@@ -42,7 +42,7 @@ private:
     virtual void interpolateDisplacement(Array2D<double,DIM>& D) {};
     virtual void interpolateForce(Array2D<double,DIM>& F) {};
     virtual void interpolatePressure(Array2D<double,1>& P) {};
-    virtual void interpolateStress(Array2D<double,DIM>& S) {};
+    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S) {};
     virtual void interpolateTemperature(Array2D<double,1>& T) {};
 
 };
@@ -52,6 +52,6 @@ private:
 #endif
 
 // version
-// $Id: TractionInterpolator.h,v 1.5 2004/03/28 23:19:00 tan2 Exp $
+// $Id: TractionInterpolator.h,v 1.6 2004/04/14 19:41:38 tan2 Exp $
 
 // End of file

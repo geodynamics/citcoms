@@ -24,6 +24,7 @@ public:
 		   Array2D<int,1>& meshNode);
     virtual ~VTInterpolator() {};
 
+    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S) {};
     virtual void interpolateTemperature(Array2D<double,1>& T);
     virtual void interpolateVelocity(Array2D<double,DIM>& V);
 
@@ -32,7 +33,6 @@ private:
     virtual void interpolateDisplacement(Array2D<double,DIM>& D) {};
     virtual void interpolateForce(Array2D<double,DIM>& F) {};
     virtual void interpolatePressure(Array2D<double,1>& P) {};
-    virtual void interpolateStress(Array2D<double,DIM>& S) {};
     virtual void interpolateTraction(Array2D<double,DIM>& F) {};
 
 };
@@ -42,6 +42,6 @@ private:
 #endif
 
 // version
-// $Id: VTInterpolator.h,v 1.1 2004/01/08 20:42:56 tan2 Exp $
+// $Id: VTInterpolator.h,v 1.2 2004/04/14 19:41:38 tan2 Exp $
 
 // End of file

@@ -36,9 +36,10 @@ public:
     inline int size() const {return meshNode_.size();}
     inline const Array2D<double,DIM>& getX() const {return X_;}
 
+    virtual void interpolateDisplacement(Array2D<double,DIM>& D) const = 0;
     virtual void interpolateForce(Array2D<double,DIM>& F) const = 0;
     virtual void interpolatePressure(Array2D<double,1>& P) const = 0;
-    virtual void interpolateStress(Array2D<double,DIM>& S) const = 0;
+    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S) const = 0;
     virtual void interpolateTemperature(Array2D<double,1>& T) const = 0;
     virtual void interpolateTraction(Array2D<double,DIM>& F) const = 0;
     virtual void interpolateVelocity(Array2D<double,DIM>& V) const = 0;
@@ -117,6 +118,6 @@ void AbstractSource::send(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: AbstractSource.h,v 1.3 2004/02/25 23:07:35 tan2 Exp $
+// $Id: AbstractSource.h,v 1.4 2004/04/14 19:41:38 tan2 Exp $
 
 // End of file

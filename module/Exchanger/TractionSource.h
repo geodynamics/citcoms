@@ -35,9 +35,10 @@ private:
     virtual void createInterpolator(const BoundedMesh& mesh);
 
     // disable these functions
+    virtual void interpolateDisplacement(Array2D<double,DIM>& D) const {};
     virtual void interpolateForce(Array2D<double,DIM>& F) const {};
     virtual void interpolatePressure(Array2D<double,1>& P) const {};
-    virtual void interpolateStress(Array2D<double,DIM>& S) const {};
+    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S) const {};
     virtual void interpolateTemperature(Array2D<double,1>& T) const {};
 
 };
@@ -46,6 +47,6 @@ private:
 #endif
 
 // version
-// $Id: TractionSource.h,v 1.5 2004/03/28 23:19:00 tan2 Exp $
+// $Id: TractionSource.h,v 1.6 2004/04/14 19:41:38 tan2 Exp $
 
 // End of file
