@@ -40,7 +40,7 @@ void AreaWeightedNormal::imposeConstraint(Velo& V) const {
     double outflow = computeOutflow(V);
     std::cout << " Net outflow before boundary velocity correction " << outflow << std::endl;
 
-    if (outflow > toleranceOutflow_) {
+    if (fabs(outflow) > toleranceOutflow_) {
 	reduceOutflow(V, outflow);
 
 	outflow = computeOutflow(V);
@@ -170,6 +170,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, const double outflow) const {
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.1 2003/10/20 17:13:08 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.2 2003/10/22 20:33:51 ces74 Exp $
 
 // End of file
