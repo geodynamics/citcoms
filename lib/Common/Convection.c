@@ -50,7 +50,6 @@ void read_convection_settings(E)
 
     /* parameters */
 
-    input_float("rayleigh",&(E->control.Atemp),"essential",m);
     input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
     advection_diffusion_parameters(E);

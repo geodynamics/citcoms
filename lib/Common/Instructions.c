@@ -334,6 +334,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("vlowstep",&(E->control.v_steps_low),"250,0,nomax",m);
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
+  input_float("rayleigh",&(E->control.Atemp),"essential",m);
+
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
   input_float("layerd",&(E->data.layer_km),"2800.0",m);
