@@ -29,13 +29,13 @@ while [ "$4" ]
 do
     cmd_paste="$mydir/pasteCitcomData.sh $modelname $n $timestep"
     cmd_copy="cp $modelname.$n.$timestep $cwd"
-    rsh $4 "cd $modeldir; $cmd_paste; $cmd_copy" &
+    rsh $4 "cd $modeldir; $cmd_paste; $cmd_copy"
     shift
     let n=n+1
 done
 
 
 # version
-# $Id: batchpaste.sh,v 1.1 2004/01/14 23:22:52 tan2 Exp $
+# $Id: batchpaste.sh,v 1.2 2004/01/15 00:47:41 tan2 Exp $
 
 # End of file
