@@ -31,26 +31,26 @@ FineGridExchanger::~FineGridExchanger() {
 
 
 
-void FineGridExchanger::gather(const Boundary* b) {
+void FineGridExchanger::gather() {
     std::cout << "in FineGridExchanger::gather" << std::endl;
 }
 
 
 
-void FineGridExchanger::distribute(const Boundary* b) {
+void FineGridExchanger::distribute() {
     std::cout << "in FineGridExchanger::distribute" << std::endl;
 }
 
 
 
-void FineGridExchanger::interpretate(const Boundary* b) {
+void FineGridExchanger::interpretate() {
     std::cout << "in FineGridExchanger::interpretate" << std::endl;
 }
 
 
 
 
-void FineGridExchanger::impose_bc(const Boundary* b) {
+void FineGridExchanger::impose_bc() {
     std::cout << "in FineGridExchanger::impose_bc" << std::endl;
 
 }
@@ -95,6 +95,7 @@ int FineGridExchanger::sendBoundary(const Boundary* b) {
 	    MPI_Send(b->X[i], size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm);
 	}
+	boundary = const_cast<Boundary*>(b);
     }
 
     return 0;
@@ -107,6 +108,6 @@ void FineGridExchanger::mapBoundary(const Boundary* b) {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.7 2003/09/09 20:41:57 puru Exp $
+// $Id: FineGridExchanger.cc,v 1.8 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

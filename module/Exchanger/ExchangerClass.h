@@ -40,12 +40,10 @@ public:
     virtual void send(int& size);
     virtual void receive(const int size);
 
-    virtual void gather(const Boundary*) = 0;
-    virtual void distribute(const Boundary*) = 0;
-    virtual void interpretate(const Boundary*) = 0;
-                                     // interpolation or extrapolation
-    virtual void impose_bc(const Boundary*) = 0;
-                                     // set bc flag
+    virtual void gather() = 0;
+    virtual void distribute() = 0;
+    virtual void interpretate() = 0; // interpolation or extrapolation
+    virtual void impose_bc() = 0;    // set bc flag
 
     virtual void mapBoundary(const Boundary*) = 0;
                                      // create mapping from Boundary object
@@ -60,6 +58,8 @@ protected:
 
     const All_variables *E;    // CitcomS data structure,
                                // Exchanger only modifies bc flags
+
+    Boundary *boundary;
 
     Data outgoing;
     Data incoming;
@@ -78,7 +78,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.3 2003/09/09 18:25:31 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file
 

@@ -22,9 +22,17 @@ extern char pyExchanger_hello__doc__[];
 extern "C"
 PyObject * pyExchanger_hello(PyObject *, PyObject *);
 
+
+extern char pyExchanger_returnE__name__[];
+extern char pyExchanger_returnE__doc__[];
+extern "C"
+PyObject * pyExchanger_returnE(PyObject *, PyObject *);
+
+
+
 #endif
 
 // version
-// $Id: misc.h,v 1.1 2003/09/06 23:44:22 tan2 Exp $
+// $Id: misc.h,v 1.2 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

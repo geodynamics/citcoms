@@ -23,10 +23,10 @@ public:
 			const All_variables *E);
     virtual ~CoarseGridExchanger();
 
-    virtual void gather(const Boundary*);
-    virtual void distribute(const Boundary*);
-    virtual void interpretate(const Boundary*);
-    virtual void impose_bc(const Boundary*);
+    virtual void gather();
+    virtual void distribute();
+    virtual void interpretate();
+    virtual void impose_bc();
     virtual void mapBoundary(const Boundary*);
 
     const Boundary* receiveBoundary();
@@ -36,7 +36,7 @@ public:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.3 2003/09/09 18:25:31 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file
 

@@ -17,9 +17,6 @@
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
 
-extern "C" {
-#include "global_defs.h"
-}
 
 #include "exchangers.h"
 
@@ -27,21 +24,6 @@ void deleteBoundary(void*);
 void deleteCoarseGridExchanger(void*);
 void deleteFineGridExchanger(void*);
 
-
-// return (All_variables* E)
-
-char pyExchanger_returnE__doc__[] = "";
-char pyExchanger_returnE__name__[] = "returnE";
-
-PyObject * pyExchanger_returnE(PyObject *, PyObject *)
-{
-    All_variables *E = new All_variables;
-
-    E->parallel.me = 1;
-
-    PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
-    return Py_BuildValue("O", cobj);
-}
 
 //
 //
@@ -74,7 +56,6 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
     //int rank;
     //MPI_Comm_rank(comm, &rank);
     //std::cout << "my rank is " << rank << std::endl;
-    //std::cout << "my rank in solver is " << E->parallel.me << std::endl;
 
     CoarseGridExchanger *cge = new CoarseGridExchanger(
 	                                comm, intercomm,
@@ -113,7 +94,6 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
     //int rank;
     //MPI_Comm_rank(comm, &rank);
     //std::cout << "my rank is " << rank << std::endl;
-    //std::cout << "my rank in solver is " << E->parallel.me << std::endl;
 
     FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
 						   localLeader, remoteLeader,
@@ -211,11 +191,86 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_distribute__doc__[] = "";
+char pyExchanger_distribute__name__[] = "distribute";
+
+PyObject * pyExchanger_distribute(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:receiveBoundary", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->distribute();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_gather__doc__[] = "";
+char pyExchanger_gather__name__[] = "gather";
+
+PyObject * pyExchanger_gather(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:gather", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->gather();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_receive__doc__[] = "";
+char pyExchanger_receive__name__[] = "receive";
+
+PyObject * pyExchanger_receive(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:receive", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    //pe->receive();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_send__doc__[] = "";
+char pyExchanger_send__name__[] = "send";
+
+PyObject * pyExchanger_send(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:send", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    //pe->send();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 /*
 char pyExchanger_rE__doc__[] = "";
 char pyExchanger_rE__name__[] = "rE";
 
-PyObject * pyExchanger_rE(PyObject *, PyObject *)
+PyObject * pyExchanger_rE(PyObject *, PyObject *args)
 {
     PyObject *obj;
 
@@ -250,6 +305,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.3 2003/09/09 18:25:31 tan2 Exp $
+// $Id: exchangers.cc,v 1.4 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

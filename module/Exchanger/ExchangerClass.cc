@@ -20,7 +20,8 @@ Exchanger::Exchanger(MPI_Comm communicator,
     intercomm(icomm),
     localLeader(local),
     remoteLeader(remote),
-    E(e) {
+    E(e),
+    boundary(NULL) {
 
     MPI_Comm_rank(intercomm, &rank);
 
@@ -81,7 +82,7 @@ void Exchanger::receive(const int size) {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.2 2003/09/09 02:35:22 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.3 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file
 

@@ -30,12 +30,12 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_copyright__doc__},
 
-    // from exchangers.h
-
     {pyExchanger_returnE__name__,
      pyExchanger_returnE,
      METH_VARARGS,
      pyExchanger_returnE__doc__},
+
+    // from exchangers.h
 
     {pyExchanger_createCoarseGridExchanger__name__,
      pyExchanger_createCoarseGridExchanger,
@@ -67,6 +67,26 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_sendBoundary__doc__},
 
+    {pyExchanger_distribute__name__,
+     pyExchanger_distribute,
+     METH_VARARGS,
+     pyExchanger_distribute__doc__},
+
+    {pyExchanger_gather__name__,
+     pyExchanger_gather,
+     METH_VARARGS,
+     pyExchanger_gather__doc__},
+
+    {pyExchanger_receive__name__,
+     pyExchanger_receive,
+     METH_VARARGS,
+     pyExchanger_receive__doc__},
+
+    {pyExchanger_send__name__,
+     pyExchanger_send,
+     METH_VARARGS,
+     pyExchanger_send__doc__},
+
 
 
 
@@ -75,6 +95,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.4 2003/09/09 18:25:31 tan2 Exp $
+// $Id: bindings.cc,v 1.5 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

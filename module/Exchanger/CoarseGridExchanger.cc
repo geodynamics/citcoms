@@ -31,26 +31,26 @@ CoarseGridExchanger::~CoarseGridExchanger() {
 
 
 
-void CoarseGridExchanger::gather(const Boundary* b) {
+void CoarseGridExchanger::gather() {
     std::cout << "in CoarseGridExchanger::gather" << std::endl;
 }
 
 
 
-void CoarseGridExchanger::distribute(const Boundary* b) {
+void CoarseGridExchanger::distribute() {
     std::cout << "in CoarseGridExchanger::distribute" << std::endl;
 }
 
 
 
-void CoarseGridExchanger::interpretate(const Boundary* b) {
+void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
 }
 
 
 
 
-void CoarseGridExchanger::impose_bc(const Boundary* b) {
+void CoarseGridExchanger::impose_bc() {
     std::cout << "in CoarseGridExchanger::impose_bc" << std::endl;
 
 }
@@ -81,6 +81,7 @@ const Boundary* CoarseGridExchanger::receiveBoundary() {
 		     remoteLeader, tag, intercomm, &status);
 	}
 
+	boundary = b;
 	b->printConnectivity();
     }
 
@@ -95,6 +96,6 @@ void CoarseGridExchanger::mapBoundary(const Boundary* b) {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.3 2003/09/09 18:25:31 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.4 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

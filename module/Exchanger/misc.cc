@@ -10,6 +10,10 @@
 #include <portinfo>
 #include <Python.h>
 
+extern "C" {
+#include "global_defs.h"
+}
+
 #include "misc.h"
 
 
@@ -37,7 +41,22 @@ PyObject * pyExchanger_hello(PyObject *, PyObject *)
     return Py_BuildValue("s", "hello");
 }
 
+// return (All_variables* E)
+
+char pyExchanger_returnE__doc__[] = "";
+char pyExchanger_returnE__name__[] = "returnE";
+
+PyObject * pyExchanger_returnE(PyObject *, PyObject *)
+{
+    All_variables *E = new All_variables;
+
+    E->parallel.me = 1;
+
+    PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
+    return Py_BuildValue("O", cobj);
+}
+
 // version
-// $Id: misc.cc,v 1.2 2003/09/08 21:47:27 tan2 Exp $
+// $Id: misc.cc,v 1.3 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file

@@ -11,12 +11,6 @@
 #define pyExchanger_exchangers_h
 
 
-extern char pyExchanger_returnE__name__[];
-extern char pyExchanger_returnE__doc__[];
-extern "C"
-PyObject * pyExchanger_returnE(PyObject *, PyObject *);
-
-
 extern char pyExchanger_createCoarseGridExchanger__name__[];
 extern char pyExchanger_createCoarseGridExchanger__doc__[];
 extern "C"
@@ -53,10 +47,34 @@ extern "C"
 PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *);
 
 
+extern char pyExchanger_distribute__name__[];
+extern char pyExchanger_distribute__doc__[];
+extern "C"
+PyObject * pyExchanger_distribute(PyObject *, PyObject *);
+
+
+extern char pyExchanger_gather__name__[];
+extern char pyExchanger_gather__doc__[];
+extern "C"
+PyObject * pyExchanger_gather(PyObject *, PyObject *);
+
+
+extern char pyExchanger_receive__name__[];
+extern char pyExchanger_receive__doc__[];
+extern "C"
+PyObject * pyExchanger_receive(PyObject *, PyObject *);
+
+
+extern char pyExchanger_send__name__[];
+extern char pyExchanger_send__doc__[];
+extern "C"
+PyObject * pyExchanger_send(PyObject *, PyObject *);
+
+
 
 #endif
 
 // version
-// $Id: exchangers.h,v 1.3 2003/09/09 18:25:31 tan2 Exp $
+// $Id: exchangers.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
 
 // End of file
