@@ -113,19 +113,19 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 			+ E->sx[m][2][node]
 			+ E->sx[m][3][node];
 
-		    E->V[m][1][node] = E->T[m][node];
-		    E->V[m][2][node] = 2.0*E->T[m][node];
-		    E->V[m][3][node] = 3.0*E->T[m][node];
+		    E->sphere.cap[m].V[1][node] = E->T[m][node];
+		    E->sphere.cap[m].V[2][node] = 2.0*E->T[m][node];
+		    E->sphere.cap[m].V[3][node] = 3.0*E->T[m][node];
 
 //  		    cfile << "in CoarsereturnE (T, v1,v2,v3): "
 // 			  <<  node << " "
-// 			  << E->X[E->mesh.levmax][m][1][node] << " "
-// 			  << E->X[E->mesh.levmax][m][2][node] << " "
-// 			  << E->X[E->mesh.levmax][m][3][node] << " "
+// 			  << E->sx[m][1][node] << " "
+// 			  << E->sx[m][2][node] << " "
+// 			  << E->sx[m][3][node] << " "
 // 			  << E->T[m][node] << " "
-// 			  << E->V[m][1][node] << " "
-// 			  << E->V[m][2][node] << " "
-// 			  << E->V[m][3][node] << " "
+// 			  << E->sphere.cap[m].V[1][node] << " "
+// 			  << E->sphere.cap[m].V[2][node] << " "
+// 			  << E->sphere.cap[m].V[3][node] << " "
 // 			  << std::endl;
 	    }
 //     cfile.close();
@@ -239,7 +239,7 @@ void commonE(All_variables *E) {
 	for(int i=1; i<=E->mesh.dof; i++) {
 	    // Don't forget to delete these later
 	    E->sx[m][i] = new double [n+1];
-	    E->V[m][i] = new float [n+1];
+	    E->sphere.cap[m].V[i] = new float [n+1];
 	}
   	E->T[m] = new double [n+1];
     }
@@ -258,9 +258,9 @@ void commonE(All_variables *E) {
 			(E->sphere.ro -  E->sphere.ri)/(E->lmesh.noz-1)*(i-1) +  E->sphere.ri;
 
 //  		    std::cout <<  node << " "
-//  			      << E->X[E->mesh.levmax][m][1][node] << " "
-//  			      << E->X[E->mesh.levmax][m][2][node] << " "
-//  			      << E->X[E->mesh.levmax][m][3][node] << " "
+//  			      << E->sx[m][1][node] << " "
+//  			      << E->sx[m][2][node] << " "
+//  			      << E->sx[m][3][node] << " "
 //  			      << std::endl;
 		}
 
@@ -268,6 +268,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.16 2003/09/29 02:20:26 puru Exp $
+// $Id: misc.cc,v 1.17 2003/09/29 18:03:35 tan2 Exp $
 
 // End of file
