@@ -18,7 +18,7 @@ class CoarseGridExchanger(Exchanger):
                                      solver.intercomm.handle(),
                                      solver.localLeader,
                                      solver.remoteLeader,
-                                     solver.all_variables
+                                     solver.coarse_E
                                      )
         return
 
@@ -84,6 +84,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.6 2003/09/17 23:15:59 ces74 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.7 2003/09/18 22:03:48 ces74 Exp $"
 
 # End of file

@@ -28,7 +28,12 @@ class TestExchanger(Application):
 
         # a dummy pointer for test only
         import CitcomS.Exchanger
-        self.all_variables = CitcomS.Exchanger.returnE()
+        if layout.fine:
+            print "in exchange.py, calling FinereturnE"
+            self.fine_E = CitcomS.Exchanger.FinereturnE()
+        elif layout.coarse:
+            print "in exchange.py, calling CoarsereturnE"
+            self.coarse_E = CitcomS.Exchanger.CoarsereturnE()
 
         exchanger = self.exchanger
         if exchanger:
@@ -47,9 +52,13 @@ class TestExchanger(Application):
         exchanger.findBoundary()
         print exchanger.name, ": boundary found"
 
-        #testing gather
+        # testing gather
         exchanger.gather()
-        print exchanger.name, ":gather worked"
+        print exchanger.name, ": gather worked"
+
+        # testing initTemperature
+##        exchanger.initTemperature()
+##        print exchanger.name, ": temperature initialized."
         
         try:
             # success if exchanger is a FGE
@@ -139,6 +148,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.6 2003/09/17 23:15:59 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.7 2003/09/18 22:03:48 ces74 Exp $"
 
 # End of file

@@ -43,9 +43,9 @@ void FineGridExchanger::gather() {
 
     if(nproc>1) {
       if(me>0)
-	inter_sendVelocities();
+	local_sendVelocities();
       if(me==0)
-	inter_receiveVelocities();
+	local_receiveVelocities();
       MPI_Barrier(intercomm);
     }
     else 
@@ -69,9 +69,9 @@ void FineGridExchanger::distribute() {
 
     if(nproc>1) {
       if(me>0)
-	inter_sendVelocities();
+	local_sendVelocities();
       if(me==0)
-	inter_receiveVelocities();
+	local_receiveVelocities();
       MPI_Barrier(intercomm);
     }
     else 
@@ -136,6 +136,25 @@ int FineGridExchanger::sendBoundary() {
 		     remoteLeader, tag, intercomm);
 	    tag ++;
 	}
+ 	MPI_Send(&boundary->theta_max, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+ 	MPI_Send(&boundary->theta_min, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+ 	MPI_Send(&boundary->fi_max, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+ 	MPI_Send(&boundary->fi_min, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+ 	MPI_Send(&boundary->ro, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+ 	MPI_Send(&boundary->ri, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+
     }
 
     return 0;
@@ -149,6 +168,6 @@ void FineGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.12 2003/09/18 16:12:15 puru Exp $
+// $Id: FineGridExchanger.cc,v 1.13 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file

@@ -30,10 +30,15 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_copyright__doc__},
 
-    {pyExchanger_returnE__name__,
-     pyExchanger_returnE,
+    {pyExchanger_FinereturnE__name__,
+     pyExchanger_FinereturnE,
      METH_VARARGS,
-     pyExchanger_returnE__doc__},
+     pyExchanger_FinereturnE__doc__},
+
+    {pyExchanger_CoarsereturnE__name__,
+     pyExchanger_CoarsereturnE,
+     METH_VARARGS,
+     pyExchanger_CoarsereturnE__doc__},
 
     // from exchangers.h
 
@@ -120,6 +125,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.6 2003/09/10 04:03:54 tan2 Exp $
+// $Id: bindings.cc,v 1.7 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file

@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
 #include <iostream>
 #include "global_defs.h"
@@ -77,6 +77,20 @@ void Boundary::init(const All_variables *E) {
         // test
     for(int j=0; j<size; j++)
         connectivity[j] = j;
+
+    theta_max=E->control.theta_max;
+    theta_min=E->control.theta_min;
+    fi_max=E->control.fi_max;
+    fi_min=E->control.fi_min;
+    ro=E->sphere.ro;
+    ri=E->sphere.ri;
+
+    // test 
+    std::cout << "Fine Grid Bounds" << std::endl;
+    std::cout << "theta= " << theta_min<< "   " << theta_max << std::endl;
+    std::cout << "fi   = " << fi_min << "   " << fi_max << std::endl;
+    std::cout << "r    = " << ri << "   " << ro  << std::endl;
+
 
         //  for two YOZ planes
 
@@ -219,6 +233,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.8 2003/09/18 17:16:44 puru Exp $
+// $Id: Boundary.cc,v 1.9 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file

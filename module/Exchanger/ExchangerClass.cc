@@ -8,6 +8,7 @@
 #include <portinfo>
 #include <iostream>
 
+#include "global_defs.h"
 #include "ExchangerClass.h"
 
 
@@ -51,34 +52,34 @@ void Exchanger::reset_target(const MPI_Comm icomm, const int receiver) {
 }
 
 
-void Exchanger::inter_sendVelocities(void) {
+void Exchanger::local_sendVelocities(void) {
 
-    std::cout << "in Exchanger::send" << std::endl;
+    std::cout << "in Exchanger::local_sendVelocities" << std::endl;
     int i,size;
 //     int size = outgoing.size;
 
-    outgoing.size=11;
-    size=outgoing.size;
+    loutgoing.size=11;
+    size=loutgoing.size;
 
     for(i=1;i<=size-1;i++) {
-      outgoing.u[i]=i*0.01;
-      outgoing.v[i]=i*0.01;
-      outgoing.w[i]=i*0.01;
+      loutgoing.u[i]=i*0.01;
+      loutgoing.v[i]=i*0.01;
+      loutgoing.w[i]=i*0.01;
     }
-    MPI_Send(outgoing.u, size, MPI_DOUBLE, 0, 1, intercomm);
-    MPI_Send(outgoing.v, size, MPI_DOUBLE, 0, 2, intercomm);
-    MPI_Send(outgoing.w, size, MPI_DOUBLE, 0, 3, intercomm);
+    MPI_Send(loutgoing.u, size, MPI_DOUBLE, 0, 1, comm);
+    MPI_Send(loutgoing.v, size, MPI_DOUBLE, 0, 2, comm);
+    MPI_Send(loutgoing.w, size, MPI_DOUBLE, 0, 3, comm);
 
     return;
 }
 
 
 
-void Exchanger::inter_receiveVelocities(void) {
-    std::cout << "in Exchanger::inter_receiveVelocities" << std::endl;
+void Exchanger::local_receiveVelocities(void) {
+    std::cout << "in Exchanger::local_receiveVelocities" << std::endl;
 
     MPI_Status status;
-    int size = outgoing.size;
+    int size = lincoming.size;
     int worldme,interme;
     int i,nproc;
 
@@ -88,17 +89,17 @@ void Exchanger::inter_receiveVelocities(void) {
     std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
       
     for(i=0;i<size;i++) {
-      MPI_Recv(incoming.u, size, MPI_DOUBLE, i, 1, intercomm, &status);
+      MPI_Recv(lincoming.u, size, MPI_DOUBLE, i, 1, comm, &status);
       /* test */
       std::cout << "interme=" << interme << " worldme=" << worldme
 		<< " source=" << i << " Vel_u transferred: size="
 		<< size << std::endl;
-      MPI_Recv(incoming.v, size, MPI_DOUBLE, i, 2, intercomm, &status);
+      MPI_Recv(lincoming.v, size, MPI_DOUBLE, i, 2, comm, &status);
       /* test */
       std::cout << "interme=" << interme << " worldme=" << worldme
 		<< " source=" << i << " Vel_v transferred: size="
 		<< size << std::endl;
-      MPI_Recv(incoming.w, size, MPI_DOUBLE, i, 3, intercomm, &status);
+      MPI_Recv(lincoming.w, size, MPI_DOUBLE, i, 3, comm, &status);
       /* test */
       std::cout << " interme=" << interme << " worldme=" << worldme
 		<< " source=" << i << " Vel_w transferred: size="
@@ -121,15 +122,124 @@ void Exchanger::inter_receiveVelocities(void) {
     return;
 }
 
+void Exchanger::local_sendTemperature(void) {
 
-void Exchanger::sendTemperature() {
     std::cout << "in Exchanger::sendTemperature" << std::endl;
+    int i,size;
+//     int size = outgoing.size;
+
+    loutgoing.size=11;
+    size=loutgoing.size;
+
+    for(i=1;i<=size-1;i++) {
+      loutgoing.T[i]=i*0.01;
+    }
+    MPI_Send(loutgoing.T, size, MPI_DOUBLE, 0, 1, comm);
+
     return;
 }
 
 
-void Exchanger::receiveTemperature() {
-    std::cout << "in Exchanger::receiveTemperature" << std::endl;
+
+void Exchanger::local_receiveTemperature(void) {
+    std::cout << "in Exchanger::local_receiveVelocities" << std::endl;
+
+    MPI_Status status;
+    int size = lincoming.size;
+    int worldme,interme;
+    int i,nproc;
+
+    MPI_Comm_rank(intercomm,&worldme);
+    MPI_Comm_rank(comm,&interme);
+    MPI_Comm_size(comm,&nproc);
+    std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
+      
+    for(i=0;i<size;i++) {
+      MPI_Recv(lincoming.T, size, MPI_DOUBLE, i, 1, comm, &status);
+      /* test */
+      std::cout << "interme=" << interme << " worldme=" << worldme
+		<< " source=" << i << " Temp transferred: size="
+		<< size << std::endl;
+    }
+
+    return;
+}
+
+
+void Exchanger::sendTemperature(void) {
+    std::cout << "in Exchanger::sendTemperature" 
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader
+	      << std::endl;
+
+    int size=outgoing.size;
+
+    if(rank == localLeader) {
+      
+//       std::cout << "nox = " << E->mesh.nox << std::endl;
+
+       MPI_Send(outgoing.T,size,MPI_DOUBLE,remoteLeader,0,intercomm);
+    }
+
+    return;
+}
+
+
+void Exchanger::receiveTemperature(void) {
+    std::cout << "in Exchanger::receiveTemperature" 
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader
+	      << std::endl;
+
+    int size=incoming.size;
+    MPI_Status status;
+
+    if(rank == localLeader) {
+//       std::cout << "nox = " << E->nox << std::endl;
+
+       MPI_Recv(incoming.T,size,MPI_DOUBLE,remoteLeader,0,intercomm,&status);
+    }
+
+    return;
+}
+
+void Exchanger::sendVelocities() {
+    std::cout << "in Exchanger::sendVelocities" 
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader
+	      << std::endl;
+
+    int size=outgoing.size;
+
+    if(rank == localLeader) {
+      MPI_Send(outgoing.u,size,MPI_DOUBLE,remoteLeader,1,intercomm);
+      MPI_Send(outgoing.v,size,MPI_DOUBLE,remoteLeader,2,intercomm);
+      MPI_Send(outgoing.w,size,MPI_DOUBLE,remoteLeader,3,intercomm);
+    }
+
+    return;
+}
+
+
+void Exchanger::receiveVelocities() {
+    std::cout << "in Exchanger::receiveVelocities" 
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader
+	      << std::endl;
+
+    int size=incoming.size;
+    MPI_Status status;
+
+    if(rank == localLeader) {
+      MPI_Recv(incoming.u,size,MPI_DOUBLE,remoteLeader,1,intercomm,&status);
+      MPI_Recv(incoming.v,size,MPI_DOUBLE,remoteLeader,2,intercomm,&status);
+      MPI_Recv(incoming.w,size,MPI_DOUBLE,remoteLeader,3,intercomm,&status);
+    }
+
     return;
 }
 
@@ -183,7 +293,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.7 2003/09/17 23:15:59 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.8 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file
 

@@ -19,7 +19,7 @@ class Boundary {
 public:
     static const int dim = 3;  // spatial dimension
     const int size;            // # of boundary nodes
-    const double theta_max, theta_min, phi_max, phi_min, rout, rin;
+    double theta_max, theta_min, fi_max, fi_min, ro, ri;
     
     int *connectivity;
     double *X[dim];            // coordinate
@@ -56,6 +56,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.6 2003/09/18 17:16:44 puru Exp $
+// $Id: Boundary.h,v 1.7 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file

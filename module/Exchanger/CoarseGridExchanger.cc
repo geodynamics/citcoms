@@ -43,9 +43,9 @@ void CoarseGridExchanger::gather() {
 
     if(nproc>1) {
       if(me>0)
-	inter_sendVelocities();
+	local_sendVelocities();
       if(me==0)
-	inter_receiveVelocities();
+	local_receiveVelocities();
       MPI_Barrier(intercomm);
     }
     else
@@ -68,9 +68,9 @@ void CoarseGridExchanger::distribute() {
 
     if(nproc>1) {
       if(me>0)
-	inter_sendVelocities();
+	local_sendVelocities();
       if(me==0)
-	inter_receiveVelocities();
+	local_receiveVelocities();
       MPI_Barrier(intercomm);
     }
     else
@@ -121,6 +121,32 @@ void CoarseGridExchanger::receiveBoundary() {
   		     remoteLeader, tag, intercomm, &status);
 	    tag ++;
 	}
+ 	MPI_Recv(&boundary->theta_max, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+ 	MPI_Recv(&boundary->theta_min, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+ 	MPI_Recv(&boundary->fi_max, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+ 	MPI_Recv(&boundary->fi_min, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+ 	MPI_Recv(&boundary->ro, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+ 	MPI_Recv(&boundary->ri, 1, MPI_DOUBLE,
+ 		 remoteLeader, tag, intercomm, &status);
+ 	tag ++;
+
+	// test 
+	std::cout << "Grid Bounds transferred to Coarse Grid" << std::endl;
+	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
+	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
+	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
+
+	
 	//boundary->printX();
     }
 
@@ -136,6 +162,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.9 2003/09/18 16:12:15 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.10 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file

@@ -43,10 +43,11 @@ public:
     void receiveTemperature();
     void sendVelocities();
     void receiveVelocities();
-//     virtual void inter_sendTemperature();
-//     virtual void inter_receiveTemperature();
-    void inter_sendVelocities();
-    void inter_receiveVelocities();
+    void local_sendVelocities();
+    void local_receiveVelocities();
+    void local_sendTemperature();
+    void local_receiveTemperature();
+
     double exchangeTimestep(const double);
 
     void wait();
@@ -75,8 +76,8 @@ protected:
 
     Data outgoing;
     Data incoming;
-
-        //Data inter_
+    Data loutgoing;
+    Data lincoming;
 
     int rank;
 
@@ -92,7 +93,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.9 2003/09/18 17:16:44 puru Exp $
+// $Id: ExchangerClass.h,v 1.10 2003/09/18 22:03:48 ces74 Exp $
 
 // End of file
 
