@@ -343,6 +343,27 @@ PyObject * pyExchanger_sendTandV(PyObject *, PyObject *args)
     return Py_None;
 }
 
+
+char pyExchanger_sendTraction__doc__[] = "";
+char pyExchanger_sendTraction__name__[] = "sendTraction";
+
+PyObject * pyExchanger_sendTraction(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:sendTraction", &obj))
+	return NULL;
+
+    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
+	                                      (PyCObject_AsVoidPtr(obj));
+
+    bcs->sendTraction();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_recvT__doc__[] = "";
 char pyExchanger_recvT__name__[] = "recvT";
 
@@ -612,6 +633,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.27 2003/11/11 19:29:27 tan2 Exp $
+// $Id: exchangers.cc,v 1.28 2003/11/23 19:06:44 ces74 Exp $
 
 // End of file
