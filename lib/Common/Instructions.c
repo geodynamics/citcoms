@@ -420,8 +420,8 @@ void allocate_common_vars(E)
   E->slice.vort[j]     = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.shflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.bhflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
-  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf)
-	  E->slice.freesurf[j]    = (float *)malloc((nsf+2)*sizeof(float));
+  //  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf)
+  E->slice.freesurf[j]    = (float *)malloc((nsf+2)*sizeof(float));
 
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
@@ -587,10 +587,13 @@ void allocate_velocity_vars(E)
     for(i=1;i<=E->mesh.nsd;i++) {
       E->sphere.cap[j].V[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
       E->sphere.cap[j].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
-      }
+      E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+    }
+#if 0
     if(E->mesh.topvbc==2 && E->control.pseudo_free_surf)
-      for(i=1;i<=E->mesh.nsd;i++)
-        E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+	    for(i=1;i<=E->mesh.nsd;i++)
+		    E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+#endif
 
     for(i=0;i<=E->lmesh.neq;i++)
       E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
