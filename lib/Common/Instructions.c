@@ -279,13 +279,6 @@ void read_initial_settings(struct All_variables *E)
   input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m);
   input_float("z_410",&(E->viscosity.z410),"0.225",m);
   input_float("z_lith",&(E->viscosity.zlith),"0.225",m);
-  E->viscosity.zcmb=0.45;
-  E->viscosity.zlm=0.225;
-  E->viscosity.z410=0.1;
-  E->viscosity.zlith=0.01;
-  fprintf(stderr,"%e %e %e %e\n",E->viscosity.zlith,
-	  E->viscosity.z410,E->viscosity.zlm,
-	  E->viscosity.zcmb);
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
