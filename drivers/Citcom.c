@@ -86,11 +86,10 @@ int main(argc,argv)
 
 
   if (E->control.stokes)  {
-    /*      if(E->control.tracer==1)  {
-	    (E->problem_tracer_advection)(E);
-	    (E->problem_tracer_output)(E,E->monitor.solution_cycles);
-	    }
-    */
+    if(E->control.tracer==1)  {
+      (E->problem_tracer_advection)(E);
+      (E->problem_tracer_output)(E,E->monitor.solution_cycles);
+    }
     parallel_process_termination();
   }
 
@@ -120,12 +119,10 @@ int main(argc,argv)
 
     general_stokes_solver(E);
 
-
-    /*      if(E->control.tracer==1)  {
-	    (E->problem_tracer_advection)(E);
-	    (E->problem_tracer_output)(E,E->monitor.solution_cycles);
-	    }
-    */
+    if(E->control.tracer==1)  {
+      (E->problem_tracer_advection)(E);
+      (E->problem_tracer_output)(E,E->monitor.solution_cycles);
+    }
 
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
       if(E->control.pseudo_free_surf) {
