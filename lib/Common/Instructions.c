@@ -310,7 +310,7 @@ void read_initial_settings(struct All_variables *E)
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
 
-  input_boolean("side_sbcs",&(E->control.side_sbcs),"on",m);
+  input_boolean("side_sbcs",&(E->control.side_sbcs),"off",m);
 
   input_int("file_vbcs",&(E->control.vbcs_file),"0",m);
   input_string("vel_bound_file",E->control.velocity_boundary_file,"",m);
