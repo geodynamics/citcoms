@@ -38,6 +38,19 @@ if __name__ == '__main__':
     for node in file(machinefile).readlines():
         nodelist += '%s ' % node.strip()
 
+    # check the length of nodelist
+    totalnodes = nprocx * nprocy * nprocz * ncap
+    print nodelist.split()
+    n = len(nodelist.split())
+    if not n == totalnodes:
+        print 'WARNING: length of machinefile does not match number of processors'
+        if (totalnodes > n) and ((totalnodes % n) == 0):
+            # try to match number of processors by duplicating nodelist
+            nodelist *= (totalnodes / n)
+        else:
+            print 'ERROR: incorrect machinefile size'
+            sys.exit(1)
+
     # paste
     cmd = 'batchpaste.sh %(modeldir)s %(modelname)s %(timestep)d %(nodelist)s' \
           % vars()
@@ -61,6 +74,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchcombine.py,v 1.1 2004/01/15 00:48:48 tan2 Exp $
+# $Id: batchcombine.py,v 1.2 2004/06/07 19:45:05 tan2 Exp $
 
 # End of file
