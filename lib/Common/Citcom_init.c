@@ -16,6 +16,7 @@ void Citcom_Init(int nproc, int rank)
   //fprintf(stderr,"%d in %d processpors\n", rank, nproc);
 
   E->monitor.solution_cycles=0;
+  E->control.keep_going=1;
 
   return;
 }

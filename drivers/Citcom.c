@@ -35,24 +35,24 @@ int main(argc,argv)
   int rank, nproc;
 
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
-  MPI_Comm_rank(MPI_COMM_WORLD, rank);
-  MPI_Comm_size(MPI_COMM_WORLD, nproc);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 
   if (argc < 2)   {
     fprintf(stderr,"Usage: %s PARAMETERFILE\n", argv[0]);
-    exit(10);
+    parallel_process_termination();
   }
 
-  //parallel_process_initilization(E,argc,argv);
+  //parallel_process_initilization(E,argc,argv);  //replaced by Citcom_Init()
 
   Citcom_Init(nproc, rank); /* allocate global E and do initializaion here */
   
-  E->monitor.solution_cycles=0;
+  //E->monitor.solution_cycles=0;  //moved to Citcom_Init()
   
   start_time = time = CPU_time0();
   read_instructions(argv[1]);
 
-  E->control.keep_going=1;
+  //E->control.keep_going=1;  //moved to Citcom_Init()
 
   if (E->parallel.me == 0)  {
     fprintf(stderr,"Input parameters taken from file '%s'\n",argv[1]);
