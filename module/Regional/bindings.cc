@@ -1,0 +1,40 @@
+// -*- C++ -*-
+// 
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+//                               Michael A.G. Aivazis
+//                        California Institute of Technology
+//                        (C) 1998-2003 All Rights Reserved
+// 
+//  <LicenseText>
+// 
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+
+#include <portinfo>
+#include <Python.h>
+
+#include "bindings.h"
+
+#include "misc.h"          // miscellaneous methods
+
+// the method table
+
+struct PyMethodDef pyCitcomSRegional_methods[] = {
+
+    // dummy entry for testing
+    {pyCitcomSRegional_return1_test__name__, pyCitcomSRegional_return1_test,
+     METH_VARARGS, pyCitcomSRegional_return1_test__doc__},
+
+    {pyCitcomSRegional_copyright__name__, pyCitcomSRegional_copyright,
+     METH_VARARGS, pyCitcomSRegional_copyright__doc__},
+
+
+// Sentinel
+    {0, 0}
+};
+
+// version
+// $Id: bindings.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+
+// End of file

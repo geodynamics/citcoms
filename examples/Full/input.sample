@@ -1,0 +1,193 @@
+# specify output files
+datafile="/scratch/fulltest"
+
+
+# specify input files
+file_vbcs=0
+vel_bound_file=""
+
+coor=0
+coor_file=""
+
+mat_control=0
+mat_file=""
+
+lith_age=0
+lith_age_file=""
+
+tracer=0
+tracer_file=""
+
+
+# processors, mesh grid information
+nproc_surf=12
+nprocx=2 nprocy=2 nprocz=1
+nodex=33 nodey=33 nodez=33
+mgunitx=16 mgunity=16 mgunitz=32
+levels=1
+
+
+# the calculation region definition
+radius_inner=0.55
+radius_outer=1.0
+
+
+# restart info
+restart=0
+post_p=0
+datafile_old=""
+solution_cycles_init=0
+zero_elapsed_time=1
+
+
+# timestepping information
+minstep=1
+maxstep=4001
+maxtotstep=4001
+storage_spacing=20
+cpu_limits_in_seconds=360000000
+
+# Initial conditions
+num_perturbations=5
+perturbmag=0.2,0.5,0.8,0.5,0.2
+perturbl=3,3,3,3,3
+perturbm=2,2,2,2,2
+perturblayer=5,10,16,22,27
+
+
+# Boundary Conditions
+topvbc=0
+     topvbxval=0.0 
+     topvbyval=0.0
+botvbc=0
+     botvbxval=0.0
+     botvbyval=0.0
+
+toptbc=1
+     toptbcval=0.0
+bottbc=1
+     bottbcval=1.0
+
+lith_age_time=0
+lith_age_depth=0.031400
+mantle_temp=1.000000
+temperature_bound_adj=0
+depth_bound_adj=0.157000
+width_bound_adj=0.087270
+
+
+# miscellaneous information
+stokes_flow_only=0
+inputdiffusicity=0.00100
+rayleigh=2000
+Q0=0
+
+
+# required information
+Problem=convection
+Geometry=sphere
+Spacing=regular
+Solver=cgrad node_assemble=1
+
+
+# Depth Information
+# for material above z_lith,    mat = 1;
+# for material above z_410,     mat = 2;
+# for material above z_lmantle, mat = 3;
+# for material below z_lmantle, mat = 4;
+z_lith=0.0007848		
+z_410=0.03924			#also depth of 410-phase change
+z_lmantle=0.06435		#also depth of 670-phase change
+z_cmb=0.439			#     depth of another phase change
+
+
+# Viscosity Information
+Viscosity=system
+rheol=3
+visc_smooth_method=3
+
+VISC_UPDATE=off
+num_mat=4
+
+TDEPV=off
+viscE=30,30,30,30
+viscT=.2,.2,.2,.2
+visc0=10,1,10,10
+
+SDEPV=off
+sdepv_expt=1,1,1,1
+sdepv_misfit=0.020
+
+VMIN=on visc_min=1.0e0
+VMAX=on visc_max=1.0e1
+
+
+# Phase Change Information
+Ra_410=0.0
+clapeyron410=0.0235
+transT410=0.78
+width410=0.0058
+
+Ra_670=0.0
+clapeyron670=-0.0235
+transT670=0.875
+width670=0.0058
+
+Ra_cmb=0.0
+clapeyroncmb=-0.0235
+transTcmb=0.875
+widthcmb=0.0058
+
+
+# Dimensional Information
+layerd=6371e3
+density=3500.0
+thermdiff=1.0e-6
+gravacc=10.0
+thermexp=3.0e-5
+refvisc=1e21
+cp=1250
+wdensity=0.0
+
+
+# Data input and program debugging
+DESCRIBE=off
+BEGINNER=off
+VERBOSE=on
+
+verbose=off
+see_convergence=1
+
+
+# Solver Related Matters
+mg_cycle=1
+down_heavy=3
+up_heavy=3
+vlowstep=500
+vhighstep=3
+
+piterations=375
+accuracy=1.0e-6
+tole_compressibility=1.0e-7
+
+ADV=on
+fixed_timestep=0.0
+finetunedt=0.7
+adv_sub_iterations=2
+maxadvtime=10.
+
+precond=on
+aug_lagr=on
+aug_number=2.0e3
+
+
+# Age information
+start_age=40.0
+reset_startage=0
+
+
+# Spherical harmonics information
+ll_max=20
+output_ll_max=20
+nlong=361	nlati=181
+
