@@ -17,14 +17,21 @@ class BC(Component):
         return
 
 
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.BC_set_prop(self.properties)
+        return
+
+
+
     class Properties(Component.Properties):
 
-
         import pyre.properties
-        import os
+
 
         __properties__ = Component.Properties.__properties__ + (
-            
+
             pyre.properties.bool("topvbc",False),
             pyre.properties.float("topvbxval",0.0),
             pyre.properties.float("topvbyval",0.0),
@@ -39,6 +46,9 @@ class BC(Component):
             pyre.properties.bool("bottbc",False),
             pyre.properties.float("bottbcval",0.0),
 
+
+	    # these parameters are for 'lith_age',
+	    # put them here temporalily
             pyre.properties.bool("temperature_bound_adj",False),
             pyre.properties.float("depth_bound_adj",0.157),
             pyre.properties.float("width_bound_adj",0.08727),
@@ -46,6 +56,6 @@ class BC(Component):
             )
 
 # version
-__id__ = "$Id: BC.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.2 2003/06/27 00:15:02 tan2 Exp $"
 
-# End of file 
+# End of file

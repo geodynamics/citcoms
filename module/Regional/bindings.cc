@@ -12,10 +12,11 @@
 
 #include "bindings.h"
 
-#include "misc.h"          // miscellaneous methods
-
 #include "advdiffu.h"
+#include "misc.h"          // miscellaneous methods
 #include "outputs.h"
+#include "setProperties.h"
+
 
 // the method table
 
@@ -62,7 +63,7 @@ struct PyMethodDef pyRegional_methods[] = {
     // This section is for finished implementation
     //////////////////////////////////////////////////////////////////////////
 
-    // from misc.h
+    // methods from misc.h
 
     {pyRegional_Citcom_Init__name__,
      pyRegional_Citcom_Init,
@@ -123,7 +124,7 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_PG_timestep_solve__doc__},
 
-    // from outputs.h
+    // methods from outputs.h
 
     {pyRegional_output_init__name__,
      pyRegional_output_init,
@@ -160,11 +161,19 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_output_visc__doc__},
 
+    // methods from setProperties.h
+
+    {pyRegional_BC_set_prop__name__,
+     pyRegional_BC_set_prop,
+     METH_VARARGS,
+     pyRegional_BC_set_prop__doc__},
+
+
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.10 2003/05/23 05:12:29 ces74 Exp $
+// $Id: bindings.cc,v 1.11 2003/06/27 00:15:02 tan2 Exp $
 
 // End of file

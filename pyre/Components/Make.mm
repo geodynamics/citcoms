@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PROJECT = CitcomS
-PACKAGE = Component
+PACKAGE = Components
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
@@ -36,13 +36,12 @@ EXPORT_PYTHON_MODULES = \
 	Parallel.py \
 	Param.py \
 	Phase.py \
-	Stokes_solver.py \
 	Visc.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.1 2003/06/11 23:02:09 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/06/27 00:15:02 tan2 Exp $
 
 # End of file

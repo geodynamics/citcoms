@@ -24,9 +24,10 @@ PROJ_SRCS = \
     bindings.cc \
     exceptions.cc \
     misc.cc \
-    outputs.cc
+    outputs.cc \
+    setProperties.cc
 
 # version
-# $Id: Make.mm,v 1.9 2003/06/08 08:11:37 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/06/27 00:15:02 tan2 Exp $
 
 # End of file

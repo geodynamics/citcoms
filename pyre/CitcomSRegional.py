@@ -16,8 +16,26 @@ class RegionalApp(Application):
     #import journal
 
 
+    # for test
     def run(self):
 	Application.run(self)
+
+	self.facilities.bc.setProperties()
+	return
+
+	#self.test_facility()
+	vsolver = self.facilities.vsolver
+	vsolver.run()
+	return
+
+
+
+    # this is the true run(), but old
+    def run_old(self):
+	Application.run(self)
+
+        # read in parameters
+        Regional.read_instructions(self.filename)
 
 	#if (Control.post_proccessing):
 	#    Regional.post_processing()
@@ -32,11 +50,6 @@ class RegionalApp(Application):
 	import CitcomS.Advection_diffusion.Advection_diffusion as Advection_diffusion
 	tsolver = Advection_diffusion.PG_timestep('temp')
 	tsolver.init()
-
-
-	#test
-	self.test_facility()
-	return
 
 
 	# solve for 0th time step velocity and pressure
@@ -66,9 +79,9 @@ class RegionalApp(Application):
         self.start_time = 0.0
 
 	#test
-	self.prefix = 'test'	
+	self.prefix = 'test'
 	print self.filename
-	
+
         return
 
 
@@ -84,14 +97,6 @@ class RegionalApp(Application):
 
 	return
 
-
-    def postInit(self):
-        #import sys
-
-        Application.postInit(self)
-        Regional.read_instructions(self.filename)
-
-	return
 
 
     def fini(self):
@@ -119,18 +124,22 @@ class RegionalApp(Application):
     class Facilities(Application.Facilities):
 
         import pyre.facilities
-	import CitcomS
-        from CitcomS.Component.BC import BC
-        from Component.Const import Const
-        from Component.IC import IC
-        from Component.Mesh import Mesh
-	from Component.Parallel import Parallel
-	from Component.Param import Param
-        from Component.Phase import Phase
-        from Component.Visc import Visc
+
+	from CitcomS.Facilities.VSolver import VSolver
+	import CitcomS.Stokes_solver
+
+        from CitcomS.Components.BC import BC
+        from CitcomS.Components.Const import Const
+        from CitcomS.Components.IC import IC
+        from CitcomS.Components.Mesh import Mesh
+	from CitcomS.Components.Parallel import Parallel
+	from CitcomS.Components.Param import Param
+        from CitcomS.Components.Phase import Phase
+        from CitcomS.Components.Visc import Visc
 
         __facilities__ = Application.Facilities.__facilities__ + (
-            #pyre.facilities.facility("CitcomS", default=CitcomS.RegionalApp()),
+            VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
+
             pyre.facilities.facility("bc", BC()),
             pyre.facilities.facility("const", Const()),
             pyre.facilities.facility("ic", IC()),
@@ -204,6 +213,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.8 2003/06/13 17:12:25 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.9 2003/06/27 00:15:02 tan2 Exp $"
 
 # End of file
