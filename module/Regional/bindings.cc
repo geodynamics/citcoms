@@ -150,6 +150,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Phase_set_properties__doc__},
 
+    {pyCitcom_Solver_set_properties__name__,
+     pyCitcom_Solver_set_properties,
+     METH_VARARGS,
+     pyCitcom_Solver_set_properties__doc__},
+
     {pyCitcom_Sphere_set_properties__name__,
      pyCitcom_Sphere_set_properties,
      METH_VARARGS,
@@ -213,6 +218,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.29 2003/08/26 20:56:34 tan2 Exp $
+// $Id: bindings.cc,v 1.30 2003/10/28 23:52:44 tan2 Exp $
 
 // End of file

@@ -13,13 +13,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
-#include "setProperties.h"
-
-extern "C" {
 #include "global_defs.h"
 
-}
+#include "setProperties.h"
 
 
 void getStringProperty(PyObject* properties, char* attribute,
@@ -51,7 +47,7 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Advection_diffusion.inventories:" << std::endl;
+	std::cout << "#Advection_diffusion.inventory:" << std::endl;
 
     getScalarProperty(properties, "ADV", E->advection.ADVECTION, m);
     getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep, m);
@@ -96,7 +92,7 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "BC.inventories:" << std::endl;
+	std::cout << "#BC.inventory:" << std::endl;
 
     getScalarProperty(properties, "topvbc", E->mesh.topvbc, m);
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval, m);
@@ -141,7 +137,7 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Const.inventories:" << std::endl;
+	std::cout << "#Const.inventory:" << std::endl;
 
     getScalarProperty(properties, "layerd", E->data.layer_km, m);
     getScalarProperty(properties, "density", E->data.density, m);
@@ -196,7 +192,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "IC.inventories:" << std::endl;
+	std::cout << "#IC.inventory:" << std::endl;
 
     int num_perturb;
     const int max_perturb = 32;
@@ -239,9 +235,7 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Param.inventories:" << std::endl;
-
-    getStringProperty(properties, "datafile", E->control.data_file, m);
+	std::cout << "#Param.inventory:" << std::endl;
 
     getScalarProperty(properties, "file_vbcs", E->control.vbcs_file, m);
     getStringProperty(properties, "vel_bound_file", E->control.velocity_boundary_file, m);
@@ -258,32 +252,8 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "tracer", E->control.tracer, m);
     getStringProperty(properties, "tracer_file", E->control.tracer_file, m);
 
-    getScalarProperty(properties, "restart", E->control.restart, m);
-    getScalarProperty(properties, "post_p", E->control.post_p, m);
-    getStringProperty(properties, "datafile_old", E->control.old_P_file, m);
-    getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
-    getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
-
-    getScalarProperty(properties, "minstep", E->advection.min_timesteps, m);
-    getScalarProperty(properties, "maxstep", E->advection.max_timesteps, m);
-    getScalarProperty(properties, "maxtotstep", E->advection.max_total_timesteps, m);
-    getScalarProperty(properties, "storage_spacing", E->control.record_every, m);
-    getScalarProperty(properties, "cpu_limits_in_seconds", E->control.record_all_until, m);
-
-    getScalarProperty(properties, "stokes_flow_only", E->control.stokes, m);
-
-    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, m);
-
-    getScalarProperty(properties, "rayleigh", E->control.Atemp, m);
-
-    getScalarProperty(properties, "Q0", E->control.Q0, m);
-
-    getScalarProperty(properties, "verbose", E->control.verbose, m);
-    getScalarProperty(properties, "see_convergence", E->control.print_convergence, m);
-
     getScalarProperty(properties, "start_age", E->control.start_age, m);
     getScalarProperty(properties, "reset_startage", E->control.reset_startage, m);
-
 
     if (PyErr_Occurred())
 	return NULL;
@@ -310,7 +280,7 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Phase.inventories:" << std::endl;
+	std::cout << "#Phase.inventory:" << std::endl;
 
     getScalarProperty(properties, "Ra_410", E->control.Ra_410, m);
     getScalarProperty(properties, "clapeyron410", E->control.clapeyron410, m);
@@ -346,6 +316,56 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
 
 
 
+char pyCitcom_Solver_set_properties__doc__[] = "";
+char pyCitcom_Solver_set_properties__name__[] = "Solver_set_properties";
+
+PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
+{
+    PyObject *obj, *properties;
+
+    if (!PyArg_ParseTuple(args, "OO:Solver_set_properties",
+			  &obj, &properties))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    int m = E->parallel.me;
+    if (not m)
+	std::cout << "#Solver.inventory:" << std::endl;
+
+    getStringProperty(properties, "datafile", E->control.data_file, m);
+    getStringProperty(properties, "datafile_old", E->control.old_P_file, m);
+
+    getScalarProperty(properties, "rayleigh", E->control.Atemp, m);
+    getScalarProperty(properties, "Q0", E->control.Q0, m);
+
+    getScalarProperty(properties, "stokes_flow_only", E->control.stokes, m);
+    getScalarProperty(properties, "restart", E->control.restart, m);
+    getScalarProperty(properties, "post_p", E->control.post_p, m);
+    getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
+    getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
+    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, m);
+
+    getScalarProperty(properties, "verbose", E->control.verbose, m);
+    getScalarProperty(properties, "see_convergence", E->control.print_convergence, m);
+
+    // parameters not used in pyre version,
+    // assigned value here to prevent uninitialized access
+    E->advection.min_timesteps = 1;
+    E->advection.max_timesteps = 1;
+    E->advection.max_total_timesteps = 1;
+    E->control.record_every = 1;
+    E->control.record_all_until = 1;
+
+    if (PyErr_Occurred())
+	return NULL;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyCitcom_Sphere_set_properties__doc__[] = "";
 char pyCitcom_Sphere_set_properties__name__[] = "Sphere_set_properties";
 
@@ -361,7 +381,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Sphere.inventories:" << std::endl;
+	std::cout << "#Sphere.inventory:" << std::endl;
 
     getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy, m);
     getScalarProperty(properties, "nprocx", E->parallel.nprocx, m);
@@ -463,14 +483,14 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 	E->sphere.cap[1].fi[4] = E->control.fi_max;
     }
 
-    getScalarProperty(properties, "dimenx", E->mesh.layer[1], m);
-    getScalarProperty(properties, "dimeny", E->mesh.layer[2], m);
-    getScalarProperty(properties, "dimenz", E->mesh.layer[3], m);
-
     getScalarProperty(properties, "ll_max", E->sphere.llmax, m);
     getScalarProperty(properties, "nlong", E->sphere.noy, m);
     getScalarProperty(properties, "nlati", E->sphere.nox, m);
     getScalarProperty(properties, "output_ll_max", E->sphere.output_llmax, m);
+
+    E->mesh.layer[1] = 1;
+    E->mesh.layer[2] = 1;
+    E->mesh.layer[3] = 1;
 
     if (PyErr_Occurred())
 	return NULL;
@@ -496,7 +516,7 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Visc.inventories:" << std::endl;
+	std::cout << "#Visc.inventory:" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE, m);
     if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
@@ -565,11 +585,13 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
     int m = E->parallel.me;
     if (not m)
-	std::cout << "Incompressible.inventories:" << std::endl;
+	std::cout << "#Incompressible.inventory:" << std::endl;
 
-    getStringProperty(properties, "Solver", E->control.SOLVER_TYPE, m);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE, m);
     getScalarProperty(properties, "precond", E->control.precondition, m);
+
+    getScalarProperty(properties, "accuracy", E->control.accuracy, m);
+    getScalarProperty(properties, "tole_compressibility", E->control.tole_comp, m);
 
     getScalarProperty(properties, "mg_cycle", E->control.mg_cycle, m);
     getScalarProperty(properties, "down_heavy", E->control.down_heavy, m);
@@ -578,9 +600,6 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getScalarProperty(properties, "vlowstep", E->control.v_steps_low, m);
     getScalarProperty(properties, "vhighstep", E->control.v_steps_high, m);
     getScalarProperty(properties, "piterations", E->control.p_iterations, m);
-
-    getScalarProperty(properties, "accuracy", E->control.accuracy, m);
-    getScalarProperty(properties, "tole_compressibility", E->control.tole_comp, m);
 
     if (PyErr_Occurred())
 	return NULL;
@@ -737,6 +756,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.18 2003/09/29 20:22:18 tan2 Exp $
+// $Id: setProperties.cc,v 1.19 2003/10/28 23:52:44 tan2 Exp $
 
 // End of file
