@@ -23,7 +23,7 @@ class Controller(SimulationController):
 
     def launch(self, app):
         self.solver = app.solver
-        self.solver.startSimulation(self)
+        self.solver.launch(app)
         return
 
 

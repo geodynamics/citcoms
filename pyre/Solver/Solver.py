@@ -14,7 +14,7 @@ import journal
 class Solver(BaseSolver):
 
 
-    def startSimulation(self):
+    def launch(self,application):
 	#journal.info("staging").log("setup MPI")
         comm = self.get_communicator()
 
@@ -170,6 +170,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.9 2003/08/28 22:49:55 ces74 Exp $"
+__id__ = "$Id: Solver.py,v 1.10 2003/08/28 23:04:19 ces74 Exp $"
 
 # End of file
