@@ -46,11 +46,8 @@ void read_convection_settings(E)
 
 {
     void advection_diffusion_parameters();
-    int m=E->parallel.me;
 
     /* parameters */
-
-    input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
     advection_diffusion_parameters(E);
 
@@ -99,7 +96,6 @@ void convection_boundary_conditions(E)
 {
     void velocity_boundary_conditions();
     void temperature_boundary_conditions();
-    void temperatures_conform_bcs();
 
     velocity_boundary_conditions(E);      /* universal */
     temperature_boundary_conditions(E);

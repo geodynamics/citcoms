@@ -120,6 +120,7 @@ void PG_timestep_solve(struct All_variables *E)
       E->advection.dt_reduced *= 0.5;
       E->advection.last_sub_iterations ++;
     }
+
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
 
   if(E->control.filter_temperature)
@@ -171,6 +172,8 @@ void advection_diffusion_parameters(E)
     input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
     input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,2,nomax",m);
     input_float("maxadvtime",&(E->advection.max_dimensionless_time),"10.0",m);
+
+    input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
 /*     input_float("sub_tolerance",&(E->advection.vel_substep_aggression),"0.005",m);   */
 /*     input_int("maxsub",&(E->advection.max_substeps),"25",m); */
