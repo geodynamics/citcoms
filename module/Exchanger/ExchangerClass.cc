@@ -59,19 +59,19 @@ void Exchanger::local_sendVelocities(void) {
     int i,size;
 
 //     int size = outgoing->size;
-
+    
     loutgoing.size=11;
     size=loutgoing.size;
-
+    
     for(i=1;i<=size-1;i++) {
-      loutgoing.v[0][i]=i*0.01;
-      loutgoing.v[1][i]=i*0.01;
-      loutgoing.v[2][i]=i*0.01;
+	loutgoing.v[0][i]=i*0.01;
+	loutgoing.v[1][i]=i*0.01;
+	loutgoing.v[2][i]=i*0.01;
     }
     MPI_Send(loutgoing.v[0], size, MPI_DOUBLE, 0, 1, comm);
     MPI_Send(loutgoing.v[1], size, MPI_DOUBLE, 0, 2, comm);
     MPI_Send(loutgoing.v[2], size, MPI_DOUBLE, 0, 3, comm);
-
+    
     return;
 }
 
@@ -95,23 +95,23 @@ void Exchanger::local_receiveVelocities(void) {
     std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
       
     for(i=0;i<size;i++) {
-      MPI_Recv(lincoming.v[0], size, MPI_DOUBLE, i, 1, comm, &status);
-      /* test */
-      std::cout << "interme=" << interme << " worldme=" << worldme
-		<< " source=" << i << " Vel_u transferred: size="
-		<< size << std::endl;
-      MPI_Recv(lincoming.v[1], size, MPI_DOUBLE, i, 2, comm, &status);
-      /* test */
-      std::cout << "interme=" << interme << " worldme=" << worldme
-		<< " source=" << i << " Vel_v transferred: size="
-		<< size << std::endl;
-      MPI_Recv(lincoming.v[2], size, MPI_DOUBLE, i, 3, comm, &status);
-      /* test */
-      std::cout << " interme=" << interme << " worldme=" << worldme
-		<< " source=" << i << " Vel_w transferred: size="
-		<< size << std::endl;
+	MPI_Recv(lincoming.v[0], size, MPI_DOUBLE, i, 1, comm, &status);
+	/* test */
+	std::cout << "interme=" << interme << " worldme=" << worldme
+		  << " source=" << i << " Vel_u transferred: size="
+		  << size << std::endl;
+	MPI_Recv(lincoming.v[1], size, MPI_DOUBLE, i, 2, comm, &status);
+	/* test */
+	std::cout << "interme=" << interme << " worldme=" << worldme
+		  << " source=" << i << " Vel_v transferred: size="
+		  << size << std::endl;
+	MPI_Recv(lincoming.v[2], size, MPI_DOUBLE, i, 3, comm, &status);
+	/* test */
+	std::cout << " interme=" << interme << " worldme=" << worldme
+		  << " source=" << i << " Vel_w transferred: size="
+		  << size << std::endl;
     }
-
+    
     /*
     MPI_request *request = new MPI_request[incoming->exchanges-1];
     MPI_Status *status = new MPI_Status[incoming->exchanges-1];
@@ -349,24 +349,25 @@ void Exchanger::receiveVelocities() {
     return;
 }
 
+
 void Exchanger::imposeBC() {
     std::cout << "in Exchanger::imposeBC" << std::endl;
-
-    for(int i=0;i<boundary->size;i++) {
-      int n = boundary->bid2gid[i];
-      if(int m=1;m<=E->sphere.caps_per_proc;m++) {
-	E->V[m][1][n] = incoming.v[0][i];
-	E->V[m][2][n] = incoming.v[1][i];
-	E->V[m][3][n] = incoming.v[2][i];
-	E->node[m][n] = E->node[m][n] | VBX;
-	E->node[m][n] = E->node[m][n] | VBY;
-	E->node[m][n] = E->node[m][n] | VBZ;
-	E->node[m][n] = E->node[m][n] & (~SBX);
-	E->node[m][n] = E->node[m][n] & (~SBY);
-	E->node[m][n] = E->node[m][n] & (~SBZ);
-      }
+    
+    for(int m=1;m<=E->sphere.caps_per_proc;m++) {
+	for(int i=0;i<boundary->size;i++) {
+	    int n = boundary->bid2gid[i];
+	    E->sphere.cap[m].VB[1][n] = incoming.v[0][i];
+	    E->sphere.cap[m].VB[2][n] = incoming.v[1][i];
+	    E->sphere.cap[m].VB[3][n] = incoming.v[2][i];
+	    E->node[m][n] = E->node[m][n] | VBX;
+	    E->node[m][n] = E->node[m][n] | VBY;
+	    E->node[m][n] = E->node[m][n] | VBZ;
+	    E->node[m][n] = E->node[m][n] & (~SBX);
+	    E->node[m][n] = E->node[m][n] & (~SBY);
+	    E->node[m][n] = E->node[m][n] & (~SBZ);
+	}
     }
-
+    
     return;
 }
 
@@ -420,7 +421,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.13 2003/09/26 01:05:51 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.14 2003/09/26 17:01:08 ces74 Exp $
 
 // End of file
 
