@@ -653,6 +653,7 @@ struct CONTROL {
     float lith_age_depth;
     float lith_age_mantle_temp;
 
+    int filter_temperature;
     int temperature_bound_adj;
     float depth_bound_adj;
     float width_bound_adj;

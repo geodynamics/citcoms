@@ -74,11 +74,12 @@ class Advection_diffusion(CitcomComponent):
             prop.float("inputdiffusivity", default=1),
             prop.float("fixed_timestep", default=0.0),
             prop.float("finetunedt", default=0.9),
+            prop.bool("filter_temp", default=True),
 
 	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.20 2004/05/26 23:53:35 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.21 2004/11/24 21:47:03 ces74 Exp $"
 
 # End of file

@@ -61,6 +61,8 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     getScalarProperty(properties, "aug_lagr", E->control.augmented_Lagr, m);
     getScalarProperty(properties, "aug_number", E->control.augmented, m);
 
+    getScalarProperty(properties, "filter_temp", E->control.filter_temperature, m);
+
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
     E->advection.last_sub_iterations = 1;
@@ -754,6 +756,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.26 2004/08/03 20:11:22 tan2 Exp $
+// $Id: setProperties.cc,v 1.27 2004/11/24 21:47:03 ces74 Exp $
 
 // End of file

@@ -60,6 +60,7 @@ void PG_timestep_solve(struct All_variables *E)
 
   double Tmaxd();
   double CPU_time0();
+  void filter();
   void predictor();
   void corrector();
   void pg_solver();
@@ -120,6 +121,9 @@ void PG_timestep_solve(struct All_variables *E)
       E->advection.last_sub_iterations ++;
     }
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
+
+  if(E->control.filter_temperature)
+    filter(E);
 
   /*   time0= CPU_time0()-time1; */
   /*     if(E->control.verbose) */
@@ -647,3 +651,60 @@ void std_timestep(E)
 
     return;
   }
+
+
+void filter(struct All_variables *E)
+{
+	double Tsum0,Tmin,Tmax,Tsum1,TDIST,TDIST1;
+	int m,i,TNUM,TNUM1;
+	double Tmax1,Tmin1;
+	int lev;
+
+	Tsum0= Tsum1= 0.0;
+	Tmin= Tmax= 0.0;
+	Tmin1= Tmax1= 0.0;
+	TNUM= TNUM1= 0;
+	TDIST= TDIST1= 0.0;
+
+	lev=E->mesh.levmax;
+
+	for(m=1;m<=E->sphere.caps_per_proc;m++)
+		for(i=1;i<=E->lmesh.nno;i++)  {
+
+			if(!(E->NODE[lev][m][i] & SKIP))	Tsum0 +=E->T[m][i];
+			if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
+			if(E->T[m][i]<0.0) E->T[m][i]=0.0;
+			if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
+			if(E->T[m][i]>1.0) E->T[m][i]=1.0;
+
+		}
+
+	MPI_Allreduce(&Tmin,&Tmin1,1,MPI_DOUBLE,MPI_MIN,E->parallel.world);
+	MPI_Allreduce(&Tmax,&Tmax1,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
+
+	for(m=1;m<=E->sphere.caps_per_proc;m++)
+		for(i=1;i<=E->lmesh.nno;i++)  {
+
+			if(E->T[m][i]<=abs(Tmin1))   E->T[m][i]=0.0;
+			if(E->T[m][i]>=(2-Tmax1))   E->T[m][i]=1.0;
+
+			if (!(E->NODE[lev][m][i] & SKIP))  {
+				Tsum1+=E->T[m][i];
+				if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)  TNUM++;
+			}
+
+		}
+
+	TDIST=Tsum0-Tsum1;
+	MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+	MPI_Allreduce(&TNUM,&TNUM1,1,MPI_INT,MPI_SUM,E->parallel.world);
+	TDIST=TDIST1/TNUM1;
+
+	for(m=1;m<=E->sphere.caps_per_proc;m++)
+		for(i=1;i<=E->lmesh.nno;i++)   {
+			if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)
+				E->T[m][i] +=TDIST;
+		}
+
+	return;
+}

@@ -115,8 +115,9 @@ void read_instructions(struct All_variables *E, char *filename)
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
 
-    if(E->control.lith_age)
+    if(E->control.lith_age) {
       lith_age_init(E);
+    }
 
     (E->problem_boundary_conds)(E);
 
@@ -305,6 +306,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("bottbc",&(E->mesh.bottbc),"1",m);
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
+  input_int("filter_temp",&(E->control.filter_temperature),"1",m);
 
   input_boolean("side_sbcs",&(E->control.side_sbcs),"off",m);
 
@@ -351,6 +353,7 @@ void read_initial_settings(struct All_variables *E)
   input_float("surftemp",&(E->data.surf_temp),"273.0",m);
 
   E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
+
   E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
     * E->data.ref_viscosity
     / (E->data.density * E->data.grav_acc * E->data.therm_exp)
