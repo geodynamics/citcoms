@@ -504,6 +504,35 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 
 
 
+char pyCitcom_Tracer_set_properties__doc__[] = "";
+char pyCitcom_Tracer_set_properties__name__[] = "Tracer_set_properties";
+
+PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
+{
+    PyObject *obj, *properties;
+
+    if (!PyArg_ParseTuple(args, "OO:Tracer_set_properties",
+			  &obj, &properties))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    int m = E->parallel.me;
+    if (not m)
+	std::cout << "#Tracer.inventory:" << std::endl;
+
+    getScalarProperty(properties, "tracer", E->control.tracer, m);
+    getStringProperty(properties, "tracer_file", E->control.tracer_file, m);
+
+    if (PyErr_Occurred())
+	return NULL;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyCitcom_Visc_set_properties__doc__[] = "";
 char pyCitcom_Visc_set_properties__name__[] = "Visc_set_properties";
 
@@ -758,6 +787,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.28 2005/01/08 03:02:18 ces74 Exp $
+// $Id: setProperties.cc,v 1.29 2005/01/19 01:05:50 tan2 Exp $
 
 // End of file

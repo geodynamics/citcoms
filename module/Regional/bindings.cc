@@ -198,6 +198,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Sphere_set_properties__doc__},
 
+    {pyCitcom_Tracer_set_properties__name__,
+     pyCitcom_Tracer_set_properties,
+     METH_VARARGS,
+     pyCitcom_Tracer_set_properties__doc__},
+
     {pyCitcom_Visc_set_properties__name__,
      pyCitcom_Visc_set_properties,
      METH_VARARGS,
@@ -270,6 +275,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.36 2005/01/08 03:20:32 ces74 Exp $
+// $Id: bindings.cc,v 1.37 2005/01/19 01:05:50 tan2 Exp $
 
 // End of file
