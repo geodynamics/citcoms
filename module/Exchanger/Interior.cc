@@ -35,6 +35,7 @@ Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
 
     X_.shrink();
     X_.print("Interior-X");
+
     nodeID_.shrink();
     nodeID_.print("Interior-nodeID");
 }
@@ -64,6 +65,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.11 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Interior.cc,v 1.12 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

@@ -43,7 +43,7 @@ BoundaryConditionSink::BoundaryConditionSink(const MPI_Comm& c,
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in BoundaryConditionSink::c'tor"
+	  << "in BoundaryConditionSink::Citcom"
 	  << " sink.size = " << sink.size()
 	  << journal::end;
 
@@ -216,7 +216,7 @@ BoundaryConditionSource::BoundaryConditionSource(const Source& s,
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in BoundaryConditionSource::c'tor"
+	  << "in BoundaryConditionSource::Citcom"
 	  << " source.size = " << source.size()
 	  << journal::end;
 }
@@ -263,6 +263,6 @@ void BoundaryConditionSource::domain_cutout()
 
 }
 // version
-// $Id: BoundaryCondition.cc,v 1.11 2004/01/08 02:29:37 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.12 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

@@ -227,6 +227,8 @@ PyObject * pyExchanger_createInterior(PyObject *, PyObject *args)
     Interior* i = new Interior(*rbbox, E);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
+    std::cout << "Citcom createInterior interior.size()="<<i->size()<<std::endl;
+
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
     PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
     return Py_BuildValue("OO", cobj1, cobj2);
@@ -252,7 +254,7 @@ PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
     BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
 
     Sink* sink = new Sink(comm, numSrc, *b);
-
+    std::cout << "Citcom createSink: sink.size()="<<sink->size()<<std::endl;
     PyObject *cobj = PyCObject_FromVoidPtr(sink, deleteSink);
     return Py_BuildValue("O", cobj);
 }
@@ -377,6 +379,26 @@ PyObject * pyExchanger_recvTandV(PyObject *, PyObject *args)
     PyObject *obj;
 
     if (!PyArg_ParseTuple(args, "O:recvTandV", &obj))
+	return NULL;
+
+    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
+
+    bcs->recvTandV();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_recvV__doc__[] = "";
+char pyExchanger_recvV__name__[] = "recvV";
+
+PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:recvV", &obj))
 	return NULL;
 
     BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
@@ -731,6 +753,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.37 2004/01/08 01:50:25 tan2 Exp $
+// $Id: exchangers.cc,v 1.38 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

@@ -33,7 +33,7 @@ Source::Source(MPI_Comm c, int s,
 
 void Source::interpolateT(Array2D<double,1>& T, const All_variables* E) const
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("Citcom_Exchanger");
     debug << journal::loc(__HERE__)
 	  << "in Source::interpolateT" << journal::end;
 
@@ -78,6 +78,6 @@ void Source::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Source.cc,v 1.7 2004/01/08 20:42:56 tan2 Exp $
+// $Id: Source.cc,v 1.8 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

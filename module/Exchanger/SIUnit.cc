@@ -15,7 +15,7 @@
 
 
 SIUnit::SIUnit(const All_variables* E) :
-    length_factor(E->data.radius_km * 1000),
+    length_factor(E->data.radius_km * 1000.),
     velocity_factor(E->data.therm_diff / length_factor),
     surf_temperature(E->data.surf_temp),
     temperature_factor(E->data.ref_temperature),
@@ -27,6 +27,7 @@ SIUnit::SIUnit(const All_variables* E) :
 
 void SIUnit::coordinate(BoundedBox& bbox) const
 {
+
     for(int i=0; i<2; ++i)
 	bbox[i][DIM-1] *= length_factor;
 }
@@ -116,6 +117,6 @@ void SIUnit::xvelocity(Array2D<double,DIM>& V) const
 
 
 // version
-// $Id: SIUnit.cc,v 1.3 2004/01/08 18:38:40 tan2 Exp $
+// $Id: SIUnit.cc,v 1.4 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

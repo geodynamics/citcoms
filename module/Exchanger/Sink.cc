@@ -88,7 +88,7 @@ void Sink::sumSourceSize()
     partial_sum(numSrcNodes.begin(), numSrcNodes.end(),
 		++beginSrcNodes.begin());
 
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("Citcom_Sink");
     for(size_t i=0; i<source.size(); i++) {
 	debug << journal::loc(__HERE__)
 	      << " source = " << i << "  size = " << numSrcNodes[i]
@@ -116,7 +116,7 @@ void Sink::initX(const BoundedMesh& mesh)
     X_.resize(meshNode_.size());
 
     for(int i=0; i<X_.size(); ++i) {
-	int n = meshNode_[0][i];
+ 	int n = meshNode_[0][i];
 	for(int j=0; j<DIM; ++j)
 	    X_[j][i] = mesh.X(j,n);
     }
@@ -124,6 +124,6 @@ void Sink::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Sink.cc,v 1.3 2004/01/08 02:29:37 tan2 Exp $
+// $Id: Sink.cc,v 1.4 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

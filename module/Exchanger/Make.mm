@@ -11,7 +11,7 @@ PROJECT = CitcomS
 PACKAGE = Exchangermodule
 
 include std-pythonmodule.def
-PROJ_CXX_INCLUDES = ../../lib/Common
+PROJ_CXX_INCLUDES = ../../lib/Common 
 
 PROJ_CXX_SRCLIB = \
         $(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
@@ -46,6 +46,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.12 2004/01/08 20:42:56 tan2 Exp $
+# $Id: Make.mm,v 1.13 2004/01/13 01:21:07 ces74 Exp $
 
 # End of file

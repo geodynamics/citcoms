@@ -41,6 +41,8 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
     BoundedBox bbox(bbox_);
     Array2D<double,DIM> X(X_);
 
+    bbox_.print("before_send_bbox");
+    bbox.print("converted_bbox");
     convertor.coordinate(bbox);
     convertor.coordinate(X);
 
@@ -50,6 +52,6 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 
 
 // version
-// $Id: BoundedMesh.cc,v 1.5 2004/01/07 21:54:00 tan2 Exp $
+// $Id: BoundedMesh.cc,v 1.6 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file

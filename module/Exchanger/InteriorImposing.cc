@@ -28,7 +28,7 @@ InteriorImposingSink::InteriorImposingSink(const Interior& i, const Sink& s,
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in InteriorImposingSink::c'tor"
+	  << "in InteriorImposingSink::Citcom"
 	  << " sink.size = " << sink.size()
 	  << journal::end;
 }
@@ -86,7 +86,7 @@ InteriorImposingSource::InteriorImposingSource(const Source& s,
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in InteriorImposingSource::c'tor"
+	  << "in InteriorImposingSource::Citcom"
 	  << " source.size = " << source.size()
 	  << journal::end;
 }
@@ -109,6 +109,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.10 2004/01/07 23:54:34 tan2 Exp $
+// $Id: InteriorImposing.cc,v 1.11 2004/01/13 01:21:07 ces74 Exp $
 
 // End of file
