@@ -16,6 +16,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Components \
+	Controller \
 	Facilities \
 	Solver
 
@@ -49,7 +50,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.9 2003/08/27 22:24:06 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/08/28 23:10:26 ces74 Exp $
 
 #
 # End of file
