@@ -94,6 +94,13 @@ extern char pyExchanger_sendTandV__doc__[];
 extern "C"
 PyObject * pyExchanger_sendTandV(PyObject *, PyObject *);
 
+
+extern char pyExchanger_sendTraction__name__[];
+extern char pyExchanger_sendTraction__doc__[];
+extern "C"
+PyObject * pyExchanger_sendTraction(PyObject *, PyObject *);
+
+
 extern char pyExchanger_recvT__name__[];
 extern char pyExchanger_recvT__doc__[];
 extern "C"
@@ -143,6 +150,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.21 2003/11/11 19:29:27 tan2 Exp $
+// $Id: exchangers.h,v 1.22 2003/11/23 19:08:27 ces74 Exp $
 
 // End of file
