@@ -30,14 +30,14 @@ public:
   
   void mapBoundary();
   void createBoundary();
-  int sendBoundary();
+  void sendBoundary();
 
 };
 
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.9 2003/09/25 22:25:01 ces74 Exp $
+// $Id: FineGridExchanger.h,v 1.10 2003/09/27 00:27:35 tan2 Exp $
 
 // End of file
 

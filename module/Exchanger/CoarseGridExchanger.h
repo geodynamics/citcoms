@@ -31,14 +31,13 @@ public:
 
     void receiveBoundary();
     void interpolate();
-  void interpolateTemperature();
-    void getBid2crseelem();
+    void interpolateTemperature();
 };
 
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.9 2003/09/25 22:25:40 ces74 Exp $
+// $Id: CoarseGridExchanger.h,v 1.10 2003/09/27 00:27:35 tan2 Exp $
 
 // End of file
 

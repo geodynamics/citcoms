@@ -10,11 +10,12 @@
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
-using namespace std;
+
 #include "global_defs.h"
 #include "Boundary.h"
 #include "FineGridExchanger.h"
 
+using namespace std;
 
 
 FineGridExchanger::FineGridExchanger(MPI_Comm communicator,
@@ -39,6 +40,7 @@ void FineGridExchanger::interpretate() {
     return;
 }
 
+
 void FineGridExchanger::createBoundary() {
     std::cout << "in FineGridExchanger::createBoundary" << std::endl;
 
@@ -51,13 +53,12 @@ void FineGridExchanger::createBoundary() {
 	// initialize...
 	boundary->init(E);
 
-	//boundary->printConnectivity();
 	//boundary->printX();
     }
 }
 
 
-int FineGridExchanger::sendBoundary() {
+void FineGridExchanger::sendBoundary() {
     std::cout << "in FineGridExchanger::sendBoundary"
 	      << "  rank = " << rank
 	      << "  leader = "<< localLeader
@@ -65,56 +66,20 @@ int FineGridExchanger::sendBoundary() {
 
     if (rank == localLeader) {
 	int tag = 0;
-	int size = boundary->size;
-
-	MPI_Send(&size, 1, MPI_INT,
+	int itmp = boundary->size;
+	MPI_Send(&itmp, 1, MPI_INT,
 		 remoteLeader, tag, intercomm);
-	tag ++;
 
- 	MPI_Send(boundary->bid2gid, size, MPI_INT,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
-
-	for (int i=0; i<boundary->dim; i++) {
-	    MPI_Send(boundary->X[i], size, MPI_DOUBLE,
-		     remoteLeader, tag, intercomm);
-	    tag ++;
-	}
-
- 	MPI_Send(&boundary->theta_max, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
- 	MPI_Send(&boundary->theta_min, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
- 	MPI_Send(&boundary->fi_max, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
- 	MPI_Send(&boundary->fi_min, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
- 	MPI_Send(&boundary->ro, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
- 	MPI_Send(&boundary->ri, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm);
- 	tag ++;
-	//Test
-// 	std::cout << "in FineGridExchanger::receiveBoundary" << std::endl;
-// 	std::cout << "Fine Grid Bounds transferred to Coarse Grid" << std::endl;
-// 	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
-// 	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
-// 	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
-
+	boundary->send(intercomm, remoteLeader);
     }
 
-    return 0;
+    return;
 }
 
 
 void FineGridExchanger::mapBoundary() {
     std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
-    boundary->mapFineGrid(E, localLeader);
+    boundary->mapFineGrid(E);
 
     return;
 }
@@ -193,6 +158,6 @@ void FineGridExchanger::mapBoundary() {
 // }
 
 // version
-// $Id: FineGridExchanger.cc,v 1.15 2003/09/25 19:16:30 ces74 Exp $
+// $Id: FineGridExchanger.cc,v 1.16 2003/09/27 00:27:35 tan2 Exp $
 
 // End of file

@@ -27,7 +27,6 @@ CoarseGridExchanger::CoarseGridExchanger(MPI_Comm communicator,
 }
 
 
-
 CoarseGridExchanger::~CoarseGridExchanger() {
     std::cout << "in CoarseGridExchanger::~CoarseGridExchanger" << std::endl;
 }
@@ -37,10 +36,11 @@ void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
 }
 
+
 void CoarseGridExchanger::interpolate() {
   std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
   
-  int n1,n2,bnid,node;
+  int n1,n2,node;
   for(int i=0;i<boundary->size;i++)
     {
       n1=boundary->bid2elem[i];
@@ -78,6 +78,7 @@ void CoarseGridExchanger::interpolate() {
   
   return;
 }
+
 
 void CoarseGridExchanger::interpolateTemperature() {
   std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
@@ -118,92 +119,31 @@ void CoarseGridExchanger::receiveBoundary() {
     std::cout << "in CoarseGridExchanger::receiveBoundary"
 	      << "  rank = " << rank
 	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader << std::endl;
-    int size,nproc,lrank;
-    int tag = 0;
+	      << "  sender = "<< remoteLeader << std::endl;
+    int size;
     
     if (rank == localLeader) {
+	int tag = 0;
 	MPI_Status status;
 
  	MPI_Recv(&size, 1, MPI_INT,
  		 remoteLeader, tag, intercomm, &status);
-	tag ++;
 
 	boundary = new Boundary(size);
-
-  	MPI_Recv(boundary->bid2gid, size, MPI_INT,
-  		 remoteLeader, tag, intercomm, &status);
-  	//boundary->printConnectivity();
- 	tag ++;
-
-	for (int i=0; i<boundary->dim; i++) {
-  	    MPI_Recv(boundary->X[i], size, MPI_DOUBLE,
-  		     remoteLeader, tag, intercomm, &status);
-	    tag ++;
-	}
-
- 	MPI_Recv(&boundary->theta_max, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
- 	MPI_Recv(&boundary->theta_min, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
- 	MPI_Recv(&boundary->fi_max, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
- 	MPI_Recv(&boundary->fi_min, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
- 	MPI_Recv(&boundary->ro, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
- 	MPI_Recv(&boundary->ri, 1, MPI_DOUBLE,
- 		 remoteLeader, tag, intercomm, &status);
- 	tag ++;
-
-	// test 
-// 	std::cout << "in CoarseGridExchanger::receiveBoundary" << std::endl;
-// 	std::cout << "Grid Bounds transferred to Coarse Grid" << std::endl;
-// 	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
-// 	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
-// 	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
-
-	
-	//boundary->printX();
+	boundary->receive(intercomm, remoteLeader);
     }
-    
-    // Test: Broadcast info received by localLeader to the other procs 
+
+    // Broadcast info received by localLeader to the other procs 
     // in the Coarse communicator.
-    MPI_Comm_size(comm,&nproc);
-    MPI_Comm_rank(comm,&lrank);
-    MPI_Bcast(&size,1,MPI_INT,nproc-1,comm);
-
-    
-    if(lrank != localLeader)
-      boundary = new Boundary(size);
-
-    MPI_Bcast(boundary->bid2gid,size,MPI_INT,nproc-1,comm);
-    for (int i=0; i<boundary->dim; i++) {
-      MPI_Bcast(boundary->X[i],size,MPI_DOUBLE,nproc-1,comm);
+    if (rank == localLeader) {
+	MPI_Bcast(&size, 1, MPI_INT, localLeader, comm);
+	boundary->broadcast(comm, localLeader);
+    } 
+    else {
+	MPI_Bcast(&size, 1, MPI_INT, localLeader, comm);
+	boundary = new Boundary(size);
+	boundary->broadcast(comm, localLeader);
     }
-    MPI_Bcast(&boundary->theta_max,1,MPI_DOUBLE,nproc-1,comm);
-    MPI_Bcast(&boundary->theta_min,1,MPI_DOUBLE,nproc-1,comm);
-    MPI_Bcast(&boundary->fi_max,1,MPI_DOUBLE,nproc-1,comm);
-    MPI_Bcast(&boundary->fi_min,1,MPI_DOUBLE,nproc-1,comm);
-    MPI_Bcast(&boundary->ro,1,MPI_DOUBLE,nproc-1,comm);
-    MPI_Bcast(&boundary->ri,1,MPI_DOUBLE,nproc-1,comm);
-
-    MPI_Barrier(comm);
-    std::cout << "in CoarseGridExchanger::receiveBoundary: Done!!" << std::endl;
-    // Test end
-
-    return;
-}
-
-void CoarseGridExchanger::getBid2crseelem() {
-    std::cout << "in CoarseGridExchanger::getBid2crseelem" << std::endl;
-
-    boundary->getBid2crseelem(E);
 
     return;
 }
@@ -211,22 +151,7 @@ void CoarseGridExchanger::getBid2crseelem() {
 
 void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
-    char fname[255];
-    int lrank;
-
-
-    boundary->mapCoarseGrid(E, localLeader);
-
-    // Test    
-//     MPI_Comm_rank(comm,&lrank);
-
-//     sprintf(fname,"bid2crs%d.dat",lrank);
-//     ofstream file(fname);
-//     for(int i=0; i< boundary->size; i++)
-//       {
-// 	file << "i = " << i << "elem = " << boundary->bid2elem[i] << " " << "capid = " << boundary->bid2proc[i] << endl;
-//       }
-//     file.close();
+    boundary->mapCoarseGrid(E);
 
     return;
 }
@@ -234,6 +159,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.20 2003/09/26 18:24:58 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.21 2003/09/27 00:27:35 tan2 Exp $
 
 // End of file
