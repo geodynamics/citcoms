@@ -35,6 +35,12 @@ extern "C"
 PyObject * pyExchanger_createBoundary(PyObject *, PyObject *);
 
 
+extern char pyExchanger_mapBoundary__name__[];
+extern char pyExchanger_mapBoundary__doc__[];
+extern "C"
+PyObject * pyExchanger_mapBoundary(PyObject *, PyObject *);
+
+
 extern char pyExchanger_receiveBoundary__name__[];
 extern char pyExchanger_receiveBoundary__doc__[];
 extern "C"
@@ -51,6 +57,6 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.2 2003/09/09 02:35:22 tan2 Exp $
+// $Id: exchangers.h,v 1.3 2003/09/09 18:25:31 tan2 Exp $
 
 // End of file

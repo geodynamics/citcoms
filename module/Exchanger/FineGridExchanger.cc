@@ -31,26 +31,26 @@ FineGridExchanger::~FineGridExchanger() {
 
 
 
-void FineGridExchanger::gather() {
+void FineGridExchanger::gather(const Boundary* b) {
     std::cout << "in FineGridExchanger::gather" << std::endl;
 }
 
 
 
-void FineGridExchanger::distribute() {
+void FineGridExchanger::distribute(const Boundary* b) {
     std::cout << "in FineGridExchanger::distribute" << std::endl;
 }
 
 
 
-void FineGridExchanger::interpretate() {
+void FineGridExchanger::interpretate(const Boundary* b) {
     std::cout << "in FineGridExchanger::interpretate" << std::endl;
 }
 
 
 
 
-void FineGridExchanger::impose_bc() {
+void FineGridExchanger::impose_bc(const Boundary* b) {
     std::cout << "in FineGridExchanger::impose_bc" << std::endl;
 
 }
@@ -66,11 +66,7 @@ const Boundary* FineGridExchanger::createBoundary() {
 	b = new Boundary(size);
 
 	// initialize...
-
-	// test
-	int *c = b->connectivity.get();
-	for(int j=0; j<size; j++)
-	    c[j] = j;
+	b->init(E);
 
 	//b->printConnectivity();
     }
@@ -91,11 +87,11 @@ int FineGridExchanger::sendBoundary(const Boundary* b) {
 	MPI_Send(&size, 1, MPI_INT,
 		 remoteLeader, tag, intercomm);
 	tag ++;
-	MPI_Send(b->connectivity.get(), size, MPI_INT,
+	MPI_Send(b->connectivity, size, MPI_INT,
 		 remoteLeader, tag, intercomm);
 	tag ++;
 	for (int i=0; i<b->dim; i++, tag++) {
-	    MPI_Send(b->X[i].get(), size, MPI_DOUBLE,
+	    MPI_Send(b->X[i], size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm);
 	}
     }
@@ -104,8 +100,12 @@ int FineGridExchanger::sendBoundary(const Boundary* b) {
 }
 
 
+void FineGridExchanger::mapBoundary(const Boundary* b) {
+
+}
+
 
 // version
-// $Id: FineGridExchanger.cc,v 1.3 2003/09/09 02:35:22 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.4 2003/09/09 18:25:31 tan2 Exp $
 
 // End of file

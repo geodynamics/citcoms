@@ -17,6 +17,9 @@
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
 
+extern "C" {
+#include "global_defs.h"
+}
 
 #include "exchangers.h"
 
@@ -144,6 +147,27 @@ PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
 
 
 
+char pyExchanger_mapBoundary__doc__[] = "";
+char pyExchanger_mapBoundary__name__[] = "mapBoundary";
+
+PyObject * pyExchanger_mapBoundary(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:mapBoundary", &obj1, &obj2))
+        return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj1));
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
+
+    pe->mapBoundary(b);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyExchanger_receiveBoundary__doc__[] = "";
 char pyExchanger_receiveBoundary__name__[] = "receiveBoundary";
 
@@ -180,7 +204,6 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
 	                                (PyCObject_AsVoidPtr(obj1));
     Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
 
-
     fge->sendBoundary(b);
 
     Py_INCREF(Py_None);
@@ -208,11 +231,6 @@ PyObject * pyExchanger_rE(PyObject *, PyObject *)
 void deleteBoundary(void* p) {
     std::cout << "deleting Boundary" << std::endl;
     delete static_cast<Boundary*>(p);
-
-    //Boundary *b = (Boundary *)p;
-    //delete b;
-
-    return;
 }
 
 
@@ -220,8 +238,6 @@ void deleteBoundary(void* p) {
 void deleteCoarseGridExchanger(void* p) {
     std::cout << "deleting CoarseGridExchanger" << std::endl;
     delete static_cast<CoarseGridExchanger*>(p);
-
-    return;
 }
 
 
@@ -229,13 +245,11 @@ void deleteCoarseGridExchanger(void* p) {
 void deleteFineGridExchanger(void* p) {
     std::cout << "deleting FineGridExchanger" << std::endl;
     delete static_cast<FineGridExchanger*>(p);
-
-    return;
 }
 
 
 
 // version
-// $Id: exchangers.cc,v 1.2 2003/09/09 02:35:22 tan2 Exp $
+// $Id: exchangers.cc,v 1.3 2003/09/09 18:25:31 tan2 Exp $
 
 // End of file

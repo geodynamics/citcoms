@@ -8,6 +8,7 @@
 #if !defined(pyCitcom_FineGridExchanger_h)
 #define pyCitcom_FineGridExchanger_h
 
+class Boundary;
 
 #include "ExchangerClass.h"
 
@@ -22,10 +23,11 @@ public:
 		      const All_variables *E);
     virtual ~FineGridExchanger();
 
-    virtual void gather();
-    virtual void distribute();
-    virtual void interpretate(); // interpolation or extrapolation
-    virtual void impose_bc();
+    virtual void gather(const Boundary*);
+    virtual void distribute(const Boundary*);
+    virtual void interpretate(const Boundary*);
+    virtual void impose_bc(const Boundary*);
+    virtual void mapBoundary(const Boundary*);
 
     const Boundary* createBoundary();
     int sendBoundary(const Boundary*);
@@ -35,7 +37,7 @@ public:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.3 2003/09/09 02:35:22 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.4 2003/09/09 18:25:31 tan2 Exp $
 
 // End of file
 
