@@ -102,7 +102,8 @@ int main(argc,argv)
 	    }
     */
 
-    output(E, E->monitor.solution_cycles);
+    if ((E->monitor.solution_cycles % E->control.record_every)==0)
+	output(E, E->monitor.solution_cycles);
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);
