@@ -33,6 +33,7 @@ void viscosity_system_input(struct All_variables *E)
   if (E->viscosity.TDEPV) {
     input_float_vector("viscT",E->viscosity.num_mat,(E->viscosity.T),m);
     input_float_vector("viscE",E->viscosity.num_mat,(E->viscosity.E),m);
+    input_float_vector("viscZ",E->viscosity.num_mat,(E->viscosity.Z),m);
   }
 
 
@@ -235,6 +236,57 @@ void visc_from_T(E,EEta,propogate)
 	  }
 	}
       break;
+
+    case 4:
+                                                                                                                                                             
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=nel;i++)   {
+          l = E->mat[m][i];
+          tempa = E->viscosity.N0[l-1];
+          j = 0;
+                                                                                                                                                             
+          for(kk=1;kk<=ends;kk++) {
+            TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+            zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+          }
+                                                                                                                                                             
+          for(jj=1;jj<=vpts;jj++) {
+            temp=0.0;
+            zzz=0.0;
+            for(kk=1;kk<=ends;kk++)   {
+              TT[kk]=max(TT[kk],zero);
+              temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+              zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+            }
+              
+/* The viscosity formulation (dimensional) is: visc=visc0*exp[(Ea+p*Va)/R*T] 
+   Typical values for dry upper mantle are: Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol 
+   T=T0+DT*T'; where DT - temperature contrast (from Rayleigh number) 
+   T' - nondimensional temperature; T0 - surface tempereture (273 K) 
+   T=DT*[(T0/DT) + T'] => visc=visc0*exp{(Ea+p*Va)/R*DT*[(T0/DT) + T']} 
+   visc=visc0*exp{[(Ea/R*DT) + (p*Va/R*DT)]/[(T0/DT) + T']} 
+   so: E->viscosity.E = Ea/R*DT ; E->viscosity.Z = Va/R*DT 
+   p = zzz and E->viscosity.T = T0/DT */
+
+                                                                                                                                               
+            if(E->control.mat_control==0)
+              EEta[m][ (i-1)*vpts + jj ] = tempa*
+                exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
+                         / (E->viscosity.T[l-1]+temp) );
+                                                                               
+                                                                              
+
+            if(E->control.mat_control==1)
+              EEta[m][ (i-1)*vpts + jj ] = tempa*E->VIP[m][i]*
+                exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
+                         / (E->viscosity.T[l-1]+temp) ); 
+
+	    }
+        }
+      break;
+
+
+
 
     }
 
