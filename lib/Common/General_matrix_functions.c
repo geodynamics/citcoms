@@ -209,10 +209,16 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   else  {
 
     counts =0;
+    if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+    if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+    valid = (residual < acc)?1:0;
+
     while (!valid) {
       residual=multi_grid(E,d0,F,acc,high_lev);
       valid = (residual < acc)?1:0;
       counts ++;
+      if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+      if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
     }
 
     cycles = counts;
