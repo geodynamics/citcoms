@@ -20,7 +20,8 @@ void velocity_boundary_conditions(E)
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
       noz = E->lmesh.NOZ[lv];
-      if(E->mesh.topvbc != 1) {
+
+      if(E->mesh.topvbc == 0) {
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
@@ -28,16 +29,7 @@ void velocity_boundary_conditions(E)
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
 	}
-      if(E->mesh.botvbc != 1) {
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
-        }
-
-      if(E->mesh.topvbc == 1) {
+      else if(E->mesh.topvbc == 1) {
         horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j);
@@ -45,22 +37,31 @@ void velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
 
-        if(E->control.vbcs_file)   {
-          read_velocity_boundary_from_file(E);   /* read in the velocity boundary
-condition from file if E->control.bcs_file==1   */
-          }
-        else
-          {
-
-/* commented out 2/26/00 CPC - remove program specification of velocity BC
-           renew_top_velocity_boundary(E);
-*/
-          }
-
+	if(E->control.vbcs_file)   {
+	  read_velocity_boundary_from_file(E);   /* read in the velocity boundary condition from file */
+	}
+      }
+      else if(E->mesh.topvbc == 2) {
+	/* This extra BC is for a open top */
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
         }
 
 
-      if(E->mesh.botvbc == 1) {
+
+      if(E->mesh.botvbc == 0) {
+        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
+        }
+      else if(E->mesh.botvbc == 1) {
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,VBY,1,lv,j);
@@ -72,12 +73,12 @@ condition from file if E->control.bcs_file==1   */
 
       velocity_refl_vert_bc(E);
 
-if(E->control.verbose)
- for (j=1;j<=E->sphere.caps_per_proc;j++)
-   for (node=1;node<=E->lmesh.nno;node++)
-      fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ);
+      if(E->control.verbose)
+	for (j=1;j<=E->sphere.caps_per_proc;j++)
+	  for (node=1;node<=E->lmesh.nno;node++)
+	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ);
 
-  /* If any imposed internal velocity structure it goes here */
+      /* If any imposed internal velocity structure it goes here */
 
 
    return; }
