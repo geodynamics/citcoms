@@ -59,12 +59,14 @@ class BoundaryConditionSource {
     const Source& source;
     Array2D<double,DIM> vbc;
     Array2D<double,1> tbc;
+    Array2D<double,DIM> fbc;
 
 public:
     BoundaryConditionSource(const Source& src, All_variables* E);
     ~BoundaryConditionSource() {};
 
     void sendTandV();
+    void sendTraction();
 
 private:
 
@@ -74,6 +76,6 @@ private:
 #endif
 
 // version
-// $Id: BoundaryCondition.h,v 1.3 2003/11/10 21:55:28 tan2 Exp $
+// $Id: BoundaryCondition.h,v 1.4 2003/11/23 18:21:48 ces74 Exp $
 
 // End of file
