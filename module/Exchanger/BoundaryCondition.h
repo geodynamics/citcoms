@@ -67,6 +67,7 @@ public:
 
     void sendTandV();
     void sendTraction();
+    void domain_cutout();
 
 private:
 
@@ -76,6 +77,6 @@ private:
 #endif
 
 // version
-// $Id: BoundaryCondition.h,v 1.4 2003/11/23 18:21:48 ces74 Exp $
+// $Id: BoundaryCondition.h,v 1.5 2003/11/28 22:20:43 ces74 Exp $
 
 // End of file
