@@ -1,0 +1,192 @@
+//
+// time: Tue May 11 11:03:38 2004
+//
+// version: 3.2.0 (format), 4.3.0 (DX)
+//
+//
+//
+// macro reference (indirect): RTFtoXYZ /home/tan2/OpenDXMacro/RTFtoXYZ.net
+//
+// macro reference (indirect): CitcomSTemperature /home/tan2/OpenDXMacro/CitcomSTemperature.net
+//
+// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/OpenDXMacro/VelocityRTFtoXYZ.net
+//
+// macro reference (indirect): CitcomSVelocity /home/tan2/OpenDXMacro/CitcomSVelocity.net
+//
+// macro reference (direct): CitcomSImport /home/tan2/OpenDXMacro/CitcomSImport.net
+include "CitcomSImport.net"
+//
+// Begin MDF
+// MODULE CitcomSFullImport
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT format_string; string; (no default);  
+// INPUT reduced; scalar list or vector list; (no default);  
+// OUTPUT velocity; group;  
+// OUTPUT temperature; group;  
+// End MDF
+// workspace: width = 454, height = 599
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSFullImport(
+ format_string
+,reduced
+) -> (
+ velocity
+,temperature
+) {
+    // 
+    // node CollectMultiGrid[1]: x = 334, y = 280, inputs = 4, label = temperature
+    // input[2]: defaulting = 1, visible = 1, type = 32, value = "cap0"
+    // input[4]: defaulting = 1, visible = 1, type = 32, value = "cap1"
+    //
+CitcomSFullImport_CollectMultiGrid_1_out_1 = 
+    CollectMultiGrid(
+    NULL,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node GetLocal[1]: x = 378, y = 358, inputs = 3, label = GetLocal
+    // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
+    //
+CitcomSFullImport_GetLocal_1_out_1,
+CitcomSFullImport_GetLocal_1_out_2 = 
+    GetLocal(
+    CitcomSFullImport_CollectMultiGrid_1_out_1,
+    NULL,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Input[9]: x = 66, y = 9, inputs = 0, label = Filename Format String
+    // parameter: position = 1, name = 'format_string', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSFullImport_Input_9_out_1 = format_string;
+    // 
+    // node ForEachN[1]: x = 156, y = 41, inputs = 3, label = ForEachN
+    // input[1]: defaulting = 0, visible = 1, type = 1, value = 0
+    // input[2]: defaulting = 0, visible = 1, type = 1, value = 11
+    //
+CitcomSFullImport_ForEachN_1_out_1,
+CitcomSFullImport_ForEachN_1_out_2 = 
+    ForEachN(
+    0,
+    11,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Format[1]: x = 95, y = 109, inputs = 2, label = Format
+    // input[1]: defaulting = 1, visible = 1, type = 32, value = "/home/tan2/tmp/benchmarkfull.cap%d.0.general"
+    //
+CitcomSFullImport_Format_1_out_1 = 
+    Format(
+    CitcomSFullImport_Input_9_out_1,
+    CitcomSFullImport_ForEachN_1_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Input[10]: x = 285, y = 9, inputs = 0, label = Reduced Factor
+    // parameter: position = 2, name = 'reduced', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSFullImport_Input_10_out_1 = reduced;
+    // 
+    // node CitcomSImport[1]: x = 117, y = 197, inputs = 2, label = CitcomSImport
+    //
+CitcomSFullImport_CitcomSImport_1_out_1,
+CitcomSFullImport_CitcomSImport_1_out_2 = 
+    CitcomSImport(
+    CitcomSFullImport_Format_1_out_1,
+    CitcomSFullImport_Input_10_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Append[2]: x = 263, y = 435, inputs = 5, label = Append
+    //
+CitcomSFullImport_Append_2_out_1 = 
+    Append(
+    CitcomSFullImport_GetLocal_1_out_1,
+    CitcomSFullImport_CitcomSImport_1_out_2,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 2, cache: 1];
+    // 
+    // node CollectMultiGrid[2]: x = 112, y = 287, inputs = 4, label = velocity
+    //
+CitcomSFullImport_CollectMultiGrid_2_out_1 = 
+    CollectMultiGrid(
+    NULL,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 2, cache: 1];
+    // 
+    // node GetLocal[2]: x = 156, y = 356, inputs = 3, label = GetLocal
+    // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
+    //
+CitcomSFullImport_GetLocal_2_out_1,
+CitcomSFullImport_GetLocal_2_out_2 = 
+    GetLocal(
+    CitcomSFullImport_CollectMultiGrid_2_out_1,
+    NULL,
+    NULL
+    ) [instance: 2, cache: 1];
+    // 
+    // node Append[3]: x = 26, y = 437, inputs = 5, label = Append
+    //
+CitcomSFullImport_Append_3_out_1 = 
+    Append(
+    CitcomSFullImport_GetLocal_2_out_1,
+    CitcomSFullImport_CitcomSImport_1_out_1,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node Echo[1]: x = 7, y = 197, inputs = 2, label = Echo
+    //
+    Echo(
+    CitcomSFullImport_Format_1_out_1,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Output[6]: x = 59, y = 537, inputs = 1, label = velocity
+    // parameter: position = 1, name = 'velocity', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+velocity = CitcomSFullImport_Append_3_out_1;
+    // 
+    // node Output[7]: x = 296, y = 531, inputs = 1, label = temperature
+    // parameter: position = 2, name = 'temperature', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+temperature = CitcomSFullImport_Append_2_out_1;
+    // 
+    // node SetLocal[1]: x = 379, y = 509, inputs = 3, label = SetLocal
+    //
+    SetLocal(
+    CitcomSFullImport_Append_2_out_1,
+    CitcomSFullImport_GetLocal_1_out_2,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node SetLocal[2]: x = 157, y = 507, inputs = 3, label = SetLocal
+    //
+    SetLocal(
+    CitcomSFullImport_Append_3_out_1,
+    CitcomSFullImport_GetLocal_2_out_2,
+    NULL
+    ) [instance: 2, cache: 1];
+// network: end of macro body
+}
+CitcomSFullImport_CollectMultiGrid_1_out_1 = NULL;
+CitcomSFullImport_GetLocal_1_out_1 = NULL;
+CitcomSFullImport_GetLocal_1_out_2 = NULL;
+CitcomSFullImport_Input_9_out_1 = NULL;
+CitcomSFullImport_ForEachN_1_out_1 = NULL;
+CitcomSFullImport_Format_1_out_1 = NULL;
+CitcomSFullImport_Input_10_out_1 = NULL;
+CitcomSFullImport_CitcomSImport_1_out_1 = NULL;
+CitcomSFullImport_CitcomSImport_1_out_2 = NULL;
+CitcomSFullImport_Append_2_out_1 = NULL;
+CitcomSFullImport_CollectMultiGrid_2_out_1 = NULL;
+CitcomSFullImport_GetLocal_2_out_1 = NULL;
+CitcomSFullImport_GetLocal_2_out_2 = NULL;
+CitcomSFullImport_Append_3_out_1 = NULL;

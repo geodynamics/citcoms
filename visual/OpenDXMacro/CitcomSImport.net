@@ -1,0 +1,91 @@
+//
+// time: Tue May 11 11:04:19 2004
+//
+// version: 3.2.0 (format), 4.3.0 (DX)
+//
+//
+//
+// macro reference (indirect): RTFtoXYZ /home/tan2/OpenDXMacro/RTFtoXYZ.net
+//
+// macro reference (direct): CitcomSTemperature /home/tan2/OpenDXMacro/CitcomSTemperature.net
+include "CitcomSTemperature.net"
+//
+// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/OpenDXMacro/VelocityRTFtoXYZ.net
+//
+// macro reference (direct): CitcomSVelocity /home/tan2/OpenDXMacro/CitcomSVelocity.net
+include "CitcomSVelocity.net"
+//
+// Begin MDF
+// MODULE CitcomSImport
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT filename; string; (no default);  
+// INPUT reduced; scalar list or vector list; (no default);  
+// OUTPUT velocity; field;  
+// OUTPUT temperature; field;  
+// End MDF
+// workspace: width = 500, height = 419
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSImport(
+ filename
+,reduced
+) -> (
+ velocity
+,temperature
+) {
+    // 
+    // node Input[1]: x = 120, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'filename', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSImport_Input_1_out_1 = filename;
+    // 
+    // node Import[1]: x = 129, y = 102, inputs = 6, label = Import
+    // input[3]: defaulting = 0, visible = 1, type = 32, value = "general"
+    //
+CitcomSImport_Import_1_out_1 = 
+    Import(
+    CitcomSImport_Input_1_out_1,
+    NULL,
+    "general",
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node CitcomSTemperature[1]: x = 181, y = 204, inputs = 1, label = CitcomSTemperature
+    //
+CitcomSImport_CitcomSTemperature_1_out_1 = 
+    CitcomSTemperature(
+    CitcomSImport_Import_1_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Input[2]: x = 43, y = 5, inputs = 0, label = Input
+    // parameter: position = 2, name = 'reduced', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSImport_Input_2_out_1 = reduced;
+    // 
+    // node CitcomSVelocity[1]: x = 0, y = 197, inputs = 2, label = CitcomSVelocity
+    //
+CitcomSImport_CitcomSVelocity_1_out_1 = 
+    CitcomSVelocity(
+    CitcomSImport_Import_1_out_1,
+    CitcomSImport_Input_2_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Output[1]: x = 230, y = 351, inputs = 1, label = Output
+    // parameter: position = 2, name = 'temperature', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+temperature = CitcomSImport_CitcomSTemperature_1_out_1;
+    // 
+    // node Output[2]: x = 33, y = 357, inputs = 1, label = Output
+    // parameter: position = 1, name = 'velocity', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+velocity = CitcomSImport_CitcomSVelocity_1_out_1;
+// network: end of macro body
+}
+CitcomSImport_Input_1_out_1 = NULL;
+CitcomSImport_Import_1_out_1 = NULL;
+CitcomSImport_CitcomSTemperature_1_out_1 = NULL;
+CitcomSImport_Input_2_out_1 = NULL;
+CitcomSImport_CitcomSVelocity_1_out_1 = NULL;
