@@ -7,6 +7,9 @@
 
 #include <portinfo>
 #include <iostream>
+#include <fstream>
+#include <stdio.h>
+using namespace std;
 
 #include "Boundary.h"
 #include "CoarseGridExchanger.h"
@@ -30,93 +33,78 @@ CoarseGridExchanger::~CoarseGridExchanger() {
 }
 
 
-
-void CoarseGridExchanger::gather() {
-    std::cout << "in CoarseGridExchanger::gather" << std::endl;
-
-    int me,nproc;
-
-    MPI_Comm_rank(comm,&me);
-    MPI_Comm_size(comm,&nproc);
-
-    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
-
-    if(nproc>1) {
-      if(me>0)
-	local_sendVelocities();
-      if(me==0)
-	local_receiveVelocities();
-      MPI_Barrier(intercomm);
-    }
-    else
-      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
-
-    return;
-}
-
-
-
-void CoarseGridExchanger::distribute() {
-    std::cout << "in CoarseGridExchanger::distribute" << std::endl;
-
-    int me,nproc;
-
-    MPI_Comm_rank(comm,&me);
-    MPI_Comm_size(comm,&nproc);
-
-    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
-
-    if(nproc>1) {
-      if(me>0)
-	local_sendVelocities();
-      if(me==0)
-	local_receiveVelocities();
-      MPI_Barrier(intercomm);
-    }
-    else {
-      std::cout << "in CoarseGridExchanger::distribute" << std::endl;
-      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
-    }
-    return;
-}
-
-
-
 void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
 }
 
 void CoarseGridExchanger::interpolate() {
+  std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
+  
+  int n1,n2,bnid,node;
+  for(int i=0;i<boundary->size;i++)
+    {
+      n1=boundary->bid2crseelem[0][i];
+      n2=boundary->bid2crseelem[1][i];	
+      cout << "in CoarseGridExchanger::interpolate"
+	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
+      
+      outgoing.T[i]=outgoing.v[0][i]=outgoing.v[1][i]=outgoing.v[2][i]=0.0;
+      if(n1!=0) { 
+	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+	  for(int k=0; k< 8 ;k++)
+	    {
+	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	      cout << "Interpolated...: node = " << node 
+		   << " " << E->T[mm][node]
+		   << endl;
+	      outgoing.T[i]+=boundary->shape[i*8+k]*E->T[mm][node];
+	      outgoing.v[0][i]+=boundary->shape[i*8+k]*E->V[mm][1][node];
+	      outgoing.v[1][i]+=boundary->shape[i*8+k]*E->V[mm][2][node];
+	      outgoing.v[2][i]+=boundary->shape[i*8+k]*E->V[mm][3][node];
+	    }
+	//test
+	cout << "Interpolated...: i = " << i << " " << E->parallel.me << " " 
+	     << outgoing.T[i] << " "
+	     << outgoing.v[0][i] << " " << outgoing.v[0][i] << " " 
+	     << outgoing.v[0][i] << endl;
+      }
+    }
+  // Test
+  //     std::cout << "in CoarseGridExchanger::interpolated fields" << std::endl;
+  //     for(int i=0;i<boundary->size;i++)
+  //       {
+  // 	std::cout << i << " " << outgoing.T[i] << std::endl;
+  //       }
+  
+  return;
+}
+
+void CoarseGridExchanger::interpolateTemperature() {
+  std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
   
   int n1,n2,node;
-
-    std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
-
-    for(int i=0;i<boundary->size;i++)
-      {
-	n1=boundary->bid2crseelem[0][i];
-        n2=boundary->bid2crseelem[1][i];	
-	
-	outgoing.T[i]=outgoing.v[0][i]=outgoing.v[1][i]=outgoing.v[2][i]=0.0;
-
-	for(int k=0; k< 8 ;k++)
-	  {
-	    node=E->IEN[E->mesh.levmax][n2][n1].node[k+1];
-	    outgoing.T[i]+=boundary->shape[k]*E->T[n2][node];
-	    outgoing.v[0][i]+=boundary->shape[k]*E->V[n2][1][node];
-	    outgoing.v[1][i]+=boundary->shape[k]*E->V[n2][2][node];
-	    outgoing.v[2][i]+=boundary->shape[k]*E->V[n2][3][node];
-	  }
+  for(int i=0;i<boundary->size;i++)
+    {
+      n1=boundary->bid2crseelem[0][i];
+      n2=boundary->bid2crseelem[1][i];	
+//       cout << "in CoarseGridExchanger::interpolateTemperature"
+// 	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
+      
+      outgoing.T[i]=0.0;
+      if(n1!=0) { 
+	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+	  for(int k=0; k< 8 ;k++)
+	    {
+	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	      outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
+	    }
+	//test
+// 	cout << "Interpolated...: i = " << i << " " << E->parallel.me << " " 
+// 	     << outgoing.T[i] << endl;
       }
-
-    // Test
-//     std::cout << "in CoarseGridExchanger::interpolated fields" << std::endl;
-//     for(int i=0;i<boundary->size;i++)
-//       {
-// 	std::cout << i << " " << outgoing.T[i] << std::endl;
-//       }
-
-    return;
+    }
+  
+  return;
 }
 
 
@@ -131,11 +119,11 @@ void CoarseGridExchanger::receiveBoundary() {
 	      << "  rank = " << rank
 	      << "  leader = "<< localLeader
 	      << "  receiver = "<< remoteLeader << std::endl;
-
+    int size,nproc,lrank;
+    int tag = 0;
+    
     if (rank == localLeader) {
-	int tag = 0;
 	MPI_Status status;
-	int size;
 
  	MPI_Recv(&size, 1, MPI_INT,
  		 remoteLeader, tag, intercomm, &status);
@@ -143,7 +131,7 @@ void CoarseGridExchanger::receiveBoundary() {
 
 	boundary = new Boundary(size);
 
-  	MPI_Recv(boundary->connectivity, size, MPI_INT,
+  	MPI_Recv(boundary->bid2gid, size, MPI_INT,
   		 remoteLeader, tag, intercomm, &status);
   	//boundary->printConnectivity();
  	tag ++;
@@ -153,6 +141,7 @@ void CoarseGridExchanger::receiveBoundary() {
   		     remoteLeader, tag, intercomm, &status);
 	    tag ++;
 	}
+
  	MPI_Recv(&boundary->theta_max, 1, MPI_DOUBLE,
  		 remoteLeader, tag, intercomm, &status);
  	tag ++;
@@ -173,16 +162,42 @@ void CoarseGridExchanger::receiveBoundary() {
  	tag ++;
 
 	// test 
-	std::cout << "in CoarseGridExchanger::receiveBoundary" << std::endl;
-	std::cout << "Grid Bounds transferred to Coarse Grid" << std::endl;
-	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
-	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
-	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
+// 	std::cout << "in CoarseGridExchanger::receiveBoundary" << std::endl;
+// 	std::cout << "Grid Bounds transferred to Coarse Grid" << std::endl;
+// 	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
+// 	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
+// 	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
 
 	
 	//boundary->printX();
     }
+    
+    // Test: Broadcast info received by localLeader to the other procs 
+    // in the Coarse communicator.
+    MPI_Comm_size(comm,&nproc);
+    MPI_Comm_rank(comm,&lrank);
+    MPI_Bcast(&size,1,MPI_INT,nproc-1,comm);
 
+    
+    if(lrank != localLeader)
+      boundary = new Boundary(size);
+
+    MPI_Bcast(boundary->connectivity,size,MPI_INT,nproc-1,comm);
+    for (int i=0; i<boundary->dim; i++) {
+      MPI_Bcast(boundary->X[i],size,MPI_DOUBLE,nproc-1,comm);
+    }
+    MPI_Bcast(&boundary->theta_max,1,MPI_DOUBLE,nproc-1,comm);
+    MPI_Bcast(&boundary->theta_min,1,MPI_DOUBLE,nproc-1,comm);
+    MPI_Bcast(&boundary->fi_max,1,MPI_DOUBLE,nproc-1,comm);
+    MPI_Bcast(&boundary->fi_min,1,MPI_DOUBLE,nproc-1,comm);
+    MPI_Bcast(&boundary->ro,1,MPI_DOUBLE,nproc-1,comm);
+    MPI_Bcast(&boundary->ri,1,MPI_DOUBLE,nproc-1,comm);
+
+    MPI_Barrier(comm);
+    std::cout << "in CoarseGridExchanger::receiveBoundary: Done!!" << std::endl;
+    // Test end
+
+    return;
 }
 
 void CoarseGridExchanger::getBid2crseelem() {
@@ -196,12 +211,29 @@ void CoarseGridExchanger::getBid2crseelem() {
 
 void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
+    char fname[255];
+    int lrank;
+
+
     boundary->mapCoarseGrid(E, localLeader);
+
+    // Test    
+//     MPI_Comm_rank(comm,&lrank);
+
+//     sprintf(fname,"bid2crs%d.dat",lrank);
+//     ofstream file(fname);
+//     for(int i=0; i< boundary->size; i++)
+//       {
+// 	file << "i = " << i << "elem = " << boundary->bid2crseelem[0][i] << " " << "capid = " << boundary->bid2crseelem[1][i] << endl;
+//       }
+//     file.close();
+
+    return;
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.17 2003/09/25 02:51:28 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.18 2003/09/25 19:17:49 ces74 Exp $
 
 // End of file
