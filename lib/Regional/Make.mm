@@ -24,6 +24,7 @@ PROJ_SRCS = \
 	Geometry_cartesian.c \
 	Lith_age.c \
 	Parallel_related.c \
+	Read_input_from_files.c \
 	Sphere_related.c \
 	Version_dependent.c
 
@@ -35,7 +36,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.11 2003/08/12 16:54:50 ces74 Exp $
+# $Id: Make.mm,v 1.12 2003/09/01 18:30:21 ces74 Exp $
 
 #
 # End of file
