@@ -588,11 +588,6 @@ void allocate_velocity_vars(E)
       E->sphere.cap[j].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
       E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
     }
-#if 0
-    if(E->mesh.topvbc==2 && E->control.pseudo_free_surf)
-	    for(i=1;i<=E->mesh.nsd;i++)
-		    E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
-#endif
 
     for(i=0;i<=E->lmesh.neq;i++)
       E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
