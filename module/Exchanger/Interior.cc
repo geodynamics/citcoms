@@ -29,14 +29,14 @@ Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
     bbox_.print("Interior-BBox");
 
     X_.reserve(E->lmesh.nno);
-    meshID_.reserve(E->lmesh.nno);
+    nodeID_.reserve(E->lmesh.nno);
 
     initX(E);
 
     X_.shrink();
     X_.print("Interior-X");
-    meshID_.shrink();
-    meshID_.print("Interior-meshID");
+    nodeID_.shrink();
+    nodeID_.print("Interior-nodeID");
 }
 
 
@@ -57,13 +57,13 @@ void Interior::initX(const All_variables* E)
 
                     if(isInside(x, bbox_)) {
                         X_.push_back(x);
-                        meshID_.push_back(node);
+                        nodeID_.push_back(node);
                     }
                 }
 }
 
 
 // version
-// $Id: Interior.cc,v 1.5 2003/11/11 19:29:27 tan2 Exp $
+// $Id: Interior.cc,v 1.6 2003/11/21 23:15:13 tan2 Exp $
 
 // End of file

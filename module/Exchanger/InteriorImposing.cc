@@ -61,7 +61,7 @@ void InteriorImposingSink::imposeTIC()
     const int mm = 1;
 
     for(int i=0; i<sink.size(); i++) {
-	int n = interior.meshID(sink.meshNode(i));
+	int n = interior.nodeID(sink.meshNode(i));
 	E->T[mm][n] = tic[0][i];
 	debugIC << E->T[mm][n] << journal::newline;
     }
@@ -101,6 +101,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.3 2003/11/11 19:29:27 tan2 Exp $
+// $Id: InteriorImposing.cc,v 1.4 2003/11/21 23:15:13 tan2 Exp $
 
 // End of file

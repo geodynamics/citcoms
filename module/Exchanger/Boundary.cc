@@ -36,14 +36,14 @@ Boundary::Boundary(const All_variables* E) :
 	                         *(E->lmesh.noy-2)
 	                         *(E->lmesh.noz-2);
     X_.reserve(maxNodes);
-    meshID_.reserve(maxNodes);
+    nodeID_.reserve(maxNodes);
 
     initX(E);
 
     X_.shrink();
     X_.print("Boundary-X");
-    meshID_.shrink();
-    meshID_.print("Boundary-meshID");
+    nodeID_.shrink();
+    nodeID_.print("Boundary-nodeID");
 }
 
 
@@ -90,7 +90,7 @@ void Boundary::initX(const All_variables* E)
 			x[d] = E->sx[m][d+1][node];
 
 		    X_.push_back(x);
-		    meshID_.push_back(node);
+		    nodeID_.push_back(node);
 		}
 	    }
 }
@@ -103,7 +103,7 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 	   ((E->parallel.me_loc[3] == 0) && (i == 1)) ||
    	   ((E->parallel.me_loc[1] == E->parallel.nprocx - 1)
 	     && (j == E->lmesh.nox)) ||
-	   ((E->parallel.me_loc[2] == E->parallel.nprocy - 1) 
+	   ((E->parallel.me_loc[2] == E->parallel.nprocy - 1)
 	     && (k == E->lmesh.noy)) ||
 	   ((E->parallel.me_loc[3] == E->parallel.nprocz - 1)
 	     && (i == E->lmesh.noz));
@@ -111,6 +111,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.41 2003/11/11 19:29:27 tan2 Exp $
+// $Id: Boundary.cc,v 1.42 2003/11/21 23:15:13 tan2 Exp $
 
 // End of file

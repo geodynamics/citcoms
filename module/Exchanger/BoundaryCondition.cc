@@ -17,6 +17,7 @@
 extern "C" {
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
+    void temperatures_conform_bcs(All_variables* E);
 }
 
 
@@ -93,7 +94,7 @@ void BoundaryConditionSink::setVBCFlag()
     // here we should change to velocity BC.
     const int m = 1;
     for(int i=0; i<boundary.size(); i++) {
-	int n = boundary.meshID(i);
+	int n = boundary.nodeID(i);
 	E->node[m][n] = E->node[m][n] | VBX;
 	E->node[m][n] = E->node[m][n] | VBY;
 	E->node[m][n] = E->node[m][n] | VBZ;
@@ -113,7 +114,7 @@ void BoundaryConditionSink::setTBCFlag()
 
     const int m = 1;
     for(int i=0; i<boundary.size(); i++) {
-	int n = boundary.meshID(i);
+	int n = boundary.nodeID(i);
 	E->node[m][n] = E->node[m][n] | TBX;
 	E->node[m][n] = E->node[m][n] | TBY;
 	E->node[m][n] = E->node[m][n] | TBZ;
@@ -151,7 +152,7 @@ void BoundaryConditionSink::imposeTBC()
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
-	int n = boundary.meshID(sink.meshNode(i));
+	int n = boundary.nodeID(sink.meshNode(i));
 	for(int d=0; d<DIM; d++)
 	    E->sphere.cap[m].TB[d+1][n] = N1 * old_tbc[0][i]
 		                        + N2 * tbc[0][i];
@@ -162,6 +163,7 @@ void BoundaryConditionSink::imposeTBC()
 
     }
     debugBC << journal::end;
+    temperatures_conform_bcs(E);
 }
 
 
@@ -182,7 +184,7 @@ void BoundaryConditionSink::imposeVBC()
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
-	int n = boundary.meshID(sink.meshNode(i));
+	int n = boundary.nodeID(sink.meshNode(i));
 	for(int d=0; d<DIM; d++)
 	    E->sphere.cap[m].VB[d+1][n] = N1 * old_vbc[d][i]
 		                        + N2 * vbc[d][i];
@@ -229,6 +231,6 @@ void BoundaryConditionSource::sendTandV()
 
 
 // version
-// $Id: BoundaryCondition.cc,v 1.4 2003/11/11 19:45:17 ces74 Exp $
+// $Id: BoundaryCondition.cc,v 1.5 2003/11/21 23:15:13 tan2 Exp $
 
 // End of file
