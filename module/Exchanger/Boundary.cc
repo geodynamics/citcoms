@@ -81,8 +81,6 @@ Boundary::~Boundary() {
 void Boundary::init(const All_variables *E) {
     int nodes,node1,node2,nodest;
     int *nid;
-    int ind;
-    int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
 
     nodest = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
     nid = new int[nodest];
@@ -146,7 +144,6 @@ void Boundary::init(const All_variables *E) {
                     }
                 }
         //  for two XOY planes
-
     if (E->parallel.me_loc[3]==0 || E->parallel.me_loc[3]==E->parallel.nprocz-1)        for (int m=1;m<=E->sphere.caps_per_proc;m++)
             for(int j=1;j<=E->lmesh.noy;j++)
                 for(int i=1;i<=E->lmesh.nox;i++)  {
@@ -166,49 +163,62 @@ void Boundary::init(const All_variables *E) {
                 }
     if(nodes != size) std::cout << " nodes != size ";
 
-        //    for(int i=0; i<dim; i++)
-        //      for(int j=0; j<size; j++) {
-        //          X[i][j] = i+j;
-        //      }
+    delete nid;
+    return;
+}
 
+
+void Boundary::getBid2crseelem(const All_variables *E) {
+
+  int ind;
+  int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
+  
+//   for(int j=1; j < 2; j++) {
+  for(int j=0; j < size; j++) {
+    bid2crseelem[j]=0;
+    ind=0;
     for(int i=1; i <= E->lmesh.nel; i++)
       {
-	std::cout << "number of elements " << E->lmesh.nel << std::endl;
-	std::cout << "IEN for elem " << i << " node " << 2
-		  << " = " << E->IEN[E->mesh.levmax][1][i].node[2]
-		  << std::endl;
 	nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
 	nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
 	nymax = E->IEN[E->mesh.levmax][1][i].node[4];
 	nymin = E->IEN[E->mesh.levmax][1][i].node[1];
 	nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
 	nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
-	std::cout << nxmax << nxmin << nymax << nymin << nzmax << nzmin << std::endl;
-      }
-    std::cout << "number of elements " << E->mesh.nel << std::endl;
-    for(int j=0; j < size; j++)
-      {
-	bid2crseelem[j]=0;
-	ind=0;
-	for(int i=1; i <= E->mesh.nel; i++)
+	// Test
+// 	std::cout << "in Boundary::init " << nxmax << " "  << nxmin << " " 
+// 		  << nymax << " "  << nymin << " " 
+// 		  << nzmax << " "  << nzmin << " | " 
+// 		  << X[0][j] << " "  
+// 		  << X[1][j] << " "  
+// 		  << X[2][j] << " | "  
+// 		  << E->X[E->mesh.levmax][1][1][nxmax] << " "  << E->X[E->mesh.levmax][1][1][nxmin] << " " 
+// 		  << E->X[E->mesh.levmax][1][2][nymax] << " "  << E->X[E->mesh.levmax][1][2][nymin] << " " 
+// 		  << E->X[E->mesh.levmax][1][3][nzmax] << " "  << E->X[E->mesh.levmax][1][3][nzmin] << " " 
+// 		  << std::endl;
+
+	if(  (X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) 
+	     &&(X[0][j] <= E->X[E->mesh.levmax][1][1][nxmax])
+	     &&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin])
+	     &&(X[1][j] <= E->X[E->mesh.levmax][1][2][nymax])
+	     &&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin])
+	     &&(X[2][j] <= E->X[E->mesh.levmax][1][3][nzmax]) )
 	  {
-	    nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
-	    nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
-	    nymax = E->IEN[E->mesh.levmax][1][i].node[4];
-	    nymin = E->IEN[E->mesh.levmax][1][i].node[1];
-	    nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
-	    nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
-	    if((X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) &&(X[0][j] < E->X[E->mesh.levmax][1][1][nxmax])&&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin]) &&(X[1][j] < E->X[E->mesh.levmax][1][2][nymax])&&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin]) &&(X[2][j] < E->X[E->mesh.levmax][1][3][nzmax]))
-	      {
-		bid2crseelem[j]=i;
-		ind=1;
-	      }
-	    if(ind)break;
+	    bid2crseelem[j]=i;
+	    ind=1;
 	  }
-	if(!ind) std::cout << " screwed up " << std::endl;
-	if(ind) std::cout << " done right" << std::endl;
+	if(ind) {
+	  std::cout << " done right bid = " << j << " "
+		    << " bid2crseelem[j] = " << bid2crseelem[j]
+		    << std::endl;
+	  break;
+	}
       }
-    delete nid;
+    if(!ind)
+      std::cout << " screwed up bid = " << j << std::endl;
+  }
+  
+  return;
 }
 
 
@@ -286,6 +296,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.11 2003/09/20 01:32:10 ces74 Exp $
+// $Id: Boundary.cc,v 1.12 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file

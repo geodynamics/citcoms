@@ -46,6 +46,10 @@ extern char pyExchanger_sendBoundary__doc__[];
 extern "C"
 PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *);
 
+extern char pyExchanger_getBid2crseelem__name__[];
+extern char pyExchanger_getBid2crseelem__doc__[];
+extern "C"
+PyObject * pyExchanger_getBid2crseelem(PyObject *, PyObject *);
 
 extern char pyExchanger_createDataArrays__name__[];
 extern char pyExchanger_createDataArrays__doc__[];
@@ -135,6 +139,6 @@ PyObject * pyExchanger_nowait(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.7 2003/09/20 01:32:10 ces74 Exp $
+// $Id: exchangers.h,v 1.8 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file

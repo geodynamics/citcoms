@@ -72,6 +72,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_sendBoundary__doc__},
 
+    {pyExchanger_getBid2crseelem__name__,
+     pyExchanger_getBid2crseelem,
+     METH_VARARGS,
+     pyExchanger_getBid2crseelem__doc__},
+
     {pyExchanger_createDataArrays__name__,
      pyExchanger_createDataArrays,
      METH_VARARGS,
@@ -150,6 +155,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.9 2003/09/20 01:32:10 ces74 Exp $
+// $Id: bindings.cc,v 1.10 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file

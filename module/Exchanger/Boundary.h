@@ -32,6 +32,7 @@ public:
     ~Boundary();
 
     void init(const All_variables *E);  // initialize connectivity and X
+    void getBid2crseelem(const All_variables *E);
     void mapFineGrid(const All_variables *E, int localLeader);
     void mapCoarseGrid(const All_variables *E, int localLeader);
                                         // initialize bid2gid and bid2proc
@@ -57,6 +58,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.8 2003/09/20 01:32:10 ces74 Exp $
+// $Id: Boundary.h,v 1.9 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file

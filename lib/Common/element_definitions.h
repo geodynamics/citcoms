@@ -156,9 +156,8 @@ static const struct Int_points
 			{	{{0.0,0.0,0.0},{0.0,0.0,0.0}},
 				{{0.0,0.0,0.0},{0.0,4.0,8.0}} };
 	                  
-static const struct Node_points { 
-	float x[3]; }
-			node_point[9] =
+static const struct Node_points 
+{ float x[3]; }	node_point[9] =
 			{	{0.0,0.0,0.0},
 				{-1.0,-1.0,-1.0},
 				{-1.0, 1.0,-1.0},
@@ -167,8 +166,7 @@ static const struct Node_points {
 				{-1.0,-1.0, 1.0},
 				{-1.0, 1.0, 1.0},
 				{ 1.0, 1.0, 1.0},
-				{ 1.0,-1.0, 1.0}
-			};
+				{ 1.0,-1.0, 1.0} };
 				
 static const struct Internal_structure  /* integer coordinates relative to node 1 */
 	{	int vector[3]; } offset[9] =
@@ -187,8 +185,7 @@ static const struct E_loc_info {
 	int plus[3];
 	float delta[3];
 	int num_nebrs[3];
-	int node_nebrs[3][2]; } 
-		loc[9] = {
+	int node_nebrs[3][2]; } loc[9] = {
 			{{0,0,0},{0,0,0},{0.0,0.0,0.0},{0,0,0},{{0,0},{0,0},{0,0}}},
 		/* 1 */	{{0,0,0},{4,2,5},{0.5,0.5,0.5},{2,2,2},{{1,4},{1,2},{1,5}}},
 			{{0,1,0},{3,0,6},{0.5,0.5,0.5},{2,2,2},{{2,3},{1,2},{2,6}}},

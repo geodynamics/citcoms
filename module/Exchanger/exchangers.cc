@@ -185,6 +185,24 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
     return Py_None;
 }
 
+char pyExchanger_getBid2crseelem__doc__[] = "";
+char pyExchanger_getBid2crseelem__name__[] = "getBid2crseelem";
+
+PyObject * pyExchanger_getBid2crseelem(PyObject *, PyObject *args)
+{
+    PyObject *obj1;
+
+    if (!PyArg_ParseTuple(args, "O:getBid2crseelem", &obj1))
+	return NULL;
+
+    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
+	                                (PyCObject_AsVoidPtr(obj1));
+    cge->getBid2crseelem();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 
 char pyExchanger_createDataArrays__doc__[] = "";
 char pyExchanger_createDataArrays__name__[] = "createDataArrays";
@@ -205,7 +223,7 @@ PyObject * pyExchanger_createDataArrays(PyObject *, PyObject *args)
 }
 
 char pyExchanger_deleteDataArrays__doc__[] = "";
-char pyExchanger_deleteDataArrays__name__[] = "createDataArrays";
+char pyExchanger_deleteDataArrays__name__[] = "deleteDataArrays";
 
 PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *args)
 {
@@ -282,7 +300,7 @@ PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *args)
 }
 
 char pyExchanger_receiveVelocities__doc__[] = "";
-char pyExchanger_receiveVelocities__name__[] = "receiveTemperature";
+char pyExchanger_receiveVelocities__name__[] = "receiveVelocities";
 
 PyObject * pyExchanger_receiveVelocities(PyObject *, PyObject *args)
 {
@@ -490,6 +508,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.8 2003/09/20 01:32:10 ces74 Exp $
+// $Id: exchangers.cc,v 1.9 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file

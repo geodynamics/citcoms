@@ -184,8 +184,17 @@ void Exchanger::createDataArrays(void) {
 	      << std::endl;
 
     if(rank == localLeader) {
+      incoming.size=boundary->size;
+      incoming.T = new double[incoming.size];      
+      outgoing.size=boundary->size;
+      outgoing.T = new double[incoming.size];
+      for(int i=0; i < boundary->dim; i++)
+	{
+	  incoming.v[i] = new double[incoming.size];
+	  outgoing.v[i] = new double[outgoing.size];
+	}   
     }
-
+    
     return;
 }
 
@@ -195,10 +204,17 @@ void Exchanger::deleteDataArrays(void) {
 	      << "  leader = "<< localLeader
 	      << "  receiver = "<< remoteLeader
 	      << std::endl;
-
+    
     if(rank == localLeader) {
+      delete incoming.T;
+      delete outgoing.T;
+      for(int i=0; i < boundary->dim; i++)
+	{
+	  delete incoming.v[i];
+	  delete outgoing.v[i];
+	}
     }
-
+    
     return;
 }
 
@@ -208,24 +224,20 @@ void Exchanger::sendTemperature(void) {
 	      << "  leader = "<< localLeader
 	      << "  receiver = "<< remoteLeader
 	      << std::endl;
-    int n;
 
-    outgoing.size=boundary->size;
-    outgoing.T = new double[outgoing.size];
-    
     if(rank == localLeader) {
       
 //       std::cout << "nox = " << E->mesh.nox << std::endl;
-      for(int j=0; j < boundary->size; j++)
-	{
-	  n=boundary->bid2gid[j];
-	  outgoing.T[j]=E->T[1][n];
+//       for(int j=0; j < boundary->size; j++)
+// 	{
+// 	  n=boundary->bid2gid[j];
+// 	  outgoing.T[j]=E->T[1][n];
 
-	  // Test
-	  std::cout << "Temperature sent" << std::endl;
-	  std::cout << j << " " << n << "  " << outgoing.T[j] << std::endl;
+// 	  // Test
+// 	  std::cout << "Temperature sent" << std::endl;
+// 	  std::cout << j << " " << n << "  " << outgoing.T[j] << std::endl;
 	    
-	}
+// 	}
       MPI_Send(outgoing.T,outgoing.size,MPI_DOUBLE,remoteLeader,0,intercomm);
     }
 
@@ -243,9 +255,6 @@ void Exchanger::receiveTemperature(void) {
 	      << std::endl;
     int n,success;
 
-    incoming.size=boundary->size;
-    incoming.T = new double[incoming.size];
-
     MPI_Status status;
     MPI_Request request;
     
@@ -253,8 +262,7 @@ void Exchanger::receiveTemperature(void) {
 //       std::cout << "nox = " << E->nox << std::endl;
 
       MPI_Irecv(incoming.T,incoming.size,MPI_DOUBLE,remoteLeader,0,intercomm,&request);
-      std::cout << "Exchanger::receiveTemperature" << std::endl;
-      std::cout << "==> Receive posted " << std::endl;
+      std::cout << "Exchanger::receiveTemperature ===> Posted" << std::endl;
     }
     // Test
     MPI_Wait(&request,&status);
@@ -279,30 +287,25 @@ void Exchanger::sendVelocities() {
 	      << "  receiver = "<< remoteLeader
 	      << std::endl;
 
-    int n;
-
-    outgoing.size=boundary->size;
-    for(int i=0; i < boundary->dim; i++)
-      {
-	outgoing.v[i] = new double[outgoing.size];
-      }
-    for(int j=0; j < boundary->size; j++)
-	{
-	  n=boundary->bid2gid[j];
-	  for(int i=0; i< boundary->dim; i++)
-	    {
-	      outgoing.v[i][j]=E->V[E->sphere.caps_per_proc][i][n];	 
-	    }
-	}
+//     outgoing.size=boundary->size;
+//     for(int i=0; i < boundary->dim; i++)
+//       {
+// 	outgoing.v[i] = new double[outgoing.size];
+//       }
+//     for(int j=0; j < boundary->size; j++)
+// 	{
+// 	  n=boundary->bid2gid[j];
+// 	  for(int i=0; i< boundary->dim; i++)
+// 	    {
+// 	      outgoing.v[i][j]=E->V[E->sphere.caps_per_proc][i][n];	 
+// 	    }
+// 	}
     if(rank == localLeader) {
       MPI_Send(outgoing.v[0],outgoing.size,MPI_DOUBLE,remoteLeader,1,intercomm);
       MPI_Send(outgoing.v[1],outgoing.size,MPI_DOUBLE,remoteLeader,2,intercomm);
       MPI_Send(outgoing.v[2],outgoing.size,MPI_DOUBLE,remoteLeader,3,intercomm);
     }
-    for(int i=0; i < boundary->dim; i++)
-      {
-	delete outgoing.v[i];
-      }
+
     return;
 }
 
@@ -321,16 +324,11 @@ void Exchanger::receiveVelocities() {
 
     incoming.size=boundary->size;
 
-    for(int i=0; i < boundary->dim; i++)
-      {
-	incoming.v[i] = new double[incoming.size];
-      }
     if(rank == localLeader) {
       MPI_Irecv(incoming.v[0],incoming.size,MPI_DOUBLE,remoteLeader,1,intercomm,&request);
       MPI_Irecv(incoming.v[1],incoming.size,MPI_DOUBLE,remoteLeader,2,intercomm,&request);
       MPI_Irecv(incoming.v[2],incoming.size,MPI_DOUBLE,remoteLeader,3,intercomm,&request);
-      std::cout << "Exchanger::receiveVelocities" << std::endl;
-      std::cout << "==> Receive posted " << std::endl;
+      std::cout << "Exchanger::receiveVelocities ===> Posted" << std::endl;
     }
 
     // Test
@@ -341,7 +339,7 @@ void Exchanger::receiveVelocities() {
     for(int j=0; j < boundary->size; j++)
       {
 	n=boundary->bid2gid[j];
-	std::cout << "Temperature received" << std::endl;
+	std::cout << "Velocities received" << std::endl;
 	std::cout << j << " " << n << "  " 
 		  << incoming.v[0][n] << incoming.v[1][n] << incoming.v[2][n] 
 		  << std::endl;
@@ -400,7 +398,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.10 2003/09/20 01:32:10 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.11 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file
 

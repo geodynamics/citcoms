@@ -31,12 +31,13 @@ public:
 
     void receiveBoundary();
     void interpolate();
+    void getBid2crseelem();
 };
 
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.7 2003/09/20 01:32:10 ces74 Exp $
+// $Id: CoarseGridExchanger.h,v 1.8 2003/09/21 22:24:00 ces74 Exp $
 
 // End of file
 

@@ -18,8 +18,6 @@ class TestExchanger(Application):
         self.exchanger = None
         return
 
-
-
     def run(self):
         layout = self.inventory.layout
         layout.initialize(self)
@@ -31,9 +29,12 @@ class TestExchanger(Application):
         if layout.fine:
             print "in exchange.py, calling FinereturnE"
             self.fine_E = CitcomS.Exchanger.FinereturnE()
+            print "in exchange.py, calling FinereturnE Done!!"            
         elif layout.coarse:
             print "in exchange.py, calling CoarsereturnE"
             self.coarse_E = CitcomS.Exchanger.CoarsereturnE()
+            print "in exchange.py, calling CoarsereturnE Done!!"
+            pass
 
         exchanger = self.exchanger
         if exchanger:
@@ -52,6 +53,15 @@ class TestExchanger(Application):
         exchanger.findBoundary()
         print exchanger.name, ": boundary found"
 
+        # assemble bid2crseelem
+        if layout.coarse:
+            exchanger.getBid2crseelem()
+            print exchanger.name, ": bid2crseelem assembled"
+
+        # create Data arrays
+        exchanger.createDataArrays()
+        print "incoming/outgoing structres created"
+        
         # testing gather
         exchanger.gather()
         print exchanger.name, ": gather worked"
@@ -66,8 +76,8 @@ class TestExchanger(Application):
         print exchanger.name, ": temperature transferred"
 
         # testing send/receiveVelocities
-##        exchanger.exchangeVelocities()
-##        print exchanger.name, ": velocities transferred"
+        exchanger.exchangeVelocities()
+        print exchanger.name, ": velocities transferred"
         
         try:
             # success if exchanger is a FGE
@@ -89,7 +99,10 @@ class TestExchanger(Application):
             time = exchanger.stableTimestep(dt)
             print "%s - step %d: %f" % (exchanger.name, step, time)
 
-
+        # delete Data arrays
+        exchanger.createDataArrays()
+        print "incoming/outgoing structres deleted"
+        
         return
 
 
@@ -157,6 +170,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.9 2003/09/20 01:32:10 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.10 2003/09/21 22:24:00 ces74 Exp $"
 
 # End of file

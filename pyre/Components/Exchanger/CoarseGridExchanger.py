@@ -39,6 +39,10 @@ class CoarseGridExchanger(Exchanger):
         self.module.mapBoundary(self.exchanger)
         return
 
+    def getBid2crseelem(self):
+        self.module.getBid2crseelem(self.exchanger)
+        return
+
     def gather(self):
         self.module.gather(self.exchanger)
         return
@@ -57,7 +61,7 @@ class CoarseGridExchanger(Exchanger):
         return
 
     def exchangeVelocities(self):
-        self.module.receiveVelocities(self.exchanger)
+        self.module.sendVelocities(self.exchanger)
         return
 
     def NewStep(self):
@@ -97,6 +101,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.9 2003/09/20 01:32:10 ces74 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.10 2003/09/21 22:24:00 ces74 Exp $"
 
 # End of file
