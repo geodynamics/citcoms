@@ -48,8 +48,9 @@ class CoarseGridExchanger(Exchanger):
                               self.srcComm,
                               self.boundary):
             # sink is always in the last rank of a communicator
+            sinkRank = comm.size - 1
             self.source["BC"][i] = self.module.createSource(comm.handle(),
-                                                            comm.size - 1,
+                                                            sinkRank,
                                                             b,
                                                             self.all_variables,
                                                             self.myBBox)
@@ -123,6 +124,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.20 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.21 2003/11/10 21:59:49 tan2 Exp $"
 
 # End of file

@@ -64,7 +64,8 @@ class FineGridExchanger(Exchanger):
 
 
     def createBC(self):
-        self.BC = self.module.createBCSink(self.boundary,
+        self.BC = self.module.createBCSink(self.communicator.handle(),
+                                           self.boundary,
                                            self.sink["BC"],
                                            self.all_variables)
         return
@@ -154,6 +155,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.22 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.23 2003/11/10 21:59:49 tan2 Exp $"
 
 # End of file
