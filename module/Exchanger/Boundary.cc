@@ -229,9 +229,6 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                 }                
                 if(ind) break;          
             }
-        if(bid2elem[i]==0) std::cout << "node" << i <<"did not find element "
-                                     <<xt[0]<<" " << xt[1] << " " << xt[2] << std::endl;
-        
     }
     //printBid2proc();
     //printBid2elem();
@@ -324,6 +321,7 @@ void Boundary::testMapping(const All_variables *E) const {
     double xc[24], xi[3], xt[3],tshape;
 
     for(int i=0; i< size; i++) {
+	if(!bid2elem[i])continue;
         for(int j=0; j< dim; j++) xt[j]=X[j][i];
 
         int n1=bid2elem[i];
@@ -526,6 +524,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.28 2003/09/29 22:31:35 puru Exp $
+// $Id: Boundary.cc,v 1.29 2003/09/30 00:48:05 puru Exp $
 
 // End of file
