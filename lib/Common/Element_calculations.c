@@ -61,10 +61,10 @@ void assemble_forces(E,penalty)
 
  for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
-   for(a=0;a<=neq;a++)
+   for(a=0;a<neq;a++)
      E->F[m][a] = 0.0;
 
-  /*for(a=0;a<=npno;a++)
+  /*for(a=0;a<npno;a++)
     E->H[m][a]=0.0;*/
 
    for (e=1;e<=nel;e++)  {
