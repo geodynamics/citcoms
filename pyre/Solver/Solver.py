@@ -41,14 +41,10 @@ class Solver(BaseSolver):
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 	self.communicator = comm
 
-        # some special treatment, will go away in the future
-        self.inventory.param.inventory.datafile = self.inventory.datafile
-
         # information about clock time
 	self.start_cpu_time = self.CitcomModule.CPU_time()
         self.cpu_time = self.start_cpu_time
-        self.fptime = open("%s.time" % self.inventory.param.inventory.datafile,
-                           "w")
+        self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
         # if there is a coupler, initialize it
         try:
@@ -59,6 +55,7 @@ class Solver(BaseSolver):
             self.intercomm = application.intercomm
             self.leader = application.leader
             self.remoteLeader = application.remoteLeader
+            self.exchanger = application.exchanger
             self.coupler = application.inventory.coupler
             self.coupler.initialize(self)
 
@@ -286,6 +283,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.29 2003/10/28 23:51:49 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.30 2003/10/29 01:13:15 tan2 Exp $"
 
 # End of file

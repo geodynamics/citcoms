@@ -49,11 +49,11 @@ class CoupledApp(SimpleApp):
 
         if layout.coarse:
             self.solver = self.inventory.coarse
-            self.solver.inventory.exchanger = Exchanger.coarsegridexchanger("exchanger", "exchanger")
+            self.exchanger = self.inventory.cge
             self.solverCommunicator = layout.coarse
         elif layout.fine:
             self.solver = self.inventory.fine
-            self.solver.inventory.exchanger = Exchanger.finegridexchanger("exchanger", "exchanger")
+            self.exchanger = self.inventory.fge
             self.solverCommunicator = layout.fine
         else:
             import journal
@@ -127,6 +127,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.7 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.8 2003/10/29 01:13:15 tan2 Exp $"
 
 # End of file

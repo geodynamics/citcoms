@@ -30,7 +30,7 @@ class Coupler(Component):
     def initialize(self, solver):
         # exchanger could be either a FineGridExchanger (FGE)
         # or a CoarseGridExchanger (CGE)
-        self.exchanger = solver.inventory.exchanger
+        self.exchanger = solver.exchanger
 
         # choose c++ exchanger module
         self.exchanger.selectModule()
@@ -89,6 +89,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.8 2003/10/24 04:55:54 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.9 2003/10/29 01:13:15 tan2 Exp $"
 
 # End of file
