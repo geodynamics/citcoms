@@ -82,7 +82,14 @@ int main(argc,argv)
       E->control.print_convergence=1;
 
     (E->next_buoyancy_field)(E);
-
+    
+    if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
+	(E->advection.timesteps < E->advection.max_timesteps)) ||
+       (E->advection.total_timesteps < E->advection.min_timesteps) )
+      E->control.keep_going = 1;
+    else
+      E->control.keep_going = 0;
+    
     cpu_total_seconds = CPU_time0()-start_time;
     if (cpu_total_seconds > E->control.record_all_until)  {
       E->control.keep_going = 0;
