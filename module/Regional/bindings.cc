@@ -13,6 +13,8 @@
 #include "bindings.h"
 
 #include "misc.h"          // miscellaneous methods
+
+#include "advdiffu.h"
 #include "outputs.h"
 
 // the method table
@@ -110,6 +112,26 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_general_stokes_solver_log__doc__},
 
+    // methods for advection_diffusion 
+    {pyRegional_PG_timestep_init__name__,
+     pyRegional_PG_timestep_init,
+     METH_VARARGS,
+     pyRegional_PG_timestep_init__doc__},
+
+    {pyRegional_PG_timestep_solve__name__,
+     pyRegional_PG_timestep_solve,
+     METH_VARARGS,
+     pyRegional_PG_timestep_solve__doc__},
+
+    {pyRegional_PG_timemarching_control__name__,
+     pyRegional_PG_timemarching_control,
+     METH_VARARGS,
+     pyRegional_PG_timemarching_control__doc__},
+
+    {pyRegional_PG_timestep_fini__name__,
+     pyRegional_PG_timestep_fini,
+     METH_VARARGS,
+     pyRegional_PG_timestep_fini__doc__},
 
     // from outputs.h
 
@@ -143,6 +165,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.7 2003/05/22 18:21:38 tan2 Exp $
+// $Id: bindings.cc,v 1.8 2003/05/22 18:32:14 ces74 Exp $
 
 // End of file

@@ -13,25 +13,25 @@
 #include "exceptions.h"
 #include "misc.h"
 
-
 extern "C" {
+
 #include "mpi.h"
 #include "global_defs.h"
 #include "citcom_init.h"
 #include "drive_solvers.h"
-
-    double return1_test();
-    void read_instructions(char*);
-    double CPU_time0();
-    void solve_constrained_flow_iterative(struct All_variables*);
-    void get_system_viscosity(struct All_variables*, int, float**, float**);
-
-    void construct_stiffness_B_matrix(struct All_variables*);
-    void velocities_conform_bcs(struct All_variables*, double **);
-    void assemble_forces(struct All_variables*, int);
+#include "advection_diffusion.h"
+  
+  double return1_test();
+  void read_instructions(char*);
+  double CPU_time0();
+  void solve_constrained_flow_iterative(struct All_variables*);
+  void get_system_viscosity(struct All_variables*, int, float**, float**);
+  
+  void construct_stiffness_B_matrix(struct All_variables*);
+  void velocities_conform_bcs(struct All_variables*, double **);
+  void assemble_forces(struct All_variables*, int);
 
 }
-
 
 // copyright
 
@@ -39,12 +39,12 @@ char pyRegional_copyright__doc__[] = "";
 char pyRegional_copyright__name__[] = "copyright";
 
 static char pyRegional_copyright_note[] = 
-    "CitcomSRegional python module: Copyright (c) 1998-2003 California Institute of Technology";
+"CitcomSRegional python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
 PyObject * pyRegional_copyright(PyObject *, PyObject *)
 {
-    return Py_BuildValue("s", pyRegional_copyright_note);
+  return Py_BuildValue("s", pyRegional_copyright_note);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -272,6 +272,6 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.11 2003/05/21 21:28:00 tan2 Exp $
+// $Id: misc.cc,v 1.12 2003/05/22 18:32:14 ces74 Exp $
 
 // End of file

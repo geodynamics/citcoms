@@ -23,12 +23,13 @@ PROJ_CXX_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
 #PROJ_CXX_INCLUDES = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 
 PROJ_SRCS = \
+    advdiffu.cc \
     bindings.cc \
     exceptions.cc \
     misc.cc \
     outputs.cc
 
 # version
-# $Id: Make.mm,v 1.6 2003/05/22 18:21:38 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/05/22 18:32:14 ces74 Exp $
 
 # End of file
