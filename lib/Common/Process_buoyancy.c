@@ -136,7 +136,7 @@ void heat_flux(E)
 /*     if (E->control.verbose && E->parallel.me==E->parallel.nprocz-1) fprintf(E->fp_out,"surface heat flux= %f %f\n",sum_h[0],E->monitor.elapsed_time); */
     if (E->parallel.me==E->parallel.nprocz-1) {
       fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
-      fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]);
+      //fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]);
     }
   }
 
