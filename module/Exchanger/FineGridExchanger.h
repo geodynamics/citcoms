@@ -18,6 +18,8 @@ class FineGridExchanger : public Exchanger {
 public:
     FineGridExchanger(const MPI_Comm communicator,
 		      const MPI_Comm intercomm,
+		      const int localrank,
+		      const int interrank,
 		      const int localLeader,
 		      const int remoteLeader,
 		      const All_variables *E);
@@ -37,7 +39,7 @@ public:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.10 2003/09/27 00:27:35 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.11 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file
 

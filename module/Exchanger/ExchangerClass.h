@@ -28,6 +28,8 @@ class Exchanger {
 public:
     Exchanger(const MPI_Comm communicator,
 	      const MPI_Comm intercomm,
+	      const int localrank,
+	      const int interrank,
 	      const int localLeader,
 	      const int remoteLeader,
 	      const All_variables *E);
@@ -65,18 +67,19 @@ public:
                                      // to global id array
 
 protected:
-    const MPI_Comm comm;
-    const MPI_Comm intercomm;
+    const MPI_Comm comm;       // communicator of current solver
+    const MPI_Comm intercomm;  // intercommunicator between solvers
 
-    const int localLeader;
-    const int remoteLeader;
+    int lrank;                 // proc. rank in comm
+    int rank;                  // proc. rank in intercomm
+
+    const int localLeader;     // leader rank (in intercomm) of current solver
+    const int remoteLeader;    // leader rank (in intercomm) of another solver
 
     const All_variables *E;    // CitcomS data structure,
                                // Exchanger only modifies bc flags
-
     Boundary *boundary;
-
-    int rank;
+    
 
     struct Data outgoing;
     struct Data incoming;
@@ -96,7 +99,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.15 2003/09/27 00:29:05 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.16 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file
 

@@ -7,27 +7,23 @@
 
 #include <portinfo>
 #include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "global_defs.h"
 #include "Boundary.h"
 #include "FineGridExchanger.h"
 
-using namespace std;
 
-
-FineGridExchanger::FineGridExchanger(MPI_Comm communicator,
-				     MPI_Comm icomm,
-				     int local,
-				     int remote,
-				     const All_variables *e):
-    Exchanger(communicator, icomm, local, remote, e)
+FineGridExchanger::FineGridExchanger(const MPI_Comm communicator,
+				     const MPI_Comm icomm,
+				     const int localrank,
+				     const int interrank,
+				     const int local,
+				     const int remote,
+				     const All_variables *e) :
+    Exchanger(communicator, icomm, localrank, interrank, local, remote, e)
 {
     std::cout << "in FineGridExchanger::FineGridExchanger" << std::endl;
 }
-
 
 
 FineGridExchanger::~FineGridExchanger() {
@@ -37,7 +33,6 @@ FineGridExchanger::~FineGridExchanger() {
 
 void FineGridExchanger::interpretate() {
     std::cout << "in FineGridExchanger::interpretate" << std::endl;
-    return;
 }
 
 
@@ -45,14 +40,15 @@ void FineGridExchanger::createBoundary() {
     std::cout << "in FineGridExchanger::createBoundary" << std::endl;
 
     if (rank == localLeader) {
-      // Face nodes + Edge nodes + vertex nodes
-	const int size = 2*((E->mesh.nox-2)*(E->mesh.noy-2)+(E->mesh.noy-2)*(E->mesh.noz-2)+(E->mesh.noz-2)*(E->mesh.nox-2))+4*(E->mesh.nox+E->mesh.noy+E->mesh.noz-6)+8;
+	// Face nodes + Edge nodes + vertex nodes
+	const int size = 2*( (E->mesh.nox-2)*(E->mesh.noy-2)
+			    +(E->mesh.noy-2)*(E->mesh.noz-2)
+			    +(E->mesh.noz-2)*(E->mesh.nox-2))
+	                 + 4*(E->mesh.nox+E->mesh.noy+E->mesh.noz-6)
+	                 + 8;
 
 	boundary = new Boundary(size);
-
-	// initialize...
 	boundary->init(E);
-
 	//boundary->printX();
     }
 }
@@ -72,16 +68,12 @@ void FineGridExchanger::sendBoundary() {
 
 	boundary->send(intercomm, remoteLeader);
     }
-
-    return;
 }
 
 
 void FineGridExchanger::mapBoundary() {
     std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
     boundary->mapFineGrid(E);
-
-    return;
 }
 
 
@@ -158,6 +150,6 @@ void FineGridExchanger::mapBoundary() {
 // }
 
 // version
-// $Id: FineGridExchanger.cc,v 1.16 2003/09/27 00:27:35 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.17 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file

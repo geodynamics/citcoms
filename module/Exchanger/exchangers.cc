@@ -53,12 +53,15 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    //int rank;
-    //MPI_Comm_rank(comm, &rank);
-    //std::cout << "my rank is " << rank << std::endl;
+    int lrank;
+    MPI_Comm_rank(comm, &lrank);
+
+    int rank;
+    MPI_Comm_rank(intercomm, &rank);
 
     CoarseGridExchanger *cge = new CoarseGridExchanger(
 	                                comm, intercomm,
+					lrank, rank,
 					localLeader, remoteLeader,
 					E);
 
@@ -91,11 +94,14 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    //int rank;
-    //MPI_Comm_rank(comm, &rank);
-    //std::cout << "my rank is " << rank << std::endl;
+    int lrank;
+    MPI_Comm_rank(comm, &lrank);
+
+    int rank;
+    MPI_Comm_rank(intercomm, &rank);
 
     FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
+						   lrank, rank,
 						   localLeader, remoteLeader,
 						   E);
 
@@ -529,6 +535,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.12 2003/09/27 00:28:17 tan2 Exp $
+// $Id: exchangers.cc,v 1.13 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file

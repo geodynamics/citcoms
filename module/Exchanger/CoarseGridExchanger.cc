@@ -15,17 +15,17 @@ using namespace std;
 #include "CoarseGridExchanger.h"
 #include "global_defs.h"
 
-
-CoarseGridExchanger::CoarseGridExchanger(MPI_Comm communicator,
-					 MPI_Comm icomm,
-					 int local,
-					 int remote,
+CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm communicator,
+					 const MPI_Comm icomm,
+					 const int localrank,
+					 const int interrank,
+					 const int local,
+					 const int remote,
 					 const All_variables *e):
-    Exchanger(communicator, icomm, local, remote, e)
+    Exchanger(communicator, icomm, localrank, interrank, local, remote, e)
 {
     std::cout << "in CoarseGridExchanger::CoarseGridExchanger" << std::endl;
 }
-
 
 CoarseGridExchanger::~CoarseGridExchanger() {
     std::cout << "in CoarseGridExchanger::~CoarseGridExchanger" << std::endl;
@@ -135,30 +135,23 @@ void CoarseGridExchanger::receiveBoundary() {
 
     // Broadcast info received by localLeader to the other procs 
     // in the Coarse communicator.
-    if (rank == localLeader) {
-	MPI_Bcast(&size, 1, MPI_INT, localLeader, comm);
-	boundary->broadcast(comm, localLeader);
-    } 
-    else {
-	MPI_Bcast(&size, 1, MPI_INT, localLeader, comm);
-	boundary = new Boundary(size);
-	boundary->broadcast(comm, localLeader);
-    }
+    MPI_Bcast(&size, 1, MPI_INT, localLeader, comm);
 
-    return;
+    if (rank != localLeader)
+	boundary = new Boundary(size);
+
+    boundary->broadcast(comm, localLeader);
 }
 
 
 void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
     boundary->mapCoarseGrid(E);
-
-    return;
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.21 2003/09/27 00:27:35 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.22 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file

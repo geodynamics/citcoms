@@ -11,33 +11,22 @@
 #include "Boundary.h"
 #include "global_defs.h"
 #include "ExchangerClass.h"
-using namespace std;
 
-Exchanger::Exchanger(MPI_Comm communicator,
-		     MPI_Comm icomm,
-		     int local,
-		     int remote,
+Exchanger::Exchanger(const MPI_Comm communicator,
+		     const MPI_Comm icomm,
+		     const int localrank,
+		     const int interrank,
+		     const int local,
+		     const int remote,
 		     const All_variables *e):
     comm(communicator),
     intercomm(icomm),
+    lrank(localrank),
+    rank(interrank),
     localLeader(local),
     remoteLeader(remote),
     E(e),
     boundary(NULL) {
-
-    MPI_Comm_rank(intercomm, &rank);
-
-//     int size;
-//     MPI_Comm_size(intercomm, &size);
-//     std::cout << "intercomm: rank = " << rank
-// 	      << "  size = " << size << std::endl;
-
-//     int localrank;
-//     MPI_Comm_rank(comm, &localrank);
-//     MPI_Comm_size(intercomm, &size);
-//     std::cout << "localcomm: rank = " << localrank
-// 	      << "  size = " << size << std::endl;
-
 
 }
 
@@ -414,7 +403,6 @@ void Exchanger::wait() {
 		 remoteLeader, WAIT_TAG, intercomm, &status);
     }
     MPI_Barrier(comm);  // wait until leader has received signal
-    return;
 }
 
 
@@ -426,12 +414,11 @@ void Exchanger::nowait() {
 	MPI_Send(&junk, 1, MPI_INT,
 		 remoteLeader, WAIT_TAG, intercomm);
     }
-    return;
 }
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.15 2003/09/27 00:29:05 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.16 2003/09/27 17:12:52 tan2 Exp $
 
 // End of file
 
