@@ -150,7 +150,7 @@ void VTInlet::recvV()
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    sink.recvD(v);
+    sink.recv(v);
 
     Convertor& convertor = Convertor::instance();
     convertor.xvelocity(v, sink.getX());
@@ -250,6 +250,6 @@ void VTInlet::imposet()
 
 
 // version
-// $Id: VTInlet.cc,v 1.3 2004/03/11 22:36:47 tan2 Exp $
+// $Id: VTInlet.cc,v 1.4 2004/03/11 22:42:17 tan2 Exp $
 
 // End of file

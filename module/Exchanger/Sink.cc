@@ -69,7 +69,7 @@ void Sink::recvMeshNode()
     // fill meshNode_ with value "numMeshNodes", which is an invalid node #
     meshNode_.resize(beginSrcNodes[source.size()], numMeshNodes);
 
-    recvArray2D(meshNode_);
+    recv(meshNode_);
     meshNode_.print("meshNode_recv");
 
     testMeshNode();
@@ -124,6 +124,6 @@ void Sink::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Sink.cc,v 1.5 2004/02/05 19:45:09 tan2 Exp $
+// $Id: Sink.cc,v 1.6 2004/03/11 22:42:17 tan2 Exp $
 
 // End of file
