@@ -22,6 +22,8 @@ void general_stokes_solver_init(struct All_variables *E)
     for(i=0;i<=neq;i++) 
       oldU[m][i]=0.0;
   }
+  
+  E->monitor.elapsed_time_vsoln = E->monitor.elapsed_time;
 
   return;
 }
