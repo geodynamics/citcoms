@@ -5,6 +5,7 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "citcom_init.h"
 
 extern int Emergency_stop;
 
@@ -31,106 +32,105 @@ int main(argc,argv)
 
   int cpu_total_seconds,k, *temp;
   double CPU_time0(),time,initial_time,start_time,avaimem();
-  
-  struct All_variables E;
-  
+    
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
+  E = Citcom_Init();
   
-  parallel_process_initilization(&E,argc,argv);
+  parallel_process_initilization(E,argc,argv);
   
-  E.monitor.solution_cycles=0;
+  E->monitor.solution_cycles=0;
   
   start_time = time = CPU_time0();
-  read_instructions(&E,argc,argv);
+  read_instructions(argc,argv);
 
-  E.control.keep_going=1;
+  E->control.keep_going=1;
 
-  if (E.parallel.me == 0)  {
+  if (E->parallel.me == 0)  {
     fprintf(stderr,"Input parameters taken from file '%s'\n",argv[1]);
-    fprintf(stderr,"Initialization complete after %g seconds\n\n",CPU_time0()-time); fflush(E.fp);
+    fprintf(stderr,"Initialization complete after %g seconds\n\n",CPU_time0()-time); fflush(E->fp);
     initial_time = CPU_time0()-time;
-    E.monitor.cpu_time_on_vp_it = CPU_time0();
+    E->monitor.cpu_time_on_vp_it = CPU_time0();
   }
   
-  if (E.control.post_p)   {
-    process_output_field(&E,E.monitor.solution_cycles);
+  if (E->control.post_p)   {
+    process_output_field(E,E->monitor.solution_cycles);
     parallel_process_termination();
   }
 
-  general_stokes_solver(&E);
+  general_stokes_solver(E);
 
   /* moved up here so that the first time step would be outputted CPC 3/21/00 */
-  process_temp_field(&E,E.monitor.solution_cycles);
-  process_new_velocity(&E,E.monitor.solution_cycles);
+  process_temp_field(E,E->monitor.solution_cycles);
+  process_new_velocity(E,E->monitor.solution_cycles);
 
-  if (E.control.stokes)  {
+  if (E->control.stokes)  {
     
-    /*     process_temp_field(&E,E.monitor.solution_cycles);
-	   process_new_velocity(&E,E.monitor.solution_cycles); */
+    /*     process_temp_field(E,E->monitor.solution_cycles);
+	   process_new_velocity(E,E->monitor.solution_cycles); */
     
-    /*      if(E.control.tracer==1)  {
-	    (E.problem_tracer_advection)(&E);
-	    (E.problem_tracer_output)(&E,E.monitor.solution_cycles);
+    /*      if(E->control.tracer==1)  {
+	    (E->problem_tracer_advection)(E);
+	    (E->problem_tracer_output)(E,E->monitor.solution_cycles);
 	    }
     */    
     parallel_process_termination();
   }
   
-  E.control.DIRECTII = 0;
+  E->control.DIRECTII = 0;
   
-  while ( E.control.keep_going   &&  (Emergency_stop == 0) )   {
+  while ( E->control.keep_going   &&  (Emergency_stop == 0) )   {
     
     
-    E.monitor.solution_cycles++; 
-    if(E.monitor.solution_cycles>E.control.print_convergence)
-      E.control.print_convergence=1;
+    E->monitor.solution_cycles++; 
+    if(E->monitor.solution_cycles>E->control.print_convergence)
+      E->control.print_convergence=1;
     
     
-    (E.next_buoyancy_field)(&E);
+    (E->next_buoyancy_field)(E);
     
     cpu_total_seconds = CPU_time0()-start_time;
-    if (cpu_total_seconds > E.control.record_all_until)  {
-      E.control.DIRECTII = 1;
-      E.control.keep_going = 0;
+    if (cpu_total_seconds > E->control.record_all_until)  {
+      E->control.DIRECTII = 1;
+      E->control.keep_going = 0;
     }
     
-    process_temp_field(&E,E.monitor.solution_cycles); 
+    process_temp_field(E,E->monitor.solution_cycles); 
     
-    if (E.monitor.T_interior>1.5)  {
-      fprintf(E.fp,"quit due to maxT = %.4e sub_iteration%d\n",E.monitor.T_interior,E.advection.last_sub_iterations);
+    if (E->monitor.T_interior>1.5)  {
+      fprintf(E->fp,"quit due to maxT = %.4e sub_iteration%d\n",E->monitor.T_interior,E->advection.last_sub_iterations);
       parallel_process_termination();
     }
     
-    general_stokes_solver(&E);
-    process_new_velocity(&E,E.monitor.solution_cycles);
+    general_stokes_solver(E);
+    process_new_velocity(E,E->monitor.solution_cycles);
     
-    /*      if(E.control.tracer==1)  {
-	    (E.problem_tracer_advection)(&E);
-	    (E.problem_tracer_output)(&E,E.monitor.solution_cycles);
+    /*      if(E->control.tracer==1)  {
+	    (E->problem_tracer_advection)(E);
+	    (E->problem_tracer_output)(E,E->monitor.solution_cycles);
 	    }
     */
     
-    if(E.control.mat_control==1)
-      read_mat_from_file(&E);
+    if(E->control.mat_control==1)
+      read_mat_from_file(E);
     /*
       else
-      construct_mat_group(&E);
+      construct_mat_group(E);
     */
     
-    if(E.control.vbcs_file==1)
-      read_velocity_boundary_from_file(&E);
+    if(E->control.vbcs_file==1)
+      read_velocity_boundary_from_file(E);
     /*
       else
-      renew_top_velocity_boundary(&E);
+      renew_top_velocity_boundary(E);
     */
     
     
     
-    if (E.parallel.me == 0)  {
-      fprintf(E.fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E.monitor.solution_cycles,E.monitor.elapsed_time,E.advection.timestep,E.monitor.T_interior,E.advection.last_sub_iterations);
+    if (E->parallel.me == 0)  {
+      fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
       /* added a time output CPC 6/18/00 */
-      fprintf(E.fptime,"%d %.4e %.4e %.4e %.4e\n",E.monitor.solution_cycles,E.monitor.elapsed_time,E.advection.timestep,CPU_time0()-start_time,CPU_time0()-time);
-      fprintf(stderr,"%d %.4e %.4e %.4e %.4e\n",E.monitor.solution_cycles,E.monitor.elapsed_time,E.advection.timestep,CPU_time0()-start_time,CPU_time0()-time);
+      fprintf(E->fptime,"%d %.4e %.4e %.4e %.4e\n",E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,CPU_time0()-start_time,CPU_time0()-time);
+      fprintf(stderr,"%d %.4e %.4e %.4e %.4e\n",E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,CPU_time0()-start_time,CPU_time0()-time);
       time = CPU_time0();
     }
     
@@ -139,18 +139,18 @@ int main(argc,argv)
   
   
   
-  if (E.parallel.me == 0)  {
-    fprintf(stderr,"cycles=%d\n",E.monitor.solution_cycles);
-    E.monitor.cpu_time_on_vp_it=CPU_time0()-E.monitor.cpu_time_on_vp_it;
+  if (E->parallel.me == 0)  {
+    fprintf(stderr,"cycles=%d\n",E->monitor.solution_cycles);
+    E->monitor.cpu_time_on_vp_it=CPU_time0()-E->monitor.cpu_time_on_vp_it;
     fprintf(stderr,"Average cpu time taken for velocity step = %f\n",
-	    E.monitor.cpu_time_on_vp_it/((float)(E.monitor.solution_cycles-E.control.restart)));
-    fprintf(E.fp,"Initialization overhead = %f\n",initial_time);
-    fprintf(E.fp,"Average cpu time taken for velocity step = %f\n",
-	    E.monitor.cpu_time_on_vp_it/((float)(E.monitor.solution_cycles-E.control.restart)));
+	    E->monitor.cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
+    fprintf(E->fp,"Initialization overhead = %f\n",initial_time);
+    fprintf(E->fp,"Average cpu time taken for velocity step = %f\n",
+	    E->monitor.cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
   
-  fclose(E.fp);
-  fclose(E.fptime);
+  fclose(E->fp);
+  fclose(E->fptime);
   
   parallel_process_termination();
   
