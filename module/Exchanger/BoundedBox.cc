@@ -29,6 +29,15 @@ bool isOverlapped(const BoundedBox& lhs,
 
 		if(isInside(x, rhs)) return true;
 	    }
+     if((lhs[0][0] < rhs[0][0])&&
+       (lhs[1][0] > rhs[1][0])&&
+       (lhs[0][1] < rhs[0][1])&&
+       (lhs[1][1] > rhs[1][1])&&
+       (lhs[0][2] < rhs[0][2])&&
+       (lhs[1][2] > rhs[1][2]))
+    {        
+        return true;
+    }
     return false;
 }
 
@@ -73,6 +82,6 @@ void regionalGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
 
 
 // version
-// $Id: BoundedBox.cc,v 1.5 2003/12/30 21:46:01 tan2 Exp $
+// $Id: BoundedBox.cc,v 1.6 2004/01/22 03:38:00 puru Exp $
 
 // End of file
