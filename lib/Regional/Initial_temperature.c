@@ -105,9 +105,9 @@ void restart_tic_from_file(struct All_variables *E)
 
 void construct_tic_regional(struct All_variables *E)
 {
-  int number_of_perturbations;
-  int perturb_ll[32], perturb_mm[32], load_depth[32];
-  float perturb_mag[32];
+/*   int number_of_perturbations; */
+/*   int perturb_ll[32], perturb_mm[32], load_depth[32]; */
+/*   float perturb_mag[32]; */
   int i, j ,k , m, p, node;
   int nox, noy, noz;
   double r1, f1, t1;
@@ -126,32 +126,32 @@ void construct_tic_regional(struct All_variables *E)
      node number is equal to load_depth. The horizontal pattern of
      the anomaly is given by spherical harmonic ll & mm. */
 
-  input_int("num_perturbations",&number_of_perturbations,"0,0,32",m);
+  input_int("num_perturbations",E->number_of_perturbations,"0,0,32",m);
 
-  if (number_of_perturbations > 0) {
-    if (! input_float_vector("perturbmag",number_of_perturbations,perturb_mag,m) ) {
+  if (E->number_of_perturbations > 0) {
+    if (! input_float_vector("perturbmag",E->number_of_perturbations,E->perturb_mag,m) ) {
       fprintf(stderr,"Missing input parameter: 'perturbmag'\n");
       parallel_process_termination();
     }
-    if (! input_int_vector("perturbm",number_of_perturbations,perturb_mm,m) ) {
+    if (! input_int_vector("perturbm",E->number_of_perturbations,E->perturb_mm,m) ) {
       fprintf(stderr,"Missing input parameter: 'perturbm'\n");
       parallel_process_termination();
     }
-    if (! input_int_vector("perturbl",number_of_perturbations,perturb_ll,m) ) {
+    if (! input_int_vector("perturbl",E->number_of_perturbations,E->perturb_ll,m) ) {
       fprintf(stderr,"Missing input parameter: 'perturbml'\n");
       parallel_process_termination();
     }
-    if (! input_int_vector("perturblayer",number_of_perturbations,load_depth,m) ) {
+    if (! input_int_vector("perturblayer",E->number_of_perturbations,E->load_depth,m) ) {
       fprintf(stderr,"Missing input parameter: 'perturblayer'\n");
       parallel_process_termination();
     }
   }
   else {
-    number_of_perturbations = 1;
-    perturb_mag[0] = 0.05 * (E->control.TBCbotval - E->control.TBCtopval);
-    perturb_mm[0] = 2;
-    perturb_ll[0] = 2;
-    load_depth[0] = (noz+1)/2;
+    E->number_of_perturbations = 1;
+    E->perturb_mag[0] = 0.05 * (E->control.TBCbotval - E->control.TBCtopval);
+    E->perturb_mm[0] = 2;
+    E->perturb_ll[0] = 2;
+    E->load_depth[0] = (noz+1)/2;
   }
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -164,10 +164,10 @@ void construct_tic_regional(struct All_variables *E)
 	  r1 = E->sx[m][3][node] - E->sphere.ri;
 	  E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*r1/(E->sphere.ro - E->sphere.ri);
 
-	  for (p=0; p<number_of_perturbations; p++) {
-	    mm = perturb_mm[p];
-	    ll = perturb_ll[p];
-	    con = perturb_mag[p];
+	  for (p=0; p<E->number_of_perturbations; p++) {
+	    mm = E->perturb_mm[p];
+	    ll = E->perturb_ll[p];
+	    con = E->perturb_mag[p];
 		  
 	    E->T[m][node] += con*cos(ll*f1)*cos(mm*t1)*sin(M_PI*r1/(E->sphere.ro - E->sphere.ri));
 	    E->T[m][node] = max(min(E->T[m][node], 1.0), 0.0);
