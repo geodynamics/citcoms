@@ -149,8 +149,8 @@ void restart_tic_from_file(struct All_variables *E)
 
 void construct_tic_regional(struct All_variables *E)
 {
-  int i, j ,k , m, p, node;
-  int nox, noy, noz;
+  int i, j ,k , kk, m, p, node;
+  int nox, noy, noz, gnoz;
   double r1, f1, t1;
   int mm, ll;
   double con;
@@ -161,32 +161,48 @@ void construct_tic_regional(struct All_variables *E)
   noy=E->lmesh.noy;
   nox=E->lmesh.nox;
   noz=E->lmesh.noz;
+  gnoz=E->mesh.noz;
+
+  /* set up a linear temperature profile first */
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(i=1;i<=noy;i++)
+      for(j=1;j<=nox;j++)
+	for(k=1;k<=noz;k++) {
+	  node=k+(j-1)*noz+(i-1)*nox*noz;
+	  r1=E->sx[m][3][node];
+	  E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
+	}
 
   /* This part put a temperature anomaly at depth where the global
      node number is equal to load_depth. The horizontal pattern of
      the anomaly is given by spherical harmonic ll & mm. */
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=noy;i++)
-      for(j=1;j<=nox;j++)
-	for(k=1;k<=noz;k++)  {
+  for (p=0; p<E->number_of_perturbations; p++) {
+    mm = E->perturb_mm[p];
+    ll = E->perturb_ll[p];
+    con = E->perturb_mag[p];
+    kk = E->load_depth[p];
+
+    if ( kk<=0 || kk>gnoz ) continue;
+
+    k = kk - E->lmesh.nzs + 1;
+    if ( k<=0 || k>noz ) continue; // if layer k is not inside this proc.
+
+    if (E->parallel.me_locl[1] == 0 && E->parallel.me_locl[2] == 0) 
+      fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
+    
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=noy;i++)
+	for(j=1;j<=nox;j++) {
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  t1 = (E->sx[m][1][node] - E->control.theta_min) * tlen;
 	  f1 = (E->sx[m][2][node] - E->control.fi_min) * flen;
-	  r1 = E->sx[m][3][node] - E->sphere.ri;
-	  E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*r1/(E->sphere.ro - E->sphere.ri);
 
-	  for (p=0; p<E->number_of_perturbations; p++) {
-	    mm = E->perturb_mm[p];
-	    ll = E->perturb_ll[p];
-	    con = E->perturb_mag[p];
-
-	    E->T[m][node] += con*cos(ll*f1)*cos(mm*t1)*sin(M_PI*r1/(E->sphere.ro - E->sphere.ri));
-	    E->T[m][node] = max(min(E->T[m][node], 1.0), 0.0);
-	  }
+	  E->T[m][node] += con*cos(ll*t1)*cos(mm*f1);
+	  E->T[m][node] = max( min(E->T[m][node], E->control.TBCbotval),
+			       E->control.TBCtopval);
 	}
-
-  fprintf(stderr, "%d %d\n", mm, ll);
+  }
 
   temperatures_conform_bcs(E);
 

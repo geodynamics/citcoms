@@ -9,8 +9,8 @@
 #include "citcom_init.h"
 #include "parallel_related.h"
 
-extern void set_horizontal_communicator(struct All_variables*);
-extern void set_vertical_communicator(struct All_variables*);
+void set_horizontal_communicator(struct All_variables*);
+void set_vertical_communicator(struct All_variables*);
 
 
 void parallel_process_initilization(E,argc,argv)
@@ -208,9 +208,9 @@ oordinate and F-B
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
       fprintf(E->fp_out,"capid[%d]=%d \n",j,E->sphere.capid[j]);
     }
-    for (m=0;m<12;m++) 
-      for (i=0;i<E->parallel.nprocx;i++)
-	for (j=0;j<E->parallel.nprocy;j++) 
+    for (m=0;m<E->sphere.caps;m++) 
+      for (j=0;j<E->parallel.nprocy;j++) 
+	for (i=0;i<E->parallel.nprocx;i++)
 	  for (k=0;k<E->parallel.nprocz;k++) 
 	    fprintf(E->fp_out,"loc2proc_map[cap=%d][x=%d][y=%d][z=%d] = %d\n",
 		    m,i,j,k,E->parallel.loc2proc_map[m][i][j][k]);
@@ -220,8 +220,74 @@ oordinate and F-B
 /*   parallel_process_termination(); */
 
 
+  parallel_process_sync();
+  set_vertical_communicator(E);
+  set_horizontal_communicator(E);
+
   return;
   }
+
+
+
+void set_horizontal_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, horizon_g;
+  int i,j,k,m,n;
+  int *processors;
+
+  processors = (int *) malloc((E->parallel.nprocxy*E->sphere.caps+1)*sizeof(int));
+
+  m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
+  k = E->parallel.me_loc[3];
+  n = 0;
+  for (m=0;m<E->sphere.caps;m++)
+    for (i=0;i<E->parallel.nprocx;i++)
+      for (j=0;j<E->parallel.nprocy;j++) {
+	processors[n] = E->parallel.loc2proc_map[m][i][j][k];
+	n++;
+      }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, n, processors, &horizon_g);
+  MPI_Comm_create(E->parallel.world, horizon_g, &(E->parallel.horizontal_comm));
+  //MPI_Comm_size(E->parallel.horizontal_comm, &m);
+  //fprintf(stderr,"horizontal_comm.size = %d\n", m);
+
+  MPI_Group_free(&horizon_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+
+  return;
+}
+
+
+void set_vertical_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, vertical_g;
+  int i,j,k,m;
+  int *processors;
+
+  processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
+
+  m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
+  i = E->parallel.me_loc[1];
+  j = E->parallel.me_loc[2];
+  //fprintf(stderr, "setup vertical communicator: m=%d i=%d j=%d\n",m,i,j);
+
+  for (k=0;k<E->parallel.nprocz;k++) {
+      processors[k] = E->parallel.loc2proc_map[m][i][j][k];
+  }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, E->parallel.nprocz, processors, &vertical_g);
+  MPI_Comm_create(E->parallel.world, vertical_g, &(E->parallel.vertical_comm));
+  //MPI_Comm_size(E->parallel.vertical_comm, &m);
+  //fprintf(stderr,"vertical_comm.size = %d\n", m);
+
+  MPI_Group_free(&vertical_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+}
 
 
 /* =========================================================================
@@ -789,6 +855,7 @@ void parallel_communication_routs_v(E)
   return;
   }
 
+
 /* ============================================ 
  determine communication routs for 
  exchange info across the boundaries on the surfaces       
@@ -881,6 +948,8 @@ void parallel_communication_routs_s(E)
 
 /*   return; */
   }
+
+
 
 /* ================================================ */
 /* ================================================ */
@@ -1494,6 +1563,11 @@ void exchange_snode_f(E, U1, U2, lev)
 
  return;
  }
+
+
+#if 0
+
+
 /* ==========================================================  */
  void scatter_to_nlayer_id (E,AUi,AUo,lev) 
  struct All_variables *E;
@@ -1959,6 +2033,9 @@ void exchange_snode_f(E, U1, U2, lev)
  return;
  }
 
+#endif
+
+
 /* ================================================== */
 
  void set_communication_sphereh(E)
@@ -1990,6 +2067,4 @@ void exchange_snode_f(E, U1, U2, lev)
 
  return;
  }
-
-
 

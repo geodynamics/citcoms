@@ -81,13 +81,13 @@ void read_instructions(filename)
 
     setup_parser(E,filename);
 
-    open_log_and_time(E);
-    if (E->control.verbose)
-      open_info(E);
-
     global_default_values(E);
     read_initial_settings(E);
     tracer_initial_settings(E);
+
+    open_log_and_time(E);
+    if (E->control.verbose)
+      open_info(E);
 
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);

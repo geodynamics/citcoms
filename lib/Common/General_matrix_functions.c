@@ -262,14 +262,14 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
 
   if(E->control.verbose)  {
-    printf("Total time for %d loops = %g \n",count,CPU_time0()-initial_time);
+    fprintf(stderr, "Total time for %d loops = %g \n",count,CPU_time0()-initial_time);
     for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
-      printf("Level %d, total time = %g\n",i,cost_per_level[i]);
-      printf("     total cycles = %d (%g)\n",total_cycles[i],
+      fprintf(stderr, "Level %d, total time = %g\n",i,cost_per_level[i]);
+      fprintf(stderr, "     total cycles = %d (%g)\n",total_cycles[i],
 	     cost_per_level[i]/(1.0e-5+(float)total_cycles[i]));
     }
-    printf("projection time = %g\n",E->monitor.cpu_time_on_mg_maps);
-    printf("Del sq u solved to accuracy of  %g \n",residual);
+    fprintf(stderr, "projection time = %g\n",E->monitor.cpu_time_on_mg_maps);
+    fprintf(stderr, "Del sq u solved to accuracy of  %g \n",residual);
   }
 
 
