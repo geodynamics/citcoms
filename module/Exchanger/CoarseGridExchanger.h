@@ -5,22 +5,22 @@
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
-#if !defined(pyCitcom_FineGridExchanger_h)
-#define pyCitcom_FineGridExchanger_h
+#if !defined(pyCitcom_CoarseGridExchanger_h)
+#define pyCitcom_CoarseGridExchanger_h
 
 
 #include "ExchangerClass.h"
 
 
-class FineGridExchanger : public Exchanger {
+class CoarseGridExchanger : public Exchanger {
 
 public:
-    FineGridExchanger(MPI_Comm communicator,
-		      MPI_Comm intercomm,
-		      int localLeader,
-		      int remoteLeader,
-		      const All_variables *E);
-    virtual ~FineGridExchanger();
+    CoarseGridExchanger(MPI_Comm communicator,
+			MPI_Comm intercomm,
+			int localLeader,
+			int remoteLeader,
+			const All_variables *E);
+    virtual ~CoarseGridExchanger();
 
     void set_target(const MPI_Comm comm,
 			    const MPI_Comm intercomm,
@@ -40,7 +40,7 @@ public:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.2 2003/09/08 21:47:27 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.1 2003/09/08 21:47:27 tan2 Exp $
 
 // End of file
 

@@ -11,7 +11,6 @@
 #include <Python.h>
 
 #include "misc.h"
-#include "src/hello.h"
 
 
 // copyright
@@ -35,10 +34,10 @@ char pyExchanger_hello__name__[] = "hello";
 
 PyObject * pyExchanger_hello(PyObject *, PyObject *)
 {
-    return Py_BuildValue("s", hello());
+    return Py_BuildValue("s", "hello");
 }
 
 // version
-// $Id: misc.cc,v 1.1 2003/09/06 23:44:22 tan2 Exp $
+// $Id: misc.cc,v 1.2 2003/09/08 21:47:27 tan2 Exp $
 
 // End of file

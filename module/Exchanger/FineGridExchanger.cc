@@ -8,55 +8,76 @@
 #include <portinfo>
 #include <iostream>
 
-#include "Exchanger.h"
 #include "FineGridExchanger.h"
 
 
 
-FineGridExchanger::FineGridExchanger(const All_variables *E) {
-    cout << "in FineGridExchanger::FineGridExchanger" << std::endl;
+FineGridExchanger::FineGridExchanger(MPI_Comm communicator,
+				     MPI_Comm icomm,
+				     int local,
+				     int remote,
+				     const All_variables *e)
+     :
+    Exchanger(communicator, icomm, local, remote, e)
+    /*
+    comm(communicator),
+    intercomm(icomm),
+    localLeader(local),
+    remoteLeader(remote),
+    E(e)
+    */
+{
+    std::cout << "in FineGridExchanger::FineGridExchanger" << std::endl;
+    /*
+    comm = communicator;
+    intercomm = icomm;
+    localLeader = local;
+    remoteLeader = remote;
+    E = e;
+    */
+    return;
 }
 
 
 
 FineGridExchanger::~FineGridExchanger() {
-    cout << "in FineGridExchanger::~FineGridExchanger" << std::endl;
+    std::cout << "in FineGridExchanger::~FineGridExchanger" << std::endl;
 }
 
 
 
-void FineGridExchanger::setup() {
-    cout << "in FineGridExchanger::setup" << std::endl;
+void FineGridExchanger::set_target(int, int, int) {
+    std::cout << "in FineGridExchanger::setup" << std::endl;
 }
 
 
 void FineGridExchanger::gather() {
-    cout << "in FineGridExchanger::gather" << std::endl;
+    std::cout << "in FineGridExchanger::gather" << std::endl;
 }
 
 
 
 void FineGridExchanger::distribute() {
-    cout << "in FineGridExchanger::distribute" << std::endl;
+    std::cout << "in FineGridExchanger::distribute" << std::endl;
 }
 
 
 
 void FineGridExchanger::interpretate() {
-    cout << "in FineGridExchanger::interpretate" << std::endl;
+    std::cout << "in FineGridExchanger::interpretate" << std::endl;
 }
 
 
 
 
 void FineGridExchanger::impose_bc() {
-    cout << "in FineGridExchanger::impose_bc" << std::endl;
+    std::cout << "in FineGridExchanger::impose_bc" << std::endl;
 
 }
 
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.1 2003/09/06 23:44:22 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.2 2003/09/08 21:47:27 tan2 Exp $
 
 // End of file
