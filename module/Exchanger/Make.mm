@@ -25,6 +25,7 @@ PROJ_SRCS = \
 	CoarseGridExchanger.cc \
 	ExchangerClass.cc \
 	FineGridExchanger.cc \
+	Mapping.cc \
 	bindings.cc \
 	exceptions.cc \
 	exchangers.cc \
@@ -32,6 +33,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.4 2003/10/02 01:14:22 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/10/11 00:38:46 tan2 Exp $
 
 # End of file

@@ -13,6 +13,7 @@
 #include "Array2D.h"
 #include "Array2D.cc"
 #include "Boundary.h"
+#include "Mapping.h"
 #include "CoarseGridExchanger.h"
 #include "global_defs.h"
 
@@ -40,7 +41,7 @@ void CoarseGridExchanger::gather() {
 
     if (rank == leader) {
 	const int dim = 3;
-	int size = boundary->size;
+	int size = boundary->size();
 
 	auto_array_ptr<double> tmp(new double[dim*size]);
 
@@ -56,13 +57,13 @@ void CoarseGridExchanger::gather() {
 	    }
 
 	    for (int n=0; n<size; n++)
-		if (boundary->bid2proc[n] == i)
+		if (cgmapping->bid2proc(n) == i)
 		    for (int d=0; d<dim; d++)
 			tmp[n*dim+d] = (*V)(d,n);
 	}
 
 	outgoingV = Velo(new Array2D<dim>(tmp, size));
-	//outgoingV->print();
+	//outgoingV->print("outgoingV");
     }
     else {
 	localV->send(comm, leader);
@@ -79,13 +80,12 @@ void CoarseGridExchanger::distribute() {
 void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
     // interpolate velocity field to boundary nodes
-
     const int dim = 3;
-    const int size = boundary->size;
+    const int size = boundary->size();
     auto_array_ptr<double> tmp(new double[dim*size]);
 
-    for(int i=0; i<boundary->size; i++) {
-	int n1 = boundary->bid2elem[i];
+    for(int i=0; i<size; i++) {
+	int n1 = cgmapping->bid2elem(i);
 	for(int d=0; d<dim; d++)
 	    tmp[i*dim+d] = 0;
 
@@ -94,42 +94,26 @@ void CoarseGridExchanger::interpretate() {
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
 		    for(int d=0; d<dim; d++)
-			tmp[i*dim+d] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[d+1][node];
+			tmp[i*dim+d] += cgmapping->shape(i*8+k) * E->sphere.cap[mm].V[d+1][node];
 		}
 	}
     }
     localV = Velo(new Array2D<dim>(tmp, size));
-    //localV->print();
+    //localV->print("localV");
 }
 
 
-void CoarseGridExchanger::interpolateTemperature() {
-  std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
+void CoarseGridExchanger::mapBoundary() {
+    std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
 
-  int n1,n2,node;
-  for(int i=0;i<boundary->size;i++)
-    {
-      n1=boundary->bid2elem[i];
-      n2=boundary->bid2proc[i];
-
-      //outgoing.T[i] = 0;
-      if(n1!=0) {
-	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
-	  for(int k=0; k< 8 ;k++)
-	    {
-	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-	      //outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
-	    }
-      }
-    }
-
-  return;
+    createMapping();
+    createDataArrays();
 }
 
 
-void CoarseGridExchanger::impose_bc() {
-    std::cout << "in CoarseGridExchanger::impose_bc" << std::endl;
-
+void CoarseGridExchanger::createMapping() {
+    cgmapping = new CoarseGridMapping(boundary, E, comm, rank, leader);
+    mapping = cgmapping;
 }
 
 
@@ -162,16 +146,27 @@ void CoarseGridExchanger::receiveBoundary() {
 }
 
 
-void CoarseGridExchanger::mapBoundary() {
-    std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
-    boundary->mapCoarseGrid(E, rank);
-    boundary->sendBid2proc(comm, rank, leader);
-    createDataArrays();
+void CoarseGridExchanger::interpolateTemperature() {
+  std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
+
+  int n1,n2,node;
+  for(int i=0;i<boundary->size();i++) {
+      n1 = cgmapping->bid2elem(i);
+      n2 = cgmapping->bid2proc(i);
+
+      //outgoing.T[i] = 0;
+      if(n1!=0) {
+	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+	  for(int k=0; k< 8 ;k++)
+	    {
+	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	      //outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
+	    }
+      }
+    }
 }
 
-
-
 // version
-// $Id: CoarseGridExchanger.cc,v 1.28 2003/10/10 18:14:49 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.29 2003/10/11 00:38:46 tan2 Exp $
 
 // End of file

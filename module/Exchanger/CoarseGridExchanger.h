@@ -10,12 +10,13 @@
 #if !defined(pyCitcom_CoarseGridExchanger_h)
 #define pyCitcom_CoarseGridExchanger_h
 
-class Boundary;
-
 #include "ExchangerClass.h"
+
+class CoarseGridMapping;
 
 
 class CoarseGridExchanger : public Exchanger {
+    CoarseGridMapping* cgmapping;
 
 public:
     CoarseGridExchanger(const MPI_Comm comm,
@@ -29,8 +30,8 @@ public:
     virtual void gather();
     virtual void distribute();
     virtual void interpretate();
-    virtual void impose_bc();
     virtual void mapBoundary();
+    virtual void createMapping();
 
     void receiveBoundary();
     void interpolateTemperature();
@@ -39,7 +40,7 @@ public:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.13 2003/09/28 00:11:03 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.14 2003/10/11 00:38:46 tan2 Exp $
 
 // End of file
 

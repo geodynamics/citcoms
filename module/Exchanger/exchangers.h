@@ -89,6 +89,12 @@ extern "C"
 PyObject * pyExchanger_sendVelocities(PyObject *, PyObject *);
 
 
+extern char pyExchanger_imposeConstraint__name__[];
+extern char pyExchanger_imposeConstraint__doc__[];
+extern "C"
+PyObject * pyExchanger_imposeConstraint(PyObject *, PyObject *);
+
+
 extern char pyExchanger_distribute__name__[];
 extern char pyExchanger_distribute__doc__[];
 extern "C"
@@ -134,6 +140,6 @@ PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.16 2003/10/02 01:14:22 tan2 Exp $
+// $Id: exchangers.h,v 1.17 2003/10/11 00:38:46 tan2 Exp $
 
 // End of file

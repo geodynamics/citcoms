@@ -320,6 +320,26 @@ PyObject * pyExchanger_sendVelocities(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_imposeConstraint__doc__[] = "";
+char pyExchanger_imposeConstraint__name__[] = "imposeConstraint";
+
+PyObject * pyExchanger_imposeConstraint(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:imposeConstraint", &obj))
+        return NULL;
+
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+                                        (PyCObject_AsVoidPtr(obj));
+
+    fge->imposeConstraint();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_distribute__doc__[] = "";
 char pyExchanger_distribute__name__[] = "distribute";
 
@@ -368,9 +388,10 @@ PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:imposeBC", &obj))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+                                        (PyCObject_AsVoidPtr(obj));
 
-    pe->imposeBC();
+    fge->imposeBC();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -387,9 +408,10 @@ PyObject * pyExchanger_setBCFlag(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:setBCFlag", &obj))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+                                        (PyCObject_AsVoidPtr(obj));
 
-    pe->setBCFlag();
+    fge->setBCFlag();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -479,6 +501,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.20 2003/10/02 01:14:22 tan2 Exp $
+// $Id: exchangers.cc,v 1.21 2003/10/11 00:38:46 tan2 Exp $
 
 // End of file

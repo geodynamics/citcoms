@@ -13,12 +13,11 @@
 #include <memory>
 #include "mpi.h"
 
+struct All_variables;
 template <int dim> class Array2D;
 class Boundary;
-struct All_variables;
+class Mapping;
 
-typedef std::auto_ptr<Array2D<1> > Temper;
-typedef std::auto_ptr<Array2D<3> > Velo;
 
 class Exchanger {
 
@@ -40,10 +39,6 @@ public:
     void sendVelocities();
     void receiveVelocities();
 
-    void imposeConstraint();
-    void imposeBC();
-    void setBCFlag();
-
     void storeTimestep(const double fge_time, const double cge_time);
     double exchangeTimestep(const double) const;
     int exchangeSignal(const int) const;
@@ -51,9 +46,9 @@ public:
     virtual void gather() = 0;
     virtual void distribute() = 0;
     virtual void interpretate() = 0;  // interpolate or extrapolate
-    //virtual void imposeBC() = 0;      // set bc flag
     virtual void mapBoundary() = 0;   // create mapping from Boundary object
                                       // to global id array
+    virtual void createMapping() = 0;
 
 protected:
     const MPI_Comm comm;       // communicator of current solver
@@ -70,6 +65,11 @@ protected:
 	                       // and id array indirectly
     Boundary *boundary;
 
+    Mapping *mapping;
+
+    typedef std::auto_ptr<Array2D<1> > Temper;
+    typedef std::auto_ptr<Array2D<3> > Velo;
+
     Temper outgoingT;
     Temper incomingT;
 
@@ -85,10 +85,6 @@ private:
     float exchangeFloat(const float &sent, const int len) const;
     int exchangeInt(const int &sent, const int len) const;
 
-    void computeWeightedNormal(double* nwght) const;
-    double computeOutflow(const Velo& V, const double* nwght) const;
-    void reduceOutflow(const double outflow, const double* nwght);
-
     // disable copy constructor and copy operator
     Exchanger(const Exchanger&);
     Exchanger& operator=(const Exchanger&);
@@ -101,7 +97,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.27 2003/10/10 18:14:49 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.28 2003/10/11 00:38:46 tan2 Exp $
 
 // End of file
 
