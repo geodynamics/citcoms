@@ -234,7 +234,7 @@ void BoundaryConditionSource::sendTraction()
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in BoundaryConditionSource::sendForce" << journal::end;
+	  << "in BoundaryConditionSource::sendTraction" << journal::end;
 
     source.interpolateF(fbc, E);
     //fbc.print("FBC");
@@ -242,6 +242,6 @@ void BoundaryConditionSource::sendTraction()
     source.sendArray2D(fbc);
 }
 // version
-// $Id: BoundaryCondition.cc,v 1.6 2003/11/23 18:25:17 ces74 Exp $
+// $Id: BoundaryCondition.cc,v 1.7 2003/11/23 18:25:37 ces74 Exp $
 
 // End of file
