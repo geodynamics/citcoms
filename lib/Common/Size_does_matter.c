@@ -207,7 +207,7 @@ void construct_surf_det (E)
      struct All_variables *E;
      {
 
-  int ll,mm,m,ii,i,k,d,e,es,el,node;
+  int m,i,k,d,e,es,el,node;
 
   double jacobian;
   double determinant();
@@ -215,7 +215,12 @@ void construct_surf_det (E)
 
   const int oned = onedvpoints[E->mesh.nsd];
 
-  double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
+  double to,fo,xx[4][5],dxdy[4][4],dxda[4][4];
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(k=1;k<=oned;k++)    { /* all of the vpoints*/
+      E->surf_det[m][k] = (double *)malloc(E->lmesh.snel*sizeof(double));
+    }
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
   for (es=1;es<=E->lmesh.snel;es++)   {
@@ -260,8 +265,8 @@ void construct_surf_det (E)
              dxda[d][e] += xx[e][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
       jacobian = determinant(dxda,E->mesh.nsd-1);
-/*      E->surf_det[m][k][es] = jacobian;
- */     }
+      E->surf_det[m][k][es] = jacobian;
+      }
     }
 
   return;

@@ -15,11 +15,11 @@ void construct_ien(E)
      struct All_variables *E;
 
 {
-  int lev,p,q,r,rr,e1,e2,i,j,a,node,node2,e;
-  int element,start,start1,nel,nno,accumulatives;
-  int elz,elx,ely,nox,noy,noz,nozx,nozx1;
+  int lev,p,q,r,rr,j;
+  int element,start,nel,nno;
+  int elz,elx,ely,nox,noy,noz;
 
-  const int dims=E->mesh.nsd,  dofs=E->mesh.dof;
+  const int dims=E->mesh.nsd;
   const int ends=enodes[dims];
 
   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
@@ -46,12 +46,32 @@ void construct_ien(E)
                   + offset[rr].vector[2]*noz*nox;
 	     }
 
-
       }     /* end for cap j */
     }     /* end loop for lev */
 
 
-             /*  determine surface things */
+/* if(E->control.verbose)  { */
+/*   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  { */
+/*     fprintf(E->fp_out,"output_IEN_arrays me=%d lev=%d \n",E->parallel.me,lev); */
+/*   for (j=1;j<=E->sphere.caps_per_proc;j++) { */
+/*     fprintf(E->fp_out,"output_IEN_arrays me=%d %d %d\n",E->parallel.me,j,E->sphere.capid[j]); */
+/*     for (i=1;i<=E->lmesh.NEL[lev];i++) */
+/*        fprintf(E->fp_out,"%d %d %d %d %d %d %d %d %d\n",i,E->IEN[lev][j][i].node[1],E->IEN[lev][j][i].node[2],E->IEN[lev][j][i].node[3],E->IEN[lev][j][i].node[4],E->IEN[lev][j][i].node[5],E->IEN[lev][j][i].node[6],E->IEN[lev][j][i].node[7],E->IEN[lev][j][i].node[8]); */
+/*     } */
+/*     } */
+/*   fflush (E->fp_out); */
+/*   } */
+
+  return;
+}
+
+
+/*  determine surface things */
+
+void construct_surface( struct All_variables *E)
+{
+  int i, j, e, element;
+
   for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     e = 0;
     for(element=1;element<=E->lmesh.nel;element++)
@@ -68,22 +88,9 @@ void construct_ien(E)
     for (i=1;i<=E->lmesh.nsf;i++)
       E->surf_node[j][i] = i*E->lmesh.noz;
 
-    }     /* end for cap j */
-
-/* if(E->control.verbose)  { */
-/*   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  { */
-/*     fprintf(E->fp_out,"output_IEN_arrays me=%d lev=%d \n",E->parallel.me,lev); */
-/*   for (j=1;j<=E->sphere.caps_per_proc;j++) { */
-/*     fprintf(E->fp_out,"output_IEN_arrays me=%d %d %d\n",E->parallel.me,j,E->sphere.capid[j]); */
-/*     for (i=1;i<=E->lmesh.NEL[lev];i++) */
-/*        fprintf(E->fp_out,"%d %d %d %d %d %d %d %d %d\n",i,E->IEN[lev][j][i].node[1],E->IEN[lev][j][i].node[2],E->IEN[lev][j][i].node[3],E->IEN[lev][j][i].node[4],E->IEN[lev][j][i].node[5],E->IEN[lev][j][i].node[6],E->IEN[lev][j][i].node[7],E->IEN[lev][j][i].node[8]); */
-/*     } */
-/*     } */
-/*   fflush (E->fp_out); */
-/*   } */
-
-  return;
+  }     /* end for cap j */
 }
+
 
 /*============================================
   Function to make the ID array for above case

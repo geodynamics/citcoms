@@ -27,6 +27,7 @@ void read_instructions(struct All_variables *E, char *filename)
     void global_default_values();
     void global_derived_values();
     void construct_ien();
+    void construct_surface();
     void construct_masks();
     void construct_shape_functions();
     void construct_id();
@@ -56,7 +57,7 @@ void read_instructions(struct All_variables *E, char *filename)
     void set_elapsed_time();
 
 
-    double start_time, CPU_time0(),vmag;
+    double start_time, CPU_time0();
     double global_vdot();
 
     /* =====================================================
@@ -96,6 +97,7 @@ void read_instructions(struct All_variables *E, char *filename)
 
            /* logical domain */
     construct_ien(E);
+    construct_surface(E);
     parallel_domain_boundary_nodes(E);
 
            /* physical domain */
