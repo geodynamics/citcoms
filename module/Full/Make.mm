@@ -21,6 +21,7 @@ PROJ_CXX_SRCLIB = \
 	-lmpimodule
 
 PROJ_CXX_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
+EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -41,6 +42,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.6 2003/08/13 01:22:21 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/14 18:35:41 tan2 Exp $
 
 # End of file

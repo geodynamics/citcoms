@@ -21,6 +21,7 @@ PROJ_CXX_SRCLIB = \
 	-lmpimodule
 
 PROJ_CXX_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
+EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -33,6 +34,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.14 2003/08/13 01:22:21 tan2 Exp $
+# $Id: Make.mm,v 1.15 2003/08/14 18:35:41 tan2 Exp $
 
 # End of file
