@@ -3,6 +3,7 @@ struct ADVECTION {
  
   float gamma;
   float timestep;
+  float diff_timestep;
   float fine_tune_dt;
   float dt_reduced;
   float fixed_timestep;

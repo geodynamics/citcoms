@@ -6,14 +6,14 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+
 #include "advection_diffusion.h"
+#include "parsing.h"
 
 extern int Emergency_stop;
 
-struct el { double gpt[9]; };
-
-static double *DTdot[NCS], *T1[NCS], *Tdot1[NCS], T_interior1;
-static double time0,time1,T_interior1;
+//struct el { double gpt[9]; };
+void set_diffusion_timestep(struct All_variables *E);
 
 /* ============================================
    Generic adv-diffusion for temperature field.
@@ -25,9 +25,35 @@ void PG_timestep_init(struct All_variables *E)
 { 
 
   E->advection.timesteps=0;
+  set_diffusion_timestep(E);
  
   return;
 }
+
+
+void set_diffusion_timestep(struct All_variables *E)
+{
+  float diff_timestep, ts;
+  int m, el, d;
+
+  float global_fmin();
+
+  diff_timestep = 1.0e8; 
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(el=1;el<=E->lmesh.nel;el++)  { 
+      for(d=1;d<=E->mesh.nsd;d++)    {
+	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
+	diff_timestep = min(diff_timestep,ts);
+      }
+    }
+
+  diff_timestep = global_fmin(E,diff_timestep);
+/*   diff_timestep = ((3==dims)? 0.125:0.25) * diff_timestep; */
+  E->advection.diff_timestep = 0.5 * diff_timestep;
+
+  return;
+}
+
 
 void PG_timestep_solve(struct All_variables *E)
 {
@@ -41,6 +67,8 @@ void PG_timestep_solve(struct All_variables *E)
   void temperatures_conform_bcs();
   double Tmaxd();
   int i,m,psc_pass,iredo;
+  double time0,time1,T_interior1;
+  double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
 
   E->monitor.solution_cycles++;
   E->advection.timesteps++;
@@ -193,7 +221,6 @@ void PG_timestep(struct All_variables *E)
     double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
     double CPU_time0(),time1,time0,time2;
 
-    static int loops_since_new_eta = 0;
     static int been_here = 0;
    
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
@@ -673,7 +700,6 @@ void std_timestep(E)
 
 { 
     static int been_here = 0;
-    static float diff_timestep,root3,root2;
     int i,d,n,nel,el,node,m;
 
     float global_fmin();
@@ -697,19 +723,7 @@ void std_timestep(E)
     }
 
     if (been_here == 0)  {
-      diff_timestep = 1.0e8; 
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for(el=1;el<=nel;el++)  { 
-	  for(d=1;d<=dims;d++)    {
-	    ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
-	    diff_timestep = min(diff_timestep,ts);
-	  }
-	}
-      diff_timestep = global_fmin(E,diff_timestep);
-
-      diff_timestep = 0.5*diff_timestep;
-
-/*      diff_timestep = ((3==dims)? 0.125:0.25) * diff_timestep;  */
+      set_diffusion_timestep(E);
     }
     
     adv_timestep = 1.0e8;
@@ -732,12 +746,13 @@ void std_timestep(E)
 
     adv_timestep = E->advection.dt_reduced * adv_timestep;         
 
-    adv_timestep = 1.0e-32+min(E->advection.fine_tune_dt*adv_timestep,diff_timestep);
+    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
+				 E->advection.diff_timestep);
     
     E->advection.timestep = global_fmin(E,adv_timestep);
 
-/*     if (E->parallel.me==0) */
-/*       fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,diff_timestep); */
+    if (E->parallel.me==0)
+      fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep);
 
     return; 
   }
