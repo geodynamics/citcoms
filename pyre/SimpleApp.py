@@ -7,6 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+
 from mpi.Application import Application
 import journal
 
@@ -100,8 +101,16 @@ class SimpleApp(Application):
             ]
 
 
+# main
+if __name__ == "__main__":
+
+    app = SimpleApp("citcoms")
+    app.main()
+
+
+
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.6 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.7 2003/11/28 22:14:55 tan2 Exp $"
 
 # End of file

@@ -127,7 +127,15 @@ class CoupledApp(SimpleApp):
 
 
 
+# main
+if __name__ == "__main__":
+
+    app = CoupledApp("citcoms")
+    app.main()
+
+
+
 # version
-__id__ = "$Id: CoupledApp.py,v 1.9 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.10 2003/11/28 22:14:55 tan2 Exp $"
 
 # End of file
