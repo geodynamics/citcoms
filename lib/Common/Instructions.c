@@ -12,9 +12,8 @@
 
 int Emergency_stop;
 
-void read_instructions(argc,argv)
-     int argc;
-     char **argv;
+void read_instructions(filename)
+     char *filename;
 {
     int get_process_identifier();
 
@@ -71,6 +70,7 @@ void read_instructions(argc,argv)
 
     if (E->parallel.me==0) start_time=CPU_time0();
     Emergency_stop = 0;
+
     signal(SIGINT,interuption);
     signal(SIGTERM,interuption);
 
@@ -81,7 +81,7 @@ void read_instructions(argc,argv)
        from startup files. (See Parsing.c).
        ==================================================  */
 
-    setup_parser(E,argc,argv);
+    setup_parser(E,filename);
 
     global_default_values(E); 
     read_initial_settings(E); 
@@ -137,8 +137,6 @@ void read_instructions(argc,argv)
     construct_shape_functions(E);
 
 /*    construct_c3x3matrix(E);       */  /* this matrix results from spherical geometry*/
-
-    if (E->parallel.me==0) start_time=CPU_time0();
 
     mass_matrix(E);
 

@@ -21,8 +21,6 @@ extern "C"
 PyObject * pyCitcomSRegional_copyright(PyObject *, PyObject *);
 
 
-
-// return1_test
 extern char pyCitcomSRegional_return1_test__name__[];
 extern char pyCitcomSRegional_return1_test__doc__[];
 extern "C"
@@ -35,10 +33,17 @@ extern "C"
 PyObject * pyCitcomSRegional_Citcom_Init(PyObject *, PyObject *);
 
 
+extern char pyCitcomSRegional_read_instructions__name__[];
+extern char pyCitcomSRegional_read_instructions__doc__[];
+extern "C"
+PyObject * pyCitcomSRegional_read_instructions(PyObject *, PyObject *);
+
+
+
 
 #endif
 
 // version
-// $Id: misc.h,v 1.2 2003/04/04 00:42:50 tan2 Exp $
+// $Id: misc.h,v 1.3 2003/04/05 23:51:35 tan2 Exp $
 
 // End of file

@@ -34,6 +34,12 @@ int main(argc,argv)
   double CPU_time0(),time,initial_time,start_time,avaimem();
     
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
+
+  if (argc < 2)   {
+    fprintf(stderr,"Usage: %s PARAMETERFILE\n", argv[0]);
+    exit(10);
+  }
+
   Citcom_Init();         /* allocate global E here */
   
   parallel_process_initilization(E,argc,argv);
@@ -41,7 +47,7 @@ int main(argc,argv)
   E->monitor.solution_cycles=0;
   
   start_time = time = CPU_time0();
-  read_instructions(argc,argv);
+  read_instructions(argv[1]);
 
   E->control.keep_going=1;
 

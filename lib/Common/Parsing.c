@@ -58,10 +58,9 @@ int VERBOSE = 0;
 int DESCRIBE = 0;
 int BEGINNER = 0;
 
-void setup_parser(E,ac,av)
+void setup_parser(E,filename)
      struct All_variables *E;
-     int ac; 
-     char **av;     
+     char *filename;     
 {
     void unique_copy_file();
     
@@ -76,17 +75,19 @@ void setup_parser(E,ac,av)
     /* for now, read one filename from the command line, we'll parse that ! */
     
 
-    if (ac < 2)   {
-	fprintf(stderr,"Usage: citcom PARAMETERFILE\n");
-	exit(10);
-    }
-  
-    if ((fp = fopen(av[1],"r")) == NULL)  {
-      fprintf(stderr,"(Parsing #1) File: %s is unreadable\n",av[1]);
+	// this section moved to main()
+/*     if (ac < 2)   { */
+/* 	fprintf(stderr,"Usage: citcom PARAMETERFILE\n"); */
+/* 	exit(10); */
+/*     } */
+ 
+
+    if ((fp = fopen(filename,"r")) == NULL)  {
+      fprintf(stderr,"(Parsing #1) File: %s is unreadable\n",filename);
       exit(11);
     }
 
-    unique_copy_file(E,av[1],"copy");
+    unique_copy_file(E,filename,"copy");
 
 
   /* now the parameter file is open, read into memory */
