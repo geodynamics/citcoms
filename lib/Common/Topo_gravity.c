@@ -25,7 +25,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     void get_surf_stress();
     void return_horiz_ave_f();
     int i,j,k,e,node,snode,m,nel2;
-    
+
     float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
     float *divv[NCS],*vorv[NCS];
     float *H,VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
@@ -34,7 +34,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct Shape_function GN;
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
-    
+
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int vpts=vpoints[dims];
     const int ppts=ppoints[dims];
@@ -100,7 +100,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
       get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
 
       velo_from_element(E,VV,m,e,sphere_key);
-	
+
       for(j=1;j<=vpts;j++)  {
 	  pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
           Vxyz[1][j] = 0.0;
@@ -119,11 +119,11 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
               tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
                      * E->N.vpt[GNVINDEX(i,j)];
          }
-	    
+
       for(j=1;j<=vpts;j++)   {
         for(i=1;i<=ends;i++)   {
           Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
-                      + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j]; 
+                      + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
           Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
               + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
  	      + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
@@ -218,19 +218,30 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
   /* return_horiz_ave_f(E,SZZ,H); */
 
    if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
-      get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
+     get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)       
+   /* assign stress to all the nodes */
+   for(m=1;m<=E->sphere.caps_per_proc;m++)
+     for (node=1;node<=E->lmesh.nno;node++) {
+       E->gstress[m][(node-1)*6+1] = SXX[m][node];
+       E->gstress[m][(node-1)*6+2] = SZZ[m][node];
+       E->gstress[m][(node-1)*6+3] = SYY[m][node];
+       E->gstress[m][(node-1)*6+4] = SXY[m][node];
+       E->gstress[m][(node-1)*6+5] = SXZ[m][node];
+       E->gstress[m][(node-1)*6+6] = SZY[m][node];
+     }
+
+   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(snode=1;snode<=E->lmesh.nsf;snode++)   {
         node = E->surf_node[m][snode];
         tpg[m][snode]  = -2*SZZ[m][node] + SZZ[m][node-1];
-        tpgb[m][snode] = 2*SZZ[m][node-E->lmesh.noz+1]-SZZ[m][node-E->lmesh.noz+2]; 
+        tpgb[m][snode] = 2*SZZ[m][node-E->lmesh.noz+1]-SZZ[m][node-E->lmesh.noz+2];
         tpg[m][snode]  = tpg[m][snode]*topo_scaling1;
         tpgb[m][snode]  = tpgb[m][snode]*topo_scaling2;
 
         divg[m][snode] = 2*divv[m][node]-divv[m][node-1];
         vort[m][snode] = 2*vorv[m][node]-vorv[m][node-1];
-        }
+     }
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)        {
     free((void *)SXX[m]);
@@ -244,8 +255,8 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     }
   free((void *)H);
 
-    return; 
-}      
+    return;
+}
 
 
 
@@ -253,19 +264,19 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
    ===================================================================  */
 
 /* ===================================================================
-   Consistent boundary flux method for stress ... Zhong,Gurnis,Hulbert 
+   Consistent boundary flux method for stress ... Zhong,Gurnis,Hulbert
 
    Solve for the stress as the code defined it internally, rather than
    what was intended to be solved. This is more appropriate.
 
-   Note also that the routine is dependent on the method 
+   Note also that the routine is dependent on the method
    used to solve for the velocity in the first place.
    ===================================================================  */
 
 void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*/
     struct All_variables *E;
     float **H,**HB;
-   
+
 {
 /*     void get_elt_k(); */
 /*     void get_elt_g(); */
@@ -276,10 +287,10 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 
 /*     int a,address,el,elb,els,node,nodeb,nodes,i,j,k,l,m,n,count; */
 /*     int nodel,nodem,nodesl,nodesm,nnsf,nel2; */
-    
+
 /*     struct Shape_function1 GM,GMb; */
 /*     struct Shape_function1_dA dGammax,dGammabx; */
- 
+
 /*     float *eltTU,*eltTL,*SU[NCS],*SL[NCS],*RU[NCS],*RL[NCS]; */
 /*     float VV[4][9]; */
 
@@ -289,7 +300,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*     higher_precision eltg[24][1],eltgb[24][1]; */
 
 /*     const int dims=E->mesh.nsd; */
-/*     const int Tsize=5;   */ /* maximum values, applicable to 3d, harmless for 2d */ 
+/*     const int Tsize=5;   */ /* maximum values, applicable to 3d, harmless for 2d */
 /*     const int Ssize=4; */
 /*     const int ends=enodes[dims]; */
 /*     const int noz=E->lmesh.noz; */
@@ -301,9 +312,9 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*     const int ely = E->lmesh.ely; */
 /*     const int lev=E->mesh.levmax; */
 /*     const int sphere_key=1; */
- 
+
 /*     const int lnsf=E->lmesh.nsf; */
- 
+
 /*     eltTU = (float *)malloc((1+Tsize)*sizeof(float));  */
 /*     eltTL = (float *)malloc((1+Tsize)*sizeof(float)); */
 
@@ -346,20 +357,20 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*       get_elt_f(E,elb,eltfb,0,j); */
 /*       get_elt_g(E,el,eltg,lev,j); */
 /*       get_elt_g(E,elb,eltgb,lev,j); */
-	   
+
 /*       for(m=0;m<dims*ends;m++) { */
 /*             res[m]  = eltf[m]  - E->elt_del[lev][j][el].g[m][0]  * E->P[j][el]; */
 /*             resb[m] = eltfb[m] - E->elt_del[lev][j][elb].g[m][0]* E->P[j][elb]; */
 /*             } */
-	   
+
 /*       for(m=0;m<dims*ends;m++) */
 /*          for(l=0;l<dims*ends;l++) { */
 /*               res[m]  -= eltk[ends*dims*m+l]  * eu[l]; */
 /*               resb[m] -= eltkb[ends*dims*m+l] * eub[l]; */
 /*               } */
-	   
+
 	    /* Put relevant (vertical & surface) parts of element residual into surface residual */
-		
+
 /*       for(m=1;m<=ends;m++) {    */  /* for bottom elements */
 /*          switch (m) { */
 /*              case 2: */
@@ -397,16 +408,16 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*              RU[j][nodes] += res[(m-1)*dims+1];   */
 /*          }  */     /* end for m */
 /*       } */
-    
+
     /* calculate the LHS */
- 
+
 /*     for(els=1;els<=E->lmesh.snel;els++) { */
 /*        el = E->surf_element[j][els]; */
 /*        elb = el + elz-1; */
 
 /*        get_global_1d_shape_fn(E,el,&GM,&dGammax,0,j); */
 /*        get_global_1d_shape_fn(E,elb,&GMb,&dGammabx,0,j); */
-   
+
 /*        for(m=1;m<=onedv;m++)        { */
 /*           eltTU[m-1] = 0.0; */
 /*           eltTL[m-1] = 0.0;  */
@@ -450,7 +461,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*         for(i=1;i<=E->lmesh.nsf;i++) */
 /*           H[j][i] = -RU[j][i]/SU[j][i]; */
 /*       } */
-        
+
 /*     if (E->parallel.me_loc[3]==E->parallel.nprocz-1)   {  */   /* for bottom topo */
 /*       exchange_snode_f(E,RL,SL,E->mesh.levmax); */
 /*       for (j=1;j<=E->sphere.caps_per_proc;j++) */
