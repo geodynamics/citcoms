@@ -23,6 +23,13 @@ class CoarseGridExchanger(Exchanger):
         return
 
 
+    def createDataArrays(self):
+        self.module.createDataArrays(self.exchanger)
+        return
+
+    def deleteDataArrays(self):
+        self.module.deleteDataArrays(self.exchanger)
+        return    
 
     def findBoundary(self):
         # receive boundary from FGE
@@ -84,6 +91,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.7 2003/09/18 22:03:48 ces74 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
 
 # End of file

@@ -73,9 +73,10 @@ void CoarseGridExchanger::distribute() {
 	local_receiveVelocities();
       MPI_Barrier(intercomm);
     }
-    else
+    else {
+      std::cout << "in CoarseGridExchanger::distribute" << std::endl;
       std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
-
+    }
     return;
 }
 
@@ -141,6 +142,7 @@ void CoarseGridExchanger::receiveBoundary() {
  	tag ++;
 
 	// test 
+	std::cout << "in CoarseGridExchanger::receiveBoundary" << std::endl;
 	std::cout << "Grid Bounds transferred to Coarse Grid" << std::endl;
 	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
 	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
@@ -162,6 +164,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.10 2003/09/18 22:03:48 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.11 2003/09/19 06:32:42 ces74 Exp $
 
 // End of file

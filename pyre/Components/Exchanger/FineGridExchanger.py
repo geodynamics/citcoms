@@ -29,9 +29,17 @@ class FineGridExchanger(Exchanger):
                                      solver.remoteLeader,
                                      solver.fine_E
                                      )
+
         return
 
 
+    def createDataArrays(self):
+        self.module.createDataArrays(self.exchanger)
+        return
+
+    def deleteDataArrays(self):
+        self.module.deleteDataArrays(self.exchanger)
+        return    
 
     def findBoundary(self):
         self.module.createBoundary(self.exchanger)
@@ -105,6 +113,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.7 2003/09/18 22:03:48 ces74 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
 
 # End of file

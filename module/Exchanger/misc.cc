@@ -134,20 +134,34 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
     E->sphere.ri=0.0;
 
     const int n = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+    for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=1; i<=E->mesh.dof; i++) {
+	  // Don't forget to delete these later
 	    E->X[E->mesh.levmax][m][i] = new double[n+1];
+	    E->V[m][1] = new float[n+1];
+	    E->V[m][2] = new float[n+1];
+	    E->V[m][3] = new float[n+1];
+	}
+	E->T[m] = new double[n+1];
     }
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int k=1;k<=E->lmesh.noy;k++)
-	    for(int j=1;j<=E->lmesh.nox;j++)
-		for(int i=1;i<=E->lmesh.noz;i++)  {
-		    int node = i + (j-1)*E->lmesh.noz
+        for(int k=1;k<=E->lmesh.noy;k++)
+ 	  for(int j=1;j<=E->lmesh.nox;j++) 
+	    for(int i=1;i<=E->lmesh.noz;i++)  {
+	      int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 		    E->X[E->mesh.levmax][m][1][node] = j-1;
 		    E->X[E->mesh.levmax][m][2][node] = k-1;
 		    E->X[E->mesh.levmax][m][3][node] = i-1;
+		    
+		    E->T[m][node] = E->X[E->mesh.levmax][m][1][node]
+		      + E->X[E->mesh.levmax][m][2][node]
+		      + E->X[E->mesh.levmax][m][3][node];
+
+		    E->V[m][1][node] = E->T[m][node];
+		    E->V[m][2][node] = 2.0*E->T[m][node];
+		    E->V[m][3][node] = 3.0*E->T[m][node];
 
 // 		    std::cout << "Coarse Grid " <<  node << " "
 //  			      << E->X[E->mesh.levmax][m][1][node] << " "
@@ -161,6 +175,6 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 }
 
 // version
-// $Id: misc.cc,v 1.5 2003/09/18 22:03:48 ces74 Exp $
+// $Id: misc.cc,v 1.6 2003/09/19 06:32:42 ces74 Exp $
 
 // End of file

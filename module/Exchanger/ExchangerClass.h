@@ -22,7 +22,10 @@ struct Data {
     double *T, *P;       // temperature and pressure
 };
 
-
+// Data *outgoing;
+// Data *incoming;
+// Data *loutgoing;
+// Data *lincoming;
 
 class Exchanger {
   
@@ -39,6 +42,8 @@ public:
 
 //     virtual void send(int& size);
 //     virtual void receive(const int size);
+    void createDataArrays();
+    void deleteDataArrays();
     void sendTemperature();
     void receiveTemperature();
     void sendVelocities();
@@ -61,6 +66,9 @@ public:
     virtual void mapBoundary() = 0;
                                      // create mapping from Boundary object
                                      // to global id array
+//     struct Data *incoming;
+//     struct Data *outgoing;
+
 
 protected:
     const MPI_Comm comm;
@@ -74,10 +82,6 @@ protected:
 
     Boundary *boundary;
 
-    Data outgoing;
-    Data incoming;
-    Data loutgoing;
-    Data lincoming;
 
     int rank;
 
@@ -93,7 +97,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.11 2003/09/18 22:37:43 ces74 Exp $
+// $Id: ExchangerClass.h,v 1.12 2003/09/19 06:32:42 ces74 Exp $
 
 // End of file
 

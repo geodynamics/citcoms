@@ -57,8 +57,8 @@ class TestExchanger(Application):
         print exchanger.name, ": gather worked"
 
         # testing initTemperature
-##        exchanger.initTemperature()
-##        print exchanger.name, ": temperature initialized."
+        exchanger.initTemperature()
+        print exchanger.name, ": temperature transferred"
         
         try:
             # success if exchanger is a FGE
@@ -80,8 +80,8 @@ class TestExchanger(Application):
             time = exchanger.stableTimestep(dt)
             print "%s - step %d: %f" % (exchanger.name, step, time)
 
-        return
 
+        return
 
 
     def findLayout(self, layout):
@@ -148,6 +148,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.7 2003/09/18 22:03:48 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
 
 # End of file

@@ -50,7 +50,7 @@ class Exchanger(Component):
     def initTemperature(self):
         raise NotImplementedError
         return
-
+    
 
 
     def NewStep(self):
@@ -89,6 +89,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.7 2003/09/11 21:33:52 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
 
 # End of file

@@ -8,7 +8,7 @@
 #include <iostream>
 #include "global_defs.h"
 #include "Boundary.h"
-#include "ExchangerClass.h"
+// #include "ExchangerClass.h"
 
 //using std::auto_ptr;
 
@@ -62,6 +62,18 @@ Boundary::~Boundary() {
 
     delete [] bid2proc;
     delete [] bid2gid;
+
+    // memory allocated to Data structures
+//     delete outgoing->T;
+//     delete incoming->T;
+//     delete outgoing->v[0];
+//     delete outgoing->v[1];
+//     delete outgoing->v[2];
+//     delete incoming->v[0];
+//     delete incoming->v[1];
+//     delete incoming->v[2];
+//     delete loutgoing;
+//     delete lincoming;
 };
 
 
@@ -92,7 +104,7 @@ void Boundary::init(const All_variables *E) {
     std::cout << "r    = " << ri << "   " << ro  << std::endl;
 
 
-        //  for two YOZ planes
+    //  for two YOZ planes
 
     if (E->parallel.me_loc[1]==0 || E->parallel.me_loc[1]==E->parallel.nprocx-1)        for (int m=1;m<=E->sphere.caps_per_proc;m++)
             for(int j=1;j<=E->lmesh.noy;j++)
@@ -233,6 +245,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.9 2003/09/18 22:03:48 ces74 Exp $
+// $Id: Boundary.cc,v 1.10 2003/09/19 06:32:42 ces74 Exp $
 
 // End of file
