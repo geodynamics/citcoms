@@ -29,6 +29,7 @@ update: clean
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
 	BC.py \
+	CitcomComponent.py \
 	Const.py \
 	IC.py \
 	Parallel.py \
@@ -40,6 +41,6 @@ EXPORT_PYTHON_MODULES = \
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.3 2003/07/15 21:53:38 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/07/24 17:46:46 tan2 Exp $
 
 # End of file

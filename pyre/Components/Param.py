@@ -7,25 +7,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from CitcomComponent import CitcomComponent
 
-class Param(Component):
-
-
-    def __init__(self):
-        Component.__init__(self, "param", "param")
-        return
+class Param(CitcomComponent):
 
 
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-	Regional.Param_set_properties(self.inventory)
-        return
-
-
-
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
 
         import pyre.properties
@@ -83,6 +70,6 @@ class Param(Component):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.4 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.5 2003/07/24 17:46:46 tan2 Exp $"
 
 # End of file

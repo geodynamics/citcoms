@@ -9,15 +9,15 @@
 
 
 
-def imcompressibleNewtonian():
+def imcompressibleNewtonian(CitcomModule):
     from Imcompressible import ImcompressibleNewtonian
-    return ImcompressibleNewtonian('imcomp-newtonian')
+    return ImcompressibleNewtonian('imcomp-newtonian', 'vsolver', CitcomModule)
 
 
 
-def imcompressibleNonNewtonian():
+def imcompressibleNonNewtonian(CitcomModule):
     from Imcompressible import ImcompressibleNonNewtonian
-    return ImcompressibleNonNewtonian('imcomp-non-newtonian')
+    return ImcompressibleNonNewtonian('imcomp-non-newtonian', 'vsolver', CitcomModule)
 
 
 
@@ -29,6 +29,6 @@ def imcompressibleNonNewtonian():
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.3 2003/06/23 20:54:13 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.4 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file

@@ -7,23 +7,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from CitcomS.Components.CitcomComponent import CitcomComponent
+
+class Stokes_solver(CitcomComponent):
 
 
-class Stokes_solver(Component):
+    def __init__(self, name, facility, CitcomModule):
+        # bind component method to facility method
+        CitcomModule.vsolver_set_properties = CitcomModule.Stokes_solver_set_properties
 
-
-    def __init__(self, name, facility="vsolver"):
-        Component.__init__(self, name, facility)
+        CitcomComponent.__init__(self, name, facility, CitcomModule)
         return
-
-
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-        Regional.Stokes_solver_set_properties(self.inventory)
-        return
-
 
 
     def run(self):
@@ -41,14 +35,14 @@ class Stokes_solver(Component):
 
 
     def init(self, parent):
-        import CitcomS.Regional as Regional
         if self.inventory.Solver == "cgrad":
-            Regional.set_cg_defaults()
+            self.CitcomModule.set_cg_defaults()
         elif self.inventory.Solver == "multigrid":
-            Regional.set_mg_defaults()
+            self.CitcomModule.set_mg_defaults()
         elif self.inventory.Solver == "multigrid-el":
-            Regional.set_mg_el_defaults()
+            self.CitcomModule.set_mg_el_defaults()
 	return
+
 
 
     def fini(self):
@@ -72,7 +66,7 @@ class Stokes_solver(Component):
 
 
 
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
         import pyre.properties as prop
 
@@ -95,6 +89,6 @@ class Stokes_solver(Component):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.9 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.10 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file

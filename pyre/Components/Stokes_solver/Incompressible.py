@@ -8,27 +8,26 @@
 #
 
 from Stokes_solver import Stokes_solver
-import CitcomS.Regional as Regional
 
 
 class ImcompressibleNewtonian(Stokes_solver):
 
 
     def _form_RHS(self):
-	Regional.velocities_conform_bcs()
-	Regional.assemble_forces()
+	self.CitcomModule.velocities_conform_bcs()
+	self.CitcomModule.assemble_forces()
 	return
 
 
     def _form_LHS(self):
-	Regional.get_system_viscosity()
-	Regional.construct_stiffness_B_matrix()
+	self.CitcomModule.get_system_viscosity()
+	self.CitcomModule.construct_stiffness_B_matrix()
 	return
 
 
     def _solve(self):
-	return Regional.solve_constrained_flow_iterative()
-
+	misfit = self.CitcomModule.solve_constrained_flow_iterative()
+        return misfit
 
 
 
@@ -46,11 +45,11 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 	    self._form_LHS()
 	    self.viscosity_misfit = self._solve()
 
-	    Regional.general_stokes_solver_update_velo()
-	    self.Udot_mag = Regional.general_stokes_solver_Unorm()
-	    self.dUdot_mag = Regional.general_stokes_solver_Udotnorm()
+	    self.CitcomModule.general_stokes_solver_update_velo()
+	    self.Udot_mag = self.CitcomModule.general_stokes_solver_Unorm()
+	    self.dUdot_mag = self.CitcomModule.general_stokes_solver_Udotnorm()
 
-	    Regional.general_stokes_solver_log(self.Udot_mag, self.dUdot_mag,
+	    self.CitcomModule.general_stokes_solver_log(self.Udot_mag, self.dUdot_mag,
 					       self.count)
 
 	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
@@ -63,7 +62,7 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 
     def _myinit(self):
 	# allocate and initialize memory here
-	Regional.general_stokes_solver_init()
+	self.CitcomModule.general_stokes_solver_init()
 
 	self.Udot_mag = 0
 	self.dUdot_mag = 0
@@ -74,7 +73,7 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 
     def _myfini(self):
 	# free memory here
-	Regional.general_stokes_solver_fini()
+	self.CitcomModule.general_stokes_solver_fini()
 	return
 
 
@@ -85,6 +84,6 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.6 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.7 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file

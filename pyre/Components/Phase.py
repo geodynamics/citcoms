@@ -7,25 +7,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from CitcomComponent import CitcomComponent
 
-class Phase(Component):
-
-
-    def __init__(self):
-        Component.__init__(self, "phase", "phase")
-        return
+class Phase(CitcomComponent):
 
 
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-	Regional.Phase_set_properties(self.inventory)
-        return
-
-
-
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
 
         import pyre.properties
@@ -50,6 +37,6 @@ class Phase(Component):
             ]
 
 # version
-__id__ = "$Id: Phase.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
+__id__ = "$Id: Phase.py,v 1.4 2003/07/24 17:46:46 tan2 Exp $"
 
 # End of file

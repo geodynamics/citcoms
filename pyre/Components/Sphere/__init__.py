@@ -9,13 +9,13 @@
 
 
 
-def regionalSphere():
+def regionalSphere(CitcomModule):
     from RegionalSphere import RegionalSphere
-    return RegionalSphere('regional-sphere')
+    return RegionalSphere('regional-sphere', 'mesher', CitcomModule)
 
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.1 2003/07/15 21:50:30 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.2 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file

@@ -8,7 +8,7 @@
 #
 
 from mpi.Application import Application
-import CitcomS.Regional as Regional
+import CitcomS.Regional as CitcomModule
 import journal
 
 
@@ -19,17 +19,17 @@ class RegionalApp(Application):
     def run(self):
 	journal.info("staging").log("setup MPI")
         import mpi
-        Regional.citcom_init(mpi.world().handle())
+        CitcomModule.citcom_init(mpi.world().handle())
 
 	self.rank = mpi.world().rank
-	self.start_time = Regional.CPU_time()
+	self.start_time = CitcomModule.CPU_time()
 	print "my rank is ", self.rank
 
         self._setProperties()
         self.prefix = self.inventory.param.inventory.datafile
 
         if self.inventory.param.inventory.verbose:
-            Regional.open_info_file()
+            CitcomModule.open_info_file()
 
         mesher = self.inventory.mesher
         mesher.init(self)
@@ -40,28 +40,27 @@ class RegionalApp(Application):
         tsolver = self.inventory.tsolver
         tsolver.init(self)
 
-        mesher.run()
+        #mesher.run()
 
         return
 
 
-    def __init__(self, inputfile):
-        Application.__init__(self, "citcomsregional")
-	self.filename = inputfile
-        self.total_time = 0
-        self.cycles = 0
-        self.keep_going = True
-        self.Emergency_stop = False
-        self.start_time = 0.0
+    def __init__(self):
+        Application.__init__(self, "regional-citcoms")
+        #self.total_time = 0
+        #self.cycles = 0
+        #self.keep_going = True
 
         return
+
 
     def init(self):
         return
 
+
     #def fini(self):
-	#self.total_time = Regional.CPU_time() - self.start_time
-	#Regional.finalize()
+	#self.total_time = CitcomModule.CPU_time() - self.start_time
+	#CitcomModule.finalize()
 	#Application.fini()
 	#return
 
@@ -82,17 +81,19 @@ class RegionalApp(Application):
 
 
     def _setProperties(self):
-        self.inventory.mesher.setProperties()
-        self.inventory.tsolver.setProperties()
-        self.inventory.vsolver.setProperties()
+	inv = self.inventory
 
-        self.inventory.bc.setProperties()
-        self.inventory.const.setProperties()
-        self.inventory.ic.setProperties()
-        self.inventory.parallel.setProperties()
-        self.inventory.param.setProperties()
-        self.inventory.phase.setProperties()
-        self.inventory.visc.setProperties()
+        inv.mesher.setProperties(CitcomModule.mesher_set_properties)
+        inv.tsolver.setProperties(CitcomModule.tsolver_set_properties)
+        inv.vsolver.setProperties(CitcomModule.vsolver_set_properties)
+
+        inv.bc.setProperties(CitcomModule.BC_set_properties)
+        inv.const.setProperties(CitcomModule.Const_set_properties)
+        inv.ic.setProperties(CitcomModule.IC_set_properties)
+        inv.parallel.setProperties(CitcomModule.Parallel_set_properties)
+        inv.param.setProperties(CitcomModule.Param_set_properties)
+        inv.phase.setProperties(CitcomModule.Phase_set_properties)
+        inv.visc.setProperties(CitcomModule.Visc_set_properties)
 
         return
 
@@ -122,18 +123,24 @@ class RegionalApp(Application):
         from CitcomS.Components.Visc import Visc
 
         inventory = [
-            Mesher("mesher", CitcomS.Sphere.regionalSphere()),
-            VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
-            TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv()),
+            Mesher("mesher", CitcomS.Sphere.regionalSphere(CitcomModule)),
+            VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian(CitcomModule)),
+            TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv(CitcomModule)),
 
-            pyre.facilities.facility("bc", default=BC()),
-            pyre.facilities.facility("const", default=Const()),
-            pyre.facilities.facility("ic", default=IC()),
-            #pyre.facilities.facility("mesher", default=Mesher(1)),
-	    pyre.facilities.facility("parallel", default=Parallel()),
-            pyre.facilities.facility("param", default=Param()),
-            pyre.facilities.facility("phase", default=Phase()),
-            pyre.facilities.facility("visc", default=Visc()),
+            pyre.facilities.facility("bc",
+				     default=BC("bc", "bc", CitcomModule)),
+            pyre.facilities.facility("const",
+				     default=Const("const", "const", CitcomModule)),
+            pyre.facilities.facility("ic",
+				     default=IC("ic", "ic", CitcomModule)),
+	    pyre.facilities.facility("parallel",
+				     default=Parallel("parallel", "parallel", CitcomModule)),
+            pyre.facilities.facility("param",
+				     default=Param("param", "param", CitcomModule)),
+            pyre.facilities.facility("phase",
+				     default=Phase("phase", "phase", CitcomModule)),
+            pyre.facilities.facility("visc",
+				     default=Visc("visc", "visc", CitcomModule)),
 
             ]
 
@@ -143,10 +150,10 @@ class RegionalApp(Application):
 	Application.run(self)
 
         # read in parameters
-        Regional.read_instructions(self.filename)
+        CitcomModule.read_instructions(self.filename)
 
 	#if (Control.post_proccessing):
-	#    Regional.post_processing()
+	#    CitcomModule.post_processing()
 	#    return
 
 	# decide which stokes solver to use
@@ -171,13 +178,13 @@ class RegionalApp(Application):
 	    print 'cycles = ', self.cycles
 	    #tsolver.run()
 	    #vsolver.run()
-	    total_time = Regional.CPU_time() - self.start_time
+	    total_time = CitcomModule.CPU_time() - self.start_time
 
             #self.output()
 	return
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.18 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.19 2003/07/24 17:46:46 tan2 Exp $"
 
 # End of file

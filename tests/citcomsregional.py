@@ -19,11 +19,11 @@ if __name__ == "__main__":
     journal.debug("staging").activate()
 
     import sys
-    app = RegionalApp(sys.argv[1])
+    app = RegionalApp()
     app.main()
 
 
 # version
-__id__ = "$Id: citcomsregional.py,v 1.4 2003/06/13 17:11:32 tan2 Exp $"
+__id__ = "$Id: citcomsregional.py,v 1.5 2003/07/24 17:46:47 tan2 Exp $"
 
 #  End of file 

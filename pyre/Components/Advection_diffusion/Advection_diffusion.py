@@ -7,22 +7,20 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
-import CitcomS.Regional as Regional
-
-class Advection_diffusion(Component):
+from CitcomS.Components.CitcomComponent import CitcomComponent
 
 
-    def __init__(self,name,facility="tsolver"):
-        Component.__init__(self, name, facility)
+class Advection_diffusion(CitcomComponent):
+
+
+    def __init__(self, name, facility, CitcomModule):
+        # bind component method to facility method
+        CitcomModule.tsolver_set_properties = CitcomModule.Advection_diffusion_set_properties
+
+        CitcomComponent.__init__(self, name, facility, CitcomModule)
         return
 
 
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-        Regional.Advection_diffusion_set_properties(self.inventory)
-        return
 
 
 
@@ -36,8 +34,8 @@ class Advection_diffusion(Component):
 
 
     def init(self,parent):
-        Regional.set_convection_defaults()
-        Regional.PG_timestep_init()
+        self.CitcomModule.set_convection_defaults()
+        self.CitcomModule.PG_timestep_init()
 	return
 
 
@@ -45,7 +43,7 @@ class Advection_diffusion(Component):
 	return
 
     def _solve(self):
-        Regional.PG_timestep_solve()
+        self.CitcomModule.PG_timestep_solve()
 	return
 
 
@@ -53,7 +51,7 @@ class Advection_diffusion(Component):
 	return
 
 
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
         import pyre.properties as prop
 
@@ -74,6 +72,6 @@ class Advection_diffusion(Component):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.8 2003/07/24 00:04:04 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.9 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file

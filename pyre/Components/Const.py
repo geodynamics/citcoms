@@ -7,26 +7,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from CitcomComponent import CitcomComponent
 
 
-class Const(Component):
+class Const(CitcomComponent):
 
 
-    def __init__(self):
-        Component.__init__(self, "const", "const")
-        return
-
-
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-	Regional.Const_set_properties(self.inventory)
-        return
-
-
-
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
 
         import pyre.properties
@@ -73,6 +60,6 @@ class Const(Component):
 
 
 # version
-__id__ = "$Id: Const.py,v 1.4 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.5 2003/07/24 17:46:46 tan2 Exp $"
 
 # End of file

@@ -7,25 +7,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from CitcomComponent import CitcomComponent
 
-class Visc(Component):
-
-
-    def __init__(self):
-        Component.__init__(self, "visc", "visc")
-        return
+class Visc(CitcomComponent):
 
 
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-	Regional.Visc_set_properties(self.inventory)
-        return
-
-
-
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
 
         import pyre.properties
@@ -62,6 +49,6 @@ class Visc(Component):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.4 2003/07/23 05:29:58 ces74 Exp $"
+__id__ = "$Id: Visc.py,v 1.5 2003/07/24 17:46:46 tan2 Exp $"
 
 # End of file

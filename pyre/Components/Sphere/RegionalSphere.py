@@ -7,51 +7,46 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
-import CitcomS.Regional as Regional
+from CitcomS.Components.CitcomComponent import CitcomComponent
+
+class RegionalSphere(CitcomComponent):
 
 
-class RegionalSphere(Component):
+    def __init__(self, name, facility, CitcomModule):
+        # bind component method to facility method
+        CitcomModule.mesher_set_properties = CitcomModule.RegionalSphere_set_properties
 
-
-    def __init__(self, name, facility="mesher"):
-        Component.__init__(self, name, facility)
+        CitcomComponent.__init__(self, name, facility, CitcomModule)
         return
 
-
-
-    def setProperties(self):
-        import CitcomS.Regional as Regional
-        Regional.RegionalSphere_set_properties(self.inventory)
-        return
 
 
 
     def run(self):
-        start_time = Regional.CPU_time()
-        #Regional.mesher_setup()
+        start_time = self.CitcomModule.CPU_time()
+        self.CitcomModule.mesher_setup()
 
         import mpi
         if not mpi.world().rank:
             print "initialization time = %f" % \
-                  (Regional.CPU_time() - start_time)
+                  (self.CitcomModule.CPU_time() - start_time)
 
 	return
 
 
 
     def init(self, parent):
-        Regional.set_3dsphere_defaults()
+        self.CitcomModule.set_3dsphere_defaults()
         return
 
 
 
-    #def fini(self):
-	#return
+    def fini(self):
+	return
 
 
 
-    class Inventory(Component.Inventory):
+    class Inventory(CitcomComponent.Inventory):
 
         import pyre.properties
         from math import pi
@@ -61,13 +56,13 @@ class RegionalSphere(Component):
             pyre.properties.bool("coor", False),
             pyre.properties.str("coor_file", "coor.dat"),
 
-            pyre.properties.int("nodex", 17),
-            pyre.properties.int("nodey", 17),
+            pyre.properties.int("nodex", 9),
+            pyre.properties.int("nodey", 9),
             pyre.properties.int("nodez", 9),
             pyre.properties.int("mgunitx", 8),
             pyre.properties.int("mgunity", 8),
             pyre.properties.int("mgunitz", 8),
-            pyre.properties.int("levels", 3),
+            pyre.properties.int("levels", 1),
 
             pyre.properties.float("radius_outer", 1.0),
             pyre.properties.float("radius_inner", 0.55),
@@ -81,6 +76,6 @@ class RegionalSphere(Component):
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.2 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.3 2003/07/24 17:46:47 tan2 Exp $"
 
 # End of file
