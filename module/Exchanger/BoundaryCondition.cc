@@ -205,7 +205,8 @@ BoundaryConditionSource::BoundaryConditionSource(const Source& s,
     E(e),
     source(s),
     vbc(source.size()),
-    tbc(source.size())
+    tbc(source.size()),
+    fbc(source.size())
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
@@ -229,8 +230,18 @@ void BoundaryConditionSource::sendTandV()
     source.sendArray2D(tbc, vbc);
 }
 
+void BoundaryConditionSource::sendTraction()
+{
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in BoundaryConditionSource::sendForce" << journal::end;
 
+    source.interpolateF(fbc, E);
+    //fbc.print("FBC");
+
+    source.sendArray2D(fbc);
+}
 // version
-// $Id: BoundaryCondition.cc,v 1.5 2003/11/21 23:15:13 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.6 2003/11/23 18:25:17 ces74 Exp $
 
 // End of file
