@@ -21,11 +21,11 @@ class RegionalApp(Application):
 
     def run(self):
 	Application.run(self)
-	
+
 	#if (Control.post_proccessing):
 	#    Regional.post_processing()
 	#    return
-	
+
 	# decide which stokes solver to use
 	import CitcomS.Stokes_solver
 	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
@@ -35,26 +35,12 @@ class RegionalApp(Application):
 	import CitcomS.Advection_diffusion.Advection_diffusion as Advection_diffusion
 	tsolver = Advection_diffusion.PG_timestep('temp')
 	tsolver.init()
-	
+
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
 	# output phase
-	prefix = 'test'
-	import mpi
-	self.rank = mpi.world().rank
-	
-	import CitcomS.Output as Output
-	output_coord = Output.outputCoord(prefix, self.rank)
-	output_coord.init()
-	output_coord.write()
-	output_coord.close()
-	
-	output_velo = Output.outputVelo(prefix, self.rank, self.cycles)
-	output_velo.init()
-	output_velo.write()
-	output_velo.close()
-	
+        self.output()
 
 	while (self.keep_going and not self.Emergency_stop):
 	    self.cycles += 1
@@ -62,9 +48,9 @@ class RegionalApp(Application):
 	    vsolver.run()
 	    total_time = Regional.CPU_time() - self.start_time
 
-
+            self.output()
 	return
-	    
+
 
     def __init__(self, inputfile):
         Application.__init__(self, "citcomsregional")
@@ -74,7 +60,7 @@ class RegionalApp(Application):
         self.keep_going = True
         self.Emergency_stop = False
         self.start_time=0.0
-        
+
 	print self.filename
         return
 
@@ -86,8 +72,12 @@ class RegionalApp(Application):
         Regional.Citcom_Init(mpi.mpi.world)
 	self.start_time = Regional.CPU_time()
         print self.start_time
+
+        #testing...
+	self.prefix = 'test'
+	self.rank = mpi.world().rank
 	return
- 
+
 
     def postInit(self):
         import sys
@@ -95,7 +85,7 @@ class RegionalApp(Application):
         #filename = self.facility.infile
         Regional.read_instructions(self.filename)
 	return
-    
+
 
     def fini(self):
 	self.total_time = Regional.CPU_time() - self.start_time
@@ -104,15 +94,32 @@ class RegionalApp(Application):
 	return
 
 
+    def output(self):
+        import CitcomS.Output as Output
+        output_coord = Output.outputCoord(self.prefix, self.rank)
+	output_coord.go()
+
+	output_velo = Output.outputVelo(self.prefix, self.rank, self.cycles)
+        output_velo.go()
+
+	output_visc = Output.outputVisc(self.prefix, self.rank, self.cycles)
+        output_visc.go()
+
+        return
+
+
+
     class Facilities(Application.Facilities):
 
         import pyre.facilities
+	import CitcomS
         from EarthModelConstants import EarthModelConstants
         from EarthModelPhase import EarthModelPhase
         from EarthModelVisc import EarthModelVisc
         from SimulationGrid import SimulationGrid
-        
+
         __facilities__ = Application.Facilities.__facilities__ + (
+            #pyre.facilities.facility("CitcomS", default=CitcomS.RegionalApp()),
             pyre.facilities.facility("earthModel", EarthModelConstants()),
             pyre.facilities.facility("earthModel_phase", EarthModelPhase()),
             pyre.facilities.facility("earthModel_visc", EarthModelVisc()),
@@ -130,18 +137,18 @@ class RegionalApp(Application):
     def test(self):
         import mpi
         import CitcomS.RadiusDepth
-        
+
         world = mpi.world()
         rank = world.rank
         size = world.size
-        
+
         print "Hello from [%d/%d]" % (world.rank, world.size)
 
         earthProps = self.facilities.earthModel.properties
         earthGrid = self.facilities.earthModel_grid.properties
-        earthPhase = self.facilities.earthModel_phase.properties        
+        earthPhase = self.facilities.earthModel_phase.properties
         earthVisc = self.facilities.earthModel_visc.properties
-        
+
         print "%02d: EarthModelConstants:" % rank
         print "%02d:      EarthModel.radius: %s" % (rank, earthProps.radius)
         print "%02d:      EarthModel.ref_density: %s" % (rank, earthProps.ref_density)
@@ -176,11 +183,11 @@ class RegionalApp(Application):
         print "%02d:      EarthModel.visc.VISC_UPDATE: %s" % (rank, earthVisc.VISC_UPDATE)
         print "%02d:      EarthModel.visc.viscE: %s" % (rank, earthVisc.viscE)
         print "%02d:      EarthModel.visc.viscT: %s" % (rank, earthVisc.viscT)
-        print "%02d:      EarthModel.visc.visc0: %s" % (rank, earthVisc.visc0)        
+        print "%02d:      EarthModel.visc.visc0: %s" % (rank, earthVisc.visc0)
         return
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.6 2003/05/22 18:20:21 ces74 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.7 2003/05/23 02:41:43 tan2 Exp $"
 
-# End of file 
+# End of file

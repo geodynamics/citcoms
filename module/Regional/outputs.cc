@@ -121,15 +121,11 @@ char pyRegional_output_visc_prepare__name__[] = "output_visc_prepare";
 
 PyObject * pyRegional_output_visc_prepare(PyObject *self, PyObject *args)
 {
+    float **pt;
     PyObject *obj;
-    FILE *fp;
-    int step;
 
-//     if (!PyArg_ParseTuple(args, "Oi", &obj, &step))
-//         return NULL;
-
-//     fp = static_cast<FILE*> (PyCObject_AsVoidPtr(obj));
-//     output_visc_prepare(E, fp, step);
+    pt = output_visc_prepare(E);
+    obj = PyCObject_FromVoidPtr((void *)pt, NULL);
 
     return Py_BuildValue("O", obj);
 }
@@ -144,7 +140,7 @@ PyObject * pyRegional_output_visc(PyObject *self, PyObject *args)
     FILE *fp;
     float **visc;
 
-    if (!PyArg_ParseTuple(args, "O0", &obj1, &obj2))
+    if (!PyArg_ParseTuple(args, "OO", &obj1, &obj2))
         return NULL;
 
     fp = static_cast<FILE*> (PyCObject_AsVoidPtr(obj1));
@@ -158,6 +154,6 @@ PyObject * pyRegional_output_visc(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.3 2003/05/22 23:08:59 tan2 Exp $
+// $Id: outputs.cc,v 1.4 2003/05/23 02:41:42 tan2 Exp $
 
 // End of file
