@@ -49,10 +49,8 @@ class Controller(SimulationController):
     def march(self, totalTime=0, steps=0):
         """explicit time loop"""
 
-        self.step += 1
-
-        if (steps and self.step >= steps) or \
-           (totalTime and self.clock >= totalTime):
+        if (self.step + 1) >= steps:
+            self.step += 1
             self.endSimulation()
             return
 
@@ -115,7 +113,8 @@ class Controller(SimulationController):
 
     def save(self):
         step = self.step
-        if not step % self.inventory.monitoringFrequency:
+        self.solver.timesave(self.clock, step)
+        if not (step % self.inventory.monitoringFrequency):
             self.solver.save(step)
         return
 
