@@ -24,29 +24,37 @@ PROJ_SRCS = \
 	AreaWeightedNormal.cc \
 	Boundary.cc \
 	BoundaryCondition.cc \
+	BoundaryVTInlet.cc \
 	BoundedBox.cc \
 	BoundedMesh.cc \
 	CartesianCoord.cc \
 	Convertor.cc \
 	FEMInterpolator.cc \
+	Inlet.cc \
 	Interior.cc \
 	InteriorImposing.cc \
+	Outlet.cc \
 	SIUnit.cc \
 	Sink.cc \
 	Source.cc \
 	TractionBC.cc \
 	TractionInterpolator.cc \
+	TractionOutlet.cc \
 	TractionSource.cc \
+	VTInlet.cc \
 	VTInterpolator.cc \
+	VTOutlet.cc \
+	VTSource.cc \
 	bindings.cc \
 	exceptions.cc \
 	exchangers.cc \
 	initTemperature.cc \
+	inlets_outlets.cc \
 	misc.cc \
 	utility.cc
 
 
 # version
-# $Id: Make.mm,v 1.14 2004/01/14 02:11:24 ces74 Exp $
+# $Id: Make.mm,v 1.15 2004/02/24 20:40:06 tan2 Exp $
 
 # End of file
