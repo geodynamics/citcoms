@@ -55,7 +55,7 @@ public:
     inline double shape(const int n) const {return shape_[0][n];};
     void printBid2elem(const std::string& prefix="") const;
     virtual void resize(const int n);
-    void FindInteriorNodes(const Boundary* boundary,const All_variables* E) const;
+    void FindInteriorNodes(const Boundary* boundary,const All_variables* E);
 
 private:
     void findMaxGridSpacing(const All_variables* E, double& theta_tol,
@@ -96,6 +96,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.6 2003/10/23 18:26:53 puru Exp $
+// $Id: Mapping.h,v 1.7 2003/10/23 19:06:24 puru Exp $
 
 // End of file

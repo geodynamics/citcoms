@@ -306,7 +306,7 @@ void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
 // E is the All variables corresponding to the Coaese Grid
 
     int node;
-    int m,i,j,k,l,n;
+    int l,n;
     
 // Number of nodes of the Coarse mesh inside the fine mesh
     interiornodes=0;
@@ -329,7 +329,7 @@ void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
                     
                 }
 
-    Xinterior = new double [boundary->dim*interiornodes];
+    Xinterior = new double [dim_*interiornodes];
     n=0;
     for (int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int i=1;i<=E->lmesh.nox;i++) 
@@ -344,7 +344,7 @@ void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
                        (E->sx[m][3][node]> boundary->ri()) &&
                        (E->sx[m][3][node]< boundary->ro()))
                     {
-                        for(k=0;k<boundary->dim;k++) Xinterior[n*boundary->dim+k]=E->sx[m][l+1][node];
+                        for(l=0;l<dim_;l++) Xinterior[n*dim_+k]=E->sx[m][l+1][node];
                         n++;
                     }                    
                 }
@@ -483,6 +483,6 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 
 
 // version
-// $Id: Mapping.cc,v 1.5 2003/10/23 18:26:53 puru Exp $
+// $Id: Mapping.cc,v 1.6 2003/10/23 19:06:24 puru Exp $
 
 // End of file
