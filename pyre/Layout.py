@@ -15,8 +15,10 @@ class Layout(Component):
 
     def __init__(self, name="layout", facility="layout"):
         Component.__init__(self, name, facility)
+
         self.coarse = None
         self.fine = None
+        self.intercomm = None
 
         self.rank = 0
         self.nodes = 0
@@ -24,14 +26,14 @@ class Layout(Component):
 
 
 
-    def layout(self, application):
+    def initialize(self, application):
 
         self.discover()
         self.verify(application)
         self.allocateNodes()
         self.createCommunicators()
 
-        return self
+        return
 
 
 
@@ -65,7 +67,7 @@ class Layout(Component):
     def allocateNodes(self):
         rank = self.rank
         nodes = self.nodes
-        ratio = self.inventory.ratio
+        #ratio = self.inventory.ratio
 
         fine = self.inventory.fine
         coarse = self.inventory.coarse
@@ -79,8 +81,8 @@ class Layout(Component):
         #    fine = range(sp)
         #    coarse = range(sp, nodes)
 
-        self.inventory.fine = fine
-        self.inventory.coarse = coarse
+        #self.inventory.fine = fine
+        #self.inventory.coarse = coarse
         return
 
 
@@ -92,8 +94,21 @@ class Layout(Component):
         self.fine = world.include(self.inventory.fine)
         self.coarse = world.include(self.inventory.coarse)
 
+        if self.fine:
+            self.createIntercomm(self.fine, self.inventory.coarse)
+        elif self.coarse:
+            self.createIntercomm(self.coarse, self.inventory.fine)
+        else:
+            import journal
+            journal.warning(self.name).log("node '%d' is an orphan" % self.rank)
+
         return
 
+
+
+    def createIntercomm(self, comm, remoteGroup):
+        self.intercomm = comm
+        return
 
 
     class Inventory(Component.Inventory):
@@ -113,6 +128,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.1 2003/08/30 00:35:07 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.2 2003/09/03 21:16:40 tan2 Exp $"
 
 # End of file
