@@ -526,19 +526,19 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_Stokes_solver_set_properties__doc__[] = "";
-char pyCitcom_Stokes_solver_set_properties__name__[] = "Stokes_solver_set_properties";
+char pyCitcom_Imcompressible_set_properties__doc__[] = "";
+char pyCitcom_Imcompressible_set_properties__name__[] = "Imcompressible_set_properties";
 
-PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Imcompressible_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Stokes_solver_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "O:Imcompressible_set_properties", &properties))
         return NULL;
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Stokes_solver.inventories:" << std::endl;
+	std::cerr << "Imcompressible.inventories:" << std::endl;
 
     getStringProperty(properties, "Solver", E->control.SOLVER_TYPE, m);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE, m);
@@ -722,6 +722,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.14 2003/08/08 22:03:13 tan2 Exp $
+// $Id: setProperties.cc,v 1.15 2003/08/15 18:56:05 tan2 Exp $
 
 // End of file
