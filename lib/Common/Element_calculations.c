@@ -68,7 +68,7 @@ void assemble_forces(E,penalty)
       e = E->boundary.element[m][i];
 
       for(a=0;a<24;a++) elt_f[a] = 0.0;
-      for(a=SIDE_TOP; a<=SIDE_TOP; a++)
+      for(a=SIDE_BOTTOM; a<=SIDE_TOP; a++)
 	get_elt_tr(E, i, a, elt_f, m);
 
       add_force(E, e, elt_f, m);
@@ -880,6 +880,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.14 2004/04/12 23:23:57 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.15 2004/04/12 23:30:13 tan2 Exp $ */
 
 /* End of file  */
