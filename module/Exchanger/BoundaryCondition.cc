@@ -20,18 +20,6 @@ extern "C" {
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-
-
-BoundaryCondition::BoundaryCondition(All_variables* e) :
-    E(e)
-{}
-
-
-BoundaryCondition::~BoundaryCondition()
-{}
-
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -39,7 +27,7 @@ BoundaryCondition::~BoundaryCondition()
 
 BoundaryConditionSink::BoundaryConditionSink(const Boundary& b, const Sink& s,
 					     All_variables* e) :
-    BoundaryCondition(e),
+    E(e),
     boundary(b),
     sink(s),
     awnormal(boundary, sink, E),
@@ -167,7 +155,7 @@ void BoundaryConditionSink::imposeVBC()
 
 BoundaryConditionSource::BoundaryConditionSource(const Source& s,
 						 All_variables* e) :
-    BoundaryCondition(e),
+    E(e),
     source(s),
     vbc(source.size()),
     tbc(source.size())
@@ -196,6 +184,6 @@ void BoundaryConditionSource::sendTandV()
 
 
 // version
-// $Id: BoundaryCondition.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.2 2003/11/07 01:20:02 tan2 Exp $
 
 // End of file

@@ -20,23 +20,8 @@ class Sink;
 class Source;
 
 
-class BoundaryCondition {
-protected:
+class BoundaryConditionSink {
     All_variables* E;
-
-public:
-    BoundaryCondition(All_variables* E);
-    virtual ~BoundaryCondition() = 0;
-
-    double exchangeTimestep(double dt) const;
-    int exchangeSignal(int sent) const;
-
-private:
-
-};
-
-
-class BoundaryConditionSink : BoundaryCondition {
     const Boundary& boundary;
     const Sink& sink;
     AreaWeightedNormal awnormal;
@@ -50,7 +35,7 @@ class BoundaryConditionSink : BoundaryCondition {
 public:
     BoundaryConditionSink(const Boundary& boundary, const Sink& sink,
 			  All_variables* E);
-    virtual ~BoundaryConditionSink() {};
+    ~BoundaryConditionSink() {};
 
     void recvTandV();
     void imposeBC();
@@ -66,14 +51,15 @@ private:
 };
 
 
-class BoundaryConditionSource : BoundaryCondition {
+class BoundaryConditionSource {
+    All_variables* E;
     const Source& source;
     Array2D<double,DIM> vbc;
     Array2D<double,1> tbc;
 
 public:
     BoundaryConditionSource(const Source& src, All_variables* E);
-    virtual ~BoundaryConditionSource() {};
+    ~BoundaryConditionSource() {};
 
     void sendTandV();
 
@@ -85,6 +71,6 @@ private:
 #endif
 
 // version
-// $Id: BoundaryCondition.h,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: BoundaryCondition.h,v 1.2 2003/11/07 01:20:02 tan2 Exp $
 
 // End of file
