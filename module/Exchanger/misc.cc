@@ -237,12 +237,18 @@ void commonE(All_variables *E)
 	    }
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
+	E->sphere.cap[m].TB[1] = new float[E->lmesh.nno+1];
+	E->sphere.cap[m].TB[2] = new float[E->lmesh.nno+1];
+	E->sphere.cap[m].TB[3] = new float[E->lmesh.nno+1];
 	E->sphere.cap[m].VB[1] = new float[E->lmesh.nno+1];
 	E->sphere.cap[m].VB[2] = new float[E->lmesh.nno+1];
 	E->sphere.cap[m].VB[3] = new float[E->lmesh.nno+1];
 	E->node[m] = new unsigned int[E->lmesh.nno+1];
 
 	for(int n=1; n<=E->lmesh.nno; n++) {
+	    E->sphere.cap[m].TB[1][n] = 0;
+	    E->sphere.cap[m].TB[2][n] = 0;
+	    E->sphere.cap[m].TB[3][n] = 0;
 	    E->sphere.cap[m].VB[1][n] = 0;
 	    E->sphere.cap[m].VB[2][n] = 0;
 	    E->sphere.cap[m].VB[3][n] = 0;
@@ -512,6 +518,6 @@ void debug_output(const All_variables* E)
 
 
 // version
-// $Id: misc.cc,v 1.23 2004/01/20 22:57:51 tan2 Exp $
+// $Id: misc.cc,v 1.24 2004/02/05 19:46:36 tan2 Exp $
 
 // End of file
