@@ -45,7 +45,15 @@ class FineGridExchanger(Exchanger):
 
     def initTemperature(self):
         # receive temperture field from CGE
-        self.module.receiveTemperature(self.exchanger)
+        #self.module.receiveTemperature(self.exchanger)
+        return
+
+
+    def solveVelocities(self, vsolver):
+        if self.catchup:
+            self.applyBoundaryConditions()
+
+        vsolver.run()
         return
 
 
@@ -71,11 +79,16 @@ class FineGridExchanger(Exchanger):
             self.catchup = False
 
         self.fge_t += dt
+        old_dt = dt
 
         if self.fge_t >= self.cge_t:
             dt = dt - (self.fge_t - self.cge_t)
+            self.fge_t = self.cge_t
             self.catchup = True
 
+        # store timestep for interpolating boundary velocities
+        self.module.storeTimestep(self.exchanger, self.fge_t, self.cge_t)
+        #print "%s - old dt = %g   exchanged dt = %g" % (self.__class__, old_dt, dt)
         return dt
 
 
@@ -92,6 +105,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.16 2003/09/28 20:36:56 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.17 2003/09/30 01:50:24 tan2 Exp $"
 
 # End of file
