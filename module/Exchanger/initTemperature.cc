@@ -11,11 +11,6 @@
 #include <algorithm>
 #include <cmath>
 #include <string>
-#include "Array2D.h"
-#include "Interior.h"
-#include "InteriorImposing.h"
-#include "Sink.h"
-#include "Source.h"
 #include "global_defs.h"
 #include "initTemperature.h"
 
@@ -23,24 +18,6 @@ void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E);
 
 extern "C" {
     void temperatures_conform_bcs(struct All_variables*);
-}
-
-
-void initTemperatureSink(const Interior& interior,
-			 const Sink& sink,
-			 All_variables* E)
-{
-    InteriorImposingSink itsink(interior, sink, E);
-    itsink.recvT();
-    itsink.imposeIC();
-}
-
-
-void initTemperatureSource(const Source& source,
-			   All_variables* E)
-{
-    InteriorImposingSource itsource(source, E);
-    itsource.sendT();
 }
 
 
@@ -133,6 +110,6 @@ void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E)
 
 
 // version
-// $Id: initTemperature.cc,v 1.3 2004/01/14 00:34:34 tan2 Exp $
+// $Id: initTemperature.cc,v 1.4 2004/02/26 23:04:21 tan2 Exp $
 
 // End of file
