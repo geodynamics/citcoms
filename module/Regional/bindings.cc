@@ -172,6 +172,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_construct_stiffness_B_matrix__doc__},
 
+    {pyCitcom_general_stokes_solver__name__,
+     pyCitcom_general_stokes_solver,
+     METH_VARARGS,
+     pyCitcom_general_stokes_solver__doc__},
+
     {pyCitcom_general_stokes_solver_Unorm__name__,
      pyCitcom_general_stokes_solver_Unorm,
      METH_VARARGS,
@@ -228,6 +233,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.25 2003/08/08 22:03:13 tan2 Exp $
+// $Id: bindings.cc,v 1.26 2003/08/14 22:50:44 tan2 Exp $
 
 // End of file

@@ -22,9 +22,11 @@ class Stokes_solver(CitcomComponent):
 
 
     def run(self):
-	self._form_RHS()
-	self._form_LHS()
-	self._solve()
+        self.CitcomModule.general_stokes_solver()
+
+	#self._form_RHS()
+	#self._form_LHS()
+	#self._solve()
 	return
 
 
@@ -87,6 +89,6 @@ class Stokes_solver(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.12 2003/07/28 21:57:02 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.13 2003/08/14 22:50:44 tan2 Exp $"
 
 # End of file

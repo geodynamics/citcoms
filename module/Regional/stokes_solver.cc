@@ -23,11 +23,12 @@ extern "C" {
 
     void assemble_forces(struct All_variables*, int);
     void construct_stiffness_B_matrix(struct All_variables*);
+    void general_stokes_solver(struct All_variables *);
     void get_system_viscosity(struct All_variables*, int, float**, float**);
     void set_cg_defaults(struct All_variables*);
     void set_mg_defaults(struct All_variables*);
     void solve_constrained_flow_iterative(struct All_variables*);
-      
+
 }
 
 
@@ -51,6 +52,19 @@ char pyCitcom_construct_stiffness_B_matrix__name__[] = "construct_stiffness_B_ma
 PyObject * pyCitcom_construct_stiffness_B_matrix(PyObject *self, PyObject *args)
 {
     construct_stiffness_B_matrix(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
+char pyCitcom_general_stokes_solver__doc__[] = "";
+char pyCitcom_general_stokes_solver__name__[] = "general_stokes_solver";
+
+PyObject * pyCitcom_general_stokes_solver(PyObject *self, PyObject *args)
+{
+    general_stokes_solver(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -201,6 +215,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 
 
 // version
-// $Id: stokes_solver.cc,v 1.3 2003/08/01 22:53:50 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.4 2003/08/14 22:50:44 tan2 Exp $
 
 // End of file

@@ -32,6 +32,7 @@ extern "C" {
     void construct_shape_functions(struct All_variables*);
     void construct_sub_element(struct All_variables*);
     void construct_surf_det (struct All_variables*);
+    void general_stokes_solver_setup(struct All_variables*);
     void get_initial_elapsed_time(struct All_variables*);
     int get_process_identifier();
     void global_derived_values(struct All_variables*);
@@ -98,6 +99,8 @@ void sphere_launch(struct All_variables *E)
 
     mass_matrix(E);
 
+    general_stokes_solver_setup(E);
+
     construct_surf_det (E);
 
     set_sphere_harmonics (E);
@@ -142,6 +145,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.7 2003/08/07 19:49:13 tan2 Exp $
+// $Id: mesher.cc,v 1.8 2003/08/14 22:50:44 tan2 Exp $
 
 // End of file
