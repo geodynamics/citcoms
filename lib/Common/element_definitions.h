@@ -222,10 +222,13 @@ static const int loc_e_stencil[3][9] = {
 
 #define SIDE_BOTTOM 1
 #define SIDE_TOP 2
-#define SIDE_LEFT 3
-#define SIDE_RIGHT 4
-#define SIDE_FRONT 5
-#define SIDE_BACK 6
+#define SIDE_WEST 3
+#define SIDE_EAST 4
+#define SIDE_NORTH 5
+#define SIDE_SOUTH 6
+
+#define SIDE_BEGIN 1
+#define SIDE_END 6
 
 static const int sidenodes[7][5] = {
   {0,0,0,0,0},
@@ -236,5 +239,14 @@ static const int sidenodes[7][5] = {
   {0,1,4,8,5},
   {0,2,3,7,6} };
 
+
+static const int sidedim[7][3] = {
+  {0,0,0},
+  {0,1,2},
+  {0,1,2},
+  {0,1,3},
+  {0,1,3},
+  {0,2,3},
+  {0,2,3} };
 
 /**/
