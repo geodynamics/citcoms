@@ -74,10 +74,20 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_BoundaryVTInlet_create__doc__},
 
+    {pyExchanger_TractionInlet_create__name__,
+     pyExchanger_TractionInlet_create,
+     METH_VARARGS,
+     pyExchanger_TractionInlet_create__doc__},
+
     {pyExchanger_VTInlet_create__name__,
      pyExchanger_VTInlet_create,
      METH_VARARGS,
      pyExchanger_VTInlet_create__doc__},
+
+    {pyExchanger_TractionOutlet_create__name__,
+     pyExchanger_TractionOutlet_create,
+     METH_VARARGS,
+     pyExchanger_TractionOutlet_create__doc__},
 
     {pyExchanger_VTOutlet_create__name__,
      pyExchanger_VTOutlet_create,
@@ -156,6 +166,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.38 2004/03/11 23:23:49 tan2 Exp $
+// $Id: bindings.cc,v 1.39 2004/03/28 23:05:44 tan2 Exp $
 
 // End of file
