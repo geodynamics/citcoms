@@ -130,11 +130,11 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   v_res=sqrt(global_vdot(E,F,F,lev)/gneq);
 
 
-if (E->parallel.me==0)  {
-  fprintf(E->fp,"initial residue of momentum equation F %.9e %d\n",v_res,gneq);
-  fprintf(stderr,"initial residue of momentum equation F %.9e %d\n",v_res,gneq);
+  if (E->parallel.me==0)  {
+    fprintf(E->fp,"initial residue of momentum equation F %.9e %d\n",v_res,gneq);
+    fprintf(stderr,"initial residue of momentum equation F %.9e %d\n",v_res,gneq);
   }
-
+  
 
   assemble_grad_p(E,P,E->u1,lev);
 
@@ -166,89 +166,89 @@ if (E->parallel.me==0)  {
 
   E->monitor.incompressibility = residual/E->monitor.vdotv;
          
-   count = 0;
-   convergent=0;
-
-   if (E->control.print_convergence && E->parallel.me==0)  {
-         fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
-         fflush(E->fp);
-         fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
-         }         
-
-
-   while( (valid) && (count < *steps_max) && ( E->monitor.incompressibility >= E->control.tole_comp ) )  {   
-
-     for (m=1;m<=E->sphere.caps_per_proc;m++)    
-       for(j=1;j<=npno;j++)
-         z1[m][j] = E->BPI[lev][m][j]*r1[m][j];
-     
-     r1dotz1 = global_pdot(E,r1,z1,lev);
-
-     if ((count == 0))
-       for (m=1;m<=E->sphere.caps_per_proc;m++)    
-         for(j=1;j<=npno;j++)
-           s2[m][j] = z1[m][j];
-     else {
-       r0dotr0=global_pdot(E,r0,z0,lev);
-       assert(r0dotr0 != 0.0  /* Division by zero in head of incompressibility iteration */);
-       delta = r1dotz1/r0dotr0;
-       for (m=1;m<=E->sphere.caps_per_proc;m++)    
-         for(j=1;j<=npno;j++)
-           s2[m][j] = z1[m][j] + delta * s1[m][j];
-       }
-      
-     assemble_grad_p(E,s2,F,lev); 
-
-     valid=solve_del2_u(E,E->u1,F,imp*v_res,lev);  
-     strip_bcs_from_residual(E,E->u1,lev);
-
-     assemble_div_u(E,E->u1,F,lev);
-
-     s2dotAhat=global_pdot(E,s2,F,lev);
-      
-     if (valid)    
-	                 /* alpha defined this way is the same as R&W */
-       alpha = r1dotz1/s2dotAhat; 
-     else 
-       alpha = 0.0;
-      
-     for (m=1;m<=E->sphere.caps_per_proc;m++)    
-       for(j=1;j<=npno;j++)   {
-         r2[m][j] = r1[m][j] - alpha * F[m][j];
-         P[m][j] += alpha * s2[m][j];
-         }
-     
-     for (m=1;m<=E->sphere.caps_per_proc;m++)    
-       for(j=0;j<neq;j++)
-         V[m][j] -= alpha * E->u1[m][j];
-
-      
-     assemble_div_u(E,V,F,lev);
-     E->monitor.vdotv = global_vdot(E,V,V,E->mesh.levmax);
-     E->monitor.incompressibility = sqrt((gneq/gnpno)*(1.0e-32+global_pdot(E,F,F,lev)/(1.0e-32+E->monitor.vdotv)));
-         
-     count++;
-     if (E->control.print_convergence && E->parallel.me==0)  {
-       fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
-       fflush(E->fp);
-       fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
-       }         
-
-     for (m=1;m<=E->sphere.caps_per_proc;m++)    {
-       shuffle[m]=s1[m];s1[m]=s2[m];s2[m]=shuffle[m];
-       shuffle[m]=r0[m];r0[m]=r1[m];r1[m]=r2[m];r2[m]=shuffle[m];
-       shuffle[m]=z0[m];z0[m]=z1[m];z1[m]=shuffle[m];
-       }
-
-     }       /* end loop for conjugate gradient   */
-
-    if(problems) {
-      fprintf(E->fp,"Convergence of velocity solver may affect continuity\n");
-      fprintf(E->fp,"Consider running with the `see_convergence=on' option\n");
-      fprintf(E->fp,"To evaluate the performance of the current relaxation parameters\n");
-      fflush(E->fp);
+  count = 0;
+  convergent=0;
+  
+  if (E->control.print_convergence && E->parallel.me==0)  {
+    fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+    fflush(E->fp);
+    fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+  }         
+  
+  fprintf(stderr,"acc=%e valid=%d count=%d steps_max=%d incomp=%e tole_comp=%e\n",imp*v_res,valid,count,*steps_max,E->monitor.incompressibility,E->control.tole_comp);
+  while( (valid) && (count < *steps_max) && ( E->monitor.incompressibility >= E->control.tole_comp ) )  {   
+    
+    for (m=1;m<=E->sphere.caps_per_proc;m++)    
+      for(j=1;j<=npno;j++)
+	z1[m][j] = E->BPI[lev][m][j]*r1[m][j];
+    
+    r1dotz1 = global_pdot(E,r1,z1,lev);
+    
+    if ((count == 0))
+      for (m=1;m<=E->sphere.caps_per_proc;m++)    
+	for(j=1;j<=npno;j++)
+	  s2[m][j] = z1[m][j];
+    else {
+      r0dotr0=global_pdot(E,r0,z0,lev);
+      assert(r0dotr0 != 0.0  /* Division by zero in head of incompressibility iteration */);
+      delta = r1dotz1/r0dotr0;
+      for (m=1;m<=E->sphere.caps_per_proc;m++)    
+	for(j=1;j<=npno;j++)
+	  s2[m][j] = z1[m][j] + delta * s1[m][j];
+    }
+    
+    assemble_grad_p(E,s2,F,lev); 
+    
+    valid=solve_del2_u(E,E->u1,F,imp*v_res,lev);  
+    strip_bcs_from_residual(E,E->u1,lev);
+    
+    assemble_div_u(E,E->u1,F,lev);
+    
+    s2dotAhat=global_pdot(E,s2,F,lev);
+    
+    if (valid)    
+      /* alpha defined this way is the same as R&W */
+      alpha = r1dotz1/s2dotAhat; 
+    else 
+      alpha = 0.0;
+    
+    for (m=1;m<=E->sphere.caps_per_proc;m++)    
+      for(j=1;j<=npno;j++)   {
+	r2[m][j] = r1[m][j] - alpha * F[m][j];
+	P[m][j] += alpha * s2[m][j];
       }
- 
+    
+    for (m=1;m<=E->sphere.caps_per_proc;m++)    
+      for(j=0;j<neq;j++)
+	V[m][j] -= alpha * E->u1[m][j];
+    
+    
+    assemble_div_u(E,V,F,lev);
+    E->monitor.vdotv = global_vdot(E,V,V,E->mesh.levmax);
+    E->monitor.incompressibility = sqrt((gneq/gnpno)*(1.0e-32+global_pdot(E,F,F,lev)/(1.0e-32+E->monitor.vdotv)));
+    
+    count++;
+    if (E->control.print_convergence && E->parallel.me==0)  {
+      fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+      fflush(E->fp);
+      fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+    }         
+    
+    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+      shuffle[m]=s1[m];s1[m]=s2[m];s2[m]=shuffle[m];
+      shuffle[m]=r0[m];r0[m]=r1[m];r1[m]=r2[m];r2[m]=shuffle[m];
+      shuffle[m]=z0[m];z0[m]=z1[m];z1[m]=shuffle[m];
+    }
+    
+  }       /* end loop for conjugate gradient   */
+  
+  if(problems) {
+    fprintf(E->fp,"Convergence of velocity solver may affect continuity\n");
+    fprintf(E->fp,"Consider running with the `see_convergence=on' option\n");
+    fprintf(E->fp,"To evaluate the performance of the current relaxation parameters\n");
+    fflush(E->fp);
+  }
+  
   for (m=1;m<=E->sphere.caps_per_proc;m++)    {
     free((void *) r0[m]);
     free((void *) r1[m]);       
@@ -257,12 +257,12 @@ if (E->parallel.me==0)  {
     free((void *) z1[m]);
     free((void *) s1[m]);
     free((void *) s2[m]);
-    }
-
-    *steps_max=count;
-
-    return(residual);
- }
+  }
+  
+  *steps_max=count;
+  
+  return(residual);
+}
 
 /*  ==========================================================================  */
 

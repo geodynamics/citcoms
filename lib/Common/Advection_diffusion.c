@@ -20,6 +20,109 @@ static double time0,time1,T_interior1;
    ============================================ */
 
 
+/***************************************************************/
+void PG_timestep_init(struct All_variables *E)
+{ 
+
+  E->advection.timesteps=0;
+ 
+  return;
+}
+
+void PG_timestep_solve(struct All_variables *E)
+{
+
+  double Tmaxd();
+  double CPU_time0();
+  void std_timestep();
+  void predictor();
+  void corrector();
+  void pg_solver();
+  void temperatures_conform_bcs();
+  double Tmaxd();
+  int i,m,psc_pass,iredo;
+
+  E->monitor.solution_cycles++;
+  E->advection.timesteps++;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+  } 
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for (i=1;i<=E->lmesh.nno;i++)   {
+      T1[m][i] = E->T[m][i];
+      Tdot1[m][i] = E->Tdot[m][i];
+    }
+
+  std_timestep(E);
+  /* get the max temperature for old T */
+  T_interior1 = Tmaxd(E,E->T);
+
+  E->advection.dt_reduced = 1.0;         
+  E->advection.last_sub_iterations = 1;
+
+  time1= CPU_time0();   
+
+  do {
+    E->advection.timestep *= E->advection.dt_reduced; 
+    
+    iredo = 0;
+    predictor(E,E->T,E->Tdot);
+    
+    for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
+      pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
+      corrector(E,E->T,E->Tdot,DTdot);
+      temperatures_conform_bcs(E); 
+    }	     
+    
+    /* get the max temperature for new T */
+    E->monitor.T_interior = Tmaxd(E,E->T);
+    
+    if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+	for (i=1;i<=E->lmesh.nno;i++)   {
+	  E->T[m][i] = T1[m][i];
+	  E->Tdot[m][i] = Tdot1[m][i];
+	}
+      iredo = 1;
+      E->advection.dt_reduced *= 0.5;         
+      E->advection.last_sub_iterations ++;
+    }
+    
+  }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
+  time0= CPU_time0()-time1;
+  
+  /*     if(E->control.verbose) */
+  /*       fprintf(E->fp_out,"time=%f\n",time0); */
+  
+  E->advection.total_timesteps++;
+  E->monitor.elapsed_time += E->advection.timestep; 
+  
+  if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
+      (E->advection.timesteps < E->advection.max_timesteps) && 
+      (E->monitor.elapsed_time < E->advection.max_dimensionless_time) ) ||
+     (E->advection.total_timesteps < E->advection.min_timesteps) )
+    E->control.keep_going = 1;
+  else
+    E->control.keep_going = 0;
+  
+  if (E->advection.last_sub_iterations==5)
+    E->control.keep_going = 0;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    free((void *) DTdot[m] );  
+    free((void *) T1[m] );   
+    free((void *) Tdot1[m] );
+  }
+
+  return;
+}
+
+/***************************************************************/
+
 void advection_diffusion_parameters(E)
      struct All_variables *E;
 
@@ -71,123 +174,6 @@ void advection_diffusion_allocate_memory(E)
     }
 
 return;
-}
-
-void PG_timestep_init(struct All_variables *E)
-{ 
-
-  void std_timestep();
-  double Tmaxd();
-  double CPU_time0();
-  int m,i;
-  static int been_here = 0;
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-  } 
-
-  if (been_here++ ==0)    {
-    E->advection.timesteps=0;
-  }
-
-  E->advection.timesteps++;
- 
-  std_timestep(E);
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for (i=1;i<=E->lmesh.nno;i++)   {
-      T1[m][i] = E->T[m][i];
-      Tdot1[m][i] = E->Tdot[m][i];
-    }
-
-  /* get the max temperature for old T */
-  T_interior1 = Tmaxd(E,E->T);
-
-  E->advection.dt_reduced = 1.0;         
-  E->advection.last_sub_iterations = 1;
-
-  time1= CPU_time0();   
-
-  return;
-}
-
-void PG_timestep_solve(struct All_variables *E)
-{
-  void predictor();
-  void corrector();
-  void pg_solver();
-  void temperatures_conform_bcs();
-  double Tmaxd();
-  int i,m,psc_pass,iredo;
-
-  do {
-    E->advection.timestep *= E->advection.dt_reduced; 
-    
-    iredo = 0;
-    predictor(E,E->T,E->Tdot);
-    
-    for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
-      pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
-      corrector(E,E->T,E->Tdot,DTdot);
-      temperatures_conform_bcs(E); 
-    }	     
-    
-    /* get the max temperature for new T */
-    E->monitor.T_interior = Tmaxd(E,E->T);
-    
-    if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for (i=1;i<=E->lmesh.nno;i++)   {
-	  E->T[m][i] = T1[m][i];
-	  E->Tdot[m][i] = Tdot1[m][i];
-	}
-      iredo = 1;
-      E->advection.dt_reduced *= 0.5;         
-      E->advection.last_sub_iterations ++;
-    }
-    
-  }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
-  time0= CPU_time0()-time1;
-  
-  /*     if(E->control.verbose) */
-  /*       fprintf(E->fp_out,"time=%f\n",time0); */
-  
-  E->advection.total_timesteps++;
-  E->monitor.elapsed_time += E->advection.timestep; 
-  
-  return;
-}
-
-void PG_timemarching_control(struct All_variables *E)
-{ 
-
-  if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
-      (E->advection.timesteps < E->advection.max_timesteps) && 
-      (E->monitor.elapsed_time < E->advection.max_dimensionless_time) ) ||
-     (E->advection.total_timesteps < E->advection.min_timesteps) )
-    E->control.keep_going = 1;
-  else
-    E->control.keep_going = 0;
-  
-  if (E->advection.last_sub_iterations==5)
-    E->control.keep_going = 0;
-
-  return;
-}
-
-void PG_timestep_fini(struct All_variables *E)
-{ 
-  int m;
- 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *) DTdot[m] );  
-    free((void *) T1[m] );   
-    free((void *) Tdot1[m] );
-  }
-
-  return;
 }
 
 void PG_timestep(struct All_variables *E)

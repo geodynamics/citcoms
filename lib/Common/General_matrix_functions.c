@@ -171,121 +171,122 @@ int solve_del2_u(E,d0,F,acc,high_lev)
      double acc;
      int high_lev;
 { 
-    void assemble_del2_u();
-    void e_assemble_del2_u();
-    void n_assemble_del2_u();
-    void strip_bcs_from_residual();
-    void gauss_seidel();
-    void jacobi();
-   
-    double conj_grad();
-    double multi_grid();
-    double global_vdot();
-   
-    static int been_here = 0;
-    int count,counts,cycles,convergent,valid;
-    int i, neq, gneq,m;
+  void assemble_del2_u();
+  void e_assemble_del2_u();
+  void n_assemble_del2_u();
+  void strip_bcs_from_residual();
+  void gauss_seidel();
+  void jacobi();
   
-    double CPU_time0(),initial_time,time;
-    double residual,prior_residual,r0;
-    double *D1[NCS], *r[NCS], *Au[NCS];
+  double conj_grad();
+  double multi_grid();
+  double global_vdot();
   
-    gneq  = E->mesh.NEQ[high_lev];
-    gneq  = E->mesh.neq;
-
+  static int been_here = 0;
+  int count,counts,cycles,convergent,valid;
+  int i, neq, gneq,m;
+  
+  double CPU_time0(),initial_time,time;
+  double residual,prior_residual,r0;
+  double *D1[NCS], *r[NCS], *Au[NCS];
+  
+  gneq  = E->mesh.NEQ[high_lev];
+  gneq  = E->mesh.neq;
+  
   for (m=1;m<=E->sphere.caps_per_proc;m++)    {
     neq  = E->lmesh.NEQ[high_lev];
-    }
+  }
   
-    if (been_here==0)  {
-	E->control.total_iteration_cycles = 0;
-	E->control.total_v_solver_calls = 0;
-	for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
-	    cost_per_level[i] = 0.0;
-	    cost_per_level_gs[i] = 0.0;
-	    total_cycles[i] = 0; 
-	    }
-	been_here++;
-        }
+  if (been_here==0)  {
+    E->control.total_iteration_cycles = 0;
+    E->control.total_v_solver_calls = 0;
+    for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
+      cost_per_level[i] = 0.0;
+      cost_per_level_gs[i] = 0.0;
+      total_cycles[i] = 0; 
+    }
+    been_here++;
+  }
   
   for (m=1;m<=E->sphere.caps_per_proc;m++)     
       for(i=0;i<neq;i++)  {
 	d0[m][i] = 0.0;
-	}
-    
-    r0=residual=sqrt(global_vdot(E,F,F,high_lev)/gneq);
-   
-    prior_residual=2*residual; 
-    count = 0;  
-    initial_time=CPU_time0();
-
-    if (!(E->control.NMULTIGRID || E->control.EMULTIGRID)) {
-	    cycles = E->control.v_steps_low;
-	    time=CPU_time0();
-	    residual = conj_grad(E,d0,F,acc,&cycles,high_lev); 
-
-	    cost_per_level[high_lev] +=  CPU_time0()-time;
-	    total_cycles[high_lev] += cycles;
-	    valid = (residual < acc)? 0:1;
-	}
-      
-    else  { 
-
-        counts =0;
-if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-        valid = (residual < acc)?0:1;
-
-        while (residual > acc) {
-	    residual=multi_grid(E,d0,F,acc,high_lev);
-	  
-            counts ++;
-if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-
-          }
-          cycles = counts;
-	}
-	
-
-	/* Convergence check .....
-	   We should give it a chance to recover if it briefly diverges initially, and
-	   don't worry about slower convergence if it is close to the answer   */
-	
-	if((count > 0) && 
-	   (residual > r0*2.0)  ||
-	   (fabs(residual-prior_residual) < acc*0.1 && (residual > acc * 10.0))   )
-	    convergent=0; 
-	else {
-	    convergent=1;
-	    prior_residual=residual;
-	    }
-	
-    if(E->control.print_convergence&&E->parallel.me==0)   {
-	fprintf(E->fp,"%s residual (%03d)(%03d) = %.3e from %.3e to %.3e in %5.2f secs \n",
-		(convergent ? " * ":"!!!"),count,cycles,residual,r0,acc,CPU_time0()-initial_time);
-		fflush(E->fp);
-		}
-	
-    count++;
-
-
-    if(E->control.verbose)  {
-	printf("Total time for %d loops = %g \n",count,CPU_time0()-initial_time);
-	for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
-	    printf("Level %d, total time = %g\n",i,cost_per_level[i]);
-	    printf("     total cycles = %d (%g)\n",total_cycles[i],
-		   cost_per_level[i]/(1.0e-5+(float)total_cycles[i]));
       }
-	printf("projection time = %g\n",E->monitor.cpu_time_on_mg_maps);
-	printf("Del sq u solved to accuracy of  %g \n",residual);
-    }
-
-
-    E->control.total_iteration_cycles += count;
-    E->control.total_v_solver_calls += 1;
+  
+  r0=residual=sqrt(global_vdot(E,F,F,high_lev)/gneq);
+  
+  prior_residual=2*residual; 
+  count = 0;  
+  initial_time=CPU_time0();
+  
+  if (!(E->control.NMULTIGRID || E->control.EMULTIGRID)) {
+    cycles = E->control.v_steps_low;
+    time=CPU_time0();
+    residual = conj_grad(E,d0,F,acc,&cycles,high_lev); 
     
-    return(valid);
+    cost_per_level[high_lev] +=  CPU_time0()-time;
+    total_cycles[high_lev] += cycles;
+    fprintf(stderr,"residual=%e acc=%e\n",residual,acc);
+    valid = (residual < acc)? 1:0;
+  }
+  
+  else  { 
+    
+    counts =0;
+    if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+    if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+    valid = (residual < acc)?1:0;
+    
+    while (residual > acc) {
+      residual=multi_grid(E,d0,F,acc,high_lev);
+      
+      counts ++;
+      if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+      if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+      
+    }
+    cycles = counts;
+  }
+  
+  
+  /* Convergence check .....
+     We should give it a chance to recover if it briefly diverges initially, and
+     don't worry about slower convergence if it is close to the answer   */
+  
+  if((count > 0) && 
+     (residual > r0*2.0)  ||
+     (fabs(residual-prior_residual) < acc*0.1 && (residual > acc * 10.0))   )
+    convergent=0; 
+  else {
+    convergent=1;
+    prior_residual=residual;
+  }
+  
+  if(E->control.print_convergence&&E->parallel.me==0)   {
+    fprintf(E->fp,"%s residual (%03d)(%03d) = %.3e from %.3e to %.3e in %5.2f secs \n",
+	    (convergent ? " * ":"!!!"),count,cycles,residual,r0,acc,CPU_time0()-initial_time);
+    fflush(E->fp);
+  }
+  
+  count++;
+  
+  
+  if(E->control.verbose)  {
+    printf("Total time for %d loops = %g \n",count,CPU_time0()-initial_time);
+    for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
+      printf("Level %d, total time = %g\n",i,cost_per_level[i]);
+      printf("     total cycles = %d (%g)\n",total_cycles[i],
+	     cost_per_level[i]/(1.0e-5+(float)total_cycles[i]));
+    }
+    printf("projection time = %g\n",E->monitor.cpu_time_on_mg_maps);
+    printf("Del sq u solved to accuracy of  %g \n",residual);
+  }
+  
+  
+  E->control.total_iteration_cycles += count;
+  E->control.total_v_solver_calls += 1;
+  
+  return(valid);
 }
 
 /* =================================
