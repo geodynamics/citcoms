@@ -55,6 +55,9 @@ void Interior::initX(const All_variables* E)
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
 
+                        // Dimensionalizing
+                    x[2]*=E->data.radius_km*1000.;
+                    
                     if(isInside(x, bbox_)) {
                         X_.push_back(x);
                         nodeID_.push_back(node);
@@ -64,6 +67,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.6 2003/11/21 23:15:13 tan2 Exp $
+// $Id: Interior.cc,v 1.7 2003/12/16 03:01:43 puru Exp $
 
 // End of file

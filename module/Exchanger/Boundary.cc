@@ -69,8 +69,8 @@ void Boundary::initBBox(const All_variables *E)
     bbox_[1][0] = theta_max;
     bbox_[0][1] = fi_min;
     bbox_[1][1] = fi_max;
-    bbox_[0][2] = ri;
-    bbox_[1][2] = ro;
+    bbox_[0][2] = ri*E->data.radius_km*1000.;
+    bbox_[1][2] = ro*E->data.radius_km*1000.;
 }
 
 
@@ -78,6 +78,7 @@ void Boundary::initX(const All_variables* E)
 {
     std::vector<double> x(DIM);
     const int m = 1;
+    
     for(int k=1; k<=E->lmesh.noy; k++)
 	for(int j=1; j<=E->lmesh.nox; j++)
 	    for(int i=1; i<=E->lmesh.noz; i++) {
@@ -88,7 +89,9 @@ void Boundary::initX(const All_variables* E)
 
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
-
+                        // Dimensionalizing
+                    x[2]*=E->data.radius_km*1000.;
+                    
 		    X_.push_back(x);
 		    nodeID_.push_back(node);
 		}
@@ -111,6 +114,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.42 2003/11/21 23:15:13 tan2 Exp $
+// $Id: Boundary.cc,v 1.43 2003/12/16 03:01:43 puru Exp $
 
 // End of file

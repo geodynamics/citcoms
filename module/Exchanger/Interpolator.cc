@@ -95,6 +95,8 @@ void Interpolator::init(const BoundedMesh& boundedMesh,
 		for(int k=0; k<DIM; k++) {
 		    xc[j*DIM+k] = E->sx[mm][k+1][gnode];
 		}
+                    // Dimensionalization
+                xc[j*DIM+2] =E->data.radius_km*1000.;
 	    }
 
 	    if(!isCandidate(xc, boundedMesh.bbox()))continue;
@@ -299,6 +301,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.6 2003/11/28 22:32:51 ces74 Exp $
+// $Id: Interpolator.cc,v 1.7 2003/12/16 03:01:43 puru Exp $
 
 // End of file

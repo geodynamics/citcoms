@@ -55,8 +55,8 @@ void fullGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
     bbox[1][0] = 2 * pi;
     bbox[1][1] = pi;
 
-    bbox[0][2] = E->sphere.ri;
-    bbox[1][2] = E->sphere.ro;
+    bbox[0][2] = E->sphere.ri*E->data.radius_km*1000.;
+    bbox[1][2] = E->sphere.ro*E->data.radius_km*1000.;
 }
 
 
@@ -66,12 +66,12 @@ void regionalGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
     bbox[1][0] = E->control.theta_max;
     bbox[0][1] = E->control.fi_min;
     bbox[1][1] = E->control.fi_max;
-    bbox[0][2] = E->sphere.ri;
-    bbox[1][2] = E->sphere.ro;
+    bbox[0][2] = E->sphere.ri*E->data.radius_km*1000.;
+    bbox[1][2] = E->sphere.ro*E->data.radius_km*1000.;
 }
 
 
 // version
-// $Id: BoundedBox.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: BoundedBox.cc,v 1.2 2003/12/16 03:01:43 puru Exp $
 
 // End of file
