@@ -30,9 +30,6 @@ public:
 	      const All_variables *E);
     virtual ~Exchanger();
 
-    void createDataArrays();
-    void deleteDataArrays();
-
     void initTemperature();
     void sendTemperature();
     void receiveTemperature();
@@ -49,8 +46,11 @@ public:
     virtual void mapBoundary() = 0;   // create mapping from Boundary object
                                       // to global id array
     virtual void createMapping() = 0;
+    virtual void createDataArrays() = 0;
 
 protected:
+    static const int dim = 3;
+    
     const MPI_Comm comm;       // communicator of current solver
     const MPI_Comm intercomm;  // intercommunicator between solvers
 
@@ -69,6 +69,8 @@ protected:
 
     typedef std::auto_ptr<Array2D<double,1> > Temper;
     typedef std::auto_ptr<Array2D<double,3> > Velo;
+    typedef Array2D<double,1> Temper2;
+    typedef Array2D<double,3> Velo2;
 
     Temper outgoingT;
     Temper incomingT;
@@ -97,7 +99,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.29 2003/10/16 20:06:02 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.30 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file
 

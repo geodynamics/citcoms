@@ -40,41 +40,23 @@ Exchanger::~Exchanger() {
 }
 
 
-void Exchanger::createDataArrays() {
-    std::cout << "in Exchanger::createDataArrays" << std::endl;
-
-    int size = boundary->size();
-
-    outgoingT = Temper(new Array2D<double,1>(size));
-    incomingT = Temper(new Array2D<double,1>(size));
-
-    incomingV = Velo(new Array2D<double,3>(size));
-    old_incomingV = Velo(new Array2D<double,3>(size));
-}
-
-
-void Exchanger::deleteDataArrays() {
-    std::cout << "in Exchanger::deleteDataArrays" << std::endl;
-}
-
-
 void Exchanger::initTemperature() {
     std::cout << "in Exchanger::initTemperature" << std::endl;
     // put a hot blob in the center of fine grid mesh and T=0 elsewhere
 
     // center of fine grid mesh
-    double theta_center = 0.5 * (boundary->theta_max + boundary->theta_min);
-    double fi_center = 0.5 * (boundary->fi_max + boundary->fi_min);
-    double r_center = 0.5 * (boundary->ro + boundary->ri);
+    double theta_center = 0.5 * (boundary->theta_max() + boundary->theta_min());
+    double fi_center = 0.5 * (boundary->fi_max() + boundary->fi_min());
+    double r_center = 0.5 * (boundary->ro() + boundary->ri());
 
     double x_center = r_center * sin(fi_center) * cos(theta_center);
     double y_center = r_center * sin(fi_center) * sin(theta_center);
     double z_center = r_center * cos(fi_center);
 
     // radius of the blob is one third of the smallest dimension
-    double d = min(min(boundary->theta_max - boundary->theta_min,
-		       boundary->fi_max - boundary->fi_min),
-		   boundary->ro - boundary->ri) / 3;
+    double d = min(min(boundary->theta_max() - boundary->theta_min(),
+		       boundary->fi_max() - boundary->fi_min()),
+		   boundary->ro() - boundary->ri()) / 3;
 
     // compute temperature field according to nodal coordinate
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
@@ -240,7 +222,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.34 2003/10/16 20:06:02 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.35 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file
 

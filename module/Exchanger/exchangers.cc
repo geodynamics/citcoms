@@ -186,45 +186,6 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_createDataArrays__doc__[] = "";
-char pyExchanger_createDataArrays__name__[] = "createDataArrays";
-
-PyObject * pyExchanger_createDataArrays(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:createBoundary", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->createDataArrays();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyExchanger_deleteDataArrays__doc__[] = "";
-char pyExchanger_deleteDataArrays__name__[] = "deleteDataArrays";
-
-PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:createBoundary", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->deleteDataArrays();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyExchanger_initTemperature__doc__[] = "";
 char pyExchanger_initTemperature__name__[] = "initTemperature";
 
@@ -501,6 +462,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.21 2003/10/11 00:38:46 tan2 Exp $
+// $Id: exchangers.cc,v 1.22 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

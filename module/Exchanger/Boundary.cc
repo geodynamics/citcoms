@@ -11,120 +11,77 @@
 #include <iostream>
 #include <memory>
 #include "global_defs.h"
+#include "Array2D.cc"
 #include "Boundary.h"
 
 
-Boundary::Boundary(const int n) : size_(n) {
+Boundary::Boundary(const All_variables* E) :
+    size_(E->mesh.nno - (E->mesh.nox-2)*(E->mesh.noy-2)*(E->mesh.noz-2)),
+    bounds_(2),
+    X_(size_)
+{
     std::cout << "in Boundary::Boundary  size = " << size_ << std::endl;
-
-    for(int i=0; i<dim; i++) {
-	auto_array_ptr<double> tmp(new double[size_]);
-	X[i] = tmp;
-    }
+    initBounds(E);
 }
 
 
-void Boundary::initBound(const All_variables *E) {
-    theta_max = E->control.theta_max;
-    theta_min = E->control.theta_min;
-    fi_max = E->control.fi_max;
-    fi_min = E->control.fi_min;
-    ro = E->sphere.ro;
-    ri = E->sphere.ri;
 
-    //printBound();
+Boundary::Boundary(const int n) :
+    size_(n),
+    bounds_(2),
+    X_(n)
+{
+    std::cout << "in Boundary::Boundary  size = " << size_ << std::endl;
+}
+
+
+void Boundary::initBounds(const All_variables *E) {
+
+    bounds_[0][0] = E->control.theta_max;
+    bounds_[0][1] = E->control.theta_min;
+    bounds_[1][0] = E->control.fi_max;
+    bounds_[1][1] = E->control.fi_min;
+    bounds_[2][0] = E->sphere.ro;
+    bounds_[2][1] = E->sphere.ri;
+    //printBounds();
 }
 
 
 void Boundary::send(const MPI_Comm comm, const int receiver) const {
-    int tag = 1;
-
-    for (int i=0; i<dim; i++) {
-	MPI_Send(X[i].get(), size_, MPI_DOUBLE,
-		 receiver, tag, comm);
-	tag ++;
-    }
-
-    const int size_temp = 6;
-    double temp[size_temp] = {theta_max,
-			      theta_min,
-			      fi_max,
-			      fi_min,
-			      ro,
-			      ri};
-
-    MPI_Send(temp, size_temp, MPI_DOUBLE,
-	     receiver, tag, comm);
-    tag ++;
+    X_.send(comm, receiver);
+    bounds_.send(comm, receiver);
 }
 
 
 void Boundary::receive(const MPI_Comm comm, const int sender) {
-    MPI_Status status;
-    int tag = 1;
-
-    for (int i=0; i<dim; i++) {
-	MPI_Recv(X[i].get(), size_, MPI_DOUBLE,
-		 sender, tag, comm, &status);
-	tag ++;
-    }
+    X_.receive(comm, sender);
     //printX();
 
-    const int size_temp = 6;
-    double temp[size_temp];
-
-    MPI_Recv(&temp, size_temp, MPI_DOUBLE,
-	     sender, tag, comm, &status);
-    tag ++;
-
-    theta_max = temp[0];
-    theta_min = temp[1];
-    fi_max = temp[2];
-    fi_min = temp[3];
-    ro = temp[4];
-    ri = temp[5];
-    //printBound();
+    bounds_.receive(comm, sender);
+    //printBounds();
 }
 
 
 void Boundary::broadcast(const MPI_Comm comm, const int broadcaster) {
-
-    for (int i=0; i<dim; i++) {
-      MPI_Bcast(X[i].get(), size_, MPI_DOUBLE, broadcaster, comm);
-    }
+    X_.broadcast(comm, broadcaster);
     //printX();
 
-    MPI_Bcast(&theta_max, 1, MPI_DOUBLE, broadcaster, comm);
-    MPI_Bcast(&theta_min, 1, MPI_DOUBLE, broadcaster, comm);
-    MPI_Bcast(&fi_max, 1, MPI_DOUBLE, broadcaster, comm);
-    MPI_Bcast(&fi_min, 1, MPI_DOUBLE, broadcaster, comm);
-    MPI_Bcast(&ro, 1, MPI_DOUBLE, broadcaster, comm);
-    MPI_Bcast(&ri, 1, MPI_DOUBLE, broadcaster, comm);
-    //printBound();
+    bounds_.broadcast(comm, broadcaster);
+    //printBounds();
 }
 
 
-void Boundary::printBound() const {
-    std::cout << "theta= " << theta_min
-	      << " : " << theta_max << std::endl;
-    std::cout << "fi   = " << fi_min
-	      << " : " << fi_max << std::endl;
-    std::cout << "r    = " << ri
-	      << " : " << ro  << std::endl;
+void Boundary::printBounds(const std::string& prefix) const {
+    bounds_.print(prefix + "  bounds");
 }
 
 
-void Boundary::printX() const {
-    for(int j=0; j<size_; j++) {
-	std::cout << "  X:  " << j << ":  ";
-	    for(int i=0; i<dim; i++)
-		std::cout << X[i][j] << " ";
-	std::cout << std::endl;
-    }
+void Boundary::printX(const std::string& prefix) const {
+    X_.print(prefix + "  X");
 }
 
 
 // version
-// $Id: Boundary.cc,v 1.33 2003/10/11 00:38:46 tan2 Exp $
+// $Id: Boundary.cc,v 1.34 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

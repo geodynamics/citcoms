@@ -47,18 +47,6 @@ extern "C"
 PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createDataArrays__name__[];
-extern char pyExchanger_createDataArrays__doc__[];
-extern "C"
-PyObject * pyExchanger_createDataArrays(PyObject *, PyObject *);
-
-
-extern char pyExchanger_deleteDataArrays__name__[];
-extern char pyExchanger_deleteDataArrays__doc__[];
-extern "C"
-PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *);
-
-
 extern char pyExchanger_initTemperature__name__[];
 extern char pyExchanger_initTemperature__doc__[];
 extern "C"
@@ -140,6 +128,6 @@ PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.17 2003/10/11 00:38:46 tan2 Exp $
+// $Id: exchangers.h,v 1.18 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

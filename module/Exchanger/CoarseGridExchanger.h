@@ -32,6 +32,7 @@ public:
     virtual void interpretate();
     virtual void mapBoundary();
     virtual void createMapping();
+    virtual void createDataArrays();
 
     void receiveBoundary();
     void interpolateTemperature();
@@ -40,7 +41,7 @@ public:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.14 2003/10/11 00:38:46 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.15 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file
 

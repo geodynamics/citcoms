@@ -59,7 +59,6 @@ void FineGridExchanger::mapBoundary() {
     // Assuming all boundary nodes are inside localLeader!
     // assumption will be relaxed in future
     if (rank == leader) {
-	boundary->initBound(E);
 	createMapping();
 	createDataArrays();
     }
@@ -72,13 +71,21 @@ void FineGridExchanger::createMapping() {
 }
 
 
+void FineGridExchanger::createDataArrays() {
+    std::cout << "in FineGridExchanger::createDataArrays" << std::endl;
+
+    if (rank == leader) {
+	incomingV = Velo(new Array2D<double,3>(boundary->size()));
+	old_incomingV = Velo(new Array2D<double,3>(boundary->size()));
+    }
+}
+
+
 void FineGridExchanger::createBoundary() {
     std::cout << "in FineGridExchanger::createBoundary" << std::endl;
 
     if (rank == leader) {
-	// boundary = all - interior
-	int size = E->mesh.nno - (E->mesh.nox-2)*(E->mesh.noy-2)*(E->mesh.noz-2);
-	boundary = new Boundary(size);
+	boundary = new Boundary(E);
     }
 }
 
@@ -106,7 +113,7 @@ void FineGridExchanger::setBCFlag() {
     // Because CitcomS is defaulted to have reflecting side BC,
     // here we should change to velocity BC.
     for(int m=1; m<=E->sphere.caps_per_proc; m++)
-	for(int i=0; i<boundary->size(); i++) {
+	for(int i=0; i<fgmapping->size(); i++) {
 	    int n = fgmapping->bid2gid(i);
 	    int p = fgmapping->bid2proc(i);
 	    if (p == rank) {
@@ -133,9 +140,6 @@ void FineGridExchanger::imposeConstraint(){
     std::cout << "in FineGridExchanger::imposeConstraint" << std::endl;
 
     if(rank == leader) {
-	// this function is for 3D velocity field only
-        const int dim = 3;
-
 	// area-weighted normal vector
         double* nwght  = new double[boundary->size() * dim];
 	computeWeightedNormal(nwght);
@@ -169,12 +173,11 @@ void FineGridExchanger::imposeBC() {
     }
 
     // setup aliases
-    const int dim = 3;
     Array2D<double,dim>& oldV = *old_incomingV;
     Array2D<double,dim>& newV = *incomingV;
 
     for(int m=1; m<=E->sphere.caps_per_proc; m++) {
-	for(int i=0; i<boundary->size(); i++) {
+	for(int i=0; i<fgmapping->size(); i++) {
 	    int n = fgmapping->bid2gid(i);
 	    int p = fgmapping->bid2proc(i);
 	    if (p == rank) {
@@ -191,8 +194,7 @@ void FineGridExchanger::imposeBC() {
 
 
 void FineGridExchanger::computeWeightedNormal(double* nwght) const {
-    const int dim = 3;
-    const int enodes = 2 << (dim-1); // # of nodes per element
+    const int nodesPerElement = (int) pow(2, dim);
     const int facenodes[]={0, 1, 5, 4,
                            2, 3, 7, 6,
                            1, 2, 6, 5,
@@ -202,18 +204,18 @@ void FineGridExchanger::computeWeightedNormal(double* nwght) const {
 
     for(int i=0; i<boundary->size()*dim; i++) nwght[i] = 0.0;
 
-    int nodest = enodes * E->lmesh.nel;
+    int nodest = nodesPerElement * E->lmesh.nel;
     int* bnodes = new int[nodest];
-    for(int i=0; i< nodest; i++) bnodes[i] = -1;
+    for(int i=0; i<nodest; i++) bnodes[i] = -1;
 
     // Assignment of the local boundary node numbers
     // to bnodes elements array
     for(int n=0; n<E->lmesh.nel; n++) {
-	for(int j=0; j<enodes; j++) {
+	for(int j=0; j<nodesPerElement; j++) {
 	    int gnode = E->IEN[E->mesh.levmax][1][n+1].node[j+1];
-	    for(int k=0; k<boundary->size(); k++) {
+	    for(int k=0; k<fgmapping->size(); k++) {
 		if(gnode == fgmapping->bid2gid(k)) {
-		    bnodes[n*enodes+j] = k;
+		    bnodes[n*nodesPerElement+j] = k;
 		    break;
 		}
 	    }
@@ -229,20 +231,20 @@ void FineGridExchanger::computeWeightedNormal(double* nwght) const {
 	// Loop over element faces
 	for(int i=0; i<6; i++) {
 	    // Checking of diagonal nodal faces
-	    if((bnodes[n*enodes+facenodes[i*4]] >=0) &&
-	       (bnodes[n*enodes+facenodes[i*4+1]] >=0) &&
-	       (bnodes[n*enodes+facenodes[i*4+2]] >=0) &&
-	       (bnodes[n*enodes+facenodes[i*4+3]] >=0)) {
+	    if((bnodes[n*nodesPerElement+facenodes[i*4]] >=0) &&
+	       (bnodes[n*nodesPerElement+facenodes[i*4+1]] >=0) &&
+	       (bnodes[n*nodesPerElement+facenodes[i*4+2]] >=0) &&
+	       (bnodes[n*nodesPerElement+facenodes[i*4+3]] >=0)) {
 
 		double xc[12], normal[dim];
 		for(int j=0; j<4; j++) {
-		    int lnode = bnodes[n*enodes+facenodes[i*4+j]];
+		    int lnode = bnodes[n*nodesPerElement+facenodes[i*4+j]];
 		    if(lnode >= boundary->size())
 			std::cout <<" lnode = " << lnode
 				  << " size " << boundary->size()
 				  << std::endl;
 		    for(int l=0; l<dim; l++)
-			xc[j*dim+l] = boundary->X[l][lnode];
+			xc[j*dim+l] = boundary->X(l,lnode);
 		}
 
 		normal[0] = (xc[4]-xc[1])*(xc[11]-xc[2])
@@ -258,7 +260,6 @@ void FineGridExchanger::computeWeightedNormal(double* nwght) const {
 		for(int l=0; l<dim; l++)
 		    normal[l] /= area;
 
-
 		if(xc[0] == xc[6])
 		    area = fabs(0.5 * (xc[2]+xc[8]) * (xc[8]-xc[2])
 				* (xc[7]-xc[1]) * sin(xc[0]));
@@ -271,10 +272,10 @@ void FineGridExchanger::computeWeightedNormal(double* nwght) const {
 
 		for(int l=0; l<dim; l++) {
 		    if(normal[l] > 0.999 ) garea[l][0] += area;
-                        if(normal[l] < -0.999 ) garea[l][1] += area;
+		    if(normal[l] < -0.999 ) garea[l][1] += area;
 		}
 		for(int j=0; j<4; j++) {
-		    int lnode = bnodes[n*enodes+facenodes[i*4+j]];
+		    int lnode = bnodes[n*nodesPerElement+facenodes[i*4+j]];
 		    for(int l=0; l<dim; l++)
 			nwght[lnode*dim+l] += normal[l] * area/4.;
 		}
@@ -287,8 +288,6 @@ void FineGridExchanger::computeWeightedNormal(double* nwght) const {
 
 double FineGridExchanger::computeOutflow(const Velo& V,
 					 const double* nwght) const {
-    const int dim = 3;
-
     double outflow = 0;
     for(int n=0; n<V->size(); n++)
 	for(int j=0; j<dim; j++)
@@ -300,8 +299,6 @@ double FineGridExchanger::computeOutflow(const Velo& V,
 
 void FineGridExchanger::reduceOutflow(const double outflow,
 				      const double* nwght) {
-
-	const int dim = 3;
 	const int size = boundary->size();
 
 	double total_area = 0;
@@ -309,28 +306,26 @@ void FineGridExchanger::reduceOutflow(const double outflow,
 	    for(int j=0; j<dim; j++)
 		total_area += fabs(nwght[n*3+j]);
 
-	auto_array_ptr<double> tmp(new double[dim*size]);
+// 	auto_array_ptr<double> tmp(new double[dim*size]);
 
-	for(int n=0; n<size; n++)
-	    for(int j=0; j<dim; j++)
-		tmp[n*dim+j] = (*incomingV)[j][n];
+// 	for(int n=0; n<size; n++)
+// 	    for(int j=0; j<dim; j++)
+// 		tmp[n*dim+j] = (*incomingV)[j][n];
 
 	for(int n=0; n<size; n++) {
             for(int j=0; j<dim; j++)
                 if(fabs(nwght[n*dim+j]) > 1.e-10) {
-                    tmp[n*dim+j] = (*incomingV)[j][n]
-			         - outflow * nwght[n*dim+j]
+                    (*incomingV)[j][n] -= outflow * nwght[n*dim+j]
 			           / (total_area * fabs(nwght[n*dim+j]));
 	    }
 	}
 
-	incomingV = Velo(new Array2D<double,dim>(tmp.release(), size));
-	//incomingV->print("incomingV");
+	incomingV->print("incomingV");
 }
 
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.24 2003/10/16 20:06:02 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.25 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

@@ -18,23 +18,23 @@ class Boundary;
 
 class Mapping {
 protected:
+    const int dim_;
     int size_;
     const int memsize_;
     Array2D<int,1> bid2proc_; // bid -> proc. rank
 
 public:
-    explicit Mapping(const int size);
+    Mapping(const int dim, const int size);
     virtual ~Mapping() = 0;
 
     inline const int size() {return size_;}
     inline int bid2proc(const int n) const {return bid2proc_[0][n];};
+    void printBid2proc(const std::string& prefix="") const;
 
 protected:
     void sendBid2proc(const MPI_Comm comm,
 		      const int rank, const int leader);
                                          // send bid2proc to leader
-    void printBid2proc() const;
-
 };
 
 
@@ -51,6 +51,7 @@ public:
 
     inline int bid2elem(const int n) const {return bid2elem_[0][n];};
     inline double shape(const int n) const {return shape_[0][n];};
+    void printBid2elem(const std::string& prefix="") const;
 
 private:
     void findMaxGridSpacing(const All_variables* E, double& theta_tol,
@@ -66,9 +67,6 @@ private:
 			     double *x3, double *x4) const;
 
     double det3_sub(double  *x1, double *x2, double *x3) const;
-
-    void printBid2elem() const;
-
 };
 
 
@@ -83,17 +81,16 @@ public:
     virtual ~FineGridMapping() {};
 
     inline int bid2gid(const int n) const {return bid2gid_[0][n];};
+    void printBid2gid(const std::string& prefix="") const;
 
 private:
     void findBoundaryNodes(Boundary* boundary, const All_variables* E);
-    void printBid2gid(const std::string& prefix="") const;
-
 };
 
 
 #endif
 
 // version
-// $Id: Mapping.h,v 1.2 2003/10/16 20:06:02 tan2 Exp $
+// $Id: Mapping.h,v 1.3 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

@@ -8,13 +8,25 @@
 #include <portinfo>
 #include <iostream>
 #include "Array2D.h"
+#include "auto_array_ptr.h"
+
+
+template <class T, int N>
+Array2D<T,N>::Array2D() :
+    size_(0),
+    a_(NULL)
+{
+    std::cout << "in Array2D<" << N << ">.c'tor()" << std::endl;
+}
 
 
 template <class T, int N>
 Array2D<T,N>::Array2D(const int n) :
     size_(n),
     a_(new T[n*N])
-{}
+{
+    std::cout << "in Array2D<" << N << ">.c'tor(int)" << std::endl;
+}
 
 
 template <class T, int N>
@@ -22,6 +34,7 @@ Array2D<T,N>::Array2D(const Array2D<T,N>& rhs) :
     size_(rhs.size_),
     a_(new T[size_*N])
 {
+    std::cout << "in Array2D<" << N << ">.c'tor(Array2D)" << std::endl;
     for(int i=0; i<size_*N; i++)
 	a_[i] = rhs.a_[i];
 }
@@ -31,37 +44,61 @@ template <class T, int N>
 Array2D<T,N>::Array2D(T* array, const int size) :
     size_(size),
     a_(array)
-{}
+{
+    std::cout << "in Array2D<" << N << ">.c'tor(T*,int)" << std::endl;
+}
 
 
 template <class T, int N>
 Array2D<T,N>::~Array2D()
 {
+    std::cout << "in Array2D<" << N << ">.d'tor()" << std::endl;
     delete [] a_;
 }
 
 
 template <class T, int N>
 Array2D<T,N>& Array2D<T,N>::operator=(const Array2D<T,N>& rhs) {
-    std::cout << "in Array2D<" << dim << "> operator=" << std::endl;
-
-    if(this == &rhs) return;  // if rhs is itself, do nothing
+    std::cout << "in Array2D<" << N << ">.operator=" << std::endl;
+    if(this == &rhs) return *this;  // if rhs is itself, do nothing
 
     if(size_ != rhs.size_) {
+	// copy rhs.a_
 	int n = N*rhs.size_;
-	T* tmp = new T[n];
-
+	auto_array_ptr<T> tmp(new T[n]);
 	for(int i=0; i<n; i++)
 	    tmp[i] = rhs.a_[i];
 
-	delete [] a_;
-	a_ = tmp;
-	size_ = rhs.size_;
-	return;
+	this->reset(tmp.release(), rhs.size_);
+
+	return *this;
     }
 
     for(int i=0; i<N*size_; i++)
 	a_[i] = rhs.a_[i];
+
+    return *this;
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::resize(const int size) {
+    std::cout << "in Array2D<" << N << ">.resize" << std::endl;
+    if (size_ == size) return;
+
+    T* tmp = new T[size];
+    this->reset(tmp, size);
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::reset(T* array, const int size) {
+    std::cout << "in Array2D<" << N << ">.reset" << std::endl;
+    if (a_ == array) return;
+
+    delete [] a_;
+    a_ = array;
+    size_ = size;
 }
 
 
@@ -70,11 +107,11 @@ void Array2D<T,N>::send(const MPI_Comm comm, const int receiver) const {
 
     const int tag = 10;
     MPI_Datatype datatype = typeofT();
-    int ok = MPI_Send(a_, N*size_, datatype,
-		      receiver, tag, comm);
-    if (ok != MPI_SUCCESS) {
+    int result = MPI_Send(a_, N*size_, datatype,
+			  receiver, tag, comm);
+    if (result != MPI_SUCCESS) {
 	std::cerr << " send error!" << std::endl;
-	throw ok;
+	throw result;
     }
 }
 
@@ -85,11 +122,11 @@ void Array2D<T,N>::receive(const MPI_Comm comm, const int sender) {
     const int tag = 10;
     MPI_Status status;
     MPI_Datatype datatype = typeofT();
-    int ok = MPI_Recv(a_, N*size_, datatype,
-		      sender, tag, comm, &status);
-    if (ok != MPI_SUCCESS) {
+    int result = MPI_Recv(a_, N*size_, datatype,
+			  sender, tag, comm, &status);
+    if (result != MPI_SUCCESS) {
 	std::cerr << " receive error!" << std::endl;
-	throw ok;
+	throw result;
     }
 }
 
@@ -98,16 +135,18 @@ template <class T, int N>
 void Array2D<T,N>::broadcast(const MPI_Comm comm, const int broadcaster) {
 
     MPI_Datatype datatype = typeofT();
-    int ok = MPI_Bcast(a_, N*size_, datatype, broadcaster, comm);
-    if (ok != MPI_SUCCESS) {
+    int result = MPI_Bcast(a_, N*size_, datatype, broadcaster, comm);
+    if (result != MPI_SUCCESS) {
 	std::cerr << " broadcast error!" << std::endl;
-	throw ok;
+	throw result;
     }
 }
 
 
 template <class T, int N>
 void Array2D<T,N>::print(const std::string& prefix) const {
+    std::cout << "  " << prefix << ":  addr = " << a_ << std::endl;
+
     for (int n=0; n<size_; n++) {
 	std::cout << "  " << prefix << ":  " << n << ":  ";
 	for (int j=0; j<N; j++)
@@ -137,7 +176,22 @@ MPI_Datatype Array2D<T,N>::typeofT() {
     throw msg;
 }
 
+
+// friend functions
+
+template <class T, int N>
+void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs) {
+    std::cout << "swapping Array2D<" << N << ">" << std::endl;
+
+    if(&lhs == &rhs) return;
+
+    std::swap(lhs.a_, rhs.a_);
+    std::swap(lhs.size_, rhs.size_);
+}
+
+
+
 // version
-// $Id: Array2D.cc,v 1.3 2003/10/16 20:06:02 tan2 Exp $
+// $Id: Array2D.cc,v 1.4 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

@@ -8,24 +8,27 @@
 #if !defined(pyCitcom_Array2D_h)
 #define pyCitcom_Array2D_h
 
-#include <portinfo>
-#include <iostream>
 #include <string>
 #include "mpi.h"
 
 
 template <class T, int N>
 class Array2D {
-    const int size_;
+    int size_;
     T* a_;
 
 public:
+    Array2D();
     explicit Array2D(const int size);
     Array2D(const Array2D<T,N>& rhs);
     Array2D(T* array, const int size);
     ~Array2D();
 
     Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
+    void resize(const int size);
+    void reset(T* array, const int size);
+    template <class T1, int N1>
+    friend void swap(Array2D<T1,N1>& lhs, Array2D<T1,N1>& rhs);
 
     inline int size() const {return size_;}
     void send(const MPI_Comm comm, const int receiver) const;
@@ -64,9 +67,13 @@ private:
 
 
 
+template <class T, int N>
+void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
+
+
 #endif
 
 // version
-// $Id: Array2D.h,v 1.3 2003/10/16 20:06:02 tan2 Exp $
+// $Id: Array2D.h,v 1.4 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file

@@ -40,15 +40,10 @@ void CoarseGridExchanger::gather() {
     interpretate();
 
     if (rank == leader) {
-	const int dim = 3;
-	int size = boundary->size();
-
-	auto_array_ptr<double> tmp(new double[dim*size]);
-
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 	for (int i=0; i<nproc; i++) {
-	    Array2D<double,dim> recV(size);
+	    Array2D<double,dim> recV(boundary->size());
 	    Array2D<double,dim>* V = localV.get();
 
 	    if (i != leader) {
@@ -56,13 +51,12 @@ void CoarseGridExchanger::gather() {
 		V = &recV;
 	    }
 
-	    for (int n=0; n<size; n++)
+	    for (int n=0; n<cgmapping->size(); n++)
 		if (cgmapping->bid2proc(n) == i)
 		    for (int d=0; d<dim; d++)
-			tmp[n*dim+d] = (*V)[d][n];
+			(*outgoingV)[d][n] = (*V)[d][n];
 	}
-
-	outgoingV = Velo(new Array2D<double,dim>(tmp.release(), size));
+	
 	//outgoingV->print("outgoingV");
     }
     else {
@@ -79,26 +73,24 @@ void CoarseGridExchanger::distribute() {
 
 void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
+
     // interpolate velocity field to boundary nodes
-    const int dim = 3;
-    const int size = boundary->size();
-    auto_array_ptr<double> tmp(new double[dim*size]);
+    const int size = cgmapping->size();
 
     for(int i=0; i<size; i++) {
 	int n1 = cgmapping->bid2elem(i);
 	for(int d=0; d<dim; d++)
-	    tmp[i*dim+d] = 0;
+	    (*localV)[d][i] = 0;
 
 	if(n1 != 0) {
 	    for(int mm=1; mm<=E->sphere.caps_per_proc; mm++)
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
 		    for(int d=0; d<dim; d++)
-			tmp[i*dim+d] += cgmapping->shape(i*8+k) * E->sphere.cap[mm].V[d+1][node];
+			(*localV)[d][i] += cgmapping->shape(i*8+k) * E->sphere.cap[mm].V[d+1][node];
 		}
 	}
     }
-    localV = Velo(new Array2D<double,dim>(tmp.release(), size));
     //localV->print("localV");
 }
 
@@ -114,6 +106,17 @@ void CoarseGridExchanger::mapBoundary() {
 void CoarseGridExchanger::createMapping() {
     cgmapping = new CoarseGridMapping(boundary, E, comm, rank, leader);
     mapping = cgmapping;
+}
+
+
+void CoarseGridExchanger::createDataArrays() {
+    std::cout << "in CoarseGridExchanger::createDataArrays" << std::endl;
+
+    localV = Velo(new Array2D<double,3>(cgmapping->size()));
+
+    if (rank == leader)
+	outgoingV = Velo(new Array2D<double,3>(boundary->size()));
+
 }
 
 
@@ -150,7 +153,7 @@ void CoarseGridExchanger::interpolateTemperature() {
   std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
 
   int n1,n2,node;
-  for(int i=0;i<boundary->size();i++) {
+  for(int i=0;i<cgmapping->size();i++) {
       n1 = cgmapping->bid2elem(i);
       n2 = cgmapping->bid2proc(i);
 
@@ -167,6 +170,6 @@ void CoarseGridExchanger::interpolateTemperature() {
 }
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.30 2003/10/16 20:06:02 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.31 2003/10/19 01:01:33 tan2 Exp $
 
 // End of file
