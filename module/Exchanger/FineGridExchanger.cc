@@ -144,11 +144,11 @@ int FineGridExchanger::sendBoundary() {
 
 void FineGridExchanger::mapBoundary() {
     std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
-    boundary->map(E, localLeader);
+    boundary->mapFineGrid(E, localLeader);
 }
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.11 2003/09/17 23:15:59 ces74 Exp $
+// $Id: FineGridExchanger.cc,v 1.12 2003/09/18 16:12:15 puru Exp $
 
 // End of file

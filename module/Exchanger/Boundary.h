@@ -19,7 +19,8 @@ class Boundary {
 public:
     static const int dim = 3;  // spatial dimension
     const int size;            // # of boundary nodes
-
+    const double theta_max, theta_min, phi_max, phi_min, rout, rin;
+    
     int *connectivity;
     double *X[dim];            // coordinate
 
@@ -30,7 +31,7 @@ public:
     ~Boundary();
 
     void init(const All_variables *E);  // initialize connectivity and X
-    void map(const All_variables *E, int localLeader);
+    void mapFineGrid(const All_variables *E, int localLeader);
                                         // initialize bid2gid and bid2proc
     void printConnectivity() const;
     void printX() const;
@@ -54,6 +55,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.4 2003/09/11 21:50:00 tan2 Exp $
+// $Id: Boundary.h,v 1.5 2003/09/18 16:12:15 puru Exp $
 
 // End of file

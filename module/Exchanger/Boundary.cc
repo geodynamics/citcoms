@@ -146,7 +146,7 @@ void Boundary::init(const All_variables *E) {
 
 
 
-void Boundary::map(const All_variables *E, int localLeader) {
+void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
 
     for(int i=0; i<size; i++)
         bid2proc[i]=localLeader;
@@ -197,6 +197,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.6 2003/09/11 21:50:00 tan2 Exp $
+// $Id: Boundary.cc,v 1.7 2003/09/18 16:12:15 puru Exp $
 
 // End of file

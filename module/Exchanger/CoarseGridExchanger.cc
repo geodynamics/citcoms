@@ -130,12 +130,12 @@ void CoarseGridExchanger::receiveBoundary() {
 
 void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
-    boundary->map(E, localLeader);
+    boundary->mapCoarseGrid(E, localLeader);
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.8 2003/09/17 23:15:59 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.9 2003/09/18 16:12:15 puru Exp $
 
 // End of file
