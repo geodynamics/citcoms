@@ -55,6 +55,18 @@ class Exchanger(Component):
 
 
 
+    def preVSolverRun(self):
+        # do nothing, overridden by FGE
+        return
+
+
+
+    def postVSolverRun(self):
+        # do nothing, overridden by CGE
+        return
+
+
+
     def NewStep(self):
         raise NotImplementedError
         return
@@ -118,6 +130,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.9 2003/09/28 20:36:56 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.10 2003/10/01 22:04:41 tan2 Exp $"
 
 # End of file

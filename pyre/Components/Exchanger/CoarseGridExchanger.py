@@ -34,13 +34,13 @@ class CoarseGridExchanger(Exchanger):
 
 
     def initTemperature(self):
+        self.module.initTemperature(self.exchanger)
         # send temperture field to FGE
         #self.module.sendTemperature(self.exchanger)
         return
 
 
-    def solveVelocities(self, vsolver):
-        vsolver.run()
+    def postVSolverRun(self):
         self.applyBoundaryConditions()
         return
 
@@ -58,10 +58,10 @@ class CoarseGridExchanger(Exchanger):
 
 
     def stableTimestep(self, dt):
-        old_dt = dt
-        self.module.exchangeTimestep(self.exchanger, dt)
-        #print "%s - old dt = %g   exchanged dt = %g" % (self.__class__, old_dt, dt)
-        return dt
+        new_dt = self.module.exchangeTimestep(self.exchanger, dt)
+        #print "%s - old dt = %g   exchanged dt = %g" % (
+        #       self.__class__, dt, new_dt)
+        return min(dt, new_dt)
 
 
 
@@ -77,6 +77,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.16 2003/09/30 01:50:24 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.17 2003/10/01 22:04:41 tan2 Exp $"
 
 # End of file

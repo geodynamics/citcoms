@@ -16,6 +16,7 @@ class FineGridExchanger(Exchanger):
         Exchanger.__init__(self, name, facility)
         self.cge_t = 0
         self.fge_t = 0
+        self.toApplyBC = True
         return
 
 
@@ -44,16 +45,14 @@ class FineGridExchanger(Exchanger):
 
 
     def initTemperature(self):
+        self.module.initTemperature(self.exchanger)
         # receive temperture field from CGE
         #self.module.receiveTemperature(self.exchanger)
         return
 
 
-    def solveVelocities(self, vsolver):
-        if self.catchup:
-            self.applyBoundaryConditions()
-
-        vsolver.run()
+    def preVSolverRun(self):
+        self.applyBoundaryConditions()
         return
 
 
@@ -66,9 +65,16 @@ class FineGridExchanger(Exchanger):
 
 
     def applyBoundaryConditions(self):
-        self.module.receiveVelocities(self.exchanger)
-        self.module.distribute(self.exchanger)
-        self.module.imposeBC(self.exchanger)
+        if self.toApplyBC:
+            self.module.receiveVelocities(self.exchanger)
+            self.module.distribute(self.exchanger)
+            self.toApplyBC = False
+            self.module.imposeBC(self.exchanger)
+
+        # applyBC only when previous step is a catchup step
+        if self.catchup:
+            self.toApplyBC = True
+
         return
 
 
@@ -85,10 +91,14 @@ class FineGridExchanger(Exchanger):
             dt = dt - (self.fge_t - self.cge_t)
             self.fge_t = self.cge_t
             self.catchup = True
+            #print "FGE: CATCHUP!"
 
         # store timestep for interpolating boundary velocities
         self.module.storeTimestep(self.exchanger, self.fge_t, self.cge_t)
-        #print "%s - old dt = %g   exchanged dt = %g" % (self.__class__, old_dt, dt)
+
+        #print "%s - old dt = %g   exchanged dt = %g" % (
+        #       self.__class__, old_dt, dt)
+        print "cge_t = %g  fge_t = %g" % (self.cge_t, self.fge_t)
         return dt
 
 
@@ -105,6 +115,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.17 2003/09/30 01:50:24 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.18 2003/10/01 22:04:41 tan2 Exp $"
 
 # End of file
