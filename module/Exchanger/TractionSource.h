@@ -20,20 +20,19 @@ class BoundedMesh;
 
 
 class TractionSource : public AbstractSource {
+    const All_variables* E;
 
 public:
     TractionSource(MPI_Comm comm, int sinkRank,
 		   BoundedMesh& mesh, const All_variables* E,
 		   const BoundedBox& mybbox);
-    virtual ~TractionSource() {};
+    virtual ~TractionSource();
 
     virtual void interpolateTraction(Array2D<double,DIM>& F) const;
     void domain_cutout();
 
 private:
-    void recvMesh(BoundedMesh& mesh);
-    void sendMeshNode() const;
-    void initX(const BoundedMesh& mesh);
+    virtual void createInterpolator(const BoundedMesh& mesh);
 
     // disable these functions
     virtual void interpolateForce(Array2D<double,DIM>& F) const {};
@@ -47,6 +46,6 @@ private:
 #endif
 
 // version
-// $Id: TractionSource.h,v 1.3 2004/01/14 02:11:24 ces74 Exp $
+// $Id: TractionSource.h,v 1.4 2004/02/25 23:07:35 tan2 Exp $
 
 // End of file

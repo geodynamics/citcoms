@@ -24,6 +24,7 @@ class VTInterpolator;
 
 
 class VTSource : public AbstractSource {
+    const All_variables* E;
 
 public:
     VTSource(MPI_Comm comm, int sink,
@@ -35,10 +36,15 @@ public:
     virtual void interpolateVelocity(Array2D<double,DIM>& V) const;
 
 private:
+    virtual void createInterpolator(const BoundedMesh& mesh);
+
+#if 0
     void recvMesh(BoundedMesh& mesh);
     void sendMeshNode() const;
     void initX(const BoundedMesh& mesh);
+#endif
 
+    // disable these functions
     virtual void interpolateForce(Array2D<double,DIM>& F) const {};
     virtual void interpolatePressure(Array2D<double,1>& P) const {};
     virtual void interpolateStress(Array2D<double,DIM>& S) const {};
@@ -54,6 +60,6 @@ private:
 #endif
 
 // version
-// $Id: VTSource.h,v 1.1 2004/02/24 20:20:32 tan2 Exp $
+// $Id: VTSource.h,v 1.2 2004/02/25 23:07:35 tan2 Exp $
 
 // End of file

@@ -15,20 +15,18 @@
 #include "TractionSource.h"
 
 
-TractionSource::TractionSource(MPI_Comm c, int s,
-			       BoundedMesh& mesh, const All_variables* E,
+TractionSource::TractionSource(MPI_Comm comm, int sink,
+			       BoundedMesh& mesh, const All_variables* e,
 			       const BoundedBox& mybbox) :
-    AbstractSource(c, s)
+    AbstractSource(comm, sink, mesh, mybbox),
+    E(e)
 {
-    recvMesh(mesh);
-
-    if(isOverlapped(mesh.bbox(), mybbox)) {
-	interp = new TractionInterpolator(mesh, E, meshNode_);
-	meshNode_.print("meshNode");
-    }
-    sendMeshNode();
-    initX(mesh);
+    init(mesh, mybbox);
 }
+
+
+TractionSource::~TractionSource()
+{}
 
 
 void TractionSource::interpolateTraction(Array2D<double,DIM>& F) const
@@ -46,33 +44,13 @@ void TractionSource::domain_cutout()
 
 // private functions
 
-void TractionSource::recvMesh(BoundedMesh& mesh)
+void TractionSource::createInterpolator(const BoundedMesh& mesh)
 {
-    // assuming sink is broadcasting mesh to every source
-    mesh.broadcast(comm, sink);
-}
-
-
-void TractionSource::sendMeshNode() const
-{
-    meshNode_.sendSize(comm, sink);
-    send(meshNode_);
-}
-
-
-void TractionSource::initX(const BoundedMesh& mesh)
-{
-    X_.resize(meshNode_.size());
-
-    for(int i=0; i<X_.size(); ++i) {
-	int n = meshNode_[0][i];
-	for(int j=0; j<DIM; ++j)
-	    X_[j][i] = mesh.X(j,n);
-    }
+    interp = new TractionInterpolator(mesh, E, meshNode_);
 }
 
 
 // version
-// $Id: TractionSource.cc,v 1.4 2004/01/14 02:11:24 ces74 Exp $
+// $Id: TractionSource.cc,v 1.5 2004/02/25 23:07:35 tan2 Exp $
 
 // End of file

@@ -16,18 +16,12 @@
 
 
 VTSource::VTSource(MPI_Comm comm, int sink,
-		   BoundedMesh& mesh, const All_variables* E,
+		   BoundedMesh& mesh, const All_variables* e,
 		   const BoundedBox& mybbox) :
-    AbstractSource(comm, sink)
+    AbstractSource(comm, sink, mesh, mybbox),
+    E(e)
 {
-    recvMesh(mesh);
-
-    if(isOverlapped(mesh.bbox(), mybbox)) {
-  	interp = new VTInterpolator(mesh, E, meshNode_);
-	meshNode_.print("meshNode");
-    }
-    sendMeshNode();
-    initX(mesh);
+    init(mesh, mybbox);
 }
 
 
@@ -37,9 +31,6 @@ VTSource::~VTSource()
 
 void VTSource::interpolateTemperature(Array2D<double,1>& T) const
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
     if(size())
 	interp->interpolateTemperature(T);
 }
@@ -54,33 +45,13 @@ void VTSource::interpolateVelocity(Array2D<double,DIM>& V) const
 
 // private functions
 
-void VTSource::recvMesh(BoundedMesh& mesh)
+void VTSource::createInterpolator(const BoundedMesh& mesh)
 {
-    // assuming sink is broadcasting mesh to every source
-    mesh.broadcast(comm, sink);
-}
-
-
-void VTSource::sendMeshNode() const
-{
-    meshNode_.sendSize(comm, sink);
-    send(meshNode_);
-}
-
-
-void VTSource::initX(const BoundedMesh& mesh)
-{
-    X_.resize(meshNode_.size());
-
-    for(int i=0; i<X_.size(); ++i) {
-	int n = meshNode_[0][i];
-	for(int j=0; j<DIM; ++j)
-	    X_[j][i] = mesh.X(j,n);
-    }
+    interp = new VTInterpolator(mesh, E, meshNode_);
 }
 
 
 // version
-// $Id: VTSource.cc,v 1.1 2004/02/24 20:20:32 tan2 Exp $
+// $Id: VTSource.cc,v 1.2 2004/02/25 23:07:35 tan2 Exp $
 
 // End of file

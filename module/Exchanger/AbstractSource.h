@@ -14,7 +14,10 @@
 #include "mpi.h"
 #include "utility.h"
 #include "Array2D.h"
-#include "FEMInterpolator.h"
+#include "BoundedBox.h"
+
+class BoundedMesh;
+class FEMInterpolator;
 
 
 class AbstractSource {
@@ -26,8 +29,9 @@ protected:
     FEMInterpolator* interp;
 
 public:
-    AbstractSource(MPI_Comm c, int s) : comm(c), sink(s), interp(NULL) {};
-    virtual ~AbstractSource() {delete interp;}
+    AbstractSource(MPI_Comm c, int sinkRank,
+		   BoundedMesh& mesh, const BoundedBox& mybbox);
+    virtual ~AbstractSource();
 
     inline int size() const {return meshNode_.size();}
     inline const Array2D<double,DIM>& getX() const {return X_;}
@@ -46,7 +50,14 @@ public:
     void send(const Array2D<T1,N1>& array1,
 	      const Array2D<T2,N2>& array2) const;
 
+protected:
+    void init(BoundedMesh& mesh, const BoundedBox& mybbox);
+    virtual void createInterpolator(const BoundedMesh& mesh) = 0;
+
 private:
+    void recvMesh(BoundedMesh& mesh, const BoundedBox& mybbox);
+    void sendMeshNode() const;
+    void initX(const BoundedMesh& mesh);
 
     // disable copy c'tor and assignment operator
     AbstractSource(const AbstractSource&);
@@ -106,6 +117,6 @@ void AbstractSource::send(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: AbstractSource.h,v 1.2 2004/01/08 02:29:37 tan2 Exp $
+// $Id: AbstractSource.h,v 1.3 2004/02/25 23:07:35 tan2 Exp $
 
 // End of file
