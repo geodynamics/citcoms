@@ -191,6 +191,10 @@ struct Shape_function1_dA  {
   double vpt[6*4];
   double ppt[6*1]; };
 
+struct Shape_function_side_dA  {
+  double vpt[4];
+  double ppt[1]; };
+
 struct Shape_function1 	{
     double vpt[4*4];  /* node & gauss pt */
     double ppt[4*1];  };
@@ -597,7 +601,7 @@ struct CONTROL {
     int tracer;
 
 
-    float theta_min, theta_max, fi_min, fi_max;
+    double theta_min, theta_max, fi_min, fi_max;
     float start_age;
     int reset_startage;
     int zero_elapsed_time;
@@ -792,6 +796,8 @@ struct All_variables {
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
     float *stress[NCS];
+    float *gstress[NCS];
+    float *traction[NCS];
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
     float *Fascmb[NCS],*Fascmb_b[NCS];
 
