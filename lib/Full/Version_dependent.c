@@ -531,6 +531,107 @@ if (E->control.verbose)
 
 
 
-return;
- }
+  return;
+}
 
+
+
+void construct_tic_from_input(struct All_variables *E)
+{
+  int i, j, k, kk, m, p, node;
+  int nox, noy, noz, gnoz;
+  double r1, f1, t1;
+  int mm, ll;
+  double con;
+  double modified_plgndr_a(int, int, double);
+
+  noy=E->lmesh.noy;
+  nox=E->lmesh.nox;
+  noz=E->lmesh.noz;
+  gnoz=E->mesh.noz;
+  
+  /* set up a linear temperature profile first */
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(i=1;i<=noy;i++)
+      for(j=1;j<=nox;j++)
+	for(k=1;k<=noz;k++) {
+	  node=k+(j-1)*noz+(i-1)*nox*noz;
+	  r1=E->sx[m][3][node];
+	  E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
+	}
+
+  /* This part put a temperature anomaly at depth where the global
+     node number is equal to load_depth. The horizontal pattern of
+     the anomaly is given by spherical harmonic ll & mm. */
+  
+  for (p=0; p<E->convection.number_of_perturbations; p++) {
+    mm = E->convection.perturb_mm[p];
+    ll = E->convection.perturb_ll[p];
+    con = E->convection.perturb_mag[p];
+    kk = E->convection.load_depth[p];
+
+    if ( (kk < 1) || (kk >= gnoz) ) continue;
+
+    k = kk - E->lmesh.nzs + 1;
+    if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
+    if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0 
+	&& E->sphere.capid[1] == 1 ) 
+      fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
+    
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=noy;i++)
+	for(j=1;j<=nox;j++) {
+	  node=k+(j-1)*noz+(i-1)*nox*noz;
+	  t1=E->sx[m][1][node];
+	  f1=E->sx[m][2][node];
+
+	  E->T[m][node] += con*modified_plgndr_a(ll,mm,t1)*cos(mm*f1);
+	}
+  }
+
+  temperatures_conform_bcs(E);
+
+  return;
+}
+
+
+
+void restart_tic_from_file(struct All_variables *E)
+{
+  int ii, ll, mm;
+  float notusedhere;
+  int i, m;
+  char output_file[255], input_s[1000];
+  FILE *fp;
+
+  float v1, v2, v3, g;
+
+  ii = E->monitor.solution_cycles_init;
+  sprintf(output_file,"%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,ii);
+  fp=fopen(output_file,"r");
+  if (fp == NULL) {
+    fprintf(E->fp,"(Initial_temperature.c #1) Cannot open %s\n",output_file);
+    parallel_process_termination();
+  }
+
+  fgets(input_s,1000,fp);
+  sscanf(input_s,"%d %d %f",&ll,&mm,&notusedhere);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    fgets(input_s,1000,fp);
+    sscanf(input_s,"%d %d",&ll,&mm);
+    for(i=1;i<=E->lmesh.nno;i++)  {
+      fgets(input_s,1000,fp);
+      sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
+
+      /*  E->sphere.cap[m].V[1][i] = d;
+	  E->sphere.cap[m].V[1][i] = e;
+	  E->sphere.cap[m].V[1][i] = f;  */
+      E->T[m][i] = max(0.0,min(g,1.0));
+    }
+  }
+  fclose (fp);
+
+  temperatures_conform_bcs(E);
+  return;
+}

@@ -180,17 +180,17 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
     getScalarProperty(properties, "num_perturbations", num_perturb);
     if(num_perturb > max_perturb) {
-	// max. allowed perturberial types = 40
+	// max. allowed perturbations = 32
 	std::cerr << "'num_perturb' greater than allowed value, set to "
 		  << max_perturb << std::endl;
 	num_perturb = max_perturb;
     }
-    E->number_of_perturbations = num_perturb;
+    E->convection.number_of_perturbations = num_perturb;
 
-    getVectorProperty(properties, "perturbl", E->perturb_ll, num_perturb);
-    getVectorProperty(properties, "perturbm", E->perturb_mm, num_perturb);
-    getVectorProperty(properties, "perturblayer", E->load_depth, num_perturb);
-    getVectorProperty(properties, "perturbmag", E->perturb_mag, num_perturb);
+    getVectorProperty(properties, "perturbl", E->convection.perturb_ll, num_perturb);
+    getVectorProperty(properties, "perturbm", E->convection.perturb_mm, num_perturb);
+    getVectorProperty(properties, "perturblayer", E->convection.load_depth, num_perturb);
+    getVectorProperty(properties, "perturbmag", E->convection.perturb_mag, num_perturb);
 
     if (PyErr_Occurred())
       return NULL;
@@ -703,6 +703,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.11 2003/08/03 00:43:35 tan2 Exp $
+// $Id: setProperties.cc,v 1.12 2003/08/06 21:00:02 tan2 Exp $
 
 // End of file

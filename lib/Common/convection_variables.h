@@ -25,9 +25,10 @@ struct CONVECTION { /* information controlling convection problems */
     int half_space_cooling;
 
     int number_of_perturbations;
-    float perturb_mag[33];
-    float perturb_mm[33];
-    float perturb_ll[33];
+    int perturb_ll[32];
+    int perturb_mm[32];
+    int load_depth[32];
+    float perturb_mag[32];
 
     struct SOURCES {
 	    int number;

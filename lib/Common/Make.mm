@@ -25,6 +25,7 @@ PROJ_SRCS = \
 	Element_calculations.c \
 	General_matrix_functions.c \
 	Global_operations.c \
+	Initial_temperature.c \
 	Instructions.c \
 	Interuption.c \
 	Nodal_mesh.c \
@@ -59,7 +60,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.7 2003/08/06 18:47:45 tan2 Exp $
+# $Id: Make.mm,v 1.8 2003/08/06 21:00:02 tan2 Exp $
 
 #
 # End of file
