@@ -41,8 +41,12 @@ class CoarseGridExchanger(Exchanger):
 
 
 
-    def waitNewStep(self):
+    def NewStep(self):
         # wait until FGE catchs up
+        self.module.wait(self.exchanger)
+
+        # receive temperture field from FGE
+        #self.module.receiveTemperature(self.exchanger)
         return
 
 
@@ -51,6 +55,15 @@ class CoarseGridExchanger(Exchanger):
         self.module.receive(self.exchanger)
         self.module.distribute(self.exchanger)
         return
+
+
+
+    def stableTimestep(self, dt):
+        self.module.exchangeTimestep(self.exchanger, dt)
+        return dt
+
+
+
 
 
     class Inventory(Exchanger.Inventory):
@@ -65,6 +78,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.3 2003/09/09 21:04:45 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.4 2003/09/10 04:01:53 tan2 Exp $"
 
 # End of file

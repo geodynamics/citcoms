@@ -12,6 +12,15 @@ from Exchanger import Exchanger
 class FineGridExchanger(Exchanger):
 
 
+    def __init__(self, name, facility):
+        Exchanger.__init__(self, name, facility)
+        self.catchup = True
+        self.cge_t = 0
+        self.fge_t = 0
+        return
+
+
+
     def createExchanger(self, solver):
         self.exchanger = self.module.createFineGridExchanger(
                                      solver.communicator.handle(),
@@ -43,8 +52,14 @@ class FineGridExchanger(Exchanger):
 
 
 
-    def waitNewStep(self):
-        # no wait
+    def NewStep(self):
+        if self.catchup:
+            # send wakeup signal to CGE
+            self.module.nowait(self.exchanger)
+
+            # send temperture field to CGE
+            #self.module.sendTemperature(self.exchanger)
+
         return
 
 
@@ -53,6 +68,23 @@ class FineGridExchanger(Exchanger):
         self.module.gather(self.exchanger)
         self.module.send(self.exchanger)
         return
+
+
+
+    def stableTimestep(self, dt):
+        if self.catchup:
+            self.cge_t = self.module.exchangeTimestep(self.exchanger, dt)
+            self.fge_t = 0
+            self.catchup = False
+
+        self.fge_t += dt
+
+        if self.fge_t >= self.cge_t:
+            dt = dt - (self.fge_t - self.cge_t)
+            self.catchup = True
+
+        return dt
+
 
 
     class Inventory(Exchanger.Inventory):
@@ -67,6 +99,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.3 2003/09/09 21:04:45 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.4 2003/09/10 04:01:53 tan2 Exp $"
 
 # End of file

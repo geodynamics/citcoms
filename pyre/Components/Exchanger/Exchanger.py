@@ -72,7 +72,7 @@ class Exchanger(Component):
 
 
     def endTimestep(self):
-        raise NotImplementedError
+        #raise NotImplementedError
         return
 
 
@@ -89,6 +89,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.5 2003/09/09 21:04:45 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.6 2003/09/10 04:01:53 tan2 Exp $"
 
 # End of file
