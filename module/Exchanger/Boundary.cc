@@ -22,7 +22,8 @@ Boundary::Boundary() :
 Boundary::Boundary(const All_variables* E,
 		   bool excludeTop,
 		   bool excludeBottom) :
-    Exchanger::Boundary()
+    Exchanger::Boundary(),
+    bnode_(E->lmesh.nno+1, -1)
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
@@ -57,6 +58,9 @@ Boundary::~Boundary()
 void Boundary::initBBox(const All_variables *E)
 {
     bbox_ = tightBBox();
+
+    bbox_[0][2] = E->sphere.ri;
+    bbox_[1][2] = E->sphere.ro;
 }
 
 
@@ -152,6 +156,7 @@ void Boundary::appendNode(const All_variables* E,
     for(int d=0; d<Exchanger::DIM; d++)
 	x[d] = E->sx[m][d+1][node];
 
+    bnode_[node] = X_.size();
     X_.push_back(x);
     nodeID_.push_back(node);
     normal_.push_back(normalFlag);
@@ -159,6 +164,6 @@ void Boundary::appendNode(const All_variables* E,
 
 
 // version
-// $Id: Boundary.cc,v 1.54 2004/06/02 20:27:48 tan2 Exp $
+// $Id: Boundary.cc,v 1.55 2004/07/27 18:14:44 tan2 Exp $
 
 // End of file
