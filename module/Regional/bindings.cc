@@ -155,10 +155,10 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Visc_set_properties__doc__},
 
-    {pyCitcom_Stokes_solver_set_properties__name__,
-     pyCitcom_Stokes_solver_set_properties,
+    {pyCitcom_Imcompressible_set_properties__name__,
+     pyCitcom_Imcompressible_set_properties,
      METH_VARARGS,
-     pyCitcom_Stokes_solver_set_properties__doc__},
+     pyCitcom_Imcompressible_set_properties__doc__},
 
     // from stokes_solver.h
 
@@ -176,31 +176,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_general_stokes_solver,
      METH_VARARGS,
      pyCitcom_general_stokes_solver__doc__},
-
-    {pyCitcom_general_stokes_solver_Unorm__name__,
-     pyCitcom_general_stokes_solver_Unorm,
-     METH_VARARGS,
-     pyCitcom_general_stokes_solver_Unorm__doc__},
-
-//     {pyCitcom_general_stokes_solver_fini__name__,
-//      pyCitcom_general_stokes_solver_fini,
-//      METH_VARARGS,
-//      pyCitcom_general_stokes_solver_fini__doc__},
-
-    {pyCitcom_general_stokes_solver_init__name__,
-     pyCitcom_general_stokes_solver_init,
-     METH_VARARGS,
-     pyCitcom_general_stokes_solver_init__doc__},
-
-    {pyCitcom_general_stokes_solver_log__name__,
-     pyCitcom_general_stokes_solver_log,
-     METH_VARARGS,
-     pyCitcom_general_stokes_solver_log__doc__},
-
-    {pyCitcom_general_stokes_solver_update_velo__name__,
-     pyCitcom_general_stokes_solver_update_velo,
-     METH_VARARGS,
-     pyCitcom_general_stokes_solver_update_velo__doc__},
 
     {pyCitcom_get_system_viscosity__name__,
      pyCitcom_get_system_viscosity,
@@ -233,6 +208,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.26 2003/08/14 22:50:44 tan2 Exp $
+// $Id: bindings.cc,v 1.27 2003/08/15 18:56:57 tan2 Exp $
 
 // End of file

@@ -28,36 +28,6 @@ extern "C"
 PyObject * pyCitcom_general_stokes_solver(PyObject *, PyObject *);
 
 
-extern char pyCitcom_general_stokes_solver_Unorm__name__[];
-extern char pyCitcom_general_stokes_solver_Unorm__doc__[];
-extern "C"
-PyObject * pyCitcom_general_stokes_solver_Unorm(PyObject *, PyObject *);
-
-
-extern char pyCitcom_general_stokes_solver_fini__name__[];
-extern char pyCitcom_general_stokes_solver_fini__doc__[];
-extern "C"
-PyObject * pyCitcom_general_stokes_solver_fini(PyObject *, PyObject *);
-
-
-extern char pyCitcom_general_stokes_solver_init__name__[];
-extern char pyCitcom_general_stokes_solver_init__doc__[];
-extern "C"
-PyObject * pyCitcom_general_stokes_solver_init(PyObject *, PyObject *);
-
-
-extern char pyCitcom_general_stokes_solver_log__name__[];
-extern char pyCitcom_general_stokes_solver_log__doc__[];
-extern "C"
-PyObject * pyCitcom_general_stokes_solver_log(PyObject *, PyObject *);
-
-
-extern char pyCitcom_general_stokes_solver_update_velo__name__[];
-extern char pyCitcom_general_stokes_solver_update_velo__doc__[];
-extern "C"
-PyObject * pyCitcom_general_stokes_solver_update_velo(PyObject *, PyObject *);
-
-
 extern char pyCitcom_get_system_viscosity__name__[];
 extern char pyCitcom_get_system_viscosity__doc__[];
 extern "C"
@@ -91,6 +61,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: stokes_solver.h,v 1.3 2003/08/14 22:50:44 tan2 Exp $
+// $Id: stokes_solver.h,v 1.4 2003/08/15 18:56:57 tan2 Exp $
 
 // End of file

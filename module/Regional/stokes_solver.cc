@@ -72,82 +72,6 @@ PyObject * pyCitcom_general_stokes_solver(PyObject *self, PyObject *args)
 
 
 
-char pyCitcom_general_stokes_solver_Unorm__doc__[] = "";
-char pyCitcom_general_stokes_solver_Unorm__name__[] = "general_stokes_solver_Unorm";
-
-PyObject * pyCitcom_general_stokes_solver_Unorm(PyObject *self, PyObject *args)
-{
-    double Udot_mag, dUdot_mag;
-
-    general_stokes_solver_Unorm(E, &Udot_mag, &dUdot_mag);
-
-    return Py_BuildValue("dd", Udot_mag, dUdot_mag);
-}
-
-
-
-char pyCitcom_general_stokes_solver_fini__doc__[] = "";
-char pyCitcom_general_stokes_solver_fini__name__[] = "general_stokes_solver_fini";
-
-PyObject * pyCitcom_general_stokes_solver_fini(PyObject *self, PyObject *args)
-{
-    general_stokes_solver_fini(E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyCitcom_general_stokes_solver_init__doc__[] = "";
-char pyCitcom_general_stokes_solver_init__name__[] = "general_stokes_solver_init";
-
-PyObject * pyCitcom_general_stokes_solver_init(PyObject *self, PyObject *args)
-{
-    general_stokes_solver_init(E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyCitcom_general_stokes_solver_log__doc__[] = "";
-char pyCitcom_general_stokes_solver_log__name__[] = "general_stokes_solver_log";
-
-PyObject * pyCitcom_general_stokes_solver_log(PyObject *self, PyObject *args)
-{
-    double Udot_mag, dUdot_mag;
-    int count;
-
-    if (!PyArg_ParseTuple(args, "ddi:general_stokes_solver_log", &Udot_mag, &dUdot_mag, &count))
-        return NULL;
-
-    if(E->parallel.me==0){
-	fprintf(stderr,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
-	fprintf(E->fp,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
-	fflush(E->fp);
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyCitcom_general_stokes_solver_update_velo__doc__[] = "";
-char pyCitcom_general_stokes_solver_update_velo__name__[] = "general_stokes_solver_update_velo";
-
-PyObject * pyCitcom_general_stokes_solver_update_velo(PyObject *self, PyObject *args)
-{
-    general_stokes_solver_update_velo(E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
 char pyCitcom_get_system_viscosity__doc__[] = "";
 char pyCitcom_get_system_viscosity__name__[] = "get_system_viscosity";
 
@@ -215,6 +139,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 
 
 // version
-// $Id: stokes_solver.cc,v 1.4 2003/08/14 22:50:44 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.5 2003/08/15 18:56:57 tan2 Exp $
 
 // End of file
