@@ -36,6 +36,7 @@ public:
     void imposeIC();
 
 private:
+    void setVBCFlag();
     void imposeTIC();
     void imposeVIC();
 
@@ -61,6 +62,6 @@ private:
 #endif
 
 // version
-// $Id: InteriorImposing.h,v 1.6 2004/01/17 02:10:38 puru Exp $
+// $Id: InteriorImposing.h,v 1.7 2004/01/22 20:06:07 puru Exp $
 
 // End of file

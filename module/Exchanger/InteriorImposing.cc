@@ -15,6 +15,13 @@
 #include "Source.h"
 #include "InteriorImposing.h"
 
+extern "C" {
+    void check_bc_consistency(const All_variables *E);
+    void construct_id(const All_variables *E);
+    void temperatures_conform_bcs(All_variables* E);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +39,27 @@ InteriorImposingSink::InteriorImposingSink(const Interior& i, const Sink& s,
 	  << "in InteriorImposingSink::Citcom"
 	  << " sink.size = " << sink.size()
 	  << journal::end;
+
+}
+
+void InteriorImposingSink::setVBCFlag()
+{
+    // Because CitcomS' default side BC is reflecting,
+    // here we should change to velocity BC.
+    const int m = 1;
+    for(int i=0; i<sink.size(); i++) {
+	int n = interior.nodeID(sink.meshNode(i));
+	E->node[m][n] = E->node[m][n] | VBX;
+	E->node[m][n] = E->node[m][n] | VBY;
+	E->node[m][n] = E->node[m][n] | VBZ;
+	E->node[m][n] = E->node[m][n] & (~SBX);
+	E->node[m][n] = E->node[m][n] & (~SBY);
+	E->node[m][n] = E->node[m][n] & (~SBZ);
+    }
+
+    check_bc_consistency(E);
+    // reconstruct ID array to reflect changes in VBC
+    construct_id(E);
 }
 
 
@@ -59,6 +87,8 @@ void InteriorImposingSink::recvV()
     
     sink.recvArray2D(vic);
 
+    setVBCFlag();
+    
     Convertor& convertor = Convertor::instance();
     convertor.xvelocity(vic,sink.getX());
 
@@ -143,6 +173,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.13 2004/01/21 00:13:53 puru Exp $
+// $Id: InteriorImposing.cc,v 1.14 2004/01/22 20:06:07 puru Exp $
 
 // End of file
