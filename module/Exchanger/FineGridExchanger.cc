@@ -311,9 +311,9 @@ void FineGridExchanger::reduceOutflow(const double outflow,
 
 	auto_array_ptr<double> tmp(new double[dim*size]);
 
-	for(int i=0; i<size; i++)
+	for(int n=0; n<size; n++)
 	    for(int j=0; j<dim; j++)
-		tmp[i*dim+j] = (*incomingV)(i,j);
+		tmp[n*dim+j] = (*incomingV)(j,n);
 
 	for(int n=0; n<size; n++) {
             for(int j=0; j<dim; j++)
@@ -331,6 +331,6 @@ void FineGridExchanger::reduceOutflow(const double outflow,
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.22 2003/10/11 00:38:46 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.23 2003/10/15 18:51:24 tan2 Exp $
 
 // End of file
