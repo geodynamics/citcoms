@@ -101,6 +101,12 @@ extern "C"
 PyObject * pyExchanger_sendTraction(PyObject *, PyObject *);
 
 
+extern char pyExchanger_domain_cutout__name__[];
+extern char pyExchanger_domain_cutout__doc__[];
+extern "C"
+PyObject * pyExchanger_domain_cutout(PyObject *, PyObject *);
+
+
 extern char pyExchanger_recvT__name__[];
 extern char pyExchanger_recvT__doc__[];
 extern "C"
@@ -155,6 +161,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.23 2003/11/25 17:58:15 puru Exp $
+// $Id: exchangers.h,v 1.24 2003/11/28 22:25:00 ces74 Exp $
 
 // End of file
