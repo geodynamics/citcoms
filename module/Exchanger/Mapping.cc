@@ -17,7 +17,6 @@
 Mapping::Mapping(const int dim, const int size) :
     dim_(dim),
     size_(size),
-    memsize_(size),
     bid2proc_(size)
 {}
 
@@ -66,6 +65,14 @@ void Mapping::sendBid2proc(const MPI_Comm comm,
 }
 
 
+void Mapping::resize(const int n) {
+    if (n == size_) return;
+
+    bid2proc_.resize(n);
+    size_ = n;
+}
+
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
@@ -91,6 +98,15 @@ CoarseGridMapping::CoarseGridMapping(const Boundary* boundary,
 
 void CoarseGridMapping::printBid2elem(const std::string& prefix) const {
     bid2elem_.print(prefix + " elem");
+}
+
+
+void CoarseGridMapping::resize(const int n) {
+    if (n == size_) return;
+
+    bid2elem_.resize(n);
+    shape_.resize(8*n);
+    Mapping::resize(n);
 }
 
 
@@ -306,6 +322,14 @@ void FineGridMapping::printBid2gid(const std::string& prefix) const {
 }
 
 
+void FineGridMapping::resize(const int n) {
+    if (n == size_) return;
+
+    bid2gid_.resize(n);
+    Mapping::resize(n);
+}
+
+
 void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 					const All_variables* E) {
 
@@ -392,14 +416,20 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
     printBid2gid();
 
     if(nodes != size_) {
-	const std::string msg = " nodes != size ";
-	std::cerr << msg << std::endl;
-	throw msg;
+	if(nodes < size_) {
+	    this->resize(nodes);
+	    boundary->resize(nodes);
+	}
+	else {
+	    const std::string msg = " nodes > size ";
+	    std::cerr << msg << std::endl;
+	    throw msg;
+	}
     }
 }
 
 
 // version
-// $Id: Mapping.cc,v 1.3 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Mapping.cc,v 1.4 2003/10/22 01:15:47 tan2 Exp $
 
 // End of file

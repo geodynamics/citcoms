@@ -20,7 +20,6 @@ class Mapping {
 protected:
     const int dim_;
     int size_;
-    const int memsize_;
     Array2D<int,1> bid2proc_; // bid -> proc. rank
 
 public:
@@ -30,6 +29,7 @@ public:
     inline const int size() const {return size_;}
     inline int bid2proc(const int n) const {return bid2proc_[0][n];};
     void printBid2proc(const std::string& prefix="") const;
+    virtual void resize(const int n);
 
 protected:
     void sendBid2proc(const MPI_Comm comm,
@@ -52,6 +52,7 @@ public:
     inline int bid2elem(const int n) const {return bid2elem_[0][n];};
     inline double shape(const int n) const {return shape_[0][n];};
     void printBid2elem(const std::string& prefix="") const;
+    virtual void resize(const int n);
 
 private:
     void findMaxGridSpacing(const All_variables* E, double& theta_tol,
@@ -82,6 +83,7 @@ public:
 
     inline int bid2gid(const int n) const {return bid2gid_[0][n];};
     void printBid2gid(const std::string& prefix="") const;
+    virtual void resize(const int n);
 
 private:
     void findBoundaryNodes(Boundary* boundary, const All_variables* E);
@@ -91,6 +93,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.4 2003/10/19 19:54:12 tan2 Exp $
+// $Id: Mapping.h,v 1.5 2003/10/22 01:15:47 tan2 Exp $
 
 // End of file

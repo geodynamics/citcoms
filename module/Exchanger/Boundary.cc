@@ -16,7 +16,8 @@
 
 
 Boundary::Boundary(const All_variables* E) :
-    size_(E->mesh.nno - (E->mesh.nox-2)*(E->mesh.noy-2)*(E->mesh.noz-2)),
+    // boundary = all - interior
+    size_(E->lmesh.nno - (E->lmesh.nox-2)*(E->lmesh.noy-2)*(E->lmesh.noz-2)),
     bounds_(2),
     X_(size_)
 {
@@ -91,6 +92,14 @@ void Boundary::broadcast(const MPI_Comm comm, const int broadcaster) {
 }
 
 
+void Boundary::resize(const int n) {
+    if (n == size_) return;
+
+    X_.resize(n);
+    size_ = n;
+}
+
+
 void Boundary::printBounds(const std::string& prefix) const {
     bounds_.print(prefix + "  bounds");
 }
@@ -102,6 +111,6 @@ void Boundary::printX(const std::string& prefix) const {
 
 
 // version
-// $Id: Boundary.cc,v 1.35 2003/10/20 17:13:08 tan2 Exp $
+// $Id: Boundary.cc,v 1.36 2003/10/22 01:15:47 tan2 Exp $
 
 // End of file

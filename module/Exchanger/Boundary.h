@@ -43,6 +43,8 @@ public:
     void receive(const MPI_Comm comm, const int sender);
     void broadcast(const MPI_Comm comm, const int broadcaster);
 
+    void resize(const int n);
+
     void printBounds(const std::string& prefix="") const;
     void printX(const std::string& prefix="") const;
 
@@ -56,6 +58,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.19 2003/10/20 17:13:08 tan2 Exp $
+// $Id: Boundary.h,v 1.20 2003/10/22 01:15:47 tan2 Exp $
 
 // End of file
