@@ -82,7 +82,7 @@ class FineGridExchanger(Exchanger):
                               self.interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["Intr"][i] = self.module.createSource(
+            self.source["Intr"][i] = self.module.VTSource_create(
                                                      comm.handle(),
                                                      sinkRank,
                                                      b,
@@ -92,18 +92,27 @@ class FineGridExchanger(Exchanger):
 
 
     def createBC(self):
-        self.BC = self.module.createBCSink(self.communicator.handle(),
-                                           self.boundary,
-                                           self.sink["BC"],
-                                           self.all_variables)
+        if self.inventory.incompressibility:
+            self.BC = self.module.BoundaryVTInlet_create(self.communicator.handle(),
+                                                         self.boundary,
+                                                         self.sink["BC"],
+                                                         self.all_variables,
+                                                         "VT")
+        else:
+            self.BC = self.module.VTInlet_create(self.boundary,
+                                                 self.sink["BC"],
+                                                 self.all_variables,
+                                                 "VT")
+
         return
 
 
     def createII(self):
         for i, src in zip(range(self.numSrc),
                           self.source["Intr"]):
-            self.II[i] = self.module.createIISource(src,
-                                                    self.all_variables)
+            self.II[i] = self.module.VTOutlet_create(src,
+                                                     self.all_variables,
+                                                     "T")
         return
 
 
@@ -143,17 +152,24 @@ class FineGridExchanger(Exchanger):
         if self.catchup:
             # send temperture field to CGE
             for ii in self.II:
-                self.module.sendT(ii)
+                self.module.VTOutlet_send(ii)
 
         return
 
 
     def applyBoundaryConditions(self):
         if self.toApplyBC:
-            self.module.recvTandV(self.BC)
+            if self.inventory.incompressibility:
+                self.module.BoundaryVTInlet_recv(self.BC)
+            else:
+                self.module.VTInlet_recv(self.BC)
+
             self.toApplyBC = False
 
-        self.module.imposeBC(self.BC)
+        if self.inventory.incompressibility:
+            self.module.BoundaryVTInlet_impose(self.BC)
+        else:
+            self.module.VTInlet_impose(self.BC)
 
         # applyBC only when previous step is a catchup step
         if self.catchup:
@@ -182,7 +198,10 @@ class FineGridExchanger(Exchanger):
             #print "FGE: CATCHUP!"
 
         # store timestep for interpolating boundary velocities
-        self.module.storeTimestep(self.BC, self.fge_t, self.cge_t)
+        if self.inventory.incompressibility:
+            self.module.BoundaryVTInlet_storeTimestep(self.BC, self.fge_t, self.cge_t)
+        else:
+            self.module.VTInlet_storeTimestep(self.BC, self.fge_t, self.cge_t)
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)
@@ -207,11 +226,13 @@ class FineGridExchanger(Exchanger):
 
         inventory = [
 
+            prop.bool("incompressibility", default=True),
+
             ]
 
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.31 2004/01/13 18:53:43 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.32 2004/02/25 00:54:42 tan2 Exp $"
 
 # End of file

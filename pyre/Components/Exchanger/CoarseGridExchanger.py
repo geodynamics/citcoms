@@ -72,7 +72,7 @@ class CoarseGridExchanger(Exchanger):
                               self.boundary):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["BC"][i] = self.module.createSource(comm.handle(),
+            self.source["BC"][i] = self.module.VTSource_create(comm.handle(),
                                                             sinkRank,
                                                             b,
                                                             self.all_variables,
@@ -90,15 +90,17 @@ class CoarseGridExchanger(Exchanger):
     def createBC(self):
         for i, src in zip(range(self.numSrc),
                           self.source["BC"]):
-            self.BC[i] = self.module.createBCSource(src,
-                                                    self.all_variables)
+            self.BC[i] = self.module.VTOutlet_create(src,
+                                                     self.all_variables,
+                                                     "VT")
         return
 
 
     def createII(self):
-        self.II = self.module.createIISink(self.interior,
-                                           self.sink["Intr"],
-                                           self.all_variables)
+        self.II = self.module.VTInlet_create(self.interior,
+                                             self.sink["Intr"],
+                                             self.all_variables,
+                                             "t")
         return
 
 
@@ -153,14 +155,14 @@ class CoarseGridExchanger(Exchanger):
 
     def NewStep(self):
         # receive temperture field from FGE
-        self.module.recvT(self.II)
-        self.module.imposeIC(self.II)
+        self.module.VTInlet_recv(self.II)
+        self.module.VTInlet_impose(self.II)
         return
 
 
     def applyBoundaryConditions(self):
         for bc in self.BC:
-            self.module.sendTandV(bc)
+            self.module.VTOutlet_send(bc)
         return
 
 
@@ -195,6 +197,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.29 2004/01/13 18:53:43 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.30 2004/02/25 00:54:42 tan2 Exp $"
 
 # End of file
