@@ -1,18 +1,11 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#                               Michael A.G. Aivazis
-#                                  Steve Quenette
-#                        California Institute of Technology
-#                        (C) 1998-2003  All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# version
-# $Id: Make.mm,v 1.6 2003/07/29 20:54:43 tan2 Exp $
 
 include local.def
 
@@ -41,7 +34,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.6 2003/07/29 20:54:43 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/07 18:41:42 tan2 Exp $
 
 #
 # End of file

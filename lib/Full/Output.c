@@ -16,7 +16,10 @@ void output_surf_botm(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
 void output_mat(struct All_variables *);
 
-void parallel_process_termination();
+extern void parallel_process_termination();
+extern void heat_flux(struct All_variables *);
+extern void get_STD_topo(struct All_variables *, float**, float**,
+			 float**, float**, int);
 
 /**********************************************************************/
 
@@ -132,8 +135,6 @@ void output_surf_botm(struct All_variables *E, int cycles)
   char output_file[255];
   FILE* fp2;
 
-  void heat_flux();
-  void get_STD_topo();
 
   heat_flux(E);
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
