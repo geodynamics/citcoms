@@ -23,7 +23,7 @@ class Solver(BaseSolver):
         self.intercomm = None
         self.coupler = None
 
-        self.leaderRank = 0
+        self.leader = 0
         self.localLeader = 0
         self.remoteLeader = 0
 	self._start_cpu_time = 0
@@ -41,7 +41,7 @@ class Solver(BaseSolver):
         # if there is a coupler, initialize it
         if application.inventory.coupler:
             self.intercomm = application.intercomm
-            self.leaderRank = application.leaderRank
+            self.leader = application.leader
             self.localLeader = application.localLeader
             self.remoteLeader = application.remoteLeader
             self.coupler = application.inventory.coupler
@@ -229,6 +229,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.20 2003/09/27 20:24:46 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.21 2003/09/28 00:30:50 tan2 Exp $"
 
 # End of file
