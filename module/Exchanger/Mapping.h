@@ -42,7 +42,9 @@ protected:
 class CoarseGridMapping : public Mapping {
     Array2D<int,1> bid2elem_; // bid -> elem from which fields are interpolated in CG
     Array2D<double,1> shape_; // shape functions for interpolation
-
+    int interiornodes;
+    double *Xinterior;
+    
 public:
     CoarseGridMapping(const Boundary* b, const All_variables* E,
 		      const MPI_Comm comm,
@@ -53,6 +55,7 @@ public:
     inline double shape(const int n) const {return shape_[0][n];};
     void printBid2elem(const std::string& prefix="") const;
     virtual void resize(const int n);
+    void FindInteriorNodes(const Boundary* boundary,const All_variables* E) const;
 
 private:
     void findMaxGridSpacing(const All_variables* E, double& theta_tol,
@@ -93,6 +96,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.5 2003/10/22 01:15:47 tan2 Exp $
+// $Id: Mapping.h,v 1.6 2003/10/23 18:26:53 puru Exp $
 
 // End of file
