@@ -105,26 +105,15 @@ PyObject * pyCitcom_general_stokes_solver(PyObject *self, PyObject *args)
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
-    general_stokes_solver(E);
+    if(E->control.pseudo_free_surf)
+	    if(E->mesh.topvbc==2)
+		    general_stokes_solver_pseudo_surf(E);
+	    else
+		    assert(0);
+    else
+	    general_stokes_solver(E);
 
-    Py_INCREF(Py_None);
-    return Py_None;
-}
 
-
-char pyCitcom_general_stokes_solver_pseudo_surf__doc__[] = "";
-char pyCitcom_general_stokes_solver_pseudo_surf__name__[] = "general_stokes_solver_pseudo_surf";
-
-PyObject * pyCitcom_general_stokes_solver_pseudo_surf(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:general_stokes_solver_pseudo_surf", &obj))
-        return NULL;
-
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
-
-    general_stokes_solver_pseudo_surf(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -270,6 +259,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative_pseudo_surf(PyObject *self,
 }
 
 // version
-// $Id: stokes_solver.cc,v 1.9 2005/01/08 03:02:18 ces74 Exp $
+// $Id: stokes_solver.cc,v 1.10 2005/01/08 03:20:32 ces74 Exp $
 
 // End of file

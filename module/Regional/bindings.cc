@@ -156,11 +156,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_output__doc__},
 
-    {pyCitcom_output_pseudo_surf__name__,
-     pyCitcom_output_pseudo_surf,
-     METH_VARARGS,
-     pyCitcom_output_pseudo_surf__doc__},
-
     // from setProperties.h
 
     {pyCitcom_Advection_diffusion_set_properties__name__,
@@ -235,11 +230,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_general_stokes_solver__doc__},
 
-    {pyCitcom_general_stokes_solver_pseudo_surf__name__,
-     pyCitcom_general_stokes_solver_pseudo_surf,
-     METH_VARARGS,
-     pyCitcom_general_stokes_solver_pseudo_surf__doc__},
-
     {pyCitcom_general_stokes_solver_setup__name__,
      pyCitcom_general_stokes_solver_setup,
      METH_VARARGS,
@@ -280,6 +270,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.35 2005/01/08 03:02:18 ces74 Exp $
+// $Id: bindings.cc,v 1.36 2005/01/08 03:20:32 ces74 Exp $
 
 // End of file
