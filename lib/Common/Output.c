@@ -74,7 +74,7 @@ void output_coord(struct All_variables *E)
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+      fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
   }
 
   fclose(fp1);
@@ -97,7 +97,7 @@ void output_visc(struct All_variables *E, int cycles)
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.3e\n",E->VI[lev][j][i]);
+      fprintf(fp1,"%.4e\n",E->VI[lev][j][i]);
   }
 
   fclose(fp1);
