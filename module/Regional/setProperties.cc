@@ -556,9 +556,6 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     else
 	E->viscosity.FROM_SYSTEM = 0;
 
-    getScalarProperty(properties, "rheol", E->viscosity.RHEOL, m);
-
-
     getScalarProperty(properties, "visc_smooth_method", E->viscosity.smooth_cycles, m);
     getScalarProperty(properties, "VISC_UPDATE", E->viscosity.update_allowed, m);
 
@@ -578,10 +575,13 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 			E->viscosity.N0, num_mat, m);
 
     getScalarProperty(properties, "TDEPV", E->viscosity.TDEPV, m);
+    getScalarProperty(properties, "rheol", E->viscosity.RHEOL, m);
     getVectorProperty(properties, "viscE",
 			E->viscosity.E, num_mat, m);
     getVectorProperty(properties, "viscT",
 			E->viscosity.T, num_mat, m);
+    getVectorProperty(properties, "viscZ",
+			E->viscosity.Z, num_mat, m);
 
     getScalarProperty(properties, "SDEPV", E->viscosity.SDEPV, m);
     getScalarProperty(properties, "sdepv_misfit", E->viscosity.sdepv_misfit, m);
@@ -787,6 +787,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.29 2005/01/19 01:05:50 tan2 Exp $
+// $Id: setProperties.cc,v 1.30 2005/01/19 18:55:00 tan2 Exp $
 
 // End of file

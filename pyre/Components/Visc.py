@@ -16,7 +16,6 @@ class Visc(CitcomComponent):
         CitcomComponent.__init__(self, name, facility)
 
         self.inventory.Viscosity = "system"
-        self.inventory.rheol = 3
         self.inventory.visc_smooth_method = 3
         return
 
@@ -54,8 +53,10 @@ class Visc(CitcomComponent):
             pyre.properties.list("visc0", [1, 1, 1, 1]),
 
             pyre.properties.bool("TDEPV", False),
+            pyre.properties.int("rheol", 3),
             pyre.properties.list("viscE", [1, 1, 1, 1]),
             pyre.properties.list("viscT", [1, 1, 1, 1]),
+            pyre.properties.list("viscZ", [1, 1, 1, 1]),
 
             pyre.properties.bool("SDEPV",False),
             pyre.properties.list("sdepv_expt", [1, 1, 1, 1]),
@@ -70,6 +71,6 @@ class Visc(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.10 2004/05/26 23:55:38 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.11 2005/01/19 18:55:00 tan2 Exp $"
 
 # End of file
