@@ -7,12 +7,10 @@
 
 void parallel_process_termination();
 void temperatures_conform_bcs();
-void construct_tic_from_input(struct All_variables *);
 
 #include "initial_temperature.h"
-void restart_tic(struct All_variables *);
-void construct_tic(struct All_variables *);
 void debug_tic(struct All_variables *);
+void construct_tic_from_input(struct All_variables *);
 void restart_tic_from_file(struct All_variables *);
 
 
