@@ -13,7 +13,6 @@
 #include "journal/journal.h"
 #include "Boundary.h"
 #include "TractionInterpolator.h"
-#include <fstream>
 
 extern "C" {
 
@@ -21,13 +20,12 @@ extern "C" {
 
     void construct_side_c3x3matrix_el(const struct All_variables*, int,
 				      struct CC*, struct CCX*,
-                                      int, int, int,
-				      int, int);
+				      int lev,int m,int pressure,int side);
     void get_global_side_1d_shape_fn(const struct All_variables*, int,
 				     struct Shape_function1*,
 				     struct Shape_function1_dx*,
 				     struct Shape_function_side_dA*,
-				     int, int, int);
+				     int side, int m);
 }
 
 
@@ -131,6 +129,9 @@ void TractionInterpolator::get_elt_traction(int el,
     int elx,ely,elz;
     double temp,x[4];
     int *elist[3];
+    int side[3][2] = {{SIDE_NORTH, SIDE_SOUTH},
+		      {SIDE_WEST, SIDE_EAST},
+		      {SIDE_BOTTOM, SIDE_TOP}};
 
     double traction[4][5],traction_at_gs[4][5];
     struct Shape_function1 GM;
@@ -168,8 +169,8 @@ void TractionInterpolator::get_elt_traction(int el,
 	}
     }
 
-    construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,lev,m,0,NS,far);
-    get_global_side_1d_shape_fn(E,el,&GM,&GMx,&dGamma,NS,far,m);
+    construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,lev,m,0,side[NS][far]);
+    get_global_side_1d_shape_fn(E,el,&GM,&GMx,&dGamma,side[NS][far],m);
 
     // if normal is in theta direction: 0, in fi: 1, and in r: 2
     if(NS==0)
@@ -246,6 +247,6 @@ void TractionInterpolator::get_elt_traction(int el,
 
 
 // version
-// $Id: TractionInterpolator.cc,v 1.10 2004/03/28 23:19:00 tan2 Exp $
+// $Id: TractionInterpolator.cc,v 1.11 2004/04/10 01:05:46 tan2 Exp $
 
 // End of file
