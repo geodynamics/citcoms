@@ -27,8 +27,7 @@ extern "C" {
     void set_cg_defaults(struct All_variables*);
     void set_mg_defaults(struct All_variables*);
     void solve_constrained_flow_iterative(struct All_variables*);
-
-
+      
 }
 
 
@@ -202,6 +201,6 @@ PyObject * pyRegional_solve_constrained_flow_iterative(PyObject *self, PyObject 
 
 
 // version
-// $Id: stokes_solver.cc,v 1.1 2003/07/15 00:40:03 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.2 2003/07/23 05:19:16 ces74 Exp $
 
 // End of file

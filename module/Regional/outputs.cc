@@ -124,11 +124,17 @@ PyObject * pyRegional_output_visc_prepare(PyObject *self, PyObject *args)
 {
     float **pt;
     PyObject *obj;
+    float **visc;
 
-    pt = output_visc_prepare(E);
-    obj = PyCObject_FromVoidPtr((void *)pt, NULL);
+    if (!PyArg_ParseTuple(args, "O:output_visc_prepare", &obj))
+        return NULL;
 
-    return Py_BuildValue("O", obj);
+    visc = static_cast<float**> (PyCObject_AsVoidPtr(obj));
+
+    output_visc_prepare(E,visc);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 
@@ -229,6 +235,6 @@ PyObject * pyRegional_output_bottom(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.5 2003/05/23 17:49:11 tan2 Exp $
+// $Id: outputs.cc,v 1.6 2003/07/23 05:19:16 ces74 Exp $
 
 // End of file

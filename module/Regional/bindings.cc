@@ -145,15 +145,40 @@ struct PyMethodDef pyRegional_methods[] = {
 
     // from setProperties.h
 
-    {pyRegional_BC_set_prop__name__,
-     pyRegional_BC_set_prop,
+    {pyRegional_BC_set_properties__name__,
+     pyRegional_BC_set_properties,
      METH_VARARGS,
-     pyRegional_BC_set_prop__doc__},
+     pyRegional_BC_set_properties__doc__},
 
-    {pyRegional_Visc_set_prop__name__,
-     pyRegional_Visc_set_prop,
+    {pyRegional_Visc_set_properties__name__,
+     pyRegional_Visc_set_properties,
      METH_VARARGS,
-     pyRegional_Visc_set_prop__doc__},
+     pyRegional_Visc_set_properties__doc__},
+
+    {pyRegional_IC_set_properties__name__,
+     pyRegional_IC_set_properties,
+     METH_VARARGS,
+     pyRegional_IC_set_properties__doc__},
+
+    {pyRegional_Const_set_properties__name__,
+     pyRegional_Const_set_properties,
+     METH_VARARGS,
+     pyRegional_Const_set_properties__doc__},
+
+    {pyRegional_Parallel_set_properties__name__,
+     pyRegional_Parallel_set_properties,
+     METH_VARARGS,
+     pyRegional_Parallel_set_properties__doc__},
+
+    {pyRegional_Param_set_properties__name__,
+     pyRegional_Param_set_properties,
+     METH_VARARGS,
+     pyRegional_Param_set_properties__doc__},
+
+    {pyRegional_Phase_set_properties__name__,
+     pyRegional_Phase_set_properties,
+     METH_VARARGS,
+     pyRegional_Phase_set_properties__doc__},
 
     // from stokes_solver.h
 
@@ -172,10 +197,10 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_general_stokes_solver_Unorm__doc__},
 
-    {pyRegional_general_stokes_solver_fini__name__,
-     pyRegional_general_stokes_solver_fini,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_fini__doc__},
+//     {pyRegional_general_stokes_solver_fini__name__,
+//      pyRegional_general_stokes_solver_fini,
+//      METH_VARARGS,
+//      pyRegional_general_stokes_solver_fini__doc__},
 
     {pyRegional_general_stokes_solver_init__name__,
      pyRegional_general_stokes_solver_init,
@@ -223,6 +248,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.16 2003/07/22 21:58:08 tan2 Exp $
+// $Id: bindings.cc,v 1.17 2003/07/23 05:19:16 ces74 Exp $
 
 // End of file
