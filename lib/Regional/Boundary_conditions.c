@@ -2,6 +2,7 @@
 #include "global_defs.h"
 #include <math.h>
 
+#include "lith_age.h"
 /* ========================================== */
 
 void velocity_boundary_conditions(E)
@@ -123,7 +124,7 @@ void temperature_boundary_conditions(E)
 /* set the regions in which to use lithosphere files to determine temperature 
    note that this is called if the lithosphere age in inputted every time step
    OR it is only maintained in the boundary regions */
-     temperature_lith_adj(E,lev);
+      lith_age_temperature_bound_adj(E,lev);
     }
 
     temperatures_conform_bcs(E);
@@ -355,8 +356,8 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
   else 
       rowl = E->lmesh.NOZ[level];
    
-  if ( ROW==1&&E->parallel.me_locl[3]==0 ||
-       ROW==E->lmesh.NOZ[level]&&E->parallel.me_locl[3]==E->parallel.nproczl-1 ) {
+  if ( (ROW==1 && E->parallel.me_locl[3]==0) ||
+       (ROW==E->lmesh.NOZ[level] && E->parallel.me_locl[3]==E->parallel.nproczl-1) ) {
 
     /* turn bc marker to zero */
     if (onoff == 0)          {
@@ -458,164 +459,29 @@ void get_bcs_id_for_residual(E,level,m)
     return;
 }
     
-
-void temperatures_conform_bcs(E)
-     struct All_variables *E;
+void temperatures_conform_bcs(struct All_variables *E)
 {
-    int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k;
-    unsigned int type;
-    float ttt2,ttt3,fff2,fff3;
-    float r1,t1,f1,t0,temp;
-    float e_4;
-    FILE *fp1, *fp2;
-    char output_file[255];
-    static int been_here=0;
-    static int local_solution_cycles=-1;
-    float inputage1,inputage2,timedir;
-    float age1,age2,newage1,newage2;
-    int nage, output;
+  void temperatures_conform_bcs2(struct All_variables *);
+  if(E->control.lith_age)
+    lith_age_conform_tbc(E);
 
-    e_4=1.e-4;
-    nno=E->lmesh.nno;
-    output = 0;
+  temperatures_conform_bcs2(E);
+  return;
+}
 
 
-    ttt2=E->control.theta_min + E->control.width_bound_adj;
-    ttt3=E->control.theta_max - E->control.width_bound_adj;
-    fff2=E->control.fi_min + E->control.width_bound_adj;
-    fff3=E->control.fi_max - E->control.width_bound_adj;
+void temperatures_conform_bcs2(struct All_variables *E)
+{
+  int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k;
+  unsigned int type;
 
-       gnox=E->mesh.nox;
-       gnoy=E->mesh.noy;
-       gnoz=E->mesh.noz;
-       nox=E->lmesh.nox;
-       noy=E->lmesh.noy;
-       noz=E->lmesh.noz;
-
-    if(E->control.lith_age==1)   { /* if specifying lithosphere age */
-    if(E->control.lith_age_time==1)   {  /* to open files every timestep */
-        if(been_here==0) {
-      	    E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
-      	    local_solution_cycles=E->monitor.solution_cycles-1;
-      	    been_here++;
-        }
-        if (local_solution_cycles<E->monitor.solution_cycles) {
-            output = 1;
-	    local_solution_cycles++; /*update so that output only happens once*/
-        }
-        read_input_files_for_timesteps(E,2,output); /* 2 for reading ages */
-
-    }  /* end E->control.lith_age_time == true */
-
-else {  /* otherwise, just open for the first timestep */
-        /* NOTE: This is only used if we are adjusting the boundaries */
-
-    if(been_here==0) {
-        E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
-        sprintf(output_file,"%s",E->control.lith_age_file);
-        fp1=fopen(output_file,"r");
-	if (fp1 == NULL) {
-          fprintf(E->fp,"(Boundary_conditions #1) Can't open %s\n",output_file);
-          exit(8);
-	}
-            for(i=1;i<=gnoy;i++)
-            for(j=1;j<=gnox;j++) {
-                node=j+(i-1)*gnox;
-                fscanf(fp1,"%f",&(E->age_t[node]));
-                E->age_t[node]=E->age_t[node]*E->data.scalet;
-            }
-        fclose(fp1);
-        been_here++;
-    } /* end been_here */
- } /* end E->control.lith_age_time == false */ 
-
-/* NOW SET THE TEMPERATURES IN THE BOUNDARY REGIONS */
-     if(E->monitor.solution_cycles>1 && E->control.temperature_bound_adj)   {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-          for(i=1;i<=noy;i++)  
-            for(j=1;j<=nox;j++) 
-              for(k=1;k<=noz;k++)  {
-                nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-                node=k+(j-1)*noz+(i-1)*nox*noz;
-                  t1=E->sx[m][1][node];
-                  f1=E->sx[m][2][node];
-                  r1=E->sx[m][3][node];
-
-
-                     if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-
-      if( ((E->sx[m][1][node]<=ttt2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[m][1][node]>=ttt3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) 
-
-                   { /* if < (width) from x bounds AND (depth) from top */
-
-                     temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-                     t0 = E->control.mantle_temp * erf(temp);
-
-                     /* keep the age the same! */
-                      E->sphere.cap[m].TB[1][node]=t0;
-                      E->sphere.cap[m].TB[2][node]=t0;
-                      E->sphere.cap[m].TB[3][node]=t0;
-                   }
-
-      if( ((E->sx[m][2][node]<=fff2) || (E->sx[m][2][node]>=fff3)) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) 
-
-                   { /* if < (width) from y bounds AND (depth) from top */
-
-                     /* keep the age the same! */
-                     temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-                     t0 = E->control.mantle_temp * erf(temp);
-
-                      E->sphere.cap[m].TB[1][node]=t0;
-                      E->sphere.cap[m].TB[2][node]=t0;
-                      E->sphere.cap[m].TB[3][node]=t0;
-
-                   }
-
-                }
-
-            }     /* end k   */
-
-       }   /*  end of solution cycles  && temperature_bound_adj */
-
-/* NOW SET THE TEMPERATURES IN THE LITHOSPHERE IF CHANGING EVERY TIME STEP */
-     if(E->monitor.solution_cycles>1 && E->control.lith_age_time)   {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-          for(i=1;i<=noy;i++)  
-            for(j=1;j<=nox;j++) 
-              for(k=1;k<=noz;k++)  {
-                nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-                node=k+(j-1)*noz+(i-1)*nox*noz;
-                  t1=E->sx[m][1][node];
-                  f1=E->sx[m][2][node];
-                  r1=E->sx[m][3][node];
-
-
-                     if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-
-
-      if(  E->sx[m][3][node]>=E->sphere.ro-E->control.lith_age_depth ) 
-
-                   { /* if closer than (lith_age_depth) from top */
-
-
-                     /* set a new age from the file */
-                     temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-                     t0 = E->control.mantle_temp * erf(temp);
-
-                      E->sphere.cap[m].TB[1][node]=t0;
-                      E->sphere.cap[m].TB[2][node]=t0;
-                      E->sphere.cap[m].TB[3][node]=t0;
-
-                   }
-
-                }
-
-            }     /* end k   */
-
-       }   /*  end of solution cycles  && lith_age_time */
-
-   } /* end control.lith_age=true */
-
+  nno=E->lmesh.nno;
+  gnox=E->mesh.nox;
+  gnoy=E->mesh.noy;
+  gnoz=E->mesh.noz;
+  nox=E->lmesh.nox;
+  noy=E->lmesh.noy;
+  noz=E->lmesh.noz;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
@@ -684,92 +550,6 @@ void velocities_conform_bcs(E,U)
 
     return;
 }
-
-void temperature_lith_adj(E,lv)
-    struct All_variables *E;
-    int lv;
- {
-    int j,node,nno;
-    float ttt2,ttt3,fff2,fff3;
-    FILE *fp1;
-    char output[255];
-  
-    nno=E->lmesh.nno;
-
-
-    ttt2=E->control.theta_min + E->control.width_bound_adj;
-    ttt3=E->control.theta_max - E->control.width_bound_adj;
-    fff2=E->control.fi_min + E->control.width_bound_adj;
-    fff3=E->control.fi_max - E->control.width_bound_adj;
-
-
-/* NOTE: To start, the relevent bits of "node" are zero. Thus, they only
-get set to TBX/TBY/TBZ if the node is in one of the bounding regions.
-Also note that right now, no matter which bounding region you are in,
-all three get set to true. CPC 6/20/00 */
-
-if (E->control.temperature_bound_adj==1) {
-
- if(lv=E->mesh.gridmax)   
-  for(j=1;j<=E->sphere.caps_per_proc;j++)
-    for(node=1;node<=E->lmesh.nno;node++)  {
-      if( ((E->sx[j][1][node]<=ttt2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[j][1][node]>=ttt3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) 
-/* if < (width) from x bounds AND (depth) from top */
-  {
-     E->node[j][node]=E->node[j][node] | TBX;
-     E->node[j][node]=E->node[j][node] & (~FBX);
-     E->node[j][node]=E->node[j][node] | TBY;
-     E->node[j][node]=E->node[j][node] & (~FBY);
-     E->node[j][node]=E->node[j][node] | TBZ;
-     E->node[j][node]=E->node[j][node] & (~FBZ);
-  }
-
-      if( ((E->sx[j][2][node]<=fff2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) 
-  /* if fi is < (width) from side AND z is < (depth) from top */
-  {
-     E->node[j][node]=E->node[j][node] | TBX;
-     E->node[j][node]=E->node[j][node] & (~FBX);
-     E->node[j][node]=E->node[j][node] | TBY;
-     E->node[j][node]=E->node[j][node] & (~FBY);
-     E->node[j][node]=E->node[j][node] | TBZ;
-     E->node[j][node]=E->node[j][node] & (~FBZ);
-  }
-
-      if( ((E->sx[j][2][node]>=fff3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) 
-  /* if fi is < (width) from side AND z is < (depth) from top */
-  {
-     E->node[j][node]=E->node[j][node] | TBX;
-     E->node[j][node]=E->node[j][node] & (~FBX);
-     E->node[j][node]=E->node[j][node] | TBY;
-     E->node[j][node]=E->node[j][node] & (~FBY);
-     E->node[j][node]=E->node[j][node] | TBZ;
-     E->node[j][node]=E->node[j][node] & (~FBZ);
-  }
-
- }
-} /* end E->control.temperature_bound_adj==1 */
-
-if (E->control.lith_age_time==1) {
-
- if(lv=E->mesh.gridmax)   
-  for(j=1;j<=E->sphere.caps_per_proc;j++)
-    for(node=1;node<=E->lmesh.nno;node++)  {
-      if(E->sx[j][3][node]>=E->sphere.ro-E->control.lith_age_depth) 
-  { /* if closer than (lith_age_depth) from top */
-     E->node[j][node]=E->node[j][node] | TBX;
-     E->node[j][node]=E->node[j][node] & (~FBX);
-     E->node[j][node]=E->node[j][node] | TBY;
-     E->node[j][node]=E->node[j][node] & (~FBY);
-     E->node[j][node]=E->node[j][node] | TBZ;
-     E->node[j][node]=E->node[j][node] & (~FBZ);
-  }
-
- }
-} /* end E->control.lith_age_time==1 */
-
-return;
-}
-
 
  void renew_top_velocity_boundary(E)
    struct All_variables *E;

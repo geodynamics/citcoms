@@ -222,14 +222,6 @@ void read_initial_settings(E)
     input_string("datafile",E->control.data_file,"initialize",m);
     input_string("datafile_old",E->control.old_P_file,"initialize",m);
 /*     input_string("post_topo_file",E->control.post_topo_file,"initialize",m); */
-
-    input_int("lith_age",&(E->control.lith_age),"0",m);
-    input_int("lith_age_time",&(E->control.lith_age_time),"0",m);
-    input_string("lith_age_file",&(E->control.lith_age_file),"",m);
-    input_float("lith_age_depth",&(E->control.lith_age_depth),"0.0471",m);
-    input_float("mantle_temp",&(E->control.mantle_temp),"1.0",m);
-
-
 /*     input_string("process_command",E->control.output_written_external_command,"",m); */
 /*     input_boolean("AVS",&(E->control.AVS),"off",m); */
 /*     input_boolean("CONMAN",&(E->control.CONMAN),"off",m); */
@@ -278,9 +270,6 @@ void read_initial_settings(E)
     input_int("post_p",&(E->control.post_p),"0",m);
     input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
    
-    input_int("temperature_bound_adj",&(E->control.temperature_bound_adj),"0",m);
-    input_float("depth_bound_adj",&(E->control.depth_bound_adj),"0.1570",m);
-    input_float("width_bound_adj",&(E->control.width_bound_adj),"0.08727",m);
 
         /* for layers    */
 
@@ -298,6 +287,7 @@ void read_initial_settings(E)
     input_float("z_410",&(E->viscosity.z410),"1.0",m);
     input_float("z_lith",&(E->viscosity.zlith),"0.0",m);
 
+    lith_age_input(E);
 
 /*  the start age and initial subduction history   */
     input_float("start_age",&(E->control.start_age),"0.0",m);
