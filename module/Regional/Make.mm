@@ -21,8 +21,8 @@ PROJ_CXX_SRCLIB = \
 	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
-EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include
-EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib
+EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR)
+EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib -L$(PYTHIA_LIBDIR)
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -36,6 +36,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.20 2004/06/11 20:14:46 tan2 Exp $
+# $Id: Make.mm,v 1.21 2004/11/16 11:43:28 steve Exp $
 
 # End of file

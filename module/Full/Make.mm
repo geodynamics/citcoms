@@ -21,8 +21,8 @@ PROJ_CXX_SRCLIB = \
 	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
-EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include
-EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib
+EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR)
+EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib -L$(PYTHIA_LIBDIR)
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -44,6 +44,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.12 2004/06/11 20:14:45 tan2 Exp $
+# $Id: Make.mm,v 1.13 2004/11/16 11:43:28 steve Exp $
 
 # End of file
