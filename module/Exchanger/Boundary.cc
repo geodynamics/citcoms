@@ -206,9 +206,9 @@ void Boundary::getBid2crseelem(const All_variables *E) {
                     if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
-//                     bid2crseelem[0][i]=n+1;
-//                     bid2crseelem[1][i]=E->sphere.capid[mm];
-// 		    cout << "i = " << i << "elem = " << n+1 << " " << "capid = " << E->sphere.capid[mm] << endl;                    
+                    bid2crseelem[0][i]=n+1;
+                    bid2crseelem[1][i]=E->sphere.capid[mm];
+		    //		    cout << "i = " << i << "elem = " << n+1 << " " << "capid = " << E->sphere.capid[mm] << endl;                    
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
@@ -459,6 +459,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.18 2003/09/25 22:37:55 ces74 Exp $
+// $Id: Boundary.cc,v 1.19 2003/09/25 22:45:36 ces74 Exp $
 
 // End of file
