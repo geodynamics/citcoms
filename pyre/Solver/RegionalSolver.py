@@ -14,7 +14,7 @@
 from mpi.Application import Application
 
 
-class CitcomsRegionalApp(Application):
+class RegionalApp(Application):
 
 
     def run(self):
@@ -117,6 +117,6 @@ class CitcomsRegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.2 2003/04/10 23:34:00 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.3 2003/04/11 01:27:42 ces74 Exp $"
 
 # End of file 
