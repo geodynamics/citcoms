@@ -86,7 +86,7 @@ void Array2D<T,N>::resize(const int size) {
     std::cout << "in Array2D<" << N << ">.resize" << std::endl;
     if (size_ == size) return;
 
-    T* tmp = new T[size];
+    T* tmp = new T[N*size];
     this->reset(tmp, size);
 }
 
@@ -192,6 +192,6 @@ void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs) {
 
 
 // version
-// $Id: Array2D.cc,v 1.4 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Array2D.cc,v 1.5 2003/10/20 17:12:43 tan2 Exp $
 
 // End of file
