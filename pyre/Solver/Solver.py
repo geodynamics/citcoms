@@ -31,7 +31,7 @@ class Solver(BaseSolver):
 
 
     def initialize(self, application):
-        BaseSolver.initialize(self. application)
+        BaseSolver.initialize(self, application)
 	#journal.info("staging").log("setup MPI")
         comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
@@ -227,6 +227,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.18 2003/09/09 21:04:45 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.19 2003/09/26 21:54:11 ces74 Exp $"
 
 # End of file
