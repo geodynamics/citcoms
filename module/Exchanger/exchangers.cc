@@ -449,6 +449,9 @@ PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
 {
     PyObject *obj;
 
+    std::cout << " exchangers :: recvV " << std::endl;
+    
+    
     if (!PyArg_ParseTuple(args, "O:recvV", &obj))
 	return NULL;
 
@@ -815,6 +818,6 @@ void deleteTractionBC(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.40 2004/01/17 02:10:38 puru Exp $
+// $Id: exchangers.cc,v 1.41 2004/01/21 00:13:07 puru Exp $
 
 // End of file
