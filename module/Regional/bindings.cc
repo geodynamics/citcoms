@@ -102,15 +102,20 @@ struct PyMethodDef pyCitcom_methods[] = {
 
     // from initial_conditions.h
 
+    {pyCitcom_ic_constructTemperature__name__,
+     pyCitcom_ic_constructTemperature,
+     METH_VARARGS,
+     pyCitcom_ic_constructTemperature__doc__},
+
+    {pyCitcom_ic_restartTemperature__name__,
+     pyCitcom_ic_restartTemperature,
+     METH_VARARGS,
+     pyCitcom_ic_restartTemperature__doc__},
+
     {pyCitcom_ic_initPressure__name__,
      pyCitcom_ic_initPressure,
      METH_VARARGS,
      pyCitcom_ic_initPressure__doc__},
-
-    {pyCitcom_ic_initTemperature__name__,
-     pyCitcom_ic_initTemperature,
-     METH_VARARGS,
-     pyCitcom_ic_initTemperature__doc__},
 
     {pyCitcom_ic_initVelocity__name__,
      pyCitcom_ic_initVelocity,
@@ -246,6 +251,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.31 2003/10/29 18:40:00 tan2 Exp $
+// $Id: bindings.cc,v 1.32 2003/11/28 22:20:23 tan2 Exp $
 
 // End of file
