@@ -19,7 +19,7 @@
 //#include "citcom_init.h"
 
 extern "C" double return1_test();
-extern "C" struct All_variables* Citcom_Init();
+extern "C" struct All_variables* Citcom_Init(int, int);
 extern "C" void read_instructions(char*);
 
 
@@ -56,9 +56,14 @@ PyObject * pyCitcomSRegional_return1_test(PyObject *, PyObject *)
 char pyCitcomSRegional_Citcom_Init__doc__[] = "";
 char pyCitcomSRegional_Citcom_Init__name__[] = "Citcom_Init";
 
-PyObject * pyCitcomSRegional_Citcom_Init(PyObject *, PyObject *)
+PyObject * pyCitcomSRegional_Citcom_Init(PyObject *self, PyObject *args)
 {
-    Citcom_Init();
+    int nproc, rank;
+    
+    if (!PyArg_ParseTuple(args, "ii", &nproc, &rank))
+        return NULL;
+
+    Citcom_Init(nproc, rank);
 
     // if E is NULL, raise an exception here... to be done.
 
@@ -90,6 +95,6 @@ PyObject * pyCitcomSRegional_read_instructions(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.4 2003/04/05 23:51:35 tan2 Exp $
+// $Id: misc.cc,v 1.5 2003/04/10 19:07:09 tan2 Exp $
 
 // End of file

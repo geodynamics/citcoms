@@ -4,17 +4,16 @@
 
 struct All_variables *E;
 
-void Citcom_Init()
+void Citcom_Init(int nproc, int rank)
 {
 
   E = (struct All_variables*) malloc(sizeof(struct All_variables));
   fprintf(stderr,"Citcom_Init: address of E is %p\n",E);
 
-  E->parallel.me = 0;
-  E->parallel.nproc = 1;
-  E->parallel.me_loc[1] = 0;
-  E->parallel.me_loc[2] = 0;
-  E->parallel.me_loc[3] = 0;
+  E->parallel.nproc = nproc;
+  E->parallel.me = rank;
+
+  fprintf(stderr,"%d in %d processpors\n", rank, nproc);
 
   E->monitor.solution_cycles=0;
 
