@@ -116,7 +116,8 @@ class Layout(Component):
 
     def createIntercomm(self, comm):
         # not finished
-        self.intercomm = comm
+        import mpi
+        self.intercomm = mpi.world()
         return
 
 
@@ -138,6 +139,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.3 2003/09/05 19:49:15 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.4 2003/09/09 02:27:36 tan2 Exp $"
 
 # End of file
