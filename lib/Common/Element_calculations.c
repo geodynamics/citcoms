@@ -68,7 +68,7 @@ void assemble_forces(E,penalty)
       e = E->boundary.element[m][i];
 
       for(a=0;a<24;a++) elt_f[a] = 0.0;
-      for(a=SIDE_BOTTOM; a<=SIDE_TOP; a++)
+      for(a=SIDE_BEGIN; a<=SIDE_END; a++)
 	get_elt_tr(E, i, a, elt_f, m);
 
       add_force(E, e, elt_f, m);
@@ -765,25 +765,40 @@ void get_elt_tr(struct All_variables *E, int bel, int side,
 
   const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
 
-  double traction[4][5],traction_at_gs[4][5], tmp;
+  double traction[4][5],traction_at_gs[4][5], value, tmp;
   int j, b, p, k, a, nodea, d;
   int el = E->boundary.element[m][bel];
   int flagged;
   int found = 0;
 
-  for(a=1;a<=ends1;a++)  {
-    nodea = E->ien[m][el].node[sidenodes[side][a]];
-    for(d=1;d<=dims;d++)  {
-      flagged = E->node[m][nodea] & sbc_flag[d];
-      found |= flagged;
-      traction[d][a] = ( flagged ? E->sphere.cap[m].VB[d][nodea] : 0.0 );
+  if(E->control.side_sbcs)
+    for(a=1;a<=ends1;a++)  {
+      nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+      for(d=1;d<=dims;d++) {
+	value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
+	flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+	found |= flagged;
+	traction[d][a] = ( flagged ? value : 0.0 );
+      }
     }
-  }
+  else
+    /* if side_sbcs is false, only apply sbc on top and bottom surfaces */
+    if(side == SIDE_BOTTOM || side == SIDE_TOP)
+      for(a=1;a<=ends1;a++)  {
+	nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+	for(d=1;d<=dims;d++) {
+	  value = E->sphere.cap[m].VB[d][nodea];
+	  flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+	  found |= flagged;
+	  traction[d][a] = ( flagged ? value : 0.0 );
+	}
+      }
 
-  /* skip the following computation if no sbc_flag is set */
+  /* skip the following computation if no sbc_flag is set
+     or value of sbcs are zero */
   if(!found) return;
 
-   /* compute traction at each int point */
+  /* compute traction at each int point */
   construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
 			       E->mesh.levmax,m,0,side);
 
@@ -880,6 +895,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.15 2004/04/12 23:30:13 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.16 2004/04/14 18:29:00 tan2 Exp $ */
 
 /* End of file  */

@@ -81,6 +81,13 @@ struct Bdry {
 };
 
 
+struct SBC {
+  /* stress (traction) boundary conditions */
+  int *node[NCS];
+  double *SB[NCS][7][4];
+};
+
+
 struct Rect {
     int numb;
     char overlay[40];
@@ -676,6 +683,7 @@ struct CONTROL {
     int eqn_zigzag;
     int verbose;
 
+    int side_sbcs;
     int vbcs_file;
     int mat_control;
     double accuracy;
@@ -759,6 +767,7 @@ struct All_variables {
     struct SPHERE sphere;
     struct Tracer Tracer;
     struct Bdry boundary;
+    struct SBC sbc;
 
     int filed[20];
 

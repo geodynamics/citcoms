@@ -1,4 +1,4 @@
-				
+
 #include "element_definitions.h"
 #include "global_defs.h"
 
@@ -23,7 +23,7 @@
 
 /*#include "/home/limbo1/louis/Software/src/dmalloc-3.2.1/dmalloc.h"
 */
-int get_process_identifier()   
+int get_process_identifier()
 {
     int pid;
 
@@ -47,8 +47,49 @@ void unique_copy_file(E,name,comment)
 }
 
 
-void thermal_buoyancy(struct All_variables *E, double **buoy)    
-{ 
+void apply_side_sbc(struct All_variables *E)
+{
+  /* This function is called only when E->control.side_sbcs is true.
+     Purpose: convert the original b.c. data structure, which only supports
+              SBC on top/bottom surfaces, to new data structure, which supports
+	      SBC on all (6) sides
+  */
+  int i, j, d, m, side, n;
+  const unsigned sbc_flags = SBX | SBY | SBZ;
+  const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
+
+  for(m=1; m<=E->sphere.caps_per_proc; m++) {
+    E->sbc.node[m] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
+
+    n = 0;
+    for(i=1; i<=E->lmesh.nno; i++) {
+      if(E->node[m][i] & sbc_flags) {
+	E->sbc.node[m][i] = n;
+	n++;
+      }
+    }
+
+    for(side=SIDE_BEGIN; side<=SIDE_END; side++)
+      for(d=1; d<=E->mesh.nsd; d++) {
+	E->sbc.SB[m][side][d] = (double *) malloc(n*sizeof(double));
+
+	for(i=0; i<n; i++)
+	  E->sbc.SB[m][side][d][i] = 0;
+      }
+
+    for(d=1; d<=E->mesh.nsd; d++)
+      for(i=1; i<=E->lmesh.nno; i++)
+	if(E->node[m][i] & sbc_flag[d] && E->sphere.cap[m].VB[d][i] != 0) {
+	  j = E->sbc.node[m][i];
+	  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
+	    E->sbc.SB[m][side][d][j] = E->sphere.cap[m].VB[d][i];
+	}
+  }
+}
+
+
+void thermal_buoyancy(struct All_variables *E, double **buoy)
+{
     int i,m;
     double temp,*H;
     void remove_horiz_ave();
@@ -70,7 +111,7 @@ void thermal_buoyancy(struct All_variables *E, double **buoy)
 
     return;
 }
- 
+
 double SIN_D(x)
      double x;
 {
@@ -114,8 +155,8 @@ void * Malloc1(bytes,file,line)
 
 
 /* Read in a file containing previous values of a field. The input in the parameter
-   file for this should look like: `previous_name_file=string' and `previous_name_column=int' 
-   where `name' is substituted by the argument of the function. 
+   file for this should look like: `previous_name_file=string' and `previous_name_column=int'
+   where `name' is substituted by the argument of the function.
 
    The file should have the standard CITCOM output format:
      # HEADER LINES etc
@@ -125,7 +166,7 @@ void * Malloc1(bytes,file,line)
    the field value is in the column specified by the abbr term in the function argument
 
    If the number of nodes OR the XZY coordinates for the node number (to within a small tolerance)
-   are not in agreement with the existing mesh, the data is interpolated. 
+   are not in agreement with the existing mesh, the data is interpolated.
 
    */
 
@@ -161,9 +202,9 @@ int read_previous_field(E,field,name,abbr)
 	return(0);   /* if not found, take no further action, return zero */
     }
 
-     
+
     fprintf(E->fp,"Previous %s information is in file %s\n",name,filename);fflush(E->fp);
- 
+
     /* Try opening the file, fatal if this fails too */
 
     if((fp=fopen(filename,"r")) == NULL) {
@@ -172,12 +213,12 @@ int read_previous_field(E,field,name,abbr)
 
 	exit(1);
     }
-  
-    
+
+
      /* Read header, get nodes xzy */
 
     fgets(discard,4999,fp);
-    fgets(discard,4999,fp); 
+    fgets(discard,4999,fp);
     i=sscanf(discard,"# NODESX=%d NODESZ=%d NODESY=%d",&fnodesx,&fnodesz,&fnodesy);
     if(i<3) {
 	fprintf(E->fp,"File %s is not in the correct format\n",filename);fflush(E->fp);
@@ -186,11 +227,11 @@ int read_previous_field(E,field,name,abbr)
 
     fgets(discard,4999,fp); /* largely irrelevant line */
     fgets(discard,4999,fp);
-    
+
     /* this last line is the column headers, we need to search for the occurence of abbr to
        find out the column to be read in */
 
-    if(strtok(discard,"|")==NULL) { 
+    if(strtok(discard,"|")==NULL) {
 	fprintf(E->fp,"Unable to deciphre the columns in the input file");fflush(E->fp);
 	exit(1);
     }
@@ -206,14 +247,14 @@ int read_previous_field(E,field,name,abbr)
 
     if(found) {
 	fprintf(E->fp,"\t%s (%s) found in column %d\n",name,abbr,column);fflush(E->fp);
-    }    
+    }
     else {
 	fprintf(E->fp,"\t%s (%s) not found in file: %s\n",name,abbr,filename);fflush(E->fp);
 	exit(1);
     }
-    
 
-  
+
+
     /* Another fatal condition (not suitable for interpolation: */
     if(((3!= E->mesh.nsd) && (fnodesy !=1)) || ((3==E->mesh.nsd) && (1==fnodesy))) {
 	fprintf(E->fp,"Input data for file `%s'  is of inappropriate dimension (not %dD)\n",filename,E->mesh.nsd);fflush(E->fp);
@@ -228,7 +269,7 @@ int read_previous_field(E,field,name,abbr)
     X=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
     Z=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
     Y=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
-    
+
    /* Format for reading the input file (including coordinates) */
 
     sprintf(input_token," %%d %%e %%e %%e");
@@ -252,13 +293,13 @@ int read_previous_field(E,field,name,abbr)
     free((void *)Y);
     free((void *)filename);
     free((void *)input_token);
-    
+
     return(1);
 }
 
 
 /* returns the out of plane component of the cross product of
-   the two vectors assuming that one is looking AGAINST the 
+   the two vectors assuming that one is looking AGAINST the
    direction of the axis of D, anti-clockwise angles
    are positive (are you sure ?), and the axes are ordered 2,3 or 1,3 or 1,2 */
 
@@ -270,7 +311,7 @@ float cross2d(x11,x12,x21,x22,D)
   float temp;
    if(1==D)
        temp = ( x11*x22-x12*x21);
-   if(2==D) 
+   if(2==D)
        temp = (-x11*x22+x12*x21);
    if(3==D)
        temp = ( x11*x22-x12*x21);

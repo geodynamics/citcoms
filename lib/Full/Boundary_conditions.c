@@ -12,51 +12,56 @@ void velocity_boundary_conditions(E)
   void velocity_refl_vert_bc();
   void horizontal_bc();
   void velocity_apply_periodicapply_periodic_bcs();
-  void read_velocity_boundary_from_file(); 
+  void read_velocity_boundary_from_file();
+  void apply_side_sbc();
+
   int node,d,j,noz,lv;
- 
+
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
       noz = E->mesh.NOZ[lv];
       if(E->mesh.topvbc != 1) {
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);	 
+	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);	 
+	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
 	}
       if(E->mesh.botvbc != 1) {
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j); 
+        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);	 
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j); 
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);  
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j); 
-        } 
+        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
+        }
 
       if(E->mesh.topvbc == 1) {
         horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j); 
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,SBX,0,lv,j);	 
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,SBX,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);	 
+        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
 
-        if(E->control.vbcs_file) 
-          read_velocity_boundary_from_file(E);   
+        if(E->control.vbcs_file)
+          read_velocity_boundary_from_file(E);
 
         }
       if(E->mesh.botvbc == 1) {
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,VBY,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,SBX,0,lv,j);	 
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j); 
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,SBY,0,lv,j);	 
+        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,SBX,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,SBY,0,lv,j);
         }
       }    /* end for j and lv */
- 
+
+      if(E->control.side_sbcs)
+	apply_side_sbc(E);
+
 /* if(E->control.verbose) */
 /*  for (j=1;j<=E->sphere.caps_per_proc;j++) */
 /*    for (node=1;node<=E->lmesh.nno;node++) */
@@ -64,7 +69,7 @@ void velocity_boundary_conditions(E)
 
   /* If any imposed internal velocity structure it goes here */
 
- 
+
    return; }
 
 /* ========================================== */
@@ -77,7 +82,7 @@ void temperature_boundary_conditions(E)
   void temperature_apply_periodic_bcs();
   void temperature_imposed_vert_bcs();
   int j,lev,noz;
-  
+
   lev = E->mesh.levmax;
   for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->mesh.noz;
@@ -89,16 +94,16 @@ void temperature_boundary_conditions(E)
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,j);
       }
- 
+
     if(E->mesh.bottbc == 1)    {
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,1,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,0,lev,j);
       }
     else        {
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j); 
+      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
       }
- 
+
     }     /* end for j */
 
    return; }
@@ -108,7 +113,7 @@ void temperature_boundary_conditions(E)
 void velocity_refl_vert_bc(E)
      struct All_variables *E;
 {
- 
+
   return;
 }
 
@@ -126,7 +131,7 @@ void temperature_refl_vert_bc(E)
 
 
 /*  =========================================================  */
-    
+
 
 void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
      struct All_variables *E;
@@ -143,14 +148,14 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
   const int dims=E->mesh.nsd;
 
     /* safety feature */
-  if(dirn > E->mesh.nsd) 
+  if(dirn > E->mesh.nsd)
      return;
 
-  if (ROW==1) 
+  if (ROW==1)
       rowl = 1;
-  else 
+  else
       rowl = E->lmesh.NOZ[level];
-   
+
   if ( ROW==1&&E->parallel.me_loc[3]==0 ||
        ROW==E->mesh.NOZ[level]&&E->parallel.me_loc[3]==E->parallel.nprocz-1 ) {
 
@@ -163,19 +168,19 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
     	  }        /* end for loop i & j */
       }
 
-    /* turn bc marker to one */    
+    /* turn bc marker to one */
     else        {
       for(j=1;j<=E->lmesh.NOY[level];j++)
         for(i=1;i<=E->lmesh.NOX[level];i++)       {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
     	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
     	  if(level==E->mesh.levmax)   /* NB */
-    	    BC[dirn][node] = value;   
+    	    BC[dirn][node] = value;
     	  }     /* end for loop i & j */
       }
 
     }             /* end for if ROW */
-    
+
   return;
 }
 
@@ -200,7 +205,7 @@ void temperature_apply_periodic_bcs(E)
  const int dims=E->mesh.nsd;
 
  fprintf(E->fp,"Periodic temperature boundary conditions\n");
-   
+
   return;
   }
 
@@ -212,7 +217,7 @@ void strip_bcs_from_residual(E,Res,level)
     int level;
 {
     int m,i;
-     
+
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     if (E->num_zero_resid[level][m])
       for(i=1;i<=E->num_zero_resid[level][m];i++)
@@ -228,14 +233,14 @@ void get_bcs_id_for_residual(E,level,m)
   {
 
     int i,j;
-     
+
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int nno=E->lmesh.NNO[level];
     const int neq=E->lmesh.NEQ[level];
     const int addi_dof=additional_dof[dims];
 
    j = 0;
-   for(i=1;i<=nno;i++) { 
+   for(i=1;i<=nno;i++) {
       if ( (E->NODE[level][m][i] & VBX) != 0 )  {
 	j++;
         E->zero_resid[level][m][j] = E->ID[level][m][i].doff[1];
@@ -251,10 +256,10 @@ void get_bcs_id_for_residual(E,level,m)
       }
 
     E->num_zero_resid[level][m] = j;
- 
+
     return;
 }
-    
+
 
 void temperatures_conform_bcs(E)
      struct All_variables *E;
@@ -264,21 +269,21 @@ void temperatures_conform_bcs(E)
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
-      
+
 	type = (E->node[j][node] & (TBX | TBZ | TBY));
-	
+
 	switch (type) {
 	case 0:  /* no match, next node */
 	    break;
-	case TBX: 
+	case TBX:
 	    E->T[j][node] = E->sphere.cap[j].TB[1][node];
 	    break;
 	case TBZ:
 	    E->T[j][node] = E->sphere.cap[j].TB[3][node];
-	    break; 
+	    break;
 	case TBY:
 	    E->T[j][node] = E->sphere.cap[j].TB[2][node];
-	    break; 
+	    break;
 	case (TBX | TBZ):     /* clashes ! */
 	    E->T[j][node] = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]);
 	    break;
@@ -292,8 +297,8 @@ void temperatures_conform_bcs(E)
 	    E->T[j][node] = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]);
 	    break;
 	}
-	
-	/* next node */ 
+
+	/* next node */
     }
 
 return;
@@ -304,7 +309,7 @@ return;
 void velocities_conform_bcs(E,U)
     struct All_variables *E;
     double **U;
-{ 
+{
     int node,d,m;
 
     const unsigned int typex = VBX;
@@ -318,14 +323,14 @@ void velocities_conform_bcs(E,U)
     for(m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(node=1;node<=nno;node++) {
 
-        if (E->node[m][node] & typex)  
-	      U[m][E->id[m][node].doff[1]] = E->sphere.cap[m].VB[1][node]; 
- 	if (E->node[m][node] & typey)  
-	      U[m][E->id[m][node].doff[2]] = E->sphere.cap[m].VB[2][node]; 
-	if (E->node[m][node] & typez)  
-	      U[m][E->id[m][node].doff[3]] = E->sphere.cap[m].VB[3][node]; 
-        } 
-      } 
+        if (E->node[m][node] & typex)
+	      U[m][E->id[m][node].doff[1]] = E->sphere.cap[m].VB[1][node];
+ 	if (E->node[m][node] & typey)
+	      U[m][E->id[m][node].doff[2]] = E->sphere.cap[m].VB[2][node];
+	if (E->node[m][node] & typez)
+	      U[m][E->id[m][node].doff[3]] = E->sphere.cap[m].VB[3][node];
+        }
+      }
 
     return;
 }

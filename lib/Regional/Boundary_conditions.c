@@ -14,6 +14,7 @@ void velocity_boundary_conditions(E)
   void velocity_apply_periodic_bcs();
   void read_velocity_boundary_from_file();
   void renew_top_velocity_boundary();
+  void apply_side_sbc();
 
   int node,d,j,noz,lv;
 
@@ -72,6 +73,9 @@ void velocity_boundary_conditions(E)
       }    /* end for j and lv */
 
       velocity_refl_vert_bc(E);
+
+      if(E->control.side_sbcs)
+	apply_side_sbc(E);
 
       if(E->control.verbose)
 	for (j=1;j<=E->sphere.caps_per_proc;j++)

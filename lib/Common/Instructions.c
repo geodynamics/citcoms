@@ -300,12 +300,6 @@ void read_initial_settings(struct All_variables *E)
   input_int("topvbc",&(E->mesh.topvbc),"0",m);
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
-  input_int("file_vbcs",&(E->control.vbcs_file),"0",m);
-  input_string("vel_bound_file",E->control.velocity_boundary_file,"",m);
-
-  input_int("mat_control",&(E->control.mat_control),"0",m);
-  input_string("mat_file",E->control.mat_file,"",m);
-
   input_float("topvbxval",&(E->control.VBXtopval),"0.0",m);
   input_float("botvbxval",&(E->control.VBXbotval),"0.0",m);
   input_float("topvbyval",&(E->control.VBYtopval),"0.0",m);
@@ -315,6 +309,14 @@ void read_initial_settings(struct All_variables *E)
   input_int("bottbc",&(E->mesh.bottbc),"1",m);
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
+
+  input_boolean("side_sbcs",&(E->control.side_sbcs),"on",m);
+
+  input_int("file_vbcs",&(E->control.vbcs_file),"0",m);
+  input_string("vel_bound_file",E->control.velocity_boundary_file,"",m);
+
+  input_int("mat_control",&(E->control.mat_control),"0",m);
+  input_string("mat_file",E->control.mat_file,"",m);
 
   input_int("nodex",&(E->mesh.nox),"essential",m);
   input_int("nodez",&(E->mesh.noz),"essential",m);
