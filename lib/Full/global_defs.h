@@ -640,6 +640,7 @@ struct CONTROL {
     int read_slabgeoid;
     int tracer;
 
+    float theta_min, theta_max, fi_min, fi_max;
     float start_age;
     int reset_startage;
     int zero_elapsed_time;
