@@ -17,6 +17,7 @@ void output_surf_botm(struct All_variables *, int);
 void output_surf_botm_pseudo_surf(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
+void output_tracer(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -36,12 +37,17 @@ void output(struct All_variables *E, int cycles)
 
   output_velo(E, cycles);
   output_visc(E, cycles);
+
   if(E->control.pseudo_free_surf) {
     if(E->mesh.topvbc == 2)
        output_surf_botm_pseudo_surf(E, cycles);
   }
   else
     output_surf_botm(E, cycles);
+
+  if(E->control.tracer==1)
+    output_tracer(E, cycles);
+
   //output_stress(E, cycles);
   //output_pressure(E, cycles);
 
@@ -50,6 +56,7 @@ void output(struct All_variables *E, int cycles)
 
   return;
 }
+
 
 void output_pseudo_surf(struct All_variables *E, int cycles)
 {
@@ -62,6 +69,10 @@ void output_pseudo_surf(struct All_variables *E, int cycles)
   output_velo(E, cycles);
   output_visc(E, cycles);
   output_surf_botm_pseudo_surf(E, cycles);
+
+  if(E->control.tracer==1)
+    output_tracer(E, cycles);
+
   //output_stress(E, cycles);
   //output_pressure(E, cycles);
 
@@ -70,6 +81,7 @@ void output_pseudo_surf(struct All_variables *E, int cycles)
 
   return;
 }
+
 
 FILE* output_open(char *filename)
 {
@@ -371,5 +383,24 @@ void output_pressure(struct All_variables *E, int cycles)
 
 
 
+void output_tracer(struct All_variables *E, int cycles)
+{
+  int n;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.tracer.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+  fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+
+  for(n=1;n<=E->Tracer.NUM_TRACERS;n++)   {
+    fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
 
 
