@@ -16,7 +16,7 @@ class:
     Radius(radius, outer_radius=1)
     Depth(depth, outer_radius=1)
 
-    both classes have 3 attributes:
+    both classes have 3 read-only attributes:
       outer_radius, inRadius, inDepth
 
 
@@ -38,6 +38,8 @@ cmb.inDepth
 cmb.inRadius
 """
 
+__all__ = ['Radius', 'Depth']
+
 
 class RadiusDepthBase(object):
 
@@ -47,8 +49,7 @@ class RadiusDepthBase(object):
     def get_outer_radius(self):
 	return self.Ro
 
-    outer_radius = property(get_outer_radius, None, None,
-			    "outer-radius, read-only")
+    outer_radius = property(get_outer_radius)
 
 
 
@@ -66,11 +67,9 @@ class Radius(RadiusDepthBase):
     def get_inDepth(self):
 	return self.outer_radius - self.radius
 
-    inRadius = property(get_inRadius, None, None,
-			"radius, read-only")
+    inRadius = property(get_inRadius)
 
-    inDepth = property(get_inDepth, None, None,
-		       "convert radius to depth, read-only")
+    inDepth = property(get_inDepth)
 
     __slots__ = ('inRadius', 'inDepth')
 
@@ -89,11 +88,9 @@ class Depth(RadiusDepthBase):
     def get_inDepth(self):
 	return self.depth
 
-    inRadius = property(get_inRadius, None, None,
-			"convert depth to radius, read-only")
+    inRadius = property(get_inRadius)
 
-    inDepth = property(get_inDepth, None, None,
-		       "depth, read-only")
+    inDepth = property(get_inDepth)
 
 
 ####################################################
@@ -127,6 +124,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: RadiusDepth.py,v 1.2 2003/03/24 21:48:45 tan2 Exp $"
+__id__ = "$Id: RadiusDepth.py,v 1.3 2003/04/03 19:40:25 tan2 Exp $"
 
 # End of file 

@@ -12,11 +12,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/03 19:40:25 tan2 Exp $
 
 include local.def
 
-PROJECT = CitcomS
+PROJECT = CitcomS/lib
 PACKAGE = lib
 
 BLD_DIRS = \
@@ -57,7 +57,7 @@ distclean::
 	(cd Regional; TYPE=Regional $(MM) distclean)
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/03 19:40:25 tan2 Exp $
 
 #
 # End of file
