@@ -22,7 +22,7 @@ class FineGridExchanger(Exchanger):
 
     def initialize(self, solver):
         Exchanger.initialize(self, solver)
-
+	self.all_variables = solver.all_variables
         self.interior = range(self.numSrc)
         self.source["Intr"] = range(self.numSrc)
         self.II = range(self.numSrc)
@@ -194,6 +194,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.25 2003/11/30 01:22:57 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.26 2003/12/22 17:47:59 puru Exp $"
 
 # End of file

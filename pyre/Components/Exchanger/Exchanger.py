@@ -34,7 +34,7 @@ class Exchanger(Component):
 
     def initialize(self, solver):
         self.selectModule()
-        self.all_variables = solver.all_variables
+        #self.all_variables = solver.all_variables
         self.communicator = solver.communicator
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
@@ -125,6 +125,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.13 2003/11/30 01:22:57 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.14 2003/12/22 17:47:59 puru Exp $"
 
 # End of file

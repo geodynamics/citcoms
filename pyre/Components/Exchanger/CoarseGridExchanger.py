@@ -14,7 +14,7 @@ class CoarseGridExchanger(Exchanger):
 
     def initialize(self, solver):
         Exchanger.initialize(self, solver)
-
+	self.all_variables = solver.all_variables
         self.boundary = range(self.numSrc)
         self.source["BC"] = range(self.numSrc)
         self.BC = range(self.numSrc)
@@ -172,6 +172,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.23 2003/11/30 01:22:57 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.24 2003/12/22 17:47:59 puru Exp $"
 
 # End of file
