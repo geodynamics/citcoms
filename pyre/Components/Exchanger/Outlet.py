@@ -56,6 +56,14 @@ class VTOutlet(Outlet):
         return
 
 
+class VOutlet(Outlet):
+
+    def __init__(self, source, all_variables):
+        import CitcomS.Exchanger as Exchanger
+        self._handle = Exchanger.VOutlet_create(source,
+                                                all_variables)
+        return
+
 
 """
 class TractionOutlet(Outlet):
@@ -72,6 +80,6 @@ class TractionOutlet(Outlet):
 
 
 # version
-__id__ = "$Id: Outlet.py,v 1.4 2004/05/11 07:59:31 tan2 Exp $"
+__id__ = "$Id: Outlet.py,v 1.5 2004/05/18 21:15:26 ces74 Exp $"
 
 # End of file
