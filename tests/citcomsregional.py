@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env mpipython.exe
 # 
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
@@ -21,13 +21,15 @@ if __name__ == "__main__":
     import journal
     #journal.debug("mesher").activate()
     #journal.debug("mesher.phases").activate()
+    journal.info("staging").activate()
     journal.debug("staging").activate()
 
-    app = RegionalApp()
+    import sys
+    app = RegionalApp(sys.argv[1])
     app.main()
 
 
 # version
-__id__ = "$Id: citcomsregional.py,v 1.2 2003/04/10 23:40:55 tan2 Exp $"
+__id__ = "$Id: citcomsregional.py,v 1.3 2003/05/16 21:11:54 tan2 Exp $"
 
 #  End of file 

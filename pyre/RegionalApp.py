@@ -12,12 +12,104 @@
 #
 
 from mpi.Application import Application
+import CitcomS.Regional as Regional
 
 
 class RegionalApp(Application):
-
+#    import journal
+    total_time = 0
+    cycles = 0
+    keep_going = True
+    Emergency_stop = False
 
     def run(self):
+	Application.run(self)
+	
+#	if (Control.post_proccessing):
+#	    Regional.post_processing()
+#	    return
+	
+	# decide which stokes solver to use
+	import CitcomS.Stokes_solver
+	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
+	vsolver.init()
+	
+#	# decide which advection solver to use
+#	import CitcomS.Advection_solver
+#	tsolver = CitcomS.Advection_solver.PGsolver()
+#	tsolver.init()
+
+	#
+	#import CitcomS.Regional.output as Output
+	#Output.init()
+
+	# solve for 0th time step velocity and pressure
+	vsolver.run()
+
+#	while (self.keep_going and not Emergency_stop):
+#	    self.cycles += 1
+#	    tsolver.run()
+#	    vsolver.run()
+#	    total_time = Regional.CPU_time() - self.start_time
+
+	return
+	    
+
+    def __init__(self, inputfile):
+        Application.__init__(self, "citcomsregional")
+	self.filename = inputfile
+	print self.filename
+        return
+
+
+    def preInit(self):
+        import mpi
+        #world = mpi.world()
+        Application.preInit(self)
+        Regional.Citcom_Init(mpi.mpi.world)
+	self.start_time = Regional.CPU_time()
+	return
+ 
+
+    def postInit(self):
+        import sys
+        Application.postInit(self)
+        #filename = self.facility.infile
+        Regional.read_instructions(self.filename)
+	return
+    
+
+    def fini(self):
+	total_time = Regional.CPU_time() - self.start_time
+	Regional.finalize()
+	Application.fini()
+	return
+
+
+    class Facilities(Application.Facilities):
+
+        import pyre.facilities
+        from EarthModelConstants import EarthModelConstants
+        from EarthModelPhase import EarthModelPhase
+        from EarthModelVisc import EarthModelVisc
+        from SimulationGrid import SimulationGrid
+        
+        __facilities__ = Application.Facilities.__facilities__ + (
+            pyre.facilities.facility("earthModel", EarthModelConstants()),
+            pyre.facilities.facility("earthModel_phase", EarthModelPhase()),
+            pyre.facilities.facility("earthModel_visc", EarthModelVisc()),
+            pyre.facilities.facility("simulation_grid", SimulationGrid()),
+            )
+
+
+    class Properties(Application.Properties):
+
+
+        __properties__ = Application.Properties.__properties__ + (
+            )
+
+
+    def test(self):
         import mpi
         import CitcomS.RadiusDepth
         
@@ -70,53 +162,7 @@ class RegionalApp(Application):
         return
 
 
-    def __init__(self):
-        Application.__init__(self, "citcomsregional")
-        return
-
-
-    def preInit(self):
-        import mpi
-        import CitcomS.Regional as Regional
-        world = mpi.world()
-        Application.preInit(self)
-        Regional.Citcom_Init(world.size, world.rank)
- 
- 
-    def postInit(self):
-        import sys
-        import CitcomS.Regional as Regional
-        Application.postInit(self)
-        #filename = self.facility.infile
-        filename = sys.argv[1]
-        Regional.read_instructions(filename)
-
-
-    class Facilities(Application.Facilities):
-
-
-        import pyre.facilities
-        from EarthModelConstants import EarthModelConstants
-        from EarthModelPhase import EarthModelPhase
-        from EarthModelVisc import EarthModelVisc
-        from SimulationGrid import SimulationGrid
-        
-        __facilities__ = Application.Facilities.__facilities__ + (
-            pyre.facilities.facility("earthModel", EarthModelConstants()),
-            pyre.facilities.facility("earthModel_phase", EarthModelPhase()),
-            pyre.facilities.facility("earthModel_visc", EarthModelVisc()),
-            pyre.facilities.facility("simulation_grid", SimulationGrid()),
-            )
-
-
-    class Properties(Application.Properties):
-
-
-        __properties__ = Application.Properties.__properties__ + (
-            )
-
-
 # version
-__id__ = "$Id: RegionalApp.py,v 1.3 2003/04/11 01:27:42 ces74 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.4 2003/05/16 21:11:54 tan2 Exp $"
 
 # End of file 

@@ -13,9 +13,15 @@
 
 
 
-def imcompressible():
-    from Imcompressible import Imcompressible
-    return Imcompressible()
+def imcompressibleNewtionian(name):
+    from Imcompressible import ImcompressibleNewtionian
+    return ImcompressibleNewtionian(name)
+    
+
+
+def imcompressibleNonNewtionian(name):
+    from Imcompressible import ImcompressibleNonNewtionian
+    return ImcompressibleNonNewtionian(name)
     
 
 
@@ -27,6 +33,6 @@ def imcompressible():
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.1 2003/05/15 00:07:54 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.2 2003/05/16 21:11:54 tan2 Exp $"
 
 # End of file 

@@ -2,10 +2,88 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "drive_solvers.h"
 
-void general_stokes_solver(E)
-     struct All_variables *E;
+float global_fvdot();
+float vnorm_nonnewt();
 
+static float *delta_U[NCS];
+static float *oldU[NCS];
+
+
+void general_stokes_solver_init(struct All_variables *E)
+{
+  int i, m, neq;
+  neq = E->lmesh.neq;
+  
+  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+    delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
+    oldU[m] = (float *)malloc((neq+2)*sizeof(float));
+    for(i=0;i<=neq;i++) 
+      oldU[m][i]=0.0;
+  }
+
+  return;
+}
+  
+
+void general_stokes_solver_fini(struct All_variables *E)
+{
+  int m;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+    free((void *) delta_U[m]);
+    free((void *) oldU[m]);
+  }
+  
+  return;
+}
+
+
+void general_stokes_solver_update_velo(struct All_variables *E)
+{
+  int i, m, neq;
+  neq = E->lmesh.neq;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)   
+    for (i=0;i<neq;i++) {
+      delta_U[m][i] = E->U[m][i] - oldU[m][i]; 
+      oldU[m][i] = E->U[m][i];
+    }
+  
+  return;
+}
+
+
+void general_stokes_solver_Unorm(struct All_variables *E, double *Udot_mag, double *dUdot_mag)
+{
+
+  *Udot_mag  = sqrt(global_fvdot(E,oldU,oldU,E->mesh.levmax));
+  *dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax); 
+
+  return;
+}
+
+
+void general_stokes_solver_log(struct All_variables *E, float Udot_mag, float dUdot_mag, int count)
+{
+  
+  if(E->parallel.me==0){
+    fprintf(stderr,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
+    fprintf(E->fp,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
+    fflush(E->fp);
+  }
+
+  return;
+}
+
+
+
+
+//***********************************************************
+
+
+void general_stokes_solver(struct All_variables *E)
 {
     void construct_stiffness_B_matrix();
     void velocities_conform_bcs();
@@ -17,12 +95,11 @@ void general_stokes_solver(E)
     void get_system_viscosity();
 
     float vmag;
-    float *delta_U[NCS];
+
     double Udot_mag, dUdot_mag;
     double CPU_time0(),time;
     int m,count,i,j,k;
 
-    static float *oldU[NCS];
     static int visits=0;
 
     const int nno = E->lmesh.nno;

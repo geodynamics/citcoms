@@ -17,24 +17,25 @@ class Stokes_solver(Application):
 
 
     def main(self):
-	# Solver doesn't run stand along
+	raise NotImplementedError, \
+	      "Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
 	return
 
-    def run(self, *args, **kwds):
-	Application.run(*args, **kwds)
-	return
+#    def run(self, *args, **kwds):
+#	Application.run(*args, **kwds)
+#	return
 
 
     def output(self, *args, **kwds):
 	return
 
 
-    def __init__(self, name):
-	Application.__init__(self, name)
-	return
+#    def __init__(self, name):
+#	Application.__init__(self, name)
+#	return
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.1 2003/05/15 00:07:54 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.2 2003/05/16 21:11:54 tan2 Exp $"
 
 # End of file 

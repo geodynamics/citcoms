@@ -14,7 +14,7 @@
 if __name__ == "__main__":
 
     import CitcomS 
-    import CitcomS.Full as Full
+#    import CitcomS.Full as Full
     import CitcomS.Regional as Regional
 
     print "copyright information:"
@@ -22,10 +22,10 @@ if __name__ == "__main__":
 
     print
     print "module information:"
-    print "  Full--"
-    print "    file:", Full.__file__
-    print "    doc:", Full.__doc__
-    print "    contents:", dir(Full)
+#    print "  Full--"
+#    print "    file:", Full.__file__
+#    print "    doc:", Full.__doc__
+#    print "    contents:", dir(Full)
     print
     print "  Regional--"
     print "    file:", Regional.__file__
@@ -34,13 +34,16 @@ if __name__ == "__main__":
 
 
     print
-    print "Full.return1_test:    ", Full.return1_test()
+#    print "Full.return1_test:    ", Full.return1_test()
     print "Regional.return1_test:", Regional.return1_test()
 
     import mpi
     world = mpi.world()
     print mpi.world
     print "Citcom_Init: return", Regional.Citcom_Init(mpi.mpi.world)
+
+    print
+    print "Time is %f" % Regional.CPU_time()
 
     import os, sys
     filename = sys.argv[1]
@@ -50,6 +53,6 @@ if __name__ == "__main__":
     
 
 # version
-__id__ = "$Id: signon.py,v 1.7 2003/05/14 18:32:20 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.8 2003/05/16 21:11:54 tan2 Exp $"
 
 #  End of file 
