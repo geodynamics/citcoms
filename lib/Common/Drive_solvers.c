@@ -52,26 +52,6 @@ void general_stokes_solver_update_velo(struct All_variables *E)
   return;
 }
 
-void general_stokes_solver_assign_tempvars(struct All_variables *E)
-{
-  int m;
-  const int neq = E->lmesh.neq;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
-  }
-  
-  return;
-}
-
-void general_stokes_solver_free_tempvars(struct All_variables *E)
-{
-  int m;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    free((void *) delta_U[m]);
-  }
-  return;
-}
-
 void general_stokes_solver_Unorm(struct All_variables *E, double *Udot_mag, double *dUdot_mag)
 {
 

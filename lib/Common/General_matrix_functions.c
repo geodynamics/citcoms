@@ -226,12 +226,11 @@ int solve_del2_u(E,d0,F,acc,high_lev)
     
     cost_per_level[high_lev] +=  CPU_time0()-time;
     total_cycles[high_lev] += cycles;
-    fprintf(stderr,"residual=%e acc=%e\n",residual,acc);
     valid = (residual < acc)? 1:0;
   }
   
   else  { 
-    
+
     counts =0;
     if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
     if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
@@ -267,6 +266,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 	    (convergent ? " * ":"!!!"),count,cycles,residual,r0,acc,CPU_time0()-initial_time);
     fflush(E->fp);
   }
+
   
   count++;
   

@@ -175,7 +175,6 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
     fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
   }         
   
-  fprintf(stderr,"acc=%e valid=%d count=%d steps_max=%d incomp=%e tole_comp=%e\n",imp*v_res,valid,count,*steps_max,E->monitor.incompressibility,E->control.tole_comp);
   while( (valid) && (count < *steps_max) && ( E->monitor.incompressibility >= E->control.tole_comp ) )  {   
     
     for (m=1;m<=E->sphere.caps_per_proc;m++)    
