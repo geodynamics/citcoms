@@ -20,7 +20,9 @@ public:
     static const int dim = 3;  // spatial dimension
     const int size;            // # of boundary nodes
 
-    double theta_max, theta_min, fi_max, fi_min, ro, ri;  // domain bound of FG
+    double theta_max, theta_min,
+	   fi_max, fi_min,
+	   ro, ri;   // domain bound of FG
     double *X[dim];  // coordinate
     int *bid2gid;    // bid (local id) -> ID (ie. global id in FG)
     int *bid2elem;   // bid -> elem from which fields are interpolated in CG
@@ -32,14 +34,20 @@ public:
 
     void init(const All_variables *E);  // initialize X and domain bound
     void mapFineGrid(const All_variables *E);  // initialize bid2gid
-    void mapCoarseGrid(const All_variables *E);  // initialize shape, bid2elem and bid2proc
+    void mapCoarseGrid(const All_variables *E, const int lrank);  // initialize shape, bid2elem and bid2proc
 
     void send(const MPI_Comm comm, const int receiver) const;
     void receive(const MPI_Comm comm, const int sender);
     void broadcast(const MPI_Comm comm, const int broadcaster);
 
+    void sendBid2proc(const MPI_Comm comm,
+		      const int lrank, const int leader);
+                                         // send bid2proc to leader
+
     void printX() const;
     void printBid2gid() const;
+    void printBid2proc() const;
+    void printBid2elem() const;
     void printBound() const;
     
 private:
@@ -62,6 +70,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.13 2003/09/27 00:05:02 tan2 Exp $
+// $Id: Boundary.h,v 1.14 2003/09/27 21:04:37 tan2 Exp $
 
 // End of file

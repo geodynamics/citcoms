@@ -1,16 +1,17 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <iostream>
 #include "global_defs.h"
 #include "Boundary.h"
-using namespace std;
 
-//using std::auto_ptr;
+using std::auto_ptr;
 
 Boundary::Boundary(const int n) : size(n){
     std::cout << "in Boundary::Boundary  size = " << size << std::endl;
@@ -152,7 +153,7 @@ void Boundary::init(const All_variables *E) {
 }
 
 
-void Boundary::mapCoarseGrid(const All_variables *E) {
+void Boundary::mapCoarseGrid(const All_variables *E, const int localrank) {
     std::cout << "in Boundary::mapCoarseGrid" << std::endl;
 
     int ind,n,n1,n2;    
@@ -163,6 +164,9 @@ void Boundary::mapCoarseGrid(const All_variables *E) {
 		5, 7, 6, 2, 
 		5, 7, 2, 0};
   
+    for(int i=0; i<size; i++)
+	bid2proc[i] = E->parallel.nproc;  // nproc is always an illegal rank
+
     for(int i=0; i< size; i++) {
 	for(int j=0; j< dim; j++)xt[j]=X[j][i];
 	// loop over 5 sub tets in a brick element
@@ -192,8 +196,8 @@ void Boundary::mapCoarseGrid(const All_variables *E) {
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
                     bid2elem[i]=n+1;
-                    bid2proc[i]=E->sphere.capid[mm];
-		    //cout << "i = " << i << "elem = " << n+1 << " " << "capid = " << E->sphere.capid[mm] << endl;                    
+                    bid2proc[i]=localrank;
+		    //cout << "i = " << i << "elem = " << n+1 << " " << "rank = " << localrank << endl;
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
@@ -204,6 +208,8 @@ void Boundary::mapCoarseGrid(const All_variables *E) {
                 if(ind) break;          
             }
     }
+    //printBid2proc();
+    //printBid2elem();
     
     // self test
     for(int i=0; i< size; i++) {
@@ -213,7 +219,8 @@ void Boundary::mapCoarseGrid(const All_variables *E) {
         for(int j=0; j < 8; j++) {
             
             for(int k=0; k < dim; k++) {                
-                xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
+                //xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
+                xc[j*dim+k]=E->X[E->mesh.levmax][1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
             }
 	    //std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
         }        
@@ -230,7 +237,6 @@ void Boundary::mapCoarseGrid(const All_variables *E) {
         }
     }
 
-    return;
 }
 
 
@@ -304,7 +310,7 @@ void Boundary::mapFineGrid(const All_variables *E) {
 			nid[node2-1]++;
 		    }
 		}
-    if(nodes != size) cout << "in Boundary::mapFineGrid ==> nodes != size " << endl;
+    if(nodes != size) std::cout << "in Boundary::mapFineGrid ==> nodes != size " << std::endl;
     
     delete [] nid;
   
@@ -412,6 +418,37 @@ void Boundary::broadcast(const MPI_Comm comm, const int broadcaster) {
 }
 
 
+void Boundary::sendBid2proc(const MPI_Comm comm, 
+			    const int lrank, const int leader) {
+    std::cout << "in Boundary::sendBid2proc" << std::endl;
+
+    if (lrank == leader) {
+	int nproc;
+	MPI_Comm_size(comm, &nproc);
+
+	auto_ptr<int> tmp = auto_ptr<int>(new int[size]);
+	int *ptmp = tmp.get();
+
+	for (int i=0; i<nproc; i++) {
+	    if (i == leader) continue; // skip leader itself
+
+	    MPI_Status status;
+	    MPI_Recv(ptmp, size, MPI_INT,
+	    	     i, i, comm, &status);
+	    for (int n=0; n<size; n++) {
+		if (ptmp[n] != nproc) bid2proc[n] = ptmp[n];
+	    }
+	}
+	//printBid2proc();
+    }
+    else {
+	MPI_Send(bid2proc, size, MPI_INT,
+		 leader, lrank, comm);
+    }
+
+}
+
+
 void Boundary::printX() const {
     for(int j=0; j<size; j++) {
 	std::cout << "  X:  " << j << ":  ";
@@ -429,6 +466,20 @@ void Boundary::printBid2gid() const {
 }
 
 
+void Boundary::printBid2proc() const {
+    int *c = bid2proc;
+    for(int j=0; j<size; j++)
+	std::cout << "  proc:  " << j << ":  " << c[j] << std::endl;
+}
+
+
+void Boundary::printBid2elem() const {
+    int *c = bid2elem;
+    for(int j=0; j<size; j++)
+	std::cout << "  elem:  " << j << ":  " << c[j] << std::endl;
+}
+
+
 void Boundary::printBound() const {
     std::cout << "theta= " << theta_min
 	      << " : " << theta_max << std::endl;
@@ -441,6 +492,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.23 2003/09/27 00:05:02 tan2 Exp $
+// $Id: Boundary.cc,v 1.24 2003/09/27 21:04:37 tan2 Exp $
 
 // End of file
