@@ -63,7 +63,7 @@ const Boundary* FineGridExchanger::createBoundary() {
 
     if (rank == localLeader) {
       // Face nodes + Edge nodes + vertex nodes
-	const int size = 2*((E.mesh.nox-2)*(E.mesh.noy-2)+(E.mesh.noy-2)*(E.mesh.noz-2)+(E.mesh.noz-2)*(E.mesh.nox-2))+4*(E.mesh.nox+E.mesh.noy+E.mesh.noz-6)+8;
+	const int size = 2*((E->mesh.nox-2)*(E->mesh.noy-2)+(E->mesh.noy-2)*(E->mesh.noz-2)+(E->mesh.noz-2)*(E->mesh.nox-2))+4*(E->mesh.nox+E->mesh.noy+E->mesh.noz-6)+8;
 	b = new Boundary(size);
 
 	// initialize...
@@ -107,6 +107,6 @@ void FineGridExchanger::mapBoundary(const Boundary* b) {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.5 2003/09/09 20:03:01 puru Exp $
+// $Id: FineGridExchanger.cc,v 1.6 2003/09/09 20:07:01 puru Exp $
 
 // End of file
