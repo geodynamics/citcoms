@@ -89,7 +89,7 @@ void PG_timestep_solve(struct All_variables *E)
   E->advection.dt_reduced = 1.0;
   E->advection.last_sub_iterations = 1;
 
-  time1= CPU_time0();
+/*   time1= CPU_time0(); */
 
   do {
     E->advection.timestep *= E->advection.dt_reduced;
@@ -121,21 +121,12 @@ void PG_timestep_solve(struct All_variables *E)
     }
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
 
-  time0= CPU_time0()-time1;
-
+  /*   time0= CPU_time0()-time1; */
   /*     if(E->control.verbose) */
   /*       fprintf(E->fp_out,"time=%f\n",time0); */
 
   E->advection.total_timesteps++;
   E->monitor.elapsed_time += E->advection.timestep;
-
-  if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
-      (E->advection.timesteps < E->advection.max_timesteps) &&
-      (E->monitor.elapsed_time < E->advection.max_dimensionless_time) ) ||
-     (E->advection.total_timesteps < E->advection.min_timesteps) )
-    E->control.keep_going = 1;
-  else
-    E->control.keep_going = 0;
 
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
@@ -145,7 +136,6 @@ void PG_timestep_solve(struct All_variables *E)
     free((void *) T1[m] );
     free((void *) Tdot1[m] );
   }
-
   return;
 }
 
