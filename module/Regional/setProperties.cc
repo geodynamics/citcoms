@@ -56,7 +56,6 @@ PyObject * pyRegional_Advection_diffusion_set_properties(PyObject *self, PyObjec
     getScalarProperty(properties, "aug_lagr", E->control.augmented_Lagr);
     getScalarProperty(properties, "aug_number", E->control.augmented);
 
-    E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
     E->advection.last_sub_iterations = 1;
@@ -128,7 +127,6 @@ PyObject * pyRegional_Const_set_properties(PyObject *self, PyObject *args)
 
     std::cerr << "Const.inventories:" << std::endl;
 
-    getScalarProperty(properties, "radius", E->data.radius_km);
     getScalarProperty(properties, "layerd", E->data.layer_km);
     getScalarProperty(properties, "density", E->data.density);
     getScalarProperty(properties, "thermdiff", E->data.therm_diff);
@@ -152,8 +150,8 @@ PyObject * pyRegional_Const_set_properties(PyObject *self, PyObject *args)
     E->viscosity.zcmb = zcmb / E->data.radius_km;
 
     // convert meter to kilometer
-    E->data.radius_km = E->data.radius_km / 1e3;
     E->data.layer_km = E->data.layer_km / 1e3;
+    E->data.radius_km = E->data.layer_km;
 
     if (PyErr_Occurred())
 	return NULL;
@@ -219,6 +217,13 @@ PyObject * pyRegional_Parallel_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "nprocx", E->parallel.nprocxl);
     getScalarProperty(properties, "nprocy", E->parallel.nprocyl);
     getScalarProperty(properties, "nprocz", E->parallel.nproczl);
+
+    if (E->parallel.nprocxy == 12)
+	if (E->parallel.nprocxl != E->parallel.nprocyl) {
+	    char errmsg[] = "!!!! nprocx must equal to nprocy";
+	    PyErr_SetString(PyExc_SyntaxError, errmsg);
+	    return NULL;
+    }
 
     if (PyErr_Occurred())
 	return NULL;
@@ -365,6 +370,19 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
     getScalarProperty(properties, "mgunitz", E->mesh.mgunitz);
     getScalarProperty(properties, "levels", E->mesh.levels);
 
+    if (E->parallel.nprocxy == 12) {
+	if (E->mesh.nox != E->mesh.noy) {
+	    char errmsg[] = "!!!! nodex must equal to nodey";
+	    PyErr_SetString(PyExc_SyntaxError, errmsg);
+	    return NULL;
+	}
+	if (E->mesh.mgunitx != E->mesh.mgunity) {
+	    char errmsg[] = "!!!! mgunitx must equal to mgunity";
+	    PyErr_SetString(PyExc_SyntaxError, errmsg);
+	    return NULL;
+	}
+    }
+
     getScalarProperty(properties, "radius_outer", E->sphere.ro);
     getScalarProperty(properties, "radius_inner", E->sphere.ri);
 
@@ -381,6 +399,11 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
     E->sphere.cap[1].fi[2] = E->control.fi_min;
     E->sphere.cap[1].fi[3] = E->control.fi_max;
     E->sphere.cap[1].fi[4] = E->control.fi_max;
+
+    E->mesh.nsd = 3;
+    E->mesh.dof = 3;
+    E->sphere.caps = 1;
+    E->sphere.max_connections = 6;
 
     getScalarProperty(properties, "dimenx", E->mesh.layer[1]);
     getScalarProperty(properties, "dimeny", E->mesh.layer[2]);
@@ -589,9 +612,9 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	sprintf(errmsg, "length of '%s' < %d", attribute, len);
 	PyErr_SetString(PyExc_IndexError, errmsg);
 	return;
-    } else if(n > len) {
+    } else if (n > len) {
 	char warnmsg[255];
-	sprintf(warnmsg, "length of '%s' > %d", attribute, len);
+	sprintf(warnmsg, "WARNING: length of '%s' > %d", attribute, len);
 	std::cerr << warnmsg << std::endl;
     }
 

@@ -35,14 +35,13 @@ class RegionalSphere(CitcomComponent):
 
 
 
-    def init(self, parent):
-        self.CitcomModule.regional_sphere_init()
-        return
+    #def init(self, parent):
+        #return
 
 
 
-    def fini(self):
-	return
+    #def fini(self):
+	#return
 
 
 
@@ -67,15 +66,17 @@ class RegionalSphere(CitcomComponent):
             pyre.properties.float("radius_outer", 1.0),
             pyre.properties.float("radius_inner", 0.55),
 
+            # used only in Regional version, not in Full version
             pyre.properties.float("theta_min", 1.5),
             pyre.properties.float("theta_max", 1.8),
             pyre.properties.float("fi_min", 0.0),
             pyre.properties.float("fi_max", 0.4),
 
+            # these three parameters are not used anymore, will be removed in the future
             pyre.properties.float("dimenx", 1.0),
             pyre.properties.float("dimeny", 1.0),
             pyre.properties.float("dimenz", 1.0),
-	    
+
 
 	    # these parameters are for spherical harmonics output
 	    # put them here temporalily
@@ -88,6 +89,6 @@ class RegionalSphere(CitcomComponent):
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.5 2003/07/25 20:43:30 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.6 2003/07/28 21:57:02 tan2 Exp $"
 
 # End of file

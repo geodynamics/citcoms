@@ -21,8 +21,6 @@ void set_mg_defaults(E)
   E->build_forcing_term = assemble_forces_iterative;
   E->solve_stokes_problem = solve_constrained_flow_iterative;
 
-  E->control.mg_cycle = 1;
-
 return;
 }
 

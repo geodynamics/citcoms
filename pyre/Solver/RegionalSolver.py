@@ -15,17 +15,8 @@ import journal
 class RegionalApp(Application):
 
 
-    # for test
-    def run(self):
-	journal.info("staging").log("setup MPI")
-        import mpi
-        CitcomModule.citcom_init(mpi.world().handle())
-	CitcomModule.global_default_values()
 
-	self.rank = mpi.world().rank
-	self.start_time = CitcomModule.CPU_time()
-	self.prefix = self.inventory.param.inventory.datafile
-	print "my rank is ", self.rank
+    def run(self):
 
         mesher = self.inventory.mesher
         mesher.init(self)
@@ -36,59 +27,73 @@ class RegionalApp(Application):
         tsolver = self.inventory.tsolver
         tsolver.init(self)
 
-        self._setProperties()
-        self.prefix = self.inventory.param.inventory.datafile
+	#if (self.invenotry.param.inventory.post_proccessing):
+	#    CitcomModule.post_processing()
+	#    return
 
         if self.inventory.param.inventory.verbose:
             CitcomModule.open_info_file()
 
         mesher.run()
 
-	# for a give temperature field, solve for velocity and pressure
+	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
 	# output phase
-        self.output(self.cycles)
+        self._output(self._cycles)
 
-	while (self.keep_going):
+	while (self._keep_going):
 	    tsolver.run()
 	    vsolver.run()
 
-	    self.cycles += 1
-            self.output(self.cycles)
+	    self._cycles += 1
+            self._output(self._cycles)
 
-	    if self.cycles >= self.inventory.param.inventory.maxstep:
-		self.keep_going = False
-
-
-
-	total_time = CitcomModule.CPU_time() - self.start_time
+	    if self._cycles >= self.inventory.param.inventory.maxstep:
+		self._keep_going = False
 
         return
+
 
 
     def __init__(self):
         Application.__init__(self, "regional-citcoms")
-        CitcomModule.set_signal()
-        self.total_time = 0
-        self.cycles = 0
-        self.keep_going = True
-
         return
+
 
 
     def init(self):
+	journal.info("staging").log("setup MPI")
+        import mpi
+        CitcomModule.citcom_init(mpi.world().handle())
+	CitcomModule.global_default_values()
+        CitcomModule.set_signal()
+        self._setProperties()
+
+	self._start_time = CitcomModule.CPU_time()
+        self._cycles = 0
+        self._keep_going = True
+
+	self.rank = mpi.world().rank
+	print "my rank is ", self.rank
+
         return
 
 
-    #def fini(self):
-	#self.total_time = CitcomModule.CPU_time() - self.start_time
+
+    def fini(self):
+        total_time = CitcomModule.CPU_time() - self._start_time
+        print "Average cpu time taken for velocity step = %f" % (
+            total_time / self._cycles )
+
 	#CitcomModule.finalize()
 	#Application.fini()
-	#return
+
+	return
 
 
-    def output(self, cycles):
+
+    def _output(self, cycles):
         CitcomModule.output(cycles)
         return
 
@@ -159,46 +164,8 @@ class RegionalApp(Application):
             ]
 
 
-    # this is the true run(), but old
-    def run_old(self):
-	Application.run(self)
-
-        # read in parameters
-        CitcomModule.read_instructions(self.filename)
-
-	#if (Control.post_proccessing):
-	#    CitcomModule.post_processing()
-	#    return
-
-	# decide which stokes solver to use
-	import CitcomS.Stokes_solver
-	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
-	vsolver.init()
-
-	# decide which field to advect (and to diffuse)
-	import CitcomS.Advection_diffusion as Advection_diffusion
-	tsolver = Advection_diffusion.temperature_diffadv('temp')
-	tsolver.init()
-
-
-	# solve for 0th time step velocity and pressure
-	vsolver.run()
-
-	# output phase
-        self.output()
-
-	while (self.keep_going and not self.Emergency_stop):
-	    self.cycles += 1
-	    print 'cycles = ', self.cycles
-	    #tsolver.run()
-	    #vsolver.run()
-	    total_time = CitcomModule.CPU_time() - self.start_time
-
-            #self.output()
-	return
-
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.22 2003/07/26 21:47:51 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.23 2003/07/28 21:57:02 tan2 Exp $"
 
 # End of file

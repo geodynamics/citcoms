@@ -20,11 +20,11 @@ class Stokes_solver(CitcomComponent):
         return
 
 
+
     def run(self):
 	self._form_RHS()
 	self._form_LHS()
 	self._solve()
-
 	return
 
 
@@ -40,23 +40,25 @@ class Stokes_solver(CitcomComponent):
 
 
 
-    def fini(self):
-	return
+    #def fini(self):
+	#return
+
 
 
     def _form_RHS(self):
+        raise NotImplementedError
 	return
+
 
 
     def _form_LHS(self):
+        raise NotImplementedError
 	return
+
 
 
     def _solve(self):
-	return
-
-
-    def output(self, *args, **kwds):
+        raise NotImplementedError
 	return
 
 
@@ -85,6 +87,6 @@ class Stokes_solver(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.11 2003/07/25 20:43:30 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.12 2003/07/28 21:57:02 tan2 Exp $"
 
 # End of file

@@ -113,43 +113,6 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_output__doc__},
 
-#if 0
-    {pyRegional_output_init__name__,
-     pyRegional_output_init,
-     METH_VARARGS,
-     pyRegional_output_init__doc__},
-
-    {pyRegional_output_close__name__,
-     pyRegional_output_close,
-     METH_VARARGS,
-     pyRegional_output_close__doc__},
-
-    {pyRegional_output_coord__name__,
-     pyRegional_output_coord,
-     METH_VARARGS,
-     pyRegional_output_coord__doc__},
-
-    {pyRegional_output_velo_header__name__,
-     pyRegional_output_velo_header,
-     METH_VARARGS,
-     pyRegional_output_velo_header__doc__},
-
-    {pyRegional_output_velo__name__,
-     pyRegional_output_velo,
-     METH_VARARGS,
-     pyRegional_output_velo__doc__},
-
-    {pyRegional_output_visc_prepare__name__,
-     pyRegional_output_visc_prepare,
-     METH_VARARGS,
-     pyRegional_output_visc_prepare__doc__},
-
-    {pyRegional_output_visc__name__,
-     pyRegional_output_visc,
-     METH_VARARGS,
-     pyRegional_output_visc__doc__},
-
-#endif
     // from setProperties.h
 
     {pyRegional_Advection_diffusion_set_properties__name__,
@@ -270,6 +233,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.22 2003/07/26 21:47:51 tan2 Exp $
+// $Id: bindings.cc,v 1.23 2003/07/28 21:57:01 tan2 Exp $
 
 // End of file
