@@ -38,6 +38,7 @@ class BC(CitcomComponent):
         inventory = [
 
             pyre.properties.bool("side_sbcs", False),
+            pyre.properties.bool("pseudo_free_surf", False),
 
             pyre.properties.int("topvbc", 0),
             pyre.properties.float("topvbxval", 0.0),
@@ -63,6 +64,6 @@ class BC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: BC.py,v 1.12 2004/05/26 23:55:38 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.13 2005/01/19 19:02:46 ces74 Exp $"
 
 # End of file
