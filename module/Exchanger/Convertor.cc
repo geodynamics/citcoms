@@ -122,15 +122,15 @@ void Convertor::velocity(Array2D<double,DIM>& V,
 
 void Convertor::xcoordinate(BoundedBox& bbox) const
 {
-    if(si) si->xcoordinate(bbox);
     if(cart) cart->xcoordinate(bbox);
+    if(si) si->xcoordinate(bbox);
 }
 
 
 void Convertor::xcoordinate(Array2D<double,DIM>& X) const
 {
-    if(si) si->xcoordinate(X);
     if(cart) cart->xcoordinate(X);
+    if(si) si->xcoordinate(X);
 }
 
 
@@ -149,20 +149,20 @@ void Convertor::xtime(double& t) const
 void Convertor::xtraction(Array2D<double,DIM>& F,
 			  const Array2D<double,DIM>& X) const
 {
-    if(si) si->xtraction(F);
     if(cart) cart->xvector(F, X);
+    if(si) si->xtraction(F);
 }
 
 
 void Convertor::xvelocity(Array2D<double,DIM>& V,
 			  const Array2D<double,DIM>& X) const
 {
-    if(si) si->xvelocity(V);
     if(cart) cart->xvector(V, X);
+    if(si) si->xvelocity(V);
 }
 
 
 // version
-// $Id: Convertor.cc,v 1.3 2004/01/08 18:04:32 tan2 Exp $
+// $Id: Convertor.cc,v 1.4 2004/01/09 01:25:30 tan2 Exp $
 
 // End of file
