@@ -23,7 +23,7 @@ class CoupledApp(SimpleApp):
 
         self.rank = 0
         self.nodes = 0
-        self.leaderRank = 0
+        self.leader = 0
         self.localLeader = 0
         self.remoteLeader = 0
 
@@ -60,7 +60,7 @@ class CoupledApp(SimpleApp):
         self.intercomm = layout.intercomm
         self.rank = layout.rank
         self.nodes = layout.nodes
-        self.leaderRank = layout.leaderRank
+        self.leader = layout.leader
         self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
@@ -111,8 +111,8 @@ class CoupledApp(SimpleApp):
             pyre.facilities.facility("coupler", default=Coupler.coupler()),
             pyre.facilities.facility("layout", default=Layout.layout()),
 
-            #SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
-            SolverFacility("coarse", default=Solver.regionalSolver("coarse", "coarse")),
+            SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
+            #SolverFacility("coarse", default=Solver.regionalSolver("coarse", "coarse")),
             SolverFacility("fine", default=Solver.regionalSolver("fine", "fine")),
 
             pyre.properties.int("steps", 1),
@@ -122,6 +122,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.4 2003/09/27 20:24:46 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.5 2003/09/28 21:44:53 tan2 Exp $"
 
 # End of file
