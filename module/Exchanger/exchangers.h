@@ -59,6 +59,12 @@ extern "C"
 PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *);
 
 
+extern char pyExchanger_initTemperature__name__[];
+extern char pyExchanger_initTemperature__doc__[];
+extern "C"
+PyObject * pyExchanger_initTemperature(PyObject *, PyObject *);
+
+
 extern char pyExchanger_receiveTemperature__name__[];
 extern char pyExchanger_receiveTemperature__doc__[];
 extern "C"
@@ -122,6 +128,6 @@ PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.14 2003/09/30 01:33:11 tan2 Exp $
+// $Id: exchangers.h,v 1.15 2003/10/01 22:21:14 tan2 Exp $
 
 // End of file

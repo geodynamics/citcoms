@@ -225,6 +225,25 @@ PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_initTemperature__doc__[] = "";
+char pyExchanger_initTemperature__name__[] = "initTemperature";
+
+PyObject * pyExchanger_initTemperature(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:initTemperature", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->initTemperature();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_receiveTemperature__doc__[] = "";
 char pyExchanger_receiveTemperature__name__[] = "receiveTemperature";
 
@@ -441,6 +460,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.18 2003/09/30 01:33:11 tan2 Exp $
+// $Id: exchangers.cc,v 1.19 2003/10/01 22:21:14 tan2 Exp $
 
 // End of file

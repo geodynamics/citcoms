@@ -42,6 +42,7 @@ public:
     void createDataArrays();
     void deleteDataArrays();
 
+    void initTemperature();
     void sendTemperature();
     void receiveTemperature();
     void sendVelocities();
@@ -83,7 +84,7 @@ protected:
     struct Data loutgoing;
     struct Data lincoming;
     struct Data poutgoing;
-    
+
     double fge_t, cge_t;
 
     void printDataT(const Data &data) const;
@@ -106,7 +107,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.22 2003/09/30 01:45:27 puru Exp $
+// $Id: ExchangerClass.h,v 1.23 2003/10/01 22:21:14 tan2 Exp $
 
 // End of file
 

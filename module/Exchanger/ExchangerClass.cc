@@ -8,6 +8,7 @@
 #include <portinfo>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include "Boundary.h"
 #include "global_defs.h"
 #include "ExchangerClass.h"
@@ -198,6 +199,45 @@ void Exchanger::deleteDataArrays() {
 }
 
 
+void Exchanger::initTemperature() {
+    std::cout << "in Exchanger::initTemperature" << std::endl;
+
+    // center of fine grid mesh
+    double theta_center = 0.5 * (boundary->theta_max + boundary->theta_min);
+    double fi_center = 0.5 * (boundary->fi_max + boundary->fi_min);
+    double r_center = 0.5 * (boundary->ro + boundary->ri);
+
+    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int k=1;k<=E->lmesh.noy;k++)
+	    for(int j=1;j<=E->lmesh.nox;j++)
+		for(int i=1;i<=E->lmesh.noz;i++)  {
+		    int node = i + (j-1)*E->lmesh.noz
+			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
+
+ 		    double theta = E->sx[m][1][node];
+		    double fi = E->sx[m][2][node];
+		    double r =E->sx[m][3][node];
+
+		    const double d = 4e-2;
+		    if ((fabs(theta - theta_center) < d) &&
+			(fabs(fi - fi_center) < d) &&
+			(fabs(r - r_center) < d))
+			E->T[m][node] = 1;
+		    else
+			E->T[m][node] = 0;
+
+// 		    if (rank == leader) {
+// 			std::cout << "(theta,fi,r,T) = "
+// 				  << theta << "  "
+// 				  << fi << "  "
+// 				  << r << "  "
+// 				  << E->T[m][node] << std::endl;
+// 		    }
+		}
+}
+
+
 void Exchanger::sendTemperature(void) {
     std::cout << "in Exchanger::sendTemperature"
 	      << "  rank = " << rank
@@ -277,7 +317,7 @@ void Exchanger::sendVelocities() {
 
 void Exchanger::receiveVelocities() {
     std::cout << "in Exchanger::receiveVelocities" << std::endl;
-    
+
     if(rank == leader) {
 	int tag = 0;
 	MPI_Status status;
@@ -286,19 +326,19 @@ void Exchanger::receiveVelocities() {
             {
                 if(!((fge_t==0)&&(cge_t==0)))poutgoing.v[i][n]=incoming.v[i][n];
             }
-            
+
 	    MPI_Recv(incoming.v[i], incoming.size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm, &status);
 	    tag ++;
             if((fge_t==0)&&(cge_t==0))
             {
-                for(int n=0; n < incoming.size; n++)poutgoing.v[i][n]=incoming.v[i][n];   
+                for(int n=0; n < incoming.size; n++)poutgoing.v[i][n]=incoming.v[i][n];
             }
-            
+
 	}
     }
-        //printDataV(incoming);
-    printDataV(poutgoing);
+    //printDataV(incoming);
+    //printDataV(poutgoing);
 
     // Don't forget to delete inoming.v
     return;
@@ -306,9 +346,9 @@ void Exchanger::receiveVelocities() {
 
 
 void Exchanger::imposeBC() {
+    std::cout << "in Exchanger::imposeBC" << std::endl;
 
     double N1,N2;
-    std::cout << "in Exchanger::imposeBC" << std::endl;
 
     if(cge_t==0)
     {
@@ -316,11 +356,11 @@ void Exchanger::imposeBC() {
         N2=0.0;
     }
     else
-    {    
+    {
         N1=(cge_t-fge_t)/cge_t;
         N2=fge_t/cge_t;
     }
-    
+
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=0;i<boundary->size;i++) {
 	    int n = boundary->bid2gid[i];
@@ -329,7 +369,7 @@ void Exchanger::imposeBC() {
 		E->sphere.cap[m].VB[1][n] = N1*poutgoing.v[0][i]+N2*incoming.v[0][i];
 		E->sphere.cap[m].VB[2][n] = N1*poutgoing.v[1][i]+N2*incoming.v[1][i];
 		E->sphere.cap[m].VB[3][n] = N1*poutgoing.v[2][i]+N2*incoming.v[2][i];
-                std::cout << E->sphere.cap[m].VB[1][n] << " " << E->sphere.cap[m].VB[2][n] << " " <<  E->sphere.cap[m].VB[3][n] << std::endl;
+                //std::cout << E->sphere.cap[m].VB[1][n] << " " << E->sphere.cap[m].VB[2][n] << " " <<  E->sphere.cap[m].VB[3][n] << std::endl;
 		E->node[m][n] = E->node[m][n] | VBX;
 		E->node[m][n] = E->node[m][n] | VBY;
 		E->node[m][n] = E->node[m][n] | VBZ;
@@ -440,7 +480,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.24 2003/09/30 02:02:40 puru Exp $
+// $Id: ExchangerClass.cc,v 1.25 2003/10/01 22:21:14 tan2 Exp $
 
 // End of file
 

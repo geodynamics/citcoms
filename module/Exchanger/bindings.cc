@@ -82,6 +82,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_deleteDataArrays__doc__},
 
+    {pyExchanger_initTemperature__name__,
+     pyExchanger_initTemperature,
+     METH_VARARGS,
+     pyExchanger_initTemperature__doc__},
+
     {pyExchanger_receiveTemperature__name__,
      pyExchanger_receiveTemperature,
      METH_VARARGS,
@@ -138,6 +143,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.16 2003/09/30 01:33:11 tan2 Exp $
+// $Id: bindings.cc,v 1.17 2003/10/01 22:21:14 tan2 Exp $
 
 // End of file
