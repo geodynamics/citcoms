@@ -210,7 +210,7 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                             std::cout << xc[j*3] <<" "<<xc[j*3+1] <<" " << xc[j*3+2] << std::endl;
                     }
 
-                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
+                    if(det[0] < -1.e-10 || det[1] < -1.e-10 || det[2] < -1.e-10 || det[3] < -1.e-10) continue;
 //                    std::cout << "node" << i <<"Found the  element "<< n+1 <<std::endl;
 
 //		       std::cout << " node " << i << " " << xt[0] << " " << xt[1] << " " << xt[2] << std::endl;
@@ -452,6 +452,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.31 2003/10/03 19:20:35 tan2 Exp $
+// $Id: Boundary.cc,v 1.32 2003/10/06 01:09:20 puru Exp $
 
 // End of file
