@@ -19,7 +19,12 @@ class IC(CitcomComponent):
 
 
     def setProperties(self):
-        self.CitcomModule.IC_set_properties(self.all_variables, self.inventory)
+        inv = self.inventory
+        inv.perturbmag = map(float, inv.perturbmag)
+        inv.perturbl = map(float, inv.perturbl)
+        inv.perturbm = map(float, inv.perturbm)
+
+        self.CitcomModule.IC_set_properties(self.all_variables, inv)
         return
 
 
@@ -74,14 +79,14 @@ class IC(CitcomComponent):
             pyre.properties.bool("zero_elapsed_time", default=True),
 
             pyre.properties.int("num_perturbations",2),
-            pyre.properties.sequence("perturbmag",[0.05,0.05]),
-            pyre.properties.sequence("perturbl",[2,2]),
-            pyre.properties.sequence("perturbm",[2,2]),
+            pyre.properties.list("perturbmag",[0.05,0.05]),
+            pyre.properties.list("perturbl",[2,2]),
+            pyre.properties.list("perturbm",[2,2]),
             pyre.properties.sequence("perturblayer",[3,6]),
 
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.9 2003/11/28 22:17:26 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.10 2004/02/05 19:06:29 tan2 Exp $"
 
 # End of file

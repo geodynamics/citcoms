@@ -23,7 +23,13 @@ class Visc(CitcomComponent):
 
 
     def setProperties(self):
-        self.CitcomModule.Visc_set_properties(self.all_variables, self.inventory)
+        inv = self.inventory
+        inv.visc0 = map(float, inv.visc0)
+        inv.viscE = map(float, inv.viscE)
+        inv.viscT = map(float, inv.viscT)
+        inv.sdepv_expt = map(float, inv.sdepv_expt)
+
+        self.CitcomModule.Visc_set_properties(self.all_variables, inv)
         return
 
 
@@ -39,14 +45,14 @@ class Visc(CitcomComponent):
             pyre.properties.bool("VISC_UPDATE", True),
 
             pyre.properties.int("num_mat", 4),
-            pyre.properties.sequence("visc0", [1, 1, 1, 1]),
+            pyre.properties.list("visc0", [1, 1, 1, 1]),
 
             pyre.properties.bool("TDEPV", False),
-            pyre.properties.sequence("viscE", [1, 1, 1, 1]),
-            pyre.properties.sequence("viscT", [1, 1, 1, 1]),
+            pyre.properties.list("viscE", [1, 1, 1, 1]),
+            pyre.properties.list("viscT", [1, 1, 1, 1]),
 
             pyre.properties.bool("SDEPV",False),
-            pyre.properties.sequence("sdepv_expt", [1, 1, 1, 1]),
+            pyre.properties.list("sdepv_expt", [1, 1, 1, 1]),
             pyre.properties.float("sdepv_misfit", 0.02),
 
             pyre.properties.bool("VMIN", False),
@@ -58,6 +64,6 @@ class Visc(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.8 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.9 2004/02/05 19:06:29 tan2 Exp $"
 
 # End of file
