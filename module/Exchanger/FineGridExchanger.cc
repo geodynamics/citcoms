@@ -56,58 +56,60 @@ void FineGridExchanger::impose_bc() {
 }
 
 
-const Boundary* FineGridExchanger::createBoundary() {
+void FineGridExchanger::createBoundary() {
     std::cout << "in FineGridExchanger::createBoundary" << std::endl;
-
-    Boundary* b = NULL;
 
     if (rank == localLeader) {
       // Face nodes + Edge nodes + vertex nodes
 	const int size = 2*((E->mesh.nox-2)*(E->mesh.noy-2)+(E->mesh.noy-2)*(E->mesh.noz-2)+(E->mesh.noz-2)*(E->mesh.nox-2))+4*(E->mesh.nox+E->mesh.noy+E->mesh.noz-6)+8;
-	b = new Boundary(size);
+
+	boundary = new Boundary(size);
 
 	// initialize...
-	b->init(E);
+	boundary->init(E);
 
-	//b->printConnectivity();
+	//boundary->printConnectivity();
+	//boundary->printX();
     }
-
-    return b;
 }
 
 
-int FineGridExchanger::sendBoundary(const Boundary* b) {
+int FineGridExchanger::sendBoundary() {
     std::cout << "in FineGridExchanger::sendBoundary"
 	      << "  rank = " << rank
-	      << "  leader = "<< localLeader << std::endl;
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader << std::endl;
 
     if (rank == localLeader) {
 	int tag = 0;
-	int size = b->size;
+	int size = boundary->size;
 
 	MPI_Send(&size, 1, MPI_INT,
 		 remoteLeader, tag, intercomm);
 	tag ++;
-	MPI_Send(b->connectivity, size, MPI_INT,
-		 remoteLeader, tag, intercomm);
-	tag ++;
-	for (int i=0; i<b->dim; i++, tag++) {
-	    MPI_Send(b->X[i], size, MPI_DOUBLE,
+
+ 	MPI_Send(boundary->connectivity, size, MPI_INT,
+ 		 remoteLeader, tag, intercomm);
+ 	tag ++;
+
+	for (int i=0; i<boundary->dim; i++) {
+	    MPI_Send(boundary->X[i], size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm);
+	    tag ++;
 	}
-	boundary = const_cast<Boundary*>(b);
     }
 
     return 0;
 }
 
 
-void FineGridExchanger::mapBoundary(Boundary* b) {
-    b->map(E, localLeader);
+void FineGridExchanger::mapBoundary() {
+    std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
+    boundary->map(E, localLeader);
 }
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.9 2003/09/10 21:11:09 puru Exp $
+// $Id: FineGridExchanger.cc,v 1.10 2003/09/11 22:10:55 tan2 Exp $
 
 // End of file

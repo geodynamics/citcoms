@@ -67,46 +67,48 @@ void CoarseGridExchanger::impose_bc() {
 }
 
 
-const Boundary* CoarseGridExchanger::receiveBoundary() {
+void CoarseGridExchanger::receiveBoundary() {
     std::cout << "in CoarseGridExchanger::receiveBoundary"
 	      << "  rank = " << rank
-	      << "  leader = "<< localLeader << std::endl;
-
-    Boundary *b = NULL;
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader << std::endl;
 
     if (rank == localLeader) {
 	int tag = 0;
 	MPI_Status status;
 	int size;
-	MPI_Recv(&size, 1, MPI_INT,
-		 remoteLeader, tag, intercomm, &status);
+
+ 	MPI_Recv(&size, 1, MPI_INT,
+ 		 remoteLeader, tag, intercomm, &status);
 	tag ++;
 
-	b = new Boundary(size);
+	boundary = new Boundary(size);
 
-	MPI_Recv(b->connectivity, size, MPI_INT,
-		 remoteLeader, tag, intercomm, &status);
-	tag ++;
-	for (int i=0; i<b->dim; i++, tag++) {
-	    MPI_Recv(b->X[i], size, MPI_DOUBLE,
-		     remoteLeader, tag, intercomm, &status);
+  	MPI_Recv(boundary->connectivity, size, MPI_INT,
+  		 remoteLeader, tag, intercomm, &status);
+  	//boundary->printConnectivity();
+ 	tag ++;
+
+	for (int i=0; i<boundary->dim; i++) {
+  	    MPI_Recv(boundary->X[i], size, MPI_DOUBLE,
+  		     remoteLeader, tag, intercomm, &status);
+	    tag ++;
 	}
-
-	boundary = b;
-	b->printConnectivity();
+	//boundary->printX();
     }
 
-    return b;
 }
 
 
-void CoarseGridExchanger::mapBoundary(Boundary* b) {
 
+void CoarseGridExchanger::mapBoundary() {
+    std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
+    boundary->map(E, localLeader);
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.6 2003/09/10 21:11:09 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.7 2003/09/11 22:10:55 tan2 Exp $
 
 // End of file

@@ -27,16 +27,16 @@ public:
     virtual void distribute();
     virtual void interpretate();
     virtual void impose_bc();
-    virtual void mapBoundary(Boundary*);
+    virtual void mapBoundary();
 
-    const Boundary* receiveBoundary();
+    void receiveBoundary();
 
 };
 
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.5 2003/09/10 21:11:09 puru Exp $
+// $Id: CoarseGridExchanger.h,v 1.6 2003/09/11 22:10:55 tan2 Exp $
 
 // End of file
 
