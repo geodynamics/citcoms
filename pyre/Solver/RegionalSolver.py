@@ -25,12 +25,6 @@ class RegionalApp(Application):
 	self.start_time = CitcomModule.CPU_time()
 	print "my rank is ", self.rank
 
-        self._setProperties()
-        self.prefix = self.inventory.param.inventory.datafile
-
-        if self.inventory.param.inventory.verbose:
-            CitcomModule.open_info_file()
-
         mesher = self.inventory.mesher
         mesher.init(self)
 
@@ -40,13 +34,20 @@ class RegionalApp(Application):
         tsolver = self.inventory.tsolver
         tsolver.init(self)
 
-        #mesher.run()
+        self._setProperties()
+        self.prefix = self.inventory.param.inventory.datafile
+
+        if self.inventory.param.inventory.verbose:
+            CitcomModule.open_info_file()
+
+        mesher.run()
 
         return
 
 
     def __init__(self):
         Application.__init__(self, "regional-citcoms")
+        CitcomModule.set_signal()
         #self.total_time = 0
         #self.cycles = 0
         #self.keep_going = True
@@ -185,6 +186,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.19 2003/07/24 17:46:46 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.20 2003/07/24 20:10:33 tan2 Exp $"
 
 # End of file

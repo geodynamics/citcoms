@@ -24,7 +24,7 @@ class RegionalSphere(CitcomComponent):
 
     def run(self):
         start_time = self.CitcomModule.CPU_time()
-        self.CitcomModule.mesher_setup()
+        self.CitcomModule.regional_sphere_setup()
 
         import mpi
         if not mpi.world().rank:
@@ -36,7 +36,7 @@ class RegionalSphere(CitcomComponent):
 
 
     def init(self, parent):
-        self.CitcomModule.set_3dsphere_defaults()
+        self.CitcomModule.regional_sphere_init()
         return
 
 
@@ -76,6 +76,6 @@ class RegionalSphere(CitcomComponent):
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.3 2003/07/24 17:46:47 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.4 2003/07/24 20:10:33 tan2 Exp $"
 
 # End of file

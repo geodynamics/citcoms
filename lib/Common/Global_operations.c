@@ -5,55 +5,6 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void set_horizontal_communicator(struct All_variables *E)
-{
-  MPI_Group world_g, horizon_g;
-  int j;
-  int *processors;
-
-  processors = (int *) malloc((E->parallel.nprocxy+2)*sizeof(int));
-
-  for (j=0;j<E->parallel.nprocxy;j++) {
-    processors[j] = E->parallel.me_loc[3] + j * E->parallel.nprocz;
-  }
-
-  MPI_Comm_group(E->parallel.world, &world_g);
-  MPI_Group_incl(world_g, j, processors, &horizon_g);
-  MPI_Comm_create(E->parallel.world, horizon_g, &(E->parallel.horizontal_comm));
-
-  MPI_Group_free(&horizon_g);
-  MPI_Group_free(&world_g);
-  free((void *) processors);
-
-  return;
-}
-
-
-void set_vertical_communicator(struct All_variables *E)
-{
-  MPI_Group world_g, vertical_g;
-  int j;
-  int *processors;
-
-  processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
-
-  for (j=0;j<E->parallel.nprocz;j++) {
-    processors[j] = E->parallel.me_sph * E->parallel.nprocz
-                  + E->parallel.nprocz - 1 - j;
-    fprintf(stderr, "%d %d\n", j,E->parallel.me_sph * E->parallel.nprocz
-                  + E->parallel.nprocz - 1 - j);
-  }
-
-  MPI_Comm_group(E->parallel.world, &world_g);
-  MPI_Group_incl(world_g, j, processors, &vertical_g);
-  MPI_Comm_create(E->parallel.world, vertical_g, &(E->parallel.vertical_comm));
-
-  MPI_Group_free(&vertical_g);
-  MPI_Group_free(&world_g);
-  free((void *) processors);
-}
-
-
 /* ===============================================
    strips horizontal average from nodal field X.
    Assumes orthogonal mesh, otherwise, horizontals

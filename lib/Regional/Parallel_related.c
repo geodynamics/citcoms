@@ -162,6 +162,54 @@ if (E->control.verbose)
   }
 
 
+void set_horizontal_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, horizon_g;
+  int j;
+  int *processors;
+
+  processors = (int *) malloc((E->parallel.nprocxy+2)*sizeof(int));
+
+  for (j=0;j<E->parallel.nprocxy;j++) {
+    processors[j] = E->parallel.me_loc[3] + j * E->parallel.nprocz;
+  }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, E->parallel.nprocxy, processors, &horizon_g);
+  MPI_Comm_create(E->parallel.world, horizon_g, &(E->parallel.horizontal_comm));
+
+  MPI_Group_free(&horizon_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+
+  return;
+}
+
+
+void set_vertical_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, vertical_g;
+  int j;
+  int *processors;
+
+  processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
+
+  for (j=0;j<E->parallel.nprocz;j++) {
+    processors[j] = E->parallel.me_sph * E->parallel.nprocz
+                  + E->parallel.nprocz - 1 - j;
+  }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, E->parallel.nprocz, processors, &vertical_g);
+  MPI_Comm_create(E->parallel.world, vertical_g, &(E->parallel.vertical_comm));
+
+  MPI_Group_free(&vertical_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+}
+
+
+
 /* =========================================================================
 get element information for each processor.
  ========================================================================= */
@@ -744,7 +792,7 @@ void parallel_communication_routs_s(E)
   return;
   }
 
-/* ================================================ 
+/* ================================================
 WARNING: BUGS AHEAD
 
    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
@@ -899,7 +947,7 @@ void exchange_node_f(E, U, lev)
        U[m][ E->parallel.EXCHANGE_NODE[lev][m][j].pass[k] ] += R[k][j-1];
    }
  }
- 
+
 
  for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
    free((void*) S[k]);

@@ -342,6 +342,14 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
     getScalarProperty(properties, "fi_min", E->control.fi_min);
     getScalarProperty(properties, "fi_max", E->control.fi_max);
 
+    E->sphere.cap[1].theta[1] = E->control.theta_min;
+    E->sphere.cap[1].theta[2] = E->control.theta_max;
+    E->sphere.cap[1].theta[3] = E->control.theta_max;
+    E->sphere.cap[1].theta[4] = E->control.theta_min;
+    E->sphere.cap[1].fi[1] = E->control.fi_min;
+    E->sphere.cap[1].fi[2] = E->control.fi_min;
+    E->sphere.cap[1].fi[3] = E->control.fi_max;
+    E->sphere.cap[1].fi[4] = E->control.fi_max;
 
     if (PyErr_Occurred())
 	return NULL;

@@ -96,15 +96,15 @@ struct PyMethodDef pyRegional_methods[] = {
 
     // from mesher.h
 
-    {pyRegional_mesher_setup__name__,
-     pyRegional_mesher_setup,
+    {pyRegional_regional_sphere_setup__name__,
+     pyRegional_regional_sphere_setup,
      METH_VARARGS,
-     pyRegional_mesher_setup__doc__},
+     pyRegional_regional_sphere_setup__doc__},
 
-    {pyRegional_set_3dsphere_defaults__name__,
-     pyRegional_set_3dsphere_defaults,
+    {pyRegional_regional_sphere_init__name__,
+     pyRegional_regional_sphere_init,
      METH_VARARGS,
-     pyRegional_set_3dsphere_defaults__doc__},
+     pyRegional_regional_sphere_init__doc__},
 
     // from outputs.h
 
@@ -263,6 +263,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.19 2003/07/24 00:04:04 tan2 Exp $
+// $Id: bindings.cc,v 1.20 2003/07/24 20:10:33 tan2 Exp $
 
 // End of file

@@ -9,14 +9,13 @@
 
 #include <portinfo>
 #include <Python.h>
-
+#include <iostream>
 
 #include "exceptions.h"
 #include "mesher.h"
 
 extern "C" {
 
-    //#include "mpi.h"
 #include "global_defs.h"
 #include "citcom_init.h"
 
@@ -51,10 +50,10 @@ extern "C" {
 
 
 
-char pyRegional_mesher_setup__doc__[] = "";
-char pyRegional_mesher_setup__name__[] = "mesher_setup";
+char pyRegional_regional_sphere_setup__doc__[] = "";
+char pyRegional_regional_sphere_setup__name__[] = "regional_sphere_setup";
 
-PyObject * pyRegional_mesher_setup(PyObject *self, PyObject *args)
+PyObject * pyRegional_regional_sphere_setup(PyObject *self, PyObject *args)
     // copied from read_instructions()
 {
 
@@ -116,20 +115,16 @@ PyObject * pyRegional_mesher_setup(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_set_3dsphere_defaults__doc__[] = "";
-char pyRegional_set_3dsphere_defaults__name__[] = "set_3dsphere_defaults";
+char pyRegional_regional_sphere_init__doc__[] = "";
+char pyRegional_regional_sphere_init__name__[] = "regional_sphere_init";
 
-PyObject * pyRegional_set_3dsphere_defaults(PyObject *self, PyObject *args)
+PyObject * pyRegional_regional_sphere_init(PyObject *self, PyObject *args)
 {
-
-    E->sphere.cap[1].theta[1] = E->control.theta_min;
-    E->sphere.cap[1].theta[2] = E->control.theta_max;
-    E->sphere.cap[1].theta[3] = E->control.theta_max;
-    E->sphere.cap[1].theta[4] = E->control.theta_min;
-    E->sphere.cap[1].fi[1] = E->control.fi_min;
-    E->sphere.cap[1].fi[2] = E->control.fi_min;
-    E->sphere.cap[1].fi[3] = E->control.fi_max;
-    E->sphere.cap[1].fi[4] = E->control.fi_max;
+    // copied from set_3dsphere_defaults()
+    E->mesh.nsd = 3;
+    E->mesh.dof = 3;
+    E->sphere.caps = 1;
+    E->sphere.max_connections = 6;
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -140,6 +135,6 @@ PyObject * pyRegional_set_3dsphere_defaults(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.2 2003/07/22 21:58:08 tan2 Exp $
+// $Id: mesher.cc,v 1.3 2003/07/24 20:10:33 tan2 Exp $
 
 // End of file
