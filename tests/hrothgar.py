@@ -2,10 +2,6 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#                             Michael A.G. Aivazis
-#                      California Institute of Technology
-#                      (C) 1998-2003  All Rights Reserved
-#
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -15,24 +11,22 @@ import journal
 
 
 # the required component factory
-def staging(options):
+def staging():
 
     info = journal.debug("staging")
     info.log("instantiating application launcher")
 
-    from mpi.StagingMPICH import StagingMPICH
-    stager = StagingMPICH()
-    
-    # initialize using the local default values
-    stager.properties.nodegen = "n%03d"
+    from mpi.LauncherMPICH import LauncherMPICH
+    stager = LauncherMPICH()
 
-    # initialize using the local default values
-    stager.configure(options)
-
+    # initialize using the local values
+    stager.inventory.nodegen = "n%03d"
+    stager.inventory.nodes = 12
+    stager.inventory.nodelist = [101,102,103,104,105,106]
     return stager
 
 
 # version
-# $Id: hrothgar.py,v 1.1 2003/05/23 17:58:13 tan2 Exp $
+# $Id: hrothgar.py,v 1.2 2003/08/01 22:57:42 tan2 Exp $
 
-# End of file 
+# End of file
