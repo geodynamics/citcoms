@@ -38,6 +38,8 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
+	CitcomApp.py \
+	FullApp.py \
 	RadiusDepth.py \
 	RegionalApp.py
 
@@ -47,7 +49,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.5 2003/07/28 23:03:48 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/08/01 22:24:00 tan2 Exp $
 
 #
 # End of file

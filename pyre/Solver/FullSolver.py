@@ -8,15 +8,15 @@
 #
 
 from CitcomApp import CitcomApp
-import CitcomS.Regional as CitcomModule
+import CitcomS.Full as CitcomModule
 import journal
 
 
-class RegionalApp(CitcomApp):
+class FullApp(CitcomApp):
 
 
     def __init__(self):
-	CitcomApp.__init__(self, "regional-citcoms")
+	CitcomApp.__init__(self, "full-citcoms")
 	self.CitcomModule = CitcomModule
         return
 
@@ -40,12 +40,13 @@ class RegionalApp(CitcomApp):
         from CitcomS.Components.BC import BC
         from CitcomS.Components.Const import Const
         from CitcomS.Components.IC import IC
+	from CitcomS.Components.Parallel import Parallel
 	from CitcomS.Components.Param import Param
         from CitcomS.Components.Phase import Phase
         from CitcomS.Components.Visc import Visc
 
         inventory = [
-            Mesher("mesher", Sphere.regionalSphere(CitcomModule)),
+            Mesher("mesher", Sphere.fullSphere(CitcomModule)),
             VSolver("vsolver", Stokes_solver.imcompressibleNewtonian(CitcomModule)),
             TSolver("tsolver", Advection_diffusion.temperature_diffadv(CitcomModule)),
 
@@ -55,6 +56,8 @@ class RegionalApp(CitcomApp):
 				     default=Const("const", "const", CitcomModule)),
             pyre.facilities.facility("ic",
 				     default=IC("ic", "ic", CitcomModule)),
+	    pyre.facilities.facility("parallel",
+				     default=Parallel("parallel", "parallel", CitcomModule)),
             pyre.facilities.facility("param",
 				     default=Param("param", "param", CitcomModule)),
             pyre.facilities.facility("phase",
@@ -67,6 +70,6 @@ class RegionalApp(CitcomApp):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.25 2003/08/01 22:24:00 tan2 Exp $"
+__id__ = "$Id: FullSolver.py,v 1.1 2003/08/01 22:24:00 tan2 Exp $"
 
 # End of file
