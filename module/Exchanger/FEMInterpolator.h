@@ -41,14 +41,16 @@ public:
 private:
     void init(const BoundedMesh& boundedMesh,
 	      Array2D<int,1>& meshNode);
-
-    bool isCandidate(const double* xc, const BoundedBox& bbox) const;
-    double TetrahedronVolume(double *x1, double *x2,
-			     double *x3, double *x4) const;
-    double det3_sub(double  *x1, double *x2, double *x3) const;
-    void appendFoundElement(int el, int ntetra,
-			    const double* det, double dett);
-
+    void computeElementGeometry(Array2D<double,DIM*DIM>& etaAxes,
+				Array2D<double,DIM>& inv_length_sq) const;
+    int bisectInsertPoint(double x, const std::vector<double>& v) const;
+    bool elementInverseMapping(std::vector<double>& elmShape,
+		       const std::vector<double>& x,
+		       const Array2D<double,DIM*DIM>& etaAxes,
+		       const Array2D<double,DIM>& inv_length_sq,
+		       int element, double accuracy);
+    void getShapeFunction(std::vector<double>& shape,
+			  const std::vector<double>& eta) const;
     void selfTest(const BoundedMesh& boundedMesh,
 		  const Array2D<int,1>& meshNode) const;
 
@@ -63,6 +65,6 @@ private:
 #endif
 
 // version
-// $Id: FEMInterpolator.h,v 1.3 2004/01/08 20:42:56 tan2 Exp $
+// $Id: FEMInterpolator.h,v 1.4 2004/01/13 03:55:36 tan2 Exp $
 
 // End of file

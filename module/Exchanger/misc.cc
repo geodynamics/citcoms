@@ -82,7 +82,7 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *args)
     E->control.theta_min = 0.9;
     E->control.fi_max = 2.1;
     E->control.fi_min = 0.9;
-    E->sphere.ro = 2.0;
+    E->sphere.ro = 1.9;
     E->sphere.ri = 0.9;
 
     commonE(E);
@@ -107,9 +107,9 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *args)
 
     All_variables *E = citcom_init(&world);
 
-    E->lmesh.nox = 7;
-    E->lmesh.noy = 7;
-    E->lmesh.noz = 5;
+    E->lmesh.nox = 4;
+    E->lmesh.noy = 4;
+    E->lmesh.noz = 3;
 
     E->control.theta_max = 3.0;
     E->control.theta_min = 0.0;
@@ -157,6 +157,9 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *args)
 
 void commonE(All_variables *E)
 {
+    E->control.accuracy = 1e-6;
+    E->control.tole_comp = 1e-7;
+
     E->parallel.nprocxy = 1;
 
     E->parallel.nprocx = E->parallel.nproc;
@@ -212,11 +215,20 @@ void commonE(All_variables *E)
     for (int lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
 	for (int j=1;j<=E->sphere.caps_per_proc;j++)  {
 	    E->IEN[lev][j] = new IEN [E->lmesh.nel+1];
+	    E->ECO[lev][j] = (struct COORD *) malloc((E->lmesh.nno+2)*sizeof(struct COORD));
 	}
     }
 
-    for (int j=1;j<=E->sphere.caps_per_proc;j++)
+    for (int j=1;j<=E->sphere.caps_per_proc;j++) {
 	E->ien[j] = E->IEN[E->mesh.levmax][j];
+	E->eco[j] = E->ECO[E->mesh.levmax][j];
+    }
+
+    for (int lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)
+	for (int j=1;j<=E->sphere.caps_per_proc;j++)
+	    for(int n=1; n<=E->lmesh.nno; n++) {
+		E->ECO[lev][j][n].area = 1.0;
+	    }
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	E->sphere.cap[m].VB[1] = new float[E->lmesh.nno+1];
@@ -396,6 +408,6 @@ void initTemperatureTest(const BoundedBox& bbox, All_variables* E)
 }
 
 // version
-// $Id: misc.cc,v 1.21 2003/11/11 19:29:27 tan2 Exp $
+// $Id: misc.cc,v 1.22 2004/01/13 03:55:36 tan2 Exp $
 
 // End of file
