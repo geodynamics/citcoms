@@ -12,12 +12,15 @@
 #include <iostream>
 #include "global_defs.h"
 #include "journal/journal.h"
-#include "utilTemplate.h"
-#include "Array2D.h"
 #include "Boundary.h"
-#include "Sink.h"
+#include "Exchanger/UtilTemplate.h"
+#include "Exchanger/Array2D.h"
+#include "Exchanger/Sink.h"
 #include "AreaWeightedNormal.h"
 
+using Exchanger::Array2D;
+using Exchanger::DIM;
+using Exchanger::Sink;
 
 
 AreaWeightedNormal::AreaWeightedNormal(const MPI_Comm& comm,
@@ -33,11 +36,15 @@ AreaWeightedNormal::AreaWeightedNormal(const MPI_Comm& comm,
 }
 
 
+AreaWeightedNormal::~AreaWeightedNormal()
+{}
+
+
 void AreaWeightedNormal::imposeConstraint(Velo& V,
 					  const MPI_Comm& comm,
 					  const Sink& sink) const
 {
-    journal::info_t info("incompressibility");
+    journal::info_t info("CitcomS-AreaWeightedNormal-outflow");
 
     double outflow = computeOutflow(V, comm, sink);
     info << journal::loc(__HERE__)
@@ -56,6 +63,8 @@ void AreaWeightedNormal::imposeConstraint(Velo& V,
 
 
 // private functions
+
+static const int NODES_PER_ELEMENT = 8;
 
 void AreaWeightedNormal::computeWeightedNormal(const Boundary& boundary,
 					       const All_variables* E)
@@ -153,7 +162,7 @@ void AreaWeightedNormal::computeTotalArea(const MPI_Comm& comm,
 	    total_area_ += std::abs(nwght[i*DIM+j]);
     }
 
-    util::gatherSum(comm, total_area_);
+    Exchanger::util::gatherSum(comm, total_area_);
 }
 
 
@@ -168,7 +177,7 @@ double AreaWeightedNormal::computeOutflow(const Velo& V,
 	    outflow += V[j][n] * nwght[i*DIM+j];
     }
 
-    util::gatherSum(comm, outflow);
+    Exchanger::util::gatherSum(comm, outflow);
 
     return outflow;
 }
@@ -190,6 +199,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow,
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.9 2004/02/25 23:24:50 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.10 2004/05/11 18:35:24 tan2 Exp $
 
 // End of file

@@ -7,17 +7,17 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_AreaWeightedNormal_h)
-#define pyCitcom_AreaWeightedNormal_h
+#if !defined(pyCitcomSExchanger_AreaWeightedNormal_h)
+#define pyCitcomSExchanger_AreaWeightedNormal_h
 
 #include <vector>
 #include "mpi.h"
-#include "DIM.h"
+#include "Exchanger/Array2D.h"
+#include "Exchanger/DIM.h"
+#include "Exchanger/Sink.h"
 
 struct All_variables;
-template <class T, int N> class Array2D;
 class Boundary;
-class Sink;
 
 
 class AreaWeightedNormal {
@@ -29,24 +29,26 @@ class AreaWeightedNormal {
 public:
     AreaWeightedNormal(const MPI_Comm& comm,
 		       const Boundary& boundary,
-		       const Sink& sink,
+		       const Exchanger::Sink& sink,
 		       const All_variables* E);
-    ~AreaWeightedNormal() {};
+    ~AreaWeightedNormal();
 
-    typedef Array2D<double,DIM> Velo;
+    typedef Exchanger::Array2D<double,Exchanger::DIM> Velo;
 
     void imposeConstraint(Velo& V,
 			  const MPI_Comm& comm,
-			  const Sink& sink) const;
+			  const Exchanger::Sink& sink) const;
 
 private:
     void computeWeightedNormal(const Boundary& boundary,
 			       const All_variables* E);
-    void computeTotalArea(const MPI_Comm& comm, const Sink& sink);
+    void computeTotalArea(const MPI_Comm& comm,
+			  const Exchanger::Sink& sink);
     double computeOutflow(const Velo& V,
 			  const MPI_Comm& comm,
-			  const Sink& sink) const;
-    void reduceOutflow(Velo& V, double outflow, const Sink& sink) const;
+			  const Exchanger::Sink& sink) const;
+    void reduceOutflow(Velo& V, double outflow,
+		       const Exchanger::Sink& sink) const;
 
 };
 
@@ -54,7 +56,7 @@ private:
 #endif
 
 // version
-// $Id: AreaWeightedNormal.h,v 1.5 2004/01/21 20:46:01 tan2 Exp $
+// $Id: AreaWeightedNormal.h,v 1.6 2004/05/11 18:35:24 tan2 Exp $
 
 // End of file
 

@@ -13,21 +13,19 @@
 #include "Boundary.h"
 #include "BoundaryVTInlet.h"
 
+using Exchanger::Sink;
 
-BoundaryVTInlet::BoundaryVTInlet(MPI_Comm c,
-				 const Boundary& boundary,
+
+BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
 				 const Sink& sink,
 				 All_variables* E,
-				 const std::string& mode) :
-    VTInlet(boundary, sink, E, mode),
+				 MPI_Comm c) :
+    VTInlet(boundary, sink, E),
     comm(c),
     awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
 {
-    if(mode.find('V',0) == std::string::npos) {
-	journal::firewall_t firewall("BoundaryVTInlet");
-	firewall << journal::loc(__HERE__)
-		 << "invalid mode" << journal::end;
-    }
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
 }
 
 
@@ -39,17 +37,17 @@ BoundaryVTInlet::~BoundaryVTInlet()
 
 void BoundaryVTInlet::recv()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
     VTInlet::recv();
 
     awnormal->imposeConstraint(v, comm, sink);
-    v.print("V_constrained");
+    v.print("CitcomS-BoundaryVTInlet-V_constrained");
 }
 
 
 // version
-// $Id: BoundaryVTInlet.cc,v 1.1 2004/02/24 20:34:43 tan2 Exp $
+// $Id: BoundaryVTInlet.cc,v 1.2 2004/05/11 18:35:24 tan2 Exp $
 
 // End of file
