@@ -102,16 +102,14 @@ void free_STD_mem(struct All_variables *E,
 }
 
 
-
 void compute_nodal_stress(struct All_variables *E,
 			  float** SXX, float** SYY, float** SZZ,
 			  float** SXY, float** SXZ, float** SZY,
 			  float** divv, float** vorv)
 {
-  void exchange_node_f();
   void get_global_shape_fn();
   void velo_from_element();
-  void get_surf_stress();
+
   int i,j,e,node,m;
 
   float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
@@ -224,14 +222,14 @@ void compute_nodal_stress(struct All_variables *E,
     }    /* end for el */
   }     /* end for m */
 
-  exchange_node_f(E,SZZ,lev);
-  exchange_node_f(E,SXX,lev);
-  exchange_node_f(E,SYY,lev);
-  exchange_node_f(E,SXY,lev);
-  exchange_node_f(E,SXZ,lev);
-  exchange_node_f(E,SZY,lev);
-  exchange_node_f(E,divv,lev);
-  exchange_node_f(E,vorv,lev);
+  (E->exchange_node_f)(E,SXX,lev);
+  (E->exchange_node_f)(E,SYY,lev);
+  (E->exchange_node_f)(E,SZZ,lev);
+  (E->exchange_node_f)(E,SXY,lev);
+  (E->exchange_node_f)(E,SXZ,lev);
+  (E->exchange_node_f)(E,SZY,lev);
+  (E->exchange_node_f)(E,divv,lev);
+  (E->exchange_node_f)(E,vorv,lev);
 
   /*    stress_scaling = 1.0e-6*E->data.ref_viscosity*E->data.therm_diff/ */
   /*                       (E->data.radius_km*E->data.radius_km); */

@@ -163,6 +163,9 @@ oordinate and F-B
   set_vertical_communicator(E);
   set_horizontal_communicator(E);
 
+  E->exchange_node_d = exchange_node_d;
+  E->exchange_node_f = exchange_node_f;
+
   return;
   }
 

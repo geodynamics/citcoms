@@ -851,6 +851,10 @@ struct All_variables {
 
     float (* node_space_function[3])(void*);
 
+  /* the following function pointers are for exchanger */
+  void (* exchange_node_d)(void*, double**, int);
+  void (* exchange_node_f)(void*, float**, int);
+
 };
 
 #endif

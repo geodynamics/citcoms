@@ -125,6 +125,9 @@ void parallel_processor_setup(struct All_variables *E)
   set_horizontal_communicator(E);
   set_vertical_communicator(E);
 
+  E->exchange_node_d = exchange_node_d;
+  E->exchange_node_f = exchange_node_f;
+
   return;
   }
 
