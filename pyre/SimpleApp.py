@@ -90,7 +90,7 @@ class SimpleApp(Application):
         inventory = [
 
             pyre.facilities.facility("controller", default=Controller.controller()),
-            SolverFacility("solver", Solver.regionalSolver()),
+            SolverFacility("solver", default=Solver.regionalSolver()),
 
             pyre.properties.int("steps", 1),
 
@@ -99,6 +99,6 @@ class SimpleApp(Application):
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.3 2003/08/29 19:46:38 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.4 2003/08/29 20:41:04 tan2 Exp $"
 
 # End of file

@@ -32,13 +32,13 @@ class FullSolver(Solver):
 
         inventory = [
 
-            Mesher("mesher", Sphere.fullSphere("full-sphere")),
+            Mesher("mesher", default=Sphere.fullSphere("full-sphere")),
 
             ]
 
 
 
 # version
-__id__ = "$Id: FullSolver.py,v 1.6 2003/08/27 22:24:07 tan2 Exp $"
+__id__ = "$Id: FullSolver.py,v 1.7 2003/08/29 20:41:04 tan2 Exp $"
 
 # End of file

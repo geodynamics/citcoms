@@ -152,8 +152,8 @@ class Solver(BaseSolver):
 
         inventory = [
 
-            TSolver("tsolver", Advection_diffusion.temperature_diffadv("temp")),
-            VSolver("vsolver", Stokes_solver.incompressibleNewtonian("incomp-newtonian")),
+            TSolver("tsolver", default=Advection_diffusion.temperature_diffadv("temp")),
+            VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian("incomp-newtonian")),
 
             pyre.facilities.facility("bc", default=BC("bc", "bc")),
             pyre.facilities.facility("const", default=Const("const", "const")),
@@ -165,6 +165,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.14 2003/08/29 18:31:09 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.15 2003/08/29 20:41:04 tan2 Exp $"
 
 # End of file

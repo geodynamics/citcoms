@@ -32,13 +32,13 @@ class RegionalSolver(Solver):
 
         inventory = [
 
-            Mesher("mesher", Sphere.regionalSphere("regional-sphere")),
+            Mesher("mesher", default=Sphere.regionalSphere("regional-sphere")),
 
             ]
 
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.30 2003/08/27 22:24:07 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.31 2003/08/29 20:41:04 tan2 Exp $"
 
 # End of file
