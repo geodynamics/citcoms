@@ -7,29 +7,28 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from Citcom import Citcom
-import Regional as CitcomModule
+from Solver import Solver
 import journal
 
 
-class CitcomSRegional(Citcom):
+class RegionalSolver(Solver):
 
 
-    def __init__(self, name="regional", facility="citcom"):
-	Citcom.__init__(self, name, facility)
+    def __init__(self, name, facility="solver"):
+	Solver.__init__(self, name, facility)
+        import CitcomS.Regional as CitcomModule
 	self.CitcomModule = CitcomModule
         return
 
 
 
-    class Inventory(Citcom.Inventory):
+    class Inventory(Solver.Inventory):
 
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
 
         # component modules
         import CitcomS.Components.Sphere as Sphere
-
 
         inventory = [
 
@@ -40,6 +39,6 @@ class CitcomSRegional(Citcom):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.29 2003/08/27 20:52:46 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.30 2003/08/27 22:24:07 tan2 Exp $"
 
 # End of file

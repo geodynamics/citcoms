@@ -16,7 +16,7 @@ class RegionalApp(Application):
 
     def run(self):
 
-        regional = self.inventory.citcom
+        regional = self.inventory.solver
         regional.run()
 
         return
@@ -26,17 +26,17 @@ class RegionalApp(Application):
     class Inventory(Application.Inventory):
 
         import pyre.facilities
-        from CitcomSRegional import CitcomSRegional
+        import Solver
 
         inventory = [
 
-            pyre.facilities.facility("citcom", default=CitcomSRegional()),
+            pyre.facilities.facility("solver", default=Solver.regionalSolver()),
 
             ]
 
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.28 2003/08/25 19:16:04 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.29 2003/08/27 22:24:06 tan2 Exp $"
 
 # End of file

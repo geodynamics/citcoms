@@ -16,7 +16,8 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Components \
-	Facilities
+	Facilities \
+	Solver
 
 RECURSE_DIRS = $(BLD_DIRS)
 
@@ -38,9 +39,6 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	Citcom.py \
-	CitcomSFull.py \
-	CitcomSRegional.py \
 	CoupledRegionalApp.py \
 	FullApp.py \
 	RegionalApp.py
@@ -51,7 +49,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.8 2003/08/25 19:16:04 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/08/27 22:24:06 tan2 Exp $
 
 #
 # End of file

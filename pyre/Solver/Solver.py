@@ -7,11 +7,20 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Solver import Solver
+from pyre.components.Solver import Solver as BaseSolver
 import journal
 
 
-class Citcom(Solver):
+class Solver(BaseSolver):
+
+
+    def __init__(self, name, facility="solver"):
+        BaseSolver.__init__(self, name, facility)
+
+        # use non-dimensional time
+        self.t = 0.0
+        return
+
 
 
     def run(self):
@@ -34,8 +43,8 @@ class Citcom(Solver):
         self.setProperties()
 
 	self._start_cpu_time = self.CitcomModule.CPU_time()
-        self._time = 0
-        self._cycles = 0
+        self.t = 0
+        self.step = 0
 
 	self.rank = comm.rank
 	print "my rank is ", self.rank
@@ -63,12 +72,12 @@ class Citcom(Solver):
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
-        self.save(self._cycles)
+        self.save()
 
-	while self._cycles < self.inventory.param.inventory.maxstep:
+	while self.step < self.inventory.param.inventory.maxstep:
 
 	    #tsolver.run()
-            if not self._cycles:
+            if not self.step:
                 self.CitcomModule.PG_timestep_init(self.all_variables)
 
             dt = tsolver.stable_timestep()
@@ -76,12 +85,12 @@ class Citcom(Solver):
 
 	    vsolver.run()
 
-            self._time += dt
-	    self._cycles += 1
+            self.t += dt
+	    self.step += 1
 
-            if not (self._cycles %
+            if not (self.step %
                     self.inventory.param.inventory.storage_spacing):
-                self.save(self._cycles)
+                self.save()
 
 
         return
@@ -92,7 +101,7 @@ class Citcom(Solver):
         total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
         if not self.rank:
             print "Average cpu time taken for velocity step = %f" % (
-                total_cpu_time / self._cycles )
+                total_cpu_time / self.step )
 
 	#self.CitcomModule.finalize()
 
@@ -113,8 +122,8 @@ class Citcom(Solver):
 
 
 
-    def save(self, cycles):
-        self.CitcomModule.output(self.all_variables, cycles)
+    def save(self):
+        self.CitcomModule.output(self.all_variables, self.step)
         return
 
 
@@ -156,7 +165,7 @@ class Citcom(Solver):
 
 
 
-    class Inventory(Solver.Inventory):
+    class Inventory(BaseSolver.Inventory):
 
         import pyre.facilities
         import pyre.properties
@@ -194,6 +203,6 @@ class Citcom(Solver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.6 2003/08/27 20:52:46 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.7 2003/08/27 22:24:07 tan2 Exp $"
 
 # End of file

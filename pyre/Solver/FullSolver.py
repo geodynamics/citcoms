@@ -7,42 +7,28 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from Citcom import Citcom
-import Full as CitcomModule
+from Solver import Solver
 import journal
 
 
-class CitcomSFull(Citcom):
+class FullSolver(Solver):
 
 
-    def __init__(self, name="full", facility="citcom"):
-	Citcom.__init__(self, name, facility)
+    def __init__(self, name, facility="solver"):
+	Solver.__init__(self, name, facility)
+        import CitcomS.Full as CitcomModule
 	self.CitcomModule = CitcomModule
         return
 
 
 
-    class Inventory(Citcom.Inventory):
-
-        import pyre.facilities
+    class Inventory(Solver.Inventory):
 
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
-        from CitcomS.Facilities.TSolver import TSolver
-        from CitcomS.Facilities.VSolver import VSolver
 
         # component modules
-        import CitcomS.Components.Advection_diffusion as Advection_diffusion
         import CitcomS.Components.Sphere as Sphere
-        import CitcomS.Components.Stokes_solver as Stokes_solver
-
-        # components
-        from CitcomS.Components.BC import BC
-        from CitcomS.Components.Const import Const
-        from CitcomS.Components.IC import IC
-        from CitcomS.Components.Param import Param
-        from CitcomS.Components.Phase import Phase
-        from CitcomS.Components.Visc import Visc
 
         inventory = [
 
@@ -53,6 +39,6 @@ class CitcomSFull(Citcom):
 
 
 # version
-__id__ = "$Id: FullSolver.py,v 1.5 2003/08/27 20:52:46 tan2 Exp $"
+__id__ = "$Id: FullSolver.py,v 1.6 2003/08/27 22:24:07 tan2 Exp $"
 
 # End of file
