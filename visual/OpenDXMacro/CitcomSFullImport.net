@@ -1,5 +1,5 @@
 //
-// time: Fri Jun 25 11:46:30 2004
+// time: Wed Aug  4 11:26:52 2004
 //
 // version: 3.2.0 (format), 4.3.0 (DX)
 //
@@ -25,7 +25,6 @@ include "CitcomSImport.net"
 // INPUT format_string; string; (none);  
 // INPUT reduced; scalar list or vector list; (no default);  
 // INPUT cap_start; integer; (0);  
-// OPTIONS 0 ; 1
 // INPUT cap_end; integer; (11);  
 // OUTPUT velocity; group;  
 // OUTPUT temperature; group;  
