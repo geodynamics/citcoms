@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.5 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/07/29 20:54:43 tan2 Exp $
 
 include local.def
 
@@ -22,6 +22,7 @@ PACKAGE = drivers
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
+	Full \
 	Regional
 
 RECURSE_DIRS = $(BLD_DIRS)
@@ -40,7 +41,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.5 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/07/29 20:54:43 tan2 Exp $
 
 #
 # End of file

@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.4 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/07/29 20:54:33 tan2 Exp $
 
 include local.def
 
@@ -23,6 +23,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Common \
+	Full \
 	Regional
 
 .PHONY: Common
@@ -58,7 +59,7 @@ distclean::
 	(cd Regional; $(MM) distclean)
 
 # version
-# $Id: Make.mm,v 1.4 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/07/29 20:54:33 tan2 Exp $
 
 #
 # End of file
