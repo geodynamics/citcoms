@@ -155,10 +155,10 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Visc_set_properties__doc__},
 
-    {pyCitcom_Imcompressible_set_properties__name__,
-     pyCitcom_Imcompressible_set_properties,
+    {pyCitcom_Incompressible_set_properties__name__,
+     pyCitcom_Incompressible_set_properties,
      METH_VARARGS,
-     pyCitcom_Imcompressible_set_properties__doc__},
+     pyCitcom_Incompressible_set_properties__doc__},
 
     // from stokes_solver.h
 
@@ -208,6 +208,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.27 2003/08/15 18:56:57 tan2 Exp $
+// $Id: bindings.cc,v 1.28 2003/08/22 22:35:17 tan2 Exp $
 
 // End of file

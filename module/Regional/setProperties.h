@@ -43,14 +43,14 @@ extern char pyCitcom_Visc_set_properties__doc__[];
 extern char pyCitcom_Visc_set_properties__name__[];
 extern PyObject * pyCitcom_Visc_set_properties(PyObject *, PyObject *);
 
-extern char pyCitcom_Imcompressible_set_properties__doc__[];
-extern char pyCitcom_Imcompressible_set_properties__name__[];
-extern PyObject * pyCitcom_Imcompressible_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Incompressible_set_properties__doc__[];
+extern char pyCitcom_Incompressible_set_properties__name__[];
+extern PyObject * pyCitcom_Incompressible_set_properties(PyObject *, PyObject *);
 
 
 #endif
 
 // version
-// $Id: setProperties.h,v 1.7 2003/08/15 18:56:05 tan2 Exp $
+// $Id: setProperties.h,v 1.8 2003/08/22 22:35:17 tan2 Exp $
 
 // End of file

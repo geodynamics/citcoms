@@ -550,14 +550,14 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_Imcompressible_set_properties__doc__[] = "";
-char pyCitcom_Imcompressible_set_properties__name__[] = "Imcompressible_set_properties";
+char pyCitcom_Incompressible_set_properties__doc__[] = "";
+char pyCitcom_Incompressible_set_properties__name__[] = "Incompressible_set_properties";
 
-PyObject * pyCitcom_Imcompressible_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "OO:Imcompressible_set_properties",
+    if (!PyArg_ParseTuple(args, "OO:Incompressible_set_properties",
 			  &obj, &properties))
         return NULL;
 
@@ -565,7 +565,7 @@ PyObject * pyCitcom_Imcompressible_set_properties(PyObject *self, PyObject *args
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Imcompressible.inventories:" << std::endl;
+	std::cerr << "Incompressible.inventories:" << std::endl;
 
     getStringProperty(properties, "Solver", E->control.SOLVER_TYPE, m);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE, m);
@@ -749,6 +749,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.16 2003/08/19 21:21:43 tan2 Exp $
+// $Id: setProperties.cc,v 1.17 2003/08/22 22:35:17 tan2 Exp $
 
 // End of file
