@@ -16,12 +16,12 @@ extern "C" {
 
 #include "global_defs.h"
 
-    void construct_tic_from_input(struct All_variables*);
+    void construct_tic(struct All_variables*);
     void initial_pressure(struct All_variables*);
     void initial_velocity(struct All_variables*);
     void initial_viscosity(struct All_variables*);
     void report(struct All_variables*, char* str);
-    void restart_tic_from_file(struct All_variables*);
+    void restart_tic(struct All_variables*);
 
 }
 
@@ -39,7 +39,7 @@ PyObject * pyCitcom_ic_constructTemperature(PyObject *self, PyObject *args)
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     report(E,"Initialize temperature field");
-    construct_tic_from_input(E);
+    construct_tic(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -60,7 +60,7 @@ PyObject * pyCitcom_ic_restartTemperature(PyObject *self, PyObject *args)
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     report(E,"Initialize temperature field");
-    restart_tic_from_file(E);
+    restart_tic(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -132,6 +132,6 @@ PyObject * pyCitcom_ic_initViscosity(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: initial_conditions.cc,v 1.2 2003/11/28 22:20:23 tan2 Exp $
+// $Id: initial_conditions.cc,v 1.3 2004/06/27 01:04:15 tan2 Exp $
 
 // End of file
