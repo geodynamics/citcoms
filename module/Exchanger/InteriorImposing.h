@@ -11,6 +11,7 @@
 #define pyCitcom_InteriorImposing_h
 
 #include "Array2D.h"
+#include "DIM.h"
 
 struct All_variables;
 class Interior;
@@ -23,6 +24,7 @@ class InteriorImposingSink {
     const Interior& interior;
     const Sink& sink;
     Array2D<double,1> tic;
+    Array2D<double,DIM> vic;
 
 public:
     InteriorImposingSink(const Interior& interior, const Sink& sink,
@@ -30,11 +32,14 @@ public:
     ~InteriorImposingSink() {};
 
     void recvT();
+    void recvV();
     void imposeIC();
-
+    void imposeVIC();
+    
 private:
     void imposeTIC();
-
+    void imposeVICP();
+    
 };
 
 
@@ -57,6 +62,6 @@ private:
 #endif
 
 // version
-// $Id: InteriorImposing.h,v 1.3 2003/11/11 19:29:27 tan2 Exp $
+// $Id: InteriorImposing.h,v 1.4 2003/11/25 17:58:15 puru Exp $
 
 // End of file

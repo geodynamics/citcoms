@@ -383,6 +383,24 @@ PyObject * pyExchanger_recvT(PyObject *, PyObject *args)
     return Py_None;
 }
 
+char pyExchanger_recvV__doc__[] = "";
+char pyExchanger_recvV__name__[] = "recvV";
+
+PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:recvV", &obj))
+	return NULL;
+
+    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
+
+    ics->recvV();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 char pyExchanger_sendT__doc__[] = "";
 char pyExchanger_sendT__name__[] = "sendT";
@@ -633,6 +651,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.28 2003/11/23 19:06:44 ces74 Exp $
+// $Id: exchangers.cc,v 1.29 2003/11/25 17:58:15 puru Exp $
 
 // End of file

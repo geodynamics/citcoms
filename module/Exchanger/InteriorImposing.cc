@@ -23,6 +23,7 @@ InteriorImposingSink::InteriorImposingSink(const Interior& i, const Sink& s,
     E(e),
     interior(i),
     sink(s),
+    vic(sink.size()),
     tic(sink.size())
 {
     journal::debug_t debug("Exchanger");
@@ -44,10 +45,25 @@ void InteriorImposingSink::recvT()
 
 }
 
+void InteriorImposingSink::recvV()
+{
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in InteriorImposingSink::recvV" << journal::end;
+
+    sink.recvArray2D(vic);
+    vic.print("VIC");
+
+}
 
 void InteriorImposingSink::imposeIC()
 {
     imposeTIC();
+}
+
+void InteriorImposingSink::imposeVIC()
+{
+    imposeVICP();
 }
 
 
@@ -66,6 +82,22 @@ void InteriorImposingSink::imposeTIC()
 	debugIC << E->T[mm][n] << journal::newline;
     }
     debugIC << journal::end;
+}
+void InteriorImposingSink::imposeVICP()
+{
+    journal::debug_t debugIC("imposeTIC");
+    debugIC << journal::loc(__HERE__);
+
+    const int mm = 1;
+
+    for(int i=0; i<sink.size(); i++) {
+	int n = interior.nodeID(sink.meshNode(i));
+        for(int d=0; d<DIM; d++)
+            E->sphere.cap[mm].VB[d+1][n]=vic[d][i];
+        
+	debugVIC << E->T[mm][n] << journal::newline;
+    }
+    debugVIC << journal::end;
 }
 
 
@@ -101,6 +133,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.4 2003/11/21 23:15:13 tan2 Exp $
+// $Id: InteriorImposing.cc,v 1.5 2003/11/25 17:58:15 puru Exp $
 
 // End of file
