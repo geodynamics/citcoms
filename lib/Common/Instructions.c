@@ -304,11 +304,6 @@ void read_initial_settings(struct All_variables *E)
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
 
-  input_float("dimenx",&(E->mesh.layer[1]),"1.0",m);
-  input_float("dimenz",&(E->mesh.layer[2]),"1.0",m);
-  input_float("dimeny",&(E->mesh.layer[3]),"1.0",m);
-
-
   input_int("nodex",&(E->mesh.nox),"essential",m);
   input_int("nodez",&(E->mesh.noz),"essential",m);
   input_int("nodey",&(E->mesh.noy),"essential",m);
@@ -670,9 +665,6 @@ void global_default_values(E)
   E->sphere.ro = 1.0;
   E->sphere.ri = 0.5;
 
-  E->viscosity.guess = 0;
-  sprintf(E->viscosity.old_file,"initialize");
-
   E->control.precondition = 0;	/* for larger visc contrasts turn this back on  */
   E->control.vprecondition = 1;
 
@@ -680,16 +672,10 @@ void global_default_values(E)
   E->mesh.bottbc = 1;
   E->mesh.topvbc = 0; /* stress */
   E->mesh.botvbc = 0;
-  E->mesh.sidevbc=0;
-  E->mesh.periodic_x=0; /* reflection is default*/
-  E->mesh.periodic_y=0;
   E->control.VBXtopval=0.0;
   E->control.VBYtopval=0.0;
   E->control.VBXbotval=0.0;
   E->control.VBYbotval=0.0;
-
-  E->crust.total_node = 0;
-  E->control.crust = 0;
 
   E->data.layer_km = 2890.0; /* Earth, whole mantle defaults */
   E->data.radius_km = 6370.0; /* Earth, whole mantle defaults */
@@ -700,7 +686,6 @@ void global_default_values(E)
   E->data.ref_viscosity=1.e21;
   E->data.density_above = 1000.0;    /* sea water */
   E->data.density_below = 6600.0;    /* sea water */
-
 
   E->data.Cp = 1200.0;
   E->data.therm_cond = 3.168;
@@ -728,7 +713,6 @@ void global_default_values(E)
 
     E->control.NASSEMBLE = 0;
 
-    E->mesh.layer[1] =  E->mesh.layer[2] =  E->mesh.layer[3] = 1.0;
     E->monitor.elapsed_time=0.0;
 
     E->control.record_all_until = 10000000;

@@ -255,17 +255,6 @@ struct SIEN {
 struct LM  {
     struct { int doff[4]; } node[9]; } ;
 
-struct NEI {
-    int *nels;
-    int *lnode;
-    int *element; };
-
-struct Crust  { float   width;
-                float   thickness;
-                float   *T;
-		int     total_node;
-		int     *node;};
-
 struct BOUND  {
     int bound[8];	};
 
@@ -399,21 +388,6 @@ struct SPHERE   {
   int leys;
   };
 
-struct MODEL  {
-  int plates;
-  int plate_node[MAXP];
-  int *slab[MAXP];
-  int dplate_node;
-  int d410_node;
-  int d670_node;
-  float *plate_coord[MAXP][3];
-  float *slab_age[MAXP];
-  float plate_tfmax[MAXP][3];
-  float plate_tfmin[MAXP][3];
-  float plate_thickness;
-  float plate_vel;
-  float pmargin_width;
-  };
 
 struct MESH_DATA {/* general information concerning the fe mesh */
     int nsd;        /* Spatial extent 1,2,3d*/
@@ -526,9 +500,6 @@ struct BAVE {
     float Vi;
     double V[4]; };
 
-
-struct TOTAL {
-    float melt_prod;  };
 
 struct MONITOR {
     char node_output[100][6];  /* recording the format of the output data */
@@ -643,7 +614,6 @@ struct CONTROL {
     int augmented_Lagr;
     double augmented;
     int NASSEMBLE;
-    int crust;
 
     float tole_comp;
 
@@ -767,7 +737,6 @@ struct All_variables {
     FILE *fp_out;
     struct HAVE Have;
     struct BAVE Bulkave;
-    struct TOTAL Total;
     struct MESH_DATA mesh;
     struct MESH_DATA lmesh;
     struct CONTROL control;
@@ -776,7 +745,6 @@ struct All_variables {
     struct SLICE slice;
     struct Parallel parallel;
     struct SPHERE sphere;
-    struct MODEL model;
     struct Tracer Tracer;
 
     int filed[20];
@@ -791,7 +759,6 @@ struct All_variables {
     struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
     struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS][NCS];
-    struct NEI NEI[MAX_LEVELS][NCS];
     struct SUBEL *EL[MAX_LEVELS][NCS];
     struct EG *elt_del[MAX_LEVELS][NCS];
     struct EK *elt_k[MAX_LEVELS][NCS];
@@ -802,8 +769,6 @@ struct All_variables {
 
     struct CC element_Cc;
     struct CCX element_Ccx;
-
-    struct Crust crust;
 
     higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
     int *Node_map [MAX_LEVELS][NCS];
@@ -857,14 +822,6 @@ struct All_variables {
     struct Shape_function1 L; /* master-element shape funtions */
     struct Shape_function1_dx Lx;
     struct Shape_function_dx NMx;
-
-  /* for temperature initial conditions */
-  int number_of_perturbations;
-  int perturb_ll[32];
-  int perturb_mm[32];
-  int load_depth[32];
-  float perturb_mag[32];
-  /*ccccc*/
 
     void (* build_forcing_term)(void*);
     void (* iterative_solver)(void*);
