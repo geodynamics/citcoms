@@ -1,0 +1,68 @@
+//
+// time: Wed Sep 22 09:57:21 2004
+//
+// version: 3.2.0 (format), 4.3.2 (DX)
+//
+//
+//
+// macro reference (direct): VelocityRTFtoXYZ2D /home/ces74/cases/embedded/G3_case1/OpenDXMacro/VelocityRTFtoXYZ2D.net
+include "VelocityRTFtoXYZ2D.net"
+//
+// macro reference (direct): RTFtoXYZ2D /home/ces74/cases/embedded/G3_case1/OpenDXMacro/RTFtoXYZ2D.net
+include "RTFtoXYZ2D.net"
+//
+// Begin MDF
+// MODULE CitcomSSurfaceVelocity
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT input_1; group or series or value list or string list; (no default);  
+// OUTPUT output_1; field;  
+// End MDF
+// workspace: width = 500, height = 400
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSSurfaceVelocity(
+ input_1
+) -> (
+ output_1
+) {
+    // 
+    // node Input[26]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'input_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+CitcomSSurfaceVelocity_Input_26_out_1 = input_1;
+    // 
+    // node Select[15]: x = 87, y = 80, inputs = 3, label = Select
+    // input[2]: defaulting = 0, visible = 1, type = 32, value = "surf_velocity"
+    //
+CitcomSSurfaceVelocity_Select_15_out_1 = 
+    Select(
+    CitcomSSurfaceVelocity_Input_26_out_1,
+    "surf_velocity",
+    NULL
+    ) [instance: 15, cache: 1];
+    // 
+    // node VelocityRTFtoXYZ2D[1]: x = 73, y = 152, inputs = 1, label = VelocityRTFtoXYZ2D
+    //
+CitcomSSurfaceVelocity_VelocityRTFtoXYZ2D_1_out_1 = 
+    VelocityRTFtoXYZ2D(
+    CitcomSSurfaceVelocity_Select_15_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node RTFtoXYZ2D[6]: x = 0, y = 234, inputs = 1, label = RTFtoXYZ2D
+    //
+CitcomSSurfaceVelocity_RTFtoXYZ2D_6_out_1 = 
+    RTFtoXYZ2D(
+    CitcomSSurfaceVelocity_VelocityRTFtoXYZ2D_1_out_1
+    ) [instance: 6, cache: 1];
+    // 
+    // node Output[21]: x = 0, y = 314, inputs = 1, label = Output
+    // parameter: position = 1, name = 'output_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_1 = CitcomSSurfaceVelocity_RTFtoXYZ2D_6_out_1;
+// network: end of macro body
+}
+CitcomSSurfaceVelocity_Input_26_out_1 = NULL;
+CitcomSSurfaceVelocity_Select_15_out_1 = NULL;
+CitcomSSurfaceVelocity_VelocityRTFtoXYZ2D_1_out_1 = NULL;
+CitcomSSurfaceVelocity_RTFtoXYZ2D_6_out_1 = NULL;
