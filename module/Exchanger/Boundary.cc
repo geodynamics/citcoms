@@ -260,14 +260,12 @@ void Boundary::getBid2crseelem(const All_variables *E) {
                     ind=1;
                     bid2crseelem[0][i]=n+1;
                     bid2crseelem[1][i]=mm;
-                    for(int m=0; m<4; m++)
-                    {
-                        shape[i*8+nsub[k*4]]=det[0]/dett;
-                        shape[i*8+nsub[k*4+1]]=det[1]/dett;
-                        shape[i*8+nsub[k*4+2]]=det[2]/dett;
-                        shape[i*8+nsub[k*4+3]]=det[3]/dett;
-                    }
-                   
+                    
+                    shape[i*8+nsub[k*4]]=det[0]/dett;
+                    shape[i*8+nsub[k*4+1]]=det[1]/dett;
+                    shape[i*8+nsub[k*4+2]]=det[2]/dett;
+                    shape[i*8+nsub[k*4+3]]=det[3]/dett;
+                                       
                     break;
                     
                 }
@@ -425,63 +423,8 @@ void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
 	  }
 	}
   if(nodes != size) cout << "in Boundary::mapFineGrid ==> nodes != size " << endl;
-  // Test
-  
-//   for(int i=0;i<nodes;i++)
-//     cout<< "i = " << i << " gid = " << bid2gid[i] << endl;
-  
-  delete nid;
-  
- //   for(int i=0; i<size*8; i++)
-//        shape[i]=0.0;
-  
-//    for(int i=0; i< nodes; i++)
-//    {
-//        for(int j=0; j< dim; j++)xt[j]=X[j][i];
-//  // loop over 5 sub tets in a brick element
-//        ind = 0;
 
-//        for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
-//            for(n=0;n<E->lmesh.nel;n++)
-//            {
-//                for(int j=0; j < 8; j++)
-//                    for(int k=0; k < dim; k++)
-//                    {
-                  
-//                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
-//                    }
-                  
-//            for(int k=0; k < 5; k++)
-//            {
-//                for(int m=0; m < dim; m++)
-//                {
-//                    x1[m]=xc[nsub[k*4]*dim+m];
-//                    x2[m]=xc[nsub[k*4+1]*dim+m];
-//                    x3[m]=xc[nsub[k*4+2]*dim+m];
-//                    x4[m]=xc[nsub[k*4+3]*dim+m];
-//                }
-//                dett=Tetrahedronvolume(x1,x2,x3,x4);
-//                det[0]=Tetrahedronvolume(x2,x3,x4,xt);
-//                det[1]=Tetrahedronvolume(x3,x4,x1,xt);
-//                det[2]=Tetrahedronvolume(x4,x1,x2,xt);
-//                det[3]=Tetrahedronvolume(x1,x2,x3,xt);
-//                if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
-//                if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
-//                ind=1;
-//                bid2cseelem[i]=n;
-//                for(int m=0; m<4; m++)
-//                {
-//                    shape[nsub[k*4]]=det[0]/dett;
-//                    shape[nsub[k*4+1]]=det[1]/dett;
-//                    shape[nsub[k*4+2]]=det[2]/dett;
-//                    shape[nsub[k*4+3]]=det[3]/dett;
-//                }              
-//                break;              
-//            }
-//            if(ind) break;          
-//        }
-//    }
-//       test
+  delete nid;
   
   return;
 }
@@ -534,101 +477,7 @@ void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
 		}
     if(n != size) std::cout << " nodes != size ";
     printBid2gid();
-
-  //    for(int i=0; i<size*8; i++)
-//          shape[i]=0.0;
-    
-//      for(int i=0; i< size; i++)
-//      {
-//          for(int j=0; j< dim; j++)xt[j]=X[j][i];
-//  // loop over 5 sub tets in a brick element
-//          ind = 0;
-         
-//          for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
-//              for(n=0;n<E->lmesh.nel;n++)
-//              {
-//                  for(int j=0; j < 8; j++)
-//                      for(int k=0; k < dim; k++)
-//                      {
-//                          xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
-//                      }
-                  
-//                  for(int k=0; k < 5; k++)
-//                  {
-//                      for(int m=0; m < dim; m++)
-//                      {
-//                          x1[m]=xc[nsub[k*4]*dim+m];
-//                          x2[m]=xc[nsub[k*4+1]*dim+m];
-//                          x3[m]=xc[nsub[k*4+2]*dim+m];
-//                          x4[m]=xc[nsub[k*4+3]*dim+m];
-//                      }
-//                      dett=Tetrahedronvolume(x1,x2,x3,x4);
-//                      det[0]=Tetrahedronvolume(x2,x4,x3,xt);
-//                      det[1]=Tetrahedronvolume(x3,x4,x1,xt);
-//                      det[2]=Tetrahedronvolume(x1,x4,x2,xt);
-//                      det[3]=Tetrahedronvolume(x1,x2,x3,xt);
-//                      if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
-//                      if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
-//                      ind=1;
-//                      bid2crseelem[0][i]=n+1;
-//                      bid2crseelem[1][i]=mm;
-//                      for(int m=0; m<4; m++)
-//                      {
-//                          shape[i*8+nsub[k*4]]=det[0]/dett;
-//                          shape[i*8+nsub[k*4+1]]=det[1]/dett;
-//                          shape[i*8+nsub[k*4+2]]=det[2]/dett;
-//                          shape[i*8+nsub[k*4+3]]=det[3]/dett;
-//                      }
-                   
-//                      break;
-                    
-//                  }
-//                  if(ind)
-//                  {
-//                      xi[0]=xi[1]=xi[2]=0.0;
-//                      for(int j=0; j < 8; j++)
-//                          for(int k=0; k < dim; k++)
-//                          {
-                  
-//                              xi[k]+=xc[j*dim+k]*shape[i*8+j];
-//                          }
-//                  }
-                
-//                  if(ind) break;          
-//              }
-//      }
-//  // test
-//  //    std::cout << "in Boundary::mapCoarseGrid for bid2crseelem " << std::endl;    
-//      for(int i=0; i< size; i++)
-//      {
-//          n1=bid2crseelem[0][i];
-//          n2=bid2crseelem[1][i];
-//          for(int j=0; j< dim; j++)xt[j]=X[j][i];
-//          for(int j=0; j < 8; j++)
-//          {
-            
-//              for(int k=0; k < dim; k++)
-//              {                
-//                  xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
-//              }
-//  //            std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
-//          }        
-//          for(int k=0; k<dim; k++)xi[k]=0.0;
-//          for(int k=0; k<dim; k++)
-//              for(int j=0; j < 8; j++)
-//              {
-//                  xi[k]+=xc[j*dim+k]*shape[i*8+j];                
-//              }
-//  //        std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
-//          norm = 0.0;
-//          for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
-//          if(norm > 1.e-10)
-//          {            
-//              std::cout << "\n in Boundary::mapCoarseGrid for bid2crseelem interpolation functions are wrong " << norm << std::endl;
-//          }
-        
-//      }
-//      std::cout << "end of  Boundary::mapCoarseGrid for bid2crseelem " << std::endl;
+ 
     return;  
 }
 
@@ -659,6 +508,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.15 2003/09/24 19:42:24 puru Exp $
+// $Id: Boundary.cc,v 1.16 2003/09/24 20:14:12 puru Exp $
 
 // End of file

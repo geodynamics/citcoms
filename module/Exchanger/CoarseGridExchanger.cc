@@ -88,74 +88,24 @@ void CoarseGridExchanger::interpretate() {
 
 void CoarseGridExchanger::interpolate() {
   
-  double finex[3],crsex[24],xi[3],shape[8];
-  int n,node;
-  
-//   outgoing.size=boundary->size;
-//   outgoing.T = new double[outgoing.size];
-//     for(int i=0; i < boundary->dim; i++)
-//       {
-// 	outgoing.v[i] = new double[outgoing.size];
-//       }
+  int n1,n2,node;
 
     std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
-//     for(int i=0;i<boundary->size;i++)
-//       {
-// 	std::cout << "i = " << i << " boundary->bid2crseelem = " << boundary->bid2crseelem[0][i] << std::endl;	
-//       }
 
     for(int i=0;i<boundary->size;i++)
       {
-	n=boundary->bid2crseelem[0][i];
-	for(int j=0; j < boundary->dim ;j++)
-	  {
-	    finex[j]=boundary->X[j][i];
-	    for(int k=0; k< 8 ;k++)
-	      {
-		node=E->IEN[E->mesh.levmax][1][n].node[k+1];
-		crsex[k*3+j]=E->X[E->mesh.levmax][1][j+1][node];
-	      }
-	  }
-	std::cout << "n = " << n << " | "
-		  << finex[0] << " " << finex[1] << " " << finex[2] << " | "
-		  << crsex[0] << " " << crsex[3] << " "
-		  << crsex[1] << " " << crsex[10] << " "
-		  << crsex[2] << " " << crsex[14] << " "
-		  << std::endl;	
-	xi[0]=(finex[0]-crsex[0])/(crsex[3]-crsex[0]);
-	xi[1]=(finex[1]-crsex[1])/(crsex[10]-crsex[1]);
-	xi[2]=(finex[2]-crsex[2])/(crsex[14]-crsex[2]);
-	std::cout << n << " " << "xi[0] = " << xi[0] << " "	
-		  << "xi[1] = " << xi[1] << " "	
-		  << "xi[2] = " << xi[2] << " "	
-		  << std::endl;
-	shape[0]=(1.-xi[0])*(1.-xi[1])*(1.-xi[2]);
-	shape[1]=xi[0]*(1.-xi[1])*(1.-xi[2]);
-	shape[2]=xi[0]*xi[1]*(1.-xi[2]);
-	shape[3]=(1.-xi[0])*xi[1]*(1.-xi[2]);
-
-	shape[4]=(1.-xi[0])*(1.-xi[1])*xi[2];
-	shape[5]=xi[0]*(1.-xi[1])*xi[2];
-	shape[6]=xi[0]*xi[1]*xi[2];
-	shape[7]=(1.-xi[0])*xi[1]*xi[2];
+	n1=boundary->bid2crseelem[0][i];
+        n2=boundary->bid2crseelem[1][i];	
 	
-	outgoing.T[i]=outgoing.v[0][i]=outgoing.v[1][i]=outgoing.v[2][i];
+	outgoing.T[i]=outgoing.v[0][i]=outgoing.v[1][i]=outgoing.v[2][i]=0.0;
 
 	for(int k=0; k< 8 ;k++)
 	  {
-	    node=E->IEN[E->mesh.levmax][1][n].node[k+1];
-// 	    std::cout << "node = " << node << " "
-// 		      << "k = " << k << " "
-// 		      << "shape = " << shape[k] << " "
-// 		      << "T = " << E->T[E->sphere.caps_per_proc][node]<<" "
-// 		      << "v1 = " << E->V[E->sphere.caps_per_proc][1][node]<<" "
-// 		      << "v2 = " << E->V[E->sphere.caps_per_proc][2][node]<<" "
-// 		      << "v3 = " << E->V[E->sphere.caps_per_proc][3][node]<<" "
-// 		      << std::endl;
-	    outgoing.T[i]+=shape[k]*E->T[E->sphere.caps_per_proc][node];
-	    outgoing.v[0][i]+=shape[k]*E->V[E->sphere.caps_per_proc][1][node];
-	    outgoing.v[1][i]+=shape[k]*E->V[E->sphere.caps_per_proc][2][node];
-	    outgoing.v[2][i]+=shape[k]*E->V[E->sphere.caps_per_proc][3][node];
+	    node=E->IEN[E->mesh.levmax][n2][n1].node[k+1];
+	    outgoing.T[i]+=boundary->shape[k]*E->T[n2][node];
+	    outgoing.v[0][i]+=boundary->shape[k]*E->V[n2][1][node];
+	    outgoing.v[1][i]+=boundary->shape[k]*E->V[n2][2][node];
+	    outgoing.v[2][i]+=boundary->shape[k]*E->V[n2][3][node];
 	  }
       }
 
@@ -252,6 +202,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.15 2003/09/24 19:42:24 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.16 2003/09/24 20:14:12 puru Exp $
 
 // End of file
