@@ -49,12 +49,6 @@ class Param(CitcomComponent):
             pyre.properties.int("solution_cycles_init", 100),
             pyre.properties.bool("zero_elapsed_time", True),
 
-            pyre.properties.int("minstep", 1),
-            pyre.properties.int("maxstep", 1),
-            pyre.properties.int("maxtotstep", 1),
-            pyre.properties.int("storage_spacing", 1),
-            pyre.properties.int("cpu_limits_in_seconds", 360000000),
-
             pyre.properties.bool("stokes_flow_only", False),
 
             pyre.properties.float("inputdiffusivity", 1),
@@ -76,6 +70,6 @@ class Param(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.7 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.8 2003/08/30 00:27:41 ces74 Exp $"
 
 # End of file
