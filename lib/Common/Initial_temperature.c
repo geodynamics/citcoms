@@ -28,7 +28,7 @@ void tic_input(struct All_variables *E)
      node number is equal to load_depth. The horizontal pattern of
      the anomaly is given by spherical harmonic ll & mm. */
 
-  input_int("num_perturbations", &n, "0,0,32", m);
+  input_int("num_perturbations", &n, "0,0,PERTURB_MAX_LAYERS", m);
 
   if (n > 0) {
     E->convection.number_of_perturbations = n;

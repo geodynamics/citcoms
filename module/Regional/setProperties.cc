@@ -206,14 +206,13 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
     getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
 
-    const int max_perturb = 32;	// max. allowed perturbations = 32
     int num_perturb;
 
     getScalarProperty(properties, "num_perturbations", num_perturb, m);
-    if(num_perturb > max_perturb) {
+    if(num_perturb > PERTURB_MAX_LAYERS) {
 	std::cerr << "'num_perturb' greater than allowed value, set to "
-		  << max_perturb << std::endl;
-	num_perturb = max_perturb;
+		  << PERTURB_MAX_LAYERS << std::endl;
+	num_perturb = PERTURB_MAX_LAYERS;
     }
     E->convection.number_of_perturbations = num_perturb;
 
@@ -761,6 +760,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.23 2004/02/05 19:56:04 tan2 Exp $
+// $Id: setProperties.cc,v 1.24 2004/02/05 20:17:51 tan2 Exp $
 
 // End of file
