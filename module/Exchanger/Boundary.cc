@@ -44,8 +44,8 @@ void Boundary::init(const All_variables *E) {
 
     if (E->parallel.me_loc[1]==0 || E->parallel.me_loc[1]==E->parallel.nprocx-1)
       for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int j=1;j<=E->lmesh.noy;j++)
-	  for(int i=1;i<=E->lmesh.noz;i++)  {
+	for(int j=1;j<=E->lmesh.noy-1;j++)
+	  for(int i=1;i<=E->lmesh.noz-1;i++)  {
 	    node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
 	    node2 = node1 + (E->lmesh.nox-1)*E->lmesh.noz;
 	    
@@ -63,8 +63,8 @@ void Boundary::init(const All_variables *E) {
 
     if (E->parallel.me_loc[2]==0 || E->parallel.me_loc[2]==E->parallel.nprocy-1)
       for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int j=1;j<=E->lmesh.nox;j++)
-	  for(int i=1;i<=E->lmesh.noz;i++)  {
+	for(int j=1;j<=E->lmesh.nox-1;j++)
+	  for(int i=1;i<=E->lmesh.noz-1;i++)  {
 	    node1 = i + (j-1)*E->lmesh.noz;
 	    node2 = node1 + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;	    
 	    if (E->parallel.me_loc[2]==0 )  {
@@ -80,8 +80,8 @@ void Boundary::init(const All_variables *E) {
 
     if (E->parallel.me_loc[3]==0 || E->parallel.me_loc[3]==E->parallel.nprocz-1)
       for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int j=1;j<=E->lmesh.noy;j++)
-	  for(int i=1;i<=E->lmesh.nox;i++)  {
+	for(int j=1;j<=E->lmesh.noy-1;j++)
+	  for(int i=1;i<=E->lmesh.nox-1;i++)  {
 	    node1 = 1 + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
 	    node2 = node1 + E->lmesh.noz-1;
 	    
@@ -137,6 +137,6 @@ void Boundary::printConnectivity() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.3 2003/09/10 21:11:09 puru Exp $
+// $Id: Boundary.cc,v 1.4 2003/09/10 23:40:09 puru Exp $
 
 // End of file
