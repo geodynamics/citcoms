@@ -94,12 +94,12 @@ void Boundary::init(const All_variables *E) {
 		    node2 = node1 + (E->lmesh.nox-1)*E->lmesh.noz;
 	    
 		    if ((E->parallel.me_loc[1]==0) && (!nid[node1-1]))  {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node1];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node1];
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if ((E->parallel.me_loc[1]==E->parallel.nprocx-1) && (!nid[node2-1])) {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node2];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node2];
 			nid[node2-1]++;
 			nodes++;
 		    }
@@ -114,12 +114,12 @@ void Boundary::init(const All_variables *E) {
 		    node1 = i + (j-1)*E->lmesh.noz;
 		    node2 = node1 + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
 		    if ((E->parallel.me_loc[2]==0) && (!nid[node1-1]))  {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node1];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node1];
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if((E->parallel.me_loc[2]==E->parallel.nprocy-1)&& (!nid[node2-1]))  {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node2];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node2];
 			nid[node2-1]++;
 			nodes++;
 		    }
@@ -133,12 +133,12 @@ void Boundary::init(const All_variables *E) {
 		    node2 = node1 + E->lmesh.noz-1;
 		    
 		    if ((E->parallel.me_loc[3]==0 ) && (!nid[node1-1])) {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node1];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node1];
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if ((E->parallel.me_loc[3]==E->parallel.nprocz-1) &&(!nid[node2-1])) {
-			for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node2];
+			for(int k=0;k<dim;k++)X[k][nodes]=E->sx[m][k+1][node2];
 			nid[node2-1]++;
 			nodes++;
 		    }
@@ -177,7 +177,7 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                 for(int j=0; j < 8; j++) {
 		    int gnode = E->IEN[E->mesh.levmax][mm][n+1].node[j+1];
                     for(int k=0; k < dim; k++) {
-                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][gnode];
+                        xc[j*dim+k]=E->sx[mm][k+1][gnode];
                     }
 		}
                 for(int k=0; k < 5; k++) {
@@ -305,7 +305,7 @@ void Boundary::testMapping(const All_variables *E) const {
 
         for(int j=0; j < 8; j++) {
             for(int k=0; k < dim; k++) {                
-                xc[j*dim+k]=E->X[E->mesh.levmax][1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
+                xc[j*dim+k]=E->sx[1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
             }
 	    //std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
         }        
@@ -497,6 +497,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.25 2003/09/28 00:11:03 tan2 Exp $
+// $Id: Boundary.cc,v 1.26 2003/09/29 02:04:13 puru Exp $
 
 // End of file
