@@ -631,7 +631,7 @@ void getStringProperty(PyObject* properties, char* attribute, char* value, int m
     else
 	out = &std::cout;
 
-    *out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << "=";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -667,7 +667,7 @@ void getScalarProperty(PyObject* properties, char* attribute, T& value, int mute
     else
 	out = &std::cout;
 
-    *out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << "=";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -704,7 +704,7 @@ void getVectorProperty(PyObject* properties, char* attribute,
     else
 	out = &std::cout;
 
-    *out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << "=";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -735,7 +735,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	*out << warnmsg << std::endl;
     }
 
-    *out << "[ ";
     for (int i=0; i<len; i++) {
 	PyObject* item = PySequence_GetItem(prop, i);
 	if(!item) {
@@ -753,15 +752,15 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	    PyErr_SetString(PyExc_TypeError, errmsg);
 	    return;
 	}
-	*out << vector[i] << ", ";
+	*out << vector[i] << ",";
     }
-    *out << ']' << std::endl;
+    *out << std::endl;
 
     return;
 }
 
 
 // version
-// $Id: setProperties.cc,v 1.22 2004/01/08 18:37:26 tan2 Exp $
+// $Id: setProperties.cc,v 1.23 2004/02/05 19:56:04 tan2 Exp $
 
 // End of file
