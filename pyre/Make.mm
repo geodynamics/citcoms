@@ -42,7 +42,8 @@ EXPORT_PYTHON_MODULES = \
 	__init__.py \
 	CoupledRegionalApp.py \
 	FullApp.py \
-	RegionalApp.py
+	RegionalApp.py \
+	SimpleApp.py
 
 
 export:: export-python-modules
@@ -50,7 +51,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.10 2003/08/28 23:10:26 ces74 Exp $
+# $Id: Make.mm,v 1.11 2003/08/29 00:43:32 tan2 Exp $
 
 #
 # End of file
