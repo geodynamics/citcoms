@@ -21,7 +21,6 @@
 #include "BoundaryCondition.h"
 #include "DIM.h"
 #include "Dimensional.h"
-#include "Transformational.h"
 #include "Interior.h"
 #include "InteriorImposing.h"
 #include "Sink.h"
@@ -596,21 +595,12 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 	    dimen.coordinate(*newbbox);
 	}
         // transform before sending
-	if(transformational) {
-	    Transformational& trans = Transformational::instance();
-	    trans.coordinate(*newbbox);
-	}
 	util::exchange(intercomm, target, *newbbox);
 
 	// non-dimensionalize after receiving
 	if(dimensional) {
 	    Dimensional& dimen = Dimensional::instance();
 	    dimen.xcoordinate(*newbbox);
-	}
-        // reverse transform after receiving
-	if(transformational) {
-	    Transformational& trans = Transformational::instance();
-	    trans.xcoordinate(*newbbox);
 	}
     }
 
@@ -784,6 +774,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.33 2004/01/06 22:40:28 puru Exp $
+// $Id: exchangers.cc,v 1.34 2004/01/07 08:12:03 tan2 Exp $
 
 // End of file
