@@ -10,6 +10,12 @@
 #if !defined(pyCitcom_Array2D_h)
 #define pyCitcom_Array2D_h
 
+#ifdef DEBUG
+#include <iostream>
+#include <exception>
+#include <stdexcept>
+#endif
+
 #include <string>
 #include <vector>
 #include "mpi.h"
@@ -43,8 +49,24 @@ public:
 
     class Array1D;  // forward declaration
 
-    inline Array1D operator[](const int index) {return Array1D(a_, index);}
-    inline const Array1D operator[](const int index) const {
+    inline Array1D operator[](const size_t index) {
+// #ifdef DEBUG
+// 	if (index >= N) {
+// 	    std::string msg = "Array2D: first index out of range";
+// 	    std::cout << msg << std::endl;
+// 	    throw std::out_of_range(msg);
+// 	}
+// #endif
+	return Array1D(a_, index);
+    }
+    inline const Array1D operator[](const size_t index) const {
+// #ifdef DEBUG
+// 	if (index >= N) {
+// 	    std::string msg = "Array2D: first index out of range";
+// 	    std::cout << msg << std::endl;
+// 	    throw std::out_of_range(msg);
+// 	}
+// #endif
 	return Array1D(const_cast<std::vector<T>&>(a_), index);
     }
 
@@ -53,10 +75,28 @@ public:
 	std::vector<T>& p_;
 	int n_;
     public:
-	inline Array1D(std::vector<T>& a_, const int n) : p_(a_), n_(n) {};
+	inline Array1D(std::vector<T>& a_, const size_t n) : p_(a_), n_(n) {};
 
-	inline T& operator[](const int index) {return p_[index*N+n_];}
-	inline const T& operator[](const int index) const {return p_[index*N+n_];}
+	inline T& operator[](const size_t index) {
+#ifdef DEBUG
+	    if (index*N+n_ >= p_.size()) {
+		std::string msg = "Array2D: second index out of range";
+		std::cout << msg << std::endl;
+		throw std::out_of_range(msg);
+	    }
+#endif
+	    return p_[index*N+n_];
+	}
+	inline const T& operator[](const size_t index) const {
+#ifdef DEBUG
+	    if (index*N+n_ >= p_.size()) {
+		std::string msg = "Array2D: second index out of range";
+		std::cout << msg << std::endl;
+		throw std::out_of_range(msg);
+	    }
+#endif
+	    return p_[index*N+n_];
+	}
     };
 
 private:
@@ -65,16 +105,11 @@ private:
 };
 
 
-
-template <class T, int N>
-void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
-
-
 #include "Array2D.cc"
 
 #endif
 
 // version
-// $Id: Array2D.h,v 1.9 2003/10/28 19:57:45 tan2 Exp $
+// $Id: Array2D.h,v 1.10 2003/10/29 17:18:44 tan2 Exp $
 
 // End of file
