@@ -19,13 +19,17 @@ class RegionalApp(Application):
     def run(self):
 	journal.info("staging").log("setup MPI")
         import mpi
-        Regional.Citcom_Init(mpi.world().handle())
+        Regional.citcom_init(mpi.world().handle())
 
 	self.rank = mpi.world().rank
 	self.start_time = Regional.CPU_time()
 	print "my rank is ", self.rank
 
         self.setProperties()
+
+        #### wait for Params.setProperties()
+        #if self.inventory.params.inventory.verbose:
+        #    Regional.open_info_file()
 
         mesher = self.inventory.mesher
         mesher.init(self)
@@ -169,6 +173,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.16 2003/07/15 21:50:30 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.17 2003/07/22 21:58:08 tan2 Exp $"
 
 # End of file

@@ -16,7 +16,7 @@
 
 extern "C" {
 
-#include "mpi.h"
+    //#include "mpi.h"
 #include "global_defs.h"
 #include "citcom_init.h"
 
@@ -32,6 +32,7 @@ extern "C" {
     void construct_sub_element(struct All_variables*);
     void construct_surf_det (struct All_variables*);
     void get_initial_elapsed_time(struct All_variables*);
+    int get_process_identifier();
     void global_derived_values(struct All_variables*);
     void mass_matrix(struct All_variables*);
     void node_locations(struct All_variables*);
@@ -54,7 +55,10 @@ char pyRegional_mesher_setup__doc__[] = "";
 char pyRegional_mesher_setup__name__[] = "mesher_setup";
 
 PyObject * pyRegional_mesher_setup(PyObject *self, PyObject *args)
+    // copied from read_instructions()
 {
+
+    E->control.PID = get_process_identifier();
 
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);
@@ -136,6 +140,6 @@ PyObject * pyRegional_set_3dsphere_defaults(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.1 2003/07/16 21:49:50 tan2 Exp $
+// $Id: mesher.cc,v 1.2 2003/07/22 21:58:08 tan2 Exp $
 
 // End of file

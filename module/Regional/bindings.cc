@@ -1,4 +1,4 @@
-
+// -*- C++ -*-
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
@@ -57,10 +57,15 @@ struct PyMethodDef pyRegional_methods[] = {
 
     // from misc.h
 
-    {pyRegional_Citcom_Init__name__,
-     pyRegional_Citcom_Init,
+    {pyRegional_citcom_init__name__,
+     pyRegional_citcom_init,
      METH_VARARGS,
-     pyRegional_Citcom_Init__doc__},
+     pyRegional_citcom_init__doc__},
+
+    {pyRegional_open_info_file__name__,
+     pyRegional_open_info_file,
+     METH_VARARGS,
+     pyRegional_open_info_file__doc__},
 
     {pyRegional_set_convection_defaults__name__,
      pyRegional_set_convection_defaults,
@@ -218,6 +223,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.15 2003/07/16 21:49:50 tan2 Exp $
+// $Id: bindings.cc,v 1.16 2003/07/22 21:58:08 tan2 Exp $
 
 // End of file

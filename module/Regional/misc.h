@@ -38,10 +38,16 @@ PyObject * pyRegional_CPU_time(PyObject *, PyObject *);
 //
 //
 
-extern char pyRegional_Citcom_Init__doc__[];
-extern char pyRegional_Citcom_Init__name__[];
+extern char pyRegional_citcom_init__doc__[];
+extern char pyRegional_citcom_init__name__[];
 extern "C"
-PyObject * pyRegional_Citcom_Init(PyObject *, PyObject *);
+PyObject * pyRegional_citcom_init(PyObject *, PyObject *);
+
+
+extern char pyRegional_open_info_file__name__[];
+extern char pyRegional_open_info_file__doc__[];
+extern "C"
+PyObject * pyRegional_open_info_file(PyObject *, PyObject *);
 
 
 extern char pyRegional_set_convection_defaults__name__[];
@@ -66,6 +72,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: misc.h,v 1.9 2003/07/15 00:40:03 tan2 Exp $
+// $Id: misc.h,v 1.10 2003/07/22 21:58:08 tan2 Exp $
 
 // End of file
