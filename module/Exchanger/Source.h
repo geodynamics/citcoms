@@ -15,6 +15,7 @@
 #include "mpi.h"
 #include "utility.h"
 #include "Array2D.h"
+#include "BoundedBox.h"
 #include "DIM.h"
 
 struct All_variables;
@@ -108,6 +109,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.9 2004/01/14 00:34:02 tan2 Exp $
+// $Id: Source.h,v 1.10 2004/01/21 18:09:49 tan2 Exp $
 
 // End of file
