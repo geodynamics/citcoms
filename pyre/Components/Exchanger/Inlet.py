@@ -17,12 +17,14 @@ class Inlet(object):
 
 
     def impose(self):
-        raise NotImplementedError
+        import CitcomS.Exchanger as Exchanger
+        Exchanger.Inlet_impose(self._handle)
         return
 
 
     def recv(self):
-        raise NotImplementedError
+        import CitcomS.Exchanger as Exchanger
+        Exchanger.Inlet_recv(self._handle)
         return
 
 
@@ -53,18 +55,6 @@ class VTInlet(Inlet):
         return
 
 
-    def impose(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.VTInlet_impose(self._handle)
-        return
-
-
-    def recv(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.VTInlet_recv(self._handle)
-        return
-
-
 
 
 class BoundaryVTInlet(Inlet):
@@ -82,21 +72,28 @@ class BoundaryVTInlet(Inlet):
         return
 
 
-    def impose(self):
+
+
+class TractionInlet(Inlet):
+    '''Inlet that impose velocity and/or traction on the boundary
+    Available modes --
+    "F": traction only
+    "V": velocity only
+    "FV": normal velocity and tangent traction
+    '''
+
+    def __init__(self, communicator, boundary, sink, all_variables, mode='F'):
         import CitcomS.Exchanger as Exchanger
-        Exchanger.BoundaryVTInlet_impose(self._handle)
+        self._handle = Exchanger.TractionInlet_create(communicator.handle(),
+                                                      boundary,
+                                                      sink,
+                                                      all_variables,
+                                                      mode)
         return
-
-
-    def recv(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.BoundaryVTInlet_recv(self._handle)
-        return
-
 
 
 
 # version
-__id__ = "$Id: Inlet.py,v 1.2 2004/03/11 01:07:19 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.3 2004/03/11 23:25:47 tan2 Exp $"
 
 # End of file

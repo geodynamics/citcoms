@@ -17,7 +17,8 @@ class Outlet(object):
 
 
     def send(self):
-        raise NotImplementedError
+        import CitcomS.Exchanger as Exchanger
+        Exchanger.Outlet_send(self._handle)
         return
 
 
@@ -39,32 +40,22 @@ class VTOutlet(Outlet):
         return
 
 
-    def send(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.VTOutlet_send(self._handle)
-        return
-
-
 
 
 class TractionOutlet(Outlet):
 
 
-    def __init__(self, source, all_variables):
+    def __init__(self, source, all_variables, mode='F'):
         import CitcomS.Exchanger as Exchanger
         self._handle = Exchanger.TractionOutlet_create(source,
-                                                       all_variables)
+                                                       all_variables,
+                                                       mode)
         return
 
-
-    def send(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.TractionOutlet_send(self._handle)
-        return
 
 
 
 # version
-__id__ = "$Id: Outlet.py,v 1.1 2004/02/26 22:29:30 tan2 Exp $"
+__id__ = "$Id: Outlet.py,v 1.2 2004/03/11 23:25:47 tan2 Exp $"
 
 # End of file
