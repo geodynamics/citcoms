@@ -7,65 +7,65 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyRegional_misc_h)
-#define pyRegional_misc_h
+#if !defined(pyCitcom_misc_h)
+#define pyCitcom_misc_h
 
 // copyright
-extern char pyRegional_copyright__name__[];
-extern char pyRegional_copyright__doc__[];
+extern char pyCitcom_copyright__name__[];
+extern char pyCitcom_copyright__doc__[];
 extern "C"
-PyObject * pyRegional_copyright(PyObject *, PyObject *);
+PyObject * pyCitcom_copyright(PyObject *, PyObject *);
 
 
-extern char pyRegional_return1_test__name__[];
-extern char pyRegional_return1_test__doc__[];
+extern char pyCitcom_return1_test__name__[];
+extern char pyCitcom_return1_test__doc__[];
 extern "C"
-PyObject * pyRegional_return1_test(PyObject *, PyObject *);
+PyObject * pyCitcom_return1_test(PyObject *, PyObject *);
 
 
-extern char pyRegional_read_instructions__name__[];
-extern char pyRegional_read_instructions__doc__[];
+extern char pyCitcom_read_instructions__name__[];
+extern char pyCitcom_read_instructions__doc__[];
 extern "C"
-PyObject * pyRegional_read_instructions(PyObject *, PyObject *);
+PyObject * pyCitcom_read_instructions(PyObject *, PyObject *);
 
 
-extern char pyRegional_CPU_time__name__[];
-extern char pyRegional_CPU_time__doc__[];
+extern char pyCitcom_CPU_time__name__[];
+extern char pyCitcom_CPU_time__doc__[];
 extern "C"
-PyObject * pyRegional_CPU_time(PyObject *, PyObject *);
+PyObject * pyCitcom_CPU_time(PyObject *, PyObject *);
 
 
 //
 //
 
-extern char pyRegional_citcom_init__doc__[];
-extern char pyRegional_citcom_init__name__[];
+extern char pyCitcom_citcom_init__doc__[];
+extern char pyCitcom_citcom_init__name__[];
 extern "C"
-PyObject * pyRegional_citcom_init(PyObject *, PyObject *);
+PyObject * pyCitcom_citcom_init(PyObject *, PyObject *);
 
 
-extern char pyRegional_global_default_values__name__[];
-extern char pyRegional_global_default_values__doc__[];
+extern char pyCitcom_global_default_values__name__[];
+extern char pyCitcom_global_default_values__doc__[];
 extern "C"
-PyObject * pyRegional_global_default_values(PyObject *, PyObject *);
+PyObject * pyCitcom_global_default_values(PyObject *, PyObject *);
 
 
-extern char pyRegional_set_signal__name__[];
-extern char pyRegional_set_signal__doc__[];
+extern char pyCitcom_set_signal__name__[];
+extern char pyCitcom_set_signal__doc__[];
 extern "C"
-PyObject * pyRegional_set_signal(PyObject *, PyObject *);
+PyObject * pyCitcom_set_signal(PyObject *, PyObject *);
 
 
-extern char pyRegional_velocities_conform_bcs__name__[];
-extern char pyRegional_velocities_conform_bcs__doc__[];
+extern char pyCitcom_velocities_conform_bcs__name__[];
+extern char pyCitcom_velocities_conform_bcs__doc__[];
 extern "C"
-PyObject * pyRegional_velocities_conform_bcs(PyObject *, PyObject *);
+PyObject * pyCitcom_velocities_conform_bcs(PyObject *, PyObject *);
 
 
 
 #endif
 
 // version
-// $Id: misc.h,v 1.13 2003/07/26 21:47:51 tan2 Exp $
+// $Id: misc.h,v 1.14 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

@@ -21,9 +21,9 @@ extern "C" {
 
 }
 
-char pyRegional_PG_timestep_init__doc__[] = "";
-char pyRegional_PG_timestep_init__name__[] = "PG_timestep_init";
-PyObject * pyRegional_PG_timestep_init(PyObject *self, PyObject *args)
+char pyCitcom_PG_timestep_init__doc__[] = "";
+char pyCitcom_PG_timestep_init__name__[] = "PG_timestep_init";
+PyObject * pyCitcom_PG_timestep_init(PyObject *self, PyObject *args)
 {
 
     PG_timestep_init(E);
@@ -33,9 +33,9 @@ PyObject * pyRegional_PG_timestep_init(PyObject *self, PyObject *args)
 }
 
 
-char pyRegional_PG_timestep_solve__doc__[] = "";
-char pyRegional_PG_timestep_solve__name__[] = "PG_timestep_solve";
-PyObject * pyRegional_PG_timestep_solve(PyObject *self, PyObject *args)
+char pyCitcom_PG_timestep_solve__doc__[] = "";
+char pyCitcom_PG_timestep_solve__name__[] = "PG_timestep_solve";
+PyObject * pyCitcom_PG_timestep_solve(PyObject *self, PyObject *args)
 {
 
     E->monitor.solution_cycles++;
@@ -49,9 +49,9 @@ PyObject * pyRegional_PG_timestep_solve(PyObject *self, PyObject *args)
 }
 
 
-char pyRegional_set_convection_defaults__doc__[] = "";
-char pyRegional_set_convection_defaults__name__[] = "set_convection_defaults";
-PyObject * pyRegional_set_convection_defaults(PyObject *self, PyObject *args)
+char pyCitcom_set_convection_defaults__doc__[] = "";
+char pyCitcom_set_convection_defaults__name__[] = "set_convection_defaults";
+PyObject * pyCitcom_set_convection_defaults(PyObject *self, PyObject *args)
 {
 
     E->control.CONVECTION = 1;
@@ -74,6 +74,6 @@ PyObject * pyRegional_set_convection_defaults(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: advdiffu.cc,v 1.5 2003/07/25 20:43:29 tan2 Exp $
+// $Id: advdiffu.cc,v 1.6 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

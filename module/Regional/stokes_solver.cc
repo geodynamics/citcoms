@@ -32,10 +32,10 @@ extern "C" {
 
 
 
-char pyRegional_assemble_forces__doc__[] = "";
-char pyRegional_assemble_forces__name__[] = "assemble_forces";
+char pyCitcom_assemble_forces__doc__[] = "";
+char pyCitcom_assemble_forces__name__[] = "assemble_forces";
 
-PyObject * pyRegional_assemble_forces(PyObject *self, PyObject *args)
+PyObject * pyCitcom_assemble_forces(PyObject *self, PyObject *args)
 {
     assemble_forces(E,0);
 
@@ -45,10 +45,10 @@ PyObject * pyRegional_assemble_forces(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_construct_stiffness_B_matrix__doc__[] = "";
-char pyRegional_construct_stiffness_B_matrix__name__[] = "construct_stiffness_B_matrix";
+char pyCitcom_construct_stiffness_B_matrix__doc__[] = "";
+char pyCitcom_construct_stiffness_B_matrix__name__[] = "construct_stiffness_B_matrix";
 
-PyObject * pyRegional_construct_stiffness_B_matrix(PyObject *self, PyObject *args)
+PyObject * pyCitcom_construct_stiffness_B_matrix(PyObject *self, PyObject *args)
 {
     construct_stiffness_B_matrix(E);
 
@@ -58,10 +58,10 @@ PyObject * pyRegional_construct_stiffness_B_matrix(PyObject *self, PyObject *arg
 
 
 
-char pyRegional_general_stokes_solver_Unorm__doc__[] = "";
-char pyRegional_general_stokes_solver_Unorm__name__[] = "general_stokes_solver_Unorm";
+char pyCitcom_general_stokes_solver_Unorm__doc__[] = "";
+char pyCitcom_general_stokes_solver_Unorm__name__[] = "general_stokes_solver_Unorm";
 
-PyObject * pyRegional_general_stokes_solver_Unorm(PyObject *self, PyObject *args)
+PyObject * pyCitcom_general_stokes_solver_Unorm(PyObject *self, PyObject *args)
 {
     double Udot_mag, dUdot_mag;
 
@@ -72,10 +72,10 @@ PyObject * pyRegional_general_stokes_solver_Unorm(PyObject *self, PyObject *args
 
 
 
-char pyRegional_general_stokes_solver_fini__doc__[] = "";
-char pyRegional_general_stokes_solver_fini__name__[] = "general_stokes_solver_fini";
+char pyCitcom_general_stokes_solver_fini__doc__[] = "";
+char pyCitcom_general_stokes_solver_fini__name__[] = "general_stokes_solver_fini";
 
-PyObject * pyRegional_general_stokes_solver_fini(PyObject *self, PyObject *args)
+PyObject * pyCitcom_general_stokes_solver_fini(PyObject *self, PyObject *args)
 {
     general_stokes_solver_fini(E);
 
@@ -85,10 +85,10 @@ PyObject * pyRegional_general_stokes_solver_fini(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_general_stokes_solver_init__doc__[] = "";
-char pyRegional_general_stokes_solver_init__name__[] = "general_stokes_solver_init";
+char pyCitcom_general_stokes_solver_init__doc__[] = "";
+char pyCitcom_general_stokes_solver_init__name__[] = "general_stokes_solver_init";
 
-PyObject * pyRegional_general_stokes_solver_init(PyObject *self, PyObject *args)
+PyObject * pyCitcom_general_stokes_solver_init(PyObject *self, PyObject *args)
 {
     general_stokes_solver_init(E);
 
@@ -98,10 +98,10 @@ PyObject * pyRegional_general_stokes_solver_init(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_general_stokes_solver_log__doc__[] = "";
-char pyRegional_general_stokes_solver_log__name__[] = "general_stokes_solver_log";
+char pyCitcom_general_stokes_solver_log__doc__[] = "";
+char pyCitcom_general_stokes_solver_log__name__[] = "general_stokes_solver_log";
 
-PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
+PyObject * pyCitcom_general_stokes_solver_log(PyObject *self, PyObject *args)
 {
     double Udot_mag, dUdot_mag;
     int count;
@@ -121,10 +121,10 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_general_stokes_solver_update_velo__doc__[] = "";
-char pyRegional_general_stokes_solver_update_velo__name__[] = "general_stokes_solver_update_velo";
+char pyCitcom_general_stokes_solver_update_velo__doc__[] = "";
+char pyCitcom_general_stokes_solver_update_velo__name__[] = "general_stokes_solver_update_velo";
 
-PyObject * pyRegional_general_stokes_solver_update_velo(PyObject *self, PyObject *args)
+PyObject * pyCitcom_general_stokes_solver_update_velo(PyObject *self, PyObject *args)
 {
     general_stokes_solver_update_velo(E);
 
@@ -134,10 +134,10 @@ PyObject * pyRegional_general_stokes_solver_update_velo(PyObject *self, PyObject
 
 
 
-char pyRegional_get_system_viscosity__doc__[] = "";
-char pyRegional_get_system_viscosity__name__[] = "get_system_viscosity";
+char pyCitcom_get_system_viscosity__doc__[] = "";
+char pyCitcom_get_system_viscosity__name__[] = "get_system_viscosity";
 
-PyObject * pyRegional_get_system_viscosity(PyObject *self, PyObject *args)
+PyObject * pyCitcom_get_system_viscosity(PyObject *self, PyObject *args)
 {
     get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 
@@ -147,10 +147,10 @@ PyObject * pyRegional_get_system_viscosity(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_set_cg_defaults__doc__[] = "";
-char pyRegional_set_cg_defaults__name__[] = "set_cg_defaults";
+char pyCitcom_set_cg_defaults__doc__[] = "";
+char pyCitcom_set_cg_defaults__name__[] = "set_cg_defaults";
 
-PyObject * pyRegional_set_cg_defaults(PyObject *self, PyObject *args)
+PyObject * pyCitcom_set_cg_defaults(PyObject *self, PyObject *args)
 {
     E->control.CONJ_GRAD = 1;
     set_cg_defaults(E);
@@ -161,10 +161,10 @@ PyObject * pyRegional_set_cg_defaults(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_set_mg_defaults__doc__[] = "";
-char pyRegional_set_mg_defaults__name__[] = "set_mg_defaults";
+char pyCitcom_set_mg_defaults__doc__[] = "";
+char pyCitcom_set_mg_defaults__name__[] = "set_mg_defaults";
 
-PyObject * pyRegional_set_mg_defaults(PyObject *self, PyObject *args)
+PyObject * pyCitcom_set_mg_defaults(PyObject *self, PyObject *args)
 {
     E->control.NMULTIGRID = 1;
     set_mg_defaults(E);
@@ -175,10 +175,10 @@ PyObject * pyRegional_set_mg_defaults(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_set_mg_el_defaults__doc__[] = "";
-char pyRegional_set_mg_el_defaults__name__[] = "set_mg_el_defaults";
+char pyCitcom_set_mg_el_defaults__doc__[] = "";
+char pyCitcom_set_mg_el_defaults__name__[] = "set_mg_el_defaults";
 
-PyObject * pyRegional_set_mg_el_defaults(PyObject *self, PyObject *args)
+PyObject * pyCitcom_set_mg_el_defaults(PyObject *self, PyObject *args)
 {
     E->control.EMULTIGRID = 1;
     set_mg_defaults(E);
@@ -189,10 +189,10 @@ PyObject * pyRegional_set_mg_el_defaults(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_solve_constrained_flow_iterative__doc__[] = "";
-char pyRegional_solve_constrained_flow_iterative__name__[] = "solve_constrained_flow_iterative";
+char pyCitcom_solve_constrained_flow_iterative__doc__[] = "";
+char pyCitcom_solve_constrained_flow_iterative__name__[] = "solve_constrained_flow_iterative";
 
-PyObject * pyRegional_solve_constrained_flow_iterative(PyObject *self, PyObject *args)
+PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *args)
 {
     solve_constrained_flow_iterative(E);
 
@@ -201,6 +201,6 @@ PyObject * pyRegional_solve_constrained_flow_iterative(PyObject *self, PyObject 
 
 
 // version
-// $Id: stokes_solver.cc,v 1.2 2003/07/23 05:19:16 ces74 Exp $
+// $Id: stokes_solver.cc,v 1.3 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

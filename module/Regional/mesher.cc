@@ -53,10 +53,7 @@ extern "C" {
 
 
 
-char pyRegional_regional_sphere_setup__doc__[] = "";
-char pyRegional_regional_sphere_setup__name__[] = "regional_sphere_setup";
-
-PyObject * pyRegional_regional_sphere_setup(PyObject *self, PyObject *args)
+void sphere_launch(struct All_variables *E)
     // copied from read_instructions()
 {
 
@@ -117,34 +114,38 @@ PyObject * pyRegional_regional_sphere_setup(PyObject *self, PyObject *args)
     (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
     common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
 
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    return;
 }
 
 
 
+char pyCitcom_full_sphere_launch__doc__[] = "";
+char pyCitcom_full_sphere_launch__name__[] = "full_sphere_launch";
 
-char pyRegional_regional_sphere_init__doc__[] = "";
-char pyRegional_regional_sphere_init__name__[] = "regional_sphere_init";
-
-PyObject * pyRegional_regional_sphere_init(PyObject *self, PyObject *args)
+PyObject * pyCitcom_full_sphere_launch(PyObject *self, PyObject *args)
 {
-    // copied from set_3dsphere_defaults()
-    E->mesh.nsd = 3;
-    E->mesh.dof = 3;
-    E->sphere.caps = 1;
-    E->sphere.max_connections = 6;
+    sphere_launch(E);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
+
+char pyCitcom_regional_sphere_launch__doc__[] = "";
+char pyCitcom_regional_sphere_launch__name__[] = "regional_sphere_launch";
+
+PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
+{
+    sphere_launch(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 
 
 // version
-// $Id: mesher.cc,v 1.5 2003/07/26 21:47:51 tan2 Exp $
+// $Id: mesher.cc,v 1.6 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

@@ -7,25 +7,25 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyRegional_mesher_h)
-#define pyRegional_mesher_h
+#if !defined(pyCitcom_mesher_h)
+#define pyCitcom_mesher_h
 
 
-extern char pyRegional_regional_sphere_setup__name__[];
-extern char pyRegional_regional_sphere_setup__doc__[];
+extern char pyCitcom_full_sphere_launch__name__[];
+extern char pyCitcom_full_sphere_launch__doc__[];
 extern "C"
-PyObject * pyRegional_regional_sphere_setup(PyObject *, PyObject *);
+PyObject * pyCitcom_full_sphere_launch(PyObject *, PyObject *);
 
 
-extern char pyRegional_regional_sphere_init__name__[];
-extern char pyRegional_regional_sphere_init__doc__[];
+extern char pyCitcom_regional_sphere_launch__name__[];
+extern char pyCitcom_regional_sphere_launch__doc__[];
 extern "C"
-PyObject * pyRegional_regional_sphere_init(PyObject *, PyObject *);
+PyObject * pyCitcom_regional_sphere_launch(PyObject *, PyObject *);
 
 
 #endif
 
 // version
-// $Id: mesher.h,v 1.2 2003/07/24 20:10:33 tan2 Exp $
+// $Id: mesher.h,v 1.3 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

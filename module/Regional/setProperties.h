@@ -8,54 +8,54 @@
 //
 
 
-#if !defined(pyRegional_setProperties_h)
-#define pyRegional_setProperties_h
+#if !defined(pyCitcom_setProperties_h)
+#define pyCitcom_setProperties_h
 
-extern char pyRegional_Advection_diffusion_set_properties__doc__[];
-extern char pyRegional_Advection_diffusion_set_properties__name__[];
-extern PyObject * pyRegional_Advection_diffusion_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Advection_diffusion_set_properties__doc__[];
+extern char pyCitcom_Advection_diffusion_set_properties__name__[];
+extern PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_BC_set_properties__doc__[];
-extern char pyRegional_BC_set_properties__name__[];
-extern PyObject * pyRegional_BC_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_BC_set_properties__doc__[];
+extern char pyCitcom_BC_set_properties__name__[];
+extern PyObject * pyCitcom_BC_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Const_set_properties__doc__[];
-extern char pyRegional_Const_set_properties__name__[];
-extern PyObject * pyRegional_Const_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Const_set_properties__doc__[];
+extern char pyCitcom_Const_set_properties__name__[];
+extern PyObject * pyCitcom_Const_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_IC_set_properties__doc__[];
-extern char pyRegional_IC_set_properties__name__[];
-extern PyObject * pyRegional_IC_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_IC_set_properties__doc__[];
+extern char pyCitcom_IC_set_properties__name__[];
+extern PyObject * pyCitcom_IC_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Parallel_set_properties__doc__[];
-extern char pyRegional_Parallel_set_properties__name__[];
-extern PyObject * pyRegional_Parallel_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Parallel_set_properties__doc__[];
+extern char pyCitcom_Parallel_set_properties__name__[];
+extern PyObject * pyCitcom_Parallel_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Param_set_properties__doc__[];
-extern char pyRegional_Param_set_properties__name__[];
-extern PyObject * pyRegional_Param_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Param_set_properties__doc__[];
+extern char pyCitcom_Param_set_properties__name__[];
+extern PyObject * pyCitcom_Param_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Phase_set_properties__doc__[];
-extern char pyRegional_Phase_set_properties__name__[];
-extern PyObject * pyRegional_Phase_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Phase_set_properties__doc__[];
+extern char pyCitcom_Phase_set_properties__name__[];
+extern PyObject * pyCitcom_Phase_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_RegionalSphere_set_properties__doc__[];
-extern char pyRegional_RegionalSphere_set_properties__name__[];
+extern char pyCitcom_Sphere_set_properties__doc__[];
+extern char pyCitcom_Sphere_set_properties__name__[];
 extern "C"
-PyObject * pyRegional_RegionalSphere_set_properties(PyObject *, PyObject *);
+PyObject * pyCitcom_Sphere_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Visc_set_properties__doc__[];
-extern char pyRegional_Visc_set_properties__name__[];
-extern PyObject * pyRegional_Visc_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Visc_set_properties__doc__[];
+extern char pyCitcom_Visc_set_properties__name__[];
+extern PyObject * pyCitcom_Visc_set_properties(PyObject *, PyObject *);
 
-extern char pyRegional_Stokes_solver_set_properties__doc__[];
-extern char pyRegional_Stokes_solver_set_properties__name__[];
-extern PyObject * pyRegional_Stokes_solver_set_properties(PyObject *, PyObject *);
+extern char pyCitcom_Stokes_solver_set_properties__doc__[];
+extern char pyCitcom_Stokes_solver_set_properties__name__[];
+extern PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *, PyObject *);
 
 
 #endif
 
 // version
-// $Id: setProperties.h,v 1.4 2003/07/23 22:00:57 tan2 Exp $
+// $Id: setProperties.h,v 1.5 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

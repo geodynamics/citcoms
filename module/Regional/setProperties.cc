@@ -34,10 +34,10 @@ void getVectorProperty(PyObject* properties, char* attribute,
 //
 //
 
-char pyRegional_Advection_diffusion_set_properties__doc__[] = "";
-char pyRegional_Advection_diffusion_set_properties__name__[] = "Advection_diffusion_set_properties";
+char pyCitcom_Advection_diffusion_set_properties__doc__[] = "";
+char pyCitcom_Advection_diffusion_set_properties__name__[] = "Advection_diffusion_set_properties";
 
-PyObject * pyRegional_Advection_diffusion_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -74,10 +74,10 @@ PyObject * pyRegional_Advection_diffusion_set_properties(PyObject *self, PyObjec
 
 
 
-char pyRegional_BC_set_properties__doc__[] = "";
-char pyRegional_BC_set_properties__name__[] = "BC_set_properties";
+char pyCitcom_BC_set_properties__doc__[] = "";
+char pyCitcom_BC_set_properties__name__[] = "BC_set_properties";
 
-PyObject * pyRegional_BC_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -114,10 +114,10 @@ PyObject * pyRegional_BC_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_Const_set_properties__doc__[] = "";
-char pyRegional_Const_set_properties__name__[] = "Const_set_properties";
+char pyCitcom_Const_set_properties__doc__[] = "";
+char pyCitcom_Const_set_properties__name__[] = "Const_set_properties";
 
-PyObject * pyRegional_Const_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
     float zlith, z410, zlm, zcmb;
@@ -163,10 +163,10 @@ PyObject * pyRegional_Const_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_IC_set_properties__doc__[] = "";
-char pyRegional_IC_set_properties__name__[] = "IC_set_properties";
+char pyCitcom_IC_set_properties__doc__[] = "";
+char pyCitcom_IC_set_properties__name__[] = "IC_set_properties";
 
-PyObject * pyRegional_IC_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -201,10 +201,10 @@ PyObject * pyRegional_IC_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_Parallel_set_properties__doc__[] = "";
-char pyRegional_Parallel_set_properties__name__[] = "Parallel_set_properties";
+char pyCitcom_Parallel_set_properties__doc__[] = "";
+char pyCitcom_Parallel_set_properties__name__[] = "Parallel_set_properties";
 
-PyObject * pyRegional_Parallel_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Parallel_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -235,10 +235,10 @@ PyObject * pyRegional_Parallel_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_Param_set_properties__doc__[] = "";
-char pyRegional_Param_set_properties__name__[] = "Param_set_properties";
+char pyCitcom_Param_set_properties__doc__[] = "";
+char pyCitcom_Param_set_properties__name__[] = "Param_set_properties";
 
-PyObject * pyRegional_Param_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -301,10 +301,10 @@ PyObject * pyRegional_Param_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_Phase_set_properties__doc__[] = "";
-char pyRegional_Phase_set_properties__name__[] = "Phase_set_properties";
+char pyCitcom_Phase_set_properties__doc__[] = "";
+char pyCitcom_Phase_set_properties__name__[] = "Phase_set_properties";
 
-PyObject * pyRegional_Phase_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -347,17 +347,29 @@ PyObject * pyRegional_Phase_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_RegionalSphere_set_properties__doc__[] = "";
-char pyRegional_RegionalSphere_set_properties__name__[] = "RegionalSphere_set_properties";
+char pyCitcom_Sphere_set_properties__doc__[] = "";
+char pyCitcom_Sphere_set_properties__name__[] = "Sphere_set_properties";
 
-PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
-    if (!PyArg_ParseTuple(args, "O:RegionalSphere_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "O:Sphere_set_properties", &properties))
         return NULL;
 
-    std::cerr << "RegionalSphere.inventories:" << std::endl;
+    std::cerr << "Sphere.inventories:" << std::endl;
+
+    getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy);
+    getScalarProperty(properties, "nprocx", E->parallel.nprocxl);
+    getScalarProperty(properties, "nprocy", E->parallel.nprocyl);
+    getScalarProperty(properties, "nprocz", E->parallel.nproczl);
+
+    if (E->parallel.nprocxy == 12)
+	if (E->parallel.nprocxl != E->parallel.nprocyl) {
+	    char errmsg[] = "!!!! nprocx must equal to nprocy";
+	    PyErr_SetString(PyExc_SyntaxError, errmsg);
+	    return NULL;
+    }
 
     getScalarProperty(properties, "coor", E->control.coor);
     getStringProperty(properties, "coor_file", E->control.coor_file);
@@ -402,8 +414,11 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
 
     E->mesh.nsd = 3;
     E->mesh.dof = 3;
-    E->sphere.caps = 1;
     E->sphere.max_connections = 6;
+    if (E->parallel.nprocxy == 12)
+	E->sphere.caps = 12;
+    else
+	E->sphere.caps = 1;
 
     getScalarProperty(properties, "dimenx", E->mesh.layer[1]);
     getScalarProperty(properties, "dimeny", E->mesh.layer[2]);
@@ -423,10 +438,10 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
 
 
 
-char pyRegional_Visc_set_properties__doc__[] = "";
-char pyRegional_Visc_set_properties__name__[] = "Visc_set_properties";
+char pyCitcom_Visc_set_properties__doc__[] = "";
+char pyCitcom_Visc_set_properties__name__[] = "Visc_set_properties";
 
-PyObject * pyRegional_Visc_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -487,10 +502,10 @@ PyObject * pyRegional_Visc_set_properties(PyObject *self, PyObject *args)
 }
 
 
-char pyRegional_Stokes_solver_set_properties__doc__[] = "";
-char pyRegional_Stokes_solver_set_properties__name__[] = "Stokes_solver_set_properties";
+char pyCitcom_Stokes_solver_set_properties__doc__[] = "";
+char pyCitcom_Stokes_solver_set_properties__name__[] = "Stokes_solver_set_properties";
 
-PyObject * pyRegional_Stokes_solver_set_properties(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *self, PyObject *args)
 {
     PyObject *properties;
 
@@ -643,3 +658,8 @@ void getVectorProperty(PyObject* properties, char* attribute,
     return;
 }
 
+
+// version
+// $Id: setProperties.cc,v 1.10 2003/08/01 22:53:50 tan2 Exp $
+
+// End of file

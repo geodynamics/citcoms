@@ -23,10 +23,10 @@ extern "C" {
 }
 
 
-char pyRegional_output__doc__[] = "";
-char pyRegional_output__name__[] = "output";
+char pyCitcom_output__doc__[] = "";
+char pyCitcom_output__name__[] = "output";
 
-PyObject * pyRegional_output(PyObject *self, PyObject *args)
+PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 {
     int cycles;
 
@@ -43,6 +43,6 @@ PyObject * pyRegional_output(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.8 2003/07/28 21:57:01 tan2 Exp $
+// $Id: outputs.cc,v 1.9 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file

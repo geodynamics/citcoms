@@ -38,16 +38,16 @@ extern "C" {
 
 // copyright
 
-char pyRegional_copyright__doc__[] = "";
-char pyRegional_copyright__name__[] = "copyright";
+char pyCitcom_copyright__doc__[] = "";
+char pyCitcom_copyright__name__[] = "copyright";
 
-static char pyRegional_copyright_note[] =
-"CitcomSRegional python module: Copyright (c) 1998-2003 California Institute of Technology";
+static char pyCitcom_copyright_note[] =
+"CitcomS python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
-PyObject * pyRegional_copyright(PyObject *, PyObject *)
+PyObject * pyCitcom_copyright(PyObject *, PyObject *)
 {
-  return Py_BuildValue("s", pyRegional_copyright_note);
+  return Py_BuildValue("s", pyCitcom_copyright_note);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,10 +56,10 @@ PyObject * pyRegional_copyright(PyObject *, PyObject *)
 
 
 
-char pyRegional_return1_test__doc__[] = "";
-char pyRegional_return1_test__name__[] = "return1_test";
+char pyCitcom_return1_test__doc__[] = "";
+char pyCitcom_return1_test__name__[] = "return1_test";
 
-PyObject * pyRegional_return1_test(PyObject *, PyObject *)
+PyObject * pyCitcom_return1_test(PyObject *, PyObject *)
 {
     double a;
     a = return1_test();
@@ -67,10 +67,10 @@ PyObject * pyRegional_return1_test(PyObject *, PyObject *)
 }
 
 
-char pyRegional_read_instructions__doc__[] = "";
-char pyRegional_read_instructions__name__[] = "read_instructions";
+char pyCitcom_read_instructions__doc__[] = "";
+char pyCitcom_read_instructions__name__[] = "read_instructions";
 
-PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
+PyObject * pyCitcom_read_instructions(PyObject *self, PyObject *args)
 {
     char *filename;
 
@@ -87,10 +87,10 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 }
 
 
-char pyRegional_CPU_time__doc__[] = "";
-char pyRegional_CPU_time__name__[] = "CPU_time";
+char pyCitcom_CPU_time__doc__[] = "";
+char pyCitcom_CPU_time__name__[] = "CPU_time";
 
-PyObject * pyRegional_CPU_time(PyObject *, PyObject *)
+PyObject * pyCitcom_CPU_time(PyObject *, PyObject *)
 {
     return Py_BuildValue("d", CPU_time0());
 }
@@ -100,10 +100,10 @@ PyObject * pyRegional_CPU_time(PyObject *, PyObject *)
 // This section is for finished implementation
 //////////////////////////////////////////////////////////////////////////
 
-char pyRegional_citcom_init__doc__[] = "";
-char pyRegional_citcom_init__name__[] = "citcom_init";
+char pyCitcom_citcom_init__doc__[] = "";
+char pyCitcom_citcom_init__name__[] = "citcom_init";
 
-PyObject * pyRegional_citcom_init(PyObject *self, PyObject *args)
+PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
 {
     PyObject *Obj;
 
@@ -127,10 +127,10 @@ PyObject * pyRegional_citcom_init(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_global_default_values__doc__[] = "";
-char pyRegional_global_default_values__name__[] = "global_default_values";
+char pyCitcom_global_default_values__doc__[] = "";
+char pyCitcom_global_default_values__name__[] = "global_default_values";
 
-PyObject * pyRegional_global_default_values(PyObject *, PyObject *)
+PyObject * pyCitcom_global_default_values(PyObject *, PyObject *)
 {
     global_default_values(E);
 
@@ -139,10 +139,10 @@ PyObject * pyRegional_global_default_values(PyObject *, PyObject *)
 }
 
 
-char pyRegional_set_signal__doc__[] = "";
-char pyRegional_set_signal__name__[] = "set_signal";
+char pyCitcom_set_signal__doc__[] = "";
+char pyCitcom_set_signal__name__[] = "set_signal";
 
-PyObject * pyRegional_set_signal(PyObject *, PyObject *)
+PyObject * pyCitcom_set_signal(PyObject *, PyObject *)
 {
     set_signal();
 
@@ -151,10 +151,10 @@ PyObject * pyRegional_set_signal(PyObject *, PyObject *)
 }
 
 
-char pyRegional_velocities_conform_bcs__doc__[] = "";
-char pyRegional_velocities_conform_bcs__name__[] = "velocities_conform_bcs";
+char pyCitcom_velocities_conform_bcs__doc__[] = "";
+char pyCitcom_velocities_conform_bcs__name__[] = "velocities_conform_bcs";
 
-PyObject * pyRegional_velocities_conform_bcs(PyObject *self, PyObject *args)
+PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 {
     velocities_conform_bcs(E, E->U);
 
@@ -172,6 +172,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.20 2003/07/26 21:47:51 tan2 Exp $
+// $Id: misc.cc,v 1.21 2003/08/01 22:53:50 tan2 Exp $
 
 // End of file
