@@ -9,7 +9,7 @@
 
       Written 2/96 M. Gurnis for Citcom in cartesian geometry
 
-      Modified by Lijie in 1998 for CitcomS
+      Modified by Lijie in 1998 and by Vlad and Eh in 2005 for CitcomS
 */
 
 #include <mpi.h>
@@ -45,13 +45,14 @@ void tracer_initial_settings(E)
 void tracer_setup(E)
     struct All_variables *E;
 {
-	int i,j,k,nn;
-	int m;
+	int i,j,k,node;
+	int m,c,nn;
 	float idummy,xdummy,ydummy,zdummy;
-	FILE *fp, *fp1;
+        float xmin,xmax,ymin,ymax,zmin,zmax;
+	FILE *fp,*fp1;
         int nox,noy,noz,gnox,gnoy,gnoz;
-        char aaa[100];
         char output_file[255];
+	char aaa[100];
 
         gnox=E->mesh.nox;
         gnoy=E->mesh.noy;
@@ -66,11 +67,6 @@ void tracer_setup(E)
           fprintf(E->fp,"(Tracer_advection #1) Cannot open %s\n",output_file);
           exit(8);
 	}
-       fp1=fopen("coorr.dat","r");
-	if (fp1 == NULL) {
-          fprintf(E->fp,"(Tracer_advection #2) Cannot open %s\n","coorr.dat");
-          exit(8);
-	}
          fscanf(fp,"%d",&(E->Tracer.NUM_TRACERS));
 
         E->Tracer.tracer_x=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
@@ -82,50 +78,77 @@ void tracer_setup(E)
         E->Tracer.y_space=(float*) malloc((gnoy+1)*sizeof(float));
         E->Tracer.z_space=(float*) malloc((gnoz+1)*sizeof(float));
 
-        fscanf(fp1,"%s",aaa);
+
+	/***comment by Vlad 03/08/2005
+	checking the coor file
+	***/
+
+       fp1=fopen("coor.dat","r");
+        if (fp1 == NULL) {
+          c = 0;
+                         }
+        else             {
+          c = 1;
+                         }
+
+        /***comment by Vlad 1/26/2005
+        reading the mesh coordinate
+        ***/
+	
+	if(E->parallel.me == 0) {
+
+        if(c == 0) {
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+
         for(i=1;i<=gnox;i++)
 	   {
-/*
-	    E->Tracer.x_space[i]=E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[3]-E->sphere.cap[m].theta[1])/(gnox-1)*(i-1);
-*/
-         fscanf(fp1,"%d %f",&nn,&(E->Tracer.x_space[i]));
-
-            if(E->parallel.me==0) printf("%s %f\n","E->Tracer.x_space[i]", E->Tracer.x_space[i]);
-
+	     xmin = E->sphere.cap[m].theta[1];
+	     xmax = E->sphere.cap[m].theta[3];
+             E->Tracer.x_space[i]=xmin + (i-1)*(xmax-xmin)/(gnox-1);
 	   }
 
-        fscanf(fp1,"%s",aaa);
-
-        for(k=1;k<=gnoy;k++)
+        for(j=1;j<=gnoy;j++)
 	   {
-/*
-	    E->Tracer.y_space[k]=E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[3]-E->sphere.cap[m].fi[1])/(gnoy-1)*(k-1);
-*/
-
-         fscanf(fp1,"%d %f",&nn,&(E->Tracer.y_space[k]));
-/*
-            if(E->parallel.me==0) printf("%s %f\n","E->Tracer.y_space[k]", E->Tracer.y_space[k]);
-*/
+             ymin = E->sphere.cap[m].fi[1];
+             ymax = E->sphere.cap[m].fi[3];
+             E->Tracer.y_space[j]=ymin + (j-1)*(ymax-ymin)/(gnoy-1);
 	   }
 
-        fscanf(fp1,"%s",aaa);
-
-        for(j=1;j<=gnoz;j++)
+        for(k=1;k<=gnoz;k++)
 	   {
-/*
-	    E->Tracer.z_space[j]=E->sphere.ri+(E->sphere.ro-E->sphere.ri)/(gnoz-1)*(j-1);
-*/
-         fscanf(fp1,"%d %f",&nn,&(E->Tracer.z_space[j]));
-
-/*
-            if(E->parallel.me==0) printf("%s %f\n","E->Tracer.z_space[j]", E->Tracer.z_space[j]);
-*/
-	   }
+	     zmin=E->sphere.ri;
+             zmax=E->sphere.ro;
+             E->Tracer.z_space[k]=zmin + (k-1)*(zmax-zmin)/(gnoz-1);
+	   }   /* end of reading the coord */
 
            }   /* end of m  */
 
+	   }   /* end of c */
+
+
+        else {
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+
+        fscanf(fp1, "%s %d", aaa, &nn);
+        for(i=1;i<=gnox;i++)  {
+        fscanf(fp1, "%d %f", &nn, &(E->Tracer.x_space[i]));
+                              }
+        fscanf(fp1, "%s %d", aaa, &nn);
+        for(j=1;j<=gnoy;j++)  {
+        fscanf(fp1, "%d %f", &nn, &(E->Tracer.y_space[j]));
+                              }
+        fscanf(fp1, "%s %d", aaa, &nn);
+        for(k=1;k<=gnoz;k++)  {
+        fscanf(fp1, "%d %f", &nn, &(E->Tracer.z_space[k]));
+                              }
+
+                                                }
+             }
+
+
+	}
 
            for(i=1;i<=E->Tracer.NUM_TRACERS;i++)
 	     {
@@ -143,8 +166,6 @@ return;
 void tracer_advection(E)
     struct All_variables *E;
     {
-      float find_age_in_MY();
-
       int n,loc;
       int i,j,k,m,ii,jj,kk;
       int n_x,n_y,n_z;
@@ -156,8 +177,7 @@ void tracer_advection(E)
       float x_tmp, y_tmp, z_tmp;
       float volume, tr_dx, tr_dy, tr_dz, dx, dy, dz;
       float w1,w2,w3,w4,w5,w6,w7,w8;
-      float tr_v[1][4];
-      float time;
+      float tr_v[NCS][4];
       MPI_Comm world;
       float xmin,xmax,ymin,ymax,zmin,zmax;
 
@@ -174,9 +194,10 @@ void tracer_advection(E)
 
 
       /*** comment by Tan2 1/25/2005
-	   This part of code find the bouding box of the global mesh.
+	   This part of code find the bounding box of the global mesh.
 	   Not checked.
       ***/
+
        for(m=1;m<=E->sphere.caps_per_proc;m++)  {
 
        if(E->sphere.cap[m].theta[1]<=E->sphere.cap[m].theta[3]) {
@@ -202,30 +223,32 @@ void tracer_advection(E)
          zmax=E->sphere.ro;
 
      }   /* end of m */
-
-
-
+      
       /*** comment by Tan2 1/25/2005
-	   Copy the velocity array. Is it necessary?
+           Copy the velocity array. Is it necessary?
       ***/
+
+
       for(m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(i=0;i<=nno-1;i++)
          for(j=1;j<=3;j++)   {
            E->V[m][j][i]=E->sphere.cap[m].V[j][i+1];
+
         }
       }
 
 
-      //time=find_age_in_MY(E); /* NOT TESTED CPC 6/25/00 */
-
 
     root=0;
 
+
       /*** comment by Tan2 1/25/2005
-	   Gather the global velocity to root processor from all processors.
-	   Seems the code is designed for multi-processor run, although the
-	   tracer advection only runs in root processor.
+           Gather the global velocity to root processor from all processors.
+           Seems the code is designed for multi-processor run, although the
+           tracer advection only runs in root processor.
       ***/
+
+
       for(m=1;m<=E->sphere.caps_per_proc;m++)   {
 
       MPI_Gather(E->V[m][1], nno, MPI_FLOAT, E->GV1[m][1], nno, MPI_FLOAT, root, world);
@@ -239,9 +262,11 @@ void tracer_advection(E)
     nprocyl=E->parallel.nprocy;
     nproczl=E->parallel.nprocz;
 
+
       /*** comment by Tan2 1/25/2005
 	   Combine the gathered velocity to get the global velocity field.
       ***/
+
  if(E->parallel.me==root)    {
  for(m=1;m<=E->sphere.caps_per_proc;m++)
   for (k=1;k<=nprocyl;k++)
@@ -267,10 +292,11 @@ void tracer_advection(E)
               E->GV[m][1][nodeg] = E->GV1[m][1][nodel+loc-1];
               E->GV[m][2][nodeg] = E->GV1[m][2][nodel+loc-1];
               E->GV[m][3][nodeg] = E->GV1[m][3][nodel+loc-1];
-
-              }
+              
+	      }
 
         loc += nno;
+
 
         }
 
@@ -281,6 +307,7 @@ void tracer_advection(E)
 	   Now, root processor has velocity field of the whole mesh and starts
 	   to advect the tracers.
       ***/
+
       if(E->parallel.me==root)   {
       for(n=1;n<=E->Tracer.NUM_TRACERS;n++) {
       n_x=0;
@@ -288,10 +315,9 @@ void tracer_advection(E)
       n_z=0;
 
       /*** comment by Tan2 1/25/2005
-	   itcolor is like the starting age of the tracer. Disable it temperory.
+	   itcolor is like the starting age of the tracer. Disable it temporarly.
       ***/
 
-      //if(E->Tracer.itcolor[n]>=time)   {
       if(1)   {
 
      /*  mid point method uses 2 iterations */
@@ -302,6 +328,7 @@ void tracer_advection(E)
 	    x_tmp=E->Tracer.tracer_x[n];
 	    y_tmp=E->Tracer.tracer_y[n];
 	    z_tmp=E->Tracer.tracer_z[n];
+
 	 }
 
 	 /*** comment by Tan2 1/25/2005
@@ -315,12 +342,12 @@ void tracer_advection(E)
 	      <-------------------->
 	               dx
 	  ***/
+
 	 for(i=1;i<gnox;i++) {
              if(x_tmp >= E->Tracer.x_space[i] && x_tmp <= E->Tracer.x_space[i+1]) {
 		tr_dx=x_tmp-E->Tracer.x_space[i];
 		dx=E->Tracer.x_space[i+1]-E->Tracer.x_space[i];
 		n_x=i;
-
              }
 	 }
 	 for(j=1;j<gnoz;j++) {
@@ -344,6 +371,7 @@ void tracer_advection(E)
 	      This assumes linear element
 	  ***/
 
+
           /* compute volumetic weighting functions */
 	    w1=tr_dx*tr_dz*tr_dy;
 	    w2=(dx-tr_dx)*tr_dz*tr_dy;
@@ -356,10 +384,11 @@ void tracer_advection(E)
 
 	    volume=dx*dz*dy;
 
-
-	    /*** comment by Tan2 1/25/2005
+	     
+	/*** comment by Tan2 1/25/2005
 		 Calculate the 8 node numbers of current element
 	     ***/
+
 	 node1 = n_z + (n_x-1)*gnoz + (n_y-1)*gnoz*gnox;
 	 node2 = n_z + n_x*gnoz + (n_y-1)*gnoz*gnox;
 	 node3 = n_z+1  + (n_x-1)*gnoz + (n_y-1)*gnoz*gnox;
@@ -373,6 +402,7 @@ void tracer_advection(E)
 	 /*** comment by Tan2 1/25/2005
 	      Interpolate the velocity on the tracer position
 	  ***/
+
             for(m=1;m<=E->sphere.caps_per_proc;m++)   {
               for(j=1;j<=3;j++)   {
 	     tr_v[m][j]=w8*E->GV[m][j][node1]
@@ -384,12 +414,13 @@ void tracer_advection(E)
 		    +w2*E->GV[m][j][node7]
 		    +w1*E->GV[m][j][node8];
               tr_v[m][j]=tr_v[m][j]/volume;
+
 	    }
-
-
+                                                                                                                                                         
 	      /*** comment by Tan2 1/25/2005
 		   advect tracer using mid-point method (2nd order accuracy)
 	       ***/
+
           /* mid point method */
 
 	  if(iteration == 1) {
@@ -418,15 +449,16 @@ void tracer_advection(E)
      }
 
 
+
 /* make sure that the new position of the tracers within the box  */
 
-      for(n=1;n<=E->Tracer.NUM_TRACERS;n++) {
-       if(E->Tracer.tracer_x[n]>xmax) E->Tracer.tracer_x[n]=2.0*xmax-E->Tracer.tracer_x[n];
-       if(E->Tracer.tracer_x[n]<xmin) E->Tracer.tracer_x[n]=2.0*xmin-E->Tracer.tracer_x[n];
-       if(E->Tracer.tracer_y[n]>ymax) E->Tracer.tracer_y[n]=2.0*ymax-E->Tracer.tracer_y[n];
-       if(E->Tracer.tracer_y[n]<ymin) E->Tracer.tracer_y[n]=2.0*ymin-E->Tracer.tracer_y[n];
-       if(E->Tracer.tracer_z[n]>zmax) E->Tracer.tracer_z[n]=2.0*zmax-E->Tracer.tracer_z[n];
-       if(E->Tracer.tracer_z[n]<zmin) E->Tracer.tracer_z[n]=2.0*zmin-E->Tracer.tracer_z[n];
+       for(n=1;n<=E->Tracer.NUM_TRACERS;n++) {
+        if(E->Tracer.tracer_x[n]>xmax) E->Tracer.tracer_x[n]=2.0*xmax-E->Tracer.tracer_x[n];
+        if(E->Tracer.tracer_x[n]<xmin) E->Tracer.tracer_x[n]=2.0*xmin-E->Tracer.tracer_x[n];
+        if(E->Tracer.tracer_y[n]>ymax) E->Tracer.tracer_y[n]=2.0*ymax-E->Tracer.tracer_y[n];
+        if(E->Tracer.tracer_y[n]<ymin) E->Tracer.tracer_y[n]=2.0*ymin-E->Tracer.tracer_y[n];
+        if(E->Tracer.tracer_z[n]>zmax) E->Tracer.tracer_z[n]=2.0*zmax-E->Tracer.tracer_z[n];
+        if(E->Tracer.tracer_z[n]<zmin) E->Tracer.tracer_z[n]=2.0*zmin-E->Tracer.tracer_z[n];
       }
 
 return;
