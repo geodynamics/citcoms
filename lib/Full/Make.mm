@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/04 00:41:53 tan2 Exp $
 
 include local.def
 TYPE=Full
@@ -36,14 +36,14 @@ PROJ_SRCS = \
 	Sphere_related.c \
 	Version_dependent.c
 
-#EXPORT_HEADERS = \
-#	global_defs.h
+EXPORT_HEADERS = \
+	global_defs.h
 
-all: $(PROJ_LIB)
+all: $(PROJ_LIB) export-headers
 
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/04 00:41:53 tan2 Exp $
 
 #
 # End of file
