@@ -328,8 +328,8 @@ void Exchanger::receiveVelocities() {
     
     int nodest,gnode,lnode;
     int *bnodes;
-    double xc[12],avgV[3],normal[3];
-    double outflow,area;
+    double xc[12],avgV[3],normal[3],garea[3][2],tarea;
+    double outflow,area,factr,*nwght;
     
     int facenodes[]={0, 1, 5, 4,
 		     2, 3, 7, 6,
@@ -351,8 +351,8 @@ void Exchanger::receiveVelocities() {
 	    tag ++;
             if((fge_t==0)&&(cge_t==0))
             {
-                if(i==2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=1000.0/(boundary->X[2][n]);
-                if(i!=2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=0.0;
+//                if(i==2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=1000.0/(boundary->X[2][n]*boundary->X[2][n]);
+//                if(i!=2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=0.0;
                 for(int n=0; n < incoming.size; n++)poutgoing.v[i][n]=incoming.v[i][n];
             }
 
@@ -362,7 +362,9 @@ void Exchanger::receiveVelocities() {
 	
         nodest = 8*E->lmesh.nel;	
         bnodes = new int[nodest];
+        nwght  = new double[boundary->size*3];
         for(int i=0; i< nodest; i++) bnodes[i]=-1;
+        for(int i=0; i< boundary->size*3; i++) nwght[i]=0.0;
 // Assignment of the local boundary node numbers to bnodes elements array
         for(int n=0; n<E->lmesh.nel; n++)
         {
@@ -379,7 +381,10 @@ void Exchanger::receiveVelocities() {
         }
 
         outflow=0.0;
-        
+       	for( int i=0;i<3;i++)
+		for(int j=0; j<2 ;j++)
+			garea[i][j]=0.0;
+       	
         for(int n=0; n<E->lmesh.nel; n++)
         {
 // Loop over element faces
@@ -392,7 +397,7 @@ void Exchanger::receiveVelocities() {
                     for(int j=0;j<4;j++)
                     {
                         lnode=bnodes[n*8+facenodes[i*4+j]];
-			if(lnode >= boundary->size) std::cout <<" lnode = " << lnode << " size " << boundary->size << std::endl;
+ 			if(lnode >= boundary->size) std::cout <<" lnode = " << lnode << " size " << boundary->size << std::endl;
                         for(int l=0; l<3; l++)
                         {
                             xc[j*3+l]=boundary->X[l][lnode];
@@ -413,6 +418,18 @@ void Exchanger::receiveVelocities() {
 		    if(xc[1]==xc[7]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[6]-xc[0])*sin(0.5*(xc[7]+xc[1])));
 		    if(xc[2]==xc[8]) area=fabs(xc[2]*xc[8]*(xc[7]-xc[1])*(xc[6]-xc[0])*sin(0.5*(xc[0]+xc[6])));
 	
+		    
+                    for(int l=0; l<3; l++)
+                    {
+                        if(normal[l] > 0.999 ) garea[l][0]+=area;
+                        if(normal[l] < -0.999 ) garea[l][1]+=area;
+                    }
+                    for(int j=0;j<4;j++)
+                    {
+                        lnode=bnodes[n*8+facenodes[i*4+j]];
+                        for(int l=0; l<3; l++)nwght[lnode*3+l]+=normal[l]*area/4.;
+                    }                     
+                     
     		    std::cout << " coordinates " << xc[0] << " " << xc[1] << " " << xc[2] << " " << xc[3] << " " 
 			    << xc[4] << " " << xc[5] << " " << xc[6] << " " << xc[7] << " " << xc[8] << " " 
 			    << xc[9] << " " << xc[10] << " " << xc[11] <<" normals " <<  normal[0] << " " 
@@ -425,9 +442,45 @@ void Exchanger::receiveVelocities() {
                 }
                 
             }            
-        }        
+        }
+        
+	std::cout << " areas of positive normals " << garea[0][0] <<" " <<garea[1][0] << " " << garea[2][0] << std::endl;
+	std::cout << " areas of negative normals " << garea[0][1] <<" " <<garea[1][1] << " " << garea[2][1] << std::endl;
 	std::cout << " outflow is in receiveVelocities" << outflow << std::endl;
+
+        if(outflow > 0.0) factr = -1.0;
+        if(outflow < 0.0) factr = 1.0;
+        outflow=0.0;
+        tarea=0.0;
+        for(int n=0; n<boundary->size;n++)
+        {
+            for(int j=0; j < 3; j++)
+            {    
+                outflow+=incoming.v[j][n]*nwght[n*3+j];
+                tarea+=fabs(nwght[n*3+j]);
+            }
+        }
+        
+        std::cout << " outflow from wighted areas in receiveVelocities" << outflow << std::endl;
+        for(int n=0; n<boundary->size;n++)
+        {
+            for(int j=0; j < 3; j++)
+            {    
+                if(fabs(nwght[n*3+j]) > 1.e-10)
+                    incoming.v[j][n]-=outflow*nwght[n*3+j]/(tarea*fabs(nwght[n*3+j]));
+            }
+        }
+        outflow=0.0;
+        for(int n=0; n<boundary->size;n++)
+        {
+            for(int j=0; j < 3; j++)
+            {    
+                outflow+=incoming.v[j][n]*nwght[n*3+j];
+            }
+        }
+        std::cout << " Outflow here should be zero " <<outflow << std::endl;
         delete [] bnodes;
+        delete [] nwght;
     }
 
 //printDataV(incoming);
@@ -493,7 +546,6 @@ void Exchanger::setBCFlag() {
 // 			  << E->node[m][n] << std::dec << std::endl;
 	    }
 	}
-    check_bc_consistency(E);
 
     // reconstruct ID array to reflect changes in BC
     construct_id(E);
@@ -596,7 +648,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.27 2003/10/03 21:50:17 puru Exp $
+// $Id: ExchangerClass.cc,v 1.28 2003/10/04 14:24:59 puru Exp $
 
 // End of file
 
