@@ -1,4 +1,4 @@
-/*	Header file containing the appropriate definitions for the elements being used 
+/*	Header file containing the appropriate definitions for the elements being used
 in the problem.   Include in all of the files linking in to the element program.  */
 
 #define ELN 8  /* for this element, the max nodes/vpoints/ppoints, used in indexing */
@@ -93,40 +93,40 @@ static const int seq[]={0,1,3,6,10,15,21,28,36,45,55,66,78,91,105,120,136,153,17
 
 
 
-#define BETA  0.57735026918962576451      
+#define BETA  0.57735026918962576451
 
 /*  4-pt co-ords  */
 
-/*   Declare everything to be static: no changes are made to this data ... it is 
+/*   Declare everything to be static: no changes are made to this data ... it is
 easiest to redeclare it all each time and have just one file of definitions   */
 
 static const struct One_d_int_points {
 	float x[2];
-	float weight[3]; 	 } 
-			g_1d[5] = 
+	float weight[3]; 	 }
+			g_1d[5] =
                         {	{{0.0,0.0},{0.0,0.0,0.0}},
 				{{-BETA,-BETA},{0.0,1.0,1.0}},
-				{{ BETA,-BETA},{0.0,1.0,1.0}}, 
-				{{ BETA, BETA},{0.0,1.0,1.0}}, 
+				{{ BETA,-BETA},{0.0,1.0,1.0}},
+				{{ BETA, BETA},{0.0,1.0,1.0}},
 				{{-BETA, BETA},{0.0,1.0,1.0}}   } ;
 
-static const struct One_d_int_points 
-			l_1d[5] = 
+static const struct One_d_int_points
+			l_1d[5] =
                         {	{{0.0,0.0},{0.0,0.0,0.0}},
 				{{-1.0,-1.0},{0.0,1.0,1.0}},
-				{{ 1.0,-1.0},{0.0,1.0,1.0}}, 
-				{{ 1.0, 1.0},{0.0,1.0,1.0}}, 
+				{{ 1.0,-1.0},{0.0,1.0,1.0}},
+				{{ 1.0, 1.0},{0.0,1.0,1.0}},
 				{{-1.0, 1.0},{0.0,1.0,1.0}}   } ;
 
-static const struct One_d_int_points 
-			p_1d[2] = 
+static const struct One_d_int_points
+			p_1d[2] =
 			{	{{0.0,0.0},{0.0,0.0,0.0}},
 				{{0.0,0.0},{0.0,2.0,4.0}} };
-	                                                  	   
+
 static const struct Int_points {
-	float x[3]; 
+	float x[3];
 	float weight[3];    }
-                        g_point[9] = 
+                        g_point[9] =
 			{	{{0.0,0.0,0.0},{0.0,0.0,0.0}},
 				{{-BETA,-BETA,-BETA},{0.0,1.0,1.0}},
 				{{ BETA,-BETA,-BETA},{0.0,1.0,1.0}},
@@ -136,10 +136,10 @@ static const struct Int_points {
 				{{ BETA,-BETA, BETA},{0.0,1.0,1.0}},
                                 {{ BETA, BETA, BETA},{0.0,1.0,1.0}},
                                 {{-BETA, BETA, BETA},{0.0,1.0,1.0}} };
-  
-  
-static const struct Int_points 
-			s_point[9] = 
+
+
+static const struct Int_points
+			s_point[9] =
 			{	{{0.0,0.0,0.0},{0.0,0.0,0.0}},
 				{{-BETA,-BETA,-1.0},{0.0,2.0,2.0}},
 				{{ BETA,-BETA,-1.0},{0.0,2.0,2.0}},
@@ -149,14 +149,14 @@ static const struct Int_points
 				{{ BETA,-BETA, 1.0},{0.0,2.0,2.0}},
                                 {{ BETA, BETA, 1.0},{0.0,2.0,2.0}},
                                 {{-BETA, BETA, 1.0},{0.0,2.0,2.0}} };
-  
-  
-static const struct Int_points 
+
+
+static const struct Int_points
 			p_point[2] =
 			{	{{0.0,0.0,0.0},{0.0,0.0,0.0}},
 				{{0.0,0.0,0.0},{0.0,4.0,8.0}} };
-	                  
-static const struct Node_points 
+
+static const struct Node_points
 { float x[3]; }	node_point[9] =
 			{	{0.0,0.0,0.0},
 				{-1.0,-1.0,-1.0},
@@ -167,7 +167,7 @@ static const struct Node_points
 				{-1.0, 1.0, 1.0},
 				{ 1.0, 1.0, 1.0},
 				{ 1.0,-1.0, 1.0} };
-				
+
 static const struct Internal_structure  /* integer coordinates relative to node 1 */
 	{	int vector[3]; } offset[9] =
 				{	{0,0,0},
@@ -179,7 +179,7 @@ static const struct Internal_structure  /* integer coordinates relative to node 
 					{1,1,0},
 					{1,1,1},
 					{1,0,1}	};
-	
+
 static const struct E_loc_info {
 	int minus[3];
 	int plus[3];
@@ -195,8 +195,8 @@ static const struct E_loc_info {
 			{{0,5,2},{7,0,0},{0.5,0.5,0.5},{2,2,2},{{6,7},{5,6},{2,6}}},
 			{{6,8,3},{0,0,0},{0.5,0.5,0.5},{2,2,2},{{6,7},{8,7},{3,7}}},
 			{{5,0,4},{0,7,0},{0.5,0.5,0.5},{2,2,2},{{5,8},{8,7},{4,8}}} };
-			
-	
+
+
 static const int bb[3][9] = {	{0,1,2,2,1,1,2,2,1},  /* x dirn */
  			        {0,1,1,2,2,1,1,2,2},  /* y dirn */
 			        {0,1,1,1,1,2,2,2,2}   /* z dirn */ };
@@ -214,3 +214,27 @@ static const int loc_e_stencil[3][9] = {
     {0,8,7,5,6,4,3,1,2} } ;
 
 
+
+/*
+   This section defines the ordering of the 6 surfaces of a element
+   and the ordering of 4 nodes within each surface
+*/
+
+#define SIDE_BOTTOM 1
+#define SIDE_TOP 2
+#define SIDE_LEFT 3
+#define SIDE_RIGHT 4
+#define SIDE_FRONT 5
+#define SIDE_BACK 6
+
+static const int sidenodes[7][5] = {
+  {0,0,0,0,0},
+  {0,1,2,3,4},
+  {0,5,6,7,8},
+  {0,1,2,6,5},
+  {0,4,3,7,8},
+  {0,1,4,8,5},
+  {0,2,3,7,6} };
+
+
+/**/
