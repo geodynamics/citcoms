@@ -8,33 +8,42 @@
 #
 
 from pyre.facilities.Facility import Facility
+from pyre.facilities.ScriptBinder import ScriptBinder
 
 
 class TSolver(Facility):
 
 
-    def bind(self, configuration):
-        componentName = configuration.get(self.name)
-
-        # if the user didn't provide a setting, use the default
-        if not componentName:
-            component = self.component
-
-        # these cases we want to treat specially
-        elif componentName == "temperature_diffadv":
-            import CitcomS.Advection_diffusion
-            component = CitcomS.Advection_diffusion.temperature_diffadv()
-
-        ## let the Facility handle unknown component names
-        else:
-            component = Facility.bind(self, configuration)
-
-        return component
+    def __init__(self, name, component):
+        Facility.__init__(self, name,
+                          default=component, binder=self.Binder())
+        return
 
 
 
+    class Binder(ScriptBinder):
+
+        def bind(self,facility,value):
+            try:
+                return self._builtins[value]()
+            except KeyError:
+                pass
+
+            return ScriptBinder.bind(self, facility, value)
+
+
+        def __init__(self):
+            ScriptBinder.__init__(self)
+
+	    import CitcomS.Advection_diffusion as Advection_diffusion
+
+            self._builtins = {
+                "temp": Advection_diffusion.temperature_diffadv,
+                }
+
+            return            
 
 # version
-__id__ = "$Id: TSolver.py,v 1.1 2003/07/03 23:40:21 ces74 Exp $"
+__id__ = "$Id: TSolver.py,v 1.2 2003/07/15 18:04:36 ces74 Exp $"
 
 # End of file
