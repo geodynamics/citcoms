@@ -24,7 +24,7 @@ for i; do
 
     echo processing $i ...
     output=$i.general
-    grid=`head -1 $i`
+    grid=`head -1 $i | awk '{print $3, $2, $1, $4, $5}'`
 
     echo file = $i > $output
     echo grid = $grid >> $output
@@ -42,6 +42,6 @@ done
 
 
 # version
-# $Id: dxgeneral.sh,v 1.2 2004/01/15 00:17:39 tan2 Exp $
+# $Id: dxgeneral.sh,v 1.3 2004/05/12 19:01:39 tan2 Exp $
 
 # End of file
