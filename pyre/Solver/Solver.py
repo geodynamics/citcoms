@@ -95,15 +95,19 @@ class Solver(BaseSolver):
         # create mesh
         mesher.run()
 
+        # initialize const. related to mesh
+        tsolver.launch()
+
         # if there is a coupler, launch it
         if self.coupler:
             self.coupler.launch(self)
 
-        # solver for 0th step velocity
-        vsolver.run()
-
-        # initialze const. related to mesh
-        tsolver.launch()
+        # initial temperature and velocities field
+        if self.coupler:
+            self.coupler.initTemperature()
+            self.coupler.solveVelocities(vsolver)
+        else:
+            vsolver.run()
 
         return
 
@@ -141,14 +145,14 @@ class Solver(BaseSolver):
     def advance(self, dt):
         BaseSolver.advance(self, dt)
 
-        vsolver = self.inventory.vsolver
-        vsolver.setup()
-
         tsolver = self.inventory.tsolver
-        tsolver.setup()
-
         tsolver.run(dt)
-        vsolver.run()
+
+        vsolver = self.inventory.vsolver
+        if self.coupler:
+            self.coupler.solveVelocities(vsolver)
+        else:
+            vsolver.run()
 
         return
 
@@ -248,6 +252,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.23 2003/09/29 20:21:20 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.24 2003/09/30 01:47:58 tan2 Exp $"
 
 # End of file
