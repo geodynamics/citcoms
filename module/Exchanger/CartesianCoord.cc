@@ -19,7 +19,12 @@
 void CartesianCoord::coordinate(BoundedBox& bbox) const
 {
     BoundedBox bbox_tmp(bbox);
+
     std::vector<double> xt(DIM),xc(DIM);
+    std::cout << "bbox (tpr) " << bbox_tmp[0][0] <<" "<< bbox_tmp[1][0] << std::endl;
+    std::cout << "bbox (tpr) " << bbox_tmp[0][1] <<" "<< bbox_tmp[1][1] << std::endl;
+    std::cout << "bbox (tpr) " << bbox_tmp[0][2] <<" "<< bbox_tmp[1][2] << std::endl;
+
     for(int i=0; i<2; i++)
       for(int j=0; j<DIM; j++)
       {
@@ -33,21 +38,27 @@ void CartesianCoord::coordinate(BoundedBox& bbox) const
 
 // Degenerate case for theta (xt[0])
 
-        if((a==0) && ((bbox_tmp[0][0] < M_PI) &&(bbox_tmp[1][0] > M_PI))) xt[0]=M_PI;
-        if((a==1) && ((bbox_tmp[0][0] < 0) &&(bbox_tmp[1][0] > 0))) xt[0]=0;
-
+//         if((a==0) && ((bbox_tmp[0][0] < M_PI) &&(bbox_tmp[1][0] > M_PI))) xt[0]=M_PI;
+//         if((a==1) && ((bbox_tmp[0][0] < 0) &&(bbox_tmp[1][0] > 0))) xt[0]=0;
 
         for(int b=0; b<2; b++)
         {
-            xt[1]=bbox_tmp[a][1];
+            xt[1]=bbox_tmp[b][1];
             for(int c=0; c<2; c++)
             {
-                xt[2]=bbox_tmp[a][2];
+                xt[2]=bbox_tmp[c][2];
+		xc[2] = xt[2] * cos(xt[0]);
+		if(c==1 &&  bbox_tmp[0][0] < M_PI/2. &&  bbox_tmp[1][0] > M_PI/2.)xt[0]=M_PI/2.;
                 xc[0] = xt[2] * sin(xt[0]) * cos(xt[1]);
                 xc[1] = xt[2] * sin(xt[0]) * sin(xt[1]);
-                xc[2] = xt[2] * cos(xt[0]);
-
+	
+		for(int j=0;j<DIM;j++)
+		    {
+			if(xc[j] < bbox[0][j])bbox[0][j]=xc[j];
+			if(xc[j] > bbox[1][j])bbox[1][j]=xc[j];
+		    }
 // Degenerate case for phi (xt[1])
+		if(c==1 &&  bbox_tmp[0][0] < M_PI/2. &&  bbox_tmp[1][0] > M_PI/2.)xt[0]=M_PI/2.;
                 if(c==1 &&  bbox_tmp[0][1]< 0 &&  bbox_tmp[1][1]> 0)xc[0] = xt[2] * sin(xt[0]);
                 if(c==1 && bbox_tmp[0][1]< M_PI/2. &&  bbox_tmp[1][1]> M_PI/2.) xc[1] = xt[2] * sin(xt[0]);
                 if(c==0 &&  bbox_tmp[0][1]< M_PI && bbox_tmp[1][1]> M_PI) xc[0] = -1.*xt[2] * sin(xt[0]);
@@ -62,6 +73,9 @@ void CartesianCoord::coordinate(BoundedBox& bbox) const
             }
         }
     }
+    std::cout << "bbox (xyz) " << bbox[0][0] <<" "<< bbox[1][0] << std::endl;
+    std::cout << "bbox (xyz) " << bbox[0][1] <<" "<< bbox[1][1] << std::endl;
+    std::cout << "bbox (xyz) " << bbox[0][2] <<" "<< bbox[1][2] << std::endl;
 }
 
 
@@ -203,6 +217,6 @@ void CartesianCoord::xvector(Array2D<double,DIM>& V,
 
 
 // version
-// $Id: CartesianCoord.cc,v 1.4 2004/01/08 21:19:27 tan2 Exp $
+// $Id: CartesianCoord.cc,v 1.5 2004/01/09 00:38:23 ces74 Exp $
 
 // End of file
