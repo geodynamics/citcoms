@@ -7,6 +7,8 @@
 
 #include <portinfo>
 #include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 #include "global_defs.h"
 #include "Boundary.h"
 #include "FineGridExchanger.h"
@@ -86,15 +88,6 @@ void FineGridExchanger::interpretate() {
     std::cout << "in FineGridExchanger::interpretate" << std::endl;
 }
 
-
-
-
-void FineGridExchanger::impose_bc() {
-    std::cout << "in FineGridExchanger::impose_bc" << std::endl;
-
-}
-
-
 void FineGridExchanger::createBoundary() {
     std::cout << "in FineGridExchanger::createBoundary" << std::endl;
 
@@ -168,6 +161,6 @@ void FineGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.13 2003/09/18 22:03:48 ces74 Exp $
+// $Id: FineGridExchanger.cc,v 1.14 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file

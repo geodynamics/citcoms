@@ -68,6 +68,10 @@ class FineGridExchanger(Exchanger):
         self.module.receiveVelocities(self.exchanger)
         return
 
+    def imposeBC(self):
+        self.module.imposeBC(self.exchanger)
+        return
+
     def NewStep(self):
         if self.catchup:
             # send wakeup signal to CGE
@@ -115,6 +119,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.10 2003/09/21 22:24:00 ces74 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.11 2003/09/22 18:14:32 ces74 Exp $"
 
 # End of file

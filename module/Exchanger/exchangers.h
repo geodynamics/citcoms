@@ -117,6 +117,12 @@ extern "C"
 PyObject * pyExchanger_send(PyObject *, PyObject *);
 
 
+extern char pyExchanger_imposeBC__name__[];
+extern char pyExchanger_imposeBC__doc__[];
+extern "C"
+PyObject * pyExchanger_imposeBC(PyObject *, PyObject *);
+
+
 extern char pyExchanger_exchangeTimestep__name__[];
 extern char pyExchanger_exchangeTimestep__doc__[];
 extern "C"
@@ -139,6 +145,6 @@ PyObject * pyExchanger_nowait(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.8 2003/09/21 22:24:00 ces74 Exp $
+// $Id: exchangers.h,v 1.9 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file

@@ -252,7 +252,7 @@ PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
 	return NULL;
 
     CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
-	                                  (PyCObject_AsVoidPtr(obj));
+      (PyCObject_AsVoidPtr(obj));
 
     cge->interpolate();
 
@@ -413,6 +413,25 @@ PyObject * pyExchanger_send(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_imposeBC__doc__[] = "";
+char pyExchanger_imposeBC__name__[] = "imposeBC";
+
+PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:imposeBC", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->imposeBC();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_exchangeTimestep__doc__[] = "";
 char pyExchanger_exchangeTimestep__name__[] = "exchangeTimestep";
 
@@ -508,6 +527,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.9 2003/09/21 22:24:00 ces74 Exp $
+// $Id: exchangers.cc,v 1.10 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file

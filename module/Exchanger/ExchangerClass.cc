@@ -7,10 +7,11 @@
 
 #include <portinfo>
 #include <iostream>
-
+#include <fstream>
 #include "Boundary.h"
 #include "global_defs.h"
 #include "ExchangerClass.h"
+using namespace std;
 
 Exchanger::Exchanger(MPI_Comm communicator,
 		     MPI_Comm icomm,
@@ -348,6 +349,33 @@ void Exchanger::receiveVelocities() {
     return;
 }
 
+void Exchanger::imposeBC() {
+    std::cout << "in Exchanger::imposeBC" << std::endl;
+
+    int m = E->sphere.caps_per_proc;
+
+//     ofstream ffile("fine.dat");
+    for(int i=0;i<boundary->size;i++) {
+      int n = boundary->bid2gid[i];
+      E->T[m][n] = incoming.T[i];
+      E->V[m][1][n] = incoming.v[0][i];
+      E->V[m][2][n] = incoming.v[1][i];
+      E->V[m][3][n] = incoming.v[2][i];
+
+//       ffile << "in Exchanger::impose_bc ==> " << i << " " 
+// 	    << n << " " 
+// 	    << E->X[E->mesh.levmax][m][1][n] << " " 
+// 	    << E->X[E->mesh.levmax][m][2][n] << " " 
+// 	    << E->X[E->mesh.levmax][m][3][n] << " "
+// 	    << E->T[m][n] << " " 
+// 	    << E->V[m][1][n] << " " << E->V[m][2][n] << " " 
+// 	    << E->V[m][3][n] << " " << std::endl;
+    }
+//     ffile.close();
+
+    return;
+}
+
 
 double Exchanger::exchangeTimestep(const double dt) {
     std::cout << "in Exchanger::exchangeTimestep"
@@ -398,7 +426,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.11 2003/09/21 22:24:00 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.12 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file
 

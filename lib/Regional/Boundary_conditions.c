@@ -213,7 +213,7 @@ void velocity_refl_vert_bc(E)
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
                E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBY);
                E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBY;
-               E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~ VBZ);
+               E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBZ);
                E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBZ;
                }
             }
@@ -223,7 +223,7 @@ void velocity_refl_vert_bc(E)
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
               E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBY);
               E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBY;
-              E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~ VBZ);
+              E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBZ);
               E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBZ;
                   }
             }

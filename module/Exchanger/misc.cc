@@ -10,6 +10,7 @@
 #include <portinfo>
 #include <Python.h>
 #include <iostream>
+#include <fstream>
 
 extern "C" {
 #include "global_defs.h"
@@ -17,7 +18,7 @@ extern "C" {
 }
 
 #include "misc.h"
-
+using namespace std;
 
 // copyright
 
@@ -140,9 +141,12 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
     E->sphere.ri=1.0;
 
     const int n = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+    for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=1; i<=E->mesh.dof; i++) {
 	    E->X[E->mesh.levmax][m][i] = new double[n+1];
+	    E->V[m][i] = new float [n+1];
+	}
+  	E->T[m] = new double [n+1];
     }
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
@@ -267,7 +271,9 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 	}
   	E->T[m] = new double [n+1];
     }
-
+    
+    //Test
+//     ofstream cfile("coarse.dat");
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(k=1;k<=E->lmesh.noy;k++)
  	  for(j=1;j<=E->lmesh.nox;j++) 
@@ -287,19 +293,25 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 		    E->V[m][2][node] = 2.0*E->T[m][node];
 		    E->V[m][3][node] = 3.0*E->T[m][node];
 
-//  		    std::cout << "in CoarsereturnE (T, v1,v2,v3): " <<  node << " "
-//   			      << E->T[m][node] << " "
-//   			      << E->V[m][1][node] << " "
-//   			      << E->V[m][2][node] << " "
-//   			      << E->V[m][3][node] << " "
-//   			      << std::endl;
-		}
-
+//  		    cfile << "in CoarsereturnE (T, v1,v2,v3): " 
+// 			  <<  node << " "
+// 			  << E->X[E->mesh.levmax][m][1][node] << " " 
+// 			  << E->X[E->mesh.levmax][m][2][node] << " " 
+// 			  << E->X[E->mesh.levmax][m][3][node] << " "
+// 			  << E->T[m][node] << " "
+// 			  << E->V[m][1][node] << " "
+// 			  << E->V[m][2][node] << " "
+// 			  << E->V[m][3][node] << " "
+// 			  << std::endl;
+	    }
+//     cfile.close();
+    
+    
     PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
     return Py_BuildValue("O", cobj);
 }
 
 // version
-// $Id: misc.cc,v 1.8 2003/09/21 22:24:00 ces74 Exp $
+// $Id: misc.cc,v 1.9 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file

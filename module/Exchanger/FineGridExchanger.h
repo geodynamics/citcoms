@@ -26,7 +26,7 @@ public:
     virtual void gather();
     virtual void distribute();
     virtual void interpretate();
-    virtual void impose_bc();
+//     virtual void imposeBC();
     virtual void mapBoundary();
 
     void createBoundary();
@@ -37,7 +37,7 @@ public:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.7 2003/09/11 22:10:55 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.8 2003/09/22 18:14:32 ces74 Exp $
 
 // End of file
 

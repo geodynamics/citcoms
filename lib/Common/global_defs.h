@@ -688,6 +688,9 @@ struct CONTROL {
     int MELTING_MODULE;
     int CHEMISTRY_MODULE;
 
+  /* for embedded setting */
+  int embedded;
+
 };
 
 struct DATA {

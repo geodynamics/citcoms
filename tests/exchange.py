@@ -78,6 +78,11 @@ class TestExchanger(Application):
         # testing send/receiveVelocities
         exchanger.exchangeVelocities()
         print exchanger.name, ": velocities transferred"
+
+        # testing imposeBC
+        if layout.fine:
+            exchanger.imposeBC()
+            print exchanger.name, ": BC imposed successfully"
         
         try:
             # success if exchanger is a FGE
@@ -100,7 +105,7 @@ class TestExchanger(Application):
             print "%s - step %d: %f" % (exchanger.name, step, time)
 
         # delete Data arrays
-        exchanger.createDataArrays()
+        exchanger.deleteDataArrays()
         print "incoming/outgoing structres deleted"
         
         return
@@ -170,6 +175,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.10 2003/09/21 22:24:00 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.11 2003/09/22 18:14:32 ces74 Exp $"
 
 # End of file
