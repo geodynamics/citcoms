@@ -41,7 +41,7 @@ macro main(
 ) {
     // 
     // node FileSelector[1]: x = 86, y = 49, inputs = 0, label = FileSelector
-    // output[1]: visible = 1, type = 32, value = "/home/tan2/ITR/packages/CitcomS/visual/samples/regtest.cap0.0.general"
+    // output[1]: visible = 1, type = 32, value = "samples/regtest.cap0.0.general"
     // output[2]: visible = 1, type = 32, value = "regtest.cap0.0.general"
     // page group: import
     //
