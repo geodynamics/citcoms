@@ -97,9 +97,9 @@ class Exchanger(Component):
                 pass
             elif signal == NEW_STEP_SIGNAL:
                 if self.catchup:
-                    print self.name, 'exchanging timestep =', steps
+                    #print self.name, 'exchanging timestep =', steps
                     self.coupled_steps = self.exchangeSignal(steps)
-                    print self.name, 'exchanged timestep =', self.coupled_steps
+                    #print self.name, 'exchanged timestep =', self.coupled_steps
                 break
             else:
                 raise ValueError, \
@@ -128,6 +128,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.20 2004/08/07 22:08:36 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.21 2005/01/23 21:20:26 tan2 Exp $"
 
 # End of file
