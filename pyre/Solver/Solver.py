@@ -42,6 +42,9 @@ class Solver(BaseSolver):
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 	self.communicator = comm
 
+        # some special treatment, will go away in the future
+        self.inventory.param.inventory.datafile = self.inventory.datafile
+
         # information about clock time
 	self.start_cpu_time = self.CitcomModule.CPU_time()
         self.cpu_time = self.start_cpu_time
@@ -105,10 +108,28 @@ class Solver(BaseSolver):
         # initial temperature and velocities field
         if self.coupler:
             self.coupler.initTemperature()
-            self.coupler.solveVelocities(vsolver)
+
+        self.solveVelocities()
+
+        return
+
+
+
+    def solveVelocities(self):
+        vsolver = self.inventory.vsolver
+        if self.coupler:
+            self.coupler.preVSolverRun()
+            vsolver.run()
+            self.coupler.postVSolverRun()
         else:
             vsolver.run()
+        return
 
+
+
+    def solveTemperature(self, dt):
+        tsolver = self.inventory.tsolver
+        tsolver.run(dt)
         return
 
 
@@ -121,11 +142,11 @@ class Solver(BaseSolver):
 
 
 
-    def applyBoundaryConditions(self):
-        BaseSolver.applyBoundaryConditions(self)
-        if self.coupler:
-            self.coupler.applyBoundaryConditions()
-        return
+    #def applyBoundaryConditions(self):
+        #BaseSolver.applyBoundaryConditions(self)
+        #if self.coupler:
+        #    self.coupler.applyBoundaryConditions()
+        #return
 
 
 
@@ -145,14 +166,8 @@ class Solver(BaseSolver):
     def advance(self, dt):
         BaseSolver.advance(self, dt)
 
-        tsolver = self.inventory.tsolver
-        tsolver.run(dt)
-
-        vsolver = self.inventory.vsolver
-        if self.coupler:
-            self.coupler.solveVelocities(vsolver)
-        else:
-            vsolver.run()
+        self.solveTemperature(dt)
+        self.solveVelocities()
 
         return
 
@@ -252,6 +267,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.24 2003/09/30 01:47:58 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.25 2003/10/01 22:16:33 tan2 Exp $"
 
 # End of file
