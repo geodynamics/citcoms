@@ -18,6 +18,7 @@ class Controller(SimulationController):
 
         self.step = 0
         self.clock = 0.0
+        self.done = False
         self.solver = None
         return
 
@@ -67,15 +68,27 @@ class Controller(SimulationController):
             self.endTimestep()
 
             # are we done?
-            if steps and self.step >= steps:
-                break
-            if totalTime and self.clock >= totalTime:
+            if self.done:
                 break
 
         # end of time advance loop
 
         # Notify solver we are done
         self.endSimulation()
+
+        return
+
+
+
+    def endTimestep(self):
+        # are we done?
+        if steps and self.step >= steps:
+            self.done = True
+        if totalTime and self.clock >= totalTime:
+            self.done = True
+
+        # solver can terminate time marching by returning True
+        self.done = self.solver.endTimestep(self.clock, self.done)
 
         return
 

@@ -146,13 +146,13 @@ class Solver(BaseSolver):
 
 
 
-    def endTimestep(self, t):
+    def endTimestep(self, t, done):
         BaseSolver.endTimestep(self, t)
 
         if self.coupler:
-            self.coupler.endTimestep()
+            done = self.coupler.endTimestep(done)
 
-        return
+        return done
 
 
     def endSimulation(self, step):
@@ -229,6 +229,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.21 2003/09/28 00:30:50 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.22 2003/09/28 20:40:46 tan2 Exp $"
 
 # End of file
