@@ -150,6 +150,7 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "refvisc", E->data.ref_viscosity, m);
     getScalarProperty(properties, "cp", E->data.Cp, m);
     getScalarProperty(properties, "wdensity", E->data.density_above, m);
+    getScalarProperty(properties, "surftemp", E->data.surf_temp, m);
 
     E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
     E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
@@ -761,6 +762,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.21 2004/01/08 18:26:40 tan2 Exp $
+// $Id: setProperties.cc,v 1.22 2004/01/08 18:37:26 tan2 Exp $
 
 // End of file
