@@ -303,6 +303,61 @@ void compute_nodal_stress(struct All_variables *E,
 
 
 
+
+void stress_conform_bcs(struct All_variables *E)
+{
+  int m, i, j, k, n, d;
+  const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
+  const int stress_index[4][4] = { {0, 0, 0, 0},
+				   {0, 1, 4, 5},
+				   {0, 4, 2, 6},
+				   {0, 5, 6, 3} };
+
+  if(E->control.side_sbcs) {
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+      for(i=1; i<=E->lmesh.noy; i++)
+        for(j=1; j<=E->lmesh.nox; j++)
+	  for(k=1; k<=E->lmesh.noz; k++) {
+	    n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+	    for(d=1; d<=E->mesh.nsd; d++)
+	      if(E->node[m][n] & sbc_flag[d]) {
+		if(i==1)
+		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_WEST][d][ E->sbc.node[m][n] ];
+		if(i==E->lmesh.noy)
+		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_EAST][d][ E->sbc.node[m][n] ];
+		if(j==1)
+		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_NORTH][d][ E->sbc.node[m][n] ];
+		if(j==E->lmesh.nox)
+		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_SOUTH][d][ E->sbc.node[m][n] ];
+		if(k==1)
+		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_BOTTOM][d][ E->sbc.node[m][n] ];
+		if(k==E->lmesh.noz)
+		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_TOP][d][ E->sbc.node[m][n] ];
+	      }
+	  }
+
+  } else {
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+      for(i=1; i<=E->lmesh.noy; i++)
+        for(j=1; j<=E->lmesh.nox; j++)
+	  for(k=1; k<=E->lmesh.noz; k++) {
+	    n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+	    for(d=1; d<=E->mesh.nsd; d++)
+	      if(E->node[m][n] & sbc_flag[d]) {
+		if(i==1 || i==E->lmesh.noy)
+		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
+		if(j==1 || j==E->lmesh.nox)
+		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
+		if(k==1 || k==E->lmesh.noz)
+		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+	      }
+	  }
+  }
+}
+
+
 /* ===================================================================
    ===================================================================  */
 
@@ -525,6 +580,6 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 
 
 /* version */
-/* $Id: Topo_gravity.c,v 1.8 2004/04/29 21:35:30 tan2 Exp $ */
+/* $Id: Topo_gravity.c,v 1.9 2004/05/23 19:10:26 tan2 Exp $ */
 
 /* End of file  */

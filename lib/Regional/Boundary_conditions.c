@@ -555,44 +555,7 @@ void velocities_conform_bcs(E,U)
 }
 
 
-void stress_conform_bcs(struct All_variables *E)
-{
-  int m, i, j, k, n, d;
-  const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
-  const int stress_index[4][4] = { {0, 0, 0, 0},
-				   {0, 1, 4, 5},
-				   {0, 4, 2, 6},
-				   {0, 5, 6, 3} };
-
-  /*
-  if(E->control.side_sbcs) {
-
-  }
-  else {
-  */
-
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-      for(i=1; i<=E->lmesh.noy; i++)
-        for(j=1; j<=E->lmesh.nox; j++)
-	  for(k=1; k<=E->lmesh.noz; k++) {
-	    n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-	    for(d=1; d<=E->mesh.nsd; d++)
-	      if(E->node[m][n] & sbc_flag[d]) {
-		if(i==1 || i==E->lmesh.noy)
-		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
-		if(j==1 || j==E->lmesh.nox)
-		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
-		if(k==1 || k==E->lmesh.noz)
-		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
-	      }
-	  }
-    /*
-      }
-    */
-}
-
-
 /* version */
-/* $Id: Boundary_conditions.c,v 1.9 2004/04/29 21:35:30 tan2 Exp $ */
+/* $Id: Boundary_conditions.c,v 1.10 2004/05/23 19:10:27 tan2 Exp $ */
 
 /* End of file  */

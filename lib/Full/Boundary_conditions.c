@@ -15,7 +15,7 @@ void velocity_boundary_conditions(E)
   void read_velocity_boundary_from_file();
   void apply_side_sbc();
 
-  int node,d,j,noz,lv;
+  int j,noz,lv;
 
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
@@ -120,11 +120,6 @@ void velocity_refl_vert_bc(E)
 void temperature_refl_vert_bc(E)
      struct All_variables *E;
 {
-  int i,j;
-  int node1,node2;
-  const int dims=E->mesh.nsd;
-
- /* Temps and bc-values  at top level only */
 
   return;
 }
@@ -145,7 +140,6 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 
 {
   int i,j,node,rowl;
-  const int dims=E->mesh.nsd;
 
     /* safety feature */
   if(dirn > E->mesh.nsd)
@@ -156,8 +150,8 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
   else
       rowl = E->lmesh.NOZ[level];
 
-  if ( ROW==1&&E->parallel.me_loc[3]==0 ||
-       ROW==E->mesh.NOZ[level]&&E->parallel.me_loc[3]==E->parallel.nprocz-1 ) {
+  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
+       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
 
     /* turn bc marker to zero */
     if (onoff == 0)          {
@@ -188,10 +182,6 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 void velocity_apply_periodic_bcs(E)
     struct All_variables *E;
 {
-  int n1,n2,level;
-  int i,j,ii,jj;
-  const int dims=E->mesh.nsd;
-
   fprintf(E->fp,"Periodic boundary conditions\n");
 
   return;
@@ -200,10 +190,6 @@ void velocity_apply_periodic_bcs(E)
 void temperature_apply_periodic_bcs(E)
     struct All_variables *E;
 {
- int n1,n2,e1,level;
- int i,j,ii,jj;
- const int dims=E->mesh.nsd;
-
  fprintf(E->fp,"Periodic temperature boundary conditions\n");
 
   return;
@@ -234,10 +220,7 @@ void get_bcs_id_for_residual(E,level,m)
 
     int i,j;
 
-    const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int nno=E->lmesh.NNO[level];
-    const int neq=E->lmesh.NEQ[level];
-    const int addi_dof=additional_dof[dims];
 
    j = 0;
    for(i=1;i<=nno;i++) {
@@ -310,14 +293,12 @@ void velocities_conform_bcs(E,U)
     struct All_variables *E;
     double **U;
 {
-    int node,d,m;
+    int node,m;
 
     const unsigned int typex = VBX;
     const unsigned int typez = VBZ;
     const unsigned int typey = VBY;
-    const int addi_dof = additional_dof[E->mesh.nsd];
 
-    const int dofs = E->mesh.dof;
     const int nno = E->lmesh.nno;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)   {
@@ -336,12 +317,7 @@ void velocities_conform_bcs(E,U)
 }
 
 
-void stress_conform_bcs(struct All_variables *E)
-{
-}
-
-
 /* version */
-/* $Id: Boundary_conditions.c,v 1.4 2004/04/29 21:35:30 tan2 Exp $ */
+/* $Id: Boundary_conditions.c,v 1.5 2004/05/23 19:10:27 tan2 Exp $ */
 
 /* End of file  */
