@@ -31,8 +31,12 @@ class PG_timestep(Application):
         return
         
     def main(self):
-	raise NotImplementedError, \
-	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
+        self.init()
+        self.run()
+        self.fini()
+        
+##	raise NotImplementedError, \
+##	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
 	return
     
     def run(self):
@@ -64,6 +68,6 @@ class PG_timestep(Application):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.1 2003/05/22 18:20:21 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.2 2003/05/22 22:27:20 ces74 Exp $"
 
 # End of file 
