@@ -168,11 +168,12 @@ void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
     boundary->mapCoarseGrid(E, rank);
     boundary->sendBid2proc(comm, rank, leader);
+    createDataArrays();
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.24 2003/09/28 00:11:03 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.25 2003/09/28 15:36:11 tan2 Exp $
 
 // End of file

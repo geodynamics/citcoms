@@ -85,12 +85,14 @@ void FineGridExchanger::mapBoundary() {
 
     // Assuming all boundary nodes are inside localLeader!
     // assumption will be relaxed in future
-    if (rank == leader)
+    if (rank == leader) {
 	boundary->mapFineGrid(E);
+	createDataArrays();
+    }
 }
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.19 2003/09/28 00:11:03 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.20 2003/09/28 15:36:11 tan2 Exp $
 
 // End of file
