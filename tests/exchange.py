@@ -41,11 +41,11 @@ class TestExchanger(Application):
         # testing exchanger creation
         exchanger.selectModule()
 	exchanger.createExchanger(self)
-        print exchanger.name, exchanger.exchanger
+        #print exchanger.name, exchanger.exchanger
 
         # testing boundary creation and exchange
         boundary = exchanger.findBoundary()
-        print exchanger.name, boundary
+        print exchanger.name, ": boundary found"
 
         try:
             # success if exchanger is a FGE
@@ -56,8 +56,9 @@ class TestExchanger(Application):
             dt = 1
 
         # testing dt exchanging
-        print "%s - old = %f   exchanged = %f   old = %f" % (exchanger.name,
-              dt, exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
+        print "%s - old dt = %f   exchanged dt = %f   old dt = %f" % (
+              exchanger.name, dt,
+              exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
               dt)
 
         # testing wait & nowait
@@ -86,8 +87,9 @@ class TestExchanger(Application):
         self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
-        print self.exchanger.name, self.rank, \
-              self.localLeader, self.remoteLeader
+        print "%s exchanger: rank=%d  localLeader=%d  remoteLeader=%d" % (
+              self.exchanger.name, self.rank,
+              self.localLeader, self.remoteLeader)
 
         return
 
@@ -133,6 +135,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.4 2003/09/10 04:00:31 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.5 2003/09/11 21:32:17 tan2 Exp $"
 
 # End of file
