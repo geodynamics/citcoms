@@ -78,8 +78,6 @@ void Interpolator::init(const BoundedMesh& boundedMesh,
 {
     double xt[DIM], xc[DIM*NODES_PER_ELEMENT], x1[DIM], x2[DIM], x3[DIM], x4[DIM];
 
-    findMaxGridSpacing(E);
-
     elem_.reserve(boundedMesh.size());
     shape_.reserve(boundedMesh.size());
 
@@ -154,51 +152,6 @@ void Interpolator::init(const BoundedMesh& boundedMesh,
     }
     elem_.shrink();
     shape_.shrink();
-}
-
-
-void Interpolator::findMaxGridSpacing(const All_variables* E)
-{
-
-    if(E->parallel.nprocxy == 12) {
-	// for CitcomSFull
-	const double pi = 4*atan(1);
-	const double cap_side = 0.5*pi / sqrt(2);  // side length of a spherical cap
-	double elem_side = cap_side / E->mesh.elx;
-	theta_tol = fi_tol = elem_side;
-    }
-    else {
-	theta_tol = fi_tol = 0;
-	const int m = 1;
-	for(int n=0; n<E->lmesh.nel; n++) {
-	    int gnode1 = E->ien[m][n+1].node[1];
-	    int gnode2 = E->ien[m][n+1].node[2];
-	    int gnode4 = E->ien[m][n+1].node[4];
-	    theta_tol = std::max(theta_tol,
-				 std::abs(E->sx[m][1][gnode2]
-					  - E->sx[m][1][gnode1]));
-	    fi_tol = std::max(fi_tol,
-			      std::abs(E->sx[m][2][gnode4]
-				       - E->sx[m][2][gnode1]));
-	}
-    }
-
-    r_tol = 0;
-    const int m = 1;
-    for(int n=0; n<E->lmesh.nel; n++) {
-	int gnode1 = E->ien[m][n+1].node[1];
-	int gnode5 = E->ien[m][n+1].node[5];
-	r_tol = std::max(r_tol,
-			 std::abs(E->sx[m][3][gnode5]
-				  - E->sx[m][3][gnode1]));
-    }
-
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "max grid spacing: "
-	  << theta_tol << " "
-	  << fi_tol << " "
-	  << r_tol << journal::end;
 }
 
 
@@ -301,6 +254,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.9 2003/12/17 04:27:56 puru Exp $
+// $Id: Interpolator.cc,v 1.10 2004/01/07 01:07:57 tan2 Exp $
 
 // End of file

@@ -18,10 +18,6 @@ class BoundedMesh;
 
 
 class Interpolator {
-    double theta_tol;
-    double fi_tol;
-    double r_tol;
-
     Array2D<int,1> elem_;  // elem # from which fields are interpolated
     Array2D<double,NODES_PER_ELEMENT> shape_; // shape functions for interpolation
 
@@ -42,7 +38,6 @@ private:
     void selfTest(const BoundedMesh& boundedMesh, const All_variables* E,
 		  const Array2D<int,1>& meshNode) const;
 
-    void findMaxGridSpacing(const All_variables* E);
     bool isCandidate(const double* xc, const BoundedBox& bbox) const;
     double TetrahedronVolume(double *x1, double *x2,
 			     double *x3, double *x4) const;
@@ -57,6 +52,6 @@ private:
 #endif
 
 // version
-// $Id: Interpolator.h,v 1.3 2003/11/28 22:32:35 ces74 Exp $
+// $Id: Interpolator.h,v 1.4 2004/01/07 01:07:57 tan2 Exp $
 
 // End of file
