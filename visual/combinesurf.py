@@ -18,20 +18,29 @@ class CombineSurf(object):
 
     def __init__(self, grid):
         # data storage
-        self.saved = range(grid['nox'] * grid['noy'])
+        self.saved = [''] * (grid['nox'] * grid['noy'])
         return
 
 
 
-    def readData(self, crdfilename, surffilename, grid):
+    def readData(self, crdfilename, surffilename, grid, cap):
         fp1 = file(crdfilename, 'r')
         fp2 = file(surffilename, 'r')
+
+        # processor geometry
+        nprocx = int(cap['nprocx'])
+        nprocy = int(cap['nprocy'])
+        nprocz = int(cap['nprocz'])
 
         # mesh geometry
         nox = grid['nox']
         noy = grid['noy']
         noz = grid['noz']
-        snodes = nox*noy
+
+        mynox = 1 + (nox-1)/nprocx
+        mynoy = 1 + (noy-1)/nprocy
+        mynoz = 1 + (noz-1)/nprocz
+        snodes = mynox * mynoy
 
         # skip header
         fp1.readline()
@@ -43,13 +52,13 @@ class CombineSurf(object):
             print '"%s" file size incorrect' % surffilename
 
         crd = fp1.readlines()
-        if not (len(crd) == snodes*noz):
+        if not (len(crd) == snodes*mynoz):
             print '"%s" file size incorrect' % crdfilename
 
         # paste data
         data = range(snodes)
         for i in range(len(data)):
-            x, y, z = crd[(i+1)*noz-1].split()
+            x, y, z = crd[(i+1)*mynoz-1].split()
             data[i] = '%s %s %s' % (x, y, surf[i])
 
         return data
@@ -129,7 +138,7 @@ if __name__ == '__main__':
         crdfilename = '%s.coord.%d' % (prefix, n)
         surffilename = '%s.surf.%d.%d' % (prefix, n, step)
         print 'reading', surffilename
-        data = cb.readData(crdfilename, surffilename, grid)
+        data = cb.readData(crdfilename, surffilename, grid, cap)
         cb.join(data, n, grid, cap)
 
         filename = '%s.surf%d.%d' % (prefix, i, step)
@@ -138,6 +147,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: combinesurf.py,v 1.1 2004/06/08 01:35:06 tan2 Exp $
+# $Id: combinesurf.py,v 1.2 2004/08/06 23:24:43 tan2 Exp $
 
 # End of file
