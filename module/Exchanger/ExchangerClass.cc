@@ -79,6 +79,7 @@ void Exchanger::local_receiveVelocities(void) {
     int size;
     int worldme,interme;
     int i,nproc;
+			
 
     // dummy setting
     lincoming.size=5;
@@ -197,9 +198,11 @@ void Exchanger::deleteDataArrays() {
 
       delete [] incoming.T;
       delete [] outgoing.T;
+      delete [] poutgoing.T;	
       for(int i=0; i < boundary->dim; i++) {
 	  delete [] incoming.v[i];
 	  delete [] outgoing.v[i];
+	  delete [] poutgoing.v[i];
       }
 }
 
@@ -322,7 +325,19 @@ void Exchanger::sendVelocities() {
 
 void Exchanger::receiveVelocities() {
     std::cout << "in Exchanger::receiveVelocities" << std::endl;
-
+    
+    int nodest,gnode,lnode;
+    int *bnodes;
+    double xc[12],avgV[3],normal[3];
+    double outflow,area;
+    
+    int facenodes[]={0, 1, 5, 4,
+		     2, 3, 7, 6,
+                     1, 2, 6, 5, 
+                     0, 4, 7, 3, 
+                     4, 5, 6, 7,
+                     0, 3, 2, 1};
+    
     if(rank == leader) {
 	int tag = 0;
 	MPI_Status status;
@@ -331,18 +346,91 @@ void Exchanger::receiveVelocities() {
             {
                 if(!((fge_t==0)&&(cge_t==0)))poutgoing.v[i][n]=incoming.v[i][n];
             }
-
 	    MPI_Recv(incoming.v[i], incoming.size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm, &status);
 	    tag ++;
             if((fge_t==0)&&(cge_t==0))
             {
+                if(i==2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=1000.0/(boundary->X[2][n]);
+                if(i!=2)for(int n=0; n < incoming.size; n++)incoming.v[i][n]=0.0;
                 for(int n=0; n < incoming.size; n++)poutgoing.v[i][n]=incoming.v[i][n];
             }
 
 	}
     }
-    //printDataV(incoming);
+    if(rank == leader) {
+	
+        nodest = 8*E->lmesh.nel;	
+        bnodes = new int[nodest];
+        for(int i=0; i< nodest; i++) bnodes[i]=-1;
+// Assignment of the local boundary node numbers to bnodes elements array
+        for(int n=0; n<E->lmesh.nel; n++)
+        {
+            for( int j=0; j<8; j++)
+            {
+                gnode = E->IEN[E->mesh.levmax][1][n+1].node[j+1];
+                for(int k=0; k < incoming.size; k++)
+                {
+                    if(gnode==boundary->bid2gid[k])bnodes[n*8+j]=k;
+                    if(gnode==boundary->bid2gid[k])break;
+                }
+                
+            }	       
+        }
+
+        outflow=0.0;
+        
+        for(int n=0; n<E->lmesh.nel; n++)
+        {
+// Loop over element faces
+            for(int i=0; i<6; i++)
+            {
+                    // Checking of diagonal nodal faces
+                if((bnodes[n*8+facenodes[i*4]] >=0)&&(bnodes[n*8+facenodes[i*4+1]] >=0) &&(bnodes[n*8+facenodes[i*4+2]] >=0)&&(bnodes[n*8+facenodes[i*4+3]] >=0))
+                {
+                    avgV[0]=avgV[1]=avgV[2]=0.0;
+                    for(int j=0;j<4;j++)
+                    {
+                        lnode=bnodes[n*8+facenodes[i*4+j]];
+			if(lnode >= boundary->size) std::cout <<" lnode = " << lnode << " size " << boundary->size << std::endl;
+                        for(int l=0; l<3; l++)
+                        {
+                            xc[j*3+l]=boundary->X[l][lnode];
+                            avgV[l]+=incoming.v[l][lnode]/4.0;
+                        }
+                                         
+                    }
+                    normal[0]=(xc[4]-xc[1])*(xc[11]-xc[2])-(xc[5]-xc[2])*(xc[10]-xc[1]);
+                    normal[1]=(xc[5]-xc[2])*(xc[9]-xc[0])-(xc[3]-xc[0])*(xc[11]-xc[2]);
+                    normal[2]=(xc[3]-xc[0])*(xc[10]-xc[1])-(xc[4]-xc[1])*(xc[9]-xc[0]);
+                    area=sqrt(normal[0]*normal[0]+normal[1]*normal[1]+normal[2]*normal[2]);
+	            	
+                    for(int l=0; l<3; l++)
+                    {
+                        normal[l]/=area;
+                    }
+		    if(xc[0]==xc[6]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[7]-xc[1]));
+		    if(xc[1]==xc[7]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[6]-xc[0])*sin(0.5*(xc[7]+xc[1])));
+		    if(xc[2]==xc[8]) area=fabs(xc[2]*xc[8]*(xc[7]-xc[1])*(xc[6]-xc[0])*sin(0.5*(xc[0]+xc[6])));
+	
+    		    std::cout << " coordinates " << xc[0] << " " << xc[1] << " " << xc[2] << " " << xc[3] << " " 
+			    << xc[4] << " " << xc[5] << " " << xc[6] << " " << xc[7] << " " << xc[8] << " " 
+			    << xc[9] << " " << xc[10] << " " << xc[11] <<" normals " <<  normal[0] << " " 
+			    << normal[1] << " " << normal[2] << " area " << area << std::endl;
+                    for(int l=0; l<3; l++)
+                    {
+                        outflow+=avgV[l]*normal[l]*area;
+                    }
+                    
+                }
+                
+            }            
+        }        
+	std::cout << " outflow is in receiveVelocities" << outflow << std::endl;
+        delete [] bnodes;
+    }
+
+//printDataV(incoming);
     //printDataV(poutgoing);
 
     // Don't forget to delete inoming.v
@@ -508,7 +596,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.26 2003/10/02 01:14:22 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.27 2003/10/03 21:50:17 puru Exp $
 
 // End of file
 
