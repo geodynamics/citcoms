@@ -14,6 +14,7 @@ include std-pythonmodule.def
 PROJ_CXX_INCLUDES = ../../lib/Common
 
 PROJ_CXX_SRCLIB = \
+        $(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
         -ljournal \
         -lmpimodule
 
@@ -31,6 +32,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.3 2003/09/09 02:35:22 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/10/02 01:14:22 tan2 Exp $
 
 # End of file

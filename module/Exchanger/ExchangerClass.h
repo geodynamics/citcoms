@@ -53,9 +53,10 @@ public:
 //     void local_receiveTemperature();
 
     void imposeBC();
+    void setBCFlag();
 
     void storeTimestep(const double fge_time, const double cge_time);
-    double exchangeTimestep(const double);
+    double exchangeTimestep(const double) const;
     int exchangeSignal(const int) const;
 
     virtual void gather() = 0;
@@ -76,7 +77,8 @@ protected:
     const int remoteLeader;    // leader rank (in intercomm) of another solver
 
     const All_variables *E;    // CitcomS data structure,
-                               // Exchanger only modifies bc flags
+                               // Exchanger only modifies bc flags directly
+	                       // and id array indirectly
     Boundary *boundary;
 
     struct Data outgoing;
@@ -107,7 +109,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.23 2003/10/01 22:21:14 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.24 2003/10/02 01:14:22 tan2 Exp $
 
 // End of file
 

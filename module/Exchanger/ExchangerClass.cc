@@ -13,6 +13,11 @@
 #include "global_defs.h"
 #include "ExchangerClass.h"
 
+extern "C" {
+    void check_bc_consistency(const All_variables *E);
+    void construct_id(const All_variables *E);
+}
+
 Exchanger::Exchanger(const MPI_Comm communicator,
 		     const MPI_Comm icomm,
 		     const int leaderRank,
@@ -370,17 +375,40 @@ void Exchanger::imposeBC() {
 		E->sphere.cap[m].VB[2][n] = N1*poutgoing.v[1][i]+N2*incoming.v[1][i];
 		E->sphere.cap[m].VB[3][n] = N1*poutgoing.v[2][i]+N2*incoming.v[2][i];
                 //std::cout << E->sphere.cap[m].VB[1][n] << " " << E->sphere.cap[m].VB[2][n] << " " <<  E->sphere.cap[m].VB[3][n] << std::endl;
+	    }
+	}
+    }
+
+    return;
+}
+
+
+void Exchanger::setBCFlag() {
+    std::cout << "in Exchanger::setBCFlag" << std::endl;
+
+    // Because CitcomS is defaulted to have reflecting side BC,
+    // here we should change to velocity BC.
+    for(int m=1; m<=E->sphere.caps_per_proc; m++)
+	for(int i=0; i<boundary->size; i++) {
+	    int n = boundary->bid2gid[i];
+	    int p = boundary->bid2proc[i];
+	    if (p == rank) {
+// 		std::cout << "    before: " << std::hex
+// 			  << E->node[m][n] << std::dec << std::endl;
 		E->node[m][n] = E->node[m][n] | VBX;
 		E->node[m][n] = E->node[m][n] | VBY;
 		E->node[m][n] = E->node[m][n] | VBZ;
 		E->node[m][n] = E->node[m][n] & (~SBX);
 		E->node[m][n] = E->node[m][n] & (~SBY);
 		E->node[m][n] = E->node[m][n] & (~SBZ);
+// 		std::cout << "    after : "  << std::hex
+// 			  << E->node[m][n] << std::dec << std::endl;
 	    }
 	}
-    }
+    check_bc_consistency(E);
 
-    return;
+    // reconstruct ID array to reflect changes in BC
+    construct_id(E);
 }
 
 
@@ -390,7 +418,7 @@ void Exchanger::storeTimestep(const double fge_time, const double cge_time) {
 }
 
 
-double Exchanger::exchangeTimestep(const double dt) {
+double Exchanger::exchangeTimestep(const double dt) const {
     std::cout << "in Exchanger::exchangeTimestep"
 	      << "  rank = " << rank
 	      << "  leader = "<< localLeader
@@ -480,7 +508,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.25 2003/10/01 22:21:14 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.26 2003/10/02 01:14:22 tan2 Exp $
 
 // End of file
 

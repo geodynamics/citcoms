@@ -377,6 +377,25 @@ PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_setBCFlag__doc__[] = "";
+char pyExchanger_setBCFlag__name__[] = "setBCFlag";
+
+PyObject * pyExchanger_setBCFlag(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:setBCFlag", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->setBCFlag();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_storeTimestep__doc__[] = "";
 char pyExchanger_storeTimestep__name__[] = "storeTimestep";
 
@@ -460,6 +479,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.19 2003/10/01 22:21:14 tan2 Exp $
+// $Id: exchangers.cc,v 1.20 2003/10/02 01:14:22 tan2 Exp $
 
 // End of file

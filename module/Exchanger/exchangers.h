@@ -107,6 +107,12 @@ extern "C"
 PyObject * pyExchanger_imposeBC(PyObject *, PyObject *);
 
 
+extern char pyExchanger_setBCFlag__name__[];
+extern char pyExchanger_setBCFlag__doc__[];
+extern "C"
+PyObject * pyExchanger_setBCFlag(PyObject *, PyObject *);
+
+
 extern char pyExchanger_storeTimestep__name__[];
 extern char pyExchanger_storeTimestep__doc__[];
 extern "C"
@@ -128,6 +134,6 @@ PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.15 2003/10/01 22:21:14 tan2 Exp $
+// $Id: exchangers.h,v 1.16 2003/10/02 01:14:22 tan2 Exp $
 
 // End of file
