@@ -20,6 +20,16 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "parsing.h"
+
+void tracer_input(struct All_variables *E)
+{
+  int m=E->parallel.me;
+
+  input_int("tracer",&(E->control.tracer),"0",m);
+  input_string("tracer_file",E->control.tracer_file,"",m);
+}
+
 
 void tracer_initial_settings(E)
    struct All_variables *E;
@@ -28,13 +38,11 @@ void tracer_initial_settings(E)
    void tracer_advection();
    void tracer_output();
 
-  if (E->control.tracer==1)  {
-    E->problem_tracer_setup=tracer_setup;
-    E->problem_tracer_advection=tracer_advection;
-    E->problem_tracer_output=tracer_output;
-  }
- return;
+   E->problem_tracer_setup=tracer_setup;
+   E->problem_tracer_advection=tracer_advection;
+   E->problem_tracer_output=tracer_output;
 }
+
 
 void tracer_setup(E)
     struct All_variables *E;

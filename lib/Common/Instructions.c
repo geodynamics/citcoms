@@ -81,7 +81,6 @@ void read_instructions(struct All_variables *E, char *filename)
 
     global_default_values(E);
     read_initial_settings(E);
-    tracer_initial_settings(E);
 
     open_log(E);
     if (E->control.verbose)
@@ -107,6 +106,7 @@ void read_instructions(struct All_variables *E, char *filename)
     node_locations (E);
 
     if(E->control.tracer==1)
+      tracer_initial_settings(E);
       (E->problem_tracer_setup)(E);
 
     allocate_velocity_vars(E);
@@ -271,9 +271,6 @@ void read_initial_settings(struct All_variables *E)
 
   input_int("stokes_flow_only",&(E->control.stokes),"0",m);
 
-  input_int("tracer",&(E->control.tracer),"0",m);
-  input_string("tracer_file",E->control.tracer_file,"",m);
-
   input_int("restart",&(E->control.restart),"0",m);
   input_int("post_p",&(E->control.post_p),"0",m);
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
@@ -365,6 +362,7 @@ void read_initial_settings(struct All_variables *E)
   lith_age_input(E);
   viscosity_input(E);
   tic_input(E);
+  tracer_input(E);
 
   (E->problem_settings)(E);
 
