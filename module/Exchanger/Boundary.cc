@@ -20,10 +20,9 @@ Boundary::Boundary(const int n) : size(n){
     for(int i=0; i<dim; i++)
 	X[i] = new double[size];
 
-    bid2proc = new int[size];
     bid2gid = new int[size];
-    bid2crseelem[0] = new int[size];
-    bid2crseelem[1] = new int[size];
+    bid2elem = new int[size];
+    bid2proc = new int[size];
     shape = new double[size*8];    
   
     // use auto_ptr for exception-proof
@@ -206,8 +205,8 @@ void Boundary::getBid2crseelem(const All_variables *E) {
                     if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
-                    bid2crseelem[0][i]=n+1;
-                    bid2crseelem[1][i]=E->sphere.capid[mm];
+                    bid2elem[i]=n+1;
+                    bid2proc[i]=E->sphere.capid[mm];
 		    //		    cout << "i = " << i << "elem = " << n+1 << " " << "capid = " << E->sphere.capid[mm] << endl;                    
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
@@ -215,19 +214,7 @@ void Boundary::getBid2crseelem(const All_variables *E) {
                     shape[i*8+nsub[k*4+3]]=det[3]/dett;
                                        
                     break;
-                    
-                }
-                if(ind)
-                {
-                    xi[0]=xi[1]=xi[2]=0.0;
-                    for(int j=0; j < 8; j++)
-                        for(int k=0; k < dim; k++)
-                        {
-                  
-                            xi[k]+=xc[j*dim+k]*shape[i*8+j];
-                        }
-                }
-                
+                }                
                 if(ind) break;          
             }
     }
@@ -235,8 +222,8 @@ void Boundary::getBid2crseelem(const All_variables *E) {
  std::cout << "in Boundary::bid2crseelem for bid2crseelem " << std::endl;    
     for(int i=0; i< size; i++)
     {
-        n1=bid2crseelem[0][i];
-        n2=bid2crseelem[1][i];
+        n1=bid2elem[i];
+        n2=bid2proc[i];
         for(int j=0; j< dim; j++)xt[j]=X[j][i];
         for(int j=0; j < 8; j++)
         {
@@ -457,6 +444,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.20 2003/09/26 17:33:31 tan2 Exp $
+// $Id: Boundary.cc,v 1.21 2003/09/26 18:23:53 puru Exp $
 
 // End of file
