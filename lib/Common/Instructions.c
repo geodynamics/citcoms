@@ -115,6 +115,9 @@ void read_instructions(struct All_variables *E, char *filename)
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
 
+    if(E->control.lith_age)
+      lith_age_init(E);
+
     (E->problem_boundary_conds)(E);
 
     check_bc_consistency(E);
