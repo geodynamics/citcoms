@@ -54,9 +54,9 @@ void CoarseGridExchanger::interpolate() {
 	  for(int k=0; k< 8 ;k++)
 	    {
 	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-	      cout << "Interpolated...: node = " << node 
-		   << " " << E->T[mm][node]
-		   << endl;
+	      //	      cout << "Interpolated...: node = " << node 
+	      //	   << " " << E->T[mm][node]
+	      //	   << endl;
 	      outgoing.T[i]+=boundary->shape[i*8+k]*E->T[mm][node];
 	      outgoing.v[0][i]+=boundary->shape[i*8+k]*E->V[mm][1][node];
 	      outgoing.v[1][i]+=boundary->shape[i*8+k]*E->V[mm][2][node];
@@ -182,7 +182,7 @@ void CoarseGridExchanger::receiveBoundary() {
     if(lrank != localLeader)
       boundary = new Boundary(size);
 
-    MPI_Bcast(boundary->connectivity,size,MPI_INT,nproc-1,comm);
+    MPI_Bcast(boundary->bid2gid,size,MPI_INT,nproc-1,comm);
     for (int i=0; i<boundary->dim; i++) {
       MPI_Bcast(boundary->X[i],size,MPI_DOUBLE,nproc-1,comm);
     }
@@ -234,6 +234,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.18 2003/09/25 19:17:49 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.19 2003/09/25 22:47:34 ces74 Exp $
 
 // End of file
