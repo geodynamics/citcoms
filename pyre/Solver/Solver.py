@@ -102,7 +102,7 @@ class Solver(BaseSolver):
         if self.coupler:
             self.coupler.launch(self)
             # switch the default initTemperature to couled version
-            ic.initTemperature = self.coupler.initTemperature
+            ic.initTemperature = self.exchanger.initTemperature
 
         # initial conditions
         ic.launch()
@@ -283,6 +283,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.33 2003/11/28 22:17:26 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.34 2003/12/24 22:46:56 ces74 Exp $"
 
 # End of file
