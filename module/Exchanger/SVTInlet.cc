@@ -19,14 +19,14 @@ extern "C" {
 
 #include "element_definitions.h"
 
-    void construct_side_c3x3matrix_el(const struct All_variables*, int,
-				      struct CC*, struct CCX*,
-				      int lev,int m,int pressure,int side);
-    void get_global_side_1d_shape_fn(const struct All_variables*, int,
-				     struct Shape_function1*,
-				     struct Shape_function1_dx*,
-				     struct Shape_function_side_dA*,
-				     int side, int m);
+//     void construct_side_c3x3matrix_el(const struct All_variables*, int,
+// 				      struct CC*, struct CCX*,
+// 				      int lev,int m,int pressure,int side);
+//     void get_global_side_1d_shape_fn(const struct All_variables*, int,
+// 				     struct Shape_function1*,
+// 				     struct Shape_function1_dx*,
+// 				     struct Shape_function_side_dA*,
+// 				     int side, int m);
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
     void temperatures_conform_bcs(All_variables* E);
@@ -55,7 +55,6 @@ SVTInlet::SVTInlet(const Boundary& boundary,
     t_old.resize(sink.size());
 
     setVBCFlag();
-    setTBCFlag();
 
     check_bc_consistency(E);
 }
@@ -186,15 +185,44 @@ void SVTInlet::imposeT()
     journal::debug_t debugBC("imposeT");
     debugBC << journal::loc(__HERE__);
 
+    const Boundary& boundary = dynamic_cast<const Boundary&>(mesh);
     double N1, N2;
     getFactor(N1, N2);
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
-	int n = mesh.nodeID(sink.meshNode(i));
- 	for(int d=0; d<DIM; d++)
- 	    E->sphere.cap[m].TB[d+1][n] = N1 * t_old[0][i]
- 		                        + N2 * t[0][i];
+	int j = sink.meshNode(i);
+	int n = mesh.nodeID(j);
+
+	bool influx = false;
+	for(int d=0; d<DIM; d++)
+	    if( (boundary.normal(d,j) * (N1 * v_old[d][i] + N2 * v[d][i])) < 0 ) {
+		influx = true;
+		break;
+	    }
+
+	if(influx) {
+	    E->node[m][n] = E->node[m][n] | TBX;
+	    E->node[m][n] = E->node[m][n] | TBY;
+	    E->node[m][n] = E->node[m][n] | TBZ;
+	    E->node[m][n] = E->node[m][n] & (~FBX);
+	    E->node[m][n] = E->node[m][n] & (~FBY);
+	    E->node[m][n] = E->node[m][n] & (~FBZ);
+
+	    for(int d=0; d<DIM; d++)
+		E->sphere.cap[m].TB[d+1][n] = N1 * t_old[0][i] + N2 * t[0][i];
+	}
+	else {
+	    E->node[m][n] = E->node[m][n] | FBX;
+	    E->node[m][n] = E->node[m][n] | FBY;
+	    E->node[m][n] = E->node[m][n] | FBZ;
+	    E->node[m][n] = E->node[m][n] & (~TBX);
+	    E->node[m][n] = E->node[m][n] & (~TBY);
+	    E->node[m][n] = E->node[m][n] & (~TBZ);
+
+	    for(int d=0; d<DIM; d++)
+		E->sphere.cap[m].TB[d+1][n] = 0;
+	}
 
   	debugBC << E->sphere.cap[m].TB[1][n] << " "
   		<< E->sphere.cap[m].TB[2][n] << " "
@@ -220,6 +248,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.2 2004/04/29 21:41:25 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.3 2004/05/07 18:44:08 tan2 Exp $
 
 // End of file
