@@ -11,49 +11,61 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from mpi.Application import Application
-import CitcomS.Regional as Regional
-    
-class PG_timestep(Application):
+from pyre.components.Component import Component
 
-    def __init__(self,field_name='temp'):
-        Application.__init__(self, "PG_timestep")
-        if(field_name=='temp'):
-            self.init=Regional.PG_timestep_init
-            self.solve=Regional.PG_timestep_solve
-##      if(self.field_name=="comp"):
-##            self.solve=Regional.PG_timestep_solve_comp
-##            self.init=Regional.PG_timestep_init_comp
+class Advection_diffusion(Component):
+
+    def __init__(self,name,facility="tsolver"):
+        Component.__init__(self, name, facility)
+        self._setProperties()
         return
-        
-    def main(self):
-	raise NotImplementedError, \
-	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
-	return
-    
+
+    def _setProperties(self):
+        import CitcomS.Regional as Regional
+        #Regional.general_stokes_solver_set_prop(self.properties)
+        return
+
     def run(self):
-        self.solve()
+        #test
+        print self.properties.ADV
         return
-
-    def init(self):
-        Application.init(self)
-        self.init()
-        return
-
-    class Facilities(Application.Facilities):
-
-        __facilities__ = Application.Facilities.__facilities__ + (
-            )
+    
+    def _init(self):
+	return
 
 
-    class Properties(Application.Properties):
+    def _fini(self):
+	return
+
+    def _solve(self):
+	return
 
 
-        __properties__ = Application.Properties.__properties__ + (
-            )
+    def _output(self, *args, **kwds):
+	return
+
+
+    class Properties(Component.Properties):
+
+        import pyre.properties as prop
+
+        __properties__ = (
+            
+            prop.bool("ADV",True),
+            prop.float("fixed_timestep",0.0),
+            prop.float("finetunedt",0.7),
+
+            prop.int("adv_sub_iterations",2),
+            prop.float("maxadvtime",10.0),
+            prop.bool("precond",True),
+
+            prop.bool("aug_lagr",True),
+            prop.float("aug_number",2.0e3),
+
+	    )
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.3 2003/05/23 04:22:04 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.4 2003/07/03 23:43:20 ces74 Exp $"
 
 # End of file 

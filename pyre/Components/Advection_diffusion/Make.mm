@@ -31,12 +31,13 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	Advection_diffusion.py
+	Advection_diffusion.py \
+	Temperature_diffadv.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.1 2003/05/22 18:20:21 ces74 Exp $
+# $Id: Make.mm,v 1.2 2003/07/03 23:43:20 ces74 Exp $
 
 # End of file

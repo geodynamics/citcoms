@@ -1,21 +1,19 @@
 #!/usr/bin/env python
-# 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
-#                               Michael A.G. Aivazis
-#                        California Institute of Technology
-#                        (C) 1998-2003 All Rights Reserved
-# 
-#  <LicenseText>
-# 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
-def copyright():
-    return "CitcomS Advection_diffusion module: Copyright (c) 1998-2003 California Institute of Technology";
 
+
+def temperature_diffadv():
+    from Temperature_diffadv import Temperature_diffadv
+    return Temperature_diffadv('temperature-diffadv')
 
 # version
-__id__ = "$Id: __init__.py,v 1.1 2003/05/22 18:20:21 ces74 Exp $"
+__id__ = "$Id: __init__.py,v 1.2 2003/07/03 23:43:20 ces74 Exp $"
 
-#  End of file 
+# End of file
