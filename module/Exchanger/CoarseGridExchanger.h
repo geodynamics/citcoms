@@ -27,7 +27,7 @@ public:
     virtual void distribute();
     virtual void interpretate();
     virtual void impose_bc();
-    virtual void mapBoundary(const Boundary*);
+    virtual void mapBoundary(Boundary*);
 
     const Boundary* receiveBoundary();
 
@@ -36,7 +36,7 @@ public:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.5 2003/09/10 21:11:09 puru Exp $
 
 // End of file
 

@@ -102,12 +102,12 @@ int FineGridExchanger::sendBoundary(const Boundary* b) {
 }
 
 
-void FineGridExchanger::mapBoundary(const Boundary* b) {
-
+void FineGridExchanger::mapBoundary(Boundary* b) {
+    b->map(E, localLeader);
 }
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.8 2003/09/09 20:57:25 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.9 2003/09/10 21:11:09 puru Exp $
 
 // End of file

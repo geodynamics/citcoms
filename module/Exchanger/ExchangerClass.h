@@ -51,7 +51,7 @@ public:
     virtual void interpretate() = 0; // interpolation or extrapolation
     virtual void impose_bc() = 0;    // set bc flag
 
-    virtual void mapBoundary(const Boundary*) = 0;
+    virtual void mapBoundary(Boundary*) = 0;
                                      // create mapping from Boundary object
                                      // to global id array
 
@@ -84,7 +84,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.5 2003/09/10 04:03:54 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.6 2003/09/10 21:11:09 puru Exp $
 
 // End of file
 

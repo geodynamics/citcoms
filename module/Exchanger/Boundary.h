@@ -30,7 +30,7 @@ public:
     ~Boundary();
 
     void init(const All_variables *E);  // initialize connectivity and X
-    void map(const All_variables *E);   // initialize bid2gid and bid2proc
+    void map(const All_variables *E, int localLeader);   // initialize bid2gid and bid2proc
     void printConnectivity() const;
 
 private:
@@ -45,6 +45,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.2 2003/09/09 18:25:31 tan2 Exp $
+// $Id: Boundary.h,v 1.3 2003/09/10 21:11:09 puru Exp $
 
 // End of file

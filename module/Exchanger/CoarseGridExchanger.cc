@@ -100,13 +100,13 @@ const Boundary* CoarseGridExchanger::receiveBoundary() {
 }
 
 
-void CoarseGridExchanger::mapBoundary(const Boundary* b) {
+void CoarseGridExchanger::mapBoundary(Boundary* b) {
 
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.5 2003/09/10 18:51:42 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.6 2003/09/10 21:11:09 puru Exp $
 
 // End of file
