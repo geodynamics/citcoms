@@ -66,12 +66,15 @@ void regionalGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
     bbox[1][0] = E->control.theta_max;
     bbox[0][1] = E->control.fi_min;
     bbox[1][1] = E->control.fi_max;
-    bbox[0][2] = E->sphere.ri*dimensional_len;
-    bbox[1][2] = E->sphere.ro*dimensional_len;
+//     bbox[0][2] = E->sphere.ri*dimensional_len;
+//     bbox[1][2] = E->sphere.ro*dimensional_len;
+    bbox[0][2] = E->sphere.ri;
+    bbox[1][2] = E->sphere.ro;
+
 }
 
 
 // version
-// $Id: BoundedBox.cc,v 1.3 2003/12/17 04:27:56 puru Exp $
+// $Id: BoundedBox.cc,v 1.4 2003/12/30 00:31:53 ces74 Exp $
 
 // End of file
