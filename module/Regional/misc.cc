@@ -10,6 +10,7 @@
 #include <portinfo>
 #include <Python.h>
 
+
 #include "exceptions.h"
 #include "misc.h"
 
@@ -32,6 +33,10 @@ extern "C" {
   void assemble_forces(struct All_variables*, int);
 
 }
+
+
+#include "mpi/Communicator.h"
+#include "mpi/Group.h"
 
 // copyright
 
@@ -126,25 +131,15 @@ char pyRegional_Citcom_Init__name__[] = "Citcom_Init";
 PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
 {
     PyObject *Obj;
-    MPI_Comm world;
 
     if (!PyArg_ParseTuple(args, "O:Citcom_Init", &Obj))
         return NULL;
 
-//     if (PyCObject_Check(Obj)) {
-// 	world = static_cast <MPI_Comm*> (PyCObject_AsVoidPtr(Obj));
-// 	fprintf(stderr,"%d %d\n", MPI_COMM_WORLD, *world);
+    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
+    MPI_Comm world = comm->handle();
 
-//     }
-//     else {
-//         fprintf(stderr,"not a CObject\n");
-//         PyErr_SetString(pyRegional_runtimeError,
-// 			"CitcomS.RuntimeError");
-// 	return NULL;
-//     }
-
-    // test
-    world = MPI_COMM_WORLD;
+//     // test
+//     world = MPI_COMM_WORLD;
 
     // Allocate global pointer E
     Citcom_Init(&world);
@@ -273,6 +268,6 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.14 2003/05/23 17:49:11 tan2 Exp $
+// $Id: misc.cc,v 1.15 2003/06/06 19:04:36 tan2 Exp $
 
 // End of file
