@@ -28,9 +28,6 @@ Boundary::Boundary(const All_variables* E) :
     debug << journal::loc(__HERE__)
 	  << "in Boundary::Boundary" << journal::end;
 
-    initBBox(E);
-    bbox_.print("Boundary-BBox");
-
     // boundary = all - interior
     int maxNodes = E->lmesh.nno - (E->lmesh.nox-2)
 	                         *(E->lmesh.noy-2)
@@ -39,6 +36,9 @@ Boundary::Boundary(const All_variables* E) :
     nodeID_.reserve(maxNodes);
 
     initX(E);
+    initBBox(E);
+    bbox_.print("Boundary-BBox");
+
 
     X_.shrink();
     X_.print("Boundary-X");
@@ -49,28 +49,7 @@ Boundary::Boundary(const All_variables* E) :
 
 void Boundary::initBBox(const All_variables *E)
 {
-    double theta_max, theta_min;
-    double fi_max, fi_min;
-    double ri, ro;
-
-    theta_max = fi_max = ro = std::numeric_limits<double>::min();
-    theta_min = fi_min = ri = std::numeric_limits<double>::max();
-
-    for(int n=1; n<=E->lmesh.nno; n++) {
-	theta_max = std::max(theta_max, E->sx[1][1][n]);
-	theta_min = std::min(theta_min, E->sx[1][1][n]);
-	fi_max = std::max(fi_max, E->sx[1][2][n]);
-	fi_min = std::min(fi_min, E->sx[1][2][n]);
-	ro = std::max(ro, E->sx[1][3][n]);
-	ri = std::min(ri, E->sx[1][3][n]);
-    }
-
-    bbox_[0][0] = theta_min;
-    bbox_[1][0] = theta_max;
-    bbox_[0][1] = fi_min;
-    bbox_[1][1] = fi_max;
-    bbox_[0][2] = ri;
-    bbox_[1][2] = ro;
+    bbox_ = tightBBox();
 }
 
 
@@ -112,6 +91,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.48 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Boundary.cc,v 1.49 2004/01/14 18:52:19 tan2 Exp $
 
 // End of file
