@@ -35,11 +35,11 @@ char pyExchanger_createCoarseGridExchanger__name__[] = "createCoarseGridExchange
 PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int localLeader, remoteLeader;
+    int leaderRank, localLeader, remoteLeader;
 
-    if (!PyArg_ParseTuple(args, "OOiiO:createCoarseGridExchanger",
+    if (!PyArg_ParseTuple(args, "OOiiiO:createCoarseGridExchanger",
 			  &obj1, &obj2,
-			  &localLeader, &remoteLeader,
+			  &leaderRank, &localLeader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -53,15 +53,9 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    int lrank;
-    MPI_Comm_rank(comm, &lrank);
-
-    int rank;
-    MPI_Comm_rank(intercomm, &rank);
-
     CoarseGridExchanger *cge = new CoarseGridExchanger(
 	                                comm, intercomm,
-					lrank, rank,
+					leaderRank,
 					localLeader, remoteLeader,
 					E);
 
@@ -76,11 +70,11 @@ char pyExchanger_createFineGridExchanger__name__[] = "createFineGridExchanger";
 PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int localLeader, remoteLeader;
+    int leaderRank, localLeader, remoteLeader;
 
-    if (!PyArg_ParseTuple(args, "OOiiO:createFineGridExchanger",
+    if (!PyArg_ParseTuple(args, "OOiiiO:createFineGridExchanger",
 			  &obj1, &obj2,
-			  &localLeader, &remoteLeader,
+			  &leaderRank, &localLeader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -101,7 +95,7 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
     MPI_Comm_rank(intercomm, &rank);
 
     FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
-						   lrank, rank,
+						   leaderRank,
 						   localLeader, remoteLeader,
 						   E);
 
@@ -535,6 +529,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.13 2003/09/27 17:12:52 tan2 Exp $
+// $Id: exchangers.cc,v 1.14 2003/09/27 20:52:05 tan2 Exp $
 
 // End of file
