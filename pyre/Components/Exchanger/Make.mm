@@ -31,12 +31,14 @@ EXPORT_PYTHON_MODULES = \
 	__init__.py \
 	CoarseGridExchanger.py \
 	Exchanger.py \
-	FineGridExchanger.py
+	FineGridExchanger.py \
+	Inlet.py \
+	Outlet.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.2 2003/09/05 19:49:14 tan2 Exp $
+# $Id: Make.mm,v 1.3 2004/02/26 22:29:30 tan2 Exp $
 
 # End of file
