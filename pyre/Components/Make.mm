@@ -11,6 +11,14 @@ PACKAGE = Components
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
+BLD_DIRS = \
+	Advection_diffusion \
+	Sphere \
+	Stokes_solver
+
+RECURSE_DIRS = $(BLD_DIRS)
+
+
 #--------------------------------------------------------------------------
 #
 
@@ -39,8 +47,9 @@ EXPORT_PYTHON_MODULES = \
 
 
 export:: export-package-python-modules
+	BLD_ACTION="export" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.4 2003/07/24 17:46:46 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/07/28 23:03:49 tan2 Exp $
 
 # End of file

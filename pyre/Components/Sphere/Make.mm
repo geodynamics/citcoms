@@ -7,7 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 PROJECT = CitcomS
-PACKAGE = Sphere
+PACKAGE = Components/Sphere
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
@@ -34,6 +34,6 @@ EXPORT_PYTHON_MODULES = \
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.1 2003/07/15 21:50:30 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/07/28 23:03:49 tan2 Exp $
 
 # End of file

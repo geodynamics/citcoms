@@ -1,18 +1,11 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#                               Michael A.G. Aivazis
-#                                  Steve Quenette
-#                        California Institute of Technology
-#                        (C) 1998-2003  All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# version
-# $Id: Make.mm,v 1.4 2003/04/25 22:58:28 tan2 Exp $
 
 include local.def
 
@@ -22,26 +15,39 @@ PACKAGE = pyre
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
-	Common \
-	Regional
+	Components \
+	Facilities
 
 RECURSE_DIRS = $(BLD_DIRS)
 
 
-all:
-	BLD_ACTION="all" $(MM) recurse
+#--------------------------------------------------------------------------
+#
 
-tidy::
-	BLD_ACTION="tidy" $(MM) recurse
+all: export
 
-clean::
-	BLD_ACTION="clean" $(MM) recurse
+release: tidy
+	cvs release .
 
-distclean::
-	BLD_ACTION="distclean" $(MM) recurse
+update: clean
+	cvs update .
+
+#--------------------------------------------------------------------------
+#
+# export
+
+EXPORT_PYTHON_MODULES = \
+	__init__.py \
+	RadiusDepth.py \
+	RegionalApp.py
+
+
+export:: export-python-modules
+	BLD_ACTION="export" $(MM) recurse
+
 
 # version
-# $Id: Make.mm,v 1.4 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/07/28 23:03:48 tan2 Exp $
 
 #
 # End of file

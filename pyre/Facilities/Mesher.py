@@ -36,10 +36,10 @@ class Mesher(Facility):
         def __init__(self):
             ScriptBinder.__init__(self)
 
-	    import CitcomS.Sphere
+	    import CitcomS.Components.Sphere as Sphere
 
             self._builtins = {
-                "regional-sphere": CitcomS.Sphere.regionalSphere,
+                "regional-sphere": Sphere.regionalSphere,
                 }
 
             return
@@ -48,6 +48,6 @@ class Mesher(Facility):
 
 
 # version
-__id__ = "$Id: Mesher.py,v 1.1 2003/07/15 21:50:30 tan2 Exp $"
+__id__ = "$Id: Mesher.py,v 1.2 2003/07/28 23:03:50 tan2 Exp $"
 
 # End of file

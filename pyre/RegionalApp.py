@@ -128,9 +128,9 @@ class RegionalApp(Application):
 	from CitcomS.Facilities.VSolver import VSolver
 
         # component modules
-        import CitcomS.Advection_diffusion
-        import CitcomS.Sphere
-	import CitcomS.Stokes_solver
+        import CitcomS.Components.Advection_diffusion as Advection_diffusion
+        import CitcomS.Components.Sphere as Sphere
+	import CitcomS.Components.Stokes_solver as Stokes_solver
 
         # components
         from CitcomS.Components.BC import BC
@@ -142,9 +142,9 @@ class RegionalApp(Application):
         from CitcomS.Components.Visc import Visc
 
         inventory = [
-            Mesher("mesher", CitcomS.Sphere.regionalSphere(CitcomModule)),
-            VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian(CitcomModule)),
-            TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv(CitcomModule)),
+            Mesher("mesher", Sphere.regionalSphere(CitcomModule)),
+            VSolver("vsolver", Stokes_solver.imcompressibleNewtonian(CitcomModule)),
+            TSolver("tsolver", Advection_diffusion.temperature_diffadv(CitcomModule)),
 
             pyre.facilities.facility("bc",
 				     default=BC("bc", "bc", CitcomModule)),
@@ -166,6 +166,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.23 2003/07/28 21:57:02 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.24 2003/07/28 23:03:48 tan2 Exp $"
 
 # End of file
