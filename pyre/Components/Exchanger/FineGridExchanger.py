@@ -34,14 +34,14 @@ class FineGridExchanger(Exchanger):
 
 
     def findBoundary(self):
-        boundary = self.module.createBoundary(self.exchanger)
+        self.module.createBoundary(self.exchanger)
 
         # send boundary from CGE
-        self.module.sendBoundary(self.exchanger, boundary)
+        self.module.sendBoundary(self.exchanger)
 
 	# create mapping from boundary to id array
-	self.module.mapBoundary(self.exchanger, boundary)
-        return boundary
+	self.module.mapBoundary(self.exchanger)
+        return
 
 
 
@@ -99,6 +99,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.4 2003/09/10 04:01:53 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.5 2003/09/11 21:33:52 tan2 Exp $"
 
 # End of file

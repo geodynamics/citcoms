@@ -26,11 +26,11 @@ class CoarseGridExchanger(Exchanger):
 
     def findBoundary(self):
         # receive boundary from FGE
-        boundary = self.module.receiveBoundary(self.exchanger)
+        self.module.receiveBoundary(self.exchanger)
 
         # create mapping from boundary to id array
-        self.module.mapBoundary(self.exchanger, boundary)
-        return boundary
+        self.module.mapBoundary(self.exchanger)
+        return
 
 
 
@@ -78,6 +78,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.4 2003/09/10 04:01:53 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.5 2003/09/11 21:33:52 tan2 Exp $"
 
 # End of file

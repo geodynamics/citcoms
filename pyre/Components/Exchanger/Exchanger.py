@@ -37,11 +37,11 @@ class Exchanger(Component):
 
     def findBoundary(self):
         raise NotImplementedError
-        return None
+        return
 
 
 
-    def mapBoundary(self, boundary):
+    def mapBoundary(self):
         raise NotImplementedError
         return
 
@@ -89,6 +89,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.6 2003/09/10 04:01:53 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.7 2003/09/11 21:33:52 tan2 Exp $"
 
 # End of file
