@@ -43,8 +43,6 @@ protected:
 class CoarseGridMapping : public Mapping {
     Array2D<int,1> bid2elem_; // bid -> elem from which fields are interpolated in CG
     Array2D<double,1> shape_; // shape functions for interpolation
-    int interiornodes;
-    double *Xinterior;
     
 public:
     CoarseGridMapping(const Boundary* b, const All_variables* E,
@@ -80,15 +78,22 @@ private:
 
 class FineGridMapping : public Mapping {
     Array2D<int,1> bid2gid_;  // bid (local id) -> ID (ie. global id in FG)
+    Array2D<int,1> bid2elem_; // bid -> elem from which fields are interpolated in CG
+    Array2D<double,1> shape_; // shape functions for interpolation
 
 public:
     explicit FineGridMapping(Boundary* b, const All_variables* E,
 			     const MPI_Comm comm,
 			     const int rank, const int leader);
+    
     virtual ~FineGridMapping() {};
 
     inline int bid2gid(const int n) const {return bid2gid_[0][n];};
     void printBid2gid(const std::string& prefix="") const;
+    void InteriorMapping(Boundary* b, const All_variables* E,
+			     const MPI_Comm comm,
+			     const int rank, const int leader);
+    
     virtual void resize(const int n);
     virtual void shrinksize();
 
@@ -100,6 +105,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.8 2003/10/24 04:51:53 tan2 Exp $
+// $Id: Mapping.h,v 1.9 2003/10/28 02:34:37 puru Exp $
 
 // End of file

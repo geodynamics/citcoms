@@ -14,10 +14,12 @@
 
 class AreaWeightedNormal;
 class FineGridMapping;
+class CoarseGridMapping;
 
 
 class FineGridExchanger : public Exchanger {
     FineGridMapping* fgmapping;
+    CoarseGridMapping* intmapping;
     AreaWeightedNormal* awnormal;
 
 public:
@@ -39,7 +41,11 @@ public:
     void sendBoundary();
     void setBCFlag();
     void imposeConstraint();
+    void interpolateTemperature();
+    
     void imposeBC();
+    void receiveInterior();
+    
 
 private:
 
@@ -48,7 +54,7 @@ private:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.17 2003/10/24 04:51:53 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.18 2003/10/28 02:34:37 puru Exp $
 
 // End of file
 

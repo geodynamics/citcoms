@@ -111,6 +111,25 @@ void CoarseGridExchanger::mapBoundary() {
 }
 
 
+void CoarseGridExchanger::createInterior() {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::createBoundary" << journal::end;
+
+    interior = new Boundary(E,boundary);
+}
+
+void CoarseGridExchanger::sendInterior() {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::sendBoundary"
+	  << "  rank = " << rank
+	  << "  receiver = "<< remoteLeader << journal::end;
+
+    if (rank == leader)
+	interior->send(intercomm, remoteLeader);
+}
+
 void CoarseGridExchanger::createMapping() {
     cgmapping = new CoarseGridMapping(boundary, E, comm, rank, leader);
     mapping = cgmapping;
@@ -177,6 +196,6 @@ void CoarseGridExchanger::gatherToOutgoingV(Velo& V, int sender) {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.33 2003/10/24 04:51:53 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.34 2003/10/28 02:34:37 puru Exp $
 
 // End of file

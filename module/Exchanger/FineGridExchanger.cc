@@ -52,6 +52,8 @@ void FineGridExchanger::gather() {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
 	  << "in FineGridExchanger::gather" << journal::end;
+    interpolateTemperature();
+    
 }
 
 
@@ -90,6 +92,7 @@ void FineGridExchanger::createBoundary() {
 
 void FineGridExchanger::createMapping() {
     // init boundary->X and fgmapping
+    intmapping = new CoarseGridMapping(interior, E, comm, rank, leader);
     fgmapping = new FineGridMapping(boundary, E, comm, rank, leader);
     awnormal = new AreaWeightedNormal(boundary, E, fgmapping);
     mapping = fgmapping;
@@ -118,6 +121,22 @@ void FineGridExchanger::sendBoundary() {
 
     if (rank == leader)
 	boundary->send(intercomm, remoteLeader);
+}
+
+void FineGridExchanger::receiveInterior() {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::receiveBoundary"
+	  << "  rank = " << rank
+	  << "  sender = "<< remoteLeader << journal::end;
+
+    boundary = new Boundary;
+    if (rank == leader)
+	interior->receive(intercomm, remoteLeader);
+
+    // Broadcast info received by leader to the other procs
+    // in the Coarse communicator.
+    interior->broadcast(comm, leader);
 }
 
 
@@ -198,8 +217,29 @@ void FineGridExchanger::imposeBC() {
     debugBC << journal::end;
 }
 
+void FineGridExchanger::interpolateTemperature() {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::interpolateTemperature" << journal::end;
+
+  int n1,n2,node;
+  for(int i=0;i<intmapping->size();i++) {
+      n1 = intmapping->bid2elem(i);
+      n2 = intmapping->bid2proc(i);
+
+      CoutgoingT[0][i] = 0;
+      if(n1!=0) {
+	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+	  for(int k=0; k< 8 ;k++)
+	    {
+	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	      CoutgoingT[0][i] += intmapping->shape(k) * E->T[mm][node];
+	    }
+      }
+    }
+}
 
 // version
-// $Id: FineGridExchanger.cc,v 1.27 2003/10/24 04:51:53 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.28 2003/10/28 02:34:37 puru Exp $
 
 // End of file

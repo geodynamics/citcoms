@@ -32,10 +32,13 @@ public:
     virtual void mapBoundary();
     virtual void createMapping();
     virtual void createDataArrays();
-
+    
     void receiveBoundary();
+    void sendInterior();
+    
     void interpolateTemperature();
-
+    void createInterior();
+    
 private:
     void gatherToOutgoingV(Velo& V, int sender);
 
@@ -44,7 +47,7 @@ private:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.17 2003/10/24 04:51:53 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.18 2003/10/28 02:34:37 puru Exp $
 
 // End of file
 

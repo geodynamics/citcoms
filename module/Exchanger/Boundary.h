@@ -24,6 +24,8 @@ class Boundary {
 public:
     explicit Boundary(const All_variables* E);  // allocate memory and init domain bounds
     explicit Boundary(const int n);     // allocate memory only
+    explicit Boundary(const All_variables* E, Boundary *b);  // allocate memory and set the interior nodes
+    
     Boundary();
     ~Boundary() {};
 
@@ -54,10 +56,9 @@ private:
 
     void initBounds(const All_variables *E);
 };
-
 #endif
 
 // version
-// $Id: Boundary.h,v 1.20 2003/10/22 01:15:47 tan2 Exp $
+// $Id: Boundary.h,v 1.21 2003/10/28 02:34:37 puru Exp $
 
 // End of file

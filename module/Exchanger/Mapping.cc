@@ -322,62 +322,6 @@ double CoarseGridMapping::det3_sub(double *x1, double *x2, double *x3) const
 }
 
 
-void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
-					  const All_variables* E) {
-// Here it is assumed that Boundary is the bounday of the fine mesh
-// E is the All variables corresponding to the Coaese Grid
-
-    int node;
-    int l,n;
-    
-// Number of nodes of the Coarse mesh inside the fine mesh
-    interiornodes=0;
-    
-    for (int m=1;m<=E->sphere.caps_per_proc;m++)
-        for(int i=1;i<=E->lmesh.nox;i++) 
-	    for(int j=1;j<=E->lmesh.noy;j++)
-		for(int k=1;k<=E->lmesh.noz;k++)   
-                {
-                    node = k + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
-                    if((E->sx[m][1][node]> boundary->theta_min()) &&
-                       (E->sx[m][1][node]< boundary->theta_max()) &&
-                       (E->sx[m][2][node]> boundary->fi_min()) &&
-                       (E->sx[m][2][node]< boundary->fi_max()) &&
-                       (E->sx[m][3][node]> boundary->ri()) &&
-                       (E->sx[m][3][node]< boundary->ro()))
-                    {
-                        interiornodes++;                        
-                    }
-                    
-                }
-
-    Xinterior = new double [dim_*interiornodes];
-    n=0;
-    for (int m=1;m<=E->sphere.caps_per_proc;m++)
-        for(int i=1;i<=E->lmesh.nox;i++) 
-	    for(int j=1;j<=E->lmesh.noy;j++)
-		for(int k=1;k<=E->lmesh.noz;k++)   
-                {
-                    node = k + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
-                    if((E->sx[m][1][node]> boundary->theta_min()) &&
-                       (E->sx[m][1][node]< boundary->theta_max()) &&
-                       (E->sx[m][2][node]> boundary->fi_min()) &&
-                       (E->sx[m][2][node]< boundary->fi_max()) &&
-                       (E->sx[m][3][node]> boundary->ri()) &&
-                       (E->sx[m][3][node]< boundary->ro()))
-                    {
-                        for(l=0;l<dim_;l++) Xinterior[n*dim_+k]=E->sx[m][l+1][node];
-                        n++;
-                    }                    
-                }
-
-    if(n != interiornodes) {
-	journal::firewall_t firewall("Mapping");
-	firewall << "error in CoarseGridMapping::findinteriornodes" << journal::end;
-    }
-}
-
-
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
@@ -390,6 +334,7 @@ FineGridMapping::FineGridMapping(Boundary* boundary,
     bid2gid_(size_)
 {
     findBoundaryNodes(boundary, E);
+    
 }
 
 
@@ -511,6 +456,6 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 
 
 // version
-// $Id: Mapping.cc,v 1.7 2003/10/24 04:51:53 tan2 Exp $
+// $Id: Mapping.cc,v 1.8 2003/10/28 02:34:37 puru Exp $
 
 // End of file

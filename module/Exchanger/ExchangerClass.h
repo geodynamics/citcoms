@@ -61,7 +61,9 @@ protected:
                                // Exchanger only modifies bc flags directly
 	                       // and id array indirectly
     Boundary *boundary;
-
+    Boundary *interior;
+    
+    
     Mapping *mapping;
 
     typedef Array2D<double,1> Temper;
@@ -69,12 +71,17 @@ protected:
 
     Temper outgoingT;
     Temper incomingT;
+    Temper CoutgoingT;
+    Temper CincomingT;
+    
 
     Velo localV;
     Velo outgoingV;
-    Velo incomingV;
+    Velo incomingV;    
     Velo old_incomingV;
 
+    
+    
     double fge_t, cge_t;
 
 private:
@@ -92,7 +99,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.32 2003/10/24 04:51:53 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.33 2003/10/28 02:34:37 puru Exp $
 
 // End of file
 

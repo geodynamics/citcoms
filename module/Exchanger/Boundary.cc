@@ -115,8 +115,61 @@ void Boundary::printX(const std::string& prefix) const {
     X_.print(prefix + "  X");
 }
 
-
+Boundary::Boundary(const All_variables* E, Boundary *b) :
+    // boundary = all - interior
+    size_(0),
+    bounds_(2),
+    X_(size_)
+{
+    int node,n,l;
+    
+    size_=0;
+    for (int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int i=1;i<=E->lmesh.nox;i++) 
+	    for(int j=1;j<=E->lmesh.noy;j++)
+		for(int k=1;k<=E->lmesh.noz;k++)   
+                {
+                    node = k + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
+                    if((E->sx[m][1][node]> b->theta_min()) &&
+                       (E->sx[m][1][node]< b->theta_max()) &&
+                       (E->sx[m][2][node]> b->fi_min()) &&
+                       (E->sx[m][2][node]< b->fi_max()) &&
+                       (E->sx[m][3][node]> b->ri()) &&
+                       (E->sx[m][3][node]< b->ro()))
+                    {
+                        size_++;                        
+                    }
+                    
+                }
+    X_.resize(size_);
+     n=0;
+    for (int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int i=1;i<=E->lmesh.nox;i++) 
+	    for(int j=1;j<=E->lmesh.noy;j++)
+		for(int k=1;k<=E->lmesh.noz;k++)   
+                {
+                    node = k + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
+                    if((E->sx[m][1][node]> b->theta_min()) &&
+                       (E->sx[m][1][node]< b->theta_max()) &&
+                       (E->sx[m][2][node]> b->fi_min()) &&
+                       (E->sx[m][2][node]< b->fi_max()) &&
+                       (E->sx[m][3][node]> b->ri()) &&
+                       (E->sx[m][3][node]< b->ro()))
+                    {
+                        for(l=0;l<dim_;l++) setX(k,n,E->sx[m][l+1][node]);
+                        n++;
+                    }                    
+                }
+    if(n != size_) {
+	journal::firewall_t firewall("Mapping");
+	firewall << "error in CoarseGridMapping::findinteriornodes" << journal::end;
+    }
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Interior::Interior  size = " << size_ << journal::end;
+    initBounds(E);
+}
 // version
-// $Id: Boundary.cc,v 1.37 2003/10/24 04:51:53 tan2 Exp $
+// $Id: Boundary.cc,v 1.38 2003/10/28 02:34:37 puru Exp $
 
 // End of file
