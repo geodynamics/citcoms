@@ -15,7 +15,8 @@ PACKAGE = drivers/$(TYPE)
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 PROJ_BIN = $(BLD_BINDIR)/$(PROJECT)$(TYPE)
-PROJ_LIBS = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB)
+PROJ_LIBS = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB) \
+		$(BLD_LIBDIR)/lib$(PROJECT)Common.$(EXT_LIB)
 
 #PROJ_CC_INCLUDES = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 PROJ_CC_INCLUDES = ../../lib/Common
@@ -41,7 +42,7 @@ $(PROJ_OBJS): $(PROJ_SRCS)
 
 
 # version
-# $Id: Make.mm,v 1.4 2003/08/07 18:41:42 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/08/12 20:43:18 ces74 Exp $
 
 #
 # End of file
