@@ -44,6 +44,7 @@ extern "C" {
     void set_elapsed_time(struct All_variables*);
     void set_sphere_harmonics (struct All_variables*);
     void set_starting_age(struct All_variables*);
+    void tracer_initial_settings(struct All_variables*);
 
 }
 
@@ -79,9 +80,10 @@ void sphere_launch(struct All_variables *E)
            /* physical domain */
     node_locations (E);
 
-//  tracer is not implemented at this moment, disable its setup
-//     if(E->control.tracer==1)
-//       (E->problem_tracer_setup)(E);
+    if(E->control.tracer==1) {
+	tracer_initial_settings(E);
+	(E->problem_tracer_setup)(E);
+    }
 
     allocate_velocity_vars(E);
 
@@ -164,6 +166,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.14 2004/06/28 19:54:23 tan2 Exp $
+// $Id: mesher.cc,v 1.15 2005/01/19 00:38:49 tan2 Exp $
 
 // End of file
