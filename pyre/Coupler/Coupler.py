@@ -36,13 +36,20 @@ class Coupler(Component):
 
 
     def launch(self, solver):
-        exchanger = self.exchanger
+        self.boundary = self.exchanger.findBoundary()
+        return
 
-        # find the common boundary
-        self.boundary = exchanger.findBoundary()
 
+
+    def initTemperature(self):
         # send initial temperature field from CGE to FGE
-        #exchanger.initTemperature()
+        self.exchanger.initTemperature()
+        return
+
+
+
+    def solveVelocities(self, vsolver):
+        self.exchanger.solveVelocities(vsolver)
         return
 
 
@@ -71,6 +78,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.5 2003/09/29 20:22:49 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.6 2003/09/30 01:48:34 tan2 Exp $"
 
 # End of file
