@@ -154,8 +154,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 void initial_viscosity(struct All_variables *E)
 {
   if (E->viscosity.FROM_SYSTEM)
-    if(!E->viscosity.update_allowed)
-      get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
+    get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 
   return;
 }
