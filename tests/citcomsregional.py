@@ -12,7 +12,7 @@
 # 
 
 
-from CitcomS.CitcomSRegionalApp import CitcomSRegionalApp
+from CitcomS.RegionalApp import RegionalApp
 
 
 # main
@@ -23,11 +23,11 @@ if __name__ == "__main__":
     #journal.debug("mesher.phases").activate()
     journal.debug("staging").activate()
 
-    app = CitcomSRegionalApp()
+    app = RegionalApp()
     app.main()
 
 
 # version
-__id__ = "$Id: citcomsregional.py,v 1.1 2003/03/26 00:49:05 ces74 Exp $"
+__id__ = "$Id: citcomsregional.py,v 1.2 2003/04/10 23:40:55 tan2 Exp $"
 
 #  End of file 
