@@ -69,6 +69,12 @@ extern "C"
 PyObject * pyExchanger_interpolate(PyObject *, PyObject *);
 
 
+extern char pyExchanger_interpolateTemperature__name__[];
+extern char pyExchanger_interpolateTemperature__doc__[];
+extern "C"
+PyObject * pyExchanger_interpolateTemperature(PyObject *, PyObject *);
+
+
 extern char pyExchanger_receiveTemperature__name__[];
 extern char pyExchanger_receiveTemperature__doc__[];
 extern "C"
@@ -145,6 +151,6 @@ PyObject * pyExchanger_nowait(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.9 2003/09/22 18:14:32 ces74 Exp $
+// $Id: exchangers.h,v 1.10 2003/09/25 22:14:46 ces74 Exp $
 
 // End of file

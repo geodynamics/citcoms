@@ -260,6 +260,24 @@ PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
     return Py_None;
 }
 
+char pyExchanger_interpolateTemperature__doc__[] = "";
+char pyExchanger_interpolateTemperature__name__[] = "interpolateTemperature";
+
+PyObject * pyExchanger_interpolateTemperature(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:interpolateTemperature", &obj))
+	return NULL;
+
+    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
+      (PyCObject_AsVoidPtr(obj));
+
+    cge->interpolateTemperature();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
 
 
 char pyExchanger_receiveTemperature__doc__[] = "";
@@ -527,6 +545,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.10 2003/09/22 18:14:32 ces74 Exp $
+// $Id: exchangers.cc,v 1.11 2003/09/25 22:14:57 ces74 Exp $
 
 // End of file
