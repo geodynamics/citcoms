@@ -68,7 +68,6 @@ class Advection_diffusion(CitcomComponent):
             prop.float("finetunedt", 0.7),
 
             prop.int("adv_sub_iterations", 2),
-            prop.float("maxadvtime", 10.0),
 
             prop.bool("aug_lagr", True),
             prop.float("aug_number", 2.0e3),
@@ -77,6 +76,6 @@ class Advection_diffusion(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.16 2003/08/28 22:37:39 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.17 2003/08/30 00:29:21 ces74 Exp $"
 
 # End of file
