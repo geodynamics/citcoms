@@ -10,6 +10,7 @@
 
 #include <portinfo>
 #include <iostream>
+#include <string>
 #include "auto_array_ptr.h"
 #include "mpi.h"
 
@@ -29,14 +30,16 @@ public:
 
     inline double operator()(int d, int n) const {return a_[n*N+d];}
     inline int size() const {return size_;}
-    inline void swap(Array2D<N>& rhs) {a_.swap(rhs.a_);
-                                         std::swap(size_, rhs.size_);}
+    inline void swap(Array2D<N>& rhs) {
+	a_.swap(rhs.a_);
+	std::swap(size_, rhs.size_);
+    }
 
     void send(const MPI_Comm comm, const int receiver) const;
     void receive(const MPI_Comm comm, const int sender);
     void broadcast(const MPI_Comm comm, const int broadcaster);
 
-    void print() const;
+    void print(const std::string& prefix="Array2D") const;
 
 };
 
@@ -45,6 +48,6 @@ public:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.1 2003/10/10 18:14:49 tan2 Exp $
+// $Id: Array2D.h,v 1.2 2003/10/11 00:35:50 tan2 Exp $
 
 // End of file

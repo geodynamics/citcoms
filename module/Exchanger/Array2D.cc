@@ -87,9 +87,9 @@ void Array2D<N>::broadcast(const MPI_Comm comm, const int broadcaster) {
 
 
 template <int N>
-void Array2D<N>::print() const {
+void Array2D<N>::print(const std::string& prefix) const {
     for (int n=0; n<size_; n++) {
-	std::cout << "  Array2D:  " << n << ":  ";
+	std::cout << "  " << prefix << ":  " << n << ":  ";
 	for (int j=0; j<N; j++)
 	    std::cout << a_[n*N + j] << "  ";
 	std::cout << std::endl;
@@ -99,6 +99,6 @@ void Array2D<N>::print() const {
 
 
 // version
-// $Id: Array2D.cc,v 1.1 2003/10/10 18:14:49 tan2 Exp $
+// $Id: Array2D.cc,v 1.2 2003/10/11 00:35:50 tan2 Exp $
 
 // End of file
