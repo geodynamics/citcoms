@@ -1,14 +1,10 @@
 #!/usr/bin/env mpipython.exe
 # 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
-#                               Michael A.G. Aivazis
-#                        California Institute of Technology
-#                        (C) 1998-2003 All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
 #  <LicenseText>
 # 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
 
 
@@ -19,8 +15,6 @@ from CitcomS.RegionalApp import RegionalApp
 if __name__ == "__main__":
 
     import journal
-    #journal.debug("mesher").activate()
-    #journal.debug("mesher.phases").activate()
     journal.info("staging").activate()
     journal.debug("staging").activate()
 
@@ -30,6 +24,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: citcomsregional.py,v 1.3 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: citcomsregional.py,v 1.4 2003/06/13 17:11:32 tan2 Exp $"
 
 #  End of file 
