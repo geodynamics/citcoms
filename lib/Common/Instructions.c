@@ -8,7 +8,9 @@
 #include <string.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+
 #include "citcom_init.h"
+#include "phase_change.h"
 
 int Emergency_stop;
 
@@ -193,13 +195,6 @@ void allocate_common_vars(E)
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
   E->edot[j]     = (float *) malloc((nno+1)*sizeof(float));
 
-  E->Fas410[j]   = (float *) malloc((nno+1)*sizeof(float));
-  E->Fas410_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-  E->Fas670[j]   = (float *) malloc((nno+1)*sizeof(float));
-  E->Fas670_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-  E->Fascmb[j]   = (float *) malloc((nno+1)*sizeof(float));
-  E->Fascmb_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-
   E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
   for(i=1;i<=E->mesh.nsd;i++)  
@@ -342,6 +337,7 @@ void allocate_common_vars(E)
   for(i=1;i<=E->lmesh.npno;i++)
       E->P[j][i] = 0.0;
 
+  phase_change_allocate(E);
   set_up_nonmg_aliases(E,j); 
 
   }         /* end for cap j  */

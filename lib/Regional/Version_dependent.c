@@ -1,8 +1,7 @@
 #include <math.h>
 #include <sys/types.h>
-#include "element_definitions.h"
 #include "global_defs.h"
-
+#include "phase_change.h"
 
 void global_derived_values(E)
      struct All_variables *E;
@@ -287,6 +286,7 @@ void read_initial_settings(E)
     input_float("z_410",&(E->viscosity.z410),"1.0",m);
     input_float("z_lith",&(E->viscosity.zlith),"0.0",m);
 
+    phase_change_input(E);
     lith_age_input(E);
 
 /*  the start age and initial subduction history   */
@@ -306,34 +306,6 @@ void read_initial_settings(E)
 /*     input_int("read_density",&(E->control.read_density),"1",m); */
 /*     if (E->control.read_density && E->control.read_slab) */
 /*         E->control.read_slab = 0; */
-
-         /* for phase change 410km  */
-     input_float("Ra_410",&(E->control.Ra_410),"0.0",m);
-     input_float("clapeyron410",&(E->control.clapeyron410),"0.0",m);
-     input_float("transT410",&(E->control.transT410),"0.0",m);
-     input_float("width410",&(E->control.width410),"0.0",m);
-
-     if (E->control.width410!=0.0)
-        E->control.width410 = 1.0/E->control.width410;
-
-
-        /* for phase change 670km   */
-    input_float("Ra_670",&(E->control.Ra_670),"0.0",m);
-    input_float("clapeyron670",&(E->control.clapeyron670),"0.0",m);
-    input_float("transT670",&(E->control.transT670),"0.0",m);
-    input_float("width670",&(E->control.width670),"0.0",m);
-
-    if (E->control.width670!=0.0)
-       E->control.width670 = 1.0/E->control.width670;
-    
-         /* for phase change CMB  */
-     input_float("Ra_cmb",&(E->control.Ra_cmb),"0.0",m);
-     input_float("clapeyroncmb",&(E->control.clapeyroncmb),"0.0",m);
-     input_float("transTcmb",&(E->control.transTcmb),"0.0",m);
-     input_float("widthcmb",&(E->control.widthcmb),"0.0",m);
-
-     if (E->control.widthcmb!=0.0)
-        E->control.widthcmb = 1.0/E->control.widthcmb;
 
     input_int("topvbc",&(E->mesh.topvbc),"0",m);
     input_int("botvbc",&(E->mesh.botvbc),"0",m);

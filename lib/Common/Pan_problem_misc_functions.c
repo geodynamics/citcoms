@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #endif
 
+#include "phase_change.h"
+
 /*#include "/home/limbo1/louis/Software/src/dmalloc-3.2.1/dmalloc.h"
 */
 int get_process_identifier()   
@@ -45,17 +47,10 @@ void unique_copy_file(E,name,comment)
 }
 
 
-void thermal_buoyancy(E,buoy)
-     struct All_variables *E;
-     double **buoy;
-    
+void thermal_buoyancy(struct All_variables *E, double **buoy)    
 { 
     int i,m;
     double temp,*H;
-    void phase_change_410();
-    void phase_change_670();
-    void phase_change_cmb();
-
     void remove_horiz_ave();
 
     H = (double *)malloc( (E->lmesh.noz+1)*sizeof(double));
@@ -66,29 +61,9 @@ void thermal_buoyancy(E,buoy)
       for(i=1;i<=E->lmesh.nno;i++)
         buoy[m][i] =  temp * E->T[m][i];
 
-    if ( abs(E->control.Ra_410) > 1e-10)   {
-      phase_change_410(E,E->Fas410,E->Fas410_b);
-
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)
-          buoy[m][i] -= E->control.Ra_410 * E->Fas410[m][i];
-     }
-
-    if ( abs(E->control.Ra_670) > 1e-10)   {
-      phase_change_670(E,E->Fas670,E->Fas670_b);
-
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)
-          buoy[m][i] -= E->control.Ra_670 * E->Fas670[m][i];
-     }
-
-    if ( abs(E->control.Ra_cmb) > 1e-10)   {
-      phase_change_cmb(E,E->Fascmb,E->Fascmb_b);
-
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)
-          buoy[m][i] -= E->control.Ra_cmb * E->Fascmb[m][i];
-     }
+    phase_change_apply_410(E, buoy);
+    phase_change_apply_670(E, buoy);
+    phase_change_apply_cmb(E, buoy);
 
     remove_horiz_ave(E,buoy,H,0);
     free ((void *) H);
