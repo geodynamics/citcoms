@@ -1,10 +1,10 @@
 # -*- Makefile -*-
 #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
 PROJECT = CitcomS
@@ -23,17 +23,21 @@ EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
 PROJ_SRCS = \
 	AreaWeightedNormal.cc \
 	Boundary.cc \
-	CoarseGridExchanger.cc \
-	ExchangerClass.cc \
-	FineGridExchanger.cc \
-	Mapping.cc \
+	BoundaryCondition.cc \
+	BoundedBox.cc \
+	BoundedMesh.cc \
+	Interior.cc \
+	Interpolator.cc \
+	Sink.cc \
+	Source.cc \
 	bindings.cc \
 	exceptions.cc \
 	exchangers.cc \
+	initTemperature.cc \
 	misc.cc
 
 
 # version
-# $Id: Make.mm,v 1.6 2003/10/20 17:13:08 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/11/07 01:08:01 tan2 Exp $
 
 # End of file

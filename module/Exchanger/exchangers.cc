@@ -1,107 +1,86 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
 #include <Python.h>
-#include <iostream>
-
-#include "Boundary.h"
-#include "CoarseGridExchanger.h"
-#include "FineGridExchanger.h"
-
+#include "mpi.h"
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
+#include "global_defs.h"
 
+#include "Boundary.h"
+#include "BoundedBox.h"
+#include "BoundaryCondition.h"
+#include "DIM.h"
+#include "Interior.h"
+#include "Sink.h"
+#include "Source.h"
+#include "initTemperature.h"
+#include "utilTemplate.h"
 
 #include "exchangers.h"
 
+struct All_variables;
+
+void deleteBCSink(void*);
+void deleteBCSource(void*);
 void deleteBoundary(void*);
-void deleteCoarseGridExchanger(void*);
-void deleteFineGridExchanger(void*);
-
+void deleteBoundedBox(void*);
+void deleteInterior(void*);
+void deleteSink(void*);
+void deleteSource(void*);
 
 //
 //
 
 
-char pyExchanger_createCoarseGridExchanger__doc__[] = "";
-char pyExchanger_createCoarseGridExchanger__name__[] = "createCoarseGridExchanger";
+char pyExchanger_createBCSink__doc__[] = "";
+char pyExchanger_createBCSink__name__[] = "createBCSink";
 
-PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
+PyObject * pyExchanger_createBCSink(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int leader, remoteLeader;
 
-    if (!PyArg_ParseTuple(args, "OOiiO:createCoarseGridExchanger",
-			  &obj1, &obj2,
-			  &leader, &remoteLeader,
-			  &obj3))
+    if (!PyArg_ParseTuple(args, "OOO:createBCSink",
+			  &obj1, &obj2, &obj3))
         return NULL;
 
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj1));
-    MPI_Comm comm = temp->handle();
-
-    temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj2));
-    MPI_Comm intercomm = temp->handle();
-
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
+    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    CoarseGridExchanger *cge = new CoarseGridExchanger(
-	                                comm, intercomm,
-					leader, remoteLeader,
-					E);
+    BoundaryConditionSink* BCSink = new BoundaryConditionSink(*b, *sink, E);
 
-    PyObject *cobj = PyCObject_FromVoidPtr(cge, deleteCoarseGridExchanger);
+    PyObject *cobj = PyCObject_FromVoidPtr(BCSink, deleteBCSink);
     return Py_BuildValue("O", cobj);
 }
 
 
-char pyExchanger_createFineGridExchanger__doc__[] = "";
-char pyExchanger_createFineGridExchanger__name__[] = "createFineGridExchanger";
+char pyExchanger_createBCSource__doc__[] = "";
+char pyExchanger_createBCSource__name__[] = "createBCSource";
 
-PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
+PyObject * pyExchanger_createBCSource(PyObject *self, PyObject *args)
 {
-    PyObject *obj1, *obj2, *obj3;
-    int leader, remoteLeader;
+    PyObject *obj1, *obj2;
 
-    if (!PyArg_ParseTuple(args, "OOiiO:createFineGridExchanger",
-			  &obj1, &obj2,
-			  &leader, &remoteLeader,
-			  &obj3))
+    if (!PyArg_ParseTuple(args, "OO:createBCSource",
+			  &obj1, &obj2))
         return NULL;
 
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj1));
-    MPI_Comm comm = temp->handle();
+    Source* source = static_cast<Source*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
 
-    temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj2));
-    MPI_Comm intercomm = temp->handle();
+    BoundaryConditionSource* BCSource = new BoundaryConditionSource(*source, E);
 
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
-
-    int lrank;
-    MPI_Comm_rank(comm, &lrank);
-
-    int rank;
-    MPI_Comm_rank(intercomm, &rank);
-
-    FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
-						   leader, remoteLeader,
-						   E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(fge, deleteFineGridExchanger);
+    PyObject *cobj = PyCObject_FromVoidPtr(BCSource, deleteBCSource);
     return Py_BuildValue("O", cobj);
 }
-
 
 
 char pyExchanger_createBoundary__doc__[] = "";
@@ -109,78 +88,152 @@ char pyExchanger_createBoundary__name__[] = "createBoundary";
 
 PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
 {
-    PyObject *obj;
+    PyObject *obj1, *obj2;
 
-    if (!PyArg_ParseTuple(args, "O:createBoundary", &obj))
+    if (!PyArg_ParseTuple(args, "OO:createBoundary", &obj1, &obj2))
 	return NULL;
 
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-	                                (PyCObject_AsVoidPtr(obj));
+    All_variables* E = static_cast<All_variables*>
+	                          (PyCObject_AsVoidPtr(obj2));
 
-    fge->createBoundary();
+    Boundary* b = new Boundary(E);
+    BoundedBox* bbox = const_cast<BoundedBox*>(&(b->bbox()));
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    PyObject *cobj1 = PyCObject_FromVoidPtr(b, deleteBoundary);
+    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
+    return Py_BuildValue("OO", cobj1, cobj2);
 }
 
 
+char pyExchanger_createEmptyBoundary__doc__[] = "";
+char pyExchanger_createEmptyBoundary__name__[] = "createEmptyBoundary";
 
-char pyExchanger_mapBoundary__doc__[] = "";
-char pyExchanger_mapBoundary__name__[] = "mapBoundary";
+PyObject * pyExchanger_createEmptyBoundary(PyObject *, PyObject *args)
+{
+    Boundary* b = new Boundary();
 
-PyObject * pyExchanger_mapBoundary(PyObject *, PyObject *args)
+    PyObject *cobj = PyCObject_FromVoidPtr(b, deleteBoundary);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_createEmptyInterior__doc__[] = "";
+char pyExchanger_createEmptyInterior__name__[] = "createEmptyInterior";
+
+PyObject * pyExchanger_createEmptyInterior(PyObject *, PyObject *args)
+{
+    Interior* b = new Interior();
+
+    PyObject *cobj = PyCObject_FromVoidPtr(b, deleteInterior);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_createGlobalBoundedBox__doc__[] = "";
+char pyExchanger_createGlobalBoundedBox__name__[] = "createGlobalBoundedBox";
+
+PyObject * pyExchanger_createGlobalBoundedBox(PyObject *, PyObject *args)
 {
     PyObject *obj1;
 
-    if (!PyArg_ParseTuple(args, "O:mapBoundary", &obj1))
+    if (!PyArg_ParseTuple(args, "O:createGlobalBoundedBox", &obj1))
+	return NULL;
+
+    All_variables* E = static_cast<All_variables*>
+	                          (PyCObject_AsVoidPtr(obj1));
+
+    BoundedBox* bbox = new BoundedBox(DIM);
+
+    if(E->parallel.nprocxy == 12) {
+	// for CitcomS Full
+	fullGlobalBoundedBox(*bbox, E);
+    }
+    else {
+	// for CitcomS Regional
+	regionalGlobalBoundedBox(*bbox, E);
+    }
+    bbox->print("GlobalBBox");
+
+    PyObject *cobj = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_createInterior__doc__[] = "";
+char pyExchanger_createInterior__name__[] = "createInterior";
+
+PyObject * pyExchanger_createInterior(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:createInterior", &obj1, &obj2))
+	return NULL;
+
+    BoundedBox* rbbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>
+	                          (PyCObject_AsVoidPtr(obj2));
+
+    Interior* i = new Interior(*rbbox, E);
+    BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
+
+    PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
+    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
+    return Py_BuildValue("OO", cobj1, cobj2);
+}
+
+
+char pyExchanger_createSink__doc__[] = "";
+char pyExchanger_createSink__name__[] = "createSink";
+
+PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+    int numSrc;
+
+    if (!PyArg_ParseTuple(args, "OiOO:createSink",
+			  &obj1, &numSrc,
+			  &obj2, &obj3))
         return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj1));
+    mpi::Communicator* temp = static_cast<mpi::Communicator*>
+	                      (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm comm = temp->handle();
 
-    pe->mapBoundary();
+    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Sink* sink = new Sink(comm, numSrc, *b, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(sink, deleteSink);
+    return Py_BuildValue("O", cobj);
 }
 
 
+char pyExchanger_createSource__doc__[] = "";
+char pyExchanger_createSource__name__[] = "createSource";
 
-char pyExchanger_receiveBoundary__doc__[] = "";
-char pyExchanger_receiveBoundary__name__[] = "receiveBoundary";
-
-PyObject * pyExchanger_receiveBoundary(PyObject *, PyObject *args)
+PyObject * pyExchanger_createSource(PyObject *self, PyObject *args)
 {
-    PyObject *obj;
+    PyObject *obj1, *obj2, *obj3, *obj4;
+    int sink;
 
-    if (!PyArg_ParseTuple(args, "O:receiveBoundary", &obj))
-	return NULL;
+    if (!PyArg_ParseTuple(args, "OiOOO:createSource",
+			  &obj1, &sink,
+			  &obj2, &obj3, &obj4))
+        return NULL;
 
-    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
-	                                  (PyCObject_AsVoidPtr(obj));
+    mpi::Communicator* temp = static_cast<mpi::Communicator*>
+	                      (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm comm = temp->handle();
 
-    cge->receiveBoundary();
+    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj4));
 
-    Py_INCREF(Py_None);
-    return Py_None;
-}
+    Source* source = new Source(comm, sink, *b, E, *bbox);
 
-
-char pyExchanger_sendBoundary__doc__[] = "";
-char pyExchanger_sendBoundary__name__[] = "sendBoundary";
-
-PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
-{
-    PyObject *obj1;
-
-    if (!PyArg_ParseTuple(args, "O:sendBoundary", &obj1))
-	return NULL;
-
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-	                                (PyCObject_AsVoidPtr(obj1));
-    fge->sendBoundary();
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    PyObject *cobj = PyCObject_FromVoidPtr(source, deleteSource);
+    return Py_BuildValue("O", cobj);
 }
 
 
@@ -194,143 +247,49 @@ PyObject * pyExchanger_initTemperature(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:initTemperature", &obj))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj));
 
-    pe->initTemperature();
+    initTemperature(E);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
-char pyExchanger_receiveTemperature__doc__[] = "";
-char pyExchanger_receiveTemperature__name__[] = "receiveTemperature";
+char pyExchanger_recvTandV__doc__[] = "";
+char pyExchanger_recvTandV__name__[] = "recvTandV";
 
-PyObject * pyExchanger_receiveTemperature(PyObject *, PyObject *args)
+PyObject * pyExchanger_recvTandV(PyObject *, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:receiveTemperature", &obj))
+    if (!PyArg_ParseTuple(args, "O:recvTandV", &obj))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
 
-    pe->receiveTemperature();
+    bcs->recvTandV();
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
-char pyExchanger_sendTemperature__doc__[] = "";
-char pyExchanger_sendTemperature__name__[] = "sendTemperature";
+char pyExchanger_sendTandV__doc__[] = "";
+char pyExchanger_sendTandV__name__[] = "sendTandV";
 
-PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *args)
+PyObject * pyExchanger_sendTandV(PyObject *, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:sendTemperature", &obj))
+    if (!PyArg_ParseTuple(args, "O:sendTandV", &obj))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
+	                                      (PyCObject_AsVoidPtr(obj));
 
-    pe->sendTemperature();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_receiveVelocities__doc__[] = "";
-char pyExchanger_receiveVelocities__name__[] = "receiveVelocities";
-
-PyObject * pyExchanger_receiveVelocities(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:receiveVelocities", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->receiveVelocities();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_sendVelocities__doc__[] = "";
-char pyExchanger_sendVelocities__name__[] = "sendVelocities";
-
-PyObject * pyExchanger_sendVelocities(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:sendVelocities", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->sendVelocities();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_imposeConstraint__doc__[] = "";
-char pyExchanger_imposeConstraint__name__[] = "imposeConstraint";
-
-PyObject * pyExchanger_imposeConstraint(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:imposeConstraint", &obj))
-        return NULL;
-
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-                                        (PyCObject_AsVoidPtr(obj));
-
-    fge->imposeConstraint();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_distribute__doc__[] = "";
-char pyExchanger_distribute__name__[] = "distribute";
-
-PyObject * pyExchanger_distribute(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:distribute", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->distribute();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_gather__doc__[] = "";
-char pyExchanger_gather__name__[] = "gather";
-
-PyObject * pyExchanger_gather(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:gather", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->gather();
+    bcs->sendTandV();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -347,33 +306,124 @@ PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:imposeBC", &obj))
 	return NULL;
 
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-                                        (PyCObject_AsVoidPtr(obj));
+    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
 
-    fge->imposeBC();
+    bcs->imposeBC();
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
-char pyExchanger_setBCFlag__doc__[] = "";
-char pyExchanger_setBCFlag__name__[] = "setBCFlag";
+char pyExchanger_exchangeBoundedBox__doc__[] = "";
+char pyExchanger_exchangeBoundedBox__name__[] = "exchangeBoundedBox";
 
-PyObject * pyExchanger_setBCFlag(PyObject *, PyObject *args)
+PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 {
-    PyObject *obj;
+    PyObject *obj0, *obj1, *obj2;
+    int target;
 
-    if (!PyArg_ParseTuple(args, "O:setBCFlag", &obj))
+    if (!PyArg_ParseTuple(args, "OOOi:exchangeBoundedBox",
+			  &obj0, &obj1, &obj2, &target))
 	return NULL;
 
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-                                        (PyCObject_AsVoidPtr(obj));
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj0));
 
-    fge->setBCFlag();
+    mpi::Communicator* temp1 = static_cast<mpi::Communicator*>
+  	                       (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm mycomm = temp1->handle();
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    const int leader = 0;
+    int rank;
+    MPI_Comm_rank(mycomm, &rank);
+
+    // copy contents of bbox to newbbox
+    BoundedBox* newbbox = new BoundedBox(*bbox);
+
+    if(rank == leader) {
+	mpi::Communicator* temp2 = static_cast<mpi::Communicator*>
+	                           (PyCObject_AsVoidPtr(obj2));
+	MPI_Comm intercomm = temp2->handle();
+
+	exchange(intercomm, target, *newbbox);
+    }
+
+    broadcast(mycomm, leader, *newbbox);
+    newbbox->print("RemoteBBox");
+
+    PyObject *cobj = PyCObject_FromVoidPtr(newbbox, deleteBoundedBox);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_exchangeSignal__doc__[] = "";
+char pyExchanger_exchangeSignal__name__[] = "exchangeSignal";
+
+PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *args)
+{
+    int signal;
+    PyObject *obj1, *obj2;
+    int target;
+
+    if (!PyArg_ParseTuple(args, "iOOi:exchangeTimestep",
+			  &signal, &obj1, &obj2, &target))
+	return NULL;
+
+    mpi::Communicator* temp1 = static_cast<mpi::Communicator*>
+	                       (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm mycomm = temp1->handle();
+
+    const int leader = 0;
+    int rank;
+    MPI_Comm_rank(mycomm, &rank);
+
+    if(rank == leader) {
+	mpi::Communicator* temp2 = static_cast<mpi::Communicator*>
+	                           (PyCObject_AsVoidPtr(obj2));
+	MPI_Comm intercomm = temp2->handle();
+
+	exchange(intercomm, target, signal);
+    }
+
+    broadcast(mycomm, leader, signal);
+
+    return Py_BuildValue("i", signal);
+}
+
+
+char pyExchanger_exchangeTimestep__doc__[] = "";
+char pyExchanger_exchangeTimestep__name__[] = "exchangeTimestep";
+
+PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
+{
+    double dt;
+    PyObject *obj1, *obj2;
+    int target;
+
+    if (!PyArg_ParseTuple(args, "dOOi:exchangeTimestep",
+			  &dt, &obj1, &obj2, &target))
+	return NULL;
+
+    mpi::Communicator* temp1 = static_cast<mpi::Communicator*>
+  	                       (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm mycomm = temp1->handle();
+
+    const int leader = 0;
+    int rank;
+    MPI_Comm_rank(mycomm, &rank);
+
+    if(rank == leader) {
+	mpi::Communicator* temp2 = static_cast<mpi::Communicator*>
+	                           (PyCObject_AsVoidPtr(obj2));
+	MPI_Comm intercomm = temp2->handle();
+
+	exchange(intercomm, target, dt);
+    }
+
+    broadcast(mycomm, leader, dt);
+
+    return Py_BuildValue("d", dt);
 }
 
 
@@ -388,78 +438,62 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "Odd:storeTimestep", &obj, &fge_t, &cge_t))
 	return NULL;
 
-    FineGridExchanger* fge = static_cast<FineGridExchanger*>
-	                                (PyCObject_AsVoidPtr(obj));
+    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
+	                         (PyCObject_AsVoidPtr(obj));
 
-    fge->storeTimestep(fge_t, cge_t);
+    bcs->storeTimestep(fge_t, cge_t);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
-char pyExchanger_exchangeTimestep__doc__[] = "";
-char pyExchanger_exchangeTimestep__name__[] = "exchangeTimestep";
-
-PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-    double dt;
-
-    if (!PyArg_ParseTuple(args, "Od:exchangeTimestep", &obj, &dt))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    double newdt = pe->exchangeTimestep(dt);
-
-    return Py_BuildValue("d", newdt);
-}
-
-
-char pyExchanger_exchangeSignal__doc__[] = "";
-char pyExchanger_exchangeSignal__name__[] = "exchangeSignal";
-
-PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *args)
-{
-    PyObject *obj1;
-    int done;
-
-    if (!PyArg_ParseTuple(args, "Oi:exchangeSignal", &obj1, &done))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj1));
-    int signal = pe->exchangeSignal(done);
-
-    return Py_BuildValue("i", signal);
-}
-
-
-
 // helper functions
 
-void deleteBoundary(void* p) {
-    std::cout << "deleting Boundary" << std::endl;
+void deleteBCSink(void* p)
+{
+    delete static_cast<BoundaryConditionSink*>(p);
+}
+
+
+void deleteBCSource(void* p)
+{
+    delete static_cast<BoundaryConditionSource*>(p);
+}
+
+
+void deleteBoundary(void* p)
+{
     delete static_cast<Boundary*>(p);
 }
 
 
-
-void deleteCoarseGridExchanger(void* p) {
-    std::cout << "deleting CoarseGridExchanger" << std::endl;
-    delete static_cast<CoarseGridExchanger*>(p);
+void deleteBoundedBox(void* p)
+{
+    delete static_cast<BoundedBox*>(p);
 }
 
 
+void deleteInterior(void* p)
+{
+    delete static_cast<Interior*>(p);
+}
 
-void deleteFineGridExchanger(void* p) {
-    std::cout << "deleting FineGridExchanger" << std::endl;
-    delete static_cast<FineGridExchanger*>(p);
+
+void deleteSink(void* p)
+{
+    delete static_cast<Sink*>(p);
+}
+
+
+void deleteSource(void* p)
+{
+    delete static_cast<Source*>(p);
 }
 
 
 
 // version
-// $Id: exchangers.cc,v 1.23 2003/10/24 04:51:53 tan2 Exp $
+// $Id: exchangers.cc,v 1.24 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

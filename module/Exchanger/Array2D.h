@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #if !defined(pyCitcom_Array2D_h)
@@ -28,19 +28,27 @@ class Array2D {
 public:
     Array2D();
     explicit Array2D(int size);
+    Array2D(int size, const T& val);
     Array2D(const Array2D<T,N>& rhs);
     ~Array2D();
 
     inline Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
     inline void swap(Array2D<T,N>& rhs);
     inline void reserve(int n);
-    inline void resize(int n);
+    inline void resize(int n, T val=T());
     inline void shrink();
     inline int size() const;
     inline int capacity() const;
     inline bool empty() const;
     inline void push_back(const std::vector<T>& val);
     inline void push_back(const T& val);
+
+    typedef T* iterator;
+    typedef const T* const_iterator;
+    inline iterator begin();
+    inline const_iterator begin() const;
+    inline iterator end();
+    inline const_iterator end() const;
 
     void sendSize(const MPI_Comm& comm, int receiver) const;
     void sendSize(const MPI_Comm& comm, int receiver, int size) const;
@@ -56,6 +64,10 @@ public:
     void receive(const MPI_Comm& comm, int sender,
 		 int begin, int recvsize, MPI_Request&);
     void broadcast(const MPI_Comm& comm, int broadcaster);
+    void broadcast(const MPI_Comm& comm, int broadcaster) const;
+
+    MPI_Status wait(const MPI_Request& request) const;
+    std::vector<MPI_Status> wait(const std::vector<MPI_Request>& request) const;
 
     void print(const std::string& prefix="Array2D") const;
 
@@ -89,6 +101,6 @@ private:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.12 2003/10/30 22:45:37 tan2 Exp $
+// $Id: Array2D.h,v 1.13 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

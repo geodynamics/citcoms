@@ -1,24 +1,31 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
 #include <Python.h>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
+#include "journal/journal.h"
+#include "mpi.h"
+#include "mpi/Communicator.h"
+#include "BoundedBox.h"
+#include "misc.h"
 
 extern "C" {
 #include "global_defs.h"
 #include "element_definitions.h"
+#include "citcom_init.h"
 }
 
-#include "misc.h"
 void commonE(All_variables*);
+void initTemperatureTest(const BoundedBox&, All_variables*);
 
 
 // copyright
@@ -55,15 +62,21 @@ PyObject * pyExchanger_hello(PyObject *, PyObject *)
 char pyExchanger_FinereturnE__doc__[] = "";
 char pyExchanger_FinereturnE__name__[] = "FinereturnE";
 
-PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
+PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *args)
 {
-    All_variables *E = new All_variables;
+    PyObject *Obj;
 
-    E->parallel.nproc = 1;
+    if (!PyArg_ParseTuple(args, "O:FinereturnE", &Obj))
+        return NULL;
 
-    E->mesh.nox = 4;
-    E->mesh.noy = 4;
-    E->mesh.noz = 3;
+    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
+    MPI_Comm world = comm->handle();
+
+    All_variables *E = citcom_init(&world);
+
+    E->lmesh.nox = 4;
+    E->lmesh.noy = 4;
+    E->lmesh.noz = 3;
 
     E->control.theta_max = 2.1;
     E->control.theta_min = 0.9;
@@ -82,15 +95,21 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
 char pyExchanger_CoarsereturnE__doc__[] = "";
 char pyExchanger_CoarsereturnE__name__[] = "CoarsereturnE";
 
-PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
+PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *args)
 {
-    All_variables *E = new All_variables;
+    PyObject *Obj;
 
-    E->parallel.nproc = 12;
+    if (!PyArg_ParseTuple(args, "O:CoarsereturnE", &Obj))
+        return NULL;
 
-    E->mesh.nox = 4;
-    E->mesh.noy = 4;
-    E->mesh.noz = 3;
+    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
+    MPI_Comm world = comm->handle();
+
+    All_variables *E = citcom_init(&world);
+
+    E->lmesh.nox = 4;
+    E->lmesh.noy = 4;
+    E->lmesh.noz = 3;
 
     E->control.theta_max = 3.0;
     E->control.theta_min = 0.0;
@@ -136,42 +155,35 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 }
 
 
-void commonE(All_variables *E) {
-    E->parallel.me = 1;
-    E->parallel.me_loc[1] = 0;
-    E->parallel.me_loc[2] = 0;
-    E->parallel.me_loc[3] = 0;
-    E->parallel.nprocx = 1;
+void commonE(All_variables *E)
+{
+    E->parallel.nprocxy = 1;
+
+    E->parallel.nprocx = E->parallel.nproc;
     E->parallel.nprocy = 1;
     E->parallel.nprocz = 1;
+
+    E->parallel.me_loc[1] = E->parallel.me;
+    E->parallel.me_loc[2] = 0;
+    E->parallel.me_loc[3] = 0;
 
     E->sphere.caps_per_proc = 1;
 
     E->mesh.levmax = 1;
     E->mesh.levmin = 1;
-
     E->mesh.dof = 3;
 
-    E->mesh.nno = E->mesh.nox * E->mesh.noy * E->mesh.noz;
+    E->lmesh.elx = E->lmesh.nox - 1;
+    E->lmesh.elz = E->lmesh.noz - 1;
+    E->lmesh.ely = E->lmesh.noy - 1;
 
-    E->mesh.elx = E->mesh.nox - 1;
-    E->mesh.ely = E->mesh.noy - 1;
-    E->mesh.elz = E->mesh.noz - 1;
-
-    E->lmesh.elx = E->mesh.elx/E->parallel.nprocx;
-    E->lmesh.elz = E->mesh.elz/E->parallel.nprocz;
-    E->lmesh.ely = E->mesh.ely/E->parallel.nprocy;
-    E->lmesh.nox = E->lmesh.elx + 1;
-    E->lmesh.noz = E->lmesh.elz + 1;
-    E->lmesh.noy = E->lmesh.ely + 1;
-
-    E->lmesh.nno = E->lmesh.noz*E->lmesh.nox*E->lmesh.noy;
-    E->lmesh.nel = E->lmesh.ely*E->lmesh.elx*E->lmesh.elz;
+    E->lmesh.nno = E->lmesh.noz * E->lmesh.nox * E->lmesh.noy;
+    E->lmesh.nel = E->lmesh.ely * E->lmesh.elx * E->lmesh.elz;
     E->lmesh.npno = E->lmesh.nel;
 
     int noz = E->lmesh.noz;
-    int noy = E->mesh.noy;
-    int nox = E->mesh.nox;
+    int noy = E->lmesh.noy;
+    int nox = E->lmesh.nox;
 
     E->lmesh.ELX[E->mesh.levmax] = nox-1;
     E->lmesh.ELY[E->mesh.levmax] = noy-1;
@@ -181,6 +193,17 @@ void commonE(All_variables *E) {
     E->lmesh.NOX[E->mesh.levmax] = nox;
     E->lmesh.NNO[E->mesh.levmax] = nox * noz * noy;
     E->lmesh.NEL[E->mesh.levmax] = (nox-1) * (noz-1) * (noy-1);
+
+    E->mesh.elx = E->lmesh.elx * E->parallel.nprocx;
+    E->mesh.elz = E->lmesh.elz * E->parallel.nprocz;
+    E->mesh.ely = E->lmesh.ely * E->parallel.nprocy;
+
+    E->mesh.nox = E->mesh.elx + 1;
+    E->mesh.noz = E->mesh.elz + 1;
+    E->mesh.noy = E->mesh.ely + 1;
+
+    E->mesh.nno = E->mesh.nox * E->mesh.noy * E->mesh.noz;
+    E->mesh.nel = E->mesh.ely * E->mesh.elx * E->mesh.elz;
 
     for (int j=1;j<=E->sphere.caps_per_proc;j++)  {
 	E->sphere.capid[j] = 1;
@@ -253,11 +276,23 @@ void commonE(All_variables *E) {
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 		    E->sx[m][1][node] =
-			(E->control.theta_max - E->control.theta_min)/(E->lmesh.nox-1)*(j-1) + E->control.theta_min;
+			(E->control.theta_max - E->control.theta_min)
+  			  / E->mesh.elx * (j-1)
+			+ (E->control.theta_max - E->control.theta_min)
+			  * E->parallel.me_loc[1] / E->parallel.nprocx
+			+ E->control.theta_min;
 		    E->sx[m][2][node] =
-			(E->control.fi_max - E->control.fi_min)/(E->lmesh.noy-1)*(k-1) + E->control.fi_min;
+			(E->control.fi_max - E->control.fi_min)
+			  / E->mesh.ely * (k-1)
+			+ (E->control.fi_max - E->control.fi_min)
+			  * E->parallel.me_loc[2] / E->parallel.nprocy
+			+ E->control.fi_min;
 		    E->sx[m][3][node] =
-			(E->sphere.ro -  E->sphere.ri)/(E->lmesh.noz-1)*(i-1) +  E->sphere.ri;
+			(E->sphere.ro -  E->sphere.ri)
+			  / E->mesh.elz * (i-1)
+			+ (E->sphere.ro - E->sphere.ri)
+			  * E->parallel.me_loc[3] / E->parallel.nprocz
+			+  E->sphere.ri;
 
 //  		    std::cout <<  node << " "
 //  			      << E->sx[m][1][node] << " "
@@ -269,7 +304,95 @@ void commonE(All_variables *E) {
     return;
 }
 
+
+char pyExchanger_initTemperatureTest__doc__[] = "";
+char pyExchanger_initTemperatureTest__name__[] = "initTemperatureTest";
+
+PyObject * pyExchanger_initTemperatureTest(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:initTemperatureTest", &obj1, &obj2))
+	return NULL;
+
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
+
+    initTemperatureTest(*bbox, E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
+void initTemperatureTest(const BoundedBox& bbox, All_variables* E)
+{
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+          << "in initTemperatureTest" << journal::end;
+
+    journal::debug_t debugInitT("initTemperatureTest");
+    debugInitT << journal::loc(__HERE__);
+
+    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
+
+    const double theta_min = bbox[0][0];
+    const double theta_max = bbox[1][0];
+    const double fi_min = bbox[0][1];
+    const double fi_max = bbox[1][1];
+    const double ri = bbox[0][2];
+    const double ro = bbox[1][2];
+
+    // center of fine grid mesh
+    double theta_center = 0.5 * (theta_max + theta_min);
+    double fi_center = 0.5 * (fi_max + fi_min);
+    double r_center = 0.5 * (ro + ri);
+
+    double x_center = r_center * sin(fi_center) * cos(theta_center);
+    double y_center = r_center * sin(fi_center) * sin(theta_center);
+    double z_center = r_center * cos(fi_center);
+
+    // radius of the blob is one third of the smallest dimension
+    double d = std::min(std::min(theta_max - theta_min,
+				 fi_max - fi_min),
+                        ro - ri) / 3;
+
+    // compute temperature field according to nodal coordinate
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int k=1;k<=E->lmesh.noy;k++)
+            for(int j=1;j<=E->lmesh.nox;j++)
+                for(int i=1;i<=E->lmesh.noz;i++)  {
+                    int node = i + (j-1)*E->lmesh.noz
+                             + (k-1)*E->lmesh.noz*E->lmesh.nox;
+
+                    double theta = E->sx[m][1][node];
+                    double fi = E->sx[m][2][node];
+                    double r = E->sx[m][3][node];
+
+                    double x = r * sin(fi) * cos(theta);
+                    double y = r * sin(fi) * sin(theta);
+                    double z = r * cos(fi);
+
+                    double distance = sqrt((x - x_center)*(x - x_center) +
+                                           (y - y_center)*(y - y_center) +
+                                           (z - z_center)*(z - z_center));
+
+                    if (distance <= d)
+                        E->T[m][node] = 0.5 + 0.5*cos(distance/d * M_PI);
+                    else
+                        E->T[m][node] = 0;
+
+		    debugInitT << "(theta,fi,r,T) = "
+			       << theta << "  "
+			       << fi << "  "
+			       << r << "  "
+			       << E->T[m][node] << journal::newline;
+                }
+    debugInitT << journal::end;
+}
+
 // version
-// $Id: misc.cc,v 1.19 2003/10/03 18:10:05 tan2 Exp $
+// $Id: misc.cc,v 1.20 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

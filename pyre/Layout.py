@@ -23,31 +23,30 @@ class Layout(Component):
 
         self.coarse = None
         self.fine = None
-        self.intercomm = None
+        self.coarsePlus = []
+        self.finePlus = []
 
+        self.comm = None
         self.rank = 0
         self.nodes = 0
-        self.leader = 0
-        self.remoteLeader = 0
         return
 
 
 
     def initialize(self, application):
-
         self.discover()
         self.verify(application)
         self.allocateNodes()
         self.createCommunicators()
-        self.setAttributes()
         return
 
 
 
     def discover(self):
         import mpi
-        self.rank = mpi.world().rank
-        self.nodes = mpi.world().size
+        self.comm = mpi.world()
+        self.rank = self.comm.rank
+        self.nodes = self.comm.size
         return
 
 
@@ -63,7 +62,8 @@ class Layout(Component):
         if nodes < 2:
             import journal
             firewall = journal.firewall("layout")
-            firewall.log("'%s' requires at least 2 processors" % application.inventory.name)
+            firewall.log("'%s' requires at least 2 processors"
+                         % application.inventory.name)
 
         return
 
@@ -75,40 +75,20 @@ class Layout(Component):
 
 
     def createCommunicators(self):
-        import mpi
-        world = mpi.world()
+        world = self.comm
+        myrank = world.rank
+        fineGroup = self.inventory.fine
+        coarseGroup = self.inventory.coarse
 
-        self.fine = world.include(self.inventory.fine)
-        self.coarse = world.include(self.inventory.coarse)
-        return
+        self.fine = world.include(fineGroup)
+        self.coarse = world.include(coarseGroup)
 
+        for each in coarseGroup:
+            self.finePlus.append(world.include(fineGroup + [each]))
 
+        for each in fineGroup:
+            self.coarsePlus.append(world.include(coarseGroup + [each]))
 
-    def setAttributes(self):
-        if self.fine:
-            mygroup = self.inventory.fine
-            remotegroup = self.inventory.coarse
-            self.createIntercomm(self.fine)
-        elif self.coarse:
-            mygroup = self.inventory.coarse
-            remotegroup = self.inventory.fine
-            self.createIntercomm(self.coarse)
-        else:
-            import journal
-            journal.warning(self.name).log("node '%d' is an orphan" % self.rank)
-
-        # use the last proc. as the group leader
-        self.leader = len(mygroup) - 1
-        self.remoteLeader = remotegroup[-1]
-
-        return
-
-
-
-    def createIntercomm(self, comm):
-        # not finished
-        import mpi
-        self.intercomm = mpi.world()
         return
 
 
@@ -126,6 +106,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.9 2003/10/24 04:55:54 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.10 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

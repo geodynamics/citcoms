@@ -1,43 +1,47 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #if !defined(pyCitcom_AreaWeightedNormal_h)
 #define pyCitcom_AreaWeightedNormal_h
 
+#include <vector>
+#include "DIM.h"
+
 struct All_variables;
 template <class T, int N> class Array2D;
 class Boundary;
-class FineGridMapping;
+class Sink;
 
 
 class AreaWeightedNormal {
-    static const int dim_ = 3;
     const int size_;
     const double toleranceOutflow_;
-    double* nwght;
+    double total_area_;
+    std::vector<double> nwght;
 
 public:
-    AreaWeightedNormal(const Boundary* boundary,
-		       const All_variables* E,
-		       const FineGridMapping* fgmapping);
-    ~AreaWeightedNormal();
+    AreaWeightedNormal(const Boundary& boundary,
+		       const Sink& sink,
+		       const All_variables* E);
+    ~AreaWeightedNormal() {};
 
-    typedef Array2D<double,dim_> Velo;
+    typedef Array2D<double,DIM> Velo;
 
     void imposeConstraint(Velo& V) const;
 
 private:
-    void computeWeightedNormal(const Boundary* boundary,
-			       const All_variables* E,
-			       const FineGridMapping* fgmapping);
+    void computeWeightedNormal(const Boundary& boundary,
+			       const Sink& sink,
+			       const All_variables* E);
+    void computeTotalArea();
     double computeOutflow(const Velo& V) const;
-    void reduceOutflow(Velo& V, const double outflow) const;
+    void reduceOutflow(Velo& V, double outflow) const;
 
 };
 
@@ -45,7 +49,7 @@ private:
 #endif
 
 // version
-// $Id: AreaWeightedNormal.h,v 1.1 2003/10/20 17:13:08 tan2 Exp $
+// $Id: AreaWeightedNormal.h,v 1.2 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file
 

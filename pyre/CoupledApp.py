@@ -19,12 +19,12 @@ class CoupledApp(SimpleApp):
 
         self.solver = None
         self.solverCommunicator = None
-        self.intercomm = None
+        self.myPlus = []
+        self.remotePlus = []
 
+        self.comm = None
         self.rank = 0
         self.nodes = 0
-        self.leader = 0
-        self.remoteLeader = 0
 
         self._info = journal.debug("application")
         return
@@ -45,25 +45,27 @@ class CoupledApp(SimpleApp):
 
 
     def findLayout(self, layout):
-        import Components.Exchanger as Exchanger
 
         if layout.coarse:
             self.solver = self.inventory.coarse
             self.exchanger = self.inventory.cge
             self.solverCommunicator = layout.coarse
+            self.myPlus = layout.coarsePlus
+            self.remotePlus = layout.finePlus
         elif layout.fine:
             self.solver = self.inventory.fine
             self.exchanger = self.inventory.fge
             self.solverCommunicator = layout.fine
+            self.myPlus = layout.finePlus
+            self.remotePlus = layout.coarsePlus
         else:
             import journal
-            journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
+            journal.warning(self.name).log("node '%d' is an orphan"
+                                           % layout.rank)
 
-        self.intercomm = layout.intercomm
+        self.comm = layout.comm
         self.rank = layout.rank
         self.nodes = layout.nodes
-        self.leader = layout.leader
-        self.remoteLeader = layout.remoteLeader
 
         return
 
@@ -71,8 +73,7 @@ class CoupledApp(SimpleApp):
 
     def reportConfiguration(self):
 
-        import mpi
-        rank = mpi.world().rank
+        rank = self.comm.rank
 
         if rank != 0:
             return
@@ -127,6 +128,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.8 2003/10/29 01:13:15 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.9 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

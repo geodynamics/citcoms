@@ -12,28 +12,64 @@ from Exchanger import Exchanger
 class CoarseGridExchanger(Exchanger):
 
 
-    def createExchanger(self, solver):
-        self.exchanger = self.module.createCoarseGridExchanger(
-                                     solver.communicator.handle(),
-                                     solver.intercomm.handle(),
-                                     solver.leader,
-                                     solver.remoteLeader,
-                                     solver.all_variables
-                                     )
+    def initialize(self, solver):
+        Exchanger.initialize(self, solver)
+
+        self.boundary = range(self.numSrc)
+        self.source["BC"] = range(self.numSrc)
+        self.BC = range(self.numSrc)
         return
 
 
-    def findBoundary(self):
-        # receive boundary from FGE
-        self.module.receiveBoundary(self.exchanger)
+    def createMesh(self):
+        self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
+        self.remoteBBox = self.module.exchangeBoundedBox(
+                                          self.globalBBox,
+                                          self.communicator.handle(),
+                                          self.srcComm[0].handle(),
+                                          self.srcComm[0].size - 1)
+        self.interior, self.myBBox = self.module.createInterior(
+                                                     self.remoteBBox,
+                                                     self.all_variables)
+        for i in range(len(self.boundary)):
+            self.boundary[i] = self.module.createEmptyBoundary()
 
-        # create mapping from boundary to id array
-        self.module.mapBoundary(self.exchanger)
+        return
+
+
+    def createSourceSink(self):
+        self.createSource()
+        self.createSink()
+        return
+
+
+    def createSource(self):
+        for i, comm, b in zip(range(self.numSrc),
+                              self.srcComm,
+                              self.boundary):
+            # sink is always in the last rank of a communicator
+            self.source["BC"][i] = self.module.createSource(comm.handle(),
+                                                            comm.size - 1,
+                                                            b,
+                                                            self.all_variables,
+                                                            self.myBBox)
+        return
+
+
+    def createSink(self):
+        return
+
+
+    def createBC(self):
+        for i, src in zip(range(self.numSrc),
+                          self.source["BC"]):
+            self.BC[i] = self.module.createBCSource(src,
+                                                    self.all_variables)
         return
 
 
     def initTemperature(self):
-        self.module.initTemperature(self.exchanger)
+        self.module.initTemperatureTest(self.remoteBBox, self.all_variables)
         # send temperture field to FGE
         #self.module.sendTemperature(self.exchanger)
         return
@@ -51,16 +87,27 @@ class CoarseGridExchanger(Exchanger):
 
 
     def applyBoundaryConditions(self):
-        self.module.gather(self.exchanger)
-        self.module.sendVelocities(self.exchanger)
+        for bc in self.BC:
+            self.module.sendTandV(bc)
         return
 
 
     def stableTimestep(self, dt):
-        new_dt = self.module.exchangeTimestep(self.exchanger, dt)
+        new_dt = self.module.exchangeTimestep(dt,
+                                              self.communicator.handle(),
+                                              self.srcComm[0].handle(),
+                                              self.srcComm[0].size - 1)
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, dt, new_dt)
         return dt
+
+
+    def exchangeSignal(self, signal):
+        newsgnl = self.module.exchangeSignal(signal,
+                                             self.communicator.handle(),
+                                             self.srcComm[0].handle(),
+                                             self.srcComm[0].size - 1)
+        return newsgnl
 
 
 
@@ -76,6 +123,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.19 2003/10/28 01:56:14 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.20 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

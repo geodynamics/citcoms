@@ -1,10 +1,10 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #if !defined(pyExchanger_misc_h)
@@ -28,14 +28,22 @@ extern char pyExchanger_FinereturnE__doc__[];
 extern "C"
 PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *);
 
+
 extern char pyExchanger_CoarsereturnE__name__[];
 extern char pyExchanger_CoarsereturnE__doc__[];
 extern "C"
 PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *);
 
+
+extern char pyExchanger_initTemperatureTest__name__[];
+extern char pyExchanger_initTemperatureTest__doc__[];
+extern "C"
+PyObject * pyExchanger_initTemperatureTest(PyObject *, PyObject *);
+
+
 #endif
 
 // version
-// $Id: misc.h,v 1.3 2003/09/18 22:03:48 ces74 Exp $
+// $Id: misc.h,v 1.4 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

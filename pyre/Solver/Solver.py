@@ -20,11 +20,11 @@ class Solver(BaseSolver):
         self.CitcomModule = None
         self.all_variables = None
         self.communicator = None
-        self.intercomm = None
-        self.coupler = None
 
-        self.leader = 0
-        self.remoteLeader = 0
+        self.coupler = None
+        self.exchanger = None
+        self.myPlus = []
+        self.remotePlus = []
 
 	self.start_cpu_time = 0
         self.cpu_time = 0
@@ -36,7 +36,7 @@ class Solver(BaseSolver):
 
     def initialize(self, application):
         BaseSolver.initialize(self, application)
-	#journal.info("staging").log("setup MPI")
+
         comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 	self.communicator = comm
@@ -52,9 +52,8 @@ class Solver(BaseSolver):
         except AttributeError:
             pass
         else:
-            self.intercomm = application.intercomm
-            self.leader = application.leader
-            self.remoteLeader = application.remoteLeader
+            self.myPlus = application.myPlus
+            self.remotePlus = application.remotePlus
             self.exchanger = application.exchanger
             self.coupler = application.inventory.coupler
             self.coupler.initialize(self)
@@ -287,6 +286,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.31 2003/10/29 18:40:01 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.32 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

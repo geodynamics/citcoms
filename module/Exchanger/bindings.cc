@@ -1,25 +1,26 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
 #include <Python.h>
 
-#include "bindings.h"
-
 #include "exchangers.h"
 #include "misc.h"          // miscellaneous methods
+
+#include "bindings.h"
 
 // the method table
 
 struct PyMethodDef pyExchanger_methods[] = {
 
-    // dummy entry for testing
+    // from misc.h
+
     {pyExchanger_hello__name__,
      pyExchanger_hello,
      METH_VARARGS,
@@ -40,102 +41,97 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_CoarsereturnE__doc__},
 
+    {pyExchanger_initTemperatureTest__name__,
+     pyExchanger_initTemperatureTest,
+     METH_VARARGS,
+     pyExchanger_initTemperatureTest__doc__},
+
     // from exchangers.h
 
-    {pyExchanger_createCoarseGridExchanger__name__,
-     pyExchanger_createCoarseGridExchanger,
+    {pyExchanger_createBCSink__name__,
+     pyExchanger_createBCSink,
      METH_VARARGS,
-     pyExchanger_createCoarseGridExchanger__doc__},
+     pyExchanger_createBCSink__doc__},
 
-    {pyExchanger_createFineGridExchanger__name__,
-     pyExchanger_createFineGridExchanger,
+    {pyExchanger_createBCSource__name__,
+     pyExchanger_createBCSource,
      METH_VARARGS,
-     pyExchanger_createFineGridExchanger__doc__},
+     pyExchanger_createBCSource__doc__},
 
     {pyExchanger_createBoundary__name__,
      pyExchanger_createBoundary,
      METH_VARARGS,
      pyExchanger_createBoundary__doc__},
 
-    {pyExchanger_mapBoundary__name__,
-     pyExchanger_mapBoundary,
+    {pyExchanger_createEmptyBoundary__name__,
+     pyExchanger_createEmptyBoundary,
      METH_VARARGS,
-     pyExchanger_mapBoundary__doc__},
+     pyExchanger_createEmptyBoundary__doc__},
 
-    {pyExchanger_receiveBoundary__name__,
-     pyExchanger_receiveBoundary,
+    {pyExchanger_createEmptyInterior__name__,
+     pyExchanger_createEmptyInterior,
      METH_VARARGS,
-     pyExchanger_receiveBoundary__doc__},
+     pyExchanger_createEmptyInterior__doc__},
 
-    {pyExchanger_sendBoundary__name__,
-     pyExchanger_sendBoundary,
+    {pyExchanger_createGlobalBoundedBox__name__,
+     pyExchanger_createGlobalBoundedBox,
      METH_VARARGS,
-     pyExchanger_sendBoundary__doc__},
+     pyExchanger_createGlobalBoundedBox__doc__},
+
+    {pyExchanger_createInterior__name__,
+     pyExchanger_createInterior,
+     METH_VARARGS,
+     pyExchanger_createInterior__doc__},
 
     {pyExchanger_initTemperature__name__,
      pyExchanger_initTemperature,
      METH_VARARGS,
      pyExchanger_initTemperature__doc__},
 
-    {pyExchanger_receiveTemperature__name__,
-     pyExchanger_receiveTemperature,
+    {pyExchanger_createSink__name__,
+     pyExchanger_createSink,
      METH_VARARGS,
-     pyExchanger_receiveTemperature__doc__},
+     pyExchanger_createSink__doc__},
 
-    {pyExchanger_sendTemperature__name__,
-     pyExchanger_sendTemperature,
+    {pyExchanger_createSource__name__,
+     pyExchanger_createSource,
      METH_VARARGS,
-     pyExchanger_sendTemperature__doc__},
+     pyExchanger_createSource__doc__},
 
-    {pyExchanger_receiveVelocities__name__,
-     pyExchanger_receiveVelocities,
+    {pyExchanger_recvTandV__name__,
+     pyExchanger_recvTandV,
      METH_VARARGS,
-     pyExchanger_receiveVelocities__doc__},
+     pyExchanger_recvTandV__doc__},
 
-    {pyExchanger_sendVelocities__name__,
-     pyExchanger_sendVelocities,
+    {pyExchanger_sendTandV__name__,
+     pyExchanger_sendTandV,
      METH_VARARGS,
-     pyExchanger_sendVelocities__doc__},
-
-    {pyExchanger_imposeConstraint__name__,
-     pyExchanger_imposeConstraint,
-     METH_VARARGS,
-     pyExchanger_imposeConstraint__doc__},
-
-    {pyExchanger_distribute__name__,
-     pyExchanger_distribute,
-     METH_VARARGS,
-     pyExchanger_distribute__doc__},
-
-    {pyExchanger_gather__name__,
-     pyExchanger_gather,
-     METH_VARARGS,
-     pyExchanger_gather__doc__},
+     pyExchanger_sendTandV__doc__},
 
     {pyExchanger_imposeBC__name__,
      pyExchanger_imposeBC,
      METH_VARARGS,
      pyExchanger_imposeBC__doc__},
 
-    {pyExchanger_setBCFlag__name__,
-     pyExchanger_setBCFlag,
+    {pyExchanger_exchangeBoundedBox__name__,
+     pyExchanger_exchangeBoundedBox,
      METH_VARARGS,
-     pyExchanger_setBCFlag__doc__},
+     pyExchanger_exchangeBoundedBox__doc__},
 
-    {pyExchanger_storeTimestep__name__,
-     pyExchanger_storeTimestep,
+    {pyExchanger_exchangeSignal__name__,
+     pyExchanger_exchangeSignal,
      METH_VARARGS,
-     pyExchanger_storeTimestep__doc__},
+     pyExchanger_exchangeSignal__doc__},
 
     {pyExchanger_exchangeTimestep__name__,
      pyExchanger_exchangeTimestep,
      METH_VARARGS,
      pyExchanger_exchangeTimestep__doc__},
 
-    {pyExchanger_exchangeSignal__name__,
-     pyExchanger_exchangeSignal,
+    {pyExchanger_storeTimestep__name__,
+     pyExchanger_storeTimestep,
      METH_VARARGS,
-     pyExchanger_exchangeSignal__doc__},
+     pyExchanger_storeTimestep__doc__},
 
 
 // Sentinel
@@ -143,6 +139,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.20 2003/10/19 01:01:33 tan2 Exp $
+// $Id: bindings.cc,v 1.21 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

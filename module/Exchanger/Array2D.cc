@@ -1,15 +1,16 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 #include "journal/journal.h"
 
 
@@ -30,6 +31,16 @@ Array2D<T,N>::Array2D(int n) :
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.c'tor(int)" << journal::end;
+}
+
+
+template <class T, int N>
+Array2D<T,N>::Array2D(int n, const T& val) :
+    a_(n*N, val)
+{
+    journal::debug_t debug("Array2D");
+    debug << journal::loc(__HERE__)
+          << "in Array2D<" << N << ">.c'tor(int,T)" << journal::end;
 }
 
 
@@ -88,12 +99,12 @@ void Array2D<T,N>::reserve(int n)
 
 
 template <class T, int N>
-void Array2D<T,N>::resize(int n)
+void Array2D<T,N>::resize(int n, T val)
 {
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.resize" << journal::end;
-    a_.resize(N*n);
+    a_.resize(N*n, val);
 }
 
 
@@ -153,6 +164,34 @@ void Array2D<T,N>::push_back(const T& val)
 
 
 template <class T, int N>
+typename Array2D<T,N>::iterator Array2D<T,N>::begin()
+{
+    return &a_[0];
+}
+
+
+template <class T, int N>
+typename Array2D<T,N>::const_iterator Array2D<T,N>::begin() const
+{
+    return &a_[0];
+}
+
+
+template <class T, int N>
+typename Array2D<T,N>::iterator Array2D<T,N>::end()
+{
+    return &a_[a_.size()];
+}
+
+
+template <class T, int N>
+typename Array2D<T,N>::const_iterator Array2D<T,N>::end() const
+{
+    return &a_[a_.size()];
+}
+
+
+template <class T, int N>
 void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver) const
 {
     sendSize(comm, receiver, size());
@@ -196,8 +235,7 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver) const
 {
     sendSize(comm, receiver);
 
-    MPI_Datatype datatype = typeofT();
-    int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), datatype,
+    int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), typeofT(),
 			  receiver, TAG_, comm);
     testResult(result, "send error!");
 }
@@ -216,11 +254,10 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
 template <class T, int N>
 void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
 			int begin, int sendsize, MPI_Request& request) const
-    // non-blocking send the vector[begin ~ begin+sendsize-1]
+    // non-blocking send the vector[begin ~ begin+sendsize)
     // the caller must guarantee a_ is of sufficent size
 {
-    MPI_Datatype datatype = typeofT();
-    int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N, datatype,
+    int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N, typeofT(),
 			   receiver, TAG_, comm, &request);
     testResult(result, "send error!");
 }
@@ -234,8 +271,7 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender)
     resize(receiveSize(comm, sender));
 
     MPI_Status status;
-    MPI_Datatype datatype = typeofT();
-    int result = MPI_Recv(&a_[0], a_.size(), datatype,
+    int result = MPI_Recv(&a_[0], a_.size(), typeofT(),
 			  sender, TAG_, comm, &status);
     testResult(result, "receive error!");
 }
@@ -254,11 +290,10 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
 template <class T, int N>
 void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
 			   int begin, int recvsize, MPI_Request& request)
-    // non-blocking receive the vector[begin ~ begin+recvsize-1]
+    // non-blocking receive the vector[begin ~ begin+recvsize)
     // the caller must guarantee a_ is of sufficent size
 {
-    MPI_Datatype datatype = typeofT();
-    int result = MPI_Irecv(&a_[begin*N], recvsize*N, datatype,
+    int result = MPI_Irecv(&a_[begin*N], recvsize*N, typeofT(),
 			   sender, TAG_, comm, &request);
     testResult(result, "receive error!");
 }
@@ -270,9 +305,44 @@ void Array2D<T,N>::broadcast(const MPI_Comm& comm, int broadcaster)
     // resize to accommodate incoming data
     resize(broadcastSize(comm, broadcaster));
 
-    MPI_Datatype datatype = typeofT();
-    int result = MPI_Bcast(&a_[0], a_.size(), datatype, broadcaster, comm);
+    int result = MPI_Bcast(&a_[0], a_.size(), typeofT(),
+			   broadcaster, comm);
     testResult(result, "broadcast error!");
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::broadcast(const MPI_Comm& comm, int broadcaster) const
+{
+    broadcastSize(comm, broadcaster);
+
+    int result = MPI_Bcast(const_cast<T*>(&a_[0]), a_.size(), typeofT(),
+			   broadcaster, comm);
+    testResult(result, "broadcast error!");
+}
+
+
+template <class T, int N>
+MPI_Status Array2D<T,N>::wait(const MPI_Request& request) const
+{
+    MPI_Status status;
+    int result = MPI_Wait(const_cast<MPI_Request*>(&request), &status);
+    testResult(result, "wait error!");
+
+    return status;
+}
+
+
+template <class T, int N>
+std::vector<MPI_Status>
+Array2D<T,N>::wait(const std::vector<MPI_Request>& request) const
+{
+    std::vector<MPI_Status> status(request.size());
+    int result = MPI_Waitall(request.size(),
+			     const_cast<MPI_Request*>(&request[0]), &status[0]);
+    testResult(result, "wait error!");
+
+    return status;
 }
 
 
@@ -367,8 +437,8 @@ const T& Array2D<T,N>::Array1D::operator[](size_t index) const
 
 
 template <class T, int N>
-MPI_Datatype Array2D<T,N>::typeofT() {
-
+MPI_Datatype Array2D<T,N>::typeofT()
+{
     if (typeid(T) == typeid(double))
 	return MPI_DOUBLE;
 
@@ -384,8 +454,7 @@ MPI_Datatype Array2D<T,N>::typeofT() {
     journal::firewall_t firewall("Array2D");
     firewall << journal::loc(__HERE__)
              << "unexpected Array2D datatype" << journal::end;
-    // firewall will throw an exception or terminate the job
-    return 0;
+    throw std::domain_error("unexpected Array2D datatype");
 }
 
 
@@ -402,6 +471,6 @@ void Array2D<T,N>::testResult(int result, const std::string& errmsg)
 
 
 // version
-// $Id: Array2D.cc,v 1.11 2003/10/30 22:45:37 tan2 Exp $
+// $Id: Array2D.cc,v 1.12 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

@@ -17,9 +17,38 @@ class Exchanger(Component):
         Component.__init__(self, name, facility)
 
         self.module = None
-        self.exchanger = None
+        self.mesh = None
+        self.all_variables = None
+        self.communicator = None
+        self.srcComm = []
+        self.sinkComm = None
+        self.numSrc = 0
+
+        self.sink = {}
+        self.source = {}
+
         self.catchup = True
         self.done = False
+        return
+
+
+    def initialize(self, solver):
+        self.selectModule()
+        self.all_variables = solver.all_variables
+        self.communicator = solver.communicator
+        self.srcComm = solver.myPlus
+        self.numSrc = len(self.srcComm)
+
+        # only one of remotePlus is sinkComm
+        self.sinkComm = solver.remotePlus[self.communicator.rank]
+        return
+
+
+
+    def launch(self, solver):
+        self.createMesh()
+        self.createSourceSink()
+        self.createBC()
         return
 
 
@@ -31,19 +60,19 @@ class Exchanger(Component):
 
 
 
-    def createExchanger(self, solver):
+    def createMesh(self):
         raise NotImplementedError
         return
 
 
 
-    def findBoundary(self):
+    def createSourceSink(self):
         raise NotImplementedError
         return
 
 
 
-    def mapBoundary(self):
+    def createBC(self):
         raise NotImplementedError
         return
 
@@ -81,7 +110,7 @@ class Exchanger(Component):
 
     def stableTimestep(self, dt):
         raise NotImplementedError
-        return
+        return dt
 
 
 
@@ -99,7 +128,8 @@ class Exchanger(Component):
         #print "    ", self.name, "  send: ", sent
 
         while 1:
-            signal = self.module.exchangeSignal(self.exchanger, sent)
+            signal = self.exchangeSignal(sent)
+
             if sent == END_SIMULATION_SIGNAL:
                 signal = END_SIMULATION_SIGNAL
             #print "    ", self.name, " received  ", signal
@@ -118,6 +148,13 @@ class Exchanger(Component):
 
 
 
+    def exchangeSignal(self, signal):
+        raise NotImplementedError
+        return signal
+
+
+
+
     class Inventory(Component.Inventory):
 
         import pyre.properties as prop
@@ -130,6 +167,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.10 2003/10/01 22:04:41 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.11 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

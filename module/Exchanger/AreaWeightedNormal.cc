@@ -1,40 +1,32 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
 #include <cmath>
-#include <iostream>
 #include "Array2D.h"
 #include "Boundary.h"
-#include "Mapping.h"
+#include "Sink.h"
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "AreaWeightedNormal.h"
 
 
 
-AreaWeightedNormal::AreaWeightedNormal(const Boundary* boundary,
-				       const All_variables* E,
-				       const FineGridMapping* fgmapping) :
-    size_(boundary->size()),
+AreaWeightedNormal::AreaWeightedNormal(const Boundary& boundary,
+				       const Sink& sink,
+				       const All_variables* E) :
+    size_(boundary.size()),
     toleranceOutflow_(E->control.tole_comp),
-    nwght(new double[size_ * dim_])
+    nwght(size_ * DIM)
 {
-    for(int i=0; i<size_*dim_; i++)
-	nwght[i] = 0;
-
-    computeWeightedNormal(boundary, E, fgmapping);
-}
-
-
-AreaWeightedNormal::~AreaWeightedNormal() {
-    delete [] nwght;
+    computeWeightedNormal(boundary, sink, E);
+    computeTotalArea();
 }
 
 
@@ -46,7 +38,7 @@ void AreaWeightedNormal::imposeConstraint(Velo& V) const {
 	  << "Net outflow before boundary velocity correction " 
 	  << outflow << journal::end;
 
-    if (fabs(outflow) > toleranceOutflow_) {
+    if (std::abs(outflow) > toleranceOutflow_) {
 	reduceOutflow(V, outflow);
 
 	outflow = computeOutflow(V);
@@ -57,10 +49,9 @@ void AreaWeightedNormal::imposeConstraint(Velo& V) const {
 }
 
 
-void AreaWeightedNormal::computeWeightedNormal(const Boundary* boundary,
-					       const All_variables* E,
-					       const FineGridMapping* fgmapping) {
-    const int nodesPerElement = (int) pow(2, dim_);
+void AreaWeightedNormal::computeWeightedNormal(const Boundary& boundary,
+					       const Sink& sink,
+					       const All_variables* E) {
     const int facenodes[]={0, 1, 5, 4,
                            2, 3, 7, 6,
                            1, 2, 6, 5,
@@ -68,26 +59,25 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary* boundary,
                            4, 5, 6, 7,
                            0, 3, 2, 1};
 
-    int nodest = nodesPerElement * E->lmesh.nel;
-    int* bnodes = new int[nodest];
-    for(int i=0; i<nodest; i++) bnodes[i] = -1;
+    const int nodest = NODES_PER_ELEMENT * E->lmesh.nel;
+    std::vector<int> bnodes(nodest, -1);
 
     // Assignment of the local boundary node numbers
     // to bnodes elements array
     for(int n=0; n<E->lmesh.nel; n++) {
-	for(int j=0; j<nodesPerElement; j++) {
+	for(int j=0; j<NODES_PER_ELEMENT; j++) {
 	    int gnode = E->IEN[E->mesh.levmax][1][n+1].node[j+1];
-	    for(int k=0; k<fgmapping->size(); k++) {
-		if(gnode == fgmapping->bid2gid(k)) {
-		    bnodes[n*nodesPerElement+j] = k;
+	    for(int k=0; k<sink.size(); k++) {
+		if(gnode == sink.meshNode(k)) {
+		    bnodes[n*NODES_PER_ELEMENT+j] = k;
 		    break;
 		}
 	    }
 	}
     }
 
-    double garea[dim_][2];
-    for(int i=0; i<dim_; i++)
+    double garea[DIM][2];
+    for(int i=0; i<DIM; i++)
 	for(int j=0; j<2; j++)
 	    garea[i][j] = 0.0;
 
@@ -95,25 +85,25 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary* boundary,
 	// Loop over element faces
 	for(int i=0; i<6; i++) {
 	    // Checking of diagonal nodal faces
-	    if((bnodes[n*nodesPerElement+facenodes[i*4]] >=0) &&
-	       (bnodes[n*nodesPerElement+facenodes[i*4+1]] >=0) &&
-	       (bnodes[n*nodesPerElement+facenodes[i*4+2]] >=0) &&
-	       (bnodes[n*nodesPerElement+facenodes[i*4+3]] >=0)) {
+	    if((bnodes[n*NODES_PER_ELEMENT+facenodes[i*4]] >=0) &&
+	       (bnodes[n*NODES_PER_ELEMENT+facenodes[i*4+1]] >=0) &&
+	       (bnodes[n*NODES_PER_ELEMENT+facenodes[i*4+2]] >=0) &&
+	       (bnodes[n*NODES_PER_ELEMENT+facenodes[i*4+3]] >=0)) {
 
-		double xc[12], normal[dim_];
+		double xc[12], normal[DIM];
 		for(int j=0; j<4; j++) {
-		    int lnode = bnodes[n*nodesPerElement+facenodes[i*4+j]];
+		    int lnode = bnodes[n*NODES_PER_ELEMENT+facenodes[i*4+j]];
 
-		    if(lnode >= boundary->size()) {
+		    if(lnode >= boundary.size()) {
 			journal::firewall_t firewall("Exchanger");
 			firewall << journal::loc(__HERE__)
 				 << " lnode = " << lnode
-				 << " size " << boundary->size()
+				 << " size " << boundary.size()
 				 << journal::end;
 		    }
 
-		    for(int l=0; l<dim_; l++)
-			xc[j*dim_+l] = boundary->X(l,lnode);
+		    for(int l=0; l<DIM; l++)
+			xc[j*DIM+l] = boundary.X(l,lnode);
 		}
 
 		normal[0] = (xc[4]-xc[1])*(xc[11]-xc[2])
@@ -126,56 +116,60 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary* boundary,
 				   + normal[1]*normal[1]
 				   + normal[2]*normal[2]);
 
-		for(int l=0; l<dim_; l++)
+		for(int l=0; l<DIM; l++)
 		    normal[l] /= area;
 
 		if(xc[0] == xc[6])
-		    area = fabs(0.5 * (xc[2]+xc[8]) * (xc[8]-xc[2])
-				* (xc[7]-xc[1]) * sin(xc[0]));
+		    area = std::abs(0.5 * (xc[2]+xc[8]) * (xc[8]-xc[2])
+				    * (xc[7]-xc[1]) * sin(xc[0]));
 		if(xc[1] == xc[7])
-		    area = fabs(0.5 * (xc[2]+xc[8]) * (xc[8]-xc[2])
-				* (xc[6]-xc[0]));
+		    area = std::abs(0.5 * (xc[2]+xc[8]) * (xc[8]-xc[2])
+				    * (xc[6]-xc[0]));
 		if(xc[2] == xc[8])
-		    area = fabs(xc[2] * xc[8] * (xc[7]-xc[1])
-				* (xc[6]-xc[0]) * sin(0.5*(xc[0]+xc[6])));
+		    area = std::abs(xc[2] * xc[8] * (xc[7]-xc[1])
+				    * (xc[6]-xc[0]) * sin(0.5*(xc[0]+xc[6])));
 
-		for(int l=0; l<dim_; l++) {
+		for(int l=0; l<DIM; l++) {
 		    if(normal[l] > 0.999 ) garea[l][0] += area;
 		    if(normal[l] < -0.999 ) garea[l][1] += area;
 		}
 		for(int j=0; j<4; j++) {
-		    int lnode = bnodes[n*nodesPerElement+facenodes[i*4+j]];
-		    for(int l=0; l<dim_; l++)
-			nwght[lnode*dim_+l] += normal[l] * area/4.;
+		    int lnode = bnodes[n*NODES_PER_ELEMENT+facenodes[i*4+j]];
+		    for(int l=0; l<DIM; l++)
+			nwght[lnode*DIM+l] += normal[l] * area/4.;
 		}
 	    } // end of check of nodes
 	} // end of loop over faces
     } // end of loop over elements
-    delete [] bnodes;
+}
+
+
+void AreaWeightedNormal::computeTotalArea()
+{
+    total_area_ = 0;
+    for(int n=0; n<size_; n++)
+	for(int j=0; j<DIM; j++)
+	    total_area_ += std::abs(nwght[n*3+j]);
 }
 
 
 double AreaWeightedNormal::computeOutflow(const Velo& V) const {
     double outflow = 0;
     for(int n=0; n<V.size(); n++)
-	for(int j=0; j<dim_; j++)
-	    outflow += V[j][n] * nwght[n*dim_+j];
+	for(int j=0; j<DIM; j++)
+	    outflow += V[j][n] * nwght[n*DIM+j];
 
     return outflow;
 }
 
 
-void AreaWeightedNormal::reduceOutflow(Velo& V, const double outflow) const {
-    double total_area = 0;
-    for(int n=0; n<size_; n++)
-	for(int j=0; j<dim_; j++)
-	    total_area += fabs(nwght[n*3+j]);
-
+void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow) const
+{
     for(int n=0; n<size_; n++) {
-	for(int j=0; j<dim_; j++)
-	    if(fabs(nwght[n*dim_+j]) > 1.e-10) {
-		V[j][n] -= outflow * nwght[n*dim_+j]
-		    / (total_area * fabs(nwght[n*dim_+j]));
+	for(int j=0; j<DIM; j++)
+	    if(std::abs(nwght[n*DIM+j]) > 1.e-10) {
+		V[j][n] -= outflow * nwght[n*DIM+j]
+		    / (total_area_ * std::abs(nwght[n*DIM+j]));
 	    }
     }
 }
@@ -183,6 +177,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, const double outflow) const {
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.3 2003/10/24 04:51:53 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.4 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file

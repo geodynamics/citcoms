@@ -20,32 +20,58 @@ class FineGridExchanger(Exchanger):
         return
 
 
-    def createExchanger(self, solver):
-        self.exchanger = self.module.createFineGridExchanger(
-                                     solver.communicator.handle(),
-                                     solver.intercomm.handle(),
-                                     solver.leader,
-                                     solver.remoteLeader,
-                                     solver.all_variables
-                                     )
+    def initialize(self, solver):
+        Exchanger.initialize(self, solver)
+
+        self.interior = range(self.numSrc)
+        self.source["Intr"] = range(self.numSrc)
+        self.interior = range(self.numSrc)
+        return
+
+
+    def createMesh(self):
+        self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
+        mycomm = self.communicator
+        self.remoteBBox = self.module.exchangeBoundedBox(self.globalBBox,
+                                                         mycomm.handle(),
+                                                         self.sinkComm.handle(),
+                                                         0)
+        self.boundary, self.myBBox = self.module.createBoundary(
+                                                     self.remoteBBox,
+                                                     self.all_variables)
+        for i in range(len(self.interior)):
+            self.interior[i] = self.module.createEmptyInterior()
 
         return
 
 
-    def findBoundary(self):
-        self.module.createBoundary(self.exchanger)
-        # create mapping from boundary node # to global node #
-        self.module.mapBoundary(self.exchanger)
+    def createSourceSink(self):
+        self.createSink()
+        self.createSource()
+        return
 
-        # send boundary from CGE
-        self.module.sendBoundary(self.exchanger)
 
-        self.module.setBCFlag(self.exchanger)
+    def createSink(self):
+        self.sink["BC"] = self.module.createSink(self.sinkComm.handle(),
+                                                 self.numSrc,
+                                                 self.boundary,
+                                                 self.all_variables)
+        return
+
+
+    def createSource(self):
+        return
+
+
+    def createBC(self):
+        self.BC = self.module.createBCSink(self.boundary,
+                                           self.sink["BC"],
+                                           self.all_variables)
         return
 
 
     def initTemperature(self):
-        self.module.initTemperature(self.exchanger)
+        self.module.initTemperatureTest(self.globalBBox, self.all_variables)
         # receive temperture field from CGE
         #self.module.receiveTemperature(self.exchanger)
         return
@@ -66,11 +92,10 @@ class FineGridExchanger(Exchanger):
 
     def applyBoundaryConditions(self):
         if self.toApplyBC:
-            self.module.receiveVelocities(self.exchanger)
-            self.module.imposeConstraint(self.exchanger)
-            self.module.distribute(self.exchanger)
+            self.module.recvTandV(self.BC)
             self.toApplyBC = False
-            self.module.imposeBC(self.exchanger)
+
+        self.module.imposeBC(self.BC)
 
         # applyBC only when previous step is a catchup step
         if self.catchup:
@@ -81,7 +106,11 @@ class FineGridExchanger(Exchanger):
 
     def stableTimestep(self, dt):
         if self.catchup:
-            self.cge_t = self.module.exchangeTimestep(self.exchanger, dt)
+            mycomm = self.communicator
+            self.cge_t = self.module.exchangeTimestep(dt,
+                                                      mycomm.handle(),
+                                                      self.sinkComm.handle(),
+                                                      0)
             self.fge_t = 0
             self.catchup = False
 
@@ -95,12 +124,21 @@ class FineGridExchanger(Exchanger):
             #print "FGE: CATCHUP!"
 
         # store timestep for interpolating boundary velocities
-        self.module.storeTimestep(self.exchanger, self.fge_t, self.cge_t)
+        self.module.storeTimestep(self.BC, self.fge_t, self.cge_t)
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)
         print "cge_t = %g  fge_t = %g" % (self.cge_t, self.fge_t)
         return dt
+
+
+    def exchangeSignal(self, signal):
+        mycomm = self.communicator
+        newsgnl = self.module.exchangeSignal(signal,
+                                             mycomm.handle(),
+                                             self.sinkComm.handle(),
+                                             0)
+        return newsgnl
 
 
 
@@ -116,6 +154,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.21 2003/10/24 05:04:31 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.22 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

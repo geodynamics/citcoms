@@ -22,7 +22,6 @@ class Coupler(Component):
         Component.__init__(self, name, facility)
 
         self.exchanger = None
-        self.boundary = None
         return
 
 
@@ -31,17 +30,13 @@ class Coupler(Component):
         # exchanger could be either a FineGridExchanger (FGE)
         # or a CoarseGridExchanger (CGE)
         self.exchanger = solver.exchanger
-
-        # choose c++ exchanger module
-        self.exchanger.selectModule()
-        # create c++ exchanger
-        self.exchanger.createExchanger(solver)
+        self.exchanger.initialize(solver)
         return
 
 
 
     def launch(self, solver):
-        self.boundary = self.exchanger.findBoundary()
+        self.exchanger.launch(solver)
         return
 
 
@@ -89,6 +84,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.9 2003/10/29 01:13:15 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.10 2003/11/07 01:08:22 tan2 Exp $"
 
 # End of file

@@ -8,11 +8,15 @@
 //
 
 #include <portinfo>
-#include <Python.h>
+#include "global_defs.h"
+#include "initTemperature.h"
 
-PyObject *pyExchanger_runtimeError = 0;
+
+void initTemperature(All_variables* E)
+{}
+
 
 // version
-// $Id: exceptions.cc,v 1.2 2003/11/07 01:08:01 tan2 Exp $
+// $Id: initTemperature.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
 
 // End of file
