@@ -152,6 +152,41 @@ void deleteBoundaryVTInlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "SVTInlet.h"
+
+extern "C" void deleteSVTInlet(void*);
+
+
+char pyExchanger_SVTInlet_create__doc__[] = "";
+char pyExchanger_SVTInlet_create__name__[] = "SVTInlet_create";
+
+PyObject * pyExchanger_SVTInlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+
+    if (!PyArg_ParseTuple(args, "OOO:SVTInlet_create",
+                          &obj1, &obj2, &obj3))
+        return NULL;
+
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
+    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+
+    SVTInlet* inlet = new SVTInlet(*b, *sink, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteSVTInlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteSVTInlet(void* p)
+{
+    delete static_cast<SVTInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "TractionInlet.h"
 
 extern "C" void deleteTractionInlet(void*);
@@ -219,6 +254,40 @@ PyObject * pyExchanger_VTInlet_create(PyObject *self, PyObject *args)
 void deleteVTInlet(void* p)
 {
     delete static_cast<VTInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "SVTOutlet.h"
+
+extern "C" void deleteSVTOutlet(void*);
+
+
+char pyExchanger_SVTOutlet_create__doc__[] = "";
+char pyExchanger_SVTOutlet_create__name__[] = "SVTOutlet_create";
+
+PyObject * pyExchanger_SVTOutlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj0, *obj1;
+
+    if (!PyArg_ParseTuple(args, "OO:SVTOutlet_create",
+                          &obj0, &obj1))
+        return NULL;
+
+    VTSource* source = static_cast<VTSource*>(PyCObject_AsVoidPtr(obj0));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
+
+    SVTOutlet* outlet = new SVTOutlet(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteSVTOutlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteSVTOutlet(void* p)
+{
+    delete static_cast<SVTOutlet*>(p);
 }
 
 
@@ -293,6 +362,6 @@ void deleteTractionOutlet(void* p)
 
 
 // version
-// $Id: inlets_outlets.cc,v 1.4 2004/03/28 23:05:19 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.5 2004/04/16 00:03:50 tan2 Exp $
 
 // End of file
