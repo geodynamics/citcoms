@@ -786,7 +786,6 @@ void get_elt_tr(struct All_variables *E, int bel,
                                  E->mesh.levmax,m,0,
                                  NS[side],far[side]);
 
-    side = SIDE_TOP;
     for(j=1;j<=oned;j++)
       for(d=1;d<=dims;d++)
         traction_at_gs[d][j] = 0.0;
@@ -887,7 +886,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.11 2004/04/09 23:56:06 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.12 2004/04/10 00:00:06 tan2 Exp $ */
 
 /* End of file  */
-
