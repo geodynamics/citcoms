@@ -49,6 +49,8 @@ class SimpleApp(Application):
 
     def layout(self):
         self.solver = self.inventory.solver
+        import mpi
+        self.solverCommunicator = mpi.world()
         return
 
 
@@ -97,6 +99,6 @@ class SimpleApp(Application):
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.1 2003/08/29 00:08:44 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.2 2003/08/29 18:06:35 tan2 Exp $"
 
 # End of file

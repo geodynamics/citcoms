@@ -16,8 +16,7 @@ class Solver(BaseSolver):
 
     def launch(self,application):
 	#journal.info("staging").log("setup MPI")
-        comm = self.get_communicator()
-
+        comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 
         self.initialize()
@@ -89,19 +88,6 @@ class Solver(BaseSolver):
 
 
 
-    def get_communicator(self):
-	#journal.info("staging").log("setup MPI")
-        import mpi
-        world = mpi.world()
-
-        if self.inventory.ranklist:
-            comm = world.include(self.inventory.ranklist)
-            return comm
-        else:
-            return world
-
-
-
     def save(self,step):
         self.CitcomModule.output(self.all_variables,step)
         return
@@ -148,7 +134,6 @@ class Solver(BaseSolver):
     class Inventory(BaseSolver.Inventory):
 
         import pyre.facilities
-        import pyre.properties
 
         # facilities
         from CitcomS.Facilities.TSolver import TSolver
@@ -168,8 +153,6 @@ class Solver(BaseSolver):
 
         inventory = [
 
-            pyre.properties.sequence("ranklist", []),
-
             TSolver("tsolver", Advection_diffusion.temperature_diffadv("temp")),
             VSolver("vsolver", Stokes_solver.incompressibleNewtonian("incomp-newtonian")),
 
@@ -183,6 +166,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.12 2003/08/28 23:58:48 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.13 2003/08/29 18:06:35 tan2 Exp $"
 
 # End of file
