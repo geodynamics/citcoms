@@ -747,13 +747,13 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
 {
 
-  int aid,i,p,a,b,d,j,k,q,es;
-  int node[5],back_front,got_elt_k,nodea,nodeb;
+  int i,p,a,b,j,k,q,es;
+  int got_elt_k,nodea,nodeb;
   unsigned int type;
+  const unsigned int vbc_flag[] = {0, VBX, VBY, VBZ};
 
-  double force[9],force_at_gs[9],stress[9],elt_k[24*24];
-  double vector[4],magnitude;
-  double tmp,rtf[4][9];
+  double force[9],force_at_gs[9],elt_k[24*24];
+  double rtf[4][9];
 
   void get_global_shape_fn();
   void construct_c3x3matrix_el();
@@ -762,7 +762,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   struct Shape_function_dA dOmega;
   struct Shape_function_dx GNx;
 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int dims=E->mesh.nsd;
   const int n=loc_mat_size[dims];
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
@@ -800,8 +800,8 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
       if(bcs)  {
         got_elt_k = 0;
-        type=VBX;
         for(j=1;j<=dims;j++) {
+	  type=vbc_flag[j];
           for(b=1;b<=ends;b++) {
             nodeb=E->ien[m][el].node[b];
             if ((E->node[m][nodeb]&type)&&(E->sphere.cap[m].VB[j][nodeb]!=0.0)){
@@ -815,7 +815,6 @@ void get_elt_f(E,el,elt_f,bcs,m)
                 }
               }
             }  /* end for b */
-            type *= (unsigned int) 2;
           }      /* end for j */
         }      /* end if for if bcs */
 
