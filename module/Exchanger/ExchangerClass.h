@@ -14,7 +14,7 @@
 #include "mpi.h"
 
 struct All_variables;
-template <int dim> class Array2D;
+template <class T, int dim> class Array2D;
 class Boundary;
 class Mapping;
 
@@ -67,8 +67,8 @@ protected:
 
     Mapping *mapping;
 
-    typedef std::auto_ptr<Array2D<1> > Temper;
-    typedef std::auto_ptr<Array2D<3> > Velo;
+    typedef std::auto_ptr<Array2D<double,1> > Temper;
+    typedef std::auto_ptr<Array2D<double,3> > Velo;
 
     Temper outgoingT;
     Temper incomingT;
@@ -97,7 +97,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.28 2003/10/11 00:38:46 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.29 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file
 

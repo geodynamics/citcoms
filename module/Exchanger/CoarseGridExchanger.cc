@@ -48,8 +48,8 @@ void CoarseGridExchanger::gather() {
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 	for (int i=0; i<nproc; i++) {
-	    Array2D<dim> recV(size);
-	    Array2D<3>* V = localV.get();
+	    Array2D<double,dim> recV(size);
+	    Array2D<double,dim>* V = localV.get();
 
 	    if (i != leader) {
 		recV.receive(comm, i);
@@ -59,10 +59,10 @@ void CoarseGridExchanger::gather() {
 	    for (int n=0; n<size; n++)
 		if (cgmapping->bid2proc(n) == i)
 		    for (int d=0; d<dim; d++)
-			tmp[n*dim+d] = (*V)(d,n);
+			tmp[n*dim+d] = (*V)[d][n];
 	}
 
-	outgoingV = Velo(new Array2D<dim>(tmp, size));
+	outgoingV = Velo(new Array2D<double,dim>(tmp.release(), size));
 	//outgoingV->print("outgoingV");
     }
     else {
@@ -98,7 +98,7 @@ void CoarseGridExchanger::interpretate() {
 		}
 	}
     }
-    localV = Velo(new Array2D<dim>(tmp, size));
+    localV = Velo(new Array2D<double,dim>(tmp.release(), size));
     //localV->print("localV");
 }
 
@@ -167,6 +167,6 @@ void CoarseGridExchanger::interpolateTemperature() {
 }
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.29 2003/10/11 00:38:46 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.30 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file

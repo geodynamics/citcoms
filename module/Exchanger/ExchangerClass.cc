@@ -45,11 +45,11 @@ void Exchanger::createDataArrays() {
 
     int size = boundary->size();
 
-    outgoingT = Temper(new Array2D<1>(size));
-    incomingT = Temper(new Array2D<1>(size));
+    outgoingT = Temper(new Array2D<double,1>(size));
+    incomingT = Temper(new Array2D<double,1>(size));
 
-    incomingV = Velo(new Array2D<3>(size));
-    old_incomingV = Velo(new Array2D<3>(size));
+    incomingV = Velo(new Array2D<double,3>(size));
+    old_incomingV = Velo(new Array2D<double,3>(size));
 }
 
 
@@ -240,7 +240,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.33 2003/10/11 00:38:46 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.34 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file
 

@@ -7,9 +7,9 @@
 
 #include <portinfo>
 #include <iostream>
-#include <memory>
 #include <cmath>
 #include "global_defs.h"
+#include "Array2D.cc"
 #include "Boundary.h"
 #include "Mapping.h"
 
@@ -17,7 +17,7 @@
 Mapping::Mapping(const int n) :
     size_(n),
     memsize_(n),
-    bid2proc_(new int[n])
+    bid2proc_(n)
 {}
 
 
@@ -31,40 +31,37 @@ void Mapping::sendBid2proc(const MPI_Comm comm,
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 
-	std::auto_ptr<int> tmp(new int[size_]);
-	int *ptmp = tmp.get();
+	Array2D<int,1> tmp(size_);
 
 	for (int i=0; i<nproc; i++) {
 	    if (i == leader) continue; // skip leader itself
 
-	    MPI_Status status;
-	    MPI_Recv(ptmp, size_, MPI_INT,
-	    	     i, i, comm, &status);
-	    for (int n=0; n<size_; n++) {
-		if (ptmp[n] != nproc) bid2proc_[n] = ptmp[n];
-	    }
+	    tmp.receive(comm, i);
+
+ 	    for (int n=0; n<size_; n++) {
+ 		if (tmp[0][n] != nproc) bid2proc_[0][n] = tmp[0][n];
+ 	    }
 	}
+
 	// whether all boundary nodes are mapped to a processor?
 	for (int n=0; n<size_; n++)
-	    if (bid2proc_[n] == nproc) {
-		// nproc is an invalid rank
+	    if (bid2proc_[0][n] == nproc) { // nproc is an invalid rank
 		printBid2proc();
-		break;
+		const std::string msg = "Unmapped boundary node";
+		std::cerr << msg << std::endl;
+		throw msg;
 	    }
 
-	//printBid2proc();
+	printBid2proc();
     }
     else {
-	MPI_Send(bid2proc_.get(), size_, MPI_INT,
-		 leader, rank, comm);
+	bid2proc_.send(comm, leader);
     }
-
 }
 
 
 void Mapping::printBid2proc() const {
-    for(int j=0; j<size_; j++)
-	std::cout << "  proc:  " << j << ":  " << bid2proc_[j] << std::endl;
+    bid2proc_.print("proc");
 }
 
 
@@ -77,8 +74,8 @@ CoarseGridMapping::CoarseGridMapping(const Boundary* boundary,
 				     const MPI_Comm comm,
 				     const int rank, const int leader) :
     Mapping(boundary->size()),
-    bid2elem_(new int[size_]),
-    shape_(new double[size_*8])
+    bid2elem_(size_),
+    shape_(8*size_)
 {
     double theta_tol = 0;
     double fi_tol = 0;
@@ -128,8 +125,8 @@ void CoarseGridMapping::findBoundaryElements(const Boundary* boundary,
     double xt[3], xc[24], x1[3], x2[3], x3[3], x4[3];
 
     for(int i=0; i<size_; i++) {
-	bid2proc_[i] = E->parallel.nproc;  // nproc is always an invalid rank
-	bid2elem_[i] = 0;
+	bid2proc_[0][i] = E->parallel.nproc;  // nproc is always an invalid rank
+	bid2elem_[0][i] = 0;
     }
 
     const int dim = 3;
@@ -179,16 +176,17 @@ void CoarseGridMapping::findBoundaryElements(const Boundary* boundary,
                     det[2] = TetrahedronVolume(x1,x4,x2,xt);
                     det[3] = TetrahedronVolume(x1,x2,x3,xt);
                     if(dett < 0) {
-                        std::cout << " Determinant evaluation is wrong "
-				  << in << std::endl;
 			std::cout << " node " << i
 				  << " " << xt[0]
 				  << " " << xt[1]
 				  << " " << xt[2] << std::endl;
-                       for(int j=0; j<8; j++)
+			for(int j=0; j<8; j++)
                             std::cout << xc[j*3]
 				      << " " << xc[j*3+1]
 				      << " " << xc[j*3+2] << std::endl;
+                        const std::string msg = "Determinant evaluation is wrong ";
+			std::cerr << msg << std::endl;
+			throw msg;
                     }
 
 		    if (det[0] < -1.e-10 ||
@@ -197,13 +195,13 @@ void CoarseGridMapping::findBoundaryElements(const Boundary* boundary,
 			det[3] < -1.e-10) continue;
 
                     ind = 1;
-                    bid2elem_[i] = n+1;
-                    bid2proc_[i] = rank;
-                    for(int j=0; j<8; j++) shape_[i*8+j] = 0.0;
-                    shape_[i*8+nsub[k*4]] = det[0]/dett;
-                    shape_[i*8+nsub[k*4+1]] = det[1]/dett;
-                    shape_[i*8+nsub[k*4+2]] = det[2]/dett;
-                    shape_[i*8+nsub[k*4+3]] = det[3]/dett;
+                    bid2elem_[0][i] = n+1;
+                    bid2proc_[0][i] = rank;
+                    for(int j=0; j<8; j++) shape_[0][i*8+j] = 0.0;
+                    shape_[0][i*8+nsub[k*4]] = det[0]/dett;
+                    shape_[0][i*8+nsub[k*4+1]] = det[1]/dett;
+                    shape_[0][i*8+nsub[k*4+2]] = det[2]/dett;
+                    shape_[0][i*8+nsub[k*4+3]] = det[3]/dett;
                     break;
                 }
                 if(ind) break;
@@ -223,10 +221,10 @@ void CoarseGridMapping::selfTest(const Boundary* boundary,
     const int dim = boundary->dim;
 
     for(int i=0; i<size_; i++) {
-	if(!bid2elem_[i]) continue;
+	if(!bid2elem_[0][i]) continue;
         for(int j=0; j<dim; j++) xt[j] = boundary->X[j][i];
 
-        int n1 = bid2elem_[i];
+        int n1 = bid2elem_[0][i];
 
         for(int j=0; j<8; j++) {
             for(int k=0; k<dim; k++) {
@@ -236,19 +234,22 @@ void CoarseGridMapping::selfTest(const Boundary* boundary,
         for(int k=0; k<dim; k++) xi[k] = 0.0;
         for(int k=0; k<dim; k++)
             for(int j=0; j<8; j++) {
-                xi[k] += xc[j*dim+k]*shape_[i*8+j];
+                xi[k] += xc[j*dim+k]*shape_[0][i*8+j];
             }
 
         double norm = 0.0;
         for(int k=0; k<dim; k++) norm += (xt[k]-xi[k]) * (xt[k]-xi[k]);
         if(norm > 1.e-10) {
             double tshape = 0.0;
-            for(int j=0; j<8; j++) tshape += shape_[i*8+j];
-            std::cout << "\n in CoarseGridMapping::selfTest for bid2elem interpolation functions are wrong " << norm << std::endl;
+            for(int j=0; j<8; j++) tshape += shape_[0][i*8+j];
             std::cout << "node #" << i << " tshape = " << tshape <<std::endl;
             std::cout << xi[0] << " " << xt[0] << " "
 		      << xi[1] << " " << xt[1] << " "
-		      << xi[2] << " " << xt[2] << std::endl;
+		      << xi[2] << " " << xt[2] << " "
+		      << " norm = " << norm << std::endl;
+            const std::string msg = "bid2elem interpolation functions are wrong ";
+	    std::cerr << msg << std::endl;
+	    throw msg;
         }
     }
 }
@@ -280,8 +281,7 @@ double CoarseGridMapping::det3_sub(double *x1, double *x2, double *x3) const
 
 
 void CoarseGridMapping::printBid2elem() const {
-    for(int j=0; j<size_; j++)
-	std::cout << "  elem:  " << j << ":  " << bid2elem_[j] << std::endl;
+    bid2elem_.print();
 }
 
 
@@ -296,7 +296,7 @@ FineGridMapping::FineGridMapping(Boundary* boundary,
 				 const MPI_Comm comm,
 				 const int rank, const int leader) :
     Mapping(boundary->size()),
-    bid2gid_(new int[size_])
+    bid2gid_(size_)
 {
     findBoundaryNodes(boundary, E);
 }
@@ -323,14 +323,14 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 		    if ((E->parallel.me_loc[1]==0) && (!nid[node1-1]))  {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node1];
-			bid2gid_[nodes] = node1;
+			bid2gid_[0][nodes] = node1;
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if ((E->parallel.me_loc[1]==E->parallel.nprocx-1) && (!nid[node2-1])) {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node2];
-			bid2gid_[nodes] = node2;
+			bid2gid_[0][nodes] = node2;
 			nid[node2-1]++;
 			nodes++;
 		    }
@@ -347,14 +347,14 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 		    if ((E->parallel.me_loc[2]==0) && (!nid[node1-1]))  {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node1];
-			bid2gid_[nodes] = node1;
+			bid2gid_[0][nodes] = node1;
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if((E->parallel.me_loc[2]==E->parallel.nprocy-1)&& (!nid[node2-1]))  {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node2];
-			bid2gid_[nodes] = node2;
+			bid2gid_[0][nodes] = node2;
 			nid[node2-1]++;
 			nodes++;
 		    }
@@ -370,36 +370,39 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 		    if ((E->parallel.me_loc[3]==0 ) && (!nid[node1-1])) {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node1];
-			bid2gid_[nodes] = node1;
+			bid2gid_[0][nodes] = node1;
 			nid[node1-1]++;
 			nodes++;
 		    }
 		    if ((E->parallel.me_loc[3]==E->parallel.nprocz-1) &&(!nid[node2-1])) {
 			for(int k=0;k<boundary->dim;k++)
 			    boundary->X[k][nodes]=E->sx[m][k+1][node2];
-			bid2gid_[nodes] = node2;
+			bid2gid_[0][nodes] = node2;
 			nid[node2-1]++;
 			nodes++;
 		    }
 		}
-    if(nodes != size_) std::cout << " nodes != size ";
 
     delete [] nid;
+    boundary->printX();
+    printBid2gid();
 
-    //boundary->printX();
-    //printBid2gid();
+    if(nodes != size_) {
+	const std::string msg = " nodes != size ";
+	std::cerr << msg << std::endl;
+	throw msg;
+    }
 }
 
 
-void FineGridMapping::printBid2gid() const {
-    for(int j=0; j<size_; j++)
-	std::cout << "  bid:  " << j << ":  " << bid2gid_[j] << std::endl;
+void FineGridMapping::printBid2gid(const std::string& prefix) const {
+    bid2gid_.print(prefix + ":bid");
 }
 
 
 
 
 // version
-// $Id: Mapping.cc,v 1.1 2003/10/11 00:38:46 tan2 Exp $
+// $Id: Mapping.cc,v 1.2 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file

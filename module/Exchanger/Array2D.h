@@ -11,36 +11,55 @@
 #include <portinfo>
 #include <iostream>
 #include <string>
-#include "auto_array_ptr.h"
 #include "mpi.h"
 
 
-template <int N>
+template <class T, int N>
 class Array2D {
     const int size_;
-    auto_array_ptr<double> a_;
+    T* a_;
 
 public:
     explicit Array2D(const int size);
-    Array2D(const Array2D<N>& rhs);
-    Array2D(auto_array_ptr<double> array, const int size);
-    ~Array2D() {};
+    Array2D(const Array2D<T,N>& rhs);
+    Array2D(T* array, const int size);
+    ~Array2D();
 
-    Array2D<N>& operator=(const Array2D<N>& rhs);
+    Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
 
-    inline double operator()(int d, int n) const {return a_[n*N+d];}
     inline int size() const {return size_;}
-    inline void swap(Array2D<N>& rhs) {
-	a_.swap(rhs.a_);
-	std::swap(size_, rhs.size_);
-    }
-
     void send(const MPI_Comm comm, const int receiver) const;
     void receive(const MPI_Comm comm, const int sender);
     void broadcast(const MPI_Comm comm, const int broadcaster);
-
     void print(const std::string& prefix="Array2D") const;
 
+
+    // proxy class for operator[]
+    class Array1D {
+	T* const& p_;
+	const int n_;
+    public:
+	inline Array1D(T* const& a_, const int n) : p_(a_), n_(n){};
+
+	inline T& operator[](const int index) {
+	    return p_[index*N+n_];
+	}
+
+	inline const T& operator[](const int index) const {
+	    return p_[index*N+n_];
+	}
+    };
+
+    inline Array1D operator[](const int index) {
+	return Array1D(a_, index);
+    }
+
+    inline const Array1D operator[](const int index) const {
+	return Array1D(a_, index);
+    }
+
+private:
+    static MPI_Datatype typeofT();
 };
 
 
@@ -48,6 +67,6 @@ public:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.2 2003/10/11 00:35:50 tan2 Exp $
+// $Id: Array2D.h,v 1.3 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file

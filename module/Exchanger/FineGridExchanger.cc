@@ -170,8 +170,8 @@ void FineGridExchanger::imposeBC() {
 
     // setup aliases
     const int dim = 3;
-    Array2D<dim>& oldV = *old_incomingV;
-    Array2D<dim>& newV = *incomingV;
+    Array2D<double,dim>& oldV = *old_incomingV;
+    Array2D<double,dim>& newV = *incomingV;
 
     for(int m=1; m<=E->sphere.caps_per_proc; m++) {
 	for(int i=0; i<boundary->size(); i++) {
@@ -179,8 +179,8 @@ void FineGridExchanger::imposeBC() {
 	    int p = fgmapping->bid2proc(i);
 	    if (p == rank) {
  		for(int d=0; d<dim; d++)
- 		    E->sphere.cap[m].VB[d+1][n] = N1 * oldV(d,i)
- 		                                + N2 * newV(d,i);
+ 		    E->sphere.cap[m].VB[d+1][n] = N1 * oldV[d][i]
+ 		                                + N2 * newV[d][i];
 //                 std::cout << E->sphere.cap[m].VB[1][n] << " "
 // 			  << E->sphere.cap[m].VB[2][n] << " "
 // 			  <<  E->sphere.cap[m].VB[3][n] << std::endl;
@@ -292,7 +292,7 @@ double FineGridExchanger::computeOutflow(const Velo& V,
     double outflow = 0;
     for(int n=0; n<V->size(); n++)
 	for(int j=0; j<dim; j++)
-	    outflow += (*V)(j,n) * nwght[n*dim+j];
+	    outflow += (*V)[j][n] * nwght[n*dim+j];
 
     return outflow;
 }
@@ -313,24 +313,24 @@ void FineGridExchanger::reduceOutflow(const double outflow,
 
 	for(int n=0; n<size; n++)
 	    for(int j=0; j<dim; j++)
-		tmp[n*dim+j] = (*incomingV)(j,n);
+		tmp[n*dim+j] = (*incomingV)[j][n];
 
 	for(int n=0; n<size; n++) {
             for(int j=0; j<dim; j++)
                 if(fabs(nwght[n*dim+j]) > 1.e-10) {
-                    tmp[n*dim+j] = (*incomingV)(j,n)
+                    tmp[n*dim+j] = (*incomingV)[j][n]
 			         - outflow * nwght[n*dim+j]
 			           / (total_area * fabs(nwght[n*dim+j]));
 	    }
 	}
 
-	incomingV = Velo(new Array2D<dim>(tmp, size));
+	incomingV = Velo(new Array2D<double,dim>(tmp.release(), size));
 	//incomingV->print("incomingV");
 }
 
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.23 2003/10/15 18:51:24 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.24 2003/10/16 20:06:02 tan2 Exp $
 
 // End of file
