@@ -21,7 +21,7 @@ extern "C" {
 
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
-    void temperatures_conform_bcs(All_variables* E);
+    void my_tbc(struct All_variables* E);
 }
 
 using Exchanger::Array2D;
@@ -235,7 +235,9 @@ void SVTInlet::imposeT()
     }
 //     debugBC << journal::end;
 
-    temperatures_conform_bcs(E);
+    my_tbc(E);
+
+    (E->temperatures_conform_bcs)(E);
 }
 
 
@@ -252,6 +254,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.6 2004/05/25 00:29:30 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.7 2004/10/08 00:11:23 tan2 Exp $
 
 // End of file

@@ -18,6 +18,9 @@
 
 using Exchanger::BoundedBox;
 
+void isothermal(const BoundedBox& bbox, All_variables* E);
+void basal_hallow(const BoundedBox& bbox, All_variables* E);
+void plate(const BoundedBox& bbox, All_variables* E);
 void hot_blob(const BoundedBox& bbox, All_variables* E);
 void hot_blob_below(const BoundedBox& bbox, All_variables* E);
 void five_hot_blobs(const BoundedBox& bbox, All_variables* E);
@@ -28,21 +31,74 @@ void debug_output(const All_variables* E);
 void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E);
 
 
-extern "C" {
-    void temperatures_conform_bcs(struct All_variables*);
-}
-
-
 void initTemperature(const BoundedBox& bbox, All_variables* E)
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    hot_blob_below(bbox, E);
+    //isothermal(bbox, E);
+    basal_hallow(bbox, E);
+    //plate(bbox, E);
+    //hot_blob_below(bbox, E);
     //hot_blob(bbox, E);
     //five_hot_blobs(bbox, E);
 
     debug_output(E);
+    (E->temperatures_conform_bcs)(E);
+}
+
+
+void isothermal(const BoundedBox& bbox, All_variables* E)
+{
+    // isothermal mantle
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+	for(int i=1; i<E->lmesh.nno; ++i)
+	    E->T[m][i] = E->control.TBCbotval;
+}
+
+
+void basal_hallow(const BoundedBox& bbox, All_variables* E)
+{
+    // isothermal mantle + a hot thermal hallow in accordance to bottom TBC
+    isothermal(bbox, E);
+
+    const float lambda = 0.01;
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int k=1;k<=E->lmesh.noy;k++)
+            for(int j=1;j<=E->lmesh.nox;j++)
+                for(int i=1;i<=E->lmesh.noz;i++)  {
+                    int node = i + (j-1)*E->lmesh.noz
+ 			      + (k-1)*E->lmesh.noz*E->lmesh.nox;
+		    int bnode = node - i + 1;
+		    double tbc = E->sphere.cap[m].TB[3][bnode];
+                    double r = E->sx[m][3][node];
+
+		    E->T[m][node] = tbc * exp(-(r - E->sphere.ri) / lambda);
+		}
+}
+
+
+void plate(const BoundedBox& bbox, All_variables* E)
+{
+    // isothermal mantle + cold lithosphere (age specified by 'seafloor_age')
+    isothermal(bbox, E);
+
+    const double limit = 0.9;
+    const double seafloor_age = 40 / E->data.scalet; // Ma
+
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int k=1;k<=E->lmesh.noy;k++)
+            for(int j=1;j<=E->lmesh.nox;j++)
+                for(int i=1;i<=E->lmesh.noz;i++)  {
+                    int node = i + (j-1)*E->lmesh.noz
+                             + (k-1)*E->lmesh.noz*E->lmesh.nox;
+
+                    double r = E->sx[m][3][node];
+                    if(r >= limit) {
+			double temp = (1 - r) * 0.5 / sqrt(seafloor_age);
+                        E->T[m][node] = E->control.TBCbotval * erf(temp);
+		    }
+		}
 }
 
 
@@ -238,7 +294,7 @@ void modifyT(const BoundedBox& bbox, All_variables* E)
 
     basal_tbl_central_hot_blob(bbox, E);
 
-    temperatures_conform_bcs(E);
+    (E->temperatures_conform_bcs)(E);
 }
 
 
@@ -324,6 +380,6 @@ void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E)
 
 
 // version
-// $Id: initTemperature.cc,v 1.5 2004/05/11 07:55:30 tan2 Exp $
+// $Id: initTemperature.cc,v 1.6 2004/10/08 00:11:23 tan2 Exp $
 
 // End of file

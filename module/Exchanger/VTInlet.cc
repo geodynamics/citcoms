@@ -18,7 +18,6 @@
 extern "C" {
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
-    void temperatures_conform_bcs(All_variables* E);
 }
 
 using Exchanger::Array2D;
@@ -166,11 +165,11 @@ void VTInlet::imposeT()
     }
     debugBC << journal::end;
 
-    temperatures_conform_bcs(E);
+    (E->temperatures_conform_bcs)(E);
 }
 
 
 // version
-// $Id: VTInlet.cc,v 1.5 2004/05/11 07:55:30 tan2 Exp $
+// $Id: VTInlet.cc,v 1.6 2004/10/08 00:11:23 tan2 Exp $
 
 // End of file

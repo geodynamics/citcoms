@@ -19,10 +19,6 @@
 #include "Exchanger/Sink.h"
 #include "TInlet.h"
 
-extern "C" {
-    void temperatures_conform_bcs(All_variables* E);
-}
-
 using Exchanger::Array2D;
 using Exchanger::BoundedMesh;
 using Exchanger::Sink;
@@ -69,7 +65,7 @@ void TInlet::impose()
 	E->T[m][n] = t[0][i];
     }
 
-    temperatures_conform_bcs(E);
+    (E->temperatures_conform_bcs)(E);
 }
 
 
@@ -77,6 +73,6 @@ void TInlet::impose()
 
 
 // version
-// $Id: TInlet.cc,v 1.1 2004/05/11 07:55:30 tan2 Exp $
+// $Id: TInlet.cc,v 1.2 2004/10/08 00:11:23 tan2 Exp $
 
 // End of file
