@@ -29,6 +29,7 @@ PROJ_SRCS = \
 	Instructions.c \
 	Interuption.c \
 	Nodal_mesh.c \
+	Output.c \
 	Pan_problem_misc_functions.c \
 	Parsing.c \
 	Phase_change.c \
@@ -72,7 +73,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.10 2003/08/08 22:34:31 tan2 Exp $
+# $Id: Make.mm,v 1.11 2003/08/08 22:51:53 tan2 Exp $
 
 #
 # End of file

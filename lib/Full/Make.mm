@@ -23,7 +23,6 @@ PROJ_SRCS = \
 	Boundary_conditions.c \
 	Geometry_cartesian.c \
 	Lith_age.c \
-	Output.c \
 	Parallel_related.c \
 	Sphere_related.c \
 	Version_dependent.c
@@ -36,7 +35,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.8 2003/08/08 22:34:31 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/08/08 22:51:53 tan2 Exp $
 
 #
 # End of file

@@ -771,7 +771,81 @@ void output_temp(E,file_number)
 }
 
 
+void output_visc_prepare(struct All_variables *E, float **VE)
+{
+  void get_ele_visc();
+  void visc_from_ele_to_gint();
+  void visc_from_gint_to_nodes();
 
+  float *EV, *VN[NCS];
+  const int lev = E->mesh.levmax;
+  const int nsd = E->mesh.nsd;
+  const int vpts = vpoints[nsd];
+  int i, m;
+
+
+  // Here is a bug in the original code. EV is not allocated for each
+  // E->sphere.caps_per_proc. Later, when elemental viscosity is written
+  // to it (in get_ele_visc()), viscosity in high cap number will overwrite
+  // that in a lower cap number.
+  //
+  // Since current CitcomS only support 1 cap per processor, this bug won't
+  // manifest itself. So, I will leave it here.
+  // by Tan2 5/22/2003
+  int size2 = (E->lmesh.nel+1)*sizeof(float);
+  EV = (float *) malloc (size2);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    VN[m]=(float *)malloc((1+E->lmesh.nel*vpts)*sizeof(float));
+  }
+
+  get_ele_visc(E,EV,1);
+
+  for(i=1;i<=E->lmesh.nel;i++)
+    VE[1][i]=EV[i];
+
+  visc_from_ele_to_gint(E, VE, VN, lev);
+  visc_from_gint_to_nodes(E, VN, VE, lev);
+
+  free((void *) EV);
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    free((void *) VN[m]);
+  }
+
+  return;
+}
+
+
+void output_visc(struct All_variables *E, int cycles)
+{
+  int i, j, m;
+  char output_file[255];
+  FILE *fp1;
+  float *VE[NCS];
+
+  sprintf(output_file,"%s.visc.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    VE[m]=(float *)malloc((1+E->lmesh.nno)*sizeof(float));
+  }
+
+  output_visc_prepare(E, VE);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.3e\n",VE[1][i]);
+  }
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    free((void*) VE[m]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
 
 /* ==========================================================  */
 /* from Process_buoyancy.c                                     */
