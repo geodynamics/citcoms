@@ -27,12 +27,16 @@ class RegionalApp(Application):
 
         self.setProperties()
 
+        mesher = self.inventory.mesher
+        mesher.init(self)
+
         vsolver = self.inventory.vsolver
         vsolver.init(self)
 
         tsolver = self.inventory.tsolver
         tsolver.init(self)
 
+        mesher.run()
 
         return
 
@@ -88,30 +92,35 @@ class RegionalApp(Application):
 
         import pyre.facilities
 
-	from CitcomS.Facilities.VSolver import VSolver
+        # facilities
+        from CitcomS.Facilities.Mesher import Mesher
         from CitcomS.Facilities.TSolver import TSolver
+	from CitcomS.Facilities.VSolver import VSolver
 
-	import CitcomS.Stokes_solver
+        # component modules
         import CitcomS.Advection_diffusion
+        import CitcomS.Sphere
+	import CitcomS.Stokes_solver
 
+        # components
         from CitcomS.Components.BC import BC
         from CitcomS.Components.Const import Const
         from CitcomS.Components.IC import IC
-        from CitcomS.Components.Mesh import Mesh
+        #from CitcomS.Components.Mesher import Mesher
 	from CitcomS.Components.Parallel import Parallel
 	from CitcomS.Components.Param import Param
         from CitcomS.Components.Phase import Phase
         from CitcomS.Components.Visc import Visc
 
         inventory = [
+            Mesher("mesher", CitcomS.Sphere.regionalSphere()),
             VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
-
             TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv()),
 
             pyre.facilities.facility("bc", default=BC()),
             pyre.facilities.facility("const", default=Const()),
             pyre.facilities.facility("ic", default=IC()),
-            pyre.facilities.facility("mesh", default=Mesh()),
+            #pyre.facilities.facility("mesher", default=Mesher(1)),
 	    pyre.facilities.facility("parallel", default=Parallel()),
             pyre.facilities.facility("param", default=Param()),
             pyre.facilities.facility("phase", default=Phase()),
@@ -160,6 +169,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.15 2003/07/15 18:01:21 ces74 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.16 2003/07/15 21:50:30 tan2 Exp $"
 
 # End of file
