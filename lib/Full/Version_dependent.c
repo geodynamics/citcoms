@@ -3,8 +3,13 @@
 #include <math.h>
 #include <sys/types.h>
 #include <string.h>
-#include "element_definitions.h"
+//#include "element_definitions.h"
 #include "global_defs.h"
+#include "initial_temperature.h"
+#include "lith_age.h"
+#include "parsing.h"
+#include "phase_change.h"
+
 
 // Setup global mesh parameters
 //
@@ -15,25 +20,6 @@ void global_derived_values(E)
     char logfile[100], timeoutput[100];
     FILE *fp, *fptime;
     void parallel_process_termination();
- 
-    /* As early as possible, set up the log file to 
-       record information about the progress of the 
-       program as it runs 
-       */
-    /* also add a time file to output time CPC 6/18/00 */
-
-    sprintf(logfile,"%s.log",E->control.data_file);
-    sprintf(timeoutput,"%s.time",E->control.data_file);
-
-    if((fp=fopen(logfile,"w")) == NULL)
-	E->fp = stdout;
-    else
-	E->fp = fp;
-
-    if((fptime=fopen(timeoutput,"w")) == NULL)
-	E->fptime = stdout;
-    else
-	E->fptime = fptime;
 
    E->mesh.levmax = E->mesh.levels-1;
    nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
@@ -236,6 +222,9 @@ void read_initial_settings(E)
 	input_int("mgunity",&(E->mesh.mgunity),"1",m);
 	input_int("levels",&(E->mesh.levels),"0",m);
 
+	input_int("coor",&(E->control.coor),"0",m);
+	input_string("coor_file",E->control.coor_file,"",m);
+
         input_int("nprocx",&(E->parallel.nprocx),"1",m);
         input_int("nprocy",&(E->parallel.nprocy),"1",m);
         input_int("nprocz",&(E->parallel.nprocz),"1",m);
@@ -253,8 +242,8 @@ void read_initial_settings(E)
 
     input_int("stokes_flow_only",&(E->control.stokes),"0",m);
 
-    input_int("tracer",&(E->control.tracer),"0");
-    input_string("tracer_file",E->control.tracer_file," ");
+    input_int("tracer",&(E->control.tracer),"0",m);
+    input_string("tracer_file",E->control.tracer_file,"",m);
 
     input_int("restart",&(E->control.restart),"0",m);
     input_int("post_p",&(E->control.post_p),"0",m);
@@ -285,31 +274,6 @@ void read_initial_settings(E)
 /*     input_int("read_density",&(E->control.read_density),"1",m); */
 /*     if (E->control.read_density && E->control.read_slab) */
 /*         E->control.read_slab = 0; */
-
-        /* for phase change    */
-    input_float("Ra_410",&(E->control.Ra_410),"0.0",m);
-    input_float("clapeyron410",&(E->control.clapeyron410),"0.0",m);
-    input_float("transT410",&(E->control.transT410),"0.0",m);
-    input_float("width410",&(E->control.width410),"0.0",m);
-
-    if (E->control.width410!=0.0)
-       E->control.width410 = 1.0/E->control.width410;
-
-    input_float("Ra_670",&(E->control.Ra_670),"0.0",m);
-    input_float("clapeyron670",&(E->control.clapeyron670),"0.0",m);
-    input_float("transT670",&(E->control.transT670),"0.0",m);
-    input_float("width670",&(E->control.width670),"0.0",m);
-
-    if (E->control.width670!=0.0)
-       E->control.width670 = 1.0/E->control.width670;
-    
-    input_float("Ra_cmb",&(E->control.Ra_cmb),"0.0",m);
-    input_float("clapeyroncmb",&(E->control.clapeyroncmb),"0.0",m);
-    input_float("transTcmb",&(E->control.transTcmb),"0.0",m);
-    input_float("widthcmb",&(E->control.widthcmb),"0.0",m);
-
-    if (E->control.widthcmb!=0.0)
-       E->control.widthcmb = 1.0/E->control.widthcmb;
 
     input_int("topvbc",&(E->mesh.topvbc),"0",m);
     input_int("botvbc",&(E->mesh.botvbc),"0",m);
@@ -433,6 +397,11 @@ void read_initial_settings(E)
 /*   input_float("gasconst",&(E->data.gas_const),"8.3",m); */   /* not much cause to change these ! */
 /*   input_float("gravconst",&(E->data.grav_const),"6.673e-11",m); */
 /*   input_float("permeability",&(E->data.permeability),"3.0e-10",m); */
+
+  phase_change_input(E);
+  lith_age_input(E);
+  viscosity_input(E);
+  tic_input(E);
 
  (E->problem_settings)(E);
 

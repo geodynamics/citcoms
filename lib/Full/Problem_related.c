@@ -115,18 +115,7 @@ void read_mat_from_file(E)
 
     }     /* end for E->control.mat==1  */
 
-/*
-  sprintf(output_file,"mat.%d",E->parallel.me);
-  fp=fopen(output_file,"w");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Problem_related #3) Cannot open %s\n",output_file);
-          exit(8);
-	}
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   
-      for(el=1;el<=E->lmesh.nel;el++)  
-         fprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
-  fclose(fp); 
-*/
+  /* mat output moved to Output.c */
 
      free ((void *) VIP1);
      free ((void *) VIP2);
@@ -206,6 +195,8 @@ void read_input_files_for_timesteps(E,action,output)
       }
       break;
 
+#if 0
+
     case 2:  /* read ages for lithosphere tempperature boundary conditions */
       sprintf(output_file1,"%s%0.0f",E->control.lith_age_file,newage1);
       sprintf(output_file2,"%s%0.0f",E->control.lith_age_file,newage2);
@@ -230,6 +221,8 @@ void read_input_files_for_timesteps(E,action,output)
            fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
       }
       break;
+
+#endif
 
     } /* end switch */
 
@@ -281,6 +274,8 @@ void read_input_files_for_timesteps(E,action,output)
       }
       break;
 
+#if 0
+
     case 2:  /* ages for lithosphere temperature boundary conditions */
       for(i=1;i<=noy;i++)
       for(j=1;j<=nox;j++) {
@@ -297,6 +292,8 @@ void read_input_files_for_timesteps(E,action,output)
       fclose(fp1);
       if (pos_age) fclose(fp2);
       break;
+
+#endif
 
     } /* end switch */
 

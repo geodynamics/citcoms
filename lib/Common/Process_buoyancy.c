@@ -5,17 +5,24 @@
     get output the next time around the velocity solver);
     */
 
+#if 0
+
 #include <math.h>
 #include <sys/types.h>
 #include <stdlib.h> /* for "system" command */
 
+#endif
+
+
 #include "element_definitions.h"
 #include "global_defs.h"
 
+
+#if 0
 void process_temp_field(E,ii)
  struct All_variables *E;
     int ii;
-{ 
+{
     void heat_flux();
     void output_temp();
     void parallel_process_sync();
@@ -28,17 +35,29 @@ void process_temp_field(E,ii)
       heat_flux(E);
       parallel_process_sync();
 /*      output_temp(E,ii);  */
-    }  
+    }
 
     if ( ((ii == 0) || ((ii % E->control.record_every) == 0))
 	 || E->control.DIRECTII)     {
        process_output_field(E,ii);
     }
-    
+
     return;
 }
+
+#endif
+
+
+
+void post_processing(struct All_variables *E)
+{
+  return;
+}
+
+
+
 /* ===================
-    Surface heat flux  
+    Surface heat flux
    =================== */
 
 void heat_flux(E)
@@ -115,7 +134,7 @@ void heat_flux(E)
   exchange_node_f(E,flux,lev);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(i=1;i<=nno;i++)   
+     for(i=1;i<=nno;i++)
        flux[m][i] *= E->MASS[lev][m][i];
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
@@ -125,13 +144,13 @@ void heat_flux(E)
 
   if (E->parallel.me_loc[3]==0)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nsf;i++) 
+      for(i=1;i<=E->lmesh.nsf;i++)
         E->slice.bhflux[m][i] = 2*flux[m][E->surf_node[m][i]-E->lmesh.noz+1]
                                 - flux[m][E->surf_node[m][i]-E->lmesh.noz+2];
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.snel;e++) {
-         uT =(E->slice.shflux[m][E->sien[m][e].node[1]] + 
+         uT =(E->slice.shflux[m][E->sien[m][e].node[1]] +
               E->slice.shflux[m][E->sien[m][e].node[2]] +
               E->slice.shflux[m][E->sien[m][e].node[3]] +
               E->slice.shflux[m][E->sien[m][e].node[4]])*0.25;
@@ -139,7 +158,7 @@ void heat_flux(E)
          sum_h[0] += uT*E->eco[m][el].area;
          sum_h[1] += E->eco[m][el].area;
 
-         uT =(E->slice.bhflux[m][E->sien[m][e].node[1]] + 
+         uT =(E->slice.bhflux[m][E->sien[m][e].node[1]] +
               E->slice.bhflux[m][E->sien[m][e].node[2]] +
               E->slice.bhflux[m][E->sien[m][e].node[3]] +
               E->slice.bhflux[m][E->sien[m][e].node[4]])*0.25;
@@ -169,12 +188,12 @@ void heat_flux(E)
   }
 
   fflush(E->fp_out);
-  
+
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     free((void *)flux[m]);
 
   free((void *)sum_h);
 
-  return;  
+  return;
   }
-  
+

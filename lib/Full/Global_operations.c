@@ -5,6 +5,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+#if 0
 
 MPI_Comm get_horizontal_communicator(E, layer)
      struct All_variables *E;
@@ -25,9 +26,9 @@ MPI_Comm get_horizontal_communicator(E, layer)
 	for (j=0;j<E->parallel.nprocy;j++) 
 	  processors[k++] = E->parallel.loc2proc_map[m][i][j][layer];
 	
-    MPI_Comm_group(MPI_COMM_WORLD, &world_g);
+    MPI_Comm_group(E->parallel.world, &world_g);
     MPI_Group_incl(world_g, nproch, processors, &horizon_g);
-    MPI_Comm_create(MPI_COMM_WORLD, horizon_g, &MY_HORZ_COMM);
+    MPI_Comm_create(E->parallel.world, horizon_g, &MY_HORZ_COMM);
 
     MPI_Group_free(&horizon_g);
     MPI_Group_free(&world_g);
@@ -36,6 +37,10 @@ MPI_Comm get_horizontal_communicator(E, layer)
 
   return(MY_HORZ_COMM);
 }	
+
+
+#endif
+
 
 /* ===============================================
    strips horizontal average from nodal field X. 
@@ -137,13 +142,7 @@ void return_horiz_ave(E,X,H)
      }        /* Done for i */ 
 
 
-  if (E->parallel.nproc>1)  {
-    MPI_Allreduce(temp,Have,noz2+1,MPI_DOUBLE,MPI_SUM,
-    			  get_horizontal_communicator(E, E->parallel.me_loc[3]));
-  }
-  else
-    for (i=1;i<=noz2;i++)
-      Have[i] = temp[i];
+  MPI_Allreduce(temp,Have,noz2+1,MPI_DOUBLE,MPI_SUM,E->parallel.horizontal_comm);
 
   for (i=1;i<=noz;i++) {
     if(Have[i+noz] != 0.0) 
@@ -224,13 +223,7 @@ void return_horiz_ave_f(E,X,H)
      }        /* Done for i */ 
 
 
-  if (E->parallel.nproc>1)  {
-    MPI_Allreduce(temp,Have,noz2+1,MPI_FLOAT,MPI_SUM,
-    			  get_horizontal_communicator(E, E->parallel.me_loc[3]));
-    }
-  else
-    for (i=1;i<=noz2;i++)
-      Have[i] = temp[i];
+  MPI_Allreduce(temp,Have,noz2+1,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
   for (i=1;i<=noz;i++) {
     if(Have[i+noz] != 0.0) 
@@ -286,8 +279,8 @@ float return_bulk_value(E,Z,average)
           }
 
 
-    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
+    MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
      
     if(average && volume != 0.0)
  	   integral /= volume;
@@ -322,7 +315,7 @@ float return_bulk_value(E,Z,average)
 /*    } */
 
 /*  if (nproc>0)  { */
-/*     world = MPI_COMM_WORLD; */
+/*     world = E->parallel.world; */
 /*     MPI_Comm_group(world, &world_g); */
 /*     MPI_Group_incl(world_g, nproc, processors, &horizon_g); */
 /*     MPI_Comm_create(world, horizon_g, &horizon_p); */
@@ -359,15 +352,9 @@ struct All_variables *E;
 float Tmax;
 {
  int j,d;
- static int been_here=0;
  float ttmax;
- MPI_Comm get_horizontal_communicator();
 
- if (E->parallel.nproc>1)
-   MPI_Allreduce(&Tmax,&ttmax,1,MPI_FLOAT,MPI_MAX,
-   				 get_horizontal_communicator(E, E->parallel.me_loc[3]));
- else
-   ttmax = Tmax;
+ MPI_Allreduce(&Tmax,&ttmax,1,MPI_FLOAT,MPI_MAX,E->parallel.horizontal_comm);
 
  return(ttmax);
  }
@@ -382,19 +369,16 @@ int total;
  float *temp;
  MPI_Comm get_horizontal_communicator();
 
- if (E->parallel.nproc>1)  {
+ temp = (float *)malloc((total+1)*sizeof(float));
+ MPI_Allreduce(data,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
-    temp = (float *)malloc((total+1)*sizeof(float));
-    MPI_Allreduce(data,temp,total,MPI_FLOAT,MPI_SUM,
-    			  get_horizontal_communicator(E, E->parallel.me_loc[3]));
+ for (j=0;j<total;j++)   {
+   data[j] = temp[j];
+ }
 
-    for (j=0;j<total;j++)   {
-      data[j] = temp[j];
-      }
-    free((void *)temp); 
-    }
+ free((void *)temp); 
 		    
-return;
+ return;
 }
 
 /* ================================================== */
@@ -406,15 +390,10 @@ struct All_variables *E;
 float *sphc,*sphs;
 {
  int jumpp,total,j,d;
- static float *sphcs,*temp;
- static int been_here=0;
- MPI_Comm get_horizontal_communicator();
+ float *sphcs,*temp;
  
- if (been_here==0)  {
  temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
  sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
- been_here++;
- }
 
  jumpp = E->sphere.hindice;
  total = E->sphere.hindice*2+3;
@@ -423,16 +402,17 @@ float *sphc,*sphs;
     sphcs[j+jumpp] = sphs[j];
     }
 
- if (E->parallel.nproc>1)  {
-    MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,
-				  get_horizontal_communicator(E, E->parallel.me_loc[3]));
-    for (j=0;j<E->sphere.hindice;j++)   {
-      sphc[j] = temp[j];
-      sphs[j] = temp[j+jumpp];
-      }
-    }
-		    
-return;
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
+ 
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphc[j] = temp[j];
+   sphs[j] = temp[j+jumpp];
+ }
+
+ free((void *)temp);
+ free((void *)sphcs);
+
+ return;
 }
 
 /* ================================================== */
@@ -465,7 +445,7 @@ float global_fvdot(E,A,B,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -498,7 +478,7 @@ double kineticE_radial(E,A,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -528,7 +508,7 @@ double global_vdot(E,A,B,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -553,7 +533,7 @@ double global_pdot(E,A,B,lev)
       temp += A[m][i]*B[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -579,7 +559,7 @@ double global_tdot_d(E,A,B,lev)
       temp += A[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -603,7 +583,7 @@ float global_tdot(E,A,B,lev)
         temp += A[m][i]*B[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -614,7 +594,7 @@ float global_fmin(E,a)
    float a;
 {
   float temp;
-  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MIN,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MIN,E->parallel.world);
   return (temp);
   }
 
@@ -623,7 +603,7 @@ double global_dmax(E,a)
    double a;
 {
   double temp;
-  MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
   return (temp);
   }
 
@@ -633,7 +613,7 @@ float global_fmax(E,a)
    float a;
 {
   float temp;
-  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,E->parallel.world);
   return (temp);
   }
 
@@ -686,7 +666,7 @@ float  vnorm_nonnewt(E,dU,U,lev)
  temp=0.0;
  for (m=1;m<=E->sphere.caps_per_proc;m++)    
   for (e=1;e<=nel;e++)
-   if (E->mat[m][e]==1)
+    //if (E->mat[m][e]==1)
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
 	 node = E->IEN[lev][m][e].node[a];
@@ -697,8 +677,8 @@ float  vnorm_nonnewt(E,dU,U,lev)
          }
    
 
-  MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
-  MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   temp1 = sqrt(temp2/temp1);
 

@@ -1,7 +1,8 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
- 
+
+#include "lith_age.h"
 /* ========================================== */
 
 void velocity_boundary_conditions(E)

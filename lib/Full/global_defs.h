@@ -5,10 +5,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include "mpi.h"
 
 /*#include "/home/limbo1/louis/Software/include/dmalloc.h" */
 
-#if defined(__osf__) 
+#if defined(__osf__)
 void *Malloc1();
 #endif
 
@@ -86,7 +87,7 @@ struct Rect {
     float halfw[40];
     float mag[40];
 } ;
- 
+
 
 struct Circ {
     int numb;
@@ -137,7 +138,7 @@ struct RectBc {
     float halfw[40];
     float mag[40];
 } ;
- 
+
 
 struct CircBc {
     int numb;
@@ -192,43 +193,43 @@ struct Shape_function1_dA  {
   double vpt[6*4];
   double ppt[6*1]; };
 
-struct Shape_function1 	{ 
+struct Shape_function1 	{
     double vpt[4*4];  /* node & gauss pt */
     double ppt[4*1];  };
 
-struct Shape_function 	{ 
+struct Shape_function 	{
     double vpt[8*8];  /* node & gauss pt */
     double spt[8*4];  /* node & gauss pt */
     double ppt[8*1];  };
 
-struct Shape_function_dx 	{ 
+struct Shape_function_dx 	{
     double vpt[3*8*8]; /* dirn & node & gauss pt */
     double ppt[3*8*1];  };
 
-struct Shape_function1_dx 	{ 
+struct Shape_function1_dx 	{
     double vpt[2*4*4]; /* dirn & node & gauss pt */
     double ppt[2*4*1];  };
 
-struct CC 	{ 
+struct CC 	{
     double vpt[3*3*8*8];
     double ppt[3*3*8*1]; }; /* dirn & node & gauss pt */
 
-struct CCX 	{ 
+struct CCX 	{
     double vpt[3*3*2*8*8];
     double ppt[3*3*2*8*1]; }; /* dirn & node & gauss pt */
 
-struct EG { 
+struct EG {
     higher_precision g[24][1]; };
 
-struct EK2 { 
+struct EK2 {
     double k[8*8]; };
 
-struct EK { 
+struct EK {
     double k[24*24]; };
 
-struct MEK { 
+struct MEK {
     double nint[9]; };
- 
+
 struct NK {
     higher_precision *k;
     int *map;
@@ -239,10 +240,10 @@ struct COORD {
     float size[4];
     float area;   } ;
 
-struct SUBEL { 
+struct SUBEL {
     int sub[9];   };
-			
-struct ID  { 
+
+struct ID  {
     int doff[4];	}; /* can  be 1 or 2 or 3 */
 struct IEN {
     int node[9];	};
@@ -250,7 +251,7 @@ struct FNODE {
     float node[9];	};
 struct SIEN {
     int node[5];	};
-struct LM  { 
+struct LM  {
     struct { int doff[4]; } node[9]; } ;
 
 struct NEI {
@@ -265,12 +266,16 @@ struct Crust  { float   width;
 		int     *node;};
 
 struct BOUND  {
-    int bound[8];	}; 
+    int bound[8];	};
 
-struct PASS  { 
-    int pass[27];	}; 
+struct PASS  {
+    int pass[27];	};
 
 struct Parallel {
+    MPI_Comm world;
+    MPI_Comm horizontal_comm;
+    MPI_Comm vertical_comm;
+
     int me;
     int nproc;
     int nprocx;
@@ -347,8 +352,8 @@ struct SPHERE   {
   int nox;
   int noy;
   int noz;
-  int nsf; 
-  int nno; 
+  int nsf;
+  int nno;
   int elx;
   int ely;
   int elz;
@@ -379,7 +384,7 @@ struct SPHERE   {
   double *tablecosf_n[362];
   double *tablesinf_n[362];
   struct SIEN *sien;
-  
+
   double area[NCS];
   double angle[NCS][5];
   double *area1[MAX_LEVELS][NCS];
@@ -398,8 +403,8 @@ struct SPHERE   {
   int lnox;
   int lnoy;
   int lnoz;
-  int lnsf; 
-  int lnno; 
+  int lnsf;
+  int lnno;
   int lelx;
   int lely;
   int lelz;
@@ -424,12 +429,12 @@ struct MODEL  {
   float pmargin_width;
   };
 
-struct MESH_DATA {/* general information concerning the fe mesh */ 
+struct MESH_DATA {/* general information concerning the fe mesh */
     int nsd;        /* Spatial extent 1,2,3d*/
     int dof;        /* degrees of freedom per node */
-    int levmax;     
+    int levmax;
     int levmin;
-    int gridmax;     
+    int gridmax;
     int gridmin;
     int levels;
     int mgunitx;
@@ -499,7 +504,7 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     float layer[4];			/* dimensionless dimensions */
     float lidz;
     float bl1width[4],bl2width[4],bl1mag[4],bl2mag[4];
-    float hwidth[4],magnitude[4],offset[4],width[4]; /* grid compression information */ 
+    float hwidth[4],magnitude[4],offset[4],width[4]; /* grid compression information */
     int fnodal_malloc_size;
     int dnodal_malloc_size;
     int feqn_malloc_size;
@@ -554,7 +559,7 @@ struct MONITOR {
     float  geoscale;
     float  tpgscale;
     float  grvscale;
-  
+
     float  delta_v_last_soln;
     float  elapsed_time;
     float  elapsed_time_vsoln;
@@ -562,15 +567,15 @@ struct MONITOR {
     float  reference_stress;
     float  incompressibility;
     float  vdotv;
-    float  nond_av_heat_fl;  
-    float  nond_av_adv_hfl;  
+    float  nond_av_heat_fl;
+    float  nond_av_adv_hfl;
     float  cpu_time_elapsed;
     float  cpu_time_on_vp_it;
     float  cpu_time_on_forces;
     float  cpu_time_on_mg_maps;
     float  tpgkmag;
     float  grvkmag;
-   
+
     float  Nusselt;
     float  Vmax;
     float  Vsrms;
@@ -586,7 +591,7 @@ struct MONITOR {
     float  Sigma_max;
     float  Sigma_interior;
     float  Vi_average;
-   
+
 };
 
 struct CONTROL {
@@ -605,7 +610,7 @@ struct CONTROL {
     char which_horiz_averages[1000];
     char which_running_data[1000];
     char which_observable_data[1000];
-  
+
     char PROBLEM_TYPE[20]; /* one of ... */
     int KERNEL;
     int CONVECTION;
@@ -613,12 +618,12 @@ struct CONTROL {
     int restart;
     int post_p;
 
-    int SLAB;	
+    int SLAB;
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
     int CART2pt5D;
     int CART3D;
-    int AXI;	 
+    int AXI;
     char SOLVER_TYPE[20]; /* one of ... */
     int DIRECT;
     int CONJ_GRAD;
@@ -639,8 +644,8 @@ struct CONTROL {
     int reset_startage;
     int zero_elapsed_time;
 
- 
-    float Ra_670,clapeyron670,transT670,width670;  
+
+    float Ra_670,clapeyron670,transT670,width670;
     float Ra_410,clapeyron410,transT410,width410;
     float Ra_cmb,clapeyroncmb,transTcmb,widthcmb;
 
@@ -652,11 +657,11 @@ struct CONTROL {
     int crust;
 
     float tole_comp;
-  
+
     float sob_tolerance;
- 
+
     float Atemp;
-    float inputdiff; 
+    float inputdiff;
     float VBXtopval;
     float VBXbotval;
     float VBYtopval;
@@ -670,9 +675,17 @@ struct CONTROL {
 
     char tracer_file[100];
 
+    int lith_age;
+    int lith_age_time;
+    float lith_age_depth;
+    float lith_age_mantle_temp;
+    int temperature_bound_adj;
+    float depth_bound_adj;
+    float width_bound_adj;
+
     float Q0;
     float jrelax;
-    
+
     int precondition;
     int vprecondition;
     int keep_going;
@@ -693,18 +706,18 @@ struct CONTROL {
     int eqn_zigzag;
     int verbose;
     double accuracy;
-    double vaccuracy; 
-    int comm_line_min;
+    double vaccuracy;
+    //int comm_line_min;
 
     int vbcs_file;
     int mat_control;
     char velocity_boundary_file[1000];
     char mat_file[1000];
     char lith_age_file[1000];
-   
+
     int total_iteration_cycles;
     int total_v_solver_calls;
-    
+
     int record_every;
     int record_all_until;
 
@@ -716,7 +729,7 @@ struct CONTROL {
     int CHEMISTRY_MODULE;
 };
 
-struct DATA {  
+struct DATA {
     float  layer_km;
     float  radius_km;
     float   grav_acc;
@@ -737,7 +750,7 @@ struct DATA {
     float   permeability;
     float   grav_const;
     float  surf_temp;
-    float   youngs_mod; 
+    float   youngs_mod;
     float   Te;
     float   ref_temperature;
     float   Tsurf;
@@ -750,8 +763,8 @@ struct DATA {
     float   scalev;
     float   timedir;
 };
-	      
-struct All_variables {     
+
+struct All_variables {
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "temperature_descriptions.h"
@@ -776,14 +789,14 @@ struct All_variables {
     struct Tracer Tracer;
 
     int filed[20];
-   
+
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
     struct SIEN *sien[NCS];
     struct ID *id[NCS];
     struct COORD *ECO[MAX_LEVELS][NCS];
-    struct IEN *IEN_redundant[NCS]; 
-    struct ID *ID_redundant[NCS]; 
+    struct IEN *IEN_redundant[NCS];
+    struct ID *ID_redundant[NCS];
     struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
     struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS][NCS];
@@ -798,7 +811,7 @@ struct All_variables {
 
     struct Crust crust;
 
-    higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];  
+    higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
     int *Node_map [MAX_LEVELS][NCS];
     int *Node_eqn [MAX_LEVELS][NCS];
     int *Node_k_id[MAX_LEVELS][NCS];
@@ -819,17 +832,17 @@ struct All_variables {
     float *TT;
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
-    float *stress[NCS];		
+    float *stress[NCS];
     float *Fas670[NCS],*Fas410[NCS],*Fascmb[NCS],*Fas670_b[NCS],*Fas410_b[NCS],*Fascmb_b[NCS];
 
     float *Vi[NCS],*EVi[NCS];
     float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
     float *TW[MAX_LEVELS][NCS];	/* nodal weightings */
 
-    int num_zero_resid[MAX_LEVELS][NCS];	       
-    int *zero_resid[MAX_LEVELS][NCS];	       
-    int *surf_element[NCS],*surf_node[NCS];	       
-    int *mat[NCS];	     
+    int num_zero_resid[MAX_LEVELS][NCS];
+    int *zero_resid[MAX_LEVELS][NCS];
+    int *surf_element[NCS],*surf_node[NCS];
+    int *mat[NCS];
     float *VIP[NCS];
     unsigned int *ELEMENT[MAX_LEVELS][NCS],*NODE[MAX_LEVELS][NCS];
     unsigned int *element[NCS],*node[NCS];
@@ -837,40 +850,48 @@ struct All_variables {
 
     float *age[NCS];	/* nodal weightings */
     float *age_t;
- 		
+
     struct LM *lm[NCS];
     struct LM *LMD[MAX_LEVELS][NCS];
-  
+
     struct Shape_function1 M; /* master-element shape funtions */
-    struct Shape_function1_dx Mx; 
+    struct Shape_function1_dx Mx;
     struct Shape_function N;
     struct Shape_function NM;
     struct Shape_function_dx Nx;
     struct Shape_function1 L; /* master-element shape funtions */
-    struct Shape_function1_dx Lx; 
+    struct Shape_function1_dx Lx;
     struct Shape_function_dx NMx;
- 
-    void (* build_forcing_term)();
-    void (* iterative_solver)();
-    void (* next_buoyancy_field)();
-    void (* obtain_gravity)();
-    void (* problem_settings)();
-    void (* problem_derived_values)();
-    void (* problem_allocate_vars)();
-    void (* problem_boundary_conds)();
-    void (* problem_node_positions)();
-    void (* problem_update_node_positions)();
-    void (* problem_initial_fields)();
-    void (* problem_tracer_setup)();
-    void (* problem_tracer_advection)();
-    void (* problem_tracer_output)();
-    void (* problem_update_bcs)();
-    void (* special_process_new_velocity)();
-    void (* special_process_new_buoyancy)();
-    void (* solve_stokes_problem)(); 
-    void (* solver_allocate_vars)(); 
-    void (* transform)();
 
-    float (* node_space_function[3])();
- 
+  /* for temperature initial conditions */
+  int number_of_perturbations;
+  int perturb_ll[32];
+  int perturb_mm[32];
+  int load_depth[32];
+  float perturb_mag[32];
+  /*ccccc*/
+
+    void (* build_forcing_term)(void*);
+    void (* iterative_solver)(void*);
+    void (* next_buoyancy_field)(void*);
+    void (* obtain_gravity)(void*);
+    void (* problem_settings)(void*);
+    void (* problem_derived_values)(void*);
+    void (* problem_allocate_vars)(void*);
+    void (* problem_boundary_conds)(void*);
+    void (* problem_node_positions)(void*);
+    void (* problem_update_node_positions)(void*);
+    void (* problem_initial_fields)(void*);
+    void (* problem_tracer_setup)(void*);
+    void (* problem_tracer_advection)(void*);
+    void (* problem_tracer_output)(void*);
+    void (* problem_update_bcs)(void*);
+    void (* special_process_new_velocity)(void*);
+    void (* special_process_new_buoyancy)(void*);
+    void (* solve_stokes_problem)(void*);
+    void (* solver_allocate_vars)(void*);
+    void (* transform)(void*);
+
+    float (* node_space_function[3])(void*);
+
 };

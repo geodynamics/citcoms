@@ -6,6 +6,11 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "sphere_communication.h"
+#include "citcom_init.h"
+#include "parallel_related.h"
+
+extern void set_horizontal_communicator(struct All_variables*);
+extern void set_vertical_communicator(struct All_variables*);
 
 
 void parallel_process_initilization(E,argc,argv)
@@ -21,8 +26,8 @@ void parallel_process_initilization(E,argc,argv)
   E->parallel.me_loc[3] = 0;
 
   /*  MPI_Init(&argc,&argv); moved to main{} in Citcom.c, CPC 6/16/00 */
-  MPI_Comm_rank(MPI_COMM_WORLD, &(E->parallel.me) );
-  MPI_Comm_size(MPI_COMM_WORLD, &(E->parallel.nproc) );
+  MPI_Comm_rank(E->parallel.world, &(E->parallel.me) );
+  MPI_Comm_size(E->parallel.world, &(E->parallel.nproc) );
 
   return;
   }
@@ -44,7 +49,7 @@ void parallel_process_termination()
 void parallel_process_sync()
 {
 
-  MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(E->parallel.world);
   return;
   }
 
@@ -492,7 +497,7 @@ void parallel_domain_boundary_nodes(E)
       if(E->node[m][node] & SKIPS)
         ii+=1; 
 
- MPI_Allreduce(&ii, &node  ,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
+ MPI_Allreduce(&ii, &node  ,1,MPI_INT,MPI_SUM,E->parallel.world);
 
  E->mesh.nno = E->lmesh.nno*E->parallel.total_proc - node - 2*E->mesh.noz;
  /* the above line changed to accomodate multiple proc. per cap CPC 10/18/00 */
@@ -994,9 +999,9 @@ void exchange_id_d(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
 	 /*         MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
           MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-          E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]); 
+          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]); 
          }
       }
       }           /* for k */
@@ -1018,9 +1023,9 @@ void exchange_id_d(E, U, lev)
 
          idb++;
 	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
 	 MPI_Irecv(R[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-	   E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+	   E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
 	}
          }
 
@@ -1064,7 +1069,7 @@ void exchange_id_d(E, U, lev)
     MPI_Sendrecv(SV,E->parallel.NUM_NEQz[lev].pass[k],MPI_DOUBLE,
              E->parallel.PROCESSORz[lev].pass[k],1,
                  RV,E->parallel.NUM_NEQz[lev].pass[k],MPI_DOUBLE,
-             E->parallel.PROCESSORz[lev].pass[k],1,MPI_COMM_WORLD,&status1);
+             E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
     for(m=1;m<=E->sphere.caps_per_proc;m++)    
@@ -1139,9 +1144,9 @@ void exchange_node_d(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
 	 /*         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-             E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+             E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
 	}
          }
       }           /* for k */
@@ -1162,9 +1167,9 @@ void exchange_node_d(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb++;
 	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-         E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+         E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
 
@@ -1208,7 +1213,7 @@ void exchange_node_d(E, U, lev)
     MPI_Sendrecv(SV,E->parallel.NUM_NODEz[lev].pass[k],MPI_DOUBLE,
              E->parallel.PROCESSORz[lev].pass[k],1,
                  RV,E->parallel.NUM_NODEz[lev].pass[k],MPI_DOUBLE,
-             E->parallel.PROCESSORz[lev].pass[k],1,MPI_COMM_WORLD,&status1);
+             E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
     for(m=1;m<=E->sphere.caps_per_proc;m++)    
@@ -1285,9 +1290,9 @@ void exchange_node_f(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
 	 /*         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]); */
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]); */
          MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-          E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]); 
+          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]); 
          }
       }
       }           /* for k */
@@ -1309,9 +1314,9 @@ void exchange_node_f(E, U, lev)
 
          idb++;
 	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-           E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+           E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
 
@@ -1355,7 +1360,7 @@ void exchange_node_f(E, U, lev)
     MPI_Sendrecv(SV,E->parallel.NUM_NODEz[lev].pass[k],MPI_FLOAT,
              E->parallel.PROCESSORz[lev].pass[k],1,
                  RV,E->parallel.NUM_NODEz[lev].pass[k],MPI_FLOAT,
-             E->parallel.PROCESSORz[lev].pass[k],1,MPI_COMM_WORLD,&status1);
+             E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
     for(m=1;m<=E->sphere.caps_per_proc;m++)    
@@ -1424,9 +1429,9 @@ void exchange_snode_f(E, U1, U2, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
 	 /*         MPI_Isend(S[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Isend(S[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-             E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+             E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
       }           /* for k */
@@ -1448,9 +1453,9 @@ void exchange_snode_f(E, U1, U2, lev)
 
          idb ++;
 	 /*         MPI_Irecv(R[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],MPI_COMM_WORLD,&request[idb-1]);*/
+		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-           E->parallel.PROCESSOR[lev][m].pass[k],1,MPI_COMM_WORLD,&request[idb-1]);
+           E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
 
@@ -1547,14 +1552,14 @@ void exchange_snode_f(E, U1, U2, lev)
           }
 
         if (processors[d]!=rootid)  {
-           MPI_Send(SD,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],rootid,MPI_COMM_WORLD);
+           MPI_Send(SD,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],rootid,E->parallel.world);
 	   }
         else
            for (i=0;i<=E->lmesh.NEQ[lev];i++)   
 	      AUo[m][i] = SD[i];
         }
     else
-        MPI_Recv(AUo[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,rootid,MPI_COMM_WORLD,&status);
+        MPI_Recv(AUo[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,rootid,E->parallel.world,&status);
     }
 
  return;
@@ -1603,11 +1608,11 @@ void exchange_snode_f(E, U1, U2, lev)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     if (E->parallel.me!=rootid)
-       MPI_Send(AUi[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,E->parallel.me,MPI_COMM_WORLD);
+       MPI_Send(AUi[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,E->parallel.me,E->parallel.world);
     else
        for (d=0;d<E->parallel.nprocz;d++) {
          if (processors[d]!=rootid)
-	   MPI_Recv(RV,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],processors[d],MPI_COMM_WORLD,&status);
+	   MPI_Recv(RV,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],processors[d],E->parallel.world,&status);
          else
            for (node=0;node<E->lmesh.NEQ[lev];node++)
 	      RV[node] = AUi[m][node];
@@ -1672,14 +1677,14 @@ void exchange_snode_f(E, U1, U2, lev)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     if (E->parallel.me!=rootid) {
-       MPI_Send(AUi[m],E->lmesh.NNO[lev]+1,MPI_FLOAT,rootid,E->parallel.me,MPI_COMM_WORLD);
+       MPI_Send(AUi[m],E->lmesh.NNO[lev]+1,MPI_FLOAT,rootid,E->parallel.me,E->parallel.world);
          for (node=1;node<=NNO;node++)
            AUo[m][node] = 1.0;
        }
     else 
        for (d=0;d<E->parallel.nprocz;d++) {
 	 if (processors[d]!=rootid)
-           MPI_Recv(RV,E->lmesh.NNO[lev]+1,MPI_FLOAT,processors[d],processors[d],MPI_COMM_WORLD,&status);
+           MPI_Recv(RV,E->lmesh.NNO[lev]+1,MPI_FLOAT,processors[d],processors[d],E->parallel.world,&status);
          else
 	   for (node=1;node<=E->lmesh.NNO[lev];node++)
 	      RV[node] = AUi[m][node];
@@ -1740,14 +1745,14 @@ void exchange_snode_f(E, U1, U2, lev)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     if (E->parallel.me!=rootid) {
-       MPI_Send(AUi[m],E->lmesh.NEL[lev]+1,MPI_FLOAT,rootid,E->parallel.me,MPI_COMM_WORLD);
+       MPI_Send(AUi[m],E->lmesh.NEL[lev]+1,MPI_FLOAT,rootid,E->parallel.me,E->parallel.world);
          for (e=1;e<=NNO;e++)
            AUo[m][e] = 1.0;
        }
     else 
        for (d=0;d<E->parallel.nprocz;d++) {
 	 if (processors[d]!=rootid)
-           MPI_Recv(RV,E->lmesh.NEL[lev]+1,MPI_FLOAT,processors[d],processors[d],MPI_COMM_WORLD,&status);
+           MPI_Recv(RV,E->lmesh.NEL[lev]+1,MPI_FLOAT,processors[d],processors[d],E->parallel.world,&status);
          else
 	   for (e=1;e<=E->lmesh.NEL[lev];e++)
 	      RV[e] = AUi[m][e];
@@ -1804,7 +1809,7 @@ void exchange_snode_f(E, U1, U2, lev)
    if (me!=to_everyone)    {  /* send TG */
      idb++;
      mst = me;
-     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,MPI_COMM_WORLD,&request[idb-1]);
+     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,E->parallel.world,&request[idb-1]);
      }
    }
 
@@ -1816,7 +1821,7 @@ void exchange_snode_f(E, U1, U2, lev)
    if (me!=from_proc)   {    /* me==0 receive all TG and add them up */
       mst = from_proc;
       idb++;
-      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,MPI_COMM_WORLD,&request[idb-1]);
+      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&request[idb-1]);
       }
    }
 
@@ -1867,7 +1872,7 @@ void exchange_snode_f(E, U1, U2, lev)
  if (E->parallel.me_loc[3]!=dest_proc)    {  /* send TG */
      to_proc = E->parallel.me_sph*E->parallel.nprocz+E->parallel.nprocz-1;
      mst = me;
-     MPI_Send(TG,nsl,MPI_FLOAT,to_proc,mst,MPI_COMM_WORLD);
+     MPI_Send(TG,nsl,MPI_FLOAT,to_proc,mst,E->parallel.world);
      }
 
  parallel_process_sync();
@@ -1876,7 +1881,7 @@ void exchange_snode_f(E, U1, U2, lev)
    for (i=1;i<E->parallel.nprocz;i++) {
       from_proc = me - i;
       mst = from_proc;
-      MPI_Recv(RG,nsl,MPI_FLOAT,from_proc,mst,MPI_COMM_WORLD,&status1);
+      MPI_Recv(RG,nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&status1);
 
       for (j=0;j<E->sphere.hindice;j++)   {
         sphc[j] += RG[j];
@@ -1923,7 +1928,7 @@ void exchange_snode_f(E, U1, U2, lev)
    if (me!=to_everyone)    {  /* send TG */
      idb++;
      mst = me;
-     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,MPI_COMM_WORLD,&request[idb-1]);
+     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,E->parallel.world,&request[idb-1]);
      }
    }
 
@@ -1935,7 +1940,7 @@ void exchange_snode_f(E, U1, U2, lev)
    if (me!=from_proc)   {    /* me==0 receive all TG and add them up */
       mst = from_proc;
       idb++;
-      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,MPI_COMM_WORLD,&request[idb-1]);
+      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&request[idb-1]);
       }
    }
 

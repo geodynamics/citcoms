@@ -1,4 +1,4 @@
-/* Routine to process the output of the finite element cycles 
+/* Routine to process the output of the finite element cycles
    and to turn them into a coherent suite  files  */
 
 
@@ -13,15 +13,27 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "output.h"
+
+void output_coord(struct All_variables *);
+void output_velo(struct All_variables *, int);
+void output_visc_prepare(struct All_variables *, float **);
+void output_visc(struct All_variables *, int);
+void output_surf_botm(struct All_variables *, int);
+void output_ave_r(struct All_variables *, int);
+void output_mat(struct All_variables *);
+
+void parallel_process_termination();
 
 
+#if 0
 void output_velo_related(E,file_number)
   struct All_variables *E;
-  int file_number; 
+  int file_number;
 {
   int el,els,i,j,k,ii,m,node,fd;
   int s,nox,noz,noy,size1,size2,size3;
-  
+
   char output_file[255];
   FILE *fp1,*fp2,*fp3,*fp4,*fp5,*fp6,*fp7,*fp8;
 /*   static float *SV,*EV; */
@@ -55,7 +67,7 @@ void output_velo_related(E,file_number)
   }
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
     }
   fclose(fp1);
@@ -68,7 +80,7 @@ void output_velo_related(E,file_number)
   fp1=fopen(output_file,"w");
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.3e\n",E->VI[lev][j][i]);
 
     }
@@ -79,9 +91,9 @@ void output_velo_related(E,file_number)
   fprintf(fp1,"%d %d %.5e\n",file_number,E->lmesh.nno,E->monitor.elapsed_time);
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-     for(i=1;i<=E->lmesh.nno;i++)           
-       fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]); 
-     /* for(i=1;i<=E->lmesh.nno;i++)           
+     for(i=1;i<=E->lmesh.nno;i++)
+       fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
+     /* for(i=1;i<=E->lmesh.nno;i++)
 	fprintf(fp1,"%.6e\n",E->T[j][i]); */
     }
 
@@ -92,7 +104,7 @@ void output_velo_related(E,file_number)
     fp2=fopen(output_file,"w");
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-      for(i=1;i<=E->lmesh.nsf;i++)   { 
+      for(i=1;i<=E->lmesh.nsf;i++)   {
 	s = i*E->lmesh.noz;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpg[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
 	}
@@ -106,7 +118,7 @@ void output_velo_related(E,file_number)
     fp2=fopen(output_file,"w");
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-      for(i=1;i<=E->lmesh.nsf;i++)  { 
+      for(i=1;i<=E->lmesh.nsf;i++)  {
 	s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
 	}
@@ -132,7 +144,7 @@ void output_velo_related(E,file_number)
 
 void output_temp(E,file_number)
   struct All_variables *E;
-  int file_number; 
+  int file_number;
 {
   int m,nno,i,j,fd;
   static int *temp1;
@@ -141,7 +153,7 @@ void output_temp(E,file_number)
   char output_file[255];
   void parallel_process_sync();
 
-  return; 
+  return;
 }
 
 
@@ -149,7 +161,7 @@ void output_temp(E,file_number)
 
 void output_stress(E,file_number,SXX,SYY,SZZ,SXY,SXZ,SZY)
     struct All_variables *E;
-    int file_number; 
+    int file_number;
     float *SXX,*SYY,*SZZ,*SXY,*SXZ,*SZY;
 {
     int i,j,k,ii,m,fd,size2;
@@ -217,3 +229,205 @@ void print_field_spectral_regular(E,TG,sphc,sphs,proc_loc,filen)
 
   return;
   }
+
+#endif
+
+/**********************************************************************/
+
+
+
+void output(struct All_variables *E, int cycles)
+{
+
+  if (cycles == 0) {
+    output_coord(E);
+    output_mat(E);
+  }
+
+  output_velo(E, cycles);
+  output_visc(E, cycles);
+  output_surf_botm(E, cycles);
+
+  /* disable horizontal average output   by Tan2 */
+  /* output_ave_r(E, cycles); */
+
+  return;
+}
+
+
+FILE* output_open(char *filename)
+{
+  FILE *fp1;
+
+  // if filename is empty, output to stderr.
+  if (*filename) {
+    fp1 = fopen(filename,"w");
+    if (!fp1) {
+      fprintf(stderr,"Cannot open file '%s'\n",filename);
+      parallel_process_termination();
+    }
+  }
+  else
+    fp1 = stderr;
+
+  return fp1;
+}
+
+
+void output_coord(struct All_variables *E)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.coord.%d",E->control.data_file,E->parallel.me);
+  fp1 = output_open(output_file);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++)     {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+
+void output_visc(struct All_variables *E, int cycles)
+{
+  int i, j, m;
+  char output_file[255];
+  FILE *fp1;
+  int lev = E->mesh.levmax;
+
+  sprintf(output_file,"%s.visc.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.3e\n",E->VI[lev][j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+
+void output_velo(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.velo.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+
+void output_surf_botm(struct All_variables *E, int cycles)
+{
+  int i, j, s;
+  char output_file[255];
+  FILE* fp2;
+
+  void heat_flux();
+  void get_STD_topo();
+
+  heat_flux(E);
+  get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
+
+  if (E->parallel.me_loc[3]==E->parallel.nproczl-1) {
+    sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp2 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
+      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      for(i=1;i<=E->lmesh.nsf;i++)   {
+	s = i*E->lmesh.noz;
+        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpg[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+      }
+    }
+    fclose(fp2);
+  }
+
+
+  if (E->parallel.me_loc[3]==0)      {
+    sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp2 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
+      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      for(i=1;i<=E->lmesh.nsf;i++)  {
+	s = (i-1)*E->lmesh.noz + 1;
+        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+      }
+    }
+    fclose(fp2);
+  }
+
+  return;
+}
+
+
+void output_ave_r(struct All_variables *E, int cycles)
+{
+  int j;
+  char output_file[255];
+  FILE* fp2;
+
+  // compute horizontal average here....
+
+  // only the first nproczl processors need to output
+  if (E->parallel.me<E->parallel.nproczl)  {
+    sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp2 = output_open(output_file);
+
+    for(j=1;j<=E->lmesh.noz;j++)  {
+      fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+    }
+    fclose(fp2);
+  }
+
+
+  return;
+}
+
+
+
+void output_mat(struct All_variables *E)
+{
+  int m, el;
+  char output_file[255];
+  FILE* fp;
+
+  sprintf(output_file,"%s.mat.%d",E->control.data_file,E->parallel.me);
+  fp = output_open(output_file);
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(el=1;el<=E->lmesh.nel;el++)
+      fprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
+
+  fclose(fp);
+
+  return;
+}
+
+
+
