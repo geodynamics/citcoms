@@ -2,46 +2,53 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#                             Michael A.G. Aivazis
-#                      California Institute of Technology
-#                      (C) 1998-2003  All Rights Reserved
-#
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
 from pyre.components.Component import Component
+import CitcomS.Regional as Regional
 
 class Advection_diffusion(Component):
 
+
     def __init__(self,name,facility="tsolver"):
         Component.__init__(self, name, facility)
-        self._setProperties()
         return
 
-    def _setProperties(self):
-        import CitcomS.Regional as Regional
+
+
+    def setProperties(self):
+        #import CitcomS.Regional as Regional
         #Regional.general_stokes_solver_set_prop(self.inventory)
         return
 
+
+
     def run(self):
         #test
-        print self.inventory.ADV
+        print "ADV = ",self.inventory.ADV
         return
 
-    def _init(self):
+        self._solve()
+        return
+
+    
+    def init(self,parent):
+        Regional.PG_timestep_init()
 	return
 
 
-    def _fini(self):
+    def fini(self):
 	return
 
     def _solve(self):
+        Regional.PG_timestep_solve()
 	return
 
 
-    def _output(self, *args, **kwds):
+    def output(self, *args, **kwds):
 	return
 
 
@@ -66,6 +73,6 @@ class Advection_diffusion(Component):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.5 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.6 2003/07/15 18:03:23 ces74 Exp $"
 
 # End of file

@@ -25,10 +25,10 @@ class Temperature_diffadv(Advection_diffusion):
 
     def main(self):
 	raise NotImplementedError, \
-	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
+	      "PG Solver doesn't run stand-alone. Call init(), run(), fini() sequentially in stead."
 	return
     
 # version
-__id__ = "$Id: Temperature_diffadv.py,v 1.1 2003/07/03 23:43:20 ces74 Exp $"
+__id__ = "$Id: Temperature_diffadv.py,v 1.2 2003/07/15 18:03:23 ces74 Exp $"
 
 # End of file 
