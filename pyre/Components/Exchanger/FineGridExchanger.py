@@ -122,8 +122,8 @@ class FineGridExchanger(Exchanger):
         import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["Intr"]):
-            self.II[i] = Outlet.VTOutlet(src,
-                                         self.all_variables)
+            self.II[i] = Outlet.TOutlet(src,
+                                        self.all_variables)
         return
 
 
@@ -241,6 +241,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.38 2004/05/29 01:19:31 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.39 2004/08/06 22:47:13 tan2 Exp $"
 
 # End of file
