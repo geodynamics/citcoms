@@ -21,6 +21,7 @@ extern "C" {
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
     void check_bc_consistency(struct All_variables*);
+    void construct_boundary(struct All_variables*);
     void construct_id(struct All_variables*);
     void construct_ien(struct All_variables*);
     void construct_lm(struct All_variables*);
@@ -29,6 +30,7 @@ extern "C" {
     void construct_shape_functions(struct All_variables*);
     void construct_sub_element(struct All_variables*);
     void construct_surf_det (struct All_variables*);
+    void construct_bdry_det (struct All_variables*);
     void construct_surface (struct All_variables*);
     void get_initial_elapsed_time(struct All_variables*);
     int get_process_identifier();
@@ -70,10 +72,15 @@ void sphere_launch(struct All_variables *E)
            /* logical domain */
     construct_ien(E);
     construct_surface(E);
+    construct_boundary(E);
     parallel_domain_boundary_nodes(E);
 
            /* physical domain */
     node_locations (E);
+
+//  tracer is not implemented at this moment, disable its setup
+//     if(E->control.tracer==1)
+//       (E->problem_tracer_setup)(E);
 
     allocate_velocity_vars(E);
 
@@ -98,6 +105,7 @@ void sphere_launch(struct All_variables *E)
     mass_matrix(E);
 
     construct_surf_det (E);
+    construct_bdry_det (E);
 
     set_sphere_harmonics (E);
 
@@ -152,6 +160,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.12 2004/03/16 21:07:34 tan2 Exp $
+// $Id: mesher.cc,v 1.13 2004/03/28 23:31:53 tan2 Exp $
 
 // End of file
