@@ -38,7 +38,6 @@ PROJ_SRCS = \
 	Phase_change.c \
 	Problem_related.c \
 	Process_buoyancy.c \
-	Process_velocity.c \
 	Shape_functions.c \
 	Size_does_matter.c \
 	Solver_conj_grad.c \
@@ -76,7 +75,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_LIB)
 
 # version
-# $Id: Make.mm,v 1.12 2003/08/12 16:34:19 ces74 Exp $
+# $Id: Make.mm,v 1.13 2004/04/15 18:35:04 tan2 Exp $
 
 #
 # End of file
