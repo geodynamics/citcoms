@@ -21,7 +21,8 @@ Boundary::Boundary(const int n) : size(n){
 
     bid2proc = new int[size];
     bid2gid = new int[size];
-
+    bid2crseelem = new int[size];
+  
     // use auto_ptr for exception-proof
     //Boundary(n, auto_ptr<int>(new int[size]),
     //     auto_ptr<double>(new double[size]),
@@ -80,6 +81,8 @@ Boundary::~Boundary() {
 void Boundary::init(const All_variables *E) {
     int nodes,node1,node2,nodest;
     int *nid;
+    int ind;
+    int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
 
     nodest = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
     nid = new int[nodest];
@@ -167,6 +170,44 @@ void Boundary::init(const All_variables *E) {
         //      for(int j=0; j<size; j++) {
         //          X[i][j] = i+j;
         //      }
+
+    for(int i=1; i <= E->lmesh.nel; i++)
+      {
+	std::cout << "number of elements " << E->lmesh.nel << std::endl;
+	std::cout << "IEN for elem " << i << " node " << 2
+		  << " = " << E->IEN[E->mesh.levmax][1][i].node[2]
+		  << std::endl;
+	nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
+	nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
+	nymax = E->IEN[E->mesh.levmax][1][i].node[4];
+	nymin = E->IEN[E->mesh.levmax][1][i].node[1];
+	nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
+	nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
+	std::cout << nxmax << nxmin << nymax << nymin << nzmax << nzmin << std::endl;
+      }
+    std::cout << "number of elements " << E->mesh.nel << std::endl;
+    for(int j=0; j < size; j++)
+      {
+	bid2crseelem[j]=0;
+	ind=0;
+	for(int i=1; i <= E->mesh.nel; i++)
+	  {
+	    nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
+	    nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
+	    nymax = E->IEN[E->mesh.levmax][1][i].node[4];
+	    nymin = E->IEN[E->mesh.levmax][1][i].node[1];
+	    nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
+	    nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
+	    if((X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) &&(X[0][j] < E->X[E->mesh.levmax][1][1][nxmax])&&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin]) &&(X[1][j] < E->X[E->mesh.levmax][1][2][nymax])&&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin]) &&(X[2][j] < E->X[E->mesh.levmax][1][3][nzmax]))
+	      {
+		bid2crseelem[j]=i;
+		ind=1;
+	      }
+	    if(ind)break;
+	  }
+	if(!ind) std::cout << " screwed up " << std::endl;
+	if(ind) std::cout << " done right" << std::endl;
+      }
     delete nid;
 }
 
@@ -245,6 +286,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.10 2003/09/19 06:32:42 ces74 Exp $
+// $Id: Boundary.cc,v 1.11 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file

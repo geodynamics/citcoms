@@ -64,7 +64,9 @@ class FineGridExchanger(Exchanger):
         self.module.receiveTemperature(self.exchanger)
         return
 
-
+    def exchangeVelocities(self):
+        self.module.sendVelocities(self.exchanger)
+        return
 
     def NewStep(self):
         if self.catchup:
@@ -113,6 +115,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.9 2003/09/20 01:32:10 ces74 Exp $"
 
 # End of file

@@ -30,13 +30,13 @@ public:
     virtual void mapBoundary();
 
     void receiveBoundary();
-
+    void interpolate();
 };
 
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.6 2003/09/11 22:10:55 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.7 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file
 

@@ -26,7 +26,8 @@ public:
 
     int *bid2gid;    // bid (local id) -> ID (ie. global id)
     int *bid2proc;   // bid -> proc. rank
-
+  // bid2crseelem provides for the element number in coarse mesh from which to interpolate
+    int *bid2crseelem; 
     explicit Boundary(const int n);     // constructor only allocates memory
     ~Boundary();
 
@@ -56,6 +57,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.7 2003/09/18 22:03:48 ces74 Exp $
+// $Id: Boundary.h,v 1.8 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file

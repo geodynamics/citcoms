@@ -22,10 +22,6 @@ struct Data {
     double *T, *P;       // temperature and pressure
 };
 
-// Data *outgoing;
-// Data *incoming;
-// Data *loutgoing;
-// Data *lincoming;
 
 class Exchanger {
   
@@ -66,9 +62,6 @@ public:
     virtual void mapBoundary() = 0;
                                      // create mapping from Boundary object
                                      // to global id array
-//     struct Data *incoming;
-//     struct Data *outgoing;
-
 
 protected:
     const MPI_Comm comm;
@@ -82,8 +75,13 @@ protected:
 
     Boundary *boundary;
 
-
     int rank;
+
+    struct Data outgoing;
+    struct Data incoming;
+    struct Data loutgoing;
+    struct Data lincoming;
+
 
 private:
     // disable copy constructor and copy operator
@@ -97,7 +95,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.12 2003/09/19 06:32:42 ces74 Exp $
+// $Id: ExchangerClass.h,v 1.13 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file
 

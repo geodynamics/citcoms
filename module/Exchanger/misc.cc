@@ -13,6 +13,7 @@
 
 extern "C" {
 #include "global_defs.h"
+#include "element_definitions.h"
 }
 
 #include "misc.h"
@@ -50,6 +51,8 @@ char pyExchanger_FinereturnE__name__[] = "FinereturnE";
 PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
 {
     All_variables *E = new All_variables;
+    int nox,noy,noz,p,q,r,lev,i,j,rr;
+    int elx,ely,elz,nel,nno,element,start;
 
     E->parallel.me = 1;
     E->parallel.me_loc[1] = 0;
@@ -62,10 +65,79 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
     E->sphere.caps_per_proc = 1;
 
     E->mesh.levmax = 1;
+    E->mesh.levmin = 1;
+
     E->mesh.dof = 3;
-    E->mesh.nox = E->lmesh.nox = 4;
-    E->mesh.noy = E->lmesh.noy = 4;
-    E->mesh.noz = E->lmesh.noz = 3;
+    E->mesh.nox = 4;
+    E->mesh.noy = 4;
+    E->mesh.noz = 3;
+
+    E->mesh.elx = E->mesh.nox - 1;
+    E->mesh.ely = E->mesh.noy - 1;
+    E->mesh.elz = E->mesh.noz - 1;
+
+    E->lmesh.elx = E->mesh.elx/E->parallel.nprocx;
+    E->lmesh.elz = E->mesh.elz/E->parallel.nprocz;
+    E->lmesh.ely = E->mesh.ely/E->parallel.nprocy;
+    E->lmesh.nox = E->lmesh.elx + 1;
+    E->lmesh.noz = E->lmesh.elz + 1;
+    E->lmesh.noy = E->lmesh.ely + 1;
+    
+    E->lmesh.nno = E->lmesh.noz*E->lmesh.nox*E->lmesh.noy;
+    E->lmesh.nel = E->lmesh.ely*E->lmesh.elx*E->lmesh.elz;
+    E->lmesh.npno = E->lmesh.nel;
+    
+    for(i=E->mesh.levmax;i>=E->mesh.levmin;i--)   {
+      noz = E->lmesh.noz;
+      noy = E->mesh.noy;
+      nox = E->mesh.nox;
+      if(i<E->mesh.levmax) noz=2;
+    }
+    
+    E->lmesh.ELX[E->mesh.levmax] = nox-1;
+    E->lmesh.ELY[E->mesh.levmax] = noy-1;
+    E->lmesh.ELZ[E->mesh.levmax] = noz-1;
+    E->lmesh.NOZ[E->mesh.levmax] = noz;
+    E->lmesh.NOY[E->mesh.levmax] = noy;
+    E->lmesh.NOX[E->mesh.levmax] = nox;
+    E->lmesh.NNO[E->mesh.levmax] = nox * noz * noy;
+    E->lmesh.NEL[E->mesh.levmax] = (nox-1) * (noz-1) * (noy-1);
+    
+    for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
+      for (j=1;j<=E->sphere.caps_per_proc;j++)  {	
+	E->IEN[i][j] = new struct IEN;
+      }
+    }
+
+    for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
+      for (j=1;j<=E->sphere.caps_per_proc;j++)  {
+	std::cout << "cap = " << j << " level = " << lev << std::endl;	
+	elx = E->lmesh.ELX[lev];
+	elz = E->lmesh.ELZ[lev];
+	ely = E->lmesh.ELY[lev];
+	nox = E->lmesh.NOX[lev];
+	noz = E->lmesh.NOZ[lev];
+	noy = E->lmesh.NOY[lev];
+	nel=E->lmesh.NEL[lev];
+	nno=E->lmesh.NNO[lev];
+	
+	for(r=1;r<=ely;r++)
+	  for(q=1;q<=elx;q++)
+	    for(p=1;p<=elz;p++)     {
+	      element = (r-1)*elx*elz + (q-1)*elz  + p;
+	      start = (r-1)*noz*nox + (q-1)*noz + p;
+	      for(rr=1;rr<=8;rr++)
+		E->IEN[lev][j][element].node[rr]= start
+                  + offset[rr].vector[0]
+                  + offset[rr].vector[1]*noz
+                  + offset[rr].vector[2]*noz*nox;
+	      std::cout << "cap = " << j << std::endl;
+	      std::cout << "IEN for elem " << element << " node " << 2
+			<< " = " << E->IEN[lev][j][element].node[2]
+			<< std::endl;
+	    }
+      }     /* end for cap j */
+    }     /* end loop for lev */
 
     E->control.theta_max=2.0;
     E->control.theta_min=1.0;
@@ -73,7 +145,6 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
     E->control.fi_min=1.0;
     E->sphere.ro=2.0;
     E->sphere.ri=1.0;
-
 
     const int n = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
@@ -109,6 +180,8 @@ char pyExchanger_CoarsereturnE__name__[] = "CoarsereturnE";
 PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 {
     All_variables *E = new All_variables;
+    int nox,noy,noz,p,q,r,lev,i,j,rr;
+    int elx,ely,elz,nel,nno,element,start;
 
     E->parallel.me = 1;
     E->parallel.me_loc[1] = 0;
@@ -121,10 +194,77 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
     E->sphere.caps_per_proc = 1;
 
     E->mesh.levmax = 1;
+    E->mesh.levmin = 1;
+    
     E->mesh.dof = 3;
-    E->mesh.nox = E->lmesh.nox = 4;
-    E->mesh.noy = E->lmesh.noy = 4;
-    E->mesh.noz = E->lmesh.noz = 3;
+    E->mesh.nox = 4;
+    E->mesh.noy = 4;
+    E->mesh.noz = 3;
+
+    E->mesh.elx = E->mesh.nox - 1;
+    E->mesh.ely = E->mesh.noy - 1;
+    E->mesh.elz = E->mesh.noz - 1;
+
+    E->lmesh.elx = E->mesh.elx/E->parallel.nprocx;
+    E->lmesh.elz = E->mesh.elz/E->parallel.nprocz;
+    E->lmesh.ely = E->mesh.ely/E->parallel.nprocy;
+    E->lmesh.nox = E->lmesh.elx + 1;
+    E->lmesh.noz = E->lmesh.elz + 1;
+    E->lmesh.noy = E->lmesh.ely + 1;
+    
+    E->lmesh.nno = E->lmesh.noz*E->lmesh.nox*E->lmesh.noy;
+    E->lmesh.nel = E->lmesh.ely*E->lmesh.elx*E->lmesh.elz;
+    E->lmesh.npno = E->lmesh.nel;
+    
+    noz = E->lmesh.noz;
+    noy = E->mesh.noy;
+    nox = E->mesh.nox;
+
+    E->lmesh.ELX[E->mesh.levmax] = nox-1;
+    E->lmesh.ELY[E->mesh.levmax] = noy-1;
+    E->lmesh.ELZ[E->mesh.levmax] = noz-1;
+    E->lmesh.NOZ[E->mesh.levmax] = noz;
+    E->lmesh.NOY[E->mesh.levmax] = noy;
+    E->lmesh.NOX[E->mesh.levmax] = nox;
+    E->lmesh.NNO[E->mesh.levmax] = nox * noz * noy;
+    E->lmesh.NEL[E->mesh.levmax] = (nox-1) * (noz-1) * (noy-1);
+    
+    for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
+      for (j=1;j<=E->sphere.caps_per_proc;j++)  {	
+	E->IEN[i][j] = new struct IEN;
+      }
+    }
+    for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
+      std::cout << " level = " << lev << std::endl;	
+      for (j=1;j<=E->sphere.caps_per_proc;j++)  {	
+	std::cout << " cap = " << j << std::endl;	
+	elx = E->lmesh.ELX[lev];
+	elz = E->lmesh.ELZ[lev];
+	ely = E->lmesh.ELY[lev];
+	nox = E->lmesh.NOX[lev];
+	noz = E->lmesh.NOZ[lev];
+	noy = E->lmesh.NOY[lev];
+	nel=E->lmesh.NEL[lev];
+	nno=E->lmesh.NNO[lev];
+
+	for(r=1;r<=ely;r++)
+	  for(q=1;q<=elx;q++)
+	    for(p=1;p<=elz;p++)     {
+	      element = (r-1)*elx*elz + (q-1)*elz  + p;
+	      start = (r-1)*noz*nox + (q-1)*noz + p;
+	      for(rr=1;rr<=8;rr++)
+		E->IEN[lev][j][element].node[rr]= start
+                  + offset[rr].vector[0]
+                  + offset[rr].vector[1]*noz
+                  + offset[rr].vector[2]*noz*nox;
+	      std::cout << "cap = " << j << std::endl;
+	      std::cout << "IEN for elem " << element << " node " << 2
+			<< " = " << E->IEN[lev][j][element].node[2]
+			<< std::endl;
+	    }
+      }     /* end for cap j */
+    }     /* end loop for lev */
+    
 
     E->control.theta_max=3.0;
     E->control.theta_min=0.0;
@@ -132,10 +272,11 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
     E->control.fi_min=0.0;
     E->sphere.ro=2.0;
     E->sphere.ri=0.0;
+    E->mesh.nel=(E->mesh.nox-1)*(E->mesh.noy-1)*(E->mesh.noz-1);
 
     const int n = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
-	for(int i=1; i<=E->mesh.dof; i++) {
+	for(i=1; i<=E->mesh.dof; i++) {
 	  // Don't forget to delete these later
 	    E->X[E->mesh.levmax][m][i] = new double[n+1];
 	    E->V[m][1] = new float[n+1];
@@ -148,7 +289,7 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int k=1;k<=E->lmesh.noy;k++)
  	  for(int j=1;j<=E->lmesh.nox;j++) 
-	    for(int i=1;i<=E->lmesh.noz;i++)  {
+	    for(i=1;i<=E->lmesh.noz;i++)  {
 	      int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 		    E->X[E->mesh.levmax][m][1][node] = j-1;
@@ -175,6 +316,6 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 }
 
 // version
-// $Id: misc.cc,v 1.6 2003/09/19 06:32:42 ces74 Exp $
+// $Id: misc.cc,v 1.7 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file

@@ -47,12 +47,18 @@ class CoarseGridExchanger(Exchanger):
         self.module.distribute(self.exchanger)
         return
 
+    def interpolate(self):
+        self.module.interpolate(self.exchanger)
+        return
+
     def initTemperature(self):
         # send temperture field to FGE
         self.module.sendTemperature(self.exchanger)
         return
 
-
+    def exchangeVelocities(self):
+        self.module.receiveVelocities(self.exchanger)
+        return
 
     def NewStep(self):
         # wait until FGE catchs up
@@ -91,6 +97,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.9 2003/09/20 01:32:10 ces74 Exp $"
 
 # End of file

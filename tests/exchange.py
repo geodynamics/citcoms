@@ -37,12 +37,12 @@ class TestExchanger(Application):
 
         exchanger = self.exchanger
         if exchanger:
-            self.test(exchanger)
+            self.test(exchanger,layout)
 
         return
 
 
-    def test(self, exchanger):
+    def test(self, exchanger,layout):
         # testing exchanger creation
         exchanger.selectModule()
 	exchanger.createExchanger(self)
@@ -56,9 +56,18 @@ class TestExchanger(Application):
         exchanger.gather()
         print exchanger.name, ": gather worked"
 
+        # interpolate only in Coarse Grid
+        if layout.coarse:
+            exchanger.interpolate()
+            print exchanger.name, ": interpolation done."
+            
         # testing initTemperature
         exchanger.initTemperature()
         print exchanger.name, ": temperature transferred"
+
+        # testing send/receiveVelocities
+##        exchanger.exchangeVelocities()
+##        print exchanger.name, ": velocities transferred"
         
         try:
             # success if exchanger is a FGE
@@ -148,6 +157,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.8 2003/09/19 06:32:42 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.9 2003/09/20 01:32:10 ces74 Exp $"
 
 # End of file

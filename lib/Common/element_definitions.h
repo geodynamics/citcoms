@@ -167,7 +167,8 @@ static const struct Node_points {
 				{-1.0,-1.0, 1.0},
 				{-1.0, 1.0, 1.0},
 				{ 1.0, 1.0, 1.0},
-				{ 1.0,-1.0, 1.0}	};
+				{ 1.0,-1.0, 1.0}
+			};
 				
 static const struct Internal_structure  /* integer coordinates relative to node 1 */
 	{	int vector[3]; } offset[9] =

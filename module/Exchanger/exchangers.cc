@@ -222,6 +222,28 @@ PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *args)
     return Py_None;
 }
 
+
+char pyExchanger_interpolate__doc__[] = "";
+char pyExchanger_interpolate__name__[] = "interpolate";
+
+PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:interpolate", &obj))
+	return NULL;
+
+    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
+	                                  (PyCObject_AsVoidPtr(obj));
+
+    cge->interpolate();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyExchanger_receiveTemperature__doc__[] = "";
 char pyExchanger_receiveTemperature__name__[] = "receiveTemperature";
 
@@ -254,6 +276,43 @@ PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *args)
     Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
 
     pe->sendTemperature();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+char pyExchanger_receiveVelocities__doc__[] = "";
+char pyExchanger_receiveVelocities__name__[] = "receiveTemperature";
+
+PyObject * pyExchanger_receiveVelocities(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:receiveVelocities", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->receiveVelocities();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_sendVelocities__doc__[] = "";
+char pyExchanger_sendVelocities__name__[] = "sendVelocities";
+
+PyObject * pyExchanger_sendVelocities(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:sendVelocities", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->sendVelocities();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -431,6 +490,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.7 2003/09/19 06:32:42 ces74 Exp $
+// $Id: exchangers.cc,v 1.8 2003/09/20 01:32:10 ces74 Exp $
 
 // End of file
