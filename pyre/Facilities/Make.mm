@@ -28,12 +28,13 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	VSolver.py
+	VSolver.py  \
+	TSolver.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.1 2003/06/23 20:43:32 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/07/03 23:40:21 ces74 Exp $
 
 # End of file
