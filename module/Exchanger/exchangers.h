@@ -23,6 +23,12 @@ extern "C"
 PyObject * pyExchanger_createBCSource(PyObject *, PyObject *);
 
 
+extern char pyExchanger_createTractionSource__name__[];
+extern char pyExchanger_createTractionSource__doc__[];
+extern "C"
+PyObject * pyExchanger_createTractionSource(PyObject *, PyObject *);
+
+
 extern char pyExchanger_createIISink__name__[];
 extern char pyExchanger_createIISink__doc__[];
 extern "C"
@@ -176,6 +182,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.28 2004/01/07 23:54:34 tan2 Exp $
+// $Id: exchangers.h,v 1.29 2004/01/14 02:11:24 ces74 Exp $
 
 // End of file

@@ -31,7 +31,7 @@ TractionSource::TractionSource(MPI_Comm c, int s,
 }
 
 
-void TractionSource::interpolateTraction(Array2D<double,DIM>& F)
+void TractionSource::interpolateTraction(Array2D<double,DIM>& F) const
 {
     if(size())
 	interp->interpolateTraction(F);
@@ -73,6 +73,6 @@ void TractionSource::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: TractionSource.cc,v 1.3 2004/01/08 20:42:56 tan2 Exp $
+// $Id: TractionSource.cc,v 1.4 2004/01/14 02:11:24 ces74 Exp $
 
 // End of file

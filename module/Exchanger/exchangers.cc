@@ -25,6 +25,8 @@
 #include "InteriorImposing.h"
 #include "Sink.h"
 #include "Source.h"
+#include "TractionSource.h"
+#include "TractionBC.h"
 
 #include "exchangers.h"
 
@@ -39,6 +41,8 @@ void deleteBoundedBox(void*);
 void deleteInterior(void*);
 void deleteSink(void*);
 void deleteSource(void*);
+void deleteTractionSource(void*);
+void deleteTractionBC(void*);
 
 //
 //
@@ -90,6 +94,25 @@ PyObject * pyExchanger_createBCSource(PyObject *self, PyObject *args)
     return Py_BuildValue("O", cobj);
 }
 
+char pyExchanger_createTractionBC__doc__[] = "";
+char pyExchanger_createTractionBC__name__[] = "createTractionBC";
+
+PyObject * pyExchanger_createTractionBC(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:createTractionBC",
+			  &obj1, &obj2))
+        return NULL;
+
+    TractionSource* source = static_cast<TractionSource*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
+
+    TractionBC* TSource = new TractionBC(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(TSource, deleteTractionBC);
+    return Py_BuildValue("O", cobj);
+}
 
 char pyExchanger_createIISink__doc__[] = "";
 char pyExchanger_createIISink__name__[] = "createIISink";
@@ -288,6 +311,34 @@ PyObject * pyExchanger_createSource(PyObject *self, PyObject *args)
 }
 
 
+char pyExchanger_createTractionSource__doc__[] = "";
+char pyExchanger_createTractionSource__name__[] = "createTractionSource";
+
+PyObject * pyExchanger_createTractionSource(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3, *obj4;
+    int sink;
+
+    if (!PyArg_ParseTuple(args, "OiOOO:createTractionSource",
+			  &obj1, &sink,
+			  &obj2, &obj3, &obj4))
+        return NULL;
+
+    mpi::Communicator* temp = static_cast<mpi::Communicator*>
+	                      (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm comm = temp->handle();
+
+    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj4));
+
+    TractionSource* tractionsource = new TractionSource(comm, sink, *b, E, *bbox);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(tractionsource, deleteTractionSource);
+    return Py_BuildValue("O", cobj);
+}
+
+
 char pyExchanger_initConvertor__doc__[] = "";
 char pyExchanger_initConvertor__name__[] = "initConvertor";
 
@@ -441,10 +492,10 @@ PyObject * pyExchanger_sendTraction(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:sendTraction", &obj))
 	return NULL;
 
-    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
+    TractionBC* ts = static_cast<TractionBC*>
 	                                      (PyCObject_AsVoidPtr(obj));
 
-    bcs->sendTraction();
+    ts->sendTraction();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -461,10 +512,9 @@ PyObject * pyExchanger_domain_cutout(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:domain_cutout", &obj))
 	return NULL;
 
-    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
+    TractionBC* ts = static_cast<TractionBC*>
 	                                      (PyCObject_AsVoidPtr(obj));
-
-    bcs->domain_cutout();
+    ts->domain_cutout();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -751,8 +801,20 @@ void deleteSource(void* p)
 }
 
 
+void deleteTractionSource(void* p)
+{
+    delete static_cast<TractionSource*>(p);
+}
+
+
+void deleteTractionBC(void* p)
+{
+    delete static_cast<TractionBC*>(p);
+}
+
+
 
 // version
-// $Id: exchangers.cc,v 1.38 2004/01/13 01:21:07 ces74 Exp $
+// $Id: exchangers.cc,v 1.39 2004/01/14 02:11:24 ces74 Exp $
 
 // End of file

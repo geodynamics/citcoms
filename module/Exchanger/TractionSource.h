@@ -27,7 +27,7 @@ public:
 		   const BoundedBox& mybbox);
     virtual ~TractionSource() {};
 
-    void interpolateTraction(Array2D<double,DIM>& F);
+    virtual void interpolateTraction(Array2D<double,DIM>& F) const;
     void domain_cutout();
 
 private:
@@ -47,6 +47,6 @@ private:
 #endif
 
 // version
-// $Id: TractionSource.h,v 1.2 2004/01/08 02:29:37 tan2 Exp $
+// $Id: TractionSource.h,v 1.3 2004/01/14 02:11:24 ces74 Exp $
 
 // End of file
