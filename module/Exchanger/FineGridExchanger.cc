@@ -7,8 +7,10 @@
 
 #include <portinfo>
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
+using namespace std;
 #include "global_defs.h"
 #include "Boundary.h"
 #include "FineGridExchanger.h"
@@ -32,60 +34,9 @@ FineGridExchanger::~FineGridExchanger() {
 }
 
 
-
-void FineGridExchanger::gather() {
-    std::cout << "in FineGridExchanger::gather" << std::endl;
-
-    int me,nproc;
-
-    MPI_Comm_rank(comm,&me);
-    MPI_Comm_size(comm,&nproc);
-
-    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
-
-    if(nproc>1) {
-      if(me>0)
-	local_sendVelocities();
-      if(me==0)
-	local_receiveVelocities();
-      MPI_Barrier(intercomm);
-    }
-    else 
-      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
-
-    return;
-
-}
-
-
-
-void FineGridExchanger::distribute() {
-    std::cout << "in FineGridExchanger::distribute" << std::endl;
-
-    int me,nproc;
-
-    MPI_Comm_rank(comm,&me);
-    MPI_Comm_size(comm,&nproc);
-
-    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
-
-    if(nproc>1) {
-      if(me>0)
-	local_sendVelocities();
-      if(me==0)
-	local_receiveVelocities();
-      MPI_Barrier(intercomm);
-    }
-    else 
-      std::cout << "Don't need to run distribute since nproc is " << nproc << std::endl;
-
-    return;
-}
-
-
-
 void FineGridExchanger::interpretate() {
     std::cout << "in FineGridExchanger::interpretate" << std::endl;
+    return;
 }
 
 void FineGridExchanger::createBoundary() {
@@ -120,7 +71,7 @@ int FineGridExchanger::sendBoundary() {
 		 remoteLeader, tag, intercomm);
 	tag ++;
 
- 	MPI_Send(boundary->connectivity, size, MPI_INT,
+ 	MPI_Send(boundary->bid2gid, size, MPI_INT,
  		 remoteLeader, tag, intercomm);
  	tag ++;
 
@@ -129,6 +80,7 @@ int FineGridExchanger::sendBoundary() {
 		     remoteLeader, tag, intercomm);
 	    tag ++;
 	}
+
  	MPI_Send(&boundary->theta_max, 1, MPI_DOUBLE,
  		 remoteLeader, tag, intercomm);
  	tag ++;
@@ -147,6 +99,12 @@ int FineGridExchanger::sendBoundary() {
  	MPI_Send(&boundary->ri, 1, MPI_DOUBLE,
  		 remoteLeader, tag, intercomm);
  	tag ++;
+	//Test
+// 	std::cout << "in FineGridExchanger::receiveBoundary" << std::endl;
+// 	std::cout << "Fine Grid Bounds transferred to Coarse Grid" << std::endl;
+// 	std::cout << "theta= " << boundary->theta_min<< "   " << boundary->theta_max << std::endl;
+// 	std::cout << "fi   = " << boundary->fi_min << "   " << boundary->fi_max << std::endl;
+// 	std::cout << "r    = " << boundary->ri << "   " << boundary->ro  << std::endl;
 
     }
 
@@ -157,10 +115,84 @@ int FineGridExchanger::sendBoundary() {
 void FineGridExchanger::mapBoundary() {
     std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
     boundary->mapFineGrid(E, localLeader);
+
+    return;
 }
 
 
+// void FineGridExchanger::interpolate() {
+  
+//   double finex[3],crsex[24],xi[3],shape[8];
+//   int n,node;
+  
+//   std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
+  
+//   for(int i=0;i<boundary->size;i++)
+//     {
+//       n=boundary->bid2crseelem[i];
+//       for(int j=0; j < boundary->dim ;j++)
+// 	{
+// 	  crsex[j]=boundary->X[j][i];
+// 	  for(int k=0; k< 8 ;k++)
+// 	    {
+// 	      node=E->IEN[E->mesh.levmax][1][n].node[k+1];
+// 	      finex[k*3+j]=E->X[E->mesh.levmax][1][j+1][node];
+// 	    }
+// 	}
+//       std::cout << "n = " << n << " | "
+// 		<< crsex[0] << " " << crsex[1] << " " << crsex[2] << " | "
+// 		<< finex[0] << " " << finex[3] << " "
+// 		<< finex[1] << " " << finex[10] << " "
+// 		<< finex[2] << " " << finex[14] << " "
+// 		<< std::endl;	
+//       xi[0]=(finex[0]-crsex[0])/(finex[3]-finex[0]);
+//       xi[1]=(finex[1]-crsex[1])/(finex[10]-finex[1]);
+//       xi[2]=(finex[2]-crsex[2])/(finex[14]-finex[2]);
+// //       std::cout << n << " " << "xi[0] = " << xi[0] << " "	
+// // 		<< "xi[1] = " << xi[1] << " "	
+// // 		<< "xi[2] = " << xi[2] << " "	
+// // 		<< std::endl;
+//       shape[0]=(1.-xi[0])*(1.-xi[1])*(1.-xi[2]);
+//       shape[1]=xi[0]*(1.-xi[1])*(1.-xi[2]);
+//       shape[2]=xi[0]*xi[1]*(1.-xi[2]);
+//       shape[3]=(1.-xi[0])*xi[1]*(1.-xi[2]);
+      
+//       shape[4]=(1.-xi[0])*(1.-xi[1])*xi[2];
+//       shape[5]=xi[0]*(1.-xi[1])*xi[2];
+//       shape[6]=xi[0]*xi[1]*xi[2];
+//       shape[7]=(1.-xi[0])*xi[1]*xi[2];
+      
+//       outgoing.T[i]=outgoing.v[0][i]=outgoing.v[1][i]=outgoing.v[2][i];
+      
+//       for(int k=0; k< 8 ;k++)
+// 	{
+// 	  node=E->IEN[E->mesh.levmax][1][n].node[k+1];
+// 	  // 	    std::cout << "node = " << node << " "
+// 	  // 		      << "k = " << k << " "
+// 	  // 		      << "shape = " << shape[k] << " "
+// 	  // 		      << "T = " << E->T[E->sphere.caps_per_proc][node]<<" "
+// 	  // 		      << "v1 = " << E->V[E->sphere.caps_per_proc][1][node]<<" "
+// 	  // 		      << "v2 = " << E->V[E->sphere.caps_per_proc][2][node]<<" "
+// 	  // 		      << "v3 = " << E->V[E->sphere.caps_per_proc][3][node]<<" "
+// 	  // 		      << std::endl;
+// 	  outgoing.T[i]+=shape[k]*E->T[E->sphere.caps_per_proc][node];
+// 	  outgoing.v[0][i]+=shape[k]*E->V[E->sphere.caps_per_proc][1][node];
+// 	  outgoing.v[1][i]+=shape[k]*E->V[E->sphere.caps_per_proc][2][node];
+// 	  outgoing.v[2][i]+=shape[k]*E->V[E->sphere.caps_per_proc][3][node];
+// 	}
+//     }
+  
+//   // Test
+//   //     std::cout << "in CoarseGridExchanger::interpolated fields" << std::endl;
+//   //     for(int i=0;i<boundary->size;i++)
+//   //       {
+//   // 	std::cout << i << " " << outgoing.T[i] << std::endl;
+//   //       }
+  
+//   return;
+// }
+
 // version
-// $Id: FineGridExchanger.cc,v 1.14 2003/09/22 18:14:32 ces74 Exp $
+// $Id: FineGridExchanger.cc,v 1.15 2003/09/25 19:16:30 ces74 Exp $
 
 // End of file
