@@ -33,12 +33,51 @@ FineGridExchanger::~FineGridExchanger() {
 
 void FineGridExchanger::gather() {
     std::cout << "in FineGridExchanger::gather" << std::endl;
+
+    int me,nproc;
+
+    MPI_Comm_rank(comm,&me);
+    MPI_Comm_size(comm,&nproc);
+
+    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
+
+    if(nproc>1) {
+      if(me>0)
+	inter_sendVelocities();
+      if(me==0)
+	inter_receiveVelocities();
+      MPI_Barrier(intercomm);
+    }
+    else 
+      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
+
+    return;
+
 }
 
 
 
 void FineGridExchanger::distribute() {
     std::cout << "in FineGridExchanger::distribute" << std::endl;
+
+    int me,nproc;
+
+    MPI_Comm_rank(comm,&me);
+    MPI_Comm_size(comm,&nproc);
+
+    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
+
+    if(nproc>1) {
+      if(me>0)
+	inter_sendVelocities();
+      if(me==0)
+	inter_receiveVelocities();
+      MPI_Barrier(intercomm);
+    }
+    else 
+      std::cout << "Don't need to run distribute since nproc is " << nproc << std::endl;
+
+    return;
 }
 
 
@@ -110,6 +149,6 @@ void FineGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.10 2003/09/11 22:10:55 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.11 2003/09/17 23:15:59 ces74 Exp $
 
 // End of file

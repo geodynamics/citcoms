@@ -42,11 +42,15 @@ class TestExchanger(Application):
         exchanger.selectModule()
 	exchanger.createExchanger(self)
         #print exchanger.name, exchanger.exchanger
-
+        
         # testing boundary creation and exchange
-        boundary = exchanger.findBoundary()
+        exchanger.findBoundary()
         print exchanger.name, ": boundary found"
 
+        #testing gather
+        exchanger.gather()
+        print exchanger.name, ":gather worked"
+        
         try:
             # success if exchanger is a FGE
             exchanger.catchup
@@ -60,7 +64,7 @@ class TestExchanger(Application):
               exchanger.name, dt,
               exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
               dt)
-
+        
         # testing wait & nowait
         for step in range(7*2+1):
             exchanger.NewStep()
@@ -135,6 +139,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.5 2003/09/11 21:32:17 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.6 2003/09/17 23:15:59 ces74 Exp $"
 
 # End of file

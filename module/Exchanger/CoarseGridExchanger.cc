@@ -35,13 +35,21 @@ void CoarseGridExchanger::gather() {
     std::cout << "in CoarseGridExchanger::gather" << std::endl;
 
     int me,nproc;
-    MPI_Comm_size(intercomm,&nproc);
-    MPI_Comm_rank(intercomm,&me);
-    if(me>0)
-      sendVelocities();
-    if(me==0)
-      receiveVelocities();
-    MPI_Barrier(intercomm);
+
+    MPI_Comm_rank(comm,&me);
+    MPI_Comm_size(comm,&nproc);
+
+    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
+
+    if(nproc>1) {
+      if(me>0)
+	inter_sendVelocities();
+      if(me==0)
+	inter_receiveVelocities();
+      MPI_Barrier(intercomm);
+    }
+    else
+      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
 
     return;
 }
@@ -50,6 +58,25 @@ void CoarseGridExchanger::gather() {
 
 void CoarseGridExchanger::distribute() {
     std::cout << "in CoarseGridExchanger::distribute" << std::endl;
+
+    int me,nproc;
+
+    MPI_Comm_rank(comm,&me);
+    MPI_Comm_size(comm,&nproc);
+
+    std::cout << "me= " << me << " nproc=" << nproc << std::endl;
+
+    if(nproc>1) {
+      if(me>0)
+	inter_sendVelocities();
+      if(me==0)
+	inter_receiveVelocities();
+      MPI_Barrier(intercomm);
+    }
+    else
+      std::cout << "Don't need to run gather since nproc is " << nproc << std::endl;
+
+    return;
 }
 
 
@@ -109,6 +136,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.7 2003/09/11 22:10:55 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.8 2003/09/17 23:15:59 ces74 Exp $
 
 // End of file

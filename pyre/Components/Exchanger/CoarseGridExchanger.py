@@ -32,7 +32,13 @@ class CoarseGridExchanger(Exchanger):
         self.module.mapBoundary(self.exchanger)
         return
 
+    def gather(self):
+        self.module.gather(self.exchanger)
+        return
 
+    def distribute(self):
+        self.module.distribute(self.exchanger)
+        return
 
     def initTemperature(self):
         # send temperture field to FGE
@@ -78,6 +84,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.5 2003/09/11 21:33:52 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.6 2003/09/17 23:15:59 ces74 Exp $"
 
 # End of file

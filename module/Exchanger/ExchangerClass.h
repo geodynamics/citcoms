@@ -25,7 +25,7 @@ struct Data {
 
 
 class Exchanger {
-
+  
 public:
     Exchanger(const MPI_Comm communicator,
 	      const MPI_Comm intercomm,
@@ -33,16 +33,20 @@ public:
 	      const int remoteLeader,
 	      const All_variables *E);
     virtual ~Exchanger();
-
+  
     void reset_target(const MPI_Comm intercomm,
 		      const int receiver);
 
 //     virtual void send(int& size);
 //     virtual void receive(const int size);
     void sendTemperature();
-    void sendVelocities();
     void receiveTemperature();
+    void sendVelocities();
     void receiveVelocities();
+//     virtual void inter_sendTemperature();
+//     virtual void inter_receiveTemperature();
+    void inter_sendVelocities();
+    void inter_receiveVelocities();
     double exchangeTimestep(const double);
 
     void wait();
@@ -72,6 +76,8 @@ protected:
     Data outgoing;
     Data incoming;
 
+    Data inter_
+
     int rank;
 
 private:
@@ -86,7 +92,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.7 2003/09/11 21:56:26 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.8 2003/09/17 23:15:59 ces74 Exp $
 
 // End of file
 

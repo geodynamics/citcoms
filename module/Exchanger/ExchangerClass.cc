@@ -51,7 +51,7 @@ void Exchanger::reset_target(const MPI_Comm icomm, const int receiver) {
 }
 
 
-void Exchanger::sendVelocities(void) {
+void Exchanger::inter_sendVelocities(void) {
 
     std::cout << "in Exchanger::send" << std::endl;
     int i,size;
@@ -74,34 +74,36 @@ void Exchanger::sendVelocities(void) {
 
 
 
-void Exchanger::receiveVelocities(void) {
-    std::cout << "in Exchanger::receive" << std::endl;
+void Exchanger::inter_receiveVelocities(void) {
+    std::cout << "in Exchanger::inter_receiveVelocities" << std::endl;
 
     MPI_Status status;
     int size = outgoing.size;
-    int i,interme,worldme,nproc;
+    int worldme,interme;
+    int i,nproc;
 
-    i = remoteLeader;
-    MPI_Comm_size(intercomm,&nproc);
-    MPI_Comm_rank(intercomm,&interme);
-    MPI_Comm_rank(comm,&worldme);
-
-    MPI_Recv(incoming.u, size, MPI_DOUBLE, i, 1, intercomm, &status);
-    /* test */
-    std::cerr << "interme=" << interme << "worldme=" << worldme
-	      << "source=" << i << "Vel_u transferred: size="
-	      << size << std::endl;
-    MPI_Recv(incoming.v, size, MPI_DOUBLE, i, 2, intercomm, &status);
-    /* test */
-    std::cerr << "interme=" << interme << "worldme=" << worldme
-	      << "source=" << i << "Vel_v transferred: size="
-	      << size << std::endl;
-    MPI_Recv(incoming.w, size, MPI_DOUBLE, i, 3, intercomm, &status);
-    /* test */
-    std::cerr << "interme=" << interme << "worldme=" << worldme
-	      << "source=" << i << "Vel_w transferred: size="
-	      << size << std::endl;
-
+    MPI_Comm_rank(intercomm,&worldme);
+    MPI_Comm_rank(comm,&interme);
+    MPI_Comm_size(comm,&nproc);
+    std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
+      
+    for(i=0;i<size;i++) {
+      MPI_Recv(incoming.u, size, MPI_DOUBLE, i, 1, intercomm, &status);
+      /* test */
+      std::cout << "interme=" << interme << " worldme=" << worldme
+		<< " source=" << i << " Vel_u transferred: size="
+		<< size << std::endl;
+      MPI_Recv(incoming.v, size, MPI_DOUBLE, i, 2, intercomm, &status);
+      /* test */
+      std::cout << "interme=" << interme << " worldme=" << worldme
+		<< " source=" << i << " Vel_v transferred: size="
+		<< size << std::endl;
+      MPI_Recv(incoming.w, size, MPI_DOUBLE, i, 3, intercomm, &status);
+      /* test */
+      std::cout << " interme=" << interme << " worldme=" << worldme
+		<< " source=" << i << " Vel_w transferred: size="
+		<< size << std::endl;
+    }
 
     /*
     MPI_request *request = new MPI_request[incoming.exchanges-1];
@@ -181,7 +183,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.6 2003/09/11 21:56:26 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.7 2003/09/17 23:15:59 ces74 Exp $
 
 // End of file
 
