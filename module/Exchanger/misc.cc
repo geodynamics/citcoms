@@ -27,6 +27,7 @@ extern "C" {
 void commonE(All_variables*);
 void initTemperatureTest(const BoundedBox&, All_variables*);
 void hot_blob(const BoundedBox& bbox, All_variables* E);
+void hot_blob_below(const BoundedBox& bbox, All_variables* E);
 void five_hot_blobs(const BoundedBox& bbox, All_variables* E);
 void add_hot_blob(All_variables* E,
 		  double x_center, double y_center, double z_center,
@@ -359,8 +360,8 @@ void initTemperatureTest(const BoundedBox& bbox, All_variables* E)
     debug << journal::loc(__HERE__)
           << "in initTemperatureTest" << journal::end;
 
-    //hot_blob(bbox, E);
-    five_hot_blobs(bbox, E);
+    hot_blob_below(bbox, E);
+    //five_hot_blobs(bbox, E);
 
     debug_output(E);
 }
@@ -390,6 +391,38 @@ void hot_blob(const BoundedBox& bbox, All_variables* E)
     double theta_center = 0.5 * (theta_max + theta_min);
     double fi_center = 0.5 * (fi_max + fi_min);
     double r_center = 0.5 * (ro + ri);
+
+    double x_center = r_center * sin(fi_center) * cos(theta_center);
+    double y_center = r_center * sin(fi_center) * sin(theta_center);
+    double z_center = r_center * cos(fi_center);
+
+    // compute temperature field according to nodal coordinate
+    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
+}
+
+
+void hot_blob_below(const BoundedBox& bbox, All_variables* E)
+{
+    // put a hot blob below the fine grid mesh and T=0 elsewhere
+
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+	for(int i=1; i<E->lmesh.nno; ++i)
+	    E->T[m][i] = 0;
+
+    const double theta_min = bbox[0][0];
+    const double theta_max = bbox[1][0];
+    const double fi_min = bbox[0][1];
+    const double fi_max = bbox[1][1];
+    const double ri = bbox[0][2];
+    const double ro = bbox[1][2];
+
+    // radius of the blob
+    double d = 0.1;
+
+    // center of fine grid mesh
+    double theta_center = 0.5 * (theta_max + theta_min);
+    double fi_center = 0.5 * (fi_max + fi_min);
+    double r_center = 0.6;
 
     double x_center = r_center * sin(fi_center) * cos(theta_center);
     double y_center = r_center * sin(fi_center) * sin(theta_center);
@@ -518,6 +551,6 @@ void debug_output(const All_variables* E)
 
 
 // version
-// $Id: misc.cc,v 1.24 2004/02/05 19:46:36 tan2 Exp $
+// $Id: misc.cc,v 1.25 2004/05/07 18:41:46 tan2 Exp $
 
 // End of file
