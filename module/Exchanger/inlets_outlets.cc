@@ -27,6 +27,31 @@ class VTSource;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "Inlet.h"
+
+char pyExchanger_Inlet_storeTimestep__doc__[] = "";
+char pyExchanger_Inlet_storeTimestep__name__[] = "Inlet_storeTimestep";
+
+PyObject * pyExchanger_Inlet_storeTimestep(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    double fge_t, cge_t;
+
+    if (!PyArg_ParseTuple(args, "Odd:Inlet_storeTimestep",
+                          &obj, &fge_t, &cge_t))
+        return NULL;
+
+    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
+
+    inlet->storeTimestep(fge_t, cge_t);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "BoundaryVTInlet.h"
 
 extern "C" void deleteBoundaryVTInlet(void*);
@@ -95,15 +120,6 @@ PyObject * pyExchanger_BoundaryVTInlet_recv(PyObject *, PyObject *args)
 
     Py_INCREF(Py_None);
     return Py_None;
-}
-
-
-char pyExchanger_BoundaryVTInlet_storeTimestep__doc__[] = "";
-char pyExchanger_BoundaryVTInlet_storeTimestep__name__[] = "BoundaryVTInlet_storeTimestep";
-
-PyObject * pyExchanger_BoundaryVTInlet_storeTimestep(PyObject *self, PyObject *args)
-{
-    return pyExchanger_VTInlet_storeTimestep(self, args);
 }
 
 
@@ -181,27 +197,6 @@ PyObject * pyExchanger_VTInlet_recv(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_VTInlet_storeTimestep__doc__[] = "";
-char pyExchanger_VTInlet_storeTimestep__name__[] = "VTInlet_storeTimestep";
-
-PyObject * pyExchanger_VTInlet_storeTimestep(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    double fge_t, cge_t;
-
-    if (!PyArg_ParseTuple(args, "Odd:VTInlet_storeTimestep",
-                          &obj, &fge_t, &cge_t))
-        return NULL;
-
-    VTInlet* inlet = static_cast<VTInlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->storeTimestep(fge_t, cge_t);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 void deleteVTInlet(void* p)
 {
     delete static_cast<VTInlet*>(p);
@@ -263,6 +258,6 @@ void deleteVTOutlet(void* p)
 
 
 // version
-// $Id: inlets_outlets.cc,v 1.1 2004/02/24 20:35:25 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.2 2004/03/11 01:06:14 tan2 Exp $
 
 // End of file

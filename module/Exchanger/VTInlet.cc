@@ -29,9 +29,7 @@ VTInlet::VTInlet(const BoundedMesh& boundedMesh,
     Inlet(boundedMesh, sink, E),
     modeV(mode.find('V',0) != std::string::npos),
     modeT(mode.find('T',0) != std::string::npos),
-    modet(mode.find('t',0) != std::string::npos),
-    fge_t(0),
-    cge_t(0)
+    modet(mode.find('t',0) != std::string::npos)
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
@@ -91,16 +89,6 @@ void VTInlet::impose()
 
     if(modet)
  	imposet();
-}
-
-
-void VTInlet::storeTimestep(double fge_time, double cge_time)
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
-    fge_t = fge_time;
-    cge_t = cge_time;
 }
 
 
@@ -185,18 +173,6 @@ void VTInlet::recvT()
 }
 
 
-void VTInlet::getFactor(double& N1, double& N2) const
-{
-    if(cge_t == 0) {
-        N1 = 0.0;
-        N2 = 1.0;
-    } else {
-        N1 = (cge_t - fge_t) / cge_t;
-        N2 = fge_t / cge_t;
-    }
-}
-
-
 void VTInlet::imposeV()
 {
     journal::debug_t debug("Exchanger");
@@ -274,6 +250,6 @@ void VTInlet::imposet()
 
 
 // version
-// $Id: VTInlet.cc,v 1.1 2004/02/24 20:26:33 tan2 Exp $
+// $Id: VTInlet.cc,v 1.2 2004/03/11 01:06:14 tan2 Exp $
 
 // End of file

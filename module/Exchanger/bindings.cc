@@ -49,6 +49,11 @@ struct PyMethodDef pyExchanger_methods[] = {
 
     // from inlets_outlets.h
 
+    {pyExchanger_Inlet_storeTimestep__name__,
+     pyExchanger_Inlet_storeTimestep,
+     METH_VARARGS,
+     pyExchanger_Inlet_storeTimestep__doc__},
+
     {pyExchanger_BoundaryVTInlet_create__name__,
      pyExchanger_BoundaryVTInlet_create,
      METH_VARARGS,
@@ -64,11 +69,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_BoundaryVTInlet_recv__doc__},
 
-    {pyExchanger_BoundaryVTInlet_storeTimestep__name__,
-     pyExchanger_BoundaryVTInlet_storeTimestep,
-     METH_VARARGS,
-     pyExchanger_BoundaryVTInlet_storeTimestep__doc__},
-
     {pyExchanger_VTInlet_create__name__,
      pyExchanger_VTInlet_create,
      METH_VARARGS,
@@ -83,11 +83,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      pyExchanger_VTInlet_recv,
      METH_VARARGS,
      pyExchanger_VTInlet_recv__doc__},
-
-    {pyExchanger_VTInlet_storeTimestep__name__,
-     pyExchanger_VTInlet_storeTimestep,
-     METH_VARARGS,
-     pyExchanger_VTInlet_storeTimestep__doc__},
 
     {pyExchanger_VTOutlet_create__name__,
      pyExchanger_VTOutlet_create,
@@ -253,6 +248,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.35 2004/02/26 23:04:21 tan2 Exp $
+// $Id: bindings.cc,v 1.36 2004/03/11 01:06:14 tan2 Exp $
 
 // End of file

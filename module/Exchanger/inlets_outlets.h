@@ -14,6 +14,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
+extern char pyExchanger_Inlet_storeTimestep__name__[];
+extern char pyExchanger_Inlet_storeTimestep__doc__[];
+extern "C"
+PyObject * pyExchanger_Inlet_storeTimestep(PyObject *, PyObject *);
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+
 extern char pyExchanger_BoundaryVTInlet_create__name__[];
 extern char pyExchanger_BoundaryVTInlet_create__doc__[];
 extern "C"
@@ -30,12 +39,6 @@ extern char pyExchanger_BoundaryVTInlet_recv__name__[];
 extern char pyExchanger_BoundaryVTInlet_recv__doc__[];
 extern "C"
 PyObject * pyExchanger_BoundaryVTInlet_recv(PyObject *, PyObject *);
-
-
-extern char pyExchanger_BoundaryVTInlet_storeTimestep__name__[];
-extern char pyExchanger_BoundaryVTInlet_storeTimestep__doc__[];
-extern "C"
-PyObject * pyExchanger_BoundaryVTInlet_storeTimestep(PyObject *, PyObject *);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,12 +62,6 @@ extern "C"
 PyObject * pyExchanger_VTInlet_recv(PyObject *, PyObject *);
 
 
-extern char pyExchanger_VTInlet_storeTimestep__name__[];
-extern char pyExchanger_VTInlet_storeTimestep__doc__[];
-extern "C"
-PyObject * pyExchanger_VTInlet_storeTimestep(PyObject *, PyObject *);
-
-
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -83,6 +80,6 @@ PyObject * pyExchanger_VTOutlet_send(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: inlets_outlets.h,v 1.1 2004/02/24 20:35:25 tan2 Exp $
+// $Id: inlets_outlets.h,v 1.2 2004/03/11 01:06:14 tan2 Exp $
 
 // End of file

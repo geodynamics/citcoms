@@ -25,8 +25,6 @@ protected:
     Array2D<double,DIM> v_old;
     Array2D<double,1> t;
     Array2D<double,1> t_old;
-    double fge_t;
-    double cge_t;
 
 public:
     VTInlet(const BoundedMesh& boundedMesh,
@@ -46,15 +44,12 @@ public:
     virtual void recv();
     virtual void impose();
 
-    void storeTimestep(double fge_t, double cge_t);
-
 private:
     void setVBCFlag();
     void setTBCFlag();
     void recvVT();
     void recvV();
     void recvT();
-    void getFactor(double& N1, double& N2) const;
     void imposeV();
     void imposeT();
     void imposet();
@@ -66,6 +61,6 @@ private:
 #endif
 
 // version
-// $Id: VTInlet.h,v 1.1 2004/02/24 20:26:33 tan2 Exp $
+// $Id: VTInlet.h,v 1.2 2004/03/11 01:06:14 tan2 Exp $
 
 // End of file
