@@ -12,21 +12,24 @@
 #include <limits>
 #include <vector>
 #include "global_defs.h"
-#include "BoundedBox.h"
 #include "Interior.h"
 
 
 Interior::Interior() :
-    BoundedMesh()
+    Exchanger::BoundedMesh()
 {}
 
 
 
-Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
-    BoundedMesh()
+Interior::Interior(const Exchanger::BoundedBox& remoteBBox,
+		   const All_variables* E) :
+    Exchanger::BoundedMesh()
 {
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
+
     bbox_ = remoteBBox;
-    bbox_.print("Interior-BBox");
+    bbox_.print("CitcomS-Interior-BBox");
 
     X_.reserve(E->lmesh.nno);
     nodeID_.reserve(E->lmesh.nno);
@@ -34,26 +37,29 @@ Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
     initX(E);
 
     X_.shrink();
-    X_.print("Interior-X");
+    X_.print("CitcomS-Interior-X");
 
     nodeID_.shrink();
-    nodeID_.print("Interior-nodeID");
+    nodeID_.print("CitcomS-Interior-nodeID");
 }
+
+
+Interior::~Interior()
+{}
 
 
 void Interior::initX(const All_variables* E)
 {
-    std::vector<double> x(DIM);
+    std::vector<double> x(Exchanger::DIM);
 
     for (int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int i=1;i<=E->lmesh.nox;i++)
 	    for(int j=1;j<=E->lmesh.noy;j++)
-		for(int k=1;k<=E->lmesh.noz;k++)
-                {
+		for(int k=1;k<=E->lmesh.noz;k++) {
                     int node = k + (i-1)*E->lmesh.noz
 			     + (j-1)*E->lmesh.nox*E->lmesh.noz;
 
-		    for(int d=0; d<DIM; d++)
+		    for(int d=0; d<Exchanger::DIM; d++)
 			x[d] = E->sx[m][d+1][node];
 
                     if(isInside(x, bbox_)) {
@@ -65,6 +71,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.12 2004/01/13 01:21:07 ces74 Exp $
+// $Id: Interior.cc,v 1.13 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

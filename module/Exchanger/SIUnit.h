@@ -7,45 +7,21 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_SIUnit_h)
-#define pyCitcom_SIUnit_h
+#if !defined(pyCitcomSExchanger_SIUnit_h)
+#define pyCitcomSExchanger_SIUnit_h
 
-#include "Array2D.h"
-#include "BoundedBox.h"
-#include "DIM.h"
+#include "Exchanger/SIUnit.h"
 
 struct All_variables;
 
 
 // singleton class
 
-class SIUnit {
-    const double length_factor;
-    const double velocity_factor;
-    const double surf_temperature;
-    const double temperature_factor;
-    const double time_factor;
-    const double traction_factor;
+class SIUnit : public Exchanger::SIUnit {
 
 public:
     SIUnit(const All_variables* E);
-    ~SIUnit() {};
-
-    // dimensionalize
-    void coordinate(BoundedBox& bbox) const;
-    void coordinate(Array2D<double,DIM>& X) const;
-    void temperature(Array2D<double,1>& T) const;
-    void time(double& t) const;
-    void traction(Array2D<double,DIM>& F) const;
-    void velocity(Array2D<double,DIM>& V) const;
-
-    // non-dimensionalize
-    void xcoordinate(BoundedBox& bbox) const;
-    void xcoordinate(Array2D<double,DIM>& X) const;
-    void xtemperature(Array2D<double,1>& T) const;
-    void xtime(double& t) const;
-    void xtraction(Array2D<double,DIM>& F) const;
-    void xvelocity(Array2D<double,DIM>& V) const;
+    virtual ~SIUnit();
 
 private:
     // disable
@@ -55,11 +31,9 @@ private:
 };
 
 
-
-
 #endif
 
 // version
-// $Id: SIUnit.h,v 1.3 2004/01/08 18:38:40 tan2 Exp $
+// $Id: SIUnit.h,v 1.4 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

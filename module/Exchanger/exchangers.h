@@ -7,103 +7,67 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyExchanger_exchangers_h)
-#define pyExchanger_exchangers_h
+#if !defined(pyCitcomSExchanger_exchangers_h)
+#define pyCitcomSExchanger_exchangers_h
 
 
-extern char pyExchanger_createBoundary__name__[];
-extern char pyExchanger_createBoundary__doc__[];
+extern char PyCitcomSExchanger_createBoundary__name__[];
+extern char PyCitcomSExchanger_createBoundary__doc__[];
 extern "C"
-PyObject * pyExchanger_createBoundary(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_createBoundary(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createEmptyBoundary__name__[];
-extern char pyExchanger_createEmptyBoundary__doc__[];
+extern char PyCitcomSExchanger_createEmptyBoundary__name__[];
+extern char PyCitcomSExchanger_createEmptyBoundary__doc__[];
 extern "C"
-PyObject * pyExchanger_createEmptyBoundary(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_createEmptyBoundary(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createEmptyInterior__name__[];
-extern char pyExchanger_createEmptyInterior__doc__[];
+extern char PyCitcomSExchanger_createEmptyInterior__name__[];
+extern char PyCitcomSExchanger_createEmptyInterior__doc__[];
 extern "C"
-PyObject * pyExchanger_createEmptyInterior(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_createEmptyInterior(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createGlobalBoundedBox__name__[];
-extern char pyExchanger_createGlobalBoundedBox__doc__[];
+extern char PyCitcomSExchanger_createGlobalBoundedBox__name__[];
+extern char PyCitcomSExchanger_createGlobalBoundedBox__doc__[];
 extern "C"
-PyObject * pyExchanger_createGlobalBoundedBox(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_createGlobalBoundedBox(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createInterior__name__[];
-extern char pyExchanger_createInterior__doc__[];
+extern char PyCitcomSExchanger_createInterior__name__[];
+extern char PyCitcomSExchanger_createInterior__doc__[];
 extern "C"
-PyObject * pyExchanger_createInterior(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_createInterior(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createSink__name__[];
-extern char pyExchanger_createSink__doc__[];
+extern char PyCitcomSExchanger_initConvertor__name__[];
+extern char PyCitcomSExchanger_initConvertor__doc__[];
 extern "C"
-PyObject * pyExchanger_createSink(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_initConvertor(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createTractionSource__name__[];
-extern char pyExchanger_createTractionSource__doc__[];
+extern char PyCitcomSExchanger_initTemperature__name__[];
+extern char PyCitcomSExchanger_initTemperature__doc__[];
 extern "C"
-PyObject * pyExchanger_createTractionSource(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_initTemperature(PyObject *, PyObject *);
 
 
-extern char pyExchanger_VTSource_create__name__[];
-extern char pyExchanger_VTSource_create__doc__[];
+extern char PyCitcomSExchanger_modifyT__name__[];
+extern char PyCitcomSExchanger_modifyT__doc__[];
 extern "C"
-PyObject * pyExchanger_VTSource_create(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_modifyT(PyObject *, PyObject *);
 
 
-extern char pyExchanger_initConvertor__name__[];
-extern char pyExchanger_initConvertor__doc__[];
+extern char PyCitcomSExchanger_CitcomSource_create__name__[];
+extern char PyCitcomSExchanger_CitcomSource_create__doc__[];
 extern "C"
-PyObject * pyExchanger_initConvertor(PyObject *, PyObject *);
-
-
-extern char pyExchanger_initTemperatureSink__name__[];
-extern char pyExchanger_initTemperatureSink__doc__[];
-extern "C"
-PyObject * pyExchanger_initTemperatureSink(PyObject *, PyObject *);
-
-
-extern char pyExchanger_initTemperatureSource__name__[];
-extern char pyExchanger_initTemperatureSource__doc__[];
-extern "C"
-PyObject * pyExchanger_initTemperatureSource(PyObject *, PyObject *);
-
-
-extern char pyExchanger_modifyT__name__[];
-extern char pyExchanger_modifyT__doc__[];
-extern "C"
-PyObject * pyExchanger_modifyT(PyObject *, PyObject *);
-
-
-extern char pyExchanger_exchangeBoundedBox__name__[];
-extern char pyExchanger_exchangeBoundedBox__doc__[];
-extern "C"
-PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *);
-
-
-extern char pyExchanger_exchangeSignal__name__[];
-extern char pyExchanger_exchangeSignal__doc__[];
-extern "C"
-PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
-
-
-extern char pyExchanger_exchangeTimestep__name__[];
-extern char pyExchanger_exchangeTimestep__doc__[];
-extern "C"
-PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *);
+PyObject * PyCitcomSExchanger_CitcomSource_create(PyObject *, PyObject *);
 
 
 #endif
 
 // version
-// $Id: exchangers.h,v 1.33 2004/03/11 22:46:25 tan2 Exp $
+// $Id: exchangers.h,v 1.34 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

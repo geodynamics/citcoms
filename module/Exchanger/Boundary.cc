@@ -15,16 +15,15 @@
 
 
 Boundary::Boundary() :
-    BoundedMesh()
+    Exchanger::Boundary()
 {}
 
 
 Boundary::Boundary(const All_variables* E) :
-    BoundedMesh()
+    Exchanger::Boundary()
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in Boundary::Boundary" << journal::end;
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
 
     // boundary = all - interior
     int maxNodes = E->lmesh.nno - (E->lmesh.nox-2)
@@ -36,48 +35,19 @@ Boundary::Boundary(const All_variables* E) :
 
     initX(E);
     initBBox(E);
-    bbox_.print("Boundary-BBox");
+    bbox_.print("CitcomS-Boundary-BBox");
 
     X_.shrink();
-    X_.print("Boundary-X");
+    X_.print("CitcomS-Boundary-X");
     nodeID_.shrink();
-    nodeID_.print("Boundary-nodeID");
+    nodeID_.print("CitcomS-Boundary-nodeID");
     normal_.shrink();
-    normal_.print("Boundary-normal");
+    normal_.print("CitcomS-Boundary-normal");
 }
 
 
-void Boundary::broadcast(const MPI_Comm& comm, int broadcaster)
-{
-    BoundedMesh::broadcast(comm, broadcaster);
-
-    normal_.broadcast(comm, broadcaster);
-    normal_.print("normal_recv");
-}
-
-
-void Boundary::broadcast(const MPI_Comm& comm, int broadcaster) const
-{
-    BoundedMesh::broadcast(comm, broadcaster);
-
-    normal_.broadcast(comm, broadcaster);
-}
-
-
-void Boundary::recv(const MPI_Comm& comm, int sender)
-{
-    BoundedMesh::recv(comm, sender);
-
-    normal_.receive(comm, sender);
-}
-
-
-void Boundary::send(const MPI_Comm& comm, int receiver) const
-{
-    BoundedMesh::send(comm, receiver);
-
-    normal_.send(comm, receiver);
-}
+Boundary::~Boundary()
+{}
 
 
 // private functions
@@ -90,7 +60,7 @@ void Boundary::initBBox(const All_variables *E)
 
 void Boundary::initX(const All_variables* E)
 {
-    std::vector<double> x(DIM);
+    std::vector<double> x(Exchanger::DIM);
     const int m = 1;
 
     for(int k=1; k<=E->lmesh.noy; k++)
@@ -98,7 +68,7 @@ void Boundary::initX(const All_variables* E)
 	    for(int i=1; i<=E->lmesh.noz; i++) {
 
 		bool isBoundary = false;
-		std::vector<int> normalFlag(DIM,0);
+		std::vector<int> normalFlag(Exchanger::DIM,0);
 
 		if((E->parallel.me_loc[1] == 0) && (j == 1)) {
 		    isBoundary |= true;
@@ -138,7 +108,7 @@ void Boundary::initX(const All_variables* E)
 		    int node = i + (j-1)*E->lmesh.noz
 			      + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
-		    for(int d=0; d<DIM; d++)
+		    for(int d=0; d<Exchanger::DIM; d++)
 			x[d] = E->sx[m][d+1][node];
 
 		    X_.push_back(x);
@@ -150,6 +120,6 @@ void Boundary::initX(const All_variables* E)
 
 
 // version
-// $Id: Boundary.cc,v 1.51 2004/03/28 23:01:57 tan2 Exp $
+// $Id: Boundary.cc,v 1.52 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -12,25 +12,22 @@
 #include "global_defs.h"
 #include "Boundary.h"
 #include "Convertor.h"
-#include "Sink.h"
+#include "Exchanger/Sink.h"
 #include "SVTInlet.h"
 
 extern "C" {
 
 #include "element_definitions.h"
 
-//     void construct_side_c3x3matrix_el(const struct All_variables*, int,
-// 				      struct CC*, struct CCX*,
-// 				      int lev,int m,int pressure,int side);
-//     void get_global_side_1d_shape_fn(const struct All_variables*, int,
-// 				     struct Shape_function1*,
-// 				     struct Shape_function1_dx*,
-// 				     struct Shape_function_side_dA*,
-// 				     int side, int m);
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
     void temperatures_conform_bcs(All_variables* E);
 }
+
+using Exchanger::Array2D;
+using Exchanger::DIM;
+using Exchanger::STRESS_DIM;
+using Exchanger::Sink;
 
 
 const unsigned vbcFlag[] = {VBX, VBY, VBZ};
@@ -39,20 +36,18 @@ const unsigned sbcFlag[] = {SBX, SBY, SBZ};
 
 SVTInlet::SVTInlet(const Boundary& boundary,
 		   const Sink& sink,
-		   All_variables* E) :
-    Inlet(boundary, sink, E)
+		   All_variables* e) :
+    Inlet(boundary, sink),
+    E(e),
+    s(sink.size()),
+    s_old(sink.size()),
+    v(sink.size()),
+    v_old(sink.size()),
+    t(sink.size()),
+    t_old(sink.size())
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
-
-    s.resize(sink.size());
-    s_old.resize(sink.size());
-
-    v.resize(sink.size());
-    v_old.resize(sink.size());
-
-    t.resize(sink.size());
-    t_old.resize(sink.size());
 
     setVBCFlag();
 
@@ -66,7 +61,7 @@ SVTInlet::~SVTInlet()
 
 void SVTInlet::recv()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
     // store bc from previous timestep
@@ -77,20 +72,20 @@ void SVTInlet::recv()
     sink.recv(t, v);
     sink.recv(s);
 
-    Convertor& convertor = Convertor::instance();
+    Exchanger::Convertor& convertor = Convertor::instance();
     convertor.xtemperature(t);
     convertor.xvelocity(v, sink.getX());
     //convertor.xstress(s, sink.getX());
 
-    t.print("SVTInlet_T");
-    v.print("SVTInlet_V");
-    s.print("SVTInlet_S");
+    t.print("CitcomS-SVTInlet-T");
+    v.print("CitcomS-SVTInlet-V");
+    s.print("CitcomS-SVTInlet-S");
 }
 
 
 void SVTInlet::impose()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
     imposeSV();
@@ -147,7 +142,7 @@ void SVTInlet::imposeSV()
     const Boundary& boundary = dynamic_cast<const Boundary&>(mesh);
 
     double N1, N2;
-    getFactor(N1, N2);
+    getTimeFactors(N1, N2);
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
@@ -182,12 +177,12 @@ void SVTInlet::imposeSV()
 
 void SVTInlet::imposeT()
 {
-    journal::debug_t debugBC("imposeT");
+    journal::debug_t debugBC("CitcomS-imposeT");
     debugBC << journal::loc(__HERE__);
 
     const Boundary& boundary = dynamic_cast<const Boundary&>(mesh);
     double N1, N2;
-    getFactor(N1, N2);
+    getTimeFactors(N1, N2);
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
@@ -248,6 +243,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.3 2004/05/07 18:44:08 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.4 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

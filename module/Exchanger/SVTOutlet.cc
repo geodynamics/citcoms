@@ -10,20 +10,24 @@
 #include <portinfo>
 #include "journal/journal.h"
 #include "Convertor.h"
-#include "VTSource.h"
+#include "CitcomSource.h"
 #include "SVTOutlet.h"
 
+using Exchanger::Array2D;
+using Exchanger::DIM;
+using Exchanger::STRESS_DIM;
 
-SVTOutlet::SVTOutlet(const VTSource& source,
-		     All_variables* E) :
-    Outlet(source, E)
+
+SVTOutlet::SVTOutlet(const CitcomSource& source,
+		     All_variables* e) :
+    Outlet(source),
+    E(e),
+    s(source.size()),
+    v(source.size()),
+    t(source.size())
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
-
-    s.resize(source.size());
-    v.resize(source.size());
-    t.resize(source.size());
 }
 
 
@@ -33,19 +37,19 @@ SVTOutlet::~SVTOutlet()
 
 void SVTOutlet::send()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
     source.interpolateStress(s);
-    s.print("SVTOutlet_S");
+    s.print("CitcomS-SVTOutlet-S");
 
     source.interpolateVelocity(v);
-    v.print("SVTOutlet_V");
+    v.print("CitcomS-SVTOutlet-V");
 
     source.interpolateTemperature(t);
-    t.print("SVTOutlet_T");
+    t.print("CitcomS-SVTOutlet-T");
 
-    Convertor& convertor = Convertor::instance();
+    Exchanger::Convertor& convertor = Convertor::instance();
     //convertor.stress(s, source.getX());
     convertor.velocity(v, source.getX());
     convertor.temperature(t);
@@ -56,6 +60,6 @@ void SVTOutlet::send()
 
 
 // version
-// $Id: SVTOutlet.cc,v 1.1 2004/04/16 00:03:50 tan2 Exp $
+// $Id: SVTOutlet.cc,v 1.2 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -7,8 +7,8 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyExchanger_exceptions_h)
-#define pyExchanger_exceptions_h
+#if !defined(pyCitcomSExchanger_exceptions_h)
+#define pyCitcomSExchanger_exceptions_h
 
 // exceptions
 
@@ -17,6 +17,6 @@ extern PyObject *pyExchanger_runtimeError;
 #endif
 
 // version
-// $Id: exceptions.h,v 1.2 2003/11/07 01:08:01 tan2 Exp $
+// $Id: exceptions.h,v 1.3 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -8,147 +8,10 @@
 //
 
 #include <portinfo>
-#include <string>
 #include <Python.h>
 #include "mpi.h"
 #include "mpi/Communicator.h"
-//#include "Boundary.h"
-//#include "BoundedMesh.h"
-//#include "Sink.h"
 #include "inlets_outlets.h"
-
-struct All_variables;
-class Boundary;
-class BoundedMesh;
-class Interior;
-class Sink;
-class VTSource;
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-#include "Inlet.h"
-
-char pyExchanger_Inlet_impose__doc__[] = "";
-char pyExchanger_Inlet_impose__name__[] = "Inlet_impose";
-
-PyObject * pyExchanger_Inlet_impose(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:Inlet_impose", &obj))
-        return NULL;
-
-    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->impose();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_Inlet_recv__doc__[] = "";
-char pyExchanger_Inlet_recv__name__[] = "Inlet_recv";
-
-PyObject * pyExchanger_Inlet_recv(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:Inlet_recv", &obj))
-        return NULL;
-
-    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->recv();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_Inlet_storeTimestep__doc__[] = "";
-char pyExchanger_Inlet_storeTimestep__name__[] = "Inlet_storeTimestep";
-
-PyObject * pyExchanger_Inlet_storeTimestep(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    double fge_t, cge_t;
-
-    if (!PyArg_ParseTuple(args, "Odd:Inlet_storeTimestep",
-                          &obj, &fge_t, &cge_t))
-        return NULL;
-
-    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->storeTimestep(fge_t, cge_t);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-#include "Outlet.h"
-
-char pyExchanger_Outlet_send__doc__[] = "";
-char pyExchanger_Outlet_send__name__[] = "Outlet_send";
-
-PyObject * pyExchanger_Outlet_send(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:Outlet_send", &obj))
-        return NULL;
-
-    Outlet* outlet = static_cast<Outlet*>(PyCObject_AsVoidPtr(obj));
-
-    outlet->send();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-#include "BoundaryVTInlet.h"
-
-extern "C" void deleteBoundaryVTInlet(void*);
-
-
-char pyExchanger_BoundaryVTInlet_create__doc__[] = "";
-char pyExchanger_BoundaryVTInlet_create__name__[] = "BoundaryVTInlet_create";
-
-PyObject * pyExchanger_BoundaryVTInlet_create(PyObject *self, PyObject *args)
-{
-    PyObject *obj0, *obj1, *obj2, *obj3;
-    char* mode;
-
-    if (!PyArg_ParseTuple(args, "OOOOs:BoundaryVTInlet_create",
-                          &obj0, &obj1, &obj2, &obj3, &mode))
-        return NULL;
-
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-                              (PyCObject_AsVoidPtr(obj0));
-    MPI_Comm comm = temp->handle();
-    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
-
-    BoundaryVTInlet* inlet = new BoundaryVTInlet(comm, *b, *sink, E, mode);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteBoundaryVTInlet);
-    return Py_BuildValue("O", cobj);
-}
-
-
-void deleteBoundaryVTInlet(void* p)
-{
-    delete static_cast<BoundaryVTInlet*>(p);
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -157,10 +20,10 @@ void deleteBoundaryVTInlet(void* p)
 extern "C" void deleteSVTInlet(void*);
 
 
-char pyExchanger_SVTInlet_create__doc__[] = "";
-char pyExchanger_SVTInlet_create__name__[] = "SVTInlet_create";
+char PyCitcomSExchanger_SVTInlet_create__doc__[] = "";
+char PyCitcomSExchanger_SVTInlet_create__name__[] = "SVTInlet_create";
 
-PyObject * pyExchanger_SVTInlet_create(PyObject *self, PyObject *args)
+PyObject * PyCitcomSExchanger_SVTInlet_create(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
 
@@ -169,7 +32,7 @@ PyObject * pyExchanger_SVTInlet_create(PyObject *self, PyObject *args)
         return NULL;
 
     Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
     SVTInlet* inlet = new SVTInlet(*b, *sink, E);
@@ -187,37 +50,36 @@ void deleteSVTInlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "TractionInlet.h"
+#include "TInlet.h"
 
-extern "C" void deleteTractionInlet(void*);
+extern "C" void deleteTInlet(void*);
 
 
-char pyExchanger_TractionInlet_create__doc__[] = "";
-char pyExchanger_TractionInlet_create__name__[] = "TractionInlet_create";
+char PyCitcomSExchanger_TInlet_create__doc__[] = "";
+char PyCitcomSExchanger_TInlet_create__name__[] = "TInlet_create";
 
-PyObject * pyExchanger_TractionInlet_create(PyObject *self, PyObject *args)
+PyObject * PyCitcomSExchanger_TInlet_create(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    char* mode;
 
-    if (!PyArg_ParseTuple(args, "OOOs:TractionInlet_create",
-                          &obj1, &obj2, &obj3, &mode))
+    if (!PyArg_ParseTuple(args, "OOO:TInlet_create",
+                          &obj1, &obj2, &obj3))
         return NULL;
 
-    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    Exchanger::BoundedMesh* b = static_cast<Exchanger::BoundedMesh*>(PyCObject_AsVoidPtr(obj1));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    TractionInlet* inlet = new TractionInlet(*b, *sink, E, mode);
+    TInlet* inlet = new TInlet(*b, *sink, E);
 
-    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteTractionInlet);
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteTInlet);
     return Py_BuildValue("O", cobj);
 }
 
 
-void deleteTractionInlet(void* p)
+void deleteTInlet(void* p)
 {
-    delete static_cast<TractionInlet*>(p);
+    delete static_cast<TInlet*>(p);
 }
 
 
@@ -228,23 +90,22 @@ void deleteTractionInlet(void* p)
 extern "C" void deleteVTInlet(void*);
 
 
-char pyExchanger_VTInlet_create__doc__[] = "";
-char pyExchanger_VTInlet_create__name__[] = "VTInlet_create";
+char PyCitcomSExchanger_VTInlet_create__doc__[] = "";
+char PyCitcomSExchanger_VTInlet_create__name__[] = "VTInlet_create";
 
-PyObject * pyExchanger_VTInlet_create(PyObject *self, PyObject *args)
+PyObject * PyCitcomSExchanger_VTInlet_create(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    char* mode;
 
-    if (!PyArg_ParseTuple(args, "OOOs:VTInlet_create",
-                          &obj1, &obj2, &obj3, &mode))
+    if (!PyArg_ParseTuple(args, "OOO:VTInlet_create",
+                          &obj1, &obj2, &obj3))
         return NULL;
 
-    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    Exchanger::BoundedMesh* b = static_cast<Exchanger::BoundedMesh*>(PyCObject_AsVoidPtr(obj1));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    VTInlet* inlet = new VTInlet(*b, *sink, E, mode);
+    VTInlet* inlet = new VTInlet(*b, *sink, E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteVTInlet);
     return Py_BuildValue("O", cobj);
@@ -264,10 +125,10 @@ void deleteVTInlet(void* p)
 extern "C" void deleteSVTOutlet(void*);
 
 
-char pyExchanger_SVTOutlet_create__doc__[] = "";
-char pyExchanger_SVTOutlet_create__name__[] = "SVTOutlet_create";
+char PyCitcomSExchanger_SVTOutlet_create__doc__[] = "";
+char PyCitcomSExchanger_SVTOutlet_create__name__[] = "SVTOutlet_create";
 
-PyObject * pyExchanger_SVTOutlet_create(PyObject *self, PyObject *args)
+PyObject * PyCitcomSExchanger_SVTOutlet_create(PyObject *self, PyObject *args)
 {
     PyObject *obj0, *obj1;
 
@@ -275,7 +136,7 @@ PyObject * pyExchanger_SVTOutlet_create(PyObject *self, PyObject *args)
                           &obj0, &obj1))
         return NULL;
 
-    VTSource* source = static_cast<VTSource*>(PyCObject_AsVoidPtr(obj0));
+    CitcomSource* source = static_cast<CitcomSource*>(PyCObject_AsVoidPtr(obj0));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
 
     SVTOutlet* outlet = new SVTOutlet(*source, E);
@@ -293,27 +154,60 @@ void deleteSVTOutlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TOutlet.h"
+
+extern "C" void deleteTOutlet(void*);
+
+
+char PyCitcomSExchanger_TOutlet_create__doc__[] = "";
+char PyCitcomSExchanger_TOutlet_create__name__[] = "TOutlet_create";
+
+PyObject * PyCitcomSExchanger_TOutlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj0, *obj1;
+
+    if (!PyArg_ParseTuple(args, "OO:TOutlet_create",
+                          &obj0, &obj1))
+        return NULL;
+
+    CitcomSource* source = static_cast<CitcomSource*>(PyCObject_AsVoidPtr(obj0));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
+
+    TOutlet* outlet = new TOutlet(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteTOutlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteTOutlet(void* p)
+{
+    delete static_cast<TOutlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "VTOutlet.h"
 
 extern "C" void deleteVTOutlet(void*);
 
 
-char pyExchanger_VTOutlet_create__doc__[] = "";
-char pyExchanger_VTOutlet_create__name__[] = "VTOutlet_create";
+char PyCitcomSExchanger_VTOutlet_create__doc__[] = "";
+char PyCitcomSExchanger_VTOutlet_create__name__[] = "VTOutlet_create";
 
-PyObject * pyExchanger_VTOutlet_create(PyObject *self, PyObject *args)
+PyObject * PyCitcomSExchanger_VTOutlet_create(PyObject *self, PyObject *args)
 {
     PyObject *obj0, *obj1;
-    char* mode;
 
-    if (!PyArg_ParseTuple(args, "OOs:VTOutlet_create",
-                          &obj0, &obj1, &mode))
+    if (!PyArg_ParseTuple(args, "OO:VTOutlet_create",
+                          &obj0, &obj1))
         return NULL;
 
-    VTSource* source = static_cast<VTSource*>(PyCObject_AsVoidPtr(obj0));
+    CitcomSource* source = static_cast<CitcomSource*>(PyCObject_AsVoidPtr(obj0));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
 
-    VTOutlet* outlet = new VTOutlet(*source, E, mode);
+    VTOutlet* outlet = new VTOutlet(*source, E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteVTOutlet);
     return Py_BuildValue("O", cobj);
@@ -326,42 +220,7 @@ void deleteVTOutlet(void* p)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-
-#include "TractionOutlet.h"
-
-extern "C" void deleteTractionOutlet(void*);
-
-
-char pyExchanger_TractionOutlet_create__doc__[] = "";
-char pyExchanger_TractionOutlet_create__name__[] = "TractionOutlet_create";
-
-PyObject * pyExchanger_TractionOutlet_create(PyObject *self, PyObject *args)
-{
-    PyObject *obj0, *obj1;
-    char* mode;
-
-    if (!PyArg_ParseTuple(args, "OOs:TractionOutlet_create",
-                          &obj0, &obj1, &mode))
-        return NULL;
-
-    TractionSource* source = static_cast<TractionSource*>(PyCObject_AsVoidPtr(obj0));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
-
-    TractionOutlet* outlet = new TractionOutlet(*source, E, mode);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteTractionOutlet);
-    return Py_BuildValue("O", cobj);
-}
-
-
-void deleteTractionOutlet(void* p)
-{
-    delete static_cast<TractionOutlet*>(p);
-}
-
-
 // version
-// $Id: inlets_outlets.cc,v 1.5 2004/04/16 00:03:50 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.6 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

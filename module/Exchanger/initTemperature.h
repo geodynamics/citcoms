@@ -7,18 +7,15 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_initTemperature_h)
-#define pyCitcom_initTemperature_h
+#if !defined(pyCitcomSExchanger_initTemperature_h)
+#define pyCitcomSExchanger_initTemperature_h
 
-#include "BoundedBox.h"
-
-struct All_variables;
-void modifyT(const BoundedBox& bbox, All_variables* E);
-
+void initTemperature(const Exchanger::BoundedBox&, All_variables* E);
+void modifyT(const Exchanger::BoundedBox& bbox, All_variables* E);
 
 #endif
 
 // version
-// $Id: initTemperature.h,v 1.3 2004/02/26 23:04:21 tan2 Exp $
+// $Id: initTemperature.h,v 1.4 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

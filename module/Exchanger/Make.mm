@@ -11,50 +11,39 @@ PROJECT = CitcomS
 PACKAGE = Exchangermodule
 
 include std-pythonmodule.def
-PROJ_CXX_INCLUDES = ../../lib/Common 
+PROJ_CXX_INCLUDES = ../../lib/Common $(EXPORT_ROOT)/include
 
 PROJ_CXX_SRCLIB = \
         $(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
+	-lExchanger \
         -ljournal \
         -lmpimodule
 
 EXTERNAL_LIBPATH += -L$(TOOLS_LIBDIR)
 
 PROJ_SRCS = \
-	AbstractSource.cc \
-	AreaWeightedNormal.cc \
 	Boundary.cc \
-	BoundaryVTInlet.cc \
-	BoundedBox.cc \
-	BoundedMesh.cc \
-	CartesianCoord.cc \
+	CitcomInterpolator.cc \
+	CitcomSource.cc \
 	Convertor.cc \
-	FEMInterpolator.cc \
-	Inlet.cc \
 	Interior.cc \
-	Outlet.cc \
 	SIUnit.cc \
-	Sink.cc \
 	SVTInlet.cc \
 	SVTOutlet.cc \
-	TractionInlet.cc \
-	TractionInterpolator.cc \
-	TractionOutlet.cc \
-	TractionSource.cc \
+	TInlet.cc \
+	TOutlet.cc \
 	VTInlet.cc \
-	VTInterpolator.cc \
 	VTOutlet.cc \
-	VTSource.cc \
 	bindings.cc \
+	global_bbox.cc \
 	exceptions.cc \
 	exchangers.cc \
 	initTemperature.cc \
 	inlets_outlets.cc \
 	misc.cc \
-	utility.cc
 
 
 # version
-# $Id: Make.mm,v 1.20 2004/04/16 00:03:50 tan2 Exp $
+# $Id: Make.mm,v 1.21 2004/05/11 07:55:30 tan2 Exp $
 
 # End of file

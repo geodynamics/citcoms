@@ -7,20 +7,21 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_Interior_h)
-#define pyCitcom_Interior_h
+#if !defined(pyCitcomSExchanger_Interior_h)
+#define pyCitcomSExchanger_Interior_h
 
-#include "BoundedMesh.h"
+#include "Exchanger/BoundedMesh.h"
 
 struct All_variables;
 
 
-class Interior : public BoundedMesh {
+class Interior : public Exchanger::BoundedMesh {
 
 public:
     Interior();
-    Interior(const BoundedBox& remoteBBox, const All_variables* E);
-    virtual ~Interior() {};
+    Interior(const Exchanger::BoundedBox& remoteBBox,
+	     const All_variables* E);
+    virtual ~Interior();
 
 private:
     void initX(const All_variables* E);
@@ -31,6 +32,6 @@ private:
 #endif
 
 // version
-// $Id: Interior.h,v 1.6 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Interior.h,v 1.7 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -10,9 +10,9 @@
 #include <portinfo>
 #include "journal/journal.h"
 #include "global_defs.h"
-#include "BoundedMesh.h"
 #include "Convertor.h"
-#include "Sink.h"
+#include "Exchanger/BoundedMesh.h"
+#include "Exchanger/Sink.h"
 #include "VTInlet.h"
 
 extern "C" {
@@ -21,40 +21,27 @@ extern "C" {
     void temperatures_conform_bcs(All_variables* E);
 }
 
+using Exchanger::Array2D;
+using Exchanger::BoundedMesh;
+using Exchanger::DIM;
+using Exchanger::Sink;
+
 
 VTInlet::VTInlet(const BoundedMesh& boundedMesh,
 		 const Sink& sink,
-		 All_variables* E,
-		 const std::string& mode) :
-    Inlet(boundedMesh, sink, E),
-    modeV(mode.find('V',0) != std::string::npos),
-    modeT(mode.find('T',0) != std::string::npos),
-    modet(mode.find('t',0) != std::string::npos)
+		 All_variables* e) :
+    Inlet(boundedMesh, sink),
+    E(e),
+    v(sink.size()),
+    v_old(sink.size()),
+    t(sink.size()),
+    t_old(sink.size())
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "modeV = " << modeV << "  modeT = " << modeT
-	  << "  modet= " << modet << journal::end;
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
 
-    if((modeT && modet) || !(modeV || modeT || modet)) {
-	journal::firewall_t firewall("VTInlet");
-	firewall << journal::loc(__HERE__)
-		 << "invalid mode" << journal::end;
-    }
-
-    if(modeV) {
-	v.resize(sink.size());
-	v_old.resize(sink.size());
-	setVBCFlag();
-    }
-
-    if(modeT || modet) {
-	t.resize(sink.size());
-	t_old.resize(sink.size());
-    }
-
-    if(modeT)
-	setTBCFlag();
+    setVBCFlag();
+    setTBCFlag();
 
     check_bc_consistency(E);
 }
@@ -66,29 +53,28 @@ VTInlet::~VTInlet()
 
 void VTInlet::recv()
 {
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
+
     // store bc from previous timestep
     t.swap(t_old);
     v.swap(v_old);
 
-    if(modeV && (modeT || modet))
-	recvVT();
-    else if(modeV)
-	recvV();
-    else
-	recvT();
+    sink.recv(t, v);
+
+    Exchanger::Convertor& convertor = Convertor::instance();
+    convertor.xtemperature(t);
+    convertor.xvelocity(v, sink.getX());
+
+    t.print("CitcomS-VTInlet-T");
+    v.print("CitcomS-VTInlet-V");
 }
 
 
 void VTInlet::impose()
 {
-    if(modeV)
- 	imposeV();
-
-    if(modeT)
- 	imposeT();
-
-    if(modet)
- 	imposet();
+    imposeV();
+    imposeT();
 }
 
 
@@ -129,60 +115,16 @@ void VTInlet::setTBCFlag()
 }
 
 
-void VTInlet::recvVT()
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
-    sink.recv(t, v);
-
-    Convertor& convertor = Convertor::instance();
-    convertor.xtemperature(t);
-    convertor.xvelocity(v, sink.getX());
-
-    t.print("VTInlet_T");
-    v.print("VTInlet_V");
-}
-
-
-void VTInlet::recvV()
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
-    sink.recv(v);
-
-    Convertor& convertor = Convertor::instance();
-    convertor.xvelocity(v, sink.getX());
-
-    v.print("VTInlet_V");
-}
-
-
-void VTInlet::recvT()
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
-    sink.recv(t);
-
-    Convertor& convertor = Convertor::instance();
-    convertor.xtemperature(t);
-
-    t.print("VTInlet_T");
-}
-
-
 void VTInlet::imposeV()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    journal::debug_t debugBC("imposeV");
+    journal::debug_t debugBC("CitcomS-VTInlet-imposeV");
     debugBC << journal::loc(__HERE__);
 
     double N1, N2;
-    getFactor(N1, N2);
+    getTimeFactors(N1, N2);
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
@@ -201,14 +143,14 @@ void VTInlet::imposeV()
 
 void VTInlet::imposeT()
 {
-    journal::debug_t debug("Exchanger");
+    journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    journal::debug_t debugBC("imposeT");
+    journal::debug_t debugBC("CitcomS-VTInlet-imposeT");
     debugBC << journal::loc(__HERE__);
 
     double N1, N2;
-    getFactor(N1, N2);
+    getTimeFactors(N1, N2);
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
@@ -228,28 +170,7 @@ void VTInlet::imposeT()
 }
 
 
-void VTInlet::imposet()
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
-
-    journal::debug_t debugBC("imposet");
-    debugBC << journal::loc(__HERE__);
-
-    const int m = 1;
-    for(int i=0; i<sink.size(); i++) {
-	int n = mesh.nodeID(sink.meshNode(i));
-	E->T[m][n] = t[0][i];
-
-  	debugBC << E->T[m][n] << journal::newline;
-    }
-    debugBC << journal::end;
-
-    temperatures_conform_bcs(E);
-}
-
-
 // version
-// $Id: VTInlet.cc,v 1.4 2004/03/11 22:42:17 tan2 Exp $
+// $Id: VTInlet.cc,v 1.5 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -10,26 +10,23 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_SVTOutlet_h)
-#define pyCitcom_SVTOutlet_h
+#if !defined(pyCitcomSExchanger_SVTOutlet_h)
+#define pyCitcomSExchanger_SVTOutlet_h
 
-#include <string>
-#include "Array2D.h"
-#include "DIM.h"
-#include "Outlet.h"
+#include "Exchanger/Outlet.h"
 
 struct All_variables;
-class BoundedMesh;
-class VTSource;
+class CitcomSource;
 
 
-class SVTOutlet : public Outlet {
-    Array2D<double,STRESS_DIM> s;
-    Array2D<double,DIM> v;
-    Array2D<double,1> t;
+class SVTOutlet : public Exchanger::Outlet {
+    All_variables* E;
+    Exchanger::Array2D<double,Exchanger::STRESS_DIM> s;
+    Exchanger::Array2D<double,Exchanger::DIM> v;
+    Exchanger::Array2D<double,1> t;
 
 public:
-    SVTOutlet(const VTSource& source,
+    SVTOutlet(const CitcomSource& source,
 	      All_variables* E);
     virtual ~SVTOutlet();
 
@@ -46,6 +43,6 @@ private:
 #endif
 
 // version
-// $Id: SVTOutlet.h,v 1.1 2004/04/16 00:03:50 tan2 Exp $
+// $Id: SVTOutlet.h,v 1.2 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

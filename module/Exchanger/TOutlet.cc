@@ -12,42 +12,36 @@
 #include "journal/journal.h"
 #include "CitcomSource.h"
 #include "Convertor.h"
-#include "VTOutlet.h"
+#include "TOutlet.h"
 
 
-VTOutlet::VTOutlet(const CitcomSource& source,
-		   All_variables* e) :
+TOutlet::TOutlet(const CitcomSource& source,
+		 All_variables* e) :
     Outlet(source),
     E(e),
-    v(source.size()),
     t(source.size())
-
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 }
 
 
-VTOutlet::~VTOutlet()
+TOutlet::~TOutlet()
 {}
 
 
-void VTOutlet::send()
+void TOutlet::send()
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    source.interpolateVelocity(v);
-    v.print("CitcomS-VTOutlet-V");
-
     source.interpolateTemperature(t);
-    t.print("CitcomS-VTOutlet-T");
+    t.print("CitcomS-TOutlet-T");
 
     Exchanger::Convertor& convertor = Convertor::instance();
-    convertor.velocity(v, source.getX());
     convertor.temperature(t);
 
-    source.send(t, v);
+    source.send(t);
 }
 
 
@@ -56,6 +50,6 @@ void VTOutlet::send()
 
 
 // version
-// $Id: VTOutlet.cc,v 1.2 2004/05/11 07:55:30 tan2 Exp $
+// $Id: TOutlet.cc,v 1.1 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

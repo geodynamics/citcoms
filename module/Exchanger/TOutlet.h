@@ -7,8 +7,8 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcomSExchanger_VTOutlet_h)
-#define pyCitcomSExchanger_VTOutlet_h
+#if !defined(pyCitcomSExchanger_TOutlet_h)
+#define pyCitcomSExchanger_TOutlet_h
 
 #include "Exchanger/Outlet.h"
 
@@ -16,22 +16,21 @@ struct All_variables;
 class CitcomSource;
 
 
-class VTOutlet : public Exchanger::Outlet {
+class TOutlet : public Exchanger::Outlet {
     All_variables* E;
-    Exchanger::Array2D<double,Exchanger::DIM> v;
     Exchanger::Array2D<double,1> t;
 
 public:
-    VTOutlet(const CitcomSource& source,
-	     All_variables* E);
-    virtual ~VTOutlet();
+    TOutlet(const CitcomSource& source,
+	    All_variables* E);
+    virtual ~TOutlet();
 
     virtual void send();
 
 private:
     // disable copy c'tor and assignment operator
-    VTOutlet(const VTOutlet&);
-    VTOutlet& operator=(const VTOutlet&);
+    TOutlet(const TOutlet&);
+    TOutlet& operator=(const TOutlet&);
 
 };
 
@@ -39,6 +38,6 @@ private:
 #endif
 
 // version
-// $Id: VTOutlet.h,v 1.2 2004/05/11 07:55:30 tan2 Exp $
+// $Id: TOutlet.h,v 1.1 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -11,30 +11,29 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_SVTInlet_h)
-#define pyCitcom_SVTInlet_h
+#if !defined(pyCitcomSExchanger_SVTInlet_h)
+#define pyCitcomSExchanger_SVTInlet_h
 
-#include <string>
-#include "Array2D.h"
-#include "DIM.h"
-#include "Inlet.h"
+#include "Exchanger/Array2D.h"
+#include "Exchanger/DIM.h"
+#include "Exchanger/Inlet.h"
 
+struct All_variables;
 class Boundary;
-class Sink;
 
 
-class SVTInlet : public Inlet{
-protected:
-    Array2D<double,STRESS_DIM> s;
-    Array2D<double,STRESS_DIM> s_old;
-    Array2D<double,DIM> v;
-    Array2D<double,DIM> v_old;
-    Array2D<double,1> t;
-    Array2D<double,1> t_old;
+class SVTInlet : public Exchanger::Inlet{
+    All_variables* E;
+    Exchanger::Array2D<double,Exchanger::STRESS_DIM> s;
+    Exchanger::Array2D<double,Exchanger::STRESS_DIM> s_old;
+    Exchanger::Array2D<double,Exchanger::DIM> v;
+    Exchanger::Array2D<double,Exchanger::DIM> v_old;
+    Exchanger::Array2D<double,1> t;
+    Exchanger::Array2D<double,1> t_old;
 
 public:
     SVTInlet(const Boundary& boundary,
-	     const Sink& sink,
+	     const Exchanger::Sink& sink,
 	     All_variables* E);
 
     virtual ~SVTInlet();
@@ -49,7 +48,7 @@ private:
     void imposeSV();
     void imposeT();
 
-    double side_tractions(const Array2D<double,STRESS_DIM>& stress,
+    double side_tractions(const Exchanger::Array2D<double,Exchanger::STRESS_DIM>& stress,
 			  int node, int normal_dir,  int dim) const;
 };
 
@@ -57,6 +56,6 @@ private:
 #endif
 
 // version
-// $Id: SVTInlet.h,v 1.1 2004/04/16 00:03:50 tan2 Exp $
+// $Id: SVTInlet.h,v 1.2 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file

@@ -9,13 +9,11 @@
 
 #include <portinfo>
 #include <Python.h>
-#include <algorithm>
-#include <iostream>
-#include <fstream>
+//#include <iostream>
+//#include <fstream>
 #include "journal/journal.h"
 #include "mpi.h"
 #include "mpi/Communicator.h"
-#include "BoundedBox.h"
 #include "misc.h"
 
 extern "C" {
@@ -25,51 +23,29 @@ extern "C" {
 }
 
 void commonE(All_variables*);
-void initTemperatureTest(const BoundedBox&, All_variables*);
-void hot_blob(const BoundedBox& bbox, All_variables* E);
-void hot_blob_below(const BoundedBox& bbox, All_variables* E);
-void five_hot_blobs(const BoundedBox& bbox, All_variables* E);
-void add_hot_blob(All_variables* E,
-		  double x_center, double y_center, double z_center,
-		  double radius, double baseline, double amp);
-void debug_output(const All_variables* E);
 
 
 // copyright
 
-char pyExchanger_copyright__doc__[] = "";
-char pyExchanger_copyright__name__[] = "copyright";
+char PyCitcomSExchanger_copyright__doc__[] = "";
+char PyCitcomSExchanger_copyright__name__[] = "copyright";
 
-static char pyExchanger_copyright_note[] =
-    "Exchanger python module: Copyright (c) 1998-2003 California Institute of Technology";
+static char PyCitcomSExchanger_copyright_note[] =
+    "CitcomS Exchanger python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
-PyObject * pyExchanger_copyright(PyObject *, PyObject *)
+PyObject * PyCitcomSExchanger_copyright(PyObject *, PyObject *)
 {
-    return Py_BuildValue("s", pyExchanger_copyright_note);
+    return Py_BuildValue("s", PyCitcomSExchanger_copyright_note);
 }
-
-// hello
-
-char pyExchanger_hello__doc__[] = "";
-char pyExchanger_hello__name__[] = "hello";
-
-PyObject * pyExchanger_hello(PyObject *, PyObject *)
-{
-    return Py_BuildValue("s", "hello");
-}
-
-//
-//
-
 
 
 // return (All_variables* E)
 
-char pyExchanger_FinereturnE__doc__[] = "";
-char pyExchanger_FinereturnE__name__[] = "FinereturnE";
+char PyCitcomSExchanger_FinereturnE__doc__[] = "";
+char PyCitcomSExchanger_FinereturnE__name__[] = "FinereturnE";
 
-PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *args)
+PyObject * PyCitcomSExchanger_FinereturnE(PyObject *, PyObject *args)
 {
     PyObject *Obj;
 
@@ -99,10 +75,10 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_CoarsereturnE__doc__[] = "";
-char pyExchanger_CoarsereturnE__name__[] = "CoarsereturnE";
+char PyCitcomSExchanger_CoarsereturnE__doc__[] = "";
+char PyCitcomSExchanger_CoarsereturnE__name__[] = "CoarsereturnE";
 
-PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *args)
+PyObject * PyCitcomSExchanger_CoarsereturnE(PyObject *, PyObject *args)
 {
     PyObject *Obj;
 
@@ -333,224 +309,8 @@ void commonE(All_variables *E)
 }
 
 
-char pyExchanger_initTemperatureTest__doc__[] = "";
-char pyExchanger_initTemperatureTest__name__[] = "initTemperatureTest";
-
-PyObject * pyExchanger_initTemperatureTest(PyObject *, PyObject *args)
-{
-    PyObject *obj1, *obj2;
-
-    if (!PyArg_ParseTuple(args, "OO:initTemperatureTest", &obj1, &obj2))
-	return NULL;
-
-    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
-
-    initTemperatureTest(*bbox, E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-void initTemperatureTest(const BoundedBox& bbox, All_variables* E)
-{
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-          << "in initTemperatureTest" << journal::end;
-
-    hot_blob_below(bbox, E);
-    //five_hot_blobs(bbox, E);
-
-    debug_output(E);
-}
-
-
-void hot_blob(const BoundedBox& bbox, All_variables* E)
-{
-    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
-
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int i=1; i<E->lmesh.nno; ++i)
-	    E->T[m][i] = 0;
-
-    const double theta_min = bbox[0][0];
-    const double theta_max = bbox[1][0];
-    const double fi_min = bbox[0][1];
-    const double fi_max = bbox[1][1];
-    const double ri = bbox[0][2];
-    const double ro = bbox[1][2];
-
-    // radius of the blob is one third of the smallest dimension
-    double d = std::min(std::min(theta_max - theta_min,
-				 fi_max - fi_min),
-                        ro - ri) / 3;
-
-    // center of fine grid mesh
-    double theta_center = 0.5 * (theta_max + theta_min);
-    double fi_center = 0.5 * (fi_max + fi_min);
-    double r_center = 0.5 * (ro + ri);
-
-    double x_center = r_center * sin(fi_center) * cos(theta_center);
-    double y_center = r_center * sin(fi_center) * sin(theta_center);
-    double z_center = r_center * cos(fi_center);
-
-    // compute temperature field according to nodal coordinate
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-}
-
-
-void hot_blob_below(const BoundedBox& bbox, All_variables* E)
-{
-    // put a hot blob below the fine grid mesh and T=0 elsewhere
-
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int i=1; i<E->lmesh.nno; ++i)
-	    E->T[m][i] = 0;
-
-    const double theta_min = bbox[0][0];
-    const double theta_max = bbox[1][0];
-    const double fi_min = bbox[0][1];
-    const double fi_max = bbox[1][1];
-    const double ri = bbox[0][2];
-    const double ro = bbox[1][2];
-
-    // radius of the blob
-    double d = 0.1;
-
-    // center of fine grid mesh
-    double theta_center = 0.5 * (theta_max + theta_min);
-    double fi_center = 0.5 * (fi_max + fi_min);
-    double r_center = 0.6;
-
-    double x_center = r_center * sin(fi_center) * cos(theta_center);
-    double y_center = r_center * sin(fi_center) * sin(theta_center);
-    double z_center = r_center * cos(fi_center);
-
-    // compute temperature field according to nodal coordinate
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-}
-
-
-void five_hot_blobs(const BoundedBox& bbox, All_variables* E)
-{
-    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
-    // also put 4 hot blobs around bbox in coarse mesh
-
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int i=1; i<E->lmesh.nno; ++i)
-	    E->T[m][i] = 0;
-
-    const double theta_min = bbox[0][0];
-    const double theta_max = bbox[1][0];
-    const double fi_min = bbox[0][1];
-    const double fi_max = bbox[1][1];
-    const double ri = bbox[0][2];
-    const double ro = bbox[1][2];
-
-    // radius of blobs is one third of the smallest dimension
-    double d = std::min(std::min(theta_max - theta_min,
-				 fi_max - fi_min),
-			ro - ri) / 3;
-
-    // center of hot blob is in the center of bbx
-    double theta_center = 0.5 * (theta_max + theta_min);
-    double fi_center = 0.5 * (fi_max + fi_min);
-    double r_center = 0.5 * (ro + ri);
-    double x_center = r_center * sin(fi_center) * cos(theta_center);
-    double y_center = r_center * sin(fi_center) * sin(theta_center);
-    double z_center = r_center * cos(fi_center);
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-
-    // center of hot blob is outside bbx
-    theta_center = theta_max + 0.4 * (theta_max - theta_min);
-    x_center = r_center * sin(fi_center) * cos(theta_center);
-    y_center = r_center * sin(fi_center) * sin(theta_center);
-    z_center = r_center * cos(fi_center);
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-
-    theta_center = theta_min - 0.4 * (theta_max - theta_min);
-    x_center = r_center * sin(fi_center) * cos(theta_center);
-    y_center = r_center * sin(fi_center) * sin(theta_center);
-    z_center = r_center * cos(fi_center);
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-
-    theta_center = 0.5 * (theta_max + theta_min);
-    fi_center = fi_max + 0.4 * (fi_max - fi_min);
-    x_center = r_center * sin(fi_center) * cos(theta_center);
-    y_center = r_center * sin(fi_center) * sin(theta_center);
-    z_center = r_center * cos(fi_center);
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-
-    fi_center = fi_min - 0.4 * (fi_max - fi_min);
-    x_center = r_center * sin(fi_center) * cos(theta_center);
-    y_center = r_center * sin(fi_center) * sin(theta_center);
-    z_center = r_center * cos(fi_center);
-    add_hot_blob(E, x_center, y_center, z_center, d, 0.5, 0.5);
-
-}
-
-
-void add_hot_blob(All_variables* E,
-		  double x_center, double y_center, double z_center,
-		  double radius, double baseline, double amp)
-{
-    // compute temperature field according to nodal coordinate
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-        for(int k=1;k<=E->lmesh.noy;k++)
-            for(int j=1;j<=E->lmesh.nox;j++)
-                for(int i=1;i<=E->lmesh.noz;i++)  {
-                    int node = i + (j-1)*E->lmesh.noz
-                             + (k-1)*E->lmesh.noz*E->lmesh.nox;
-
-                    double theta = E->sx[m][1][node];
-                    double fi = E->sx[m][2][node];
-                    double r = E->sx[m][3][node];
-
-		    double x = r * sin(fi) * cos(theta);
-                    double y = r * sin(fi) * sin(theta);
-                    double z = r * cos(fi);
-
-                    double distance = sqrt((x - x_center)*(x - x_center) +
-                                           (y - y_center)*(y - y_center) +
-                                           (z - z_center)*(z - z_center));
-
-                    if (distance < radius)
-                        E->T[m][node] += baseline
-			              + amp * cos(distance/radius * M_PI);
-
-                }
-}
-
-
-void debug_output(const All_variables* E)
-{
-    journal::debug_t debugInitT("initTemperature");
-    debugInitT << journal::loc(__HERE__);
-
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-        for(int k=1;k<=E->lmesh.noy;k++)
-            for(int j=1;j<=E->lmesh.nox;j++)
-                for(int i=1;i<=E->lmesh.noz;i++)  {
-                    int node = i + (j-1)*E->lmesh.noz
-                             + (k-1)*E->lmesh.noz*E->lmesh.nox;
-
-                    double theta = E->sx[m][1][node];
-                    double fi = E->sx[m][2][node];
-                    double r = E->sx[m][3][node];
-
-		    debugInitT << "(theta,fi,r,T) = "
-			       << theta << "  "
-			       << fi << "  "
-			       << r << "  "
-			       << E->T[m][node] << journal::newline;
-                }
-    debugInitT << journal::end;
-}
-
 
 // version
-// $Id: misc.cc,v 1.25 2004/05/07 18:41:46 tan2 Exp $
+// $Id: misc.cc,v 1.26 2004/05/11 07:55:30 tan2 Exp $
 
 // End of file
