@@ -20,13 +20,13 @@ class FullSphere(Sphere):
 
 
     def launch(self):
-        self.CitcomModule.full_sphere_launch()
+        self.CitcomModule.full_sphere_launch(self.all_variables)
 	return
 
 
 
 
 # version
-__id__ = "$Id: FullSphere.py,v 1.1 2003/08/01 19:05:36 tan2 Exp $"
+__id__ = "$Id: FullSphere.py,v 1.2 2003/08/19 21:24:35 tan2 Exp $"
 
 # End of file

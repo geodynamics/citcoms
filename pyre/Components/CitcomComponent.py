@@ -19,13 +19,14 @@ class CitcomComponent(Component):
 
 
 
-    def setProperties(self, PropertySetter):
-	PropertySetter(self.inventory)
+    def setProperties(self, all_variables, PropertySetter):
+        self.all_variables = all_variables
+	PropertySetter(self.all_variables, self.inventory)
         return
 
 
 
 # version
-__id__ = "$Id: CitcomComponent.py,v 1.1 2003/07/24 17:46:46 tan2 Exp $"
+__id__ = "$Id: CitcomComponent.py,v 1.2 2003/08/19 21:24:35 tan2 Exp $"
 
 # End of file

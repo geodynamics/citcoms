@@ -23,18 +23,18 @@ class Imcompressible(CitcomComponent):
 
 
     def run(self):
-        self.CitcomModule.general_stokes_solver()
+        self.CitcomModule.general_stokes_solver(self.all_variables)
 	return
 
 
 
     def init(self, parent):
         if self.inventory.Solver == "cgrad":
-            self.CitcomModule.set_cg_defaults()
+            self.CitcomModule.set_cg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid":
-            self.CitcomModule.set_mg_defaults()
+            self.CitcomModule.set_mg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid-el":
-            self.CitcomModule.set_mg_el_defaults()
+            self.CitcomModule.set_mg_el_defaults(self.all_variables)
 	return
 
 
@@ -67,6 +67,6 @@ class Imcompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.8 2003/08/15 18:47:24 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.9 2003/08/19 21:24:35 tan2 Exp $"
 
 # End of file

@@ -29,7 +29,7 @@ class Advection_diffusion(CitcomComponent):
 
 
     def init(self,parent):
-        self.CitcomModule.set_convection_defaults()
+        self.CitcomModule.set_convection_defaults(self.all_variables)
 	self._been_here = False
 	return
 
@@ -42,10 +42,10 @@ class Advection_diffusion(CitcomComponent):
 
     def _solve(self):
 	if not self._been_here:
-	    self.CitcomModule.PG_timestep_init()
+	    self.CitcomModule.PG_timestep_init(self.all_variables)
 	    self._been_here = True
 
-        self.CitcomModule.PG_timestep_solve()
+        self.CitcomModule.PG_timestep_solve(self.all_variables)
 	return
 
 
@@ -70,6 +70,6 @@ class Advection_diffusion(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.11 2003/07/28 21:57:02 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.12 2003/08/19 21:24:35 tan2 Exp $"
 
 # End of file
