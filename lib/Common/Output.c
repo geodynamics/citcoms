@@ -394,7 +394,7 @@ void output_tracer(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
-  for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++)   {
+  for(n=1;n<=E->Tracer.NUM_TRACERS;n++)   {
     fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
   }
 
