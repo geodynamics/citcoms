@@ -17,8 +17,8 @@ struct All_variables;
 struct Data {
     static const int npass = 8;  // # of arrays to pass
     int size;                    // length of each array
-    double *x, *y, *z;    // coordinates
-    double *u, *v, *w;    // velocities
+    double *x[3];        // coordinates
+    double *v[3];        // velocities
     double *T, *P;       // temperature and pressure
 };
 
@@ -93,7 +93,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.10 2003/09/18 22:03:48 ces74 Exp $
+// $Id: ExchangerClass.h,v 1.11 2003/09/18 22:37:43 ces74 Exp $
 
 // End of file
 
