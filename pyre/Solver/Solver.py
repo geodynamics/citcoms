@@ -279,7 +279,7 @@ class Solver(BaseSolver):
             pyre.facilities.facility("phase", default=Phase()),
             pyre.facilities.facility("visc", default=Visc()),
 
-            pyre.properties.float("rayleigh", default=1e+08),
+            pyre.properties.float("rayleigh", default=1e+05),
             pyre.properties.float("Q0", default=0.0),
 
             pyre.properties.bool("stokes_flow_only", default=False),
@@ -290,6 +290,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.39 2004/05/26 23:55:38 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.40 2004/06/24 19:26:25 tan2 Exp $"
 
 # End of file
