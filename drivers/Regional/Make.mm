@@ -9,16 +9,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.2 2003/04/03 19:38:36 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 include local.def
 TYPE = Regional
 
-PROJECT = CitcomS/drivers/$(TYPE)
-PACKAGE = CitcomS$(TYPE)
+PROJECT = CitcomS
+PACKAGE = drivers/$(TYPE)
 
-PROJ_BIN = $(BLD_BINDIR)/$(PACKAGE)
-PROJ_LIBS = $(BLD_LIBDIR)/lib$(PACKAGE).$(EXT_LIB) $(BLD_LIBDIR)/lib$(PACKAGE)Common.$(EXT_LIB)
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
+PROJ_BIN = $(BLD_BINDIR)/$(PROJECT)$(TYPE)
+PROJ_LIBS = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB)
 
 #PROJ_CC_INCLUDES = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 PROJ_CC_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
@@ -44,7 +45,7 @@ $(PROJ_OBJS): $(PROJ_SRCS)
 
 
 # version
-# $Id: Make.mm,v 1.2 2003/04/03 19:38:36 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 #
 # End of file

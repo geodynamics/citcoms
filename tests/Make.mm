@@ -12,6 +12,8 @@
 PROJECT = CitcomS
 PACKAGE = tests
 
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
+
 PROJ_PYTHONTESTS = signon.py
 PROJ_EMPTYTESTS = $(BLD_BINDIR)/CitcomSFull $(BLD_BINDIR)/CitcomSRegional
 PROJ_TESTS = $(PROJ_PYTHONTESTS) $(PROJ_EMPTYTESTS)
@@ -31,6 +33,6 @@ update: clean
 	cvs update .
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/05 20:25:10 tan2 Exp $
 
 # End of file

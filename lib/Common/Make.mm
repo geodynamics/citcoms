@@ -12,14 +12,15 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.2 2003/04/04 00:37:42 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 include local.def
 
-PROJECT = CitcomS/$(TYPE)
+PROJECT = CitcomS
 PACKAGE = lib/$(TYPE)
 
-PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE)Common.$(EXT_LIB)
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
+#PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE)Common.$(EXT_LIB)
 PROJ_CC_INCLUDES = ../$(TYPE) .
 
 PROJ_SRCS = \
@@ -56,10 +57,14 @@ EXPORT_HEADERS = \
 	tracer_defs.h \
 	viscosity_descriptions.h
 
-all: $(PROJ_LIB) export-headers
+PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
+PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
+
+#all: $(PROJ_OBJS) export-headers
+all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.2 2003/04/04 00:37:42 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 #
 # End of file

@@ -8,8 +8,13 @@
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TYPE=Full
 
 PROJECT = CitcomS
+PACKAGE = examples/$(TYPE)
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
+
 
 #--------------------------------------------------------------------------
 #
@@ -31,6 +36,6 @@ clean::
 	@find * -name \*~ -exec rm {} \;
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/05 20:25:09 tan2 Exp $
 
 # End of file

@@ -12,13 +12,15 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.2 2003/04/04 00:41:53 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 include local.def
 TYPE=Regional
 
-PROJECT = CitcomS/$(TYPE)
+PROJECT = CitcomS
 PACKAGE = lib/$(TYPE)
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
 
 PROJ_LIBRARIES = $(EXTERNAL_LIBPATH) $(EXTERNAL_LIBS) -lm
@@ -36,14 +38,18 @@ PROJ_SRCS = \
 	Sphere_related.c \
 	Version_dependent.c
 
-EXPORT_HEADERS = \
-	global_defs.h
+#EXPORT_HEADERS = \
+#	global_defs.h
 
-all: $(PROJ_LIB) export-headers
+#PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
+PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
+
+#all: $(PROJ_LIB) export-headers
+all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.2 2003/04/04 00:41:53 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 #
 # End of file

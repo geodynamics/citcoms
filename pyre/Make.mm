@@ -12,12 +12,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.2 2003/03/24 17:38:20 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:10 tan2 Exp $
 
 include local.def
 
 PROJECT = CitcomS
 PACKAGE = pyre
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Common \
@@ -40,7 +42,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.2 2003/03/24 17:38:20 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:10 tan2 Exp $
 
 #
 # End of file

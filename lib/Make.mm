@@ -12,12 +12,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.2 2003/04/03 19:40:25 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 include local.def
 
-PROJECT = CitcomS/lib
+PROJECT = CitcomS
 PACKAGE = lib
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Common \
@@ -38,26 +40,26 @@ Common:
 
 Full:
 	(cd Common; TYPE=Full $(MM))
-	(cd Full; TYPE=Full $(MM))
+	(cd Full; $(MM))
 
 Regional:
 	(cd Common; TYPE=Regional $(MM))
-	(cd Regional; TYPE=Regional $(MM))
+	(cd Regional; $(MM))
 
 clean::
 	(cd Common; TYPE=Full $(MM) clean)
 	(cd Common; TYPE=Regional $(MM) clean)
-	(cd Full; TYPE=Full $(MM) clean)
-	(cd Regional; TYPE=Regional $(MM) clean)
+	(cd Full;  $(MM) clean)
+	(cd Regional; $(MM) clean)
 
 distclean::
 	(cd Common; TYPE=Full $(MM) distclean)
 	(cd Common; TYPE=Regional $(MM) distclean)
-	(cd Full; TYPE=Full $(MM) distclean)
-	(cd Regional; TYPE=Regional $(MM) distclean)
+	(cd Full; $(MM) distclean)
+	(cd Regional; $(MM) distclean)
 
 # version
-# $Id: Make.mm,v 1.2 2003/04/03 19:40:25 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
 
 #
 # End of file

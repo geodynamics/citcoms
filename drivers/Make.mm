@@ -12,12 +12,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.3 2003/04/03 19:38:35 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/04/05 20:25:09 tan2 Exp $
 
 include local.def
 
-PROJECT = CitcomS/drivers
+PROJECT = CitcomS
 PACKAGE = drivers
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Full \
@@ -39,7 +41,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.3 2003/04/03 19:38:35 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/04/05 20:25:09 tan2 Exp $
 
 #
 # End of file
