@@ -14,8 +14,8 @@
 
 
 // definition of static variables
-std::auto_ptr<SIUnit> Convertor::si;
-std::auto_ptr<CartesianCoord> Convertor::cart;
+SIUnit* Convertor::si = 0;
+CartesianCoord* Convertor::cart = 0;
 bool Convertor::inited = false;
 
 
@@ -45,11 +45,16 @@ Convertor& Convertor::instance()
 void Convertor::init(bool dimensional, bool transformational,
 		     const All_variables* E)
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "initializing Convertor singleton"
+	  << journal::end;
+
     if(dimensional)
-	si.reset(new SIUnit(E));
+	si = new SIUnit(E);
 
     if(transformational)
-	cart.reset(new CartesianCoord());
+	cart = new CartesianCoord();
 
     inited = true;
 }
@@ -59,48 +64,57 @@ Convertor::Convertor()
 {}
 
 
+Convertor::~Convertor()
+{
+    delete si;
+    si = 0;
+    delete cart;
+    cart = 0;
+}
+
+
 
 // internal representation ==> standard representation
 
 void Convertor::coordinate(BoundedBox& bbox) const
 {
-    if(si.get()) si->coordinate(bbox);
-    if(cart.get()) cart->coordinate(bbox);
+    if(si) si->coordinate(bbox);
+    if(cart) cart->coordinate(bbox);
 }
 
 
 void Convertor::coordinate(Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->coordinate(X);
-    if(cart.get()) cart->coordinate(X);
+    if(si) si->coordinate(X);
+    if(cart) cart->coordinate(X);
 }
 
 
 void Convertor::temperature(Array2D<double,1>& T) const
 {
-    if(si.get()) si->temperature(T);
+    if(si) si->temperature(T);
 }
 
 
 void Convertor::time(double& t) const
 {
-    if(si.get()) si->time(t);
+    if(si) si->time(t);
 }
 
 
 void Convertor::traction(Array2D<double,DIM>& F,
 			 const Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->traction(F);
-    if(cart.get()) cart->vector(F, X);
+    if(si) si->traction(F);
+    if(cart) cart->vector(F, X);
 }
 
 
 void Convertor::velocity(Array2D<double,DIM>& V,
 			 const Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->velocity(V);
-    if(cart.get()) cart->vector(V, X);
+    if(si) si->velocity(V);
+    if(cart) cart->vector(V, X);
 }
 
 
@@ -108,47 +122,47 @@ void Convertor::velocity(Array2D<double,DIM>& V,
 
 void Convertor::xcoordinate(BoundedBox& bbox) const
 {
-    if(si.get()) si->xcoordinate(bbox);
-    if(cart.get()) cart->xcoordinate(bbox);
+    if(si) si->xcoordinate(bbox);
+    if(cart) cart->xcoordinate(bbox);
 }
 
 
 void Convertor::xcoordinate(Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->xcoordinate(X);
-    if(cart.get()) cart->xcoordinate(X);
+    if(si) si->xcoordinate(X);
+    if(cart) cart->xcoordinate(X);
 }
 
 
 void Convertor::xtemperature(Array2D<double,1>& T) const
 {
-    if(si.get()) si->xtemperature(T);
+    if(si) si->xtemperature(T);
 }
 
 
 void Convertor::xtime(double& t) const
 {
-    if(si.get()) si->xtime(t);
+    if(si) si->xtime(t);
 }
 
 
 void Convertor::xtraction(Array2D<double,DIM>& F,
 			  const Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->xtraction(F);
-    if(cart.get()) cart->xvector(F, X);
+    if(si) si->xtraction(F);
+    if(cart) cart->xvector(F, X);
 }
 
 
 void Convertor::xvelocity(Array2D<double,DIM>& V,
 			  const Array2D<double,DIM>& X) const
 {
-    if(si.get()) si->xvelocity(V);
-    if(cart.get()) cart->xvector(V, X);
+    if(si) si->xvelocity(V);
+    if(cart) cart->xvector(V, X);
 }
 
 
 // version
-// $Id: Convertor.cc,v 1.2 2004/01/08 02:29:37 tan2 Exp $
+// $Id: Convertor.cc,v 1.3 2004/01/08 18:04:32 tan2 Exp $
 
 // End of file

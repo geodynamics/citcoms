@@ -10,7 +10,6 @@
 #if !defined(pyCitcom_Convertor_h)
 #define pyCitcom_Convertor_h
 
-#include <memory>
 #include "Array2D.h"
 #include "BoundedBox.h"
 #include "DIM.h"
@@ -23,12 +22,12 @@ class SIUnit;
 // singleton class
 
 class Convertor {
-    static std::auto_ptr<SIUnit> si;
-    static std::auto_ptr<CartesianCoord> cart;
+    static SIUnit* si;
+    static CartesianCoord* cart;
     static bool inited;
 
 public:
-    ~Convertor() {};
+    ~Convertor();
 
     static void init(bool dimensional, bool transformational,
 		     const All_variables* E);
@@ -67,6 +66,6 @@ private:
 #endif
 
 // version
-// $Id: Convertor.h,v 1.1 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Convertor.h,v 1.2 2004/01/08 18:04:32 tan2 Exp $
 
 // End of file
