@@ -12,12 +12,14 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.5 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/05/23 17:07:17 tan2 Exp $
 
 include local.def
 
 PROJECT = CitcomS
-PACKAGE = module 
+PACKAGE = module
+
+PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Regional
@@ -38,7 +40,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.5 2003/04/25 22:58:28 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/05/23 17:07:17 tan2 Exp $
 
 #
 # End of file
