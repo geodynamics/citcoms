@@ -87,7 +87,6 @@ void read_instructions(struct All_variables *E, char *filename)
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);
 
-
     parallel_processor_setup(E);   /* get # of proc in x,y,z */
     parallel_domain_decomp0(E);  /* get local nel, nno, elx, nox et al */
 
@@ -270,10 +269,17 @@ void read_initial_settings(struct All_variables *E)
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
 
   /* for layers    */
-  input_float("z_cmb",&(E->viscosity.zcmb),"1.0",m);
-  input_float("z_lmantle",&(E->viscosity.zlm),"1.0",m);
-  input_float("z_410",&(E->viscosity.z410),"1.0",m);
-  input_float("z_lith",&(E->viscosity.zlith),"0.0",m);
+  input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m);
+  input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m);
+  input_float("z_410",&(E->viscosity.z410),"0.225",m);
+  input_float("z_lith",&(E->viscosity.zlith),"0.225",m);
+  E->viscosity.zcmb=0.45;
+  E->viscosity.zlm=0.225;
+  E->viscosity.z410=0.1;
+  E->viscosity.zlith=0.01;
+  fprintf(stderr,"%e %e %e %e\n",E->viscosity.zlith,
+	  E->viscosity.z410,E->viscosity.zlm,
+	  E->viscosity.zcmb);
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
@@ -382,6 +388,8 @@ void allocate_common_vars(E)
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
   E->edot[j]     = (float *) malloc((nno+1)*sizeof(float));
 
+  E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
+  E->traction[j] = (float *) malloc((3*nno+1)*sizeof(float));
   E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
   for(i=1;i<=E->mesh.nsd;i++)
@@ -472,11 +480,12 @@ void allocate_common_vars(E)
     nxyz = elx*ely;
     E->CC[i][j] =(struct CC *)  malloc((1)*sizeof(struct CC));
     E->CCX[i][j]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
-    E->ELEMENT[i][j] = (unsigned int *) malloc ((nxyz+2)*sizeof(unsigned int));
+    /* Test */
+    E->ELEMENT[i][j] = (unsigned int *) malloc ((nel+2)*sizeof(unsigned int));
 
-    for (k=1;k<=nxyz;k++)
+    for (k=1;k<=nel;k++)
        E->ELEMENT[i][j][k] = 0;
-
+    /*ccccc*/
 
     E->elt_del[i][j]=(struct EG *)  malloc((nel+1)*sizeof(struct EG));
 
