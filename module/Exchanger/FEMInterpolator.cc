@@ -50,10 +50,11 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
     elem_.reserve(boundedMesh.size());
     shape_.reserve(boundedMesh.size());
 
-    Array2D<double,DIM*DIM> etaAxes;     // mapped axes of eta coord.
-    Array2D<double,DIM> inv_length_sq;   // reciprocal of (length of mapped axes)^2
+    Array2D<double,DIM*DIM> etaAxes;     // axes of eta coord.
+    Array2D<double,DIM> inv_length_sq;   // reciprocal of (length of etaAxes)^2
     computeElementGeometry(etaAxes, inv_length_sq);
 
+    // z is the range of depth in current processor
     std::vector<double> z(E->lmesh.noz);
     for(size_t i=0; i<z.size(); ++i)
 	z[i] = E->sx[mm][DIM][i+1];
@@ -66,16 +67,22 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 
 	// skip if x is not inside bbox
 	if(!isInside(x, boundedMesh.bbox())) continue;
-	// skip if x is not in the range of z
+
+#if 1
+	// skip if x is not in the range of depth
 	if(x.back() < z.front() || x.back() > z.back()) continue;
-
 	int elz = bisectInsertPoint(x.back(), z);
-
+	// Since the mesh of CitcomS is structural and regular
+	// we only need to loop over elements in a constant depth
 	for(int el=elz; el<E->lmesh.nel; el+=E->lmesh.elz) {
+#else
+	// If the mesh is not regular, loop over all elements
+	for(int el=0; el<E->lmesh.nel; ++el) {
+#endif
 
+	    std::vector<double> elmShape(NODES_PER_ELEMENT);
 	    double accuracy = E->control.accuracy * E->control.accuracy
  		              * E->eco[mm][el+1].area;
-	    std::vector<double> elmShape(NODES_PER_ELEMENT);
 	    bool found = elementInverseMapping(elmShape, x,
 					       etaAxes, inv_length_sq,
 					       el, accuracy);
@@ -102,7 +109,15 @@ void FEMInterpolator::computeElementGeometry(Array2D<double,DIM*DIM>& etaAxes,
     inv_length_sq.resize(E->lmesh.nel);
 
     const int mm = 1;
-    const int surfnodes = 4;
+    const int surfnodes = 4;  // # of nodes on element's face
+
+    // node 1, 2, 5, 6 are in the face that is on positive x axis
+    // node 2, 3, 6, 7 are in the face that is on positive y axis
+    // node 4, 5, 6, 7 are in the face that is on positive z axis
+    // node 0, 3, 4, 7 are in the face that is on negative x axis
+    // node 0, 1, 4, 5 are in the face that is on negative y axis
+    // node 0, 1, 2, 3 are in the face that is on negative z axis
+    // see comment of getShapeFunction() for the ordering of nodes
     const int high[] = {1, 2, 5, 6,
   			  2, 3, 6, 7,
 			  4, 5, 6, 7};
@@ -136,12 +151,10 @@ void FEMInterpolator::computeElementGeometry(Array2D<double,DIM*DIM>& etaAxes,
 
     for(int element=0; element<E->lmesh.nel; ++element)
 	for(int n=0; n<DIM; ++n) {
-	    double lengthsq = etaAxes[n*DIM+0][element] *
-		               etaAxes[n*DIM+0][element] +
-		               etaAxes[n*DIM+1][element] *
-		               etaAxes[n*DIM+1][element] +
-		               etaAxes[n*DIM+2][element] *
-		               etaAxes[n*DIM+2][element];
+	    double lengthsq = 0;
+	    for(int d=0; d<DIM; ++d)
+		lengthsq += etaAxes[n*DIM+d][element]
+		          * etaAxes[n*DIM+d][element];
 
 	    inv_length_sq[n][element] = 1 / lengthsq;
 	}
@@ -184,7 +197,7 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
     bool found = false;
     bool keep_going = true;
     int count = 0;
-    std::vector<double> eta(DIM);
+    std::vector<double> eta(DIM); // initial eta = (0,0,0)
 
     do {
 	getShapeFunction(elmShape, eta);
@@ -203,6 +216,7 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
 	    distancesq += dx[d] * dx[d];
 	}
 
+	// correction of eta
 	std::vector<double> deta(DIM);
 	for(int d=0; d<DIM; ++d) {
 	    for(int i=0; i<DIM; ++i)
@@ -218,6 +232,7 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
 	    for(int d=0; d<DIM; ++d)
 		eta[d] += 0.8 * deta[d];
 
+	// if x is inside this element, -1 < eta[d] < 1, d = 0 ... DIM
 	bool outside = false;
 	for(int d=0; d<DIM; ++d)
 	    outside = outside || (std::abs(eta[d]) > 2);
@@ -239,6 +254,17 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
 void FEMInterpolator::getShapeFunction(std::vector<double>& shape,
 				       const std::vector<double>& eta) const
 {
+    // the ordering of nodes in an element
+    // node #: eta coordinate
+    // node 0: (-1, -1, -1)
+    // node 1: ( 1, -1, -1)
+    // node 2: ( 1,  1, -1)
+    // node 3: (-1,  1, -1)
+    // node 4: (-1, -1,  1)
+    // node 5: ( 1, -1,  1)
+    // node 6: ( 1,  1,  1)
+    // node 7: (-1,  1,  1)
+
     shape[0] = 0.125 * (1.0-eta[0]) * (1.0-eta[1]) * (1.0-eta[2]);
     shape[1] = 0.125 * (1.0+eta[0]) * (1.0-eta[1]) * (1.0-eta[2]);
     shape[2] = 0.125 * (1.0+eta[0]) * (1.0+eta[1]) * (1.0-eta[2]);
@@ -260,21 +286,21 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
     for(int i=0; i<size(); i++) {
 
+	// xt is the node that we like to interpolate to
         std::vector<double> xt(DIM);
         for(int j=0; j<DIM; j++)
 	    xt[j] = boundedMesh.X(j, meshNode[0][i]);
 
-        std::vector<double> xc(DIM*NODES_PER_ELEMENT);
-        int n1 = elem_[0][i];
-        for(int j=0; j<NODES_PER_ELEMENT; j++)
-            for(int k=0; k<DIM; k++)
-                xc[j*DIM+k] = E->sx[1][k+1][E->ien[1][n1].node[j+1]];
-
+	// xi is the result of interpolation
         std::vector<double> xi(DIM);
-        for(int k=0; k<DIM; k++)
-            for(int j=0; j<NODES_PER_ELEMENT; j++)
-                xi[k] += xc[j*DIM+k] * shape_[j][i];
+        int n1 = elem_[0][i];
+	for(int j=0; j<NODES_PER_ELEMENT; j++) {
+	    int node = E->ien[1][n1].node[j+1];
+	    for(int k=0; k<DIM; k++)
+                xi[k] += E->sx[1][k+1][node] * shape_[j][i];
+	}
 
+	// if xi and xt are not coincide, the interpolation is wrong
         double norm = 0.0;
         for(int k=0; k<DIM; k++)
 	    norm += (xt[k]-xi[k]) * (xt[k]-xi[k]);
@@ -300,6 +326,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.5 2004/01/16 02:05:30 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.6 2004/01/18 21:07:38 tan2 Exp $
 
 // End of file
