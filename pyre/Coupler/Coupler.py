@@ -48,8 +48,14 @@ class Coupler(Component):
 
 
 
-    def solveVelocities(self, vsolver):
-        self.exchanger.solveVelocities(vsolver)
+    def preVSolverRun(self):
+        self.exchanger.preVSolverRun()
+        return
+
+
+
+    def postVSolverRun(self):
+        self.exchanger.postVSolverRun()
         return
 
 
@@ -78,6 +84,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.6 2003/09/30 01:48:34 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.7 2003/10/01 22:06:01 tan2 Exp $"
 
 # End of file
