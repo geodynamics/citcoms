@@ -32,8 +32,9 @@ PROJ_CLEAN += $(PROJ_BIN) $(PROJ_OBJS)
 
 all: $(PROJ_BIN)
 
-$(PROJ_BIN): $(PROJ_OBJS) 
-	$(CC) $(PROJ_CC_FLAGS) -o $@ $^ $(PROJ_LIBS) $(LCFLAGS)
+.PHONY: $(PROJ_BIN)
+$(PROJ_BIN):
+	$(CC) $(PROJ_CC_FLAGS) -o $@ $(PROJ_OBJS) $(PROJ_LIBS) $(LCFLAGS)
 
 $(PROJ_OBJS): $(PROJ_SRCS)
 	$(CC_COMPILE_COMMAND) $(PROJ_CC_FLAGS) 
@@ -41,7 +42,7 @@ $(PROJ_OBJS): $(PROJ_SRCS)
 
 
 # version
-# $Id: Make.mm,v 1.6 2003/09/01 02:02:35 ces74 Exp $
+# $Id: Make.mm,v 1.7 2003/11/26 23:27:09 tan2 Exp $
 
 #
 # End of file
