@@ -75,20 +75,37 @@ class CitcomsRegionalApp(Application):
         return
 
 
+    def preInit(self):
+        import mpi
+        import CitcomS.Regional as Regional
+        world = mpi.world()
+        Application.preInit(self)
+        Regional.Citcom_Init(world.size, world.rank)
+ 
+ 
+    def postInit(self):
+        import sys
+        import CitcomS.Regional as Regional
+        Application.postInit(self)
+        #filename = self.facility.infile
+        filename = sys.argv[1]
+        Regional.read_instructions(filename)
+
+
     class Facilities(Application.Facilities):
 
 
         import pyre.facilities
         from EarthModelConstants import EarthModelConstants
-        from EarthModelGrid import EarthModelGrid
         from EarthModelPhase import EarthModelPhase
         from EarthModelVisc import EarthModelVisc
+        from SimulationGrid import SimulationGrid
         
         __facilities__ = Application.Facilities.__facilities__ + (
             pyre.facilities.facility("earthModel", EarthModelConstants()),
-            pyre.facilities.facility("earthModel_grid", EarthModelGrid()),
             pyre.facilities.facility("earthModel_phase", EarthModelPhase()),
             pyre.facilities.facility("earthModel_visc", EarthModelVisc()),
+            pyre.facilities.facility("simulation_grid", SimulationGrid()),
             )
 
 
@@ -100,6 +117,6 @@ class CitcomsRegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.1 2003/04/09 18:59:23 ces74 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.2 2003/04/10 23:34:00 tan2 Exp $"
 
 # End of file 
