@@ -109,9 +109,9 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
- 		    E->T[m][node] = E->X[E->mesh.levmax][m][1][node]
-			+ E->X[E->mesh.levmax][m][2][node]
-			+ E->X[E->mesh.levmax][m][3][node];
+ 		    E->T[m][node] = E->sx[m][1][node]
+			+ E->sx[m][2][node]
+			+ E->sx[m][3][node];
 
 		    E->V[m][1][node] = E->T[m][node];
 		    E->V[m][2][node] = 2.0*E->T[m][node];
@@ -238,7 +238,7 @@ void commonE(All_variables *E) {
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=1; i<=E->mesh.dof; i++) {
 	    // Don't forget to delete these later
-	    E->X[E->mesh.levmax][m][i] = new double [n+1];
+	    E->sx[m][i] = new double [n+1];
 	    E->V[m][i] = new float [n+1];
 	}
   	E->T[m] = new double [n+1];
@@ -268,6 +268,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.14 2003/09/28 20:41:46 tan2 Exp $
+// $Id: misc.cc,v 1.15 2003/09/29 02:09:06 puru Exp $
 
 // End of file
