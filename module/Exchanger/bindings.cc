@@ -96,35 +96,10 @@ struct PyMethodDef pyExchanger_methods[] = {
 
     // from exchangers.h
 
-    {pyExchanger_createBCSink__name__,
-     pyExchanger_createBCSink,
-     METH_VARARGS,
-     pyExchanger_createBCSink__doc__},
-
-    {pyExchanger_createBCSource__name__,
-     pyExchanger_createBCSource,
-     METH_VARARGS,
-     pyExchanger_createBCSource__doc__},
-
     {pyExchanger_createTractionSource__name__,
      pyExchanger_createTractionSource,
      METH_VARARGS,
      pyExchanger_createTractionSource__doc__},
-
-    {pyExchanger_createTractionBC__name__,
-     pyExchanger_createTractionBC,
-     METH_VARARGS,
-     pyExchanger_createTractionBC__doc__},
-
-	 {pyExchanger_createIISink__name__,
-     pyExchanger_createIISink,
-     METH_VARARGS,
-     pyExchanger_createIISink__doc__},
-
-    {pyExchanger_createIISource__name__,
-     pyExchanger_createIISource,
-     METH_VARARGS,
-     pyExchanger_createIISource__doc__},
 
     {pyExchanger_createBoundary__name__,
      pyExchanger_createBoundary,
@@ -156,11 +131,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_createSink__doc__},
 
-    {pyExchanger_createSource__name__,
-     pyExchanger_createSource,
-     METH_VARARGS,
-     pyExchanger_createSource__doc__},
-
     {pyExchanger_VTSource_create__name__,
      pyExchanger_VTSource_create,
      METH_VARARGS,
@@ -175,52 +145,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      pyExchanger_modifyT,
      METH_VARARGS,
      pyExchanger_modifyT__doc__},
-
-    {pyExchanger_recvTandV__name__,
-     pyExchanger_recvTandV,
-     METH_VARARGS,
-     pyExchanger_recvTandV__doc__},
-
-    {pyExchanger_sendTandV__name__,
-     pyExchanger_sendTandV,
-     METH_VARARGS,
-     pyExchanger_sendTandV__doc__},
-
-    {pyExchanger_sendTraction__name__,
-     pyExchanger_sendTraction,
-     METH_VARARGS,
-     pyExchanger_sendTraction__doc__},
-
-    {pyExchanger_domain_cutout__name__,
-     pyExchanger_domain_cutout,
-     METH_VARARGS,
-     pyExchanger_domain_cutout__doc__},
-
-    {pyExchanger_recvT__name__,
-     pyExchanger_recvT,
-     METH_VARARGS,
-     pyExchanger_recvT__doc__},
-
-    {pyExchanger_sendT__name__,
-     pyExchanger_sendT,
-     METH_VARARGS,
-     pyExchanger_sendT__doc__},
-
-    {pyExchanger_recvV__name__,
-     pyExchanger_recvV,
-     METH_VARARGS,
-     pyExchanger_recvV__doc__},
-
-
-    {pyExchanger_imposeBC__name__,
-     pyExchanger_imposeBC,
-     METH_VARARGS,
-     pyExchanger_imposeBC__doc__},
-
-    {pyExchanger_imposeIC__name__,
-     pyExchanger_imposeIC,
-     METH_VARARGS,
-     pyExchanger_imposeIC__doc__},
 
     {pyExchanger_exchangeBoundedBox__name__,
      pyExchanger_exchangeBoundedBox,
@@ -237,17 +161,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_exchangeTimestep__doc__},
 
-    {pyExchanger_storeTimestep__name__,
-     pyExchanger_storeTimestep,
-     METH_VARARGS,
-     pyExchanger_storeTimestep__doc__},
-
-
 // Sentinel
     {0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.36 2004/03/11 01:06:14 tan2 Exp $
+// $Id: bindings.cc,v 1.37 2004/03/11 22:46:25 tan2 Exp $
 
 // End of file

@@ -18,145 +18,26 @@
 #include "utility.h"
 #include "Boundary.h"
 #include "BoundedBox.h"
-#include "BoundaryCondition.h"
 #include "DIM.h"
 #include "Convertor.h"
 #include "Interior.h"
-#include "InteriorImposing.h"
 #include "Sink.h"
-#include "Source.h"
 #include "TractionSource.h"
-#include "TractionBC.h"
 #include "VTSource.h"
 
 #include "exchangers.h"
 
 struct All_variables;
 
-void deleteBCSink(void*);
-void deleteBCSource(void*);
-void deleteIISink(void*);
-void deleteIISource(void*);
 void deleteBoundary(void*);
 void deleteBoundedBox(void*);
 void deleteInterior(void*);
 void deleteSink(void*);
-void deleteSource(void*);
 void deleteTractionSource(void*);
-void deleteTractionBC(void*);
 void deleteVTSource(void*);
 
 //
 //
-
-
-char pyExchanger_createBCSink__doc__[] = "";
-char pyExchanger_createBCSink__name__[] = "createBCSink";
-
-PyObject * pyExchanger_createBCSink(PyObject *self, PyObject *args)
-{
-    PyObject *obj0, *obj1, *obj2, *obj3;
-
-    if (!PyArg_ParseTuple(args, "OOOO:createBCSink",
-			  &obj0, &obj1, &obj2, &obj3))
-        return NULL;
-
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj0));
-    MPI_Comm comm = temp->handle();
-    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
-
-    BoundaryConditionSink* BCSink = new BoundaryConditionSink(comm, *b,
-							      *sink, E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(BCSink, deleteBCSink);
-    return Py_BuildValue("O", cobj);
-}
-
-
-char pyExchanger_createBCSource__doc__[] = "";
-char pyExchanger_createBCSource__name__[] = "createBCSource";
-
-PyObject * pyExchanger_createBCSource(PyObject *self, PyObject *args)
-{
-    PyObject *obj1, *obj2;
-
-    if (!PyArg_ParseTuple(args, "OO:createBCSource",
-			  &obj1, &obj2))
-        return NULL;
-
-    Source* source = static_cast<Source*>(PyCObject_AsVoidPtr(obj1));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
-
-    BoundaryConditionSource* BCSource = new BoundaryConditionSource(*source, E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(BCSource, deleteBCSource);
-    return Py_BuildValue("O", cobj);
-}
-
-char pyExchanger_createTractionBC__doc__[] = "";
-char pyExchanger_createTractionBC__name__[] = "createTractionBC";
-
-PyObject * pyExchanger_createTractionBC(PyObject *self, PyObject *args)
-{
-    PyObject *obj1, *obj2;
-
-    if (!PyArg_ParseTuple(args, "OO:createTractionBC",
-			  &obj1, &obj2))
-        return NULL;
-
-    TractionSource* source = static_cast<TractionSource*>(PyCObject_AsVoidPtr(obj1));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
-
-    TractionBC* TSource = new TractionBC(*source, E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(TSource, deleteTractionBC);
-    return Py_BuildValue("O", cobj);
-}
-
-char pyExchanger_createIISink__doc__[] = "";
-char pyExchanger_createIISink__name__[] = "createIISink";
-
-PyObject * pyExchanger_createIISink(PyObject *self, PyObject *args)
-{
-    PyObject *obj1, *obj2, *obj3;
-
-    if (!PyArg_ParseTuple(args, "OOO:createIISink",
-			  &obj1, &obj2, &obj3))
-        return NULL;
-
-    Interior* b = static_cast<Interior*>(PyCObject_AsVoidPtr(obj1));
-    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
-
-    InteriorImposingSink* IISink = new InteriorImposingSink(*b, *sink, E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(IISink, deleteIISink);
-    return Py_BuildValue("O", cobj);
-}
-
-
-char pyExchanger_createIISource__doc__[] = "";
-char pyExchanger_createIISource__name__[] = "createIISource";
-
-PyObject * pyExchanger_createIISource(PyObject *self, PyObject *args)
-{
-    PyObject *obj1, *obj2;
-
-    if (!PyArg_ParseTuple(args, "OO:createIISource",
-			  &obj1, &obj2))
-        return NULL;
-
-    Source* source = static_cast<Source*>(PyCObject_AsVoidPtr(obj1));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
-
-    InteriorImposingSource* IISource = new InteriorImposingSource(*source, E);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(IISource, deleteIISource);
-    return Py_BuildValue("O", cobj);
-}
 
 
 char pyExchanger_createBoundary__doc__[] = "";
@@ -283,34 +164,6 @@ PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
 }
 
 
-char pyExchanger_createSource__doc__[] = "";
-char pyExchanger_createSource__name__[] = "createSource";
-
-PyObject * pyExchanger_createSource(PyObject *self, PyObject *args)
-{
-    PyObject *obj1, *obj2, *obj3, *obj4;
-    int sink;
-
-    if (!PyArg_ParseTuple(args, "OiOOO:createSource",
-			  &obj1, &sink,
-			  &obj2, &obj3, &obj4))
-        return NULL;
-
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj1));
-    MPI_Comm comm = temp->handle();
-
-    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
-    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj4));
-
-    Source* source = new Source(comm, sink, *b, E, *bbox);
-
-    PyObject *cobj = PyCObject_FromVoidPtr(source, deleteSource);
-    return Py_BuildValue("O", cobj);
-}
-
-
 char pyExchanger_createTractionSource__doc__[] = "";
 char pyExchanger_createTractionSource__name__[] = "createTractionSource";
 
@@ -402,188 +255,6 @@ PyObject * pyExchanger_modifyT(PyObject *, PyObject *args)
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
 
     modifyT(*bbox, E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_recvTandV__doc__[] = "";
-char pyExchanger_recvTandV__name__[] = "recvTandV";
-
-PyObject * pyExchanger_recvTandV(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:recvTandV", &obj))
-	return NULL;
-
-    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
-	                                    (PyCObject_AsVoidPtr(obj));
-
-    bcs->recvTandV();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_recvV__doc__[] = "";
-char pyExchanger_recvV__name__[] = "recvV";
-
-PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    std::cout << " exchangers :: recvV " << std::endl;
-
-
-    if (!PyArg_ParseTuple(args, "O:recvV", &obj))
-	return NULL;
-
-    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
-	                                    (PyCObject_AsVoidPtr(obj));
-
-    ics->recvV();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_sendTandV__doc__[] = "";
-char pyExchanger_sendTandV__name__[] = "sendTandV";
-
-PyObject * pyExchanger_sendTandV(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:sendTandV", &obj))
-	return NULL;
-
-    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
-	                                      (PyCObject_AsVoidPtr(obj));
-
-    bcs->sendTandV();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_sendTraction__doc__[] = "";
-char pyExchanger_sendTraction__name__[] = "sendTraction";
-
-PyObject * pyExchanger_sendTraction(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:sendTraction", &obj))
-	return NULL;
-
-    TractionBC* ts = static_cast<TractionBC*>
-	                                      (PyCObject_AsVoidPtr(obj));
-
-    ts->sendTraction();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_domain_cutout__doc__[] = "";
-char pyExchanger_domain_cutout__name__[] = "domain_cutout";
-
-PyObject * pyExchanger_domain_cutout(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:domain_cutout", &obj))
-	return NULL;
-
-    TractionBC* ts = static_cast<TractionBC*>
-	                                      (PyCObject_AsVoidPtr(obj));
-    ts->domain_cutout();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_recvT__doc__[] = "";
-char pyExchanger_recvT__name__[] = "recvT";
-
-PyObject * pyExchanger_recvT(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:recvT", &obj))
-	return NULL;
-
-    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
-	                                    (PyCObject_AsVoidPtr(obj));
-
-    ics->recvT();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_sendT__doc__[] = "";
-char pyExchanger_sendT__name__[] = "sendT";
-
-PyObject * pyExchanger_sendT(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:sendT", &obj))
-	return NULL;
-
-    InteriorImposingSource* ics = static_cast<InteriorImposingSource*>
-	                                      (PyCObject_AsVoidPtr(obj));
-
-    ics->sendT();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_imposeBC__doc__[] = "";
-char pyExchanger_imposeBC__name__[] = "imposeBC";
-
-PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:imposeBC", &obj))
-	return NULL;
-
-    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
-	                                    (PyCObject_AsVoidPtr(obj));
-
-    bcs->imposeBC();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_imposeIC__doc__[] = "";
-char pyExchanger_imposeIC__name__[] = "imposeIC";
-
-PyObject * pyExchanger_imposeIC(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:imposeIC", &obj))
-	return NULL;
-
-    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
-	                                    (PyCObject_AsVoidPtr(obj));
-
-    ics->imposeIC();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -713,58 +384,7 @@ PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_storeTimestep__doc__[] = "";
-char pyExchanger_storeTimestep__name__[] = "storeTimestep";
-
-PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-    double fge_t, cge_t;
-
-    if (!PyArg_ParseTuple(args, "Odd:storeTimestep", &obj, &fge_t, &cge_t))
-	return NULL;
-
-    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
-	                         (PyCObject_AsVoidPtr(obj));
-
-    bcs->storeTimestep(fge_t, cge_t);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 // helper functions
-
-void deleteBCSink(void* p)
-{
-    delete static_cast<BoundaryConditionSink*>(p);
-}
-
-
-void deleteBCSource(void* p)
-{
-    delete static_cast<BoundaryConditionSource*>(p);
-}
-
-
-void deleteIISink(void* p)
-{
-    delete static_cast<InteriorImposingSink*>(p);
-}
-
-
-void deleteIISource(void* p)
-{
-    delete static_cast<InteriorImposingSource*>(p);
-}
-
-
-void deleteVTSource(void* p)
-{
-    delete static_cast<VTSource*>(p);
-}
-
 
 void deleteBoundary(void* p)
 {
@@ -790,26 +410,19 @@ void deleteSink(void* p)
 }
 
 
-void deleteSource(void* p)
-{
-    delete static_cast<Source*>(p);
-}
-
-
 void deleteTractionSource(void* p)
 {
     delete static_cast<TractionSource*>(p);
 }
 
 
-void deleteTractionBC(void* p)
+void deleteVTSource(void* p)
 {
-    delete static_cast<TractionBC*>(p);
+    delete static_cast<VTSource*>(p);
 }
 
 
-
 // version
-// $Id: exchangers.cc,v 1.43 2004/02/26 23:04:21 tan2 Exp $
+// $Id: exchangers.cc,v 1.44 2004/03/11 22:46:25 tan2 Exp $
 
 // End of file

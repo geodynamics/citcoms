@@ -11,42 +11,6 @@
 #define pyExchanger_exchangers_h
 
 
-extern char pyExchanger_createBCSink__name__[];
-extern char pyExchanger_createBCSink__doc__[];
-extern "C"
-PyObject * pyExchanger_createBCSink(PyObject *, PyObject *);
-
-
-extern char pyExchanger_createBCSource__name__[];
-extern char pyExchanger_createBCSource__doc__[];
-extern "C"
-PyObject * pyExchanger_createBCSource(PyObject *, PyObject *);
-
-
-extern char pyExchanger_createTractionSource__name__[];
-extern char pyExchanger_createTractionSource__doc__[];
-extern "C"
-PyObject * pyExchanger_createTractionSource(PyObject *, PyObject *);
-
-
-extern char pyExchanger_createTractionBC__name__[];
-extern char pyExchanger_createTractionBC__doc__[];
-extern "C"
-PyObject * pyExchanger_createTractionBC(PyObject *, PyObject *);
-
-
-extern char pyExchanger_createIISink__name__[];
-extern char pyExchanger_createIISink__doc__[];
-extern "C"
-PyObject * pyExchanger_createIISink(PyObject *, PyObject *);
-
-
-extern char pyExchanger_createIISource__name__[];
-extern char pyExchanger_createIISource__doc__[];
-extern "C"
-PyObject * pyExchanger_createIISource(PyObject *, PyObject *);
-
-
 extern char pyExchanger_createBoundary__name__[];
 extern char pyExchanger_createBoundary__doc__[];
 extern "C"
@@ -83,10 +47,10 @@ extern "C"
 PyObject * pyExchanger_createSink(PyObject *, PyObject *);
 
 
-extern char pyExchanger_createSource__name__[];
-extern char pyExchanger_createSource__doc__[];
+extern char pyExchanger_createTractionSource__name__[];
+extern char pyExchanger_createTractionSource__doc__[];
 extern "C"
-PyObject * pyExchanger_createSource(PyObject *, PyObject *);
+PyObject * pyExchanger_createTractionSource(PyObject *, PyObject *);
 
 
 extern char pyExchanger_VTSource_create__name__[];
@@ -119,59 +83,6 @@ extern "C"
 PyObject * pyExchanger_modifyT(PyObject *, PyObject *);
 
 
-extern char pyExchanger_recvTandV__name__[];
-extern char pyExchanger_recvTandV__doc__[];
-extern "C"
-PyObject * pyExchanger_recvTandV(PyObject *, PyObject *);
-
-
-extern char pyExchanger_sendTandV__name__[];
-extern char pyExchanger_sendTandV__doc__[];
-extern "C"
-PyObject * pyExchanger_sendTandV(PyObject *, PyObject *);
-
-
-extern char pyExchanger_sendTraction__name__[];
-extern char pyExchanger_sendTraction__doc__[];
-extern "C"
-PyObject * pyExchanger_sendTraction(PyObject *, PyObject *);
-
-
-extern char pyExchanger_domain_cutout__name__[];
-extern char pyExchanger_domain_cutout__doc__[];
-extern "C"
-PyObject * pyExchanger_domain_cutout(PyObject *, PyObject *);
-
-
-extern char pyExchanger_recvT__name__[];
-extern char pyExchanger_recvT__doc__[];
-extern "C"
-PyObject * pyExchanger_recvT(PyObject *, PyObject *);
-
-extern char pyExchanger_recvV__name__[];
-extern char pyExchanger_recvV__doc__[];
-extern "C"
-PyObject * pyExchanger_recvV(PyObject *, PyObject *);
-
-
-extern char pyExchanger_sendT__name__[];
-extern char pyExchanger_sendT__doc__[];
-extern "C"
-PyObject * pyExchanger_sendT(PyObject *, PyObject *);
-
-
-extern char pyExchanger_imposeBC__name__[];
-extern char pyExchanger_imposeBC__doc__[];
-extern "C"
-PyObject * pyExchanger_imposeBC(PyObject *, PyObject *);
-
-
-extern char pyExchanger_imposeIC__name__[];
-extern char pyExchanger_imposeIC__doc__[];
-extern "C"
-PyObject * pyExchanger_imposeIC(PyObject *, PyObject *);
-
-
 extern char pyExchanger_exchangeBoundedBox__name__[];
 extern char pyExchanger_exchangeBoundedBox__doc__[];
 extern "C"
@@ -190,16 +101,9 @@ extern "C"
 PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *);
 
 
-extern char pyExchanger_storeTimestep__name__[];
-extern char pyExchanger_storeTimestep__doc__[];
-extern "C"
-PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
-
-
-
 #endif
 
 // version
-// $Id: exchangers.h,v 1.32 2004/02/24 20:37:19 tan2 Exp $
+// $Id: exchangers.h,v 1.33 2004/03/11 22:46:25 tan2 Exp $
 
 // End of file
