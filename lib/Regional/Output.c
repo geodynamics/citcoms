@@ -1,4 +1,4 @@
-/* Routine to process the output of the finite element cycles 
+/* Routine to process the output of the finite element cycles
    and to turn them into a coherent suite  files  */
 
 
@@ -41,23 +41,72 @@ void output_coord(struct All_variables *E, FILE *fp1)
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
   }
   return;
 }
 
 
-void output_visc(struct All_variables *E, FILE *fp1)
+float** output_visc_prepare(struct All_variables *E)
 {
-  int i, j;
+  void get_ele_visc ();
+  void visc_from_ele_to_gint();
+  void visc_from_gint_to_nodes();
+
+  float *EV, *VN[NCS];
+  static float *VE[NCS];
+  const int lev = E->mesh.levmax;
+  const int nsd = E->mesh.nsd;
+  const int vpts = vpoints[nsd];
+  int i, m;
+
+
+  // Here is a bug in the original code. EV is not allocated for each
+  // E->sphere.caps_per_proc. Later, when elemental viscosity is written
+  // to it (in get_ele_visc()), viscosity in high cap number will overwrite
+  // that in a lower cap number.
+  //
+  // Since current CitcomS only support 1 cap per processor, this bug won't
+  // manifest itself. So, I will leave it here.
+  // by Tan2 5/22/2003
+  int size2 = (E->lmesh.nel+1)*sizeof(float);
+  EV = (float *) malloc (size2);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    VE[m]=(float *)malloc((1+E->lmesh.nno)*sizeof(float));
+    VN[m]=(float *)malloc((1+E->lmesh.nel*vpts)*sizeof(float));
+  }
+
+  get_ele_visc(E,EV,1);
+
+  for(i=1;i<=E->lmesh.nel;i++)
+    VE[1][i]=EV[i];
+
+  visc_from_ele_to_gint(E, VE, VN, lev);
+  visc_from_gint_to_nodes(E, VN, VE, lev);
+
+  free((void *) EV);
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    free((void *) VN[m]);
+
+  return VE;
+}
+
+
+void output_visc(struct All_variables *E, FILE *fp1, float **VE)
+{
+  int i, j, m;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      break;
-    //fprintf(fp1,"%.3e\n",VE[1][i]);
+      fprintf(fp1,"%.3e\n",VE[1][i]);
   }
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    free((void *) VE[m]);
+
   return;
 }
 
@@ -75,7 +124,7 @@ void output_velo(struct All_variables *E, FILE *fp1)
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
   }
 
@@ -87,11 +136,11 @@ void output_velo(struct All_variables *E, FILE *fp1)
 
 void output_velo_related(E,file_number)
   struct All_variables *E;
-  int file_number; 
+  int file_number;
 {
   int el,els,i,j,k,ii,m,node,fd;
   int s,nox,noz,noy,size1,size2,size3;
-  
+
   char output_file[255];
   FILE *fp1,*fp2,*fp3,*fp4,*fp5,*fp6,*fp7,*fp8;
   static float *SV,*EV;
@@ -125,7 +174,7 @@ void output_velo_related(E,file_number)
 	}
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
     }
   fclose(fp1);
@@ -139,7 +188,7 @@ void output_velo_related(E,file_number)
      }
 
     get_ele_visc(E,EV,1);
-     
+
      for(i=1;i<=E->lmesh.nel;i++)
      VE[1][i]=EV[i];
 
@@ -154,7 +203,7 @@ void output_velo_related(E,file_number)
 	}
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.3e\n",VE[1][i]);
     }
   fclose(fp1);
@@ -168,7 +217,7 @@ void output_velo_related(E,file_number)
   fprintf(fp1,"%d %d %.5e\n",file_number,E->lmesh.nno,E->monitor.elapsed_time);
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)           
+    for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
     }
 
@@ -183,7 +232,7 @@ void output_velo_related(E,file_number)
 	}
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-      for(i=1;i<=E->lmesh.nsf;i++)   { 
+      for(i=1;i<=E->lmesh.nsf;i++)   {
 	s = i*E->lmesh.noz;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpg[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
 	}
@@ -201,7 +250,7 @@ void output_velo_related(E,file_number)
 	}
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-      for(i=1;i<=E->lmesh.nsf;i++)  { 
+      for(i=1;i<=E->lmesh.nsf;i++)  {
 	s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
 	}
@@ -235,7 +284,7 @@ void output_velo_related(E,file_number)
 
 void output_temp(E,file_number)
   struct All_variables *E;
-  int file_number; 
+  int file_number;
 {
   int m,nno,i,j,fd;
   static int *temp1;
@@ -244,7 +293,7 @@ void output_temp(E,file_number)
   char output_file[255];
   void parallel_process_sync();
 
-  return; 
+  return;
 }
 
 
@@ -252,7 +301,7 @@ void output_temp(E,file_number)
 
 void output_stress(E,file_number,SXX,SYY,SZZ,SXY,SXZ,SZY)
     struct All_variables *E;
-    int file_number; 
+    int file_number;
     float *SXX,*SYY,*SZZ,*SXY,*SXZ,*SZY;
 {
     int i,j,k,ii,m,fd,size2;
