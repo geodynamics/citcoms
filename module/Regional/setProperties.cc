@@ -44,7 +44,7 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     if (!PyArg_ParseTuple(args, "O:Advection_diffusion_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Advection_diffusion.inventories:" << std::endl;
+    //std::cerr << "Advection_diffusion.inventories:" << std::endl;
 
     getScalarProperty(properties, "ADV", E->advection.ADVECTION);
     getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep);
@@ -84,7 +84,7 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:BC_set_properties", &properties))
         return NULL;
 
-    std::cerr << "BC.inventories:" << std::endl;
+    //std::cerr << "BC.inventories:" << std::endl;
 
     getScalarProperty(properties, "topvbc", E->mesh.topvbc);
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval);
@@ -125,7 +125,7 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Const_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Const.inventories:" << std::endl;
+    //std::cerr << "Const.inventories:" << std::endl;
 
     getScalarProperty(properties, "layerd", E->data.layer_km);
     getScalarProperty(properties, "density", E->data.density);
@@ -173,7 +173,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:IC_set_properties", &properties))
         return NULL;
 
-    std::cerr << "IC.inventories:" << std::endl;
+    //std::cerr << "IC.inventories:" << std::endl;
 
     int num_perturb;
     const int max_perturb = 32;
@@ -211,7 +211,7 @@ PyObject * pyCitcom_Parallel_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Parallel_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Parallel.inventories:" << std::endl;
+    //std::cerr << "Parallel.inventories:" << std::endl;
 
     getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy);
     getScalarProperty(properties, "nprocx", E->parallel.nprocxl);
@@ -245,7 +245,7 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Param_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Param.inventories:" << std::endl;
+    //std::cerr << "Param.inventories:" << std::endl;
 
     getStringProperty(properties, "datafile", E->control.data_file);
 
@@ -311,7 +311,7 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Phase_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Phase.inventories:" << std::endl;
+    //std::cerr << "Phase.inventories:" << std::endl;
 
     getScalarProperty(properties, "Ra_410", E->control.Ra_410 );
     getScalarProperty(properties, "clapeyron410", E->control.clapeyron410);
@@ -357,12 +357,16 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Sphere_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Sphere.inventories:" << std::endl;
+    //std::cerr << "Sphere.inventories:" << std::endl;
 
     getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy);
-    getScalarProperty(properties, "nprocx", E->parallel.nprocxl);
-    getScalarProperty(properties, "nprocy", E->parallel.nprocyl);
-    getScalarProperty(properties, "nprocz", E->parallel.nproczl);
+    getScalarProperty(properties, "nprocx", E->parallel.nprocx);
+    getScalarProperty(properties, "nprocy", E->parallel.nprocy);
+    getScalarProperty(properties, "nprocz", E->parallel.nprocz);
+
+    E->parallel.nprocxl = E->parallel.nprocx;
+    E->parallel.nprocyl = E->parallel.nprocy;
+    E->parallel.nproczl = E->parallel.nprocz;
 
     if (E->parallel.nprocxy == 12)
 	if (E->parallel.nprocxl != E->parallel.nprocyl) {
@@ -377,19 +381,18 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "nodex", E->mesh.nox);
     getScalarProperty(properties, "nodey", E->mesh.noy);
     getScalarProperty(properties, "nodez", E->mesh.noz);
-    getScalarProperty(properties, "mgunitx", E->mesh.mgunitx);
-    getScalarProperty(properties, "mgunity", E->mesh.mgunity);
-    getScalarProperty(properties, "mgunitz", E->mesh.mgunitz);
     getScalarProperty(properties, "levels", E->mesh.levels);
+
+    E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx /
+	(int) std::pow(2.0, E->mesh.levels - 1);
+    E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy /
+	(int) std::pow(2.0, E->mesh.levels - 1);
+    E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz /
+	(int) std::pow(2.0, E->mesh.levels - 1);
 
     if (E->parallel.nprocxy == 12) {
 	if (E->mesh.nox != E->mesh.noy) {
 	    char errmsg[] = "!!!! nodex must equal to nodey";
-	    PyErr_SetString(PyExc_SyntaxError, errmsg);
-	    return NULL;
-	}
-	if (E->mesh.mgunitx != E->mesh.mgunity) {
-	    char errmsg[] = "!!!! mgunitx must equal to mgunity";
 	    PyErr_SetString(PyExc_SyntaxError, errmsg);
 	    return NULL;
 	}
@@ -398,27 +401,67 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "radius_outer", E->sphere.ro);
     getScalarProperty(properties, "radius_inner", E->sphere.ri);
 
-    getScalarProperty(properties, "theta_min", E->control.theta_min);
-    getScalarProperty(properties, "theta_max", E->control.theta_max);
-    getScalarProperty(properties, "fi_min", E->control.fi_min);
-    getScalarProperty(properties, "fi_max", E->control.fi_max);
-
-    E->sphere.cap[1].theta[1] = E->control.theta_min;
-    E->sphere.cap[1].theta[2] = E->control.theta_max;
-    E->sphere.cap[1].theta[3] = E->control.theta_max;
-    E->sphere.cap[1].theta[4] = E->control.theta_min;
-    E->sphere.cap[1].fi[1] = E->control.fi_min;
-    E->sphere.cap[1].fi[2] = E->control.fi_min;
-    E->sphere.cap[1].fi[3] = E->control.fi_max;
-    E->sphere.cap[1].fi[4] = E->control.fi_max;
-
     E->mesh.nsd = 3;
     E->mesh.dof = 3;
     E->sphere.max_connections = 6;
-    if (E->parallel.nprocxy == 12)
+
+    if (E->parallel.nprocxy == 12) {
+
 	E->sphere.caps = 12;
-    else
+
+	int i, j;
+	double offset = 10.0/180.0*M_PI;
+	for (i=1;i<=4;i++)  {
+	    E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
+	    E->sphere.cap[(i-1)*3+1].theta[2] = M_PI/4.0+offset;
+	    E->sphere.cap[(i-1)*3+1].theta[3] = M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+1].theta[4] = M_PI/4.0+offset;
+	    E->sphere.cap[(i-1)*3+1].fi[1] = 0.0;
+	    E->sphere.cap[(i-1)*3+1].fi[2] = (i-1)*M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+1].fi[3] = (i-1)*M_PI/2.0 + M_PI/4.0;
+	    E->sphere.cap[(i-1)*3+1].fi[4] = i*M_PI/2.0;
+
+	    E->sphere.cap[(i-1)*3+2].theta[1] = M_PI/4.0+offset;
+	    E->sphere.cap[(i-1)*3+2].theta[2] = M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+2].theta[3] = 3*M_PI/4.0-offset;
+	    E->sphere.cap[(i-1)*3+2].theta[4] = M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+2].fi[1] = i*M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+2].fi[2] = i*M_PI/2.0 - M_PI/4.0;
+	    E->sphere.cap[(i-1)*3+2].fi[3] = i*M_PI/2.0;
+	    E->sphere.cap[(i-1)*3+2].fi[4] = i*M_PI/2.0 + M_PI/4.0;
+	}
+
+	for (i=1;i<=4;i++)  {
+	    j = (i-1)*3;
+	    if (i==1) j=12;
+	    E->sphere.cap[j].theta[1] = M_PI/2.0;
+	    E->sphere.cap[j].theta[2] = 3*M_PI/4.0-offset;
+	    E->sphere.cap[j].theta[3] = M_PI;
+	    E->sphere.cap[j].theta[4] = 3*M_PI/4.0-offset;
+	    E->sphere.cap[j].fi[1] = (i-1)*M_PI/2.0 + M_PI/4.0;
+	    E->sphere.cap[j].fi[2] = (i-1)*M_PI/2.0;
+	    E->sphere.cap[j].fi[3] = 0.0;
+	    E->sphere.cap[j].fi[4] = i*M_PI/2.0;
+	}
+
+    } else {
+
 	E->sphere.caps = 1;
+
+	getScalarProperty(properties, "theta_min", E->control.theta_min);
+	getScalarProperty(properties, "theta_max", E->control.theta_max);
+	getScalarProperty(properties, "fi_min", E->control.fi_min);
+	getScalarProperty(properties, "fi_max", E->control.fi_max);
+
+	E->sphere.cap[1].theta[1] = E->control.theta_min;
+	E->sphere.cap[1].theta[2] = E->control.theta_max;
+	E->sphere.cap[1].theta[3] = E->control.theta_max;
+	E->sphere.cap[1].theta[4] = E->control.theta_min;
+	E->sphere.cap[1].fi[1] = E->control.fi_min;
+	E->sphere.cap[1].fi[2] = E->control.fi_min;
+	E->sphere.cap[1].fi[3] = E->control.fi_max;
+	E->sphere.cap[1].fi[4] = E->control.fi_max;
+    }
 
     getScalarProperty(properties, "dimenx", E->mesh.layer[1]);
     getScalarProperty(properties, "dimeny", E->mesh.layer[2]);
@@ -448,7 +491,7 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Visc_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Visc.inventories:" << std::endl;
+    //std::cerr << "Visc.inventories:" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE);
     if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
@@ -512,7 +555,7 @@ PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:Stokes_solver_set_properties", &properties))
         return NULL;
 
-    std::cerr << "Stokes_solver.inventories:" << std::endl;
+    //std::cerr << "Stokes_solver.inventories:" << std::endl;
 
     getStringProperty(properties, "Solver", E->control.SOLVER_TYPE);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE);
@@ -545,7 +588,7 @@ PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *self, PyObject *args)
 
 void getStringProperty(PyObject* properties, char* attribute, char* value)
 {
-    std::cerr << '\t' << attribute << " = ";
+    //std::cerr << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -563,7 +606,7 @@ void getStringProperty(PyObject* properties, char* attribute, char* value)
     }
 
     strcpy(value, PyString_AsString(prop));
-    std::cerr << '"' << value << '"' << std::endl;
+    //std::cerr << '"' << value << '"' << std::endl;
 
     return;
 }
@@ -573,7 +616,7 @@ void getStringProperty(PyObject* properties, char* attribute, char* value)
 template <class T>
 void getScalarProperty(PyObject* properties, char* attribute, T& value)
 {
-    std::cerr << '\t' << attribute << " = ";
+    //std::cerr << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -591,7 +634,7 @@ void getScalarProperty(PyObject* properties, char* attribute, T& value)
     }
 
     value = static_cast<T>(PyFloat_AsDouble(prop));
-    std::cerr << value << std::endl;
+    //std::cerr << value << std::endl;
 
     return;
 }
@@ -602,7 +645,7 @@ template <class T>
 void getVectorProperty(PyObject* properties, char* attribute,
 		       T* vector, const int len)
 {
-    std::cerr << '\t' << attribute << " = ";
+    //std::cerr << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
@@ -633,7 +676,7 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	std::cerr << warnmsg << std::endl;
     }
 
-    std::cerr << "[ ";
+    //std::cerr << "[ ";
     for (int i=0; i<len; i++) {
 	PyObject* item = PySequence_GetItem(prop, i);
 	if(!item) {
@@ -651,15 +694,15 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	    PyErr_SetString(PyExc_TypeError, errmsg);
 	    return;
 	}
-	std::cerr << vector[i] << ", ";
+	//std::cerr << vector[i] << ", ";
     }
-    std::cerr << ']' << std::endl;
+    //std::cerr << ']' << std::endl;
 
     return;
 }
 
 
 // version
-// $Id: setProperties.cc,v 1.10 2003/08/01 22:53:50 tan2 Exp $
+// $Id: setProperties.cc,v 1.11 2003/08/03 00:43:35 tan2 Exp $
 
 // End of file
