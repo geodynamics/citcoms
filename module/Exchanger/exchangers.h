@@ -59,18 +59,6 @@ extern "C"
 PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *);
 
 
-extern char pyExchanger_interpolate__name__[];
-extern char pyExchanger_interpolate__doc__[];
-extern "C"
-PyObject * pyExchanger_interpolate(PyObject *, PyObject *);
-
-
-extern char pyExchanger_interpolateTemperature__name__[];
-extern char pyExchanger_interpolateTemperature__doc__[];
-extern "C"
-PyObject * pyExchanger_interpolateTemperature(PyObject *, PyObject *);
-
-
 extern char pyExchanger_receiveTemperature__name__[];
 extern char pyExchanger_receiveTemperature__doc__[];
 extern "C"
@@ -107,18 +95,6 @@ extern "C"
 PyObject * pyExchanger_gather(PyObject *, PyObject *);
 
 
-extern char pyExchanger_receive__name__[];
-extern char pyExchanger_receive__doc__[];
-extern "C"
-PyObject * pyExchanger_receive(PyObject *, PyObject *);
-
-
-extern char pyExchanger_send__name__[];
-extern char pyExchanger_send__doc__[];
-extern "C"
-PyObject * pyExchanger_send(PyObject *, PyObject *);
-
-
 extern char pyExchanger_imposeBC__name__[];
 extern char pyExchanger_imposeBC__doc__[];
 extern "C"
@@ -147,6 +123,6 @@ PyObject * pyExchanger_nowait(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.11 2003/09/27 00:28:17 tan2 Exp $
+// $Id: exchangers.h,v 1.12 2003/09/28 00:34:17 tan2 Exp $
 
 // End of file

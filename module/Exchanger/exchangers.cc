@@ -35,11 +35,11 @@ char pyExchanger_createCoarseGridExchanger__name__[] = "createCoarseGridExchange
 PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int leaderRank, localLeader, remoteLeader;
+    int leader, localLeader, remoteLeader;
 
     if (!PyArg_ParseTuple(args, "OOiiiO:createCoarseGridExchanger",
 			  &obj1, &obj2,
-			  &leaderRank, &localLeader, &remoteLeader,
+			  &leader, &localLeader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -55,7 +55,7 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 
     CoarseGridExchanger *cge = new CoarseGridExchanger(
 	                                comm, intercomm,
-					leaderRank,
+					leader,
 					localLeader, remoteLeader,
 					E);
 
@@ -70,11 +70,11 @@ char pyExchanger_createFineGridExchanger__name__[] = "createFineGridExchanger";
 PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int leaderRank, localLeader, remoteLeader;
+    int leader, localLeader, remoteLeader;
 
     if (!PyArg_ParseTuple(args, "OOiiiO:createFineGridExchanger",
 			  &obj1, &obj2,
-			  &leaderRank, &localLeader, &remoteLeader,
+			  &leader, &localLeader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -95,7 +95,7 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
     MPI_Comm_rank(intercomm, &rank);
 
     FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
-						   leaderRank,
+						   leader,
 						   localLeader, remoteLeader,
 						   E);
 
@@ -224,46 +224,6 @@ PyObject * pyExchanger_deleteDataArrays(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_interpolate__doc__[] = "";
-char pyExchanger_interpolate__name__[] = "interpolate";
-
-PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:interpolate", &obj))
-	return NULL;
-
-    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
-      (PyCObject_AsVoidPtr(obj));
-
-    //cge->interpolate();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_interpolateTemperature__doc__[] = "";
-char pyExchanger_interpolateTemperature__name__[] = "interpolateTemperature";
-
-PyObject * pyExchanger_interpolateTemperature(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:interpolateTemperature", &obj))
-	return NULL;
-
-    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
-      (PyCObject_AsVoidPtr(obj));
-
-    cge->interpolateTemperature();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyExchanger_receiveTemperature__doc__[] = "";
 char pyExchanger_receiveTemperature__name__[] = "receiveTemperature";
 
@@ -300,6 +260,7 @@ PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+
 
 char pyExchanger_receiveVelocities__doc__[] = "";
 char pyExchanger_receiveVelocities__name__[] = "receiveVelocities";
@@ -371,44 +332,6 @@ PyObject * pyExchanger_gather(PyObject *, PyObject *args)
     Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
 
     pe->gather();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_receive__doc__[] = "";
-char pyExchanger_receive__name__[] = "receive";
-
-PyObject * pyExchanger_receive(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:receive", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    //pe->receive();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_send__doc__[] = "";
-char pyExchanger_send__name__[] = "send";
-
-PyObject * pyExchanger_send(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:send", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    //pe->send();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -529,6 +452,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.15 2003/09/28 00:11:03 tan2 Exp $
+// $Id: exchangers.cc,v 1.16 2003/09/28 00:34:17 tan2 Exp $
 
 // End of file
