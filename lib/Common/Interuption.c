@@ -2,9 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int Emergency_stop;
+#include "interuption.h"
 
 void parallel_process_termination();
+
+int Emergency_stop;
 
 
 

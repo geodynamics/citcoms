@@ -27,7 +27,7 @@ void tracer_initial_settings(E)
    void tracer_setup();
    void tracer_advection();
    void tracer_output();
-   
+
   if (E->control.tracer==1)  {
     E->problem_tracer_setup=tracer_setup;
     E->problem_tracer_advection=tracer_advection;
@@ -47,7 +47,7 @@ void tracer_setup(E)
         char aaa[100];
         char output_file[255];
         void tracer_output();
- 
+
         gnox=E->mesh.nox;
         gnoy=E->mesh.noy;
         gnoz=E->mesh.noz;
@@ -61,7 +61,7 @@ void tracer_setup(E)
           fprintf(E->fp,"(Tracer_advection #1) Cannot open %s\n",output_file);
           exit(8);
 	}
-       fp1=fopen("coorr.dat","r");   
+       fp1=fopen("coorr.dat","r");
 	if (fp1 == NULL) {
           fprintf(E->fp,"(Tracer_advection #2) Cannot open %s\n","coorr.dat");
           exit(8);
@@ -124,13 +124,13 @@ void tracer_setup(E)
            }   /* end of m  */
 
 
-           for(i=1;i<=E->Tracer.NUM_TRACERS;i++) 
+           for(i=1;i<=E->Tracer.NUM_TRACERS;i++)
 	     {
 	          fscanf(fp,"%f %f %f %f",
 	          &idummy, &xdummy, &ydummy, &zdummy);
 	          E->Tracer.itcolor[i]=idummy; E->Tracer.tracer_x[i]=xdummy;
 		  E->Tracer.tracer_y[i]=ydummy;E->Tracer.tracer_z[i]=zdummy;
-       
+
               }
 
 return;
@@ -159,11 +159,10 @@ void tracer_advection(E)
       FILE *fp,*fp1;
       char output[255];
       MPI_Comm world;
-      static float xmin,xmax,ymin,ymax,zmin,zmax;
-      
-      static int been_here=0;
+      float xmin,xmax,ymin,ymax,zmin,zmax;
 
-      world=MPI_COMM_WORLD;
+
+      world=E->parallel.world;
 
       gnox=E->mesh.nox;
       gnoy=E->mesh.noy;
@@ -203,7 +202,7 @@ void tracer_advection(E)
 
 
       for(m=1;m<=E->sphere.caps_per_proc;m++)   {
-      for(i=0;i<=nno-1;i++)  
+      for(i=0;i<=nno-1;i++)
          for(j=1;j<=3;j++)   {
            E->V[m][j][i]=E->sphere.cap[m].V[j][i+1];
         }
@@ -227,14 +226,14 @@ void tracer_advection(E)
     nprocxl=E->parallel.nprocxl;
     nprocyl=E->parallel.nprocyl;
     nproczl=E->parallel.nproczl;
-   
- if(E->parallel.me==root)    {
- for(m=1;m<=E->sphere.caps_per_proc;m++) 
-  for (k=1;k<=nprocyl;k++)  
-    for (j=1;j<=nprocxl;j++)  
-      for (i=1;i<=nproczl;i++)    {  
 
-        proc = i-1 + (j-1)*nproczl+(k-1)*nprocxl*nproczl;  
+ if(E->parallel.me==root)    {
+ for(m=1;m<=E->sphere.caps_per_proc;m++)
+  for (k=1;k<=nprocyl;k++)
+    for (j=1;j<=nprocxl;j++)
+      for (i=1;i<=nproczl;i++)    {
+
+        proc = i-1 + (j-1)*nproczl+(k-1)*nprocxl*nproczl;
 
         nxs = (j-1)*(nox-1) + 1;
         nys = (k-1)*(noy-1) + 1;
@@ -243,7 +242,7 @@ void tracer_advection(E)
         for (kk=1;kk<=noy;kk++)
           for (jj=1;jj<=nox;jj++)
             for (ii=1;ii<=noz;ii++)              {
-              
+
               nodeg = ii + nzs -1 + gnoz*
                   (nxs+jj-2)
                   + (nys+kk-2)*gnox*gnoz;
@@ -259,9 +258,9 @@ void tracer_advection(E)
         loc += nno;
 
         }
-     
+
       }
- 
+
 
       if(E->parallel.me==root)   {
       for(n=1;n<=E->Tracer.NUM_TRACERS;n++) {
@@ -304,7 +303,7 @@ void tracer_advection(E)
 
 	     }
 	 }
-        
+
 
           /* compute volumetic weighting functions */
 	    w1=tr_dx*tr_dz*tr_dy;
@@ -329,7 +328,7 @@ void tracer_advection(E)
 	 node8 = n_z+1 + n_x*gnoz + n_y*gnoz*gnox;
 
             for(m=1;m<=E->sphere.caps_per_proc;m++)   {
-              for(j=1;j<=3;j++)   { 
+              for(j=1;j<=3;j++)   {
 	     tr_v[m][j]=w8*E->GV[m][j][node1]
 		    +w7*E->GV[m][j][node2]
 		    +w6*E->GV[m][j][node3]
@@ -361,9 +360,9 @@ void tracer_advection(E)
 
 
       } /* end of iteration loop */
-	    
 
-      } /* if E->Tracer.itcolor   */ 
+
+      } /* if E->Tracer.itcolor   */
 
       } /* end of tracer loop */
 
@@ -405,7 +404,7 @@ void tracer_output(E,ii)
           exit(8);
 	}
 
-      fprintf(fp,"%g\n",E->monitor.elapsed_time); 
+      fprintf(fp,"%g\n",E->monitor.elapsed_time);
 
       for(n=1;n<=E->Tracer.NUM_TRACERS;n++)   {
 

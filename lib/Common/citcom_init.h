@@ -5,7 +5,7 @@
 
 extern struct All_variables *E;
 
-extern void Citcom_Init(MPI_Comm *world);
+extern void citcom_init(MPI_Comm *world);
 
-#endif  
+#endif
 

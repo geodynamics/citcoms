@@ -14,23 +14,18 @@
 void process_new_velocity(E,ii)
     struct All_variables *E;
     int ii;
-{ 
+{
     void output_velo_related();
     void get_STD_topo();
     void get_CBF_topo();
     void parallel_process_sync();
 
-    static int been_here=0;
     int m,i,it;
 
 
-    if(been_here==0) {
- 	   E->monitor.length_scale = E->data.layer_km/E->mesh.layer[2]; /* km */
-	   E->monitor.time_scale = pow(E->data.layer_km*1000.0,2.0)/   /* Million years */
-	    (E->data.therm_diff*3600.0*24.0*365.25*1.0e6);
-	   been_here++;
-
-       } 
+    E->monitor.length_scale = E->data.layer_km/E->mesh.layer[2]; /* km */
+    E->monitor.time_scale = pow(E->data.layer_km*1000.0,2.0)/   /* Million years */
+      (E->data.therm_diff*3600.0*24.0*365.25*1.0e6);
 
     if ( (ii == 0) || ((ii % E->control.record_every) == 0)
 		|| E->control.DIRECTII)     {
@@ -45,7 +40,7 @@ void process_new_velocity(E,ii)
 void process_output_field(E,ii)
     struct All_variables *E;
     int ii;
-{ 
+{
   void output_velo_related();
   void parallel_process_sync();
 
@@ -104,7 +99,7 @@ void get_ele_visc(E, EV,m)
 
   lev = E->mesh.levmax;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)    
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (el=1;el<=nel;el++)   {
       EV[el] = 0.0;
       for (j=1;j<=vpts;j++)   {
@@ -125,7 +120,7 @@ void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY)
 
   stride = E->lmesh.nsf*6;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)    
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (node=1;node<=E->lmesh.nno;node++)
       if ( (node%E->lmesh.noz)==0 )  {
         i = node/E->lmesh.noz;

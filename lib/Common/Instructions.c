@@ -2,7 +2,6 @@
 /* allocated, temperature, viscosity, node locations and how to use */
 /* them all established. 8.29.92 or 29.8.92 depending on your nationality*/
 
-#include <signal.h>
 #include <math.h>
 #include <sys/types.h>
 #include <string.h>
@@ -11,8 +10,7 @@
 
 #include "citcom_init.h"
 #include "phase_change.h"
-
-//int Emergency_stop;
+#include "interuption.h"
 
 void read_instructions(filename)
      char *filename;
@@ -37,8 +35,6 @@ void read_instructions(filename)
     void construct_node_maps();
     void read_mat_from_file();
     void construct_mat_group();
-    //void interuption();
-    void set_signal();
     void set_up_nonmg_aliases();
     void check_bc_consistency();
     void node_locations();
@@ -72,12 +68,7 @@ void read_instructions(filename)
        =====================================================  */
 
     if (E->parallel.me==0) start_time=CPU_time0();
-    /*
-    Emergency_stop = 0;
 
-    signal(SIGINT,interuption);
-    signal(SIGTERM,interuption);
-    */
     set_signal();
 
     E->control.PID=get_process_identifier();
@@ -421,15 +412,6 @@ void allocate_velocity_vars(E)
 
 
 /*  =========================================================  */
-
-/*
-void interuption()
-
-{  if (Emergency_stop++) exit(0);
-   fprintf(stderr,"Cleaning up before exit\n");
-   return;
-   }
-*/
 
 void global_default_values(E)
      struct All_variables *E;

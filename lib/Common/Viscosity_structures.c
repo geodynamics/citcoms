@@ -80,8 +80,8 @@ void viscosity_input(struct All_variables *E)
 void get_system_viscosity(E,propogate,evisc,visc)
      struct All_variables *E;
      int propogate;
-     float **evisc,**visc;     
-{ 
+     float **evisc,**visc;
+{
     void visc_from_mat();
     void visc_from_T();
     void visc_from_S();
@@ -89,7 +89,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
     void visc_to_node_interpolate();
     void visc_from_nodes_to_gint();
     void visc_from_gint_to_nodes();
-					   
+
 
     int i,j,m;
     float temp1,temp2,*vvvis;
@@ -98,13 +98,13 @@ void get_system_viscosity(E,propogate,evisc,visc)
     const int vpts = vpoints[E->mesh.nsd];
 
     if(E->viscosity.TDEPV)
-       visc_from_T(E,evisc,propogate); 
+       visc_from_T(E,evisc,propogate);
     else
-       visc_from_mat(E,evisc);   
+       visc_from_mat(E,evisc);
 
     if(E->viscosity.SDEPV)
        visc_from_S(E,evisc,propogate);
-    
+
     if(E->viscosity.MAX) {
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nel;i++)
@@ -140,12 +140,12 @@ void get_system_viscosity(E,propogate,evisc,visc)
 */
 
 /*    for(m=1;m<=E->sphere.caps_per_proc;m++) {
-      for(i=1;i<=E->lmesh.nel;i++)  
+      for(i=1;i<=E->lmesh.nel;i++)
 	if (i%E->lmesh.elz==0) {
           fprintf(E->fp_out,"%.4e %.4e %.4e %5d %2d\n",E->eco[m][i].centre[1],E->eco[m][i].centre[2],log10(evisc[m][(i-1)*vpts+1]),i,E->mat[m][i]);
-          
+
 	  }
-        }  */   
+        }  */
  return;
 }
 
@@ -184,7 +184,6 @@ void visc_from_T(E,EEta,propogate)
     int m,i,j,k,l,z,jj,kk,imark;
     float zero,e_6,one,eta0,Tave,depth,temp,tempa,temp1,TT[9];
     float zzz,zz[9];
-    static int visits=0;
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
     const int nel = E->lmesh.nel;
@@ -204,18 +203,8 @@ void visc_from_T(E,EEta,propogate)
       break;
 
     case 3:
-      if(E->parallel.me==0 && propogate && visits==0) {
-	fprintf(E->fp,"\tRheological option 3:\n");
 
-	for(l=1;l<=E->viscosity.num_mat;l++) {
-	  fprintf(E->fp,"\tlayer %d/%d: E=%g T1=%g \n",
-		  l,E->viscosity.num_mat,
-		  E->viscosity.E[l-1],E->viscosity.T[l-1]);
-	}
-	fflush(E->fp);
-      }
-
-      for(m=1;m<=E->sphere.caps_per_proc;m++)    
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=nel;i++)   {
 	  l = E->mat[m][i];
 	  tempa = E->viscosity.N0[l-1];
@@ -235,7 +224,7 @@ void visc_from_T(E,EEta,propogate)
 	      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	    }
 
-	    if(E->control.mat_control==0)  
+	    if(E->control.mat_control==0)
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
 		     - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
@@ -247,12 +236,10 @@ void visc_from_T(E,EEta,propogate)
 	  }
 	}
       break;
-	
+
     }
 
-    visits++;
-  
-    return;  
+    return;
 }
 
 
@@ -261,10 +248,9 @@ void visc_from_S(E,EEta,propogate)
      float **EEta;
      int propogate;
 {
-    static int visits = 0;
     float one,two,scale,stress_magnitude,depth,exponent1;
     float *eedot;
-    
+
     void strain_rate_2_inv();
     int m,e,l,z,jj,kk;
 
@@ -274,28 +260,20 @@ void visc_from_S(E,EEta,propogate)
     eedot = (float *) malloc((2+nel)*sizeof(float));
     one = 1.0;
     two = 2.0;
-    
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {   
-      if (visits==0)   {
-        for(e=1;e<=nel;e++)
-            eedot[e] = one; 
-        } 
-      else
-        strain_rate_2_inv(E,m,eedot,1);
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+      strain_rate_2_inv(E,m,eedot,1);
 
       for(e=1;e<=nel;e++)   {
         exponent1= one/E->viscosity.sdepv_expt[E->mat[m][e]-1];
         scale=pow(eedot[e],exponent1-one);
         for(jj=1;jj<=vpts;jj++)
-	      EEta[m][(e-1)*vpts + jj] = scale*pow(EEta[m][(e-1)*vpts+jj],exponent1);
-
-        }
+	  EEta[m][(e-1)*vpts + jj] = scale*pow(EEta[m][(e-1)*vpts+jj],exponent1);
       }
+    }
 
-      visits ++;
-
-	free ((void *)eedot);
-    return;  
+    free ((void *)eedot);
+    return;
 }
 
 
@@ -311,7 +289,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     struct Shape_function GN;
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
-    
+
     double edot[4][4],dudx[4][4],rtf[4][9];
     float VV[4][9];
 
@@ -323,36 +301,36 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     const int nno = E->lmesh.nno;
     const int vpts = vpoints[dims];
     const int sphere_key = 0;
- 
+
     nel = E->lmesh.nel;
 
     for(e=1;e<=nel;e++) {
-  
+
       get_global_shape_fn(E,e,&GN,&GNx,&dOmega,2,sphere_key,rtf,lev,m);
 
       velo_from_element(E,VV,m,e,sphere_key);
 
       for(p=1;p<=dims;p++)
         for(q=1;q<=dims;q++)
-           dudx[p][q] = 0.0;  
-      
+           dudx[p][q] = 0.0;
+
       for(i=1;i<=ends;i++)
         for(p=1;p<=dims;p++)
            for(q=1;q<=dims;q++)
-              dudx[p][q] += VV[p][i] * GNx.ppt[GNPXINDEX(q-1,i,1)];  
-	
+              dudx[p][q] += VV[p][i] * GNx.ppt[GNPXINDEX(q-1,i,1)];
+
       for(p=1;p<=dims;p++)
         for(q=1;q<=dims;q++)
-            edot[p][q] = dudx[p][q] + dudx[q][p];   
+            edot[p][q] = dudx[p][q] + dudx[q][p];
 
       if (dims==2)
          EEDOT[e] = edot[1][1]*edot[1][1] + edot[2][2]*edot[2][2]
-                  + edot[1][2]*edot[1][2]*2.0; 
+                  + edot[1][2]*edot[1][2]*2.0;
 
       else if (dims==3)
          EEDOT[e] = edot[1][1]*edot[1][1] + edot[1][2]*edot[1][2]*2.0
                   + edot[2][2]*edot[2][2] + edot[2][3]*edot[2][3]*2.0
-                  + edot[3][3]*edot[3][3] + edot[1][3]*edot[1][3]*2.0; 
+                  + edot[3][3]*edot[3][3] + edot[1][3]*edot[1][3]*2.0;
 
       }
 
@@ -362,7 +340,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     else
 	for(e=1;e<=nel;e++)
 	    EEDOT[e] *=  0.5;
-  
+
     return;
 }
 
@@ -372,7 +350,7 @@ void visc_to_node_interpolate(E,evisc,visc)
  struct All_variables *E;
  float **evisc,**visc;
 {
-	 
+
 /*  void exchange_node_f(); */
 /*  void get_global_shape_fn(); */
 /*  void return_horiz_ave_f(); */
@@ -383,7 +361,7 @@ void visc_to_node_interpolate(E,evisc,visc)
 /*  int i,j,k,e,node,snode,m,nel2; */
 /*    FILE *fp; */
 /*    char output_file[255]; */
-			  
+
 /*  float *TG,t,f,rad, Szz; */
 
 /*  double time1,CPU_time0(),tww[9],rtf[4][9]; */
@@ -407,7 +385,7 @@ void visc_to_node_interpolate(E,evisc,visc)
 /* 	   TG[node] = 0.0; */
 /*   	   m = E->sphere.int_cap[node]; */
 /* 	   e = E->sphere.int_ele[node]; */
-			  
+
 /* 	   if (m>0 && e>0) { */
 /* 	      e=e+E->lmesh.elz-1; */
 /* 	      TG[node] = log10(evisc[m][(e-1)*vpts+1]); */
@@ -430,9 +408,9 @@ void visc_to_node_interpolate(E,evisc,visc)
 /* 	   } */
 /*       fclose(fp); */
 /*      } */
- 
+
 /*  free((void *)TG); */
-			
+
    return;
    }
 

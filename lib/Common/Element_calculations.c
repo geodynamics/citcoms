@@ -1,5 +1,5 @@
 /* Functions to assemble the element k matrices and the element f vector.
-   Note that for the regular grid case the calculation of k becomes repetitive 
+   Note that for the regular grid case the calculation of k becomes repetitive
    to the point of redundancy. */
 
 #include <math.h>
@@ -8,21 +8,21 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 
-
-static double Dl[5][5] =   
+/*
+static double Dl[5][5] =
 	{	{ 0.0, 0.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 1.0, 1.0, 0.0, 1.0 },
 		{ 0.0, 1.0, 1.0, 0.0, 1.0 },
 		{ 0.0, 0.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 1.0, 1.0, 0.0, 1.0 } };
 
-static double Dm[5][5] =   
+static double Dm[5][5] =
 	{	{ 0.0, 0.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 2.0, 0.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 2.0, 0.0, 0.0 },
 		{ 0.0, 0.0, 0.0, 1.0, 0.0 },
 		{ 0.0, 0.0, 0.0, 0.0, 2.0 } };
-
+*/
 
 
 /* ================================================================
@@ -35,7 +35,7 @@ void assemble_forces(E,penalty)
      struct All_variables *E;
      int penalty;
 {
-  double elt_f[24],elt_h[1]; 
+  double elt_f[24],elt_h[1];
   int m,el,p,i,a,a1,a2,a3,e,ii,jj,kk,elx,ely,elz,node;
   FILE *fp;
   char output_file[255];
@@ -43,7 +43,7 @@ void assemble_forces(E,penalty)
   void get_elt_f();
   void get_elt_h();
   void strip_bcs_from_residual();
- 
+
   void exchange_id_d();
 
   void thermal_buoyancy();
@@ -65,7 +65,7 @@ void assemble_forces(E,penalty)
 
    for(a=0;a<neq;a++)
      E->F[m][a] = 0.0;
-  
+
   /*for(a=0;a<npno;a++)
     E->H[m][a]=0.0;*/
 
@@ -85,11 +85,11 @@ void assemble_forces(E,penalty)
        E->F[m][a2] += elt_f[p+1];
        a3=E->id[m][node].doff[3];
        E->F[m][a3] += elt_f[p+2];
-       }  
+       }
      }
    }       /* end for m */
 
-   exchange_id_d(E, E->F, lev);   
+   exchange_id_d(E, E->F, lev);
 
    strip_bcs_from_residual(E,E->F,lev);
   return;
@@ -109,9 +109,9 @@ void get_elt_k(E,el,elt_k,lev,m)
 {
     double bdbmu[4][4];
     double bdbl[4][4];
-    
+
     void print_elt_k();
-    
+
     int pn,qn,ad,bd;
 
     int a,b,i,j,j1,p,q,nint,d,k,n,es;
@@ -125,7 +125,7 @@ void get_elt_k(E,el,elt_k,lev,m)
     static struct CCX Ccx;
     double visc[9],temp;
 
- 
+
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
 
     const int nn=loc_mat_size[E->mesh.nsd];
@@ -136,23 +136,23 @@ void get_elt_k(E,el,elt_k,lev,m)
     const int sphere_key = 1;
 
  /*   es = (el-1)/E->lmesh.ELZ[lev] + 1; */
-       
-    get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m); 
- 
+
+    get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
+
     if ((el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&Cc,&Ccx,lev,m,0);
 
     /* Note N[a].gauss_pt[n] is the value of shape fn a at the nth gaussian
        quadrature point. Nx[d] is the derivative wrt x[d]. */
-       
+
     for(k=1;k<=vpts;k++) {
       W[k]=g_point[k].weight[dims-1]*dOmega.vpt[k]*E->EVI[lev][m][(el-1)*vpts+k];
 
      ra[k] = rtf[3][k];
      si[k] = sin(rtf[1][k]);
      ct[k] = cos(rtf[1][k])/si[k];
-     }  
- 	
+     }
+
 
   for(k=1;k<=VPOINTS3D;k++)
     for(a=1;a<=ends;a++)
@@ -171,7 +171,7 @@ void get_elt_k(E,el,elt_k,lev,m)
 
         ba[a][k][n][3]=
           GNx.vpt[GNVXINDEX(2,a,k)]*Cc.vpt[BVINDEX(3,n,a,k)];
-                  
+
         ba[a][k][n][4]=
           (GNx.vpt[GNVXINDEX(0,a,k)]*Cc.vpt[BVINDEX(2,n,a,k)]
          + E->N.vpt[GNVINDEX(a,k)]*Ccx.vpt[BVXINDEX(2,n,1,a,k)]
@@ -203,19 +203,19 @@ void get_elt_k(E,el,elt_k,lev,m)
       bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
       bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-      for(i=1;i<=dims;i++)    
-        for(j=1;j<=dims;j++)    
+      for(i=1;i<=dims;i++)
+        for(j=1;j<=dims;j++)
           for(j1=1;j1<=6;j1++)
             for(k=1;k<=VPOINTS3D;k++)
-              bdbmu[i][j] += 
+              bdbmu[i][j] +=
                 W[k]*((j1>3)?1.0:2.0)*ba[a][k][i][j1]*ba[b][k][j][j1];
 
 		/**/
       pn=ad*nn+bd;
       qn=bd*nn+ad;
-	    
+
       elt_k[pn       ] = bdbmu[1][1] ; /* above */
-      elt_k[pn+1     ] = bdbmu[1][2] ;	
+      elt_k[pn+1     ] = bdbmu[1][2] ;
       elt_k[pn+2     ] = bdbmu[1][3] ;
       elt_k[pn+nn    ] = bdbmu[2][1] ;
       elt_k[pn+nn+1  ] = bdbmu[2][2] ;
@@ -223,7 +223,7 @@ void get_elt_k(E,el,elt_k,lev,m)
       elt_k[pn+2*nn  ] = bdbmu[3][1] ;
       elt_k[pn+2*nn+1] = bdbmu[3][2] ;
       elt_k[pn+2*nn+2] = bdbmu[3][3] ;
-	
+
       elt_k[qn       ] = bdbmu[1][1] ; /* below diag */
       elt_k[qn+1     ] = bdbmu[2][1] ;
       elt_k[qn+2     ] = bdbmu[3][1] ;
@@ -233,16 +233,16 @@ void get_elt_k(E,el,elt_k,lev,m)
       elt_k[qn+2*nn  ] = bdbmu[1][3] ;
       elt_k[qn+2*nn+1] = bdbmu[2][3] ;
       elt_k[qn+2*nn+2] = bdbmu[3][3] ;
-		/**/   
+		/**/
 
       } /*  Sum over all the a,b's to obtain full  elt_k matrix */
-     
-    return; 
+
+    return;
 }
 
 
 /* =============================================
-   General calling function for del_squared: 
+   General calling function for del_squared:
    according to whether it should be element by
    element or node by node.
    ============================================= */
@@ -255,12 +255,12 @@ void assemble_del2_u(E,u,Au,level,strip_bcs)
 {
   void e_assemble_del2_u();
   void n_assemble_del2_u();
- 
+
   if(E->control.NMULTIGRID||E->control.NASSEMBLE)
     n_assemble_del2_u(E,u,Au,level,strip_bcs);
   else
     e_assemble_del2_u(E,u,Au,level,strip_bcs);
- 
+
   return;
 }
 
@@ -274,66 +274,66 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
   int level;
   int strip_bcs;
 
-{ 
+{
   int  el,e,i,a,b,a1,a2,a3,ii,m,nodeb;
   double elt_k[24*24],U[24],AU[24],alpha=1.0,beta=0.0;
-  
+
   int indx[24];
   char uplo='U';
-    
+
   void strip_bcs_from_residual();
 
   void exchange_id_d();
 
   void get_elt_k();
-   
+
   double U1[24];
-   
+
   const int n=loc_mat_size[E->mesh.nsd];
-  const int ends=enodes[E->mesh.nsd]; 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof; 
+  const int ends=enodes[E->mesh.nsd];
+  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int nel=E->lmesh.NEL[level];
   const int neq=E->lmesh.NEQ[level];
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   { 
+  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     for(i=0;i<neq;i++)
       Au[m][i] = 0.0;
- 
+
     for(e=1;e<=nel;e++)   {
       for(a=1;a<=ends;a++) {
 	ii = E->IEN[level][m][e].node[a];
-	a1 = E->ID[level][m][ii].doff[1];   
-	a2 = E->ID[level][m][ii].doff[2];   
-	a3 = E->ID[level][m][ii].doff[3];   
+	a1 = E->ID[level][m][ii].doff[1];
+	a2 = E->ID[level][m][ii].doff[2];
+	a3 = E->ID[level][m][ii].doff[3];
 	for(b=1;b<=ends;b++) {
 	        nodeb = E->IEN[level][m][e].node[b];
 	        ii = (a*n+b)*dims-(dims*n+dims);
-			/* i=1, j=1,2 */ 
-	          /* i=1, j=1,2,3 */ 
-		Au[m][a1] += 
-		        E->elt_k[level][m][e].k[ii] * 
-			u[m][E->ID[level][m][nodeb].doff[1]]   
-		      + E->elt_k[level][m][e].k[ii+1] * 
-			u[m][E->ID[level][m][nodeb].doff[2]]   
-		      + E->elt_k[level][m][e].k[ii+2] * 
-			u[m][E->ID[level][m][nodeb].doff[3]]; 
-		/* i=2, j=1,2,3 */
-		Au[m][a2] += 
-		        E->elt_k[level][m][e].k[ii+n] * 
-			u[m][E->ID[level][m][nodeb].doff[1]]   
-		      + E->elt_k[level][m][e].k[ii+n+1] * 
-			u[m][E->ID[level][m][nodeb].doff[2]]   
-		      + E->elt_k[level][m][e].k[ii+n+2] * 
-			u[m][E->ID[level][m][nodeb].doff[3]]; 
-		/* i=3, j=1,2,3 */
-		Au[m][a3] += 
-		        E->elt_k[level][m][e].k[ii+n+n] * 
-			u[m][E->ID[level][m][nodeb].doff[1]]   
-		      + E->elt_k[level][m][e].k[ii+n+n+1] * 
-			u[m][E->ID[level][m][nodeb].doff[2]]   
-		      + E->elt_k[level][m][e].k[ii+n+n+2] * 
+			/* i=1, j=1,2 */
+	          /* i=1, j=1,2,3 */
+		Au[m][a1] +=
+		        E->elt_k[level][m][e].k[ii] *
+			u[m][E->ID[level][m][nodeb].doff[1]]
+		      + E->elt_k[level][m][e].k[ii+1] *
+			u[m][E->ID[level][m][nodeb].doff[2]]
+		      + E->elt_k[level][m][e].k[ii+2] *
 			u[m][E->ID[level][m][nodeb].doff[3]];
-	   
+		/* i=2, j=1,2,3 */
+		Au[m][a2] +=
+		        E->elt_k[level][m][e].k[ii+n] *
+			u[m][E->ID[level][m][nodeb].doff[1]]
+		      + E->elt_k[level][m][e].k[ii+n+1] *
+			u[m][E->ID[level][m][nodeb].doff[2]]
+		      + E->elt_k[level][m][e].k[ii+n+2] *
+			u[m][E->ID[level][m][nodeb].doff[3]];
+		/* i=3, j=1,2,3 */
+		Au[m][a3] +=
+		        E->elt_k[level][m][e].k[ii+n+n] *
+			u[m][E->ID[level][m][nodeb].doff[1]]
+		      + E->elt_k[level][m][e].k[ii+n+n+1] *
+			u[m][E->ID[level][m][nodeb].doff[2]]
+		      + E->elt_k[level][m][e].k[ii+n+n+2] *
+			u[m][E->ID[level][m][nodeb].doff[3]];
+
  	    }         /* end for loop b */
         }             /* end for loop a */
 
@@ -360,14 +360,12 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 {
     int m,node, e,i;
     int eqn1,eqn2,eqn3;
-   
+
     double UU,U1,U2,U3;
     void strip_bcs_from_residual();
 
     void exchange_id_d();
 
-    static int been_here=0;
- 
     int *C;
     higher_precision *B1,*B2,*B3;
 
@@ -375,7 +373,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
     const int nno=E->lmesh.NNO[level];
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int max_eqn = dims*14;
- 
+
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 
@@ -398,7 +396,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        B1=E->Eqn_k1[level][m]+(e-1)*max_eqn;
        B2=E->Eqn_k2[level][m]+(e-1)*max_eqn;
        B3=E->Eqn_k3[level][m]+(e-1)*max_eqn;
-	   
+
        for(i=3;i<max_eqn;i++)  {
          if (C[i] != neq+1) {
 	  UU = u[m][C[i]];
@@ -419,9 +417,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
     if (strip_bcs)
 	strip_bcs_from_residual(E,Au,level);
 
-    been_here++;
-
-    return; 
+    return;
 }
 
 
@@ -432,7 +428,7 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
 
 {
     int a,a1,a2,p,node;
-     
+
     const int n=loc_mat_size[E->mesh.nsd];
     const int dims=E->mesh.nsd;
     const int ends=enodes[E->mesh.nsd];
@@ -441,45 +437,45 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
 	    node=E->IEN[level][m][el].node[a];
 	    /* dirn 1 */
 	    a1 = E->ID[level][m][node].doff[1];
-	    p=(a-1)*dims; 
-	    E->BI[level][m][a1] += elt_k[p*n+p];  
+	    p=(a-1)*dims;
+	    E->BI[level][m][a1] += elt_k[p*n+p];
 
 	    /* dirn 2 */
 	    a2 = E->ID[level][m][node].doff[2];
-	    p=(a-1)*dims+1; 
-	    E->BI[level][m][a2] += elt_k[p*n+p];  
+	    p=(a-1)*dims+1;
+	    E->BI[level][m][a2] += elt_k[p*n+p];
 
 	    /* dirn 3 */
 	    a1 = E->ID[level][m][node].doff[3];
-	    p=(a-1)*dims+2; 
-	    E->BI[level][m][a1] += elt_k[p*n+p];  
-            } 	    
+	    p=(a-1)*dims+2;
+	    E->BI[level][m][a1] += elt_k[p*n+p];
+            }
 
   return;
 }
-  
+
 void build_diagonal_of_Ahat(E)
     struct All_variables *E;
 {
     double assemble_dAhatp_entry();
- 
+
     double BU;
     int m,e,npno,neq,level;
     float time,time0,CPU_time();
-   
+
  for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++)
 
    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
 
      npno = E->lmesh.NPNO[level];
      neq=E->lmesh.NEQ[level];
-       
+
      for(e=1;e<=npno;e++)
 	E->BPI[level][m][e]=1.0;
 
      if(!E->control.precondition)
 	return;
-    
+
      for(e=1;e<=npno;e++)  {
 	BU=assemble_dAhatp_entry(E,e,level,m);
 	if(BU != 0.0)
@@ -499,22 +495,22 @@ void build_diagonal_of_Ahat(E)
 void assemble_div_u(E,U,divU,level)
      struct All_variables *E;
      double **U,**divU;
-     int level;       
-{ 
+     int level;
+{
     int e,j1,j2,j3,p,a,b,m;
     higher_precision elt_g[24][1];
     void get_elt_g();
 
-    
+
     const int nel=E->lmesh.NEL[level];
     const int ends=enodes[E->mesh.nsd];
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int npno=E->lmesh.NPNO[level];
-    
+
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=npno;e++)
 	divU[m][e] = 0.0;
-   
+
   for(m=1;m<=E->sphere.caps_per_proc;m++)
        for(a=1;a<=ends;a++)   {
 	  p = (a-1)*dims;
@@ -527,9 +523,9 @@ void assemble_div_u(E,U,divU,level)
 	                + E->elt_del[level][m][e].g[p+1][0] * U[m][j2]
 	                + E->elt_del[level][m][e].g[p+2][0] * U[m][j3];
 	    }
-	 } 
+	 }
 
-    
+
     return;
 }
 
@@ -542,7 +538,7 @@ void assemble_grad_p(E,P,gradP,lev)
      struct All_variables *E;
      double **P,**gradP;
      int lev;
-    
+
 {
   int m,el,e,i,j1,j2,j3,p,a,b,nel,neq;
   void strip_bcs_from_residual();
@@ -551,7 +547,7 @@ void assemble_grad_p(E,P,gradP,lev)
 
   higher_precision elt_g[24][1];
   void get_elt_g();
- 
+
   const int ends=enodes[E->mesh.nsd];
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
 
@@ -562,9 +558,9 @@ void assemble_grad_p(E,P,gradP,lev)
 
     for(i=0;i<=neq;i++)
       gradP[m][i] = 0.0;
- 
+
     for(e=1;e<=nel;e++) {
-     
+
 	if(0.0==P[m][e])
 	    continue;
 
@@ -574,7 +570,7 @@ void assemble_grad_p(E,P,gradP,lev)
 	     j1= E->ID[lev][m][b].doff[1];
 	     j2= E->ID[lev][m][b].doff[2];
 	     j3= E->ID[lev][m][b].doff[3];
-		        /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */ 
+		        /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
              gradP[m][j1] += E->elt_del[lev][m][e].g[p  ][0] * P[m][e];
              gradP[m][j2] += E->elt_del[lev][m][e].g[p+1][0] * P[m][e];
              gradP[m][j3] += E->elt_del[lev][m][e].g[p+2][0] * P[m][e];
@@ -587,14 +583,14 @@ void assemble_grad_p(E,P,gradP,lev)
 
   strip_bcs_from_residual(E,gradP,lev);
 
-return; 
+return;
 }
 
 double assemble_dAhatp_entry(E,e,level,m)
      struct All_variables *E;
      int e,level,m;
-    
-{ 
+
+{
     int i,j,p,a,b,node,ee,element,lnode,npno;
     void strip_bcs_from_residual();
     higher_precision elt_g[24][1];
@@ -606,12 +602,12 @@ double assemble_dAhatp_entry(E,e,level,m)
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
 
     npno=E->lmesh.NPNO[level];
-    
+
     for(i=0;i<81;i++)
 	gradP[i] = 0.0;
-  
+
     divU=0.0;
- 
+
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
       node = E->IEN[level][m][e].node[a];
@@ -620,12 +616,12 @@ double assemble_dAhatp_entry(E,e,level,m)
 
       j=E->ID[level][m][node].doff[2];
       gradP[p+1] += E->BI[level][m][j]*E->elt_del[level][m][e].g[p+1][0];
-	    
+
       j=E->ID[level][m][node].doff[3];
       gradP[p+2] += E->BI[level][m][j]*E->elt_del[level][m][e].g[p+2][0];
       }
 
-   
+
     /* calculate div U from the same thing .... */
 
     /* only need to run over nodes with non-zero grad P, i.e. the ones in
@@ -634,12 +630,12 @@ double assemble_dAhatp_entry(E,e,level,m)
        the end ... */
 
     for(b=1;b<=ends;b++) {
-      p = (b-1)*dims;	   
-      divU +=E->elt_del[level][m][e].g[p][0] * gradP[p];	    
+      p = (b-1)*dims;
+      divU +=E->elt_del[level][m][e].g[p][0] * gradP[p];
       divU +=E->elt_del[level][m][e].g[p+1][0] * gradP[p+1];
       divU +=E->elt_del[level][m][e].g[p+2][0] * gradP[p+2];
       }
-   
+
 return(divU);  }
 
 
@@ -665,12 +661,12 @@ void get_elt_g(E,el,elt_del,lev,m)
    struct Shape_function_dx GNx;
    static struct CC Cc;
    static struct CCX Ccx;
-    
+
    const int dims=E->mesh.nsd,dofs=E->mesh.dof;
    const int ends=enodes[dims];
    const int vpts=vpoints[dims];
    const int sphere_key = 1;
-  
+
    /* Special case, 4/8 node bilinear cartesian square/cube element -> 1 pressure point */
 
 /*   es = (el-1)/E->lmesh.ELZ[lev]+1;  */
@@ -686,7 +682,7 @@ void get_elt_g(E,el,elt_del,lev,m)
    ra = rtf[3][1];
    si = 1.0/sin(rtf[1][1]);
    ct = cos(rtf[1][1])*si;
-  
+
    for(a=1;a<=ends;a++)      {
      for (i=1;i<=dims;i++)
        x[i]=GNx.ppt[GNPXINDEX(2,a,1)]*Cc.ppt[BPINDEX(3,i,a,1)]
@@ -705,8 +701,8 @@ void get_elt_g(E,el,elt_del,lev,m)
       /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,dOmega.ppt[1],GNx.ppt[GNPXINDEX(0,a,1)],GNx.ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
       */
      }
-       
-   return; 
+
+   return;
  }
 
 /* ===============================================================
@@ -725,21 +721,21 @@ void get_elt_h(E,el,elt_h,m)
     void get_elt_g();
 
     for(p=0;p<1;p++) elt_h[p] = 0.0;
-   
+
     got_g = 0;
-  
+
   type=VBX;
   for(i=1;i<=E->mesh.nsd;i++)
     { for(a=1;a<=enodes[E->mesh.nsd];a++)
 	{ if (E->node[m][E->ien[m][el].node[a]] & type)
-	    { if(!got_g) 
+	    { if(!got_g)
 		{  get_elt_g(E,el,elt_g,E->mesh.levmax,m);
 		   got_g++;
 		 }
-	      
+
 	      p=E->mesh.nsd*(a-1) + i - 1;
 	      for(b=1;b<=pnodes[E->mesh.nsd];b++)
-		{ q = b-1; 
+		{ q = b-1;
 		  elt_h[q] -= elt_g[p][q] * E->sphere.cap[m].VB[i][E->ien[m][el].node[a]];
 		}
 	    }
@@ -748,7 +744,7 @@ void get_elt_h(E,el,elt_h,m)
     }
    return;
 }
-	
+
 /*=================================================================
   Function to create the element force vector (allowing for b.c.'s)
   ================================================================= */
@@ -758,7 +754,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
      int el,m;
      double elt_f[24];
      int bcs;
-   
+
 {
 
   int aid,i,p,a,b,d,j,k,q,es;
@@ -768,7 +764,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   double force[9],force_at_gs[9],stress[9],elt_k[24*24];
   double vector[4],magnitude;
   double tmp,rtf[4][9];
-  
+
   void get_global_shape_fn();
   void construct_c3x3matrix_el();
 
@@ -777,7 +773,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   struct Shape_function_dx GNx;
   static struct CC Cc;
   static struct CCX Ccx;
-  
+
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int n=loc_mat_size[dims];
   const int ends=enodes[dims];
@@ -792,7 +788,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
       construct_c3x3matrix_el(E,el,&Cc,&Ccx,E->mesh.levmax,m,0);
 
   for(p=0;p<n;p++) elt_f[p] = 0.0;
-  
+
   for(p=1;p<=ends;p++)
     force[p] = E->temp[m][E->ien[m][el].node[p]];
 
@@ -806,16 +802,16 @@ void get_elt_f(E,el,elt_f,bcs,m)
     for(a=1;a<=ends;a++)  {
       nodea=E->ien[m][el].node[a];
       p= dims*(a-1)+i-1;
-	  
+
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
         elt_f[p] += force_at_gs[j] * E->N.vpt[GNVINDEX(a,j)]
-           *dOmega.vpt[j]*g_point[j].weight[dims-1] 
+           *dOmega.vpt[j]*g_point[j].weight[dims-1]
            *Cc.vpt[BVINDEX(3,i,a,j)];
-		   
+
 	  /* imposed velocity terms */
 
       if(bcs)  {
-        got_elt_k = 0; 
+        got_elt_k = 0;
         type=VBX;
         for(j=1;j<=dims;j++) {
           for(b=1;b<=ends;b++) {
@@ -840,7 +836,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
 
 
-  return; 
+  return;
 }
 
 /* =================================================================
@@ -879,7 +875,7 @@ void get_aug_k(E,el,elt_k,level,m)
 	   elt_k[i+1] += Visc*E->control.augmented*
 	              E->elt_del[level][m][el].g[p[a]][0]*
 		      E->elt_del[level][m][el].g[p[b]+1][0];  /* for 12 */
-	   elt_k[i+n] += Visc*E->control.augmented*          
+	   elt_k[i+n] += Visc*E->control.augmented*
 	              E->elt_del[level][m][el].g[p[a]+1][0]*
 		      E->elt_del[level][m][el].g[p[b]][0];    /* for 21 */
 	   elt_k[i+n+1] += Visc*E->control.augmented*

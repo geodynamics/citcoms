@@ -2,13 +2,14 @@
 #include "global_defs.h"
 #include <math.h>
 
+/*
 static double weightIJ[5][5] =
         {       { 0.0,    0.0,    0.0,    0.0,    0.0 },
 		{ 0.0, 0.5625, 0.1875, 0.0625, 0.1875 },
 		{ 0.0, 0.1875, 0.5625, 0.1875, 0.0625 },
 		{ 0.0, 0.0625, 0.1875, 0.5625, 0.1875 },
 		{ 0.0, 0.1875, 0.0625, 0.1875, 0.5625 } };
-
+*/
 
 void set_mg_defaults(E)
      struct All_variables *E;
@@ -21,13 +22,13 @@ void set_mg_defaults(E)
   E->solve_stokes_problem = solve_constrained_flow_iterative;
 
   E->control.mg_cycle = 1;
- 
+
 return;
 }
 
 void mg_allocate_vars(E)
      struct All_variables *E;
-{  
+{
   return;
 
 }
@@ -43,12 +44,10 @@ void inject_scalar(E,start_lev,AU,AD)
      int start_lev;
      float **AU,**AD;  /* data on upper/lower mesh  */
 
-{  
+{
     int i,m,el,node_coarse,node_fine,sl_minus,eqn,eqn_coarse;
     void gather_to_1layer_node ();
-    static float *AU1[NCS];
-    static int been_here=0;
- 
+
     const int dims = E->mesh.nsd;
     const int ends = enodes[dims];
 
@@ -60,7 +59,7 @@ void inject_scalar(E,start_lev,AU,AD)
     sl_minus = start_lev-1;
 
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)      
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
           node_coarse = E->IEN[sl_minus][m][el].node[i];
@@ -83,8 +82,6 @@ void inject_vector(E,start_lev,AU,AD)
     const int ends = enodes[dims];
 
     void gather_to_1layer_id ();
-    static double *AU1[NCS];
-    static int been_here=0;
 
     if(start_lev == E->mesh.levmin)   {
         fprintf(E->fp,"Warning, attempting to project below lowest level\n");
@@ -119,13 +116,13 @@ void un_inject_vector(E,start_lev,AD,AU)
      struct All_variables *E;
      int start_lev;
      double **AU,**AD;  /* data on upper/lower mesh  */
-{  
+{
     int i,m;
     int el,node,node_plus;
     int eqn1,eqn_plus1;
     int eqn2,eqn_plus2;
     int eqn3,eqn_plus3;
-    
+
     const int dims = E->mesh.nsd;
     const int ends = enodes[dims];
     const int sl_plus = start_lev+1;
@@ -134,28 +131,28 @@ void un_inject_vector(E,start_lev,AD,AU)
 
     assert(start_lev != E->mesh.levmax  /* un_injection */);
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++) 
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=neq;i++)
 	AU[m][i]=0.0;
-    
-    for(m=1;m<=E->sphere.caps_per_proc;m++) 
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nels;el++)
         for(i=1;i<=ENODES3D;i++)  {
           node = E->IEN[start_lev][m][el].node[i];
 	  node_plus=E->IEN[sl_plus][m][E->EL[start_lev][m][el].sub[i]].node[i];
-	    
+
 	  eqn1 = E->ID[start_lev][m][node].doff[1];
 	  eqn2 = E->ID[start_lev][m][node].doff[2];
 	  eqn3 = E->ID[start_lev][m][node].doff[3];
 	  eqn_plus1 = E->ID[sl_plus][m][node_plus].doff[1];
 	  eqn_plus2 = E->ID[sl_plus][m][node_plus].doff[2];
 	  eqn_plus3 = E->ID[sl_plus][m][node_plus].doff[3];
-	  AU[m][eqn_plus1] = AD[m][eqn1];      
-	  AU[m][eqn_plus2] = AD[m][eqn2]; 
-	  AU[m][eqn_plus3] = AD[m][eqn3]; 
-	  } 
+	  AU[m][eqn_plus1] = AD[m][eqn1];
+	  AU[m][eqn_plus2] = AD[m][eqn2];
+	  AU[m][eqn_plus3] = AD[m][eqn3];
+	  }
 
-    return; 
+    return;
   }
 
 
@@ -183,20 +180,17 @@ void interp_vector(E,start_lev,AD,AU)
     float n1,n2;
     int noxz,node0,node1,node2;
     int eqn0,eqn1,eqn2;
-    static int been_here = 0;
-    static double *AU1[NCS];
-
 
     const int level = start_lev + 1;
     const int dims =E->mesh.nsd;
     const int ends= enodes[dims];
-    
+
     const int nox = E->lmesh.NOX[level];
     const int noz = E->lmesh.NOZ[level];
     const int noy = E->lmesh.NOY[level];
     const int high_eqn = E->lmesh.NEQ[level];
 
- if (start_lev==E->mesh.levmax) return;
+    if (start_lev==E->mesh.levmax) return;
 
     from_rtf_to_xyz(E,start_lev,AD,AU);    /* transform in xyz coordinates */
     un_inject_vector(E,start_lev,AU,E->temp); /*  information from lower level */
@@ -210,14 +204,14 @@ void interp_vector(E,start_lev,AD,AU)
 
 
 /*  ==============================================
-    function to project viscosity down to all the 
+    function to project viscosity down to all the
     levels in the problem. (no gaps for vbcs)
     ==============================================  */
 
 void project_viscosity(E)
      struct All_variables *E;
 
-{ 
+{
     int lv,i,j,k,m,sl_minus;
     void inject_scalar();
     void project_scalar();
@@ -230,7 +224,7 @@ void project_viscosity(E)
 
     const int nsd=E->mesh.nsd;
     const int vpts=vpoints[nsd];
-   
+
     float *viscU[NCS],*viscD[NCS];
 
   lv = E->mesh.levmax;
@@ -284,8 +278,8 @@ void project_viscosity(E)
     free((void *)viscU[m]);
     free((void *)viscD[m]);
     }
-    
-    return;  
+
+    return;
 }
 
 /* ==================================================== */
@@ -299,9 +293,6 @@ void inject_scalar_e(E,start_lev,AU,AD)
     int el,node,e;
     float average,w;
     void gather_to_1layer_ele ();
-
-    static float *AU1[NCS];
-    static int been_here=0;
 
     const int sl_minus = start_lev-1;
     const int nels_minus=E->lmesh.NEL[start_lev-1];
@@ -336,9 +327,6 @@ void project_scalar_e(E,start_lev,AU,AD)
     int el,node,e;
     float average,w;
     void gather_to_1layer_ele ();
-
-    static float *AU1[NCS];
-    static int been_here=0;
 
     const int sl_minus = start_lev-1;
     const int nels_minus=E->lmesh.NEL[start_lev-1];
@@ -381,9 +369,6 @@ void project_scalar(E,start_lev,AU,AD)
 
     void exchange_node_f();
 
-    static float *AU1[NCS];
-    static int been_here=0;
-
     const int sl_minus = start_lev-1;
     const int nno_minus=E->lmesh.NNO[start_lev-1];
     const int nels_minus=E->lmesh.NEL[start_lev-1];
@@ -419,7 +404,7 @@ void project_scalar(E,start_lev,AU,AD)
      for(i=1;i<=nno_minus;i++)  {
        AD[m][i] *= E->MASS[sl_minus][m][i];
        }
-   
+
 
 return;
 }
@@ -452,28 +437,24 @@ void project_vector(E,start_lev,AU,AD,ic)
     const int nels_minus=E->lmesh.NEL[start_lev-1];
     const int  dims=E->mesh.nsd;
     const int ends=enodes[E->mesh.nsd];
-  
-    static double *AU1[NCS];
-    static int been_here = 0;
-    static int been_here1= 0;
 
 
     if (ic==1)
        weight = 1.0;
-    else 
+    else
        weight=(double) 1.0/ends;
 
    if (start_lev==E->mesh.levmin) return;
 
                 /* convert into xyz coordinates */
       from_rtf_to_xyz(E,start_lev,AU,E->temp);
-  
-   for(m=1;m<=E->sphere.caps_per_proc;m++) 
+
+   for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=0;i<=neq_minus;i++)
         E->temp1[m][i] = 0.0;
 
                 /* smooth in xyz coordinates */
-      for(m=1;m<=E->sphere.caps_per_proc;m++) 
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
           for(i=1;i<=ENODES3D;i++) {
                 node= E->IEN[sl_minus][m][el].node[i];
@@ -484,18 +465,18 @@ void project_vector(E,start_lev,AU,AD,ic)
 		    average1 += E->temp[m][E->ID[start_lev][m][node1].doff[1]];
 		    average2 += E->temp[m][E->ID[start_lev][m][node1].doff[2]];
 		    average3 += E->temp[m][E->ID[start_lev][m][node1].doff[3]];
-		    }     
+		    }
 		w = weight*E->TWW[sl_minus][m][el].node[i];
-	       
-		E->temp1[m][E->ID[sl_minus][m][node].doff[1]] += w * average1; 
-		E->temp1[m][E->ID[sl_minus][m][node].doff[2]] += w * average2; 
-	 	E->temp1[m][E->ID[sl_minus][m][node].doff[3]] += w * average3; 
+
+		E->temp1[m][E->ID[sl_minus][m][node].doff[1]] += w * average1;
+		E->temp1[m][E->ID[sl_minus][m][node].doff[2]] += w * average2;
+	 	E->temp1[m][E->ID[sl_minus][m][node].doff[3]] += w * average3;
                 }
-	 
+
 
    exchange_id_d(E, E->temp1, sl_minus);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++) 
+   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
        E->temp1[m][E->ID[sl_minus][m][i].doff[1]] *= E->MASS[sl_minus][m][i];
        E->temp1[m][E->ID[sl_minus][m][i].doff[2]] *= E->MASS[sl_minus][m][i];
@@ -505,7 +486,7 @@ void project_vector(E,start_lev,AU,AD,ic)
                /* back into rtf coordinates */
    from_xyz_to_rtf(E,sl_minus,E->temp1,AD);
 
- return;  
+ return;
  }
 
 /* ================================================= */
@@ -588,7 +569,7 @@ void project_vector(E,start_lev,AU,AD,ic)
 
     const int dims =E->mesh.nsd;
     const int ends= enodes[dims];
-    
+
     const int nox = E->lmesh.NOX[level];
     const int noz = E->lmesh.NOZ[level];
     const int noy = E->lmesh.NOY[level];
@@ -605,10 +586,10 @@ void project_vector(E,start_lev,AU,AD,ic)
 	      node2 = node0 + noz;
 
 	      /* now for each direction */
-	      
+
 	      eqn0=E->ID[level][m][node0].doff[1];
 	      eqn1=E->ID[level][m][node1].doff[1];
-	      eqn2=E->ID[level][m][node2].doff[1]; 
+	      eqn2=E->ID[level][m][node2].doff[1];
 	      temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 
 	      eqn0=E->ID[level][m][node0].doff[2];
@@ -618,7 +599,7 @@ void project_vector(E,start_lev,AU,AD,ic)
 
 	      eqn0=E->ID[level][m][node0].doff[3];
 	      eqn1=E->ID[level][m][node1].doff[3];
-	      eqn2=E->ID[level][m][node2].doff[3];	       
+	      eqn2=E->ID[level][m][node2].doff[3];
 	      temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 	      }
 
@@ -632,17 +613,17 @@ void project_vector(E,start_lev,AU,AD,ic)
 
 	        eqn0=E->ID[level][m][node0].doff[1];
 	        eqn1=E->ID[level][m][node1].doff[1];
-	        eqn2=E->ID[level][m][node2].doff[1]; 
+	        eqn2=E->ID[level][m][node2].doff[1];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 
 	        eqn0=E->ID[level][m][node0].doff[2];
 	        eqn1=E->ID[level][m][node1].doff[2];
-	        eqn2=E->ID[level][m][node2].doff[2]; 
+	        eqn2=E->ID[level][m][node2].doff[2];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 
 	        eqn0=E->ID[level][m][node0].doff[3];
 	        eqn1=E->ID[level][m][node1].doff[3];
-	        eqn2=E->ID[level][m][node2].doff[3]; 
+	        eqn2=E->ID[level][m][node2].doff[3];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 	       }
 
@@ -660,17 +641,17 @@ void project_vector(E,start_lev,AU,AD,ic)
 
 	        eqn0=E->ID[level][m][node0].doff[1];
 	        eqn1=E->ID[level][m][node1].doff[1];
-	        eqn2=E->ID[level][m][node2].doff[1]; 
+	        eqn2=E->ID[level][m][node2].doff[1];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 
 	        eqn0=E->ID[level][m][node0].doff[2];
 	        eqn1=E->ID[level][m][node1].doff[2];
-	        eqn2=E->ID[level][m][node2].doff[2]; 
+	        eqn2=E->ID[level][m][node2].doff[2];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 
 	        eqn0=E->ID[level][m][node0].doff[3];
 	        eqn1=E->ID[level][m][node1].doff[3];
-	        eqn2=E->ID[level][m][node2].doff[3]; 
+	        eqn2=E->ID[level][m][node2].doff[3];
 	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
 	        }
        }
