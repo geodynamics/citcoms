@@ -55,6 +55,7 @@ void TractionBC::sendTraction()
     Convertor& convertor = Convertor::instance();
     convertor.traction(fbc, source.getX());
 
+    fbc.print( "FBC" );
     source.send(fbc);
 }
 
@@ -68,6 +69,6 @@ void TractionBC::domain_cutout()
 	source.domain_cutout();
 }
 // version
-// $Id: TractionBC.cc,v 1.2 2004/01/14 02:40:40 ces74 Exp $
+// $Id: TractionBC.cc,v 1.3 2004/01/15 02:59:16 ces74 Exp $
 
 // End of file
