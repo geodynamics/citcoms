@@ -72,7 +72,7 @@ class CoarseGridExchanger(Exchanger):
                               self.boundary):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-
+            '''
             self.source["BC"][i] = self.module.createTractionSource(
                                                    comm.handle(),
                                                    sinkRank,
@@ -85,7 +85,6 @@ class CoarseGridExchanger(Exchanger):
                                                             b,
                                                             self.all_variables,
                                                             self.myBBox)
-                                                            '''
         return
 
 
@@ -100,9 +99,8 @@ class CoarseGridExchanger(Exchanger):
         import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["BC"]):
-            self.BC[i] = Outlet.TractionOutlet(src,
-                                         self.all_variables,
-                                         "FV")
+            self.BC[i] = Outlet.SVTOutlet(src,
+                                          self.all_variables)
         return
 
 
@@ -209,6 +207,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.32 2004/03/28 23:22:42 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.33 2004/04/16 00:08:14 tan2 Exp $"
 
 # End of file

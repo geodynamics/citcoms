@@ -93,10 +93,9 @@ class FineGridExchanger(Exchanger):
 
     def createBC(self):
         import Inlet
-        self.BC = Inlet.TractionInlet(self.boundary,
-                                    self.sink["BC"],
-                                    self.all_variables,
-                                    "FV")
+        self.BC = Inlet.SVTInlet(self.boundary,
+                                 self.sink["BC"],
+                                 self.all_variables)
         '''
         if self.inventory.incompressibility:
             self.BC = Inlet.BoundaryVTInlet(self.communicator,
@@ -236,6 +235,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.35 2004/03/28 23:22:42 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.36 2004/04/16 00:08:14 tan2 Exp $"
 
 # End of file
