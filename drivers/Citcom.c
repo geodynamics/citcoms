@@ -32,6 +32,8 @@ int main(argc,argv)
 
   int cpu_total_seconds,k, *temp;
   double CPU_time0(),time,initial_time,start_time,avaimem();
+
+  struct All_variables *E;
   MPI_Comm world;
 
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
@@ -41,17 +43,11 @@ int main(argc,argv)
     parallel_process_termination();
   }
 
-  //parallel_process_initilization(E,argc,argv);  //replaced by Citcom_Init()
-
   world = MPI_COMM_WORLD;
-  citcom_init(&world); /* allocate global E and do initializaion here */
-
-  //E->monitor.solution_cycles=0;  //moved to Citcom_Init()
+  E = citcom_init(&world); /* allocate global E and do initializaion here */
 
   start_time = time = CPU_time0();
-  read_instructions(argv[1]);
-
-  //E->control.keep_going=1;  //moved to Citcom_Init()
+  read_instructions(E, argv[1]);
 
   cpu_time_on_vp_it = CPU_time0();
   initial_time = cpu_time_on_vp_it - time;

@@ -16,8 +16,7 @@
 #include "phase_change.h"
 #include "interuption.h"
 
-void read_instructions(filename)
-     char *filename;
+void read_instructions(struct All_variables *E, char *filename)
 {
     int get_process_identifier();
 

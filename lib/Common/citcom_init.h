@@ -3,9 +3,7 @@
 #define CITCOM_INIT_HDR
 #include "mpi.h"
 
-extern struct All_variables *E;
-
-extern void citcom_init(MPI_Comm *world);
+extern struct All_variables* citcom_init(MPI_Comm *world);
 
 #endif
 
