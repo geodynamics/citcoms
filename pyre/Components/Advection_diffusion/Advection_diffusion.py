@@ -36,6 +36,7 @@ class Advection_diffusion(Component):
 
 
     def init(self,parent):
+        Regional.set_convection_defaults()
         Regional.PG_timestep_init()
 	return
 
@@ -73,6 +74,6 @@ class Advection_diffusion(Component):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.7 2003/07/23 22:00:57 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.8 2003/07/24 00:04:04 tan2 Exp $"
 
 # End of file

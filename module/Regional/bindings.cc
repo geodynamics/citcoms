@@ -67,11 +67,6 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_open_info_file__doc__},
 
-    {pyRegional_set_convection_defaults__name__,
-     pyRegional_set_convection_defaults,
-     METH_VARARGS,
-     pyRegional_set_convection_defaults__doc__},
-
     {pyRegional_set_signal__name__,
      pyRegional_set_signal,
      METH_VARARGS,
@@ -93,6 +88,11 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_PG_timestep_solve,
      METH_VARARGS,
      pyRegional_PG_timestep_solve__doc__},
+
+    {pyRegional_set_convection_defaults__name__,
+     pyRegional_set_convection_defaults,
+     METH_VARARGS,
+     pyRegional_set_convection_defaults__doc__},
 
     // from mesher.h
 
@@ -263,6 +263,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.18 2003/07/23 22:00:57 tan2 Exp $
+// $Id: bindings.cc,v 1.19 2003/07/24 00:04:04 tan2 Exp $
 
 // End of file

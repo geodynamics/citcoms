@@ -26,7 +26,6 @@ extern "C" {
     double CPU_time0();
 
     void parallel_process_termination();
-    void set_convection_defaults();
     void set_signal();
     void velocities_conform_bcs(struct All_variables*, double **);
 
@@ -127,18 +126,6 @@ PyObject * pyRegional_citcom_init(PyObject *self, PyObject *args)
 
 
 
-char pyRegional_set_convection_defaults__doc__[] = "";
-char pyRegional_set_convection_defaults__name__[] = "set_convection_defaults";
-
-PyObject * pyRegional_set_convection_defaults(PyObject *, PyObject *)
-{
-    set_convection_defaults();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyRegional_open_info_file__doc__[] = "";
 char pyRegional_open_info_file__name__[] = "open_info_file";
 
@@ -195,6 +182,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.17 2003/07/22 21:58:08 tan2 Exp $
+// $Id: misc.cc,v 1.18 2003/07/24 00:04:04 tan2 Exp $
 
 // End of file
