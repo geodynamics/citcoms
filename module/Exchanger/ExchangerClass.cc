@@ -147,7 +147,7 @@ void Exchanger::receiveVelocities() {
 
     if(rank == leader) {
 	// store previously received V
-	swap(incomingV, old_incomingV);
+	incomingV.swap(old_incomingV);
 
 	incomingV.receive(intercomm, remoteLeader);
 	//incomingV.print("incomingV");
@@ -238,7 +238,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.37 2003/10/24 04:51:53 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.38 2003/10/28 01:51:50 tan2 Exp $
 
 // End of file
 
