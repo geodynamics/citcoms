@@ -30,87 +30,8 @@ class Solver(BaseSolver):
 
 
 
-    def launch(self, application):
-        BaseSolver.launch(self, application)
-
-        mesher = self.inventory.mesher
-        mesher.setup()
-
-        vsolver = self.inventory.vsolver
-        vsolver.setup()
-
-        tsolver = self.inventory.tsolver
-        tsolver.setup()
-
-        # create mesh
-        mesher.run()
-
-        # if there is a coupler, launch it
-        if self.coupler:
-            self.coupler.launch(self)
-
-        # solver for 0th step velocity
-        vsolver.run()
-
-        # initialze const. related to mesh
-        tsolver.launch()
-
-        return
-
-
-
-    def advance(self, dt):
-        BaseSolver.advance(self, dt)
-
-        vsolver = self.inventory.vsolver
-        vsolver.setup()
-
-        tsolver = self.inventory.tsolver
-        tsolver.setup()
-
-        tsolver.run(dt)
-        vsolver.run()
-
-        return
-
-
-
-    def stableTimestep(self):
-        tsolver = self.inventory.tsolver
-        dt = tsolver.stable_timestep()
-
-        if self.coupler:
-            # negotiate with other solver(s)
-            dt = self.coupler.stableTimestep(dt)
-
-        BaseSolver.stableTimestep(self, dt)
-
-        return dt
-
-
-
-    def endSimulation(self, step):
-        BaseSolver.endSimulation(self, step, self.t)
-
-        total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
-
-        rank = self.communicator.rank
-        if not rank:
-            print "Average cpu time taken for velocity step = %f" % (
-                total_cpu_time / step )
-
-	#self.CitcomModule.finalize()
-        return
-
-
-
-    def save(self, step):
-        self.CitcomModule.output(self.all_variables, step)
-        return
-
-
-
     def initialize(self, application):
+        BaseSolver.initialize(self. application)
 	#journal.info("staging").log("setup MPI")
         comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
@@ -145,7 +66,110 @@ class Solver(BaseSolver):
         self.setProperties()
 
 	self._start_cpu_time = self.CitcomModule.CPU_time()
+        return
 
+
+
+    def launch(self, application):
+        BaseSolver.launch(self, application)
+
+        mesher = self.inventory.mesher
+        mesher.setup()
+
+        vsolver = self.inventory.vsolver
+        vsolver.setup()
+
+        tsolver = self.inventory.tsolver
+        tsolver.setup()
+
+        # create mesh
+        mesher.run()
+
+        # if there is a coupler, launch it
+        if self.coupler:
+            self.coupler.launch(self)
+
+        # solver for 0th step velocity
+        vsolver.run()
+
+        # initialze const. related to mesh
+        tsolver.launch()
+
+        return
+
+
+
+    def newStep(self, t, step):
+        BaseSolver.newStep(self, t, step)
+        if self.coupler:
+            self.coupler.newStep()
+        return
+
+
+
+    def applyBoundaryConditions(self):
+        BaseSolver.applyBoundaryConditions(self)
+        if self.coupler:
+            self.coupler.applyBoundaryConditions()
+        return
+
+
+
+    def stableTimestep(self):
+        tsolver = self.inventory.tsolver
+        dt = tsolver.stable_timestep()
+
+        if self.coupler:
+            # negotiate with other solver(s)
+            dt = self.coupler.stableTimestep(dt)
+
+        BaseSolver.stableTimestep(self, dt)
+        return dt
+
+
+
+    def advance(self, dt):
+        BaseSolver.advance(self, dt)
+
+        vsolver = self.inventory.vsolver
+        vsolver.setup()
+
+        tsolver = self.inventory.tsolver
+        tsolver.setup()
+
+        tsolver.run(dt)
+        vsolver.run()
+
+        return
+
+
+
+    def endTimestep(self, t):
+        BaseSolver.endTimestep(self, t)
+
+        if self.coupler:
+            self.coupler.endTimestep()
+
+        return
+
+
+    def endSimulation(self, step):
+        BaseSolver.endSimulation(self, step, self.t)
+
+        total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
+
+        rank = self.communicator.rank
+        if not rank:
+            print "Average cpu time taken for velocity step = %f" % (
+                total_cpu_time / step )
+
+	#self.CitcomModule.finalize()
+        return
+
+
+
+    def save(self, step):
+        self.CitcomModule.output(self.all_variables, step)
         return
 
 
@@ -163,16 +187,6 @@ class Solver(BaseSolver):
         inv.param.setProperties()
         inv.phase.setProperties()
         inv.visc.setProperties()
-
-        return
-
-
-
-    def applyBoundaryConditions(self):
-        BaseSolver.applyBoundaryConditions(self)
-
-        if self.coupler:
-            self.coupler.applyBoundaryConditions()
 
         return
 
@@ -213,6 +227,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.17 2003/09/05 19:49:15 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.18 2003/09/09 21:04:45 tan2 Exp $"
 
 # End of file

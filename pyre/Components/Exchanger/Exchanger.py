@@ -22,16 +22,6 @@ class Exchanger(Component):
 
 
 
-    def initialize(self, solver):
-        # choose c++ exchanger module
-        self.selectModule()
-
-        # create c++ exchanger
-        self.createExchanger(solver)
-        return
-
-
-
     def selectModule(self):
         import CitcomS.Exchanger
         self.module = CitcomS.Exchanger
@@ -40,14 +30,50 @@ class Exchanger(Component):
 
 
     def createExchanger(self, solver):
+        raise NotImplementedError
         return
 
 
 
-    def launch(self):
+    def findBoundary(self):
+        raise NotImplementedError
+        return None
+
+
+
+    def mapBoundary(self, boundary):
+        raise NotImplementedError
         return
 
 
+
+    def initTemperature(self):
+        raise NotImplementedError
+        return
+
+
+
+    def NewStep(self):
+        raise NotImplementedError
+        return
+
+
+
+    def applyBoundaryConditions(self):
+        raise NotImplementedError
+        return
+
+
+
+    def stableTimestep(self, dt):
+        raise NotImplementedError
+        return
+
+
+
+    def endTimestep(self):
+        raise NotImplementedError
+        return
 
 
 
@@ -63,6 +89,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.4 2003/09/08 21:37:42 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.5 2003/09/09 21:04:45 tan2 Exp $"
 
 # End of file

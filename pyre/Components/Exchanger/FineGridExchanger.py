@@ -29,16 +29,30 @@ class FineGridExchanger(Exchanger):
 
         # send boundary from CGE
         self.module.sendBoundary(self.exchanger, boundary)
+
+	# create mapping from boundary to id array
+	self.module.mapBoundary(self.exchanger, boundary)
         return boundary
 
 
 
-    def initTemperature(self, boundary):
+    def initTemperature(self):
         # receive temperture field from CGE
-        self.module.receiveTemperature(self.exchanger, boundary)
+        self.module.receiveTemperature(self.exchanger)
         return
 
 
+
+    def waitNewStep(self):
+        # no wait
+        return
+
+
+
+    def applyBoundaryConditions(self):
+        self.module.gather(self.exchanger)
+        self.module.send(self.exchanger)
+        return
 
 
     class Inventory(Exchanger.Inventory):
@@ -53,6 +67,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.2 2003/09/08 21:37:42 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.3 2003/09/09 21:04:45 tan2 Exp $"
 
 # End of file

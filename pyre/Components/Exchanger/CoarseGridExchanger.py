@@ -27,16 +27,30 @@ class CoarseGridExchanger(Exchanger):
     def findBoundary(self):
         # receive boundary from FGE
         boundary = self.module.receiveBoundary(self.exchanger)
+
+        # create mapping from boundary to id array
+        self.module.mapBoundary(self.exchanger, boundary)
         return boundary
 
 
 
-    def initTemperature(self, boundary):
+    def initTemperature(self):
         # send temperture field to FGE
-        self.module.sendTemperature(self.exchanger, boundary)
+        self.module.sendTemperature(self.exchanger)
         return
 
 
+
+    def waitNewStep(self):
+        # wait until FGE catchs up
+        return
+
+
+
+    def applyBoundaryConditions(self):
+        self.module.receive(self.exchanger)
+        self.module.distribute(self.exchanger)
+        return
 
 
     class Inventory(Exchanger.Inventory):
@@ -51,6 +65,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.2 2003/09/08 21:37:42 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.3 2003/09/09 21:04:45 tan2 Exp $"
 
 # End of file
