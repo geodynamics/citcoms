@@ -23,12 +23,13 @@ PROJ_SRCS = \
     advdiffu.cc \
     bindings.cc \
     exceptions.cc \
+    mesher.cc \
     misc.cc \
     outputs.cc \
     setProperties.cc \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.11 2003/07/15 00:40:03 tan2 Exp $
+# $Id: Make.mm,v 1.12 2003/07/16 21:49:50 tan2 Exp $
 
 # End of file

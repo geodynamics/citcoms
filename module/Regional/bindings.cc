@@ -13,6 +13,7 @@
 #include "bindings.h"
 
 #include "advdiffu.h"
+#include "mesher.h"
 #include "misc.h"          // miscellaneous methods
 #include "outputs.h"
 #include "setProperties.h"
@@ -49,51 +50,17 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_read_instructions__doc__},
 
-    {pyRegional_get_system_viscosity__name__,
-     pyRegional_get_system_viscosity,
-     METH_VARARGS,
-     pyRegional_get_system_viscosity__doc__},
-
-    {pyRegional_solve_constrained_flow_iterative__name__,
-     pyRegional_solve_constrained_flow_iterative,
-     METH_VARARGS,
-     pyRegional_solve_constrained_flow_iterative__doc__},
-
-    {pyRegional_set_cg_defaults__name__,
-     pyRegional_set_cg_defaults,
-     METH_VARARGS,
-     pyRegional_set_cg_defaults__doc__},
-
-    {pyRegional_set_mg_defaults__name__,
-     pyRegional_set_mg_defaults,
-     METH_VARARGS,
-     pyRegional_set_mg_defaults__doc__},
-
-    {pyRegional_set_mg_el_defaults__name__,
-     pyRegional_set_mg_el_defaults,
-     METH_VARARGS,
-     pyRegional_set_mg_el_defaults__doc__},
 
     //////////////////////////////////////////////////////////////////////////
     // This section is for finished implementation
     //////////////////////////////////////////////////////////////////////////
 
-    // methods from misc.h
+    // from misc.h
 
     {pyRegional_Citcom_Init__name__,
      pyRegional_Citcom_Init,
      METH_VARARGS,
      pyRegional_Citcom_Init__doc__},
-
-    {pyRegional_assemble_forces__name__,
-     pyRegional_assemble_forces,
-     METH_VARARGS,
-     pyRegional_assemble_forces__doc__},
-
-    {pyRegional_construct_stiffness_B_matrix__name__,
-     pyRegional_construct_stiffness_B_matrix,
-     METH_VARARGS,
-     pyRegional_construct_stiffness_B_matrix__doc__},
 
     {pyRegional_set_convection_defaults__name__,
      pyRegional_set_convection_defaults,
@@ -110,35 +77,8 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_velocities_conform_bcs__doc__},
 
+    // from advdiffu.h
 
-    //
-
-    {pyRegional_general_stokes_solver_init__name__,
-     pyRegional_general_stokes_solver_init,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_init__doc__},
-
-    {pyRegional_general_stokes_solver_fini__name__,
-     pyRegional_general_stokes_solver_fini,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_fini__doc__},
-
-    {pyRegional_general_stokes_solver_update_velo__name__,
-     pyRegional_general_stokes_solver_update_velo,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_update_velo__doc__},
-
-    {pyRegional_general_stokes_solver_Unorm__name__,
-     pyRegional_general_stokes_solver_Unorm,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_Unorm__doc__},
-
-    {pyRegional_general_stokes_solver_log__name__,
-     pyRegional_general_stokes_solver_log,
-     METH_VARARGS,
-     pyRegional_general_stokes_solver_log__doc__},
-
-    // methods for advection_diffusion
     {pyRegional_PG_timestep_init__name__,
      pyRegional_PG_timestep_init,
      METH_VARARGS,
@@ -149,7 +89,19 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_PG_timestep_solve__doc__},
 
-    // methods from outputs.h
+    // from mesher.h
+
+    {pyRegional_mesher_setup__name__,
+     pyRegional_mesher_setup,
+     METH_VARARGS,
+     pyRegional_mesher_setup__doc__},
+
+    {pyRegional_set_3dsphere_defaults__name__,
+     pyRegional_set_3dsphere_defaults,
+     METH_VARARGS,
+     pyRegional_set_3dsphere_defaults__doc__},
+
+    // from outputs.h
 
     {pyRegional_output_init__name__,
      pyRegional_output_init,
@@ -186,7 +138,7 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_output_visc__doc__},
 
-    // methods from setProperties.h
+    // from setProperties.h
 
     {pyRegional_BC_set_prop__name__,
      pyRegional_BC_set_prop,
@@ -198,12 +150,74 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_Visc_set_prop__doc__},
 
+    // from stokes_solver.h
+
+    {pyRegional_assemble_forces__name__,
+     pyRegional_assemble_forces,
+     METH_VARARGS,
+     pyRegional_assemble_forces__doc__},
+
+    {pyRegional_construct_stiffness_B_matrix__name__,
+     pyRegional_construct_stiffness_B_matrix,
+     METH_VARARGS,
+     pyRegional_construct_stiffness_B_matrix__doc__},
+
+    {pyRegional_general_stokes_solver_Unorm__name__,
+     pyRegional_general_stokes_solver_Unorm,
+     METH_VARARGS,
+     pyRegional_general_stokes_solver_Unorm__doc__},
+
+    {pyRegional_general_stokes_solver_fini__name__,
+     pyRegional_general_stokes_solver_fini,
+     METH_VARARGS,
+     pyRegional_general_stokes_solver_fini__doc__},
+
+    {pyRegional_general_stokes_solver_init__name__,
+     pyRegional_general_stokes_solver_init,
+     METH_VARARGS,
+     pyRegional_general_stokes_solver_init__doc__},
+
+    {pyRegional_general_stokes_solver_log__name__,
+     pyRegional_general_stokes_solver_log,
+     METH_VARARGS,
+     pyRegional_general_stokes_solver_log__doc__},
+
+    {pyRegional_general_stokes_solver_update_velo__name__,
+     pyRegional_general_stokes_solver_update_velo,
+     METH_VARARGS,
+     pyRegional_general_stokes_solver_update_velo__doc__},
+
+    {pyRegional_get_system_viscosity__name__,
+     pyRegional_get_system_viscosity,
+     METH_VARARGS,
+     pyRegional_get_system_viscosity__doc__},
+
+    {pyRegional_set_cg_defaults__name__,
+     pyRegional_set_cg_defaults,
+     METH_VARARGS,
+     pyRegional_set_cg_defaults__doc__},
+
+    {pyRegional_set_mg_defaults__name__,
+     pyRegional_set_mg_defaults,
+     METH_VARARGS,
+     pyRegional_set_mg_defaults__doc__},
+
+    {pyRegional_set_mg_el_defaults__name__,
+     pyRegional_set_mg_el_defaults,
+     METH_VARARGS,
+     pyRegional_set_mg_el_defaults__doc__},
+
+    {pyRegional_solve_constrained_flow_iterative__name__,
+     pyRegional_solve_constrained_flow_iterative,
+     METH_VARARGS,
+     pyRegional_solve_constrained_flow_iterative__doc__},
+
 
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.14 2003/07/15 18:17:38 ces74 Exp $
+// $Id: bindings.cc,v 1.15 2003/07/16 21:49:50 tan2 Exp $
 
 // End of file
