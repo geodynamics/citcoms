@@ -24,6 +24,6 @@ class Carrier(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.1 2003/08/30 00:39:17 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.2 2003/08/30 00:44:19 tan2 Exp $"
 
 # End of file
