@@ -57,6 +57,7 @@ cpu_limits_in_seconds=360000000
 
 # Initial conditions
 num_perturbations=1
+perturblayer=3
 perturbmag=0.1
 perturbl=1
 perturbm=1
