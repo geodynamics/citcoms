@@ -10,7 +10,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py machinefile modeldir modelname timestep nodex nodey nodez n_surf_proc nprocx nprocy nprocz
+Usage: batchcombine.py <machinefile | node-list> model-dir model-name timestep nodex nodey nodez ncap nprocx nprocy nprocz
 '''
 
 if __name__ == '__main__':
@@ -33,7 +33,10 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
-    nodelist = file(machinefile).readlines()
+    try:
+        nodelist = file(machinefile).readlines()
+    except IOError:
+        nodelist = machinefile.split()
 
     # check the length of nodelist
     totalnodes = nprocx * nprocy * nprocz * ncap
@@ -75,6 +78,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchcombine.py,v 1.4 2004/06/07 22:29:03 tan2 Exp $
+# $Id: batchcombine.py,v 1.5 2004/07/26 23:56:42 tan2 Exp $
 
 # End of file
