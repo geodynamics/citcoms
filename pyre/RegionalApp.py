@@ -12,6 +12,7 @@ import CitcomS.Regional as Regional
 
 
 class RegionalApp(Application):
+
     #import journal
     total_time = 0
     cycles = 0
@@ -29,12 +30,12 @@ class RegionalApp(Application):
 	import CitcomS.Stokes_solver
 	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
 	vsolver.init()
-	
-	## decide which advection solver to use
-	#import CitcomS.Advection_solver
-	#tsolver = CitcomS.Advection_solver.PGsolver()
-	#tsolver.init()
 
+	# decide which field to advect (and diffuse)
+	import CitcomS.Advection_diffusion.Advection_diffusion as Advection_diffusion
+	tsolver = Advection_diffusion.PG_timestep('temp')
+	tsolver.init()
+	
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
@@ -55,11 +56,12 @@ class RegionalApp(Application):
 	output_velo.close()
 	
 
-	#while (self.keep_going and not Emergency_stop):
-	#    self.cycles += 1
-	#    tsolver.run()
-	#    vsolver.run()
-	#    total_time = Regional.CPU_time() - self.start_time
+	while (self.keep_going and not self.Emergency_stop):
+	    self.cycles += 1
+	    tsolver.run()
+	    vsolver.run()
+	    total_time = Regional.CPU_time() - self.start_time
+
 
 	return
 	    
@@ -67,6 +69,12 @@ class RegionalApp(Application):
     def __init__(self, inputfile):
         Application.__init__(self, "citcomsregional")
 	self.filename = inputfile
+        self.total_time = 0
+        self.cycles = 0
+        self.keep_going = True
+        self.Emergency_stop = False
+        self.start_time=0.0
+        
 	print self.filename
         return
 
@@ -77,6 +85,7 @@ class RegionalApp(Application):
         Application.preInit(self)
         Regional.Citcom_Init(mpi.mpi.world)
 	self.start_time = Regional.CPU_time()
+        print self.start_time
 	return
  
 
@@ -89,7 +98,7 @@ class RegionalApp(Application):
     
 
     def fini(self):
-	total_time = Regional.CPU_time() - self.start_time
+	self.total_time = Regional.CPU_time() - self.start_time
 	Regional.finalize()
 	Application.fini()
 	return
@@ -172,6 +181,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.5 2003/05/21 21:28:01 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.6 2003/05/22 18:20:21 ces74 Exp $"
 
 # End of file 
