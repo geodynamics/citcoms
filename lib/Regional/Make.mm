@@ -17,8 +17,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
 
 PROJ_LIBRARIES = $(EXTERNAL_LIBPATH) $(EXTERNAL_LIBS) -lm
-#PROJ_CC_INCLUDES = ../Common
-PROJ_CC_INCLUDES = ./
+PROJ_CC_INCLUDES = ../Common ./
 
 PROJ_SRCS = \
 	Boundary_conditions.c \
@@ -36,7 +35,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.10 2003/08/12 16:34:19 ces74 Exp $
+# $Id: Make.mm,v 1.11 2003/08/12 16:54:50 ces74 Exp $
 
 #
 # End of file
