@@ -27,8 +27,10 @@ BoundedBox BoundedMesh::tightBBox() const
 {
     BoundedBox tbbox(DIM);
 
-    tbbox[0][0] = tbbox[0][1] = tbbox[0][2] = std::numeric_limits<double>::max();
-    tbbox[1][0] = tbbox[1][1] = tbbox[1][2] = std::numeric_limits<double>::min();
+    for(int d=0; d<DIM; ++d) {
+	tbbox[0][d] = std::numeric_limits<double>::max();
+	tbbox[1][d] = std::numeric_limits<double>::min();
+    }
 
     for(int n=0; n<size(); ++n)
 	for(int d=0; d<DIM; ++d) {
@@ -71,6 +73,6 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 
 
 // version
-// $Id: BoundedMesh.cc,v 1.7 2004/01/14 18:49:28 tan2 Exp $
+// $Id: BoundedMesh.cc,v 1.8 2004/01/14 19:07:11 tan2 Exp $
 
 // End of file
