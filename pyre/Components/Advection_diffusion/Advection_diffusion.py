@@ -73,10 +73,12 @@ class Advection_diffusion(CitcomComponent):
 
         inventory = [
 
+            prop.float("inputdiffusivity", default=1),
+
 	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.18 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.19 2003/11/28 22:17:26 tan2 Exp $"
 
 # End of file

@@ -34,7 +34,10 @@ class IC(CitcomComponent):
 
 
     def initTemperature(self):
-        self.CitcomModule.initTemperature(self.all_variables)
+        if self.inventory.restart:
+            self.CitcomModule.restartTemperature(self.all_variables)
+        else:
+            self.CitcomModule.constructTemperature(self.all_variables)
         return
 
 
@@ -65,6 +68,11 @@ class IC(CitcomComponent):
 
         inventory = [
 
+            pyre.properties.bool("restart", default=False),
+            pyre.properties.bool("post_p", default=False),
+            pyre.properties.int("solution_cycles_init", default=0),
+            pyre.properties.bool("zero_elapsed_time", default=True),
+
             pyre.properties.int("num_perturbations",2),
             pyre.properties.sequence("perturbmag",[0.05,0.05]),
             pyre.properties.sequence("perturbl",[2,2]),
@@ -74,6 +82,6 @@ class IC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.8 2003/10/29 18:40:01 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.9 2003/11/28 22:17:26 tan2 Exp $"
 
 # End of file

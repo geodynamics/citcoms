@@ -213,6 +213,8 @@ class Solver(BaseSolver):
                                           time - self.start_cpu_time,
                                           time - self.cpu_time)
         print >> self.fptime, msg
+        self.fptime.flush()
+
         self.model_time = t
         self.cpu_time = time
         return
@@ -274,11 +276,6 @@ class Solver(BaseSolver):
             pyre.properties.float("Q0", default=0.0),
 
             pyre.properties.bool("stokes_flow_only", default=False),
-            pyre.properties.bool("restart", default=False),
-            pyre.properties.bool("post_p", default=False),
-            pyre.properties.int("solution_cycles_init", default=0),
-            pyre.properties.bool("zero_elapsed_time", default=True),
-            pyre.properties.float("inputdiffusivity", default=1),
 
             pyre.properties.bool("verbose", default=False),
             pyre.properties.bool("see_convergence", default=True),
@@ -286,6 +283,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.32 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.33 2003/11/28 22:17:26 tan2 Exp $"
 
 # End of file
