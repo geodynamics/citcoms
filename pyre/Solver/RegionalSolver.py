@@ -27,6 +27,7 @@ class RegionalSolver(Solver):
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
         import pyre.facilities
+        import pyre.properties
 
         # component modules
         import CitcomS.Components.Sphere as Sphere
@@ -37,11 +38,13 @@ class RegionalSolver(Solver):
             Mesher("mesher", default=Sphere.regionalSphere("regional-sphere")),
             pyre.facilities.facility("exchanger", default=Exchanger.finegridexchanger("exchanger", "exchanger")),
 
+            pyre.properties.str("datafile", default="regtest")
+
             ]
 
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.32 2003/09/05 19:49:15 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.33 2003/10/01 22:07:40 tan2 Exp $"
 
 # End of file
