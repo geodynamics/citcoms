@@ -41,11 +41,12 @@ class Stokes_solver(Component):
 
 
     def init(self, parent):
+        import CitcomS.Regional as Regional
         if self.inventory.Solver == "cgrad":
             Regional.set_cg_defaults()
-        else if self.inventory.Solver == "multigrid":
+        elif self.inventory.Solver == "multigrid":
             Regional.set_mg_defaults()
-        else if self.inventory.Solver == "multigrid-el":
+        elif self.inventory.Solver == "multigrid-el":
             Regional.set_mg_el_defaults()
 	return
 
@@ -94,6 +95,6 @@ class Stokes_solver(Component):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.7 2003/07/15 00:40:03 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.8 2003/07/15 21:47:05 tan2 Exp $"
 
 # End of file
