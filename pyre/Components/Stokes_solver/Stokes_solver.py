@@ -41,6 +41,12 @@ class Stokes_solver(Component):
 
 
     def init(self, parent):
+        if self.inventory.Solver == "cgrad":
+            Regional.set_cg_defaults()
+        else if self.inventory.Solver == "multigrid":
+            Regional.set_mg_defaults()
+        else if self.inventory.Solver == "multigrid-el":
+            Regional.set_mg_el_defaults()
 	return
 
 
@@ -88,6 +94,6 @@ class Stokes_solver(Component):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.6 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.7 2003/07/15 00:40:03 tan2 Exp $"
 
 # End of file

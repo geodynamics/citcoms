@@ -25,11 +25,13 @@ class RegionalApp(Application):
 	self.start_time = Regional.CPU_time()
 	print "my rank is ", self.rank
 
+        self.setProperties()
+
         vsolver = self.inventory.vsolver
-        print vsolver
+        vsolver.init(self)
+
         #tsolver = self.inventory.tsolver
 
-        self.setProperties()
 
         return
 
@@ -158,6 +160,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.13 2003/07/13 22:58:12 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.14 2003/07/15 00:40:03 tan2 Exp $"
 
 # End of file

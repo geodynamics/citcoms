@@ -16,6 +16,7 @@
 #include "misc.h"          // miscellaneous methods
 #include "outputs.h"
 #include "setProperties.h"
+#include "stokes_solver.h"
 
 
 // the method table
@@ -70,11 +71,6 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_Citcom_Init__doc__},
 
-    {pyRegional_velocities_conform_bcs__name__,
-     pyRegional_velocities_conform_bcs,
-     METH_VARARGS,
-     pyRegional_velocities_conform_bcs__doc__},
-
     {pyRegional_assemble_forces__name__,
      pyRegional_assemble_forces,
      METH_VARARGS,
@@ -84,6 +80,21 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_construct_stiffness_B_matrix,
      METH_VARARGS,
      pyRegional_construct_stiffness_B_matrix__doc__},
+
+    {pyRegional_set_convection_defaults__name__,
+     pyRegional_set_convection_defaults,
+     METH_VARARGS,
+     pyRegional_set_convection_defaults__doc__},
+
+    {pyRegional_set_signal__name__,
+     pyRegional_set_signal,
+     METH_VARARGS,
+     pyRegional_set_signal__doc__},
+
+    {pyRegional_velocities_conform_bcs__name__,
+     pyRegional_velocities_conform_bcs,
+     METH_VARARGS,
+     pyRegional_velocities_conform_bcs__doc__},
 
 
     //
@@ -179,6 +190,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.12 2003/07/13 22:58:12 tan2 Exp $
+// $Id: bindings.cc,v 1.13 2003/07/15 00:40:03 tan2 Exp $
 
 // End of file

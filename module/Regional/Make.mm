@@ -25,9 +25,10 @@ PROJ_SRCS = \
     exceptions.cc \
     misc.cc \
     outputs.cc \
-    setProperties.cc
+    setProperties.cc \
+    stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.10 2003/06/27 00:15:02 tan2 Exp $
+# $Id: Make.mm,v 1.11 2003/07/15 00:40:03 tan2 Exp $
 
 # End of file
