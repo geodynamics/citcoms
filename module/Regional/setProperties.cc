@@ -204,20 +204,31 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
     getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
 
-    int num_perturb;
+    getScalarProperty(properties, "tic_method", E->convection.tic_method, m);
 
-    getScalarProperty(properties, "num_perturbations", num_perturb, m);
-    if(num_perturb > PERTURB_MAX_LAYERS) {
-	std::cerr << "'num_perturb' greater than allowed value, set to "
-		  << PERTURB_MAX_LAYERS << std::endl;
-	num_perturb = PERTURB_MAX_LAYERS;
+    if (E->convection.tic_method == 0) {
+	int num_perturb;
+
+	getScalarProperty(properties, "num_perturbations", num_perturb, m);
+	if(num_perturb > PERTURB_MAX_LAYERS) {
+	    std::cerr << "'num_perturb' greater than allowed value, set to "
+		      << PERTURB_MAX_LAYERS << std::endl;
+	    num_perturb = PERTURB_MAX_LAYERS;
+	}
+	E->convection.number_of_perturbations = num_perturb;
+
+	getVectorProperty(properties, "perturbl", E->convection.perturb_ll,
+			  num_perturb, m);
+	getVectorProperty(properties, "perturbm", E->convection.perturb_mm,
+			  num_perturb, m);
+	getVectorProperty(properties, "perturblayer", E->convection.load_depth,
+			  num_perturb, m);
+	getVectorProperty(properties, "perturbmag", E->convection.perturb_mag,
+			  num_perturb, m);
     }
-    E->convection.number_of_perturbations = num_perturb;
-
-    getVectorProperty(properties, "perturbl", E->convection.perturb_ll, num_perturb, m);
-    getVectorProperty(properties, "perturbm", E->convection.perturb_mm, num_perturb, m);
-    getVectorProperty(properties, "perturblayer", E->convection.load_depth, num_perturb, m);
-    getVectorProperty(properties, "perturbmag", E->convection.perturb_mag, num_perturb, m);
+    else if (E->convection.tic_method == 1) {
+	getScalarProperty(properties, "half_space_age", E->convection.half_space_age, m);
+    }
 
     if (PyErr_Occurred())
       return NULL;
@@ -784,6 +795,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.31 2005/01/20 22:29:50 tan2 Exp $
+// $Id: setProperties.cc,v 1.32 2005/02/17 23:15:36 tan2 Exp $
 
 // End of file
