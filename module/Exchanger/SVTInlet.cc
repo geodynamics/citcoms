@@ -21,7 +21,6 @@ extern "C" {
 
     void check_bc_consistency(const All_variables *E);
     void construct_id(const All_variables *E);
-    void my_tbc(struct All_variables* E);
 }
 
 using Exchanger::Array2D;
@@ -216,6 +215,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.8 2005/01/04 22:57:11 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.9 2005/01/04 22:58:07 tan2 Exp $
 
 // End of file
