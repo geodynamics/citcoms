@@ -67,47 +67,42 @@ void Boundary::initBBox(const All_variables *E)
 void Boundary::initX(const All_variables* E,
 		     bool excludeTop, bool excludeBottom)
 {
-    if(E->parallel.me_loc[3] == E->parallel.nprocz - 1)
-	if(!excludeTop) {
-	    const int i = E->lmesh.noz;
+    if( (E->parallel.me_loc[3] != E->parallel.nprocz - 1) || (!excludeTop) ) {
+	const int i = E->lmesh.noz;
+	for(int k=1; k<=E->lmesh.noy; k++)
+	    for(int j=1; j<=E->lmesh.nox; j++) {
+		std::vector<int> normalFlag(Exchanger::DIM,0);
+		normalFlag[2] = 1;
+		checkSidewalls(E, j, k, normalFlag);
+		int node = ijk2node(E, i, j, k);
+		appendNode(E, node, normalFlag);
+	    }
+    }
 
-	    for(int k=1; k<=E->lmesh.noy; k++)
-		for(int j=1; j<=E->lmesh.nox; j++) {
-		    std::vector<int> normalFlag(Exchanger::DIM,0);
-		    normalFlag[2] = 1;
-		    checkSidewalls(E, j, k, normalFlag);
+    if( (E->parallel.me_loc[3] != 0) || (!excludeBottom) ) {
+	const int i = 1;
+	for(int k=1; k<=E->lmesh.noy; k++)
+	    for(int j=1; j<=E->lmesh.nox; j++) {
+		std::vector<int> normalFlag(Exchanger::DIM,0);
+		normalFlag[2] = -1;
+		checkSidewalls(E, j, k, normalFlag);
+		int node = ijk2node(E, i, j, k);
+		appendNode(E, node, normalFlag);
+	    }
+    }
+    else {
+	/* including edge nodes at the bottom */
+	const int i = 1;
+	for(int k=1; k<=E->lmesh.noy; k++)
+	    for(int j=1; j<=E->lmesh.nox; j++) {
+		std::vector<int> normalFlag(Exchanger::DIM,0);
+		normalFlag[2] = -1;
+		if(checkSidewalls(E, j, k, normalFlag)) {
 		    int node = ijk2node(E, i, j, k);
 		    appendNode(E, node, normalFlag);
 		}
-	}
-
-    if(E->parallel.me_loc[3] == 0)
-	if(!excludeBottom) {
-	    const int i = 1;
-
-	    for(int k=1; k<=E->lmesh.noy; k++)
-		for(int j=1; j<=E->lmesh.nox; j++) {
-		    std::vector<int> normalFlag(Exchanger::DIM,0);
-		    normalFlag[2] = -1;
-		    checkSidewalls(E, j, k, normalFlag);
-		    int node = ijk2node(E, i, j, k);
-		    appendNode(E, node, normalFlag);
-		}
-	}
-	else {
-	    /* include edge nodes */
-	    const int i = 1;
-
-	    for(int k=1; k<=E->lmesh.noy; k++)
-		for(int j=1; j<=E->lmesh.nox; j++) {
-		    std::vector<int> normalFlag(Exchanger::DIM,0);
-		    normalFlag[2] = -1;
-		    if(checkSidewalls(E, j, k, normalFlag)) {
-			int node = ijk2node(E, i, j, k);
-			appendNode(E, node, normalFlag);
-		    }
-		}
-	}
+	    }
+    }
 
     for(int k=1; k<=E->lmesh.noy; k++)
 	for(int j=1; j<=E->lmesh.nox; j++)
@@ -178,6 +173,6 @@ void Boundary::appendNode(const All_variables* E,
 
 
 // version
-// $Id: Boundary.cc,v 1.56 2004/10/08 00:08:09 tan2 Exp $
+// $Id: Boundary.cc,v 1.57 2004/12/28 01:38:38 tan2 Exp $
 
 // End of file
