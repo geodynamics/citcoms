@@ -21,11 +21,15 @@ extern "C" {
 
 }
 
-long getIntProperty(PyObject* properties, char* attribute);
-double getFloatProperty(PyObject* properties, char* attribute);
+
 void getStringProperty(PyObject* properties, char* attribute, char* value);
-void getIntVecProperty(PyObject* properties, char* attribute, int* vector, int len);
-void getFloatVecProperty(PyObject* properties, char* attribute, float* vector, int len);
+
+template <class T>
+void getScalarProperty(PyObject* properties, char* attribute, T& value);
+
+template <class T>
+void getVectorProperty(PyObject* properties, char* attribute,
+		       T* vector, int len);
 
 //
 //
@@ -42,23 +46,23 @@ PyObject * pyRegional_BC_set_prop(PyObject *self, PyObject *args)
 
     std::cerr << "BC.inventories:" << std::endl;
 
-    E->mesh.topvbc = getIntProperty(properties, "topvbc");
-    E->control.VBXtopval = getFloatProperty(properties, "topvbxval");
-    E->control.VBYtopval = getFloatProperty(properties, "topvbyval");
+    getScalarProperty(properties, "topvbc", E->mesh.topvbc);
+    getScalarProperty(properties, "topvbxval", E->control.VBXtopval);
+    getScalarProperty(properties, "topvbyval", E->control.VBYtopval);
 
-    E->mesh.botvbc = getIntProperty(properties, "botvbc");
-    E->control.VBXbotval = getFloatProperty(properties, "botvbxval");
-    E->control.VBYbotval = getFloatProperty(properties, "botvbyval");
+    getScalarProperty(properties, "botvbc", E->mesh.botvbc);
+    getScalarProperty(properties, "botvbxval", E->control.VBXbotval);
+    getScalarProperty(properties, "botvbyval", E->control.VBYbotval);
 
-    E->mesh.toptbc = getIntProperty(properties, "toptbc");
-    E->control.TBCtopval = getFloatProperty(properties, "toptbcval");
+    getScalarProperty(properties, "toptbc", E->mesh.toptbc);
+    getScalarProperty(properties, "toptbcval", E->control.TBCtopval);
 
-    E->mesh.bottbc = getIntProperty(properties, "bottbc");
-    E->control.TBCbotval = getFloatProperty(properties, "bottbcval");
+    getScalarProperty(properties, "bottbc", E->mesh.bottbc);
+    getScalarProperty(properties, "bottbcval", E->control.TBCbotval);
 
-    E->control.temperature_bound_adj = getIntProperty(properties, "temperature_bound_adj");
-    E->control.depth_bound_adj = getFloatProperty(properties, "depth_bound_adj");
-    E->control.width_bound_adj = getFloatProperty(properties, "width_bound_adj");
+    getScalarProperty(properties, "temperature_bound_adj", E->control.temperature_bound_adj);
+    getScalarProperty(properties, "depth_bound_adj", E->control.depth_bound_adj);
+    getScalarProperty(properties, "width_bound_adj", E->control.width_bound_adj);
 
 
     if (PyErr_Occurred())
@@ -83,11 +87,15 @@ PyObject * pyRegional_Visc_set_prop(PyObject *self, PyObject *args)
     std::cerr << "Visc.inventories:" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE);
-    E->viscosity.RHEOL = getIntProperty(properties, "rheol");
-    E->viscosity.smooth_cycles = getIntProperty(properties, "visc_smooth_method");
-    E->viscosity.update_allowed = getIntProperty(properties, "VISC_UPDATE");
-    int num_mat = getIntProperty(properties, "num_mat");
 
+    getScalarProperty(properties, "rheol", E->viscosity.RHEOL);
+
+
+    getScalarProperty(properties, "visc_smooth_method", E->viscosity.smooth_cycles);
+    getScalarProperty(properties, "VISC_UPDATE", E->viscosity.update_allowed);
+
+    int num_mat;
+    getScalarProperty(properties, "num_mat", num_mat);
     if(num_mat > 40) {
 	// max. allowed material types = 40
 	std::cerr << "'num_mat' greater than allowed value, set to 40.";
@@ -95,25 +103,25 @@ PyObject * pyRegional_Visc_set_prop(PyObject *self, PyObject *args)
     }
     E->viscosity.num_mat = num_mat;
 
-    getFloatVecProperty(properties, "visc0",
+    getVectorProperty(properties, "visc0",
 			E->viscosity.N0, num_mat);
 
-    E->viscosity.TDEPV = getIntProperty(properties, "TDEPV");
-    getFloatVecProperty(properties, "viscE",
+    getScalarProperty(properties, "TDEPV", E->viscosity.TDEPV);
+    getVectorProperty(properties, "viscE",
 			E->viscosity.E, num_mat);
-    getFloatVecProperty(properties, "viscT",
+    getVectorProperty(properties, "viscT",
 			E->viscosity.T, num_mat);
 
-    E->viscosity.SDEPV = getIntProperty(properties, "SDEPV");
-    E->viscosity.sdepv_misfit = getIntProperty(properties, "sdepv_misfit");
-    getFloatVecProperty(properties, "sdepv_expt",
+    getScalarProperty(properties, "SDEPV", E->viscosity.SDEPV);
+    getScalarProperty(properties, "sdepv_misfit", E->viscosity.sdepv_misfit);
+    getVectorProperty(properties, "sdepv_expt",
 			E->viscosity.sdepv_expt, num_mat);
 
-    E->viscosity.MIN = getIntProperty(properties, "VMIN");
-    E->viscosity.min_value = getIntProperty(properties, "visc_min");
+    getScalarProperty(properties, "VMIN", E->viscosity.MIN);
+    getScalarProperty(properties, "visc_min", E->viscosity.min_value);
 
-    E->viscosity.MAX = getIntProperty(properties, "VMAX");
-    E->viscosity.max_value = getIntProperty(properties, "visc_max");
+    getScalarProperty(properties, "VMAX", E->viscosity.MAX);
+    getScalarProperty(properties, "visc_max", E->viscosity.max_value);
 
     if (PyErr_Occurred())
 	return NULL;
@@ -127,59 +135,6 @@ PyObject * pyRegional_Visc_set_prop(PyObject *self, PyObject *args)
 
 //==========================================================
 // helper functions
-
-
-long getIntProperty(PyObject* properties, char* attribute)
-{
-    std::cerr << '\t' << attribute << " = ";
-
-    if(!PyObject_HasAttrString(properties, attribute)) {
-	char errmsg[255];
-	sprintf(errmsg, "no such attribute: %s", attribute);
-	PyErr_SetString(PyExc_AttributeError, errmsg);
-	return 0;
-    }
-
-    PyObject* prop = PyObject_GetAttrString(properties, attribute);
-    if(!PyNumber_Check(prop)) {
-	char errmsg[255];
-	sprintf(errmsg, "'%s' is not a number", attribute);
-	PyErr_SetString(PyExc_TypeError, errmsg);
-	return 0;
-    }
-
-    long value = PyInt_AsLong(prop);
-    std::cerr << value << std::endl;
-
-    return value;
-}
-
-
-double getFloatProperty(PyObject* properties, char* attribute)
-{
-    std::cerr << '\t' << attribute << " = ";
-
-    if(!PyObject_HasAttrString(properties, attribute)) {
-	char errmsg[255];
-	sprintf(errmsg, "no such attribute: %s", attribute);
-	PyErr_SetString(PyExc_AttributeError, errmsg);
-	return 0;
-    }
-
-    PyObject* prop = PyObject_GetAttrString(properties, attribute);
-    if(!PyNumber_Check(prop)) {
-	char errmsg[255];
-	sprintf(errmsg, "'%s' is not a number", attribute);
-	PyErr_SetString(PyExc_TypeError, errmsg);
-	return 0;
-    }
-
-    double value = PyFloat_AsDouble(prop);
-    std::cerr << value << std::endl;
-
-    return value;
-}
-
 
 
 void getStringProperty(PyObject* properties, char* attribute, char* value)
@@ -209,7 +164,8 @@ void getStringProperty(PyObject* properties, char* attribute, char* value)
 
 
 
-void getIntVecProperty(PyObject* properties, char* attribute, int* vector, int len)
+template <class T>
+void getScalarProperty(PyObject* properties, char* attribute, T& value)
 {
     std::cerr << '\t' << attribute << " = ";
 
@@ -220,56 +176,25 @@ void getIntVecProperty(PyObject* properties, char* attribute, int* vector, int l
 	return;
     }
 
-    // is it a sequence?
     PyObject* prop = PyObject_GetAttrString(properties, attribute);
-    if(!PySequence_Check(prop)) {
+    if(!PyNumber_Check(prop)) {
 	char errmsg[255];
-	sprintf(errmsg, "'%s' is not a sequence", attribute);
+	sprintf(errmsg, "'%s' is not a number", attribute);
 	PyErr_SetString(PyExc_TypeError, errmsg);
 	return;
     }
 
-    // is it of length len?
-    int n = PySequence_Size(prop);
-    if(n < len) {
-	char errmsg[255];
-	sprintf(errmsg, "length of '%s' < %d", attribute, len);
-	PyErr_SetString(PyExc_IndexError, errmsg);
-	return;
-    } else if(n > len) {
-	char warnmsg[255];
-	sprintf(warnmsg, "length of '%s' > %d", attribute, len);
-	std::cerr << warnmsg << std::endl;
-    }
-
-    std::cerr << "[ ";
-    for (int i=0; i<len; i++) {
-	PyObject* item = PySequence_GetItem(prop, i);
-	if(!item) {
-	    char errmsg[255];
-	    sprintf(errmsg, "can't get %s[%d]", attribute, i);
-	    PyErr_SetString(PyExc_IndexError, errmsg);
-	    return;
-	}
-
-	if(PyNumber_Check(item)) {
-	    vector[i] = PyInt_AsLong(item);
-	} else {
-	    char errmsg[255];
-	    sprintf(errmsg, "'%s[%d]' is not a number ", attribute, i);
-	    PyErr_SetString(PyExc_TypeError, errmsg);
-	    return;
-	}
-	std::cerr << vector[i] << ", ";
-    }
-    std::cerr << ']' << std::endl;
+    value = static_cast<T>(PyFloat_AsDouble(prop));
+    std::cerr << value << std::endl;
 
     return;
 }
 
 
 
-void getFloatVecProperty(PyObject* properties, char* attribute, float* vector, int len)
+template <class T>
+void getVectorProperty(PyObject* properties, char* attribute,
+		       T* vector, const int len)
 {
     std::cerr << '\t' << attribute << " = ";
 
@@ -313,7 +238,7 @@ void getFloatVecProperty(PyObject* properties, char* attribute, float* vector, i
 	}
 
 	if(PyNumber_Check(item)) {
-	    vector[i] = PyFloat_AsDouble(item);
+	    vector[i] = static_cast<T>(PyFloat_AsDouble(item));
 	} else {
 	    char errmsg[255];
 	    sprintf(errmsg, "'%s[%d]' is not a number ", attribute, i);
