@@ -23,8 +23,8 @@ InteriorImposingSink::InteriorImposingSink(const Interior& i, const Sink& s,
     E(e),
     interior(i),
     sink(s),
-    vic(sink.size()),
-    tic(sink.size())
+    tic(sink.size()),
+    vic(sink.size())
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
@@ -85,8 +85,8 @@ void InteriorImposingSink::imposeTIC()
 }
 void InteriorImposingSink::imposeVICP()
 {
-    journal::debug_t debugIC("imposeTIC");
-    debugIC << journal::loc(__HERE__);
+    journal::debug_t debugVICP("imposeVICP");
+    debugVICP << journal::loc(__HERE__);
 
     const int mm = 1;
 
@@ -95,9 +95,9 @@ void InteriorImposingSink::imposeVICP()
         for(int d=0; d<DIM; d++)
             E->sphere.cap[mm].VB[d+1][n]=vic[d][i];
         
-	debugVIC << E->T[mm][n] << journal::newline;
+	debugVICP << E->T[mm][n] << journal::newline;
     }
-    debugVIC << journal::end;
+    debugVICP << journal::end;
 }
 
 
@@ -133,6 +133,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.5 2003/11/25 17:58:15 puru Exp $
+// $Id: InteriorImposing.cc,v 1.6 2003/11/25 18:41:16 puru Exp $
 
 // End of file
