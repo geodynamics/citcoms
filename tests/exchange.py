@@ -47,6 +47,25 @@ class TestExchanger(Application):
         boundary = exchanger.findBoundary()
         print exchanger.name, boundary
 
+        try:
+            # success if exchanger is a FGE
+            exchanger.catchup
+            dt = 0.15
+        except:
+            # exception if exchanger is a CGE
+            dt = 1
+
+        # testing dt exchanging
+        print "%s - old = %f   exchanged = %f   old = %f" % (exchanger.name,
+              dt, exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
+              dt)
+
+        # testing wait & nowait
+        for step in range(7*2+1):
+            exchanger.NewStep()
+            time = exchanger.stableTimestep(dt)
+            print "%s - step %d: %f" % (exchanger.name, step, time)
+
         return
 
 
@@ -114,6 +133,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.3 2003/09/09 21:08:02 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.4 2003/09/10 04:00:31 tan2 Exp $"
 
 # End of file
