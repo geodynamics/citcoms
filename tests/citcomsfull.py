@@ -8,7 +8,7 @@
 #
 
 
-from CitcomS.FullApp import FullApp as RegionalApp
+from CitcomS.FullApp import FullApp
 
 
 # main
@@ -18,16 +18,11 @@ if __name__ == "__main__":
     journal.info("staging").activate()
     journal.debug("staging").activate()
 
-    import sys
-    app = RegionalApp()
-    app.inventory.staging.inventory.nodes = \
-                                  app.inventory.mesher.inventory.nprocx * \
-                                  app.inventory.mesher.inventory.nprocy * \
-                                  app.inventory.mesher.inventory.nprocz * 12
+    app = FullApp("full")
     app.main()
 
 
 # version
-__id__ = "$Id: citcomsfull.py,v 1.2 2003/08/20 02:45:23 tan2 Exp $"
+__id__ = "$Id: citcomsfull.py,v 1.3 2003/08/22 22:19:48 tan2 Exp $"
 
 #  End of file
