@@ -8,8 +8,8 @@
 //
 
 #include <portinfo>
+#include <algorithm>
 #include <iostream>
-#include "auto_array_ptr.h"
 #include "journal/journal.h"
 
 
@@ -24,7 +24,7 @@ Array2D<T,N>::Array2D() :
 
 
 template <class T, int N>
-Array2D<T,N>::Array2D(const int n) :
+Array2D<T,N>::Array2D(int n) :
     a_(n*N)
 {
     journal::debug_t debug("Array2D");
@@ -53,7 +53,8 @@ Array2D<T,N>::~Array2D()
 
 
 template <class T, int N>
-Array2D<T,N>& Array2D<T,N>::operator=(const Array2D<T,N>& rhs) {
+Array2D<T,N>& Array2D<T,N>::operator=(const Array2D<T,N>& rhs)
+{
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.operator=" << journal::end;
@@ -65,7 +66,8 @@ Array2D<T,N>& Array2D<T,N>::operator=(const Array2D<T,N>& rhs) {
 
 
 template <class T, int N>
-void Array2D<T,N>::swap(Array2D<T,N>& rhs) {
+void Array2D<T,N>::swap(Array2D<T,N>& rhs)
+{
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.swap" << journal::end;
@@ -76,7 +78,8 @@ void Array2D<T,N>::swap(Array2D<T,N>& rhs) {
 
 
 template <class T, int N>
-void Array2D<T,N>::reserve(const int n) {
+void Array2D<T,N>::reserve(int n)
+{
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.reserve" << journal::end;
@@ -85,7 +88,8 @@ void Array2D<T,N>::reserve(const int n) {
 
 
 template <class T, int N>
-void Array2D<T,N>::resize(const int n) {
+void Array2D<T,N>::resize(int n)
+{
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.resize" << journal::end;
@@ -94,7 +98,8 @@ void Array2D<T,N>::resize(const int n) {
 
 
 template <class T, int N>
-void Array2D<T,N>::shrink() {
+void Array2D<T,N>::shrink()
+{
     journal::debug_t debug("Array2D");
     debug << journal::loc(__HERE__)
           << "in Array2D<" << N << ">.shrink" << journal::end;
@@ -103,86 +108,132 @@ void Array2D<T,N>::shrink() {
 
 
 template <class T, int N>
-int Array2D<T,N>::size() const {
+int Array2D<T,N>::size() const
+{
     return a_.size()/N;
 }
 
 
 template <class T, int N>
-bool Array2D<T,N>::empty() const {
+int Array2D<T,N>::capacity() const
+{
+    return a_.capacity()/N;
+}
+
+
+template <class T, int N>
+bool Array2D<T,N>::empty() const
+{
     return (a_.size() == 0);
 }
 
 
 template <class T, int N>
-void Array2D<T,N>::sendSize(const MPI_Comm comm, const int receiver) const {
+void Array2D<T,N>::push_back(const std::vector<T>& val)
+{
+#ifdef DEBUG
+    if (val.size() != N) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: push_back element out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif
+    reserve(size()+1);
+    copy(val.begin(), val.end(), back_inserter(a_));
+}
 
+
+template <class T, int N>
+void Array2D<T,N>::push_back(const T& val)
+{
+    reserve(size()+1);
+    fill_n(back_inserter(a_), N, val);
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver) const
+{
+    sendSize(comm, receiver, size());
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver, int n) const
+{
     const int tag = 10;
-    int n = size();
     int result = MPI_Send(&n, 1, MPI_INT,
 			  receiver, tag, comm);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " sendSize error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "sendSize error!");
 }
 
 
 template <class T, int N>
-int Array2D<T,N>::receiveSize(const MPI_Comm comm, const int sender) const {
-
-    const int tag = 10;
-    MPI_Status status;
+int Array2D<T,N>::receiveSize(const MPI_Comm& comm, int sender) const
+{
     int n;
+    MPI_Status status;
+    const int tag = 10;
     int result = MPI_Recv(&n, 1, MPI_INT,
 			  sender, tag, comm, &status);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " receiveSize error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "receiveSize error!");
     return n;
 }
 
 
 template <class T, int N>
-int Array2D<T,N>::broadcastSize(const MPI_Comm comm, const int broadcaster) const {
+int Array2D<T,N>::broadcastSize(const MPI_Comm& comm, int broadcaster) const
+{
     int n = size();
     int result = MPI_Bcast(&n, 1, MPI_INT, broadcaster, comm);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " receiveSize error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "broadcastSize error!");
     return n;
 }
 
 
 template <class T, int N>
-void Array2D<T,N>::send(const MPI_Comm comm, const int receiver) const {
-
+void Array2D<T,N>::send(const MPI_Comm& comm, int receiver) const
+    // blocking send the whole vector
+{
     sendSize(comm, receiver);
 
     const int tag = 11;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), datatype,
 			  receiver, tag, comm);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " send error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "send error!");
 }
 
 
 template <class T, int N>
-void Array2D<T,N>::receive(const MPI_Comm comm, const int sender) {
+void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
+			MPI_Request& request) const
+    // non-blocking send the whole vector
+{
+    sendSize(comm, receiver, size());
+    send(comm, receiver, 0, size(), request);
+}
 
+
+template <class T, int N>
+void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
+			int begin, int sendsize, MPI_Request& request) const
+    // non-blocking send the vector[begin ~ begin+sendsize-1]
+    // the caller must guarantee a_ is of sufficent size
+{
+    const int tag = begin;
+    MPI_Datatype datatype = typeofT();
+    int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N, datatype,
+			   receiver, tag, comm, &request);
+    testResult(result, "send error!");
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::receive(const MPI_Comm& comm, int sender)
+    // blocking receive the whole vector
+{
     // resize to accommodate incoming data
     resize(receiveSize(comm, sender));
 
@@ -191,34 +242,49 @@ void Array2D<T,N>::receive(const MPI_Comm comm, const int sender) {
     MPI_Datatype datatype = typeofT();
     int result = MPI_Recv(&a_[0], a_.size(), datatype,
 			  sender, tag, comm, &status);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " receive error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "receive error!");
 }
 
 
 template <class T, int N>
-void Array2D<T,N>::broadcast(const MPI_Comm comm, const int broadcaster) {
+void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
+			   MPI_Request& request)
+    // non-blocking receive the whole vector
+{
+    resize(receiveSize(comm, sender));
+    receive(comm, sender, 0, size(), request);
+}
 
+
+template <class T, int N>
+void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
+			   int begin, int recvsize, MPI_Request& request)
+    // non-blocking receive the vector[begin ~ begin+recvsize-1]
+    // the caller must guarantee a_ is of sufficent size
+{
+    const int tag = begin;
+    MPI_Datatype datatype = typeofT();
+    int result = MPI_Irecv(&a_[begin*N], recvsize*N, datatype,
+			   sender, tag, comm, &request);
+    testResult(result, "receive error!");
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::broadcast(const MPI_Comm& comm, int broadcaster)
+{
     // resize to accommodate incoming data
     resize(broadcastSize(comm, broadcaster));
 
     MPI_Datatype datatype = typeofT();
     int result = MPI_Bcast(&a_[0], a_.size(), datatype, broadcaster, comm);
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << " broadcast error!" << journal::end;
-	throw result;
-    }
+    testResult(result, "broadcast error!");
 }
 
 
 template <class T, int N>
-void Array2D<T,N>::print(const std::string& prefix) const {
+void Array2D<T,N>::print(const std::string& prefix) const
+{
     journal::info_t info(prefix);
     info << "  " << prefix << ":  addr = " << &a_;
 
@@ -228,6 +294,78 @@ void Array2D<T,N>::print(const std::string& prefix) const {
             info << a_[n*N + j] << "  ";
     }
     info << journal::newline << journal::end;
+}
+
+
+template <class T, int N>
+typename Array2D<T,N>::Array1D
+Array2D<T,N>::operator[](size_t index)
+{
+#ifdef DEBUG
+    if (index >= N) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: first index out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif
+    return Array1D(a_, index);
+}
+
+
+template <class T, int N>
+const typename Array2D<T,N>::Array1D
+Array2D<T,N>::operator[](size_t index) const
+{
+#ifdef DEBUG
+    if (index >= N) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: first index out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif
+    return Array1D(const_cast<std::vector<T>&>(a_), index);
+}
+
+
+// Proxy class
+
+
+template <class T, int N>
+Array2D<T,N>::Array1D::Array1D(std::vector<T>& a, size_t n) :
+    p_(a),
+    n_(n)
+{}
+
+
+template <class T, int N>
+T& Array2D<T,N>::Array1D::operator[](size_t index)
+{
+#ifdef DEBUG
+    if (index*N+n_ >= p_.size()) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: second index out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif
+    return p_[index*N+n_];
+}
+
+
+template <class T, int N>
+const T& Array2D<T,N>::Array1D::operator[](size_t index) const
+{
+#ifdef DEBUG
+    if (index*N+n_ >= p_.size()) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: second index out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif
+    return p_[index*N+n_];
 }
 
 
@@ -257,8 +395,19 @@ MPI_Datatype Array2D<T,N>::typeofT() {
 }
 
 
+template <class T, int N>
+void Array2D<T,N>::testResult(int result, const std::string& errmsg)
+{
+    if (result != MPI_SUCCESS) {
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << errmsg << journal::end;
+	throw result;
+    }
+}
+
 
 // version
-// $Id: Array2D.cc,v 1.9 2003/10/28 19:57:45 tan2 Exp $
+// $Id: Array2D.cc,v 1.10 2003/10/30 22:21:00 tan2 Exp $
 
 // End of file

@@ -27,80 +27,57 @@ class Array2D {
 
 public:
     Array2D();
-    explicit Array2D(const int size);
+    explicit Array2D(int size);
     Array2D(const Array2D<T,N>& rhs);
     ~Array2D();
 
     inline Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
     inline void swap(Array2D<T,N>& rhs);
-    inline void reserve(const int n);
-    inline void resize(const int n);
+    inline void reserve(int n);
+    inline void resize(int n);
     inline void shrink();
     inline int size() const;
+    inline int capacity() const;
     inline bool empty() const;
+    inline void push_back(const std::vector<T>& val);
+    inline void push_back(const T& val);
 
-    void sendSize(const MPI_Comm comm, const int receiver) const;
-    int receiveSize(const MPI_Comm comm, const int sender) const;
-    int broadcastSize(const MPI_Comm comm, const int broadcaster) const;
-    void send(const MPI_Comm comm, const int receiver) const;
-    void receive(const MPI_Comm comm, const int sender);
-    void broadcast(const MPI_Comm comm, const int broadcaster);
+    void sendSize(const MPI_Comm& comm, int receiver) const;
+    void sendSize(const MPI_Comm& comm, int receiver, int size) const;
+    int receiveSize(const MPI_Comm& comm, int sender) const;
+    int broadcastSize(const MPI_Comm& comm, int broadcaster) const;
+
+    void send(const MPI_Comm& comm, int receiver) const;
+    void send(const MPI_Comm& comm, int receiver, MPI_Request&) const;
+    void send(const MPI_Comm& comm, int receiver,
+	      int begin, int sendsize, MPI_Request&) const;
+    void receive(const MPI_Comm& comm, int sender);
+    void receive(const MPI_Comm& comm, int sender, MPI_Request&);
+    void receive(const MPI_Comm& comm, int sender,
+		 int begin, int recvsize, MPI_Request&);
+    void broadcast(const MPI_Comm& comm, int broadcaster);
+
     void print(const std::string& prefix="Array2D") const;
 
     class Array1D;  // forward declaration
 
-    inline Array1D operator[](const size_t index) {
-// #ifdef DEBUG
-// 	if (index >= N) {
-// 	    std::string msg = "Array2D: first index out of range";
-// 	    std::cout << msg << std::endl;
-// 	    throw std::out_of_range(msg);
-// 	}
-// #endif
-	return Array1D(a_, index);
-    }
-    inline const Array1D operator[](const size_t index) const {
-// #ifdef DEBUG
-// 	if (index >= N) {
-// 	    std::string msg = "Array2D: first index out of range";
-// 	    std::cout << msg << std::endl;
-// 	    throw std::out_of_range(msg);
-// 	}
-// #endif
-	return Array1D(const_cast<std::vector<T>&>(a_), index);
-    }
+    inline Array1D operator[](size_t index);
+    inline const Array1D operator[](size_t index) const;
 
     // proxy class for operator[]
     class Array1D {
 	std::vector<T>& p_;
-	int n_;
-    public:
-	inline Array1D(std::vector<T>& a_, const size_t n) : p_(a_), n_(n) {};
+	size_t n_;
 
-	inline T& operator[](const size_t index) {
-#ifdef DEBUG
-	    if (index*N+n_ >= p_.size()) {
-		std::string msg = "Array2D: second index out of range";
-		std::cout << msg << std::endl;
-		throw std::out_of_range(msg);
-	    }
-#endif
-	    return p_[index*N+n_];
-	}
-	inline const T& operator[](const size_t index) const {
-#ifdef DEBUG
-	    if (index*N+n_ >= p_.size()) {
-		std::string msg = "Array2D: second index out of range";
-		std::cout << msg << std::endl;
-		throw std::out_of_range(msg);
-	    }
-#endif
-	    return p_[index*N+n_];
-	}
+    public:
+	inline Array1D(std::vector<T>& a, size_t n);
+	inline T& operator[](size_t index);
+	inline const T& operator[](size_t index) const;
     };
 
 private:
     static MPI_Datatype typeofT();
+    static void testResult(int result, const std::string& errmsg);
 
 };
 
@@ -110,6 +87,6 @@ private:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.10 2003/10/29 17:18:44 tan2 Exp $
+// $Id: Array2D.h,v 1.11 2003/10/30 22:21:00 tan2 Exp $
 
 // End of file
