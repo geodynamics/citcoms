@@ -85,6 +85,41 @@ void deleteTInlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "SInlet.h"
+
+extern "C" void deleteSInlet(void*);
+
+
+char PyCitcomSExchanger_SInlet_create__doc__[] = "";
+char PyCitcomSExchanger_SInlet_create__name__[] = "SInlet_create";
+
+PyObject * PyCitcomSExchanger_SInlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+
+    if (!PyArg_ParseTuple(args, "OOO:SInlet_create",
+                          &obj1, &obj2, &obj3))
+        return NULL;
+
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+
+    SInlet* inlet = new SInlet(*b, *sink, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteSInlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteSInlet(void* p)
+{
+    delete static_cast<SInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "VTInlet.h"
 
 extern "C" void deleteVTInlet(void*);
@@ -256,6 +291,6 @@ void deleteVTOutlet(void* p)
 
 
 // version
-// $Id: inlets_outlets.cc,v 1.7 2004/05/18 21:21:05 ces74 Exp $
+// $Id: inlets_outlets.cc,v 1.8 2005/02/04 18:51:15 ces74 Exp $
 
 // End of file

@@ -44,6 +44,8 @@ SInlet::SInlet(const Boundary& boundary,
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
+    //setSBCFlag();
+
 }
 
 
@@ -78,6 +80,36 @@ void SInlet::impose()
 
 
 // private functions
+void SInlet::setSBCFlag()
+{
+    // BC: normal velocity and shear traction
+
+    const Boundary& boundary = dynamic_cast<const Boundary&>(mesh);
+    const int m = 1;
+
+    for(int i=0; i<boundary.size(); i++) {
+        int n = boundary.nodeID(i);
+		for(int d=0; d<DIM; ++d) {
+#if 0
+			if(boundary.normal(d,i)) {
+				E->node[m][n] = E->node[m][n] | vbcFlag[d];
+				E->node[m][n] = E->node[m][n] & (~sbcFlag[d]);
+			}
+			else {
+				E->node[m][n] = E->node[m][n] | sbcFlag[d];
+				E->node[m][n] = E->node[m][n] & (~vbcFlag[d]);
+			}
+#endif
+			E->node[m][n] = E->node[m][n] | sbcFlag[d];
+			E->node[m][n] = E->node[m][n] & (~vbcFlag[d]);
+		}
+    }
+
+    // reconstruct ID array to reflect changes in VBC
+    construct_id(E);
+}
+
+
 void SInlet::imposeS()
 {
     const int sidelow[3] = {SIDE_NORTH, SIDE_WEST, SIDE_BOTTOM};
@@ -129,6 +161,6 @@ double SInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SInlet.cc,v 1.1 2005/01/29 00:15:57 ces74 Exp $
+// $Id: SInlet.cc,v 1.2 2005/02/04 18:51:16 ces74 Exp $
 
 // End of file

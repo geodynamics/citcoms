@@ -26,6 +26,12 @@ extern "C"
 PyObject * PyCitcomSExchanger_TInlet_create(PyObject *, PyObject *);
 
 
+extern char PyCitcomSExchanger_SInlet_create__name__[];
+extern char PyCitcomSExchanger_SInlet_create__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_SInlet_create(PyObject *, PyObject *);
+
+
 extern char PyCitcomSExchanger_VTInlet_create__name__[];
 extern char PyCitcomSExchanger_VTInlet_create__doc__[];
 extern "C"
@@ -62,6 +68,6 @@ PyObject * PyCitcomSExchanger_VTOutlet_create(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: inlets_outlets.h,v 1.7 2004/05/18 21:18:13 ces74 Exp $
+// $Id: inlets_outlets.h,v 1.8 2005/02/04 18:51:16 ces74 Exp $
 
 // End of file

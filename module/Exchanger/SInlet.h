@@ -38,6 +38,7 @@ public:
     virtual void impose();
 
 private:
+    void setSBCFlag();
     void imposeS();
 
     double side_tractions(const Exchanger::Array2D<double,Exchanger::STRESS_DIM>& stress,
@@ -48,6 +49,6 @@ private:
 #endif
 
 // version
-// $Id: SInlet.h,v 1.1 2005/01/29 00:15:57 ces74 Exp $
+// $Id: SInlet.h,v 1.2 2005/02/04 18:51:16 ces74 Exp $
 
 // End of file
