@@ -117,6 +117,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_imposeBC__doc__},
 
+    {pyExchanger_storeTimestep__name__,
+     pyExchanger_storeTimestep,
+     METH_VARARGS,
+     pyExchanger_storeTimestep__doc__},
+
     {pyExchanger_exchangeTimestep__name__,
      pyExchanger_exchangeTimestep,
      METH_VARARGS,
@@ -133,6 +138,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.15 2003/09/28 20:45:45 tan2 Exp $
+// $Id: bindings.cc,v 1.16 2003/09/30 01:33:11 tan2 Exp $
 
 // End of file

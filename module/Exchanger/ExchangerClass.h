@@ -53,6 +53,7 @@ public:
 
     void imposeBC();
 
+    void storeTimestep(const double fge_time, const double cge_time);
     double exchangeTimestep(const double);
     int exchangeSignal(const int) const;
 
@@ -82,6 +83,8 @@ protected:
     struct Data loutgoing;
     struct Data lincoming;
 
+    double fge_t, cge_t;
+
     void printDataT(const Data &data) const;
     void printDataV(const Data &data) const;
 
@@ -102,7 +105,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.20 2003/09/29 18:06:26 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.21 2003/09/30 01:33:11 tan2 Exp $
 
 // End of file
 

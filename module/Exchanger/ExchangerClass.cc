@@ -27,6 +27,7 @@ Exchanger::Exchanger(const MPI_Comm communicator,
     boundary(NULL) {
 
     MPI_Comm_rank(comm, const_cast<int*>(&rank));
+    fge_t = cge_t = 0;
 }
 
 
@@ -315,6 +316,12 @@ void Exchanger::imposeBC() {
 }
 
 
+void Exchanger::storeTimestep(const double fge_time, const double cge_time) {
+    fge_t = fge_time;
+    cge_t = cge_time;
+}
+
+
 double Exchanger::exchangeTimestep(const double dt) {
     std::cout << "in Exchanger::exchangeTimestep"
 	      << "  rank = " << rank
@@ -405,7 +412,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.21 2003/09/29 18:06:26 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.22 2003/09/30 01:33:11 tan2 Exp $
 
 // End of file
 

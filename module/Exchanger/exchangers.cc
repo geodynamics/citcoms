@@ -358,6 +358,27 @@ PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_storeTimestep__doc__[] = "";
+char pyExchanger_storeTimestep__name__[] = "storeTimestep";
+
+PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+    double fge_t, cge_t;
+
+    if (!PyArg_ParseTuple(args, "Odd:storeTimestep", &obj, &fge_t, &cge_t))
+	return NULL;
+
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+	                                (PyCObject_AsVoidPtr(obj));
+
+    fge->storeTimestep(fge_t, cge_t);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_exchangeTimestep__doc__[] = "";
 char pyExchanger_exchangeTimestep__name__[] = "exchangeTimestep";
 
@@ -420,6 +441,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.17 2003/09/28 20:45:45 tan2 Exp $
+// $Id: exchangers.cc,v 1.18 2003/09/30 01:33:11 tan2 Exp $
 
 // End of file
