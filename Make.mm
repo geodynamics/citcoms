@@ -31,7 +31,7 @@ OTHER_DIRS = \
     $(DIR_TESTS) \
     $(DIR_EXAMPLES)
 
-RECURSE_DIRS = $(BUILD_DIRS) $(OTHER_DIRS)
+RECURSE_DIRS = $(BUILD_DIRS)
 
 # targets
 
@@ -87,7 +87,7 @@ distclean::
 
 
 # version
-# $Id: Make.mm,v 1.2 2004/06/01 23:59:14 tan2 Exp $
+# $Id: Make.mm,v 1.3 2004/06/24 19:31:44 tan2 Exp $
 
 #
 # End of file
