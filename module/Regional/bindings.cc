@@ -112,7 +112,7 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_general_stokes_solver_log__doc__},
 
-    // methods for advection_diffusion 
+    // methods for advection_diffusion
     {pyRegional_PG_timestep_init__name__,
      pyRegional_PG_timestep_init,
      METH_VARARGS,
@@ -160,11 +160,21 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_output_velo__doc__},
 
+    {pyRegional_output_visc_prepare__name__,
+     pyRegional_output_visc_prepare,
+     METH_VARARGS,
+     pyRegional_output_visc_prepare__doc__},
+
+    {pyRegional_output_visc__name__,
+     pyRegional_output_visc,
+     METH_VARARGS,
+     pyRegional_output_visc__doc__},
+
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.8 2003/05/22 18:32:14 ces74 Exp $
+// $Id: bindings.cc,v 1.9 2003/05/22 23:10:09 tan2 Exp $
 
 // End of file
