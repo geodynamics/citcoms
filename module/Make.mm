@@ -13,9 +13,9 @@ PACKAGE = module
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
-	Exchanger \
 	Full \
-	Regional
+	Regional \
+	Exchanger
 
 RECURSE_DIRS = $(BLD_DIRS)
 
@@ -34,7 +34,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.9 2003/09/08 21:38:38 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/10/28 01:52:56 tan2 Exp $
 
 #
 # End of file
