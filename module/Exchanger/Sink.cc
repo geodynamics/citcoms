@@ -101,12 +101,38 @@ void Sink::sumSourceSize()
 
 void Sink::testMeshNode() const
 {
+    // **** test #1 ****
+    // check missing meshNode_
+
     if(std::find(meshNode_.begin(), meshNode_.end(), numMeshNodes)
        != meshNode_.end()) {
 	journal::firewall_t firewall("Sink");
 	firewall << journal::loc(__HERE__)
 		 << "some node in meshNode not mapped" << journal::end;
 	throw std::domain_error("Sink");
+    }
+
+    // **** test #2 ****
+    // make sure that every mesh node is interpolated
+
+    // sort copy of meshNode_
+    std::vector<int> a;
+    a.assign(meshNode_.begin(), meshNode_.end());
+    std::sort(a.begin(), a.end());
+
+//     for(int i=0; i<a.size(); ++i)
+// 	fprintf(stderr, "sorted meshNode: %d %d\n", i, a.at(i));
+
+    // does meshNode_ contains node [0,mesh.size()) ?
+    std::vector<int>::iterator start = a.begin();
+    for(int index=0; index<numMeshNodes; ++index) {
+	start = std::find(start, a.end(), index);
+	if(start == a.end()) {
+	    journal::firewall_t firewall("Sink");
+	    firewall << journal::loc(__HERE__)
+		     << "mesh node #" << index << " not interpolated" << journal::end;
+	    throw std::domain_error("Sink");
+	}
     }
 }
 
@@ -124,6 +150,6 @@ void Sink::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Sink.cc,v 1.6 2004/03/11 22:42:17 tan2 Exp $
+// $Id: Sink.cc,v 1.7 2004/04/30 18:41:32 tan2 Exp $
 
 // End of file
