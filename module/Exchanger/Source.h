@@ -16,7 +16,6 @@
 #include "utility.h"
 #include "Array2D.h"
 #include "Interpolator.h"
-#include "TractionInterpolator.h"
 
 struct All_variables;
 class BoundedMesh;
@@ -27,7 +26,6 @@ protected:
     MPI_Comm comm;
     const int sink;
     std::auto_ptr<Interpolator> interp;
-    std::auto_ptr<TractionInterpolator> traction_interp;
     Array2D<int,1> meshNode_;
 
 public:
@@ -39,8 +37,6 @@ public:
     inline int size() const {return meshNode_.size();}
     void interpolateT(Array2D<double,1>& T, const All_variables* E) const;
     void interpolateV(Array2D<double,DIM>& V, const All_variables* E) const;
-    void interpolateF(Array2D<double,DIM>& F, All_variables* E) const;
-    void domain_cutout(const All_variables* E) const;
 
     template <class T, int N>
     void sendArray2D(const Array2D<T,N>& array) const;
@@ -107,6 +103,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.5 2003/11/28 22:19:23 ces74 Exp $
+// $Id: Source.h,v 1.6 2003/12/16 19:08:23 tan2 Exp $
 
 // End of file
