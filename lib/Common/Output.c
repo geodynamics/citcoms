@@ -3,18 +3,18 @@
 
 
 #include <stdlib.h>
-
+#include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "output.h"
 
 void output_coord(struct All_variables *);
+void output_mat(struct All_variables *);
 void output_velo(struct All_variables *, int);
 void output_visc_prepare(struct All_variables *, float **);
 void output_visc(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
-void output_mat(struct All_variables *);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -85,7 +85,7 @@ void output_coord(struct All_variables *E)
 
 void output_visc(struct All_variables *E, int cycles)
 {
-  int i, j, m;
+  int i, j;
   char output_file[255];
   FILE *fp1;
   int lev = E->mesh.levmax;
@@ -172,25 +172,58 @@ void output_surf_botm(struct All_variables *E, int cycles)
 }
 
 
-void output_ave_r(struct All_variables *E, int cycles)
+void output_avg_r(struct All_variables *E, int cycles)
 {
-  int j;
+  /* horizontal average output of temperature and rms velocity*/
+  void return_horiz_ave_f();
+
+  int m, i, j;
+  float *S1[NCS],*S2[NCS],*S3[NCS];
   char output_file[255];
-  FILE* fp2;
+  FILE *fp1;
 
   // compute horizontal average here....
 
-  // only the first nprocz processors need to output
-  if (E->parallel.me<E->parallel.nprocz)  {
-    sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp2 = output_open(output_file);
-
-    for(j=1;j<=E->lmesh.noz;j++)  {
-      fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
-    }
-    fclose(fp2);
+  for(m=1;m<=E->sphere.caps_per_proc;m++)      {
+    S1[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    S2[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    S3[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
   }
 
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    for(i=1;i<=E->lmesh.nno;i++) {
+      S1[m][i] = E->T[m][i];
+      S2[m][i] = E->sphere.cap[m].V[1][i]*E->sphere.cap[m].V[1][i]
+          	+ E->sphere.cap[m].V[2][i]*E->sphere.cap[m].V[2][i];
+      S3[m][i] = E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i];
+    }
+  }
+
+  return_horiz_ave_f(E,S1,E->Have.T);
+  return_horiz_ave_f(E,S2,E->Have.V[1]);
+  return_horiz_ave_f(E,S3,E->Have.V[2]);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    free((void *)S1[m]);
+    free((void *)S2[m]);
+    free((void *)S3[m]);
+  }
+
+  for (i=1;i<=E->lmesh.noz;i++) {
+      E->Have.V[1][i] = sqrt(E->Have.V[1][i]);
+      E->Have.V[2][i] = sqrt(E->Have.V[2][i]);
+  }
+
+  // only the first nprocz processors need to output
+
+  if (E->parallel.me<E->parallel.nprocz)  {
+    sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp1=fopen(output_file,"w");
+    for(j=1;j<=E->lmesh.noz;j++)  {
+        fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+    }
+    fclose(fp1);
+  }
 
   return;
 }
@@ -242,55 +275,4 @@ void output_pressure(struct All_variables *E, int cycles)
 
 
 
-void output_horizontal_avg(struct All_variables *E, int cycles)
-{
-  /* horizontal average output of temperature and rms velocity*/
-  void return_horiz_ave_f();
-
-  int m, i, j;
-  float *S1[NCS],*S2[NCS],*S3[NCS];
-  char output_file[255];
-  FILE *fp1;
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)      {
-    S1[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    S2[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    S3[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-  }
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    for(i=1;i<=E->lmesh.nno;i++) {
-      S1[m][i] = E->T[m][i];
-      S2[m][i] = E->sphere.cap[m].V[1][i]*E->sphere.cap[m].V[1][i]
-          	+ E->sphere.cap[m].V[2][i]*E->sphere.cap[m].V[2][i];
-      S3[m][i] = E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i];
-    }
-  }
-
-  return_horiz_ave_f(E,S1,E->Have.T);
-  return_horiz_ave_f(E,S2,E->Have.V[1]);
-  return_horiz_ave_f(E,S3,E->Have.V[2]);
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *)S1[m]);
-    free((void *)S2[m]);
-    free((void *)S3[m]);
-  }
-
-  for (i=1;i<=E->lmesh.noz;i++) {
-      E->Have.V[1][i] = sqrt(E->Have.V[1][i]);
-      E->Have.V[2][i] = sqrt(E->Have.V[2][i]);
-  }
-
-  if (E->parallel.me<E->parallel.nprocz)  {
-    sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp1=fopen(output_file,"w");
-    for(j=1;j<=E->lmesh.noz;j++)  {
-        fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
-    }
-    fclose(fp1);
-  }
-
-  return;
-}
 
