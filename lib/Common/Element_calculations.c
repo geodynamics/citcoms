@@ -61,12 +61,16 @@ void assemble_forces(E,penalty)
     for (e=1;e<=nel;e++)  {
       get_elt_f(E,e,elt_f,1,m);
       add_force(E, e, elt_f, m);
-    }       /* end for e */
+    }
 
     /* for traction bc */
     for(i=1; i<=E->boundary.nel; i++) {
       e = E->boundary.element[m][i];
-      get_elt_tr(E, i, elt_f, m);
+
+      for(a=0;a<24;a++) elt_f[a] = 0.0;
+      for(a=SIDE_TOP; a<=SIDE_TOP; a++)
+	get_elt_tr(E, i, a, elt_f, m);
+
       add_force(E, e, elt_f, m);
     }
   }       /* end for m */
@@ -747,67 +751,61 @@ void get_elt_f(E,el,elt_f,bcs,m)
   Function to create the element force vector due to stress b.c.
   ================================================================= */
 
-void get_elt_tr(struct All_variables *E, int bel,
-                double elt_tr[24], int m)
+void get_elt_tr(struct All_variables *E, int bel, int side,
+		double elt_tr[24], int m)
 {
   void construct_side_c3x3matrix_el();
 
   const int dims=E->mesh.nsd;
-  const int ends=enodes[dims];
   const int ends1=enodes[dims-1];
-  const int oned = onedvpoints[E->mesh.nsd];
+  const int oned = onedvpoints[dims];
 
   struct CC Cc;
   struct CCX Ccx;
 
-  const unsigned sbcflag[4] = {0,SBX,SBY,SBZ};
+  const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
 
-  double traction[24],traction_at_gs[4][5], tmp;
-  int j, b, side, p, k, a, nodea, d;
+  double traction[4][5],traction_at_gs[4][5], tmp;
+  int j, b, p, k, a, nodea, d;
   int el = E->boundary.element[m][bel];
+  int flagged;
+  int found = 0;
 
-  for(p=0;p<loc_mat_size[dims];p++) elt_tr[p] = 0.0;
-
-  for(a=1;a<=ends;a++)  {
-    nodea = E->ien[m][el].node[a];
+  for(a=1;a<=ends1;a++)  {
+    nodea = E->ien[m][el].node[sidenodes[side][a]];
     for(d=1;d<=dims;d++)  {
-      p = dims*(a-1)+d-1;
-      traction[p] = ( (E->node[m][nodea] & sbcflag[d]) ?
-                      E->sphere.cap[m].VB[d][nodea] : 0.0 );
+      flagged = E->node[m][nodea] & sbc_flag[d];
+      found |= flagged;
+      traction[d][a] = ( flagged ? E->sphere.cap[m].VB[d][nodea] : 0.0 );
     }
   }
 
-   /*compute traction at each int point */
-  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++) {
-    construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
-                                 E->mesh.levmax,m,0,side);
+  /* skip the following computation if no sbc_flag is set */
+  if(!found) return;
 
-    for(j=1;j<=oned;j++)
-      for(d=1;d<=dims;d++)
-        traction_at_gs[d][j] = 0.0;
+   /* compute traction at each int point */
+  construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
+			       E->mesh.levmax,m,0,side);
 
-    for(j=1;j<=ends1;j++) {
-      a = sidenodes[side][j];
-      for(d=1;d<=dims;d++) {
-        p = dims*(a-1)+d-1;
-        for(k=1;k<=oned;k++)
-          traction_at_gs[d][k] += traction[p] * E->M.vpt[GMVINDEX(j,k)] ;
-      }
+  for(k=1;k<=oned;k++)
+    for(d=1;d<=dims;d++) {
+      traction_at_gs[d][k] = 0.0;
+      for(j=1;j<=ends1;j++)
+	traction_at_gs[d][k] += traction[d][j] * E->M.vpt[GMVINDEX(j,k)] ;
     }
 
-    for(j=1;j<=ends1;j++) {
-      a = sidenodes[side][j];
-      for(d=1;d<=dims;d++) {
-        p = dims*(a-1)+d-1;
-        for(k=1;k<=oned;k++) {
-          tmp = 0.0;
-          for(b=1;b<=dims;b++)
-            tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
+  for(j=1;j<=ends1;j++) {
+    a = sidenodes[side][j];
+    for(d=1;d<=dims;d++) {
+      p = dims*(a-1)+d-1;
+      for(k=1;k<=oned;k++) {
+	tmp = 0.0;
+	for(b=1;b<=dims;b++)
+	  tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
-	  elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-	    * E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
+	elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
+	  * E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
 
-        }
       }
     }
   }
@@ -882,6 +880,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.13 2004/04/10 00:49:34 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.14 2004/04/12 23:23:57 tan2 Exp $ */
 
 /* End of file  */
