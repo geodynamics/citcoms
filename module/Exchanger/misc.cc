@@ -57,6 +57,8 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
 {
     All_variables *E = new All_variables;
 
+    E->parallel.nproc = 1;
+
     E->mesh.nox = 4;
     E->mesh.noy = 4;
     E->mesh.noz = 3;
@@ -81,6 +83,8 @@ char pyExchanger_CoarsereturnE__name__[] = "CoarsereturnE";
 PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 {
     All_variables *E = new All_variables;
+
+    E->parallel.nproc = 12;
 
     E->mesh.nox = 4;
     E->mesh.noy = 4;
@@ -249,6 +253,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.11 2003/09/27 00:09:56 tan2 Exp $
+// $Id: misc.cc,v 1.12 2003/09/27 20:16:25 tan2 Exp $
 
 // End of file
