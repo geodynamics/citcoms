@@ -87,13 +87,17 @@ void InteriorImposingSink::imposeVICP()
 {
     journal::debug_t debugVICP("imposeVICP");
     debugVICP << journal::loc(__HERE__);
-
+    double refvel;
+    
+    refvel = E->data.therm_diff/(E->data.layer_km*1000);
+    
     const int mm = 1;
-
+    
     for(int i=0; i<sink.size(); i++) {
 	int n = interior.nodeID(sink.meshNode(i));
         for(int d=0; d<DIM; d++)
-            E->sphere.cap[mm].VB[d+1][n]=vic[d][i];
+// Non-dimensionalizing the values of velocities received from Snac 
+            E->sphere.cap[mm].VB[d+1][n]=vic[d][i]/refvel;
         
 	debugVICP << E->T[mm][n] << journal::newline;
     }
@@ -133,6 +137,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.6 2003/11/25 18:41:16 puru Exp $
+// $Id: InteriorImposing.cc,v 1.7 2003/12/04 00:28:51 puru Exp $
 
 // End of file

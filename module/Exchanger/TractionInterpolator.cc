@@ -57,7 +57,10 @@ void TractionInterpolator::InterpolateTraction(Array2D<double,DIM>& target,
 	for(int k=0; k< NODES_PER_ELEMENT; k++) {
 	    int node = E->ien[mm][n1].node[k+1];
 	    for(int d=0; d<DIM; d++) {
-		target[d][i] += shape_[k][i] * gtraction[d][node];
+
+// multiplied by ref_viscosity*therm_diff to get dimensionalized forces
+                
+		target[d][i] += shape_[k][i] * gtraction[d][node]*E->data.ref_viscosity*E->data.therm_diff;
 	    }
 	}
 // 	std::cout << target[0][i] << " " << target[1][i] << " "
@@ -748,6 +751,6 @@ void TractionInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: TractionInterpolator.cc,v 1.1 2003/11/28 22:34:16 ces74 Exp $
+// $Id: TractionInterpolator.cc,v 1.2 2003/12/04 00:28:51 puru Exp $
 
 // End of file
