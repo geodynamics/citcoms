@@ -38,11 +38,11 @@ public:
     inline const Array2D<double,DIM>& getX() const {return X_;}
 
     template <class T, int N>
-    void recvArray2D(Array2D<T,N>& array) const;
+    void recv(Array2D<T,N>& array) const;
 
     template <class T1, int N1, class T2, int N2>
-    void recvArray2D(Array2D<T1,N1>& array1,
-		     Array2D<T2,N2>& array2) const;
+    void recv(Array2D<T1,N1>& array1,
+	      Array2D<T2,N2>& array2) const;
 
 private:
     void checkCommSize(int nsrc) const;
@@ -57,7 +57,7 @@ private:
 
 
 template <class T, int N>
-void Sink::recvArray2D(Array2D<T,N>& array) const
+void Sink::recv(Array2D<T,N>& array) const
 {
 #ifdef DEBUG
     if(size() != array.size()) {
@@ -83,8 +83,8 @@ void Sink::recvArray2D(Array2D<T,N>& array) const
 
 
 template <class T1, int N1, class T2, int N2>
-void Sink::recvArray2D(Array2D<T1,N1>& array1,
-		       Array2D<T2,N2>& array2) const
+void Sink::recv(Array2D<T1,N1>& array1,
+	        Array2D<T2,N2>& array2) const
 {
 #ifdef DEBUG
     if(size() != array1.size() || size() != array2.size()) {
@@ -116,6 +116,6 @@ void Sink::recvArray2D(Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Sink.h,v 1.4 2004/01/08 02:29:37 tan2 Exp $
+// $Id: Sink.h,v 1.5 2004/03/11 22:36:47 tan2 Exp $
 
 // End of file
