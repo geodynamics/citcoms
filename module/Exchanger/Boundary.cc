@@ -154,10 +154,11 @@ void Boundary::init(const All_variables *E) {
 
 
 void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
-    std::cout << "in Boundary::mapCoarseGrid" << std::endl;
 
-    int ind,n;    
-    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3];
+    std::cout << "\n\nin Boundary::mapCoarseGrid\n\n" << std::endl;
+    
+    int ind,n,in;    
+    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xmin[3],xmax[3],tshape;
     int nsub[]={0, 2, 3, 7,
 		0, 1, 2, 5, 
 		4, 7, 5, 0, 
@@ -165,8 +166,12 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
 		5, 7, 2, 0};
   
     for(int i=0; i<size; i++)
+    {
+        
 	bid2proc[i] = E->parallel.nproc;  // nproc is always an illegal rank
-
+        bid2elem[i] = 0;
+    }
+    
     for(int i=0; i< size; i++) {
 	for(int j=0; j< dim; j++)xt[j]=X[j][i];
 	// loop over 5 sub tets in a brick element
@@ -180,6 +185,26 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                         xc[j*dim+k]=E->sx[mm][k+1][gnode];
                     }
 		}
+                in=0;
+                for(int k=0;k<3;k++)
+                {                    
+                    xmin[k]=1.e27;
+                    xmax[k]=-1.e27;
+                }
+                
+                for(int j=0;j<8;j++)
+                {                  
+                    for(int k=0;k<3;k++)
+                    {                        
+                        if(xc[j*3+k] > xmin[k])xmin[k]=xc[j*3+k];
+                        if(xc[j*3+k] > xmax[k])xmax[k]=xc[j*3+k];
+                    }
+                }
+                if((xt[0]>=xmin[0])&&(xt[0]<=xmax[0])
+                   &&(xt[1]>=xmin[1])&&(xt[1]<=xmax[1])
+                   &&(xt[0]>=xmin[2])&&(xt[0]<=xmax[2]))in=1;                
+                if(in==0)continue;
+                
                 for(int k=0; k < 5; k++) {
                     for(int m=0; m < dim; m++) {
                         x1[m]=xc[nsub[k*4]*dim+m];
@@ -192,7 +217,7 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                     det[1]=Tetrahedronvolume(x3,x4,x1,xt);
                     det[2]=Tetrahedronvolume(x1,x4,x2,xt);
                     det[3]=Tetrahedronvolume(x1,x2,x3,xt);
-                    if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
+                    if(dett < 0) std::cout << " Determinent evaluation is wrong " << in << std::endl;
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
                     bid2elem[i]=n+1;
@@ -202,11 +227,16 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
                     shape[i*8+nsub[k*4+3]]=det[3]/dett;
-                                       
+                    tshape=0.0;
+                    for(int j=0;j<8;j++)tshape+=shape[i*8+j];
+                    if(fabs(tshape-1.) > 1.e-10)std::cout << "shape sum != 1."
+                                                          << std::endl;                    
                     break;
                 }                
                 if(ind) break;          
             }
+        if(bid2elem[i]==0) std::cout << "node" << i <<"did not find element "<< std::endl;
+        
     }
     //printBid2proc();
     //printBid2elem();
@@ -296,7 +326,7 @@ void Boundary::mapFineGrid(const All_variables *E) {
 
 
 void Boundary::testMapping(const All_variables *E) const {
-    double xc[24], xi[3], xt[3];
+    double xc[24], xi[3], xt[3],tshape;
 
     for(int i=0; i< size; i++) {
         for(int j=0; j< dim; j++) xt[j]=X[j][i];
@@ -317,8 +347,12 @@ void Boundary::testMapping(const All_variables *E) const {
 	//std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
         double norm = 0.0;
         for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
-        if(norm > 1.e-10) {            
-            std::cout << "\n in Boundary::mapCoarseGrid for bid2elem interpolation functions are wrong " << norm << std::endl;
+        if(norm > 1.e-10) {
+            tshape=0.0;
+            for(int j=0; j < 8; j++) tshape+=shape[i*8+j];
+            std::cout << "\n in Boundary::testMappingfor bid2elem interpolation functions are wrong " << norm <<std::endl;
+            std::cout << "node #"<< i <<"tshape" << tshape <<std::endl;
+            std::cout << xi[0] <<" " <<xt[0] <<" "<< xi[1] <<" " <<xt[1] << " "<<xi[2] <<" " <<xt[2] << std::endl;
         }
     }
 }
@@ -497,6 +531,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.26 2003/09/29 02:04:13 puru Exp $
+// $Id: Boundary.cc,v 1.27 2003/09/29 18:34:23 puru Exp $
 
 // End of file
