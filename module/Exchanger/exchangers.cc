@@ -35,14 +35,16 @@ char PyCitcomSExchanger_createBoundary__name__[] = "createBoundary";
 PyObject * PyCitcomSExchanger_createBoundary(PyObject *, PyObject *args)
 {
     PyObject *obj1;
+    bool excludeTop, excludeBottom;
 
-    if (!PyArg_ParseTuple(args, "O:createBoundary", &obj1))
+    if (!PyArg_ParseTuple(args, "Obb:createBoundary",
+			  &obj1, excludeTop, excludeBottom))
 	return NULL;
 
     All_variables* E = static_cast<All_variables*>
 	                          (PyCObject_AsVoidPtr(obj1));
 
-    Boundary* b = new Boundary(E);
+    Boundary* b = new Boundary(E, excludeTop, excludeBottom);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(b->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(b, deleteBoundary);
@@ -244,6 +246,6 @@ void deleteCitcomSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.46 2004/05/11 07:55:30 tan2 Exp $
+// $Id: exchangers.cc,v 1.47 2004/05/28 21:26:34 tan2 Exp $
 
 // End of file
