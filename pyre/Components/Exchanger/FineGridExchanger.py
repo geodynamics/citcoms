@@ -24,7 +24,7 @@ class FineGridExchanger(Exchanger):
         self.exchanger = self.module.createFineGridExchanger(
                                      solver.communicator.handle(),
                                      solver.intercomm.handle(),
-                                     solver.leaderRank,
+                                     solver.leader,
                                      solver.localLeader,
                                      solver.remoteLeader,
                                      solver.all_variables
@@ -54,29 +54,9 @@ class FineGridExchanger(Exchanger):
         return
 
 
-    def gather(self):
-        self.module.gather(self.exchanger)
-        return
-
-
-    def distribute(self):
-        self.module.distribute(self.exchanger)
-        return
-
-
     def initTemperature(self):
         # receive temperture field from CGE
         self.module.receiveTemperature(self.exchanger)
-        return
-
-
-    def exchangeVelocities(self):
-        self.module.receiveVelocities(self.exchanger)
-        return
-
-
-    def imposeBC(self):
-        self.module.imposeBC(self.exchanger)
         return
 
 
@@ -92,8 +72,10 @@ class FineGridExchanger(Exchanger):
 
 
     def applyBoundaryConditions(self):
-        self.module.gather(self.exchanger)
-        self.module.send(self.exchanger)
+        self.module.receiveVelocities(self.exchanger)
+        return
+        self.module.distribute(self.exchanger)
+        self.module.imposeBC(self.exchanger)
         return
 
 
@@ -125,6 +107,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.13 2003/09/27 20:24:46 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.14 2003/09/28 00:35:11 tan2 Exp $"
 
 # End of file

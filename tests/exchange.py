@@ -42,36 +42,18 @@ class TestExchanger(Application):
         exchanger.findBoundary()
         print exchanger.name, ": boundary found"
 
-        # assemble bid2crseelem
-        if layout.coarse:
-            exchanger.getBid2crseelem()
-            print exchanger.name, ": bid2crseelem assembled"
-
         # create Data arrays
         exchanger.createDataArrays()
-        print "incoming/outgoing structres created"
+        print "incoming/outgoing structures created"
 
-        # testing gather
-        exchanger.gather()
-        print exchanger.name, ": gather worked"
-
-        # interpolate only in Coarse Grid
-        if layout.coarse:
-            exchanger.interpolate()
-            print exchanger.name, ": interpolation done."
+        # testing applyBoundaryConditions
+        exchanger.applyBoundaryConditions()
+        print exchanger.name, ": applyBoundaryConditions worked"
+        return
 
         # testing initTemperature
-        exchanger.initTemperature()
-        print exchanger.name, ": temperature transferred"
-
-        # testing send/receiveVelocities
-        exchanger.exchangeVelocities()
-        print exchanger.name, ": velocities transferred"
-
-        # testing imposeBC
-        if layout.fine:
-            exchanger.imposeBC()
-            print exchanger.name, ": BC imposed successfully"
+        #exchanger.initTemperature()
+        #print exchanger.name, ": temperature transferred"
 
         try:
             # success if exchanger is a FGE
@@ -116,11 +98,12 @@ class TestExchanger(Application):
         self.intercomm = layout.intercomm
         self.rank = layout.rank
         self.nodes = layout.nodes
+        self.leader = layout.leader
         self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
-        print "%s exchanger: rank=%d  localLeader=%d  remoteLeader=%d" % (
-              self.exchanger.name, self.rank,
+        print "%s exchanger: rank=%d  leader=%d  localLeader=%d  remoteLeader=%d" % (
+              self.exchanger.name, self.rank, self.leader,
               self.localLeader, self.remoteLeader)
 
         return
@@ -167,6 +150,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.12 2003/09/26 19:04:35 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.13 2003/09/28 00:35:11 tan2 Exp $"
 
 # End of file

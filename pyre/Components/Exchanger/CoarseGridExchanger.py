@@ -16,7 +16,7 @@ class CoarseGridExchanger(Exchanger):
         self.exchanger = self.module.createCoarseGridExchanger(
                                      solver.communicator.handle(),
                                      solver.intercomm.handle(),
-                                     solver.leaderRank,
+                                     solver.leader,
                                      solver.localLeader,
                                      solver.remoteLeader,
                                      solver.all_variables
@@ -43,29 +43,9 @@ class CoarseGridExchanger(Exchanger):
         return
 
 
-    def gather(self):
-        self.module.gather(self.exchanger)
-        return
-
-
-    def distribute(self):
-        self.module.distribute(self.exchanger)
-        return
-
-
-    def interpolate(self):
-        self.module.interpolate(self.exchanger)
-        return
-
-
     def initTemperature(self):
         # send temperture field to FGE
         self.module.sendTemperature(self.exchanger)
-        return
-
-
-    def exchangeVelocities(self):
-        self.module.sendVelocities(self.exchanger)
         return
 
 
@@ -79,8 +59,8 @@ class CoarseGridExchanger(Exchanger):
 
 
     def applyBoundaryConditions(self):
-        self.module.receive(self.exchanger)
-        self.module.distribute(self.exchanger)
+        self.module.gather(self.exchanger)
+        self.module.sendVelocities(self.exchanger)
         return
 
 
@@ -104,6 +84,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.13 2003/09/27 20:24:46 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.14 2003/09/28 00:35:11 tan2 Exp $"
 
 # End of file
