@@ -66,9 +66,6 @@ public:
     void broadcast(const MPI_Comm& comm, int broadcaster);
     void broadcast(const MPI_Comm& comm, int broadcaster) const;
 
-    MPI_Status wait(const MPI_Request& request) const;
-    std::vector<MPI_Status> wait(const std::vector<MPI_Request>& request) const;
-
     void print(const std::string& prefix="Array2D") const;
 
     class Array1D;  // forward declaration
@@ -90,8 +87,6 @@ public:
 private:
     static const int SIZETAG_ = 74;
     static const int TAG_ = 75;
-    static MPI_Datatype typeofT();
-    static void testResult(int result, const std::string& errmsg);
 
 };
 
@@ -101,6 +96,6 @@ private:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.13 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Array2D.h,v 1.14 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

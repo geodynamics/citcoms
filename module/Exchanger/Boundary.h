@@ -23,6 +23,7 @@ public:
     virtual ~Boundary() {};
 
 private:
+    void initBBox(const All_variables *E);
     void initX(const All_variables *E);
     void appendX(const All_variables *E, int m, int node);
 
@@ -32,6 +33,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.22 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Boundary.h,v 1.23 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

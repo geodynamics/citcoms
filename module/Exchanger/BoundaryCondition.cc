@@ -25,12 +25,15 @@ extern "C" {
 //////////////////////////////////////////////////////////////////////////////
 
 
-BoundaryConditionSink::BoundaryConditionSink(const Boundary& b, const Sink& s,
+BoundaryConditionSink::BoundaryConditionSink(const MPI_Comm& c,
+					     const Boundary& b,
+					     const Sink& s,
 					     All_variables* e) :
+    comm(c),
     E(e),
     boundary(b),
     sink(s),
-    awnormal(boundary, sink, E),
+    awnormal(comm, boundary, sink, E),
     vbc(sink.size()),
     old_vbc(sink.size()),
     tbc(sink.size()),
@@ -63,7 +66,8 @@ void BoundaryConditionSink::recvTandV()
     tbc.print("TBC");
     vbc.print("VBC");
 
-    //imposeConstrain();
+    imposeConstraint();
+    vbc.print("VBC_i");
 }
 
 
@@ -111,7 +115,7 @@ void BoundaryConditionSink::setTBCFlag()
 
 void BoundaryConditionSink::imposeConstraint()
 {
-    awnormal.imposeConstraint(vbc);
+    awnormal.imposeConstraint(vbc, comm, sink);
 }
 
 
@@ -137,10 +141,10 @@ void BoundaryConditionSink::imposeVBC()
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
-	int n = sink.meshNode(i);
+	int n = boundary.meshID(sink.meshNode(i));
 	for(int d=0; d<DIM; d++)
 	    E->sphere.cap[m].VB[d+1][n] = N1 * old_vbc[d][i]
-		                        + N2 * vbc[d][i];
+		+ N2 * vbc[d][i];
 	debugBC << E->sphere.cap[m].VB[1][n] << " "
 		<< E->sphere.cap[m].VB[2][n] << " "
 		<< E->sphere.cap[m].VB[3][n] << journal::newline;
@@ -184,6 +188,6 @@ void BoundaryConditionSource::sendTandV()
 
 
 // version
-// $Id: BoundaryCondition.cc,v 1.2 2003/11/07 01:20:02 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.3 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

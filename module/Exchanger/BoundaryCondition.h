@@ -21,6 +21,7 @@ class Source;
 
 
 class BoundaryConditionSink {
+    MPI_Comm comm;
     All_variables* E;
     const Boundary& boundary;
     const Sink& sink;
@@ -33,7 +34,9 @@ class BoundaryConditionSink {
     double cge_t;
 
 public:
-    BoundaryConditionSink(const Boundary& boundary, const Sink& sink,
+    BoundaryConditionSink(const MPI_Comm& comm,
+			  const Boundary& boundary,
+			  const Sink& sink,
 			  All_variables* E);
     ~BoundaryConditionSink() {};
 
@@ -71,6 +74,6 @@ private:
 #endif
 
 // version
-// $Id: BoundaryCondition.h,v 1.2 2003/11/07 01:20:02 tan2 Exp $
+// $Id: BoundaryCondition.h,v 1.3 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

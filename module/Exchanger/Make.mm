@@ -27,6 +27,7 @@ PROJ_SRCS = \
 	BoundedBox.cc \
 	BoundedMesh.cc \
 	Interior.cc \
+	InteriorImposing.cc \
 	Interpolator.cc \
 	Sink.cc \
 	Source.cc \
@@ -34,10 +35,11 @@ PROJ_SRCS = \
 	exceptions.cc \
 	exchangers.cc \
 	initTemperature.cc \
-	misc.cc
+	misc.cc \
+	utility.cc
 
 
 # version
-# $Id: Make.mm,v 1.7 2003/11/07 01:08:01 tan2 Exp $
+# $Id: Make.mm,v 1.8 2003/11/10 21:55:28 tan2 Exp $
 
 # End of file

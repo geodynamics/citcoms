@@ -19,10 +19,8 @@ class Interior : public BoundedMesh {
 
 public:
     Interior();
-    explicit Interior(const BoundedBox& remoteBBox, const All_variables* E);
+    Interior(const BoundedBox& remoteBBox, const All_variables* E);
     virtual ~Interior() {};
-
-    virtual void broadcast(const MPI_Comm& comm, int broadcaster);
 
 };
 
@@ -30,6 +28,6 @@ public:
 #endif
 
 // version
-// $Id: Interior.h,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Interior.h,v 1.2 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

@@ -12,9 +12,10 @@
 
 #include <memory>
 #include <vector>
+#include "mpi.h"
+#include "utility.h"
 #include "Array2D.h"
 #include "Interpolator.h"
-#include "mpi.h"
 
 
 struct All_variables;
@@ -59,7 +60,7 @@ void Source::sendArray2D(const Array2D<T,N>& array) const
 	MPI_Request request;
 	// are you sure size() == array.size()?
 	array.send(comm, sink, 0, array.size(), request);
-	array.wait(request);
+	util::waitRequest(request);
     }
 }
 
@@ -78,7 +79,7 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 	request.push_back(MPI_Request());
 	array2.send(comm, sink, 0, array2.size(), request.back());
 
-	array1.wait(request);
+	util::waitRequest(request);
     }
 }
 
@@ -86,6 +87,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Source.h,v 1.2 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

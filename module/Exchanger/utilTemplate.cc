@@ -8,39 +8,50 @@
 //
 
 #include <portinfo>
+#include "journal/journal.h"
+#include "utility.h"
 #include "Array2D.h"
-#include "utilTemplate.h"
 
 
 template <class T>
-void broadcast(const MPI_Comm& comm, int broadcaster, T& data)
+void util::broadcast(const MPI_Comm& comm, int broadcaster, T& data)
 {
-    MPI_Bcast(&data, 1, datatype(data), broadcaster, comm);
+    int size;
+    MPI_Comm_size(comm, &size);
+    if(size == 1) return;
+
+    int result = MPI_Bcast(&data, 1, datatype(data), broadcaster, comm);
+    testResult(result, "broadcast error!");
 }
 
 
 template <class T, int N>
-void broadcast(const MPI_Comm& comm, int broadcaster, Array2D<T,N>& data)
+void util::broadcast(const MPI_Comm& comm, int broadcaster, Array2D<T,N>& data)
 {
+    int size;
+    MPI_Comm_size(comm, &size);
+    if(size == 1) return;
+
     data.broadcast(comm, broadcaster);
 }
 
 
 template <class T>
-void exchange(const MPI_Comm& comm, int target, T& data)
+void util::exchange(const MPI_Comm& comm, int target, T& data)
 {
     const int tag = 352;
     MPI_Status status;
 
-    MPI_Sendrecv_replace(&data, 1, datatype(data),
-			 target, tag,
-			 target, tag,
-			 comm, &status);
+    int result = MPI_Sendrecv_replace(&data, 1, datatype(data),
+				      target, tag,
+				      target, tag,
+				      comm, &status);
+    testResult(result, "exchange error!");
 }
 
 
 template <class T, int N>
-void exchange(const MPI_Comm& comm, int target, Array2D<T,N>& data)
+void util::exchange(const MPI_Comm& comm, int target, Array2D<T,N>& data)
 {
     // non-blocking send
     MPI_Request request;
@@ -50,12 +61,29 @@ void exchange(const MPI_Comm& comm, int target, Array2D<T,N>& data)
     // blocking receive
     data.receive(comm, target);
 
-    data2.wait(request);
+    waitRequest(request);
 }
 
 
 template <class T>
-MPI_Datatype datatype(const T& data)
+void util::gatherSum(const MPI_Comm& comm, T& data)
+{
+    int size;
+    MPI_Comm_size(comm, &size);
+    if(size == 1) return;
+
+    const int root = 0;
+    T tmp(data);
+    int result = MPI_Reduce(&tmp, &data, 1, datatype(data),
+			    MPI_SUM, root, comm);
+    testResult(result, "gatherSum error!");
+
+    broadcast(comm, root, data);
+}
+
+
+template <class T>
+MPI_Datatype util::datatype(const T&)
 {
     if (typeid(T) == typeid(double))
 	return MPI_DOUBLE;
@@ -76,7 +104,8 @@ MPI_Datatype datatype(const T& data)
 }
 
 
+
 // version
-// $Id: utilTemplate.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: utilTemplate.cc,v 1.2 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

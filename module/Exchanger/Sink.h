@@ -12,6 +12,7 @@
 
 #include <vector>
 #include "mpi.h"
+#include "utility.h"
 
 struct All_variables;
 class BoundedMesh;
@@ -66,7 +67,7 @@ void Sink::recvArray2D(Array2D<T,N>& array) const
 			  numSrcNodes[i], request.back());
 	}
 
-    array.wait(request);
+    util::waitRequest(request);
 }
 
 
@@ -88,13 +89,13 @@ void Sink::recvArray2D(Array2D<T1,N1>& array1,
 			   numSrcNodes[i], request.back());
 	}
 
-    array1.wait(request);
+    util::waitRequest(request);
 }
 
 
 #endif
 
 // version
-// $Id: Sink.h,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Sink.h,v 1.2 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <stdexcept>
 #include "journal/journal.h"
+#include "utilTemplate.h"
+#include "utility.h"
 
 
 template <class T, int N>
@@ -203,7 +205,7 @@ void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver, int n) const
 {
     int result = MPI_Send(&n, 1, MPI_INT,
 			  receiver, SIZETAG_, comm);
-    testResult(result, "sendSize error!");
+    util::testResult(result, "sendSize error!");
 }
 
 
@@ -214,7 +216,7 @@ int Array2D<T,N>::receiveSize(const MPI_Comm& comm, int sender) const
     MPI_Status status;
     int result = MPI_Recv(&n, 1, MPI_INT,
 			  sender, SIZETAG_, comm, &status);
-    testResult(result, "receiveSize error!");
+    util::testResult(result, "receiveSize error!");
     return n;
 }
 
@@ -224,7 +226,7 @@ int Array2D<T,N>::broadcastSize(const MPI_Comm& comm, int broadcaster) const
 {
     int n = size();
     int result = MPI_Bcast(&n, 1, MPI_INT, broadcaster, comm);
-    testResult(result, "broadcastSize error!");
+    util::testResult(result, "broadcastSize error!");
     return n;
 }
 
@@ -235,9 +237,10 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver) const
 {
     sendSize(comm, receiver);
 
-    int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), typeofT(),
+    int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(),
+			  util::datatype(T()),
 			  receiver, TAG_, comm);
-    testResult(result, "send error!");
+    util::testResult(result, "send error!");
 }
 
 
@@ -257,9 +260,10 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
     // non-blocking send the vector[begin ~ begin+sendsize)
     // the caller must guarantee a_ is of sufficent size
 {
-    int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N, typeofT(),
-			   receiver, TAG_, comm, &request);
-    testResult(result, "send error!");
+    int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N,
+			   util::datatype(T()), receiver,
+			   TAG_, comm, &request);
+    util::testResult(result, "send error!");
 }
 
 
@@ -271,9 +275,9 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender)
     resize(receiveSize(comm, sender));
 
     MPI_Status status;
-    int result = MPI_Recv(&a_[0], a_.size(), typeofT(),
+    int result = MPI_Recv(&a_[0], a_.size(), util::datatype(T()),
 			  sender, TAG_, comm, &status);
-    testResult(result, "receive error!");
+    util::testResult(result, "receive error!");
 }
 
 
@@ -293,9 +297,9 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
     // non-blocking receive the vector[begin ~ begin+recvsize)
     // the caller must guarantee a_ is of sufficent size
 {
-    int result = MPI_Irecv(&a_[begin*N], recvsize*N, typeofT(),
+    int result = MPI_Irecv(&a_[begin*N], recvsize*N, util::datatype(T()),
 			   sender, TAG_, comm, &request);
-    testResult(result, "receive error!");
+    util::testResult(result, "receive error!");
 }
 
 
@@ -305,9 +309,9 @@ void Array2D<T,N>::broadcast(const MPI_Comm& comm, int broadcaster)
     // resize to accommodate incoming data
     resize(broadcastSize(comm, broadcaster));
 
-    int result = MPI_Bcast(&a_[0], a_.size(), typeofT(),
+    int result = MPI_Bcast(&a_[0], a_.size(), util::datatype(T()),
 			   broadcaster, comm);
-    testResult(result, "broadcast error!");
+    util::testResult(result, "broadcast error!");
 }
 
 
@@ -316,33 +320,10 @@ void Array2D<T,N>::broadcast(const MPI_Comm& comm, int broadcaster) const
 {
     broadcastSize(comm, broadcaster);
 
-    int result = MPI_Bcast(const_cast<T*>(&a_[0]), a_.size(), typeofT(),
+    int result = MPI_Bcast(const_cast<T*>(&a_[0]), a_.size(),
+			   util::datatype(T()),
 			   broadcaster, comm);
-    testResult(result, "broadcast error!");
-}
-
-
-template <class T, int N>
-MPI_Status Array2D<T,N>::wait(const MPI_Request& request) const
-{
-    MPI_Status status;
-    int result = MPI_Wait(const_cast<MPI_Request*>(&request), &status);
-    testResult(result, "wait error!");
-
-    return status;
-}
-
-
-template <class T, int N>
-std::vector<MPI_Status>
-Array2D<T,N>::wait(const std::vector<MPI_Request>& request) const
-{
-    std::vector<MPI_Status> status(request.size());
-    int result = MPI_Waitall(request.size(),
-			     const_cast<MPI_Request*>(&request[0]), &status[0]);
-    testResult(result, "wait error!");
-
-    return status;
+    util::testResult(result, "broadcast error!");
 }
 
 
@@ -433,44 +414,7 @@ const T& Array2D<T,N>::Array1D::operator[](size_t index) const
 }
 
 
-// private functions
-
-
-template <class T, int N>
-MPI_Datatype Array2D<T,N>::typeofT()
-{
-    if (typeid(T) == typeid(double))
-	return MPI_DOUBLE;
-
-    if (typeid(T) == typeid(float))
-	return MPI_FLOAT;
-
-    if (typeid(T) == typeid(int))
-	return MPI_INT;
-
-    if (typeid(T) == typeid(char))
-	return MPI_CHAR;
-
-    journal::firewall_t firewall("Array2D");
-    firewall << journal::loc(__HERE__)
-             << "unexpected Array2D datatype" << journal::end;
-    throw std::domain_error("unexpected Array2D datatype");
-}
-
-
-template <class T, int N>
-void Array2D<T,N>::testResult(int result, const std::string& errmsg)
-{
-    if (result != MPI_SUCCESS) {
-        journal::error_t error("Array2D");
-        error << journal::loc(__HERE__)
-              << errmsg << journal::end;
-	throw result;
-    }
-}
-
-
 // version
-// $Id: Array2D.cc,v 1.12 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Array2D.cc,v 1.13 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file

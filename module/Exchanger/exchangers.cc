@@ -13,7 +13,9 @@
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
 #include "global_defs.h"
-
+#include "initTemperature.h"
+#include "utilTemplate.h"
+#include "utility.h"
 #include "Boundary.h"
 #include "BoundedBox.h"
 #include "BoundaryCondition.h"
@@ -22,8 +24,6 @@
 #include "InteriorImposing.h"
 #include "Sink.h"
 #include "Source.h"
-#include "initTemperature.h"
-#include "utilTemplate.h"
 
 #include "exchangers.h"
 
@@ -46,17 +46,21 @@ char pyExchanger_createBCSink__name__[] = "createBCSink";
 
 PyObject * pyExchanger_createBCSink(PyObject *self, PyObject *args)
 {
-    PyObject *obj1, *obj2, *obj3;
+    PyObject *obj0, *obj1, *obj2, *obj3;
 
-    if (!PyArg_ParseTuple(args, "OOO:createBCSink",
-			  &obj1, &obj2, &obj3))
+    if (!PyArg_ParseTuple(args, "OOOO:createBCSink",
+			  &obj0, &obj1, &obj2, &obj3))
         return NULL;
 
+    mpi::Communicator* temp = static_cast<mpi::Communicator*>
+	                      (PyCObject_AsVoidPtr(obj0));
+    MPI_Comm comm = temp->handle();
     Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
     Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    BoundaryConditionSink* BCSink = new BoundaryConditionSink(*b, *sink, E);
+    BoundaryConditionSink* BCSink = new BoundaryConditionSink(comm, *b,
+							      *sink, E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(BCSink, deleteBCSink);
     return Py_BuildValue("O", cobj);
@@ -405,10 +409,10 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 	                           (PyCObject_AsVoidPtr(obj2));
 	MPI_Comm intercomm = temp2->handle();
 
-	exchange(intercomm, target, *newbbox);
+	util::exchange(intercomm, target, *newbbox);
     }
 
-    broadcast(mycomm, leader, *newbbox);
+    util::broadcast(mycomm, leader, *newbbox);
     newbbox->print("RemoteBBox");
 
     PyObject *cobj = PyCObject_FromVoidPtr(newbbox, deleteBoundedBox);
@@ -442,10 +446,10 @@ PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *args)
 	                           (PyCObject_AsVoidPtr(obj2));
 	MPI_Comm intercomm = temp2->handle();
 
-	exchange(intercomm, target, signal);
+	util::exchange(intercomm, target, signal);
     }
 
-    broadcast(mycomm, leader, signal);
+    util::broadcast(mycomm, leader, signal);
 
     return Py_BuildValue("i", signal);
 }
@@ -477,10 +481,10 @@ PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
 	                           (PyCObject_AsVoidPtr(obj2));
 	MPI_Comm intercomm = temp2->handle();
 
-	exchange(intercomm, target, dt);
+	util::exchange(intercomm, target, dt);
     }
 
-    broadcast(mycomm, leader, dt);
+    util::broadcast(mycomm, leader, dt);
 
     return Py_BuildValue("d", dt);
 }
@@ -553,6 +557,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.25 2003/11/07 21:43:47 puru Exp $
+// $Id: exchangers.cc,v 1.26 2003/11/10 21:55:28 tan2 Exp $
 
 // End of file
