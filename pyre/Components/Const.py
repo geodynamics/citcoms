@@ -65,16 +65,15 @@ class Const(CitcomComponent):
             pyre.properties.float("wdensity", 0.0),
             pyre.properties.float("surftemp", 273.0),
 
-            pyre.properties.float("depth_lith", 89e3),
-            pyre.properties.float("depth_410", 410e3),
-            pyre.properties.float("depth_660", 660e3),
-            #pyre.properties.float("depth_d_double_prime", 2691e3),
-            pyre.properties.float("depth_cmb", 2691e3) # this is used as the D" phase change depth
+            pyre.properties.float("z_lith", 0.014),
+            pyre.properties.float("z_410", 0.06435),
+            pyre.properties.float("z_lmantle", 0.105),
+            pyre.properties.float("z_cmb", 0.439) # this is used as the D" phase change depth
 
             ]
 
 
 # version
-__id__ = "$Id: Const.py,v 1.9 2004/01/08 18:26:40 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.10 2004/08/03 20:11:22 tan2 Exp $"
 
 # End of file

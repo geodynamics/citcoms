@@ -159,18 +159,10 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 	* E->data.ref_viscosity / (radius * radius * radius)
 	/ (E->data.density * E->data.grav_acc * E->data.therm_exp);
 
-    float zlith, z410, zlm, zcmb;
-
-    getScalarProperty(properties, "depth_lith", zlith, m);
-    getScalarProperty(properties, "depth_410", z410, m);
-    getScalarProperty(properties, "depth_660", zlm, m);
-    getScalarProperty(properties, "depth_cmb", zcmb, m); //this is used as the D" phase change depth
-    //getScalarProperty(properties, "depth_d_double_prime", E->data.zd_double_prime, m);
-
-    E->viscosity.zlith = zlith / radius;
-    E->viscosity.z410 = z410 / radius;
-    E->viscosity.zlm = zlm / radius;
-    E->viscosity.zcmb = zcmb / radius;
+    getScalarProperty(properties, "z_lith", E->viscosity.zlith, m);
+    getScalarProperty(properties, "z_410", E->viscosity.z410, m);
+    getScalarProperty(properties, "z_lmantle", E->viscosity.zlm, m);
+    getScalarProperty(properties, "z_cmb", E->viscosity.zcmb, m); //this is used as the D" phase change depth
 
     // convert meter to kilometer
     E->data.layer_km = radius / 1e3;
@@ -762,6 +754,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.25 2004/04/16 01:17:24 tan2 Exp $
+// $Id: setProperties.cc,v 1.26 2004/08/03 20:11:22 tan2 Exp $
 
 // End of file
