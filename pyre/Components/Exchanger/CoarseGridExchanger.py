@@ -16,6 +16,7 @@ class CoarseGridExchanger(Exchanger):
         self.exchanger = self.module.createCoarseGridExchanger(
                                      solver.communicator.handle(),
                                      solver.intercomm.handle(),
+                                     solver.leaderRank,
                                      solver.localLeader,
                                      solver.remoteLeader,
                                      solver.all_variables
@@ -103,6 +104,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.12 2003/09/27 00:30:22 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.13 2003/09/27 20:24:46 tan2 Exp $"
 
 # End of file

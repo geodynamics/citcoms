@@ -23,6 +23,7 @@ class CoupledApp(SimpleApp):
 
         self.rank = 0
         self.nodes = 0
+        self.leaderRank = 0
         self.localLeader = 0
         self.remoteLeader = 0
 
@@ -46,8 +47,6 @@ class CoupledApp(SimpleApp):
 
     def findLayout(self, layout):
 
-        self.intercomm = layout.intercomm
-
         if layout.coarse:
             self.solver = self.inventory.coarse
             self.solverCommunicator = layout.coarse
@@ -58,8 +57,10 @@ class CoupledApp(SimpleApp):
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
 
+        self.intercomm = layout.intercomm
         self.rank = layout.rank
         self.nodes = layout.nodes
+        self.leaderRank = layout.leaderRank
         self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
@@ -121,6 +122,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.3 2003/09/05 19:49:14 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.4 2003/09/27 20:24:46 tan2 Exp $"
 
 # End of file
