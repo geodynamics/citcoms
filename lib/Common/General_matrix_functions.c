@@ -226,7 +226,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
 	    cost_per_level[high_lev] +=  CPU_time0()-time;
 	    total_cycles[high_lev] += cycles;
-	 
+	    valid = (residual < acc)? 0:1;
 	}
       
     else  { 

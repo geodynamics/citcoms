@@ -400,14 +400,16 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        B3=E->Eqn_k3[level][m]+(e-1)*max_eqn;
 	   
        for(i=3;i<max_eqn;i++)  {
-          UU = u[m][C[i]];
+         if (C[i] != neq+1) {
+	  UU = u[m][C[i]];
   	  Au[m][eqn1] += B1[i]*UU;
   	  Au[m][eqn2] += B2[i]*UU;
   	  Au[m][eqn3] += B3[i]*UU;
           }
-
+       }
        for(i=0;i<max_eqn;i++)
-  	  Au[m][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+	 if (C[i] != neq+1)
+          Au[m][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
        }     /* end for e */
      }     /* end for m */
