@@ -7,7 +7,7 @@
 
 #include <portinfo>
 #include <iostream>
-
+#include "global_defs.h"
 #include "Boundary.h"
 #include "FineGridExchanger.h"
 
@@ -107,6 +107,6 @@ void FineGridExchanger::mapBoundary(const Boundary* b) {
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.6 2003/09/09 20:07:01 puru Exp $
+// $Id: FineGridExchanger.cc,v 1.7 2003/09/09 20:41:57 puru Exp $
 
 // End of file
