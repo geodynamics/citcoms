@@ -89,6 +89,12 @@ extern "C"
 PyObject * pyExchanger_createSource(PyObject *, PyObject *);
 
 
+extern char pyExchanger_VTSource_create__name__[];
+extern char pyExchanger_VTSource_create__doc__[];
+extern "C"
+PyObject * pyExchanger_VTSource_create(PyObject *, PyObject *);
+
+
 extern char pyExchanger_initConvertor__name__[];
 extern char pyExchanger_initConvertor__doc__[];
 extern "C"
@@ -194,6 +200,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.31 2004/01/17 02:10:38 puru Exp $
+// $Id: exchangers.h,v 1.32 2004/02/24 20:37:19 tan2 Exp $
 
 // End of file

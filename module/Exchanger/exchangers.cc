@@ -27,6 +27,7 @@
 #include "Source.h"
 #include "TractionSource.h"
 #include "TractionBC.h"
+#include "VTSource.h"
 
 #include "exchangers.h"
 
@@ -43,6 +44,7 @@ void deleteSink(void*);
 void deleteSource(void*);
 void deleteTractionSource(void*);
 void deleteTractionBC(void*);
+void deleteVTSource(void*);
 
 //
 //
@@ -250,8 +252,6 @@ PyObject * pyExchanger_createInterior(PyObject *, PyObject *args)
     Interior* i = new Interior(*rbbox, E);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
-    std::cout << "Citcom createInterior interior.size()="<<i->size()<<std::endl;
-
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
     PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
     return Py_BuildValue("OO", cobj1, cobj2);
@@ -277,7 +277,7 @@ PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
     BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
 
     Sink* sink = new Sink(comm, numSrc, *b);
-    std::cout << "Citcom createSink: sink.size()="<<sink->size()<<std::endl;
+
     PyObject *cobj = PyCObject_FromVoidPtr(sink, deleteSink);
     return Py_BuildValue("O", cobj);
 }
@@ -335,6 +335,34 @@ PyObject * pyExchanger_createTractionSource(PyObject *self, PyObject *args)
     TractionSource* tractionsource = new TractionSource(comm, sink, *b, E, *bbox);
 
     PyObject *cobj = PyCObject_FromVoidPtr(tractionsource, deleteTractionSource);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_VTSource_create__doc__[] = "";
+char pyExchanger_VTSource_create__name__[] = "VTSource_create";
+
+PyObject * pyExchanger_VTSource_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3, *obj4;
+    int sink;
+
+    if (!PyArg_ParseTuple(args, "OiOOO:VTSource_create",
+			  &obj1, &sink,
+			  &obj2, &obj3, &obj4))
+        return NULL;
+
+    mpi::Communicator* temp = static_cast<mpi::Communicator*>
+	                      (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm comm = temp->handle();
+
+    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj4));
+
+    VTSource* source = new VTSource(comm, sink, *b, E, *bbox);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(source, deleteVTSource);
     return Py_BuildValue("O", cobj);
 }
 
@@ -450,8 +478,8 @@ PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
     PyObject *obj;
 
     std::cout << " exchangers :: recvV " << std::endl;
-    
-    
+
+
     if (!PyArg_ParseTuple(args, "O:recvV", &obj))
 	return NULL;
 
@@ -774,6 +802,12 @@ void deleteIISource(void* p)
 }
 
 
+void deleteVTSource(void* p)
+{
+    delete static_cast<VTSource*>(p);
+}
+
+
 void deleteBoundary(void* p)
 {
     delete static_cast<Boundary*>(p);
@@ -818,6 +852,6 @@ void deleteTractionBC(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.41 2004/01/21 00:13:07 puru Exp $
+// $Id: exchangers.cc,v 1.42 2004/02/24 20:37:19 tan2 Exp $
 
 // End of file
