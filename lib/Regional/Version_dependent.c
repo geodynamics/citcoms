@@ -10,8 +10,6 @@ void global_derived_values(E)
 
 {
     int d,lx,lz,ly,i,nox,noz,noy;
-    char logfile[100], timeoutput[100];
-    FILE *fp, *fptime;
     void parallel_process_termination();
 
 
@@ -122,17 +120,14 @@ void global_derived_values(E)
 void node_locations(E)
   struct All_variables *E;
 {
-  int m,i,j,k,ii,d,node,lev;
-  double ro,ri,dr,*rr,*RR,fo;
-  float t1,f1,tt1,ff1;
-  int nox,noy,noz,lnoz,step;
+  int i,j,k,lev;
+  double ro,dr,*rr,*RR,fo;
+  float tt1;
+  int nox,noy,noz,step;
   int nn;
   char output_file[255];
   char a[100];
-  FILE *fp,*fp1;
-
-
-  const int dims = E->mesh.nsd;
+  FILE *fp1;
 
   void coord_of_cap();
   void rotate_mesh ();
@@ -154,15 +149,15 @@ void node_locations(E)
           exit(8);
 	}
 
-      fscanf(fp1,"%s %d",&a,&i);
+      fscanf(fp1,"%s %d",a,&i);
       for(i=1;i<=nox;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
 
-      fscanf(fp1,"%s%d",&a,&i);
+      fscanf(fp1,"%s%d",a,&i);
       for(i=1;i<=noy;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
 
-      fscanf(fp1,"%s%d",&a,&i);
+      fscanf(fp1,"%s%d",a,&i);
       for (k=1;k<=E->mesh.noz;k++)  {
       fscanf(fp1,"%d %f",&nn,&tt1);
       rr[k]=tt1;
@@ -303,6 +298,8 @@ if (E->control.verbose)
 
 void construct_tic_from_input(struct All_variables *E)
 {
+  void temperatures_conform_bcs();
+
   int i, j ,k , kk, m, p, node;
   int nox, noy, noz, gnoz;
   double r1, f1, t1;
@@ -361,3 +358,83 @@ void construct_tic_from_input(struct All_variables *E)
   return;
 }
 
+
+/* setup boundary node and element arrays for bookkeeping */
+
+void construct_boundary( struct All_variables *E)
+{
+  const int dims=E->mesh.nsd;
+
+  int m, i, j, k, d, el, count;
+  int isBoundary;
+  int normalFlag[4];
+
+  /* boundary = all - interior */
+  int max_size = E->lmesh.elx*E->lmesh.ely*E->lmesh.elz
+    - (E->lmesh.elx-2)*(E->lmesh.ely-2)*(E->lmesh.elz-2) + 1;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    E->boundary.element[m] = (int *)malloc(max_size*sizeof(int));
+
+    for(d=1; d<=dims; d++)
+      E->boundary.normal[m][d] = (int *)malloc(max_size*sizeof(int));
+
+  }
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    count = 1;
+    for(k=1; k<=E->lmesh.ely; k++)
+      for(j=1; j<=E->lmesh.elx; j++)
+	for(i=1; i<=E->lmesh.elz; i++) {
+
+	  isBoundary = 0;
+	  for(d=1; d<=dims; d++)
+	    normalFlag[d] = 0;
+
+	  if((E->parallel.me_loc[1] == 0) && (j == 1)) {
+	    isBoundary = 1;
+	    normalFlag[1] = -1;
+	  }
+
+	  if((E->parallel.me_loc[1] == E->parallel.nprocx - 1)
+	     && (j == E->lmesh.elx)) {
+	    isBoundary = 1;
+	    normalFlag[1] = 1;
+	  }
+
+	  if((E->parallel.me_loc[2] == 0) && (k == 1)) {
+	    isBoundary = 1;
+	    normalFlag[2] = -1;
+	  }
+
+	  if((E->parallel.me_loc[2] == E->parallel.nprocy - 1)
+	     && (k == E->lmesh.ely)) {
+	    isBoundary = 1;
+	    normalFlag[2] = 1;
+	  }
+
+	  if((E->parallel.me_loc[3] == 0) && (i == 1)) {
+	    isBoundary = 1;
+	    normalFlag[3] = -1;
+	  }
+
+	  if((E->parallel.me_loc[3] == E->parallel.nprocz - 1)
+	     && (i == E->lmesh.elz)) {
+	    isBoundary = 1;
+	    normalFlag[3] = 1;
+	  }
+
+	  if(isBoundary) {
+	    el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
+	    E->boundary.element[m][count] = el;
+	    for(d=1; d<=dims; d++)
+	      E->boundary.normal[m][d][count] = normalFlag[d];
+
+	    ++count;
+	  }
+
+	} /* end for i, j, k */
+
+    E->boundary.nel = count - 1;
+  } /* end for m */
+}

@@ -8,9 +8,7 @@
 void global_derived_values(E)
   struct All_variables *E;
 {
-  int d,lx,lz,ly,i,nox,noz,noy;
-  char logfile[100], timeoutput[100];
-  FILE *fp, *fptime;
+  int d,i,nox,noz,noy;
 
   E->mesh.levmax = E->mesh.levels-1;
   nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
@@ -112,14 +110,12 @@ void global_derived_values(E)
 void node_locations(E)
      struct All_variables *E;
 {
-  int m,i,j,k,ii,d,node,lev;
-  double ro,ri,dr,*rr,*RR,fo;
-  float t1,f1,tt1;
-  int noz,lnoz,step,nn;
+  int i,j,k,ii,lev;
+  double ro,dr,*rr,*RR,fo;
+  float tt1;
+  int step,nn;
   char output_file[255], a[255];
   FILE *fp1;
-
-  const int dims = E->mesh.nsd;
 
   void coord_of_cap();
   void rotate_mesh ();
@@ -135,7 +131,7 @@ void node_locations(E)
           fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
           exit(8);
 	}
-      fscanf(fp1,"%s%d",&a,&i);
+      fscanf(fp1,"%s%d",a,&i);
       if (i != E->mesh.noz ) {
           fprintf(E->fp,"(Nodal_mesh.c #2) inconsistent file length: %s\n",output_file);
           exit(8);
@@ -237,6 +233,7 @@ void construct_tic_from_input(struct All_variables *E)
   int mm, ll;
   double con;
   double modified_plgndr_a(int, int, double);
+  void temperatures_conform_bcs();
 
   noy=E->lmesh.noy;
   nox=E->lmesh.nox;
@@ -287,3 +284,51 @@ void construct_tic_from_input(struct All_variables *E)
   return;
 }
 
+
+/* setup boundary node and element arrays for bookkeeping */
+
+void construct_boundary( struct All_variables *E)
+{
+
+  const int dims=E->mesh.nsd;
+
+  int m, i, j, k, d, el, count;
+
+  /* boundary = top + bottom */
+  int max_size = 2*E->lmesh.elx*E->lmesh.ely;
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    E->boundary.element[m] = (int *)malloc(max_size*sizeof(int));
+
+    for(d=1; d<=dims; d++)
+      E->boundary.normal[m][d] = (int *)malloc(max_size*sizeof(int));
+  }
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    count = 1;
+    for(k=1; k<=E->lmesh.ely; k++)
+      for(j=1; j<=E->lmesh.elx; j++) {
+	if(E->parallel.me_loc[3] == 0) {
+	  i = 1;
+	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
+	  E->boundary.element[m][count] = el;
+	  E->boundary.normal[m][dims][count] = -1;
+	  for(d=1; d<dims; d++)
+	      E->boundary.normal[m][d][count] = 0;
+	  ++count;
+	}
+
+	if(E->parallel.me_loc[3] == E->parallel.nprocz - 1) {
+	  i = E->lmesh.elz;
+	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
+	  E->boundary.element[m][count] = el;
+	  E->boundary.normal[m][dims][count] = 1;
+	  for(d=1; d<dims; d++)
+	    E->boundary.normal[m][d][count] = 0;
+	  ++count;
+	}
+
+      } /* end for i, j, k */
+
+    E->boundary.nel = count - 1;
+  } /* end for m */
+}
