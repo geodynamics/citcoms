@@ -31,7 +31,7 @@ class IC(Component):
         import pyre.properties
 
 
-        __inventory__ = [
+        inventory = [
 
             pyre.properties.int("num_perturbations",2),
             pyre.properties.sequence("perturbmag",[0.05,0.05]),
@@ -42,6 +42,6 @@ class IC(Component):
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
+__id__ = "$Id: IC.py,v 1.4 2003/07/23 19:00:17 tan2 Exp $"
 
 # End of file
