@@ -14,31 +14,20 @@
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "Boundary.h"
-//#include "dimensionalization.h"
 
 
-double dimensional_len;
-double dimensional_vel;
-double dimensional_traction;
-double dimensional_temp;
-
-
-Boundary::Boundary() :
-    BoundedMesh()
+Boundary::Boundary(bool dimensional) :
+    BoundedMesh(dimensional)
 {}
 
 
-Boundary::Boundary(const All_variables* E) :
-    BoundedMesh()
+Boundary::Boundary(const All_variables* E, bool dimensional) :
+    BoundedMesh(dimensional)
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
 	  << "in Boundary::Boundary" << journal::end;
-// Computation of dimensional paramatars
-    dimensional_len = E->data.radius_km*1000.;
-    dimensional_vel = E->data.therm_diff/dimensional_len;    
-    dimensional_traction = E->data.ref_viscosity*E->data.therm_diff;
-    dimensional_temp = 1.0; // To be set properly
+
     initBBox(E);
     bbox_.print("Boundary-BBox");
 
@@ -80,8 +69,8 @@ void Boundary::initBBox(const All_variables *E)
     bbox_[1][0] = theta_max;
     bbox_[0][1] = fi_min;
     bbox_[1][1] = fi_max;
-    bbox_[0][2] = ri*dimensional_len;
-    bbox_[1][2] = ro*dimensional_len;
+    bbox_[0][2] = ri;
+    bbox_[1][2] = ro;
 }
 
 
@@ -89,7 +78,7 @@ void Boundary::initX(const All_variables* E)
 {
     std::vector<double> x(DIM);
     const int m = 1;
-    
+
     for(int k=1; k<=E->lmesh.noy; k++)
 	for(int j=1; j<=E->lmesh.nox; j++)
 	    for(int i=1; i<=E->lmesh.noz; i++) {
@@ -100,9 +89,7 @@ void Boundary::initX(const All_variables* E)
 
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
-                        // Dimensionalizing
-                    x[2]*=dimensional_len;
-                    
+
 		    X_.push_back(x);
 		    nodeID_.push_back(node);
 		}
@@ -125,6 +112,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.45 2003/12/23 00:42:24 puru Exp $
+// $Id: Boundary.cc,v 1.46 2003/12/30 21:46:01 tan2 Exp $
 
 // End of file

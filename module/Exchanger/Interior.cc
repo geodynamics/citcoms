@@ -14,16 +14,17 @@
 #include "global_defs.h"
 #include "BoundedBox.h"
 #include "Interior.h"
-#include "dimensionalization.h"
 
-Interior::Interior() :
-    BoundedMesh()
+
+Interior::Interior(bool dimensional) :
+    BoundedMesh(dimensional)
 {}
 
 
 
-Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
-    BoundedMesh()
+Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E,
+		   bool dimensional) :
+    BoundedMesh(dimensional)
 {
     bbox_ = remoteBBox;
     bbox_.print("Interior-BBox");
@@ -55,9 +56,6 @@ void Interior::initX(const All_variables* E)
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
 
-                        // Dimensionalizing
-                    x[2]*=dimensional_len;
-                    
                     if(isInside(x, bbox_)) {
                         X_.push_back(x);
                         nodeID_.push_back(node);
@@ -67,6 +65,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.8 2003/12/17 04:27:56 puru Exp $
+// $Id: Interior.cc,v 1.9 2003/12/30 21:46:01 tan2 Exp $
 
 // End of file

@@ -24,9 +24,10 @@ protected:
     BoundedBox bbox_;         // domain bounds
     Array2D<double,DIM> X_;   // coordinate
     Array2D<int,1> nodeID_;   // node # in Solver data structure
+    bool dimensional_;
 
 public:
-    BoundedMesh();
+    BoundedMesh(bool dimensional);
     virtual ~BoundedMesh() = 0;
 
     inline int size() const {return X_.size();}
@@ -48,6 +49,6 @@ private:
 #endif
 
 // version
-// $Id: BoundedMesh.h,v 1.3 2003/11/21 23:15:13 tan2 Exp $
+// $Id: BoundedMesh.h,v 1.4 2003/12/30 21:46:01 tan2 Exp $
 
 // End of file

@@ -77,6 +77,12 @@ extern "C"
 PyObject * pyExchanger_createSource(PyObject *, PyObject *);
 
 
+extern char pyExchanger_initDimensional__name__[];
+extern char pyExchanger_initDimensional__doc__[];
+extern "C"
+PyObject * pyExchanger_initDimensional(PyObject *, PyObject *);
+
+
 extern char pyExchanger_initTemperatureSink__name__[];
 extern char pyExchanger_initTemperatureSink__doc__[];
 extern "C"
@@ -176,6 +182,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.25 2003/12/19 18:21:27 tan2 Exp $
+// $Id: exchangers.h,v 1.26 2003/12/30 21:46:01 tan2 Exp $
 
 // End of file

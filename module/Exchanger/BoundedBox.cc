@@ -11,7 +11,7 @@
 #include <vector>
 #include "global_defs.h"
 #include "BoundedBox.h"
-#include "dimensionalization.h"
+
 
 bool isOverlapped(const BoundedBox& lhs,
 		  const BoundedBox& rhs)
@@ -55,8 +55,8 @@ void fullGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
     bbox[1][0] = 2 * pi;
     bbox[1][1] = pi;
 
-    bbox[0][2] = E->sphere.ri*dimensional_len;
-    bbox[1][2] = E->sphere.ro*dimensional_len;
+    bbox[0][2] = E->sphere.ri;
+    bbox[1][2] = E->sphere.ro;
 }
 
 
@@ -66,8 +66,6 @@ void regionalGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
     bbox[1][0] = E->control.theta_max;
     bbox[0][1] = E->control.fi_min;
     bbox[1][1] = E->control.fi_max;
-//     bbox[0][2] = E->sphere.ri*dimensional_len;
-//     bbox[1][2] = E->sphere.ro*dimensional_len;
     bbox[0][2] = E->sphere.ri;
     bbox[1][2] = E->sphere.ro;
 
@@ -75,6 +73,6 @@ void regionalGlobalBoundedBox(BoundedBox& bbox, const All_variables* E)
 
 
 // version
-// $Id: BoundedBox.cc,v 1.4 2003/12/30 00:31:53 ces74 Exp $
+// $Id: BoundedBox.cc,v 1.5 2003/12/30 21:46:01 tan2 Exp $
 
 // End of file
