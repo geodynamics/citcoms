@@ -22,6 +22,7 @@ struct All_variables;
 class SIUnit {
     const double length_factor;
     const double velocity_factor;
+    const double surf_temperature;
     const double temperature_factor;
     const double time_factor;
     const double traction_factor;
@@ -59,6 +60,6 @@ private:
 #endif
 
 // version
-// $Id: SIUnit.h,v 1.2 2004/01/07 21:54:00 tan2 Exp $
+// $Id: SIUnit.h,v 1.3 2004/01/08 18:38:40 tan2 Exp $
 
 // End of file

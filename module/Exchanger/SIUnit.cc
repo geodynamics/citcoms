@@ -17,7 +17,8 @@
 SIUnit::SIUnit(const All_variables* E) :
     length_factor(E->data.radius_km * 1000),
     velocity_factor(E->data.therm_diff / length_factor),
-    temperature_factor(1),
+    surf_temperature(E->data.surf_temp),
+    temperature_factor(E->data.ref_temperature),
     time_factor(length_factor / velocity_factor),
     traction_factor(E->data.ref_viscosity * E->data.therm_diff)
 {}
@@ -40,8 +41,10 @@ void SIUnit::coordinate(Array2D<double,DIM>& X) const
 
 void SIUnit::temperature(Array2D<double,1>& T) const
 {
-    for(int i=0; i<T.size(); ++i)
+    for(int i=0; i<T.size(); ++i) {
 	T[0][i] *= temperature_factor;
+	T[0][i] += surf_temperature;
+    }
 }
 
 
@@ -83,8 +86,10 @@ void SIUnit::xcoordinate(Array2D<double,DIM>& X) const
 
 void SIUnit::xtemperature(Array2D<double,1>& T) const
 {
-    for(int i=0; i<T.size(); ++i)
+    for(int i=0; i<T.size(); ++i) {
+	T[0][i] -= surf_temperature;
 	T[0][i] /= temperature_factor;
+    }
 }
 
 
@@ -111,6 +116,6 @@ void SIUnit::xvelocity(Array2D<double,DIM>& V) const
 
 
 // version
-// $Id: SIUnit.cc,v 1.2 2004/01/07 21:54:00 tan2 Exp $
+// $Id: SIUnit.cc,v 1.3 2004/01/08 18:38:40 tan2 Exp $
 
 // End of file
