@@ -256,9 +256,6 @@ PyObject * pyRegional_Param_set_properties(PyObject *self, PyObject *args)
 
     getScalarProperty(properties, "Q0", E->control.Q0);
 
-    getScalarProperty(properties, "DESCRIBE", E->control.DESCRIBE);
-    getScalarProperty(properties, "BEGINNER", E->control.BEGINNER);
-    getScalarProperty(properties, "VERBOSE", E->control.VERBOSE);
     getScalarProperty(properties, "verbose", E->control.verbose);
     getScalarProperty(properties, "see_convergence", E->control.print_convergence);
 

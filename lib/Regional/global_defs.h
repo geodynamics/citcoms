@@ -701,10 +701,6 @@ struct CONTROL {
     int eqn_viscosity;
     int eqn_zigzag;
     int verbose;
-  /* input info */
-  int VERBOSE;
-  int DESCRIBE;
-  int BEGINNER;
 
     int vbcs_file;
     int mat_control;
