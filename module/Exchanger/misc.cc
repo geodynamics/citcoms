@@ -152,6 +152,8 @@ void commonE(All_variables *E) {
 
     E->mesh.dof = 3;
 
+    E->mesh.nno = E->mesh.nox * E->mesh.noy * E->mesh.noz;
+
     E->mesh.elx = E->mesh.nox - 1;
     E->mesh.ely = E->mesh.noy - 1;
     E->mesh.elz = E->mesh.noz - 1;
@@ -268,6 +270,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.18 2003/09/29 22:31:35 puru Exp $
+// $Id: misc.cc,v 1.19 2003/10/03 18:10:05 tan2 Exp $
 
 // End of file
