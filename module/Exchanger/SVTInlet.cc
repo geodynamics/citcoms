@@ -50,6 +50,7 @@ SVTInlet::SVTInlet(const Boundary& boundary,
     debug << journal::loc(__HERE__) << journal::end;
 
     setVBCFlag();
+    setTBCFlag();
 
     check_bc_consistency(E);
 }
@@ -189,9 +190,15 @@ void SVTInlet::imposeT()
 	int j = sink.meshNode(i);
 	int n = mesh.nodeID(j);
 
+#if 1
+	for(int d=0; d<DIM; d++)
+	    E->sphere.cap[m].TB[d+1][n] = N1 * t_old[0][i] + N2 * t[0][i];
+
+#else
 	bool influx = false;
 	for(int d=0; d<DIM; d++)
-	    if( (boundary.normal(d,j) * (N1 * v_old[d][i] + N2 * v[d][i])) < 0 ) {
+	    if( (boundary.normal(d,j) *
+		 (N1 * v_old[d][i] + N2 * v[d][i])) < 0 ) {
 		influx = true;
 		break;
 	    }
@@ -219,9 +226,11 @@ void SVTInlet::imposeT()
 		E->sphere.cap[m].TB[d+1][n] = 0;
 	}
 
-  	debugBC << E->sphere.cap[m].TB[1][n] << " "
-  		<< E->sphere.cap[m].TB[2][n] << " "
-  		<< E->sphere.cap[m].TB[3][n] << journal::newline;
+#endif
+
+	debugBC << E->sphere.cap[m].TB[1][n] << " "
+		<< E->sphere.cap[m].TB[2][n] << " "
+		<< E->sphere.cap[m].TB[3][n] << journal::newline;
 
     }
     debugBC << journal::end;
@@ -243,6 +252,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.4 2004/05/11 07:55:30 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.5 2004/05/24 19:59:29 tan2 Exp $
 
 // End of file
