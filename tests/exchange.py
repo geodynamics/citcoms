@@ -39,7 +39,8 @@ class TestExchanger(Application):
 
     def test(self, exchanger):
         # testing exchanger creation
-        exchanger.initialize(self)
+        exchanger.selectModule()
+	exchanger.createExchanger(self)
         print exchanger.name, exchanger.exchanger
 
         # testing boundary creation and exchange
@@ -113,6 +114,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.2 2003/09/09 02:28:47 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.3 2003/09/09 21:08:02 tan2 Exp $"
 
 # End of file
