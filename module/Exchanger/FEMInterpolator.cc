@@ -67,7 +67,8 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 	// skip if x is not inside bbox
 	if(!isInside(x, boundedMesh.bbox())) continue;
 	// skip if x is not in the range of z
-	if(x.back() < z.front() || x.back() > z.back()) continue;
+	if(x.back() < z.front() - 1e-10 ||
+	   x.back() > z.back() + 1e-10) continue;
 
 	int elz = bisectInsertPoint(x.back(), z);
 
@@ -300,6 +301,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.3 2004/01/13 03:55:36 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.4 2004/01/16 01:50:27 tan2 Exp $
 
 // End of file
