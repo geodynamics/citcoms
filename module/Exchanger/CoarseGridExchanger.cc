@@ -43,8 +43,8 @@ void CoarseGridExchanger::interpolate() {
   int n1,n2,bnid,node;
   for(int i=0;i<boundary->size;i++)
     {
-      n1=boundary->bid2crseelem[0][i];
-      n2=boundary->bid2crseelem[1][i];	
+      n1=boundary->bid2elem[i];
+      n2=boundary->bid2proc[i];	
       cout << "in CoarseGridExchanger::interpolate"
 	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
       
@@ -85,8 +85,8 @@ void CoarseGridExchanger::interpolateTemperature() {
   int n1,n2,node;
   for(int i=0;i<boundary->size;i++)
     {
-      n1=boundary->bid2crseelem[0][i];
-      n2=boundary->bid2crseelem[1][i];	
+      n1=boundary->bid2elem[i];
+      n2=boundary->bid2proc[i];	
 //       cout << "in CoarseGridExchanger::interpolateTemperature"
 // 	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
       
@@ -224,7 +224,7 @@ void CoarseGridExchanger::mapBoundary() {
 //     ofstream file(fname);
 //     for(int i=0; i< boundary->size; i++)
 //       {
-// 	file << "i = " << i << "elem = " << boundary->bid2crseelem[0][i] << " " << "capid = " << boundary->bid2crseelem[1][i] << endl;
+// 	file << "i = " << i << "elem = " << boundary->bid2elem[i] << " " << "capid = " << boundary->bid2proc[i] << endl;
 //       }
 //     file.close();
 
@@ -234,6 +234,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.19 2003/09/25 22:47:34 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.20 2003/09/26 18:24:58 puru Exp $
 
 // End of file
