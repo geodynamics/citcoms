@@ -18,7 +18,7 @@ PROJ_CXX_SRCLIB = \
         -ljournal \
         -lmpimodule
 
-EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
+EXTERNAL_LIBPATH += -L$(TOOLS_LIBDIR)
 
 PROJ_SRCS = \
 	AbstractSource.cc \
@@ -52,6 +52,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.17 2004/03/11 22:22:59 tan2 Exp $
+# $Id: Make.mm,v 1.18 2004/03/27 00:10:56 steve Exp $
 
 # End of file
