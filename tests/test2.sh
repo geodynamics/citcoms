@@ -9,7 +9,7 @@
 
 # coupled citcoms test
 # 4-proc coarse-grid solver, 1-proc fine-grid solver
-# no correction on outflow
+# with correction on outflow
 
 
 FINE=fine
@@ -113,7 +113,7 @@ fi
 echo test2: outflow2 ... $result.
 
 
-echo '9.787985e+02 9.785439e+02 1.654943e+03 0.000000e+00' > $TEMPFILE
+echo '9.978408e+02 9.975862e+02 1.673985e+03 0.000000e+00' > $TEMPFILE
 result=Failed
 if tail +3 $FINE.velo.0.0 | head -1 | diff -w - $TEMPFILE; then
     result=Passed
@@ -121,7 +121,7 @@ fi
 echo test2: imposeBC ... $result.
 
 
-echo '<stdin>: N = 4913       <-2265.95/1950.77>      <-2264.66/1949> <944.907/17056.7>       <0/1>' > $TEMPFILE
+echo '<stdin>: N = 4913     <-2276.61/1956.99>      <-2275.61/1955.28>      <925.864/17051.2>       <0/1>' > $TEMPFILE
 result=Failed
 if tail +3 $FINE.velo.0.0 | minmax | diff -w - $TEMPFILE; then
     result=Passed
@@ -129,7 +129,7 @@ fi
 echo test2: minmax ... $result.
 
 
-echo '-6.325670e+02 -3.417676e+02 1.111416e+04 4.940558e-01' > $TEMPFILE
+echo '-6.280208e+02 -3.384822e+02 1.110555e+04 4.940558e-01' > $TEMPFILE
 result=Failed
 if tail +2120 $FINE.velo.0.0 | head -1 | diff -w - $TEMPFILE; then
     result=Passed
@@ -141,6 +141,6 @@ rm $TEMPFILE
 
 
 # version
-# $Id: test2.sh,v 1.1 2003/10/21 17:31:10 tan2 Exp $
+# $Id: test2.sh,v 1.2 2003/10/21 17:32:18 tan2 Exp $
 
 # End of file
