@@ -46,22 +46,22 @@ class RegionalApp(Application):
 
 	# for a give temperature field, solve for velocity and pressure
 	vsolver.run()
-    
+
 	# output phase
-        self.output()
+        self.output(self.cycles)
 
 	while (self.keep_going):
 	    tsolver.run()
 	    vsolver.run()
-	    
+
 	    self.cycles += 1
+            self.output(self.cycles)
 
 	    if self.cycles >= self.inventory.param.inventory.maxstep:
 		self.keep_going = False
 
-            #self.output()
 
-	    
+
 	total_time = CitcomModule.CPU_time() - self.start_time
 
         return
@@ -88,17 +88,8 @@ class RegionalApp(Application):
 	#return
 
 
-    def output(self):
-        import CitcomS.Output as Output
-        output_coord = Output.outputCoord(self.prefix, self.rank)
-	output_coord.go()
-
-	output_velo = Output.outputVelo(self.prefix, self.rank, self.cycles)
-        output_velo.go()
-
-	#output_visc = Output.outputVisc(self.prefix, self.rank, self.cycles)
-        #output_visc.go()
-
+    def output(self, cycles):
+        CitcomModule.output(cycles)
         return
 
 
@@ -208,6 +199,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.21 2003/07/25 20:43:29 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.22 2003/07/26 21:47:51 tan2 Exp $"
 
 # End of file

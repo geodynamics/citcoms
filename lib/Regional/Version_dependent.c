@@ -16,24 +16,6 @@ void global_derived_values(E)
     FILE *fp, *fptime;
     void parallel_process_termination();
 
-    /* As early as possible, set up the log file to
-       record information about the progress of the
-       program as it runs
-       */
-    /* also add a time file to output time CPC 6/18/00 */
-
-    sprintf(logfile,"%s.log",E->control.data_file);
-    sprintf(timeoutput,"%s.time",E->control.data_file);
-
-    if((fp=fopen(logfile,"w")) == NULL)
-	E->fp = stdout;
-    else
-	E->fp = fp;
-
-    if((fptime=fopen(timeoutput,"w")) == NULL)
-	E->fptime = stdout;
-    else
-	E->fptime = fptime;
 
    E->mesh.levmax = E->mesh.levels-1;
    nox = (E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocxl + 1;

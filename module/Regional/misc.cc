@@ -139,30 +139,6 @@ PyObject * pyRegional_global_default_values(PyObject *, PyObject *)
 }
 
 
-
-char pyRegional_open_info_file__doc__[] = "";
-char pyRegional_open_info_file__name__[] = "open_info_file";
-
-PyObject * pyRegional_open_info_file(PyObject *, PyObject *)
-    // copied from read_instructions()
-{
-
-    if (E->control.verbose)  {
-	char output_file[255];
-	sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
-	E->fp_out = fopen(output_file,"w");
-	if (E->fp_out == NULL) {
-	    char errmsg[255];
-	    sprintf(errmsg,"Cannot open file '%s'\n",output_file);
-	    PyErr_SetString(PyExc_IOError, errmsg);
-	    return NULL;
-	}
-    }
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyRegional_set_signal__doc__[] = "";
 char pyRegional_set_signal__name__[] = "set_signal";
 
@@ -196,6 +172,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.19 2003/07/25 20:43:29 tan2 Exp $
+// $Id: misc.cc,v 1.20 2003/07/26 21:47:51 tan2 Exp $
 
 // End of file

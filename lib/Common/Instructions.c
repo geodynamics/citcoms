@@ -11,6 +11,7 @@
 #include "citcom_init.h"
 #include "phase_change.h"
 #include "interuption.h"
+#include "output.h"
 
 void read_instructions(filename)
      char *filename;
@@ -48,6 +49,9 @@ void read_instructions(filename)
     void set_sphere_harmonics ();
 
     void setup_parser();
+    void shutdown_parser();
+    void open_log_and_time();
+    void open_info();
 
     void get_initial_elapsed_time();
     void set_starting_age();
@@ -59,9 +63,6 @@ void read_instructions(filename)
 
     double start_time, CPU_time0(),vmag;
     double global_vdot();
-    char output_file[255];
-
-    int *temp, i;
 
     /* =====================================================
        Global interuption handling routine defined once here
@@ -80,6 +81,10 @@ void read_instructions(filename)
 
     setup_parser(E,filename);
 
+    open_log_and_time(E);
+    if (E->control.verbose)
+      open_info(E);
+
     global_default_values(E);
     read_initial_settings(E);
     tracer_initial_settings(E);
@@ -87,14 +92,6 @@ void read_instructions(filename)
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);
 
-    if (E->control.verbose)  {
-      sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
-      E->fp_out = fopen(output_file,"w");
-	if (E->fp_out == NULL) {
-          fprintf(E->fp,"(Instructions.c #1) Cannot open %s\n",output_file);
-          exit(8);
-	}
-      }
 
     parallel_processor_setup(E);   /* get # of proc in x,y,z */
     parallel_domain_decomp0(E);  /* get local nel, nno, elx, nox et al */
@@ -416,7 +413,6 @@ void allocate_velocity_vars(E)
 void global_default_values(E)
      struct All_variables *E;
 {
-    FILE *fp;
 
   /* FIRST: values which are not changed routinely by the user */
 
@@ -686,4 +682,30 @@ void initial_velocity(E)
 	}
 
     return;
+}
+
+
+
+void open_log_and_time(struct All_variables *E)
+{
+  char logfile[255], timeoutput[255];
+
+  sprintf(logfile,"%s.log",E->control.data_file);
+  sprintf(timeoutput,"%s.time",E->control.data_file);
+
+  E->fp = output_open(logfile);
+  E->fptime = output_open(timeoutput);
+
+  return;
+}
+
+
+void open_info(struct All_variables *E)
+{
+  char output_file[255];
+
+  sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
+  E->fp_out = output_open(output_file);
+
+  return;
 }

@@ -10,12 +10,13 @@
 #if !defined(pyRegional_outputs_h)
 #define pyRegional_outputs_h
 
-extern char pyRegional_output_init__name__[];
-extern char pyRegional_output_init__doc__[];
+extern char pyRegional_output__name__[];
+extern char pyRegional_output__doc__[];
 extern "C"
-PyObject * pyRegional_output_init(PyObject *, PyObject *);
+PyObject * pyRegional_output(PyObject *, PyObject *);
 
 
+#if 0
 extern char pyRegional_output_close__name__[];
 extern char pyRegional_output_close__doc__[];
 extern "C"
@@ -52,13 +53,13 @@ extern "C"
 PyObject * pyRegional_output_visc(PyObject *, PyObject *);
 
 
-
+#endif
 
 
 
 #endif
 
 // version
-// $Id: outputs.h,v 1.2 2003/05/22 23:08:59 tan2 Exp $
+// $Id: outputs.h,v 1.3 2003/07/26 21:47:51 tan2 Exp $
 
 // End of file

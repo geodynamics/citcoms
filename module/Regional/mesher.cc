@@ -36,6 +36,8 @@ extern "C" {
     void global_derived_values(struct All_variables*);
     void mass_matrix(struct All_variables*);
     void node_locations(struct All_variables*);
+    void open_info(struct All_variables*);
+    void open_log_and_time(struct All_variables*);
     void parallel_communication_routs_s(struct All_variables*);
     void parallel_communication_routs_v(struct All_variables*);
     void parallel_domain_boundary_nodes(struct All_variables*);
@@ -59,6 +61,10 @@ PyObject * pyRegional_regional_sphere_setup(PyObject *self, PyObject *args)
 {
 
     E->control.PID = get_process_identifier();
+
+    open_log_and_time(E);
+    if (E->control.verbose)
+      open_info(E);
 
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);
@@ -139,6 +145,6 @@ PyObject * pyRegional_regional_sphere_init(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.4 2003/07/25 20:43:29 tan2 Exp $
+// $Id: mesher.cc,v 1.5 2003/07/26 21:47:51 tan2 Exp $
 
 // End of file

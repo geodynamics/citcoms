@@ -10,6 +10,7 @@
 #include <portinfo>
 #include <Python.h>
 #include <cstdio>
+#include <iostream>
 
 #include "outputs.h"
 
@@ -21,63 +22,26 @@ extern "C" {
 
 }
 
-char pyRegional_output_init__doc__[] = "";
-char pyRegional_output_init__name__[] = "output_init";
 
-PyObject * pyRegional_output_init(PyObject *self, PyObject *args)
+char pyRegional_output__doc__[] = "";
+char pyRegional_output__name__[] = "output";
+
+PyObject * pyRegional_output(PyObject *self, PyObject *args)
 {
-    char *filename;
-    FILE *fp;
-    PyObject *obj;
+    int cycles;
 
-    if (!PyArg_ParseTuple(args, "s:output_init", &filename))
+    if (!PyArg_ParseTuple(args, "i:output_coord", &cycles))
         return NULL;
 
-    fp = output_init(filename);
-    obj = PyCObject_FromVoidPtr((void *)fp, NULL);
-
-    return Py_BuildValue("O", obj);
-}
-
-
-char pyRegional_output_close__doc__[] = "";
-char pyRegional_output_close__name__[] = "output_close";
-
-PyObject * pyRegional_output_close(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    FILE *fp;
-
-    if (!PyArg_ParseTuple(args, "O:output_close", &obj))
-        return NULL;
-
-    fp = static_cast<FILE*> (PyCObject_AsVoidPtr(obj));
-    output_close(fp);
+    std::cerr << "cycles = " << cycles << std::endl;
+    output(E, cycles);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
 
-char pyRegional_output_coord__doc__[] = "";
-char pyRegional_output_coord__name__[] = "output_coord";
-
-PyObject * pyRegional_output_coord(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    FILE *fp;
-
-    if (!PyArg_ParseTuple(args, "O:output_coord", &obj))
-        return NULL;
-
-    fp = static_cast<FILE*> (PyCObject_AsVoidPtr(obj));
-    output_coord(E, fp);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
+#if 0
 char pyRegional_output_velo_header__doc__[] = "";
 char pyRegional_output_velo_header__name__[] = "output_velo_header";
 
@@ -158,7 +122,6 @@ PyObject * pyRegional_output_visc(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-#ifdef READY__
 
 char pyRegional_output_surface_prepare__doc__[] = "";
 char pyRegional_output_surface_prepare__name__[] = "output_surface_prepare";
@@ -235,6 +198,6 @@ PyObject * pyRegional_output_bottom(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.6 2003/07/23 05:19:16 ces74 Exp $
+// $Id: outputs.cc,v 1.7 2003/07/26 21:47:51 tan2 Exp $
 
 // End of file

@@ -668,6 +668,185 @@ char * filen;
 
 
 /* ==========================================================  */
+/* from Output.c                                               */
+/* =========================================================== */
+
+void output_velo_related(E,file_number)
+  struct All_variables *E;
+  int file_number;
+{
+  int el,els,i,j,k,m,node,fd;
+  int s,nox,noz,noy,size1,size2,size3;
+  char output_file[255];
+  FILE *fp1,*fp2;
+
+
+  output_velo(E);
+  output_visc(E);
+
+
+  if (E->parallel.me_locl[3]==E->parallel.nproczl-1)      {
+    sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp2 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
+      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      for(i=1;i<=E->lmesh.nsf;i++)   {
+	s = i*E->lmesh.noz;
+        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpg[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+	}
+      }
+    fclose(fp2);
+
+    }
+
+  if (E->parallel.me_locl[3]==0)      {
+    sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    fp2 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
+      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      for(i=1;i<=E->lmesh.nsf;i++)  {
+	s = (i-1)*E->lmesh.noz + 1;
+        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+	}
+      }
+    fclose(fp2);
+    }
+
+  /* remove horizontal average output   by Tan2 Mar. 1 2002  */
+/*    if (E->parallel.me<E->parallel.nproczl)  { */
+/*      sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles); */
+/*      fp2 = output_open(output_file); */
+/*  	if (fp2 == NULL) { */
+/*            fprintf(E->fp,"(Output.c #6) Cannot open %s\n",output_file); */
+/*            exit(8); */
+/*  	} */
+/*      for(j=1;j<=E->lmesh.noz;j++)  { */
+/*          fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]); */
+/*  	} */
+/*      fclose(fp2); */
+/*      } */
+
+  return;
+  }
+
+
+
+void output_temp(E,file_number)
+  struct All_variables *E;
+  int file_number;
+{
+  int m,nno,i,j,fd;
+  char output_file[255];
+  void parallel_process_sync();
+
+  return;
+}
+
+
+
+
+/* ==========================================================  */
+/* from Process_buoyancy.c                                     */
+/* =========================================================== */
+
+
+void process_temp_field(E,ii)
+ struct All_variables *E;
+    int ii;
+{
+    void heat_flux();
+    void output_temp();
+    void parallel_process_sync();
+    void process_output_field();
+    int record_h;
+
+/* This form prevented running for timesteps less than 10!!
+    record_h = E->control.record_every/10;  */
+    record_h = E->control.record_every;
+
+/* changed to allow 0th time step to be outputted CPC 6/18/00 */
+/*    if ( ((ii % record_h) == 0) || E->control.DIRECTII)    { */
+
+    if ( (ii == 0) || ((ii % record_h) == 0) || E->control.DIRECTII)    {
+      heat_flux(E);
+      parallel_process_sync();
+/*      output_temp(E,ii);  */
+    }
+
+/*    if ( ((ii % E->control.record_every) == 0) || E->control.DIRECTII)  { */
+    if ( ((ii == 0) || ((ii % E->control.record_every) == 0))
+		|| E->control.DIRECTII)     {
+       process_output_field(E,ii);
+    }
+
+    return;
+}
+
+
+/* ==========================================================  */
+/* from Process_velocity.c                                     */
+/* =========================================================== */
+
+void process_new_velocity(E,ii)
+    struct All_variables *E;
+    int ii;
+{
+    void output_velo_related();
+    void get_STD_topo();
+    void get_CBF_topo();
+    void parallel_process_sync();
+
+    int m,i,it;
+
+
+    E->monitor.length_scale = E->data.layer_km/E->mesh.layer[2]; /* km */
+    E->monitor.time_scale = pow(E->data.layer_km*1000.0,2.0)/   /* Million years */
+      (E->data.therm_diff*3600.0*24.0*365.25*1.0e6);
+
+    if ( (ii == 0) || ((ii % E->control.record_every) == 0)
+		|| E->control.DIRECTII)     {
+      get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,ii);
+      parallel_process_sync();
+      output_velo_related(E,ii);         /* also topo */
+    }
+
+    return;
+}
+
+
+void get_surface_velo(E, SV,m)
+  struct All_variables *E;
+  float *SV;
+  int m;
+  {
+
+  int el,els,i,node,lev;
+  char output_file[255];
+  FILE *fp;
+
+  const int dims=E->mesh.nsd;
+  const int ends=enodes[dims];
+  const int nno=E->lmesh.nno;
+
+  lev = E->mesh.levmax;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for (node=1;node<=nno;node++)
+      if (node%E->lmesh.noz==0)   {
+        i = node/E->lmesh.noz;
+        SV[(i-1)*2+1] = E->sphere.cap[m].V[1][node];
+        SV[(i-1)*2+2] = E->sphere.cap[m].V[2][node];
+      }
+
+  return;
+  }
+
+
+
+/* ==========================================================  */
 /* from                                                        */
 /* =========================================================== */
+
 

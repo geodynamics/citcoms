@@ -23,13 +23,13 @@ void read_velocity_boundary_from_file(E)
 
 void read_mat_from_file(E)
   struct All_variables *E;
-{ 
+{
   float find_age_in_MY();
 
   int nn,m,i,j,k,kk,el,lev,els;
   int elx,ely,elz,e,elg,emax,gmax;
   float *VIP1,*VIP2;
-  
+
   float age1,newage1,newage2;
   int nodea,nage;
 
@@ -40,14 +40,14 @@ void read_mat_from_file(E)
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
-  
+
   elx=E->lmesh.elx;
   elz=E->lmesh.elz;
   ely=E->lmesh.ely;
- 
+
   emax=E->mesh.elx*E->mesh.elz*E->mesh.ely;
   gmax=E->mesh.elx*E->mesh.ely;
-  
+
   VIP1 = (float*) malloc ((gmax+1)*sizeof(float));
   VIP2 = (float*) malloc ((gmax+1)*sizeof(float));
 
@@ -98,7 +98,7 @@ void read_mat_from_file(E)
        fclose(fp2);
 
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
          for (k=1;k<=ely;k++)
                     for (i=1;i<=elx;i++)   {
                 elg = E->lmesh.exs+i + (E->lmesh.eys+k-1)*E->mesh.elx;
@@ -106,7 +106,7 @@ void read_mat_from_file(E)
                         for (j=1;j<=elz;j++)  {
           el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
 
-         if(E->sx[m][3][E->ien[m][el].node[2]]>=E->sphere.ro-E->viscosity.zlith) 
+         if(E->sx[m][3][E->ien[m][el].node[2]]>=E->sphere.ro-E->viscosity.zlith)
           E->VIP[m][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age1-newage1);
 
         }   /* end for j  */
@@ -115,18 +115,8 @@ void read_mat_from_file(E)
 
     }     /* end for E->control.mat==1  */
 
-/*
-  sprintf(output_file,"mat.%d",E->parallel.me);
-  fp=fopen(output_file,"w");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Problem_related #3) Cannot open %s\n",output_file);
-          exit(8);
-	}
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   
-      for(el=1;el<=E->lmesh.nel;el++)  
-         fprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
-  fclose(fp); 
-*/
+
+  /* mat output moved to Output.c */
 
      free ((void *) VIP1);
      free ((void *) VIP2);
@@ -168,7 +158,7 @@ void read_input_files_for_timesteps(E,action,output)
     noy1=E->lmesh.noy;
     lev=E->mesh.levmax;
 
-    
+
     age=find_age_in_MY(E);
     intage = age;
     newage1 = 1.0*intage;
@@ -246,7 +236,7 @@ void read_input_files_for_timesteps(E,action,output)
                     E->sphere.cap[1].VB[3][nodel] = 0.0;
 		}
              }
-      }   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */ 
+      }   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
       for(i=1;i<=dims;i++) {
           free ((void *) VB1[i]);
           free ((void *) VB2[i]);
@@ -325,7 +315,7 @@ void set_starting_age(E)
   struct All_variables *E;
 {
    float age_in_MY, e_4;
-   
+
 
    e_4=1.e-4;
 
@@ -335,7 +325,7 @@ void set_starting_age(E)
    else { /* backward convection */
       age_in_MY = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
    }
-    
+
       if (((age_in_MY+e_4) < 0.0) && (E->monitor.solution_cycles <= 1)) {
         if (E->parallel.me == 0) fprintf(stderr,"Age = %g Ma, Initial age should not be negative!\n",age_in_MY);
 	exit(11);
