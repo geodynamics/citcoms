@@ -872,6 +872,7 @@ struct All_variables {
   /* the following function pointers are for exchanger */
   void (* exchange_node_d)(void*, double**, int);
   void (* exchange_node_f)(void*, float**, int);
+  void (* temperatures_conform_bcs)(void*);
 
 };
 
