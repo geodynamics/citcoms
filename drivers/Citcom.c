@@ -34,7 +34,7 @@ int main(argc,argv)
   double CPU_time0(),time,initial_time,start_time,avaimem();
     
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
-  E = Citcom_Init();
+  Citcom_Init();         /* allocate global E here */
   
   parallel_process_initilization(E,argc,argv);
   

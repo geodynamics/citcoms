@@ -4,7 +4,7 @@
 
 extern struct All_variables *E;
 
-extern struct All_variables* Citcom_Init();
+extern void Citcom_Init();
 
 #endif  
 

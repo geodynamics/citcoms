@@ -4,11 +4,11 @@
 
 struct All_variables *E;
 
-struct All_variables* Citcom_Init()
+void Citcom_Init()
 {
 
   E = (struct All_variables*) malloc(sizeof(struct All_variables));
   fprintf(stderr,"Citcom_Init: address of E is %p\n",E);
 
-  return E;
+  return;
 }

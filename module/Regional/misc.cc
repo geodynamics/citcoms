@@ -55,14 +55,18 @@ char pyCitcomSRegional_Citcom_Init__name__[] = "Citcom_Init";
 
 PyObject * pyCitcomSRegional_Citcom_Init(PyObject *, PyObject *)
 {
-    E = Citcom_Init();
-    return Py_BuildValue("O", E);
+    Citcom_Init();
+
+    // if E is NULL, raise an exception here... to be done.
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 
 
 
 // version
-// $Id: misc.cc,v 1.2 2003/04/04 00:42:50 tan2 Exp $
+// $Id: misc.cc,v 1.3 2003/04/05 20:57:15 tan2 Exp $
 
 // End of file
