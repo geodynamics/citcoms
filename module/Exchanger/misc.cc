@@ -189,6 +189,20 @@ void commonE(All_variables *E) {
 	}
     }
 
+    for(int m=1;m<=E->sphere.caps_per_proc;m++) {
+	E->sphere.cap[m].VB[1] = new float[E->lmesh.nno+1];
+	E->sphere.cap[m].VB[2] = new float[E->lmesh.nno+1];
+	E->sphere.cap[m].VB[3] = new float[E->lmesh.nno+1];
+	E->node[m] = new unsigned int[E->lmesh.nno+1];
+
+	for(int n=1; n<=E->lmesh.nno; n++) {
+	    E->sphere.cap[m].VB[1][n] = 0;
+	    E->sphere.cap[m].VB[2][n] = 0;
+	    E->sphere.cap[m].VB[3][n] = 0;
+	    E->node[m][n] = 0;
+	}
+    }
+
     for (int lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
 	for (int j=1;j<=E->sphere.caps_per_proc;j++)  {
 
@@ -253,6 +267,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.12 2003/09/27 20:16:25 tan2 Exp $
+// $Id: misc.cc,v 1.13 2003/09/28 06:03:12 tan2 Exp $
 
 // End of file
