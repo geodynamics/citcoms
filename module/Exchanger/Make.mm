@@ -19,8 +19,8 @@ PROJ_CXX_SRCLIB = \
         $(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
-EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR) $(EXCHANGER_INCDIR)
-EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib -L$(PYTHIA_LIBDIR) -L$(EXCHANGER_LIBDIR)
+EXTERNAL_INCLUDES += $(PYTHIA_INCDIR)
+EXTERNAL_LIBPATH += -L$(PYTHIA_LIBDIR)
 
 PROJ_SRCS = \
 	AreaWeightedNormal.cc \
@@ -47,6 +47,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.24 2004/11/16 11:43:27 steve Exp $
+# $Id: Make.mm,v 1.25 2005/01/28 19:20:28 tan2 Exp $
 
 # End of file
