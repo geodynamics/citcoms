@@ -13,6 +13,72 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "output.h"
+
+FILE* output_init(char *output_file)
+{
+  FILE *fp1;
+
+  if (*output_file)
+    fp1 = fopen(output_file,"w");
+  else
+    fp1 = stderr;
+
+  return fp1;
+}
+
+
+void output_close(FILE* fp1)
+{
+  fclose(fp1);
+  return;
+}
+
+
+void output_coord_header(struct All_variables *E, FILE *fp1)
+{
+  int j;
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++)
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+  return;
+}
+
+
+void output_coord(struct All_variables *E, FILE *fp1)
+{
+  int i, j;
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++)     {
+    for(i=1;i<=E->lmesh.nno;i++)           
+      fprintf(fp1,"%.3e %.3e %.3e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+  }
+  return;
+}
+
+
+void output_velo_header(struct All_variables *E, FILE *fp1, int file_number)
+{
+  fprintf(fp1,"%d %d %.5e\n",file_number,E->lmesh.nno,E->monitor.elapsed_time);
+  return;
+}
+
+
+void output_velo(struct All_variables *E, FILE *fp1)
+{
+  int i, j;
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)           
+      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
+  }
+
+  return;
+}
+
+
+/*********************************************************************/
 
 
 void output_velo_related(E,file_number)

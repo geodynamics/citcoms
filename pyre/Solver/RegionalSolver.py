@@ -2,10 +2,6 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#                             Michael A.G. Aivazis
-#                      California Institute of Technology
-#                      (C) 1998-2003  All Rights Reserved
-#
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -16,7 +12,7 @@ import CitcomS.Regional as Regional
 
 
 class RegionalApp(Application):
-#    import journal
+    #import journal
     total_time = 0
     cycles = 0
     keep_going = True
@@ -25,32 +21,45 @@ class RegionalApp(Application):
     def run(self):
 	Application.run(self)
 	
-#	if (Control.post_proccessing):
-#	    Regional.post_processing()
-#	    return
+	#if (Control.post_proccessing):
+	#    Regional.post_processing()
+	#    return
 	
 	# decide which stokes solver to use
 	import CitcomS.Stokes_solver
 	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
 	vsolver.init()
 	
-#	# decide which advection solver to use
-#	import CitcomS.Advection_solver
-#	tsolver = CitcomS.Advection_solver.PGsolver()
-#	tsolver.init()
-
-	#
-	#import CitcomS.Regional.output as Output
-	#Output.init()
+	## decide which advection solver to use
+	#import CitcomS.Advection_solver
+	#tsolver = CitcomS.Advection_solver.PGsolver()
+	#tsolver.init()
 
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
-#	while (self.keep_going and not Emergency_stop):
-#	    self.cycles += 1
-#	    tsolver.run()
-#	    vsolver.run()
-#	    total_time = Regional.CPU_time() - self.start_time
+	# output phase
+	prefix = 'test'
+	import mpi
+	self.rank = mpi.world().rank
+	
+	import CitcomS.Output as Output
+	output_coord = Output.outputCoord(prefix, self.rank)
+	output_coord.init()
+	output_coord.write()
+	output_coord.close()
+	
+	output_velo = Output.outputVelo(prefix, self.rank, self.cycles)
+	output_velo.init()
+	output_velo.write()
+	output_velo.close()
+	
+
+	#while (self.keep_going and not Emergency_stop):
+	#    self.cycles += 1
+	#    tsolver.run()
+	#    vsolver.run()
+	#    total_time = Regional.CPU_time() - self.start_time
 
 	return
 	    
@@ -163,6 +172,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.4 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.5 2003/05/21 21:28:01 tan2 Exp $"
 
 # End of file 

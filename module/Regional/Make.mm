@@ -25,9 +25,10 @@ PROJ_CXX_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
 PROJ_SRCS = \
     bindings.cc \
     exceptions.cc \
-    misc.cc
+    misc.cc \
+    output_bindings.cc
 
 # version
-# $Id: Make.mm,v 1.4 2003/04/10 23:18:24 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/05/21 21:28:00 tan2 Exp $
 
 # End of file

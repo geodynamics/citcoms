@@ -1,14 +1,10 @@
 // -*- C++ -*-
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
-//                               Michael A.G. Aivazis
-//                        California Institute of Technology
-//                        (C) 1998-2003 All Rights Reserved
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //  <LicenseText>
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
 #include <portinfo>
@@ -17,6 +13,7 @@
 #include "bindings.h"
 
 #include "misc.h"          // miscellaneous methods
+#include "output_bindings.h"
 
 // the method table
 
@@ -27,6 +24,11 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_copyright,
      METH_VARARGS,
      pyRegional_copyright__doc__},
+
+
+    //////////////////////////////////////////////////////////////////////////
+    // This section is for testing or temporatory implementation
+    //////////////////////////////////////////////////////////////////////////
 
     {pyRegional_return1_test__name__, 
      pyRegional_return1_test,
@@ -54,6 +56,11 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_solve_constrained_flow_iterative__doc__},
 
 
+    //////////////////////////////////////////////////////////////////////////
+    // This section is for finished implementation
+    //////////////////////////////////////////////////////////////////////////
+
+    // from misc.h
 
     {pyRegional_Citcom_Init__name__,
      pyRegional_Citcom_Init,
@@ -76,7 +83,7 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_construct_stiffness_B_matrix__doc__},
 
 
-
+    //
 
     {pyRegional_general_stokes_solver_init__name__,
      pyRegional_general_stokes_solver_init,
@@ -104,12 +111,43 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_general_stokes_solver_log__doc__},
 
 
+    // from output.h
+
+    {pyRegional_output_init__name__,
+     pyRegional_output_init,
+     METH_VARARGS,
+     pyRegional_output_init__doc__},
+
+    {pyRegional_output_close__name__,
+     pyRegional_output_close,
+     METH_VARARGS,
+     pyRegional_output_close__doc__},
+
+    {pyRegional_output_coord_header__name__,
+     pyRegional_output_coord_header,
+     METH_VARARGS,
+     pyRegional_output_coord_header__doc__},
+
+    {pyRegional_output_coord__name__,
+     pyRegional_output_coord,
+     METH_VARARGS,
+     pyRegional_output_coord__doc__},
+
+    {pyRegional_output_velo_header__name__,
+     pyRegional_output_velo_header,
+     METH_VARARGS,
+     pyRegional_output_velo_header__doc__},
+
+    {pyRegional_output_velo__name__,
+     pyRegional_output_velo,
+     METH_VARARGS,
+     pyRegional_output_velo__doc__},
 
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.5 2003/05/16 21:11:53 tan2 Exp $
+// $Id: bindings.cc,v 1.6 2003/05/21 21:28:00 tan2 Exp $
 
 // End of file

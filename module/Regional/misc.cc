@@ -1,14 +1,10 @@
 // -*- C++ -*-
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
-//                               Michael A.G. Aivazis
-//                        California Institute of Technology
-//                        (C) 1998-2003 All Rights Reserved
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //  <LicenseText>
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
 #include <portinfo>
@@ -52,7 +48,7 @@ PyObject * pyRegional_copyright(PyObject *, PyObject *)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// This section is for test or temporatory implementation
+// This section is for testing or temporatory implementation
 //////////////////////////////////////////////////////////////////////////
 
 
@@ -202,6 +198,9 @@ PyObject * pyRegional_construct_stiffness_B_matrix(PyObject *self, PyObject *arg
 //////////////////////////////////////////////////////////////////////////
 
 
+//////////////////////////////////////////////////////////////////////////
+
+
 char pyRegional_general_stokes_solver_init__doc__[] = "";
 char pyRegional_general_stokes_solver_init__name__[] = "general_stokes_solver_init";
 PyObject * pyRegional_general_stokes_solver_init(PyObject *self, PyObject *args)
@@ -273,6 +272,6 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.10 2003/05/16 21:11:53 tan2 Exp $
+// $Id: misc.cc,v 1.11 2003/05/21 21:28:00 tan2 Exp $
 
 // End of file
