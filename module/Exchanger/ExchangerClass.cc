@@ -302,15 +302,18 @@ void Exchanger::imposeBC() {
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=0;i<boundary->size;i++) {
 	    int n = boundary->bid2gid[i];
-	    E->sphere.cap[m].VB[1][n] = incoming.v[0][i];
-	    E->sphere.cap[m].VB[2][n] = incoming.v[1][i];
-	    E->sphere.cap[m].VB[3][n] = incoming.v[2][i];
-	    E->node[m][n] = E->node[m][n] | VBX;
-	    E->node[m][n] = E->node[m][n] | VBY;
-	    E->node[m][n] = E->node[m][n] | VBZ;
-	    E->node[m][n] = E->node[m][n] & (~SBX);
-	    E->node[m][n] = E->node[m][n] & (~SBY);
-	    E->node[m][n] = E->node[m][n] & (~SBZ);
+	    int p = boundary->bid2proc[i];
+	    if (p == rank) {
+		E->sphere.cap[m].VB[1][n] = incoming.v[0][i];
+		E->sphere.cap[m].VB[2][n] = incoming.v[1][i];
+		E->sphere.cap[m].VB[3][n] = incoming.v[2][i];
+		E->node[m][n] = E->node[m][n] | VBX;
+		E->node[m][n] = E->node[m][n] | VBY;
+		E->node[m][n] = E->node[m][n] | VBZ;
+		E->node[m][n] = E->node[m][n] & (~SBX);
+		E->node[m][n] = E->node[m][n] & (~SBY);
+		E->node[m][n] = E->node[m][n] & (~SBZ);
+	    }
 	}
     }
     
@@ -365,7 +368,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.18 2003/09/28 00:11:03 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.19 2003/09/28 15:47:10 tan2 Exp $
 
 // End of file
 
