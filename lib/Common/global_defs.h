@@ -73,6 +73,14 @@ typedef double higher_precision1; /* intermediate calculations for finding above
 
 /* Common structures */
 
+struct Bdry {
+  int nel;
+  int *element[NCS];
+  int *normal[NCS][4];
+  double *det[NCS][7][5];
+};
+
+
 struct Rect {
     int numb;
     char overlay[40];
@@ -750,6 +758,7 @@ struct All_variables {
     struct Parallel parallel;
     struct SPHERE sphere;
     struct Tracer Tracer;
+    struct Bdry boundary;
 
     int filed[20];
 
