@@ -14,37 +14,37 @@ import CitcomS.Regional as Regional
 class ImcompressibleNewtonian(Stokes_solver):
 
 
-    def form_RHS(self):
+    def _form_RHS(self):
 	Regional.velocities_conform_bcs()
 	Regional.assemble_forces()
 	return
 
 
-    def form_LHS(self):
+    def _form_LHS(self):
 	Regional.get_system_viscosity()
 	Regional.construct_stiffness_B_matrix()
 	return
 
 
-    def solve(self):
+    def _solve(self):
 	return Regional.solve_constrained_flow_iterative()
 
 
 
 
-class ImcompressibleNonNewtonian(Stokes_solver):
+class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 
-    # over-ride Stokes.solver.run()
-    def run(self, *args, **kwds):
+    # over-ride Stokes_solver.run()
+    def run(self):
 
-	self.init()
+	self._init()
 
-	self.form_RHS()
+	self._form_RHS()
 
 	while (self.count < 50) and self.sdepv_not_convergent:
 
-	    self.form_LHS()
-	    self.viscosity_misfit = self.solve()
+	    self._form_LHS()
+	    self.viscosity_misfit = self._solve()
 
 	    Regional.general_stokes_solver_update_velo()
 	    self.Udot_mag = Regional.general_stokes_solver_Unorm()
@@ -56,12 +56,12 @@ class ImcompressibleNonNewtonian(Stokes_solver):
 	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
 	    self.count += 1
 
-	self.fini()
+	self._fini()
 
 	return
 
 
-    def init(self):
+    def _init(self):
 	# allocate and initialize memory here
 	Regional.general_stokes_solver_init()
 
@@ -72,7 +72,7 @@ class ImcompressibleNonNewtonian(Stokes_solver):
 	return
 
 
-    def fini(self):
+    def _fini(self):
 	# free memory here
 	Regional.general_stokes_solver_fini()
 	return
@@ -85,6 +85,6 @@ class ImcompressibleNonNewtonian(Stokes_solver):
 
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.4 2003/06/23 20:54:13 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.5 2003/06/26 23:14:42 tan2 Exp $"
 
 # End of file
