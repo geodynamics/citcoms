@@ -30,12 +30,11 @@ class RegionalApp(Application):
         vsolver = self.inventory.vsolver
         vsolver.init(self)
 
-        #tsolver = self.inventory.tsolver
+        tsolver = self.inventory.tsolver
+        tsolver.init(self)
 
 
         return
-
-
 
 
     def __init__(self, inputfile):
@@ -52,7 +51,8 @@ class RegionalApp(Application):
 
         return
 
-
+    def init(self):
+        return
 
     #def fini(self):
 	#self.total_time = Regional.CPU_time() - self.start_time
@@ -106,7 +106,7 @@ class RegionalApp(Application):
         inventory = [
             VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
 
-            #TSolver("tsolver", default=CitcomS.Advection_diffusion.temperature_diffadv()),
+            TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv()),
 
             pyre.facilities.facility("bc", default=BC()),
             pyre.facilities.facility("const", default=Const()),
@@ -137,8 +137,8 @@ class RegionalApp(Application):
 	vsolver.init()
 
 	# decide which field to advect (and to diffuse)
-	import CitcomS.Advection_diffusion.Advection_diffusion as Advection_diffusion
-	tsolver = Advection_diffusion.PG_timestep('temp')
+	import CitcomS.Advection_diffusion as Advection_diffusion
+	tsolver = Advection_diffusion.temperature_diffadv('temp')
 	tsolver.init()
 
 
@@ -160,6 +160,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.14 2003/07/15 00:40:03 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.15 2003/07/15 18:01:21 ces74 Exp $"
 
 # End of file
