@@ -17,13 +17,14 @@ struct All_variables;
 
 class Boundary {
     static const int dim_ = 3;      // spatial dimension
-    const int size_;                // # of boundary nodes
+    int size_;                      // # of boundary nodes
     Array2D<double, dim_> bounds_;  // domain bounds
     Array2D<double, dim_> X_;       // coordinate
 
 public:
     explicit Boundary(const All_variables* E);  // allocate memory and init domain bounds
     explicit Boundary(const int n);     // allocate memory only
+    Boundary();
     ~Boundary() {};
 
     inline int dim() const {return dim_;}
@@ -55,6 +56,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.18 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Boundary.h,v 1.19 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file

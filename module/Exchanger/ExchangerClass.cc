@@ -102,7 +102,7 @@ void Exchanger::sendTemperature() {
 	      << std::endl;
 
     if(rank == leader) {
-	outgoingT->send(intercomm, remoteLeader);
+	outgoingT.send(intercomm, remoteLeader);
     }
 }
 
@@ -115,7 +115,7 @@ void Exchanger::receiveTemperature() {
 	      << std::endl;
 
     if(rank == leader) {
-	incomingT->receive(intercomm, remoteLeader);
+	incomingT.receive(intercomm, remoteLeader);
     }
 }
 
@@ -124,7 +124,7 @@ void Exchanger::sendVelocities() {
     std::cout << "in Exchanger::sendVelocities" << std::endl;
 
     if(rank == leader) {
-	outgoingV->send(intercomm, remoteLeader);
+	outgoingV.send(intercomm, remoteLeader);
     }
 }
 
@@ -134,10 +134,10 @@ void Exchanger::receiveVelocities() {
 
     if(rank == leader) {
 	// store previously received V
-	std::swap(incomingV, old_incomingV);
+	swap(incomingV, old_incomingV);
 
-	incomingV->receive(intercomm, remoteLeader);
-	//incomingV->print("incomingV");
+	incomingV.receive(intercomm, remoteLeader);
+	//incomingV.print("incomingV");
     }
 }
 
@@ -222,7 +222,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.35 2003/10/19 01:01:33 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.36 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file
 

@@ -50,7 +50,7 @@ public:
 
 protected:
     static const int dim = 3;
-    
+
     const MPI_Comm comm;       // communicator of current solver
     const MPI_Comm intercomm;  // intercommunicator between solvers
 
@@ -67,10 +67,8 @@ protected:
 
     Mapping *mapping;
 
-    typedef std::auto_ptr<Array2D<double,1> > Temper;
-    typedef std::auto_ptr<Array2D<double,3> > Velo;
-    typedef Array2D<double,1> Temper2;
-    typedef Array2D<double,3> Velo2;
+    typedef Array2D<double,1> Temper;
+    typedef Array2D<double,dim> Velo;
 
     Temper outgoingT;
     Temper incomingT;
@@ -90,8 +88,6 @@ private:
     // disable copy constructor and copy operator
     Exchanger(const Exchanger&);
     Exchanger& operator=(const Exchanger&);
-
-
 };
 
 
@@ -99,7 +95,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.30 2003/10/19 01:01:33 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.31 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file
 

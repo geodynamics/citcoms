@@ -36,12 +36,16 @@ public:
 
     void receiveBoundary();
     void interpolateTemperature();
+
+private:
+    void gatherToOutgoingV(Velo& V, int sender);
+
 };
 
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.15 2003/10/19 01:01:33 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.16 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file
 

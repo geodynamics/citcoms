@@ -12,11 +12,13 @@
 
 #include "ExchangerClass.h"
 
+class AreaWeightedNormal;
 class FineGridMapping;
 
 
 class FineGridExchanger : public Exchanger {
     FineGridMapping* fgmapping;
+    AreaWeightedNormal* awnormal;
 
 public:
     FineGridExchanger(const MPI_Comm comm,
@@ -40,18 +42,14 @@ public:
     void imposeConstraint();
     void imposeBC();
 
-
 private:
-    void computeWeightedNormal(double* nwght) const;
-    double computeOutflow(const Velo& V, const double* nwght) const;
-    void reduceOutflow(const double outflow, const double* nwght);
 
 };
 
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.15 2003/10/19 01:01:33 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.16 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file
 

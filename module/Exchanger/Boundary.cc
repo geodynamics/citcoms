@@ -25,13 +25,20 @@ Boundary::Boundary(const All_variables* E) :
 }
 
 
-
 Boundary::Boundary(const int n) :
     size_(n),
     bounds_(2),
     X_(n)
 {
     std::cout << "in Boundary::Boundary  size = " << size_ << std::endl;
+}
+
+
+Boundary::Boundary() :
+    size_(0),
+    bounds_(2)
+{
+    std::cout << "in Boundary::Boundary  size = " << 0 << std::endl;
 }
 
 
@@ -48,21 +55,34 @@ void Boundary::initBounds(const All_variables *E) {
 
 
 void Boundary::send(const MPI_Comm comm, const int receiver) const {
+    int tag = 0;
+    MPI_Send(const_cast<int*>(&size_), 1, MPI_INT,
+	     receiver, tag, comm);
+
     X_.send(comm, receiver);
     bounds_.send(comm, receiver);
 }
 
 
 void Boundary::receive(const MPI_Comm comm, const int sender) {
+    int tag = 0;
+    MPI_Status status;
+    MPI_Recv(&size_, 1, MPI_INT,
+	     sender, tag, comm, &status);
+
+    X_.resize(size_);
     X_.receive(comm, sender);
     //printX();
-
     bounds_.receive(comm, sender);
     //printBounds();
+
 }
 
 
 void Boundary::broadcast(const MPI_Comm comm, const int broadcaster) {
+    MPI_Bcast(&size_, 1, MPI_INT, broadcaster, comm);
+
+    X_.resize(size_);
     X_.broadcast(comm, broadcaster);
     //printX();
 
@@ -82,6 +102,6 @@ void Boundary::printX(const std::string& prefix) const {
 
 
 // version
-// $Id: Boundary.cc,v 1.34 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Boundary.cc,v 1.35 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file

@@ -21,6 +21,7 @@ PROJ_CXX_SRCLIB = \
 EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
 
 PROJ_SRCS = \
+	AreaWeightedNormal.cc \
 	Boundary.cc \
 	CoarseGridExchanger.cc \
 	ExchangerClass.cc \
@@ -33,6 +34,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.5 2003/10/11 00:38:46 tan2 Exp $
+# $Id: Make.mm,v 1.6 2003/10/20 17:13:08 tan2 Exp $
 
 # End of file

@@ -24,13 +24,15 @@ CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm comm,
 					 const int localLeader,
 					 const int remoteLeader,
 					 const All_variables *E):
-    Exchanger(comm, intercomm, leader, localLeader, remoteLeader, E)
+    Exchanger(comm, intercomm, leader, localLeader, remoteLeader, E),
+    cgmapping(NULL)
 {
     std::cout << "in CoarseGridExchanger::CoarseGridExchanger" << std::endl;
 }
 
 CoarseGridExchanger::~CoarseGridExchanger() {
     std::cout << "in CoarseGridExchanger::~CoarseGridExchanger" << std::endl;
+    delete cgmapping;
 }
 
 
@@ -39,29 +41,25 @@ void CoarseGridExchanger::gather() {
 
     interpretate();
 
-    if (rank == leader) {
-	int nproc;
-	MPI_Comm_size(comm, &nproc);
-	for (int i=0; i<nproc; i++) {
-	    Array2D<double,dim> recV(boundary->size());
-	    Array2D<double,dim>* V = localV.get();
+    if (rank != leader) {
+	localV.send(comm, leader);
+	return;
+    }
 
-	    if (i != leader) {
-		recV.receive(comm, i);
-		V = &recV;
-	    }
+    Velo recV(boundary->size());
 
-	    for (int n=0; n<cgmapping->size(); n++)
-		if (cgmapping->bid2proc(n) == i)
-		    for (int d=0; d<dim; d++)
-			(*outgoingV)[d][n] = (*V)[d][n];
+    int nproc;
+    MPI_Comm_size(comm, &nproc);
+    for (int i=0; i<nproc; i++) {
+	if (i != leader) {
+	    recV.receive(comm, i);
+	    gatherToOutgoingV(recV, i);
 	}
-	
-	//outgoingV->print("outgoingV");
+	else
+	    gatherToOutgoingV(localV, i);
     }
-    else {
-	localV->send(comm, leader);
-    }
+
+    //outgoingV.print("outgoingV");
 }
 
 
@@ -80,18 +78,19 @@ void CoarseGridExchanger::interpretate() {
     for(int i=0; i<size; i++) {
 	int n1 = cgmapping->bid2elem(i);
 	for(int d=0; d<dim; d++)
-	    (*localV)[d][i] = 0;
+	    localV[d][i] = 0;
 
 	if(n1 != 0) {
 	    for(int mm=1; mm<=E->sphere.caps_per_proc; mm++)
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
 		    for(int d=0; d<dim; d++)
-			(*localV)[d][i] += cgmapping->shape(i*8+k) * E->sphere.cap[mm].V[d+1][node];
+			localV[d][i] += cgmapping->shape(i*8+k)
+			              * E->sphere.cap[mm].V[d+1][node];
 		}
 	}
     }
-    //localV->print("localV");
+    //localV.print("localV");
 }
 
 
@@ -112,11 +111,9 @@ void CoarseGridExchanger::createMapping() {
 void CoarseGridExchanger::createDataArrays() {
     std::cout << "in CoarseGridExchanger::createDataArrays" << std::endl;
 
-    localV = Velo(new Array2D<double,3>(cgmapping->size()));
-
+    localV.resize(cgmapping->size());
     if (rank == leader)
-	outgoingV = Velo(new Array2D<double,3>(boundary->size()));
-
+	outgoingV.resize(boundary->size());
 }
 
 
@@ -125,26 +122,13 @@ void CoarseGridExchanger::receiveBoundary() {
 	      << "  rank = " << rank
 	      << "  leader = "<< localLeader
 	      << "  sender = "<< remoteLeader << std::endl;
-    int size;
 
-    if (rank == leader) {
-	int tag = 0;
-	MPI_Status status;
-
- 	MPI_Recv(&size, 1, MPI_INT,
- 		 remoteLeader, tag, intercomm, &status);
-
-	boundary = new Boundary(size);
+    boundary = new Boundary;
+    if (rank == leader)
 	boundary->receive(intercomm, remoteLeader);
-    }
 
     // Broadcast info received by localLeader to the other procs
     // in the Coarse communicator.
-    MPI_Bcast(&size, 1, MPI_INT, leader, comm);
-
-    if (rank != leader)
-	boundary = new Boundary(size);
-
     boundary->broadcast(comm, leader);
 }
 
@@ -169,7 +153,16 @@ void CoarseGridExchanger::interpolateTemperature() {
     }
 }
 
+
+void CoarseGridExchanger::gatherToOutgoingV(Velo& V, int sender) {
+    for (int n=0; n<cgmapping->size(); n++)
+	if (cgmapping->bid2proc(n) == sender)
+	    for (int d=0; d<dim; d++)
+		outgoingV[d][n] = V[d][n];
+}
+
+
 // version
-// $Id: CoarseGridExchanger.cc,v 1.31 2003/10/19 01:01:33 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.32 2003/10/20 17:13:08 tan2 Exp $
 
 // End of file
