@@ -37,8 +37,7 @@ class CoupledApp(SimpleApp):
 
         self.findLayout(layout)
 
-        controller = self.inventory.controller
-        controller.initialize(self)
+        self.controller.initialize(self)
 
         return
 
@@ -47,12 +46,14 @@ class CoupledApp(SimpleApp):
     def findLayout(self, layout):
 
         if layout.coarse:
+            self.controller = self.inventory.coarseController
             self.solver = self.inventory.coarse
             self.exchanger = self.inventory.cge
             self.solverCommunicator = layout.coarse
             self.myPlus = layout.coarsePlus
             self.remotePlus = layout.finePlus
         elif layout.fine:
+            self.controller = self.inventory.fineController
             self.solver = self.inventory.fine
             self.exchanger = self.inventory.fge
             self.solverCommunicator = layout.fine
@@ -91,7 +92,8 @@ class CoupledApp(SimpleApp):
         self._info.line("    fine: %r" % self.inventory.fine.name)
         self._info.line("    cge: %r" % self.inventory.cge.name)
         self._info.line("    fge: %r" % self.inventory.fge.name)
-        self._info.line("    controller: %r" % self.inventory.controller.name)
+        self._info.line("    coarseController: %r" % self.inventory.coarseController.name)
+        self._info.line("    fineController: %r" % self.inventory.fineController.name)
         self._info.line("    coupler: %r" % self.inventory.coupler.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
 
@@ -112,7 +114,8 @@ class CoupledApp(SimpleApp):
 
         inventory = [
 
-            pyre.facilities.facility("controller", default=Controller.controller()),
+            pyre.facilities.facility( name="coarseController", default=Controller.controller(name="coarseController")),
+            pyre.facilities.facility( name="fineController", default=Controller.controller(name="fineController")),
             pyre.facilities.facility("coupler", default=Coupler.coupler()),
             pyre.facilities.facility("layout", default=Layout.layout()),
 
@@ -136,6 +139,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.10 2003/11/28 22:14:55 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.11 2004/12/02 20:23:12 tan2 Exp $"
 
 # End of file

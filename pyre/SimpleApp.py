@@ -36,22 +36,21 @@ class SimpleApp(Application):
     def initialize(self):
         layout = self.findLayout()
 
-        controller = self.inventory.controller
-        controller.initialize(self)
+        self.controller.initialize(self)
         return
 
 
 
     def launch(self):
-        controller = self.inventory.controller
-        controller.launch(self)
+        self.controller.launch(self)
 
-        controller.march(steps=self.inventory.steps)
+        self.controller.march(steps=self.inventory.steps)
         return
 
 
 
     def findLayout(self):
+        self.controller = self.inventory.controller
         self.solver = self.inventory.solver
         import mpi
         self.solverCommunicator = mpi.world()
@@ -76,8 +75,8 @@ class SimpleApp(Application):
         self._info.line("    journal: %r" % self.inventory.journal.name)
         self._info.line("    staging: %r" % self.inventory.staging.name)
 
-        self._info.line("    solver: %r" % self.inventory.solver.name)
-        self._info.line("    controller: %r" % self.inventory.controller.name)
+        self._info.line("    solver: %r" % self.solver.name)
+        self._info.line("    controller: %r" % self.controller.name)
 
         return
 
@@ -111,6 +110,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.7 2003/11/28 22:14:55 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.8 2004/12/02 20:23:12 tan2 Exp $"
 
 # End of file
