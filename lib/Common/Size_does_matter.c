@@ -40,11 +40,10 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
   double dxda[4][4],cof[4][4],x[4],bc[4][4];
 
 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int dims=E->mesh.nsd;
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
   const int ppts=ppoints[dims];
-  const int spts=spoints[dims];
 
 
   if(pressure < 2) {
@@ -199,10 +198,8 @@ void form_rtf_bc(k,x,rtf,bc)
   }
 
 
-
-
-void get_x_cart(struct All_variables *E, double xx[4][5],
-		int el, int side, int m)
+void get_side_x_cart(struct All_variables *E, double xx[4][5],
+		     int el, int side, int m)
 {
   double to,fo,dxdy[4][4];
   int i, node, s;
@@ -261,7 +258,7 @@ void construct_surf_det (E)
   for (m=1;m<=E->sphere.caps_per_proc;m++)
   for (es=1;es<=E->lmesh.snel;es++)   {
     el = es * E->lmesh.elz;
-    get_x_cart(E, xx, el, SIDE_TOP, m);
+    get_side_x_cart(E, xx, el, SIDE_TOP, m);
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       for(d=1;d<=E->mesh.nsd-1;d++)
@@ -300,7 +297,7 @@ void construct_bdry_det(struct All_variables *E)
   double xx[4][5],dxda[4][4];
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for (side=SIDE_BOTTOM; side<=SIDE_BACK; side++)
+    for (side=SIDE_BEGIN; side<=SIDE_END; side++)
       for(d=1; d<=oned; d++)
 	E->boundary.det[m][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
 
@@ -308,8 +305,8 @@ void construct_bdry_det(struct All_variables *E)
     for (es=1;es<=E->boundary.nel;es++) {
       el = E->boundary.element[m][es];
 
-      for (side=SIDE_BOTTOM; side<=SIDE_BACK; side++) {
-	get_x_cart(E, xx, el, side, m);
+      for (side=SIDE_BEGIN; side<=SIDE_END; side++) {
+	get_side_x_cart(E, xx, el, side, m);
 
 	for(k=1;k<=oned;k++) { /* all of the vpoints*/
 
@@ -320,17 +317,21 @@ void construct_bdry_det(struct All_variables *E)
 	  for(i=1;i<=oned;i++) /* nodes */
 	    for(d=1;d<=E->mesh.nsd-1;d++)
 	      for(e=1;e<=E->mesh.nsd-1;e++)
-		dxda[d][e] += xx[e][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+		dxda[d][e] += xx[sidedim[side][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
 	  jacobian = determinant(dxda,E->mesh.nsd-1);
 	  E->boundary.det[m][side][k][es] = jacobian;
 	}
 
 	/*
-	fprintf(stderr, "Boundary det: %d %d- %f %f %f %f\n", el, side,
+	fprintf(stderr, "Boundary det: %d %d- %e %e %e %e; sum = %e\n", el, side,
 	      E->boundary.det[m][side][1][es],
 	      E->boundary.det[m][side][2][es],
 	      E->boundary.det[m][side][3][es],
+	      E->boundary.det[m][side][4][es],
+	      E->boundary.det[m][side][1][es]+
+	      E->boundary.det[m][side][2][es]+
+	      E->boundary.det[m][side][3][es]+
 	      E->boundary.det[m][side][4][es]);
 	*/
       }
@@ -349,63 +350,36 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
      struct Shape_function1 *GM;
      struct Shape_function1_dA *dGammax;
 {
-  int ii,i,k,d,e,node;
+  int ii,i,k,d,e;
 
   double jacobian;
   double determinant();
-  double cofactor();
-  double **dmatrix();
 
   const int oned = onedvpoints[E->mesh.nsd];
 
-  double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
+  double xx[4][5],dxda[4][4];
 
-  to = E->eco[m][el].centre[1];
-  fo = E->eco[m][el].centre[2];
+  for (ii=0;ii<=top;ii++)   {   /* ii=0 for bottom and ii=1 for top */
 
-  dxdy[1][1] = cos(to)*cos(fo);
-  dxdy[1][2] = cos(to)*sin(fo);
-  dxdy[1][3] = -sin(to);
-  dxdy[2][1] = -sin(fo);
-  dxdy[2][2] = cos(fo);
-  dxdy[2][3] = 0.0;
-  dxdy[3][1] = sin(to)*cos(fo);
-  dxdy[3][2] = sin(to)*sin(fo);
-  dxdy[3][3] = cos(to);
+    get_side_x_cart(E, xx, el, ii+1, m);
 
- for (ii=0;ii<=top;ii++)   {   /* ii=0 for bottom and ii=1 for top */
+    for(k=1;k<=oned;k++)    { /* all of the vpoints*/
+      for(d=1;d<=E->mesh.nsd-1;d++)
+	for(e=1;e<=E->mesh.nsd-1;e++)
+	  dxda[d][e]=0.0;
 
-  for(i=1;i<=oned;i++) {     /* nodes */
-     e = i+ii*oned;
-     node = E->ien[m][el].node[e];
-     xx[1][i] = E->x[m][1][node]*dxdy[1][1]
-              + E->x[m][2][node]*dxdy[1][2]
-              + E->x[m][3][node]*dxdy[1][3];
-     xx[2][i] = E->x[m][1][node]*dxdy[2][1]
-              + E->x[m][2][node]*dxdy[2][2]
-              + E->x[m][3][node]*dxdy[2][3];
-     xx[3][i] = E->x[m][1][node]*dxdy[3][1]
-              + E->x[m][2][node]*dxdy[3][2]
-              + E->x[m][3][node]*dxdy[3][3];
-     }
+      for(i=1;i<=oned;i++)      /* nodes */
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++)
+	    dxda[d][e] += xx[e][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
-  for(k=1;k<=oned;k++)    { /* all of the vpoints*/
-     for(d=1;d<=E->mesh.nsd-1;d++)
-       for(e=1;e<=E->mesh.nsd-1;e++)
-            dxda[d][e]=0.0;
-
-     for(i=1;i<=oned;i++)      /* nodes */
-       for(d=1;d<=E->mesh.nsd-1;d++)
-         for(e=1;e<=E->mesh.nsd-1;e++)
-             dxda[d][e] += xx[e][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
-
-     jacobian = determinant(dxda,E->mesh.nsd-1);
-     dGammax->vpt[GMVGAMMA(ii,k)] = jacobian;
-     }
+      jacobian = determinant(dxda,E->mesh.nsd-1);
+      dGammax->vpt[GMVGAMMA(ii,k)] = jacobian;
+    }
   }
 
   return;
-  }
+}
 
 
 /*   ======================================================================
@@ -418,28 +392,18 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
      struct Shape_function1_dx *GMx;
      struct Shape_function_side_dA *dGamma;
 {
-  int ii,i,j,k,d,a,e,node;
+  int i,k,d,e;
 
   double jacobian;
   double determinant();
-  double cofactor();
-  void   form_rtf_bc();
 
-  struct Shape_function1 LGM;
-  struct Shape_function1_dx LGMx;
-
-  int dims[2][3];
-  int *elist[3];
+  int dims[3];
+  int elist[3][9];
   const int oned = onedvpoints[E->mesh.nsd];
-  const int vpts = vpoints[E->mesh.nsd-1];
-  const int ppts = ppoints[E->mesh.nsd-1];
-  const int ends = enodes[E->mesh.nsd-1];
-  double to,fo,ro,xx[4][5],dxda[4][4],dxdy[4][4];
+  double xx[4][5],dxda[4][4];
+  int side;
 
   /******************************************/
-  elist[0] = (int *)malloc(9*sizeof(int));
-  elist[1] = (int *)malloc(9*sizeof(int));
-  elist[2] = (int *)malloc(9*sizeof(int));
   /*for NS boundary elements */
   elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
   elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
@@ -451,114 +415,44 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
   elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
   /******************************************/
 
-  to = E->eco[m][el].centre[1];
-  fo = E->eco[m][el].centre[2];
-  ro = E->eco[m][el].centre[3];
-
-  dxdy[1][1] = cos(to)*cos(fo);
-  dxdy[1][2] = cos(to)*sin(fo);
-  dxdy[1][3] = -sin(to);
-  dxdy[2][1] = -sin(fo);
-  dxdy[2][2] = cos(fo);
-  dxdy[2][3] = 0.0;
-  dxdy[3][1] = sin(to)*cos(fo);
-  dxdy[3][2] = sin(to)*sin(fo);
-  dxdy[3][3] = cos(to);
-
   /*for side elements*/
-  for(i=1;i<=ends;i++) {
-    a = elist[NS][i+far*ends];
-    node=E->ien[m][el].node[a];
-    xx[1][i] = E->x[m][1][node]*dxdy[1][1]
-      + E->x[m][2][node]*dxdy[1][2]
-      + E->x[m][3][node]*dxdy[1][3];
-    xx[2][i] = E->x[m][1][node]*dxdy[2][1]
-      + E->x[m][2][node]*dxdy[2][2]
-      + E->x[m][3][node]*dxdy[2][3];
-    xx[3][i] = E->x[m][1][node]*dxdy[3][1]
-      + E->x[m][2][node]*dxdy[3][2]
-      + E->x[m][3][node]*dxdy[3][3];
+
+  if(NS == 0) {
+    dims[1]=2; dims[2]=3;
+    if(far == 0) side = SIDE_NORTH;
+    else side = SIDE_SOUTH;
   }
+  else if(NS == 1) {
+    dims[1]=1; dims[2]=3;
+    if(far == 0) side = SIDE_WEST;
+    else side = SIDE_EAST;
+  }
+  else if(NS == 2) {
+    dims[1]=1; dims[2]=2;
+    if(far == 0) side = SIDE_BOTTOM;
+    else side = SIDE_TOP;
+  }
+  else
+    fprintf(stderr, "Invalid input: NS = %d, far = %d\n", NS, far);
+
+  get_side_x_cart(E, xx, el, side, m);
 
   for(k=1;k<=oned;k++)    {
+
     for(d=1;d<=E->mesh.nsd-1;d++)
       for(e=1;e<=E->mesh.nsd-1;e++)
 	dxda[d][e]=0.0;
 
-    if(NS==0) {
-      for(i=1;i<=oned;i++) {
-	dims[NS][1]=2; dims[NS][2]=3;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++) {
-	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
-	  }
-      }
-    }
-    else if(NS==1) {
-      for(i=1;i<=oned;i++) {
-	dims[NS][1]=1; dims[NS][2]=3;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++) {
-	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
-	  }
-      }
-    }
-    else if(NS==2) {
-      for(i=1;i<=oned;i++) {
-	dims[NS][1]=1; dims[NS][2]=2;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++) {
-	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
-	  }
-      }
+    for(i=1;i<=oned;i++) {
+      for(d=1;d<=E->mesh.nsd-1;d++)
+	for(e=1;e<=E->mesh.nsd-1;e++) {
+	  dxda[d][e] += xx[dims[e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+	}
     }
 
     jacobian = determinant(dxda,E->mesh.nsd-1);
     dGamma->vpt[k] = jacobian;
   }
-
-  for(i=1;i<=ppts;i++)    { /* all of the ppoints*/
-    for(d=1;d<=E->mesh.nsd-1;d++)
-      for(e=1;e<=E->mesh.nsd-1;e++)
-	dxda[d][e]=0.0;
-
-    if(NS==0) {
-      for(k=1;k<=ends;k++) {
-	dims[NS][1]=2; dims[NS][2]=3;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++)
-	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
-      }
-    }
-    else if(NS==1) {
-      for(k=1;k<=ends;k++) {
-	dims[NS][1]=1; dims[NS][2]=3;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++) {
-	    a = elist[NS][k+far*ends];
-	    node=E->ien[m][el].node[a];
-	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
-	  }
-      }
-    }
-    else if(NS==2) {
-      for(k=1;k<=ends;k++) {
-	dims[NS][1]=1; dims[NS][2]=2;
-	for(d=1;d<=E->mesh.nsd-1;d++)
-	  for(e=1;e<=E->mesh.nsd-1;e++) {
-	    a = elist[NS][k+far*ends];
-	    node=E->ien[m][el].node[a];
-	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
-	  }
-      }
-    }
-
-    jacobian = determinant(dxda,E->mesh.nsd-1);
-    dGamma->ppt[i] = jacobian;
-  }
-
-  for(i=0;i<3;i++)
-    free((void *) elist[i]);
 
   return;
 }
@@ -572,12 +466,12 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
      struct CCX *ccx;
      int lev,el,m,pressure;
 {
-  int a,i,j,k,d,e,es,nel_surface;
+  int a,i,j,k,d;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int dims=E->mesh.nsd;
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
   const int ppts=ppoints[dims];
@@ -704,30 +598,27 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
 
 void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,struct CCX *ccx,int lev,int m,int pressure,int NS,int far)
 {
-  int a,aa,i,j,k,d,e,es,nel_surface;
+  int a,aa,i,j,k,d;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
-  int *elist[3];
+  int elist[3][9];
   const int dims=E->mesh.nsd;
   const int ends=enodes[dims-1];
   const int vpts=onedvpoints[dims];
   const int ppts=ppoints[dims];
 
   /******************************************/
-  elist[0] = (int *)malloc(9*sizeof(int));
-  elist[1] = (int *)malloc(9*sizeof(int));
-  elist[2] = (int *)malloc(9*sizeof(int));
   /*for NS boundary elements */
   elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
-  elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
+  elist[0][5]=2; elist[0][6]=6; elist[0][7]=7; elist[0][8]=3;
   /*for EW boundary elements */
-  elist[1][0]=0; elist[1][1]=1; elist[1][2]=2; elist[1][3]=6; elist[1][4]=5;
-  elist[1][5]=4; elist[1][6]=3; elist[1][7]=7; elist[1][8]=8;
+  elist[1][0]=0; elist[1][1]=1; elist[1][2]=5; elist[1][3]=6; elist[1][4]=2;
+  elist[1][5]=3; elist[1][6]=7; elist[1][7]=8; elist[1][8]=4;
   /*for TB boundary elements */
   elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
-  elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
+  elist[2][5]=5; elist[2][6]=8; elist[2][7]=7; elist[2][8]=6;
   /******************************************/
 
   if(pressure==0) {
@@ -844,9 +735,6 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
     }      /* end for int points */
   }      /* end if pressure  */
 
-  for(i=0;i<3;i++)
-    free((void *) elist[i]);
-
   return;
 }
 
@@ -855,12 +743,12 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
 void construct_c3x3matrix(E)
      struct All_variables *E;
 {
-  int m,a,i,j,k,d,e,es,el,nel_surface,lev;
+  int m,a,i,j,k,d,es,el,nel_surface,lev;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int dims=E->mesh.nsd;
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
   const int ppts=ppoints[dims];
@@ -1001,19 +889,15 @@ void construct_c3x3matrix(E)
 void mass_matrix(E)
      struct All_variables *E;
 
-{ int m,node,el,i,nint,e,lev;
+{ int m,node,i,nint,e,lev;
   int n[9];
   void get_global_shape_fn();
   void exchange_node_f();
   double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
-  double start_time,time1,time2, CPU_time0();
   struct Shape_function GN;
   struct Shape_function_dA dOmega;
   struct Shape_function_dx GNx;
-  char output_file[255];
-  FILE *fp;
 
-  const int ppts=ppoints[E->mesh.nsd];
   const int vpts=vpoints[E->mesh.nsd];
   const int sphere_key=1;
 
@@ -1109,23 +993,18 @@ void mass_matrix(E)
 
 
  if (E->control.verbose)  {
- for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
-  fprintf(E->fp_out,"output_mass lev=%d\n",lev);
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
-    for(e=1;e<=E->lmesh.NEL[lev];e++)
+   for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
+     fprintf(E->fp_out,"output_mass lev=%d\n",lev);
+     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+       fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
+       for(e=1;e<=E->lmesh.NEL[lev];e++)
          fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][m][e].area);
-    for (node=1;node<=E->lmesh.NNO[lev];node++)
-      fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
-    }
+       for (node=1;node<=E->lmesh.NNO[lev];node++)
+	 fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
+     }
    }
 
-/*   fprintf(E->fp_out,"output_mass \n"); */
-/*   for (m=1;m<=E->sphere.caps_per_proc;m++)   { */
-/*     fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m); */
-/*     for (node=1;node<=E->lmesh.nno;node++) */
-/*       fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->Mass[m][node]); */
-/*   } */
  }
-  return;
- }
+
+ return;
+}
