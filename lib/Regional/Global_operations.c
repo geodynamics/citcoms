@@ -125,7 +125,7 @@ void return_horiz_ave(E,X,H)
     }
 
   if (nproc>0)  {
-    world = MPI_COMM_WORLD;
+    world = E->parallel.world;
     MPI_Comm_group(world, &world_g);
     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
     MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -237,7 +237,7 @@ void return_horiz_ave_f(E,X,H)
     }
 
   if (nproc>0)  {
-    world = MPI_COMM_WORLD;
+    world = E->parallel.world;
     MPI_Comm_group(world, &world_g);
     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
     MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -308,8 +308,8 @@ float return_bulk_value(E,Z,average)
           }
 
 
-    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
+    MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
      
     if(average && volume != 0.0)
  	   integral /= volume;
@@ -344,7 +344,7 @@ if (been_here==0)  {
    }
 
  if (nproc>0)  {
-    world = MPI_COMM_WORLD;
+    world = E->parallel.world;
     MPI_Comm_group(world, &world_g);
     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
     MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -399,7 +399,7 @@ float Tmax;
      }
 
    if (nproc>0)  {
-     world = MPI_COMM_WORLD;
+     world = E->parallel.world;
      MPI_Comm_group(world, &world_g);
      MPI_Group_incl(world_g, nproc, processors, &horizon_g);
      MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -441,7 +441,7 @@ if (been_here==0)  {
    }
 
  if (nproc>0)  {
-    world = MPI_COMM_WORLD;
+    world = E->parallel.world;
     MPI_Comm_group(world, &world_g);
     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
     MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -495,7 +495,7 @@ if (been_here==0)  {
    }
 
  if (nproc>0)  {
-    world = MPI_COMM_WORLD;
+    world = E->parallel.world;
     MPI_Comm_group(world, &world_g);
     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
     MPI_Comm_create(world, horizon_g, &horizon_p);
@@ -555,7 +555,7 @@ float global_fvdot(E,A,B,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -588,7 +588,7 @@ double kineticE_radial(E,A,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -618,7 +618,7 @@ double global_vdot(E,A,B,lev)
 
     }  
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
@@ -643,7 +643,7 @@ double global_pdot(E,A,B,lev)
       temp += A[m][i]*B[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -669,7 +669,7 @@ double global_tdot_d(E,A,B,lev)
       temp += A[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -693,7 +693,7 @@ float global_tdot(E,A,B,lev)
         temp += A[m][i]*B[m][i]; 
     }
 
-  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
   }
@@ -704,7 +704,7 @@ float global_fmin(E,a)
    float a;
 {
   float temp;
-  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MIN,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MIN,E->parallel.world);
   return (temp);
   }
 
@@ -713,7 +713,7 @@ double global_dmax(E,a)
    double a;
 {
   double temp;
-  MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
   return (temp);
   }
 
@@ -723,7 +723,7 @@ float global_fmax(E,a)
    float a;
 {
   float temp;
-  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,MPI_COMM_WORLD);
+  MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,E->parallel.world);
   return (temp);
   }
 
@@ -787,8 +787,8 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
          }
    
 
-  MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
-  MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,MPI_COMM_WORLD);
+  MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   temp1 = sqrt(temp2/temp1);
 

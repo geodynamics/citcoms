@@ -32,11 +32,9 @@ int main(argc,argv)
 
   int cpu_total_seconds,k, *temp;
   double CPU_time0(),time,initial_time,start_time,avaimem();
-  int rank, nproc;
+  MPI_Comm world;
 
   MPI_Init(&argc,&argv); /* added here to allow command-line input */
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &nproc);
 
   if (argc < 2)   {
     fprintf(stderr,"Usage: %s PARAMETERFILE\n", argv[0]);
@@ -45,7 +43,8 @@ int main(argc,argv)
 
   //parallel_process_initilization(E,argc,argv);  //replaced by Citcom_Init()
 
-  Citcom_Init(nproc, rank); /* allocate global E and do initializaion here */
+  world = MPI_COMM_WORLD;
+  Citcom_Init(&world); /* allocate global E and do initializaion here */
   
   //E->monitor.solution_cycles=0;  //moved to Citcom_Init()
   

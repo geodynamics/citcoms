@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include "mpi.h"
 
 /*#include "/home/limbo1/louis/Software/include/dmalloc.h" */
 
@@ -270,6 +271,7 @@ struct PASS  {
     int pass[27];	}; 
 
 struct Parallel {
+    MPI_Comm world;
     int me;
     int nproc;
     int nprocx;

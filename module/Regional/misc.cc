@@ -60,13 +60,16 @@ char pyRegional_Citcom_Init__name__[] = "Citcom_Init";
 
 PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
 {
-    int nproc, rank;
+    PyObject *Obj;
+    MPI_Comm *world;
     
-    if (!PyArg_ParseTuple(args, "ii", &nproc, &rank))
+    if (!PyArg_ParseTuple(args, "O", &Obj))
         return NULL;
 
+    world = static_cast <MPI_Comm*> (PyCObject_AsVoidPtr(Obj));
+
     // Allocate global pointer E
-    Citcom_Init(nproc, rank);
+    Citcom_Init(world);
 
     // if E is NULL, raise an exception here.
     if (E == NULL)
@@ -101,6 +104,6 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.7 2003/04/11 01:31:59 tan2 Exp $
+// $Id: misc.cc,v 1.8 2003/05/13 19:51:11 tan2 Exp $
 
 // End of file
