@@ -162,9 +162,8 @@ void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver) const
 template <class T, int N>
 void Array2D<T,N>::sendSize(const MPI_Comm& comm, int receiver, int n) const
 {
-    const int tag = 10;
     int result = MPI_Send(&n, 1, MPI_INT,
-			  receiver, tag, comm);
+			  receiver, SIZETAG_, comm);
     testResult(result, "sendSize error!");
 }
 
@@ -174,9 +173,8 @@ int Array2D<T,N>::receiveSize(const MPI_Comm& comm, int sender) const
 {
     int n;
     MPI_Status status;
-    const int tag = 10;
     int result = MPI_Recv(&n, 1, MPI_INT,
-			  sender, tag, comm, &status);
+			  sender, SIZETAG_, comm, &status);
     testResult(result, "receiveSize error!");
     return n;
 }
@@ -198,10 +196,9 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver) const
 {
     sendSize(comm, receiver);
 
-    const int tag = 11;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), datatype,
-			  receiver, tag, comm);
+			  receiver, TAG_, comm);
     testResult(result, "send error!");
 }
 
@@ -222,10 +219,9 @@ void Array2D<T,N>::send(const MPI_Comm& comm, int receiver,
     // non-blocking send the vector[begin ~ begin+sendsize-1]
     // the caller must guarantee a_ is of sufficent size
 {
-    const int tag = begin;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Isend(const_cast<T*>(&a_[begin*N]), sendsize*N, datatype,
-			   receiver, tag, comm, &request);
+			   receiver, TAG_, comm, &request);
     testResult(result, "send error!");
 }
 
@@ -237,11 +233,10 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender)
     // resize to accommodate incoming data
     resize(receiveSize(comm, sender));
 
-    const int tag = 11;
     MPI_Status status;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Recv(&a_[0], a_.size(), datatype,
-			  sender, tag, comm, &status);
+			  sender, TAG_, comm, &status);
     testResult(result, "receive error!");
 }
 
@@ -262,10 +257,9 @@ void Array2D<T,N>::receive(const MPI_Comm& comm, int sender,
     // non-blocking receive the vector[begin ~ begin+recvsize-1]
     // the caller must guarantee a_ is of sufficent size
 {
-    const int tag = begin;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Irecv(&a_[begin*N], recvsize*N, datatype,
-			   sender, tag, comm, &request);
+			   sender, TAG_, comm, &request);
     testResult(result, "receive error!");
 }
 
@@ -408,6 +402,6 @@ void Array2D<T,N>::testResult(int result, const std::string& errmsg)
 
 
 // version
-// $Id: Array2D.cc,v 1.10 2003/10/30 22:21:00 tan2 Exp $
+// $Id: Array2D.cc,v 1.11 2003/10/30 22:45:37 tan2 Exp $
 
 // End of file

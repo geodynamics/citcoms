@@ -76,6 +76,8 @@ public:
     };
 
 private:
+    static const int SIZETAG_ = 74;
+    static const int TAG_ = 75;
     static MPI_Datatype typeofT();
     static void testResult(int result, const std::string& errmsg);
 
@@ -87,6 +89,6 @@ private:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.11 2003/10/30 22:21:00 tan2 Exp $
+// $Id: Array2D.h,v 1.12 2003/10/30 22:45:37 tan2 Exp $
 
 // End of file
