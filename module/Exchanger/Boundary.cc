@@ -22,7 +22,8 @@ Boundary::Boundary(const int n) : size(n){
 
     bid2proc = new int[size];
     bid2gid = new int[size];
-    bid2crseelem = new int[size];;
+    bid2crseelem[0] = new int[size];
+    bid2crseelem[1] = new int[size];
     shape = new double[size*8];    
   
     // use auto_ptr for exception-proof
@@ -175,23 +176,25 @@ void Boundary::init(const All_variables *E) {
 
 
 void Boundary::getBid2crseelem(const All_variables *E) {
-
-  int ind;
-  int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
+    
+   int ind,n,n1,n2;    
+   double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
+   int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
+//   int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
   
 //   for(int j=1; j < 2; j++) {
-  for(int j=0; j < size; j++) {
-    bid2crseelem[j]=0;
-    ind=0;
-    for(int i=1; i <= E->lmesh.nel; i++)
-      {
-	nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
-	nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
-	nymax = E->IEN[E->mesh.levmax][1][i].node[4];
-	nymin = E->IEN[E->mesh.levmax][1][i].node[1];
-	nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
-	nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
-	// Test
+//  for(int j=0; j < size; j++) {
+//    bid2crseelem[j]=0;
+//    ind=0;
+//    for(int i=1; i <= E->lmesh.nel; i++)
+//      {
+//	nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
+//	nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
+//	nymax = E->IEN[E->mesh.levmax][1][i].node[4];
+//	nymin = E->IEN[E->mesh.levmax][1][i].node[1];
+//	nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
+//	nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
+// Test
 // 	std::cout << "in Boundary::init " << nxmax << " "  << nxmin << " " 
 // 		  << nymax << " "  << nymin << " " 
 // 		  << nzmax << " "  << nzmin << " | " 
@@ -203,28 +206,118 @@ void Boundary::getBid2crseelem(const All_variables *E) {
 // 		  << E->X[E->mesh.levmax][1][3][nzmax] << " "  << E->X[E->mesh.levmax][1][3][nzmin] << " " 
 // 		  << std::endl;
 
-	if(  (X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) 
-	     &&(X[0][j] <= E->X[E->mesh.levmax][1][1][nxmax])
-	     &&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin])
-	     &&(X[1][j] <= E->X[E->mesh.levmax][1][2][nymax])
-	     &&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin])
-	     &&(X[2][j] <= E->X[E->mesh.levmax][1][3][nzmax]) )
-	  {
-	    bid2crseelem[j]=i;
-	    ind=1;
-	  }
-	if(ind) {
-	  std::cout << " done right bid = " << j << " "
-		    << " bid2crseelem[j] = " << bid2crseelem[j]
-		    << std::endl;
-	  break;
-	}
-      }
-    if(!ind)
-      std::cout << "  wrong bid = " << j << std::endl;
-  }
-  
-  return;
+//	if(  (X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) 
+//	     &&(X[0][j] <= E->X[E->mesh.levmax][1][1][nxmax])
+//	     &&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin])
+//	     &&(X[1][j] <= E->X[E->mesh.levmax][1][2][nymax])
+//	     &&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin])
+//	     &&(X[2][j] <= E->X[E->mesh.levmax][1][3][nzmax]) )
+//	  {
+//	    bid2crseelem[0][j]=i;
+//	    ind=1;
+//	  }
+//	if(ind) {
+//	  std::cout << " done right bid = " << j << " "
+//		    << " bid2crseelem[j] = " << bid2crseelem[0][j]
+//		    << std::endl;
+//	  break;
+//	}
+//      }
+//    if(!ind)
+//      std::cout << "  wrong bid = " << j << std::endl;
+//  }
+  for(int i=0; i< size; i++)
+    {
+        for(int j=0; j< dim; j++)xt[j]=X[j][i];
+// loop over 5 sub tets in a brick element
+        ind = 0;
+         
+        for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+            for(n=0;n<E->lmesh.nel;n++)
+            {
+                for(int j=0; j < 8; j++)
+                    for(int k=0; k < dim; k++)
+                    {
+                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
+                    }
+                  
+                for(int k=0; k < 5; k++)
+                {
+                    for(int m=0; m < dim; m++)
+                    {
+                        x1[m]=xc[nsub[k*4]*dim+m];
+                        x2[m]=xc[nsub[k*4+1]*dim+m];
+                        x3[m]=xc[nsub[k*4+2]*dim+m];
+                        x4[m]=xc[nsub[k*4+3]*dim+m];
+                    }
+                    dett=Tetrahedronvolume(x1,x2,x3,x4);
+                    det[0]=Tetrahedronvolume(x2,x4,x3,xt);
+                    det[1]=Tetrahedronvolume(x3,x4,x1,xt);
+                    det[2]=Tetrahedronvolume(x1,x4,x2,xt);
+                    det[3]=Tetrahedronvolume(x1,x2,x3,xt);
+                    if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
+                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
+                    ind=1;
+                    bid2crseelem[0][i]=n+1;
+                    bid2crseelem[1][i]=mm;
+                    for(int m=0; m<4; m++)
+                    {
+                        shape[i*8+nsub[k*4]]=det[0]/dett;
+                        shape[i*8+nsub[k*4+1]]=det[1]/dett;
+                        shape[i*8+nsub[k*4+2]]=det[2]/dett;
+                        shape[i*8+nsub[k*4+3]]=det[3]/dett;
+                    }
+                   
+                    break;
+                    
+                }
+                if(ind)
+                {
+                    xi[0]=xi[1]=xi[2]=0.0;
+                    for(int j=0; j < 8; j++)
+                        for(int k=0; k < dim; k++)
+                        {
+                  
+                            xi[k]+=xc[j*dim+k]*shape[i*8+j];
+                        }
+                }
+                
+                if(ind) break;          
+            }
+    }
+// test
+//  std::cout << "in Boundary::bid2crseelem for bid2crseelem " << std::endl;    
+    for(int i=0; i< size; i++)
+    {
+        n1=bid2crseelem[0][i];
+        n2=bid2crseelem[1][i];
+        for(int j=0; j< dim; j++)xt[j]=X[j][i];
+        for(int j=0; j < 8; j++)
+        {
+            
+            for(int k=0; k < dim; k++)
+            {                
+                xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
+            }
+//            std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
+        }        
+        for(int k=0; k<dim; k++)xi[k]=0.0;
+        for(int k=0; k<dim; k++)
+            for(int j=0; j < 8; j++)
+            {
+                xi[k]+=xc[j*dim+k]*shape[i*8+j];                
+            }
+//        std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
+        norm = 0.0;
+        for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
+        if(norm > 1.e-10)
+        {            
+            std::cout << "\n in Boundary::mapCoarseGrid for bid2crseelem interpolation functions are wrong " << norm << std::endl;
+        }
+        
+    }
+//    std::cout << "end of  Boundary::bid2crseelem for bid2crseelem " << std::endl; 
+    return;
 }
 
 
@@ -394,31 +487,33 @@ void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
 }
 double Boundary::Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4)
 {
-    double *xx[3],vol;
-    xx[0] = x2;  xx[1] = x3;  xx[2] = x4;
-    vol = det3_sub(xx);
-    xx[0] = x1;  xx[1] = x3;  xx[2] = x4;
-    vol -= det3_sub(xx);
-    xx[0] = x1;  xx[1] = x2;  xx[2] = x4;
-    vol += det3_sub(xx);
-    xx[0] = x1;  xx[1] = x2;  xx[2] = x3;
-    vol -= det3_sub(xx);
-    vol /= 6;
+    double vol;
+//    xx[0] = x2;  xx[1] = x3;  xx[2] = x4;
+    vol = det3_sub(x2,x3,x4);
+//    xx[0] = x1;  xx[1] = x3;  xx[2] = x4;
+    vol -= det3_sub(x1,x3,x4);
+//    xx[0] = x1;  xx[1] = x2;  xx[2] = x4;
+    vol += det3_sub(x1,x2,x4);
+//    xx[0] = x1;  xx[1] = x2;  xx[2] = x3;
+    vol -= det3_sub(x1,x2,x3);
+    vol /= 6.;
     return vol;       
 }
-double Boundary::det3_sub(double **x)
+double Boundary::det3_sub(double *x1, double *x2, double *x3)
 {
-    return (x[0][0]*(x[1][1]*x[2][2]-x[2][1]*x[1][2])
-            -x[0][1]*(x[1][0]*x[2][2]-x[2][0]*x[1][2])
-            +x[0][2]*(x[1][0]*x[2][1]-x[2][0]*x[1][1]));
+    return (x1[0]*(x2[1]*x3[2]-x3[1]*x2[2])
+            -x1[1]*(x2[0]*x3[2]-x3[0]*x2[2])
+            +x1[2]*(x2[0]*x3[1]-x3[0]*x2[1]));
+//   return (x[0][0]*(x[1][1]*x[2][2]-x[2][1]*x[1][2])
+//              -x[0][1]*(x[1][0]*x[2][2]-x[2][0]*x[1][2])
+//              +x[0][2]*(x[1][0]*x[2][1]-x[2][0]*x[1][1]));
 }
 
 
 void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
-    int ind;
-    
-    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3];
-    int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
+//      int ind,n1,n2;
+//     double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
+//      int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
     
     for(int i=0; i<size; i++)
         bid2proc[i]=localLeader;
@@ -440,57 +535,100 @@ void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
     if(n != size) std::cout << " nodes != size ";
     printBid2gid();
 
-    for(int i=0; i<size*8; i++)
-        shape[i]=0.0;
-  
-    for(int i=0; i< size; i++)
-    {
-        for(int j=0; j< dim; j++)xt[j]=X[j][i];
-// loop over 5 sub tets in a brick element
-        ind = 0;
-         
-        for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
-            for(n=0;n<E->lmesh.nel;n++)
-            {
-                for(int j=0; j < 8; j++)
-                    for(int k=0; k < dim; k++)
-                    {
-                  
-                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
-                    }
-                  
-                for(int k=0; k < 5; k++)
-                {
-                    for(int m=0; m < dim; m++)
-                    {
-                        x1[m]=xc[nsub[k*4]*dim+m];
-                        x2[m]=xc[nsub[k*4+1]*dim+m];
-                        x3[m]=xc[nsub[k*4+2]*dim+m];
-                        x4[m]=xc[nsub[k*4+3]*dim+m];
-                    }
-                    dett=Tetrahedronvolume(x1,x2,x3,x4);
-                    det[0]=Tetrahedronvolume(x2,x3,x4,xt);
-                    det[1]=Tetrahedronvolume(x3,x4,x1,xt);
-                    det[2]=Tetrahedronvolume(x4,x1,x2,xt);
-                    det[3]=Tetrahedronvolume(x1,x2,x3,xt);
-                    if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
-                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
-                    ind=1;
-                    bid2crseelem[i]=n;
-                    for(int m=0; m<4; m++)
-                    {
-                        shape[nsub[k*4]]=det[0]/dett;
-                        shape[nsub[k*4+1]]=det[1]/dett;
-                        shape[nsub[k*4+2]]=det[2]/dett;
-                        shape[nsub[k*4+3]]=det[3]/dett;
-                    }              
-                    break;              
-                }
-                if(ind) break;          
-            }
-    }
-// test
+  //    for(int i=0; i<size*8; i++)
+//          shape[i]=0.0;
     
+//      for(int i=0; i< size; i++)
+//      {
+//          for(int j=0; j< dim; j++)xt[j]=X[j][i];
+//  // loop over 5 sub tets in a brick element
+//          ind = 0;
+         
+//          for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+//              for(n=0;n<E->lmesh.nel;n++)
+//              {
+//                  for(int j=0; j < 8; j++)
+//                      for(int k=0; k < dim; k++)
+//                      {
+//                          xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
+//                      }
+                  
+//                  for(int k=0; k < 5; k++)
+//                  {
+//                      for(int m=0; m < dim; m++)
+//                      {
+//                          x1[m]=xc[nsub[k*4]*dim+m];
+//                          x2[m]=xc[nsub[k*4+1]*dim+m];
+//                          x3[m]=xc[nsub[k*4+2]*dim+m];
+//                          x4[m]=xc[nsub[k*4+3]*dim+m];
+//                      }
+//                      dett=Tetrahedronvolume(x1,x2,x3,x4);
+//                      det[0]=Tetrahedronvolume(x2,x4,x3,xt);
+//                      det[1]=Tetrahedronvolume(x3,x4,x1,xt);
+//                      det[2]=Tetrahedronvolume(x1,x4,x2,xt);
+//                      det[3]=Tetrahedronvolume(x1,x2,x3,xt);
+//                      if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
+//                      if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
+//                      ind=1;
+//                      bid2crseelem[0][i]=n+1;
+//                      bid2crseelem[1][i]=mm;
+//                      for(int m=0; m<4; m++)
+//                      {
+//                          shape[i*8+nsub[k*4]]=det[0]/dett;
+//                          shape[i*8+nsub[k*4+1]]=det[1]/dett;
+//                          shape[i*8+nsub[k*4+2]]=det[2]/dett;
+//                          shape[i*8+nsub[k*4+3]]=det[3]/dett;
+//                      }
+                   
+//                      break;
+                    
+//                  }
+//                  if(ind)
+//                  {
+//                      xi[0]=xi[1]=xi[2]=0.0;
+//                      for(int j=0; j < 8; j++)
+//                          for(int k=0; k < dim; k++)
+//                          {
+                  
+//                              xi[k]+=xc[j*dim+k]*shape[i*8+j];
+//                          }
+//                  }
+                
+//                  if(ind) break;          
+//              }
+//      }
+//  // test
+//  //    std::cout << "in Boundary::mapCoarseGrid for bid2crseelem " << std::endl;    
+//      for(int i=0; i< size; i++)
+//      {
+//          n1=bid2crseelem[0][i];
+//          n2=bid2crseelem[1][i];
+//          for(int j=0; j< dim; j++)xt[j]=X[j][i];
+//          for(int j=0; j < 8; j++)
+//          {
+            
+//              for(int k=0; k < dim; k++)
+//              {                
+//                  xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
+//              }
+//  //            std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
+//          }        
+//          for(int k=0; k<dim; k++)xi[k]=0.0;
+//          for(int k=0; k<dim; k++)
+//              for(int j=0; j < 8; j++)
+//              {
+//                  xi[k]+=xc[j*dim+k]*shape[i*8+j];                
+//              }
+//  //        std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
+//          norm = 0.0;
+//          for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
+//          if(norm > 1.e-10)
+//          {            
+//              std::cout << "\n in Boundary::mapCoarseGrid for bid2crseelem interpolation functions are wrong " << norm << std::endl;
+//          }
+        
+//      }
+//      std::cout << "end of  Boundary::mapCoarseGrid for bid2crseelem " << std::endl;
     return;  
 }
 
@@ -521,6 +659,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.14 2003/09/24 04:53:10 puru Exp $
+// $Id: Boundary.cc,v 1.15 2003/09/24 19:42:24 puru Exp $
 
 // End of file

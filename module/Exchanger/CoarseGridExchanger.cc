@@ -101,12 +101,12 @@ void CoarseGridExchanger::interpolate() {
     std::cout << "in CoarseGridExchanger::interpolate" << std::endl;
 //     for(int i=0;i<boundary->size;i++)
 //       {
-// 	std::cout << "i = " << i << " boundary->bid2crseelem = " << boundary->bid2crseelem[i] << std::endl;	
+// 	std::cout << "i = " << i << " boundary->bid2crseelem = " << boundary->bid2crseelem[0][i] << std::endl;	
 //       }
 
     for(int i=0;i<boundary->size;i++)
       {
-	n=boundary->bid2crseelem[i];
+	n=boundary->bid2crseelem[0][i];
 	for(int j=0; j < boundary->dim ;j++)
 	  {
 	    finex[j]=boundary->X[j][i];
@@ -252,6 +252,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.14 2003/09/22 18:14:32 ces74 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.15 2003/09/24 19:42:24 puru Exp $
 
 // End of file
