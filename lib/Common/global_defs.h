@@ -701,6 +701,11 @@ struct CONTROL {
     int eqn_viscosity;
     int eqn_zigzag;
     int verbose;
+  /* input info */
+  int VERBOSE;
+  int DESCRIBE;
+  int BEGINNER;
+
     int vbcs_file;
     int mat_control;
     double accuracy;
@@ -721,6 +726,7 @@ struct CONTROL {
      /* modules */
     int MELTING_MODULE;
     int CHEMISTRY_MODULE;
+
 };
 
 struct DATA {  
@@ -858,6 +864,14 @@ struct All_variables {
     struct Shape_function1_dx Lx; 
     struct Shape_function_dx NMx;
  
+  /* for temperature initial conditions */
+  int number_of_perturbations;
+  int perturb_ll[32];
+  int perturb_mm[32];
+  int load_depth[32];
+  float perturb_mag[32];
+  /*ccccc*/
+
     void (* build_forcing_term)(void*);
     void (* iterative_solver)(void*);
     void (* next_buoyancy_field)(void*);
