@@ -21,6 +21,7 @@ PROJ_CXX_SRCLIB = \
 EXTERNAL_LIBPATH += -L$(TOOLS_DIR)/lib
 
 PROJ_SRCS = \
+	AbstractSource.cc \
 	AreaWeightedNormal.cc \
 	Boundary.cc \
 	BoundaryCondition.cc \
@@ -55,6 +56,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.15 2004/02/24 20:40:06 tan2 Exp $
+# $Id: Make.mm,v 1.16 2004/02/25 23:07:51 tan2 Exp $
 
 # End of file
