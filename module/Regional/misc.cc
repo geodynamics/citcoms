@@ -180,34 +180,40 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_BC_update_bc__doc__[] = "";
-char pyCitcom_BC_update_bc__name__[] = "BC_update_bc";
+char pyCitcom_Visc_update_material__doc__[] = "";
+char pyCitcom_Visc_update_material__name__[] = "Visc_update_material";
 
-PyObject * pyCitcom_BC_update_bc(PyObject *self, PyObject *args)
+PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:BC_update_bc", &obj))
+    if (!PyArg_ParseTuple(args, "O:Visc_update_material", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
-
-    // copied from near the end of Citcom.c
-
     if(E->control.mat_control==1)
       read_mat_from_file(E);
-    /*
-      else
-      construct_mat_group(E);
-    */
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_BC_update_plate_velocity__doc__[] = "";
+char pyCitcom_BC_update_plate_velocity__name__[] = "BC_update_plate_velocity";
+
+PyObject * pyCitcom_BC_update_plate_velocity(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:BC_update_plate_velocity", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
-    /*
-      else
-      renew_top_velocity_boundary(E);
-    */
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -222,6 +228,6 @@ PyObject * pyCitcom_BC_update_bc(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.23 2004/05/24 20:32:06 tan2 Exp $
+// $Id: misc.cc,v 1.24 2004/05/26 23:56:33 tan2 Exp $
 
 // End of file
