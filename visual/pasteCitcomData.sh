@@ -18,10 +18,10 @@ line=`cat $1.velo.$2.$3 | wc -l`
 let line=line-1
 #echo $line
 
-tail -$line $1.velo.$2.$3 | paste $1.coord.$2 - $1.visc.$2.$3 > $1.$2.$3
+tail -$line $1.velo.$2.$3 | paste -d' ' $1.coord.$2 - $1.visc.$2.$3 > $1.$2.$3
 
 
 # version
-# $Id: pasteCitcomData.sh,v 1.1 2004/01/14 23:22:52 tan2 Exp $
+# $Id: pasteCitcomData.sh,v 1.2 2004/02/05 00:46:37 tan2 Exp $
 
 # End of file
