@@ -11,7 +11,6 @@
 #include <Python.h>
 //#include <iostream>
 //#include <fstream>
-#include "journal/journal.h"
 #include "mpi.h"
 #include "mpi/Communicator.h"
 #include "misc.h"
@@ -311,6 +310,6 @@ void commonE(All_variables *E)
 
 
 // version
-// $Id: misc.cc,v 1.26 2004/05/11 07:55:30 tan2 Exp $
+// $Id: misc.cc,v 1.27 2004/06/02 20:30:33 tan2 Exp $
 
 // End of file
