@@ -8,21 +8,16 @@
 #include <malloc.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-#if (defined __sunos__)
 #include <string.h>
-#else
-#include <strings.h>
-#endif
 
 #if defined(__sgi) || defined(__osf__)
 #include <sys/types.h>
 #endif
 
 #include "phase_change.h"
+#include "parallel_related.h"
 
-/*#include "/home/limbo1/louis/Software/src/dmalloc-3.2.1/dmalloc.h"
-*/
+
 int get_process_identifier()
 {
     int pid;
@@ -30,6 +25,7 @@ int get_process_identifier()
     pid = (int) getpid();
     return(pid);
 }
+
 
 void unique_copy_file(E,name,comment)
     struct All_variables *E;
@@ -57,6 +53,11 @@ void apply_side_sbc(struct All_variables *E)
   int i, j, d, m, side, n;
   const unsigned sbc_flags = SBX | SBY | SBZ;
   const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
+
+  if(E->parallel.total_surf_proc==12) {
+    fprintf(stderr, "side_sbc is applicable only in Regional version\n");
+    parallel_process_termination(E);
+  }
 
   for(m=1; m<=E->sphere.caps_per_proc; m++) {
     E->sbc.node[m] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
@@ -178,7 +179,6 @@ int read_previous_field(E,field,name,abbr)
     float **field;
     char *name, *abbr;
 {
-    void fcopy_interpolating();
     int input_string();
 
     float cross2d();
@@ -190,7 +190,6 @@ int read_previous_field(E,field,name,abbr)
     FILE *fp;
     int fnodesx,fnodesz,fnodesy;
     int i,j,column,found,m;
-    int interpolate=0;
 
     float *X,*Z,*Y;
 
