@@ -93,11 +93,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_createInterior__doc__},
 
-    {pyExchanger_initTemperature__name__,
-     pyExchanger_initTemperature,
-     METH_VARARGS,
-     pyExchanger_initTemperature__doc__},
-
     {pyExchanger_createSink__name__,
      pyExchanger_createSink,
      METH_VARARGS,
@@ -107,6 +102,21 @@ struct PyMethodDef pyExchanger_methods[] = {
      pyExchanger_createSource,
      METH_VARARGS,
      pyExchanger_createSource__doc__},
+
+    {pyExchanger_initTemperatureSink__name__,
+     pyExchanger_initTemperatureSink,
+     METH_VARARGS,
+     pyExchanger_initTemperatureSink__doc__},
+
+    {pyExchanger_initTemperatureSource__name__,
+     pyExchanger_initTemperatureSource,
+     METH_VARARGS,
+     pyExchanger_initTemperatureSource__doc__},
+
+    {pyExchanger_modifyT__name__,
+     pyExchanger_modifyT,
+     METH_VARARGS,
+     pyExchanger_modifyT__doc__},
 
     {pyExchanger_recvTandV__name__,
      pyExchanger_recvTandV,
@@ -179,6 +189,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.26 2003/11/28 22:21:51 ces74 Exp $
+// $Id: bindings.cc,v 1.27 2003/12/19 18:21:27 tan2 Exp $
 
 // End of file

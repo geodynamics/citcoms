@@ -77,10 +77,22 @@ extern "C"
 PyObject * pyExchanger_createSource(PyObject *, PyObject *);
 
 
-extern char pyExchanger_initTemperature__name__[];
-extern char pyExchanger_initTemperature__doc__[];
+extern char pyExchanger_initTemperatureSink__name__[];
+extern char pyExchanger_initTemperatureSink__doc__[];
 extern "C"
-PyObject * pyExchanger_initTemperature(PyObject *, PyObject *);
+PyObject * pyExchanger_initTemperatureSink(PyObject *, PyObject *);
+
+
+extern char pyExchanger_initTemperatureSource__name__[];
+extern char pyExchanger_initTemperatureSource__doc__[];
+extern "C"
+PyObject * pyExchanger_initTemperatureSource(PyObject *, PyObject *);
+
+
+extern char pyExchanger_modifyT__name__[];
+extern char pyExchanger_modifyT__doc__[];
+extern "C"
+PyObject * pyExchanger_modifyT(PyObject *, PyObject *);
 
 
 extern char pyExchanger_recvTandV__name__[];
@@ -123,15 +135,18 @@ extern char pyExchanger_sendT__doc__[];
 extern "C"
 PyObject * pyExchanger_sendT(PyObject *, PyObject *);
 
+
 extern char pyExchanger_imposeBC__name__[];
 extern char pyExchanger_imposeBC__doc__[];
 extern "C"
 PyObject * pyExchanger_imposeBC(PyObject *, PyObject *);
 
+
 extern char pyExchanger_imposeIC__name__[];
 extern char pyExchanger_imposeIC__doc__[];
 extern "C"
 PyObject * pyExchanger_imposeIC(PyObject *, PyObject *);
+
 
 extern char pyExchanger_exchangeBoundedBox__name__[];
 extern char pyExchanger_exchangeBoundedBox__doc__[];
@@ -161,6 +176,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.24 2003/11/28 22:25:00 ces74 Exp $
+// $Id: exchangers.h,v 1.25 2003/12/19 18:21:27 tan2 Exp $
 
 // End of file

@@ -285,19 +285,62 @@ PyObject * pyExchanger_createSource(PyObject *self, PyObject *args)
 }
 
 
-char pyExchanger_initTemperature__doc__[] = "";
-char pyExchanger_initTemperature__name__[] = "initTemperature";
+char pyExchanger_initTemperatureSink__doc__[] = "";
+char pyExchanger_initTemperatureSink__name__[] = "initTemperatureSink";
 
-PyObject * pyExchanger_initTemperature(PyObject *, PyObject *args)
+PyObject * pyExchanger_initTemperatureSink(PyObject *, PyObject *args)
 {
-    PyObject *obj;
+   PyObject *obj1, *obj2, *obj3;
 
-    if (!PyArg_ParseTuple(args, "O:initTemperature", &obj))
-	return NULL;
+    if (!PyArg_ParseTuple(args, "OOO:initTemperatureSink",
+                          &obj1, &obj2, &obj3))
+        return NULL;
 
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj));
+    Interior* b = static_cast<Interior*>(PyCObject_AsVoidPtr(obj1));
+    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    initTemperature(E);
+    initTemperatureSink(*b, *sink, E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_initTemperatureSource__doc__[] = "";
+char pyExchanger_initTemperatureSource__name__[] = "initTemperatureSource";
+
+PyObject * pyExchanger_initTemperatureSource(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:initTemperatureSource", &obj1, &obj2))
+        return NULL;
+
+    Source* source = static_cast<Source*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
+
+    initTemperatureSource(*source, E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_modifyT__doc__[] = "";
+char pyExchanger_modifyT__name__[] = "modifyT";
+
+PyObject * pyExchanger_modifyT(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:modifyT", &obj1, &obj2))
+        return NULL;
+
+    BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
+
+    modifyT(*bbox, E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -671,6 +714,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.30 2003/11/28 22:23:45 ces74 Exp $
+// $Id: exchangers.cc,v 1.31 2003/12/19 18:21:27 tan2 Exp $
 
 // End of file
