@@ -45,8 +45,15 @@ class Advection_diffusion(CitcomComponent):
 	    self.CitcomModule.PG_timestep_init(self.all_variables)
 	    self._been_here = True
 
-        self.CitcomModule.PG_timestep_solve(self.all_variables)
+        dt = self.stable_timestep()
+        self.CitcomModule.PG_timestep_solve(self.all_variables, dt)
 	return
+
+
+
+    def stable_timestep(self):
+        dt = self.CitcomModule.stable_timestep(self.all_variables)
+        return dt
 
 
 
@@ -70,6 +77,6 @@ class Advection_diffusion(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.13 2003/08/25 19:16:04 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.14 2003/08/26 20:58:28 tan2 Exp $"
 
 # End of file
