@@ -17,13 +17,14 @@ TEMPFILE=/tmp/$USER/tmptest1
 
 exchange.py \
 --staging.nodegen="n%03d" \
---staging.nodelist=[103-112] \
+--staging.nodelist=[101-113,115-129] \
 --staging.nodes=13 \
+--layout.coarse=[0-11] \
+--layout.fine=[12] \
 > $OUTPUT
 
 
-echo 'coarse exchanger: rank=8  leader=11  localLeader=11  remoteLeader=12' \
-    > $TEMPFILE
+echo 'coarse exchanger: rank=8  leader=11  remoteLeader=12' > $TEMPFILE
 result=Failed
 if grep 'coarse exchanger: rank=8' $OUTPUT | diff -w - $TEMPFILE; then
     result=Passed
@@ -31,8 +32,7 @@ fi
 echo test1: coarse exchanger rank ... $result.
 
 
-echo 'fine exchanger: rank=12  leader=0  localLeader=12  remoteLeader=11' \
-    > $TEMPFILE
+echo 'fine exchanger: rank=12  leader=0  remoteLeader=11' > $TEMPFILE
 result=Failed
 if grep 'fine exchanger: rank=12' $OUTPUT | diff -w - $TEMPFILE; then
     result=Passed
@@ -40,20 +40,20 @@ fi
 echo test1: fine exchanger rank ... $result.
 
 
-echo 'in Boundary::Boundary  size = 44' > $TEMPFILE
+echo ' -- in Boundary::Boundary  size = 44' > $TEMPFILE
 result=Failed
 if grep 'in Boundary::Boundary  size = 44' $OUTPUT | diff -w - $TEMPFILE; then
     result=Passed
 fi
-echo test1: bounary size ... $result.
+echo test1: boundary size ... $result.
 
 
-echo "X:  31:  1.7 2.1 0.9" > $TEMPFILE
+echo " --   X:  31:  1.7 2.1 0.9" > $TEMPFILE
 result=Failed
 if grep 'X:  31:' $OUTPUT | diff -w - $TEMPFILE; then
     result=Passed
 fi
-echo test1: bounary coord ... $result.
+echo test1: boundary coord ... $result.
 
 
 echo "0" > $TEMPFILE
@@ -68,6 +68,6 @@ rm $TEMPFILE
 
 
 # version
-# $Id: test1.sh,v 1.1 2003/10/21 17:26:32 tan2 Exp $
+# $Id: test1.sh,v 1.2 2003/10/24 05:23:36 tan2 Exp $
 
 # End of file

@@ -27,16 +27,16 @@ class TestExchanger(Application):
 
         exchanger = self.exchanger
         if exchanger:
-            self.test(exchanger,layout)
+            self.test(exchanger)
 
         return
 
 
-    def test(self, exchanger,layout):
+    def test(self, exchanger):
         # testing exchanger creation
         exchanger.selectModule()
         exchanger.createExchanger(self)
-        print exchanger.name, exchanger.exchanger
+        #print exchanger.name, exchanger.exchanger
 
         # testing boundary creation and exchange
         exchanger.findBoundary()
@@ -54,22 +54,23 @@ class TestExchanger(Application):
         try:
             # success if exchanger is a FGE
             exchanger.fge_t
-            dt = 0.15
+            dt = 0.4
         except:
             # exception if exchanger is a CGE
             dt = 1
 
         # testing dt exchanging
-        print "%s - old dt = %f   exchanged dt = %f   old dt = %f" % (
+        print "%s - old dt = %g   exchanged dt = %g   old dt = %g" % (
               exchanger.name, dt,
               exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
               dt)
 
         # testing exchangeSignal
-        steps = 2*7 + 1
+        steps = 2*3 + 1
         for step in range(steps):
             time = exchanger.stableTimestep(dt)
-            print "%s - step %d: %f" % (exchanger.name, step, time)
+            print "%s - step %d: %g" % (exchanger.name, step, time)
+            exchanger.applyBoundaryConditions()
 
             if step == steps-1:
                 done = True
@@ -101,12 +102,10 @@ class TestExchanger(Application):
         self.rank = layout.rank
         self.nodes = layout.nodes
         self.leader = layout.leader
-        self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
-        print "%s exchanger: rank=%d  leader=%d  localLeader=%d  remoteLeader=%d" % (
-              self.exchanger.name, self.rank, self.leader,
-              self.localLeader, self.remoteLeader)
+        print "%s exchanger: rank=%d  leader=%d  remoteLeader=%d" % (
+              self.exchanger.name, self.rank, self.leader, self.remoteLeader)
 
         return
 
@@ -126,8 +125,8 @@ class TestExchanger(Application):
             pyre.facilities.facility("controller", default=Controller.controller()),
             pyre.facilities.facility("layout", default=Layout.layout()),
 
-            pyre.facilities.facility("coarse", default=Exchanger.coarsegridexchanger("coarse", "coarse")),
-            pyre.facilities.facility("fine", default=Exchanger.finegridexchanger("fine", "fine")),
+            pyre.facilities.facility("coarse", default=Exchanger.coarsegridexchanger("coarse")),
+            pyre.facilities.facility("fine", default=Exchanger.finegridexchanger("fine")),
 
             ]
 
@@ -145,6 +144,12 @@ if __name__ == "__main__":
         print CitcomS.Exchanger.copyright()
         print dir(CitcomS.Exchanger)
 
+    import journal
+    #journal.debug("Array2D").activate()
+    journal.debug("Exchanger").activate()
+    journal.info("  X").activate()
+    journal.info("  proc").activate()
+    journal.info("  bid").activate()
 
     app = TestExchanger("test")
     app.main()
@@ -152,6 +157,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.14 2003/09/28 20:36:56 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.15 2003/10/24 05:23:36 tan2 Exp $"
 
 # End of file

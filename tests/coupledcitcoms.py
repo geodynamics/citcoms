@@ -15,14 +15,19 @@ from CitcomS.CoupledApp import CoupledApp
 if __name__ == "__main__":
 
     import journal
-    journal.info("staging").activate()
-    journal.debug("staging").activate()
+    #journal.debug("Array2D").activate()
+    #journal.debug("initTemperature").activate()
+    #journal.debug("imposeBC").activate()
+    journal.debug("Exchanger").activate()
+    journal.info("  X").activate()
+    journal.info("  proc").activate()
+    journal.info("  bid").activate()
 
-    app = CoupledApp("r1")
+    app = CoupledApp("app")
     app.main()
 
 
 # version
-__id__ = "$Id: coupledcitcoms.py,v 1.2 2003/09/12 16:25:49 tan2 Exp $"
+__id__ = "$Id: coupledcitcoms.py,v 1.3 2003/10/24 05:23:36 tan2 Exp $"
 
 #  End of file

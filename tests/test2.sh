@@ -22,7 +22,7 @@ rm $FINE.* $COARSE.*
 
 coupledcitcoms.py  \
 --staging.nodegen="n%03d" \
---staging.nodelist=[115-129,131-170] \
+--staging.nodelist=[101-118,120-129,131-170] \
 --staging.nodes=5 \
 --layout.coarse=[0-3] \
 --layout.fine=[4] \
@@ -68,7 +68,7 @@ coupledcitcoms.py  \
 
 echo '1.61688 1.51375 0.765625' > $TEMPFILE
 result=Failed
-if grep 'X:' $OUTPUT | grep ' 183:' | awk '{print $3 " " $4 " " $5}' \
+if grep 'X:' $OUTPUT | grep ' 183:' | awk '{print $4 " " $5 " " $6}' \
     | diff -w - $TEMPFILE; then
     result=Passed
 fi
@@ -77,7 +77,7 @@ echo test2: boundary.X ... $result.
 
 echo '2755' > $TEMPFILE
 result=Failed
-if grep 'bid:' $OUTPUT | grep ' 1344:' | awk '{print $3}' \
+if grep 'bid:' $OUTPUT | grep ' 1344:' | awk '{print $4}' \
     | diff -w - $TEMPFILE; then
     result=Passed
 fi
@@ -85,11 +85,11 @@ echo test2: bid2gid ... $result.
 
 
 echo '1' > $TEMPFILE
-if grep 'proc:' $OUTPUT | grep ' 954:' | awk '{print $3}' \
+if grep 'proc:' $OUTPUT | grep ' 954:' | awk '{print $4}' \
     | diff -w - $TEMPFILE; then
 
     echo '3' > $TEMPFILE
-    if grep 'proc:' $OUTPUT | grep ' 955:' | awk '{print $3}' \
+    if grep 'proc:' $OUTPUT | grep ' 955:' | awk '{print $4}' \
 	| diff -w - $TEMPFILE; then
     result=Passed
     fi
@@ -99,7 +99,7 @@ echo test2: bid2proc ... $result.
 
 echo '1.87341' > $TEMPFILE
 result=Failed
-if grep 'before boundary' $OUTPUT | cut -c 49- | diff -w - $TEMPFILE; then
+if grep 'before boundary' $OUTPUT | cut -c 52- | diff -w - $TEMPFILE; then
     result=Passed
 fi
 echo test2: outflow1 ... $result.
@@ -107,7 +107,7 @@ echo test2: outflow1 ... $result.
 
 echo '-1.12559e-15' > $TEMPFILE
 result=Failed
-if grep 'after boundary' $OUTPUT | cut -c 67- | diff -w - $TEMPFILE; then
+if grep 'after boundary' $OUTPUT | cut -c 70- | diff -w - $TEMPFILE; then
     result=Passed
 fi
 echo test2: outflow2 ... $result.
@@ -141,6 +141,6 @@ rm $TEMPFILE
 
 
 # version
-# $Id: test2.sh,v 1.2 2003/10/21 17:32:18 tan2 Exp $
+# $Id: test2.sh,v 1.3 2003/10/24 05:23:36 tan2 Exp $
 
 # End of file
