@@ -7,6 +7,27 @@
 #include "global_defs.h"
 
 
+
+void add_force(struct All_variables *E, int e, double *elt_f, int m)
+{
+  const int dims=E->mesh.nsd;
+  const int ends=enodes[E->mesh.nsd];
+  int a, a1, a2, a3, p, node;
+
+  for(a=1;a<=ends;a++)          {
+    node = E->ien[m][e].node[a];
+    p=(a-1)*dims;
+    a1=E->id[m][node].doff[1];
+    E->F[m][a1] += elt_f[p];
+    a2=E->id[m][node].doff[2];
+    E->F[m][a2] += elt_f[p+1];
+    a3=E->id[m][node].doff[3];
+    E->F[m][a3] += elt_f[p+2];
+  }
+}
+
+
+
 /* ================================================================
    Function to assemble the global  F vector.
                      +
@@ -17,25 +38,20 @@ void assemble_forces(E,penalty)
      struct All_variables *E;
      int penalty;
 {
-  double elt_f[24],elt_h[1];
-  int m,el,p,i,a,a1,a2,a3,e,ii,jj,kk,elx,ely,elz,node;
-  FILE *fp;
-  char output_file[255];
+  double elt_f[24];
+  /*   double elt_h[1]; */
+  int m,a,e;
 
   void get_elt_f();
   void get_elt_h();
+  void get_elt_tr();
   void strip_bcs_from_residual();
 
   void exchange_id_d();
 
   void thermal_buoyancy();
-  void parallel_process_termination();
-  double temp1,global_vdot();
 
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
-  const int ends=enodes[E->mesh.nsd];
   const int neq=E->lmesh.neq;
-  const int npno=E->lmesh.npno;
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
@@ -54,27 +70,23 @@ void assemble_forces(E,penalty)
    for (e=1;e<=nel;e++)  {
 
      get_elt_f(E,e,elt_f,1,m);
+     add_force(E, e, elt_f, m);
 
-    /*get_elt_h(E,e,elt_h,m);
-        E->H[m][e] = elt_h[0];   due to single pressure node per element */
+     /*get_elt_h(E,e,elt_h,m);
+       E->H[m][e] = elt_h[0];   due to single pressure node per element */
 
-     for(a=1;a<=ends;a++)          {
-       node = E->ien[m][e].node[a];
-       p=(a-1)*dims;
-       a1=E->id[m][node].doff[1];
-       E->F[m][a1] += elt_f[p];
-       a2=E->id[m][node].doff[2];
-       E->F[m][a2] += elt_f[p+1];
-       a3=E->id[m][node].doff[3];
-       E->F[m][a3] += elt_f[p+2];
-       }
-     }
+
+     /* for traction bc */
+     get_elt_tr(E, e, elt_f, m);
+     /* add_force(E, e, elt_f, m); */
+
+     }       /* end for e */
    }       /* end for m */
 
    exchange_id_d(E, E->F, lev);
 
    strip_bcs_from_residual(E,E->F,lev);
-  return;
+   return;
   }
 
 
@@ -724,7 +736,7 @@ void get_elt_h(E,el,elt_h,m)
 }
 
 /*=================================================================
-  Function to create the element force vector (allowing for b.c.'s)
+  Function to create the element force vector (allowing for velocity b.c.'s)
   ================================================================= */
 
 void get_elt_f(E,el,elt_f,bcs,m)
@@ -814,6 +826,83 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
   return;
 }
+
+
+/*=================================================================
+  Function to create the element force vector due to stress b.c.
+  ================================================================= */
+
+void get_elt_tr(struct All_variables *E, int e, double *elt_tr, int m)
+{
+#if 0
+  struct Shape_function GN;
+  struct Shape_function_dA dOmega;
+  struct Shape_function_dx GNx;
+
+  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int n=loc_mat_size[dims];
+  const int ends=enodes[dims];
+  const int vpts=vpoints[dims];
+  const int sphere_key=1;
+
+  type = SBX;
+  for(j=1;j<=dims;j++) {
+    for(b=1;b<=ends;b++) {
+      nodeb=E->ien[m][el].node[b];
+      if ((E->node[m][nodeb]&type)&&(E->sphere.cap[m].VB[j][nodeb]!=0.0)){
+	if(!got_elt_k) {
+	  get_elt_k(E,el,elt_k,E->mesh.levmax,m);
+	  got_elt_k = 1;
+	}
+	q = dims*(b-1)+j-1;
+	if(p!=q) {
+	  elt_f[p] -= elt_k[p*n+q] * E->sphere.cap[m].VB[j][nodeb];
+	}
+      }
+    }  /* end for b */
+    type *= (unsigned int) 2;
+  }      /* end for j */
+
+  /* this part is copied and modified from
+     element_residual() in Advection_diffusion.c  */
+
+  struct Shape_function1 GM;
+  struct Shape_function1_dA dGamma;
+  struct Shape_function_side_dA dGamma;
+  struct Shape_function1_dx GMx;
+
+  type = SBX;
+
+  for(a=1;a<=ends;a++)
+    if (BCFlag[E->ien[m][el].node[a]] & type) {
+      if (dim=3) get_global_1d_shape_fn(E,el,&GM,&dGamma,1,m);
+      else get_global_side_1d_shape_fn(E, el, &GM, &
+
+      nodes[1] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][0];
+      nodes[2] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][0];
+      nodes[4] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][1];
+      nodes[3] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][1];
+
+      for(aid=0,j=1;j<=onedvpoints[E->mesh.nsd];j++)
+	if (a==nodes[j])
+	  aid = j;
+      if(aid==0)
+	printf("%d: mixed up in pg-flux int: looking for %d\n",el,a);
+
+      if (loc[a].plus[1] != 0)
+	back_front = 0;
+      else back_front = 1;
+
+      for(j=1;j<=onedvpoints[dims];j++)
+	for(k=1;k<=onedvpoints[dims];k++)
+	  Eres[a] += dGamma.vpt[GMVGAMMA(back_front,j)] *
+	    E->M.vpt[GMVINDEX(aid,j)] * g_1d[j].weight[dims-1] *
+	    BC[2][E->ien[m][el].node[a]] * E->M.vpt[GMVINDEX(k,j)];
+    }
+
+#endif
+}
+
 
 /* =================================================================
  subroutine to get augmented lagrange part of stiffness matrix
