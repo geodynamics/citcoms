@@ -26,7 +26,7 @@ public:
 
     Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
     void resize(const int size);
-    void reset(T* array, const int size);
+
     template <class T1, int N1>
     friend void swap(Array2D<T1,N1>& lhs, Array2D<T1,N1>& rhs);
 
@@ -62,6 +62,7 @@ public:
     }
 
 private:
+    void reset(T* array, const int size);
     static MPI_Datatype typeofT();
 };
 
@@ -74,6 +75,6 @@ void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
 #endif
 
 // version
-// $Id: Array2D.h,v 1.5 2003/10/19 19:54:13 tan2 Exp $
+// $Id: Array2D.h,v 1.6 2003/10/22 01:13:56 tan2 Exp $
 
 // End of file

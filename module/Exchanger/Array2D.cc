@@ -87,18 +87,11 @@ void Array2D<T,N>::resize(const int size) {
     if (size_ == size) return;
 
     T* tmp = new T[N*size];
+    int n = (size < size_)? size : size_;  // find minimum
+    for(int i=0; i<N*n; i++)
+	tmp[i] = a_[i];
+
     this->reset(tmp, size);
-}
-
-
-template <class T, int N>
-void Array2D<T,N>::reset(T* array, const int size) {
-    std::cout << "in Array2D<" << N << ">.reset" << std::endl;
-    if (a_ == array) return;
-
-    delete [] a_;
-    a_ = array;
-    size_ = size;
 }
 
 
@@ -156,6 +149,18 @@ void Array2D<T,N>::print(const std::string& prefix) const {
 }
 
 
+// private functions
+
+template <class T, int N>
+void Array2D<T,N>::reset(T* array, const int size) {
+    if (a_ == array) return;
+
+    delete [] a_;
+    a_ = array;
+    size_ = size;
+}
+
+
 template <class T, int N>
 MPI_Datatype Array2D<T,N>::typeofT() {
 
@@ -192,6 +197,6 @@ void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs) {
 
 
 // version
-// $Id: Array2D.cc,v 1.5 2003/10/20 17:12:43 tan2 Exp $
+// $Id: Array2D.cc,v 1.6 2003/10/22 01:13:56 tan2 Exp $
 
 // End of file
