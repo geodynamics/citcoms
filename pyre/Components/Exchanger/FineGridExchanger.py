@@ -14,8 +14,8 @@ class FineGridExchanger(Exchanger):
 
     def createExchanger(self, solver):
         self.exchanger = self.module.createFineGridExchanger(
-                                     solver.communicator,
-                                     solver.intercomm,
+                                     solver.communicator.handle(),
+                                     solver.intercomm.handle(),
                                      solver.localLeader,
                                      solver.remoteLeader,
                                      solver.all_variables
@@ -53,6 +53,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.1 2003/09/05 19:49:14 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.2 2003/09/08 21:37:42 tan2 Exp $"
 
 # End of file

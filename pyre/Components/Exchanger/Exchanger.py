@@ -24,10 +24,10 @@ class Exchanger(Component):
 
     def initialize(self, solver):
         # choose c++ exchanger module
-        #self.selectModule()
+        self.selectModule()
 
         # create c++ exchanger
-        #self.createExchanger(solver)
+        self.createExchanger(solver)
         return
 
 
@@ -40,13 +40,6 @@ class Exchanger(Component):
 
 
     def createExchanger(self, solver):
-        self.exchanger = self.module.createExchanger(
-                                     solver.communicator,
-                                     solver.intercomm,
-                                     solver.localLeader,
-                                     solver.remoteLeader,
-                                     solver.all_variables
-                                     )
         return
 
 
@@ -70,6 +63,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.3 2003/09/05 19:49:14 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.4 2003/09/08 21:37:42 tan2 Exp $"
 
 # End of file
