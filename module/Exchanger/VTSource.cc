@@ -37,6 +37,9 @@ VTSource::VTSource(MPI_Comm comm, int sink,
     AbstractSource(comm, sink, mesh, mybbox),
     E(e)
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
+
     init(mesh, mybbox);
 }
 
@@ -47,6 +50,8 @@ VTSource::~VTSource()
 
 void VTSource::interpolateStress(Array2D<double,STRESS_DIM>& S) const
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
     // copied and modified from get_STD_topo() in Topo_gravity.c
 
     float *SXX[NCS], *SYY[NCS], *SZZ[NCS];
@@ -64,6 +69,9 @@ void VTSource::interpolateStress(Array2D<double,STRESS_DIM>& S) const
 
 void VTSource::interpolateTemperature(Array2D<double,1>& T) const
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
+
     if(size())
 	interp->interpolateTemperature(T);
 }
@@ -71,6 +79,9 @@ void VTSource::interpolateTemperature(Array2D<double,1>& T) const
 
 void VTSource::interpolateVelocity(Array2D<double,DIM>& V) const
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__) << journal::end;
+
     if(size())
 	interp->interpolateVelocity(V);
 }
@@ -85,6 +96,6 @@ void VTSource::createInterpolator(const BoundedMesh& mesh)
 
 
 // version
-// $Id: VTSource.cc,v 1.3 2004/04/14 20:12:13 tan2 Exp $
+// $Id: VTSource.cc,v 1.4 2004/04/16 00:01:40 tan2 Exp $
 
 // End of file
