@@ -49,6 +49,13 @@ void Source::interpolateV(Array2D<double,DIM>& V, const All_variables* E) const
 }
 
 
+void Source::interpolateF(Array2D<double,DIM>& V, const All_variables* E) const
+{
+    if(size())
+	interp->interpolateF(F, E);
+}
+
+
 // private functions
 
 void Source::recvMesh(BoundedMesh& mesh)
@@ -67,6 +74,6 @@ void Source::sendMeshNode() const
 
 
 // version
-// $Id: Source.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Source.cc,v 1.2 2003/11/23 18:10:34 ces74 Exp $
 
 // End of file
