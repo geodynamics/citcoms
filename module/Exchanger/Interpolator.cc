@@ -45,6 +45,25 @@ void Interpolator::interpolateV(Array2D<double,DIM>& target,
 }
 
 
+void Interpolator::interpolateF(Array2D<double,DIM>& target,
+				const All_variables* E) const
+{
+    target.assign(size(), 0);
+
+    const int mm = 1;
+    for(int i=0; i<size(); i++) {
+	int n1 = elem_[0][i];
+	for(int k=0; k<NODES_PER_ELEMENT; k++) {
+	    int node = E->ien[mm][n1].node[k+1];
+	    for(int d=0; d<DIM; d++) {
+		int a=E->id[m][node].doff[d+1];
+		target[d][i] += shape_[k][i] * E->F[m][a1];
+	    }
+	}
+    }
+}
+
+
 void Interpolator::interpolateT(Array2D<double,1>& target,
 				const All_variables* E) const
 {
@@ -299,6 +318,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.2 2003/11/11 19:29:27 tan2 Exp $
+// $Id: Interpolator.cc,v 1.3 2003/11/23 18:02:01 ces74 Exp $
 
 // End of file
