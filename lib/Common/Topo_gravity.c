@@ -115,8 +115,8 @@ void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY)
       if ( (node%E->lmesh.noz)==0 )  {
         i = node/E->lmesh.noz;
         E->stress[m][(i-1)*6+1] = SXX[m][node];
-        E->stress[m][(i-1)*6+2] = SZZ[m][node];
-        E->stress[m][(i-1)*6+3] = SYY[m][node];
+        E->stress[m][(i-1)*6+2] = SYY[m][node];
+        E->stress[m][(i-1)*6+3] = SZZ[m][node];
         E->stress[m][(i-1)*6+4] = SXY[m][node];
         E->stress[m][(i-1)*6+5] = SXZ[m][node];
         E->stress[m][(i-1)*6+6] = SZY[m][node];
@@ -124,8 +124,8 @@ void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY)
      else if ( ((node+1)%E->lmesh.noz)==0 )  {
         i = (node+1)/E->lmesh.noz;
         E->stress[m][stride+(i-1)*6+1] = SXX[m][node];
-        E->stress[m][stride+(i-1)*6+2] = SZZ[m][node];
-        E->stress[m][stride+(i-1)*6+3] = SYY[m][node];
+        E->stress[m][stride+(i-1)*6+2] = SYY[m][node];
+        E->stress[m][stride+(i-1)*6+3] = SZZ[m][node];
         E->stress[m][stride+(i-1)*6+4] = SXY[m][node];
         E->stress[m][stride+(i-1)*6+5] = SXZ[m][node];
         E->stress[m][stride+(i-1)*6+6] = SZY[m][node];
@@ -288,8 +288,8 @@ void compute_nodal_stress(struct All_variables *E,
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (node=1;node<=E->lmesh.nno;node++) {
       E->gstress[m][(node-1)*6+1] = SXX[m][node];
-      E->gstress[m][(node-1)*6+2] = SZZ[m][node];
-      E->gstress[m][(node-1)*6+3] = SYY[m][node];
+      E->gstress[m][(node-1)*6+2] = SYY[m][node];
+      E->gstress[m][(node-1)*6+3] = SZZ[m][node];
       E->gstress[m][(node-1)*6+4] = SXY[m][node];
       E->gstress[m][(node-1)*6+5] = SXZ[m][node];
       E->gstress[m][(node-1)*6+6] = SZY[m][node];

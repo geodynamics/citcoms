@@ -184,7 +184,7 @@ void TractionInterpolator::get_elt_traction(int el,
 	for(j=1;j<=ends;j++) {
 	    a = E->ien[m][el].node[elist[NS][j+ends*far]];
 	    traction[1][j] = E->gstress[m][(a-1)*6+4];
-	    traction[2][j] = E->gstress[m][(a-1)*6+3];
+	    traction[2][j] = E->gstress[m][(a-1)*6+2];
 	    traction[3][j] = E->gstress[m][(a-1)*6+6];
 	}
     else if(NS==2)
@@ -192,7 +192,7 @@ void TractionInterpolator::get_elt_traction(int el,
 	    a = E->ien[m][el].node[elist[NS][j+ends*far]];
 	    traction[1][j] = E->gstress[m][(a-1)*6+5];
 	    traction[2][j] = E->gstress[m][(a-1)*6+6];
-	    traction[3][j] = E->gstress[m][(a-1)*6+2];
+	    traction[3][j] = E->gstress[m][(a-1)*6+3];
 	}
     else {
 	std::cout << " NS value is wrong!!" << std::endl;
@@ -247,6 +247,6 @@ void TractionInterpolator::get_elt_traction(int el,
 
 
 // version
-// $Id: TractionInterpolator.cc,v 1.11 2004/04/10 01:05:46 tan2 Exp $
+// $Id: TractionInterpolator.cc,v 1.12 2004/04/15 18:39:54 tan2 Exp $
 
 // End of file
