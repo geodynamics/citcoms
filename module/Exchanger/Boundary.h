@@ -27,7 +27,8 @@ public:
     int *bid2gid;    // bid (local id) -> ID (ie. global id)
     int *bid2proc;   // bid -> proc. rank
   // bid2crseelem provides for the element number in coarse mesh from which to interpolate
-    int *bid2crseelem; 
+    int *bid2crseelem;
+    double *shape;
     explicit Boundary(const int n);     // constructor only allocates memory
     ~Boundary();
 
@@ -39,7 +40,9 @@ public:
     void printConnectivity() const;
     void printX() const;
     void printBid2gid() const;
-
+    double Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4);
+    double det3_sub(double  **xx);
+    
 private:
 //     Boundary(const int,
 // 	     std::auto_ptr<int>,
@@ -51,13 +54,12 @@ private:
 //     const std::auto_ptr<double> X_[dim];
 
 //     std::auto_ptr<int> bid2gid_;
-//     std::auto_ptr<int> bid2proc_;
-
+//     std::auto_ptr<int> bid2proc_;  
 };
 
 #endif
 
 // version
-// $Id: Boundary.h,v 1.9 2003/09/21 22:24:00 ces74 Exp $
+// $Id: Boundary.h,v 1.10 2003/09/24 04:53:10 puru Exp $
 
 // End of file

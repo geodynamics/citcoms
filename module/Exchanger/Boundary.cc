@@ -22,7 +22,8 @@ Boundary::Boundary(const int n) : size(n){
 
     bid2proc = new int[size];
     bid2gid = new int[size];
-    bid2crseelem = new int[size];
+    bid2crseelem = new int[size];;
+    shape = new double[size*8];    
   
     // use auto_ptr for exception-proof
     //Boundary(n, auto_ptr<int>(new int[size]),
@@ -220,7 +221,7 @@ void Boundary::getBid2crseelem(const All_variables *E) {
 	}
       }
     if(!ind)
-      std::cout << " screwed up bid = " << j << std::endl;
+      std::cout << "  wrong bid = " << j << std::endl;
   }
   
   return;
@@ -252,16 +253,20 @@ void Boundary::getBid2crseelem(const All_variables *E) {
 // }
 
 void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
-  int nodes,node1,node2,nodest;
-  int *nid;
-
-  nid = new int[nodest];
-  for(int i=0;i<nodest;i++)nid[i]=0;  
-
+    int nodes,node1,node2,nodest;
+    int *nid;
+    // xc is the array of the coarse grid coordinates
+    //  double xt[3],xc[24],xl[12],dett,det[4];
+//      int nsub[]={1, 3, 4, 8, 1, 2, 3, 6, 5, 8, 6, 1, 6, 8, 7, 3, 6, 8, 3, 1};  
+  
   for(int i=0; i<size; i++)
     bid2proc[i]=localLeader;
   
+  
   nodest = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
+  nid = new int[nodest];
+  for(int i=0;i<nodest;i++)nid[i]=0;
+
   nodes=0;
   
   //  for two YOZ planes
@@ -314,13 +319,13 @@ void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
 	  node2 = node1 + E->lmesh.noz-1;
 	  
 	  if ((E->parallel.me_loc[3]==0 ) && (!nid[node1-1])) {
-	    for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node1];
+	    for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][m][k+1][node1];
 	    bid2gid[nodes] = node1;
 	    nodes++;
 	    nid[node1-1]++;
 	  }
 	  if ((E->parallel.me_loc[3]==E->parallel.nprocz-1) &&(!nid[node2-1])) {
-	    for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][1][k+1][node2];
+	    for(int k=0;k<dim;k++)X[k][nodes]=E->X[E->mesh.levmax][m][k+1][node2];
 	    bid2gid[nodes] = node2;
 	    nodes++;
 	    nid[node2-1]++;
@@ -333,13 +338,88 @@ void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
 //     cout<< "i = " << i << " gid = " << bid2gid[i] << endl;
   
   delete nid;
+  
+ //   for(int i=0; i<size*8; i++)
+//        shape[i]=0.0;
+  
+//    for(int i=0; i< nodes; i++)
+//    {
+//        for(int j=0; j< dim; j++)xt[j]=X[j][i];
+//  // loop over 5 sub tets in a brick element
+//        ind = 0;
 
+//        for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+//            for(n=0;n<E->lmesh.nel;n++)
+//            {
+//                for(int j=0; j < 8; j++)
+//                    for(int k=0; k < dim; k++)
+//                    {
+                  
+//                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
+//                    }
+                  
+//            for(int k=0; k < 5; k++)
+//            {
+//                for(int m=0; m < dim; m++)
+//                {
+//                    x1[m]=xc[nsub[k*4]*dim+m];
+//                    x2[m]=xc[nsub[k*4+1]*dim+m];
+//                    x3[m]=xc[nsub[k*4+2]*dim+m];
+//                    x4[m]=xc[nsub[k*4+3]*dim+m];
+//                }
+//                dett=Tetrahedronvolume(x1,x2,x3,x4);
+//                det[0]=Tetrahedronvolume(x2,x3,x4,xt);
+//                det[1]=Tetrahedronvolume(x3,x4,x1,xt);
+//                det[2]=Tetrahedronvolume(x4,x1,x2,xt);
+//                det[3]=Tetrahedronvolume(x1,x2,x3,xt);
+//                if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
+//                if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
+//                ind=1;
+//                bid2cseelem[i]=n;
+//                for(int m=0; m<4; m++)
+//                {
+//                    shape[nsub[k*4]]=det[0]/dett;
+//                    shape[nsub[k*4+1]]=det[1]/dett;
+//                    shape[nsub[k*4+2]]=det[2]/dett;
+//                    shape[nsub[k*4+3]]=det[3]/dett;
+//                }              
+//                break;              
+//            }
+//            if(ind) break;          
+//        }
+//    }
+//       test
+  
   return;
+}
+double Boundary::Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4)
+{
+    double *xx[3],vol;
+    xx[0] = x2;  xx[1] = x3;  xx[2] = x4;
+    vol = det3_sub(xx);
+    xx[0] = x1;  xx[1] = x3;  xx[2] = x4;
+    vol -= det3_sub(xx);
+    xx[0] = x1;  xx[1] = x2;  xx[2] = x4;
+    vol += det3_sub(xx);
+    xx[0] = x1;  xx[1] = x2;  xx[2] = x3;
+    vol -= det3_sub(xx);
+    vol /= 6;
+    return vol;       
+}
+double Boundary::det3_sub(double **x)
+{
+    return (x[0][0]*(x[1][1]*x[2][2]-x[2][1]*x[1][2])
+            -x[0][1]*(x[1][0]*x[2][2]-x[2][0]*x[1][2])
+            +x[0][2]*(x[1][0]*x[2][1]-x[2][0]*x[1][1]));
 }
 
 
 void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
-
+    int ind;
+    
+    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3];
+    int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
+    
     for(int i=0; i<size; i++)
         bid2proc[i]=localLeader;
 
@@ -359,6 +439,59 @@ void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
 		}
     if(n != size) std::cout << " nodes != size ";
     printBid2gid();
+
+    for(int i=0; i<size*8; i++)
+        shape[i]=0.0;
+  
+    for(int i=0; i< size; i++)
+    {
+        for(int j=0; j< dim; j++)xt[j]=X[j][i];
+// loop over 5 sub tets in a brick element
+        ind = 0;
+         
+        for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
+            for(n=0;n<E->lmesh.nel;n++)
+            {
+                for(int j=0; j < 8; j++)
+                    for(int k=0; k < dim; k++)
+                    {
+                  
+                        xc[j*dim+k]=E->X[E->mesh.levmax][mm][k+1][E->IEN[E->mesh.levmax][mm][n+1].node[j+1]];
+                    }
+                  
+                for(int k=0; k < 5; k++)
+                {
+                    for(int m=0; m < dim; m++)
+                    {
+                        x1[m]=xc[nsub[k*4]*dim+m];
+                        x2[m]=xc[nsub[k*4+1]*dim+m];
+                        x3[m]=xc[nsub[k*4+2]*dim+m];
+                        x4[m]=xc[nsub[k*4+3]*dim+m];
+                    }
+                    dett=Tetrahedronvolume(x1,x2,x3,x4);
+                    det[0]=Tetrahedronvolume(x2,x3,x4,xt);
+                    det[1]=Tetrahedronvolume(x3,x4,x1,xt);
+                    det[2]=Tetrahedronvolume(x4,x1,x2,xt);
+                    det[3]=Tetrahedronvolume(x1,x2,x3,xt);
+                    if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
+                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
+                    ind=1;
+                    bid2crseelem[i]=n;
+                    for(int m=0; m<4; m++)
+                    {
+                        shape[nsub[k*4]]=det[0]/dett;
+                        shape[nsub[k*4+1]]=det[1]/dett;
+                        shape[nsub[k*4+2]]=det[2]/dett;
+                        shape[nsub[k*4+3]]=det[3]/dett;
+                    }              
+                    break;              
+                }
+                if(ind) break;          
+            }
+    }
+// test
+    
+    return;  
 }
 
 
@@ -388,6 +521,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.13 2003/09/22 18:14:32 ces74 Exp $
+// $Id: Boundary.cc,v 1.14 2003/09/24 04:53:10 puru Exp $
 
 // End of file
