@@ -22,7 +22,6 @@ class FineGridExchanger(Exchanger):
         self.inventory.dimensional = False
         # exchanged information is in spherical coordinate
         self.inventory.transformational = False
-
         return
 
 
@@ -30,7 +29,6 @@ class FineGridExchanger(Exchanger):
         Exchanger.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
-
         self.restart = solver.restart
         if self.restart:
             self.ic_initTemperature = solver.ic_initTemperature
@@ -48,6 +46,7 @@ class FineGridExchanger(Exchanger):
 
 
     def createMesh(self):
+        inv = self.inventory
         self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
         mycomm = self.communicator
         self.remoteBBox = self.module.exchangeBoundedBox(self.globalBBox,
@@ -55,16 +54,22 @@ class FineGridExchanger(Exchanger):
                                                          self.sinkComm.handle(),
                                                          0)
         self.boundary, self.myBBox = self.module.createBoundary(
-                                                     self.all_variables)
-        for i in range(len(self.interior)):
-            self.interior[i] = self.module.createEmptyInterior()
+                                                     self.all_variables,
+                                                     inv.excludeTop,
+                                                     inv.excludeBottom)
+
+        if inv.two_way_communication:
+            for i in range(len(self.interior)):
+                self.interior[i] = self.module.createEmptyInterior()
 
         return
 
 
     def createSourceSink(self):
         self.createSink()
-        self.createSource()
+
+        if self.inventory.two_way_communication:
+            self.createSource()
         return
 
 
@@ -106,7 +111,7 @@ class FineGridExchanger(Exchanger):
             import journal
             journal.info("incompressibility").activate()
         else:
-            self.BC = Inlet.VTInlet(self.boundary,
+            self.BC = Inlet.SVTInlet(self.boundary,
                                     self.sink["BC"],
                                     self.all_variables)
         '''
@@ -158,11 +163,11 @@ class FineGridExchanger(Exchanger):
 
 
     def NewStep(self):
-        if self.catchup:
-            # send temperture field to CGE
-            for ii in self.II:
-                pass
-                #ii.send()
+        if self.inventory.two_way_communication:
+            if self.catchup:
+                # send temperture field to CGE
+                for ii in self.II:
+                    ii.send()
 
         return
 
@@ -227,6 +232,8 @@ class FineGridExchanger(Exchanger):
 
         inventory = [
 
+            prop.bool("excludeTop", default=False),
+            prop.bool("excludeBottom", default=False),
             prop.bool("incompressibility", default=True),
 
             ]
@@ -234,6 +241,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.37 2004/05/11 07:59:31 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.38 2004/05/29 01:19:31 tan2 Exp $"
 
 # End of file

@@ -47,7 +47,9 @@ class Exchanger(Component):
         self.createMesh()
         self.createSourceSink()
         self.createBC()
-        self.createII()
+
+        if self.inventory.two_way_communication:
+            self.createII()
         return
 
 
@@ -109,6 +111,8 @@ class Exchanger(Component):
 
         inventory = [
 
+            prop.bool("two_way_communication", True),
+
             # if dimensional is True, quantities exchanged are dimensional
             prop.bool("dimensional", True),
             # if transformational is True, quantities exchanged are in standard coordiate system
@@ -119,6 +123,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.18 2004/05/11 07:59:31 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.19 2004/05/29 01:19:31 tan2 Exp $"
 
 # End of file

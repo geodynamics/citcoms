@@ -62,7 +62,9 @@ class CoarseGridExchanger(Exchanger):
 
     def createSourceSink(self):
         self.createSource()
-        self.createSink()
+
+        if self.inventory.two_way_communication:
+            self.createSink()
         return
 
 
@@ -138,7 +140,7 @@ class CoarseGridExchanger(Exchanger):
 
         import Outlet
         for i, src in zip(range(self.numSrc), source):
-            outlet = Outlet.VTOutlet(src, self.all_variables)
+            outlet = Outlet.TOutlet(src, self.all_variables)
             outlet.send()
 
         # Any modification of read-in temperature is done here
@@ -156,9 +158,10 @@ class CoarseGridExchanger(Exchanger):
 
 
     def NewStep(self):
-        # receive temperture field from FGE
-        #self.II.recv()
-        #self.II.impose()
+        if self.inventory.two_way_communication:
+            # receive temperture field from FGE
+            self.II.recv()
+            self.II.impose()
         return
 
 
@@ -199,6 +202,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.34 2004/05/11 07:59:31 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.35 2004/05/29 01:19:31 tan2 Exp $"
 
 # End of file
