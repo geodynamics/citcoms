@@ -6,7 +6,7 @@
 #include "global_defs.h"
 
 /* ===============================================
-   strips horizontal average from nodal field X. 
+   strips horizontal average from nodal field X.
    Assumes orthogonal mesh, otherwise, horizontals
    aren't & another method is required.
    =============================================== */
@@ -34,20 +34,20 @@ void remove_horiz_ave(E,X,H,store_or_not)
 */
   for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noz;i++)
-        for(k=1;k<=noy;k++)      
+        for(k=1;k<=noy;k++)
           for(j=1;j<=nox;j++)     {
             n = i+(j-1)*noz+(k-1)*noz*nox;
-            X[m][n] -= H[i];  
+            X[m][n] -= H[i];
            }
 
-   return; 
+   return;
   }
 
 
 void return_horiz_ave(E,X,H)
      struct All_variables *E;
      double **X, *H;
-{ 
+{
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
   int top,lnode[5], sizeofH, noz2,iroot;
@@ -83,7 +83,7 @@ void return_horiz_ave(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);   
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
 
           lnode[1] = E->ien[m][el].node[1];
           lnode[2] = E->ien[m][el].node[2];
@@ -92,7 +92,7 @@ void return_horiz_ave(E,X,H)
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)] 
+              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
@@ -105,21 +105,21 @@ void return_horiz_ave(E,X,H)
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)] 
+                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
 
             }   /* end of if i==elz    */
           }   /* end of j  and k, and m  */
-     }        /* Done for i */ 
+     }        /* Done for i */
 
-       /* determine which processors should get the message from me for 
+       /* determine which processors should get the message from me for
 	       computing the layer averages */
 
   nproc = 0;
   for (j=0;j<E->parallel.nprocxy;j++) {
-    d = E->parallel.me_loc[3] + j*E->parallel.nprocz; 
+    d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
     processors[nproc] =  d;
     nproc ++;
     }
@@ -142,7 +142,7 @@ void return_horiz_ave(E,X,H)
       Have[i] = temp[i];
 
   for (i=1;i<=noz;i++) {
-    if(Have[i+noz] != 0.0) 
+    if(Have[i+noz] != 0.0)
        H[i] = Have[i]/Have[i+noz];
     }
  /* if (E->parallel.me==0)
@@ -152,14 +152,14 @@ void return_horiz_ave(E,X,H)
   free ((void *) Have);
   free ((void *) temp);
   free ((void *) processors);
-  
-  return; 
+
+  return;
   }
-	   
+
 void return_horiz_ave_f(E,X,H)
      struct All_variables *E;
      float **X, *H;
-{ 
+{
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
   int top,lnode[5], sizeofH, noz2,iroot;
@@ -195,7 +195,7 @@ void return_horiz_ave_f(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);   
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
 
           lnode[1] = E->ien[m][el].node[1];
           lnode[2] = E->ien[m][el].node[2];
@@ -204,7 +204,7 @@ void return_horiz_ave_f(E,X,H)
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)] 
+              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
@@ -217,21 +217,21 @@ void return_horiz_ave_f(E,X,H)
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)] 
+                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
 
             }   /* end of if i==elz    */
           }   /* end of j  and k, and m  */
-     }        /* Done for i */ 
+     }        /* Done for i */
 
-       /* determine which processors should get the message from me for 
+       /* determine which processors should get the message from me for
 	       computing the layer averages */
 
   nproc = 0;
   for (j=0;j<E->parallel.nprocxy;j++) {
-    d = E->parallel.me_loc[3] + j*E->parallel.nprocz; 
+    d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
     processors[nproc] =  d;
     nproc ++;
     }
@@ -254,7 +254,7 @@ void return_horiz_ave_f(E,X,H)
       Have[i] = temp[i];
 
   for (i=1;i<=noz;i++) {
-    if(Have[i+noz] != 0.0) 
+    if(Have[i+noz] != 0.0)
        H[i] = Have[i]/Have[i+noz];
     }
  /* if (E->parallel.me==0)
@@ -264,16 +264,16 @@ void return_horiz_ave_f(E,X,H)
   free ((void *) Have);
   free ((void *) temp);
   free ((void *) processors);
-  
-  return; 
+
+  return;
   }
 
-float return_bulk_value(E,Z,average) 
+float return_bulk_value(E,Z,average)
      struct All_variables *E;
      float **Z;
      int average;
 
-{  
+{
     void get_global_shape_fn();
     void float_global_operation();
 
@@ -281,23 +281,23 @@ float return_bulk_value(E,Z,average)
 
     int n,i,j,k,el,m;
     float volume,integral,volume1,integral1;
-   
+
     struct Shape_function GN;
     struct Shape_function_dx GNx;
     struct Shape_function_dA dOmega;
-    
+
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
     const int sphere_key=1;
 
     volume1=0.0;
     integral1=0.0;
-     
+
     for (m=1;m<=E->sphere.caps_per_proc;m++)
        for (el=1;el<=E->lmesh.nel;el++)  {
 
 	  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
-	
+
 	  for(j=1;j<=vpts;j++)
 	    for(i=1;i<=ends;i++) {
 		n = E->ien[m][el].node[i];
@@ -310,7 +310,7 @@ float return_bulk_value(E,Z,average)
 
     MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
     MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
-     
+
     if(average && volume != 0.0)
  	   integral /= volume;
 
@@ -338,7 +338,7 @@ if (been_here==0)  {
 
  nproc = 0;
  for (j=0;j<E->parallel.nprocz;j++) {
-   d =E->parallel.me_sph*E->parallel.nprocz+E->parallel.nprocz-1-j; 
+   d =E->parallel.me_sph*E->parallel.nprocz+E->parallel.nprocz-1-j;
    processors[nproc] =  d;
    nproc ++;
    }
@@ -459,10 +459,10 @@ if (been_here==0)  {
       data[j] = temp[j];
       }
 
-    free((void *)temp); 
+    free((void *)temp);
 
     }
-		    
+
 return;
 }
 
@@ -521,7 +521,7 @@ if (been_here==0)  {
       }
 
     }
-		    
+
 return;
 }
 
@@ -546,14 +546,14 @@ float global_fvdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i]; 
+      temp += A[m][i]*B[m][i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
        temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
 
     temp -= temp1;
 
-    }  
+    }
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
@@ -576,7 +576,7 @@ double kineticE_radial(E,A,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
-    for (i=0;i<neq;i++)  
+    for (i=0;i<neq;i++)
       if ((i+1)%3==0)
         temp += A[m][i]*A[m][i];
 
@@ -586,7 +586,7 @@ double kineticE_radial(E,A,lev)
 
     temp -= temp1;
 
-    }  
+    }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
@@ -609,14 +609,14 @@ double global_vdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i]; 
+      temp += A[m][i]*B[m][i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
        temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
 
     temp -= temp1;
 
-    }  
+    }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
@@ -640,7 +640,7 @@ double global_pdot(E,A,B,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     npno=E->lmesh.NPNO[lev];
     for (i=1;i<=npno;i++)
-      temp += A[m][i]*B[m][i]; 
+      temp += A[m][i]*B[m][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -666,7 +666,7 @@ double global_tdot_d(E,A,B,lev)
     nno=E->lmesh.NNO[lev];
     for (i=1;i<=nno;i++)
     if (!(E->NODE[lev][m][i] & SKIP))
-      temp += A[m][i]; 
+      temp += A[m][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -690,7 +690,7 @@ float global_tdot(E,A,B,lev)
     nno=E->lmesh.NNO[lev];
     for (i=1;i<=nno;i++)
       if (!(E->NODE[lev][m][i] & SKIP))
-        temp += A[m][i]*B[m][i]; 
+        temp += A[m][i]*B[m][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
@@ -774,9 +774,9 @@ float  vnorm_nonnewt(E,dU,U,lev)
 
  dtemp=0.0;
  temp=0.0;
-for (m=1;m<=E->sphere.caps_per_proc;m++)    
+for (m=1;m<=E->sphere.caps_per_proc;m++)
   for (e=1;e<=nel;e++)
-   if (E->mat[m][e]==1)
+    //if (E->mat[m][e]==1)
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
 	 node = E->IEN[lev][m][e].node[a];
@@ -785,7 +785,7 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
          temp += U[m][ E->ID[lev][m][node].doff[i] ]*
                  U[m][ E->ID[lev][m][node].doff[i] ];
          }
-   
+
 
   MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
   MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
