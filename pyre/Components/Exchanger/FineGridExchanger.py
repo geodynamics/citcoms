@@ -25,7 +25,6 @@ class FineGridExchanger(Exchanger):
                                      solver.communicator.handle(),
                                      solver.intercomm.handle(),
                                      solver.leader,
-                                     solver.localLeader,
                                      solver.remoteLeader,
                                      solver.all_variables
                                      )
@@ -35,7 +34,6 @@ class FineGridExchanger(Exchanger):
 
     def findBoundary(self):
         self.module.createBoundary(self.exchanger)
-
         # create mapping from boundary node # to global node #
         self.module.mapBoundary(self.exchanger)
 
@@ -118,6 +116,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.20 2003/10/11 00:40:56 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.21 2003/10/24 05:04:31 tan2 Exp $"
 
 # End of file
