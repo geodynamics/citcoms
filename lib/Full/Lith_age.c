@@ -107,6 +107,7 @@ void lith_age_restart_tic(struct All_variables *E)
 
   /* modify temperature BC to be concorded with restarted T */
   lith_age_restart_conform_tbc(E);
+  temperatures_conform_bcs(E);
 
   return;
 }
