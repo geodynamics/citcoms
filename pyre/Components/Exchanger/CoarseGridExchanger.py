@@ -60,7 +60,7 @@ class CoarseGridExchanger(Exchanger):
         new_dt = self.module.exchangeTimestep(self.exchanger, dt)
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, dt, new_dt)
-        return min(dt, new_dt)
+        return dt
 
 
 
@@ -76,6 +76,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.18 2003/10/24 05:04:31 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.19 2003/10/28 01:56:14 tan2 Exp $"
 
 # End of file

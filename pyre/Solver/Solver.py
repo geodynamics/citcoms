@@ -174,17 +174,6 @@ class Solver(BaseSolver):
     def endTimestep(self, t, steps, done):
         BaseSolver.endTimestep(self, t)
 
-        # output time information
-        time = self.CitcomModule.CPU_time()
-        msg = "%d %.4e %.4e %.4e %.4e" % (steps,
-                                          t,
-                                          t - self.model_time,
-                                          time - self.start_cpu_time,
-                                          time - self.cpu_time)
-        print >> self.fptime, msg
-        self.model_time = t
-        self.cpu_time = time
-
         if self.coupler:
             done = self.coupler.endTimestep(done)
 
@@ -210,6 +199,19 @@ class Solver(BaseSolver):
         self.CitcomModule.output(self.all_variables, step)
         return
 
+
+    def timesave(self, t, steps):
+        # output time information
+        time = self.CitcomModule.CPU_time()
+        msg = "%d %.4e %.4e %.4e %.4e" % (steps,
+                                          t,
+                                          t - self.model_time,
+                                          time - self.start_cpu_time,
+                                          time - self.cpu_time)
+        print >> self.fptime, msg
+        self.model_time = t
+        self.cpu_time = time
+        return
 
 
     def setProperties(self):
@@ -265,6 +267,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.27 2003/10/24 04:55:54 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.28 2003/10/28 01:56:14 tan2 Exp $"
 
 # End of file
