@@ -49,7 +49,7 @@ class Controller(SimulationController):
             self.startTimestep()
 
             # synchronize boundary information
-            self.applyBoundaryConditions()
+            #self.applyBoundaryConditions()
 
             # compute an acceptable timestep
             dt = self.stableTimestep()
