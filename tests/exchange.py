@@ -40,10 +40,11 @@ class TestExchanger(Application):
     def test(self, exchanger):
         # testing exchanger creation
         exchanger.initialize(self)
-        print exchanger, exchanger.exchanger
+        print exchanger.name, exchanger.exchanger
 
         # testing boundary creation and exchange
-        #boundary = exchanger.findBoundary()
+        boundary = exchanger.findBoundary()
+        print exchanger.name, boundary
 
         return
 
@@ -65,6 +66,9 @@ class TestExchanger(Application):
         self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
+        print self.exchanger.name, self.rank, \
+              self.localLeader, self.remoteLeader
+
         return
 
 
@@ -83,8 +87,8 @@ class TestExchanger(Application):
             pyre.facilities.facility("controller", default=Controller.controller()),
             pyre.facilities.facility("layout", default=Layout.layout()),
 
-            pyre.facilities.facility("coarse", default=Exchanger.coarsegridexchanger("exchanger", "coarse")),
-            pyre.facilities.facility("fine", default=Exchanger.finegridexchanger("exchanger", "fine")),
+            pyre.facilities.facility("coarse", default=Exchanger.coarsegridexchanger("coarse", "coarse")),
+            pyre.facilities.facility("fine", default=Exchanger.finegridexchanger("fine", "fine")),
 
             ]
 
@@ -109,6 +113,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.1 2003/09/08 21:35:16 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.2 2003/09/09 02:28:47 tan2 Exp $"
 
 # End of file
