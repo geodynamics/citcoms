@@ -23,21 +23,21 @@ public:
 		      const All_variables *E);
     virtual ~FineGridExchanger();
 
-    virtual void gather();
-    virtual void distribute();
+  //    virtual void gather();
+  //    virtual void distribute();
     virtual void interpretate();
 //     virtual void imposeBC();
-    virtual void mapBoundary();
-
-    void createBoundary();
-    int sendBoundary();
+  
+  void mapBoundary();
+  void createBoundary();
+  int sendBoundary();
 
 };
 
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.8 2003/09/22 18:14:32 ces74 Exp $
+// $Id: FineGridExchanger.h,v 1.9 2003/09/25 22:25:01 ces74 Exp $
 
 // End of file
 
