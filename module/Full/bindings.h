@@ -21,6 +21,6 @@ extern struct PyMethodDef pyCitcomSFull_methods[];
 #endif
 
 // version
-// $Id: bindings.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: bindings.h,v 1.1.1.1 2003/03/24 01:46:37 tan2 Exp $
 
 // End of file

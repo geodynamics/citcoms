@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.1.1.1 2003/03/24 01:46:37 tan2 Exp $
 
 include local.def
 TYPE=Full
@@ -43,7 +43,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.1.1.1 2003/03/24 01:46:37 tan2 Exp $
 
 #
 # End of file

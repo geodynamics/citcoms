@@ -38,6 +38,6 @@ if __name__ == "__main__":
     print "CitcomSRegional.return1_test:", CitcomSRegional.return1_test()
 
 # version
-__id__ = "$Id: signon.py,v 1.1 2003/03/24 01:46:37 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.1.1.1 2003/03/24 01:46:37 tan2 Exp $"
 
 #  End of file 
