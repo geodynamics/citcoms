@@ -6,6 +6,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "advection_diffusion.h"
 
 extern int Emergency_stop;
 
