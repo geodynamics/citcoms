@@ -378,7 +378,7 @@ void Boundary::sendBid2proc(const MPI_Comm comm,
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 
-	std::auto_ptr<int> tmp = auto_ptr<int>(new int[size]);
+	std::auto_ptr<int> tmp(new int[size]);
 	int *ptmp = tmp.get();
 
 	for (int i=0; i<nproc; i++) {
@@ -452,6 +452,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.30 2003/10/03 18:36:17 tan2 Exp $
+// $Id: Boundary.cc,v 1.31 2003/10/03 19:20:35 tan2 Exp $
 
 // End of file
