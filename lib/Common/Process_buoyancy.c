@@ -5,47 +5,9 @@
     get output the next time around the velocity solver);
     */
 
-#if 0
-
-#include <math.h>
-#include <sys/types.h>
-#include <stdlib.h> /* for "system" command */
-
-#endif
-
 
 #include "element_definitions.h"
 #include "global_defs.h"
-
-
-#if 0
-void process_temp_field(E,ii)
- struct All_variables *E;
-    int ii;
-{
-    void heat_flux();
-    void output_temp();
-    void parallel_process_sync();
-    void process_output_field();
-    int record_h;
-
-    record_h = E->control.record_every;
-
-    if ( (ii == 0) || ((ii % record_h) == 0) || E->control.DIRECTII)    {
-      heat_flux(E);
-      parallel_process_sync();
-/*      output_temp(E,ii);  */
-    }
-
-    if ( ((ii == 0) || ((ii % E->control.record_every) == 0))
-	 || E->control.DIRECTII)     {
-       process_output_field(E,ii);
-    }
-
-    return;
-}
-
-#endif
 
 
 
