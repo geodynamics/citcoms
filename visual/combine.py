@@ -10,7 +10,7 @@
 '''
 Combine the pasted Citcom Data
 
-usage: combine.py modelname timestep nodex nodey nodez n_surf_proc nprocx nprocy nprocz
+usage: combine.py modelname timestep nodex nodey nodez ncap nprocx nprocy nprocz
 '''
 
 class Combine(object):
@@ -70,10 +70,10 @@ class Combine(object):
 
 
 
-    def write(self, filename, grid, data):
+    def write(self, filename, grid):
         fp = file(filename, 'w')
         fp.write('%d x %d x %d\n' % (grid['nox'], grid['noy'], grid['noz']))
-        fp.writelines(data)
+	fp.writelines(self.saved)
         return
 
 
@@ -94,14 +94,14 @@ if __name__ == '__main__':
     grid['noy'] = int(sys.argv[4])
     grid['noz'] = int(sys.argv[5])
 
-    nprocxy = int(sys.argv[6])
+    ncap = int(sys.argv[6])
     cap = {}
     cap['nprocx'] = int(sys.argv[7])
     cap['nprocy'] = int(sys.argv[8])
     cap['nprocz'] = int(sys.argv[9])
 
     nproc_per_cap = cap['nprocx'] * cap['nprocy'] * cap['nprocz']
-    for i in range(nprocxy):
+    for i in range(ncap):
         cb = Combine(grid)
         for n in range(i * nproc_per_cap, (i+1) * nproc_per_cap):
             filename = '%s.%d.%d' % (prefix, n, step)
@@ -111,10 +111,10 @@ if __name__ == '__main__':
 
         filename = '%s.cap%d.%d' % (prefix, i, step)
         print 'writing', filename
-        cb.write(filename, grid, cb.saved)
+        cb.write(filename, grid)
 
 
 # version
-# $Id: combine.py,v 1.1 2004/01/14 23:22:52 tan2 Exp $
+# $Id: combine.py,v 1.2 2004/12/27 19:49:54 tan2 Exp $
 
 # End of file
