@@ -35,6 +35,7 @@ extern "C" {
     void get_initial_elapsed_time(struct All_variables*);
     int get_process_identifier();
     void global_derived_values(struct All_variables*);
+    void lith_age_init(struct All_variables *E);
     void mass_matrix(struct All_variables*);
     void node_locations(struct All_variables*);
     void open_info(struct All_variables*);
@@ -87,6 +88,9 @@ void sphere_launch(struct All_variables *E)
     get_initial_elapsed_time(E);  /* Get elapsed time from restart run*/
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
+
+    if(E->control.lith_age)
+        lith_age_init(E);
 
     (E->problem_boundary_conds)(E);
 
@@ -160,6 +164,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.13 2004/03/28 23:31:53 tan2 Exp $
+// $Id: mesher.cc,v 1.14 2004/06/28 19:54:23 tan2 Exp $
 
 // End of file
