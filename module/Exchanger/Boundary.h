@@ -8,7 +8,7 @@
 #if !defined(pyCitcom_Boundary_h)
 #define pyCitcom_Boundary_h
 
-#include <memory>
+#include "auto_array_ptr.h"
 #include "mpi.h"
 
 struct All_variables;
@@ -23,11 +23,12 @@ public:
     double theta_max, theta_min,
 	   fi_max, fi_min,
 	   ro, ri;   // domain bound of FG
-    double *X[dim];  // coordinate
-    int *bid2gid;    // bid (local id) -> ID (ie. global id in FG)
-    int *bid2elem;   // bid -> elem from which fields are interpolated in CG
-    int *bid2proc;   // bid -> proc. rank
-    double *shape;   // shape functions for interpolation
+    auto_array_ptr<double> X[dim];  // coordinate
+
+    auto_array_ptr<int> bid2gid;    // bid (local id) -> ID (ie. global id in FG)
+    auto_array_ptr<int> bid2elem;   // bid -> elem from which fields are interpolated in CG
+    auto_array_ptr<int> bid2proc;   // bid -> proc. rank
+    auto_array_ptr<double> shape;   // shape functions for interpolation
 
     explicit Boundary(const int n);     // constructor, allocating memory only
     ~Boundary();
@@ -44,33 +45,25 @@ public:
 		      const int lrank, const int leader);
                                          // send bid2proc to leader
 
+private:
+    void initBound(const All_variables *E);
+    void findBoundaryNodes(const All_variables *E);
+    void testMapping(const All_variables *E) const;
+    double Tetrahedronvolume(double *x1, double *x2,
+			     double *x3, double *x4) const;
+    double det3_sub(double  *x1, double *x2, double *x3) const;
+
     void printX() const;
     void printBid2gid() const;
     void printBid2proc() const;
     void printBid2elem() const;
     void printBound() const;
-    
-private:
-//     Boundary(const int,
-// 	     std::auto_ptr<int>,
-// 	     std::auto_ptr<double>,
-// 	     std::auto_ptr<double>,
-// 	     std::auto_ptr<double>);
-
-//     const std::auto_ptr<double> X_[dim];
-//     std::auto_ptr<int> bid2gid_;
-//     std::auto_ptr<int> bid2proc_;  
-
-    void testMapping(const All_variables *E) const;
-    double Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4) const;
-    double det3_sub(double  *x1, double *x2, double *x3) const;
-
 
 };
 
 #endif
 
 // version
-// $Id: Boundary.h,v 1.15 2003/09/28 00:11:03 tan2 Exp $
+// $Id: Boundary.h,v 1.16 2003/10/03 18:36:17 tan2 Exp $
 
 // End of file
