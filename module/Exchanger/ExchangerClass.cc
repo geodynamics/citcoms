@@ -176,9 +176,12 @@ void Exchanger::createDataArrays() {
     incoming.T = new double[size];
     outgoing.size = size;
     outgoing.T = new double[size];
+    poutgoing.size = size;
+    poutgoing.T = new double[size];
     for(int i=0; i < boundary->dim; i++) {
 	incoming.v[i] = new double[size];
 	outgoing.v[i] = new double[size];
+        poutgoing.v[i] = new double[size];
     }
 }
 
@@ -274,14 +277,24 @@ void Exchanger::sendVelocities() {
 
 void Exchanger::receiveVelocities() {
     std::cout << "in Exchanger::receiveVelocities" << std::endl;
-
+    
     if(rank == leader) {
 	int tag = 0;
 	MPI_Status status;
 	for(int i=0; i < boundary->dim; i++) {
+            for(int n=0; n < incoming.size; n++)
+            {
+                if(!((fge_t==0)&&(cge_t==0)))poutgoing.v[i][n]=incoming.v[i][n];
+            }
+            
 	    MPI_Recv(incoming.v[i], incoming.size, MPI_DOUBLE,
 		     remoteLeader, tag, intercomm, &status);
 	    tag ++;
+            if((fge_t==0)&&(cge_t==0))
+            {
+                for(int n=0; n < incoming.size; n++)poutgoing.v[i][n]=incoming.v[i][n];   
+            }
+            
 	}
     }
     //printDataV(incoming);
@@ -292,16 +305,21 @@ void Exchanger::receiveVelocities() {
 
 
 void Exchanger::imposeBC() {
+
+    double N1,N2;
     std::cout << "in Exchanger::imposeBC" << std::endl;
 
+    N1=(cge_t-fge_t)/cge_t;
+    N2=fge_t/cge_t;
+    
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=0;i<boundary->size;i++) {
 	    int n = boundary->bid2gid[i];
 	    int p = boundary->bid2proc[i];
 	    if (p == rank) {
-		E->sphere.cap[m].VB[1][n] = incoming.v[0][i];
-		E->sphere.cap[m].VB[2][n] = incoming.v[1][i];
-		E->sphere.cap[m].VB[3][n] = incoming.v[2][i];
+		E->sphere.cap[m].VB[1][n] = N1*poutgoing.v[0][i]+N2*incoming.v[0][i];
+		E->sphere.cap[m].VB[2][n] = N1*poutgoing.v[1][i]+N2*incoming.v[1][i];
+		E->sphere.cap[m].VB[3][n] = N1*poutgoing.v[2][i]+N2*incoming.v[2][i];
 		E->node[m][n] = E->node[m][n] | VBX;
 		E->node[m][n] = E->node[m][n] | VBY;
 		E->node[m][n] = E->node[m][n] | VBZ;
@@ -412,7 +430,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.22 2003/09/30 01:33:11 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.23 2003/09/30 01:45:27 puru Exp $
 
 // End of file
 
