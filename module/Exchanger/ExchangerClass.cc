@@ -297,7 +297,8 @@ void Exchanger::receiveVelocities() {
             
 	}
     }
-    //printDataV(incoming);
+        //printDataV(incoming);
+    printDataV(poutgoing);
 
     // Don't forget to delete inoming.v
     return;
@@ -309,8 +310,16 @@ void Exchanger::imposeBC() {
     double N1,N2;
     std::cout << "in Exchanger::imposeBC" << std::endl;
 
-    N1=(cge_t-fge_t)/cge_t;
-    N2=fge_t/cge_t;
+    if(cge_t==0)
+    {
+        N1=1.0;
+        N2=0.0;
+    }
+    else
+    {    
+        N1=(cge_t-fge_t)/cge_t;
+        N2=fge_t/cge_t;
+    }
     
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(int i=0;i<boundary->size;i++) {
@@ -320,6 +329,7 @@ void Exchanger::imposeBC() {
 		E->sphere.cap[m].VB[1][n] = N1*poutgoing.v[0][i]+N2*incoming.v[0][i];
 		E->sphere.cap[m].VB[2][n] = N1*poutgoing.v[1][i]+N2*incoming.v[1][i];
 		E->sphere.cap[m].VB[3][n] = N1*poutgoing.v[2][i]+N2*incoming.v[2][i];
+                std::cout << E->sphere.cap[m].VB[1][n] << " " << E->sphere.cap[m].VB[2][n] << " " <<  E->sphere.cap[m].VB[3][n] << std::endl;
 		E->node[m][n] = E->node[m][n] | VBX;
 		E->node[m][n] = E->node[m][n] | VBY;
 		E->node[m][n] = E->node[m][n] | VBZ;
@@ -430,7 +440,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.23 2003/09/30 01:45:27 puru Exp $
+// $Id: ExchangerClass.cc,v 1.24 2003/09/30 02:02:40 puru Exp $
 
 // End of file
 
