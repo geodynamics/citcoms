@@ -28,13 +28,13 @@ class RegionalApp(Application):
 	self.facilities.param.Properties()
 	self.facilities.phase.Properties()
 	self.facilities.visc.Properties()
-        print "Setting up done."
+        print "Properties setup.."
 
 ##        VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
 ##        TSolver("tsolver", CitcomS.Advection_diffusion.PG_timestep()),
         vsolver = self.facilities.vsolver
         tsolver = self.facilities.tsolver
-        print "Solvers called."
+        print "Solvers called.."
         
         return
     
@@ -232,6 +232,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.10 2003/07/03 23:52:38 ces74 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.11 2003/07/03 23:56:21 ces74 Exp $"
 
 # End of file
