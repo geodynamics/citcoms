@@ -115,11 +115,14 @@ class Exchanger(Component):
 
         inventory = [
 
+            # if dimensional is True, quantities exchanged are dimensional
+            prop.bool("dimensional", True)
+
             ]
 
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.15 2003/12/23 07:02:06 puru Exp $"
+__id__ = "$Id: Exchanger.py,v 1.16 2003/12/30 21:42:51 tan2 Exp $"
 
 # End of file

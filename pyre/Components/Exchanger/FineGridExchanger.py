@@ -17,36 +17,47 @@ class FineGridExchanger(Exchanger):
         self.cge_t = 0
         self.fge_t = 0
         self.toApplyBC = True
+
+        # exchanged information is non-dimensional
+        self.inventory.dimensional = False
+
         return
 
 
     def initialize(self, solver):
         Exchanger.initialize(self, solver)
-	
+
 	# restart and use temperautre field of previous run?
         self.restart = solver.inventory.ic.inventory.restart
         if self.restart:
             self.ic_initTemperature = solver.inventory.ic.initTemperature
-	    
+
 	self.all_variables = solver.all_variables
         self.interior = range(self.numSrc)
         self.source["Intr"] = range(self.numSrc)
         self.II = range(self.numSrc)
+
+        if self.inventory.dimensional:
+            self.module.initDimensional(self.all_varialbes)
+
         return
 
 
     def createMesh(self):
         self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
         mycomm = self.communicator
+        dimensional = self.inventory.dimensional
         self.remoteBBox = self.module.exchangeBoundedBox(self.globalBBox,
                                                          mycomm.handle(),
                                                          self.sinkComm.handle(),
-                                                         0)
+                                                         0,
+                                                         dimensional)
         self.boundary, self.myBBox = self.module.createBoundary(
                                                      self.remoteBBox,
-                                                     self.all_variables)
+                                                     self.all_variables,
+                                                     dimensional)
         for i in range(len(self.interior)):
-            self.interior[i] = self.module.createEmptyInterior()
+            self.interior[i] = self.module.createEmptyInterior(dimensional)
 
         return
 
@@ -153,10 +164,12 @@ class FineGridExchanger(Exchanger):
     def stableTimestep(self, dt):
         if self.catchup:
             mycomm = self.communicator
+            dimensional = self.inventory.dimensional
             self.cge_t = self.module.exchangeTimestep(dt,
                                                       mycomm.handle(),
                                                       self.sinkComm.handle(),
-                                                      0)
+                                                      0,
+                                                      dimensional)
             self.fge_t = 0
             self.catchup = False
 
@@ -200,6 +213,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.27 2003/12/23 07:02:06 puru Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.28 2003/12/30 21:42:51 tan2 Exp $"
 
 # End of file
