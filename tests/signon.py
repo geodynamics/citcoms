@@ -37,7 +37,10 @@ if __name__ == "__main__":
     print "CitcomSFull.return1_test:    ", CitcomSFull.return1_test()
     print "CitcomSRegional.return1_test:", CitcomSRegional.return1_test()
 
+    print
+    print "Citcom_Init: address of E is", CitcomSRegional.Citcom_Init()
+
 # version
-__id__ = "$Id: signon.py,v 1.1 2003/03/24 01:46:37 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.2 2003/04/04 00:42:50 tan2 Exp $"
 
 #  End of file 

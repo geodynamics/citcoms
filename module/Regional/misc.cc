@@ -15,8 +15,13 @@
 #include <Python.h>
 
 #include "misc.h"
+#include "global_defs.h"
+//#include "citcom_init.h"
 
 extern "C" double return1_test();
+extern "C" struct All_variables* Citcom_Init();
+struct All_variables *E;
+
 
 // copyright
 
@@ -34,9 +39,6 @@ PyObject * pyCitcomSRegional_copyright(PyObject *, PyObject *)
 
 
 
-
-// hello
-
 char pyCitcomSRegional_return1_test__doc__[] = "";
 char pyCitcomSRegional_return1_test__name__[] = "return1_test";
 
@@ -48,10 +50,19 @@ PyObject * pyCitcomSRegional_return1_test(PyObject *, PyObject *)
 }
 
 
+char pyCitcomSRegional_Citcom_Init__doc__[] = "";
+char pyCitcomSRegional_Citcom_Init__name__[] = "Citcom_Init";
+
+PyObject * pyCitcomSRegional_Citcom_Init(PyObject *, PyObject *)
+{
+    E = Citcom_Init();
+    return Py_BuildValue("O", E);
+}
+
 
 
 
 // version
-// $Id: misc.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: misc.cc,v 1.2 2003/04/04 00:42:50 tan2 Exp $
 
 // End of file

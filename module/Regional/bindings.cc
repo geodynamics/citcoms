@@ -26,6 +26,9 @@ struct PyMethodDef pyCitcomSRegional_methods[] = {
     {pyCitcomSRegional_return1_test__name__, pyCitcomSRegional_return1_test,
      METH_VARARGS, pyCitcomSRegional_return1_test__doc__},
 
+    {pyCitcomSRegional_Citcom_Init__name__, pyCitcomSRegional_Citcom_Init,
+     METH_VARARGS, pyCitcomSRegional_Citcom_Init__doc__},
+
     {pyCitcomSRegional_copyright__name__, pyCitcomSRegional_copyright,
      METH_VARARGS, pyCitcomSRegional_copyright__doc__},
 
@@ -35,6 +38,6 @@ struct PyMethodDef pyCitcomSRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: bindings.cc,v 1.2 2003/04/04 00:42:50 tan2 Exp $
 
 // End of file

@@ -29,12 +29,16 @@ extern "C"
 PyObject * pyCitcomSRegional_return1_test(PyObject *, PyObject *);
 
 
+extern char pyCitcomSRegional_Citcom_Init__doc__[];
+extern char pyCitcomSRegional_Citcom_Init__name__[];
+extern "C"
+PyObject * pyCitcomSRegional_Citcom_Init(PyObject *, PyObject *);
 
 
 
 #endif
 
 // version
-// $Id: misc.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: misc.h,v 1.2 2003/04/04 00:42:50 tan2 Exp $
 
 // End of file
