@@ -92,29 +92,30 @@ class FineGridExchanger(Exchanger):
 
 
     def createBC(self):
+        import Inlet
         if self.inventory.incompressibility:
+            self.BC = Inlet.BoundaryVTInlet(self.communicator,
+                                            self.boundary,
+                                            self.sink["BC"],
+                                            self.all_variables,
+                                            "VT")
             import journal
             journal.info("incompressibility").activate()
-            self.BC = self.module.BoundaryVTInlet_create(self.communicator.handle(),
-                                                         self.boundary,
-                                                         self.sink["BC"],
-                                                         self.all_variables,
-                                                         "VT")
         else:
-            self.BC = self.module.VTInlet_create(self.boundary,
-                                                 self.sink["BC"],
-                                                 self.all_variables,
-                                                 "VT")
-
+            self.BC = Inlet.VTInlet(self.boundary,
+                                    self.sink["BC"],
+                                    self.all_variables,
+                                    "VT")
         return
 
 
     def createII(self):
+        import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["Intr"]):
-            self.II[i] = self.module.VTOutlet_create(src,
-                                                     self.all_variables,
-                                                     "T")
+            self.II[i] = Outlet.VTOutlet(src,
+                                         self.all_variables,
+                                         "T")
         return
 
 
@@ -134,7 +135,10 @@ class FineGridExchanger(Exchanger):
         sink = self.module.createSink(self.sinkComm.handle(),
                                       self.numSrc,
                                       interior)
-        self.module.initTemperatureSink(interior, sink, self.all_variables)
+        import Inlet
+        inlet = Inlet.VTInlet(interior, sink, self.all_variables, "t")
+        inlet.recv()
+        inlet.impose()
 
         # Any modification of read-in temperature is done here
         # Note: modifyT is called after receiving unmodified T from CGE.
@@ -154,24 +158,18 @@ class FineGridExchanger(Exchanger):
         if self.catchup:
             # send temperture field to CGE
             for ii in self.II:
-                self.module.VTOutlet_send(ii)
+                ii.send()
 
         return
 
 
     def applyBoundaryConditions(self):
         if self.toApplyBC:
-            if self.inventory.incompressibility:
-                self.module.BoundaryVTInlet_recv(self.BC)
-            else:
-                self.module.VTInlet_recv(self.BC)
+            self.BC.recv()
 
             self.toApplyBC = False
 
-        if self.inventory.incompressibility:
-            self.module.BoundaryVTInlet_impose(self.BC)
-        else:
-            self.module.VTInlet_impose(self.BC)
+        self.BC.impose()
 
         # applyBC only when previous step is a catchup step
         if self.catchup:
@@ -200,10 +198,7 @@ class FineGridExchanger(Exchanger):
             #print "FGE: CATCHUP!"
 
         # store timestep for interpolating boundary velocities
-        if self.inventory.incompressibility:
-            self.module.BoundaryVTInlet_storeTimestep(self.BC, self.fge_t, self.cge_t)
-        else:
-            self.module.VTInlet_storeTimestep(self.BC, self.fge_t, self.cge_t)
+        self.BC.storeTimestep(self.fge_t, self.cge_t)
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)
@@ -235,6 +230,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.33 2004/02/25 23:25:20 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.34 2004/02/26 22:29:49 tan2 Exp $"
 
 # End of file

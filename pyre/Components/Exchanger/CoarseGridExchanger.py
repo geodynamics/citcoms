@@ -88,19 +88,21 @@ class CoarseGridExchanger(Exchanger):
 
 
     def createBC(self):
+        import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["BC"]):
-            self.BC[i] = self.module.VTOutlet_create(src,
-                                                     self.all_variables,
-                                                     "VT")
+            self.BC[i] = Outlet.VTOutlet(src,
+                                         self.all_variables,
+                                         "VT")
         return
 
 
     def createII(self):
-        self.II = self.module.VTInlet_create(self.interior,
-                                             self.sink["Intr"],
-                                             self.all_variables,
-                                             "t")
+        import Inlet
+        self.II = Inlet.VTInlet(self.interior,
+                                self.sink["Intr"],
+                                self.all_variables,
+                                "t")
         return
 
 
@@ -135,9 +137,10 @@ class CoarseGridExchanger(Exchanger):
                                                  self.all_variables,
                                                  self.myBBox)
 
+        import Outlet
         for i, src in zip(range(self.numSrc), source):
-            self.module.initTemperatureSource(src,
-                                              self.all_variables)
+            outlet = Outlet.VTOutlet(src, self.all_variables, "t")
+            outlet.send()
 
         # Any modification of read-in temperature is done here
         # Note: modifyT is called after sending unmodified T to FGE.
@@ -155,14 +158,14 @@ class CoarseGridExchanger(Exchanger):
 
     def NewStep(self):
         # receive temperture field from FGE
-        self.module.VTInlet_recv(self.II)
-        self.module.VTInlet_impose(self.II)
+        self.II.recv()
+        self.II.impose()
         return
 
 
     def applyBoundaryConditions(self):
         for bc in self.BC:
-            self.module.VTOutlet_send(bc)
+            bc.send()
         return
 
 
@@ -197,6 +200,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.30 2004/02/25 00:54:42 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.31 2004/02/26 22:29:49 tan2 Exp $"
 
 # End of file
