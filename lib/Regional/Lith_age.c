@@ -73,6 +73,14 @@ void lith_age_restart_tic(struct All_variables *E)
   gnox=E->mesh.nox;
   gnoy=E->mesh.noy;
   gnoz=E->mesh.noz;
+
+  E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
+
+  if(E->control.lith_age_time==1)   {
+    /* to open files every timestep */
+      E->control.lith_age_old_cycles = E->monitor.solution_cycles;
+  }
+
   for(i=1;i<=gnoy;i++)
     for(j=1;j<=gnox;j++) {
       node=j+(i-1)*gnox;
@@ -88,6 +96,7 @@ void lith_age_restart_tic(struct All_variables *E)
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
+	  E->T[m][node] = E->control.lith_age_mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
@@ -320,10 +329,6 @@ void lith_age_conform_tbc(struct All_variables *E)
 
   if(E->control.lith_age_time==1)   {
     /* to open files every timestep */
-    if(E->monitor.solution_cycles==0) {
-      E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
-      E->control.lith_age_old_cycles = E->monitor.solution_cycles;
-    }
     if (E->control.lith_age_old_cycles != E->monitor.solution_cycles) {
       /*update so that output only happens once*/
       output = 1;
@@ -331,28 +336,6 @@ void lith_age_conform_tbc(struct All_variables *E)
     }
     lith_age_read_files(E,output);
   }
-  else {
-    /* otherwise, just open for the first timestep */
-    /* NOTE: This is only used if we are adjusting the boundaries */
-
-    if(E->monitor.solution_cycles==0) {
-      E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
-      sprintf(output_file,"%s",E->control.lith_age_file);
-      fp1=fopen(output_file,"r");
-      if (fp1 == NULL) {
-	fprintf(E->fp,"(Boundary_conditions #1) Can't open %s\n",output_file);
-	parallel_process_termination();
-      }
-      for(i=1;i<=gnoy;i++)
-	for(j=1;j<=gnox;j++) {
-	  node=j+(i-1)*gnox;
-	  fscanf(fp1,"%f",&(E->age_t[node]));
-	  E->age_t[node]=E->age_t[node]*E->data.scalet;
-	}
-      fclose(fp1);
-    } /* end E->monitor.solution_cycles == 0 */
-  } /* end E->control.lith_age_time == false */
-
 
   /* NOW SET THE TEMPERATURES IN THE BOUNDARY REGIONS */
   if(E->monitor.solution_cycles>1 && E->control.temperature_bound_adj) {
