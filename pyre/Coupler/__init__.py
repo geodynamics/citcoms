@@ -8,12 +8,12 @@
 #
 
 
-def coupler(name="coupler"):
+def coupler(name="coupler", facility="coupler"):
     from Coupler import Coupler
-    return Coupler(name)
+    return Coupler(name, facility)
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.1 2003/08/30 00:37:59 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.2 2003/09/05 19:49:15 tan2 Exp $"
 
 # End of file

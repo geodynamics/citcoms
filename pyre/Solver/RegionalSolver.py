@@ -26,19 +26,22 @@ class RegionalSolver(Solver):
 
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
+        import pyre.facilities
 
         # component modules
         import CitcomS.Components.Sphere as Sphere
+        import CitcomS.Components.Exchanger as Exchanger
 
         inventory = [
 
             Mesher("mesher", default=Sphere.regionalSphere("regional-sphere")),
+            pyre.facilities.facility("exchanger", default=Exchanger.finegridexchanger("exchanger", "exchanger")),
 
             ]
 
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.31 2003/08/29 20:41:04 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.32 2003/09/05 19:49:15 tan2 Exp $"
 
 # End of file

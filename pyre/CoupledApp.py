@@ -20,6 +20,12 @@ class CoupledApp(SimpleApp):
         self.solver = None
         self.solverCommunicator = None
         self.intercomm = None
+
+        self.rank = 0
+        self.nodes = 0
+        self.localLeader = 0
+        self.remoteLeader = 0
+
         self._info = journal.debug("application")
         return
 
@@ -52,6 +58,11 @@ class CoupledApp(SimpleApp):
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
 
+        self.rank = layout.rank
+        self.nodes = layout.nodes
+        self.localLeader = layout.localLeader
+        self.remoteLeader = layout.remoteLeader
+
         return
 
 
@@ -76,7 +87,7 @@ class CoupledApp(SimpleApp):
         self._info.line("    coarse: %r" % self.inventory.coarse.name)
         self._info.line("    fine: %r" % self.inventory.fine.name)
         self._info.line("    controller: %r" % self.inventory.controller.name)
-        #self._info.line("    coupler: %r" % self.inventory.coupler.name)
+        self._info.line("    coupler: %r" % self.inventory.coupler.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
 
         return
@@ -90,13 +101,13 @@ class CoupledApp(SimpleApp):
 
         import Controller
         import Solver
-        #import Coupler
+        import Coupler
         import Layout
 
         inventory = [
 
             pyre.facilities.facility("controller", default=Controller.controller()),
-            #pyre.facilities.facility("coupler", default=Coupler.coupler()),
+            pyre.facilities.facility("coupler", default=Coupler.coupler()),
             pyre.facilities.facility("layout", default=Layout.layout()),
 
             #SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
@@ -110,6 +121,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.2 2003/09/03 21:18:56 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.3 2003/09/05 19:49:14 tan2 Exp $"
 
 # End of file

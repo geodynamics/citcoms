@@ -29,12 +29,14 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	Exchanger.py
+	CoarseGridExchanger.py \
+	Exchanger.py \
+	FineGridExchanger.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.1 2003/08/30 00:44:19 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/09/05 19:49:14 tan2 Exp $
 
 # End of file

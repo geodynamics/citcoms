@@ -13,7 +13,7 @@ from pyre.components.Component import Component
 class Layout(Component):
 
 
-    def __init__(self, name="layout", facility="layout"):
+    def __init__(self, name, facility):
         Component.__init__(self, name, facility)
 
         self.coarse = None
@@ -22,6 +22,8 @@ class Layout(Component):
 
         self.rank = 0
         self.nodes = 0
+        self.localLeader = 0
+        self.remoteLeader = 0
         return
 
 
@@ -95,9 +97,15 @@ class Layout(Component):
         self.coarse = world.include(self.inventory.coarse)
 
         if self.fine:
-            self.createIntercomm(self.fine, self.inventory.coarse)
+            # use the last proc. as the group leader
+            self.localLeader = self.inventory.fine[-1]
+            self.remoteLeader = self.inventory.coarse[-1]
+            self.createIntercomm(self.fine)
         elif self.coarse:
-            self.createIntercomm(self.coarse, self.inventory.fine)
+            # use the last proc. as the group leader
+            self.localLeader = self.inventory.coarse[-1]
+            self.remoteLeader = self.inventory.fine[-1]
+            self.createIntercomm(self.coarse)
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % self.rank)
@@ -106,9 +114,11 @@ class Layout(Component):
 
 
 
-    def createIntercomm(self, comm, remoteGroup):
+    def createIntercomm(self, comm):
+        # not finished
         self.intercomm = comm
         return
+
 
 
     class Inventory(Component.Inventory):
@@ -128,6 +138,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.2 2003/09/03 21:16:40 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.3 2003/09/05 19:49:15 tan2 Exp $"
 
 # End of file
