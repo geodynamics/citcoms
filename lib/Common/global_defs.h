@@ -3,7 +3,7 @@
 
 /*
 This file contains the definitions of variables which are passed as arguments
-to functions across the whole filespace of CITCOM. 
+to functions across the whole filespace of CITCOM.
 #include this file everywhere !
 */
 
@@ -14,17 +14,15 @@ to functions across the whole filespace of CITCOM.
 #include "mpi.h"
 
 
+#if !defined(__cplusplus)
 
-/*#include "/home/limbo1/louis/Software/include/dmalloc.h" */
+/* Macros */
+#define max(A,B) (((A) > (B)) ? (A) : (B))
+#define min(A,B) (((A) < (B)) ? (A) : (B))
+#define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 
-#if defined(__osf__)
-void *Malloc1();
 #endif
 
-#define Malloc0(a) Malloc1((a),__FILE__,__LINE__)
-
-
-/* #define Malloc0 malloc */
 
 #define LIDN 0x1
 #define VBX 0x2
@@ -58,7 +56,6 @@ void *Malloc1();
 #define SKIPID 0x4000000
 #define ZEROID 0x8000000
 
-//#define LIDE 1
 
 #ifndef COMPRESS_BINARY
 #define COMPRESS_BINARY "/usr/bin/compress"
@@ -69,12 +66,6 @@ void *Malloc1();
 #define MAX_S    30
 #define NCS      14   /* max. number of sphere caps */
 #define MAXP 20      /* max. number of plates */
-
-/* Macros */
-
-#define max(A,B) (((A) > (B)) ? (A) : (B))
-#define min(A,B) (((A) < (B)) ? (A) : (B))
-#define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 
 typedef float higher_precision;  /* matrix coeffs etc */
 typedef double higher_precision1; /* intermediate calculations for finding above coeffs */
