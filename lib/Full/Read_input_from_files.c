@@ -32,7 +32,7 @@ void read_input_files_for_timesteps(E,action,output)
     noz1=E->lmesh.noz;
     noy1=E->lmesh.noy;
     lev=E->mesh.levmax;
-    
+
     age=find_age_in_MY(E);
 
     intage = age;
@@ -44,7 +44,7 @@ void read_input_files_for_timesteps(E,action,output)
     }
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      cap = E->sphere.capid[m];  /* capid: 1-12 */
+      cap = E->sphere.capid[m] - 1;  /* capid: 1-12 */
 
       switch (action) { /* set up files to open */
 
@@ -97,13 +97,13 @@ void read_input_files_for_timesteps(E,action,output)
 	    fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
 	}
 	break;
-	
+
       } /* end switch */
 
 
 
       switch (action) { /* Read the contents of files and average */
-	
+
       case 1:  /* velocity boundary conditions */
 	nnn=nox*noy;
 	for(i=1;i<=dims;i++)  {
@@ -124,7 +124,7 @@ void read_input_files_for_timesteps(E,action,output)
 	}
 	fclose(fp1);
 	if (pos_age) fclose(fp2);
-	
+
 	if(E->parallel.me_loc[3]==E->parallel.nprocz-1 )  {
           for(k=1;k<=noy1;k++)
 	    for(i=1;i<=nox1;i++)    {
@@ -141,7 +141,7 @@ void read_input_files_for_timesteps(E,action,output)
 		E->sphere.cap[m].VB[3][nodel] = 0.0;
 	      }
 	    }
-	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */ 
+	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
 	for(i=1;i<=dims;i++) {
           free ((void *) VB1[i]);
           free ((void *) VB2[i]);
@@ -167,7 +167,7 @@ void read_input_files_for_timesteps(E,action,output)
 
       } /* end switch */
     } /* end for m */
-    
+
     fflush(E->fp);
 
     return;
