@@ -11,6 +11,7 @@
 #define pyCitcom_AreaWeightedNormal_h
 
 #include <vector>
+#include "mpi.h"
 #include "DIM.h"
 
 struct All_variables;
@@ -53,7 +54,7 @@ private:
 #endif
 
 // version
-// $Id: AreaWeightedNormal.h,v 1.4 2004/01/21 17:40:20 tan2 Exp $
+// $Id: AreaWeightedNormal.h,v 1.5 2004/01/21 20:46:01 tan2 Exp $
 
 // End of file
 
