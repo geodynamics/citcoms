@@ -26,7 +26,7 @@ struct Data {
 
 
 class Exchanger {
-  
+
 public:
     Exchanger(const MPI_Comm comm,
 	      const MPI_Comm intercomm,
@@ -35,35 +35,33 @@ public:
 	      const int remoteLeader,
 	      const All_variables *E);
     virtual ~Exchanger();
-  
+
     void reset_target(const MPI_Comm intercomm,
 		      const int receiver);
 
-//     virtual void send(int& size);
-//     virtual void receive(const int size);
     void createDataArrays();
     void deleteDataArrays();
+
     void sendTemperature();
     void receiveTemperature();
     void sendVelocities();
     void receiveVelocities();
-    void local_sendVelocities();
-    void local_receiveVelocities();
-    void local_sendTemperature();
-    void local_receiveTemperature();
-    // Test
-    void imposeBC();
-    double exchangeTimestep(const double);
+//     void local_sendVelocities();
+//     void local_receiveVelocities();
+//     void local_sendTemperature();
+//     void local_receiveTemperature();
 
-    void wait();
-    void nowait();
+    void imposeBC();
+
+    double exchangeTimestep(const double);
+    int exchangeSignal(const int) const;
 
     virtual void gather() = 0;
     virtual void distribute() = 0;
     virtual void interpretate() = 0;  // interpolate or extrapolate
-  //    virtual void impose_bc() = 0;    // set bc flag
-    virtual void mapBoundary() = 0;  // create mapping from Boundary object
-                                     // to global id array
+    //virtual void imposeBC() = 0;      // set bc flag
+    virtual void mapBoundary() = 0;   // create mapping from Boundary object
+                                      // to global id array
 
 protected:
     const MPI_Comm comm;       // communicator of current solver
@@ -78,7 +76,6 @@ protected:
     const All_variables *E;    // CitcomS data structure,
                                // Exchanger only modifies bc flags
     Boundary *boundary;
-    
 
     struct Data outgoing;
     struct Data incoming;
@@ -87,9 +84,14 @@ protected:
 
 
 private:
+    double exchangeDouble(const double &sent, const int len) const;
+    float exchangeFloat(const float &sent, const int len) const;
+    int exchangeInt(const int &sent, const int len) const;
+
     // disable copy constructor and copy operator
     Exchanger(const Exchanger&);
     Exchanger operator=(const Exchanger&);
+
 
 };
 
@@ -98,7 +100,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.18 2003/09/28 00:11:03 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.19 2003/09/28 20:45:45 tan2 Exp $
 
 // End of file
 

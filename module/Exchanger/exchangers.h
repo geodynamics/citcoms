@@ -107,22 +107,15 @@ extern "C"
 PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *);
 
 
-extern char pyExchanger_wait__name__[];
-extern char pyExchanger_wait__doc__[];
+extern char pyExchanger_exchangeSignal__name__[];
+extern char pyExchanger_exchangeSignal__doc__[];
 extern "C"
-PyObject * pyExchanger_wait(PyObject *, PyObject *);
-
-
-extern char pyExchanger_nowait__name__[];
-extern char pyExchanger_nowait__doc__[];
-extern "C"
-PyObject * pyExchanger_nowait(PyObject *, PyObject *);
-
+PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *);
 
 
 #endif
 
 // version
-// $Id: exchangers.h,v 1.12 2003/09/28 00:34:17 tan2 Exp $
+// $Id: exchangers.h,v 1.13 2003/09/28 20:45:45 tan2 Exp $
 
 // End of file

@@ -122,17 +122,10 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_exchangeTimestep__doc__},
 
-    {pyExchanger_wait__name__,
-     pyExchanger_wait,
+    {pyExchanger_exchangeSignal__name__,
+     pyExchanger_exchangeSignal,
      METH_VARARGS,
-     pyExchanger_wait__doc__},
-
-    {pyExchanger_nowait__name__,
-     pyExchanger_nowait,
-     METH_VARARGS,
-     pyExchanger_nowait__doc__},
-
-
+     pyExchanger_exchangeSignal__doc__},
 
 
 // Sentinel
@@ -140,6 +133,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.14 2003/09/28 00:34:17 tan2 Exp $
+// $Id: bindings.cc,v 1.15 2003/09/28 20:45:45 tan2 Exp $
 
 // End of file

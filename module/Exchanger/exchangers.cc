@@ -14,6 +14,7 @@
 #include "Boundary.h"
 #include "CoarseGridExchanger.h"
 #include "FineGridExchanger.h"
+
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
 
@@ -376,56 +377,23 @@ PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
 }
 
 
-char pyExchanger_wait__doc__[] = "";
-char pyExchanger_wait__name__[] = "wait";
+char pyExchanger_exchangeSignal__doc__[] = "";
+char pyExchanger_exchangeSignal__name__[] = "exchangeSignal";
 
-PyObject * pyExchanger_wait(PyObject *, PyObject *args)
+PyObject * pyExchanger_exchangeSignal(PyObject *, PyObject *args)
 {
-    PyObject *obj;
+    PyObject *obj1;
+    int done;
 
-    if (!PyArg_ParseTuple(args, "O:wait", &obj))
+    if (!PyArg_ParseTuple(args, "Oi:exchangeSignal", &obj1, &done))
 	return NULL;
 
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj1));
+    int signal = pe->exchangeSignal(done);
 
-    pe->wait();
-
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_BuildValue("i", signal);
 }
 
-
-char pyExchanger_nowait__doc__[] = "";
-char pyExchanger_nowait__name__[] = "nowait";
-
-PyObject * pyExchanger_nowait(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:nowait", &obj))
-	return NULL;
-
-    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
-
-    pe->nowait();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-/*
-char pyExchanger_rE__doc__[] = "";
-char pyExchanger_rE__name__[] = "rE";
-
-PyObject * pyExchanger_rE(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:rE", &obj))
-	return NULL;
-
-}
-*/
 
 
 // helper functions
@@ -452,6 +420,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.16 2003/09/28 00:34:17 tan2 Exp $
+// $Id: exchangers.cc,v 1.17 2003/09/28 20:45:45 tan2 Exp $
 
 // End of file
