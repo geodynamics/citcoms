@@ -304,8 +304,8 @@ void Exchanger::imposeConstraint(){
                     {
                         normal[l]/=area;
                     }
-		    if(xc[0]==xc[6]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[7]-xc[1]));
-		    if(xc[1]==xc[7]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[6]-xc[0])*sin(0.5*(xc[7]+xc[1])));
+		    if(xc[0]==xc[6]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[7]-xc[1])*sin(xc[0]));
+		    if(xc[1]==xc[7]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[6]-xc[0]));
 		    if(xc[2]==xc[8]) area=fabs(xc[2]*xc[8]*(xc[7]-xc[1])*(xc[6]-xc[0])*sin(0.5*(xc[0]+xc[6])));
 
 
@@ -527,7 +527,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.30 2003/10/05 18:55:48 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.31 2003/10/06 00:53:59 puru Exp $
 
 // End of file
 
