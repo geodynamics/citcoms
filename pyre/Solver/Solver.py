@@ -14,18 +14,23 @@ import journal
 class Solver(BaseSolver):
 
 
-    def launch(self,application):
-	#journal.info("staging").log("setup MPI")
-        comm = application.solverCommunicator
-        self.all_variables = self.CitcomModule.citcom_init(comm.handle())
-	self.rank = comm.rank
+    def __init__(self, name, facility="solver"):
+        BaseSolver.__init__(self, name, facility)
 
-        self.initialize()
-	self.CitcomModule.global_default_values(self.all_variables)
-        self.CitcomModule.set_signal()
-        self.setProperties()
+        self.CitcomModule = None
+        self.all_variables = None
+        self.coupler = None
+	self._start_cpu_time = 0
+        return
 
-	self._start_cpu_time = self.CitcomModule.CPU_time()
+
+
+    def launch(self, application):
+        BaseSolver.launch(self, application)
+
+        # if there is a coupler, launch it
+        if self.coupler:
+            self.coupler.launch(application)
 
         mesher = self.inventory.mesher
         mesher.setup()
@@ -49,9 +54,8 @@ class Solver(BaseSolver):
 
 
 
-    def advance(self,dt):
-        self._loopInfo.log(
-            "%s: step %d: advancing the solution by dt = %s" % (self.name, self.step, dt))
+    def advance(self, dt):
+        BaseSolver.advance(self, dt)
 
         vsolver = self.inventory.vsolver
         vsolver.setup()
@@ -69,31 +73,49 @@ class Solver(BaseSolver):
     def stableTimestep(self):
         tsolver = self.inventory.tsolver
         dt = tsolver.stable_timestep()
-        self._loopInfo.log(
-            "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))
+
+        if self.coupler:
+            # negotiate with other solver(s)
+            dt = self.coupler.stableTimestep(self, dt)
+
+        BaseSolver.stableTimestep(self, dt)
+
         return dt
 
 
 
     def endSimulation(self, step):
+        BaseSolver.endSimulation(self, step, self.t)
+
         total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
-        if not self.rank:
+
+        rank = self.communicator.rank
+        if not rank:
             print "Average cpu time taken for velocity step = %f" % (
                 total_cpu_time / step )
 
 	#self.CitcomModule.finalize()
-
         return
 
 
 
-    def save(self,step):
-        self.CitcomModule.output(self.all_variables,step)
+    def save(self, step):
+        self.CitcomModule.output(self.all_variables, step)
         return
 
 
 
-    def initialize(self):
+    def initialize(self, application):
+	#journal.info("staging").log("setup MPI")
+        comm = application.solverCommunicator
+        self.all_variables = self.CitcomModule.citcom_init(comm.handle())
+	self.communicator = comm
+
+        # if there is a coupler, initialize it
+        if application.inventory.coupler:
+            self.coupler = application.inventory.coupler
+            self.coupler.initialize(application)
+
 	inv = self.inventory
         CitcomModule = self.CitcomModule
         all_variables = self.all_variables
@@ -108,6 +130,14 @@ class Solver(BaseSolver):
         inv.param.initialize(CitcomModule, all_variables)
         inv.phase.initialize(CitcomModule, all_variables)
         inv.visc.initialize(CitcomModule, all_variables)
+
+        CitcomModule.global_default_values(self.all_variables)
+        CitcomModule.set_signal()
+
+        self.setProperties()
+
+	self._start_cpu_time = self.CitcomModule.CPU_time()
+
         return
 
 
@@ -125,6 +155,16 @@ class Solver(BaseSolver):
         inv.param.setProperties()
         inv.phase.setProperties()
         inv.visc.setProperties()
+
+        return
+
+
+
+    def applyBoundaryConditions(self):
+        BaseSolver.applyBoundaryConditions(self)
+
+        if self.coupler:
+            self.coupler.applyBoundaryConditions(self)
 
         return
 
@@ -165,6 +205,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.15 2003/08/29 20:41:04 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.16 2003/09/03 21:08:34 tan2 Exp $"
 
 # End of file
