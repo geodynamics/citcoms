@@ -9,7 +9,6 @@
 
 #include <portinfo>
 #include <algorithm>
-#include <iostream>
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "BoundedBox.h"
@@ -78,6 +77,7 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 	    std::vector<double> elmShape(NODES_PER_ELEMENT);
 	    double accuracy = E->control.accuracy * E->control.accuracy
  		              * E->eco[mm][el+1].area;
+
 	    bool found = elementInverseMapping(elmShape, x,
 					       etaAxes, inv_length_sq,
 					       el, accuracy);
@@ -186,11 +186,10 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
 {
     const int mm = 1;
     bool found = false;
-    bool keep_going = true;
     int count = 0;
     std::vector<double> eta(DIM); // initial eta = (0,0,0)
 
-    do {
+    while (1) {
 	getShapeFunction(elmShape, eta);
 
 	std::vector<double> xx(DIM);
@@ -221,22 +220,26 @@ bool FEMInterpolator::elementInverseMapping(std::vector<double>& elmShape,
 		eta[d] += deta[d];
 	else  // Damping
 	    for(int d=0; d<DIM; ++d)
-		eta[d] += 0.8 * deta[d];
+		eta[d] += 0.9 * deta[d];
 
 	// if x is inside this element, -1 < eta[d] < 1, d = 0 ... DIM
 	bool outside = false;
 	for(int d=0; d<DIM; ++d)
-	    outside = outside || (std::abs(eta[d]) > 2);
+	    outside = outside || (std::abs(eta[d]) > 1.5);
 
-	found = distancesq < accuracy;
-	keep_going = (!found) && (count < 100) && (!outside);
+	// iterate at least twice
+	found = (distancesq < accuracy) && (count > 0);
+
+	if (outside || found || (count > 100))
+	    break;
+
 	++count;
 
 	/* Only need to iterate if this is marginal. If eta > distortion of
 	   an individual element then almost certainly x is in a
 	   different element ... or the mesh is terrible !  */
 
-    } while(keep_going);
+    }
 
     return found;
 }
@@ -316,6 +319,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.7 2004/02/05 19:45:09 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.8 2004/02/24 20:09:24 tan2 Exp $
 
 // End of file
