@@ -20,7 +20,7 @@ class Param(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.Param_set_prop(self.inventory)
+	Regional.Param_set_properties(self.inventory)
         return
 
 
@@ -83,6 +83,6 @@ class Param(Component):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
 
 # End of file

@@ -21,7 +21,7 @@ class Const(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.Const_set_prop(self.inventory)
+	Regional.Const_set_properties(self.inventory)
         return
 
 
@@ -31,6 +31,7 @@ class Const(Component):
 
         import pyre.properties
         from pyre.units.length import m
+        from pyre.units.lengt
         from pyre.units.mass import kg
         from pyre.units.time import s
         from pyre.units.temperature import K
@@ -38,7 +39,7 @@ class Const(Component):
         from pyre.units.energy import J
 
         inventory = [
-            pyre.properties.float("radius", 6371e3*m),
+            pyre.properties.float("radius", 6371.0*km),
             pyre.properties.float("ref_density", 3500.0*kg/m**3),
             pyre.properties.float("thermdiff", 1.0e-6*m**2/s),
             pyre.properties.float("gravacc", 10.0*m/s**2),
@@ -57,6 +58,6 @@ class Const(Component):
 
 
 # version
-__id__ = "$Id: Const.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
 
 # End of file

@@ -20,7 +20,7 @@ class BC(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.BC_set_prop(self.inventory)
+	Regional.BC_set_properties(self.inventory)
         return
 
 
@@ -56,6 +56,6 @@ class BC(Component):
             ]
 
 # version
-__id__ = "$Id: BC.py,v 1.3 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.4 2003/07/23 05:29:58 ces74 Exp $"
 
 # End of file

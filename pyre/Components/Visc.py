@@ -20,7 +20,7 @@ class Visc(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.Visc_set_prop(self.inventory)
+	Regional.Visc_set_properties(self.inventory)
         return
 
 
@@ -62,6 +62,6 @@ class Visc(Component):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.3 2003/07/13 22:58:12 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.4 2003/07/23 05:29:58 ces74 Exp $"
 
 # End of file

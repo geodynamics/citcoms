@@ -20,7 +20,7 @@ class Phase(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.Phase_set_prop(self.inventory)
+	Regional.Phase_set_properties(self.inventory)
         return
 
 
@@ -50,6 +50,6 @@ class Phase(Component):
             ]
 
 # version
-__id__ = "$Id: Phase.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Phase.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
 
 # End of file
