@@ -865,7 +865,7 @@ struct All_variables {
     void (* problem_initial_fields)(void*);
     void (* problem_tracer_setup)(void*);
     void (* problem_tracer_advection)(void*);
-    void (* problem_tracer_output)(void*);
+    void (* problem_tracer_output)(void*, int);
     void (* problem_update_bcs)(void*);
     void (* special_process_new_velocity)(void*);
     void (* special_process_new_buoyancy)(void*);
