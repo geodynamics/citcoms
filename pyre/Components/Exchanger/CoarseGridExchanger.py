@@ -42,11 +42,6 @@ class CoarseGridExchanger(Exchanger):
         return
 
 
-    def getBid2crseelem(self):
-        self.module.getBid2crseelem(self.exchanger)
-        return
-
-
     def gather(self):
         self.module.gather(self.exchanger)
         return
@@ -108,6 +103,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.11 2003/09/26 19:04:36 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.12 2003/09/27 00:30:22 tan2 Exp $"
 
 # End of file
