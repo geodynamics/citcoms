@@ -23,7 +23,7 @@ if __name__ == "__main__":
     app = SimpleApp("regional")
 
     #print app.name
-    #print dir(app.inventory)
+    print dir(app.inventory)
     #print app.inventory.controller.name
     #print dir(app.inventory.controller.inventory)
 
@@ -31,6 +31,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: citcomsregional.py,v 1.8 2003/08/29 00:08:44 tan2 Exp $"
+__id__ = "$Id: citcomsregional.py,v 1.9 2003/09/12 16:25:49 tan2 Exp $"
 
 #  End of file
