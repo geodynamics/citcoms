@@ -84,7 +84,6 @@ Boundary::~Boundary() {
 void Boundary::init(const All_variables *E) {
     int nodes,node1,node2,nodest;
     int *nid;
-    double theta_max,theta_min,fi_max,fi_min,ro,ri;
 
     nodest = E->lmesh.nox * E->lmesh.noy * E->lmesh.noz;
     nid = new int[nodest];
@@ -101,13 +100,6 @@ void Boundary::init(const All_variables *E) {
     fi_min=E->control.fi_min;
     ro=E->sphere.ro;
     ri=E->sphere.ri;
-
-    // test 
-    std::cout << "Fine Grid Bounds" << std::endl;
-    std::cout << "theta= " << theta_min<< "   " << theta_max << std::endl;
-    std::cout << "fi   = " << fi_min << "   " << fi_max << std::endl;
-    std::cout << "r    = " << ri << "   " << ro  << std::endl;
-
 
     //  for two YOZ planes
 
@@ -176,60 +168,16 @@ void Boundary::init(const All_variables *E) {
 
 
 void Boundary::getBid2crseelem(const All_variables *E) {
-    
-   int ind,n,n1,n2;    
-   double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
-   int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
-//   int nxmax,nxmin,nymax,nymin,nzmax,nzmin;
+  std::cout << "in Boundary::getBid2crseelem" << std::endl;
   
-//   for(int j=1; j < 2; j++) {
-//  for(int j=0; j < size; j++) {
-//    bid2crseelem[j]=0;
-//    ind=0;
-//    for(int i=1; i <= E->lmesh.nel; i++)
-//      {
-//	nxmax = E->IEN[E->mesh.levmax][1][i].node[2];
-//	nxmin = E->IEN[E->mesh.levmax][1][i].node[1];
-//	nymax = E->IEN[E->mesh.levmax][1][i].node[4];
-//	nymin = E->IEN[E->mesh.levmax][1][i].node[1];
-//	nzmax = E->IEN[E->mesh.levmax][1][i].node[5];
-//	nzmin = E->IEN[E->mesh.levmax][1][i].node[1];
-// Test
-// 	std::cout << "in Boundary::init " << nxmax << " "  << nxmin << " " 
-// 		  << nymax << " "  << nymin << " " 
-// 		  << nzmax << " "  << nzmin << " | " 
-// 		  << X[0][j] << " "  
-// 		  << X[1][j] << " "  
-// 		  << X[2][j] << " | "  
-// 		  << E->X[E->mesh.levmax][1][1][nxmax] << " "  << E->X[E->mesh.levmax][1][1][nxmin] << " " 
-// 		  << E->X[E->mesh.levmax][1][2][nymax] << " "  << E->X[E->mesh.levmax][1][2][nymin] << " " 
-// 		  << E->X[E->mesh.levmax][1][3][nzmax] << " "  << E->X[E->mesh.levmax][1][3][nzmin] << " " 
-// 		  << std::endl;
-
-//	if(  (X[0][j] >= E->X[E->mesh.levmax][1][1][nxmin]) 
-//	     &&(X[0][j] <= E->X[E->mesh.levmax][1][1][nxmax])
-//	     &&(X[1][j] >= E->X[E->mesh.levmax][1][2][nymin])
-//	     &&(X[1][j] <= E->X[E->mesh.levmax][1][2][nymax])
-//	     &&(X[2][j] >= E->X[E->mesh.levmax][1][3][nzmin])
-//	     &&(X[2][j] <= E->X[E->mesh.levmax][1][3][nzmax]) )
-//	  {
-//	    bid2crseelem[0][j]=i;
-//	    ind=1;
-//	  }
-//	if(ind) {
-//	  std::cout << " done right bid = " << j << " "
-//		    << " bid2crseelem[j] = " << bid2crseelem[0][j]
-//		    << std::endl;
-//	  break;
-//	}
-//      }
-//    if(!ind)
-//      std::cout << "  wrong bid = " << j << std::endl;
-//  }
+  int ind,n,n1,n2;    
+  double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
+  int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
+  
   for(int i=0; i< size; i++)
     {
-        for(int j=0; j< dim; j++)xt[j]=X[j][i];
-// loop over 5 sub tets in a brick element
+      for(int j=0; j< dim; j++)xt[j]=X[j][i];
+      // loop over 5 sub tets in a brick element
         ind = 0;
          
         for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
@@ -258,9 +206,9 @@ void Boundary::getBid2crseelem(const All_variables *E) {
                     if(dett < 0) std::cout << " Determinent evaluation is wrong" << std::endl;
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
-                    bid2crseelem[0][i]=n+1;
-                    bid2crseelem[1][i]=mm;
-                    
+//                     bid2crseelem[0][i]=n+1;
+//                     bid2crseelem[1][i]=E->sphere.capid[mm];
+// 		    cout << "i = " << i << "elem = " << n+1 << " " << "capid = " << E->sphere.capid[mm] << endl;                    
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
@@ -315,6 +263,9 @@ void Boundary::getBid2crseelem(const All_variables *E) {
         
     }
 //    std::cout << "end of  Boundary::bid2crseelem for bid2crseelem " << std::endl; 
+
+    std::cout << "in Boundary::getBid2crseelem: me =" << E->parallel.me
+	      << " Done" << std::endl;    
     return;
 }
 
@@ -458,26 +409,26 @@ void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
 //     double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
 //      int nsub[]={0, 2, 3, 7, 0, 1, 2, 5, 4, 7, 5, 0, 5, 7, 6, 2, 5, 7, 2, 0};
     
-    for(int i=0; i<size; i++)
-        bid2proc[i]=localLeader;
+//     for(int i=0; i<size; i++)
+//         bid2proc[i]=localLeader;
 
-    int n=0;
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int k=1;k<=E->lmesh.noy;k++)
-	    for(int j=1;j<=E->lmesh.nox;j++)
-		for(int i=1;i<=E->lmesh.noz;i++)  {
-		    int node = i + (j-1)*E->lmesh.noz
-                        + (k-1)*E->lmesh.noz*E->lmesh.nox;
+//     int n=0;
+//     for(int m=1;m<=E->sphere.caps_per_proc;m++)
+// 	for(int k=1;k<=E->lmesh.noy;k++)
+// 	    for(int j=1;j<=E->lmesh.nox;j++)
+// 		for(int i=1;i<=E->lmesh.noz;i++)  {
+// 		    int node = i + (j-1)*E->lmesh.noz
+//                         + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
-		    if((k==1)||(k==E->lmesh.noy)||(j==1)||(j==E->lmesh.nox)||(i==1)||(i==E->lmesh.noz))
-		    {
-                        bid2gid[n]=node;
-                        n++;
-		    }
-		}
-    if(n != size) std::cout << " nodes != size ";
-    printBid2gid();
- 
+// 		    if((k==1)||(k==E->lmesh.noy)||(j==1)||(j==E->lmesh.nox)||(i==1)||(i==E->lmesh.noz))
+// 		    {
+//                         bid2gid[n]=node;
+//                         n++;
+// 		    }
+// 		}
+//     if(n != size) std::cout << " nodes != size ";
+//     printBid2gid();
+  getBid2crseelem(E);
     return;  
 }
 
@@ -508,6 +459,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.16 2003/09/24 20:14:12 puru Exp $
+// $Id: Boundary.cc,v 1.17 2003/09/25 03:37:52 ces74 Exp $
 
 // End of file
