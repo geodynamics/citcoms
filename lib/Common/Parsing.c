@@ -134,12 +134,12 @@ void setup_parser(E,filename)
 
   /* Now we can use our routines to check & set their own flags ! */
 
-  input_boolean("VERBOSE",E->control.VERBOSE,"off",m);
-  input_boolean("DESCRIBE",E->control.DESCRIBE,"off",m);
-  input_boolean("BEGINNER",E->control.BEGINNER,"off",m);
-  VERBOSE=E->control.VERBOSE;
-  DESCRIBE=E->control.DESCRIBE;
-  BEGINNER=E->control.BEGINNER;
+  input_boolean("VERBOSE",&i,"off",m);
+  input_boolean("DESCRIBE",&j,"off",m);
+  input_boolean("BEGINNER",&k,"off",m);
+  VERBOSE=i;
+  DESCRIBE=j;
+  BEGINNER=k;
 
 }
 
