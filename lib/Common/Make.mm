@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.5 2003/05/23 00:46:07 ces74 Exp $
+# $Id: Make.mm,v 1.6 2003/07/14 21:08:10 tan2 Exp $
 
 include local.def
 
@@ -32,6 +32,7 @@ PROJ_SRCS = \
 	Element_calculations.c \
 	General_matrix_functions.c \
 	Instructions.c \
+	Interuption.c \
 	Nodal_mesh.c \
 	Pan_problem_misc_functions.c \
 	Parsing.c \
@@ -64,7 +65,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.5 2003/05/23 00:46:07 ces74 Exp $
+# $Id: Make.mm,v 1.6 2003/07/14 21:08:10 tan2 Exp $
 
 #
 # End of file

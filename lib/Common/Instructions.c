@@ -12,14 +12,14 @@
 #include "citcom_init.h"
 #include "phase_change.h"
 
-int Emergency_stop;
+//int Emergency_stop;
 
 void read_instructions(filename)
      char *filename;
 {
     int get_process_identifier();
 
-    void allocate_common_vars();  
+    void allocate_common_vars();
     void common_initial_fields();
     void read_initial_settings();
     void tracer_initial_settings();
@@ -37,7 +37,8 @@ void read_instructions(filename)
     void construct_node_maps();
     void read_mat_from_file();
     void construct_mat_group();
-    void interuption();
+    //void interuption();
+    void set_signal();
     void set_up_nonmg_aliases();
     void check_bc_consistency();
     void node_locations();
@@ -45,7 +46,7 @@ void read_instructions(filename)
     void parallel_communication_routs_v();
     void parallel_communication_routs_s();
     void parallel_processor_setup();
-    void allocate_velocity_vars();                 
+    void allocate_velocity_vars();
     void construct_c3x3matrix();
     void construct_surf_det ();
     void set_sphere_harmonics ();
@@ -54,41 +55,44 @@ void read_instructions(filename)
 
     void get_initial_elapsed_time();
     void set_starting_age();
-    void set_elapsed_time();   
+    void set_elapsed_time();
 
     void parallel_process_termination();
     void parallel_process_sync();
-  
-  
+
+
     double start_time, CPU_time0(),vmag;
     double global_vdot();
     char output_file[255];
 
     int *temp, i;
- 
+
     /* =====================================================
        Global interuption handling routine defined once here
        =====================================================  */
 
     if (E->parallel.me==0) start_time=CPU_time0();
+    /*
     Emergency_stop = 0;
 
     signal(SIGINT,interuption);
     signal(SIGTERM,interuption);
+    */
+    set_signal();
 
-    E->control.PID=get_process_identifier(); 
+    E->control.PID=get_process_identifier();
 
     /* ==================================================
-       Initialize from the command line 
+       Initialize from the command line
        from startup files. (See Parsing.c).
        ==================================================  */
 
     setup_parser(E,filename);
 
-    global_default_values(E); 
-    read_initial_settings(E); 
+    global_default_values(E);
+    read_initial_settings(E);
     tracer_initial_settings(E);
- 
+
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     global_derived_values(E);
 
@@ -104,22 +108,22 @@ void read_instructions(filename)
     parallel_processor_setup(E);   /* get # of proc in x,y,z */
     parallel_domain_decomp0(E);  /* get local nel, nno, elx, nox et al */
 
-    allocate_common_vars(E);                 
+    allocate_common_vars(E);
     (E->problem_allocate_vars)(E);
     (E->solver_allocate_vars)(E);
- 
+
            /* logical domain */
     construct_ien(E);
     parallel_domain_boundary_nodes(E);
 
            /* physical domain */
-    node_locations (E);             
+    node_locations (E);
 
     if(E->control.tracer==1)
       (E->problem_tracer_setup)(E);
 
-    allocate_velocity_vars(E);   
-              
+    allocate_velocity_vars(E);
+
     get_initial_elapsed_time(E);  /* Get elapsed time from restart run*/
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
@@ -144,7 +148,7 @@ void read_instructions(filename)
 
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",CPU_time0()-start_time);
 
-    construct_surf_det (E); 
+    construct_surf_det (E);
 
     set_sphere_harmonics (E);
 
@@ -157,27 +161,27 @@ void read_instructions(filename)
     common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
 
     shutdown_parser(E);
- 
+
     return;
 }
 
 
 /* ===================================
-   Functions which set up details 
+   Functions which set up details
    common to all problems follow ...
    ===================================  */
 
-void allocate_common_vars(E) 
+void allocate_common_vars(E)
      struct All_variables *E;
 
-{ 
+{
     void set_up_nonmg_aliases();
     int m,n,snel,nsf,elx,ely,nox,noy,noz,nno,nel,npno;
     int k,i,j,d,l,nno_l,npno_l,nozl,nnov_l,nxyz;
 
     m=0;
     n=1;
- 
+
  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
   npno = E->lmesh.npno;
@@ -197,7 +201,7 @@ void allocate_common_vars(E)
 
   E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
-  for(i=1;i<=E->mesh.nsd;i++)  
+  for(i=1;i<=E->mesh.nsd;i++)
       E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
   E->age[j]      = (float *)malloc((nsf+2)*sizeof(float));
@@ -208,7 +212,7 @@ void allocate_common_vars(E)
   E->slice.vort[j]     = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.shflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.bhflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
-   
+
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
 
@@ -299,7 +303,7 @@ void allocate_common_vars(E)
     E->ID[i][j]  = (struct ID *)    malloc((nno+2)*sizeof(struct ID));
     E->VI[i][j]  = (float *)        malloc((nno+2)*sizeof(float));
     E->NODE[i][j] = (unsigned int *)malloc((nno+2)*sizeof(unsigned int));
-    
+
     nxyz = max(nox*noz,nox*noy);
     nxyz = 2*max(nxyz,noz*noy);
     nozl = max(noy,nox*2);
@@ -323,12 +327,12 @@ void allocate_common_vars(E)
  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
   for(k=1;k<=E->mesh.nsd;k++)
-    for(i=1;i<=E->lmesh.nno;i++)    
+    for(i=1;i<=E->lmesh.nno;i++)
       E->sphere.cap[j].TB[k][i] = 0.0;
 
-  for(i=1;i<=E->lmesh.nno;i++)    
+  for(i=1;i<=E->lmesh.nno;i++)
      E->T[j][i] = 0.0;
-  
+
   for(i=1;i<E->lmesh.nel;i++)   {
       E->mat[j][i]=1;
       E->VIP[j][i]=1.0;
@@ -338,24 +342,24 @@ void allocate_common_vars(E)
       E->P[j][i] = 0.0;
 
   phase_change_allocate(E);
-  set_up_nonmg_aliases(E,j); 
+  set_up_nonmg_aliases(E,j);
 
   }         /* end for cap j  */
 
 
 
 
-  return; 
+  return;
   }
-  
+
 /*  =========================================================  */
 
-void allocate_velocity_vars(E) 
+void allocate_velocity_vars(E)
      struct All_variables *E;
 
-{ 
+{
     int m,n,i,j,k,l;
- 
+
  m=0;
  n=1;
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
@@ -368,7 +372,7 @@ void allocate_velocity_vars(E)
     E->U[j] = (double *) malloc((E->lmesh.neq+2)*sizeof(double));
     E->u1[j] = (double *) malloc((E->lmesh.neq+2)*sizeof(double));
 
- 
+
     for(i=1;i<=E->mesh.nsd;i++) {
       E->sphere.cap[j].V[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
       E->sphere.cap[j].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
@@ -400,32 +404,32 @@ void allocate_velocity_vars(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)   {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
 
-      E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l]+2)*sizeof(double)); 
+      E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l]+2)*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
 	  E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
-      E->zero_resid[l][j] = (int *) malloc((k+2)*sizeof(int)); 
-      E->parallel.Skip_id[l][j] = (int *) malloc((k+2)*sizeof(int)); 
+      E->zero_resid[l][j] = (int *) malloc((k+2)*sizeof(int));
+      E->parallel.Skip_id[l][j] = (int *) malloc((k+2)*sizeof(int));
 
       for(i=0;i<E->lmesh.NEQ[l]+2;i++) {
          E->BI[l][j][i]=0.0;
          }
 
       }   /* end for j & l */
- 
-  return;  
+
+  return;
  }
-  
+
 
 /*  =========================================================  */
 
-
+/*
 void interuption()
-    
+
 {  if (Emergency_stop++) exit(0);
    fprintf(stderr,"Cleaning up before exit\n");
    return;
    }
-
+*/
 
 void global_default_values(E)
      struct All_variables *E;
@@ -433,7 +437,7 @@ void global_default_values(E)
     FILE *fp;
 
   /* FIRST: values which are not changed routinely by the user */
- 		
+
   E->control.v_steps_low = 10;
   E->control.v_steps_upper = 1;
   E->control.max_res_red_each_p_mg = 1.0e-3;
@@ -449,7 +453,7 @@ void global_default_values(E)
   E->control.ORTHO = 1; /* for orthogonal meshes by default */
   E->control.ORTHOZ = 1; /* for orthogonal meshes by default */
 
- 
+
     E->control.KERNEL = 0;
     E->control.stokes=0;
     E->control.restart=0;
@@ -490,10 +494,10 @@ void global_default_values(E)
 
   E->viscosity.guess = 0;
   sprintf(E->viscosity.old_file,"initialize");
- 
+
   E->control.precondition = 0;	/* for larger visc contrasts turn this back on  */
-  E->control.vprecondition = 1;	
- 
+  E->control.vprecondition = 1;
+
   E->mesh.toptbc = 1; /* fixed t */
   E->mesh.bottbc = 1;
   E->mesh.topvbc = 0; /* stress */
@@ -539,18 +543,18 @@ void global_default_values(E)
   E->data.dT_dz = 0.48e-3;
   E->data.delta_S = 250.0;
   E->data.ref_temperature = 2 * 1350.0; /* fixed temperature ... delta T */
-    
+
   /* THIRD: you forgot and then went home, let's see if we can help out */
- 
+
     sprintf(E->control.data_file,"citcom.tmp.%d",getpid());
-  
+
     E->control.NASSEMBLE = 0;
-  
+
     E->mesh.layer[1] =  E->mesh.layer[2] =  E->mesh.layer[3] = 1.0;
     E->monitor.elapsed_time=0.0;
 
     E->control.record_all_until = 10000000;
- 
+
   return;  }
 
 
@@ -575,7 +579,7 @@ void check_bc_consistency(E)
       if ((E->node[j][i] & TBZ) && (E->node[j][i] & FBZ))
 	printf("Inconsistent z temperature bc at %d\n",i);
       if ((E->node[j][i] & TBY) && (E->node[j][i] & FBY))
-	printf("Inconsistent y temperature bc at %d\n",i); 
+	printf("Inconsistent y temperature bc at %d\n",i);
       }
     }          /* end for j */
 
@@ -588,7 +592,7 @@ void check_bc_consistency(E)
 	  printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
 	if ((E->NODE[lev][j][i] & VBY) && (E->NODE[lev][j][i]  & SBY))
 	  printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
-	/* Tbc's not applicable below top level */ 
+	/* Tbc's not applicable below top level */
         }
 
     }   /* end for  j and lev */
@@ -600,12 +604,12 @@ void check_bc_consistency(E)
 void set_up_nonmg_aliases(E,j)
      struct All_variables *E;
      int j;
-     
+
 { /* Aliases for functions only interested in the highest mg level */
 
   int i;
 
-  E->eco[j] = E->ECO[E->mesh.levmax][j]; 
+  E->eco[j] = E->ECO[E->mesh.levmax][j];
   E->ien[j] = E->IEN[E->mesh.levmax][j];
   E->id[j] = E->ID[E->mesh.levmax][j];
   E->Vi[j] = E->VI[E->mesh.levmax][j];
@@ -620,7 +624,7 @@ void set_up_nonmg_aliases(E,j)
     E->x[j][i] = E->X[E->mesh.levmax][j][i];
     E->sx[j][i] = E->SX[E->mesh.levmax][j][i];
     }
- 
+
   return; }
 
 void report(E,string)
@@ -649,7 +653,7 @@ void record(E,string)
 /* =============================================================
    Initialize values which are not problem dependent.
    NOTE: viscosity may be a function of all previous
-   input fields (temperature, pressure, velocity, chemistry) and 
+   input fields (temperature, pressure, velocity, chemistry) and
    so is always to be done last.
    ============================================================= */
 
@@ -684,7 +688,7 @@ void initial_pressure(E)
     for(i=1;i<=E->lmesh.npno;i++)
       E->P[m][i]=0.0;
 
-  return; 
+  return;
 }
 
 void initial_velocity(E)
@@ -699,5 +703,5 @@ void initial_velocity(E)
         E->sphere.cap[m].V[3][i]=0.0;
 	}
 
-    return; 
+    return;
 }
