@@ -98,11 +98,13 @@ class Layout(Component):
 
         if self.fine:
             # use the last proc. as the group leader
+            self.leaderRank = len(self.inventory.fine) - 1 
             self.localLeader = self.inventory.fine[-1]
             self.remoteLeader = self.inventory.coarse[-1]
             self.createIntercomm(self.fine)
         elif self.coarse:
             # use the last proc. as the group leader
+            self.leaderRank = len(self.inventory.coarse) - 1
             self.localLeader = self.inventory.coarse[-1]
             self.remoteLeader = self.inventory.fine[-1]
             self.createIntercomm(self.coarse)
@@ -139,6 +141,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.5 2003/09/26 19:03:24 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.6 2003/09/27 20:17:51 tan2 Exp $"
 
 # End of file
