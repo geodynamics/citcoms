@@ -20,7 +20,6 @@ extern "C" {
 #include "misc.h"
 void commonE(All_variables*);
 
-using namespace std;
 
 // copyright
 
@@ -45,6 +44,9 @@ PyObject * pyExchanger_hello(PyObject *, PyObject *)
 {
     return Py_BuildValue("s", "hello");
 }
+
+//
+//
 
 
 
@@ -99,10 +101,10 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 
     commonE(E);
 
-//    ofstream cfile("coarse.dat"); 
+//    std::ofstream cfile("coarse.dat");
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int k=1;k<=E->lmesh.noy;k++)
-	    for(int j=1;j<=E->lmesh.nox;j++) 
+	    for(int j=1;j<=E->lmesh.nox;j++)
 		for(int i=1;i<=E->lmesh.noz;i++)  {
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
@@ -114,11 +116,11 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 		    E->V[m][1][node] = E->T[m][node];
 		    E->V[m][2][node] = 2.0*E->T[m][node];
 		    E->V[m][3][node] = 3.0*E->T[m][node];
-		    
-//  		    cfile << "in CoarsereturnE (T, v1,v2,v3): " 
+
+//  		    cfile << "in CoarsereturnE (T, v1,v2,v3): "
 // 			  <<  node << " "
-// 			  << E->X[E->mesh.levmax][m][1][node] << " " 
-// 			  << E->X[E->mesh.levmax][m][2][node] << " " 
+// 			  << E->X[E->mesh.levmax][m][1][node] << " "
+// 			  << E->X[E->mesh.levmax][m][2][node] << " "
 // 			  << E->X[E->mesh.levmax][m][3][node] << " "
 // 			  << E->T[m][node] << " "
 // 			  << E->V[m][1][node] << " "
@@ -127,12 +129,11 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 // 			  << std::endl;
 	    }
 //     cfile.close();
-    
-    
+
+
     PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
     return Py_BuildValue("O", cobj);
 }
-
 
 
 void commonE(All_variables *E) {
@@ -161,15 +162,15 @@ void commonE(All_variables *E) {
     E->lmesh.nox = E->lmesh.elx + 1;
     E->lmesh.noz = E->lmesh.elz + 1;
     E->lmesh.noy = E->lmesh.ely + 1;
-    
+
     E->lmesh.nno = E->lmesh.noz*E->lmesh.nox*E->lmesh.noy;
     E->lmesh.nel = E->lmesh.ely*E->lmesh.elx*E->lmesh.elz;
     E->lmesh.npno = E->lmesh.nel;
-    
+
     int noz = E->lmesh.noz;
     int noy = E->mesh.noy;
     int nox = E->mesh.nox;
-    
+
     E->lmesh.ELX[E->mesh.levmax] = nox-1;
     E->lmesh.ELY[E->mesh.levmax] = noy-1;
     E->lmesh.ELZ[E->mesh.levmax] = noz-1;
@@ -179,12 +180,12 @@ void commonE(All_variables *E) {
     E->lmesh.NNO[E->mesh.levmax] = nox * noz * noy;
     E->lmesh.NEL[E->mesh.levmax] = (nox-1) * (noz-1) * (noy-1);
 
-    for (int j=1;j<=E->sphere.caps_per_proc;j++)  {	
+    for (int j=1;j<=E->sphere.caps_per_proc;j++)  {
 	E->sphere.capid[j] = 1;
     }
-    
+
     for (int lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
-	for (int j=1;j<=E->sphere.caps_per_proc;j++)  {	
+	for (int j=1;j<=E->sphere.caps_per_proc;j++)  {
 	    E->IEN[lev][j] = new IEN [E->lmesh.nel+1];
 	}
     }
@@ -211,7 +212,7 @@ void commonE(All_variables *E) {
 	    int ely = E->lmesh.ELY[lev];
 	    int nox = E->lmesh.NOX[lev];
 	    int noz = E->lmesh.NOZ[lev];
-	
+
 	    for(int r=1;r<=ely;r++)
 		for(int q=1;q<=elx;q++)
 		    for(int p=1;p<=elz;p++)     {
@@ -249,11 +250,11 @@ void commonE(All_variables *E) {
 		for(int i=1;i<=E->lmesh.noz;i++)  {
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
-		    E->X[E->mesh.levmax][m][1][node] = 
+		    E->X[E->mesh.levmax][m][1][node] =
 			(E->control.theta_max - E->control.theta_min)/(E->lmesh.nox-1)*(j-1) + E->control.theta_min;
-		    E->X[E->mesh.levmax][m][2][node] = 
+		    E->X[E->mesh.levmax][m][2][node] =
 			(E->control.fi_max - E->control.fi_min)/(E->lmesh.noy-1)*(k-1) + E->control.fi_min;
-		    E->X[E->mesh.levmax][m][3][node] = 
+		    E->X[E->mesh.levmax][m][3][node] =
 			(E->sphere.ro -  E->sphere.ri)/(E->lmesh.noz-1)*(i-1) +  E->sphere.ri;
 
 //  		    std::cout <<  node << " "
@@ -262,11 +263,11 @@ void commonE(All_variables *E) {
 //  			      << E->X[E->mesh.levmax][m][3][node] << " "
 //  			      << std::endl;
 		}
-    
+
     return;
 }
 
 // version
-// $Id: misc.cc,v 1.13 2003/09/28 06:03:12 tan2 Exp $
+// $Id: misc.cc,v 1.14 2003/09/28 20:41:46 tan2 Exp $
 
 // End of file
