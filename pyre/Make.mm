@@ -38,7 +38,9 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	CitcomApp.py \
+	Citcom.py \
+	CitcomSFull.py \
+	CitcomSRegional.py \
 	CoupledRegionalApp.py \
 	FullApp.py \
 	RegionalApp.py
@@ -49,7 +51,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.7 2003/08/22 22:18:41 tan2 Exp $
+# $Id: Make.mm,v 1.8 2003/08/25 19:16:04 tan2 Exp $
 
 #
 # End of file

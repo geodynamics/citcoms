@@ -7,22 +7,22 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomApp import CitcomApp
+from Citcom import Citcom
 import Regional as CitcomModule
 import journal
 
 
-class RegionalApp(CitcomApp):
+class CitcomSRegional(Citcom):
 
 
-    def __init__(self, name):
-	CitcomApp.__init__(self, name)
+    def __init__(self, name="regional"):
+	Citcom.__init__(self, name)
 	self.CitcomModule = CitcomModule
         return
 
 
 
-    class Inventory(CitcomApp.Inventory):
+    class Inventory(Citcom.Inventory):
 
         import pyre.facilities
 
@@ -72,6 +72,6 @@ class RegionalApp(CitcomApp):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.27 2003/08/22 22:35:57 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.28 2003/08/25 19:16:04 tan2 Exp $"
 
 # End of file

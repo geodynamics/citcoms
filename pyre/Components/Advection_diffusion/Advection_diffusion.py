@@ -28,7 +28,7 @@ class Advection_diffusion(CitcomComponent):
 
 
 
-    def init(self,parent):
+    def setup(self):
         self.CitcomModule.set_convection_defaults(self.all_variables)
 	self._been_here = False
 	return
@@ -70,6 +70,6 @@ class Advection_diffusion(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.12 2003/08/19 21:24:35 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.13 2003/08/25 19:16:04 tan2 Exp $"
 
 # End of file

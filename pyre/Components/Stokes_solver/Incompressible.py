@@ -28,7 +28,7 @@ class Incompressible(CitcomComponent):
 
 
 
-    def init(self, parent):
+    def setup(self):
         if self.inventory.Solver == "cgrad":
             self.CitcomModule.set_cg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid":
@@ -67,6 +67,6 @@ class Incompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.10 2003/08/22 22:14:59 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.11 2003/08/25 19:16:04 tan2 Exp $"
 
 # End of file

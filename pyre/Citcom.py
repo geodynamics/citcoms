@@ -7,19 +7,34 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from mpi.Application import Application
+from pyre.components.Component import Component
 import journal
 
 
-class CitcomApp(Application):
+class Citcom(Component):
+
+
+    def __init__(self, name):
+        Component.__init__(self, "citcom", name)
+        return
+
 
 
     def run(self):
+        self.start_simulation()
+        self.run_simulation()
+        self.end_simulation()
+        return
+
+
+
+    def start_simulation(self):
 	#journal.info("staging").log("setup MPI")
         comm = self.get_communicator()
 
         E = self.CitcomModule.citcom_init(comm.handle())
         self.all_variables = E
+
 	self.CitcomModule.global_default_values(self.all_variables)
         self.CitcomModule.set_signal()
         self._setProperties()
@@ -29,15 +44,20 @@ class CitcomApp(Application):
 
 	self.rank = comm.rank
 	print "my rank is ", self.rank
+        return
+
+
+
+    def run_simulation(self):
 
         mesher = self.inventory.mesher
-        mesher.init(self)
+        mesher.setup()
 
         vsolver = self.inventory.vsolver
-        vsolver.init(self)
+        vsolver.setup()
 
         tsolver = self.inventory.tsolver
-        tsolver.init(self)
+        tsolver.setup()
 
 	#if (self.invenotry.param.inventory.post_proccessing):
 	#    self.CitcomModule.post_processing()
@@ -61,6 +81,11 @@ class CitcomApp(Application):
                 self._output(self._cycles)
 
 
+        return
+
+
+
+    def end_simulation(self):
         total_time = self.CitcomModule.CPU_time() - self._start_time
         if not self.rank:
             print "Average cpu time taken for velocity step = %f" % (
@@ -82,16 +107,6 @@ class CitcomApp(Application):
             return comm
         else:
             return world
-
-
-
-    def init(self):
-        return
-
-
-
-    def fini(self):
-        return
 
 
 
@@ -128,7 +143,7 @@ class CitcomApp(Application):
 
 
 
-    class Inventory(Application.Inventory):
+    class Inventory(Component.Inventory):
 
         import pyre.properties
 
@@ -139,6 +154,6 @@ class CitcomApp(Application):
             ]
 
 # version
-__id__ = "$Id: Citcom.py,v 1.4 2003/08/22 22:35:57 tan2 Exp $"
+__id__ = "$Id: Citcom.py,v 1.5 2003/08/25 19:16:04 tan2 Exp $"
 
 # End of file
