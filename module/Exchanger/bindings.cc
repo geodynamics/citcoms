@@ -148,11 +148,6 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_recvT__doc__},
 
-    {pyExchanger_recvV__name__,
-     pyExchanger_recvV,
-     METH_VARARGS,
-     pyExchanger_recvV__doc__},
-
     {pyExchanger_sendT__name__,
      pyExchanger_sendT,
      METH_VARARGS,
@@ -194,6 +189,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.29 2004/01/07 21:54:00 tan2 Exp $
+// $Id: bindings.cc,v 1.30 2004/01/07 23:54:34 tan2 Exp $
 
 // End of file

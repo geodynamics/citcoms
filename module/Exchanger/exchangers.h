@@ -130,12 +130,6 @@ extern char pyExchanger_recvT__doc__[];
 extern "C"
 PyObject * pyExchanger_recvT(PyObject *, PyObject *);
 
-extern char pyExchanger_recvV__name__[];
-extern char pyExchanger_recvV__doc__[];
-extern "C"
-PyObject * pyExchanger_recvV(PyObject *, PyObject *);
-
-
 extern char pyExchanger_sendT__name__[];
 extern char pyExchanger_sendT__doc__[];
 extern "C"
@@ -182,6 +176,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.27 2004/01/07 21:54:00 tan2 Exp $
+// $Id: exchangers.h,v 1.28 2004/01/07 23:54:34 tan2 Exp $
 
 // End of file
