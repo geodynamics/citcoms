@@ -79,7 +79,7 @@ class IC(CitcomComponent):
             pyre.properties.bool("zero_elapsed_time", default=True),
 
             pyre.properties.int("tic_method", default=0,
-                                validator=pyre.properties.range(0, 1)),
+                                validator=pyre.properties.choice([0, 1])),
 
             pyre.properties.float("half_space_age", default=40,
                                   validator=pyre.properties.greater(1e-3)),
@@ -94,6 +94,6 @@ class IC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.12 2005/02/17 22:57:42 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.13 2005/02/18 00:13:36 tan2 Exp $"
 
 # End of file
