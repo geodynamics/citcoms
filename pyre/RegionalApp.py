@@ -20,9 +20,24 @@ class RegionalApp(Application):
     def run(self):
 	Application.run(self)
 
-	self.facilities.bc.setProperties()
-	return
+	self.facilities.bc.Properties()
+	self.facilities.const.Properties()
+	self.facilities.ic.Properties()
+	self.facilities.mesh.Properties()
+	self.facilities.parallel.Properties()
+	self.facilities.param.Properties()
+	self.facilities.phase.Properties()
+	self.facilities.visc.Properties()
+        print "Setting up done."
 
+##        VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
+##        TSolver("tsolver", CitcomS.Advection_diffusion.PG_timestep()),
+        vsolver = self.facilities.vsolver
+        tsolver = self.facilities.tsolver
+        print "Solvers called."
+        
+        return
+    
 	#self.test_facility()
 	vsolver = self.facilities.vsolver
 	vsolver.run()
@@ -126,8 +141,11 @@ class RegionalApp(Application):
         import pyre.facilities
 
 	from CitcomS.Facilities.VSolver import VSolver
+        from CitcomS.Facilities.TSolver import TSolver
+        
 	import CitcomS.Stokes_solver
-
+        import CitcomS.Advection_diffusion
+        
         from CitcomS.Components.BC import BC
         from CitcomS.Components.Const import Const
         from CitcomS.Components.IC import IC
@@ -139,7 +157,8 @@ class RegionalApp(Application):
 
         __facilities__ = Application.Facilities.__facilities__ + (
             VSolver("vsolver", CitcomS.Stokes_solver.imcompressibleNewtonian()),
-
+            TSolver("tsolver", CitcomS.Advection_diffusion.temperature_diffadv()),
+            
             pyre.facilities.facility("bc", BC()),
             pyre.facilities.facility("const", Const()),
             pyre.facilities.facility("ic", IC()),
@@ -213,6 +232,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.9 2003/06/27 00:15:02 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.10 2003/07/03 23:52:38 ces74 Exp $"
 
 # End of file
