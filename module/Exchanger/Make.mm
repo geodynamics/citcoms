@@ -11,17 +11,19 @@ PROJECT = CitcomS
 PACKAGE = Exchangermodule
 
 include std-pythonmodule.def
-PROJ_CXX_INCLUDES = ../../lib/Common $(EXPORT_ROOT)/include
 
 PROJ_CXX_SRCLIB = \
         $(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
 	-lExchanger \
         -ljournal \
-        -lmpimodule
+        $(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
-EXTERNAL_LIBPATH += -L$(TOOLS_LIBDIR)
+PROJ_CXX_INCLUDES = ../../lib/Common
+EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include
+EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib
 
 PROJ_SRCS = \
+	AreaWeightedNormal.cc \
 	Boundary.cc \
 	CitcomInterpolator.cc \
 	CitcomSource.cc \
@@ -45,6 +47,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.22 2004/05/18 21:21:05 ces74 Exp $
+# $Id: Make.mm,v 1.23 2004/06/11 20:14:45 tan2 Exp $
 
 # End of file
