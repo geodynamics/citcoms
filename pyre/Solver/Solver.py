@@ -64,11 +64,11 @@ class Solver(BaseSolver):
             "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))        
         return dt
     
-    def endSimulation(self):
+    def endSimulation(self,step):
         total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
         if not self.rank:
             print "Average cpu time taken for velocity step = %f" % (
-                total_cpu_time / self.step )
+                total_cpu_time / step )
 
 	#self.CitcomModule.finalize()
 
@@ -170,6 +170,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.8 2003/08/28 22:37:39 ces74 Exp $"
+__id__ = "$Id: Solver.py,v 1.9 2003/08/28 22:49:55 ces74 Exp $"
 
 # End of file
