@@ -272,6 +272,9 @@ struct PASS  {
 
 struct Parallel {
     MPI_Comm world;
+    MPI_Comm horizontal_comm;
+    MPI_Comm vertical_comm;
+
     int me;
     int nproc;
     int nprocx;

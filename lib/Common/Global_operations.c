@@ -5,6 +5,55 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+void set_horizontal_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, horizon_g;
+  int j;
+  int *processors;
+
+  processors = (int *) malloc((E->parallel.nprocxy+2)*sizeof(int));
+
+  for (j=0;j<E->parallel.nprocxy;j++) {
+    processors[j] = E->parallel.me_loc[3] + j * E->parallel.nprocz;
+  }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, j, processors, &horizon_g);
+  MPI_Comm_create(E->parallel.world, horizon_g, &(E->parallel.horizontal_comm));
+
+  MPI_Group_free(&horizon_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+
+  return;
+}
+
+
+void set_vertical_communicator(struct All_variables *E)
+{
+  MPI_Group world_g, vertical_g;
+  int j;
+  int *processors;
+
+  processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
+
+  for (j=0;j<E->parallel.nprocz;j++) {
+    processors[j] = E->parallel.me_sph * E->parallel.nprocz
+                  + E->parallel.nprocz - 1 - j;
+    fprintf(stderr, "%d %d\n", j,E->parallel.me_sph * E->parallel.nprocz
+                  + E->parallel.nprocz - 1 - j);
+  }
+
+  MPI_Comm_group(E->parallel.world, &world_g);
+  MPI_Group_incl(world_g, j, processors, &vertical_g);
+  MPI_Comm_create(E->parallel.world, vertical_g, &(E->parallel.vertical_comm));
+
+  MPI_Group_free(&vertical_g);
+  MPI_Group_free(&world_g);
+  free((void *) processors);
+}
+
+
 /* ===============================================
    strips horizontal average from nodal field X.
    Assumes orthogonal mesh, otherwise, horizontals
@@ -56,14 +105,8 @@ void return_horiz_ave(E,X,H)
   struct Shape_function1_dA dGamma;
   void get_global_1d_shape_fn();
 
-  int *processors;
-
-  MPI_Comm world, horizon_p;
-  MPI_Group world_g, horizon_g;
-
   sizeofH = (2*E->lmesh.noz+2)*sizeof(double);
 
-  processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
   Have = (double *)malloc(sizeofH);
   temp = (double *)malloc(sizeofH);
 
@@ -114,32 +157,7 @@ void return_horiz_ave(E,X,H)
           }   /* end of j  and k, and m  */
      }        /* Done for i */
 
-       /* determine which processors should get the message from me for
-	       computing the layer averages */
-
-  nproc = 0;
-  for (j=0;j<E->parallel.nprocxy;j++) {
-    d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-    processors[nproc] =  d;
-    nproc ++;
-    }
-
-  if (nproc>0)  {
-    world = E->parallel.world;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-
-    MPI_Allreduce(temp,Have,noz2+1,MPI_DOUBLE,MPI_SUM,horizon_p);
-
-    MPI_Comm_free (&horizon_p);
-    MPI_Group_free(&horizon_g);
-    MPI_Group_free(&world_g);
-
-    }
-  else
-    for (i=1;i<=noz2;i++)
-      Have[i] = temp[i];
+  MPI_Allreduce(temp,Have,noz2+1,MPI_DOUBLE,MPI_SUM,E->parallel.horizontal_comm);
 
   for (i=1;i<=noz;i++) {
     if(Have[i+noz] != 0.0)
@@ -151,7 +169,6 @@ void return_horiz_ave(E,X,H)
 */
   free ((void *) Have);
   free ((void *) temp);
-  free ((void *) processors);
 
   return;
   }
@@ -168,14 +185,8 @@ void return_horiz_ave_f(E,X,H)
   struct Shape_function1_dA dGamma;
   void get_global_1d_shape_fn();
 
-  int *processors;
-
-  MPI_Comm world, horizon_p;
-  MPI_Group world_g, horizon_g;
-
   sizeofH = (2*E->lmesh.noz+2)*sizeof(float);
 
-  processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
   Have = (float *)malloc(sizeofH);
   temp = (float *)malloc(sizeofH);
 
@@ -226,32 +237,7 @@ void return_horiz_ave_f(E,X,H)
           }   /* end of j  and k, and m  */
      }        /* Done for i */
 
-       /* determine which processors should get the message from me for
-	       computing the layer averages */
-
-  nproc = 0;
-  for (j=0;j<E->parallel.nprocxy;j++) {
-    d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-    processors[nproc] =  d;
-    nproc ++;
-    }
-
-  if (nproc>0)  {
-    world = E->parallel.world;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-
-    MPI_Allreduce(temp,Have,noz2+1,MPI_FLOAT,MPI_SUM,horizon_p);
-
-    MPI_Comm_free (&horizon_p);
-    MPI_Group_free(&horizon_g);
-    MPI_Group_free(&world_g);
-
-    }
-  else
-    for (i=1;i<=noz2;i++)
-      Have[i] = temp[i];
+  MPI_Allreduce(temp,Have,noz2+1,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
   for (i=1;i<=noz;i++) {
     if(Have[i+noz] != 0.0)
@@ -263,10 +249,10 @@ void return_horiz_ave_f(E,X,H)
 */
   free ((void *) Have);
   free ((void *) temp);
-  free ((void *) processors);
 
   return;
   }
+
 
 float return_bulk_value(E,Z,average)
      struct All_variables *E;
@@ -323,54 +309,29 @@ struct All_variables *E;
 float *sphc,*sphs;
 {
  int jumpp,total,j,d;
+ float *sphcs,*temp;
 
- static float *sphcs,*temp;
- static int been_here=0;
- static int *processors,nproc;
-
- static MPI_Comm world, horizon_p;
- static MPI_Group world_g, horizon_g;
-
-if (been_here==0)  {
- processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
  temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
  sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
 
- nproc = 0;
- for (j=0;j<E->parallel.nprocz;j++) {
-   d =E->parallel.me_sph*E->parallel.nprocz+E->parallel.nprocz-1-j;
-   processors[nproc] =  d;
-   nproc ++;
-   }
-
- if (nproc>0)  {
-    world = E->parallel.world;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-    }
-
- been_here++;
+ total = E->sphere.hindice*2+3;
+ jumpp = E->sphere.hindice;
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphcs[j] = sphc[j];
+   sphcs[j+jumpp] = sphs[j];
  }
 
- total = E->sphere.hindice*2+3;
-  jumpp = E->sphere.hindice;
-  for (j=0;j<E->sphere.hindice;j++)   {
-      sphcs[j] = sphc[j];
-      sphcs[j+jumpp] = sphs[j];
-     }
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
 
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphc[j] = temp[j];
+   sphs[j] = temp[j+jumpp];
+ }
 
- if (nproc>0)  {
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
 
-    MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,horizon_p);
-
-    for (j=0;j<E->sphere.hindice;j++)   {
-      sphc[j] = temp[j];
-      sphs[j] = temp[j+jumpp];
-     }
-
-    }
+ free((void*) temp);
+ free((void*) sphcs);
 
 return;
 }
@@ -380,38 +341,9 @@ float find_max_horizontal(E,Tmax)
 struct All_variables *E;
 float Tmax;
 {
- int j,d;
- static int been_here=0;
- static int *processors,nproc;
  float ttmax;
 
- static MPI_Comm world, horizon_p;
- static MPI_Group world_g, horizon_g;
-
- if (been_here==0)  {
-   processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
-
-   nproc = 0;
-   for (j=0;j<E->parallel.nprocxy;j++) {
-     d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-     processors[nproc] =  d;
-     nproc ++;
-     }
-
-   if (nproc>0)  {
-     world = E->parallel.world;
-     MPI_Comm_group(world, &world_g);
-     MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-     MPI_Comm_create(world, horizon_g, &horizon_p);
-     }
-
-   been_here++;
-   }
-
- if (nproc>0)
-   MPI_Allreduce(&Tmax,&ttmax,1,MPI_FLOAT,MPI_MAX,horizon_p);
- else
-   ttmax = Tmax;
+ MPI_Allreduce(&Tmax,&ttmax,1,MPI_FLOAT,MPI_MAX,E->parallel.horizontal_comm);
 
  return(ttmax);
  }
@@ -424,46 +356,17 @@ int total;
 {
  int j,d;
  float *temp;
- static int been_here=0;
- static int *processors,nproc;
 
- static MPI_Comm world, horizon_p;
- static MPI_Group world_g, horizon_g;
+ temp = (float *)malloc((total+1)*sizeof(float));
+ MPI_Allreduce(data,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
-if (been_here==0)  {
- processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
-
- nproc = 0;
- for (j=0;j<E->parallel.nprocxy;j++) {
-   d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-   processors[nproc] =  d;
-   nproc ++;
-   }
-
- if (nproc>0)  {
-    world = E->parallel.world;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-    }
-
- been_here++;
+ for (j=0;j<total;j++) {
+   data[j] = temp[j];
  }
 
- if (nproc>0)  {
+ free((void *)temp);
 
-    temp = (float *)malloc((total+1)*sizeof(float));
-    MPI_Allreduce(data,temp,total,MPI_FLOAT,MPI_SUM,horizon_p);
-
-    for (j=0;j<total;j++)   {
-      data[j] = temp[j];
-      }
-
-    free((void *)temp);
-
-    }
-
-return;
+ return;
 }
 
 /* ================================================== */
@@ -475,54 +378,29 @@ struct All_variables *E;
 float *sphc,*sphs;
 {
  int jumpp,total,j,d;
- static float *sphcs,*temp;
- static int been_here=0;
- static int *processors,nproc;
+ float *sphcs,*temp;
 
- static MPI_Comm world, horizon_p;
- static MPI_Group world_g, horizon_g;
-
-if (been_here==0)  {
- processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
  temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
  sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
-
- nproc = 0;
- for (j=0;j<E->parallel.nprocxy;j++) {
-   d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-   processors[nproc] =  d;
-   nproc ++;
-   }
-
- if (nproc>0)  {
-    world = E->parallel.world;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-    }
-
- been_here++;
- }
 
  jumpp = E->sphere.hindice;
  total = E->sphere.hindice*2+3;
  for (j=0;j<E->sphere.hindice;j++)   {
-    sphcs[j] = sphc[j];
-    sphcs[j+jumpp] = sphs[j];
-    }
+   sphcs[j] = sphc[j];
+   sphcs[j+jumpp] = sphs[j];
+ }
 
- if (nproc>0)  {
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
-    MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,horizon_p);
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphc[j] = temp[j];
+   sphs[j] = temp[j+jumpp];
+ }
 
-    for (j=0;j<E->sphere.hindice;j++)   {
-      sphc[j] = temp[j];
-      sphs[j] = temp[j+jumpp];
-      }
+ free((void *)temp);
+ free((void *)sphcs);
 
-    }
-
-return;
+ return;
 }
 
 /* ================================================== */
