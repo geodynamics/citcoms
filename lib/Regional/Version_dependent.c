@@ -298,6 +298,7 @@ if (E->control.verbose)
 
 void construct_tic_from_input(struct All_variables *E)
 {
+  double modified_plgndr_a(int, int, double);
   void temperatures_conform_bcs();
 
   int i, j ,k , kk, m, p, node;
@@ -338,7 +339,6 @@ void construct_tic_from_input(struct All_variables *E)
 
     k = kk - E->lmesh.nzs + 1;
     if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
-
     if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0)
       fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
 
@@ -350,6 +350,12 @@ void construct_tic_from_input(struct All_variables *E)
 	  f1 = (E->sx[m][2][node] - E->control.fi_min) * flen;
 
 	  E->T[m][node] += con*cos(ll*t1)*cos(mm*f1);
+
+	  /*
+	  t1=E->sx[m][1][node];
+	  f1=E->sx[m][2][node];
+	  E->T[m][node] += con*modified_plgndr_a(ll,mm,t1)*cos(mm*f1);
+	  */
 	}
   }
 
