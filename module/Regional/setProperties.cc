@@ -49,6 +49,8 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     if (not m)
 	std::cout << "#Advection_diffusion.inventory:" << std::endl;
 
+    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, m);
+
     getScalarProperty(properties, "ADV", E->advection.ADVECTION, m);
     getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep, m);
     getScalarProperty(properties, "finetunedt", E->advection.fine_tune_dt, m);
@@ -194,12 +196,16 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     if (not m)
 	std::cout << "#IC.inventory:" << std::endl;
 
+    getScalarProperty(properties, "restart", E->control.restart, m);
+    getScalarProperty(properties, "post_p", E->control.post_p, m);
+    getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
+    getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
+
+    const int max_perturb = 32;	// max. allowed perturbations = 32
     int num_perturb;
-    const int max_perturb = 32;
 
     getScalarProperty(properties, "num_perturbations", num_perturb, m);
     if(num_perturb > max_perturb) {
-	// max. allowed perturbations = 32
 	std::cerr << "'num_perturb' greater than allowed value, set to "
 		  << max_perturb << std::endl;
 	num_perturb = max_perturb;
@@ -340,11 +346,6 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "Q0", E->control.Q0, m);
 
     getScalarProperty(properties, "stokes_flow_only", E->control.stokes, m);
-    getScalarProperty(properties, "restart", E->control.restart, m);
-    getScalarProperty(properties, "post_p", E->control.post_p, m);
-    getScalarProperty(properties, "solution_cycles_init", E->monitor.solution_cycles_init, m);
-    getScalarProperty(properties, "zero_elapsed_time", E->control.zero_elapsed_time, m);
-    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, m);
 
     getScalarProperty(properties, "verbose", E->control.verbose, m);
     getScalarProperty(properties, "see_convergence", E->control.print_convergence, m);
@@ -756,6 +757,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.19 2003/10/28 23:52:44 tan2 Exp $
+// $Id: setProperties.cc,v 1.20 2003/11/28 22:18:12 tan2 Exp $
 
 // End of file
