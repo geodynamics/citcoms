@@ -385,9 +385,9 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
 /*   ======================================================================
      For calculating pressure boundary term --- Choi, 11/13/02
      ======================================================================  */
-void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
+void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
      struct All_variables *E;
-     int el,far,m,NS;
+     int el,side,m;
      struct Shape_function1 *GM;
      struct Shape_function1_dx *GMx;
      struct Shape_function_side_dA *dGamma;
@@ -397,43 +397,8 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
   double jacobian;
   double determinant();
 
-  int dims[3];
-  int elist[3][9];
   const int oned = onedvpoints[E->mesh.nsd];
   double xx[4][5],dxda[4][4];
-  int side;
-
-  /******************************************/
-  /*for NS boundary elements */
-  elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
-  elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
-  /*for EW boundary elements */
-  elist[1][0]=0; elist[1][1]=1; elist[1][2]=2; elist[1][3]=6; elist[1][4]=5;
-  elist[1][5]=4; elist[1][6]=3; elist[1][7]=7; elist[1][8]=8;
-  /*for TB boundary elements */
-  elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
-  elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
-  /******************************************/
-
-  /*for side elements*/
-
-  if(NS == 0) {
-    dims[1]=2; dims[2]=3;
-    if(far == 0) side = SIDE_NORTH;
-    else side = SIDE_SOUTH;
-  }
-  else if(NS == 1) {
-    dims[1]=1; dims[2]=3;
-    if(far == 0) side = SIDE_WEST;
-    else side = SIDE_EAST;
-  }
-  else if(NS == 2) {
-    dims[1]=1; dims[2]=2;
-    if(far == 0) side = SIDE_BOTTOM;
-    else side = SIDE_TOP;
-  }
-  else
-    fprintf(stderr, "Invalid input: NS = %d, far = %d\n", NS, far);
 
   get_side_x_cart(E, xx, el, side, m);
 
@@ -446,7 +411,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
     for(i=1;i<=oned;i++) {
       for(d=1;d<=E->mesh.nsd-1;d++)
 	for(e=1;e<=E->mesh.nsd-1;e++) {
-	  dxda[d][e] += xx[dims[e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+	  dxda[d][e] += xx[sidedim[side][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 	}
     }
 
@@ -1000,6 +965,6 @@ void mass_matrix(E)
 
 
 /* version */
-/* $Id: Size_does_matter.c,v 1.7 2004/04/10 00:49:34 tan2 Exp $ */
+/* $Id: Size_does_matter.c,v 1.8 2004/04/10 01:03:22 tan2 Exp $ */
 
 /* End of file  */
