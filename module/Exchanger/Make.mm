@@ -33,6 +33,7 @@ PROJ_SRCS = \
 	SVTInlet.cc \
 	SVTOutlet.cc \
 	TInlet.cc \
+	SInlet.cc \
 	TOutlet.cc \
 	VTInlet.cc \
 	VOutlet.cc \
@@ -45,8 +46,7 @@ PROJ_SRCS = \
 	inlets_outlets.cc \
 	misc.cc \
 
-
 # version
-# $Id: Make.mm,v 1.25 2005/01/28 19:20:28 tan2 Exp $
+# $Id: Make.mm,v 1.26 2005/01/29 00:15:57 ces74 Exp $
 
 # End of file
