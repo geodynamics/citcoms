@@ -352,26 +352,20 @@ void Exchanger::receiveVelocities() {
 void Exchanger::imposeBC() {
     std::cout << "in Exchanger::imposeBC" << std::endl;
 
-    int m = E->sphere.caps_per_proc;
-
-//     ofstream ffile("fine.dat");
     for(int i=0;i<boundary->size;i++) {
       int n = boundary->bid2gid[i];
-      E->T[m][n] = incoming.T[i];
-      E->V[m][1][n] = incoming.v[0][i];
-      E->V[m][2][n] = incoming.v[1][i];
-      E->V[m][3][n] = incoming.v[2][i];
-
-//       ffile << "in Exchanger::impose_bc ==> " << i << " " 
-// 	    << n << " " 
-// 	    << E->X[E->mesh.levmax][m][1][n] << " " 
-// 	    << E->X[E->mesh.levmax][m][2][n] << " " 
-// 	    << E->X[E->mesh.levmax][m][3][n] << " "
-// 	    << E->T[m][n] << " " 
-// 	    << E->V[m][1][n] << " " << E->V[m][2][n] << " " 
-// 	    << E->V[m][3][n] << " " << std::endl;
+      if(int m=1;m<=E->sphere.caps_per_proc;m++) {
+	E->V[m][1][n] = incoming.v[0][i];
+	E->V[m][2][n] = incoming.v[1][i];
+	E->V[m][3][n] = incoming.v[2][i];
+	E->node[m][n] = E->node[m][n] | VBX;
+	E->node[m][n] = E->node[m][n] | VBY;
+	E->node[m][n] = E->node[m][n] | VBZ;
+	E->node[m][n] = E->node[m][n] & (~SBX);
+	E->node[m][n] = E->node[m][n] & (~SBY);
+	E->node[m][n] = E->node[m][n] & (~SBZ);
+      }
     }
-//     ffile.close();
 
     return;
 }
@@ -426,7 +420,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.12 2003/09/22 18:14:32 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.13 2003/09/26 01:05:51 ces74 Exp $
 
 // End of file
 
