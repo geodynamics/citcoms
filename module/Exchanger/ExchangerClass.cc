@@ -283,14 +283,8 @@ void Exchanger::receiveVelocities() {
 	    tag ++;
 	}
     }
+    //printDataV(incoming);
 
-    for(int j=0; j < boundary->size; j++) {
-	int n=boundary->bid2gid[j];
-	std::cout << "Velocities received" << std::endl;
-	std::cout << j << " " << n << "  "
-		  << incoming.v[0][n] << incoming.v[1][n] << incoming.v[2][n]
-		  << std::endl;
-    }
     // Don't forget to delete inoming.v
     return;
 }
@@ -392,8 +386,26 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 }
 
 
+void Exchanger::printDataT(const Data &data) const {
+    for (int n=0; n<data.size; n++) {
+	std::cout << "  Data.T:  " << n << ":  "
+		  << data.T[n] << std::endl;
+    }
+}
+
+
+void Exchanger::printDataV(const Data &data) const {
+    for (int n=0; n<data.size; n++) {
+	std::cout << "  Data.v:  " << n << ":  ";
+	for (int j=0; j<boundary->dim; j++)
+	    std::cout << data.v[j][n] << "  ";
+	std::cout << std::endl;
+    }
+}
+
+
 // version
-// $Id: ExchangerClass.cc,v 1.20 2003/09/28 20:45:45 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.21 2003/09/29 18:06:26 tan2 Exp $
 
 // End of file
 

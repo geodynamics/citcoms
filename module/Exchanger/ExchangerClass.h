@@ -82,6 +82,8 @@ protected:
     struct Data loutgoing;
     struct Data lincoming;
 
+    void printDataT(const Data &data) const;
+    void printDataV(const Data &data) const;
 
 private:
     double exchangeDouble(const double &sent, const int len) const;
@@ -100,7 +102,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.19 2003/09/28 20:45:45 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.20 2003/09/29 18:06:26 tan2 Exp $
 
 // End of file
 

@@ -35,38 +35,35 @@ CoarseGridExchanger::~CoarseGridExchanger() {
 
 void CoarseGridExchanger::gather() {
     std::cout << "in CoarseGridExchanger::gather" << std::endl;
-    
+
     interpretate();
+
+    int size = boundary->size;
+    int dim = boundary->dim;
 
     if (rank == leader) {
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 
-	int size = boundary->size;
 	auto_ptr<double> tmp = auto_ptr<double>(new double[size]);
 	double *ptmp = tmp.get();
 
 	for (int i=0; i<nproc; i++) {
 	    if (i == leader) continue; // skip leader itself
 
-	    for (int j=0; j<boundary->dim; j++) {
+	    for (int j=0; j<dim; j++) {
 		MPI_Status status;
 		MPI_Recv(ptmp, size, MPI_DOUBLE,
 			 i, i, comm, &status);
-		for (int n=0; n<size; n++) 
+		for (int n=0; n<size; n++)
 		    if (boundary->bid2proc[n] == i) outgoing.v[j][n] = ptmp[n];
 	    }
 	}
-// 	for (int n=0; n<size; n++) {
-// 	    std::cout << n << " : ";
-// 	    for (int j=0; j<boundary->dim; j++) 
-// 		std::cout << outgoing.v[j][n] << "  ";
-// 	    std::cout << std::endl;
-// 	}
+	//printDataV(outgoing);
     }
     else {
-	for (int j=0; j<boundary->dim; j++) {
-	    MPI_Send(outgoing.v[j], boundary->size, MPI_DOUBLE,
+	for (int j=0; j<dim; j++) {
+	    MPI_Send(outgoing.v[j], size, MPI_DOUBLE,
 		     leader, rank, comm);
 	}
     }
@@ -87,7 +84,7 @@ void CoarseGridExchanger::interpretate() {
 	int n1 = boundary->bid2elem[i];
 	outgoing.v[0][i] = outgoing.v[1][i] = outgoing.v[2][i] = 0;
 
-	if(n1 != 0) { 
+	if(n1 != 0) {
 	    for(int mm=1; mm<=E->sphere.caps_per_proc; mm++)
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
@@ -102,17 +99,17 @@ void CoarseGridExchanger::interpretate() {
 
 void CoarseGridExchanger::interpolateTemperature() {
   std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
-  
+
   int n1,n2,node;
   for(int i=0;i<boundary->size;i++)
     {
       n1=boundary->bid2elem[i];
-      n2=boundary->bid2proc[i];	
+      n2=boundary->bid2proc[i];
 //       cout << "in CoarseGridExchanger::interpolateTemperature"
 // 	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
-      
+
       outgoing.T[i]=0.0;
-      if(n1!=0) { 
+      if(n1!=0) {
 	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
 	  for(int k=0; k< 8 ;k++)
 	    {
@@ -120,11 +117,11 @@ void CoarseGridExchanger::interpolateTemperature() {
 	      outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
 	    }
 	//test
-// 	cout << "Interpolated...: i = " << i << " " << E->parallel.me << " " 
+// 	cout << "Interpolated...: i = " << i << " " << E->parallel.me << " "
 // 	     << outgoing.T[i] << endl;
       }
     }
-  
+
   return;
 }
 
@@ -141,7 +138,7 @@ void CoarseGridExchanger::receiveBoundary() {
 	      << "  leader = "<< localLeader
 	      << "  sender = "<< remoteLeader << std::endl;
     int size;
-    
+
     if (rank == leader) {
 	int tag = 0;
 	MPI_Status status;
@@ -153,7 +150,7 @@ void CoarseGridExchanger::receiveBoundary() {
 	boundary->receive(intercomm, remoteLeader);
     }
 
-    // Broadcast info received by localLeader to the other procs 
+    // Broadcast info received by localLeader to the other procs
     // in the Coarse communicator.
     MPI_Bcast(&size, 1, MPI_INT, leader, comm);
 
@@ -174,6 +171,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.26 2003/09/29 02:52:22 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.27 2003/09/29 18:06:26 tan2 Exp $
 
 // End of file
