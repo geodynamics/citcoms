@@ -105,8 +105,6 @@ void convection_boundary_conditions(E)
     velocity_boundary_conditions(E);      /* universal */
     temperature_boundary_conditions(E);
 
-    temperatures_conform_bcs(E);
-
     return;
 }
 

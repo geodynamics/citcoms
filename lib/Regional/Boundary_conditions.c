@@ -87,7 +87,6 @@ if(E->control.verbose)
 void temperature_boundary_conditions(E)
      struct All_variables *E;
 {
-  void temperatures_conform_bcs();
   void horizontal_bc();
   void temperature_apply_periodic_bcs();
   void temperature_imposed_vert_bcs();
@@ -126,9 +125,6 @@ void temperature_boundary_conditions(E)
    OR it is only maintained in the boundary regions */
       lith_age_temperature_bound_adj(E,lev);
     }
-
-    temperatures_conform_bcs(E);
-
 
     }     /* end for j */
 

@@ -178,12 +178,6 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   double multi_grid();
   double global_vdot();
 
-
-  static float cost_per_level[MAX_LEVELS]; /* this will accumulate data over the run */
-  static float cost_per_level_gs[MAX_LEVELS]; /* this will accumulate data over the run */
-  static int total_cycles[MAX_LEVELS];
-
-  static int been_here = 0;
   int count,counts,cycles,convergent,valid;
   int i, neq, gneq,m;
 
@@ -193,10 +187,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   gneq  = E->mesh.NEQ[high_lev];
   gneq  = E->mesh.neq;
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)    {
-    neq  = E->lmesh.NEQ[high_lev];
-  }
+  neq  = E->lmesh.NEQ[high_lev];
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=0;i<neq;i++)  {
@@ -211,29 +202,19 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   if (!(E->control.NMULTIGRID || E->control.EMULTIGRID)) {
     cycles = E->control.v_steps_low;
-    time=CPU_time0();
     residual = conj_grad(E,d0,F,acc,&cycles,high_lev);
-
-    cost_per_level[high_lev] +=  CPU_time0()-time;
-    total_cycles[high_lev] += cycles;
     valid = (residual < acc)? 1:0;
   }
 
   else  {
 
     counts =0;
-    if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-    if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-    valid = (residual < acc)?1:0;
-
-    while (residual > acc) {
+    while (!valid) {
       residual=multi_grid(E,d0,F,acc,high_lev);
-
+      valid = (residual < acc)?1:0;
       counts ++;
-      if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-      if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-
     }
+
     cycles = counts;
   }
 
@@ -252,25 +233,12 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   }
 
   if(E->control.print_convergence&&E->parallel.me==0)   {
-    fprintf(E->fp,"%s residual (%03d)(%03d) = %.3e from %.3e to %.3e in %5.2f secs \n",
-	    (convergent ? " * ":"!!!"),count,cycles,residual,r0,acc,CPU_time0()-initial_time);
+    fprintf(E->fp,"%s residual (%03d) = %.3e from %.3e to %.3e in %5.2f secs \n",
+	    (convergent ? " * ":"!!!"),cycles,residual,r0,acc,CPU_time0()-initial_time);
     fflush(E->fp);
   }
 
-
   count++;
-
-
-  if(E->control.verbose)  {
-    fprintf(stderr, "Total time for %d loops = %g \n",count,CPU_time0()-initial_time);
-    for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
-      fprintf(stderr, "Level %d, total time = %g\n",i,cost_per_level[i]);
-      fprintf(stderr, "     total cycles = %d (%g)\n",total_cycles[i],
-	     cost_per_level[i]/(1.0e-5+(float)total_cycles[i]));
-    }
-    fprintf(stderr, "projection time = %g\n",E->monitor.cpu_time_on_mg_maps);
-    fprintf(stderr, "Del sq u solved to accuracy of  %g \n",residual);
-  }
 
 
   E->control.total_iteration_cycles += count;

@@ -663,11 +663,14 @@ struct CONTROL {
 
     int lith_age;
     int lith_age_time;
+    int lith_age_old_cycles;
     float lith_age_depth;
     float lith_age_mantle_temp;
+
     int temperature_bound_adj;
     float depth_bound_adj;
     float width_bound_adj;
+
     float TBCtopval;
     float TBCbotval;
 
@@ -796,6 +799,9 @@ struct All_variables {
     struct CCX *ccx[NCS];
     struct CC *CC[MAX_LEVELS][NCS];
     struct CCX *CCX[MAX_LEVELS][NCS];
+
+    struct CC element_Cc;
+    struct CCX element_Ccx;
 
     struct Crust crust;
 
