@@ -73,10 +73,11 @@ void phase_change_input(struct All_variables *E)
 
 void phase_change_apply_410(struct All_variables *E, double **buoy)
 {
-  if (abs(E->control.Ra_410) > 1e-10)
+  if (abs(E->control.Ra_410) > 1e-10) {
     phase_change_apply(E, buoy, E->Fas410, E->Fas410_b, E->control.Ra_410,
 		       E->control.clapeyron410, E->viscosity.z410,
 		       E->control.transT410, E->control.width410);
+				      }
   return;
 }
 
