@@ -14,10 +14,7 @@ import CitcomS.Regional as Regional
 class RegionalApp(Application):
 
     #import journal
-    total_time = 0
-    cycles = 0
-    keep_going = True
-    Emergency_stop = False
+
 
     def run(self):
 	Application.run(self)
@@ -31,10 +28,16 @@ class RegionalApp(Application):
 	vsolver = CitcomS.Stokes_solver.imcompressibleNewtionian('imcompressible')
 	vsolver.init()
 
-	# decide which field to advect (and diffuse)
+	# decide which field to advect (and to diffuse)
 	import CitcomS.Advection_diffusion.Advection_diffusion as Advection_diffusion
 	tsolver = Advection_diffusion.PG_timestep('temp')
 	tsolver.init()
+
+
+	#test
+	self.test_facility()
+	return
+
 
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
@@ -44,11 +47,12 @@ class RegionalApp(Application):
 
 	while (self.keep_going and not self.Emergency_stop):
 	    self.cycles += 1
-	    tsolver.run()
-	    vsolver.run()
+	    print 'cycles = ', self.cycles
+	    #tsolver.run()
+	    #vsolver.run()
 	    total_time = Regional.CPU_time() - self.start_time
 
-            self.output()
+            #self.output()
 	return
 
 
@@ -59,31 +63,34 @@ class RegionalApp(Application):
         self.cycles = 0
         self.keep_going = True
         self.Emergency_stop = False
-        self.start_time=0.0
+        self.start_time = 0.0
 
+	#test
+	self.prefix = 'test'	
 	print self.filename
+	
         return
 
 
     def preInit(self):
         import mpi
-        #world = mpi.world()
-        Application.preInit(self)
-        Regional.Citcom_Init(mpi.mpi.world)
-	self.start_time = Regional.CPU_time()
-        print self.start_time
 
-        #testing...
-	self.prefix = 'test'
+        Application.preInit(self)
+        Regional.Citcom_Init(mpi.world().handle())
+
 	self.rank = mpi.world().rank
+	self.start_time = Regional.CPU_time()
+        #print self.start_time
+
 	return
 
 
     def postInit(self):
-        import sys
+        #import sys
+
         Application.postInit(self)
-        #filename = self.facility.infile
         Regional.read_instructions(self.filename)
+
 	return
 
 
@@ -113,17 +120,26 @@ class RegionalApp(Application):
 
         import pyre.facilities
 	import CitcomS
-        from EarthModelConstants import EarthModelConstants
-        from EarthModelPhase import EarthModelPhase
-        from EarthModelVisc import EarthModelVisc
-        from SimulationGrid import SimulationGrid
+        from CitcomS.Component.BC import BC
+        from Component.Const import Const
+        from Component.IC import IC
+        from Component.Mesh import Mesh
+	from Component.Parallel import Parallel
+	from Component.Param import Param
+        from Component.Phase import Phase
+        from Component.Visc import Visc
 
         __facilities__ = Application.Facilities.__facilities__ + (
             #pyre.facilities.facility("CitcomS", default=CitcomS.RegionalApp()),
-            pyre.facilities.facility("earthModel", EarthModelConstants()),
-            pyre.facilities.facility("earthModel_phase", EarthModelPhase()),
-            pyre.facilities.facility("earthModel_visc", EarthModelVisc()),
-            pyre.facilities.facility("simulation_grid", SimulationGrid()),
+            pyre.facilities.facility("bc", BC()),
+            pyre.facilities.facility("const", Const()),
+            pyre.facilities.facility("ic", IC()),
+            pyre.facilities.facility("mesh", Mesh()),
+	    pyre.facilities.facility("parallel", Parallel()),
+            pyre.facilities.facility("param", Param()),
+            pyre.facilities.facility("phase", Phase()),
+            pyre.facilities.facility("visc", Visc()),
+
             )
 
 
@@ -134,7 +150,7 @@ class RegionalApp(Application):
             )
 
 
-    def test(self):
+    def test_facility(self):
         import mpi
         import CitcomS.RadiusDepth
 
@@ -144,50 +160,50 @@ class RegionalApp(Application):
 
         print "Hello from [%d/%d]" % (world.rank, world.size)
 
-        earthProps = self.facilities.earthModel.properties
-        earthGrid = self.facilities.earthModel_grid.properties
-        earthPhase = self.facilities.earthModel_phase.properties
-        earthVisc = self.facilities.earthModel_visc.properties
+        const = self.facilities.const.properties
+        mesh = self.facilities.mesh.properties
+        phase = self.facilities.phase.properties
+        visc = self.facilities.visc.properties
 
-        print "%02d: EarthModelConstants:" % rank
-        print "%02d:      EarthModel.radius: %s" % (rank, earthProps.radius)
-        print "%02d:      EarthModel.ref_density: %s" % (rank, earthProps.ref_density)
-        print "%02d:      EarthModel.thermdiff: %s" % (rank, earthProps.thermdiff)
-        print "%02d:      EarthModel.gravacc: %s" % (rank, earthProps.gravacc)
-        print "%02d:      EarthModel.thermexp: %s" % (rank, earthProps.thermexp)
-        print "%02d:      EarthModel.ref_visc: %s" % (rank, earthProps.ref_visc)
-        print "%02d:      EarthModel.heatcapacity: %s" % (rank, earthProps.heatcapacity)
-        print "%02d:      EarthModel.water_density: %s" % (rank, earthProps.water_density)
-        print "%02d:      EarthModel.depth_lith: %s" % (rank, earthProps.depth_lith)
-        print "%02d:      EarthModel.depth_410: %s" % (rank, earthProps.depth_410)
-        print "%02d:      EarthModel.depth_660: %s" % (rank, earthProps.depth_660)
-        print "%02d:      EarthModel.depth_cmb: %s" % (rank, earthProps.depth_cmb)
-        print "%02d: EarthModelGrid:" % rank
-        print "%02d:      EarthModel.grid.coor: %s" % (rank, earthGrid.coor)
-        print "%02d:      EarthModel.grid.coor_file: %s" % (rank, earthGrid.coor_file)
-        print "%02d:      EarthModel.grid.nodex: %s" % (rank, earthGrid.nodex)
-        print "%02d:      EarthModel.grid.mgunitx: %s" % (rank, earthGrid.mgunitx)
-        print "%02d:      EarthModel.grid.levels: %s" % (rank, earthGrid.levels)
-        print "%02d:      EarthModel.grid.theta_min: %s" % (rank, earthGrid.theta_min)
-        print "%02d:      EarthModel.grid.fi_min: %s" % (rank, earthGrid.fi_min)
-        print "%02d:      EarthModel.grid.radius_innter: %s" % (rank, earthGrid.radius_inner)
-        print "%02d: EarthModelPhase:" % rank
-        print "%02d:      EarthModel.phase.Ra410: %s" % (rank, earthPhase.Ra_410)
-        print "%02d:      EarthModel.phase.clapeyron410: %s" % (rank, earthPhase.clapeyron410)
-        print "%02d:      EarthModel.phase.transT410: %s" % (rank, earthPhase.transT410)
-        print "%02d:      EarthModel.phase.width410: %s" % (rank, earthPhase.width410)
-        print "%02d: EarthModelVisc:" % rank
-        print "%02d:      EarthModel.visc.Viscosity: %s" % (rank, earthVisc.Viscosity)
-        print "%02d:      EarthModel.visc.rheol: %s" % (rank, earthVisc.rheol)
-        print "%02d:      EarthModel.visc.visc_smooth_method: %s" % (rank, earthVisc.visc_smooth_method)
-        print "%02d:      EarthModel.visc.VISC_UPDATE: %s" % (rank, earthVisc.VISC_UPDATE)
-        print "%02d:      EarthModel.visc.viscE: %s" % (rank, earthVisc.viscE)
-        print "%02d:      EarthModel.visc.viscT: %s" % (rank, earthVisc.viscT)
-        print "%02d:      EarthModel.visc.visc0: %s" % (rank, earthVisc.visc0)
+        print "%02d: Constants:" % rank
+        print "%02d:      const.radius: %s" % (rank, const.radius)
+        print "%02d:      const.ref_density: %s" % (rank, const.ref_density)
+        print "%02d:      const.thermdiff: %s" % (rank, const.thermdiff)
+        print "%02d:      const.gravacc: %s" % (rank, const.gravacc)
+        print "%02d:      const.thermexp: %s" % (rank, const.thermexp)
+        print "%02d:      const.ref_visc: %s" % (rank, const.ref_visc)
+        print "%02d:      const.heatcapacity: %s" % (rank, const.heatcapacity)
+        print "%02d:      const.water_density: %s" % (rank, const.water_density)
+        print "%02d:      const.depth_lith: %s" % (rank, const.depth_lith)
+        print "%02d:      const.depth_410: %s" % (rank, const.depth_410)
+        print "%02d:      const.depth_660: %s" % (rank, const.depth_660)
+        print "%02d:      const.depth_cmb: %s" % (rank, const.depth_cmb)
+        print "%02d: Mesh:" % rank
+        print "%02d:      mesh.coord: %s" % (rank, mesh.coord)
+        print "%02d:      mesh.coord_file: %s" % (rank, mesh.coord_file)
+        print "%02d:      mesh.nodex: %s" % (rank, mesh.nodex)
+        print "%02d:      mesh.mgunitx: %s" % (rank, mesh.mgunitx)
+        print "%02d:      mesh.levels: %s" % (rank, mesh.levels)
+        print "%02d:      mesh.theta_min: %s" % (rank, mesh.theta_min)
+        print "%02d:      mesh.phi_min: %s" % (rank, mesh.phi_min)
+        print "%02d:      mesh.radius_innter: %s" % (rank, mesh.radius_inner)
+        print "%02d: PhaseChange:" % rank
+        print "%02d:      phase.Ra410: %s" % (rank, phase.Ra_410)
+        print "%02d:      phase.clapeyron410: %s" % (rank, phase.clapeyron410)
+        print "%02d:      phase.transT410: %s" % (rank, phase.transT410)
+        print "%02d:      phase.width410: %s" % (rank, phase.width410)
+        print "%02d: Viscosity:" % rank
+        print "%02d:      visc.Viscosity: %s" % (rank, visc.Viscosity)
+        print "%02d:      visc.rheol: %s" % (rank, visc.rheol)
+        print "%02d:      visc.visc_smooth_method: %s" % (rank, visc.visc_smooth_method)
+        print "%02d:      visc.VISC_UPDATE: %s" % (rank, visc.VISC_UPDATE)
+        print "%02d:      visc.viscE: %s" % (rank, visc.viscE)
+        print "%02d:      visc.viscT: %s" % (rank, visc.viscT)
+        print "%02d:      visc.visc0: %s" % (rank, visc.visc0)
         return
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.7 2003/05/23 02:41:43 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.8 2003/06/13 17:12:25 tan2 Exp $"
 
 # End of file
