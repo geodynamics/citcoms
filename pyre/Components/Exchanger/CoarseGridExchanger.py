@@ -38,7 +38,7 @@ class CoarseGridExchanger(Exchanger):
 
         self.module.initConvertor(self.inventory.dimensional,
                                   self.inventory.transformational,
-                                  self.all_varialbes)
+                                  self.all_variables)
 
         return
 
@@ -194,6 +194,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.27 2004/01/07 22:01:09 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.28 2004/01/08 01:50:06 tan2 Exp $"
 
 # End of file
