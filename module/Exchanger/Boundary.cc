@@ -14,7 +14,7 @@
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "Boundary.h"
-
+#include "dimensionalization.h"
 
 Boundary::Boundary() :
     BoundedMesh()
@@ -27,7 +27,10 @@ Boundary::Boundary(const All_variables* E) :
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
 	  << "in Boundary::Boundary" << journal::end;
-
+// Computation of dimensional paramatars
+    dimensional_len = E->data.radius_km*1000.;
+    dimensional_vel = E->data.therm_diff/dimensional_len;    
+    dimensional_traction = E->data.ref_viscosity*E->data.therm_diff;    
     initBBox(E);
     bbox_.print("Boundary-BBox");
 
@@ -69,8 +72,8 @@ void Boundary::initBBox(const All_variables *E)
     bbox_[1][0] = theta_max;
     bbox_[0][1] = fi_min;
     bbox_[1][1] = fi_max;
-    bbox_[0][2] = ri*E->data.radius_km*1000.;
-    bbox_[1][2] = ro*E->data.radius_km*1000.;
+    bbox_[0][2] = ri*dimensional_len;
+    bbox_[1][2] = ro*dimensional_len;
 }
 
 
@@ -90,7 +93,7 @@ void Boundary::initX(const All_variables* E)
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
                         // Dimensionalizing
-                    x[2]*=E->data.radius_km*1000.;
+                    x[2]*=dimensional_len;
                     
 		    X_.push_back(x);
 		    nodeID_.push_back(node);
@@ -114,6 +117,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.43 2003/12/16 03:01:43 puru Exp $
+// $Id: Boundary.cc,v 1.44 2003/12/17 04:27:56 puru Exp $
 
 // End of file

@@ -13,6 +13,7 @@
 #include "Sink.h"
 #include "Source.h"
 #include "BoundaryCondition.h"
+#include "dimensionalization.h"
 
 extern "C" {
     void check_bc_consistency(const All_variables *E);
@@ -64,6 +65,13 @@ void BoundaryConditionSink::recvTandV()
     vbc.swap(old_vbc);
 
     sink.recvArray2D(tbc, vbc);
+    
+// TODO : non-dimensionalizing temeperature
+    
+    for(int i=0; i<sink.size(); i++) {
+	for(int d=0; d<DIM; d++)vbc[d][i]/=dimensional_vel;
+    }
+     
     tbc.print("TBC");
     vbc.print("VBC");
 
@@ -227,6 +235,12 @@ void BoundaryConditionSource::sendTandV()
     source.interpolateV(vbc, E);
     //vbc.print("VBC");
 
+    for(int i=0; i<source.size(); i++) {
+	for(int d=0; d<DIM; d++)vbc[d][i]*=dimensional_vel;
+    }
+    
+// TODO dimensionalize temperature
+    
     source.sendArray2D(tbc, vbc);
 }
 
@@ -252,6 +266,6 @@ void BoundaryConditionSource::domain_cutout()
 
 }
 // version
-// $Id: BoundaryCondition.cc,v 1.8 2003/11/28 22:16:36 ces74 Exp $
+// $Id: BoundaryCondition.cc,v 1.9 2003/12/17 04:27:56 puru Exp $
 
 // End of file

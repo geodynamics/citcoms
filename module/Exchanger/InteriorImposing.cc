@@ -13,6 +13,7 @@
 #include "Sink.h"
 #include "Source.h"
 #include "InteriorImposing.h"
+#include "dimensionalization.h"
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ void InteriorImposingSink::recvT()
 	  << "in InteriorImposingSink::recvT" << journal::end;
 
     sink.recvArray2D(tic);
+//  TODO : Non-dimensionalize temperature  
     tic.print("TIC");
 
 }
@@ -52,6 +54,9 @@ void InteriorImposingSink::recvV()
 	  << "in InteriorImposingSink::recvV" << journal::end;
 
     sink.recvArray2D(vic);
+    for(int i=0; i<sink.size(); i++) {
+	for(int d=0; d<DIM; d++)vic[d][i]/=dimensional_vel;
+    }
     vic.print("VIC");
 
 }
@@ -89,15 +94,13 @@ void InteriorImposingSink::imposeVICP()
     debugVICP << journal::loc(__HERE__);
     double refvel;
     
-    refvel = E->data.therm_diff/(E->data.layer_km*1000);
-    
     const int mm = 1;
     
     for(int i=0; i<sink.size(); i++) {
 	int n = interior.nodeID(sink.meshNode(i));
         for(int d=0; d<DIM; d++)
 // Non-dimensionalizing the values of velocities received from Snac 
-            E->sphere.cap[mm].VB[d+1][n]=vic[d][i]/refvel;
+            E->sphere.cap[mm].VB[d+1][n]=vic[d][i];
         
 	debugVICP << E->T[mm][n] << journal::newline;
     }
@@ -131,12 +134,12 @@ void InteriorImposingSource::sendT()
 
     source.interpolateT(tic, E);
     //tbc.print("TIC");
-
+// TODO : dimensionalize Temparature
     source.sendArray2D(tic);
 }
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.7 2003/12/04 00:28:51 puru Exp $
+// $Id: InteriorImposing.cc,v 1.8 2003/12/17 04:27:56 puru Exp $
 
 // End of file

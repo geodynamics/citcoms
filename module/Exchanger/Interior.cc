@@ -14,7 +14,7 @@
 #include "global_defs.h"
 #include "BoundedBox.h"
 #include "Interior.h"
-
+#include "dimensionalization.h"
 
 Interior::Interior() :
     BoundedMesh()
@@ -56,7 +56,7 @@ void Interior::initX(const All_variables* E)
 			x[d] = E->sx[m][d+1][node];
 
                         // Dimensionalizing
-                    x[2]*=E->data.radius_km*1000.;
+                    x[2]*=dimensional_len;
                     
                     if(isInside(x, bbox_)) {
                         X_.push_back(x);
@@ -67,6 +67,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.7 2003/12/16 03:01:43 puru Exp $
+// $Id: Interior.cc,v 1.8 2003/12/17 04:27:56 puru Exp $
 
 // End of file

@@ -14,7 +14,7 @@
 #include "BoundedBox.h"
 #include "BoundedMesh.h"
 #include "Interpolator.h"
-
+#include "dimensionalization.h"
 
 Interpolator::Interpolator(const BoundedMesh& boundedMesh,
 			   const All_variables* E,
@@ -96,7 +96,7 @@ void Interpolator::init(const BoundedMesh& boundedMesh,
 		    xc[j*DIM+k] = E->sx[mm][k+1][gnode];
 		}
                     // Dimensionalization
-                xc[j*DIM+2] *=E->data.radius_km*1000.;
+                xc[j*DIM+2] *=dimensional_len;
 	    }
 
 	    if(!isCandidate(xc, boundedMesh.bbox()))continue;
@@ -301,6 +301,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.8 2003/12/17 01:35:16 puru Exp $
+// $Id: Interpolator.cc,v 1.9 2003/12/17 04:27:56 puru Exp $
 
 // End of file
