@@ -18,7 +18,7 @@ struct All_variables;
 class BoundedMesh;
 
 class TractionInterpolator: public FEMInterpolator {
-    float *gtraction[DIM];
+    Array2D<float,DIM> gtraction;
 
     int xmin;
     int xmax;
@@ -56,6 +56,7 @@ private:
     void computeTraction();
     void get_elt_traction(int el, int far, int NS,
 			  int lev, int mm);
+    void get_global_stress(const All_variables* E);
 
     // disable
     virtual void interpolateDisplacement(Array2D<double,DIM>& D) {};
@@ -72,6 +73,6 @@ private:
 #endif
 
 // version
-// $Id: TractionInterpolator.h,v 1.3 2004/01/08 20:42:56 tan2 Exp $
+// $Id: TractionInterpolator.h,v 1.4 2004/01/15 03:00:24 ces74 Exp $
 
 // End of file
