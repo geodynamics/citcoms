@@ -334,3 +334,14 @@ void velocities_conform_bcs(E,U)
 
     return;
 }
+
+
+void stress_conform_bcs(struct All_variables *E)
+{
+}
+
+
+/* version */
+/* $Id: Boundary_conditions.c,v 1.4 2004/04/29 21:35:30 tan2 Exp $ */
+
+/* End of file  */

@@ -142,6 +142,7 @@ void compute_nodal_stress(struct All_variables *E,
 {
   void get_global_shape_fn();
   void velo_from_element();
+  void stress_conform_bcs();
 
   int i,j,e,node,m;
 
@@ -294,6 +295,9 @@ void compute_nodal_stress(struct All_variables *E,
       E->gstress[m][(node-1)*6+5] = SXZ[m][node];
       E->gstress[m][(node-1)*6+6] = SZY[m][node];
     }
+
+  /* replace boundary stresses with boundary conditions (if specified) */
+  stress_conform_bcs(E);
 
 }
 
@@ -518,3 +522,9 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*       } */
     return;
  }
+
+
+/* version */
+/* $Id: Topo_gravity.c,v 1.8 2004/04/29 21:35:30 tan2 Exp $ */
+
+/* End of file  */
