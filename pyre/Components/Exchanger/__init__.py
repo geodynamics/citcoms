@@ -18,8 +18,11 @@ def finegridexchanger(name='fge', facility='fge'):
     return FineGridExchanger(name, facility)
 
 
+def exchanger(name='exchanger', facility='exchanger'):
+    from Exchanger import Exchanger
+    return Exchanger
 
 # version
-__id__ = "$Id: __init__.py,v 1.4 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.5 2003/12/18 22:30:19 puru Exp $"
 
 # End of file
