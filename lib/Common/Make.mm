@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/05/22 18:17:12 ces74 Exp $
 
 include local.def
 
@@ -24,7 +24,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 PROJ_CC_INCLUDES = ../$(TYPE) .
 
 PROJ_SRCS = \
-	Advection_diffusion.c \
+#	Advection_diffusion.c \
 	Citcom_init.c \
 	Construct_arrays.c \
 	Convection.c \
@@ -64,7 +64,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.3 2003/04/05 20:25:09 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/05/22 18:17:12 ces74 Exp $
 
 #
 # End of file
