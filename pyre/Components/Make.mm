@@ -28,11 +28,9 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	Adv_solver.py \
 	BC.py \
 	Const.py \
 	IC.py \
-	Mesh.py \
 	Parallel.py \
 	Param.py \
 	Phase.py \
@@ -42,6 +40,6 @@ EXPORT_PYTHON_MODULES = \
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.2 2003/06/27 00:15:02 tan2 Exp $
+# $Id: Make.mm,v 1.3 2003/07/15 21:53:38 tan2 Exp $
 
 # End of file
