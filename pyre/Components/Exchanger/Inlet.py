@@ -27,7 +27,8 @@ class Inlet(object):
 
 
     def storeTimestep(self, fge_t, cge_t):
-        raise NotImplementedError
+        import CitcomS.Exchanger as Exchanger
+        Exchanger.Inlet_storeTimestep(self._handle, fge_t, cge_t)
         return
 
 
@@ -64,12 +65,6 @@ class VTInlet(Inlet):
         return
 
 
-    def storeTimestep(self, fge_t, cge_t):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.VTInlet_storeTimestep(self._handle, fge_t, cge_t)
-        return
-
-
 
 
 class BoundaryVTInlet(Inlet):
@@ -99,15 +94,9 @@ class BoundaryVTInlet(Inlet):
         return
 
 
-    def storeTimestep(self, fge_t, cge_t):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.BoundaryVTInlet_storeTimestep(self._handle, fge_t, cge_t)
-        return
-
-
 
 
 # version
-__id__ = "$Id: Inlet.py,v 1.1 2004/02/26 22:29:30 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.2 2004/03/11 01:07:19 tan2 Exp $"
 
 # End of file
