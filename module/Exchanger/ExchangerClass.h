@@ -91,7 +91,8 @@ protected:
 
     void printDataT(const Data &data) const;
     void printDataV(const Data &data) const;
-
+    void imposeConstraint();
+    
 private:
     double exchangeDouble(const double &sent, const int len) const;
     float exchangeFloat(const float &sent, const int len) const;
@@ -109,7 +110,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.24 2003/10/02 01:14:22 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.25 2003/10/04 23:37:38 puru Exp $
 
 // End of file
 
