@@ -26,6 +26,7 @@ class Visc(CitcomComponent):
         inv.visc0 = map(float, inv.visc0)
         inv.viscE = map(float, inv.viscE)
         inv.viscT = map(float, inv.viscT)
+        inv.viscZ = map(float, inv.viscZ)
         inv.sdepv_expt = map(float, inv.sdepv_expt)
 
         self.CitcomModule.Visc_set_properties(self.all_variables, inv)
@@ -71,6 +72,6 @@ class Visc(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.11 2005/01/19 18:55:00 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.12 2005/01/20 22:25:53 tan2 Exp $"
 
 # End of file
