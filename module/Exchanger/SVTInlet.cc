@@ -62,8 +62,8 @@ SVTInlet::~SVTInlet()
 
 void SVTInlet::recv()
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
 
     // store bc from previous timestep
     s.swap(s_old);
@@ -78,16 +78,16 @@ void SVTInlet::recv()
     convertor.xvelocity(v, sink.getX());
     //convertor.xstress(s, sink.getX());
 
-    t.print("CitcomS-SVTInlet-T");
-    v.print("CitcomS-SVTInlet-V");
-    s.print("CitcomS-SVTInlet-S");
+//     t.print("CitcomS-SVTInlet-T");
+//     v.print("CitcomS-SVTInlet-V");
+//     s.print("CitcomS-SVTInlet-S");
 }
 
 
 void SVTInlet::impose()
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
 
     imposeSV();
     imposeT();
@@ -178,8 +178,8 @@ void SVTInlet::imposeSV()
 
 void SVTInlet::imposeT()
 {
-    journal::debug_t debugBC("CitcomS-imposeT");
-    debugBC << journal::loc(__HERE__);
+//     journal::debug_t debugBC("CitcomS-imposeT");
+//     debugBC << journal::loc(__HERE__);
 
     const Boundary& boundary = dynamic_cast<const Boundary&>(mesh);
     double N1, N2;
@@ -228,12 +228,12 @@ void SVTInlet::imposeT()
 
 #endif
 
-	debugBC << E->sphere.cap[m].TB[1][n] << " "
-		<< E->sphere.cap[m].TB[2][n] << " "
-		<< E->sphere.cap[m].TB[3][n] << journal::newline;
+// 	debugBC << E->sphere.cap[m].TB[1][n] << " "
+// 		<< E->sphere.cap[m].TB[2][n] << " "
+// 		<< E->sphere.cap[m].TB[3][n] << journal::newline;
 
     }
-    debugBC << journal::end;
+//     debugBC << journal::end;
 
     temperatures_conform_bcs(E);
 }
@@ -252,6 +252,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.5 2004/05/24 19:59:29 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.6 2004/05/25 00:29:30 tan2 Exp $
 
 // End of file

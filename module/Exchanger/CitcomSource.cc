@@ -58,8 +58,8 @@ CitcomSource::~CitcomSource()
 
 void CitcomSource::interpolatePressure(Array2D<double,1>& P) const
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
 
     if(size())
 	interp->interpolatePressure(P);
@@ -68,8 +68,8 @@ void CitcomSource::interpolatePressure(Array2D<double,1>& P) const
 
 void CitcomSource::interpolateStress(Array2D<double,STRESS_DIM>& S) const
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
     // copied and modified from get_STD_topo() in Topo_gravity.c
 
     float *SXX[NCS], *SYY[NCS], *SZZ[NCS];
@@ -87,8 +87,8 @@ void CitcomSource::interpolateStress(Array2D<double,STRESS_DIM>& S) const
 
 void CitcomSource::interpolateTemperature(Array2D<double,1>& T) const
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
 
     if(size())
 	interp->interpolateTemperature(T);
@@ -97,8 +97,8 @@ void CitcomSource::interpolateTemperature(Array2D<double,1>& T) const
 
 void CitcomSource::interpolateVelocity(Array2D<double,DIM>& V) const
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+//     journal::debug_t debug("CitcomS-Exchanger");
+//     debug << journal::loc(__HERE__) << journal::end;
 
     if(size())
 	interp->interpolateVelocity(V);
@@ -114,6 +114,6 @@ void CitcomSource::createInterpolator(const BoundedMesh& mesh)
 
 
 // version
-// $Id: CitcomSource.cc,v 1.1 2004/05/11 07:55:30 tan2 Exp $
+// $Id: CitcomSource.cc,v 1.2 2004/05/25 00:29:30 tan2 Exp $
 
 // End of file
