@@ -15,46 +15,56 @@ class Stokes_solver(Component):
 
     def __init__(self, name, facility="vsolver"):
         Component.__init__(self, name, facility)
+        self._setProperties()
         return
 
 
-    def run(self, *args, **kwds):
+
+    def _setProperties(self):
+        import CitcomS.Regional as Regional
+        #Regional.general_stokes_solver_set_prop(self.properties)
+        return
+
+
+
+    def run(self):
 
 	# test
 	print self.properties.Solver
 	return
 
 
-	self.init()
-	self.form_RHS()
-	self.form_LHS()
-	self.solve()
-	self.fini()
+	self._init()
+	self._form_RHS()
+	self._form_LHS()
+	self._solve()
+	self._fini()
 
 	return
 
 
-    def init(self):
+
+    def _init(self):
 	return
 
 
-    def fini(self):
+    def _fini(self):
 	return
 
 
-    def form_RHS(self):
+    def _form_RHS(self):
 	return
 
 
-    def form_LHS(self):
+    def _form_LHS(self):
 	return
 
 
-    def solve(self):
+    def _solve(self):
 	return
 
 
-    def output(self, *args, **kwds):
+    def _output(self, *args, **kwds):
 	return
 
 
@@ -79,37 +89,10 @@ class Stokes_solver(Component):
             prop.float("tole_compressibility",1.0e-7),
 
 
-	    # the following propoerties should belong to 'Viscosity'
-	    # put them here temporalily
-            prop.string("Viscosity","system"),
-            prop.int("rheol",3),
-            prop.int("visc_smooth_method",3),
-            prop.bool("VISC_UPDATE",True),
-            prop.int("num_mat",4),
-
-            prop.bool("TDEPV",True),
-            prop.sequence("viscE",
-                                     [0.1, 0.1, 1.0, 1.0]),
-            prop.sequence("viscT",
-                                     [-1.02126,-1.01853, -1.32722, -1.32722]),
-            prop.sequence("visc0",
-                                     [1.0e3,2.0e-3,2.0e0,2.0e1]),
-
-            prop.bool("SDEPV",False),
-            prop.sequence("sdepv_expt",
-                                     [1,1,1,1]),
-            prop.float("sdepv_misfit",0.02),
-
-            prop.bool("VMIN",True),
-            prop.float("visc_min",1.0e-4),
-
-            prop.bool("VMAX",True),
-            prop.float("visc_max",1.0e3),
-
 	    )
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.4 2003/06/23 20:54:13 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.5 2003/06/26 23:14:08 tan2 Exp $"
 
 # End of file
