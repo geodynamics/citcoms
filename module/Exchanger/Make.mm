@@ -31,6 +31,8 @@ PROJ_SRCS = \
 	Interpolator.cc \
 	Sink.cc \
 	Source.cc \
+	TractionInterpolator.cc \
+	TractionSource.cc \
 	bindings.cc \
 	exceptions.cc \
 	exchangers.cc \
@@ -40,6 +42,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.8 2003/11/10 21:55:28 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/12/16 19:09:25 tan2 Exp $
 
 # End of file
