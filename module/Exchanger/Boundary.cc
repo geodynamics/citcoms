@@ -67,43 +67,7 @@ void Boundary::initBBox(const All_variables *E)
 void Boundary::initX(const All_variables* E,
 		     bool excludeTop, bool excludeBottom)
 {
-    if( (E->parallel.me_loc[3] != E->parallel.nprocz - 1) || (!excludeTop) ) {
-	const int i = E->lmesh.noz;
-	for(int k=1; k<=E->lmesh.noy; k++)
-	    for(int j=1; j<=E->lmesh.nox; j++) {
-		std::vector<int> normalFlag(Exchanger::DIM,0);
-		normalFlag[2] = 1;
-		checkSidewalls(E, j, k, normalFlag);
-		int node = ijk2node(E, i, j, k);
-		appendNode(E, node, normalFlag);
-	    }
-    }
-
-    if( (E->parallel.me_loc[3] != 0) || (!excludeBottom) ) {
-	const int i = 1;
-	for(int k=1; k<=E->lmesh.noy; k++)
-	    for(int j=1; j<=E->lmesh.nox; j++) {
-		std::vector<int> normalFlag(Exchanger::DIM,0);
-		normalFlag[2] = -1;
-		checkSidewalls(E, j, k, normalFlag);
-		int node = ijk2node(E, i, j, k);
-		appendNode(E, node, normalFlag);
-	    }
-    }
-    else {
-	/* including edge nodes at the bottom */
-	const int i = 1;
-	for(int k=1; k<=E->lmesh.noy; k++)
-	    for(int j=1; j<=E->lmesh.nox; j++) {
-		std::vector<int> normalFlag(Exchanger::DIM,0);
-		normalFlag[2] = -1;
-		if(checkSidewalls(E, j, k, normalFlag)) {
-		    int node = ijk2node(E, i, j, k);
-		    appendNode(E, node, normalFlag);
-		}
-	    }
-    }
-
+    // add sidewall nodes which aren't at top or bottom
     for(int k=1; k<=E->lmesh.noy; k++)
 	for(int j=1; j<=E->lmesh.nox; j++)
 	    for(int i=2; i<E->lmesh.noz; i++) {
@@ -116,6 +80,59 @@ void Boundary::initX(const All_variables* E,
 		    appendNode(E, node, normalFlag);
 		}
 	    }
+
+    int nbottom = 1;
+    if(E->parallel.me_loc[3] != 1) {
+	// add bottom edge nodes if not the bottom processor
+	addSidewalls(E, nbottom, 0);
+    } else if (!excludeBottom) {
+	// add all bottom most nodes if is the bottom processor
+	addSidewalls(E, nbottom, -1);
+	for(int k=2; k<E->lmesh.noy; k++)
+	    for(int j=2; j<E->lmesh.nox; j++) {
+		std::vector<int> normalFlag(Exchanger::DIM,0);
+		normalFlag[2] = -1;
+		int node = ijk2node(E, nbottom, j, k);
+		appendNode(E, node, normalFlag);
+	    }
+    } else if (E->mesh.botvbc == 0) {
+	// add edge nodes if stress vbc is used
+	addSidewalls(E, nbottom, -1);
+    }
+
+    int ntop = E->lmesh.noz;
+    if(E->parallel.me_loc[3] != E->parallel.nprocz - 1) {
+	// add top edge nodes if not the top processor
+	addSidewalls(E, ntop, 0);
+    } else if (!excludeTop) {
+	// add all top most node if is the top processor
+	addSidewalls(E, ntop, 1);
+	for(int k=2; k<E->lmesh.noy; k++)
+	    for(int j=2; j<E->lmesh.nox; j++) {
+		std::vector<int> normalFlag(Exchanger::DIM,0);
+		normalFlag[2] = 1;
+		int node = ijk2node(E, ntop, j, k);
+		appendNode(E, node, normalFlag);
+	    }
+    } else if (E->mesh.topvbc == 0) {
+	// add edge nodes if stress vbc is used
+	addSidewalls(E, ntop, 1);
+    }
+}
+
+
+void Boundary::addSidewalls(const All_variables* E, int znode, int r_normal)
+{
+    int i = znode;
+    for(int k=1; k<=E->lmesh.noy; k++)
+	for(int j=1; j<=E->lmesh.nox; j++) {
+	    std::vector<int> normalFlag(Exchanger::DIM,0);
+	    normalFlag[2] = r_normal;
+	    if(checkSidewalls(E, j, k, normalFlag)) {
+		int node = ijk2node(E, i, j, k);
+		appendNode(E, node, normalFlag);
+	    }
+	}
 }
 
 
@@ -173,6 +190,6 @@ void Boundary::appendNode(const All_variables* E,
 
 
 // version
-// $Id: Boundary.cc,v 1.57 2004/12/28 01:38:38 tan2 Exp $
+// $Id: Boundary.cc,v 1.58 2004/12/31 01:03:42 tan2 Exp $
 
 // End of file

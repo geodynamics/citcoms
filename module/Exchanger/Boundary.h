@@ -43,6 +43,7 @@ private:
     void initX(const All_variables *E,
 	       bool excludeTop, bool excludeBottom);
 
+    void addSidewalls(const All_variables* E, int znode, int r_normal);
     bool checkSidewalls(const All_variables* E,
 			int j, int k, std::vector<int>& normalFlag);
     int ijk2node(const All_variables* E,
@@ -55,6 +56,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.32 2004/07/27 18:14:44 tan2 Exp $
+// $Id: Boundary.h,v 1.33 2004/12/31 01:03:42 tan2 Exp $
 
 // End of file
