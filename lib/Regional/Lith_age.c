@@ -42,7 +42,7 @@ void lith_age_init(struct All_variables *E)
 {
   char output_file[255];
   FILE *fp1;
-  int node, i, j;
+  int node, i, j, output;
 
   int gnox, gnoy;
   gnox=E->mesh.nox;
@@ -53,11 +53,12 @@ void lith_age_init(struct All_variables *E)
   if(E->control.lith_age_time==1)   {
     /* to open files every timestep */
     E->control.lith_age_old_cycles = E->monitor.solution_cycles;
+    output = 1;
+    lith_age_read_files(E,output);
   }
   else {
     /* otherwise, just open for the first timestep */
     /* NOTE: This is only used if we are adjusting the boundaries */
-    E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
     sprintf(output_file,"%s",E->control.lith_age_file);
     fp1=fopen(output_file,"r");
     if (fp1 == NULL) {
@@ -85,25 +86,6 @@ void lith_age_restart_tic(struct All_variables *E)
   char output_file[255];
   FILE *fp1;
 
-  if(E->control.lith_age_time==1)   {
-    /* if opening lithosphere age info every timestep - naming is different*/
-    age=find_age_in_MY(E);
-    sprintf(output_file,"%s%0.0f",E->control.lith_age_file,age);
-  }
-  else {     /* just open lithosphere age info here*/
-    sprintf(output_file,"%s",E->control.lith_age_file);
-  }
-
-  if(E->parallel.me==0)  {
-    fprintf(E->fp,"%s %s\n","Initial Lithosphere age info:",output_file);
-  }
-
-  fp1=fopen(output_file,"r");
-  if (fp1 == NULL) {
-    fprintf(E->fp,"(Convection.c #2) Cannot open %s\n",output_file);
-    parallel_process_termination();
-  }
-
   noy=E->lmesh.noy;
   nox=E->lmesh.nox;
   noz=E->lmesh.noz;
@@ -111,13 +93,6 @@ void lith_age_restart_tic(struct All_variables *E)
   gnox=E->mesh.nox;
   gnoy=E->mesh.noy;
   gnoz=E->mesh.noz;
-  for(i=1;i<=gnoy;i++)
-    for(j=1;j<=gnox;j++) {
-      node=j+(i-1)*gnox;
-      fscanf(fp1,"%f",&(E->age_t[node]));
-      E->age_t[node]=E->age_t[node]/E->data.scalet;
-    }
-  fclose(fp1);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=noy;i++)
@@ -126,6 +101,7 @@ void lith_age_restart_tic(struct All_variables *E)
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
+	  E->T[m][node] = E->control.lith_age_mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
@@ -225,12 +201,12 @@ void lith_age_read_files(struct All_variables *E, int output)
     }
   }
   if((E->parallel.me==0) && output) {
-    fprintf(E->fp,"Age: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
-    fprintf(E->fp,"Age: File1 = %s\n",output_file1);
+    fprintf(E->fp,"Lith_Age: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+    fprintf(E->fp,"Lith_Age: File1 = %s\n",output_file1);
     if (pos_age)
-      fprintf(E->fp,"Age: File2 = %s\n",output_file2);
+      fprintf(E->fp,"Lith_Age: File2 = %s\n",output_file2);
     else
-      fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
+      fprintf(E->fp,"Lith_Age: File2 = No file inputted (negative age)\n");
   }
 
   for(i=1;i<=noy;i++)
