@@ -217,3 +217,24 @@ void output_mat(struct All_variables *E)
 
 
 
+void output_pressure(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.pressure.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      fprintf(fp1,"%.6e\n",E->NP[j][i]);
+  }
+
+  fclose(fp1);
+
+  return;
+}
