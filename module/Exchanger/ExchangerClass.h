@@ -10,20 +10,15 @@
 #if !defined(pyCitcom_Exchanger_h)
 #define pyCitcom_Exchanger_h
 
+#include <memory>
 #include "mpi.h"
 
-
+template <int dim> class Array2D;
 class Boundary;
 struct All_variables;
 
-struct Data {
-    static const int npass = 4;  // # of arrays to send/receive
-    int size;                    // length of each array
-    double *v[3];                // velocities
-    double *T;                   // temperature
-    //double *P;                   // pressure
-};
-
+typedef std::auto_ptr<Array2D<1> > Temper;
+typedef std::auto_ptr<Array2D<3> > Velo;
 
 class Exchanger {
 
@@ -45,6 +40,7 @@ public:
     void sendVelocities();
     void receiveVelocities();
 
+    void imposeConstraint();
     void imposeBC();
     void setBCFlag();
 
@@ -74,26 +70,28 @@ protected:
 	                       // and id array indirectly
     Boundary *boundary;
 
-    struct Data outgoing;
-    struct Data incoming;
-    struct Data loutgoing;
-    struct Data lincoming;
-    struct Data poutgoing;
+    Temper outgoingT;
+    Temper incomingT;
+
+    Velo localV;
+    Velo outgoingV;
+    Velo incomingV;
+    Velo old_incomingV;
 
     double fge_t, cge_t;
-
-    void printDataT(const Data &data) const;
-    void printDataV(const Data &data) const;
-    void imposeConstraint();
 
 private:
     double exchangeDouble(const double &sent, const int len) const;
     float exchangeFloat(const float &sent, const int len) const;
     int exchangeInt(const int &sent, const int len) const;
 
+    void computeWeightedNormal(double* nwght) const;
+    double computeOutflow(const Velo& V, const double* nwght) const;
+    void reduceOutflow(const double outflow, const double* nwght);
+
     // disable copy constructor and copy operator
     Exchanger(const Exchanger&);
-    Exchanger operator=(const Exchanger&);
+    Exchanger& operator=(const Exchanger&);
 
 
 };
@@ -103,7 +101,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.26 2003/10/05 18:55:48 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.27 2003/10/10 18:14:49 tan2 Exp $
 
 // End of file
 

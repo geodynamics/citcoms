@@ -10,11 +10,11 @@
 #include <fstream>
 #include <stdio.h>
 
+#include "Array2D.h"
+#include "Array2D.cc"
 #include "Boundary.h"
 #include "CoarseGridExchanger.h"
 #include "global_defs.h"
-
-using std::auto_ptr;
 
 
 CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm comm,
@@ -38,34 +38,34 @@ void CoarseGridExchanger::gather() {
 
     interpretate();
 
-    int size = boundary->size;
-    int dim = boundary->dim;
-
     if (rank == leader) {
+	const int dim = 3;
+	int size = boundary->size;
+
+	auto_array_ptr<double> tmp(new double[dim*size]);
+
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
-
-	auto_ptr<double> tmp = auto_ptr<double>(new double[size]);
-	double *ptmp = tmp.get();
-
 	for (int i=0; i<nproc; i++) {
-	    if (i == leader) continue; // skip leader itself
+	    Array2D<dim> recV(size);
+	    Array2D<3>* V = localV.get();
 
-	    for (int j=0; j<dim; j++) {
-		MPI_Status status;
-		MPI_Recv(ptmp, size, MPI_DOUBLE,
-			 i, i, comm, &status);
-		for (int n=0; n<size; n++)
-		    if (boundary->bid2proc[n] == i) outgoing.v[j][n] = ptmp[n];
+	    if (i != leader) {
+		recV.receive(comm, i);
+		V = &recV;
 	    }
+
+	    for (int n=0; n<size; n++)
+		if (boundary->bid2proc[n] == i)
+		    for (int d=0; d<dim; d++)
+			tmp[n*dim+d] = (*V)(d,n);
 	}
-	//printDataV(outgoing);
+
+	outgoingV = Velo(new Array2D<dim>(tmp, size));
+	//outgoingV->print();
     }
     else {
-	for (int j=0; j<dim; j++) {
-	    MPI_Send(outgoing.v[j], size, MPI_DOUBLE,
-		     leader, rank, comm);
-	}
+	localV->send(comm, leader);
     }
 }
 
@@ -80,20 +80,26 @@ void CoarseGridExchanger::interpretate() {
     std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
     // interpolate velocity field to boundary nodes
 
+    const int dim = 3;
+    const int size = boundary->size;
+    auto_array_ptr<double> tmp(new double[dim*size]);
+
     for(int i=0; i<boundary->size; i++) {
 	int n1 = boundary->bid2elem[i];
-	outgoing.v[0][i] = outgoing.v[1][i] = outgoing.v[2][i] = 0;
+	for(int d=0; d<dim; d++)
+	    tmp[i*dim+d] = 0;
 
 	if(n1 != 0) {
 	    for(int mm=1; mm<=E->sphere.caps_per_proc; mm++)
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-		    outgoing.v[0][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[1][node];
-		    outgoing.v[1][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[2][node];
-		    outgoing.v[2][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[3][node];
+		    for(int d=0; d<dim; d++)
+			tmp[i*dim+d] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[d+1][node];
 		}
 	}
     }
+    localV = Velo(new Array2D<dim>(tmp, size));
+    //localV->print();
 }
 
 
@@ -105,20 +111,15 @@ void CoarseGridExchanger::interpolateTemperature() {
     {
       n1=boundary->bid2elem[i];
       n2=boundary->bid2proc[i];
-//       cout << "in CoarseGridExchanger::interpolateTemperature"
-// 	   << " me = " << E->parallel.me << " n1 = " << n1 << " n2 = " << n2 << endl;
 
-      outgoing.T[i]=0.0;
+      //outgoing.T[i] = 0;
       if(n1!=0) {
 	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
 	  for(int k=0; k< 8 ;k++)
 	    {
 	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-	      outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
+	      //outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
 	    }
-	//test
-// 	cout << "Interpolated...: i = " << i << " " << E->parallel.me << " "
-// 	     << outgoing.T[i] << endl;
       }
     }
 
@@ -171,6 +172,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.27 2003/09/29 18:06:26 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.28 2003/10/10 18:14:49 tan2 Exp $
 
 // End of file
