@@ -27,10 +27,6 @@ extern char pyCitcom_IC_set_properties__doc__[];
 extern char pyCitcom_IC_set_properties__name__[];
 extern PyObject * pyCitcom_IC_set_properties(PyObject *, PyObject *);
 
-extern char pyCitcom_Parallel_set_properties__doc__[];
-extern char pyCitcom_Parallel_set_properties__name__[];
-extern PyObject * pyCitcom_Parallel_set_properties(PyObject *, PyObject *);
-
 extern char pyCitcom_Param_set_properties__doc__[];
 extern char pyCitcom_Param_set_properties__name__[];
 extern PyObject * pyCitcom_Param_set_properties(PyObject *, PyObject *);
@@ -56,6 +52,6 @@ extern PyObject * pyCitcom_Stokes_solver_set_properties(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: setProperties.h,v 1.5 2003/08/01 22:53:50 tan2 Exp $
+// $Id: setProperties.h,v 1.6 2003/08/08 22:03:13 tan2 Exp $
 
 // End of file

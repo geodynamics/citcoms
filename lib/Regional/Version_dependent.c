@@ -18,15 +18,15 @@ void global_derived_values(E)
 
 
    E->mesh.levmax = E->mesh.levels-1;
-   nox = (E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocxl + 1;
-   noy = (E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocyl + 1;
+   nox = (E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocx + 1;
+   noy = (E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocy + 1;
 
    if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
       E->mesh.levmax = E->mesh.levels-1;
       E->mesh.gridmax = E->mesh.levmax;
-      E->mesh.nox = (E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocxl + 1;
-      E->mesh.noy = (E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocyl + 1;
-      E->mesh.noz = (E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nproczl + 1;
+      E->mesh.nox = (E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocx + 1;
+      E->mesh.noy = (E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocy + 1;
+      E->mesh.noz = (E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax)))*E->parallel.nprocz + 1;
       }
    else   {
       if (nox!=E->mesh.nox || noy!=E->mesh.noy) {
@@ -66,14 +66,14 @@ void global_derived_values(E)
 
    for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
       if (E->control.NMULTIGRID||E->control.EMULTIGRID)
-	{ nox = (E->mesh.mgunitx * (int) pow(2.0,(double)i))*E->parallel.nprocxl + 1;
-	  noy = (E->mesh.mgunity * (int) pow(2.0,(double)i))*E->parallel.nprocyl + 1;
-	  noz = (E->mesh.mgunitz * (int) pow(2.0,(double)i))*E->parallel.nproczl + 1;
+	{ nox = (E->mesh.mgunitx * (int) pow(2.0,(double)i))*E->parallel.nprocx + 1;
+	  noy = (E->mesh.mgunity * (int) pow(2.0,(double)i))*E->parallel.nprocy + 1;
+	  noz = (E->mesh.mgunitz * (int) pow(2.0,(double)i))*E->parallel.nprocz + 1;
 	}
       else
 	{ noz = E->mesh.noz;
-	  nox = (E->mesh.mgunitx * (int) pow(2.0,(double)i))*E->parallel.nprocxl + 1;
-	  noy = (E->mesh.mgunity * (int) pow(2.0,(double)i))*E->parallel.nprocyl + 1;
+	  nox = (E->mesh.mgunitx * (int) pow(2.0,(double)i))*E->parallel.nprocx + 1;
+	  noy = (E->mesh.mgunity * (int) pow(2.0,(double)i))*E->parallel.nprocy + 1;
           if (i<E->mesh.levmax) noz=2;
 	}
 
@@ -227,13 +227,9 @@ void read_initial_settings(E)
         input_int("coor",&(E->control.coor),"0",m);
         input_string("coor_file",E->control.coor_file,"",m);
 
-  	E->parallel.nprocxl=1;
-  	E->parallel.nprocyl=1;
-  	E->parallel.nproczl=1;
-
-        input_int("nprocx",&(E->parallel.nprocxl),"1",m);
-        input_int("nprocy",&(E->parallel.nprocyl),"1",m);
-        input_int("nprocz",&(E->parallel.nproczl),"1",m);
+        input_int("nprocx",&(E->parallel.nprocx),"1",m);
+        input_int("nprocy",&(E->parallel.nprocy),"1",m);
+        input_int("nprocz",&(E->parallel.nprocz),"1",m);
 	input_int("nproc_surf",&(E->parallel.nprocxy),"1",m);
 
 /* 	input_int("relaxation",&(E->control.dfact),"0",m); */
@@ -524,8 +520,7 @@ void node_locations(E)
   E->sphere.dircos[3][3] = cos(ro);
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     ii = E->sphere.capid[j];
-     coord_of_cap(E,j);
+     coord_of_cap(E,j,0);
      }
 
 
@@ -543,8 +538,7 @@ if (E->control.verbose)
                    /* rotate the mesh to avoid two poles on mesh points */
 /*
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     ii = E->sphere.capid[j];
-     rotate_mesh(E,j,ii);
+     rotate_mesh(E,j,0);
      }
 */
 
@@ -561,7 +555,7 @@ if (E->control.verbose)
         }
 
 /*
-  if (E->parallel.me_locl[3]==E->parallel.nproczl-1)  {
+  if (E->parallel.me_loc[3]==E->parallel.nprocz-1)  {
     sprintf(output_file,"coord.%d",E->parallel.me);
     fp=fopen(output_file,"w");
 	if (fp == NULL) {
@@ -651,9 +645,9 @@ void construct_tic_from_input(struct All_variables *E)
     k = kk - E->lmesh.nzs + 1;
     if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
 
-    if (E->parallel.me_locl[1] == 0 && E->parallel.me_locl[2] == 0) 
+    if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0)
       fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
-    
+
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++) {

@@ -220,7 +220,7 @@ void read_input_files_for_timesteps(E,action,output)
       fclose(fp1);
       if (pos_age) fclose(fp2);
 
-      if(E->parallel.me_locl[3]==E->parallel.nproczl-1 )  {
+      if(E->parallel.me_loc[3]==E->parallel.nprocz-1 )  {
           for(k=1;k<=noy1;k++)
              for(i=1;i<=nox1;i++)    {
                 nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
@@ -236,7 +236,7 @@ void read_input_files_for_timesteps(E,action,output)
                     E->sphere.cap[1].VB[3][nodel] = 0.0;
 		}
              }
-      }   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
+      }   /* end of E->parallel.me_loc[3]==E->parallel.nprocz-1   */
       for(i=1;i<=dims;i++) {
           free ((void *) VB1[i]);
           free ((void *) VB2[i]);

@@ -53,6 +53,7 @@ void parallel_processor_setup(struct All_variables *E)
 
   int i,j,k,m,me,temp,pid_surf;
   int cap_id_surf;
+  int surf_proc_per_cap, proc_per_cap, total_proc;
 
   me = E->parallel.me;
 
@@ -61,44 +62,38 @@ void parallel_processor_setup(struct All_variables *E)
     parallel_process_termination();
   }
 
-  E->parallel.total_proc = E->parallel.nprocxy*E->parallel.nprocx*E->parallel.nprocy*E->parallel.nprocz;
-  E->parallel.surf_proc_per_cap = E->parallel.nprocx*E->parallel.nprocy;
-  E->sphere.total_sub_caps = E->sphere.caps*E->parallel.surf_proc_per_cap;
-  E->parallel.proc_per_cap = E->parallel.nprocx*E->parallel.nprocy*E->parallel.nprocz;
+  surf_proc_per_cap = E->parallel.nprocx * E->parallel.nprocy;
+  proc_per_cap = surf_proc_per_cap * E->parallel.nprocz;
+  total_proc = E->sphere.caps * proc_per_cap;
+  E->parallel.total_surf_proc = E->sphere.caps * surf_proc_per_cap;
 
-  if ( E->parallel.total_proc != E->parallel.nproc ) {
+  if ( total_proc != E->parallel.nproc ) {
     if (E->parallel.me==0) fprintf(stderr,"!!!! # of requested CPU is incorrect \n");
     parallel_process_termination();
     }
 
-  E->sphere.caps_per_proc = max(1,E->sphere.caps/E->parallel.nprocxy);
-
-  if ( (E->sphere.caps_per_proc > 1) && (E->parallel.surf_proc_per_cap > 1) ) {
-    if (E->parallel.me==0) fprintf(stderr,"!!!! Shouldn't have # surface proc per cap > 1 if # caps per proc > 1\n \n");
-    parallel_process_termination();
-  }
+  E->sphere.caps_per_proc = max(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
 
   if (E->sphere.caps_per_proc > 1) {
-    if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not fully tested yet.\n \n");
+    if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not supported.\n \n");
     parallel_process_termination();
   }
 
   /* determine the location of processors in each cap */
-  cap_id_surf = me / E->parallel.proc_per_cap;
-
-  j = me % E->parallel.nprocz;
+  cap_id_surf = me / proc_per_cap;
 
  /* z-direction first*/
-  E->parallel.me_loc[3] = (me - cap_id_surf*E->parallel.proc_per_cap) % E->parallel.nprocz;
+  E->parallel.me_loc[3] = (me - cap_id_surf*proc_per_cap) % E->parallel.nprocz;
 
  /* x-direction then*/
-  E->parallel.me_loc[1] = ((me - cap_id_surf*E->parallel.proc_per_cap - E->parallel.me_loc[3])/E->parallel.nprocz) % E->parallel.nprocx;
+  E->parallel.me_loc[1] = ((me - cap_id_surf*proc_per_cap - E->parallel.me_loc[3])/E->parallel.nprocz) % E->parallel.nprocx;
 
  /* y-direction then*/
-  E->parallel.me_loc[2] = ((((me - cap_id_surf*E->parallel.proc_per_cap - E->parallel.me_loc[3])/E->parallel.nprocz) - E->parallel.me_loc[1])/E->parallel.nprocx) % E->parallel.nprocy;
+  E->parallel.me_loc[2] = ((((me - cap_id_surf*proc_per_cap - E->parallel.me_loc[3])/E->parallel.nprocz) - E->parallel.me_loc[1])/E->parallel.nprocx) % E->parallel.nprocy;
 
 
-/*the numbering of proc in each caps is as so (example for an xyz = 2x2x2 box):
+/*
+the numbering of proc in each caps is as so (example for an xyz = 2x2x2 box):
 NOTE: This is different (in a way) than the numbering of the nodes:
 the nodeal number has the first oordinate as theta, which goes N-S and
 the second oordinate as fi, which goes E-W. Here we use R-L as the first
@@ -110,10 +105,8 @@ oordinate and F-B
 [xyz] is x=E->parallel.me_loc[1],y=E->parallel.me_loc[2],z=E->parallel.me_loc[3]
 */
 
-      /* determine cap id for each cap in a given processor  */
-
-  pid_surf = me/E->parallel.proc_per_cap; /* cap number (0~11) */
-/*  pid_surf = me/E->parallel.nprocz; CPC 7/27/00 */
+  /* determine cap id for each cap in a given processor  */
+  pid_surf = me/proc_per_cap; /* cap number (0~11) */
   i = cases[E->sphere.caps_per_proc]; /* 1 for more than 12 processors */
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)  {
@@ -123,15 +116,13 @@ oordinate and F-B
 
   /* determine which caps are linked with each of 12 caps  */
   /* if the 12 caps are broken, set these up instead */
-  if (E->parallel.surf_proc_per_cap > 1) {
-/*      E->sphere.caps = E->parallel.surf_proc_per_cap*12; */
+  if (surf_proc_per_cap > 1) {
      E->sphere.max_connections = 8;
   }
 
   /* steup location-to-processor map */
-
-  E->parallel.loc2proc_map = (int ****) malloc(12*sizeof(int ***));
-  for (m=0;m<12;m++)  {
+  E->parallel.loc2proc_map = (int ****) malloc(E->sphere.caps*sizeof(int ***));
+  for (m=0;m<E->sphere.caps;m++)  {
     E->parallel.loc2proc_map[m] = (int ***) malloc(E->parallel.nprocx*sizeof(int **));
     for (i=0;i<E->parallel.nprocx;i++) {
       E->parallel.loc2proc_map[m][i] = (int **) malloc(E->parallel.nprocy*sizeof(int *));
@@ -140,7 +131,7 @@ oordinate and F-B
     }
   }
 
-  for (m=0;m<12;m++)
+  for (m=0;m<E->sphere.caps;m++)
     for (i=0;i<E->parallel.nprocx;i++)
       for (j=0;j<E->parallel.nprocy;j++)
 	for (k=0;k<E->parallel.nprocz;k++) {
@@ -149,39 +140,10 @@ oordinate and F-B
 	    E->parallel.loc2proc_map[m][i][j][k] = incases2[temp].links[m-1];
 	  }
 	  else
-	    E->parallel.loc2proc_map[m][i][j][k] = m*E->parallel.proc_per_cap
+	    E->parallel.loc2proc_map[m][i][j][k] = m*proc_per_cap
 	      + j*E->parallel.nprocx*E->parallel.nprocz
 	      + i*E->parallel.nprocz + k;
 	}
-
-          /* determine surface proc id for each cap  */
-  i = cases[E->sphere.caps_per_proc]; /* =1 for proc >= 12 */
-/*   for (j=1;j<=E->sphere.caps;j++)     { */
-/*     if (E->parallel.surf_proc_per_cap > 1) */
-/*       E->sphere.pid_surf[j] = j-1; */
-/*     else */
-/*       E->sphere.pid_surf[j] = incases2[i].links[j-1]; */
-/*     } */
-/*   E->sphere.pid_surf[0] = -1;  */
-  /* used to indicate that this processor link
-     should NOT be used!! CPC 8/25/00 */
-
-/* still needs to be changed? I am pretty sure not. CPC 8/24/00 */
-
-
-/** E->parallel.mst never used, commented out by Tan2 2/23/02 **/
-/*   temp = 1; */
-/*   for (j=1;j<=E->sphere.caps;j++)    */
-/*     for (i=1;i<=j;i++)   */
-/*       if (i!=j) */
-/*         E->parallel.mst[j][i] = temp++;    */
-
-/*   for (j=1;j<=E->sphere.caps;j++)    */
-/*     for (i=1;i<=E->sphere.caps;i++)   */
-/*       if (i>j) */
-/*         E->parallel.mst[j][i] = E->parallel.mst[i][j];    */
-
-
 
   if (E->control.verbose) {
     fprintf(E->fp_out,"me=%d loc1=%d loc2=%d loc3=%d\n",me,E->parallel.me_loc[1],E->parallel.me_loc[2],E->parallel.me_loc[3]);
@@ -197,7 +159,6 @@ oordinate and F-B
 
     fflush(E->fp_out);
   }
-/*   parallel_process_termination(); */
 
   set_vertical_communicator(E);
   set_horizontal_communicator(E);
@@ -213,9 +174,8 @@ void set_horizontal_communicator(struct All_variables *E)
   int i,j,k,m,n;
   int *processors;
 
-  processors = (int *) malloc((E->parallel.nprocxy*E->sphere.caps+1)*sizeof(int));
+  processors = (int *) malloc((E->parallel.total_surf_proc+1)*sizeof(int));
 
-  m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
   k = E->parallel.me_loc[3];
   n = 0;
   for (m=0;m<E->sphere.caps;m++)
@@ -226,10 +186,16 @@ void set_horizontal_communicator(struct All_variables *E)
       }
 
   MPI_Comm_group(E->parallel.world, &world_g);
-  MPI_Group_incl(world_g, n, processors, &horizon_g);
+  MPI_Group_incl(world_g, E->parallel.total_surf_proc, processors, &horizon_g);
   MPI_Comm_create(E->parallel.world, horizon_g, &(E->parallel.horizontal_comm));
-  //MPI_Comm_size(E->parallel.horizontal_comm, &m);
-  //fprintf(stderr,"horizontal_comm.size = %d\n", m);
+
+  if (E->control.verbose) {
+    fprintf(E->fp_out,"horizontal group of me=%d loc3=%d\n",E->parallel.me,E->parallel.me_loc[3]);
+    for (j=0;j<E->parallel.total_surf_proc;j++) {
+      fprintf(E->fp_out,"%d proc=%d\n",j,processors[j]);
+    }
+    fflush(E->fp_out);
+  }
 
   MPI_Group_free(&horizon_g);
   MPI_Group_free(&world_g);
@@ -250,7 +216,6 @@ void set_vertical_communicator(struct All_variables *E)
   m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
   i = E->parallel.me_loc[1];
   j = E->parallel.me_loc[2];
-  //fprintf(stderr, "setup vertical communicator: m=%d i=%d j=%d\n",m,i,j);
 
   for (k=0;k<E->parallel.nprocz;k++) {
       processors[k] = E->parallel.loc2proc_map[m][i][j][k];
@@ -259,8 +224,14 @@ void set_vertical_communicator(struct All_variables *E)
   MPI_Comm_group(E->parallel.world, &world_g);
   MPI_Group_incl(world_g, E->parallel.nprocz, processors, &vertical_g);
   MPI_Comm_create(E->parallel.world, vertical_g, &(E->parallel.vertical_comm));
-  //MPI_Comm_size(E->parallel.vertical_comm, &m);
-  //fprintf(stderr,"vertical_comm.size = %d\n", m);
+
+  if (E->control.verbose) {
+    fprintf(E->fp_out,"vertical group of me=%d loc1=%d loc2=%d\n",E->parallel.me,E->parallel.me_loc[1],E->parallel.me_loc[2]);
+    for (j=0;j<E->parallel.nprocz;j++) {
+      fprintf(E->fp_out,"%d proc=%d\n",j,processors[j]);
+    }
+    fflush(E->fp_out);
+  }
 
   MPI_Group_free(&vertical_g);
   MPI_Group_free(&world_g);
@@ -517,18 +488,16 @@ void parallel_domain_boundary_nodes(E)
       }       /* end for m */
     }   /* end for level */
 
- ii=0;
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for (node=1;node<=E->lmesh.nno;node++)
-      if(E->node[m][node] & SKIPS)
-        ii+=1;
+/*  ii=0; */
+/*  for (m=1;m<=E->sphere.caps_per_proc;m++) */
+/*     for (node=1;node<=E->lmesh.nno;node++) */
+/*       if(E->node[m][node] & SKIPS) */
+/*         ii+=1; */
 
- MPI_Allreduce(&ii, &node  ,1,MPI_INT,MPI_SUM,E->parallel.world);
+/*  MPI_Allreduce(&ii, &node  ,1,MPI_INT,MPI_SUM,E->parallel.world); */
 
- E->mesh.nno = E->lmesh.nno*E->parallel.total_proc - node - 2*E->mesh.noz;
- /* the above line changed to accomodate multiple proc. per cap CPC 10/18/00 */
- /*E->mesh.nno -= node + 2*E->mesh.noz; */
- E->mesh.neq = E->mesh.nno*3;
+/*  E->mesh.nno = E->lmesh.nno*E->parallel.nproc - node - 2*E->mesh.noz; */
+/*  E->mesh.neq = E->mesh.nno*3; */
 
 if (E->control.verbose) {
  fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);
@@ -570,9 +539,8 @@ void parallel_communication_routs_v(E)
   int me, nprocx,nprocy,nprocz,nprocxz;
   int tscaps,cap,scap,large,npass,lx,ly,lz,temp,layer;
 
-  void face_eqn_node_to_pass();
-  void line_eqn_node_to_pass();
-  void parallel_process_termination();
+  void face_eqn_node_to_pass(struct All_variables *, int, int, int, int);
+  void line_eqn_node_to_pass(struct All_variables *, int, int, int, int, int, int);
 
   const int dims=E->mesh.nsd;
 
@@ -581,7 +549,7 @@ void parallel_communication_routs_v(E)
   nprocy = E->parallel.nprocy;
   nprocz = E->parallel.nprocz;
   nprocxz = nprocx * nprocz;
-  tscaps = E->sphere.total_sub_caps;
+  tscaps = E->parallel.total_surf_proc;
   lx = E->parallel.me_loc[1];
   ly = E->parallel.me_loc[2];
   lz = E->parallel.me_loc[3];
@@ -866,7 +834,7 @@ void parallel_communication_routs_s(E)
 /*         else  {    */      /* the last FOUR communications are for lines */
 /*           E->parallel.NUM_sNODE[lev][m].pass[kkk]=1; */
 /*           for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   { */
-/* 	    if (E->parallel.surf_proc_per_cap > 1) { */ /* 4 or more horiz. proc*/
+/* 	    if (E->parallel.nprocx*E->parallel.nprocy > 1) { */ /* 4 or more horiz. proc*/
 /* 	      switch(kkk) { */
 /* 	      case 5: */
 /* 		ii = 1; */
@@ -961,8 +929,26 @@ void line_eqn_node_to_pass(E,lev,m,npass,num_node,offset,stride)
   return;
 }
 
-/* ================================================ */
-/* ================================================ */
+/* ================================================
+WARNING: BUGS AHEAD
+
+   for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+     for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
+
+       sizeofk = (1+E->parallel.NUM_NEQ[lev][m].pass[k])*sizeof(double);
+       S[k]=(double *)malloc( sizeofk );
+       R[k]=(double *)malloc( sizeofk );
+       }
+      }
+
+This piece of code contain a bug. Arrays S and R are allocated for each m.
+But most of the memory is leaked.
+
+In this version of CitcomS, sphere.caps_per_proc is always equal to one.
+So, this bug won't manifest itself. But in other version of CitcomS, it will.
+
+by Tan2 7/21, 2003
+================================================ */
 
 void exchange_id_d(E, U, lev)
  struct All_variables *E;
@@ -1027,8 +1013,6 @@ void exchange_id_d(E, U, lev)
       if (E->parallel.PROCESSOR[lev][m].pass[k]!=E->parallel.me) {
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
-	 /*         MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
           MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
           E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
@@ -1051,8 +1035,6 @@ void exchange_id_d(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
 
          idb++;
-	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
 	 MPI_Irecv(R[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
 	   E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
 	}
@@ -1172,8 +1154,6 @@ void exchange_node_d(E, U, lev)
       if (E->parallel.PROCESSOR[lev][m].pass[k]!=E->parallel.me) {
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
-	 /*         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
              E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
 	}
@@ -1195,8 +1175,6 @@ void exchange_node_d(E, U, lev)
       if (E->parallel.PROCESSOR[lev][m].pass[k]!=E->parallel.me)  {
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb++;
-	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_DOUBLE,
          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
@@ -1318,8 +1296,6 @@ void exchange_node_f(E, U, lev)
       if (E->parallel.PROCESSOR[lev][m].pass[k]!=E->parallel.me) {
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
-	 /*         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]); */
          MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
           E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
@@ -1342,8 +1318,6 @@ void exchange_node_f(E, U, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
 
          idb++;
-	 /*         MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
            E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
@@ -1455,8 +1429,6 @@ void exchange_snode_f(E, U1, U2, lev)
       if (E->parallel.PROCESSOR[lev][m].pass[k]!=E->parallel.me) {
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
          idb ++;
-	 /*         MPI_Isend(S[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Isend(S[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
              E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
@@ -1479,8 +1451,6 @@ void exchange_snode_f(E, U1, U2, lev)
 	if (E->parallel.PROCESSOR[lev][m].pass[k]!=-1) {
 
          idb ++;
-	 /*         MPI_Irecv(R[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
-		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
          MPI_Irecv(R[kk],2*E->parallel.NUM_sNODE[lev][m].pass[k],MPI_FLOAT,
            E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }

@@ -286,18 +286,7 @@ struct Parallel {
     int nproczy;
     int nprocxz;
 
-    int proc_per_cap;
-    int total_proc;
-    int surf_proc_per_cap;
-
-    int nprocl;
-    int nprocxl;
-    int nproczl;
-    int nprocyl;
-    int nprocxyl;
-    int nproczyl;
-    int nprocxzl;
-    int me_locl[4];
+    int total_surf_proc;
     int ****loc2proc_map;
 
     int nproc_sph[3];
@@ -311,7 +300,6 @@ struct Parallel {
     int Skip_neq[MAX_LEVELS][NCS];
     int *Skip_id[MAX_LEVELS][NCS];
 
-    int mst[NCS][NCS];
     int TNUM_PASS[MAX_LEVELS][NCS];
     struct BOUND *NODE[MAX_LEVELS][NCS];
     struct BOUND NUM_NNO[MAX_LEVELS][NCS];
@@ -340,16 +328,12 @@ struct CAP    {
     float *TB[4];
     float *VB[4];
     float *V[4];
-    int connection[7];
     };
 
 struct SPHERE   {
   int caps;
   int caps_per_proc;
-  int total_sub_caps;
-  int local_capid[NCS];
   int capid[NCS];
-  int pid_surf[NCS];
   int max_connections;
   int nox;
   int noy;

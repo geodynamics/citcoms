@@ -139,7 +139,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   heat_flux(E);
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
 
-  if (E->parallel.me_loc[3]==E->parallel.nproczl-1) {
+  if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
     sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 
@@ -180,8 +180,8 @@ void output_ave_r(struct All_variables *E, int cycles)
 
   // compute horizontal average here....
 
-  // only the first nproczl processors need to output
-  if (E->parallel.me<E->parallel.nproczl)  {
+  // only the first nprocz processors need to output
+  if (E->parallel.me<E->parallel.nprocz)  {
     sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 

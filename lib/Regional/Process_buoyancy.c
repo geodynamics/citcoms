@@ -106,7 +106,7 @@ void heat_flux(E)
   /*
     if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
   */
-  if (E->parallel.me_locl[3]==E->parallel.nproczl-1)
+  if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nsf;i++)
@@ -115,7 +115,7 @@ void heat_flux(E)
     if (E->parallel.me_loc[3]==0)
   */
 
-  if (E->parallel.me_locl[3]==0)
+  if (E->parallel.me_loc[3]==0)
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nsf;i++)
@@ -157,14 +157,14 @@ void heat_flux(E)
     }
   */
 
-  if (E->parallel.me_locl[3]==E->parallel.nproczl-1)   {
+  if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
     sum_h[0] = sum_h[0]/sum_h[1];
-    if (E->parallel.me==E->parallel.nproczl-1) fprintf(E->fp,"surface heat flux= %f %f\n",sum_h[0],E->monitor.elapsed_time);
-    if (E->parallel.me==E->parallel.nproczl-1) fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
+    if (E->parallel.me==E->parallel.nprocz-1) fprintf(E->fp,"surface heat flux= %f %f\n",sum_h[0],E->monitor.elapsed_time);
+    if (E->parallel.me==E->parallel.nprocz-1) fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
 
   }
 
-  if (E->parallel.me_locl[3]==0)    {
+  if (E->parallel.me_loc[3]==0)    {
     sum_h[2] = sum_h[2]/sum_h[3];
     if (E->parallel.me==0) fprintf(E->fp,"bottom heat flux= %f %f\n",sum_h[2],E->monitor.elapsed_time);
     if (E->parallel.me==0) fprintf(stderr,"bottom heat flux= %f\n",sum_h[2]);

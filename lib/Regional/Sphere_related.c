@@ -5,12 +5,11 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void coord_of_cap(E,icap)
+void coord_of_cap(E,m,icap)
    struct All_variables *E;
-   int icap;
+   int icap,m;
   {
 
-  int m;
   int i,j,k,jjj,lev,temp,elx,ely,nox,noy,noz,node,nodes;
   int nprocxl,nprocyl,nproczl;
   int nnproc;
@@ -39,9 +38,9 @@ void coord_of_cap(E,icap)
   noy=E->lmesh.noy;
   noz=E->lmesh.noz;
 
-  nprocxl=E->parallel.nprocxl;
-  nprocyl=E->parallel.nprocyl;
-  nproczl=E->parallel.nproczl;
+  nprocxl=E->parallel.nprocx;
+  nprocyl=E->parallel.nprocy;
+  nproczl=E->parallel.nprocz;
   nnproc=nprocyl*nprocxl*nproczl;
   temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
@@ -152,13 +151,13 @@ else if(E->control.coor==0)   {
   SX[1]  = (double *)malloc((temp+1)*sizeof(double));
 
 
-     tt[1] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_locl[1]);
-     tt[2] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_locl[1]+1);
+     tt[1] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_loc[1]);
+     tt[2] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_loc[1]+1);
      tt[3] = tt[2];
      tt[4] = tt[1];
-     ff[1] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_locl[2]);
+     ff[1] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_loc[2]);
      ff[2] = ff[1];
-     ff[3] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_locl[2]+1);
+     ff[3] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_loc[2]+1);
      ff[4] = ff[3];
 
 

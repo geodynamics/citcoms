@@ -223,9 +223,9 @@ void tracer_advection(E)
       }
 
     loc=0;
-    nprocxl=E->parallel.nprocxl;
-    nprocyl=E->parallel.nprocyl;
-    nproczl=E->parallel.nproczl;
+    nprocxl=E->parallel.nprocx;
+    nprocyl=E->parallel.nprocy;
+    nproczl=E->parallel.nprocz;
 
  if(E->parallel.me==root)    {
  for(m=1;m<=E->sphere.caps_per_proc;m++)

@@ -212,42 +212,6 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
 
 
-char pyCitcom_Parallel_set_properties__doc__[] = "";
-char pyCitcom_Parallel_set_properties__name__[] = "Parallel_set_properties";
-
-PyObject * pyCitcom_Parallel_set_properties(PyObject *self, PyObject *args)
-{
-    PyObject *properties;
-
-    if (!PyArg_ParseTuple(args, "O:Parallel_set_properties", &properties))
-        return NULL;
-
-    int m = E->parallel.me;
-    if (not m)
-	std::cerr << "Parallel.inventories:" << std::endl;
-
-    getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy, m);
-    getScalarProperty(properties, "nprocx", E->parallel.nprocxl, m);
-    getScalarProperty(properties, "nprocy", E->parallel.nprocyl, m);
-    getScalarProperty(properties, "nprocz", E->parallel.nproczl, m);
-
-    if (E->parallel.nprocxy == 12)
-	if (E->parallel.nprocxl != E->parallel.nprocyl) {
-	    char errmsg[] = "!!!! nprocx must equal to nprocy";
-	    PyErr_SetString(PyExc_SyntaxError, errmsg);
-	    return NULL;
-    }
-
-    if (PyErr_Occurred())
-	return NULL;
-
-    Py_INCREF(Py_None);
-    return Py_None;
-
-}
-
-
-
 char pyCitcom_Param_set_properties__doc__[] = "";
 char pyCitcom_Param_set_properties__name__[] = "Param_set_properties";
 
@@ -383,12 +347,8 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "nprocy", E->parallel.nprocy, m);
     getScalarProperty(properties, "nprocz", E->parallel.nprocz, m);
 
-    E->parallel.nprocxl = E->parallel.nprocx;
-    E->parallel.nprocyl = E->parallel.nprocy;
-    E->parallel.nproczl = E->parallel.nprocz;
-
     if (E->parallel.nprocxy == 12)
-	if (E->parallel.nprocxl != E->parallel.nprocyl) {
+	if (E->parallel.nprocx != E->parallel.nprocy) {
 	    char errmsg[] = "!!!! nprocx must equal to nprocy";
 	    PyErr_SetString(PyExc_SyntaxError, errmsg);
 	    return NULL;
@@ -762,6 +722,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.13 2003/08/07 21:34:26 tan2 Exp $
+// $Id: setProperties.cc,v 1.14 2003/08/08 22:03:13 tan2 Exp $
 
 // End of file

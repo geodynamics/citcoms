@@ -21,9 +21,6 @@ void parallel_process_initilization(E,argc,argv)
   E->parallel.me_loc[1] = 0;
   E->parallel.me_loc[2] = 0;
   E->parallel.me_loc[3] = 0;
-  E->parallel.me_locl[1] = 0;
-  E->parallel.me_locl[2] = 0;
-  E->parallel.me_locl[3] = 0;
 
   /*  MPI_Init(&argc,&argv); moved to main{} in Citcom.c, cpc 12/24/00 */
   MPI_Comm_rank(E->parallel.world, &(E->parallel.me) );
@@ -583,7 +580,7 @@ void renew_top_velocity_boundary(E)
 
   fprintf(stderr,"%f %f\n",fxx1,fxx2);
 
-  if (E->parallel.me_locl[3] == E->parallel.nproczl-1 ) {
+  if (E->parallel.me_loc[3] == E->parallel.nprocz-1 ) {
     for(k=1;k<=noy;k++)
       for(i=1;i<=nox;i++)   {
 	nodel = (k-1)*nox*noz + (i-1)*noz+noz;
@@ -612,7 +609,7 @@ void renew_top_velocity_boundary(E)
 	}   /* end of else if (fyy>=fyy1 && fyy <=fyy2)  */
 
       }  /* end if for(i=1;i<nox;i++)  */
-  }    /* end of E->parallel.me_locl[3]   */
+  }    /* end of E->parallel.me_loc[3]   */
 
   return;
 }
@@ -715,7 +712,7 @@ void output_velo_related(E,file_number)
   output_visc(E);
 
 
-  if (E->parallel.me_locl[3]==E->parallel.nproczl-1)      {
+  if (E->parallel.me_loc[3]==E->parallel.nprocz-1)      {
     sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 
@@ -730,7 +727,7 @@ void output_velo_related(E,file_number)
 
     }
 
-  if (E->parallel.me_locl[3]==0)      {
+  if (E->parallel.me_loc[3]==0)      {
     sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 
@@ -745,7 +742,7 @@ void output_velo_related(E,file_number)
     }
 
   /* remove horizontal average output   by Tan2 Mar. 1 2002  */
-/*    if (E->parallel.me<E->parallel.nproczl)  { */
+/*    if (E->parallel.me<E->parallel.nprocz)  { */
 /*      sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles); */
 /*      fp2 = output_open(output_file); */
 /*  	if (fp2 == NULL) { */
