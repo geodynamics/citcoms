@@ -14,6 +14,7 @@ void output_velo(struct All_variables *, int);
 void output_visc_prepare(struct All_variables *, float **);
 void output_visc(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
+void output_stress(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
 
 extern void parallel_process_termination();
@@ -35,6 +36,8 @@ void output(struct All_variables *E, int cycles)
   output_velo(E, cycles);
   output_visc(E, cycles);
   output_surf_botm(E, cycles);
+  output_stress(E, cycles);
+  output_pressure(E, cycles);
 
   /* disable horizontal average output   by Tan2 */
   /* output_ave_r(E, cycles); */
@@ -169,6 +172,32 @@ void output_surf_botm(struct All_variables *E, int cycles)
   }
 
   return;
+}
+
+
+void output_stress(struct All_variables *E, int cycles)
+{
+  int m, node;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.stress.%d.%d",E->control.data_file,E->parallel.me,cycles);
+  fp1 = output_open(output_file);
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    fprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
+    for (node=1;node<=E->lmesh.nno;node++)
+      fprintf(fp1, "%d %e %e %e %e %e %e\n", node,
+	      E->gstress[m][(node-1)*6+1],
+	      E->gstress[m][(node-1)*6+2],
+	      E->gstress[m][(node-1)*6+3],
+	      E->gstress[m][(node-1)*6+4],
+	      E->gstress[m][(node-1)*6+5],
+	      E->gstress[m][(node-1)*6+6]);
+  }
+  fclose(fp1);
 }
 
 
