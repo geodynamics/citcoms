@@ -7,83 +7,66 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from Stokes_solver import Stokes_solver
+from CitcomS.Components.CitcomComponent import CitcomComponent
 
 
-class ImcompressibleNewtonian(Stokes_solver):
+class Imcompressible(CitcomComponent):
 
 
-    def _form_RHS(self):
-	self.CitcomModule.velocities_conform_bcs()
-	self.CitcomModule.assemble_forces()
-	return
+    def __init__(self, name, facility, CitcomModule):
+        # bind component method to facility method
+        CitcomModule.vsolver_set_properties = CitcomModule.Imcompressible_set_properties
 
-
-    def _form_LHS(self):
-	self.CitcomModule.get_system_viscosity()
-	self.CitcomModule.construct_stiffness_B_matrix()
-	return
-
-
-    def _solve(self):
-	misfit = self.CitcomModule.solve_constrained_flow_iterative()
-        return misfit
+        CitcomComponent.__init__(self, name, facility, CitcomModule)
+        return
 
 
 
-class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
-
-    # over-ride Stokes_solver.run()
     def run(self):
-
-	self._myinit()
-
-	self._form_RHS()
-
-	while (self.count < 50) and self.sdepv_not_convergent:
-
-	    self._form_LHS()
-	    self.viscosity_misfit = self._solve()
-
-	    self.CitcomModule.general_stokes_solver_update_velo()
-	    self.Udot_mag = self.CitcomModule.general_stokes_solver_Unorm()
-	    self.dUdot_mag = self.CitcomModule.general_stokes_solver_Udotnorm()
-
-	    self.CitcomModule.general_stokes_solver_log(self.Udot_mag, self.dUdot_mag,
-					       self.count)
-
-	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
-	    self.count += 1
-
-	self._myfini()
-
-	return
-
-
-    def _myinit(self):
-	# allocate and initialize memory here
-	self.CitcomModule.general_stokes_solver_init()
-
-	self.Udot_mag = 0
-	self.dUdot_mag = 0
-	self.count = 1
-	self.sdepv_not_convergent = True
-	return
-
-
-    def _myfini(self):
-	# free memory here
-	self.CitcomModule.general_stokes_solver_fini()
+        self.CitcomModule.general_stokes_solver()
 	return
 
 
 
+    def init(self, parent):
+        if self.inventory.Solver == "cgrad":
+            self.CitcomModule.set_cg_defaults()
+        elif self.inventory.Solver == "multigrid":
+            self.CitcomModule.set_mg_defaults()
+        elif self.inventory.Solver == "multigrid-el":
+            self.CitcomModule.set_mg_el_defaults()
+	return
 
 
 
+    #def fini(self):
+	#return
 
+
+
+    class Inventory(CitcomComponent.Inventory):
+
+        import pyre.properties as prop
+
+        inventory = [
+            prop.str("Solver", "cgrad"),
+            prop.bool("node_assemble", True),
+            prop.bool("precond",True),
+
+            prop.int("mg_cycle", 1),
+            prop.int("down_heavy", 3),
+            prop.int("up_heavy", 3),
+
+            prop.int("vlowstep", 500),
+            prop.int("vhighstep", 3),
+            prop.int("piterations", 500),
+
+            prop.float("accuracy", 1.0e-6),
+            prop.float("tole_compressibility", 1.0e-7),
+
+	    ]
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.7 2003/07/24 17:46:47 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.8 2003/08/15 18:47:24 tan2 Exp $"
 
 # End of file
