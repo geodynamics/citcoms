@@ -11,7 +11,7 @@
 #include <Python.h>
 #include <cstdio>
 
-#include "output_bindings.h"
+#include "outputs.h"
 
 extern "C" {
 #include "mpi.h"
@@ -138,6 +138,6 @@ PyObject * pyRegional_output_velo(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.1 2003/05/21 21:28:00 tan2 Exp $
+// $Id: outputs.cc,v 1.2 2003/05/22 22:41:13 ces74 Exp $
 
 // End of file
