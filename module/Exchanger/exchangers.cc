@@ -181,7 +181,7 @@ PyObject * pyExchanger_createTractionSource(PyObject *self, PyObject *args)
 	                      (PyCObject_AsVoidPtr(obj1));
     MPI_Comm comm = temp->handle();
 
-    BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
     BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj4));
 
@@ -423,6 +423,6 @@ void deleteVTSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.44 2004/03/11 22:46:25 tan2 Exp $
+// $Id: exchangers.cc,v 1.45 2004/03/28 23:19:00 tan2 Exp $
 
 // End of file

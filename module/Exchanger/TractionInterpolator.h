@@ -15,44 +15,24 @@
 #include "FEMInterpolator.h"
 
 struct All_variables;
-class BoundedMesh;
+class Boundary;
 
 class TractionInterpolator: public FEMInterpolator {
-    Array2D<float,DIM> gtraction;
-
-    int xmin;
-    int xmax;
-    int ymin;
-    int ymax;
-    int zmin;
-    int zmax;
-
-    int dm_xmin;
-    int dm_xmax;
-    int dm_ymin;
-    int dm_ymax;
-    int dm_zmin;
-    int dm_zmax;
-
-    int do_xmin;
-    int do_xmax;
-    int do_ymin;
-    int do_ymax;
-    int do_zmin;
-    int do_zmax;
+    const Boundary& boundary;
+    const Array2D<int,1>& meshnode;
+    Array2D<double,DIM> gtraction;
 
 public:
-    TractionInterpolator(const BoundedMesh& boundedMesh,
+    TractionInterpolator(const Boundary& boundary,
 			 const All_variables* E,
 			 Array2D<int,1>& meshNode);
 
     virtual ~TractionInterpolator();
 
     virtual void interpolateTraction(Array2D<double,DIM>& F);
-    void domain_cutout();
+    virtual void interpolateVelocity(Array2D<double,DIM>& V);
 
 private:
-    void initComputeTraction(const BoundedMesh& boundedMesh);
     void computeTraction();
     void get_elt_traction(int el, int far, int NS,
 			  int lev, int mm);
@@ -64,7 +44,6 @@ private:
     virtual void interpolatePressure(Array2D<double,1>& P) {};
     virtual void interpolateStress(Array2D<double,DIM>& S) {};
     virtual void interpolateTemperature(Array2D<double,1>& T) {};
-    virtual void interpolateVelocity(Array2D<double,DIM>& V) {};
 
 };
 
@@ -73,6 +52,6 @@ private:
 #endif
 
 // version
-// $Id: TractionInterpolator.h,v 1.4 2004/01/15 03:00:24 ces74 Exp $
+// $Id: TractionInterpolator.h,v 1.5 2004/03/28 23:19:00 tan2 Exp $
 
 // End of file
