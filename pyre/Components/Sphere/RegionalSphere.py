@@ -32,15 +32,15 @@ class RegionalSphere(Sphere):
         inventory = [
 
             # used only in Regional version, not in Full version
-            pyre.properties.float("theta_min", 1.5),
-            pyre.properties.float("theta_max", 1.8),
+            pyre.properties.float("theta_min", 1.0708),
+            pyre.properties.float("theta_max", 2.0708),
             pyre.properties.float("fi_min", 0.0),
-            pyre.properties.float("fi_max", 0.4),
+            pyre.properties.float("fi_max", 1.0),
 
             ]
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.10 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.11 2004/06/24 19:25:48 tan2 Exp $"
 
 # End of file
