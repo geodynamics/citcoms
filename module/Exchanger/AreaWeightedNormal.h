@@ -40,7 +40,6 @@ public:
 
 private:
     void computeWeightedNormal(const Boundary& boundary,
-			       const Sink& sink,
 			       const All_variables* E);
     void computeTotalArea(const MPI_Comm& comm, const Sink& sink);
     double computeOutflow(const Velo& V,
@@ -54,7 +53,7 @@ private:
 #endif
 
 // version
-// $Id: AreaWeightedNormal.h,v 1.3 2003/11/10 21:55:28 tan2 Exp $
+// $Id: AreaWeightedNormal.h,v 1.4 2004/01/21 17:40:20 tan2 Exp $
 
 // End of file
 

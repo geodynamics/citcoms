@@ -27,7 +27,7 @@ AreaWeightedNormal::AreaWeightedNormal(const MPI_Comm& comm,
     toleranceOutflow_(E->control.tole_comp),
     nwght(size_ * DIM)
 {
-    computeWeightedNormal(boundary, sink, E);
+    computeWeightedNormal(boundary, E);
     computeTotalArea(comm, sink);
 }
 
@@ -56,8 +56,9 @@ void AreaWeightedNormal::imposeConstraint(Velo& V,
 }
 
 
+// private functions
+
 void AreaWeightedNormal::computeWeightedNormal(const Boundary& boundary,
-					       const Sink& sink,
 					       const All_variables* E)
 {
     const int facenodes[]={0, 1, 5, 4,
@@ -190,6 +191,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow,
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.7 2003/11/21 23:15:12 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.8 2004/01/21 17:40:20 tan2 Exp $
 
 // End of file
