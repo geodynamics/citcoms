@@ -18,18 +18,18 @@ if __name__ == "__main__":
     import mpi
     Regional.citcom_init(mpi.world().handle())
 
-    const=Const()
-    print dir(const.inventory)
+    #const=Const()
+    #print dir(const.inventory)
     #print const.inventory.radius.value
-    Regional.Const_set_properties(const.inventory)
+    #Regional.Const_set_properties(const.inventory)
 
     #visc=Visc()
     #print dir(visc.inventory) 
     #print visc.inventory.sdepv_expt
     #Regional.Visc_set_properties(visc.inventory)
 
-    Regional.set_signal()
-    Regional.set_convection_defaults()
+    #Regional.set_signal()
+    #Regional.set_convection_defaults()
 
     print "copyright information:"
     print "   ", CitcomS.copyright()
@@ -62,6 +62,6 @@ if __name__ == "__main__":
     
 
 # version
-__id__ = "$Id: signon.py,v 1.10 2003/07/24 17:46:47 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.11 2005/01/18 22:24:44 tan2 Exp $"
 
 #  End of file 
