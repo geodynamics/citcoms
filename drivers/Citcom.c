@@ -17,6 +17,7 @@ int main(argc,argv)
 
 {	/* Functions called by main*/
   void general_stokes_solver();
+  void general_stokes_solver_pseudo_surf();
   void read_instructions();
   void solve_constrained_flow();
   void solve_derived_velocities();
@@ -27,6 +28,8 @@ int main(argc,argv)
   void read_velocity_boundary_from_file();
   void read_mat_from_file();
   void open_time();
+  void output();
+  void output_pseudo_surf();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -65,9 +68,22 @@ int main(argc,argv)
     parallel_process_termination();
   }
 
-  general_stokes_solver(E);
+  if(E->control.pseudo_free_surf) {
+    if(E->mesh.topvbc == 2)
+	    general_stokes_solver_pseudo_surf(E);
+    else
+	    assert(0);
+  }
+  else
+    general_stokes_solver(E);
 
-  output(E, E->monitor.solution_cycles);
+  if(E->control.pseudo_free_surf) {
+    if(E->mesh.topvbc == 2)
+	    output_pseudo_surf(E, E->monitor.solution_cycles);
+  }
+  else
+    output(E, E->monitor.solution_cycles);
+
 
   if (E->control.stokes)  {
     /*      if(E->control.tracer==1)  {
@@ -111,8 +127,14 @@ int main(argc,argv)
 	    }
     */
 
-    if ((E->monitor.solution_cycles % E->control.record_every)==0)
+    if ((E->monitor.solution_cycles % E->control.record_every)==0) {
+      if(E->control.pseudo_free_surf) {
+        if(E->mesh.topvbc == 2)
+	  output_pseudo_surf(E, E->monitor.solution_cycles);
+      }
+      else
 	output(E, E->monitor.solution_cycles);
+    }
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);
