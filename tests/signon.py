@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env mpipython.exe
 # 
 #  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
@@ -37,15 +37,20 @@ if __name__ == "__main__":
     print "CitcomSFull.return1_test:    ", CitcomSFull.return1_test()
     print "CitcomSRegional.return1_test:", CitcomSRegional.return1_test()
 
+    import mpi
+    world = mpi.world()
     print
-    print "Citcom_Init: return", CitcomSRegional.Citcom_Init()
+    print "Citcom_Init: return", CitcomSRegional.Citcom_Init(world.size,
+                                                             world.rank)
 
-    import os
-    filename = '%s/../packages/CitcomS/examples/Regional/input.sample' % os.environ["BLD_ROOT"]
+    import os, sys
+    filename = sys.argv[1]
     print filename
     print "read_instructions:", CitcomSRegional.read_instructions(filename)
 
+    
+
 # version
-__id__ = "$Id: signon.py,v 1.3 2003/04/05 23:51:35 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.4 2003/04/10 20:15:28 tan2 Exp $"
 
 #  End of file 
