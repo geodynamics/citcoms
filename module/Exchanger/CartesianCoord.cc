@@ -21,9 +21,6 @@ void CartesianCoord::coordinate(BoundedBox& bbox) const
     BoundedBox bbox_tmp(bbox);
 
     std::vector<double> xt(DIM),xc(DIM);
-    std::cout << "bbox (tpr) " << bbox_tmp[0][0] <<" "<< bbox_tmp[1][0] << std::endl;
-    std::cout << "bbox (tpr) " << bbox_tmp[0][1] <<" "<< bbox_tmp[1][1] << std::endl;
-    std::cout << "bbox (tpr) " << bbox_tmp[0][2] <<" "<< bbox_tmp[1][2] << std::endl;
 
     for(int i=0; i<2; i++)
       for(int j=0; j<DIM; j++)
@@ -73,9 +70,6 @@ void CartesianCoord::coordinate(BoundedBox& bbox) const
             }
         }
     }
-    std::cout << "bbox (xyz) " << bbox[0][0] <<" "<< bbox[1][0] << std::endl;
-    std::cout << "bbox (xyz) " << bbox[0][1] <<" "<< bbox[1][1] << std::endl;
-    std::cout << "bbox (xyz) " << bbox[0][2] <<" "<< bbox[1][2] << std::endl;
 }
 
 
@@ -132,12 +126,14 @@ void CartesianCoord::vector(Array2D<double,DIM>& V,
 void CartesianCoord::xcoordinate(BoundedBox& bbox) const
 {
     BoundedBox bbox_tmp(bbox);
+    double minrad;
     std::vector<double> xt(DIM),xc(DIM);
     for(int i=0; i<2; i++)
         for(int j=0; j<DIM; j++)
         {
             if(i==0)bbox[0][j]=1.e27;
             if(i==1)bbox[1][j]=-1.e27;
+	    minrad=1.e27;
         }
 
     for(int a=0; a<2; a++)
@@ -146,25 +142,27 @@ void CartesianCoord::xcoordinate(BoundedBox& bbox) const
 
         for(int b=0; b<2; b++)
         {
-            xt[1]=bbox_tmp[a][1];
+            xt[1]=bbox_tmp[b][1];
             for(int c=0; c<2; c++)
             {
-                xt[2]=bbox_tmp[a][2];
-
-                xc[2] = std::sqrt(xt[0]*xt[0] + xt[1]*xt[1] + xt[2]*xt[2]);
-                xc[1] = std::atan(xt[1] / xt[0]);
-                xc[0] = std::acos(xt[2] / xc[2]);
-
-                for(int j=0;j<DIM;j++)
-                {
-                    if(xc[j] < bbox[0][j])bbox[0][j]=xc[j];
-                    if(xc[j] > bbox[1][j])bbox[1][j]=xc[j];
-                }
-
-            }
-        }
+	      xt[2]=bbox_tmp[c][2];
+	      
+	      xc[2] = std::sqrt(xt[0]*xt[0] + xt[1]*xt[1] + xt[2]*xt[2]);
+	      xc[1] = std::atan2(xt[1], xt[0]);
+	      xc[0] = std::acos(xt[2] / xc[2]);
+	      
+	      for(int j=0;j<DIM;j++)
+		{
+		  
+		  if(minrad > fabs(xt[j]))minrad = fabs(xt[j]);
+		  if(xc[j] < bbox[0][j])bbox[0][j]=xc[j];
+		  if(xc[j] > bbox[1][j])bbox[1][j]=xc[j];
+		}
+	      
+	    }
+	}
     }
-
+    bbox[0][2]=minrad;
 }
 
 
@@ -178,7 +176,7 @@ void CartesianCoord::xcoordinate(Array2D<double,DIM>& X) const
             xt[j] = X[j][i];
 
         X[2][i] = std::sqrt(xt[0]*xt[0] + xt[1]*xt[1] + xt[2]*xt[2]);
-        X[1][i] = std::atan(xt[1] / xt[0]);
+        X[1][i] = std::atan2(xt[1], xt[0]);
         X[0][i] = std::acos(xt[2] / X[2][i]);
     }
 }
@@ -217,6 +215,6 @@ void CartesianCoord::xvector(Array2D<double,DIM>& V,
 
 
 // version
-// $Id: CartesianCoord.cc,v 1.5 2004/01/09 00:38:23 ces74 Exp $
+// $Id: CartesianCoord.cc,v 1.6 2004/01/09 06:10:11 ces74 Exp $
 
 // End of file
