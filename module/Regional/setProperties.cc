@@ -51,7 +51,7 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Advection_diffusion.inventories:" << std::endl;
+	std::cout << "Advection_diffusion.inventories:" << std::endl;
 
     getScalarProperty(properties, "ADV", E->advection.ADVECTION, m);
     getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep, m);
@@ -96,7 +96,7 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "BC.inventories:" << std::endl;
+	std::cout << "BC.inventories:" << std::endl;
 
     getScalarProperty(properties, "topvbc", E->mesh.topvbc, m);
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval, m);
@@ -141,7 +141,7 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Const.inventories:" << std::endl;
+	std::cout << "Const.inventories:" << std::endl;
 
     getScalarProperty(properties, "layerd", E->data.layer_km, m);
     getScalarProperty(properties, "density", E->data.density, m);
@@ -196,7 +196,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "IC.inventories:" << std::endl;
+	std::cout << "IC.inventories:" << std::endl;
 
     int num_perturb;
     const int max_perturb = 32;
@@ -239,7 +239,7 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Param.inventories:" << std::endl;
+	std::cout << "Param.inventories:" << std::endl;
 
     getStringProperty(properties, "datafile", E->control.data_file, m);
 
@@ -310,7 +310,7 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Phase.inventories:" << std::endl;
+	std::cout << "Phase.inventories:" << std::endl;
 
     getScalarProperty(properties, "Ra_410", E->control.Ra_410, m);
     getScalarProperty(properties, "clapeyron410", E->control.clapeyron410, m);
@@ -361,7 +361,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Sphere.inventories:" << std::endl;
+	std::cout << "Sphere.inventories:" << std::endl;
 
     getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy, m);
     getScalarProperty(properties, "nprocx", E->parallel.nprocx, m);
@@ -496,7 +496,7 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Visc.inventories:" << std::endl;
+	std::cout << "Visc.inventories:" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE, m);
     if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
@@ -565,7 +565,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
     int m = E->parallel.me;
     if (not m)
-	std::cerr << "Incompressible.inventories:" << std::endl;
+	std::cout << "Incompressible.inventories:" << std::endl;
 
     getStringProperty(properties, "Solver", E->control.SOLVER_TYPE, m);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE, m);
@@ -598,20 +598,20 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
 void getStringProperty(PyObject* properties, char* attribute, char* value, int mute)
 {
-    std::ofstream out;
+    std::ofstream outf("/dev/null");
+    std::ostream *out;
 
     if (mute)
-	out.open("/dev/null");
+	out = &outf;
     else
-	out.open("/dev/stderr");
+	out = &std::cout;
 
-    out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
 	sprintf(errmsg, "no such attribute: %s", attribute);
 	PyErr_SetString(PyExc_AttributeError, errmsg);
-	out.close();
 	return;
     }
 
@@ -620,14 +620,11 @@ void getStringProperty(PyObject* properties, char* attribute, char* value, int m
 	char errmsg[255];
 	sprintf(errmsg, "'%s' is not a string", attribute);
 	PyErr_SetString(PyExc_TypeError, errmsg);
-	out.close();
 	return;
     }
 
     strcpy(value, PyString_AsString(prop));
-    out << '"' << value << '"' << std::endl;
-
-    out.close();
+    *out << '"' << value << '"' << std::endl;
 
     return;
 }
@@ -637,20 +634,20 @@ void getStringProperty(PyObject* properties, char* attribute, char* value, int m
 template <class T>
 void getScalarProperty(PyObject* properties, char* attribute, T& value, int mute)
 {
-    std::ofstream out;
+    std::ofstream outf("/dev/null");
+    std::ostream *out;
 
     if (mute)
-	out.open("/dev/null");
+	out = &outf;
     else
-	out.open("/dev/stderr");
+	out = &std::cout;
 
-    out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
 	sprintf(errmsg, "no such attribute: %s", attribute);
 	PyErr_SetString(PyExc_AttributeError, errmsg);
-	out.close();
 	return;
     }
 
@@ -659,14 +656,11 @@ void getScalarProperty(PyObject* properties, char* attribute, T& value, int mute
 	char errmsg[255];
 	sprintf(errmsg, "'%s' is not a number", attribute);
 	PyErr_SetString(PyExc_TypeError, errmsg);
-	out.close();
 	return;
     }
 
     value = static_cast<T>(PyFloat_AsDouble(prop));
-    out << value << std::endl;
-
-    out.close();
+    *out << value << std::endl;
 
     return;
 }
@@ -677,20 +671,20 @@ template <class T>
 void getVectorProperty(PyObject* properties, char* attribute,
 		       T* vector, const int len, int mute)
 {
-    std::ofstream out;
+    std::ofstream outf("/dev/null");
+    std::ostream *out;
 
     if (mute)
-	out.open("/dev/null");
+	out = &outf;
     else
-	out.open("/dev/stderr");
+	out = &std::cout;
 
-    out << '\t' << attribute << " = ";
+    *out << '\t' << attribute << " = ";
 
     if(!PyObject_HasAttrString(properties, attribute)) {
 	char errmsg[255];
 	sprintf(errmsg, "no such attribute: %s", attribute);
 	PyErr_SetString(PyExc_AttributeError, errmsg);
-	out.close();
 	return;
     }
 
@@ -700,7 +694,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	char errmsg[255];
 	sprintf(errmsg, "'%s' is not a sequence", attribute);
 	PyErr_SetString(PyExc_TypeError, errmsg);
-	out.close();
 	return;
     }
 
@@ -710,22 +703,20 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	char errmsg[255];
 	sprintf(errmsg, "length of '%s' < %d", attribute, len);
 	PyErr_SetString(PyExc_IndexError, errmsg);
-	out.close();
 	return;
     } else if (n > len) {
 	char warnmsg[255];
 	sprintf(warnmsg, "WARNING: length of '%s' > %d", attribute, len);
-	out << warnmsg << std::endl;
+	*out << warnmsg << std::endl;
     }
 
-    out << "[ ";
+    *out << "[ ";
     for (int i=0; i<len; i++) {
 	PyObject* item = PySequence_GetItem(prop, i);
 	if(!item) {
 	    char errmsg[255];
 	    sprintf(errmsg, "can't get %s[%d]", attribute, i);
 	    PyErr_SetString(PyExc_IndexError, errmsg);
-	    out.close();
 	    return;
 	}
 
@@ -735,20 +726,17 @@ void getVectorProperty(PyObject* properties, char* attribute,
 	    char errmsg[255];
 	    sprintf(errmsg, "'%s[%d]' is not a number ", attribute, i);
 	    PyErr_SetString(PyExc_TypeError, errmsg);
-	    out.close();
 	    return;
 	}
-	out << vector[i] << ", ";
+	*out << vector[i] << ", ";
     }
-    out << ']' << std::endl;
-
-    out.close();
+    *out << ']' << std::endl;
 
     return;
 }
 
 
 // version
-// $Id: setProperties.cc,v 1.17 2003/08/22 22:35:17 tan2 Exp $
+// $Id: setProperties.cc,v 1.18 2003/09/29 20:22:18 tan2 Exp $
 
 // End of file
