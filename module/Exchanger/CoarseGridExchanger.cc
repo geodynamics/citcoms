@@ -33,6 +33,17 @@ CoarseGridExchanger::~CoarseGridExchanger() {
 
 void CoarseGridExchanger::gather() {
     std::cout << "in CoarseGridExchanger::gather" << std::endl;
+
+    int me,nproc;
+    MPI_Comm_size(intercomm,&nproc);
+    MPI_Comm_rank(intercomm,&me);
+    if(me>0)
+      sendVelocities();
+    if(me==0)
+      receiveVelocities();
+    MPI_Barrier(intercomm);
+
+    return;
 }
 
 
@@ -96,6 +107,6 @@ void CoarseGridExchanger::mapBoundary(const Boundary* b) {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.4 2003/09/09 20:57:25 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.5 2003/09/10 18:51:42 ces74 Exp $
 
 // End of file
