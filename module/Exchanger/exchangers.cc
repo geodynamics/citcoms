@@ -452,10 +452,10 @@ PyObject * pyExchanger_recvV(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:recvV", &obj))
 	return NULL;
 
-    BoundaryConditionSink* bcs = static_cast<BoundaryConditionSink*>
+    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
 	                                    (PyCObject_AsVoidPtr(obj));
 
-    bcs->recvTandV();
+    ics->recvV();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -815,6 +815,6 @@ void deleteTractionBC(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.39 2004/01/14 02:11:24 ces74 Exp $
+// $Id: exchangers.cc,v 1.40 2004/01/17 02:10:38 puru Exp $
 
 // End of file

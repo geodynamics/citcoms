@@ -24,6 +24,7 @@ class InteriorImposingSink {
     const Interior& interior;
     const Sink& sink;
     Array2D<double,1> tic;
+    Array2D<double,DIM> vic;
 
 public:
     InteriorImposingSink(const Interior& interior, const Sink& sink,
@@ -31,10 +32,12 @@ public:
     ~InteriorImposingSink() {};
 
     void recvT();
+    void recvV();
     void imposeIC();
 
 private:
     void imposeTIC();
+    void imposeVIC();
 
 };
 
@@ -58,6 +61,6 @@ private:
 #endif
 
 // version
-// $Id: InteriorImposing.h,v 1.5 2004/01/07 23:54:34 tan2 Exp $
+// $Id: InteriorImposing.h,v 1.6 2004/01/17 02:10:38 puru Exp $
 
 // End of file
