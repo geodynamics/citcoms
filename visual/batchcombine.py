@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
     # check the length of nodelist
     totalnodes = nprocx * nprocy * nprocz * ncap
-    print nodelist.split()
     n = len(nodelist.split())
     if not n == totalnodes:
         print 'WARNING: length of machinefile does not match number of processors'
@@ -74,6 +73,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchcombine.py,v 1.2 2004/06/07 19:45:05 tan2 Exp $
+# $Id: batchcombine.py,v 1.3 2004/06/07 19:54:30 tan2 Exp $
 
 # End of file
