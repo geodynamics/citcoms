@@ -31,21 +31,25 @@ class Solver(BaseSolver):
 	print "my rank is ", self.rank
         return
 
+
+
     def run_init_simulation(self):
         mesher = self.inventory.mesher
         mesher.setup()
-        
+
         vsolver = self.inventory.vsolver
         vsolver.setup()
-        
+
         tsolver = self.inventory.tsolver
         tsolver.setup()
-        
+
         mesher.run()
         vsolver.run()
         tsolver.launch()
-        
+
         return
+
+
 
     def advance(self,dt):
         self._loopInfo.log(
@@ -53,23 +57,27 @@ class Solver(BaseSolver):
 
         vsolver = self.inventory.vsolver
         vsolver.setup()
-        
+
         tsolver = self.inventory.tsolver
         tsolver.setup()
-        
+
         tsolver.run(dt)
         vsolver.run()
 
         return
-    
-    
+
+
+
     def stableTimestep(self):
+        tsolver = self.inventory.tsolver
         dt=tsolver.stable_timestep()
         self._loopInfo.log(
-            "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))        
+            "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))
         return dt
-    
-    def endSimulation(self,step):
+
+
+
+    def endSimulation(self, step):
         total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
         if not self.rank:
             print "Average cpu time taken for velocity step = %f" % (
@@ -175,6 +183,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.11 2003/08/28 23:18:10 ces74 Exp $"
+__id__ = "$Id: Solver.py,v 1.12 2003/08/28 23:58:48 tan2 Exp $"
 
 # End of file
