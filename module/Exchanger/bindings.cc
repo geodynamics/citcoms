@@ -118,6 +118,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_sendTandV__doc__},
 
+    {pyExchanger_sendTraction__name__,
+     pyExchanger_sendTraction,
+     METH_VARARGS,
+     pyExchanger_sendTraction__doc__},
+
     {pyExchanger_recvT__name__,
      pyExchanger_recvT,
      METH_VARARGS,
@@ -126,7 +131,7 @@ struct PyMethodDef pyExchanger_methods[] = {
     {pyExchanger_sendT__name__,
      pyExchanger_sendT,
      METH_VARARGS,
-     pyExchanger_sendTandV__doc__},
+     pyExchanger_sendT__doc__},
 
     {pyExchanger_imposeBC__name__,
      pyExchanger_imposeBC,
@@ -164,6 +169,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.23 2003/11/11 19:29:27 tan2 Exp $
+// $Id: bindings.cc,v 1.24 2003/11/23 19:04:58 ces74 Exp $
 
 // End of file
