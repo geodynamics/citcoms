@@ -37,15 +37,16 @@ class Visc(Component):
             pyre.properties.int("rheol",3),
             pyre.properties.int("visc_smooth_method",3),
             pyre.properties.bool("VISC_UPDATE",True),
+
             pyre.properties.int("num_mat",4),
+            pyre.properties.sequence("visc0",
+				     [1.0e3,2.0e-3,2.0e0,2.0e1]),
 
             pyre.properties.bool("TDEPV",True),
             pyre.properties.sequence("viscE",
 				     [0.1, 0.1, 1.0, 1.0]),
             pyre.properties.sequence("viscT",
 				     [-1.02126,-1.01853, -1.32722, -1.32722]),
-            pyre.properties.sequence("visc0",
-				     [1.0e3,2.0e-3,2.0e0,2.0e1]),
 
             pyre.properties.bool("SDEPV",False),
             pyre.properties.sequence("sdepv_expt",
@@ -61,6 +62,6 @@ class Visc(Component):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.3 2003/07/13 22:58:12 tan2 Exp $"
 
 # End of file

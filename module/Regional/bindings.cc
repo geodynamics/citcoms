@@ -168,12 +168,17 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_BC_set_prop__doc__},
 
+    {pyRegional_Visc_set_prop__name__,
+     pyRegional_Visc_set_prop,
+     METH_VARARGS,
+     pyRegional_Visc_set_prop__doc__},
+
 
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.11 2003/06/27 00:15:02 tan2 Exp $
+// $Id: bindings.cc,v 1.12 2003/07/13 22:58:12 tan2 Exp $
 
 // End of file

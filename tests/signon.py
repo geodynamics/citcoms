@@ -1,14 +1,10 @@
 #!/usr/bin/env mpipython.exe
 # 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 
-#                               Michael A.G. Aivazis
-#                        California Institute of Technology
-#                        (C) 1998-2002 All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
 #  <LicenseText>
 # 
-#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 
 
 if __name__ == "__main__":
@@ -16,6 +12,20 @@ if __name__ == "__main__":
     import CitcomS 
 #    import CitcomS.Full as Full
     import CitcomS.Regional as Regional
+    from CitcomS.Components.BC import BC
+    from CitcomS.Components.Visc import Visc
+
+    import mpi
+    Regional.Citcom_Init(mpi.world().handle())
+
+    bc=BC()
+    dir(bc.inventory)
+    Regional.BC_set_prop(bc.inventory)
+
+    visc=Visc()
+    print visc.__dict__
+    print visc.inventory.sdepv_expt
+    Regional.Visc_set_prop(visc.inventory)
 
     print "copyright information:"
     print "   ", CitcomS.copyright()
@@ -53,6 +63,6 @@ if __name__ == "__main__":
     
 
 # version
-__id__ = "$Id: signon.py,v 1.8 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.9 2003/07/13 22:58:12 tan2 Exp $"
 
 #  End of file 

@@ -29,6 +29,8 @@ class RegionalApp(Application):
         print vsolver
         #tsolver = self.inventory.tsolver
 
+        self.setProperties()
+
         return
 
 
@@ -67,6 +69,14 @@ class RegionalApp(Application):
 
 	output_visc = Output.outputVisc(self.prefix, self.rank, self.cycles)
         output_visc.go()
+
+        return
+
+
+
+    def setProperties(self):
+        self.inventory.bc.setProperties()
+        self.inventory.visc.setProperties()
 
         return
 
@@ -148,6 +158,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: CitcomSRegional.py,v 1.12 2003/07/09 19:42:27 tan2 Exp $"
+__id__ = "$Id: CitcomSRegional.py,v 1.13 2003/07/13 22:58:12 tan2 Exp $"
 
 # End of file
