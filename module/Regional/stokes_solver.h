@@ -16,6 +16,12 @@ extern "C"
 PyObject * pyCitcom_assemble_forces(PyObject *, PyObject *);
 
 
+extern char pyCitcom_assemble_forces_pseudo_surf__name__[];
+extern char pyCitcom_assemble_forces_pseudo_surf__doc__[];
+extern "C"
+PyObject * pyCitcom_assemble_forces_pseudo_surf(PyObject *, PyObject *);
+
+
 extern char pyCitcom_construct_stiffness_B_matrix__name__[];
 extern char pyCitcom_construct_stiffness_B_matrix__doc__[];
 extern "C"
@@ -26,6 +32,12 @@ extern char pyCitcom_general_stokes_solver__name__[];
 extern char pyCitcom_general_stokes_solver__doc__[];
 extern "C"
 PyObject * pyCitcom_general_stokes_solver(PyObject *, PyObject *);
+
+
+extern char pyCitcom_general_stokes_solver_pseudo_surf__name__[];
+extern char pyCitcom_general_stokes_solver_pseudo_surf__doc__[];
+extern "C"
+PyObject * pyCitcom_general_stokes_solver_pseudo_surf(PyObject *, PyObject *);
 
 
 extern char pyCitcom_general_stokes_solver_setup__name__[];
@@ -64,9 +76,14 @@ extern "C"
 PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *, PyObject *);
 
 
+extern char pyCitcom_solve_constrained_flow_iterative_pseudo_surf__name__[];
+extern char pyCitcom_solve_constrained_flow_iterative_pseudo_surf__doc__[];
+extern "C"
+PyObject * pyCitcom_solve_constrained_flow_iterative_pseudo_surf(PyObject *, PyObject *);
+
 #endif
 
 // version
-// $Id: stokes_solver.h,v 1.5 2003/10/29 18:40:00 tan2 Exp $
+// $Id: stokes_solver.h,v 1.6 2005/01/08 03:02:18 ces74 Exp $
 
 // End of file

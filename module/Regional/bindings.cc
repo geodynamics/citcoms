@@ -156,6 +156,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_output__doc__},
 
+    {pyCitcom_output_pseudo_surf__name__,
+     pyCitcom_output_pseudo_surf,
+     METH_VARARGS,
+     pyCitcom_output_pseudo_surf__doc__},
+
     // from setProperties.h
 
     {pyCitcom_Advection_diffusion_set_properties__name__,
@@ -215,6 +220,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_assemble_forces__doc__},
 
+    {pyCitcom_assemble_forces_pseudo_surf__name__,
+     pyCitcom_assemble_forces_pseudo_surf,
+     METH_VARARGS,
+     pyCitcom_assemble_forces_pseudo_surf__doc__},
+
     {pyCitcom_construct_stiffness_B_matrix__name__,
      pyCitcom_construct_stiffness_B_matrix,
      METH_VARARGS,
@@ -224,6 +234,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_general_stokes_solver,
      METH_VARARGS,
      pyCitcom_general_stokes_solver__doc__},
+
+    {pyCitcom_general_stokes_solver_pseudo_surf__name__,
+     pyCitcom_general_stokes_solver_pseudo_surf,
+     METH_VARARGS,
+     pyCitcom_general_stokes_solver_pseudo_surf__doc__},
 
     {pyCitcom_general_stokes_solver_setup__name__,
      pyCitcom_general_stokes_solver_setup,
@@ -255,12 +270,16 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_solve_constrained_flow_iterative__doc__},
 
+    {pyCitcom_solve_constrained_flow_iterative_pseudo_surf__name__,
+     pyCitcom_solve_constrained_flow_iterative_pseudo_surf,
+     METH_VARARGS,
+     pyCitcom_solve_constrained_flow_iterative_pseudo_surf__doc__},
 
 // Sentinel
     {0, 0, 0, 0}
 };
 
 // version
-// $Id: bindings.cc,v 1.34 2004/05/26 23:56:33 tan2 Exp $
+// $Id: bindings.cc,v 1.35 2005/01/08 03:02:18 ces74 Exp $
 
 // End of file

@@ -104,6 +104,8 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval, m);
     getScalarProperty(properties, "topvbyval", E->control.VBYtopval, m);
 
+    getScalarProperty(properties, "pseudo_free_surf", E->control.pseudo_free_surf, m);
+
     getScalarProperty(properties, "botvbc", E->mesh.botvbc, m);
     getScalarProperty(properties, "botvbxval", E->control.VBXbotval, m);
     getScalarProperty(properties, "botvbyval", E->control.VBYbotval, m);
@@ -756,6 +758,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.27 2004/11/24 21:47:03 ces74 Exp $
+// $Id: setProperties.cc,v 1.28 2005/01/08 03:02:18 ces74 Exp $
 
 // End of file
