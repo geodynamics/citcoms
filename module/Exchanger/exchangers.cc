@@ -36,11 +36,11 @@ char pyExchanger_createCoarseGridExchanger__name__[] = "createCoarseGridExchange
 PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int leader, localLeader, remoteLeader;
+    int leader, remoteLeader;
 
-    if (!PyArg_ParseTuple(args, "OOiiiO:createCoarseGridExchanger",
+    if (!PyArg_ParseTuple(args, "OOiiO:createCoarseGridExchanger",
 			  &obj1, &obj2,
-			  &leader, &localLeader, &remoteLeader,
+			  &leader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -56,8 +56,7 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
 
     CoarseGridExchanger *cge = new CoarseGridExchanger(
 	                                comm, intercomm,
-					leader,
-					localLeader, remoteLeader,
+					leader, remoteLeader,
 					E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(cge, deleteCoarseGridExchanger);
@@ -71,11 +70,11 @@ char pyExchanger_createFineGridExchanger__name__[] = "createFineGridExchanger";
 PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
 {
     PyObject *obj1, *obj2, *obj3;
-    int leader, localLeader, remoteLeader;
+    int leader, remoteLeader;
 
-    if (!PyArg_ParseTuple(args, "OOiiiO:createFineGridExchanger",
+    if (!PyArg_ParseTuple(args, "OOiiO:createFineGridExchanger",
 			  &obj1, &obj2,
-			  &leader, &localLeader, &remoteLeader,
+			  &leader, &remoteLeader,
 			  &obj3))
         return NULL;
 
@@ -96,8 +95,7 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
     MPI_Comm_rank(intercomm, &rank);
 
     FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
-						   leader,
-						   localLeader, remoteLeader,
+						   leader, remoteLeader,
 						   E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(fge, deleteFineGridExchanger);
@@ -462,6 +460,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.22 2003/10/19 01:01:33 tan2 Exp $
+// $Id: exchangers.cc,v 1.23 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

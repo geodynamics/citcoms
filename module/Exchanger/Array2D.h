@@ -14,6 +14,7 @@
 
 template <class T, int N>
 class Array2D {
+    int memsize_;
     int size_;
     T* a_;
 
@@ -26,6 +27,7 @@ public:
 
     Array2D<T,N>& operator=(const Array2D<T,N>& rhs);
     void resize(const int size);
+    void shrink();
 
     template <class T1, int N1>
     friend void swap(Array2D<T1,N1>& lhs, Array2D<T1,N1>& rhs);
@@ -36,34 +38,28 @@ public:
     void broadcast(const MPI_Comm comm, const int broadcaster);
     void print(const std::string& prefix="Array2D") const;
 
+    class Array1D;  // forward declaration
+
+    inline Array1D operator[](const int index) {return Array1D(a_, index);}
+    inline const Array1D operator[](const int index) const {return Array1D(a_, index);}
 
     // proxy class for operator[]
     class Array1D {
 	T* p_;
 	int n_;
     public:
-	inline Array1D(T* a_, const int n) : p_(a_), n_(n){};
+	inline Array1D(T* a_, const int n) : p_(a_), n_(n) {};
 
-	inline T& operator[](const int index) {
-	    return p_[index*N+n_];
-	}
-
-	inline const T& operator[](const int index) const {
-	    return p_[index*N+n_];
-	}
+	inline T& operator[](const int index) {return p_[index*N+n_];}
+	inline const T& operator[](const int index) const {return p_[index*N+n_];}
     };
 
-    inline Array1D operator[](const int index) {
-	return Array1D(a_, index);
-    }
-
-    inline const Array1D operator[](const int index) const {
-	return Array1D(a_, index);
-    }
-
 private:
+    void upsize(const int size);
+    void downsize(const int size);
     void reset(T* array, const int size);
     static MPI_Datatype typeofT();
+
 };
 
 
@@ -72,9 +68,11 @@ template <class T, int N>
 void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
 
 
+#include "Array2D.cc"
+
 #endif
 
 // version
-// $Id: Array2D.h,v 1.6 2003/10/22 01:13:56 tan2 Exp $
+// $Id: Array2D.h,v 1.7 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

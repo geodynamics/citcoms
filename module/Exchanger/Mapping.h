@@ -30,6 +30,7 @@ public:
     inline int bid2proc(const int n) const {return bid2proc_[0][n];};
     void printBid2proc(const std::string& prefix="") const;
     virtual void resize(const int n);
+    virtual void shrinksize();
 
 protected:
     void sendBid2proc(const MPI_Comm comm,
@@ -55,6 +56,8 @@ public:
     inline double shape(const int n) const {return shape_[0][n];};
     void printBid2elem(const std::string& prefix="") const;
     virtual void resize(const int n);
+    virtual void shrinksize();
+
     void FindInteriorNodes(const Boundary* boundary,const All_variables* E);
 
 private:
@@ -87,6 +90,7 @@ public:
     inline int bid2gid(const int n) const {return bid2gid_[0][n];};
     void printBid2gid(const std::string& prefix="") const;
     virtual void resize(const int n);
+    virtual void shrinksize();
 
 private:
     void findBoundaryNodes(Boundary* boundary, const All_variables* E);
@@ -96,6 +100,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.7 2003/10/23 19:06:24 puru Exp $
+// $Id: Mapping.h,v 1.8 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

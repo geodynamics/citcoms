@@ -1,17 +1,15 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include <portinfo>
-#include <iostream>
-#include <memory>
 #include "global_defs.h"
-#include "Array2D.cc"
+#include "journal/journal.h"
 #include "Boundary.h"
 
 
@@ -21,7 +19,9 @@ Boundary::Boundary(const All_variables* E) :
     bounds_(2),
     X_(size_)
 {
-    std::cout << "in Boundary::Boundary  size = " << size_ << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Boundary::Boundary  size = " << size_ << journal::end;
     initBounds(E);
 }
 
@@ -31,7 +31,9 @@ Boundary::Boundary(const int n) :
     bounds_(2),
     X_(n)
 {
-    std::cout << "in Boundary::Boundary  size = " << size_ << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Boundary::Boundary  size = " << size_ << journal::end;
 }
 
 
@@ -39,7 +41,9 @@ Boundary::Boundary() :
     size_(0),
     bounds_(2)
 {
-    std::cout << "in Boundary::Boundary  size = " << 0 << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Boundary::Boundary  size = " << 0 << journal::end;
 }
 
 
@@ -51,7 +55,8 @@ void Boundary::initBounds(const All_variables *E) {
     bounds_[1][1] = E->control.fi_min;
     bounds_[2][0] = E->sphere.ro;
     bounds_[2][1] = E->sphere.ri;
-    //printBounds();
+
+    printBounds();
 }
 
 
@@ -74,6 +79,7 @@ void Boundary::receive(const MPI_Comm comm, const int sender) {
     X_.resize(size_);
     X_.receive(comm, sender);
     //printX();
+
     bounds_.receive(comm, sender);
     //printBounds();
 
@@ -111,6 +117,6 @@ void Boundary::printX(const std::string& prefix) const {
 
 
 // version
-// $Id: Boundary.cc,v 1.36 2003/10/22 01:15:47 tan2 Exp $
+// $Id: Boundary.cc,v 1.37 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

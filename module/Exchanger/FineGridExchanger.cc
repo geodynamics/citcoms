@@ -1,20 +1,22 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <portinfo>
 #include <iostream>
-
 #include "AreaWeightedNormal.h"
 #include "Array2D.h"
-#include "Array2D.cc"
 #include "Boundary.h"
 #include "Mapping.h"
 #include "FineGridExchanger.h"
 #include "global_defs.h"
+#include "journal/journal.h"
+
 
 extern "C" {
     void check_bc_consistency(const All_variables *E);
@@ -25,61 +27,81 @@ extern "C" {
 FineGridExchanger::FineGridExchanger(const MPI_Comm comm,
 				     const MPI_Comm intercomm,
 				     const int leader,
-				     const int localLeader,
 				     const int remoteLeader,
 				     const All_variables *E):
-    Exchanger(comm, intercomm, leader, localLeader, remoteLeader, E),
+    Exchanger(comm, intercomm, leader, remoteLeader, E),
     fgmapping(NULL),
     awnormal(NULL)
 {
-    std::cout << "in FineGridExchanger::FineGridExchanger" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::FineGridExchanger" << journal::end;
 }
 
 
 FineGridExchanger::~FineGridExchanger() {
-    std::cout << "in FineGridExchanger::~FineGridExchanger" << std::endl;
-    delete fgmapping;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::~FineGridExchanger" << journal::end;
     delete awnormal;
+    delete fgmapping;
 }
 
 
 void FineGridExchanger::gather() {
-    std::cout << "in FineGridExchanger::gather" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::gather" << journal::end;
 }
 
 
 void FineGridExchanger::distribute() {
-    std::cout << "in FineGridExchanger::distribute" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::distribute" << journal::end;
 }
 
 
 void FineGridExchanger::interpretate() {
-    std::cout << "in FineGridExchanger::interpretate" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::interpretate" << journal::end;
 }
 
 
 void FineGridExchanger::mapBoundary() {
-    std::cout << "in FineGridExchanger::mapBoundary" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::mapBoundary" << journal::end;
 
-    // Assuming all boundary nodes are inside localLeader!
-    // assumption will be relaxed in future
-    if (rank == leader) {
-	createMapping();
-	createDataArrays();
-    }
+    createMapping();
+    createDataArrays();
+}
+
+
+void FineGridExchanger::createBoundary() {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::createBoundary" << journal::end;
+
+    boundary = new Boundary(E);
 }
 
 
 void FineGridExchanger::createMapping() {
+    // init boundary->X and fgmapping
     fgmapping = new FineGridMapping(boundary, E, comm, rank, leader);
-    mapping = fgmapping;
     awnormal = new AreaWeightedNormal(boundary, E, fgmapping);
+    mapping = fgmapping;
 }
 
 
 void FineGridExchanger::createDataArrays() {
-    std::cout << "in FineGridExchanger::createDataArrays" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::createDataArrays" << journal::end;
 
+    localV.resize(fgmapping->size());
     if (rank == leader) {
 	incomingV.resize(boundary->size());
 	old_incomingV.resize(boundary->size());
@@ -87,20 +109,12 @@ void FineGridExchanger::createDataArrays() {
 }
 
 
-void FineGridExchanger::createBoundary() {
-    std::cout << "in FineGridExchanger::createBoundary" << std::endl;
-
-    if (rank == leader) {
-	boundary = new Boundary(E);
-    }
-}
-
-
 void FineGridExchanger::sendBoundary() {
-    std::cout << "in FineGridExchanger::sendBoundary"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::sendBoundary"
+	  << "  rank = " << rank
+	  << "  receiver = "<< remoteLeader << journal::end;
 
     if (rank == leader)
 	boundary->send(intercomm, remoteLeader);
@@ -108,7 +122,9 @@ void FineGridExchanger::sendBoundary() {
 
 
 void FineGridExchanger::setBCFlag() {
-    std::cout << "in FineGridExchanger::setBCFlag" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::setBCFlag" << journal::end;
 
     // Because CitcomS is defaulted to have reflecting side BC,
     // here we should change to velocity BC.
@@ -137,7 +153,9 @@ void FineGridExchanger::setBCFlag() {
 
 
 void FineGridExchanger::imposeConstraint(){
-    std::cout << "in FineGridExchanger::imposeConstraint" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::imposeConstraint" << journal::end;
 
     if(rank == leader) {
 	awnormal->imposeConstraint(incomingV);
@@ -146,7 +164,12 @@ void FineGridExchanger::imposeConstraint(){
 
 
 void FineGridExchanger::imposeBC() {
-    std::cout << "in FineGridExchanger::imposeBC" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in FineGridExchanger::imposeBC" << journal::end;
+
+    journal::debug_t debugBC("imposeBC");
+    debugBC << journal::loc(__HERE__);
 
     double N1, N2;
 
@@ -166,16 +189,17 @@ void FineGridExchanger::imposeBC() {
  		for(int d=0; d<dim; d++)
  		    E->sphere.cap[m].VB[d+1][n] = N1 * old_incomingV[d][i]
  		                                + N2 * incomingV[d][i];
-//                 std::cout << E->sphere.cap[m].VB[1][n] << " "
-// 			  << E->sphere.cap[m].VB[2][n] << " "
-// 			  <<  E->sphere.cap[m].VB[3][n] << std::endl;
+		debugBC << E->sphere.cap[m].VB[1][n] << " "
+			<< E->sphere.cap[m].VB[2][n] << " "
+			<<  E->sphere.cap[m].VB[3][n] << journal::newline;
 	    }
 	}
     }
+    debugBC << journal::end;
 }
 
 
 // version
-// $Id: FineGridExchanger.cc,v 1.26 2003/10/20 17:13:08 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.27 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

@@ -24,7 +24,6 @@ public:
     FineGridExchanger(const MPI_Comm comm,
 		      const MPI_Comm intercomm,
 		      const int leader,
-		      const int localLeader,
 		      const int remoteLeader,
 		      const All_variables *E);
     virtual ~FineGridExchanger();
@@ -49,7 +48,7 @@ private:
 #endif
 
 // version
-// $Id: FineGridExchanger.h,v 1.16 2003/10/20 17:13:08 tan2 Exp $
+// $Id: FineGridExchanger.h,v 1.17 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file
 

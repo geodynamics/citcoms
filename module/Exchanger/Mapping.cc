@@ -1,15 +1,17 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <portinfo>
 #include <iostream>
 #include <cmath>
 #include "global_defs.h"
-#include "Array2D.cc"
+#include "journal/journal.h"
 #include "Boundary.h"
 #include "Mapping.h"
 
@@ -52,9 +54,9 @@ void Mapping::sendBid2proc(const MPI_Comm comm,
 	for (int n=0; n<size_; n++)
 	    if (bid2proc_[0][n] == nproc) { // nproc is an invalid rank
 		printBid2proc();
-		const std::string msg = "Unmapped boundary node";
-		std::cerr << msg << std::endl;
-		throw msg;
+
+		journal::firewall_t firewall("Mapping");
+		firewall << "Unmapped boundary node" << journal::end;
 	    }
 
 	printBid2proc();
@@ -70,6 +72,11 @@ void Mapping::resize(const int n) {
 
     bid2proc_.resize(n);
     size_ = n;
+}
+
+
+void Mapping::shrinksize() {
+    bid2proc_.shrink();
 }
 
 
@@ -97,7 +104,7 @@ CoarseGridMapping::CoarseGridMapping(const Boundary* boundary,
 
 
 void CoarseGridMapping::printBid2elem(const std::string& prefix) const {
-    bid2elem_.print(prefix + " elem");
+    bid2elem_.print(prefix + "  elem");
 }
 
 
@@ -107,6 +114,13 @@ void CoarseGridMapping::resize(const int n) {
     bid2elem_.resize(n);
     shape_.resize(8*n);
     Mapping::resize(n);
+}
+
+
+void CoarseGridMapping::shrinksize() {
+    bid2elem_.shrink();
+    shape_.shrink();
+    Mapping::shrinksize();
 }
 
 
@@ -197,17 +211,22 @@ void CoarseGridMapping::findBoundaryElements(const Boundary* boundary,
                     det[2] = TetrahedronVolume(x1,x4,x2,xt);
                     det[3] = TetrahedronVolume(x1,x2,x3,xt);
                     if(dett < 0) {
-			std::cout << " node " << i
-				  << " " << xt[0]
-				  << " " << xt[1]
-				  << " " << xt[2] << std::endl;
+			journal::firewall_t firewall("Mapping");
+			firewall << journal::loc(__HERE__)
+				 << "Determinant evaluation is wrong"
+				 << journal::newline
+				 << " node " << i
+				 << " " << xt[0]
+				 << " " << xt[1]
+				 << " " << xt[2] 
+				 << journal::newline;
 			for(int j=0; j<8; j++)
-                            std::cout << xc[j*3]
-				      << " " << xc[j*3+1]
-				      << " " << xc[j*3+2] << std::endl;
-                        const std::string msg = "Determinant evaluation is wrong ";
-			std::cerr << msg << std::endl;
-			throw msg;
+                            firewall << xc[j*3]
+				     << " " << xc[j*3+1]
+				     << " " << xc[j*3+2]
+				     << journal::newline;
+
+			firewall << journal::end;
                     }
 
 		    if (det[0] < -1.e-10 ||
@@ -262,14 +281,17 @@ void CoarseGridMapping::selfTest(const Boundary* boundary,
         if(norm > 1.e-10) {
             double tshape = 0.0;
             for(int j=0; j<8; j++) tshape += shape_[0][i*8+j];
-            std::cout << "node #" << i << " tshape = " << tshape <<std::endl;
-            std::cout << xi[0] << " " << xt[0] << " "
-		      << xi[1] << " " << xt[1] << " "
-		      << xi[2] << " " << xt[2] << " "
-		      << " norm = " << norm << std::endl;
-            const std::string msg = "bid2elem interpolation functions are wrong ";
-	    std::cerr << msg << std::endl;
-	    throw msg;
+
+	    journal::firewall_t firewall("Mapping");
+            firewall << journal::loc(__HERE__)
+		     << "node #" << i << " tshape = " << tshape 
+		     << journal::newline
+		     << xi[0] << " " << xt[0] << " "
+		     << xi[1] << " " << xt[1] << " "
+		     << xi[2] << " " << xt[2] << " "
+		     << " norm = " << norm << journal::newline
+		     << "bid2elem interpolation functions are wrong" 
+		     << journal::end;
         }
     }
 }
@@ -301,7 +323,7 @@ double CoarseGridMapping::det3_sub(double *x1, double *x2, double *x3) const
 
 
 void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
-                                            const All_variables* E) {
+					  const All_variables* E) {
 // Here it is assumed that Boundary is the bounday of the fine mesh
 // E is the All variables corresponding to the Coaese Grid
 
@@ -348,11 +370,12 @@ void CoarseGridMapping::FindInteriorNodes(const Boundary* boundary,
                         n++;
                     }                    
                 }
-    if(n!=interiornodes)std::cout << " error in CoarseGridMapping::findinteriornodes "<<std::endl;
-    return;    
+
+    if(n != interiornodes) {
+	journal::firewall_t firewall("Mapping");
+	firewall << "error in CoarseGridMapping::findinteriornodes" << journal::end;
+    }
 }
-
-
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
@@ -380,6 +403,12 @@ void FineGridMapping::resize(const int n) {
 
     bid2gid_.resize(n);
     Mapping::resize(n);
+}
+
+
+void FineGridMapping::shrinksize() {
+    bid2gid_.shrink();
+    Mapping::shrinksize();
 }
 
 
@@ -474,15 +503,14 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 	    boundary->resize(nodes);
 	}
 	else {
-	    const std::string msg = " nodes > size ";
-	    std::cerr << msg << std::endl;
-	    throw msg;
+	    journal::firewall_t firewall("Mapping");
+	    firewall << "nodes > size" << journal::end;
 	}
     }
 }
 
 
 // version
-// $Id: Mapping.cc,v 1.6 2003/10/23 19:06:24 puru Exp $
+// $Id: Mapping.cc,v 1.7 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

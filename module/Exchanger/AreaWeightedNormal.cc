@@ -1,9 +1,11 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <portinfo>
 #include <cmath>
@@ -12,6 +14,7 @@
 #include "Boundary.h"
 #include "Mapping.h"
 #include "global_defs.h"
+#include "journal/journal.h"
 #include "AreaWeightedNormal.h"
 
 
@@ -36,15 +39,20 @@ AreaWeightedNormal::~AreaWeightedNormal() {
 
 
 void AreaWeightedNormal::imposeConstraint(Velo& V) const {
+    journal::debug_t debug("Exchanger");
 
     double outflow = computeOutflow(V);
-    std::cout << " Net outflow before boundary velocity correction " << outflow << std::endl;
+    debug << journal::loc(__HERE__)
+	  << "Net outflow before boundary velocity correction " 
+	  << outflow << journal::end;
 
     if (fabs(outflow) > toleranceOutflow_) {
 	reduceOutflow(V, outflow);
 
 	outflow = computeOutflow(V);
-	std::cout << " Net outflow after boundary velocity correction (SHOULD BE ZERO !) " << outflow << std::endl;
+	debug << journal::loc(__HERE__)
+	      << "Net outflow after boundary velocity correction (SHOULD BE ZERO !) "
+	      << outflow << journal::end;
     }
 }
 
@@ -95,10 +103,15 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary* boundary,
 		double xc[12], normal[dim_];
 		for(int j=0; j<4; j++) {
 		    int lnode = bnodes[n*nodesPerElement+facenodes[i*4+j]];
-		    if(lnode >= boundary->size())
-			std::cout <<" lnode = " << lnode
-				  << " size " << boundary->size()
-				  << std::endl;
+
+		    if(lnode >= boundary->size()) {
+			journal::firewall_t firewall("Exchanger");
+			firewall << journal::loc(__HERE__)
+				 << " lnode = " << lnode
+				 << " size " << boundary->size()
+				 << journal::end;
+		    }
+
 		    for(int l=0; l<dim_; l++)
 			xc[j*dim_+l] = boundary->X(l,lnode);
 		}
@@ -170,6 +183,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, const double outflow) const {
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.2 2003/10/22 20:33:51 ces74 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.3 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file

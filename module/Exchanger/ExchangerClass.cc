@@ -1,47 +1,53 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <portinfo>
-#include <iostream>
-#include <fstream>
 #include <cmath>
 #include "Array2D.h"
-#include "Array2D.cc"
 #include "Boundary.h"
 #include "global_defs.h"
+#include "journal/journal.h"
 #include "ExchangerClass.h"
 
 
 Exchanger::Exchanger(const MPI_Comm communicator,
 		     const MPI_Comm icomm,
 		     const int leaderRank,
-		     const int local,
 		     const int remote,
 		     const All_variables *e):
     comm(communicator),
     intercomm(icomm),
     leader(leaderRank),
-    localLeader(local),
     remoteLeader(remote),
     E(e),
-    boundary(NULL) {
-
+    boundary(NULL)
+{
     MPI_Comm_rank(comm, const_cast<int*>(&rank));
     fge_t = cge_t = 0;
 }
 
 
 Exchanger::~Exchanger() {
-    std::cout << "in Exchanger::~Exchanger" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::~Exchanger" << journal::end;
 }
 
 
 void Exchanger::initTemperature() {
-    std::cout << "in Exchanger::initTemperature" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::initTemperature" << journal::end;
+
+    journal::debug_t debugInitT("initTemperature");
+    debugInitT << journal::loc(__HERE__);
+
     // put a hot blob in the center of fine grid mesh and T=0 elsewhere
 
     // center of fine grid mesh
@@ -83,23 +89,25 @@ void Exchanger::initTemperature() {
 		    else
 			E->T[m][node] = 0;
 
-// 		    if (rank == leader) {
-// 			std::cout << "(theta,fi,r,T) = "
-// 				  << theta << "  "
-// 				  << fi << "  "
-// 				  << r << "  "
-// 				  << E->T[m][node] << std::endl;
-// 		    }
+		    if (rank == leader) {
+			debugInitT << "(theta,fi,r,T) = "
+			      << theta << "  "
+			      << fi << "  "
+			      << r << "  "
+			      << E->T[m][node] << journal::newline;
+		    }
 		}
+    debugInitT << journal::end;
 }
 
 
 void Exchanger::sendTemperature() {
-    std::cout << "in Exchanger::sendTemperature"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::sendTemperature"
+	  << "  rank = " << rank
+	  << "  receiver = "<< remoteLeader
+	  << journal::end;
 
     if(rank == leader) {
 	outgoingT.send(intercomm, remoteLeader);
@@ -108,11 +116,12 @@ void Exchanger::sendTemperature() {
 
 
 void Exchanger::receiveTemperature() {
-    std::cout << "in Exchanger::receiveTemperature"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::receiveTemperature"
+	  << "  rank = " << rank
+	  << "  receiver = "<< remoteLeader
+	  << journal::end;
 
     if(rank == leader) {
 	incomingT.receive(intercomm, remoteLeader);
@@ -121,7 +130,9 @@ void Exchanger::receiveTemperature() {
 
 
 void Exchanger::sendVelocities() {
-    std::cout << "in Exchanger::sendVelocities" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::sendVelocities" << journal::end;
 
     if(rank == leader) {
 	outgoingV.send(intercomm, remoteLeader);
@@ -130,7 +141,9 @@ void Exchanger::sendVelocities() {
 
 
 void Exchanger::receiveVelocities() {
-    std::cout << "in Exchanger::receiveVelocities" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::receiveVelocities" << journal::end;
 
     if(rank == leader) {
 	// store previously received V
@@ -149,16 +162,19 @@ void Exchanger::storeTimestep(const double fge_time, const double cge_time) {
 
 
 double Exchanger::exchangeTimestep(const double dt) const {
-    std::cout << "in Exchanger::exchangeTimestep"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::exchangeTimestep"
+	  << "  rank = " << rank
+	  << "  receiver = "<< remoteLeader << journal::end;
     return exchangeDouble(dt, 1);
 }
 
 
 int Exchanger::exchangeSignal(const int sent) const {
-    std::cout << "in Exchanger::exchangeSignal" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in Exchanger::exchangeSignal" << journal::end;
     return exchangeInt(sent, 1);
 }
 
@@ -222,7 +238,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.36 2003/10/20 17:13:08 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.37 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file
 

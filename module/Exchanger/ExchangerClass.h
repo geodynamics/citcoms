@@ -25,7 +25,6 @@ public:
     Exchanger(const MPI_Comm comm,
 	      const MPI_Comm intercomm,
 	      const int leader,
-	      const int localLeader,
 	      const int remoteLeader,
 	      const All_variables *E);
     virtual ~Exchanger();
@@ -56,8 +55,6 @@ protected:
 
     const int rank;            // proc. rank in comm
     const int leader;          // leader rank (in comm) of current solver
-
-    const int localLeader;     // leader rank (in intercomm) of current solver
     const int remoteLeader;    // leader rank (in intercomm) of another solver
 
     const All_variables *E;    // CitcomS data structure,
@@ -95,7 +92,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.31 2003/10/20 17:13:08 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.32 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file
 

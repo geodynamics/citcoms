@@ -1,43 +1,46 @@
 // -*- C++ -*-
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 //  <LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
 
 #include <portinfo>
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-
 #include "Array2D.h"
-#include "Array2D.cc"
 #include "Boundary.h"
 #include "Mapping.h"
 #include "CoarseGridExchanger.h"
 #include "global_defs.h"
+#include "journal/journal.h"
 
 
 CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm comm,
 					 const MPI_Comm intercomm,
 					 const int leader,
-					 const int localLeader,
 					 const int remoteLeader,
 					 const All_variables *E):
-    Exchanger(comm, intercomm, leader, localLeader, remoteLeader, E),
+    Exchanger(comm, intercomm, leader, remoteLeader, E),
     cgmapping(NULL)
 {
-    std::cout << "in CoarseGridExchanger::CoarseGridExchanger" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::CoarseGridExchanger" << journal::end;
 }
 
 CoarseGridExchanger::~CoarseGridExchanger() {
-    std::cout << "in CoarseGridExchanger::~CoarseGridExchanger" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::~CoarseGridExchanger" << journal::end;
     delete cgmapping;
 }
 
 
 void CoarseGridExchanger::gather() {
-    std::cout << "in CoarseGridExchanger::gather" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::gather" << journal::end;
 
     interpretate();
 
@@ -64,13 +67,17 @@ void CoarseGridExchanger::gather() {
 
 
 void CoarseGridExchanger::distribute() {
-    std::cout << "in CoarseGridExchanger::distribute" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::distribute" << journal::end;
 }
 
 
 
 void CoarseGridExchanger::interpretate() {
-    std::cout << "in CoarseGridExchanger::interpretate" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::interpretate" << journal::end;
 
     // interpolate velocity field to boundary nodes
     const int size = cgmapping->size();
@@ -95,7 +102,9 @@ void CoarseGridExchanger::interpretate() {
 
 
 void CoarseGridExchanger::mapBoundary() {
-    std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::mapBoundary" << journal::end;
 
     createMapping();
     createDataArrays();
@@ -109,7 +118,9 @@ void CoarseGridExchanger::createMapping() {
 
 
 void CoarseGridExchanger::createDataArrays() {
-    std::cout << "in CoarseGridExchanger::createDataArrays" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::createDataArrays" << journal::end;
 
     localV.resize(cgmapping->size());
     if (rank == leader)
@@ -118,36 +129,39 @@ void CoarseGridExchanger::createDataArrays() {
 
 
 void CoarseGridExchanger::receiveBoundary() {
-    std::cout << "in CoarseGridExchanger::receiveBoundary"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  sender = "<< remoteLeader << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::receiveBoundary"
+	  << "  rank = " << rank
+	  << "  sender = "<< remoteLeader << journal::end;
 
     boundary = new Boundary;
     if (rank == leader)
 	boundary->receive(intercomm, remoteLeader);
 
-    // Broadcast info received by localLeader to the other procs
+    // Broadcast info received by leader to the other procs
     // in the Coarse communicator.
     boundary->broadcast(comm, leader);
 }
 
 
 void CoarseGridExchanger::interpolateTemperature() {
-  std::cout << "in CoarseGridExchanger::interpolateTemperature" << std::endl;
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in CoarseGridExchanger::interpolateTemperature" << journal::end;
 
   int n1,n2,node;
   for(int i=0;i<cgmapping->size();i++) {
       n1 = cgmapping->bid2elem(i);
       n2 = cgmapping->bid2proc(i);
 
-      //outgoing.T[i] = 0;
+      outgoingT[0][i] = 0;
       if(n1!=0) {
 	for(int mm=1;mm<=E->sphere.caps_per_proc;mm++)
 	  for(int k=0; k< 8 ;k++)
 	    {
 	      node=E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-	      //outgoing.T[i]+=boundary->shape[k]*E->T[mm][node];
+	      outgoingT[0][i] += cgmapping->shape(k) * E->T[mm][node];
 	    }
       }
     }
@@ -163,6 +177,6 @@ void CoarseGridExchanger::gatherToOutgoingV(Velo& V, int sender) {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.32 2003/10/20 17:13:08 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.33 2003/10/24 04:51:53 tan2 Exp $
 
 // End of file
