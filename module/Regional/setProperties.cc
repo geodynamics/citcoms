@@ -96,6 +96,8 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
     if (not m)
 	std::cout << "#BC.inventory:" << std::endl;
 
+    getScalarProperty(properties, "side_sbcs", E->control.side_sbcs, m);
+
     getScalarProperty(properties, "topvbc", E->mesh.topvbc, m);
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval, m);
     getScalarProperty(properties, "topvbyval", E->control.VBYtopval, m);
@@ -760,6 +762,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.24 2004/02/05 20:17:51 tan2 Exp $
+// $Id: setProperties.cc,v 1.25 2004/04/16 01:17:24 tan2 Exp $
 
 // End of file
