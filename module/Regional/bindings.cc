@@ -1,11 +1,11 @@
 // -*- C++ -*-
-// 
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+//
 //  <LicenseText>
-// 
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+//
 
 #include <portinfo>
 #include <Python.h>
@@ -13,14 +13,14 @@
 #include "bindings.h"
 
 #include "misc.h"          // miscellaneous methods
-#include "output_bindings.h"
+#include "outputs.h"
 
 // the method table
 
 struct PyMethodDef pyRegional_methods[] = {
 
     // dummy entry for testing
-    {pyRegional_copyright__name__, 
+    {pyRegional_copyright__name__,
      pyRegional_copyright,
      METH_VARARGS,
      pyRegional_copyright__doc__},
@@ -30,12 +30,12 @@ struct PyMethodDef pyRegional_methods[] = {
     // This section is for testing or temporatory implementation
     //////////////////////////////////////////////////////////////////////////
 
-    {pyRegional_return1_test__name__, 
+    {pyRegional_return1_test__name__,
      pyRegional_return1_test,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_return1_test__doc__},
 
-    {pyRegional_CPU_time__name__, 
+    {pyRegional_CPU_time__name__,
      pyRegional_CPU_time,
      METH_VARARGS,
      pyRegional_CPU_time__doc__},
@@ -87,31 +87,31 @@ struct PyMethodDef pyRegional_methods[] = {
 
     {pyRegional_general_stokes_solver_init__name__,
      pyRegional_general_stokes_solver_init,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_general_stokes_solver_init__doc__},
 
-    {pyRegional_general_stokes_solver_fini__name__, 
+    {pyRegional_general_stokes_solver_fini__name__,
      pyRegional_general_stokes_solver_fini,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_general_stokes_solver_fini__doc__},
 
-    {pyRegional_general_stokes_solver_update_velo__name__, 
+    {pyRegional_general_stokes_solver_update_velo__name__,
      pyRegional_general_stokes_solver_update_velo,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_general_stokes_solver_update_velo__doc__},
 
-    {pyRegional_general_stokes_solver_Unorm__name__, 
+    {pyRegional_general_stokes_solver_Unorm__name__,
      pyRegional_general_stokes_solver_Unorm,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_general_stokes_solver_Unorm__doc__},
 
-    {pyRegional_general_stokes_solver_log__name__, 
+    {pyRegional_general_stokes_solver_log__name__,
      pyRegional_general_stokes_solver_log,
-     METH_VARARGS, 
+     METH_VARARGS,
      pyRegional_general_stokes_solver_log__doc__},
 
 
-    // from output.h
+    // from outputs.h
 
     {pyRegional_output_init__name__,
      pyRegional_output_init,
@@ -122,11 +122,6 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_output_close,
      METH_VARARGS,
      pyRegional_output_close__doc__},
-
-    {pyRegional_output_coord_header__name__,
-     pyRegional_output_coord_header,
-     METH_VARARGS,
-     pyRegional_output_coord_header__doc__},
 
     {pyRegional_output_coord__name__,
      pyRegional_output_coord,
@@ -148,6 +143,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.6 2003/05/21 21:28:00 tan2 Exp $
+// $Id: bindings.cc,v 1.7 2003/05/22 18:21:38 tan2 Exp $
 
 // End of file
