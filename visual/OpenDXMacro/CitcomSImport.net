@@ -1,19 +1,22 @@
 //
-// time: Tue May 11 11:04:19 2004
+// time: Fri Jun 25 11:00:44 2004
 //
 // version: 3.2.0 (format), 4.3.0 (DX)
 //
 //
 //
-// macro reference (indirect): RTFtoXYZ /home/tan2/OpenDXMacro/RTFtoXYZ.net
+// macro reference (indirect): RTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/RTFtoXYZ.net
 //
-// macro reference (direct): CitcomSTemperature /home/tan2/OpenDXMacro/CitcomSTemperature.net
+// macro reference (direct): CitcomSTemperature /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSTemperature.net
 include "CitcomSTemperature.net"
 //
-// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/OpenDXMacro/VelocityRTFtoXYZ.net
+// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/VelocityRTFtoXYZ.net
 //
-// macro reference (direct): CitcomSVelocity /home/tan2/OpenDXMacro/CitcomSVelocity.net
+// macro reference (direct): CitcomSVelocity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSVelocity.net
 include "CitcomSVelocity.net"
+//
+// macro reference (direct): CitcomSViscosity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSViscosity.net
+include "CitcomSViscosity.net"
 //
 // Begin MDF
 // MODULE CitcomSImport
@@ -23,8 +26,9 @@ include "CitcomSVelocity.net"
 // INPUT reduced; scalar list or vector list; (no default);  
 // OUTPUT velocity; field;  
 // OUTPUT temperature; field;  
+// OUTPUT viscosity; field; 
 // End MDF
-// workspace: width = 500, height = 419
+// workspace: width = 495, height = 419
 // layout: snap = 0, width = 50, height = 50, align = NN
 //
 macro CitcomSImport(
@@ -33,6 +37,7 @@ macro CitcomSImport(
 ) -> (
  velocity
 ,temperature
+,viscosity
 ) {
     // 
     // node Input[1]: x = 120, y = 0, inputs = 0, label = Input
@@ -73,6 +78,13 @@ CitcomSImport_CitcomSVelocity_1_out_1 =
     CitcomSImport_Input_2_out_1
     ) [instance: 1, cache: 1];
     // 
+    // node CitcomSViscosity[2]: x = 366, y = 206, inputs = 1, label = CitcomSViscosity
+    //
+CitcomSImport_CitcomSViscosity_2_out_1 = 
+    CitcomSViscosity(
+    CitcomSImport_Import_1_out_1
+    ) [instance: 2, cache: 1];
+    // 
     // node Output[1]: x = 230, y = 351, inputs = 1, label = Output
     // parameter: position = 2, name = 'temperature', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
     //
@@ -82,6 +94,11 @@ temperature = CitcomSImport_CitcomSTemperature_1_out_1;
     // parameter: position = 1, name = 'velocity', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
     //
 velocity = CitcomSImport_CitcomSVelocity_1_out_1;
+    // 
+    // node Output[3]: x = 403, y = 352, inputs = 1, label = Output
+    // parameter: position = 3, name = 'viscosity', value = '(NULL)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+viscosity = CitcomSImport_CitcomSViscosity_2_out_1;
 // network: end of macro body
 }
 CitcomSImport_Input_1_out_1 = NULL;
@@ -89,3 +106,4 @@ CitcomSImport_Import_1_out_1 = NULL;
 CitcomSImport_CitcomSTemperature_1_out_1 = NULL;
 CitcomSImport_Input_2_out_1 = NULL;
 CitcomSImport_CitcomSVelocity_1_out_1 = NULL;
+CitcomSImport_CitcomSViscosity_2_out_1 = NULL;
