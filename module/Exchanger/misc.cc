@@ -65,12 +65,12 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
     E->mesh.noy = 4;
     E->mesh.noz = 3;
 
-    E->control.theta_max = 1.9;
-    E->control.theta_min = 1.1;
-    E->control.fi_max = 1.9;
-    E->control.fi_min = 1.1;
+    E->control.theta_max = 2.1;
+    E->control.theta_min = 0.9;
+    E->control.fi_max = 2.1;
+    E->control.fi_min = 0.9;
     E->sphere.ro = 2.0;
-    E->sphere.ri = 1.2;
+    E->sphere.ri = 0.9;
 
     commonE(E);
 
@@ -268,6 +268,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.17 2003/09/29 18:03:35 tan2 Exp $
+// $Id: misc.cc,v 1.18 2003/09/29 22:31:35 puru Exp $
 
 // End of file

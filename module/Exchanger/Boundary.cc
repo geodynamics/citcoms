@@ -155,23 +155,21 @@ void Boundary::init(const All_variables *E) {
 
 void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
 
-    std::cout << "\n\nin Boundary::mapCoarseGrid\n\n" << std::endl;
-    
+    std::cout << "\n \n in Boundary::mapCoarseGrid \n \n" << std::endl;
     int ind,n,in;    
-    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xmin[3],xmax[3],tshape;
+    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3];
     int nsub[]={0, 2, 3, 7,
 		0, 1, 2, 5, 
 		4, 7, 5, 0, 
 		5, 7, 6, 2, 
 		5, 7, 2, 0};
-  
     for(int i=0; i<size; i++)
     {
         
 	bid2proc[i] = E->parallel.nproc;  // nproc is always an illegal rank
         bid2elem[i] = 0;
     }
-    
+	   
     for(int i=0; i< size; i++) {
 	for(int j=0; j< dim; j++)xt[j]=X[j][i];
 	// loop over 5 sub tets in a brick element
@@ -186,25 +184,13 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                     }
 		}
                 in=0;
-                for(int k=0;k<3;k++)
-                {                    
-                    xmin[k]=1.e27;
-                    xmax[k]=-1.e27;
-                }
-                
                 for(int j=0;j<8;j++)
                 {                  
-                    for(int k=0;k<3;k++)
-                    {                        
-                        if(xc[j*3+k] > xmin[k])xmin[k]=xc[j*3+k];
-                        if(xc[j*3+k] > xmax[k])xmax[k]=xc[j*3+k];
-                    }
+                      if((xc[j*3]>=theta_min)&&(xc[j*3]<=theta_max)
+                   	&&(xc[j*3+1]>=fi_min)&&(xc[j*3+1]<=fi_max)
+                   	&&(xc[j*3+2]>=ri)&&(xc[j*3+2]<=ro))in=1;                
                 }
-                if((xt[0]>=xmin[0])&&(xt[0]<=xmax[0])
-                   &&(xt[1]>=xmin[1])&&(xt[1]<=xmax[1])
-                   &&(xt[0]>=xmin[2])&&(xt[0]<=xmax[2]))in=1;                
                 if(in==0)continue;
-                
                 for(int k=0; k < 5; k++) {
                     for(int m=0; m < dim; m++) {
                         x1[m]=xc[nsub[k*4]*dim+m];
@@ -217,25 +203,34 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
                     det[1]=Tetrahedronvolume(x3,x4,x1,xt);
                     det[2]=Tetrahedronvolume(x1,x4,x2,xt);
                     det[3]=Tetrahedronvolume(x1,x2,x3,xt);
-                    if(dett < 0) std::cout << " Determinent evaluation is wrong " << in << std::endl;
-                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
+                    if(dett < 0)
+                    {
+                        std::cout << " Determinant evaluation is wrong " << in << std::endl;
+		       std::cout << " node " << i << " " << xt[0] << " " << xt[1] << " " << xt[2] << std::endl;				 
+                       for(int j=0;j<8;j++)
+                            std::cout << xc[j*3] <<" "<<xc[j*3+1] <<" " << xc[j*3+2] << std::endl;
+                    }
+                    
+                    if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;
+//                    std::cout << "node" << i <<"Found the  element "<< n+1 <<std::endl;                    
+		    	
+//		       std::cout << " node " << i << " " << xt[0] << " " << xt[1] << " " << xt[2] << std::endl;				 
+//                       for(int j=0;j<8;j++)
+//                            std::cout << xc[j*3] <<" "<<xc[j*3+1] <<" " << xc[j*3+2] << std::endl;
                     ind=1;
                     bid2elem[i]=n+1;
                     bid2proc[i]=rank;
-		    //cout << "i = " << i << "elem = " << n+1 << " " << "rank = " << rank << endl;
+                    for(int j=0;j<8;j++)shape[i*8+j]=0.0;
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
                     shape[i*8+nsub[k*4+3]]=det[3]/dett;
-                    tshape=0.0;
-                    for(int j=0;j<8;j++)tshape+=shape[i*8+j];
-                    if(fabs(tshape-1.) > 1.e-10)std::cout << "shape sum != 1."
-                                                          << std::endl;                    
                     break;
                 }                
                 if(ind) break;          
             }
-        if(bid2elem[i]==0) std::cout << "node" << i <<"did not find element "<< std::endl;
+        if(bid2elem[i]==0) std::cout << "node" << i <<"did not find element "
+                                     <<xt[0]<<" " << xt[1] << " " << xt[2] << std::endl;
         
     }
     //printBid2proc();
@@ -531,6 +526,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.27 2003/09/29 18:34:23 puru Exp $
+// $Id: Boundary.cc,v 1.28 2003/09/29 22:31:35 puru Exp $
 
 // End of file
