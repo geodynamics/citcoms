@@ -15,14 +15,13 @@ using namespace std;
 #include "CoarseGridExchanger.h"
 #include "global_defs.h"
 
-CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm communicator,
-					 const MPI_Comm icomm,
-					 const int localrank,
-					 const int interrank,
-					 const int local,
-					 const int remote,
-					 const All_variables *e):
-    Exchanger(communicator, icomm, localrank, interrank, local, remote, e)
+CoarseGridExchanger::CoarseGridExchanger(const MPI_Comm comm,
+					 const MPI_Comm intercomm,
+					 const int leaderRank,
+					 const int localLeader,
+					 const int remoteLeader,
+					 const All_variables *E):
+    Exchanger(comm, intercomm, leaderRank, localLeader, remoteLeader, E)
 {
     std::cout << "in CoarseGridExchanger::CoarseGridExchanger" << std::endl;
 }
@@ -146,12 +145,13 @@ void CoarseGridExchanger::receiveBoundary() {
 
 void CoarseGridExchanger::mapBoundary() {
     std::cout << "in CoarseGridExchanger::mapBoundary" << std::endl;
-    boundary->mapCoarseGrid(E);
+    boundary->mapCoarseGrid(E, lrank);
+    boundary->sendBid2proc(comm, lrank, leaderRank);
 }
 
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.22 2003/09/27 17:12:52 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.23 2003/09/27 20:30:55 tan2 Exp $
 
 // End of file

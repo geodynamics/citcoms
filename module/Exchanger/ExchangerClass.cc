@@ -14,20 +14,20 @@
 
 Exchanger::Exchanger(const MPI_Comm communicator,
 		     const MPI_Comm icomm,
-		     const int localrank,
-		     const int interrank,
+		     const int leader,
 		     const int local,
 		     const int remote,
 		     const All_variables *e):
     comm(communicator),
     intercomm(icomm),
-    lrank(localrank),
-    rank(interrank),
+    leaderRank(leader),
     localLeader(local),
     remoteLeader(remote),
     E(e),
     boundary(NULL) {
 
+    MPI_Comm_rank(comm, const_cast<int*>(&lrank));
+    MPI_Comm_rank(intercomm, const_cast<int*>(&rank));
 }
 
 
@@ -280,70 +280,41 @@ void Exchanger::receiveTemperature(void) {
     return;
 }
 
+
 void Exchanger::sendVelocities() {
-    std::cout << "in Exchanger::sendVelocities" 
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
+    std::cout << "in Exchanger::sendVelocities" << std::endl;
 
-//     outgoing.size=boundary->size;
-//     for(int i=0; i < boundary->dim; i++)
-//       {
-// 	outgoing.v[i] = new double[outgoing.size];
-//       }
-//     for(int j=0; j < boundary->size; j++)
-// 	{
-// 	  n=boundary->bid2gid[j];
-// 	  for(int i=0; i< boundary->dim; i++)
-// 	    {
-// 	      outgoing.v[i][j]=E->V[E->sphere.caps_per_proc][i][n];	 
-// 	    }
-// 	}
     if(rank == localLeader) {
-      MPI_Send(outgoing.v[0],outgoing.size,MPI_DOUBLE,remoteLeader,1,intercomm);
-      MPI_Send(outgoing.v[1],outgoing.size,MPI_DOUBLE,remoteLeader,2,intercomm);
-      MPI_Send(outgoing.v[2],outgoing.size,MPI_DOUBLE,remoteLeader,3,intercomm);
+	int tag = 0;
+	for(int i=0; i < boundary->dim; i++) {
+	    MPI_Send(outgoing.v[i], outgoing.size, MPI_DOUBLE,
+		     remoteLeader, tag, intercomm);
+	    tag ++;
+	}
     }
-
-    return;
 }
 
 
 void Exchanger::receiveVelocities() {
-    std::cout << "in Exchanger::receiveVelocities" 
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
-
-    MPI_Status status;
-    MPI_Request request;
-
-    int success,n;
-
-    incoming.size=boundary->size;
+    std::cout << "in Exchanger::receiveVelocities" << std::endl;
 
     if(rank == localLeader) {
-      MPI_Irecv(incoming.v[0],incoming.size,MPI_DOUBLE,remoteLeader,1,intercomm,&request);
-      MPI_Irecv(incoming.v[1],incoming.size,MPI_DOUBLE,remoteLeader,2,intercomm,&request);
-      MPI_Irecv(incoming.v[2],incoming.size,MPI_DOUBLE,remoteLeader,3,intercomm,&request);
-      std::cout << "Exchanger::receiveVelocities ===> Posted" << std::endl;
+	int tag = 0;
+	MPI_Status status;
+	for(int i=0; i < boundary->dim; i++) {
+	    MPI_Recv(incoming.v[i], incoming.size, MPI_DOUBLE,
+		     remoteLeader, tag, intercomm, &status);
+	    tag ++;
+	}
     }
 
-    // Test
-    MPI_Wait(&request,&status);
-    MPI_Test(&request,&success,&status);
-    if(success)
-      std::cout << "Velocity transfer Succeeded!!" << std::endl;
-    for(int j=0; j < boundary->size; j++)
-      {
-	n=boundary->bid2gid[j];
+    for(int j=0; j < boundary->size; j++) {
+	int n=boundary->bid2gid[j];
 	std::cout << "Velocities received" << std::endl;
 	std::cout << j << " " << n << "  " 
 		  << incoming.v[0][n] << incoming.v[1][n] << incoming.v[2][n] 
 		  << std::endl;
-      }
+    }
     // Don't forget to delete inoming.v
     return;
 }
@@ -418,7 +389,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.16 2003/09/27 17:12:52 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.17 2003/09/27 20:30:55 tan2 Exp $
 
 // End of file
 

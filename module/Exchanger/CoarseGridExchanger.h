@@ -16,10 +16,9 @@ class Boundary;
 class CoarseGridExchanger : public Exchanger {
 
 public:
-    CoarseGridExchanger(const MPI_Comm communicator,
+    CoarseGridExchanger(const MPI_Comm comm,
 			const MPI_Comm intercomm,
-			const int localrank,
-			const int interrank,
+			const int leaderRank,
 			const int localLeader,
 			const int remoteLeader,
 			const All_variables *E);
@@ -39,7 +38,7 @@ public:
 #endif
 
 // version
-// $Id: CoarseGridExchanger.h,v 1.11 2003/09/27 17:12:52 tan2 Exp $
+// $Id: CoarseGridExchanger.h,v 1.12 2003/09/27 20:30:55 tan2 Exp $
 
 // End of file
 
