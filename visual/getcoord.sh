@@ -19,18 +19,19 @@ fi
 cwd=`pwd`
 modeldir=$1
 modelname=$2
-proc=0
+nprocz=$3
+let proc=nprocz-1
 
-while [ "$3" ]
+while [ "$4" ]
 do
     cmd_copy="cp $modelname.coord.$proc $cwd"
-    rsh $3 "cd $modeldir; $cmd_copy"
+    rsh $4 "cd $modeldir; $cmd_copy"
     shift
-    let proc=proc+1
+    let proc=proc+nprocz
 done
 
 
 # version
-# $Id: getcoord.sh,v 1.1 2004/06/08 01:32:39 tan2 Exp $
+# $Id: getcoord.sh,v 1.2 2004/09/21 23:44:12 ces74 Exp $
 
 # End of file

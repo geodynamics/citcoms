@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     # generate a string of machine names
     nodes = ''
-    for n in range(0, totalnodes/nprocz, nprocz):
+    for n in range(nprocz-1, totalnodes, nprocz):
         nodes += '%s ' % nodelist[n].strip()
 
     # get coordinate, if necessary
@@ -62,7 +62,7 @@ if __name__ == '__main__':
         coord_exist &= os.path.exists(coord_file)
 
     if not coord_exist:
-        cmd = 'getcoord.sh %(modeldir)s %(modelname)s %(nodes)s' % vars()
+        cmd = 'getcoord.sh %(modeldir)s %(modelname)s %(nprocz)d %(nodes)s' % vars()
         print cmd
         os.system(cmd)
 
@@ -88,6 +88,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchsurf.py,v 1.2 2004/08/06 23:25:20 tan2 Exp $
+# $Id: batchsurf.py,v 1.3 2004/09/21 23:44:12 ces74 Exp $
 
 # End of file
