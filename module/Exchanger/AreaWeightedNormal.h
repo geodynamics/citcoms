@@ -23,8 +23,7 @@ class Boundary;
 class AreaWeightedNormal {
     const int size_;
     const double toleranceOutflow_;
-    double total_area_;
-    std::vector<double> nwght;
+    Exchanger::Array2D<double,Exchanger::DIM> nwght;
 
 public:
     AreaWeightedNormal(const MPI_Comm& comm,
@@ -42,11 +41,13 @@ public:
 private:
     void computeWeightedNormal(const Boundary& boundary,
 			       const All_variables* E);
-    void computeTotalArea(const MPI_Comm& comm,
-			  const Exchanger::Sink& sink);
+    double computeTotalArea(const MPI_Comm& comm,
+			  const Exchanger::Sink& sink) const;
+    void normalize(double total_area);
     double computeOutflow(const Velo& V,
 			  const MPI_Comm& comm,
 			  const Exchanger::Sink& sink) const;
+    inline int sign(double number) const;
     void reduceOutflow(Velo& V, double outflow,
 		       const Exchanger::Sink& sink) const;
 
@@ -56,7 +57,7 @@ private:
 #endif
 
 // version
-// $Id: AreaWeightedNormal.h,v 1.6 2004/05/11 18:35:24 tan2 Exp $
+// $Id: AreaWeightedNormal.h,v 1.7 2004/07/27 18:19:18 tan2 Exp $
 
 // End of file
 
