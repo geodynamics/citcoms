@@ -46,18 +46,6 @@ class Solver(BaseSolver):
         self.cpu_time = self.start_cpu_time
         self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
-        # if there is a coupler, initialize it
-        try:
-            application.inventory.coupler
-        except AttributeError:
-            pass
-        else:
-            self.myPlus = application.myPlus
-            self.remotePlus = application.remotePlus
-            self.exchanger = application.exchanger
-            self.coupler = application.inventory.coupler
-            self.coupler.initialize(self)
-
 	inv = self.inventory
         CitcomModule = self.CitcomModule
         all_variables = self.all_variables
@@ -77,6 +65,19 @@ class Solver(BaseSolver):
         CitcomModule.set_signal()
 
         self.setProperties()
+
+        # if there is a coupler, initialize it
+        try:
+            application.inventory.coupler
+        except AttributeError:
+            pass
+        else:
+            self.myPlus = application.myPlus
+            self.remotePlus = application.remotePlus
+            self.exchanger = application.exchanger
+            self.coupler = application.inventory.coupler
+            self.coupler.initialize(self)
+
         return
 
 
@@ -283,6 +284,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.34 2003/12/24 22:46:56 ces74 Exp $"
+__id__ = "$Id: Solver.py,v 1.35 2004/01/08 23:43:18 tan2 Exp $"
 
 # End of file
