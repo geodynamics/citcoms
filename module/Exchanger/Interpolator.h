@@ -35,8 +35,6 @@ public:
 		      const All_variables* E) const;
     void interpolateT(Array2D<double,1>& target,
 		      const All_variables* E) const;
-    void interpolateF(Array2D<double,DIM>& target,
-		      const All_variables* E) const;
 
 private:
     void init(const BoundedMesh& boundedMesh, const All_variables* E,
@@ -59,6 +57,6 @@ private:
 #endif
 
 // version
-// $Id: Interpolator.h,v 1.2 2003/11/24 21:03:34 ces74 Exp $
+// $Id: Interpolator.h,v 1.3 2003/11/28 22:32:35 ces74 Exp $
 
 // End of file
