@@ -1,11 +1,11 @@
 // -*- C++ -*-
-// 
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+//
 //  <LicenseText>
-// 
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+//
 
 #include <portinfo>
 #include <Python.h>
@@ -20,13 +20,13 @@ extern "C" {
 #include "citcom_init.h"
 #include "drive_solvers.h"
 #include "advection_diffusion.h"
-  
+
   double return1_test();
   void read_instructions(char*);
   double CPU_time0();
   void solve_constrained_flow_iterative(struct All_variables*);
   void get_system_viscosity(struct All_variables*, int, float**, float**);
-  
+
   void construct_stiffness_B_matrix(struct All_variables*);
   void velocities_conform_bcs(struct All_variables*, double **);
   void assemble_forces(struct All_variables*, int);
@@ -38,7 +38,7 @@ extern "C" {
 char pyRegional_copyright__doc__[] = "";
 char pyRegional_copyright__name__[] = "copyright";
 
-static char pyRegional_copyright_note[] = 
+static char pyRegional_copyright_note[] =
 "CitcomSRegional python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
@@ -71,7 +71,7 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 {
     char *filename;
 
-    if (!PyArg_ParseTuple(args, "s", &filename))
+    if (!PyArg_ParseTuple(args, "s:read_instructions", &filename))
         return NULL;
 
     read_instructions(filename);
@@ -127,8 +127,8 @@ PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
 {
     PyObject *Obj;
     MPI_Comm world;
-    
-    if (!PyArg_ParseTuple(args, "O", &Obj))
+
+    if (!PyArg_ParseTuple(args, "O:Citcom_Init", &Obj))
         return NULL;
 
 //     if (PyCObject_Check(Obj)) {
@@ -152,7 +152,7 @@ PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
     // if E is NULL, raise an exception here.
     if (E == NULL)
       return PyErr_NoMemory();
-      
+
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -253,7 +253,7 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
     double Udot_mag, dUdot_mag;
     int count;
 
-    if (!PyArg_ParseTuple(args, "ddi", &Udot_mag, &dUdot_mag, &count))
+    if (!PyArg_ParseTuple(args, "ddi:general_stokes_solver_log", &Udot_mag, &dUdot_mag, &count))
         return NULL;
 
     if(E->parallel.me==0){
@@ -261,7 +261,7 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 	fprintf(E->fp,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
 	fflush(E->fp);
     }
-    
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -273,6 +273,6 @@ PyObject * pyRegional_general_stokes_solver_log(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.13 2003/05/23 05:12:29 ces74 Exp $
+// $Id: misc.cc,v 1.14 2003/05/23 17:49:11 tan2 Exp $
 
 // End of file
