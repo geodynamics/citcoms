@@ -382,7 +382,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
      for(e=0;e<=neq;e++)
 	Au[m][e]=0.0;
 
-     u[m][neq+1]=u[m][neq]=0.0;
+     u[m][neq]=0.0;
 
      for(e=1;e<=nno;e++)     {
 

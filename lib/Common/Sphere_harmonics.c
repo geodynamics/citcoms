@@ -24,7 +24,7 @@ void set_sphere_harmonics(E)
   E->sphere.int_cap = (int *) malloc((E->sphere.nsf+1)*sizeof(int));
   E->sphere.int_ele = (int *) malloc((E->sphere.nsf+1)*sizeof(int));
 
-  E->sphere.radius=(float *) malloc((E->sphere.slab_layers+3)*sizeof(float));
+/*   E->sphere.radius=(float *) malloc((E->sphere.slab_layers+3)*sizeof(float)); */
 
    i=0;
    for (ll=0;ll<=E->sphere.llmax;ll++)
