@@ -12,6 +12,12 @@ from CitcomComponent import CitcomComponent
 class Param(CitcomComponent):
 
 
+    def __init__(self, name="param", facility="param"):
+        CitcomComponent.__init__(self, name, facility)
+        return
+
+
+
     def setProperties(self):
         self.CitcomModule.Param_set_properties(self.all_variables, self.inventory)
         return
@@ -25,8 +31,6 @@ class Param(CitcomComponent):
 
 
         inventory = [
-
-            pyre.properties.str("datafile", "test"),
 
             pyre.properties.bool("file_vbcs", False),
             pyre.properties.str("vel_bound_file", "bvel.dat"),
@@ -43,25 +47,9 @@ class Param(CitcomComponent):
             pyre.properties.bool("tracer", False),
             pyre.properties.str("tracer_file", "tracer.dat"),
 
-            pyre.properties.bool("restart", False),
-            pyre.properties.bool("post_p", False),
-            pyre.properties.str("datafile_old", "test"),
-            pyre.properties.int("solution_cycles_init", 100),
-            pyre.properties.bool("zero_elapsed_time", True),
-
-            pyre.properties.bool("stokes_flow_only", False),
-
-            pyre.properties.float("inputdiffusivity", 1),
-
-            pyre.properties.float("rayleigh", 1e+08),
-
-            pyre.properties.float("Q0", 0.0),
-
-            pyre.properties.bool("DESCRIBE", False),
-            pyre.properties.bool("BEGINNER", False),
-            pyre.properties.bool("VERBOSE", False),
-            pyre.properties.bool("verbose", False),
-            pyre.properties.bool("see_convergence", True),
+            #pyre.properties.bool("DESCRIBE", False),
+            #pyre.properties.bool("BEGINNER", False),
+            #pyre.properties.bool("VERBOSE", False),
 
             pyre.properties.float("start_age", 40.0),
             pyre.properties.bool("reset_startage", False)
@@ -70,6 +58,6 @@ class Param(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.8 2003/08/30 00:27:41 ces74 Exp $"
+__id__ = "$Id: Param.py,v 1.9 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

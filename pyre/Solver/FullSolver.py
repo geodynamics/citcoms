@@ -26,25 +26,23 @@ class FullSolver(Solver):
 
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
-        import pyre.facilities
         import pyre.properties
 
         # component modules
         import CitcomS.Components.Sphere as Sphere
-        import CitcomS.Components.Exchanger as Exchanger
 
         inventory = [
 
             Mesher("mesher", default=Sphere.fullSphere("full-sphere")),
-            pyre.facilities.facility("exchanger", default=Exchanger.coarsegridexchanger("exchanger", "exchanger")),
 
-            pyre.properties.str("datafile", default="fulltest")
+            pyre.properties.str("datafile", default="fulltest"),
+            pyre.properties.str("datafile_old", default="fulltest"),
 
             ]
 
 
 
 # version
-__id__ = "$Id: FullSolver.py,v 1.9 2003/10/01 22:07:40 tan2 Exp $"
+__id__ = "$Id: FullSolver.py,v 1.10 2003/10/28 23:51:49 tan2 Exp $"
 
 # End of file

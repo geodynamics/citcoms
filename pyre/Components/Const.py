@@ -13,6 +13,12 @@ from CitcomComponent import CitcomComponent
 class Const(CitcomComponent):
 
 
+    def __init__(self, name="const", facility="const"):
+        CitcomComponent.__init__(self, name, facility)
+        return
+
+
+
     def setProperties(self):
         self.CitcomModule.Const_set_properties(self.all_variables, self.inventory)
         return
@@ -68,6 +74,6 @@ class Const(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Const.py,v 1.7 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.8 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

@@ -13,6 +13,19 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 class Incompressible(CitcomComponent):
 
 
+    def __init__(self, name, facility):
+        CitcomComponent.__init__(self, name, facility)
+
+        self.inventory.mg_cycle = 1
+        self.inventory.down_heavy = 3
+        self.inventory.up_heavy = 3
+
+        self.inventory.vlowstep = 1000
+        self.inventory.vhighstep = 3
+        self.inventory.piterations = 1000
+        return
+
+
 
     def run(self):
         self.CitcomModule.general_stokes_solver(self.all_variables)
@@ -47,17 +60,13 @@ class Incompressible(CitcomComponent):
         import pyre.properties as prop
 
         inventory = [
-            prop.str("Solver", "cgrad"),
+
+            prop.str("Solver", "cgrad",
+                     validator=prop.choice(["cgrad",
+                                            "multigrid",
+                                            "multigrid-el"])),
             prop.bool("node_assemble", True),
-            prop.bool("precond",True),
-
-            prop.int("mg_cycle", 1),
-            prop.int("down_heavy", 3),
-            prop.int("up_heavy", 3),
-
-            prop.int("vlowstep", 500),
-            prop.int("vhighstep", 3),
-            prop.int("piterations", 500),
+            prop.bool("precond", True),
 
             prop.float("accuracy", 1.0e-6),
             prop.float("tole_compressibility", 1.0e-7),
@@ -65,6 +74,6 @@ class Incompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.12 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.13 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

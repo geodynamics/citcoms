@@ -51,7 +51,11 @@ class Solver(BaseSolver):
                            "w")
 
         # if there is a coupler, initialize it
-        if application.inventory.coupler:
+        try:
+            application.inventory.coupler
+        except AttributeError:
+            pass
+        else:
             self.intercomm = application.intercomm
             self.leader = application.leader
             self.remoteLeader = application.remoteLeader
@@ -215,8 +219,10 @@ class Solver(BaseSolver):
 
 
     def setProperties(self):
-	inv = self.inventory
+        self.CitcomModule.Solver_set_properties(self.all_variables,
+                                                self.inventory)
 
+	inv = self.inventory
         inv.mesher.setProperties()
         inv.tsolver.setProperties()
         inv.vsolver.setProperties()
@@ -254,19 +260,32 @@ class Solver(BaseSolver):
 
         inventory = [
 
-            TSolver("tsolver", default=Advection_diffusion.temperature_diffadv("temp")),
-            VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian("incomp-newtonian")),
+            TSolver("tsolver", default=Advection_diffusion.temperature_diffadv()),
+            VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian()),
 
-            pyre.facilities.facility("bc", default=BC("bc", "bc")),
-            pyre.facilities.facility("const", default=Const("const", "const")),
-            pyre.facilities.facility("ic", default=IC("ic", "ic")),
-            pyre.facilities.facility("param", default=Param("param", "param")),
-            pyre.facilities.facility("phase", default=Phase("phase", "phase")),
-            pyre.facilities.facility("visc", default=Visc("visc", "visc")),
+            pyre.facilities.facility("bc", default=BC()),
+            pyre.facilities.facility("const", default=Const()),
+            pyre.facilities.facility("ic", default=IC()),
+            pyre.facilities.facility("param", default=Param()),
+            pyre.facilities.facility("phase", default=Phase()),
+            pyre.facilities.facility("visc", default=Visc()),
+
+            pyre.properties.float("rayleigh", default=1e+08),
+            pyre.properties.float("Q0", default=0.0),
+
+            pyre.properties.bool("stokes_flow_only", default=False),
+            pyre.properties.bool("restart", default=False),
+            pyre.properties.bool("post_p", default=False),
+            pyre.properties.int("solution_cycles_init", default=0),
+            pyre.properties.bool("zero_elapsed_time", default=True),
+            pyre.properties.float("inputdiffusivity", default=1),
+
+            pyre.properties.bool("verbose", default=False),
+            pyre.properties.bool("see_convergence", default=True),
 
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.28 2003/10/28 01:56:14 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.29 2003/10/28 23:51:49 tan2 Exp $"
 
 # End of file

@@ -13,6 +13,21 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 class Advection_diffusion(CitcomComponent):
 
 
+    def __init__(self, name, facility):
+        CitcomComponent.__init__(self, name, facility)
+        self.inventory.ADV = True
+        self.inventory.fixed_timestep = 0.0
+        self.inventory.finetunedt = 0.7
+
+        self.inventory.adv_sub_iterations = 2
+        self.inventory.maxadvtime = 10
+
+        self.inventory.aug_lagr = True
+        self.inventory.aug_number = 2.0e3
+        return
+
+
+
     def setProperties(self):
         self.CitcomModule.Advection_diffusion_set_properties(self.all_variables, self.inventory)
         return
@@ -41,11 +56,6 @@ class Advection_diffusion(CitcomComponent):
 
 
     def _solve(self,dt):
-##	if not self._been_here:
-##	    self.CitcomModule.PG_timestep_init(self.all_variables)
-##	    self._been_here = True
-
-##        dt = self.stable_timestep()
         self.CitcomModule.PG_timestep_solve(self.all_variables, dt)
 	return
 
@@ -63,19 +73,10 @@ class Advection_diffusion(CitcomComponent):
 
         inventory = [
 
-            prop.bool("ADV", True),
-            prop.float("fixed_timestep", 0.0),
-            prop.float("finetunedt", 0.7),
-
-            prop.int("adv_sub_iterations", 2),
-
-            prop.bool("aug_lagr", True),
-            prop.float("aug_number", 2.0e3),
-
 	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.17 2003/08/30 00:29:21 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.18 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

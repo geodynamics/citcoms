@@ -12,6 +12,12 @@ from CitcomComponent import CitcomComponent
 class IC(CitcomComponent):
 
 
+    def __init__(self, name="ic", facility="ic"):
+        CitcomComponent.__init__(self, name, facility)
+        return
+
+
+
     def setProperties(self):
         self.CitcomModule.IC_set_properties(self.all_variables, self.inventory)
         return
@@ -35,6 +41,6 @@ class IC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.6 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.7 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

@@ -9,13 +9,13 @@
 
 
 
-def incompressibleNewtonian(name, facility='vsolver'):
+def incompressibleNewtonian(name="incomp-newtonian", facility='vsolver'):
     from Incompressible import Incompressible
     return Incompressible(name, facility)
 
 
 
-def incompressibleNonNewtonian(name, facility='vsolver'):
+def incompressibleNonNewtonian(name="incomp-non-newtonian", facility='vsolver'):
     from Incompressible import Incompressible
     return Incompressible(name, facility)
 
@@ -29,6 +29,6 @@ def incompressibleNonNewtonian(name, facility='vsolver'):
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.7 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.8 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

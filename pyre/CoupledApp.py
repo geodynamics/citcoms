@@ -88,6 +88,8 @@ class CoupledApp(SimpleApp):
 
         self._info.line("    coarse: %r" % self.inventory.coarse.name)
         self._info.line("    fine: %r" % self.inventory.fine.name)
+        self._info.line("    cge: %r" % self.inventory.cge.name)
+        self._info.line("    fge: %r" % self.inventory.fge.name)
         self._info.line("    controller: %r" % self.inventory.controller.name)
         self._info.line("    coupler: %r" % self.inventory.coupler.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
@@ -105,6 +107,7 @@ class CoupledApp(SimpleApp):
         import Solver
         import Coupler
         import Layout
+        import CitcomS.Components.Exchanger as Exchanger
 
         inventory = [
 
@@ -114,6 +117,8 @@ class CoupledApp(SimpleApp):
 
             SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
             SolverFacility("fine", default=Solver.regionalSolver("fine", "fine")),
+            pyre.facilities.facility("cge", default=Exchanger.coarsegridexchanger()),
+            pyre.facilities.facility("fge", default=Exchanger.finegridexchanger()),
 
             pyre.properties.int("steps", 1),
 
@@ -122,6 +127,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.6 2003/10/24 04:55:54 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.7 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

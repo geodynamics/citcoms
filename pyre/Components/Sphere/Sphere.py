@@ -46,7 +46,6 @@ class Sphere(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
         import pyre.properties
-        from math import pi
 
         inventory = [
 
@@ -60,25 +59,10 @@ class Sphere(CitcomComponent):
             pyre.properties.int("nodex", 9),
             pyre.properties.int("nodey", 9),
             pyre.properties.int("nodez", 9),
-            pyre.properties.int("mgunitx", 8),
-            pyre.properties.int("mgunity", 8),
-            pyre.properties.int("mgunitz", 8),
             pyre.properties.int("levels", 1),
 
             pyre.properties.float("radius_outer", 1.0),
             pyre.properties.float("radius_inner", 0.55),
-
-            # used only in Regional version, not in Full version
-            pyre.properties.float("theta_min", 1.5),
-            pyre.properties.float("theta_max", 1.8),
-            pyre.properties.float("fi_min", 0.0),
-            pyre.properties.float("fi_max", 0.4),
-
-            # these three parameters are not used anymore, will be removed in the future
-            pyre.properties.float("dimenx", 1.0),
-            pyre.properties.float("dimeny", 1.0),
-            pyre.properties.float("dimenz", 1.0),
-
 
 	    # these parameters are for spherical harmonics output
 	    # put them here temporalily
@@ -92,6 +76,6 @@ class Sphere(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Sphere.py,v 1.3 2003/08/27 20:52:47 tan2 Exp $"
+__id__ = "$Id: Sphere.py,v 1.4 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file

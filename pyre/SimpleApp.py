@@ -68,8 +68,8 @@ class SimpleApp(Application):
 
         self._info.line("configuration:")
         self._info.line("  properties:")
-        self._info.line("    name: %r" % self.inventory.name)
-        self._info.line("    full name: %r" % self.inventory.fullname)
+        #self._info.line("    name: %r" % self.inventory.name)
+        #self._info.line("    full name: %r" % self.inventory.fullname)
 
         self._info.line("  facilities:")
         self._info.line("    journal: %r" % self.inventory.journal.name)
@@ -102,6 +102,6 @@ class SimpleApp(Application):
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.5 2003/09/03 21:18:56 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.6 2003/10/28 23:51:48 tan2 Exp $"
 
 # End of file
