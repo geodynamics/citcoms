@@ -60,27 +60,27 @@ int BEGINNER = 0;
 
 void setup_parser(E,filename)
      struct All_variables *E;
-     char *filename;     
+     char *filename;
 {
     void unique_copy_file();
-    
+
     FILE * fp;
     char *pl,*pn,*pv;
     char t1, t2, line[MAXLINE], name[MAXNAME], value[MAXVALUE];
     int i,j,k;
     int m=E->parallel.me;
-  
+
     /* should get file length & cpp &c before any further parsing */
 
     /* for now, read one filename from the command line, we'll parse that ! */
-    
+
 
 	// this section moved to main()
 /*     if (ac < 2)   { */
 /* 	fprintf(stderr,"Usage: citcom PARAMETERFILE\n"); */
 /* 	exit(10); */
 /*     } */
- 
+
 
     if ((fp = fopen(filename,"r")) == NULL)  {
       fprintf(stderr,"(Parsing #1) File: %s is unreadable\n",filename);
@@ -95,7 +95,7 @@ void setup_parser(E,filename)
   while( fgets(line,MAXLINE,fp) != NULL )
     { pl= line;
       /* loop over entries on each line */
-    loop:	
+    loop:
       while(*pl==' ' || *pl=='\t') pl++;
       if(*pl=='\0'|| *pl=='\n') continue; /* end of line */
       if(*pl=='#') continue; /* end of interpretable part of line */
@@ -104,16 +104,16 @@ void setup_parser(E,filename)
       pn= name;
       while(*pl != '=' && *pl != '\0' && *pl != ' '
 	    && *pl != '\n'		/* FIX by Glenn Nelson */
-	    && *pl != '\t') 
+	    && *pl != '\t')
 	*pn++ = *pl++;
       *pn = '\0';
       if(*pl == '=') pl++;
-      
+
       /* get value */
       *value= '\0';
       pv= value;
       if(*pl=='"' || *pl=='\'')
-	t1= t2= *pl++; 
+	t1= t2= *pl++;
       else
 	{ t1= ' ';
 	  t2= '\t';
@@ -124,7 +124,7 @@ void setup_parser(E,filename)
       if(*pl=='"' || *pl=='\'')
 	pl++;
       add_to_parameter_list(name,value);
-     
+
       goto loop;
     }
 
@@ -140,7 +140,7 @@ void setup_parser(E,filename)
   VERBOSE=E->control.VERBOSE;
   DESCRIBE=E->control.DESCRIBE;
   BEGINNER=E->control.BEGINNER;
-  
+
 }
 
 void shutdown_parser(E)
@@ -151,7 +151,7 @@ void shutdown_parser(E)
 	if(ARGBUF  != NULL) free(ARGBUF);
 	ARGBUF=  NULL;
 	ARGLIST= NULL;
-	
+
 }
 
 
@@ -167,7 +167,7 @@ add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory *
     { LISTMAX += LISTINC;
       if(ARGLIST == NULL)
 	ARGLIST= (AL *)malloc(LISTMAX * sizeof(AL));
-      else	
+      else
 	ARGLIST= (AL *)realloc(ARGLIST,LISTMAX * sizeof(AL));
     }
   /* check argbuf memory */
@@ -186,10 +186,10 @@ add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory *
   alptr->hash= compute_parameter_hash_table(name);
   alptr->argname_offset = NBUF;
   ptr= ARGBUF + NBUF;
-  do 
-    *ptr++ = *name; 
+  do
+    *ptr++ = *name;
   while(*name++);
-  
+
   /* add value */
   NBUF += len;
   alptr->argval_offset= ptr - ARGBUF;
@@ -202,7 +202,7 @@ add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory *
 int compute_parameter_hash_table(s)
      register char *s;
 { register int h;
-  
+
   h= s[0];
   if(s[1])
     h |= (s[1])<<8;
@@ -210,7 +210,7 @@ int compute_parameter_hash_table(s)
     return(h);
   if(s[2])
     h |= (s[2])<<16;
-  else 
+  else
     return(h);
   if(s[3])
     h |= (s[3])<<24;
@@ -225,10 +225,10 @@ int input_int(name,value,interpret,m)
 
 {
     int interpret_control_string();
-    struct arglist *alptr; 
+    struct arglist *alptr;
     int h, found;
     char  *str;
-    
+
   int exists,essential;
   double Default,minvalue,maxvalue;
 
@@ -236,11 +236,11 @@ int input_int(name,value,interpret,m)
   if(DESCRIBE)
     fprintf(stderr,"input_int: searching for '%s' with default/range '%s'\n",
 	    name,(interpret == NULL) ? "**EMPTY**" : interpret);
- 
+
   exists = interpret_control_string(interpret,&essential,&Default,&minvalue,&maxvalue);
- 
+
   *value = (int)(Default);
- 
+
   h=compute_parameter_hash_table(name);
   found=0;
 
@@ -255,7 +255,7 @@ int input_int(name,value,interpret,m)
       sscanf(str,"%d",value);
       found=1;
       break;
-    } 
+    }
 
   if(essential && !found)
     { fprintf(stderr,"There MUST be an entry for the parameter %s\n",name);
@@ -271,19 +271,19 @@ int input_int(name,value,interpret,m)
   if(m==0)
   if(VERBOSE)
    { if (found)
-       fprintf(stderr,"%25s: (int) = %d \n",name,*value); 
+       fprintf(stderr,"%25s: (int) = %d \n",name,*value);
      else
        if (Default != STRANGE_NUM)
-	  fprintf(stderr,"%25s: (int) = not found (%d) \n",name,(int)(Default)); 
+	  fprintf(stderr,"%25s: (int) = not found (%d) \n",name,(int)(Default));
        else
-	 { fprintf(stderr,"%25s: (int) = not found (no default) \n",name); 
+	 { fprintf(stderr,"%25s: (int) = not found (no default) \n",name);
 	   if(BEGINNER)
 	     { fprintf(stderr,"\t\t Previously set value gives ...");
 	       fprintf(stderr,"%d\n",*value);
 	     }
-	  } 
+	  }
    }
-  
+
   return(found);
 }
 
@@ -292,25 +292,25 @@ int input_string(name,value,Default,m)  /* in the case of a string default=NULL 
      char *value;
      char *Default;
      int m;
-{ 
+{
     char *sptr;
-  struct arglist *alptr; 
+  struct arglist *alptr;
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
   int essential;
 
- 
+
   if(m==0)
   if(DESCRIBE)
     fprintf(stderr,"input_string: searching for '%s' with default '%s'\n",
 	    name,(Default == NULL) ? "no default" : Default);
- 
+
   h=compute_parameter_hash_table(name);
   essential=found=0;
 
-    
+
     if (Default != NULL)   /* Cannot use "Essential" as this is a valid input */
-	strcpy(value,Default);  
+	strcpy(value,Default);
     else
 	essential=1;
 
@@ -325,18 +325,18 @@ int input_string(name,value,Default,m)  /* in the case of a string default=NULL 
       strcpy(value,str);
       found=1;
       break;
-    } 
-  
+    }
+
   if(essential && !found)
     { fprintf(stderr,"There MUST be an entry for the parameter %s\n",name);
       exit(12);
     }
- 
+
   if(m==0)
   if(VERBOSE)
     fprintf(stderr,"%25s: (string) = %s (%s)\n",name,
 	    (found ? value : "not found"),
-	    (Default != NULL ?  Default : "no default")); 
+	    (Default != NULL ?  Default : "no default"));
 
   return(found);
 }
@@ -345,9 +345,9 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
      char *name;
      int *value;
      char *interpret;
-     int m;     
+     int m;
 { char *sptr;
-  struct arglist *alptr; 
+  struct arglist *alptr;
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
 
@@ -358,12 +358,12 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
   if(DESCRIBE)
     fprintf(stderr,"input_boolean: searching for '%s' with default/range '%s'\n",
 	    name,(interpret == NULL) ? "**EMPTY**" : interpret);
- 
- 
+
+
   interpret_control_string(interpret,&essential,&Default,&minvalue,&maxvalue);
-  
+
   *value = (int)(Default);
- 
+
   h=compute_parameter_hash_table(name);
   found=0;
 
@@ -377,24 +377,24 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
       str= ARGBUF + alptr->argval_offset;
       found=1;
       break;
-    } 
- 
+    }
+
   if(!found)
     {if(m==0)
       if(VERBOSE)
 	if (Default != STRANGE_NUM)
-	  fprintf(stderr,"%25s: (boolean int) = not found (%d) \n",name,(int)(Default)); 
+	  fprintf(stderr,"%25s: (boolean int) = not found (%d) \n",name,(int)(Default));
 	else
-	 { fprintf(stderr,"%25s: (boolean int) = not found (no default) \n",name); 
+	 { fprintf(stderr,"%25s: (boolean int) = not found (no default) \n",name);
 	   if(BEGINNER)
 	     { fprintf(stderr,"\t\t Previously set value gives ...");
 	       fprintf(stderr,"%d\n",*value);
 	     }
 	 }
-	 
+
       return(0);
     }
- 
+
   if((strstr(str,"on")!=NULL) || (strstr(str,"ON")!=NULL))
     *value=1;
   else if ((strstr(str,"off") != NULL) || (strstr(str,"OFF")!=NULL))
@@ -404,8 +404,8 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
 
   if(m==0)
   if(VERBOSE)
-    fprintf(stderr,"%25s: (boolean int) = %d \n",name,*value); 
-  
+    fprintf(stderr,"%25s: (boolean int) = %d \n",name,*value);
+
   return(found);
 }
 
@@ -417,7 +417,7 @@ int input_float(name,value,interpret,m)
 
 { char *sptr;
   struct arglist *alptr;
-  
+
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
   int exists,essential;
@@ -427,10 +427,10 @@ int input_float(name,value,interpret,m)
   if(DESCRIBE)
     fprintf(stderr,"input_float: searching for '%s' with default/range '%s'\n",
 	    name,(interpret == NULL) ? "**EMPTY**" : interpret);
- 
- 
+
+
   exists=interpret_control_string(interpret,&essential,&Default,&minvalue,&maxvalue);
- 
+
   *value = (float) Default;
 
   h=compute_parameter_hash_table(name);
@@ -447,8 +447,8 @@ int input_float(name,value,interpret,m)
       sscanf(str,"%f",value);
       found=1;
       break;
-    } 
- 
+    }
+
   if(essential && !found)
     { fprintf(stderr,"There MUST be an entry for the parameter %s\n",name);
       exit(12);
@@ -462,12 +462,12 @@ int input_float(name,value,interpret,m)
   if(m==0)
   if(VERBOSE)
    { if (found)
-       fprintf(stderr,"%25s: (float) = %f \n",name,*value); 
+       fprintf(stderr,"%25s: (float) = %g \n",name,*value);
      else
        if (Default != STRANGE_NUM)
-	  fprintf(stderr,"%25s: (float) = not found (%f) \n",name,Default); 
+	  fprintf(stderr,"%25s: (float) = not found (%g) \n",name,Default);
        else
-	 { fprintf(stderr,"%25s: (float) = not found (no default) \n",name); 
+	 { fprintf(stderr,"%25s: (float) = not found (no default) \n",name);
 	   if(BEGINNER)
 	     { fprintf(stderr,"\t\t Previously set value gives ...");
 	       fprintf(stderr,"%g\n",*value);
@@ -476,7 +476,7 @@ int input_float(name,value,interpret,m)
    }
   return(found);
 }
-  
+
 int input_double(name,value,interpret,m)
      char *name;
      double *value;
@@ -485,7 +485,7 @@ int input_double(name,value,interpret,m)
 
 { char *sptr;
   struct arglist *alptr;
-  
+
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
 
@@ -497,10 +497,10 @@ int input_double(name,value,interpret,m)
   if(DESCRIBE)
    fprintf(stderr,"input_double: searching for '%s' with default/range '%s'\n",
 	   name,(interpret == NULL) ? "**EMPTY**" : interpret);
- 
- 
+
+
   exists=interpret_control_string(interpret,&essential,&Default,&minvalue,&maxvalue);
- 
+
 
   *value = Default;
 
@@ -517,8 +517,8 @@ int input_double(name,value,interpret,m)
       sscanf(str,"%lf",value);
       found=1;
       break;
-    } 
- 
+    }
+
   if(essential && !found)
     { fprintf(stderr,"There MUST be an entry for the parameter %s\n",name);
       exit(12);
@@ -531,30 +531,30 @@ int input_double(name,value,interpret,m)
   if(m==0)
   if(VERBOSE)
    { if (found)
-       fprintf(stderr,"%25s: (double) = %g \n",name,*value); 
+       fprintf(stderr,"%25s: (double) = %g \n",name,*value);
      else
        if (Default != STRANGE_NUM)
-	  fprintf(stderr,"%25s: (double) = not found (%g) \n",name,Default); 
+	  fprintf(stderr,"%25s: (double) = not found (%g) \n",name,Default);
        else
-	  { fprintf(stderr,"%25s: (double) = not found (no default) \n",name); 
+	  { fprintf(stderr,"%25s: (double) = not found (no default) \n",name);
 	    if(BEGINNER)
 	       { fprintf(stderr,"\t\t Previously set value gives ...");
 		 fprintf(stderr,"%g\n",*value);
 	       }
 	  }
    }
-  
+
 
   return(found);
 }
 
 
 int input_int_vector(char *name, int number,int *value,int m)
-{ 
+{
   char *sptr;
   struct arglist *alptr;
   char control_string[500];
- 
+
   int h,i, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
 
@@ -574,9 +574,9 @@ int input_int_vector(char *name, int number,int *value,int m)
       str= ARGBUF + alptr->argval_offset;
       found=1;
       break;
-    } 
+    }
   /* now interpret vector */
-  
+
   if(!found) return(0);
 
   for(h=0;h<number;h++)
@@ -589,7 +589,7 @@ int input_int_vector(char *name, int number,int *value,int m)
 
   if(m==0)
   if(VERBOSE)
-   fprintf(stderr,"%25s: (vector) = %s\n",name,str); 
+   fprintf(stderr,"%25s: (vector) = %s\n",name,str);
 
   return(found);
 }
@@ -605,7 +605,7 @@ int input_char_vector(name,number,value,m)
 { char *sptr;
   struct arglist *alptr;
   char control_string[500];
- 
+
   int h,i, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
 
@@ -625,9 +625,9 @@ int input_char_vector(name,number,value,m)
       str= ARGBUF + alptr->argval_offset;
       found=1;
       break;
-    } 
+    }
   /* now interpret vector */
-  
+
   if(!found) return(0);
 
   for(h=0;h<number;h++)
@@ -640,7 +640,7 @@ int input_char_vector(name,number,value,m)
 
   if(m==0)
   if(VERBOSE)
-   fprintf(stderr,"%25s: (vector) = %s\n",name,str); 
+   fprintf(stderr,"%25s: (vector) = %s\n",name,str);
 
   return(found);
 }
@@ -654,7 +654,7 @@ int input_float_vector(name,number,value,m)
 { char *sptr;
   struct arglist *alptr;
   char control_string[500];
- 
+
   int h,i, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
 
@@ -677,9 +677,9 @@ int input_float_vector(name,number,value,m)
       str= ARGBUF + alptr->argval_offset;
       found=1;
       break;
-    } 
+    }
   /* now interpret vector */
-  
+
   if(!found) return(0);
 
   for(h=0;h<number;h++)
@@ -692,7 +692,7 @@ int input_float_vector(name,number,value,m)
 
   if(m==0)
   if(VERBOSE)
-   fprintf(stderr,"%25s: (float vector) = %s\n",name,str); 
+   fprintf(stderr,"%25s: (float vector) = %s\n",name,str);
 
   return(found);
 }
@@ -706,10 +706,10 @@ int input_double_vector(name,number,value,m)
 { char *sptr;
   struct arglist *alptr;
   char control_string[500];
- 
+
   int h,i, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
- 
+
   if(m==0)
   if(DESCRIBE)
     fprintf(stderr,"input_double_vector: searching for %s (%d times)\n",name,number);
@@ -726,12 +726,12 @@ int input_double_vector(name,number,value,m)
       str= ARGBUF + alptr->argval_offset;
       found=1;
       break;
-    } 
+    }
 
   if(!found) return(0);
 
  /* now interpret vector */
-  
+
   for(h=0;h<number;h++)
     { sprintf(control_string,"");
       for(i=0;i<h;i++)
@@ -742,7 +742,7 @@ int input_double_vector(name,number,value,m)
 
   if(m==0)
   if(VERBOSE)
-   fprintf(stderr,"%25s: (double vector) = %s\n",name,str); 
+   fprintf(stderr,"%25s: (double vector) = %s\n",name,str);
 
   return(found);
 }
@@ -761,22 +761,22 @@ int interpret_control_string(interpret,essential,Default,minvalue,maxvalue)
 
   *Default=*maxvalue=*minvalue=STRANGE_NUM;
   *essential=0;
-   
+
   if (strstr(interpret,"essential")!=NULL)
    { *essential=1; /* no default possible, must read a value */
      return(0);
    }
-  
-  if (strstr(interpret,"nodefault")==NULL) 
+
+  if (strstr(interpret,"nodefault")==NULL)
    { if((strstr(interpret,"on")!=NULL) || (strstr(interpret,"ON")!=NULL))
        *Default = 1.0;
-     else 
+     else
        if ((strstr(interpret,"off") != NULL) || (strstr(interpret,"OFF")!=NULL))
-	 *Default = 0.0; 
+	 *Default = 0.0;
        else
-         sscanf(interpret,"%lf",Default);  /* read number as a default value */ 
+         sscanf(interpret,"%lf",Default);  /* read number as a default value */
    }
-  
+
   if ((substring=strstr(interpret,",")) == NULL) /* minvalue */
     { /* no minimum, no maximum */
       return(1);
@@ -784,7 +784,7 @@ int interpret_control_string(interpret,essential,Default,minvalue,maxvalue)
 
   if (strstr(substring,"nomin")==NULL)
     sscanf(substring,"%lf",minvalue);
-      
+
   if ((substring=strstr(substring,",")) == NULL) /* maxvalue */
     { /* no maximum */
 /*       if (DESCRIBE) */
@@ -797,5 +797,5 @@ int interpret_control_string(interpret,essential,Default,minvalue,maxvalue)
 
 
   return(0);
- 
+
 }
