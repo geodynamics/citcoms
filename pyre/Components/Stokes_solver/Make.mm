@@ -29,13 +29,13 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
-	Imcompressible.py \
+	Incompressible.py \
 	Stokes_solver.py
 
 
 export:: export-package-python-modules
 
 # version
-# $Id: Make.mm,v 1.4 2003/07/28 23:03:49 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/08/22 22:14:59 tan2 Exp $
 
 # End of file

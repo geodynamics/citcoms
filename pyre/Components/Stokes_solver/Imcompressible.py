@@ -10,12 +10,12 @@
 from CitcomS.Components.CitcomComponent import CitcomComponent
 
 
-class Imcompressible(CitcomComponent):
+class Incompressible(CitcomComponent):
 
 
     def __init__(self, name, facility, CitcomModule):
         # bind component method to facility method
-        CitcomModule.vsolver_set_properties = CitcomModule.Imcompressible_set_properties
+        CitcomModule.vsolver_set_properties = CitcomModule.Incompressible_set_properties
 
         CitcomComponent.__init__(self, name, facility, CitcomModule)
         return
@@ -67,6 +67,6 @@ class Imcompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.9 2003/08/19 21:24:35 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.10 2003/08/22 22:14:59 tan2 Exp $"
 
 # End of file
