@@ -109,14 +109,72 @@ int Array2D<T,N>::size() const {
 
 
 template <class T, int N>
-void Array2D<T,N>::send(const MPI_Comm comm, const int receiver) const {
+bool Array2D<T,N>::empty() const {
+    return (a_.size() == 0);
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::sendSize(const MPI_Comm comm, const int receiver) const {
 
     const int tag = 10;
+    int n = size();
+    int result = MPI_Send(&n, 1, MPI_INT,
+			  receiver, tag, comm);
+    if (result != MPI_SUCCESS) {
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " sendSize error!" << journal::end;
+	throw result;
+    }
+}
+
+
+template <class T, int N>
+int Array2D<T,N>::receiveSize(const MPI_Comm comm, const int sender) const {
+
+    const int tag = 10;
+    MPI_Status status;
+    int n;
+    int result = MPI_Recv(&n, 1, MPI_INT,
+			  sender, tag, comm, &status);
+    if (result != MPI_SUCCESS) {
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " receiveSize error!" << journal::end;
+	throw result;
+    }
+    return n;
+}
+
+
+template <class T, int N>
+int Array2D<T,N>::broadcastSize(const MPI_Comm comm, const int broadcaster) const {
+    int n = size();
+    int result = MPI_Bcast(&n, 1, MPI_INT, broadcaster, comm);
+    if (result != MPI_SUCCESS) {
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " receiveSize error!" << journal::end;
+	throw result;
+    }
+    return n;
+}
+
+
+template <class T, int N>
+void Array2D<T,N>::send(const MPI_Comm comm, const int receiver) const {
+
+    sendSize(comm, receiver);
+
+    const int tag = 11;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Send(const_cast<T*>(&a_[0]), a_.size(), datatype,
 			  receiver, tag, comm);
     if (result != MPI_SUCCESS) {
-	std::cerr << " send error!" << std::endl;
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " send error!" << journal::end;
 	throw result;
     }
 }
@@ -125,13 +183,18 @@ void Array2D<T,N>::send(const MPI_Comm comm, const int receiver) const {
 template <class T, int N>
 void Array2D<T,N>::receive(const MPI_Comm comm, const int sender) {
 
-    const int tag = 10;
+    // resize to accommodate incoming data
+    resize(receiveSize(comm, sender));
+
+    const int tag = 11;
     MPI_Status status;
     MPI_Datatype datatype = typeofT();
     int result = MPI_Recv(&a_[0], a_.size(), datatype,
 			  sender, tag, comm, &status);
     if (result != MPI_SUCCESS) {
-	std::cerr << " receive error!" << std::endl;
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " receive error!" << journal::end;
 	throw result;
     }
 }
@@ -140,10 +203,15 @@ void Array2D<T,N>::receive(const MPI_Comm comm, const int sender) {
 template <class T, int N>
 void Array2D<T,N>::broadcast(const MPI_Comm comm, const int broadcaster) {
 
+    // resize to accommodate incoming data
+    resize(broadcastSize(comm, broadcaster));
+
     MPI_Datatype datatype = typeofT();
     int result = MPI_Bcast(&a_[0], a_.size(), datatype, broadcaster, comm);
     if (result != MPI_SUCCESS) {
-	std::cerr << " broadcast error!" << std::endl;
+        journal::error_t error("Array2D");
+        error << journal::loc(__HERE__)
+              << " broadcast error!" << journal::end;
 	throw result;
     }
 }
@@ -181,14 +249,16 @@ MPI_Datatype Array2D<T,N>::typeofT() {
     if (typeid(T) == typeid(char))
 	return MPI_CHAR;
 
-    const std::string msg = "unexpected Array2D datatype";
-    std::cerr << msg << std::endl;
-    throw msg;
+    journal::firewall_t firewall("Array2D");
+    firewall << journal::loc(__HERE__)
+             << "unexpected Array2D datatype" << journal::end;
+    // firewall will throw an exception or terminate the job
+    return 0;
 }
 
 
 
 // version
-// $Id: Array2D.cc,v 1.8 2003/10/28 01:51:05 tan2 Exp $
+// $Id: Array2D.cc,v 1.9 2003/10/28 19:57:45 tan2 Exp $
 
 // End of file

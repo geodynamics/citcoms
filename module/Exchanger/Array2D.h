@@ -31,7 +31,11 @@ public:
     inline void resize(const int n);
     inline void shrink();
     inline int size() const;
+    inline bool empty() const;
 
+    void sendSize(const MPI_Comm comm, const int receiver) const;
+    int receiveSize(const MPI_Comm comm, const int sender) const;
+    int broadcastSize(const MPI_Comm comm, const int broadcaster) const;
     void send(const MPI_Comm comm, const int receiver) const;
     void receive(const MPI_Comm comm, const int sender);
     void broadcast(const MPI_Comm comm, const int broadcaster);
@@ -71,6 +75,6 @@ void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
 #endif
 
 // version
-// $Id: Array2D.h,v 1.8 2003/10/28 01:51:05 tan2 Exp $
+// $Id: Array2D.h,v 1.9 2003/10/28 19:57:45 tan2 Exp $
 
 // End of file
