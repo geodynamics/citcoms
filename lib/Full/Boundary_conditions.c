@@ -106,6 +106,9 @@ void temperature_boundary_conditions(E)
 
     }     /* end for j */
 
+  temperatures_conform_bcs(E);
+  E->temperatures_conform_bcs = temperatures_conform_bcs;
+
    return; }
 
 /* ========================================== */
@@ -213,37 +216,6 @@ void strip_bcs_from_residual(E,Res,level)
     }
 
 
-void get_bcs_id_for_residual(E,level,m)
-    struct All_variables *E;
-    int level,m;
-  {
-
-    int i,j;
-
-    const int nno=E->lmesh.NNO[level];
-
-   j = 0;
-   for(i=1;i<=nno;i++) {
-      if ( (E->NODE[level][m][i] & VBX) != 0 )  {
-	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[1];
-	}
-      if ( (E->NODE[level][m][i] & VBY) != 0 )  {
-	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[2];
-	}
-      if ( (E->NODE[level][m][i] & VBZ) != 0 )  {
-	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[3];
-	}
-      }
-
-    E->num_zero_resid[level][m] = j;
-
-    return;
-}
-
-
 void temperatures_conform_bcs(E)
      struct All_variables *E;
 {
@@ -318,6 +290,6 @@ void velocities_conform_bcs(E,U)
 
 
 /* version */
-/* $Id: Boundary_conditions.c,v 1.5 2004/05/23 19:10:27 tan2 Exp $ */
+/* $Id: Boundary_conditions.c,v 1.6 2004/10/08 00:18:05 tan2 Exp $ */
 
 /* End of file  */
