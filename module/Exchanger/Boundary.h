@@ -25,6 +25,11 @@ public:
 
     inline int normal(int d, int n) const {return normal_[d][n];}
 
+    virtual void broadcast(const MPI_Comm& comm, int broadcaster);
+    virtual void broadcast(const MPI_Comm& comm, int broadcaster) const;
+    virtual void recv(const MPI_Comm& comm, int sender);
+    virtual void send(const MPI_Comm& comm, int receiver) const;
+
 private:
     void initBBox(const All_variables *E);
     void initX(const All_variables *E);
@@ -35,6 +40,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.28 2004/03/11 22:50:09 tan2 Exp $
+// $Id: Boundary.h,v 1.29 2004/03/28 23:01:57 tan2 Exp $
 
 // End of file

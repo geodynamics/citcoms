@@ -38,7 +38,6 @@ Boundary::Boundary(const All_variables* E) :
     initBBox(E);
     bbox_.print("Boundary-BBox");
 
-
     X_.shrink();
     X_.print("Boundary-X");
     nodeID_.shrink();
@@ -47,6 +46,41 @@ Boundary::Boundary(const All_variables* E) :
     normal_.print("Boundary-normal");
 }
 
+
+void Boundary::broadcast(const MPI_Comm& comm, int broadcaster)
+{
+    BoundedMesh::broadcast(comm, broadcaster);
+
+    normal_.broadcast(comm, broadcaster);
+    normal_.print("normal_recv");
+}
+
+
+void Boundary::broadcast(const MPI_Comm& comm, int broadcaster) const
+{
+    BoundedMesh::broadcast(comm, broadcaster);
+
+    normal_.broadcast(comm, broadcaster);
+}
+
+
+void Boundary::recv(const MPI_Comm& comm, int sender)
+{
+    BoundedMesh::recv(comm, sender);
+
+    normal_.receive(comm, sender);
+}
+
+
+void Boundary::send(const MPI_Comm& comm, int receiver) const
+{
+    BoundedMesh::send(comm, receiver);
+
+    normal_.send(comm, receiver);
+}
+
+
+// private functions
 
 void Boundary::initBBox(const All_variables *E)
 {
@@ -116,6 +150,6 @@ void Boundary::initX(const All_variables* E)
 
 
 // version
-// $Id: Boundary.cc,v 1.50 2004/03/11 22:50:09 tan2 Exp $
+// $Id: Boundary.cc,v 1.51 2004/03/28 23:01:57 tan2 Exp $
 
 // End of file
