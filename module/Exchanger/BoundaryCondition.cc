@@ -73,7 +73,7 @@ void BoundaryConditionSink::recvTandV()
 
 void BoundaryConditionSink::imposeBC()
 {
-    //imposeTBC();
+    imposeTBC();
     imposeVBC();
 }
 
@@ -110,6 +110,20 @@ void BoundaryConditionSink::setVBCFlag()
 
 void BoundaryConditionSink::setTBCFlag()
 {
+
+    const int m = 1;
+    for(int i=0; i<boundary.size(); i++) {
+	int n = boundary.meshID(i);
+	E->node[m][n] = E->node[m][n] | TBX;
+	E->node[m][n] = E->node[m][n] | TBY;
+	E->node[m][n] = E->node[m][n] | TBZ;
+	E->node[m][n] = E->node[m][n] & (~FBX);
+	E->node[m][n] = E->node[m][n] & (~FBY);
+	E->node[m][n] = E->node[m][n] & (~FBZ);
+    }
+
+    check_bc_consistency(E);
+
 }
 
 
@@ -121,6 +135,33 @@ void BoundaryConditionSink::imposeConstraint()
 
 void BoundaryConditionSink::imposeTBC()
 {
+
+    journal::debug_t debugBC("imposeTBC");
+    debugBC << journal::loc(__HERE__);
+
+    double N1, N2;
+
+    if(cge_t == 0) {
+        N1 = 0.0;
+        N2 = 1.0;
+    } else {
+        N1 = (cge_t - fge_t) / cge_t;
+        N2 = fge_t / cge_t;
+    }
+
+    const int m = 1;
+    for(int i=0; i<sink.size(); i++) {
+	int n = boundary.meshID(sink.meshNode(i));
+	for(int d=0; d<DIM; d++)
+	    E->sphere.cap[m].TB[d+1][n] = N1 * old_tbc[0][i]
+		                        + N2 * tbc[0][i];
+
+	debugBC << E->sphere.cap[m].TB[1][n] << " "
+		<< E->sphere.cap[m].TB[2][n] << " "
+		<< E->sphere.cap[m].TB[3][n] << journal::newline;
+
+    }
+    debugBC << journal::end;
 }
 
 
@@ -144,7 +185,7 @@ void BoundaryConditionSink::imposeVBC()
 	int n = boundary.meshID(sink.meshNode(i));
 	for(int d=0; d<DIM; d++)
 	    E->sphere.cap[m].VB[d+1][n] = N1 * old_vbc[d][i]
-		+ N2 * vbc[d][i];
+		                        + N2 * vbc[d][i];
 	debugBC << E->sphere.cap[m].VB[1][n] << " "
 		<< E->sphere.cap[m].VB[2][n] << " "
 		<< E->sphere.cap[m].VB[3][n] << journal::newline;
@@ -188,6 +229,6 @@ void BoundaryConditionSource::sendTandV()
 
 
 // version
-// $Id: BoundaryCondition.cc,v 1.3 2003/11/10 21:55:28 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.4 2003/11/11 19:45:17 ces74 Exp $
 
 // End of file
