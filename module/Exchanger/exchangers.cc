@@ -191,6 +191,44 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_receiveTemperature__doc__[] = "";
+char pyExchanger_receiveTemperature__name__[] = "receiveTemperature";
+
+PyObject * pyExchanger_receiveTemperature(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:receiveTemperature", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->receiveTemperature();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_sendTemperature__doc__[] = "";
+char pyExchanger_sendTemperature__name__[] = "sendTemperature";
+
+PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:sendTemperature", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->sendTemperature();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_distribute__doc__[] = "";
 char pyExchanger_distribute__name__[] = "distribute";
 
@@ -198,7 +236,7 @@ PyObject * pyExchanger_distribute(PyObject *, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:receiveBoundary", &obj))
+    if (!PyArg_ParseTuple(args, "O:distribute", &obj))
 	return NULL;
 
     Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
@@ -266,6 +304,63 @@ PyObject * pyExchanger_send(PyObject *, PyObject *args)
     return Py_None;
 }
 
+
+char pyExchanger_exchangeTimestep__doc__[] = "";
+char pyExchanger_exchangeTimestep__name__[] = "exchangeTimestep";
+
+PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+    double dt;
+
+    if (!PyArg_ParseTuple(args, "Od:exchangeTimestep", &obj, &dt))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    double newdt = pe->exchangeTimestep(dt);
+
+    return Py_BuildValue("d", newdt);
+}
+
+
+char pyExchanger_wait__doc__[] = "";
+char pyExchanger_wait__name__[] = "wait";
+
+PyObject * pyExchanger_wait(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:wait", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->wait();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_nowait__doc__[] = "";
+char pyExchanger_nowait__name__[] = "nowait";
+
+PyObject * pyExchanger_nowait(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:nowait", &obj))
+	return NULL;
+
+    Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj));
+
+    pe->nowait();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 /*
 char pyExchanger_rE__doc__[] = "";
 char pyExchanger_rE__name__[] = "rE";
@@ -305,6 +400,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.4 2003/09/09 20:57:25 tan2 Exp $
+// $Id: exchangers.cc,v 1.5 2003/09/10 04:03:54 tan2 Exp $
 
 // End of file

@@ -81,8 +81,68 @@ void Exchanger::receive(const int size) {
 }
 
 
+void Exchanger::sendTemperature() {
+    std::cout << "in Exchanger::sendTemperature" << std::endl;
+    return;
+}
+
+
+void Exchanger::receiveTemperature() {
+    std::cout << "in Exchanger::receiveTemperature" << std::endl;
+    return;
+}
+
+
+double Exchanger::exchangeTimestep(const double dt) {
+    std::cout << "in Exchanger::exchangeTimestep"
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader
+	      << "  receiver = "<< remoteLeader << std::endl;
+    double remotedt = dt;
+
+    if (rank == localLeader) {
+	const int tag = 0;
+	MPI_Status status;
+
+	MPI_Sendrecv_replace(&remotedt, 1, MPI_DOUBLE,
+			     remoteLeader, tag,
+			     remoteLeader, tag,
+			     intercomm, &status);
+    }
+    return remotedt;
+}
+
+
+static const int WAIT_TAG = 356;
+
+void Exchanger::wait() {
+    std::cout << "in Exchanger::wait" << std::endl;
+    if (rank == localLeader) {
+	int junk;
+	MPI_Status status;
+
+	MPI_Recv(&junk, 1, MPI_INT,
+		 remoteLeader, WAIT_TAG, intercomm, &status);
+    }
+    MPI_Barrier(comm);  // wait until leader has received signal
+    return;
+}
+
+
+void Exchanger::nowait() {
+    std::cout << "in Exchanger::nowait" << std::endl;
+    if (rank == localLeader) {
+	int junk = 0;
+
+	MPI_Send(&junk, 1, MPI_INT,
+		 remoteLeader, WAIT_TAG, intercomm);
+    }
+    return;
+}
+
+
 // version
-// $Id: ExchangerClass.cc,v 1.3 2003/09/09 20:57:25 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.4 2003/09/10 04:03:54 tan2 Exp $
 
 // End of file
 

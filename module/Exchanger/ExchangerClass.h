@@ -39,6 +39,12 @@ public:
 
     virtual void send(int& size);
     virtual void receive(const int size);
+    void sendTemperature();
+    void receiveTemperature();
+    double exchangeTimestep(const double);
+
+    void wait();
+    void nowait();
 
     virtual void gather() = 0;
     virtual void distribute() = 0;
@@ -78,7 +84,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.5 2003/09/10 04:03:54 tan2 Exp $
 
 // End of file
 

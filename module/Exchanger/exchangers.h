@@ -47,6 +47,18 @@ extern "C"
 PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *);
 
 
+extern char pyExchanger_receiveTemperature__name__[];
+extern char pyExchanger_receiveTemperature__doc__[];
+extern "C"
+PyObject * pyExchanger_receiveTemperature(PyObject *, PyObject *);
+
+
+extern char pyExchanger_sendTemperature__name__[];
+extern char pyExchanger_sendTemperature__doc__[];
+extern "C"
+PyObject * pyExchanger_sendTemperature(PyObject *, PyObject *);
+
+
 extern char pyExchanger_distribute__name__[];
 extern char pyExchanger_distribute__doc__[];
 extern "C"
@@ -71,10 +83,28 @@ extern "C"
 PyObject * pyExchanger_send(PyObject *, PyObject *);
 
 
+extern char pyExchanger_exchangeTimestep__name__[];
+extern char pyExchanger_exchangeTimestep__doc__[];
+extern "C"
+PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *);
+
+
+extern char pyExchanger_wait__name__[];
+extern char pyExchanger_wait__doc__[];
+extern "C"
+PyObject * pyExchanger_wait(PyObject *, PyObject *);
+
+
+extern char pyExchanger_nowait__name__[];
+extern char pyExchanger_nowait__doc__[];
+extern "C"
+PyObject * pyExchanger_nowait(PyObject *, PyObject *);
+
+
 
 #endif
 
 // version
-// $Id: exchangers.h,v 1.4 2003/09/09 20:57:25 tan2 Exp $
+// $Id: exchangers.h,v 1.5 2003/09/10 04:03:54 tan2 Exp $
 
 // End of file

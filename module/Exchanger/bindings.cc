@@ -67,6 +67,16 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_sendBoundary__doc__},
 
+    {pyExchanger_receiveTemperature__name__,
+     pyExchanger_receiveTemperature,
+     METH_VARARGS,
+     pyExchanger_receiveTemperature__doc__},
+
+    {pyExchanger_sendTemperature__name__,
+     pyExchanger_sendTemperature,
+     METH_VARARGS,
+     pyExchanger_sendTemperature__doc__},
+
     {pyExchanger_distribute__name__,
      pyExchanger_distribute,
      METH_VARARGS,
@@ -87,6 +97,21 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_send__doc__},
 
+    {pyExchanger_exchangeTimestep__name__,
+     pyExchanger_exchangeTimestep,
+     METH_VARARGS,
+     pyExchanger_exchangeTimestep__doc__},
+
+    {pyExchanger_wait__name__,
+     pyExchanger_wait,
+     METH_VARARGS,
+     pyExchanger_wait__doc__},
+
+    {pyExchanger_nowait__name__,
+     pyExchanger_nowait,
+     METH_VARARGS,
+     pyExchanger_nowait__doc__},
+
 
 
 
@@ -95,6 +120,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.5 2003/09/09 20:57:25 tan2 Exp $
+// $Id: bindings.cc,v 1.6 2003/09/10 04:03:54 tan2 Exp $
 
 // End of file
