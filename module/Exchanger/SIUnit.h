@@ -7,8 +7,8 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_Dimensional_h)
-#define pyCitcom_Dimensional_h
+#if !defined(pyCitcom_SIUnit_h)
+#define pyCitcom_SIUnit_h
 
 #include "Array2D.h"
 #include "BoundedBox.h"
@@ -19,9 +19,7 @@ struct All_variables;
 
 // singleton class
 
-class Dimensional {
-    static const All_variables* E;
-
+class SIUnit {
     const double length_factor;
     const double velocity_factor;
     const double temperature_factor;
@@ -29,10 +27,8 @@ class Dimensional {
     const double traction_factor;
 
 public:
-    ~Dimensional() {};
-
-    static void setE(const All_variables* E);
-    static Dimensional& instance();   // the singleton
+    SIUnit(const All_variables* E);
+    ~SIUnit() {};
 
     // dimensionalize
     void coordinate(BoundedBox& bbox) const;
@@ -51,12 +47,9 @@ public:
     void xvelocity(Array2D<double,DIM>& V) const;
 
 private:
-    Dimensional(const All_variables* E);
-
     // disable
-    Dimensional();
-    Dimensional(const Dimensional&);
-    Dimensional& operator=(const Dimensional&);
+    SIUnit(const SIUnit&);
+    SIUnit& operator=(const SIUnit&);
 
 };
 
@@ -66,6 +59,6 @@ private:
 #endif
 
 // version
-// $Id: SIUnit.h,v 1.1 2003/12/30 21:44:32 tan2 Exp $
+// $Id: SIUnit.h,v 1.2 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file

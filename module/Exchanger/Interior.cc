@@ -16,15 +16,14 @@
 #include "Interior.h"
 
 
-Interior::Interior(bool dimensional, bool transformational) :
-    BoundedMesh(dimensional,transformational)
+Interior::Interior() :
+    BoundedMesh()
 {}
 
 
 
-Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E,
-		   bool dimensional, bool transformational) :
-    BoundedMesh(dimensional, transformational)
+Interior::Interior(const BoundedBox& remoteBBox, const All_variables* E) :
+    BoundedMesh()
 {
     bbox_ = remoteBBox;
     bbox_.print("Interior-BBox");
@@ -65,6 +64,6 @@ void Interior::initX(const All_variables* E)
 
 
 // version
-// $Id: Interior.cc,v 1.10 2004/01/06 22:40:28 puru Exp $
+// $Id: Interior.cc,v 1.11 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file

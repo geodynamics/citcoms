@@ -20,7 +20,7 @@
 #include "BoundedBox.h"
 #include "BoundaryCondition.h"
 #include "DIM.h"
-#include "Dimensional.h"
+#include "Convertor.h"
 #include "Interior.h"
 #include "InteriorImposing.h"
 #include "Sink.h"
@@ -140,16 +140,14 @@ char pyExchanger_createBoundary__name__[] = "createBoundary";
 PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
 {
     PyObject *obj1, *obj2;
-    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOii:createBoundary",
-			  &obj1, &obj2, &dimensional,&transformational))
+    if (!PyArg_ParseTuple(args, "OO:createBoundary", &obj1, &obj2))
 	return NULL;
 
     All_variables* E = static_cast<All_variables*>
 	                          (PyCObject_AsVoidPtr(obj2));
 
-    Boundary* b = new Boundary(E, dimensional,transformational);
+    Boundary* b = new Boundary(E);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(b->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(b, deleteBoundary);
@@ -163,12 +161,7 @@ char pyExchanger_createEmptyBoundary__name__[] = "createEmptyBoundary";
 
 PyObject * pyExchanger_createEmptyBoundary(PyObject *, PyObject *args)
 {
-    int dimensional,transformational;
-
-    if (!PyArg_ParseTuple(args, "ii:createEmptyBoundary", &dimensional,&transformational))
-	return NULL;
-
-    Boundary* b = new Boundary(dimensional,transformational);
+    Boundary* b = new Boundary();
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteBoundary);
     return Py_BuildValue("O", cobj);
@@ -180,12 +173,7 @@ char pyExchanger_createEmptyInterior__name__[] = "createEmptyInterior";
 
 PyObject * pyExchanger_createEmptyInterior(PyObject *, PyObject *args)
 {
-    int dimensional,transformational;
-
-    if (!PyArg_ParseTuple(args, "ii:createEmptyInterior", &dimensional,&transformational))
-	return NULL;
-
-    Interior* b = new Interior(dimensional,transformational);
+    Interior* b = new Interior();
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteInterior);
     return Py_BuildValue("O", cobj);
@@ -228,17 +216,15 @@ char pyExchanger_createInterior__name__[] = "createInterior";
 PyObject * pyExchanger_createInterior(PyObject *, PyObject *args)
 {
     PyObject *obj1, *obj2;
-    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOii:createInterior",
-			  &obj1, &obj2, &dimensional,&transformational))
+    if (!PyArg_ParseTuple(args, "OO:createInterior", &obj1, &obj2))
 	return NULL;
 
     BoundedBox* rbbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
     All_variables* E = static_cast<All_variables*>
 	                          (PyCObject_AsVoidPtr(obj2));
 
-    Interior* i = new Interior(*rbbox, E, dimensional,transformational);
+    Interior* i = new Interior(*rbbox, E);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
@@ -300,19 +286,21 @@ PyObject * pyExchanger_createSource(PyObject *self, PyObject *args)
 }
 
 
-char pyExchanger_initDimensional__doc__[] = "";
-char pyExchanger_initDimensional__name__[] = "initDimensional";
+char pyExchanger_initConvertor__doc__[] = "";
+char pyExchanger_initConvertor__name__[] = "initConvertor";
 
-PyObject * pyExchanger_initDimensional(PyObject *, PyObject *args)
+PyObject * pyExchanger_initConvertor(PyObject *, PyObject *args)
 {
    PyObject *obj1;
+   int dimensional, transformational;
 
-    if (!PyArg_ParseTuple(args, "O:initDimensional", &obj1))
+   if (!PyArg_ParseTuple(args, "Oii:initConvertor",
+			 &obj1, &dimensional, &transformational))
         return NULL;
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
 
-    Dimensional::setE(E);
+    Convertor::init(dimensional, transformational, E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -565,10 +553,9 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 {
     PyObject *obj0, *obj1, *obj2;
     int target;
-    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOOiii:exchangeBoundedBox",
-			  &obj0, &obj1, &obj2, &target, &dimensional,&transformational))
+    if (!PyArg_ParseTuple(args, "OOOi:exchangeBoundedBox",
+			  &obj0, &obj1, &obj2, &target))
 	return NULL;
 
     BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj0));
@@ -589,19 +576,14 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 	                           (PyCObject_AsVoidPtr(obj2));
 	MPI_Comm intercomm = temp2->handle();
 
-	// dimensionalize before sending
-	if(dimensional) {
-	    Dimensional& dimen = Dimensional::instance();
-	    dimen.coordinate(*newbbox);
-	}
-        // transform before sending
+	// convert before sending
+	Convertor& convertor = Convertor::instance();
+	convertor.coordinate(*newbbox);
+
 	util::exchange(intercomm, target, *newbbox);
 
-	// non-dimensionalize after receiving
-	if(dimensional) {
-	    Dimensional& dimen = Dimensional::instance();
-	    dimen.xcoordinate(*newbbox);
-	}
+	// unconvert after receiving
+	convertor.xcoordinate(*newbbox);
     }
 
     util::broadcast(mycomm, leader, *newbbox);
@@ -655,10 +637,9 @@ PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
     double dt;
     PyObject *obj1, *obj2;
     int target;
-    int dimensional;
 
-    if (!PyArg_ParseTuple(args, "dOOii:exchangeTimestep",
-			  &dt, &obj1, &obj2, &target, &dimensional))
+    if (!PyArg_ParseTuple(args, "dOOi:exchangeTimestep",
+			  &dt, &obj1, &obj2, &target))
 	return NULL;
 
     mpi::Communicator* temp1 = static_cast<mpi::Communicator*>
@@ -674,19 +655,12 @@ PyObject * pyExchanger_exchangeTimestep(PyObject *, PyObject *args)
 	                           (PyCObject_AsVoidPtr(obj2));
 	MPI_Comm intercomm = temp2->handle();
 
-	// dimensionalize before sending
-	if(dimensional) {
-	    Dimensional& dimen = Dimensional::instance();
-	    dimen.time(dt);
-	}
+	Convertor& convertor = Convertor::instance();
+	convertor.time(dt);
 
 	util::exchange(intercomm, target, dt);
 
-	// non-dimensionalize after receiving
-	if(dimensional) {
-	    Dimensional& dimen = Dimensional::instance();
-	    dimen.xtime(dt);
-	}
+	convertor.xtime(dt);
     }
 
     util::broadcast(mycomm, leader, dt);
@@ -774,6 +748,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.34 2004/01/07 08:12:03 tan2 Exp $
+// $Id: exchangers.cc,v 1.35 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file

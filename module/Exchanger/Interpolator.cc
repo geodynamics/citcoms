@@ -253,7 +253,313 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 }
 
 
+#if 0
+/* ===========================================================================
+   Function to create the element locations from  the node positions.
+   ===========================================================================	*/
+
+void element_locations_from_nodes(struct All_variables *E)
+{
+
+    for(int element=1; element<=E->lmesh.nel; element++) {
+
+	int n1=E->ien[1][element].node[1];
+	int n2=E->ien[1][element].node[2];
+	int n3=E->ien[1][element].node[3];
+	int n4=E->ien[1][element].node[4];
+	int n5=E->ien[1][element].node[5];
+	int n6=E->ien[1][element].node[6];
+	int n7=E->ien[1][element].node[7];
+	int n8=E->ien[1][element].node[8];
+
+
+	/* 1: x direction */
+
+	double xlowmean = (E->x[1][1][n1] +
+			   E->x[1][1][n2] +
+			   E->x[1][1][n5] +
+			   E->x[1][1][n6] )  * 0.25;
+	double xhighmean = (E->x[1][1][n3] +
+			    E->x[1][1][n4] +
+			    E->x[1][1][n7] +
+			    E->x[1][1][n8] )  * 0.25;
+	double zlowmean = (E->x[1][2][n1] +
+			   E->x[1][2][n2] +
+			   E->x[1][2][n5] +
+			   E->x[1][2][n6] )  * 0.25;
+	double zhighmean = (E->x[1][2][n3] +
+			    E->x[1][2][n4] +
+			    E->x[1][2][n7] +
+			    E->x[1][2][n8] )  * 0.25;
+	double ylowmean = (E->x[1][3][n1] +
+			   E->x[1][3][n2] +
+			   E->x[1][3][n5] +
+			   E->x[1][3][n6] )  * 0.25;
+	double yhighmean = (E->x[1][3][n3] +
+			    E->x[1][3][n4] +
+			    E->x[1][3][n7] +
+			    E->x[1][3][n8] )  * 0.25;
+
+	ntl_dirns[element][1][1] = xhighmean - xlowmean;
+	ntl_dirns[element][1][2] = zhighmean - zlowmean;
+	ntl_dirns[element][1][3] = yhighmean - ylowmean;
+
+	double ntl_size = sqrt(ntl_dirns[element][1][1] *
+			       ntl_dirns[element][1][1] +
+			       ntl_dirns[element][1][2] *
+			       ntl_dirns[element][1][2] +
+			       ntl_dirns[element][1][3] *
+			       ntl_dirns[element][1][3] );
+
+	ntl_recip_size[element][1] = 1.0 / ntl_size ;
+
+	ntl_dirns[element][1][1] *= ntl_recip_size[element][1];
+	ntl_dirns[element][1][2] *= ntl_recip_size[element][1];
+	ntl_dirns[element][1][3] *= ntl_recip_size[element][1];
+
+	ntl_recip_size[element][1] *= 2.0;
+
+	/* 2: z direction */
+
+	xlowmean =  (E->x[1][1][n1] +
+		     E->x[1][1][n4] +
+		     E->x[1][1][n5] +
+		     E->x[1][1][n8] )  * 0.25;
+	xhighmean = (E->x[1][1][n2] +
+		     E->x[1][1][n3] +
+		     E->x[1][1][n6] +
+		     E->x[1][1][n7] )  * 0.25;
+	zlowmean =  (E->x[1][2][n1] +
+		     E->x[1][2][n4] +
+		     E->x[1][2][n5] +
+		     E->x[1][2][n8] )  * 0.25;
+	zhighmean = (E->x[1][2][n2] +
+		     E->x[1][2][n3] +
+		     E->x[1][2][n6] +
+		     E->x[1][2][n7] )  * 0.25;
+	ylowmean =  (E->x[1][3][n1] +
+		     E->x[1][3][n4] +
+		     E->x[1][3][n5] +
+		     E->x[1][3][n8] )  * 0.25;
+	yhighmean = (E->x[1][3][n2] +
+		     E->x[1][3][n3] +
+		     E->x[1][3][n6] +
+		     E->x[1][3][n7] )  * 0.25;
+
+	ntl_dirns[element][2][1] = xhighmean - xlowmean;
+	ntl_dirns[element][2][2] = zhighmean - zlowmean;
+	ntl_dirns[element][2][3] = yhighmean - ylowmean;
+
+	ntl_size = sqrt(ntl_dirns[element][2][1] *
+			ntl_dirns[element][2][1] +
+			ntl_dirns[element][2][2] *
+			ntl_dirns[element][2][2] +
+			ntl_dirns[element][2][3] *
+			ntl_dirns[element][2][3] );
+
+	ntl_recip_size[element][2] = 1.0 / ntl_size;
+
+	ntl_dirns[element][2][1] *= ntl_recip_size[element][2];
+	ntl_dirns[element][2][2] *= ntl_recip_size[element][2];
+	ntl_dirns[element][2][3] *= ntl_recip_size[element][2];
+
+	ntl_recip_size[element][2] *= 2.0;
+
+	/* 3: y direction */
+
+	xlowmean =  (E->x[1][1][n1] +
+		     E->x[1][1][n2] +
+		     E->x[1][1][n3] +
+		     E->x[1][1][n4] )  * 0.25;
+	xhighmean = (E->x[1][1][n5] +
+		     E->x[1][1][n6] +
+		     E->x[1][1][n7] +
+		     E->x[1][1][n8] )  * 0.25;
+	zlowmean =  (E->x[1][2][n1] +
+		     E->x[1][2][n2] +
+		     E->x[1][2][n3] +
+		     E->x[1][2][n4] )  * 0.25;
+	zhighmean = (E->x[1][2][n5] +
+		     E->x[1][2][n6] +
+		     E->x[1][2][n7] +
+		     E->x[1][2][n8] )  * 0.25;
+	ylowmean =  (E->x[1][3][n1] +
+		     E->x[1][3][n2] +
+		     E->x[1][3][n3] +
+		     E->x[1][3][n4] )  * 0.25;
+	yhighmean = (E->x[1][3][n5] +
+		     E->x[1][3][n6] +
+		     E->x[1][3][n7] +
+		     E->x[1][3][n8] )  * 0.25;
+
+	ntl_dirns[element][3][1] = xhighmean - xlowmean;
+	ntl_dirns[element][3][2] = zhighmean - zlowmean;
+	ntl_dirns[element][3][3] = yhighmean - ylowmean;
+
+	ntl_size = sqrt(ntl_dirns[element][3][1] *
+			ntl_dirns[element][3][1] +
+			ntl_dirns[element][3][2] *
+			ntl_dirns[element][3][2] +
+			ntl_dirns[element][3][3] *
+			ntl_dirns[element][3][3] );
+
+	ntl_recip_size[element][3] = 1.0 / ntl_size ;
+
+	ntl_dirns[element][3][1] *= ntl_recip_size[element][3];
+	ntl_dirns[element][3][2] *= ntl_recip_size[element][3];
+	ntl_dirns[element][3][3] *= ntl_recip_size[element][3];
+
+	ntl_recip_size[element][3] *= 2.0;
+
+    } // end of for loop
+
+    /*RAA: data checking */
+    /*   if(E->control.verbose)
+	 for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
+	 for (i=1; i<=E->mesh.NEL[lev];i++)
+	 fprintf(stderr,"checking element %d, lev: %d,  area: %g,    ntl_size1: %g, ntl_size2: %g, ntl_size3: %g\n",i,lev,E->ECO[lev][i].area,E->ECO[lev][i].ntl_size[1],E->ECO[lev][i].ntl_size[2],E->ECO[lev][i].ntl_size[3]);
+    */
+    /*
+      if(E->control.verbose)
+      for (i=1; i<=E->mesh.nel;i++)
+      fprintf(stderr,"checking element %d,  area: %g,  size1: %g, size2: %g, size3: %g\n",i,E->eco[i].area,E->eco[i].size[1],E->eco[i].size[2],E->eco[i].size[3]);
+    */
+
+    return;
+}
+
+
+void get_element_coords(struct All_variables *E,
+			int el,
+			int num,
+			standard_precision *x,
+			standard_precision *z,
+			standard_precision *y,
+			standard_precision *eta1,
+			standard_precision *eta2,
+			standard_precision *eta3,
+			int level
+			)
+{
+    int k,kk;
+    int node;
+    int lnode[28]; /* what's the #defined variable for the max nodes/element ? */
+
+    standard_precision xx1,xx2,xx3;
+    standard_precision x1,x2,x3;
+    standard_precision etadash1,etadash2,etadash3;
+    standard_precision distance;
+    standard_precision dirn[5][4],mag;
+    standard_precision lN[ELNMAX+1];
+
+    standard_precision area_1;
+
+    const int dims = E->mesh.nsd;
+    const int ends = enodes[dims];
+
+
+    /* initial guess */
+
+    *eta1 = *eta2 = *eta3 = 0.0;
+    kk = 0;
+
+    for(k=1;k<=ends;k++) {
+	node = E->ien[1][el].node[k];
+	if((E->NODE[level][node] & (PER_OFFSIDE/* | OFFSIDE*/))) { /*RAA: 1/11/01, added (..| OFFSIDE) for perx and y */
+	    /* This node has ambiguous coordinates ! */
+
+	    x1 = E->X[level][1][node] - E->ECO[level][el].centre[1];
+	    x2 = E->X[level][2][node] - E->ECO[level][el].centre[2];
+	    x3 = E->X[level][3][node] - E->ECO[level][el].centre[3];
+
+	}  /*end of 'if' PER_OFFSIDE*/
+	lnode[k] = node;
+    }
+
+	do {
+	    shape_fn(E,el,lN,*eta1,*eta2,*eta3,level);
+
+	    /*------------------------------------------------------*/
+
+	    /* If periodic, we want actual (not wrapped around) coordinates
+	       NB - this currently assumes only periodic in x direction -
+	       and will need to be extended to y direction
+	    */
+
+	    xx1=xx2=xx3=0.0;
+	    for(k=1;k<=ends;k++) {
+		node = lnode[k];
+
+		xx1 += E->X[level][1][node] * lN[k];
+		xx2 += E->X[level][2][node] * lN[k];
+		xx3 += E->X[level][3][node] * lN[k];
+	    }
+
+	    x1 = x[num] - xx1;
+	    x2 = z[num] - xx2;
+	    x3 = y[num] - xx3;
+
+	    distance = (x1*x1+x2*x2+x3*x3);
+
+	    etadash1 = ( x1 * ntl_dirns[el][1][1] +
+			 x2 * ntl_dirns[el][1][2] +
+			 x3 * ntl_dirns[el][1][3] ) * ntl_recip_size[el][1];
+
+	    etadash2 = ( x1 * ntl_dirns[el][2][1] +
+			 x2 * ntl_dirns[el][2][2] +
+			 x3 * ntl_dirns[el][2][3] ) * ntl_recip_size[el][2];
+
+	    etadash3 = ( x1 * ntl_dirns[el][3][1] +
+			 x2 * ntl_dirns[el][3][2] +
+			 x3 * ntl_dirns[el][3][3] ) * ntl_recip_size[el][3];
+
+	    if(kk == 0) {
+		*eta1 += etadash1;
+		*eta2 += etadash2;
+		*eta3 += etadash3;
+	    }
+	    else /* Damping */{
+		*eta1 += 0.8 * etadash1;
+		*eta2 += 0.8 * etadash2;
+		*eta3 += 0.8 * etadash3;
+	    }
+
+	    if(++kk > 10)
+		fprintf(stderr,"%d ... Tracer %d/%d in element %d ... eta (%g,%g,%g v %g,%g,%g) -> distance %g (%g,%g,%g)\n",kk,
+			num,level,el,*eta1,*eta2,*eta3,x[num],z[num],y[num],distance,xx1,xx2,xx3);
+
+	    /* Only need to iterate if this is marginal. If eta > distortion of
+	       an individual element then almost certainly the tracer is in a different element ...
+	       or the mesh is terrible !  */
+
+	} while((distance > E->ECO[level][el].area * E->control.accuracy * E->control.accuracy) &&
+		(fabs(*eta1) < 1.5) && (fabs(*eta2) < 1.5) && (fabs(*eta3) < 1.5) &&
+		(kk < 100)); /*RAA: changed 1.5 to 5.0 in this line, to correspond with 2D case */
+
+
+    return;
+}
+
+
+void shape_fn(Array2D<double,NODES_PER_ELEMENT>& shape,
+		double eta1, double eta2, double eta3)
+{
+    std::vector<double> lN(NODES_PER_ELEMENT);
+    lN[7] = 0.125 * (1.0+eta1) * (1.0-eta2) * (1.0+eta3);
+    lN[6] = 0.125 * (1.0+eta1) * (1.0+eta2) * (1.0+eta3);
+    lN[5] = 0.125 * (1.0-eta1) * (1.0+eta2) * (1.0+eta3);
+    lN[4] = 0.125 * (1.0-eta1) * (1.0-eta2) * (1.0+eta3);
+    lN[3] = 0.125 * (1.0+eta1) * (1.0-eta2) * (1.0-eta3);
+    lN[2] = 0.125 * (1.0+eta1) * (1.0+eta2) * (1.0-eta3);
+    lN[1] = 0.125 * (1.0-eta1) * (1.0+eta2) * (1.0-eta3);
+    lN[0] = 0.125 * (1.0-eta1) * (1.0-eta2) * (1.0-eta3);
+
+    shape.push_back(lN);
+}
+#endif
+
+
 // version
-// $Id: Interpolator.cc,v 1.10 2004/01/07 01:07:57 tan2 Exp $
+// $Id: Interpolator.cc,v 1.11 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file

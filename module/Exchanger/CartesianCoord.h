@@ -7,47 +7,42 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_Transformational_h)
-#define pyCitcom_Transformational_h
+#if !defined(pyCitcom_CartesianCoord_h)
+#define pyCitcom_CartesianCoord_h
 
 #include "Array2D.h"
 #include "BoundedBox.h"
 #include "DIM.h"
 
-struct All_variables;
+class BoundedMesh;
 
-class Transformational {
-    
-     static const All_variables* E;
-    
+
+class CartesianCoord {
+
 public:
-    ~Transformational() {};
+    CartesianCoord() {};
+    ~CartesianCoord() {};
 
-    static void setE(const All_variables* E);
-    static Transformational& instance();
-    
     // Transform to cartesian coordinate system from spherical system
     void coordinate(BoundedBox& bbox) const;
     void coordinate(Array2D<double,DIM>& X) const;
-    void traction(Array2D<double,DIM>& F) const;
-    void velocity(Array2D<double,DIM>& V) const;
+    void vector(Array2D<double,DIM>& V,
+		const Array2D<double,DIM>& X) const;
 
     // Transform to spherical coordinate system from cartesian system
     void xcoordinate(BoundedBox& bbox) const;
     void xcoordinate(Array2D<double,DIM>& X) const;
-    void xtraction(Array2D<double,DIM>& F) const;
-    void xvelocity(Array2D<double,DIM>& V) const;
+    void xvector(Array2D<double,DIM>& V,
+		 const Array2D<double,DIM>& X) const;
 
 private:
-    Transformational();
+
 };
-
-
 
 
 #endif
 
 // version
-// $Id: CartesianCoord.h,v 1.1 2004/01/06 22:38:07 puru Exp $
+// $Id: CartesianCoord.h,v 1.2 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file

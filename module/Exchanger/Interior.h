@@ -18,9 +18,8 @@ struct All_variables;
 class Interior : public BoundedMesh {
 
 public:
-    Interior(bool dimensional, bool transformational);
-    Interior(const BoundedBox& remoteBBox, const All_variables* E,
-	     bool dimensional, bool transformational);
+    Interior();
+    Interior(const BoundedBox& remoteBBox, const All_variables* E);
     virtual ~Interior() {};
 
 private:
@@ -32,6 +31,6 @@ private:
 #endif
 
 // version
-// $Id: Interior.h,v 1.5 2004/01/06 22:40:28 puru Exp $
+// $Id: Interior.h,v 1.6 2004/01/07 21:54:00 tan2 Exp $
 
 // End of file
