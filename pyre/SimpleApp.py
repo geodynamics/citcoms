@@ -33,7 +33,10 @@ class SimpleApp(Application):
 
 
     def initialize(self):
-        self.layout()
+        layout = self.findLayout()
+
+        controller = self.inventory.controller
+        controller.initialize(self)
         return
 
 
@@ -47,7 +50,7 @@ class SimpleApp(Application):
 
 
 
-    def layout(self):
+    def findLayout(self):
         self.solver = self.inventory.solver
         import mpi
         self.solverCommunicator = mpi.world()
@@ -99,6 +102,6 @@ class SimpleApp(Application):
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.4 2003/08/29 20:41:04 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.5 2003/09/03 21:18:56 tan2 Exp $"
 
 # End of file

@@ -19,36 +19,40 @@ class CoupledApp(SimpleApp):
 
         self.solver = None
         self.solverCommunicator = None
+        self.intercomm = None
         self._info = journal.debug("application")
         return
 
 
 
     def initialize(self):
-        layout = self.layout()
+        layout = self.inventory.layout
+        layout.initialize(self)
 
-        #coupler = self.facilities.coupler
-        #coupler.initialize(self)
+        self.findLayout(layout)
+
+        controller = self.inventory.controller
+        controller.initialize(self)
 
         return
 
 
 
-    def layout(self):
-        layout = self.inventory.layout
-        layout.layout(self)
+    def findLayout(self, layout):
+
+        self.intercomm = layout.intercomm
 
         if layout.coarse:
             self.solver = self.inventory.coarse
             self.solverCommunicator = layout.coarse
-        if layout.fine:
+        elif layout.fine:
             self.solver = self.inventory.fine
             self.solverCommunicator = layout.fine
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
 
-        return layout
+        return
 
 
 
@@ -106,6 +110,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.1 2003/08/30 00:39:16 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.2 2003/09/03 21:18:56 tan2 Exp $"
 
 # End of file
