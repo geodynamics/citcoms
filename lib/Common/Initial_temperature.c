@@ -138,6 +138,9 @@ void restart_tic_from_file(struct All_variables *E)
     parallel_process_termination();
   }
 
+  if (E->parallel.me==0)
+    fprintf(E->fp,"Reading %s for restarted temperature\n",output_file);
+
   fgets(input_s,1000,fp);
   sscanf(input_s,"%d %d %f",&ll,&mm,&notusedhere);
 
