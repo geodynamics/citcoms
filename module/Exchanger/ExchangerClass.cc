@@ -14,20 +14,19 @@
 
 Exchanger::Exchanger(const MPI_Comm communicator,
 		     const MPI_Comm icomm,
-		     const int leader,
+		     const int leaderRank,
 		     const int local,
 		     const int remote,
 		     const All_variables *e):
     comm(communicator),
     intercomm(icomm),
-    leaderRank(leader),
+    leader(leaderRank),
     localLeader(local),
     remoteLeader(remote),
     E(e),
     boundary(NULL) {
 
-    MPI_Comm_rank(comm, const_cast<int*>(&lrank));
-    MPI_Comm_rank(intercomm, const_cast<int*>(&rank));
+    MPI_Comm_rank(comm, const_cast<int*>(&rank));
 }
 
 
@@ -36,22 +35,12 @@ Exchanger::~Exchanger() {
 }
 
 
-void Exchanger::gather() {
-    std::cout << "in Exchanger::gather" << std::endl;
-}
-
-
-void Exchanger::distribute() {
-    std::cout << "in Exchanger::distribute" << std::endl;
-}
-
-
 void Exchanger::reset_target(const MPI_Comm icomm, const int receiver) {
     //intercomm = icomm;
     //remoteLeader = receiver;
 }
 
-
+#if 0
 void Exchanger::local_sendVelocities(void) {
 
     std::cout << "in Exchanger::local_sendVelocities" << std::endl;
@@ -175,48 +164,35 @@ void Exchanger::local_receiveTemperature(void) {
 
     return;
 }
+#endif
 
-void Exchanger::createDataArrays(void) {
-    std::cout << "in Exchanger::createDataArrays"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
 
-    if(rank == localLeader) {
-      incoming.size=boundary->size;
-      incoming.T = new double[incoming.size];      
-      outgoing.size=boundary->size;
-      outgoing.T = new double[incoming.size];
-      for(int i=0; i < boundary->dim; i++)
-	{
-	  incoming.v[i] = new double[incoming.size];
-	  outgoing.v[i] = new double[outgoing.size];
-	}   
-    }
-    
-    return;
+void Exchanger::createDataArrays() {
+    std::cout << "in Exchanger::createDataArrays" << std::endl;
+
+    int size = boundary->size;
+    incoming.size = size;
+    incoming.T = new double[size];      
+    outgoing.size = size;
+    outgoing.T = new double[size];
+    for(int i=0; i < boundary->dim; i++) {
+	incoming.v[i] = new double[size];
+	outgoing.v[i] = new double[size];
+    }   
 }
 
-void Exchanger::deleteDataArrays(void) {
-    std::cout << "in Exchanger::deleteDataArrays"
-	      << "  rank = " << rank
-	      << "  leader = "<< localLeader
-	      << "  receiver = "<< remoteLeader
-	      << std::endl;
+
+void Exchanger::deleteDataArrays() {
+    std::cout << "in Exchanger::deleteDataArrays" << std::endl;
     
-    if(rank == localLeader) {
-      delete incoming.T;
-      delete outgoing.T;
-      for(int i=0; i < boundary->dim; i++)
-	{
-	  delete incoming.v[i];
-	  delete outgoing.v[i];
-	}
-    }
-    
-    return;
+      delete [] incoming.T;
+      delete [] outgoing.T;
+      for(int i=0; i < boundary->dim; i++) {
+	  delete [] incoming.v[i];
+	  delete [] outgoing.v[i];
+      }
 }
+
 
 void Exchanger::sendTemperature(void) {
     std::cout << "in Exchanger::sendTemperature" 
@@ -225,7 +201,7 @@ void Exchanger::sendTemperature(void) {
 	      << "  receiver = "<< remoteLeader
 	      << std::endl;
 
-    if(rank == localLeader) {
+    if(rank == leader) {
       
 //       std::cout << "nox = " << E->mesh.nox << std::endl;
 //       for(int j=0; j < boundary->size; j++)
@@ -284,7 +260,7 @@ void Exchanger::receiveTemperature(void) {
 void Exchanger::sendVelocities() {
     std::cout << "in Exchanger::sendVelocities" << std::endl;
 
-    if(rank == localLeader) {
+    if(rank == leader) {
 	int tag = 0;
 	for(int i=0; i < boundary->dim; i++) {
 	    MPI_Send(outgoing.v[i], outgoing.size, MPI_DOUBLE,
@@ -298,7 +274,7 @@ void Exchanger::sendVelocities() {
 void Exchanger::receiveVelocities() {
     std::cout << "in Exchanger::receiveVelocities" << std::endl;
 
-    if(rank == localLeader) {
+    if(rank == leader) {
 	int tag = 0;
 	MPI_Status status;
 	for(int i=0; i < boundary->dim; i++) {
@@ -349,7 +325,7 @@ double Exchanger::exchangeTimestep(const double dt) {
 	      << "  receiver = "<< remoteLeader << std::endl;
     double remotedt = dt;
 
-    if (rank == localLeader) {
+    if (rank == leader) {
 	const int tag = 0;
 	MPI_Status status;
 
@@ -366,7 +342,7 @@ static const int WAIT_TAG = 356;
 
 void Exchanger::wait() {
     std::cout << "in Exchanger::wait" << std::endl;
-    if (rank == localLeader) {
+    if (rank == leader) {
 	int junk;
 	MPI_Status status;
 
@@ -379,7 +355,7 @@ void Exchanger::wait() {
 
 void Exchanger::nowait() {
     std::cout << "in Exchanger::nowait" << std::endl;
-    if (rank == localLeader) {
+    if (rank == leader) {
 	int junk = 0;
 
 	MPI_Send(&junk, 1, MPI_INT,
@@ -389,7 +365,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.17 2003/09/27 20:30:55 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.18 2003/09/28 00:11:03 tan2 Exp $
 
 // End of file
 

@@ -153,11 +153,11 @@ void Boundary::init(const All_variables *E) {
 }
 
 
-void Boundary::mapCoarseGrid(const All_variables *E, const int localrank) {
+void Boundary::mapCoarseGrid(const All_variables *E, const int rank) {
     std::cout << "in Boundary::mapCoarseGrid" << std::endl;
 
-    int ind,n,n1,n2;    
-    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3],xi[3],norm;
+    int ind,n;    
+    double xt[3],xc[24],dett,det[4],x1[3],x2[3],x3[3],x4[3];
     int nsub[]={0, 2, 3, 7,
 		0, 1, 2, 5, 
 		4, 7, 5, 0, 
@@ -196,8 +196,8 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int localrank) {
                     if(det[0] < 0.0 || det[1] <0.0 || det[2] < 0.0 || det[3] < 0.0) continue;                    
                     ind=1;
                     bid2elem[i]=n+1;
-                    bid2proc[i]=localrank;
-		    //cout << "i = " << i << "elem = " << n+1 << " " << "rank = " << localrank << endl;
+                    bid2proc[i]=rank;
+		    //cout << "i = " << i << "elem = " << n+1 << " " << "rank = " << rank << endl;
                     shape[i*8+nsub[k*4]]=det[0]/dett;
                     shape[i*8+nsub[k*4+1]]=det[1]/dett;
                     shape[i*8+nsub[k*4+2]]=det[2]/dett;
@@ -211,31 +211,7 @@ void Boundary::mapCoarseGrid(const All_variables *E, const int localrank) {
     //printBid2proc();
     //printBid2elem();
     
-    // self test
-    for(int i=0; i< size; i++) {
-        n1=bid2elem[i];
-        n2=bid2proc[i];
-        for(int j=0; j< dim; j++) xt[j]=X[j][i];
-        for(int j=0; j < 8; j++) {
-            
-            for(int k=0; k < dim; k++) {                
-                //xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
-                xc[j*dim+k]=E->X[E->mesh.levmax][1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
-            }
-	    //std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
-        }        
-        for(int k=0; k<dim; k++)xi[k]=0.0;
-        for(int k=0; k<dim; k++)
-            for(int j=0; j < 8; j++) {
-                xi[k]+=xc[j*dim+k]*shape[i*8+j];                
-            }
-	//std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
-        norm = 0.0;
-        for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
-        if(norm > 1.e-10) {            
-            std::cout << "\n in Boundary::mapCoarseGrid for bid2elem interpolation functions are wrong " << norm << std::endl;
-        }
-    }
+    testMapping(E);
 
 }
 
@@ -319,7 +295,36 @@ void Boundary::mapFineGrid(const All_variables *E) {
 }
 
 
-double Boundary::Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4)
+void Boundary::testMapping(const All_variables *E) const {
+    double xc[24], xi[3], xt[3];
+
+    for(int i=0; i< size; i++) {
+        for(int j=0; j< dim; j++) xt[j]=X[j][i];
+
+        int n1=bid2elem[i];
+
+        for(int j=0; j < 8; j++) {
+            for(int k=0; k < dim; k++) {                
+                xc[j*dim+k]=E->X[E->mesh.levmax][1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
+            }
+	    //std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
+        }        
+        for(int k=0; k<dim; k++)xi[k]=0.0;
+        for(int k=0; k<dim; k++)
+            for(int j=0; j < 8; j++) {
+                xi[k]+=xc[j*dim+k]*shape[i*8+j];                
+            }
+	//std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
+        double norm = 0.0;
+        for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
+        if(norm > 1.e-10) {            
+            std::cout << "\n in Boundary::mapCoarseGrid for bid2elem interpolation functions are wrong " << norm << std::endl;
+        }
+    }
+}
+
+
+double Boundary::Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4)  const 
 {
     double vol;
 //    xx[0] = x2;  xx[1] = x3;  xx[2] = x4;
@@ -335,7 +340,7 @@ double Boundary::Tetrahedronvolume(double  *x1, double *x2, double *x3, double *
 }
 
 
-double Boundary::det3_sub(double *x1, double *x2, double *x3)
+double Boundary::det3_sub(double *x1, double *x2, double *x3) const 
 {
     return (x1[0]*(x2[1]*x3[2]-x3[1]*x2[2])
             -x1[1]*(x2[0]*x3[2]-x3[0]*x2[2])
@@ -419,10 +424,10 @@ void Boundary::broadcast(const MPI_Comm comm, const int broadcaster) {
 
 
 void Boundary::sendBid2proc(const MPI_Comm comm, 
-			    const int lrank, const int leader) {
+			    const int rank, const int leader) {
     std::cout << "in Boundary::sendBid2proc" << std::endl;
 
-    if (lrank == leader) {
+    if (rank == leader) {
 	int nproc;
 	MPI_Comm_size(comm, &nproc);
 
@@ -443,7 +448,7 @@ void Boundary::sendBid2proc(const MPI_Comm comm,
     }
     else {
 	MPI_Send(bid2proc, size, MPI_INT,
-		 leader, lrank, comm);
+		 leader, rank, comm);
     }
 
 }
@@ -492,6 +497,6 @@ void Boundary::printBound() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.24 2003/09/27 21:04:37 tan2 Exp $
+// $Id: Boundary.cc,v 1.25 2003/09/28 00:11:03 tan2 Exp $
 
 // End of file

@@ -61,8 +61,9 @@ private:
 //     std::auto_ptr<int> bid2gid_;
 //     std::auto_ptr<int> bid2proc_;  
 
-    double Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4);
-    double det3_sub(double  *x1, double *x2, double *x3);
+    void testMapping(const All_variables *E) const;
+    double Tetrahedronvolume(double  *x1, double *x2, double *x3, double *x4) const;
+    double det3_sub(double  *x1, double *x2, double *x3) const;
 
 
 };
@@ -70,6 +71,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.14 2003/09/27 21:04:37 tan2 Exp $
+// $Id: Boundary.h,v 1.15 2003/09/28 00:11:03 tan2 Exp $
 
 // End of file

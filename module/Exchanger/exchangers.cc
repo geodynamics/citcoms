@@ -237,7 +237,7 @@ PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
     CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
       (PyCObject_AsVoidPtr(obj));
 
-    cge->interpolate();
+    //cge->interpolate();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -529,6 +529,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.14 2003/09/27 20:52:05 tan2 Exp $
+// $Id: exchangers.cc,v 1.15 2003/09/28 00:11:03 tan2 Exp $
 
 // End of file

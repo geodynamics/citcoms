@@ -30,7 +30,7 @@ class Exchanger {
 public:
     Exchanger(const MPI_Comm comm,
 	      const MPI_Comm intercomm,
-	      const int leaderRank,
+	      const int leader,
 	      const int localLeader,
 	      const int remoteLeader,
 	      const All_variables *E);
@@ -58,23 +58,20 @@ public:
     void wait();
     void nowait();
 
-    virtual void gather();
-    virtual void distribute();
-    virtual void interpretate() = 0; // interpolation or extrapolation
+    virtual void gather() = 0;
+    virtual void distribute() = 0;
+    virtual void interpretate() = 0;  // interpolate or extrapolate
   //    virtual void impose_bc() = 0;    // set bc flag
-
-    virtual void mapBoundary() = 0;
-                                     // create mapping from Boundary object
+    virtual void mapBoundary() = 0;  // create mapping from Boundary object
                                      // to global id array
 
 protected:
     const MPI_Comm comm;       // communicator of current solver
     const MPI_Comm intercomm;  // intercommunicator between solvers
 
-    const int lrank;           // proc. rank in comm
-    const int rank;            // proc. rank in intercomm
+    const int rank;            // proc. rank in comm
+    const int leader;          // leader rank (in comm) of current solver
 
-    const int leaderRank;      // leader rank (in comm) of current solver
     const int localLeader;     // leader rank (in intercomm) of current solver
     const int remoteLeader;    // leader rank (in intercomm) of another solver
 
@@ -101,7 +98,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.17 2003/09/27 20:30:55 tan2 Exp $
+// $Id: ExchangerClass.h,v 1.18 2003/09/28 00:11:03 tan2 Exp $
 
 // End of file
 
