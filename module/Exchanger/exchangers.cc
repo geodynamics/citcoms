@@ -11,6 +11,7 @@
 #include <Python.h>
 #include <iostream>
 
+#include "Boundary.h"
 #include "CoarseGridExchanger.h"
 #include "FineGridExchanger.h"
 #include "mpi/Communicator.h"
@@ -19,6 +20,7 @@
 
 #include "exchangers.h"
 
+void deleteBoundary(void*);
 void deleteCoarseGridExchanger(void*);
 void deleteFineGridExchanger(void*);
 
@@ -71,11 +73,12 @@ PyObject * pyExchanger_createCoarseGridExchanger(PyObject *self, PyObject *args)
     //std::cout << "my rank is " << rank << std::endl;
     //std::cout << "my rank in solver is " << E->parallel.me << std::endl;
 
-    CoarseGridExchanger fge(comm, intercomm,
-			  localLeader, remoteLeader,
-			  E);
+    CoarseGridExchanger *cge = new CoarseGridExchanger(
+	                                comm, intercomm,
+					localLeader, remoteLeader,
+					E);
 
-    PyObject *cobj = PyCObject_FromVoidPtr(&fge, deleteCoarseGridExchanger);
+    PyObject *cobj = PyCObject_FromVoidPtr(cge, deleteCoarseGridExchanger);
     return Py_BuildValue("O", cobj);
 }
 
@@ -109,32 +112,130 @@ PyObject * pyExchanger_createFineGridExchanger(PyObject *self, PyObject *args)
     //std::cout << "my rank is " << rank << std::endl;
     //std::cout << "my rank in solver is " << E->parallel.me << std::endl;
 
-    FineGridExchanger fge(comm, intercomm,
-			  localLeader, remoteLeader,
-			  E);
+    FineGridExchanger *fge = new FineGridExchanger(comm, intercomm,
+						   localLeader, remoteLeader,
+						   E);
 
-    PyObject *cobj = PyCObject_FromVoidPtr(&fge, deleteFineGridExchanger);
+    PyObject *cobj = PyCObject_FromVoidPtr(fge, deleteFineGridExchanger);
     return Py_BuildValue("O", cobj);
 }
 
 
+
+char pyExchanger_createBoundary__doc__[] = "";
+char pyExchanger_createBoundary__name__[] = "createBoundary";
+
+PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:createBoundary", &obj))
+	return NULL;
+
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+	                                (PyCObject_AsVoidPtr(obj));
+
+    const Boundary* b = fge->createBoundary();
+    PyObject* cobj = PyCObject_FromVoidPtr((void *)b,
+					   deleteBoundary);
+
+    return Py_BuildValue("O", cobj);
+}
+
+
+
+char pyExchanger_receiveBoundary__doc__[] = "";
+char pyExchanger_receiveBoundary__name__[] = "receiveBoundary";
+
+PyObject * pyExchanger_receiveBoundary(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:receiveBoundary", &obj))
+	return NULL;
+
+    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
+	                                  (PyCObject_AsVoidPtr(obj));
+
+    const Boundary* b = cge->receiveBoundary();
+    PyObject* cobj = PyCObject_FromVoidPtr((void *)b,
+					   deleteBoundary);
+
+    return Py_BuildValue("O", cobj);
+}
+
+
+
+char pyExchanger_sendBoundary__doc__[] = "";
+char pyExchanger_sendBoundary__name__[] = "sendBoundary";
+
+PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:sendBoundary", &obj1, &obj2))
+	return NULL;
+
+    FineGridExchanger* fge = static_cast<FineGridExchanger*>
+	                                (PyCObject_AsVoidPtr(obj1));
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
+
+
+    fge->sendBoundary(b);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+/*
+char pyExchanger_rE__doc__[] = "";
+char pyExchanger_rE__name__[] = "rE";
+
+PyObject * pyExchanger_rE(PyObject *, PyObject *)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:rE", &obj))
+	return NULL;
+
+}
+*/
+
+
 // helper functions
 
-void deleteCoarseGridExchanger(void* p) {
+void deleteBoundary(void* p) {
+    std::cout << "deleting Boundary" << std::endl;
+    delete static_cast<Boundary*>(p);
 
+    //Boundary *b = (Boundary *)p;
+    //delete b;
+
+    return;
+}
+
+
+
+void deleteCoarseGridExchanger(void* p) {
+    std::cout << "deleting CoarseGridExchanger" << std::endl;
     delete static_cast<CoarseGridExchanger*>(p);
+
+    return;
 }
 
 
 
 void deleteFineGridExchanger(void* p) {
-
+    std::cout << "deleting FineGridExchanger" << std::endl;
     delete static_cast<FineGridExchanger*>(p);
+
+    return;
 }
 
 
 
 // version
-// $Id: exchangers.cc,v 1.1 2003/09/08 21:47:27 tan2 Exp $
+// $Id: exchangers.cc,v 1.2 2003/09/09 02:35:22 tan2 Exp $
 
 // End of file

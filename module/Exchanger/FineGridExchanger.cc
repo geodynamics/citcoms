@@ -8,6 +8,7 @@
 #include <portinfo>
 #include <iostream>
 
+#include "Boundary.h"
 #include "FineGridExchanger.h"
 
 
@@ -16,26 +17,10 @@ FineGridExchanger::FineGridExchanger(MPI_Comm communicator,
 				     MPI_Comm icomm,
 				     int local,
 				     int remote,
-				     const All_variables *e)
-     :
+				     const All_variables *e):
     Exchanger(communicator, icomm, local, remote, e)
-    /*
-    comm(communicator),
-    intercomm(icomm),
-    localLeader(local),
-    remoteLeader(remote),
-    E(e)
-    */
 {
     std::cout << "in FineGridExchanger::FineGridExchanger" << std::endl;
-    /*
-    comm = communicator;
-    intercomm = icomm;
-    localLeader = local;
-    remoteLeader = remote;
-    E = e;
-    */
-    return;
 }
 
 
@@ -44,11 +29,6 @@ FineGridExchanger::~FineGridExchanger() {
     std::cout << "in FineGridExchanger::~FineGridExchanger" << std::endl;
 }
 
-
-
-void FineGridExchanger::set_target(int, int, int) {
-    std::cout << "in FineGridExchanger::setup" << std::endl;
-}
 
 
 void FineGridExchanger::gather() {
@@ -76,8 +56,56 @@ void FineGridExchanger::impose_bc() {
 }
 
 
+const Boundary* FineGridExchanger::createBoundary() {
+    std::cout << "in FineGridExchanger::createBoundary" << std::endl;
+
+    Boundary* b = NULL;
+
+    if (rank == localLeader) {
+	const int size = 10;
+	b = new Boundary(size);
+
+	// initialize...
+
+	// test
+	int *c = b->connectivity.get();
+	for(int j=0; j<size; j++)
+	    c[j] = j;
+
+	//b->printConnectivity();
+    }
+
+    return b;
+}
+
+
+int FineGridExchanger::sendBoundary(const Boundary* b) {
+    std::cout << "in FineGridExchanger::sendBoundary"
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader << std::endl;
+
+    if (rank == localLeader) {
+	int tag = 0;
+	int size = b->size;
+
+	MPI_Send(&size, 1, MPI_INT,
+		 remoteLeader, tag, intercomm);
+	tag ++;
+	MPI_Send(b->connectivity.get(), size, MPI_INT,
+		 remoteLeader, tag, intercomm);
+	tag ++;
+	for (int i=0; i<b->dim; i++, tag++) {
+	    MPI_Send(b->X[i].get(), size, MPI_DOUBLE,
+		     remoteLeader, tag, intercomm);
+	}
+    }
+
+    return 0;
+}
+
+
 
 // version
-// $Id: FineGridExchanger.cc,v 1.2 2003/09/08 21:47:27 tan2 Exp $
+// $Id: FineGridExchanger.cc,v 1.3 2003/09/09 02:35:22 tan2 Exp $
 
 // End of file

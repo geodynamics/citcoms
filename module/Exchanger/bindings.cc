@@ -47,6 +47,21 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_createFineGridExchanger__doc__},
 
+    {pyExchanger_createBoundary__name__,
+     pyExchanger_createBoundary,
+     METH_VARARGS,
+     pyExchanger_createBoundary__doc__},
+
+    {pyExchanger_receiveBoundary__name__,
+     pyExchanger_receiveBoundary,
+     METH_VARARGS,
+     pyExchanger_receiveBoundary__doc__},
+
+    {pyExchanger_sendBoundary__name__,
+     pyExchanger_sendBoundary,
+     METH_VARARGS,
+     pyExchanger_sendBoundary__doc__},
+
 
 
 
@@ -55,6 +70,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.2 2003/09/08 21:47:27 tan2 Exp $
+// $Id: bindings.cc,v 1.3 2003/09/09 02:35:22 tan2 Exp $
 
 // End of file

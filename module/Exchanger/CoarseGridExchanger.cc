@@ -8,6 +8,7 @@
 #include <portinfo>
 #include <iostream>
 
+#include "Boundary.h"
 #include "CoarseGridExchanger.h"
 
 
@@ -16,26 +17,10 @@ CoarseGridExchanger::CoarseGridExchanger(MPI_Comm communicator,
 					 MPI_Comm icomm,
 					 int local,
 					 int remote,
-					 const All_variables *e)
-    :
+					 const All_variables *e):
     Exchanger(communicator, icomm, local, remote, e)
-    /*
-    comm(communicator),
-    intercomm(icomm),
-    localLeader(local),
-    remoteLeader(remote),
-    E(e)
-    */
 {
     std::cout << "in CoarseGridExchanger::CoarseGridExchanger" << std::endl;
-    /*
-    comm = communicator;
-    intercomm = icomm;
-    localLeader = local;
-    remoteLeader = remote;
-    E = e;
-    */
-    return;
 }
 
 
@@ -44,11 +29,6 @@ CoarseGridExchanger::~CoarseGridExchanger() {
     std::cout << "in CoarseGridExchanger::~CoarseGridExchanger" << std::endl;
 }
 
-
-
-void CoarseGridExchanger::set_target(int, int, int) {
-    std::cout << "in CoarseGridExchanger::setup" << std::endl;
-}
 
 
 void CoarseGridExchanger::gather() {
@@ -76,8 +56,41 @@ void CoarseGridExchanger::impose_bc() {
 }
 
 
+const Boundary* CoarseGridExchanger::receiveBoundary() {
+    std::cout << "in CoarseGridExchanger::receiveBoundary"
+	      << "  rank = " << rank
+	      << "  leader = "<< localLeader << std::endl;
+
+    Boundary *b = NULL;
+
+    if (rank == localLeader) {
+	int tag = 0;
+	MPI_Status status;
+	int size;
+	MPI_Recv(&size, 1, MPI_INT,
+		 remoteLeader, tag, intercomm, &status);
+	tag ++;
+
+	b = new Boundary(size);
+
+	MPI_Recv(b->connectivity.get(), size, MPI_INT,
+		 remoteLeader, tag, intercomm, &status);
+	tag ++;
+	for (int i=0; i<b->dim; i++, tag++) {
+	    MPI_Recv(b->X[i].get(), size, MPI_DOUBLE,
+		     remoteLeader, tag, intercomm, &status);
+	}
+
+	//b->printConnectivity();
+    }
+
+    return b;
+}
+
+
+
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.1 2003/09/08 21:47:27 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.2 2003/09/09 02:35:22 tan2 Exp $
 
 // End of file
