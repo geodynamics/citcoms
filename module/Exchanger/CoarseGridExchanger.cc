@@ -91,9 +91,9 @@ void CoarseGridExchanger::interpretate() {
 	    for(int mm=1; mm<=E->sphere.caps_per_proc; mm++)
 		for(int k=0; k<8; k++) {
 		    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
-		    outgoing.v[0][i] += boundary->shape[i*8+k] * E->V[mm][1][node];
-		    outgoing.v[1][i] += boundary->shape[i*8+k] * E->V[mm][2][node];
-		    outgoing.v[2][i] += boundary->shape[i*8+k] * E->V[mm][3][node];
+		    outgoing.v[0][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[1][node];
+		    outgoing.v[1][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[2][node];
+		    outgoing.v[2][i] += boundary->shape[i*8+k] * E->sphere.cap[mm].V[3][node];
 		}
 	}
     }
@@ -174,6 +174,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.25 2003/09/28 15:36:11 tan2 Exp $
+// $Id: CoarseGridExchanger.cc,v 1.26 2003/09/29 02:52:22 puru Exp $
 
 // End of file
