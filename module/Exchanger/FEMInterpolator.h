@@ -24,13 +24,13 @@ public:
     virtual ~FEMInterpolator() {};
 
     inline int size() const {return elem_.size();}
-    virtual void interpolateDisplacement(Array2D<double,DIM>& D) const = 0;
-    virtual void interpolateForce(Array2D<double,DIM>& F) const = 0;
-    virtual void interpolatePressure(Array2D<double,1>& P) const = 0;
-    virtual void interpolateStress(Array2D<double,DIM>& S) const = 0;
-    virtual void interpolateTemperature(Array2D<double,1>& T) const = 0;
-    virtual void interpolateTraction(Array2D<double,DIM>& F) const = 0;
-    virtual void interpolateVelocity(Array2D<double,DIM>& V) const = 0;
+    virtual void interpolateDisplacement(Array2D<double,DIM>& D) = 0;
+    virtual void interpolateForce(Array2D<double,DIM>& F) = 0;
+    virtual void interpolatePressure(Array2D<double,1>& P) = 0;
+    virtual void interpolateStress(Array2D<double,DIM>& S) = 0;
+    virtual void interpolateTemperature(Array2D<double,1>& T) = 0;
+    virtual void interpolateTraction(Array2D<double,DIM>& F) = 0;
+    virtual void interpolateVelocity(Array2D<double,DIM>& V) = 0;
 
 private:
     // disable copy c'tor and assignment operator
@@ -44,6 +44,6 @@ private:
 #endif
 
 // version
-// $Id: FEMInterpolator.h,v 1.1 2003/11/25 02:59:11 tan2 Exp $
+// $Id: FEMInterpolator.h,v 1.2 2003/12/16 02:14:10 tan2 Exp $
 
 // End of file

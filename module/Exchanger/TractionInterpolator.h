@@ -20,21 +20,25 @@ class BoundedMesh;
 class TractionInterpolator: public FEMInterpolator {
     const All_variables* E;
     float *gtraction[DIM];
+
     double theta_tol;
     double fi_tol;
     double r_tol;
+
     int xmin;
     int xmax;
     int ymin;
     int ymax;
     int zmin;
     int zmax;
+
     int dm_xmin;
     int dm_xmax;
     int dm_ymin;
     int dm_ymax;
     int dm_zmin;
     int dm_zmax;
+
     int do_xmin;
     int do_xmax;
     int do_ymin;
@@ -47,21 +51,21 @@ public:
 			 Array2D<int,1>& meshNode,
 			 const All_variables* E);
 
-    virtual ~TractionInterpolator() {};
+    virtual ~TractionInterpolator();
 
-    void InterpolateTraction(Array2D<double,DIM>& F,All_variables* E);
-    virtual void domain_cutout(const All_variables* E);
+    virtual void InterpolateTraction(Array2D<double,DIM>& F);
+    void domain_cutout();
+
 private:
     void init(const BoundedMesh& boundedMesh,
-	      const All_variables* E,
 	      Array2D<int,1>& meshNode);
 
-    void initComputeTraction(const BoundedMesh& boundedMesh,
-			     const All_variables* E);
-    void computeTraction(All_variables* E);
-    void get_elt_traction(All_variables* E,int el,int far,int NS,int lev,int mm);
+    void initComputeTraction(const BoundedMesh& boundedMesh);
+    void computeTraction();
+    void get_elt_traction(int el, int far, int NS,
+			  int lev, int mm);
 
-    void findMaxGridSpacing(const All_variables* E);
+    void findMaxGridSpacing();
     bool isCandidate(const double* xc, const BoundedBox& bbox) const;
     double TetrahedronVolume(double *x1, double *x2,
 			     double *x3, double *x4) const;
@@ -72,13 +76,14 @@ private:
     void selfTest(const BoundedMesh& boundedMesh,
 		  const Array2D<int,1>& meshNode) const;
 
-    virtual void interpolateDisplacement(Array2D<double,DIM>& D) const {};
-    virtual void interpolateForce(Array2D<double,DIM>& F) const {};
-    virtual void interpolatePressure(Array2D<double,1>& P) const {};
-    virtual void interpolateStress(Array2D<double,DIM>& S) const {};
-    virtual void interpolateTemperature(Array2D<double,1>& T) const {};
-    virtual void interpolateTraction(Array2D<double,DIM>& T) const {};
-    virtual void interpolateVelocity(Array2D<double,DIM>& V) const {};
+    // disable
+    virtual void interpolateDisplacement(Array2D<double,DIM>& D) {};
+    virtual void interpolateForce(Array2D<double,DIM>& F) {};
+    virtual void interpolatePressure(Array2D<double,1>& P) {};
+    virtual void interpolateStress(Array2D<double,DIM>& S) {};
+    virtual void interpolateTemperature(Array2D<double,1>& T) {};
+    virtual void interpolateTraction(Array2D<double,DIM>& T) {};
+    virtual void interpolateVelocity(Array2D<double,DIM>& V) {};
 };
 
 
@@ -86,6 +91,6 @@ private:
 #endif
 
 // version
-// $Id: TractionInterpolator.h,v 1.1 2003/11/28 22:34:16 ces74 Exp $
+// $Id: TractionInterpolator.h,v 1.2 2003/12/16 02:14:10 tan2 Exp $
 
 // End of file
