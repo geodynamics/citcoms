@@ -15,6 +15,7 @@ PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
+	-l$(PROJECT)Common \
 	-l$(PROJECT)$(TYPE) \
 	-ljournal \
 	-lmpimodule
@@ -33,6 +34,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.16 2003/09/29 20:25:36 tan2 Exp $
+# $Id: Make.mm,v 1.17 2003/09/30 00:39:49 tan2 Exp $
 
 # End of file

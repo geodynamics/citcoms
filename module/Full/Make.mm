@@ -15,6 +15,7 @@ PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
+	-l$(PROJECT)Common \
 	-l$(PROJECT)$(TYPE) \
 	-ljournal \
 	-lmpimodule
@@ -41,6 +42,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.8 2003/09/29 20:25:36 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/09/30 00:39:30 tan2 Exp $
 
 # End of file
