@@ -56,8 +56,7 @@ void Interpolator::interpolateF(Array2D<double,DIM>& target,
 	for(int k=0; k<NODES_PER_ELEMENT; k++) {
 	    int node = E->ien[mm][n1].node[k+1];
 	    for(int d=0; d<DIM; d++) {
-		int a=E->id[m][node].doff[d+1];
-		target[d][i] += shape_[k][i] * E->F[m][a1];
+		target[d][i] += shape_[k][i] * E->traction[m][3*(node-1)+d+1];
 	    }
 	}
     }
@@ -318,6 +317,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.3 2003/11/23 18:02:01 ces74 Exp $
+// $Id: Interpolator.cc,v 1.4 2003/11/23 18:05:05 ces74 Exp $
 
 // End of file
