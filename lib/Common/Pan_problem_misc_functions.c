@@ -61,12 +61,15 @@ void apply_side_sbc(struct All_variables *E)
   for(m=1; m<=E->sphere.caps_per_proc; m++) {
     E->sbc.node[m] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
 
-    n = 0;
+    n = 1;
     for(i=1; i<=E->lmesh.nno; i++) {
       if(E->node[m][i] & sbc_flags) {
 	E->sbc.node[m][i] = n;
 	n++;
       }
+      else
+	E->sbc.node[m][i] = 0;
+
     }
 
     for(side=SIDE_BEGIN; side<=SIDE_END; side++)
