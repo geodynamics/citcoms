@@ -667,9 +667,6 @@ char * filen;
 }
 
 
-/* ==========================================================  */
-/* from Output.c                                               */
-/* =========================================================== */
 
 void output_velo_related(E,file_number)
   struct All_variables *E;
@@ -846,7 +843,43 @@ void get_surface_velo(E, SV,m)
 
 
 /* ==========================================================  */
-/* from                                                        */
+/* from Global_operations.c                                    */
 /* =========================================================== */
 
+void sum_across_depth_sph1(E,sphc,sphs)
+struct All_variables *E;
+float *sphc,*sphs;
+{
+ int jumpp,total,j,d;
+ float *sphcs,*temp;
+
+ temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
+ sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
+
+ total = E->sphere.hindice*2+3;
+ jumpp = E->sphere.hindice;
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphcs[j] = sphc[j];
+   sphcs[j+jumpp] = sphs[j];
+ }
+
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
+
+ for (j=0;j<E->sphere.hindice;j++)   {
+   sphc[j] = temp[j];
+   sphs[j] = temp[j+jumpp];
+ }
+
+ MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
+
+ free((void*) temp);
+ free((void*) sphcs);
+
+return;
+}
+
+
+/* ==========================================================  */
+/* from                                                        */
+/* =========================================================== */
 

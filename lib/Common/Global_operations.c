@@ -17,7 +17,7 @@ void remove_horiz_ave(E,X,H,store_or_not)
      int store_or_not;
 
 {
-    int m,i,j,k,n,ln,nox,noz,noy;
+    int m,i,j,k,n,nox,noz,noy;
     void return_horiz_ave();
 
     const int dims = E->mesh.nsd;
@@ -28,17 +28,13 @@ void remove_horiz_ave(E,X,H,store_or_not)
 
     return_horiz_ave(E,X,H);
 
-/*  if (E->parallel.me==0)
-    for(i=1;i<=noz;i++)
-      fprintf(E->fp,"av %d %d %g\n",E->parallel.me,i,H[i]);
-*/
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=noz;i++)
-        for(k=1;k<=noy;k++)
-          for(j=1;j<=nox;j++)     {
+    for(k=1;k<=noy;k++)
+      for(j=1;j<=nox;j++)
+	for(i=1;i<=noz;i++) {
             n = i+(j-1)*noz+(k-1)*noz*nox;
             X[m][n] -= H[i];
-           }
+	}
 
    return;
   }
@@ -254,38 +250,6 @@ float return_bulk_value(E,Z,average)
     return((float)integral);
 }
 
-/* ================================================== */
-void sum_across_depth_sph1(E,sphc,sphs)
-struct All_variables *E;
-float *sphc,*sphs;
-{
- int jumpp,total,j,d;
- float *sphcs,*temp;
-
- temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
- sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
-
- total = E->sphere.hindice*2+3;
- jumpp = E->sphere.hindice;
- for (j=0;j<E->sphere.hindice;j++)   {
-   sphcs[j] = sphc[j];
-   sphcs[j+jumpp] = sphs[j];
- }
-
- MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
-
- for (j=0;j<E->sphere.hindice;j++)   {
-   sphc[j] = temp[j];
-   sphs[j] = temp[j+jumpp];
- }
-
- MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.vertical_comm);
-
- free((void*) temp);
- free((void*) sphcs);
-
-return;
-}
 
 /* ================================================== */
 float find_max_horizontal(E,Tmax)

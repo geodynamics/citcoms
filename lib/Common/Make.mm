@@ -1,18 +1,11 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#                               Michael A.G. Aivazis
-#                                  Steve Quenette
-#                        California Institute of Technology
-#                        (C) 1998-2003  All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# version
-# $Id: Make.mm,v 1.6 2003/07/14 21:08:10 tan2 Exp $
 
 include local.def
 
@@ -31,6 +24,7 @@ PROJ_SRCS = \
 	Drive_solvers.c \
 	Element_calculations.c \
 	General_matrix_functions.c \
+	Global_operations.c \
 	Instructions.c \
 	Interuption.c \
 	Nodal_mesh.c \
@@ -65,7 +59,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.6 2003/07/14 21:08:10 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/06 18:47:45 tan2 Exp $
 
 #
 # End of file

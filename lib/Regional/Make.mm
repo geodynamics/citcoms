@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.4 2003/04/25 22:29:56 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/08/06 18:47:45 tan2 Exp $
 
 include local.def
 TYPE=Regional
@@ -29,7 +29,6 @@ PROJ_CC_INCLUDES = ../Common
 PROJ_SRCS = \
 	Boundary_conditions.c \
 	Geometry_cartesian.c \
-	Global_operations.c \
 	Initial_temperature.c \
 	Lith_age.c \
 	Output.c \
@@ -50,7 +49,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.4 2003/04/25 22:29:56 tan2 Exp $
+# $Id: Make.mm,v 1.5 2003/08/06 18:47:45 tan2 Exp $
 
 #
 # End of file
