@@ -118,11 +118,10 @@ PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
     FineGridExchanger* fge = static_cast<FineGridExchanger*>
 	                                (PyCObject_AsVoidPtr(obj));
 
-    const Boundary* b = fge->createBoundary();
-    PyObject* cobj = PyCObject_FromVoidPtr((void *)b,
-					   deleteBoundary);
+    fge->createBoundary();
 
-    return Py_BuildValue("O", cobj);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 
@@ -132,15 +131,14 @@ char pyExchanger_mapBoundary__name__[] = "mapBoundary";
 
 PyObject * pyExchanger_mapBoundary(PyObject *, PyObject *args)
 {
-    PyObject *obj1, *obj2;
+    PyObject *obj1;
 
-    if (!PyArg_ParseTuple(args, "OO:mapBoundary", &obj1, &obj2))
+    if (!PyArg_ParseTuple(args, "O:mapBoundary", &obj1))
         return NULL;
 
     Exchanger* pe = static_cast<Exchanger*>(PyCObject_AsVoidPtr(obj1));
-    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
 
-    pe->mapBoundary(b);
+    pe->mapBoundary();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -161,11 +159,10 @@ PyObject * pyExchanger_receiveBoundary(PyObject *, PyObject *args)
     CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
 	                                  (PyCObject_AsVoidPtr(obj));
 
-    const Boundary* b = cge->receiveBoundary();
-    PyObject* cobj = PyCObject_FromVoidPtr((void *)b,
-					   deleteBoundary);
+    cge->receiveBoundary();
 
-    return Py_BuildValue("O", cobj);
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 
@@ -175,16 +172,14 @@ char pyExchanger_sendBoundary__name__[] = "sendBoundary";
 
 PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
 {
-    PyObject *obj1, *obj2;
+    PyObject *obj1;
 
-    if (!PyArg_ParseTuple(args, "OO:sendBoundary", &obj1, &obj2))
+    if (!PyArg_ParseTuple(args, "O:sendBoundary", &obj1))
 	return NULL;
 
     FineGridExchanger* fge = static_cast<FineGridExchanger*>
 	                                (PyCObject_AsVoidPtr(obj1));
-    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj2));
-
-    fge->sendBoundary(b);
+    fge->sendBoundary();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -400,6 +395,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.5 2003/09/10 04:03:54 tan2 Exp $
+// $Id: exchangers.cc,v 1.6 2003/09/11 21:43:44 tan2 Exp $
 
 // End of file
