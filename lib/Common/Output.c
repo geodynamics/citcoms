@@ -36,8 +36,8 @@ void output(struct All_variables *E, int cycles)
   output_velo(E, cycles);
   output_visc(E, cycles);
   output_surf_botm(E, cycles);
-  output_stress(E, cycles);
-  output_pressure(E, cycles);
+  //output_stress(E, cycles);
+  //output_pressure(E, cycles);
 
   /* disable horizontal average output   by Tan2 */
   /* output_ave_r(E, cycles); */
