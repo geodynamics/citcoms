@@ -35,6 +35,7 @@ public:
     inline double X(int d, int n) const {return X_[d][n];}
     inline int nodeID(int n) const {return nodeID_[0][n];}
 
+    BoundedBox tightBBox() const;
     virtual void broadcast(const MPI_Comm& comm, int broadcaster);
     virtual void broadcast(const MPI_Comm& comm, int broadcaster) const;
 
@@ -48,6 +49,6 @@ private:
 #endif
 
 // version
-// $Id: BoundedMesh.h,v 1.6 2004/01/07 21:54:00 tan2 Exp $
+// $Id: BoundedMesh.h,v 1.7 2004/01/14 18:49:28 tan2 Exp $
 
 // End of file
