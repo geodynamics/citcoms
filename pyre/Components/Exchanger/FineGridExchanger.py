@@ -69,6 +69,7 @@ class FineGridExchanger(Exchanger):
     def applyBoundaryConditions(self):
         if self.toApplyBC:
             self.module.receiveVelocities(self.exchanger)
+            self.module.imposeConstraint(self.exchanger)
             self.module.distribute(self.exchanger)
             self.toApplyBC = False
             self.module.imposeBC(self.exchanger)
@@ -117,6 +118,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.19 2003/10/03 18:17:27 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.20 2003/10/11 00:40:56 tan2 Exp $"
 
 # End of file
