@@ -20,14 +20,13 @@ class FineGridExchanger(Exchanger):
         return
 
 
-
     def createExchanger(self, solver):
         self.exchanger = self.module.createFineGridExchanger(
                                      solver.communicator.handle(),
                                      solver.intercomm.handle(),
                                      solver.localLeader,
                                      solver.remoteLeader,
-                                     solver.fine_E
+                                     solver.all_variables
                                      )
 
         return
@@ -37,9 +36,11 @@ class FineGridExchanger(Exchanger):
         self.module.createDataArrays(self.exchanger)
         return
 
+
     def deleteDataArrays(self):
         self.module.deleteDataArrays(self.exchanger)
-        return    
+        return
+
 
     def findBoundary(self):
         self.module.createBoundary(self.exchanger)
@@ -51,26 +52,32 @@ class FineGridExchanger(Exchanger):
 	self.module.mapBoundary(self.exchanger)
         return
 
+
     def gather(self):
         self.module.gather(self.exchanger)
         return
 
+
     def distribute(self):
         self.module.distribute(self.exchanger)
         return
+
 
     def initTemperature(self):
         # receive temperture field from CGE
         self.module.receiveTemperature(self.exchanger)
         return
 
+
     def exchangeVelocities(self):
         self.module.receiveVelocities(self.exchanger)
         return
 
+
     def imposeBC(self):
         self.module.imposeBC(self.exchanger)
         return
+
 
     def NewStep(self):
         if self.catchup:
@@ -83,12 +90,10 @@ class FineGridExchanger(Exchanger):
         return
 
 
-
     def applyBoundaryConditions(self):
         self.module.gather(self.exchanger)
         self.module.send(self.exchanger)
         return
-
 
 
     def stableTimestep(self, dt):
@@ -119,6 +124,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.11 2003/09/22 18:14:32 ces74 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.12 2003/09/26 19:04:36 tan2 Exp $"
 
 # End of file

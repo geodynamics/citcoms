@@ -18,23 +18,12 @@ class TestExchanger(Application):
         self.exchanger = None
         return
 
+
     def run(self):
         layout = self.inventory.layout
         layout.initialize(self)
 
         self.findLayout(layout)
-
-        # a dummy pointer for test only
-        import CitcomS.Exchanger
-        if layout.fine:
-            print "in exchange.py, calling FinereturnE"
-            self.fine_E = CitcomS.Exchanger.FinereturnE()
-            print "in exchange.py, calling FinereturnE Done!!"            
-        elif layout.coarse:
-            print "in exchange.py, calling CoarsereturnE"
-            self.coarse_E = CitcomS.Exchanger.CoarsereturnE()
-            print "in exchange.py, calling CoarsereturnE Done!!"
-            pass
 
         exchanger = self.exchanger
         if exchanger:
@@ -48,7 +37,7 @@ class TestExchanger(Application):
         exchanger.selectModule()
 	exchanger.createExchanger(self)
         #print exchanger.name, exchanger.exchanger
-        
+
         # testing boundary creation and exchange
         exchanger.findBoundary()
         print exchanger.name, ": boundary found"
@@ -61,7 +50,7 @@ class TestExchanger(Application):
         # create Data arrays
         exchanger.createDataArrays()
         print "incoming/outgoing structres created"
-        
+
         # testing gather
         exchanger.gather()
         print exchanger.name, ": gather worked"
@@ -70,7 +59,7 @@ class TestExchanger(Application):
         if layout.coarse:
             exchanger.interpolate()
             print exchanger.name, ": interpolation done."
-            
+
         # testing initTemperature
         exchanger.initTemperature()
         print exchanger.name, ": temperature transferred"
@@ -83,7 +72,7 @@ class TestExchanger(Application):
         if layout.fine:
             exchanger.imposeBC()
             print exchanger.name, ": BC imposed successfully"
-        
+
         try:
             # success if exchanger is a FGE
             exchanger.catchup
@@ -97,7 +86,7 @@ class TestExchanger(Application):
               exchanger.name, dt,
               exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
               dt)
-        
+
         # testing wait & nowait
         for step in range(7*2+1):
             exchanger.NewStep()
@@ -107,17 +96,20 @@ class TestExchanger(Application):
         # delete Data arrays
         exchanger.deleteDataArrays()
         print "incoming/outgoing structres deleted"
-        
+
         return
 
 
     def findLayout(self, layout):
+        import CitcomS.Exchanger
         if layout.coarse:
             self.exchanger = self.inventory.coarse
             self.communicator = layout.coarse
+            self.all_variables = CitcomS.Exchanger.CoarsereturnE()
         elif layout.fine:
             self.exchanger = self.inventory.fine
             self.communicator = layout.fine
+            self.all_variables = CitcomS.Exchanger.FinereturnE()
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
@@ -175,6 +167,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.11 2003/09/22 18:14:32 ces74 Exp $"
+__id__ = "$Id: exchange.py,v 1.12 2003/09/26 19:04:35 tan2 Exp $"
 
 # End of file

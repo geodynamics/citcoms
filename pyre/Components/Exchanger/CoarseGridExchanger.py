@@ -18,7 +18,7 @@ class CoarseGridExchanger(Exchanger):
                                      solver.intercomm.handle(),
                                      solver.localLeader,
                                      solver.remoteLeader,
-                                     solver.coarse_E
+                                     solver.all_variables
                                      )
         return
 
@@ -27,9 +27,11 @@ class CoarseGridExchanger(Exchanger):
         self.module.createDataArrays(self.exchanger)
         return
 
+
     def deleteDataArrays(self):
         self.module.deleteDataArrays(self.exchanger)
-        return    
+        return
+
 
     def findBoundary(self):
         # receive boundary from FGE
@@ -39,30 +41,37 @@ class CoarseGridExchanger(Exchanger):
         self.module.mapBoundary(self.exchanger)
         return
 
+
     def getBid2crseelem(self):
         self.module.getBid2crseelem(self.exchanger)
         return
+
 
     def gather(self):
         self.module.gather(self.exchanger)
         return
 
+
     def distribute(self):
         self.module.distribute(self.exchanger)
         return
 
+
     def interpolate(self):
         self.module.interpolate(self.exchanger)
         return
+
 
     def initTemperature(self):
         # send temperture field to FGE
         self.module.sendTemperature(self.exchanger)
         return
 
+
     def exchangeVelocities(self):
         self.module.sendVelocities(self.exchanger)
         return
+
 
     def NewStep(self):
         # wait until FGE catchs up
@@ -73,12 +82,10 @@ class CoarseGridExchanger(Exchanger):
         return
 
 
-
     def applyBoundaryConditions(self):
         self.module.receive(self.exchanger)
         self.module.distribute(self.exchanger)
         return
-
 
 
     def stableTimestep(self, dt):
@@ -101,6 +108,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.10 2003/09/21 22:24:00 ces74 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.11 2003/09/26 19:04:36 tan2 Exp $"
 
 # End of file
