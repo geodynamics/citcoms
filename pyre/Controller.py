@@ -7,13 +7,18 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+
+def controller(name="controller", facility="controller"):
+    return Controller(name, facility)
+
+
 from pyre.components.SimulationController import SimulationController
 import journal
 
 class Controller(SimulationController):
 
 
-    def __init__(self, name, facility="controller"):
+    def __init__(self, name, facility):
         SimulationController.__init__(self, name, facility)
 
         self.step = 0
@@ -32,7 +37,11 @@ class Controller(SimulationController):
 
 
     def launch(self, app):
+        # 0th step
         self.solver.launch(app)
+
+        # do io for 0th step
+        self.save()
         return
 
 
@@ -40,8 +49,12 @@ class Controller(SimulationController):
     def march(self, totalTime=0, steps=0):
         """explicit time loop"""
 
-        # do io for 0th step
-        self.save()
+        self.step += 1
+
+        if (steps and self.step >= steps) or \
+           (totalTime and self.clock >= totalTime):
+            self.endSimulation()
+            return
 
         while 1:
 

@@ -16,10 +16,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Components \
-	Controller \
-	Coupler \
 	Facilities \
-	Layout \
 	Solver
 
 RECURSE_DIRS = $(BLD_DIRS)
@@ -42,10 +39,11 @@ update: clean
 
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
+	Controller.py \
 	CoupledApp.py \
-	CoupledRegionalApp.py \
+	Coupler.py \
 	FullApp.py \
-	RegionalApp.py \
+	Layout.py \
 	SimpleApp.py
 
 
@@ -54,7 +52,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.12 2003/08/30 00:46:26 tan2 Exp $
+# $Id: Make.mm,v 1.13 2003/10/24 04:55:54 tan2 Exp $
 
 #
 # End of file

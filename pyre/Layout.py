@@ -7,6 +7,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+
+def layout(name="layout", facility="layout"):
+    return Layout(name, facility)
+
+
 from pyre.components.Component import Component
 
 
@@ -23,7 +28,6 @@ class Layout(Component):
         self.rank = 0
         self.nodes = 0
         self.leader = 0
-        self.localLeader = 0
         self.remoteLeader = 0
         return
 
@@ -49,7 +53,6 @@ class Layout(Component):
 
 
     def verify(self, application):
-
         size = self.nodes
         nodes = application.inventory.staging.inventory.nodes
         if nodes != size:
@@ -57,7 +60,6 @@ class Layout(Component):
             firewall = journal.firewall("layout")
             firewall.log("processor count mismatch: %d != %d" % (nodes, size))
 
-        return
         if nodes < 2:
             import journal
             firewall = journal.firewall("layout")
@@ -68,24 +70,6 @@ class Layout(Component):
 
 
     def allocateNodes(self):
-        rank = self.rank
-        nodes = self.nodes
-        #ratio = self.inventory.ratio
-
-        fine = self.inventory.fine
-        coarse = self.inventory.coarse
-
-        #sr, fr = map(int, ratio.split(":"))
-
-        #sp = int(nodes * sr/(sr+fr))
-        #fp = nodes - sp
-
-        #if len(fine) < sp or len(coarse) < fp:
-        #    fine = range(sp)
-        #    coarse = range(sp, nodes)
-
-        #self.inventory.fine = fine
-        #self.inventory.coarse = coarse
         return
 
 
@@ -102,23 +86,21 @@ class Layout(Component):
 
     def setAttributes(self):
         if self.fine:
-            # use the last proc. as the group leader
-            self.leader = len(self.inventory.fine) - 1
-            self.localLeader = self.inventory.fine[-1]
-            #self.remoteLeader = self.inventory.coarse[-1]
-            self.remoteLeader = self.inventory.coarse[1]
+            mygroup = self.inventory.fine
+            remotegroup = self.inventory.coarse
             self.createIntercomm(self.fine)
         elif self.coarse:
-            # use the last proc. as the group leader
-            #self.leader = len(self.inventory.coarse) - 1
-            #self.localLeader = self.inventory.coarse[-1]
-            self.leader = 1
-            self.localLeader = self.inventory.coarse[1]
-            self.remoteLeader = self.inventory.fine[-1]
+            mygroup = self.inventory.coarse
+            remotegroup = self.inventory.fine
             self.createIntercomm(self.coarse)
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % self.rank)
+
+        # use the last proc. as the group leader
+        self.leader = len(mygroup) - 1
+        self.remoteLeader = remotegroup[-1]
+
         return
 
 
@@ -140,14 +122,10 @@ class Layout(Component):
             pyre.properties.sequence("coarse", range(12)),
             pyre.properties.sequence("fine", [12]),
 
-            # test
-            #pyre.properties.sequence("coarse", [0]),
-            #pyre.properties.sequence("fine", [1]),
-
             ]
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.8 2003/09/29 20:23:19 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.9 2003/10/24 04:55:54 tan2 Exp $"
 
 # End of file

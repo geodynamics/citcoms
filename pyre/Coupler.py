@@ -7,6 +7,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+
+def coupler(name="coupler", facility="coupler"):
+    return Coupler(name, facility)
+
+
 from pyre.components.Component import Component
 
 
@@ -61,7 +66,7 @@ class Coupler(Component):
 
 
     def newStep(self):
-        #self.exchanger.NewStep()
+        self.exchanger.NewStep()
         return
 
 
@@ -84,6 +89,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.7 2003/10/01 22:06:01 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.8 2003/10/24 04:55:54 tan2 Exp $"
 
 # End of file

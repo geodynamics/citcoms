@@ -24,7 +24,6 @@ class CoupledApp(SimpleApp):
         self.rank = 0
         self.nodes = 0
         self.leader = 0
-        self.localLeader = 0
         self.remoteLeader = 0
 
         self._info = journal.debug("application")
@@ -46,12 +45,15 @@ class CoupledApp(SimpleApp):
 
 
     def findLayout(self, layout):
+        import Components.Exchanger as Exchanger
 
         if layout.coarse:
             self.solver = self.inventory.coarse
+            self.solver.inventory.exchanger = Exchanger.coarsegridexchanger("exchanger", "exchanger")
             self.solverCommunicator = layout.coarse
         elif layout.fine:
             self.solver = self.inventory.fine
+            self.solver.inventory.exchanger = Exchanger.finegridexchanger("exchanger", "exchanger")
             self.solverCommunicator = layout.fine
         else:
             import journal
@@ -61,7 +63,6 @@ class CoupledApp(SimpleApp):
         self.rank = layout.rank
         self.nodes = layout.nodes
         self.leader = layout.leader
-        self.localLeader = layout.localLeader
         self.remoteLeader = layout.remoteLeader
 
         return
@@ -77,9 +78,9 @@ class CoupledApp(SimpleApp):
             return
 
         self._info.line("configuration:")
-        self._info.line("  properties:")
-        self._info.line("    name: %r" % self.inventory.name)
-        self._info.line("    full name: %r" % self.inventory.fullname)
+#        self._info.line("  properties:")
+#        self._info.line("    name: %r" % self.inventory.name)
+#        self._info.line("    full name: %r" % self.inventory.fullname)
 
         self._info.line("  facilities:")
         self._info.line("    journal: %r" % self.inventory.journal.name)
@@ -112,7 +113,6 @@ class CoupledApp(SimpleApp):
             pyre.facilities.facility("layout", default=Layout.layout()),
 
             SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
-            #SolverFacility("coarse", default=Solver.regionalSolver("coarse", "coarse")),
             SolverFacility("fine", default=Solver.regionalSolver("fine", "fine")),
 
             pyre.properties.int("steps", 1),
@@ -122,6 +122,6 @@ class CoupledApp(SimpleApp):
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.5 2003/09/28 21:44:53 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.6 2003/10/24 04:55:54 tan2 Exp $"
 
 # End of file
