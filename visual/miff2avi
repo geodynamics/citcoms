@@ -14,6 +14,9 @@ echo "  Assumes mjpeg tools and \"convert\" (ImageMagick) are installed." 1>&2
 echo  1>&2
 echo "  file.miff should contain all the frames to be animated. " 1>&2
 echo "  $0 does not accept a file list (e.g. file*.miff) as an argument. " 1>&2
+echo 1>&2
+echo "  This script was originally written by Ulrich Oelmann <Ulrich.Oelmann@iws.uni-stuttgart.de>. " 1>&2
+echo "  See http://opendx.npaci.edu/mail/opendx-users/2004.10/msg00026.html" 1>&2
 echo  1>&2
 exit 0
 }
