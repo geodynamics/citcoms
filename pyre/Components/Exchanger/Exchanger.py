@@ -116,13 +116,15 @@ class Exchanger(Component):
         inventory = [
 
             # if dimensional is True, quantities exchanged are dimensional
-            prop.bool("dimensional", True)
+            prop.bool("dimensional", True),
+            # if transformational is True, quantities exchanged are in standard coordiate system
+            prop.bool("transformational", True)
 
             ]
 
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.16 2003/12/30 21:42:51 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.17 2004/01/07 22:01:09 tan2 Exp $"
 
 # End of file

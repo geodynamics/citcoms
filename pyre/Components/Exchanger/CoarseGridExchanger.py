@@ -17,6 +17,8 @@ class CoarseGridExchanger(Exchanger):
 
         # exchanged information is non-dimensional
         self.inventory.dimensional = False
+        # exchanged information is in spherical coordinate
+        self.inventory.transformational = False
 
         return
 
@@ -34,27 +36,25 @@ class CoarseGridExchanger(Exchanger):
         self.source["BC"] = range(self.numSrc)
         self.BC = range(self.numSrc)
 
-        if self.inventory.dimensional:
-            self.module.initDimensional(self.all_varialbes)
+        self.module.initConvertor(self.inventory.dimensional,
+                                  self.inventory.transformational,
+                                  self.all_varialbes)
 
         return
 
 
     def createMesh(self):
         self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
-        dimensional = self.inventory.dimensional
         self.remoteBBox = self.module.exchangeBoundedBox(
                                           self.globalBBox,
                                           self.communicator.handle(),
                                           self.srcComm[0].handle(),
-                                          self.srcComm[0].size - 1,
-                                          dimensional)
+                                          self.srcComm[0].size - 1)
         self.interior, self.myBBox = self.module.createInterior(
                                                      self.remoteBBox,
-                                                     self.all_variables,
-                                                     dimensional)
+                                                     self.all_variables)
         for i in range(len(self.boundary)):
-            self.boundary[i] = self.module.createEmptyBoundary(dimensional)
+            self.boundary[i] = self.module.createEmptyBoundary()
 
         return
 
@@ -164,12 +164,10 @@ class CoarseGridExchanger(Exchanger):
 
 
     def stableTimestep(self, dt):
-        dimensional = self.inventory.dimensional
         new_dt = self.module.exchangeTimestep(dt,
                                               self.communicator.handle(),
                                               self.srcComm[0].handle(),
-                                              self.srcComm[0].size - 1,
-                                              dimensional)
+                                              self.srcComm[0].size - 1)
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, dt, new_dt)
         return dt
@@ -196,6 +194,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.26 2003/12/30 21:42:51 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.27 2004/01/07 22:01:09 tan2 Exp $"
 
 # End of file
