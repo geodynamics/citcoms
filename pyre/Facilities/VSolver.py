@@ -39,8 +39,8 @@ class VSolver(Facility):
 	    import CitcomS.Components.Stokes_solver as Stokes
 
             self._builtins = {
-                "imcomp-newtonian": Stokes.imcompressibleNewtonian,
-                "imcomp-non-newtonian": Stokes.imcompressibleNonNewtonian,
+                "incomp-newtonian": Stokes.incompressibleNewtonian,
+                "incomp-non-newtonian": Stokes.incompressibleNonNewtonian,
                 }
 
             return
@@ -49,6 +49,6 @@ class VSolver(Facility):
 
 
 # version
-__id__ = "$Id: VSolver.py,v 1.4 2003/07/28 23:03:50 tan2 Exp $"
+__id__ = "$Id: VSolver.py,v 1.5 2003/08/22 22:16:05 tan2 Exp $"
 
 # End of file
