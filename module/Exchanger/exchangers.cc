@@ -38,7 +38,7 @@ PyObject * PyCitcomSExchanger_createBoundary(PyObject *, PyObject *args)
     bool excludeTop, excludeBottom;
 
     if (!PyArg_ParseTuple(args, "Obb:createBoundary",
-			  &obj1, excludeTop, excludeBottom))
+			  &obj1, &excludeTop, &excludeBottom))
 	return NULL;
 
     All_variables* E = static_cast<All_variables*>
@@ -246,6 +246,6 @@ void deleteCitcomSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.47 2004/05/28 21:26:34 tan2 Exp $
+// $Id: exchangers.cc,v 1.48 2004/06/02 20:28:37 tan2 Exp $
 
 // End of file
