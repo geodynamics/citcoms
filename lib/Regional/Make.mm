@@ -16,7 +16,6 @@ PACKAGE = lib/$(TYPE)
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
 
-PROJ_LIBRARIES = $(EXTERNAL_LIBPATH) $(EXTERNAL_LIBS) -lm
 PROJ_CC_INCLUDES = ../Common ./
 
 PROJ_SRCS = \
@@ -36,7 +35,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.12 2003/09/01 18:30:21 ces74 Exp $
+# $Id: Make.mm,v 1.13 2003/11/26 21:24:39 tan2 Exp $
 
 #
 # End of file
