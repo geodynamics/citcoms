@@ -10,6 +10,7 @@
 #include <portinfo>
 #include <Python.h>
 
+#include "inlets_outlets.h"
 #include "exchangers.h"
 #include "misc.h"          // miscellaneous methods
 
@@ -46,6 +47,58 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_initTemperatureTest__doc__},
 
+    // from inlets_outlets.h
+
+    {pyExchanger_BoundaryVTInlet_create__name__,
+     pyExchanger_BoundaryVTInlet_create,
+     METH_VARARGS,
+     pyExchanger_BoundaryVTInlet_create__doc__},
+
+    {pyExchanger_BoundaryVTInlet_impose__name__,
+     pyExchanger_BoundaryVTInlet_impose,
+     METH_VARARGS,
+     pyExchanger_BoundaryVTInlet_impose__doc__},
+
+    {pyExchanger_BoundaryVTInlet_recv__name__,
+     pyExchanger_BoundaryVTInlet_recv,
+     METH_VARARGS,
+     pyExchanger_BoundaryVTInlet_recv__doc__},
+
+    {pyExchanger_BoundaryVTInlet_storeTimestep__name__,
+     pyExchanger_BoundaryVTInlet_storeTimestep,
+     METH_VARARGS,
+     pyExchanger_BoundaryVTInlet_storeTimestep__doc__},
+
+    {pyExchanger_VTInlet_create__name__,
+     pyExchanger_VTInlet_create,
+     METH_VARARGS,
+     pyExchanger_VTInlet_create__doc__},
+
+    {pyExchanger_VTInlet_impose__name__,
+     pyExchanger_VTInlet_impose,
+     METH_VARARGS,
+     pyExchanger_VTInlet_impose__doc__},
+
+    {pyExchanger_VTInlet_recv__name__,
+     pyExchanger_VTInlet_recv,
+     METH_VARARGS,
+     pyExchanger_VTInlet_recv__doc__},
+
+    {pyExchanger_VTInlet_storeTimestep__name__,
+     pyExchanger_VTInlet_storeTimestep,
+     METH_VARARGS,
+     pyExchanger_VTInlet_storeTimestep__doc__},
+
+    {pyExchanger_VTOutlet_create__name__,
+     pyExchanger_VTOutlet_create,
+     METH_VARARGS,
+     pyExchanger_VTOutlet_create__doc__},
+
+    {pyExchanger_VTOutlet_send__name__,
+     pyExchanger_VTOutlet_send,
+     METH_VARARGS,
+     pyExchanger_VTOutlet_send__doc__},
+
     // from exchangers.h
 
     {pyExchanger_createBCSink__name__,
@@ -62,12 +115,12 @@ struct PyMethodDef pyExchanger_methods[] = {
      pyExchanger_createTractionSource,
      METH_VARARGS,
      pyExchanger_createTractionSource__doc__},
-    
+
     {pyExchanger_createTractionBC__name__,
      pyExchanger_createTractionBC,
      METH_VARARGS,
      pyExchanger_createTractionBC__doc__},
-	
+
 	 {pyExchanger_createIISink__name__,
      pyExchanger_createIISink,
      METH_VARARGS,
@@ -112,6 +165,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      pyExchanger_createSource,
      METH_VARARGS,
      pyExchanger_createSource__doc__},
+
+    {pyExchanger_VTSource_create__name__,
+     pyExchanger_VTSource_create,
+     METH_VARARGS,
+     pyExchanger_VTSource_create__doc__},
 
     {pyExchanger_initConvertor__name__,
      pyExchanger_initConvertor,
@@ -168,7 +226,7 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_recvV__doc__},
 
-    
+
     {pyExchanger_imposeBC__name__,
      pyExchanger_imposeBC,
      METH_VARARGS,
@@ -205,6 +263,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.33 2004/01/17 02:10:38 puru Exp $
+// $Id: bindings.cc,v 1.34 2004/02/24 20:39:33 tan2 Exp $
 
 // End of file
