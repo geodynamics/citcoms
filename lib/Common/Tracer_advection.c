@@ -39,9 +39,9 @@ void tracer_initial_settings(E)
 void tracer_setup(E)
     struct All_variables *E;
 {
-	int i,j,k,n,nn,node;
+	int i,j,k,nn;
 	int m;
-	float idummy,dummy_time,xdummy,ydummy,zdummy;
+	float idummy,xdummy,ydummy,zdummy;
 	FILE *fp, *fp1;
         int nox,noy,noz,gnox,gnoy,gnoz;
         char aaa[100];
@@ -77,7 +77,7 @@ void tracer_setup(E)
         E->Tracer.y_space=(float*) malloc((gnoy+1)*sizeof(float));
         E->Tracer.z_space=(float*) malloc((gnoz+1)*sizeof(float));
 
-        fscanf(fp1,"%s %d",&(aaa),&nn);
+        fscanf(fp1,"%s %d",aaa,&nn);
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=1;i<=gnox;i++)
@@ -93,7 +93,7 @@ void tracer_setup(E)
 
 	   }
 
-        fscanf(fp1,"%s %d",&(aaa),&nn);
+        fscanf(fp1,"%s %d",aaa,&nn);
 
         for(k=1;k<=gnoy;k++)
 	   {
@@ -107,7 +107,7 @@ void tracer_setup(E)
 */
 	   }
 
-        fscanf(fp1,"%s %d",&(aaa),&nn);
+        fscanf(fp1,"%s %d",aaa,&nn);
 
         for(j=1;j<=gnoz;j++)
 	   {
@@ -142,22 +142,19 @@ void tracer_advection(E)
     {
       float find_age_in_MY();
 
-      int n,start_n,loc;
+      int n,loc;
       int i,j,k,m,ii,jj,kk;
       int n_x,n_y,n_z;
       int node1,node2,node3,node4,node5,node6,node7,node8;
       int nno,nox,noy,noz,gnox,gnoy,gnoz,nodeg,nodel;
-      int nxs,nys,nzs,nproc,proc,nprocxl,nprocyl,nproczl;
+      int nxs,nys,nzs,proc,nprocxl,nprocyl,nproczl;
       int iteration;
       int root;
       float x_tmp, y_tmp, z_tmp;
       float volume, tr_dx, tr_dy, tr_dz, dx, dy, dz;
       float w1,w2,w3,w4,w5,w6,w7,w8;
       float tr_v[1][4];
-      float *gx[1][4];
       float time;
-      FILE *fp,*fp1;
-      char output[255];
       MPI_Comm world;
       float xmin,xmax,ymin,ymax,zmin,zmax;
 
@@ -391,7 +388,7 @@ void tracer_output(E,ii)
     int ii;
 {
   FILE *fp, *fopen();
-  int i,j,m,n;
+  int n;
   char filename[255];
 
     if(E->parallel.me==0)    {
