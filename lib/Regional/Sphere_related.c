@@ -10,7 +10,7 @@ void coord_of_cap(E,m,icap)
    int icap,m;
   {
 
-  int i,j,k,jjj,lev,temp,elx,ely,nox,noy,noz,node,nodes;
+  int i,j,k,lev,temp,elx,ely,nox,noy,noz,node,nodes;
   int nprocxl,nprocyl,nproczl;
   int nnproc;
   int gnox,gnoy,gnoz;
@@ -18,8 +18,7 @@ void coord_of_cap(E,m,icap)
   char output_file[255];
   char a[100];
   int nn,step;
-  FILE *fp,*fp1;
-  double *x[5],*y[5],*z[5],xx[5],yy[5],zz[5];
+  FILE *fp;
   float *theta1[MAX_LEVELS],*fi1[MAX_LEVELS];
   double *SX[2];
   double *tt,*ff;
@@ -60,12 +59,12 @@ if(E->control.coor==1)   {
           exit(8);
 	}
 
-  fscanf(fp,"%s%d",&a,&nn);
+  fscanf(fp,"%s%d",a,&nn);
    for(i=1;i<=gnox;i++) {
      fscanf(fp,"%d%f",&nn,&theta1[E->mesh.gridmax][i]);
    }
 
-  fscanf(fp,"%s%d",&a,&nn);
+  fscanf(fp,"%s%d",a,&nn);
    for(i=1;i<=gnoy;i++)  {
      fscanf(fp,"%d%f",&nn,&fi1[E->mesh.gridmax][i]);
     }
