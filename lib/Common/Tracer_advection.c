@@ -27,7 +27,7 @@ void tracer_input(struct All_variables *E)
   int m=E->parallel.me;
 
   input_int("tracer",&(E->control.tracer),"0",m);
-  input_string("tracer_file",E->control.tracer_file,"",m);
+  input_string("tracer_file",E->control.tracer_file,"tracer.dat",m);
 }
 
 
