@@ -25,6 +25,17 @@ class Outlet(object):
 
 
 
+class SVTOutlet(Outlet):
+
+    def __init__(self, source, all_variables):
+        import CitcomS.Exchanger as Exchanger
+        self._handle = Exchanger.SVTOutlet_create(source,
+                                                  all_variables)
+        return
+
+
+
+
 class VTOutlet(Outlet):
     '''Available modes --
     "V": send velocity
@@ -56,6 +67,6 @@ class TractionOutlet(Outlet):
 
 
 # version
-__id__ = "$Id: Outlet.py,v 1.2 2004/03/11 23:25:47 tan2 Exp $"
+__id__ = "$Id: Outlet.py,v 1.3 2004/04/16 00:05:50 tan2 Exp $"
 
 # End of file

@@ -36,6 +36,18 @@ class Inlet(object):
 
 
 
+class SVTInlet(Inlet):
+
+    def __init__(self, mesh, sink, all_variables):
+        import CitcomS.Exchanger as Exchanger
+        self._handle = Exchanger.SVTInlet_create(mesh,
+                                                 sink,
+                                                 all_variables)
+        return
+
+
+
+
 class VTInlet(Inlet):
     '''Available modes --
     "V": impose velocity as BC
@@ -93,6 +105,6 @@ class TractionInlet(Inlet):
 
 
 # version
-__id__ = "$Id: Inlet.py,v 1.4 2004/03/28 23:20:55 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.5 2004/04/16 00:05:50 tan2 Exp $"
 
 # End of file
