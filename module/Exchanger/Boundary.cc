@@ -8,8 +8,6 @@
 //
 
 #include <portinfo>
-#include <algorithm>
-#include <limits>
 #include <vector>
 #include "global_defs.h"
 #include "journal/journal.h"
@@ -30,10 +28,11 @@ Boundary::Boundary(const All_variables* E) :
 
     // boundary = all - interior
     int maxNodes = E->lmesh.nno - (E->lmesh.nox-2)
-	                         *(E->lmesh.noy-2)
-	                         *(E->lmesh.noz-2);
+	                         * (E->lmesh.noy-2)
+	                         * (E->lmesh.noz-2);
     X_.reserve(maxNodes);
     nodeID_.reserve(maxNodes);
+    normal_.reserve(maxNodes);
 
     initX(E);
     initBBox(E);
@@ -44,6 +43,8 @@ Boundary::Boundary(const All_variables* E) :
     X_.print("Boundary-X");
     nodeID_.shrink();
     nodeID_.print("Boundary-nodeID");
+    normal_.shrink();
+    normal_.print("Boundary-normal");
 }
 
 
@@ -62,35 +63,59 @@ void Boundary::initX(const All_variables* E)
 	for(int j=1; j<=E->lmesh.nox; j++)
 	    for(int i=1; i<=E->lmesh.noz; i++) {
 
-		if(isOnBoundary(E, i, j, k)) {
+		bool isBoundary = false;
+		std::vector<int> normalFlag(DIM,0);
+
+		if((E->parallel.me_loc[1] == 0) && (j == 1)) {
+		    isBoundary |= true;
+		    normalFlag[0] = -1;
+		}
+
+		if((E->parallel.me_loc[1] == E->parallel.nprocx - 1)
+		   && (j == E->lmesh.nox)) {
+		    isBoundary |= true;
+		    normalFlag[0] = 1;
+		}
+
+		if((E->parallel.me_loc[2] == 0) && (k == 1)) {
+		    isBoundary |= true;
+		    normalFlag[1] = -1;
+		}
+
+		if((E->parallel.me_loc[2] == E->parallel.nprocy - 1)
+		   && (k == E->lmesh.noy)) {
+		    isBoundary |= true;
+		    normalFlag[1] = 1;
+		}
+
+		if((E->parallel.me_loc[3] == 0) && (i == 1)) {
+		    isBoundary |= true;
+		    normalFlag[2] = -1;
+		}
+
+		if((E->parallel.me_loc[3] == E->parallel.nprocz - 1)
+		   && (i == E->lmesh.noz)) {
+		    isBoundary |= true;
+		    normalFlag[2] = 1;
+		}
+
+
+		if(isBoundary) {
 		    int node = i + (j-1)*E->lmesh.noz
-			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
+			      + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
 		    for(int d=0; d<DIM; d++)
 			x[d] = E->sx[m][d+1][node];
 
 		    X_.push_back(x);
 		    nodeID_.push_back(node);
+		    normal_.push_back(normalFlag);
 		}
 	    }
 }
 
 
-bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
-{
-    return ((E->parallel.me_loc[1] == 0) && (j == 1)) ||
-	   ((E->parallel.me_loc[2] == 0) && (k == 1)) ||
-	   ((E->parallel.me_loc[3] == 0) && (i == 1)) ||
-   	   ((E->parallel.me_loc[1] == E->parallel.nprocx - 1)
-	     && (j == E->lmesh.nox)) ||
-	   ((E->parallel.me_loc[2] == E->parallel.nprocy - 1)
-	     && (k == E->lmesh.noy)) ||
-	   ((E->parallel.me_loc[3] == E->parallel.nprocz - 1)
-	     && (i == E->lmesh.noz));
-}
-
-
 // version
-// $Id: Boundary.cc,v 1.49 2004/01/14 18:52:19 tan2 Exp $
+// $Id: Boundary.cc,v 1.50 2004/03/11 22:50:09 tan2 Exp $
 
 // End of file

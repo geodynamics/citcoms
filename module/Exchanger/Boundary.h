@@ -16,17 +16,18 @@ struct All_variables;
 
 
 class Boundary : public BoundedMesh {
+    Array2D<int,DIM> normal_;
 
 public:
     Boundary();
     explicit Boundary(const All_variables* E);
     virtual ~Boundary() {};
 
+    inline int normal(int d, int n) const {return normal_[d][n];}
+
 private:
     void initBBox(const All_variables *E);
     void initX(const All_variables *E);
-    inline bool isOnBoundary(const All_variables* E, int i,
-			     int j, int k) const;
 
 };
 
@@ -34,6 +35,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.27 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Boundary.h,v 1.28 2004/03/11 22:50:09 tan2 Exp $
 
 // End of file
