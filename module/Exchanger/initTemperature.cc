@@ -19,6 +19,7 @@
 #include "global_defs.h"
 #include "initTemperature.h"
 
+void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E);
 
 extern "C" {
     void temperatures_conform_bcs(struct All_variables*);
@@ -44,6 +45,13 @@ void initTemperatureSource(const Source& source,
 
 
 void modifyT(const BoundedBox& bbox, All_variables* E)
+{
+    basal_tbl_central_hot_blob(bbox, E);
+    temperatures_conform_bcs(E);
+}
+
+
+void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E)
 {
     /*
       This function modify/decorate the temperature field.
@@ -121,11 +129,10 @@ void modifyT(const BoundedBox& bbox, All_variables* E)
 
 		    }
 		}
-
-    temperatures_conform_bcs(E);
 }
 
+
 // version
-// $Id: initTemperature.cc,v 1.2 2003/11/30 01:21:57 tan2 Exp $
+// $Id: initTemperature.cc,v 1.3 2004/01/14 00:34:34 tan2 Exp $
 
 // End of file
