@@ -20,6 +20,7 @@ RECURSE_DIRS = $(BLD_DIRS)
 
 
 all:
+	@(cd Full; mm link)
 	BLD_ACTION="all" $(MM) recurse
 
 tidy::
@@ -32,7 +33,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.7 2003/08/01 22:53:50 tan2 Exp $
+# $Id: Make.mm,v 1.8 2003/08/07 22:05:04 tan2 Exp $
 
 #
 # End of file
