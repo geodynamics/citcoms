@@ -259,8 +259,43 @@ void get_elt_h(E,el,elt_h,m)
    return;
 }
 
+/* ==========================================================  */
+/* from Process_velocity.c                                     */
+/* =========================================================== */
+
+void get_ele_visc(E, EV,m)
+  struct All_variables *E;
+  float *EV;
+  int m;
+  {
+
+  int el,j,lev;
+
+  const int nel=E->lmesh.nel;
+  const int vpts=vpoints[E->mesh.nsd];
+
+  lev = E->mesh.levmax;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for (el=1;el<=nel;el++)   {
+      EV[el] = 0.0;
+      for (j=1;j<=vpts;j++)   {
+        EV[el] +=  E->EVI[lev][m][(el-1)*vpts+j];
+      }
+
+      EV[el] /= vpts;
+      }
+
+  return;
+  }
+
+
+/* ==========================================================  */
+/*                                                             */
+/* =========================================================== */
+
 
 /* version */
-/* $Id: Obsolete.c,v 1.2 2004/04/09 23:56:06 tan2 Exp $ */
+/* $Id: Obsolete.c,v 1.3 2004/04/15 18:33:19 tan2 Exp $ */
 
 /* End of file  */
