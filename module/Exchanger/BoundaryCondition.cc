@@ -10,12 +10,10 @@
 #include <portinfo>
 #include "global_defs.h"
 #include "Boundary.h"
+#include "Convertor.h"
 #include "Sink.h"
 #include "Source.h"
 #include "BoundaryCondition.h"
-#include "dimensionalization.h"
-
-double dimensional_len,dimensional_vel,dimensional_traction,dimesional_temp;
 
 extern "C" {
     void check_bc_consistency(const All_variables *E);
@@ -68,11 +66,9 @@ void BoundaryConditionSink::recvTandV()
 
     sink.recvArray2D(tbc, vbc);
 
-// TODO : non-dimensionalizing temeperature
-
-    for(int i=0; i<sink.size(); i++) {
-	for(int d=0; d<DIM; d++)vbc[d][i]/=dimensional_vel;
-    }
+    Convertor& convertor = Convertor::instance();
+    convertor.xtemperature(tbc);
+    convertor.xvelocity(vbc, sink.getX());
 
     tbc.print("TBC");
     vbc.print("VBC");
@@ -237,14 +233,13 @@ void BoundaryConditionSource::sendTandV()
     source.interpolateV(vbc, E);
     //vbc.print("VBC");
 
-    for(int i=0; i<source.size(); i++) {
-	for(int d=0; d<DIM; d++)vbc[d][i]*=dimensional_vel;
-    }
-
-// TODO dimensionalize temperature
+    Convertor& convertor = Convertor::instance();
+    convertor.temperature(tbc);
+    convertor.velocity(vbc, source.getX());
 
     source.sendArray2D(tbc, vbc);
 }
+
 
 void BoundaryConditionSource::sendTraction()
 {
@@ -268,6 +263,6 @@ void BoundaryConditionSource::domain_cutout()
 
 }
 // version
-// $Id: BoundaryCondition.cc,v 1.10 2003/12/30 21:46:48 tan2 Exp $
+// $Id: BoundaryCondition.cc,v 1.11 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

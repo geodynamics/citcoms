@@ -33,6 +33,7 @@ public:
 private:
     void recvMesh(BoundedMesh& mesh);
     void sendMeshNode() const;
+    void initX(const BoundedMesh& mesh);
 
     // disable these functions
     virtual void interpolateForce(Array2D<double,DIM>& F) const {};
@@ -46,6 +47,6 @@ private:
 #endif
 
 // version
-// $Id: TractionSource.h,v 1.1 2003/12/16 18:50:53 tan2 Exp $
+// $Id: TractionSource.h,v 1.2 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

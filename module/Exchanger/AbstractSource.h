@@ -22,6 +22,7 @@ protected:
     MPI_Comm comm;
     const int sink;
     Array2D<int,1> meshNode_;
+    Array2D<double,DIM> X_;
     FEMInterpolator* interp;
 
 public:
@@ -29,6 +30,7 @@ public:
     virtual ~AbstractSource() {delete interp;}
 
     inline int size() const {return meshNode_.size();}
+    inline const Array2D<double,DIM>& getX() const {return X_;}
 
     virtual void interpolateForce(Array2D<double,DIM>& F) const = 0;
     virtual void interpolatePressure(Array2D<double,1>& P) const = 0;
@@ -104,6 +106,6 @@ void AbstractSource::send(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: AbstractSource.h,v 1.1 2003/11/25 02:59:11 tan2 Exp $
+// $Id: AbstractSource.h,v 1.2 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

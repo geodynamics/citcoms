@@ -16,7 +16,7 @@
 // definition of static variables
 std::auto_ptr<SIUnit> Convertor::si;
 std::auto_ptr<CartesianCoord> Convertor::cart;
-bool inited = false;
+bool Convertor::inited = false;
 
 
 // the singleton
@@ -53,6 +53,11 @@ void Convertor::init(bool dimensional, bool transformational,
 
     inited = true;
 }
+
+
+Convertor::Convertor()
+{}
+
 
 
 // internal representation ==> standard representation
@@ -144,6 +149,6 @@ void Convertor::xvelocity(Array2D<double,DIM>& V,
 
 
 // version
-// $Id: Convertor.cc,v 1.1 2004/01/07 21:54:00 tan2 Exp $
+// $Id: Convertor.cc,v 1.2 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

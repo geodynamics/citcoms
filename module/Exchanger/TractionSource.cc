@@ -27,6 +27,7 @@ TractionSource::TractionSource(MPI_Comm c, int s,
 	meshNode_.print("meshNode");
     }
     sendMeshNode();
+    initX(mesh);
 }
 
 
@@ -59,7 +60,19 @@ void TractionSource::sendMeshNode() const
 }
 
 
+void TractionSource::initX(const BoundedMesh& mesh)
+{
+    X_.resize(meshNode_.size());
+
+    for(int i=0; i<X_.size(); ++i) {
+	int n = meshNode_[0][i];
+	for(int j=0; j<DIM; ++j)
+	    X_[j][i] = mesh.X(j,n);
+    }
+}
+
+
 // version
-// $Id: TractionSource.cc,v 1.1 2003/12/16 18:50:53 tan2 Exp $
+// $Id: TractionSource.cc,v 1.2 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

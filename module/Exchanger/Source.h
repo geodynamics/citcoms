@@ -15,6 +15,7 @@
 #include "mpi.h"
 #include "utility.h"
 #include "Array2D.h"
+#include "DIM.h"
 #include "Interpolator.h"
 
 struct All_variables;
@@ -27,6 +28,7 @@ protected:
     const int sink;
     std::auto_ptr<Interpolator> interp;
     Array2D<int,1> meshNode_;
+    Array2D<double,DIM> X_;
 
 public:
     Source(MPI_Comm comm, int sink,
@@ -35,6 +37,8 @@ public:
     virtual ~Source() {};
 
     inline int size() const {return meshNode_.size();}
+    inline const Array2D<double,DIM>& getX() const {return X_;}
+
     void interpolateT(Array2D<double,1>& T, const All_variables* E) const;
     void interpolateV(Array2D<double,DIM>& V, const All_variables* E) const;
 
@@ -48,6 +52,7 @@ public:
 private:
     void recvMesh(BoundedMesh& mesh);
     void sendMeshNode() const;
+    void initX(const BoundedMesh& mesh);
 
 };
 
@@ -103,6 +108,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.6 2003/12/16 19:08:23 tan2 Exp $
+// $Id: Source.h,v 1.7 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

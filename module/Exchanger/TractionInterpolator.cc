@@ -14,7 +14,6 @@
 #include "BoundedBox.h"
 #include "BoundedMesh.h"
 #include "TractionInterpolator.h"
-#include "dimensionalization.h"
 
 extern "C" {
 
@@ -63,10 +62,7 @@ void TractionInterpolator::InterpolateTraction(Array2D<double,DIM>& target)
 	for(int k=0; k< NODES_PER_ELEMENT; k++) {
 	    int node = E->ien[mm][n1].node[k+1];
 	    for(int d=0; d<DIM; d++) {
-
-// multiplied by ref_viscosity*therm_diff to get dimensionalized forces
-                
-		target[d][i] += shape_[k][i] * gtraction[d][node]*dimensional_traction;
+		target[d][i] += shape_[k][i] * gtraction[d][node];
 	    }
 	}
 // 	std::cout << target[0][i] << " " << target[1][i] << " "
@@ -753,6 +749,6 @@ void TractionInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: TractionInterpolator.cc,v 1.4 2003/12/17 04:27:56 puru Exp $
+// $Id: TractionInterpolator.cc,v 1.5 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file

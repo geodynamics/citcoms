@@ -35,6 +35,7 @@ Sink::Sink(MPI_Comm c, int nsrc, const BoundedMesh& mesh) :
     sendMesh(mesh);
 
     recvMeshNode();
+    initX(mesh);
 }
 
 
@@ -65,7 +66,7 @@ void Sink::recvMeshNode()
     recvSourceSize();
     sumSourceSize();
 
-    // fill meshNodei_ with value "numMeshNodes", which is an invalid node #
+    // fill meshNode_ with value "numMeshNodes", which is an invalid node #
     meshNode_.resize(beginSrcNodes[source.size()], numMeshNodes);
 
     recvArray2D(meshNode_);
@@ -110,7 +111,19 @@ void Sink::testMeshNode() const
 }
 
 
+void Sink::initX(const BoundedMesh& mesh)
+{
+    X_.resize(meshNode_.size());
+
+    for(int i=0; i<X_.size(); ++i) {
+	int n = meshNode_[0][i];
+	for(int j=0; j<DIM; ++j)
+	    X_[j][i] = mesh.X(j,n);
+    }
+}
+
+
 // version
-// $Id: Sink.cc,v 1.2 2003/11/11 19:29:27 tan2 Exp $
+// $Id: Sink.cc,v 1.3 2004/01/08 02:29:37 tan2 Exp $
 
 // End of file
