@@ -37,10 +37,12 @@ public:
     void reset_target(const MPI_Comm intercomm,
 		      const int receiver);
 
-    virtual void send(int& size);
-    virtual void receive(const int size);
+//     virtual void send(int& size);
+//     virtual void receive(const int size);
     void sendTemperature();
+    void sendVelocities();
     void receiveTemperature();
+    void receiveVelocities();
     double exchangeTimestep(const double);
 
     void wait();
@@ -51,16 +53,16 @@ public:
     virtual void interpretate() = 0; // interpolation or extrapolation
     virtual void impose_bc() = 0;    // set bc flag
 
-    virtual void mapBoundary(Boundary*) = 0;
+    virtual void mapBoundary() = 0;
                                      // create mapping from Boundary object
                                      // to global id array
 
 protected:
     const MPI_Comm comm;
-    MPI_Comm intercomm;
+    const MPI_Comm intercomm;
 
     const int localLeader;
-    int remoteLeader;
+    const int remoteLeader;
 
     const All_variables *E;    // CitcomS data structure,
                                // Exchanger only modifies bc flags
@@ -84,7 +86,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.6 2003/09/10 21:11:09 puru Exp $
+// $Id: ExchangerClass.h,v 1.7 2003/09/11 21:56:26 tan2 Exp $
 
 // End of file
 
