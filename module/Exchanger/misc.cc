@@ -61,31 +61,15 @@ PyObject * pyExchanger_FinereturnE(PyObject *, PyObject *)
     E->mesh.noy = 4;
     E->mesh.noz = 3;
 
-    E->control.theta_max = 2.0;
-    E->control.theta_min = 1.0;
-    E->control.fi_max = 2.0;
-    E->control.fi_min = 1.0;
+    E->control.theta_max = 1.9;
+    E->control.theta_min = 1.1;
+    E->control.fi_max = 1.9;
+    E->control.fi_min = 1.1;
     E->sphere.ro = 2.0;
-    E->sphere.ri = 1.0;
+    E->sphere.ri = 1.2;
 
     commonE(E);
 
-    for(int m=1;m<=E->sphere.caps_per_proc;m++)
-	for(int k=1;k<=E->lmesh.noy;k++)
-	    for(int j=1;j<=E->lmesh.nox;j++)
-		for(int i=1;i<=E->lmesh.noz;i++)  {
-		    int node = i + (j-1)*E->lmesh.noz
-			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
-		    E->X[E->mesh.levmax][m][1][node] = 1.0/(E->lmesh.nox-1)*(j-1)+1.0;
-		    E->X[E->mesh.levmax][m][2][node] = 1.0/(E->lmesh.noy-1)*(k-1)+1.0;
-		    E->X[E->mesh.levmax][m][3][node] = 1.0/(E->lmesh.noz-1)*(i-1)+1.0;
-
-//  		    std::cout << "Fine Grid " <<  node << " "
-//  			      << E->X[E->mesh.levmax][m][1][node] << " "
-//  			      << E->X[E->mesh.levmax][m][2][node] << " "
-//  			      << E->X[E->mesh.levmax][m][3][node] << " "
-//  			      << std::endl;
-		}
     PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
     return Py_BuildValue("O", cobj);
 }
@@ -111,8 +95,7 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 
     commonE(E);
 
-    //Test
-//     ofstream cfile("coarse.dat");
+//    ofstream cfile("coarse.dat"); 
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int k=1;k<=E->lmesh.noy;k++)
 	    for(int j=1;j<=E->lmesh.nox;j++) 
@@ -120,10 +103,6 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *)
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
-		    E->X[E->mesh.levmax][m][1][node] = j-1;
-		    E->X[E->mesh.levmax][m][2][node] = k-1;
-		    E->X[E->mesh.levmax][m][3][node] = i-1;
-		    
  		    E->T[m][node] = E->X[E->mesh.levmax][m][1][node]
 			+ E->X[E->mesh.levmax][m][2][node]
 			+ E->X[E->mesh.levmax][m][3][node];
@@ -196,7 +175,9 @@ void commonE(All_variables *E) {
     E->lmesh.NNO[E->mesh.levmax] = nox * noz * noy;
     E->lmesh.NEL[E->mesh.levmax] = (nox-1) * (noz-1) * (noy-1);
 
-
+    for (int j=1;j<=E->sphere.caps_per_proc;j++)  {	
+	E->sphere.capid[j] = 1;
+    }
     
     for (int lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
 	for (int j=1;j<=E->sphere.caps_per_proc;j++)  {	
@@ -218,11 +199,18 @@ void commonE(All_variables *E) {
 		    for(int p=1;p<=elz;p++)     {
 			int element = (r-1)*elx*elz + (q-1)*elz  + p;
 			int start = (r-1)*noz*nox + (q-1)*noz + p;
-			for(int rr=1;rr<=8;rr++)
+			for(int rr=1;rr<=8;rr++) {
 			    E->IEN[lev][j][element].node[rr]= start
 				+ offset[rr].vector[0]
 				+ offset[rr].vector[1]*noz
 				+ offset[rr].vector[2]*noz*nox;
+
+// 			    std::cout << "  el = " << element
+// 				      << "  lnode = " << rr
+// 				      << "  ien = "
+// 				      << E->IEN[lev][j][element].node[rr]
+// 				      << std::endl;
+			}
 		    }
 	}     /* end for cap j */
     }     /* end loop for lev */
@@ -236,11 +224,31 @@ void commonE(All_variables *E) {
 	}
   	E->T[m] = new double [n+1];
     }
+
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+	for(int k=1;k<=E->lmesh.noy;k++)
+	    for(int j=1;j<=E->lmesh.nox;j++)
+		for(int i=1;i<=E->lmesh.noz;i++)  {
+		    int node = i + (j-1)*E->lmesh.noz
+			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
+		    E->X[E->mesh.levmax][m][1][node] = 
+			(E->control.theta_max - E->control.theta_min)/(E->lmesh.nox-1)*(j-1) + E->control.theta_min;
+		    E->X[E->mesh.levmax][m][2][node] = 
+			(E->control.fi_max - E->control.fi_min)/(E->lmesh.noy-1)*(k-1) + E->control.fi_min;
+		    E->X[E->mesh.levmax][m][3][node] = 
+			(E->sphere.ro -  E->sphere.ri)/(E->lmesh.noz-1)*(i-1) +  E->sphere.ri;
+
+//  		    std::cout <<  node << " "
+//  			      << E->X[E->mesh.levmax][m][1][node] << " "
+//  			      << E->X[E->mesh.levmax][m][2][node] << " "
+//  			      << E->X[E->mesh.levmax][m][3][node] << " "
+//  			      << std::endl;
+		}
     
     return;
 }
 
 // version
-// $Id: misc.cc,v 1.10 2003/09/26 21:11:50 tan2 Exp $
+// $Id: misc.cc,v 1.11 2003/09/27 00:09:56 tan2 Exp $
 
 // End of file
