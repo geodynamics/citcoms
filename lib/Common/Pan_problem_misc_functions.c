@@ -56,7 +56,7 @@ void apply_side_sbc(struct All_variables *E)
 
   if(E->parallel.total_surf_proc==12) {
     fprintf(stderr, "side_sbc is applicable only in Regional version\n");
-    parallel_process_termination(E);
+    parallel_process_termination();
   }
 
   for(m=1; m<=E->sphere.caps_per_proc; m++) {
