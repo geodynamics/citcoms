@@ -45,6 +45,7 @@ EXPORT_PYTHON_MODULES = \
 	Parallel.py \
 	Param.py \
 	Phase.py \
+	Tracer.py \
 	Visc.py
 
 
@@ -52,6 +53,6 @@ export:: export-package-python-modules
 	BLD_ACTION="export" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.7 2003/08/30 00:45:59 tan2 Exp $
+# $Id: Make.mm,v 1.8 2005/01/19 00:57:43 tan2 Exp $
 
 # End of file
