@@ -29,7 +29,7 @@ PROJ_OBJS = ${addprefix ${PROJ_TMPDIR}/, ${addsuffix .${EXT_OBJ}, ${basename ${n
 
 PROJ_CLEAN += $(PROJ_BIN) $(PROJ_OBJS)
 
-EXPORT_BINS = $(PROJ_BIN)
+EXPORT_BINS = $(PROJECT)$(TYPE)
 
 all: $(PROJ_BIN) release-binaries
 
@@ -43,7 +43,7 @@ $(PROJ_OBJS): $(PROJ_SRCS)
 
 
 # version
-# $Id: Make.mm,v 1.9 2004/04/23 21:15:20 tan2 Exp $
+# $Id: Make.mm,v 1.10 2004/06/28 19:56:36 tan2 Exp $
 
 #
 # End of file
