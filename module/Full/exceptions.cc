@@ -14,9 +14,9 @@
 #include <portinfo>
 #include <Python.h>
 
-PyObject *pyCitcomSFull_runtimeError = 0;
+PyObject *pyFull_runtimeError = 0;
     
 // version
-// $Id: exceptions.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: exceptions.cc,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file

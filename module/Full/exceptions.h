@@ -11,16 +11,16 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
-#if !defined(pyCitcomSFull_exceptions_h)
-#define pyCitcomSFull_exceptions_h
+#if !defined(pyFull_exceptions_h)
+#define pyFull_exceptions_h
 
 // exceptions
 
-extern PyObject *pyCitcomSFull_runtimeError;
+extern PyObject *pyFull_runtimeError;
 
 #endif
 
 // version
-// $Id: exceptions.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: exceptions.h,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file

@@ -19,34 +19,34 @@
 #include "bindings.h"
 
 
-char pyCitcomSFull_module__doc__[] = "";
+char pyFull_module__doc__[] = "";
 
-// Initialization function for the module (*must* be called initCitcomSFull)
+// Initialization function for the module (*must* be called initFull)
 extern "C"
 void
-initCitcomSFull()
+initFull()
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        "CitcomSFull", pyCitcomSFull_methods,
-        pyCitcomSFull_module__doc__, 0, PYTHON_API_VERSION);
+        "Full", pyFull_methods,
+        pyFull_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
     PyObject * d = PyModule_GetDict(m);
 
     // check for errors
     if (PyErr_Occurred()) {
-        Py_FatalError("can't initialize module CitcomSFull");
+        Py_FatalError("can't initialize module Full");
     }
 
     // install the module exceptions
-    pyCitcomSFull_runtimeError = PyErr_NewException("CitcomSFull.runtime", 0, 0);
-    PyDict_SetItemString(d, "RuntimeException", pyCitcomSFull_runtimeError);
+    pyFull_runtimeError = PyErr_NewException("Full.runtime", 0, 0);
+    PyDict_SetItemString(d, "RuntimeException", pyFull_runtimeError);
 
     return;
 }
 
 // version
-// $Id: Fullmodule.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: Fullmodule.cc,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file

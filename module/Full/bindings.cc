@@ -20,14 +20,14 @@
 
 // the method table
 
-struct PyMethodDef pyCitcomSFull_methods[] = {
+struct PyMethodDef pyFull_methods[] = {
 
     // dummy entry for testing
-    {pyCitcomSFull_return1_test__name__, pyCitcomSFull_return1_test,
-     METH_VARARGS, pyCitcomSFull_return1_test__doc__},
+    {pyFull_return1_test__name__, pyFull_return1_test,
+     METH_VARARGS, pyFull_return1_test__doc__},
 
-    {pyCitcomSFull_copyright__name__, pyCitcomSFull_copyright,
-     METH_VARARGS, pyCitcomSFull_copyright__doc__},
+    {pyFull_copyright__name__, pyFull_copyright,
+     METH_VARARGS, pyFull_copyright__doc__},
 
 
 // Sentinel
@@ -35,6 +35,6 @@ struct PyMethodDef pyCitcomSFull_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: bindings.cc,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file

@@ -11,16 +11,16 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
-#if !defined(pyCitcomSFull_bindings_h)
-#define pyCitcomSFull_bindings_h
+#if !defined(pyFull_bindings_h)
+#define pyFull_bindings_h
 
 // the method table
 
-extern struct PyMethodDef pyCitcomSFull_methods[];
+extern struct PyMethodDef pyFull_methods[];
 
 #endif
 
 // version
-// $Id: bindings.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: bindings.h,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file

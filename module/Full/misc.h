@@ -11,22 +11,22 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
-#if !defined(pyCitcomSFull_misc_h)
-#define pyCitcomSFull_misc_h
+#if !defined(pyFull_misc_h)
+#define pyFull_misc_h
 
 // copyright
-extern char pyCitcomSFull_copyright__name__[];
-extern char pyCitcomSFull_copyright__doc__[];
+extern char pyFull_copyright__name__[];
+extern char pyFull_copyright__doc__[];
 extern "C"
-PyObject * pyCitcomSFull_copyright(PyObject *, PyObject *);
+PyObject * pyFull_copyright(PyObject *, PyObject *);
 
 
 
 // return1_test
-extern char pyCitcomSFull_return1_test__name__[];
-extern char pyCitcomSFull_return1_test__doc__[];
+extern char pyFull_return1_test__name__[];
+extern char pyFull_return1_test__doc__[];
 extern "C"
-PyObject * pyCitcomSFull_return1_test(PyObject *, PyObject *);
+PyObject * pyFull_return1_test(PyObject *, PyObject *);
 
 
 
@@ -35,6 +35,6 @@ PyObject * pyCitcomSFull_return1_test(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: misc.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: misc.h,v 1.2 2003/04/10 23:25:29 tan2 Exp $
 
 // End of file
