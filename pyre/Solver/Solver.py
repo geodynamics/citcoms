@@ -14,23 +14,6 @@ import journal
 class Solver(BaseSolver):
 
 
-    def __init__(self, name, facility="solver"):
-        BaseSolver.__init__(self, name, facility)
-
-        # use non-dimensional time
-        self.t = 0.0
-        return
-
-
-
-    def run(self):
-        self.startSimulation()
-        self.run_simulation()
-        self.endSimulation()
-        return
-
-
-
     def startSimulation(self):
 	#journal.info("staging").log("setup MPI")
         comm = self.get_communicator()
@@ -43,8 +26,6 @@ class Solver(BaseSolver):
         self.setProperties()
 
 	self._start_cpu_time = self.CitcomModule.CPU_time()
-        self.t = 0
-        self.step = 0
 
 	self.rank = comm.rank
 	print "my rank is ", self.rank
@@ -52,51 +33,37 @@ class Solver(BaseSolver):
 
 
 
-    def run_simulation(self):
-
+    def run_init_simulation(self):
         mesher = self.inventory.mesher
         mesher.setup()
-
+        
         vsolver = self.inventory.vsolver
         vsolver.setup()
-
+        
         tsolver = self.inventory.tsolver
         tsolver.setup()
-
-	#if (self.invenotry.param.inventory.post_proccessing):
-	#    self.CitcomModule.post_processing()
-	#    return
-
+        
         mesher.run()
-
-	# solve for 0th time step velocity and pressure
-	vsolver.run()
-
-        self.save()
-
-	while self.step < self.inventory.param.inventory.maxstep:
-
-	    #tsolver.run()
-            if not self.step:
-                self.CitcomModule.PG_timestep_init(self.all_variables)
-
-            dt = tsolver.stable_timestep()
-            self.CitcomModule.PG_timestep_solve(self.all_variables, dt)
-
-	    vsolver.run()
-
-            self.t += dt
-	    self.step += 1
-
-            if not (self.step %
-                    self.inventory.param.inventory.storage_spacing):
-                self.save()
-
-
+        vsolver.run()
+        tsolver.launch()
+        
         return
 
+    def advance(self,dt):
+        self._loopInfo.log(
+            "%s: step %d: advancing the solution by dt = %s" % (self.name, self.step, dt))        
+        tsolver.run(dt)
+        vsolver.run()
 
-
+        return
+    
+    
+    def stableTimestep(self):
+        dt=tsolver.stable_timestep()
+        self._loopInfo.log(
+            "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))        
+        return dt
+    
     def endSimulation(self):
         total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
         if not self.rank:
@@ -122,8 +89,8 @@ class Solver(BaseSolver):
 
 
 
-    def save(self):
-        self.CitcomModule.output(self.all_variables, self.step)
+    def save(self,step):
+        self.CitcomModule.output(self.all_variables,step)
         return
 
 
@@ -203,6 +170,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.7 2003/08/27 22:24:07 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.8 2003/08/28 22:37:39 ces74 Exp $"
 
 # End of file
