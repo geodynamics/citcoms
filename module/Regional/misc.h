@@ -62,21 +62,27 @@ extern "C"
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *, PyObject *);
 
 
-extern char pyCitcom_Visc_update_material__name__[];
-extern char pyCitcom_Visc_update_material__doc__[];
-extern "C"
-PyObject * pyCitcom_Visc_update_material(PyObject *, PyObject *);
-
-
 extern char pyCitcom_BC_update_plate_velocity__name__[];
 extern char pyCitcom_BC_update_plate_velocity__doc__[];
 extern "C"
 PyObject * pyCitcom_BC_update_plate_velocity(PyObject *, PyObject *);
 
 
+extern char pyCitcom_Tracer_tracer_advection__name__[];
+extern char pyCitcom_Tracer_tracer_advection__doc__[];
+extern "C"
+PyObject * pyCitcom_Tracer_tracer_advection(PyObject *, PyObject *);
+
+
+extern char pyCitcom_Visc_update_material__name__[];
+extern char pyCitcom_Visc_update_material__doc__[];
+extern "C"
+PyObject * pyCitcom_Visc_update_material(PyObject *, PyObject *);
+
+
 #endif
 
 // version
-// $Id: misc.h,v 1.16 2004/05/26 23:56:33 tan2 Exp $
+// $Id: misc.h,v 1.17 2005/01/19 02:01:41 tan2 Exp $
 
 // End of file

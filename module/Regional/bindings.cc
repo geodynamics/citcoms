@@ -78,15 +78,20 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_velocities_conform_bcs__doc__},
 
-    {pyCitcom_Visc_update_material__name__,
-     pyCitcom_Visc_update_material,
-     METH_VARARGS,
-     pyCitcom_Visc_update_material__doc__},
-
     {pyCitcom_BC_update_plate_velocity__name__,
      pyCitcom_BC_update_plate_velocity,
      METH_VARARGS,
      pyCitcom_BC_update_plate_velocity__doc__},
+
+    {pyCitcom_Tracer_tracer_advection__name__,
+     pyCitcom_Tracer_tracer_advection,
+     METH_VARARGS,
+     pyCitcom_Tracer_tracer_advection__doc__},
+
+    {pyCitcom_Visc_update_material__name__,
+     pyCitcom_Visc_update_material,
+     METH_VARARGS,
+     pyCitcom_Visc_update_material__doc__},
 
     // from advdiffu.h
 
@@ -275,6 +280,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.37 2005/01/19 01:05:50 tan2 Exp $
+// $Id: bindings.cc,v 1.38 2005/01/19 02:01:41 tan2 Exp $
 
 // End of file

@@ -27,10 +27,11 @@ extern "C" {
 
     void global_default_values(struct All_variables*);
     void parallel_process_termination();
-    void set_signal();
-    void velocities_conform_bcs(struct All_variables*, double **);
     void read_mat_from_file(struct All_variables*);
     void read_velocity_boundary_from_file(struct All_variables*);
+    void set_signal();
+    void tracer_advection(struct All_variables*);
+    void velocities_conform_bcs(struct All_variables*, double **);
 
 }
 
@@ -180,26 +181,6 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_Visc_update_material__doc__[] = "";
-char pyCitcom_Visc_update_material__name__[] = "Visc_update_material";
-
-PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:Visc_update_material", &obj))
-        return NULL;
-
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
-
-    if(E->control.mat_control==1)
-      read_mat_from_file(E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyCitcom_BC_update_plate_velocity__doc__[] = "";
 char pyCitcom_BC_update_plate_velocity__name__[] = "BC_update_plate_velocity";
 
@@ -220,6 +201,46 @@ PyObject * pyCitcom_BC_update_plate_velocity(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_Tracer_tracer_advection__doc__[] = "";
+char pyCitcom_Tracer_tracer_advection__name__[] = "Tracer_tracer_advection";
+
+PyObject * pyCitcom_Tracer_tracer_advection(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:Tracer_tracer_advection", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    if(E->control.tracer==1)
+      tracer_advection(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_Visc_update_material__doc__[] = "";
+char pyCitcom_Visc_update_material__name__[] = "Visc_update_material";
+
+PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:Visc_update_material", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    if(E->control.mat_control==1)
+      read_mat_from_file(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -228,6 +249,6 @@ PyObject * pyCitcom_BC_update_plate_velocity(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.24 2004/05/26 23:56:33 tan2 Exp $
+// $Id: misc.cc,v 1.25 2005/01/19 02:01:41 tan2 Exp $
 
 // End of file
