@@ -29,6 +29,8 @@ extern "C" {
     void parallel_process_termination();
     void set_signal();
     void velocities_conform_bcs(struct All_variables*, double **);
+    void read_mat_from_file(struct All_variables*);
+    void read_velocity_boundary_from_file(struct All_variables*);
 
 }
 
@@ -178,6 +180,40 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_BC_update_bc__doc__[] = "";
+char pyCitcom_BC_update_bc__name__[] = "BC_update_bc";
+
+PyObject * pyCitcom_BC_update_bc(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:BC_update_bc", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+
+    // copied from near the end of Citcom.c
+
+    if(E->control.mat_control==1)
+      read_mat_from_file(E);
+    /*
+      else
+      construct_mat_group(E);
+    */
+
+    if(E->control.vbcs_file==1)
+      read_velocity_boundary_from_file(E);
+    /*
+      else
+      renew_top_velocity_boundary(E);
+    */
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -186,6 +222,6 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.22 2003/08/19 21:21:43 tan2 Exp $
+// $Id: misc.cc,v 1.23 2004/05/24 20:32:06 tan2 Exp $
 
 // End of file

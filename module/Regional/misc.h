@@ -62,10 +62,16 @@ extern "C"
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *, PyObject *);
 
 
+extern char pyCitcom_BC_update_bc__name__[];
+extern char pyCitcom_BC_update_bc__doc__[];
+extern "C"
+PyObject * pyCitcom_BC_update_bc(PyObject *, PyObject *);
+
+
 
 #endif
 
 // version
-// $Id: misc.h,v 1.14 2003/08/01 22:53:50 tan2 Exp $
+// $Id: misc.h,v 1.15 2004/05/24 20:32:06 tan2 Exp $
 
 // End of file

@@ -78,6 +78,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_velocities_conform_bcs__doc__},
 
+    {pyCitcom_BC_update_bc__name__,
+     pyCitcom_BC_update_bc,
+     METH_VARARGS,
+     pyCitcom_BC_update_bc__doc__},
+
     // from advdiffu.h
 
     {pyCitcom_PG_timestep_init__name__,
@@ -251,6 +256,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.32 2003/11/28 22:20:23 tan2 Exp $
+// $Id: bindings.cc,v 1.33 2004/05/24 20:32:06 tan2 Exp $
 
 // End of file
