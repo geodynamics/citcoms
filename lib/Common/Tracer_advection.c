@@ -36,11 +36,9 @@ void tracer_initial_settings(E)
  {
    void tracer_setup();
    void tracer_advection();
-   void tracer_output();
 
    E->problem_tracer_setup=tracer_setup;
    E->problem_tracer_advection=tracer_advection;
-   E->problem_tracer_output=tracer_output;
 }
 
 
@@ -54,7 +52,6 @@ void tracer_setup(E)
         int nox,noy,noz,gnox,gnoy,gnoz;
         char aaa[100];
         char output_file[255];
-        void tracer_output();
 
         gnox=E->mesh.nox;
         gnoy=E->mesh.noy;
@@ -434,46 +431,3 @@ void tracer_advection(E)
 
 return;
     }
-/*========================================================
-=========================================================*/
-
-void tracer_output(E,ii)
-    struct All_variables *E;
-    int ii;
-{
-  FILE *fp, *fopen();
-  int n;
-  char filename[255];
-
-    if(E->parallel.me==0)    {
-    if ( ((ii % E->control.record_every) == 0) || E->control.DIRECTII)     {
-
-      sprintf(filename,"%s%d.%d","tracer_out",E->parallel.me,ii);
-      fp=fopen(filename,"w");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Tracer_advection #3) Cannot open %s\n",filename);
-          exit(8);
-	}
-
-      fprintf(fp,"%g\n",E->monitor.elapsed_time);
-
-      for(n=1;n<=E->Tracer.NUM_TRACERS;n++)   {
-
-/*
-	     printf("%f %f %f %f\n",E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
-*/
-
-	     fprintf(fp,"%f %f %f %f\n",
-	     E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
-
-        }  /*  end of n */
-
-      fclose(fp);
-
-
-    }    /* end of ii  */
-
-  }
-
-return;
-}
