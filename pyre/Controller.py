@@ -65,7 +65,7 @@ class Controller(SimulationController):
             self.save()
 
             # notify solver we finished a timestep
-            self.endTimestep()
+            self.endTimestep(totalTime, steps)
 
             # are we done?
             if self.done:
@@ -80,7 +80,7 @@ class Controller(SimulationController):
 
 
 
-    def endTimestep(self):
+    def endTimestep(self, totalTime, steps):
         # are we done?
         if steps and self.step >= steps:
             self.done = True
