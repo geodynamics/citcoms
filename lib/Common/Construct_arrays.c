@@ -4,7 +4,7 @@
 #include "global_defs.h"
 
 /*========================================================
-  Function to make the IEN array for a mesh of given 
+  Function to make the IEN array for a mesh of given
   dimension. IEN is an externally defined structure array
 
   NOTE: this is not really general enough for new elements:
@@ -14,7 +14,7 @@
 void construct_ien(E)
      struct All_variables *E;
 
-{	
+{
   int lev,p,q,r,rr,e1,e2,i,j,a,node,node2,e;
   int element,start,start1,nel,nno,accumulatives;
   int elz,elx,ely,nox,noy,noz,nozx,nozx1;
@@ -34,17 +34,17 @@ void construct_ien(E)
       nel=E->lmesh.NEL[lev];
       nno=E->lmesh.NNO[lev];
 
-      for(r=1;r<=ely;r++) 
-        for(q=1;q<=elx;q++)    
+      for(r=1;r<=ely;r++)
+        for(q=1;q<=elx;q++)
           for(p=1;p<=elz;p++)     {
-             element = (r-1)*elx*elz + (q-1)*elz  + p;	
+             element = (r-1)*elx*elz + (q-1)*elz  + p;
              start = (r-1)*noz*nox + (q-1)*noz + p;
              for(rr=1;rr<=ends;rr++)
-               E->IEN[lev][j][element].node[rr]= start 
+               E->IEN[lev][j][element].node[rr]= start
                   + offset[rr].vector[0]
                   + offset[rr].vector[1]*noz
-                  + offset[rr].vector[2]*noz*nox;   
-	     }    
+                  + offset[rr].vector[2]*noz*nox;
+	     }
 
 
       }     /* end for cap j */
@@ -91,8 +91,8 @@ void construct_ien(E)
 
 void construct_id(E)
      struct All_variables *E;
-{ 
-    int i,j,k;	
+{
+    int i,j,k;
     int eqn_count,node,nno;
     unsigned int type,doff;
     int lev;
@@ -115,7 +115,7 @@ void construct_id(E)
 
       i = 0;
       for(node=1;node<=E->lmesh.NNO[lev];node++) {
-        if (E->NODE[lev][j][node] & SKIP)              
+        if (E->NODE[lev][j][node] & SKIP)
         for(doff=1;doff<=dims;doff++)  {
 	  i++;
           E->parallel.Skip_id[lev][j][i] = E->ID[lev][j][node].doff[doff];
@@ -140,24 +140,24 @@ void construct_id(E)
 /*       } */
 
 
-    return; 
+    return;
     }
 
 /*==========================================================
-  Function to construct  the LM array from the ID and IEN arrays 
+  Function to construct  the LM array from the ID and IEN arrays
   ========================================================== */
 
 void construct_lm(E)
      struct All_variables *E;
-{	
+{
   int i,j,a,e;
   int lev,eqn_no;
   int nel, nel2;
-  
+
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
 
-  return;	
+  return;
 }
 
 
@@ -172,7 +172,7 @@ void construct_node_maps(E)
 
     int ii,noz,noxz,m,n,nn,lev,i,j,k,jj,kk,ia,ja,is,ie,js,je,ks,ke,doff;
     int neq,nno,dims2,matrix,nox,noy;
-   
+
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int ends=enodes[dims];
     int max_eqn;
@@ -190,8 +190,8 @@ void construct_node_maps(E)
        matrix = max_eqn*(nno+3);
 
        E->Node_map[lev][m]=(int *) malloc ((matrix+3)*sizeof(int));
-        
-       for(i=0;i<=matrix;i++) 
+
+       for(i=0;i<=matrix;i++)
 	   E->Node_map[lev][m][i] = neq+1;  /* DANGER !!! */
 
        for (ii=1;ii<=noy;ii++)
@@ -222,40 +222,40 @@ void construct_node_maps(E)
                  }
                }
          }
-      
+
        E->Eqn_k1[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
        E->Eqn_k2[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
        E->Eqn_k3[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
 
        E->mesh.matrix_size[lev] = matrix + 1;
        }         /* end for level and m */
-    
+
     return;
 }
 
 
 void construct_node_ks(E)
      struct All_variables *E;
-{ 
+{
     int m,level,i,j,k,e;
     int node,node1,eqn1,eqn2,eqn3,loc0,loc1,loc2,loc3,found,element,index,pp,qq;
     int neq,nno,nel,max_eqn;
-   
+
     double elt_K[24*24];
     double w1,w2,w3,ww1,ww2,ww3,zero;
 
     higher_precision *B1,*B2,*B3;
-   
+
     void get_elt_k();
     void get_aug_k();
     void build_diagonal_of_K();
     void exchange_id_d();
     void parallel_process_termination();
-   
+
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int ends=enodes[dims];
     const int lms=loc_mat_size[E->mesh.nsd];
- 
+
     zero = 0.0;
     max_eqn = 14*dims;
 
@@ -266,12 +266,12 @@ void construct_node_ks(E)
         neq=E->lmesh.NEQ[level];
         nel=E->lmesh.NEL[level];
         nno=E->lmesh.NNO[level];
-	for(i=0;i<=(neq+1);i++) 
-	    E->BI[level][m][i] = zero; 
+	for(i=0;i<=(neq+1);i++)
+	    E->BI[level][m][i] = zero;
         for(i=0;i<=E->mesh.matrix_size[level];i++) {
-            E->Eqn_k1[level][m][i] = zero; 
-            E->Eqn_k2[level][m][i] = zero; 
-            E->Eqn_k3[level][m][i] = zero; 
+            E->Eqn_k1[level][m][i] = zero;
+            E->Eqn_k2[level][m][i] = zero;
+            E->Eqn_k3[level][m][i] = zero;
             }
 
         for(element=1;element<=nel;element++) {
@@ -282,24 +282,24 @@ void construct_node_ks(E)
 	         get_aug_k(E,element,elt_K,level,m);
 
             build_diagonal_of_K(E,element,elt_K,level,m);
-	     
+
 	    for(i=1;i<=ends;i++) {  /* i, is the node we are storing to */
 	       node=E->IEN[level][m][element].node[i];
-		
+
 	       pp=(i-1)*dims;
 	       w1=w2=w3=1.0;
-	
+
 	       loc0=(node-1)*max_eqn;
-	
+
 	       if(E->NODE[level][m][node] & VBX) w1=0.0;
 	       if(E->NODE[level][m][node] & VBZ) w3=0.0;
 	       if(E->NODE[level][m][node] & VBY) w2=0.0;
-		   
+
 	       for(j=1;j<=ends;j++) { /* j is the node we are receiving from */
 	         node1=E->IEN[level][m][element].node[j];
 
                         /* only for half of the matrix ,because of the symmetry */
-                 if (node1<=node)  {   
+                 if (node1<=node)  {
 
 		    ww1=ww2=ww3=1.0;
 		    qq=(j-1)*dims;
@@ -309,8 +309,8 @@ void construct_node_ks(E)
 
 		    if(E->NODE[level][m][node1] & VBX) ww1=0.0;
 		    if(E->NODE[level][m][node1] & VBZ) ww3=0.0;
-		    if(E->NODE[level][m][node1] & VBY) ww2=0.0; 
-		    
+		    if(E->NODE[level][m][node1] & VBY) ww2=0.0;
+
 		    /* search for direction 1*/
 
 		    found=0;
@@ -320,13 +320,13 @@ void construct_node_ks(E)
 			    found++;
 			    break;
 			}
-		       
+
 		    assert(found /* direction 1 */);
 
 		    E->Eqn_k1[level][m][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
 		    E->Eqn_k2[level][m][loc0+index] +=  w2*ww1*elt_K[(pp+1)*lms+qq]; /* direction 1 */
 		    E->Eqn_k3[level][m][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
-		    
+
 		     /* search for direction 2*/
 
 		    found=0;
@@ -342,9 +342,9 @@ void construct_node_ks(E)
 		    E->Eqn_k1[level][m][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
 		    E->Eqn_k2[level][m][loc0+index] += w2*ww2*elt_K[(pp+1)*lms+qq+1]; /* direction 2 */
 		    E->Eqn_k3[level][m][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
-		
+
 		    /* search for direction 3*/
-		   
+
                     found=0;
 		    for(k=0;k<max_eqn;k++)
 		    if(E->Node_map[level][m][loc0+k] == eqn3) { /* found, index next equation */
@@ -352,9 +352,9 @@ void construct_node_ks(E)
 			found++;
 			break;
 		        }
-			
+
                     assert(found /* direction 3 */);
-			
+
 		    E->Eqn_k1[level][m][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
                     E->Eqn_k2[level][m][loc0+index] += w2*ww3*elt_K[(pp+1)*lms+qq+2]; /* direction 2 */
 		    E->Eqn_k3[level][m][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
@@ -373,31 +373,31 @@ void construct_node_ks(E)
         for(j=0;j<neq;j++)                 {
             if(E->BI[level][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,level,j,neq);
 	    assert( E->BI[level][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-            E->BI[level][m][j]  = (double) 1.0/E->BI[level][m][j];   
+            E->BI[level][m][j]  = (double) 1.0/E->BI[level][m][j];
 	    }
 	}           /* end for m */
-    
+
 
     }     /* end for level */
 
     return;
 }
 
-void rebuild_BI_on_boundary(E) 
+void rebuild_BI_on_boundary(E)
      struct All_variables *E;
-{	
+{
     int m,level,i,j;
     int eqn1,eqn2,eqn3;
-   
+
     higher_precision *B1,*B2,*B3;
     int *C;
-   
+
     void exchange_id_d();
-   
+
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
 
     const int max_eqn = dims*14;
- 
+
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(j=0;j<E->lmesh.NEQ[level];j++)
@@ -456,19 +456,19 @@ void rebuild_BI_on_boundary(E)
 
 void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
      struct All_variables *E;
-{	
+{
   int i,j,k,l,node,el,elt;
   int lev,elx,elz,ely,nno,nox,noz,noy;
-  
-  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) 
+
+  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)           {
       elz = E->lmesh.ELZ[lev];
       ely = E->lmesh.ELY[lev];
       noy = E->lmesh.NOY[lev];
       noz = E->lmesh.NOZ[lev];
       nno = E->lmesh.NNO[lev];
- 
-        if (E->parallel.me_loc[3]==0 )   
+
+        if (E->parallel.me_loc[3]==0 )
           for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[5];i++)   {
             node = E->parallel.NODE[lev][j][i].bound[5];
  	    E->NODE[lev][j][node] = E->NODE[lev][j][node] | TZEDGE;
@@ -510,8 +510,8 @@ void construct_sub_element(E)
 {    int i,j,k,l,m;
      int lev,nox,noy,noz,nnn,elx,elz,ely,elzu,elxu,elt,eltu;
 
-     
-  for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--) 
+
+  for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--)
      for (m=1;m<=E->sphere.caps_per_proc;m++)       {
           elx = E->lmesh.ELX[lev];
 	  elz = E->lmesh.ELZ[lev];
@@ -525,7 +525,7 @@ void construct_sub_element(E)
 	  elzu = 2 * elz;
           if (!(E->control.NMULTIGRID||E->control.EMULTIGRID))  {
              elzu = 1;
-             if (lev == E->mesh.levmax-1) 
+             if (lev == E->mesh.levmax-1)
                  elzu = E->lmesh.ELZ[E->mesh.levmax];
              }
 
@@ -537,22 +537,22 @@ void construct_sub_element(E)
 
 		  for(l=1;l<=enodes[E->mesh.nsd];l++)   {
 		      E->EL[lev][m][elt].sub[l] = eltu
-                                 + offset[l].vector[0] 
+                                 + offset[l].vector[0]
                                  + offset[l].vector[1] * elzu
-                                 + offset[l].vector[2] * elzu * elxu; 
+                                 + offset[l].vector[2] * elzu * elxu;
 		      }
-		  }  
+		  }
 
 	  }
 
 
-   return; 
+   return;
    }
 
 
 void construct_elt_ks(E)
      struct All_variables *E;
-{ 
+{
     int e,el,lev,j,k,ii,m;
     void get_elt_k();
     void get_aug_k();
@@ -572,7 +572,7 @@ void construct_elt_ks(E)
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
-	    get_elt_k(E,el,E->elt_k[lev][m][el].k,lev,m);  /* not for penalty */ 
+	    get_elt_k(E,el,E->elt_k[lev][m][el].k,lev,m);  /* not for penalty */
 
 	    if (E->control.augmented_Lagr)
 	        get_aug_k(E,el,E->elt_k[lev][m][el].k,lev,m);
@@ -589,12 +589,12 @@ void construct_elt_ks(E)
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
 	       if(E->BI[lev][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->mesh.NEQ[lev]);
                assert( E->BI[lev][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-               E->BI[lev][m][j]  = (float) 1.0/E->BI[lev][m][j];    
+               E->BI[lev][m][j]  = (float) 1.0/E->BI[lev][m][j];
 	       }
 
     }       /* end for level */
 
-  return; 
+  return;
 }
 
 
@@ -613,15 +613,15 @@ void construct_elt_gs(E)
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[lev];el++)
-        get_elt_g(E,el,E->elt_del[lev][m][el].g,lev,m);  
-      
+        get_elt_g(E,el,E->elt_del[lev][m][el].g,lev,m);
 
-  return; 
+
+  return;
 }
 
 
 /* ==============================================================
- routine for constructing stiffness and node_maps 
+ routine for constructing stiffness and node_maps
  ============================================================== */
 
 void construct_stiffness_B_matrix(E)
@@ -631,53 +631,28 @@ void construct_stiffness_B_matrix(E)
   void build_diagonal_of_Ahat();
   void project_viscosity();
   void construct_node_maps();
-  void construct_node_ks(); 
-  void construct_elt_ks(); 
-  void construct_elt_gs(); 
-  void rebuild_BI_on_boundary(); 
-  
-  static int been_here = 0;
-  static int been_here0 = 0;
+  void construct_node_ks();
+  void construct_elt_ks();
+  void construct_elt_gs();
+  void rebuild_BI_on_boundary();
 
-  int i,m;
+  if (E->control.NMULTIGRID)
+    project_viscosity(E);
 
- if (been_here0 == 0)   
-   for (i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)  {
-     for (m=1;m<=E->sphere.caps_per_proc;m++)
-       if(!E->control.NMULTIGRID && !E->control.NASSEMBLE)  {
-         E->elt_k[i][m]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
-         }
-       }
-    
-  if (been_here0 == 0 || E->viscosity.update_allowed)   {
-     /* do the following for the 1st time or update_allowed is true */
+  construct_elt_gs(E);
 
-    if (E->control.NMULTIGRID)
-       project_viscosity(E);
-    
-    construct_elt_gs(E);
-   
-    if (E->control.NMULTIGRID || E->control.NASSEMBLE) {
-      if (been_here == 0)   {    /* node_maps only built once */
-        construct_node_maps(E);
-        been_here = 1;
-        }
-      construct_node_ks(E);
-      } 
-    else {
-      construct_elt_ks(E);
-      }
-     
-    build_diagonal_of_Ahat(E);
+  if (E->control.NMULTIGRID || E->control.NASSEMBLE) {
+    construct_node_ks(E);
+  }
+  else {
+    construct_elt_ks(E);
+  }
 
+  build_diagonal_of_Ahat(E);
 
-    if (E->control.NMULTIGRID || (E->control.NASSEMBLE && !E->control.CONJ_GRAD))
-      rebuild_BI_on_boundary(E); 
+  if (E->control.NMULTIGRID || (E->control.NASSEMBLE && !E->control.CONJ_GRAD))
+    rebuild_BI_on_boundary(E);
 
- 
-    }
-
-    been_here0 = 1;
 
   return;
 }
@@ -687,13 +662,13 @@ void construct_stiffness_B_matrix(E)
  ============================================================== */
 void construct_mat_group(E)
      struct All_variables *E;
-{ 
+{
 
   int m,i,j,k,kk,el,lev,a,nodea,els,llayer;
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
-  
+
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     for(el=1;el<=E->lmesh.nel;el++) {
       E->mat[m][el] = 1;
@@ -705,7 +680,7 @@ void construct_mat_group(E)
     }
   }
 
-  return; 
+  return;
 }
 
 int layers(E,m,node)

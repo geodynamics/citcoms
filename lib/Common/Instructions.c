@@ -45,6 +45,7 @@ void read_instructions(filename)
     void construct_c3x3matrix();
     void construct_surf_det ();
     void set_sphere_harmonics ();
+    void general_stokes_solver_setup();
 
     void setup_parser();
     void shutdown_parser();
@@ -126,8 +127,9 @@ void read_instructions(filename)
     construct_shape_functions(E);
 
 /*    construct_c3x3matrix(E);       */  /* this matrix results from spherical geometry*/
-
     mass_matrix(E);
+
+    general_stokes_solver_setup(E);
 
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",CPU_time0()-start_time);
 
