@@ -7,7 +7,7 @@
 float global_fvdot();
 float vnorm_nonnewt();
 
-/*
+
 static float *delta_U[NCS];
 static float *oldU[NCS];
 
@@ -74,8 +74,6 @@ void general_stokes_solver_log(struct All_variables *E, float Udot_mag, float dU
 
   return;
 }
-
-*/
 
 
 //***********************************************************
