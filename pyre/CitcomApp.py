@@ -130,48 +130,15 @@ class CitcomApp(Application):
 
     class Inventory(Application.Inventory):
 
-        import pyre.facilities
         import pyre.properties
 
-        # facilities
-        from Facilities.TSolver import TSolver
-	from Facilities.VSolver import VSolver
-
-        # component modules
-        import Components.Advection_diffusion as Advection_diffusion
-	import Components.Stokes_solver as Stokes_solver
-
-        # components
-        from Components.BC import BC
-        from Components.Const import Const
-        from Components.IC import IC
-	from Components.Param import Param
-        from Components.Phase import Phase
-        from Components.Visc import Visc
-
         inventory = [
-
-            VSolver("vsolver", Stokes_solver.incompressibleNewtonian(CitcomModule)),
-            TSolver("tsolver", Advection_diffusion.temperature_diffadv(CitcomModule)),
-
-            pyre.facilities.facility("bc",
-				     default=BC("bc", "bc", CitcomModule)),
-            pyre.facilities.facility("const",
-				     default=Const("const", "const", CitcomModule)),
-            pyre.facilities.facility("ic",
-				     default=IC("ic", "ic", CitcomModule)),
-            pyre.facilities.facility("param",
-				     default=Param("param", "param", CitcomModule)),
-            pyre.facilities.facility("phase",
-				     default=Phase("phase", "phase", CitcomModule)),
-            pyre.facilities.facility("visc",
-				     default=Visc("visc", "visc", CitcomModule)),
 
             pyre.properties.sequence("ranklist", []),
 
             ]
 
 # version
-__id__ = "$Id: CitcomApp.py,v 1.3 2003/08/22 22:18:41 tan2 Exp $"
+__id__ = "$Id: CitcomApp.py,v 1.4 2003/08/22 22:35:57 tan2 Exp $"
 
 # End of file
