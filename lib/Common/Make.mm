@@ -1,4 +1,4 @@
-# -*- Makefile -*-
+# -*- Common Makefile -*-
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -8,13 +8,16 @@
 #
 
 include local.def
+TYPE=Common
 
 PROJECT = CitcomS
 PACKAGE = lib/$(TYPE)
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
-#PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE)Common.$(EXT_LIB)
-#PROJ_CC_INCLUDES = .
+PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
+
+PROJ_LIBRARIES = $(EXTERNAL_LIBPATH) $(EXTERNAL_LIBS) -lm
+PROJ_CC_INCLUDES = ./
 
 PROJ_SRCS = \
 	Advection_diffusion.c \
@@ -70,10 +73,10 @@ PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 
 #all: $(PROJ_OBJS) export-headers
-all: $(PROJ_OBJS)
+all: $(PROJ_LIB)
 
 # version
-# $Id: Make.mm,v 1.11 2003/08/08 22:51:53 tan2 Exp $
+# $Id: Make.mm,v 1.12 2003/08/12 16:34:19 ces74 Exp $
 
 #
 # End of file

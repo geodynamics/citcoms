@@ -30,13 +30,14 @@ all: $(BLD_DIRS)
 # runs and one for region runs. Hence a few hacks are needed.
 
 Common:
+	(cd Common; $(MM))
 
 Full:
-	(cd Common; TYPE=Full $(MM))
+#	(cd Common; TYPE=Full $(MM))
 	(cd Full; $(MM))
 
 Regional:
-	(cd Common; TYPE=Regional $(MM))
+#	(cd Common; TYPE=Regional $(MM))
 	(cd Regional; $(MM))
 
 clean::
@@ -52,7 +53,7 @@ distclean::
 	(cd Regional; $(MM) distclean)
 
 # version
-# $Id: Make.mm,v 1.6 2003/08/07 18:41:41 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/12 16:34:18 ces74 Exp $
 
 #
 # End of file
