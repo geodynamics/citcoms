@@ -48,6 +48,20 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
    return;
 }
 
+void get_STD_freesurf(struct All_variables *E,float **freesurf)
+{
+	int node,snode,m;
+
+	if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
+		for(m=1;m<=E->sphere.caps_per_proc;m++)
+			for(snode=1;snode<=E->lmesh.nsf;snode++) {
+				node = E->surf_node[m][snode];
+				//freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;
+				freesurf[m][snode] += E->sphere.cap[m].V[3][node]*E->advection.timestep;
+			}
+	return;
+}
+
 
 void allocate_STD_mem(struct All_variables *E,
 		      float** SXX, float** SYY, float** SZZ,
@@ -580,6 +594,6 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 
 
 /* version */
-/* $Id: Topo_gravity.c,v 1.9 2004/05/23 19:10:26 tan2 Exp $ */
+/* $Id: Topo_gravity.c,v 1.10 2005/01/08 02:15:18 ces74 Exp $ */
 
 /* End of file  */

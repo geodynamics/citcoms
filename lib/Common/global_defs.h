@@ -333,6 +333,7 @@ struct CAP    {
     float *TB[4];
     float *VB[4];
     float *V[4];
+    float *Vprev[4];
     };
 
 struct SPHERE   {
@@ -509,6 +510,7 @@ struct SLICE {    /* horizontally sliced data, including topography */
     float *bhflux[NCS];
     float *divg[NCS];
     float *vort[NCS];
+    float *freesurf[NCS];
   };
 
 struct BAVE {
@@ -526,6 +528,8 @@ struct MONITOR {
     int solution_cycles;
     int solution_cycles_init;
 
+    int stop_topo_loop;
+    int topo_loop;
 
     float  time_scale;
     float  length_scale;
@@ -614,6 +618,7 @@ struct CONTROL {
     int read_slab;
     int read_slabgeoid;
     int tracer;
+    int pseudo_free_surf;
 
 
     double theta_min, theta_max, fi_min, fi_max;

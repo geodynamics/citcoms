@@ -81,6 +81,52 @@ void assemble_forces(E,penalty)
 }
 
 
+void assemble_forces_pseudo_surf(E,penalty)
+     struct All_variables *E;
+     int penalty;
+{
+  double elt_f[24];
+  int m,a,e,i;
+
+  void get_elt_f();
+  void get_elt_tr_pseudo_surf();
+  void strip_bcs_from_residual();
+  void exchange_id_d();
+  void thermal_buoyancy();
+
+  const int neq=E->lmesh.neq;
+  const int nel=E->lmesh.nel;
+  const int lev=E->mesh.levmax;
+
+  thermal_buoyancy(E,E->temp);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)    {
+
+    for(a=0;a<neq;a++)
+      E->F[m][a] = 0.0;
+
+    for (e=1;e<=nel;e++)  {
+      get_elt_f(E,e,elt_f,1,m);
+      add_force(E, e, elt_f, m);
+    }
+
+    /* for traction bc */
+    for(i=1; i<=E->boundary.nel; i++) {
+      e = E->boundary.element[m][i];
+
+      for(a=0;a<24;a++) elt_f[a] = 0.0;
+      for(a=SIDE_BEGIN; a<=SIDE_END; a++)
+	get_elt_tr_pseudo_surf(E, i, a, elt_f, m);
+
+      add_force(E, e, elt_f, m);
+    }
+  }       /* end for m */
+
+  exchange_id_d(E, E->F, lev);
+  strip_bcs_from_residual(E,E->F,lev);
+  return;
+}
+
 /*==============================================================
   Function to supply the element k matrix for a given element e.
   ==============================================================  */
@@ -751,79 +797,215 @@ void get_elt_f(E,el,elt_f,bcs,m)
   Function to create the element force vector due to stress b.c.
   ================================================================= */
 
-void get_elt_tr(struct All_variables *E, int bel, int side,
-		double elt_tr[24], int m)
+void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
-  void construct_side_c3x3matrix_el();
+	void construct_side_c3x3matrix_el();
 
-  const int dims=E->mesh.nsd;
-  const int ends1=enodes[dims-1];
-  const int oned = onedvpoints[dims];
+	const int dims=E->mesh.nsd;
+	const int ends1=enodes[dims-1];
+	const int oned = onedvpoints[dims];
 
-  struct CC Cc;
-  struct CCX Ccx;
+	struct CC Cc;
+	struct CCX Ccx;
 
-  const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
+	const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
 
-  double traction[4][5],traction_at_gs[4][5], value, tmp;
-  int j, b, p, k, a, nodea, d;
-  int el = E->boundary.element[m][bel];
-  int flagged;
-  int found = 0;
+	double traction[4][5],traction_at_gs[4][5], value, tmp;
+	int j, b, p, k, a, nodea, d;
+	int el = E->boundary.element[m][bel];
+	int flagged;
+	int found = 0;
 
-  if(E->control.side_sbcs)
-    for(a=1;a<=ends1;a++)  {
-      nodea = E->ien[m][el].node[ sidenodes[side][a] ];
-      for(d=1;d<=dims;d++) {
-	value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
-	flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
-	found |= flagged;
-	traction[d][a] = ( flagged ? value : 0.0 );
-      }
-    }
-  else
-    /* if side_sbcs is false, only apply sbc on top and bottom surfaces */
-    if(side == SIDE_BOTTOM || side == SIDE_TOP)
-      for(a=1;a<=ends1;a++)  {
-	nodea = E->ien[m][el].node[ sidenodes[side][a] ];
-	for(d=1;d<=dims;d++) {
-	  value = E->sphere.cap[m].VB[d][nodea];
-	  flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
-	  found |= flagged;
-	  traction[d][a] = ( flagged ? value : 0.0 );
+	const float rho = E->data.density;
+	const float g = E->data.grav_acc;
+	const float R = 6371000.0;
+	const float eta = E->data.ref_viscosity;
+	const float kappa = E->data.therm_diff;
+	const float factor = 1.0e+00;
+	int nodeas;
+
+	if(E->control.side_sbcs)
+		for(a=1;a<=ends1;a++)  {
+			nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+			for(d=1;d<=dims;d++) {
+				value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
+				flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+				found |= flagged;
+				traction[d][a] = ( flagged ? value : 0.0 );
+			}
+		}
+	else {
+		/* if side_sbcs is false, only apply sbc on top and bottom surfaces */
+		//if(side == SIDE_BOTTOM || side == SIDE_TOP) {
+		if( side == SIDE_TOP && E->mesh.topvbc == 2 && E->control.pseudo_free_surf &&
+		    E->parallel.me_loc[3]==E->parallel.nprocz-1 && (el%E->lmesh.elz==0)) {
+			for(a=1;a<=ends1;a++)  {
+				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				nodeas = E->ien[m][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
+				traction[1][a] = 0.0;
+				traction[2][a] = 0.0;
+				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
+					*(E->slice.freesurf[m][nodeas]+E->sphere.cap[m].V[3][nodea]*E->advection.timestep);
+				if(E->parallel.me==11 && nodea==3328)
+					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[m].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
+				found = 1;
+#if 0
+				if(found && E->parallel.me==1)
+					fprintf(stderr,"me=%d bel=%d el=%d side=%d TOP=%d a=%d sidenodes=%d ien=%d noz=%d nodea=%d traction=%e %e %e\n",
+						E->parallel.me,bel,el,side,SIDE_TOP,a,sidenodes[side][a],
+						E->ien[m][el].node[ sidenodes[side][a] ],E->lmesh.noz,
+						nodea,traction[1][a],traction[2][a],traction[3][a]);
+
+#endif
+			}
+		}
+		else {
+			for(a=1;a<=ends1;a++)  {
+				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				for(d=1;d<=dims;d++) {
+					value = E->sphere.cap[m].VB[d][nodea];
+					flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+					found |= flagged;
+					traction[d][a] = ( flagged ? value : 0.0 );
+				}
+			}
+		}
 	}
-      }
 
-  /* skip the following computation if no sbc_flag is set
-     or value of sbcs are zero */
-  if(!found) return;
+	/* skip the following computation if no sbc_flag is set
+	   or value of sbcs are zero */
+	if(!found) return;
 
-  /* compute traction at each int point */
-  construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
-			       E->mesh.levmax,m,0,side);
+	/* compute traction at each int point */
+	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
+				     E->mesh.levmax,m,0,side);
 
-  for(k=1;k<=oned;k++)
-    for(d=1;d<=dims;d++) {
-      traction_at_gs[d][k] = 0.0;
-      for(j=1;j<=ends1;j++)
-	traction_at_gs[d][k] += traction[d][j] * E->M.vpt[GMVINDEX(j,k)] ;
-    }
+	for(k=1;k<=oned;k++)
+		for(d=1;d<=dims;d++) {
+			traction_at_gs[d][k] = 0.0;
+			for(j=1;j<=ends1;j++)
+				traction_at_gs[d][k] += traction[d][j] * E->M.vpt[GMVINDEX(j,k)] ;
+		}
 
-  for(j=1;j<=ends1;j++) {
-    a = sidenodes[side][j];
-    for(d=1;d<=dims;d++) {
-      p = dims*(a-1)+d-1;
-      for(k=1;k<=oned;k++) {
-	tmp = 0.0;
-	for(b=1;b<=dims;b++)
-	  tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
+	for(j=1;j<=ends1;j++) {
+		a = sidenodes[side][j];
+		for(d=1;d<=dims;d++) {
+			p = dims*(a-1)+d-1;
+			for(k=1;k<=oned;k++) {
+				tmp = 0.0;
+				for(b=1;b<=dims;b++)
+					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
-	elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-	  * E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
+				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
+					* E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
 
-      }
-    }
-  }
+			}
+		}
+	}
+}
+
+void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+{
+	void construct_side_c3x3matrix_el();
+
+	const int dims=E->mesh.nsd;
+	const int ends1=enodes[dims-1];
+	const int oned = onedvpoints[dims];
+
+	struct CC Cc;
+	struct CCX Ccx;
+
+	const unsigned sbc_flag[4] = {0,SBX,SBY,SBZ};
+
+	double traction[4][5],traction_at_gs[4][5], value, tmp;
+	int j, b, p, k, a, nodea, d;
+	int el = E->boundary.element[m][bel];
+	int flagged;
+	int found = 0;
+
+	const float rho = E->data.density;
+	const float g = E->data.grav_acc;
+	const float R = 6371000.0;
+	const float eta = E->data.ref_viscosity;
+	const float kappa = E->data.therm_diff;
+	const float factor = 1.0e+00;
+	int nodeas;
+
+	if(E->control.side_sbcs)
+		for(a=1;a<=ends1;a++)  {
+			nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+			for(d=1;d<=dims;d++) {
+				value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
+				flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+				found |= flagged;
+				traction[d][a] = ( flagged ? value : 0.0 );
+			}
+		}
+	else {
+		if( side == SIDE_TOP && E->parallel.me_loc[3]==E->parallel.nprocz-1 && (el%E->lmesh.elz==0)) {
+			for(a=1;a<=ends1;a++)  {
+				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				nodeas = E->ien[m][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
+				traction[1][a] = 0.0;
+				traction[2][a] = 0.0;
+				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
+					*(E->slice.freesurf[m][nodeas]+E->sphere.cap[m].V[3][nodea]*E->advection.timestep);
+				if(E->parallel.me==11 && nodea==3328)
+					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[m].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
+				found = 1;
+#if 0
+				if(found && E->parallel.me==1)
+					fprintf(stderr,"me=%d bel=%d el=%d side=%d TOP=%d a=%d sidenodes=%d ien=%d noz=%d nodea=%d traction=%e %e %e\n",
+						E->parallel.me,bel,el,side,SIDE_TOP,a,sidenodes[side][a],
+						E->ien[m][el].node[ sidenodes[side][a] ],E->lmesh.noz,
+						nodea,traction[1][a],traction[2][a],traction[3][a]);
+
+#endif
+			}
+		}
+		else {
+			for(a=1;a<=ends1;a++)  {
+				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				for(d=1;d<=dims;d++) {
+					value = E->sphere.cap[m].VB[d][nodea];
+					flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+					found |= flagged;
+					traction[d][a] = ( flagged ? value : 0.0 );
+				}
+			}
+		}
+	}
+
+	/* skip the following computation if no sbc_flag is set
+	   or value of sbcs are zero */
+	if(!found) return;
+
+	/* compute traction at each int point */
+	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
+				     E->mesh.levmax,m,0,side);
+
+	for(k=1;k<=oned;k++)
+		for(d=1;d<=dims;d++) {
+			traction_at_gs[d][k] = 0.0;
+			for(j=1;j<=ends1;j++)
+				traction_at_gs[d][k] += traction[d][j] * E->M.vpt[GMVINDEX(j,k)] ;
+		}
+
+	for(j=1;j<=ends1;j++) {
+		a = sidenodes[side][j];
+		for(d=1;d<=dims;d++) {
+			p = dims*(a-1)+d-1;
+			for(k=1;k<=oned;k++) {
+				tmp = 0.0;
+				for(b=1;b<=dims;b++)
+					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
+
+				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
+					* E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
+
+			}
+		}
+	}
 }
 
 
@@ -895,6 +1077,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.16 2004/04/14 18:29:00 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.17 2005/01/08 02:15:17 ces74 Exp $ */
 
 /* End of file  */

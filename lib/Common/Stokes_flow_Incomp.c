@@ -60,6 +60,49 @@ void solve_constrained_flow_iterative(E)
   return;
 }
 
+void solve_constrained_flow_iterative_pseudo_surf(E)
+     struct All_variables *E;
+
+{
+    double *D1;
+    double *u;
+    double *R,*Bp;
+    double residual_ddash;
+    double vmag;
+    double global_vdot(),global_pdot();
+
+    float solve_Ahat_p_fhat();
+    void v_from_vector_pseudo_surf();
+    void p_to_nodes();
+
+    int steps,cycles;
+    int i,j,k,doff,vel_cycles_previous,vel_calls_previous;
+
+    double time,CPU_time0();
+
+    const int npno = E->lmesh.npno;
+    const int gnpno = E->mesh.npno;
+    const int nno = E->lmesh.nno;
+    const int dims = E->mesh.nsd;
+    const int neq = E->lmesh.neq;
+    const int gneq = E->mesh.neq;
+    const int addi_dof = additional_dof[dims];
+
+    time=CPU_time0();
+
+    cycles=E->control.p_iterations;
+
+    /* Solve for velocity and pressure, correct for bc's */
+
+    residual_ddash=solve_Ahat_p_fhat(E,E->U,E->P,E->F,E->control.accuracy,&cycles);
+
+    v_from_vector_pseudo_surf(E);
+    p_to_nodes(E,E->P,E->NP,E->mesh.levmax);
+
+/* */
+
+  return;
+}
 
 
 /*  ==========================================================================  */
@@ -262,52 +305,116 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
 
 
 void v_from_vector(E)
-     struct All_variables *E;
+	struct All_variables *E;
 {
-  int i,eqn1,eqn2,eqn3,m,node,d;
-  unsigned int type;
-  float sint,cost,sinf,cosf;
+	int i,eqn1,eqn2,eqn3,m,node,d;
+	unsigned int type;
+	float sint,cost,sinf,cosf;
 
-  const int nno = E->lmesh.nno;
-  const int dofs = E->mesh.dof;
-  const int level=E->mesh.levmax;
+	const int nno = E->lmesh.nno;
+	const int dofs = E->mesh.dof;
+	const int level=E->mesh.levmax;
+	double sum_V = 0.0, sum_dV = 0.0, rel_error = 0.0, global_max_error = 0.0;
+	double tol_error = 1.0e-03;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    for(node=1;node<=nno;node++)     {
+	for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+		for(node=1;node<=nno;node++)     {
+			E->sphere.cap[m].V[1][node] = E->U[m][E->id[m][node].doff[1]];
+			E->sphere.cap[m].V[2][node] = E->U[m][E->id[m][node].doff[2]];
+			E->sphere.cap[m].V[3][node] = E->U[m][E->id[m][node].doff[3]];
+			if (E->node[m][node] & VBX)
+				E->sphere.cap[m].V[1][node] = E->sphere.cap[m].VB[1][node];
+			if (E->node[m][node] & VBY)
+				E->sphere.cap[m].V[2][node] = E->sphere.cap[m].VB[2][node];
+			if (E->node[m][node] & VBZ)
+				E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
+		}
+		for (i=1;i<=E->lmesh.nno;i++)  {
+			eqn1 = E->id[m][i].doff[1];
+			eqn2 = E->id[m][i].doff[2];
+			eqn3 = E->id[m][i].doff[3];
+			sint = E->SinCos[level][m][0][i];
+			sinf = E->SinCos[level][m][1][i];
+			cost = E->SinCos[level][m][2][i];
+			cosf = E->SinCos[level][m][3][i];
+			E->temp[m][eqn1] = E->sphere.cap[m].V[1][i]*cost*cosf
+				- E->sphere.cap[m].V[2][i]*sinf
+				+ E->sphere.cap[m].V[3][i]*sint*cosf;
+			E->temp[m][eqn2] = E->sphere.cap[m].V[1][i]*cost*sinf
+				+ E->sphere.cap[m].V[2][i]*cosf
+				+ E->sphere.cap[m].V[3][i]*sint*sinf;
+			E->temp[m][eqn3] = -E->sphere.cap[m].V[1][i]*sint
+				+ E->sphere.cap[m].V[3][i]*cost;
 
-      E->sphere.cap[m].V[1][node] = E->U[m][E->id[m][node].doff[1]];
-      E->sphere.cap[m].V[2][node] = E->U[m][E->id[m][node].doff[2]];
-      E->sphere.cap[m].V[3][node] = E->U[m][E->id[m][node].doff[3]];
-      if (E->node[m][node] & VBX)
-        E->sphere.cap[m].V[1][node] = E->sphere.cap[m].VB[1][node];
-      if (E->node[m][node] & VBY)
-        E->sphere.cap[m].V[2][node] = E->sphere.cap[m].VB[2][node];
-      if (E->node[m][node] & VBZ)
-        E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
+		}
+	}
 
-    }
+	return;
+}
 
-    for (i=1;i<=E->lmesh.nno;i++)  {
-      eqn1 = E->id[m][i].doff[1];
-      eqn2 = E->id[m][i].doff[2];
-      eqn3 = E->id[m][i].doff[3];
-      sint = E->SinCos[level][m][0][i];
-      sinf = E->SinCos[level][m][1][i];
-      cost = E->SinCos[level][m][2][i];
-      cosf = E->SinCos[level][m][3][i];
-      E->temp[m][eqn1] = E->sphere.cap[m].V[1][i]*cost*cosf
-                       - E->sphere.cap[m].V[2][i]*sinf
-                       + E->sphere.cap[m].V[3][i]*sint*cosf;
-      E->temp[m][eqn2] = E->sphere.cap[m].V[1][i]*cost*sinf
-                       + E->sphere.cap[m].V[2][i]*cosf
-                       + E->sphere.cap[m].V[3][i]*sint*sinf;
-      E->temp[m][eqn3] = -E->sphere.cap[m].V[1][i]*sint
-                        + E->sphere.cap[m].V[3][i]*cost;
+void v_from_vector_pseudo_surf(E)
+	struct All_variables *E;
+{
+	int i,eqn1,eqn2,eqn3,m,node,d;
+	unsigned int type;
+	float sint,cost,sinf,cosf;
 
-      }
-   }
+	const int nno = E->lmesh.nno;
+	const int dofs = E->mesh.dof;
+	const int level=E->mesh.levmax;
+	double sum_V = 0.0, sum_dV = 0.0, rel_error = 0.0, global_max_error = 0.0;
+	double tol_error = 1.0e-03;
 
-  return;
+	for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+		for(node=1;node<=nno;node++)     {
+			E->sphere.cap[m].Vprev[1][node] = E->sphere.cap[m].V[1][node];
+			E->sphere.cap[m].Vprev[2][node] = E->sphere.cap[m].V[2][node];
+			E->sphere.cap[m].Vprev[3][node] = E->sphere.cap[m].V[3][node];
+
+			E->sphere.cap[m].V[1][node] = E->U[m][E->id[m][node].doff[1]];
+			E->sphere.cap[m].V[2][node] = E->U[m][E->id[m][node].doff[2]];
+			E->sphere.cap[m].V[3][node] = E->U[m][E->id[m][node].doff[3]];
+			if (E->node[m][node] & VBX)
+				E->sphere.cap[m].V[1][node] = E->sphere.cap[m].VB[1][node];
+			if (E->node[m][node] & VBY)
+				E->sphere.cap[m].V[2][node] = E->sphere.cap[m].VB[2][node];
+			if (E->node[m][node] & VBZ)
+				E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
+
+			sum_dV += (E->sphere.cap[m].V[1][node] - E->sphere.cap[m].Vprev[1][node])*(E->sphere.cap[m].V[1][node] - E->sphere.cap[m].Vprev[1][node])
+				+ (E->sphere.cap[m].V[2][node] - E->sphere.cap[m].Vprev[2][node])*(E->sphere.cap[m].V[2][node] - E->sphere.cap[m].Vprev[2][node])
+				+ (E->sphere.cap[m].V[3][node] - E->sphere.cap[m].Vprev[3][node])*(E->sphere.cap[m].V[3][node] - E->sphere.cap[m].Vprev[3][node]);
+			sum_V += E->sphere.cap[m].V[1][node]*E->sphere.cap[m].V[1][node]
+				+ E->sphere.cap[m].V[2][node]*E->sphere.cap[m].V[2][node]
+				+ E->sphere.cap[m].V[3][node]*E->sphere.cap[m].V[3][node];
+		}
+		rel_error = sqrt(sum_dV)/sqrt(sum_V);
+		MPI_Allreduce(&rel_error,&global_max_error,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
+		if(global_max_error <= tol_error) E->monitor.stop_topo_loop = 1;
+		if(E->parallel.me==0)
+			fprintf(stderr,"global_max_error=%e stop_topo_loop=%d\n",global_max_error,E->monitor.stop_topo_loop);
+
+		for (i=1;i<=E->lmesh.nno;i++)  {
+			eqn1 = E->id[m][i].doff[1];
+			eqn2 = E->id[m][i].doff[2];
+			eqn3 = E->id[m][i].doff[3];
+			sint = E->SinCos[level][m][0][i];
+			sinf = E->SinCos[level][m][1][i];
+			cost = E->SinCos[level][m][2][i];
+			cosf = E->SinCos[level][m][3][i];
+			E->temp[m][eqn1] = E->sphere.cap[m].V[1][i]*cost*cosf
+				- E->sphere.cap[m].V[2][i]*sinf
+				+ E->sphere.cap[m].V[3][i]*sint*cosf;
+			E->temp[m][eqn2] = E->sphere.cap[m].V[1][i]*cost*sinf
+				+ E->sphere.cap[m].V[2][i]*cosf
+				+ E->sphere.cap[m].V[3][i]*sint*sinf;
+			E->temp[m][eqn3] = -E->sphere.cap[m].V[1][i]*sint
+				+ E->sphere.cap[m].V[3][i]*cost;
+
+		}
+	}
+
+	return;
 }
 
 void velo_from_element(E,VV,m,el,sphere_key)
