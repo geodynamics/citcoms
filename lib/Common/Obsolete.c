@@ -213,3 +213,54 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
   return;
 }
 
+
+
+/* ==========================================================  */
+/* from Element_calculations.c                                 */
+/* =========================================================== */
+
+/* ===============================================================
+   Function to create the element pressure-forcing vector (due
+   to imposed velocity boundary conditions, mixed method).
+   =============================================================== */
+
+void get_elt_h(E,el,elt_h,m)
+     struct All_variables *E;
+     int el,m;
+     double elt_h[1];
+{
+    int i,p,a,b,q,got_g;
+    unsigned int type;
+    double elt_g[24][1];
+    void get_elt_g();
+
+    for(p=0;p<1;p++) elt_h[p] = 0.0;
+
+    got_g = 0;
+
+  type=VBX;
+  for(i=1;i<=E->mesh.nsd;i++)
+    { for(a=1;a<=enodes[E->mesh.nsd];a++)
+	{ if (E->node[m][E->ien[m][el].node[a]] & type)
+	    { if(!got_g)
+		{  get_elt_g(E,el,elt_g,E->mesh.levmax,m);
+		   got_g++;
+		 }
+
+	      p=E->mesh.nsd*(a-1) + i - 1;
+	      for(b=1;b<=pnodes[E->mesh.nsd];b++)
+		{ q = b-1;
+		  elt_h[q] -= elt_g[p][q] * E->sphere.cap[m].VB[i][E->ien[m][el].node[a]];
+		}
+	    }
+	}
+      type *= (unsigned int) 2;
+    }
+   return;
+}
+
+
+/* version */
+/* $Id: Obsolete.c,v 1.2 2004/04/09 23:56:06 tan2 Exp $ */
+
+/* End of file  */
