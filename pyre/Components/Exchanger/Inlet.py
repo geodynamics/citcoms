@@ -82,10 +82,9 @@ class TractionInlet(Inlet):
     "FV": normal velocity and tangent traction
     '''
 
-    def __init__(self, communicator, boundary, sink, all_variables, mode='F'):
+    def __init__(self, boundary, sink, all_variables, mode='F'):
         import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.TractionInlet_create(communicator.handle(),
-                                                      boundary,
+        self._handle = Exchanger.TractionInlet_create(boundary,
                                                       sink,
                                                       all_variables,
                                                       mode)
@@ -94,6 +93,6 @@ class TractionInlet(Inlet):
 
 
 # version
-__id__ = "$Id: Inlet.py,v 1.3 2004/03/11 23:25:47 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.4 2004/03/28 23:20:55 tan2 Exp $"
 
 # End of file
