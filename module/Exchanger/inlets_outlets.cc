@@ -29,6 +29,44 @@ class VTSource;
 
 #include "Inlet.h"
 
+char pyExchanger_Inlet_impose__doc__[] = "";
+char pyExchanger_Inlet_impose__name__[] = "Inlet_impose";
+
+PyObject * pyExchanger_Inlet_impose(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:Inlet_impose", &obj))
+        return NULL;
+
+    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
+
+    inlet->impose();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_Inlet_recv__doc__[] = "";
+char pyExchanger_Inlet_recv__name__[] = "Inlet_recv";
+
+PyObject * pyExchanger_Inlet_recv(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:Inlet_recv", &obj))
+        return NULL;
+
+    Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
+
+    inlet->recv();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_Inlet_storeTimestep__doc__[] = "";
 char pyExchanger_Inlet_storeTimestep__name__[] = "Inlet_storeTimestep";
 
@@ -44,6 +82,29 @@ PyObject * pyExchanger_Inlet_storeTimestep(PyObject *self, PyObject *args)
     Inlet* inlet = static_cast<Inlet*>(PyCObject_AsVoidPtr(obj));
 
     inlet->storeTimestep(fge_t, cge_t);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "Outlet.h"
+
+char pyExchanger_Outlet_send__doc__[] = "";
+char pyExchanger_Outlet_send__name__[] = "Outlet_send";
+
+PyObject * pyExchanger_Outlet_send(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:Outlet_send", &obj))
+        return NULL;
+
+    Outlet* outlet = static_cast<Outlet*>(PyCObject_AsVoidPtr(obj));
+
+    outlet->send();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -83,46 +144,6 @@ PyObject * pyExchanger_BoundaryVTInlet_create(PyObject *self, PyObject *args)
 }
 
 
-char pyExchanger_BoundaryVTInlet_impose__doc__[] = "";
-char pyExchanger_BoundaryVTInlet_impose__name__[] = "BoundaryVTInlet_impose";
-
-PyObject * pyExchanger_BoundaryVTInlet_impose(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:BoundaryVTInlet_impose", &obj))
-        return NULL;
-
-    BoundaryVTInlet* inlet = static_cast<BoundaryVTInlet*>
-                                        (PyCObject_AsVoidPtr(obj));
-
-    inlet->impose();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_BoundaryVTInlet_recv__doc__[] = "";
-char pyExchanger_BoundaryVTInlet_recv__name__[] = "BoundaryVTInlet_recv";
-
-PyObject * pyExchanger_BoundaryVTInlet_recv(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:BoundaryVTInlet_recv", &obj))
-        return NULL;
-
-    BoundaryVTInlet* inlet = static_cast<BoundaryVTInlet*>
-                                        (PyCObject_AsVoidPtr(obj));
-
-    inlet->recv();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 void deleteBoundaryVTInlet(void* p)
 {
     delete static_cast<BoundaryVTInlet*>(p);
@@ -156,44 +177,6 @@ PyObject * pyExchanger_VTInlet_create(PyObject *self, PyObject *args)
 
     PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteVTInlet);
     return Py_BuildValue("O", cobj);
-}
-
-
-char pyExchanger_VTInlet_impose__doc__[] = "";
-char pyExchanger_VTInlet_impose__name__[] = "VTInlet_impose";
-
-PyObject * pyExchanger_VTInlet_impose(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:VTInlet_impose", &obj))
-        return NULL;
-
-    VTInlet* inlet = static_cast<VTInlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->impose();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyExchanger_VTInlet_recv__doc__[] = "";
-char pyExchanger_VTInlet_recv__name__[] = "VTInlet_recv";
-
-PyObject * pyExchanger_VTInlet_recv(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:VTInlet_recv", &obj))
-        return NULL;
-
-    VTInlet* inlet = static_cast<VTInlet*>(PyCObject_AsVoidPtr(obj));
-
-    inlet->recv();
-
-    Py_INCREF(Py_None);
-    return Py_None;
 }
 
 
@@ -232,32 +215,49 @@ PyObject * pyExchanger_VTOutlet_create(PyObject *self, PyObject *args)
 }
 
 
-char pyExchanger_VTOutlet_send__doc__[] = "";
-char pyExchanger_VTOutlet_send__name__[] = "VTOutlet_send";
-
-PyObject * pyExchanger_VTOutlet_send(PyObject *, PyObject *args)
-{
-    PyObject *obj;
-
-    if (!PyArg_ParseTuple(args, "O:VTOutlet_send", &obj))
-        return NULL;
-
-    VTOutlet* outlet = static_cast<VTOutlet*>(PyCObject_AsVoidPtr(obj));
-
-    outlet->send();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 void deleteVTOutlet(void* p)
 {
     delete static_cast<VTOutlet*>(p);
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+
+#if 0
+#include "TractionOutlet.h"
+
+extern "C" void deleteTractionOutlet(void*);
+
+
+char pyExchanger_TractionOutlet_create__doc__[] = "";
+char pyExchanger_TractionOutlet_create__name__[] = "TractionOutlet_create";
+
+PyObject * pyExchanger_TractionOutlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj0, *obj1;
+    char* mode;
+
+    if (!PyArg_ParseTuple(args, "OOs:TractionOutlet_create",
+                          &obj0, &obj1, &mode))
+        return NULL;
+
+    TractionSource* source = static_cast<TractionSource*>(PyCObject_AsVoidPtr(obj0));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
+
+    TractionOutlet* outlet = new TractionOutlet(*source, E, mode);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteTractionOutlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteTractionOutlet(void* p)
+{
+    delete static_cast<TractionOutlet*>(p);
+}
+#endif
+
 // version
-// $Id: inlets_outlets.cc,v 1.2 2004/03/11 01:06:14 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.3 2004/03/11 23:23:49 tan2 Exp $
 
 // End of file

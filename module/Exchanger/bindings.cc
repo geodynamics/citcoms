@@ -49,50 +49,40 @@ struct PyMethodDef pyExchanger_methods[] = {
 
     // from inlets_outlets.h
 
+    {pyExchanger_Inlet_impose__name__,
+     pyExchanger_Inlet_impose,
+     METH_VARARGS,
+     pyExchanger_Inlet_impose__doc__},
+
+    {pyExchanger_Inlet_recv__name__,
+     pyExchanger_Inlet_recv,
+     METH_VARARGS,
+     pyExchanger_Inlet_recv__doc__},
+
     {pyExchanger_Inlet_storeTimestep__name__,
      pyExchanger_Inlet_storeTimestep,
      METH_VARARGS,
      pyExchanger_Inlet_storeTimestep__doc__},
+
+    {pyExchanger_Outlet_send__name__,
+     pyExchanger_Outlet_send,
+     METH_VARARGS,
+     pyExchanger_Outlet_send__doc__},
 
     {pyExchanger_BoundaryVTInlet_create__name__,
      pyExchanger_BoundaryVTInlet_create,
      METH_VARARGS,
      pyExchanger_BoundaryVTInlet_create__doc__},
 
-    {pyExchanger_BoundaryVTInlet_impose__name__,
-     pyExchanger_BoundaryVTInlet_impose,
-     METH_VARARGS,
-     pyExchanger_BoundaryVTInlet_impose__doc__},
-
-    {pyExchanger_BoundaryVTInlet_recv__name__,
-     pyExchanger_BoundaryVTInlet_recv,
-     METH_VARARGS,
-     pyExchanger_BoundaryVTInlet_recv__doc__},
-
     {pyExchanger_VTInlet_create__name__,
      pyExchanger_VTInlet_create,
      METH_VARARGS,
      pyExchanger_VTInlet_create__doc__},
 
-    {pyExchanger_VTInlet_impose__name__,
-     pyExchanger_VTInlet_impose,
-     METH_VARARGS,
-     pyExchanger_VTInlet_impose__doc__},
-
-    {pyExchanger_VTInlet_recv__name__,
-     pyExchanger_VTInlet_recv,
-     METH_VARARGS,
-     pyExchanger_VTInlet_recv__doc__},
-
     {pyExchanger_VTOutlet_create__name__,
      pyExchanger_VTOutlet_create,
      METH_VARARGS,
      pyExchanger_VTOutlet_create__doc__},
-
-    {pyExchanger_VTOutlet_send__name__,
-     pyExchanger_VTOutlet_send,
-     METH_VARARGS,
-     pyExchanger_VTOutlet_send__doc__},
 
     // from exchangers.h
 
@@ -166,6 +156,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.37 2004/03/11 22:46:25 tan2 Exp $
+// $Id: bindings.cc,v 1.38 2004/03/11 23:23:49 tan2 Exp $
 
 // End of file
