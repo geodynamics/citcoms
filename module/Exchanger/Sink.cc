@@ -46,7 +46,7 @@ void Sink::checkCommSize(int nsrc) const
     int size;
     MPI_Comm_size(comm, &size);
     if(size != nsrc + 1) {
-	journal::firewall_t firewall("Exchanger");
+	journal::firewall_t firewall("Sink");
 	firewall << journal::loc(__HERE__)
 		 << "size of communicator != (numSrc + 1)" << journal::end;
 	throw std::domain_error("size of communicator != (numSrc + 1)");
@@ -88,7 +88,7 @@ void Sink::sumSourceSize()
     partial_sum(numSrcNodes.begin(), numSrcNodes.end(),
 		++beginSrcNodes.begin());
 
-    journal::debug_t debug("Citcom_Sink");
+    journal::debug_t debug("Exchanger");
     for(size_t i=0; i<source.size(); i++) {
 	debug << journal::loc(__HERE__)
 	      << " source = " << i << "  size = " << numSrcNodes[i]
@@ -103,9 +103,9 @@ void Sink::testMeshNode() const
 {
     if(std::find(meshNode_.begin(), meshNode_.end(), numMeshNodes)
        != meshNode_.end()) {
-	journal::firewall_t firewall("Exchanger");
+	journal::firewall_t firewall("Sink");
 	firewall << journal::loc(__HERE__)
-		 << "Sink: some node in meshNode not mapped" << journal::end;
+		 << "some node in meshNode not mapped" << journal::end;
 	throw std::domain_error("Sink");
     }
 }
@@ -124,6 +124,6 @@ void Sink::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Sink.cc,v 1.4 2004/01/13 01:21:07 ces74 Exp $
+// $Id: Sink.cc,v 1.5 2004/02/05 19:45:09 tan2 Exp $
 
 // End of file

@@ -25,8 +25,7 @@ FEMInterpolator::FEMInterpolator(const BoundedMesh& boundedMesh,
     shape_(0)
 {
     journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in FEMInterpolator::FEMInterpolator" << journal::end;
+    debug << journal::loc(__HERE__) << journal::end;
 
     init(boundedMesh, meshNode);
     selfTest(boundedMesh, meshNode);
@@ -41,10 +40,6 @@ FEMInterpolator::FEMInterpolator(const BoundedMesh& boundedMesh,
 void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 			   Array2D<int,1>& meshNode)
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in FEMInterpolator::init" << journal::end;
-
     const int mm = 1;
 
     elem_.reserve(boundedMesh.size());
@@ -101,10 +96,6 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 void FEMInterpolator::computeElementGeometry(Array2D<double,DIM*DIM>& etaAxes,
 					     Array2D<double,DIM>& inv_length_sq) const
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in FEMInterpolator::computeElementGeometry" << journal::end;
-
     etaAxes.resize(E->lmesh.nel);
     inv_length_sq.resize(E->lmesh.nel);
 
@@ -281,8 +272,7 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 			       const Array2D<int,1>& meshNode) const
 {
     journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in FEMInterpolator::selfTest" << journal::end;
+    debug << journal::loc(__HERE__) << journal::end;
 
     for(int i=0; i<size(); i++) {
 
@@ -326,6 +316,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.6 2004/01/18 21:07:38 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.7 2004/02/05 19:45:09 tan2 Exp $
 
 // End of file
