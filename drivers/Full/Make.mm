@@ -29,8 +29,9 @@ PROJ_OBJS = ${addprefix ${PROJ_TMPDIR}/, ${addsuffix .${EXT_OBJ}, ${basename ${n
 
 PROJ_CLEAN += $(PROJ_BIN) $(PROJ_OBJS)
 
+EXPORT_BINS = $(PROJ_BIN)
 
-all: $(PROJ_BIN)
+all: $(PROJ_BIN) release-binaries
 
 .PHONY: $(PROJ_BIN)
 $(PROJ_BIN): $(PROJ_OBJS)
@@ -42,7 +43,7 @@ $(PROJ_OBJS): $(PROJ_SRCS)
 
 
 # version
-# $Id: Make.mm,v 1.8 2004/01/13 01:32:25 tan2 Exp $
+# $Id: Make.mm,v 1.9 2004/04/22 20:52:02 tan2 Exp $
 
 #
 # End of file
