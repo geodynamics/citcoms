@@ -14,6 +14,7 @@
 #include "BoundedBox.h"
 #include "BoundedMesh.h"
 #include "TractionInterpolator.h"
+#include <fstream>
 
 extern "C" {
 
@@ -53,7 +54,6 @@ void TractionInterpolator::interpolateTraction(Array2D<double,DIM>& target)
     target.assign(size(), 0);
 
     computeTraction();
-    gtraction.print("gtraction");
 
     const int mm = 1;
     for(int i=0; i<size(); i++) {
@@ -64,8 +64,6 @@ void TractionInterpolator::interpolateTraction(Array2D<double,DIM>& target)
 		target[d][i] += shape_[k][i] * gtraction[d][node];
 	    }
 	}
-// 	std::cout << target[0][i] << " " << target[1][i] << " "
-// 		  << target[2][i] << std::endl;
     }
 }
 
@@ -319,8 +317,8 @@ void TractionInterpolator::get_elt_traction(int el,
     elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
     elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
     // for EW boundary elements
-    elist[1][0]=0; elist[1][1]=1; elist[1][2]=2; elist[1][3]=6; elist[1][4]=5;
-    elist[1][5]=4; elist[1][6]=3; elist[1][7]=7; elist[1][8]=8;
+    elist[1][0]=0; elist[1][1]=1; elist[1][2]=5; elist[1][3]=6; elist[1][4]=2;
+    elist[1][5]=4; elist[1][6]=8; elist[1][7]=7; elist[1][8]=3;
     // for TB boundary elements
     elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
     elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
@@ -367,6 +365,7 @@ void TractionInterpolator::get_elt_traction(int el,
 	exit(0);
     }
 
+
     // seems ad hoc: improve later
     if(far==0 && (NS==0 || NS==1)) {
 	for(i=1;i<=dims;i++)
@@ -391,8 +390,10 @@ void TractionInterpolator::get_elt_traction(int el,
     }
 
     for(e=1;e<=ends;e++) {
+	a=elist[NS][e+ends*far];
+	p=E->ien[m][el].node[a];
 	for(i=1;i<=dims;i++)  {
-	    a=elist[NS][e+ends*far];
+	    x[i]=0.0;
 	    for(k=1;k<=vpts;k++) {
 		// in 2D 4-pt Gauss quadrature, the weighting factor is 1.
 		temp = 1.0 * dGamma.vpt[k];
@@ -400,7 +401,6 @@ void TractionInterpolator::get_elt_traction(int el,
 						    +Cc.vpt[BVINDEX(2,i,a,k)]*traction_at_gs[2][k]
 						    +Cc.vpt[BVINDEX(3,i,a,k)]*traction_at_gs[3][k]);
 	    }
-	    p=E->ien[m][el].node[a];
 	    gtraction[i-1][p] += x[i];
 	}
     }
@@ -646,6 +646,7 @@ void TractionInterpolator::initComputeTraction(const BoundedMesh& boundedMesh)
 	      << do_xmin << " " << do_xmax << " "
 	      << do_ymin << " " << do_ymax << " "
 	      << do_zmin << " " << do_zmax << " " << std::endl;
+
     return;
 }
 
@@ -694,7 +695,7 @@ void TractionInterpolator::computeTraction()
 	for(int j=xmin;j<=xmax;j++) {
 	    if(do_zmin) {
 		int el=zmin+(j-1)*elz+(i-1)*elz*elx;
-// 		std::cout << "B:" << el << std::endl;
+//		std::cout << "B:" << el << std::endl;
 		get_elt_traction(el,1,2,lev,mm);
 	    }
 	}
@@ -703,6 +704,6 @@ void TractionInterpolator::computeTraction()
 }
 
 // version
-// $Id: TractionInterpolator.cc,v 1.8 2004/01/15 01:04:32 ces74 Exp $
+// $Id: TractionInterpolator.cc,v 1.9 2004/01/17 22:22:18 ces74 Exp $
 
 // End of file
