@@ -1,6 +1,9 @@
 #include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include "global_defs.h"
+#include "lith_age.h"
+#include "parsing.h"
 #include "phase_change.h"
 
 void global_derived_values(E)
@@ -239,7 +242,7 @@ void read_initial_settings(E)
 	input_int("levels",&(E->mesh.levels),"0",m);
 
         input_int("coor",&(E->control.coor),"0",m);
-        input_string("coor_file", &E->control.coor_file,"",m);
+        input_string("coor_file",E->control.coor_file,"",m);
 
   	E->parallel.nprocxl=1;
   	E->parallel.nprocyl=1;
@@ -291,8 +294,8 @@ void read_initial_settings(E)
 
 /*  the start age and initial subduction history   */
     input_float("start_age",&(E->control.start_age),"0.0",m);
-    input_float("reset_startage",&(E->control.reset_startage),"0",m);
-    input_float("zero_elapsed_time",&(E->control.zero_elapsed_time),"0",m);
+    input_int("reset_startage",&(E->control.reset_startage),"0",m);
+    input_int("zero_elapsed_time",&(E->control.zero_elapsed_time),"0",m);
     
 
     input_int("ll_max",&(E->sphere.llmax),"1",m);
