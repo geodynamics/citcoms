@@ -12,6 +12,7 @@ import journal
 
 class Controller(SimulationController):
 
+
     def __init__(self, name, facility="controller"):
         SimulationController.__init__(self, name, facility)
 
@@ -26,16 +27,15 @@ class Controller(SimulationController):
     def launch(self, app):
         self.solver = app.solver
         self.solver.launch(app)
-        self.run_init_simulation()
-
-        # temporary change
-        #self.inventory.monitoringFrequency = 1
         return
 
 
 
     def march(self, totalTime=0, steps=0):
         """explicit time loop"""
+
+        # do io for 0th step
+        self.save()
 
         while 1:
 
@@ -44,14 +44,6 @@ class Controller(SimulationController):
 
             # synchronize boundary information
             self.applyBoundaryConditions()
-
-            self.save(self.step)
-
-            # are we done?
-            if steps and self.step >= steps:
-                break
-            if totalTime and self.clock >= totalTime:
-                break
 
             # compute an acceptable timestep
             dt = self.stableTimestep()
@@ -63,8 +55,17 @@ class Controller(SimulationController):
             self.clock += dt
             self.step += 1
 
+            # do io
+            self.save()
+
             # notify solver we finished a timestep
             self.endTimestep()
+
+            # are we done?
+            if steps and self.step >= steps:
+                break
+            if totalTime and self.clock >= totalTime:
+                break
 
         # end of time advance loop
 
@@ -75,19 +76,14 @@ class Controller(SimulationController):
 
 
 
-    def run_init_simulation(self):
-        self.solver.run_init_simulation()
-        return
-
-
-
     def endSimulation(self):
         self.solver.endSimulation(self.step)
         return
 
 
 
-    def save(self, step):
+    def save(self):
+        step = self.step
         if not step % self.inventory.monitoringFrequency:
             self.solver.save(step)
         return
