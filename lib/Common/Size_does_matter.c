@@ -677,14 +677,6 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
    return;
   }
 
-void test_function(struct All_variables *E, struct CC *cc, struct CCX *ccx, int el,int m, int lev, int NS, int far)
-{
-
-  fprintf(stderr,"transferred: el=%d m=%d lev=%d NS=%d far=%d\n",
-	  el,m,lev,NS,far);
-
-  return;
-}
 
 void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,struct CCX *ccx,int lev,int m,int pressure,int NS,int far)
 {
@@ -715,26 +707,20 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
   /******************************************/
 
   if(pressure==0) {
-    fprintf(stderr,"should see this(0)\n");
     for(k=1;k<=vpts;k++) {       /* all of the vpoints */
       for(d=1;d<=dims;d++)
 	x[d]=0.0;
-      fprintf(stderr,"should see this(1)\n");
       for(d=1;d<=dims;d++)
 	for(aa=1;aa<=ends;aa++) {
 	  a=elist[NS][aa+far*ends];
-	  fprintf(stderr,"lev=%d m=%d el=%d a=%d NS=%d far=%d\n",lev,m,el,a,NS,far);
-	  fprintf(stderr,"IEN=%d\n",E->IEN[lev][m][el].node[a]);
 	  x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
 	    *E->M.vpt[GMVINDEX(aa,k)];
 
 	}
 
-      fprintf(stderr,"should see this(2)\n");
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
       tt = acos(x[3]/rr);
       ff = myatan(x[2],x[1]);
-      fprintf(stderr,"should see this(3)\n");
 
       costt = cos(tt);
       cosff = cos(ff);
