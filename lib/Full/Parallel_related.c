@@ -1,36 +1,18 @@
 /* Routines here are for intel paragon with MPI */
 
 #include <mpi.h>
-
 #include <math.h>
+
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "sphere_communication.h"
-#include "citcom_init.h"
+
 #include "parallel_related.h"
 
 void set_horizontal_communicator(struct All_variables*);
 void set_vertical_communicator(struct All_variables*);
 
 
-void parallel_process_initilization(E,argc,argv)
-  struct All_variables *E;
-  int argc;
-  char **argv;
-  {
-
-  E->parallel.me = 0;
-  E->parallel.nproc = 1;
-  E->parallel.me_loc[1] = 0;
-  E->parallel.me_loc[2] = 0;
-  E->parallel.me_loc[3] = 0;
-
-  /*  MPI_Init(&argc,&argv); moved to main{} in Citcom.c, CPC 6/16/00 */
-  MPI_Comm_rank(E->parallel.world, &(E->parallel.me) );
-  MPI_Comm_size(E->parallel.world, &(E->parallel.nproc) );
-
-  return;
-  }
 
 /* ============================================ */
 /* ============================================ */
@@ -46,7 +28,7 @@ void parallel_process_termination()
 /* ============================================ */
 /* ============================================ */
 
-void parallel_process_sync()
+void parallel_process_sync(struct All_variables *E)
 {
 
   MPI_Barrier(E->parallel.world);
@@ -66,13 +48,11 @@ void parallel_process_sync()
 /* ============================================ */
 /* ============================================ */
 
-void parallel_processor_setup(E)
-  struct All_variables *E;
+void parallel_processor_setup(struct All_variables *E)
   {
-  
+
   int i,j,k,m,me,temp,pid_surf;
   int cap_id_surf;
-  void parallel_process_termination();
 
   me = E->parallel.me;
 
@@ -122,7 +102,7 @@ void parallel_processor_setup(E)
 NOTE: This is different (in a way) than the numbering of the nodes:
 the nodeal number has the first oordinate as theta, which goes N-S and
 the second oordinate as fi, which goes E-W. Here we use R-L as the first
-oordinate and F-B 
+oordinate and F-B
  0 = lower  left front corner=[000]  4 = lower  left back corner=[010]
  1 = upper  left front corner=[001]  5 = upper  left back corner=[011]
  2 = lower right front corner=[100]  6 = lower right back corner=[110]
@@ -155,14 +135,14 @@ oordinate and F-B
     E->parallel.loc2proc_map[m] = (int ***) malloc(E->parallel.nprocx*sizeof(int **));
     for (i=0;i<E->parallel.nprocx;i++) {
       E->parallel.loc2proc_map[m][i] = (int **) malloc(E->parallel.nprocy*sizeof(int *));
-      for (j=0;j<E->parallel.nprocy;j++) 
+      for (j=0;j<E->parallel.nprocy;j++)
 	E->parallel.loc2proc_map[m][i][j] = (int *) malloc(E->parallel.nprocz*sizeof(int));
     }
   }
 
-  for (m=0;m<12;m++) 
+  for (m=0;m<12;m++)
     for (i=0;i<E->parallel.nprocx;i++)
-      for (j=0;j<E->parallel.nprocy;j++) 
+      for (j=0;j<E->parallel.nprocy;j++)
 	for (k=0;k<E->parallel.nprocz;k++) {
 	  if (E->sphere.caps_per_proc>1) {
 	    temp = cases[E->sphere.caps_per_proc];
@@ -208,10 +188,10 @@ oordinate and F-B
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
       fprintf(E->fp_out,"capid[%d]=%d \n",j,E->sphere.capid[j]);
     }
-    for (m=0;m<E->sphere.caps;m++) 
-      for (j=0;j<E->parallel.nprocy;j++) 
+    for (m=0;m<E->sphere.caps;m++)
+      for (j=0;j<E->parallel.nprocy;j++)
 	for (i=0;i<E->parallel.nprocx;i++)
-	  for (k=0;k<E->parallel.nprocz;k++) 
+	  for (k=0;k<E->parallel.nprocz;k++)
 	    fprintf(E->fp_out,"loc2proc_map[cap=%d][x=%d][y=%d][z=%d] = %d\n",
 		    m,i,j,k,E->parallel.loc2proc_map[m][i][j][k]);
 
@@ -219,8 +199,6 @@ oordinate and F-B
   }
 /*   parallel_process_termination(); */
 
-
-  parallel_process_sync();
   set_vertical_communicator(E);
   set_horizontal_communicator(E);
 
@@ -291,19 +269,13 @@ void set_vertical_communicator(struct All_variables *E)
 
 
 /* =========================================================================
-get element information for each processor. 
+get element information for each processor.
  ========================================================================= */
 
-void parallel_domain_decomp0(E)
-  struct All_variables *E;
+void parallel_domain_decomp0(struct All_variables *E)
   {
-  
-  int iy,eelx,i,j,k,nox,noz,noy,me,nel,lev,eaccumulatives,naccumulatives;
-  int temp0,temp1;
-  FILE *fp;
-  char output_file[255];
 
-  void parallel_process_termination();
+  int i,nox,noz,noy,me;
 
   me = E->parallel.me;
 
@@ -342,7 +314,7 @@ void parallel_domain_decomp0(E)
   E->sphere.lnsf = E->sphere.lnox*E->sphere.lnoy;
 
 /* NOTE: These are for spherical harmonics - they may not be correct! CPC */
-  for (i=0;i<=E->parallel.nprocz-1;i++)   
+  for (i=0;i<=E->parallel.nprocz-1;i++)
     if (E->parallel.me_loc[3] == i)    {
       E->parallel.me_sph = (E->parallel.me-i)/E->parallel.nprocz;
       E->parallel.me_loc_sph[1] = E->parallel.me_sph%E->parallel.nproc_sph[1];
@@ -394,27 +366,15 @@ void parallel_domain_decomp0(E)
 /*
 fprintf(stderr,"b %d %d %d %d %d %d %d\n",E->parallel.me,E->parallel.me_loc[1],E->parallel.me_loc[2],E->parallel.me_loc[3],E->lmesh.nzs,E->lmesh.nys,E->lmesh.noy);
 */
-/* parallel_process_termination(); 
+/* parallel_process_termination();
 */
   return;
   }
 
 
-/* ============================================ 
- get numerical grid coordinates for each relevant processor 
- ============================================ */
 
-void parallel_domain_decomp2(E,GX)
-  struct All_variables *E;
-  float *GX[4];
-  {
-  
-  return;
-  }
-
-
-/* ============================================ 
- determine boundary nodes for 
+/* ============================================
+ determine boundary nodes for
  exchange info across the boundaries
  ============================================ */
 
@@ -439,12 +399,12 @@ void parallel_domain_boundary_nodes(E)
       noy = E->lmesh.NOY[lev];
       noz = E->lmesh.NOZ[lev];
       nno = E->lmesh.NNO[lev];
- 
+
 /* do the ZOY boundary elements first */
       lnode = 0;
       ii =1;              /* left */
-      for(j=1;j<=noz;j++)   
-      for(k=1;k<=noy;k++)  {     
+      for(j=1;j<=noz;j++)
+      for(k=1;k<=noy;k++)  {
         node = j + (k-1)*noz*nox;
         E->parallel.NODE[lev][m][++lnode].bound[ii] =  node;
         E->NODE[lev][m][node] = E->NODE[lev][m][node] | OFFSIDE;
@@ -455,7 +415,7 @@ void parallel_domain_boundary_nodes(E)
 
       lnode = 0;
       ii =2;              /* right */
-      for(j=1;j<=noz;j++)   
+      for(j=1;j<=noz;j++)
       for(k=1;k<=noy;k++)      {
         node = (nox-1)*noz + j + (k-1)*noz*nox;
         E->parallel.NODE[lev][m][++lnode].bound[ii] =  node;
@@ -561,7 +521,7 @@ void parallel_domain_boundary_nodes(E)
  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for (node=1;node<=E->lmesh.nno;node++)
       if(E->node[m][node] & SKIPS)
-        ii+=1; 
+        ii+=1;
 
  MPI_Allreduce(&ii, &node  ,1,MPI_INT,MPI_SUM,E->parallel.world);
 
@@ -570,13 +530,13 @@ void parallel_domain_boundary_nodes(E)
  /*E->mesh.nno -= node + 2*E->mesh.noz; */
  E->mesh.neq = E->mesh.nno*3;
 
-if (E->control.verbose) { 
+if (E->control.verbose) {
  fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);
- for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) 
+ for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
    for (m=1;m<=E->sphere.caps_per_proc;m++)      {
     fprintf(E->fp_out,"lev=%d  me=%d capid=%d m=%d \n",lev,E->parallel.me,E->sphere.capid[m],m);
-    for (ii=1;ii<=6;ii++)  
-      for (i=1;i<=E->parallel.NUM_NNO[lev][m].bound[ii];i++)  
+    for (ii=1;ii<=6;ii++)
+      for (i=1;i<=E->parallel.NUM_NNO[lev][m].bound[ii];i++)
         fprintf(E->fp_out,"ii=%d   %d %d \n",ii,i,E->parallel.NODE[lev][m][i].bound[ii]);
 
     lnode=0;
@@ -595,9 +555,9 @@ if (E->control.verbose) {
   }
 
 
-/* ============================================ 
- determine communication routs  and boundary ID for 
- exchange info across the boundaries         
+/* ============================================
+ determine communication routs  and boundary ID for
+ exchange info across the boundaries
  assuming fault nodes are in the top row of processors
  ============================================ */
 
@@ -625,7 +585,7 @@ void parallel_communication_routs_v(E)
   lx = E->parallel.me_loc[1];
   ly = E->parallel.me_loc[2];
   lz = E->parallel.me_loc[3];
-  
+
         /* determine the communications in horizontal direction        */
   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)       {
     nox = E->lmesh.NOX[lev];
@@ -644,7 +604,7 @@ void parallel_communication_routs_v(E)
 	  temp = (cap+2) % 12;
 	  target = E->parallel.loc2proc_map[temp][nprocx-1][ly][lz];
 	}
-	else { 
+	else {
 	  temp = (cap+3) % 12;
 	  target = E->parallel.loc2proc_map[temp][ly][0][lz];
 	}
@@ -656,7 +616,7 @@ void parallel_communication_routs_v(E)
       npass = ii = 2;
       if (lx != nprocx-1)
 	target = E->parallel.loc2proc_map[cap][lx+1][ly][lz];
-      else 
+      else
 	if ( cap%3 != 2) {
 	  temp = (12+cap-2) % 12;
 	  target = E->parallel.loc2proc_map[temp][0][ly][lz];
@@ -710,7 +670,7 @@ void parallel_communication_routs_v(E)
 	  if ((cap%3==0) && (lx==0) && (ly==0)) {
 	    temp = (cap+6) % 12;
 	    target = E->parallel.loc2proc_map[temp][lx][ly][lz];
-	  } 
+	  }
 	  else if ((cap%3==0) && (lx==0))
 	    target = E->parallel.PROCESSOR[lev][m].pass[1] - nprocz;
 	  else if ((cap%3==0) && (ly==0))
@@ -728,14 +688,14 @@ void parallel_communication_routs_v(E)
 	  if ((cap%3==2) && (lx==nprocx-1) && (ly==nprocy-1)) {
 	    temp = (cap+6) % 12;
 	    target = E->parallel.loc2proc_map[temp][lx][ly][lz];
-	  } 
+	  }
 	  else if ((cap%3==2) && (lx==nprocx-1))
 	    target = E->parallel.PROCESSOR[lev][m].pass[2] + nprocz;
 	  else if ((cap%3==2) && (ly==nprocy-1))
 	    target = E->parallel.PROCESSOR[lev][m].pass[4] + nprocxz;
 	  else
 	    target = E->parallel.PROCESSOR[lev][m].pass[2] + nprocxz;
-	  
+
 	  E->parallel.PROCESSOR[lev][m].pass[npass] = target;
 	  line_eqn_node_to_pass(E,lev,m,npass,noz,(noy*nox-1)*noz+1,1);
 	}
@@ -801,8 +761,8 @@ void parallel_communication_routs_v(E)
 	  for (k=1;k<=E->parallel.NUM_NNO[lev][m].bound[ii];k++)   {
 	    node = E->parallel.NODE[lev][m][k].bound[ii];
 	    E->parallel.EXCHANGE_NODE[lev][m][++kk].pass[kkkp] = node;
-	    for(doff=1;doff<=dims;doff++)   
-	      E->parallel.EXCHANGE_ID[lev][m][++jj].pass[kkkp] = 
+	    for(doff=1;doff<=dims;doff++)
+	      E->parallel.EXCHANGE_ID[lev][m][++jj].pass[kkkp] =
 		E->ID[lev][m][node].doff[doff];
 	  }
 	  E->parallel.NUM_NODE[lev][m].pass[kkkp] = kk;
@@ -819,25 +779,25 @@ void parallel_communication_routs_v(E)
 
 
 
-  if(E->control.verbose) { 
-    for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) { 
-      fprintf(E->fp_out,"output_communication route surface for lev=%d \n",lev); 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)  { 
-	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[m],E->parallel.TNUM_PASS[lev][m]); 
-	for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)   {  
-	  fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d eqn and %d node\n",E->parallel.me,k,E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.NUM_NEQ[lev][m].pass[k],E->parallel.NUM_NODE[lev][m].pass[k]); 
+  if(E->control.verbose) {
+    for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
+      fprintf(E->fp_out,"output_communication route surface for lev=%d \n",lev);
+      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[m],E->parallel.TNUM_PASS[lev][m]);
+	for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)   {
+	  fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d eqn and %d node\n",E->parallel.me,k,E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.NUM_NEQ[lev][m].pass[k],E->parallel.NUM_NODE[lev][m].pass[k]);
 /* 	  fprintf(E->fp_out,"Eqn:\n");  */
 /* 	  for (ii=1;ii<=E->parallel.NUM_NEQ[lev][m].pass[k];ii++)  */
 /* 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][m][ii].pass[k]);  */
 /* 	  fprintf(E->fp_out,"Node:\n");  */
 /* 	  for (ii=1;ii<=E->parallel.NUM_NODE[lev][m].pass[k];ii++)  */
 /* 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_NODE[lev][m][ii].pass[k]);  */
-	} 
+	}
       }
 
       fprintf(E->fp_out,"output_communication route vertical \n");
       fprintf(E->fp_out," me= %d pass  %d \n",E->parallel.me,E->parallel.TNUM_PASSz[lev]);
-      for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)   { 
+      for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)   {
 	kkkp = k + E->sphere.max_connections;
 	fprintf(E->fp_out,"proc %d and pass  %d to proc %d\n",E->parallel.me,k,E->parallel.PROCESSORz[lev].pass[k]);
 	for (m=1;m<=E->sphere.caps_per_proc;m++)  {
@@ -849,16 +809,16 @@ void parallel_communication_routs_v(E)
 	}
       }
     }
-    fflush(E->fp_out); 
+    fflush(E->fp_out);
   }
-  
+
   return;
   }
 
 
-/* ============================================ 
- determine communication routs for 
- exchange info across the boundaries on the surfaces       
+/* ============================================
+ determine communication routs for
+ exchange info across the boundaries on the surfaces
  assuming fault nodes are in the top row of processors
  ============================================ */
 
@@ -963,7 +923,7 @@ void face_eqn_node_to_pass(E,lev,m,npass,bd)
 
   E->parallel.NUM_NODE[lev][m].pass[npass] = E->parallel.NUM_NNO[lev][m].bound[bd];
 
-  jj = 0;   
+  jj = 0;
   for (kk=1;kk<=E->parallel.NUM_NODE[lev][m].pass[npass];kk++)   {
     node = E->parallel.NODE[lev][m][kk].bound[bd];
     E->parallel.EXCHANGE_NODE[lev][m][kk].pass[npass] = node;
@@ -995,7 +955,7 @@ void line_eqn_node_to_pass(E,lev,m,npass,num_node,offset,stride)
     for(doff=1;doff<=dims;doff++)
       E->parallel.EXCHANGE_ID[lev][m][++jj].pass[npass] = E->ID[lev][m][node].doff[doff];
   }
-	  
+
   E->parallel.NUM_NEQ[lev][m].pass[npass] = jj;
 
   return;
@@ -1070,7 +1030,7 @@ void exchange_id_d(E, U, lev)
 	 /*         MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
 		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]);*/
           MPI_Isend(S[kk],E->parallel.NUM_NEQ[lev][m].pass[k],MPI_DOUBLE,
-          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]); 
+          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
       }           /* for k */
@@ -1131,8 +1091,8 @@ void exchange_id_d(E, U, lev)
     jj = 0;
     kk = k + E->sphere.max_connections;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NEQ[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NEQ[lev][m].pass[kk];j++)
         SV[jj++] = U[m][ E->parallel.EXCHANGE_ID[lev][m][j].pass[kk] ];
 
     MPI_Sendrecv(SV,E->parallel.NUM_NEQz[lev].pass[k],MPI_DOUBLE,
@@ -1141,8 +1101,8 @@ void exchange_id_d(E, U, lev)
              E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NEQ[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NEQ[lev][m].pass[kk];j++)
         U[m][ E->parallel.EXCHANGE_ID[lev][m][j].pass[kk] ] += RV[jj++];
     }
 
@@ -1221,7 +1181,7 @@ void exchange_node_d(E, U, lev)
       }           /* for k */
     }     /* for m */         /* finish sending */
 
-/*  MPI_Waitall(idb,request,status);  
+/*  MPI_Waitall(idb,request,status);
 
   idb = 0; */
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
@@ -1275,8 +1235,8 @@ void exchange_node_d(E, U, lev)
     jj = 0;
     kk = k + E->sphere.max_connections;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)
         SV[jj++] = U[m][ E->parallel.EXCHANGE_NODE[lev][m][j].pass[kk] ];
 
     MPI_Sendrecv(SV,E->parallel.NUM_NODEz[lev].pass[k],MPI_DOUBLE,
@@ -1285,8 +1245,8 @@ void exchange_node_d(E, U, lev)
              E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)
         U[m][ E->parallel.EXCHANGE_NODE[lev][m][j].pass[kk] ] += RV[jj++];
     }
 
@@ -1361,7 +1321,7 @@ void exchange_node_f(E, U, lev)
 	 /*         MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
 		    E->parallel.PROCESSOR[lev][m].pass[k],E->parallel.mst[ii][t_cap],E->parallel.world,&request[idb-1]); */
          MPI_Isend(S[kk],E->parallel.NUM_NODE[lev][m].pass[k],MPI_FLOAT,
-          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]); 
+          E->parallel.PROCESSOR[lev][m].pass[k],1,E->parallel.world,&request[idb-1]);
          }
       }
       }           /* for k */
@@ -1422,8 +1382,8 @@ void exchange_node_f(E, U, lev)
     jj = 0;
     kk = k + E->sphere.max_connections;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)
         SV[jj++] = U[m][ E->parallel.EXCHANGE_NODE[lev][m][j].pass[kk] ];
 
     MPI_Sendrecv(SV,E->parallel.NUM_NODEz[lev].pass[k],MPI_FLOAT,
@@ -1432,8 +1392,8 @@ void exchange_node_f(E, U, lev)
              E->parallel.PROCESSORz[lev].pass[k],1,E->parallel.world,&status1);
 
     jj = 0;
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    
-      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)  
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for (j=1;j<=E->parallel.NUM_NODE[lev][m].pass[kk];j++)
         U[m][ E->parallel.EXCHANGE_NODE[lev][m][j].pass[kk] ] += RV[jj++];
     }
 
@@ -1447,8 +1407,6 @@ void exchange_snode_f(E, U1, U2, lev)
  float **U1,**U2;
  int lev;
  {
-
- void parallel_process_sync();
 
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];
 
@@ -1506,7 +1464,7 @@ void exchange_snode_f(E, U1, U2, lev)
       }           /* for k */
     }     /* for m */         /* finish sending */
 
-/*  MPI_Waitall(idb,request,status); 
+/*  MPI_Waitall(idb,request,status);
 
   idb = 0; */
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
@@ -1533,7 +1491,7 @@ void exchange_snode_f(E, U1, U2, lev)
 	kk=k;
          for (j=1;j<=E->parallel.NUM_sNODE[lev][m].pass[k];j++)     {
            U1[m][ E->parallel.EXCHANGE_sNODE[lev][m][j].pass[k] ] += S[kk][j-1];
-           U2[m][ E->parallel.EXCHANGE_sNODE[lev][m][j].pass[k] ] += 
+           U2[m][ E->parallel.EXCHANGE_sNODE[lev][m][j].pass[k] ] +=
                                S[kk][j-1+E->parallel.NUM_sNODE[lev][m].pass[k]];
            }
          }
@@ -1556,7 +1514,7 @@ void exchange_snode_f(E, U1, U2, lev)
            U1[m][ E->parallel.EXCHANGE_sNODE[lev][m][j].pass[k] ] += R[kk][j-1];
            U2[m][ E->parallel.EXCHANGE_sNODE[lev][m][j].pass[k] ] +=
                               R[kk][j-1+E->parallel.NUM_sNODE[lev][m].pass[k]];
-           } 
+           }
 	}
       }
     }
@@ -1564,507 +1522,4 @@ void exchange_snode_f(E, U1, U2, lev)
  return;
  }
 
-
-#if 0
-
-
-/* ==========================================================  */
- void scatter_to_nlayer_id (E,AUi,AUo,lev) 
- struct All_variables *E;
- double **AUi,**AUo;
- int lev;
- {
-
- int i,j,k,k1,m,node1,node,eqn1,eqn,d;
-
- const int dims = E->mesh.nsd;
-
- static double *SD;
- static int been_here=0;
- static int *processors,rootid,nproc,NOZ;
-
- MPI_Status status;
-
- if (E->parallel.nprocz==1)  {
-    if (E->parallel.me==0) fprintf(stderr,"scatter_to_nlayer should not be called\n");
-    return;
-    } 
-
- if (been_here==0)   {
-   NOZ = E->lmesh.ELZ[lev]*E->parallel.nprocz + 1;
-
-   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
-
-   SD = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
-
-
-   rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */
-   nproc = 0;
-   for (j=0;j<E->parallel.nprocz;j++) {
-     d = rootid + j;
-     processors[nproc] =  d;
-     nproc ++;
-     }
-
-   been_here++;
-   }
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    if (E->parallel.me==rootid)
-      for (d=0;d<E->parallel.nprocz;d++)  { 
-
-        for (k=1;k<=E->lmesh.NOZ[lev];k++)   {
-          k1 = k + d*E->lmesh.ELZ[lev]; 
-          for (j=1;j<=E->lmesh.NOY[lev];j++)
-            for (i=1;i<=E->lmesh.NOX[lev];i++)   {
-              node = k + (i-1)*E->lmesh.NOZ[lev] + (j-1)*E->lmesh.NOZ[lev]*E->lmesh.NOX[lev];
-              node1= k1+ (i-1)*NOZ + (j-1)*NOZ*E->lmesh.NOX[lev];
-              SD[dims*(node-1)] = AUi[m][dims*(node1-1)];
-              SD[dims*(node-1)+1] = AUi[m][dims*(node1-1)+1];
-              SD[dims*(node-1)+2] = AUi[m][dims*(node1-1)+2];
-              }
-          }
-
-        if (processors[d]!=rootid)  {
-           MPI_Send(SD,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],rootid,E->parallel.world);
-	   }
-        else
-           for (i=0;i<=E->lmesh.NEQ[lev];i++)   
-	      AUo[m][i] = SD[i];
-        }
-    else
-        MPI_Recv(AUo[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,rootid,E->parallel.world,&status);
-    }
-
- return;
- }
-
-/* ==========================================================  */
- void gather_to_1layer_id (E,AUi,AUo,lev) 
- struct All_variables *E;
- double **AUi,**AUo;
- int lev;
- {
-
- int i,j,k,k1,m,node1,node,eqn1,eqn,d;
-
- const int dims = E->mesh.nsd;
-
- MPI_Status status;
-
- static double *RV;
- static int been_here=0;
- static int *processors,rootid,nproc,NOZ;
-
- if (E->parallel.nprocz==1)  {
-    if (E->parallel.me==0) fprintf(stderr,"gather_to_1layer should not be called\n");
-    return;
-    } 
-
- if (been_here==0)   {
-   NOZ = E->lmesh.ELZ[lev]*E->parallel.nprocz + 1;
-
-   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
-
-   RV = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
-
-
-   rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */
-   nproc = 0;
-   for (j=0;j<E->parallel.nprocz;j++) {
-     d = rootid + j;
-     processors[nproc] =  d;
-     nproc ++;
-     }
-
-   been_here++;
-   }
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    if (E->parallel.me!=rootid)
-       MPI_Send(AUi[m],E->lmesh.NEQ[lev],MPI_DOUBLE,rootid,E->parallel.me,E->parallel.world);
-    else
-       for (d=0;d<E->parallel.nprocz;d++) {
-         if (processors[d]!=rootid)
-	   MPI_Recv(RV,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],processors[d],E->parallel.world,&status);
-         else
-           for (node=0;node<E->lmesh.NEQ[lev];node++)
-	      RV[node] = AUi[m][node];
-
-         for (k=1;k<=E->lmesh.NOZ[lev];k++)   {
-           k1 = k + d*E->lmesh.ELZ[lev];
-           for (j=1;j<=E->lmesh.NOY[lev];j++)
-             for (i=1;i<=E->lmesh.NOX[lev];i++)   {
-               node = k + (i-1)*E->lmesh.NOZ[lev] + (j-1)*E->lmesh.NOZ[lev]*E->lmesh.NOX[lev];
-               node1 = k1 + (i-1)*NOZ + (j-1)*NOZ*E->lmesh.NOX[lev];
-	       
-               AUo[m][dims*(node1-1)] = RV[dims*(node-1)];
-               AUo[m][dims*(node1-1)+1] = RV[dims*(node-1)+1];
-               AUo[m][dims*(node1-1)+2] = RV[dims*(node-1)+2];
-	       }
-	   }
-	 }
-       }
-
- return;
- }
-
-
-/* ==========================================================  */
- void gather_to_1layer_node (E,AUi,AUo,lev) 
- struct All_variables *E;
- float **AUi,**AUo;
- int lev;
- {
-
- int i,j,k,k1,m,node1,node,d;
-
- MPI_Status status;
-
- static float *RV;
- static int been_here=0;
- static int *processors,rootid,nproc,NOZ,NNO;
-
- if (E->parallel.nprocz==1)  {
-    if (E->parallel.me==0) fprintf(stderr,"gather_to_1layer should not be called\n");
-    return;
-    } 
-
- if (been_here==0)   {
-   NOZ = E->lmesh.ELZ[lev]*E->parallel.nprocz + 1;
-   NNO = NOZ*E->lmesh.NOX[lev]*E->lmesh.NOY[lev];
-
-   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
-   RV = (float *)malloc((E->lmesh.NNO[lev]+2)*sizeof(float));
-
-
-   rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */
-   nproc = 0;
-   for (j=0;j<E->parallel.nprocz;j++) {
-     d = rootid + j;
-     processors[nproc] =  d;
-     nproc ++;
-     }
-
-   been_here++;
-   }
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    if (E->parallel.me!=rootid) {
-       MPI_Send(AUi[m],E->lmesh.NNO[lev]+1,MPI_FLOAT,rootid,E->parallel.me,E->parallel.world);
-         for (node=1;node<=NNO;node++)
-           AUo[m][node] = 1.0;
-       }
-    else 
-       for (d=0;d<E->parallel.nprocz;d++) {
-	 if (processors[d]!=rootid)
-           MPI_Recv(RV,E->lmesh.NNO[lev]+1,MPI_FLOAT,processors[d],processors[d],E->parallel.world,&status);
-         else
-	   for (node=1;node<=E->lmesh.NNO[lev];node++)
-	      RV[node] = AUi[m][node];
-	  
-         for (k=1;k<=E->lmesh.NOZ[lev];k++)   {
-           k1 = k + d*E->lmesh.ELZ[lev]; 
-           for (j=1;j<=E->lmesh.NOY[lev];j++)
-             for (i=1;i<=E->lmesh.NOX[lev];i++)   {
-               node = k + (i-1)*E->lmesh.NOZ[lev] + (j-1)*E->lmesh.NOZ[lev]*E->lmesh.NOX[lev];
-               node1 = k1 + (i-1)*NOZ + (j-1)*NOZ*E->lmesh.NOX[lev];
-               AUo[m][node1] = RV[node];
-               }
-           }
-         }
-    }
-
- return;
- }
-
-/* ==========================================================  */
- void gather_to_1layer_ele (E,AUi,AUo,lev) 
- struct All_variables *E;
- float **AUi,**AUo;
- int lev;
- {
-
- int i,j,k,k1,m,e,d,e1;
-
- MPI_Status status;
-
- static float *RV;
- static int been_here=0;
- static int *processors,rootid,nproc,NOZ,NNO;
-
- if (E->parallel.nprocz==1)  {
-    if (E->parallel.me==0) fprintf(stderr,"gather_to_1layer should not be called\n");
-    return;
-    } 
-
- if (been_here==0)   {
-   NOZ = E->lmesh.ELZ[lev]*E->parallel.nprocz;
-   NNO = NOZ*E->lmesh.ELX[lev]*E->lmesh.ELY[lev];
-
-   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
-   RV = (float *)malloc((E->lmesh.NEL[lev]+2)*sizeof(float));
-
-
-   rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */
-   nproc = 0;
-   for (j=0;j<E->parallel.nprocz;j++) {
-     d = rootid + j;
-     processors[nproc] =  d;
-     nproc ++;
-     }
-
-   been_here++;
-   }
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    if (E->parallel.me!=rootid) {
-       MPI_Send(AUi[m],E->lmesh.NEL[lev]+1,MPI_FLOAT,rootid,E->parallel.me,E->parallel.world);
-         for (e=1;e<=NNO;e++)
-           AUo[m][e] = 1.0;
-       }
-    else 
-       for (d=0;d<E->parallel.nprocz;d++) {
-	 if (processors[d]!=rootid)
-           MPI_Recv(RV,E->lmesh.NEL[lev]+1,MPI_FLOAT,processors[d],processors[d],E->parallel.world,&status);
-         else
-	   for (e=1;e<=E->lmesh.NEL[lev];e++)
-	      RV[e] = AUi[m][e];
-	  
-         for (k=1;k<=E->lmesh.ELZ[lev];k++)   {
-           k1 = k + d*E->lmesh.ELZ[lev]; 
-           for (j=1;j<=E->lmesh.ELY[lev];j++)
-             for (i=1;i<=E->lmesh.ELX[lev];i++)   {
-               e = k + (i-1)*E->lmesh.ELZ[lev] + (j-1)*E->lmesh.ELZ[lev]*E->lmesh.ELX[lev];
-               e1 = k1 + (i-1)*NOZ + (j-1)*NOZ*E->lmesh.ELX[lev];
-               AUo[m][e1] = RV[e];
-               }
-           }
-         }
-    }
-
- return;
- }
-
-
-/* ==========================================================  */
- void gather_TG_to_me0(E,TG)
- struct All_variables *E;
- float *TG;
- {
-
- void parallel_process_sync();
- int i,j,nsl,idb,to_everyone,from_proc,mst,me;
-
- static float *RG[20];
- static int been_here=0;
- const float e_16=1.e-16;
-
- MPI_Status status[100];
- MPI_Status status1;
- MPI_Request request[100];
-
- if (E->parallel.nprocxy==1)   return;
-
- nsl = E->sphere.nsf+1;
- me = E->parallel.me;
-
- if (been_here==0)   {
-   been_here++;
-   for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-     RG[i] = ( float *)malloc((E->sphere.nsf+1)*sizeof(float));
-   }
-
-
- idb=0;
- for (i=1;i<=E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)  {
-   to_everyone = E->parallel.nprocz*(i-1) + E->parallel.me_loc[3];
-
-   if (me!=to_everyone)    {  /* send TG */
-     idb++;
-     mst = me;
-     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,E->parallel.world,&request[idb-1]);
-     }
-   }
-
-/* parallel_process_sync(); */
-
- idb=0;
- for (i=1;i<=E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)  {
-   from_proc = E->parallel.nprocz*(i-1) + E->parallel.me_loc[3];
-   if (me!=from_proc)   {    /* me==0 receive all TG and add them up */
-      mst = from_proc;
-      idb++;
-      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&request[idb-1]);
-      }
-   }
-
- MPI_Waitall(idb,request,status);
-
- for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-   for (j=1;j<=E->sphere.nsf; j++)  {
-        if (fabs(TG[j]) < e_16) TG[j] += RG[i][j];
-        }
-
-/* parallel_process_sync(); */
-
- return;
- }
-
-/* ========================================= */
- void sum_across_depth_sph(E,sphc,sphs,dest_proc)
- struct All_variables *E;
- int dest_proc;
- float *sphc,*sphs;
- {
-
- void parallel_process_sync();
- int jumpp,i,j,nsl,idb,to_proc,from_proc,mst,me;
-
- float *RG,*TG;
-
- MPI_Status status[100];
- MPI_Status status1;
- MPI_Request request[100];
-
- if (E->parallel.nprocz==1)   return;
-
- jumpp = E->sphere.hindice;
- nsl = E->sphere.hindice*2+3;
- me = E->parallel.me;
-
- TG = ( float *)malloc((nsl+1)*sizeof(float));
- if (E->parallel.me_loc[3]==dest_proc) 
-      RG = ( float *)malloc((nsl+1)*sizeof(float));
-
- for (i=0;i<E->sphere.hindice;i++)   {
-    TG[i] = sphc[i];
-    TG[i+jumpp] = sphs[i];
-    }
-
-
- if (E->parallel.me_loc[3]!=dest_proc)    {  /* send TG */
-     to_proc = E->parallel.me_sph*E->parallel.nprocz+E->parallel.nprocz-1;
-     mst = me;
-     MPI_Send(TG,nsl,MPI_FLOAT,to_proc,mst,E->parallel.world);
-     }
-
- parallel_process_sync();
-
- if (E->parallel.me_loc[3]==dest_proc)  {
-   for (i=1;i<E->parallel.nprocz;i++) {
-      from_proc = me - i;
-      mst = from_proc;
-      MPI_Recv(RG,nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&status1);
-
-      for (j=0;j<E->sphere.hindice;j++)   {
-        sphc[j] += RG[j];
-        sphs[j] += RG[j+jumpp];
-        }
-      }
-   }
-
- free((void *) TG);
- if (E->parallel.me_loc[3]==dest_proc) 
-   free((void *) RG);
-
- return;
- }
-/* ========================================= */
- void sum_across_surf_sph(E,TG,loc_proc)
- struct All_variables *E;
- int loc_proc;
- float *TG;
- {
-
- void parallel_process_sync();
- int i,j,nsl,idb,to_everyone,from_proc,mst,me;
-
- float *RG[20];
-
- MPI_Status status[100];
- MPI_Status status1;
- MPI_Request request[100];
-
- if (E->parallel.nprocxy==1)   return;
-
- nsl = E->sphere.hindice*2+2;
- me = E->parallel.me;
-
- for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-    RG[i] = ( float *)malloc((nsl+1)*sizeof(float));
-
-
- idb=0;
- for (i=1;i<=E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)  {
-   to_everyone = E->parallel.nprocz*(i-1) + loc_proc;
-
-   if (me!=to_everyone)    {  /* send TG */
-     idb++;
-     mst = me;
-     MPI_Isend(TG,nsl,MPI_FLOAT,to_everyone,mst,E->parallel.world,&request[idb-1]);
-     }
-   }
-
-/* parallel_process_sync(); */
-
- idb=0;
- for (i=1;i<=E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)  {
-   from_proc = E->parallel.nprocz*(i-1) + loc_proc;
-   if (me!=from_proc)   {    /* me==0 receive all TG and add them up */
-      mst = from_proc;
-      idb++;
-      MPI_Irecv(RG[idb],nsl,MPI_FLOAT,from_proc,mst,E->parallel.world,&request[idb-1]);
-      }
-   }
-
- MPI_Waitall(idb,request,status);
-
- for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-   for (j=0;j<nsl; j++)  {
-        TG[j] += RG[i][j];
-        }
-
-/* parallel_process_sync(); */
-
- for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-       free((void *) RG[i]);
-
- return;
- }
-
-#endif
-
-
-/* ================================================== */
-
- void set_communication_sphereh(E)
- struct All_variables *E;
- {
-  int i;
-
-  i = cases[E->sphere.caps_per_proc];
-
-  E->parallel.nproc_sph[1] = incases3[i].xy[0];
-  E->parallel.nproc_sph[2] = incases3[i].xy[1];
-
-  E->sphere.lelx = E->sphere.elx/E->parallel.nproc_sph[1];
-  E->sphere.lely = E->sphere.ely/E->parallel.nproc_sph[2];
-  E->sphere.lsnel = E->sphere.lely*E->sphere.lelx;
-  E->sphere.lnox = E->sphere.lelx + 1;
-  E->sphere.lnoy = E->sphere.lely + 1;
-  E->sphere.lnsf = E->sphere.lnox*E->sphere.lnoy;
-
-  for (i=0;i<=E->parallel.nprocz-1;i++)   
-    if (E->parallel.me_loc[3] == i)    {
-      E->parallel.me_sph = (E->parallel.me-i)/E->parallel.nprocz;
-      E->parallel.me_loc_sph[1] = E->parallel.me_sph%E->parallel.nproc_sph[1];
-      E->parallel.me_loc_sph[2] = E->parallel.me_sph/E->parallel.nproc_sph[1];
-      }
-
-  E->sphere.lexs = E->sphere.lelx * E->parallel.me_loc_sph[1];
-  E->sphere.leys = E->sphere.lely * E->parallel.me_loc_sph[2];
-
- return;
- }
 

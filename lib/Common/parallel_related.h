@@ -1,5 +1,5 @@
 void parallel_process_termination();
-void parallel_process_sync();
+void parallel_process_sync(struct All_variables *E);
 double CPU_time0();
 void parallel_processor_setup(struct All_variables *E);
 void parallel_domain_decomp0(struct All_variables *E);

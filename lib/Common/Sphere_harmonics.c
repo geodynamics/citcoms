@@ -2,10 +2,10 @@
 
 
 #include <math.h>
-#include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
-#include <stdlib.h>
+#include "parallel_related.h"
+
 
 /*   ======================================================================
     ======================================================================  */
@@ -70,7 +70,7 @@ void set_sphere_harmonics(E)
 
   for (ll=0;ll<=E->sphere.output_llmax;ll++)
      for (mm=0;mm<=ll;mm++)   {
-        E->sphere.con[E->sphere.hindex[ll][mm]] = 
+        E->sphere.con[E->sphere.hindex[ll][mm]] =
 	     sqrt( (2.0-((mm==0)?1.0:0.0))*(2*ll+1)/(4.0*M_PI) )
 	    *sqrt_multis(ll+mm,ll-mm);  /* which is sqrt((ll-mm)!/(ll+mm)!) */
 	}
@@ -104,8 +104,6 @@ void sphere_harmonics_layer(E,T,sphc,sphs,iprint,filen)
  {
 /*    void sphere_expansion(); */
 /*    void sphere_interpolate(); */
-/*    void parallel_process_termination(); */
-/*    void parallel_process_sync(); */
 /*    void print_field_spectral_regular(); */
 /*    FILE *fp; */
 /*    char output_file[255]; */
@@ -136,15 +134,15 @@ void sphere_harmonics_layer(E,T,sphc,sphs,iprint,filen)
 /* 	print_field_spectral_regular(E,TG,sphc,sphs,proc_loc,filen); */
 
 
-/*    parallel_process_sync(); */
+/*    parallel_process_sync(E); */
 
 /*    free ((void *)TG); */
 
    return;
   }
-  
+
 /* ================================================
-  compute angle and area  
+  compute angle and area
  ================================================*/
 
 void compute_angle_surf_area (E)
@@ -154,7 +152,6 @@ void compute_angle_surf_area (E)
  int es,el,m,i,j,ii,ia[5],lev;
  double aa,y1[4],y2[4],angle[6],xx[4][5],area_sphere_cap();
  void get_angle_sphere_cap();
- void parallel_process_termination();
 
  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
    ia[1] = 1;
@@ -175,7 +172,7 @@ void compute_angle_surf_area (E)
 
    E->sphere.area[m] = area_sphere_cap(angle);
 
-   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--) 
+   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)
      for (es=1;es<=E->lmesh.SNEL[lev];es++)              {
        el = (es-1)*E->lmesh.ELZ[lev]+1;
        for (i=1;i<=4;i++)
@@ -204,7 +201,7 @@ void compute_angle_surf_area (E)
  }
 
 /* ================================================
- area of spherical rectangle 
+ area of spherical rectangle
  ================================================ */
 double area_sphere_cap(angle)
  double angle[6];
@@ -213,14 +210,14 @@ double area_sphere_cap(angle)
  double area,a,b,c;
  double area_of_sphere_triag();
 
-   a = angle[1]; 
-   b = angle[2]; 
-   c = angle[5]; 
+   a = angle[1];
+   b = angle[2];
+   c = angle[5];
    area = area_of_sphere_triag(a,b,c);
 
-   a = angle[3]; 
-   b = angle[4]; 
-   c = angle[5]; 
+   a = angle[3];
+   b = angle[4];
+   c = angle[5];
    area += area_of_sphere_triag(a,b,c);
 
    return (area);
@@ -290,7 +287,7 @@ double area_of_5points(E,lev,m,el,x,ne)
   }
 
 /*  ================================
- get the angle for given four points spherical rectangle 
+ get the angle for given four points spherical rectangle
  ================================= */
 
 void  get_angle_sphere_cap(xx,angle)
@@ -319,7 +316,7 @@ void  get_angle_sphere_cap(xx,angle)
    }
 
 /*  ================================
- get the angle for given two points 
+ get the angle for given two points
  ================================= */
 double get_angle(x,xx)
   double x[4],xx[4];
@@ -344,8 +341,6 @@ void construct_interp_net(E)
   struct All_variables *E;
   {
 
-/*    void parallel_process_termination(); */
-/*    void parallel_process_sync(); */
 /*    int ii,jj,es,i,j,m,el,node; */
 /*    int locate_cap(),locate_element(); */
 /*    double x[4],t,f; */
@@ -388,8 +383,8 @@ void construct_interp_net(E)
 
 /*           } */
 /*      }     */    /* end for i and j */
-  
-/*    parallel_process_sync(); */
+
+/*    parallel_process_sync(E); */
 
   return;
   }
@@ -440,9 +435,9 @@ int locate_cap(E,x)
  }
 
 /* ================================================
-  locate the element containing the node (i,j) with coord x. 
+  locate the element containing the node (i,j) with coord x.
   The radius is assumed to be 1 in computing the areas.
-  NOTE:  The returned element el is for the bottom layer. 
+  NOTE:  The returned element el is for the bottom layer.
  ================================================*/
 
 int locate_element(E,m,x,ne)
@@ -456,7 +451,7 @@ int locate_element(E,m,x,ne)
   double area_of_5points();
   const double e_7=1.e-7;
   const double e_6=1.e6;
-  
+
   el_located = 0;
 
 
@@ -474,7 +469,7 @@ int locate_element(E,m,x,ne)
 	  areamin = e_6;
 	  do {
              el_plus = E->EL[lev][m][el].sub[j];
-               
+
              es_plus = (el_plus-1)/E->lmesh.ELZ[lev_plus]+1;
 
              area1 = area_of_5points(E,lev_plus,m,el_plus,x,ne);
@@ -501,10 +496,10 @@ int locate_element(E,m,x,ne)
 
 /* ===============================================================
   interpolate nodal T's within cap m and element el onto node with
-  coordinate x[3] which is derived from a regular mesh and within 
+  coordinate x[3] which is derived from a regular mesh and within
   the element el. NOTE the radius of x[3] is the inner radius.
  =============================================================== */
- 
+
 float sphere_interpolate_point(E,T,m,el,x,ne)
  struct All_variables *E;
  float **T;
@@ -530,7 +525,7 @@ float sphere_interpolate_point(E,T,m,el,x,ne)
 
 /*   to = E->eco[m][el].centre[1]; */
 /*   fo = E->eco[m][el].centre[2]; */
- 
+
 /*   dxdy[1][1] = cos(to)*cos(fo); */
 /*   dxdy[1][2] = cos(to)*sin(fo); */
 /*   dxdy[1][3] = -sin(to); */
@@ -554,9 +549,9 @@ float sphere_interpolate_point(E,T,m,el,x,ne)
 /*   for (j=1;j<=E->mesh.nsd;j++)  */
 /*      y[j] = x[1]*dxdy[j][1] + x[2]*dxdy[j][2] + x[3]*dxdy[j][3]; */
 
-       /* then for node y, determine its coordinates xx1,yy1 
+       /* then for node y, determine its coordinates xx1,yy1
         in the parental element in the isoparametric element system*/
- 
+
 /*   a1 = yy[1][1] + yy[1][2] + yy[1][3] + yy[1][4]; */
 /*   b1 = yy[1][3] + yy[1][2] - yy[1][1] - yy[1][4]; */
 /*   c1 = yy[1][3] + yy[1][1] - yy[1][2] - yy[1][4]; */
@@ -596,7 +591,7 @@ float sphere_interpolate_point(E,T,m,el,x,ne)
 
 /* ===================================================================
   do the interpolation on sphere for data T, which is needed for both
-  spherical harmonic expansion and graphics 
+  spherical harmonic expansion and graphics
  =================================================================== */
 
 void sphere_interpolate(E,T,TG)
@@ -606,7 +601,6 @@ void sphere_interpolate(E,T,TG)
 
 /*    float sphere_interpolate_point(); */
 /*    void gather_TG_to_me0(); */
-/*    void parallel_process_termination(); */
 
 /*    int ii,jj,es,i,j,m,el,node; */
 /*    double x[4],t,f; */
@@ -699,7 +693,6 @@ void inv_sphere_harmonics(E,sphc,sphs,TG,proc_loc)
  {
 /*  int k,ll,mm,node,i,j,p,noz,snode; */
 /*  float t1,f1,rad; */
-/*  void parallel_process_sync(); */
 /*  void gather_TG_to_me0(); */
 
 /*  if (E->parallel.me_loc[3]==proc_loc)   { */
@@ -728,7 +721,7 @@ void inv_sphere_harmonics(E,sphc,sphs,TG,proc_loc)
 
 /*   } */
 
-/*   parallel_process_sync(); */
+/*   parallel_process_sync(E); */
 
  return;
  }
@@ -765,7 +758,7 @@ const double pt25=0.25;
 /*        E->sphere.tablesinf[j][mm] = sin( (double)(mm)*f ); */
 /*        } */
 /*     } */
-      
+
 /*   for (i=1;i<=E->sphere.lelx;i++) { */
 /*     es = i+(1-1)*E->sphere.lelx; */
 /*     t=pt25*(E->sphere.sx[1][E->sphere.sien[es].node[1]] */
@@ -789,7 +782,7 @@ const double pt25=0.25;
 /*        E->sphere.tablesinf_n[j][mm] = sin( (double)(mm)*f ); */
 /*        } */
 /*     } */
-      
+
 /*   for (i=1;i<=E->sphere.lnox;i++) { */
 /*     node = E->sphere.lexs + i + (E->sphere.leys+1-1)*E->sphere.nox; */
 /*     t=E->sphere.sx[1][node]; */

@@ -1,36 +1,16 @@
 #include <mpi.h>
 #include <math.h>
+
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "sphere_communication.h"
-#include "citcom_init.h"
+
 #include "parallel_related.h"
 
-extern void set_horizontal_communicator(struct All_variables*);
-extern void set_vertical_communicator(struct All_variables*);
+void set_horizontal_communicator(struct All_variables*);
+void set_vertical_communicator(struct All_variables*);
 
 
-void parallel_process_initilization(E,argc,argv)
-  struct All_variables *E;
-  int argc;
-  char **argv;
-  {
-
-  E->parallel.me = 0;
-  E->parallel.nproc = 1;
-  E->parallel.me_loc[1] = 0;
-  E->parallel.me_loc[2] = 0;
-  E->parallel.me_loc[3] = 0;
-  E->parallel.me_locl[1] = 0;
-  E->parallel.me_locl[2] = 0;
-  E->parallel.me_locl[3] = 0;
-
-  /*  MPI_Init(&argc,&argv); moved to main{} in Citcom.c, cpc 12/24/00 */
-  MPI_Comm_rank(E->parallel.world, &(E->parallel.me) );
-  MPI_Comm_size(E->parallel.world, &(E->parallel.nproc) );
-
-  return;
-  }
 
 /* ============================================ */
 /* ============================================ */
@@ -46,7 +26,7 @@ void parallel_process_termination()
 /* ============================================ */
 /* ============================================ */
 
-void parallel_process_sync()
+void parallel_process_sync(struct All_variables *E)
 {
 
   MPI_Barrier(E->parallel.world);
@@ -66,12 +46,10 @@ void parallel_process_sync()
 /* ============================================ */
 /* ============================================ */
 
-void parallel_processor_setup(E)
-  struct All_variables *E;
+void parallel_processor_setup(struct All_variables *E)
   {
 
   int i,j,k,me,temp,pid_surf;
-  void parallel_process_termination();
 
   me = E->parallel.me;
 
@@ -214,15 +192,10 @@ void set_vertical_communicator(struct All_variables *E)
 get element information for each processor.
  ========================================================================= */
 
-void parallel_domain_decomp0(E)
-  struct All_variables *E;
+void parallel_domain_decomp0(struct All_variables *E)
   {
 
-  int iy,eelx,i,j,k,nox,noz,noy,me,nel,lev,eaccumulatives,naccumulatives;
-  int temp0,temp1;
-  FILE *fp;
-  char output_file[255];
-  void parallel_process_termination();
+  int i,nox,noz,noy,me;
 
   me = E->parallel.me;
 
@@ -317,17 +290,6 @@ fprintf(stderr,"b %d %d %d %d %d %d %d\n",E->parallel.me,E->parallel.me_loc[1],E
   }
 
 
-/* ============================================
- get numerical grid coordinates for each relevant processor
- ============================================ */
-
-void parallel_domain_decomp2(E,GX)
-  struct All_variables *E;
-  float *GX[4];
-  {
-
-  return;
-  }
 
 
 /* ============================================
@@ -966,7 +928,6 @@ void exchange_snode_f(E, U1, U2, lev)
  int lev;
  {
 
- void parallel_process_sync();
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];
  float *S[27],*R[27];
  int sizeofk;

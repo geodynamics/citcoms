@@ -18,6 +18,7 @@ extern "C" {
 
 #include "global_defs.h"
 #include "citcom_init.h"
+#include "parallel_related.h"
 
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
@@ -38,11 +39,6 @@ extern "C" {
     void node_locations(struct All_variables*);
     void open_info(struct All_variables*);
     void open_log_and_time(struct All_variables*);
-    void parallel_communication_routs_s(struct All_variables*);
-    void parallel_communication_routs_v(struct All_variables*);
-    void parallel_domain_boundary_nodes(struct All_variables*);
-    void parallel_domain_decomp0(struct All_variables*);
-    void parallel_processor_setup(struct All_variables*);
     void read_mat_from_file(struct All_variables*);
     void set_elapsed_time(struct All_variables*);
     void set_sphere_harmonics (struct All_variables*);
@@ -146,6 +142,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.6 2003/08/01 22:53:50 tan2 Exp $
+// $Id: mesher.cc,v 1.7 2003/08/07 19:49:13 tan2 Exp $
 
 // End of file

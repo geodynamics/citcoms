@@ -9,6 +9,7 @@
 #include "global_defs.h"
 
 #include "citcom_init.h"
+#include "parallel_related.h"
 #include "phase_change.h"
 #include "interuption.h"
 #include "output.h"
@@ -25,7 +26,6 @@ void read_instructions(filename)
     void global_default_values();
     void global_derived_values();
     void construct_ien();
-    void parallel_domain_boundary_nodes();
     void construct_masks();
     void construct_shape_functions();
     void construct_id();
@@ -39,10 +39,6 @@ void read_instructions(filename)
     void set_up_nonmg_aliases();
     void check_bc_consistency();
     void node_locations();
-    void parallel_domain_decomp0();
-    void parallel_communication_routs_v();
-    void parallel_communication_routs_s();
-    void parallel_processor_setup();
     void allocate_velocity_vars();
     void construct_c3x3matrix();
     void construct_surf_det ();
@@ -56,9 +52,6 @@ void read_instructions(filename)
     void get_initial_elapsed_time();
     void set_starting_age();
     void set_elapsed_time();
-
-    void parallel_process_termination();
-    void parallel_process_sync();
 
 
     double start_time, CPU_time0(),vmag;

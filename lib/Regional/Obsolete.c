@@ -10,6 +10,42 @@
 /* from Parallel_related.c                                     */
 /* =========================================================== */
 
+void parallel_process_initilization(E,argc,argv)
+  struct All_variables *E;
+  int argc;
+  char **argv;
+  {
+
+  E->parallel.me = 0;
+  E->parallel.nproc = 1;
+  E->parallel.me_loc[1] = 0;
+  E->parallel.me_loc[2] = 0;
+  E->parallel.me_loc[3] = 0;
+  E->parallel.me_locl[1] = 0;
+  E->parallel.me_locl[2] = 0;
+  E->parallel.me_locl[3] = 0;
+
+  /*  MPI_Init(&argc,&argv); moved to main{} in Citcom.c, cpc 12/24/00 */
+  MPI_Comm_rank(E->parallel.world, &(E->parallel.me) );
+  MPI_Comm_size(E->parallel.world, &(E->parallel.nproc) );
+
+  return;
+  }
+
+
+/* ============================================
+ get numerical grid coordinates for each relevant processor
+ ============================================ */
+
+void parallel_domain_decomp2(E,GX)
+  struct All_variables *E;
+  float *GX[4];
+  {
+
+  return;
+  }
+
+
 void scatter_to_nlayer_id (E,AUi,AUo,lev)
   struct All_variables *E;
 double **AUi,**AUo;
@@ -293,7 +329,6 @@ void gather_TG_to_me0(E,TG)
 float *TG;
 {
 
-  void parallel_process_sync();
   int i,j,nsl,idb,to_everyone,from_proc,mst,me;
 
   static float *RG[20];
@@ -326,7 +361,7 @@ float *TG;
     }
   }
 
-  /* parallel_process_sync(); */
+  /* parallel_process_sync(E); */
 
   idb=0;
   for (i=1;i<=E->parallel.nprocxy;i++)  {
@@ -345,7 +380,7 @@ float *TG;
       if (fabs(TG[j]) < e_16) TG[j] += RG[i][j];
     }
 
-  /* parallel_process_sync(); */
+  /* parallel_process_sync(E); */
 
   return;
 }
@@ -357,7 +392,6 @@ int dest_proc;
 float *sphc,*sphs;
 {
 
-  void parallel_process_sync();
   int jumpp,i,j,nsl,idb,to_proc,from_proc,mst,me;
 
   float *RG,*TG;
@@ -388,7 +422,7 @@ float *sphc,*sphs;
     MPI_Send(TG,nsl,MPI_FLOAT,to_proc,mst,E->parallel.world);
   }
 
-  parallel_process_sync();
+  parallel_process_sync(E);
 
   if (E->parallel.me_loc[3]==dest_proc)  {
     for (i=1;i<E->parallel.nprocz;i++) {
@@ -417,7 +451,6 @@ int loc_proc;
 float *TG;
 {
 
-  void parallel_process_sync();
   int i,j,nsl,idb,to_everyone,from_proc,mst,me;
 
   float *RG[20];
@@ -446,7 +479,7 @@ float *TG;
     }
   }
 
-  /* parallel_process_sync(); */
+  /* parallel_process_sync(E); */
 
   idb=0;
   for (i=1;i<=E->parallel.nprocxy;i++)  {
@@ -465,7 +498,7 @@ float *TG;
       TG[j] += RG[i][j];
     }
 
-  /* parallel_process_sync(); */
+  /* parallel_process_sync(E); */
 
   for (i=1;i<E->parallel.nprocxy;i++)
     free((void *) RG[i]);
@@ -736,7 +769,6 @@ void output_temp(E,file_number)
 {
   int m,nno,i,j,fd;
   char output_file[255];
-  void parallel_process_sync();
 
   return;
 }
@@ -755,7 +787,6 @@ void process_temp_field(E,ii)
 {
     void heat_flux();
     void output_temp();
-    void parallel_process_sync();
     void process_output_field();
     int record_h;
 
@@ -768,7 +799,7 @@ void process_temp_field(E,ii)
 
     if ( (ii == 0) || ((ii % record_h) == 0) || E->control.DIRECTII)    {
       heat_flux(E);
-      parallel_process_sync();
+      parallel_process_sync(E);
 /*      output_temp(E,ii);  */
     }
 
@@ -793,7 +824,6 @@ void process_new_velocity(E,ii)
     void output_velo_related();
     void get_STD_topo();
     void get_CBF_topo();
-    void parallel_process_sync();
 
     int m,i,it;
 
@@ -805,7 +835,7 @@ void process_new_velocity(E,ii)
     if ( (ii == 0) || ((ii % E->control.record_every) == 0)
 		|| E->control.DIRECTII)     {
       get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,ii);
-      parallel_process_sync();
+      parallel_process_sync(E);
       output_velo_related(E,ii);         /* also topo */
     }
 

@@ -7,6 +7,7 @@
 #include "global_defs.h"
 #include "citcom_init.h"
 #include "output.h"
+#include "parallel_related.h"
 
 extern int Emergency_stop;
 
@@ -19,9 +20,6 @@ int main(argc,argv)
   void read_instructions();
   void solve_constrained_flow();
   void solve_derived_velocities();
-  void parallel_process_initilization();
-  void parallel_process_termination();
-  void parallel_process_sync();
   void process_temp_field();
   void post_processing();
   void vcopy();
