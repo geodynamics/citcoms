@@ -31,8 +31,6 @@ class Solver(BaseSolver):
 	print "my rank is ", self.rank
         return
 
-
-
     def run_init_simulation(self):
         mesher = self.inventory.mesher
         mesher.setup()
@@ -51,7 +49,14 @@ class Solver(BaseSolver):
 
     def advance(self,dt):
         self._loopInfo.log(
-            "%s: step %d: advancing the solution by dt = %s" % (self.name, self.step, dt))        
+            "%s: step %d: advancing the solution by dt = %s" % (self.name, self.step, dt))
+
+        vsolver = self.inventory.vsolver
+        vsolver.setup()
+        
+        tsolver = self.inventory.tsolver
+        tsolver.setup()
+        
         tsolver.run(dt)
         vsolver.run()
 
@@ -170,6 +175,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.10 2003/08/28 23:04:19 ces74 Exp $"
+__id__ = "$Id: Solver.py,v 1.11 2003/08/28 23:18:10 ces74 Exp $"
 
 # End of file
