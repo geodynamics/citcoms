@@ -30,6 +30,10 @@ TractionInterpolator::TractionInterpolator(const BoundedMesh& boundedMesh,
 					   Array2D<int,1>& meshNode) :
     FEMInterpolator(boundedMesh, E, meshNode)
 {
+    journal::debug_t debug("Exchanger");
+    debug << journal::loc(__HERE__)
+	  << "in TractionInterpolator::c'tor" << journal::end;
+
     initComputeTraction(boundedMesh);
 
     // for the time being, domain_cutout is hidden here.
@@ -511,6 +515,6 @@ void TractionInterpolator::computeTraction()
 }
 
 // version
-// $Id: TractionInterpolator.cc,v 1.6 2004/01/08 20:42:56 tan2 Exp $
+// $Id: TractionInterpolator.cc,v 1.7 2004/01/14 02:40:40 ces74 Exp $
 
 // End of file

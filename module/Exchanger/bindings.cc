@@ -63,7 +63,12 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_createTractionSource__doc__},
     
-	{pyExchanger_createIISink__name__,
+    {pyExchanger_createTractionBC__name__,
+     pyExchanger_createTractionBC,
+     METH_VARARGS,
+     pyExchanger_createTractionBC__doc__},
+	
+	 {pyExchanger_createIISink__name__,
      pyExchanger_createIISink,
      METH_VARARGS,
      pyExchanger_createIISink__doc__},
@@ -194,6 +199,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.31 2004/01/14 02:11:24 ces74 Exp $
+// $Id: bindings.cc,v 1.32 2004/01/14 02:40:40 ces74 Exp $
 
 // End of file

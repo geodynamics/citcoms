@@ -48,6 +48,10 @@ void TractionBC::sendTraction()
 
     source.interpolateTraction(fbc);
 
+    debug << journal::loc(__HERE__)
+	  << "after interpolateTration" << journal::end;
+
+
     Convertor& convertor = Convertor::instance();
     convertor.traction(fbc, source.getX());
 
@@ -64,6 +68,6 @@ void TractionBC::domain_cutout()
 	source.domain_cutout();
 }
 // version
-// $Id: TractionBC.cc,v 1.1 2004/01/14 02:11:24 ces74 Exp $
+// $Id: TractionBC.cc,v 1.2 2004/01/14 02:40:40 ces74 Exp $
 
 // End of file
