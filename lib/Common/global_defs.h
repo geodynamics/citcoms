@@ -1,5 +1,11 @@
- 	/* This file contains the definitions of variables which are passed as arguments */
-	/* to functions across the whole filespace of CITCOM. #include this file everywhere !*/
+#if !defined(CitcomS_global_defs_h)
+#define CitcomS_global_defs_h
+
+/*
+This file contains the definitions of variables which are passed as arguments
+to functions across the whole filespace of CITCOM. 
+#include this file everywhere !
+*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -850,3 +856,5 @@ struct All_variables {
     float (* node_space_function[3])(void*);
 
 };
+
+#endif
