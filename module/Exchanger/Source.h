@@ -16,7 +16,7 @@
 #include "utility.h"
 #include "Array2D.h"
 #include "DIM.h"
-#include "Interpolator.h"
+#include "VTInterpolator.h"
 
 struct All_variables;
 class BoundedMesh;
@@ -26,7 +26,7 @@ class Source {
 protected:
     MPI_Comm comm;
     const int sink;
-    std::auto_ptr<Interpolator> interp;
+    std::auto_ptr<VTInterpolator> interp;
     Array2D<int,1> meshNode_;
     Array2D<double,DIM> X_;
 
@@ -108,6 +108,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.7 2004/01/08 02:29:37 tan2 Exp $
+// $Id: Source.h,v 1.8 2004/01/08 20:42:56 tan2 Exp $
 
 // End of file

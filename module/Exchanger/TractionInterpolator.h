@@ -18,12 +18,7 @@ struct All_variables;
 class BoundedMesh;
 
 class TractionInterpolator: public FEMInterpolator {
-    const All_variables* E;
     float *gtraction[DIM];
-
-    double theta_tol;
-    double fi_tol;
-    double r_tol;
 
     int xmin;
     int xmax;
@@ -48,33 +43,19 @@ class TractionInterpolator: public FEMInterpolator {
 
 public:
     TractionInterpolator(const BoundedMesh& boundedMesh,
-			 Array2D<int,1>& meshNode,
-			 const All_variables* E);
+			 const All_variables* E,
+			 Array2D<int,1>& meshNode);
 
     virtual ~TractionInterpolator();
 
-    virtual void InterpolateTraction(Array2D<double,DIM>& F);
+    virtual void interpolateTraction(Array2D<double,DIM>& F);
     void domain_cutout();
 
 private:
-    void init(const BoundedMesh& boundedMesh,
-	      Array2D<int,1>& meshNode);
-
     void initComputeTraction(const BoundedMesh& boundedMesh);
     void computeTraction();
     void get_elt_traction(int el, int far, int NS,
 			  int lev, int mm);
-
-    void findMaxGridSpacing();
-    bool isCandidate(const double* xc, const BoundedBox& bbox) const;
-    double TetrahedronVolume(double *x1, double *x2,
-			     double *x3, double *x4) const;
-    double det3_sub(double  *x1, double *x2, double *x3) const;
-    void appendFoundElement(int el, int ntetra,
-			    const double* det, double dett);
-
-    void selfTest(const BoundedMesh& boundedMesh,
-		  const Array2D<int,1>& meshNode) const;
 
     // disable
     virtual void interpolateDisplacement(Array2D<double,DIM>& D) {};
@@ -82,8 +63,8 @@ private:
     virtual void interpolatePressure(Array2D<double,1>& P) {};
     virtual void interpolateStress(Array2D<double,DIM>& S) {};
     virtual void interpolateTemperature(Array2D<double,1>& T) {};
-    virtual void interpolateTraction(Array2D<double,DIM>& T) {};
     virtual void interpolateVelocity(Array2D<double,DIM>& V) {};
+
 };
 
 
@@ -91,6 +72,6 @@ private:
 #endif
 
 // version
-// $Id: TractionInterpolator.h,v 1.2 2003/12/16 02:14:10 tan2 Exp $
+// $Id: TractionInterpolator.h,v 1.3 2004/01/08 20:42:56 tan2 Exp $
 
 // End of file

@@ -23,7 +23,7 @@ TractionSource::TractionSource(MPI_Comm c, int s,
     recvMesh(mesh);
 
     if(isOverlapped(mesh.bbox(), mybbox)) {
-	interp = new TractionInterpolator(mesh, meshNode_, E);
+	interp = new TractionInterpolator(mesh, E, meshNode_);
 	meshNode_.print("meshNode");
     }
     sendMeshNode();
@@ -73,6 +73,6 @@ void TractionSource::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: TractionSource.cc,v 1.2 2004/01/08 02:29:37 tan2 Exp $
+// $Id: TractionSource.cc,v 1.3 2004/01/08 20:42:56 tan2 Exp $
 
 // End of file

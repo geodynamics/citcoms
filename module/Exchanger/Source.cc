@@ -23,7 +23,7 @@ Source::Source(MPI_Comm c, int s,
     recvMesh(mesh);
 
     if(isOverlapped(mesh.bbox(), mybbox)) {
-  	interp.reset(new Interpolator(mesh, E, meshNode_));
+  	interp.reset(new VTInterpolator(mesh, E, meshNode_));
 	meshNode_.print("meshNode");
     }
     sendMeshNode();
@@ -38,14 +38,14 @@ void Source::interpolateT(Array2D<double,1>& T, const All_variables* E) const
 	  << "in Source::interpolateT" << journal::end;
 
     if(size())
-	interp->interpolateT(T, E);
+	interp->interpolateTemperature(T);
 }
 
 
 void Source::interpolateV(Array2D<double,DIM>& V, const All_variables* E) const
 {
     if(size())
-	interp->interpolateV(V, E);
+	interp->interpolateVelocity(V);
 }
 
 
@@ -78,6 +78,6 @@ void Source::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Source.cc,v 1.6 2004/01/08 02:29:37 tan2 Exp $
+// $Id: Source.cc,v 1.7 2004/01/08 20:42:56 tan2 Exp $
 
 // End of file
