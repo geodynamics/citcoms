@@ -82,7 +82,6 @@ void output_velo(struct All_variables *E, FILE *fp1)
   return;
 }
 
-
 /*********************************************************************/
 
 
