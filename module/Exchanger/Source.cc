@@ -11,6 +11,7 @@
 #include "BoundedBox.h"
 #include "BoundedMesh.h"
 #include "journal/journal.h"
+#include "VTInterpolator.h"
 #include "Source.h"
 
 
@@ -29,6 +30,10 @@ Source::Source(MPI_Comm c, int s,
     sendMeshNode();
     initX(mesh);
 }
+
+
+Source::~Source()
+{}
 
 
 void Source::interpolateT(Array2D<double,1>& T, const All_variables* E) const
@@ -78,6 +83,6 @@ void Source::initX(const BoundedMesh& mesh)
 
 
 // version
-// $Id: Source.cc,v 1.8 2004/01/13 01:21:07 ces74 Exp $
+// $Id: Source.cc,v 1.9 2004/01/14 00:34:02 tan2 Exp $
 
 // End of file

@@ -16,10 +16,10 @@
 #include "utility.h"
 #include "Array2D.h"
 #include "DIM.h"
-#include "VTInterpolator.h"
 
 struct All_variables;
 class BoundedMesh;
+class VTInterpolator;
 
 
 class Source {
@@ -34,7 +34,7 @@ public:
     Source(MPI_Comm comm, int sink,
 	   BoundedMesh& mesh, const All_variables* E,
 	   const BoundedBox& mybbox);
-    virtual ~Source() {};
+    virtual ~Source();
 
     inline int size() const {return meshNode_.size();}
     inline const Array2D<double,DIM>& getX() const {return X_;}
@@ -108,6 +108,6 @@ void Source::sendArray2D(const Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Source.h,v 1.8 2004/01/08 20:42:56 tan2 Exp $
+// $Id: Source.h,v 1.9 2004/01/14 00:34:02 tan2 Exp $
 
 // End of file
