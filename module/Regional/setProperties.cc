@@ -257,9 +257,6 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "lith_age_depth", E->control.lith_age_depth, m);
     getScalarProperty(properties, "mantle_temp", E->control.lith_age_mantle_temp, m);
 
-    getScalarProperty(properties, "tracer", E->control.tracer, m);
-    getStringProperty(properties, "tracer_file", E->control.tracer_file, m);
-
     getScalarProperty(properties, "start_age", E->control.start_age, m);
     getScalarProperty(properties, "reset_startage", E->control.reset_startage, m);
 
@@ -787,6 +784,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.30 2005/01/19 18:55:00 tan2 Exp $
+// $Id: setProperties.cc,v 1.31 2005/01/20 22:29:50 tan2 Exp $
 
 // End of file

@@ -44,9 +44,6 @@ class Param(CitcomComponent):
             pyre.properties.float("lith_age_depth", 0.0314),
             pyre.properties.float("mantle_temp", 1.0),
 
-            pyre.properties.bool("tracer", False),
-            pyre.properties.str("tracer_file", "tracer.dat"),
-
             #pyre.properties.bool("DESCRIBE", False),
             #pyre.properties.bool("BEGINNER", False),
             #pyre.properties.bool("VERBOSE", False),
@@ -58,6 +55,6 @@ class Param(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.9 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.10 2005/01/20 22:29:50 tan2 Exp $"
 
 # End of file
