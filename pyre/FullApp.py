@@ -7,69 +7,34 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomApp import CitcomApp
-import Full as CitcomModule
+from mpi.Application import Application
 import journal
 
 
-class FullApp(CitcomApp):
+class FullApp(Application):
 
 
-    def __init__(self, name):
-	CitcomApp.__init__(self, name)
-	self.CitcomModule = CitcomModule
+    def run(self):
+
+        full = self.inventory.citcom
+        full.run()
+
         return
 
 
 
-    class Inventory(CitcomApp.Inventory):
+    class Inventory(Application.Inventory):
 
         import pyre.facilities
-
-        # facilities
-        from CitcomS.Facilities.Mesher import Mesher
-        from CitcomS.Facilities.TSolver import TSolver
-        from CitcomS.Facilities.VSolver import VSolver
-
-        # component modules
-        import CitcomS.Components.Advection_diffusion as Advection_diffusion
-        import CitcomS.Components.Sphere as Sphere
-        import CitcomS.Components.Stokes_solver as Stokes_solver
-
-        # components
-        from CitcomS.Components.BC import BC
-        from CitcomS.Components.Const import Const
-        from CitcomS.Components.IC import IC
-        from CitcomS.Components.Parallel import Parallel
-        from CitcomS.Components.Param import Param
-        from CitcomS.Components.Phase import Phase
-        from CitcomS.Components.Visc import Visc
+        from CitcomSFull import CitcomSFull
 
         inventory = [
 
-            Mesher("mesher", Sphere.fullSphere(CitcomModule)),
-            VSolver("vsolver", Stokes_solver.incompressibleNewtonian(CitcomModule)),
-            TSolver("tsolver", Advection_diffusion.temperature_diffadv(CitcomModule)),
+            pyre.facilities.facility("citcom", default=CitcomSFull()),
 
-            pyre.facilities.facility("bc",
-                                     default=BC("bc", "bc", CitcomModule)),
-            pyre.facilities.facility("const",
-                                     default=Const("const", "const", CitcomModule)),
-            pyre.facilities.facility("ic",
-                                     default=IC("ic", "ic", CitcomModule)),
-            pyre.facilities.facility("parallel",
-                                     default=Parallel("parallel", "parallel", CitcomModule)),
-            pyre.facilities.facility("param",
-                                     default=Param("param", "param", CitcomModule)),
-            pyre.facilities.facility("phase",
-                                     default=Phase("phase", "phase", CitcomModule)),
-            pyre.facilities.facility("visc",
-                                     default=Visc("visc", "visc", CitcomModule)),
             ]
 
-
-
 # version
-__id__ = "$Id: FullApp.py,v 1.3 2003/08/22 22:35:57 tan2 Exp $"
+__id__ = "$Id: FullApp.py,v 1.4 2003/08/25 19:34:40 tan2 Exp $"
 
 # End of file

@@ -7,22 +7,22 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomApp import CitcomApp
+from Citcom import Citcom
 import Full as CitcomModule
 import journal
 
 
-class FullApp(CitcomApp):
+class CitcomSFull(Citcom):
 
 
-    def __init__(self, name):
-	CitcomApp.__init__(self, name)
+    def __init__(self, name="full"):
+	Citcom.__init__(self, name)
 	self.CitcomModule = CitcomModule
         return
 
 
 
-    class Inventory(CitcomApp.Inventory):
+    class Inventory(Citcom.Inventory):
 
         import pyre.facilities
 
@@ -70,6 +70,6 @@ class FullApp(CitcomApp):
 
 
 # version
-__id__ = "$Id: CitcomSFull.py,v 1.3 2003/08/22 22:35:57 tan2 Exp $"
+__id__ = "$Id: CitcomSFull.py,v 1.4 2003/08/25 19:34:40 tan2 Exp $"
 
 # End of file
