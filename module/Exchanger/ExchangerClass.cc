@@ -47,6 +47,16 @@ Exchanger::~Exchanger() {
 }
 
 
+void Exchanger::gather() {
+    std::cout << "in Exchanger::gather" << std::endl;
+}
+
+
+void Exchanger::distribute() {
+    std::cout << "in Exchanger::distribute" << std::endl;
+}
+
+
 void Exchanger::reset_target(const MPI_Comm icomm, const int receiver) {
     //intercomm = icomm;
     //remoteLeader = receiver;
@@ -421,7 +431,7 @@ void Exchanger::nowait() {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.14 2003/09/26 17:01:08 ces74 Exp $
+// $Id: ExchangerClass.cc,v 1.15 2003/09/27 00:29:05 tan2 Exp $
 
 // End of file
 

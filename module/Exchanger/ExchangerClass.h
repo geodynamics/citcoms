@@ -48,15 +48,15 @@ public:
     void local_receiveVelocities();
     void local_sendTemperature();
     void local_receiveTemperature();
-  // Test
-  void imposeBC();
+    // Test
+    void imposeBC();
     double exchangeTimestep(const double);
 
     void wait();
     void nowait();
 
-    virtual void gather() = 0;
-    virtual void distribute() = 0;
+    virtual void gather();
+    virtual void distribute();
     virtual void interpretate() = 0; // interpolation or extrapolation
   //    virtual void impose_bc() = 0;    // set bc flag
 
@@ -96,7 +96,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.14 2003/09/22 18:14:32 ces74 Exp $
+// $Id: ExchangerClass.h,v 1.15 2003/09/27 00:29:05 tan2 Exp $
 
 // End of file
 
