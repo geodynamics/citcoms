@@ -294,8 +294,8 @@ PyObject * pyExchanger_initConvertor(PyObject *, PyObject *args)
    PyObject *obj1;
    int dimensional, transformational;
 
-   if (!PyArg_ParseTuple(args, "Oii:initConvertor",
-			 &obj1, &dimensional, &transformational))
+   if (!PyArg_ParseTuple(args, "iiO:initConvertor",
+			 &dimensional, &transformational, &obj1))
         return NULL;
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
@@ -731,6 +731,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.36 2004/01/07 23:54:34 tan2 Exp $
+// $Id: exchangers.cc,v 1.37 2004/01/08 01:50:25 tan2 Exp $
 
 // End of file
