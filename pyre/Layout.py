@@ -128,17 +128,17 @@ class Layout(Component):
 
         inventory = [
 
-            #pyre.properties.sequence("coarse", range(12)),
-            #pyre.properties.sequence("fine", [12]),
+            pyre.properties.sequence("coarse", range(12)),
+            pyre.properties.sequence("fine", [12]),
 
             # test
-            pyre.properties.sequence("coarse", [0]),
-            pyre.properties.sequence("fine", [1]),
+            #pyre.properties.sequence("coarse", [0]),
+            #pyre.properties.sequence("fine", [1]),
 
             ]
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.4 2003/09/09 02:27:36 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.5 2003/09/26 19:03:24 tan2 Exp $"
 
 # End of file
