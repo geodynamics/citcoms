@@ -8,9 +8,9 @@
 #
 
 '''
-Combine the pasted Citcom Data
+Paste and combine Citcom data
 
-usage: batchcombine.py machinefile modeldir modelname timestep nodex nodey nodez n_surf_proc nprocx nprocy nprocz
+Usage: batchcombine.py machinefile modeldir modelname timestep nodex nodey nodez n_surf_proc nprocx nprocy nprocz
 '''
 
 if __name__ == '__main__':
@@ -33,14 +33,11 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
-    # generate a list of machines
-    nodelist = ''
-    for node in file(machinefile).readlines():
-        nodelist += '%s ' % node.strip()
+    nodelist = file(machinefile).readlines()
 
     # check the length of nodelist
     totalnodes = nprocx * nprocy * nprocz * ncap
-    n = len(nodelist.split())
+    n = len(nodelist)
     if not n == totalnodes:
         print 'WARNING: length of machinefile does not match number of processors'
         if (totalnodes > n) and ((totalnodes % n) == 0):
@@ -50,8 +47,13 @@ if __name__ == '__main__':
             print 'ERROR: incorrect machinefile size'
             sys.exit(1)
 
+    # generate a string of machine names
+    nodes = ''
+    for node in nodelist:
+        nodes += '%s ' % node.strip()
+
     # paste
-    cmd = 'batchpaste.sh %(modeldir)s %(modelname)s %(timestep)d %(nodelist)s' \
+    cmd = 'batchpaste.sh %(modeldir)s %(modelname)s %(timestep)d %(nodes)s' \
           % vars()
     print cmd
     os.system(cmd)
@@ -73,6 +75,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchcombine.py,v 1.3 2004/06/07 19:54:30 tan2 Exp $
+# $Id: batchcombine.py,v 1.4 2004/06/07 22:29:03 tan2 Exp $
 
 # End of file
