@@ -101,9 +101,9 @@ class CoarseGridExchanger(Exchanger):
 
     def createII(self):
         import Inlet
-        self.II = Inlet.VTInlet(self.interior,
-                                self.sink["Intr"],
-                                self.all_variables)
+        self.II = Inlet.TInlet(self.interior,
+                               self.sink["Intr"],
+                               self.all_variables)
         return
 
 
@@ -202,6 +202,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.35 2004/05/29 01:19:31 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.36 2004/08/06 20:22:30 tan2 Exp $"
 
 # End of file
