@@ -17,21 +17,31 @@ class IC(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.IC_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
-        import os
 
-        __properties__ = Component.Properties.__properties__ + (
+
+        __inventory__ = [
+
             pyre.properties.int("num_perturbations",2),
             pyre.properties.sequence("perturbmag",[0.05,0.05]),
             pyre.properties.sequence("perturbl",[2,2]),
             pyre.properties.sequence("perturbm",[2,2]),
             pyre.properties.sequence("perturblayer",[3,6]),
-            )
+
+            ]
 
 # version
-__id__ = "$Id: IC.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

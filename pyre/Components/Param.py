@@ -17,40 +17,49 @@ class Param(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Param_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
-        import os
 
-        __properties__ = Component.Properties.__properties__ + (
-            pyre.properties.string("datafile","test"),
+
+        __inventory__ = [
+
+            pyre.properties.str("datafile","test"),
 
             pyre.properties.bool("file_vbcs",False),
-            pyre.properties.string("vel_bound_file","bvel.dat"),
+            pyre.properties.str("vel_bound_file","bvel.dat"),
 
             pyre.properties.bool("mat_control",False),
-            pyre.properties.string("mat_file","mat.dat"),
-            
+            pyre.properties.str("mat_file","mat.dat"),
+
             pyre.properties.bool("lith_age",False),
-            pyre.properties.string("lith_age_file","age.dat"),
+            pyre.properties.str("lith_age_file","age.dat"),
             pyre.properties.bool("lith_age_time",False),
             pyre.properties.float("lith_age_depth",0.314),
             pyre.properties.float("mantle_temp",1.0),
 
             pyre.properties.bool("tracer",False),
-            pyre.properties.string("tracer_file",""),
-            
+            pyre.properties.str("tracer_file",""),
+
             pyre.properties.bool("restart",False),
             pyre.properties.bool("post_p",False),
-            pyre.properties.string("datafile_old","test"),
+            pyre.properties.str("datafile_old","test"),
             pyre.properties.int("solution_cycles_init",100),
-            pyre.properties.bool("zero_elapsed_time",True),            
+            pyre.properties.bool("zero_elapsed_time",True),
 
             pyre.properties.int("minstep",1),
             pyre.properties.int("maxstep",8001),
             pyre.properties.int("maxtotstep",8001),
-            pyre.properties.int("storage_spacing",50),            
+            pyre.properties.int("storage_spacing",50),
             pyre.properties.int("cpu_limits_in_seconds",360000000),
 
             pyre.properties.bool("stokes_flow_only",False),
@@ -68,11 +77,12 @@ class Param(Component):
             pyre.properties.bool("see_convergence",True),
 
             pyre.properties.float("start_age",40.0),
-            pyre.properties.bool("reset_startage",False),
-            )
+            pyre.properties.bool("reset_startage",False)
+
+            ]
 
 
 # version
-__id__ = "$Id: Param.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

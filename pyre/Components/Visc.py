@@ -17,19 +17,27 @@ class Visc(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Visc_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
-        import os
 
-        __properties__ = Component.Properties.__properties__ + (
-            
-            pyre.properties.string("Viscosity","system"),
+
+        inventory = [
+
+            pyre.properties.str("Viscosity","system"),
             pyre.properties.int("rheol",3),
-            pyre.properties.int("visc_smooth_method",3),            
+            pyre.properties.int("visc_smooth_method",3),
             pyre.properties.bool("VISC_UPDATE",True),
-            pyre.properties.int("num_mat",4),            
+            pyre.properties.int("num_mat",4),
 
             pyre.properties.bool("TDEPV",True),
             pyre.properties.sequence("viscE",
@@ -37,7 +45,7 @@ class Visc(Component):
             pyre.properties.sequence("viscT",
 				     [-1.02126,-1.01853, -1.32722, -1.32722]),
             pyre.properties.sequence("visc0",
-				     [1.0e3,2.0e-3,2.0e0,2.0e1]),            
+				     [1.0e3,2.0e-3,2.0e0,2.0e1]),
 
             pyre.properties.bool("SDEPV",False),
             pyre.properties.sequence("sdepv_expt",
@@ -48,11 +56,11 @@ class Visc(Component):
             pyre.properties.float("visc_min",1.0e-4),
 
             pyre.properties.bool("VMAX",True),
-            pyre.properties.float("visc_max",1.0e3),
-            
-            )
+            pyre.properties.float("visc_max",1.0e3)
+
+            ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

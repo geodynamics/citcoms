@@ -17,14 +17,21 @@ class Adv_solver(Component):
         return
 
 
-    class Properties(Component.Properties):
 
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Adv_solver_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
         import pyre.properties
-        import os
 
-        __properties__ = Component.Properties.__properties__ + (
-            
+
+        inventory = [
+
             pyre.properties.bool("ADV",True),
             pyre.properties.float("fixed_timestep",0.0),
             pyre.properties.float("finetunedt",0.7),
@@ -34,11 +41,11 @@ class Adv_solver(Component):
             pyre.properties.bool("precond",True),
 
             pyre.properties.bool("aug_lagr",True),
-            pyre.properties.float("aug_number",2.0e3),
+            pyre.properties.float("aug_number",2.0e3)
 
-            )
+            ]
 
 # version
-__id__ = "$Id: Adv_solver.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Adv_solver.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

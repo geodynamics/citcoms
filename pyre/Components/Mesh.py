@@ -18,17 +18,25 @@ class Mesh(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Mesh_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
 
 
-        __properties__ = Component.Properties.__properties__ + (
+        inventory = [
 
             pyre.properties.bool("coord",False),
-            pyre.properties.string("coord_file","coord.dat"),
-            
+            pyre.properties.str("coord_file","coord.dat"),
+
             pyre.properties.int("nodex",17),
             pyre.properties.int("nodey",17),
             pyre.properties.int("nodez",9),
@@ -42,12 +50,12 @@ class Mesh(Component):
             pyre.properties.float("phi_min",2.26893),
             pyre.properties.float("phi_max",3.83972),
             pyre.properties.float("radius_inner",0.55),
-            pyre.properties.float("radius_outer",1.0),            
-            
-            )
+            pyre.properties.float("radius_outer",1.0),
+
+            ]
 
 
 # version
-__id__ = "$Id: Mesh.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Mesh.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

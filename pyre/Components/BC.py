@@ -20,17 +20,17 @@ class BC(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-	Regional.BC_set_prop(self.properties)
+	Regional.BC_set_prop(self.inventory)
         return
 
 
 
-    class Properties(Component.Properties):
+    class Inventory(Component.Inventory):
 
         import pyre.properties
 
 
-        __properties__ = Component.Properties.__properties__ + (
+        inventory = [
 
             pyre.properties.bool("topvbc",False),
             pyre.properties.float("topvbxval",0.0),
@@ -51,11 +51,11 @@ class BC(Component):
 	    # put them here temporalily
             pyre.properties.bool("temperature_bound_adj",False),
             pyre.properties.float("depth_bound_adj",0.157),
-            pyre.properties.float("width_bound_adj",0.08727),
+            pyre.properties.float("width_bound_adj",0.08727)
 
-            )
+            ]
 
 # version
-__id__ = "$Id: BC.py,v 1.2 2003/06/27 00:15:02 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.3 2003/07/09 19:42:27 tan2 Exp $"
 
 # End of file

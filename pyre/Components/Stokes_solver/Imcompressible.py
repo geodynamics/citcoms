@@ -37,7 +37,7 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
     # over-ride Stokes_solver.run()
     def run(self):
 
-	self._init()
+	self._myinit()
 
 	self._form_RHS()
 
@@ -56,12 +56,12 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
 	    self.count += 1
 
-	self._fini()
+	self._myfini()
 
 	return
 
 
-    def _init(self):
+    def _myinit(self):
 	# allocate and initialize memory here
 	Regional.general_stokes_solver_init()
 
@@ -72,7 +72,7 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 	return
 
 
-    def _fini(self):
+    def _myfini(self):
 	# free memory here
 	Regional.general_stokes_solver_fini()
 	return
@@ -85,6 +85,6 @@ class ImcompressibleNonNewtonian(ImcompressibleNewtonian):
 
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.5 2003/06/26 23:14:42 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.6 2003/07/09 19:42:27 tan2 Exp $"
 
 # End of file

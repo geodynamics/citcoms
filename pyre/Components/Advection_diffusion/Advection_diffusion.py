@@ -22,14 +22,14 @@ class Advection_diffusion(Component):
 
     def _setProperties(self):
         import CitcomS.Regional as Regional
-        #Regional.general_stokes_solver_set_prop(self.properties)
+        #Regional.general_stokes_solver_set_prop(self.inventory)
         return
 
     def run(self):
         #test
-        print self.properties.ADV
+        print self.inventory.ADV
         return
-    
+
     def _init(self):
 	return
 
@@ -45,12 +45,12 @@ class Advection_diffusion(Component):
 	return
 
 
-    class Properties(Component.Properties):
+    class Inventory(Component.Inventory):
 
         import pyre.properties as prop
 
-        __properties__ = (
-            
+        inventory = [
+
             prop.bool("ADV",True),
             prop.float("fixed_timestep",0.0),
             prop.float("finetunedt",0.7),
@@ -62,10 +62,10 @@ class Advection_diffusion(Component):
             prop.bool("aug_lagr",True),
             prop.float("aug_number",2.0e3),
 
-	    )
+	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.4 2003/07/03 23:43:20 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.5 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

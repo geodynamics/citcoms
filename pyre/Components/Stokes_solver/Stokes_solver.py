@@ -15,14 +15,13 @@ class Stokes_solver(Component):
 
     def __init__(self, name, facility="vsolver"):
         Component.__init__(self, name, facility)
-        self._setProperties()
         return
 
 
 
-    def _setProperties(self):
+    def setProperties(self):
         import CitcomS.Regional as Regional
-        #Regional.general_stokes_solver_set_prop(self.properties)
+        #Regional.Stokes_solver_set_prop(self.inventory)
         return
 
 
@@ -30,25 +29,22 @@ class Stokes_solver(Component):
     def run(self):
 
 	# test
-	print self.properties.Solver
+	print "vlowstep = ", self.inventory.vlowstep
 	return
 
-
-	self._init()
 	self._form_RHS()
 	self._form_LHS()
 	self._solve()
-	self._fini()
 
 	return
 
 
 
-    def _init(self):
+    def init(self, parent):
 	return
 
 
-    def _fini(self):
+    def fini(self):
 	return
 
 
@@ -64,17 +60,17 @@ class Stokes_solver(Component):
 	return
 
 
-    def _output(self, *args, **kwds):
+    def output(self, *args, **kwds):
 	return
 
 
 
-    class Properties(Component.Properties):
+    class Inventory(Component.Inventory):
 
         import pyre.properties as prop
 
-        __properties__ = (
-            prop.string("Solver","cgrad"),
+        inventory = [
+            prop.str("Solver","cgrad"),
             prop.bool("node_assemble",True),
 
             prop.int("mg_cycle",1),
@@ -88,11 +84,10 @@ class Stokes_solver(Component):
             prop.float("accuracy",1.0e-6),
             prop.float("tole_compressibility",1.0e-7),
 
-
-	    )
+	    ]
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.5 2003/06/26 23:14:08 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.6 2003/07/09 19:42:27 tan2 Exp $"
 
 # End of file

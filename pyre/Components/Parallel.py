@@ -17,23 +17,33 @@ class Parallel(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Parallel_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
 
-        __properties__ = Component.Properties.__properties__ + (
+        inventory = [
+
             pyre.properties.list("nproc_surf",1,
 				 pyre.properties.choice([1,12])
-				 ),            
+				 ),
             pyre.properties.int("nprocx",1),
             pyre.properties.int("nprocy",1),
-            pyre.properties.int("nprocz",1),            
+            pyre.properties.int("nprocz",1),
             # debugging flags?
-            )
+
+            ]
 
 
 # version
-__id__ = "$Id: Parallel.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Parallel.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

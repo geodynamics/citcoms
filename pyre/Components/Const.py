@@ -18,7 +18,15 @@ class Const(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Const_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
@@ -29,7 +37,7 @@ class Const(Component):
         from pyre.units.pressure import Pa
         from pyre.units.energy import J
 
-        __properties__ = Component.Properties.__properties__ + (
+        inventory = [
             pyre.properties.float("radius", 6371e3*m),
             pyre.properties.float("ref_density", 3500.0*kg/m**3),
             pyre.properties.float("thermdiff", 1.0e-6*m**2/s),
@@ -38,16 +46,17 @@ class Const(Component):
             pyre.properties.float("ref_visc", 1.0e21*Pa*s),
             pyre.properties.float("heatcapacity", 1250.0*J/kg/K),
             pyre.properties.float("water_density", 0.0*kg/m**3),
-	    
+
             pyre.properties.float("depth_lith", 89e3*m),
             pyre.properties.float("depth_410", 410e3*m),
             pyre.properties.float("depth_660", 660e3*m),
             pyre.properties.float("depth_d_double_prime", 2691e3*m),
-            pyre.properties.float("depth_cmb", 2891e3*m),
-            )
+            pyre.properties.float("depth_cmb", 2891e3*m)
+
+            ]
 
 
 # version
-__id__ = "$Id: Const.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

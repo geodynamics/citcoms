@@ -17,13 +17,21 @@ class Phase(Component):
         return
 
 
-    class Properties(Component.Properties):
+
+    def setProperties(self):
+        import CitcomS.Regional as Regional
+	Regional.Phase_set_prop(self.inventory)
+        return
+
+
+
+    class Inventory(Component.Inventory):
 
 
         import pyre.properties
 
-        __properties__ = Component.Properties.__properties__ + (
-            
+        inventory = [
+
             pyre.properties.float("Ra_410",0.0),
             pyre.properties.float("clapeyron410",0.0235),
             pyre.properties.float("transT410",0.78),
@@ -37,11 +45,11 @@ class Phase(Component):
             pyre.properties.float("Ra_cmb",0.0),
             pyre.properties.float("clapeyroncmb",0.0235),
             pyre.properties.float("transTcmb",0.78),
-            pyre.properties.float("widthcmb",0.0058),
-            
-            )
+            pyre.properties.float("widthcmb",0.0058)
+
+            ]
 
 # version
-__id__ = "$Id: Phase.py,v 1.1 2003/06/11 23:02:09 tan2 Exp $"
+__id__ = "$Id: Phase.py,v 1.2 2003/07/09 19:42:27 tan2 Exp $"
 
-# End of file 
+# End of file

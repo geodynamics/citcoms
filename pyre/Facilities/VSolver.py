@@ -8,37 +8,47 @@
 #
 
 from pyre.facilities.Facility import Facility
+from pyre.facilities.ScriptBinder import ScriptBinder
 
 
 class VSolver(Facility):
 
 
-    def bind(self, configuration):
-        componentName = configuration.get(self.name)
+    def __init__(self, name, component):
+        Facility.__init__(self, name,
+                          default=component, binder=self.Binder())
+        return
 
-        # if the user didn't provide a setting, use the default
-        if not componentName:
-            component = self.component
 
-        # these cases we want to treat specially
-        elif componentName == "imcomp-newtonian":
-            import CitcomS.Stokes_solver
-            component = CitcomS.Stokes_solver.imcompressibleNewtonian()
 
-        elif componentName == "imcomp-non-newtonian":
-	    import CitcomS.Stokes_solver
-            component = CitcomS.Stokes_solver.imcompressibleNonNewtonian()
+    class Binder(ScriptBinder):
 
-        ## let the Facility handle unknown component names
-        else:
-            component = Facility.bind(self, configuration)
 
-        return component
+        def bind(self, facility, value):
+            try:
+                return self._builtins[value]()
+            except KeyError:
+                pass
+
+            return ScriptBinder.bind(self, facility, value)
+
+
+        def __init__(self):
+            ScriptBinder.__init__(self)
+
+	    import CitcomS.Stokes_solver as Stokes
+
+            self._builtins = {
+                "imcomp-newtonian": Stokes.imcompressibleNewtonian,
+                "imcomp-non-newtonian": Stokes.imcompressibleNonNewtonian,
+                }
+
+            return
 
 
 
 
 # version
-__id__ = "$Id: VSolver.py,v 1.2 2003/06/23 21:01:03 tan2 Exp $"
+__id__ = "$Id: VSolver.py,v 1.3 2003/07/09 19:42:27 tan2 Exp $"
 
 # End of file
