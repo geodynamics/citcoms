@@ -33,6 +33,7 @@ PROJ_SRCS = \
 	TInlet.cc \
 	TOutlet.cc \
 	VTInlet.cc \
+	VOutlet.cc \
 	VTOutlet.cc \
 	bindings.cc \
 	global_bbox.cc \
@@ -44,6 +45,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.21 2004/05/11 07:55:30 tan2 Exp $
+# $Id: Make.mm,v 1.22 2004/05/18 21:21:05 ces74 Exp $
 
 # End of file

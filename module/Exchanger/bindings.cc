@@ -66,6 +66,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      PyCitcomSExchanger_TOutlet_create__doc__},
 
+    {PyCitcomSExchanger_VOutlet_create__name__,
+     PyCitcomSExchanger_VOutlet_create,
+     METH_VARARGS,
+     PyCitcomSExchanger_VOutlet_create__doc__},
+
     {PyCitcomSExchanger_VTOutlet_create__name__,
      PyCitcomSExchanger_VTOutlet_create,
      METH_VARARGS,
@@ -165,6 +170,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.41 2004/05/11 07:55:30 tan2 Exp $
+// $Id: bindings.cc,v 1.42 2004/05/18 21:21:05 ces74 Exp $
 
 // End of file

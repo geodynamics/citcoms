@@ -188,6 +188,41 @@ void deleteTOutlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "VOutlet.h"
+
+extern "C" void deleteVOutlet(void*);
+
+
+char PyCitcomSExchanger_VOutlet_create__doc__[] = "";
+char PyCitcomSExchanger_VOutlet_create__name__[] = "VOutlet_create";
+
+PyObject * PyCitcomSExchanger_VOutlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj0, *obj1;
+
+    if (!PyArg_ParseTuple(args, "OO:VOutlet_create",
+                          &obj0, &obj1))
+        return NULL;
+
+    CitcomSource* source = static_cast<CitcomSource*>(PyCObject_AsVoidPtr(obj0));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
+
+    VOutlet* outlet = new VOutlet(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deleteVOutlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteVOutlet(void* p)
+{
+    delete static_cast<VOutlet*>(p);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "VTOutlet.h"
 
 extern "C" void deleteVTOutlet(void*);
@@ -221,6 +256,6 @@ void deleteVTOutlet(void* p)
 
 
 // version
-// $Id: inlets_outlets.cc,v 1.6 2004/05/11 07:55:30 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.7 2004/05/18 21:21:05 ces74 Exp $
 
 // End of file
