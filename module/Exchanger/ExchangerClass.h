@@ -36,9 +36,6 @@ public:
 	      const All_variables *E);
     virtual ~Exchanger();
 
-    void reset_target(const MPI_Comm intercomm,
-		      const int receiver);
-
     void createDataArrays();
     void deleteDataArrays();
 
@@ -47,10 +44,6 @@ public:
     void receiveTemperature();
     void sendVelocities();
     void receiveVelocities();
-//     void local_sendVelocities();
-//     void local_receiveVelocities();
-//     void local_sendTemperature();
-//     void local_receiveTemperature();
 
     void imposeBC();
     void setBCFlag();
@@ -92,7 +85,7 @@ protected:
     void printDataT(const Data &data) const;
     void printDataV(const Data &data) const;
     void imposeConstraint();
-    
+
 private:
     double exchangeDouble(const double &sent, const int len) const;
     float exchangeFloat(const float &sent, const int len) const;
@@ -110,7 +103,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.25 2003/10/04 23:37:38 puru Exp $
+// $Id: ExchangerClass.h,v 1.26 2003/10/05 18:55:48 tan2 Exp $
 
 // End of file
 

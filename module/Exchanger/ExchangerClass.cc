@@ -42,139 +42,6 @@ Exchanger::~Exchanger() {
 }
 
 
-void Exchanger::reset_target(const MPI_Comm icomm, const int receiver) {
-    //intercomm = icomm;
-    //remoteLeader = receiver;
-}
-
-#if 0
-void Exchanger::local_sendVelocities(void) {
-
-    std::cout << "in Exchanger::local_sendVelocities" << std::endl;
-    int i,size;
-
-//     int size = outgoing->size;
-
-    loutgoing.size=11;
-    size=loutgoing.size;
-
-    for(i=1;i<=size-1;i++) {
-	loutgoing.v[0][i]=i*0.01;
-	loutgoing.v[1][i]=i*0.01;
-	loutgoing.v[2][i]=i*0.01;
-    }
-    MPI_Send(loutgoing.v[0], size, MPI_DOUBLE, 0, 1, comm);
-    MPI_Send(loutgoing.v[1], size, MPI_DOUBLE, 0, 2, comm);
-    MPI_Send(loutgoing.v[2], size, MPI_DOUBLE, 0, 3, comm);
-
-    return;
-}
-
-
-
-void Exchanger::local_receiveVelocities(void) {
-    std::cout << "in Exchanger::local_receiveVelocities" << std::endl;
-
-    MPI_Status status;
-    int size;
-    int worldme,interme;
-    int i,nproc;
-			
-
-    // dummy setting
-    lincoming.size=5;
-    size = lincoming.size;
-
-    MPI_Comm_rank(intercomm,&worldme);
-    MPI_Comm_rank(comm,&interme);
-    MPI_Comm_size(comm,&nproc);
-    std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
-
-    for(i=0;i<size;i++) {
-	MPI_Recv(lincoming.v[0], size, MPI_DOUBLE, i, 1, comm, &status);
-	/* test */
-	std::cout << "interme=" << interme << " worldme=" << worldme
-		  << " source=" << i << " Vel_u transferred: size="
-		  << size << std::endl;
-	MPI_Recv(lincoming.v[1], size, MPI_DOUBLE, i, 2, comm, &status);
-	/* test */
-	std::cout << "interme=" << interme << " worldme=" << worldme
-		  << " source=" << i << " Vel_v transferred: size="
-		  << size << std::endl;
-	MPI_Recv(lincoming.v[2], size, MPI_DOUBLE, i, 3, comm, &status);
-	/* test */
-	std::cout << " interme=" << interme << " worldme=" << worldme
-		  << " source=" << i << " Vel_w transferred: size="
-		  << size << std::endl;
-    }
-
-    /*
-    MPI_request *request = new MPI_request[incoming->exchanges-1];
-    MPI_Status *status = new MPI_Status[incoming->exchanges-1];
-    int tag = 0;
-
-    MPI_Ireceive(incoming->x, size, MPI_DOUBLE, target, tag,
-		 intercomm, &request[tag]);
-    tag++;
-
-
-    int MPI_Wait(tag, request, status);
-
-    */
-    return;
-}
-
-
-void Exchanger::local_sendTemperature(void) {
-
-    std::cout << "in Exchanger::sendTemperature" << std::endl;
-    int i,size;
-
-//     int size = outgoing->size;
-
-    loutgoing.size=11;
-    size=loutgoing.size;
-
-    for(i=1;i<=size-1;i++) {
-      loutgoing.T[i]=i*0.01;
-    }
-    MPI_Send(loutgoing.T, size, MPI_DOUBLE, 0, 1, comm);
-
-    return;
-}
-
-
-
-void Exchanger::local_receiveTemperature(void) {
-    std::cout << "in Exchanger::local_receiveVelocities" << std::endl;
-
-    MPI_Status status;
-    int size;
-    int worldme,interme;
-    int i,nproc;
-
-    // dummy setting
-    lincoming.size=5;
-    size=lincoming.size;
-
-    MPI_Comm_rank(intercomm,&worldme);
-    MPI_Comm_rank(comm,&interme);
-    MPI_Comm_size(comm,&nproc);
-    std::cout << "interme=" << interme << " worldme=" << worldme << " nproc=" << nproc << std::endl;
-
-    for(i=0;i<size;i++) {
-      MPI_Recv(lincoming.T, size, MPI_DOUBLE, i, 1, comm, &status);
-      /* test */
-      std::cout << "interme=" << interme << " worldme=" << worldme
-		<< " source=" << i << " Temp transferred: size="
-		<< size << std::endl;
-    }
-
-    return;
-}
-#endif
-
-
 void Exchanger::createDataArrays() {
     std::cout << "in Exchanger::createDataArrays" << std::endl;
 
@@ -198,7 +65,7 @@ void Exchanger::deleteDataArrays() {
 
       delete [] incoming.T;
       delete [] outgoing.T;
-      delete [] poutgoing.T;	
+      delete [] poutgoing.T;
       for(int i=0; i < boundary->dim; i++) {
 	  delete [] incoming.v[i];
 	  delete [] outgoing.v[i];
@@ -209,13 +76,23 @@ void Exchanger::deleteDataArrays() {
 
 void Exchanger::initTemperature() {
     std::cout << "in Exchanger::initTemperature" << std::endl;
+    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
 
     // center of fine grid mesh
     double theta_center = 0.5 * (boundary->theta_max + boundary->theta_min);
     double fi_center = 0.5 * (boundary->fi_max + boundary->fi_min);
     double r_center = 0.5 * (boundary->ro + boundary->ri);
 
-    // put a hot blob in the center of fine grid mesh and T=0 elsewhere
+    double x_center = r_center * sin(fi_center) * cos(theta_center);
+    double y_center = r_center * sin(fi_center) * sin(theta_center);
+    double z_center = r_center * cos(fi_center);
+
+    // radius of the blob is one third of the smallest dimension
+    double d = min(min(boundary->theta_max - boundary->theta_min,
+		       boundary->fi_max - boundary->fi_min),
+		   boundary->ro - boundary->ri) / 3;
+
+    // compute temperature field according to nodal coordinate
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int k=1;k<=E->lmesh.noy;k++)
 	    for(int j=1;j<=E->lmesh.nox;j++)
@@ -225,13 +102,18 @@ void Exchanger::initTemperature() {
 
  		    double theta = E->sx[m][1][node];
 		    double fi = E->sx[m][2][node];
-		    double r =E->sx[m][3][node];
+		    double r = E->sx[m][3][node];
 
-		    const double d = 4e-2;
-		    if ((fabs(theta - theta_center) < d) &&
-			(fabs(fi - fi_center) < d) &&
-			(fabs(r - r_center) < d))
-			E->T[m][node] = 1;
+		    double x = r * sin(fi) * cos(theta);
+		    double y = r * sin(fi) * sin(theta);
+		    double z = r * cos(fi);
+
+		    double distance = sqrt((x - x_center)*(x - x_center) +
+					   (y - y_center)*(y - y_center) +
+					   (z - z_center)*(z - z_center));
+
+		    if (distance <= d)
+			E->T[m][node] = 0.5 + 0.5*cos(distance/d * M_PI);
 		    else
 			E->T[m][node] = 0;
 
@@ -325,7 +207,7 @@ void Exchanger::sendVelocities() {
 
 void Exchanger::receiveVelocities() {
     std::cout << "in Exchanger::receiveVelocities" << std::endl;
-    
+
     if(rank == leader) {
 	int tag = 0;
 	MPI_Status status;
@@ -354,21 +236,21 @@ void Exchanger::receiveVelocities() {
 }
 void Exchanger::imposeConstraint(){
     std::cout << "in Exchanger::imposeConstraint" << std::endl;
-    
+
     int nodest,gnode,lnode;
     int *bnodes;
     double xc[12],avgV[3],normal[3],garea[3][2],tarea;
     double outflow,area,factr,*nwght;
-    
+
     int facenodes[]={0, 1, 5, 4,
 		     2, 3, 7, 6,
-                     1, 2, 6, 5, 
-                     0, 4, 7, 3, 
+                     1, 2, 6, 5,
+                     0, 4, 7, 3,
                      4, 5, 6, 7,
                      0, 3, 2, 1};
     if(rank == leader) {
-	
-        nodest = 8*E->lmesh.nel;	
+
+        nodest = 8*E->lmesh.nel;
         bnodes = new int[nodest];
         nwght  = new double[boundary->size*3];
         for(int i=0; i< nodest; i++) bnodes[i]=-1;
@@ -384,15 +266,15 @@ void Exchanger::imposeConstraint(){
                     if(gnode==boundary->bid2gid[k])bnodes[n*8+j]=k;
                     if(gnode==boundary->bid2gid[k])break;
                 }
-                
-            }	       
+
+            }
         }
 
         outflow=0.0;
        	for( int i=0;i<3;i++)
 		for(int j=0; j<2 ;j++)
 			garea[i][j]=0.0;
-       	
+
         for(int n=0; n<E->lmesh.nel; n++)
         {
 // Loop over element faces
@@ -411,13 +293,13 @@ void Exchanger::imposeConstraint(){
                             xc[j*3+l]=boundary->X[l][lnode];
                             avgV[l]+=incoming.v[l][lnode]/4.0;
                         }
-                                         
+
                     }
                     normal[0]=(xc[4]-xc[1])*(xc[11]-xc[2])-(xc[5]-xc[2])*(xc[10]-xc[1]);
                     normal[1]=(xc[5]-xc[2])*(xc[9]-xc[0])-(xc[3]-xc[0])*(xc[11]-xc[2]);
                     normal[2]=(xc[3]-xc[0])*(xc[10]-xc[1])-(xc[4]-xc[1])*(xc[9]-xc[0]);
                     area=sqrt(normal[0]*normal[0]+normal[1]*normal[1]+normal[2]*normal[2]);
-	            	
+
                     for(int l=0; l<3; l++)
                     {
                         normal[l]/=area;
@@ -425,8 +307,8 @@ void Exchanger::imposeConstraint(){
 		    if(xc[0]==xc[6]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[7]-xc[1]));
 		    if(xc[1]==xc[7]) area=fabs(0.5*(xc[2]+xc[8])*(xc[8]-xc[2])*(xc[6]-xc[0])*sin(0.5*(xc[7]+xc[1])));
 		    if(xc[2]==xc[8]) area=fabs(xc[2]*xc[8]*(xc[7]-xc[1])*(xc[6]-xc[0])*sin(0.5*(xc[0]+xc[6])));
-	
-		    
+
+
                     for(int l=0; l<3; l++)
                     {
                         if(normal[l] > 0.999 ) garea[l][0]+=area;
@@ -436,34 +318,34 @@ void Exchanger::imposeConstraint(){
                     {
                         lnode=bnodes[n*8+facenodes[i*4+j]];
                         for(int l=0; l<3; l++)nwght[lnode*3+l]+=normal[l]*area/4.;
-                    }                     
-                     
+                    }
+
                     for(int l=0; l<3; l++)
                     {
                         outflow+=avgV[l]*normal[l]*area;
                     }
-                    
+
                 }
-                
-            }            
+
+            }
         }
-        
+
         outflow=0.0;
         tarea=0.0;
         for(int n=0; n<boundary->size;n++)
         {
             for(int j=0; j < 3; j++)
-            {    
+            {
                 outflow+=incoming.v[j][n]*nwght[n*3+j];
                 tarea+=fabs(nwght[n*3+j]);
             }
         }
-        
+
         std::cout << " Net outflow before boundary velocity correction in imposeConstraint" << outflow << std::endl;
         for(int n=0; n<boundary->size;n++)
         {
             for(int j=0; j < 3; j++)
-            {    
+            {
                 if(fabs(nwght[n*3+j]) > 1.e-10)
                     incoming.v[j][n]-=outflow*nwght[n*3+j]/(tarea*fabs(nwght[n*3+j]));
             }
@@ -472,7 +354,7 @@ void Exchanger::imposeConstraint(){
         for(int n=0; n<boundary->size;n++)
         {
             for(int j=0; j < 3; j++)
-            {    
+            {
                 outflow+=incoming.v[j][n]*nwght[n*3+j];
             }
         }
@@ -645,7 +527,7 @@ void Exchanger::printDataV(const Data &data) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.29 2003/10/04 23:37:38 puru Exp $
+// $Id: ExchangerClass.cc,v 1.30 2003/10/05 18:55:48 tan2 Exp $
 
 // End of file
 
