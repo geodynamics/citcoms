@@ -20,20 +20,20 @@
 
 // the method table
 
-struct PyMethodDef pyCitcomSRegional_methods[] = {
+struct PyMethodDef pyRegional_methods[] = {
 
     // dummy entry for testing
-    {pyCitcomSRegional_copyright__name__, pyCitcomSRegional_copyright,
-     METH_VARARGS, pyCitcomSRegional_copyright__doc__},
+    {pyRegional_copyright__name__, pyRegional_copyright,
+     METH_VARARGS, pyRegional_copyright__doc__},
 
-    {pyCitcomSRegional_return1_test__name__, pyCitcomSRegional_return1_test,
-     METH_VARARGS, pyCitcomSRegional_return1_test__doc__},
+    {pyRegional_return1_test__name__, pyRegional_return1_test,
+     METH_VARARGS, pyRegional_return1_test__doc__},
 
-    {pyCitcomSRegional_Citcom_Init__name__, pyCitcomSRegional_Citcom_Init,
-     METH_VARARGS, pyCitcomSRegional_Citcom_Init__doc__},
+    {pyRegional_Citcom_Init__name__, pyRegional_Citcom_Init,
+     METH_VARARGS, pyRegional_Citcom_Init__doc__},
 
-    {pyCitcomSRegional_read_instructions__name__, pyCitcomSRegional_read_instructions,
-     METH_VARARGS, pyCitcomSRegional_read_instructions__doc__},
+    {pyRegional_read_instructions__name__, pyRegional_read_instructions,
+     METH_VARARGS, pyRegional_read_instructions__doc__},
 
 
 
@@ -42,6 +42,6 @@ struct PyMethodDef pyCitcomSRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.3 2003/04/05 23:51:35 tan2 Exp $
+// $Id: bindings.cc,v 1.4 2003/04/10 23:18:24 tan2 Exp $
 
 // End of file

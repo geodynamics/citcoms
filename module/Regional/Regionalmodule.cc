@@ -19,34 +19,34 @@
 #include "bindings.h"
 
 
-char pyCitcomSRegional_module__doc__[] = "";
+char pyRegional_module__doc__[] = "";
 
-// Initialization function for the module (*must* be called initCitcomSRegional)
+// Initialization function for the module (*must* be called initRegional)
 extern "C"
 void
-initCitcomSRegional()
+initRegional()
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        "CitcomSRegional", pyCitcomSRegional_methods,
-        pyCitcomSRegional_module__doc__, 0, PYTHON_API_VERSION);
+        "Regional", pyRegional_methods,
+        pyRegional_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
     PyObject * d = PyModule_GetDict(m);
 
     // check for errors
     if (PyErr_Occurred()) {
-        Py_FatalError("can't initialize module CitcomSRegional");
+        Py_FatalError("can't initialize module Regional");
     }
 
     // install the module exceptions
-    pyCitcomSRegional_runtimeError = PyErr_NewException("CitcomSRegional.runtime", 0, 0);
-    PyDict_SetItemString(d, "RuntimeException", pyCitcomSRegional_runtimeError);
+    pyRegional_runtimeError = PyErr_NewException("Regional.runtime", 0, 0);
+    PyDict_SetItemString(d, "RuntimeException", pyRegional_runtimeError);
 
     return;
 }
 
 // version
-// $Id: Regionalmodule.cc,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: Regionalmodule.cc,v 1.2 2003/04/10 23:18:24 tan2 Exp $
 
 // End of file

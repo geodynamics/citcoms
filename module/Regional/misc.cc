@@ -28,24 +28,24 @@ struct All_variables *E;
 
 // copyright
 
-char pyCitcomSRegional_copyright__doc__[] = "";
-char pyCitcomSRegional_copyright__name__[] = "copyright";
+char pyRegional_copyright__doc__[] = "";
+char pyRegional_copyright__name__[] = "copyright";
 
-static char pyCitcomSRegional_copyright_note[] = 
+static char pyRegional_copyright_note[] = 
     "CitcomSRegional python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
-PyObject * pyCitcomSRegional_copyright(PyObject *, PyObject *)
+PyObject * pyRegional_copyright(PyObject *, PyObject *)
 {
-    return Py_BuildValue("s", pyCitcomSRegional_copyright_note);
+    return Py_BuildValue("s", pyRegional_copyright_note);
 }
 
 
 
-char pyCitcomSRegional_return1_test__doc__[] = "";
-char pyCitcomSRegional_return1_test__name__[] = "return1_test";
+char pyRegional_return1_test__doc__[] = "";
+char pyRegional_return1_test__name__[] = "return1_test";
 
-PyObject * pyCitcomSRegional_return1_test(PyObject *, PyObject *)
+PyObject * pyRegional_return1_test(PyObject *, PyObject *)
 {
     double a;
     a = return1_test();
@@ -53,10 +53,10 @@ PyObject * pyCitcomSRegional_return1_test(PyObject *, PyObject *)
 }
 
 
-char pyCitcomSRegional_Citcom_Init__doc__[] = "";
-char pyCitcomSRegional_Citcom_Init__name__[] = "Citcom_Init";
+char pyRegional_Citcom_Init__doc__[] = "";
+char pyRegional_Citcom_Init__name__[] = "Citcom_Init";
 
-PyObject * pyCitcomSRegional_Citcom_Init(PyObject *self, PyObject *args)
+PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
 {
     int nproc, rank;
     
@@ -72,10 +72,10 @@ PyObject * pyCitcomSRegional_Citcom_Init(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcomSRegional_read_instructions__doc__[] = "";
-char pyCitcomSRegional_read_instructions__name__[] = "read_instructions";
+char pyRegional_read_instructions__doc__[] = "";
+char pyRegional_read_instructions__name__[] = "read_instructions";
 
-PyObject * pyCitcomSRegional_read_instructions(PyObject *self, PyObject *args)
+PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 {
     char *filename;
 
@@ -95,6 +95,6 @@ PyObject * pyCitcomSRegional_read_instructions(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.5 2003/04/10 19:07:09 tan2 Exp $
+// $Id: misc.cc,v 1.6 2003/04/10 23:18:24 tan2 Exp $
 
 // End of file

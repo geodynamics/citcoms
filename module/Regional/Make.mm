@@ -15,7 +15,7 @@ include local.def
 TYPE=Regional
 
 PROJECT = CitcomS
-PACKAGE = $(PROJECT)$(TYPE)module
+PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB) 
@@ -28,6 +28,6 @@ PROJ_SRCS = \
     misc.cc
 
 # version
-# $Id: Make.mm,v 1.3 2003/04/05 20:25:10 tan2 Exp $
+# $Id: Make.mm,v 1.4 2003/04/10 23:18:24 tan2 Exp $
 
 # End of file

@@ -11,16 +11,16 @@
 //  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
-#if !defined(pyCitcomSRegional_bindings_h)
-#define pyCitcomSRegional_bindings_h
+#if !defined(pyRegional_bindings_h)
+#define pyRegional_bindings_h
 
 // the method table
 
-extern struct PyMethodDef pyCitcomSRegional_methods[];
+extern struct PyMethodDef pyRegional_methods[];
 
 #endif
 
 // version
-// $Id: bindings.h,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+// $Id: bindings.h,v 1.2 2003/04/10 23:18:24 tan2 Exp $
 
 // End of file
