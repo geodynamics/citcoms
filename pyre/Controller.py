@@ -19,13 +19,18 @@ class Controller(SimulationController):
         self.step = 0
         self.clock = 0.0
         self.solver = None
+        return
 
+
+
+    def initialize(self, app):
+        self.solver = app.solver
+        self.solver.initialize(app)
         return
 
 
 
     def launch(self, app):
-        self.solver = app.solver
         self.solver.launch(app)
         return
 
