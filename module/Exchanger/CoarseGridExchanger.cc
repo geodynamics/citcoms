@@ -186,7 +186,7 @@ void CoarseGridExchanger::receiveBoundary() {
 }
 
 void CoarseGridExchanger::getBid2crseelem() {
-    std::cout << "in FineGridExchanger::getBid2crseelem" << std::endl;
+    std::cout << "in CoarseGridExchanger::getBid2crseelem" << std::endl;
 
     boundary->getBid2crseelem(E);
 
@@ -202,6 +202,6 @@ void CoarseGridExchanger::mapBoundary() {
 
 
 // version
-// $Id: CoarseGridExchanger.cc,v 1.16 2003/09/24 20:14:12 puru Exp $
+// $Id: CoarseGridExchanger.cc,v 1.17 2003/09/25 02:51:28 ces74 Exp $
 
 // End of file
