@@ -50,24 +50,32 @@ class SVTInlet(Inlet):
 
 class TInlet(Inlet):
 
-    def __init__(self, mesh, sink, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.TInlet_create(mesh,
-                                               sink,
-                                               all_variables)
-        return
+	def __init__(self, mesh, sink, all_variables):
+		import CitcomS.Exchanger as Exchanger
+		self._handle = Exchanger.TInlet_create(mesh,
+											   sink,
+											   all_variables)
+		return
 
 
+class SInlet(Inlet):
+
+	def __init__(self, mesh, sink, all_variables):
+		import CitcomS.Exchanger as Exchanger
+		self._handle = Exchanger.SInlet_create(mesh,
+											   sink,
+											   all_variables)
+		return
 
 
 class VTInlet(Inlet):
 
-    def __init__(self, mesh, sink, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.VTInlet_create(mesh,
-                                                sink,
-                                                all_variables)
-        return
+	def __init__(self, mesh, sink, all_variables):
+		import CitcomS.Exchanger as Exchanger
+		self._handle = Exchanger.VTInlet_create(mesh,
+												sink,
+												all_variables)
+		return
 
 
 
@@ -108,6 +116,6 @@ class TractionInlet(Inlet):
 """
 
 # version
-__id__ = "$Id: Inlet.py,v 1.6 2004/05/11 07:59:31 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.7 2005/01/29 00:23:14 ces74 Exp $"
 
 # End of file
