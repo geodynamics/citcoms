@@ -9,12 +9,14 @@
 
 #include <portinfo>
 #include "Dimensional.h"
+#include "Transformational.h"
 #include "BoundedMesh.h"
 
 
-BoundedMesh::BoundedMesh(bool dimensional) :
+BoundedMesh::BoundedMesh(bool dimensional, bool transformational) :
     bbox_(DIM),
-    dimensional_(dimensional)
+    dimensional_(dimensional),
+    transformational_(transformational)
 {}
 
 
@@ -31,23 +33,31 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster)
 
     if(dimensional_) {
 	Dimensional& dimen = Dimensional::instance();
+        
 	dimen.xcoordinate(bbox_);
 	dimen.xcoordinate(X_);
     }
+    if(transformational_){
+ //         Transformational& trans = Transformational::instance();
+        
+//          trans.xcoordinate(bbox_);
+//          trans.xcoordinate(X_);
+    }        
 }
 
 
 void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 {
-    if(dimensional_) {
+    if(dimensional_ || transformational_) {
 	Dimensional& dimen = Dimensional::instance();
-
+//        if(transformational_) Transformational& trans = Transformational::instance();
+        
 	BoundedBox bbox(bbox_);
-	dimen.coordinate(bbox);
-
+//        if(transformational_) trans.coordinate(bbox);
+        
 	Array2D<double,DIM> X(X_);
-	dimen.coordinate(X);
-
+//        if(transformational_) trans.coordinate(X);
+        
 	bbox.broadcast(comm, broadcaster);
 	X.broadcast(comm, broadcaster);
     }
@@ -59,6 +69,6 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 
 
 // version
-// $Id: BoundedMesh.cc,v 1.3 2003/12/30 21:46:01 tan2 Exp $
+// $Id: BoundedMesh.cc,v 1.4 2004/01/06 22:40:28 puru Exp $
 
 // End of file

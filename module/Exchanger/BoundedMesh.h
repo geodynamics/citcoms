@@ -25,9 +25,10 @@ protected:
     Array2D<double,DIM> X_;   // coordinate
     Array2D<int,1> nodeID_;   // node # in Solver data structure
     bool dimensional_;
+    bool transformational_;
 
 public:
-    BoundedMesh(bool dimensional);
+    BoundedMesh(bool dimensional, bool transformational);
     virtual ~BoundedMesh() = 0;
 
     inline int size() const {return X_.size();}
@@ -49,6 +50,6 @@ private:
 #endif
 
 // version
-// $Id: BoundedMesh.h,v 1.4 2003/12/30 21:46:01 tan2 Exp $
+// $Id: BoundedMesh.h,v 1.5 2004/01/06 22:40:28 puru Exp $
 
 // End of file

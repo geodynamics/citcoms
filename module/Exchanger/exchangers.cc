@@ -21,6 +21,7 @@
 #include "BoundaryCondition.h"
 #include "DIM.h"
 #include "Dimensional.h"
+#include "Transformational.h"
 #include "Interior.h"
 #include "InteriorImposing.h"
 #include "Sink.h"
@@ -140,16 +141,16 @@ char pyExchanger_createBoundary__name__[] = "createBoundary";
 PyObject * pyExchanger_createBoundary(PyObject *, PyObject *args)
 {
     PyObject *obj1, *obj2;
-    int dimensional;
+    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOi:createBoundary",
-			  &obj1, &obj2, &dimensional))
+    if (!PyArg_ParseTuple(args, "OOii:createBoundary",
+			  &obj1, &obj2, &dimensional,&transformational))
 	return NULL;
 
     All_variables* E = static_cast<All_variables*>
 	                          (PyCObject_AsVoidPtr(obj2));
 
-    Boundary* b = new Boundary(E, dimensional);
+    Boundary* b = new Boundary(E, dimensional,transformational);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(b->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(b, deleteBoundary);
@@ -163,12 +164,12 @@ char pyExchanger_createEmptyBoundary__name__[] = "createEmptyBoundary";
 
 PyObject * pyExchanger_createEmptyBoundary(PyObject *, PyObject *args)
 {
-    int dimensional;
+    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "i:createEmptyBoundary", &dimensional))
+    if (!PyArg_ParseTuple(args, "ii:createEmptyBoundary", &dimensional,&transformational))
 	return NULL;
 
-    Boundary* b = new Boundary(dimensional);
+    Boundary* b = new Boundary(dimensional,transformational);
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteBoundary);
     return Py_BuildValue("O", cobj);
@@ -180,12 +181,12 @@ char pyExchanger_createEmptyInterior__name__[] = "createEmptyInterior";
 
 PyObject * pyExchanger_createEmptyInterior(PyObject *, PyObject *args)
 {
-    int dimensional;
+    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "i:createEmptyInterior", &dimensional))
+    if (!PyArg_ParseTuple(args, "ii:createEmptyInterior", &dimensional,&transformational))
 	return NULL;
 
-    Interior* b = new Interior(dimensional);
+    Interior* b = new Interior(dimensional,transformational);
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteInterior);
     return Py_BuildValue("O", cobj);
@@ -228,17 +229,17 @@ char pyExchanger_createInterior__name__[] = "createInterior";
 PyObject * pyExchanger_createInterior(PyObject *, PyObject *args)
 {
     PyObject *obj1, *obj2;
-    int dimensional;
+    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOi:createInterior",
-			  &obj1, &obj2, &dimensional))
+    if (!PyArg_ParseTuple(args, "OOii:createInterior",
+			  &obj1, &obj2, &dimensional,&transformational))
 	return NULL;
 
     BoundedBox* rbbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
     All_variables* E = static_cast<All_variables*>
 	                          (PyCObject_AsVoidPtr(obj2));
 
-    Interior* i = new Interior(*rbbox, E, dimensional);
+    Interior* i = new Interior(*rbbox, E, dimensional,transformational);
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
@@ -565,10 +566,10 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 {
     PyObject *obj0, *obj1, *obj2;
     int target;
-    int dimensional;
+    int dimensional,transformational;
 
-    if (!PyArg_ParseTuple(args, "OOOii:exchangeBoundedBox",
-			  &obj0, &obj1, &obj2, &target, &dimensional))
+    if (!PyArg_ParseTuple(args, "OOOiii:exchangeBoundedBox",
+			  &obj0, &obj1, &obj2, &target, &dimensional,&transformational))
 	return NULL;
 
     BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj0));
@@ -594,13 +595,22 @@ PyObject * pyExchanger_exchangeBoundedBox(PyObject *, PyObject *args)
 	    Dimensional& dimen = Dimensional::instance();
 	    dimen.coordinate(*newbbox);
 	}
-
+        // transform before sending
+	if(transformational) {
+	    Transformational& trans = Transformational::instance();
+	    trans.coordinate(*newbbox);
+	}
 	util::exchange(intercomm, target, *newbbox);
 
 	// non-dimensionalize after receiving
 	if(dimensional) {
 	    Dimensional& dimen = Dimensional::instance();
 	    dimen.xcoordinate(*newbbox);
+	}
+        // reverse transform after receiving
+	if(transformational) {
+	    Transformational& trans = Transformational::instance();
+	    trans.xcoordinate(*newbbox);
 	}
     }
 
@@ -774,6 +784,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.32 2003/12/30 21:46:01 tan2 Exp $
+// $Id: exchangers.cc,v 1.33 2004/01/06 22:40:28 puru Exp $
 
 // End of file

@@ -16,13 +16,13 @@
 #include "Boundary.h"
 
 
-Boundary::Boundary(bool dimensional) :
-    BoundedMesh(dimensional)
+Boundary::Boundary(bool dimensional, bool transformational) :
+    BoundedMesh(dimensional, transformational)
 {}
 
 
-Boundary::Boundary(const All_variables* E, bool dimensional) :
-    BoundedMesh(dimensional)
+Boundary::Boundary(const All_variables* E, bool dimensional, bool transformational) :
+    BoundedMesh(dimensional, transformational)
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
@@ -112,6 +112,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.46 2003/12/30 21:46:01 tan2 Exp $
+// $Id: Boundary.cc,v 1.47 2004/01/06 22:40:28 puru Exp $
 
 // End of file

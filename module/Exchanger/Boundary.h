@@ -18,8 +18,8 @@ struct All_variables;
 class Boundary : public BoundedMesh {
 
 public:
-    Boundary(bool dimensional);
-    explicit Boundary(const All_variables* E, bool dimensional);
+    Boundary(bool dimensional, bool transformational);
+    explicit Boundary(const All_variables* E, bool dimensional, bool transformational);
     virtual ~Boundary() {};
 
 private:
@@ -34,6 +34,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.25 2003/12/30 21:46:01 tan2 Exp $
+// $Id: Boundary.h,v 1.26 2004/01/06 22:40:28 puru Exp $
 
 // End of file
