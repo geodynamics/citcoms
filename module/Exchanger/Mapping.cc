@@ -8,7 +8,7 @@
 //
 
 #include <portinfo>
-#include <iostream>
+#include <algorithm>
 #include <cmath>
 #include "global_defs.h"
 #include "journal/journal.h"
@@ -140,7 +140,8 @@ void CoarseGridMapping::findMaxGridSpacing(const All_variables* E,
 	const int m = 1;
 	int gnode1 = E->IEN[E->mesh.levmax][m][n+1].node[1];
 	int gnode5 = E->IEN[E->mesh.levmax][m][n+1].node[5];
-	r_tol = max(r_tol, fabs(E->sx[m][3][gnode5] - E->sx[m][3][gnode1]));
+	r_tol = std::max(r_tol,
+			 std::abs(E->sx[m][3][gnode5] - E->sx[m][3][gnode1]));
     }
 }
 
@@ -218,7 +219,7 @@ void CoarseGridMapping::findBoundaryElements(const Boundary* boundary,
 				 << " node " << i
 				 << " " << xt[0]
 				 << " " << xt[1]
-				 << " " << xt[2] 
+				 << " " << xt[2]
 				 << journal::newline;
 			for(int j=0; j<8; j++)
                             firewall << xc[j*3]
@@ -284,13 +285,13 @@ void CoarseGridMapping::selfTest(const Boundary* boundary,
 
 	    journal::firewall_t firewall("Mapping");
             firewall << journal::loc(__HERE__)
-		     << "node #" << i << " tshape = " << tshape 
+		     << "node #" << i << " tshape = " << tshape
 		     << journal::newline
 		     << xi[0] << " " << xt[0] << " "
 		     << xi[1] << " " << xt[1] << " "
 		     << xi[2] << " " << xt[2] << " "
 		     << " norm = " << norm << journal::newline
-		     << "bid2elem interpolation functions are wrong" 
+		     << "bid2elem interpolation functions are wrong"
 		     << journal::end;
         }
     }
@@ -334,7 +335,7 @@ FineGridMapping::FineGridMapping(Boundary* boundary,
     bid2gid_(size_)
 {
     findBoundaryNodes(boundary, E);
-    
+
 }
 
 
@@ -456,6 +457,6 @@ void FineGridMapping::findBoundaryNodes(Boundary* boundary,
 
 
 // version
-// $Id: Mapping.cc,v 1.8 2003/10/28 02:34:37 puru Exp $
+// $Id: Mapping.cc,v 1.9 2003/10/30 23:36:07 tan2 Exp $
 
 // End of file

@@ -8,7 +8,7 @@
 //
 
 #include <portinfo>
-#include <cmath>
+#include <algorithm>
 #include "Array2D.h"
 #include "Boundary.h"
 #include "global_defs.h"
@@ -60,9 +60,9 @@ void Exchanger::initTemperature() {
     double z_center = r_center * cos(fi_center);
 
     // radius of the blob is one third of the smallest dimension
-    double d = min(min(boundary->theta_max() - boundary->theta_min(),
-		       boundary->fi_max() - boundary->fi_min()),
-		   boundary->ro() - boundary->ri()) / 3;
+    double d = std::min(std::min(boundary->theta_max() - boundary->theta_min(),
+				 boundary->fi_max() - boundary->fi_min()),
+			boundary->ro() - boundary->ri()) / 3;
 
     // compute temperature field according to nodal coordinate
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
@@ -91,10 +91,10 @@ void Exchanger::initTemperature() {
 
 		    if (rank == leader) {
 			debugInitT << "(theta,fi,r,T) = "
-			      << theta << "  "
-			      << fi << "  "
-			      << r << "  "
-			      << E->T[m][node] << journal::newline;
+				   << theta << "  "
+				   << fi << "  "
+				   << r << "  "
+				   << E->T[m][node] << journal::newline;
 		    }
 		}
     debugInitT << journal::end;
@@ -238,7 +238,7 @@ int Exchanger::exchangeInt(const int &sent, const int len) const {
 
 
 // version
-// $Id: ExchangerClass.cc,v 1.38 2003/10/28 01:51:50 tan2 Exp $
+// $Id: ExchangerClass.cc,v 1.39 2003/10/30 23:36:07 tan2 Exp $
 
 // End of file
 
