@@ -596,30 +596,19 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
   }
 
 
-void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,struct CCX *ccx,int lev,int m,int pressure,int NS,int far)
+void construct_side_c3x3matrix_el(struct All_variables *E,int el,
+				  struct CC *cc,struct CCX *ccx,
+				  int lev,int m,int pressure,int side)
 {
   int a,aa,i,j,k,d;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
-  int elist[3][9];
   const int dims=E->mesh.nsd;
   const int ends=enodes[dims-1];
   const int vpts=onedvpoints[dims];
   const int ppts=ppoints[dims];
-
-  /******************************************/
-  /*for NS boundary elements */
-  elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
-  elist[0][5]=2; elist[0][6]=6; elist[0][7]=7; elist[0][8]=3;
-  /*for EW boundary elements */
-  elist[1][0]=0; elist[1][1]=1; elist[1][2]=5; elist[1][3]=6; elist[1][4]=2;
-  elist[1][5]=3; elist[1][6]=7; elist[1][7]=8; elist[1][8]=4;
-  /*for TB boundary elements */
-  elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
-  elist[2][5]=5; elist[2][6]=8; elist[2][7]=7; elist[2][8]=6;
-  /******************************************/
 
   if(pressure==0) {
     for(k=1;k<=vpts;k++) {       /* all of the vpoints */
@@ -627,7 +616,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
 	x[d]=0.0;
       for(d=1;d<=dims;d++)
 	for(aa=1;aa<=ends;aa++) {
-	  a=elist[NS][aa+far*ends];
+	  a=sidenodes[side][aa];
 	  x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
 	    *E->M.vpt[GMVINDEX(aa,k)];
 
@@ -654,7 +643,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
       ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
       for(aa=1;aa<=ends;aa++) {
-	a=elist[NS][aa+far*ends];
+	a=sidenodes[side][aa];
 	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
 	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
 	costt = cos(tt);
@@ -684,7 +673,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
       for(d=1;d<=E->mesh.nsd;d++)
        	x[d]=0.0;
       for(a=1;a<=ends;a++) {
-       	aa=elist[NS][a+far*ends];
+       	aa=sidenodes[side][a];
        	x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[aa]]
        	  *E->M.ppt[GMPINDEX(a,k)];
       }
@@ -709,7 +698,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,s
       ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
       for(a=1;a<=ends;a++)   {
-	aa=elist[NS][a+far*ends];
+	aa=sidenodes[side][a];
 	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[aa]];
 	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[aa]];
 	costt = cos(tt);
@@ -1008,3 +997,9 @@ void mass_matrix(E)
 
  return;
 }
+
+
+/* version */
+/* $Id: Size_does_matter.c,v 1.7 2004/04/10 00:49:34 tan2 Exp $ */
+
+/* End of file  */

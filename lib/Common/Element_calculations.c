@@ -69,7 +69,6 @@ void assemble_forces(E,penalty)
       get_elt_tr(E, i, elt_f, m);
       add_force(E, e, elt_f, m);
     }
-
   }       /* end for m */
 
   exchange_id_d(E, E->F, lev);
@@ -761,8 +760,6 @@ void get_elt_tr(struct All_variables *E, int bel,
   struct CC Cc;
   struct CCX Ccx;
 
-  const int NS[7] = {0, 2, 2, 1, 1, 0, 0};
-  const int far[7] = {0, 0, 1, 0, 1, 0, 1};
   const unsigned sbcflag[4] = {0,SBX,SBY,SBZ};
 
   double traction[24],traction_at_gs[4][5], tmp;
@@ -781,10 +778,9 @@ void get_elt_tr(struct All_variables *E, int bel,
   }
 
    /*compute traction at each int point */
-  for(side=SIDE_BEGIN; side<=SIDE_END; side++) {
+  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++) {
     construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
-                                 E->mesh.levmax,m,0,
-                                 NS[side],far[side]);
+                                 E->mesh.levmax,m,0,side);
 
     for(j=1;j<=oned;j++)
       for(d=1;d<=dims;d++)
@@ -886,6 +882,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.12 2004/04/10 00:00:06 tan2 Exp $ */
+/* $Id: Element_calculations.c,v 1.13 2004/04/10 00:49:34 tan2 Exp $ */
 
 /* End of file  */
