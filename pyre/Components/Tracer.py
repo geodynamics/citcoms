@@ -19,6 +19,12 @@ class Tracer(CitcomComponent):
 
 
 
+    def run(self):
+        self.CitcomModule.Tracer_tracer_advection(self.all_variables)
+        return
+
+
+
     def setProperties(self):
         self.CitcomModule.Tracer_set_properties(self.all_variables, self.inventory)
         return
@@ -39,6 +45,6 @@ class Tracer(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Tracer.py,v 1.1 2005/01/19 00:44:30 tan2 Exp $"
+__id__ = "$Id: Tracer.py,v 1.2 2005/01/19 02:02:27 tan2 Exp $"
 
 # End of file

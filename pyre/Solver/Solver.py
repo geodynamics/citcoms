@@ -59,6 +59,7 @@ class Solver(BaseSolver):
         inv.ic.initialize(CitcomModule, all_variables)
         inv.param.initialize(CitcomModule, all_variables)
         inv.phase.initialize(CitcomModule, all_variables)
+        inv.tracer.initialize(CitcomModule, all_variables)
         inv.visc.initialize(CitcomModule, all_variables)
 
         CitcomModule.global_default_values(self.all_variables)
@@ -142,6 +143,14 @@ class Solver(BaseSolver):
 
 
 
+    def solveAdditional(self):
+        if not self.coupler:
+            # tracer module doesn't work with exchanger module
+            self.inventory.tracer.run()
+        return
+
+
+
     def newStep(self, t, step):
         BaseSolver.newStep(self, t, step)
         if self.coupler:
@@ -176,6 +185,7 @@ class Solver(BaseSolver):
 
         self.solveTemperature(dt)
         self.solveVelocities()
+        self.solveAdditional()
 
         return
 
@@ -252,6 +262,7 @@ class Solver(BaseSolver):
         inv.ic.setProperties()
         inv.param.setProperties()
         inv.phase.setProperties()
+        inv.tracer.setProperties()
         inv.visc.setProperties()
 
         return
@@ -276,6 +287,7 @@ class Solver(BaseSolver):
         from CitcomS.Components.IC import IC
         from CitcomS.Components.Param import Param
         from CitcomS.Components.Phase import Phase
+        from CitcomS.Components.Tracer import Tracer
         from CitcomS.Components.Visc import Visc
 
         inventory = [
@@ -288,6 +300,7 @@ class Solver(BaseSolver):
             pyre.facilities.facility("ic", default=IC()),
             pyre.facilities.facility("param", default=Param()),
             pyre.facilities.facility("phase", default=Phase()),
+            pyre.facilities.facility("tracer", default=Tracer()),
             pyre.facilities.facility("visc", default=Visc()),
 
             pyre.properties.float("rayleigh", default=1e+05),
@@ -301,6 +314,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.42 2004/10/08 00:28:58 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.43 2005/01/19 02:02:28 tan2 Exp $"
 
 # End of file
