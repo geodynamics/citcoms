@@ -39,7 +39,7 @@ PyObject * pyCitcom_assemble_forces(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:assemble_forces", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -59,7 +59,7 @@ PyObject * pyCitcom_construct_stiffness_B_matrix(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:construct_stiffness_B_matrix", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -119,7 +119,7 @@ PyObject * pyCitcom_get_system_viscosity(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:get_system_viscosity", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -139,7 +139,7 @@ PyObject * pyCitcom_set_cg_defaults(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:set_cg_defaults", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -160,7 +160,7 @@ PyObject * pyCitcom_set_mg_defaults(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:set_mg_defaults", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -181,7 +181,7 @@ PyObject * pyCitcom_set_mg_el_defaults(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:set_mg_el_defaults", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -202,7 +202,7 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:solve_constrained_flow_iterative", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
@@ -214,6 +214,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 
 
 // version
-// $Id: stokes_solver.cc,v 1.7 2003/10/29 18:40:00 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.8 2004/05/24 20:30:44 tan2 Exp $
 
 // End of file
