@@ -27,6 +27,6 @@ def imcompressible():
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.1 2003/05/15 00:07:54 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.1.1.1 2003/05/15 00:07:54 tan2 Exp $"
 
 # End of file 

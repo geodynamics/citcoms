@@ -75,6 +75,6 @@ class Imcompressible(Stokes_solver):
 
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.1 2003/05/15 00:07:54 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.1.1.1 2003/05/15 00:07:54 tan2 Exp $"
 
 # End of file 

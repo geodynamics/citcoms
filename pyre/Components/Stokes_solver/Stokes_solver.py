@@ -35,6 +35,6 @@ class Stokes_solver(Application):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.1 2003/05/15 00:07:54 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.1.1.1 2003/05/15 00:07:54 tan2 Exp $"
 
 # End of file 
