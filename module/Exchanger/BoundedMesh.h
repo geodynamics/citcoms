@@ -38,6 +38,8 @@ public:
     BoundedBox tightBBox() const;
     virtual void broadcast(const MPI_Comm& comm, int broadcaster);
     virtual void broadcast(const MPI_Comm& comm, int broadcaster) const;
+    virtual void recv(const MPI_Comm& comm, int sender);
+    virtual void send(const MPI_Comm& comm, int receiver) const;
 
 private:
     BoundedMesh(const BoundedMesh&);
@@ -49,6 +51,6 @@ private:
 #endif
 
 // version
-// $Id: BoundedMesh.h,v 1.7 2004/01/14 18:49:28 tan2 Exp $
+// $Id: BoundedMesh.h,v 1.8 2004/02/26 19:27:23 tan2 Exp $
 
 // End of file

@@ -57,13 +57,10 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster)
 
 void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 {
-    Convertor& convertor = Convertor::instance();
-
     BoundedBox bbox(bbox_);
     Array2D<double,DIM> X(X_);
 
-    bbox_.print("before_send_bbox");
-    bbox.print("converted_bbox");
+    Convertor& convertor = Convertor::instance();
     convertor.coordinate(bbox);
     convertor.coordinate(X);
 
@@ -72,7 +69,34 @@ void BoundedMesh::broadcast(const MPI_Comm& comm, int broadcaster) const
 }
 
 
+void BoundedMesh::recv(const MPI_Comm& comm, int sender)
+{
+    bbox_.receive(comm, sender);
+    bbox_.print("BBox_recv");
+    X_.receive(comm, sender);
+    X_.print("X_recv");
+
+    Convertor& convertor = Convertor::instance();
+    convertor.xcoordinate(bbox_);
+    convertor.xcoordinate(X_);
+}
+
+
+void BoundedMesh::send(const MPI_Comm& comm, int receiver) const
+{
+    BoundedBox bbox(bbox_);
+    Array2D<double,DIM> X(X_);
+
+    Convertor& convertor = Convertor::instance();
+    convertor.coordinate(bbox);
+    convertor.coordinate(X);
+
+    bbox.send(comm, receiver);
+    X.send(comm, receiver);
+}
+
+
 // version
-// $Id: BoundedMesh.cc,v 1.8 2004/01/14 19:07:11 tan2 Exp $
+// $Id: BoundedMesh.cc,v 1.9 2004/02/26 19:27:23 tan2 Exp $
 
 // End of file
