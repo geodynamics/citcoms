@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/04 00:37:42 tan2 Exp $
 
 include local.def
 
@@ -24,6 +24,7 @@ PROJ_CC_INCLUDES = ../$(TYPE) .
 
 PROJ_SRCS = \
 	Advection_diffusion.c \
+	Citcom_init.c \
 	Construct_arrays.c \
 	Convection.c \
 	Drive_solvers.c \
@@ -45,19 +46,20 @@ PROJ_SRCS = \
 	Tracer_advection.c \
 	Viscosity_structures.c
 
-#EXPORT_HEADERS = \
-#	advection.h \
-#	convection_variables.h \
-#	element_definitions.h \
-#	sphere_communication.h \
-#	temperature_descriptions.h \
-#	tracer_defs.h \
-#	viscosity_descriptions.h
+EXPORT_HEADERS = \
+	advection.h \
+	citcom_init.h \
+	convection_variables.h \
+	element_definitions.h \
+	sphere_communication.h \
+	temperature_descriptions.h \
+	tracer_defs.h \
+	viscosity_descriptions.h
 
-all: $(PROJ_LIB) 
+all: $(PROJ_LIB) export-headers
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/04/04 00:37:42 tan2 Exp $
 
 #
 # End of file

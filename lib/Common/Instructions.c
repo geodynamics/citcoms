@@ -8,11 +8,11 @@
 #include <string.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "citcom_init.h"
 
 int Emergency_stop;
 
-void read_instructions(E,argc,argv)
-     struct All_variables *E;
+void read_instructions(argc,argv)
      int argc;
      char **argv;
 {
