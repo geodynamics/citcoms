@@ -92,7 +92,6 @@ void InteriorImposingSink::imposeVICP()
 {
     journal::debug_t debugVICP("imposeVICP");
     debugVICP << journal::loc(__HERE__);
-    double refvel;
     
     const int mm = 1;
     
@@ -140,6 +139,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.8 2003/12/17 04:27:56 puru Exp $
+// $Id: InteriorImposing.cc,v 1.9 2003/12/23 00:42:24 puru Exp $
 
 // End of file

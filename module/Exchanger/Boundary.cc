@@ -14,7 +14,14 @@
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "Boundary.h"
-#include "dimensionalization.h"
+//#include "dimensionalization.h"
+
+
+double dimensional_len;
+double dimensional_vel;
+double dimensional_traction;
+double dimensional_temp;
+
 
 Boundary::Boundary() :
     BoundedMesh()
@@ -30,7 +37,8 @@ Boundary::Boundary(const All_variables* E) :
 // Computation of dimensional paramatars
     dimensional_len = E->data.radius_km*1000.;
     dimensional_vel = E->data.therm_diff/dimensional_len;    
-    dimensional_traction = E->data.ref_viscosity*E->data.therm_diff;    
+    dimensional_traction = E->data.ref_viscosity*E->data.therm_diff;
+    dimensional_temp = 1.0; // To be set properly
     initBBox(E);
     bbox_.print("Boundary-BBox");
 
@@ -117,6 +125,6 @@ bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 
 
 // version
-// $Id: Boundary.cc,v 1.44 2003/12/17 04:27:56 puru Exp $
+// $Id: Boundary.cc,v 1.45 2003/12/23 00:42:24 puru Exp $
 
 // End of file
