@@ -24,7 +24,6 @@ PROJ_SRCS = \
 	AbstractSource.cc \
 	AreaWeightedNormal.cc \
 	Boundary.cc \
-	BoundaryCondition.cc \
 	BoundaryVTInlet.cc \
 	BoundedBox.cc \
 	BoundedMesh.cc \
@@ -33,12 +32,9 @@ PROJ_SRCS = \
 	FEMInterpolator.cc \
 	Inlet.cc \
 	Interior.cc \
-	InteriorImposing.cc \
 	Outlet.cc \
 	SIUnit.cc \
 	Sink.cc \
-	Source.cc \
-	TractionBC.cc \
 	TractionInterpolator.cc \
 	TractionOutlet.cc \
 	TractionSource.cc \
@@ -56,6 +52,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.16 2004/02/25 23:07:51 tan2 Exp $
+# $Id: Make.mm,v 1.17 2004/03/11 22:22:59 tan2 Exp $
 
 # End of file
