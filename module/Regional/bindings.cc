@@ -94,6 +94,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_set_convection_defaults__doc__},
 
+    {pyCitcom_stable_timestep__name__,
+     pyCitcom_stable_timestep,
+     METH_VARARGS,
+     pyCitcom_stable_timestep__doc__},
+
     // from mesher.h
 
     {pyCitcom_full_sphere_launch__name__,
@@ -208,6 +213,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.28 2003/08/22 22:35:17 tan2 Exp $
+// $Id: bindings.cc,v 1.29 2003/08/26 20:56:34 tan2 Exp $
 
 // End of file

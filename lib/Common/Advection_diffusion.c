@@ -60,7 +60,6 @@ void PG_timestep_solve(struct All_variables *E)
 
   double Tmaxd();
   double CPU_time0();
-  void std_timestep();
   void predictor();
   void corrector();
   void pg_solver();
@@ -77,8 +76,6 @@ void PG_timestep_solve(struct All_variables *E)
     T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
     Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
   }
-
-  std_timestep(E);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (i=1;i<=E->lmesh.nno;i++)   {
@@ -159,7 +156,6 @@ void advection_diffusion_parameters(E)
 
 {
 
-    void std_timestep();
     /* Set intial values, defaults & read parameters*/
     int m=E->parallel.me;
 
@@ -214,6 +210,8 @@ void PG_timestep(struct All_variables *E)
   if (been_here++ ==0)    {
     PG_timestep_init(E);
   }
+
+  std_timestep(E);
 
   PG_timestep_solve(E);
 
