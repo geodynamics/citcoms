@@ -22,6 +22,7 @@ class Layout(Component):
 
         self.rank = 0
         self.nodes = 0
+        self.leader = 0
         self.localLeader = 0
         self.remoteLeader = 0
         return
@@ -34,7 +35,7 @@ class Layout(Component):
         self.verify(application)
         self.allocateNodes()
         self.createCommunicators()
-
+        self.setAttributes()
         return
 
 
@@ -95,23 +96,29 @@ class Layout(Component):
 
         self.fine = world.include(self.inventory.fine)
         self.coarse = world.include(self.inventory.coarse)
+        return
 
+
+
+    def setAttributes(self):
         if self.fine:
             # use the last proc. as the group leader
             self.leader = len(self.inventory.fine) - 1
             self.localLeader = self.inventory.fine[-1]
-            self.remoteLeader = self.inventory.coarse[-1]
+            #self.remoteLeader = self.inventory.coarse[-1]
+            self.remoteLeader = self.inventory.coarse[1]
             self.createIntercomm(self.fine)
         elif self.coarse:
             # use the last proc. as the group leader
-            self.leader = len(self.inventory.coarse) - 1
-            self.localLeader = self.inventory.coarse[-1]
+            #self.leader = len(self.inventory.coarse) - 1
+            #self.localLeader = self.inventory.coarse[-1]
+            self.leader = 1
+            self.localLeader = self.inventory.coarse[1]
             self.remoteLeader = self.inventory.fine[-1]
             self.createIntercomm(self.coarse)
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % self.rank)
-
         return
 
 
@@ -141,6 +148,6 @@ class Layout(Component):
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.7 2003/09/28 00:30:50 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.8 2003/09/29 20:23:19 tan2 Exp $"
 
 # End of file
