@@ -78,15 +78,15 @@ class IC(CitcomComponent):
             pyre.properties.int("solution_cycles_init", default=0),
             pyre.properties.bool("zero_elapsed_time", default=True),
 
-            pyre.properties.int("num_perturbations",2),
-            pyre.properties.list("perturbmag",[0.05,0.05]),
-            pyre.properties.list("perturbl",[2,2]),
-            pyre.properties.list("perturbm",[2,2]),
-            pyre.properties.sequence("perturblayer",[3,6]),
+            pyre.properties.int("num_perturbations",1),
+            pyre.properties.list("perturbmag",[0.05]),
+            pyre.properties.list("perturbl",[1]),
+            pyre.properties.list("perturbm",[1]),
+            pyre.properties.sequence("perturblayer",[5]),
 
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.10 2004/02/05 19:06:29 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.11 2004/06/24 19:24:39 tan2 Exp $"
 
 # End of file
