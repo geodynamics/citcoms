@@ -620,10 +620,6 @@ void parallel_communication_routs_v(E)
 
       }        /* end for level */
 
-
-
-fflush(E->fp_out);
-
   return;
   }
 
@@ -793,6 +789,7 @@ void exchange_id_d(E, U, lev)
    }           /* for k */
  }     /* for m */         /* finish sending */
 
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
  for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
    free((void*) S[k]);
    free((void*) R[k]);
@@ -841,6 +838,7 @@ void exchange_node_d(E, U, lev)
    }
  }
 
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
  for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
    free((void*) S[k]);
    free((void*) R[k]);
@@ -891,6 +889,7 @@ void exchange_node_f(E, U, lev)
  }
 
 
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
  for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
    free((void*) S[k]);
    free((void*) R[k]);
@@ -946,6 +945,7 @@ void exchange_snode_f(E, U1, U2, lev)
    }
  }
 
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
  for (k=1;k<=E->parallel.sTNUM_PASS[lev][m];k++)  {
    free((void*) S[k]);
    free((void*) R[k]);
