@@ -118,6 +118,10 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 	    }
 	    if(found) break;
 	}
+	if(!found)
+	  {
+	    std::cout << " Element has not bee found for node " << xt[0] << " " << xt[1] << "  " <<xt[2] << std::endl;
+	  }
     }
     elem_.shrink();
     shape_.shrink();
@@ -222,6 +226,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.1 2004/01/08 20:42:56 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.2 2004/01/09 22:42:55 ces74 Exp $
 
 // End of file
