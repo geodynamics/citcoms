@@ -25,7 +25,7 @@ char pyRegional_PG_timestep_init__name__[] = "PG_timestep_init";
 PyObject * pyRegional_PG_timestep_init(PyObject *self, PyObject *args)
 {
   
-  PG_timestep_Init(E);
+  PG_timestep_init(E);
   
   Py_INCREF(Py_None);
   return Py_None;
@@ -58,7 +58,7 @@ char pyRegional_PG_timestep_fini__name__[] = "PG_timestep_fini";
 PyObject * pyRegional_PG_timestep_fini(PyObject *self, PyObject *args)
 {
   
-  PG_timestep_Fini(E);
+  PG_timestep_fini(E);
   
   Py_INCREF(Py_None);
   return Py_None;
@@ -69,6 +69,6 @@ PyObject * pyRegional_PG_timestep_fini(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: advdiffu.cc,v 1.1 2003/05/22 18:32:14 ces74 Exp $
+// $Id: advdiffu.cc,v 1.2 2003/05/22 22:39:44 ces74 Exp $
 
 // End of file
