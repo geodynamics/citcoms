@@ -105,9 +105,10 @@ void read_instructions(struct All_variables *E, char *filename)
            /* physical domain */
     node_locations (E);
 
-    if(E->control.tracer==1)
+    if(E->control.tracer==1) {
       tracer_initial_settings(E);
       (E->problem_tracer_setup)(E);
+    }
 
     allocate_velocity_vars(E);
 
