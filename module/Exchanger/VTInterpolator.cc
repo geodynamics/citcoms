@@ -33,7 +33,7 @@ void VTInterpolator::interpolateStress(Array2D<double,STRESS_DIM>& S)
 	for(int k=0; k<NODES_PER_ELEMENT; k++) {
 	    int node = E->ien[mm][n1].node[k+1] - 1;
 	    for(int d=0; d<STRESS_DIM; d++)
-		S[d][i] += shape_[k][i] * E->gstress[mm][node*STRESS_DIM+d];
+		S[d][i] += shape_[k][i] * E->gstress[mm][node*STRESS_DIM+d+1];
 	}
     }
 }
@@ -74,6 +74,6 @@ void VTInterpolator::interpolateVelocity(Array2D<double,DIM>& V)
 
 
 // version
-// $Id: VTInterpolator.cc,v 1.2 2004/04/14 20:06:24 tan2 Exp $
+// $Id: VTInterpolator.cc,v 1.3 2004/04/29 21:36:41 tan2 Exp $
 
 // End of file
