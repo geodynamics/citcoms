@@ -58,6 +58,16 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_createBCSource__doc__},
 
+    {pyExchanger_createIISink__name__,
+     pyExchanger_createIISink,
+     METH_VARARGS,
+     pyExchanger_createIISink__doc__},
+
+    {pyExchanger_createIISource__name__,
+     pyExchanger_createIISource,
+     METH_VARARGS,
+     pyExchanger_createIISource__doc__},
+
     {pyExchanger_createBoundary__name__,
      pyExchanger_createBoundary,
      METH_VARARGS,
@@ -154,6 +164,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.22 2003/11/07 21:43:47 puru Exp $
+// $Id: bindings.cc,v 1.23 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

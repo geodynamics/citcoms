@@ -31,6 +31,8 @@ struct All_variables;
 
 void deleteBCSink(void*);
 void deleteBCSource(void*);
+void deleteIISink(void*);
+void deleteIISource(void*);
 void deleteBoundary(void*);
 void deleteBoundedBox(void*);
 void deleteInterior(void*);
@@ -84,6 +86,49 @@ PyObject * pyExchanger_createBCSource(PyObject *self, PyObject *args)
     BoundaryConditionSource* BCSource = new BoundaryConditionSource(*source, E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(BCSource, deleteBCSource);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_createIISink__doc__[] = "";
+char pyExchanger_createIISink__name__[] = "createIISink";
+
+PyObject * pyExchanger_createIISink(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+
+    if (!PyArg_ParseTuple(args, "OOO:createIISink",
+			  &obj1, &obj2, &obj3))
+        return NULL;
+
+    Interior* b = static_cast<Interior*>(PyCObject_AsVoidPtr(obj1));
+    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+
+    InteriorImposingSink* IISink = new InteriorImposingSink(*b, *sink, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(IISink, deleteIISink);
+    return Py_BuildValue("O", cobj);
+}
+
+
+char pyExchanger_createIISource__doc__[] = "";
+char pyExchanger_createIISource__name__[] = "createIISource";
+
+PyObject * pyExchanger_createIISource(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:createIISource",
+			  &obj1, &obj2))
+        return NULL;
+
+    Source* source = static_cast<Source*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj2));
+
+    InteriorImposingSource* IISource = new InteriorImposingSource(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(IISource, deleteIISource);
     return Py_BuildValue("O", cobj);
 }
 
@@ -192,12 +237,11 @@ char pyExchanger_createSink__name__[] = "createSink";
 
 PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
 {
-    PyObject *obj1, *obj2, *obj3;
+    PyObject *obj1, *obj2;
     int numSrc;
 
-    if (!PyArg_ParseTuple(args, "OiOO:createSink",
-			  &obj1, &numSrc,
-			  &obj2, &obj3))
+    if (!PyArg_ParseTuple(args, "OiO:createSink",
+			  &obj1, &numSrc, &obj2))
         return NULL;
 
     mpi::Communicator* temp = static_cast<mpi::Communicator*>
@@ -205,9 +249,8 @@ PyObject * pyExchanger_createSink(PyObject *self, PyObject *args)
     MPI_Comm comm = temp->handle();
 
     BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
-    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
 
-    Sink* sink = new Sink(comm, numSrc, *b, E);
+    Sink* sink = new Sink(comm, numSrc, *b);
 
     PyObject *cobj = PyCObject_FromVoidPtr(sink, deleteSink);
     return Py_BuildValue("O", cobj);
@@ -525,6 +568,18 @@ void deleteBCSource(void* p)
 }
 
 
+void deleteIISink(void* p)
+{
+    delete static_cast<InteriorImposingSink*>(p);
+}
+
+
+void deleteIISource(void* p)
+{
+    delete static_cast<InteriorImposingSource*>(p);
+}
+
+
 void deleteBoundary(void* p)
 {
     delete static_cast<Boundary*>(p);
@@ -557,6 +612,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.26 2003/11/10 21:55:28 tan2 Exp $
+// $Id: exchangers.cc,v 1.27 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

@@ -31,14 +31,13 @@ Interpolator::Interpolator(const BoundedMesh& boundedMesh,
 void Interpolator::interpolateV(Array2D<double,DIM>& target,
 				const All_variables* E) const
 {
-    target.resize(0);
-    target.resize(size(), 0);
+    target.assign(size(), 0);
 
     const int mm = 1;
     for(int i=0; i<size(); i++) {
 	int n1 = elem_[0][i];
 	for(int k=0; k<NODES_PER_ELEMENT; k++) {
-	    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	    int node = E->ien[mm][n1].node[k+1];
 	    for(int d=0; d<DIM; d++)
 		target[d][i] += shape_[k][i] * E->sphere.cap[mm].V[d+1][node];
 	}
@@ -49,14 +48,13 @@ void Interpolator::interpolateV(Array2D<double,DIM>& target,
 void Interpolator::interpolateT(Array2D<double,1>& target,
 				const All_variables* E) const
 {
-    target.resize(0);
-    target.resize(size(), 0);
+    target.assign(size(), 0);
 
     const int mm = 1;
     for(int i=0; i<size(); i++) {
 	int n1 = elem_[0][i];
 	for(int k=0; k<NODES_PER_ELEMENT; k++) {
-	    int node = E->IEN[E->mesh.levmax][mm][n1].node[k+1];
+	    int node = E->ien[mm][n1].node[k+1];
 	    target[0][i] += shape_[k][i] * E->T[mm][node];
 	}
     }
@@ -93,7 +91,7 @@ void Interpolator::init(const BoundedMesh& boundedMesh,
 	for(int n=0; n<E->lmesh.nel; n++) {
 
 	    for(int j=0; j<NODES_PER_ELEMENT; j++) {
-		int gnode = E->IEN[E->mesh.levmax][mm][n+1].node[j+1];
+		int gnode = E->ien[mm][n+1].node[j+1];
 		for(int k=0; k<DIM; k++) {
 		    xc[j*DIM+k] = E->sx[mm][k+1][gnode];
 		}
@@ -171,9 +169,9 @@ void Interpolator::findMaxGridSpacing(const All_variables* E)
 	theta_tol = fi_tol = 0;
 	const int m = 1;
 	for(int n=0; n<E->lmesh.nel; n++) {
-	    int gnode1 = E->IEN[E->mesh.levmax][m][n+1].node[1];
-	    int gnode2 = E->IEN[E->mesh.levmax][m][n+1].node[2];
-	    int gnode4 = E->IEN[E->mesh.levmax][m][n+1].node[4];
+	    int gnode1 = E->ien[m][n+1].node[1];
+	    int gnode2 = E->ien[m][n+1].node[2];
+	    int gnode4 = E->ien[m][n+1].node[4];
 	    theta_tol = std::max(theta_tol,
 				 std::abs(E->sx[m][1][gnode2]
 					  - E->sx[m][1][gnode1]));
@@ -186,8 +184,8 @@ void Interpolator::findMaxGridSpacing(const All_variables* E)
     r_tol = 0;
     const int m = 1;
     for(int n=0; n<E->lmesh.nel; n++) {
-	int gnode1 = E->IEN[E->mesh.levmax][m][n+1].node[1];
-	int gnode5 = E->IEN[E->mesh.levmax][m][n+1].node[5];
+	int gnode1 = E->ien[m][n+1].node[1];
+	int gnode5 = E->ien[m][n+1].node[5];
 	r_tol = std::max(r_tol,
 			 std::abs(E->sx[m][3][gnode5]
 				  - E->sx[m][3][gnode1]));
@@ -268,7 +266,7 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
         for(int j=0; j<NODES_PER_ELEMENT; j++) {
             for(int k=0; k<DIM; k++) {
-                xc[j*DIM+k] = E->sx[1][k+1][E->IEN[E->mesh.levmax][1][n1].node[j+1]];
+                xc[j*DIM+k] = E->sx[1][k+1][E->ien[1][n1].node[j+1]];
             }
         }
 
@@ -301,6 +299,6 @@ void Interpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: Interpolator.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Interpolator.cc,v 1.2 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

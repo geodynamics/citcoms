@@ -74,7 +74,7 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary& boundary,
     // to bnodes elements array
     for(int n=0; n<E->lmesh.nel; n++) {
 	for(int j=0; j<NODES_PER_ELEMENT; j++) {
-	    int gnode = E->IEN[E->mesh.levmax][1][n+1].node[j+1];
+	    int gnode = E->ien[1][n+1].node[j+1];
 	    for(int k=0; k<boundary.size(); k++) {
 		if(gnode == boundary.meshID(k)) {
 		    bnodes[n*NODES_PER_ELEMENT+j] = k;
@@ -190,6 +190,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow,
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.5 2003/11/10 21:55:28 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.6 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

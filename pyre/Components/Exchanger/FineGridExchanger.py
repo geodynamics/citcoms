@@ -25,7 +25,7 @@ class FineGridExchanger(Exchanger):
 
         self.interior = range(self.numSrc)
         self.source["Intr"] = range(self.numSrc)
-        self.interior = range(self.numSrc)
+        self.II = range(self.numSrc)
         return
 
 
@@ -54,12 +54,22 @@ class FineGridExchanger(Exchanger):
     def createSink(self):
         self.sink["BC"] = self.module.createSink(self.sinkComm.handle(),
                                                  self.numSrc,
-                                                 self.boundary,
-                                                 self.all_variables)
+                                                 self.boundary)
         return
 
 
     def createSource(self):
+        for i, comm, b in zip(range(self.numSrc),
+                              self.srcComm,
+                              self.interior):
+            # sink is always in the last rank of a communicator
+            sinkRank = comm.size - 1
+            self.source["Intr"][i] = self.module.createSource(
+                                                     comm.handle(),
+                                                     sinkRank,
+                                                     b,
+                                                     self.all_variables,
+                                                     self.myBBox)
         return
 
 
@@ -68,6 +78,14 @@ class FineGridExchanger(Exchanger):
                                            self.boundary,
                                            self.sink["BC"],
                                            self.all_variables)
+        return
+
+
+    def createII(self):
+        for i, src in zip(range(self.numSrc),
+                          self.source["Intr"]):
+            self.II[i] = self.module.createIISource(src,
+                                                    self.all_variables)
         return
 
 
@@ -84,9 +102,10 @@ class FineGridExchanger(Exchanger):
 
 
     def NewStep(self):
-        #if self.catchup:
+        if self.catchup:
             # send temperture field to CGE
-            #self.module.sendTemperature(self.exchanger)
+            for ii in self.II:
+                self.module.sendT(ii)
 
         return
 
@@ -155,6 +174,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.23 2003/11/10 21:59:49 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.24 2003/11/11 19:29:50 tan2 Exp $"
 
 # End of file

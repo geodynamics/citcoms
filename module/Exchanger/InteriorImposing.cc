@@ -19,7 +19,7 @@
 
 
 InteriorImposingSink::InteriorImposingSink(const Interior& i, const Sink& s,
-					     All_variables* e) :
+					   All_variables* e) :
     E(e),
     interior(i),
     sink(s),
@@ -39,8 +39,6 @@ void InteriorImposingSink::recvT()
     debug << journal::loc(__HERE__)
 	  << "in InteriorImposingSink::recvT" << journal::end;
 
-    // store bc from previous timestep
-
     sink.recvArray2D(tic);
     tic.print("TIC");
 
@@ -57,16 +55,14 @@ void InteriorImposingSink::imposeIC()
 
 void InteriorImposingSink::imposeTIC()
 {
-
     journal::debug_t debugIC("imposeTIC");
     debugIC << journal::loc(__HERE__);
 
     const int mm = 1;
 
     for(int i=0; i<sink.size(); i++) {
-	int n = sink.meshNode(i);
-	for(int d=0; d<DIM; d++)
-	    E->T[mm][n] = tic[0][i];
+	int n = interior.meshID(sink.meshNode(i));
+	E->T[mm][n] = tic[0][i];
 	debugIC << E->T[mm][n] << journal::newline;
     }
     debugIC << journal::end;
@@ -78,7 +74,7 @@ void InteriorImposingSink::imposeTIC()
 
 
 InteriorImposingSource::InteriorImposingSource(const Source& s,
-						 All_variables* e) :
+					       All_variables* e) :
     E(e),
     source(s),
     tic(source.size())
@@ -95,16 +91,16 @@ void InteriorImposingSource::sendT()
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in InteriorImposingSource::sendTandV" << journal::end;
+	  << "in InteriorImposingSource::sendT" << journal::end;
 
     source.interpolateT(tic, E);
-    //tbc.print("TBC");
+    //tbc.print("TIC");
 
     source.sendArray2D(tic);
 }
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.2 2003/11/07 21:43:47 puru Exp $
+// $Id: InteriorImposing.cc,v 1.3 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

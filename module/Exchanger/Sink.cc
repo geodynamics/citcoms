@@ -17,8 +17,7 @@
 #include "Sink.h"
 
 
-Sink::Sink(MPI_Comm c, int nsrc,
-	   const BoundedMesh& mesh, const All_variables* E) :
+Sink::Sink(MPI_Comm c, int nsrc, const BoundedMesh& mesh) :
     comm(c),
     numSrcNodes(nsrc),
     beginSrcNodes(nsrc+1),
@@ -112,6 +111,6 @@ void Sink::testMeshNode() const
 
 
 // version
-// $Id: Sink.cc,v 1.1 2003/11/07 01:08:01 tan2 Exp $
+// $Id: Sink.cc,v 1.2 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

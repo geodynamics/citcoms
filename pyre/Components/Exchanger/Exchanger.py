@@ -49,6 +49,7 @@ class Exchanger(Component):
         self.createMesh()
         self.createSourceSink()
         self.createBC()
+        self.createII()
         return
 
 
@@ -167,6 +168,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.11 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.12 2003/11/11 19:29:50 tan2 Exp $"
 
 # End of file

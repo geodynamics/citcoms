@@ -142,6 +142,21 @@ bool Array2D<T,N>::empty() const
 
 
 template <class T, int N>
+void Array2D<T,N>::assign(int n, const T& val)
+{
+#ifdef DEBUG
+    if (n > size()) {
+	journal::firewall_t firewall("Array2D");
+	firewall << journal::loc(__HERE__)
+		 << "Array2D: assignment out of range" << journal::end;
+	throw std::out_of_range("Array2D");
+    }
+#endif    
+    a_.assign(N*n, val);
+}
+
+
+template <class T, int N>
 void Array2D<T,N>::push_back(const std::vector<T>& val)
 {
 #ifdef DEBUG
@@ -415,6 +430,6 @@ const T& Array2D<T,N>::Array1D::operator[](size_t index) const
 
 
 // version
-// $Id: Array2D.cc,v 1.13 2003/11/10 21:55:28 tan2 Exp $
+// $Id: Array2D.cc,v 1.14 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

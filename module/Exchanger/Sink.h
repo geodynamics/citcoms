@@ -14,7 +14,6 @@
 #include "mpi.h"
 #include "utility.h"
 
-struct All_variables;
 class BoundedMesh;
 
 
@@ -29,8 +28,7 @@ protected:
     int me;
 
 public:
-    Sink(MPI_Comm comm, int nsrc,
-	 const BoundedMesh& mesh, const All_variables* E);
+    Sink(MPI_Comm comm, int nsrc, const BoundedMesh& mesh);
     virtual ~Sink() {};
 
     inline int size() const {return meshNode_.size();}
@@ -57,6 +55,15 @@ private:
 template <class T, int N>
 void Sink::recvArray2D(Array2D<T,N>& array) const
 {
+#ifdef DEBUG
+    if(size() != array.size()) {
+	journal::firewall_t firewall("Sink");
+	firewall << journal::loc(__HERE__)
+		 << "Sink: inconsistenet array size" << journal::end;
+	throw std::out_of_range("Sink");
+    }
+#endif
+
     std::vector<MPI_Request> request;
     request.reserve(source.size());
 
@@ -75,6 +82,15 @@ template <class T1, int N1, class T2, int N2>
 void Sink::recvArray2D(Array2D<T1,N1>& array1,
 		       Array2D<T2,N2>& array2) const
 {
+#ifdef DEBUG
+    if(size() != array1.size() || size() != array2.size()) {
+	journal::firewall_t firewall("Sink");
+	firewall << journal::loc(__HERE__)
+		 << "Sink: inconsistenet array size" << journal::end;
+	throw std::out_of_range("Sink");
+    }
+#endif
+
     std::vector<MPI_Request> request;
     request.reserve(2*source.size());
 
@@ -96,6 +112,6 @@ void Sink::recvArray2D(Array2D<T1,N1>& array1,
 #endif
 
 // version
-// $Id: Sink.h,v 1.2 2003/11/10 21:55:28 tan2 Exp $
+// $Id: Sink.h,v 1.3 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

@@ -107,9 +107,9 @@ PyObject * pyExchanger_CoarsereturnE(PyObject *, PyObject *args)
 
     All_variables *E = citcom_init(&world);
 
-    E->lmesh.nox = 4;
-    E->lmesh.noy = 4;
-    E->lmesh.noz = 3;
+    E->lmesh.nox = 7;
+    E->lmesh.noy = 7;
+    E->lmesh.noz = 5;
 
     E->control.theta_max = 3.0;
     E->control.theta_min = 0.0;
@@ -214,6 +214,9 @@ void commonE(All_variables *E)
 	    E->IEN[lev][j] = new IEN [E->lmesh.nel+1];
 	}
     }
+
+    for (int j=1;j<=E->sphere.caps_per_proc;j++)
+	E->ien[j] = E->IEN[E->mesh.levmax][j];
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++) {
 	E->sphere.cap[m].VB[1] = new float[E->lmesh.nno+1];
@@ -393,6 +396,6 @@ void initTemperatureTest(const BoundedBox& bbox, All_variables* E)
 }
 
 // version
-// $Id: misc.cc,v 1.20 2003/11/07 01:08:01 tan2 Exp $
+// $Id: misc.cc,v 1.21 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

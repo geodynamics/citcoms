@@ -76,100 +76,41 @@ void Boundary::initBBox(const All_variables *E)
 
 void Boundary::initX(const All_variables* E)
 {
-    std::vector<int> nid(E->lmesh.nno, 0);
+    std::vector<double> x(DIM);
+    const int m = 1;
+    for(int k=1; k<=E->lmesh.noy; k++)
+	for(int j=1; j<=E->lmesh.nox; j++)
+	    for(int i=1; i<=E->lmesh.noz; i++) {
 
-    //  for two XOZ planes
-    
-    if (E->parallel.me_loc[2] == 0)
-	for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	    for(int j=1;j<=E->lmesh.nox;j++)
-		for(int i=1;i<=E->lmesh.noz;i++)  {
-		    int node1 = i + (j-1)*E->lmesh.noz;
-		    
-		    if (!nid[node1-1]) {
-			appendX(E, m, node1);
-			nid[node1-1]++;
-		    }
-		}
+		if(isOnBoundary(E, i, j, k)) {
+		    int node = i + (j-1)*E->lmesh.noz
+			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
 
-    if (E->parallel.me_loc[2] == E->parallel.nprocy-1)
-	for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	    for(int j=1;j<=E->lmesh.nox;j++)
-		for(int i=1;i<=E->lmesh.noz;i++)  {
-		    int node1 = i + (j-1)*E->lmesh.noz;
-		    int node2 = node1 + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
-		    if (!nid[node2-1]) {
-			appendX(E, m, node2);
-			nid[node2-1]++;
-		    }
+		    for(int d=0; d<DIM; d++)
+			x[d] = E->sx[m][d+1][node];
+
+		    X_.push_back(x);
+		    meshID_.push_back(node);
 		}
-    
-    //  for two YOZ planes
-    
-    if (E->parallel.me_loc[1] == 0)
-	for (int m=1; m<=E->sphere.caps_per_proc; m++)
-	    for(int j=1; j<=E->lmesh.noy; j++)
-		for(int i=1; i<=E->lmesh.noz; i++) {
-		    int node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
-		    
-		    if (!nid[node1-1]) {
-			appendX(E, m, node1);
-			nid[node1-1]++;
-		    }
-		}
-    
-    if (E->parallel.me_loc[1] == E->parallel.nprocx-1)
-	for (int m=1; m<=E->sphere.caps_per_proc; m++)
-	    for(int j=1; j<=E->lmesh.noy; j++)
-		for(int i=1; i<=E->lmesh.noz; i++) {
-		    int node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
-		    int node2 = node1 + (E->lmesh.nox-1)*E->lmesh.noz;
-		    
-		    if (!nid[node2-1]) {
-			appendX(E, m, node2);
-			nid[node2-1]++;
-		    }
-		}
-    
-    //  for two XOY planes
-    
-    if (E->parallel.me_loc[3] == 0)
-	for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	    for(int j=1;j<=E->lmesh.noy;j++)
-		for(int i=1;i<=E->lmesh.nox;i++)  {
-		    int node1 = 1 + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
-		    if (!nid[node1-1]) {
-			appendX(E, m, node1);
-			nid[node1-1]++;
-		    }
-		}
-    
-    if (E->parallel.me_loc[3] == E->parallel.nprocz-1)
-	for (int m=1;m<=E->sphere.caps_per_proc;m++)
-	    for(int j=1;j<=E->lmesh.noy;j++)
-		for(int i=1;i<=E->lmesh.nox;i++)  {
-		    int node1 = 1 + (i-1)*E->lmesh.noz+(j-1)*E->lmesh.nox*E->lmesh.noz;
-		    int node2 = node1 + E->lmesh.noz-1;
-		    
-		    if (!nid[node2-1]) {
-			appendX(E, m, node2);
-			nid[node2-1]++;
-		    }
-		}
+	    }
 }
 
 
-void Boundary::appendX(const All_variables *E, int m, int node)
+bool Boundary::isOnBoundary(const All_variables* E, int i, int j, int k) const
 {
-    std::vector<double> x(DIM);
-    for(int k=0; k<DIM; k++)
-	x[k] = E->sx[m][k+1][node];
-    X_.push_back(x);
-    meshID_.push_back(node);
+    return ((E->parallel.me_loc[1] == 0) && (j == 1)) ||
+	   ((E->parallel.me_loc[2] == 0) && (k == 1)) ||
+	   ((E->parallel.me_loc[3] == 0) && (i == 1)) ||
+   	   ((E->parallel.me_loc[1] == E->parallel.nprocx - 1)
+	     && (j == E->lmesh.nox)) ||
+	   ((E->parallel.me_loc[2] == E->parallel.nprocy - 1) 
+	     && (k == E->lmesh.noy)) ||
+	   ((E->parallel.me_loc[3] == E->parallel.nprocz - 1)
+	     && (i == E->lmesh.noz));
 }
 
 
 // version
-// $Id: Boundary.cc,v 1.40 2003/11/10 21:55:28 tan2 Exp $
+// $Id: Boundary.cc,v 1.41 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

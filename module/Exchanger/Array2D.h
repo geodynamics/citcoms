@@ -40,6 +40,7 @@ public:
     inline int size() const;
     inline int capacity() const;
     inline bool empty() const;
+    inline void assign(int n, const T& val);
     inline void push_back(const std::vector<T>& val);
     inline void push_back(const T& val);
 
@@ -96,6 +97,6 @@ private:
 #endif
 
 // version
-// $Id: Array2D.h,v 1.14 2003/11/10 21:55:28 tan2 Exp $
+// $Id: Array2D.h,v 1.15 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file

@@ -58,6 +58,9 @@ class CoarseGridExchanger(Exchanger):
 
 
     def createSink(self):
+        self.sink["Intr"] = self.module.createSink(self.sinkComm.handle(),
+                                                   self.numSrc,
+                                                   self.interior)
         return
 
 
@@ -66,6 +69,13 @@ class CoarseGridExchanger(Exchanger):
                           self.source["BC"]):
             self.BC[i] = self.module.createBCSource(src,
                                                     self.all_variables)
+        return
+
+
+    def createII(self):
+        self.II = self.module.createIISink(self.interior,
+                                           self.sink["Intr"],
+                                           self.all_variables)
         return
 
 
@@ -83,7 +93,8 @@ class CoarseGridExchanger(Exchanger):
 
     def NewStep(self):
         # receive temperture field from FGE
-        #self.module.receiveTemperature(self.exchanger)
+        self.module.recvT(self.II)
+        self.module.imposeIC(self.II)
         return
 
 
@@ -124,6 +135,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.21 2003/11/10 21:59:49 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.22 2003/11/11 19:29:50 tan2 Exp $"
 
 # End of file

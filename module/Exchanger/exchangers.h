@@ -23,6 +23,18 @@ extern "C"
 PyObject * pyExchanger_createBCSource(PyObject *, PyObject *);
 
 
+extern char pyExchanger_createIISink__name__[];
+extern char pyExchanger_createIISink__doc__[];
+extern "C"
+PyObject * pyExchanger_createIISink(PyObject *, PyObject *);
+
+
+extern char pyExchanger_createIISource__name__[];
+extern char pyExchanger_createIISource__doc__[];
+extern "C"
+PyObject * pyExchanger_createIISource(PyObject *, PyObject *);
+
+
 extern char pyExchanger_createBoundary__name__[];
 extern char pyExchanger_createBoundary__doc__[];
 extern "C"
@@ -131,6 +143,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.20 2003/11/07 21:43:47 puru Exp $
+// $Id: exchangers.h,v 1.21 2003/11/11 19:29:27 tan2 Exp $
 
 // End of file
