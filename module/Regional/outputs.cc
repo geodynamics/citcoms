@@ -15,9 +15,7 @@
 #include "outputs.h"
 
 extern "C" {
-#include "mpi.h"
 #include "global_defs.h"
-#include "citcom_init.h"
 #include "output.h"
 
 }
@@ -28,10 +26,13 @@ char pyCitcom_output__name__[] = "output";
 
 PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
     int cycles;
 
-    if (!PyArg_ParseTuple(args, "i:output", &cycles))
+    if (!PyArg_ParseTuple(args, "Oi:output", &obj, &cycles))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     output(E, cycles);
 
@@ -43,6 +44,6 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: outputs.cc,v 1.9 2003/08/01 22:53:50 tan2 Exp $
+// $Id: outputs.cc,v 1.10 2003/08/19 21:21:43 tan2 Exp $
 
 // End of file

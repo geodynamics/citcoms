@@ -17,7 +17,6 @@
 extern "C" {
 
 #include "global_defs.h"
-#include "citcom_init.h"
 #include "parallel_related.h"
 
     void allocate_common_vars(struct All_variables*);
@@ -123,6 +122,13 @@ char pyCitcom_full_sphere_launch__name__[] = "full_sphere_launch";
 
 PyObject * pyCitcom_full_sphere_launch(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:full_sphere_launch", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     sphere_launch(E);
 
     Py_INCREF(Py_None);
@@ -136,6 +142,13 @@ char pyCitcom_regional_sphere_launch__name__[] = "regional_sphere_launch";
 
 PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:regional_sphere_launch", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     sphere_launch(E);
 
     Py_INCREF(Py_None);
@@ -145,6 +158,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.8 2003/08/14 22:50:44 tan2 Exp $
+// $Id: mesher.cc,v 1.9 2003/08/19 21:21:43 tan2 Exp $
 
 // End of file

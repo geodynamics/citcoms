@@ -22,7 +22,7 @@ extern "C" {
 #include "advection_diffusion.h"
 
     double return1_test();
-    void read_instructions(char*);
+    void read_instructions(struct All_variables*, char*);
     double CPU_time0();
 
     void global_default_values(struct All_variables*);
@@ -31,7 +31,6 @@ extern "C" {
     void velocities_conform_bcs(struct All_variables*, double **);
 
 }
-
 
 #include "mpi/Communicator.h"
 #include "mpi/Group.h"
@@ -72,15 +71,18 @@ char pyCitcom_read_instructions__name__[] = "read_instructions";
 
 PyObject * pyCitcom_read_instructions(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
     char *filename;
 
-    if (!PyArg_ParseTuple(args, "s:read_instructions", &filename))
+    if (!PyArg_ParseTuple(args, "Os:read_instructions", &obj, &filename))
         return NULL;
 
-    read_instructions(filename);
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    read_instructions(E, filename);
 
     // test
-    // fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
+    fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -114,24 +116,30 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
     MPI_Comm world = comm->handle();
 
     // Allocate global pointer E
-    citcom_init(&world);
+    struct All_variables* E = citcom_init(&world);
 
     // if E is NULL, raise an exception here.
     if (E == NULL)
       return PyErr_NoMemory();
 
+    PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    return Py_BuildValue("O", cobj);
 }
-
 
 
 char pyCitcom_global_default_values__doc__[] = "";
 char pyCitcom_global_default_values__name__[] = "global_default_values";
 
-PyObject * pyCitcom_global_default_values(PyObject *, PyObject *)
+PyObject * pyCitcom_global_default_values(PyObject *, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:global_default_values", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     global_default_values(E);
 
     Py_INCREF(Py_None);
@@ -156,12 +164,18 @@ char pyCitcom_velocities_conform_bcs__name__[] = "velocities_conform_bcs";
 
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:velocities_conform_bcs", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     velocities_conform_bcs(E, E->U);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
-
 
 
 
@@ -172,6 +186,6 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.21 2003/08/01 22:53:50 tan2 Exp $
+// $Id: misc.cc,v 1.22 2003/08/19 21:21:43 tan2 Exp $
 
 // End of file

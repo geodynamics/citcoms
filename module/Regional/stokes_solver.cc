@@ -16,9 +16,7 @@
 
 extern "C" {
 
-#include "mpi.h"
 #include "global_defs.h"
-#include "citcom_init.h"
 #include "drive_solvers.h"
 
     void assemble_forces(struct All_variables*, int);
@@ -38,6 +36,13 @@ char pyCitcom_assemble_forces__name__[] = "assemble_forces";
 
 PyObject * pyCitcom_assemble_forces(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     assemble_forces(E,0);
 
     Py_INCREF(Py_None);
@@ -51,6 +56,13 @@ char pyCitcom_construct_stiffness_B_matrix__name__[] = "construct_stiffness_B_ma
 
 PyObject * pyCitcom_construct_stiffness_B_matrix(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     construct_stiffness_B_matrix(E);
 
     Py_INCREF(Py_None);
@@ -64,6 +76,13 @@ char pyCitcom_general_stokes_solver__name__[] = "general_stokes_solver";
 
 PyObject * pyCitcom_general_stokes_solver(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     general_stokes_solver(E);
 
     Py_INCREF(Py_None);
@@ -77,6 +96,13 @@ char pyCitcom_get_system_viscosity__name__[] = "get_system_viscosity";
 
 PyObject * pyCitcom_get_system_viscosity(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 
     Py_INCREF(Py_None);
@@ -90,6 +116,13 @@ char pyCitcom_set_cg_defaults__name__[] = "set_cg_defaults";
 
 PyObject * pyCitcom_set_cg_defaults(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     E->control.CONJ_GRAD = 1;
     set_cg_defaults(E);
 
@@ -104,6 +137,13 @@ char pyCitcom_set_mg_defaults__name__[] = "set_mg_defaults";
 
 PyObject * pyCitcom_set_mg_defaults(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     E->control.NMULTIGRID = 1;
     set_mg_defaults(E);
 
@@ -118,6 +158,13 @@ char pyCitcom_set_mg_el_defaults__name__[] = "set_mg_el_defaults";
 
 PyObject * pyCitcom_set_mg_el_defaults(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     E->control.EMULTIGRID = 1;
     set_mg_defaults(E);
 
@@ -132,6 +179,13 @@ char pyCitcom_solve_constrained_flow_iterative__name__[] = "solve_constrained_fl
 
 PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *args)
 {
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
     solve_constrained_flow_iterative(E);
 
     return Py_BuildValue("d", E->viscosity.sdepv_misfit);
@@ -139,6 +193,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 
 
 // version
-// $Id: stokes_solver.cc,v 1.5 2003/08/15 18:56:57 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.6 2003/08/19 21:21:43 tan2 Exp $
 
 // End of file

@@ -18,7 +18,6 @@
 
 extern "C" {
 #include "global_defs.h"
-#include "citcom_init.h"
 
 }
 
@@ -42,10 +41,13 @@ char pyCitcom_Advection_diffusion_set_properties__name__[] = "Advection_diffusio
 
 PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Advection_diffusion_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Advection_diffusion_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -84,10 +86,13 @@ char pyCitcom_BC_set_properties__name__[] = "BC_set_properties";
 
 PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:BC_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:BC_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -126,11 +131,13 @@ char pyCitcom_Const_set_properties__name__[] = "Const_set_properties";
 
 PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
-    float zlith, z410, zlm, zcmb;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Const_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Const_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -146,6 +153,8 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "wdensity", E->data.density_above, m);
 
     E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
+
+    float zlith, z410, zlm, zcmb;
 
     getScalarProperty(properties, "depth_lith", zlith, m);
     getScalarProperty(properties, "depth_410", z410, m);
@@ -177,10 +186,13 @@ char pyCitcom_IC_set_properties__name__[] = "IC_set_properties";
 
 PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:IC_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:IC_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -217,10 +229,13 @@ char pyCitcom_Param_set_properties__name__[] = "Param_set_properties";
 
 PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Param_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Param_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -285,10 +300,13 @@ char pyCitcom_Phase_set_properties__name__[] = "Phase_set_properties";
 
 PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Phase_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Phase_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -333,10 +351,13 @@ char pyCitcom_Sphere_set_properties__name__[] = "Sphere_set_properties";
 
 PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Sphere_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Sphere_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -465,10 +486,13 @@ char pyCitcom_Visc_set_properties__name__[] = "Visc_set_properties";
 
 PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Visc_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Visc_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -531,10 +555,13 @@ char pyCitcom_Imcompressible_set_properties__name__[] = "Imcompressible_set_prop
 
 PyObject * pyCitcom_Imcompressible_set_properties(PyObject *self, PyObject *args)
 {
-    PyObject *properties;
+    PyObject *obj, *properties;
 
-    if (!PyArg_ParseTuple(args, "O:Imcompressible_set_properties", &properties))
+    if (!PyArg_ParseTuple(args, "OO:Imcompressible_set_properties",
+			  &obj, &properties))
         return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     int m = E->parallel.me;
     if (not m)
@@ -722,6 +749,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.15 2003/08/15 18:56:05 tan2 Exp $
+// $Id: setProperties.cc,v 1.16 2003/08/19 21:21:43 tan2 Exp $
 
 // End of file
