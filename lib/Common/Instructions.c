@@ -28,6 +28,7 @@ void read_instructions(struct All_variables *E, char *filename)
     void global_derived_values();
     void construct_ien();
     void construct_surface();
+    void construct_boundary();
     void construct_masks();
     void construct_shape_functions();
     void construct_id();
@@ -44,6 +45,7 @@ void read_instructions(struct All_variables *E, char *filename)
     void allocate_velocity_vars();
     void construct_c3x3matrix();
     void construct_surf_det ();
+    void construct_bdry_det ();
     void set_sphere_harmonics ();
     void general_stokes_solver_setup();
 
@@ -98,6 +100,7 @@ void read_instructions(struct All_variables *E, char *filename)
            /* logical domain */
     construct_ien(E);
     construct_surface(E);
+    construct_boundary(E);
     parallel_domain_boundary_nodes(E);
 
            /* physical domain */
@@ -134,6 +137,7 @@ void read_instructions(struct All_variables *E, char *filename)
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",CPU_time0()-start_time);
 
     construct_surf_det (E);
+    construct_bdry_det (E);
 
     set_sphere_harmonics (E);
 
