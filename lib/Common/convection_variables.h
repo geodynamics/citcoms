@@ -1,8 +1,7 @@
 struct CONVECTION { /* information controlling convection problems */
-    char old_T_file[100];
 
+    int tic_method;
     float half_space_age;
-    int half_space_cooling;
 
 #define PERTURB_MAX_LAYERS 255
     int number_of_perturbations;

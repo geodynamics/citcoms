@@ -22,38 +22,57 @@ void tic_input(struct All_variables *E)
   int noz = E->lmesh.noz;
   int n;
 
-  /* This part put a temperature anomaly at depth where the global
-     node number is equal to load_depth. The horizontal pattern of
-     the anomaly is given by spherical harmonic ll & mm. */
 
-  input_int("num_perturbations", &n, "0,0,PERTURB_MAX_LAYERS", m);
+  input_int("tic_method", &(E->convection.tic_method), "0,0,1", m);
+  /* When tic_method is 0 (default), the temperature is a linear profile +
+     perturbation at some layers. When tic_method is 1, the temperature is
+     isothermal (== bottom b.c.) + uniformly cold plate (thickness specified
+     by 'half_space_age').  */
 
-  if (n > 0) {
-    E->convection.number_of_perturbations = n;
 
-    if (! input_float_vector("perturbmag", n, E->convection.perturb_mag, m) ) {
-      fprintf(stderr,"Missing input parameter: 'perturbmag'\n");
-      parallel_process_termination();
+  if (E->convection.tic_method == 0) {
+    /* This part put a temperature anomaly at depth where the global
+       node number is equal to load_depth. The horizontal pattern of
+       the anomaly is given by spherical harmonic ll & mm. */
+
+    input_int("num_perturbations", &n, "0,0,PERTURB_MAX_LAYERS", m);
+
+    if (n > 0) {
+      E->convection.number_of_perturbations = n;
+
+      if (! input_float_vector("perturbmag", n, E->convection.perturb_mag, m) ) {
+	fprintf(stderr,"Missing input parameter: 'perturbmag'\n");
+	parallel_process_termination();
+      }
+      if (! input_int_vector("perturbm", n, E->convection.perturb_mm, m) ) {
+	fprintf(stderr,"Missing input parameter: 'perturbm'\n");
+	parallel_process_termination();
+      }
+      if (! input_int_vector("perturbl", n, E->convection.perturb_ll, m) ) {
+	fprintf(stderr,"Missing input parameter: 'perturbl'\n");
+	parallel_process_termination();
+      }
+      if (! input_int_vector("perturblayer", n, E->convection.load_depth, m) ) {
+	fprintf(stderr,"Missing input parameter: 'perturblayer'\n");
+	parallel_process_termination();
+      }
     }
-    if (! input_int_vector("perturbm", n, E->convection.perturb_mm, m) ) {
-      fprintf(stderr,"Missing input parameter: 'perturbm'\n");
-      parallel_process_termination();
+    else {
+      E->convection.number_of_perturbations = 1;
+      E->convection.perturb_mag[0] = 1;
+      E->convection.perturb_mm[0] = 2;
+      E->convection.perturb_ll[0] = 2;
+      E->convection.load_depth[0] = (noz+1)/2;
     }
-    if (! input_int_vector("perturbl", n, E->convection.perturb_ll, m) ) {
-      fprintf(stderr,"Missing input parameter: 'perturbl'\n");
-      parallel_process_termination();
-    }
-    if (! input_int_vector("perturblayer", n, E->convection.load_depth, m) ) {
-      fprintf(stderr,"Missing input parameter: 'perturblayer'\n");
-      parallel_process_termination();
-    }
+
+  } else if (E->convection.tic_method == 1) {
+
+    input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
+
   }
   else {
-    E->convection.number_of_perturbations = 1;
-    E->convection.perturb_mag[0] = 1;
-    E->convection.perturb_mm[0] = 2;
-    E->convection.perturb_ll[0] = 2;
-    E->convection.load_depth[0] = (noz+1)/2;
+    fprintf(stderr,"Invalid value of 'tic_method'\n");
+    parallel_process_termination();
   }
 
   return;
