@@ -1,0 +1,13 @@
+
+To show how to read in velocity boundary conditions from files,
+example files are provided.
+
+First, untar the given 'velbc_full.tar.gz'.
+(e.g., type 'tar xzvf velbc_full.tar.gz')
+
+Each of the velbc files has the following naming scheme:
+{root}{age}.{# of cap}, 
+
+{root} is 'velbc_full' in this example, but can be defined by 'file_vbcs' in the input file.
+{age} is each million years from 'start_age' defined in the input file to 0 M.y.
+{# of cap} is an integer from 1 to 12, the number of 12 spherical caps defined FullCitcomS.
