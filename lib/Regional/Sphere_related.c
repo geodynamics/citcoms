@@ -53,7 +53,7 @@ if(E->control.coor==1)   {
   }
 
   temp = E->mesh.NOY[E->mesh.levmax]*E->mesh.NOX[E->mesh.levmax];
- 
+
   sprintf(output_file,"%s",E->control.coor_file);
   fp=fopen(output_file,"r");
 	if (fp == NULL) {
@@ -114,11 +114,11 @@ if(E->control.coor==1)   {
                 E->SX[lev][m][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][m][1][node] = 
+                E->X[lev][m][1][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*cos(fi1[lev][nodesy]);
-                E->X[lev][m][2][node] = 
+                E->X[lev][m][2][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*sin(fi1[lev][nodesy]);
-                E->X[lev][m][3][node] = 
+                E->X[lev][m][3][node] =
                             E->sphere.R[lev][i]*cos(theta1[lev][nodesx]);
                 }
              }
@@ -135,16 +135,16 @@ if(E->control.coor==1)   {
  }
 
 else if(E->control.coor==0)   {
-  
 
+  /*
   for(i=1;i<=5;i++)  {
   x[i] = (double *) malloc((E->parallel.nproc+1)*sizeof(double));
   y[i] = (double *) malloc((E->parallel.nproc+1)*sizeof(double));
   z[i] = (double *) malloc((E->parallel.nproc+1)*sizeof(double));
+  */
   tt = (double *) malloc((4+1)*sizeof(double));
   ff = (double *) malloc((4+1)*sizeof(double));
 
-  }
 
   temp = E->lmesh.NOY[E->mesh.levmax]*E->lmesh.NOX[E->mesh.levmax];
 
@@ -197,11 +197,11 @@ else if(E->control.coor==0)   {
                 E->SX[lev][m][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][m][1][node] = 
+                E->X[lev][m][1][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*cos(SX[1][nodes]);
-                E->X[lev][m][2][node] = 
+                E->X[lev][m][2][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*sin(SX[1][nodes]);
-                E->X[lev][m][3][node] = 
+                E->X[lev][m][3][node] =
                             E->sphere.R[lev][i]*cos(SX[0][nodes]);
                 }
              }
@@ -212,6 +212,8 @@ else if(E->control.coor==0)   {
 
   free ((void *)SX[0]);
   free ((void *)SX[1]);
+  free ((void *)tt);
+  free ((void *)ff);
 }
 
   return;
@@ -219,7 +221,7 @@ else if(E->control.coor==0)   {
 
 /* =================================================
   this routine evenly divides the arc between points
-  1 and 2 in a great cicle. The word "evenly" means 
+  1 and 2 in a great cicle. The word "evenly" means
   anglewise evenly.
  =================================================*/
 
@@ -248,7 +250,7 @@ void even_divide_arc12(elx,x1,y1,z1,x2,y2,z2,theta,fi)
 
 
 /* =================================================
-  rotate the mesh 
+  rotate the mesh
  =================================================*/
 void rotate_mesh(E,m,icap)
    struct All_variables *E;
@@ -260,15 +262,15 @@ void rotate_mesh(E,m,icap)
 
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
     for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-      t[0] = E->X[lev][m][1][i]*E->sphere.dircos[1][1]+ 
-             E->X[lev][m][2][i]*E->sphere.dircos[1][2]+ 
-             E->X[lev][m][3][i]*E->sphere.dircos[1][3]; 
-      t[1] = E->X[lev][m][1][i]*E->sphere.dircos[2][1]+ 
-             E->X[lev][m][2][i]*E->sphere.dircos[2][2]+ 
-             E->X[lev][m][3][i]*E->sphere.dircos[2][3]; 
-      t[2] = E->X[lev][m][1][i]*E->sphere.dircos[3][1]+ 
-             E->X[lev][m][2][i]*E->sphere.dircos[3][2]+ 
-             E->X[lev][m][3][i]*E->sphere.dircos[3][3]; 
+      t[0] = E->X[lev][m][1][i]*E->sphere.dircos[1][1]+
+             E->X[lev][m][2][i]*E->sphere.dircos[1][2]+
+             E->X[lev][m][3][i]*E->sphere.dircos[1][3];
+      t[1] = E->X[lev][m][1][i]*E->sphere.dircos[2][1]+
+             E->X[lev][m][2][i]*E->sphere.dircos[2][2]+
+             E->X[lev][m][3][i]*E->sphere.dircos[2][3];
+      t[2] = E->X[lev][m][1][i]*E->sphere.dircos[3][1]+
+             E->X[lev][m][2][i]*E->sphere.dircos[3][2]+
+             E->X[lev][m][3][i]*E->sphere.dircos[3][3];
 
       E->X[lev][m][1][i] = t[0];
       E->X[lev][m][2][i] = t[1];
