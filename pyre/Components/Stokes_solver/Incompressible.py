@@ -16,13 +16,6 @@ class Incompressible(CitcomComponent):
     def __init__(self, name, facility):
         CitcomComponent.__init__(self, name, facility)
 
-        self.inventory.mg_cycle = 1
-        self.inventory.down_heavy = 3
-        self.inventory.up_heavy = 3
-
-        self.inventory.vlowstep = 1000
-        self.inventory.vhighstep = 3
-        self.inventory.piterations = 1000
         return
 
 
@@ -76,10 +69,17 @@ class Incompressible(CitcomComponent):
 
             prop.float("accuracy", 1.0e-6),
             prop.float("tole_compressibility", 1.0e-7),
+            prop.int("mg_cycle", 1),
+            prop.int("down_heavy", 3),
+            prop.int("up_heavy", 3),
+
+            prop.int("vlowstep", 1000),
+            prop.int("vhighstep", 3),
+            prop.int("piterations", 1000),
 
 	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.14 2003/10/29 18:40:01 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.15 2004/08/02 16:34:26 ces74 Exp $"
 
 # End of file
