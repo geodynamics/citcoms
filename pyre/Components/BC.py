@@ -12,6 +12,12 @@ from CitcomComponent import CitcomComponent
 class BC(CitcomComponent):
 
 
+    def setProperties(self):
+        self.CitcomModule.BC_set_properties(self.all_variables, self.inventory)
+        return
+
+
+
     class Inventory(CitcomComponent.Inventory):
 
         import pyre.properties
@@ -43,6 +49,6 @@ class BC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: BC.py,v 1.6 2003/07/25 20:43:29 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.7 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

@@ -12,21 +12,18 @@ from pyre.components.Component import Component
 class CitcomComponent(Component):
 
 
-    def __init__(self, name, facility, CitcomModule):
-        Component.__init__(self, name, facility)
-	self.CitcomModule = CitcomModule
-        return
-
-
-
-    def setProperties(self, all_variables, PropertySetter):
+    def initialize(self, Module, all_variables):
+        self.CitcomModule = Module
         self.all_variables = all_variables
-	PropertySetter(self.all_variables, self.inventory)
         return
 
+
+
+    def setProperties(self):
+        return
 
 
 # version
-__id__ = "$Id: CitcomComponent.py,v 1.2 2003/08/19 21:24:35 tan2 Exp $"
+__id__ = "$Id: CitcomComponent.py,v 1.3 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

@@ -9,19 +9,19 @@
 
 
 
-def fullSphere(CitcomModule):
+def fullSphere(name, facility='mesher'):
     from FullSphere import FullSphere
-    return FullSphere('full-sphere', 'mesher', CitcomModule)
+    return FullSphere(name, facility)
 
 
 
-def regionalSphere(CitcomModule):
+def regionalSphere(name, facility='mesher'):
     from RegionalSphere import RegionalSphere
-    return RegionalSphere('regional-sphere', 'mesher', CitcomModule)
+    return RegionalSphere(name, facility)
 
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.3 2003/08/01 19:05:36 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.4 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

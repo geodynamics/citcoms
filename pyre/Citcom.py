@@ -7,39 +7,34 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Component import Component
+from pyre.components.Solver import Solver
 import journal
 
 
-class Citcom(Component):
-
-
-    def __init__(self, name):
-        Component.__init__(self, "citcom", name)
-        return
-
+class Citcom(Solver):
 
 
     def run(self):
-        self.start_simulation()
+        self.startSimulation()
         self.run_simulation()
-        self.end_simulation()
+        self.endSimulation()
         return
 
 
 
-    def start_simulation(self):
+    def startSimulation(self):
 	#journal.info("staging").log("setup MPI")
         comm = self.get_communicator()
 
-        E = self.CitcomModule.citcom_init(comm.handle())
-        self.all_variables = E
+        self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 
+        self.initialize()
 	self.CitcomModule.global_default_values(self.all_variables)
         self.CitcomModule.set_signal()
-        self._setProperties()
+        self.setProperties()
 
-	self._start_time = self.CitcomModule.CPU_time()
+	self._start_cpu_time = self.CitcomModule.CPU_time()
+        self._time = 0
         self._cycles = 0
 
 	self.rank = comm.rank
@@ -68,28 +63,36 @@ class Citcom(Component):
 	# solve for 0th time step velocity and pressure
 	vsolver.run()
 
-        self._output(self._cycles)
+        self.save(self._cycles)
 
 	while self._cycles < self.inventory.param.inventory.maxstep:
-	    self._cycles += 1
 
-	    tsolver.run()
+	    #tsolver.run()
+            if not self._cycles:
+                self.CitcomModule.PG_timestep_init(self.all_variables)
+
+            dt = tsolver.stable_timestep()
+            self.CitcomModule.PG_timestep_solve(self.all_variables, dt)
+
 	    vsolver.run()
+
+            self._time += dt
+	    self._cycles += 1
 
             if not (self._cycles %
                     self.inventory.param.inventory.storage_spacing):
-                self._output(self._cycles)
+                self.save(self._cycles)
 
 
         return
 
 
 
-    def end_simulation(self):
-        total_time = self.CitcomModule.CPU_time() - self._start_time
+    def endSimulation(self):
+        total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
         if not self.rank:
             print "Average cpu time taken for velocity step = %f" % (
-                total_time / self._cycles )
+                total_cpu_time / self._cycles )
 
 	#self.CitcomModule.finalize()
 
@@ -110,50 +113,87 @@ class Citcom(Component):
 
 
 
-    def _output(self, cycles):
+    def save(self, cycles):
         self.CitcomModule.output(self.all_variables, cycles)
         return
 
 
 
-    def _setProperties(self):
+    def initialize(self):
+	inv = self.inventory
+        CitcomModule = self.CitcomModule
+        all_variables = self.all_variables
+
+        inv.mesher.initialize(CitcomModule, all_variables)
+        inv.tsolver.initialize(CitcomModule, all_variables)
+        inv.vsolver.initialize(CitcomModule, all_variables)
+
+        inv.bc.initialize(CitcomModule, all_variables)
+        inv.const.initialize(CitcomModule, all_variables)
+        inv.ic.initialize(CitcomModule, all_variables)
+        inv.param.initialize(CitcomModule, all_variables)
+        inv.phase.initialize(CitcomModule, all_variables)
+        inv.visc.initialize(CitcomModule, all_variables)
+        return
+
+
+
+    def setProperties(self):
 	inv = self.inventory
 
-        inv.mesher.setProperties(self.all_variables,
-                                 self.CitcomModule.mesher_set_properties)
-        inv.tsolver.setProperties(self.all_variables,
-                                  self.CitcomModule.tsolver_set_properties)
-        inv.vsolver.setProperties(self.all_variables,
-                                  self.CitcomModule.vsolver_set_properties)
+        inv.mesher.setProperties()
+        inv.tsolver.setProperties()
+        inv.vsolver.setProperties()
 
-        inv.bc.setProperties(self.all_variables,
-                             self.CitcomModule.BC_set_properties)
-        inv.const.setProperties(self.all_variables,
-                                self.CitcomModule.Const_set_properties)
-        inv.ic.setProperties(self.all_variables,
-                             self.CitcomModule.IC_set_properties)
-        inv.param.setProperties(self.all_variables,
-                                self.CitcomModule.Param_set_properties)
-        inv.phase.setProperties(self.all_variables,
-                                self.CitcomModule.Phase_set_properties)
-        inv.visc.setProperties(self.all_variables,
-                               self.CitcomModule.Visc_set_properties)
+        inv.bc.setProperties()
+        inv.const.setProperties()
+        inv.ic.setProperties()
+        inv.param.setProperties()
+        inv.phase.setProperties()
+        inv.visc.setProperties()
 
         return
 
 
 
-    class Inventory(Component.Inventory):
+    class Inventory(Solver.Inventory):
 
+        import pyre.facilities
         import pyre.properties
+
+        # facilities
+        from CitcomS.Facilities.TSolver import TSolver
+        from CitcomS.Facilities.VSolver import VSolver
+
+        # component modules
+        import CitcomS.Components.Advection_diffusion as Advection_diffusion
+        import CitcomS.Components.Stokes_solver as Stokes_solver
+
+        # components
+        from CitcomS.Components.BC import BC
+        from CitcomS.Components.Const import Const
+        from CitcomS.Components.IC import IC
+        from CitcomS.Components.Param import Param
+        from CitcomS.Components.Phase import Phase
+        from CitcomS.Components.Visc import Visc
 
         inventory = [
 
             pyre.properties.sequence("ranklist", []),
 
+            TSolver("tsolver", Advection_diffusion.temperature_diffadv("temp")),
+            VSolver("vsolver", Stokes_solver.incompressibleNewtonian("incomp-newtonian")),
+
+            pyre.facilities.facility("bc", default=BC("bc", "bc")),
+            pyre.facilities.facility("const", default=Const("const", "const")),
+            pyre.facilities.facility("ic", default=IC("ic", "ic")),
+            pyre.facilities.facility("param", default=Param("param", "param")),
+            pyre.facilities.facility("phase", default=Phase("phase", "phase")),
+            pyre.facilities.facility("visc", default=Visc("visc", "visc")),
+
             ]
 
 # version
-__id__ = "$Id: Citcom.py,v 1.5 2003/08/25 19:16:04 tan2 Exp $"
+__id__ = "$Id: Citcom.py,v 1.6 2003/08/27 20:52:46 tan2 Exp $"
 
 # End of file

@@ -12,17 +12,6 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 class Sphere(CitcomComponent):
 
 
-    def __init__(self, name, facility, CitcomModule):
-        # bind component method to facility method
-        CitcomModule.mesher_set_properties = CitcomModule.Sphere_set_properties
-
-        CitcomComponent.__init__(self, name, facility, CitcomModule)
-
-	# will be overridden by child class
-	self.inventory.nproc_surf = None
-        return
-
-
 
     def setup(self):
         return
@@ -44,6 +33,12 @@ class Sphere(CitcomComponent):
 
     def launch(self):
 	raise NotImplementedError, "not implemented"
+        return
+
+
+
+    def setProperties(self):
+        self.CitcomModule.Sphere_set_properties(self.all_variables, self.inventory)
         return
 
 
@@ -97,6 +92,6 @@ class Sphere(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Sphere.py,v 1.2 2003/08/25 19:16:04 tan2 Exp $"
+__id__ = "$Id: Sphere.py,v 1.3 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

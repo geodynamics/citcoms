@@ -13,11 +13,8 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 class Advection_diffusion(CitcomComponent):
 
 
-    def __init__(self, name, facility, CitcomModule):
-        # bind component method to facility method
-        CitcomModule.tsolver_set_properties = CitcomModule.Advection_diffusion_set_properties
-
-        CitcomComponent.__init__(self, name, facility, CitcomModule)
+    def setProperties(self):
+        self.CitcomModule.Advection_diffusion_set_properties(self.all_variables, self.inventory)
         return
 
 
@@ -77,6 +74,6 @@ class Advection_diffusion(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.14 2003/08/26 20:58:28 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.15 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

@@ -12,6 +12,11 @@ from CitcomComponent import CitcomComponent
 class Phase(CitcomComponent):
 
 
+    def setProperties(self):
+        self.CitcomModule.Phase_set_properties(self.all_variables, self.inventory)
+        return
+
+
     class Inventory(CitcomComponent.Inventory):
 
 
@@ -37,6 +42,6 @@ class Phase(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: Phase.py,v 1.5 2003/07/25 20:43:29 tan2 Exp $"
+__id__ = "$Id: Phase.py,v 1.6 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file

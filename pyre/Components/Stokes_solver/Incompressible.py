@@ -13,14 +13,6 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 class Incompressible(CitcomComponent):
 
 
-    def __init__(self, name, facility, CitcomModule):
-        # bind component method to facility method
-        CitcomModule.vsolver_set_properties = CitcomModule.Incompressible_set_properties
-
-        CitcomComponent.__init__(self, name, facility, CitcomModule)
-        return
-
-
 
     def run(self):
         self.CitcomModule.general_stokes_solver(self.all_variables)
@@ -41,6 +33,12 @@ class Incompressible(CitcomComponent):
 
     #def fini(self):
 	#return
+
+
+
+    def setProperties(self):
+        self.CitcomModule.Incompressible_set_properties(self.all_variables, self.inventory)
+        return
 
 
 
@@ -67,6 +65,6 @@ class Incompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.11 2003/08/25 19:16:04 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.12 2003/08/27 20:52:47 tan2 Exp $"
 
 # End of file
