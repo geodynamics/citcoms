@@ -14,6 +14,12 @@ class CoarseGridExchanger(Exchanger):
 
     def initialize(self, solver):
         Exchanger.initialize(self, solver)
+
+	# restart and use temperautre field of previous run?
+        self.restart = solver.inventory.ic.inventory.restart
+        if self.restart:
+            self.ic_initTemperature = solver.inventory.ic.initTemperature
+
 	self.all_variables = solver.all_variables
         self.boundary = range(self.numSrc)
         self.source["BC"] = range(self.numSrc)
@@ -172,6 +178,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.24 2003/12/22 17:47:59 puru Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.25 2003/12/23 07:02:06 puru Exp $"
 
 # End of file

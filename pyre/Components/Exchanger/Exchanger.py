@@ -39,11 +39,6 @@ class Exchanger(Component):
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
 
-        # restart and use temperautre field of previous run?
-        self.restart = solver.inventory.ic.inventory.restart
-        if self.restart:
-            self.ic_initTemperature = solver.inventory.ic.initTemperature
-
         # only one of remotePlus is sinkComm
         self.sinkComm = solver.remotePlus[self.communicator.rank]
         return
@@ -125,6 +120,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.14 2003/12/22 17:47:59 puru Exp $"
+__id__ = "$Id: Exchanger.py,v 1.15 2003/12/23 07:02:06 puru Exp $"
 
 # End of file
