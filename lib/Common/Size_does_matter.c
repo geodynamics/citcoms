@@ -17,9 +17,9 @@ void twiddle_thumbs(yawn,scratch_groin)
 
 
 /*	==================================================================================
-	Function to give the global shape function from the local: Assumes ORTHOGONAL MESH 
+	Function to give the global shape function from the local: Assumes ORTHOGONAL MESH
 	==================================================================================      */
-	
+
 void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
      struct All_variables *E;
      int el,m;
@@ -28,7 +28,7 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
      struct Shape_function_dA *dOmega;
      int pressure,lev,sphere;
      double rtf[4][9];
-{	
+{
   int i,j,k,d,e;
   double scale1,scale2,scale3;
   double area;
@@ -39,9 +39,9 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
 
   struct Shape_function LGN;
   struct Shape_function_dx LGNx;
- 
+
   double dxda[4][4],cof[4][4],x[4],bc[4][4];
- 
+
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
@@ -66,16 +66,16 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
       for(d=1;d<=dims;d++)
 	for(e=1;e<=dims;e++)
 	  for(i=1;i<=ends;i++)
-            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]] 
+            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
                * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
 
-      jacobian = determinant(dxda,E->mesh.nsd);  
+      jacobian = determinant(dxda,E->mesh.nsd);
       dOmega->vpt[k] = jacobian;
 
       for(d=1;d<=dims;d++)
         for(e=1;e<=dims;e++)
-          cof[d][e]=cofactor(dxda,d,e,dims); 
- 
+          cof[d][e]=cofactor(dxda,d,e,dims);
+
       if (sphere)   {
 
         form_rtf_bc(k,x,rtf,bc);
@@ -83,17 +83,17 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
           for(d=1;d<=dims;d++)         {
             LGNx.vpt[GNVXINDEX(d-1,j,k)] = 0.0;
             for(e=1;e<=dims;e++)
-              LGNx.vpt[GNVXINDEX(d-1,j,k)] += 
+              LGNx.vpt[GNVXINDEX(d-1,j,k)] +=
                  E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
 
             LGNx.vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
-            }    
+            }
 
         for(j=1;j<=ends;j++)
           for(d=1;d<=dims;d++)         {
-            GNx->vpt[GNVXINDEX(d-1,j,k)] = 
+            GNx->vpt[GNVXINDEX(d-1,j,k)] =
                 bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
-              + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)] 
+              + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
               + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
             }
         }
@@ -102,15 +102,15 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
           for(d=1;d<=dims;d++)         {
             GNx->vpt[GNVXINDEX(d-1,j,k)] = 0.0;
             for(e=1;e<=dims;e++)
-              GNx->vpt[GNVXINDEX(d-1,j,k)] += 
+              GNx->vpt[GNVXINDEX(d-1,j,k)] +=
                  E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
 
             GNx->vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
-            }    
+            }
         }
       }     /* end for k */
     }    /* end for pressure */
-	
+
   if(pressure > 0 && pressure < 3) {
     for(k=1;k<=ppts;k++)         {   /* all of the ppoints */
       for(d=1;d<=dims;d++) {
@@ -130,12 +130,12 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
             dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
                      * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
 
-      jacobian = determinant(dxda,E->mesh.nsd);     
+      jacobian = determinant(dxda,E->mesh.nsd);
       dOmega->ppt[k] = jacobian;
-	      
+
       for(d=1;d<=dims;d++)
         for(e=1;e<=dims;e++)
-          cof[d][e]=cofactor(dxda,d,e,E->mesh.nsd); 
+          cof[d][e]=cofactor(dxda,d,e,E->mesh.nsd);
 
       if (sphere)   {
         form_rtf_bc(k,x,rtf,bc);
@@ -143,15 +143,15 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
           for(d=1;d<=dims;d++)  {
             LGNx.ppt[GNPXINDEX(d-1,j,k)]=0.0;
             for(e=1;e<=dims;e++)
-              LGNx.ppt[GNPXINDEX(d-1,j,k)] += 
-                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d]; 
+              LGNx.ppt[GNPXINDEX(d-1,j,k)] +=
+                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
 	    LGNx.ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
             }
         for(j=1;j<=ends;j++)
           for(d=1;d<=dims;d++)         {
-            GNx->ppt[GNPXINDEX(d-1,j,k)] 
+            GNx->ppt[GNPXINDEX(d-1,j,k)]
              = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
-             + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)] 
+             + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
              + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
           }
         }
@@ -161,8 +161,8 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
           for(d=1;d<=dims;d++)  {
             GNx->ppt[GNPXINDEX(d-1,j,k)]=0.0;
             for(e=1;e<=dims;e++)
-              GNx->ppt[GNPXINDEX(d-1,j,k)] += 
-                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d]; 
+              GNx->ppt[GNPXINDEX(d-1,j,k)] +=
+                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
 	    GNx->ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
             }
         }
@@ -208,11 +208,11 @@ void construct_surf_det (E)
      {
 
   int ll,mm,m,ii,i,k,d,e,es,el,node;
- 
+
   double jacobian;
   double determinant();
   double cofactor();
- 
+
   const int oned = onedvpoints[E->mesh.nsd];
 
   double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
@@ -235,7 +235,7 @@ void construct_surf_det (E)
     dxdy[3][3] = cos(to);
 
     for(i=1;i<=oned;i++) {     /* nodes */
-    
+
       e = i+oned;
       node = E->ien[m][el].node[e];
       xx[1][i] = E->x[m][1][node]*dxdy[1][1]
@@ -276,12 +276,12 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
      struct Shape_function1_dA *dGammax;
 {
   int ii,i,k,d,e,node;
- 
+
   double jacobian;
   double determinant();
   double cofactor();
   double **dmatrix();
- 
+
   const int oned = onedvpoints[E->mesh.nsd];
 
   double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
@@ -336,13 +336,13 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
 
 /*   ======================================================================
      ======================================================================  */
-	
+
 void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
      struct All_variables *E;
      int el,nodal,m;
      struct Shape_function *GM;
      struct Shape_function_dA *dGammax;
-{ 
+{
   int i,k,d,e,h,l,kk;
 
   double jacobian;
@@ -352,9 +352,9 @@ void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
-  
+
   double dxda[4][4],cof[4][4];
-  
+
 
    for(k=1;k<=vpoints[E->mesh.nsd];k++)  {
 
@@ -374,7 +374,7 @@ void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
           }
 
       if (cof[3][3]!=0.0)
-        jacobian = sqrt(abs(determinant(cof,E->mesh.nsd)))/cof[3][3]; 
+        jacobian = sqrt(abs(determinant(cof,E->mesh.nsd)))/cof[3][3];
 
       dGammax->vpt[k] = jacobian;
 
@@ -382,19 +382,177 @@ void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
 
   return;
 }
-/* ====================================================   */  
+
+
+/*   ======================================================================
+     For calculating pressure boundary term --- Choi, 11/13/02
+     ======================================================================  */
+void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
+     struct All_variables *E;
+     int el,far,m,NS;
+     struct Shape_function1 *GM;
+     struct Shape_function1_dx *GMx;
+     struct Shape_function_side_dA *dGamma;
+{
+  int ii,i,j,k,d,a,e,node;
+
+  double jacobian;
+  double determinant();
+  double cofactor();
+  void   form_rtf_bc();
+
+  struct Shape_function1 LGM;
+  struct Shape_function1_dx LGMx;
+
+  int dims[2][3];
+  int *elist[3];
+  const int oned = onedvpoints[E->mesh.nsd];
+  const int vpts = vpoints[E->mesh.nsd-1];
+  const int ppts = ppoints[E->mesh.nsd-1];
+  const int ends = enodes[E->mesh.nsd-1];
+  double to,fo,ro,xx[4][5],dxda[4][4],dxdy[4][4];
+
+  /******************************************/
+  elist[0] = (int *)malloc(9*sizeof(int));
+  elist[1] = (int *)malloc(9*sizeof(int));
+  elist[2] = (int *)malloc(9*sizeof(int));
+  /*for NS boundary elements */
+  elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
+  elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
+  /*for EW boundary elements */
+  elist[1][0]=0; elist[1][1]=1; elist[1][2]=2; elist[1][3]=6; elist[1][4]=5;
+  elist[1][5]=4; elist[1][6]=3; elist[1][7]=7; elist[1][8]=8;
+  /*for TB boundary elements */
+  elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
+  elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
+  /******************************************/
+
+  to = E->eco[m][el].centre[1];
+  fo = E->eco[m][el].centre[2];
+  ro = E->eco[m][el].centre[3];
+
+  dxdy[1][1] = cos(to)*cos(fo);
+  dxdy[1][2] = cos(to)*sin(fo);
+  dxdy[1][3] = -sin(to);
+  dxdy[2][1] = -sin(fo);
+  dxdy[2][2] = cos(fo);
+  dxdy[2][3] = 0.0;
+  dxdy[3][1] = sin(to)*cos(fo);
+  dxdy[3][2] = sin(to)*sin(fo);
+  dxdy[3][3] = cos(to);
+
+  /*for side elements*/
+  for(i=1;i<=ends;i++) {
+    a = elist[NS][i+far*ends];
+    node=E->ien[m][el].node[a];
+    xx[1][i] = E->x[m][1][node]*dxdy[1][1]
+      + E->x[m][2][node]*dxdy[1][2]
+      + E->x[m][3][node]*dxdy[1][3];
+    xx[2][i] = E->x[m][1][node]*dxdy[2][1]
+      + E->x[m][2][node]*dxdy[2][2]
+      + E->x[m][3][node]*dxdy[2][3];
+    xx[3][i] = E->x[m][1][node]*dxdy[3][1]
+      + E->x[m][2][node]*dxdy[3][2]
+      + E->x[m][3][node]*dxdy[3][3];
+  }
+
+  for(k=1;k<=oned;k++)    {
+    for(d=1;d<=E->mesh.nsd-1;d++)
+      for(e=1;e<=E->mesh.nsd-1;e++)
+	dxda[d][e]=0.0;
+
+    if(NS==0) {
+      for(i=1;i<=oned;i++) {
+	dims[NS][1]=2; dims[NS][2]=3;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++) {
+	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+	  }
+      }
+    }
+    else if(NS==1) {
+      for(i=1;i<=oned;i++) {
+	dims[NS][1]=1; dims[NS][2]=3;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++) {
+	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+	  }
+      }
+    }
+    else if(NS==2) {
+      for(i=1;i<=oned;i++) {
+	dims[NS][1]=1; dims[NS][2]=2;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++) {
+	    dxda[d][e] += xx[dims[NS][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
+	  }
+      }
+    }
+
+    jacobian = determinant(dxda,E->mesh.nsd-1);
+    dGamma->vpt[k] = jacobian;
+  }
+
+  for(i=1;i<=ppts;i++)    { /* all of the ppoints*/
+    for(d=1;d<=E->mesh.nsd-1;d++)
+      for(e=1;e<=E->mesh.nsd-1;e++)
+	dxda[d][e]=0.0;
+
+    if(NS==0) {
+      for(k=1;k<=ends;k++) {
+	dims[NS][1]=2; dims[NS][2]=3;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++)
+	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
+      }
+    }
+    else if(NS==1) {
+      for(k=1;k<=ends;k++) {
+	dims[NS][1]=1; dims[NS][2]=3;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++) {
+	    a = elist[NS][k+far*ends];
+	    node=E->ien[m][el].node[a];
+	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
+	  }
+      }
+    }
+    else if(NS==2) {
+      for(k=1;k<=ends;k++) {
+	dims[NS][1]=1; dims[NS][2]=2;
+	for(d=1;d<=E->mesh.nsd-1;d++)
+	  for(e=1;e<=E->mesh.nsd-1;e++) {
+	    a = elist[NS][k+far*ends];
+	    node=E->ien[m][el].node[a];
+	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
+	  }
+      }
+    }
+
+    jacobian = determinant(dxda,E->mesh.nsd-1);
+    dGamma->ppt[i] = jacobian;
+  }
+
+  for(i=0;i<3;i++)
+    free((void *) elist[i]);
+
+  return;
+}
+
+
+/* ====================================================   */
 
 void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
      struct All_variables *E;
      struct CC *cc;
      struct CCX *ccx;
      int lev,el,m,pressure;
-{	
+{
   int a,i,j,k,d,e,es,nel_surface;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
- 
+
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
@@ -402,7 +560,7 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
 
   if (pressure==0)           {
     for(k=1;k<=vpts;k++)           {       /* all of the vpoints */
-      for(d=1;d<=dims;d++)   
+      for(d=1;d<=dims;d++)
           x[d]=0.0;
 
       for(d=1;d<=dims;d++)
@@ -444,7 +602,7 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              cc->vpt[BVINDEX(i,j,a,k)] = 
+              cc->vpt[BVINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               ccx->vpt[BVXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
@@ -459,7 +617,7 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
    else if (pressure)  {
 
       for(k=1;k<=ppts;k++)           {       /* all of the ppoints */
-        for(d=1;d<=dims;d++)   
+        for(d=1;d<=dims;d++)
           x[d]=0.0;
 
         for(d=1;d<=dims;d++)
@@ -501,7 +659,7 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              cc->ppt[BPINDEX(i,j,a,k)] = 
+              cc->ppt[BPINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               ccx->ppt[BPXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
@@ -519,15 +677,179 @@ void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
    return;
   }
 
+void test_function(struct All_variables *E, struct CC *cc, struct CCX *ccx, int el,int m, int lev, int NS, int far)
+{
+
+  fprintf(stderr,"transferred: el=%d m=%d lev=%d NS=%d far=%d\n",
+	  el,m,lev,NS,far);
+
+  return;
+}
+
+void construct_side_c3x3matrix_el(struct All_variables *E,int el,struct CC *cc,struct CCX *ccx,int lev,int m,int pressure,int NS,int far)
+{
+  int a,aa,i,j,k,d,e,es,nel_surface;
+  double cofactor(),myatan();
+  double x[4],u[4][4],ux[3][4][4],ua[4][4];
+  double costt,cosff,sintt,sinff,rr,tt,ff;
+
+  int *elist[3];
+  const int dims=E->mesh.nsd;
+  const int ends=enodes[dims-1];
+  const int vpts=onedvpoints[dims];
+  const int ppts=ppoints[dims];
+
+  /******************************************/
+  elist[0] = (int *)malloc(9*sizeof(int));
+  elist[1] = (int *)malloc(9*sizeof(int));
+  elist[2] = (int *)malloc(9*sizeof(int));
+  /*for NS boundary elements */
+  elist[0][0]=0; elist[0][1]=1; elist[0][2]=4; elist[0][3]=8; elist[0][4]=5;
+  elist[0][5]=2; elist[0][6]=3; elist[0][7]=7; elist[0][8]=6;
+  /*for EW boundary elements */
+  elist[1][0]=0; elist[1][1]=1; elist[1][2]=2; elist[1][3]=6; elist[1][4]=5;
+  elist[1][5]=4; elist[1][6]=3; elist[1][7]=7; elist[1][8]=8;
+  /*for TB boundary elements */
+  elist[2][0]=0; elist[2][1]=1; elist[2][2]=2; elist[2][3]=3; elist[2][4]=4;
+  elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
+  /******************************************/
+
+  if(pressure==0) {
+    fprintf(stderr,"should see this(0)\n");
+    for(k=1;k<=vpts;k++) {       /* all of the vpoints */
+      for(d=1;d<=dims;d++)
+	x[d]=0.0;
+      fprintf(stderr,"should see this(1)\n");
+      for(d=1;d<=dims;d++)
+	for(aa=1;aa<=ends;aa++) {
+	  a=elist[NS][aa+far*ends];
+	  fprintf(stderr,"lev=%d m=%d el=%d a=%d NS=%d far=%d\n",lev,m,el,a,NS,far);
+	  fprintf(stderr,"IEN=%d\n",E->IEN[lev][m][el].node[a]);
+	  x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+	    *E->M.vpt[GMVINDEX(aa,k)];
+
+	}
+
+      fprintf(stderr,"should see this(2)\n");
+      rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+      tt = acos(x[3]/rr);
+      ff = myatan(x[2],x[1]);
+      fprintf(stderr,"should see this(3)\n");
+
+      costt = cos(tt);
+      cosff = cos(ff);
+      sintt = sin(tt);
+      sinff = sin(ff);
+
+      u[1][1] = costt*cosff; u[1][2] = costt*sinff;  u[1][3] =-sintt;
+      u[2][1] =-sinff;       u[2][2] = cosff;        u[2][3] = 0.0;
+      u[3][1] = sintt*cosff; u[3][2] = sintt*sinff;  u[3][3] = costt;
+
+      ux[1][1][1] =-sintt*cosff;  ux[1][1][2] =-sintt*sinff;  ux[1][1][3] =-costt;
+      ux[2][1][1] =-costt*sinff;  ux[2][1][2] = costt*cosff;  ux[2][1][3] =0.0;
+      ux[1][2][1] =0.0;           ux[1][2][2] = 0.0;          ux[1][2][3] =0.0;
+      ux[2][2][1] =-cosff;        ux[2][2][2] =-sinff;        ux[2][2][3] =0.0;
+      ux[1][3][1] = costt*cosff;  ux[1][3][2] = costt*sinff;  ux[1][3][3] =-sintt;
+      ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
+
+      for(aa=1;aa<=ends;aa++) {
+	a=elist[NS][aa+far*ends];
+	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
+	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
+	costt = cos(tt);
+	cosff = cos(ff);
+	sintt = sin(tt);
+	sinff = sin(ff);
+
+	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
+	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
+	ua[3][1] = sintt*cosff; ua[3][2] = sintt*sinff;  ua[3][3] = costt;
+
+	for (i=1;i<=dims;i++)
+	  for (j=1;j<=dims;j++)   {
+	    cc->vpt[BVINDEX(i,j,a,k)] =
+	      ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
+	    ccx->vpt[BVXINDEX(i,j,1,a,k)] =
+	      ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
+	    ccx->vpt[BVXINDEX(i,j,2,a,k)] =
+	      ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
+	  }
+
+      }      /* end for local node */
+    }        /* end for int points */
+  }    /* end if */
+  else {
+    for(k=1;k<=ppts;k++) {       /* all of the ppoints */
+      for(d=1;d<=E->mesh.nsd;d++)
+       	x[d]=0.0;
+      for(a=1;a<=ends;a++) {
+       	aa=elist[NS][a+far*ends];
+       	x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[aa]]
+       	  *E->M.ppt[GMPINDEX(a,k)];
+      }
+      rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+      tt = acos(x[3]/rr);
+      ff = myatan(x[2],x[1]);
+
+      costt = cos(tt);
+      cosff = cos(ff);
+      sintt = sin(tt);
+      sinff = sin(ff);
+
+      u[1][1] = costt*cosff; u[1][2] = costt*sinff;  u[1][3] =-sintt;
+      u[2][1] =-sinff;       u[2][2] = cosff;        u[2][3] = 0.0;
+      u[3][1] = sintt*cosff; u[3][2] = sintt*sinff;  u[3][3] = costt;
+
+      ux[1][1][1] =-sintt*cosff;  ux[1][1][2] =-sintt*sinff;  ux[1][1][3] =-costt;
+      ux[2][1][1] =-costt*sinff;  ux[2][1][2] = costt*cosff;  ux[2][1][3] =0.0;
+      ux[1][2][1] =0.0;           ux[1][2][2] = 0.0;          ux[1][2][3] =0.0;
+      ux[2][2][1] =-cosff;        ux[2][2][2] =-sinff;        ux[2][2][3] =0.0;
+      ux[1][3][1] = costt*cosff;  ux[1][3][2] = costt*sinff;  ux[1][3][3] =-sintt;
+      ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
+
+      for(a=1;a<=ends;a++)   {
+	aa=elist[NS][a+far*ends];
+	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[aa]];
+	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[aa]];
+	costt = cos(tt);
+	cosff = cos(ff);
+	sintt = sin(tt);
+	sinff = sin(ff);
+
+	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
+	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
+	ua[3][1] = sintt*cosff; ua[3][2] = sintt*sinff;  ua[3][3] = costt;
+
+	for (i=1;i<=E->mesh.nsd;i++) {
+	  for (j=1;j<=E->mesh.nsd;j++) {
+	    cc->ppt[BPINDEX(i,j,a,k)] =
+	      ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
+	    ccx->ppt[BPXINDEX(i,j,1,a,k)] =
+	      ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
+	    ccx->ppt[BPXINDEX(i,j,2,a,k)] =
+	      ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
+	  }
+	}
+      }      /* end for local node */
+    }      /* end for int points */
+  }      /* end if pressure  */
+
+  for(i=0;i<3;i++)
+    free((void *) elist[i]);
+
+  return;
+}
+
+
 /* ======================================= */
 void construct_c3x3matrix(E)
      struct All_variables *E;
-{	
+{
   int m,a,i,j,k,d,e,es,el,nel_surface,lev;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
- 
+
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
@@ -541,7 +863,7 @@ void construct_c3x3matrix(E)
       el = es*E->lmesh.ELZ[lev];
 
       for(k=1;k<=vpts;k++)           {       /* all of the vpoints */
-        for(d=1;d<=dims;d++)   
+        for(d=1;d<=dims;d++)
           x[d]=0.0;
 
         for(d=1;d<=dims;d++)
@@ -583,7 +905,7 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][m][es].vpt[BVINDEX(i,j,a,k)] = 
+              E->CC[lev][m][es].vpt[BVINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               E->CCX[lev][m][es].vpt[BVXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
@@ -595,7 +917,7 @@ void construct_c3x3matrix(E)
         }        /* end for int points */
 
       for(k=1;k<=ppts;k++)           {       /* all of the ppoints */
-        for(d=1;d<=dims;d++)   
+        for(d=1;d<=dims;d++)
           x[d]=0.0;
 
         for(d=1;d<=dims;d++)
@@ -637,7 +959,7 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][m][es].ppt[BPINDEX(i,j,a,k)] = 
+              E->CC[lev][m][es].ppt[BPINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               E->CCX[lev][m][es].ppt[BPXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
@@ -660,7 +982,7 @@ void construct_c3x3matrix(E)
 
 /*  ==========================================
     construct the lumped mass matrix. The full
-    matrix is the FE integration of the density 
+    matrix is the FE integration of the density
     field. The lumped version is the diagonal
     matrix obtained by letting the shape function
     Na be delta(a,b)
@@ -694,7 +1016,7 @@ void mass_matrix(E)
       E->MASS[lev][m][node] = 0.0;
 
     for(e=1;e<=E->lmesh.NEL[lev];e++)  {
- 
+
       get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
 
       area = centre[1] = centre[2] = centre[3] = 0.0;
@@ -703,9 +1025,9 @@ void mass_matrix(E)
            n[node] = E->IEN[lev][m][e].node[node];
 
       for(i=1;i<=E->mesh.nsd;i++)  {
-        for(node=1;node<=enodes[E->mesh.nsd];node++)    
+        for(node=1;node<=enodes[E->mesh.nsd];node++)
            centre[i] += E->X[lev][m][i][E->IEN[lev][m][e].node[node]];
-            
+
     	centre[i] = centre[i]/enodes[E->mesh.nsd];
         }     /* end for i */
 
@@ -760,7 +1082,7 @@ void mass_matrix(E)
 
       for(node=1;node<=enodes[E->mesh.nsd];node++)
          E->TWW[lev][m][e].node[node] = temp[node];
-	 
+
 
       } /* end of ele*/
 
@@ -769,7 +1091,7 @@ void mass_matrix(E)
   if (E->control.NMULTIGRID||E->control.EMULTIGRID||E->mesh.levmax==lev)
      exchange_node_f(E,E->MASS[lev],lev);
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.NNO[lev];node++)
       E->MASS[lev][m][node] = 1.0/E->MASS[lev][m][node];
 
@@ -786,7 +1108,7 @@ void mass_matrix(E)
     for (node=1;node<=E->lmesh.NNO[lev];node++)
       fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
     }
-   } 
+   }
 
 /*   fprintf(E->fp_out,"output_mass \n"); */
 /*   for (m=1;m<=E->sphere.caps_per_proc;m++)   { */
