@@ -3,16 +3,18 @@
 /* them all established. 8.29.92 or 29.8.92 depending on your nationality*/
 
 #include <math.h>
-#include <sys/types.h>
 #include <string.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
 #include "citcom_init.h"
+#include "initial_temperature.h"
+#include "lith_age.h"
+#include "output.h"
 #include "parallel_related.h"
+#include "parsing.h"
 #include "phase_change.h"
 #include "interuption.h"
-#include "output.h"
 
 void read_instructions(filename)
      char *filename;
@@ -144,6 +146,210 @@ void read_instructions(filename)
     shutdown_parser(E);
 
     return;
+}
+
+
+
+
+void read_initial_settings(struct All_variables *E)
+{
+  void set_convection_defaults();
+  void set_2dc_defaults();
+  void set_3dc_defaults();
+  void set_3dsphere_defaults();
+  void set_cg_defaults();
+  void set_mg_defaults();
+  int m=E->parallel.me;
+
+  /* first the problem type (defines subsequent behaviour) */
+
+  input_string("Problem",E->control.PROBLEM_TYPE,NULL,m);
+  if ( strcmp(E->control.PROBLEM_TYPE,"convection") == 0)  {
+    E->control.CONVECTION = 1;
+    set_convection_defaults(E);
+  }
+
+  else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0) {
+    E->control.CONVECTION = 1;
+    E->control.CHEMISTRY_MODULE=1;
+    set_convection_defaults(E);
+  }
+
+  else {
+    fprintf(E->fp,"Unable to determine problem type, assuming convection ... \n");
+    E->control.CONVECTION = 1;
+    set_convection_defaults(E);
+  }
+
+  input_string("Geometry",E->control.GEOMETRY,NULL,m);
+  if ( strcmp(E->control.GEOMETRY,"cart2d") == 0)
+    { E->control.CART2D = 1;
+    set_2dc_defaults(E);}
+  else if ( strcmp(E->control.GEOMETRY,"axi") == 0)
+    { E->control.AXI = 1;
+    }
+  else if ( strcmp(E->control.GEOMETRY,"cart2pt5d") == 0)
+    { E->control.CART2pt5D = 1;
+    set_2pt5dc_defaults(E);}
+  else if ( strcmp(E->control.GEOMETRY,"cart3d") == 0)
+    { E->control.CART3D = 1;
+    set_3dc_defaults(E);}
+  else if ( strcmp(E->control.GEOMETRY,"sphere") == 0)
+    {
+      set_3dsphere_defaults(E);}
+  else
+    { fprintf(E->fp,"Unable to determine geometry, assuming cartesian 2d ... \n");
+    E->control.CART2D = 1;
+    set_2dc_defaults(E); }
+
+  input_string("Solver",E->control.SOLVER_TYPE,NULL,m);
+  if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0)
+    { E->control.CONJ_GRAD = 1;
+    set_cg_defaults(E);}
+  else if ( strcmp(E->control.SOLVER_TYPE,"multigrid") == 0)
+    { E->control.NMULTIGRID = 1;
+    set_mg_defaults(E);}
+  else if ( strcmp(E->control.SOLVER_TYPE,"multigrid-el") == 0)
+    { E->control.EMULTIGRID = 1;
+    set_mg_defaults(E);}
+  else
+    { if (E->parallel.me==0) fprintf(stderr,"Unable to determine how to solve, specify Solver=VALID_OPTION \n");
+    exit(0);
+    }
+
+
+  /* admin */
+
+  input_string("Spacing",E->control.NODE_SPACING,"regular",m);
+  if ( strcmp(E->control.NODE_SPACING,"regular") == 0)
+    E->control.GRID_TYPE = 1;
+  else if ( strcmp(E->control.NODE_SPACING,"bound_lyr") == 0)
+    E->control.GRID_TYPE = 2;
+  else if ( strcmp(E->control.NODE_SPACING,"region") == 0)
+    E->control.GRID_TYPE = 3;
+  else if ( strcmp(E->control.NODE_SPACING,"ortho_files") == 0)
+    E->control.GRID_TYPE = 4;
+  else
+    {  E->control.GRID_TYPE = 1; }
+
+  /* Information on which files to print, which variables of the flow to calculate and print.
+     Default is no information recorded (apart from special things for given applications.
+  */
+
+  input_string("datafile",E->control.data_file,"initialize",m);
+  input_string("datafile_old",E->control.old_P_file,"initialize",m);
+
+  input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
+  input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
+  input_int("mgunity",&(E->mesh.mgunity),"1",m);
+  input_int("levels",&(E->mesh.levels),"0",m);
+
+  input_int("coor",&(E->control.coor),"0",m);
+  input_string("coor_file",E->control.coor_file,"",m);
+
+  input_int("nprocx",&(E->parallel.nprocx),"1",m);
+  input_int("nprocy",&(E->parallel.nprocy),"1",m);
+  input_int("nprocz",&(E->parallel.nprocz),"1",m);
+  input_int("nproc_surf",&(E->parallel.nprocxy),"1",m);
+
+
+  input_boolean("node_assemble",&(E->control.NASSEMBLE),"off",m);
+  /* general mesh structure */
+
+  input_boolean("verbose",&(E->control.verbose),"off",m);
+  input_boolean("see_convergence",&(E->control.print_convergence),"off",m);
+
+  input_int("stokes_flow_only",&(E->control.stokes),"0",m);
+
+  input_int("tracer",&(E->control.tracer),"0",m);
+  input_string("tracer_file",E->control.tracer_file,"",m);
+
+  input_int("restart",&(E->control.restart),"0",m);
+  input_int("post_p",&(E->control.post_p),"0",m);
+  input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
+
+  /* for layers    */
+  input_float("z_cmb",&(E->viscosity.zcmb),"1.0",m);
+  input_float("z_lmantle",&(E->viscosity.zlm),"1.0",m);
+  input_float("z_410",&(E->viscosity.z410),"1.0",m);
+  input_float("z_lith",&(E->viscosity.zlith),"0.0",m);
+
+  /*  the start age and initial subduction history   */
+  input_float("start_age",&(E->control.start_age),"0.0",m);
+  input_int("reset_startage",&(E->control.reset_startage),"0",m);
+  input_int("zero_elapsed_time",&(E->control.zero_elapsed_time),"0",m);
+
+  input_int("ll_max",&(E->sphere.llmax),"1",m);
+  input_int("nlong",&(E->sphere.noy),"1",m);
+  input_int("nlati",&(E->sphere.nox),"1",m);
+  input_int("output_ll_max",&(E->sphere.output_llmax),"1",m);
+
+  input_int("topvbc",&(E->mesh.topvbc),"0",m);
+  input_int("botvbc",&(E->mesh.botvbc),"0",m);
+
+  input_int("file_vbcs",&(E->control.vbcs_file),"0",m);
+  input_string("vel_bound_file",E->control.velocity_boundary_file,"",m);
+
+  input_int("mat_control",&(E->control.mat_control),"0",m);
+  input_string("mat_file",E->control.mat_file,"",m);
+
+  input_float("topvbxval",&(E->control.VBXtopval),"0.0",m);
+  input_float("botvbxval",&(E->control.VBXbotval),"0.0",m);
+  input_float("topvbyval",&(E->control.VBYtopval),"0.0",m);
+  input_float("botvbyval",&(E->control.VBYbotval),"0.0",m);
+
+  input_int("toptbc",&(E->mesh.toptbc),"1",m);
+  input_int("bottbc",&(E->mesh.bottbc),"1",m);
+  input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
+  input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
+
+  input_float("dimenx",&(E->mesh.layer[1]),"1.0",m);
+  input_float("dimenz",&(E->mesh.layer[2]),"1.0",m);
+  input_float("dimeny",&(E->mesh.layer[3]),"1.0",m);
+
+
+  input_int("nodex",&(E->mesh.nox),"essential",m);
+  input_int("nodez",&(E->mesh.noz),"essential",m);
+  input_int("nodey",&(E->mesh.noy),"essential",m);
+
+  input_boolean("aug_lagr",&(E->control.augmented_Lagr),"off",m);
+  input_double("aug_number",&(E->control.augmented),"0.0",m);
+
+  input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
+
+  input_int("storage_spacing",&(E->control.record_every),"10",m);
+  input_int("cpu_limits_in_seconds",&(E->control.record_all_until),"5",m);
+
+  input_boolean("precond",&(E->control.precondition),"off",m);
+  input_int("mg_cycle",&(E->control.mg_cycle),"2,0,nomax",m);
+  input_int("down_heavy",&(E->control.down_heavy),"1,0,nomax",m);
+  input_int("up_heavy",&(E->control.up_heavy),"1,0,nomax",m);
+  input_double("accuracy",&(E->control.accuracy),"1.0e-4,0.0,1.0",m);
+
+  input_int("vhighstep",&(E->control.v_steps_high),"1,0,nomax",m);
+  input_int("vlowstep",&(E->control.v_steps_low),"250,0,nomax",m);
+  input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
+
+  /* data section */
+  input_float("Q0",&(E->control.Q0),"0.0",m);
+  input_float("layerd",&(E->data.layer_km),"2800.0",m);
+  input_float("gravacc",&(E->data.grav_acc),"9.81",m);
+  input_float("thermexp",&(E->data.therm_exp),"3.28e-5",m);
+  input_float("cp",&(E->data.Cp),"1200.0",m);
+  input_float("thermdiff",&(E->data.therm_diff),"8.0e-7",m);
+  input_float("density",&(E->data.density),"3340.0",m);
+  input_float("wdensity",&(E->data.density_above),"1030.0",m);
+  input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
+
+  phase_change_input(E);
+  lith_age_input(E);
+  viscosity_input(E);
+  tic_input(E);
+
+  (E->problem_settings)(E);
+
+
+  return;
 }
 
 
