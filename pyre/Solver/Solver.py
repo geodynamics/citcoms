@@ -9,7 +9,7 @@
 
 from pyre.components.Solver import Solver as BaseSolver
 import journal
-
+import sys
 
 class Solver(BaseSolver):
 
@@ -46,6 +46,7 @@ class Solver(BaseSolver):
         self.cpu_time = self.start_cpu_time
         self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
+        # if there is a coupler, initialize it
 	inv = self.inventory
         CitcomModule = self.CitcomModule
         all_variables = self.all_variables
@@ -111,9 +112,7 @@ class Solver(BaseSolver):
         # initialize const. related to mesh
         vsolver.launch()
         tsolver.launch()
-
         self.solveVelocities()
-
         return
 
 
@@ -156,7 +155,8 @@ class Solver(BaseSolver):
     def stableTimestep(self):
         tsolver = self.inventory.tsolver
         dt = tsolver.stable_timestep()
-
+        cmt="CitcomS' dt=%e\n" % dt
+        sys.stderr.write(cmt)
         if self.coupler:
             # negotiate with other solver(s)
             dt = self.coupler.stableTimestep(dt)
@@ -284,6 +284,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.35 2004/01/08 23:43:18 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.36 2004/01/13 03:01:18 ces74 Exp $"
 
 # End of file
