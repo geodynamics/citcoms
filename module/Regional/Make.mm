@@ -1,14 +1,10 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#                               Michael A.G. Aivazis
-#                        California Institute of Technology
-#                        (C) 1998-2003  All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
 include local.def
@@ -18,10 +14,10 @@ PROJECT = CitcomS
 PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
-PROJ_CXX_SRCLIB = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB)
-EXTERNAL_LIBS += -lmpimodule -ljournal
+PROJ_CXX_SRCLIB = $(BLD_LIBDIR)/lib$(PROJECT)$(TYPE).$(EXT_LIB) \
+                  $(BLD_LIBDIR)/libmpimodule.a
+EXTERNAL_LIBS += -ljournal
 PROJ_CXX_INCLUDES = ../../lib/Common ../../lib/$(TYPE)
-#PROJ_CXX_INCLUDES = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -31,6 +27,6 @@ PROJ_SRCS = \
     outputs.cc
 
 # version
-# $Id: Make.mm,v 1.8 2003/06/06 19:04:36 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/06/08 08:11:37 tan2 Exp $
 
 # End of file
