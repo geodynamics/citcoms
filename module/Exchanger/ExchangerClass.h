@@ -76,7 +76,7 @@ protected:
     Data outgoing;
     Data incoming;
 
-    Data inter_
+        //Data inter_
 
     int rank;
 
@@ -92,7 +92,7 @@ private:
 #endif
 
 // version
-// $Id: ExchangerClass.h,v 1.8 2003/09/17 23:15:59 ces74 Exp $
+// $Id: ExchangerClass.h,v 1.9 2003/09/18 17:16:44 puru Exp $
 
 // End of file
 

@@ -32,6 +32,7 @@ public:
 
     void init(const All_variables *E);  // initialize connectivity and X
     void mapFineGrid(const All_variables *E, int localLeader);
+    void mapCoarseGrid(const All_variables *E, int localLeader);
                                         // initialize bid2gid and bid2proc
     void printConnectivity() const;
     void printX() const;
@@ -55,6 +56,6 @@ private:
 #endif
 
 // version
-// $Id: Boundary.h,v 1.5 2003/09/18 16:12:15 puru Exp $
+// $Id: Boundary.h,v 1.6 2003/09/18 17:16:44 puru Exp $
 
 // End of file

@@ -169,6 +169,28 @@ void Boundary::mapFineGrid(const All_variables *E, int localLeader) {
     printBid2gid();
 }
 
+void Boundary::mapCoarseGrid(const All_variables *E, int localLeader) {
+
+    for(int i=0; i<size; i++)
+        bid2proc[i]=localLeader;
+
+    int n=0;
+    for(int m=1;m<=E->sphere.caps_per_proc;m++)
+	for(int k=1;k<=E->lmesh.noy;k++)
+	    for(int j=1;j<=E->lmesh.nox;j++)
+		for(int i=1;i<=E->lmesh.noz;i++)  {
+		    int node = i + (j-1)*E->lmesh.noz
+                        + (k-1)*E->lmesh.noz*E->lmesh.nox;
+
+		    if((k==1)||(k==E->lmesh.noy)||(j==1)||(j==E->lmesh.nox)||(i==1)||(i==E->lmesh.noz))
+		    {
+                        bid2gid[n]=node;
+                        n++;
+		    }
+		}
+    if(n != size) std::cout << " nodes != size ";
+    printBid2gid();
+}
 
 
 void Boundary::printConnectivity() const {
@@ -197,6 +219,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.7 2003/09/18 16:12:15 puru Exp $
+// $Id: Boundary.cc,v 1.8 2003/09/18 17:16:44 puru Exp $
 
 // End of file
