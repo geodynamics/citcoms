@@ -82,12 +82,26 @@ extern char pyExchanger_sendTandV__doc__[];
 extern "C"
 PyObject * pyExchanger_sendTandV(PyObject *, PyObject *);
 
+extern char pyExchanger_recvT__name__[];
+extern char pyExchanger_recvT__doc__[];
+extern "C"
+PyObject * pyExchanger_recvT(PyObject *, PyObject *);
+
+
+extern char pyExchanger_sendT__name__[];
+extern char pyExchanger_sendT__doc__[];
+extern "C"
+PyObject * pyExchanger_sendT(PyObject *, PyObject *);
 
 extern char pyExchanger_imposeBC__name__[];
 extern char pyExchanger_imposeBC__doc__[];
 extern "C"
 PyObject * pyExchanger_imposeBC(PyObject *, PyObject *);
 
+extern char pyExchanger_imposeIC__name__[];
+extern char pyExchanger_imposeIC__doc__[];
+extern "C"
+PyObject * pyExchanger_imposeIC(PyObject *, PyObject *);
 
 extern char pyExchanger_exchangeBoundedBox__name__[];
 extern char pyExchanger_exchangeBoundedBox__doc__[];
@@ -117,6 +131,6 @@ PyObject * pyExchanger_storeTimestep(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: exchangers.h,v 1.19 2003/11/07 01:08:01 tan2 Exp $
+// $Id: exchangers.h,v 1.20 2003/11/07 21:43:47 puru Exp $
 
 // End of file

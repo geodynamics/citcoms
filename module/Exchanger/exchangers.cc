@@ -19,6 +19,7 @@
 #include "BoundaryCondition.h"
 #include "DIM.h"
 #include "Interior.h"
+#include "InteriorImposing.h"
 #include "Sink.h"
 #include "Source.h"
 #include "initTemperature.h"
@@ -295,6 +296,45 @@ PyObject * pyExchanger_sendTandV(PyObject *, PyObject *args)
     return Py_None;
 }
 
+char pyExchanger_recvT__doc__[] = "";
+char pyExchanger_recvT__name__[] = "recvT";
+
+PyObject * pyExchanger_recvT(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:recvT", &obj))
+	return NULL;
+
+    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
+
+    ics->recvT();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyExchanger_sendT__doc__[] = "";
+char pyExchanger_sendT__name__[] = "sendT";
+
+PyObject * pyExchanger_sendT(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:sendT", &obj))
+	return NULL;
+
+    InteriorImposingSource* ics = static_cast<InteriorImposingSource*>
+	                                      (PyCObject_AsVoidPtr(obj));
+
+    ics->sendT();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 
 char pyExchanger_imposeBC__doc__[] = "";
 char pyExchanger_imposeBC__name__[] = "imposeBC";
@@ -310,6 +350,25 @@ PyObject * pyExchanger_imposeBC(PyObject *, PyObject *args)
 	                                    (PyCObject_AsVoidPtr(obj));
 
     bcs->imposeBC();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+char pyExchanger_imposeIC__doc__[] = "";
+char pyExchanger_imposeIC__name__[] = "imposeIC";
+
+PyObject * pyExchanger_imposeIC(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:imposeIC", &obj))
+	return NULL;
+
+    InteriorImposingSink* ics = static_cast<InteriorImposingSink*>
+	                                    (PyCObject_AsVoidPtr(obj));
+
+    ics->imposeIC();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -494,6 +553,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.24 2003/11/07 01:08:01 tan2 Exp $
+// $Id: exchangers.cc,v 1.25 2003/11/07 21:43:47 puru Exp $
 
 // End of file

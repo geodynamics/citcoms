@@ -7,10 +7,9 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcom_BoundaryCondition_h)
-#define pyCitcom_BoundaryCondition_h
+#if !defined(pyCitcom_InteriorImposing_h)
+#define pyCitcom_InteriorImposing_h
 
-#include "AreaWeightedNormal.h"
 #include "Array2D.h"
 #include "DIM.h"
 
@@ -59,6 +58,6 @@ private:
 #endif
 
 // version
-// $Id: InteriorImposing.h,v 1.1 2003/11/07 20:39:36 puru Exp $
+// $Id: InteriorImposing.h,v 1.2 2003/11/07 21:43:47 puru Exp $
 
 // End of file

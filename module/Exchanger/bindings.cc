@@ -108,10 +108,25 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      pyExchanger_sendTandV__doc__},
 
+    {pyExchanger_recvT__name__,
+     pyExchanger_recvT,
+     METH_VARARGS,
+     pyExchanger_recvT__doc__},
+
+    {pyExchanger_sendT__name__,
+     pyExchanger_sendT,
+     METH_VARARGS,
+     pyExchanger_sendTandV__doc__},
+
     {pyExchanger_imposeBC__name__,
      pyExchanger_imposeBC,
      METH_VARARGS,
      pyExchanger_imposeBC__doc__},
+
+    {pyExchanger_imposeIC__name__,
+     pyExchanger_imposeIC,
+     METH_VARARGS,
+     pyExchanger_imposeIC__doc__},
 
     {pyExchanger_exchangeBoundedBox__name__,
      pyExchanger_exchangeBoundedBox,
@@ -139,6 +154,6 @@ struct PyMethodDef pyExchanger_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.21 2003/11/07 01:08:01 tan2 Exp $
+// $Id: bindings.cc,v 1.22 2003/11/07 21:43:47 puru Exp $
 
 // End of file

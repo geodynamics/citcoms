@@ -37,7 +37,7 @@ void InteriorImposingSink::recvT()
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in InteriorImposingSink::recvTandV" << journal::end;
+	  << "in InteriorImposingSink::recvT" << journal::end;
 
     // store bc from previous timestep
 
@@ -105,6 +105,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.1 2003/11/07 20:39:36 puru Exp $
+// $Id: InteriorImposing.cc,v 1.2 2003/11/07 21:43:47 puru Exp $
 
 // End of file
