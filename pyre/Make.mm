@@ -12,7 +12,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/03/24 17:38:20 tan2 Exp $
 
 include local.def
 
@@ -28,7 +28,7 @@ RECURSE_DIRS = $(BLD_DIRS)
 
 
 all:
-	BLD_ACTION="" $(MM) recurse
+	BLD_ACTION="all" $(MM) recurse
 
 tidy::
 	BLD_ACTION="tidy" $(MM) recurse
@@ -40,7 +40,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.1 2003/03/24 01:46:37 tan2 Exp $
+# $Id: Make.mm,v 1.2 2003/03/24 17:38:20 tan2 Exp $
 
 #
 # End of file
