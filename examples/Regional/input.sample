@@ -3,8 +3,10 @@ datafile="/scratch/regtest"
 
 
 # specify input files
+# Important: when file_vbcs is 1, make sure topvbc is also turned on.
 file_vbcs=0
 vel_bound_file=""
+#vel_bound_file="velbc/velbc_regional"
 
 coor=0
 coor_file=""
