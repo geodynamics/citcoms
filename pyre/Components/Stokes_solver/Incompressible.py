@@ -40,7 +40,13 @@ class Incompressible(CitcomComponent):
             self.CitcomModule.set_mg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid-el":
             self.CitcomModule.set_mg_el_defaults(self.all_variables)
-	return
+        return
+
+
+
+    def launch(self):
+        self.CitcomModule.general_stokes_solver_setup(self.all_variables)
+        return
 
 
 
@@ -74,6 +80,6 @@ class Incompressible(CitcomComponent):
 	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.13 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.14 2003/10/29 18:40:01 tan2 Exp $"
 
 # End of file

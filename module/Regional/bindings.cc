@@ -13,6 +13,7 @@
 #include "bindings.h"
 
 #include "advdiffu.h"
+#include "initial_conditions.h"
 #include "mesher.h"
 #include "misc.h"          // miscellaneous methods
 #include "outputs.h"
@@ -98,6 +99,28 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_stable_timestep,
      METH_VARARGS,
      pyCitcom_stable_timestep__doc__},
+
+    // from initial_conditions.h
+
+    {pyCitcom_ic_initPressure__name__,
+     pyCitcom_ic_initPressure,
+     METH_VARARGS,
+     pyCitcom_ic_initPressure__doc__},
+
+    {pyCitcom_ic_initTemperature__name__,
+     pyCitcom_ic_initTemperature,
+     METH_VARARGS,
+     pyCitcom_ic_initTemperature__doc__},
+
+    {pyCitcom_ic_initVelocity__name__,
+     pyCitcom_ic_initVelocity,
+     METH_VARARGS,
+     pyCitcom_ic_initVelocity__doc__},
+
+    {pyCitcom_ic_initViscosity__name__,
+     pyCitcom_ic_initViscosity,
+     METH_VARARGS,
+     pyCitcom_ic_initViscosity__doc__},
 
     // from mesher.h
 
@@ -187,6 +210,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_general_stokes_solver__doc__},
 
+    {pyCitcom_general_stokes_solver_setup__name__,
+     pyCitcom_general_stokes_solver_setup,
+     METH_VARARGS,
+     pyCitcom_general_stokes_solver_setup__doc__},
+
     {pyCitcom_get_system_viscosity__name__,
      pyCitcom_get_system_viscosity,
      METH_VARARGS,
@@ -218,6 +246,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.30 2003/10/28 23:52:44 tan2 Exp $
+// $Id: bindings.cc,v 1.31 2003/10/29 18:40:00 tan2 Exp $
 
 // End of file

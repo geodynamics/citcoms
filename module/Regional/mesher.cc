@@ -9,7 +9,6 @@
 
 #include <portinfo>
 #include <Python.h>
-#include <iostream>
 
 #include "exceptions.h"
 #include "mesher.h"
@@ -22,7 +21,6 @@ extern "C" {
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
     void check_bc_consistency(struct All_variables*);
-    void common_initial_fields(struct All_variables*);
     void construct_id(struct All_variables*);
     void construct_ien(struct All_variables*);
     void construct_lm(struct All_variables*);
@@ -31,7 +29,6 @@ extern "C" {
     void construct_shape_functions(struct All_variables*);
     void construct_sub_element(struct All_variables*);
     void construct_surf_det (struct All_variables*);
-    void general_stokes_solver_setup(struct All_variables*);
     void get_initial_elapsed_time(struct All_variables*);
     int get_process_identifier();
     void global_derived_values(struct All_variables*);
@@ -98,8 +95,6 @@ void sphere_launch(struct All_variables *E)
 
     mass_matrix(E);
 
-    general_stokes_solver_setup(E);
-
     construct_surf_det (E);
 
     set_sphere_harmonics (E);
@@ -108,9 +103,6 @@ void sphere_launch(struct All_variables *E)
       read_mat_from_file(E);
     else
       construct_mat_group(E);
-
-    (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
-    common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
 
     return;
 }
@@ -158,6 +150,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.10 2003/09/29 20:21:20 tan2 Exp $
+// $Id: mesher.cc,v 1.11 2003/10/29 18:40:00 tan2 Exp $
 
 // End of file

@@ -27,6 +27,7 @@ PROJ_SRCS = \
     advdiffu.cc \
     bindings.cc \
     exceptions.cc \
+    initial_conditions.cc \
     mesher.cc \
     misc.cc \
     outputs.cc \
@@ -42,6 +43,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.9 2003/09/30 00:39:30 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/10/29 18:40:01 tan2 Exp $
 
 # End of file

@@ -24,6 +24,39 @@ class IC(CitcomComponent):
 
 
 
+    def launch(self):
+        self.initTemperature()
+        self.initPressure()
+        self.initVelocity()
+        self.initViscosity()
+        return
+
+
+
+    def initTemperature(self):
+        self.CitcomModule.initTemperature(self.all_variables)
+        return
+
+
+
+    def initPressure(self):
+        self.CitcomModule.initPressure(self.all_variables)
+        return
+
+
+
+    def initVelocity(self):
+        self.CitcomModule.initVelocity(self.all_variables)
+        return
+
+
+
+    def initViscosity(self):
+        self.CitcomModule.initViscosity(self.all_variables)
+        return
+
+
+
     class Inventory(CitcomComponent.Inventory):
 
 
@@ -41,6 +74,6 @@ class IC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.7 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.8 2003/10/29 18:40:01 tan2 Exp $"
 
 # End of file

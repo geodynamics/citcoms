@@ -22,6 +22,7 @@ extern "C" {
     void assemble_forces(struct All_variables*, int);
     void construct_stiffness_B_matrix(struct All_variables*);
     void general_stokes_solver(struct All_variables *);
+    void general_stokes_solver_setup(struct All_variables*);
     void get_system_viscosity(struct All_variables*, int, float**, float**);
     void set_cg_defaults(struct All_variables*);
     void set_mg_defaults(struct All_variables*);
@@ -78,12 +79,32 @@ PyObject * pyCitcom_general_stokes_solver(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:", &obj))
+    if (!PyArg_ParseTuple(args, "O:general_stokes_solver", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
     general_stokes_solver(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
+char pyCitcom_general_stokes_solver_setup__doc__[] = "";
+char pyCitcom_general_stokes_solver_setup__name__[] = "general_stokes_solver_setup";
+
+PyObject * pyCitcom_general_stokes_solver_setup(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:general_stokes_solver_setup", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    general_stokes_solver_setup(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -193,6 +214,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *self, PyObject *a
 
 
 // version
-// $Id: stokes_solver.cc,v 1.6 2003/08/19 21:21:43 tan2 Exp $
+// $Id: stokes_solver.cc,v 1.7 2003/10/29 18:40:00 tan2 Exp $
 
 // End of file

@@ -97,16 +97,20 @@ class Solver(BaseSolver):
         # create mesh
         mesher.run()
 
+        ic = self.inventory.ic
+
         # if there is a coupler, launch it
         if self.coupler:
             self.coupler.launch(self)
+            # switch the default initTemperature to couled version
+            ic.initTemperature = self.coupler.initTemperature
+
+        # initial conditions
+        ic.launch()
 
         # initialize const. related to mesh
+        vsolver.launch()
         tsolver.launch()
-
-        # initial temperature and velocities field
-        if self.coupler:
-            self.coupler.initTemperature()
 
         self.solveVelocities()
 
@@ -283,6 +287,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.30 2003/10/29 01:13:15 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.31 2003/10/29 18:40:01 tan2 Exp $"
 
 # End of file
