@@ -42,11 +42,8 @@ class Coupler(Component):
         print 'exchanging boundary'
         self.boundary = exchanger.findBoundary()
 
-        # create mapping from boundary -> ID and rank
-        exchanger.mapBounary(self.boundary)
-
         # send initial temperature field from CGE to FGE
-        exchanger.initTemperature()
+        #exchanger.initTemperature()
         return
 
 
@@ -75,6 +72,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.3 2003/09/28 20:40:46 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.4 2003/09/28 21:43:25 tan2 Exp $"
 
 # End of file
