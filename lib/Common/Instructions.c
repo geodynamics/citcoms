@@ -539,7 +539,7 @@ void allocate_common_vars(E)
   for(i=1;i<=E->lmesh.nno;i++)
      E->T[j][i] = 0.0;
 
-  for(i=1;i<E->lmesh.nel;i++)   {
+  for(i=1;i<=E->lmesh.nel;i++)   {
       E->mat[j][i]=1;
       E->VIP[j][i]=1.0;
   }
