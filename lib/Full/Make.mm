@@ -25,22 +25,18 @@ PROJ_SRCS = \
 	Lith_age.c \
 	Output.c \
 	Parallel_related.c \
-	Process_buoyancy.c \
 	Sphere_related.c \
 	Version_dependent.c
 
-#EXPORT_HEADERS = \
-#	global_defs.h
-
-#PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 
-#all: $(PROJ_LIB) export-headers
+
+
 all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.7 2003/08/06 21:09:26 tan2 Exp $
+# $Id: Make.mm,v 1.8 2003/08/08 22:34:31 tan2 Exp $
 
 #
 # End of file

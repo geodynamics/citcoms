@@ -14,7 +14,7 @@ PACKAGE = lib/$(TYPE)
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 #PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE)Common.$(EXT_LIB)
-PROJ_CC_INCLUDES = ../$(TYPE) .
+#PROJ_CC_INCLUDES = .
 
 PROJ_SRCS = \
 	Advection_diffusion.c \
@@ -33,6 +33,7 @@ PROJ_SRCS = \
 	Parsing.c \
 	Phase_change.c \
 	Problem_related.c \
+	Process_buoyancy.c \
 	Process_velocity.c \
 	Shape_functions.c \
 	Size_does_matter.c \
@@ -45,10 +46,20 @@ PROJ_SRCS = \
 	Viscosity_structures.c
 
 EXPORT_HEADERS = \
+	advection_diffusion.h \
 	advection.h \
 	citcom_init.h \
 	convection_variables.h \
-	element_definitions.h \
+	drive_solvers.h \
+	element_definitions.h a \
+	global_defs.h \
+	initial_temperature.h \
+	interuption.h \
+	lith_age.h \
+	output.h \
+	parallel_related.h \
+	parsing.h \
+	phase_change.h \
 	sphere_communication.h \
 	temperature_descriptions.h \
 	tracer_defs.h \
@@ -61,7 +72,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.9 2003/08/06 21:09:26 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/08/08 22:34:31 tan2 Exp $
 
 #
 # End of file
