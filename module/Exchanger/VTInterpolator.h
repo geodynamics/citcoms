@@ -24,7 +24,7 @@ public:
 		   Array2D<int,1>& meshNode);
     virtual ~VTInterpolator() {};
 
-    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S) {};
+    virtual void interpolateStress(Array2D<double,STRESS_DIM>& S);
     virtual void interpolateTemperature(Array2D<double,1>& T);
     virtual void interpolateVelocity(Array2D<double,DIM>& V);
 
@@ -42,6 +42,6 @@ private:
 #endif
 
 // version
-// $Id: VTInterpolator.h,v 1.2 2004/04/14 19:41:38 tan2 Exp $
+// $Id: VTInterpolator.h,v 1.3 2004/04/14 20:06:24 tan2 Exp $
 
 // End of file
