@@ -836,30 +836,7 @@ void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], i
 		}
 	else {
 		/* if side_sbcs is false, only apply sbc on top and bottom surfaces */
-		//if(side == SIDE_BOTTOM || side == SIDE_TOP) {
-		if( side == SIDE_TOP && E->mesh.topvbc == 2 && E->control.pseudo_free_surf &&
-		    E->parallel.me_loc[3]==E->parallel.nprocz-1 && (el%E->lmesh.elz==0)) {
-			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
-				nodeas = E->ien[m][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
-				traction[1][a] = 0.0;
-				traction[2][a] = 0.0;
-				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
-					*(E->slice.freesurf[m][nodeas]+E->sphere.cap[m].V[3][nodea]*E->advection.timestep);
-				if(E->parallel.me==11 && nodea==3328)
-					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[m].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
-				found = 1;
-#if 0
-				if(found && E->parallel.me==1)
-					fprintf(stderr,"me=%d bel=%d el=%d side=%d TOP=%d a=%d sidenodes=%d ien=%d noz=%d nodea=%d traction=%e %e %e\n",
-						E->parallel.me,bel,el,side,SIDE_TOP,a,sidenodes[side][a],
-						E->ien[m][el].node[ sidenodes[side][a] ],E->lmesh.noz,
-						nodea,traction[1][a],traction[2][a],traction[3][a]);
-
-#endif
-			}
-		}
-		else {
+		if(side == SIDE_BOTTOM || side == SIDE_TOP) {
 			for(a=1;a<=ends1;a++)  {
 				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
@@ -1077,6 +1054,6 @@ void get_aug_k(E,el,elt_k,level,m)
 
 
 /* version */
-/* $Id: Element_calculations.c,v 1.17 2005/01/08 02:15:17 ces74 Exp $ */
+/* $Id: Element_calculations.c,v 1.18 2005/01/08 03:24:37 ces74 Exp $ */
 
 /* End of file  */
