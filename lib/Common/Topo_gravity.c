@@ -1,15 +1,8 @@
 #include <stdio.h>
 #include <math.h>
-#include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#define c_re(a) a.real
-#define c_im(a) a.imag
-  typedef struct compl {  double real;
-			  double imag;    } COMPLEX;
-
-extern float Zj0[1000],Zj1[1000];
 
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
@@ -17,36 +10,53 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     float **divg,**vort;
     int ii;
 {
-
-    void exchange_node_f();
-    void output_stress();
-    void get_global_shape_fn();
-    void velo_from_element();
+    void allocate_STD_mem();
+    void compute_nodal_stress();
+    void free_STD_mem();
     void get_surf_stress();
-    void return_horiz_ave_f();
-    int i,j,k,e,node,snode,m,nel2;
 
+    int node,snode,m;
     float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
     float *divv[NCS],*vorv[NCS];
-    float *H,VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
-    float velo_scaling,topo_scaling1,topo_scaling2,stress_scaling;
-    double el_volume,pre[9],Visc,a,b,tww[9],rtf[4][9];
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
+    float topo_scaling1, topo_scaling2;
 
-    const int dims=E->mesh.nsd,dofs=E->mesh.dof;
-    const int vpts=vpoints[dims];
-    const int ppts=ppoints[dims];
-    const int ends=enodes[dims];
-    const int nno=E->lmesh.nno;
-    const int lev=E->mesh.levmax;
-    const int sphere_key=1;
+    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 
-  H = (float *)malloc((E->lmesh.noz+1)*sizeof(float));
+   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
+     get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)      {
+/*    topo_scaling1=1.0/((E->data.density-E->data.density_above)*E->data.grav_acc); */
+/*    topo_scaling2=1.0/((E->data.density_below-E->data.density)*E->data.grav_acc); */
 
+   topo_scaling1 = topo_scaling2 = 1.0;
+
+   for(m=1;m<=E->sphere.caps_per_proc;m++)
+     for(snode=1;snode<=E->lmesh.nsf;snode++)   {
+        node = E->surf_node[m][snode];
+        tpg[m][snode]  = -2*SZZ[m][node] + SZZ[m][node-1];
+        tpgb[m][snode] = 2*SZZ[m][node-E->lmesh.noz+1]-SZZ[m][node-E->lmesh.noz+2];
+        tpg[m][snode]  = tpg[m][snode]*topo_scaling1;
+        tpgb[m][snode]  = tpgb[m][snode]*topo_scaling2;
+
+        divg[m][snode] = 2*divv[m][node]-divv[m][node-1];
+        vort[m][snode] = 2*vorv[m][node]-vorv[m][node-1];
+     }
+
+   free_STD_mem(SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+
+   return;
+}
+
+
+void allocate_STD_mem(struct All_variables *E,
+		      float** SXX, float** SYY, float** SZZ,
+		      float** SXY, float** SXZ, float** SZY,
+		      float** divv, float** vorv)
+{
+  int m, i;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     SXX[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     SYY[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     SXY[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
@@ -55,28 +65,9 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     SZZ[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     divv[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     vorv[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+  }
 
-
-  /* remove horizontal average output   by Tan2 Mar. 1 2002  */
-
-/*     for(i=1;i<=E->lmesh.nno;i++) { */
-/*       SXX[m][i] = E->sphere.cap[m].V[1][i]*E->sphere.cap[m].V[1][i] */
-/*           	+ E->sphere.cap[m].V[2][i]*E->sphere.cap[m].V[2][i]; */
-/*       SYY[m][i] = E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i]; */
-/*       SZZ[m][i] = E->T[m][i]; */
-/*       } */
-    }
-
-/*   return_horiz_ave_f(E,SXX,E->Have.V[1]); */
-/*   return_horiz_ave_f(E,SYY,E->Have.V[2]); */
-/*   return_horiz_ave_f(E,SZZ,E->Have.T); */
-
-/*   for (i=1;i<=E->lmesh.noz;i++) { */
-/*       E->Have.V[1][i] = sqrt(E->Have.V[1][i]); */
-/*       E->Have.V[2][i] = sqrt(E->Have.V[2][i]); */
-/*       } */
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)      {
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     for(i=1;i<=E->lmesh.nno;i++) {
       SZZ[m][i] = 0.0;
       SXX[m][i] = 0.0;
@@ -86,8 +77,58 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
       SZY[m][i] = 0.0;
       divv[m][i] = 0.0;
       vorv[m][i] = 0.0;
-      }
+    }
+  }
+  return;
+}
 
+
+void free_STD_mem(struct All_variables *E,
+		  float** SXX, float** SYY, float** SZZ,
+		  float** SXY, float** SXZ, float** SZY,
+		  float** divv, float** vorv)
+{
+  int m;
+  for(m=1;m<=E->sphere.caps_per_proc;m++)        {
+    free((void *)SXX[m]);
+    free((void *)SYY[m]);
+    free((void *)SXY[m]);
+    free((void *)SXZ[m]);
+    free((void *)SZY[m]);
+    free((void *)SZZ[m]);
+    free((void *)divv[m]);
+    free((void *)vorv[m]);
+    }
+}
+
+
+
+void compute_nodal_stress(struct All_variables *E,
+			  float** SXX, float** SYY, float** SZZ,
+			  float** SXY, float** SXZ, float** SZY,
+			  float** divv, float** vorv)
+{
+  void exchange_node_f();
+  void get_global_shape_fn();
+  void velo_from_element();
+  void get_surf_stress();
+  int i,j,e,node,m;
+
+  float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
+  double pre[9],tww[9],rtf[4][9];
+  double velo_scaling, stress_scaling;
+
+  struct Shape_function GN;
+  struct Shape_function_dA dOmega;
+  struct Shape_function_dx GNx;
+
+  const int dims=E->mesh.nsd;
+  const int vpts=vpoints[dims];
+  const int ends=enodes[dims];
+  const int lev=E->mesh.levmax;
+  const int sphere_key=1;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     for(e=1;e<=E->lmesh.nel;e++)  {
       Szz = 0.0;
       Sxx = 0.0;
@@ -102,58 +143,58 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
       velo_from_element(E,VV,m,e,sphere_key);
 
       for(j=1;j<=vpts;j++)  {
-	  pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
-          Vxyz[1][j] = 0.0;
-          Vxyz[2][j] = 0.0;
-          Vxyz[3][j] = 0.0;
-          Vxyz[4][j] = 0.0;
-          Vxyz[5][j] = 0.0;
-          Vxyz[6][j] = 0.0;
-          Vxyz[7][j] = 0.0;
-          Vxyz[8][j] = 0.0;
-          }
+	pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
+	Vxyz[1][j] = 0.0;
+	Vxyz[2][j] = 0.0;
+	Vxyz[3][j] = 0.0;
+	Vxyz[4][j] = 0.0;
+	Vxyz[5][j] = 0.0;
+	Vxyz[6][j] = 0.0;
+	Vxyz[7][j] = 0.0;
+	Vxyz[8][j] = 0.0;
+      }
 
       for(i=1;i<=ends;i++) {
-         tww[i] = 0.0;
-	 for(j=1;j<=vpts;j++)
-              tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
-                     * E->N.vpt[GNVINDEX(i,j)];
-         }
+	tww[i] = 0.0;
+	for(j=1;j<=vpts;j++)
+	  tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
+	    * E->N.vpt[GNVINDEX(i,j)];
+      }
 
       for(j=1;j<=vpts;j++)   {
-        for(i=1;i<=ends;i++)   {
-          Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
-                      + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
-              + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
- 	      + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[3][j]+= VV[3][i]*GNx.vpt[GNVXINDEX(2,i,j)];
+	for(i=1;i<=ends;i++)   {
+	  Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+			+ VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+	  Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
+			 + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+			+ VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+	  Vxyz[3][j]+= VV[3][i]*GNx.vpt[GNVXINDEX(2,i,j)];
 
 	  Vxyz[4][j]+=( (VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)]
-              - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
- 	      + VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
+			 - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+			+ VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
 	  Vxyz[5][j]+=VV[1][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
- 	      *GNx.vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
+								      *GNx.vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
 	  Vxyz[6][j]+=VV[2][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
- 	      *GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
+								      *GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
 	  Vxyz[7][j]+=rtf[3][j] * (
-               VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
-             + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
-             + VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
+				   VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+				   + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
+				   + VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
 	  Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
-             ( VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
-             + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
-             - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
-          }
-        Sxx += 2.0 * pre[j] * Vxyz[1][j];
-        Syy += 2.0 * pre[j] * Vxyz[2][j];
-        Szz += 2.0 * pre[j] * Vxyz[3][j];
-        Sxy += pre[j] * Vxyz[4][j];
-        Sxz += pre[j] * Vxyz[5][j];
-        Szy += pre[j] * Vxyz[6][j];
-        div += Vxyz[7][j]*dOmega.vpt[j];
-        vor += Vxyz[8][j]*dOmega.vpt[j];
-        }
+	    ( VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
+	      + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
+	      - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
+	}
+	Sxx += 2.0 * pre[j] * Vxyz[1][j];
+	Syy += 2.0 * pre[j] * Vxyz[2][j];
+	Szz += 2.0 * pre[j] * Vxyz[3][j];
+	Sxy += pre[j] * Vxyz[4][j];
+	Sxz += pre[j] * Vxyz[5][j];
+	Szy += pre[j] * Vxyz[6][j];
+	div += Vxyz[7][j]*dOmega.vpt[j];
+	vor += Vxyz[8][j]*dOmega.vpt[j];
+      }
 
       Sxx /= E->eco[m][e].area;
       Syy /= E->eco[m][e].area;
@@ -169,93 +210,60 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
       Syy -= E->P[m][e];  /* add the pressure term */
 
       for(i=1;i<=ends;i++) {
-	    node = E->ien[m][e].node[i];
-            SZZ[m][node] += tww[i] * Szz;
-            SXX[m][node] += tww[i] * Sxx;
-            SYY[m][node] += tww[i] * Syy;
-            SXY[m][node] += tww[i] * Sxy;
-            SXZ[m][node] += tww[i] * Sxz;
-            SZY[m][node] += tww[i] * Szy;
-	    divv[m][node]+= tww[i] * div;
-	    vorv[m][node]+= tww[i] * vor;
-            }
+	node = E->ien[m][e].node[i];
+	SZZ[m][node] += tww[i] * Szz;
+	SXX[m][node] += tww[i] * Sxx;
+	SYY[m][node] += tww[i] * Syy;
+	SXY[m][node] += tww[i] * Sxy;
+	SXZ[m][node] += tww[i] * Sxz;
+	SZY[m][node] += tww[i] * Szy;
+	divv[m][node]+= tww[i] * div;
+	vorv[m][node]+= tww[i] * vor;
+      }
 
-      }    /* end for el */
-    }     /* end for m */
+    }    /* end for el */
+  }     /* end for m */
 
-   exchange_node_f(E,SZZ,lev);
-   exchange_node_f(E,SXX,lev);
-   exchange_node_f(E,SYY,lev);
-   exchange_node_f(E,SXY,lev);
-   exchange_node_f(E,SXZ,lev);
-   exchange_node_f(E,SZY,lev);
-   exchange_node_f(E,divv,lev);
-   exchange_node_f(E,vorv,lev);
+  exchange_node_f(E,SZZ,lev);
+  exchange_node_f(E,SXX,lev);
+  exchange_node_f(E,SYY,lev);
+  exchange_node_f(E,SXY,lev);
+  exchange_node_f(E,SXZ,lev);
+  exchange_node_f(E,SZY,lev);
+  exchange_node_f(E,divv,lev);
+  exchange_node_f(E,vorv,lev);
 
-/*    stress_scaling = 1.0e-6*E->data.ref_viscosity*E->data.therm_diff/ */
-/*                       (E->data.radius_km*E->data.radius_km); */
+  /*    stress_scaling = 1.0e-6*E->data.ref_viscosity*E->data.therm_diff/ */
+  /*                       (E->data.radius_km*E->data.radius_km); */
 
-/*    velo_scaling = 100.*365.*24.*3600.*1.0e-3*E->data.therm_diff/E->data.radius_km; */
-                 /* cm/yr */
+  /*    velo_scaling = 100.*365.*24.*3600.*1.0e-3*E->data.therm_diff/E->data.radius_km; */
+  /* cm/yr */
 
-/*    topo_scaling1=1.0/((E->data.density-E->data.density_above)*E->data.grav_acc); */
-/*    topo_scaling2=1.0/((E->data.density_below-E->data.density)*E->data.grav_acc); */
+  stress_scaling = velo_scaling = 1.0;
 
-   stress_scaling = velo_scaling = topo_scaling1 = topo_scaling2 = 1.0;
-
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(node=1;node<=E->lmesh.nno;node++)   {
-        SZZ[m][node] = SZZ[m][node]*E->Mass[m][node]*stress_scaling;
-        SXX[m][node] = SXX[m][node]*E->Mass[m][node]*stress_scaling;
-        SYY[m][node] = SYY[m][node]*E->Mass[m][node]*stress_scaling;
-        SXY[m][node] = SXY[m][node]*E->Mass[m][node]*stress_scaling;
-        SXZ[m][node] = SXZ[m][node]*E->Mass[m][node]*stress_scaling;
-        SZY[m][node] = SZY[m][node]*E->Mass[m][node]*stress_scaling;
-        vorv[m][node] = vorv[m][node]*E->Mass[m][node]*velo_scaling;
-        divv[m][node] = divv[m][node]*E->Mass[m][node]*velo_scaling;
-        }
-
-  /* return_horiz_ave_f(E,SZZ,H); */
-
-   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
-     get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
-
-   /* assign stress to all the nodes */
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for (node=1;node<=E->lmesh.nno;node++) {
-       E->gstress[m][(node-1)*6+1] = SXX[m][node];
-       E->gstress[m][(node-1)*6+2] = SZZ[m][node];
-       E->gstress[m][(node-1)*6+3] = SYY[m][node];
-       E->gstress[m][(node-1)*6+4] = SXY[m][node];
-       E->gstress[m][(node-1)*6+5] = SXZ[m][node];
-       E->gstress[m][(node-1)*6+6] = SZY[m][node];
-     }
-
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(snode=1;snode<=E->lmesh.nsf;snode++)   {
-        node = E->surf_node[m][snode];
-        tpg[m][snode]  = -2*SZZ[m][node] + SZZ[m][node-1];
-        tpgb[m][snode] = 2*SZZ[m][node-E->lmesh.noz+1]-SZZ[m][node-E->lmesh.noz+2];
-        tpg[m][snode]  = tpg[m][snode]*topo_scaling1;
-        tpgb[m][snode]  = tpgb[m][snode]*topo_scaling2;
-
-        divg[m][snode] = 2*divv[m][node]-divv[m][node-1];
-        vort[m][snode] = 2*vorv[m][node]-vorv[m][node-1];
-     }
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)        {
-    free((void *)SXX[m]);
-    free((void *)SYY[m]);
-    free((void *)SXY[m]);
-    free((void *)SXZ[m]);
-    free((void *)SZY[m]);
-    free((void *)SZZ[m]);
-    free((void *)divv[m]);
-    free((void *)vorv[m]);
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(node=1;node<=E->lmesh.nno;node++)   {
+      SZZ[m][node] = SZZ[m][node]*E->Mass[m][node]*stress_scaling;
+      SXX[m][node] = SXX[m][node]*E->Mass[m][node]*stress_scaling;
+      SYY[m][node] = SYY[m][node]*E->Mass[m][node]*stress_scaling;
+      SXY[m][node] = SXY[m][node]*E->Mass[m][node]*stress_scaling;
+      SXZ[m][node] = SXZ[m][node]*E->Mass[m][node]*stress_scaling;
+      SZY[m][node] = SZY[m][node]*E->Mass[m][node]*stress_scaling;
+      vorv[m][node] = vorv[m][node]*E->Mass[m][node]*velo_scaling;
+      divv[m][node] = divv[m][node]*E->Mass[m][node]*velo_scaling;
     }
-  free((void *)H);
 
-    return;
+  /* assign stress to all the nodes */
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for (node=1;node<=E->lmesh.nno;node++) {
+      E->gstress[m][(node-1)*6+1] = SXX[m][node];
+      E->gstress[m][(node-1)*6+2] = SZZ[m][node];
+      E->gstress[m][(node-1)*6+3] = SYY[m][node];
+      E->gstress[m][(node-1)*6+4] = SXY[m][node];
+      E->gstress[m][(node-1)*6+5] = SXZ[m][node];
+      E->gstress[m][(node-1)*6+6] = SZY[m][node];
+    }
+
 }
 
 
