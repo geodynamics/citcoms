@@ -123,16 +123,6 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_PG_timestep_solve__doc__},
 
-    {pyRegional_PG_timemarching_control__name__,
-     pyRegional_PG_timemarching_control,
-     METH_VARARGS,
-     pyRegional_PG_timemarching_control__doc__},
-
-    {pyRegional_PG_timestep_fini__name__,
-     pyRegional_PG_timestep_fini,
-     METH_VARARGS,
-     pyRegional_PG_timestep_fini__doc__},
-
     // from outputs.h
 
     {pyRegional_output_init__name__,
@@ -175,6 +165,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.9 2003/05/22 23:10:09 tan2 Exp $
+// $Id: bindings.cc,v 1.10 2003/05/23 05:12:29 ces74 Exp $
 
 // End of file

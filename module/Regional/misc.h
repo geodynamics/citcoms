@@ -100,10 +100,9 @@ extern char pyRegional_general_stokes_solver_log__doc__[];
 extern "C"
 PyObject * pyRegional_general_stokes_solver_log(PyObject *, PyObject *);
 
-
 #endif
 
 // version
-// $Id: misc.h,v 1.7 2003/05/22 18:32:14 ces74 Exp $
+// $Id: misc.h,v 1.8 2003/05/23 05:12:29 ces74 Exp $
 
 // End of file

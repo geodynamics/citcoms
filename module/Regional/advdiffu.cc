@@ -42,33 +42,12 @@ PyObject * pyRegional_PG_timestep_solve(PyObject *self, PyObject *args)
   return Py_None;
 }
 
-char pyRegional_PG_timemarching_control__doc__[] = "";
-char pyRegional_PG_timemarching_control__name__[] = "PG_timemarching_control";
-PyObject * pyRegional_PG_timemarching_control(PyObject *self, PyObject *args)
-{
-  
-  PG_timemarching_control(E);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-char pyRegional_PG_timestep_fini__doc__[] = "";
-char pyRegional_PG_timestep_fini__name__[] = "PG_timestep_fini";
-PyObject * pyRegional_PG_timestep_fini(PyObject *self, PyObject *args)
-{
-  
-  PG_timestep_fini(E);
-  
-  Py_INCREF(Py_None);
-  return Py_None;
-}
 
 //////////////////////////////////////////////////////////////////////////
 
 
 
 // version
-// $Id: advdiffu.cc,v 1.2 2003/05/22 22:39:44 ces74 Exp $
+// $Id: advdiffu.cc,v 1.3 2003/05/23 05:12:29 ces74 Exp $
 
 // End of file
