@@ -14,7 +14,6 @@ class FineGridExchanger(Exchanger):
 
     def __init__(self, name, facility):
         Exchanger.__init__(self, name, facility)
-        self.catchup = True
         self.cge_t = 0
         self.fge_t = 0
         return
@@ -30,16 +29,6 @@ class FineGridExchanger(Exchanger):
                                      solver.all_variables
                                      )
 
-        return
-
-
-    def createDataArrays(self):
-        self.module.createDataArrays(self.exchanger)
-        return
-
-
-    def deleteDataArrays(self):
-        self.module.deleteDataArrays(self.exchanger)
         return
 
 
@@ -61,10 +50,7 @@ class FineGridExchanger(Exchanger):
 
 
     def NewStep(self):
-        if self.catchup:
-            # send wakeup signal to CGE
-            self.module.nowait(self.exchanger)
-
+        #if self.catchup:
             # send temperture field to CGE
             #self.module.sendTemperature(self.exchanger)
 
@@ -106,6 +92,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.15 2003/09/28 06:01:38 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.16 2003/09/28 20:36:56 tan2 Exp $"
 
 # End of file

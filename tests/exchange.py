@@ -35,29 +35,25 @@ class TestExchanger(Application):
     def test(self, exchanger,layout):
         # testing exchanger creation
         exchanger.selectModule()
-	exchanger.createExchanger(self)
-        #print exchanger.name, exchanger.exchanger
+        exchanger.createExchanger(self)
+        print exchanger.name, exchanger.exchanger
 
         # testing boundary creation and exchange
         exchanger.findBoundary()
         print exchanger.name, ": boundary found"
 
-        # create Data arrays
-        exchanger.createDataArrays()
-        print "incoming/outgoing structures created"
-
         # testing applyBoundaryConditions
         exchanger.applyBoundaryConditions()
         print exchanger.name, ": applyBoundaryConditions worked"
-        return
 
         # testing initTemperature
         #exchanger.initTemperature()
         #print exchanger.name, ": temperature transferred"
 
+        # select dt
         try:
             # success if exchanger is a FGE
-            exchanger.catchup
+            exchanger.fge_t
             dt = 0.15
         except:
             # exception if exchanger is a CGE
@@ -69,15 +65,21 @@ class TestExchanger(Application):
               exchanger.module.exchangeTimestep(exchanger.exchanger, dt),
               dt)
 
-        # testing wait & nowait
-        for step in range(7*2+1):
-            exchanger.NewStep()
+        # testing exchangeSignal
+        steps = 2*7 + 1
+        for step in range(steps):
             time = exchanger.stableTimestep(dt)
             print "%s - step %d: %f" % (exchanger.name, step, time)
 
-        # delete Data arrays
-        exchanger.deleteDataArrays()
-        print "incoming/outgoing structres deleted"
+            if step == steps-1:
+                done = True
+            else:
+                done = False
+
+            done = exchanger.endTimestep(done)
+
+            if done:
+                break
 
         return
 
@@ -150,6 +152,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.13 2003/09/28 00:35:11 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.14 2003/09/28 20:36:56 tan2 Exp $"
 
 # End of file

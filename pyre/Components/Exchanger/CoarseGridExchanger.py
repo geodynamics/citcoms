@@ -24,16 +24,6 @@ class CoarseGridExchanger(Exchanger):
         return
 
 
-    def createDataArrays(self):
-        self.module.createDataArrays(self.exchanger)
-        return
-
-
-    def deleteDataArrays(self):
-        self.module.deleteDataArrays(self.exchanger)
-        return
-
-
     def findBoundary(self):
         # receive boundary from FGE
         self.module.receiveBoundary(self.exchanger)
@@ -50,9 +40,6 @@ class CoarseGridExchanger(Exchanger):
 
 
     def NewStep(self):
-        # wait until FGE catchs up
-        self.module.wait(self.exchanger)
-
         # receive temperture field from FGE
         #self.module.receiveTemperature(self.exchanger)
         return
@@ -70,8 +57,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 
-
-
     class Inventory(Exchanger.Inventory):
 
         import pyre.properties as prop
@@ -84,6 +69,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.14 2003/09/28 00:35:11 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.15 2003/09/28 20:36:56 tan2 Exp $"
 
 # End of file
