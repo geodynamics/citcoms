@@ -1,4 +1,4 @@
-// -*- C++ -*-
+
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
@@ -59,6 +59,20 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_solve_constrained_flow_iterative__doc__},
 
+    {pyRegional_set_cg_defaults__name__,
+     pyRegional_set_cg_defaults,
+     METH_VARARGS,
+     pyRegional_set_cg_defaults__doc__},
+
+    {pyRegional_set_mg_defaults__name__,
+     pyRegional_set_mg_defaults,
+     METH_VARARGS,
+     pyRegional_set_mg_defaults__doc__},
+
+    {pyRegional_set_mg_el_defaults__name__,
+     pyRegional_set_mg_el_defaults,
+     METH_VARARGS,
+     pyRegional_set_mg_el_defaults__doc__},
 
     //////////////////////////////////////////////////////////////////////////
     // This section is for finished implementation
@@ -190,6 +204,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.13 2003/07/15 00:40:03 tan2 Exp $
+// $Id: bindings.cc,v 1.14 2003/07/15 18:17:38 ces74 Exp $
 
 // End of file
