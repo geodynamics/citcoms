@@ -42,7 +42,7 @@ void tic_input(struct All_variables *E)
       parallel_process_termination();
     }
     if (! input_int_vector("perturbl", n, E->convection.perturb_ll, m) ) {
-      fprintf(stderr,"Missing input parameter: 'perturbml'\n");
+      fprintf(stderr,"Missing input parameter: 'perturbl'\n");
       parallel_process_termination();
     }
     if (! input_int_vector("perturblayer", n, E->convection.load_depth, m) ) {
