@@ -94,7 +94,7 @@ void SVTInlet::impose()
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__) << journal::end;
 
-    //imposeSV();
+    imposeSV();
     imposeT();
 }
 
@@ -110,7 +110,6 @@ void SVTInlet::setVBCFlag()
 
     for(int i=0; i<boundary.size(); i++) {
         int n = boundary.nodeID(i);
-
 	for(int d=0; d<DIM; ++d)
 	    if(boundary.normal(d,i)) {
 		E->node[m][n] = E->node[m][n] | vbcFlag[d];
@@ -153,25 +152,30 @@ void SVTInlet::imposeSV()
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
-	int n = boundary.nodeID(sink.meshNode(i));
+	int j = sink.meshNode(i);
+	int n = boundary.nodeID(j);
+	int q = E->sbc.node[m][n];
+
 	for(int d=0; d<DIM; d++)
 	    if(E->node[m][n] & vbcFlag[d])
-		E->sphere.cap[m].VB[1][n] = N1 * v_old[0][i] + N2 * v[0][i];
+		E->sphere.cap[m].VB[d+1][n] = N1 * v_old[d][i] + N2 * v[d][i];
 
-	for(int d=0; d<DIM; d++) {
-	    int p;
-	    if(boundary.normal(d,i) == -1)
-		p = sidelow[d];
-	    else if(boundary.normal(d,i) == 1)
-		p = sidehigh[d];
-	    else
-		continue;
+	if(E->node[m][n] & (SBX | SBY | SBZ))
+	    for(int d=0; d<DIM; d++) {
+		int p;
+		if(boundary.normal(d,j) == -1)
+		    p = sidelow[d];
+		else if(boundary.normal(d,j) == 1)
+		    p = sidehigh[d];
+		else
+		    continue;
 
-	    for(int k=0; k<DIM; k++) {
-		E->sbc.SB[m][p][k+1][ E->sbc.node[m][n] ] = boundary.normal(d,i) *
-		    ( N1 * side_tractions(s_old, i, d, k) +
-		      N2 * side_tractions(s, i, d, k) );
-	    }
+		for(int k=0; k<DIM; k++) {
+		    E->sbc.SB[m][p][k+1][q] =
+			boundary.normal(d,j) *
+			( N1 * side_tractions(s_old, i, d, k) +
+			  N2 * side_tractions(s, i, d, k) );
+		}
 	}
     }
 }
@@ -216,6 +220,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.1 2004/04/16 00:03:50 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.2 2004/04/29 21:41:25 tan2 Exp $
 
 // End of file
