@@ -364,6 +364,26 @@ PyObject * pyExchanger_sendTraction(PyObject *, PyObject *args)
 }
 
 
+char pyExchanger_domain_cutout__doc__[] = "";
+char pyExchanger_domain_cutout__name__[] = "domain_cutout";
+
+PyObject * pyExchanger_domain_cutout(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:domain_cutout", &obj))
+	return NULL;
+
+    BoundaryConditionSource* bcs = static_cast<BoundaryConditionSource*>
+	                                      (PyCObject_AsVoidPtr(obj));
+
+    bcs->domain_cutout();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyExchanger_recvT__doc__[] = "";
 char pyExchanger_recvT__name__[] = "recvT";
 
@@ -651,6 +671,6 @@ void deleteSource(void* p)
 
 
 // version
-// $Id: exchangers.cc,v 1.29 2003/11/25 17:58:15 puru Exp $
+// $Id: exchangers.cc,v 1.30 2003/11/28 22:23:45 ces74 Exp $
 
 // End of file
