@@ -43,7 +43,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
         vort[m][snode] = 2*vorv[m][node]-vorv[m][node-1];
      }
 
-   free_STD_mem(SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+   free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 
    return;
 }
