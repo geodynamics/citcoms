@@ -855,27 +855,27 @@ struct All_variables {
     struct Shape_function1_dx Lx; 
     struct Shape_function_dx NMx;
  
-    void (* build_forcing_term)();
-    void (* iterative_solver)();
-    void (* next_buoyancy_field)();
-    void (* obtain_gravity)();
-    void (* problem_settings)();
-    void (* problem_derived_values)();
-    void (* problem_allocate_vars)();
-    void (* problem_boundary_conds)();
-    void (* problem_node_positions)();
-    void (* problem_update_node_positions)();
-    void (* problem_initial_fields)();
-    void (* problem_tracer_setup)();
-    void (* problem_tracer_advection)();
-    void (* problem_tracer_output)();
-    void (* problem_update_bcs)();
-    void (* special_process_new_velocity)();
-    void (* special_process_new_buoyancy)();
-    void (* solve_stokes_problem)(); 
-    void (* solver_allocate_vars)(); 
-    void (* transform)();
+    void (* build_forcing_term)(void*);
+    void (* iterative_solver)(void*);
+    void (* next_buoyancy_field)(void*);
+    void (* obtain_gravity)(void*);
+    void (* problem_settings)(void*);
+    void (* problem_derived_values)(void*);
+    void (* problem_allocate_vars)(void*);
+    void (* problem_boundary_conds)(void*);
+    void (* problem_node_positions)(void*);
+    void (* problem_update_node_positions)(void*);
+    void (* problem_initial_fields)(void*);
+    void (* problem_tracer_setup)(void*);
+    void (* problem_tracer_advection)(void*);
+    void (* problem_tracer_output)(void*);
+    void (* problem_update_bcs)(void*);
+    void (* special_process_new_velocity)(void*);
+    void (* special_process_new_buoyancy)(void*);
+    void (* solve_stokes_problem)(void*); 
+    void (* solver_allocate_vars)(void*); 
+    void (* transform)(void*);
 
-    float (* node_space_function[3])();
+    float (* node_space_function[3])(void*);
  
 };
