@@ -14,9 +14,12 @@ from pyre.facilities.ScriptBinder import ScriptBinder
 class Mesher(Facility):
 
 
-    def __init__(self, name, component):
+    def __init__(self, name, default, binder=None):
+        if not binder:
+            binder = self.Binder()
+
         Facility.__init__(self, name,
-                          default=component, binder=self.Binder())
+                          default=default, binder=binder)
         return
 
 
@@ -49,6 +52,6 @@ class Mesher(Facility):
 
 
 # version
-__id__ = "$Id: Mesher.py,v 1.3 2003/08/01 19:05:36 tan2 Exp $"
+__id__ = "$Id: Mesher.py,v 1.4 2003/08/29 20:40:22 tan2 Exp $"
 
 # End of file

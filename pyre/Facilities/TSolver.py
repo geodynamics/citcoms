@@ -14,9 +14,12 @@ from pyre.facilities.ScriptBinder import ScriptBinder
 class TSolver(Facility):
 
 
-    def __init__(self, name, component):
+    def __init__(self, name, default, binder=None):
+        if not binder:
+            binder = self.Binder()
+
         Facility.__init__(self, name,
-                          default=component, binder=self.Binder())
+                          default=default, binder=binder)
         return
 
 
@@ -44,6 +47,6 @@ class TSolver(Facility):
             return
 
 # version
-__id__ = "$Id: TSolver.py,v 1.3 2003/07/28 23:03:50 tan2 Exp $"
+__id__ = "$Id: TSolver.py,v 1.4 2003/08/29 20:40:22 tan2 Exp $"
 
 # End of file

@@ -12,9 +12,12 @@ from pyre.facilities.ScriptBinder import ScriptBinder
 class Solver(Facility):
 
 
-    def __init__(self, name, default, binder=self.Binder()):
+    def __init__(self, name, default, binder=None):
+        if not binder:
+            binder = self.Binder()
+
         Facility.__init__(self, name,
-                          default, binder)
+                          default=default, binder=binder)
         return
 
 
@@ -47,6 +50,6 @@ class Solver(Facility):
 
 
 # version
-__id__ = "$Id: Solver.py,v 1.1 2003/08/29 19:46:38 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.2 2003/08/29 20:40:22 tan2 Exp $"
 
 # End of file

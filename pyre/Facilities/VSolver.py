@@ -14,9 +14,12 @@ from pyre.facilities.ScriptBinder import ScriptBinder
 class VSolver(Facility):
 
 
-    def __init__(self, name, component):
+    def __init__(self, name, default, binder=None):
+        if not binder:
+            binder = self.Binder()
+
         Facility.__init__(self, name,
-                          default=component, binder=self.Binder())
+                          default=default, binder=binder)
         return
 
 
@@ -49,6 +52,6 @@ class VSolver(Facility):
 
 
 # version
-__id__ = "$Id: VSolver.py,v 1.5 2003/08/22 22:16:05 tan2 Exp $"
+__id__ = "$Id: VSolver.py,v 1.6 2003/08/29 20:40:22 tan2 Exp $"
 
 # End of file
