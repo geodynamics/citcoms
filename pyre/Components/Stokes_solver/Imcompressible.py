@@ -2,21 +2,17 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#                             Michael A.G. Aivazis
-#                      California Institute of Technology
-#                      (C) 1998-2003  All Rights Reserved
-#
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-
 from Stokes_solver import Stokes_solver
 import CitcomS.Regional as Regional
 
 
-class ImcompressibleNewtionian(Stokes_solver):
+class ImcompressibleNewtonian(Stokes_solver):
+
 
     def form_RHS(self):
 	Regional.velocities_conform_bcs()
@@ -32,32 +28,19 @@ class ImcompressibleNewtionian(Stokes_solver):
 
     def solve(self):
 	return Regional.solve_constrained_flow_iterative()
-    
-
-    def preInit(self):
-	# read/check input parameters here
-	return
-
-
-    def postInit(self):
-	# allocate and initialize memory here
-	return
-
-
-    def fini(self):
-	# free memory here
-	return
 
 
 
 
+class ImcompressibleNonNewtonian(Stokes_solver):
 
-class ImcompressibleNonNewtionian(ImcompressibleNewtionian):
-
+    # over-ride Stokes.solver.run()
     def run(self, *args, **kwds):
 
+	self.init()
+
 	self.form_RHS()
-	
+
 	while (self.count < 50) and self.sdepv_not_convergent:
 
 	    self.form_LHS()
@@ -72,16 +55,13 @@ class ImcompressibleNonNewtionian(ImcompressibleNewtionian):
 
 	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
 	    self.count += 1
-	    
+
+	self.fini()
+
 	return
 
 
-    def preInit(self):
-	# read/check input parameters here
-	return
-
-
-    def postInit(self):
+    def init(self):
 	# allocate and initialize memory here
 	Regional.general_stokes_solver_init()
 
@@ -105,6 +85,6 @@ class ImcompressibleNonNewtionian(ImcompressibleNewtionian):
 
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.3 2003/05/20 18:56:58 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.4 2003/06/23 20:54:13 tan2 Exp $"
 
-# End of file 
+# End of file

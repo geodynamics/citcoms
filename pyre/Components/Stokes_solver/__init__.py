@@ -2,10 +2,6 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#                             Michael A.G. Aivazis
-#                      California Institute of Technology
-#                      (C) 1998-2003  All Rights Reserved
-#
 # <LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13,16 +9,16 @@
 
 
 
-def imcompressibleNewtionian(name):
-    from Imcompressible import ImcompressibleNewtionian
-    return ImcompressibleNewtionian(name)
-    
+def imcompressibleNewtonian():
+    from Imcompressible import ImcompressibleNewtonian
+    return ImcompressibleNewtonian('imcomp-newtonian')
 
 
-def imcompressibleNonNewtionian(name):
-    from Imcompressible import ImcompressibleNonNewtionian
-    return ImcompressibleNonNewtionian(name)
-    
+
+def imcompressibleNonNewtonian():
+    from Imcompressible import ImcompressibleNonNewtonian
+    return ImcompressibleNonNewtonian('imcomp-non-newtonian')
+
 
 
 
@@ -33,6 +29,6 @@ def imcompressibleNonNewtionian(name):
 
 
 # version
-__id__ = "$Id: __init__.py,v 1.2 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: __init__.py,v 1.3 2003/06/23 20:54:13 tan2 Exp $"
 
-# End of file 
+# End of file
