@@ -54,8 +54,9 @@ void InteriorImposingSink::recvV()
 {
     journal::debug_t debug("Exchanger");
     debug << journal::loc(__HERE__)
-	  << "in InteriorImposingSink::recvT" << journal::end;
-
+	  << "in InteriorImposingSink::recvV" << journal::end;
+    
+    
     sink.recvArray2D(vic);
 
     Convertor& convertor = Convertor::instance();
@@ -142,6 +143,6 @@ void InteriorImposingSource::sendT()
 
 
 // version
-// $Id: InteriorImposing.cc,v 1.12 2004/01/17 02:10:38 puru Exp $
+// $Id: InteriorImposing.cc,v 1.13 2004/01/21 00:13:53 puru Exp $
 
 // End of file
