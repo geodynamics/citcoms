@@ -31,7 +31,7 @@ class VSolver(Facility):
 
         ## let the Facility handle unknown component names
         else:
-            component = Facility.bind(configuration)
+            component = Facility.bind(self, configuration)
 
         return component
 
@@ -39,6 +39,6 @@ class VSolver(Facility):
 
 
 # version
-__id__ = "$Id: VSolver.py,v 1.1 2003/06/23 20:43:32 tan2 Exp $"
+__id__ = "$Id: VSolver.py,v 1.2 2003/06/23 21:01:03 tan2 Exp $"
 
 # End of file
