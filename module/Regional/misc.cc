@@ -15,15 +15,17 @@
 #include <Python.h>
 
 #include "misc.h"
+
+
+extern "C" {
 #include "global_defs.h"
-//#include "citcom_init.h"
+#include "citcom_init.h"
 
-extern "C" double return1_test();
-extern "C" struct All_variables* Citcom_Init(int, int);
-extern "C" void read_instructions(char*);
-
+double return1_test();
+void read_instructions(char*);
 
 struct All_variables *E;
+}
 
 
 // copyright
@@ -63,9 +65,13 @@ PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "ii", &nproc, &rank))
         return NULL;
 
+    // Allocate global pointer E
     Citcom_Init(nproc, rank);
 
-    // if E is NULL, raise an exception here... to be done.
+    // if E is NULL, raise an exception here.
+    if (E == NULL)
+      return PyErr_NoMemory();
+      
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -85,7 +91,7 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
     read_instructions(filename);
 
     // test
-    fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
+    // fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -95,6 +101,6 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.6 2003/04/10 23:18:24 tan2 Exp $
+// $Id: misc.cc,v 1.7 2003/04/11 01:31:59 tan2 Exp $
 
 // End of file
