@@ -250,11 +250,11 @@ void commonE(All_variables *E) {
 		for(int i=1;i<=E->lmesh.noz;i++)  {
 		    int node = i + (j-1)*E->lmesh.noz
 			     + (k-1)*E->lmesh.noz*E->lmesh.nox;
-		    E->X[E->mesh.levmax][m][1][node] =
+		    E->sx[m][1][node] =
 			(E->control.theta_max - E->control.theta_min)/(E->lmesh.nox-1)*(j-1) + E->control.theta_min;
-		    E->X[E->mesh.levmax][m][2][node] =
+		    E->sx[m][2][node] =
 			(E->control.fi_max - E->control.fi_min)/(E->lmesh.noy-1)*(k-1) + E->control.fi_min;
-		    E->X[E->mesh.levmax][m][3][node] =
+		    E->sx[m][3][node] =
 			(E->sphere.ro -  E->sphere.ri)/(E->lmesh.noz-1)*(i-1) +  E->sphere.ri;
 
 //  		    std::cout <<  node << " "
@@ -268,6 +268,6 @@ void commonE(All_variables *E) {
 }
 
 // version
-// $Id: misc.cc,v 1.15 2003/09/29 02:09:06 puru Exp $
+// $Id: misc.cc,v 1.16 2003/09/29 02:20:26 puru Exp $
 
 // End of file
