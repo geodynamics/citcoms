@@ -33,7 +33,10 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
-    nodelist = file(machinefile).readlines()
+    try:
+        nodelist = file(machinefile).readlines()
+    except IOError:
+        nodelist = machinefile.split()
 
     # check the length of nodelist
     totalnodes = nprocx * nprocy * nprocz * ncap
@@ -85,6 +88,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: batchsurf.py,v 1.1 2004/06/08 01:35:06 tan2 Exp $
+# $Id: batchsurf.py,v 1.2 2004/08/06 23:25:20 tan2 Exp $
 
 # End of file
