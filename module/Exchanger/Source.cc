@@ -25,6 +25,7 @@ Source::Source(MPI_Comm c, int s,
 
     if(isOverlapped(mesh.bbox(), mybbox)) {
   	interp.reset(new Interpolator(mesh, E, meshNode_));
+	traction_interp.reset(new TractionInterpolator(mesh,meshNode_,E));
 	meshNode_.print("meshNode");
     }
     sendMeshNode();
@@ -49,10 +50,17 @@ void Source::interpolateV(Array2D<double,DIM>& V, const All_variables* E) const
 }
 
 
-void Source::interpolateF(Array2D<double,DIM>& F, const All_variables* E) const
+void Source::interpolateF(Array2D<double,DIM>& F, All_variables* E) const
 {
     if(size())
-	interp->interpolateF(F, E);
+	traction_interp->InterpolateTraction(F, E);
+}
+
+
+void Source::domain_cutout(const All_variables* E) const
+{
+    if(size())
+	traction_interp->domain_cutout(E);
 }
 
 
@@ -74,6 +82,6 @@ void Source::sendMeshNode() const
 
 
 // version
-// $Id: Source.cc,v 1.3 2003/11/23 18:11:08 ces74 Exp $
+// $Id: Source.cc,v 1.4 2003/11/28 22:18:20 ces74 Exp $
 
 // End of file
