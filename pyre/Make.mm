@@ -39,8 +39,8 @@ update: clean
 EXPORT_PYTHON_MODULES = \
 	__init__.py \
 	CitcomApp.py \
+	CoupledRegionalApp.py \
 	FullApp.py \
-	RadiusDepth.py \
 	RegionalApp.py
 
 
@@ -49,7 +49,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.6 2003/08/01 22:24:00 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/22 22:18:41 tan2 Exp $
 
 #
 # End of file
