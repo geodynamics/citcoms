@@ -9,6 +9,7 @@
 
 #include <portinfo>
 #include <cmath>
+#include <iostream>
 #include "global_defs.h"
 #include "journal/journal.h"
 #include "utilTemplate.h"
@@ -36,22 +37,20 @@ void AreaWeightedNormal::imposeConstraint(Velo& V,
 					  const MPI_Comm& comm,
 					  const Sink& sink) const
 {
-    journal::debug_t debug("Exchanger");
-    debug << journal::loc(__HERE__)
-	  << "in AreaWeightedNormal::imposeConstraint" << journal::end;
+    journal::info_t info("incompressibility");
 
     double outflow = computeOutflow(V, comm, sink);
-    debug << journal::loc(__HERE__)
-	  << "Net outflow before boundary velocity correction "
-	  << outflow << journal::end;
+    info << journal::loc(__HERE__)
+	 << "Net outflow before boundary velocity correction "
+	 << outflow << journal::end;
 
     if (std::abs(outflow) > toleranceOutflow_) {
 	reduceOutflow(V, outflow, sink);
 
 	outflow = computeOutflow(V, comm, sink);
-	debug << journal::loc(__HERE__)
-	      << "Net outflow after boundary velocity correction (SHOULD BE ZERO !) "
-	      << outflow << journal::end;
+	info << journal::loc(__HERE__)
+	     << "Net outflow after boundary velocity correction (SHOULD BE ZERO !) "
+	     << outflow << journal::end;
     }
 }
 
@@ -191,6 +190,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow,
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.8 2004/01/21 17:40:20 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.9 2004/02/25 23:24:50 tan2 Exp $
 
 // End of file
