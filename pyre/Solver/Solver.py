@@ -182,7 +182,9 @@ class Solver(BaseSolver):
     def endTimestep(self, t, steps, done):
         BaseSolver.endTimestep(self, t)
 
-        self.inventory.bc.updateBC()
+        self.inventory.visc.updateMaterial()
+        self.inventory.bc.updatePlateVelocity()
+
         if self.coupler:
             done = self.coupler.endTimestep(done)
 
@@ -288,6 +290,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.38 2004/05/24 20:32:06 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.39 2004/05/26 23:55:38 tan2 Exp $"
 
 # End of file

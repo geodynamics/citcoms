@@ -34,6 +34,12 @@ class Visc(CitcomComponent):
 
 
 
+    def updateMaterial(self):
+        self.CitcomModule.Visc_update_material(self.all_variables)
+        return
+
+
+
     class Inventory(CitcomComponent.Inventory):
 
 
@@ -64,6 +70,6 @@ class Visc(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.9 2004/02/05 19:06:29 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.10 2004/05/26 23:55:38 tan2 Exp $"
 
 # End of file

@@ -24,8 +24,8 @@ class BC(CitcomComponent):
 
 
 
-    def updateBC(self):
-        self.CitcomModule.BC_update_bc(self.all_variables)
+    def updatePlateVelocity(self):
+        self.CitcomModule.BC_update_plate_velocity(self.all_variables)
         return
 
 
@@ -63,6 +63,6 @@ class BC(CitcomComponent):
             ]
 
 # version
-__id__ = "$Id: BC.py,v 1.11 2004/05/24 20:32:06 tan2 Exp $"
+__id__ = "$Id: BC.py,v 1.12 2004/05/26 23:55:38 tan2 Exp $"
 
 # End of file
