@@ -659,14 +659,16 @@ void common_initial_fields(E)
 {
     void initial_pressure();
     void initial_velocity();
-    void read_viscosity_option();
+    //void read_viscosity_option();
+    void initial_viscosity();
 
     report(E,"Initialize pressure field");
     initial_pressure(E);
     report(E,"Initialize velocity field");
     initial_velocity(E);
     report(E,"Initialize viscosity field");
-    get_viscosity_option(E);
+    //get_viscosity_option(E);
+    initial_viscosity(E);
 
     return;
 

@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
     import mpi
     world = mpi.world()
-    print
-    print "Citcom_Init: return", Regional.Citcom_Init(world)
+    print mpi.world
+    print "Citcom_Init: return", Regional.Citcom_Init(mpi.mpi.world)
 
     import os, sys
     filename = sys.argv[1]
@@ -50,6 +50,6 @@ if __name__ == "__main__":
     
 
 # version
-__id__ = "$Id: signon.py,v 1.6 2003/05/13 19:51:11 tan2 Exp $"
+__id__ = "$Id: signon.py,v 1.7 2003/05/14 18:32:20 tan2 Exp $"
 
 #  End of file 

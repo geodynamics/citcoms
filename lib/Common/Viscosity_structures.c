@@ -7,85 +7,75 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "parsing.h"
 
-void get_viscosity_option(E)
-     struct All_variables *E;
+
+void viscosity_system_input(struct All_variables *E)
 {
-    void viscosity_for_system();
-    void parallel_process_termination();
+  int m=E->parallel.me;
+  int i;
 
-    int m=E->parallel.me;
- 
-    /* general, essential default */
-  
-    E->viscosity.update_allowed = 0; 
-    E->viscosity.SDEPV = E->viscosity.TDEPV = 0;
-    E->viscosity.EXPX=0;
-  
-    input_string("Viscosity",E->viscosity.STRUCTURE,NULL,m);   /* Which form of viscosity */
-    
-    input_int ("visc_smooth_method",&(E->viscosity.smooth_cycles),"0",m);
-    
-    if ( strcmp(E->viscosity.STRUCTURE,"system") == 0) /* Interpret */ {
-      if(E->parallel.me==0) fprintf(E->fp,"Viscosity derived from system state\n");
-      E->viscosity.FROM_SYSTEM = 1;
-      viscosity_for_system(E);
-    }
-
-
-  return;
-
-}
-
-/* ============================================ */
-
-
-void viscosity_for_system(E)
-     struct All_variables *E;
-{
-    void get_system_viscosity();
-    void twiddle_thumbs();
-    int m=E->parallel.me;
-    int i;
-  
   /* default values .... */
-
-   for(i=0;i<40;i++) {
-       E->viscosity.N0[i]=1.0;
-       E->viscosity.T[i] = 0.0;
-       E->viscosity.Z[i] = 0.0;
-       E->viscosity.E[i] = 0.0;
-       E->viscosity.T0[i] = 0.0;
-   }
+  for(i=0;i<40;i++) {
+    E->viscosity.N0[i]=1.0;
+    E->viscosity.T[i] = 0.0;
+    E->viscosity.Z[i] = 0.0;
+    E->viscosity.E[i] = 0.0;
+  }
 
   /* read in information */
-    input_int("rheol",&(E->viscosity.RHEOL),"essential",m);
-    input_int("num_mat",&(E->viscosity.num_mat),"1",m);
- 
+  input_boolean("VISC_UPDATE",&(E->viscosity.update_allowed),"on",m);
+  input_int("rheol",&(E->viscosity.RHEOL),"essential",m);
+  input_int("num_mat",&(E->viscosity.num_mat),"1",m);
+  input_float_vector("visc0",E->viscosity.num_mat,(E->viscosity.N0),m);
+
+  input_boolean("TDEPV",&(E->viscosity.TDEPV),"on",m);
+  if (E->viscosity.TDEPV) {
     input_float_vector("viscT",E->viscosity.num_mat,(E->viscosity.T),m);
-/*     input_float_vector("viscZ",E->viscosity.num_mat,(E->viscosity.Z),m); */
     input_float_vector("viscE",E->viscosity.num_mat,(E->viscosity.E),m);
-    input_float_vector("viscT0",E->viscosity.num_mat,(E->viscosity.T0),m);
-    input_float_vector("visc0",E->viscosity.num_mat,(E->viscosity.N0),m);
-  
-    input_boolean("TDEPV",&(E->viscosity.TDEPV),"on",m);
-    input_boolean("SDEPV",&(E->viscosity.SDEPV),"off",m);
-    
+  }
+
+
+  E->viscosity.sdepv_misfit = 1.0;
+  input_boolean("SDEPV",&(E->viscosity.SDEPV),"off",m);
+  if (E->viscosity.SDEPV) {
     input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);
     input_float_vector("sdepv_expt",E->viscosity.num_mat,(E->viscosity.sdepv_expt),m);
-    input_boolean("VMAX",&(E->viscosity.MAX),"off",m);
-    input_boolean("VMIN",&(E->viscosity.MIN),"off",m);
-    input_boolean("VISC_UPDATE",&(E->viscosity.update_allowed),"on",m);
-  
+  }
+
+  input_boolean("VMAX",&(E->viscosity.MAX),"off",m);
+  if (E->viscosity.MAX)
     input_float("visc_max",&(E->viscosity.max_value),"1e22,1,nomax",m);
+
+  input_boolean("VMIN",&(E->viscosity.MIN),"off",m);
+  if (E->viscosity.MIN)
     input_float("visc_min",&(E->viscosity.min_value),"1e20",m);
 
-    if(!E->viscosity.update_allowed)
-      get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
- 
-    return;
+  return;
 }
 
+
+void viscosity_input(struct All_variables *E)
+{
+  int m = E->parallel.me;
+
+  input_string("Viscosity",E->viscosity.STRUCTURE,NULL,m);
+  input_int ("visc_smooth_method",&(E->viscosity.smooth_cycles),"0",m);
+
+  if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
+    E->viscosity.FROM_SYSTEM = 1;
+  else
+    E->viscosity.FROM_SYSTEM = 0;
+
+  if (E->viscosity.FROM_SYSTEM)
+    viscosity_system_input(E);
+
+  return;
+}
+
+
+
+/* ============================================ */
 
 void get_system_viscosity(E,propogate,evisc,visc)
      struct All_variables *E;
@@ -157,6 +147,17 @@ void get_system_viscosity(E,propogate,evisc,visc)
 	  }
         }  */   
  return;
+}
+
+
+
+void initial_viscosity(struct All_variables *E)
+{
+  if (E->viscosity.FROM_SYSTEM)
+    if(!E->viscosity.update_allowed)
+      get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
+
+  return;
 }
 
 

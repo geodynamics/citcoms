@@ -289,9 +289,6 @@ void read_initial_settings(E)
     input_float("z_410",&(E->viscosity.z410),"1.0",m);
     input_float("z_lith",&(E->viscosity.zlith),"0.0",m);
 
-    phase_change_input(E);
-    lith_age_input(E);
-
 /*  the start age and initial subduction history   */
     input_float("start_age",&(E->control.start_age),"0.0",m);
     input_int("reset_startage",&(E->control.reset_startage),"0",m);
@@ -430,6 +427,10 @@ void read_initial_settings(E)
 /*   input_float("gasconst",&(E->data.gas_const),"8.3",m); */     /* not much cause to change these ! */
 /*   input_float("gravconst",&(E->data.grav_const),"6.673e-11",m); */
 /*   input_float("permeability",&(E->data.permeability),"3.0e-10",m); */
+
+  phase_change_input(E);
+  lith_age_input(E);
+  viscosity_input(E);
 
  (E->problem_settings)(E);
 

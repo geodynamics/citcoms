@@ -66,7 +66,15 @@ PyObject * pyRegional_Citcom_Init(PyObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "O", &Obj))
         return NULL;
 
-    world = static_cast <MPI_Comm*> (PyCObject_AsVoidPtr(Obj));
+    if (PyCObject_Check(Obj)) {
+	world = static_cast <MPI_Comm*> (PyCObject_AsVoidPtr(Obj));
+	fprintf(stderr,"%d %d\n", MPI_COMM_WORLD, *world);
+	//*world = MPI_COMM_WORLD;
+    }
+    else {
+        fprintf(stderr,"not a CObject\n");
+        exit(1);
+    }
 
     // Allocate global pointer E
     Citcom_Init(world);
@@ -104,6 +112,6 @@ PyObject * pyRegional_read_instructions(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.8 2003/05/13 19:51:11 tan2 Exp $
+// $Id: misc.cc,v 1.9 2003/05/14 18:32:20 tan2 Exp $
 
 // End of file
