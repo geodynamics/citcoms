@@ -25,11 +25,11 @@ class RegionalApp(Application):
 	self.start_time = Regional.CPU_time()
 	print "my rank is ", self.rank
 
-        self.setProperties()
+        self._setProperties()
+        self.prefix = self.inventory.param.inventory.datafile
 
-        #### wait for Params.setProperties()
-        #if self.inventory.params.inventory.verbose:
-        #    Regional.open_info_file()
+        if self.inventory.param.inventory.verbose:
+            Regional.open_info_file()
 
         mesher = self.inventory.mesher
         mesher.init(self)
@@ -53,9 +53,6 @@ class RegionalApp(Application):
         self.keep_going = True
         self.Emergency_stop = False
         self.start_time = 0.0
-
-	#test
-	self.prefix = 'test'
 
         return
 
@@ -84,8 +81,17 @@ class RegionalApp(Application):
 
 
 
-    def setProperties(self):
+    def _setProperties(self):
+        self.inventory.mesher.setProperties()
+        self.inventory.tsolver.setProperties()
+        self.inventory.vsolver.setProperties()
+
         self.inventory.bc.setProperties()
+        self.inventory.const.setProperties()
+        self.inventory.ic.setProperties()
+        self.inventory.parallel.setProperties()
+        self.inventory.param.setProperties()
+        self.inventory.phase.setProperties()
         self.inventory.visc.setProperties()
 
         return
@@ -110,7 +116,6 @@ class RegionalApp(Application):
         from CitcomS.Components.BC import BC
         from CitcomS.Components.Const import Const
         from CitcomS.Components.IC import IC
-        #from CitcomS.Components.Mesher import Mesher
 	from CitcomS.Components.Parallel import Parallel
 	from CitcomS.Components.Param import Param
         from CitcomS.Components.Phase import Phase
@@ -173,6 +178,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalApp.py,v 1.17 2003/07/22 21:58:08 tan2 Exp $"
+__id__ = "$Id: RegionalApp.py,v 1.18 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file

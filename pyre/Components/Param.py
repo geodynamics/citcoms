@@ -31,7 +31,7 @@ class Param(Component):
         import pyre.properties
 
 
-        __inventory__ = [
+        inventory = [
 
             pyre.properties.str("datafile","test"),
 
@@ -83,6 +83,6 @@ class Param(Component):
 
 
 # version
-__id__ = "$Id: Param.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
+__id__ = "$Id: Param.py,v 1.4 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file

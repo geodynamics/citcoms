@@ -145,25 +145,25 @@ struct PyMethodDef pyRegional_methods[] = {
 
     // from setProperties.h
 
+    {pyRegional_Advection_diffusion_set_properties__name__,
+     pyRegional_Advection_diffusion_set_properties,
+     METH_VARARGS,
+     pyRegional_Advection_diffusion_set_properties__doc__},
+
     {pyRegional_BC_set_properties__name__,
      pyRegional_BC_set_properties,
      METH_VARARGS,
      pyRegional_BC_set_properties__doc__},
 
-    {pyRegional_Visc_set_properties__name__,
-     pyRegional_Visc_set_properties,
+    {pyRegional_Const_set_properties__name__,
+     pyRegional_Const_set_properties,
      METH_VARARGS,
-     pyRegional_Visc_set_properties__doc__},
+     pyRegional_Const_set_properties__doc__},
 
     {pyRegional_IC_set_properties__name__,
      pyRegional_IC_set_properties,
      METH_VARARGS,
      pyRegional_IC_set_properties__doc__},
-
-    {pyRegional_Const_set_properties__name__,
-     pyRegional_Const_set_properties,
-     METH_VARARGS,
-     pyRegional_Const_set_properties__doc__},
 
     {pyRegional_Parallel_set_properties__name__,
      pyRegional_Parallel_set_properties,
@@ -179,6 +179,21 @@ struct PyMethodDef pyRegional_methods[] = {
      pyRegional_Phase_set_properties,
      METH_VARARGS,
      pyRegional_Phase_set_properties__doc__},
+
+    {pyRegional_RegionalSphere_set_properties__name__,
+     pyRegional_RegionalSphere_set_properties,
+     METH_VARARGS,
+     pyRegional_RegionalSphere_set_properties__doc__},
+
+    {pyRegional_Visc_set_properties__name__,
+     pyRegional_Visc_set_properties,
+     METH_VARARGS,
+     pyRegional_Visc_set_properties__doc__},
+
+    {pyRegional_Stokes_solver_set_properties__name__,
+     pyRegional_Stokes_solver_set_properties,
+     METH_VARARGS,
+     pyRegional_Stokes_solver_set_properties__doc__},
 
     // from stokes_solver.h
 
@@ -248,6 +263,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.17 2003/07/23 05:19:16 ces74 Exp $
+// $Id: bindings.cc,v 1.18 2003/07/23 22:00:57 tan2 Exp $
 
 // End of file

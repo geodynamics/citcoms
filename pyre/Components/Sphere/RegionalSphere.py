@@ -22,7 +22,7 @@ class RegionalSphere(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-        #Regional.Mesher_set_prop(self.inventory)
+        Regional.RegionalSphere_set_properties(self.inventory)
         return
 
 
@@ -69,17 +69,18 @@ class RegionalSphere(Component):
             pyre.properties.int("mgunitz", 8),
             pyre.properties.int("levels", 3),
 
+            pyre.properties.float("radius_outer", 1.0),
+            pyre.properties.float("radius_inner", 0.55),
+
             pyre.properties.float("theta_min", pi/2),
             pyre.properties.float("theta_max", pi*3/4),
-            pyre.properties.float("phi_min", pi*3/4),
-            pyre.properties.float("phi_max", pi*5/4),
-            pyre.properties.float("radius_inner", 0.55),
-            pyre.properties.float("radius_outer", 1.0),
+            pyre.properties.float("fi_min", pi*3/4),
+            pyre.properties.float("fi_max", pi*5/4),
 
             ]
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.1 2003/07/15 21:50:30 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.2 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file

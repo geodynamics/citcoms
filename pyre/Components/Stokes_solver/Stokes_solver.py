@@ -21,7 +21,7 @@ class Stokes_solver(Component):
 
     def setProperties(self):
         import CitcomS.Regional as Regional
-        #Regional.Stokes_solver_set_prop(self.inventory)
+        Regional.Stokes_solver_set_properties(self.inventory)
         return
 
 
@@ -95,6 +95,6 @@ class Stokes_solver(Component):
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.8 2003/07/15 21:47:05 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.9 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file

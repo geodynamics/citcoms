@@ -20,8 +20,8 @@ class Advection_diffusion(Component):
 
 
     def setProperties(self):
-        #import CitcomS.Regional as Regional
-        #Regional.general_stokes_solver_set_prop(self.inventory)
+        import CitcomS.Regional as Regional
+        Regional.Advection_diffusion_set_properties(self.inventory)
         return
 
 
@@ -34,7 +34,7 @@ class Advection_diffusion(Component):
         self._solve()
         return
 
-    
+
     def init(self,parent):
         Regional.PG_timestep_init()
 	return
@@ -64,8 +64,8 @@ class Advection_diffusion(Component):
 
             prop.int("adv_sub_iterations",2),
             prop.float("maxadvtime",10.0),
-            prop.bool("precond",True),
 
+            prop.bool("precond",True),
             prop.bool("aug_lagr",True),
             prop.float("aug_number",2.0e3),
 
@@ -73,6 +73,6 @@ class Advection_diffusion(Component):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.6 2003/07/15 18:03:23 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.7 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file

@@ -32,9 +32,8 @@ class Parallel(Component):
 
         inventory = [
 
-            pyre.properties.list("nproc_surf",1,
-				 pyre.properties.choice([1,12])
-				 ),
+            pyre.properties.int("nproc_surf",1,
+                                pyre.properties.choice([1,12])),
             pyre.properties.int("nprocx",1),
             pyre.properties.int("nprocy",1),
             pyre.properties.int("nprocz",1),
@@ -44,6 +43,6 @@ class Parallel(Component):
 
 
 # version
-__id__ = "$Id: Parallel.py,v 1.3 2003/07/23 05:29:58 ces74 Exp $"
+__id__ = "$Id: Parallel.py,v 1.4 2003/07/23 22:00:57 tan2 Exp $"
 
 # End of file
