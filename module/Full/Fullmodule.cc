@@ -1,18 +1,13 @@
 // -*- C++ -*-
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
-//                               Michael A.G. Aivazis
-//                        California Institute of Technology
-//                        (C) 1998-2003 All Rights Reserved
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //  <LicenseText>
 // 
-//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
 #include <portinfo>
-
 #include <Python.h>
 
 #include "exceptions.h"
@@ -28,7 +23,7 @@ initFull()
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        "Full", pyFull_methods,
+        "Full", pyCitcom_methods,
         pyFull_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
@@ -40,13 +35,13 @@ initFull()
     }
 
     // install the module exceptions
-    pyFull_runtimeError = PyErr_NewException("Full.runtime", 0, 0);
-    PyDict_SetItemString(d, "RuntimeException", pyFull_runtimeError);
+    pyCitcom_runtimeError = PyErr_NewException("Full.runtime", 0, 0);
+    PyDict_SetItemString(d, "RuntimeException", pyCitcom_runtimeError);
 
     return;
 }
 
 // version
-// $Id: Fullmodule.cc,v 1.2 2003/04/10 23:25:29 tan2 Exp $
+// $Id: Fullmodule.cc,v 1.3 2003/08/01 22:52:05 tan2 Exp $
 
 // End of file
