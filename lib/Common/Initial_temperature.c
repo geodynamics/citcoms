@@ -8,12 +8,12 @@
 void parallel_process_termination();
 void temperatures_conform_bcs();
 void construct_tic_from_input(struct All_variables *);
-void restart_tic_from_file(struct All_variables *);
 
 #include "initial_temperature.h"
 void restart_tic(struct All_variables *);
 void construct_tic(struct All_variables *);
 void debug_tic(struct All_variables *);
+void restart_tic_from_file(struct All_variables *);
 
 
 
@@ -119,3 +119,47 @@ void debug_tic(struct All_variables *E)
 
   return;
 }
+
+
+
+void restart_tic_from_file(struct All_variables *E)
+{
+  int ii, ll, mm;
+  float notusedhere;
+  int i, m;
+  char output_file[255], input_s[1000];
+  FILE *fp;
+
+  float v1, v2, v3, g;
+
+  ii = E->monitor.solution_cycles_init;
+  sprintf(output_file,"%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,ii);
+  fp=fopen(output_file,"r");
+  if (fp == NULL) {
+    fprintf(E->fp,"(Initial_temperature.c #1) Cannot open %s\n",output_file);
+    parallel_process_termination();
+  }
+
+  fgets(input_s,1000,fp);
+  sscanf(input_s,"%d %d %f",&ll,&mm,&notusedhere);
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    fgets(input_s,1000,fp);
+    sscanf(input_s,"%d %d",&ll,&mm);
+    for(i=1;i<=E->lmesh.nno;i++)  {
+      fgets(input_s,1000,fp);
+      sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
+
+      /*  E->sphere.cap[m].V[1][i] = d;
+	  E->sphere.cap[m].V[1][i] = e;
+	  E->sphere.cap[m].V[1][i] = f;  */
+      E->T[m][i] = max(0.0,min(g,1.0));
+    }
+  }
+  fclose (fp);
+
+  temperatures_conform_bcs(E);
+  return;
+}
+
+

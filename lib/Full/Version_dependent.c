@@ -91,8 +91,10 @@ void global_derived_values(E)
   E->sphere.snel = E->sphere.ely*E->sphere.elx;
   E->sphere.nsf = E->sphere.noy*E->sphere.nox;
 
-  E->data.scalet = (E->data.layer_km*E->data.layer_km/E->data.therm_diff)/(1.e6*365.25*24*3600);
-  E->data.scalev = (E->data.layer_km/E->data.therm_diff)/(100.0*365.25*24*3600);
+  // Myr
+  E->data.scalet = (E->data.layer_km*1e3*E->data.layer_km*1e3/E->data.therm_diff)/(1.e6*365.25*24*3600);
+  // cm/yr
+  E->data.scalev = (E->data.layer_km*1e3/E->data.therm_diff)/(100*365.25*24*3600);
   E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
 
   if(E->control.print_convergence && E->parallel.me==0)
@@ -285,44 +287,3 @@ void construct_tic_from_input(struct All_variables *E)
   return;
 }
 
-
-
-void restart_tic_from_file(struct All_variables *E)
-{
-  int ii, ll, mm;
-  float notusedhere;
-  int i, m;
-  char output_file[255], input_s[1000];
-  FILE *fp;
-
-  float v1, v2, v3, g;
-
-  ii = E->monitor.solution_cycles_init;
-  sprintf(output_file,"%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,ii);
-  fp=fopen(output_file,"r");
-  if (fp == NULL) {
-    fprintf(E->fp,"(Initial_temperature.c #1) Cannot open %s\n",output_file);
-    parallel_process_termination();
-  }
-
-  fgets(input_s,1000,fp);
-  sscanf(input_s,"%d %d %f",&ll,&mm,&notusedhere);
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    fgets(input_s,1000,fp);
-    sscanf(input_s,"%d %d",&ll,&mm);
-    for(i=1;i<=E->lmesh.nno;i++)  {
-      fgets(input_s,1000,fp);
-      sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
-
-      /*  E->sphere.cap[m].V[1][i] = d;
-	  E->sphere.cap[m].V[1][i] = e;
-	  E->sphere.cap[m].V[1][i] = f;  */
-      E->T[m][i] = max(0.0,min(g,1.0));
-    }
-  }
-  fclose (fp);
-
-  temperatures_conform_bcs(E);
-  return;
-}
