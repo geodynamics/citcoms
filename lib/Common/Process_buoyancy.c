@@ -149,7 +149,6 @@ void heat_flux(E)
     }
   }
 
-  fflush(E->fp_out);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     free((void *)flux[m]);
