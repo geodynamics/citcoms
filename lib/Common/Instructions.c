@@ -342,6 +342,13 @@ void read_initial_settings(struct All_variables *E)
   input_float("density",&(E->data.density),"3340.0",m);
   input_float("wdensity",&(E->data.density_above),"1030.0",m);
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
+  input_float("surftemp",&(E->data.surf_temp),"273.0",m);
+
+  E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
+  E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
+    * E->data.ref_viscosity
+    / (E->data.density * E->data.grav_acc * E->data.therm_exp)
+    / (E->data.layer_km * E->data.layer_km * E->data.layer_km * 1e9);
 
   phase_change_input(E);
   lith_age_input(E);

@@ -63,6 +63,7 @@ class Const(CitcomComponent):
             pyre.properties.float("refvisc", 1.0e21),
             pyre.properties.float("cp", 1250.0),
             pyre.properties.float("wdensity", 0.0),
+            pyre.properties.float("surftemp", 273.0),
 
             pyre.properties.float("depth_lith", 89e3),
             pyre.properties.float("depth_410", 410e3),
@@ -74,6 +75,6 @@ class Const(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Const.py,v 1.8 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.9 2004/01/08 18:26:40 tan2 Exp $"
 
 # End of file

@@ -141,7 +141,8 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     if (not m)
 	std::cout << "#Const.inventory:" << std::endl;
 
-    getScalarProperty(properties, "layerd", E->data.layer_km, m);
+    float radius;
+    getScalarProperty(properties, "layerd", radius, m);
     getScalarProperty(properties, "density", E->data.density, m);
     getScalarProperty(properties, "thermdiff", E->data.therm_diff, m);
     getScalarProperty(properties, "gravacc", E->data.grav_acc, m);
@@ -151,6 +152,9 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "wdensity", E->data.density_above, m);
 
     E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
+    E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
+	* E->data.ref_viscosity / (radius * radius * radius)
+	/ (E->data.density * E->data.grav_acc * E->data.therm_exp);
 
     float zlith, z410, zlm, zcmb;
 
@@ -160,13 +164,13 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "depth_cmb", zcmb, m); //this is used as the D" phase change depth
     //getScalarProperty(properties, "depth_d_double_prime", E->data.zd_double_prime, m);
 
-    E->viscosity.zlith = zlith / E->data.radius_km;
-    E->viscosity.z410 = z410 / E->data.radius_km;
-    E->viscosity.zlm = zlm / E->data.radius_km;
-    E->viscosity.zcmb = zcmb / E->data.radius_km;
+    E->viscosity.zlith = zlith / radius;
+    E->viscosity.z410 = z410 / radius;
+    E->viscosity.zlm = zlm / radius;
+    E->viscosity.zcmb = zcmb / radius;
 
     // convert meter to kilometer
-    E->data.layer_km = E->data.layer_km / 1e3;
+    E->data.layer_km = radius / 1e3;
     E->data.radius_km = E->data.layer_km;
 
     if (PyErr_Occurred())
@@ -757,6 +761,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.20 2003/11/28 22:18:12 tan2 Exp $
+// $Id: setProperties.cc,v 1.21 2004/01/08 18:26:40 tan2 Exp $
 
 // End of file
