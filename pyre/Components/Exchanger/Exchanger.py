@@ -29,6 +29,7 @@ class Exchanger(Component):
 
         self.catchup = True
         self.done = False
+        self.coupled_steps = 1
         return
 
 
@@ -74,7 +75,7 @@ class Exchanger(Component):
         return
 
 
-    def endTimestep(self, done):
+    def endTimestep(self, steps, done):
         KEEP_WAITING_SIGNAL = 0
         NEW_STEP_SIGNAL = 1
         END_SIMULATION_SIGNAL = 2
@@ -95,6 +96,10 @@ class Exchanger(Component):
             elif signal == KEEP_WAITING_SIGNAL:
                 pass
             elif signal == NEW_STEP_SIGNAL:
+                if self.catchup:
+                    print self.name, 'exchanging timestep =', steps
+                    self.coupled_steps = self.exchangeSignal(steps)
+                    print self.name, 'exchanged timestep =', self.coupled_steps
                 break
             else:
                 raise ValueError, \
@@ -123,6 +128,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.19 2004/05/29 01:19:31 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.20 2004/08/07 22:08:36 tan2 Exp $"
 
 # End of file

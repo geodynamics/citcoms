@@ -78,12 +78,12 @@ class Coupler(Component):
 
 
 
-    def endTimestep(self, done):
-        done = self.exchanger.endTimestep(done)
+    def endTimestep(self, steps, done):
+        done = self.exchanger.endTimestep(steps, done)
         return done
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.10 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: Coupler.py,v 1.11 2004/08/07 22:08:35 tan2 Exp $"
 
 # End of file

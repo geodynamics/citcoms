@@ -186,7 +186,7 @@ class Solver(BaseSolver):
         self.inventory.bc.updatePlateVelocity()
 
         if self.coupler:
-            done = self.coupler.endTimestep(done)
+            done = self.coupler.endTimestep(steps, done)
 
         return done
 
@@ -201,13 +201,22 @@ class Solver(BaseSolver):
             print "Average cpu time taken for velocity step = %f" % (
                 total_cpu_time / step )
 
+        if self.coupler:
+            self.CitcomModule.output(self.all_variables, step)
+
 	#self.CitcomModule.finalize()
         return
 
 
 
-    def save(self, step):
-        self.CitcomModule.output(self.all_variables, step)
+    def save(self, step, monitoringFrequency):
+        # for non-coupled run, output spacing is 'monitoringFrequency'
+        if not (step % monitoringFrequency):
+            self.CitcomModule.output(self.all_variables, step)
+        elif self.coupler and not (self.coupler.exchanger.coupled_steps % monitoringFrequency):
+            print self.coupler.exchanger.coupled_steps, monitoringFrequency
+            self.CitcomModule.output(self.all_variables, step)
+
         return
 
 
@@ -290,6 +299,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.40 2004/06/24 19:26:25 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.41 2004/08/07 22:08:36 tan2 Exp $"
 
 # End of file

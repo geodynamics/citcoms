@@ -72,11 +72,11 @@ class Controller(SimulationController):
             self.clock += dt
             self.step += 1
 
-            # do io
-            self.save()
-
             # notify solver we finished a timestep
             self.endTimestep(totalTime, steps)
+
+            # do io
+            self.save()
 
             # are we done?
             if self.done:
@@ -114,8 +114,7 @@ class Controller(SimulationController):
     def save(self):
         step = self.step
         self.solver.timesave(self.clock, step)
-        if not (step % self.inventory.monitoringFrequency):
-            self.solver.save(step)
+        self.solver.save(step, self.inventory.monitoringFrequency)
         return
 
 
