@@ -22,11 +22,11 @@ void set_diffusion_timestep(struct All_variables *E);
 
 /***************************************************************/
 void PG_timestep_init(struct All_variables *E)
-{ 
+{
 
-  E->advection.timesteps=0;
+  E->advection.timesteps = 0;
   set_diffusion_timestep(E);
- 
+
   return;
 }
 
@@ -38,9 +38,9 @@ void set_diffusion_timestep(struct All_variables *E)
 
   float global_fmin();
 
-  diff_timestep = 1.0e8; 
+  diff_timestep = 1.0e8;
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(el=1;el<=E->lmesh.nel;el++)  { 
+    for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
 	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
 	diff_timestep = min(diff_timestep,ts);
@@ -70,14 +70,15 @@ void PG_timestep_solve(struct All_variables *E)
   double time0,time1,T_interior1;
   double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
 
-  E->monitor.solution_cycles++;
   E->advection.timesteps++;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
     DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
     T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
     Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-  } 
+  }
+
+  std_timestep(E);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (i=1;i<=E->lmesh.nno;i++)   {
@@ -85,30 +86,32 @@ void PG_timestep_solve(struct All_variables *E)
       Tdot1[m][i] = E->Tdot[m][i];
     }
 
-  std_timestep(E);
   /* get the max temperature for old T */
   T_interior1 = Tmaxd(E,E->T);
 
-  E->advection.dt_reduced = 1.0;         
+  E->advection.dt_reduced = 1.0;
   E->advection.last_sub_iterations = 1;
 
-  time1= CPU_time0();   
+  time1= CPU_time0();
 
   do {
-    E->advection.timestep *= E->advection.dt_reduced; 
-    
+    E->advection.timestep *= E->advection.dt_reduced;
+
     iredo = 0;
-    predictor(E,E->T,E->Tdot);
-    
-    for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
-      pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
-      corrector(E,E->T,E->Tdot,DTdot);
-      temperatures_conform_bcs(E); 
-    }	     
-    
+    if (E->advection.ADVECTION) {
+
+      predictor(E,E->T,E->Tdot);
+
+      for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
+	pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
+	corrector(E,E->T,E->Tdot,DTdot);
+	temperatures_conform_bcs(E);
+      }
+    }
+
     /* get the max temperature for new T */
     E->monitor.T_interior = Tmaxd(E,E->T);
-    
+
     if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 	for (i=1;i<=E->lmesh.nno;i++)   {
@@ -116,33 +119,33 @@ void PG_timestep_solve(struct All_variables *E)
 	  E->Tdot[m][i] = Tdot1[m][i];
 	}
       iredo = 1;
-      E->advection.dt_reduced *= 0.5;         
+      E->advection.dt_reduced *= 0.5;
       E->advection.last_sub_iterations ++;
     }
-    
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
+
   time0= CPU_time0()-time1;
-  
+
   /*     if(E->control.verbose) */
   /*       fprintf(E->fp_out,"time=%f\n",time0); */
-  
+
   E->advection.total_timesteps++;
-  E->monitor.elapsed_time += E->advection.timestep; 
-  
+  E->monitor.elapsed_time += E->advection.timestep;
+
   if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
-      (E->advection.timesteps < E->advection.max_timesteps) && 
+      (E->advection.timesteps < E->advection.max_timesteps) &&
       (E->monitor.elapsed_time < E->advection.max_dimensionless_time) ) ||
      (E->advection.total_timesteps < E->advection.min_timesteps) )
     E->control.keep_going = 1;
   else
     E->control.keep_going = 0;
-  
+
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *) DTdot[m] );  
-    free((void *) T1[m] );   
+    free((void *) DTdot[m] );
+    free((void *) T1[m] );
     free((void *) Tdot1[m] );
   }
 
@@ -161,16 +164,16 @@ void advection_diffusion_parameters(E)
     int m=E->parallel.me;
 
     E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
-    E->advection.total_timesteps = 1; 
+    E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
     E->advection.last_sub_iterations = 1;
     E->advection.gamma = 0.5;
-    E->advection.dt_reduced = 1.0;         
+    E->advection.dt_reduced = 1.0;
 
     E->monitor.T_maxvaried = 1.05;
- 
+
     input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
-   
+
     input_int("minstep",&(E->advection.min_timesteps),"1",m);
     input_int("maxstep",&(E->advection.max_timesteps),"1000",m);
     input_int("maxtotstep",&(E->advection.max_total_timesteps),"1000000",m);
@@ -178,13 +181,13 @@ void advection_diffusion_parameters(E)
     input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
     input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,2,nomax",m);
     input_float("maxadvtime",&(E->advection.max_dimensionless_time),"10.0",m);
-   
+
 /*     input_float("sub_tolerance",&(E->advection.vel_substep_aggression),"0.005",m);   */
 /*     input_int("maxsub",&(E->advection.max_substeps),"25",m); */
-  
+
 /*     input_float("liddefvel",&(E->advection.lid_defining_velocity),"0.01",m); */
 /*     input_float("sublayerfrac",&(E->advection.sub_layer_sample_level),"0.5",m);             */
-	      
+
 
   return;
 }
@@ -196,7 +199,7 @@ void advection_diffusion_allocate_memory(E)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
     E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    
+
     for(i=1;i<=E->lmesh.nno;i++)
       E->Tdot[m][i]=0.0;
     }
@@ -205,110 +208,16 @@ return;
 }
 
 void PG_timestep(struct All_variables *E)
-{    
-    void timestep();
-    void predictor();
-    void corrector();
-    void pg_solver();
-    void std_timestep();
-    void temperatures_conform_bcs();
-    void vcopy();
-    double Tmaxd(),global_tdot_d(),aaa,T_interior1;
-
-    int i,j,psc_pass,count,steps,iredo,m;
-    int keep_going;
-
-    double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
-    double CPU_time0(),time1,time0,time2;
-
-    static int been_here = 0;
-   
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    }
+{
+  static int been_here = 0;
 
   if (been_here++ ==0)    {
-    E->advection.timesteps=0;
+    PG_timestep_init(E);
   }
 
-  E->advection.timesteps++;
- 
-  std_timestep(E);
+  PG_timestep_solve(E);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for (i=1;i<=E->lmesh.nno;i++)   {
-       T1[m][i] = E->T[m][i];
-       Tdot1[m][i] = E->Tdot[m][i];
-       }
-
-  /* get the max temperature for old T */
-  T_interior1 = Tmaxd(E,E->T);
-
-  E->advection.dt_reduced = 1.0;         
-  E->advection.last_sub_iterations = 1;
-    
-  time1= CPU_time0();
-  do {
-
-    E->advection.timestep *= E->advection.dt_reduced; 
-
-    iredo = 0;
-    if (E->advection.ADVECTION) {
-
-      predictor(E,E->T,E->Tdot);
-	 
-      for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
-	pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
-	corrector(E,E->T,E->Tdot,DTdot);
-	temperatures_conform_bcs(E); 
-      }	     
-    }
-
-    /* get the max temperature for new T */
-    E->monitor.T_interior = Tmaxd(E,E->T);
-
-    if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for (i=1;i<=E->lmesh.nno;i++)   {
-	  E->T[m][i] = T1[m][i];
-	  E->Tdot[m][i] = Tdot1[m][i];
-	}
-      iredo = 1;
-      E->advection.dt_reduced *= 0.5;         
-      E->advection.last_sub_iterations ++;
-    }
-    
-  }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
-
-  time0= CPU_time0()-time1;
-
-/*     if(E->control.verbose) */
-/*       fprintf(E->fp_out,"time=%f\n",time0); */
-
-  E->advection.total_timesteps++;
-  E->monitor.elapsed_time += E->advection.timestep; 
-
-
-  if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
-      (E->advection.timesteps < E->advection.max_timesteps) && 
-      (E->monitor.elapsed_time < E->advection.max_dimensionless_time) ) ||
-     (E->advection.total_timesteps < E->advection.min_timesteps) )
-    E->control.keep_going = 1;
-  else
-    E->control.keep_going = 0;
-
-  if (E->advection.last_sub_iterations==5)
-    E->control.keep_going = 0;
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *) DTdot[m] );  
-    free((void *) T1[m] );   
-    free((void *) Tdot1[m] );
-  }
-    
-  return;  
+  return;
 }
 
 
@@ -320,45 +229,45 @@ void predictor(E,field,fielddot)
      struct All_variables *E;
      double **field,**fielddot;
 
-{ 
+{
   int node,m;
   double multiplier;
 
   multiplier = (1.0-E->advection.gamma) * E->advection.timestep;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++) 
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++)  {
       field[m][node] += multiplier * fielddot[m][node] ;
       fielddot[m][node] = 0.0;
     }
 
-  return; 
+  return;
 }
 
 void corrector(E,field,fielddot,Dfielddot)
      struct All_variables *E;
      double **field,**fielddot,**Dfielddot;
-    
+
 {
   int node,m;
   double multiplier;
 
   multiplier = E->advection.gamma * E->advection.timestep;
-   
-  for (m=1;m<=E->sphere.caps_per_proc;m++) 
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++) {
       field[m][node] += multiplier * Dfielddot[m][node];
-      fielddot[m][node] +=  Dfielddot[m][node]; 
+      fielddot[m][node] +=  Dfielddot[m][node];
     }
-   
-  return;  
+
+  return;
  }
 
 /* ===================================================
    The solution step -- determine residual vector from
    advective-diffusive terms and solve for delta Tdot
-   Two versions are available -- one for Cray-style 
-   vector optimizations etc and one optimized for 
+   Two versions are available -- one for Cray-style
+   vector optimizations etc and one optimized for
    workstations.
    =================================================== */
 
@@ -386,17 +295,17 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
     struct Shape_function GN;
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
- 
+
     const int dims=E->mesh.nsd;
     const int dofs=E->mesh.dof;
     const int ends=enodes[dims];
     const int sphere_key = 0;
-  
-    for (m=1;m<=E->sphere.caps_per_proc;m++) 
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++)
  	 DTdot[m][i] = 0.0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++) 
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
        for(el=1;el<=E->lmesh.nel;el++)    {
 
           velo_from_element(E,VV,m,el,sphere_key);
@@ -408,14 +317,14 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
 
         for(a=1;a<=ends;a++) {
 	    a1 = E->ien[m][el].node[a];
-	    DTdot[m][a1] += Eres[a]; 
+	    DTdot[m][a1] += Eres[a];
            }
 
         } /* next element */
 
     exchange_node_d(E,DTdot,E->mesh.levmax);
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++) 
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
         if(!(E->node[m][i] & (TBX | TBY | TBZ)))
 	  DTdot[m][i] *= E->Mass[m][i];         /* lumped mass matrix */
@@ -423,7 +332,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
 	  DTdot[m][i] = 0.0;         /* lumped mass matrix */
       }
 
-    return;    
+    return;
 }
 
 
@@ -440,7 +349,7 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
      float VV[4][9];
      double diffusion;
 
-{ 
+{
     int i,j,node;
     int *ienm;
 
@@ -456,11 +365,11 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
     const int nno=E->lmesh.nno;
     const int ends=enodes[E->mesh.nsd];
     const int vpts=vpoints[E->mesh.nsd];
-  
+
     ienm=E->ien[m][el].node;
 
     twodiff = 2.0*diffusion;
- 
+
     uc1 =  uc2 = uc3 = 0.0;
 
     for(i=1;i<=ENODES3D;i++) {
@@ -468,7 +377,7 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
       uc2 +=  E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
       uc3 +=  E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
       }
-  
+
     dx1=0.25*(E->x[m][1][ienm[3]]+E->x[m][1][ienm[4]]
              +E->x[m][1][ienm[7]]+E->x[m][1][ienm[8]]
              -E->x[m][1][ienm[1]]-E->x[m][1][ienm[2]]
@@ -530,20 +439,20 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
     for(i=1;i<=VPOINTS3D;i++) {
        u1 = u2 = u3 = 0.0;
        for(j=1;j<=ENODES3D;j++)  /* this line heavily used */ {
-		u1 += VV[1][j] * E->N.vpt[GNVINDEX(j,i)]; 
+		u1 += VV[1][j] * E->N.vpt[GNVINDEX(j,i)];
 		u2 += VV[2][j] * E->N.vpt[GNVINDEX(j,i)];
 	   	u3 += VV[3][j] * E->N.vpt[GNVINDEX(j,i)];
 	    }
-	    
+
        for(j=1;j<=ENODES3D;j++) {
             prod1 = (u1 * GNx->vpt[GNVXINDEX(0,j,i)] +
                      u2 * GNx->vpt[GNVXINDEX(1,j,i)] +
                     u3 * GNx->vpt[GNVXINDEX(2,j,i)] ) ;
-		
+
 	    PG->vpt[GNVINDEX(j,i)] = E->N.vpt[GNVINDEX(j,i)] + adiff * prod1;
 	    }
        }
-    
+
    return;
  }
 
@@ -576,23 +485,23 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
     double v1[9],v2[9],v3[9];
     double adv_dT,t2[4];
     double T,DT;
- 
+
     register double prod,sfn;
     struct Shape_function1 GM;
     struct Shape_function1_dA dGamma;
     double temp;
 
     void get_global_1d_shape_fn();
- 
+
     const int dims=E->mesh.nsd;
     const int dofs=E->mesh.dof;
     const int nno=E->lmesh.nno;
     const int lev=E->mesh.levmax;
     const int ends=enodes[dims];
     const int vpts=vpoints[dims];
-    const int diffusion = (diff != 0.0); 
- 
-    for(i=1;i<=vpts;i++)	{ 
+    const int diffusion = (diff != 0.0);
+
+    for(i=1;i<=vpts;i++)	{
       dT[i]=0.0;
       v1[i] = tx1[i]=  0.0;
       v2[i] = tx2[i]=  0.0;
@@ -601,21 +510,21 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
 
     for(j=1;j<=ends;j++)       {
       node = E->ien[m][el].node[j];
-      T = field[m][node];  
+      T = field[m][node];
       if(E->node[m][node] & (TBX | TBY | TBZ))
 	    DT=0.0;
       else
 	    DT = fielddot[m][node];
-	
+
       for(i=1;i<=vpts;i++)  {
 		  dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
-		  tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T; 
-		  tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T; 
-	 	  tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T; 
+		  tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T;
+		  tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T;
+	 	  tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T;
 		  sfn = E->N.vpt[GNVINDEX(j,i)];
 		  v1[i] += VV[1][j] * sfn;
 		  v2[i] += VV[2][j] * sfn;
-		  v3[i] += VV[3][j] * sfn;     
+		  v3[i] += VV[3][j] * sfn;
 	      }
       }
 
@@ -632,27 +541,27 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
     if(diffusion){
       for(j=1;j<=ends;j++) {
 	Eres[j]=0.0;
-	for(i=1;i<=vpts;i++) 
+	for(i=1;i<=vpts;i++)
 	  Eres[j] -=
-	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i] 
+	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
 	    * (dT[i] - Q + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
  	    + diff*dOmega.vpt[i] * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i] +
 				    GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i] +
-				    GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] ); 
+				    GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
       }
     }
 
     else { /* no diffusion term */
       for(j=1;j<=ends;j++) {
 	Eres[j]=0.0;
-	for(i=1;i<=vpts;i++) 
+	for(i=1;i<=vpts;i++)
 	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i] * (dT[i] - Q + v1[i] * tx1[i] + v2[i] * tx2[i] + v3[i] * tx3[i]);
       }
-    }	
+    }
 
-    /* See brooks etc: the diffusive term is excused upwinding for 
+    /* See brooks etc: the diffusive term is excused upwinding for
        rectangular elements  */
-  
+
     /* include BC's for fluxes at (nominally horizontal) edges (X-Y plane) */
 
     if(FLAGS!=NULL) {
@@ -660,31 +569,31 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
       for(a=1;a<=ends;a++)
 	if (FLAGS[m][E->ien[m][el].node[a]] & FBZ) {
 	  if (!onedfns++) get_global_1d_shape_fn(E,el,&GM,&dGamma,1,m);
- 
+
 	  nodes[1] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][0];
 	  nodes[2] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][0];
 	  nodes[4] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][1];
 	  nodes[3] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][1];
-	  
+
 	  for(aid=0,j=1;j<=onedvpoints[E->mesh.nsd];j++)
 	    if (a==nodes[j])
 	      aid = j;
-	  if(aid==0)  
+	  if(aid==0)
 	    printf("%d: mixed up in pg-flux int: looking for %d\n",el,a);
 
 	  if (loc[a].plus[1] != 0)
 	    back_front = 0;
 	  else back_front = 1;
-	  
+
 	  for(j=1;j<=onedvpoints[dims];j++)
 	    for(k=1;k<=onedvpoints[dims];k++)
 	      Eres[a] += dGamma.vpt[GMVGAMMA(back_front,j)] *
 		E->M.vpt[GMVINDEX(aid,j)] * g_1d[j].weight[dims-1] *
 		BC[2][E->ien[m][el].node[a]] * E->M.vpt[GMVINDEX(k,j)];
 	}
-    } 
-    
-    return; 
+    }
+
+    return;
 }
 
 
@@ -697,9 +606,7 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
 
 void std_timestep(E)
      struct All_variables *E;
-
-{ 
-    static int been_here = 0;
+{
     int i,d,n,nel,el,node,m;
 
     float global_fmin();
@@ -707,14 +614,14 @@ void std_timestep(E)
 
     float adv_timestep;
     float ts,uc1,uc2,uc3,uc,size,step,VV[4][9];
-    
+
     const int dims=E->mesh.nsd;
     const int dofs=E->mesh.dof;
     const int nno=E->lmesh.nno;
     const int lev=E->mesh.levmax;
     const int ends=enodes[dims];
     const int sphere_key = 1;
-    
+
     nel=E->lmesh.nel;
 
     if(E->advection.fixed_timestep != 0.0) {
@@ -722,17 +629,13 @@ void std_timestep(E)
       return;
     }
 
-    if (been_here == 0)  {
-      set_diffusion_timestep(E);
-    }
-    
     adv_timestep = 1.0e8;
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nel;el++) {
 
 	velo_from_element(E,VV,m,el,sphere_key);
 
-	uc=uc1=uc2=uc3=0.0;	  
+	uc=uc1=uc2=uc3=0.0;
 	for(i=1;i<=ENODES3D;i++) {
 	  uc1 += E->N.ppt[GNPINDEX(i,1)]*VV[1][i];
 	  uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
@@ -744,15 +647,15 @@ void std_timestep(E)
 	adv_timestep = min(adv_timestep,step);
       }
 
-    adv_timestep = E->advection.dt_reduced * adv_timestep;         
+    adv_timestep = E->advection.dt_reduced * adv_timestep;
 
     adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
 				 E->advection.diff_timestep);
-    
+
     E->advection.timestep = global_fmin(E,adv_timestep);
 
-    if (E->parallel.me==0)
-      fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep);
+/*     if (E->parallel.me==0) */
+/*       fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep); */
 
-    return; 
+    return;
   }

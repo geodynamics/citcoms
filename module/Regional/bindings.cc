@@ -62,6 +62,11 @@ struct PyMethodDef pyRegional_methods[] = {
      METH_VARARGS,
      pyRegional_citcom_init__doc__},
 
+    {pyRegional_global_default_values__name__,
+     pyRegional_global_default_values,
+     METH_VARARGS,
+     pyRegional_global_default_values__doc__},
+
     {pyRegional_open_info_file__name__,
      pyRegional_open_info_file,
      METH_VARARGS,
@@ -263,6 +268,6 @@ struct PyMethodDef pyRegional_methods[] = {
 };
 
 // version
-// $Id: bindings.cc,v 1.20 2003/07/24 20:10:33 tan2 Exp $
+// $Id: bindings.cc,v 1.21 2003/07/25 20:43:29 tan2 Exp $
 
 // End of file

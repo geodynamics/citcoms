@@ -29,6 +29,7 @@ int main(argc,argv)
   void read_mat_from_file();
 
   float dot();
+  float cpu_time_on_vp_it;
 
   int cpu_total_seconds,k, *temp;
   double CPU_time0(),time,initial_time,start_time,avaimem();
@@ -57,7 +58,7 @@ int main(argc,argv)
     fprintf(stderr,"Input parameters taken from file '%s'\n",argv[1]);
     fprintf(stderr,"Initialization complete after %g seconds\n\n",CPU_time0()-time); fflush(E->fp);
     initial_time = CPU_time0()-time;
-    E->monitor.cpu_time_on_vp_it = CPU_time0();
+    cpu_time_on_vp_it = CPU_time0();
   }
 
   if (E->control.post_p)   {
@@ -72,10 +73,6 @@ int main(argc,argv)
   process_new_velocity(E,E->monitor.solution_cycles);
 
   if (E->control.stokes)  {
-
-    /*     process_temp_field(E,E->monitor.solution_cycles);
-	   process_new_velocity(E,E->monitor.solution_cycles); */
-
     /*      if(E->control.tracer==1)  {
 	    (E->problem_tracer_advection)(E);
 	    (E->problem_tracer_output)(E,E->monitor.solution_cycles);
@@ -149,12 +146,12 @@ int main(argc,argv)
 
   if (E->parallel.me == 0)  {
     fprintf(stderr,"cycles=%d\n",E->monitor.solution_cycles);
-    E->monitor.cpu_time_on_vp_it=CPU_time0()-E->monitor.cpu_time_on_vp_it;
+    cpu_time_on_vp_it=CPU_time0()-cpu_time_on_vp_it;
     fprintf(stderr,"Average cpu time taken for velocity step = %f\n",
-	    E->monitor.cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
+	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
     fprintf(E->fp,"Initialization overhead = %f\n",initial_time);
     fprintf(E->fp,"Average cpu time taken for velocity step = %f\n",
-	    E->monitor.cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
+	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
 
   fclose(E->fp);

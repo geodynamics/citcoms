@@ -186,6 +186,8 @@ void construct_tic_regional(struct All_variables *E)
 	  }
 	}
 
+  fprintf(stderr, "%d %d\n", mm, ll);
+
   temperatures_conform_bcs(E);
 
   return;

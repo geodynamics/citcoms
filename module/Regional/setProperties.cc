@@ -53,9 +53,17 @@ PyObject * pyRegional_Advection_diffusion_set_properties(PyObject *self, PyObjec
     getScalarProperty(properties, "adv_sub_iterations", E->advection.temp_iterations);
     getScalarProperty(properties, "maxadvtime", E->advection.max_dimensionless_time);
 
-    getScalarProperty(properties, "precond", E->control.precondition);
     getScalarProperty(properties, "aug_lagr", E->control.augmented_Lagr);
     getScalarProperty(properties, "aug_number", E->control.augmented);
+
+    E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
+    E->advection.total_timesteps = 1;
+    E->advection.sub_iterations = 1;
+    E->advection.last_sub_iterations = 1;
+    E->advection.gamma = 0.5;
+    E->advection.dt_reduced = 1.0;
+
+    E->monitor.T_maxvaried = 1.05;
 
     if (PyErr_Occurred())
 	return NULL;
@@ -121,23 +129,31 @@ PyObject * pyRegional_Const_set_properties(PyObject *self, PyObject *args)
     std::cerr << "Const.inventories:" << std::endl;
 
     getScalarProperty(properties, "radius", E->data.radius_km);
-    getScalarProperty(properties, "ref_density", E->data.density);
+    getScalarProperty(properties, "layerd", E->data.layer_km);
+    getScalarProperty(properties, "density", E->data.density);
     getScalarProperty(properties, "thermdiff", E->data.therm_diff);
     getScalarProperty(properties, "gravacc", E->data.grav_acc);
     getScalarProperty(properties, "thermexp", E->data.therm_exp);
-    getScalarProperty(properties, "ref_visc", E->data.ref_viscosity);
-    getScalarProperty(properties, "heatcapacity", E->data.Cp);
-    getScalarProperty(properties, "water_density", E->data.density_above);
+    getScalarProperty(properties, "refvisc", E->data.ref_viscosity);
+    getScalarProperty(properties, "cp", E->data.Cp);
+    getScalarProperty(properties, "wdensity", E->data.density_above);
+
+    E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
+
     getScalarProperty(properties, "depth_lith", zlith);
     getScalarProperty(properties, "depth_410", z410);
     getScalarProperty(properties, "depth_660", zlm);
-    getScalarProperty(properties, "depth_cmb", zcmb);
+    getScalarProperty(properties, "depth_cmb", zcmb); //this is used as the D" phase change depth
+    //getScalarProperty(properties, "depth_d_double_prime", E->data.zd_double_prime);
 
-    E->viscosity.zlith=zlith/E->data.radius_km;
-    E->viscosity.z410=z410/E->data.radius_km;
-    E->viscosity.zlm=zlm/E->data.radius_km;
-    E->viscosity.zcmb=zcmb/E->data.radius_km;
-    // getScalarProperty(properties, "depth_d_double_prime", E->data.zd_double_prime);
+    E->viscosity.zlith = zlith / E->data.radius_km;
+    E->viscosity.z410 = z410 / E->data.radius_km;
+    E->viscosity.zlm = zlm / E->data.radius_km;
+    E->viscosity.zcmb = zcmb / E->data.radius_km;
+
+    // convert meter to kilometer
+    E->data.radius_km = E->data.radius_km / 1e3;
+    E->data.layer_km = E->data.layer_km / 1e3;
 
     if (PyErr_Occurred())
 	return NULL;
@@ -162,8 +178,15 @@ PyObject * pyRegional_IC_set_properties(PyObject *self, PyObject *args)
     std::cerr << "IC.inventories:" << std::endl;
 
     int num_perturb;
-    getScalarProperty(properties, "num_perturbations", num_perturb);
+    const int max_perturb = 32;
 
+    getScalarProperty(properties, "num_perturbations", num_perturb);
+    if(num_perturb > max_perturb) {
+	// max. allowed perturberial types = 40
+	std::cerr << "'num_perturb' greater than allowed value, set to "
+		  << max_perturb << std::endl;
+	num_perturb = max_perturb;
+    }
     E->number_of_perturbations = num_perturb;
 
     getVectorProperty(properties, "perturbl", E->perturb_ll, num_perturb);
@@ -290,16 +313,24 @@ PyObject * pyRegional_Phase_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "transT410", E->control.transT410);
     getScalarProperty(properties, "width410", E->control.width410);
 
+    if (E->control.width410!=0.0)
+	E->control.width410 = 1.0/E->control.width410;
+
     getScalarProperty(properties, "Ra_670", E->control.Ra_670 );
     getScalarProperty(properties, "clapeyron670", E->control.clapeyron670);
     getScalarProperty(properties, "transT670", E->control.transT670);
     getScalarProperty(properties, "width670", E->control.width670);
+
+    if (E->control.width670!=0.0)
+	E->control.width670 = 1.0/E->control.width670;
 
     getScalarProperty(properties, "Ra_cmb", E->control.Ra_cmb);
     getScalarProperty(properties, "clapeyroncmb", E->control.clapeyroncmb);
     getScalarProperty(properties, "transTcmb", E->control.transTcmb);
     getScalarProperty(properties, "widthcmb", E->control.widthcmb);
 
+    if (E->control.widthcmb!=0.0)
+	E->control.widthcmb = 1.0/E->control.widthcmb;
 
     if (PyErr_Occurred())
 	return NULL;
@@ -351,6 +382,15 @@ PyObject * pyRegional_RegionalSphere_set_properties(PyObject *self, PyObject *ar
     E->sphere.cap[1].fi[3] = E->control.fi_max;
     E->sphere.cap[1].fi[4] = E->control.fi_max;
 
+    getScalarProperty(properties, "dimenx", E->mesh.layer[1]);
+    getScalarProperty(properties, "dimeny", E->mesh.layer[2]);
+    getScalarProperty(properties, "dimenz", E->mesh.layer[3]);
+
+    getScalarProperty(properties, "ll_max", E->sphere.llmax);
+    getScalarProperty(properties, "nlong", E->sphere.noy);
+    getScalarProperty(properties, "nlati", E->sphere.nox);
+    getScalarProperty(properties, "output_ll_max", E->sphere.output_llmax);
+
     if (PyErr_Occurred())
 	return NULL;
 
@@ -373,6 +413,10 @@ PyObject * pyRegional_Visc_set_properties(PyObject *self, PyObject *args)
     std::cerr << "Visc.inventories:" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE);
+    if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
+	E->viscosity.FROM_SYSTEM = 1;
+    else
+	E->viscosity.FROM_SYSTEM = 0;
 
     getScalarProperty(properties, "rheol", E->viscosity.RHEOL);
 
@@ -381,11 +425,14 @@ PyObject * pyRegional_Visc_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "VISC_UPDATE", E->viscosity.update_allowed);
 
     int num_mat;
+    const int max_mat = 40;
+
     getScalarProperty(properties, "num_mat", num_mat);
-    if(num_mat > 40) {
+    if(num_mat > max_mat) {
 	// max. allowed material types = 40
-	std::cerr << "'num_mat' greater than allowed value, set to 40.";
-	num_mat = 40;
+	std::cerr << "'num_mat' greater than allowed value, set to "
+		  << max_mat << std::endl;
+	num_mat = max_mat;
     }
     E->viscosity.num_mat = num_mat;
 
@@ -431,6 +478,7 @@ PyObject * pyRegional_Stokes_solver_set_properties(PyObject *self, PyObject *arg
 
     getStringProperty(properties, "Solver", E->control.SOLVER_TYPE);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE);
+    getScalarProperty(properties, "precond", E->control.precondition);
 
     getScalarProperty(properties, "mg_cycle", E->control.mg_cycle);
     getScalarProperty(properties, "down_heavy", E->control.down_heavy);
@@ -477,7 +525,7 @@ void getStringProperty(PyObject* properties, char* attribute, char* value)
     }
 
     strcpy(value, PyString_AsString(prop));
-    std::cerr << value << std::endl;
+    std::cerr << '"' << value << '"' << std::endl;
 
     return;
 }

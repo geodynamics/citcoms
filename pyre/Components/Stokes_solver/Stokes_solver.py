@@ -21,11 +21,6 @@ class Stokes_solver(CitcomComponent):
 
 
     def run(self):
-
-	# test
-	print "vlowstep = ", self.inventory.vlowstep
-	return
-
 	self._form_RHS()
 	self._form_LHS()
 	self._solve()
@@ -71,24 +66,25 @@ class Stokes_solver(CitcomComponent):
         import pyre.properties as prop
 
         inventory = [
-            prop.str("Solver","cgrad"),
-            prop.bool("node_assemble",True),
+            prop.str("Solver", "cgrad"),
+            prop.bool("node_assemble", True),
+            prop.bool("precond",True),
 
-            prop.int("mg_cycle",1),
-            prop.int("down_heavy",1),
-            prop.int("up_heavy",1),
+            prop.int("mg_cycle", 1),
+            prop.int("down_heavy", 3),
+            prop.int("up_heavy", 3),
 
-            prop.int("vlowstep",2000),
-            prop.int("vhighstep",3),
-            prop.int("piterations",375),
+            prop.int("vlowstep", 500),
+            prop.int("vhighstep", 3),
+            prop.int("piterations", 500),
 
-            prop.float("accuracy",1.0e-6),
-            prop.float("tole_compressibility",1.0e-7),
+            prop.float("accuracy", 1.0e-6),
+            prop.float("tole_compressibility", 1.0e-7),
 
 	    ]
 
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.10 2003/07/24 17:46:47 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.11 2003/07/25 20:43:30 tan2 Exp $"
 
 # End of file

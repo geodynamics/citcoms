@@ -20,9 +20,11 @@ class RegionalApp(Application):
 	journal.info("staging").log("setup MPI")
         import mpi
         CitcomModule.citcom_init(mpi.world().handle())
+	CitcomModule.global_default_values()
 
 	self.rank = mpi.world().rank
 	self.start_time = CitcomModule.CPU_time()
+	self.prefix = self.inventory.param.inventory.datafile
 	print "my rank is ", self.rank
 
         mesher = self.inventory.mesher
@@ -42,15 +44,35 @@ class RegionalApp(Application):
 
         mesher.run()
 
+	# for a give temperature field, solve for velocity and pressure
+	vsolver.run()
+    
+	# output phase
+        self.output()
+
+	while (self.keep_going):
+	    tsolver.run()
+	    vsolver.run()
+	    
+	    self.cycles += 1
+
+	    if self.cycles >= self.inventory.param.inventory.maxstep:
+		self.keep_going = False
+
+            #self.output()
+
+	    
+	total_time = CitcomModule.CPU_time() - self.start_time
+
         return
 
 
     def __init__(self):
         Application.__init__(self, "regional-citcoms")
         CitcomModule.set_signal()
-        #self.total_time = 0
-        #self.cycles = 0
-        #self.keep_going = True
+        self.total_time = 0
+        self.cycles = 0
+        self.keep_going = True
 
         return
 
@@ -74,8 +96,8 @@ class RegionalApp(Application):
 	output_velo = Output.outputVelo(self.prefix, self.rank, self.cycles)
         output_velo.go()
 
-	output_visc = Output.outputVisc(self.prefix, self.rank, self.cycles)
-        output_visc.go()
+	#output_visc = Output.outputVisc(self.prefix, self.rank, self.cycles)
+        #output_visc.go()
 
         return
 
@@ -186,6 +208,6 @@ class RegionalApp(Application):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.20 2003/07/24 20:10:33 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.21 2003/07/25 20:43:29 tan2 Exp $"
 
 # End of file

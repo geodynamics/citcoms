@@ -22,6 +22,7 @@ extern "C" {
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
     void check_bc_consistency(struct All_variables*);
+    void common_initial_fields(struct All_variables*);
     void construct_id(struct All_variables*);
     void construct_ien(struct All_variables*);
     void construct_lm(struct All_variables*);
@@ -107,6 +108,9 @@ PyObject * pyRegional_regional_sphere_setup(PyObject *self, PyObject *args)
     else
       construct_mat_group(E);
 
+    (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
+    common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
+
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -135,6 +139,6 @@ PyObject * pyRegional_regional_sphere_init(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.3 2003/07/24 20:10:33 tan2 Exp $
+// $Id: mesher.cc,v 1.4 2003/07/25 20:43:29 tan2 Exp $
 
 // End of file

@@ -44,6 +44,12 @@ extern "C"
 PyObject * pyRegional_citcom_init(PyObject *, PyObject *);
 
 
+extern char pyRegional_global_default_values__name__[];
+extern char pyRegional_global_default_values__doc__[];
+extern "C"
+PyObject * pyRegional_global_default_values(PyObject *, PyObject *);
+
+
 extern char pyRegional_open_info_file__name__[];
 extern char pyRegional_open_info_file__doc__[];
 extern "C"
@@ -66,6 +72,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *, PyObject *);
 #endif
 
 // version
-// $Id: misc.h,v 1.11 2003/07/24 00:04:04 tan2 Exp $
+// $Id: misc.h,v 1.12 2003/07/25 20:43:29 tan2 Exp $
 
 // End of file

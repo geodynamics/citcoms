@@ -22,33 +22,37 @@ class Advection_diffusion(CitcomComponent):
 
 
 
-
-
     def run(self):
-        #test
-        print "ADV = ",self.inventory.ADV
-        return
-
         self._solve()
         return
 
 
+
     def init(self,parent):
         self.CitcomModule.set_convection_defaults()
-        self.CitcomModule.PG_timestep_init()
+	self.been_here = False
 	return
+
 
 
     def fini(self):
 	return
 
+
+
     def _solve(self):
+	if not self.been_here:
+	    self.CitcomModule.PG_timestep_init()
+	    self.been_here = True
+
         self.CitcomModule.PG_timestep_solve()
 	return
 
 
+
     def output(self, *args, **kwds):
 	return
+
 
 
     class Inventory(CitcomComponent.Inventory):
@@ -57,21 +61,20 @@ class Advection_diffusion(CitcomComponent):
 
         inventory = [
 
-            prop.bool("ADV",True),
-            prop.float("fixed_timestep",0.0),
-            prop.float("finetunedt",0.7),
+            prop.bool("ADV", True),
+            prop.float("fixed_timestep", 0.0),
+            prop.float("finetunedt", 0.7),
 
-            prop.int("adv_sub_iterations",2),
-            prop.float("maxadvtime",10.0),
+            prop.int("adv_sub_iterations", 2),
+            prop.float("maxadvtime", 10.0),
 
-            prop.bool("precond",True),
-            prop.bool("aug_lagr",True),
-            prop.float("aug_number",2.0e3),
+            prop.bool("aug_lagr", True),
+            prop.float("aug_number", 2.0e3),
 
 	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.9 2003/07/24 17:46:47 tan2 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.10 2003/07/25 20:43:29 tan2 Exp $"
 
 # End of file

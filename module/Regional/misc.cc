@@ -25,6 +25,7 @@ extern "C" {
     void read_instructions(char*);
     double CPU_time0();
 
+    void global_default_values(struct All_variables*);
     void parallel_process_termination();
     void set_signal();
     void velocities_conform_bcs(struct All_variables*, double **);
@@ -126,6 +127,19 @@ PyObject * pyRegional_citcom_init(PyObject *self, PyObject *args)
 
 
 
+char pyRegional_global_default_values__doc__[] = "";
+char pyRegional_global_default_values__name__[] = "global_default_values";
+
+PyObject * pyRegional_global_default_values(PyObject *, PyObject *)
+{
+    global_default_values(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyRegional_open_info_file__doc__[] = "";
 char pyRegional_open_info_file__name__[] = "open_info_file";
 
@@ -182,6 +196,6 @@ PyObject * pyRegional_velocities_conform_bcs(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.18 2003/07/24 00:04:04 tan2 Exp $
+// $Id: misc.cc,v 1.19 2003/07/25 20:43:29 tan2 Exp $
 
 // End of file

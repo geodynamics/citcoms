@@ -38,6 +38,10 @@ char pyRegional_PG_timestep_solve__name__[] = "PG_timestep_solve";
 PyObject * pyRegional_PG_timestep_solve(PyObject *self, PyObject *args)
 {
 
+    E->monitor.solution_cycles++;
+    if(E->monitor.solution_cycles>E->control.print_convergence)
+	E->control.print_convergence=1;
+
     PG_timestep_solve(E);
 
     Py_INCREF(Py_None);
@@ -53,6 +57,13 @@ PyObject * pyRegional_set_convection_defaults(PyObject *self, PyObject *args)
     E->control.CONVECTION = 1;
     set_convection_defaults(E);
 
+    // copied from advection_diffusion_parameters()
+    E->advection.total_timesteps = 1; 
+    E->advection.sub_iterations = 1;
+    E->advection.last_sub_iterations = 1;
+    E->advection.gamma = 0.5;
+    E->monitor.T_maxvaried = 1.05;
+
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -63,6 +74,6 @@ PyObject * pyRegional_set_convection_defaults(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: advdiffu.cc,v 1.4 2003/07/24 00:04:04 tan2 Exp $
+// $Id: advdiffu.cc,v 1.5 2003/07/25 20:43:29 tan2 Exp $
 
 // End of file

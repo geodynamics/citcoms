@@ -67,15 +67,27 @@ class RegionalSphere(CitcomComponent):
             pyre.properties.float("radius_outer", 1.0),
             pyre.properties.float("radius_inner", 0.55),
 
-            pyre.properties.float("theta_min", pi/2),
-            pyre.properties.float("theta_max", pi*3/4),
-            pyre.properties.float("fi_min", pi*3/4),
-            pyre.properties.float("fi_max", pi*5/4),
+            pyre.properties.float("theta_min", 1.5),
+            pyre.properties.float("theta_max", 1.8),
+            pyre.properties.float("fi_min", 0.0),
+            pyre.properties.float("fi_max", 0.4),
+
+            pyre.properties.float("dimenx", 1.0),
+            pyre.properties.float("dimeny", 1.0),
+            pyre.properties.float("dimenz", 1.0),
+	    
+
+	    # these parameters are for spherical harmonics output
+	    # put them here temporalily
+            pyre.properties.int("ll_max", 20),
+            pyre.properties.int("nlong", 361),
+            pyre.properties.int("nlati", 181),
+            pyre.properties.int("output_ll_max", 20),
 
             ]
 
 
 # version
-__id__ = "$Id: RegionalSphere.py,v 1.4 2003/07/24 20:10:33 tan2 Exp $"
+__id__ = "$Id: RegionalSphere.py,v 1.5 2003/07/25 20:43:30 tan2 Exp $"
 
 # End of file
