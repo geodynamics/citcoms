@@ -166,7 +166,6 @@ PyObject * pyExchanger_receiveBoundary(PyObject *, PyObject *args)
 }
 
 
-
 char pyExchanger_sendBoundary__doc__[] = "";
 char pyExchanger_sendBoundary__name__[] = "sendBoundary";
 
@@ -180,24 +179,6 @@ PyObject * pyExchanger_sendBoundary(PyObject *, PyObject *args)
     FineGridExchanger* fge = static_cast<FineGridExchanger*>
 	                                (PyCObject_AsVoidPtr(obj1));
     fge->sendBoundary();
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-char pyExchanger_getBid2crseelem__doc__[] = "";
-char pyExchanger_getBid2crseelem__name__[] = "getBid2crseelem";
-
-PyObject * pyExchanger_getBid2crseelem(PyObject *, PyObject *args)
-{
-    PyObject *obj1;
-
-    if (!PyArg_ParseTuple(args, "O:getBid2crseelem", &obj1))
-	return NULL;
-
-    CoarseGridExchanger* cge = static_cast<CoarseGridExchanger*>
-	                                (PyCObject_AsVoidPtr(obj1));
-    cge->getBid2crseelem();
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -221,6 +202,8 @@ PyObject * pyExchanger_createDataArrays(PyObject *, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+
+
 
 char pyExchanger_deleteDataArrays__doc__[] = "";
 char pyExchanger_deleteDataArrays__name__[] = "deleteDataArrays";
@@ -259,6 +242,7 @@ PyObject * pyExchanger_interpolate(PyObject *, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+
 
 char pyExchanger_interpolateTemperature__doc__[] = "";
 char pyExchanger_interpolateTemperature__name__[] = "interpolateTemperature";
@@ -545,6 +529,6 @@ void deleteFineGridExchanger(void* p) {
 
 
 // version
-// $Id: exchangers.cc,v 1.11 2003/09/25 22:14:57 ces74 Exp $
+// $Id: exchangers.cc,v 1.12 2003/09/27 00:28:17 tan2 Exp $
 
 // End of file
