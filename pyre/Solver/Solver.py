@@ -18,6 +18,7 @@ class Solver(BaseSolver):
 	#journal.info("staging").log("setup MPI")
         comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
+	self.rank = comm.rank
 
         self.initialize()
 	self.CitcomModule.global_default_values(self.all_variables)
@@ -26,13 +27,6 @@ class Solver(BaseSolver):
 
 	self._start_cpu_time = self.CitcomModule.CPU_time()
 
-	self.rank = comm.rank
-	print "my rank is ", self.rank
-        return
-
-
-
-    def run_init_simulation(self):
         mesher = self.inventory.mesher
         mesher.setup()
 
@@ -42,8 +36,13 @@ class Solver(BaseSolver):
         tsolver = self.inventory.tsolver
         tsolver.setup()
 
+        # create mesh
         mesher.run()
+
+        # solver for 0th step velocity
         vsolver.run()
+
+        # initialze const. related to mesh
         tsolver.launch()
 
         return
@@ -69,7 +68,7 @@ class Solver(BaseSolver):
 
     def stableTimestep(self):
         tsolver = self.inventory.tsolver
-        dt=tsolver.stable_timestep()
+        dt = tsolver.stable_timestep()
         self._loopInfo.log(
             "%s: step %d: stable timestep dt = %s" % (self.name, self.step, dt))
         return dt
@@ -166,6 +165,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.13 2003/08/29 18:06:35 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.14 2003/08/29 18:31:09 tan2 Exp $"
 
 # End of file
