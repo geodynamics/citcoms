@@ -26,6 +26,7 @@ PROJ_SRCS = \
 	BoundaryCondition.cc \
 	BoundedBox.cc \
 	BoundedMesh.cc \
+	Dimensional.cc \
 	Interior.cc \
 	InteriorImposing.cc \
 	Interpolator.cc \
@@ -42,6 +43,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.9 2003/12/16 19:09:25 tan2 Exp $
+# $Id: Make.mm,v 1.10 2003/12/30 21:44:32 tan2 Exp $
 
 # End of file
