@@ -48,6 +48,8 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
     Array2D<double,DIM> inv_length_sq;   // reciprocal of (length of etaAxes)^2
     computeElementGeometry(etaAxes, inv_length_sq);
 
+    // get remote BoundedBox
+    BoundedBox remoteBBox(boundedMesh.tightBBox());
 
     // get local BoundedBox
     BoundedBox bbox(DIM);
@@ -75,9 +77,11 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 	// sometimes after coordinate conversion, surface nodes of different
 	// solvers won't line up, need this special treatment --
 	// if x is a little bit above my top surface, move it back to surface
-	double offtop = x[DIM-1]/bbox[1][DIM-1] - 1.0;
-	if(offtop < 1e-5 && offtop > 0)
-	    x[DIM-1] = bbox[1][DIM-1];
+	if(x[DIM-1] == remoteBBox[1][DIM-1]) {
+	    double offtop = x[DIM-1]/bbox[1][DIM-1] - 1.0;
+	    if(offtop < 1e-5 && offtop > 0)
+		x[DIM-1] = bbox[1][DIM-1];
+	}
 
 	// skip if x is not inside bbox
 	if(!isInside(x, bbox)) continue;
@@ -339,6 +343,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.9 2004/04/04 23:03:39 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.10 2004/04/05 19:36:44 tan2 Exp $
 
 // End of file
