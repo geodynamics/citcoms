@@ -23,8 +23,6 @@ void read_input_files_for_timesteps(E,action,output)
     int intage, pos_age;
 
     const int dims=E->mesh.nsd;
-    pos_age = 1;
-
 
     nox=E->mesh.nox;
     noy=E->mesh.noy;
@@ -34,14 +32,18 @@ void read_input_files_for_timesteps(E,action,output)
     noy1=E->lmesh.noy;
     lev=E->mesh.levmax;
 
-
     age=find_age_in_MY(E);
-    intage = age;
-    newage1 = 1.0*intage;
-    newage2 = 1.0*intage + 1.0;
-    if (newage1 < 0.0) { /* age is negative -> use age=0 for input files */
-        newage1 = 0.0;
-        pos_age = 0;
+
+    if (age < 0.0) { /* age is negative -> use age=0 for input files */
+      intage = 0;
+      newage2 = newage1 = 0.0;
+      pos_age = 0;
+    }
+    else {
+      intage = age;
+      newage1 = 1.0*intage;
+      newage2 = 1.0*intage + 1.0;
+      pos_age = 1;
     }
 
     switch (action) { /* set up files to open */

@@ -25,7 +25,7 @@ void read_mat_from_file(E)
      struct All_variables *E;
 {
   float find_age_in_MY();
-  
+
   int nn,m,i,j,k,kk,el,lev,els;
   int elx,ely,elz,e,elg,emax,gmax;
   float *VIP1,*VIP2;
@@ -61,15 +61,15 @@ void read_mat_from_file(E)
         E->mat[m][el] = llayer;
       }
     }
-  
-  
+
+
   if(E->control.mat_control==1)  {
-    
+
     age1 = find_age_in_MY(E);
 
     nage=age1/1.;
     newage1=1.*nage;
-    
+
     sprintf(output_file,"%s%0.0f",E->control.mat_file,newage1);
     if(E->parallel.me==0)
       fprintf(E->fp,"%s %f %s\n","newage1",newage1,output_file);
@@ -78,7 +78,7 @@ void read_mat_from_file(E)
       fprintf(E->fp,"(Problem_related #1) Cannot open %s\n",output_file);
       exit(8);
     }
-    
+
     newage2=newage1+1.;
     sprintf(output_file,"%s%0.0f",E->control.mat_file,newage2);
     if(E->parallel.me==0)
@@ -88,41 +88,41 @@ void read_mat_from_file(E)
       fprintf(E->fp,"(Problem_related #2) Cannot open %s\n",output_file);
       exit(8);
     }
-    
+
     for(i=1;i<=gmax;i++)  {
       fscanf(fp1,"%d %f", &nn,&(VIP1[i]));
       fscanf(fp2,"%d %f", &nn,&(VIP2[i]));
     }
-    
+
     fclose(fp1);
     fclose(fp2);
-    
-    
+
+
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for (k=1;k<=ely;k++)
 	for (i=1;i<=elx;i++)   {
 	  elg = E->lmesh.exs+i + (E->lmesh.eys+k-1)*E->mesh.elx;
-	  
+
 	  for (j=1;j<=elz;j++)  {
 	    el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
-	    
+
 	    if(E->sx[m][3][E->ien[m][el].node[2]]>=E->sphere.ro-E->viscosity.zlith)
 	      E->VIP[m][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age1-newage1);
-	    
+
 	  }   /* end for j  */
-	  
+
 	}     /*  end for m  */
-    
+
   }     /* end for E->control.mat==1  */
-  
-  
+
+
   /* mat output moved to Output.c */
-  
+
   free ((void *) VIP1);
   free ((void *) VIP2);
-  
+
   return;
-  
+
 }
 
 
@@ -207,9 +207,6 @@ void set_starting_age(E)
       if (((age_in_MY+e_4) < 0.0) && (E->monitor.solution_cycles <= 1)) {
         if (E->parallel.me == 0) fprintf(stderr,"Age = %g Ma, Initial age should not be negative!\n",age_in_MY);
 	exit(11);
-      }
-      else {
-        age_in_MY = fabs(age_in_MY);
       }
 
    return(age_in_MY);
