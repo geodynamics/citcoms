@@ -232,38 +232,36 @@ void Boundary::getBid2crseelem(const All_variables *E) {
             }
     }
 // test
-//  std::cout << "in Boundary::bid2crseelem for bid2crseelem " << std::endl;    
-//     for(int i=0; i< size; i++)
-//     {
-//         n1=bid2crseelem[0][i];
-//         n2=bid2crseelem[1][i];
-//         for(int j=0; j< dim; j++)xt[j]=X[j][i];
-//         for(int j=0; j < 8; j++)
-//         {
+ std::cout << "in Boundary::bid2crseelem for bid2crseelem " << std::endl;    
+    for(int i=0; i< size; i++)
+    {
+        n1=bid2crseelem[0][i];
+        n2=bid2crseelem[1][i];
+        for(int j=0; j< dim; j++)xt[j]=X[j][i];
+        for(int j=0; j < 8; j++)
+        {
             
-//             for(int k=0; k < dim; k++)
-//             {                
-//                 xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
-//             }
-// //            std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
-//         }        
-//         for(int k=0; k<dim; k++)xi[k]=0.0;
-//         for(int k=0; k<dim; k++)
-//             for(int j=0; j < 8; j++)
-//             {
-//                 xi[k]+=xc[j*dim+k]*shape[i*8+j];                
-//             }
-// //        std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
-//         norm = 0.0;
-//         for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
-//         if(norm > 1.e-10)
-//         {            
-//             std::cout << "\n in Boundary::mapCoarseGrid for bid2crseelem interpolation functions are wrong " << norm << std::endl;
-//         }
+            for(int k=0; k < dim; k++)
+            {                
+                xc[j*dim+k]=E->X[E->mesh.levmax][n2][k+1][E->IEN[E->mesh.levmax][n2][n1].node[j+1]];
+            }
+	    //           std::cout <<" " <<xc[j*dim] << " " << xc[j*dim+1] << " " << xc[j*dim+2] <<" "<< shape[i*8+j] << std::endl;
+        }        
+        for(int k=0; k<dim; k++)xi[k]=0.0;
+        for(int k=0; k<dim; k++)
+            for(int j=0; j < 8; j++)
+            {
+                xi[k]+=xc[j*dim+k]*shape[i*8+j];                
+            }
+	//      std::cout << " "<< xt[0] <<" "<< xi[0] <<" "<< xt[1] << " "<< xi[1] << " " << xt[2] << " " << xi[2] << std::endl;
+        norm = 0.0;
+        for(int k=0; k < dim; k++) norm+=(xt[k]-xi[k])*(xt[k]-xi[k]);
+        if(norm > 1.e-10)
+        {            
+            std::cout << "\n in Boundary::mapCoarseGrid for bid2crseelem interpolation functions are wrong " << norm << std::endl;
+        }
         
-//     }
-//    std::cout << "end of  Boundary::bid2crseelem for bid2crseelem " << std::endl; 
-
+    }
     std::cout << "in Boundary::getBid2crseelem: me =" << E->parallel.me
 	      << " Done" << std::endl;    
     return;
@@ -459,6 +457,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.19 2003/09/25 22:45:36 ces74 Exp $
+// $Id: Boundary.cc,v 1.20 2003/09/26 17:33:31 tan2 Exp $
 
 // End of file
