@@ -32,6 +32,7 @@ PROJ_SRCS = \
 	Pan_problem_misc_functions.c \
 	Parsing.c \
 	Phase_change.c \
+	Problem_related.c \
 	Process_velocity.c \
 	Shape_functions.c \
 	Size_does_matter.c \
@@ -60,7 +61,7 @@ PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
 all: $(PROJ_OBJS)
 
 # version
-# $Id: Make.mm,v 1.8 2003/08/06 21:00:02 tan2 Exp $
+# $Id: Make.mm,v 1.9 2003/08/06 21:09:26 tan2 Exp $
 
 #
 # End of file

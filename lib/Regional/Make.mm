@@ -1,18 +1,11 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#
-#                               Michael A.G. Aivazis
-#                                  Steve Quenette
-#                        California Institute of Technology
-#                        (C) 1998-2003  All Rights Reserved
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # <LicenseText>
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# version
-# $Id: Make.mm,v 1.6 2003/08/06 21:00:02 tan2 Exp $
 
 include local.def
 TYPE=Regional
@@ -32,7 +25,6 @@ PROJ_SRCS = \
 	Lith_age.c \
 	Output.c \
 	Parallel_related.c \
-	Problem_related.c \
 	Process_buoyancy.c \
 	Sphere_related.c \
 	Version_dependent.c
@@ -48,7 +40,7 @@ all: $(PROJ_LIB)
 
 
 # version
-# $Id: Make.mm,v 1.6 2003/08/06 21:00:02 tan2 Exp $
+# $Id: Make.mm,v 1.7 2003/08/06 21:09:26 tan2 Exp $
 
 #
 # End of file
