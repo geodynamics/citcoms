@@ -6,98 +6,99 @@
 // Setup global mesh parameters
 //
 void global_derived_values(E)
-     struct All_variables *E;
+  struct All_variables *E;
 {
-    int d,lx,lz,ly,i,nox,noz,noy;
-    char logfile[100], timeoutput[100];
-    FILE *fp, *fptime;
+  int d,lx,lz,ly,i,nox,noz,noy;
+  char logfile[100], timeoutput[100];
+  FILE *fp, *fptime;
 
-   E->mesh.levmax = E->mesh.levels-1;
-   nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
-   noy = E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocy + 1;
-   noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
+  E->mesh.levmax = E->mesh.levels-1;
+  nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
+  noy = E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocy + 1;
+  noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
 
-   if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
-      E->mesh.levmax = E->mesh.levels-1;
-      E->mesh.gridmax = E->mesh.levmax;
-      E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
-      E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocy + 1;
-      E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
-      }
-   else   {
-      if (nox!=E->mesh.nox || noy!=E->mesh.noy || noz!=E->mesh.noz) {
-         if (E->parallel.me==0)
-            fprintf(stderr,"inconsistent mesh for interpolation, quit the run\n");
-         parallel_process_termination();
-         }
-      E->mesh.gridmax = E->mesh.levmax;
-      E->mesh.gridmin = E->mesh.levmax;
-     }
+  if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
+    E->mesh.levmax = E->mesh.levels-1;
+    E->mesh.gridmax = E->mesh.levmax;
+    E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
+    E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocy + 1;
+    E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
+  }
+  else   {
+    if (nox!=E->mesh.nox || noy!=E->mesh.noy || noz!=E->mesh.noz) {
+      if (E->parallel.me==0)
+	fprintf(stderr,"inconsistent mesh for interpolation, quit the run\n");
+      parallel_process_termination();
+    }
+    E->mesh.gridmax = E->mesh.levmax;
+    E->mesh.gridmin = E->mesh.levmax;
+  }
 
-   if(E->mesh.nsd != 3)
-      E->mesh.noy = 1;
+  if(E->mesh.nsd != 3)
+    E->mesh.noy = 1;
 
-   E->mesh.nnx[1] = E->mesh.nox;
-   E->mesh.nnx[2] = E->mesh.noy;
-   E->mesh.nnx[3] = E->mesh.noz;
-   E->mesh.elx = E->mesh.nox-1;
-   E->mesh.ely = E->mesh.noy-1;
-   E->mesh.elz = E->mesh.noz-1;
+  E->mesh.nnx[1] = E->mesh.nox;
+  E->mesh.nnx[2] = E->mesh.noy;
+  E->mesh.nnx[3] = E->mesh.noz;
+  E->mesh.elx = E->mesh.nox-1;
+  E->mesh.ely = E->mesh.noy-1;
+  E->mesh.elz = E->mesh.noz-1;
 
-   E->mesh.nno = E->sphere.caps;
-   for(d=1;d<=E->mesh.nsd;d++)
-      E->mesh.nno *= E->mesh.nnx[d];
+  E->mesh.nno = E->sphere.caps;
+  for(d=1;d<=E->mesh.nsd;d++)
+    E->mesh.nno *= E->mesh.nnx[d];
 
-   E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
+  E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
 
-   E->mesh.nnov = E->mesh.nno;
+  E->mesh.nnov = E->mesh.nno;
 
-   E->mesh.neq = E->mesh.nnov*E->mesh.nsd;
+  E->mesh.neq = E->mesh.nnov*E->mesh.nsd;
 
-   E->mesh.npno = E->mesh.nel;
-   E->mesh.nsf = E->mesh.nox*E->mesh.noy;
+  E->mesh.npno = E->mesh.nel;
+  E->mesh.nsf = E->mesh.nox*E->mesh.noy;
 
-   for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
-      if (E->control.NMULTIGRID||E->control.EMULTIGRID)
-	{ nox = E->mesh.mgunitx * (int) pow(2.0,(double)i) + 1;
-	  noy = E->mesh.mgunity * (int) pow(2.0,(double)i) + 1;
-	  noz = E->mesh.mgunitz * (int) pow(2.0,(double)i) + 1;
-	}
-      else
-	{ noz = E->mesh.noz;
-	  nox = E->mesh.nox;
-	  noy = E->mesh.noy;
-          /*if (i<E->mesh.levmax) noz=2;*/
-	}
+  for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
+    if (E->control.NMULTIGRID||E->control.EMULTIGRID) {
+      nox = E->mesh.mgunitx * (int) pow(2.0,(double)i)*E->parallel.nprocx + 1;
+      noy = E->mesh.mgunity * (int) pow(2.0,(double)i)*E->parallel.nprocy + 1;
+      noz = E->mesh.mgunitz * (int) pow(2.0,(double)i)*E->parallel.nprocz + 1;
+    }
+    else {
+      noz = E->mesh.noz;
+      nox = E->mesh.nox;
+      noy = E->mesh.noy;
+      /*if (i<E->mesh.levmax) noz=2;*/
+    }
 
-      E->mesh.ELX[i] = nox-1;
-      E->mesh.ELY[i] = noy-1;
-      E->mesh.ELZ[i] = noz-1;
-      E->mesh.NNO[i] = E->sphere.caps * nox * noz * noy;
-      E->mesh.NEL[i] = E->sphere.caps * (nox-1) * (noz-1) * (noy-1);
-      E->mesh.NPNO[i] = E->mesh.NEL[i] ;
-      E->mesh.NOX[i] = nox;
-      E->mesh.NOZ[i] = noz;
-      E->mesh.NOY[i] = noy;
+    E->mesh.ELX[i] = nox-1;
+    E->mesh.ELY[i] = noy-1;
+    E->mesh.ELZ[i] = noz-1;
+    E->mesh.NNO[i] = E->sphere.caps * nox * noz * noy;
+    E->mesh.NEL[i] = E->sphere.caps * (nox-1) * (noz-1) * (noy-1);
+    E->mesh.NPNO[i] = E->mesh.NEL[i] ;
+    E->mesh.NOX[i] = nox;
+    E->mesh.NOZ[i] = noz;
+    E->mesh.NOY[i] = noy;
 
-      E->mesh.NNOV[i] = E->mesh.NNO[i];
-      E->mesh.NEQ[i] = E->mesh.nsd * E->mesh.NNOV[i] ;
+    E->mesh.NNOV[i] = E->mesh.NNO[i];
+    E->mesh.NEQ[i] = E->mesh.nsd * E->mesh.NNOV[i] ;
+    /*      fprintf(stderr,"level=%d nox=%d noy=%d noz=%d %d %d %d %d %d %d %d %d %d %d %d\n",i,nox,noy,noz,E->mesh.ELX[i],E->mesh.ELY[i],E->mesh.ELZ[i],E->mesh.NNO[i],E->mesh.NEL[i],E->mesh.NPNO[i],E->mesh.NOX[i],E->mesh.NOZ[i],E->mesh.NOY[i],E->mesh.NNOV[i],E->mesh.NEQ[i]); */
+    /*      MPI_Barrier(E->parallel.world); */
+  }
 
-      }
+  E->sphere.elx = E->sphere.nox-1;
+  E->sphere.ely = E->sphere.noy-1;
+  E->sphere.snel = E->sphere.ely*E->sphere.elx;
+  E->sphere.nsf = E->sphere.noy*E->sphere.nox;
 
-    E->sphere.elx = E->sphere.nox-1;
-    E->sphere.ely = E->sphere.noy-1;
-    E->sphere.snel = E->sphere.ely*E->sphere.elx;
-    E->sphere.nsf = E->sphere.noy*E->sphere.nox;
+  E->data.scalet = (E->data.layer_km*E->data.layer_km/E->data.therm_diff)/(1.e6*365.25*24*3600);
+  E->data.scalev = (E->data.layer_km/E->data.therm_diff)/(100.0*365.25*24*3600);
+  E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
 
-    E->data.scalet = (E->data.layer_km*E->data.layer_km/E->data.therm_diff)/(1.e6*365.25*24*3600);
-    E->data.scalev = (E->data.layer_km/E->data.therm_diff)/(100.0*365.25*24*3600);
-    E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
+  if(E->control.print_convergence && E->parallel.me==0)
+    fprintf(stderr,"Problem has %d x %d x %d nodes\n",E->mesh.nox,E->mesh.noz,E->mesh.noy);
 
-    if(E->control.print_convergence && E->parallel.me==0)
-	fprintf(stderr,"Problem has %d x %d x %d nodes\n",E->mesh.nox,E->mesh.noz,E->mesh.noy);
-
-   return;
+  return;
 }
 
 
