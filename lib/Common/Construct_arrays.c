@@ -150,6 +150,38 @@ void construct_id(E)
     return;
     }
 
+
+
+void get_bcs_id_for_residual(E,level,m)
+    struct All_variables *E;
+    int level,m;
+  {
+
+    int i,j;
+
+    const int nno=E->lmesh.NNO[level];
+
+   j = 0;
+   for(i=1;i<=nno;i++) {
+      if ( (E->NODE[level][m][i] & VBX) != 0 )  {
+	j++;
+        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[1];
+	}
+      if ( (E->NODE[level][m][i] & VBY) != 0 )  {
+	j++;
+        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[2];
+	}
+      if ( (E->NODE[level][m][i] & VBZ) != 0 )  {
+	j++;
+        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[3];
+	}
+      }
+
+    E->num_zero_resid[level][m] = j;
+
+    return;
+}
+
 /*==========================================================
   Function to construct  the LM array from the ID and IEN arrays
   ========================================================== */
@@ -690,6 +722,7 @@ void construct_mat_group(E)
   return;
 }
 
+
 int layers(E,m,node)
     struct All_variables *E;
     int m,node;
@@ -712,4 +745,3 @@ int layers(E,m,node)
 
     return (llayers);
   }
-
