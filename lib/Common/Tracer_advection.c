@@ -85,7 +85,7 @@ void tracer_setup(E)
         E->Tracer.y_space=(float*) malloc((gnoy+1)*sizeof(float));
         E->Tracer.z_space=(float*) malloc((gnoz+1)*sizeof(float));
 
-        fscanf(fp1,"%s %d",aaa,&nn);
+        fscanf(fp1,"%s",aaa);
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=1;i<=gnox;i++)
@@ -95,13 +95,11 @@ void tracer_setup(E)
 */
          fscanf(fp1,"%d %f",&nn,&(E->Tracer.x_space[i]));
 
-/*
             if(E->parallel.me==0) printf("%s %f\n","E->Tracer.x_space[i]", E->Tracer.x_space[i]);
-*/
 
 	   }
 
-        fscanf(fp1,"%s %d",aaa,&nn);
+        fscanf(fp1,"%s",aaa);
 
         for(k=1;k<=gnoy;k++)
 	   {
@@ -115,7 +113,7 @@ void tracer_setup(E)
 */
 	   }
 
-        fscanf(fp1,"%s %d",aaa,&nn);
+        fscanf(fp1,"%s",aaa);
 
         for(j=1;j<=gnoz;j++)
 	   {
@@ -178,6 +176,10 @@ void tracer_advection(E)
       nno=nox*noy*noz;
 
 
+      /*** comment by Tan2 1/25/2005
+	   This part of code find the bouding box of the global mesh.
+	   Not checked.
+      ***/
        for(m=1;m<=E->sphere.caps_per_proc;m++)  {
 
        if(E->sphere.cap[m].theta[1]<=E->sphere.cap[m].theta[3]) {
@@ -206,6 +208,9 @@ void tracer_advection(E)
 
 
 
+      /*** comment by Tan2 1/25/2005
+	   Copy the velocity array. Is it necessary?
+      ***/
       for(m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(i=0;i<=nno-1;i++)
          for(j=1;j<=3;j++)   {
@@ -214,11 +219,16 @@ void tracer_advection(E)
       }
 
 
-        time=find_age_in_MY(E); /* NOT TESTED CPC 6/25/00 */
+      //time=find_age_in_MY(E); /* NOT TESTED CPC 6/25/00 */
 
 
     root=0;
 
+      /*** comment by Tan2 1/25/2005
+	   Gather the global velocity to root processor from all processors.
+	   Seems the code is designed for multi-processor run, although the
+	   tracer advection only runs in root processor.
+      ***/
       for(m=1;m<=E->sphere.caps_per_proc;m++)   {
 
       MPI_Gather(E->V[m][1], nno, MPI_FLOAT, E->GV1[m][1], nno, MPI_FLOAT, root, world);
@@ -232,6 +242,9 @@ void tracer_advection(E)
     nprocyl=E->parallel.nprocy;
     nproczl=E->parallel.nprocz;
 
+      /*** comment by Tan2 1/25/2005
+	   Combine the gathered velocity to get the global velocity field.
+      ***/
  if(E->parallel.me==root)    {
  for(m=1;m<=E->sphere.caps_per_proc;m++)
   for (k=1;k<=nprocyl;k++)
@@ -267,13 +280,22 @@ void tracer_advection(E)
       }
 
 
+      /*** comment by Tan2 1/25/2005
+	   Now, root processor has velocity field of the whole mesh and starts
+	   to advect the tracers.
+      ***/
       if(E->parallel.me==root)   {
       for(n=1;n<=E->Tracer.NUM_TRACERS;n++) {
       n_x=0;
       n_y=0;
       n_z=0;
 
-      if(E->Tracer.itcolor[n]>=time)   {
+      /*** comment by Tan2 1/25/2005
+	   itcolor is like the starting age of the tracer. Disable it temperory.
+      ***/
+
+      //if(E->Tracer.itcolor[n]>=time)   {
+      if(1)   {
 
      /*  mid point method uses 2 iterations */
       for(iteration=1;iteration<=2;iteration++)
@@ -285,6 +307,17 @@ void tracer_advection(E)
 	    z_tmp=E->Tracer.tracer_z[n];
 	 }
 
+	 /*** comment by Tan2 1/25/2005
+	      Find the element that contains the tracer.
+
+      nodex   n_x                 n_x+1
+	      |           *        |
+	      <----------->
+	          tr_dx
+
+	      <-------------------->
+	               dx
+	  ***/
 	 for(i=1;i<gnox;i++) {
              if(x_tmp >= E->Tracer.x_space[i] && x_tmp <= E->Tracer.x_space[i+1]) {
 		tr_dx=x_tmp-E->Tracer.x_space[i];
@@ -309,6 +342,10 @@ void tracer_advection(E)
 	     }
 	 }
 
+	 /*** comment by Tan2 1/25/2005
+	      Calculate shape functions from tr_dx, tr_dy, tr_dz
+	      This assumes linear element
+	  ***/
 
           /* compute volumetic weighting functions */
 	    w1=tr_dx*tr_dz*tr_dy;
@@ -323,6 +360,9 @@ void tracer_advection(E)
 	    volume=dx*dz*dy;
 
 
+	    /*** comment by Tan2 1/25/2005
+		 Calculate the 8 node numbers of current element
+	     ***/
 	 node1 = n_z + (n_x-1)*gnoz + (n_y-1)*gnoz*gnox;
 	 node2 = n_z + n_x*gnoz + (n_y-1)*gnoz*gnox;
 	 node3 = n_z+1  + (n_x-1)*gnoz + (n_y-1)*gnoz*gnox;
@@ -332,6 +372,10 @@ void tracer_advection(E)
 	 node7 = n_z+1 + (n_x-1)*gnoz + n_y*gnoz*gnox;
 	 node8 = n_z+1 + n_x*gnoz + n_y*gnoz*gnox;
 
+
+	 /*** comment by Tan2 1/25/2005
+	      Interpolate the velocity on the tracer position
+	  ***/
             for(m=1;m<=E->sphere.caps_per_proc;m++)   {
               for(j=1;j<=3;j++)   {
 	     tr_v[m][j]=w8*E->GV[m][j][node1]
@@ -346,6 +390,9 @@ void tracer_advection(E)
 	    }
 
 
+	      /*** comment by Tan2 1/25/2005
+		   advect tracer using mid-point method (2nd order accuracy)
+	       ***/
           /* mid point method */
 
 	  if(iteration == 1) {
@@ -372,7 +419,6 @@ void tracer_advection(E)
       } /* end of tracer loop */
 
      }
-
 
 
 /* make sure that the new position of the tracers within the box  */
