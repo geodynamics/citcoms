@@ -19,41 +19,27 @@ class PG_timestep(Application):
     def __init__(self,field_name='temp'):
         Application.__init__(self, "PG_timestep")
         if(field_name=='temp'):
-            self.Init=Regional.PG_timestep_init
-            self.Solve=Regional.PG_timestep_solve
-            self.Control_timemarching=Regional.PG_timemarching_control
-            self.Fini=Regional.PG_timestep_fini
+            self.init=Regional.PG_timestep_init
+            self.solve=Regional.PG_timestep_solve
 ##      if(self.field_name=="comp"):
-##            self.Init=Regional.PG_timestep_init_comp
-##            self.Solve=Regional.PG_timestep_solve_comp
-##            self.Control_timemarching=Regional.PG_timemarching_control_comp
-##            self.Fini=Regional.PG_timestep_fini_comp
+##            self.solve=Regional.PG_timestep_solve_comp
+##            self.init=Regional.PG_timestep_init_comp
         return
         
     def main(self):
-        self.init()
-        self.run()
-        self.fini()
-        
-##	raise NotImplementedError, \
-##	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
+	raise NotImplementedError, \
+	      "PG Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
 	return
     
     def run(self):
-        self.Solve()
-        self.Control_timemarching()
+        self.solve()
         return
 
     def init(self):
         Application.init(self)
-        self.Init()
+        self.init()
         return
 
-    def fini(self):
-        self.Fini()      
-        Application.fini(self)
-        return
-    
     class Facilities(Application.Facilities):
 
         __facilities__ = Application.Facilities.__facilities__ + (
@@ -68,6 +54,6 @@ class PG_timestep(Application):
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.2 2003/05/22 22:27:20 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.3 2003/05/23 04:22:04 ces74 Exp $"
 
 # End of file 
