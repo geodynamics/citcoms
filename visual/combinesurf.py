@@ -77,9 +77,9 @@ class CombineSurf(object):
         #print me, mylocx, mylocy, mylocz
 
         # mesh geometry
-        nox = grid['nox']
-        noy = grid['noy']
-        noz = grid['noz']
+        nox = int(grid['nox'])
+        noy = int(grid['noy'])
+        noz = int(grid['noz'])
 
         mynox = 1 + (nox-1)/nprocx
         mynoy = 1 + (noy-1)/nprocy
@@ -134,12 +134,12 @@ if __name__ == '__main__':
     nproc_per_cap = cap['nprocx'] * cap['nprocy'] * cap['nprocz']
     for i in range(nprocxy):
         cb = CombineSurf(grid)
-        n  = (i+1) * nproc_per_cap - 1
-        crdfilename = '%s.coord.%d' % (prefix, n)
-        surffilename = '%s.surf.%d.%d' % (prefix, n, step)
-        print 'reading', surffilename
-        data = cb.readData(crdfilename, surffilename, grid, cap)
-        cb.join(data, n, grid, cap)
+        for n in range(i * nproc_per_cap + (cap['nprocz']-1), (i+1) * nproc_per_cap, cap['nprocz']):
+            crdfilename = '%s.coord.%d' % (prefix, n)
+            surffilename = '%s.surf.%d.%d' % (prefix, n, step)
+            print 'reading', surffilename
+            data = cb.readData(crdfilename, surffilename, grid, cap)
+            cb.join(data, n, grid, cap)
 
         filename = '%s.surf%d.%d' % (prefix, i, step)
         print 'writing', filename
@@ -147,6 +147,6 @@ if __name__ == '__main__':
 
 
 # version
-# $Id: combinesurf.py,v 1.2 2004/08/06 23:24:43 tan2 Exp $
+# $Id: combinesurf.py,v 1.3 2004/09/22 00:16:40 ces74 Exp $
 
 # End of file
