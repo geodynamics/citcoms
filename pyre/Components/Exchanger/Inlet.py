@@ -48,27 +48,30 @@ class SVTInlet(Inlet):
 
 
 
-class VTInlet(Inlet):
-    '''Available modes --
-    "V": impose velocity as BC
-    "T": impose temperature as BC
-    "t": impose temperature but not as BC
-    "VT": "V" + "T"
+class TInlet(Inlet):
 
-    mode "T" and mode "t" cannot co-exist
-    '''
-
-    def __init__(self, mesh, sink, all_variables, mode="VT"):
+    def __init__(self, mesh, sink, all_variables):
         import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.VTInlet_create(mesh,
-                                                sink,
-                                                all_variables,
-                                                mode)
+        self._handle = Exchanger.TInlet_create(mesh,
+                                               sink,
+                                               all_variables)
         return
 
 
 
 
+class VTInlet(Inlet):
+
+    def __init__(self, mesh, sink, all_variables):
+        import CitcomS.Exchanger as Exchanger
+        self._handle = Exchanger.VTInlet_create(mesh,
+                                                sink,
+                                                all_variables)
+        return
+
+
+
+"""
 class BoundaryVTInlet(Inlet):
     '''Available modes -- see above
     '''
@@ -102,9 +105,9 @@ class TractionInlet(Inlet):
                                                       mode)
         return
 
-
+"""
 
 # version
-__id__ = "$Id: Inlet.py,v 1.5 2004/04/16 00:05:50 tan2 Exp $"
+__id__ = "$Id: Inlet.py,v 1.6 2004/05/11 07:59:31 tan2 Exp $"
 
 # End of file

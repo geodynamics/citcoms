@@ -72,26 +72,19 @@ class CoarseGridExchanger(Exchanger):
                               self.boundary):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            '''
-            self.source["BC"][i] = self.module.createTractionSource(
-                                                   comm.handle(),
-                                                   sinkRank,
-                                                   b,
-                                                   self.all_variables,
-                                                   self.myBBox)
-            '''
-            self.source["BC"][i] = self.module.VTSource_create(comm.handle(),
-                                                            sinkRank,
-                                                            b,
-                                                            self.all_variables,
-                                                            self.myBBox)
+            self.source["BC"][i] = self.module.CitcomSource_create(comm.handle(),
+                                                                   sinkRank,
+                                                                   b,
+                                                                   self.myBBox,
+                                                                   self.all_variables)
+
         return
 
 
     def createSink(self):
-        self.sink["Intr"] = self.module.createSink(self.sinkComm.handle(),
-                                                   self.numSrc,
-                                                   self.interior)
+        self.sink["Intr"] = self.module.Sink_create(self.sinkComm.handle(),
+                                                    self.numSrc,
+                                                    self.interior)
         return
 
 
@@ -108,8 +101,7 @@ class CoarseGridExchanger(Exchanger):
         import Inlet
         self.II = Inlet.VTInlet(self.interior,
                                 self.sink["Intr"],
-                                self.all_variables,
-                                "t")
+                                self.all_variables)
         return
 
 
@@ -121,8 +113,8 @@ class CoarseGridExchanger(Exchanger):
             # send temperature to FGE and postprocess
             self.restartTemperature()
         else:
-            self.module.initTemperatureTest(self.remoteBBox,
-                                            self.all_variables)
+            self.module.initTemperature(self.remoteBBox,
+                                        self.all_variables)
         return
 
 
@@ -138,15 +130,15 @@ class CoarseGridExchanger(Exchanger):
                               interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            source[i] = self.module.createSource(comm.handle(),
-                                                 sinkRank,
-                                                 b,
-                                                 self.all_variables,
-                                                 self.myBBox)
+            source[i] = self.module.CitcomSource_create(comm.handle(),
+                                                        sinkRank,
+                                                        b,
+                                                        self.myBBox,
+                                                        self.all_variables)
 
         import Outlet
         for i, src in zip(range(self.numSrc), source):
-            outlet = Outlet.VTOutlet(src, self.all_variables, "t")
+            outlet = Outlet.VTOutlet(src, self.all_variables)
             outlet.send()
 
         # Any modification of read-in temperature is done here
@@ -165,8 +157,8 @@ class CoarseGridExchanger(Exchanger):
 
     def NewStep(self):
         # receive temperture field from FGE
-        self.II.recv()
-        self.II.impose()
+        #self.II.recv()
+        #self.II.impose()
         return
 
 
@@ -207,6 +199,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.33 2004/04/16 00:08:14 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.34 2004/05/11 07:59:31 tan2 Exp $"
 
 # End of file

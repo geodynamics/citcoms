@@ -55,7 +55,6 @@ class FineGridExchanger(Exchanger):
                                                          self.sinkComm.handle(),
                                                          0)
         self.boundary, self.myBBox = self.module.createBoundary(
-                                                     self.remoteBBox,
                                                      self.all_variables)
         for i in range(len(self.interior)):
             self.interior[i] = self.module.createEmptyInterior()
@@ -70,9 +69,9 @@ class FineGridExchanger(Exchanger):
 
 
     def createSink(self):
-        self.sink["BC"] = self.module.createSink(self.sinkComm.handle(),
-                                                 self.numSrc,
-                                                 self.boundary)
+        self.sink["BC"] = self.module.Sink_create(self.sinkComm.handle(),
+                                                  self.numSrc,
+                                                  self.boundary)
         return
 
 
@@ -82,12 +81,13 @@ class FineGridExchanger(Exchanger):
                               self.interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["Intr"][i] = self.module.VTSource_create(
+            self.source["Intr"][i] = self.module.CitcomSource_create(
                                                      comm.handle(),
                                                      sinkRank,
                                                      b,
-                                                     self.all_variables,
-                                                     self.myBBox)
+                                                     self.myBBox,
+                                                     self.all_variables)
+
         return
 
 
@@ -108,8 +108,7 @@ class FineGridExchanger(Exchanger):
         else:
             self.BC = Inlet.VTInlet(self.boundary,
                                     self.sink["BC"],
-                                    self.all_variables,
-                                    "VT")
+                                    self.all_variables)
         '''
         return
 
@@ -119,8 +118,7 @@ class FineGridExchanger(Exchanger):
         for i, src in zip(range(self.numSrc),
                           self.source["Intr"]):
             self.II[i] = Outlet.VTOutlet(src,
-                                         self.all_variables,
-                                         "T")
+                                         self.all_variables)
         return
 
 
@@ -129,19 +127,19 @@ class FineGridExchanger(Exchanger):
             # receive temperature from CGE and postprocess
             self.restartTemperature()
         else:
-            self.module.initTemperatureTest(self.globalBBox,
-                                            self.all_variables)
+            self.module.initTemperature(self.globalBBox,
+                                        self.all_variables)
         return
 
 
     def restartTemperature(self):
         interior, bbox = self.module.createInterior(self.remoteBBox,
                                                     self.all_variables)
-        sink = self.module.createSink(self.sinkComm.handle(),
-                                      self.numSrc,
-                                      interior)
+        sink = self.module.Sink_create(self.sinkComm.handle(),
+                                       self.numSrc,
+                                       interior)
         import Inlet
-        inlet = Inlet.VTInlet(interior, sink, self.all_variables, "t")
+        inlet = Inlet.TInlet(interior, sink, self.all_variables)
         inlet.recv()
         inlet.impose()
 
@@ -163,7 +161,8 @@ class FineGridExchanger(Exchanger):
         if self.catchup:
             # send temperture field to CGE
             for ii in self.II:
-                ii.send()
+                pass
+                #ii.send()
 
         return
 
@@ -235,6 +234,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.36 2004/04/16 00:08:14 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.37 2004/05/11 07:59:31 tan2 Exp $"
 
 # End of file

@@ -34,7 +34,6 @@ class Exchanger(Component):
 
     def initialize(self, solver):
         self.selectModule()
-        #self.all_variables = solver.all_variables
         self.communicator = solver.communicator
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
@@ -84,21 +83,16 @@ class Exchanger(Component):
             sent = NEW_STEP_SIGNAL
         else:
             sent = KEEP_WAITING_SIGNAL
-        #print "    ", self.name, "  send: ", sent
 
         while 1:
             signal = self.exchangeSignal(sent)
 
-            if sent == END_SIMULATION_SIGNAL:
-                signal = END_SIMULATION_SIGNAL
-            #print "    ", self.name, " received  ", signal
-
-            if signal == KEEP_WAITING_SIGNAL:
+            if done or (signal == END_SIMULATION_SIGNAL):
+                done = True
+                break
+            elif signal == KEEP_WAITING_SIGNAL:
                 pass
             elif signal == NEW_STEP_SIGNAL:
-                break
-            elif signal == END_SIMULATION_SIGNAL:
-                done = True
                 break
             else:
                 raise ValueError, \
@@ -125,6 +119,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.17 2004/01/07 22:01:09 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.18 2004/05/11 07:59:31 tan2 Exp $"
 
 # End of file

@@ -36,23 +36,28 @@ class SVTOutlet(Outlet):
 
 
 
-class VTOutlet(Outlet):
-    '''Available modes --
-    "V": send velocity
-    "T": send temperature
-    "VT": send both velocity and temperature
-    '''
+class TOutlet(Outlet):
 
-    def __init__(self, source, all_variables, mode="VT"):
+    def __init__(self, source, all_variables):
         import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.VTOutlet_create(source,
-                                                 all_variables,
-                                                 mode)
+        self._handle = Exchanger.TOutlet_create(source,
+                                                all_variables)
         return
 
 
 
 
+class VTOutlet(Outlet):
+
+    def __init__(self, source, all_variables):
+        import CitcomS.Exchanger as Exchanger
+        self._handle = Exchanger.VTOutlet_create(source,
+                                                 all_variables)
+        return
+
+
+
+"""
 class TractionOutlet(Outlet):
 
 
@@ -63,10 +68,10 @@ class TractionOutlet(Outlet):
                                                        mode)
         return
 
-
+"""
 
 
 # version
-__id__ = "$Id: Outlet.py,v 1.3 2004/04/16 00:05:50 tan2 Exp $"
+__id__ = "$Id: Outlet.py,v 1.4 2004/05/11 07:59:31 tan2 Exp $"
 
 # End of file
