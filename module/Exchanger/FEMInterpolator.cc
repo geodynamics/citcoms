@@ -48,6 +48,19 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
     Array2D<double,DIM> inv_length_sq;   // reciprocal of (length of etaAxes)^2
     computeElementGeometry(etaAxes, inv_length_sq);
 
+
+    // get local BoundedBox
+    BoundedBox bbox(DIM);
+    if(E->parallel.nprocxy == 12) {
+	// for CitcomS Full
+	fullGlobalBoundedBox(bbox, E);
+    }
+    else {
+	// for CitcomS Regional
+	regionalGlobalBoundedBox(bbox, E);
+    }
+
+
     // z is the range of depth in current processor
     std::vector<double> z(E->lmesh.noz);
     for(size_t i=0; i<z.size(); ++i)
@@ -59,8 +72,15 @@ void FEMInterpolator::init(const BoundedMesh& boundedMesh,
 	for(int d=0; d<DIM; ++d)
 	    x[d] = boundedMesh.X(d,n);
 
+	// sometimes after coordinate conversion, surface nodes of different
+	// solvers won't line up, need this special treatment --
+	// if x is a little bit above my top surface, move it back to surface
+	double offtop = x[DIM-1]/bbox[1][DIM-1] - 1.0;
+	if(offtop < 1e-5 && offtop > 0)
+	    x[DIM-1] = bbox[1][DIM-1];
+
 	// skip if x is not inside bbox
-	if(!isInside(x, boundedMesh.bbox())) continue;
+	if(!isInside(x, bbox)) continue;
 
 #if 1
 	// skip if x is not in the range of depth
@@ -319,6 +339,6 @@ void FEMInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: FEMInterpolator.cc,v 1.8 2004/02/24 20:09:24 tan2 Exp $
+// $Id: FEMInterpolator.cc,v 1.9 2004/04/04 23:03:39 tan2 Exp $
 
 // End of file
