@@ -26,7 +26,11 @@ class Solver(BaseSolver):
         self.leader = 0
         self.localLeader = 0
         self.remoteLeader = 0
-	self._start_cpu_time = 0
+
+	self.start_cpu_time = 0
+        self.cpu_time = 0
+        self.model_time = 0
+        self.fptime = None
         return
 
 
@@ -37,6 +41,12 @@ class Solver(BaseSolver):
         comm = application.solverCommunicator
         self.all_variables = self.CitcomModule.citcom_init(comm.handle())
 	self.communicator = comm
+
+        # information about clock time
+	self.start_cpu_time = self.CitcomModule.CPU_time()
+        self.cpu_time = self.start_cpu_time
+        self.fptime = open("%s.time" % self.inventory.param.inventory.datafile,
+                           "w")
 
         # if there is a coupler, initialize it
         if application.inventory.coupler:
@@ -66,8 +76,6 @@ class Solver(BaseSolver):
         CitcomModule.set_signal()
 
         self.setProperties()
-
-	self._start_cpu_time = self.CitcomModule.CPU_time()
         return
 
 
@@ -146,8 +154,19 @@ class Solver(BaseSolver):
 
 
 
-    def endTimestep(self, t, done):
+    def endTimestep(self, t, steps, done):
         BaseSolver.endTimestep(self, t)
+
+        # output time information
+        time = self.CitcomModule.CPU_time()
+        msg = "%d %.4e %.4e %.4e %.4e" % (steps,
+                                          t,
+                                          t - self.model_time,
+                                          time - self.start_cpu_time,
+                                          time - self.cpu_time)
+        print >> self.fptime, msg
+        self.model_time = t
+        self.cpu_time = time
 
         if self.coupler:
             done = self.coupler.endTimestep(done)
@@ -158,7 +177,7 @@ class Solver(BaseSolver):
     def endSimulation(self, step):
         BaseSolver.endSimulation(self, step, self.t)
 
-        total_cpu_time = self.CitcomModule.CPU_time() - self._start_cpu_time
+        total_cpu_time = self.CitcomModule.CPU_time() - self.start_cpu_time
 
         rank = self.communicator.rank
         if not rank:
@@ -229,6 +248,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.22 2003/09/28 20:40:46 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.23 2003/09/29 20:21:20 tan2 Exp $"
 
 # End of file

@@ -26,6 +26,7 @@ int main(argc,argv)
   void construct_mat_group();
   void read_velocity_boundary_from_file();
   void read_mat_from_file();
+  void open_time();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -48,6 +49,7 @@ int main(argc,argv)
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);
+  open_time(E);
 
   cpu_time_on_vp_it = CPU_time0();
   initial_time = cpu_time_on_vp_it - time;
@@ -82,14 +84,14 @@ int main(argc,argv)
       E->control.print_convergence=1;
 
     (E->next_buoyancy_field)(E);
-    
+
     if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
 	(E->advection.timesteps < E->advection.max_timesteps)) ||
        (E->advection.total_timesteps < E->advection.min_timesteps) )
       E->control.keep_going = 1;
     else
       E->control.keep_going = 0;
-    
+
     cpu_total_seconds = CPU_time0()-start_time;
     if (cpu_total_seconds > E->control.record_all_until)  {
       E->control.keep_going = 0;

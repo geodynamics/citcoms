@@ -88,7 +88,7 @@ class Controller(SimulationController):
             self.done = True
 
         # solver can terminate time marching by returning True
-        self.done = self.solver.endTimestep(self.clock, self.done)
+        self.done = self.solver.endTimestep(self.clock, self.step, self.done)
 
         return
 

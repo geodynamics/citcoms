@@ -38,7 +38,7 @@ extern "C" {
     void mass_matrix(struct All_variables*);
     void node_locations(struct All_variables*);
     void open_info(struct All_variables*);
-    void open_log_and_time(struct All_variables*);
+    void open_log(struct All_variables*);
     void read_mat_from_file(struct All_variables*);
     void set_elapsed_time(struct All_variables*);
     void set_sphere_harmonics (struct All_variables*);
@@ -55,7 +55,7 @@ void sphere_launch(struct All_variables *E)
 
     E->control.PID = get_process_identifier();
 
-    open_log_and_time(E);
+    open_log(E);
     if (E->control.verbose)
       open_info(E);
 
@@ -158,6 +158,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.9 2003/08/19 21:21:43 tan2 Exp $
+// $Id: mesher.cc,v 1.10 2003/09/29 20:21:20 tan2 Exp $
 
 // End of file

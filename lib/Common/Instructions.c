@@ -48,7 +48,7 @@ void read_instructions(struct All_variables *E, char *filename)
 
     void setup_parser();
     void shutdown_parser();
-    void open_log_and_time();
+    void open_log();
     void open_info();
 
     void get_initial_elapsed_time();
@@ -80,7 +80,7 @@ void read_instructions(struct All_variables *E, char *filename)
     read_initial_settings(E);
     tracer_initial_settings(E);
 
-    open_log_and_time(E);
+    open_log(E);
     if (E->control.verbose)
       open_info(E);
 
@@ -870,14 +870,22 @@ void initial_velocity(E)
 
 
 
-void open_log_and_time(struct All_variables *E)
+void open_log(struct All_variables *E)
 {
-  char logfile[255], timeoutput[255];
+  char logfile[255];
 
   sprintf(logfile,"%s.log",E->control.data_file);
-  sprintf(timeoutput,"%s.time",E->control.data_file);
-
   E->fp = output_open(logfile);
+
+  return;
+}
+
+
+void open_time(struct All_variables *E)
+{
+  char timeoutput[255];
+
+  sprintf(timeoutput,"%s.time",E->control.data_file);
   E->fptime = output_open(timeoutput);
 
   return;
