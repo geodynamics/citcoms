@@ -161,7 +161,7 @@ void Boundary::init(const All_variables *E) {
 	  }
     if(nodes != size) std::cout << " nodes != size ";
     
-    delete nid;
+    delete [] nid;
     return;
 }
 
@@ -444,6 +444,6 @@ void Boundary::printBid2gid() const {
 
 
 // version
-// $Id: Boundary.cc,v 1.21 2003/09/26 18:23:53 puru Exp $
+// $Id: Boundary.cc,v 1.22 2003/09/26 22:04:31 puru Exp $
 
 // End of file
