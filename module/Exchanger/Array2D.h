@@ -39,10 +39,10 @@ public:
 
     // proxy class for operator[]
     class Array1D {
-	T* const& p_;
-	const int n_;
+	T* p_;
+	int n_;
     public:
-	inline Array1D(T* const& a_, const int n) : p_(a_), n_(n){};
+	inline Array1D(T* a_, const int n) : p_(a_), n_(n){};
 
 	inline T& operator[](const int index) {
 	    return p_[index*N+n_];
@@ -74,6 +74,6 @@ void swap(Array2D<T,N>& lhs, Array2D<T,N>& rhs);
 #endif
 
 // version
-// $Id: Array2D.h,v 1.4 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Array2D.h,v 1.5 2003/10/19 19:54:13 tan2 Exp $
 
 // End of file

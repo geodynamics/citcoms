@@ -27,7 +27,7 @@ public:
     Mapping(const int dim, const int size);
     virtual ~Mapping() = 0;
 
-    inline const int size() {return size_;}
+    inline const int size() const {return size_;}
     inline int bid2proc(const int n) const {return bid2proc_[0][n];};
     void printBid2proc(const std::string& prefix="") const;
 
@@ -91,6 +91,6 @@ private:
 #endif
 
 // version
-// $Id: Mapping.h,v 1.3 2003/10/19 01:01:33 tan2 Exp $
+// $Id: Mapping.h,v 1.4 2003/10/19 19:54:12 tan2 Exp $
 
 // End of file
