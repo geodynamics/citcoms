@@ -98,12 +98,12 @@ class Solver(BaseSolver):
         # create mesh
         mesher.run()
 
-        # initialize const. related to mesh
-        tsolver.launch()
-
         # if there is a coupler, launch it
         if self.coupler:
             self.coupler.launch(self)
+
+        # initialize const. related to mesh
+        tsolver.launch()
 
         # initial temperature and velocities field
         if self.coupler:
@@ -267,6 +267,6 @@ class Solver(BaseSolver):
             ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.25 2003/10/01 22:16:33 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.26 2003/10/03 18:18:51 tan2 Exp $"
 
 # End of file
