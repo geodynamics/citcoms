@@ -18,16 +18,21 @@ import CitcomS.Regional as Regional
 
 class ImcompressibleNewtionian(Stokes_solver):
 
-    def run(self, *args, **kwds):
-
-	self.conform_vbcs()
-	self.get_forces()
-	self.get_viscosity()
-	self.get_stiffness()
-	self.solve()
-
+    def form_RHS(self):
+	Regional.velocities_conform_bcs()
+	Regional.assemble_forces()
 	return
 
+
+    def form_LHS(self):
+	Regional.get_system_viscosity()
+	Regional.construct_stiffness_B_matrix()
+	return
+
+
+    def solve(self):
+	return Regional.solve_constrained_flow_iterative()
+    
 
     def preInit(self):
 	# read/check input parameters here
@@ -36,13 +41,6 @@ class ImcompressibleNewtionian(Stokes_solver):
 
     def postInit(self):
 	# allocate and initialize memory here
-
-	# assign function objects
-	self.get_viscosity = Regional.get_system_viscosity
-	self.conform_vbcs = Regional.velocities_conform_bcs
-	self.get_forces = Regional.assemble_forces
-	self.get_stiffness = Regional.construct_stiffness_B_matrix
-	self.solve = Regional.solve_constrained_flow_iterative
 	return
 
 
@@ -54,34 +52,31 @@ class ImcompressibleNewtionian(Stokes_solver):
 
 
 
-class ImcompressibleNonNewtionian(Stokes_solver):
+class ImcompressibleNonNewtionian(ImcompressibleNewtionian):
 
     def run(self, *args, **kwds):
-	Regional.velocities_conform_bcs()
-	Regional.assemble_forces()
+
+	self.form_RHS()
 	
 	while (self.count < 50) and self.sdepv_not_convergent:
-	    if Control.viscosity.updated_allowed:
-		Regional.get_system_viscosity()
 
-	    Regional.construct_stiffness_B_matrix()
-	    self.viscosity_misfit = Regional.solve_constrained_flow_iterative()
+	    self.form_LHS()
+	    self.viscosity_misfit = self.solve()
 
-	    if Control.viscosity.SDEPV:
-		Regional.general_stokes_solver_update_velo()
-		self.Udot_mag = Regional.general_stokes_solver_Unorm()
-		self.dUdot_mag = Regional.general_stokes_solver_Udotnorm()
+	    Regional.general_stokes_solver_update_velo()
+	    self.Udot_mag = Regional.general_stokes_solver_Unorm()
+	    self.dUdot_mag = Regional.general_stokes_solver_Udotnorm()
 
-		self.sdepv_not_convergent = self.sdepv_not_convergent or (self.dUdot_mag > self.viscosity_misfit)
+	    Regional.general_stokes_solver_log(self.Udot_mag, self.dUdot_mag,
+					       self.count)
 
-		Regional.general_stokes_solver_log(self.Udot_mag, self.dUdot_mag, self.count)
-
+	    self.sdepv_not_convergent = (self.dUdot_mag > self.viscosity_misfit)
 	    self.count += 1
+	    
 	return
 
 
     def preInit(self):
-	self.time = Regional.CPU_time()
 	# read/check input parameters here
 	return
 
@@ -93,7 +88,7 @@ class ImcompressibleNonNewtionian(Stokes_solver):
 	self.Udot_mag = 0
 	self.dUdot_mag = 0
 	self.count = 1
-	self.sdepv_not_convergent = Control.viscosity.SDEPV
+	self.sdepv_not_convergent = True
 	return
 
 
@@ -110,6 +105,6 @@ class ImcompressibleNonNewtionian(Stokes_solver):
 
 
 # version
-__id__ = "$Id: Imcompressible.py,v 1.2 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: Imcompressible.py,v 1.3 2003/05/20 18:56:58 tan2 Exp $"
 
 # End of file 

@@ -21,21 +21,34 @@ class Stokes_solver(Application):
 	      "Solver doesn't run stand-along. Call init(), run(), fini() sequentially in stead."
 	return
 
-#    def run(self, *args, **kwds):
-#	Application.run(*args, **kwds)
-#	return
+    def run(self, *args, **kwds):
+	Application.run(self, *args, **kwds)
+	
+	self.form_RHS()
+	self.form_LHS()
+	self.solve()
+
+	return
+
+
+    def form_RHS(self):
+	return
+
+
+    def form_LHS(self):
+	return
+
+
+    def solve(self):
+	return
 
 
     def output(self, *args, **kwds):
 	return
 
 
-#    def __init__(self, name):
-#	Application.__init__(self, name)
-#	return
-
 
 # version
-__id__ = "$Id: Stokes_solver.py,v 1.2 2003/05/16 21:11:54 tan2 Exp $"
+__id__ = "$Id: Stokes_solver.py,v 1.3 2003/05/20 18:56:58 tan2 Exp $"
 
 # End of file 
