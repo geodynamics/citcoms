@@ -80,9 +80,46 @@ class CoarseGridExchanger(Exchanger):
 
 
     def initTemperature(self):
-        self.module.initTemperatureTest(self.remoteBBox, self.all_variables)
-        # send temperture field to FGE
-        #self.module.sendTemperature(self.exchanger)
+        if self.restart:
+            # read-in restarted temperature field
+            self.ic_initTemperature()
+            del self.ic_initTemperature
+            # send temperature to FGE and postprocess
+            self.restartTemperature()
+        else:
+            self.module.initTemperatureTest(self.remoteBBox,
+                                            self.all_variables)
+        return
+
+
+    def restartTemperature(self):
+        interior = range(self.numSrc)
+        source = range(self.numSrc)
+
+        for i in range(len(interior)):
+            interior[i] = self.module.createEmptyInterior()
+
+        for i, comm, b in zip(range(self.numSrc),
+                              self.srcComm,
+                              interior):
+            # sink is always in the last rank of a communicator
+            sinkRank = comm.size - 1
+            source[i] = self.module.createSource(comm.handle(),
+                                                 sinkRank,
+                                                 b,
+                                                 self.all_variables,
+                                                 self.myBBox)
+
+        for i, src in zip(range(self.numSrc), source):
+            self.module.initTemperatureSource(src,
+                                              self.all_variables)
+
+        # Any modification of read-in temperature is done here
+        # Note: modifyT is called after sending unmodified T to FGE.
+        # If T is modified before sending, FGE's T will lose sharp feature.
+        # FGE has to call modifyT too to ensure consistent T field.
+        self.modifyT(self.remoteBBox)
+
         return
 
 
@@ -135,6 +172,6 @@ class CoarseGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.22 2003/11/11 19:29:50 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.23 2003/11/30 01:22:57 tan2 Exp $"
 
 # End of file

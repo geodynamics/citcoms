@@ -90,9 +90,29 @@ class FineGridExchanger(Exchanger):
 
 
     def initTemperature(self):
-        self.module.initTemperatureTest(self.globalBBox, self.all_variables)
-        # receive temperture field from CGE
-        #self.module.receiveTemperature(self.exchanger)
+        if self.restart:
+            # receive temperature from CGE and postprocess
+            self.restartTemperature()
+        else:
+            self.module.initTemperatureTest(self.globalBBox,
+                                            self.all_variables)
+        return
+
+
+    def restartTemperature(self):
+        interior, bbox = self.module.createInterior(self.remoteBBox,
+                                                    self.all_variables)
+        sink = self.module.createSink(self.sinkComm.handle(),
+                                      self.numSrc,
+                                      interior)
+        self.module.initTemperatureSink(interior, sink, self.all_variables)
+
+        # Any modification of read-in temperature is done here
+        # Note: modifyT is called after receiving unmodified T from CGE.
+        # If T is modified before sending, FGE's T will lose sharp feature.
+        # CGE has to call modifyT too to ensure consistent T field.
+        self.modifyT(self.globalBBox)
+
         return
 
 
@@ -148,7 +168,7 @@ class FineGridExchanger(Exchanger):
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)
-        print "cge_t = %g  fge_t = %g" % (self.cge_t, self.fge_t)
+        #print "cge_t = %g  fge_t = %g" % (self.cge_t, self.fge_t)
         return dt
 
 
@@ -174,6 +194,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.24 2003/11/11 19:29:50 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.25 2003/11/30 01:22:57 tan2 Exp $"
 
 # End of file

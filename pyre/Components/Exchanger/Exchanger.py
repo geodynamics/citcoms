@@ -39,10 +39,14 @@ class Exchanger(Component):
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
 
+        # restart and use temperautre field of previous run?
+        self.restart = solver.inventory.ic.inventory.restart
+        if self.restart:
+            self.ic_initTemperature = solver.inventory.ic.initTemperature
+
         # only one of remotePlus is sinkComm
         self.sinkComm = solver.remotePlus[self.communicator.rank]
         return
-
 
 
     def launch(self, solver):
@@ -53,36 +57,15 @@ class Exchanger(Component):
         return
 
 
-
     def selectModule(self):
         import CitcomS.Exchanger
         self.module = CitcomS.Exchanger
         return
 
 
-
-    def createMesh(self):
-        raise NotImplementedError
+    def modifyT(self, bbox):
+        self.module.modifyT(bbox, self.all_variables)
         return
-
-
-
-    def createSourceSink(self):
-        raise NotImplementedError
-        return
-
-
-
-    def createBC(self):
-        raise NotImplementedError
-        return
-
-
-
-    def initTemperature(self):
-        raise NotImplementedError
-        return
-
 
 
     def preVSolverRun(self):
@@ -90,29 +73,9 @@ class Exchanger(Component):
         return
 
 
-
     def postVSolverRun(self):
         # do nothing, overridden by CGE
         return
-
-
-
-    def NewStep(self):
-        raise NotImplementedError
-        return
-
-
-
-    def applyBoundaryConditions(self):
-        raise NotImplementedError
-        return
-
-
-
-    def stableTimestep(self, dt):
-        raise NotImplementedError
-        return dt
-
 
 
     def endTimestep(self, done):
@@ -143,16 +106,10 @@ class Exchanger(Component):
                 done = True
                 break
             else:
-                raise ValueError, "Unexpected signal value, singnal = %d" % signal
+                raise ValueError, \
+                      "Unexpected signal value, singnal = %d" % signal
 
         return done
-
-
-
-    def exchangeSignal(self, signal):
-        raise NotImplementedError
-        return signal
-
 
 
 
@@ -168,6 +125,6 @@ class Exchanger(Component):
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.12 2003/11/11 19:29:50 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.13 2003/11/30 01:22:57 tan2 Exp $"
 
 # End of file
