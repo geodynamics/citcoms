@@ -135,6 +135,8 @@ void temperature_boundary_conditions(E)
 
     }     /* end for j */
 
+   temperatures_conform_bcs(E);
+
    return; }
 
 /* ========================================== */
@@ -556,6 +558,6 @@ void velocities_conform_bcs(E,U)
 
 
 /* version */
-/* $Id: Boundary_conditions.c,v 1.10 2004/05/23 19:10:27 tan2 Exp $ */
+/* $Id: Boundary_conditions.c,v 1.11 2004/06/28 19:49:02 tan2 Exp $ */
 
 /* End of file  */
