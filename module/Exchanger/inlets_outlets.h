@@ -50,6 +50,12 @@ extern "C"
 PyObject * pyExchanger_BoundaryVTInlet_create(PyObject *, PyObject *);
 
 
+extern char pyExchanger_TractionInlet_create__name__[];
+extern char pyExchanger_TractionInlet_create__doc__[];
+extern "C"
+PyObject * pyExchanger_TractionInlet_create(PyObject *, PyObject *);
+
+
 extern char pyExchanger_VTInlet_create__name__[];
 extern char pyExchanger_VTInlet_create__doc__[];
 extern "C"
@@ -65,9 +71,15 @@ extern "C"
 PyObject * pyExchanger_VTOutlet_create(PyObject *, PyObject *);
 
 
+extern char pyExchanger_TractionOutlet_create__name__[];
+extern char pyExchanger_TractionOutlet_create__doc__[];
+extern "C"
+PyObject * pyExchanger_TractionOutlet_create(PyObject *, PyObject *);
+
+
 #endif
 
 // version
-// $Id: inlets_outlets.h,v 1.3 2004/03/11 23:23:49 tan2 Exp $
+// $Id: inlets_outlets.h,v 1.4 2004/03/28 23:05:19 tan2 Exp $
 
 // End of file

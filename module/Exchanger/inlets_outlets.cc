@@ -152,6 +152,42 @@ void deleteBoundaryVTInlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "TractionInlet.h"
+
+extern "C" void deleteTractionInlet(void*);
+
+
+char pyExchanger_TractionInlet_create__doc__[] = "";
+char pyExchanger_TractionInlet_create__name__[] = "TractionInlet_create";
+
+PyObject * pyExchanger_TractionInlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+    char* mode;
+
+    if (!PyArg_ParseTuple(args, "OOOs:TractionInlet_create",
+                          &obj1, &obj2, &obj3, &mode))
+        return NULL;
+
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
+    Sink* sink = static_cast<Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+
+    TractionInlet* inlet = new TractionInlet(*b, *sink, E, mode);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteTractionInlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteTractionInlet(void* p)
+{
+    delete static_cast<TractionInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "VTInlet.h"
 
 extern "C" void deleteVTInlet(void*);
@@ -223,7 +259,6 @@ void deleteVTOutlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#if 0
 #include "TractionOutlet.h"
 
 extern "C" void deleteTractionOutlet(void*);
@@ -255,9 +290,9 @@ void deleteTractionOutlet(void* p)
 {
     delete static_cast<TractionOutlet*>(p);
 }
-#endif
+
 
 // version
-// $Id: inlets_outlets.cc,v 1.3 2004/03/11 23:23:49 tan2 Exp $
+// $Id: inlets_outlets.cc,v 1.4 2004/03/28 23:05:19 tan2 Exp $
 
 // End of file

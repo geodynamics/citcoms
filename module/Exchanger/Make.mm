@@ -35,6 +35,7 @@ PROJ_SRCS = \
 	Outlet.cc \
 	SIUnit.cc \
 	Sink.cc \
+	TractionInlet.cc \
 	TractionInterpolator.cc \
 	TractionOutlet.cc \
 	TractionSource.cc \
@@ -52,6 +53,6 @@ PROJ_SRCS = \
 
 
 # version
-# $Id: Make.mm,v 1.18 2004/03/27 00:10:56 steve Exp $
+# $Id: Make.mm,v 1.19 2004/03/28 23:05:19 tan2 Exp $
 
 # End of file
