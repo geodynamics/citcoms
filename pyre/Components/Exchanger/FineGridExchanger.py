@@ -36,11 +36,13 @@ class FineGridExchanger(Exchanger):
     def findBoundary(self):
         self.module.createBoundary(self.exchanger)
 
+        # create mapping from boundary node # to global node #
+        self.module.mapBoundary(self.exchanger)
+
         # send boundary from CGE
         self.module.sendBoundary(self.exchanger)
 
-	# create mapping from boundary node # to global node #
-	self.module.mapBoundary(self.exchanger)
+        self.module.setBCFlag(self.exchanger)
         return
 
 
@@ -115,6 +117,6 @@ class FineGridExchanger(Exchanger):
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.18 2003/10/01 22:04:41 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.19 2003/10/03 18:17:27 tan2 Exp $"
 
 # End of file
