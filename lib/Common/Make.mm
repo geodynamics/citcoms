@@ -11,11 +11,14 @@ include local.def
 TYPE=Common
 
 PROJECT = CitcomS
-PACKAGE = lib/$(TYPE)
+PACKAGE = libCitcomS$(TYPE)
 
+PROJ_SAR = $(BLD_LIBDIR)/$(PACKAGE).$(EXT_SAR)
+PROJ_DLL = $(BLD_LIBDIR)/$(PACKAGE).$(EXT_SO)
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
-PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
+PROJ_CLEAN += $(PROJ_DLL) $(PROJ_SAR)
 
+PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
 PROJ_LIBRARIES = $(EXTERNAL_LIBPATH) $(EXTERNAL_LIBS) -lm
 PROJ_CC_INCLUDES = ./
 
@@ -68,14 +71,14 @@ EXPORT_HEADERS = \
 	tracer_defs.h \
 	viscosity_descriptions.h
 
-PROJ_INCDIR = $(BLD_INCDIR)/$(PROJECT)/$(TYPE)
-PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
+EXPORT_LIBS = $(PROJ_SAR)
+EXPORT_BINS = $(PROJ_DLL)
 
-#all: $(PROJ_OBJS) export-headers
-all: $(PROJ_LIB)
+#al: $(PROJ_OBJS) export-headers
+all: $(PROJ_SAR)
 
 # version
-# $Id: Make.mm,v 1.13 2004/04/15 18:35:04 tan2 Exp $
+# $Id: Make.mm,v 1.14 2005/04/11 12:09:20 steve Exp $
 
 #
 # End of file

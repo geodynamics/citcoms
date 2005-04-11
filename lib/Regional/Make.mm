@@ -11,10 +11,12 @@ include local.def
 TYPE=Regional
 
 PROJECT = CitcomS
-PACKAGE = lib/$(TYPE)
+PACKAGE = libCitcomS$(TYPE)
 
+PROJ_SAR = $(BLD_LIBDIR)/$(PACKAGE).$(EXT_SAR)
+PROJ_DLL = $(BLD_LIBDIR)/$(PACKAGE).$(EXT_SO)
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
-PROJ_LIB = $(BLD_LIBDIR)/libCitcomS$(TYPE).$(EXT_LIB)
+PROJ_CLEAN += $(PROJ_DLL) $(PROJ_SAR)
 
 PROJ_CC_INCLUDES = ../Common ./
 
@@ -27,15 +29,14 @@ PROJ_SRCS = \
 	Sphere_related.c \
 	Version_dependent.c
 
-PROJ_CLEAN = $(PROJ_OBJS) $(PROJ_DEPENDENCIES)
+EXPORT_LIBS = $(PROJ_SAR)
+EXPORT_BINS = $(PROJ_DLL)
 
-
-
-all: $(PROJ_LIB)
+all: $(PROJ_SAR)
 
 
 # version
-# $Id: Make.mm,v 1.13 2003/11/26 21:24:39 tan2 Exp $
+# $Id: Make.mm,v 1.14 2005/04/11 12:09:21 steve Exp $
 
 #
 # End of file
