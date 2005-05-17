@@ -15,8 +15,8 @@ PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
-	-l$(PROJECT)Common \
-	-l$(PROJECT)$(TYPE) \
+	$(PROJ_LIBDIR)/lib$(PROJECT)Common.so \
+	$(PROJ_LIBDIR)/lib$(PROJECT)$(TYPE).so \
 	-ljournal \
 	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
@@ -36,6 +36,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.21 2004/11/16 11:43:28 steve Exp $
+# $Id: Make.mm,v 1.22 2005/05/17 00:35:10 tan2 Exp $
 
 # End of file
