@@ -13,12 +13,15 @@ PACKAGE = Exchangermodule
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
-        $(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
+	$(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
+	-Xlinker -rpath $(EXCHANGER_LIBDIR) -Xlinker \
 	-lExchanger \
-        -ljournal \
-        $(PYTHIA_DIR)/modules/mpi/mpimodule.so
+	-Xlinker -rpath $(PYTHIA_LIBDIR) -Xlinker \
+	-ljournal \
+	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
+
 EXTERNAL_INCLUDES += $(PYTHIA_INCDIR) $(EXCHANGER_INCDIR)
 EXTERNAL_LIBPATH += -L$(PYTHIA_LIBDIR) -L$(EXCHANGER_LIBDIR)
 
@@ -47,6 +50,6 @@ PROJ_SRCS = \
 	misc.cc \
 
 # version
-# $Id: Make.mm,v 1.27 2005/03/11 04:23:33 steve Exp $
+# $Id: Make.mm,v 1.28 2005/05/17 20:54:53 tan2 Exp $
 
 # End of file
