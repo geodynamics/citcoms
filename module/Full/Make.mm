@@ -15,8 +15,10 @@ PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
-	$(PROJ_LIBDIR)/lib$(PROJECT)Common.so \
-	$(PROJ_LIBDIR)/lib$(PROJECT)$(TYPE).so \
+	-Xlinker -rpath $(PROJ_LIBDIR) -Xlinker \
+	-l$(PROJECT)Common \
+	-l$(PROJECT)$(TYPE) \
+	-Xlinker -rpath $(PYTHIA_LIBDIR) -Xlinker \
 	-ljournal \
 	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
 
@@ -44,6 +46,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.14 2005/05/17 00:35:10 tan2 Exp $
+# $Id: Make.mm,v 1.15 2005/05/17 19:45:44 tan2 Exp $
 
 # End of file
