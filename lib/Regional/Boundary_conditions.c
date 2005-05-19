@@ -99,6 +99,7 @@ void temperature_boundary_conditions(E)
   void temperature_imposed_vert_bcs();
   void temperature_refl_vert_bc();
   void temperature_lith_adj();
+  void temperatures_conform_bcs();
   int j,lev,noz;
 
   lev = E->mesh.levmax;
@@ -526,6 +527,6 @@ void velocities_conform_bcs(E,U)
 
 
 /* version */
-/* $Id: Boundary_conditions.c,v 1.12 2004/10/08 00:18:05 tan2 Exp $ */
+/* $Id: Boundary_conditions.c,v 1.13 2005/05/18 18:27:56 leif Exp $ */
 
 /* End of file  */
