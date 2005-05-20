@@ -10,6 +10,7 @@
 #include <portinfo>
 #include <algorithm>
 #include <stdexcept>
+#include <cmath>
 #include "global_bbox.h"
 #include "global_defs.h"
 #include "journal/journal.h"
@@ -421,6 +422,6 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: CitcomInterpolator.cc,v 1.2 2004/06/02 20:23:39 tan2 Exp $
+// $Id: CitcomInterpolator.cc,v 1.3 2005/05/19 22:39:18 leif Exp $
 
 // End of file

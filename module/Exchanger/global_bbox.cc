@@ -6,6 +6,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
 #include <portinfo>
+#include <cmath>
 #include "global_defs.h"
 #include "global_bbox.h"
 
@@ -37,6 +38,6 @@ void regionalGlobalBoundedBox(Exchanger::BoundedBox& bbox,
 
 
 // version
-// $Id: global_bbox.cc,v 1.2 2004/07/02 20:47:01 tan2 Exp $
+// $Id: global_bbox.cc,v 1.3 2005/05/19 22:39:19 leif Exp $
 
 // End of file

@@ -13,6 +13,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <cmath>
 #include "global_defs.h"
 
 #include "setProperties.h"
@@ -795,6 +796,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.32 2005/02/17 23:15:36 tan2 Exp $
+// $Id: setProperties.cc,v 1.33 2005/05/19 22:39:19 leif Exp $
 
 // End of file
