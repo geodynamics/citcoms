@@ -23,6 +23,7 @@ class IC(CitcomComponent):
         inv.perturbmag = map(float, inv.perturbmag)
         inv.perturbl = map(float, inv.perturbl)
         inv.perturbm = map(float, inv.perturbm)
+        inv.blob_center = map(float, inv.blob_center)
 
         self.CitcomModule.IC_set_properties(self.all_variables, inv)
         return
@@ -79,7 +80,7 @@ class IC(CitcomComponent):
             pyre.properties.bool("zero_elapsed_time", default=True),
 
             pyre.properties.int("tic_method", default=0,
-                                validator=pyre.properties.choice([0, 1])),
+                                validator=pyre.properties.choice([0, 1, 2])),
 
             pyre.properties.float("half_space_age", default=40,
                                   validator=pyre.properties.greater(1e-3)),
@@ -91,9 +92,14 @@ class IC(CitcomComponent):
             pyre.properties.list("perturbm", default=[1]),
             pyre.properties.sequence("perturblayer", default=[5]),
 
+
+            pyre.properties.list("blob_center", default=[1.570800,1.570800,0.9246600]),
+            pyre.properties.float("blob_radius", default=[0.063]),
+            pyre.properties.float("blob_dT", default=[0.18]),
+
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.13 2005/02/18 00:13:36 tan2 Exp $"
+__id__ = "$Id: IC.py,v 1.14 2005/05/23 22:00:45 ces74 Exp $"
 
 # End of file

@@ -153,15 +153,17 @@ void node_locations(E)
       for(i=1;i<=nox;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
 
-      fscanf(fp1,"%s%d",a,&i);
+      fscanf(fp1,"%s %d",a,&i);
       for(i=1;i<=noy;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
 
-      fscanf(fp1,"%s%d",a,&i);
+      fscanf(fp1,"%s %d",a,&i);
       for (k=1;k<=E->mesh.noz;k++)  {
       fscanf(fp1,"%d %f",&nn,&tt1);
       rr[k]=tt1;
       }
+      E->sphere.ri = rr[1];
+      E->sphere.ro = rr[E->mesh.noz];
 
       fclose(fp1);
 
@@ -301,11 +303,11 @@ void construct_tic_from_input(struct All_variables *E)
   double modified_plgndr_a(int, int, double);
   void temperatures_conform_bcs();
 
-  int i, j ,k , kk, m, p, node;
+  int i, j ,k , kk, m, p, node, nodet;
   int nox, noy, noz, gnoz;
   double r1, f1, t1;
   int mm, ll;
-  double con;
+  double con, temp;
 
   double tlen = M_PI / (E->control.theta_max - E->control.theta_min);
   double flen = M_PI / (E->control.fi_max - E->control.fi_min);
@@ -366,6 +368,55 @@ void construct_tic_from_input(struct All_variables *E)
   }
   else if (E->convection.tic_method == 1) {
 
+  }
+  else if (E->convection.tic_method == 2) {
+    double temp;
+    double theta_center = E->convection.blob_center[0];
+    double fi_center = E->convection.blob_center[1];
+    double r_center = E->convection.blob_center[2];
+    double radius = E->convection.blob_radius;
+    double amp = E->convection.blob_dT;
+	double x_center,y_center,z_center;
+	double theta,fi,r,x,y,z,distance;
+
+	/* set up a thermal boundary layer first */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=noy;i++)
+        for(j=1;j<=nox;j++)
+          for(k=1;k<=noz;k++) {
+            node=k+(j-1)*noz+(i-1)*nox*noz;
+            r1=E->sx[m][3][node];
+            temp = 0.2*(E->sphere.ro-r1) * 0.5/sqrt(E->convection.half_space_age*E->data.scalet);
+            E->T[m][node] = E->control.TBCbotval*erf(temp);
+          }
+
+    x_center = r_center * sin(fi_center) * cos(theta_center);
+    y_center = r_center * sin(fi_center) * sin(theta_center);
+    z_center = r_center * cos(fi_center);
+
+    // compute temperature field according to nodal coordinate
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(k=1;k<=E->lmesh.noy;k++)
+            for(j=1;j<=E->lmesh.nox;j++)
+                for(i=1;i<=E->lmesh.noz;i++)  {
+                    node = i + (j-1)*E->lmesh.noz
+                             + (k-1)*E->lmesh.noz*E->lmesh.nox;
+
+                    theta = E->sx[m][1][node];
+                    fi = E->sx[m][2][node];
+                    r = E->sx[m][3][node];
+
+                    x = r * sin(fi) * cos(theta);
+                    y = r * sin(fi) * sin(theta);
+                    z = r * cos(fi);
+
+                    distance = sqrt((x - x_center)*(x - x_center) +
+                                    (y - y_center)*(y - y_center) +
+                                    (z - z_center)*(z - z_center));
+
+                    if (distance < radius)
+                      E->T[m][node] += amp * exp(-1.0*distance/radius);
+                }
   }
 
   temperatures_conform_bcs(E);

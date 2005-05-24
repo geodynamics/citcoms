@@ -59,15 +59,19 @@ if(E->control.coor==1)   {
           exit(8);
 	}
 
-  fscanf(fp,"%s%d",a,&nn);
+  fscanf(fp,"%s %d",a,&nn);
    for(i=1;i<=gnox;i++) {
-     fscanf(fp,"%d%f",&nn,&theta1[E->mesh.gridmax][i]);
+     fscanf(fp,"%d %e",&nn,&theta1[E->mesh.gridmax][i]);
    }
+  E->control.theta_min = theta1[E->mesh.gridmax][1];
+  E->control.theta_max = theta1[E->mesh.gridmax][gnox];
 
-  fscanf(fp,"%s%d",a,&nn);
+  fscanf(fp,"%s %d",a,&nn);
    for(i=1;i<=gnoy;i++)  {
-     fscanf(fp,"%d%f",&nn,&fi1[E->mesh.gridmax][i]);
+     fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]);
     }
+  E->control.fi_min = fi1[E->mesh.gridmax][1];
+  E->control.fi_max = fi1[E->mesh.gridmax][gnox];
 
   fclose(fp);
 
