@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 """
 Slice horizontal layer(s) from CitcomS output (from batchcombine.py).
 Also convert the (x, y) coordinate to (lon, lat).
