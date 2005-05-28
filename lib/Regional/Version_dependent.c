@@ -317,7 +317,6 @@ void construct_tic_from_input(struct All_variables *E)
   noz=E->lmesh.noz;
   gnoz=E->mesh.noz;
 
-
   if (E->convection.tic_method == 0) {
 
 
@@ -346,7 +345,6 @@ void construct_tic_from_input(struct All_variables *E)
       k = kk - E->lmesh.nzs + 1;
       if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
       if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0)
-	fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
 
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 	for(i=1;i<=noy;i++)
@@ -379,6 +377,7 @@ void construct_tic_from_input(struct All_variables *E)
 	double x_center,y_center,z_center;
 	double theta,fi,r,x,y,z,distance;
 
+	fprintf(stderr,"center=%e %e %e radius=%e dT=%e\n",theta_center,fi_center,r_center,radius,amp);
 	/* set up a thermal boundary layer first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
@@ -386,7 +385,7 @@ void construct_tic_from_input(struct All_variables *E)
           for(k=1;k<=noz;k++) {
             node=k+(j-1)*noz+(i-1)*nox*noz;
             r1=E->sx[m][3][node];
-            temp = 0.2*(E->sphere.ro-r1) * 0.5/sqrt(E->convection.half_space_age*E->data.scalet);
+            temp = 0.2*(E->sphere.ro-r1) * 0.5/sqrt(E->convection.half_space_age/E->data.scalet);
             E->T[m][node] = E->control.TBCbotval*erf(temp);
           }
 
@@ -406,13 +405,9 @@ void construct_tic_from_input(struct All_variables *E)
                     fi = E->sx[m][2][node];
                     r = E->sx[m][3][node];
 
-                    x = r * sin(fi) * cos(theta);
-                    y = r * sin(fi) * sin(theta);
-                    z = r * cos(fi);
-
-                    distance = sqrt((x - x_center)*(x - x_center) +
-                                    (y - y_center)*(y - y_center) +
-                                    (z - z_center)*(z - z_center));
+                    distance = sqrt((theta - theta_center)*(theta - theta_center) +
+                                    (fi - fi_center)*(fi - fi_center) +
+                                    (r - r_center)*(r - r_center));
 
                     if (distance < radius)
                       E->T[m][node] += amp * exp(-1.0*distance/radius);

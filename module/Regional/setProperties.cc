@@ -233,6 +233,11 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     else if (E->convection.tic_method == 2) {
         getScalarProperty(properties, "half_space_age", E->convection.half_space_age, m);
         getVectorProperty(properties, "blob_center", E->convection.blob_center, 3, m);
+        if( E->convection.blob_center[0] == -999.0 && E->convection.blob_center[1] == -999.0 && E->convection.blob_center[2] == -999.0 ) {
+            E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+            E->convection.blob_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+            E->convection.blob_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
+        }
         getScalarProperty(properties, "blob_radius", E->convection.blob_radius, m);
         getScalarProperty(properties, "blob_dT", E->convection.blob_dT, m);
     }
@@ -801,6 +806,6 @@ void getVectorProperty(PyObject* properties, char* attribute,
 
 
 // version
-// $Id: setProperties.cc,v 1.34 2005/05/23 22:00:46 ces74 Exp $
+// $Id: setProperties.cc,v 1.35 2005/05/28 05:27:27 ces74 Exp $
 
 // End of file

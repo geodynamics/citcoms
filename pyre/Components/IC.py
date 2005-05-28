@@ -93,13 +93,13 @@ class IC(CitcomComponent):
             pyre.properties.sequence("perturblayer", default=[5]),
 
 
-            pyre.properties.list("blob_center", default=[1.570800,1.570800,0.9246600]),
+            pyre.properties.list("blob_center", default=[-999.,-999.,-999.]),
             pyre.properties.float("blob_radius", default=[0.063]),
             pyre.properties.float("blob_dT", default=[0.18]),
 
             ]
 
 # version
-__id__ = "$Id: IC.py,v 1.14 2005/05/23 22:00:45 ces74 Exp $"
+__id__ = "$Id: IC.py,v 1.15 2005/05/28 05:27:26 ces74 Exp $"
 
 # End of file
