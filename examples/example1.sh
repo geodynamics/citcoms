@@ -9,15 +9,15 @@
 
 ../tests/citcomsregional.sh \
 \
---steps=71 \
+--steps=1 \
 \
 --controller.monitoringFrequency=10 \
 \
 --staging.nodes=4 \
 --staging.nodegen="n%03d" \
---staging.nodelist=[101-102,101-102] \
+--staging.nodelist=[131-132] \
 \
---solver.datafile=/scratch/username/example1 \
+--solver.datafile=example1 \
 \
 --solver.mesher.nprocx=2 \
 --solver.mesher.nprocy=2 \
@@ -27,6 +27,6 @@
 
 
 # version
-# $Id: example1.sh,v 1.3 2004/06/29 17:25:11 tan2 Exp $
+# $Id: example1.sh,v 1.4 2005/05/27 21:41:22 vlad Exp $
 
 # End of file
