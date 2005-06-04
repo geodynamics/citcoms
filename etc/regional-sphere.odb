@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+def mesher():
+
+    import CitcomS.Components.Sphere as Sphere
+    return Sphere.regionalSphere()
+
+
+# version
+__id__ = "$Id: regional-sphere.odb,v 1.1 2005/06/03 21:51:40 leif Exp $"
+
+# End of file 

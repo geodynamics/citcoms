@@ -13,9 +13,9 @@
 \
 --controller.monitoringFrequency=10 \
 \
---staging.nodes=4 \
---staging.nodegen="n%03d" \
---staging.nodelist=[131-132] \
+--launcher.nodes=4 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[131-132] \
 \
 --solver.datafile=example1 \
 \
@@ -27,6 +27,6 @@
 
 
 # version
-# $Id: example1.sh,v 1.4 2005/05/27 21:41:22 vlad Exp $
+# $Id: example1.sh,v 1.5 2005/06/03 21:51:40 leif Exp $
 
 # End of file

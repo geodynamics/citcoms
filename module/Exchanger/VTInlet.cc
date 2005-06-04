@@ -8,7 +8,7 @@
 //
 
 #include <portinfo>
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "global_defs.h"
 #include "Convertor.h"
 #include "Exchanger/BoundedMesh.h"
@@ -37,7 +37,7 @@ VTInlet::VTInlet(const BoundedMesh& boundedMesh,
     t_old(sink.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     setVBCFlag();
     setTBCFlag();
@@ -53,7 +53,7 @@ VTInlet::~VTInlet()
 void VTInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     // store bc from previous timestep
     t.swap(t_old);
@@ -117,10 +117,10 @@ void VTInlet::setTBCFlag()
 void VTInlet::imposeV()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     journal::debug_t debugBC("CitcomS-VTInlet-imposeV");
-    debugBC << journal::loc(__HERE__);
+    debugBC << journal::at(__HERE__);
 
     double N1, N2;
     getTimeFactors(N1, N2);
@@ -136,17 +136,17 @@ void VTInlet::imposeV()
  		<< E->sphere.cap[m].VB[2][n] << " "
  		<< E->sphere.cap[m].VB[3][n] << journal::newline;
     }
-    debugBC << journal::end;
+    debugBC << journal::endl;
 }
 
 
 void VTInlet::imposeT()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     journal::debug_t debugBC("CitcomS-VTInlet-imposeT");
-    debugBC << journal::loc(__HERE__);
+    debugBC << journal::at(__HERE__);
 
     double N1, N2;
     getTimeFactors(N1, N2);
@@ -163,13 +163,13 @@ void VTInlet::imposeT()
   		<< E->sphere.cap[m].TB[3][n] << journal::newline;
 
     }
-    debugBC << journal::end;
+    debugBC << journal::endl;
 
     (E->temperatures_conform_bcs)(E);
 }
 
 
 // version
-// $Id: VTInlet.cc,v 1.6 2004/10/08 00:11:23 tan2 Exp $
+// $Id: VTInlet.cc,v 1.7 2005/06/03 21:51:42 leif Exp $
 
 // End of file

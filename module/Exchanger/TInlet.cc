@@ -12,7 +12,7 @@
 //
 
 #include <portinfo>
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "global_defs.h"
 #include "Convertor.h"
 #include "Exchanger/BoundedMesh.h"
@@ -32,7 +32,7 @@ TInlet::TInlet(const BoundedMesh& boundedMesh,
     t(sink.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 }
 
 
@@ -43,7 +43,7 @@ TInlet::~TInlet()
 void TInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     sink.recv(t);
 
@@ -57,7 +57,7 @@ void TInlet::recv()
 void TInlet::impose()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     const int m = 1;
     for(int i=0; i<sink.size(); i++) {
@@ -73,6 +73,6 @@ void TInlet::impose()
 
 
 // version
-// $Id: TInlet.cc,v 1.2 2004/10/08 00:11:23 tan2 Exp $
+// $Id: TInlet.cc,v 1.3 2005/06/03 21:51:42 leif Exp $
 
 // End of file

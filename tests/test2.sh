@@ -21,9 +21,9 @@ rm $FINE.* $COARSE.*
 
 
 coupledcitcoms.py  \
---staging.nodegen="n%03d" \
---staging.nodelist=[101-118,120-129,131-170] \
---staging.nodes=5 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[101-118,120-129,131-170] \
+--launcher.nodes=5 \
 --layout.coarse=[0-3] \
 --layout.fine=[4] \
 --coarse=regional \
@@ -141,6 +141,6 @@ rm $TEMPFILE
 
 
 # version
-# $Id: test2.sh,v 1.3 2003/10/24 05:23:36 tan2 Exp $
+# $Id: test2.sh,v 1.4 2005/06/03 21:51:46 leif Exp $
 
 # End of file

@@ -227,20 +227,18 @@ class FineGridExchanger(Exchanger):
 
     class Inventory(Exchanger.Inventory):
 
-        import pyre.properties as prop
+        import pyre.inventory as prop
 
 
-        inventory = [
 
-            prop.bool("excludeTop", default=False),
-            prop.bool("excludeBottom", default=False),
-            prop.bool("incompressibility", default=True),
+        excludeTop = prop.bool("excludeTop", default=False)
+        excludeBottom = prop.bool("excludeBottom", default=False)
+        incompressibility = prop.bool("incompressibility", default=True)
 
-            ]
 
 
 
 # version
-__id__ = "$Id: FineGridExchanger.py,v 1.39 2004/08/06 22:47:13 tan2 Exp $"
+__id__ = "$Id: FineGridExchanger.py,v 1.40 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

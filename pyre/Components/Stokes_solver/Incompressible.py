@@ -56,30 +56,28 @@ class Incompressible(CitcomComponent):
 
     class Inventory(CitcomComponent.Inventory):
 
-        import pyre.properties as prop
+        import pyre.inventory as prop
 
-        inventory = [
 
-            prop.str("Solver", "cgrad",
-                     validator=prop.choice(["cgrad",
-                                            "multigrid",
-                                            "multigrid-el"])),
-            prop.bool("node_assemble", True),
-            prop.bool("precond", True),
+        Solver = prop.str("Solver", default="cgrad",
+                 validator=prop.choice(["cgrad",
+                                        "multigrid",
+                                        "multigrid-el"]))
+        node_assemble = prop.bool("node_assemble", default=True)
+        precond = prop.bool("precond", default=True)
 
-            prop.float("accuracy", 1.0e-6),
-            prop.float("tole_compressibility", 1.0e-7),
-            prop.int("mg_cycle", 1),
-            prop.int("down_heavy", 3),
-            prop.int("up_heavy", 3),
+        accuracy = prop.float("accuracy", default=1.0e-6)
+        tole_compressibility = prop.float("tole_compressibility", default=1.0e-7)
+        mg_cycle = prop.int("mg_cycle", default=1)
+        down_heavy = prop.int("down_heavy", default=3)
+        up_heavy = prop.int("up_heavy", default=3)
 
-            prop.int("vlowstep", 1000),
-            prop.int("vhighstep", 3),
-            prop.int("piterations", 1000),
+        vlowstep = prop.int("vlowstep", default=1000)
+        vhighstep = prop.int("vhighstep", default=3)
+        piterations = prop.int("piterations", default=1000)
 
-	    ]
 
 # version
-__id__ = "$Id: Incompressible.py,v 1.15 2004/08/02 16:34:26 ces74 Exp $"
+__id__ = "$Id: Incompressible.py,v 1.16 2005/06/03 21:51:45 leif Exp $"
 
 # End of file

@@ -17,6 +17,7 @@ DIR_LIB = lib
 DIR_DRIVERS = drivers
 DIR_MODULE = module
 DIR_PYRE = pyre
+DIR_ETC = etc
 DIR_TESTS = tests
 DIR_EXAMPLES = examples
 
@@ -26,6 +27,7 @@ BUILD_DIRS = \
     $(DIR_DRIVERS) \
     $(DIR_MODULE) \
     $(DIR_PYRE) \
+    $(DIR_ETC) \
 
 OTHER_DIRS = \
     $(DIR_TESTS) \
@@ -65,6 +67,11 @@ $(DIR_PYRE):
 	(cd $(DIR_PYRE); $(MM))
 
 
+.PHONY: $(DIR_ETC)
+$(DIR_ETC):
+	(cd $(DIR_ETC); $(MM))
+
+
 .PHONY: $(DIR_TESTS)
 $(DIR_TESTS):
 	(cd $(DIR_TESTS); $(MM))
@@ -87,7 +94,7 @@ distclean::
 
 
 # version
-# $Id: Make.mm,v 1.3 2004/06/24 19:31:44 tan2 Exp $
+# $Id: Make.mm,v 1.4 2005/06/03 21:51:39 leif Exp $
 
 #
 # End of file

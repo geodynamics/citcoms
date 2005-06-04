@@ -8,7 +8,7 @@
 //
 
 #include <portinfo>
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "global_defs.h"
 #include "Boundary.h"
 #include "Convertor.h"
@@ -42,7 +42,7 @@ SInlet::SInlet(const Boundary& boundary,
     s_old(sink.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     //setSBCFlag();
 
@@ -56,7 +56,7 @@ SInlet::~SInlet()
 void SInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     // store bc from previous timestep
     s.swap(s_old);
@@ -73,7 +73,7 @@ void SInlet::recv()
 void SInlet::impose()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     imposeS();
 }
@@ -161,6 +161,6 @@ double SInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SInlet.cc,v 1.2 2005/02/04 18:51:16 ces74 Exp $
+// $Id: SInlet.cc,v 1.3 2005/06/03 21:51:42 leif Exp $
 
 // End of file

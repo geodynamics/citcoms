@@ -12,7 +12,7 @@ def controller(name="controller", facility="controller"):
     return Controller(name, facility)
 
 
-from pyre.components.SimulationController import SimulationController
+from pyre.simulations.SimulationController import SimulationController
 import journal
 
 class Controller(SimulationController):

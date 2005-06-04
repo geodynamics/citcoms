@@ -53,7 +53,7 @@ class Layout(Component):
 
     def verify(self, application):
         size = self.nodes
-        nodes = application.inventory.staging.inventory.nodes
+        nodes = application.inventory.launcher.inventory.nodes
         if nodes != size:
             import journal
             firewall = journal.firewall("layout")
@@ -63,7 +63,7 @@ class Layout(Component):
             import journal
             firewall = journal.firewall("layout")
             firewall.log("'%s' requires at least 2 processors"
-                         % application.inventory.name)
+                         % application.name)
 
         return
 
@@ -95,17 +95,15 @@ class Layout(Component):
 
     class Inventory(Component.Inventory):
 
-        import pyre.properties
+        import pyre.inventory
 
-        inventory = [
 
-            pyre.properties.sequence("coarse", range(12)),
-            pyre.properties.sequence("fine", [12]),
+        coarse = pyre.inventory.slice("coarse", default=range(12))
+        fine = pyre.inventory.slice("fine", default=[12])
 
-            ]
 
 
 # version
-__id__ = "$Id: Layout.py,v 1.10 2003/11/07 01:08:22 tan2 Exp $"
+__id__ = "$Id: Layout.py,v 1.11 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

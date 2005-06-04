@@ -28,7 +28,7 @@ class Const(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.properties
+        import pyre.inventory
         from pyre.units.length import m
         from pyre.units.length import km
         from pyre.units.mass import kg
@@ -37,43 +37,41 @@ class Const(CitcomComponent):
         from pyre.units.pressure import Pa
         from pyre.units.energy import J
 
-        inventory = [
-            #pyre.properties.float("radius", 6371.0*km),
-            #pyre.properties.float("ref_density", 3500.0*kg/m**3),
-            #pyre.properties.float("thermdiff", 1.0e-6*m**2/s),
-            #pyre.properties.float("gravacc", 10.0*m/s**2),
-            #pyre.properties.float("thermexp", 3.0e-5/K),
-            #pyre.properties.float("ref_visc", 1.0e21*Pa*s),
-            #pyre.properties.float("heatcapacity", 1250.0*J/kg/K),
-            #pyre.properties.float("water_density", 0.0*kg/m**3),
+        #radius = pyre.inventory.float("radius", default=6371.0*km)
+        #ref_density = pyre.inventory.float("ref_density", default=3500.0*kg/m**3)
+        #thermdiff = pyre.inventory.float("thermdiff", default=1.0e-6*m**2/s)
+        #gravacc = pyre.inventory.float("gravacc", default=10.0*m/s**2)
+        #thermexp = pyre.inventory.float("thermexp", default=3.0e-5/K)
+        #ref_visc = pyre.inventory.float("ref_visc", default=1.0e21*Pa*s)
+        #heatcapacity = pyre.inventory.float("heatcapacity", default=1250.0*J/kg/K)
+        #water_density = pyre.inventory.float("water_density", default=0.0*kg/m**3)
 
-            #pyre.properties.float("depth_lith", 89e3*m),
-            #pyre.properties.float("depth_410", 410e3*m),
-            #pyre.properties.float("depth_660", 660e3*m),
-            #pyre.properties.float("depth_d_double_prime", 2691e3*m),
-            #pyre.properties.float("depth_cmb", 2891e3*m)
+        #depth_lith = pyre.inventory.float("depth_lith", default=89e3*m)
+        #depth_410 = pyre.inventory.float("depth_410", default=410e3*m)
+        #depth_660 = pyre.inventory.float("depth_660", default=660e3*m)
+        #depth_d_double_prime = pyre.inventory.float("depth_d_double_prime", default=2691e3*m)
+        #depth_cmb = pyre.inventory.float("depth_cmb", default=2891e3*m)
 
 	    # everything in SI units
-            pyre.properties.float("radius", 6371.0e3),
-            pyre.properties.float("layerd", 6371.0e3),
-            pyre.properties.float("density", 3500.0),
-            pyre.properties.float("thermdiff", 1.0e-6),
-            pyre.properties.float("gravacc", 10.0),
-            pyre.properties.float("thermexp", 3.0e-5),
-            pyre.properties.float("refvisc", 1.0e21),
-            pyre.properties.float("cp", 1250.0),
-            pyre.properties.float("wdensity", 0.0),
-            pyre.properties.float("surftemp", 273.0),
+        radius = pyre.inventory.float("radius", default=6371.0e3)
+        layerd = pyre.inventory.float("layerd", default=6371.0e3)
+        density = pyre.inventory.float("density", default=3500.0)
+        thermdiff = pyre.inventory.float("thermdiff", default=1.0e-6)
+        gravacc = pyre.inventory.float("gravacc", default=10.0)
+        thermexp = pyre.inventory.float("thermexp", default=3.0e-5)
+        refvisc = pyre.inventory.float("refvisc", default=1.0e21)
+        cp = pyre.inventory.float("cp", default=1250.0)
+        wdensity = pyre.inventory.float("wdensity", default=0.0)
+        surftemp = pyre.inventory.float("surftemp", default=273.0)
 
-            pyre.properties.float("z_lith", 0.014),
-            pyre.properties.float("z_410", 0.06435),
-            pyre.properties.float("z_lmantle", 0.105),
-            pyre.properties.float("z_cmb", 0.439) # this is used as the D" phase change depth
+        z_lith = pyre.inventory.float("z_lith", default=0.014)
+        z_410 = pyre.inventory.float("z_410", default=0.06435)
+        z_lmantle = pyre.inventory.float("z_lmantle", default=0.105)
+        z_cmb = pyre.inventory.float("z_cmb", default=0.439)
 
-            ]
 
 
 # version
-__id__ = "$Id: Const.py,v 1.10 2004/08/03 20:11:22 tan2 Exp $"
+__id__ = "$Id: Const.py,v 1.11 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

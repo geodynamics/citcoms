@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+def tsolver():
+
+    import CitcomS.Components.Advection_diffusion as Advection_diffusion
+    return Advection_diffusion.temperature_diffadv()
+
+
+# version
+__id__ = "$Id: temp.odb,v 1.1 2005/06/03 21:51:40 leif Exp $"
+
+# End of file 

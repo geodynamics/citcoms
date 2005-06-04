@@ -67,19 +67,17 @@ class Advection_diffusion(CitcomComponent):
 
     class Inventory(CitcomComponent.Inventory):
 
-        import pyre.properties as prop
+        import pyre.inventory as prop
 
-        inventory = [
 
-            prop.float("inputdiffusivity", default=1),
-            prop.float("fixed_timestep", default=0.0),
-            prop.float("finetunedt", default=0.9),
-            prop.bool("filter_temp", default=True),
+        inputdiffusivity = prop.float("inputdiffusivity", default=1)
+        fixed_timestep = prop.float("fixed_timestep", default=0.0)
+        finetunedt = prop.float("finetunedt", default=0.9)
+        filter_temp = prop.bool("filter_temp", default=True)
 
-	    ]
 
 
 # version
-__id__ = "$Id: Advection_diffusion.py,v 1.21 2004/11/24 21:47:03 ces74 Exp $"
+__id__ = "$Id: Advection_diffusion.py,v 1.22 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

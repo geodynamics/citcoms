@@ -20,7 +20,7 @@ PROJ_CXX_SRCLIB = \
 	-l$(PROJECT)$(TYPE) \
 	-Xlinker -rpath $(PYTHIA_LIBDIR) -Xlinker \
 	-ljournal \
-	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
+	$(PYTHIA_DIR)/modules/mpi/_mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
 EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR)
@@ -38,6 +38,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.23 2005/05/17 19:45:44 tan2 Exp $
+# $Id: Make.mm,v 1.24 2005/06/03 21:51:43 leif Exp $
 
 # End of file

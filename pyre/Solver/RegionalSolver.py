@@ -26,23 +26,21 @@ class RegionalSolver(Solver):
 
         # facilities
         from CitcomS.Facilities.Mesher import Mesher
-        import pyre.properties
+        import pyre.inventory
 
         # component modules
         import CitcomS.Components.Sphere as Sphere
 
-        inventory = [
 
-            Mesher("mesher", default=Sphere.regionalSphere("regional-sphere")),
+        mesher = Mesher("mesher", default=Sphere.regionalSphere("regional-sphere"))
 
-            pyre.properties.str("datafile", default="regtest"),
-            pyre.properties.str("datafile_old", default="regtest"),
+        datafile = pyre.inventory.str("datafile", default="regtest")
+        datafile_old = pyre.inventory.str("datafile_old", default="regtest")
 
-            ]
 
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.34 2003/10/28 23:51:49 tan2 Exp $"
+__id__ = "$Id: RegionalSolver.py,v 1.35 2005/06/03 21:51:46 leif Exp $"
 
 # End of file

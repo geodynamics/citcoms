@@ -86,7 +86,7 @@ class CoupledApp(SimpleApp):
 
         self._info.line("  facilities:")
         self._info.line("    journal: %r" % self.inventory.journal.name)
-        self._info.line("    staging: %r" % self.inventory.staging.name)
+        self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    coarse: %r" % self.inventory.coarse.name)
         self._info.line("    fine: %r" % self.inventory.fine.name)
@@ -103,7 +103,7 @@ class CoupledApp(SimpleApp):
 
     class Inventory(SimpleApp.Inventory):
 
-        import pyre.facilities
+        import pyre.inventory
         from CitcomS.Facilities.Solver import Solver as SolverFacility
 
         import Controller
@@ -112,21 +112,19 @@ class CoupledApp(SimpleApp):
         import Layout
         import CitcomS.Components.Exchanger as Exchanger
 
-        inventory = [
 
-            pyre.facilities.facility( name="coarseController", default=Controller.controller(name="coarseController")),
-            pyre.facilities.facility( name="fineController", default=Controller.controller(name="fineController")),
-            pyre.facilities.facility("coupler", default=Coupler.coupler()),
-            pyre.facilities.facility("layout", default=Layout.layout()),
+        coarseController = pyre.inventory.facility(name="coarseController", default=Controller.controller(name="coarseController"))
+        fineController = pyre.inventory.facility(name="fineController", default=Controller.controller(name="fineController"))
+        coupler = pyre.inventory.facility("coupler", default=Coupler.coupler())
+        layout = pyre.inventory.facility("layout", default=Layout.layout())
 
-            SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse")),
-            SolverFacility("fine", default=Solver.regionalSolver("fine", "fine")),
-            pyre.facilities.facility("cge", default=Exchanger.coarsegridexchanger()),
-            pyre.facilities.facility("fge", default=Exchanger.finegridexchanger()),
+        coarse = SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse"))
+        fine = SolverFacility("fine", default=Solver.regionalSolver("fine", "fine"))
+        cge = pyre.inventory.facility("cge", default=Exchanger.coarsegridexchanger())
+        fge = pyre.inventory.facility("fge", default=Exchanger.finegridexchanger())
 
-            pyre.properties.int("steps", 1),
+        steps = pyre.inventory.int("steps", default=1)
 
-            ]
 
 
 
@@ -134,11 +132,11 @@ class CoupledApp(SimpleApp):
 if __name__ == "__main__":
 
     app = CoupledApp("citcoms")
-    app.main()
+    app.run()
 
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.11 2004/12/02 20:23:12 tan2 Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.12 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

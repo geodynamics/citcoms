@@ -7,8 +7,8 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.facilities.Facility import Facility
-from pyre.facilities.ScriptBinder import ScriptBinder
+from pyre.inventory.Facility import Facility
+ScriptBinder = object
 
 
 class TSolver(Facility):
@@ -18,8 +18,7 @@ class TSolver(Facility):
         if not binder:
             binder = self.Binder()
 
-        Facility.__init__(self, name,
-                          default=default, binder=binder)
+        Facility.__init__(self, name, default=default) #, binder=binder)
         return
 
 
@@ -47,6 +46,6 @@ class TSolver(Facility):
             return
 
 # version
-__id__ = "$Id: TSolver.py,v 1.4 2003/08/29 20:40:22 tan2 Exp $"
+__id__ = "$Id: TSolver.py,v 1.5 2005/06/03 21:51:45 leif Exp $"
 
 # End of file

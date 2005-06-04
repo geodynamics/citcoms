@@ -12,7 +12,7 @@
 #include <cmath>
 #include <string>
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "Exchanger/BoundedBox.h"
 #include "initTemperature.h"
 
@@ -38,7 +38,7 @@ void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E);
 void initTemperature(const BoundedBox& bbox, All_variables* E)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     //isothermal(bbox, E);
     basal_hallow(bbox, E);
@@ -355,7 +355,7 @@ void add_hot_blob_lith(All_variables* E,
 void debug_output(const All_variables* E)
 {
     journal::debug_t debugInitT("CitcomS-initTemperature");
-    debugInitT << journal::loc(__HERE__);
+    debugInitT << journal::at(__HERE__);
 
     for(int m=1;m<=E->sphere.caps_per_proc;m++)
         for(int k=1;k<=E->lmesh.noy;k++)
@@ -374,7 +374,7 @@ void debug_output(const All_variables* E)
 			       << r << "  "
 			       << E->T[m][node] << journal::newline;
                 }
-    debugInitT << journal::end;
+    debugInitT << journal::endl;
 }
 
 
@@ -385,7 +385,7 @@ void debug_output(const All_variables* E)
 void modifyT(const BoundedBox& bbox, All_variables* E)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     basal_tbl_central_hot_blob(bbox, E);
 
@@ -475,6 +475,6 @@ void basal_tbl_central_hot_blob(const BoundedBox& bbox, All_variables* E)
 
 
 // version
-// $Id: initTemperature.cc,v 1.7 2005/05/19 22:01:45 ces74 Exp $
+// $Id: initTemperature.cc,v 1.8 2005/06/03 21:51:42 leif Exp $
 
 // End of file

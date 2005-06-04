@@ -34,17 +34,15 @@ class Tracer(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.properties
+        import pyre.inventory
 
-        inventory = [
 
-            pyre.properties.bool("tracer", False),
-            pyre.properties.str("tracer_file", "tracer.dat"),
+        tracer = pyre.inventory.bool("tracer", default=False)
+        tracer_file = pyre.inventory.str("tracer_file", default="tracer.dat")
 
-            ]
 
 
 # version
-__id__ = "$Id: Tracer.py,v 1.2 2005/01/19 02:02:27 tan2 Exp $"
+__id__ = "$Id: Tracer.py,v 1.3 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

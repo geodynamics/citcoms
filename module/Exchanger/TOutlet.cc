@@ -9,7 +9,7 @@
 
 #include <portinfo>
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "CitcomSource.h"
 #include "Convertor.h"
 #include "TOutlet.h"
@@ -22,7 +22,7 @@ TOutlet::TOutlet(const CitcomSource& source,
     t(source.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 }
 
 
@@ -33,7 +33,7 @@ TOutlet::~TOutlet()
 void TOutlet::send()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     source.interpolateTemperature(t);
     t.print("CitcomS-TOutlet-T");
@@ -50,6 +50,6 @@ void TOutlet::send()
 
 
 // version
-// $Id: TOutlet.cc,v 1.1 2004/05/11 07:55:30 tan2 Exp $
+// $Id: TOutlet.cc,v 1.2 2005/06/03 21:51:42 leif Exp $
 
 // End of file

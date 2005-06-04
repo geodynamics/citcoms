@@ -8,7 +8,7 @@
 //
 
 #include <portinfo>
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "global_defs.h"
 #include "Boundary.h"
 #include "Convertor.h"
@@ -46,7 +46,7 @@ SVTInlet::SVTInlet(const Boundary& boundary,
     t_old(sink.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     setVBCFlag();
     setTBCFlag();
@@ -62,7 +62,7 @@ SVTInlet::~SVTInlet()
 void SVTInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     // store bc from previous timestep
     s.swap(s_old);
@@ -86,7 +86,7 @@ void SVTInlet::recv()
 void SVTInlet::impose()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     imposeSV();
     imposeT();
@@ -178,7 +178,7 @@ void SVTInlet::imposeSV()
 void SVTInlet::imposeT()
 {
     journal::debug_t debugBC("CitcomS-imposeT");
-    debugBC << journal::loc(__HERE__);
+    debugBC << journal::at(__HERE__);
 
     double N1, N2;
     getTimeFactors(N1, N2);
@@ -196,7 +196,7 @@ void SVTInlet::imposeT()
  		<< E->sphere.cap[m].TB[3][n] << journal::newline;
 
     }
-    debugBC << journal::end;
+    debugBC << journal::endl;
 
     (E->temperatures_conform_bcs)(E);
 }
@@ -215,6 +215,6 @@ double SVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
 
 
 // version
-// $Id: SVTInlet.cc,v 1.9 2005/01/04 22:58:07 tan2 Exp $
+// $Id: SVTInlet.cc,v 1.10 2005/06/03 21:51:42 leif Exp $
 
 // End of file

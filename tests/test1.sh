@@ -16,9 +16,9 @@ TEMPFILE=/tmp/$USER/tmptest1
 
 
 exchange.py \
---staging.nodegen="n%03d" \
---staging.nodelist=[101-113,115-129] \
---staging.nodes=13 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[101-113,115-129] \
+--launcher.nodes=13 \
 --layout.coarse=[0-11] \
 --layout.fine=[12] \
 > $OUTPUT
@@ -68,6 +68,6 @@ rm $TEMPFILE
 
 
 # version
-# $Id: test1.sh,v 1.2 2003/10/24 05:23:36 tan2 Exp $
+# $Id: test1.sh,v 1.3 2005/06/03 21:51:46 leif Exp $
 
 # End of file

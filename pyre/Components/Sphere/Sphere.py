@@ -45,37 +45,35 @@ class Sphere(CitcomComponent):
 
     class Inventory(CitcomComponent.Inventory):
 
-        import pyre.properties
+        import pyre.inventory
 
-        inventory = [
 
-            pyre.properties.int("nprocx", 1),
-            pyre.properties.int("nprocy", 1),
-            pyre.properties.int("nprocz", 1),
+        nprocx = pyre.inventory.int("nprocx", default=1)
+        nprocy = pyre.inventory.int("nprocy", default=1)
+        nprocz = pyre.inventory.int("nprocz", default=1)
 
-            pyre.properties.bool("coor", False),
-            pyre.properties.str("coor_file", "coor.dat"),
+        coor = pyre.inventory.bool("coor", default=False)
+        coor_file = pyre.inventory.str("coor_file", default="coor.dat")
 
-            pyre.properties.int("nodex", 9),
-            pyre.properties.int("nodey", 9),
-            pyre.properties.int("nodez", 9),
-            pyre.properties.int("levels", 1),
+        nodex = pyre.inventory.int("nodex", default=9)
+        nodey = pyre.inventory.int("nodey", default=9)
+        nodez = pyre.inventory.int("nodez", default=9)
+        levels = pyre.inventory.int("levels", default=1)
 
-            pyre.properties.float("radius_outer", 1.0),
-            pyre.properties.float("radius_inner", 0.55),
+        radius_outer = pyre.inventory.float("radius_outer", default=1.0)
+        radius_inner = pyre.inventory.float("radius_inner", default=0.55)
 
 	    # these parameters are for spherical harmonics output
 	    # put them here temporalily
-            pyre.properties.int("ll_max", 20),
-            pyre.properties.int("nlong", 361),
-            pyre.properties.int("nlati", 181),
-            pyre.properties.int("output_ll_max", 20),
+        ll_max = pyre.inventory.int("ll_max", default=20)
+        nlong = pyre.inventory.int("nlong", default=361)
+        nlati = pyre.inventory.int("nlati", default=181)
+        output_ll_max = pyre.inventory.int("output_ll_max", default=20)
 
-            ]
 
 
 
 # version
-__id__ = "$Id: Sphere.py,v 1.4 2003/10/28 23:51:48 tan2 Exp $"
+__id__ = "$Id: Sphere.py,v 1.5 2005/06/03 21:51:45 leif Exp $"
 
 # End of file

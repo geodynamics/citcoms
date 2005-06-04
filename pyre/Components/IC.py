@@ -69,37 +69,35 @@ class IC(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.properties
+        import pyre.inventory
 
 
-        inventory = [
 
-            pyre.properties.bool("restart", default=False),
-            pyre.properties.bool("post_p", default=False),
-            pyre.properties.int("solution_cycles_init", default=0),
-            pyre.properties.bool("zero_elapsed_time", default=True),
+        restart = pyre.inventory.bool("restart", default=False)
+        post_p = pyre.inventory.bool("post_p", default=False)
+        solution_cycles_init = pyre.inventory.int("solution_cycles_init", default=0)
+        zero_elapsed_time = pyre.inventory.bool("zero_elapsed_time", default=True)
 
-            pyre.properties.int("tic_method", default=0,
-                                validator=pyre.properties.choice([0, 1, 2])),
+        tic_method = pyre.inventory.int("tic_method", default=0,
+                            validator=pyre.inventory.choice([0, 1, 2]))
 
-            pyre.properties.float("half_space_age", default=40,
-                                  validator=pyre.properties.greater(1e-3)),
+        half_space_age = pyre.inventory.float("half_space_age", default=40,
+                              validator=pyre.inventory.greater(1e-3))
 
-            pyre.properties.int("num_perturbations", default=1,
-                                validator=pyre.properties.less(255)),
-            pyre.properties.list("perturbmag", default=[0.05]),
-            pyre.properties.list("perturbl", default=[1]),
-            pyre.properties.list("perturbm", default=[1]),
-            pyre.properties.sequence("perturblayer", default=[5]),
+        num_perturbations = pyre.inventory.int("num_perturbations", default=1,
+                            validator=pyre.inventory.less(255))
+        perturbmag = pyre.inventory.list("perturbmag", default=[0.05])
+        perturbl = pyre.inventory.list("perturbl", default=[1])
+        perturbm = pyre.inventory.list("perturbm", default=[1])
+        perturblayer = pyre.inventory.slice("perturblayer", default=[5])
 
 
-            pyre.properties.list("blob_center", default=[-999.,-999.,-999.]),
-            pyre.properties.float("blob_radius", default=[0.063]),
-            pyre.properties.float("blob_dT", default=[0.18]),
+        blob_center = pyre.inventory.list("blob_center", default=[-999., -999., -999.])
+        blob_radius = pyre.inventory.float("blob_radius", default=[0.063])
+        blob_dT = pyre.inventory.float("blob_dT", default=[0.18])
 
-            ]
 
 # version
-__id__ = "$Id: IC.py,v 1.15 2005/05/28 05:27:26 ces74 Exp $"
+__id__ = "$Id: IC.py,v 1.16 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

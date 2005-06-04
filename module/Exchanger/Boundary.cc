@@ -10,7 +10,7 @@
 #include <portinfo>
 #include <vector>
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "Boundary.h"
 
 
@@ -26,7 +26,7 @@ Boundary::Boundary(const All_variables* E,
     bnode_(E->lmesh.nno+1, -1)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     // boundary = all - interior
     int maxNodes = E->lmesh.nno - (E->lmesh.nox-2)
@@ -183,6 +183,6 @@ void Boundary::appendNode(const All_variables* E,
 
 
 // version
-// $Id: Boundary.cc,v 1.59 2005/02/02 21:49:17 tan2 Exp $
+// $Id: Boundary.cc,v 1.60 2005/06/03 21:51:41 leif Exp $
 
 // End of file

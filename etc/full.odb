@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+def solver():
+
+    import CitcomS.Solver as SolverComponent
+    return SolverComponent.fullSolver()
+
+def coarse():
+    return solver()
+
+def fine():
+    return solver()
+
+
+# version
+__id__ = "$Id: full.odb,v 1.1 2005/06/03 21:51:39 leif Exp $"
+
+# End of file 

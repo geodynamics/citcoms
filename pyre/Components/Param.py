@@ -27,34 +27,32 @@ class Param(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.properties
+        import pyre.inventory
 
 
-        inventory = [
 
-            pyre.properties.bool("file_vbcs", False),
-            pyre.properties.str("vel_bound_file", "bvel.dat"),
+        file_vbcs = pyre.inventory.bool("file_vbcs", default=False)
+        vel_bound_file = pyre.inventory.str("vel_bound_file", default="bvel.dat")
 
-            pyre.properties.bool("mat_control", False),
-            pyre.properties.str("mat_file", "mat.dat"),
+        mat_control = pyre.inventory.bool("mat_control", default=False)
+        mat_file = pyre.inventory.str("mat_file", default="mat.dat")
 
-            pyre.properties.bool("lith_age", False),
-            pyre.properties.str("lith_age_file", "age.dat"),
-            pyre.properties.bool("lith_age_time", False),
-            pyre.properties.float("lith_age_depth", 0.0314),
-            pyre.properties.float("mantle_temp", 1.0),
+        lith_age = pyre.inventory.bool("lith_age", default=False)
+        lith_age_file = pyre.inventory.str("lith_age_file", default="age.dat")
+        lith_age_time = pyre.inventory.bool("lith_age_time", default=False)
+        lith_age_depth = pyre.inventory.float("lith_age_depth", default=0.0314)
+        mantle_temp = pyre.inventory.float("mantle_temp", default=1.0)
 
-            #pyre.properties.bool("DESCRIBE", False),
-            #pyre.properties.bool("BEGINNER", False),
-            #pyre.properties.bool("VERBOSE", False),
+        #DESCRIBE = pyre.inventory.bool("DESCRIBE", default=False)
+        #BEGINNER = pyre.inventory.bool("BEGINNER", default=False)
+        #VERBOSE = pyre.inventory.bool("VERBOSE", default=False)
 
-            pyre.properties.float("start_age", 40.0),
-            pyre.properties.bool("reset_startage", False)
+        start_age = pyre.inventory.float("start_age", default=40.0)
+        reset_startage = pyre.inventory.bool("reset_startage", default=False)
 
-            ]
 
 
 # version
-__id__ = "$Id: Param.py,v 1.10 2005/01/20 22:29:50 tan2 Exp $"
+__id__ = "$Id: Param.py,v 1.11 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

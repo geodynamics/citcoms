@@ -1,9 +1,9 @@
 #!/bin/sh
 
 ./citcomsregional.sh \
---staging.nodegen=n%03d \
---staging.nodelist=[135-140,165-173,176,135-140,165-173,176] \
---staging.nodes=32 \
+--launcher.nodegen=n%03d \
+--launcher.nodelist=[135-140,165-173,176,135-140,165-173,176] \
+--launcher.nodes=32 \
 \
 --solver.datafile=/scratch/username/cookbook7 \
 --solver.rayleigh=4.312616e+08 \

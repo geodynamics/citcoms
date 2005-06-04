@@ -192,16 +192,14 @@ class CoarseGridExchanger(Exchanger):
 
     class Inventory(Exchanger.Inventory):
 
-        import pyre.properties as prop
+        import pyre.inventory as prop
 
 
-        inventory = [
 
-            ]
 
 
 
 # version
-__id__ = "$Id: CoarseGridExchanger.py,v 1.36 2004/08/06 20:22:30 tan2 Exp $"
+__id__ = "$Id: CoarseGridExchanger.py,v 1.37 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

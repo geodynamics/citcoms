@@ -111,23 +111,21 @@ class Exchanger(Component):
 
     class Inventory(Component.Inventory):
 
-        import pyre.properties as prop
+        import pyre.inventory as prop
 
 
-        inventory = [
 
-            prop.bool("two_way_communication", True),
+        two_way_communication = prop.bool("two_way_communication", default=True)
 
-            # if dimensional is True, quantities exchanged are dimensional
-            prop.bool("dimensional", True),
-            # if transformational is True, quantities exchanged are in standard coordiate system
-            prop.bool("transformational", True)
+        # if dimensional is True, quantities exchanged are dimensional
+        dimensional = prop.bool("dimensional", default=True)
+        # if transformational is True, quantities exchanged are in standard coordiate system
+        transformational = prop.bool("transformational", default=True)
 
-            ]
 
 
 
 # version
-__id__ = "$Id: Exchanger.py,v 1.21 2005/01/23 21:20:26 tan2 Exp $"
+__id__ = "$Id: Exchanger.py,v 1.22 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

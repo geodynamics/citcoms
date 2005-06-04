@@ -7,7 +7,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from pyre.components.Solver import Solver as BaseSolver
+from pyre.simulations.Solver import Solver as BaseSolver
 import journal
 
 
@@ -271,7 +271,7 @@ class Solver(BaseSolver):
 
     class Inventory(BaseSolver.Inventory):
 
-        import pyre.facilities
+        import pyre.inventory
 
         # facilities
         from CitcomS.Facilities.TSolver import TSolver
@@ -290,30 +290,28 @@ class Solver(BaseSolver):
         from CitcomS.Components.Tracer import Tracer
         from CitcomS.Components.Visc import Visc
 
-        inventory = [
 
-            TSolver("tsolver", default=Advection_diffusion.temperature_diffadv()),
-            VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian()),
+        tsolver = TSolver("tsolver", default=Advection_diffusion.temperature_diffadv())
+        vsolver = VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian())
 
-            pyre.facilities.facility("bc", default=BC()),
-            pyre.facilities.facility("const", default=Const()),
-            pyre.facilities.facility("ic", default=IC()),
-            pyre.facilities.facility("param", default=Param()),
-            pyre.facilities.facility("phase", default=Phase()),
-            pyre.facilities.facility("tracer", default=Tracer()),
-            pyre.facilities.facility("visc", default=Visc()),
+        bc = pyre.inventory.facility("bc", default=BC())
+        const = pyre.inventory.facility("const", default=Const())
+        ic = pyre.inventory.facility("ic", default=IC())
+        param = pyre.inventory.facility("param", default=Param())
+        phase = pyre.inventory.facility("phase", default=Phase())
+        tracer = pyre.inventory.facility("tracer", default=Tracer())
+        visc = pyre.inventory.facility("visc", default=Visc())
 
-            pyre.properties.float("rayleigh", default=1e+05),
-            pyre.properties.float("Q0", default=0.0),
+        rayleigh = pyre.inventory.float("rayleigh", default=1e+05)
+        Q0 = pyre.inventory.float("Q0", default=0.0)
 
-            pyre.properties.bool("stokes_flow_only", default=False),
+        stokes_flow_only = pyre.inventory.bool("stokes_flow_only", default=False)
 
-            pyre.properties.bool("verbose", default=False),
-            pyre.properties.bool("see_convergence", default=True),
+        verbose = pyre.inventory.bool("verbose", default=False)
+        see_convergence = pyre.inventory.bool("see_convergence", default=True)
 
-            ]
 
 # version
-__id__ = "$Id: Solver.py,v 1.43 2005/01/19 02:02:28 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.44 2005/06/03 21:51:46 leif Exp $"
 
 # End of file

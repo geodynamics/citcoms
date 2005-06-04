@@ -9,7 +9,7 @@
 
 #include <portinfo>
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "CitcomSource.h"
 #include "Convertor.h"
 #include "VOutlet.h"
@@ -22,7 +22,7 @@ VOutlet::VOutlet(const CitcomSource& source,
     v(source.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 }
 
 
@@ -33,7 +33,7 @@ VOutlet::~VOutlet()
 void VOutlet::send()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     source.interpolateVelocity(v);
     v.print("CitcomS-VOutlet-V");
@@ -50,6 +50,6 @@ void VOutlet::send()
 
 
 // version
-// $Id: VOutlet.cc,v 1.1 2004/05/18 21:18:13 ces74 Exp $
+// $Id: VOutlet.cc,v 1.2 2005/06/03 21:51:42 leif Exp $
 
 // End of file

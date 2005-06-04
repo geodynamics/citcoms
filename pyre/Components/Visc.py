@@ -43,35 +43,33 @@ class Visc(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.properties
+        import pyre.inventory
 
 
-        inventory = [
 
-            pyre.properties.bool("VISC_UPDATE", True),
+        VISC_UPDATE = pyre.inventory.bool("VISC_UPDATE", default=True)
 
-            pyre.properties.int("num_mat", 4),
-            pyre.properties.list("visc0", [1, 1, 1, 1]),
+        num_mat = pyre.inventory.int("num_mat", default=4)
+        visc0 = pyre.inventory.list("visc0", default=[1, 1, 1, 1])
 
-            pyre.properties.bool("TDEPV", False),
-            pyre.properties.int("rheol", 3),
-            pyre.properties.list("viscE", [1, 1, 1, 1]),
-            pyre.properties.list("viscT", [1, 1, 1, 1]),
-            pyre.properties.list("viscZ", [1, 1, 1, 1]),
+        TDEPV = pyre.inventory.bool("TDEPV", default=False)
+        rheol = pyre.inventory.int("rheol", default=3)
+        viscE = pyre.inventory.list("viscE", default=[1, 1, 1, 1])
+        viscT = pyre.inventory.list("viscT", default=[1, 1, 1, 1])
+        viscZ = pyre.inventory.list("viscZ", default=[1, 1, 1, 1])
 
-            pyre.properties.bool("SDEPV",False),
-            pyre.properties.list("sdepv_expt", [1, 1, 1, 1]),
-            pyre.properties.float("sdepv_misfit", 0.02),
+        SDEPV = pyre.inventory.bool("SDEPV", default=False)
+        sdepv_expt = pyre.inventory.list("sdepv_expt", default=[1, 1, 1, 1])
+        sdepv_misfit = pyre.inventory.float("sdepv_misfit", default=0.02)
 
-            pyre.properties.bool("VMIN", False),
-            pyre.properties.float("visc_min", 1.0e-3),
+        VMIN = pyre.inventory.bool("VMIN", default=False)
+        visc_min = pyre.inventory.float("visc_min", default=1.0e-3)
 
-            pyre.properties.bool("VMAX", False),
-            pyre.properties.float("visc_max", 1.0e3)
+        VMAX = pyre.inventory.bool("VMAX", default=False)
+        visc_max = pyre.inventory.float("visc_max", default=1.0e3)
 
-            ]
 
 # version
-__id__ = "$Id: Visc.py,v 1.12 2005/01/20 22:25:53 tan2 Exp $"
+__id__ = "$Id: Visc.py,v 1.13 2005/06/03 21:51:44 leif Exp $"
 
 # End of file

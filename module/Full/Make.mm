@@ -20,7 +20,7 @@ PROJ_CXX_SRCLIB = \
 	-l$(PROJECT)$(TYPE) \
 	-Xlinker -rpath $(PYTHIA_LIBDIR) -Xlinker \
 	-ljournal \
-	$(PYTHIA_DIR)/modules/mpi/mpimodule.so
+	$(PYTHIA_DIR)/modules/mpi/_mpimodule.so
 
 PROJ_CXX_INCLUDES = ../../lib/Common
 EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR)
@@ -46,6 +46,6 @@ link:
 	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
 
 # version
-# $Id: Make.mm,v 1.15 2005/05/17 19:45:44 tan2 Exp $
+# $Id: Make.mm,v 1.16 2005/06/03 21:51:42 leif Exp $
 
 # End of file

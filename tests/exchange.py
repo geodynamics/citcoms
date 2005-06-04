@@ -114,21 +114,19 @@ class TestExchanger(Application):
 
     class Inventory(Application.Inventory):
 
-        import pyre.facilities
+        import pyre.inventory
 
         import CitcomS.Components.Exchanger as Exchanger
         import CitcomS.Controller as Controller
         import CitcomS.Layout as Layout
 
-        inventory = [
 
-            pyre.facilities.facility("controller", default=Controller.controller()),
-            pyre.facilities.facility("layout", default=Layout.layout()),
+        controller = pyre.inventory.facility("controller", default=Controller.controller())
+        layout = pyre.inventory.facility("layout", default=Layout.layout())
 
-            pyre.facilities.facility("coarse", default=Exchanger.coarsegridexchanger("coarse")),
-            pyre.facilities.facility("fine", default=Exchanger.finegridexchanger("fine")),
+        coarse = pyre.inventory.facility("coarse", default=Exchanger.coarsegridexchanger("coarse"))
+        fine = pyre.inventory.facility("fine", default=Exchanger.finegridexchanger("fine"))
 
-            ]
 
 
 
@@ -157,6 +155,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: exchange.py,v 1.15 2003/10/24 05:23:36 tan2 Exp $"
+__id__ = "$Id: exchange.py,v 1.16 2005/06/03 21:51:46 leif Exp $"
 
 # End of file

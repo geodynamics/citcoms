@@ -13,7 +13,7 @@
 #include <cmath>
 #include "global_bbox.h"
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "Exchanger/BoundedBox.h"
 #include "Exchanger/BoundedMesh.h"
 #include "CitcomInterpolator.h"
@@ -33,7 +33,7 @@ CitcomInterpolator::CitcomInterpolator(const BoundedMesh& boundedMesh,
     E(e)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     init(boundedMesh, meshNode);
     selfTest(boundedMesh, meshNode);
@@ -115,7 +115,7 @@ void CitcomInterpolator::init(const BoundedMesh& boundedMesh,
 			      Array2D<int,1>& meshNode)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     const int mm = 1;
 
@@ -377,7 +377,7 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 				  const Array2D<int,1>& meshNode) const
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     for(int i=0; i<size(); i++) {
 
@@ -406,7 +406,7 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 		tshape += shape_[j][i];
 
 	    journal::firewall_t firewall("CitcomS-CitcomInterpolator");
-	    firewall << journal::loc(__HERE__)
+	    firewall << journal::at(__HERE__)
 		     << "node #" << i << " tshape = " << tshape
 		     << journal::newline
 	    	     << xi[0] << " " << xt[0] << " "
@@ -414,7 +414,7 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 		     << xi[2] << " " << xt[2] << " "
 		     << " norm = " << norm << journal::newline
 		     << "elem interpolation functions are wrong"
-		     << journal::end;
+		     << journal::endl;
 	    throw std::domain_error("CitcomInterpolator");
 	}
     }
@@ -422,6 +422,6 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 
 
 // version
-// $Id: CitcomInterpolator.cc,v 1.3 2005/05/19 22:39:18 leif Exp $
+// $Id: CitcomInterpolator.cc,v 1.4 2005/06/03 21:51:42 leif Exp $
 
 // End of file

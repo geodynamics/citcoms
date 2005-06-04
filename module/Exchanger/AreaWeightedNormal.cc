@@ -11,7 +11,7 @@
 #include <cmath>
 #include <iostream>
 #include "global_defs.h"
-#include "journal/journal.h"
+#include "journal/diagnostics.h"
 #include "Boundary.h"
 #include "Exchanger/UtilTemplate.h"
 #include "Exchanger/Array2D.h"
@@ -53,17 +53,17 @@ void AreaWeightedNormal::imposeConstraint(Velo& V,
     journal::info_t info("CitcomS-AreaWeightedNormal-outflow");
 
     double outflow = computeOutflow(V, comm, sink);
-    info << journal::loc(__HERE__)
+    info << journal::at(__HERE__)
 	 << "Net outflow: "
-	 << outflow << journal::end;
+	 << outflow << journal::endl;
 
     if (std::abs(outflow) > toleranceOutflow_) {
 	reduceOutflow(V, outflow, sink);
 
 	outflow = computeOutflow(V, comm, sink);
-	info << journal::loc(__HERE__)
+	info << journal::at(__HERE__)
 	     << "Net outflow after correction (SHOULD BE ZERO !): "
-	     << outflow << journal::end;
+	     << outflow << journal::endl;
     }
 }
 
@@ -160,6 +160,6 @@ void AreaWeightedNormal::reduceOutflow(Velo& V, double outflow,
 
 
 // version
-// $Id: AreaWeightedNormal.cc,v 1.11 2004/07/27 18:19:18 tan2 Exp $
+// $Id: AreaWeightedNormal.cc,v 1.12 2005/06/03 21:51:41 leif Exp $
 
 // End of file

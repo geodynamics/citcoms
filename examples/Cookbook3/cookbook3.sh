@@ -13,9 +13,9 @@
 \
 --controller.monitoringFrequency=25 \
 \
---staging.nodes=4 \
---staging.nodegen="n%03d" \
---staging.nodelist=[101-102,101-102] \
+--launcher.nodes=4 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[101-102,101-102] \
 \
 --solver.rayleigh=1e6 \
 --solver.datafile=/scratch/username/cookbook3 \
@@ -38,6 +38,6 @@
 --solver.visc.visc_max=100.0
 
 # version
-# $Id: cookbook3.sh,v 1.1 2004/06/29 20:25:21 tan2 Exp $
+# $Id: cookbook3.sh,v 1.2 2005/06/03 21:51:41 leif Exp $
 
 # End of file

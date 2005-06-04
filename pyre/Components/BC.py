@@ -32,38 +32,36 @@ class BC(CitcomComponent):
 
     class Inventory(CitcomComponent.Inventory):
 
-        import pyre.properties
+        import pyre.inventory
 
 
-        inventory = [
 
-            pyre.properties.bool("side_sbcs", False),
-            pyre.properties.bool("pseudo_free_surf", False),
+        side_sbcs = pyre.inventory.bool("side_sbcs", default=False)
+        pseudo_free_surf = pyre.inventory.bool("pseudo_free_surf", default=False)
 
-            pyre.properties.int("topvbc", 0),
-            pyre.properties.float("topvbxval", 0.0),
-            pyre.properties.float("topvbyval", 0.0),
+        topvbc = pyre.inventory.int("topvbc", default=0)
+        topvbxval = pyre.inventory.float("topvbxval", default=0.0)
+        topvbyval = pyre.inventory.float("topvbyval", default=0.0)
 
-            pyre.properties.int("botvbc", 0),
-            pyre.properties.float("botvbxval", 0.0),
-            pyre.properties.float("botvbyval", 0.0),
+        botvbc = pyre.inventory.int("botvbc", default=0)
+        botvbxval = pyre.inventory.float("botvbxval", default=0.0)
+        botvbyval = pyre.inventory.float("botvbyval", default=0.0)
 
-            pyre.properties.int("toptbc", True),
-            pyre.properties.float("toptbcval", 0.0),
+        toptbc = pyre.inventory.int("toptbc", default=True)
+        toptbcval = pyre.inventory.float("toptbcval", default=0.0)
 
-            pyre.properties.int("bottbc", True),
-            pyre.properties.float("bottbcval", 1.0),
+        bottbc = pyre.inventory.int("bottbc", default=True)
+        bottbcval = pyre.inventory.float("bottbcval", default=1.0)
 
 
 	    # these parameters are for 'lith_age',
 	    # put them here temporalily
-            pyre.properties.bool("temperature_bound_adj", False),
-            pyre.properties.float("depth_bound_adj", 0.157),
-            pyre.properties.float("width_bound_adj", 0.08727)
+        temperature_bound_adj = pyre.inventory.bool("temperature_bound_adj", default=False)
+        depth_bound_adj = pyre.inventory.float("depth_bound_adj", default=0.157)
+        width_bound_adj = pyre.inventory.float("width_bound_adj", default=0.08727)
 
-            ]
 
 # version
-__id__ = "$Id: BC.py,v 1.13 2005/01/19 19:02:46 ces74 Exp $"
+__id__ = "$Id: BC.py,v 1.14 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

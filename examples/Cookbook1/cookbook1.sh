@@ -9,9 +9,9 @@
 
 ../../tests/citcomsfull.sh \
 \
---staging.nodes=12 \
---staging.nodegen="n%03d" \
---staging.nodelist=[141-146,141-146] \
+--launcher.nodes=12 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[141-146,141-146] \
 \
 --steps=101 \
 --controller.monitoringFrequency=25 \

@@ -13,9 +13,9 @@
 \
 --controller.monitoringFrequency=30 \
 \
---staging.nodes=4 \
---staging.nodegen="n%03d" \
---staging.nodelist=[101-102,101-102] \
+--launcher.nodes=4 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[101-102,101-102] \
 \
 --solver.datafile=/scratch/username/cookbook2 \
 \
@@ -33,6 +33,6 @@
 --solver.ic.perturbmag=0.0
 
 # version
-# $Id: cookbook2.sh,v 1.1 2004/06/29 17:25:12 tan2 Exp $
+# $Id: cookbook2.sh,v 1.2 2005/06/03 21:51:40 leif Exp $
 
 # End of file

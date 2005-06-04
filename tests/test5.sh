@@ -19,9 +19,9 @@ rm $FINE.* $COARSE.*
 
 
 ./coupledcitcoms.sh  \
---staging.nodes=4 \
---staging.nodegen="n%03d" \
---staging.nodelist=[171-172,171-172] \
+--launcher.nodes=4 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[171-172,171-172] \
 \
 --layout.coarse=[0-1] \
 --layout.fine=[2-3] \
@@ -82,6 +82,6 @@ rm $FINE.* $COARSE.*
 
 
 # version
-# $Id: test5.sh,v 1.1 2005/05/18 01:57:44 tan2 Exp $
+# $Id: test5.sh,v 1.2 2005/06/03 21:51:46 leif Exp $
 
 # End of file

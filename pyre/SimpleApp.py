@@ -25,7 +25,7 @@ class SimpleApp(Application):
 
 
 
-    def run(self):
+    def main(self, *args, **kwds):
         self.initialize()
         self.reportConfiguration()
         self.launch()
@@ -73,7 +73,7 @@ class SimpleApp(Application):
 
         self._info.line("  facilities:")
         self._info.line("    journal: %r" % self.inventory.journal.name)
-        self._info.line("    staging: %r" % self.inventory.staging.name)
+        self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    solver: %r" % self.solver.name)
         self._info.line("    controller: %r" % self.controller.name)
@@ -84,32 +84,30 @@ class SimpleApp(Application):
 
     class Inventory(Application.Inventory):
 
-        import pyre.facilities
+        import pyre.inventory
         from CitcomS.Facilities.Solver import Solver as SolverFacility
 
         import Controller
         import Solver
 
-        inventory = [
 
-            pyre.facilities.facility("controller", default=Controller.controller()),
-            SolverFacility("solver", default=Solver.regionalSolver()),
+        controller = pyre.inventory.facility("controller", default=Controller.controller())
+        solver = SolverFacility("solver", default=Solver.regionalSolver())
 
-            pyre.properties.int("steps", 1),
+        steps = pyre.inventory.int("steps", default=1)
 
-            ]
 
 
 # main
 if __name__ == "__main__":
 
     app = SimpleApp("citcoms")
-    app.main()
+    app.run()
 
 
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.8 2004/12/02 20:23:12 tan2 Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.9 2005/06/03 21:51:43 leif Exp $"
 
 # End of file

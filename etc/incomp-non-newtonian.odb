@@ -1,0 +1,19 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+def vsolver():
+
+    import CitcomS.Components.Stokes_solver as Stokes
+    return Stokes.incompressibleNonNewtonian()
+
+
+# version
+__id__ = "$Id: incomp-non-newtonian.odb,v 1.1 2005/06/03 21:51:40 leif Exp $"
+
+# End of file 

@@ -5,8 +5,8 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-from pyre.facilities.Facility import Facility
-from pyre.facilities.ScriptBinder import ScriptBinder
+from pyre.inventory.Facility import Facility
+ScriptBinder = object
 
 
 class Solver(Facility):
@@ -16,8 +16,7 @@ class Solver(Facility):
         if not binder:
             binder = self.Binder()
 
-        Facility.__init__(self, name,
-                          default=default, binder=binder)
+        Facility.__init__(self, name, default=default) #binder=binder)
         return
 
 
@@ -50,6 +49,6 @@ class Solver(Facility):
 
 
 # version
-__id__ = "$Id: Solver.py,v 1.2 2003/08/29 20:40:22 tan2 Exp $"
+__id__ = "$Id: Solver.py,v 1.3 2005/06/03 21:51:45 leif Exp $"
 
 # End of file

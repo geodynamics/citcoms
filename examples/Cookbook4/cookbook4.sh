@@ -13,9 +13,9 @@
 \
 --controller.monitoringFrequency=10 \
 \
---staging.nodes=16 \
---staging.nodegen="n%03d" \
---staging.nodelist=[150-157,150-157] \
+--launcher.nodes=16 \
+--launcher.nodegen="n%03d" \
+--launcher.nodelist=[150-157,150-157] \
 \
 --solver.rayleigh=1e6 \
 --solver.datafile=../Cookbook4/cookbook4_output/cookbook4 \
@@ -52,6 +52,6 @@
 --solver.visc.visc_max=100.0
 \
 # version
-# $Id: cookbook4.sh,v 1.1 2005/01/18 22:30:29 vlad Exp $
+# $Id: cookbook4.sh,v 1.2 2005/06/03 21:51:41 leif Exp $
 
 # End of file

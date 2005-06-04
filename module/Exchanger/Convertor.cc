@@ -11,13 +11,14 @@
 #include "Exchanger/Spherical2Cartesian.h"
 #include "SIUnit.h"
 #include "Convertor.h"
+#include "journal/diagnostics.h"
 
 
 void Convertor::init(bool dimensional, bool transformational,
 		     const All_variables* E)
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     if(dimensional)
 	si = new SIUnit(E);
@@ -30,6 +31,6 @@ void Convertor::init(bool dimensional, bool transformational,
 
 
 // version
-// $Id: Convertor.cc,v 1.5 2004/05/11 07:55:30 tan2 Exp $
+// $Id: Convertor.cc,v 1.6 2005/06/03 21:51:42 leif Exp $
 
 // End of file
