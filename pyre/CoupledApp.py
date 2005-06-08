@@ -104,7 +104,6 @@ class CoupledApp(SimpleApp):
     class Inventory(SimpleApp.Inventory):
 
         import pyre.inventory
-        from CitcomS.Facilities.Solver import Solver as SolverFacility
 
         import Controller
         import Solver
@@ -113,15 +112,15 @@ class CoupledApp(SimpleApp):
         import CitcomS.Components.Exchanger as Exchanger
 
 
-        coarseController = pyre.inventory.facility(name="coarseController", default=Controller.controller(name="coarseController"))
-        fineController = pyre.inventory.facility(name="fineController", default=Controller.controller(name="fineController"))
-        coupler = pyre.inventory.facility("coupler", default=Coupler.coupler())
-        layout = pyre.inventory.facility("layout", default=Layout.layout())
+        coarseController = pyre.inventory.facility(name="coarseController", factory=Controller.controller, args=("coarseController",))
+        fineController = pyre.inventory.facility(name="fineController", factory=Controller.controller, args=("fineController",))
+        coupler = pyre.inventory.facility("coupler", factory=Coupler.coupler)
+        layout = pyre.inventory.facility("layout", factory=Layout.layout)
 
-        coarse = SolverFacility("coarse", default=Solver.fullSolver("coarse", "coarse"))
-        fine = SolverFacility("fine", default=Solver.regionalSolver("fine", "fine"))
-        cge = pyre.inventory.facility("cge", default=Exchanger.coarsegridexchanger())
-        fge = pyre.inventory.facility("fge", default=Exchanger.finegridexchanger())
+        coarse = pyre.inventory.facility("coarse", factory=Solver.fullSolver, args=("coarse", "coarse"))
+        fine = pyre.inventory.facility("fine", factory=Solver.regionalSolver, args=("fine", "fine"))
+        cge = pyre.inventory.facility("cge", factory=Exchanger.coarsegridexchanger)
+        fge = pyre.inventory.facility("fge", factory=Exchanger.finegridexchanger)
 
         steps = pyre.inventory.int("steps", default=1)
 
@@ -137,6 +136,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.12 2005/06/03 21:51:43 leif Exp $"
+__id__ = "$Id: CoupledApp.py,v 1.13 2005/06/08 01:55:33 leif Exp $"
 
 # End of file

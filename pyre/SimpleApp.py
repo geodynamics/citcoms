@@ -85,14 +85,13 @@ class SimpleApp(Application):
     class Inventory(Application.Inventory):
 
         import pyre.inventory
-        from CitcomS.Facilities.Solver import Solver as SolverFacility
 
         import Controller
         import Solver
 
 
-        controller = pyre.inventory.facility("controller", default=Controller.controller())
-        solver = SolverFacility("solver", default=Solver.regionalSolver())
+        controller = pyre.inventory.facility("controller", factory=Controller.controller)
+        solver = pyre.inventory.facility("solver", factory=Solver.regionalSolver)
 
         steps = pyre.inventory.int("steps", default=1)
 
@@ -108,6 +107,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.9 2005/06/03 21:51:43 leif Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.10 2005/06/08 01:55:33 leif Exp $"
 
 # End of file

@@ -273,10 +273,6 @@ class Solver(BaseSolver):
 
         import pyre.inventory
 
-        # facilities
-        from CitcomS.Facilities.TSolver import TSolver
-        from CitcomS.Facilities.VSolver import VSolver
-
         # component modules
         import CitcomS.Components.Advection_diffusion as Advection_diffusion
         import CitcomS.Components.Stokes_solver as Stokes_solver
@@ -291,16 +287,16 @@ class Solver(BaseSolver):
         from CitcomS.Components.Visc import Visc
 
 
-        tsolver = TSolver("tsolver", default=Advection_diffusion.temperature_diffadv())
-        vsolver = VSolver("vsolver", default=Stokes_solver.incompressibleNewtonian())
+        tsolver = pyre.inventory.facility("tsolver", factory=Advection_diffusion.temperature_diffadv)
+        vsolver = pyre.inventory.facility("vsolver", factory=Stokes_solver.incompressibleNewtonian)
 
-        bc = pyre.inventory.facility("bc", default=BC())
-        const = pyre.inventory.facility("const", default=Const())
-        ic = pyre.inventory.facility("ic", default=IC())
-        param = pyre.inventory.facility("param", default=Param())
-        phase = pyre.inventory.facility("phase", default=Phase())
-        tracer = pyre.inventory.facility("tracer", default=Tracer())
-        visc = pyre.inventory.facility("visc", default=Visc())
+        bc = pyre.inventory.facility("bc", factory=BC)
+        const = pyre.inventory.facility("const", factory=Const)
+        ic = pyre.inventory.facility("ic", factory=IC)
+        param = pyre.inventory.facility("param", factory=Param)
+        phase = pyre.inventory.facility("phase", factory=Phase)
+        tracer = pyre.inventory.facility("tracer", factory=Tracer)
+        visc = pyre.inventory.facility("visc", factory=Visc)
 
         rayleigh = pyre.inventory.float("rayleigh", default=1e+05)
         Q0 = pyre.inventory.float("Q0", default=0.0)
@@ -312,6 +308,6 @@ class Solver(BaseSolver):
 
 
 # version
-__id__ = "$Id: Solver.py,v 1.44 2005/06/03 21:51:46 leif Exp $"
+__id__ = "$Id: Solver.py,v 1.45 2005/06/08 01:55:34 leif Exp $"
 
 # End of file
