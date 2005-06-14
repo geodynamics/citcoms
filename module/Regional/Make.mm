@@ -59,10 +59,10 @@ PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
 PROJ_CXX_SRCLIB = \
-	-Xlinker -rpath $(PROJ_LIBDIR) -Xlinker \
+	-Xlinker -rpath -Xlinker $(PROJ_LIBDIR) \
+	-Xlinker -rpath -Xlinker $(PYTHIA_LIBDIR) \
 	-l$(PROJECT)Common \
 	-l$(PROJECT)$(TYPE) \
-	-Xlinker -rpath $(PYTHIA_LIBDIR) -Xlinker \
 	-ljournal \
 	$(PYTHIA_DIR)/modules/mpi/_mpimodule.so
 
@@ -82,6 +82,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.25 2005/06/10 02:23:18 leif Exp $
+# $Id: Make.mm,v 1.26 2005/06/14 16:47:38 leif Exp $
 
 # End of file
