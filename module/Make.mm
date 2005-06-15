@@ -58,8 +58,7 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Full \
-	Regional \
-	Exchanger
+	Regional
 
 RECURSE_DIRS = $(BLD_DIRS)
 
@@ -78,7 +77,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.12 2005/06/10 02:23:18 leif Exp $
+# $Id: Make.mm,v 1.12.2.1 2005/06/14 17:47:58 leif Exp $
 
 #
 # End of file
