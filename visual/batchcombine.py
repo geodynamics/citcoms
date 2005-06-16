@@ -9,7 +9,7 @@
 #                 ---------------------------------
 #
 #                              Authors:
-#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
+#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy
 #          (c) California Institute of Technology 2002-2005
 #
 #        By downloading and/or installing this software you have
@@ -21,7 +21,7 @@
 #
 #  Copyright June 2005, by the California Institute of Technology.
 #  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
-# 
+#
 #  Any commercial use must be negotiated with the Office of Technology
 #  Transfer at the California Institute of Technology. This software
 #  may be subject to U.S. export control laws and regulations. By
@@ -37,7 +37,7 @@
 #  damages, including lost profits, arising out of the use of this
 #  software and its documentation, even if the California Institute of
 #  Technology has been advised of the possibility of such damage.
-# 
+#
 #  The California Institute of Technology specifically disclaims any
 #  warranties, including the implied warranties or merchantability and
 #  fitness for a particular purpose. The software and documentation
@@ -57,25 +57,9 @@ Paste and combine Citcom data
 Usage: batchcombine.py <machinefile | node-list> model-dir model-name timestep nodex nodey nodez ncap nprocx nprocy nprocz
 '''
 
-if __name__ == '__main__':
 
-    import sys, os
 
-    if not len(sys.argv) == 12:
-        print __doc__
-        sys.exit(1)
-
-    machinefile = sys.argv[1]
-    modeldir = sys.argv[2]
-    modelname = sys.argv[3]
-    timestep = int(sys.argv[4])
-    nodex = int(sys.argv[5])
-    nodey = int(sys.argv[6])
-    nodez = int(sys.argv[7])
-    ncap = int(sys.argv[8])
-    nprocx = int(sys.argv[9])
-    nprocy = int(sys.argv[10])
-    nprocz = int(sys.argv[11])
+def machinefile2nodes(machinefile, totalnodes):
 
     try:
         nodelist = file(machinefile).readlines()
@@ -83,21 +67,27 @@ if __name__ == '__main__':
         nodelist = machinefile.split()
 
     # check the length of nodelist
-    totalnodes = nprocx * nprocy * nprocz * ncap
     n = len(nodelist)
     if not n == totalnodes:
-        print 'WARNING: length of machinefile does not match number of processors'
+        print 'WARNING: length of machinefile does not match number of processors, try to duplicate machinefile...'
         if (totalnodes > n) and ((totalnodes % n) == 0):
             # try to match number of processors by duplicating nodelist
             nodelist *= (totalnodes / n)
         else:
-            print 'ERROR: incorrect machinefile size'
-            sys.exit(1)
+            raise ValueError, 'incorrect machinefile size'
 
     # generate a string of machine names
     nodes = ''
     for node in nodelist:
         nodes += '%s ' % node.strip()
+
+    return nodes
+
+
+
+def combine(nodes, modeldir, modelname, timestep, nodex, nodey, nodez,
+            ncap, nprocx, nprocy, nprocz):
+    import os
 
     # paste
     cmd = 'batchpaste.sh %(modeldir)s %(modelname)s %(timestep)d %(nodes)s' \
@@ -120,8 +110,38 @@ if __name__ == '__main__':
     print cmd
     os.system(cmd)
 
+    return
+
+
+if __name__ == '__main__':
+
+    import sys
+
+    if not len(sys.argv) == 12:
+        print __doc__
+        sys.exit(1)
+
+    machinefile = sys.argv[1]
+    modeldir = sys.argv[2]
+    modelname = sys.argv[3]
+    timestep = int(sys.argv[4])
+    nodex = int(sys.argv[5])
+    nodey = int(sys.argv[6])
+    nodez = int(sys.argv[7])
+    ncap = int(sys.argv[8])
+    nprocx = int(sys.argv[9])
+    nprocy = int(sys.argv[10])
+    nprocz = int(sys.argv[11])
+
+    totalnodes = nprocx * nprocy * nprocz * ncap
+    nodelist = machinefile2nodes(machinefile, totalnodes)
+
+    combine(nodelist, modeldir, modelname, timestep, nodex, nodey, nodez,
+            ncap, nprocx, nprocy, nprocz)
+
+
 
 # version
-# $Id: batchcombine.py,v 1.6 2005/06/10 02:23:25 leif Exp $
+# $Id: batchcombine.py,v 1.7 2005/06/15 19:33:16 tan2 Exp $
 
 # End of file
