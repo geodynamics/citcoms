@@ -143,7 +143,7 @@ class ParsingError(Error):
         self._msg = self._msg + '\n\t[line %2d]: %s' % (lineno, line)
 
 
-class Parser:
+class Parser(object):
     def __init__(self,defaults=None):
         if defaults is None:
             self.__defaults = {}
