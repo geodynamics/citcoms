@@ -9,7 +9,7 @@
 #                 ---------------------------------
 #
 #                              Authors:
-#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
+#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy
 #          (c) California Institute of Technology 2002-2005
 #
 #        By downloading and/or installing this software you have
@@ -21,7 +21,7 @@
 #
 #  Copyright June 2005, by the California Institute of Technology.
 #  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
-# 
+#
 #  Any commercial use must be negotiated with the Office of Technology
 #  Transfer at the California Institute of Technology. This software
 #  may be subject to U.S. export control laws and regulations. By
@@ -37,7 +37,7 @@
 #  damages, including lost profits, arising out of the use of this
 #  software and its documentation, even if the California Institute of
 #  Technology has been advised of the possibility of such damage.
-# 
+#
 #  The California Institute of Technology specifically disclaims any
 #  warranties, including the implied warranties or merchantability and
 #  fitness for a particular purpose. The software and documentation
@@ -68,7 +68,8 @@ class Sphere(CitcomComponent):
 
         import mpi
         if not mpi.world().rank:
-            print "initialization time = %f" % \
+            import sys
+            print >> sys.stderr, "initialization time = %f" % \
                   (self.CitcomModule.CPU_time() - start_time)
 
 	return
@@ -118,6 +119,6 @@ class Sphere(CitcomComponent):
 
 
 # version
-__id__ = "$Id: Sphere.py,v 1.6 2005/06/10 02:23:22 leif Exp $"
+__id__ = "$Id: Sphere.py,v 1.6.2.1 2005/06/15 20:26:34 leif Exp $"
 
 # End of file
