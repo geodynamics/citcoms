@@ -60,7 +60,6 @@ PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 BLD_DIRS = \
 	Components \
-	Facilities \
 	Solver
 
 RECURSE_DIRS = $(BLD_DIRS)
@@ -96,7 +95,7 @@ export:: export-python-modules
 
 
 # version
-# $Id: Make.mm,v 1.14 2005/06/10 02:23:20 leif Exp $
+# $Id: Make.mm,v 1.15 2005/06/17 21:24:28 leif Exp $
 
 #
 # End of file
