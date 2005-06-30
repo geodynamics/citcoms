@@ -58,17 +58,23 @@ PROJECT = CitcomS
 PACKAGE = $(TYPE)module
 include std-pythonmodule.def
 
+EXTERNAL_INCLUDES += $(PYTHIA_INCDIR)
+EXTERNAL_LIBDIRS = $(PYTHIA_LIBDIR)
+EXTERNAL_LIBPATH += $(foreach dir,$(EXTERNAL_LIBDIRS),-L$(dir))
+ifeq (Linux,$(findstring Linux,$(PLATFORM_ID)))
+RPATH_ARGS = $(foreach dir,$(PROJ_LIBDIR) $(EXTERNAL_LIBDIRS),-Xlinker -rpath $(dir))
+else
+RPATH_ARGS =
+endif
+
 PROJ_CXX_SRCLIB = \
-	-Xlinker -rpath -Xlinker $(PROJ_LIBDIR) \
-	-Xlinker -rpath -Xlinker $(PYTHIA_LIBDIR) \
 	-l$(PROJECT)Common \
 	-l$(PROJECT)$(TYPE) \
+	-l_mpimodule \
 	-ljournal \
-	$(PYTHIA_DIR)/modules/mpi/_mpimodule.so
+	$(RPATH_ARGS)
 
 PROJ_CXX_INCLUDES = ../../lib/Common
-EXTERNAL_INCLUDES += $(PYTHIA_DIR)/include $(PYTHIA_INCDIR)
-EXTERNAL_LIBPATH += -L$(PYTHIA_DIR)/lib -L$(PYTHIA_LIBDIR)
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -82,6 +88,6 @@ PROJ_SRCS = \
     stokes_solver.cc
 
 # version
-# $Id: Make.mm,v 1.26 2005/06/14 16:47:38 leif Exp $
+# $Id: Make.mm,v 1.27 2005/06/30 01:31:29 leif Exp $
 
 # End of file

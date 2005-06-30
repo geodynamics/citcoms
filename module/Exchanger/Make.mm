@@ -15,13 +15,17 @@ include std-pythonmodule.def
 EXTERNAL_INCLUDES += $(PYTHIA_INCDIR) $(EXCHANGER_INCDIR)
 EXTERNAL_LIBDIRS = $(EXCHANGER_LIBDIR) $(PYTHIA_LIBDIR)
 EXTERNAL_LIBPATH += $(foreach dir,$(EXTERNAL_LIBDIRS),-L$(dir))
-
+ifeq (Linux,$(findstring Linux,$(PLATFORM_ID)))
 RPATH_ARGS = $(foreach dir,$(EXTERNAL_LIBDIRS),-Xlinker -rpath $(dir))
+else
+RRPATH_ARGS =
+endif
+
 PROJ_CXX_SRCLIB = \
-	$(EXPORT_ROOT)/modules/$(PROJECT)/Regionalmodule.so \
+	-lRegionalmodule \
 	-lExchanger \
+	-l_mpimodule \
 	-ljournal \
-	$(PYTHIA_DIR)/modules/mpi/_mpimodule.so \
 	$(RPATH_ARGS)
 
 PROJ_CXX_INCLUDES = ../../lib/Common
@@ -51,6 +55,6 @@ PROJ_SRCS = \
 	misc.cc \
 
 # version
-# $Id: Make.mm,v 1.29 2005/06/03 21:51:42 leif Exp $
+# $Id: Make.mm,v 1.30 2005/06/30 01:31:29 leif Exp $
 
 # End of file
