@@ -9,7 +9,7 @@
 #                 ---------------------------------
 #
 #                              Authors:
-#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
+#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy
 #          (c) California Institute of Technology 2002-2005
 #
 #        By downloading and/or installing this software you have
@@ -21,7 +21,7 @@
 #
 #  Copyright June 2005, by the California Institute of Technology.
 #  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
-# 
+#
 #  Any commercial use must be negotiated with the Office of Technology
 #  Transfer at the California Institute of Technology. This software
 #  may be subject to U.S. export control laws and regulations. By
@@ -37,7 +37,7 @@
 #  damages, including lost profits, arising out of the use of this
 #  software and its documentation, even if the California Institute of
 #  Technology has been advised of the possibility of such damage.
-# 
+#
 #  The California Institute of Technology specifically disclaims any
 #  warranties, including the implied warranties or merchantability and
 #  fitness for a particular purpose. The software and documentation
@@ -71,13 +71,19 @@ while [ "$4" ]
 do
     cmd_paste="$paste_exe $modelname $n $timestep"
     cmd_copy="cp $modelname.$n.$timestep $cwd"
-    rsh $4 "cd $modeldir && $cmd_paste && $cmd_copy"
+
+    if [ $4 == $HOSTNAME -o $4 == "localhost" ]; then
+	cd $modeldir && $cmd_paste && $cmd_copy
+    else
+ 	rsh $4 "cd $modeldir && $cmd_paste && $cmd_copy"
+    fi
+
     shift
     let n=n+1
 done
 
 
 # version
-# $Id: batchpaste.sh,v 1.5 2005/06/10 02:23:25 leif Exp $
+# $Id: batchpaste.sh,v 1.5.2.1 2005/06/30 17:10:46 tan2 Exp $
 
 # End of file
