@@ -62,7 +62,6 @@ to functions across the whole filespace of CITCOM.
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <malloc.h>
 #include "mpi.h"
 
 
