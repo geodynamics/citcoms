@@ -1,6 +1,6 @@
-# -*- Makefile -*-
+#!/usr/bin/env python
 #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #<LicenseText>
 #=====================================================================
@@ -9,7 +9,7 @@
 #                 ---------------------------------
 #
 #                              Authors:
-#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
+#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy
 #          (c) California Institute of Technology 2002-2005
 #
 #        By downloading and/or installing this software you have
@@ -21,7 +21,7 @@
 #
 #  Copyright June 2005, by the California Institute of Technology.
 #  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
-# 
+#
 #  Any commercial use must be negotiated with the Office of Technology
 #  Transfer at the California Institute of Technology. This software
 #  may be subject to U.S. export control laws and regulations. By
@@ -37,7 +37,7 @@
 #  damages, including lost profits, arising out of the use of this
 #  software and its documentation, even if the California Institute of
 #  Technology has been advised of the possibility of such damage.
-# 
+#
 #  The California Institute of Technology specifically disclaims any
 #  warranties, including the implied warranties or merchantability and
 #  fitness for a particular purpose. The software and documentation
@@ -48,56 +48,15 @@
 #=====================================================================
 #</LicenseText>
 #
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-PROJECT = CitcomS
-PACKAGE = Components
+def launcher():
 
-PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
-
-BLD_DIRS = \
-	Advection_diffusion \
-	Exchanger \
-	Sphere \
-	Stokes_solver
-
-RECURSE_DIRS = $(BLD_DIRS)
-
-
-#--------------------------------------------------------------------------
-#
-
-all: export
-
-release: tidy
-	cvs release .
-
-update: clean
-	cvs update .
-
-#--------------------------------------------------------------------------
-#
-# export
-
-EXPORT_PYTHON_MODULES = \
-	__init__.py \
-	BC.py \
-	CitcomComponent.py \
-	Const.py \
-	IC.py \
-	Launchers.py \
-	Parallel.py \
-	Param.py \
-	Phase.py \
-	Tracer.py \
-	Visc.py
-
-
-export:: export-package-python-modules
-	BLD_ACTION="export" $(MM) recurse
+    from CitcomS.Components.Launchers import LauncherGlobus
+    return LauncherGlobus()
 
 # version
-# $Id: Make.mm,v 1.10 2005/07/19 21:07:15 leif Exp $
+__id__ = "$Id: globus.odb,v 1.1 2005/07/19 21:07:15 leif Exp $"
 
 # End of file

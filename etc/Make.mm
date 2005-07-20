@@ -67,8 +67,13 @@ EXPORT_ETC = \
     __vault__.odb \
     full.odb \
     full-sphere.odb \
+    globus.odb \
     incomp-newtonian.odb \
     incomp-non-newtonian.odb \
+    lam-mpi.odb \
+    lsf.odb \
+    mpich.odb \
+    pbs.odb \
     regional.odb \
     regional-sphere.odb \
     temp.odb
@@ -77,6 +82,6 @@ EXPORT_ETC = \
 export:: export-etc
 
 # version
-# $Id: Make.mm,v 1.2 2005/06/10 02:23:12 leif Exp $
+# $Id: Make.mm,v 1.3 2005/07/19 21:07:15 leif Exp $
 
 # End of file
