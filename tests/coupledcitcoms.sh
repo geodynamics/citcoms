@@ -50,11 +50,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-mpipython.exe ${EXPORT_ROOT}/modules/CitcomS/CoupledApp.pyc $*
+python ${EXPORT_ROOT}/modules/CitcomS/CoupledApp.pyc $*
 
 
 # version
-# $Id: coupledcitcoms.sh,v 1.2 2005/06/10 02:23:24 leif Exp $
+# $Id: coupledcitcoms.sh,v 1.3 2005/07/19 21:23:38 leif Exp $
 
 # End of file
 

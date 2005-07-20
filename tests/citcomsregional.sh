@@ -50,11 +50,11 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-mpipython.exe ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc $*
+python ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc $*
 
 
 # version
-# $Id: citcomsregional.sh,v 1.2 2005/06/10 02:23:24 leif Exp $
+# $Id: citcomsregional.sh,v 1.3 2005/07/19 21:23:38 leif Exp $
 
 # End of file
 
