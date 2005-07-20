@@ -86,6 +86,7 @@ EXPORT_PYTHON_MODULES = \
 	CitcomComponent.py \
 	Const.py \
 	IC.py \
+	Launchers.py \
 	Parallel.py \
 	Param.py \
 	Phase.py \
@@ -97,6 +98,6 @@ export:: export-package-python-modules
 	BLD_ACTION="export" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.9 2005/06/10 02:23:21 leif Exp $
+# $Id: Make.mm,v 1.9.2.1 2005/07/19 21:41:30 leif Exp $
 
 # End of file

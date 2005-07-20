@@ -50,10 +50,10 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 
-mpipython.exe ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc --solver=full $*
+python ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc --solver=full $*
 
 
 # version
-# $Id: citcomsfull.sh,v 1.2 2005/06/10 02:23:24 leif Exp $
+# $Id: citcomsfull.sh,v 1.2.2.1 2005/07/19 21:41:30 leif Exp $
 
 # End of file
