@@ -1,4 +1,4 @@
-# -*- Common Makefile -*-
+# -*- Makefile -*-
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -53,6 +53,7 @@
 #
 
 include local.def
+
 TYPE=Common
 
 PROJECT = CitcomS
@@ -96,13 +97,22 @@ PROJ_SRCS = \
 	Tracer_advection.c \
 	Viscosity_structures.c
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+all: $(PROJ_SAR) export
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+export:: export-libraries export-binaries
+#export:: export-headers export-libraries export-binaries
+
 EXPORT_HEADERS = \
 	advection_diffusion.h \
 	advection.h \
 	citcom_init.h \
 	convection_variables.h \
 	drive_solvers.h \
-	element_definitions.h a \
+	element_definitions.h \
 	global_defs.h \
 	initial_temperature.h \
 	interuption.h \
@@ -119,11 +129,8 @@ EXPORT_HEADERS = \
 EXPORT_LIBS = $(PROJ_SAR)
 EXPORT_BINS = $(PROJ_DLL)
 
-#al: $(PROJ_OBJS) export-headers
-all: $(PROJ_SAR)
-
 # version
-# $Id: Make.mm,v 1.15 2005/06/10 02:23:15 leif Exp $
+# $Id: Make.mm,v 1.15.2.1 2005/07/21 23:16:29 leif Exp $
 
 #
 # End of file
