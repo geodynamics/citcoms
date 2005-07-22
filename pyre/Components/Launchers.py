@@ -53,6 +53,7 @@
 
 
 from mpi.Launcher import Launcher
+from pyre.util import expandMacros
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,6 +76,8 @@ def hms(t):
     return (int(t / 3600), int((t % 3600) / 60), int(t % 60))
 
 
+defaultEnvironment = "[EXPORT_ROOT,LD_LIBRARY_PATH,PYTHONPATH]"
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Launcher for LAM/MPI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,6 +96,7 @@ class LauncherLAMMPI(Launcher):
         extra = pyre.inventory.str("extra")
         command = pyre.inventory.str("command", default="mpirun")
         python_mpi = pyre.inventory.str("python-mpi", default=which("mpipython.exe"))
+        environment = pyre.inventory.list("environment", default=defaultEnvironment)
 
 
     def launch(self):
@@ -136,6 +140,7 @@ class LauncherLAMMPI(Launcher):
         args = []
         args.append(self.inventory.command)
         args.append(self.inventory.extra)
+        args.append("-x %s" % ','.join(self.inventory.environment))
         args.append("-np %d" % nodes)
 
         # use only the specific nodes specified explicitly
@@ -161,7 +166,8 @@ class LauncherLAMMPI(Launcher):
 
 #     http://www.stringtemplate.org/doc/python-doc.html
 
-# This code uses a hybrid approach, mixing Python logic with format strings.
+# This code uses a hybrid approach, mixing Python logic with primitive
+# templates powered by pyre.util.expandMacros().
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -184,10 +190,11 @@ class LauncherBatch(Launcher):
         mail = pyre.inventory.bool("mail", default=False)
         queue = pyre.inventory.str("queue")
 
-        directory = pyre.inventory.str("directory", default="%(cwd)s")
-        script = pyre.inventory.str("script", default="%(directory)s/script")
-        stdout = pyre.inventory.str("stdout", default="%(directory)s/stdout")
-        stderr = pyre.inventory.str("stderr", default="%(directory)s/stderr")
+        directory = pyre.inventory.str("directory", default="${cwd}")
+        script = pyre.inventory.str("script", default="${directory}/script")
+        stdout = pyre.inventory.str("stdout", default="${directory}/stdout")
+        stderr = pyre.inventory.str("stderr", default="${directory}/stderr")
+        environment = pyre.inventory.list("environment", default=defaultEnvironment)
 
         cwd = pyre.inventory.str("cwd", default=os.getcwd())
         argv = pyre.inventory.str("argv", default=(' '.join(sys.argv)))
@@ -196,7 +203,7 @@ class LauncherBatch(Launcher):
     def launch(self):
 
         # write the script
-        scriptFile = open("%(script)s" % self.inv, "w")
+        scriptFile = open(expandMacros("${script}", self.inv), "w")
         scriptFile.write(self._buildScript())
         scriptFile.close()
 
@@ -216,19 +223,19 @@ class LauncherBatch(Launcher):
     def __init__(self, name):
         Launcher.__init__(self, name)
         
-        # Used to recursively expand %(macro) in format strings using my inventory.
+        # Used to recursively expand ${macro) in format strings using my inventory.
         class InventoryAdapter(object):
             def __init__(self, launcher):
                 self.launcher = launcher
             def __getitem__(self, key):
-                return str(self.launcher.inventory.getTraitValue(key)) % self
+                return expandMacros(str(self.launcher.inventory.getTraitValue(key)), self)
         self.inv = InventoryAdapter(self)
         
         return
 
 
     def _buildBatchCommand(self):
-        return "%(batch-command)s %(script)s" % self.inv
+        return expandMacros("${batch-command} ${script}", self.inv)
 
 
     def _buildScript(self):
@@ -237,11 +244,11 @@ class LauncherBatch(Launcher):
             ]
         self._buildScriptDirectives(script)
         script += [
-            '''\
+            expandMacros('''\
 
-cd %(directory)s
-%(command)s %(python-mpi)s %(argv)s --mode=worker
-''' % self.inv,
+cd ${directory}
+${command} ${python-mpi} ${argv} --mode=worker
+''', self.inv)
             ]
         script = "\n".join(script) + "\n"
         return script
@@ -256,7 +263,7 @@ class LauncherPBS(LauncherBatch):
         
         import pyre.inventory
         
-        command = pyre.inventory.str("command", default="mpirun -np %(nodes)s -machinefile $PBS_NODEFILE") # Sub-launcher?
+        command = pyre.inventory.str("command", default="mpirun -np ${nodes} -machinefile $PBS_NODEFILE") # Sub-launcher?
         batch_command = pyre.inventory.str("batch-command", default="qsub")
 
 
@@ -275,9 +282,9 @@ class LauncherPBS(LauncherBatch):
             script.append("#PBS -N %s" % task)
 
         if self.inventory.stdout:
-            script.append("#PBS -o %(stdout)s" % self.inv)
+            script.append(expandMacros("#PBS -o ${stdout}", self.inv))
         if self.inventory.stderr:
-            script.append("#PBS -e %(stderr)s" % self.inv)
+            script.append(expandMacros("#PBS -e ${stderr}", self.inv))
 
         resourceList = self._buildResourceList()
 
@@ -321,7 +328,7 @@ class LauncherLSF(LauncherBatch):
 
 
     def _buildBatchCommand(self):
-        return "%(batch-command)s < %(script)s" % self.inv
+        return expandMacros("${batch-command} < ${script}", self.inv)
 
 
     def _buildScriptDirectives(self, script):
@@ -342,10 +349,10 @@ class LauncherLSF(LauncherBatch):
             script.append("#BSUB -W %d:%02d" % hms(walltime)[0:2])
         
         if self.inventory.stdout:
-            script.append("#BSUB -o %(stdout)s" % self.inv)
+            script.append(expandMacros("#BSUB -o ${stdout}", self.inv))
         if self.inventory.stderr:
-            script.append("#BSUB -e %(stderr)s" % self.inv)
-
+            script.append(expandMacros("#BSUB -e ${stderr}", self.inv))
+            
         script += [
             "#BSUB -n %d" % self.nodes,
             ]
@@ -365,7 +372,7 @@ class LauncherGlobus(LauncherBatch):
 
 
     def _buildBatchCommand(self):
-        return "%(batch-command)s -b -r %(resource)s -f %(script)s" % self.inv
+        return expandMacros("${batch-command} -b -r ${resource} -f ${script}", self.inv)
 
 
     def __init__(self):
@@ -377,13 +384,13 @@ class LauncherGlobus(LauncherBatch):
         import sys
 
         script = [
-            '''\
+            expandMacros('''\
 &   (jobType=mpi)
-    (executable="%(python-mpi)s")
-    (count=%(nodes)s)
-    (directory="%(directory)s")
-    (stdout="%(stdout)s")
-    (stderr="%(stderr)s")''' % self.inv,
+    (executable="${python-mpi}")
+    (count=${nodes})
+    (directory="${directory}")
+    (stdout="${stdout}")
+    (stderr="${stderr}")''', self.inv),
             ]
         
         script.append('    (environment = %s)' % self._buildEnvironment())
@@ -402,8 +409,8 @@ class LauncherGlobus(LauncherBatch):
     def _buildEnvironment(self):
         from os import environ
         #vars = environ.keys()
-        vars = ['PYTHONPATH', 'LD_LIBRARY_PATH']
-        env = [('(%s "%s")' % (var, environ[var])) for var in vars]
+        vars = self.inventory.environment
+        env = [('(%s "%s")' % (var, environ.get(var,""))) for var in vars]
         env = ' '.join(env)
         return env
 
@@ -449,6 +456,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: Launchers.py,v 1.1 2005/07/19 21:07:15 leif Exp $"
+__id__ = "$Id: Launchers.py,v 1.1.2.1 2005/07/22 03:04:51 leif Exp $"
 
 # End of file 
