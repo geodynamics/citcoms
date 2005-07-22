@@ -1,4 +1,4 @@
-# -*- Regional Makefile -*-
+# -*- Makefile -*-
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -53,6 +53,7 @@
 #
 
 include local.def
+
 TYPE=Regional
 
 PROJECT = CitcomS
@@ -74,14 +75,19 @@ PROJ_SRCS = \
 	Sphere_related.c \
 	Version_dependent.c
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+all: $(PROJ_SAR) export
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+export:: export-libraries export-binaries
+
 EXPORT_LIBS = $(PROJ_SAR)
 EXPORT_BINS = $(PROJ_DLL)
 
-all: $(PROJ_SAR)
-
-
 # version
-# $Id: Make.mm,v 1.15 2005/06/10 02:23:17 leif Exp $
+# $Id: Make.mm,v 1.16 2005/07/21 22:55:58 leif Exp $
 
 #
 # End of file

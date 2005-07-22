@@ -52,8 +52,16 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+#
+# Local (project) definitions
+#
+
+# C++
+
+    PROJ_CC_FLAGS += $(CC_SOFLAGS)
+    PROJ_LCC_FLAGS += $(LCC_SOFLAGS)
 
 # version
-# $Id: local.def,v 1.2 2005/06/10 02:23:18 leif Exp $
+# $Id: local.def,v 1.3 2005/07/21 22:55:58 leif Exp $
 
 # End of file
