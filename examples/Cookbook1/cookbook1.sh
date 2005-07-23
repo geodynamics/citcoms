@@ -51,7 +51,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-../../tests/citcomsfull.sh \
+citcomsfull.sh \
 \
 --launcher.nodes=12 \
 --launcher.nodegen="n%03d" \

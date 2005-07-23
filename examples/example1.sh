@@ -51,7 +51,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-../tests/citcomsregional.sh \
+citcomsregional.sh \
 \
 --steps=1 \
 \
@@ -71,6 +71,6 @@
 
 
 # version
-# $Id: example1.sh,v 1.6 2005/06/10 02:23:12 leif Exp $
+# $Id: example1.sh,v 1.6.2.1 2005/07/23 02:02:48 leif Exp $
 
 # End of file

@@ -51,7 +51,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-../../tests/citcomsregional.sh \
+citcomsregional.sh \
 \
 --steps=250 \
 \
@@ -96,6 +96,6 @@
 --solver.visc.visc_max=100.0
 \
 # version
-# $Id: cookbook4.sh,v 1.3 2005/06/10 02:23:13 leif Exp $
+# $Id: cookbook4.sh,v 1.3.2.1 2005/07/23 02:02:49 leif Exp $
 
 # End of file

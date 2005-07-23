@@ -51,23 +51,25 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+include Python/default.def
+
 PROJECT = CitcomS
 PACKAGE = tests
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
 PROJ_PYTHONTESTS = signon.py
-PROJ_CPPTESTS = array2d
+PROJ_CPPTESTS = $(PROJ_BIN)
 PROJ_EMPTYTESTS = $(BLD_BINDIR)/CitcomSFull $(BLD_BINDIR)/CitcomSRegional
 PROJ_TESTS = $(PROJ_PYTHONTESTS) $(PROJ_CPPTESTS) $(PROJ_EMPTYTESTS)
 
 #--------------------------------------------------------------------------
 #
 
-all: $(PROJ_TESTS)
+all: $(PROJ_TESTS) export
 
 test:
-	for test in $(PROJ_TESTS) ; do $${test}; done;
+	for test in $(PROJ_TESTS) ; do $${test}; done; exit 0
 
 release: tidy
 	cvs release .
@@ -75,16 +77,17 @@ release: tidy
 update: clean
 	cvs update .
 
-
 #--------------------------------------------------------------------------
 #
 
-array2d: array2d.cc ../module/Exchanger/Array2D.h ../module/Exchanger/Array2D.cc
-	$(CXX) $(CXXFLAGS) $(LCXXFLAGS) -o $@ array2d.cc -L/homegurnis/tools/mpich-1.2.5-absoft-3.0/lib -L$(TOOLS_DIR)/lib -ljournal -lmpich -lpmpich
+EXPORT_BINS = \
+    citcomsfull.sh \
+    citcomsregional.sh \
+    coupledcitcoms.sh
 
-
+export:: export-binaries release-binaries
 
 # version
-# $Id: Make.mm,v 1.4 2005/06/10 02:23:24 leif Exp $
+# $Id: Make.mm,v 1.4.2.1 2005/07/23 02:02:49 leif Exp $
 
 # End of file

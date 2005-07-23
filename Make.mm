@@ -1,90 +1,77 @@
 # -*- Makefile -*-
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-# <LicenseText>
+#<LicenseText>
+#=====================================================================
 #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#                             CitcomS.py
+#                 ---------------------------------
+#
+#                              Authors:
+#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
+#          (c) California Institute of Technology 2002-2005
+#
+#        By downloading and/or installing this software you have
+#       agreed to the CitcomS.py-LICENSE bundled with this software.
+#             Free for non-commercial academic research ONLY.
+#      This program is distributed WITHOUT ANY WARRANTY whatsoever.
+#
+#=====================================================================
+#
+#  Copyright June 2005, by the California Institute of Technology.
+#  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
+# 
+#  Any commercial use must be negotiated with the Office of Technology
+#  Transfer at the California Institute of Technology. This software
+#  may be subject to U.S. export control laws and regulations. By
+#  accepting this software, the user agrees to comply with all
+#  applicable U.S. export laws and regulations, including the
+#  International Traffic and Arms Regulations, 22 C.F.R. 120-130 and
+#  the Export Administration Regulations, 15 C.F.R. 730-744. User has
+#  the responsibility to obtain export licenses, or other export
+#  authority as may be required before exporting such information to
+#  foreign countries or providing access to foreign nationals.  In no
+#  event shall the California Institute of Technology be liable to any
+#  party for direct, indirect, special, incidental or consequential
+#  damages, including lost profits, arising out of the use of this
+#  software and its documentation, even if the California Institute of
+#  Technology has been advised of the possibility of such damage.
+# 
+#  The California Institute of Technology specifically disclaims any
+#  warranties, including the implied warranties or merchantability and
+#  fitness for a particular purpose. The software and documentation
+#  provided hereunder is on an "as is" basis, and the California
+#  Institute of Technology has no obligations to provide maintenance,
+#  support, updates, enhancements or modifications.
+#
+#=====================================================================
+#</LicenseText>
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
 include local.def
 
 PROJECT = CitcomS
+PACKAGE = CitcomS
 
-# directory structure
+RECURSE_DIRS = \
+    lib \
+    drivers \
+    module \
+    pyre \
+    etc \
+    tests \
+    visual
 
-DIR_LIB = lib
-DIR_DRIVERS = drivers
-DIR_MODULE = module
-DIR_PYRE = pyre
-DIR_ETC = etc
-DIR_TESTS = tests
-DIR_EXAMPLES = examples
+#--------------------------------------------------------------------------
+#
 
+all:
+	BLD_ACTION="all" $(MM) recurse
 
-BUILD_DIRS = \
-    $(DIR_LIB) \
-    $(DIR_DRIVERS) \
-    $(DIR_MODULE) \
-    $(DIR_PYRE) \
-    $(DIR_ETC) \
-
-OTHER_DIRS = \
-    $(DIR_TESTS) \
-    $(DIR_EXAMPLES)
-
-RECURSE_DIRS = $(BUILD_DIRS)
-
-# targets
-
-all: update
-
-update: $(BUILD_DIRS)
-
-release: tidy
-	cvs release .
-
-test: update
-	(cd $(DIR_TESTS); $(MM) test)
-
-.PHONY: $(DIR_LIB)
-$(DIR_LIB):
-	(cd $(DIR_LIB); $(MM))
-
-
-.PHONY: $(DIR_DRIVERS)
-$(DIR_DRIVERS):
-	(cd $(DIR_DRIVERS); $(MM))
-
-
-.PHONY: $(DIR_MODULE)
-$(DIR_MODULE):
-	(cd $(DIR_MODULE); $(MM))
-
-
-.PHONY: $(DIR_PYRE)
-$(DIR_PYRE):
-	(cd $(DIR_PYRE); $(MM))
-
-
-.PHONY: $(DIR_ETC)
-$(DIR_ETC):
-	(cd $(DIR_ETC); $(MM))
-
-
-.PHONY: $(DIR_TESTS)
-$(DIR_TESTS):
-	(cd $(DIR_TESTS); $(MM))
-
-
-.PHONY: $(DIR_EXAMPLES)
-$(DIR_EXAMPLES):
-	(cd $(DIR_EXAMPLES); $(MM))
-
-
-tidy::
-	BLD_ACTION="tidy" $(MM) recurse
-
+PROJ_CLEAN = 
 clean::
 	BLD_ACTION="clean" $(MM) recurse
 	$(RM) $(RMFLAGS) $(BLD_TMPDIR)/$(PROJECT) $(BLD_LIBDIR)/$(PROJECT)
@@ -92,9 +79,17 @@ clean::
 distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
+tidy::
+	BLD_ACTION="tidy" $(MM) recurse
+
+release: tidy
+	cvs release .
+
+test: all
+	BLD_ACTION="test" RECURSE_DIRS="tests" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.4 2005/06/03 21:51:39 leif Exp $
+# $Id: Make.mm,v 1.4.2.1 2005/07/23 02:02:47 leif Exp $
 
 #
 # End of file
