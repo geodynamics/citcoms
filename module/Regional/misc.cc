@@ -160,6 +160,11 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
         return NULL;
 
     mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
+    if (comm == NULL)
+        return PyErr_Format(pyCitcom_runtimeError,
+                            "%s: 'mpi::Communicator *' argument is null",
+                            pyCitcom_citcom_init__name__);
+        
     MPI_Comm world = comm->handle();
 
     // Allocate global pointer E
@@ -167,7 +172,9 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
 
     // if E is NULL, raise an exception here.
     if (E == NULL)
-      return PyErr_NoMemory();
+        return PyErr_Format(pyCitcom_runtimeError,
+                            "%s: 'libCitcomSCommon.citcom_init' failed",
+                            pyCitcom_citcom_init__name__);
 
     PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
 
@@ -293,6 +300,6 @@ PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.26 2005/06/10 02:23:19 leif Exp $
+// $Id: misc.cc,v 1.27 2005/07/23 01:00:35 leif Exp $
 
 // End of file
