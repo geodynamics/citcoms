@@ -53,10 +53,12 @@
 
 #include <portinfo>
 #include <string>
-#include "journal/journal.h"
-#include "../module/Exchanger/Array2D.h"
+#include <mpi.h>
+#include "journal/diagnostics.h"
+#include "Array2D.h"
 
 using namespace std;
+using namespace Exchanger;
 
 int main(int argc, char** argv)
 {
@@ -76,43 +78,43 @@ int main(int argc, char** argv)
 
     if (rank == 0) {
 	// testing vector-like behaviors
-	info << "c'tor" << journal::end;
+	info << "c'tor" << journal::endl;
 	d1.print(name);
 	i1.print(name);
 
-	info << "copy c'tor" << journal::end;
+	info << "copy c'tor" << journal::endl;
 	d1[0][0] = 1;
 	Array2D<double,3> d2(d1);
 	d2.print(name);
 
-	info << "op'tor [][]" << journal::end;
+	info << "op'tor [][]" << journal::endl;
 	for (int i=0; i<dim; i++)
 	    d2[i][1] = 10*i;
 
-	info << d2[1][1] << journal::end;
+	info << d2[1][1] << journal::endl;
 	d2.print(name);
 
-	info << "swap" << journal::end;
+	info << "swap" << journal::endl;
 	d2.swap(d1);
 	d1.print(name);
 	d2.print(name);
 
-	info << "resize" << journal::end;
+	info << "resize" << journal::endl;
 	i1.resize(3);
 	i1.print(name);
 
-	info << "push_back" << journal::end;
+	info << "push_back" << journal::endl;
 	i1.push_back(3);
 	i1.push_back(4);
 	i1.print(name);
 	d1.push_back(vector<double>(dim, 5));
 	d1.print(name);
 
-	info << "reserve shrink capacity" << journal::end;
+	info << "reserve shrink capacity" << journal::endl;
 	i1.reserve(1000);
-	info << "capacity = " << i1.capacity() << journal::end;
+	info << "capacity = " << i1.capacity() << journal::endl;
 	i1.shrink();
-	info << "capacity = " << i1.capacity() << journal::end;
+	info << "capacity = " << i1.capacity() << journal::endl;
 
     }
 
@@ -121,17 +123,17 @@ int main(int argc, char** argv)
     if (rank == 0) {
 	d1.sendSize(comm, 1);
     } else if(rank == 1) {
-	info << "sendSize/receiveSize" << journal::end;
+	info << "sendSize/receiveSize" << journal::endl;
 	Array2D<double,dim> d3;
-	info << "received size = " << d3.receiveSize(comm, 0) << journal::end;
+	info << "received size = " << d3.recvSize(comm, 0) << journal::endl;
     }
 
     if (rank == 0) {
 	d1.send(comm, 1);
     } else if(rank == 1) {
-	info << "blocking send -> blocking receive" << journal::end;
+	info << "blocking send -> blocking receive" << journal::endl;
 	Array2D<double,dim> d3;
-	d3.receive(comm, 0);
+	d3.recv(comm, 0);
 	d3.print(name);
     }
 
@@ -141,11 +143,11 @@ int main(int argc, char** argv)
 	d1.send(comm, 1, request);
 	MPI_Wait(&request, &status);
     } else if(rank == 1) {
-	info << "non-blocking send -> non-blocking receive" << journal::end;
+	info << "non-blocking send -> non-blocking receive" << journal::endl;
 	Array2D<double,dim> d3;
 	MPI_Request request;
 	MPI_Status status;
-	d3.receive(comm, 0, request);
+	d3.recv(comm, 0, request);
 	MPI_Wait(&request, &status);
 	d3.print(name);
     }
@@ -165,13 +167,13 @@ int main(int argc, char** argv)
 
 	MPI_Waitall(dim, &request[0], &status[0]);
     } else if(rank == 1) {
-	info << "non-blocking partial send -> non-blocking partial receive" << journal::end;
+	info << "non-blocking partial send -> non-blocking partial receive" << journal::endl;
 	Array2D<double,dim> d3(dim*dim);
 	vector<MPI_Request> request(dim);
 	vector<MPI_Status> status(dim);
 
 	for(int i=0; i<dim; i++)
-	    d3.receive(comm, 0, i*dim, dim, request[i]);
+	    d3.recv(comm, 0, i*dim, dim, request[i]);
 
 	MPI_Waitall(dim, &request[0], &status[0]);
 	d3.print(name);
@@ -181,6 +183,6 @@ int main(int argc, char** argv)
 }
 
 // version
-// $Id: array2d.cc,v 1.2 2005/06/10 02:23:24 leif Exp $
+// $Id: array2d.cc,v 1.3 2005/07/23 01:35:53 leif Exp $
 
 // End of file

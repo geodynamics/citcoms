@@ -51,23 +51,29 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+include Python/default.def
+
 PROJECT = CitcomS
 PACKAGE = tests
 
 PROJ_TMPDIR = $(BLD_TMPDIR)/$(PROJECT)/$(PACKAGE)
 
+PROJ_CXX_INCLUDES = ../../Exchanger/lib
+PROJ_BIN = $(BLD_BINDIR)/array2d
+PROJ_CLEAN += $(PROJ_BIN)
+
 PROJ_PYTHONTESTS = signon.py
-PROJ_CPPTESTS = array2d
+PROJ_CPPTESTS = $(PROJ_BIN)
 PROJ_EMPTYTESTS = $(BLD_BINDIR)/CitcomSFull $(BLD_BINDIR)/CitcomSRegional
 PROJ_TESTS = $(PROJ_PYTHONTESTS) $(PROJ_CPPTESTS) $(PROJ_EMPTYTESTS)
 
 #--------------------------------------------------------------------------
 #
 
-all: $(PROJ_TESTS)
+all: $(PROJ_TESTS) export
 
 test:
-	for test in $(PROJ_TESTS) ; do $${test}; done;
+	for test in $(PROJ_TESTS) ; do $${test}; done; exit 0
 
 release: tidy
 	cvs release .
@@ -75,16 +81,26 @@ release: tidy
 update: clean
 	cvs update .
 
+#--------------------------------------------------------------------------
+#
+
+EXPORT_BINS = \
+    array2d \
+    citcomsfull.sh \
+    citcomsregional.sh \
+    coupledcitcoms.sh
+
+export:: export-binaries release-binaries
 
 #--------------------------------------------------------------------------
 #
 
-array2d: array2d.cc ../module/Exchanger/Array2D.h ../module/Exchanger/Array2D.cc
-	$(CXX) $(CXXFLAGS) $(LCXXFLAGS) -o $@ array2d.cc -L/homegurnis/tools/mpich-1.2.5-absoft-3.0/lib -L$(TOOLS_DIR)/lib -ljournal -lmpich -lpmpich
-
-
+$(PROJ_BIN): array2d.cc
+	$(CXX) $(CXXFLAGS) -o $@ $< $(LCXXFLAGS) \
+		-lExchanger -l_mpimodule -ljournal \
+		$(PYTHON_APILIB) $(EXTERNAL_LIBS)
 
 # version
-# $Id: Make.mm,v 1.4 2005/06/10 02:23:24 leif Exp $
+# $Id: Make.mm,v 1.5 2005/07/23 01:35:53 leif Exp $
 
 # End of file

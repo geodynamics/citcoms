@@ -50,7 +50,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-../../tests/citcomsregional.sh \
+citcomsregional.sh \
 \
 --steps=1000 \
 \
@@ -99,6 +99,6 @@
 --solver.visc.visc_max=100.0 \
 \
 # version
-# $Id: cookbook5.sh,v 1.3 2005/06/10 02:23:14 leif Exp $
+# $Id: cookbook5.sh,v 1.4 2005/07/23 01:35:53 leif Exp $
 \
 # End of file
