@@ -53,10 +53,10 @@
 
 def launcher():
 
-    from mpi.LauncherMPICH import LauncherMPICH
+    from CitcomS.Components.Launchers import LauncherMPICH
     return LauncherMPICH()
 
 # version
-__id__ = "$Id: mpich.odb,v 1.1 2005/07/19 21:07:15 leif Exp $"
+__id__ = "$Id: mpich.odb,v 1.1.2.1 2005/07/27 02:06:27 leif Exp $"
 
 # End of file

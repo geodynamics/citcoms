@@ -125,6 +125,20 @@ class SimpleApp(Application):
         return
 
 
+    def usage(self):
+        name = 'citcomsregional.sh'
+        if self.inventory.solver.name == 'full':
+            name = 'citcomsfull.sh'
+        print 'usage: %s [<property>=<value>] [<facility>.<property>=<value>] ...' % name
+        self.showUsage()
+        print """\
+For more information about a particular component:
+  --<facility>.help-properties
+  --<facility>.help-components
+where <facility> is the facility to which the component is bound; e.g.:
+  %(name)s --launcher.help-properties""" % locals()
+        return
+
 
     class Inventory(Application.Inventory):
 
@@ -133,6 +147,7 @@ class SimpleApp(Application):
         import Controller
         import Solver
 
+        launcher = pyre.inventory.facility("launcher", default="mpich")
 
         controller = pyre.inventory.facility("controller", factory=Controller.controller)
         solver = pyre.inventory.facility("solver", factory=Solver.regionalSolver)
@@ -151,6 +166,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.11 2005/06/10 02:23:20 leif Exp $"
+__id__ = "$Id: SimpleApp.py,v 1.11.2.1 2005/07/27 02:06:27 leif Exp $"
 
 # End of file
