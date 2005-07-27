@@ -78,12 +78,15 @@ def hms(t):
 
 defaultEnvironment = "[EXPORT_ROOT,LD_LIBRARY_PATH,PYTHONPATH]"
 
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Launcher for LAM/MPI
+# MPI Launchers:
+#     (Replacement) Launcher for MPICH
+#     Launcher for LAM/MPI
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-class LauncherLAMMPI(Launcher):
+class LauncherMPI(Launcher):
 
 
     class Inventory(Launcher.Inventory):
@@ -91,61 +94,71 @@ class LauncherLAMMPI(Launcher):
         import pyre.inventory
 
         dry = pyre.inventory.bool("dry", default=False)
+        dry.meta['tip'] = "prints the command line and exits"
+        
         debug = pyre.inventory.bool("debug", default=False)
+
+        Launcher.Inventory.nodes.meta['tip'] = """number of machine nodes"""
+        Launcher.Inventory.nodelist.meta['tip'] = """a comma-separated list of machine names in square brackets (e.g., [101-103,105,107])"""
         nodegen = pyre.inventory.str("nodegen")
+        nodegen.meta['tip'] = """a printf-style format string, used in conjunction with 'nodelist' to generate the list of machine names (e.g., "n%03d")"""
+        
         extra = pyre.inventory.str("extra")
+        extra.meta['tip'] = "extra arguments to pass to mpirun"
+        
         command = pyre.inventory.str("command", default="mpirun")
         python_mpi = pyre.inventory.str("python-mpi", default=which("mpipython.exe"))
-        environment = pyre.inventory.list("environment", default=defaultEnvironment)
+        re_exec = pyre.inventory.bool("re-exec", default=True)
 
 
     def launch(self):
         args = self._buildArgumentList()
         if not args:
-            return False
+            return self.inventory.dry
         
         command = " ".join(args)
         self._info.log("executing: {%s}" % command)
 
-        dry = self.inventory.dry
-        if not dry:
-            import os
-            os.system(command)
+        if self.inventory.dry:
+            print command
             return True
-
-        return False
+        
+        import os
+        os.system(command)
+        return True
 
             
-    def __init__(self):
-        Launcher.__init__(self, "lam-mpi")
-        return
-
-
     def _buildArgumentList(self):
         import sys
 
-        nodes = self.nodes
-        nodelist = self.nodelist
-        nodegen = self.inventory.nodegen
         python_mpi = self.inventory.python_mpi
 
-        if not nodes:
-            nodes = len(nodelist)
+        if not self.nodes:
+            self.nodes = len(self.nodelist)
 
-        if nodes < 2:
-            self.inventory.nodes = 1
-            return []
+        if self.nodes < 2:
+            import mpi
+            if mpi.world().handle():
+                self.inventory.nodes = 1
+                return []
+            elif self.inventory.re_exec:
+                # re-exec under mpipython.exe
+                args = []
+                args.append(python_mpi)
+                args += sys.argv
+                args.append("--launcher.re-exec=False") # protect against infinite regress
+                return args
+            else:
+                # We are under the 'mpipython.exe' interpreter,
+                # yet the 'mpi' module is non-functional.  Attempt to
+                # re-raise the exception that may have caused this.
+                import _mpi
+                return []
         
         # build the command
         args = []
         args.append(self.inventory.command)
-        args.append(self.inventory.extra)
-        args.append("-x %s" % ','.join(self.inventory.environment))
-        args.append("-np %d" % nodes)
-
-        # use only the specific nodes specified explicitly
-        if nodelist:
-            args.append("n" + ",".join([(nodegen) % node for node in nodelist]))
+        self._appendMpiRunArgs(args)
 
         # add the parallel version of the interpreter on the command line
         args.append(python_mpi)
@@ -154,6 +167,65 @@ class LauncherLAMMPI(Launcher):
         args.append("--mode=worker")
 
         return args
+
+    
+    def _appendMpiRunArgs(self, args):
+        args.append(self.inventory.extra)
+        args.append("-np %d" % self.nodes)
+        
+        # use only the specific nodes specified explicitly
+        if self.nodelist:
+            self._appendNodeListArgs(args)
+
+
+class LauncherMPICH(LauncherMPI):
+
+
+    class Inventory(LauncherMPI.Inventory):
+
+        import pyre.inventory
+
+        machinefile = pyre.inventory.str("machinefile", default="mpirun.nodes")
+        machinefile.meta['tip'] = """filename of machine file"""
+
+
+    def __init__(self):
+        LauncherMPI.__init__(self, "mpich")
+
+
+    def _appendNodeListArgs(self, args):
+        machinefile = self.inventory.machinefile
+        nodegen = self.inventory.nodegen
+        file = open(machinefile, "w")
+        for node in self.nodelist:
+            file.write((nodegen + '\n') % node)
+        file.close()
+        args.append("-machinefile %s" % machinefile)
+
+
+class LauncherLAMMPI(LauncherMPI):
+
+
+    class Inventory(LauncherMPI.Inventory):
+
+        import pyre.inventory
+
+        environment = pyre.inventory.list("environment", default=defaultEnvironment)
+        environment.meta['tip'] = """a comma-separated list of environment variables to export to the batch job"""
+
+
+    def __init__(self):
+        LauncherMPI.__init__(self, "lam-mpi")
+
+
+    def _appendMpiRunArgs(self, args):
+        args.append("-x %s" % ','.join(self.inventory.environment))
+        super(LauncherLAMMPI, self)._appendMpiRunArgs(args)
+
+
+    def _appendNodeListArgs(self, args):
+        nodegen = self.inventory.nodegen
+        args.append("n" + ",".join([(nodegen) % node for node in self.nodelist]))
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -186,6 +258,10 @@ class LauncherBatch(Launcher):
         python_mpi = pyre.inventory.str("python-mpi", default=which("mpipython.exe"))
         task = pyre.inventory.str("task")
 
+        # Ignore 'nodegen' so that the examples will work without modification.
+        nodegen = pyre.inventory.str("nodegen")
+        nodegen.meta['tip'] = """(ignored)"""
+
         walltime = pyre.inventory.dimensional("walltime", default=30.0*minute)
         mail = pyre.inventory.bool("mail", default=False)
         queue = pyre.inventory.str("queue")
@@ -201,7 +277,12 @@ class LauncherBatch(Launcher):
 
 
     def launch(self):
-
+        if self.inventory.dry:
+            print self._buildScript()
+            print "# submit with:"
+            print "#", self._buildBatchCommand()
+            return True
+        
         # write the script
         scriptFile = open(expandMacros("${script}", self.inv), "w")
         scriptFile.write(self._buildScript())
@@ -211,13 +292,9 @@ class LauncherBatch(Launcher):
         command = self._buildBatchCommand()
         self._info.log("executing: {%s}" % command)
 
-        dry = self.inventory.dry
-        if not dry:
-            import os
-            os.system(command)
-            return True
-
-        return False
+        import os
+        os.system(command)
+        return True
 
 
     def __init__(self, name):
@@ -377,7 +454,6 @@ class LauncherGlobus(LauncherBatch):
 
     def __init__(self):
         LauncherBatch.__init__(self, "globus")
-        return
 
 
     def _buildScript(self):
@@ -456,6 +532,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: Launchers.py,v 1.2 2005/07/22 03:03:14 leif Exp $"
+__id__ = "$Id: Launchers.py,v 1.3 2005/07/27 01:58:32 leif Exp $"
 
 # End of file 
