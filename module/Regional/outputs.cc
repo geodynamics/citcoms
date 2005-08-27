@@ -58,11 +58,8 @@
 
 #include "outputs.h"
 
-extern "C" {
 #include "global_defs.h"
 #include "output.h"
-
-}
 
 
 char pyCitcom_output__doc__[] = "";

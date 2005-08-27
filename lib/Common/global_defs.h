@@ -64,8 +64,11 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include "mpi.h"
 
+#ifdef __cplusplus
 
-#if !defined(__cplusplus)
+extern "C" {
+
+#else
 
 /* Macros */
 #define max(A,B) (((A) > (B)) ? (A) : (B))
@@ -932,5 +935,9 @@ struct All_variables {
   void (* temperatures_conform_bcs)(void*);
 
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

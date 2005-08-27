@@ -58,12 +58,12 @@
 #include "exceptions.h"
 #include "misc.h"
 
-extern "C" {
-
 #include "mpi.h"
 #include "global_defs.h"
 #include "citcom_init.h"
 #include "advection_diffusion.h"
+
+extern "C" {
 
     double return1_test();
     void read_instructions(struct All_variables*, char*);

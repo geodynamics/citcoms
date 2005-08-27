@@ -53,9 +53,18 @@
 
 #if !defined(CITCOM_INIT_HDR)
 #define CITCOM_INIT_HDR
+
 #include "mpi.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern struct All_variables* citcom_init(MPI_Comm *world);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

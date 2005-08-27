@@ -56,9 +56,9 @@
 #include "exceptions.h"
 #include "initial_conditions.h"
 
-extern "C" {
-
 #include "global_defs.h"
+
+extern "C" {
 
     void construct_tic(struct All_variables*);
     void initial_pressure(struct All_variables*);

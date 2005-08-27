@@ -57,9 +57,10 @@
 
 #include "advdiffu.h"
 
-extern "C" {
 #include "global_defs.h"
 #include "advection_diffusion.h"
+
+extern "C" {
     void set_convection_defaults(struct All_variables *);
 }
 

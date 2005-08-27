@@ -50,6 +50,14 @@
  * 
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#if !defined(CitcomS_parallel_related_h)
+#define CitcomS_parallel_related_h
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void parallel_process_termination();
 void parallel_process_sync(struct All_variables *E);
 double CPU_time0();
@@ -64,3 +72,8 @@ void exchange_node_d(struct All_variables *E, double **U, int lev);
 void exchange_node_f(struct All_variables *E, float **U, int lev);
 void exchange_snode_f(struct All_variables *E, float **U1, float **U2, int lev);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

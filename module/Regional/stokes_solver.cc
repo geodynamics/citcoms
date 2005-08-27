@@ -58,10 +58,10 @@
 #include "exceptions.h"
 #include "stokes_solver.h"
 
-extern "C" {
-
 #include "global_defs.h"
 #include "drive_solvers.h"
+
+extern "C" {
 
     void assemble_forces(struct All_variables*, int);
     void construct_stiffness_B_matrix(struct All_variables*);

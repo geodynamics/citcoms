@@ -57,10 +57,10 @@
 #include "exceptions.h"
 #include "mesher.h"
 
-extern "C" {
-
 #include "global_defs.h"
 #include "parallel_related.h"
+
+extern "C" {
 
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
