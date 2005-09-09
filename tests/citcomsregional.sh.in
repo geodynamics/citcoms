@@ -49,11 +49,13 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+PYTHONPATH="@pythondir@:@pythondir@/pythia-0.8"
+export PYTHONPATH
 
-python ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc --solver=full $*
+python @pkgpythondir@/SimpleApp.pyc $*
 
 
 # version
-# $Id: citcomsfull.sh,v 1.3 2005/07/19 21:23:38 leif Exp $
+# $Id$
 
 # End of file

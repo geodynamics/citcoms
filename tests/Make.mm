@@ -90,7 +90,17 @@ EXPORT_BINS = \
     citcomsregional.sh \
     coupledcitcoms.sh
 
-export:: export-binaries release-binaries
+RELEASE_BINARIES = $(foreach bin,$(EXPORT_BINS),$(PROJ_BINDIR)/$(bin))
+
+export:: release-binaries
+
+release-binaries:: $(RELEASE_BINARIES)
+
+$(PROJ_BINDIR)/%.sh: %.sh.in
+	sed \
+		-e 's|[@]pythondir[@]|$(EXPORT_ROOT)/modules|g' \
+		-e 's|[@]pkgpythondir[@]|$(EXPORT_MODULEDIR)|g' \
+		$< > $@ || (rm -f $@ && exit 1)
 
 #--------------------------------------------------------------------------
 #
@@ -101,6 +111,6 @@ $(PROJ_BIN): array2d.cc
 		$(PYTHON_APILIB) $(EXTERNAL_LIBS)
 
 # version
-# $Id: Make.mm,v 1.5 2005/07/23 01:35:53 leif Exp $
+# $Id$
 
 # End of file

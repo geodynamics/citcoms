@@ -152,7 +152,7 @@ class LauncherMPI(Launcher):
                 # We are under the 'mpipython.exe' interpreter,
                 # yet the 'mpi' module is non-functional.  Attempt to
                 # re-raise the exception that may have caused this.
-                import _mpi
+                import mpi._mpi
                 return []
         
         # build the command
@@ -532,6 +532,6 @@ if __name__ == "__main__":
 
 
 # version
-__id__ = "$Id: Launchers.py,v 1.3 2005/07/27 01:58:32 leif Exp $"
+__id__ = "$Id$"
 
 # End of file 

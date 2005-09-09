@@ -60,8 +60,11 @@ class RegionalSolver(Solver):
 
     def __init__(self, name, facility="solver"):
 	Solver.__init__(self, name, facility)
-        import CitcomS.Regional as CitcomModule
-	self.CitcomModule = CitcomModule
+        try:
+            import CitcomS.Regional as CitcomModule
+	    self.CitcomModule = CitcomModule
+        except:
+            self.CitcomModule = None
         return
 
 
@@ -83,6 +86,6 @@ class RegionalSolver(Solver):
 
 
 # version
-__id__ = "$Id: RegionalSolver.py,v 1.37 2005/06/10 02:23:24 leif Exp $"
+__id__ = "$Id$"
 
 # End of file

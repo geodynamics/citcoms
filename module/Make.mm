@@ -65,7 +65,6 @@ RECURSE_DIRS = $(BLD_DIRS)
 
 
 all:
-	@(cd Full; $(MM) link)
 	BLD_ACTION="all" $(MM) recurse
 
 tidy::
@@ -78,7 +77,7 @@ distclean::
 	BLD_ACTION="distclean" $(MM) recurse
 
 # version
-# $Id: Make.mm,v 1.12 2005/06/10 02:23:18 leif Exp $
+# $Id$
 
 #
 # End of file

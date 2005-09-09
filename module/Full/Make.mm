@@ -74,7 +74,7 @@ PROJ_CXX_SRCLIB = \
 	-l_mpimodule \
 	$(RPATH_ARGS)
 
-PROJ_CXX_INCLUDES = ../../lib/Common
+PROJ_CXX_INCLUDES = ../Regional ../../lib/Common
 
 PROJ_SRCS = \
     advdiffu.cc \
@@ -87,15 +87,12 @@ PROJ_SRCS = \
     setProperties.cc \
     stokes_solver.cc
 
+REGIONAL_SRCS = $(foreach src,$(PROJ_SRCS),../Regional/$(src))
 
-#===========================================================================
-# link source files from ../Regional to .
-
-link:
-	(cd ../Regional;\
-	 ln -f $(PROJ_SRCS) *.h ../$(TYPE))
+$(PROJ_SRCS):
+	$(LN_S) -f $(REGIONAL_SRCS) .
 
 # version
-# $Id: Make.mm,v 1.19 2005/06/30 01:31:29 leif Exp $
+# $Id$
 
 # End of file
