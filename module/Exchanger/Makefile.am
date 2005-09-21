@@ -1,13 +1,11 @@
 ## Process this file with automake to produce Makefile.in
-# $Id: Makefile.am,v 1.1 2005/08/24 22:45:51 leif Exp $
+# $Id$
 
 pkgpyexec_LTLIBRARIES = Exchangermodule.la
 CXX = $(MPICXX)
 CXXLD = @CXX@
 INCLUDES = \
 	-I$(top_srcdir)/lib/Common \
-	-I$(EXCHANGER_INCDIR) \
-	-I$(PYTHIA_INCDIR) \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 Exchangermodule_la_SOURCES = \
@@ -62,7 +60,7 @@ EXTRA_DIST = \
 Exchangermodule_la_LDFLAGS = -module -release $(VERSION)
 Exchangermodule_la_LIBADD = \
 	$(top_builddir)/lib/Regional/libCitcomSRegional.la \
-	-L$(EXCHANGER_LIBDIR) -lExchanger \
-	-L$(PYTHIA_LIBDIR) -l_mpimodule -ljournal
+	-lExchanger \
+	-l_mpimodule -ljournal
 
 ## end of Makefile.am

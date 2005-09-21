@@ -55,9 +55,12 @@
 #include "global_defs.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <math.h>
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>

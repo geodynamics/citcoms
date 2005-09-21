@@ -52,7 +52,7 @@
 PYTHONPATH="@pythondir@:@pythondir@/pythia-0.8"
 export PYTHONPATH
 
-python @pkgpythondir@/SimpleApp.pyc --solver=full $*
+@PYTHON@ @pkgpythondir@/SimpleApp.pyc --solver=full $*
 
 
 # version

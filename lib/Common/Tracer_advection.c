@@ -65,7 +65,9 @@
 #include <mpi.h>
 #include <math.h>
 #include <sys/types.h>
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <stdlib.h> /* for "system" command */
 
 #include "element_definitions.h"

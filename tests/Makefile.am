@@ -1,11 +1,12 @@
 ## Process this file with automake to produce Makefile.in
-# $Id: Makefile.am,v 1.1 2005/08/24 22:45:51 leif Exp $
+# $Id$
 
 nodist_bin_SCRIPTS = \
 	citcomsfull.sh \
 	citcomsregional.sh \
 	coupledcitcoms.sh
 do_subst = sed \
+	-e 's|[@]PYTHON[@]|$(PYTHON)|g' \
 	-e 's|[@]pythondir[@]|$(pythondir)|g' \
 	-e 's|[@]pkgpythondir[@]|$(pkgpythondir)|g'
 citcomsfull.sh: $(srcdir)/citcomsfull.sh.in
@@ -30,8 +31,8 @@ INCLUDES = \
 	-I$(top_srcdir)/lib/Common \
 	$(MPIINCLUDES)
 LDADD = \
-	-L$(EXCHANGER_LIBDIR) -lExchanger \
-	-L$(PYTHIA_LIBDIR) -l_mpimodule -ljournal \
+	-lExchanger \
+	-l_mpimodule -ljournal \
 	$(PYTHON_BLDLIBRARY) \
 	$(MPILIBS)
 CC = $(MPICC)

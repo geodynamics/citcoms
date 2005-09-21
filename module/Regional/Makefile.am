@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-# $Id: Makefile.am,v 1.1 2005/08/24 22:45:51 leif Exp $
+# $Id$
 
 pkgpyexec_LTLIBRARIES = Regionalmodule.la
 noinst_LTLIBRARIES = libModuleCommon.la
@@ -7,7 +7,6 @@ CXX = $(MPICXX)
 CXXLD = @CXX@
 INCLUDES = \
 	-I$(top_srcdir)/lib/Common \
-	-I$(PYTHIA_INCDIR) \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 
@@ -38,6 +37,6 @@ Regionalmodule_la_LDFLAGS = -module -release $(VERSION)
 Regionalmodule_la_LIBADD = \
 	libModuleCommon.la \
 	$(top_builddir)/lib/Regional/libCitcomSRegional.la \
-	-L$(PYTHIA_LIBDIR) -l_mpimodule -ljournal
+	-l_mpimodule -ljournal
 
 ## end of Makefile.am

@@ -1,9 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-# $Id: configure.ac,v 1.1 2005/08/24 22:45:51 leif Exp $
+# $Id$
 
 AC_PREREQ(2.59)
-AC_INIT([CitcomS], [2.1.0], [leif@geodynamics.org], [CitcomS])
+AC_INIT([CitcomS], [2.1.0], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
 AC_CONFIG_SRCDIR([drivers/Citcom.c])
 AC_CONFIG_HEADER([portinfo])
@@ -12,6 +12,7 @@ AM_INIT_AUTOMAKE([foreign])
 
 # 'configure' options
 AC_ARG_VAR(PYTHON, [Python interpreter])
+AC_ARG_VAR(PYTHONPATH, [Python module search path])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
         [build Pyre modules @<:@default=yes@:>@])],
@@ -30,7 +31,7 @@ AC_PROG_LIBTOOL
 
 # Checks for Python modules and packages.
 if test "$want_pyre" = yes; then
-    CIT_PATH_PYTHIA([0.8])
+    CIT_PATH_PYTHIA([0.8], [mpi])
     CIT_PATH_EXCHANGER([1.0])
 fi
 
@@ -39,6 +40,7 @@ CIT_CHECK_LIB_MPI
 
 # Checks for header files.
 CIT_HEADER_MPI
+AC_CHECK_HEADERS([malloc.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -68,6 +70,11 @@ AC_CONFIG_FILES([Makefile
                  pyre/Makefile
                  tests/Makefile
                  visual/Makefile])
+
+if test "$want_pyre" = yes; then
+    AC_CONFIG_SUBDIRS([pythia-0.8 Exchanger])
+fi
+
 AC_OUTPUT
 
 dnl end of configure.ac
