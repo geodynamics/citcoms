@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-# $Id: Makefile.am,v 1.1 2005/08/24 22:45:51 leif Exp $
+# $Id$
 
 nobase_pkgpython_PYTHON = \
 	Components/Advection_diffusion/Advection_diffusion.py \
@@ -29,12 +29,24 @@ nobase_pkgpython_PYTHON = \
 	Controller.py \
 	CoupledApp.py \
 	Coupler.py \
-	__init__.py \
 	Layout.py \
 	SimpleApp.py \
 	Solver/FullSolver.py \
 	Solver/__init__.py \
 	Solver/RegionalSolver.py \
 	Solver/Solver.py
+
+nodist_pkgpython_PYTHON = \
+	config.py \
+	__init__.py
+do_subst = sed \
+	-e 's|[@]PACKAGE_VERSION[@]|$(PACKAGE_VERSION)|g'
+config.py: $(top_builddir)/portinfo $(top_builddir)/Makefile
+	$(PYCONFIG) -h $(top_builddir)/portinfo -m $(top_builddir)/Makefile -o $@
+__init__.py: $(srcdir)/__init__.py.in
+	$(do_subst) < $(srcdir)/__init__.py.in > $@ || (rm -f $@ && exit 1)
+CLEANFILES = $(nodist_pkgpython_PYTHON)
+EXTRA_DIST = \
+	__init__.py.in
 
 ## end of Makefile.am

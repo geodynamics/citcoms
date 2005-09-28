@@ -59,7 +59,7 @@ import journal
 class SimpleApp(Application):
 
 
-    def __init__(self, name="citcom"):
+    def __init__(self, name="CitcomS"):
         Application.__init__(self, name)
 
         self.solver = None
@@ -155,17 +155,26 @@ where <facility> is the facility to which the component is bound; e.g.:
         steps = pyre.inventory.int("steps", default=1)
 
 
+    def _getPrivateDepositoryLocations(self):
+        list = []
+        try:
+            from config import makefile
+            list.append(makefile['pkgsysconfdir'])
+        except ImportError, KeyError:
+            pass
+        return list
+
 
 # main
 if __name__ == "__main__":
 
-    app = SimpleApp("citcoms")
+    app = SimpleApp("CitcomS")
     app.run()
 
 
 
 
 # version
-__id__ = "$Id: SimpleApp.py,v 1.12 2005/07/27 01:58:31 leif Exp $"
+__id__ = "$Id$"
 
 # End of file

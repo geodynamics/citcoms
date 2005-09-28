@@ -13,6 +13,11 @@ AM_INIT_AUTOMAKE([foreign])
 # 'configure' options
 AC_ARG_VAR(PYTHON, [Python interpreter])
 AC_ARG_VAR(PYTHONPATH, [Python module search path])
+AC_ARG_VAR(MPIRUN, [command to run MPI programs])
+AC_ARG_VAR(BSUB, [command to submit LSF batch jobs])
+AC_ARG_VAR(QSUB, [command to submit PBS batch jobs])
+AC_ARG_VAR(GLOBUSRUN, [command to submit Globus batch jobs])
+AC_ARG_VAR(BATCHTYPE, [default batch system (lsf, pbs, or globus)])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
         [build Pyre modules @<:@default=yes@:>@])],
@@ -24,15 +29,50 @@ AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
 if test "$want_pyre" = yes; then
     AM_PATH_PYTHON([2.3])
     CIT_PYTHON_INCDIR
+    AC_PATH_PROG([MPIRUN], [mpirun])
+    if test -z "$MPIRUN"; then
+        AC_MSG_ERROR([program 'mpirun' not found])
+    fi
+    AC_PATH_PROG([BSUB], [bsub])
+    AC_PATH_PROG([QSUB], [qsub])
+    AC_PATH_PROG([GLOBUSRUN], [globusrun])
+    if test -z "$BATCHTYPE"; then
+        if test -n "$BSUB"; then
+            LAUNCHER="lsf"
+        elif test -n "$QSUB"; then
+            LAUNCHER="pbs"
+        elif test -n "$GLOBUSRUN"; then
+            LAUNCHER="globus"
+        else
+            if $MPIRUN --help 2>&1 | grep machinefile >/dev/null; then
+                LAUNCHER="mpich"
+            else
+                LAUNCHER="lam-mpi"
+            fi
+        fi
+        test -z "$BSUB" && BSUB="bsub"
+        test -z "$QSUB" && QSUB="qsub"
+        test -z "$GLOBUSRUN" && GLOBUSRUN="globusrun"
+    else
+        case "$BATCHTYPE" in
+            lsf | pbs | globus) LAUNCHER=$BATCHTYPE ;;
+            *) AC_MSG_ERROR([BATCHTYPE=$BATCHTYPE is invalid]) ;;
+        esac
+    fi
+    AC_SUBST([LAUNCHER])
 fi
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
 AC_PROG_LIBTOOL
+CIT_PROG_PYCONFIG
+AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
 
 # Checks for Python modules and packages.
 if test "$want_pyre" = yes; then
+    PYTHONPATH="${pythondir}${PYTHONPATH:+:${PYTHONPATH}}"; export PYTHONPATH
     CIT_PATH_PYTHIA([0.8], [mpi])
     CIT_PATH_EXCHANGER([1.0])
+    AC_SUBST([PYTHONPATH])
 fi
 
 # Checks for libraries.

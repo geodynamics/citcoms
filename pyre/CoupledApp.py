@@ -58,7 +58,7 @@ import journal
 class CoupledApp(SimpleApp):
 
 
-    def __init__(self, name="citcom"):
+    def __init__(self, name="CitcomS"):
         SimpleApp.__init__(self, name)
 
         self.solver = None
@@ -174,12 +174,12 @@ class CoupledApp(SimpleApp):
 # main
 if __name__ == "__main__":
 
-    app = CoupledApp("citcoms")
+    app = CoupledApp("CitcomS")
     app.run()
 
 
 
 # version
-__id__ = "$Id: CoupledApp.py,v 1.14 2005/06/10 02:23:20 leif Exp $"
+__id__ = "$Id$"
 
 # End of file

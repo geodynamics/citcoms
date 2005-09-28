@@ -49,7 +49,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-PYTHONPATH="@pythondir@:@pythondir@/pythia-0.8"
+PYTHONPATH="@PYTHONPATH@${PYTHONPATH:+:${PYTHONPATH}}"
 export PYTHONPATH
 
 @PYTHON@ @pkgpythondir@/CoupledApp.pyc $*

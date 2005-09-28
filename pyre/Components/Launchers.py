@@ -396,7 +396,7 @@ class LauncherLSF(LauncherBatch):
         
         import pyre.inventory
         
-        command = pyre.inventory.str("command", default="pam -g 1 gmmpirun_wrapper") # TACC-specific?
+        command = pyre.inventory.str("command", default="mpijob mpirun")
         batch_command = pyre.inventory.str("batch-command", default="bsub")
 
 
@@ -524,7 +524,7 @@ if __name__ == "__main__":
 
         
         def __init__(self):
-            Script.__init__(self, "citcoms")
+            Script.__init__(self, "CitcomS")
 
     
     app = TestApp()
