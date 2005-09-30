@@ -63,9 +63,15 @@ if test "$want_pyre" = yes; then
 fi
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
+if test "$want_pyre" = yes; then
+    AC_CHECK_PROG(check_CXX, [$CXX], [$CXX], [ ])
+    if test "$check_CXX" = " "; then
+        AC_MSG_ERROR([no C++ compiler found])
+    fi
+    CIT_PROG_PYCONFIG
+    AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
+fi
 AC_PROG_LIBTOOL
-CIT_PROG_PYCONFIG
-AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
 
 # Checks for Python modules and packages.
 if test "$want_pyre" = yes; then
@@ -76,10 +82,22 @@ if test "$want_pyre" = yes; then
 fi
 
 # Checks for libraries.
-CIT_CHECK_LIB_MPI
+if test "$want_pyre" = yes; then
+    AC_LANG_PUSH(C++)
+    CIT_CHECK_LIB_MPI
+    AC_LANG_POP(C++)
+else
+    CIT_CHECK_LIB_MPI
+fi
 
 # Checks for header files.
-CIT_HEADER_MPI
+if test "$want_pyre" = yes; then
+    AC_LANG_PUSH(C++)
+    CIT_HEADER_MPI
+    AC_LANG_POP(C++)
+else
+    CIT_HEADER_MPI
+fi
 AC_CHECK_HEADERS([malloc.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
