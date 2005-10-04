@@ -58,12 +58,12 @@
 #include "exceptions.h"
 #include "misc.h"
 
-extern "C" {
-
 #include "mpi.h"
 #include "global_defs.h"
 #include "citcom_init.h"
 #include "advection_diffusion.h"
+
+extern "C" {
 
     double return1_test();
     void read_instructions(struct All_variables*, char*);
@@ -300,6 +300,6 @@ PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: misc.cc,v 1.26.2.1 2005/07/23 01:09:45 leif Exp $
+// $Id$
 
 // End of file

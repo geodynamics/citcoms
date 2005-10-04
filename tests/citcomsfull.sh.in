@@ -49,11 +49,13 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
+PYTHONPATH="@PYTHONPATH@${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONPATH
 
-python ${EXPORT_ROOT}/modules/CitcomS/SimpleApp.pyc --solver=full $*
+@PYTHON@ @pkgpythondir@/SimpleApp.pyc --solver=full $*
 
 
 # version
-# $Id: citcomsfull.sh,v 1.2.2.1 2005/07/19 21:41:30 leif Exp $
+# $Id$
 
 # End of file

@@ -82,12 +82,23 @@ update: clean
 
 EXPORT_BINS = \
     citcomsfull.sh \
-    citcomsregional.sh \
-    coupledcitcoms.sh
+    citcomsregional.sh
 
-export:: export-binaries release-binaries
+RELEASE_BINARIES = $(foreach bin,$(EXPORT_BINS),$(PROJ_BINDIR)/$(bin))
+
+export:: release-binaries
+
+release-binaries:: $(RELEASE_BINARIES)
+
+$(PROJ_BINDIR)/%.sh: %.sh.in
+	sed \
+		-e 's|[@]pkgpythondir[@]|$(EXPORT_MODULEDIR)|g' \
+		-e 's|[@]PYTHON[@]|$(PYTHON)|g' \
+		-e 's|[@]PYTHONPATH[@]|$(EXPORT_ROOT)/modules|g' \
+		$< > $@ || (rm -f $@ && exit 1)
+	$(CHMOD) +x $@
 
 # version
-# $Id: Make.mm,v 1.4.2.1 2005/07/23 02:02:49 leif Exp $
+# $Id$
 
 # End of file

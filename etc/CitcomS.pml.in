@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!-- @INPUT@ -->
+<!-- $Id$ -->
+
+<!--
+
+Edit these defaults as appropriate for your system.
+
+You may override these defaults from ~/.pyre/CitcomS/CitcomS.pml,
+./CitcomS.pml, or the command line.
+
+-->
+
+<!DOCTYPE inventory>
+
+<inventory>
+
+    <component name="CitcomS">
+        <property name="help">no</property>
+        <property name="help-properties">no</property>
+        <property name="help-components">no</property>
+
+        <!-- launcher configuration; see @LAUNCHERS_PY@ -->
+
+        <property name="launcher">@LAUNCHER@</property>
+
+        <component name="launcher">
+            <property name="python-mpi">@PYTHIA_MPIPYTHON@</property>
+        </component>
+
+        <component name="mpich">
+            <property name="command">@MPIRUN@</property>
+        </component>
+
+        <component name="lam-mpi">
+            <property name="command">@MPIRUN@</property>
+        </component>
+
+        <component name="pbs">
+            <property name="command">@MPIRUN@ -np ${nodes} -machinefile $PBS_NODEFILE</property>
+            <property name="batch-command">@QSUB@</property>
+        </component>
+
+        <component name="lsf">
+            <property name="command">mpijob @MPIRUN@</property>
+            <property name="batch-command">@BSUB@</property>
+        </component>
+
+        <component name="globus">
+            <property name="batch-command">@GLOBUSRUN@</property>
+            <!-- passed as "-r <resource>" to globusrun -->
+            <property name="resource">localhost</property>
+        </component>
+    </component>
+
+</inventory>
+
+<!-- End of file -->

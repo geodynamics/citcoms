@@ -58,11 +58,8 @@
 
 #include "outputs.h"
 
-extern "C" {
 #include "global_defs.h"
 #include "output.h"
-
-}
 
 
 char pyCitcom_output__doc__[] = "";
@@ -112,6 +109,6 @@ PyObject * pyCitcom_output_pseudo_surf(PyObject *self, PyObject *args)
 }
 
 // version
-// $Id: outputs.cc,v 1.13 2005/06/10 02:23:19 leif Exp $
+// $Id$
 
 // End of file

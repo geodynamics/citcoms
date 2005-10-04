@@ -1,0 +1,19 @@
+CitComS.py NEWS -- history of user-visible changes.  2005-09-30
+
+Please send CitComS.py bug reports to cig-mc@geodynamics.org.
+
+
+Version 2.0.1
+
+* CitComS.py is now distributed under the GNU General Public License.
+  See the file COPYING for copying conditions.
+
+* CitComS.py now uses the GNU Build System (Autoconf, Automake, and
+  Libtool).  See the file INSTALL for building and installation
+  instructions.
+
+
+Local variables:
+version-control: never
+mode: indented-text
+end:

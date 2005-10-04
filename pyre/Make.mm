@@ -76,6 +76,9 @@ release: tidy
 update: clean
 	cvs update .
 
+init:
+	sed -e 's|@PACKAGE_VERSION@|2.0.1|g' < __init__.py.in > __init__.py
+
 #--------------------------------------------------------------------------
 #
 # export
@@ -89,13 +92,12 @@ EXPORT_PYTHON_MODULES = \
 	Layout.py \
 	SimpleApp.py
 
-
-export:: export-python-modules
+export:: init export-python-modules
 	BLD_ACTION="export" $(MM) recurse
-
+	$(RM) $(RMFLAGS) __init__.py __init__.pyc
 
 # version
-# $Id: Make.mm,v 1.14.2.1 2005/06/17 19:50:07 leif Exp $
+# $Id$
 
 #
 # End of file

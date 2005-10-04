@@ -56,9 +56,9 @@
 #include "exceptions.h"
 #include "initial_conditions.h"
 
-extern "C" {
-
 #include "global_defs.h"
+
+extern "C" {
 
     void construct_tic(struct All_variables*);
     void initial_pressure(struct All_variables*);
@@ -176,6 +176,6 @@ PyObject * pyCitcom_ic_initViscosity(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: initial_conditions.cc,v 1.4 2005/06/10 02:23:19 leif Exp $
+// $Id$
 
 // End of file

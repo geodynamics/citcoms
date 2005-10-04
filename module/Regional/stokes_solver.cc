@@ -58,10 +58,10 @@
 #include "exceptions.h"
 #include "stokes_solver.h"
 
-extern "C" {
-
 #include "global_defs.h"
 #include "drive_solvers.h"
+
+extern "C" {
 
     void assemble_forces(struct All_variables*, int);
     void construct_stiffness_B_matrix(struct All_variables*);
@@ -303,6 +303,6 @@ PyObject * pyCitcom_solve_constrained_flow_iterative_pseudo_surf(PyObject *self,
 }
 
 // version
-// $Id: stokes_solver.cc,v 1.11 2005/06/10 02:23:20 leif Exp $
+// $Id$
 
 // End of file

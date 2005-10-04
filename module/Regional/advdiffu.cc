@@ -57,9 +57,10 @@
 
 #include "advdiffu.h"
 
-extern "C" {
 #include "global_defs.h"
 #include "advection_diffusion.h"
+
+extern "C" {
     void set_convection_defaults(struct All_variables *);
 }
 
@@ -153,6 +154,6 @@ PyObject * pyCitcom_stable_timestep(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: advdiffu.cc,v 1.9 2005/06/10 02:23:19 leif Exp $
+// $Id$
 
 // End of file

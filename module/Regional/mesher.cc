@@ -57,10 +57,10 @@
 #include "exceptions.h"
 #include "mesher.h"
 
-extern "C" {
-
 #include "global_defs.h"
 #include "parallel_related.h"
+
+extern "C" {
 
     void allocate_common_vars(struct All_variables*);
     void allocate_velocity_vars(struct All_variables*);
@@ -210,6 +210,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 // version
-// $Id: mesher.cc,v 1.16 2005/06/10 02:23:19 leif Exp $
+// $Id$
 
 // End of file
