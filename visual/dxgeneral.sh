@@ -43,7 +43,7 @@ for i; do
 
     echo processing $i ...
     output=$i.general
-    grid=`head -1 $i | awk '{print $3, $2, $1, $4, $5}'`
+    grid=`head -n 1 $i | awk '{print $3, $2, $1, $4, $5}'`
 
     echo file = $i > $output
     echo grid = $grid >> $output
