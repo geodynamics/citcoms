@@ -3,49 +3,24 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #<LicenseText>
-#=====================================================================
 #
-#                             CitcomS.py
-#                 ---------------------------------
+# CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
+# Copyright (C) 2002-2005, California Institute of Technology.
 #
-#                              Authors:
-#            Eh Tan, Eun-seo Choi, and Pururav Thoutireddy 
-#          (c) California Institute of Technology 2002-2005
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 #
-#        By downloading and/or installing this software you have
-#       agreed to the CitcomS.py-LICENSE bundled with this software.
-#             Free for non-commercial academic research ONLY.
-#      This program is distributed WITHOUT ANY WARRANTY whatsoever.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#=====================================================================
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-#  Copyright June 2005, by the California Institute of Technology.
-#  ALL RIGHTS RESERVED. United States Government Sponsorship Acknowledged.
-# 
-#  Any commercial use must be negotiated with the Office of Technology
-#  Transfer at the California Institute of Technology. This software
-#  may be subject to U.S. export control laws and regulations. By
-#  accepting this software, the user agrees to comply with all
-#  applicable U.S. export laws and regulations, including the
-#  International Traffic and Arms Regulations, 22 C.F.R. 120-130 and
-#  the Export Administration Regulations, 15 C.F.R. 730-744. User has
-#  the responsibility to obtain export licenses, or other export
-#  authority as may be required before exporting such information to
-#  foreign countries or providing access to foreign nationals.  In no
-#  event shall the California Institute of Technology be liable to any
-#  party for direct, indirect, special, incidental or consequential
-#  damages, including lost profits, arising out of the use of this
-#  software and its documentation, even if the California Institute of
-#  Technology has been advised of the possibility of such damage.
-# 
-#  The California Institute of Technology specifically disclaims any
-#  warranties, including the implied warranties or merchantability and
-#  fitness for a particular purpose. The software and documentation
-#  provided hereunder is on an "as is" basis, and the California
-#  Institute of Technology has no obligations to provide maintenance,
-#  support, updates, enhancements or modifications.
-#
-#=====================================================================
 #</LicenseText>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -128,6 +103,6 @@ class Coupler(Component):
 
 
 # version
-__id__ = "$Id: Coupler.py,v 1.12 2005/06/10 02:23:20 leif Exp $"
+__id__ = "$Id$"
 
 # End of file
