@@ -98,9 +98,11 @@ release-binaries:: $(RELEASE_BINARIES)
 
 $(PROJ_BINDIR)/%.sh: %.sh.in
 	sed \
+		-e 's|[@]pkgpythondir[@]|$(EXPORT_MODULEDIR)|g' \
 		-e 's|[@]PYTHON[@]|$(PYTHON)|g' \
 		-e 's|[@]PYTHONPATH[@]|$(EXPORT_ROOT)/modules|g' \
 		$< > $@ || (rm -f $@ && exit 1)
+	$(CHMOD) +x $@
 
 #--------------------------------------------------------------------------
 #

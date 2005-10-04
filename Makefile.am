@@ -14,7 +14,6 @@ DIST_SUBDIRS = \
 	etc examples module pyre tests visual
 
 EXTRA_DIST = \
-	CitcomS.py-LICENSE.txt \
 	doc/CitComS.doxyconf
 
 ## end of Makefile.am
