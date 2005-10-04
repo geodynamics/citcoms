@@ -37,7 +37,7 @@ line=`cat $1.velo.$2.$3 | wc -l`
 let line=line-1
 #echo $line
 
-tail -$line $1.velo.$2.$3 | paste -d' ' $1.coord.$2 - $1.visc.$2.$3 > $1.$2.$3
+tail -n $line $1.velo.$2.$3 | paste -d' ' $1.coord.$2 - $1.visc.$2.$3 > $1.$2.$3
 
 
 # version
