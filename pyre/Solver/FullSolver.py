@@ -35,10 +35,11 @@ class FullSolver(Solver):
 
     def __init__(self, name, facility="solver"):
 	Solver.__init__(self, name, facility)
-        try:
+        import mpi
+        if mpi.world().handle():
             import CitcomS.Full as CitcomModule
             self.CitcomModule = CitcomModule
-        except:
+        else:
             self.CitcomModule = None
         return
 
