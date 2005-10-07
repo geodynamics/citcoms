@@ -35,10 +35,11 @@ class RegionalSolver(Solver):
 
     def __init__(self, name, facility="solver"):
 	Solver.__init__(self, name, facility)
-        try:
+        import mpi
+        if mpi.world().handle():
             import CitcomS.Regional as CitcomModule
-	    self.CitcomModule = CitcomModule
-        except:
+            self.CitcomModule = CitcomModule
+        else:
             self.CitcomModule = None
         return
 
