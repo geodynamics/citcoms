@@ -1,0 +1,219 @@
+/*  -*- CSS -*-  */
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ *                             Michael A.G. Aivazis
+ *                      California Institute of Technology
+ *                      (C) 1998-2005  All Rights Reserved
+ *
+ * {LicenseText}
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+a {
+    text-decoration: none;
+}
+
+abbr, acronym {
+    border-bottom: 1px dotted;
+    cursor: help;
+}
+
+blockquote {
+    font-family: Times, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 120%;
+}
+
+body {
+    font: 69% "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+code {
+    font-size: 120%;
+    border: 1px dashed;
+    padding: 0 0.1em;
+}
+
+dd {
+    line-height: 1.5em;
+    margin-bottom: 1em;
+}
+
+dd a {
+    text-decoration: underline;
+}
+
+del {
+    text-decoration: line-through;
+}
+
+dt {
+    font-weight: bold;    
+}
+
+dt a {
+    text-decoration: underline;
+}
+
+fieldset {
+    border: 1px solid;
+    margin: 1em 0em 1em 0em;
+    padding: 0em 1em 1em 1em;
+    line-height: 1.5em;
+    width: auto;
+}
+
+form { 
+    border: none;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+    font-size: 100%;
+    font-weight: normal;
+    margin: 0;
+    padding-top: 0.5em;
+    border-bottom: 1px solid;
+    text-shadow: 0.2em 0.2em 3px;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+}
+
+h1 {
+    font-size: 160%;
+}
+
+h2 {
+    font-size: 150%;
+}
+
+h3 {
+    font-size: 140%;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+h4 {
+    font-size: 120%;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+h5 {
+    font-size: 100%;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+h6 {
+    font-size: 85%;
+    border-bottom: none;
+    font-weight: bold;
+}
+
+hr {
+    height: 1px;
+}
+
+img {
+    border: none;
+    vertical-align: middle;
+}
+
+input {
+    font-family: "Lucida Grande", Verdana, Lucida, Helvetica, Arial, sans-serif;
+    visibility: visible;
+    border: 1px solid;  
+    vertical-align: middle;
+}
+
+ins {
+    text-decoration: none;
+}
+
+legend {
+    padding: 0.5em;
+    font-size: 90%;
+}
+
+li {
+    margin-bottom: 1em;
+}
+
+ol { 
+    line-height: 1.5em;
+    margin: 0.5em 0 0 1.5em;
+    padding: 0;
+}
+
+p {
+    margin: 0.5em 0em 1em 0em;
+    line-height: 1.5em;
+}
+
+p a {
+    text-decoration: underline;
+}
+
+p a:visited {
+}
+
+p a:active {
+}
+
+p img {
+    border: 0;
+    margin: 0;
+}
+
+pre {
+    font-size: 120%;
+    padding: 1em;
+    border: 1px dashed;
+    overflow: auto;
+}
+
+q {
+    font-family: Times, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 120%;
+}
+
+select {
+    border: 1px solid;  
+    vertical-align: top;
+}
+
+table {
+    font-size: 100%;
+}
+
+textarea {
+    font: 110% "Courier New", Courier, monospace; 
+    border: 1px solid;  
+    width: 100%;
+}
+
+ul {
+    line-height: 1.5em;
+    list-style-type: square;
+    margin: 0.5em 0 0 1.5em;
+    padding: 0;
+    list-style-image: url(../images/bullet.gif);
+}
+
+ul a, ol a {
+    text-decoration: underline;
+}
+
+
+/* version */
+/* $Id: visual.css,v 1.1.1.1 2005/03/15 06:09:09 aivazis Exp $ */
+
+/* End of file  */

@@ -1,0 +1,104 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_memory_FixedAllocator_h)
+#error This header file contains implementation details for the class FixedAllocator
+#else
+
+#include "journal/journal.h"
+
+// interface
+
+template <size_t slots, size_t slotSize>
+void * pyre::memory::FixedAllocator<slots, slotSize>::allocate() {
+    void * slot = _next;
+
+    _next += slotSize;
+    if (!valid(_next)) {
+        _next = 0;
+    }
+
+    return slot;
+}
+
+
+template <size_t slots, size_t slotSize>
+void * pyre::memory::FixedAllocator<slots, slotSize>::next() const {
+    return _next;
+}
+
+
+template <size_t slots, size_t slotSize>
+const void * pyre::memory::FixedAllocator<slots, slotSize>::end() const {
+    return _bin + slots*slotSize;
+}
+
+
+template <size_t slots, size_t slotSize>
+void * pyre::memory::FixedAllocator<slots, slotSize>::end() {
+    return _bin + slots*slotSize;
+}
+
+
+template <size_t slots, size_t slotSize>
+void * pyre::memory::FixedAllocator<slots, slotSize>::begin() {
+    return _bin;
+}
+
+
+template <size_t slots, size_t slotSize>
+const void * pyre::memory::FixedAllocator<slots, slotSize>::begin() const {
+    return _bin;
+}
+
+
+template <size_t slots, size_t slotSize>
+bool pyre::memory::FixedAllocator<slots, slotSize>::valid(void * proxy) const {
+    char * slot = static_cast<char *>(proxy);
+    bool isValid = (slot >= begin()) && (slot < end()) && ((slot - _bin) % slotSize == 0);
+
+    return isValid;
+}
+
+
+// meta-methods
+
+template <size_t slots, size_t slotSize>
+pyre::memory::FixedAllocator<slots, slotSize>::~FixedAllocator() {
+    journal::debug_t debug("pyre.memory.FixedAllocator");
+    debug 
+        << journal::loc(__HERE__)
+        << "deallocating FixedAllocator@" << this
+        << journal::end;
+}
+
+
+template <size_t slots, size_t slotSize>
+pyre::memory::FixedAllocator<slots, slotSize>::FixedAllocator():
+    _bin(),
+    _next(_bin)
+{
+    journal::debug_t debug("pyre.memory.FixedAllocator");
+    debug 
+        << journal::loc(__HERE__)
+        << "FixedAllocator@" << this << ": "
+        << "setting aside " << (void *)_bin << " through " << (void *)(_bin + _capacity)
+        << journal::end;
+}
+
+#endif
+
+// version
+// $Id: FixedAllocator.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

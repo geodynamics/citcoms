@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005 All Rights Reserved
+# 
+#  <LicenseText>
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+
+def modeller():
+
+    # model
+    from pyre.geometry.GeometricalModeller import GeometricalModeller
+
+    class Cylinder(GeometricalModeller):
+
+
+        class Inventory(GeometricalModeller.Inventory):
+
+            import pyre.inventory
+            from pyre.units.length import meter
+
+            scale = pyre.inventory.float("scale", default=2)
+            radius = pyre.inventory.dimensional("radius", default=0.1 * meter)
+            height = pyre.inventory.dimensional("height", default=0.1 * meter)
+
+
+        def model(self):
+            radius = self.inventory.radius
+            height = self.inventory.height
+            scale = self.inventory.scale
+
+            from pyre.geometry.solids import cylinder
+            from pyre.geometry.operations import translate
+
+            body = cylinder(radius=radius, height=height)
+            body = translate(body, (0*height, 0*height, height/2))
+
+            ils = min(height.value, radius.value)/scale 
+
+            return body
+
+
+        def __init__(self):
+            GeometricalModeller.__init__(self, "cylinder")
+            return
+
+
+    import journal
+    info = journal.debug("geometry")
+    info.log("instantiating geometry")
+
+    cylinder = Cylinder()
+
+    return cylinder
+    
+
+# version
+__id__ = "$Id: cylinder.odb,v 1.1.1.1 2005/03/08 16:13:32 aivazis Exp $"
+
+#  End of file 

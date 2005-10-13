@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005 All Rights Reserved
+# 
+#  <LicenseText>
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+
+def modeller():
+
+    # model
+
+    from pyre.geometry.GeometricalModeller import GeometricalModeller
+
+    class HollowCube(GeometricalModeller):
+
+        class Inventory(GeometricalModeller.Inventory):
+
+            import pyre.inventory
+            from pyre.units.length import meter
+
+            scale = pyre.inventory.float("scale", default=2)
+            side = pyre.inventory.dimensional("side", default=0.1 * meter)
+            diameter = pyre.inventory.dimensional("diameter", default=0.05 * meter)
+
+
+        def model(self):
+            side = self.inventory.side
+            radius = self.inventory.diameter / 2
+            scale = self.inventory.scale
+
+            from math import pi
+            from pyre.geometry.solids import block, cylinder
+            from pyre.geometry.operations import subtract, translate, rotate
+
+            diagonal = (side, side, side)
+            cube = block(diagonal)
+            cube = translate(cube, (-side/2, -side/2, -side/2))
+
+            height = 2*side
+            hole = cylinder(height=height, radius=radius)
+            hole = translate(hole, (0*side, 0*side, -height/2))
+
+            body = subtract(cube, hole)
+
+            y_hole = rotate(hole, (1, 0, 0), pi/2)
+            body = subtract(body, y_hole)
+
+            x_hole = rotate(hole, (0, 1, 0), pi/2)
+            body = subtract(body, x_hole)
+
+            ils = min(radius.value, (side-2*radius).value)/scale 
+
+            return body
+
+
+        def __init__(self):
+            GeometricalModeller.__init__(self, "hollow-cube")
+            return
+
+
+    import journal
+    info = journal.debug("geometry")
+    info.log("instantiating geometry")
+
+    cube = HollowCube()
+
+    info.log("geometry: %r" % cube.name)
+
+    return cube
+    
+
+# version
+__id__ = "$Id: hollow-cube.odb,v 1.1.1.1 2005/03/08 16:13:29 aivazis Exp $"
+
+#  End of file 

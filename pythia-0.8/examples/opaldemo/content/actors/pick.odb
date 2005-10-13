@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def actor():
+
+    from opal.components.GenericActor import GenericActor
+
+    class Picker(GenericActor):
+
+
+        class Inventory(GenericActor.Inventory):
+
+            import pyre.inventory
+
+            page = pyre.inventory.str('page', default='empty')
+
+
+        def perform(self, app, routine=None):
+            page = app.retrievePage(self.inventory.page)
+            return page
+
+
+        def __init__(self):
+            GenericActor.__init__(self, 'pick')
+            return
+
+
+    actor = Picker()
+    return actor
+
+
+# version
+__id__ = "$Id: pick.odb,v 1.3 2005/05/02 18:14:19 pyre Exp $"
+
+# End of file 

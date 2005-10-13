@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def portlet(app):
+    import opal.content
+    portlet = opal.content.portlet(title="navigation", id="portlet-navigation-tree")
+
+    home = portlet.item(description="Home")
+    home.target = "http://orthologue.com/cgi-bin/opaldemo/demo.py?actor=logout"
+    home.icon = "images/link_icon.gif"
+    home.type = "navItem"
+    
+    logout = portlet.item(description="Logout")
+    logout.target = "http://orthologue.com/cgi-bin/opaldemo/demo.py?actor=logout"
+    logout.icon = "images/link_icon.gif"
+    logout.type = "navItem"
+    
+    return portlet
+
+
+# version
+__id__ = "$Id: navigation.odb,v 1.2 2005/03/27 23:11:45 aivazis Exp $"
+
+# End of file 

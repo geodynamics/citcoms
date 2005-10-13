@@ -1,0 +1,44 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_geometry_Point_h)
+#error This header file contains implementation details for the class Point
+#else
+
+// interface
+
+template <size_t dimension, typename scalar_t>
+typename pyre::geometry::Point<dimension, scalar_t>::initializer_t
+pyre::geometry::Point<dimension, scalar_t>::operator = (scalar_t item)
+{
+    return initializer_t(*this, item);
+}
+
+// meta-methods
+
+template <size_t dimension, typename scalar_t>
+pyre::geometry::Point<dimension, scalar_t>::~Point() {}
+
+
+template <size_t dimension, typename scalar_t>
+pyre::geometry::Point<dimension, scalar_t>::Point() :
+    pyre::containers::Tuple<scalar_t, dimension>()
+{}
+
+
+#endif
+
+// version
+// $Id: Point.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

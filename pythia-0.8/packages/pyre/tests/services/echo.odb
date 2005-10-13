@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def service():
+
+    from pyre.services.UDPService import UDPService
+
+
+    class Echo(UDPService):
+
+
+        class Inventory(UDPService.Inventory):
+
+            import pyre.services
+            import pyre.inventory
+
+            marshaller = pyre.inventory.facility("marshaller", factory=pyre.services.pickler)
+
+
+        def echo(self, message):
+            import os
+            self.counter += 1
+            self._debug.line("-------------------------")
+            self._debug.line("connection attempt %d:" % self.counter)
+            self._debug.line("    pid: %r" % os.getpid())
+            self._debug.line("    message: %r" % message)
+            self._debug.log()
+            return True
+
+
+        def __init__(self):
+            UDPService.__init__(self, name="echo")
+            self.counter = 0
+            self.marshaller = None
+            return
+
+
+        def _defaults(self):
+            UDPService._defaults(self)
+            self.inventory.port = 55001
+            return
+
+
+        def _configure(self):
+            UDPService._configure(self)
+            self.marshaller = self.inventory.marshaller
+            self.marshaller.key = 'deadbeef'
+            return
+
+
+    return Echo()
+
+
+# version
+__id__ = "$Id: echo.odb,v 1.1.1.1 2005/03/08 16:13:50 aivazis Exp $"
+
+# End of file 

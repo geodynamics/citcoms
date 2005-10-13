@@ -1,0 +1,39 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                             Michael A.G. Aivazis
+//                      California Institute of Technology
+//                      (C) 1998-2005  All Rights Reserved
+//
+// {LicenseText}
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(journal_NullDiagnostic_icc)
+#error This header file contains implementation details of the class NullDiagnostic
+#else
+
+// manipulators
+const journal::NullDiagnostic & journal::endl(const NullDiagnostic & diagnostic) {
+    return diagnostic;
+}
+
+const journal::NullDiagnostic & journal::newline(const NullDiagnostic & diagnostic) {
+    return diagnostic;
+}
+
+// the injection operator
+template <typename item_t>
+journal::NullDiagnostic & operator<< (journal::NullDiagnostic & diagnostic, item_t) {
+    return diagnostic;
+}
+
+
+#endif
+
+// version
+// $Id: NullDiagnostic.icc,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $
+
+// End of file 

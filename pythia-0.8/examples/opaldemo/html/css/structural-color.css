@@ -1,0 +1,133 @@
+/*  -*- CSS -*-  */
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ *                             Michael A.G. Aivazis
+ *                      California Institute of Technology
+ *                      (C) 1998-2005  All Rights Reserved
+ *
+ * {LicenseText}
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+
+#body-wrapper { 
+}
+
+
+/* page sections */
+
+#page-header { 
+    background-color: transparent;
+}
+
+/* search box */
+#page-searchBox { 
+    background-color: transparent;
+}
+
+/* logo properties */
+#page-logo { 
+}
+
+#page-logo a {
+}
+
+#page-globalnav {
+    background-color: transparent;
+}
+#page-globalnav li {
+    display: inline;
+}
+#page-globalnav li a {
+    /* The normal, unselected tabs. They are all links */
+    background-color: transparent;
+    border-color: #8cacbb;
+    color: #436976;
+}
+#page-globalnav li.selected a {
+    /* The selected tab. There's only one of this */
+    background-color: #dee7ec;
+    border-color: #8cacbb;
+    border-bottom-color: #dee7ec;
+    color: #436976;
+}
+#page-globalnav li a:hover {
+    background-color: #dee7ec;
+    border-color: #8cacbb;
+    border-bottom-color: #dee7ec;
+    color: #436976;
+}
+
+#page-personaltools {
+    /* Bar with personalized menu (user preferences, favorites etc) */
+    background-color: #dee7ec;
+    border-top-color: #8cacbb;
+    border-bottom-color: #8cacbb;
+    color: Black;
+}
+#page-personaltools .portalUser {
+    background-color: transparent;
+    padding-left: 15px;
+}
+
+#page-personaltools .portalNotLoggedIn {
+    color: Black;
+    background: transparent;
+} /* Used on all descriptions relevant to those not logged in */
+ 
+#page-personaltools li {
+    background-color: transparent;
+    color: #436976;
+}
+#page-personaltools li a {
+    color: #436976;
+}
+
+#page-locator {
+    border-bottom-color: #8cacbb;
+}
+
+#page-content {
+}
+
+#page-columnLeft {
+}
+
+#page-main {
+}
+
+#page-columnRight {
+}
+
+#page-columnLeft .visualPadding {
+}
+#page-main .visualPadding {
+}
+#page-columnRight .visualPadding {
+}
+
+#page-footer {
+    background-color: #dee7ec;
+    border-top-color: #8cacbb;
+    border-bottom-color: #8cacbb;
+}
+
+#page-credits {
+}
+
+#page-credits ul,
+#page-credits ul li,
+#page-credits ul li a {
+    color: Black;
+}
+
+#page-credits ul li {
+}
+
+
+/* version */
+/* $Id: structural-color.css,v 1.3 2005/03/21 05:49:12 aivazis Exp $ */
+
+/* End of file  */

@@ -1,0 +1,101 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                               Michael A.G. Aivazis
+//                        California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+
+#if !defined(pyre_containers_Initializer_h)
+#error This header file contains implementation details of class Initializer
+#else
+
+// Initializer
+
+// interface
+template <typename item_t, typename iterator_t>
+pyre::containers::Initializer<item_t, iterator_t>
+pyre::containers::Initializer<item_t, iterator_t>::operator, (item_t item)
+{
+    *_iter = item;
+    return Initializer<item_t, iterator_t>(_iter + 1);
+}
+
+// meta-methods
+template <typename item_t, typename iterator_t>
+pyre::containers::Initializer<item_t, iterator_t>::Initializer(iterator_t iterator):
+    _iter(iterator)
+{}
+
+template <typename item_t, typename iterator_t>
+pyre::containers::Initializer<item_t, iterator_t>::Initializer(
+    const pyre::containers::Initializer<item_t, iterator_t> & rhs) :
+    _iter(rhs._iter)
+{}
+
+template <typename item_t, typename iterator_t>
+pyre::containers::Initializer<item_t, iterator_t>::~Initializer() {}
+
+
+// InitializerSwitch
+
+// interface
+template <typename container_t, typename iterator_t>
+void pyre::containers::InitializerSwitch<container_t, iterator_t>::disable() const
+{
+    _wipe = false;
+    return;
+}
+
+template <typename container_t, typename iterator_t>
+pyre::containers::Initializer<typename container_t::item_t, iterator_t>
+pyre::containers::InitializerSwitch<container_t, iterator_t>::operator,(item_t item) {
+    _wipe = false;
+    iterator_t iter = _container.data();
+    *iter = _item;
+
+    iterator_t next = iter + 1;
+    *next = item;
+    return Initializer<item_t, iterator_t>(next + 1);
+}
+
+// meta-methods
+template <typename container_t, typename iterator_t>
+pyre::containers::InitializerSwitch<container_t, iterator_t>::~InitializerSwitch() {
+    if (_wipe) {
+        _container.initialize(_item);
+    }
+}
+
+template <typename container_t, typename iterator_t>
+pyre::containers::InitializerSwitch<container_t, iterator_t>::InitializerSwitch(
+    container_t & container, typename container_t::item_t item) :
+    _container(container),
+    _item(item),
+    _wipe(true)
+{
+}
+    
+template <typename container_t, typename iterator_t>
+pyre::containers::InitializerSwitch<container_t, iterator_t>::InitializerSwitch(
+    const pyre::containers::InitializerSwitch<container_t, iterator_t> & rhs) :
+    _container(rhs._container),
+    _item(rhs._item),
+    _wipe(true)
+{
+    rhs.disable();
+}
+    
+
+#endif
+
+// version
+// $Id: Initializer.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

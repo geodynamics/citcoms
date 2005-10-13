@@ -1,0 +1,92 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_memory_PtrShareable_h)
+#error This header file contains implementation details for the class PtrShareable
+#else
+
+// interface
+
+template <typename shareable_t> 
+shareable_t & pyre::memory::PtrShareable<shareable_t>::operator*() 
+{
+    return *_shareable;
+}
+
+
+template <typename shareable_t>
+shareable_t * pyre::memory::PtrShareable<shareable_t>::operator->() 
+{
+    return _shareable;
+}
+
+
+// meta-methods
+
+template <typename shareable_t>
+pyre::memory::PtrShareable<shareable_t>::~PtrShareable()
+{
+    _shareable->releaseReference();
+}
+
+
+template <typename shareable_t>
+pyre::memory::PtrShareable<shareable_t>::PtrShareable(shareable_t * shareable):
+    _shareable(shareable)
+{
+    _init();
+}
+
+
+template <typename shareable_t>
+pyre::memory::PtrShareable<shareable_t>::PtrShareable(
+    const pyre::memory::PtrShareable<shareable_t> & handle):
+    _shareable(handle._shareable)
+{
+    _init();
+}
+
+
+template <typename shareable_t>
+const pyre::memory::PtrShareable<shareable_t> & 
+pyre::memory::PtrShareable<shareable_t>::operator=(
+    const pyre::memory::PtrShareable<shareable_t> & handle) {
+    if (this != &handle) {
+        if (_shareable) {
+            _shareable->releaseReference();
+        }
+        _shareable = handle._shareable;
+        _init();
+    }
+
+    return *this;
+}
+
+
+template <typename shareable_t>
+void pyre::memory::PtrShareable<shareable_t>::_init()
+{
+    if (_shareable == 0) {
+        return;
+    }
+
+    _shareable->addReference();
+    return;
+}
+
+#endif
+
+// version
+// $Id: PtrShareable.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

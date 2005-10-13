@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def page(app):
+    import os
+    import opaldemo.content
+
+    # create the page
+    page = opaldemo.content.page(name='error', title="Error", root=app.home)
+    
+    # build the body
+    body = page.body()
+
+    # build the header
+    header = body.pageHeader()
+    header.logo(href=os.path.join(app.home, 'sentinel.html'))
+    header.personalTools()
+
+    # build the client area
+    content = body.pageContent()
+    main = content.main()
+
+    # populate the main column
+    document = main.document(title='Error')
+    p = document.paragraph(cls='error')
+    p.text = [
+        "An unknown error has occurred.",
+        ]
+    
+    # build the footer
+    footer = body.pageFooter()
+
+    # build the credits
+    credits = body.pageCredits()
+    p = credits.paragraph(cls="discreet")
+    p.text = [
+        "powered by opal"
+        ]
+
+    return page
+
+
+# version
+__id__ = "$Id: error.odb,v 1.2 2005/03/30 05:54:05 aivazis Exp $"
+
+# End of file 

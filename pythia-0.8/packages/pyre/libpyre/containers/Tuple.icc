@@ -1,0 +1,98 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                               Michael A.G. Aivazis
+//                        California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+
+#if !defined(pyre_containers_Tuple_h)
+#error This header file contains implementation details of class Tuple
+#else
+
+// interface
+
+template <typename item_t, size_t dim>
+size_t pyre::containers::Tuple<item_t, dim>::size () const {
+    return length;
+}
+
+template <typename item_t, size_t dim>
+item_t * pyre::containers::Tuple<item_t, dim>::data () {
+    return _buffer;
+}
+
+template <typename item_t, size_t dim>
+const item_t * pyre::containers::Tuple<item_t, dim>::data () const {
+    return _buffer;
+}
+
+template <typename item_t, size_t dim>
+void pyre::containers::Tuple<item_t, dim>::initialize (item_t item) {
+    for (size_t i = 0; i <= dim; ++i) {
+        _buffer[i] = item;
+    }
+    return;
+}
+
+template <typename item_t, size_t dim>
+item_t & pyre::containers::Tuple<item_t, dim>::operator () (size_t index)
+{
+    return _buffer[index];
+}
+
+template <typename item_t, size_t dim>
+item_t pyre::containers::Tuple<item_t, dim>::operator () (size_t index) const
+{
+    return _buffer[index];
+}
+
+template <typename item_t, size_t dim>
+typename pyre::containers::Tuple<item_t, dim>::initializer_t
+pyre::containers::Tuple<item_t, dim>::operator = (item_t item)
+{
+    return initializer_t(*this, item);
+}
+
+// meta-methods
+
+template <typename item_t, size_t dim>
+pyre::containers::Tuple<item_t, dim>::Tuple() :
+    _buffer()
+{}
+
+
+template <typename item_t, size_t dim>
+pyre::containers::Tuple<item_t, dim>::Tuple(const pyre::containers::Tuple<item_t, dim> & rhs) :
+    _buffer()
+{
+    memcpy(_buffer, rhs._buffer, dim*sizeof(item_t));
+}
+
+
+template <typename item_t, size_t dim>
+const pyre::containers::Tuple<item_t, dim> & pyre::containers::Tuple<item_t, dim>::operator = (
+    const pyre::containers::Tuple<item_t, dim> & rhs)
+{
+    if (&rhs != this) {
+	memcpy(_buffer, rhs._buffer, dim*sizeof(item_t));
+    }
+
+    return *this;
+}
+
+template <typename item_t, size_t dim>
+pyre::containers::Tuple<item_t, dim>::~Tuple() {}
+
+#endif
+
+// version
+// $Id: Tuple.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

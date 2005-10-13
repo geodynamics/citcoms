@@ -1,0 +1,75 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def page(app):
+    import os
+    import opaldemo.content
+
+    # create the page
+    page = opaldemo.content.page(name='greet', title="Hello", root=app.home)
+    
+    # build the body
+    body = page.body()
+
+    # build the header
+    header = body.pageHeader()
+    header.logo(href=os.path.join(app.home, 'sentinel.html'))
+    header.personalTools()
+
+    # build the client area
+    content = body.pageContent()
+    main = content.main()
+
+    sentry = app.sentry
+    login = [
+        '<pre>',
+        'username: %s' % sentry.username,
+        'password: %s' % sentry.passwd,
+        '</pre>'
+        ]
+
+    registry = [
+        '<pre>',
+        ]
+    for key, value, locator in app.registry.render():
+        registry.append("key: %s, value: %s, locator: %s" % (key, value, locator))
+    registry += [
+        '</pre>',
+        ]
+
+    # populate the main column
+    document = main.document(title='Welcome')
+    p = document.paragraph()
+    p.text = registry
+
+    p = document.paragraph()
+    p.text = login
+
+    # build the footer
+    footer = body.pageFooter()
+
+    # build the credits
+    credits = body.pageCredits()
+    p = credits.paragraph(cls="discreet")
+    p.text = [
+        "powered by opal"
+        ]
+
+    return page
+
+
+# version
+__id__ = "$Id: debug.odb,v 1.1 2005/03/27 15:12:21 aivazis Exp $"
+
+# End of file 

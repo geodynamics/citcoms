@@ -1,0 +1,86 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_memory_Recycler_h)
+#error This header file contains implementation details for the class Recycler
+#else
+
+#include "journal/journal.h"
+
+
+// interface
+template <typename node_t>
+void * pyre::memory::Recycler<node_t>::reuse() {
+    journal::debug_t debug("pyre.memory.Recycler");
+
+    void * slot = _recycler;
+    if (slot) {
+        debug 
+            << journal::loc(__HERE__)
+            << "Recycler@" << this << ": "
+            << "recycling slot@" <<  slot
+            << journal::end;
+        _recycler = _recycler->next;
+    } else {
+        debug 
+            << journal::loc(__HERE__)
+            << "Recycler@" << this << ": "
+            << "empty"
+            << journal::end;
+    }
+
+    return slot;
+}
+
+template <typename node_t>
+void pyre::memory::Recycler<node_t>::recycle(void * slot) {
+    journal::debug_t debug("pyre.memory.Recycler");
+    debug 
+        << journal::loc(__HERE__)
+        << "Recycler@" << this << ": "
+        << "recycling slot@" <<  slot
+        << journal::end;
+    
+    _recycler = new (slot) node_t(_recycler); // placement new
+    return;
+}
+
+// meta-methods
+
+template <typename node_t>
+pyre::memory::Recycler<node_t>::~Recycler() {
+    journal::debug_t debug("pyre.memory.Recycler");
+    debug 
+        << journal::loc(__HERE__)
+        << "destructed Recycler@" << this
+        << journal::end;
+}
+
+
+template <typename node_t>
+pyre::memory::Recycler<node_t>::Recycler():
+    _recycler(0)
+{
+    journal::debug_t debug("pyre.memory.Recycler");
+    debug 
+        << journal::loc(__HERE__)
+        << "constructed Recycler@" << this
+        << journal::end;
+}
+
+#endif
+
+// version
+// $Id: Recycler.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

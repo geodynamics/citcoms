@@ -1,0 +1,50 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_manip_explicit_icc)
+#error This header file contains manipulator implementation details 
+#else
+
+journal::set_t::set_t(factory_t f, const char * key, const char * value) :
+    _f(f), _key(key), _value(value)
+{}
+
+journal::loc2_t::loc2_t(factory_t f, const char * file, long line) :
+    _f(f), _file(file), _line(line)
+{}
+
+journal::loc3_t::loc3_t(factory_t f, const char * file, long line, const char * function) :
+    _f(f), _file(file), _line(line), _function(function)
+{}
+
+journal::Diagnostic & operator<< (journal::Diagnostic & s, journal::set_t m)
+{
+    return (*m._f)(s, m._key, m._value);
+}
+
+journal::Diagnostic & operator<< (journal::Diagnostic & s, journal::loc2_t m)
+{
+    return (*m._f)(s, m._file, m._line);
+}
+
+journal::Diagnostic & operator<< (journal::Diagnostic & s, journal::loc3_t m)
+{
+    return (*m._f)(s, m._file, m._line, m._function);
+}
+
+#endif
+
+// version
+// $Id: manip-explicit.icc,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $
+
+// End of file

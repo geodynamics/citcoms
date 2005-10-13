@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def platform(*args):
+    import os
+
+    osname, hostname, version, release, chipset = os.uname()
+
+    import merlin.odb
+
+    record = merlin.odb.platform()
+    record.os = "linux"
+    
+    if not version.startswith("2."):
+        import journal
+        journal.error("merlin").log("unsupported Linux version '%s'" % version)
+        return record
+
+    record.release = "2.x"
+
+    _chips = {
+        "i386": "ia32",
+        "i486": "ia32",
+        "i586": "ia32",
+        "i686": "ia32",
+        }
+
+    try:
+        record.abi = _chips[chipset]
+    except KeyError:
+        import journal
+        journal.error("merlin").log("unknown processor type '%s'" % chipset)
+        record.abi = "<unknown>"
+
+    return record
+
+
+# version
+__id__ = "$Id: platform.odb,v 1.1.1.1 2005/03/08 16:13:58 aivazis Exp $"
+
+# End of file 

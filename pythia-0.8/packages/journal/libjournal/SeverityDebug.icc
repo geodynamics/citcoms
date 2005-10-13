@@ -1,0 +1,34 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_SeverityDebug_icc)
+#error This header file contains implementation details of the class SeverityDebug
+#else
+
+// inlines
+// interface
+journal::SeverityDebug::string_t 
+journal::SeverityDebug::name() const {
+    return  "debug." + facility();
+}
+
+// meta-methods
+journal::SeverityDebug::SeverityDebug(string_t name) :
+journal::Diagnostic(name, "debug", lookup(name)) {}
+
+#endif
+
+// version
+// $Id: SeverityDebug.icc,v 1.1.1.1 2005/03/08 16:13:55 aivazis Exp $
+
+// End of file

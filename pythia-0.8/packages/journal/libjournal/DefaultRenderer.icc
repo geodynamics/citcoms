@@ -1,0 +1,29 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_DefaultRenderer_icc)
+#error This header file contains implementation details of the class DefaultRenderer
+#else
+
+// meta-methods
+journal::DefaultRenderer::DefaultRenderer() :
+    journal::Renderer()
+{}
+
+#endif
+
+
+// version
+// $Id: DefaultRenderer.icc,v 1.1.1.1 2005/03/08 16:13:55 aivazis Exp $
+
+// End of file

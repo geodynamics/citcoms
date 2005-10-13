@@ -1,0 +1,28 @@
+# -*- Makefile -*-
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                              Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005 All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+# Python
+    include Python/default.def
+
+# C++
+
+    PROJ_LCXX_FLAGS = $(COMPILER_LCXX_FORSHARED) $(PLATFORM_PAREXE_FLAGS)
+
+ifeq (AIX,$(findstring AIX,$(PLATFORM_ID)))
+    PROJ_LCXX_FLAGS += -Wl,-bE:$(PYTHON_LIBDIR)/config/python.exp 
+endif
+
+# version
+# $Id: local.def,v 1.1.1.1 2005/03/08 16:13:30 aivazis Exp $
+
+# End of file

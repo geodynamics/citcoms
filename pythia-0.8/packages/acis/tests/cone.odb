@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005 All Rights Reserved
+# 
+#  <LicenseText>
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+
+def modeller():
+
+    from pyre.geometry.GeometricalModeller import GeometricalModeller
+
+    class Cone(GeometricalModeller):
+
+
+        class Inventory(GeometricalModeller.Inventory):
+
+            import pyre.inventory
+            from pyre.units.length import meter
+
+            scale = pyre.inventory.float("scale", default=2)
+            shrink = pyre.inventory.float("shrink", default=0.5)
+            major = pyre.inventory.dimensional("major", default=0.1*meter)
+            minor = pyre.inventory.dimensional("minor", default=0.05*meter)
+            height = pyre.inventory.dimensional("height", default=0.1*meter)
+
+
+        def model(self):
+            major = self.inventory.major
+            minor = self.inventory.minor
+            shrink = self.inventory.shrink
+            height = self.inventory.height
+            scale = self.inventory.scale
+
+            from pyre.geometry.solids import generalizedCone
+            from pyre.geometry.operations import translate
+
+            body = generalizedCone(major, minor, shrink, height)
+            body = translate(body, (0*height, 0*height, height/2))
+
+            ils = min(major.value, minor.value, major.value*scale, height.value)/scale 
+
+            return body
+
+
+        def __init__(self):
+            GeometricalModeller.__init__(self, "cone")
+            return
+
+
+    import journal
+    info = journal.debug("modeller")
+    info.log("instantiating geometry")
+
+    cone = Cone()
+
+    info.log("model: %r" % cone.name)
+
+    return cone
+    
+# version
+__id__ = "$Id: cone.odb,v 1.1.1.1 2005/03/08 16:13:35 aivazis Exp $"
+
+#  End of file 

@@ -1,0 +1,77 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def page(app):
+    import opaldemo.content
+    page = opaldemo.content.page(name='login', title='Please login', root=app.home)
+    
+    # build the body
+    body = page.body()
+
+    # build the header
+    header = body.pageHeader()
+    header.logo(href="%s?actor=login" % app.cgihome)
+    header.personalTools()
+
+    # build the client area
+    content = body.pageContent()
+    main = content.main()
+
+    # populate the main column
+    document = main.document(title='Please login')
+    document.description = (
+        'Please provide your username and password. '
+        'If you do not have an account, please '
+        '<a href="%s?actor=register">register</a>.' % app.cgihome)
+    document.byline = 'also spracht <a href="">michael</a>'
+
+    # build the login form
+    login = document.form(
+        name='login', legend='Account details', action=app.cgihome)
+
+    actor = login.hidden(name='actor', value='greet')
+    attempts = login.hidden(name='sentry.attempts', value=str(app.sentry.attempts))
+
+    username = login.text(id='username', name='sentry.username', label='Username')
+    username.help = 'Usernames are case sensitive; make sure your caps lock key is not enabled.'
+    
+    password = login.password(id='password', name='sentry.passwd', label='Password')
+    password.help = (
+        'Passwords are also case sensitive. If you have forgotten your password, you may '
+        'be able to <a href="%s?actor=retrieve-password">retrieve</a> it.' % app.cgihome)
+
+    submit = login.control(name="submit", type="submit", value="login")
+
+    p = login.paragraph()
+    p.text = [
+        'When you are done, please logout or exit your browser'
+        ]
+
+    # build the footer
+    footer = body.pageFooter()
+
+    # build the credits
+    credits = body.pageCredits()
+    p = credits.paragraph(cls="discreet")
+    p.text = [
+        "powered by opal"
+        ]
+
+    return page
+
+
+# version
+__id__ = "$Id: login.odb,v 1.12 2005/04/27 18:01:44 pyre Exp $"
+
+# End of file 

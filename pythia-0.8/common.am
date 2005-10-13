@@ -1,0 +1,26 @@
+## This file is included by automake to produce Makefile.in
+# $Id: common.am,v 1.2 2005/09/28 21:10:01 leif Exp $
+
+# override 'pkg' dirs to include version
+pkgdatadir = $(datadir)/$(PACKAGE)-$(VERSION)
+pkglibdir = $(libdir)/$(PACKAGE)-$(VERSION)
+pkgincludedir = $(includedir)/$(PACKAGE)-$(VERSION)
+pkgpythondir = ${xpythondir}
+pkgpyexecdir = ${xpyexecdir}
+
+# define non-standard dirs
+pkgsysconfdir = $(sysconfdir)/$(PACKAGE)-$(VERSION)
+if COND_PYTHON_SITE
+    xpythondir = ${pythondir}/$(PACKAGE)-$(VERSION)
+else
+    xpythondir = ${pythondir}
+endif
+if COND_PYEXEC_SITE
+    xpyexecdir = ${pyexecdir}/$(PACKAGE)-$(VERSION)
+else
+    xpyexecdir = ${pyexecdir}
+endif
+
+AM_LDFLAGS = -release $(VERSION).0
+
+## end of package.am
