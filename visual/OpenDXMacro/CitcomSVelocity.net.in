@@ -5,10 +5,10 @@
 //
 //
 //
-// macro reference (direct): VelocityRTFtoXYZ /home/tan2/OpenDXMacro/VelocityRTFtoXYZ.net
+// macro reference (direct): VelocityRTFtoXYZ @dxmacrodir@/VelocityRTFtoXYZ.net
 include "VelocityRTFtoXYZ.net"
 //
-// macro reference (direct): RTFtoXYZ /home/tan2/OpenDXMacro/RTFtoXYZ.net
+// macro reference (direct): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
 include "RTFtoXYZ.net"
 //
 // Begin MDF

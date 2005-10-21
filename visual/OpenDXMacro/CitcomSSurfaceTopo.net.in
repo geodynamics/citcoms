@@ -5,7 +5,7 @@
 //
 //
 //
-// macro reference (direct): RTFtoXYZ2D /home/ces74/cases/embedded/G3_case1/OpenDXMacro/RTFtoXYZ2D.net
+// macro reference (direct): RTFtoXYZ2D @dxmacrodir@/RTFtoXYZ2D.net
 include "RTFtoXYZ2D.net"
 //
 // Begin MDF

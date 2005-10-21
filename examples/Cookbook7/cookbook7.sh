@@ -27,11 +27,10 @@
 #
 
 ./citcomsregional.sh \
---launcher.nodegen=n%03d \
---launcher.nodelist=[135-140,165-173,176,135-140,165-173,176] \
+\
 --launcher.nodes=32 \
 \
---solver.datafile=/scratch/username/cookbook7 \
+--solver.datafile=cookbook7 \
 --solver.rayleigh=4.312616e+08 \
 \
 --solver.mesher.nprocx=4 \
@@ -41,7 +40,7 @@
 --solver.mesher.nodey=61 \
 --solver.mesher.nodez=25 \
 --solver.mesher.coor=true \
---solver.mesher.coor_file="./coord.dat" \
+--solver.mesher.coor_file=./coord.dat \
 \
 --solver.tsolver.fixed_timestep=7.77e-10 \
 \
@@ -82,5 +81,9 @@
 --solver.const.refvisc=1.0e+21 \
 \
 --steps=100 \
---controller.monitoringFrequency=10 \
+--controller.monitoringFrequency=10
 
+# version
+# $Id: cookbook5.sh 2397 2005-10-04 22:37:25Z leif $
+
+# End of file

@@ -16,6 +16,7 @@
 
 # $Id: Makefile.am 2397 2005-10-04 22:37:25Z leif $
 
+
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
@@ -39,8 +40,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = visual
-DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+DIST_COMMON = $(dist_bin_SCRIPTS) $(nobase_dist_visual_DATA) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/cit_check_lib_mpi.m4 \
 	$(top_srcdir)/m4/cit_header_mpi.m4 \
@@ -55,11 +56,23 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/portinfo
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(visualdir)" \
+	"$(DESTDIR)$(dxmacrodir)" "$(DESTDIR)$(visualdir)"
 dist_binSCRIPT_INSTALL = $(INSTALL_SCRIPT)
 SCRIPTS = $(dist_bin_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+nobase_dist_visualDATA_INSTALL = $(install_sh_DATA)
+nodist_dxmacroDATA_INSTALL = $(INSTALL_DATA)
+nodist_visualDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(nobase_dist_visual_DATA) $(nodist_dxmacro_DATA) \
+	$(nodist_visual_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMDEP_FALSE = @AMDEP_FALSE@
@@ -208,16 +221,9 @@ dist_bin_SCRIPTS = \
 	pasteCitcomData.sh \
 	zslice.py
 
-EXTRA_DIST = \
-	OpenDXMacro/CitcomSFullImport.net \
-	OpenDXMacro/CitcomSImport.net \
-	OpenDXMacro/CitcomSSurfaceHeatflux.net \
-	OpenDXMacro/CitcomSSurfaceImport.net \
-	OpenDXMacro/CitcomSSurfaceTopo.net \
-	OpenDXMacro/CitcomSSurfaceVelocity.net \
-	OpenDXMacro/CitcomSTemperature.net \
-	OpenDXMacro/CitcomSVelocity.net \
-	OpenDXMacro/CitcomSViscosity.net \
+visualdir = $(pkgdatadir)/visual
+dxmacrodir = $(visualdir)/OpenDXMacro
+nobase_dist_visual_DATA = \
 	OpenDXMacro/RTFtoXYZ2D.net \
 	OpenDXMacro/RTFtoXYZ.net \
 	OpenDXMacro/ScaledGlyphs.net \
@@ -251,11 +257,42 @@ EXTRA_DIST = \
 	samples/regtest.cap0.0 \
 	samples/regtest.cap0.0.general \
 	visFull.cfg \
-	visFull.net \
 	visRegional.cfg \
+	visRegionalSurface.cfg
+
+nodist_visual_DATA = \
+	visFull.net \
 	visRegional.net \
-	visRegionalSurface.cfg \
 	visRegionalSurface.net
+
+nodist_dxmacro_DATA = \
+	CitcomSFullImport.net \
+	CitcomSImport.net \
+	CitcomSSurfaceHeatflux.net \
+	CitcomSSurfaceImport.net \
+	CitcomSSurfaceTopo.net \
+	CitcomSSurfaceVelocity.net \
+	CitcomSTemperature.net \
+	CitcomSVelocity.net \
+	CitcomSViscosity.net
+
+do_subst = sed \
+	-e 's|[@]dxmacrodir[@]|$(dxmacrodir)|g'
+
+CLEANFILES = $(nodist_visual_DATA) $(nodist_dxmacro_DATA)
+EXTRA_DIST = \
+	OpenDXMacro/CitcomSFullImport.net.in \
+	OpenDXMacro/CitcomSImport.net.in \
+	OpenDXMacro/CitcomSSurfaceHeatflux.net.in \
+	OpenDXMacro/CitcomSSurfaceImport.net.in \
+	OpenDXMacro/CitcomSSurfaceTopo.net.in \
+	OpenDXMacro/CitcomSSurfaceVelocity.net.in \
+	OpenDXMacro/CitcomSTemperature.net.in \
+	OpenDXMacro/CitcomSVelocity.net.in \
+	OpenDXMacro/CitcomSViscosity.net.in \
+	visFull.net.in \
+	visRegional.net.in \
+	visRegionalSurface.net.in
 
 all: all-am
 
@@ -318,6 +355,59 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-nobase_dist_visualDATA: $(nobase_dist_visual_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(visualdir)" || $(mkdir_p) "$(DESTDIR)$(visualdir)"
+	@$(am__vpath_adj_setup) \
+	list='$(nobase_dist_visual_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  $(am__vpath_adj) \
+	  echo " $(nobase_dist_visualDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(visualdir)/$$f'"; \
+	  $(nobase_dist_visualDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(visualdir)/$$f"; \
+	done
+
+uninstall-nobase_dist_visualDATA:
+	@$(NORMAL_UNINSTALL)
+	@$(am__vpath_adj_setup) \
+	list='$(nobase_dist_visual_DATA)'; for p in $$list; do \
+	  $(am__vpath_adj) \
+	  echo " rm -f '$(DESTDIR)$(visualdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(visualdir)/$$f"; \
+	done
+install-nodist_dxmacroDATA: $(nodist_dxmacro_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(dxmacrodir)" || $(mkdir_p) "$(DESTDIR)$(dxmacrodir)"
+	@list='$(nodist_dxmacro_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_dxmacroDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(dxmacrodir)/$$f'"; \
+	  $(nodist_dxmacroDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(dxmacrodir)/$$f"; \
+	done
+
+uninstall-nodist_dxmacroDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_dxmacro_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(dxmacrodir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(dxmacrodir)/$$f"; \
+	done
+install-nodist_visualDATA: $(nodist_visual_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(visualdir)" || $(mkdir_p) "$(DESTDIR)$(visualdir)"
+	@list='$(nodist_visual_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(nodist_visualDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(visualdir)/$$f'"; \
+	  $(nodist_visualDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(visualdir)/$$f"; \
+	done
+
+uninstall-nodist_visualDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_visual_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(visualdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(visualdir)/$$f"; \
+	done
 tags: TAGS
 TAGS:
 
@@ -355,9 +445,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(SCRIPTS)
+all-am: Makefile $(SCRIPTS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(visualdir)" "$(DESTDIR)$(dxmacrodir)" "$(DESTDIR)$(visualdir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -377,6 +467,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -402,7 +493,8 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-nobase_dist_visualDATA \
+	install-nodist_dxmacroDATA install-nodist_visualDATA
 
 install-exec-am: install-dist_binSCRIPTS
 
@@ -428,19 +520,48 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dist_binSCRIPTS uninstall-info-am
+uninstall-am: uninstall-dist_binSCRIPTS uninstall-info-am \
+	uninstall-nobase_dist_visualDATA uninstall-nodist_dxmacroDATA \
+	uninstall-nodist_visualDATA
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dist_binSCRIPTS \
 	install-exec install-exec-am install-info install-info-am \
-	install-man install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am uninstall-dist_binSCRIPTS \
-	uninstall-info-am
+	install-man install-nobase_dist_visualDATA \
+	install-nodist_dxmacroDATA install-nodist_visualDATA \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-dist_binSCRIPTS \
+	uninstall-info-am uninstall-nobase_dist_visualDATA \
+	uninstall-nodist_dxmacroDATA uninstall-nodist_visualDATA
 
+visFull.net: $(srcdir)/visFull.net.in
+	$(do_subst) < $(srcdir)/visFull.net.in > $@ || (rm -f $@ && exit 1)
+visRegional.net: $(srcdir)/visRegional.net.in
+	$(do_subst) < $(srcdir)/visRegional.net.in > $@ || (rm -f $@ && exit 1)
+visRegionalSurface.net: $(srcdir)/visRegionalSurface.net.in
+	$(do_subst) < $(srcdir)/visRegionalSurface.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSFullImport.net: $(srcdir)/OpenDXMacro/CitcomSFullImport.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSFullImport.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSImport.net: $(srcdir)/OpenDXMacro/CitcomSImport.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSImport.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSSurfaceHeatflux.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceHeatflux.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceHeatflux.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSSurfaceImport.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceImport.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceImport.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSSurfaceTopo.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceTopo.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceTopo.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSSurfaceVelocity.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceVelocity.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceVelocity.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSTemperature.net: $(srcdir)/OpenDXMacro/CitcomSTemperature.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSTemperature.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSVelocity.net: $(srcdir)/OpenDXMacro/CitcomSVelocity.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSVelocity.net.in > $@ || (rm -f $@ && exit 1)
+CitcomSViscosity.net: $(srcdir)/OpenDXMacro/CitcomSViscosity.net.in
+	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSViscosity.net.in > $@ || (rm -f $@ && exit 1)
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
