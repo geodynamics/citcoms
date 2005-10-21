@@ -5,17 +5,17 @@
 //
 //
 //
-// macro reference (indirect): RTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/RTFtoXYZ.net
+// macro reference (indirect): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
 //
-// macro reference (direct): CitcomSTemperature /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSTemperature.net
+// macro reference (direct): CitcomSTemperature @dxmacrodir@/CitcomSTemperature.net
 include "CitcomSTemperature.net"
 //
-// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/VelocityRTFtoXYZ.net
+// macro reference (indirect): VelocityRTFtoXYZ @dxmacrodir@/VelocityRTFtoXYZ.net
 //
-// macro reference (direct): CitcomSVelocity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSVelocity.net
+// macro reference (direct): CitcomSVelocity @dxmacrodir@/CitcomSVelocity.net
 include "CitcomSVelocity.net"
 //
-// macro reference (direct): CitcomSViscosity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSViscosity.net
+// macro reference (direct): CitcomSViscosity @dxmacrodir@/CitcomSViscosity.net
 include "CitcomSViscosity.net"
 //
 // Begin MDF

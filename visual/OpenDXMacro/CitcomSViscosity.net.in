@@ -5,7 +5,7 @@
 //
 //
 //
-// macro reference (direct): RTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/RTFtoXYZ.net
+// macro reference (direct): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
 include "RTFtoXYZ.net"
 //
 // Begin MDF

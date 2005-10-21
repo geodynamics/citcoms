@@ -33,10 +33,8 @@ citcomsregional.sh \
 --controller.monitoringFrequency=30 \
 \
 --launcher.nodes=4 \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[101-102,101-102] \
 \
---solver.datafile=/scratch/username/cookbook2 \
+--solver.datafile=cookbook2 \
 \
 --solver.mesher.nprocx=2 \
 --solver.mesher.nprocy=2 \
