@@ -5,22 +5,22 @@
 //
 //
 //
-// macro reference (indirect): RTFtoXYZ RTFtoXYZ.net
+// macro reference (indirect): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
 //
-// macro reference (indirect): CitcomSTemperature CitcomSTemperature.net
+// macro reference (indirect): CitcomSTemperature @dxmacrodir@/CitcomSTemperature.net
 //
-// macro reference (indirect): VelocityRTFtoXYZ VelocityRTFtoXYZ.net
+// macro reference (indirect): VelocityRTFtoXYZ @dxmacrodir@/VelocityRTFtoXYZ.net
 //
-// macro reference (indirect): CitcomSVelocity CitcomSVelocity.net
+// macro reference (indirect): CitcomSVelocity @dxmacrodir@/CitcomSVelocity.net
 //
-// macro reference (indirect): CitcomSViscosity CitcomSViscosity.net
+// macro reference (indirect): CitcomSViscosity @dxmacrodir@/CitcomSViscosity.net
 //
-// macro reference (indirect): CitcomSImport CitcomSImport.net
+// macro reference (indirect): CitcomSImport @dxmacrodir@/CitcomSImport.net
 //
-// macro reference (direct): CitcomSFullImport CitcomSFullImport.net
+// macro reference (direct): CitcomSFullImport @dxmacrodir@/CitcomSFullImport.net
 include "CitcomSFullImport.net"
 //
-// macro reference (direct): ShowSphere ShowSphere.net
+// macro reference (direct): ShowSphere @dxmacrodir@/ShowSphere.net
 include "ShowSphere.net"
 //
 // MODULE main

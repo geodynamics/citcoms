@@ -26,6 +26,18 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+# Note: to run on a Beowulf cluster with MPICH, one would add
+# arguments similar to the following:
+#
+# --launcher.nodegen="n%03d" --launcher.nodelist=[131-132]
+#
+# This would generate the following machine file:
+#
+# n131
+# n132
+#
+# This generated machine file is automatically passed to 'mpirun'.
+
 citcomsregional.sh \
 \
 --steps=1 \
@@ -33,8 +45,6 @@ citcomsregional.sh \
 --controller.monitoringFrequency=10 \
 \
 --launcher.nodes=4 \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[131-132] \
 \
 --solver.datafile=example1 \
 \
@@ -42,8 +52,7 @@ citcomsregional.sh \
 --solver.mesher.nprocy=2 \
 --solver.mesher.nodex=17 \
 --solver.mesher.nodey=17 \
---solver.mesher.nodez=9 \
-
+--solver.mesher.nodez=9
 
 # version
 # $Id$

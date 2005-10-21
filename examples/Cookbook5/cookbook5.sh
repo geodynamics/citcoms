@@ -25,6 +25,7 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
+
 citcomsregional.sh \
 \
 --steps=1000 \
@@ -32,8 +33,6 @@ citcomsregional.sh \
 --controller.monitoringFrequency=10 \
 \
 --launcher.nodes=64 \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[141-172] \
 \
 --solver.datafile=./cookbook5_output/cookbook5 \
 --solver.rayleigh=4.07e+08 \
@@ -71,9 +70,9 @@ citcomsregional.sh \
 --solver.visc.VMIN=on \
 --solver.visc.visc_min=0.01 \
 --solver.visc.VMAX=on \
---solver.visc.visc_max=100.0 \
-\
+--solver.visc.visc_max=100.0
+
 # version
 # $Id$
-\
+
 # End of file

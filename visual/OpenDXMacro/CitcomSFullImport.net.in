@@ -5,17 +5,17 @@
 //
 //
 //
-// macro reference (indirect): RTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/RTFtoXYZ.net
+// macro reference (indirect): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
 //
-// macro reference (indirect): CitcomSTemperature /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSTemperature.net
+// macro reference (indirect): CitcomSTemperature @dxmacrodir@/CitcomSTemperature.net
 //
-// macro reference (indirect): VelocityRTFtoXYZ /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/VelocityRTFtoXYZ.net
+// macro reference (indirect): VelocityRTFtoXYZ @dxmacrodir@/VelocityRTFtoXYZ.net
 //
-// macro reference (indirect): CitcomSVelocity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSVelocity.net
+// macro reference (indirect): CitcomSVelocity @dxmacrodir@/CitcomSVelocity.net
 //
-// macro reference (indirect): CitcomSViscosity /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSViscosity.net
+// macro reference (indirect): CitcomSViscosity @dxmacrodir@/CitcomSViscosity.net
 //
-// macro reference (direct): CitcomSImport /home/tan2/GeoFramework/packages/CitcomS/visual/OpenDXMacro/CitcomSImport.net
+// macro reference (direct): CitcomSImport @dxmacrodir@/CitcomSImport.net
 include "CitcomSImport.net"
 //
 // Begin MDF

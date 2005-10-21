@@ -5,17 +5,17 @@
 //
 //
 //
-// macro reference (indirect): RTFtoXYZ2D /home/ces74/cases/embedded/G3_case1/OpenDXMacro/RTFtoXYZ2D.net
+// macro reference (indirect): RTFtoXYZ2D @dxmacrodir@/RTFtoXYZ2D.net
 //
-// macro reference (direct): CitcomSSurfaceHeatflux /home/ces74/cases/embedded/G3_case1/OpenDXMacro/CitcomSSurfaceHeatflux.net
+// macro reference (direct): CitcomSSurfaceHeatflux @dxmacrodir@/CitcomSSurfaceHeatflux.net
 include "CitcomSSurfaceHeatflux.net"
 //
-// macro reference (direct): CitcomSSurfaceTopo /home/ces74/cases/embedded/G3_case1/OpenDXMacro/CitcomSSurfaceTopo.net
+// macro reference (direct): CitcomSSurfaceTopo @dxmacrodir@/CitcomSSurfaceTopo.net
 include "CitcomSSurfaceTopo.net"
 //
-// macro reference (indirect): VelocityRTFtoXYZ2D /home/ces74/cases/embedded/G3_case1/OpenDXMacro/VelocityRTFtoXYZ2D.net
+// macro reference (indirect): VelocityRTFtoXYZ2D @dxmacrodir@/VelocityRTFtoXYZ2D.net
 //
-// macro reference (direct): CitcomSSurfaceVelocity /home/ces74/cases/embedded/G3_case1/OpenDXMacro/CitcomSSurfaceVelocity.net
+// macro reference (direct): CitcomSSurfaceVelocity @dxmacrodir@/CitcomSSurfaceVelocity.net
 include "CitcomSSurfaceVelocity.net"
 //
 // Begin MDF

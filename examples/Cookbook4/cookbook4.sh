@@ -33,11 +33,9 @@ citcomsregional.sh \
 --controller.monitoringFrequency=10 \
 \
 --launcher.nodes=16 \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[150-157,150-157] \
 \
 --solver.rayleigh=1e6 \
---solver.datafile=../Cookbook4/cookbook4_output/cookbook4 \
+--solver.datafile=cookbook4 \
 \
 --solver.ic.num_perturbations=1 \
 --solver.ic.perturbmag=0.05 \
@@ -46,7 +44,7 @@ citcomsregional.sh \
 --solver.ic.perturblayer=10 \
 \
 --solver.mesher.coor=on \
---solver.mesher.coor_file=../Cookbook4/coor.dat \
+--solver.mesher.coor_file=coor.dat \
 --solver.mesher.nprocx=4 \
 --solver.mesher.nprocy=2 \
 --solver.mesher.nprocz=2 \
@@ -69,7 +67,7 @@ citcomsregional.sh \
 --solver.visc.visc_min=1.0 \
 --solver.visc.VMAX=on \
 --solver.visc.visc_max=100.0
-\
+
 # version
 # $Id$
 
