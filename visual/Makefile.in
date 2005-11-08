@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# $Id: Makefile.am 2397 2005-10-04 22:37:25Z leif $
+# $Id: Makefile.am 2466 2005-10-21 19:08:39Z leif $
 
 
 srcdir = @srcdir@
