@@ -112,8 +112,8 @@ class IC(CitcomComponent):
 
 
         blob_center = pyre.inventory.list("blob_center", default=[-999., -999., -999.])
-        blob_radius = pyre.inventory.float("blob_radius", default=[0.063])
-        blob_dT = pyre.inventory.float("blob_dT", default=[0.18])
+        blob_radius = pyre.inventory.float("blob_radius", default=0.063)
+        blob_dT = pyre.inventory.float("blob_dT", default=0.18)
 
 
 # version
