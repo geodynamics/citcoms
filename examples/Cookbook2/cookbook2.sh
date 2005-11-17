@@ -44,7 +44,7 @@ citcomsregional.sh \
 \
 --solver.bc.topvbc=1 \
 --solver.bc.topvbxval=100 \
---solver.bc.topvbyvel=0 \
+--solver.bc.topvbyval=0 \
 \
 --solver.ic.num_perturbations=1 \
 --solver.ic.perturbmag=0.0
