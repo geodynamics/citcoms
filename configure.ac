@@ -86,10 +86,6 @@ fi
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
 if test "$want_pyre" = yes; then
-    AC_CHECK_PROG(check_CXX, [$CXX], [$CXX], [ ])
-    if test "$check_CXX" = " "; then
-        AC_MSG_ERROR([no C++ compiler found])
-    fi
     CIT_PROG_PYCONFIG
     AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
 fi
