@@ -28,7 +28,7 @@
 PYTHONPATH="@PYTHONPATH@${PYTHONPATH:+:${PYTHONPATH}}"
 export PYTHONPATH
 
-@PYTHON@ @pkgpythondir@/SimpleApp.pyc $*
+@PYTHON@ @pkgpyexecdir@/SimpleApp.pyc $*
 
 
 # version

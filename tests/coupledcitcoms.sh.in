@@ -28,7 +28,7 @@
 PYTHONPATH="@PYTHONPATH@${PYTHONPATH:+:${PYTHONPATH}}"
 export PYTHONPATH
 
-@PYTHON@ @pkgpythondir@/CoupledApp.pyc $*
+@PYTHON@ @pkgpyexecdir@/CoupledApp.pyc $*
 
 
 # version

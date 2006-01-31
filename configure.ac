@@ -93,7 +93,7 @@ AC_PROG_LIBTOOL
 
 # Checks for Python modules and packages.
 if test "$want_pyre" = yes; then
-    PYTHONPATH="${pythondir}${PYTHONPATH:+:${PYTHONPATH}}"; export PYTHONPATH
+    PYTHONPATH="${pyexecdir}${PYTHONPATH:+:${PYTHONPATH}}"; export PYTHONPATH
     CIT_PATH_PYTHIA([0.8], [mpi])
     CIT_PATH_EXCHANGER([1.0])
     AC_SUBST([PYTHONPATH])

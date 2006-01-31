@@ -44,7 +44,7 @@ do_subst = sed \
 	-e 's|[@]GLOBUSRUN[@]|$(GLOBUSRUN)|g' \
 	-e 's|[@]INPUT[@]|$(pkgsysconfdir)/CitcomS.pml: generated from CitcomS.pml.in|g' \
 	-e 's|[@]LAUNCHER[@]|$(LAUNCHER)|g' \
-	-e 's|[@]LAUNCHERS_PY[@]|$(pkgpythondir)/Components/Launchers.py|g' \
+	-e 's|[@]LAUNCHERS_PY[@]|$(pkgpyexecdir)/Components/Launchers.py|g' \
 	-e 's|[@]MPIRUN[@]|$(MPIRUN)|g' \
 	-e 's|[@]PYTHIA_MPIPYTHON[@]|$(PYTHIA_MPIPYTHON)|g' \
 	-e 's|[@]QSUB[@]|$(QSUB)|g'
