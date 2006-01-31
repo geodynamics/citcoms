@@ -27,7 +27,7 @@ nodist_bin_SCRIPTS = \
 	citcomsfull.sh \
 	citcomsregional.sh
 do_subst = sed \
-	-e 's|[@]pkgpythondir[@]|$(pkgpythondir)|g' \
+	-e 's|[@]pkgpyexecdir[@]|$(pkgpyexecdir)|g' \
 	-e 's|[@]PYTHON[@]|$(PYTHON)|g' \
 	-e 's|[@]PYTHONPATH[@]|$(PYTHONPATH)|g'
 citcomsfull.sh: $(srcdir)/citcomsfull.sh.in

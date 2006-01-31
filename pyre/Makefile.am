@@ -23,7 +23,7 @@
 
 # $Id$
 
-nobase_pkgpython_PYTHON = \
+nobase_pkgpyexec_PYTHON = \
 	Components/Advection_diffusion/Advection_diffusion.py \
 	Components/Advection_diffusion/__init__.py \
 	Components/BC.py \
@@ -58,7 +58,7 @@ nobase_pkgpython_PYTHON = \
 	Solver/RegionalSolver.py \
 	Solver/Solver.py
 
-nodist_pkgpython_PYTHON = \
+nodist_pkgpyexec_PYTHON = \
 	config.py \
 	__init__.py
 do_subst = sed \
@@ -67,7 +67,7 @@ config.py: $(top_builddir)/portinfo $(top_builddir)/Makefile
 	$(PYCONFIG) -h $(top_builddir)/portinfo -m $(top_builddir)/Makefile -o $@
 __init__.py: $(srcdir)/__init__.py.in
 	$(do_subst) < $(srcdir)/__init__.py.in > $@ || (rm -f $@ && exit 1)
-CLEANFILES = $(nodist_pkgpython_PYTHON)
+CLEANFILES = $(nodist_pkgpyexec_PYTHON)
 EXTRA_DIST = \
 	__init__.py.in
 
