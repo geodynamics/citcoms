@@ -317,6 +317,7 @@ class LauncherPBS(LauncherBatch):
         
         command = pyre.inventory.str("command", default="mpirun -np ${nodes} -machinefile $PBS_NODEFILE") # Sub-launcher?
         batch_command = pyre.inventory.str("batch-command", default="qsub")
+        qsub_options = pyre.inventory.list("qsub-options")
 
 
     def __init__(self):
@@ -344,6 +345,8 @@ class LauncherPBS(LauncherBatch):
             "#PBS -V", # export qsub command environment to the batch job
             "#PBS -l %s" % resourceList,
             ]
+
+        script += ["#PBS " + option for option in self.inventory.qsub_options]
 
         return script
 
@@ -373,6 +376,7 @@ class LauncherLSF(LauncherBatch):
         
         command = pyre.inventory.str("command", default="mpijob mpirun")
         batch_command = pyre.inventory.str("batch-command", default="bsub")
+        bsub_options = pyre.inventory.list("bsub-options")
 
 
     def __init__(self):
@@ -408,6 +412,8 @@ class LauncherLSF(LauncherBatch):
         script += [
             "#BSUB -n %d" % self.nodes,
             ]
+
+        script += ["#BSUB " + option for option in self.inventory.bsub_options]
 
         return script
 
