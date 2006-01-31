@@ -237,7 +237,7 @@ class LauncherBatch(Launcher):
         nodegen = pyre.inventory.str("nodegen")
         nodegen.meta['tip'] = """(ignored)"""
 
-        walltime = pyre.inventory.dimensional("walltime", default=30.0*minute)
+        walltime = pyre.inventory.dimensional("walltime", default=0*minute)
         mail = pyre.inventory.bool("mail", default=False)
         queue = pyre.inventory.str("queue")
 
