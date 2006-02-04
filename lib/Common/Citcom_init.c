@@ -48,5 +48,8 @@ struct All_variables* citcom_init(MPI_Comm *world)
   E->monitor.solution_cycles=0;
   E->control.keep_going=1;
 
+  E->control.total_iteration_cycles=0;
+  E->control.total_v_solver_calls=0;
+
   return(E);
 }
