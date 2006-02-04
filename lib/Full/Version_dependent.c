@@ -330,7 +330,7 @@ void construct_boundary( struct All_variables *E)
   int m, i, j, k, d, el, count;
 
   /* boundary = top + bottom */
-  int max_size = 2*E->lmesh.elx*E->lmesh.ely;
+  int max_size = 2*E->lmesh.elx*E->lmesh.ely + 1;
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     E->boundary.element[m] = (int *)malloc(max_size*sizeof(int));
 

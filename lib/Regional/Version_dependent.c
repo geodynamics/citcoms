@@ -36,7 +36,7 @@ void global_derived_values(E)
      struct All_variables *E;
 
 {
-    int d,lx,lz,ly,i,nox,noz,noy;
+    int d,i,nox,noz,noy;
     void parallel_process_termination();
 
 
@@ -113,7 +113,6 @@ void global_derived_values(E)
       E->mesh.NNOV[i] = E->mesh.NNO[i];
       E->mesh.NEQ[i] = E->mesh.nsd * E->mesh.NNOV[i] ;
 
-      lx--; lz--; ly--;
       }
 
     E->sphere.elx = E->sphere.nox-1;

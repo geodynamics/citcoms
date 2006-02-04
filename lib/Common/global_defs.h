@@ -227,9 +227,9 @@ struct HarmBc {
 
 
 struct Shape_function_dA  {
-  double vpt[8];
-  double spt[4];
-  double ppt[1]; };
+  double vpt[8+1];
+  double spt[4+1];
+  double ppt[1+1]; };
 
 struct Shape_function1_dA  {
   double vpt[6*4];
