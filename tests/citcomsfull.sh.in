@@ -24,8 +24,6 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-PYTHONPATH="@PYTHONPATH@${PYTHONPATH:+:${PYTHONPATH}}"
-export PYTHONPATH
 
 @PYTHON@ @pkgpyexecdir@/SimpleApp.pyc --solver=full $*
 
