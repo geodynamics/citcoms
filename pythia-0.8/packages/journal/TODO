@@ -1,0 +1,27 @@
+# -*- sh -*-
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+todo () {
+
+   journal/components <- pyre/journal
+
+   journal/__init__.py:daemon()
+   journal/__init__.py:remote()
+   journal/__init__.py:component()
+
+   tests/components/remote.py
+
+   applications/journald.py
+
+}
+
+# End of file

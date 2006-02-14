@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def project(merlin):
+
+    name = "libhello"
+    sources = [ "hello.cc" ]
+    headers = [ "hello.h" ]
+
+    project = merlin.project(name, type="code")
+
+    lib = project.library()
+
+    lib.sources = sources
+    lib.headers = headers
+
+    return project
+
+
+# version
+__id__ = "$Id: .merlin,v 1.1.1.1 2005/03/08 16:13:59 aivazis Exp $"
+
+# End of file 

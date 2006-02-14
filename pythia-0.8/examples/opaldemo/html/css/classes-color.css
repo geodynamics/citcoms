@@ -1,0 +1,217 @@
+/*  -*- CSS -*-  */
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ *                             Michael A.G. Aivazis
+ *                      California Institute of Technology
+ *                      (C) 1998-2005  All Rights Reserved
+ *
+ * {LicenseText}
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+input {
+    border-color: #8cacbb;  
+    color: Black;
+    background-color: white;
+}
+
+input.searchButton {
+    background-color: white;
+}
+
+.visualClear {
+}
+
+.hiddenObject {
+    background: transparent;
+}
+
+/* portlet rendering */
+
+.portlet {
+}
+
+.portlet h4 {
+}
+
+.portlet h5 { 
+    background: #dee7ec;
+    border-color: #8cacbb;
+}
+
+.portlet h6 { 
+    background: #dee7ec;
+    border-color: #8cacbb;
+}
+
+.portletBody {
+    background: transparent;
+    border-color: #8cacbb;
+}
+.portletDetails {
+}
+
+.portletMore {
+}
+
+.portletContent {
+}
+
+.portletContent a:hover {
+    background-color: #dee7ec;
+    color: #436976;
+    border-color: #8cacbb;
+}
+
+.portletClose {
+    border-left-color: #8cacbb;
+}
+.portlet h1, 
+.portlet h2, 
+.portlet h3, 
+.portlet h4 {
+}
+.portlet .even {
+    background-color: #f7f9fa;
+}
+.portlet .odd {
+    background-color: transparent;
+}
+.portlet input {
+}
+
+.portlet ul,
+.portlet li {
+}
+
+/* navigation tree rendering */
+
+.navItemIcon,
+.navItemIconRoot {
+}
+
+.navItemText {
+}
+
+.navRootItem,
+.navItem {
+    border: 1px dotted lightgray;
+}
+
+.currentNavItem {
+    background-color: #dee7ec;
+    color: #436976;
+    border-color: #8cacbb;
+}
+
+.navLevel1 {
+}
+
+.navLevel2 {
+}
+
+.navLevel3 {
+}
+
+.navLevel4 {
+}
+
+.navLevel5 {
+}
+
+.navLevel6 {
+}
+
+.navLevel7 {
+}
+
+.navLevel8 {
+}
+
+
+/* document rendering */
+
+.documentContent {
+    background: White;
+}
+
+.documentContent {
+    border-color: #74ae0b;
+}
+
+.documentActions {
+}
+
+.documentActions ul {
+}
+
+
+.documentActions ul,
+.documentActions li {
+}
+
+.documentActions a {
+}
+
+.documentDescription {
+}
+
+.documentByline {
+    color: #76797c;
+}
+
+.documentByline a {
+}
+
+/* forms and form fields */
+
+.formfield {
+}
+
+.formfield .formfield {
+}
+
+.formfield label {
+}
+
+.formfieldRequired {
+    color: White;
+} 
+
+.formfieldHelp, .formHelp {
+    color: #76797c;
+}
+
+.formfieldHelp a, .formHelp a {
+}
+
+.formHelp:hover, .formfieldHelp:hover {
+    color: Black;
+}
+
+.formControls {
+}
+
+.error {
+    /* Class for error indication in forms */
+    background-color: #ffce7b;
+    border-color: #ffa500;
+}
+
+.error .formfieldRequired {
+   color: #ffce7b;
+} 
+
+.context {
+}
+
+.logo { 
+    color: #ff4040;
+}
+
+/* version */
+/* $Id: classes-color.css,v 1.5 2005/04/29 17:46:50 pyre Exp $ */
+
+/* End of file  */

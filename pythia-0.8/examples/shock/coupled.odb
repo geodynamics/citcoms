@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+# factory
+
+def layout():
+    return LayoutManager()
+
+
+# implementation
+
+from pyre.components.Component import Component
+
+
+class LayoutManager(Component):
+
+
+    class Inventory(Component.Inventory):
+
+        import pyre.inventory
+
+        solid = pyre.inventory.int("solid", default=0, validator=pyre.inventory.choice([0,1]))
+        fluid = pyre.inventory.int("fluid", default=1, validator=pyre.inventory.choice([0,1]))
+
+
+    def layout(self, application):
+
+        self.discover()
+        self.verify(application)
+        self.createCommunicators(application)
+
+        return self
+
+
+    def createCommunicators(self, application):
+        import mpi
+        world = mpi.world()
+
+        solid = world.include([self.inventory.solid])
+        fluid = world.include([self.inventory.fluid])
+
+        communicators = solid, fluid
+        solvers = application.solid, application.fluid
+
+        self.solver = solvers[self.rank]
+        self.communicator = communicators[self.rank]
+        
+        # inform the coupler about the layout
+        application.coupler.servers(source=self.inventory.solid, sink=self.inventory.fluid)
+
+        return
+
+
+    def allocateNodes(self):
+        rank = self.rank
+        nodes = self.nodes
+
+        solid = self.inventory.solid
+        fluid = self.inventory.fluid
+
+        sr, fr = map(int, ratio.split(":"))
+
+        sp = int(nodes * sr/(sr+fr))
+        fp = nodes - sp
+
+        if len(solid) < sp or len(fluid) < fp:
+            solid = range(sp)
+            fluid = range(sp, nodes)
+
+        self.inventory.solid = solid
+        self.inventory.fluid = fluid
+        
+        return
+        
+
+    def verify(self, context):
+
+        if self.nodes != 2:
+            import journal
+            firewall = journal.firewall("layout")
+            firewall.log("'%s' requires exactly 2 processors" % context.name)
+
+        return
+
+
+    def discover(self):
+        import mpi
+
+        self.rank = mpi.world().rank
+        self.nodes = mpi.world().size
+
+        return
+
+
+    def __init__(self):
+        Component.__init__(self, "coupled", facility="layout")
+        self.fluid = None
+        self.solid = None
+
+        self.rank = 0
+        self.nodes = 0
+
+        self.solver = None
+        self.communicator = None
+
+        return
+
+
+# version
+__id__ = "$Id: coupled.odb,v 1.1.1.1 2005/03/08 16:14:00 aivazis Exp $"
+
+# End of file 

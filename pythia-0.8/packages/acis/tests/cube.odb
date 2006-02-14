@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005 All Rights Reserved
+# 
+#  <LicenseText>
+# 
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+
+
+def modeller():
+
+    # model
+    from pyre.geometry.GeometricalModeller import GeometricalModeller
+
+    class Cube(GeometricalModeller):
+
+        class Inventory(GeometricalModeller.Inventory):
+
+            import pyre.inventory
+            from pyre.units.length import meter
+
+            scale = pyre.inventory.float("scale", default=2)
+            side = pyre.inventory.dimensional("side", default=0.1 * meter)
+
+
+        def model(self):
+            side = self.inventory.side
+            scale = self.inventory.scale
+
+            from pyre.geometry.solids import block
+            from pyre.geometry.operations import translate
+
+            diagonal = (side, side, side)
+            cube = block(diagonal)
+            cube = translate(cube, (-side/2, -side/2, -side/2))
+
+            ils = side.value/scale 
+
+            return cube
+
+
+        def __init__(self):
+            GeometricalModeller.__init__(self, "cube")
+            return
+
+
+    import journal
+    info = journal.debug("modeller")
+    info.log("instantiating model")
+
+    cube = Cube()
+
+    info.log("model: %r" % cube.name)
+
+    return cube
+    
+
+# version
+__id__ = "$Id: cube.odb,v 1.1.1.1 2005/03/08 16:13:33 aivazis Exp $"
+
+#  End of file 

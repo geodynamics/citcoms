@@ -1,0 +1,59 @@
+// -*- C++ -*-
+//
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+//                               Michael A.G. Aivazis
+//                        California Institute of Technology
+//                        (C) 1998-2005 All Rights Reserved
+// 
+//  <LicenseText>
+// 
+//  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+// common headers
+// also used as the precompiled header mark on MSVC
+
+#if !defined(acismodule_imports)
+#define acismodule_imports
+
+#include <portinfo>
+
+#include "journal/info.h"
+#include "journal/debug.h"
+#include "journal/firewall.h"
+
+//
+// Python
+#include <Python.h>
+
+// ACIS
+#include <kernel/acis.hxx>
+
+#include <kernel/kernapi/api/api.hxx>
+#include <kernel/kernapi/api/kernapi.hxx>
+#include <kernel/kerndata/lists/lists.hxx> 
+
+#include <baseutil/vector/position.hxx>
+#include <baseutil/vector/transf.hxx>
+#include <baseutil/vector/vector.hxx>
+
+#include <kernel/kerndata/top/body.hxx>
+#include <kernel/spline/api/spl_api.hxx>
+
+
+#include <boolean/kernapi/api/boolapi.hxx>
+#include <boolean/kernbool/boolean/boolean.hxx>
+#include <constrct/kernapi/api/cstrapi.hxx>
+#include <intersct/kernapi/api/intrapi.hxx>
+
+#ifdef ACIS_HAS_MESHER
+#include <meshhusk/api/meshapi.hxx>
+#endif
+
+#endif
+
+// version
+// $Id: imports,v 1.1.1.1 2005/03/08 16:13:32 aivazis Exp $
+
+// End of file

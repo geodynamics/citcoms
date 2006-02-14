@@ -1,0 +1,71 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_memory_Shareable_h)
+#error This header file contains implementation details for the class Shareable
+#else
+
+#include "journal/journal.h"
+
+// interface
+
+int pyre::memory::Shareable::references() const {
+    return _count;
+}
+
+void pyre::memory::Shareable::addReference() {
+    ++_count;
+    return;
+}
+
+void pyre::memory::Shareable::releaseReference() {
+    --_count;
+    return;
+}
+
+
+// meta-methods
+
+pyre::memory::Shareable::~Shareable() {
+    if (_count != 0) {
+        journal::firewall_t firewall("pyre.memory");
+        firewall
+            << journal::loc(__HERE__)
+            << "destroying Shareable@" << this
+            << " with " << _count << " outstanding references"
+            << journal::end;
+    }
+}
+
+
+pyre::memory::Shareable::Shareable():
+    _count(0)
+{}
+
+
+pyre::memory::Shareable::Shareable(const pyre::memory::Shareable &):
+    _count(0)
+{}
+
+
+const pyre::memory::Shareable &
+pyre::memory::Shareable::operator=(const pyre::memory::Shareable &) {
+    return *this;
+}
+
+#endif
+
+// version
+// $Id: Shareable.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

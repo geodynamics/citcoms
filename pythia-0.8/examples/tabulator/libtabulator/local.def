@@ -1,0 +1,29 @@
+# -*- Makefile -*-
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+#
+# Local (project) definitions
+#
+
+# F90
+    include std-f90.def
+
+    EXT_F77 = f90
+
+    PROJ_F77_FLAGS += $(F77_SOFLAGS)
+    PROJ_LF77_FLAGS += $(LF77_SARFLAGS)
+
+# version
+# $Id: local.def,v 1.1.1.1 2005/03/17 20:03:02 aivazis Exp $
+
+# End of file

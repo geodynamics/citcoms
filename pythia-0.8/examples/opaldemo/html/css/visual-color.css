@@ -1,0 +1,156 @@
+/*  -*- CSS -*-  */
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ *                             Michael A.G. Aivazis
+ *                      California Institute of Technology
+ *                      (C) 1998-2005  All Rights Reserved
+ *
+ * {LicenseText}
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+a {
+    color: #436976;
+    background-color: transparent;
+}
+
+abbr, acronym {
+    background-color: transparent;
+    border-bottom-color: Black;
+    color: Black;
+}
+
+blockquote {
+    font-family: Times, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 120%;
+}
+
+body {
+    color: Black;
+    background-color: White;
+}
+
+code {
+    color: Black;
+    border-color: #8cacbb;
+    background-color: #dee7ec;
+}
+
+dd {
+}
+
+dd a {
+}
+
+del {
+    color: red;
+}
+
+dt {
+}
+
+dt a {
+}
+
+fieldset {
+    border-color: #8cacbb;
+}
+
+form { 
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: Black;
+    border-bottom-color: #8cacbb;
+    background-color: transparent;
+    text-shadow: #999999;
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    color: Black ! important; 
+}
+
+hr {
+    color: #8cacbb;
+    background-color: transparent;
+}
+
+img {
+}
+
+input {
+    color: Black;
+    border-color: #8cacbb;  
+    background-color: white;
+}
+
+ins {
+    color: green;
+}
+
+legend {
+    background: White;
+}
+
+li {
+}
+
+ol { 
+}
+
+p {
+}
+
+p a {
+}
+
+p a:visited {
+    color: Purple;
+    background-color: transparent;
+}
+
+p a:active {
+    color: Red;
+    background-color: transparent;
+}
+
+p img {
+}
+
+pre {
+    color: Black;
+    border-color: #8cacbb;
+    background-color: #dee7ec;
+}
+
+q {
+}
+
+select {
+    color: Black;
+    border-color: #8cacbb;  
+}
+
+table {
+}
+
+textarea {
+    color: Black;
+    border-color: #8cacbb;  
+    background-color: white;
+}
+
+ul {
+}
+
+ul a, ol a {
+}
+
+
+/* version */
+/* $Id: visual-color.css,v 1.2 2005/03/20 07:25:53 aivazis Exp $ */
+
+/* End of file  */

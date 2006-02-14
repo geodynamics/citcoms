@@ -1,0 +1,34 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_SeverityFirewall_icc)
+#error This header file contains implementation details of the class SeverityFirewall
+#else
+
+// inlines
+// interface
+journal::SeverityFirewall::string_t 
+journal::SeverityFirewall::name() const {
+    return  "firewall." + facility();
+}
+
+// meta-methods
+journal::SeverityFirewall::SeverityFirewall(string_t name) :
+journal::Diagnostic(name, "firewall", lookup(name)) {}
+
+#endif
+
+// version
+// $Id: SeverityFirewall.icc,v 1.1.1.1 2005/03/08 16:13:55 aivazis Exp $
+
+// End of file

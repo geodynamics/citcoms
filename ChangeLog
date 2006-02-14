@@ -1,3 +1,771 @@
+2006-02-04 02:11  luis
+
+	* doc/manual/citcoms_book.xml: Fixed about 20 assorted typos.
+
+2006-02-04 00:18  luis
+
+	* lib/Regional/Version_dependent.c: Eliminated the unused local
+	  variables lx,ly,lz in global_derived_values().
+
+2006-02-04 00:15  luis
+
+	* lib/Full/Version_dependent.c: The value of max_size needs to be
+	  larger by 1, or else we access out-of-bound array elements in
+	  the arrays E->boundary.element and E->boundary.normal. Refer to
+	  issue10 in roundup for more details.
+
+2006-02-04 00:11  luis
+
+	* lib/Common/global_defs.h: Adjusted size of arrays in struct
+	  Shape_function_dA. This fixes a bug involving out-of-bounds
+	  array access caused by use of fortran-style indexing. Refer to
+	  issue10 in roundup for more information.
+
+2006-02-04 00:04  luis
+
+	* lib/Common/Citcom_init.c: Need to initialize to zero the
+	  following variables * E->control.total_iteration_cycles *
+	  E->control.total_v_solver_calls
+
+2006-01-31 23:16  leif
+
+	* pyre/Components/Launchers.py: Merged r2575 (fix for issue9,
+	  "need a property for extra LSF options") from v2 branch to trunk.
+
+2006-01-31 20:23  leif
+
+	* pyre/Components/Launchers.py: Merged r2573 (fix for issue8,
+	  "eliminate CitcomS default time limit for batch jobs") from v2
+	  branch to trunk.
+
+2006-01-31 02:54  leif
+
+	* configure.ac, etc/Makefile.am, pyre/Makefile.am,
+	  tests/Makefile.am, tests/citcomsfull.sh.in,
+	  tests/citcomsregional.sh.in, tests/coupledcitcoms.sh.in: Merged
+	  r2565 (fix for issue11, "broken install when 'pkgpyexecdir' is
+	  distinct from 'pkgpythondir'") from v2 branch to trunk.
+
+2006-01-31 00:07  leif
+
+	* configure.ac: Merged r2563 (fix for issue7, "CitcomS check_CXX
+	  check is broken") from v2 branch to trunk.
+
+2005-11-17 19:14  luis
+
+	* examples/Cookbook2/cookbook2.sh: Corrected typo. Should be:
+	  --solver.bc.topvbyval=0
+
+2005-11-17 00:35  luis
+
+	* doc/manual/citcoms_book.xml: boundition --> boundary condition
+
+2005-11-16 02:23  leif
+
+	* pyre/Components/IC.py: Fixed a bug which Luis found
+	  ("--solver.ic.help-properties"): bad default values for
+	  blob_radius and blob_dT.
+
+2005-11-09 18:53  leif
+
+	* doc/manual/citcoms_book.xml: Regenerated PDF.
+
+2005-11-09 12:15  luis
+
+	* doc/manual/citcoms_book.xml: Fixed example 5.6 in Cookbook 5
+
+2005-11-09 11:45  luis
+
+	* doc/manual/citcoms_book.xml: Fixed a few more typos.
+
+2005-11-09 11:31  luis
+
+	* doc/manual/citcoms_book.xml: Missed a stray =
+
+2005-11-09 11:20  luis
+
+	* doc/manual/citcoms_book.xml: Corrected several typos and
+	  mispelling errors.
+
+2005-11-04 19:39  leif
+
+	* doc/manual/citcoms_book.xml: Regenerated PDF: updated date;
+	  minor corrections, format tweaks.
+
+2005-11-03 00:26  tan2
+
+	* doc/manual/citcoms_book.xml: fixed a bug in closing <filename>
+	  tag
+
+2005-11-01 01:10  tan2
+
+	* doc/manual/citcoms_book.xml: changes in Chapter 4
+	  (post-processing) and Appendix C (output format)
+
+2005-10-29 02:16  leif
+
+	* mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
+	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook1/cookbook1.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook2/cookbook2.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook3/cookbook3.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook4/cookbook4.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook5/cookbook5.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook7/cookbook7.sh,
+	  mc/3D/CitcomS/tags/v2.0.1/examples/example1.sh,
+	  examples/Cookbook1/cookbook1.sh,
+	  examples/Cookbook2/cookbook2.sh: Set svn:executable on all
+	  examples and cookbooks.
+
+2005-10-29 02:07  leif
+
+	* doc/manual/citcoms_book.xml: Numerous minor corrections and
+	  format tweaks.
+
+2005-10-28 22:58  leif
+
+	* doc/manual/citcoms_book.xml: Minor corrections to Chapter 3,
+	  "Running CitComS.py", and a major update to Chapter 4,
+	  "Postprocessing and Graphics" (which still contained references
+	  to the "regcitcom input file").
+
+2005-10-28 20:06  leif
+
+	* doc/manual/citcoms_book.xml: Minor updates to Chapter 2 -- in
+	  particular, removed reference to the separate, sync'd Pythia
+	  repository. Also, removed reference to the Python installer.
+
+2005-10-28 19:45  leif
+
+	* doc/manual, doc/manual/citcoms_book.xml,
+	  doc/manual/citcoms_cover.pdf, doc/manual/graphics.tar.gz: Added
+	  DocBook manual files from Cassie.
+
+2005-10-21 19:35  leif
+
+	* mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
+	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
+	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSFullImport.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSFullImport.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSImport.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSImport.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceHeatflux.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceHeatflux.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceImport.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceImport.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceTopo.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceTopo.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceVelocity.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceVelocity.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSTemperature.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSTemperature.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSVelocity.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSVelocity.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSViscosity.net,
+	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSViscosity.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/visFull.net,
+	  mc/3D/CitcomS/branches/v2/visual/visFull.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/visRegional.net,
+	  mc/3D/CitcomS/branches/v2/visual/visRegional.net.in,
+	  mc/3D/CitcomS/branches/v2/visual/visRegionalSurface.net,
+	  mc/3D/CitcomS/branches/v2/visual/visRegionalSurface.net.in,
+	  examples/Cookbook1/cookbook1.sh,
+	  examples/Cookbook2/cookbook2.sh,
+	  examples/Cookbook3/cookbook3.sh,
+	  examples/Cookbook4/cookbook4.sh,
+	  examples/Cookbook5/cookbook5.sh,
+	  examples/Cookbook7/cookbook7.sh, examples/example1.sh,
+	  visual/Makefile.am, visual/OpenDXMacro/CitcomSFullImport.net,
+	  visual/OpenDXMacro/CitcomSFullImport.net.in,
+	  visual/OpenDXMacro/CitcomSImport.net,
+	  visual/OpenDXMacro/CitcomSImport.net.in,
+	  visual/OpenDXMacro/CitcomSSurfaceHeatflux.net,
+	  visual/OpenDXMacro/CitcomSSurfaceHeatflux.net.in,
+	  visual/OpenDXMacro/CitcomSSurfaceImport.net,
+	  visual/OpenDXMacro/CitcomSSurfaceImport.net.in,
+	  visual/OpenDXMacro/CitcomSSurfaceTopo.net,
+	  visual/OpenDXMacro/CitcomSSurfaceTopo.net.in,
+	  visual/OpenDXMacro/CitcomSSurfaceVelocity.net,
+	  visual/OpenDXMacro/CitcomSSurfaceVelocity.net.in,
+	  visual/OpenDXMacro/CitcomSTemperature.net,
+	  visual/OpenDXMacro/CitcomSTemperature.net.in,
+	  visual/OpenDXMacro/CitcomSVelocity.net,
+	  visual/OpenDXMacro/CitcomSVelocity.net.in,
+	  visual/OpenDXMacro/CitcomSViscosity.net,
+	  visual/OpenDXMacro/CitcomSViscosity.net.in, visual/visFull.net,
+	  visual/visFull.net.in, visual/visRegional.net,
+	  visual/visRegional.net.in, visual/visRegionalSurface.net,
+	  visual/visRegionalSurface.net.in: Merged revision 2466 from
+	  CitcomS v2.0.1 to v2 branch and trunk.
+
+2005-10-07 12:37  leif
+
+	* mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
+	  pyre/Solver/FullSolver.py, pyre/Solver/RegionalSolver.py: Don't
+	  suppress errors loading Full/Regional module.
+
+2005-10-04 23:58  tan2
+
+	* visual/dxgeneralsurf.sh, visual/pasteCitcomData.sh: changed the
+	  argument style of 'head'/'tail' command to conform with the
+	  standard
+
+2005-10-04 23:56  tan2
+
+	* visual/dxgeneral.sh: changed 'head -1' to 'head -n 1' to conform
+	  with the standard
+
+2005-10-04 22:37  leif
+
+	* mc/3D/CitcomS/branches/v2/Make.mm,
+	  mc/3D/CitcomS/branches/v2/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/configure.ac,
+	  mc/3D/CitcomS/branches/v2/drivers/Citcom.c,
+	  mc/3D/CitcomS/branches/v2/drivers/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/drivers/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/drivers/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/drivers/local.def,
+	  mc/3D/CitcomS/branches/v2/etc/Make.mm,
+	  mc/3D/CitcomS/branches/v2/etc/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/etc/__vault__.odb,
+	  mc/3D/CitcomS/branches/v2/etc/full-sphere.odb,
+	  mc/3D/CitcomS/branches/v2/etc/full.odb,
+	  mc/3D/CitcomS/branches/v2/etc/globus.odb,
+	  mc/3D/CitcomS/branches/v2/etc/incomp-newtonian.odb,
+	  mc/3D/CitcomS/branches/v2/etc/incomp-non-newtonian.odb,
+	  mc/3D/CitcomS/branches/v2/etc/lam-mpi.odb,
+	  mc/3D/CitcomS/branches/v2/etc/lsf.odb,
+	  mc/3D/CitcomS/branches/v2/etc/mpich.odb,
+	  mc/3D/CitcomS/branches/v2/etc/pbs.odb,
+	  mc/3D/CitcomS/branches/v2/etc/regional-sphere.odb,
+	  mc/3D/CitcomS/branches/v2/etc/regional.odb,
+	  mc/3D/CitcomS/branches/v2/etc/temp.odb,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Advection_diffusion.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Citcom_init.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Construct_arrays.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Convection.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Drive_solvers.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Element_calculations.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/General_matrix_functions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Global_operations.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Initial_temperature.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Instructions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Interuption.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Nodal_mesh.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Obsolete.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Output.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Pan_problem_misc_functions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Parsing.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Phase_change.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Problem_related.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Process_buoyancy.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Shape_functions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Size_does_matter.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Solver_conj_grad.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Solver_multigrid.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Sphere_harmonics.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Stokes_flow_Incomp.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Topo_gravity.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Tracer_advection.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Viscosity_structures.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/advection.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/advection_diffusion.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/citcom_init.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/convection_variables.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/drive_solvers.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/element_definitions.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/global_defs.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/initial_temperature.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/interuption.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/lith_age.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/Common/output.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/parallel_related.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/parsing.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/phase_change.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/sphere_communication.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/temperature_descriptions.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/tracer_defs.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/viscosity_descriptions.h,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Boundary_conditions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Geometry_cartesian.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Lith_age.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Obsolete.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Parallel_related.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Read_input_from_files.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Sphere_related.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Version_dependent.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Boundary_conditions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Geometry_cartesian.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Lith_age.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Obsolete.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Parallel_related.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Read_input_from_files.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Sphere_related.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Version_dependent.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/local.def,
+	  mc/3D/CitcomS/branches/v2/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Full/Fullmodule.cc,
+	  mc/3D/CitcomS/branches/v2/module/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Full/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Regionalmodule.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/misc.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/misc.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.h,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Advection_diffusion.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/BC.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/CitcomComponent.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Const.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/CoarseGridExchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Exchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/FineGridExchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Inlet.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Outlet.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/IC.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Launchers.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Param.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Phase.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/FullSphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/RegionalSphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Sphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Incompressible.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Tracer.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Visc.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Controller.py,
+	  mc/3D/CitcomS/branches/v2/pyre/CoupledApp.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Coupler.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Layout.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/pyre/SimpleApp.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/Solver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/__init__.py.in,
+	  mc/3D/CitcomS/branches/v2/pyre/local.def,
+	  mc/3D/CitcomS/branches/v2/tests/Make.mm,
+	  mc/3D/CitcomS/branches/v2/tests/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/tests/asap.py,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh.in,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh.in,
+	  mc/3D/CitcomS/branches/v2/tests/hrothgar.py,
+	  mc/3D/CitcomS/branches/v2/tests/local.def,
+	  mc/3D/CitcomS/branches/v2/tests/signon.py,
+	  mc/3D/CitcomS/branches/v2/visual/Make.mm,
+	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/visual/autocombine.py,
+	  mc/3D/CitcomS/branches/v2/visual/batchcombine.py,
+	  mc/3D/CitcomS/branches/v2/visual/batchpaste.sh,
+	  mc/3D/CitcomS/branches/v2/visual/batchsurf.py,
+	  mc/3D/CitcomS/branches/v2/visual/combine.py,
+	  mc/3D/CitcomS/branches/v2/visual/combinesurf.py,
+	  mc/3D/CitcomS/branches/v2/visual/dxgeneral.sh,
+	  mc/3D/CitcomS/branches/v2/visual/dxgeneralsurf.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getcoord.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getlog.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getsurf.sh,
+	  mc/3D/CitcomS/branches/v2/visual/parser.py,
+	  mc/3D/CitcomS/branches/v2/visual/pasteCitcomData.sh,
+	  mc/3D/CitcomS/branches/v2/visual/zslice.py, Make.mm,
+	  Makefile.am, configure.ac, drivers/Citcom.c,
+	  drivers/Full/Make.mm, drivers/Full/local.def, drivers/Make.mm,
+	  drivers/Makefile.am, drivers/Regional/Make.mm,
+	  drivers/Regional/local.def, drivers/local.def, etc/Make.mm,
+	  etc/Makefile.am, etc/__vault__.odb, etc/full-sphere.odb,
+	  etc/full.odb, etc/globus.odb, etc/incomp-newtonian.odb,
+	  etc/incomp-non-newtonian.odb, etc/lam-mpi.odb, etc/lsf.odb,
+	  etc/mpich.odb, etc/pbs.odb, etc/regional-sphere.odb,
+	  etc/regional.odb, etc/temp.odb, examples/Cookbook1/cookbook1.sh,
+	  examples/Cookbook2/cookbook2.sh,
+	  examples/Cookbook3/cookbook3.sh,
+	  examples/Cookbook4/cookbook4.sh,
+	  examples/Cookbook5/cookbook5.sh,
+	  examples/Cookbook7/cookbook7.sh, examples/Makefile.am,
+	  examples/example1.sh, lib/Common/Advection_diffusion.c,
+	  lib/Common/Citcom_init.c, lib/Common/Construct_arrays.c,
+	  lib/Common/Convection.c, lib/Common/Drive_solvers.c,
+	  lib/Common/Element_calculations.c,
+	  lib/Common/General_matrix_functions.c,
+	  lib/Common/Global_operations.c,
+	  lib/Common/Initial_temperature.c, lib/Common/Instructions.c,
+	  lib/Common/Interuption.c, lib/Common/Make.mm,
+	  lib/Common/Makefile.am, lib/Common/Nodal_mesh.c,
+	  lib/Common/Obsolete.c, lib/Common/Output.c,
+	  lib/Common/Pan_problem_misc_functions.c, lib/Common/Parsing.c,
+	  lib/Common/Phase_change.c, lib/Common/Problem_related.c,
+	  lib/Common/Process_buoyancy.c, lib/Common/Shape_functions.c,
+	  lib/Common/Size_does_matter.c, lib/Common/Solver_conj_grad.c,
+	  lib/Common/Solver_multigrid.c, lib/Common/Sphere_harmonics.c,
+	  lib/Common/Stokes_flow_Incomp.c, lib/Common/Topo_gravity.c,
+	  lib/Common/Tracer_advection.c,
+	  lib/Common/Viscosity_structures.c, lib/Common/advection.h,
+	  lib/Common/advection_diffusion.h, lib/Common/citcom_init.h,
+	  lib/Common/convection_variables.h, lib/Common/drive_solvers.h,
+	  lib/Common/element_definitions.h, lib/Common/global_defs.h,
+	  lib/Common/initial_temperature.h, lib/Common/interuption.h,
+	  lib/Common/lith_age.h, lib/Common/local.def,
+	  lib/Common/output.h, lib/Common/parallel_related.h,
+	  lib/Common/parsing.h, lib/Common/phase_change.h,
+	  lib/Common/sphere_communication.h,
+	  lib/Common/temperature_descriptions.h, lib/Common/tracer_defs.h,
+	  lib/Common/viscosity_descriptions.h,
+	  lib/Full/Boundary_conditions.c, lib/Full/Geometry_cartesian.c,
+	  lib/Full/Lith_age.c, lib/Full/Make.mm, lib/Full/Makefile.am,
+	  lib/Full/Obsolete.c, lib/Full/Parallel_related.c,
+	  lib/Full/Read_input_from_files.c, lib/Full/Sphere_related.c,
+	  lib/Full/Version_dependent.c, lib/Full/local.def, lib/Make.mm,
+	  lib/Makefile.am, lib/Regional/Boundary_conditions.c,
+	  lib/Regional/Geometry_cartesian.c, lib/Regional/Lith_age.c,
+	  lib/Regional/Make.mm, lib/Regional/Makefile.am,
+	  lib/Regional/Obsolete.c, lib/Regional/Parallel_related.c,
+	  lib/Regional/Read_input_from_files.c,
+	  lib/Regional/Sphere_related.c, lib/Regional/Version_dependent.c,
+	  lib/Regional/local.def, lib/local.def, local.def,
+	  module/Exchanger/AreaWeightedNormal.cc,
+	  module/Exchanger/AreaWeightedNormal.h,
+	  module/Exchanger/Boundary.cc, module/Exchanger/Boundary.h,
+	  module/Exchanger/BoundaryVTInlet.cc,
+	  module/Exchanger/BoundaryVTInlet.h,
+	  module/Exchanger/CitcomInterpolator.cc,
+	  module/Exchanger/CitcomInterpolator.h,
+	  module/Exchanger/CitcomSource.cc,
+	  module/Exchanger/CitcomSource.h, module/Exchanger/Convertor.cc,
+	  module/Exchanger/Convertor.h,
+	  module/Exchanger/Exchangermodule.cc,
+	  module/Exchanger/Interior.cc, module/Exchanger/Interior.h,
+	  module/Exchanger/Make.mm, module/Exchanger/Makefile.am,
+	  module/Exchanger/SIUnit.cc, module/Exchanger/SIUnit.h,
+	  module/Exchanger/SInlet.cc, module/Exchanger/SInlet.h,
+	  module/Exchanger/SVTInlet.cc, module/Exchanger/SVTInlet.h,
+	  module/Exchanger/SVTOutlet.cc, module/Exchanger/SVTOutlet.h,
+	  module/Exchanger/TInlet.cc, module/Exchanger/TInlet.h,
+	  module/Exchanger/TOutlet.cc, module/Exchanger/TOutlet.h,
+	  module/Exchanger/VOutlet.cc, module/Exchanger/VOutlet.h,
+	  module/Exchanger/VTInlet.cc, module/Exchanger/VTInlet.h,
+	  module/Exchanger/VTOutlet.cc, module/Exchanger/VTOutlet.h,
+	  module/Exchanger/bindings.cc, module/Exchanger/bindings.h,
+	  module/Exchanger/exceptions.cc, module/Exchanger/exceptions.h,
+	  module/Exchanger/exchangers.cc, module/Exchanger/exchangers.h,
+	  module/Exchanger/global_bbox.cc, module/Exchanger/global_bbox.h,
+	  module/Exchanger/initTemperature.cc,
+	  module/Exchanger/initTemperature.h,
+	  module/Exchanger/inlets_outlets.cc,
+	  module/Exchanger/inlets_outlets.h, module/Exchanger/misc.cc,
+	  module/Exchanger/misc.h, module/Full/Fullmodule.cc,
+	  module/Full/Make.mm, module/Full/Makefile.am,
+	  module/Full/local.def, module/Make.mm, module/Makefile.am,
+	  module/Regional/Make.mm, module/Regional/Makefile.am,
+	  module/Regional/Regionalmodule.cc, module/Regional/advdiffu.cc,
+	  module/Regional/advdiffu.h, module/Regional/bindings.cc,
+	  module/Regional/bindings.h, module/Regional/exceptions.cc,
+	  module/Regional/exceptions.h,
+	  module/Regional/initial_conditions.cc,
+	  module/Regional/initial_conditions.h, module/Regional/local.def,
+	  module/Regional/mesher.cc, module/Regional/mesher.h,
+	  module/Regional/misc.cc, module/Regional/misc.h,
+	  module/Regional/outputs.cc, module/Regional/outputs.h,
+	  module/Regional/setProperties.cc,
+	  module/Regional/setProperties.h,
+	  module/Regional/stokes_solver.cc,
+	  module/Regional/stokes_solver.h,
+	  pyre/Components/Advection_diffusion/Advection_diffusion.py,
+	  pyre/Components/Advection_diffusion/Make.mm,
+	  pyre/Components/Advection_diffusion/__init__.py,
+	  pyre/Components/BC.py, pyre/Components/CitcomComponent.py,
+	  pyre/Components/Const.py,
+	  pyre/Components/Exchanger/CoarseGridExchanger.py,
+	  pyre/Components/Exchanger/Exchanger.py,
+	  pyre/Components/Exchanger/FineGridExchanger.py,
+	  pyre/Components/Exchanger/Inlet.py,
+	  pyre/Components/Exchanger/Make.mm,
+	  pyre/Components/Exchanger/Outlet.py,
+	  pyre/Components/Exchanger/__init__.py, pyre/Components/IC.py,
+	  pyre/Components/Launchers.py, pyre/Components/Make.mm,
+	  pyre/Components/Param.py, pyre/Components/Phase.py,
+	  pyre/Components/Sphere/FullSphere.py,
+	  pyre/Components/Sphere/Make.mm,
+	  pyre/Components/Sphere/RegionalSphere.py,
+	  pyre/Components/Sphere/Sphere.py,
+	  pyre/Components/Sphere/__init__.py,
+	  pyre/Components/Stokes_solver/Incompressible.py,
+	  pyre/Components/Stokes_solver/Make.mm,
+	  pyre/Components/Stokes_solver/__init__.py,
+	  pyre/Components/Tracer.py, pyre/Components/Visc.py,
+	  pyre/Components/__init__.py, pyre/Controller.py,
+	  pyre/CoupledApp.py, pyre/Coupler.py, pyre/Layout.py,
+	  pyre/Make.mm, pyre/Makefile.am, pyre/SimpleApp.py,
+	  pyre/Solver/FullSolver.py, pyre/Solver/Make.mm,
+	  pyre/Solver/RegionalSolver.py, pyre/Solver/Solver.py,
+	  pyre/Solver/__init__.py, pyre/__init__.py.in, pyre/local.def,
+	  tests/Make.mm, tests/Makefile.am, tests/array2d.cc,
+	  tests/asap.py, tests/citcomsfull.sh.in,
+	  tests/citcomsregional.sh.in, tests/coupledcitcoms.sh.in,
+	  tests/exchange.py, tests/hrothgar.py, tests/local.def,
+	  tests/signon.py, tests/test1.sh, tests/test2.sh, tests/test5.sh,
+	  visual/Make.mm, visual/Makefile.am, visual/autocombine.py,
+	  visual/batchcombine.py, visual/batchpaste.sh,
+	  visual/batchsurf.py, visual/combine.py, visual/combinesurf.py,
+	  visual/dxgeneral.sh, visual/dxgeneralsurf.sh,
+	  visual/getcoord.sh, visual/getlog.sh, visual/getsurf.sh,
+	  visual/parser.py, visual/pasteCitcomData.sh, visual/zslice.py:
+	  Changed CitcomS license header text to GNU GPL.
+
+2005-10-04 02:53  leif
+
+	* mc/3D/CitcomS/branches/v2/AUTHORS,
+	  mc/3D/CitcomS/branches/v2/COPYING,
+	  mc/3D/CitcomS/branches/v2/ChangeLog,
+	  mc/3D/CitcomS/branches/v2/CitcomS.py-LICENSE.txt,
+	  mc/3D/CitcomS/branches/v2/INSTALL,
+	  mc/3D/CitcomS/branches/v2/Make.mm,
+	  mc/3D/CitcomS/branches/v2/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/NEWS,
+	  mc/3D/CitcomS/branches/v2/README,
+	  mc/3D/CitcomS/branches/v2/citcoms_profile,
+	  mc/3D/CitcomS/branches/v2/configure.ac,
+	  mc/3D/CitcomS/branches/v2/drivers/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/drivers/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/drivers/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/drivers/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/drivers/local.def,
+	  mc/3D/CitcomS/branches/v2/etc/CitcomS.pml.in,
+	  mc/3D/CitcomS/branches/v2/etc/Make.mm,
+	  mc/3D/CitcomS/branches/v2/etc/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/etc/__vault__.odb,
+	  mc/3D/CitcomS/branches/v2/etc/full-sphere.odb,
+	  mc/3D/CitcomS/branches/v2/etc/full.odb,
+	  mc/3D/CitcomS/branches/v2/etc/globus.odb,
+	  mc/3D/CitcomS/branches/v2/etc/incomp-newtonian.odb,
+	  mc/3D/CitcomS/branches/v2/etc/incomp-non-newtonian.odb,
+	  mc/3D/CitcomS/branches/v2/etc/lam-mpi.odb,
+	  mc/3D/CitcomS/branches/v2/etc/lsf.odb,
+	  mc/3D/CitcomS/branches/v2/etc/mpich.odb,
+	  mc/3D/CitcomS/branches/v2/etc/pbs.odb,
+	  mc/3D/CitcomS/branches/v2/etc/regional-sphere.odb,
+	  mc/3D/CitcomS/branches/v2/etc/regional.odb,
+	  mc/3D/CitcomS/branches/v2/etc/temp.odb,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
+	  mc/3D/CitcomS/branches/v2/examples/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Element_calculations.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Obsolete.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Pan_problem_misc_functions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Size_does_matter.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Topo_gravity.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/Tracer_advection.c,
+	  mc/3D/CitcomS/branches/v2/lib/Common/advection_diffusion.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/citcom_init.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/drive_solvers.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/global_defs.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/Common/output.h,
+	  mc/3D/CitcomS/branches/v2/lib/Common/parallel_related.h,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Boundary_conditions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Full/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Boundary_conditions.c,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/lib/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/lib/local.def,
+	  mc/3D/CitcomS/branches/v2/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Full/Fullmodule.cc,
+	  mc/3D/CitcomS/branches/v2/module/Full/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Full/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Full/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Make.mm,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/module/Regional/Regionalmodule.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/local.def,
+	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/misc.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/misc.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.h,
+	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.cc,
+	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.h,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Advection_diffusion.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/BC.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/CitcomComponent.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Const.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/CoarseGridExchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Exchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/FineGridExchanger.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Inlet.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Outlet.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/IC.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Launchers.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Param.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Phase.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/FullSphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/RegionalSphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Sphere.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Incompressible.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Tracer.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/Visc.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Components/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/CoupledApp.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Coupler.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Layout.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/pyre/SimpleApp.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/Make.mm,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/Solver.py,
+	  mc/3D/CitcomS/branches/v2/pyre/Solver/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/__init__.py,
+	  mc/3D/CitcomS/branches/v2/pyre/__init__.py.in,
+	  mc/3D/CitcomS/branches/v2/pyre/local.def,
+	  mc/3D/CitcomS/branches/v2/tests/Make.mm,
+	  mc/3D/CitcomS/branches/v2/tests/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/tests/asap.py,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh.in,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh,
+	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh.in,
+	  mc/3D/CitcomS/branches/v2/tests/hrothgar.py,
+	  mc/3D/CitcomS/branches/v2/tests/local.def,
+	  mc/3D/CitcomS/branches/v2/tests/signon.py,
+	  mc/3D/CitcomS/branches/v2/visual/Make.mm,
+	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
+	  mc/3D/CitcomS/branches/v2/visual/batchcombine.py,
+	  mc/3D/CitcomS/branches/v2/visual/batchpaste.sh,
+	  mc/3D/CitcomS/branches/v2/visual/batchsurf.py,
+	  mc/3D/CitcomS/branches/v2/visual/combine.py,
+	  mc/3D/CitcomS/branches/v2/visual/combinesurf.py,
+	  mc/3D/CitcomS/branches/v2/visual/dxgeneral.sh,
+	  mc/3D/CitcomS/branches/v2/visual/dxgeneralsurf.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getcoord.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getlog.sh,
+	  mc/3D/CitcomS/branches/v2/visual/getsurf.sh,
+	  mc/3D/CitcomS/branches/v2/visual/pasteCitcomData.sh,
+	  Makefile.am, tests/Make.mm: Ported GNU Build System from CitcomS
+	  trunk to v2 branch.
+
+2005-10-04 00:34  leif
+
+	* pyre/Controller, pyre/Coupler, pyre/Facilities, pyre/Layout:
+	  Nuked empty directories.
+
+2005-10-01 01:17  leif
+
+	* ChangeLog: Strip "mc/3D/CitcomS/trunk" directory prefix. By the
+	  way, this file is generated with svn2cl
+	  (http://ch.tudelft.nl/~arthur/svn2cl/) using the command "svn
+	  log --xml --verbose | xsltproc --stringparam strip-prefix
+	  mc/3D/CitcomS/trunk svn2cl.xsl - > ChangeLog".
+
+2005-10-01 01:01  leif
+
+	* AUTHORS, COPYING, ChangeLog, CitcomS.py-LICENSE.txt, INSTALL,
+	  NEWS, README: Added various GNU standard files, including the
+	  GPL.
+
+2005-09-30 23:48  leif
+
+	* module/Full: Doh! Restored svn:ignore'ing of those ridiculous
+	  symlinks used by Make.mm.
+
 2005-09-30 22:39  leif
 
 	* ., drivers, etc, examples, lib, lib/Common, lib/Full,

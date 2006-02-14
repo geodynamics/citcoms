@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+def contact():
+
+    from Person import Person
+    person = Person()
+
+    person.id = 10000
+    person.first = 'Michael'
+    person.last = 'Aivazis'
+    person.middle = 'Alexander George'
+
+    return person
+
+
+# version
+__id__ = "$Id: 10000.odb,v 1.1.1.1 2005/03/08 16:13:49 aivazis Exp $"
+
+# End of file 

@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def actor():
+    import opal.components
+    return opal.components.actor('sentinel')
+
+
+# version
+__id__ = "$Id: sentinel.odb,v 1.1 2005/03/27 01:19:04 aivazis Exp $"
+
+# End of file 

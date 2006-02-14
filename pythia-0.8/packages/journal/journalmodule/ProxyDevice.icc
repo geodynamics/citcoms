@@ -1,0 +1,30 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journalmodule_ProxyDevice_h)
+#error This header file contains implementation details of the class ProxyDevice
+#else
+
+// meta-methods
+ProxyDevice::ProxyDevice(PyObject * journal) :
+    journal::Device(),
+    _journal(journal)
+{}
+
+#endif
+
+
+// version
+// $Id: ProxyDevice.icc,v 1.1.1.1 2005/03/08 16:13:54 aivazis Exp $
+
+// End of file

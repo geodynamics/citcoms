@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                              Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+# factory
+
+def modeller():
+    canister = Canister()
+    return canister
+
+
+# implementation
+
+from pyre.geometry.GeometricalModeller import GeometricalModeller
+
+
+class Canister(GeometricalModeller):
+    
+
+    class Inventory(GeometricalModeller.Inventory):
+        
+        import pyre.inventory
+        from pyre.units.length import meter
+
+        radius = pyre.inventory.dimensional("radius", default=1*meter)
+        length = pyre.inventory.dimensional("length", default=1*meter)
+
+
+    def model(self):
+        import pyre.geometry.solids
+        import pyre.geometry.operations
+
+        radius = self.inventory.radius
+        length = self.inventory.length
+
+        body = pyre.geometry.solids.cylinder(radius, length)
+        cone = pyre.geometry.solids.cone(radius/2, radius, length)
+        cap = pyre.geometry.operations.translate(cone, (0,0, length/2))
+
+        innerWall = pyre.geometry.operations.unite(body, cap)
+        outerWall = pyre.geometry.operations.dilate(innerWall, 1.1)
+
+        shell = pyre.geometry.operations.subtract(outerWall, innerWall)
+
+        return shell
+
+
+    def __init__(self):
+        GeometricalModeller.__init__(self, "canister")
+        return
+
+
+# version
+__id__ = "$Id: canister.odb,v 1.1.1.1 2005/03/08 16:13:50 aivazis Exp $"
+
+#
+# End of file

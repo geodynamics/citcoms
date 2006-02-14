@@ -1,0 +1,148 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<!--
+ ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ !
+ !                             Michael A.G. Aivazis
+ !                      California Institute of Technology
+ !                      (C) 1998-2005  All Rights Reserved
+ !
+ ! <LicenseText>
+ !
+ ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+
+<html>
+<head>
+<title>Sample login page</title>
+
+<style type="text/css" media="all">@import url(css/visual.css);</style>
+<style type="text/css" media="all">@import url(css/visual-color.css);</style>
+
+</head>
+
+
+<script language="javascript">
+<!-- hide javascript from older browsers
+
+function formMode(resolver, value) {
+    resolver.form.mode.value=value
+    }
+
+// end of javascript -->
+</script>
+
+
+<!-- body -->
+<body class="opaldemo">
+<table class="page" width="100%">
+  <tr class="page_header">
+    <td colspan="2">
+    <!-- page header -->
+<table border="0" width="100%" cols="2" cellspacing="0">
+  <tr>
+    <td colspan="2" height="2" bgcolor="white">
+      <img src="/opaldemo/images/pyre_logo_64.png">
+    </td>
+  </tr>
+</table>
+<br>
+
+    <!-- end of: page header -->
+    </td>
+  </tr>
+  <tr>
+    <td class="page_logo">
+    <!-- page logo -->
+
+    <!-- end of: page logo -->
+    </td>
+    <td class="page_banner">
+    <!-- page banner -->
+
+    <!-- end of: page banner -->
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="page_body">
+    <!-- page body -->
+
+<table align="center" width="600"
+  bgcolor="white" border="1" bordercolor="#333366" cols="1">
+  <tr>
+    <td valign=center>
+    <font face="Arial" size=5 color="#cc6600">Welcome!</font>
+  </td></tr>
+  <tr><td>
+<form name="login" method="post" action="/cgi-bin/opaldemo/register.py">
+  <input name="attempts" type="hidden" value="0">
+  <input name="request" type="hidden" value="interview">
+  <table border="0" cellspacing="10">
+    <tr>
+      <td>
+        <font size=3 face="Arial" color ="#333333"><p>
+        If you have not already registered, please click here:
+        </p></font>
+      </td>
+      <td><input type="submit" value="Register"></td>
+    </tr>
+  </table>
+</form>  </td></tr>
+  <tr><td>
+<form name="login" method="post" action="/cgi-bin/opaldemo/login.py">
+  <input name="journal.info.login" type="hidden" value="on">
+  <table border="0" cols="2" cellspacing="10">
+    <tr>
+      <td colspan="2">
+        <font size=3 face="Arial" color ="#333333"><p>
+        If you have already registered, please enter the <b>username</b>
+        and <b>password</b> that you were given during the registration process
+        and click on the <b>Login</b> button.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">
+        <table border="0" cellpadding="4" cellspacing="5">
+          <tr>
+            <td align="right"><b>Username:</b></td>
+            <td width="250" class="field_required" align="left">
+              <input class="stretch" name="ipa.username" type="text" value="">
+            </td>
+          </tr>
+          <tr>
+            <td align="right"><b>Password:</b></td>
+            <td width="250" class="field_required" align="left">
+              <input class="stretch" name="ipa.password" type="password" value="">
+            </td>
+          </tr>
+        </table>
+      </td>
+      <td align="left"><input type="submit" value="Login"></td>
+    </tr>
+  </table>
+</form>  </td></tr>
+  </table>
+    <!-- end of: page body -->
+    </td>
+  </tr>
+  <tr class="page_footer">
+    <td colspan="2">
+    <!-- page footer -->
+<br><br>
+ Generated automatically by DocumentWeaver on Tue Jun  8 16:33:50 2004
+    <!-- end of: page footer -->
+    </td>
+  </tr>
+</table>
+
+</body>
+<!-- end of body -->
+
+
+</html>
+
+
+<!-- version-->
+<!-- $Id: login.html,v 1.1.1.1 2005/03/14 06:15:28 aivazis Exp $-->
+
+<!-- End of file -->

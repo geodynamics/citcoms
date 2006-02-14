@@ -1,0 +1,76 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def page(app):
+    import opaldemo.content
+    page = opaldemo.content.page(name='login', title='Authentication error', root=app.home)
+    
+    # build the body
+    body = page.body()
+
+    # build the header
+    header = body.pageHeader()
+    header.logo(href="%s?actor=login" % app.cgihome)
+    header.personalTools()
+
+    # build the client area
+    content = body.pageContent()
+    main = content.main()
+
+    # populate the main column
+    document = main.document(title='Authentication error')
+
+    attempts = app.sentry.attempts
+    if attempts > 1:
+        label = "s"
+    else:
+        label = ""
+    document.description = "You have made %d unsuccessful attempt%s to log in." % (attempts, label)
+
+    p = document.paragraph(cls='error')
+    p.text = [
+        'There seems to be a problem granting you access to this web site.',
+        'Please check your username and password and',
+        '<a href="%s?actor=login&sentry.attempts=%s">try again</a>.' % (app.cgihome, attempts)
+        ]
+
+    p = document.paragraph()
+    p.text = [
+        'If you have forgotten your password, it may be possible to',
+        '<a href="%s?actor=retrieve-password">retrieve</a> it.' % app.cgihome
+        ]
+    
+    p = document.paragraph()
+    p.text = [
+        'If you are sure that you are entering the correct username and password,',
+        'please fill out a <a href="%s?actor=alert">problem report</a>.' % app.cgihome
+        ]
+    
+    # build the footer
+    footer = body.pageFooter()
+
+    # build the credits
+    credits = body.pageCredits()
+    p = credits.paragraph(cls="discreet")
+    p.text = [
+        "powered by opal"
+        ]
+
+    return page
+
+
+# version
+__id__ = "$Id: authentication-error.odb,v 1.3 2005/04/07 21:00:11 aivazis Exp $"
+
+# End of file 

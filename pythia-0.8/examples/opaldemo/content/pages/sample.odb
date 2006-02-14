@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# {LicenseText}
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def page(app):
+    import opaldemo.content
+    page = opaldemo.content.page(name='login', title="opaldemo: Please login", root=app.home)
+    
+    # build the body
+    body = page.body()
+
+    # build the header
+    header = body.pageHeader()
+    header.searchBox()
+    header.logo(href="")
+    header.personalTools()
+
+    # build the client area
+    content = body.pageContent()
+    left = content.leftColumn()
+    main = content.main()
+    right = content.rightColumn()
+
+    # populate the left column
+    nav = app.retrievePortlet("navigation")
+    if nav:
+        left.add(nav)
+    other = left.portlet(title="other stuff")
+
+    # populate the main column
+    document = main.document(title="Sample page")
+    document.description = "This part provides a description for the current page"
+    document.byline = 'also spracht <a href="">michael</a>'
+    
+    p = document.paragraph()
+    p.text = [
+        "This is some rather long text that should force the client to wrap ",
+        "so that I can see the margins. What happens as the number of lines grows?"
+        ]
+
+    # populate the right column
+    news = right.portlet(title="Some News")
+
+    # build the footer
+    footer = body.pageFooter()
+
+    # build the credits
+    credits = body.pageCredits()
+    p = credits.paragraph(cls="discreet")
+    p.text = [
+        "powered by opal"
+        ]
+
+    return page
+
+
+# version
+__id__ = "$Id: sample.odb,v 1.1 2005/03/27 11:05:53 aivazis Exp $"
+
+# End of file 

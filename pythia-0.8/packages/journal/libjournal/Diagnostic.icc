@@ -1,0 +1,58 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_Diagnostic_icc)
+#error This header file contains implementation details of the class Diagnostic
+#else
+
+// inlines
+// interface
+void journal::Diagnostic::activate() {
+    state(true);
+    return;
+}
+
+
+void journal::Diagnostic::deactivate() {
+    state(false);
+    return;
+}
+
+
+journal::Diagnostic::string_t journal::Diagnostic::facility() const {
+    return _facility;
+}
+
+
+journal::Diagnostic::string_t journal::Diagnostic::str() const {
+    return _buffer.str();
+}
+
+template <typename item_t>
+journal::Diagnostic & journal::Diagnostic::inject(item_t item) {
+    _buffer << item;
+    return *this;
+}
+
+// the injection operator
+template <typename item_t>
+journal::Diagnostic & operator<< (journal::Diagnostic & diagnostic, item_t item) {
+    return diagnostic.inject(item);
+}
+
+#endif
+
+// version
+// $Id: Diagnostic.icc,v 1.1.1.1 2005/03/08 16:13:55 aivazis Exp $
+
+// End of file

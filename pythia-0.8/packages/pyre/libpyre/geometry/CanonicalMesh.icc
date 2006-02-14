@@ -1,0 +1,106 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+#if !defined(pyre_geometry_CanonicalMesh_h)
+#error This header file contains implementation details for the class CanonicalMesh
+#else
+
+// interface
+template <typename scalar_t>
+size_t pyre::geometry::CanonicalMesh<scalar_t>::dim() const {
+    return _dim;
+}
+
+template <typename scalar_t>
+size_t pyre::geometry::CanonicalMesh<scalar_t>::order() const {
+    return _order;
+}
+
+template <typename scalar_t>
+size_t pyre::geometry::CanonicalMesh<scalar_t>::vertexCount() const {
+    return _nVertices;
+}
+
+template <typename scalar_t>
+size_t pyre::geometry::CanonicalMesh<scalar_t>::simplexCount() const {
+    return _nSimplices;
+}
+
+template <typename scalar_t>
+void pyre::geometry::CanonicalMesh<scalar_t>::vertexCount(size_t n) {
+    _nVertices = n;
+    _vertices = new scalar_t[_nVertices*_dim];
+}
+
+template <typename scalar_t>
+void pyre::geometry::CanonicalMesh<scalar_t>::simplexCount(size_t n) {
+    _nSimplices = n;
+    _simplices = new long[_nSimplices*_order];
+}
+
+template <typename scalar_t>
+void pyre::geometry::CanonicalMesh<scalar_t>::vertex(long id, size_t axis, scalar_t coordinate) {
+    _vertices[id*_dim + axis] = coordinate;
+}
+
+template <typename scalar_t>
+void pyre::geometry::CanonicalMesh<scalar_t>::simplex(long id, size_t node, long vertex) {
+    _simplices[id*_order + node] = vertex;
+}
+
+template <typename scalar_t>
+scalar_t pyre::geometry::CanonicalMesh<scalar_t>::vertex(long id, size_t axis) const {
+    return _vertices[id*_dim + axis];
+}
+
+template <typename scalar_t>
+long pyre::geometry::CanonicalMesh<scalar_t>::simplex(long id, size_t vertex) const {
+    return _simplices[id*_order + vertex];
+}
+
+template <typename scalar_t>
+scalar_t * pyre::geometry::CanonicalMesh<scalar_t>::vertices() {
+    return _vertices;
+}
+
+template <typename scalar_t>
+long * pyre::geometry::CanonicalMesh<scalar_t>::simplices() {
+    return _simplices;
+}
+
+// meta-methods
+
+template <typename scalar_t>
+pyre::geometry::CanonicalMesh<scalar_t>::~CanonicalMesh() {
+    delete [] _simplices;
+    delete [] _vertices;
+}
+
+
+template <typename scalar_t>
+pyre::geometry::CanonicalMesh<scalar_t>::CanonicalMesh(size_t dim, size_t simplexOrder):
+    _dim(dim),
+    _order(simplexOrder),
+    _nVertices(0),
+    _nSimplices(0),
+    _vertices(0),
+    _simplices(0)
+{}
+
+
+#endif
+
+// version
+// $Id: CanonicalMesh.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file

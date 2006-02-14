@@ -1,0 +1,35 @@
+# -*- Makefile -*-
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                               Michael A.G. Aivazis
+#                        California Institute of Technology
+#                        (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+# Python
+    include Python/default.def
+
+# ACIS component usage
+
+ifdef ACIS_HAS_MESHER
+    ACIS_LIBRARIES = meshhusk
+endif
+
+    ACIS_INCLUDE_DIRS += mesh base bool cstr fct ga intr kern mmgr spline
+    ACIS_LIBRARIES += boolean ct_husk ga_husk euler faceter constrct \
+	intersct kernel lawutil baseutil
+
+
+    include ACIS/default.def
+
+
+# version
+# $Id: local.def,v 1.1.1.1 2005/03/08 16:13:32 aivazis Exp $
+
+# End of file

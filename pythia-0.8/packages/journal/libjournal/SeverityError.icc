@@ -1,0 +1,34 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_SeverityError_icc)
+#error This header file contains implementation details of the class SeverityError
+#else
+
+// inlines
+// interface
+journal::SeverityError::string_t 
+journal::SeverityError::name() const {
+    return  "error." + facility();
+}
+
+// meta-methods
+journal::SeverityError::SeverityError(string_t name) :
+journal::Diagnostic(name, "error", lookup(name)) {}
+
+#endif
+
+// version
+// $Id: SeverityError.icc,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $
+
+// End of file

@@ -1,0 +1,34 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_SeverityWarning_icc)
+#error This header file contains implementation details of the class SeverityWarning
+#else
+
+// inlines
+// interface
+journal::SeverityWarning::string_t 
+journal::SeverityWarning::name() const {
+    return  "warning." + facility();
+}
+
+// meta-methods
+journal::SeverityWarning::SeverityWarning(string_t name) :
+journal::Diagnostic(name, "warning", lookup(name)) {}
+
+#endif
+
+// version
+// $Id: SeverityWarning.icc,v 1.1.1.1 2005/03/08 16:13:55 aivazis Exp $
+
+// End of file

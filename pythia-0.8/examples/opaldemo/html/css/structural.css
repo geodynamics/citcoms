@@ -1,0 +1,203 @@
+/*  -*- CSS -*-  */
+/*
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ *                             Michael A.G. Aivazis
+ *                      California Institute of Technology
+ *                      (C) 1998-2005  All Rights Reserved
+ *
+ * {LicenseText}
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+
+#body-wrapper { 
+    margin: 0;
+    padding: 0;
+}
+
+
+/* page sections */
+
+#page-header { 
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+/* search box */
+#page-searchBox { 
+    float: right;
+    clear: right;
+    margin: 1.5em 0 0 0;
+    padding: 0 2em 0 0;
+    text-align: right;
+    text-transform: lowercase;
+    white-space: nowrap;
+    z-index: 2;
+}
+
+/* logo properties */
+#page-logo { 
+    background: url(../images/logo.png) no-repeat;
+    margin: 0.75em 0em 0.75em 1.5em;
+    padding: 0;
+}
+
+#page-logo a {
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    padding-top: 100px;
+    cursor: pointer;
+    height: 0px !important;
+    height /**/: 100px;
+}
+
+#page-globalnav {
+    /* Navigational Plone Tabs(tm), implemented by customizing the a tag - they are surprisingly elegant. The power of CSS runs strong in these :) */
+    border-collapse: collapse;
+    padding: 0em 0em 0em 2em;
+    white-space: nowrap;
+    list-style: none;
+    margin: 0;
+    height: auto;
+    line-height: normal;
+}
+#page-globalnav li {
+    display: inline;
+}
+#page-globalnav li a {
+    /* The normal, unselected tabs. They are all links */
+    border-width: 1px; 
+    border-style: solid solid none solid;
+    height: auto;
+    margin-right: 0.5em;
+    padding: 0em 1.5em;
+    text-decoration: none;
+    text-transform: lowercase;
+}
+#page-globalnav li.selected a {
+    /* The selected tab. There's only one of this */
+    border: 1px solid;
+    border-bottom: 1px solid;
+}
+#page-globalnav li a:hover {
+}
+
+#page-personaltools {
+    /* Bar with personalized menu (user preferences, favorites etc) */
+    border-top-style: solid;
+    border-top-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    line-height: 1.3em;
+    padding: 0em 3em 0em 3em;
+    margin: 0;
+    text-align: right;
+    text-transform: lowercase;
+    list-style: none;
+}
+#page-personaltools .portalUser {
+    background: url(../images/user.gif) center left no-repeat;
+    padding-left: 15px;
+}
+
+#page-personaltools .portalNotLoggedIn {
+    padding: 0;
+    background-image: none;
+} /* Used on all descriptions relevant to those not logged in */
+ 
+#page-personaltools li {
+    background: url(../images/linkOpaque.gif) center left no-repeat;
+    padding-left: 8px;
+    margin-left: 1em;
+    display: inline;
+}
+#page-personaltools li a {
+    text-decoration: none;
+}
+
+#page-locator {
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    padding-left: 2em;
+    padding-right: 2em;
+    text-transform: lowercase;
+}
+
+#page-content {
+    width: 100% !important;
+}
+
+#page-columnLeft {
+    vertical-align: top;
+    width: 16em;
+    /* border: 1px dotted lightgray; */
+}
+
+#page-main {
+    vertical-align: top;
+    margin: 0;
+    padding: 0;
+    /* border: 1px dotted lightgray; */
+}
+
+#page-columnRight {
+    vertical-align: top;
+    width: 16em;
+    /* border: 1px dotted lightgray; */
+}
+
+#page-columnLeft .visualPadding {
+    padding: 1em 0em 0em 1em;
+    /* border: 1px dotted lightgray; */
+}
+
+#page-main .visualPadding {
+    padding: 0em 2em 0em 2em;
+}
+
+#page-columnRight .visualPadding {
+    padding: 1em 1em 0em 0em;
+}
+
+#page-footer {
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    float: none;
+    margin: 0em 0em 0em 0em;
+    padding: 0.5em 0em 1em 0em;
+    text-align: center;
+}
+
+#page-credits {
+    float: none;
+    margin: 0em 0em 0em 0em;
+    padding: 0.5em 0em 0em 0em;
+    text-align: center;
+    /* border: 1px dotted lightgray; */
+}
+
+#page-credits ul,
+#page-credits ul li,
+#page-credits ul li a {
+    list-style: none;
+    display: inline;
+    text-decoration: none;
+}
+
+#page-credits ul li {
+    font-size: 85%;
+    margin: 0 0.25em;
+    padding: 0.1em 0.2em;
+}
+
+
+/* version */
+/* $Id: structural.css,v 1.10 2005/03/27 22:26:13 aivazis Exp $ */
+
+/* End of file  */

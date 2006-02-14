@@ -1,0 +1,43 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_Facility_icc)
+#error This header file contains implementation details of the class Facility
+#else
+
+// inlines
+
+// interface
+void journal::Facility::state(bool flag) {
+    _state = flag;
+    return;
+}
+
+bool journal::Facility::state() const {
+    return _state;
+}
+
+
+// meta-methods
+journal::Facility::~Facility() {}
+
+journal::Facility::Facility(bool state):
+    _state(state)
+{}
+
+#endif
+
+// version
+// $Id: Facility.icc,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $
+
+// End of file

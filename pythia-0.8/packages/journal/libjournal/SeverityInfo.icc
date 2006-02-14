@@ -1,0 +1,34 @@
+// -*- C++ -*-
+//
+//--------------------------------------------------------------------------------
+//
+//                              Michael A.G. Aivazis
+//                       California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+//--------------------------------------------------------------------------------
+//
+
+#if !defined(journal_SeverityInfo_icc)
+#error This header file contains implementation details of the class SeverityInfo
+#else
+
+// inlines
+// interface
+journal::SeverityInfo::string_t 
+journal::SeverityInfo::name() const {
+    return  "info." + facility();
+}
+
+// meta-methods
+journal::SeverityInfo::SeverityInfo(string_t name) :
+journal::Diagnostic(name, "info", lookup(name)) {}
+
+#endif
+
+// version
+// $Id: SeverityInfo.icc,v 1.1.1.1 2005/03/08 16:13:56 aivazis Exp $
+
+// End of file

@@ -1,0 +1,82 @@
+// -*- C++ -*-
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+//                               Michael A.G. Aivazis
+//                        California Institute of Technology
+//                       (C) 1998-2005  All Rights Reserved
+//
+// <LicenseText>
+//
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//
+
+
+#if !defined(pyre_containers_Vector_h)
+#error This header file contains implementation details of class Vector
+#else
+
+// interface
+
+template <typename item_t>
+size_t pyre::containers::Vector<item_t>::size () const {
+    return _length;
+}
+
+template <typename item_t>
+item_t & pyre::containers::Vector<item_t>::operator () (size_t index)
+{
+    return _buffer[index];
+}
+
+template <typename item_t>
+item_t pyre::containers::Vector<item_t>::operator () (size_t index) const
+{
+    return _buffer[index];
+}
+
+// meta-methods
+
+template <typename item_t>
+pyre::containers::Vector<item_t>::Vector(size_t capacity) :
+    _length(capacity),
+    _buffer(new item_t[capacity])
+{}
+
+
+template <typename item_t>
+pyre::containers::Vector<item_t>::Vector(const pyre::containers::Vector<item_t> & rhs) :
+    _length(rhs._length),
+    _buffer(new item_t[rhs._length])
+{
+    memcpy(_buffer, rhs._buffer, _length*sizeof(item_t));
+}
+
+
+template <typename item_t>
+const pyre::containers::Vector<item_t> & pyre::containers::Vector<item_t>::operator = (
+    const pyre::containers::Vector<item_t> & rhs)
+{
+    if (&rhs != this) {
+
+        _length = rhs._length;
+        delete [] _buffer;
+        _buffer = new item_t[_length];
+
+	memcpy(_buffer, rhs._buffer, _length*sizeof(item_t));
+    }
+
+    return *this;
+}
+
+template <typename item_t>
+pyre::containers::Vector<item_t>::~Vector() {
+    delete [] _buffer;
+}
+
+#endif
+
+// version
+// $Id: Vector.icc,v 1.1.1.1 2005/03/08 16:13:51 aivazis Exp $
+
+// End of file
