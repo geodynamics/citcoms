@@ -27,6 +27,14 @@
 #
 
 
+# re-create the PYTHONPATH at 'configure' time
+import sys
+from config import makefile
+path = makefile['PYTHONPATH'].split(':')
+for dir in path:
+    sys.path.insert(1, dir)
+
+
 from mpi.Application import Application
 import journal
 
