@@ -27,7 +27,7 @@
  */
 /*
   This file contains functions that are no longer used in this version of
-  CitcomS. To reduce compilantion time and maintanance effort, these functions
+  CitcomS. To reduce compilation time and maintenance effort, these functions
   are removed from its original location to here.
 */
 
