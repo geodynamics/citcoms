@@ -246,6 +246,22 @@ void strip_bcs_from_residual(E,Res,level)
 void temperatures_conform_bcs(E)
      struct All_variables *E;
 {
+  void temperatures_conform_bcs2(struct All_variables *);
+  void assimilate_lith_conform_bcs2(struct All_variables *);
+
+  if(E->control.lith_age) {
+    lith_age_conform_tbc(E);
+    assimilate_lith_conform_bcs(E);
+    }
+  else
+    temperatures_conform_bcs2(E);
+  return;
+}
+
+
+void temperatures_conform_bcs2(E)
+     struct All_variables *E;
+{
     int j,node;
     unsigned int type;
 

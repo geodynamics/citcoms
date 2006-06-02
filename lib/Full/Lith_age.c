@@ -81,7 +81,8 @@ void lith_age_init(struct All_variables *E)
     /* to open files every timestep */
     E->control.lith_age_old_cycles = E->monitor.solution_cycles;
     output = 1;
-    lith_age_read_files(E,output);
+    /* lith_age_read_files(E,output); */
+    read_input_files_for_timesteps(E,2,output); /*2 (=action) is for lith_age*/
   }
   else {
     /* otherwise, just open for the first timestep */
@@ -125,6 +126,7 @@ void lith_age_restart_tic(struct All_variables *E)
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
+	  E->T[m][node] = E->control.lith_age_mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
@@ -365,7 +367,8 @@ void lith_age_conform_tbc(struct All_variables *E)
       output = 1;
       E->control.lith_age_old_cycles = E->monitor.solution_cycles;
     }
-    lith_age_read_files(E,output);
+    /* lith_age_read_files(E,output);a*/
+    read_input_files_for_timesteps(E,2,output); /*2 (=action) is for lith_age*/
   }
 
   /* NOW SET THE TEMPERATURES IN THE BOUNDARY REGIONS */
@@ -441,4 +444,70 @@ void lith_age_conform_tbc(struct All_variables *E)
   }   /*  end of solution cycles  && lith_age_time */
 
   return;
+}
+
+
+
+void assimilate_lith_conform_bcs(struct All_variables *E)
+{
+  float depth, daf, assimilate_new_temp;
+  int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k;
+  unsigned int type;
+
+  nno=E->lmesh.nno;
+  gnox=E->mesh.nox;
+  gnoy=E->mesh.noy;
+  gnoz=E->mesh.noz;
+  nox=E->lmesh.nox;
+  noy=E->lmesh.noy;
+  noz=E->lmesh.noz;
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++)
+    for(node=1;node<=E->lmesh.nno;node++)  {
+
+        type = (E->node[j][node] & (TBX | TBZ | TBY));
+
+        switch (type) {
+        case 0:  /* no match, next node */
+            break;
+        case TBX:
+            assimilate_new_temp = E->sphere.cap[j].TB[1][node];
+            break;
+        case TBZ:
+            assimilate_new_temp = E->sphere.cap[j].TB[3][node];
+            break;
+        case TBY:
+            assimilate_new_temp = E->sphere.cap[j].TB[2][node];
+            break;
+        case (TBX | TBZ):     /* clashes ! */
+            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]);
+            break;
+        case (TBX | TBY):     /* clashes ! */
+            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node]);
+            break;
+        case (TBZ | TBY):     /* clashes ! */
+            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[3][node] + E->sphere.cap[j].TB[2][node]);
+            break;
+        case (TBZ | TBY | TBX):     /* clashes ! */
+            assimilate_new_temp = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]);
+            break;
+        } /* end switch */
+
+        switch (type) {
+        case 0:  /* no match, next node */
+            break;
+        default:
+            depth = E->sphere.ro - E->sx[j][3][node];
+            if(depth <= E->control.lith_age_depth) {
+                /* daf == depth_assimilation_factor */
+                daf = 0.5*depth/E->control.lith_age_depth;
+                E->T[j][node] = daf*E->T[j][node] + (1.0-daf)*assimilate_new_temp;
+               }
+            else
+                E->T[j][node] = assimilate_new_temp;
+        } /* end switch */
+
+    } /* next node */
+
+return;
 }

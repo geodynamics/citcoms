@@ -463,26 +463,23 @@ void strip_bcs_from_residual(E,Res,level)
 void temperatures_conform_bcs(struct All_variables *E)
 {
   void temperatures_conform_bcs2(struct All_variables *);
-  if(E->control.lith_age)
-    lith_age_conform_tbc(E);
+  void assimilate_lith_conform_bcs2(struct All_variables *);
 
-  temperatures_conform_bcs2(E);
+  if(E->control.lith_age) {
+    lith_age_conform_tbc(E);
+    assimilate_lith_conform_bcs(E);
+    }
+  else
+    temperatures_conform_bcs2(E);
   return;
 }
 
 
 void temperatures_conform_bcs2(struct All_variables *E)
 {
-  int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k;
+  /* int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k; */
+  int j,node;
   unsigned int type;
-
-  nno=E->lmesh.nno;
-  gnox=E->mesh.nox;
-  gnoy=E->mesh.noy;
-  gnoz=E->mesh.noz;
-  nox=E->lmesh.nox;
-  noy=E->lmesh.noy;
-  noz=E->lmesh.noz;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
