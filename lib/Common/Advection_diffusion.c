@@ -159,7 +159,7 @@ void PG_timestep_solve(struct All_variables *E)
 
   E->advection.total_timesteps++;
   E->monitor.elapsed_time += E->advection.timestep;
-
+  
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
 

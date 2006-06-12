@@ -158,10 +158,12 @@ void convection_initial_temperature(struct All_variables *E)
 
 void restart_tic(struct All_variables *E)
 {
+  /*
   if (E->control.lith_age)
     lith_age_restart_tic(E);
   else
-    restart_tic_from_file(E);
+  */
+  restart_tic_from_file(E);
 
   return;
 }
@@ -198,7 +200,7 @@ void debug_tic(struct All_variables *E)
 void restart_tic_from_file(struct All_variables *E)
 {
   int ii, ll, mm;
-  float notusedhere;
+  float restart_elapsed_time;
   int i, m;
   char output_file[255], input_s[1000];
   FILE *fp;
@@ -217,7 +219,7 @@ void restart_tic_from_file(struct All_variables *E)
     fprintf(E->fp,"Reading %s for restarted temperature\n",output_file);
 
   fgets(input_s,1000,fp);
-  sscanf(input_s,"%d %d %f",&ll,&mm,&notusedhere);
+  sscanf(input_s,"%d %d %f",&ll,&mm,&restart_elapsed_time);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fgets(input_s,1000,fp);

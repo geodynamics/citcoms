@@ -187,6 +187,7 @@ void get_initial_elapsed_time(E)
 void set_elapsed_time(E)
   struct All_variables *E;
 {
+
     if (E->control.zero_elapsed_time) /* set elapsed_time to zero */
 	E->monitor.elapsed_time = 0.0;
 

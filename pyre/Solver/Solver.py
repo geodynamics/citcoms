@@ -87,6 +87,7 @@ class Solver(BaseSolver):
         self.setProperties()
 
         self.restart = self.inventory.ic.inventory.restart
+
         self.ic_initTemperature = self.inventory.ic.initTemperature
 
         # if there is a coupler, initialize it
