@@ -28,6 +28,7 @@ nobase_pkgpyexec_PYTHON = \
 	Components/Advection_diffusion/__init__.py \
 	Components/BC.py \
 	Components/CitcomComponent.py \
+	Components/CodecConfig.py \
 	Components/Const.py \
 	Components/Exchanger/CoarseGridExchanger.py \
 	Components/Exchanger/Exchanger.py \
@@ -35,6 +36,7 @@ nobase_pkgpyexec_PYTHON = \
 	Components/Exchanger/__init__.py \
 	Components/Exchanger/Inlet.py \
 	Components/Exchanger/Outlet.py \
+	Components/HackedConfigParser.py \
 	Components/IC.py \
 	Components/__init__.py \
 	Components/Launchers.py \
