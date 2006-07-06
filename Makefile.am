@@ -26,14 +26,14 @@
 ACLOCAL_AMFLAGS = -I ./m4
 
 if COND_PYRE
-    MAYBE_PYRE = etc examples module pyre tests visual
+    MAYBE_PYRE = CitcomS etc examples module tests visual
 endif
 
-SUBDIRS = $(MAYBE_PYTHIA) $(MAYBE_EXCHANGER) lib $(MAYBE_PYRE) drivers
+SUBDIRS = $(MAYBE_PYTHIA) $(MAYBE_EXCHANGER) lib $(MAYBE_PYRE) bin
 DIST_SUBDIRS = \
 	$(MAYBE_DIST_PYTHIA) $(MAYBE_DIST_EXCHANGER) \
-	lib drivers \
-	etc examples module pyre tests visual
+	lib bin \
+	CitcomS etc examples module tests visual
 
 EXTRA_DIST = \
 	doc/CitComS.doxyconf

@@ -25,17 +25,22 @@
 # $Id$
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
-nodist_bin_SCRIPTS =
+noinst_PROGRAMS =
+noinst_SCRIPTS =
 
 if COND_PYRE
 
-nodist_bin_SCRIPTS += citcoms
+noinst_SCRIPTS += citcoms
+noinstPYTHONPATH = $$top_srcdir
 
 if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms
+    noinst_PROGRAMS += pycitcoms-noinst
     INTERPRETER = $(bindir)/pycitcoms
+    noinstINTERPRETER = $$here/pycitcoms-noinst
 else
     INTERPRETER = $(PYTHON)
+    noinstINTERPRETER = $(PYTHON)
 endif
 
 endif
@@ -62,32 +67,56 @@ CitcomSRegional_CPPFLAGS =
 CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.la $(MPILIBS)
 
 # citcoms (top-level Python script)
-do_subst = sed \
-	-e 's|[@]INTERPRETER[@]|$(INTERPRETER)|g' \
-	-e 's|[@]PYTHONPATH[@]|$(PYTHONPATH)|g'
 citcoms: $(srcdir)/citcoms.in
-	$(do_subst) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
-CLEANFILES = $(nodist_bin_SCRIPTS)
+	here=`pwd`; \
+	top_srcdir=`cd $(top_srcdir) && pwd`; \
+	sed \
+		-e "s|[@]INTERPRETER[@]|$(noinstINTERPRETER)|g" \
+		-e "s|[@]PYTHONPATH[@]|$(noinstPYTHONPATH)|g" \
+		< $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+	chmod +x $@
+install-exec-hook:
+	here=`pwd`; \
+	sed \
+		-e "s|[@]INTERPRETER[@]|$(INTERPRETER)|g" \
+		-e "s|[@]PYTHONPATH[@]|$(PYTHONPATH)|g" \
+		< $(srcdir)/citcoms.in > $(DESTDIR)$(bindir)/citcoms || (rm -f $@ && exit 1)
+	chmod +x $(DESTDIR)$(bindir)/citcoms
+CLEANFILES = $(noinst_SCRIPTS)
 EXTRA_DIST = citcoms.in
 
 # pycitcoms (libCitcomS + CitcomSmodule + libExchanger +
-# Exchangermodule + embedded Python interpreter)
+# Exchangermodule + embedded Python interpreter).  A special
+# 'pycitcoms-noinst' is also created in the build directory, as the
+# 'pycitcoms' libtool wrapper script is unusable as an interpreter.
 pycitcoms_SOURCES = pycitcoms.cc
-pycitcoms_LDADD = \
+pycitcoms_LDADD = $(pycitcomsldadd)
+pycitcoms_noinst_SOURCES = pycitcoms.cc
+pycitcoms_noinst_LDFLAGS = -no-install
+pycitcoms_noinst_LDADD = $(pycitcomsldadd)
+pycitcomsldadd = \
 	$(top_builddir)/module/libPyxMPImodule.a \
 	$(top_builddir)/module/Exchanger/libExchangermodule.a \
 	$(top_builddir)/module/libCitcomSmodule.a \
 	$(top_builddir)/lib/libCitcomS.la
+pycitcomslink = $(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED)
+pycitcomslibs = \
+	-lExchanger -l_mpimodule -ljournal \
+	$(PYTHON_BLDLIBRARY) \
+	$(MPILIBS) \
+	$(FCLIBS) \
+	$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
+	$(LIBS) \
+	$(PYTHON_LDLAST)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)
-	$(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+	$(pycitcomslink) \
 		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
-		-lExchanger -l_mpimodule -ljournal \
-		$(PYTHON_BLDLIBRARY) \
-		$(MPILIBS) \
-		$(FCLIBS) \
-		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
-		$(LIBS) \
-		$(PYTHON_LDLAST)
+		$(pycitcomslibs)
+pycitcoms-noinst$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
+	@rm -f pycitcoms-noinst$(EXEEXT)
+	$(pycitcomslink) \
+		$(pycitcoms_noinst_LDFLAGS) $(pycitcoms_noinst_OBJECTS) $(pycitcoms_noinst_LDADD) \
+		$(pycitcomslibs)
 
 ## end of Makefile.am

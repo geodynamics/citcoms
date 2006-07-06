@@ -31,7 +31,14 @@ def copyright():
 
 
 # version
-__version__ = "@PACKAGE_VERSION@"
+def _getVersion():
+    try:
+        from config import makefile
+        return makefile['PACKAGE_VERSION']
+    except ImportError, KeyError:
+        return "development"
+
+__version__ = _getVersion()
 __id__ = "$Id$"
 
 #  End of file 

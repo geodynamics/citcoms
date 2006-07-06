@@ -27,7 +27,7 @@ dnl</LicenseText>
 AC_PREREQ(2.59)
 AC_INIT([CitcomS], [2.1.0], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
-AC_CONFIG_SRCDIR([drivers/Citcom.c])
+AC_CONFIG_SRCDIR([bin/Citcom.c])
 AC_CONFIG_HEADER([portinfo])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
@@ -140,13 +140,13 @@ fi
 AC_SUBST(LIBM)
 
 AC_CONFIG_FILES([Makefile
-                 drivers/Makefile
+                 bin/Makefile
+                 CitcomS/Makefile
                  etc/Makefile
                  examples/Makefile
                  lib/Makefile
                  module/Makefile
                  module/Exchanger/Makefile
-                 pyre/Makefile
                  tests/Makefile
                  visual/Makefile])
 

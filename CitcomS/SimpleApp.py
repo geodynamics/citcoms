@@ -136,7 +136,10 @@ where <facility> is the facility to which the component is bound; e.g.:
             from config import makefile
             list.append(makefile['pkgsysconfdir'])
         except ImportError, KeyError:
-            pass
+            # The user is running directly from the source directory.
+            from os.path import dirname, join
+            etc = join(dirname(dirname(__file__)), 'etc')
+            list.append(etc)
         return list
 
 
