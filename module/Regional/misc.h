@@ -63,6 +63,18 @@ extern "C"
 PyObject * pyCitcom_citcom_init(PyObject *, PyObject *);
 
 
+extern char pyCitcom_full_solver_init__doc__[];
+extern char pyCitcom_full_solver_init__name__[];
+extern "C"
+PyObject * pyCitcom_full_solver_init(PyObject *, PyObject *);
+
+
+extern char pyCitcom_regional_solver_init__doc__[];
+extern char pyCitcom_regional_solver_init__name__[];
+extern "C"
+PyObject * pyCitcom_regional_solver_init(PyObject *, PyObject *);
+
+
 extern char pyCitcom_global_default_values__name__[];
 extern char pyCitcom_global_default_values__doc__[];
 extern "C"

@@ -35,7 +35,7 @@
   Open these files, read in results, and average if necessary
 =========================================================================*/
 
-void read_input_files_for_timesteps(E,action,output)
+void full_read_input_files_for_timesteps(E,action,output)
     struct All_variables *E;
     int action, output;
 {

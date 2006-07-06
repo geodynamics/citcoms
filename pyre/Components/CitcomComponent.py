@@ -31,8 +31,7 @@ from pyre.components.Component import Component
 class CitcomComponent(Component):
 
 
-    def initialize(self, Module, all_variables):
-        self.CitcomModule = Module
+    def initialize(self, all_variables):
         self.all_variables = all_variables
         return
 

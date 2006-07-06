@@ -40,6 +40,9 @@
 
 extern "C" {
 
+    void full_solver_init(struct All_variables*);
+    void regional_solver_init(struct All_variables*);
+
     double return1_test();
     void read_instructions(struct All_variables*, char*);
     double CPU_time0();
@@ -154,6 +157,44 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
     PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
 
     return Py_BuildValue("O", cobj);
+}
+
+
+char pyCitcom_full_solver_init__doc__[] = "";
+char pyCitcom_full_solver_init__name__[] = "full_solver_init";
+
+PyObject * pyCitcom_full_solver_init(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:full_solver_init", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    full_solver_init(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_regional_solver_init__doc__[] = "";
+char pyCitcom_regional_solver_init__name__[] = "regional_solver_init";
+
+PyObject * pyCitcom_regional_solver_init(PyObject *, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:regional_solver_init", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    regional_solver_init(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 

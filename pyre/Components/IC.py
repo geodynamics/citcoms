@@ -38,13 +38,17 @@ class IC(CitcomComponent):
 
 
     def setProperties(self):
+
+        from CitcomS.CitcomS import IC_set_properties
+        
         inv = self.inventory
         inv.perturbmag = map(float, inv.perturbmag)
         inv.perturbl = map(float, inv.perturbl)
         inv.perturbm = map(float, inv.perturbm)
         inv.blob_center = map(float, inv.blob_center)
 
-        self.CitcomModule.IC_set_properties(self.all_variables, inv)
+        IC_set_properties(self.all_variables, inv)
+        
         return
 
 
@@ -59,28 +63,32 @@ class IC(CitcomComponent):
 
 
     def initTemperature(self):
+        from CitcomS.CitcomS import constructTemperature, restartTemperature
         if self.inventory.restart:
-            self.CitcomModule.restartTemperature(self.all_variables)
+            restartTemperature(self.all_variables)
         else:
-            self.CitcomModule.constructTemperature(self.all_variables)
+            constructTemperature(self.all_variables)
         return
 
 
 
     def initPressure(self):
-        self.CitcomModule.initPressure(self.all_variables)
+        from CitcomS.CitcomS import initPressure
+        initPressure(self.all_variables)
         return
 
 
 
     def initVelocity(self):
-        self.CitcomModule.initVelocity(self.all_variables)
+        from CitcomS.CitcomS import initVelocity
+        initVelocity(self.all_variables)
         return
 
 
 
     def initViscosity(self):
-        self.CitcomModule.initViscosity(self.all_variables)
+        from CitcomS.CitcomS import initViscosity
+        initViscosity(self.all_variables)
         return
 
 

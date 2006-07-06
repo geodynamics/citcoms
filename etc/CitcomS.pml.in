@@ -24,10 +24,6 @@ You may override these defaults from ~/.pyre/CitcomS/CitcomS.pml,
 
         <property name="launcher">@LAUNCHER@</property>
 
-        <component name="launcher">
-            <property name="python-mpi">@PYTHIA_MPIPYTHON@</property>
-        </component>
-
         <component name="mpich">
             <property name="command">@MPIRUN@</property>
         </component>

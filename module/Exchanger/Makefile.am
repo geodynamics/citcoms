@@ -23,14 +23,37 @@
 
 # $Id$
 
-pkgpyexec_LTLIBRARIES = Exchangermodule.la
+noinst_LIBRARIES =
+pkgpyexec_LTLIBRARIES =
+
+if COND_EMBEDDING
+    # static library
+    noinst_LIBRARIES += libExchangermodule.a
+else
+    # extension module (libtool)
+    pkgpyexec_LTLIBRARIES += Exchangermodule.la
+endif
+
+# static library
+libExchangermodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
+libExchangermodule_a_SOURCES = $(sources)
+
+# extension module (libtool)
+Exchangermodule_la_LDFLAGS = -module -release $(VERSION)
+Exchangermodule_la_LIBADD = \
+	$(top_builddir)/lib/libCitcomS.la \
+	-lExchanger \
+	-l_mpimodule -ljournal
+Exchangermodule_la_SOURCES = $(sources)
+
 CXX = $(MPICXX)
 CXXLD = @CXX@
 INCLUDES = \
 	-I$(top_srcdir)/lib/Common \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
-Exchangermodule_la_SOURCES = \
+
+sources = \
 	AreaWeightedNormal.cc \
 	AreaWeightedNormal.h \
 	bindings.cc \
@@ -79,10 +102,5 @@ Exchangermodule_la_SOURCES = \
 EXTRA_DIST = \
 	BoundaryVTInlet.cc \
 	BoundaryVTInlet.h
-Exchangermodule_la_LDFLAGS = -module -release $(VERSION)
-Exchangermodule_la_LIBADD = \
-	$(top_builddir)/lib/Regional/libCitcomSRegional.la \
-	-lExchanger \
-	-l_mpimodule -ljournal
 
 ## end of Makefile.am

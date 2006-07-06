@@ -315,7 +315,6 @@ void construct_node_ks(E)
     void get_elt_k();
     void get_aug_k();
     void build_diagonal_of_K();
-    void exchange_id_d();
     void parallel_process_termination();
 
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
@@ -431,7 +430,7 @@ void construct_node_ks(E)
 	    }            /* end for element */
 	}           /* end for m */
 
-     exchange_id_d(E, E->BI[level], level);
+     (E->solver.exchange_id_d)(E, E->BI[level], level);
 
      for(m=1;m<=E->sphere.caps_per_proc;m++)     {
         neq=E->lmesh.NEQ[level];
@@ -457,8 +456,6 @@ void rebuild_BI_on_boundary(E)
 
     higher_precision *B1,*B2,*B3;
     int *C;
-
-    void exchange_id_d();
 
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
 
@@ -491,7 +488,7 @@ void rebuild_BI_on_boundary(E)
             }
         }
 
-     exchange_id_d(E, E->temp, level);
+     (E->solver.exchange_id_d)(E, E->temp, level);
 
      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=0;i<E->lmesh.NEQ[level];i++)  {
@@ -624,8 +621,6 @@ void construct_elt_ks(E)
     void get_aug_k();
     void build_diagonal_of_K();
 
-    void exchange_id_d();
-
     const int dims=E->mesh.nsd;
     const int n=loc_mat_size[E->mesh.nsd];
 
@@ -648,7 +643,7 @@ void construct_elt_ks(E)
 	    }
 	}        /* end for m */
 
-      exchange_id_d(E, E->BI[lev], lev);    /*correct BI   */
+      (E->solver.exchange_id_d)(E, E->BI[lev], lev);    /*correct BI   */
 
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 

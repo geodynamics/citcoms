@@ -32,7 +32,7 @@
 
 // Setup global mesh parameters
 //
-void global_derived_values(E)
+void regional_global_derived_values(E)
      struct All_variables *E;
 
 {
@@ -143,7 +143,7 @@ void global_derived_values(E)
 
    =================================================  */
 
-void node_locations(E)
+void regional_node_locations(E)
   struct All_variables *E;
 {
   int i,j,k,lev;
@@ -155,7 +155,7 @@ void node_locations(E)
   char a[100];
   FILE *fp1;
 
-  void coord_of_cap();
+  void regional_coord_of_cap();
   void rotate_mesh ();
   void compute_angle_surf_area ();
   void parallel_process_termination();
@@ -240,7 +240,7 @@ void node_locations(E)
   E->sphere.dircos[3][3] = cos(ro);
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     coord_of_cap(E,j,0);
+     regional_coord_of_cap(E,j,0);
      }
 
 
@@ -324,7 +324,7 @@ if (E->control.verbose)
 
 
 
-void construct_tic_from_input(struct All_variables *E)
+void regional_construct_tic_from_input(struct All_variables *E)
 {
   double modified_plgndr_a(int, int, double);
   void temperatures_conform_bcs();
@@ -448,7 +448,7 @@ void construct_tic_from_input(struct All_variables *E)
 
 /* setup boundary node and element arrays for bookkeeping */
 
-void construct_boundary( struct All_variables *E)
+void regional_construct_boundary( struct All_variables *E)
 {
   const int dims=E->mesh.nsd;
 

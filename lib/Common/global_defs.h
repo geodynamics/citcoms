@@ -781,6 +781,7 @@ struct DATA {
 };
 
 struct All_variables {
+#include "solver.h"
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "temperature_descriptions.h"
@@ -889,7 +890,6 @@ struct All_variables {
     void (* problem_derived_values)(void*);
     void (* problem_allocate_vars)(void*);
     void (* problem_boundary_conds)(void*);
-    void (* problem_node_positions)(void*);
     void (* problem_update_node_positions)(void*);
     void (* problem_initial_fields)(void*);
     void (* problem_tracer_setup)(void*);
@@ -905,8 +905,8 @@ struct All_variables {
     float (* node_space_function[3])(void*);
 
   /* the following function pointers are for exchanger */
-  void (* exchange_node_d)(void*, double**, int);
-  void (* exchange_node_f)(void*, float**, int);
+  void (* exchange_node_d)(struct All_variables *, double**, int);
+  void (* exchange_node_f)(struct All_variables *, float**, int);
   void (* temperatures_conform_bcs)(void*);
 
 };

@@ -41,6 +41,9 @@ class Visc(CitcomComponent):
 
 
     def setProperties(self):
+
+        from CitcomS.CitcomS import Visc_set_properties
+        
         inv = self.inventory
         inv.visc0 = map(float, inv.visc0)
         inv.viscE = map(float, inv.viscE)
@@ -48,13 +51,15 @@ class Visc(CitcomComponent):
         inv.viscZ = map(float, inv.viscZ)
         inv.sdepv_expt = map(float, inv.sdepv_expt)
 
-        self.CitcomModule.Visc_set_properties(self.all_variables, inv)
+        Visc_set_properties(self.all_variables, inv)
+        
         return
 
 
 
     def updateMaterial(self):
-        self.CitcomModule.Visc_update_material(self.all_variables)
+        from CitcomS.CitcomS import Visc_update_material
+        Visc_update_material(self.all_variables)
         return
 
 

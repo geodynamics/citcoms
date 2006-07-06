@@ -26,6 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+from CitcomS.CitcomS import CPU_time
 from CitcomS.Components.CitcomComponent import CitcomComponent
 
 class Sphere(CitcomComponent):
@@ -38,14 +39,14 @@ class Sphere(CitcomComponent):
 
 
     def run(self):
-        start_time = self.CitcomModule.CPU_time()
+        start_time = CPU_time()
         self.launch()
 
         import mpi
         if not mpi.world().rank:
             import sys
             print >> sys.stderr, "initialization time = %f" % \
-                  (self.CitcomModule.CPU_time() - start_time)
+                  (CPU_time() - start_time)
 
 	return
 
@@ -58,7 +59,8 @@ class Sphere(CitcomComponent):
 
 
     def setProperties(self):
-        self.CitcomModule.Sphere_set_properties(self.all_variables, self.inventory)
+        from CitcomS.CitcomS import Sphere_set_properties
+        Sphere_set_properties(self.all_variables, self.inventory)
         return
 
 

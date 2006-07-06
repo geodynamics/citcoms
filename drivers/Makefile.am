@@ -24,12 +24,70 @@
 
 # $Id$
 
-CC = $(MPICC)
-INCLUDES = -I$(top_srcdir)/lib/Common $(MPIINCLUDES)
 bin_PROGRAMS = CitcomSFull CitcomSRegional
+nodist_bin_SCRIPTS =
+
+if COND_PYRE
+
+nodist_bin_SCRIPTS += citcoms
+
+if COND_EMBEDDING
+    bin_PROGRAMS += pycitcoms
+    INTERPRETER = $(bindir)/pycitcoms
+else
+    INTERPRETER = $(PYTHON)
+endif
+
+endif
+
+CC = $(MPICC)
+CXX = $(MPICXX)
+INCLUDES = \
+	-I$(top_srcdir)/lib/Common \
+	$(MPIINCLUDES)
+
+if COND_PYRE
+INCLUDES += \
+	-I$(top_srcdir)/module \
+	-I$(top_srcdir)/module/Exchanger \
+	-I$(PYTHON_INCDIR)
+endif
+
+# legacy drivers
 CitcomSFull_SOURCES = Citcom.c
-CitcomSFull_LDADD = $(top_builddir)/lib/Full/libCitcomSFull.la $(MPILIBS)
+CitcomSFull_CPPFLAGS = -DCITCOMS_SOLVER_FULL
+CitcomSFull_LDADD = $(top_builddir)/lib/libCitcomS.la $(MPILIBS)
 CitcomSRegional_SOURCES = Citcom.c
-CitcomSRegional_LDADD = $(top_builddir)/lib/Regional/libCitcomSRegional.la $(MPILIBS)
+CitcomSRegional_CPPFLAGS =
+CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.la $(MPILIBS)
+
+# citcoms (top-level Python script)
+do_subst = sed \
+	-e 's|[@]INTERPRETER[@]|$(INTERPRETER)|g' \
+	-e 's|[@]PYTHONPATH[@]|$(PYTHONPATH)|g'
+citcoms: $(srcdir)/citcoms.in
+	$(do_subst) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+CLEANFILES = $(nodist_bin_SCRIPTS)
+EXTRA_DIST = citcoms.in
+
+# pycitcoms (libCitcomS + CitcomSmodule + libExchanger +
+# Exchangermodule + embedded Python interpreter)
+pycitcoms_SOURCES = pycitcoms.cc
+pycitcoms_LDADD = \
+	$(top_builddir)/module/libPyxMPImodule.a \
+	$(top_builddir)/module/Exchanger/libExchangermodule.a \
+	$(top_builddir)/module/libCitcomSmodule.a \
+	$(top_builddir)/lib/libCitcomS.la
+pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
+	@rm -f pycitcoms$(EXEEXT)
+	$(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
+		-lExchanger -l_mpimodule -ljournal \
+		$(PYTHON_BLDLIBRARY) \
+		$(MPILIBS) \
+		$(FCLIBS) \
+		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
+		$(LIBS) \
+		$(PYTHON_LDLAST)
 
 ## end of Makefile.am

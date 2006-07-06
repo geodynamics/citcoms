@@ -29,7 +29,7 @@ if COND_PYRE
     MAYBE_PYRE = etc examples module pyre tests visual
 endif
 
-SUBDIRS = $(MAYBE_PYTHIA) $(MAYBE_EXCHANGER) lib drivers $(MAYBE_PYRE)
+SUBDIRS = $(MAYBE_PYTHIA) $(MAYBE_EXCHANGER) lib $(MAYBE_PYRE) drivers
 DIST_SUBDIRS = \
 	$(MAYBE_DIST_PYTHIA) $(MAYBE_DIST_EXCHANGER) \
 	lib drivers \

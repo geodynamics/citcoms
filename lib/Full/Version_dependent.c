@@ -32,7 +32,7 @@
 
 // Setup global mesh parameters
 //
-void global_derived_values(E)
+void full_global_derived_values(E)
   struct All_variables *E;
 {
   int d,i,nox,noz,noy;
@@ -134,7 +134,7 @@ void global_derived_values(E)
 
    =================================================  */
 
-void node_locations(E)
+void full_node_locations(E)
      struct All_variables *E;
 {
   int i,j,k,ii,lev;
@@ -144,7 +144,7 @@ void node_locations(E)
   char output_file[255], a[255];
   FILE *fp1;
 
-  void coord_of_cap();
+  void full_coord_of_cap();
   void rotate_mesh ();
   void compute_angle_surf_area ();
 
@@ -214,7 +214,7 @@ void node_locations(E)
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
      ii = E->sphere.capid[j];
-     coord_of_cap(E,j,ii);
+     full_coord_of_cap(E,j,ii);
      }
 
   /* rotate the mesh to avoid two poles on mesh points */
@@ -252,7 +252,7 @@ if (E->control.verbose)
 
 
 
-void construct_tic_from_input(struct All_variables *E)
+void full_construct_tic_from_input(struct All_variables *E)
 {
   int i, j, k, kk, m, p, node;
   int nox, noy, noz, gnoz;
@@ -322,7 +322,7 @@ void construct_tic_from_input(struct All_variables *E)
 
 /* setup boundary node and element arrays for bookkeeping */
 
-void construct_boundary( struct All_variables *E)
+void full_construct_boundary( struct All_variables *E)
 {
 
   const int dims=E->mesh.nsd;

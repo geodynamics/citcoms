@@ -1,0 +1,55 @@
+// -*- C++ -*-
+// 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+//<LicenseText>
+//
+// CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
+// Copyright (C) 2002-2005, California Institute of Technology.
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//</LicenseText>
+// 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
+
+#include <Python.h>
+#include <stdio.h>
+#include "CitcomSmodule.h"
+#include "Exchangermodule.h"
+
+PyMODINIT_FUNC initPyxMPI(void);
+static void init_builtin_Exchanger() { PyCitcomSExchanger_init("builtin_Exchanger"); }
+static void init_builtin_CitcomS()   { pyCitcom_init("builtin_CitcomS"); }
+
+struct _inittab inittab[] = {
+    { "PyxMPI", initPyxMPI },
+    { "builtin_Exchanger", init_builtin_Exchanger },
+    { "builtin_CitcomS", init_builtin_CitcomS },
+    { 0, 0 }
+};
+
+int main(int argc, char **argv)
+{
+    /* add our extension module */
+    if (PyImport_ExtendInittab(inittab) == -1) {
+        fprintf(stderr, "%s: PyImport_ExtendInittab failed! Exiting...\n", argv[0]);
+        return 1;
+    }
+    return Py_Main(argc, argv);
+}
+
+// End of file

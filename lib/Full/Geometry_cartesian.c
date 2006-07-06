@@ -31,7 +31,7 @@
 
 
 
-void set_2dc_defaults(E)
+void full_set_2dc_defaults(E)
      struct All_variables *E;
 { 
 
@@ -41,7 +41,7 @@ void set_2dc_defaults(E)
 }
 
 
-void set_2pt5dc_defaults(E)  
+void full_set_2pt5dc_defaults(E)  
     struct All_variables *E;
 { 
 
@@ -50,7 +50,7 @@ void set_2pt5dc_defaults(E)
  
 }
 
-void set_3dc_defaults(E)
+void full_set_3dc_defaults(E)
      struct All_variables *E;
 { 
 
@@ -59,7 +59,7 @@ void set_3dc_defaults(E)
  
 }
 
-void set_3dsphere_defaults(E)
+void full_set_3dsphere_defaults(E)
      struct All_variables *E;
 { 
   int i,j;

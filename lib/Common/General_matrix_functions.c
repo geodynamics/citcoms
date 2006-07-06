@@ -582,7 +582,6 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     void e_assemble_del2_u();
     void n_assemble_del2_u();
     void strip_bcs_from_residual();
-    void exchange_id_d();
 
     double U1[24],AD1[24],F1[24];
     double w1,w2,w3;
@@ -710,8 +709,8 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    }          /* end for el  */
 	 }               /* end for m */
 
-        exchange_id_d(E, Ad, level);
-        exchange_id_d(E, d0, level);
+        (E->solver.exchange_id_d)(E, Ad, level);
+        (E->solver.exchange_id_d)(E, d0, level);
 
 	/* completed cycle */
 
@@ -743,7 +742,6 @@ void jacobi(E,d0,F,Ad,acc,cycles,level,guess)
     int eqn1,eqn2,eqn3,gneq;
 
     void n_assemble_del2_u();
-    void exchange_id_d();
 
     double sum1,sum2,sum3,residual,global_vdot(),U1,U2,U3;
 
@@ -827,7 +825,7 @@ void jacobi(E,d0,F,Ad,acc,cycles,level,guess)
 		}
 	    }       /* end for i and m */
 
-      exchange_id_d(E, Ad, level);
+      (E->solver.exchange_id_d)(E, Ad, level);
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for(i=0;i<neq;i++)
@@ -873,7 +871,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     void parallel_process_termination();
     void n_assemble_del2_u();
 
-    void exchange_id_d();
     double U1,U2,U3,UU;
     double sor,residual,global_vdot();
 
@@ -980,7 +977,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    Ad[m][eqn3] -= E->temp1[m][eqn3];
 	    }
 
-      exchange_id_d(E, Ad, level);
+      (E->solver.exchange_id_d)(E, Ad, level);
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(i=1;i<=E->lmesh.NNO[level];i++)

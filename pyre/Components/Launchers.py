@@ -27,6 +27,7 @@
 #
 
 
+import sys
 from mpi.Launcher import Launcher
 from pyre.util import expandMacros
 
@@ -34,17 +35,6 @@ from pyre.util import expandMacros
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # utility functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-def which(filename):
-    from os.path import abspath, exists, join
-    from os import environ, pathsep
-    dirs = environ['PATH'].split(pathsep)
-    for dir in dirs:
-       pathname = join(dir, filename)
-       if exists(pathname):
-           return abspath(pathname)
-    return filename
 
 
 def hms(t):
@@ -82,8 +72,7 @@ class LauncherMPI(Launcher):
         extra.meta['tip'] = "extra arguments to pass to mpirun"
         
         command = pyre.inventory.str("command", default="mpirun")
-        python_mpi = pyre.inventory.str("python-mpi", default=which("mpipython.exe"))
-        re_exec = pyre.inventory.bool("re-exec", default=True)
+        interpreter = pyre.inventory.str("interpreter", default=sys.executable)
 
 
     def launch(self):
@@ -106,37 +95,18 @@ class LauncherMPI(Launcher):
     def _buildArgumentList(self):
         import sys
 
-        python_mpi = self.inventory.python_mpi
+        interpreter = self.inventory.interpreter
 
         if not self.nodes:
             self.nodes = len(self.nodelist)
 
-        if self.nodes < 2:
-            import mpi
-            if mpi.world().handle():
-                self.inventory.nodes = 1
-                return []
-            elif self.inventory.re_exec:
-                # re-exec under mpipython.exe
-                args = []
-                args.append(python_mpi)
-                args += sys.argv
-                args.append("--launcher.re-exec=False") # protect against infinite regress
-                return args
-            else:
-                # We are under the 'mpipython.exe' interpreter,
-                # yet the 'mpi' module is non-functional.  Attempt to
-                # re-raise the exception that may have caused this.
-                import mpi._mpi
-                return []
-        
         # build the command
         args = []
         args.append(self.inventory.command)
         self._appendMpiRunArgs(args)
 
         # add the parallel version of the interpreter on the command line
-        args.append(python_mpi)
+        args.append(interpreter)
 
         args += sys.argv
         args.append("--mode=worker")
@@ -230,7 +200,7 @@ class LauncherBatch(Launcher):
         dry = pyre.inventory.bool("dry", default=False)
         debug = pyre.inventory.bool("debug", default=False)
 
-        python_mpi = pyre.inventory.str("python-mpi", default=which("mpipython.exe"))
+        interpreter = pyre.inventory.str("interpreter", default=sys.executable)
         task = pyre.inventory.str("task")
 
         # Ignore 'nodegen' so that the examples will work without modification.
@@ -299,7 +269,7 @@ class LauncherBatch(Launcher):
             expandMacros('''\
 
 cd ${directory}
-${command} ${python-mpi} ${argv} --mode=worker
+${command} ${interpreter} ${argv} --mode=worker
 ''', self.inv)
             ]
         script = "\n".join(script) + "\n"
@@ -443,7 +413,7 @@ class LauncherGlobus(LauncherBatch):
         script = [
             expandMacros('''\
 &   (jobType=mpi)
-    (executable="${python-mpi}")
+    (executable="${interpreter}")
     (count=${nodes})
     (directory="${directory}")
     (stdout="${stdout}")

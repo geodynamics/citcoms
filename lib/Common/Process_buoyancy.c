@@ -62,7 +62,6 @@ void heat_flux(E)
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
     void get_global_shape_fn();
-    void exchange_node_f();
     void velo_from_element();
     void sum_across_surface();
     void return_horiz_ave();
@@ -120,7 +119,7 @@ void heat_flux(E)
     }             /* end of m */
 
 
-  exchange_node_f(E,flux,lev);
+  (E->exchange_node_f)(E,flux,lev);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno;i++)

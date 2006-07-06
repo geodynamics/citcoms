@@ -45,7 +45,6 @@ void set_convection_defaults(E)
     void convection_derived_values();
     void convection_allocate_memory();
     void convection_boundary_conditions();
-    void node_locations();
     void convection_initial_fields();
     void twiddle_thumbs();
 
@@ -56,7 +55,6 @@ void set_convection_defaults(E)
     E->problem_allocate_vars = convection_allocate_memory;
     E->problem_boundary_conds = convection_boundary_conditions;
     E->problem_initial_fields = convection_initial_fields;
-    E->problem_node_positions = node_locations;
     E->problem_update_node_positions = twiddle_thumbs;
     E->problem_update_bcs = twiddle_thumbs;
 
@@ -121,12 +119,8 @@ void convection_boundary_conditions(E)
      struct All_variables *E;
 
 {
-    void velocity_boundary_conditions();
-    void temperature_boundary_conditions();
-
-    velocity_boundary_conditions(E);      /* universal */
-    temperature_boundary_conditions(E);
-
+    (E->solver.velocity_boundary_conditions)(E);      /* universal */
+    (E->solver.temperature_boundary_conditions)(E);
     return;
 }
 

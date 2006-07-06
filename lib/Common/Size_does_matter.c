@@ -873,7 +873,6 @@ void mass_matrix(E)
 { int m,node,i,nint,e,lev;
   int n[9];
   void get_global_shape_fn();
-  void exchange_node_f();
   double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
   struct Shape_function GN;
   struct Shape_function_dA dOmega;
@@ -964,7 +963,7 @@ void mass_matrix(E)
     }        /* m */
 
   if (E->control.NMULTIGRID||E->control.EMULTIGRID||E->mesh.levmax==lev)
-     exchange_node_f(E,E->MASS[lev],lev);
+     (E->exchange_node_f)(E,E->MASS[lev],lev);
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.NNO[lev];node++)

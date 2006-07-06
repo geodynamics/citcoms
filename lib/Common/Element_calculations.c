@@ -71,7 +71,6 @@ void assemble_forces(E,penalty)
   void get_elt_f();
   void get_elt_tr();
   void strip_bcs_from_residual();
-  void exchange_id_d();
   void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
@@ -102,7 +101,7 @@ void assemble_forces(E,penalty)
     }
   }       /* end for m */
 
-  exchange_id_d(E, E->F, lev);
+  (E->solver.exchange_id_d)(E, E->F, lev);
   strip_bcs_from_residual(E,E->F,lev);
   return;
 }
@@ -118,7 +117,6 @@ void assemble_forces_pseudo_surf(E,penalty)
   void get_elt_f();
   void get_elt_tr_pseudo_surf();
   void strip_bcs_from_residual();
-  void exchange_id_d();
   void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
@@ -149,7 +147,7 @@ void assemble_forces_pseudo_surf(E,penalty)
     }
   }       /* end for m */
 
-  exchange_id_d(E, E->F, lev);
+  (E->solver.exchange_id_d)(E, E->F, lev);
   strip_bcs_from_residual(E,E->F,lev);
   return;
 }
@@ -323,7 +321,6 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 {
   int  e,i,a,b,a1,a2,a3,ii,m,nodeb;
   void strip_bcs_from_residual();
-  void exchange_id_d();
 
   const int n=loc_mat_size[E->mesh.nsd];
   const int ends=enodes[E->mesh.nsd];
@@ -376,7 +373,7 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
        }          /* end for e */
      }         /* end for m  */
 
-    exchange_id_d(E, Au, level);
+    (E->solver.exchange_id_d)(E, Au, level);
 
   if(strip_bcs)
      strip_bcs_from_residual(E,Au,level);
@@ -399,8 +396,6 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 
     double UU,U1,U2,U3;
     void strip_bcs_from_residual();
-
-    void exchange_id_d();
 
     int *C;
     higher_precision *B1,*B2,*B3;
@@ -448,7 +443,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        }     /* end for e */
      }     /* end for m */
 
-     exchange_id_d(E, Au, level);
+     (E->solver.exchange_id_d)(E, Au, level);
 
     if (strip_bcs)
 	strip_bcs_from_residual(E,Au,level);
@@ -574,7 +569,6 @@ void assemble_grad_p(E,P,gradP,lev)
 {
   int m,e,i,j1,j2,j3,p,a,b,nel,neq;
   void strip_bcs_from_residual();
-  void exchange_id_d();
 
   const int ends=enodes[E->mesh.nsd];
   const int dims=E->mesh.nsd;
@@ -606,7 +600,7 @@ void assemble_grad_p(E,P,gradP,lev)
         }       /* end for el */
      }       /* end for m */
 
-  exchange_id_d(E, gradP,  lev); /*  correct gradP   */
+  (E->solver.exchange_id_d)(E, gradP,  lev); /*  correct gradP   */
 
 
   strip_bcs_from_residual(E,gradP,lev);

@@ -39,7 +39,8 @@ class FullSphere(Sphere):
 
 
     def launch(self):
-        self.CitcomModule.full_sphere_launch(self.all_variables)
+        from CitcomS.CitcomS import full_sphere_launch
+        full_sphere_launch(self.all_variables)
 	return
 
 

@@ -75,7 +75,13 @@ int main(argc,argv)
   }
 
   world = MPI_COMM_WORLD;
-  E = citcom_init(&world); /* allocate global E and do initializaion here */
+  E = citcom_init(&world);             /* allocate global E and do initializaion here */
+  
+#ifdef CITCOMS_SOLVER_FULL
+  full_solver_init(E);
+#else
+  regional_solver_init(E);
+#endif
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);

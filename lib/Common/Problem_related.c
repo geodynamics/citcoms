@@ -37,10 +37,7 @@
 void read_velocity_boundary_from_file(E)
      struct All_variables *E;
 {
-    void read_input_files_for_timesteps();
-
-    read_input_files_for_timesteps(E,1,1); /* read velocity(1) and output(1) */
-
+    (E->solver.read_input_files_for_timesteps)(E,1,1); /* read velocity(1) and output(1) */
     return;
 }
 

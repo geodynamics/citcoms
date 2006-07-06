@@ -26,6 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+from CitcomS.CitcomS import CPU_time, output
 from pyre.simulations.Solver import Solver as BaseSolver
 import journal
 
@@ -36,7 +37,6 @@ class Solver(BaseSolver):
     def __init__(self, name, facility="solver"):
         BaseSolver.__init__(self, name, facility)
 
-        self.CitcomModule = None
         self.all_variables = None
         self.communicator = None
 
@@ -54,35 +54,39 @@ class Solver(BaseSolver):
 
 
     def initialize(self, application):
+
+        from CitcomS.CitcomS import citcom_init, global_default_values, set_signal
+
         BaseSolver.initialize(self, application)
 
         comm = application.solverCommunicator
-        self.all_variables = self.CitcomModule.citcom_init(comm.handle())
+        all_variables = citcom_init(comm.handle())
 	self.communicator = comm
+        self.all_variables = all_variables
+
+        self.initializeSolver()
 
         # information about clock time
-	self.start_cpu_time = self.CitcomModule.CPU_time()
+	self.start_cpu_time = CPU_time()
         self.cpu_time = self.start_cpu_time
         self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
 	inv = self.inventory
-        CitcomModule = self.CitcomModule
-        all_variables = self.all_variables
+        
+        inv.mesher.initialize(all_variables)
+        inv.tsolver.initialize(all_variables)
+        inv.vsolver.initialize(all_variables)
 
-        inv.mesher.initialize(CitcomModule, all_variables)
-        inv.tsolver.initialize(CitcomModule, all_variables)
-        inv.vsolver.initialize(CitcomModule, all_variables)
+        inv.bc.initialize(all_variables)
+        inv.const.initialize(all_variables)
+        inv.ic.initialize(all_variables)
+        inv.param.initialize(all_variables)
+        inv.phase.initialize(all_variables)
+        inv.tracer.initialize(all_variables)
+        inv.visc.initialize(all_variables)
 
-        inv.bc.initialize(CitcomModule, all_variables)
-        inv.const.initialize(CitcomModule, all_variables)
-        inv.ic.initialize(CitcomModule, all_variables)
-        inv.param.initialize(CitcomModule, all_variables)
-        inv.phase.initialize(CitcomModule, all_variables)
-        inv.tracer.initialize(CitcomModule, all_variables)
-        inv.visc.initialize(CitcomModule, all_variables)
-
-        CitcomModule.global_default_values(self.all_variables)
-        CitcomModule.set_signal()
+        global_default_values(self.all_variables)
+        set_signal()
 
         self.setProperties()
 
@@ -226,7 +230,7 @@ class Solver(BaseSolver):
     def endSimulation(self, step):
         BaseSolver.endSimulation(self, step, self.t)
 
-        total_cpu_time = self.CitcomModule.CPU_time() - self.start_cpu_time
+        total_cpu_time = CPU_time() - self.start_cpu_time
 
         rank = self.communicator.rank
         if not rank:
@@ -235,9 +239,9 @@ class Solver(BaseSolver):
                 total_cpu_time / step )
 
         if self.coupler:
-            self.CitcomModule.output(self.all_variables, step)
+            output(self.all_variables, step)
 
-	#self.CitcomModule.finalize()
+	#finalize()
         return
 
 
@@ -245,17 +249,17 @@ class Solver(BaseSolver):
     def save(self, step, monitoringFrequency):
         # for non-coupled run, output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):
-            self.CitcomModule.output(self.all_variables, step)
+            output(self.all_variables, step)
         elif self.coupler and not (self.coupler.exchanger.coupled_steps % monitoringFrequency):
             print self.coupler.exchanger.coupled_steps, monitoringFrequency
-            self.CitcomModule.output(self.all_variables, step)
+            output(self.all_variables, step)
 
         return
 
 
     def timesave(self, t, steps):
         # output time information
-        time = self.CitcomModule.CPU_time()
+        time = CPU_time()
         msg = "%d %.4e %.4e %.4e %.4e" % (steps,
                                           t,
                                           t - self.model_time,
@@ -270,8 +274,10 @@ class Solver(BaseSolver):
 
 
     def setProperties(self):
-        self.CitcomModule.Solver_set_properties(self.all_variables,
-                                                self.inventory)
+ 
+        from CitcomS.CitcomS import Solver_set_properties
+        
+        Solver_set_properties(self.all_variables, self.inventory)
 
 	inv = self.inventory
         inv.mesher.setProperties()

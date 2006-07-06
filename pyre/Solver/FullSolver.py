@@ -27,21 +27,15 @@
 #
 
 from Solver import Solver
+from CitcomS.CitcomS import full_solver_init
 import journal
 
 
 class FullSolver(Solver):
 
 
-    def __init__(self, name, facility="solver"):
-	Solver.__init__(self, name, facility)
-        import mpi
-        if mpi.world().handle():
-            import CitcomS.Full as CitcomModule
-            self.CitcomModule = CitcomModule
-        else:
-            self.CitcomModule = None
-        return
+    def initializeSolver(self):
+        full_solver_init(self.all_variables)
 
 
 

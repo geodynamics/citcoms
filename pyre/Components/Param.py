@@ -38,7 +38,8 @@ class Param(CitcomComponent):
 
 
     def setProperties(self):
-        self.CitcomModule.Param_set_properties(self.all_variables, self.inventory)
+        from CitcomS.CitcomS import Param_set_properties
+        Param_set_properties(self.all_variables, self.inventory)
         return
 
 

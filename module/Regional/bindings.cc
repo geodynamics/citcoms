@@ -82,6 +82,16 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_citcom_init__doc__},
 
+    {pyCitcom_full_solver_init__name__,
+     pyCitcom_full_solver_init,
+     METH_VARARGS,
+     pyCitcom_full_solver_init__doc__},
+
+    {pyCitcom_regional_solver_init__name__,
+     pyCitcom_regional_solver_init,
+     METH_VARARGS,
+     pyCitcom_regional_solver_init__doc__},
+
     {pyCitcom_global_default_values__name__,
      pyCitcom_global_default_values,
      METH_VARARGS,

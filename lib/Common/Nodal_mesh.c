@@ -54,7 +54,6 @@ void p_to_nodes(E,P,PN,lev)
      int lev;
 
 { int e,element,node,j,m;
-  void exchange_node_f();
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.NNO[lev];node++)
@@ -67,7 +66,7 @@ void p_to_nodes(E,P,PN,lev)
     	  PN[m][node] += P[m][element] * E->TWW[lev][m][element].node[j] ; 
     	  }
  
-   exchange_node_f (E,PN,lev);
+   (E->exchange_node_f)(E,PN,lev);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(node=1;node<=E->lmesh.NNO[lev];node++)
@@ -160,7 +159,6 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
   double temp_visc;
-  void exchange_node_f();
 
  for (m=1;m<=E->sphere.caps_per_proc;m++)
    for(i=1;i<=E->lmesh.NNO[lev];i++)
@@ -179,7 +177,7 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
        }
     }
  
-   exchange_node_f (E,VN,lev);
+   (E->exchange_node_f)(E,VN,lev);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(n=1;n<=E->lmesh.NNO[lev];n++) 

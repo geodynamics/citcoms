@@ -392,8 +392,6 @@ void project_scalar(E,start_lev,AU,AD)
     float average,w;
     void gather_to_1layer_node ();
 
-    void exchange_node_f();
-
     const int sl_minus = start_lev-1;
     const int nno_minus=E->lmesh.NNO[start_lev-1];
     const int nels_minus=E->lmesh.NEL[start_lev-1];
@@ -423,7 +421,7 @@ void project_scalar(E,start_lev,AU,AD)
                 AD[m][node] += w * E->TWW[sl_minus][m][el].node[i];
          }
 
-   exchange_node_f(E,AD,sl_minus);
+   (E->exchange_node_f)(E,AD,sl_minus);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
@@ -449,8 +447,6 @@ void project_vector(E,start_lev,AU,AD,ic)
     int eqn3,eqn_minus3;
     double average1,average2,average3,w,weight;
     float CPU_time(),time;
-
-    void exchange_id_d();
 
     void from_rtf_to_xyz();
     void from_xyz_to_rtf();
@@ -499,7 +495,7 @@ void project_vector(E,start_lev,AU,AD,ic)
                 }
 
 
-   exchange_id_d(E, E->temp1, sl_minus);
+   (E->solver.exchange_id_d)(E, E->temp1, sl_minus);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {

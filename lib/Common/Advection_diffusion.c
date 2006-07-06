@@ -305,8 +305,6 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
     void get_global_shape_fn();
     void pg_shape_fn();
     void element_residual();
-    void exchange_node_f();
-    void exchange_node_d();
     void velo_from_element();
 
     int el,e,a,i,a1,m;
@@ -344,7 +342,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
 
         } /* next element */
 
-    exchange_node_d(E,DTdot,E->mesh.levmax);
+    (E->exchange_node_d)(E,DTdot,E->mesh.levmax);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {

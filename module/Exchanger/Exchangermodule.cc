@@ -30,20 +30,18 @@
 
 #include <Python.h>
 
+#include "Exchangermodule.h"
 #include "exceptions.h"
 #include "bindings.h"
 
 
 char pyExchanger_module__doc__[] = "";
 
-// Initialization function for the module (*must* be called initExchanger)
-extern "C"
-void
-initExchanger()
+void PyCitcomSExchanger_init(const char *name)
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        "Exchanger", pyExchanger_methods,
+        (char *)name, pyExchanger_methods,
         pyExchanger_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
@@ -59,6 +57,14 @@ initExchanger()
     PyDict_SetItemString(d, "RuntimeException", pyExchanger_runtimeError);
 
     return;
+}
+
+// Initialization function for the module (*must* be called initExchanger)
+extern "C"
+void
+initExchanger()
+{
+    PyCitcomSExchanger_init("Exchanger");
 }
 
 // version

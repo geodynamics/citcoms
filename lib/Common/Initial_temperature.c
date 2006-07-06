@@ -38,7 +38,6 @@ void temperatures_conform_bcs();
 
 #include "initial_temperature.h"
 void debug_tic(struct All_variables *);
-void construct_tic_from_input(struct All_variables *);
 void restart_tic_from_file(struct All_variables *);
 
 
@@ -174,7 +173,7 @@ void construct_tic(struct All_variables *E)
   if (E->control.lith_age)
     lith_age_construct_tic(E);
   else
-    construct_tic_from_input(E);
+    (E->solver.construct_tic_from_input)(E);
 
   return;
 }

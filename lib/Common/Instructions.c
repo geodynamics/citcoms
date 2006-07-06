@@ -52,10 +52,8 @@ void read_instructions(struct All_variables *E, char *filename)
     void read_initial_settings();
     void tracer_initial_settings();
     void global_default_values();
-    void global_derived_values();
     void construct_ien();
     void construct_surface();
-    void construct_boundary();
     void construct_masks();
     void construct_shape_functions();
     void construct_id();
@@ -68,7 +66,6 @@ void read_instructions(struct All_variables *E, char *filename)
     void construct_mat_group();
     void set_up_nonmg_aliases();
     void check_bc_consistency();
-    void node_locations();
     void allocate_velocity_vars();
     void construct_c3x3matrix();
     void construct_surf_det ();
@@ -114,10 +111,10 @@ void read_instructions(struct All_variables *E, char *filename)
       open_info(E);
 
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
-    global_derived_values(E);
+    (E->solver.global_derived_values)(E);
 
-    parallel_processor_setup(E);   /* get # of proc in x,y,z */
-    parallel_domain_decomp0(E);  /* get local nel, nno, elx, nox et al */
+    (E->solver.parallel_processor_setup)(E);   /* get # of proc in x,y,z */
+    (E->solver.parallel_domain_decomp0)(E);  /* get local nel, nno, elx, nox et al */
 
     allocate_common_vars(E);
     (E->problem_allocate_vars)(E);
@@ -126,11 +123,11 @@ void read_instructions(struct All_variables *E, char *filename)
            /* logical domain */
     construct_ien(E);
     construct_surface(E);
-    construct_boundary(E);
-    parallel_domain_boundary_nodes(E);
+    (E->solver.construct_boundary)(E);
+    (E->solver.parallel_domain_boundary_nodes)(E);
 
            /* physical domain */
-    node_locations (E);
+    (E->solver.node_locations)(E);
 
     if(E->control.tracer==1) {
       tracer_initial_settings(E);
@@ -155,8 +152,8 @@ void read_instructions(struct All_variables *E, char *filename)
     construct_id(E);
     construct_lm(E);
 
-    parallel_communication_routs_v(E);
-    parallel_communication_routs_s(E);
+    (E->solver.parallel_communication_routs_v)(E);
+    (E->solver.parallel_communication_routs_s)(E);
 
     construct_sub_element(E);
     construct_shape_functions(E);
@@ -192,9 +189,6 @@ void read_instructions(struct All_variables *E, char *filename)
 void read_initial_settings(struct All_variables *E)
 {
   void set_convection_defaults();
-  void set_2dc_defaults();
-  void set_3dc_defaults();
-  void set_3dsphere_defaults();
   void set_cg_defaults();
   void set_mg_defaults();
   int m=E->parallel.me;
@@ -222,23 +216,23 @@ void read_initial_settings(struct All_variables *E)
   input_string("Geometry",E->control.GEOMETRY,NULL,m);
   if ( strcmp(E->control.GEOMETRY,"cart2d") == 0)
     { E->control.CART2D = 1;
-    set_2dc_defaults(E);}
+    (E->solver.set_2dc_defaults)(E);}
   else if ( strcmp(E->control.GEOMETRY,"axi") == 0)
     { E->control.AXI = 1;
     }
   else if ( strcmp(E->control.GEOMETRY,"cart2pt5d") == 0)
     { E->control.CART2pt5D = 1;
-    set_2pt5dc_defaults(E);}
+    (E->solver.set_2pt5dc_defaults)(E);}
   else if ( strcmp(E->control.GEOMETRY,"cart3d") == 0)
     { E->control.CART3D = 1;
-    set_3dc_defaults(E);}
+    (E->solver.set_3dc_defaults)(E);}
   else if ( strcmp(E->control.GEOMETRY,"sphere") == 0)
     {
-      set_3dsphere_defaults(E);}
+      (E->solver.set_3dsphere_defaults)(E);}
   else
     { fprintf(E->fp,"Unable to determine geometry, assuming cartesian 2d ... \n");
     E->control.CART2D = 1;
-    set_2dc_defaults(E); }
+    (E->solver.set_2dc_defaults)(E); }
 
   input_string("Solver",E->control.SOLVER_TYPE,NULL,m);
   if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0)

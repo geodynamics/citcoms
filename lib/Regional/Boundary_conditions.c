@@ -30,15 +30,21 @@
 #include <math.h>
 
 #include "lith_age.h"
+
 /* ========================================== */
 
-void velocity_boundary_conditions(E)
+static void horizontal_bc();
+static void velocity_apply_periodic_bcs();
+static void temperature_apply_periodic_bcs();
+static void velocity_refl_vert_bc();
+static void temperature_refl_vert_bc();
+
+/* ========================================== */
+
+void regional_velocity_boundary_conditions(E)
      struct All_variables *E;
 {
   void velocity_imp_vert_bc();
-  void velocity_refl_vert_bc();
-  void horizontal_bc();
-  void velocity_apply_periodic_bcs();
   void read_velocity_boundary_from_file();
   void renew_top_velocity_boundary();
   void apply_side_sbc();
@@ -118,13 +124,10 @@ void velocity_boundary_conditions(E)
 
 /* ========================================== */
 
-void temperature_boundary_conditions(E)
+void regional_temperature_boundary_conditions(E)
      struct All_variables *E;
 {
-  void horizontal_bc();
-  void temperature_apply_periodic_bcs();
   void temperature_imposed_vert_bcs();
-  void temperature_refl_vert_bc();
   void temperature_lith_adj();
   void temperatures_conform_bcs();
   int j,lev,noz;
@@ -170,7 +173,7 @@ void temperature_boundary_conditions(E)
 
 /* ========================================== */
 
-void velocity_refl_vert_bc(E)
+static void velocity_refl_vert_bc(E)
      struct All_variables *E;
 {
   int m,i,j,ii,jj;
@@ -313,7 +316,7 @@ void velocity_refl_vert_bc(E)
   return;
 }
 
-void temperature_refl_vert_bc(E)
+static void temperature_refl_vert_bc(E)
      struct All_variables *E;
 {
   int i,j,m;
@@ -367,7 +370,7 @@ void temperature_refl_vert_bc(E)
 /*  =========================================================  */
 
 
-void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
+static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
      struct All_variables *E;
      float *BC[];
      int ROW;
@@ -379,7 +382,6 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 
 {
   int i,j,node,rowl;
-  const int dims=E->mesh.nsd;
 
     /* safety feature */
   if(dirn > E->mesh.nsd)
@@ -420,7 +422,7 @@ void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 }
 
 
-void velocity_apply_periodic_bcs(E)
+static void velocity_apply_periodic_bcs(E)
     struct All_variables *E;
 {
   int n1,n2,level;
@@ -432,7 +434,7 @@ void velocity_apply_periodic_bcs(E)
   return;
   }
 
-void temperature_apply_periodic_bcs(E)
+static void temperature_apply_periodic_bcs(E)
     struct All_variables *E;
 {
  const int dims=E->mesh.nsd;
@@ -442,112 +444,6 @@ void temperature_apply_periodic_bcs(E)
   return;
   }
 
-
-
-void strip_bcs_from_residual(E,Res,level)
-    struct All_variables *E;
-    double **Res;
-    int level;
-{
-    int m,i;
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    if (E->num_zero_resid[level][m])
-      for(i=1;i<=E->num_zero_resid[level][m];i++)
-         Res[m][E->zero_resid[level][m][i]] = 0.0;
-
-    return;
-    }
-
-
-void temperatures_conform_bcs(struct All_variables *E)
-{
-  void temperatures_conform_bcs2(struct All_variables *);
-  void assimilate_lith_conform_bcs2(struct All_variables *);
-
-  if(E->control.lith_age) {
-    lith_age_conform_tbc(E);
-    assimilate_lith_conform_bcs(E);
-    }
-  else
-    temperatures_conform_bcs2(E);
-  return;
-}
-
-
-void temperatures_conform_bcs2(struct All_variables *E)
-{
-  /* int m,j,nno,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,ii,i,k; */
-  int j,node;
-  unsigned int type;
-
-  for(j=1;j<=E->sphere.caps_per_proc;j++)
-    for(node=1;node<=E->lmesh.nno;node++)  {
-
-        type = (E->node[j][node] & (TBX | TBZ | TBY));
-
-        switch (type) {
-        case 0:  /* no match, next node */
-            break;
-        case TBX:
-            E->T[j][node] = E->sphere.cap[j].TB[1][node];
-            break;
-        case TBZ:
-            E->T[j][node] = E->sphere.cap[j].TB[3][node];
-            break;
-        case TBY:
-            E->T[j][node] = E->sphere.cap[j].TB[2][node];
-            break;
-        case (TBX | TBZ):     /* clashes ! */
-            E->T[j][node] = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]);
-            break;
-        case (TBX | TBY):     /* clashes ! */
-            E->T[j][node] = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node]);
-            break;
-        case (TBZ | TBY):     /* clashes ! */
-            E->T[j][node] = 0.5 * (E->sphere.cap[j].TB[3][node] + E->sphere.cap[j].TB[2][node]);
-            break;
-        case (TBZ | TBY | TBX):     /* clashes ! */
-            E->T[j][node] = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]);
-            break;
-        } /* end switch */
-
-
-    } /* next node */
-
-return;
-
- }
-
-
-void velocities_conform_bcs(E,U)
-    struct All_variables *E;
-    double **U;
-{
-    int node,d,m;
-
-    const unsigned int typex = VBX;
-    const unsigned int typez = VBZ;
-    const unsigned int typey = VBY;
-    const int addi_dof = additional_dof[E->mesh.nsd];
-
-    const int dofs = E->mesh.dof;
-    const int nno = E->lmesh.nno;
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)   {
-      for(node=1;node<=nno;node++) {
-
-        if (E->node[m][node] & typex)
-	      U[m][E->id[m][node].doff[1]] = E->sphere.cap[m].VB[1][node];
- 	if (E->node[m][node] & typey)
-	      U[m][E->id[m][node].doff[2]] = E->sphere.cap[m].VB[2][node];
-	if (E->node[m][node] & typez)
-	      U[m][E->id[m][node].doff[3]] = E->sphere.cap[m].VB[3][node];
-        }
-      }
-
-    return;
-}
 
 
 /* version */

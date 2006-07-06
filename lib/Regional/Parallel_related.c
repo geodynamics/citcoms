@@ -34,46 +34,18 @@
 
 #include "parallel_related.h"
 
-void set_horizontal_communicator(struct All_variables*);
-void set_vertical_communicator(struct All_variables*);
 
+static void set_horizontal_communicator(struct All_variables*);
+static void set_vertical_communicator(struct All_variables*);
+
+static void exchange_node_d(struct All_variables *, double**, int);
+static void exchange_node_f(struct All_variables *, float**, int);
 
 
 /* ============================================ */
 /* ============================================ */
 
-void parallel_process_termination()
-{
-
-  MPI_Finalize();
-  exit(8);
-  return;
-  }
-
-/* ============================================ */
-/* ============================================ */
-
-void parallel_process_sync(struct All_variables *E)
-{
-
-  MPI_Barrier(E->parallel.world);
-  return;
-  }
-
-
-/* ==========================   */
-
- double CPU_time0()
-{
- double time, MPI_Wtime();
- time = MPI_Wtime();
- return (time);
-}
-
-/* ============================================ */
-/* ============================================ */
-
-void parallel_processor_setup(struct All_variables *E)
+void regional_parallel_processor_setup(struct All_variables *E)
   {
 
   int i,j,k,m,me,temp,pid_surf;
@@ -159,7 +131,7 @@ void parallel_processor_setup(struct All_variables *E)
   }
 
 
-void set_horizontal_communicator(struct All_variables *E)
+static void set_horizontal_communicator(struct All_variables *E)
 {
   MPI_Group world_g, horizon_g;
   int i,j,k,m,n;
@@ -197,7 +169,7 @@ void set_horizontal_communicator(struct All_variables *E)
 }
 
 
-void set_vertical_communicator(struct All_variables *E)
+static void set_vertical_communicator(struct All_variables *E)
 {
   MPI_Group world_g, vertical_g;
   int i,j,k,m;
@@ -238,7 +210,7 @@ void set_vertical_communicator(struct All_variables *E)
 get element information for each processor.
  ========================================================================= */
 
-void parallel_domain_decomp0(struct All_variables *E)
+void regional_parallel_domain_decomp0(struct All_variables *E)
   {
 
   int i,nox,noz,noy,me;
@@ -343,7 +315,7 @@ fprintf(stderr,"b %d %d %d %d %d %d %d\n",E->parallel.me,E->parallel.me_loc[1],E
  exchange info across the boundaries
  ============================================ */
 
-void parallel_domain_boundary_nodes(E)
+void regional_parallel_domain_boundary_nodes(E)
   struct All_variables *E;
   {
 
@@ -503,7 +475,7 @@ if (E->control.verbose) {
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-void parallel_communication_routs_v(E)
+void regional_parallel_communication_routs_v(E)
   struct All_variables *E;
   {
 
@@ -659,7 +631,7 @@ void parallel_communication_routs_v(E)
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-void parallel_communication_routs_s(E)
+void regional_parallel_communication_routs_s(E)
   struct All_variables *E;
   {
 
@@ -781,7 +753,7 @@ So, this bug won't manifest itself. But in other version of CitcomS, it will.
 by Tan2 7/21, 2003
 ================================================ */
 
-void exchange_id_d(E, U, lev)
+void regional_exchange_id_d(E, U, lev)
  struct All_variables *E;
  double **U;
  int lev;
@@ -831,7 +803,7 @@ void exchange_id_d(E, U, lev)
 
 /* ================================================ */
 /* ================================================ */
-void exchange_node_d(E, U, lev)
+static void exchange_node_d(E, U, lev)
  struct All_variables *E;
  double **U;
  int lev;
@@ -880,7 +852,7 @@ void exchange_node_d(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-void exchange_node_f(E, U, lev)
+static void exchange_node_f(E, U, lev)
  struct All_variables *E;
  float **U;
  int lev;
@@ -931,7 +903,7 @@ void exchange_node_f(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-void exchange_snode_f(E, U1, U2, lev)
+static void exchange_snode_f(E, U1, U2, lev)
  struct All_variables *E;
  float **U1,**U2;
  int lev;

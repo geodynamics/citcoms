@@ -46,11 +46,17 @@ AC_ARG_WITH([pyre],
     [want_pyre="$withval"],
     [want_pyre=yes])
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
+AC_ARG_ENABLE([embedding],
+    [AC_HELP_STRING([--enable-embedding],
+        [embed Python with CitcomS in a single executable @<:@default=yes@:>@])],
+    [want_embedding="$enableval"],
+    [want_embedding=yes])
+AM_CONDITIONAL([COND_EMBEDDING], [test "$want_embedding" = yes])
 
 # Checks for programs.
 if test "$want_pyre" = yes; then
     AM_PATH_PYTHON([2.3])
-    CIT_PYTHON_INCDIR
+    CIT_PYTHON_SYSCONFIG
     AC_PATH_PROG([MPIRUN], [mpirun])
     if test -z "$MPIRUN"; then
         AC_MSG_ERROR([program 'mpirun' not found])
@@ -85,6 +91,8 @@ if test "$want_pyre" = yes; then
 fi
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
+CC=$MPICXX
+CXX=$MPICXX
 if test "$want_pyre" = yes; then
     CIT_PROG_PYCONFIG
     AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
@@ -136,13 +144,8 @@ AC_CONFIG_FILES([Makefile
                  etc/Makefile
                  examples/Makefile
                  lib/Makefile
-                 lib/Common/Makefile
-                 lib/Full/Makefile
-                 lib/Regional/Makefile
                  module/Makefile
                  module/Exchanger/Makefile
-                 module/Full/Makefile
-                 module/Regional/Makefile
                  pyre/Makefile
                  tests/Makefile
                  visual/Makefile])
