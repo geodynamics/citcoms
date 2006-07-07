@@ -89,7 +89,7 @@ class Controller(SimulationController):
             self.advance(self.dt)
 
             # update simulation clock and step number
-            from builtin_CitcomS import return_times
+            from CitcomSLib import return_times
             self.clock, self.dt = return_times(self.solver.all_variables)
             self.step += 1
 
