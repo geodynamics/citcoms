@@ -28,6 +28,7 @@
 
 #include <Python.h>
 #include <stdio.h>
+#include <mpi.h>
 #include "CitcomSmodule.h"
 #include "Exchangermodule.h"
 
@@ -39,6 +40,12 @@ struct _inittab inittab[] = {
     { "CitcomSLib", initCitcomSLib },
     { 0, 0 }
 };
+
+void dummy()
+{
+    int flag;
+    MPI_Initialized(&flag);
+}
 
 int main(int argc, char **argv)
 {
