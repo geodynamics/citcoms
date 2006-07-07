@@ -24,90 +24,98 @@
 
 # $Id$
 
-lib_LTLIBRARIES = libCitcomS.la
-noinst_LTLIBRARIES = libFull.la libRegional.la
+noinst_LIBRARIES =
+lib_LTLIBRARIES =
+
+if COND_EMBEDDING
+    # static library
+    noinst_LIBRARIES += libCitcomS.a
+else
+    # shared library (libtool)
+    lib_LTLIBRARIES += libCitcomS.la
+endif
+
+# static library
+libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
+libCitcomS_a_SOURCES = $(sources)
+
+# shared library (libtool)
+libCitcomS_la_LIBADD = $(LIBM)
+libCitcomS_la_LDFLAGS = -release $(VERSION)
+libCitcomS_la_SOURCES = $(sources)
 
 CC = $(MPICC)
 INCLUDES = -I$(top_srcdir)/lib/Common $(MPIINCLUDES)
-
-libCitcomS_la_SOURCES = \
-	Common/Advection_diffusion.c \
-	Common/advection_diffusion.h \
-	Common/advection.h \
-	Common/BC_util.c \
-	Common/Citcom_init.c \
-	Common/citcom_init.h \
-	Common/Construct_arrays.c \
-	Common/Convection.c \
-	Common/convection_variables.h \
-	Common/Drive_solvers.c \
-	Common/drive_solvers.h \
-	Common/Element_calculations.c \
-	Common/element_definitions.h \
-	Common/General_matrix_functions.c \
-	Common/global_defs.h \
-	Common/Global_operations.c \
-	Common/Initial_temperature.c \
-	Common/initial_temperature.h \
-	Common/Instructions.c \
-	Common/Interuption.c \
-	Common/interuption.h \
-	Common/lith_age.h \
-	Common/Lith_age.c \
-	Common/Nodal_mesh.c \
-	Common/Output.c \
-	Common/output.h \
-	Common/Pan_problem_misc_functions.c \
-	Common/parallel_related.h \
-	Common/Parallel_util.c \
-	Common/Parsing.c \
-	Common/parsing.h \
-	Common/Phase_change.c \
-	Common/phase_change.h \
-	Common/Problem_related.c \
-	Common/Process_buoyancy.c \
-	Common/Shape_functions.c \
-	Common/Size_does_matter.c \
-	Common/Solver_conj_grad.c \
-	Common/Solver_multigrid.c \
-	Common/sphere_communication.h \
-	Common/Sphere_harmonics.c \
-	Common/Sphere_util.c \
-	Common/Stokes_flow_Incomp.c \
-	Common/temperature_descriptions.h \
-	Common/Topo_gravity.c \
-	Common/Tracer_advection.c \
-	Common/tracer_defs.h \
-	Common/viscosity_descriptions.h \
-	Common/Viscosity_structures.c
-libCitcomS_la_LIBADD = libFull.la libRegional.la $(LIBM)
-libCitcomS_la_LDFLAGS = -release $(VERSION)
-
-libFull_la_CFLAGS = $(AM_CFLAGS) # hack for automake
-libFull_la_SOURCES = \
-	Full/Boundary_conditions.c \
-	Full/Geometry_cartesian.c \
-	Full/Lith_age_read_files.c \
-	Full/Parallel_related.c \
-	Full/Read_input_from_files.c \
-	Full/Solver.c \
-	Full/Sphere_related.c \
-	Full/Version_dependent.c
-
-libRegional_la_CFLAGS = $(AM_CFLAGS) # hack for automake
-libRegional_la_SOURCES = \
-	Regional/Boundary_conditions.c \
-	Regional/Geometry_cartesian.c \
-	Regional/Lith_age_read_files.c \
-	Regional/Parallel_related.c \
-	Regional/Read_input_from_files.c \
-	Regional/Solver.c \
-	Regional/Sphere_related.c \
-	Regional/Version_dependent.c
+sources = \
+	Advection_diffusion.c \
+	advection_diffusion.h \
+	advection.h \
+	BC_util.c \
+	Citcom_init.c \
+	citcom_init.h \
+	Construct_arrays.c \
+	Convection.c \
+	convection_variables.h \
+	Drive_solvers.c \
+	drive_solvers.h \
+	Element_calculations.c \
+	element_definitions.h \
+	General_matrix_functions.c \
+	global_defs.h \
+	Global_operations.c \
+	Initial_temperature.c \
+	initial_temperature.h \
+	Instructions.c \
+	Interuption.c \
+	interuption.h \
+	lith_age.h \
+	Lith_age.c \
+	Nodal_mesh.c \
+	Output.c \
+	output.h \
+	Pan_problem_misc_functions.c \
+	parallel_related.h \
+	Parallel_util.c \
+	Parsing.c \
+	parsing.h \
+	Phase_change.c \
+	phase_change.h \
+	Problem_related.c \
+	Process_buoyancy.c \
+	Shape_functions.c \
+	Size_does_matter.c \
+	Solver_conj_grad.c \
+	Solver_multigrid.c \
+	sphere_communication.h \
+	Sphere_harmonics.c \
+	Sphere_util.c \
+	Stokes_flow_Incomp.c \
+	temperature_descriptions.h \
+	Topo_gravity.c \
+	Tracer_advection.c \
+	tracer_defs.h \
+	viscosity_descriptions.h \
+	Viscosity_structures.c \
+	Full_boundary_conditions.c \
+	Full_geometry_cartesian.c \
+	Full_lith_age_read_files.c \
+	Full_parallel_related.c \
+	Full_read_input_from_files.c \
+	Full_solver.c \
+	Full_sphere_related.c \
+	Full_version_dependent.c \
+	Regional_boundary_conditions.c \
+	Regional_geometry_cartesian.c \
+	Regional_lith_age_read_files.c \
+	Regional_parallel_related.c \
+	Regional_read_input_from_files.c \
+	Regional_solver.c \
+	Regional_sphere_related.c \
+	Regional_version_dependent.c
 
 EXTRA_DIST = \
-	Common/Obsolete.c \
-	Full/Obsolete.c \
-	Regional/Obsolete.c
+	Obsolete.c \
+	Full_obsolete.c \
+	Regional_obsolete.c
 
 ## end of Makefile.am

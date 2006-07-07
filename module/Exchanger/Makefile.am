@@ -49,7 +49,7 @@ Exchangermodule_la_SOURCES = $(sources)
 CXX = $(MPICXX)
 CXXLD = @CXX@
 INCLUDES = \
-	-I$(top_srcdir)/lib/Common \
+	-I$(top_srcdir)/lib \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 

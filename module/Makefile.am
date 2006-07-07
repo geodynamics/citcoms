@@ -62,7 +62,7 @@ CC = $(MPICC)
 CXX = $(MPICXX)
 INCLUDES = \
 	-I$(top_srcdir)/module/Regional \
-	-I$(top_srcdir)/lib/Common \
+	-I$(top_srcdir)/lib \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 

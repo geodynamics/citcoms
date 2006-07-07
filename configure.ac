@@ -91,7 +91,7 @@ if test "$want_pyre" = yes; then
 fi
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
-CC=$MPICXX
+CC=$MPICC
 CXX=$MPICXX
 if test "$want_pyre" = yes; then
     CIT_PROG_PYCONFIG
@@ -134,6 +134,8 @@ if test -z "$LIBM"; then
     AC_CHECK_FUNC(sqrt, , [
         AC_CHECK_LIB(m, sqrt, [
             LIBM="-lm"
+        ], [
+            AC_MSG_ERROR([math library not found; try setting LIBM])
         ])
     ])
 fi
