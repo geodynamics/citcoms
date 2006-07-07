@@ -308,6 +308,20 @@ PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_return_times__doc__[] = "";
+char pyCitcom_return_times__name__[] = "return_times";
+
+PyObject * pyCitcom_return_times(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:return_times", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    return Py_BuildValue("ff", E->monitor.elapsed_time, E->advection.timestep);
+}
 
 
 //////////////////////////////////////////////////////////////////////////

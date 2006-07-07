@@ -111,6 +111,12 @@ extern "C"
 PyObject * pyCitcom_Visc_update_material(PyObject *, PyObject *);
 
 
+extern char pyCitcom_return_times__name__[];
+extern char pyCitcom_return_times__doc__[];
+extern "C"
+PyObject * pyCitcom_return_times(PyObject *, PyObject *);
+
+
 #endif
 
 // version

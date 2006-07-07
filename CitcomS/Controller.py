@@ -42,6 +42,7 @@ class Controller(SimulationController):
 
         self.step = 0
         self.clock = 0.0
+        self.dt = 0.0
         self.done = False
         self.solver = None
         return
@@ -82,13 +83,14 @@ class Controller(SimulationController):
             #self.applyBoundaryConditions()
 
             # compute an acceptable timestep
-            dt = self.stableTimestep()
+            self.dt = self.stableTimestep()
 
             # advance
-            self.advance(dt)
+            self.advance(self.dt)
 
-            # update smulation clock and step number
-            self.clock += dt
+            # update simulation clock and step number
+            from builtin_CitcomS import return_times
+            self.clock, self.dt = return_times(self.solver.all_variables)
             self.step += 1
 
             # notify solver we finished a timestep
@@ -132,7 +134,7 @@ class Controller(SimulationController):
 
     def save(self):
         step = self.step
-        self.solver.timesave(self.clock, step)
+        self.solver.timesave(self.clock, self.dt, step)
         self.solver.save(step, self.inventory.monitoringFrequency)
         return
 

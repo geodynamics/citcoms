@@ -47,7 +47,6 @@ class Solver(BaseSolver):
 
 	self.start_cpu_time = 0
         self.cpu_time = 0
-        self.model_time = 0
         self.fptime = None
         return
 
@@ -257,18 +256,19 @@ class Solver(BaseSolver):
         return
 
 
-    def timesave(self, t, steps):
-        # output time information
+    def timesave(self, t, dt, steps):
+        '''output time information
+        '''
+
         time = CPU_time()
         msg = "%d %.4e %.4e %.4e %.4e" % (steps,
                                           t,
-                                          t - self.model_time,
+                                          dt,
                                           time - self.start_cpu_time,
                                           time - self.cpu_time)
         print >> self.fptime, msg
         self.fptime.flush()
 
-        self.model_time = t
         self.cpu_time = time
         return
 
