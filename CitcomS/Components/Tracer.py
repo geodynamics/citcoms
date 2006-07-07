@@ -39,14 +39,14 @@ class Tracer(CitcomComponent):
 
 
     def run(self):
-        from CitcomS.CitcomS import Tracer_tracer_advection
+        from CitcomSLib import Tracer_tracer_advection
         Tracer_tracer_advection(self.all_variables)
         return
 
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Tracer_set_properties
+        from CitcomSLib import Tracer_set_properties
         Tracer_set_properties(self.all_variables, self.inventory)
         return
 

@@ -74,8 +74,8 @@ class Exchanger(Component):
 
 
     def selectModule(self):
-        import CitcomS.Exchanger
-        self.module = CitcomS.Exchanger
+        import ExchangerLib
+        self.module = ExchangerLib
         return
 
 

@@ -26,31 +26,31 @@
 SUBDIRS = Exchanger
 
 noinst_LIBRARIES =
-pkgpyexec_LTLIBRARIES =
+pyexec_LTLIBRARIES =
 
 if COND_EMBEDDING
     # static library
-    noinst_LIBRARIES += libCitcomSmodule.a libPyxMPImodule.a
+    noinst_LIBRARIES += libCitcomSLibmodule.a libPyxMPImodule.a
 else
     # extension module (libtool)
-    pkgpyexec_LTLIBRARIES += CitcomSmodule.la PyxMPImodule.la
+    pyexec_LTLIBRARIES += CitcomSLibmodule.la PyxMPImodule.la
 endif
 
 # static libraries
 
-libCitcomSmodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
-libCitcomSmodule_a_SOURCES = $(sources)
+libCitcomSLibmodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
+libCitcomSLibmodule_a_SOURCES = $(sources)
 
 libPyxMPImodule_a_CFLAGS = $(AM_CXXFLAGS) # hack for automake
 libPyxMPImodule_a_SOURCES = PyxMPI/PyxMPI.c
 
 # extension modules (libtool)
 
-CitcomSmodule_la_LDFLAGS = -module -release $(VERSION)
-CitcomSmodule_la_LIBADD = \
+CitcomSLibmodule_la_LDFLAGS = -module -release $(VERSION)
+CitcomSLibmodule_la_LIBADD = \
 	$(top_builddir)/lib/libCitcomS.la \
 	-l_mpimodule -ljournal $(MPILIBS)
-CitcomSmodule_la_SOURCES = $(sources)
+CitcomSLibmodule_la_SOURCES = $(sources)
 
 PyxMPImodule_la_LDFLAGS = -module -release $(VERSION)
 PyxMPImodule_la_LIBADD =
@@ -70,23 +70,23 @@ INCLUDES = \
 
 sources = \
 	CitcomSmodule.cc \
-	Regional/advdiffu.cc \
-	Regional/advdiffu.h \
-	Regional/bindings.cc \
-	Regional/bindings.h \
-	Regional/exceptions.cc \
-	Regional/exceptions.h \
-	Regional/initial_conditions.cc \
-	Regional/initial_conditions.h \
-	Regional/mesher.cc \
-	Regional/mesher.h \
-	Regional/misc.cc \
-	Regional/misc.h \
-	Regional/outputs.cc \
-	Regional/outputs.h \
-	Regional/setProperties.cc \
-	Regional/setProperties.h \
-	Regional/stokes_solver.cc \
-	Regional/stokes_solver.h
+	advdiffu.cc \
+	advdiffu.h \
+	bindings.cc \
+	bindings.h \
+	exceptions.cc \
+	exceptions.h \
+	initial_conditions.cc \
+	initial_conditions.h \
+	mesher.cc \
+	mesher.h \
+	misc.cc \
+	misc.h \
+	outputs.cc \
+	outputs.h \
+	setProperties.cc \
+	setProperties.h \
+	stokes_solver.cc \
+	stokes_solver.h
 
 ## end of Makefile.am

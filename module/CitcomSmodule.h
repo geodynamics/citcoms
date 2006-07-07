@@ -29,7 +29,9 @@
 #ifndef pyCitcom_CitcomSmodule_h
 #define pyCitcom_CitcomSmodule_h
 
-void pyCitcom_init(const char *name);
+extern "C"
+void
+initCitcomSLib();
 
 #endif // pyCitcom_CitcomSmodule_h
 

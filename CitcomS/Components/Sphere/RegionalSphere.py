@@ -39,7 +39,7 @@ class RegionalSphere(Sphere):
 
 
     def launch(self):
-        from CitcomS.CitcomS import regional_sphere_launch
+        from CitcomSLib import regional_sphere_launch
         regional_sphere_launch(self.all_variables)
 	return
 

@@ -38,14 +38,14 @@ class BC(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import BC_set_properties
+        from CitcomSLib import BC_set_properties
         BC_set_properties(self.all_variables, self.inventory)
         return
 
 
 
     def updatePlateVelocity(self):
-        from CitcomS.CitcomS import BC_update_plate_velocity
+        from CitcomSLib import BC_update_plate_velocity
         BC_update_plate_velocity(self.all_variables)
         return
 

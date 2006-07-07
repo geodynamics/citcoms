@@ -30,16 +30,17 @@ noinst_SCRIPTS =
 if COND_PYRE
 
 noinst_SCRIPTS += citcoms
-noinstPYTHONPATH = $$top_srcdir
 
 if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms
     INTERPRETER = $(bindir)/pycitcoms
     noinstINTERPRETER = $$here/pycitcoms
+    noinstPYTHONPATH = $$top_srcdir
     libCitcomS = $(top_builddir)/lib/libCitcomS.a
 else
     INTERPRETER = $(PYTHON)
     noinstINTERPRETER = $(PYTHON)
+    noinstPYTHONPATH = $$top_srcdir:$$top_srcdir/module/.libs:$$top_srcdir/module/Exchanger/.libs
     libCitcomS = $(top_builddir)/lib/libCitcomS.la
 endif
 
@@ -67,7 +68,7 @@ CitcomSRegional_CPPFLAGS =
 CitcomSRegional_LDADD = $(libCitcomS) $(MPILIBS) $(LIBM)
 
 # citcoms (top-level Python script)
-citcoms: $(srcdir)/citcoms.in
+citcoms: $(srcdir)/citcoms.in Makefile
 	here=`pwd`; \
 	top_srcdir=`cd $(top_srcdir) && pwd`; \
 	sed \
@@ -85,13 +86,13 @@ install-exec-hook:
 CLEANFILES = $(noinst_SCRIPTS)
 EXTRA_DIST = citcoms.in
 
-# pycitcoms (libCitcomS + CitcomSmodule + libExchanger +
-# Exchangermodule + embedded Python interpreter)
+# pycitcoms (libCitcomS + CitcomSLibmodule + libExchanger +
+# ExchangerLibmodule + embedded Python interpreter)
 pycitcoms_SOURCES = pycitcoms.cc
 pycitcoms_LDADD = \
 	$(top_builddir)/module/libPyxMPImodule.a \
-	$(top_builddir)/module/Exchanger/libExchangermodule.a \
-	$(top_builddir)/module/libCitcomSmodule.a \
+	$(top_builddir)/module/Exchanger/libExchangerLibmodule.a \
+	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(libCitcomS) \
 	$(LIBM)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 

@@ -36,11 +36,14 @@
 
 char pyCitcomS_module__doc__[] = "";
 
-void pyCitcom_init(const char *name)
+// Initialization function for the module (*must* be called initCitcomSLib)
+extern "C"
+void
+initCitcomSLib()
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        (char *)name, pyCitcom_methods,
+        "CitcomSLib", pyCitcom_methods,
         pyCitcomS_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
@@ -48,22 +51,14 @@ void pyCitcom_init(const char *name)
 
     // check for errors
     if (PyErr_Occurred()) {
-        Py_FatalError("can't initialize module CitcomS");
+        Py_FatalError("can't initialize module CitcomSLib");
     }
 
     // install the module exceptions
-    pyCitcom_runtimeError = PyErr_NewException("CitcomS.runtime", 0, 0);
+    pyCitcom_runtimeError = PyErr_NewException("CitcomSLib.runtime", 0, 0);
     PyDict_SetItemString(d, "RuntimeException", pyCitcom_runtimeError);
 
     return;
-}
-
-// Initialization function for the module (*must* be called initCitcomS)
-extern "C"
-void
-initCitcomS()
-{
-    pyCitcom_init("CitcomS");
 }
 
 // version

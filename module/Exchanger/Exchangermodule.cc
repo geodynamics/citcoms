@@ -37,11 +37,14 @@
 
 char pyExchanger_module__doc__[] = "";
 
-void PyCitcomSExchanger_init(const char *name)
+// Initialization function for the module (*must* be called initExchanger)
+extern "C"
+void
+initExchangerLib()
 {
     // create the module and add the functions
     PyObject * m = Py_InitModule4(
-        (char *)name, pyExchanger_methods,
+        "ExchangerLib", pyExchanger_methods,
         pyExchanger_module__doc__, 0, PYTHON_API_VERSION);
 
     // get its dictionary
@@ -49,22 +52,14 @@ void PyCitcomSExchanger_init(const char *name)
 
     // check for errors
     if (PyErr_Occurred()) {
-        Py_FatalError("can't initialize module Exchanger");
+        Py_FatalError("can't initialize module ExchangerLib");
     }
 
     // install the module exceptions
-    pyExchanger_runtimeError = PyErr_NewException("Exchanger.runtime", 0, 0);
+    pyExchanger_runtimeError = PyErr_NewException("ExchangerLib.runtime", 0, 0);
     PyDict_SetItemString(d, "RuntimeException", pyExchanger_runtimeError);
 
     return;
-}
-
-// Initialization function for the module (*must* be called initExchanger)
-extern "C"
-void
-initExchanger()
-{
-    PyCitcomSExchanger_init("Exchanger");
 }
 
 // version

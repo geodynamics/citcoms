@@ -27,7 +27,7 @@
 #
 
 from Solver import Solver
-from CitcomS.CitcomS import regional_solver_init
+from CitcomSLib import regional_solver_init
 import journal
 
 

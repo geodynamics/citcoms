@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomS.CitcomS import CPU_time
+from CitcomSLib import CPU_time
 from CitcomS.Components.CitcomComponent import CitcomComponent
 
 class Sphere(CitcomComponent):
@@ -59,7 +59,7 @@ class Sphere(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Sphere_set_properties
+        from CitcomSLib import Sphere_set_properties
         Sphere_set_properties(self.all_variables, self.inventory)
         return
 

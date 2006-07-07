@@ -38,7 +38,7 @@ class Phase(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Phase_set_properties
+        from CitcomSLib import Phase_set_properties
         Phase_set_properties(self.all_variables, self.inventory)
         return
 

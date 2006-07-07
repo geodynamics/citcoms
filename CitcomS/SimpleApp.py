@@ -152,6 +152,8 @@ where <facility> is the facility to which the component is bound; e.g.:
 
     def collectUserInput(self, registry):
         # read INI-style .cfg files
+        import journal
+        error = journal.error(self.name)
         from Components.CodecConfig import CodecConfig
         curator = self.getCurator()
         configRegistry = curator.getTraits(self.name, extraDepositories=[], encoding='cfg')
@@ -169,9 +171,9 @@ where <facility> is the facility to which the component is bound; e.g.:
                     if paramRegistry:
                         self.updateConfiguration(paramRegistry)
                 else:
-                    self.error.log("unknown encoding: %s" % ext)
+                    error.log("unknown encoding: %s" % ext)
             else:
-                self.error.log("cannot open '%s'" % arg)
+                error.log("cannot open '%s'" % arg)
         return
 
 

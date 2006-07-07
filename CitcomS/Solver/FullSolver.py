@@ -27,7 +27,6 @@
 #
 
 from Solver import Solver
-from CitcomS.CitcomS import full_solver_init
 import journal
 
 
@@ -35,6 +34,7 @@ class FullSolver(Solver):
 
 
     def initializeSolver(self):
+        from CitcomSLib import full_solver_init
         full_solver_init(self.all_variables)
 
 

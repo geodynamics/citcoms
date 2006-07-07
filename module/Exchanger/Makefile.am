@@ -24,27 +24,27 @@
 # $Id$
 
 noinst_LIBRARIES =
-pkgpyexec_LTLIBRARIES =
+pyexec_LTLIBRARIES =
 
 if COND_EMBEDDING
     # static library
-    noinst_LIBRARIES += libExchangermodule.a
+    noinst_LIBRARIES += libExchangerLibmodule.a
 else
     # extension module (libtool)
-    pkgpyexec_LTLIBRARIES += Exchangermodule.la
+    pyexec_LTLIBRARIES += ExchangerLibmodule.la
 endif
 
 # static library
-libExchangermodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
-libExchangermodule_a_SOURCES = $(sources)
+libExchangerLibmodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
+libExchangerLibmodule_a_SOURCES = $(sources)
 
 # extension module (libtool)
-Exchangermodule_la_LDFLAGS = -module -release $(VERSION)
-Exchangermodule_la_LIBADD = \
+ExchangerLibmodule_la_LDFLAGS = -module -release $(VERSION)
+ExchangerLibmodule_la_LIBADD = \
 	$(top_builddir)/lib/libCitcomS.la \
 	-lExchanger \
 	-l_mpimodule -ljournal
-Exchangermodule_la_SOURCES = $(sources)
+ExchangerLibmodule_la_SOURCES = $(sources)
 
 CXX = $(MPICXX)
 CXXLD = @CXX@

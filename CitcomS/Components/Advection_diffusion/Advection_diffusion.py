@@ -46,7 +46,7 @@ class Advection_diffusion(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Advection_diffusion_set_properties
+        from CitcomSLib import Advection_diffusion_set_properties
         Advection_diffusion_set_properties(self.all_variables, self.inventory)
         return
 
@@ -59,14 +59,14 @@ class Advection_diffusion(CitcomComponent):
 
 
     def setup(self):
-        from CitcomS.CitcomS import set_convection_defaults
+        from CitcomSLib import set_convection_defaults
         set_convection_defaults(self.all_variables)
 	self._been_here = False
 	return
 
 
     def launch(self):
-        from CitcomS.CitcomS import PG_timestep_init
+        from CitcomSLib import PG_timestep_init
         PG_timestep_init(self.all_variables)
         return
 
@@ -76,14 +76,14 @@ class Advection_diffusion(CitcomComponent):
 
 
     def _solve(self,dt):
-        from CitcomS.CitcomS import PG_timestep_solve
+        from CitcomSLib import PG_timestep_solve
         PG_timestep_solve(self.all_variables, dt)
 	return
 
 
 
     def stable_timestep(self):
-        from CitcomS.CitcomS import stable_timestep
+        from CitcomSLib import stable_timestep
         dt = stable_timestep(self.all_variables)
         return dt
 

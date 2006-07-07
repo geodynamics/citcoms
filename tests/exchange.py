@@ -105,15 +105,15 @@ class TestExchanger(Application):
 
 
     def findLayout(self, layout):
-        import CitcomS.Exchanger
+        import ExchangerLib
         if layout.coarse:
             self.exchanger = self.inventory.coarse
             self.communicator = layout.coarse
-            self.all_variables = CitcomS.Exchanger.CoarsereturnE()
+            self.all_variables = ExchangerLib.CoarsereturnE()
         elif layout.fine:
             self.exchanger = self.inventory.fine
             self.communicator = layout.fine
-            self.all_variables = CitcomS.Exchanger.FinereturnE()
+            self.all_variables = ExchangerLib.FinereturnE()
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan" % layout.rank)
@@ -156,10 +156,10 @@ if __name__ == "__main__":
     import mpi
 
     # testing Exchangermodule.so
-    import CitcomS.Exchanger
+    import ExchangerLib
     if not mpi.world().rank:
-        print CitcomS.Exchanger.copyright()
-        print dir(CitcomS.Exchanger)
+        print ExchangerLib.copyright()
+        print dir(ExchangerLib)
 
     import journal
     #journal.debug("Array2D").activate()

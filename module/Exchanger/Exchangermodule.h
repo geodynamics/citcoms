@@ -29,7 +29,9 @@
 #ifndef pyCitcom_Exchangermodule_h
 #define pyCitcom_Exchangermodule_h
 
-void PyCitcomSExchanger_init(const char *name);
+extern "C"
+void
+initExchangerLib();
 
 #endif // pyCitcom_Exchangermodule_h
 

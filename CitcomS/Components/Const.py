@@ -39,7 +39,7 @@ class Const(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Const_set_properties
+        from CitcomSLib import Const_set_properties
         Const_set_properties(self.all_variables, self.inventory)
         return
 

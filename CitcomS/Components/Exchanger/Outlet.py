@@ -36,8 +36,8 @@ class Outlet(object):
 
 
     def send(self):
-        import CitcomS.Exchanger as Exchanger
-        Exchanger.Outlet_send(self._handle)
+        import ExchangerLib
+        ExchangerLib.Outlet_send(self._handle)
         return
 
 
@@ -47,9 +47,9 @@ class Outlet(object):
 class SVTOutlet(Outlet):
 
     def __init__(self, source, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.SVTOutlet_create(source,
-                                                  all_variables)
+        import ExchangerLib
+        self._handle = ExchangerLib.SVTOutlet_create(source,
+                                                     all_variables)
         return
 
 
@@ -58,9 +58,9 @@ class SVTOutlet(Outlet):
 class TOutlet(Outlet):
 
     def __init__(self, source, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.TOutlet_create(source,
-                                                all_variables)
+        import ExchangerLib
+        self._handle = ExchangerLib.TOutlet_create(source,
+                                                   all_variables)
         return
 
 
@@ -69,18 +69,18 @@ class TOutlet(Outlet):
 class VTOutlet(Outlet):
 
     def __init__(self, source, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.VTOutlet_create(source,
-                                                 all_variables)
+        import ExchangerLib
+        self._handle = ExchangerLib.VTOutlet_create(source,
+                                                    all_variables)
         return
 
 
 class VOutlet(Outlet):
 
     def __init__(self, source, all_variables):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.VOutlet_create(source,
-                                                all_variables)
+        import ExchangerLib
+        self._handle = ExchangerLib.VOutlet_create(source,
+                                                   all_variables)
         return
 
 
@@ -89,10 +89,10 @@ class TractionOutlet(Outlet):
 
 
     def __init__(self, source, all_variables, mode='F'):
-        import CitcomS.Exchanger as Exchanger
-        self._handle = Exchanger.TractionOutlet_create(source,
-                                                       all_variables,
-                                                       mode)
+        import ExchangerLib
+        self._handle = ExchangerLib.TractionOutlet_create(source,
+                                                          all_variables,
+                                                          mode)
         return
 
 """

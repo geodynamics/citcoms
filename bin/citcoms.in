@@ -36,15 +36,7 @@ for directory in path:
     if directory:
         sys.path.insert(1, directory)
 
-try:
-    # if we are embedding, insert the extension module in the
-    # 'CitcomS' package...
-    import builtin_Exchanger, builtin_CitcomS
-    sys.modules['CitcomS.Exchanger'] = builtin_Exchanger
-    sys.modules['CitcomS.CitcomS'] = builtin_CitcomS
-    from PyxMPI import MPI_Init, MPI_Finalize
-except ImportError:
-    from CitcomS.PyxMPI import MPI_Init, MPI_Finalize
+from PyxMPI import MPI_Init, MPI_Finalize
 
 inParallel = False
 for arg in sys.argv:

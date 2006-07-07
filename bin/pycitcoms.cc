@@ -32,13 +32,11 @@
 #include "Exchangermodule.h"
 
 PyMODINIT_FUNC initPyxMPI(void);
-static void init_builtin_Exchanger() { PyCitcomSExchanger_init("builtin_Exchanger"); }
-static void init_builtin_CitcomS()   { pyCitcom_init("builtin_CitcomS"); }
 
 struct _inittab inittab[] = {
     { "PyxMPI", initPyxMPI },
-    { "builtin_Exchanger", init_builtin_Exchanger },
-    { "builtin_CitcomS", init_builtin_CitcomS },
+    { "ExchangerLib", initExchangerLib },
+    { "CitcomSLib", initCitcomSLib },
     { 0, 0 }
 };
 

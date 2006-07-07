@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomS.CitcomS import CPU_time, output
+from CitcomSLib import CPU_time, output
 from pyre.simulations.Solver import Solver as BaseSolver
 import journal
 
@@ -54,7 +54,7 @@ class Solver(BaseSolver):
 
     def initialize(self, application):
 
-        from CitcomS.CitcomS import citcom_init, global_default_values, set_signal
+        from CitcomSLib import citcom_init, global_default_values, set_signal
 
         BaseSolver.initialize(self, application)
 
@@ -275,7 +275,7 @@ class Solver(BaseSolver):
 
     def setProperties(self):
  
-        from CitcomS.CitcomS import Solver_set_properties
+        from CitcomSLib import Solver_set_properties
         
         Solver_set_properties(self.all_variables, self.inventory)
 

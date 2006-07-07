@@ -40,14 +40,14 @@ class Incompressible(CitcomComponent):
 
 
     def run(self):
-        from CitcomS.CitcomS import general_stokes_solver
+        from CitcomSLib import general_stokes_solver
         general_stokes_solver(self.all_variables)
 	return
 
 
 
     def setup(self):
-        from CitcomS.CitcomS import set_cg_defaults, set_mg_defaults, set_mg_el_defaults
+        from CitcomSLib import set_cg_defaults, set_mg_defaults, set_mg_el_defaults
         if self.inventory.Solver == "cgrad":
             set_cg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid":
@@ -59,7 +59,7 @@ class Incompressible(CitcomComponent):
 
 
     def launch(self):
-        from CitcomS.CitcomS import general_stokes_solver_setup
+        from CitcomSLib import general_stokes_solver_setup
         general_stokes_solver_setup(self.all_variables)
         return
 
@@ -71,7 +71,7 @@ class Incompressible(CitcomComponent):
 
 
     def setProperties(self):
-        from CitcomS.CitcomS import Incompressible_set_properties
+        from CitcomSLib import Incompressible_set_properties
         Incompressible_set_properties(self.all_variables, self.inventory)
         return
 
