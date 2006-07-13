@@ -23,24 +23,6 @@
 
 # $Id$
 
-nodist_bin_SCRIPTS = \
-	citcomsfull.sh \
-	citcomsregional.sh \
-	coupledcitcoms.sh
-do_subst = sed \
-	-e 's|[@]CITCOMS[@]|$(bindir)/citcoms|g'
-citcomsfull.sh: $(srcdir)/citcomsfull.sh.in
-	$(do_subst) < $(srcdir)/citcomsfull.sh.in > $@ || (rm -f $@ && exit 1)
-citcomsregional.sh: $(srcdir)/citcomsregional.sh.in
-	$(do_subst) < $(srcdir)/citcomsregional.sh.in > $@ || (rm -f $@ && exit 1)
-coupledcitcoms.sh: $(srcdir)/coupledcitcoms.sh.in
-	$(do_subst) < $(srcdir)/coupledcitcoms.sh.in > $@ || (rm -f $@ && exit 1)
-CLEANFILES = $(nodist_bin_SCRIPTS)
-EXTRA_DIST = \
-	citcomsfull.sh.in \
-	citcomsregional.sh.in \
-	coupledcitcoms.sh.in
-
 # C++ tests
 TESTS = $(EXTRA_PROGRAMS)
 INSTALL_TESTS = $(EXTRA_PROGRAMS)
@@ -57,7 +39,7 @@ LDADD = \
 	$(MPILIBS)
 CC = $(MPICC)
 
-EXTRA_DIST += \
+EXTRA_DIST = \
 	asap.py \
 	exchange.py \
 	hrothgar.py \
