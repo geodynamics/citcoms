@@ -101,10 +101,7 @@ class SimpleApp(Application):
 
 
     def usage(self):
-        name = 'citcomsregional.sh'
-        if self.inventory.solver.name == 'full':
-            name = 'citcomsfull.sh'
-        print 'usage: %s [<property>=<value>] [<facility>.<property>=<value>] ...' % name
+        print 'usage: citcoms [<property>=<value>] [<facility>.<property>=<value>] ...'
         self.showUsage()
         print """\
 For more information about a particular component:
@@ -131,15 +128,20 @@ where <facility> is the facility to which the component is bound; e.g.:
 
 
     def _getPrivateDepositoryLocations(self):
+        from os.path import dirname, isdir, join
         list = []
-        try:
-            from config import makefile
-            list.append(makefile['pkgsysconfdir'])
-        except ImportError, KeyError:
+        etc = join(dirname(dirname(__file__)), 'etc')
+        if isdir(etc):
             # The user is running directly from the source directory.
-            from os.path import dirname, join
-            etc = join(dirname(dirname(__file__)), 'etc')
             list.append(etc)
+        else:
+            try:
+                from config import makefile
+                pkgsysconfdir = makefile['pkgsysconfdir']
+                if isdir(pkgsysconfdir):
+                    list.append(pkgsysconfdir)
+            except ImportError, KeyError:
+                pass
         return list
 
 
