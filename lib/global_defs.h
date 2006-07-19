@@ -39,6 +39,10 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include "mpi.h"
 
+#ifdef HAVE_HDF5_H
+#include "hdf5.h"
+#endif
+
 #ifdef __cplusplus
 
 extern "C" {
@@ -781,12 +785,17 @@ struct DATA {
 };
 
 struct All_variables {
+
 #include "solver.h"
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "temperature_descriptions.h"
 #include "advection.h"
 #include "tracer_defs.h"
+
+#ifdef HAVE_HDF5_H
+#include "hdf5_info.h"
+#endif
 
     FILE *fp;
     FILE *fptime;
