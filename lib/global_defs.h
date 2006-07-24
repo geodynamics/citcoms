@@ -39,7 +39,7 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include "mpi.h"
 
-#ifdef HAVE_HDF5_H
+#ifdef USE_HDF5
 #include "hdf5.h"
 #endif
 
@@ -631,27 +631,33 @@ struct CONTROL {
     int post_p;
     int post_topo;
     int SLAB;
+
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
     int CART2pt5D;
     int CART3D;
     int AXI;
+    
     char SOLVER_TYPE[20]; /* one of ... */
     int DIRECT;
     int CONJ_GRAD;
     int NMULTIGRID;
     int EMULTIGRID;
     int DIRECTII;
+    
     char NODE_SPACING[20]; /* turns into ... */
     int GRID_TYPE;
     int COMPRESS;
     int AVS;
     int CONMAN;
+    
     int read_density;
     int read_slab;
     int read_slabgeoid;
-    int tracer;
+
+    int output_format;  /* 0: ascii, 1: hdf5 */
     int pseudo_free_surf;
+    int tracer;
 
 
     double theta_min, theta_max, fi_min, fi_max;
@@ -793,7 +799,7 @@ struct All_variables {
 #include "advection.h"
 #include "tracer_defs.h"
 
-#ifdef HAVE_HDF5_H
+#ifdef USE_HDF5
 #include "hdf5_info.h"
 #endif
 
@@ -912,6 +918,9 @@ struct All_variables {
     void (* transform)(void*);
 
     float (* node_space_function[3])(void*);
+
+    /* function pointer for choosing between various output routines */
+    void (* output)(struct All_variables *, int);
 
   /* the following function pointers are for exchanger */
   void (* exchange_node_d)(struct All_variables *, double**, int);
