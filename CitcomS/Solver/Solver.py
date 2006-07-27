@@ -71,7 +71,7 @@ class Solver(BaseSolver):
         self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
 	inv = self.inventory
-        
+
         inv.mesher.initialize(all_variables)
         inv.tsolver.initialize(all_variables)
         inv.vsolver.initialize(all_variables)
@@ -256,27 +256,10 @@ class Solver(BaseSolver):
         return
 
 
-    def timesave(self, t, dt, steps):
-        '''output time information
-        '''
-
-        time = CPU_time()
-        msg = "%d %.4e %.4e %.4e %.4e" % (steps,
-                                          t,
-                                          dt,
-                                          time - self.start_cpu_time,
-                                          time - self.cpu_time)
-        print >> self.fptime, msg
-        self.fptime.flush()
-
-        self.cpu_time = time
-        return
-
-
     def setProperties(self):
- 
+
         from CitcomSLib import Solver_set_properties
-        
+
         Solver_set_properties(self.all_variables, self.inventory)
 
 	inv = self.inventory

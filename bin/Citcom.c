@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <mpi.h>
@@ -76,7 +76,7 @@ int main(argc,argv)
 
   world = MPI_COMM_WORLD;
   E = citcom_init(&world);             /* allocate global E and do initializaion here */
-  
+
 #ifdef CITCOMS_SOLVER_FULL
   full_solver_init(E);
 #else
@@ -85,7 +85,6 @@ int main(argc,argv)
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);
-  open_time(E);
 
   cpu_time_on_vp_it = CPU_time0();
   initial_time = cpu_time_on_vp_it - time;
@@ -182,9 +181,7 @@ int main(argc,argv)
 
     if (E->parallel.me == 0)  {
       fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
-      /* added a time output CPC 6/18/00 */
-      fprintf(E->fptime,"%d %.4e %.4e %.4e %.4e\n",E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,CPU_time0()-start_time,CPU_time0()-time);
-/*       fprintf(stderr,"%d %.4e %.4e %.4e %.4e\n",E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,CPU_time0()-start_time,CPU_time0()-time); */
+
       time = CPU_time0();
     }
 
@@ -204,7 +201,9 @@ int main(argc,argv)
   }
 
   fclose(E->fp);
-  fclose(E->fptime);
+
+  if (E->fptime)
+    fclose(E->fptime);
 
   parallel_process_termination();
 

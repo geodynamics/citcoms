@@ -56,11 +56,13 @@ extern "C" {
     void mass_matrix(struct All_variables*);
     void open_info(struct All_variables*);
     void open_log(struct All_variables*);
+    void open_time(struct All_variables*);
     void read_mat_from_file(struct All_variables*);
     void set_elapsed_time(struct All_variables*);
     void set_sphere_harmonics (struct All_variables*);
     void set_starting_age(struct All_variables*);
     void tracer_initial_settings(struct All_variables*);
+    double CPU_time0();
 
 }
 
@@ -71,9 +73,13 @@ void sphere_launch(struct All_variables *E)
     // copied from read_instructions()
 {
 
+    E->monitor.cpu_time_at_last_cycle =
+        E->monitor.cpu_time_at_start = CPU_time0();
+
     E->control.PID = get_process_identifier();
 
     open_log(E);
+    open_time(E);
     if (E->control.verbose)
       open_info(E);
 

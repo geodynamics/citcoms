@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #if !defined(CitcomS_global_defs_h)
@@ -580,6 +580,8 @@ struct MONITOR {
     float  vdotv;
     float  nond_av_heat_fl;
     float  nond_av_adv_hfl;
+    float  cpu_time_at_start;
+    float  cpu_time_at_last_cycle;
     float  cpu_time_elapsed;
     float  cpu_time_on_vp_it;
     float  cpu_time_on_forces;
@@ -637,20 +639,20 @@ struct CONTROL {
     int CART2pt5D;
     int CART3D;
     int AXI;
-    
+
     char SOLVER_TYPE[20]; /* one of ... */
     int DIRECT;
     int CONJ_GRAD;
     int NMULTIGRID;
     int EMULTIGRID;
     int DIRECTII;
-    
+
     char NODE_SPACING[20]; /* turns into ... */
     int GRID_TYPE;
     int COMPRESS;
     int AVS;
     int CONMAN;
-    
+
     int read_density;
     int read_slab;
     int read_slabgeoid;

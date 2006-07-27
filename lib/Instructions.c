@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Set up the finite element problem to suit: returns with all memory */
@@ -83,14 +83,15 @@ void read_instructions(struct All_variables *E, char *filename)
     void set_elapsed_time();
 
 
-    double start_time, CPU_time0();
+    double CPU_time0();
     double global_vdot();
 
     /* =====================================================
        Global interuption handling routine defined once here
        =====================================================  */
 
-    if (E->parallel.me==0) start_time=CPU_time0();
+    E->monitor.cpu_time_at_last_cycle =
+        E->monitor.cpu_time_at_start = CPU_time0();
 
     set_signal();
 
@@ -107,6 +108,7 @@ void read_instructions(struct All_variables *E, char *filename)
     read_initial_settings(E);
 
     open_log(E);
+    open_time(E);
     if (E->control.verbose)
       open_info(E);
 
@@ -163,7 +165,8 @@ void read_instructions(struct All_variables *E, char *filename)
 
     general_stokes_solver_setup(E);
 
-    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",CPU_time0()-start_time);
+    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
+				   CPU_time0()-E->monitor.cpu_time_at_start);
 
     construct_surf_det (E);
     construct_bdry_det (E);
@@ -937,8 +940,12 @@ void open_time(struct All_variables *E)
 {
   char timeoutput[255];
 
-  sprintf(timeoutput,"%s.time",E->control.data_file);
-  E->fptime = output_open(timeoutput);
+  if (E->parallel.me == 0) {
+    sprintf(timeoutput,"%s.time",E->control.data_file);
+    E->fptime = output_open(timeoutput);
+  }
+  else
+    E->fptime = NULL;
 
   return;
 }

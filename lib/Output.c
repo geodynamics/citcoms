@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Routine to process the output of the finite element cycles
@@ -45,6 +45,7 @@ void output_surf_botm_pseudo_surf(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
+void output_time(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -80,6 +81,9 @@ void output(struct All_variables *E, int cycles)
 
   /* disable horizontal average output   by Tan2 */
   /* output_ave_r(E, cycles); */
+
+  /* information about simulation time and wall clock time */
+  output_time(E, cycles);
 
   return;
 }
@@ -431,3 +435,22 @@ void output_tracer(struct All_variables *E, int cycles)
 }
 
 
+void output_time(struct All_variables *E, int cycles)
+{
+  double CPU_time0();
+
+  double current_time = CPU_time0();
+
+  if (E->parallel.me == 0) {
+    fprintf(E->fptime,"%d %.4e %.4e %.4e %.4e\n",
+	    cycles,
+	    E->monitor.elapsed_time,
+	    E->advection.timestep,
+	    current_time - E->monitor.cpu_time_at_start,
+	    current_time - E->monitor.cpu_time_at_last_cycle);
+  }
+
+  E->monitor.cpu_time_at_last_cycle = current_time;
+
+  return;
+}

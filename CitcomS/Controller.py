@@ -134,7 +134,6 @@ class Controller(SimulationController):
 
     def save(self):
         step = self.step
-        self.solver.timesave(self.clock, self.dt, step)
         self.solver.save(step, self.inventory.monitoringFrequency)
         return
 
