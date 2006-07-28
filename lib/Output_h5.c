@@ -70,7 +70,10 @@ static void h5create_array(hid_t loc_id,
                            hsize_t *dims,
                            hsize_t *maxdims,
                            hsize_t *chunk_dims);
-static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
+
+static void h5create_field(hid_t loc_id,
+                           const char *name,
+                           hid_t type_id,
                            int tdim, int xdim, int ydim, int zdim,
                            int components);
 
@@ -478,6 +481,11 @@ static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
     }
 }
 
+static void h5append_field(hid_t loc_id, hid_t type_id)
+{
+
+}
+
 static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
     h5create_field(loc_id, "coord", type_id, 0, nodex, nodey, nodez, 3);
@@ -574,9 +582,9 @@ void h5output_coord(struct All_variables *E)
 
     /* create memory dataspace */
     rank = 4;
-    dims[0] = E->mesh.nprocx;
-    dims[1] = E->mesh.nprocy;
-    dims[2] = E->mesh.nprocz;
+    dims[0] = E->mesh.nox;
+    dims[1] = E->mesh.noy;
+    dims[2] = E->mesh.noz;
     dims[3] = 3;
     memspace = H5Screate_simple(rank, dims, NULL);
 
@@ -606,11 +614,11 @@ void h5output_coord(struct All_variables *E)
     
     /* release resources */
     free(E->hdf5.coord);
-    H5Pclose(dxpl_id);
-    H5Sclose(memspace);
-    H5Sclose(filespace);
-    H5Dclose(dataset);
-    H5Gclose(cap_group);
+    status = H5Pclose(dxpl_id);
+    status = H5Sclose(memspace);
+    status = H5Sclose(filespace);
+    status = H5Dclose(dataset);
+    status = H5Gclose(cap_group);
 
 #endif
 }
