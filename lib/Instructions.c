@@ -76,6 +76,7 @@ void read_instructions(struct All_variables *E, char *filename)
     void setup_parser();
     void shutdown_parser();
     void open_log();
+    void open_time();
     void open_info();
 
     void get_initial_elapsed_time();
