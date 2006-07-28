@@ -46,8 +46,6 @@ class Solver(BaseSolver):
         self.remotePlus = []
 
 	self.start_cpu_time = 0
-        self.cpu_time = 0
-        self.fptime = None
         return
 
 
@@ -67,8 +65,6 @@ class Solver(BaseSolver):
 
         # information about clock time
 	self.start_cpu_time = CPU_time()
-        self.cpu_time = self.start_cpu_time
-        self.fptime = open("%s.time" % self.inventory.datafile, "w")
 
 	inv = self.inventory
 
