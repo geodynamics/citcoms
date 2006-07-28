@@ -448,6 +448,8 @@ void output_time(struct All_variables *E, int cycles)
 	    E->advection.timestep,
 	    current_time - E->monitor.cpu_time_at_start,
 	    current_time - E->monitor.cpu_time_at_last_cycle);
+
+    fflush(E->fptime);
   }
 
   E->monitor.cpu_time_at_last_cycle = current_time;
