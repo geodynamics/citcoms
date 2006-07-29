@@ -373,9 +373,58 @@ static void h5create_array(hid_t loc_id,
     status = H5Dclose(dataset);
 }
 
-static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
-                           int tdim, int xdim, int ydim, int zdim,
-                           int components)
+static void h5write_array_hyperslab(hid_t dset_id,
+                                    hid_t mem_type_id,
+                                    const void *data,
+                                    int rank,
+                                    hsize_t *size,
+                                    hsize_t *memdims,
+                                    hsize_t *offset,
+                                    hsize_t *stride,
+                                    hsize_t *count,
+                                    hsize_t *block)
+{
+    hid_t dataset;
+    hid_t filespace;
+    hid_t memspace;
+    hid_t dxpl_id;
+
+    herr_t status;
+    
+    /* extend the dataset if necessary */
+    if(size != NULL)
+    {
+        status = H5Dextend(dataset, size);
+    }
+
+    /* get file dataspace */
+    filespace = H5Dget_space(dataset);
+
+    /* dataset transfer property list */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    // status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+
+    /* create memory dataspace */
+    memspace = H5Screate_simple(rank, memdims, NULL);
+
+    /* hyperslab selection */
+    status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                 offset, stride, count, block);
+
+    /* write the data to the hyperslab */
+    status = H5Dwrite(dataset, mem_type_id, memspace, filespace, dxpl_id, data);
+    
+    /* release resources */
+    status = H5Pclose(dxpl_id);
+    status = H5Sclose(memspace);
+    status = H5Sclose(filespace);
+}
+
+static void h5create_field(hid_t loc_id,
+                           const char *name,
+                           hid_t type_id,
+                           int tdim, int xdim, int ydim, int zdim, int cdim)
 {
     int rank = 0;
     hsize_t dims[5] = {0,0,0,0,0};
@@ -436,12 +485,12 @@ static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
         }
 
         /* if field has components, update last dimension */
-        if (components > 0)
+        if (cdim > 0)
         {
             rank += 1;
-            dims[rank-1] = components;
-            maxdims[rank-1] = components;
-            chunkdims[rank-1] = components;
+            dims[rank-1] = cdim;
+            maxdims[rank-1] = cdim;
+            chunkdims[rank-1] = cdim;
         }
         /* finally, create the array */
         h5create_array(loc_id, name, type_id, rank, dims, maxdims, chunk_dims);
@@ -470,10 +519,10 @@ static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
         }
 
         /* if field has components, update last dimension */
-        if (components > 0)
+        if (cdim > 0)
         {
             rank += 1;
-            dims[rank-1] = components;
+            dims[rank-1] = cdim;
         }
         
         /* finally, create the array */
@@ -481,9 +530,145 @@ static void h5create_field(hid_t loc_id, const char *name, hid_t type_id,
     }
 }
 
-static void h5append_field(hid_t loc_id, hid_t type_id)
+static void h5write_field(hid_t dset_id,
+                          hid_t mem_type_id,
+                          const void *data,
+                          int tdim, int xdim, int ydim, int zdim, int cdim,
+                          int nx, int ny, int nz,
+                          int px, int py, int pz)
 {
+    hid_t dataset;
+    herr_t status;
 
+    int rank;
+    hsize_t size[5]    = {0,0,0,0,0};
+    //hsize_t memdims[5] = {0,0,0,0,0};
+    hsize_t offset[5]  = {0,0,0,0,0};
+    hsize_t stride[5]  = {1,1,1,1,1};
+    hsize_t count[5]   = {1,1,1,1,1};
+    hsize_t block[5]   = {0,0,0,0,0}; // XXX: always equal to memdims[]?
+
+    dataset = H5Dopen(loc_id, name);
+    
+    if (tdim > 0)
+    {
+        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
+        {
+            rank = 1 + 3;
+
+            size[0] = tdim;
+            size[1] = xdim;
+            size[2] = ydim;
+            size[3] = zdim;
+
+            offset[0] = tdim;
+            offset[1] = px*nx;
+            offset[2] = py*ny;
+            offset[3] = pz*nz;
+
+            block[0] = 1;
+            block[1] = nx;
+            block[2] = ny;
+            block[3] = nz;
+        }
+        else if ((xdim > 0) && (ydim > 0))
+        {
+            rank = 1 + 2;
+
+            size[0] = tdim;
+            size[1] = xdim;
+            size[2] = ydim;
+
+            offset[0] = tdim;
+            offset[1] = px*nx;
+            offset[2] = py*ny;
+
+            block[0] = 1;
+            block[1] = nx;
+            block[2] = ny;
+
+        }
+        else if (zdim > 0)
+        {
+            rank = 1 + 1;
+
+            size[0] = tdim;
+            size[1] = zdim;
+
+            offset[0] = tdim;
+            offset[1] = pz*nz;
+
+            block[0] = 1;
+            block[1] = nz;
+        }
+
+        if (cdim > 0)
+        {
+            rank += 1;
+            size[rank-1] = cdim;
+            offset[rank-1] = 0;
+            block[rank-1] = cdim;
+        }
+        
+        h5write_array_hyperslab(dataset, mem_type_id, data,
+                                rank, size, block,
+                                offset, stride, count, block);
+    }
+    else
+    {
+
+        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
+        {
+            rank = 3;
+
+            size[0] = xdim;
+            size[1] = ydim;
+            size[2] = zdim;
+
+            offset[0] = px*nx;
+            offset[1] = py*ny;
+            offset[2] = pz*nz;
+
+            block[0] = nx;
+            block[1] = ny;
+            block[2] = nz;
+        }
+        else if ((xdim > 0) && (ydim > 0))
+        {
+            rank = 2;
+
+            size[0] = xdim;
+            size[1] = ydim;
+
+            offset[0] = px*nx;
+            offset[1] = py*ny;
+
+            block[0] = nx;
+            block[1] = ny;
+        }
+        else if (zdim > 0)
+        {
+            rank = 1;
+
+            size[0] = zdim;
+            offset[0] = pz*nz;
+            block[0] = nz;
+        }
+
+        if (cdim > 0)
+        {
+            rank += 1;
+            size[rank-1] = cdim;
+            offset[rank-1] = 0;
+            block[rank-1] = cdim;
+        }
+
+        h5write_array_hyperslab(dataset, mem_type_id, data,
+                                rank, NULL, block,
+                                offset, stride, count, block);
+    }
+
+    status = H5Dclose(dataset);
 }
 
 static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
