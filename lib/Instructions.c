@@ -362,7 +362,7 @@ void read_initial_settings(struct All_variables *E)
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
-  input_float("layerd",&(E->data.layer_km),"2800.0",m);
+  input_float("layerd",&(E->data.layer_km),"6371.0",m);
   input_float("gravacc",&(E->data.grav_acc),"9.81",m);
   input_float("thermexp",&(E->data.therm_exp),"3.28e-5",m);
   input_float("cp",&(E->data.Cp),"1200.0",m);
