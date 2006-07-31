@@ -38,6 +38,7 @@
 #include "initial_temperature.h"
 #include "lith_age.h"
 #include "output.h"
+#include "output_h5.h"
 #include "parallel_related.h"
 #include "parsing.h"
 #include "phase_change.h"
@@ -75,9 +76,7 @@ void read_instructions(struct All_variables *E, char *filename)
 
     void setup_parser();
     void shutdown_parser();
-    void open_log();
-    void open_time();
-    void open_info();
+    void output_init();
 
     void get_initial_elapsed_time();
     void set_starting_age();
@@ -108,11 +107,7 @@ void read_instructions(struct All_variables *E, char *filename)
     global_default_values(E);
     read_initial_settings(E);
 
-    open_log(E);
-    open_time(E);
-    if (E->control.verbose)
-      open_info(E);
-
+    output_init(E);
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     (E->solver.global_derived_values)(E);
 
@@ -960,4 +955,42 @@ void open_info(struct All_variables *E)
   E->fp_out = output_open(output_file);
 
   return;
+}
+
+
+void output_init(struct  All_variables *E)
+{
+  open_log(E);
+  open_time(E);
+  if (E->control.verbose)
+    open_info(E);
+
+  //DEBUG
+  //strcpy(E->control.output_format, "hdf5");
+  //fprintf(stderr, "output format is %s\n", E->control.output_format);
+  if (strcmp(E->control.output_format, "ascii") == 0)
+    E->output = output;
+  else if (strcmp(E->control.output_format, "hdf5") == 0)
+    E->output = h5output;
+  else {
+    // indicate error here
+    if (E->parallel.me == 0) {
+      fprintf(stderr, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
+      fprintf(E->fp, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
+      parallel_process_termination(E);
+    }
+  }
+}
+
+
+
+void output_finalize(struct  All_variables *E)
+{
+  fclose(E->fp);
+
+  if (E->fptime)
+    fclose(E->fptime);
+
+  // close HDF5 output
+
 }

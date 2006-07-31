@@ -56,6 +56,7 @@ int main(argc,argv)
   void read_mat_from_file();
   void open_time();
   void output();
+  void output_finalize();
   void output_pseudo_surf();
 
   float dot();
@@ -160,7 +161,7 @@ int main(argc,argv)
 	  output_pseudo_surf(E, E->monitor.solution_cycles);
       }
       else
-	output(E, E->monitor.solution_cycles);
+	(E->output)(E, E->monitor.solution_cycles);
     }
 
     if(E->control.mat_control==1)
@@ -200,11 +201,7 @@ int main(argc,argv)
 	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
 
-  fclose(E->fp);
-
-  if (E->fptime)
-    fclose(E->fptime);
-
+  output_finalize(E);
   parallel_process_termination();
 
   return(0);

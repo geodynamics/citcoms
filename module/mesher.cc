@@ -54,9 +54,7 @@ extern "C" {
     int get_process_identifier();
     void lith_age_init(struct All_variables *E);
     void mass_matrix(struct All_variables*);
-    void open_info(struct All_variables*);
-    void open_log(struct All_variables*);
-    void open_time(struct All_variables*);
+    void output_init(struct All_variables*);
     void read_mat_from_file(struct All_variables*);
     void set_elapsed_time(struct All_variables*);
     void set_sphere_harmonics (struct All_variables*);
@@ -78,11 +76,7 @@ void sphere_launch(struct All_variables *E)
 
     E->control.PID = get_process_identifier();
 
-    open_log(E);
-    open_time(E);
-    if (E->control.verbose)
-      open_info(E);
-
+    output_init(E);
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
     (E->solver.global_derived_values)(E);
 

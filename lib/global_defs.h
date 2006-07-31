@@ -657,7 +657,7 @@ struct CONTROL {
     int read_slab;
     int read_slabgeoid;
 
-    int output_format;  /* 0: ascii, 1: hdf5 */
+    char  output_format[100];  /* 0: ascii, 1: hdf5 */
     int pseudo_free_surf;
     int tracer;
 
