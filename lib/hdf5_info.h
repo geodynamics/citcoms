@@ -33,8 +33,13 @@
 
 struct HDF5_INFO
 {
+    char filename[100];
+
     /* Keep a reference to the open hdf5 output file */
-    hid_t   file_id;
+    hid_t file_id;
+
+    /* Default type used is H5T_NATIVE_FLOAT */
+    hid_t type_id;
 
     /* Group names under which to store the appropriate data,
      * represented by an array of strings. For a regional
@@ -49,25 +54,23 @@ struct HDF5_INFO
     /* Temporary data buffers to use in dataset writes...
      * Note that most of these buffers correspond to time-slices
      * over a filespace in the HDF5 file.
+     *
+     * vector3d: coord, velocity
+     * scalar3d: temperature, viscosity, pressure
+     * vector2d: surf_coord, surf_velocity
+     * scalar2d: surf_heatflux, surf_topography
+     * scalar1d: horiz_avg_temperature, horiz_rms_vz, horiz_rms_vxy
+     *
      */
     
     double *connectivity;           /* shape (nel,8) */
     double *material;               /* shape (nel,) */
-
-    double *coord;                  /* shape (nx,ny,nz,3) */
-    double *velocity;               /* shape (nx,ny,nz,3) */
-    double *temperature;            /* shape (nx,ny,nz) */
-    double *viscosity;              /* shape (nx,ny,nz) */
-    double *pressure;               /* shape (nx,ny,nz) */
     double *stress;                 /* shape (nx,ny,nz,6) */
 
-    double *surf_coord;             /* shape (nx,ny,3) */
-    double *surf_velocity;          /* shape (nx,ny,3) */
-    double *surf_heatflux;          /* shape (nx,ny) */
-    double *surf_topography;        /* shape (nx,ny) */
-    
-    double *horiz_avg_temperature;  /* shape (nz,) */
-    double *horiz_rms_vz;           /* shape (nz,) */
-    double *horiz_rms_vxy;          /* shape (nz,) */
+    double *vector3d;               /* shape (nx,ny,nz,3) */
+    double *scalar3d;               /* shape (nx,ny,nz) */
+    double *vector2d;               /* shape (nx,ny,2) */
+    double *scalar2d;               /* shape (nx,ny) */
+    double *scalar1d;               /* shape (nz,) */
 
 } hdf5;
