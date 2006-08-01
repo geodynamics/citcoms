@@ -50,9 +50,6 @@ class Param(CitcomComponent):
         import pyre.inventory
 
 
-        output_format = pyre.inventory.str("output_format", default="ascii",
-                            validator=pyre.inventory.choice(["ascii", "hdf5"]))
-
         file_vbcs = pyre.inventory.bool("file_vbcs", default=False)
         vel_bound_file = pyre.inventory.str("vel_bound_file", default="bvel.dat")
 

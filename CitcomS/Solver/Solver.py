@@ -319,6 +319,8 @@ class Solver(Component):
 
         stokes_flow_only = pyre.inventory.bool("stokes_flow_only", default=False)
 
+        output_format = pyre.inventory.str("output_format", default="ascii",
+                            validator=pyre.inventory.choice(["ascii", "hdf5"]))
         verbose = pyre.inventory.bool("verbose", default=False)
         see_convergence = pyre.inventory.bool("see_convergence", default=True)
 
