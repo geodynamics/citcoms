@@ -142,7 +142,7 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
         return PyErr_Format(pyCitcom_runtimeError,
                             "%s: 'mpi::Communicator *' argument is null",
                             pyCitcom_citcom_init__name__);
-        
+
     MPI_Comm world = comm->handle();
 
     // Allocate global pointer E
@@ -308,19 +308,51 @@ PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_return_times__doc__[] = "";
-char pyCitcom_return_times__name__[] = "return_times";
+char pyCitcom_return_dt__doc__[] = "";
+char pyCitcom_return_dt__name__[] = "return_dt";
 
-PyObject * pyCitcom_return_times(PyObject *self, PyObject *args)
+PyObject * pyCitcom_return_dt(PyObject *self, PyObject *args)
 {
     PyObject *obj;
 
-    if (!PyArg_ParseTuple(args, "O:return_times", &obj))
+    if (!PyArg_ParseTuple(args, "O:return_dt", &obj))
         return NULL;
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
-    return Py_BuildValue("ff", E->monitor.elapsed_time, E->advection.timestep);
+    return Py_BuildValue("f", E->advection.timestep);
+}
+
+
+char pyCitcom_return_step__doc__[] = "";
+char pyCitcom_return_step__name__[] = "return_step";
+
+PyObject * pyCitcom_return_step(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:return_step", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    return Py_BuildValue("i", E->advection.timesteps);
+}
+
+
+char pyCitcom_return_t__doc__[] = "";
+char pyCitcom_return_t__name__[] = "return_t";
+
+PyObject * pyCitcom_return_t(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+
+    if (!PyArg_ParseTuple(args, "O:return_t", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    return Py_BuildValue("f", E->monitor.elapsed_time);
 }
 
 

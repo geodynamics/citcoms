@@ -122,10 +122,20 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Visc_update_material__doc__},
 
-    {pyCitcom_return_times__name__,
-     pyCitcom_return_times,
+    {pyCitcom_return_dt__name__,
+     pyCitcom_return_dt,
      METH_VARARGS,
-     pyCitcom_return_times__doc__},
+     pyCitcom_return_dt__doc__},
+
+    {pyCitcom_return_step__name__,
+     pyCitcom_return_step,
+     METH_VARARGS,
+     pyCitcom_return_step__doc__},
+
+    {pyCitcom_return_t__name__,
+     pyCitcom_return_t,
+     METH_VARARGS,
+     pyCitcom_return_t__doc__},
 
     // from advdiffu.h
 

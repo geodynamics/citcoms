@@ -31,22 +31,25 @@ def controller(name="controller", facility="controller"):
     return Controller(name, facility)
 
 
-from pyre.simulations.SimulationController import SimulationController
+from pyre.components.Component import Component
 import journal
 
-class Controller(SimulationController):
+class Controller(Component):
 
 
     def __init__(self, name, facility):
-        SimulationController.__init__(self, name, facility)
+        Component.__init__(self, name, facility)
 
-        self.step = 0
-        self.clock = 0.0
-        self.dt = 0.0
         self.done = False
         self.solver = None
         return
 
+
+    # Set these attributes as read-only properties, so that they are
+    # always in accordance with their counterparts in the C code
+    clock = property(lambda self: self.solver.t)
+    dt = property(lambda self: self.solver.dt)
+    step = property(lambda self: self.solver.step)
 
 
     def initialize(self, app):
@@ -70,7 +73,6 @@ class Controller(SimulationController):
         """explicit time loop"""
 
         if (self.step + 1) >= steps:
-            self.step += 1
             self.endSimulation()
             return
 
@@ -79,19 +81,11 @@ class Controller(SimulationController):
             # notify solvers we are starting a new timestep
             self.startTimestep()
 
-            # synchronize boundary information
-            #self.applyBoundaryConditions()
-
             # compute an acceptable timestep
-            self.dt = self.stableTimestep()
+            dt = self.stableTimestep()
 
             # advance
-            self.advance(self.dt)
-
-            # update simulation clock and step number
-            from CitcomSLib import return_times
-            self.clock, self.dt = return_times(self.solver.all_variables)
-            self.step += 1
+            self.advance(dt)
 
             # notify solver we finished a timestep
             self.endTimestep(totalTime, steps)
@@ -111,6 +105,20 @@ class Controller(SimulationController):
         return
 
 
+    def startTimestep(self):
+        self.solver.newStep()
+        return
+
+
+    def stableTimestep(self):
+        dt = self.solver.stableTimestep()
+        return dt
+
+
+    def advance(self, dt):
+        self.solver.advance(dt)
+        return
+
 
     def endTimestep(self, totalTime, steps):
         # are we done?
@@ -120,21 +128,26 @@ class Controller(SimulationController):
             self.done = True
 
         # solver can terminate time marching by returning True
-        self.done = self.solver.endTimestep(self.clock, self.step, self.done)
+        self.done = self.solver.endTimestep(self.done)
 
         return
 
 
 
     def endSimulation(self):
-        self.solver.endSimulation(self.step)
+        self.solver.endSimulation()
         return
 
 
 
     def save(self):
-        step = self.step
-        self.solver.save(step, self.inventory.monitoringFrequency)
+        self.solver.save(self.inventory.monitoringFrequency)
         return
 
 
+
+    class Inventory(Component.Inventory):
+
+        import pyre.inventory
+
+        monitoringFrequency = pyre.inventory.int("monitoringFrequency", default=100)

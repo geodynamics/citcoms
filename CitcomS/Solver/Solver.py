@@ -26,16 +26,16 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomSLib import CPU_time, output
-from pyre.simulations.Solver import Solver as BaseSolver
+from CitcomSLib import CPU_time, output, return_dt, return_t, return_step
+from pyre.components.Component import Component
 import journal
 
 
-class Solver(BaseSolver):
 
+class Solver(Component):
 
     def __init__(self, name, facility="solver"):
-        BaseSolver.__init__(self, name, facility)
+        Component.__init__(self, name, facility)
 
         self.all_variables = None
         self.communicator = None
@@ -49,12 +49,31 @@ class Solver(BaseSolver):
         return
 
 
+    def _dt(self):
+        '''get the value of dt from the C code'''
+        return return_dt(self.all_variables)
+
+
+    def _t(self):
+        '''get the value of t from the C code'''
+        return return_t(self.all_variables)
+
+
+    def _step(self):
+        '''get the value of step from the C code'''
+        return return_step(self.all_variables)
+
+
+    # Set these attributes as read-only properties, so that they are
+    # always in accordance with their counterparts in the C code
+    t = property(_t)
+    dt = property(_dt)
+    step = property(_step)
+
 
     def initialize(self, application):
 
         from CitcomSLib import citcom_init, global_default_values, set_signal
-
-        BaseSolver.initialize(self, application)
 
         comm = application.solverCommunicator
         all_variables = citcom_init(comm.handle())
@@ -104,10 +123,7 @@ class Solver(BaseSolver):
         return
 
 
-
     def launch(self, application):
-        BaseSolver.launch(self, application)
-
         mesher = self.inventory.mesher
         mesher.setup()
 
@@ -170,8 +186,7 @@ class Solver(BaseSolver):
 
 
 
-    def newStep(self, t, step):
-        BaseSolver.newStep(self, t, step)
+    def newStep(self):
         if self.coupler:
             self.coupler.newStep()
         return
@@ -179,7 +194,6 @@ class Solver(BaseSolver):
 
 
     #def applyBoundaryConditions(self):
-        #BaseSolver.applyBoundaryConditions(self)
         #if self.coupler:
         #    self.coupler.applyBoundaryConditions()
         #return
@@ -194,14 +208,11 @@ class Solver(BaseSolver):
             # negotiate with other solver(s)
             dt = self.coupler.stableTimestep(dt)
 
-        BaseSolver.stableTimestep(self, dt)
         return dt
 
 
 
     def advance(self, dt):
-        BaseSolver.advance(self, dt)
-
         self.solveTemperature(dt)
         self.solveVelocities()
         self.solveAdditional()
@@ -210,28 +221,25 @@ class Solver(BaseSolver):
 
 
 
-    def endTimestep(self, t, steps, done):
-        BaseSolver.endTimestep(self, t)
-
+    def endTimestep(self, done):
         self.inventory.visc.updateMaterial()
         self.inventory.bc.updatePlateVelocity()
 
         if self.coupler:
-            done = self.coupler.endTimestep(steps, done)
+            done = self.coupler.endTimestep(self.step, done)
 
         return done
 
 
-    def endSimulation(self, step):
-        BaseSolver.endSimulation(self, step, self.t)
-
+    def endSimulation(self):
+        step = self.step
         total_cpu_time = CPU_time() - self.start_cpu_time
 
         rank = self.communicator.rank
         if not rank:
             import sys
             print >> sys.stderr, "Average cpu time taken for velocity step = %f" % (
-                total_cpu_time / step )
+                total_cpu_time / (step+1) )
 
         if self.coupler:
             output(self.all_variables, step)
@@ -241,7 +249,9 @@ class Solver(BaseSolver):
 
 
 
-    def save(self, step, monitoringFrequency):
+    def save(self, monitoringFrequency):
+        step = self.step
+
         # for non-coupled run, output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):
             output(self.all_variables, step)
@@ -275,7 +285,7 @@ class Solver(BaseSolver):
 
 
 
-    class Inventory(BaseSolver.Inventory):
+    class Inventory(Component.Inventory):
 
         import pyre.inventory
 

@@ -111,10 +111,22 @@ extern "C"
 PyObject * pyCitcom_Visc_update_material(PyObject *, PyObject *);
 
 
-extern char pyCitcom_return_times__name__[];
-extern char pyCitcom_return_times__doc__[];
+extern char pyCitcom_return_dt__name__[];
+extern char pyCitcom_return_dt__doc__[];
 extern "C"
-PyObject * pyCitcom_return_times(PyObject *, PyObject *);
+PyObject * pyCitcom_return_dt(PyObject *, PyObject *);
+
+
+extern char pyCitcom_return_step__name__[];
+extern char pyCitcom_return_step__doc__[];
+extern "C"
+PyObject * pyCitcom_return_step(PyObject *, PyObject *);
+
+
+extern char pyCitcom_return_t__name__[];
+extern char pyCitcom_return_t__doc__[];
+extern "C"
+PyObject * pyCitcom_return_t(PyObject *, PyObject *);
 
 
 #endif
