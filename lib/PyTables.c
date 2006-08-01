@@ -9,6 +9,11 @@
 #include "hdf5.h"
 #include "pytables.h"
 
+
+/****************************************************************************
+ * Source: H5ATTR.c                                                         *
+ ****************************************************************************/
+
 /* Function  : find_attr
  * Purpose   : operator function used by find_attribute
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
@@ -68,15 +73,15 @@ herr_t find_attribute(hid_t loc_id, const char *attr_name)
 }
 
 
-/* Function: set_attribute_string
+/* Function: set_attribute
  * Purpose : Creates and writes a string attribute named attr_name
  *           and attaches it to the object specified by obj_id
  * Return  : Success 0, Failure -1
  * Comments: If the attribute already exists, it is overwritten.
  */
-herr_t set_attribute_string(hid_t obj_id,
-                            const char *attr_name,
-                            const char *attr_data)
+herr_t set_attribute(hid_t obj_id,
+                     const char *attr_name,
+                     const char *attr_data)
 {
     hid_t   attr_type;
     hid_t   attr_size;
@@ -136,6 +141,10 @@ out:
 }
 
 
+/****************************************************************************
+ * Source: H5ARRAY.c                                                        *
+ ****************************************************************************/
+
 herr_t make_array(hid_t loc_id,
                   const char *dset_name,
                   const int rank,
@@ -180,20 +189,20 @@ herr_t make_array(hid_t loc_id,
      */
 
     /* Attach the CLASS attribute */
-    status = set_attribute_string(dataset_id, "CLASS", "ARRAY");
+    status = set_attribute(dataset_id, "CLASS", "ARRAY");
     if(status < 0) goto out;
 
     /* Attach the FLAVOR attribute */
     /* TODO: how do you specify numpy instead? */
-    status = set_attribute_string(dataset_id, "FLAVOR", "Numeric");
+    status = set_attribute(dataset_id, "FLAVOR", "Numeric");
     if(status < 0) goto out;
 
     /* Attach the VERSION attribute */
-    status = set_attribute_string(dataset_id, "VERSION", "2.3");
+    status = set_attribute(dataset_id, "VERSION", "2.3");
     if(status < 0) goto out;
 
     /* Attach the TITLE attribute (TODO: use argument instead) */
-    status = set_attribute_string(dataset_id, "TITLE", "Numeric array!");
+    status = set_attribute(dataset_id, "TITLE", "Numeric array!");
     if(status < 0) goto out;
 
     /* Release resources */
