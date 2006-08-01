@@ -56,7 +56,7 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 	    else
 		    assert(0);
     else
-	    output(E, cycles);
+	    (E->output)(E, cycles);
 
 
     Py_INCREF(Py_None);

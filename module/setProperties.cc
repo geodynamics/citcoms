@@ -286,6 +286,8 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     if (not m)
 	std::cout << "#Param.inventory:" << std::endl;
 
+    getStringProperty(properties, "output_format", E->control.output_format, m);
+
     getScalarProperty(properties, "file_vbcs", E->control.vbcs_file, m);
     getStringProperty(properties, "vel_bound_file", E->control.velocity_boundary_file, m);
 
