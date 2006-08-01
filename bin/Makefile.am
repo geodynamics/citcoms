@@ -62,10 +62,10 @@ endif
 # legacy drivers
 CitcomSFull_SOURCES = Citcom.c
 CitcomSFull_CPPFLAGS = -DCITCOMS_SOLVER_FULL
-CitcomSFull_LDADD = $(libCitcomS) $(MPILIBS) $(LIBM)
+CitcomSFull_LDADD = $(libCitcomS) $(MPILIBS) $(LIBHDF5) $(LIBM)
 CitcomSRegional_SOURCES = Citcom.c
 CitcomSRegional_CPPFLAGS =
-CitcomSRegional_LDADD = $(libCitcomS) $(MPILIBS) $(LIBM)
+CitcomSRegional_LDADD = $(libCitcomS) $(MPILIBS) $(LIBHDF5) $(LIBM)
 
 # citcoms (top-level Python script)
 citcoms: $(srcdir)/citcoms.in Makefile
@@ -94,6 +94,7 @@ pycitcoms_LDADD = \
 	$(top_builddir)/module/Exchanger/libExchangerLibmodule.a \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(libCitcomS) \
+	$(LIBHDF5) \
 	$(LIBM)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)

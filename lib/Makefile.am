@@ -40,7 +40,7 @@ libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
 libCitcomS_a_SOURCES = $(sources)
 
 # shared library (libtool)
-libCitcomS_la_LIBADD = $(LIBM)
+libCitcomS_la_LIBADD = $(LIBM) $(LIBHDF5)
 libCitcomS_la_LDFLAGS = -release $(VERSION)
 libCitcomS_la_SOURCES = $(sources)
 
@@ -63,6 +63,7 @@ sources = \
 	General_matrix_functions.c \
 	global_defs.h \
 	Global_operations.c \
+	hdf5_info.h \
 	Initial_temperature.c \
 	initial_temperature.h \
 	Instructions.c \
@@ -73,6 +74,8 @@ sources = \
 	Nodal_mesh.c \
 	Output.c \
 	output.h \
+	Output_h5.c \
+	output_h5.h \
 	Pan_problem_misc_functions.c \
 	parallel_related.h \
 	Parallel_util.c \

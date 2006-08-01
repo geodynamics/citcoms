@@ -46,6 +46,12 @@ AC_ARG_WITH([pyre],
     [want_pyre="$withval"],
     [want_pyre=yes])
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
+AC_ARG_WITH([hdf5],
+    [AC_HELP_STRING([--with-hdf5],
+        [enable HDF5 output])],
+    [want_hdf5="$enableval"],
+    [want_hdf5=no])
+AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AC_ARG_ENABLE([embedding],
     [AC_HELP_STRING([--enable-embedding],
         [embed Python with CitcomS in a single executable @<:@default=yes@:>@])],
@@ -140,6 +146,18 @@ if test -z "$LIBM"; then
     ])
 fi
 AC_SUBST(LIBM)
+
+AC_ARG_VAR(LIBHDF5, [HDF5 library])
+if test -z "$LIBHDF5"; then
+    AC_CHECK_FUNC(H5Fopen, , [
+        AC_CHECK_LIB(hdf5, H5Fopen, [
+            LIBHDF5="-lhdf5"
+        ], [
+            AC_MSG_ERROR([HDF5 library not found; try setting LIBHDF5])
+        ])
+    ])
+fi
+AC_SUBST(LIBHDF5)
 
 AC_CONFIG_FILES([Makefile
                  bin/Makefile
