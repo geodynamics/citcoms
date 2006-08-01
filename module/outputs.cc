@@ -37,6 +37,13 @@
 #include "output.h"
 
 
+extern "C" {
+
+    void output_finalize(struct  All_variables *E);
+
+}
+
+
 char pyCitcom_output__doc__[] = "";
 char pyCitcom_output__name__[] = "output";
 
@@ -58,6 +65,26 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
     else
 	    (E->output)(E, cycles);
 
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_output_finalize__doc__[] = "";
+char pyCitcom_output_finalize__name__[] = "output_finalize";
+
+PyObject * pyCitcom_output_finalize(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    int cycles;
+
+    if (!PyArg_ParseTuple(args, "O:output_finalize", &obj))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    output_finalize(E);
 
     Py_INCREF(Py_None);
     return Py_None;

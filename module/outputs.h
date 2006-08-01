@@ -34,6 +34,11 @@ extern char pyCitcom_output__doc__[];
 extern "C"
 PyObject * pyCitcom_output(PyObject *, PyObject *);
 
+extern char pyCitcom_output_finalize__name__[];
+extern char pyCitcom_output_finalize__doc__[];
+extern "C"
+PyObject * pyCitcom_output_finalize(PyObject *, PyObject *);
+
 #endif
 
 // version

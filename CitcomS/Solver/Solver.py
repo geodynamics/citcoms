@@ -244,7 +244,7 @@ class Solver(Component):
         if self.coupler:
             output(self.all_variables, step)
 
-	#finalize()
+        self.finalize()
         return
 
 
@@ -283,6 +283,11 @@ class Solver(Component):
 
         return
 
+
+    def finalize(self):
+        from CitcomSLib import output_finalize
+        output_finalize(self.all_variables)
+        return
 
 
     class Inventory(Component.Inventory):
