@@ -615,11 +615,14 @@ struct CONTROL {
     int ORTHO,ORTHOZ;   /* indicates levels of mesh symmetry */
     char B_is_good[MAX_LEVELS];  /* general information controlling program flow */
     char Ahat_is_good[MAX_LEVELS];  /* general information controlling program flow */
+
     char old_P_file[100];
     char data_file[100];
     char post_topo_file[100];
     char slabgeoid_file[100];
 
+    char output_format[10];  /* ascii or hdf5 */
+    char which_output[1000]; /* comma-delimited list of objects to output */
     char which_data_files[1000];
     char which_horiz_averages[1000];
     char which_running_data[1000];
@@ -657,9 +660,11 @@ struct CONTROL {
     int read_slab;
     int read_slabgeoid;
 
-    char  output_format[100];  /* 0: ascii, 1: hdf5 */
     int pseudo_free_surf;
     int tracer;
+    int viscosity;    /* whether to output viscosity */
+    int stress;       /* whether to output stress */
+    int pressure;     /* whether to output pressure */
 
 
     double theta_min, theta_max, fi_min, fi_max;
