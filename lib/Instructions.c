@@ -986,11 +986,15 @@ void output_init(struct  All_variables *E)
 
 void output_finalize(struct  All_variables *E)
 {
+  void h5output_close(struct  All_variables *E);
+
   fclose(E->fp);
 
   if (E->fptime)
     fclose(E->fptime);
 
   // close HDF5 output
+  if (strcmp(E->control.output_format, "hdf5") == 0)
+    h5output_close(E);
 
 }

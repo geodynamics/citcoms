@@ -132,8 +132,11 @@ extern void get_STD_topo(struct All_variables *, float**, float**,
 
 void h5output(struct All_variables *E, int cycles)
 {
+    void h5output_open(struct  All_variables *E);
+    
     printf("h5output()\n");
     if (cycles == 0) {
+        h5output_open(E);
         h5output_coord(E);
         h5output_material(E);
     }
