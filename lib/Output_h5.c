@@ -299,34 +299,34 @@ void h5output_open(struct All_variables *E)
         h5create_coord(cap_group, type_id, nodex, nodey, nodez);
         h5create_velocity(cap_group, type_id, nodex, nodey, nodez);
         h5create_temperature(cap_group, type_id, nodex, nodey, nodez);
-        h5create_viscosity(cap_group, type_id, nodex, nodey, nodez);
-        h5create_pressure(cap_group, type_id, nodex, nodey, nodez);
-        h5create_stress(cap_group, type_id, nodex, nodey, nodez);
+        //h5create_viscosity(cap_group, type_id, nodex, nodey, nodez);
+        //h5create_pressure(cap_group, type_id, nodex, nodey, nodez);
+        //h5create_stress(cap_group, type_id, nodex, nodey, nodez);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
          ********************************************************************/
 
-        surf_group = h5create_group(cap_group, "surf", (size_t)0);
+        //surf_group = h5create_group(cap_group, "surf", (size_t)0);
 
-        h5create_surf_coord(surf_group, type_id, nodex, nodey);
-        h5create_surf_velocity(surf_group, type_id, nodex, nodey); 
-        h5create_surf_heatflux(surf_group, type_id, nodex, nodey);
-        h5create_surf_topography(surf_group, type_id, nodex, nodey);
-        status = H5Gclose(surf_group);
+        //h5create_surf_coord(surf_group, type_id, nodex, nodey);
+        //h5create_surf_velocity(surf_group, type_id, nodex, nodey); 
+        //h5create_surf_heatflux(surf_group, type_id, nodex, nodey);
+        //h5create_surf_topography(surf_group, type_id, nodex, nodey);
+        //status = H5Gclose(surf_group);
 
 
         /********************************************************************
          * Create /cap/botm/ group                                          *
          ********************************************************************/
 
-        botm_group = h5create_group(cap_group, "botm", (size_t)0);
+        //botm_group = h5create_group(cap_group, "botm", (size_t)0);
 
-        h5create_surf_coord(botm_group, type_id, nodex, nodey);
-        h5create_surf_velocity(botm_group, type_id, nodex, nodey); 
-        h5create_surf_heatflux(botm_group, type_id, nodex, nodey);
-        h5create_surf_topography(botm_group, type_id, nodex, nodey);
-        status = H5Gclose(botm_group);
+        //h5create_surf_coord(botm_group, type_id, nodex, nodey);
+        //h5create_surf_velocity(botm_group, type_id, nodex, nodey); 
+        //h5create_surf_heatflux(botm_group, type_id, nodex, nodey);
+        //h5create_surf_topography(botm_group, type_id, nodex, nodey);
+        //status = H5Gclose(botm_group);
 
         /* release resources */
         status = H5Gclose(cap_group);
@@ -436,8 +436,11 @@ static hid_t h5open_cap(struct All_variables *E)
 {
     hid_t cap_group = H5Gopen(E->hdf5.file_id,
                               E->hdf5.cap_groups[E->hdf5.capid]);
-    printf("Opening capid %d: %s\n", E->hdf5.capid,
+    ///* DEBUG
+    printf("\th5open_cap()\n");
+    printf("\t\tOpening capid %d: %s\n", E->hdf5.capid,
            E->hdf5.cap_groups[E->hdf5.capid]);
+    // */
     return cap_group;
 }
 
@@ -455,23 +458,23 @@ static void h5create_dataset(hid_t loc_id,
     herr_t status;
 
     ///* DEBUG
-    printf("h5create_dataset()\n");
-    printf("\tname=\"%s\"\n", name);
-    printf("\trank=%d\n", rank);
-    printf("\tdims={%d,%d,%d,%d,%d}\n",
+    printf("\t\th5create_dataset()\n");
+    printf("\t\t\tname=\"%s\"\n", name);
+    printf("\t\t\trank=%d\n", rank);
+    printf("\t\t\tdims={%d,%d,%d,%d,%d}\n",
         (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
     if(maxdims != NULL) 
-        printf("\tmaxdims={%d,%d,%d,%d,%d}\n",
+        printf("\t\t\tmaxdims={%d,%d,%d,%d,%d}\n",
             (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
             (int)maxdims[3], (int)maxdims[4]);
     else
-        printf("\tmaxdims=NULL\n");
+        printf("\t\t\tmaxdims=NULL\n");
     if(chunkdims != NULL)
-        printf("\tchunkdims={%d,%d,%d,%d,%d}\n",
+        printf("\t\t\tchunkdims={%d,%d,%d,%d,%d}\n",
             (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
             (int)chunkdims[3], (int)chunkdims[4]);
     else
-        printf("\tchunkdims=NULL\n");
+        printf("\t\t\tchunkdims=NULL\n");
     // */
 
     /* create the dataspace for the dataset */
@@ -642,23 +645,23 @@ static void h5create_field(hid_t loc_id,
     }
 
     ///* DEBUG
-    printf("h5create_field()\n");
-    printf("\tname=\"%s\"\n", name);
-    printf("\tshape=(%d,%d,%d,%d,%d)\n",
+    printf("\th5create_field()\n");
+    printf("\t\tname=\"%s\"\n", name);
+    printf("\t\tshape=(%d,%d,%d,%d,%d)\n",
            tdim, xdim, ydim, zdim, cdim);
-    printf("\trank=%d\n", rank);
-    printf("\tdims={%d,%d,%d,%d,%d}\n",
+    printf("\t\trank=%d\n", rank);
+    printf("\t\tdims={%d,%d,%d,%d,%d}\n",
             (int)dims[0], (int)dims[1], (int)dims[2],
             (int)dims[3], (int)dims[4]);
-    printf("\tmaxdims={%d,%d,%d,%d,%d}\n",
+    printf("\t\tmaxdims={%d,%d,%d,%d,%d}\n",
             (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
             (int)maxdims[3], (int)maxdims[4]);
     if (tdim >= 0)
-        printf("\tchunkdims={%d,%d,%d,%d,%d}\n",
+        printf("\t\tchunkdims={%d,%d,%d,%d,%d}\n",
             (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
             (int)chunkdims[3], (int)chunkdims[4]);
     else
-        printf("\tchunkdims=NULL\n");
+        printf("\t\tchunkdims=NULL\n");
     // */
 
 
@@ -687,27 +690,27 @@ static void h5write_dataset(hid_t dset_id,
     herr_t status;
     
     ///* DEBUG
-    printf("h5write_dataset()\n");
-    printf("\trank    = %d\n", rank);
+    printf("\th5write_dataset()\n");
+    printf("\t\trank    = %d\n", rank);
     if(size != NULL)
-        printf("\tsize    = {%d,%d,%d,%d,%d}\n",
+        printf("\t\tsize    = {%d,%d,%d,%d,%d}\n",
             (int)size[0], (int)size[1], (int)size[2],
             (int)size[3], (int)size[4]);
     else
-        printf("\tsize    = NULL\n");
-    printf("\tmemdims = {%d,%d,%d,%d,%d}\n",
+        printf("\t\tsize    = NULL\n");
+    printf("\t\tmemdims = {%d,%d,%d,%d,%d}\n",
         (int)memdims[0], (int)memdims[1], (int)memdims[2],
         (int)memdims[3], (int)memdims[4]);
-    printf("\toffset  = {%d,%d,%d,%d,%d}\n",
+    printf("\t\toffset  = {%d,%d,%d,%d,%d}\n",
         (int)offset[0], (int)offset[1], (int)offset[2],
         (int)offset[3], (int)offset[4]);
-    printf("\tstride  = {%d,%d,%d,%d,%d}\n",
+    printf("\t\tstride  = {%d,%d,%d,%d,%d}\n",
         (int)stride[0], (int)stride[1], (int)stride[2],
         (int)stride[3], (int)stride[4]);
-    printf("\tcount   = {%d,%d,%d,%d,%d}\n",
+    printf("\t\tcount   = {%d,%d,%d,%d,%d}\n",
         (int)count[0], (int)count[1], (int)count[2],
         (int)count[3], (int)count[4]);
-    printf("\tblock   = {%d,%d,%d,%d,%d}\n",
+    printf("\t\tblock   = {%d,%d,%d,%d,%d}\n",
         (int)block[0], (int)block[1], (int)block[2],
         (int)block[3], (int)block[4]);
     // */
@@ -715,31 +718,31 @@ static void h5write_dataset(hid_t dset_id,
     /* extend the dataset if necessary */
     if(size != NULL)
     {
-        printf("\tExtending dataset\n");
+        printf("\t\tExtending dataset\n");
         status = H5Dextend(dset_id, size);
     }
 
     /* get file dataspace */
-    printf("\tGetting file dataspace from dataset\n");
+    printf("\t\tGetting file dataspace from dataset\n");
     filespace = H5Dget_space(dset_id);
 
     /* create memory dataspace */
-    printf("\tCreating memory dataspace\n");
+    printf("\t\tCreating memory dataspace\n");
     memspace = H5Screate_simple(rank, memdims, NULL);
 
     /* hyperslab selection */
-    printf("\tSelecting hyperslab in file dataspace\n");
+    printf("\t\tSelecting hyperslab in file dataspace\n");
     status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                  offset, stride, count, block);
 
     /* dataset transfer property list */
-    printf("\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
+    printf("\t\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
     //status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
     /* write the data to the hyperslab */
-    printf("\tWriting data to the hyperslab\n");
+    printf("\t\tWriting data to the hyperslab\n");
     status = H5Dwrite(dset_id, mem_type_id, memspace, filespace, dxpl_id, data);
     
     /* release resources */
@@ -875,7 +878,7 @@ static void h5write_field(hid_t dset_id,
 
 static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "coord", type_id, 0, nodex, nodey, nodez, 3);
+    h5create_field(loc_id, "coord", type_id, -1, nodex, nodey, nodez, 3);
 }
 
 static void h5create_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
@@ -905,7 +908,7 @@ static void h5create_stress(hid_t loc_id, hid_t type_id, int nodex, int nodey, i
 
 static void h5create_surf_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey)
 {
-    h5create_field(loc_id, "coord", type_id, 0, nodex, nodey, 0, 2);
+    h5create_field(loc_id, "coord", type_id, -1, nodex, nodey, 0, 2);
 }
 
 static void h5create_surf_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey)
@@ -940,40 +943,55 @@ void h5output_coord(struct All_variables *E)
     hid_t dataset;
     herr_t status;
 
-    int m, n;
     int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+    int p, px, py, pz;
 
-    int nx = E->lmesh.nox;
-    int ny = E->lmesh.noy;
-    int nz = E->lmesh.noz;
+    int nodex = E->mesh.nox;
+    int nodey = E->mesh.noy;
+    int nodez = E->mesh.noz;
 
-    int px = E->parallel.me_loc[1];
-    int py = E->parallel.me_loc[2];
-    int pz = E->parallel.me_loc[3];
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
 
+    p  = E->parallel.me;
+    px = E->parallel.me_loc[1];
+    py = E->parallel.me_loc[2];
+    pz = E->parallel.me_loc[3];
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = (p == nprocx-1) ? nx : nx-1;
+    my = (p == nprocy-1) ? ny : ny-1;
+    mz = (p == nprocz-1) ? nz : nz-1;
+    
     /* prepare the data -- change citcom yxz order to xyz order */
-    for(n = 0; n < E->lmesh.nno; n++)
+    for(i = 0; i < mx; i++)
     {
-        /* recall that for citcom: n = k + i*nz + j*nz*nx */
-        k = n % nz;
-        i = (n / nz) % nx;
-        j = (n / (nz * nx));
-        m = k + j*nz + i*nz*ny; /* using xyz order */
-        E->hdf5.vector3d[3*m + 0] = E->sx[1][1][n+1];
-        E->hdf5.vector3d[3*m + 1] = E->sx[1][2][n+1];
-        E->hdf5.vector3d[3*m + 2] = E->sx[1][3][n+1];
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                E->hdf5.vector3d[3*m+0] = E->sx[1][1][n+1];
+                E->hdf5.vector3d[3*m+1] = E->sx[1][2][n+1];
+                E->hdf5.vector3d[3*m+2] = E->sx[1][3][n+1];
+            }
+        }
     }
 
     printf("h5output_coord()\n");
 
-    return; // XXX: remove!
-
     /* write to dataset */
     cap_group = h5open_cap(E);
     dataset = H5Dopen(cap_group, "coord");
-    h5write_field(dataset, E->hdf5.type_id, E->hdf5.vector3d,
-                  0, E->mesh.nox, E->mesh.noy, E->mesh.noz, 3,
-                  E);
+    h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.vector3d,
+                  -1, nodex, nodey, nodez, 3, E);
 
     /* release resources */
     status = H5Dclose(dataset);
@@ -989,39 +1007,54 @@ void h5output_velocity(struct All_variables *E, int cycles)
     hid_t dataset;
     herr_t status;
 
-    int m, n;
     int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+    int p, px, py, pz;
 
-    int nx = E->lmesh.nox;
-    int ny = E->lmesh.noy;
-    int nz = E->lmesh.noz;
+    int nodex = E->mesh.nox;
+    int nodey = E->mesh.noy;
+    int nodez = E->mesh.noz;
 
-    int px = E->parallel.me_loc[1];
-    int py = E->parallel.me_loc[2];
-    int pz = E->parallel.me_loc[3];
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
 
-    for(n = 0; n < E->lmesh.nno; n++)
+    p  = E->parallel.me;
+    px = E->parallel.me_loc[1];
+    py = E->parallel.me_loc[2];
+    pz = E->parallel.me_loc[3];
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = (p == nprocx-1) ? nx : nx-1;
+    my = (p == nprocy-1) ? ny : ny-1;
+    mz = (p == nprocz-1) ? nz : nz-1;
+    
+    /* prepare the data -- change citcom yxz order to xyz order */
+    for(i = 0; i < mx; i++)
     {
-        /* recall that for citcom: n = k + i*nz + j*nz*nx */
-        k = n % nz;
-        i = (n / nz) % nx;
-        j = (n / (nz * nx));
-        m = k + j*nz + i*nz*ny; /* using xyz order */
-        E->hdf5.vector3d[3*m + 0] = E->sphere.cap[1].V[1][n+1];
-        E->hdf5.vector3d[3*m + 1] = E->sphere.cap[1].V[2][n+1];
-        E->hdf5.vector3d[3*m + 2] = E->sphere.cap[1].V[3][n+1];
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                E->hdf5.vector3d[3*m+0] = E->sphere.cap[1].V[1][n+1];
+                E->hdf5.vector3d[3*m+1] = E->sphere.cap[1].V[2][n+1];
+                E->hdf5.vector3d[3*m+2] = E->sphere.cap[1].V[3][n+1];
+            }
+        }
     }
 
     printf("h5output_velocity()\n");
 
-    return; // XXX: remove!
-
-
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "velocity");
-    h5write_field(dataset, E->hdf5.type_id, E->hdf5.vector3d,
-                  cycles+1, E->mesh.nox, E->mesh.noy, E->mesh.noz, 3,
-                  E);
+    h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.vector3d,
+                  cycles+1, nodex, nodey, nodez, 3, E);
 
     /* release resources */
     status = H5Dclose(dataset);
@@ -1036,37 +1069,52 @@ void h5output_temperature(struct All_variables *E, int cycles)
     hid_t dataset;
     herr_t status;
 
-    int m, n;
     int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+    int p, px, py, pz;
 
-    int nx = E->lmesh.nox;
-    int ny = E->lmesh.noy;
-    int nz = E->lmesh.noz;
+    int nodex = E->mesh.nox;
+    int nodey = E->mesh.noy;
+    int nodez = E->mesh.noz;
 
-    int px = E->parallel.me_loc[1];
-    int py = E->parallel.me_loc[2];
-    int pz = E->parallel.me_loc[3];
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
 
-    for(n = 0; n < E->lmesh.nno; n++)
+    p  = E->parallel.me;
+    px = E->parallel.me_loc[1];
+    py = E->parallel.me_loc[2];
+    pz = E->parallel.me_loc[3];
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = (p == nprocx-1) ? nx : nx-1;
+    my = (p == nprocy-1) ? ny : ny-1;
+    mz = (p == nprocz-1) ? nz : nz-1;
+    
+    /* prepare the data -- change citcom yxz order to xyz order */
+    for(i = 0; i < mx; i++)
     {
-        /* recall that for citcom: n = k + i*nz + j*nz*nx */
-        k = n % nz;
-        i = (n / nz) % nx;
-        j = (n / (nz * nx));
-        m = k + j*nz + i*nz*ny; /* using xyz order */
-        E->hdf5.scalar3d[m] = E->T[1][n+1];
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                E->hdf5.scalar3d[m] = E->T[1][n+1];
+            }
+        }
     }
 
     printf("h5output_temperature()\n");
 
-    return; // XXX: remove!
-
-
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "temperature");
-    h5write_field(dataset, E->hdf5.type_id, E->hdf5.scalar3d,
-                  cycles+1, E->mesh.nox, E->mesh.noy, E->mesh.noz, 0,
-                  E);
+    h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.scalar3d,
+                  cycles+1, nodex, nodey, nodez, 0, E);
 
     /* release resources */
     status = H5Dclose(dataset);
