@@ -59,6 +59,11 @@ void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
 void h5output_ave_r(struct All_variables *, int);
 
 #ifdef USE_HDF5
+static hid_t h5create_file(const char *filename,
+                           unsigned flags,
+                           hid_t fcpl_id,
+                           hid_t fapl_id);
+
 static hid_t h5create_group(hid_t loc_id,
                             const char *name,
                             size_t size_hint);
@@ -208,8 +213,9 @@ void h5output_open(struct All_variables *E)
 {
 #ifdef USE_HDF5
 
-    hid_t file_id;                  /* HDF5 file identifier */
-    hid_t fapl_id;                  /* file access property list identifier */
+    hid_t file_id;      /* HDF5 file identifier */
+    hid_t fcpl_id;      /* file creation property list identifier */
+    hid_t fapl_id;      /* file access property list identifier */
 
     char *cap_name;
     hid_t cap_group;                /* group identifier for caps */
@@ -232,14 +238,19 @@ void h5output_open(struct All_variables *E)
 
     printf("h5output_open()\n");
 
+    /* determine filename */
+    strncpy(E->hdf5.filename, E->control.data_file, (size_t)99);
+    strncat(E->hdf5.filename, ".h5", (size_t)99);
+
+    /* set up file creation property list with defaults */
+    fcpl_id = H5P_DEFAULT;
+
     /* set up file access property list with parallel I/O access */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     status = H5Pset_fapl_mpio(fapl_id, comm, info);
-    //fapl_id = H5P_DEFAULT;
 
     /* create a new file collectively and release property list identifier */
-    snprintf(E->hdf5.filename, (size_t)99, "%s.h5", E->control.data_file);
-    file_id = H5Fcreate(E->hdf5.filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = h5create_file(E->hdf5.filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
     H5Pclose(fapl_id);
 
     printf("\tfilename = \"%s\"\n", E->hdf5.filename);
@@ -352,6 +363,54 @@ void h5output_close(struct All_variables *E)
  *****************************************************************************/
 #ifdef USE_HDF5
 
+/* Function to create an HDF5 file compatible with PyTables.
+ *
+ * To enable parallel I/O access, use something like the following:
+ *
+ * hid_t file_id;
+ * hid_t fcpl_id, fapl_id;
+ * herr_t status;
+ *
+ * MPI_Comm comm = MPI_COMM_WORLD;
+ * MPI_Info info = MPI_INFO_NULL;
+ *
+ * ...
+ *
+ * fcpl_id = H5P_DEFAULT;
+ *
+ * fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+ * status  = H5Pset_fapl_mpio(fapl_id, comm, info);
+ *
+ * file_id = h5create_file(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
+ * status  = H5Pclose(fapl_id);
+ */
+static hid_t h5create_file(const char *filename,
+                           unsigned flags,
+                           hid_t fcpl_id,
+                           hid_t fapl_id)
+{
+    hid_t file_id;
+    hid_t root;
+
+    herr_t status;
+
+    /* Create the HDF5 file */
+    file_id = H5Fcreate(filename, flags, fcpl_id, fapl_id);
+
+    /* Write necessary attributes to root group for PyTables compatibility */
+    root = H5Gopen(file_id, "/");
+    set_attribute(root, "TITLE", "CitcomS output");
+    set_attribute(root, "CLASS", "GROUP");
+    set_attribute(root, "VERSION", "1.0");
+    set_attribute(root, "FILTERS", FILTERS_P);
+    set_attribute(root, "PYTABLES_FORMAT_VERSION", "1.5");
+
+    /* release resources */
+    status = H5Gclose(root);
+
+    return file_id;
+}
+
 static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
 {
     hid_t group_id;
@@ -361,13 +420,15 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
      *  estimated size_hint parameter
      */
     group_id = H5Gcreate(loc_id, name, size_hint);
-   
-    printf("h5create_group(): %s\n", name);
 
-    /* TODO: Here, write necessary attributes for PyTables compatibility. */
-
-   return group_id;
-
+    /* Write necessary attributes for PyTables compatibility */
+    set_attribute(group_id, "TITLE", "CitcomS HDF5 group");
+    set_attribute(group_id, "CLASS", "GROUP");
+    set_attribute(group_id, "VERSION", "1.0");
+    set_attribute(group_id, "FILTERS", FILTERS_P);
+    set_attribute(group_id, "PYTABLES_FORMAT_VERSION", "1.5");
+    
+    return group_id;
 }
 
 static hid_t h5open_cap(struct All_variables *E)
