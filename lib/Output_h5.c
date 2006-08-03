@@ -486,7 +486,7 @@ static void h5create_dataset(hid_t loc_id,
     }
 
     /* create the dataset */
-    dataset = H5Dcreate(loc_id, name, type_id, filespace, dcpl_id);
+    dataset = H5Dcreate(loc_id, name, type_id, dataspace, dcpl_id);
 
     /* Write necessary attributes for PyTables compatibility */
     set_attribute(dataset, "TITLE", "CitcomS HDF5 dataset"); //TODO: elsewhere?
