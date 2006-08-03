@@ -68,13 +68,13 @@ static hid_t h5create_group(hid_t loc_id,
                             const char *name,
                             size_t size_hint);
 
-static void h5create_array(hid_t loc_id,
-                           const char *name,
-                           hid_t type_id,
-                           int rank,
-                           hsize_t *dims,
-                           hsize_t *maxdims,
-                           hsize_t *chunkdims);
+static void h5create_dataset(hid_t loc_id,
+                             const char *name,
+                             hid_t type_id,
+                             int rank,
+                             hsize_t *dims,
+                             hsize_t *maxdims,
+                             hsize_t *chunkdims);
 
 static void h5create_field(hid_t loc_id,
                            const char *name,
@@ -441,41 +441,40 @@ static hid_t h5open_cap(struct All_variables *E)
     return cap_group;
 }
 
-static void h5create_array(hid_t loc_id,
-                           const char *name,
-                           hid_t type_id,
-                           int rank,
-                           hsize_t *dims,
-                           hsize_t *maxdims,
-                           hsize_t *chunkdims)
+static void h5create_dataset(hid_t loc_id,
+                             const char *name,
+                             hid_t type_id,
+                             int rank,
+                             hsize_t *dims,
+                             hsize_t *maxdims,
+                             hsize_t *chunkdims)
 {
-    hid_t filespace;    /* file dataspace identifier */
     hid_t dcpl_id;      /* dataset creation property list identifier */
+    hid_t dataspace;    /* file dataspace identifier */
     hid_t dataset;      /* dataset identifier */
-
     herr_t status;
 
     ///* DEBUG
-    printf("h5create_array()\n");
+    printf("h5create_dataset()\n");
     printf("\tname=\"%s\"\n", name);
     printf("\tdims={%d,%d,%d,%d,%d}\n",
         (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
     if(maxdims != NULL) 
-        printf("maxdims={%d,%d,%d,%d,%d}\n",
+        printf("\tmaxdims={%d,%d,%d,%d,%d}\n",
             (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
             (int)maxdims[3], (int)maxdims[4]);
     else
-        printf("maxdims=NULL\n");
+        printf("\tmaxdims=NULL\n");
     if(chunkdims != NULL)
-        printf("chunkdims={%d,%d,%d,%d,%d}\n",
+        printf("\tchunkdims={%d,%d,%d,%d,%d}\n",
             (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
             (int)chunkdims[3], (int)chunkdims[4]);
     else
-        printf("chunkdims=NULL\n");
+        printf("\tchunkdims=NULL\n");
     // */
 
     /* create the dataspace for the dataset */
-    filespace = H5Screate_simple(rank, dims, maxdims);
+    dataspace = H5Screate_simple(rank, dims, maxdims);
     
     dcpl_id = H5P_DEFAULT;
     if (chunkdims != NULL)
@@ -489,14 +488,20 @@ static void h5create_array(hid_t loc_id,
     /* create the dataset */
     dataset = H5Dcreate(loc_id, name, type_id, filespace, dcpl_id);
 
-    /* TODO
-     *  1. Add attribute strings necessary for PyTables compatibility
-     */
+    /* Write necessary attributes for PyTables compatibility */
+    set_attribute(dataset, "TITLE", "CitcomS HDF5 dataset"); //TODO: elsewhere?
+    set_attribute(dataset, "CLASS", "ARRAY");
+    set_attribute(dataset, "FLAVOR", "numpy");
+    set_attribute(dataset, "VERSION", "2.3");
 
     /* release resources */
-    status = H5Pclose(dcpl_id);
-    status = H5Sclose(filespace);
+    if(chunkdims != NULL)
+    {
+        status = H5Pclose(dcpl_id);
+    }
+    status = H5Sclose(dataspace);
     status = H5Dclose(dataset);
+    return;
 }
 
 static void h5write_array_hyperslab(hid_t dset_id,
