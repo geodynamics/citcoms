@@ -137,9 +137,14 @@ extern void get_STD_topo(struct All_variables *, float**, float**,
 
 void h5output(struct All_variables *E, int cycles)
 {
-    void h5output_open(struct  All_variables *E);
-    
+#ifndef USE_HDF5
+    if(E->parallel.me == 0)
+        fprintf(stderr, "h5output(): CitcomS was compiled without HDF5!\n");
+    MPI_Finalize();
+    exit(8);
+#else
     printf("h5output()\n");
+
     if (cycles == 0) {
         h5output_open(E);
         h5output_coord(E);
@@ -174,11 +179,12 @@ void h5output(struct All_variables *E, int cycles)
     E->hdf5.step += 1;
 
     return;
+#endif
 }
 
 void h5output_pseudo_surf(struct All_variables *E, int cycles)
 {
-
+#ifdef USE_HDF5
     if (cycles == 0)
     {
         h5output_coord(E);
@@ -200,6 +206,7 @@ void h5output_pseudo_surf(struct All_variables *E, int cycles)
     /* h5output_ave_r(E, cycles); */
 
     return;
+#endif
 }
 
 
