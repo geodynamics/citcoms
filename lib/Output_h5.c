@@ -457,6 +457,7 @@ static void h5create_dataset(hid_t loc_id,
     ///* DEBUG
     printf("h5create_dataset()\n");
     printf("\tname=\"%s\"\n", name);
+    printf("\trank=%d\n", rank);
     printf("\tdims={%d,%d,%d,%d,%d}\n",
         (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
     if(maxdims != NULL) 
@@ -502,6 +503,171 @@ static void h5create_dataset(hid_t loc_id,
     status = H5Sclose(dataspace);
     status = H5Dclose(dataset);
     return;
+}
+
+/* Function for creating a Citcom field
+ *
+ *  tdim - extent of temporal dimension
+ *          if tdim < 0, field will not contain a temporal dimension
+ *          if tdim <= 0, field will have time as its first dimension
+ *
+ *  xdim - spatial extent along x-direction
+ *          if xdim <= 0, field will be one dimensional (along z-direction)
+ *
+ *  ydim - spatial extent along y-direction
+ *          if ydim <= 0, field will be one dimensional (along z-direction)
+ *
+ *  zdim - spatial extent along z-direction
+ *          if zdim <= 0, field will be two dimensional (along xy-plane)
+ *
+ *  cdim - dimensions of a single point in the field
+ *          if cdim=0, we have a scalar field (i.e., 0 components)
+ *          if cdim=2, we have a vector field with 2 components (xy plane)
+ *          if cdim=3, we have a vector field with 3 components (xyz space)
+ *          if cdim=6, we have a symmetric tensor field with 6 components
+ */
+static void h5create_field(hid_t loc_id,
+                           const char *name,
+                           hid_t type_id,
+                           int tdim,
+                           int xdim,
+                           int ydim,
+                           int zdim,
+                           int cdim)
+{
+    int nsd = 0;
+    int rank = 0;
+    hsize_t dims[5]      = {0,0,0,0,0};
+    hsize_t maxdims[5]   = {0,0,0,0,0};
+    hsize_t chunkdims[5] = {0,0,0,0,0};
+    herr_t status;
+
+    int t = -100;
+    int x = -100;
+    int y = -100;
+    int z = -100;
+    int c = -100;
+
+    /* Assign default indices according to dimensionality
+     *
+     *  nsd - number of spatial dimensions
+     *          if nsd=3, field is a three-dimensional volume (xyz)
+     *          if nsd=2, field is a two-dimensional surface (xy)
+     *          if nsd=1, field is a one-dimensional set (along z)
+     */
+    if ((xdim > 0) && (ydim > 0) && (zdim > 0))
+    {
+        nsd = 3;
+        x = 0;
+        y = 1;
+        z = 2;
+    }
+    else if ((xdim > 0) && (ydim > 0))
+    {
+        nsd = 2;
+        x = 0;
+        y = 1;
+    }
+    else if (zdim > 0)
+    {
+        nsd = 1;
+        z = 0;
+    }
+
+    /* Rank increases by the number of spatial dimensions found */
+    rank += nsd;
+
+    /* Rank increases by one for time-varying datasets. Note that
+     * since temporal dimension goes first, the spatial indices are
+     * shifted up by one (which explains why the default value for
+     * the positional indices x,y,z is not just -1).
+     */
+    if (tdim >= 0)
+    {
+        rank += 1;
+        t  = 0;
+        x += 1;
+        y += 1;
+        z += 1;
+    }
+
+    /* Rank increases by one if components are present. Note that
+     * the dimension used for the components is the last dimension.
+     */
+    if (cdim > 0)
+    {
+        rank += 1;
+        c = rank-1;
+    }
+
+
+    /* Finally, construct the appropriate dataspace parameters */
+    if (nsd > 0)
+    {
+        if (t >= 0)
+        {
+            dims[t] = tdim;
+            maxdims[t] = H5S_UNLIMITED;
+            chunkdims[t] = 1;
+        }
+        
+        if (x >= 0)
+        {
+            dims[x] = xdim;
+            maxdims[x] = xdim;
+            chunkdims[x] = xdim;
+        }
+
+        if (y >= 0)
+        {
+            dims[y] = ydim;
+            maxdims[y] = ydim;
+            chunkdims[y] = ydim;
+        }
+
+        if (z >= 0)
+        {
+            dims[z] = zdim;
+            maxdims[z] = zdim;
+            chunkdims[z] = zdim;
+        }
+
+        if (c >= 0)
+        {
+            dims[c] = cdim;
+            maxdims[c] = cdim;
+            chunkdims[c] = cdim;
+        }
+
+    }
+
+    ///* DEBUG
+    printf("h5create_field()\n");
+    printf("\tname=\"%s\"\n", name);
+    printf("\tshape=(%d,%d,%d,%d,%d)\n",
+           tdim, xdim, ydim, zdim, cdim);
+    printf("\trank=%d\n", rank);
+    printf("\tdims={%d,%d,%d,%d,%d}\n",
+            (int)dims[0], (int)dims[1], (int)dims[2],
+            (int)dims[3], (int)dims[4]);
+    printf("\tmaxdims={%d,%d,%d,%d,%d}\n",
+            (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
+            (int)maxdims[3], (int)maxdims[4]);
+    if (tdim >= 0)
+        printf("\tchunkdims={%d,%d,%d,%d,%d}\n",
+            (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
+            (int)chunkdims[3], (int)chunkdims[4]);
+    else
+        printf("\tchunkdims=NULL\n");
+    // */
+
+
+    if (tdim >= 0)
+        h5create_dataset(loc_id, name, type_id,
+                         rank, dims, maxdims, chunkdims);
+    else
+        h5create_dataset(loc_id, name, type_id,
+                         rank, dims, maxdims, NULL);
 }
 
 static void h5write_array_hyperslab(hid_t dset_id,
@@ -584,114 +750,6 @@ static void h5write_array_hyperslab(hid_t dset_id,
     status = H5Sclose(filespace);
 }
 
-static void h5create_field(hid_t loc_id,
-                           const char *name,
-                           hid_t type_id,
-                           int tdim, int xdim, int ydim, int zdim, int cdim)
-{
-    int rank = 0;
-    hsize_t dims[5] = {0,0,0,0,0};
-    hsize_t maxdims[5] = {0,0,0,0,0};
-    hsize_t chunkdims[5] = {0,0,0,0,0};
-    
-    if (tdim > 0)
-    {
-        /* time-varying dataset -- determine spatial dimensionality */
-        
-        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
-        {
-            rank = 1 + 3;
-            
-            dims[0] = 0;
-            dims[1] = xdim;
-            dims[2] = ydim;
-            dims[3] = zdim;
-
-            maxdims[0] = H5S_UNLIMITED;
-            maxdims[1] = xdim;
-            maxdims[2] = ydim;
-            maxdims[3] = zdim;
-
-            chunkdims[0] = 1;
-            chunkdims[1] = xdim;
-            chunkdims[2] = ydim;
-            chunkdims[3] = zdim;
-        }
-        else if ((xdim > 0) && (ydim > 0))
-        {
-            rank = 1 + 2;
-
-            dims[0] = 0;
-            dims[1] = xdim;
-            dims[2] = ydim;
-
-            maxdims[0] = H5S_UNLIMITED;
-            maxdims[1] = xdim;
-            maxdims[2] = ydim;
-
-            chunkdims[0] = 1;
-            chunkdims[1] = xdim;
-            chunkdims[2] = ydim;
-        }
-        else if (zdim > 0)
-        {
-            rank = 1 + 1;
-
-            dims[0] = 0;
-            dims[1] = zdim;
-
-            maxdims[0] = H5S_UNLIMITED;
-            maxdims[1] = zdim;
-
-            chunkdims[0] = 1;
-            chunkdims[1] = zdim;
-        }
-
-        /* if field has components, update last dimension */
-        if (cdim > 0)
-        {
-            rank += 1;
-            dims[rank-1] = cdim;
-            maxdims[rank-1] = cdim;
-            chunkdims[rank-1] = cdim;
-        }
-        /* finally, create the array */
-        h5create_array(loc_id, name, type_id, rank, dims, maxdims, chunkdims);
-    }
-    else
-    {
-        /* fixed dataset -- determine dimensionality */
-        
-        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
-        {
-            rank = 3;
-            dims[0] = xdim;
-            dims[1] = ydim;
-            dims[2] = zdim;
-        }
-        else if ((xdim > 0) && (ydim > 0))
-        {
-            rank = 2;
-            dims[0] = xdim;
-            dims[1] = ydim;
-        }
-        else if (zdim > 0)
-        {
-            rank = 1;
-            dims[0] = zdim;
-        }
-
-        /* if field has components, update last dimension */
-        if (cdim > 0)
-        {
-            rank += 1;
-            dims[rank-1] = cdim;
-        }
-        
-        /* finally, create the array */
-        h5create_array(loc_id, name, type_id, rank, dims, NULL, NULL);
-    }
-}
 
 static void h5write_field(hid_t dset_id,
                           hid_t mem_type_id,
