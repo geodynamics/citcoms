@@ -508,8 +508,8 @@ static void h5create_dataset(hid_t loc_id,
 /* Function for creating a Citcom field
  *
  *  tdim - extent of temporal dimension
- *          if tdim < 0, field will not contain a temporal dimension
- *          if tdim <= 0, field will have time as its first dimension
+ *          if tdim >= 0, field will not contain a temporal dimension
+ *          if tdim < 0, field will have time as its first dimension
  *
  *  xdim - spatial extent along x-direction
  *          if xdim <= 0, field will be one dimensional (along z-direction)
@@ -670,25 +670,24 @@ static void h5create_field(hid_t loc_id,
                          rank, dims, maxdims, NULL);
 }
 
-static void h5write_array_hyperslab(hid_t dset_id,
-                                    hid_t mem_type_id,
-                                    const void *data,
-                                    int rank,
-                                    hsize_t *size,
-                                    hsize_t *memdims,
-                                    hsize_t *offset,
-                                    hsize_t *stride,
-                                    hsize_t *count,
-                                    hsize_t *block)
+static void h5write_dataset(hid_t dset_id,
+                            hid_t mem_type_id,
+                            const void *data,
+                            int rank,
+                            hsize_t *size,
+                            hsize_t *memdims,
+                            hsize_t *offset,
+                            hsize_t *stride,
+                            hsize_t *count,
+                            hsize_t *block)
 {
-    hid_t filespace;
-    hid_t memspace;
-    hid_t dxpl_id;
-
+    hid_t filespace;    /* file dataspace */
+    hid_t memspace;     /* memory dataspace */
+    hid_t dxpl_id;      /* dataset transfer property list identifier */
     herr_t status;
     
     ///* DEBUG
-    printf("h5write_array_hyperslab()\n");
+    printf("h5write_dataset()\n");
     printf("\trank    = %d\n", rank);
     if(size != NULL)
         printf("\tsize    = {%d,%d,%d,%d,%d}\n",
@@ -721,15 +720,8 @@ static void h5write_array_hyperslab(hid_t dset_id,
     }
 
     /* get file dataspace */
-    printf("\tGetting file dataspace\n");
+    printf("\tGetting file dataspace from dataset\n");
     filespace = H5Dget_space(dset_id);
-
-    /* dataset transfer property list */
-    printf("\tSetting dataset transfer to ...\n");
-    //dxpl_id = H5P_DEFAULT;
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
-    //status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
     /* create memory dataspace */
     printf("\tCreating memory dataspace\n");
@@ -740,6 +732,12 @@ static void h5write_array_hyperslab(hid_t dset_id,
     status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                  offset, stride, count, block);
 
+    /* dataset transfer property list */
+    printf("\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
+    //status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+
     /* write the data to the hyperslab */
     printf("\tWriting data to the hyperslab\n");
     status = H5Dwrite(dset_id, mem_type_id, memspace, filespace, dxpl_id, data);
@@ -748,6 +746,7 @@ static void h5write_array_hyperslab(hid_t dset_id,
     status = H5Pclose(dxpl_id);
     status = H5Sclose(memspace);
     status = H5Sclose(filespace);
+    return;
 }
 
 
@@ -833,9 +832,9 @@ static void h5write_field(hid_t dset_id,
             block[rank-1] = cdim;
         }
         
-        h5write_array_hyperslab(dset_id, mem_type_id, data,
-                                rank, size, block,
-                                offset, stride, count, block);
+        h5write_dataset(dset_id, mem_type_id, data,
+                        rank, size, block,
+                        offset, stride, count, block);
     }
     else
     {
@@ -889,9 +888,9 @@ static void h5write_field(hid_t dset_id,
             block[rank-1] = cdim;
         }
 
-        h5write_array_hyperslab(dset_id, mem_type_id, data,
-                                rank, NULL, block,
-                                offset, stride, count, block);
+        h5write_dataset(dset_id, mem_type_id, data,
+                        rank, NULL, block,
+                        offset, stride, count, block);
     }
 
 }
