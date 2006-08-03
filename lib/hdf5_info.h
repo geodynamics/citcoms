@@ -41,6 +41,9 @@ struct HDF5_INFO
     /* Default type used is H5T_NATIVE_FLOAT */
     hid_t type_id;
 
+    /* Keep track of step (instead of cycle) that is about to be executed */
+    int step;
+
     /* Group names under which to store the appropriate data,
      * represented by an array of strings. For a regional
      * model, only cap_groups[0] should be used.
