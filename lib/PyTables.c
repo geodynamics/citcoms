@@ -19,7 +19,7 @@
  * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
  * Date      : June 21, 2001
  */
-static herr_t find_attr(hid_t loc_id, const_char *name, void *op_data)
+static herr_t find_attr(hid_t loc_id, const char *name, void *op_data)
 {
     /* Define a default zero value for return. This will cause the
      * iterator to continue if the palette attribute is not found yet.
