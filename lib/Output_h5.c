@@ -754,145 +754,123 @@ static void h5write_field(hid_t dset_id,
                           hid_t mem_type_id,
                           const void *data,
                           int tdim, int xdim, int ydim, int zdim, int cdim,
-                          int nx, int ny, int nz,
-                          int px, int py, int pz)
+                          struct All_variables *E)
 {
-    int rank;
+    int nsd = 0;
+    int step = 0;
+
+    int rank = 0;
     hsize_t size[5]    = {0,0,0,0,0};
-    //hsize_t memdims[5] = {0,0,0,0,0}; // unnecessary?
     hsize_t offset[5]  = {0,0,0,0,0};
     hsize_t stride[5]  = {1,1,1,1,1};
     hsize_t count[5]   = {1,1,1,1,1};
-    hsize_t block[5]   = {0,0,0,0,0}; // XXX: always equal to memdims[]?
+    hsize_t block[5]   = {0,0,0,0,0};
 
-    int step;
+    int t = -100;
+    int x = -100;
+    int y = -100;
+    int z = -100;
+    int c = -100;
+
+    int nx = E->lmesh.nox;
+    int ny = E->lmesh.noy;
+    int nz = E->lmesh.noz;
+
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
+
+    int px = E->parallel.me_loc[1];
+    int py = E->parallel.me_loc[2];
+    int pz = E->parallel.me_loc[3];
+
+
+    /* Refer to h5create_field() for more detailed comments. */
+
+    if ((xdim > 0) && (ydim > 0) && (zdim > 0))
+    {
+        nsd = 3;
+        x = 0;
+        y = 1;
+        z = 2;
+    }
+    else if ((xdim > 0) && (ydim > 0))
+    {
+        nsd = 2;
+        x = 0;
+        y = 1;
+    }
+    else if (zdim > 0)
+    {
+        nsd = 1;
+        z = 0;
+    }
+
+    rank += nsd;
 
     if (tdim > 0)
     {
-        /* time-varying dataset */
-
-        step = tdim - 1;
-
-        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
-        {
-            rank = 1 + 3;
-
-            size[0] = tdim;
-            size[1] = xdim;
-            size[2] = ydim;
-            size[3] = zdim;
-
-            offset[0] = step;
-            offset[1] = px*nx;
-            offset[2] = py*ny;
-            offset[3] = pz*nz;
-
-            block[0] = 1;
-            block[1] = nx;
-            block[2] = ny;
-            block[3] = nz;
-        }
-        else if ((xdim > 0) && (ydim > 0))
-        {
-            rank = 1 + 2;
-
-            size[0] = tdim;
-            size[1] = xdim;
-            size[2] = ydim;
-
-            offset[0] = step;
-            offset[1] = px*nx;
-            offset[2] = py*ny;
-
-            block[0] = 1;
-            block[1] = nx;
-            block[2] = ny;
-
-        }
-        else if (zdim > 0)
-        {
-            rank = 1 + 1;
-
-            size[0] = tdim;
-            size[1] = zdim;
-
-            offset[0] = step;
-            offset[1] = pz*nz;
-
-            block[0] = 1;
-            block[1] = nz;
-        }
-
-        /* if field has components, update last dimension */
-        if (cdim > 0)
-        {
-            rank += 1;
-            size[rank-1] = cdim;
-            offset[rank-1] = 0;
-            block[rank-1] = cdim;
-        }
-        
-        h5write_dataset(dset_id, mem_type_id, data,
-                        rank, size, block,
-                        offset, stride, count, block);
+        rank += 1;
+        t  = 0;
+        x += 1;
+        y += 1;
+        z += 1;
     }
-    else
+    
+    if (cdim > 0)
     {
-
-        /* fixed dataset */
-
-        if ((xdim > 0) && (ydim > 0) && (zdim > 0))
-        {
-            rank = 3;
-
-            size[0] = xdim;
-            size[1] = ydim;
-            size[2] = zdim;
-
-            offset[0] = px*nx;
-            offset[1] = py*ny;
-            offset[2] = pz*nz;
-
-            block[0] = nx;
-            block[1] = ny;
-            block[2] = nz;
-        }
-        else if ((xdim > 0) && (ydim > 0))
-        {
-            rank = 2;
-
-            size[0] = xdim;
-            size[1] = ydim;
-
-            offset[0] = px*nx;
-            offset[1] = py*ny;
-
-            block[0] = nx;
-            block[1] = ny;
-        }
-        else if (zdim > 0)
-        {
-            rank = 1;
-
-            size[0] = zdim;
-            offset[0] = pz*nz;
-            block[0] = nz;
-        }
-
-        /* if field has components, update last dimension */
-        if (cdim > 0)
-        {
-            rank += 1;
-            size[rank-1] = cdim;
-            offset[rank-1] = 0;
-            block[rank-1] = cdim;
-        }
-
-        h5write_dataset(dset_id, mem_type_id, data,
-                        rank, NULL, block,
-                        offset, stride, count, block);
+        rank += 1;
+        c = rank-1;
     }
 
+    if (nsd > 0)
+    {
+        if (t >= 0)
+        {
+            size[t]   = tdim;
+            offset[t] = tdim-1;
+            block[t]  = 1;
+        }
+
+        if (x >= 0)
+        {
+            size[x]   = xdim;
+            offset[x] = px*(nx-1);
+            block[x]  = (px == nprocx-1) ? nx : nx-1;
+        }
+
+        if (y >= 0)
+        {
+            size[y]   = ydim;
+            offset[y] = py*(ny-1);
+            block[y]  = (py == nprocy-1) ? ny : ny-1;
+        }
+
+        if (z >= 0)
+        {
+            size[z]   = zdim;
+            offset[z] = pz*(nz-1);
+            block[z]  = (pz == nprocz-1) ? nz : nz-1;
+        }
+
+        if (c >= 0)
+        {
+            size[c]   = cdim;
+            offset[c] = 0;
+            block[c]  = cdim;
+        }
+
+        if (tdim > 0)
+            h5write_dataset(dset_id, mem_type_id, data,
+                            rank, size, block,
+                            offset, stride, count, block);
+        else
+            h5write_dataset(dset_id, mem_type_id, data,
+                            rank, NULL, block,
+                            offset, stride, count, block);
+    }
+
+    return;
 }
 
 static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
@@ -995,7 +973,7 @@ void h5output_coord(struct All_variables *E)
     dataset = H5Dopen(cap_group, "coord");
     h5write_field(dataset, E->hdf5.type_id, E->hdf5.vector3d,
                   0, E->mesh.nox, E->mesh.noy, E->mesh.noz, 3,
-                  nx, ny, nz, px, py, pz);
+                  E);
 
     /* release resources */
     status = H5Dclose(dataset);
@@ -1043,7 +1021,7 @@ void h5output_velocity(struct All_variables *E, int cycles)
     dataset = H5Dopen(cap, "velocity");
     h5write_field(dataset, E->hdf5.type_id, E->hdf5.vector3d,
                   cycles+1, E->mesh.nox, E->mesh.noy, E->mesh.noz, 3,
-                  nx, ny, nz, px, py, pz);
+                  E);
 
     /* release resources */
     status = H5Dclose(dataset);
@@ -1088,7 +1066,7 @@ void h5output_temperature(struct All_variables *E, int cycles)
     dataset = H5Dopen(cap, "temperature");
     h5write_field(dataset, E->hdf5.type_id, E->hdf5.scalar3d,
                   cycles+1, E->mesh.nox, E->mesh.noy, E->mesh.noz, 0,
-                  nx, ny, nz, px, py, pz);
+                  E);
 
     /* release resources */
     status = H5Dclose(dataset);
