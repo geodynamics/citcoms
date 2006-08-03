@@ -241,6 +241,7 @@ void h5output_open(struct All_variables *E)
     /* determine filename */
     strncpy(E->hdf5.filename, E->control.data_file, (size_t)99);
     strncat(E->hdf5.filename, ".h5", (size_t)99);
+    printf("\tfilename = \"%s\"\n", E->hdf5.filename);
 
     /* set up file creation property list with defaults */
     fcpl_id = H5P_DEFAULT;
@@ -252,8 +253,6 @@ void h5output_open(struct All_variables *E)
     /* create a new file collectively and release property list identifier */
     file_id = h5create_file(E->hdf5.filename, H5F_ACC_TRUNC, fcpl_id, fapl_id);
     H5Pclose(fapl_id);
-
-    printf("\tfilename = \"%s\"\n", E->hdf5.filename);
 
     /* save the file identifier for later use */
     E->hdf5.file_id = file_id;
@@ -420,6 +419,8 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
      *  estimated size_hint parameter
      */
     group_id = H5Gcreate(loc_id, name, size_hint);
+    printf("h5create_group()\n");
+    printf("\tname=\"%s\"\n", name);
 
     /* Write necessary attributes for PyTables compatibility */
     set_attribute(group_id, "TITLE", "CitcomS HDF5 group");
@@ -455,16 +456,22 @@ static void h5create_array(hid_t loc_id,
     herr_t status;
 
     ///* DEBUG
-    printf("h5create_array(): %s\n", name);
-    printf("\tdims={%d,%d,%d,%d,%d}, ", (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
+    printf("h5create_array()\n");
+    printf("\tname=\"%s\"\n", name);
+    printf("\tdims={%d,%d,%d,%d,%d}\n",
+        (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
     if(maxdims != NULL) 
-    printf("maxdims={%d,%d,%d,%d,%d}, ", (int)maxdims[0], (int)maxdims[1], (int)maxdims[2], (int)maxdims[3], (int)maxdims[4]);
+        printf("maxdims={%d,%d,%d,%d,%d}\n",
+            (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
+            (int)maxdims[3], (int)maxdims[4]);
     else
-    printf("maxdims=NULL, ");
+        printf("maxdims=NULL\n");
     if(chunkdims != NULL)
-    printf("chunkdims={%d,%d,%d,%d,%d}\n", (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2], (int)chunkdims[3], (int)chunkdims[4]);
+        printf("chunkdims={%d,%d,%d,%d,%d}\n",
+            (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
+            (int)chunkdims[3], (int)chunkdims[4]);
     else
-    printf("chunkdims=NULL\n");
+        printf("chunkdims=NULL\n");
     // */
 
     /* create the dataspace for the dataset */
@@ -513,14 +520,26 @@ static void h5write_array_hyperslab(hid_t dset_id,
     printf("h5write_array_hyperslab()\n");
     printf("\trank    = %d\n", rank);
     if(size != NULL)
-        printf("\tsize    = {%d,%d,%d,%d,%d}\n", (int)size[0], (int)size[1], (int)size[2], (int)size[3], (int)size[4]);
+        printf("\tsize    = {%d,%d,%d,%d,%d}\n",
+            (int)size[0], (int)size[1], (int)size[2],
+            (int)size[3], (int)size[4]);
     else
         printf("\tsize    = NULL\n");
-    printf("\tmemdims = {%d,%d,%d,%d,%d}\n", (int)memdims[0], (int)memdims[1], (int)memdims[2], (int)memdims[3], (int)memdims[4]);
-    printf("\toffset  = {%d,%d,%d,%d,%d}\n", (int)offset[0], (int)offset[1], (int)offset[2], (int)offset[3], (int)offset[4]);
-    printf("\tstride  = {%d,%d,%d,%d,%d}\n", (int)stride[0], (int)stride[1], (int)stride[2], (int)stride[3], (int)stride[4]);
-    printf("\tcount   = {%d,%d,%d,%d,%d}\n", (int)count[0], (int)count[1], (int)count[2], (int)count[3], (int)count[4]);
-    printf("\tblock   = {%d,%d,%d,%d,%d}\n", (int)block[0], (int)block[1], (int)block[2], (int)block[3], (int)block[4]);
+    printf("\tmemdims = {%d,%d,%d,%d,%d}\n",
+        (int)memdims[0], (int)memdims[1], (int)memdims[2],
+        (int)memdims[3], (int)memdims[4]);
+    printf("\toffset  = {%d,%d,%d,%d,%d}\n",
+        (int)offset[0], (int)offset[1], (int)offset[2],
+        (int)offset[3], (int)offset[4]);
+    printf("\tstride  = {%d,%d,%d,%d,%d}\n",
+        (int)stride[0], (int)stride[1], (int)stride[2],
+        (int)stride[3], (int)stride[4]);
+    printf("\tcount   = {%d,%d,%d,%d,%d}\n",
+        (int)count[0], (int)count[1], (int)count[2],
+        (int)count[3], (int)count[4]);
+    printf("\tblock   = {%d,%d,%d,%d,%d}\n",
+        (int)block[0], (int)block[1], (int)block[2],
+        (int)block[3], (int)block[4]);
     // */
 
     /* extend the dataset if necessary */
