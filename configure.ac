@@ -48,8 +48,8 @@ AC_ARG_WITH([pyre],
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
 AC_ARG_WITH([hdf5],
     [AC_HELP_STRING([--with-hdf5],
-        [enable HDF5 output])],
-    [want_hdf5="$enableval"],
+        [enable HDF5 output @<:@default=no@:>@])],
+    [want_hdf5="$withval"],
     [want_hdf5=no])
 AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AC_ARG_ENABLE([embedding],
@@ -129,6 +129,11 @@ if test "$want_pyre" = yes; then
     AC_LANG_POP(C++)
 else
     CIT_HEADER_MPI
+fi
+if test "$want_hdf5" = yes; then
+    AC_CHECK_HEADERS([hdf5.h],
+                     [AC_DEFINE([HAVE_HDF5_H])],
+                     [AC_MSG_ERROR([HDF5 header file "hdf5.h" not found!])])
 fi
 AC_CHECK_HEADERS([malloc.h])
 
