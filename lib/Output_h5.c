@@ -309,7 +309,7 @@ void h5output_open(struct All_variables *E)
         h5create_coord(cap_group, type_id, nodex, nodey, nodez);
         h5create_velocity(cap_group, type_id, nodex, nodey, nodez);
         h5create_temperature(cap_group, type_id, nodex, nodey, nodez);
-        //h5create_viscosity(cap_group, type_id, nodex, nodey, nodez);
+        h5create_viscosity(cap_group, type_id, nodex, nodey, nodez);
         //h5create_pressure(cap_group, type_id, nodex, nodey, nodez);
         //h5create_stress(cap_group, type_id, nodex, nodey, nodez);
 
@@ -1142,7 +1142,62 @@ void h5output_temperature(struct All_variables *E, int cycles)
 void h5output_viscosity(struct All_variables *E, int cycles)
 {
 #ifdef USE_HDF5
+    hid_t cap;
+    hid_t dataset;
+    herr_t status;
 
+    int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+    int p, px, py, pz;
+
+    int lev = E->mesh.levmax;
+
+    int nodex = E->mesh.nox;
+    int nodey = E->mesh.noy;
+    int nodez = E->mesh.noz;
+
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
+
+    p  = E->parallel.me;
+    px = E->parallel.me_loc[1];
+    py = E->parallel.me_loc[2];
+    pz = E->parallel.me_loc[3];
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = (p == nprocx-1) ? nx : nx-1;
+    my = (p == nprocy-1) ? ny : ny-1;
+    mz = (p == nprocz-1) ? nz : nz-1;
+    
+    /* prepare the data -- change citcom yxz order to xyz order */
+    for(i = 0; i < mx; i++)
+    {
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                E->hdf5.scalar3d[m] = E->VI[lev][1][n+1];
+            }
+        }
+    }
+
+    printf("h5output_viscosity()\n");
+
+    cap = h5open_cap(E);
+    dataset = H5Dopen(cap, "viscosity");
+    h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.scalar3d,
+                  E->hdf5.count+1, nodex, nodey, nodez, 0, E);
+
+    /* release resources */
+    status = H5Dclose(dataset);
+    status = H5Gclose(cap);
 #endif
 }
 
