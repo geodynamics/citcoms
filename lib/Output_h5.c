@@ -175,10 +175,11 @@ void h5output(struct All_variables *E, int cycles)
     /* disable horizontal average h5output   by Tan2 */
     /* h5output_ave_r(E, cycles); */
 
-    /* prepare for next step */
-    E->hdf5.step += 1;
+    /* Count how many times we have called this function.
+     * This statement should always be the last one.
+     */
+    E->hdf5.count += 1;
 
-    return;
 #endif
 }
 
@@ -349,8 +350,12 @@ void h5output_open(struct All_variables *E)
     E->hdf5.scalar2d = (double *)malloc((nx*ny)*sizeof(double));
     E->hdf5.scalar1d = (double *)malloc((nz)*sizeof(double));
 
-    /* step about to be executed */
-    E->hdf5.step = 0;
+    /* Number of times we have called h5output()
+     *
+     * TODO:
+     *  Under a restart, initialize to the last count instead.
+     */
+    E->hdf5.count = 0;
 
 #endif
 }
@@ -1066,7 +1071,7 @@ void h5output_velocity(struct All_variables *E, int cycles)
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "velocity");
     h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.vector3d,
-                  E->hdf5.step+1, nodex, nodey, nodez, 3, E);
+                  E->hdf5.count+1, nodex, nodey, nodez, 3, E);
 
     /* release resources */
     status = H5Dclose(dataset);
@@ -1126,7 +1131,7 @@ void h5output_temperature(struct All_variables *E, int cycles)
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "temperature");
     h5write_field(dataset, H5T_NATIVE_DOUBLE, E->hdf5.scalar3d,
-                  E->hdf5.step+1, nodex, nodey, nodez, 0, E);
+                  E->hdf5.count+1, nodex, nodey, nodez, 0, E);
 
     /* release resources */
     status = H5Dclose(dataset);
