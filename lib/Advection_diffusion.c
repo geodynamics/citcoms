@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /*   Functions which solve the heat transport equations using Petrov-Galerkin
@@ -159,7 +159,7 @@ void PG_timestep_solve(struct All_variables *E)
 
   E->advection.total_timesteps++;
   E->monitor.elapsed_time += E->advection.timestep;
-  
+
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
 
@@ -699,23 +699,30 @@ void filter(struct All_variables *E)
 	for(m=1;m<=E->sphere.caps_per_proc;m++)
 		for(i=1;i<=E->lmesh.nno;i++)  {
 
-			if(!(E->NODE[lev][m][i] & SKIP))	Tsum0 +=E->T[m][i];
-			if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
-			if(E->T[m][i]<0.0) E->T[m][i]=0.0;
-			if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
-			if(E->T[m][i]>1.0) E->T[m][i]=1.0;
+			/* compute sum(T) before filtering, skipping nodes
+			   that's shared by another processor */
+		  	if(!(E->NODE[lev][m][i] & SKIP))
+				Tsum0 +=E->T[m][i];
+
+			  /* remove overshoot. This is crude!!!  */
+			  if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
+			  if(E->T[m][i]<0.0) E->T[m][i]=0.0;
+			  if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
+			  if(E->T[m][i]>1.0) E->T[m][i]=1.0;
 
 		}
 
+	/* find global max/min of temperature */
 	MPI_Allreduce(&Tmin,&Tmin1,1,MPI_DOUBLE,MPI_MIN,E->parallel.world);
 	MPI_Allreduce(&Tmax,&Tmax1,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
 
 	for(m=1;m<=E->sphere.caps_per_proc;m++)
 		for(i=1;i<=E->lmesh.nno;i++)  {
-
+			/* remvoe undershoot. This is crude!!! */
 			if(E->T[m][i]<=abs(Tmin1))   E->T[m][i]=0.0;
 			if(E->T[m][i]>=(2-Tmax1))   E->T[m][i]=1.0;
 
+			/* sum(T) after filtering */
 			if (!(E->NODE[lev][m][i] & SKIP))  {
 				Tsum1+=E->T[m][i];
 				if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)  TNUM++;
@@ -723,11 +730,14 @@ void filter(struct All_variables *E)
 
 		}
 
+	/* find the difference of sum(T) before/after the filtering */
 	TDIST=Tsum0-Tsum1;
 	MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 	MPI_Allreduce(&TNUM,&TNUM1,1,MPI_INT,MPI_SUM,E->parallel.world);
 	TDIST=TDIST1/TNUM1;
 
+	/* keep sum(T) the same before/after the filtering by distributing
+	   the difference back to nodes */
 	for(m=1;m<=E->sphere.caps_per_proc;m++)
 		for(i=1;i<=E->lmesh.nno;i++)   {
 			if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)
