@@ -45,7 +45,6 @@ void output_surf_botm_pseudo_surf(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_ave_r(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
-void output_time(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -81,9 +80,6 @@ void output(struct All_variables *E, int cycles)
 
   /* disable horizontal average output   by Tan2 */
   /* output_ave_r(E, cycles); */
-
-  /* information about simulation time and wall clock time */
-  output_time(E, cycles);
 
   return;
 }

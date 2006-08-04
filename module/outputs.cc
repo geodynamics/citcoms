@@ -91,6 +91,27 @@ PyObject * pyCitcom_output_finalize(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_output_time__doc__[] = "";
+char pyCitcom_output_time__name__[] = "output_time";
+
+PyObject * pyCitcom_output_time(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    int cycles;
+
+    if (!PyArg_ParseTuple(args, "Oi:output_time", &obj, &cycles))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    output_time(E, cycles);
+
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyCitcom_output_pseudo_surf__doc__[] = "";
 char pyCitcom_output_pseudo_surf__name__[] = "output_pseudo_surf";
 

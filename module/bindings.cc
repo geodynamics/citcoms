@@ -210,6 +210,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_output_finalize__doc__},
 
+    {pyCitcom_output_time__name__,
+     pyCitcom_output_time,
+     METH_VARARGS,
+     pyCitcom_output_time__doc__},
+
     // from setProperties.h
 
     {pyCitcom_Advection_diffusion_set_properties__name__,

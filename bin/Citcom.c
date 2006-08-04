@@ -55,7 +55,6 @@ int main(argc,argv)
   void read_velocity_boundary_from_file();
   void read_mat_from_file();
   void open_time();
-  void output();
   void output_finalize();
   void output_pseudo_surf();
 
@@ -115,7 +114,10 @@ int main(argc,argv)
 	    output_pseudo_surf(E, E->monitor.solution_cycles);
   }
   else
-    output(E, E->monitor.solution_cycles);
+    (E->output)(E, E->monitor.solution_cycles);
+
+  /* information about simulation time and wall clock time */
+  output_time(E, E->monitor.solution_cycles);
 
 
   if (E->control.stokes)  {
@@ -163,6 +165,9 @@ int main(argc,argv)
       else
 	(E->output)(E, E->monitor.solution_cycles);
     }
+
+    /* information about simulation time and wall clock time */
+    output_time(E, E->monitor.solution_cycles);
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);

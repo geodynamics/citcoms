@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomSLib import CPU_time, output, return_dt, return_t, return_step
+from CitcomSLib import CPU_time, output, output_time, return_dt, return_t, return_step
 from pyre.components.Component import Component
 import journal
 
@@ -258,6 +258,8 @@ class Solver(Component):
         elif self.coupler and not (self.coupler.exchanger.coupled_steps % monitoringFrequency):
             print self.coupler.exchanger.coupled_steps, monitoringFrequency
             output(self.all_variables, step)
+
+        output_time(self.all_variables, step)
 
         return
 
