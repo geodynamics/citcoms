@@ -92,27 +92,27 @@ herr_t set_attribute(hid_t obj_id,
 
     /* Create the attribute */
     attr_type = H5Tcopy(H5T_C_S1);
-    if(attr_type < 0) goto out;
+    if (attr_type < 0) goto out;
 
     attr_size = strlen(attr_data) + 1;  /* extra null term */
 
     status = H5Tset_size(attr_type, (size_t)attr_size);
-    if(status < 0) goto out;
+    if (status < 0) goto out;
 
     status = H5Tset_strpad(attr_type, H5T_STR_NULLTERM);
-    if(status < 0) goto out;
+    if (status < 0) goto out;
 
     attr_space_id = H5Screate(H5S_SCALAR);
-    if(status < 0) goto out;
+    if (status < 0) goto out;
 
     /* Verify if the attribute already exists */
     has_attr = find_attribute(obj_id, attr_name);
     
     /* The attribute already exists, delete it */
-    if(has_attr == 1)
+    if (has_attr == 1)
     {
         status = H5Adelete(obj_id, attr_name);
-        if(status < 0) goto out;
+        if (status < 0) goto out;
     }
 
     /* Create and write the attribute */
@@ -138,6 +138,120 @@ herr_t set_attribute(hid_t obj_id,
 
 out:
     return -1;
+}
+
+/* Function  : set_attribute_numerical
+ * Purpose   : Private function used by
+ *             set_attribute_int and set_attribute_float
+ * Return    : Success 0, Failure -1
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Date      : July 25, 2001
+ */
+herr_t set_attribute_numerical(hid_t obj_id,
+                               const char *attr_name,
+                               hid_t type_id,
+                               const void *data)
+{
+    hid_t space_id, attr_id;
+    herr_t status;
+
+    int has_attr;
+
+    /* Create the data space for the attribute. */
+    space_id = H5Screate(H5S_SCALAR);
+    if (space_id < 0) goto out;
+    
+    /* Verify if the attribute already exists */
+    has_attr = find_attribute(obj_id, attr_name);
+    if (has_attr == 1)
+    {
+        /* The attribute already exists. Delete it. */
+        status = H5Adelete(obj_id, attr_name);
+        if(status < 0) goto out;
+    }
+    
+    /* Create the attribute. */
+    attr_id = H5Acreate(obj_id, attr_name, type_id, space_id, H5P_DEFAULT);
+    if (attr_id < 0) goto out;
+
+    /* Write the attribute data. */
+    status = H5Awrite(attr_id, type_id, data);
+    if (status < 0) goto out;
+
+    /* Close the attribute. */
+    status = H5Aclose(attr_id);
+    if (status < 0) goto out;
+
+    /* Close the data space. */
+    status = H5Sclose(space_id);
+    if (status < 0) goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+/* Function: set_attribute_numerical_array
+ * Purpose : write an array attribute
+ * Return  : Success 0, Failure -1
+ * Date    : July 25, 2001
+ */
+herr_t set_attribute_numerical_array(hid_t obj_id,
+                                     const char *attr_name,
+                                     size_t rank,
+                                     hsize_t *dims,
+                                     hid_t type_id,
+                                     const void *data)
+{
+    hid_t space_id, attr_id;
+    herr_t status;
+
+    int has_attr;
+
+    /* Create the data space for the attribute. */
+    space_id = H5Screate_simple(rank, dims, NULL);
+    if (space_id < 0) goto out;
+
+    /* Verify if the attribute already exists. */
+    has_attr = find_attribute(obj_id, attr_name);
+    if (has_attr == 1)
+    {
+        /* The attribute already exists. Delete it. */
+        status = H5Adelete(obj_id, attr_name);
+        if (status < 0) goto out;
+    }
+
+    /* Create the attribute. */
+    attr_id = H5Acreate(obj_id, attr_name, type_id, space_id, H5P_DEFAULT);
+    if (attr_id < 0) goto out;
+
+    /* Write the attribute data. */
+    status = H5Awrite(attr_id, type_id, data);
+    if (status < 0) goto out;
+
+    /* Close the attribute. */
+    status = H5Aclose(attr_id);
+    if (status < 0) goto out;
+
+    /* Close the dataspace. */
+    status = H5Sclose(space_id);
+    if (status < 0) goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+
+herr_t set_attribute_numerical_vector(hid_t obj_id,
+                                      const char *attr_name,
+                                      hsize_t dim,
+                                      hid_t type_id,
+                                      const void *data)
+{
+    return set_attribute_numerical_array(obj_id, attr_name, 1, &dim, type_id, data);
 }
 
 
