@@ -58,6 +58,7 @@ void h5output_tracer(struct All_variables *, int);
 void h5output_surf_botm(struct All_variables *, int);
 void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
 void h5output_ave_r(struct All_variables *, int);
+void h5output_time(struct All_variables *, int);
 
 #ifdef USE_HDF5
 static hid_t h5create_file(const char *filename,
@@ -123,6 +124,7 @@ static void h5create_surf_topography(hid_t loc_id,
                                      hid_t type_id,
                                      int nodex, int nodey);
 
+static void h5create_time(hid_t loc_id);
 #endif
 
 extern void parallel_process_termination();
@@ -178,6 +180,12 @@ void h5output(struct All_variables *E, int cycles)
 
     /* disable horizontal average h5output   by Tan2 */
     /* h5output_ave_r(E, cycles); */
+
+    /* TODO: call h5output_time() from outside h5output()
+     * it should be called for each cycle (instead of skipping
+     * cycles with monitoringFrequency).
+     */
+    h5output_time(E, cycles);
 
     /* Count how many times we have called this function.
      * This statement should always be the last one.
@@ -301,6 +309,9 @@ void h5output_open(struct All_variables *E)
 
     type_id = E->hdf5.type_id;
 
+    /* Create dataset for timekeeping */
+    h5create_time(file_id);
+
     /* Create necessary groups and arrays */
     for(cap = 0; cap < caps; cap++)
     {
@@ -369,7 +380,8 @@ void h5output_open(struct All_variables *E)
 void h5output_close(struct All_variables *E)
 {
 #ifdef USE_HDF5
-    herr_t status = H5Fclose(E->hdf5.file_id);
+    herr_t status;
+    status = H5Fclose(E->hdf5.file_id);
     free(E->hdf5.vector3d);
     free(E->hdf5.scalar3d);
     free(E->hdf5.vector2d);
@@ -952,6 +964,73 @@ static void h5create_surf_topography(hid_t loc_id, hid_t type_id, int nodex, int
     h5create_field(loc_id, "topography", type_id, 1, nodex, nodey, 0, 0);
 }
 
+static void h5create_time(hid_t loc_id)
+{
+    hid_t dcpl_id;      /* dataset creation property list identifier */
+    hid_t datatype;
+    hid_t dataspace;
+    hid_t dataset;
+    herr_t status;
+
+    hsize_t dim = 0;
+    hsize_t maxdim = H5S_UNLIMITED;
+    hsize_t chunkdim = 1;
+
+    int i;
+    long n;
+    double x;
+
+    /* Modify dataset creation properties (enable chunking) */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    status  = H5Pset_chunk(dcpl_id, 1, &chunkdim);
+
+    /* Create the dataspace */
+    dataspace = H5Screate_simple(1, &dim, &maxdim);
+
+    /* Create the memory data type */
+    datatype = H5Tcreate(H5T_COMPOUND, sizeof(struct HDF5_TIME));
+    status = H5Tinsert(datatype, "time", HOFFSET(struct HDF5_TIME, time), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "time_step", HOFFSET(struct HDF5_TIME, time_step), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "cpu", HOFFSET(struct HDF5_TIME, cpu), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "cpu_step", HOFFSET(struct HDF5_TIME, cpu_step), H5T_NATIVE_FLOAT);
+
+    /* Create the dataset */
+    dataset = H5Dcreate(loc_id, "time", datatype, dataspace, dcpl_id);
+
+    /*
+     * Write necessary attributes for PyTables compatibility
+     */
+
+    set_attribute(dataset, "TITLE", "Timing table");
+    set_attribute(dataset, "CLASS", "TABLE");
+    set_attribute(dataset, "FLAVOR", "numpy");
+    set_attribute(dataset, "VERSION", "2.6");
+
+    n = 0;
+    set_attribute_numerical(dataset, "NROWS", H5T_NATIVE_LONG, &n);
+
+    set_attribute(dataset, "FIELD_0_NAME", "time");
+    set_attribute(dataset, "FIELD_1_NAME", "time_step");
+    set_attribute(dataset, "FIELD_2_NAME", "cpu");
+    set_attribute(dataset, "FIELD_3_NAME", "cpu_step");
+
+    x = 0;
+    set_attribute_numerical(dataset, "FIELD_0_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute_numerical(dataset, "FIELD_1_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute_numerical(dataset, "FIELD_2_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute_numerical(dataset, "FIELD_3_FILL", H5T_NATIVE_DOUBLE, &x);
+
+    i = 1;
+    set_attribute_numerical(dataset, "AUTOMATIC_INDEX", H5T_NATIVE_INT, &i);
+    set_attribute_numerical(dataset, "REINDEX", H5T_NATIVE_INT, &i);
+    set_attribute(dataset, "FILTERS_INDEX", FILTERS_P);
+
+    /* Release resources */
+    status = H5Pclose(dcpl_id);
+    status = H5Tclose(datatype);
+    status = H5Sclose(dataspace);
+    status = H5Dclose(dataset);
+}
 
 
 #endif
@@ -1555,3 +1634,72 @@ void h5output_avg_r(struct All_variables *E, int cycles)
 #endif
 }
 
+void h5output_time(struct All_variables *E, int cycles)
+{
+#ifdef USE_HDF5
+    double CPU_time0();
+
+    hid_t dxpl_id;      /* data transfer property list identifier */
+    hid_t datatype;
+    hid_t filespace;
+    hid_t dataspace;
+    hid_t dataset;
+
+    herr_t status;
+    
+    hsize_t dim;
+    hsize_t offset;
+    hsize_t count;
+
+    struct HDF5_TIME row;
+
+    double current_time = CPU_time0();
+
+    if(E->parallel.me == 0)
+    {
+        /* Prepare data */
+        row.time = E->monitor.elapsed_time;
+        row.time_step = E->advection.timestep;
+        row.cpu = current_time - E->monitor.cpu_time_at_start;
+        row.cpu_step = current_time - E->monitor.cpu_time_at_last_cycle;
+
+        /* Get dataset */
+        dataset = H5Dopen(E->hdf5.file_id, "time");
+
+        /* Create property list for independent dataset write */
+        dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+        status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+
+        /* Extend dataset */
+        dim = cycles + 1;
+        status = H5Dextend(dataset, &dim);
+        
+        /* Get file dataspace */
+        filespace = H5Dget_space(dataset);
+        
+        /* Define memory dataspace */
+        dim = 1;
+        dataspace = H5Screate_simple(1, &dim, NULL);
+        
+        /* Get datatype */
+        datatype = H5Dget_type(dataset);
+
+        /* Select hyperslab */
+        count  = 1;
+        offset = cycles;
+        status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                     &offset, NULL, &count, NULL);
+
+        /* Write to hyperslab selection */
+        status = H5Dwrite(dataset, datatype, dataspace, filespace,
+                          dxpl_id, &row);
+
+        /* Release resources */
+        status = H5Pclose(dxpl_id);
+        status = H5Tclose(datatype);
+        status = H5Sclose(dataspace);
+        status = H5Sclose(filespace);
+        status = H5Dclose(dataset);
+    }
+#endif
+}

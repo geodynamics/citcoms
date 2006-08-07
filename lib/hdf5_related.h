@@ -26,10 +26,25 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-/* In this file we define the contents of the HDF5_INFO data structure
- * that is used for collective output of citcom data. The contents
- * of this structure are initialized by the function h5output_open().
+/* In this file we define the following data structures:
+ *
+ *  HDF5_INFO
+ *    Used for collective output of citcom data.
+ *
+ *  HDF5_TIME
+ *    Used to define table with timing information.
+ *
+ * Any required initialization steps are performed in h5output_open().
+ *
  */
+
+struct HDF5_TIME
+{
+    float time;
+    float time_step;
+    float cpu;
+    float cpu_step;
+};
 
 struct HDF5_INFO
 {
@@ -75,5 +90,5 @@ struct HDF5_INFO
     double *vector2d;               /* shape (nx,ny,2) */
     double *scalar2d;               /* shape (nx,ny) */
     double *scalar1d;               /* shape (nz,) */
-
+    
 };
