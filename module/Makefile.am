@@ -44,6 +44,10 @@ libCitcomSLibmodule_a_SOURCES = $(sources)
 libPyxMPImodule_a_CFLAGS = $(AM_CXXFLAGS) # hack for automake
 libPyxMPImodule_a_SOURCES = PyxMPI/PyxMPI.c
 
+if COND_HDF5
+    libCitcomSLibmodule_a_CXXFLAGS += -DUSE_HDF5
+endif
+
 # extension modules (libtool)
 
 CitcomSLibmodule_la_LDFLAGS = -module -release $(VERSION)

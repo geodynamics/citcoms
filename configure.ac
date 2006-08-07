@@ -48,9 +48,9 @@ AC_ARG_WITH([pyre],
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
 AC_ARG_WITH([hdf5],
     [AC_HELP_STRING([--with-hdf5],
-        [enable HDF5 output @<:@default=no@:>@])],
+        [enable HDF5 output @<:@default=yes@:>@])],
     [want_hdf5="$withval"],
-    [want_hdf5=no])
+    [want_hdf5=yes])
 AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AC_ARG_ENABLE([embedding],
     [AC_HELP_STRING([--enable-embedding],

@@ -44,6 +44,10 @@ libCitcomS_la_LIBADD = $(LIBM) $(LIBHDF5)
 libCitcomS_la_LDFLAGS = -release $(VERSION)
 libCitcomS_la_SOURCES = $(sources)
 
+if COND_HDF5
+    libCitcomS_a_CFLAGS += -DUSE_HDF5
+endif
+
 CC = $(MPICC)
 INCLUDES = -I$(top_srcdir)/lib/Common $(MPIINCLUDES)
 sources = \

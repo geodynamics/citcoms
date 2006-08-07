@@ -67,6 +67,11 @@ CitcomSRegional_SOURCES = Citcom.c
 CitcomSRegional_CPPFLAGS =
 CitcomSRegional_LDADD = $(libCitcomS) $(MPILIBS) $(LIBHDF5) $(LIBM)
 
+if COND_HDF5
+    CitcomSFull_CPPFLAGS += -DUSE_HDF5
+    CitcomSRegional_CPPFLAGS += -DUSE_HDF5
+endif
+
 # citcoms (top-level Python script)
 citcoms: $(srcdir)/citcoms.in Makefile
 	here=`pwd`; \

@@ -76,4 +76,4 @@ struct HDF5_INFO
     double *scalar2d;               /* shape (nx,ny) */
     double *scalar1d;               /* shape (nz,) */
 
-} hdf5;
+};
