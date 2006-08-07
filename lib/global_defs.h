@@ -132,7 +132,7 @@ struct Rect {
     float y2[40];
     float halfw[40];
     float mag[40];
-} ;
+};
 
 
 struct Circ {
@@ -183,7 +183,7 @@ struct RectBc {
     float z2[40];
     float halfw[40];
     float mag[40];
-} ;
+};
 
 
 struct CircBc {
@@ -227,7 +227,7 @@ struct HarmBc {
     float ka[20][40];
     float phx[20][40];
     float phz[20][40];
- };
+};
 
 
 struct Shape_function_dA  {
@@ -797,6 +797,10 @@ struct DATA {
     float   timedir;
 };
 
+#ifdef USE_HDF5
+#include "hdf5_related.h"
+#endif
+
 struct All_variables {
 
 #include "solver.h"
@@ -806,13 +810,13 @@ struct All_variables {
 #include "advection.h"
 #include "tracer_defs.h"
 
-#ifdef USE_HDF5
-#include "hdf5_info.h"
-#endif
-
     FILE *fp;
     FILE *fptime;
     FILE *fp_out;
+
+#ifdef USE_HDF5
+    struct HDF5_INFO hdf5;
+#endif
     struct HAVE Have;
     struct BAVE Bulkave;
     struct MESH_DATA mesh;

@@ -63,7 +63,7 @@ sources = \
 	General_matrix_functions.c \
 	global_defs.h \
 	Global_operations.c \
-	hdf5_info.h \
+	hdf5_related.h \
 	Initial_temperature.c \
 	initial_temperature.h \
 	Instructions.c \
