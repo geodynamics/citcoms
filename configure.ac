@@ -162,6 +162,16 @@ if test -z "$LIBHDF5"; then
         ])
     ])
 fi
+if test "$want_hdf5" = yes; then
+    AC_CHECK_FUNC(H5Pset_dxpl_mpio, , [
+        AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [
+            LIBHDF5="-lhdf5"
+        ] , [
+            AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
+        ])
+    ])
+fi
+
 AC_SUBST(LIBHDF5)
 
 AC_CONFIG_FILES([Makefile
