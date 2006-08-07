@@ -49,7 +49,7 @@ if COND_HDF5
 endif
 
 CC = $(MPICC)
-INCLUDES = -I$(top_srcdir)/lib/Common $(MPIINCLUDES)
+INCLUDES = $(MPIINCLUDES)
 sources = \
 	Advection_diffusion.c \
 	advection_diffusion.h \
