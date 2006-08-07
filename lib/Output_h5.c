@@ -144,7 +144,9 @@ void h5output(struct All_variables *E, int cycles)
     MPI_Finalize();
     exit(8);
 #else
+    /* DEBUG
     printf("h5output()\n");
+    // */
 
     if (cycles == 0) {
         h5output_open(E);
@@ -249,12 +251,14 @@ void h5output_open(struct All_variables *E)
     int nodex, nodey, nodez;
     int nx, ny, nz;
 
+    /* DEBUG
     printf("h5output_open()\n");
+    // */
 
     /* determine filename */
     strncpy(E->hdf5.filename, E->control.data_file, (size_t)99);
     strncat(E->hdf5.filename, ".h5", (size_t)99);
-    printf("\tfilename = \"%s\"\n", E->hdf5.filename);
+    //printf("\tfilename = \"%s\"\n", E->hdf5.filename);
 
     /* set up file creation property list with defaults */
     fcpl_id = H5P_DEFAULT;
@@ -438,8 +442,11 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
      *  estimated size_hint parameter
      */
     group_id = H5Gcreate(loc_id, name, size_hint);
+
+    /* DEBUG
     printf("h5create_group()\n");
     printf("\tname=\"%s\"\n", name);
+    // */
 
     /* Write necessary attributes for PyTables compatibility */
     set_attribute(group_id, "TITLE", "CitcomS HDF5 group");
@@ -455,7 +462,7 @@ static hid_t h5open_cap(struct All_variables *E)
 {
     hid_t cap_group = H5Gopen(E->hdf5.file_id,
                               E->hdf5.cap_groups[E->hdf5.capid]);
-    ///* DEBUG
+    /* DEBUG
     printf("\th5open_cap()\n");
     printf("\t\tOpening capid %d: %s\n", E->hdf5.capid,
            E->hdf5.cap_groups[E->hdf5.capid]);
@@ -476,7 +483,7 @@ static void h5create_dataset(hid_t loc_id,
     hid_t dataset;      /* dataset identifier */
     herr_t status;
 
-    ///* DEBUG
+    /* DEBUG
     printf("\t\th5create_dataset()\n");
     printf("\t\t\tname=\"%s\"\n", name);
     printf("\t\t\trank=%d\n", rank);
@@ -663,7 +670,7 @@ static void h5create_field(hid_t loc_id,
 
     }
 
-    ///* DEBUG
+    /* DEBUG
     printf("\th5create_field()\n");
     printf("\t\tname=\"%s\"\n", name);
     printf("\t\tshape=(%d,%d,%d,%d,%d)\n",
@@ -708,7 +715,7 @@ static void h5write_dataset(hid_t dset_id,
     hid_t dxpl_id;      /* dataset transfer property list identifier */
     herr_t status;
     
-    ///* DEBUG
+    /* DEBUG
     printf("\th5write_dataset()\n");
     printf("\t\trank    = %d\n", rank);
     if(size != NULL)
@@ -737,31 +744,31 @@ static void h5write_dataset(hid_t dset_id,
     /* extend the dataset if necessary */
     if(size != NULL)
     {
-        printf("\t\tExtending dataset\n");
+        //printf("\t\tExtending dataset\n");
         status = H5Dextend(dset_id, size);
     }
 
     /* get file dataspace */
-    printf("\t\tGetting file dataspace from dataset\n");
+    //printf("\t\tGetting file dataspace from dataset\n");
     filespace = H5Dget_space(dset_id);
 
     /* create memory dataspace */
-    printf("\t\tCreating memory dataspace\n");
+    //printf("\t\tCreating memory dataspace\n");
     memspace = H5Screate_simple(rank, memdims, NULL);
 
     /* hyperslab selection */
-    printf("\t\tSelecting hyperslab in file dataspace\n");
+    //printf("\t\tSelecting hyperslab in file dataspace\n");
     status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                  offset, stride, count, block);
 
     /* dataset transfer property list */
-    printf("\t\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
+    //printf("\t\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
     //status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
     /* write the data to the hyperslab */
-    printf("\t\tWriting data to the hyperslab\n");
+    //printf("\t\tWriting data to the hyperslab\n");
     status = H5Dwrite(dset_id, mem_type_id, memspace, filespace, dxpl_id, data);
     
     /* release resources */
@@ -1292,7 +1299,9 @@ void h5output_coord(struct All_variables *E)
         }
     }
 
+    /* DEBUG
     printf("h5output_coord()\n");
+    // */
 
     /* write to dataset */
     cap_group = h5open_cap(E);
@@ -1356,7 +1365,9 @@ void h5output_velocity(struct All_variables *E, int cycles)
         }
     }
 
+    /* DEBUG
     printf("h5output_velocity()\n");
+    // */
 
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "velocity");
@@ -1416,7 +1427,9 @@ void h5output_temperature(struct All_variables *E, int cycles)
         }
     }
 
+    /* DEBUG
     printf("h5output_temperature()\n");
+    // */
 
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "temperature");
@@ -1478,7 +1491,9 @@ void h5output_viscosity(struct All_variables *E, int cycles)
         }
     }
 
+    /* DEBUG
     printf("h5output_viscosity()\n");
+    // */
 
     cap = h5open_cap(E);
     dataset = H5Dopen(cap, "viscosity");
