@@ -153,23 +153,24 @@ fi
 AC_SUBST(LIBM)
 
 AC_ARG_VAR(LIBHDF5, [HDF5 library])
-if test -z "$LIBHDF5"; then
-    AC_CHECK_FUNC(H5Fopen, , [
-        AC_CHECK_LIB(hdf5, H5Fopen, [
-            LIBHDF5="-lhdf5"
-        ], [
-            AC_MSG_ERROR([HDF5 library not found; try setting LIBHDF5])
-        ])
-    ])
-fi
 if test "$want_hdf5" = yes; then
+    if test -z "$LIBHDF5"; then
+        AC_CHECK_FUNC(H5Fopen, , [
+            AC_CHECK_LIB(hdf5, H5Fopen, [
+                LIBHDF5="-lhdf5"
+            ], [
+                AC_MSG_ERROR([HDF5 library not found; try setting LIBHDF5])
+            ])
+        ])
+    fi
     AC_CHECK_FUNC(H5Pset_dxpl_mpio, , [
         AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [
-            LIBHDF5="-lhdf5"
-        ] , [
-            AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
+            have_phdf5="yes"
         ])
     ])
+    if test -z "$have_phdf5"; then
+        AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
+    fi
 fi
 
 AC_SUBST(LIBHDF5)
