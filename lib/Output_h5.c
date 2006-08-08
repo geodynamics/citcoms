@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
@@ -46,6 +46,8 @@
  * Function prototypes                                                      *
  ****************************************************************************/
 
+#ifdef USE_HDF5
+
 void h5output_meta(struct All_variables *);
 void h5output_coord(struct All_variables *);
 void h5output_velocity(struct All_variables *, int);
@@ -60,7 +62,6 @@ void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
 void h5output_ave_r(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
-#ifdef USE_HDF5
 static hid_t h5create_file(const char *filename,
                            unsigned flags,
                            hid_t fcpl_id,
@@ -248,7 +249,7 @@ void h5output_open(struct All_variables *E)
 
     herr_t status;
 
-    MPI_Comm comm = E->parallel.world; 
+    MPI_Comm comm = E->parallel.world;
     MPI_Info info = MPI_INFO_NULL;
 
     int cap;
@@ -337,7 +338,7 @@ void h5output_open(struct All_variables *E)
         //surf_group = h5create_group(cap_group, "surf", (size_t)0);
 
         //h5create_surf_coord(surf_group, type_id, nodex, nodey);
-        //h5create_surf_velocity(surf_group, type_id, nodex, nodey); 
+        //h5create_surf_velocity(surf_group, type_id, nodex, nodey);
         //h5create_surf_heatflux(surf_group, type_id, nodex, nodey);
         //h5create_surf_topography(surf_group, type_id, nodex, nodey);
         //status = H5Gclose(surf_group);
@@ -350,7 +351,7 @@ void h5output_open(struct All_variables *E)
         //botm_group = h5create_group(cap_group, "botm", (size_t)0);
 
         //h5create_surf_coord(botm_group, type_id, nodex, nodey);
-        //h5create_surf_velocity(botm_group, type_id, nodex, nodey); 
+        //h5create_surf_velocity(botm_group, type_id, nodex, nodey);
         //h5create_surf_heatflux(botm_group, type_id, nodex, nodey);
         //h5create_surf_topography(botm_group, type_id, nodex, nodey);
         //status = H5Gclose(botm_group);
@@ -448,7 +449,7 @@ static hid_t h5create_file(const char *filename,
 static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
 {
     hid_t group_id;
-    
+
     /* TODO:
      *  Make sure this function is called with an appropriately
      *  estimated size_hint parameter
@@ -466,7 +467,7 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
     set_attribute(group_id, "VERSION", "1.0");
     set_attribute(group_id, "FILTERS", FILTERS_P);
     set_attribute(group_id, "PYTABLES_FORMAT_VERSION", "1.5");
-    
+
     return group_id;
 }
 
@@ -501,7 +502,7 @@ static void h5create_dataset(hid_t loc_id,
     printf("\t\t\trank=%d\n", rank);
     printf("\t\t\tdims={%d,%d,%d,%d,%d}\n",
         (int)dims[0], (int)dims[1], (int)dims[2], (int)dims[3], (int)dims[4]);
-    if(maxdims != NULL) 
+    if(maxdims != NULL)
         printf("\t\t\tmaxdims={%d,%d,%d,%d,%d}\n",
             (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
             (int)maxdims[3], (int)maxdims[4]);
@@ -517,7 +518,7 @@ static void h5create_dataset(hid_t loc_id,
 
     /* create the dataspace for the dataset */
     dataspace = H5Screate_simple(rank, dims, maxdims);
-    
+
     dcpl_id = H5P_DEFAULT;
     if (chunkdims != NULL)
     {
@@ -651,7 +652,7 @@ static void h5create_field(hid_t loc_id,
             maxdims[t] = H5S_UNLIMITED;
             chunkdims[t] = 1;
         }
-        
+
         if (x >= 0)
         {
             dims[x] = xdim;
@@ -726,7 +727,7 @@ static void h5write_dataset(hid_t dset_id,
     hid_t memspace;     /* memory dataspace */
     hid_t dxpl_id;      /* dataset transfer property list identifier */
     herr_t status;
-    
+
     /* DEBUG
     printf("\th5write_dataset()\n");
     printf("\t\trank    = %d\n", rank);
@@ -782,7 +783,7 @@ static void h5write_dataset(hid_t dset_id,
     /* write the data to the hyperslab */
     //printf("\t\tWriting data to the hyperslab\n");
     status = H5Dwrite(dset_id, mem_type_id, memspace, filespace, dxpl_id, data);
-    
+
     /* release resources */
     status = H5Pclose(dxpl_id);
     status = H5Sclose(memspace);
@@ -857,7 +858,7 @@ static void h5write_field(hid_t dset_id,
         y += 1;
         z += 1;
     }
-    
+
     if (cdim > 0)
     {
         rank += 1;
@@ -1040,9 +1041,9 @@ static void h5create_time(hid_t loc_id)
  * Functions to save specific physical quantities as HDF5 arrays.           *
  ****************************************************************************/
 
+#ifdef USE_HDF5
 void h5output_meta(struct All_variables *E)
 {
-#ifdef USE_HDF5
     hid_t input;
     herr_t status;
 
@@ -1050,15 +1051,15 @@ void h5output_meta(struct All_variables *E)
     int rank;
     hsize_t *dims;
     double *data;
-    
+
     input = h5create_group(E->hdf5.file_id, "input", (size_t)0);
-    
+
     /*
      * Advection_diffusion.inventory
      */
-    
+
     status = set_attribute_numerical(input, "inputdiffusivity", H5T_NATIVE_FLOAT, &(E->control.inputdiff));
-    
+
     status = set_attribute_numerical(input, "ADV", H5T_NATIVE_INT, &(E->advection.ADVECTION));
     status = set_attribute_numerical(input, "fixed_timestep", H5T_NATIVE_FLOAT, &(E->advection.fixed_timestep));
     status = set_attribute_numerical(input, "finetunedt", H5T_NATIVE_FLOAT, &(E->advection.fine_tune_dt));
@@ -1080,19 +1081,19 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_numerical(input, "topvbc", H5T_NATIVE_INT, &(E->mesh.topvbc));
     status = set_attribute_numerical(input, "topvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXtopval));
     status = set_attribute_numerical(input, "topvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYtopval));
-    
+
     status = set_attribute_numerical(input, "pseudo_free_surf", H5T_NATIVE_INT, &(E->control.pseudo_free_surf));
-    
+
     status = set_attribute_numerical(input, "botvbc", H5T_NATIVE_INT, &(E->mesh.botvbc));
     status = set_attribute_numerical(input, "botvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXbotval));
     status = set_attribute_numerical(input, "botvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYbotval));
-    
+
     status = set_attribute_numerical(input, "toptbc", H5T_NATIVE_INT, &(E->mesh.toptbc));
     status = set_attribute_numerical(input, "toptbcval", H5T_NATIVE_FLOAT, &(E->control.TBCtopval));
 
     status = set_attribute_numerical(input, "bottbc", H5T_NATIVE_INT, &(E->mesh.bottbc));
     status = set_attribute_numerical(input, "bottbcval", H5T_NATIVE_FLOAT, &(E->control.TBCbotval));
-    
+
     status = set_attribute_numerical(input, "temperature_bound_adj", H5T_NATIVE_INT, &(E->control.temperature_bound_adj));
     status = set_attribute_numerical(input, "depth_bound_adj", H5T_NATIVE_FLOAT, &(E->control.depth_bound_adj));
     status = set_attribute_numerical(input, "width_bound_adj", H5T_NATIVE_FLOAT, &(E->control.width_bound_adj));
@@ -1115,7 +1116,7 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_numerical(input, "z_cmb", H5T_NATIVE_FLOAT, &(E->viscosity.zcmb));
     status = set_attribute_numerical(input, "layer_km", H5T_NATIVE_FLOAT, &(E->data.layer_km));
     status = set_attribute_numerical(input, "radius_km", H5T_NATIVE_FLOAT, &(E->data.radius_km));
-    
+
     /*
      * IC.inventory
      */
@@ -1126,7 +1127,7 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_numerical(input, "zero_elapsed_time", H5T_NATIVE_INT, &(E->control.zero_elapsed_time));
 
     status = set_attribute_numerical(input, "tic_method", H5T_NATIVE_INT, &(E->convection.tic_method));
-    
+
     if (E->convection.tic_method == 0)
     {
         n = E->convection.number_of_perturbations;
@@ -1147,12 +1148,12 @@ void h5output_meta(struct All_variables *E)
         status = set_attribute_numerical(input, "blob_radius", H5T_NATIVE_FLOAT, &(E->convection.blob_radius));
         status = set_attribute_numerical(input, "blob_dT", H5T_NATIVE_FLOAT, &(E->convection.blob_dT));
     }
-    
+
     /*
      * Param.inventory
      */
-    
-    status = set_attribute_numerical(input, "file_vbcs", H5T_NATIVE_INT, &(E->control.vbcs_file)); 
+
+    status = set_attribute_numerical(input, "file_vbcs", H5T_NATIVE_INT, &(E->control.vbcs_file));
     status = set_attribute(input, "vel_bound_file", E->control.velocity_boundary_file);
 
     status = set_attribute_numerical(input, "mat_control", H5T_NATIVE_INT, &(E->control.mat_control));
@@ -1185,11 +1186,11 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_numerical(input, "clapeyroncmb", H5T_NATIVE_FLOAT, &(E->control.clapeyroncmb));
     status = set_attribute_numerical(input, "transTcmb", H5T_NATIVE_FLOAT, &(E->control.transTcmb));
     status = set_attribute_numerical(input, "widthcmb", H5T_NATIVE_FLOAT, &(E->control.widthcmb));
- 
+
     /*
      * Solver.inventory
      */
-    
+
     status = set_attribute(input, "datafile", E->control.data_file);
     status = set_attribute(input, "datafile_old", E->control.old_P_file);
 
@@ -1254,7 +1255,7 @@ void h5output_meta(struct All_variables *E)
 
     free(data);
     free(dims);
-    
+
     if (E->sphere.caps == 1)
     {
         status = set_attribute_numerical(input, "theta_min", H5T_NATIVE_DOUBLE, &(E->control.theta_min));
@@ -1278,7 +1279,7 @@ void h5output_meta(struct All_variables *E)
     /*
      * Visc.inventory
      */
-    
+
     status = set_attribute(input, "Viscosity", E->viscosity.STRUCTURE);
     status = set_attribute_numerical(input, "visc_smooth_method", H5T_NATIVE_INT, &(E->viscosity.smooth_cycles));
     status = set_attribute_numerical(input, "VISC_UPDATE", H5T_NATIVE_INT, &(E->viscosity.update_allowed));
@@ -1325,13 +1326,10 @@ void h5output_meta(struct All_variables *E)
      * Release resources
      */
     status = H5Gclose(input);
-#endif
 }
 
 void h5output_coord(struct All_variables *E)
 {
-#ifdef USE_HDF5
-
     hid_t cap_group;
     hid_t dataset;
     herr_t status;
@@ -1361,7 +1359,7 @@ void h5output_coord(struct All_variables *E)
     mx = (p == nprocx-1) ? nx : nx-1;
     my = (p == nprocy-1) ? ny : ny-1;
     mz = (p == nprocz-1) ? nz : nz-1;
-    
+
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
     {
@@ -1392,12 +1390,10 @@ void h5output_coord(struct All_variables *E)
     status = H5Dclose(dataset);
     status = H5Gclose(cap_group);
 
-#endif
 }
 
 void h5output_velocity(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
     hid_t cap;
     hid_t dataset;
     herr_t status;
@@ -1427,7 +1423,7 @@ void h5output_velocity(struct All_variables *E, int cycles)
     mx = (p == nprocx-1) ? nx : nx-1;
     my = (p == nprocy-1) ? ny : ny-1;
     mz = (p == nprocz-1) ? nz : nz-1;
-    
+
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
     {
@@ -1456,12 +1452,10 @@ void h5output_velocity(struct All_variables *E, int cycles)
     /* release resources */
     status = H5Dclose(dataset);
     status = H5Gclose(cap);
-#endif
 }
 
 void h5output_temperature(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
     hid_t cap;
     hid_t dataset;
     herr_t status;
@@ -1491,7 +1485,7 @@ void h5output_temperature(struct All_variables *E, int cycles)
     mx = (p == nprocx-1) ? nx : nx-1;
     my = (p == nprocy-1) ? ny : ny-1;
     mz = (p == nprocz-1) ? nz : nz-1;
-    
+
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
     {
@@ -1518,12 +1512,10 @@ void h5output_temperature(struct All_variables *E, int cycles)
     /* release resources */
     status = H5Dclose(dataset);
     status = H5Gclose(cap);
-#endif
 }
 
 void h5output_viscosity(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
     hid_t cap;
     hid_t dataset;
     herr_t status;
@@ -1555,7 +1547,7 @@ void h5output_viscosity(struct All_variables *E, int cycles)
     mx = (p == nprocx-1) ? nx : nx-1;
     my = (p == nprocy-1) ? ny : ny-1;
     mz = (p == nprocz-1) ? nz : nz-1;
-    
+
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
     {
@@ -1582,61 +1574,38 @@ void h5output_viscosity(struct All_variables *E, int cycles)
     /* release resources */
     status = H5Dclose(dataset);
     status = H5Gclose(cap);
-#endif
 }
 
 void h5output_pressure(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_stress(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_material(struct All_variables *E)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_tracer(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_surf_botm(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_surf_botm_pseudo_surf(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_avg_r(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
-
-#endif
 }
 
 void h5output_time(struct All_variables *E, int cycles)
 {
-#ifdef USE_HDF5
     double CPU_time0();
 
     hid_t dxpl_id;      /* data transfer property list identifier */
@@ -1646,7 +1615,7 @@ void h5output_time(struct All_variables *E, int cycles)
     hid_t dataset;
 
     herr_t status;
-    
+
     hsize_t dim;
     hsize_t offset;
     hsize_t count;
@@ -1673,14 +1642,14 @@ void h5output_time(struct All_variables *E, int cycles)
         /* Extend dataset */
         dim = cycles + 1;
         status = H5Dextend(dataset, &dim);
-        
+
         /* Get file dataspace */
         filespace = H5Dget_space(dataset);
-        
+
         /* Define memory dataspace */
         dim = 1;
         dataspace = H5Screate_simple(1, &dim, NULL);
-        
+
         /* Get datatype */
         datatype = H5Dget_type(dataset);
 
@@ -1701,5 +1670,5 @@ void h5output_time(struct All_variables *E, int cycles)
         status = H5Sclose(filespace);
         status = H5Dclose(dataset);
     }
-#endif
 }
+#endif

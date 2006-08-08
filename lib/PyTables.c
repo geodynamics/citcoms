@@ -1,11 +1,13 @@
 /* PyTables.c - This file exposes an API to create HDF5 files that
- *              are compatible with PyTables. 
+ *              are compatible with PyTables.
  *
  * TODO: display appropriate copyright notices, for the functions
  *       that were taken from the PyTables source.
  *
  */
 
+
+#ifdef USE_HDF5
 #include "hdf5.h"
 #include "pytables.h"
 
@@ -26,7 +28,7 @@ static herr_t find_attr(hid_t loc_id, const char *name, void *op_data)
      */
 
     int ret = 0;
-    
+
     char *attr_name = (char *)op_data;
 
     /* Shut the compiler up */
@@ -107,7 +109,7 @@ herr_t set_attribute(hid_t obj_id,
 
     /* Verify if the attribute already exists */
     has_attr = find_attribute(obj_id, attr_name);
-    
+
     /* The attribute already exists, delete it */
     if (has_attr == 1)
     {
@@ -160,7 +162,7 @@ herr_t set_attribute_numerical(hid_t obj_id,
     /* Create the data space for the attribute. */
     space_id = H5Screate(H5S_SCALAR);
     if (space_id < 0) goto out;
-    
+
     /* Verify if the attribute already exists */
     has_attr = find_attribute(obj_id, attr_name);
     if (has_attr == 1)
@@ -169,7 +171,7 @@ herr_t set_attribute_numerical(hid_t obj_id,
         status = H5Adelete(obj_id, attr_name);
         if(status < 0) goto out;
     }
-    
+
     /* Create the attribute. */
     attr_id = H5Acreate(obj_id, attr_name, type_id, space_id, H5P_DEFAULT);
     if (attr_id < 0) goto out;
@@ -298,7 +300,7 @@ herr_t make_array(hid_t loc_id,
         if(status < 0) goto out;
     }
 
-    /* 
+    /*
      * Set the conforming array attributes
      */
 
@@ -330,3 +332,4 @@ out:
     /* if(dims_chunk) free(dims_chunk); */
     return -1;
 }
+#endif
