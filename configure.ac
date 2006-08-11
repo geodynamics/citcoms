@@ -65,7 +65,10 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
     AC_PATH_PROG([MPIRUN], [mpirun])
     if test -z "$MPIRUN"; then
-        AC_MSG_ERROR([program 'mpirun' not found])
+        AC_PATH_PROG([MPIRUN], [mpiexec])
+        if test -z "$MPIRUN"; then
+            AC_MSG_ERROR([program 'mpirun' not found])
+        fi
     fi
     AC_PATH_PROG([BSUB], [bsub])
     AC_PATH_PROG([QSUB], [qsub])
@@ -79,6 +82,9 @@ if test "$want_pyre" = yes; then
             LAUNCHER="globus"
         else
             if $MPIRUN --help 2>&1 | grep machinefile >/dev/null; then
+                LAUNCHER="mpich"
+            elif $MPIRUN --invalid 2>&1 | grep softness >/dev/null; then
+                # MPICH2
                 LAUNCHER="mpich"
             else
                 LAUNCHER="lam-mpi"
@@ -184,7 +190,8 @@ AC_CONFIG_FILES([Makefile
                  module/Makefile
                  module/Exchanger/Makefile
                  tests/Makefile
-                 visual/Makefile])
+                 visual/Makefile
+                 visual/OpenDXMacro/Makefile])
 
 if test "$want_pyre" = yes; then
     AC_CONFIG_SUBDIRS([pythia-0.8 Exchanger])

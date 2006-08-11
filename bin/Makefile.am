@@ -25,22 +25,25 @@
 # $Id$
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
-noinst_SCRIPTS =
+bin_SCRIPTS =
+
+abs_top_srcdir = @abs_top_srcdir@
+abs_builddir = @abs_builddir@
 
 if COND_PYRE
 
-noinst_SCRIPTS += citcoms
+bin_SCRIPTS += citcoms
 
 if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms
     INTERPRETER = $(bindir)/pycitcoms
-    noinstINTERPRETER = $$here/pycitcoms
-    noinstPYTHONPATH = $$top_srcdir
+    noinstINTERPRETER = $(abs_builddir)/pycitcoms
+    noinstPYTHONPATH = $(abs_top_srcdir)
     libCitcomS = $(top_builddir)/lib/libCitcomS.a
 else
     INTERPRETER = $(PYTHON)
     noinstINTERPRETER = $(PYTHON)
-    noinstPYTHONPATH = $$top_srcdir:$$top_srcdir/module/.libs:$$top_srcdir/module/Exchanger/.libs
+    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_srcdir)/module/.libs:$(abs_top_srcdir)/module/Exchanger/.libs
     libCitcomS = $(top_builddir)/lib/libCitcomS.la
 endif
 
@@ -73,22 +76,24 @@ if COND_HDF5
 endif
 
 # citcoms (top-level Python script)
+do_build = sed -e s%[@]INTERPRETER[@]%$(noinstINTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(noinstPYTHONPATH)%g
+do_install = sed -e s%[@]INTERPRETER[@]%$(INTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(PYTHONPATH)%g
 citcoms: $(srcdir)/citcoms.in Makefile
-	here=`pwd`; \
-	top_srcdir=`cd $(top_srcdir) && pwd`; \
-	sed \
-		-e "s|[@]INTERPRETER[@]|$(noinstINTERPRETER)|g" \
-		-e "s|[@]PYTHONPATH[@]|$(noinstPYTHONPATH)|g" \
-		< $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+	$(do_build) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
 	chmod +x $@
-install-exec-hook:
-	here=`pwd`; \
-	sed \
-		-e "s|[@]INTERPRETER[@]|$(INTERPRETER)|g" \
-		-e "s|[@]PYTHONPATH[@]|$(PYTHONPATH)|g" \
-		< $(srcdir)/citcoms.in > $(DESTDIR)$(bindir)/citcoms || (rm -f $@ && exit 1)
-	chmod +x $(DESTDIR)$(bindir)/citcoms
-CLEANFILES = $(noinst_SCRIPTS)
+install-binSCRIPTS: $(bin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
+	@list='$(bin_SCRIPTS)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f $$d$$p; then \
+	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	    echo " $(do_install) '$$d$$p.in' > '$(DESTDIR)$(bindir)/$$f'"; \
+	    $(do_install) "$$d$$p.in" > "$(DESTDIR)$(bindir)/$$f"; \
+	    echo " chmod +x '$(DESTDIR)$(bindir)/$$f'"; \
+	    chmod +x "$(DESTDIR)$(bindir)/$$f"; \
+	  else :; fi; \
+	done
 EXTRA_DIST = citcoms.in
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + libExchanger +

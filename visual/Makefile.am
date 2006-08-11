@@ -23,6 +23,14 @@
 
 # $Id$
 
+SUBDIRS = OpenDXMacro
+
+SUFFIXES = .net.in .net
+
+visualdir = $(pkgdatadir)/visual
+dxmacrodir = $(visualdir)/OpenDXMacro
+abs_builddir = @abs_builddir@
+
 dist_bin_SCRIPTS = \
 	autocombine.py \
 	batchcombine.py \
@@ -42,15 +50,7 @@ dist_bin_SCRIPTS = \
 	pasteCitcomData.sh \
 	zslice.py
 
-visualdir = $(pkgdatadir)/visual
-dxmacrodir = $(visualdir)/OpenDXMacro
 nobase_dist_visual_DATA = \
-	OpenDXMacro/RTFtoXYZ2D.net \
-	OpenDXMacro/RTFtoXYZ.net \
-	OpenDXMacro/ScaledGlyphs.net \
-	OpenDXMacro/ShowSphere.net \
-	OpenDXMacro/VelocityRTFtoXYZ2D.net \
-	OpenDXMacro/VelocityRTFtoXYZ.net \
 	samples/fulltest.cap0.0 \
 	samples/fulltest.cap0.0.general \
 	samples/fulltest.cap1.0 \
@@ -85,55 +85,31 @@ nodist_visual_DATA = \
 	visFull.net \
 	visRegional.net \
 	visRegionalSurface.net
-nodist_dxmacro_DATA = \
-	CitcomSFullImport.net \
-	CitcomSImport.net \
-	CitcomSSurfaceHeatflux.net \
-	CitcomSSurfaceImport.net \
-	CitcomSSurfaceTopo.net \
-	CitcomSSurfaceVelocity.net \
-	CitcomSTemperature.net \
-	CitcomSVelocity.net \
-	CitcomSViscosity.net
-do_subst = sed \
-	-e 's|[@]dxmacrodir[@]|$(dxmacrodir)|g'
-visFull.net: $(srcdir)/visFull.net.in
-	$(do_subst) < $(srcdir)/visFull.net.in > $@ || (rm -f $@ && exit 1)
-visRegional.net: $(srcdir)/visRegional.net.in
-	$(do_subst) < $(srcdir)/visRegional.net.in > $@ || (rm -f $@ && exit 1)
-visRegionalSurface.net: $(srcdir)/visRegionalSurface.net.in
-	$(do_subst) < $(srcdir)/visRegionalSurface.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSFullImport.net: $(srcdir)/OpenDXMacro/CitcomSFullImport.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSFullImport.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSImport.net: $(srcdir)/OpenDXMacro/CitcomSImport.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSImport.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSSurfaceHeatflux.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceHeatflux.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceHeatflux.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSSurfaceImport.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceImport.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceImport.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSSurfaceTopo.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceTopo.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceTopo.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSSurfaceVelocity.net: $(srcdir)/OpenDXMacro/CitcomSSurfaceVelocity.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSSurfaceVelocity.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSTemperature.net: $(srcdir)/OpenDXMacro/CitcomSTemperature.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSTemperature.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSVelocity.net: $(srcdir)/OpenDXMacro/CitcomSVelocity.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSVelocity.net.in > $@ || (rm -f $@ && exit 1)
-CitcomSViscosity.net: $(srcdir)/OpenDXMacro/CitcomSViscosity.net.in
-	$(do_subst) < $(srcdir)/OpenDXMacro/CitcomSViscosity.net.in > $@ || (rm -f $@ && exit 1)
-CLEANFILES = $(nodist_visual_DATA) $(nodist_dxmacro_DATA)
-EXTRA_DIST = \
-	OpenDXMacro/CitcomSFullImport.net.in \
-	OpenDXMacro/CitcomSImport.net.in \
-	OpenDXMacro/CitcomSSurfaceHeatflux.net.in \
-	OpenDXMacro/CitcomSSurfaceImport.net.in \
-	OpenDXMacro/CitcomSSurfaceTopo.net.in \
-	OpenDXMacro/CitcomSSurfaceVelocity.net.in \
-	OpenDXMacro/CitcomSTemperature.net.in \
-	OpenDXMacro/CitcomSVelocity.net.in \
-	OpenDXMacro/CitcomSViscosity.net.in \
+
+visual_templates = \
 	visFull.net.in \
 	visRegional.net.in \
 	visRegionalSurface.net.in
+
+do_build = sed -e s:[@]dxmacrodir[@]:$(abs_builddir):g
+do_install = sed -e s:[@]dxmacrodir[@]:$(dxmacrodir):g
+
+.net.in.net:
+	$(do_build) $< > $@ || (rm -f $@ && exit 1)
+
+install-nodist_visualDATA: $(nodist_visual_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(visualdir)" || $(mkdir_p) "$(DESTDIR)$(visualdir)"
+	@list='$(nodist_visual_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(do_install) '$$d$$p.in' > '$(DESTDIR)$(visualdir)/$$f'"; \
+	  $(do_install) "$$d$$p.in" > "$(DESTDIR)$(visualdir)/$$f"; \
+	  echo " chmod 644 '$(DESTDIR)$(visualdir)/$$f'"; \
+	  chmod 644 "$(DESTDIR)$(visualdir)/$$f"; \
+	done
+
+CLEANFILES = $(nodist_visual_DATA)
+EXTRA_DIST = $(visual_templates)
 
 ## end of Makefile.am
