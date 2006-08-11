@@ -91,7 +91,7 @@ visual_templates = \
 	visRegional.net.in \
 	visRegionalSurface.net.in
 
-do_build = sed -e s:[@]dxmacrodir[@]:$(abs_builddir):g
+do_build = sed -e s:[@]dxmacrodir[@]:$(abs_builddir)/OpenDXMacro:g
 do_install = sed -e s:[@]dxmacrodir[@]:$(dxmacrodir):g
 
 .net.in.net:
