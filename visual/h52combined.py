@@ -91,15 +91,15 @@ def output(outputfile, x, v, t, visc):
         out.write(header)
 
         # write data
-        for i in range(ny):
-            for j in range(nx):
+        format = '%.6e '*7 + '%.6e\n'
+        for j in range(ny):
+            for i in range(nx):
                 for k in range(nz):
-                    #n = k + j*nz + i*nz*nx
-                    xx = x[j, i, k, :]
-                    vv = v[j, i, k, :]
-                    tt = t[j, i, k]
-                    hh = visc[j, i, k]
-                    format = '%.6e '*7 + '%.6e\n'
+                    #n = k + i*nz + j*nz*nx
+                    xx = x[i, j, k, :]
+                    vv = v[i, j, k, :]
+                    tt = t[i, j, k]
+                    hh = visc[i, j, k]
                     line = format % (
                         xx[0], xx[1], xx[2],
                         vv[0], vv[1], vv[2],
