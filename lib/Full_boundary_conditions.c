@@ -134,6 +134,15 @@ void full_temperature_boundary_conditions(E)
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
       }
 
+    if(E->control.lith_age_time==1)  {
+
+   /* set the regions in which to use lithosphere files to determine temperature
+   note that this is called if the lithosphere age in inputted every time step
+   OR it is only maintained in the boundary regions */
+      lith_age_temperature_bound_adj(E,lev);
+    }
+
+
     }     /* end for j */
 
   temperatures_conform_bcs(E);

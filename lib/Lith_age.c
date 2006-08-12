@@ -263,10 +263,12 @@ void lith_age_conform_tbc(struct All_variables *E)
   int m,j,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,i,k;
   float ttt2,ttt3,fff2,fff3;
   float r1,t1,f1,t0,temp;
+  float depth;
   float e_4;
   FILE *fp1;
   char output_file[255];
   int output;
+
 
   e_4=1.e-4;
   output = 0;
@@ -320,6 +322,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 	      if( ((E->sx[m][2][node]<=fff2) || (E->sx[m][2][node]>=fff3)) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
 		/* if < (width) from y bounds AND (depth) from top */
 
+
 		/* keep the age the same! */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.lith_age_mantle_temp * erf(temp);
@@ -353,11 +356,12 @@ void lith_age_conform_tbc(struct All_variables *E)
 	      if(  E->sx[m][3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
 		/* if closer than (lith_age_depth) from top */
 
+                depth=E->sphere.ro - E->sx[m][3][node];
+
 		/* set a new age from the file */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.lith_age_mantle_temp * erf(temp);
 
-             
 		E->sphere.cap[m].TB[1][node]=t0;
 		E->sphere.cap[m].TB[2][node]=t0;
 		E->sphere.cap[m].TB[3][node]=t0;
@@ -415,11 +419,12 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
             break;
         } /* end switch */
 
+        depth = E->sphere.ro - E->sx[j][3][node];
+
         switch (type) {
         case 0:  /* no match, next node */
             break;
         default:
-            depth = E->sphere.ro - E->sx[j][3][node];
             if(depth <= E->control.lith_age_depth) {
                 /* daf == depth_assimilation_factor */
                 daf = 0.5*depth/E->control.lith_age_depth;
