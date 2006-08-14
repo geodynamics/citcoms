@@ -40,11 +40,10 @@ extern "C" {
 
 /* PyTables.c */
 herr_t find_attribute(hid_t loc_id, const char *attr_name);
-herr_t set_attribute(hid_t obj_id, const char *attr_name, const char *attr_data);
-herr_t set_attribute_numerical(hid_t obj_id, const char *attr_name, hid_t type_id, const void *data);
-herr_t set_attribute_numerical_array(hid_t obj_id, const char *attr_name, size_t rank, hsize_t *dims, hid_t type_id, const void *data);
-herr_t set_attribute_numerical_vector(hid_t obj_id, const char *attr_name, hsize_t dim, hid_t type_id, const void *data);
-herr_t make_array(hid_t loc_id, const char *dset_name, const int rank, const hsize_t *dims, hid_t type_id, const void *data);
+herr_t set_attribute_string(hid_t obj_id, const char *attr_name, const char *attr_data);
+herr_t set_attribute(hid_t obj_id, const char *attr_name, hid_t type_id, const void *data);
+herr_t set_attribute_array(hid_t obj_id, const char *attr_name, size_t rank, hsize_t *dims, hid_t type_id, const void *data);
+herr_t set_attribute_vector(hid_t obj_id, const char *attr_name, hsize_t dim, hid_t type_id, const void *data);
 
 
 #ifdef __cplusplus

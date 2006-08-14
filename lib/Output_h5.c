@@ -62,76 +62,27 @@ void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
 void h5output_ave_r(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
-static hid_t h5create_file(const char *filename,
-                           unsigned flags,
-                           hid_t fcpl_id,
-                           hid_t fapl_id);
-
-static hid_t h5create_group(hid_t loc_id,
-                            const char *name,
-                            size_t size_hint);
-
-static void h5create_dataset(hid_t loc_id,
-                             const char *name,
-                             hid_t type_id,
-                             int rank,
-                             hsize_t *dims,
-                             hsize_t *maxdims,
-                             hsize_t *chunkdims);
-
-static void h5create_field(hid_t loc_id,
-                           const char *name,
-                           hid_t type_id,
-                           int tdim, int xdim, int ydim, int zdim,
-                           int components);
-
-static void h5create_coord(hid_t loc_id,
-                           hid_t type_id,
-                           int nodex, int nodey, int nodez);
-
-static void h5create_velocity(hid_t loc_id,
-                              hid_t type_id,
-                              int nodex, int nodey, int nodez);
-
-static void h5create_stress(hid_t loc_id,
-                            hid_t type_id,
-                            int nodex, int nodey, int nodez);
-
-static void h5create_temperature(hid_t loc_id,
-                                 hid_t type_id,
-                                 int nodex, int nodey, int nodez);
-
-static void h5create_viscosity(hid_t loc_id,
-                               hid_t type_id,
-                               int nodex, int nodey, int nodez);
-
-static void h5create_pressure(hid_t loc_id,
-                              hid_t type_id,
-                              int nodex, int nodey, int nodez);
-
-static void h5create_surf_coord(hid_t loc_id,
-                                hid_t type_id,
-                                int nodex, int nodey);
-
-static void h5create_surf_velocity(hid_t loc_id,
-                                   hid_t type_id,
-                                   int nodex, int nodey);
-
-static void h5create_surf_heatflux(hid_t loc_id,
-                                   hid_t type_id,
-                                   int nodex, int nodey);
-
-static void h5create_surf_topography(hid_t loc_id,
-                                     hid_t type_id,
-                                     int nodex, int nodey);
-
+static hid_t h5create_file(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint);
+static void h5create_dataset(hid_t loc_id, const char *name, hid_t type_id, int rank, hsize_t *dims, hsize_t *maxdims, hsize_t *chunkdims);
+static void h5create_field(hid_t loc_id, const char *name, hid_t type_id, int tdim, int xdim, int ydim, int zdim, int components);
+static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_stress(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_temperature(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_viscosity(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_pressure(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez);
+static void h5create_surf_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey);
+static void h5create_surf_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey);
+static void h5create_surf_heatflux(hid_t loc_id, hid_t type_id, int nodex, int nodey);
+static void h5create_surf_topography(hid_t loc_id, hid_t type_id, int nodex, int nodey);
 static void h5create_time(hid_t loc_id);
+
 #endif
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**,
-                         float**, float**, int);
+extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
 
 
 /****************************************************************************
@@ -434,11 +385,11 @@ static hid_t h5create_file(const char *filename,
 
     /* Write necessary attributes to root group for PyTables compatibility */
     root = H5Gopen(file_id, "/");
-    set_attribute(root, "TITLE", "CitcomS output");
-    set_attribute(root, "CLASS", "GROUP");
-    set_attribute(root, "VERSION", "1.0");
-    set_attribute(root, "FILTERS", FILTERS_P);
-    set_attribute(root, "PYTABLES_FORMAT_VERSION", "1.5");
+    set_attribute_string(root, "TITLE", "CitcomS output");
+    set_attribute_string(root, "CLASS", "GROUP");
+    set_attribute_string(root, "VERSION", "1.0");
+    set_attribute_string(root, "FILTERS", FILTERS_P);
+    set_attribute_string(root, "PYTABLES_FORMAT_VERSION", "1.5");
 
     /* release resources */
     status = H5Gclose(root);
@@ -462,11 +413,11 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
     // */
 
     /* Write necessary attributes for PyTables compatibility */
-    set_attribute(group_id, "TITLE", "CitcomS HDF5 group");
-    set_attribute(group_id, "CLASS", "GROUP");
-    set_attribute(group_id, "VERSION", "1.0");
-    set_attribute(group_id, "FILTERS", FILTERS_P);
-    set_attribute(group_id, "PYTABLES_FORMAT_VERSION", "1.5");
+    set_attribute_string(group_id, "TITLE", "CitcomS HDF5 group");
+    set_attribute_string(group_id, "CLASS", "GROUP");
+    set_attribute_string(group_id, "VERSION", "1.0");
+    set_attribute_string(group_id, "FILTERS", FILTERS_P);
+    set_attribute_string(group_id, "PYTABLES_FORMAT_VERSION", "1.5");
 
     return group_id;
 }
@@ -532,10 +483,10 @@ static void h5create_dataset(hid_t loc_id,
     dataset = H5Dcreate(loc_id, name, type_id, dataspace, dcpl_id);
 
     /* Write necessary attributes for PyTables compatibility */
-    set_attribute(dataset, "TITLE", "CitcomS HDF5 dataset"); //TODO: elsewhere?
-    set_attribute(dataset, "CLASS", "ARRAY");
-    set_attribute(dataset, "FLAVOR", "numpy");
-    set_attribute(dataset, "VERSION", "2.3");
+    set_attribute_string(dataset, "TITLE", "CitcomS HDF5 dataset"); //TODO: elsewhere?
+    set_attribute_string(dataset, "CLASS", "ARRAY");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.3");
 
     /* release resources */
     if(chunkdims != NULL)
@@ -1002,29 +953,29 @@ static void h5create_time(hid_t loc_id)
      * Write necessary attributes for PyTables compatibility
      */
 
-    set_attribute(dataset, "TITLE", "Timing table");
-    set_attribute(dataset, "CLASS", "TABLE");
-    set_attribute(dataset, "FLAVOR", "numpy");
-    set_attribute(dataset, "VERSION", "2.6");
+    set_attribute_string(dataset, "TITLE", "Timing table");
+    set_attribute_string(dataset, "CLASS", "TABLE");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.6");
 
     n = 0;
-    set_attribute_numerical(dataset, "NROWS", H5T_NATIVE_LONG, &n);
+    set_attribute(dataset, "NROWS", H5T_NATIVE_LONG, &n);
 
-    set_attribute(dataset, "FIELD_0_NAME", "time");
-    set_attribute(dataset, "FIELD_1_NAME", "time_step");
-    set_attribute(dataset, "FIELD_2_NAME", "cpu");
-    set_attribute(dataset, "FIELD_3_NAME", "cpu_step");
+    set_attribute_string(dataset, "FIELD_0_NAME", "time");
+    set_attribute_string(dataset, "FIELD_1_NAME", "time_step");
+    set_attribute_string(dataset, "FIELD_2_NAME", "cpu");
+    set_attribute_string(dataset, "FIELD_3_NAME", "cpu_step");
 
     x = 0;
-    set_attribute_numerical(dataset, "FIELD_0_FILL", H5T_NATIVE_DOUBLE, &x);
-    set_attribute_numerical(dataset, "FIELD_1_FILL", H5T_NATIVE_DOUBLE, &x);
-    set_attribute_numerical(dataset, "FIELD_2_FILL", H5T_NATIVE_DOUBLE, &x);
-    set_attribute_numerical(dataset, "FIELD_3_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute(dataset, "FIELD_0_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute(dataset, "FIELD_1_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute(dataset, "FIELD_2_FILL", H5T_NATIVE_DOUBLE, &x);
+    set_attribute(dataset, "FIELD_3_FILL", H5T_NATIVE_DOUBLE, &x);
 
     i = 1;
-    set_attribute_numerical(dataset, "AUTOMATIC_INDEX", H5T_NATIVE_INT, &i);
-    set_attribute_numerical(dataset, "REINDEX", H5T_NATIVE_INT, &i);
-    set_attribute(dataset, "FILTERS_INDEX", FILTERS_P);
+    set_attribute(dataset, "AUTOMATIC_INDEX", H5T_NATIVE_INT, &i);
+    set_attribute(dataset, "REINDEX", H5T_NATIVE_INT, &i);
+    set_attribute_string(dataset, "FILTERS_INDEX", FILTERS_P);
 
     /* Release resources */
     status = H5Pclose(dcpl_id);
@@ -1058,176 +1009,176 @@ void h5output_meta(struct All_variables *E)
      * Advection_diffusion.inventory
      */
 
-    status = set_attribute_numerical(input, "inputdiffusivity", H5T_NATIVE_FLOAT, &(E->control.inputdiff));
+    status = set_attribute(input, "inputdiffusivity", H5T_NATIVE_FLOAT, &(E->control.inputdiff));
 
-    status = set_attribute_numerical(input, "ADV", H5T_NATIVE_INT, &(E->advection.ADVECTION));
-    status = set_attribute_numerical(input, "fixed_timestep", H5T_NATIVE_FLOAT, &(E->advection.fixed_timestep));
-    status = set_attribute_numerical(input, "finetunedt", H5T_NATIVE_FLOAT, &(E->advection.fine_tune_dt));
+    status = set_attribute(input, "ADV", H5T_NATIVE_INT, &(E->advection.ADVECTION));
+    status = set_attribute(input, "fixed_timestep", H5T_NATIVE_FLOAT, &(E->advection.fixed_timestep));
+    status = set_attribute(input, "finetunedt", H5T_NATIVE_FLOAT, &(E->advection.fine_tune_dt));
 
-    status = set_attribute_numerical(input, "adv_sub_iterations", H5T_NATIVE_INT, &(E->advection.temp_iterations));
-    status = set_attribute_numerical(input, "maxadvtime", H5T_NATIVE_FLOAT, &(E->advection.max_dimensionless_time));
+    status = set_attribute(input, "adv_sub_iterations", H5T_NATIVE_INT, &(E->advection.temp_iterations));
+    status = set_attribute(input, "maxadvtime", H5T_NATIVE_FLOAT, &(E->advection.max_dimensionless_time));
 
-    status = set_attribute_numerical(input, "aug_lagr", H5T_NATIVE_INT, &(E->control.augmented_Lagr));
-    status = set_attribute_numerical(input, "aug_number", H5T_NATIVE_DOUBLE, &(E->control.augmented));
+    status = set_attribute(input, "aug_lagr", H5T_NATIVE_INT, &(E->control.augmented_Lagr));
+    status = set_attribute(input, "aug_number", H5T_NATIVE_DOUBLE, &(E->control.augmented));
 
-    status = set_attribute_numerical(input, "filter_temp", H5T_NATIVE_INT, &(E->control.filter_temperature));
+    status = set_attribute(input, "filter_temp", H5T_NATIVE_INT, &(E->control.filter_temperature));
 
     /*
      * BC.inventory
      */
 
-    status = set_attribute_numerical(input, "side_sbcs", H5T_NATIVE_INT, &(E->control.side_sbcs));
+    status = set_attribute(input, "side_sbcs", H5T_NATIVE_INT, &(E->control.side_sbcs));
 
-    status = set_attribute_numerical(input, "topvbc", H5T_NATIVE_INT, &(E->mesh.topvbc));
-    status = set_attribute_numerical(input, "topvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXtopval));
-    status = set_attribute_numerical(input, "topvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYtopval));
+    status = set_attribute(input, "topvbc", H5T_NATIVE_INT, &(E->mesh.topvbc));
+    status = set_attribute(input, "topvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXtopval));
+    status = set_attribute(input, "topvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYtopval));
 
-    status = set_attribute_numerical(input, "pseudo_free_surf", H5T_NATIVE_INT, &(E->control.pseudo_free_surf));
+    status = set_attribute(input, "pseudo_free_surf", H5T_NATIVE_INT, &(E->control.pseudo_free_surf));
 
-    status = set_attribute_numerical(input, "botvbc", H5T_NATIVE_INT, &(E->mesh.botvbc));
-    status = set_attribute_numerical(input, "botvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXbotval));
-    status = set_attribute_numerical(input, "botvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYbotval));
+    status = set_attribute(input, "botvbc", H5T_NATIVE_INT, &(E->mesh.botvbc));
+    status = set_attribute(input, "botvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXbotval));
+    status = set_attribute(input, "botvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYbotval));
 
-    status = set_attribute_numerical(input, "toptbc", H5T_NATIVE_INT, &(E->mesh.toptbc));
-    status = set_attribute_numerical(input, "toptbcval", H5T_NATIVE_FLOAT, &(E->control.TBCtopval));
+    status = set_attribute(input, "toptbc", H5T_NATIVE_INT, &(E->mesh.toptbc));
+    status = set_attribute(input, "toptbcval", H5T_NATIVE_FLOAT, &(E->control.TBCtopval));
 
-    status = set_attribute_numerical(input, "bottbc", H5T_NATIVE_INT, &(E->mesh.bottbc));
-    status = set_attribute_numerical(input, "bottbcval", H5T_NATIVE_FLOAT, &(E->control.TBCbotval));
+    status = set_attribute(input, "bottbc", H5T_NATIVE_INT, &(E->mesh.bottbc));
+    status = set_attribute(input, "bottbcval", H5T_NATIVE_FLOAT, &(E->control.TBCbotval));
 
-    status = set_attribute_numerical(input, "temperature_bound_adj", H5T_NATIVE_INT, &(E->control.temperature_bound_adj));
-    status = set_attribute_numerical(input, "depth_bound_adj", H5T_NATIVE_FLOAT, &(E->control.depth_bound_adj));
-    status = set_attribute_numerical(input, "width_bound_adj", H5T_NATIVE_FLOAT, &(E->control.width_bound_adj));
+    status = set_attribute(input, "temperature_bound_adj", H5T_NATIVE_INT, &(E->control.temperature_bound_adj));
+    status = set_attribute(input, "depth_bound_adj", H5T_NATIVE_FLOAT, &(E->control.depth_bound_adj));
+    status = set_attribute(input, "width_bound_adj", H5T_NATIVE_FLOAT, &(E->control.width_bound_adj));
 
     /*
      * Const.inventory
      */
 
-    status = set_attribute_numerical(input, "density", H5T_NATIVE_FLOAT, &(E->data.density));
-    status = set_attribute_numerical(input, "thermdiff", H5T_NATIVE_FLOAT, &(E->data.therm_diff));
-    status = set_attribute_numerical(input, "gravacc", H5T_NATIVE_FLOAT, &(E->data.grav_acc));
-    status = set_attribute_numerical(input, "thermexp", H5T_NATIVE_FLOAT, &(E->data.therm_exp));
-    status = set_attribute_numerical(input, "refvisc", H5T_NATIVE_FLOAT, &(E->data.ref_viscosity));
-    status = set_attribute_numerical(input, "cp", H5T_NATIVE_FLOAT, &(E->data.Cp));
-    status = set_attribute_numerical(input, "wdensity", H5T_NATIVE_FLOAT, &(E->data.density_above));
-    status = set_attribute_numerical(input, "surftemp", H5T_NATIVE_FLOAT, &(E->data.surf_temp));
-    status = set_attribute_numerical(input, "z_lith", H5T_NATIVE_FLOAT, &(E->viscosity.zlith));
-    status = set_attribute_numerical(input, "z_410", H5T_NATIVE_FLOAT, &(E->viscosity.z410));
-    status = set_attribute_numerical(input, "z_lmantle", H5T_NATIVE_FLOAT, &(E->viscosity.zlm));
-    status = set_attribute_numerical(input, "z_cmb", H5T_NATIVE_FLOAT, &(E->viscosity.zcmb));
-    status = set_attribute_numerical(input, "layer_km", H5T_NATIVE_FLOAT, &(E->data.layer_km));
-    status = set_attribute_numerical(input, "radius_km", H5T_NATIVE_FLOAT, &(E->data.radius_km));
+    status = set_attribute(input, "density", H5T_NATIVE_FLOAT, &(E->data.density));
+    status = set_attribute(input, "thermdiff", H5T_NATIVE_FLOAT, &(E->data.therm_diff));
+    status = set_attribute(input, "gravacc", H5T_NATIVE_FLOAT, &(E->data.grav_acc));
+    status = set_attribute(input, "thermexp", H5T_NATIVE_FLOAT, &(E->data.therm_exp));
+    status = set_attribute(input, "refvisc", H5T_NATIVE_FLOAT, &(E->data.ref_viscosity));
+    status = set_attribute(input, "cp", H5T_NATIVE_FLOAT, &(E->data.Cp));
+    status = set_attribute(input, "wdensity", H5T_NATIVE_FLOAT, &(E->data.density_above));
+    status = set_attribute(input, "surftemp", H5T_NATIVE_FLOAT, &(E->data.surf_temp));
+    status = set_attribute(input, "z_lith", H5T_NATIVE_FLOAT, &(E->viscosity.zlith));
+    status = set_attribute(input, "z_410", H5T_NATIVE_FLOAT, &(E->viscosity.z410));
+    status = set_attribute(input, "z_lmantle", H5T_NATIVE_FLOAT, &(E->viscosity.zlm));
+    status = set_attribute(input, "z_cmb", H5T_NATIVE_FLOAT, &(E->viscosity.zcmb));
+    status = set_attribute(input, "layer_km", H5T_NATIVE_FLOAT, &(E->data.layer_km));
+    status = set_attribute(input, "radius_km", H5T_NATIVE_FLOAT, &(E->data.radius_km));
 
     /*
      * IC.inventory
      */
 
-    status = set_attribute_numerical(input, "restart", H5T_NATIVE_INT, &(E->control.restart));
-    status = set_attribute_numerical(input, "post_p", H5T_NATIVE_INT, &(E->control.post_p));
-    status = set_attribute_numerical(input, "solution_cycles_init", H5T_NATIVE_INT, &(E->monitor.solution_cycles_init));
-    status = set_attribute_numerical(input, "zero_elapsed_time", H5T_NATIVE_INT, &(E->control.zero_elapsed_time));
+    status = set_attribute(input, "restart", H5T_NATIVE_INT, &(E->control.restart));
+    status = set_attribute(input, "post_p", H5T_NATIVE_INT, &(E->control.post_p));
+    status = set_attribute(input, "solution_cycles_init", H5T_NATIVE_INT, &(E->monitor.solution_cycles_init));
+    status = set_attribute(input, "zero_elapsed_time", H5T_NATIVE_INT, &(E->control.zero_elapsed_time));
 
-    status = set_attribute_numerical(input, "tic_method", H5T_NATIVE_INT, &(E->convection.tic_method));
+    status = set_attribute(input, "tic_method", H5T_NATIVE_INT, &(E->convection.tic_method));
 
     if (E->convection.tic_method == 0)
     {
         n = E->convection.number_of_perturbations;
-        status = set_attribute_numerical(input, "num_perturbations", H5T_NATIVE_INT, &n);
-        status = set_attribute_numerical_vector(input, "perturbl", n, H5T_NATIVE_INT, E->convection.perturb_ll);
-        status = set_attribute_numerical_vector(input, "perturbm", n, H5T_NATIVE_INT, E->convection.perturb_mm);
-        status = set_attribute_numerical_vector(input, "perturblayer", n, H5T_NATIVE_INT, E->convection.load_depth);
-        status = set_attribute_numerical_vector(input, "perturbmag", n, H5T_NATIVE_FLOAT, E->convection.perturb_mag);
+        status = set_attribute(input, "num_perturbations", H5T_NATIVE_INT, &n);
+        status = set_attribute_vector(input, "perturbl", n, H5T_NATIVE_INT, E->convection.perturb_ll);
+        status = set_attribute_vector(input, "perturbm", n, H5T_NATIVE_INT, E->convection.perturb_mm);
+        status = set_attribute_vector(input, "perturblayer", n, H5T_NATIVE_INT, E->convection.load_depth);
+        status = set_attribute_vector(input, "perturbmag", n, H5T_NATIVE_FLOAT, E->convection.perturb_mag);
     }
     else if (E->convection.tic_method == 1)
     {
-        status = set_attribute_numerical(input, "half_space_age", H5T_NATIVE_FLOAT, &(E->convection.half_space_age));
+        status = set_attribute(input, "half_space_age", H5T_NATIVE_FLOAT, &(E->convection.half_space_age));
     }
     else if (E->convection.tic_method == 2)
     {
-        status = set_attribute_numerical(input, "half_space_age", H5T_NATIVE_FLOAT, &(E->convection.half_space_age));
-        status = set_attribute_numerical_vector(input, "blob_center", 3, H5T_NATIVE_FLOAT, E->convection.blob_center);
-        status = set_attribute_numerical(input, "blob_radius", H5T_NATIVE_FLOAT, &(E->convection.blob_radius));
-        status = set_attribute_numerical(input, "blob_dT", H5T_NATIVE_FLOAT, &(E->convection.blob_dT));
+        status = set_attribute(input, "half_space_age", H5T_NATIVE_FLOAT, &(E->convection.half_space_age));
+        status = set_attribute_vector(input, "blob_center", 3, H5T_NATIVE_FLOAT, E->convection.blob_center);
+        status = set_attribute(input, "blob_radius", H5T_NATIVE_FLOAT, &(E->convection.blob_radius));
+        status = set_attribute(input, "blob_dT", H5T_NATIVE_FLOAT, &(E->convection.blob_dT));
     }
 
     /*
      * Param.inventory
      */
 
-    status = set_attribute_numerical(input, "file_vbcs", H5T_NATIVE_INT, &(E->control.vbcs_file));
-    status = set_attribute(input, "vel_bound_file", E->control.velocity_boundary_file);
+    status = set_attribute(input, "file_vbcs", H5T_NATIVE_INT, &(E->control.vbcs_file));
+    status = set_attribute_string(input, "vel_bound_file", E->control.velocity_boundary_file);
 
-    status = set_attribute_numerical(input, "mat_control", H5T_NATIVE_INT, &(E->control.mat_control));
-    status = set_attribute(input, "mat_file", E->control.mat_file);
+    status = set_attribute(input, "mat_control", H5T_NATIVE_INT, &(E->control.mat_control));
+    status = set_attribute_string(input, "mat_file", E->control.mat_file);
 
-    status = set_attribute_numerical(input, "lith_age", H5T_NATIVE_INT, &(E->control.lith_age));
-    status = set_attribute(input, "lith_age_file", E->control.lith_age_file);
-    status = set_attribute_numerical(input, "lith_age_time", H5T_NATIVE_INT, &(E->control.lith_age_time));
-    status = set_attribute_numerical(input, "lith_age_depth", H5T_NATIVE_FLOAT, &(E->control.lith_age_depth));
-    status = set_attribute_numerical(input, "mantle_temp", H5T_NATIVE_FLOAT, &(E->control.lith_age_mantle_temp));
+    status = set_attribute(input, "lith_age", H5T_NATIVE_INT, &(E->control.lith_age));
+    status = set_attribute_string(input, "lith_age_file", E->control.lith_age_file);
+    status = set_attribute(input, "lith_age_time", H5T_NATIVE_INT, &(E->control.lith_age_time));
+    status = set_attribute(input, "lith_age_depth", H5T_NATIVE_FLOAT, &(E->control.lith_age_depth));
+    status = set_attribute(input, "mantle_temp", H5T_NATIVE_FLOAT, &(E->control.lith_age_mantle_temp));
 
-    status = set_attribute_numerical(input, "start_age", H5T_NATIVE_FLOAT, &(E->control.start_age));
-    status = set_attribute_numerical(input, "reset_startage", H5T_NATIVE_INT, &(E->control.reset_startage));
+    status = set_attribute(input, "start_age", H5T_NATIVE_FLOAT, &(E->control.start_age));
+    status = set_attribute(input, "reset_startage", H5T_NATIVE_INT, &(E->control.reset_startage));
 
     /*
      * Phase.inventory
      */
 
-    status = set_attribute_numerical(input, "Ra_410", H5T_NATIVE_FLOAT, &(E->control.Ra_410));
-    status = set_attribute_numerical(input, "clapeyron410", H5T_NATIVE_FLOAT, &(E->control.clapeyron410));
-    status = set_attribute_numerical(input, "transT410", H5T_NATIVE_FLOAT, &(E->control.transT410));
-    status = set_attribute_numerical(input, "width410", H5T_NATIVE_FLOAT, &(E->control.width410));
+    status = set_attribute(input, "Ra_410", H5T_NATIVE_FLOAT, &(E->control.Ra_410));
+    status = set_attribute(input, "clapeyron410", H5T_NATIVE_FLOAT, &(E->control.clapeyron410));
+    status = set_attribute(input, "transT410", H5T_NATIVE_FLOAT, &(E->control.transT410));
+    status = set_attribute(input, "width410", H5T_NATIVE_FLOAT, &(E->control.width410));
 
-    status = set_attribute_numerical(input, "Ra_670", H5T_NATIVE_FLOAT, &(E->control.Ra_670));
-    status = set_attribute_numerical(input, "clapeyron670", H5T_NATIVE_FLOAT, &(E->control.clapeyron670));
-    status = set_attribute_numerical(input, "transT670", H5T_NATIVE_FLOAT, &(E->control.transT670));
-    status = set_attribute_numerical(input, "width670", H5T_NATIVE_FLOAT, &(E->control.width670));
+    status = set_attribute(input, "Ra_670", H5T_NATIVE_FLOAT, &(E->control.Ra_670));
+    status = set_attribute(input, "clapeyron670", H5T_NATIVE_FLOAT, &(E->control.clapeyron670));
+    status = set_attribute(input, "transT670", H5T_NATIVE_FLOAT, &(E->control.transT670));
+    status = set_attribute(input, "width670", H5T_NATIVE_FLOAT, &(E->control.width670));
 
-    status = set_attribute_numerical(input, "Ra_cmb", H5T_NATIVE_FLOAT, &(E->control.Ra_cmb));
-    status = set_attribute_numerical(input, "clapeyroncmb", H5T_NATIVE_FLOAT, &(E->control.clapeyroncmb));
-    status = set_attribute_numerical(input, "transTcmb", H5T_NATIVE_FLOAT, &(E->control.transTcmb));
-    status = set_attribute_numerical(input, "widthcmb", H5T_NATIVE_FLOAT, &(E->control.widthcmb));
+    status = set_attribute(input, "Ra_cmb", H5T_NATIVE_FLOAT, &(E->control.Ra_cmb));
+    status = set_attribute(input, "clapeyroncmb", H5T_NATIVE_FLOAT, &(E->control.clapeyroncmb));
+    status = set_attribute(input, "transTcmb", H5T_NATIVE_FLOAT, &(E->control.transTcmb));
+    status = set_attribute(input, "widthcmb", H5T_NATIVE_FLOAT, &(E->control.widthcmb));
 
     /*
      * Solver.inventory
      */
 
-    status = set_attribute(input, "datafile", E->control.data_file);
-    status = set_attribute(input, "datafile_old", E->control.old_P_file);
+    status = set_attribute_string(input, "datafile", E->control.data_file);
+    status = set_attribute_string(input, "datafile_old", E->control.old_P_file);
 
-    status = set_attribute_numerical(input, "rayleigh", H5T_NATIVE_FLOAT, &(E->control.Atemp));
-    status = set_attribute_numerical(input, "Q0", H5T_NATIVE_FLOAT, &(E->control.Q0));
+    status = set_attribute(input, "rayleigh", H5T_NATIVE_FLOAT, &(E->control.Atemp));
+    status = set_attribute(input, "Q0", H5T_NATIVE_FLOAT, &(E->control.Q0));
 
-    status = set_attribute_numerical(input, "stokes_flow_only", H5T_NATIVE_INT, &(E->control.stokes));
+    status = set_attribute(input, "stokes_flow_only", H5T_NATIVE_INT, &(E->control.stokes));
 
-    status = set_attribute(input, "output_format", E->control.output_format);
-    status = set_attribute_numerical(input, "verbose", H5T_NATIVE_INT, &(E->control.verbose));
-    status = set_attribute_numerical(input, "see_convergence", H5T_NATIVE_INT, &(E->control.print_convergence));
+    status = set_attribute_string(input, "output_format", E->control.output_format);
+    status = set_attribute(input, "verbose", H5T_NATIVE_INT, &(E->control.verbose));
+    status = set_attribute(input, "see_convergence", H5T_NATIVE_INT, &(E->control.print_convergence));
 
     /*
      * Sphere.inventory
      */
 
-    status = set_attribute_numerical(input, "nproc_surf", H5T_NATIVE_INT, &(E->parallel.nprocxy));
-    status = set_attribute_numerical(input, "nprocx", H5T_NATIVE_INT, &(E->parallel.nprocx));
-    status = set_attribute_numerical(input, "nprocy", H5T_NATIVE_INT, &(E->parallel.nprocy));
-    status = set_attribute_numerical(input, "nprocz", H5T_NATIVE_INT, &(E->parallel.nprocz));
+    status = set_attribute(input, "nproc_surf", H5T_NATIVE_INT, &(E->parallel.nprocxy));
+    status = set_attribute(input, "nprocx", H5T_NATIVE_INT, &(E->parallel.nprocx));
+    status = set_attribute(input, "nprocy", H5T_NATIVE_INT, &(E->parallel.nprocy));
+    status = set_attribute(input, "nprocz", H5T_NATIVE_INT, &(E->parallel.nprocz));
 
-    status = set_attribute_numerical(input, "coor", H5T_NATIVE_INT, &(E->control.coor));
-    status = set_attribute(input, "coor_file", E->control.coor_file);
+    status = set_attribute(input, "coor", H5T_NATIVE_INT, &(E->control.coor));
+    status = set_attribute_string(input, "coor_file", E->control.coor_file);
 
-    status = set_attribute_numerical(input, "nodex", H5T_NATIVE_INT, &(E->mesh.nox));
-    status = set_attribute_numerical(input, "nodey", H5T_NATIVE_INT, &(E->mesh.noy));
-    status = set_attribute_numerical(input, "nodez", H5T_NATIVE_INT, &(E->mesh.noz));
+    status = set_attribute(input, "nodex", H5T_NATIVE_INT, &(E->mesh.nox));
+    status = set_attribute(input, "nodey", H5T_NATIVE_INT, &(E->mesh.noy));
+    status = set_attribute(input, "nodez", H5T_NATIVE_INT, &(E->mesh.noz));
 
-    status = set_attribute_numerical(input, "levels", H5T_NATIVE_INT, &(E->mesh.levels));
-    status = set_attribute_numerical(input, "mgunitx", H5T_NATIVE_INT, &(E->mesh.mgunitx));
-    status = set_attribute_numerical(input, "mgunity", H5T_NATIVE_INT, &(E->mesh.mgunity));
-    status = set_attribute_numerical(input, "mgunitz", H5T_NATIVE_INT, &(E->mesh.mgunitz));
+    status = set_attribute(input, "levels", H5T_NATIVE_INT, &(E->mesh.levels));
+    status = set_attribute(input, "mgunitx", H5T_NATIVE_INT, &(E->mesh.mgunitx));
+    status = set_attribute(input, "mgunity", H5T_NATIVE_INT, &(E->mesh.mgunity));
+    status = set_attribute(input, "mgunitz", H5T_NATIVE_INT, &(E->mesh.mgunitz));
 
-    status = set_attribute_numerical(input, "radius_outer", H5T_NATIVE_DOUBLE, &(E->sphere.ro));
-    status = set_attribute_numerical(input, "radius_inner", H5T_NATIVE_DOUBLE, &(E->sphere.ri));
+    status = set_attribute(input, "radius_outer", H5T_NATIVE_DOUBLE, &(E->sphere.ro));
+    status = set_attribute(input, "radius_inner", H5T_NATIVE_DOUBLE, &(E->sphere.ri));
 
-    status = set_attribute_numerical(input, "caps", H5T_NATIVE_INT, &(E->sphere.caps));
+    status = set_attribute(input, "caps", H5T_NATIVE_INT, &(E->sphere.caps));
 
     rank = 2;
     dims = (hsize_t *)malloc(rank * sizeof(hsize_t));
@@ -1242,7 +1193,7 @@ void h5output_meta(struct All_variables *E)
         data[4*(n-1) + 2] = E->sphere.cap[n].theta[3];
         data[4*(n-1) + 3] = E->sphere.cap[n].theta[4];
     }
-    status = set_attribute_numerical_array(input, "theta", rank, dims, H5T_NATIVE_DOUBLE, data);
+    status = set_attribute_array(input, "theta", rank, dims, H5T_NATIVE_DOUBLE, data);
 
     for(n = 1; n <= E->sphere.caps; n++)
     {
@@ -1251,76 +1202,76 @@ void h5output_meta(struct All_variables *E)
         data[4*(n-1) + 2] = E->sphere.cap[n].fi[3];
         data[4*(n-1) + 3] = E->sphere.cap[n].fi[4];
     }
-    status = set_attribute_numerical_array(input, "fi", rank, dims, H5T_NATIVE_DOUBLE, data);
+    status = set_attribute_array(input, "fi", rank, dims, H5T_NATIVE_DOUBLE, data);
 
     free(data);
     free(dims);
 
     if (E->sphere.caps == 1)
     {
-        status = set_attribute_numerical(input, "theta_min", H5T_NATIVE_DOUBLE, &(E->control.theta_min));
-        status = set_attribute_numerical(input, "theta_max", H5T_NATIVE_DOUBLE, &(E->control.theta_max));
-        status = set_attribute_numerical(input, "fi_min", H5T_NATIVE_DOUBLE, &(E->control.fi_min));
-        status = set_attribute_numerical(input, "fi_max", H5T_NATIVE_DOUBLE, &(E->control.fi_max));
+        status = set_attribute(input, "theta_min", H5T_NATIVE_DOUBLE, &(E->control.theta_min));
+        status = set_attribute(input, "theta_max", H5T_NATIVE_DOUBLE, &(E->control.theta_max));
+        status = set_attribute(input, "fi_min", H5T_NATIVE_DOUBLE, &(E->control.fi_min));
+        status = set_attribute(input, "fi_max", H5T_NATIVE_DOUBLE, &(E->control.fi_max));
     }
 
-    status = set_attribute_numerical(input, "ll_max", H5T_NATIVE_INT, &(E->sphere.llmax));
-    status = set_attribute_numerical(input, "nlong", H5T_NATIVE_INT, &(E->sphere.noy));
-    status = set_attribute_numerical(input, "nlati", H5T_NATIVE_INT, &(E->sphere.nox));
-    status = set_attribute_numerical(input, "output_ll_max", H5T_NATIVE_INT, &(E->sphere.output_llmax));
+    status = set_attribute(input, "ll_max", H5T_NATIVE_INT, &(E->sphere.llmax));
+    status = set_attribute(input, "nlong", H5T_NATIVE_INT, &(E->sphere.noy));
+    status = set_attribute(input, "nlati", H5T_NATIVE_INT, &(E->sphere.nox));
+    status = set_attribute(input, "output_ll_max", H5T_NATIVE_INT, &(E->sphere.output_llmax));
 
     /*
      * Tracer.inventory
      */
 
-    status = set_attribute_numerical(input, "tracer", H5T_NATIVE_INT, &(E->control.tracer));
-    status = set_attribute(input, "tracer_file", E->control.tracer_file);
+    status = set_attribute(input, "tracer", H5T_NATIVE_INT, &(E->control.tracer));
+    status = set_attribute_string(input, "tracer_file", E->control.tracer_file);
 
     /*
      * Visc.inventory
      */
 
-    status = set_attribute(input, "Viscosity", E->viscosity.STRUCTURE);
-    status = set_attribute_numerical(input, "visc_smooth_method", H5T_NATIVE_INT, &(E->viscosity.smooth_cycles));
-    status = set_attribute_numerical(input, "VISC_UPDATE", H5T_NATIVE_INT, &(E->viscosity.update_allowed));
+    status = set_attribute_string(input, "Viscosity", E->viscosity.STRUCTURE);
+    status = set_attribute(input, "visc_smooth_method", H5T_NATIVE_INT, &(E->viscosity.smooth_cycles));
+    status = set_attribute(input, "VISC_UPDATE", H5T_NATIVE_INT, &(E->viscosity.update_allowed));
 
     n = E->viscosity.num_mat;
-    status = set_attribute_numerical(input, "num_mat", H5T_NATIVE_INT, &n);
-    status = set_attribute_numerical_vector(input, "visc0", n, H5T_NATIVE_FLOAT, E->viscosity.N0);
-    status = set_attribute_numerical(input, "TDEPV", H5T_NATIVE_INT, &(E->viscosity.TDEPV));
-    status = set_attribute_numerical(input, "rheol", H5T_NATIVE_INT, &(E->viscosity.RHEOL));
-    status = set_attribute_numerical_vector(input, "viscE", n, H5T_NATIVE_FLOAT, E->viscosity.E);
-    status = set_attribute_numerical_vector(input, "viscT", n, H5T_NATIVE_FLOAT, E->viscosity.T);
-    status = set_attribute_numerical_vector(input, "viscZ", n, H5T_NATIVE_FLOAT, E->viscosity.Z);
+    status = set_attribute(input, "num_mat", H5T_NATIVE_INT, &n);
+    status = set_attribute_vector(input, "visc0", n, H5T_NATIVE_FLOAT, E->viscosity.N0);
+    status = set_attribute(input, "TDEPV", H5T_NATIVE_INT, &(E->viscosity.TDEPV));
+    status = set_attribute(input, "rheol", H5T_NATIVE_INT, &(E->viscosity.RHEOL));
+    status = set_attribute_vector(input, "viscE", n, H5T_NATIVE_FLOAT, E->viscosity.E);
+    status = set_attribute_vector(input, "viscT", n, H5T_NATIVE_FLOAT, E->viscosity.T);
+    status = set_attribute_vector(input, "viscZ", n, H5T_NATIVE_FLOAT, E->viscosity.Z);
 
-    status = set_attribute_numerical(input, "SDEPV", H5T_NATIVE_INT, &(E->viscosity.SDEPV));
-    status = set_attribute_numerical(input, "sdepv_misfit", H5T_NATIVE_FLOAT, &(E->viscosity.sdepv_misfit));
-    status = set_attribute_numerical_vector(input, "sdepv_expt", n, H5T_NATIVE_FLOAT, E->viscosity.sdepv_expt);
+    status = set_attribute(input, "SDEPV", H5T_NATIVE_INT, &(E->viscosity.SDEPV));
+    status = set_attribute(input, "sdepv_misfit", H5T_NATIVE_FLOAT, &(E->viscosity.sdepv_misfit));
+    status = set_attribute_vector(input, "sdepv_expt", n, H5T_NATIVE_FLOAT, E->viscosity.sdepv_expt);
 
-    status = set_attribute_numerical(input, "VMIN", H5T_NATIVE_INT, &(E->viscosity.MIN));
-    status = set_attribute_numerical(input, "visc_min", H5T_NATIVE_FLOAT, &(E->viscosity.min_value));
+    status = set_attribute(input, "VMIN", H5T_NATIVE_INT, &(E->viscosity.MIN));
+    status = set_attribute(input, "visc_min", H5T_NATIVE_FLOAT, &(E->viscosity.min_value));
 
-    status = set_attribute_numerical(input, "VMAX", H5T_NATIVE_INT, &(E->viscosity.MAX));
-    status = set_attribute_numerical(input, "visc_max", H5T_NATIVE_FLOAT, &(E->viscosity.max_value));
+    status = set_attribute(input, "VMAX", H5T_NATIVE_INT, &(E->viscosity.MAX));
+    status = set_attribute(input, "visc_max", H5T_NATIVE_FLOAT, &(E->viscosity.max_value));
 
     /*
      * Incompressible.inventory
      */
-    status = set_attribute_numerical(input, "node_assemble", H5T_NATIVE_INT, &(E->control.NASSEMBLE));
-    status = set_attribute_numerical(input, "precond", H5T_NATIVE_INT, &(E->control.precondition));
+    status = set_attribute(input, "node_assemble", H5T_NATIVE_INT, &(E->control.NASSEMBLE));
+    status = set_attribute(input, "precond", H5T_NATIVE_INT, &(E->control.precondition));
 
-    status = set_attribute_numerical(input, "accuracy", H5T_NATIVE_DOUBLE, &(E->control.accuracy));
-    status = set_attribute_numerical(input, "tole_compressibility", H5T_NATIVE_FLOAT, &(E->control.tole_comp));
+    status = set_attribute(input, "accuracy", H5T_NATIVE_DOUBLE, &(E->control.accuracy));
+    status = set_attribute(input, "tole_compressibility", H5T_NATIVE_FLOAT, &(E->control.tole_comp));
 
-    status = set_attribute_numerical(input, "mg_cycle", H5T_NATIVE_INT, &(E->control.mg_cycle));
-    status = set_attribute_numerical(input, "down_heavy", H5T_NATIVE_INT, &(E->control.down_heavy));
-    status = set_attribute_numerical(input, "up_heavy", H5T_NATIVE_INT, &(E->control.up_heavy));
+    status = set_attribute(input, "mg_cycle", H5T_NATIVE_INT, &(E->control.mg_cycle));
+    status = set_attribute(input, "down_heavy", H5T_NATIVE_INT, &(E->control.down_heavy));
+    status = set_attribute(input, "up_heavy", H5T_NATIVE_INT, &(E->control.up_heavy));
 
-    status = set_attribute_numerical(input, "vlowstep", H5T_NATIVE_INT, &(E->control.v_steps_low));
-    status = set_attribute_numerical(input, "vhighstep", H5T_NATIVE_INT, &(E->control.v_steps_high));
-    status = set_attribute_numerical(input, "piterations", H5T_NATIVE_INT, &(E->control.p_iterations));
+    status = set_attribute(input, "vlowstep", H5T_NATIVE_INT, &(E->control.v_steps_low));
+    status = set_attribute(input, "vhighstep", H5T_NATIVE_INT, &(E->control.v_steps_high));
+    status = set_attribute(input, "piterations", H5T_NATIVE_INT, &(E->control.p_iterations));
 
-    /* status = set_attribute_numerical(input, "", H5T_NATIVE_, &(E->)); */
+    /* status = set_attribute(input, "", H5T_NATIVE_, &(E->)); */
 
     /*
      * Release resources
