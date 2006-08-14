@@ -1307,9 +1307,9 @@ void h5output_coord(struct All_variables *E)
     ny = E->lmesh.noy;
     nz = E->lmesh.noz;
 
-    mx = (p == nprocx-1) ? nx : nx-1;
-    my = (p == nprocy-1) ? ny : ny-1;
-    mz = (p == nprocz-1) ? nz : nz-1;
+    mx = (px == nprocx-1) ? nx : nx-1;
+    my = (py == nprocy-1) ? ny : ny-1;
+    mz = (pz == nprocz-1) ? nz : nz-1;
 
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
@@ -1371,9 +1371,9 @@ void h5output_velocity(struct All_variables *E, int cycles)
     ny = E->lmesh.noy;
     nz = E->lmesh.noz;
 
-    mx = (p == nprocx-1) ? nx : nx-1;
-    my = (p == nprocy-1) ? ny : ny-1;
-    mz = (p == nprocz-1) ? nz : nz-1;
+    mx = (px == nprocx-1) ? nx : nx-1;
+    my = (py == nprocy-1) ? ny : ny-1;
+    mz = (pz == nprocz-1) ? nz : nz-1;
 
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
@@ -1433,9 +1433,9 @@ void h5output_temperature(struct All_variables *E, int cycles)
     ny = E->lmesh.noy;
     nz = E->lmesh.noz;
 
-    mx = (p == nprocx-1) ? nx : nx-1;
-    my = (p == nprocy-1) ? ny : ny-1;
-    mz = (p == nprocz-1) ? nz : nz-1;
+    mx = (px == nprocx-1) ? nx : nx-1;
+    my = (py == nprocy-1) ? ny : ny-1;
+    mz = (pz == nprocz-1) ? nz : nz-1;
 
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
@@ -1495,9 +1495,9 @@ void h5output_viscosity(struct All_variables *E, int cycles)
     ny = E->lmesh.noy;
     nz = E->lmesh.noz;
 
-    mx = (p == nprocx-1) ? nx : nx-1;
-    my = (p == nprocy-1) ? ny : ny-1;
-    mz = (p == nprocz-1) ? nz : nz-1;
+    mx = (px == nprocx-1) ? nx : nx-1;
+    my = (py == nprocy-1) ? ny : ny-1;
+    mz = (pz == nprocz-1) ? nz : nz-1;
 
     /* prepare the data -- change citcom yxz order to xyz order */
     for(i = 0; i < mx; i++)
