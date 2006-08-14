@@ -635,23 +635,34 @@ static void h5create_field(hid_t loc_id,
     }
 
     /* DEBUG
-    printf("\th5create_field()\n");
-    printf("\t\tname=\"%s\"\n", name);
-    printf("\t\tshape=(%d,%d,%d,%d,%d)\n",
-           tdim, xdim, ydim, zdim, cdim);
-    printf("\t\trank=%d\n", rank);
-    printf("\t\tdims={%d,%d,%d,%d,%d}\n",
-            (int)dims[0], (int)dims[1], (int)dims[2],
-            (int)dims[3], (int)dims[4]);
-    printf("\t\tmaxdims={%d,%d,%d,%d,%d}\n",
-            (int)maxdims[0], (int)maxdims[1], (int)maxdims[2],
-            (int)maxdims[3], (int)maxdims[4]);
     if (tdim >= 0)
-        printf("\t\tchunkdims={%d,%d,%d,%d,%d}\n",
-            (int)chunkdims[0], (int)chunkdims[1], (int)chunkdims[2],
-            (int)chunkdims[3], (int)chunkdims[4]);
+        printf("\th5create_field()\n"
+               "\t\tname=\"%s\"\n"
+               "\t\tshape=(%d,%d,%d,%d,%d)\n"
+               "\t\trank=%d\n"
+               "\t\tdims={%d,%d,%d,%d,%d}\n"
+               "\t\tmaxdims={%d,%d,%d,%d,%d}\n"
+               "\t\tchunkdims={%d,%d,%d,%d,%d}\n",
+               name, tdim, xdim, ydim, zdim, cdim, rank,
+               (int)dims[0], (int)dims[1],
+               (int)dims[2], (int)dims[3], (int)dims[4],
+               (int)maxdims[0], (int)maxdims[1],
+               (int)maxdims[2], (int)maxdims[3], (int)maxdims[4],
+               (int)chunkdims[0], (int)chunkdims[1],
+               (int)chunkdims[2], (int)chunkdims[3], (int)chunkdims[4]);
     else
-        printf("\t\tchunkdims=NULL\n");
+        printf("\th5create_field()\n"
+               "\t\tname=\"%s\"\n"
+               "\t\tshape=(%d,%d,%d,%d,%d)\n"
+               "\t\trank=%d\n"
+               "\t\tdims={%d,%d,%d,%d,%d}\n"
+               "\t\tmaxdims={%d,%d,%d,%d,%d}\n"
+               "\t\tchunkdims=NULL\n",
+               name, tdim, xdim, ydim, zdim, cdim, rank,
+               (int)dims[0], (int)dims[1],
+               (int)dims[2], (int)dims[3], (int)dims[4],
+               (int)maxdims[0], (int)maxdims[1],
+               (int)maxdims[2], (int)maxdims[3], (int)maxdims[4]);
     // */
 
 
@@ -680,29 +691,43 @@ static void h5write_dataset(hid_t dset_id,
     herr_t status;
 
     /* DEBUG
-    printf("\th5write_dataset()\n");
-    printf("\t\trank    = %d\n", rank);
     if(size != NULL)
-        printf("\t\tsize    = {%d,%d,%d,%d,%d}\n",
-            (int)size[0], (int)size[1], (int)size[2],
-            (int)size[3], (int)size[4]);
+        printf("\th5write_dataset():\n"
+               "\t\trank    = %d\n"
+               "\t\tsize    = {%d,%d,%d,%d,%d}\n"
+               "\t\tmemdims = {%d,%d,%d,%d,%d}\n"
+               "\t\toffset  = {%d,%d,%d,%d,%d}\n"
+               "\t\tstride  = {%d,%d,%d,%d,%d}\n"
+               "\t\tblock   = {%d,%d,%d,%d,%d}\n",
+               rank,
+               (int)size[0], (int)size[1],
+               (int)size[2], (int)size[3], (int)size[4],
+               (int)memdims[0], (int)memdims[1],
+               (int)memdims[2], (int)memdims[3], (int)memdims[4],
+               (int)offset[0], (int)offset[1],
+               (int)offset[2], (int)offset[3], (int)offset[4],
+               (int)count[0], (int)count[1],
+               (int)count[2], (int)count[3], (int)count[4],
+               (int)block[0], (int)block[1],
+               (int)block[2], (int)block[3], (int)block[4]);
+
     else
-        printf("\t\tsize    = NULL\n");
-    printf("\t\tmemdims = {%d,%d,%d,%d,%d}\n",
-        (int)memdims[0], (int)memdims[1], (int)memdims[2],
-        (int)memdims[3], (int)memdims[4]);
-    printf("\t\toffset  = {%d,%d,%d,%d,%d}\n",
-        (int)offset[0], (int)offset[1], (int)offset[2],
-        (int)offset[3], (int)offset[4]);
-    printf("\t\tstride  = {%d,%d,%d,%d,%d}\n",
-        (int)stride[0], (int)stride[1], (int)stride[2],
-        (int)stride[3], (int)stride[4]);
-    printf("\t\tcount   = {%d,%d,%d,%d,%d}\n",
-        (int)count[0], (int)count[1], (int)count[2],
-        (int)count[3], (int)count[4]);
-    printf("\t\tblock   = {%d,%d,%d,%d,%d}\n",
-        (int)block[0], (int)block[1], (int)block[2],
-        (int)block[3], (int)block[4]);
+        printf("\th5write_dataset():\n"
+               "\t\trank    = %d\n"
+               "\t\tsize    = NULL\n"
+               "\t\tmemdims = {%d,%d,%d,%d,%d}\n"
+               "\t\toffset  = {%d,%d,%d,%d,%d}\n"
+               "\t\tstride  = {%d,%d,%d,%d,%d}\n"
+               "\t\tblock   = {%d,%d,%d,%d,%d}\n",
+               rank,
+               (int)memdims[0], (int)memdims[1],
+               (int)memdims[2], (int)memdims[3], (int)memdims[4],
+               (int)offset[0], (int)offset[1],
+               (int)offset[2], (int)offset[3], (int)offset[4],
+               (int)count[0], (int)count[1],
+               (int)count[2], (int)count[3], (int)count[4],
+               (int)block[0], (int)block[1],
+               (int)block[2], (int)block[3], (int)block[4]);
     // */
 
     /* extend the dataset if necessary */
@@ -726,10 +751,8 @@ static void h5write_dataset(hid_t dset_id,
                                  offset, stride, count, block);
 
     /* dataset transfer property list */
-    //printf("\t\tSetting dataset transfer to H5FD_MPIO_COLLECTIVE\n");
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    status  = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE);
-    //status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+    status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
     /* write the data to the hyperslab */
     //printf("\t\tWriting data to the hyperslab\n");
@@ -873,27 +896,27 @@ static void h5create_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey, in
 
 static void h5create_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "velocity", type_id, 1, nodex, nodey, nodez, 3);
+    h5create_field(loc_id, "velocity", type_id, 0, nodex, nodey, nodez, 3);
 }
 
 static void h5create_temperature(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "temperature", type_id, 1, nodex, nodey, nodez, 0);
+    h5create_field(loc_id, "temperature", type_id, 0, nodex, nodey, nodez, 0);
 }
 
 static void h5create_viscosity(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "viscosity", type_id, 1, nodex, nodey, nodez, 0);
+    h5create_field(loc_id, "viscosity", type_id, 0, nodex, nodey, nodez, 0);
 }
 
 static void h5create_pressure(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "pressure", type_id, 1, nodex, nodey, nodez, 0);
+    h5create_field(loc_id, "pressure", type_id, 0, nodex, nodey, nodez, 0);
 }
 
 static void h5create_stress(hid_t loc_id, hid_t type_id, int nodex, int nodey, int nodez)
 {
-    h5create_field(loc_id, "stress", type_id, 1, nodex, nodey, nodez, 6);
+    h5create_field(loc_id, "stress", type_id, 0, nodex, nodey, nodez, 6);
 }
 
 static void h5create_surf_coord(hid_t loc_id, hid_t type_id, int nodex, int nodey)
@@ -903,17 +926,17 @@ static void h5create_surf_coord(hid_t loc_id, hid_t type_id, int nodex, int node
 
 static void h5create_surf_velocity(hid_t loc_id, hid_t type_id, int nodex, int nodey)
 {
-    h5create_field(loc_id, "velocity", type_id, 1, nodex, nodey, 0, 2);
+    h5create_field(loc_id, "velocity", type_id, 0, nodex, nodey, 0, 2);
 }
 
 static void h5create_surf_heatflux(hid_t loc_id, hid_t type_id, int nodex, int nodey)
 {
-    h5create_field(loc_id, "heatflux", type_id, 1, nodex, nodey, 0, 0);
+    h5create_field(loc_id, "heatflux", type_id, 0, nodex, nodey, 0, 0);
 }
 
 static void h5create_surf_topography(hid_t loc_id, hid_t type_id, int nodex, int nodey)
 {
-    h5create_field(loc_id, "topography", type_id, 1, nodex, nodey, 0, 0);
+    h5create_field(loc_id, "topography", type_id, 0, nodex, nodey, 0, 0);
 }
 
 static void h5create_time(hid_t loc_id)
