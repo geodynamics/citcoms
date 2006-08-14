@@ -40,6 +40,7 @@
 
 struct HDF5_TIME
 {
+    int step;
     float time;
     float time_step;
     float cpu;
