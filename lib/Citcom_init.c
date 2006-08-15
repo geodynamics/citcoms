@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
@@ -50,12 +50,6 @@ struct All_variables* citcom_init(MPI_Comm *world)
 
   E->control.total_iteration_cycles=0;
   E->control.total_v_solver_calls=0;
-
-#ifdef USE_HDF5
-  strcpy(E->control.output_format, "hdf5");
-#else
-  strcpy(E->control.output_format, "ascii");
-#endif
 
   return(E);
 }
