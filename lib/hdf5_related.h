@@ -34,9 +34,45 @@
  *  HDF5_TIME
  *    Used to define table with timing information.
  *
+ *  field_t
+ *    Used to store dataspace and hyperslab parameters.
+ *
+ *  field_class_t
+ *    Used to deduce the number of components in each point of a field.
+ *
  * Any required initialization steps are performed in h5output_open().
  *
  */
+
+enum field_class_t
+{
+    SCALAR_FIELD = 0,
+    VECTOR_FIELD = 1,
+    TENSOR_FIELD = 2
+};
+
+typedef struct field_t
+{
+    /* field datatype (in file) */
+    hid_t dtype;
+
+    /* field dataspace (in file) */
+    int rank;
+    hsize_t *dims;
+    hsize_t *maxdims;
+    hsize_t *chunkdims;
+    
+    /* hyperslab selection parameters */
+    hsize_t *offset;
+    hsize_t *stride;
+    hsize_t *count;
+    hsize_t *block;
+
+    /* number of data points in buffer */
+    int n;
+    double *data;
+
+} field_t;
 
 struct HDF5_TIME
 {
@@ -49,47 +85,54 @@ struct HDF5_TIME
 
 struct HDF5_INFO
 {
-    char filename[100];
-
-    /* Keep a reference to the open hdf5 output file */
-    hid_t file_id;
-
-    /* Default type used is H5T_NATIVE_FLOAT */
-    hid_t type_id;
-
     /* Keep track of how many times we call h5output() */
     int count;
 
+    /* Keep a reference to the open hdf5 output file */
+    char filename[100];
+    hid_t file_id;
+
+    /* Cap ID and group for current process */
+    int capid;
+    hid_t cap_group;
+
     /* Group names under which to store the appropriate data,
      * represented by an array of strings. For a regional
-     * model, only cap_groups[0] should be used.
+     * model, only cap_names[0] should be used.
      */
-    char cap_groups[12][7];
-    
-    /* Cap ID for current process */
-    int capid;
+    char cap_names[12][7];
 
+    /* HDF5 group identifiers for all caps. For a regional model,
+     * only cap_groups[0] should be used.
+     */
+    hid_t cap_groups[12];
+    hid_t cap_surf_groups[12];
+    hid_t cap_botm_groups[12];
 
-    /* Temporary data buffers to use in dataset writes...
-     * Note that most of these buffers correspond to time-slices
-     * over a filespace in the HDF5 file.
+    /* Data structures to use in dataset writes...
+     * 
+     * const_vector3d: coord
+     * const_vector2d: surf_coord
      *
-     * vector3d: coord, velocity
+     * tensor3d: stress
+     * vector3d: velocity
+     * vector2d: surf_velocity
+     *
      * scalar3d: temperature, viscosity, pressure
-     * vector2d: surf_coord, surf_velocity
      * scalar2d: surf_heatflux, surf_topography
      * scalar1d: horiz_avg_temperature, horiz_rms_vz, horiz_rms_vxy
      *
      */
     
-    double *connectivity;           /* shape (nel,8) */
-    double *material;               /* shape (nel,) */
-    double *stress;                 /* shape (nx,ny,nz,6) */
-
-    double *vector3d;               /* shape (nx,ny,nz,3) */
-    double *scalar3d;               /* shape (nx,ny,nz) */
-    double *vector2d;               /* shape (nx,ny,2) */
-    double *scalar2d;               /* shape (nx,ny) */
-    double *scalar1d;               /* shape (nz,) */
+    field_t *const_vector3d;     /* shape (xdim,ydim,zdim,3) */
+    field_t *const_vector2d;     /* shape (xdim,ydim,2) */
     
+    field_t *tensor3d;           /* shape (tdim,xdim,ydim,zdim,6) */
+    field_t *vector3d;           /* shape (tdim,xdim,ydim,zdim,3) */
+    field_t *vector2d;           /* shape (tdim,xdim,ydim,2) */
+
+    field_t *scalar3d;           /* shape (tdim,xdim,ydim,zdim) */
+    field_t *scalar2d;           /* shape (tdim,xdim,ydim) */
+    field_t *scalar1d;           /* shape (tdim,zdim) */
+
 };
