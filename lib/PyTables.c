@@ -197,11 +197,6 @@ out:
     return -1;
 }
 
-herr_t set_attribute_int(hid_t obj_id, const char *attr_name, int n)
-{
-    return set_attribute(obj_id, attr_name, H5T_NATIVE_INT, &n);
-}
-
 herr_t set_attribute_float(hid_t obj_id, const char *attr_name, float x)
 {
     return set_attribute(obj_id, attr_name, H5T_NATIVE_FLOAT, &x);
@@ -212,6 +207,20 @@ herr_t set_attribute_double(hid_t obj_id, const char *attr_name, double x)
     return set_attribute(obj_id, attr_name, H5T_NATIVE_DOUBLE, &x);
 }
 
+herr_t set_attribute_int(hid_t obj_id, const char *attr_name, int n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_INT, &n);
+}
+
+herr_t set_attribute_long(hid_t obj_id, const char *attr_name, long n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_LONG, &n);
+}
+
+herr_t set_attribute_llong(hid_t obj_id, const char *attr_name, long long n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_LLONG, &n);
+}
 
 /* Function: set_attribute_array
  * Purpose : write an array attribute
