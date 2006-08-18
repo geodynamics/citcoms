@@ -114,7 +114,7 @@ int main(argc,argv)
 	    output_pseudo_surf(E, E->monitor.solution_cycles);
   }
   else
-    (E->output)(E, E->monitor.solution_cycles);
+    (E->problem_output)(E, E->monitor.solution_cycles);
 
   /* information about simulation time and wall clock time */
   output_time(E, E->monitor.solution_cycles);
@@ -163,7 +163,7 @@ int main(argc,argv)
 	  output_pseudo_surf(E, E->monitor.solution_cycles);
       }
       else
-	(E->output)(E, E->monitor.solution_cycles);
+	(E->problem_output)(E, E->monitor.solution_cycles);
     }
 
     /* information about simulation time and wall clock time */

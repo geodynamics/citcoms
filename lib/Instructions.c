@@ -270,7 +270,8 @@ void read_initial_settings(struct All_variables *E)
   input_string("datafile",E->control.data_file,"initialize",m);
   input_string("datafile_old",E->control.old_P_file,"initialize",m);
 
-  input_string("output_format",E->control.output_format,"ascii",m);
+  input_string("output_format",E->output.format,"ascii",m);
+  input_string("output_optional",E->output.optional,"",m);
 
   input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
   input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
@@ -927,6 +928,7 @@ void open_log(struct All_variables *E)
 {
   char logfile[255];
 
+  E->fp = NULL;
   sprintf(logfile,"%s.log",E->control.data_file);
   E->fp = output_open(logfile);
 
@@ -938,12 +940,11 @@ void open_time(struct All_variables *E)
 {
   char timeoutput[255];
 
+  E->fptime = NULL;
   if (E->parallel.me == 0) {
     sprintf(timeoutput,"%s.time",E->control.data_file);
     E->fptime = output_open(timeoutput);
   }
-  else
-    E->fptime = NULL;
 
   return;
 }
@@ -953,10 +954,65 @@ void open_info(struct All_variables *E)
 {
   char output_file[255];
 
-  sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
-  E->fp_out = output_open(output_file);
+  E->fp_out = NULL;
+  if (E->control.verbose) {
+    sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
+    E->fp_out = output_open(output_file);
+  }
 
   return;
+}
+
+
+void output_parse_optional(struct  All_variables *E)
+{
+    char* strip(char*);
+
+    int pos, len;
+    char *prev, *next;
+
+    len = strlen(E->output.optional);
+    /* fprintf(stderr, "### length of optional is %d\n", len); */
+    pos = 0;
+    next = E->output.optional;
+
+    E->output.stress = 0;
+    E->output.pressure = 0;
+    E->output.surf = 0;
+    E->output.botm = 0;
+    E->output.average = 0;
+
+    while(1) {
+	/* get next field */
+	prev = strsep(&next, ",");
+
+	/* break if no more field */
+	if(prev == NULL) break;
+
+	/* strip off leading and trailing whitespaces */
+	prev = strip(prev);
+
+	/* skip empty field */
+	if (strlen(prev) == 0) continue;
+
+	/* fprintf(stderr, "### %s: %s\n", prev, next); */
+	if(strcmp(prev, "stress")==0)
+	    E->output.stress = 1;
+	else if(strcmp(prev, "pressure")==0)
+	    E->output.pressure = 1;
+	else if(strcmp(prev, "surf")==0)
+	    E->output.surf = 1;
+	else if(strcmp(prev, "botm")==0)
+	    E->output.botm = 1;
+	else if(strcmp(prev, "average")==0)
+	    E->output.average = 1;
+	else
+	    if(E->parallel.me == 0)
+		fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);
+
+    }
+
+    return;
 }
 
 
@@ -964,23 +1020,24 @@ void output_init(struct  All_variables *E)
 {
   open_log(E);
   open_time(E);
-  if (E->control.verbose)
-    open_info(E);
+  open_info(E);
+
+  output_parse_optional(E);
 
   //DEBUG
-  //strcpy(E->control.output_format, "hdf5");
-  //fprintf(stderr, "output format is %s\n", E->control.output_format);
-  if (strcmp(E->control.output_format, "ascii") == 0)
-    E->output = output;
-  else if (strcmp(E->control.output_format, "hdf5") == 0)
-    E->output = h5output;
+  //strcpy(E->output.format, "hdf5");
+  //fprintf(stderr, "output format is %s\n", E->output.format);
+  if (strcmp(E->output.format, "ascii") == 0)
+    E->problem_output = output;
+  else if (strcmp(E->output.format, "hdf5") == 0)
+    E->problem_output = h5output;
   else {
     // indicate error here
     if (E->parallel.me == 0) {
-      fprintf(stderr, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
-      fprintf(E->fp, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
-      parallel_process_termination(E);
+        fprintf(stderr, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
+        fprintf(E->fp, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
     }
+    parallel_process_termination(E);
   }
 }
 
@@ -990,13 +1047,40 @@ void output_finalize(struct  All_variables *E)
 {
   void h5output_close(struct  All_variables *E);
 
-  fclose(E->fp);
+  if (E->fp)
+    fclose(E->fp);
 
   if (E->fptime)
     fclose(E->fptime);
 
+  if (E->fp_out)
+    fclose(E->fp_out);
+
   // close HDF5 output
-  if (strcmp(E->control.output_format, "hdf5") == 0)
+  if (strcmp(E->output.format, "hdf5") == 0)
     h5output_close(E);
 
 }
+
+
+char* strip(char *input)
+{
+    int end;
+    char *str;
+    end = strlen(input) - 1;
+    str = input;
+
+    /* trim trailing whitespace */
+    while (isspace(str[end]))
+        end--;
+
+    str[++end] = 0;
+
+    // trim leading whitespace
+    while(isspace(*str))
+        str++;
+
+    return str;
+}
+
+

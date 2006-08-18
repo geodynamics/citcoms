@@ -43,8 +43,9 @@ void output_visc(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
 void output_surf_botm_pseudo_surf(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
-void output_ave_r(struct All_variables *, int);
+void output_average(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
+void output_pressure(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -70,16 +71,21 @@ void output(struct All_variables *E, int cycles)
        output_surf_botm_pseudo_surf(E, cycles);
   }
   else
-    output_surf_botm(E, cycles);
+      output_surf_botm(E, cycles);
 
+  /* output tracer location if using tracer */
   if(E->control.tracer==1)
     output_tracer(E, cycles);
 
-  //output_stress(E, cycles);
-  //output_pressure(E, cycles);
+  /* optiotnal output below */
+  if (E->output.stress == 1)
+    output_stress(E, cycles);
 
-  /* disable horizontal average output   by Tan2 */
-  /* output_ave_r(E, cycles); */
+  if (E->output.pressure == 1)
+    output_pressure(E, cycles);
+
+  if (E->output.average == 1)
+      output_average(E, cycles);
 
   return;
 }
@@ -207,7 +213,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   heat_flux(E);
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
 
-  if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
+  if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
     sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 
@@ -222,7 +228,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   }
 
 
-  if (E->parallel.me_loc[3]==0)      {
+  if (E->output.botm && (E->parallel.me_loc[3]==0)) {
     sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp2 = output_open(output_file);
 
@@ -296,7 +302,7 @@ void output_stress(struct All_variables *E, int cycles)
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
     for (node=1;node<=E->lmesh.nno;node++)
-      fprintf(fp1, "%d %e %e %e %e %e %e\n", node,
+      fprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
 	      E->gstress[m][(node-1)*6+1],
 	      E->gstress[m][(node-1)*6+2],
 	      E->gstress[m][(node-1)*6+3],
@@ -308,7 +314,7 @@ void output_stress(struct All_variables *E, int cycles)
 }
 
 
-void output_avg_r(struct All_variables *E, int cycles)
+void output_average(struct All_variables *E, int cycles)
 {
   /* horizontal average output of temperature and rms velocity*/
   void return_horiz_ave_f();
@@ -353,7 +359,7 @@ void output_avg_r(struct All_variables *E, int cycles)
   // only the first nprocz processors need to output
 
   if (E->parallel.me<E->parallel.nprocz)  {
-    sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles);
+    sprintf(output_file,"%s.average.%d.%d",E->control.data_file,E->parallel.me,cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
         fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);

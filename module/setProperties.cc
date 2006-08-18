@@ -387,7 +387,9 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
 
     getScalarProperty(properties, "stokes_flow_only", E->control.stokes, m);
 
-    getStringProperty(properties, "output_format", E->control.output_format, m);
+    getStringProperty(properties, "output_format", E->output.format, m);
+    getStringProperty(properties, "output_optional", E->output.optional, m);
+
     getScalarProperty(properties, "verbose", E->control.verbose, m);
     getScalarProperty(properties, "see_convergence", E->control.print_convergence, m);
 

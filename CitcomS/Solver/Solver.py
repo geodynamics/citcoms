@@ -328,6 +328,8 @@ class Solver(Component):
 
         output_format = pyre.inventory.str("output_format", default="ascii",
                             validator=pyre.inventory.choice(["ascii", "hdf5"]))
+        output_optional = pyre.inventory.str("output_optional", default="")
+
         verbose = pyre.inventory.bool("verbose", default=False)
         see_convergence = pyre.inventory.bool("see_convergence", default=True)
 

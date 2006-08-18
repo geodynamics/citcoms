@@ -63,7 +63,7 @@ void h5output_stress(struct All_variables *, int);
 void h5output_tracer(struct All_variables *, int);
 void h5output_surf_botm(struct All_variables *, int);
 void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
-void h5output_ave_r(struct All_variables *, int);
+void h5output_average(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
 /* for creation of HDF5 objects (wrapped for PyTables compatibility) */
@@ -134,18 +134,19 @@ void h5output(struct All_variables *E, int cycles)
     else
         h5output_surf_botm(E, cycles);
 
+    /* output tracer location if using tracer */
     if(E->control.tracer == 1)
         h5output_tracer(E, cycles);
 
-    if(E->control.stress == 1)
+    /* optiotnal output below */
+    if(E->output.stress == 1)
         h5output_stress(E, cycles);
 
-    if(E->control.pressure == 1)
+    if(E->output.pressure == 1)
         h5output_pressure(E, cycles);
 
-    /* disable horizontal average h5output   by Tan2 */
-    /* h5output_ave_r(E, cycles); */
-
+    if (E->output.average == 1)
+	h5output_average(E, cycles);
 
     /* Call this last (for timing information) */
     h5output_time(E, cycles);
@@ -301,25 +302,29 @@ void h5output_open(struct All_variables *E)
         h5create_velocity(cap_group, E->hdf5.vector3d);
         h5create_temperature(cap_group, E->hdf5.scalar3d);
         h5create_viscosity(cap_group, E->hdf5.scalar3d);
-        //h5create_pressure(cap_group, E->hdf5.scalar3d);
-        //h5create_stress(cap_group, E->hdf5.tensor3d);
+
+	if(E->output.pressure == 1)
+	    h5create_pressure(cap_group, E->hdf5.scalar3d);
+
+	if(E->output.stress == 1)
+	    h5create_stress(cap_group, E->hdf5.tensor3d);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
          ********************************************************************/
-
+	if(E->output.surf == 1) {
         //surf_group = h5create_group(cap_group, "surf", (size_t)0);
 
         //h5create_surf_coord(surf_group, E->hdf5.const_vector2d);
         //h5create_surf_velocity(surf_group, E->hdf5.vector2d);
         //h5create_surf_heatflux(surf_group, E->hdf5.scalar2d);
         //h5create_surf_topography(surf_group, E->hdf5.scalar2d);
-
+	}
 
         /********************************************************************
          * Create /cap/botm/ group                                          *
          ********************************************************************/
-
+	if(E->output.botm == 1) {
         //botm_group = h5create_group(cap_group, "botm", (size_t)0);
 
         //h5create_surf_coord(botm_group, E->hdf5.const_vector2d);
@@ -327,12 +332,16 @@ void h5output_open(struct All_variables *E)
         //h5create_surf_heatflux(botm_group, E->hdf5.scalar2d);
         //h5create_surf_topography(botm_group, E->hdf5.scalar2d);
         //status = H5Gclose(botm_group);
+	}
+
+	if(E->output.average == 1) {
+	}
 
         /* save references to caps */
         E->hdf5.cap_groups[cap] = cap_group;
         //E->hdf5.cap_surf_groups[cap] = surf_group;
         //E->hdf5.cap_botm_groups[cap] = botm_group;
-        
+
     }
     //status = H5Fclose(file_id);
 
@@ -369,8 +378,14 @@ void h5output_close(struct All_variables *E)
     for (i = 0; i < E->sphere.caps; i++)
     {
         status = H5Gclose(E->hdf5.cap_groups[i]);
-        //status = H5Gclose(E->hdf5.cap_surf_groups[i]);
-        //status = H5Gclose(E->hdf5.cap_botm_groups[i]);
+	if(E->output.surf == 1) {
+	    //status = H5Gclose(E->hdf5.cap_surf_groups[i]);
+	}
+	if(E->output.botm == 1) {
+	    //status = H5Gclose(E->hdf5.cap_botm_groups[i]);
+	}
+	if(E->output.average == 1) {
+	}
     }
 
     /* close file */
@@ -578,7 +593,7 @@ static herr_t h5allocate_field(struct All_variables *E,
 
     int nx, ny, nz;
     int nodex, nodey, nodez;
-    
+
     /* coordinates of current process in cap */
     px = E->parallel.me_loc[1];
     py = E->parallel.me_loc[2];
@@ -725,7 +740,7 @@ static herr_t h5allocate_field(struct All_variables *E,
             (*field)->count[z]  = 1;
             (*field)->block[z]  = (pz == nprocz-1) ? nz : nz-1;
         }
-        
+
         if (c >= 0)
         {
             /* dataspace parameters */
@@ -1301,13 +1316,17 @@ void h5output_tracer(struct All_variables *E, int cycles)
 
 void h5output_surf_botm(struct All_variables *E, int cycles)
 {
+    if(E->output.surf == 1) {
+    }
+    if(E->output.botm == 1) {
+    }
 }
 
 void h5output_surf_botm_pseudo_surf(struct All_variables *E, int cycles)
 {
 }
 
-void h5output_avg_r(struct All_variables *E, int cycles)
+void h5output_average(struct All_variables *E, int cycles)
 {
 }
 
@@ -1372,7 +1391,7 @@ void h5output_time(struct All_variables *E, int cycles)
     if (E->parallel.me == 0)
         status = H5Dwrite(dataset, datatype, dataspace, filespace,
                           dxpl_id, &row);
-    
+
     /* Update NROWS attribute (for PyTables) */
     set_attribute_llong(dataset, "NROWS", E->hdf5.count);
 
@@ -1541,7 +1560,8 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute(input, "stokes_flow_only", H5T_NATIVE_INT, &(E->control.stokes));
 
-    status = set_attribute_string(input, "output_format", E->control.output_format);
+    status = set_attribute_string(input, "output_format", E->output.format);
+    status = set_attribute_string(input, "output_optional", E->output.optional);
     status = set_attribute(input, "verbose", H5T_NATIVE_INT, &(E->control.verbose));
     status = set_attribute(input, "see_convergence", H5T_NATIVE_INT, &(E->control.print_convergence));
 

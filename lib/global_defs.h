@@ -621,8 +621,6 @@ struct CONTROL {
     char post_topo_file[100];
     char slabgeoid_file[100];
 
-    char output_format[10];  /* ascii or hdf5 */
-    char which_output[1000]; /* comma-delimited list of objects to output */
     char which_data_files[1000];
     char which_horiz_averages[1000];
     char which_running_data[1000];
@@ -662,10 +660,6 @@ struct CONTROL {
 
     int pseudo_free_surf;
     int tracer;
-    int viscosity;    /* whether to output viscosity */
-    int stress;       /* whether to output stress */
-    int pressure;     /* whether to output pressure */
-
 
     double theta_min, theta_max, fi_min, fi_max;
     float start_age;
@@ -797,6 +791,17 @@ struct DATA {
     float   timedir;
 };
 
+struct Output {
+    char format[10];  /* ascii or hdf5 */
+    char optional[1000]; /* comma-delimited list of objects to output */
+    int stress;       /* whether to output stress */
+    int pressure;     /* whether to output pressure */
+    int surf;         /* whether to output surface data */
+    int botm;         /* whether to output bottom data */
+    int average;      /* whether to output horizontal averaged profile */
+};
+
+
 #ifdef USE_HDF5
 #include "hdf5_related.h"
 #endif
@@ -830,6 +835,7 @@ struct All_variables {
     struct Tracer Tracer;
     struct Bdry boundary;
     struct SBC sbc;
+    struct Output output;
 
     int filed[20];
 
@@ -931,7 +937,7 @@ struct All_variables {
     float (* node_space_function[3])(void*);
 
     /* function pointer for choosing between various output routines */
-    void (* output)(struct All_variables *, int);
+    void (* problem_output)(struct All_variables *, int);
 
   /* the following function pointers are for exchanger */
   void (* exchange_node_d)(struct All_variables *, double**, int);
