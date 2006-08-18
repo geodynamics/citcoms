@@ -57,13 +57,7 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 
     struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
 
-    if(E->control.pseudo_free_surf)
-	    if(E->mesh.topvbc==2)
-		    output_pseudo_surf(E, cycles);
-	    else
-		    assert(0);
-    else
-	    (E->problem_output)(E, cycles);
+    (E->problem_output)(E, cycles);
 
 
     Py_INCREF(Py_None);
@@ -111,25 +105,6 @@ PyObject * pyCitcom_output_time(PyObject *self, PyObject *args)
     return Py_None;
 }
 
-
-char pyCitcom_output_pseudo_surf__doc__[] = "";
-char pyCitcom_output_pseudo_surf__name__[] = "output_pseudo_surf";
-
-PyObject * pyCitcom_output_pseudo_surf(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    int cycles;
-
-    if (!PyArg_ParseTuple(args, "Oi:output_pseudo_surf", &obj, &cycles))
-        return NULL;
-
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
-
-    output_pseudo_surf(E, cycles);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
 
 // version
 // $Id$

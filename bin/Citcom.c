@@ -56,7 +56,6 @@ int main(argc,argv)
   void read_mat_from_file();
   void open_time();
   void output_finalize();
-  void output_pseudo_surf();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -109,12 +108,7 @@ int main(argc,argv)
   else
     general_stokes_solver(E);
 
-  if(E->control.pseudo_free_surf) {
-    if(E->mesh.topvbc == 2)
-	    output_pseudo_surf(E, E->monitor.solution_cycles);
-  }
-  else
-    (E->problem_output)(E, E->monitor.solution_cycles);
+  (E->problem_output)(E, E->monitor.solution_cycles);
 
   /* information about simulation time and wall clock time */
   output_time(E, E->monitor.solution_cycles);
@@ -158,11 +152,6 @@ int main(argc,argv)
       (E->problem_tracer_advection)(E);
 
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
-      if(E->control.pseudo_free_surf) {
-        if(E->mesh.topvbc == 2)
-	  output_pseudo_surf(E, E->monitor.solution_cycles);
-      }
-      else
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
 

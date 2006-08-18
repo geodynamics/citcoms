@@ -41,7 +41,6 @@ void output_velo(struct All_variables *, int);
 void output_visc_prepare(struct All_variables *, float **);
 void output_visc(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
-void output_surf_botm_pseudo_surf(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_average(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
@@ -66,12 +65,7 @@ void output(struct All_variables *E, int cycles)
   output_velo(E, cycles);
   output_visc(E, cycles);
 
-  if(E->control.pseudo_free_surf) {
-    if(E->mesh.topvbc == 2)
-       output_surf_botm_pseudo_surf(E, cycles);
-  }
-  else
-      output_surf_botm(E, cycles);
+  output_surf_botm(E, cycles);
 
   /* output tracer location if using tracer */
   if(E->control.tracer==1)
@@ -86,31 +80,6 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.average == 1)
       output_average(E, cycles);
-
-  return;
-}
-
-
-void output_pseudo_surf(struct All_variables *E, int cycles)
-{
-
-  if (cycles == 0) {
-    output_coord(E);
-    output_mat(E);
-  }
-
-  output_velo(E, cycles);
-  output_visc(E, cycles);
-  output_surf_botm_pseudo_surf(E, cycles);
-
-  if(E->control.tracer==1)
-    output_tracer(E, cycles);
-
-  //output_stress(E, cycles);
-  //output_pressure(E, cycles);
-
-  /* disable horizontal average output   by Tan2 */
-  /* output_ave_r(E, cycles); */
 
   return;
 }
@@ -208,7 +177,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   int i, j, s;
   char output_file[255];
   FILE* fp2;
-
+  float *topo;
 
   heat_flux(E);
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
@@ -218,11 +187,17 @@ void output_surf_botm(struct All_variables *E, int cycles)
     fp2 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-	    fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-	    for(i=1;i<=E->lmesh.nsf;i++)   {
-		    s = i*E->lmesh.noz;
-		    fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpg[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
-	    }
+	/* choose either STD topo or pseudo-free-surf topo */
+	if(E->control.pseudo_free_surf)
+	    topo = E->slice.freesurf[j];
+	else
+	    topo = E->slice.tpg[j];
+
+	fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+	for(i=1;i<=E->lmesh.nsf;i++)   {
+	    s = i*E->lmesh.noz;
+	    fprintf(fp2,"%.4e %.4e %.4e %.4e\n",topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+	}
     }
     fclose(fp2);
   }
@@ -237,48 +212,6 @@ void output_surf_botm(struct All_variables *E, int cycles)
       for(i=1;i<=E->lmesh.nsf;i++)  {
 	s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
-      }
-    }
-    fclose(fp2);
-  }
-
-  return;
-}
-
-void output_surf_botm_pseudo_surf(struct All_variables *E, int cycles)
-{
-  int i, j, s;
-  char output_file[255];
-  FILE* fp2;
-
-
-  heat_flux(E);
-  get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
-
-  if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
-    sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp2 = output_open(output_file);
-
-    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-	    fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-	    for(i=1;i<=E->lmesh.nsf;i++)   {
-		    s = i*E->lmesh.noz;
-		    fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.freesurf[j][i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
-	    }
-    }
-    fclose(fp2);
-  }
-
-
-  if (E->parallel.me_loc[3]==0)      {
-    sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp2 = output_open(output_file);
-
-    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-      for(i=1;i<=E->lmesh.nsf;i++)  {
-	s = (i-1)*E->lmesh.noz + 1;
-	fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
       }
     }
     fclose(fp2);

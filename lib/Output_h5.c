@@ -62,7 +62,6 @@ void h5output_pressure(struct All_variables *, int);
 void h5output_stress(struct All_variables *, int);
 void h5output_tracer(struct All_variables *, int);
 void h5output_surf_botm(struct All_variables *, int);
-void h5output_surf_botm_pseudo_surf(struct All_variables *, int);
 void h5output_average(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
@@ -126,13 +125,7 @@ void h5output(struct All_variables *E, int cycles)
     h5output_temperature(E, cycles);
     h5output_viscosity(E, cycles);
 
-    if(E->control.pseudo_free_surf)
-    {
-        if(E->mesh.topvbc == 2)
-            h5output_surf_botm_pseudo_surf(E, cycles);
-    }
-    else
-        h5output_surf_botm(E, cycles);
+    h5output_surf_botm(E, cycles);
 
     /* output tracer location if using tracer */
     if(E->control.tracer == 1)
@@ -151,36 +144,6 @@ void h5output(struct All_variables *E, int cycles)
     /* Call this last (for timing information) */
     h5output_time(E, cycles);
 
-#endif
-}
-
-void h5output_pseudo_surf(struct All_variables *E, int cycles)
-{
-#ifdef USE_HDF5
-    /* TODO: h5output() should replace this function (make sure
-     * all funcitonality here is included there).
-     */
-    if (cycles == 0)
-    {
-        h5output_coord(E);
-        h5output_material(E);
-    }
-
-    h5output_velocity(E, cycles);
-    h5output_temperature(E, cycles);
-    h5output_viscosity(E, cycles);
-    h5output_surf_botm_pseudo_surf(E, cycles);
-
-    if(E->control.tracer==1)
-        h5output_tracer(E, cycles);
-
-    //h5output_stress(E, cycles);
-    //h5output_pressure(E, cycles);
-
-    /* disable horizontal average h5output   by Tan2 */
-    /* h5output_ave_r(E, cycles); */
-
-    return;
 #endif
 }
 
@@ -1320,10 +1283,6 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
     }
     if(E->output.botm == 1) {
     }
-}
-
-void h5output_surf_botm_pseudo_surf(struct All_variables *E, int cycles)
-{
 }
 
 void h5output_average(struct All_variables *E, int cycles)
