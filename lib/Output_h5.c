@@ -1436,6 +1436,8 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute(input, "z_cmb", H5T_NATIVE_FLOAT, &(E->viscosity.zcmb));
     status = set_attribute(input, "layer_km", H5T_NATIVE_FLOAT, &(E->data.layer_km));
     status = set_attribute(input, "radius_km", H5T_NATIVE_FLOAT, &(E->data.radius_km));
+    status = set_attribute(input, "scalev", H5T_NATIVE_FLOAT, &(E->data.scalev));
+    status = set_attribute(input, "scalet", H5T_NATIVE_FLOAT, &(E->data.scalet));
 
     /*
      * IC.inventory
