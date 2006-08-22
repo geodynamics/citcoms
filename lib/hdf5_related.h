@@ -70,7 +70,7 @@ typedef struct field_t
 
     /* number of data points in buffer */
     int n;
-    double *data;
+    float *data;
 
 } field_t;
 

@@ -733,7 +733,7 @@ static herr_t h5allocate_field(struct All_variables *E,
                 (*field)->n *= (*field)->block[dim];
 
         /* finally, allocate buffer */
-        (*field)->data = (double *)malloc((*field)->n * sizeof(double));
+        (*field)->data = (float *)malloc((*field)->n * sizeof(float));
 
         return 0;
     }
@@ -989,7 +989,7 @@ static herr_t h5write_field(hid_t dset_id, field_t *field)
 {
     herr_t status;
 
-    status = h5write_dataset(dset_id, H5T_NATIVE_DOUBLE, field->data,
+    status = h5write_dataset(dset_id, H5T_NATIVE_FLOAT, field->data,
                              field->rank, field->block, field->offset,
                              field->stride, field->count, field->block);
     return status;
