@@ -51,6 +51,7 @@
 /* constant data (only for first cycle) */
 void h5output_meta(struct All_variables *);
 void h5output_coord(struct All_variables *);
+void h5output_surf_botm_coord(struct All_variables *E);
 void h5output_material(struct All_variables *);
 
 /* time-varying data */
@@ -70,7 +71,7 @@ static hid_t h5create_file(const char *filename, unsigned flags, hid_t fcpl_id, 
 static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint);
 static herr_t h5create_dataset(hid_t loc_id, const char *name, const char *title, hid_t type_id, int rank, hsize_t *dims, hsize_t *maxdims, hsize_t *chunkdims);
 
-/* for creation of field and dataset objects */
+/* for creation of field and other dataset objects */
 static herr_t h5allocate_field(struct All_variables *E, enum field_class_t field_class, int nsd, int time, hid_t dtype, field_t **field);
 static herr_t h5create_field(hid_t loc_id, const char *name, const char *title, field_t *field);
 static herr_t h5create_coord(hid_t loc_id, field_t *field);
@@ -83,6 +84,9 @@ static herr_t h5create_surf_coord(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_velocity(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_heatflux(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_topography(hid_t loc_id, field_t *field);
+static herr_t h5create_have_temperature(hid_t loc_id, field_t *field);
+static herr_t h5create_have_vxy_rms(hid_t loc_id, field_t *field);
+static herr_t h5create_have_vz_rms(hid_t loc_id, field_t *field);
 static herr_t h5create_time(hid_t loc_id);
 
 /* for writing to datasets */
@@ -117,6 +121,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_open(E);
         h5output_meta(E);
         h5output_coord(E);
+        h5output_surf_botm_coord(E);
         h5output_material(E);
     }
 
@@ -124,14 +129,13 @@ void h5output(struct All_variables *E, int cycles)
     h5output_velocity(E, cycles);
     h5output_temperature(E, cycles);
     h5output_viscosity(E, cycles);
-
     h5output_surf_botm(E, cycles);
 
     /* output tracer location if using tracer */
     if(E->control.tracer == 1)
         h5output_tracer(E, cycles);
 
-    /* optiotnal output below */
+    /* optional output below */
     if(E->output.stress == 1)
         h5output_stress(E, cycles);
 
@@ -139,7 +143,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_pressure(E, cycles);
 
     if (E->output.average == 1)
-	h5output_average(E, cycles);
+        h5output_average(E, cycles);
 
     /* Call this last (for timing information) */
     h5output_time(E, cycles);
@@ -217,6 +221,7 @@ void h5output_open(struct All_variables *E)
 
     /*
      * Allocate field objects for use in dataset writes...
+     * TODO: check E->output.* input parameters to decide which buffers to allocate
      */
 
     E->hdf5.const_vector3d = NULL;
@@ -228,12 +233,13 @@ void h5output_open(struct All_variables *E)
     E->hdf5.scalar2d = NULL;
     E->hdf5.scalar1d = NULL;
 
-    dtype = H5T_NATIVE_FLOAT; /* store solutions as floats in .h5 file */
+    dtype = H5T_NATIVE_FLOAT;       /* store solutions as floats in .h5 file */
 
     h5allocate_field(E, VECTOR_FIELD, 3, 0, dtype, &(E->hdf5.const_vector3d));
     h5allocate_field(E, VECTOR_FIELD, 2, 0, dtype, &(E->hdf5.const_vector2d));
 
     h5allocate_field(E, TENSOR_FIELD, 3, 1, dtype, &(E->hdf5.tensor3d));
+        
     h5allocate_field(E, VECTOR_FIELD, 3, 1, dtype, &(E->hdf5.vector3d));
     h5allocate_field(E, VECTOR_FIELD, 2, 1, dtype, &(E->hdf5.vector2d));
 
@@ -266,50 +272,55 @@ void h5output_open(struct All_variables *E)
         h5create_temperature(cap_group, E->hdf5.scalar3d);
         h5create_viscosity(cap_group, E->hdf5.scalar3d);
 
-	if(E->output.pressure == 1)
-	    h5create_pressure(cap_group, E->hdf5.scalar3d);
+        if (E->output.pressure == 1)
+            h5create_pressure(cap_group, E->hdf5.scalar3d);
 
-	if(E->output.stress == 1)
-	    h5create_stress(cap_group, E->hdf5.tensor3d);
+        if (E->output.stress == 1)
+            h5create_stress(cap_group, E->hdf5.tensor3d);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
          ********************************************************************/
-	if(E->output.surf == 1) {
-        //surf_group = h5create_group(cap_group, "surf", (size_t)0);
-
-        //h5create_surf_coord(surf_group, E->hdf5.const_vector2d);
-        //h5create_surf_velocity(surf_group, E->hdf5.vector2d);
-        //h5create_surf_heatflux(surf_group, E->hdf5.scalar2d);
-        //h5create_surf_topography(surf_group, E->hdf5.scalar2d);
-	}
+        if (E->output.surf == 1)
+        {
+            surf_group = h5create_group(cap_group, "surf", (size_t)0);
+            E->hdf5.cap_surf_groups[cap] = surf_group;
+            h5create_surf_coord(surf_group, E->hdf5.const_vector2d);
+            h5create_surf_velocity(surf_group, E->hdf5.vector2d);
+            h5create_surf_heatflux(surf_group, E->hdf5.scalar2d);
+            h5create_surf_topography(surf_group, E->hdf5.scalar2d);
+        }
 
         /********************************************************************
          * Create /cap/botm/ group                                          *
          ********************************************************************/
-	if(E->output.botm == 1) {
-        //botm_group = h5create_group(cap_group, "botm", (size_t)0);
+        if (E->output.botm == 1)
+        {
+            botm_group = h5create_group(cap_group, "botm", (size_t)0);
+            E->hdf5.cap_botm_groups[cap] = botm_group;
 
-        //h5create_surf_coord(botm_group, E->hdf5.const_vector2d);
-        //h5create_surf_velocity(botm_group, E->hdf5.vector2d);
-        //h5create_surf_heatflux(botm_group, E->hdf5.scalar2d);
-        //h5create_surf_topography(botm_group, E->hdf5.scalar2d);
-        //status = H5Gclose(botm_group);
-	}
+            h5create_surf_coord(botm_group, E->hdf5.const_vector2d);
+            h5create_surf_velocity(botm_group, E->hdf5.vector2d);
+            h5create_surf_heatflux(botm_group, E->hdf5.scalar2d);
+            h5create_surf_topography(botm_group, E->hdf5.scalar2d);
+        }
 
-	if(E->output.average == 1) {
-	}
+        /********************************************************************
+         * Create horizontal average datasets                               *
+         ********************************************************************/
+        if(E->output.average == 1)
+        {
+            h5create_have_temperature(cap_group, E->hdf5.scalar1d);
+            h5create_have_vxy_rms(cap_group, E->hdf5.scalar1d);
+            h5create_have_vz_rms(cap_group, E->hdf5.scalar1d);
+        }
 
-        /* save references to caps */
+        /* remember HDF5 group identifier for each cap */
         E->hdf5.cap_groups[cap] = cap_group;
-        //E->hdf5.cap_surf_groups[cap] = surf_group;
-        //E->hdf5.cap_botm_groups[cap] = botm_group;
 
     }
-    //status = H5Fclose(file_id);
 
-
-    /* Number of times we have called h5output() */
+    /* Remember number of times we have called h5output() */
 
     E->hdf5.count = 0; // TODO: for restart, initialize to last value
 
@@ -341,14 +352,10 @@ void h5output_close(struct All_variables *E)
     for (i = 0; i < E->sphere.caps; i++)
     {
         status = H5Gclose(E->hdf5.cap_groups[i]);
-	if(E->output.surf == 1) {
-	    //status = H5Gclose(E->hdf5.cap_surf_groups[i]);
-	}
-	if(E->output.botm == 1) {
-	    //status = H5Gclose(E->hdf5.cap_botm_groups[i]);
-	}
-	if(E->output.average == 1) {
-	}
+        if(E->output.surf == 1)
+            status = H5Gclose(E->hdf5.cap_surf_groups[i]);
+        if(E->output.botm == 1)
+            status = H5Gclose(E->hdf5.cap_botm_groups[i]);
     }
 
     /* close file */
@@ -827,6 +834,30 @@ static herr_t h5create_surf_topography(hid_t loc_id, field_t *field)
     return 0;
 }
 
+static herr_t h5create_have_temperature(hid_t loc_id, field_t *field)
+{
+    h5create_dataset(loc_id, "T_avg", "temperature horizontal average",
+                     field->dtype, field->rank, field->dims, field->maxdims,
+                     field->chunkdims);
+    return 0;
+}
+
+static herr_t h5create_have_vxy_rms(hid_t loc_id, field_t *field)
+{
+    h5create_dataset(loc_id, "Vxy_rms", "Vxy horizontal average (rms)",
+                     field->dtype, field->rank, field->dims, field->maxdims,
+                     field->chunkdims);
+    return 0;
+}
+
+static herr_t h5create_have_vz_rms(hid_t loc_id, field_t *field)
+{
+    h5create_dataset(loc_id, "Vz_rms", "Vz horizontal average (rms)",
+                     field->dtype, field->rank, field->dims, field->maxdims,
+                     field->chunkdims);
+    return 0;
+}
+
 static herr_t h5create_time(hid_t loc_id)
 {
     hid_t dataset;      /* dataset identifier */
@@ -869,15 +900,17 @@ static herr_t h5create_time(hid_t loc_id)
 
     set_attribute_llong(dataset, "NROWS", 0);
 
-    set_attribute_string(dataset, "FIELD_0_NAME", "time");
-    set_attribute_string(dataset, "FIELD_1_NAME", "time_step");
-    set_attribute_string(dataset, "FIELD_2_NAME", "cpu");
-    set_attribute_string(dataset, "FIELD_3_NAME", "cpu_step");
+    set_attribute_string(dataset, "FIELD_0_NAME", "step");
+    set_attribute_string(dataset, "FIELD_1_NAME", "time");
+    set_attribute_string(dataset, "FIELD_2_NAME", "time_step");
+    set_attribute_string(dataset, "FIELD_3_NAME", "cpu");
+    set_attribute_string(dataset, "FIELD_4_NAME", "cpu_step");
 
     set_attribute_double(dataset, "FIELD_0_FILL", 0);
     set_attribute_double(dataset, "FIELD_1_FILL", 0);
     set_attribute_double(dataset, "FIELD_2_FILL", 0);
     set_attribute_double(dataset, "FIELD_3_FILL", 0);
+    set_attribute_double(dataset, "FIELD_4_FILL", 0);
 
     set_attribute_int(dataset, "AUTOMATIC_INDEX", 1);
     set_attribute_int(dataset, "REINDEX", 1);
@@ -910,42 +943,21 @@ static herr_t h5write_dataset(hid_t dset_id,
     herr_t status;
 
     /* DEBUG
-    if(size != NULL)
-        printf("\th5write_dataset():\n"
-               "\t\trank    = %d\n"
-               "\t\tsize    = {%d,%d,%d,%d,%d}\n"
-               "\t\tmemdims = {%d,%d,%d,%d,%d}\n"
-               "\t\toffset  = {%d,%d,%d,%d,%d}\n"
-               "\t\tstride  = {%d,%d,%d,%d,%d}\n"
-               "\t\tblock   = {%d,%d,%d,%d,%d}\n",
-               rank,
-               (int)size[0], (int)size[1],
-               (int)size[2], (int)size[3], (int)size[4],
-               (int)memdims[0], (int)memdims[1],
-               (int)memdims[2], (int)memdims[3], (int)memdims[4],
-               (int)offset[0], (int)offset[1],
-               (int)offset[2], (int)offset[3], (int)offset[4],
-               (int)count[0], (int)count[1],
-               (int)count[2], (int)count[3], (int)count[4],
-               (int)block[0], (int)block[1],
-               (int)block[2], (int)block[3], (int)block[4]);
-    else
-        printf("\th5write_dataset():\n"
-               "\t\trank    = %d\n"
-               "\t\tsize    = NULL\n"
-               "\t\tmemdims = {%d,%d,%d,%d,%d}\n"
-               "\t\toffset  = {%d,%d,%d,%d,%d}\n"
-               "\t\tstride  = {%d,%d,%d,%d,%d}\n"
-               "\t\tblock   = {%d,%d,%d,%d,%d}\n",
-               rank,
-               (int)memdims[0], (int)memdims[1],
-               (int)memdims[2], (int)memdims[3], (int)memdims[4],
-               (int)offset[0], (int)offset[1],
-               (int)offset[2], (int)offset[3], (int)offset[4],
-               (int)count[0], (int)count[1],
-               (int)count[2], (int)count[3], (int)count[4],
-               (int)block[0], (int)block[1],
-               (int)block[2], (int)block[3], (int)block[4]);
+    printf("\th5write_dataset():\n"
+           "\t\trank    = %d\n"
+           "\t\tmemdims = {%d,%d,%d,%d,%d}\n"
+           "\t\toffset  = {%d,%d,%d,%d,%d}\n"
+           "\t\tstride  = {%d,%d,%d,%d,%d}\n"
+           "\t\tblock   = {%d,%d,%d,%d,%d}\n",
+           rank,
+           (int)memdims[0], (int)memdims[1],
+           (int)memdims[2], (int)memdims[3], (int)memdims[4],
+           (int)offset[0], (int)offset[1],
+           (int)offset[2], (int)offset[3], (int)offset[4],
+           (int)count[0], (int)count[1],
+           (int)count[2], (int)count[3], (int)count[4],
+           (int)block[0], (int)block[1],
+           (int)block[2], (int)block[3], (int)block[4]);
     // */
 
     /* create memory dataspace */
@@ -1012,8 +1024,8 @@ static herr_t h5close_field(field_t **field)
 #ifdef USE_HDF5
 
 /* This function extends the time dimension of all time-varying field
- * objects. Before any data to a dataset, one should perform a collective
- * call to H5Dextend(dataset, field->dims).
+ * objects. Before any data gets written to a dataset, one should perform
+ * a collective call to H5Dextend(dataset, field->dims).
  */
 void h5extend_time_dimension(struct All_variables *E)
 {
@@ -1039,6 +1051,11 @@ void h5extend_time_dimension(struct All_variables *E)
         field[i]->offset[0] += 1;
     }
 }
+
+
+/****************************************************************************
+ * 3D Fields                                                                *
+ ****************************************************************************/
 
 void h5output_coord(struct All_variables *E)
 {
@@ -1263,10 +1280,118 @@ void h5output_viscosity(struct All_variables *E, int cycles)
 
 void h5output_pressure(struct All_variables *E, int cycles)
 {
+    int cap;
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+
+    field_t *field;
+
+    int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+
+    field = E->hdf5.scalar3d;
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = field->block[1];
+    my = field->block[2];
+    mz = field->block[3];
+
+    /* extend all pressure fields -- collective I/O call */
+    for(cap = 0; cap < E->sphere.caps; cap++)
+    {
+        cap_group = E->hdf5.cap_groups[cap];
+        dataset   = H5Dopen(cap_group, "pressure");
+        status    = H5Dextend(dataset, field->dims);
+        status    = H5Dclose(dataset);
+    }
+
+    /* prepare the data -- change citcom yxz order to xyz order */
+    for(i = 0; i < mx; i++)
+    {
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                field->data[m] = E->NP[1][n+1];
+            }
+        }
+    }
+    
+    /* write to dataset */
+    cap_group = E->hdf5.cap_group;
+    dataset = H5Dopen(cap_group, "pressure");
+    status = h5write_field(dataset, field);
+
+    /* release resources */
+    status = H5Dclose(dataset);
 }
 
 void h5output_stress(struct All_variables *E, int cycles)
 {
+    int cap;
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+
+    field_t *field;
+
+    int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my, mz;
+
+
+    field = E->hdf5.tensor3d;
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = field->block[1];
+    my = field->block[2];
+    mz = field->block[3];
+
+    /* extend all stress fields -- collective I/O call */
+    for(cap = 0; cap < E->sphere.caps; cap++)
+    {
+        cap_group = E->hdf5.cap_groups[cap];
+        dataset   = H5Dopen(cap_group, "stress");
+        status    = H5Dextend(dataset, field->dims);
+        status    = H5Dclose(dataset);
+    }
+
+    /* prepare the data -- change citcom yxz order to xyz order */
+    for(i = 0; i < mx; i++)
+    {
+        for(j = 0; j < my; j++)
+        {
+            for(k = 0; k < mz; k++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = k + j*mz + i*mz*my;
+                field->data[6*m+0] = E->gstress[1][6*n+1];
+                field->data[6*m+1] = E->gstress[1][6*n+2];
+                field->data[6*m+2] = E->gstress[1][6*n+3];
+                field->data[6*m+3] = E->gstress[1][6*n+4];
+                field->data[6*m+4] = E->gstress[1][6*n+5];
+                field->data[6*m+5] = E->gstress[1][6*n+6];
+            }
+        }
+    }
+
+    /* write to dataset */
+    cap_group = E->hdf5.cap_group;
+    dataset = H5Dopen(cap_group, "stress");
+    status = h5write_field(dataset, field);
+
+    /* release resources */
+    status = H5Dclose(dataset);
 }
 
 void h5output_material(struct All_variables *E)
@@ -1277,16 +1402,386 @@ void h5output_tracer(struct All_variables *E, int cycles)
 {
 }
 
-void h5output_surf_botm(struct All_variables *E, int cycles)
+/****************************************************************************
+ * 2D Fields                                                                *
+ ****************************************************************************/
+
+void h5output_surf_botm_coord(struct All_variables *E)
 {
-    if(E->output.surf == 1) {
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+
+    field_t *field;
+
+    int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my;
+
+    int pz = E->parallel.me_loc[3];
+    int nprocz = E->parallel.nprocz;
+
+    field = E->hdf5.const_vector2d;
+
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = field->block[0];
+    my = field->block[1];
+
+    if ((E->output.surf == 1) && (pz == nprocz-1))
+    {
+        k = nz-1;
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                field->data[2*m+0] = E->sx[1][1][n+1];
+                field->data[2*m+1] = E->sx[1][2][n+1];
+            }
+        }
+        cap_group = E->hdf5.cap_surf_groups[E->hdf5.capid];
+        dataset   = H5Dopen(cap_group, "coord");
+        status    = h5write_field(dataset, field);
+        status    = H5Dclose(dataset);
     }
-    if(E->output.botm == 1) {
+    
+    if ((E->output.botm == 1) && (pz == 0))
+    {
+        k = 0;
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                field->data[2*m+0] = E->sx[1][1][n+1];
+                field->data[2*m+1] = E->sx[1][2][n+1];
+            }
+        }
+        cap_group = E->hdf5.cap_botm_groups[E->hdf5.capid];
+        dataset   = H5Dopen(cap_group, "coord");
+        status    = h5write_field(dataset, field);
+        status    = H5Dclose(dataset);
     }
 }
 
+void h5output_surf_botm(struct All_variables *E, int cycles)
+{
+    int cap;
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+
+    field_t *scalar;
+    field_t *vector;
+
+    float *topo;
+
+    int i, j, k;
+    int n, nx, ny, nz;
+    int m, mx, my;
+
+    int pz = E->parallel.me_loc[3];
+    int nprocz = E->parallel.nprocz;
+
+
+    scalar = E->hdf5.scalar2d;
+    vector = E->hdf5.vector2d;
+
+
+    nx = E->lmesh.nox;
+    ny = E->lmesh.noy;
+    nz = E->lmesh.noz;
+
+    mx = scalar->block[1];
+    my = scalar->block[2];
+
+
+    heat_flux(E);
+    get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
+
+
+    /* extend all datasets -- collective I/O call */
+    for(cap = 0; cap < E->sphere.caps; cap++)
+    {
+        if (E->output.surf == 1)
+        {
+            cap_group = E->hdf5.cap_surf_groups[cap];
+
+            dataset = H5Dopen(cap_group, "velocity");
+            status  = H5Dextend(dataset, vector->dims);
+            status  = H5Dclose(dataset);
+
+            dataset = H5Dopen(cap_group, "heatflux");
+            status  = H5Dextend(dataset, scalar->dims);
+            status  = H5Dclose(dataset);
+            
+            dataset = H5Dopen(cap_group, "topography");
+            status  = H5Dextend(dataset, scalar->dims);
+            status  = H5Dclose(dataset);
+        }
+        if (E->output.botm == 1)
+        {
+            cap_group = E->hdf5.cap_botm_groups[cap];
+
+            dataset = H5Dopen(cap_group, "velocity");
+            status  = H5Dextend(dataset, vector->dims);
+            status  = H5Dclose(dataset);
+
+            dataset = H5Dopen(cap_group, "heatflux");
+            status  = H5Dextend(dataset, scalar->dims);
+            status  = H5Dclose(dataset);
+            
+            dataset = H5Dopen(cap_group, "topography");
+            status  = H5Dextend(dataset, scalar->dims);
+            status  = H5Dclose(dataset);
+        }
+    }
+
+
+    /*
+     * top surface
+     */
+
+    if ((E->output.surf == 1) && (pz == nprocz-1))
+    {
+        /* radial index */
+        k = nz-1;
+
+        /* current cap group */
+        cap_group = E->hdf5.cap_surf_groups[E->hdf5.capid];
+
+
+        /* velocity data */
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
+            }
+        }
+        dataset = H5Dopen(cap_group, "velocity");
+        status  = h5write_field(dataset, vector);
+        status  = H5Dclose(dataset);
+
+
+        /* heatflux data */
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                scalar->data[m] = E->slice.shflux[1][n+1];
+            }
+        }
+        dataset = H5Dopen(cap_group, "heatflux");
+        status  = h5write_field(dataset, scalar);
+        status  = H5Dclose(dataset);
+
+
+        /* choose either STD topo or pseudo-free-surf topo */
+        if (E->control.pseudo_free_surf)
+            topo = E->slice.freesurf[1];
+        else
+            topo = E->slice.tpg[1];
+        
+        /* topography data */
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                scalar->data[m] = topo[i];
+            }
+        }
+        dataset = H5Dopen(cap_group, "topography");
+        status  = h5write_field(dataset, scalar);
+        status  = H5Dclose(dataset);
+    }
+
+
+    /*
+     * bottom surface
+     */
+
+    if ((E->output.botm == 1) && (pz == 0))
+    {
+        /* radial index */
+        k = 0;
+
+        /* current cap group */
+        cap_group = E->hdf5.cap_botm_groups[E->hdf5.capid];
+
+
+        /* velocity data */
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
+            }
+        }
+        dataset = H5Dopen(cap_group, "velocity");
+        status  = h5write_field(dataset, vector);
+        status  = H5Dclose(dataset);
+
+
+        /* heatflux data */
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                scalar->data[m] = E->slice.bhflux[1][n+1];
+            }
+        }
+        dataset = H5Dopen(cap_group, "heatflux");
+        status  = h5write_field(dataset, scalar);
+        status  = H5Dclose(dataset);
+
+
+        /* topography data */
+        topo = E->slice.tpg[1];
+        for(i = 0; i < mx; i++)
+        {
+            for(j = 0; j < my; j++)
+            {
+                n = k + i*nz + j*nz*nx;
+                m = j + i*my;
+                scalar->data[m] = topo[i];
+            }
+        }
+        dataset = H5Dopen(cap_group, "topography");
+        status  = h5write_field(dataset, scalar);
+        status  = H5Dclose(dataset);
+    }
+}
+
+
+/****************************************************************************
+ * 1D Fields                                                                *
+ ****************************************************************************/
+
 void h5output_average(struct All_variables *E, int cycles)
 {
+    /* horizontal average output of temperature and rms velocity */
+    void return_horiz_ave_f();
+
+    int cap;
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+    
+    float vx, vy, vz;
+    float *S1[NCS], *S2[NCS], *S3[NCS];
+
+    field_t *field;
+
+    int k;
+    int n, nz;
+    int m, mz;
+
+
+    field = E->hdf5.scalar1d;
+
+    nz = E->lmesh.noz;
+    mz = field->block[1];
+
+
+    /*
+     * calculate horizontal averages
+     */
+
+    S1[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
+    S2[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
+    S3[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
+
+    for(n = 1; n < E->lmesh.nno; n++)
+    {
+        vx = E->sphere.cap[1].V[1][n];
+        vy = E->sphere.cap[1].V[2][n];
+        vz = E->sphere.cap[1].V[3][n];
+
+        S1[1][n] = E->T[1][n];
+        S2[1][n] = vx*vx + vy*vy;
+        S3[1][n] = vz*vz;
+    }
+
+    return_horiz_ave_f(E, S1, E->Have.T);
+    return_horiz_ave_f(E, S2, E->Have.V[1]);
+    return_horiz_ave_f(E, S3, E->Have.V[2]);
+
+    free((void *)S1[1]);
+    free((void *)S2[1]);
+    free((void *)S3[1]);
+
+    for(k = 1; k <= E->lmesh.noz; k++)
+    {
+        E->Have.V[1][k] = sqrt(E->Have.V[1][k]);
+        E->Have.V[2][k] = sqrt(E->Have.V[2][k]);
+    }
+
+
+    /* extend all datasets -- collective I/O call */
+    for(cap = 0; cap < E->sphere.caps; cap++)
+    {
+        cap_group = E->hdf5.cap_groups[cap];
+
+        dataset = H5Dopen(cap_group, "T_avg");
+        status  = H5Dextend(dataset, field->dims);
+        status  = H5Dclose(dataset);
+
+        dataset = H5Dopen(cap_group, "Vxy_rms");
+        status  = H5Dextend(dataset, field->dims);
+        status  = H5Dclose(dataset);
+
+        dataset = H5Dopen(cap_group, "Vz_rms");
+        status  = H5Dextend(dataset, field->dims);
+        status  = H5Dclose(dataset);
+
+    }
+
+    /* only the first nprocz processes need to output */
+    if (E->parallel.me < E->parallel.nprocz)
+    {
+        /* current cap group */
+        cap_group = E->hdf5.cap_groups[E->hdf5.capid];
+
+        /* temperature horizontal average */
+        for(k = 0; k < mz; k++)
+            field->data[k] = E->Have.T[k+1];
+        dataset = H5Dopen(cap_group, "T_avg");
+        status  = h5write_field(dataset, field);
+        status  = H5Dclose(dataset);
+
+        /* Vxy horizontal average (rms) */
+        for(k = 0; k < mz; k++)
+            field->data[k] = E->Have.V[1][k+1];
+        dataset = H5Dopen(cap_group, "Vxy_rms");
+        status  = h5write_field(dataset, field);
+        status  = H5Dclose(dataset);
+
+        /* Vz horizontal average (rms) */
+        for(k = 0; k < mz; k++)
+            field->data[k] = E->Have.V[2][k+1];
+        dataset = H5Dopen(cap_group, "Vz_rms");
+        status  = h5write_field(dataset, field);
+        status  = H5Dclose(dataset);
+    }
 }
 
 void h5output_time(struct All_variables *E, int cycles)
@@ -1361,6 +1856,11 @@ void h5output_time(struct All_variables *E, int cycles)
     status = H5Tclose(datatype);
     status = H5Dclose(dataset);
 }
+
+
+/****************************************************************************
+ * Input parameters and other information                                   *
+ ****************************************************************************/
 
 void h5output_meta(struct All_variables *E)
 {
