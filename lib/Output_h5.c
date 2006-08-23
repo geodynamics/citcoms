@@ -302,7 +302,7 @@ void h5output_open(struct All_variables *E)
             h5create_surf_velocity(botm_group, E->hdf5.vector2d);
             h5create_surf_heatflux(botm_group, E->hdf5.scalar2d);
             h5create_surf_topography(botm_group, E->hdf5.scalar2d);
-            status = H5Gclose(avg_group);
+            status = H5Gclose(botm_group);
         }
 
         /********************************************************************
@@ -310,7 +310,7 @@ void h5output_open(struct All_variables *E)
          ********************************************************************/
         if(E->output.average == 1)
         {
-            avg_group = h5create_group(avg_group, "average", (size_t)0);
+            avg_group = h5create_group(cap_group, "average", (size_t)0);
             h5create_have_temperature(avg_group, E->hdf5.scalar1d);
             h5create_have_vxy_rms(avg_group, E->hdf5.scalar1d);
             h5create_have_vz_rms(avg_group, E->hdf5.scalar1d);
