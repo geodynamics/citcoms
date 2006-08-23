@@ -106,8 +106,6 @@ struct HDF5_INFO
      * only cap_groups[0] should be used.
      */
     hid_t cap_groups[12];
-    hid_t cap_surf_groups[12];
-    hid_t cap_botm_groups[12];
 
     /* Data structures to use in dataset writes...
      * 
