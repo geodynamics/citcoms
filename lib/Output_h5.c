@@ -52,6 +52,7 @@
 void h5output_meta(struct All_variables *);
 void h5output_coord(struct All_variables *);
 void h5output_surf_botm_coord(struct All_variables *E);
+void h5output_have_coord(struct All_variables *);
 void h5output_material(struct All_variables *);
 
 /* time-varying data */
@@ -84,6 +85,7 @@ static herr_t h5create_surf_coord(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_velocity(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_heatflux(hid_t loc_id, field_t *field);
 static herr_t h5create_surf_topography(hid_t loc_id, field_t *field);
+static herr_t h5create_have_coord(hid_t loc_id, field_t *field);
 static herr_t h5create_have_temperature(hid_t loc_id, field_t *field);
 static herr_t h5create_have_vxy_rms(hid_t loc_id, field_t *field);
 static herr_t h5create_have_vz_rms(hid_t loc_id, field_t *field);
@@ -122,6 +124,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_meta(E);
         h5output_coord(E);
         h5output_surf_botm_coord(E);
+        h5output_have_coord(E);
         h5output_material(E);
     }
 
@@ -227,6 +230,8 @@ void h5output_open(struct All_variables *E)
 
     E->hdf5.const_vector3d = NULL;
     E->hdf5.const_vector2d = NULL;
+    E->hdf5.const_scalar1d = NULL;
+
     E->hdf5.tensor3d = NULL;
     E->hdf5.vector3d = NULL;
     E->hdf5.vector2d = NULL;
@@ -238,6 +243,7 @@ void h5output_open(struct All_variables *E)
 
     h5allocate_field(E, VECTOR_FIELD, 3, 0, dtype, &(E->hdf5.const_vector3d));
     h5allocate_field(E, VECTOR_FIELD, 2, 0, dtype, &(E->hdf5.const_vector2d));
+    h5allocate_field(E, SCALAR_FIELD, 1, 0, dtype, &(E->hdf5.const_scalar1d));
 
     h5allocate_field(E, TENSOR_FIELD, 3, 1, dtype, &(E->hdf5.tensor3d));
         
@@ -311,6 +317,7 @@ void h5output_open(struct All_variables *E)
         if(E->output.average == 1)
         {
             avg_group = h5create_group(cap_group, "average", (size_t)0);
+            h5create_have_coord(avg_group, E->hdf5.const_scalar1d);
             h5create_have_temperature(avg_group, E->hdf5.scalar1d);
             h5create_have_vxy_rms(avg_group, E->hdf5.scalar1d);
             h5create_have_vz_rms(avg_group, E->hdf5.scalar1d);
@@ -326,7 +333,6 @@ void h5output_open(struct All_variables *E)
 
     E->hdf5.count = 0; // TODO: for restart, initialize to last value
 
-
     /* Determine current cap and remember it */
 
     nprocx = E->parallel.nprocx;
@@ -336,6 +342,7 @@ void h5output_open(struct All_variables *E)
     cap = (E->parallel.me) / (nprocx * nprocy * nprocz);
     E->hdf5.capid = cap;
     E->hdf5.cap_group = E->hdf5.cap_groups[cap];
+
 
 #endif
 }
@@ -464,6 +471,7 @@ static herr_t h5create_dataset(hid_t loc_id,
     herr_t status;
 
     /* DEBUG
+    if (strcmp(name, "coord") == 0)
     if (chunkdims != NULL)
         printf("\t\th5create_dataset()\n"
                "\t\t\tname=\"%s\"\n"
@@ -499,7 +507,7 @@ static herr_t h5create_dataset(hid_t loc_id,
                "\t\t\tchunkdims=NULL\n",
                name, rank,
                (int)dims[0], (int)dims[1],
-               (int)dims[2], (int)dims[3], (int)dims[4])
+               (int)dims[2], (int)dims[3], (int)dims[4]);
     // */
 
     /* create the dataspace for the dataset */
@@ -827,6 +835,14 @@ static herr_t h5create_surf_topography(hid_t loc_id, field_t *field)
     h5create_dataset(loc_id, "topography", "surface topography",
                      field->dtype, field->rank, field->dims, field->maxdims,
                      field->chunkdims);
+    return 0;
+}
+
+static herr_t h5create_have_coord(hid_t loc_id, field_t *field)
+{
+    h5create_dataset(loc_id, "coord", "radial coordinates",
+                     field->dtype, field->rank, field->dims, field->maxdims,
+                     NULL);
     return 0;
 }
 
@@ -1669,6 +1685,37 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
 /****************************************************************************
  * 1D Fields                                                                *
  ****************************************************************************/
+
+void h5output_have_coord(struct All_variables *E)
+{
+    hid_t cap_group;
+    hid_t dataset;
+    herr_t status;
+
+    field_t *field;
+
+    int k;
+    int mz;
+
+    int px = E->parallel.me_loc[1];
+    int py = E->parallel.me_loc[2];
+
+    field = E->hdf5.const_scalar1d;
+
+    mz = field->block[0];
+
+    if (px == 0 && py == 0 && E->output.average == 1)
+    {
+        for(k = 0; k < mz; k++)
+            field->data[k] = E->sx[1][3][k+1];
+
+        cap_group = E->hdf5.cap_groups[E->hdf5.capid];
+        dataset   = H5Dopen(cap_group, "average/coord");
+        status    = h5write_field(dataset, field);
+        status    = H5Dclose(dataset);
+    }
+
+}
 
 void h5output_average(struct All_variables *E, int cycles)
 {

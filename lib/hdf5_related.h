@@ -122,15 +122,16 @@ struct HDF5_INFO
      *
      */
     
-    field_t *const_vector3d;     /* shape (xdim,ydim,zdim,3) */
-    field_t *const_vector2d;     /* shape (xdim,ydim,2) */
+    field_t *const_vector3d;    /* shape (xdim,ydim,zdim,3) */
+    field_t *const_vector2d;    /* shape (xdim,ydim,2) */
+    field_t *const_scalar1d;    /* shape (zdim,) */
     
-    field_t *tensor3d;           /* shape (tdim,xdim,ydim,zdim,6) */
-    field_t *vector3d;           /* shape (tdim,xdim,ydim,zdim,3) */
-    field_t *vector2d;           /* shape (tdim,xdim,ydim,2) */
+    field_t *tensor3d;          /* shape (tdim,xdim,ydim,zdim,6) */
+    field_t *vector3d;          /* shape (tdim,xdim,ydim,zdim,3) */
+    field_t *vector2d;          /* shape (tdim,xdim,ydim,2) */
 
-    field_t *scalar3d;           /* shape (tdim,xdim,ydim,zdim) */
-    field_t *scalar2d;           /* shape (tdim,xdim,ydim) */
-    field_t *scalar1d;           /* shape (tdim,zdim) */
+    field_t *scalar3d;          /* shape (tdim,xdim,ydim,zdim) */
+    field_t *scalar2d;          /* shape (tdim,xdim,ydim) */
+    field_t *scalar1d;          /* shape (tdim,zdim) */
 
 };
