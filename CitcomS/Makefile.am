@@ -25,26 +25,21 @@
 
 nobase_pkgpython_PYTHON = \
 	__init__.py \
+	BaseApplication.py \
+	Components/__init__.py \
 	Components/Advection_diffusion/Advection_diffusion.py \
 	Components/Advection_diffusion/__init__.py \
 	Components/BC.py \
 	Components/CitcomComponent.py \
 	Components/CodecConfig.py \
 	Components/Const.py \
-	Components/Exchanger/CoarseGridExchanger.py \
-	Components/Exchanger/Exchanger.py \
-	Components/Exchanger/FineGridExchanger.py \
-	Components/Exchanger/__init__.py \
-	Components/Exchanger/Inlet.py \
-	Components/Exchanger/Outlet.py \
 	Components/HackedConfigParser.py \
 	Components/IC.py \
-	Components/__init__.py \
 	Components/Launchers.py \
 	Components/Param.py \
 	Components/Phase.py \
-	Components/Sphere/FullSphere.py \
 	Components/Sphere/__init__.py \
+	Components/Sphere/FullSphere.py \
 	Components/Sphere/RegionalSphere.py \
 	Components/Sphere/Sphere.py \
 	Components/Stokes_solver/Incompressible.py \
@@ -53,11 +48,18 @@ nobase_pkgpython_PYTHON = \
 	Components/Visc.py \
 	Controller.py \
 	CoupledApp.py \
-	Coupler.py \
+	Coupler/__init__.py \
+	Coupler/ContainingCoupler.py \
+	Coupler/EmbeddedCoupler.py \
+	Coupler/Inlet.py \
+	Coupler/Outlet.py \
 	Layout.py \
 	SimpleApp.py \
+	Solver/__init__.py
+	Solver/CoupledFullSolver.py \
+	Solver/CoupledRegionalSolver.py \
+	Solver/CoupledSolver.py \
 	Solver/FullSolver.py \
-	Solver/__init__.py \
 	Solver/RegionalSolver.py \
 	Solver/Solver.py
 
