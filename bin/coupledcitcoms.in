@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!@INTERPRETER@
+# -*- Python -*-
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -27,32 +28,29 @@
 #
 
 
+# re-create the PYTHONPATH at 'configure' time
+import os.path, sys
+path = '@PYTHONPATH@'.split(':')
+path.reverse()
+for directory in path:
+    if directory:
+        directory = os.path.abspath(directory)
+        sys.path.insert(1, directory)
 
-def coupledFullSolver(name, facility):
-    from CoupledFullSolver import CoupledFullSolver
-    return CoupledFullSolver(name, facility)
+from PyxMPI import MPI_Init, MPI_Finalize
 
+inParallel = False
+for arg in sys.argv:
+    if arg == "--mode=worker":
+        inParallel = True
+        MPI_Init(sys.argv)
+        break
 
+from CitcomS.CoupledApp import CoupledApp
+app = CoupledApp()
+app.run()
 
-def coupledRegionalSolver(name, facility):
-    from CoupledRegionalSolver import CoupledRegionalSolver
-    return CoupledRegionalSolver(name, facility)
+if inParallel:
+    MPI_Finalize()
 
-
-
-def fullSolver(name='full', facility='solver'):
-    from FullSolver import FullSolver
-    return FullSolver(name, facility)
-
-
-
-def regionalSolver(name='regional', facility='solver'):
-    from RegionalSolver import RegionalSolver
-    return RegionalSolver(name, facility)
-
-
-
-# version
-__id__ = "$Id$"
-
-# End of file
+#  end of file 

@@ -26,15 +26,15 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from SimpleApp import SimpleApp
+from BaseApplication import BaseApplication
 import journal
 
 
-class CoupledApp(SimpleApp):
+class CoupledApp(BaseApplication):
 
 
     def __init__(self, name="CitcomS"):
-        SimpleApp.__init__(self, name)
+        BaseApplication.__init__(self, name)
 
         self.solver = None
         self.solverCommunicator = None
@@ -44,8 +44,6 @@ class CoupledApp(SimpleApp):
         self.comm = None
         self.rank = 0
         self.nodes = 0
-
-        self._info = journal.debug("application")
         return
 
 
@@ -65,16 +63,16 @@ class CoupledApp(SimpleApp):
     def findLayout(self, layout):
 
         if layout.coarse:
-            self.controller = self.inventory.coarseController
-            self.solver = self.inventory.coarse
-            self.exchanger = self.inventory.cge
+            self.controller = self.inventory.controller1
+            self.solver = self.inventory.solver1
+            self.coupler = self.inventory.coupler1
             self.solverCommunicator = layout.coarse
             self.myPlus = layout.coarsePlus
             self.remotePlus = layout.finePlus
         elif layout.fine:
-            self.controller = self.inventory.fineController
-            self.solver = self.inventory.fine
-            self.exchanger = self.inventory.fge
+            self.controller = self.inventory.controller2
+            self.solver = self.inventory.solver2
+            self.coupler = self.inventory.coupler2
             self.solverCommunicator = layout.fine
             self.myPlus = layout.finePlus
             self.remotePlus = layout.coarsePlus
@@ -107,20 +105,19 @@ class CoupledApp(SimpleApp):
         self._info.line("    journal: %r" % self.inventory.journal.name)
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
-        self._info.line("    coarse: %r" % self.inventory.coarse.name)
-        self._info.line("    fine: %r" % self.inventory.fine.name)
-        self._info.line("    cge: %r" % self.inventory.cge.name)
-        self._info.line("    fge: %r" % self.inventory.fge.name)
-        self._info.line("    coarseController: %r" % self.inventory.coarseController.name)
-        self._info.line("    fineController: %r" % self.inventory.fineController.name)
-        self._info.line("    coupler: %r" % self.inventory.coupler.name)
+        self._info.line("    solver1: %r" % self.inventory.solver1.name)
+        self._info.line("    solver2: %r" % self.inventory.solver2.name)
+        self._info.line("    controller1: %r" % self.inventory.controller1.name)
+        self._info.line("    controller2: %r" % self.inventory.controller2.name)
+        self._info.line("    coupler1: %r" % self.inventory.coupler1.name)
+        self._info.line("    coupler2: %r" % self.inventory.coupler2.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
 
         return
 
 
 
-    class Inventory(SimpleApp.Inventory):
+    class Inventory(BaseApplication.Inventory):
 
         import pyre.inventory
 
@@ -128,18 +125,28 @@ class CoupledApp(SimpleApp):
         import Solver
         import Coupler
         import Layout
-        import CitcomS.Components.Exchanger as Exchanger
 
+        controller1 = pyre.inventory.facility(name="controller1",
+                                              factory=Controller.controller,
+                                              args=("ccontroller","controller1"))
+        controller2 = pyre.inventory.facility(name="controller2",
+                                              factory=Controller.controller,
+                                              args=("econtroller","controller2"))
+        coupler1 = pyre.inventory.facility("coupler1",
+                                           factory=Coupler.containingcoupler,
+                                           args=("ccoupler","coupler1"))
+        coupler2 = pyre.inventory.facility("coupler2",
+                                           factory=Coupler.embeddedcoupler,
+                                           args=("ecoupler","coupler2"))
 
-        coarseController = pyre.inventory.facility(name="coarseController", factory=Controller.controller, args=("coarseController",))
-        fineController = pyre.inventory.facility(name="fineController", factory=Controller.controller, args=("fineController",))
-        coupler = pyre.inventory.facility("coupler", factory=Coupler.coupler)
+        solver1 = pyre.inventory.facility("solver1",
+                                          factory=Solver.coupledRegionalSolver,
+                                          args=("csolver", "solver1"))
+        solver2 = pyre.inventory.facility("solver2",
+                                       factory=Solver.coupledRegionalSolver,
+                                       args=("esolver", "solver2"))
+
         layout = pyre.inventory.facility("layout", factory=Layout.layout)
-
-        coarse = pyre.inventory.facility("coarse", factory=Solver.fullSolver, args=("coarse", "coarse"))
-        fine = pyre.inventory.facility("fine", factory=Solver.regionalSolver, args=("fine", "fine"))
-        cge = pyre.inventory.facility("cge", factory=Exchanger.coarsegridexchanger)
-        fge = pyre.inventory.facility("fge", factory=Exchanger.finegridexchanger)
 
         steps = pyre.inventory.int("steps", default=1)
 

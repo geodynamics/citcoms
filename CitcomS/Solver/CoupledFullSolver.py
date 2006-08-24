@@ -26,33 +26,36 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+from CoupledSolver import CoupledSolver
+import journal
 
 
-def coupledFullSolver(name, facility):
-    from CoupledFullSolver import CoupledFullSolver
-    return CoupledFullSolver(name, facility)
+class CoupledFullSolver(CoupledSolver):
 
 
-
-def coupledRegionalSolver(name, facility):
-    from CoupledRegionalSolver import CoupledRegionalSolver
-    return CoupledRegionalSolver(name, facility)
-
-
-
-def fullSolver(name='full', facility='solver'):
-    from FullSolver import FullSolver
-    return FullSolver(name, facility)
+    def initializeSolver(self):
+        from CitcomSLib import full_solver_init
+        full_solver_init(self.all_variables)
 
 
 
-def regionalSolver(name='regional', facility='solver'):
-    from RegionalSolver import RegionalSolver
-    return RegionalSolver(name, facility)
+    class Inventory(CoupledSolver.Inventory):
+
+        import pyre.inventory
+
+        # component modules
+        import CitcomS.Components.Sphere as Sphere
+
+
+        mesher = pyre.inventory.facility("mesher", factory=Sphere.fullSphere, args=("full-sphere",))
+
+        datafile = pyre.inventory.str("datafile", default="fulltest")
+        datafile_old = pyre.inventory.str("datafile_old", default="fulltest")
+
 
 
 
 # version
-__id__ = "$Id$"
+__id__ = "$Id: /local/coupler/CitcomS/Solver/FullSolver.py 995 2006-07-07T22:35:14.359825Z leif  $"
 
 # End of file

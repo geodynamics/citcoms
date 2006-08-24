@@ -46,15 +46,9 @@ for arg in sys.argv:
         MPI_Init(sys.argv)
         break
 
-if len(sys.argv) > 1 and sys.argv[1] == "--coupled":
-    del sys.argv[1]
-    from CitcomS.CoupledApp import CoupledApp
-    app = CoupledApp()
-    app.run()
-else:
-    from CitcomS.SimpleApp import SimpleApp
-    app = SimpleApp()
-    app.run()
+from CitcomS.SimpleApp import SimpleApp
+app = SimpleApp()
+app.run()
 
 if inParallel:
     MPI_Finalize()

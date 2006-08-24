@@ -32,7 +32,7 @@ abs_builddir = @abs_builddir@
 
 if COND_PYRE
 
-bin_SCRIPTS += citcoms
+bin_SCRIPTS += citcoms coupledcitcoms
 
 if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms
@@ -80,6 +80,9 @@ do_build = sed -e s%[@]INTERPRETER[@]%$(noinstINTERPRETER)%g -e s%[@]PYTHONPATH[
 do_install = sed -e s%[@]INTERPRETER[@]%$(INTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(PYTHONPATH)%g
 citcoms: $(srcdir)/citcoms.in Makefile
 	$(do_build) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+	chmod +x $@
+coupledcitcoms: $(srcdir)/coupledcitcoms.in Makefile
+	$(do_build) < $(srcdir)/coupledcitcoms.in > $@ || (rm -f $@ && exit 1)
 	chmod +x $@
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)

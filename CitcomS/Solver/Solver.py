@@ -39,12 +39,6 @@ class Solver(Component):
 
         self.all_variables = None
         self.communicator = None
-
-        self.coupler = None
-        self.exchanger = None
-        self.myPlus = []
-        self.remotePlus = []
-
 	self.start_cpu_time = 0
         return
 
@@ -107,23 +101,21 @@ class Solver(Component):
         self.restart = self.inventory.ic.inventory.restart
 
         self.ic_initTemperature = self.inventory.ic.initTemperature
-
-        # if there is a coupler, initialize it
-        try:
-            application.inventory.coupler
-        except AttributeError:
-            pass
-        else:
-            self.myPlus = application.myPlus
-            self.remotePlus = application.remotePlus
-            self.exchanger = application.exchanger
-            self.coupler = application.inventory.coupler
-            self.coupler.initialize(self)
-
         return
 
 
     def launch(self, application):
+        self._setup()
+
+        # initial conditions
+        ic = self.inventory.ic
+        ic.launch()
+
+        self.solveVelocities()
+        return
+
+
+    def _setup(self):
         mesher = self.inventory.mesher
         mesher.setup()
 
@@ -136,37 +128,15 @@ class Solver(Component):
         # create mesh
         mesher.run()
 
-        ic = self.inventory.ic
-
-        # if there is a coupler, launch it
-        if self.coupler:
-            self.coupler.launch(self)
-
-            if not (ic.inventory.restart or ic.inventory.post_p):
-                # switch the default initTemperature to coupled version
-                ic.initTemperature = self.exchanger.initTemperature
-
-        # initial conditions
-        ic.launch()
-
         # initialize const. related to mesh
         vsolver.launch()
         tsolver.launch()
-
-        self.solveVelocities()
-
         return
-
 
 
     def solveVelocities(self):
         vsolver = self.inventory.vsolver
-        if self.coupler:
-            self.coupler.preVSolverRun()
-            vsolver.run()
-            self.coupler.postVSolverRun()
-        else:
-            vsolver.run()
+        vsolver.run()
         return
 
 
@@ -179,35 +149,19 @@ class Solver(Component):
 
 
     def solveAdditional(self):
-        if not self.coupler:
-            # tracer module doesn't work with exchanger module
-            self.inventory.tracer.run()
+        self.inventory.tracer.run()
         return
 
 
 
     def newStep(self):
-        if self.coupler:
-            self.coupler.newStep()
         return
-
-
-
-    #def applyBoundaryConditions(self):
-        #if self.coupler:
-        #    self.coupler.applyBoundaryConditions()
-        #return
 
 
 
     def stableTimestep(self):
         tsolver = self.inventory.tsolver
         dt = tsolver.stable_timestep()
-
-        if self.coupler:
-            # negotiate with other solver(s)
-            dt = self.coupler.stableTimestep(dt)
-
         return dt
 
 
@@ -216,51 +170,41 @@ class Solver(Component):
         self.solveTemperature(dt)
         self.solveVelocities()
         self.solveAdditional()
-
         return
-
 
 
     def endTimestep(self, done):
         self.inventory.visc.updateMaterial()
         self.inventory.bc.updatePlateVelocity()
-
-        if self.coupler:
-            done = self.coupler.endTimestep(self.step, done)
-
         return done
 
 
     def endSimulation(self):
+        self._avgCPUTime()
+        self.finalize()
+        return
+
+
+    def _avgCPUTime(self):
         step = self.step
         total_cpu_time = CPU_time() - self.start_cpu_time
 
         rank = self.communicator.rank
         if not rank:
             import sys
-            print >> sys.stderr, "Average cpu time taken for velocity step = %f" % (
-                total_cpu_time / (step+1) )
-
-        if self.coupler:
-            output(self.all_variables, step)
-
-        self.finalize()
+            sys.stderr.write("Average cpu time taken for velocity step = %f\n"
+                             % (total_cpu_time / (step+1)) )
         return
-
 
 
     def save(self, monitoringFrequency):
         step = self.step
 
-        # for non-coupled run, output spacing is 'monitoringFrequency'
+        # output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):
-            output(self.all_variables, step)
-        elif self.coupler and not (self.coupler.exchanger.coupled_steps % monitoringFrequency):
-            print self.coupler.exchanger.coupled_steps, monitoringFrequency
             output(self.all_variables, step)
 
         output_time(self.all_variables, step)
-
         return
 
 
