@@ -26,13 +26,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from Exchanger import Exchanger
+from Coupler import Coupler
 
-class FineGridExchanger(Exchanger):
+class EmbeddedCoupler(Coupler):
 
 
     def __init__(self, name, facility):
-        Exchanger.__init__(self, name, facility)
+        Coupler.__init__(self, name, facility)
         self.cge_t = 0
         self.fge_t = 0
         self.toApplyBC = True
@@ -45,7 +45,7 @@ class FineGridExchanger(Exchanger):
 
 
     def initialize(self, solver):
-        Exchanger.initialize(self, solver)
+        Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
         self.restart = solver.restart
@@ -244,7 +244,7 @@ class FineGridExchanger(Exchanger):
 
 
 
-    class Inventory(Exchanger.Inventory):
+    class Inventory(Coupler.Inventory):
 
         import pyre.inventory as prop
 

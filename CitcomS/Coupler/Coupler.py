@@ -29,7 +29,7 @@
 from pyre.components.Component import Component
 
 
-class Exchanger(Component):
+class Coupler(Component):
 
 
     def __init__(self, name, facility):

@@ -27,19 +27,15 @@
 #
 
 
-def coarsegridexchanger(name='cge', facility='cge'):
-    from CoarseGridExchanger import CoarseGridExchanger
-    return CoarseGridExchanger(name, facility)
+def containingcoupler(name, facility):
+    from ContainingCoupler import ContainingCoupler
+    return ContainingCoupler(name, facility)
 
 
-def finegridexchanger(name='fge', facility='fge'):
-    from FineGridExchanger import FineGridExchanger
-    return FineGridExchanger(name, facility)
+def embeddedcoupler(name, facility):
+    from EmbeddedCoupler import EmbeddedCoupler
+    return EmbeddedCoupler(name, facility)
 
-
-def exchanger(name='exchanger', facility='exchanger'):
-    from Exchanger import Exchanger
-    return Exchanger
 
 # version
 __id__ = "$Id$"

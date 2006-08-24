@@ -26,13 +26,13 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from Exchanger import Exchanger
+from Coupler import Coupler
 
-class CoarseGridExchanger(Exchanger):
+class ContainingCoupler(Coupler):
 
 
     def __init__(self, name, facility):
-        Exchanger.__init__(self, name, facility)
+        Coupler.__init__(self, name, facility)
 
         # exchanged information is non-dimensional
         self.inventory.dimensional = False
@@ -43,7 +43,7 @@ class CoarseGridExchanger(Exchanger):
 
 
     def initialize(self, solver):
-        Exchanger.initialize(self, solver)
+        Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
 
@@ -209,7 +209,7 @@ class CoarseGridExchanger(Exchanger):
 
 
 
-    class Inventory(Exchanger.Inventory):
+    class Inventory(Coupler.Inventory):
 
         import pyre.inventory as prop
 
