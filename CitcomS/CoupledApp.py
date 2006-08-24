@@ -62,20 +62,20 @@ class CoupledApp(BaseApplication):
 
     def findLayout(self, layout):
 
-        if layout.coarse:
+        if layout.comm1:
             self.controller = self.inventory.controller1
             self.solver = self.inventory.solver1
             self.coupler = self.inventory.coupler1
-            self.solverCommunicator = layout.coarse
-            self.myPlus = layout.coarsePlus
-            self.remotePlus = layout.finePlus
-        elif layout.fine:
+            self.solverCommunicator = layout.comm1
+            self.myPlus = layout.comm1Plus
+            self.remotePlus = layout.comm2Plus
+        elif layout.comm2:
             self.controller = self.inventory.controller2
             self.solver = self.inventory.solver2
             self.coupler = self.inventory.coupler2
-            self.solverCommunicator = layout.fine
-            self.myPlus = layout.finePlus
-            self.remotePlus = layout.coarsePlus
+            self.solverCommunicator = layout.comm2
+            self.myPlus = layout.comm2Plus
+            self.remotePlus = layout.comm1Plus
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan"

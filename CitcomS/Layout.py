@@ -40,10 +40,10 @@ class Layout(Component):
     def __init__(self, name, facility):
         Component.__init__(self, name, facility)
 
-        self.coarse = None
-        self.fine = None
-        self.coarsePlus = []
-        self.finePlus = []
+        self.comm1 = None
+        self.comm2 = None
+        self.comm1Plus = []
+        self.comm2Plus = []
 
         self.comm = None
         self.rank = 0
@@ -96,17 +96,19 @@ class Layout(Component):
     def createCommunicators(self):
         world = self.comm
         myrank = world.rank
-        fineGroup = self.inventory.fine
-        coarseGroup = self.inventory.coarse
+        comm1Group = self.inventory.comm1
+        comm2Group = self.inventory.comm2
 
-        self.fine = world.include(fineGroup)
-        self.coarse = world.include(coarseGroup)
+        # communicator for solvers
+        self.comm1 = world.include(comm1Group)
+        self.comm2 = world.include(comm2Group)
 
-        for each in coarseGroup:
-            self.finePlus.append(world.include(fineGroup + [each]))
+        # communicator for inter-solver communication
+        for node in comm1Group:
+            self.comm2Plus.append(world.include(comm2Group + [node]))
 
-        for each in fineGroup:
-            self.coarsePlus.append(world.include(coarseGroup + [each]))
+        for node in comm2Group:
+            self.comm1Plus.append(world.include(comm1Group + [node]))
 
         return
 
@@ -116,9 +118,8 @@ class Layout(Component):
 
         import pyre.inventory
 
-
-        coarse = pyre.inventory.slice("coarse", default=range(12))
-        fine = pyre.inventory.slice("fine", default=[12])
+        comm1 = pyre.inventory.slice("comm1", default=range(12))
+        comm2 = pyre.inventory.slice("comm2", default=[12])
 
 
 
