@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -244,7 +244,7 @@ void regional_node_locations(E)
      }
 
 
-if (E->control.verbose)
+  if (E->control.verbose) {
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
     fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
@@ -254,7 +254,8 @@ if (E->control.verbose)
              fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
       }
     }
-
+    fflush(E->fp_out);
+  }
                    /* rotate the mesh to avoid two poles on mesh points */
 /*
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
@@ -307,7 +308,7 @@ if (E->control.verbose)
 */
 
 
-if (E->control.verbose)
+  if (E->control.verbose) {
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
     fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
     for (j=1;j<=E->sphere.caps_per_proc;j++)
@@ -315,7 +316,8 @@ if (E->control.verbose)
         if(i%E->lmesh.NOZ[lev]==1)
              fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
       }
-
+    fflush(E->fp_out);
+  }
    free((void *)rr);
    free((void *)RR);
 

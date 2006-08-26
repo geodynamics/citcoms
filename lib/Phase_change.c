@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <stdio.h>
@@ -36,7 +36,7 @@ void phase_change_apply(struct All_variables *E, double **buoy,
 			float **B, float **B_b,
 			float Ra, float clapeyron,
 			float depth, float transT, float width);
-void calc_phase_change(struct All_variables *E, 
+void calc_phase_change(struct All_variables *E,
 		       float **B, float **B_b,
 		       float Ra, float clapeyron,
 		       float depth, float transT, float width);
@@ -92,7 +92,7 @@ void phase_change_input(struct All_variables *E)
 
   if (E->control.widthcmb!=0.0)
     E->control.widthcmb = 1.0/E->control.widthcmb;
- 
+
 
   return;
 }
@@ -145,13 +145,14 @@ void phase_change_apply(struct All_variables *E, double **buoy,
     fprintf(E->fp_out, "Ra=%f, clapeyron=%f, depth=%f, transT=%f, width=%f\n",
 	    Ra, clapeyron, depth, transT, width);
     debug_phase_change(E,B);
+    fflush(E->fp_out);
   }
 
   return;
 }
 
 
-void calc_phase_change(struct All_variables *E, 
+void calc_phase_change(struct All_variables *E,
 		       float **B, float **B_b,
 		       float Ra, float clapeyron,
 		       float depth, float transT, float width)
@@ -166,7 +167,7 @@ void calc_phase_change(struct All_variables *E,
     for(i=1;i<=E->lmesh.nno;i++)  {
       e_pressure = (E->sphere.ro-E->sx[m][3][i]) - depth
 	- clapeyron*(E->T[m][i]-transT);
-      
+
       B[m][i] = pt5*(one+tanh(width*e_pressure));
     }
 
@@ -182,7 +183,7 @@ void calc_phase_change(struct All_variables *E,
 	}
       }
   }
-  
+
   return;
 }
 

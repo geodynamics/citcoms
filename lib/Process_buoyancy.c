@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /*  Here are the routines which process the results of each buoyancy solution, and call
@@ -159,7 +159,10 @@ void heat_flux(E)
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)   {
     sum_h[0] = sum_h[0]/sum_h[1];
-/*     if (E->control.verbose && E->parallel.me==E->parallel.nprocz-1) fprintf(E->fp_out,"surface heat flux= %f %f\n",sum_h[0],E->monitor.elapsed_time); */
+    /*     if (E->control.verbose && E->parallel.me==E->parallel.nprocz-1) {
+	     fprintf(E->fp_out,"surface heat flux= %f %f\n",sum_h[0],E->monitor.elapsed_time);
+             fflush(E->fp_out);
+    } */
     if (E->parallel.me==E->parallel.nprocz-1) {
       fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
       //fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]);

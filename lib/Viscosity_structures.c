@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Functions relating to the determination of viscosity field either
@@ -157,6 +157,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
       for(i=1;i<=E->lmesh.nel;i++)
         fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[m][i],evisc[m][(i-1)*vpts+1],evisc[m][(i-1)*vpts+7]);
       }
+    fflush(E->fp_out);
     }
     */
 
@@ -265,18 +266,18 @@ void visc_from_T(E,EEta,propogate)
       break;
 
     case 4:
-                                                                                                                                                             
+
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=nel;i++)   {
           l = E->mat[m][i];
           tempa = E->viscosity.N0[l-1];
           j = 0;
-                                                                                                                                                             
+
           for(kk=1;kk<=ends;kk++) {
             TT[kk] = E->T[m][E->ien[m][i].node[kk]];
             zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
           }
-                                                                                                                                                             
+
           for(jj=1;jj<=vpts;jj++) {
             temp=0.0;
             zzz=0.0;
@@ -285,28 +286,28 @@ void visc_from_T(E,EEta,propogate)
               temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
               zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
             }
-              
-/* The viscosity formulation (dimensional) is: visc=visc0*exp[(Ea+p*Va)/R*T] 
-   Typical values for dry upper mantle are: Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol 
-   T=T0+DT*T'; where DT - temperature contrast (from Rayleigh number) 
-   T' - nondimensional temperature; T0 - surface tempereture (273 K) 
-   T=DT*[(T0/DT) + T'] => visc=visc0*exp{(Ea+p*Va)/R*DT*[(T0/DT) + T']} 
-   visc=visc0*exp{[(Ea/R*DT) + (p*Va/R*DT)]/[(T0/DT) + T']} 
-   so: E->viscosity.E = Ea/R*DT ; E->viscosity.Z = Va/R*DT 
+
+/* The viscosity formulation (dimensional) is: visc=visc0*exp[(Ea+p*Va)/R*T]
+   Typical values for dry upper mantle are: Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol
+   T=T0+DT*T'; where DT - temperature contrast (from Rayleigh number)
+   T' - nondimensional temperature; T0 - surface tempereture (273 K)
+   T=DT*[(T0/DT) + T'] => visc=visc0*exp{(Ea+p*Va)/R*DT*[(T0/DT) + T']}
+   visc=visc0*exp{[(Ea/R*DT) + (p*Va/R*DT)]/[(T0/DT) + T']}
+   so: E->viscosity.E = Ea/R*DT ; E->viscosity.Z = Va/R*DT
    p = zzz and E->viscosity.T = T0/DT */
 
-                                                                                                                                               
+
             if(E->control.mat_control==0)
               EEta[m][ (i-1)*vpts + jj ] = tempa*
                 exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
                          / (E->viscosity.T[l-1]+temp) );
-                                                                               
-                                                                              
+
+
 
             if(E->control.mat_control==1)
               EEta[m][ (i-1)*vpts + jj ] = tempa*E->VIP[m][i]*
                 exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
-                         / (E->viscosity.T[l-1]+temp) ); 
+                         / (E->viscosity.T[l-1]+temp) );
 
 	    }
         }
