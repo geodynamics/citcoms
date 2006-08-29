@@ -1,9 +1,20 @@
-"""A simple filter that thresholds on input data.
+"""A simple filter that thresholds CitcomS Caps from input data."""
 
-"""
-# Author: Prabhu Ramachandran <prabhu_r@users.sf.net>
-# Copyright (c) 2005, Enthought, Inc.
-# License: BSD Style.
+# Author: Martin Weier
+#
+#Copyright (C) 2006  California Institute of Technology
+#This program is free software; you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation; either version 2 of the License, or
+#any later version.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
 
 # Enthought library imports.
 from enthought.traits import Instance, Range, Int
@@ -40,16 +51,11 @@ class CitcomSshowCaps(Filter):
                       Item(name='upper_threshold'))
                 )
     
-    nx = Int()
-    ny = Int()
-    nz = Int()
+   
     n = Int()
     caps = Int()
     
-    def setvalues(self,nxin,nyin,nzin):
-        self.nx = nxin
-        self.ny = nyin
-        self.nz = nzin
+ 
     
     ######################################################################
     # `Filter` interface.
@@ -81,16 +87,12 @@ class CitcomSshowCaps(Filter):
         # input.
         fil = self.ugrid_filter
         fil.input = self.inputs[0].outputs[0]
+        
+        #Than we calculate how many points belong to one cap
         self.caps = 12
         self.n = self.inputs[0].outputs[0].number_of_points/12
-        #self.inputs[0].outputs[0].number_of_points/(self.nx*self.ny*self.nz)
-        # We force the ranges to be reset to the limits of the data.
-        # This is because if the data has changed upstream, then the
-        # limits of the data must be changed.
-        #self._update_ranges(reset=True)
-        
-        #fil.threshold_between(self.lower_threshold, self.upper_threshold)
-        #fil.update()
+       
+        #Than we set the output of the filter
         self.outputs[0] = fil.output
         self.outputs.append(self.inputs[0].outputs[0])
         self.pipeline_changed = True
@@ -102,15 +104,7 @@ class CitcomSshowCaps(Filter):
         This method is invoked (automatically) when any of the inputs
         sends a `data_changed` event.
         """
-
-        #self._update_ranges(reset=True)
-
-        # XXX: These are commented since updating the ranges does
-        # everything for us.
-        
-        #fil = self.threshold_filter
-        #fil.threshold_between(self.lower_threshold, self.upper_threshold)
-        #fil.update()
+        fil.update()
         # Propagate the data_changed event.
         self.data_changed = True
 
@@ -118,22 +112,18 @@ class CitcomSshowCaps(Filter):
     # Non-public interface
     ######################################################################
     def _lower_threshold_changed(self,old_value, new_value):
-        #if new_value <> self.upper_threshold and new_value<upper_threshold:
+        """Callback interface for the lower threshold slider"""
         fil = self.ugrid_filter
         fil.point_minimum = (self.lower_threshold)*(self.n)
         fil.update()
         self.data_changed = True
-        #else:                            #Create a single point to prevent that other filters crash because of missing input
-        #    self.outputs[0].points = [(100,100,100)]
         
     def _upper_threshold_changed(self, old_value, new_value):
-        #if new_value <> self.lower_threshold and new_value>lower_threshold:
+        """Callback interface for the upper threshold slider"""
         fil = self.ugrid_filter
         fil.point_maximum = self.upper_threshold*(self.n)
         fil.update()
         self.data_changed = True
-        #else:
-        #self.outputs[0].points = [(100,100,100)]
         
 
    

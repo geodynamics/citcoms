@@ -17,6 +17,8 @@ from enthought.mayavi.core.source import Source
 from enthought.mayavi.core.common import handle_children_state
 from enthought.mayavi.sources.vtk_xml_file_reader import get_all_attributes
 import tables
+import re
+
 
 ######################################################################
 # `CitcomSVTKDataSource` class
@@ -30,20 +32,30 @@ class CitcomSHDFFileReader(Source):
 
     # The VTK dataset to manage.
     data = Instance(tvtk.DataSet)
+    # Class to convert Hdf to Vtk Unstructured Grid Objects
     citcomshdftougrid = CitcomSHDFUgrid()
     current_timestep = Int(0)
+    #To support changing the Scalar values in Mayavi2
+    temperature = Instance(tvtk.FloatArray())
+    viscosity = Instance(tvtk.FloatArray())
+    
+    #Resolution comming from Hdf file
     nx = Int()
     ny = Int()
     nz = Int()
     
+    #Current reduced resolution. User defined
     nx_redu = Int()
     ny_redu = Int()
     nz_redu = Int()
     
+    #Number of timesteps in Hdf
     timesteps = Int()
-    frequency = Int()
+    
+    #Button to trigger the process of reading a timestep
     read_timestep = Button('Read timestep')
     filename = Str()
+    
     ########################################
     # Dynamic traits: These traits are dummies and are dynamically
     # updated depending on the contents of the file.
@@ -83,34 +95,52 @@ class CitcomSHDFFileReader(Source):
     ######################################################################
     # `object` interface
     ######################################################################
+    #Invoked during process of saving the visualization to a file
     def __get_pure_state__(self):
-        d = super(VTKDataSource, self).__get_pure_state__()
-        data = self.data
-        if data:
-            w = tvtk.DataSetWriter(write_to_output_string=1)
-            warn = w.global_warning_display
-            w.set_input(data)
-            w.global_warning_display = 0
-            w.update()
-            w.global_warning_display = warn
-            z = gzip_string(w.output_string)
-            d['data'] = z
+        d = super(CitcomSHDFFileReader, self).__get_pure_state__()
+        output = "Filename: " +self.filename+ "NX:%d NY:%d NZ:%d" %(self.nx_redu,self.ny_redu,self.nz_redu)
+        z = gzip_string(output)
+        d['data'] = z
         return d
-
+    
+    #When the Visualisation is opened again this Method is called
     def __set_pure_state__(self, state):
         z = state.data
         if z:
             d = gunzip_string(z)
-            r = tvtk.DataSetReader(read_from_input_string=1,
-                                   input_string=d)
-            r.update()
-            self.data = r.output
-        # Now set the remaining state without touching the children.
-        set_state(self, state, ignore=['children', 'data'])
-        # Setup the children.
-        handle_children_state(self.children, state.children)
-        # Setup the children's state.
-        set_state(self, state, first=['children'], ignore=['*'])
+            m = re.search('(?<=Filename:)\w+', header)
+            file_name = m.group(0)
+            m = re.search('(?<=NX:)\w+', d)
+            self.nx_redu = int(m.group(0))
+            m = re.search('(?<=NX:)\w+', d)
+            self.ny_redu = int(m.group(0))
+            m = re.search('(?<=NX:)\w+', d)
+            self.nz_redu = int(m.group(0))
+        
+            if not isfile(file_name):
+                msg = 'Could not find file at %s\n'%file_name
+                msg += 'Please move the file there and try again.'
+                raise IOError, msg
+        
+            self.filename = file_name
+        
+            #self.data = self.citcomshdftougrid.initialize(self.filename,0,0,0,0,False,False)
+            f = tables.openFile(file_name,'r')
+            self.nx = int(f.root.input._v_attrs.nodex)
+            self.ny = int(f.root.input._v_attrs.nodey)
+            self.nz = int(f.root.input._v_attrs.nodez)
+        
+            self.timesteps = int(f.root.time.nrows)
+            f.close()
+            self.data = self.citcomshdftougrid.initialize(self.filename,self.current_timestep,self.nx_redu,self.ny_redu,self.nz_redu,False,False)
+            self.data_changed = True
+            self._update_data()
+            # Now set the remaining state without touching the children.
+            set_state(self, state, ignore=['children', '_file_path'])
+            # Setup the children.
+            handle_children_state(self.children, state.children)
+            # Setup the children's state.
+            set_state(self, state, first=['children'], ignore=['*'])
 
     ######################################################################
     # `Base` interface
@@ -136,6 +166,7 @@ class CitcomSHDFFileReader(Source):
 
     
     def initialize(self,file_name):
+        """This Methods initializes the reader and reads the meta-information from the Hdf file """
         self.filename = file_name
         
         #self.data = self.citcomshdftougrid.initialize(self.filename,0,0,0,0,False,False)
@@ -148,8 +179,9 @@ class CitcomSHDFFileReader(Source):
         self.ny_redu = self.ny
         self.nz_redu = self.nz
         
-        self.timesteps =  int(f.root.input._v_attrs.steps)
-        self.frequency =  int(f.root.input._v_attrs.monitoringFrequency)
+        self.timesteps = int(f.root.time.nrows)
+        f.close()
+        
         
     ######################################################################
     # `TreeNodeObject` interface
@@ -167,6 +199,7 @@ class CitcomSHDFFileReader(Source):
     # Non-public interface
     ######################################################################
     def _data_changed(self, data):
+        """Invoked when the upsteam data sends an data_changed event"""
         self._update_data()
         self.outputs = [data]
         self.data_changed = True
@@ -174,22 +207,31 @@ class CitcomSHDFFileReader(Source):
         self.trait_property_changed('name', '',
                                     self.tno_get_label(None))
         
+    ##Callbacks for our traits    
     def _current_timestep_changed(self,new_value):
+        """Callback for the current timestep input box"""
         if new_value < 0:
             current_timestep = 0
         if new_value > self.timesteps:
             current_timestep = 100
     
     def _read_timestep_fired(self):
+        """Callback for the Button to read one timestep"""
         self.data = self.citcomshdftougrid.initialize(self.filename,self.current_timestep,self.nx_redu,self.ny_redu,self.nz_redu,False,False)
+        self.temperature = self.citcomshdftougrid.get_vtk_temperature()
+        self.viscosity = self.citcomshdftougrid.get_vtk_viscosity()
+        self.data_changed = True
+        self._update_data()
         
     def _nx_redu_changed(self, new_value):
+        """callback for the nx_redu input box"""
         if new_value < 1:
             self.nx_redu = 1
         if new_value > self.nx:
             self.nx_redu = self.nx
                      
     def _ny_redu_changed(self, new_value):
+        """callback for the ny_redu input box"""
         if new_value < 1:
             self.ny_redu = 1
         if new_value > self.ny:
@@ -197,11 +239,28 @@ class CitcomSHDFFileReader(Source):
         
     
     def _nz_redu_changed(self, new_value):
+        """callback for the nz_redu input box"""
         if new_value < 1:
             self.nz_redu = 1
         if new_value > self.nz:
             self.nz_redu = self.nz
   
+    def _point_scalars_name_changed(self, value):
+        if value == "Temperature":
+            self.data.point_data.scalars = self.temperature
+        if value == "Viscosity":
+            self.data.point_data.scalars = self.viscosity
+        self.data_changed = True
+        self._set_data_name('scalars', 'point', value)
+
+    def _point_vectors_name_changed(self, value):
+        self._set_data_name('vectors', 'point', value)
+
+    def _point_tensors_name_changed(self, value):
+        self._set_data_name('tensors', 'point', value)
+
+
+    ########################Non Public##############################
     def _set_data_name(self, data_type, attr_type, value):
         if not value:
             return
@@ -217,46 +276,13 @@ class CitcomSHDFFileReader(Source):
         # Fire an event, so the changes propagate.
         self.data_changed = True
 
-    def _point_scalars_name_changed(self, value):
-        self._set_data_name('scalars', 'point', value)
-
-    def _point_vectors_name_changed(self, value):
-        self._set_data_name('vectors', 'point', value)
-
-    def _point_tensors_name_changed(self, value):
-        self._set_data_name('tensors', 'point', value)
-
-    def _cell_scalars_name_changed(self, value):
-        self._set_data_name('scalars', 'cell', value)
-
-    def _cell_vectors_name_changed(self, value):
-        self._set_data_name('vectors', 'cell', value)
-
-    def _cell_tensors_name_changed(self, value):
-        self._set_data_name('tensors', 'cell', value)
-    
+        
     def _update_data(self):
         if not self.data:
             return
-        pnt_attr, cell_attr = get_all_attributes(self.data)
-        
-        def _setup_data_traits(obj, attributes, d_type):
-            attrs = ['scalars', 'vectors', 'tensors']
-            data = getattr(obj.data, '%s_data'%d_type)
-            for attr in attrs:
-                values = attributes[attr]
-                if values:
-                    default = getattr(obj, '%s_%s_name'%(d_type, attr))
-                    if default and default in values:
-                        pass
-                    else:
-                        default = values[0]
-                    trait = Trait(default, TraitPrefixList(values))
-                    getattr(data, 'set_active_%s'%attr)(default)
-                else:
-                    trait = Trait('', TraitPrefixList(['']))
-                obj.add_trait('%s_%s_name'%(d_type, attr), trait)
-        
-        _setup_data_traits(self, pnt_attr, 'point')
-        _setup_data_traits(self, cell_attr, 'cell')
+        else:
+            trait = Trait('Temperature', TraitPrefixList('Temperature','Viscosity'))
+            self.add_trait('point_scalars_name', trait)
+            trait = Trait('Velocity', TraitPrefixList('Velocity'))
+            self.add_trait('point_vectors_name', trait)
         
