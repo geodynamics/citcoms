@@ -84,6 +84,12 @@ int main(int argc, char *argv[])
     int n, i, j, k;
     int nodex, nodey, nodez;
 
+    int t;
+    int timesteps;
+
+    int *steps;
+    char *endptr;
+
     field_t *coord;
     field_t *velocity;
     field_t *temperature;
@@ -94,26 +100,57 @@ int main(int argc, char *argv[])
      * Parse command-line parameters.                                       *
      ************************************************************************/
 
+    /*
+     * HDF5 file must be specified as first argument.
+     */
+    
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: %s file.h5 step1 [step2 [...] ] \n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
-    /* TODO: Read step(s) from argv[1:] */
+    /*
+     * Recognize help arguments.
+     */
 
-    step = 0;   /* step zero for now.. */
+    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
+    {
+        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]] \n", argv[0]);
+        return EXIT_FAILURE;
+    }
 
-
-    /************************************************************************
-     * Open HDF5 file (read-only).                                          *
-     ************************************************************************/
+    /*
+     * Open HDF5 file (read-only). Complain if invalid.
+     */
 
     h5file = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT);
     if (h5file < 0)
     {
         fprintf(stderr, "Could not open HDF5 file \"%s\"\n", argv[1]);
         return EXIT_FAILURE;
+    }
+
+    /*
+     * Read step(s) from argv[2:]
+     */
+    
+    /* Allocate at least one step (we know argc >= 2) */
+    timesteps = (argc == 2) ? 1 : (argc-2);
+    steps = (int *)malloc(timesteps * sizeof(int));
+
+    /* By default, use zeroth step (might be overwritten) */
+    steps[0] = 0;
+
+    /* Convert argv[2:] into int array */
+    for(n = 2; n < argc; n++)
+    {
+        steps[n-2] = (int)strtol(argv[n], &endptr, 10);
+        if (!(argv[n][0] != '\0' && *endptr == '\0'))
+        {
+            fprintf(stderr, "Error: Could not parse step \"%s\"\n", argv[n]);
+            return EXIT_FAILURE;
+        }
     }
 
 
@@ -153,60 +190,69 @@ int main(int argc, char *argv[])
 
 
     /************************************************************************
-     * Iterate over timesteps(TODO) and caps.                               *
+     * Output requested data.                                               *
      ************************************************************************/
 
-    for(capid = 0; capid < caps; capid++)
+    /* Iterate over timesteps */
+    for(t = 0; t < timesteps; t++)
     {
-        cap = open_cap(h5file, capid);
+        /* Determine step */
+        step = steps[t];
 
-        snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, capid, step);
-        fprintf(stderr, "Writing %s\n", filename);
-
-        file = fopen(filename, "w");
-        fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
-
-        /* Read data from HDF5 file. */
-        read_field(cap, coord, 0);
-        read_field(cap, velocity, step);
-        read_field(cap, temperature, step);
-        read_field(cap, viscosity, step);
-
-        /* Traverse data in Citcom order */
-        n = 0;
-        for(j = 0; j < nodey; j++)
+        /* Iterate over caps */
+        for(capid = 0; capid < caps; capid++)
         {
-            for(i = 0; i < nodex; i++)
-            {
-                for(k = 0; k < nodez; k++)
-                {
-                    fprintf(file, "%g %g %g %g %g %g %g %g\n",
-                            coord->data[3*n+0],
-                            coord->data[3*n+1],
-                            coord->data[3*n+2],
-                            velocity->data[3*n+0],
-                            velocity->data[3*n+1],
-                            velocity->data[3*n+2],
-                            temperature->data[n],
-                            viscosity->data[n]);
+            cap = open_cap(h5file, capid);
 
-                    n++;    /* n = k + i*nodez + j*nodez*nodex */
+            snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, capid, step);
+            fprintf(stderr, "Writing %s\n", filename);
+
+            file = fopen(filename, "w");
+            fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
+
+            /* Read data from HDF5 file. */
+            read_field(cap, coord, 0);
+            read_field(cap, velocity, step);
+            read_field(cap, temperature, step);
+            read_field(cap, viscosity, step);
+
+            /* Traverse data in Citcom order */
+            n = 0;
+            for(j = 0; j < nodey; j++)
+            {
+                for(i = 0; i < nodex; i++)
+                {
+                    for(k = 0; k < nodez; k++)
+                    {
+                        fprintf(file, "%g %g %g %g %g %g %g %g\n",
+                                coord->data[3*n+0],
+                                coord->data[3*n+1],
+                                coord->data[3*n+2],
+                                velocity->data[3*n+0],
+                                velocity->data[3*n+1],
+                                velocity->data[3*n+2],
+                                temperature->data[n],
+                                viscosity->data[n]);
+
+                        n++;    /* n = k + i*nodez + j*nodez*nodex */
+                    }
                 }
             }
-        }
 
-        fclose(file);
-        close_cap(cap);
+            fclose(file);
+            close_cap(cap);
+        }
     }
 
     /* Release resources. */
 
-    close_field(coord);
-    close_field(velocity);
-    close_field(temperature);
-    close_field(viscosity);
-
+    status = close_field(coord);
+    status = close_field(velocity);
+    status = close_field(temperature);
+    status = close_field(viscosity);
     status = H5Fclose(h5file);
+
+    free(steps);
 
     return EXIT_SUCCESS;
 }
