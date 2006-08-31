@@ -23,6 +23,7 @@
 #include "hdf5.h"
 
 
+
 typedef struct cap_t
 {
     int id;
@@ -34,9 +35,6 @@ typedef struct cap_t
 typedef struct field_t
 {
     const char *name;
-    hid_t dataset;
-
-    int step;
     
     int rank;
     hsize_t *dims;
@@ -51,6 +49,169 @@ typedef struct field_t
 } field_t;
 
 
+static cap_t *open_cap(hid_t file_id, int capid);
+static herr_t close_cap(cap_t *cap);
+
+
+static field_t *open_field(cap_t *cap, const char *name);
+static herr_t read_field(cap_t *cap, field_t *field, int timestep);
+static herr_t close_field(field_t *field);
+
+
+static herr_t get_attribute_str(hid_t obj_id, const char *attr_name, char **data);
+static herr_t get_attribute_int(hid_t input, const char *name, int *val);
+static herr_t get_attribute(hid_t obj_id, const char *attr_name, hid_t mem_type_id, void *data);
+static herr_t get_attribute_mem(hid_t obj_id, const char *attr_name, hid_t mem_type_id, void *data);
+static herr_t get_attribute_disk(hid_t loc_id, const char *attr_name, void *attr_out);
+static herr_t get_attribute_info(hid_t obj_id, const char *attr_name, hsize_t *dims, H5T_class_t *type_class, size_t *type_size, hid_t *type_id);
+
+
+int main(int argc, char *argv[])
+{
+    FILE *file;
+    char filename[100];
+    char *datafile;
+
+    hid_t h5file;
+    hid_t input;
+    herr_t status;
+
+    int caps;
+    int capid;
+    cap_t *cap;
+
+    int step;
+    int n, i, j, k;
+    int nodex, nodey, nodez;
+
+    field_t *coord;
+    field_t *velocity;
+    field_t *temperature;
+    field_t *viscosity;
+
+
+    /************************************************************************
+     * Parse command-line parameters.                                       *
+     ************************************************************************/
+
+    if (argc < 2)
+    {
+        fprintf(stderr, "Usage: %s file.h5 step1 [step2 [...] ] \n", argv[0]);
+        return EXIT_FAILURE;
+    }
+
+    /* TODO: Read step(s) from argv[1:] */
+
+    step = 0;   /* step zero for now.. */
+
+
+    /************************************************************************
+     * Open HDF5 file (read-only).                                          *
+     ************************************************************************/
+
+    h5file = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT);
+    if (h5file < 0)
+    {
+        fprintf(stderr, "Could not open HDF5 file \"%s\"\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
+
+    /************************************************************************
+     * Get mesh parameters.                                                 *
+     ************************************************************************/
+
+    /* Read input group */
+    input = H5Gopen(h5file, "input");
+    if (input < 0)
+    {
+        fprintf(stderr, "Could not open /input group in \"%s\"\n", argv[1]);
+        status = H5Fclose(h5file);
+        return EXIT_FAILURE;
+    }
+
+    status = get_attribute_str(input, "datafile", &datafile);
+    status = get_attribute_int(input, "nproc_surf", &caps);
+    status = get_attribute_int(input, "nodex", &nodex);
+    status = get_attribute_int(input, "nodey", &nodey);
+    status = get_attribute_int(input, "nodez", &nodez);
+
+    /* Release input group */
+    status = H5Gclose(input);
+
+
+    /************************************************************************
+     * Create fields using cap00 datasets as a template.                    *
+     ************************************************************************/
+
+    cap         = open_cap(h5file, 0);
+    coord       = open_field(cap, "coord");
+    velocity    = open_field(cap, "velocity");
+    temperature = open_field(cap, "temperature");
+    viscosity   = open_field(cap, "viscosity");
+    status      = close_cap(cap);
+
+
+    /************************************************************************
+     * Iterate over timesteps(TODO) and caps.                               *
+     ************************************************************************/
+
+    for(capid = 0; capid < caps; capid++)
+    {
+        cap = open_cap(h5file, capid);
+
+        snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, capid, step);
+        fprintf(stderr, "Writing %s\n", filename);
+
+        file = fopen(filename, "w");
+        fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
+
+        /* Read data from HDF5 file. */
+        read_field(cap, coord, 0);
+        read_field(cap, velocity, step);
+        read_field(cap, temperature, step);
+        read_field(cap, viscosity, step);
+
+        /* Traverse data in Citcom order */
+        n = 0;
+        for(j = 0; j < nodey; j++)
+        {
+            for(i = 0; i < nodex; i++)
+            {
+                for(k = 0; k < nodez; k++)
+                {
+                    fprintf(file, "%g %g %g %g %g %g %g %g\n",
+                            coord->data[3*n+0],
+                            coord->data[3*n+1],
+                            coord->data[3*n+2],
+                            velocity->data[3*n+0],
+                            velocity->data[3*n+1],
+                            velocity->data[3*n+2],
+                            temperature->data[n],
+                            viscosity->data[n]);
+
+                    n++;    /* n = k + i*nodez + j*nodez*nodex */
+                }
+            }
+        }
+
+        fclose(file);
+        close_cap(cap);
+    }
+
+    /* Release resources. */
+
+    close_field(coord);
+    close_field(velocity);
+    close_field(temperature);
+    close_field(viscosity);
+
+    status = H5Fclose(h5file);
+
+    return EXIT_SUCCESS;
+}
+
+
 static cap_t *open_cap(hid_t file_id, int capid)
 {
     cap_t *cap;
@@ -58,8 +219,14 @@ static cap_t *open_cap(hid_t file_id, int capid)
     cap->id = capid;
     snprintf(cap->name, (size_t)7, "cap%02d", capid);
     cap->group = H5Gopen(file_id, cap->name);
+    if (cap->group < 0)
+    {
+        free(cap);
+        return NULL;
+    }
     return cap;
 }
+
 
 static herr_t close_cap(cap_t *cap)
 {
@@ -75,8 +242,9 @@ static herr_t close_cap(cap_t *cap)
 }
 
 
-static field_t *open_field(hid_t loc_id, const char *name)
+static field_t *open_field(cap_t *cap, const char *name)
 {
+    hid_t dataset;
     hid_t dataspace;
     herr_t status;
 
@@ -85,37 +253,36 @@ static field_t *open_field(hid_t loc_id, const char *name)
 
     field_t *field;
 
-    /*
-     * Allocate field and initialize values.
-     */
+    if (cap == NULL)
+        return NULL;
+
+
+    /* Allocate field and initialize. */
 
     field = (field_t *)malloc(sizeof(field_t));
 
+    field->name = name;
     field->rank = 0;
     field->dims = NULL;
     field->maxdims = NULL;
-
     field->n = 0;
-    field->step = -1;
 
-    field->name = name;
-    field->dataset = H5Dopen(loc_id, name);
-    if(field-> dataset < 0)
+    dataset = H5Dopen(cap->group, name);
+    if(dataset < 0)
     {
         free(field);
         return NULL;
     }
 
-    dataspace = H5Dget_space(field->dataset);
+    dataspace = H5Dget_space(dataset);
     if (dataspace < 0)
     {
         free(field);
         return NULL;
     }
 
-    /*
-     * Calculate shape of field.
-     */
+
+    /* Calculate shape of field. */
 
     rank = H5Sget_simple_extent_ndims(dataspace);
 
@@ -125,16 +292,21 @@ static field_t *open_field(hid_t loc_id, const char *name)
 
     status = H5Sget_simple_extent_dims(dataspace, field->dims, field->maxdims);
 
-    /*
-     * Allocate memory for hyperslab selection parameters.
-     */
+    /* DEBUG
+    printf("Field %s shape (", name);
+    for(d = 0; d < rank; d++)
+        printf("%d,", (int)(field->dims[d]));
+    printf(")\n");
+    // */
+
+
+    /* Allocate memory for hyperslab selection parameters. */
 
     field->offset = (hsize_t *)malloc(rank * sizeof(hsize_t));
     field->count  = (hsize_t *)malloc(rank * sizeof(hsize_t));
 
-    /*
-     * Allocate enough memory for a single time-slice.
-     */
+
+    /* Allocate enough memory for a single time-slice buffer. */
 
     field->n = 1;
     if (field->maxdims[0] == H5S_UNLIMITED)
@@ -144,30 +316,34 @@ static field_t *open_field(hid_t loc_id, const char *name)
         for(d = 0; d < rank; d++)
             field->n *= field->dims[d];
 
-    /* DEBUG
-    printf("Field %s shape (", name);
-    for(d = 0; d < rank; d++)
-        printf("%d,", (int)(field->dims[d]));
-    printf(")\n");
-    // */
-
     field->data = (float *)malloc(field->n * sizeof(float));
 
+
+    /* Release resources. */
+
     status = H5Sclose(dataspace);
-    status = H5Dclose(field->dataset);
+    status = H5Dclose(dataset);
 
     return field;
 }
 
-static herr_t read_field(field_t *field, int timestep)
+
+static herr_t read_field(cap_t *cap, field_t *field, int timestep)
 {
+    hid_t dataset;
     hid_t filespace;
     hid_t memspace;
     herr_t status;
 
     int d;
 
-    field->step = timestep; /* which step does field->data correspond to? */
+    if (cap == NULL || field == NULL)
+        return -1;
+
+    dataset = H5Dopen(cap->group, field->name);
+
+    if (dataset < 0)
+        return -1;
 
     for(d = 0; d < field->rank; d++)
     {
@@ -189,24 +365,26 @@ static herr_t read_field(field_t *field, int timestep)
     printf(")\n");
     // */
 
-    filespace = H5Dget_space(field->dataset);
+
+    filespace = H5Dget_space(dataset);
 
     status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
                                  field->offset, NULL, field->count, NULL);
 
     memspace = H5Screate_simple(field->rank, field->count, NULL);
 
-    status = H5Dread(field->dataset, H5T_NATIVE_FLOAT, memspace,
+    status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace,
                      filespace, H5P_DEFAULT, field->data);
     
     status = H5Sclose(filespace);
     status = H5Sclose(memspace);
-    status = H5Dclose(field->dataset);
+    status = H5Dclose(dataset);
 
     return 0;
 }
 
-static int free_field(field_t *field)
+
+static herr_t close_field(field_t *field)
 {
     if (field != NULL)
     {
@@ -221,7 +399,176 @@ static int free_field(field_t *field)
 }
 
 
-/* TODO: deallocating values allocated in this function? */
+static herr_t get_attribute_str(hid_t obj_id,
+                                const char *attr_name,
+                                char **data)
+{
+    hid_t attr_id;
+    hid_t attr_type;
+    size_t type_size;
+    herr_t status;
+
+    *data = NULL;
+
+    attr_id = H5Aopen_name(obj_id, attr_name);
+    if (attr_id < 0)
+        return -1;
+
+    attr_type = H5Aget_type(attr_id);
+    if (attr_type < 0)
+        goto out;
+
+    /* Get the size */
+    type_size = H5Tget_size(attr_type);
+    if (type_size < 0)
+        goto out;
+
+    /* malloc enough space for the string, plus 1 for trailing '\0' */
+    *data = (char *)malloc(type_size + 1);
+
+    status = H5Aread(attr_id, attr_type, *data);
+    if (status < 0)
+        goto out;
+
+    /* Set the last character to '\0' in case we are dealing with
+     * null padded or space padded strings
+     */
+    (*data)[type_size] = '\0';
+
+    status = H5Tclose(attr_type);
+    if (status < 0)
+        goto out;
+
+    status = H5Aclose(attr_id);
+    if (status < 0)
+        return -1;
+
+    return 0;
+
+out:
+    H5Tclose(attr_type);
+    H5Aclose(attr_id);
+    if (*data)
+        free(*data);
+    return -1;
+}
+
+
+static herr_t get_attribute_int(hid_t input, const char *name, int *val)
+{
+    hid_t attr_id;
+    hid_t type_id;
+    H5T_class_t type_class;
+    size_t type_size;
+
+    herr_t status;
+
+    char *strval;
+
+    attr_id = H5Aopen_name(input, name);
+    type_id = H5Aget_type(attr_id);
+    type_class = H5Tget_class(type_id);
+    type_size = H5Tget_size(type_id);
+
+    H5Tclose(type_id);
+    H5Aclose(attr_id);
+
+    switch(type_class)
+    {
+        case H5T_STRING:
+            status = get_attribute_str(input, name, &strval);
+            if (status < 0) return -1;
+            *val = atoi(strval);
+            free(strval);
+            return 0;
+        case H5T_INTEGER:
+            status = get_attribute(input, name, H5T_NATIVE_INT, val);
+            if (status < 0) return -1;
+            return 0;
+    }
+
+    return -1;
+}
+
+
+static herr_t get_attribute(hid_t obj_id,
+                            const char *attr_name,
+                            hid_t mem_type_id,
+                            void *data)
+{
+    herr_t status;
+
+    status = get_attribute_mem(obj_id, attr_name, mem_type_id, data);
+    if (status < 0)
+        return -1;
+
+    return 0;
+}
+
+
+static herr_t get_attribute_mem(hid_t obj_id,
+                                const char *attr_name,
+                                hid_t mem_type_id,
+                                void *data)
+{
+    hid_t attr_id;
+    herr_t status;
+
+    attr_id = H5Aopen_name(obj_id, attr_name);
+    if (attr_id < 0)
+        return -1;
+
+    status = H5Aread(attr_id, mem_type_id, data);
+    if (status < 0)
+    {
+        H5Aclose(attr_id);
+        return -1;
+    }
+
+    status = H5Aclose(attr_id);
+    if (status < 0)
+        return -1;
+
+    return 0;
+}
+
+
+static herr_t get_attribute_disk(hid_t loc_id,
+                                 const char *attr_name,
+                                 void *attr_out)
+{
+    hid_t attr_id;
+    hid_t attr_type;
+    herr_t status;
+
+    attr_id = H5Aopen_name(loc_id, attr_name);
+    if (attr_id < 0)
+        return -1;
+
+    attr_type = H5Aget_type(attr_id);
+    if (attr_type < 0)
+        goto out;
+
+    status = H5Aread(attr_id, attr_type, attr_out);
+    if (status < 0)
+        goto out;
+
+    status = H5Tclose(attr_type);
+    if (status < 0)
+        goto out;
+
+    status = H5Aclose(attr_id);
+    if (status < 0)
+        return -1;
+
+    return 0;
+out:
+    H5Tclose(attr_type);
+    H5Aclose(attr_id);
+    return -1;
+}
+
+
 static herr_t get_attribute_info(hid_t obj_id,
                                  const char *attr_name,
                                  hsize_t *dims,
@@ -275,302 +622,3 @@ out:
     return -1;
 }
 
-static herr_t get_attribute_string(hid_t obj_id,
-                                   const char *attr_name,
-                                   char **data)
-{
-    hid_t attr_id;
-    hid_t attr_type;
-    size_t type_size;
-    herr_t status;
-
-    *data = NULL;
-
-    attr_id = H5Aopen_name(obj_id, attr_name);
-    if (attr_id < 0)
-        return -1;
-
-    attr_type = H5Aget_type(attr_id);
-    if (attr_type < 0)
-        goto out;
-
-    /* Get the size */
-    type_size = H5Tget_size(attr_type);
-    if (type_size < 0)
-        goto out;
-
-    /* malloc enough space for the string, plus 1 for trailing '\0' */
-    *data = (char *)malloc(type_size + 1);
-
-    status = H5Aread(attr_id, attr_type, *data);
-    if (status < 0)
-        goto out;
-
-    /* Set the last character to '\0' in case we are dealing with
-     * null padded or space padded strings
-     */
-    (*data)[type_size] = '\0';
-
-    status = H5Tclose(attr_type);
-    if (status < 0)
-        goto out;
-
-    status = H5Aclose(attr_id);
-    if (status < 0)
-        return -1;
-
-    return 0;
-
-out:
-    H5Tclose(attr_type);
-    H5Aclose(attr_id);
-    if (*data)
-        free(*data);
-    return -1;
-}
-
-static herr_t get_attribute_mem(hid_t obj_id,
-                                const char *attr_name,
-                                hid_t mem_type_id,
-                                void *data)
-{
-    hid_t attr_id;
-    herr_t status;
-
-    attr_id = H5Aopen_name(obj_id, attr_name);
-    if (attr_id < 0)
-        return -1;
-
-    status = H5Aread(attr_id, mem_type_id, data);
-    if (status < 0)
-    {
-        H5Aclose(attr_id);
-        return -1;
-    }
-
-    status = H5Aclose(attr_id);
-    if (status < 0)
-        return -1;
-
-    return 0;
-}
-
-static herr_t get_attribute_disk(hid_t loc_id,
-                                 const char *attr_name,
-                                 void *attr_out)
-{
-    hid_t attr_id;
-    hid_t attr_type;
-    herr_t status;
-
-    attr_id = H5Aopen_name(loc_id, attr_name);
-    if (attr_id < 0)
-        return -1;
-
-    attr_type = H5Aget_type(attr_id);
-    if (attr_type < 0)
-        goto out;
-
-    status = H5Aread(attr_id, attr_type, attr_out);
-    if (status < 0)
-        goto out;
-
-    status = H5Tclose(attr_type);
-    if (status < 0)
-        goto out;
-
-    status = H5Aclose(attr_id);
-    if (status < 0)
-        return -1;
-
-    return 0;
-out:
-    H5Tclose(attr_type);
-    H5Aclose(attr_id);
-    return -1;
-}
-
-static herr_t get_attribute(hid_t obj_id,
-                            const char *attr_name,
-                            hid_t mem_type_id,
-                            void *data)
-{
-    herr_t status;
-
-    status = get_attribute_mem(obj_id, attr_name, mem_type_id, data);
-    if (status < 0)
-        return -1;
-
-    return 0;
-}
-
-static herr_t get_parameter_int(hid_t input, const char *name, int *val)
-{
-    hid_t attr_id;
-    hid_t type_id;
-    H5T_class_t type_class;
-    size_t type_size;
-
-    herr_t status;
-
-    char *strval;
-
-    attr_id = H5Aopen_name(input, name);
-    type_id = H5Aget_type(attr_id);
-    type_class = H5Tget_class(type_id);
-    type_size = H5Tget_size(type_id);
-
-    H5Tclose(type_id);
-    H5Aclose(attr_id);
-
-    switch(type_class)
-    {
-        case H5T_STRING:
-            status = get_attribute_string(input, name, &strval);
-            if (status < 0) return -1;
-            *val = atoi(strval);
-            free(strval);
-            return 0;
-        case H5T_INTEGER:
-            status = get_attribute(input, name, H5T_NATIVE_INT, val);
-            if (status < 0) return -1;
-            return 0;
-    }
-
-    return -1;
-}
-
-
-int main(int argc, char *argv[])
-{
-    FILE *file;
-    char filename[100];
-    char *datafile;
-
-    hid_t h5file;
-    hid_t input;
-    herr_t status;
-
-    int caps;
-    int capid;
-    cap_t *cap;
-
-    int step;
-    int n, i, j, k;
-    int nodex, nodey, nodez;
-
-    field_t *coord;
-    field_t *velocity;
-    field_t *temperature;
-    field_t *viscosity;
-
-    if (argc < 2)
-    {
-        fprintf(stderr, "Usage: %s file.h5 step1 [step2 [...] ] \n", argv[0]);
-        return EXIT_FAILURE;
-    }
-
-    /* Open HDF5 file (read-only) */
-    h5file = H5Fopen(argv[1], H5F_ACC_RDONLY, H5P_DEFAULT);
-    if (h5file < 0)
-    {
-        fprintf(stderr, "Could not open HDF5 file \"%s\"\n", argv[1]);
-        return EXIT_FAILURE;
-    }
-
-    /* TODO: read step(s) from command-line. For now, use single timestep */
-    step = 0;
-
-    /* Read input group */
-    input = H5Gopen(h5file, "input");
-    if (input < 0)
-    {
-        fprintf(stderr, "Could not open /input group in \"%s\"\n", argv[1]);
-        status = H5Fclose(h5file);
-        return EXIT_FAILURE;
-    }
-
-    /* Read datafile from /input */
-    get_attribute_string(input, "datafile", &datafile);
-
-    /* Read number of caps from /input */
-    get_parameter_int(input, "nproc_surf", &caps);
-
-    /* Release input group */
-    status = H5Gclose(input);
-
-    /*
-     * Read first cap and create fields
-     */
-    cap = open_cap(h5file, 0);
-    
-    velocity    = open_field(cap->group, "velocity");
-    temperature = open_field(cap->group, "temperature");
-    viscosity   = open_field(cap->group, "viscosity");
-
-    coord = open_field(cap->group, "coord");
-    coord->dataset = H5Dopen(cap->group, "coord");
-    read_field(coord, 0);
-    nodex = coord->dims[0];
-    nodey = coord->dims[1];
-    nodez = coord->dims[2];
-    close_cap(cap);
-
-    for(capid = 0; capid < caps; capid++)
-    {
-        cap = open_cap(h5file, capid);
-
-        snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, capid, step);
-        fprintf(stderr, "Writing %s\n", filename);
-
-        file = fopen(filename, "w");
-        fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
-
-        velocity->dataset    = H5Dopen(cap->group, "velocity");
-        temperature->dataset = H5Dopen(cap->group, "temperature");
-        viscosity->dataset   = H5Dopen(cap->group, "viscosity");
-
-        /*
-         * Read data from HDF5 file.
-         */
-        read_field(velocity, step);
-        read_field(temperature, step);
-        read_field(viscosity, step);
-
-        /*
-         * Traverse data in order n = k + i*nodez + j*nodez*nodex
-         */
-        n = 0;
-        for(j = 0; j < nodey; j++)
-        {
-            for(i = 0; i < nodex; i++)
-            {
-                for(k = 0; k < nodez; k++)
-                {
-                    fprintf(file, "%g %g %g %g %g %g %g %g\n",
-                            coord->data[3*n],
-                            coord->data[3*n+1],
-                            coord->data[3*n+2],
-                            velocity->data[3*n],
-                            velocity->data[3*n+1],
-                            velocity->data[3*n+2],
-                            temperature->data[n],
-                            viscosity->data[n]);
-                    n++;
-                }
-            }
-        }
-
-        fclose(file);
-        close_cap(cap);
-    }
-
-    free_field(coord);
-    free_field(velocity);
-    free_field(temperature);
-    free_field(viscosity);
-
-    status = H5Fclose(h5file);
-    return EXIT_SUCCESS;
-
-}
