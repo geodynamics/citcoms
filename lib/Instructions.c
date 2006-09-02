@@ -976,6 +976,7 @@ void output_parse_optional(struct  All_variables *E)
     pos = 0;
     next = E->output.optional;
 
+    E->output.connectivity = 0;
     E->output.stress = 0;
     E->output.pressure = 0;
     E->output.surf = 0;
@@ -996,7 +997,9 @@ void output_parse_optional(struct  All_variables *E)
 	if (strlen(prev) == 0) continue;
 
 	/* fprintf(stderr, "### %s: %s\n", prev, next); */
-	if(strcmp(prev, "stress")==0)
+    if(strcmp(prev, "connectivity")==0)
+        E->output.connectivity = 1;
+	else if(strcmp(prev, "stress")==0)
 	    E->output.stress = 1;
 	else if(strcmp(prev, "pressure")==0)
 	    E->output.pressure = 1;

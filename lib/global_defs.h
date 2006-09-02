@@ -794,6 +794,7 @@ struct DATA {
 struct Output {
     char format[10];  /* ascii or hdf5 */
     char optional[1000]; /* comma-delimited list of objects to output */
+    int connectivity; /* whether to output connectivity */
     int stress;       /* whether to output stress */
     int pressure;     /* whether to output pressure */
     int surf;         /* whether to output surface data */

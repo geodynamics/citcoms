@@ -51,12 +51,13 @@
 /* constant data (only for first cycle) */
 void h5output_meta(struct All_variables *);
 void h5output_coord(struct All_variables *);
-void h5output_surf_botm_coord(struct All_variables *E);
+void h5output_surf_botm_coord(struct All_variables *);
 void h5output_have_coord(struct All_variables *);
 void h5output_material(struct All_variables *);
+void h5output_connectivity(struct All_variables *);
 
 /* time-varying data */
-void h5extend_time_dimension(struct All_variables *E);
+void h5extend_time_dimension(struct All_variables *);
 void h5output_velocity(struct All_variables *, int);
 void h5output_temperature(struct All_variables *, int);
 void h5output_viscosity(struct All_variables *, int);
@@ -75,6 +76,8 @@ static herr_t h5create_dataset(hid_t loc_id, const char *name, const char *title
 /* for creation of field and other dataset objects */
 static herr_t h5allocate_field(struct All_variables *E, enum field_class_t field_class, int nsd, int time, hid_t dtype, field_t **field);
 static herr_t h5create_field(hid_t loc_id, const char *name, const char *title, field_t *field);
+
+/* for creation of citcoms hdf5 datasets */
 static herr_t h5create_coord(hid_t loc_id, field_t *field);
 static herr_t h5create_velocity(hid_t loc_id, field_t *field);
 static herr_t h5create_stress(hid_t loc_id, field_t *field);
@@ -90,6 +93,7 @@ static herr_t h5create_have_temperature(hid_t loc_id, field_t *field);
 static herr_t h5create_have_vxy_rms(hid_t loc_id, field_t *field);
 static herr_t h5create_have_vz_rms(hid_t loc_id, field_t *field);
 static herr_t h5create_time(hid_t loc_id);
+static herr_t h5create_connectivity(hid_t loc_id, int nel);
 
 /* for writing to datasets */
 static herr_t h5write_dataset(hid_t dset_id, hid_t mem_type_id, const void *data, int rank, hsize_t *memdims, hsize_t *offset, hsize_t *stride, hsize_t *count, hsize_t *block);
@@ -126,6 +130,8 @@ void h5output(struct All_variables *E, int cycles)
         h5output_surf_botm_coord(E);
         h5output_have_coord(E);
         h5output_material(E);
+        if(E->output.connectivity == 1)
+            h5output_connectivity(E);
     }
 
     h5extend_time_dimension(E);
@@ -201,6 +207,7 @@ void h5output_open(struct All_variables *E)
 
     herr_t status;
 
+
     /*
      * Create HDF5 file using parallel I/O
      */
@@ -222,6 +229,7 @@ void h5output_open(struct All_variables *E)
 
     /* save the file identifier for later use */
     E->hdf5.file_id = file_id;
+
 
     /*
      * Allocate field objects for use in dataset writes...
@@ -246,7 +254,7 @@ void h5output_open(struct All_variables *E)
     h5allocate_field(E, SCALAR_FIELD, 1, 0, dtype, &(E->hdf5.const_scalar1d));
 
     h5allocate_field(E, TENSOR_FIELD, 3, 1, dtype, &(E->hdf5.tensor3d));
-        
+
     h5allocate_field(E, VECTOR_FIELD, 3, 1, dtype, &(E->hdf5.vector3d));
     h5allocate_field(E, VECTOR_FIELD, 2, 1, dtype, &(E->hdf5.vector2d));
 
@@ -254,11 +262,13 @@ void h5output_open(struct All_variables *E)
     h5allocate_field(E, SCALAR_FIELD, 2, 1, dtype, &(E->hdf5.scalar2d));
     h5allocate_field(E, SCALAR_FIELD, 1, 1, dtype, &(E->hdf5.scalar1d));
 
+
     /*
      * Create time table (to store nondimensional and cpu times)
      */
 
     h5create_time(file_id);
+
 
     /*
      * Create necessary groups and arrays
@@ -284,6 +294,12 @@ void h5output_open(struct All_variables *E)
 
         if (E->output.stress == 1)
             h5create_stress(cap_group, E->hdf5.tensor3d);
+
+        /********************************************************************
+         * Create connectivity dataset                                      *
+         ********************************************************************/
+        if (E->output.connectivity == 1)
+            h5create_connectivity(cap_group, E->mesh.nel);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
@@ -872,12 +888,39 @@ static herr_t h5create_have_vz_rms(hid_t loc_id, field_t *field)
     return 0;
 }
 
+static herr_t h5create_connectivity(hid_t loc_id, int nel)
+{
+    hid_t dataset;
+    hid_t dataspace;
+    herr_t status;
+
+    hsize_t dims[2];
+
+    dims[0] = nel;
+    dims[1] = 8;
+
+    /* Create the dataspace */
+    dataspace = H5Screate_simple(2, dims, NULL);
+
+    /* Create the dataset */
+    dataset = H5Dcreate(loc_id, "connectivity", H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
+
+    /* Write necessary attributes for PyTables compatibility */
+    set_attribute_string(dataset, "TITLE", "Node connectivity");
+    set_attribute_string(dataset, "CLASS", "ARRAY");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.3");
+
+    status = H5Sclose(dataspace);
+    status = H5Dclose(dataset);
+    return 0;
+}
+
 static herr_t h5create_time(hid_t loc_id)
 {
     hid_t dataset;      /* dataset identifier */
     hid_t datatype;     /* row datatype identifier */
     hid_t dataspace;    /* memory dataspace */
-    hid_t filespace;    /* file dataspace */
     hid_t dcpl_id;      /* dataset creation property list identifier */
     herr_t status;
 
@@ -1044,11 +1087,11 @@ static herr_t h5close_field(field_t **field)
 void h5extend_time_dimension(struct All_variables *E)
 {
     int i;
-    field_t *field[6];
+    field_t *field[6];  /* TODO: add to hdf5_info struct */
 
     E->hdf5.count += 1;
 
-    field[0] = E->hdf5.tensor3d;
+    field[0] = E->hdf5.tensor3d;    /* TODO: initialize in h5output_open() */
     field[1] = E->hdf5.vector3d;
     field[2] = E->hdf5.vector2d;
     field[3] = E->hdf5.scalar3d;
@@ -1896,6 +1939,78 @@ void h5output_time(struct All_variables *E, int cycles)
     status = H5Sclose(dataspace);
     status = H5Tclose(datatype);
     status = H5Dclose(dataset);
+}
+
+void h5output_connectivity(struct All_variables *E)
+{
+    hid_t dataset;
+    herr_t status;
+
+    int rank = 2;
+    hsize_t memdims[2];
+    hsize_t offset[2];
+    hsize_t stride[2];
+    hsize_t count[2];
+    hsize_t block[2];
+
+    int p;
+    int px = E->parallel.me_loc[1];
+    int py = E->parallel.me_loc[2];
+    int pz = E->parallel.me_loc[3];
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
+
+
+    int e;
+    int nel = E->lmesh.nel;
+    int *ien;
+
+    int *data;
+
+    /* process id (local to cap) */
+    p = pz + px*nprocz + py*nprocz*nprocx;
+
+    rank = 2;
+
+    memdims[0] = nel;
+    memdims[1] = 8;
+
+    offset[0] = nel * p;
+    offset[1] = 0;
+
+    stride[0] = 1;
+    stride[1] = 1;
+
+    count[0] = 1;
+    count[1] = 1;
+
+    block[0] = nel;
+    block[1] = 8;
+
+    data = (int *)malloc((nel*8) * sizeof(int));
+
+    for(e = 0; e < nel; e++)
+    {
+        ien = E->ien[1][e+1].node;
+        data[8*e+0] = ien[1]-1; /* TODO: subtract one? */
+        data[8*e+1] = ien[2]-1;
+        data[8*e+2] = ien[3]-1;
+        data[8*e+3] = ien[4]-1;
+        data[8*e+4] = ien[5]-1;
+        data[8*e+5] = ien[6]-1;
+        data[8*e+6] = ien[7]-1;
+        data[8*e+7] = ien[8]-1;
+    }
+
+    dataset = H5Dopen(E->hdf5.cap_group, "connectivity");
+
+    status = h5write_dataset(dataset, H5T_NATIVE_INT, data, rank, memdims,
+                             offset, stride, count, block);
+    
+    status = H5Dclose(dataset);
+    
+    free(data);
 }
 
 

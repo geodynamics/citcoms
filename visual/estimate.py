@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""\
+"""
 This script estimates the size of the output from CitcomS,
 assuming binary floating point data.
 
@@ -13,8 +13,9 @@ Options are:
                 [ --nodez <number> | -z <number> ]
                 [ --caps  <number> | -c <number> | --full | --regional ]
                 [ --all | -a ]
-                [ --pressure ]
+                [ --connectivity ]
                 [ --stress ]
+                [ --pressure ]
                 [ --surf ]
                 [ --botm ]
                 [ --average ]
@@ -70,8 +71,9 @@ def main():
     import getopt
 
     out = {
-        'pressure': False,
+        'connectivity': False,
         'stress': False,
+        'pressure': False,
         'surf': False,
         'botm': False,
         'average': False,
@@ -84,7 +86,7 @@ def main():
 
     opts, args = getopt.getopt(sys.argv[1:], "hac:t:x:y:z:",
         ['help','full','regional','caps=','steps=','nodex=','nodey=','nodez=',
-         'all','pressure','stress','surf','botm','average'])
+         'all','connectivity','stress','pressure','surf','botm','average'])
     
     for opt,arg in opts:
         
@@ -111,10 +113,12 @@ def main():
         if opt in ('-a','--all'):
             for k in out:
                 out[k] = True
-        if opt == '--pressure':
-            out['pressure'] = True
+        if opt == '--connectivity':
+            out['connectivity'] = True
         if opt == '--stress':
             out['stress'] = True
+        if opt == '--pressure':
+            out['pressure'] = True
         if opt == '--surf':
             out['surf'] = True
         if opt == '--botm':
@@ -144,8 +148,12 @@ def main():
     nno = nodex * nodey * nodez
     nsf = nodex * nodey
 
+    elx = nodex - 1
+    ely = nodey - 1
+    elz = nodez - 1
+    nel = elx * ely * elz
 
-    # conversion factor (float = 4 bytes)
+    # conversion factor (double = 8 bytes, float = 4 bytes, int = 4 bytes)
     f = 4
 
 
@@ -156,9 +164,12 @@ def main():
     vector2d = f * nsf * 2
     scalar2d = f * nsf * 1
     scalar1d = f * nodez
-    buffer_total = tensor3d + vector3d + scalar3d + vector2d + scalar2d + \
+    buffer_total = tensor3d + vector3d + scalar3d + \
+                   vector2d + scalar2d + \
                    scalar1d
-    
+
+    connectivity = f * caps * nel * 8
+
     coord       = caps * scalar3d
     velocity    = steps * caps * vector3d
     temperature = steps * caps * scalar3d
@@ -182,10 +193,12 @@ def main():
 
     total  = coord + velocity + temperature + viscosity
 
-    if out['pressure']:
-        total += pressure
+    if out['connectivity']:
+        total += connectivity
     if out['stress']:
         total += stress
+    if out['pressure']:
+        total += pressure
     if out['surf']:
         total += surf_total
     if out['botm']:
@@ -208,27 +221,10 @@ def main():
     print "total            %s" % ps(buffer_total)
 
     print "\n"
-    print "By Percentage:"
-    print "=" * hr
-    if True:
-        print "coord        %s" % pc(coord,total)
-        print "velocity     %s" % pc(velocity,total)
-        print "temperature  %s" % pc(temperature,total)
-        print "viscosity    %s" % pc(viscosity,total)
-    if out['pressure']:
-        print "pressure     %s" % pc(pressure,total)
-    if out['stress']:
-        print "stress       %s" % pc(stress,total)
-    if out['surf']:
-        print "surf         %s" % pc(surf_total,total)
-    if out['botm']:
-        print "botm         %s" % pc(surf_total,total)
-    if out['average']:
-        print "average      %s" % pc(have_total,total)
-
-    print "\n"
     print "By Dataset:"
     print "=" * hr
+    if out['connectivity']:
+        print "connectivity         %s" % ps(connectivity)
     if True:
         print "coord                %s" % ps(coord)
         print "velocity             %s" % ps(velocity)
@@ -256,6 +252,27 @@ def main():
     if True:
         print "-" * hr
         print "total                %s" % ps(total)
+
+    print "\n"
+    print "By Percentage:"
+    print "=" * hr
+    if out['connectivity']:
+        print "connectivity  %s" % pc(connectivity,total)
+    if True:
+        print "coord         %s" % pc(coord,total)
+        print "velocity      %s" % pc(velocity,total)
+        print "temperature   %s" % pc(temperature,total)
+        print "viscosity     %s" % pc(viscosity,total)
+    if out['pressure']:
+        print "pressure      %s" % pc(pressure,total)
+    if out['stress']:
+        print "stress        %s" % pc(stress,total)
+    if out['surf']:
+        print "surf          %s" % pc(surf_total,total)
+    if out['botm']:
+        print "botm          %s" % pc(surf_total,total)
+    if out['average']:
+        print "average       %s" % pc(have_total,total)
 
 
 if __name__ == '__main__':
