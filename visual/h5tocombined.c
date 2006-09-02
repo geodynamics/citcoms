@@ -1,6 +1,6 @@
 /*
- * CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
- * Copyright (C) 2002-2005, California Institute of Technology.
+ * h5tocombined.c by Luis Armendariz.
+ * Copyright (C) 2006, California Institute of Technology.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "hdf5.h"
-
 
 
 typedef struct cap_t
@@ -76,9 +75,9 @@ int main(int argc, char *argv[])
     hid_t input;
     herr_t status;
 
+    int id;
     int caps;
-    int capid;
-    cap_t *cap;
+    cap_t **cap;
 
     int step;
     int n, i, j, k;
@@ -116,7 +115,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
     {
-        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]] \n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -178,15 +177,23 @@ int main(int argc, char *argv[])
 
 
     /************************************************************************
+     * Open all available cap groups.                                       *
+     ************************************************************************/
+
+    cap = (cap_t **)malloc(caps * sizeof(cap_t *));
+
+    for(id = 0; id < caps; id++)
+        cap[id] = open_cap(h5file, id);
+
+
+    /************************************************************************
      * Create fields using cap00 datasets as a template.                    *
      ************************************************************************/
 
-    cap         = open_cap(h5file, 0);
-    coord       = open_field(cap, "coord");
-    velocity    = open_field(cap, "velocity");
-    temperature = open_field(cap, "temperature");
-    viscosity   = open_field(cap, "viscosity");
-    status      = close_cap(cap);
+    coord       = open_field(cap[0], "coord");
+    velocity    = open_field(cap[0], "velocity");
+    temperature = open_field(cap[0], "temperature");
+    viscosity   = open_field(cap[0], "viscosity");
 
 
     /************************************************************************
@@ -200,21 +207,19 @@ int main(int argc, char *argv[])
         step = steps[t];
 
         /* Iterate over caps */
-        for(capid = 0; capid < caps; capid++)
+        for(id = 0; id < caps; id++)
         {
-            cap = open_cap(h5file, capid);
-
-            snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, capid, step);
+            snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, id, step);
             fprintf(stderr, "Writing %s\n", filename);
 
             file = fopen(filename, "w");
             fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
 
             /* Read data from HDF5 file. */
-            read_field(cap, coord, 0);
-            read_field(cap, velocity, step);
-            read_field(cap, temperature, step);
-            read_field(cap, viscosity, step);
+            read_field(cap[id], coord, 0);
+            read_field(cap[id], velocity, step);
+            read_field(cap[id], temperature, step);
+            read_field(cap[id], viscosity, step);
 
             /* Traverse data in Citcom order */
             n = 0;
@@ -240,11 +245,14 @@ int main(int argc, char *argv[])
             }
 
             fclose(file);
-            close_cap(cap);
         }
     }
 
     /* Release resources. */
+
+    for(id = 0; id < caps; id++)
+        status = close_cap(cap[id]);
+    free(cap);
 
     status = close_field(coord);
     status = close_field(velocity);
