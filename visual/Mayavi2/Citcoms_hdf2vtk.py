@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#    <Script to generate VTK files from CitcomS hdf files>
+#    Script to generate VTK files from CitcomS hdf files
 #    Copyright (C) 2006 California Institue of Technology 
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -83,7 +83,7 @@ def vtk_iter(nx,ny,nz):
         for i in xrange(nx):
             for j in xrange(ny):
                 for k in xrange(nz):
-                    yield k + nz * i + nz * nx * j
+                    yield k + i * nz + j * nz * nx
 
 #Reduces the CitcomS grid
 def reduce_iter(n,nredu):
@@ -226,6 +226,10 @@ def citcom2vtk(t):
         # rearange vtk data - xyz (x fastest).
         for n0 in xrange(el_nz_redu*el_ny_redu*el_nx_redu):
             iter = vtk_i.next()
+            
+            if capnr==0:
+                print iter
+            
             #print iter
             #Get Cartesian Coords from Coords
             #zxy Citcom to xyz Vtk

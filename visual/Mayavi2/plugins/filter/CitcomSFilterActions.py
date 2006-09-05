@@ -2,7 +2,7 @@
 
 """
 # Author: Martin Weier
-# Copyright (c) 
+# Copyright (c) California Institute of Technology
 # License: 
 
 # Enthought library imports.

@@ -1,9 +1,9 @@
-"""A simple filter that thresholds on input data.
+"""A that shows a slice at a specified radius
 
 """
-# Author: Prabhu Ramachandran <prabhu_r@users.sf.net>
-# Copyright (c) 2005, Enthought, Inc.
-# License: BSD Style.
+# Author: Martin Weier
+# Copyright (c) 2006, California Institue of Technology
+# License: GPL Style.
 
 # Enthought library imports.
 from enthought.traits import Instance, Range, Int, Float
@@ -15,7 +15,7 @@ from enthought.mayavi.core.filter import Filter
 
 
 ######################################################################
-# `Threshold` class.
+# `ShowSurface` class.
 ######################################################################
 class ShowSurface(Filter):
 
@@ -178,35 +178,4 @@ class ShowSurface(Filter):
         fil.update()
         self.data_changed = True
     
-    def _update_ranges(self, reset=False):
-        """Updates the ranges of the input.  When `reset` is True, the
-        lower and upper thresholds are automatically set to the limits
-        of the input data."""
-        
-        input = self.inputs[0].outputs[0]
-        data_range = []
-        ps = input.point_data.scalars
-        cs = input.cell_data.scalars
-
-        # FIXME: need to be able to handle cell and point data
-        # together.        
-        if ps:
-            data_range = ps.range
-        elif cs:
-            data_range = cs.range
-            
-        if data_range:
-            dr = data_range
-            l = max(self.lower_threshold, dr[0])
-            trait = Range(dr[0], dr[1], l,
-                          desc='the lower threshold of the filter')
-            self.add_trait('lower_threshold', trait)
-
-            h = min(dr[1], self.upper_threshold)
-            trait = Range(dr[0], dr[1], h,
-                          desc='the upper threshold of the filter')
-            self.add_trait('upper_threshold', trait)
-
-            if reset:
-                self.lower_threshold = dr[0]
-                self.upper_threshold = dr[1]
+    

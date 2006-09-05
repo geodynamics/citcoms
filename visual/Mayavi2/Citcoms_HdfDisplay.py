@@ -110,7 +110,7 @@ if __name__ == '__main__':
             sys.exit(1)
             
     else:
-        print "[filename] [timestep]"
+        print "[filename] [timestep] -x [Reduce Grid Size X] -y [Reduce Grid Size X] -z [Reduce Grid Size Z]"
         sys.exit(0)
    ##parse for reduction factors 
     try:

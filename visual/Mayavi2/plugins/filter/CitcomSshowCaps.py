@@ -111,29 +111,23 @@ class CitcomSshowCaps(Filter):
     ######################################################################
     # Non-public interface
     ######################################################################
-    def _lower_threshold_changed(self,old_value, new_value):
+    def _lower_threshold_changed(self, old_value, new_value):
         """Callback interface for the lower threshold slider"""
+        if new_value>=self.upper_threshold:
+            new_value=self.upper_threshold-1
         fil = self.ugrid_filter
-        if new_value<> self.upper_threshold and new_value<self.upper_threshold:
-            fil.point_minimum = (self.lower_threshold)*(self.n)
-            fil.update()
-            self.data_changed = True
-        else:
-            self.outputs[0].points = [(100,100,100)]
-            fil.update()
-            self.data_changed = True
-	
+        fil.point_minimum = new_value*(self.n)
+        fil.update()
+        self.data_changed = True
         
     def _upper_threshold_changed(self, old_value, new_value):
         """Callback interface for the upper threshold slider"""
+        if new_value<=self.lower_threshold:
+            new_value=self.lower_threshold+1
         fil = self.ugrid_filter
-        if new_value<> self.lower_threshold and new_value>self.lower_threshold:
-            fil.point_maximum = self.upper_threshold*(self.n)
-            fil.update()
-            self.data_changed = True
-        else:
-            self.outputs[0].points = [(100,100,100)]
-            fil.update()
-            self.data_changed = True
+        fil.point_maximum = new_value*(self.n)
+        fil.update()
+        self.data_changed = True
+       
 
    

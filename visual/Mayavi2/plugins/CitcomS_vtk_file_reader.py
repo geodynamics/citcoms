@@ -1,9 +1,9 @@
 """A VTK file reader object.
 
 """
-# Author: Prabhu Ramachandran <prabhu_r@users.sf.net>
-# Copyright (c) 2005, Enthought, Inc.
-# License: BSD Style.
+# Author: Martin Weier
+# Copyright (c) 2006, California Institute of Technology
+# License: GPL Style
 
 
 # Standard library imports.
