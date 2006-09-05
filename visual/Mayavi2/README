@@ -1,0 +1,42 @@
+Citcoms_Hdf2Vtk.py is a program to convert CitcomS Hdf files
+to Vtk files. To run it please make sure that you have
+- pyvtk 0.4.66 or above
+- pytables 1.3.1 or a above
+installed.
+
+see Citcoms_Hdf2Vtk.py --help for help.
+It is recommended but not necessary to reduce the grid size by
+specifying a new grid with the options -x|-y|-z [resolution].
+
+################################################################
+To run the Mayavi2 extensions please install the latest version.
+It is recommended to copy this folder to the Mayavi2 root directory.
+Warning these scripts won't work standalone. Always run them out
+of this folder.
+
+To start Mayavi2 with a predefined visualization please
+use:
+
+For Vtk files:
+Citcoms_VtkDisplay.py [path to vtk file]
+
+For Hdf files:
+Citcoms_HdfDisplay.py [path to hdf file] [timestep] 
+It is recommended but not necessary to reduce the grid size by
+specifying a new grid with the options -x|-y|-z [resolution].
+
+################################################################
+To make the new filters and the CitcomS File reader available 
+in the Mayavi2 menu please copy the content of this folder to 
+the Mayavi2 root directory and edit mayavi_ui_plugin_definition.py.
+To see an example have a look at
+plugins/plugin_defs/mayavi_ui_plugin_definition.py.
+Warning: Do not overwrite your file with this one. There is no 
+guarantee that Mayavi will work after this. Please edit the
+files carefully and have in mind that you are editing python code. 
+Always make a backup from the original files.
+ 
+
+
+
+

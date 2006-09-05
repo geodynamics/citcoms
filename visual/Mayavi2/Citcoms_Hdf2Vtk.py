@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-#    Script to generate VTK files from CitcomS hdf files
+#    Script to generate TVTK files from CitcomS hdf files
+#    author: Martin Weier
 #    Copyright (C) 2006 California Institue of Technology 
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -16,7 +17,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
-#    For more information contact maweier@geodynamics.org
+
 
 #import scipy
 import sys
@@ -227,8 +228,8 @@ def citcom2vtk(t):
         for n0 in xrange(el_nz_redu*el_ny_redu*el_nx_redu):
             iter = vtk_i.next()
             
-            if capnr==0:
-                print iter
+            #if capnr==0:
+            #    print iter
             
             #print iter
             #Get Cartesian Coords from Coords
@@ -663,7 +664,6 @@ def citcoms_hdf2vtk():
     f.close()
     print "Total: %d seconds" % (d2 - d1).seconds
 ###############################################################################
-
 
 
 
