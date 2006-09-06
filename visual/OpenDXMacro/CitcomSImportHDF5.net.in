@@ -1,5 +1,5 @@
 //
-// time: Mon Sep  4 13:48:01 2006
+// time: Wed Sep  6 12:58:33 2006
 //
 // version: 3.2.0 (format), 4.3.2 (DX)
 //
@@ -18,13 +18,13 @@ include "VelocityRTFtoXYZ.net"
 // INPUT filename; string; (none); Filename of CitcomS HDF5 data
 // INPUT frame; integer; 0; Time frame to import
 // INPUT reduced; integer or integer list; (1); Reduce resolution of velocity
-// INPUT caplist; object; (0); A list of caps to display
+// INPUT caplist; integer or integer list; (0); A list of caps to display
 // OPTIONS 0,1,2,3,4,5,6,7,8,9,10,11 
 // OUTPUT velocity; group;  
 // OUTPUT temperature; group;  
 // OUTPUT viscosity; group;  
 // End MDF
-// workspace: width = 812, height = 944
+// workspace: width = 771, height = 858
 // layout: snap = 0, width = 50, height = 50, align = NN
 //
 macro CitcomSImportHDF5(
@@ -38,7 +38,7 @@ macro CitcomSImportHDF5(
 ,viscosity
 ) {
     // 
-    // node CollectMultiGrid[3]: x = 581, y = 531, inputs = 4, label = temperature
+    // node CollectMultiGrid[3]: x = 90, y = 490, inputs = 4, label = temperature
     // input[2]: defaulting = 1, visible = 1, type = 32, value = "cap0"
     // input[4]: defaulting = 1, visible = 1, type = 32, value = "cap1"
     //
@@ -50,7 +50,7 @@ CitcomSImportHDF5_CollectMultiGrid_3_out_1 =
     NULL
     ) [instance: 3, cache: 1];
     // 
-    // node GetLocal[3]: x = 625, y = 609, inputs = 3, label = GetLocal
+    // node GetLocal[3]: x = 134, y = 568, inputs = 3, label = GetLocal
     // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
     //
 CitcomSImportHDF5_GetLocal_3_out_1,
@@ -66,10 +66,42 @@ CitcomSImportHDF5_GetLocal_3_out_2 =
     //
 CitcomSImportHDF5_Input_2_out_1 = filename;
     // 
-    // node Input[4]: x = 416, y = 4, inputs = 0, label = Input
+    // node Input[4]: x = 425, y = 0, inputs = 0, label = Input
     // parameter: position = 4, name = 'caplist', value = '(0)', descriptive = 1, description = 'A list of caps to display', required = 0, visible = 1
     //
 CitcomSImportHDF5_Input_4_out_1 = caplist;
+    // 
+    // node Inquire[1]: x = 524, y = 26, inputs = 3, label = Inquire
+    //
+CitcomSImportHDF5_Inquire_1_out_1 = 
+    Inquire(
+    CitcomSImportHDF5_Input_4_out_1,
+    NULL,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Compute[85]: x = 611, y = 55, inputs = 3, label = Compute
+    // input[1]: defaulting = 0, visible = 0, type = 32, value = "$0? 2: 1"
+    // expression: value = a? 2: 1
+    // name[2]: value = a
+    // name[3]: value = b
+    //
+CitcomSImportHDF5_Compute_85_out_1 = 
+    Compute(
+    "$0? 2: 1",
+    CitcomSImportHDF5_Inquire_1_out_1,
+    NULL
+    ) [instance: 85, cache: 1];
+    // 
+    // node Switch[1]: x = 699, y = 73, inputs = 3, label = Switch
+    // input[3]: defaulting = 0, visible = 1, type = 16777245, value = {0}
+    //
+CitcomSImportHDF5_Switch_1_out_1 = 
+    Switch(
+    CitcomSImportHDF5_Compute_85_out_1,
+    CitcomSImportHDF5_Input_4_out_1,
+    {0}
+    ) [instance: 1, cache: 1];
     // 
     // node ForEachMember[1]: x = 377, y = 73, inputs = 1, label = ForEachMember
     //
@@ -77,10 +109,10 @@ CitcomSImportHDF5_ForEachMember_1_out_1,
 CitcomSImportHDF5_ForEachMember_1_out_2,
 CitcomSImportHDF5_ForEachMember_1_out_3 = 
     ForEachMember(
-    CitcomSImportHDF5_Input_4_out_1
+    CitcomSImportHDF5_Switch_1_out_1
     ) [instance: 1, cache: 1];
     // 
-    // node Format[4]: x = 543, y = 183, inputs = 2, label = Format
+    // node Format[4]: x = 655, y = 184, inputs = 2, label = Format
     // input[1]: defaulting = 0, visible = 1, type = 32, value = "/cap%02d/viscosity"
     //
 CitcomSImportHDF5_Format_4_out_1 = 
@@ -89,7 +121,7 @@ CitcomSImportHDF5_Format_4_out_1 =
     CitcomSImportHDF5_ForEachMember_1_out_1
     ) [instance: 4, cache: 1];
     // 
-    // node ImportHDF5[5]: x = 462, y = 253, inputs = 12, label = ImportHDF5
+    // node ImportHDF5[5]: x = 574, y = 254, inputs = 12, label = ImportHDF5
     // input[2]: defaulting = 1, visible = 1, type = 8, value = [0,0,0,1]
     // input[3]: defaulting = 0, visible = 1, type = 16777217, value = {0,0,0,1}
     // input[4]: defaulting = 1, visible = 1, type = 16777217, value = {1,3,1,2}
@@ -115,7 +147,7 @@ CitcomSImportHDF5_ImportHDF5_5_out_2[cache: 0] =
     NULL
     ) [instance: 5, cache: 1];
     // 
-    // node Format[3]: x = 389, y = 179, inputs = 2, label = Format
+    // node Format[3]: x = 460, y = 176, inputs = 2, label = Format
     // input[1]: defaulting = 0, visible = 1, type = 32, value = "/cap%02d/temperature"
     //
 CitcomSImportHDF5_Format_3_out_1 = 
@@ -124,7 +156,7 @@ CitcomSImportHDF5_Format_3_out_1 =
     CitcomSImportHDF5_ForEachMember_1_out_1
     ) [instance: 3, cache: 1];
     // 
-    // node ImportHDF5[2]: x = 308, y = 254, inputs = 12, label = ImportHDF5
+    // node ImportHDF5[2]: x = 379, y = 251, inputs = 12, label = ImportHDF5
     // input[2]: defaulting = 1, visible = 1, type = 8, value = [0,0,0,1]
     // input[3]: defaulting = 0, visible = 1, type = 16777217, value = {0,0,0,1}
     // input[4]: defaulting = 1, visible = 1, type = 16777217, value = {1,3,1,2}
@@ -168,7 +200,7 @@ CitcomSImportHDF5_Compute_1_out_1 =
     NULL
     ) [instance: 1, cache: 1];
     // 
-    // node Format[2]: x = 236, y = 180, inputs = 2, label = Format
+    // node Format[2]: x = 264, y = 180, inputs = 2, label = Format
     // input[1]: defaulting = 0, visible = 1, type = 32, value = "/cap%02d/velocity"
     //
 CitcomSImportHDF5_Format_2_out_1 = 
@@ -177,7 +209,7 @@ CitcomSImportHDF5_Format_2_out_1 =
     CitcomSImportHDF5_ForEachMember_1_out_1
     ) [instance: 2, cache: 1];
     // 
-    // node ImportHDF5[3]: x = 155, y = 255, inputs = 12, label = ImportHDF5
+    // node ImportHDF5[3]: x = 183, y = 255, inputs = 12, label = ImportHDF5
     // input[2]: defaulting = 1, visible = 1, type = 16777217, value = NULL
     // input[3]: defaulting = 0, visible = 1, type = 16777217, value = {0,0,0,1}
     // input[4]: defaulting = 1, visible = 1, type = 16777217, value = {1,3,1,2}
@@ -249,14 +281,14 @@ CitcomSImportHDF5_Rename_1_out_1 =
     "positions"
     ) [instance: 1, cache: 1];
     // 
-    // node RTFtoXYZ[3]: x = 60, y = 392, inputs = 1, label = RTFtoXYZ
+    // node RTFtoXYZ[3]: x = 22, y = 392, inputs = 1, label = RTFtoXYZ
     //
 CitcomSImportHDF5_RTFtoXYZ_3_out_1 = 
     RTFtoXYZ(
     CitcomSImportHDF5_Rename_1_out_1
     ) [instance: 3, cache: 1];
     // 
-    // node Replace[2]: x = 179, y = 348, inputs = 4, label = Replace
+    // node Replace[2]: x = 207, y = 348, inputs = 4, label = Replace
     // input[4]: defaulting = 0, visible = 1, type = 32, value = "velocity"
     //
 CitcomSImportHDF5_Replace_2_out_1 = 
@@ -267,7 +299,7 @@ CitcomSImportHDF5_Replace_2_out_1 =
     "velocity"
     ) [instance: 2, cache: 1];
     // 
-    // node Replace[1]: x = 332, y = 348, inputs = 4, label = Replace
+    // node Replace[1]: x = 403, y = 345, inputs = 4, label = Replace
     // input[4]: defaulting = 0, visible = 1, type = 32, value = "temperature"
     //
 CitcomSImportHDF5_Replace_1_out_1 = 
@@ -278,7 +310,7 @@ CitcomSImportHDF5_Replace_1_out_1 =
     "temperature"
     ) [instance: 1, cache: 1];
     // 
-    // node Replace[3]: x = 486, y = 348, inputs = 4, label = Replace
+    // node Replace[3]: x = 642, y = 345, inputs = 4, label = Replace
     // input[4]: defaulting = 0, visible = 1, type = 32, value = "viscosity"
     //
 CitcomSImportHDF5_Replace_3_out_1 = 
@@ -289,7 +321,7 @@ CitcomSImportHDF5_Replace_3_out_1 =
     "viscosity"
     ) [instance: 3, cache: 1];
     // 
-    // node Mark[20]: x = 522, y = 455, inputs = 2, label = Mark
+    // node Mark[20]: x = 31, y = 489, inputs = 2, label = Mark
     // input[2]: defaulting = 0, visible = 1, type = 32, value = "viscosity"
     //
 CitcomSImportHDF5_Mark_20_out_1 = 
@@ -298,7 +330,7 @@ CitcomSImportHDF5_Mark_20_out_1 =
     "viscosity"
     ) [instance: 20, cache: 1];
     // 
-    // node Append[4]: x = 510, y = 686, inputs = 5, label = Append
+    // node Append[4]: x = 19, y = 645, inputs = 5, label = Append
     //
 CitcomSImportHDF5_Append_4_out_1 = 
     Append(
@@ -309,7 +341,7 @@ CitcomSImportHDF5_Append_4_out_1 =
     NULL
     ) [instance: 4, cache: 1];
     // 
-    // node CollectMultiGrid[4]: x = 374, y = 570, inputs = 4, label = temperature
+    // node CollectMultiGrid[4]: x = 547, y = 445, inputs = 4, label = temperature
     // input[2]: defaulting = 1, visible = 1, type = 32, value = "cap0"
     // input[4]: defaulting = 1, visible = 1, type = 32, value = "cap1"
     //
@@ -321,7 +353,7 @@ CitcomSImportHDF5_CollectMultiGrid_4_out_1 =
     NULL
     ) [instance: 4, cache: 1];
     // 
-    // node GetLocal[4]: x = 418, y = 648, inputs = 3, label = GetLocal
+    // node GetLocal[4]: x = 591, y = 523, inputs = 3, label = GetLocal
     // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
     //
 CitcomSImportHDF5_GetLocal_4_out_1,
@@ -332,7 +364,7 @@ CitcomSImportHDF5_GetLocal_4_out_2 =
     NULL
     ) [instance: 4, cache: 1];
     // 
-    // node Mark[18]: x = 377, y = 450, inputs = 2, label = Mark
+    // node Mark[18]: x = 487, y = 447, inputs = 2, label = Mark
     // input[2]: defaulting = 0, visible = 1, type = 32, value = "temperature"
     //
 CitcomSImportHDF5_Mark_18_out_1 = 
@@ -341,7 +373,7 @@ CitcomSImportHDF5_Mark_18_out_1 =
     "temperature"
     ) [instance: 18, cache: 1];
     // 
-    // node Append[5]: x = 303, y = 725, inputs = 5, label = Append
+    // node Append[5]: x = 475, y = 600, inputs = 5, label = Append
     //
 CitcomSImportHDF5_Append_5_out_1 = 
     Append(
@@ -352,7 +384,7 @@ CitcomSImportHDF5_Append_5_out_1 =
     NULL
     ) [instance: 5, cache: 1];
     // 
-    // node CollectMultiGrid[5]: x = 141, y = 598, inputs = 4, label = temperature
+    // node CollectMultiGrid[5]: x = 351, y = 451, inputs = 4, label = temperature
     // input[2]: defaulting = 1, visible = 1, type = 32, value = "cap0"
     // input[4]: defaulting = 1, visible = 1, type = 32, value = "cap1"
     //
@@ -364,7 +396,7 @@ CitcomSImportHDF5_CollectMultiGrid_5_out_1 =
     NULL
     ) [instance: 5, cache: 1];
     // 
-    // node GetLocal[5]: x = 185, y = 676, inputs = 3, label = GetLocal
+    // node GetLocal[5]: x = 395, y = 536, inputs = 3, label = GetLocal
     // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
     //
 CitcomSImportHDF5_GetLocal_5_out_1,
@@ -375,7 +407,7 @@ CitcomSImportHDF5_GetLocal_5_out_2 =
     NULL
     ) [instance: 5, cache: 1];
     // 
-    // node Mark[19]: x = 163, y = 447, inputs = 2, label = Mark
+    // node Mark[19]: x = 224, y = 450, inputs = 2, label = Mark
     // input[2]: defaulting = 0, visible = 1, type = 32, value = "velocity"
     //
 CitcomSImportHDF5_Mark_19_out_1 = 
@@ -384,12 +416,12 @@ CitcomSImportHDF5_Mark_19_out_1 =
     "velocity"
     ) [instance: 19, cache: 1];
     // 
-    // node Input[3]: x = 282, y = 3, inputs = 0, label = Input
+    // node Input[3]: x = 310, y = 1, inputs = 0, label = Input
     // parameter: position = 3, name = 'reduced', value = '(1)', descriptive = 1, description = 'Reduce resolution of velocity', required = 0, visible = 1
     //
 CitcomSImportHDF5_Input_3_out_1 = reduced;
     // 
-    // node Reduce[1]: x = 259, y = 496, inputs = 2, label = Reduce
+    // node Reduce[1]: x = 287, y = 449, inputs = 2, label = Reduce
     //
 CitcomSImportHDF5_Reduce_1_out_1 = 
     Reduce(
@@ -397,14 +429,14 @@ CitcomSImportHDF5_Reduce_1_out_1 =
     CitcomSImportHDF5_Input_3_out_1
     ) [instance: 1, cache: 1];
     // 
-    // node VelocityRTFtoXYZ[2]: x = 40, y = 519, inputs = 1, label = VelocityRTFtoXYZ
+    // node VelocityRTFtoXYZ[2]: x = 250, y = 525, inputs = 1, label = VelocityRTFtoXYZ
     //
 CitcomSImportHDF5_VelocityRTFtoXYZ_2_out_1 = 
     VelocityRTFtoXYZ(
     CitcomSImportHDF5_Reduce_1_out_1
     ) [instance: 2, cache: 1];
     // 
-    // node Append[6]: x = 70, y = 753, inputs = 5, label = Append
+    // node Append[6]: x = 280, y = 613, inputs = 5, label = Append
     //
 CitcomSImportHDF5_Append_6_out_1 = 
     Append(
@@ -415,40 +447,22 @@ CitcomSImportHDF5_Append_6_out_1 =
     NULL
     ) [instance: 6, cache: 1];
     // 
-    // node Inquire[1]: x = 740, y = 36, inputs = 3, label = Inquire
-    //
-CitcomSImportHDF5_Inquire_1_out_1 = 
-    Inquire(
-    CitcomSImportHDF5_Input_4_out_1,
-    NULL,
-    NULL
-    ) [instance: 1, cache: 1];
-    // 
-    // node Output[1]: x = 103, y = 882, inputs = 1, label = Output
+    // node Output[1]: x = 313, y = 742, inputs = 1, label = Output
     // parameter: position = 1, name = 'velocity', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
     //
 velocity = CitcomSImportHDF5_Append_6_out_1;
     // 
-    // node Output[2]: x = 336, y = 878, inputs = 1, label = Output
+    // node Output[2]: x = 508, y = 753, inputs = 1, label = Output
     // parameter: position = 2, name = 'temperature', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
     //
 temperature = CitcomSImportHDF5_Append_5_out_1;
     // 
-    // node Output[3]: x = 543, y = 880, inputs = 1, label = Output
+    // node Output[3]: x = 52, y = 796, inputs = 1, label = Output
     // parameter: position = 3, name = 'viscosity', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
     //
 viscosity = CitcomSImportHDF5_Append_4_out_1;
     // 
-    // node Print[1]: x = 717, y = 257, inputs = 3, label = Print
-    // input[2]: defaulting = 0, visible = 1, type = 32, value = "rd"
-    //
-    Print(
-    CitcomSImportHDF5_Inquire_1_out_1,
-    "rd",
-    NULL
-    ) [instance: 1, cache: 1];
-    // 
-    // node SetLocal[3]: x = 626, y = 760, inputs = 3, label = SetLocal
+    // node SetLocal[3]: x = 135, y = 719, inputs = 3, label = SetLocal
     //
     SetLocal(
     CitcomSImportHDF5_Append_4_out_1,
@@ -456,7 +470,7 @@ viscosity = CitcomSImportHDF5_Append_4_out_1;
     NULL
     ) [instance: 3, cache: 1];
     // 
-    // node SetLocal[4]: x = 419, y = 799, inputs = 3, label = SetLocal
+    // node SetLocal[4]: x = 592, y = 674, inputs = 3, label = SetLocal
     //
     SetLocal(
     CitcomSImportHDF5_Append_5_out_1,
@@ -464,7 +478,7 @@ viscosity = CitcomSImportHDF5_Append_4_out_1;
     NULL
     ) [instance: 4, cache: 1];
     // 
-    // node SetLocal[5]: x = 186, y = 827, inputs = 3, label = SetLocal
+    // node SetLocal[5]: x = 396, y = 687, inputs = 3, label = SetLocal
     //
     SetLocal(
     CitcomSImportHDF5_Append_6_out_1,
@@ -478,6 +492,9 @@ CitcomSImportHDF5_GetLocal_3_out_1 = NULL;
 CitcomSImportHDF5_GetLocal_3_out_2 = NULL;
 CitcomSImportHDF5_Input_2_out_1 = NULL;
 CitcomSImportHDF5_Input_4_out_1 = NULL;
+CitcomSImportHDF5_Inquire_1_out_1 = NULL;
+CitcomSImportHDF5_Compute_85_out_1 = NULL;
+CitcomSImportHDF5_Switch_1_out_1 = NULL;
 CitcomSImportHDF5_ForEachMember_1_out_1 = NULL;
 CitcomSImportHDF5_Format_4_out_1 = NULL;
 CitcomSImportHDF5_ImportHDF5_5_out_1 = NULL;
@@ -509,4 +526,3 @@ CitcomSImportHDF5_Input_3_out_1 = NULL;
 CitcomSImportHDF5_Reduce_1_out_1 = NULL;
 CitcomSImportHDF5_VelocityRTFtoXYZ_2_out_1 = NULL;
 CitcomSImportHDF5_Append_6_out_1 = NULL;
-CitcomSImportHDF5_Inquire_1_out_1 = NULL;

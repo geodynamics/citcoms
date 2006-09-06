@@ -40,6 +40,7 @@ dist_dxmacro_DATA = \
 nodist_dxmacro_DATA = \
 	CitcomSFullImport.net \
 	CitcomSImport.net \
+	CitcomSImportHDF5.net \
 	CitcomSSurfaceHeatflux.net \
 	CitcomSSurfaceImport.net \
 	CitcomSSurfaceTopo.net \
