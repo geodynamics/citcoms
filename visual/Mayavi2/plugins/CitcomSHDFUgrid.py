@@ -1,3 +1,23 @@
+#    Script to generate VTKUnstructuredGrid objects from CitcomS hdf files
+#    author: Martin Weier
+#    Copyright (C) 2006 California Institue of Technology 
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+
+
 from enthought.tvtk.api import tvtk
 import tables        #For HDF support
 import numpy
@@ -75,9 +95,6 @@ class CitcomSHDFUgrid:
         
         vtkordered_velo = tvtk.FloatArray()
         
-        ordered_temp = []
-        ordered_visc = []
-        
         nx = self._nx
         ny = self._ny
         nz = self._nz
@@ -89,7 +106,7 @@ class CitcomSHDFUgrid:
         ordered_points = [] #reset Sequences for points   
         ordered_temperature = []
         ordered_velocity = []
-        ordered_visc = []
+        ordered_viscosity = []
     
         for capnr in xrange(nproc_surf):
           
@@ -113,7 +130,7 @@ class CitcomSHDFUgrid:
             ny_redu_iter = self.reduce_iter(ny,ny_redu)
             nz_redu_iter = self.reduce_iter(nz,nz_redu)
       
-            vtk_i = self.vtk_iter(el_nx_redu,el_ny_redu,el_nz_redu)
+            #vtk_i = self.vtk_iter(el_nx_redu,el_ny_redu,el_nz_redu)
              
          
             # read citcom data - zxy (z fastest)
@@ -125,51 +142,27 @@ class CitcomSHDFUgrid:
                     nz_redu_iter = self.reduce_iter(nz,nz_redu)
                     for k in xrange(el_nz_redu):
                         k_redu = nz_redu_iter.next()
-                        thet , phi, r = map(float,hdf_coords[i_redu,j_redu,k_redu])
-                        temp_coords.append((thet,phi,r))
-                    
-                        vel_colat, vel_lon , vel_r = map(float,hdf_velocity[i,j,k])
-                        temperature = float(hdf_temperature[i,j,k])
-                        visc = float(hdf_viscosity[i,j,k])
                 
-                        temp_vel.append((vel_colat,vel_lon,vel_r))
-                        temp_temp.append(temperature)
-                        temp_visc.append(visc)
-    
+                        colat, lon, r = map(float,hdf_coords[i_redu,j_redu,k_redu])
+                        x_coord, y_coord, z_coord = self.RTF2XYZ(colat,lon,r)
+                        ordered_points.append((x_coord,y_coord,z_coord))
+      
+                        ordered_temperature.append(float(hdf_temperature[i_redu,j_redu,k_redu]))
+                        ordered_viscosity.append(float(hdf_viscosity[i_redu,j_redu,k_redu]))
+                
+                    
+                        vel_colat, vel_lon , vel_r = map(float,hdf_velocity[i_redu,j_redu,k_redu])
+                        x_velo, y_velo, z_velo = self.velocity2cart(vel_colat,vel_lon,vel_r, colat,lon , r)
+                    
+                        ordered_velocity.append((x_velo,y_velo,z_velo))                        
+        
+        
             ##Delete Objects for GC
             del hdf_coords
             del hdf_velocity
             del hdf_temperature
             del hdf_viscosity
-            
-            
-            # rearange vtk data - xyz (x fastest).
-            for n0 in xrange(el_nz_redu*el_ny_redu*el_nx_redu):
-                iter = vtk_i.next()
-                #print iter
-                #Get Cartesian Coords from Coords
-                #zxy Citcom to xyz Vtk
-                colat, lon, r = temp_coords[iter]
-                x_coord, y_coord, z_coord = self.RTF2XYZ(colat,lon,r)
-                ordered_points.append((x_coord,y_coord,z_coord))
-      
-                ordered_temp.append(temp_temp[iter])
-                ordered_visc.append(temp_visc[iter])
-                
-                
-                #Get Vectors in Cartesian Coords from Velocity field
-                vel_colat,vel_lon,vel_r = temp_vel[iter]
-                x_velo, y_velo, z_velo = self.velocity2cart(vel_colat,vel_lon,vel_r, colat,lon , r)
-                ordered_velocity.append((x_velo,y_velo,z_velo))                        
         
-                ################################################
-              
-                
-            ##Delete Unused Object for GC
-            del temp_coords
-            del temp_vel
-            del temp_temp
-            del temp_visc
 
            
             #Create Connectivity info    
@@ -204,8 +197,8 @@ class CitcomSHDFUgrid:
         
         
         #Store Arrays in Vtk conform Datastructures
-        self.__vtkordered_temp.from_array(ordered_temp)
-        self.__vtkordered_visc.from_array(ordered_visc)                                    
+        self.__vtkordered_temp.from_array(ordered_temperature)
+        self.__vtkordered_visc.from_array(ordered_viscosity)                                    
         vtkordered_velo.from_array(ordered_velocity)
         
         self.__vtkordered_temp.name = 'Temperature'

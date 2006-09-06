@@ -162,11 +162,6 @@ def citcom2vtk(t):
         print "Processing cap",capnr+1,"of",nproc_surf
         cap = f.root._f_getChild("cap%02d" % capnr)
     
-        temp_coords =  [] # reset Coordinates, Velocity, Temperature Sequence
-        temp_vel = []     
-        temp_temp = []
-        temp_visc = []
-    
         #Information from hdf
         #This information needs to be read only once
         
@@ -187,7 +182,7 @@ def citcom2vtk(t):
         nx_redu_iter = reduce_iter(nx,nx_redu)
         ny_redu_iter = reduce_iter(ny,ny_redu)
         nz_redu_iter = reduce_iter(nz,nz_redu)
-        vtk_i = vtk_iter(el_nx_redu,el_ny_redu,el_nz_redu)
+        #vtk_i = vtk_iter(el_nx_redu,el_ny_redu,el_nz_redu)
         
         # read citcom data - zxy (z fastest)
         for j in xrange(el_ny_redu):
@@ -199,17 +194,20 @@ def citcom2vtk(t):
                 for k in xrange(el_nz_redu):
                     k_redu = nz_redu_iter.next()
                 
-                    thet , phi, r = map(float,hdf_coords[i_redu,j_redu,k_redu])
-                    temp_coords.append((thet,phi,r))
+                    colat, lon, r = map(float,hdf_coords[i_redu,j_redu,k_redu])
+                    x_coord, y_coord, z_coord = RTF2XYZ(colat,lon,r)
+                    ordered_points.append((x_coord,y_coord,z_coord))
+      
+                    ordered_temperature.append(float(hdf_temperature[i_redu,j_redu,k_redu]))
+                    ordered_visc.append(float(hdf_viscosity[i_redu,j_redu,k_redu]))
+                
                     
                     vel_colat, vel_lon , vel_r = map(float,hdf_velocity[i_redu,j_redu,k_redu])
-                    temperature = float(hdf_temperature[i_redu,j_redu,k_redu])
-                    visc = float(hdf_viscosity[i_redu,j_redu,k_redu])
-                
-                    temp_vel.append((vel_colat,vel_lon,vel_r))
-                    temp_temp.append(temperature)
-                    temp_visc.append(visc)
-    
+                    x_velo, y_velo, z_velo = velocity2cart(vel_colat,vel_lon,vel_r, colat,lon , r)
+                    
+                    ordered_velocity.append((x_velo,y_velo,z_velo))                        
+        
+        
         ##Delete Objects for GC
         del hdf_coords
         del hdf_velocity
@@ -221,43 +219,6 @@ def citcom2vtk(t):
         #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
     
         ###Benchmark Point 3 Start##
-        #start = datetime.now()
-        ############################
-     
-        # rearange vtk data - xyz (x fastest).
-        for n0 in xrange(el_nz_redu*el_ny_redu*el_nx_redu):
-            iter = vtk_i.next()
-            
-            #if capnr==0:
-            #    print iter
-            
-            #print iter
-            #Get Cartesian Coords from Coords
-            #zxy Citcom to xyz Vtk
-            colat, lon, r = temp_coords[iter]
-            x_coord, y_coord, z_coord = RTF2XYZ(colat,lon,r)
-            ordered_points.append((x_coord,y_coord,z_coord))
-      
-            #Get Vectors in Cartesian Coords from Velocity
-            vel_colat,vel_lon,vel_r = temp_vel[iter]
-            x_velo, y_velo, z_velo = velocity2cart(vel_colat,vel_lon,vel_r, colat,lon , r)
-            ordered_velocity.append((x_velo,y_velo,z_velo))                        
-        
-            ordered_temperature.append(temp_temp[iter])
-            ordered_visc.append(temp_visc[iter])                                
-        
-        ###Benchmark Point 3 Stop##
-        #delta = datetime.now() - start
-        #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
-        
-        ##Delete Unused Object for GC
-        del temp_coords
-        del temp_vel
-        del temp_temp
-        del temp_visc
-        
-        
-        ###Benchmark Point 4 Start##
         #start = datetime.now()
         ############################
 
@@ -284,12 +245,12 @@ def citcom2vtk(t):
                        Set create surface to false"
                 surface = False
         
-        ###Benchmark Point 4 Stop##
+        ###Benchmark Point 3 Stop##
         #delta = datetime.now() - start
         #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
         
         
-        ###Benchmark Point 5 Start##
+        ###Benchmark Point 4 Start##
         #start = datetime.now()
         ############################
          
@@ -310,11 +271,11 @@ def citcom2vtk(t):
         
         
         
-        ###Benchmark Point 5 Stop##
+        ###Benchmark Point 4 Stop##
         #delta = datetime.now() - start
         #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
     
-        ###Benchmark Point 6 Start##
+        ###Benchmark Point 5 Start##
         #start = datetime.now()
         ############################
         
@@ -373,11 +334,11 @@ def citcom2vtk(t):
             del hdf_surface_heatflux
             del hdf_surface_velocity   
      
-        ###Benchmark Point 6 Stop##
+        ###Benchmark Point 5 Stop##
         #delta = datetime.now() - start
         #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
     
-        ###Benchmark Point 7 Start##
+        ###Benchmark Point 6 Start##
         #start = datetime.now()
         ############################
         
@@ -426,7 +387,7 @@ def citcom2vtk(t):
                         polygons2d.append([n0,n1,n2,n3])
                     i+=1
         
-        ###Benchmark Point 7 Stop##
+        ###Benchmark Point 6 Stop##
         #delta = datetime.now() - start
         #benchmarkstr += "%.5lf\n" % (delta.seconds + float(delta.microseconds)/1e6)
     #print benchmarkstr
@@ -435,7 +396,7 @@ def citcom2vtk(t):
 #Write Data to VTK  
     
     #benchmarkstr = "\n\nIO:\n"
-    ###Benchmark Point 8 Start##
+    ###Benchmark Point 7 Start##
     #start = datetime.now()
     ############################
         
@@ -455,11 +416,11 @@ def citcom2vtk(t):
             data.tofile(vtk_path + (vtkfile % ('surface',t)),'binary') 
         print "Written Surface information to file"
         
-    ###Benchmark Point 8 Stop##
+    ###Benchmark Point 7 Stop##
     #delta = datetime.now() - start
     #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
     
-    ###Benchmark Point 9 Start##
+    ###Benchmark Point 8 Start##
     #start = datetime.now()
     ############################
     
@@ -479,13 +440,13 @@ def citcom2vtk(t):
         print "Written Bottom information to file"
 
           
-    ###Benchmark Point 9 Stop##
+    ###Benchmark Point 8 Stop##
     #delta = datetime.now() - start
     #benchmarkstr += "%.5lf," % (delta.seconds + float(delta.microseconds)/1e6)
     
  
     
-    ###Benchmark Point 10 Start##
+    ###Benchmark Point 9 Start##
     #start = datetime.now()
     
     #General Data
@@ -503,7 +464,7 @@ def citcom2vtk(t):
         data.tofile(vtk_path + (vtkfile % ('general',t)),'binary')  
     print "Written general data to file"
 
-    ###Benchmark Point 10 Stop##
+    ###Benchmark Point 9 Stop##
     #delta = datetime.now() - start
     #benchmarkstr += "%.5lf\n" % (delta.seconds + float(delta.microseconds)/1e6)
 
