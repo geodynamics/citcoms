@@ -55,7 +55,7 @@ nobase_pkgpython_PYTHON = \
 	Coupler/Outlet.py \
 	Layout.py \
 	SimpleApp.py \
-	Solver/__init__.py
+	Solver/__init__.py \
 	Solver/CoupledFullSolver.py \
 	Solver/CoupledRegionalSolver.py \
 	Solver/CoupledSolver.py \
