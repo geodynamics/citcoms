@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <hdf5.h>
 #include <math.h>
+#include "hdf5.h"
 
 typedef struct vtk_pixel_t
 {
@@ -681,6 +681,41 @@ static herr_t get_attribute_int(hid_t input, const char *name, int *val)
             return 0;
     }
 
+    return -1;
+}
+
+static herr_t get_attribute_float(hid_t input, const char *name, int *val)
+{
+    hid_t attr_id;
+    hid_t type_id;
+    H5T_class_t type_class;
+    size_t type_size;
+
+    herr_t status;
+
+    char *strval;
+
+    attr_id = H5Aopen_name(input, name);
+    type_id = H5Aget_type(attr_id);
+    type_class = H5Tget_class(type_id);
+    type_size = H5Tget_size(type_id);
+
+    H5Tclose(type_id);
+    H5Aclose(attr_id);
+
+    switch(type_class)
+    {
+        case H5T_STRING:
+            status = get_attribute_str(input, name, &strval);
+            if (status < 0) return -1;
+                *val = atof(strval);
+            free(strval);
+            return 0;
+        case H5T_FLOAT:
+            status = get_attribute(input, name, H5T_NATIVE_FLOAT, val);
+            if (status < 0) return -1;
+            return 0;
+    }
     return -1;
 }
 
