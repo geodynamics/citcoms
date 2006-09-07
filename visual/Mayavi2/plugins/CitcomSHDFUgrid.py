@@ -167,33 +167,31 @@ class CitcomSHDFUgrid:
            
             #Create Connectivity info    
             if counter==0:
-                #For 3d Data 
-                i=1    #Counts X Direction
-                j=1    #Counts Y Direction
-                k=1    #Counts Z Direction
+                 i=1    #Counts X Direction
+                 j=1    #Counts Y Direction
+                 k=1    #Counts Z Direction
     
-                for n in xrange(((el_nx_redu*el_ny_redu*el_nz_redu)-(el_nz_redu*el_ny_redu))):
-                    if (i%el_nz_redu)==0:            #X-Values!!!
-                        j+=1                 #Count Y-Values
+                 for n in xrange((el_nx_redu*el_ny_redu*el_nz_redu)-(el_nz_redu*el_nx_redu)):
+                     if (i%el_nz_redu)==0:            #X-Values!!!
+                         j+=1                 #Count Y-Values
         
-                    if (j%el_ny_redu)==0:
-                        k+=1                #Count Z-Values
+                     if (j%el_nx_redu)==0:
+                         k+=1                #Count Z-Values
                   
-                    if i%el_nz_redu!=0 and j%el_ny_redu!=0:            #Check if Box can be created
-                        #Get Vertnumbers
-                        n0 = n+(capnr*(el_nx_redu*el_ny_redu*el_nz_redu))
-                        n1 = n0+1
-                        n2 = n1+el_nz_redu
-                        n3 = n0+el_nz_redu
-                        n4 = n0+(el_ny_redu*el_nz_redu)
-                        n5 = n4+1
-                        n6 = n4+el_nz_redu+1
-                        n7 = n4+el_nz_redu
-
-                        #Created Polygon Box
-                        hexagrid.insert_next_cell(12,[n0,n1,n2,n3,n4,n5,n6,n7])
+                     if i%el_nz_redu!=0 and j%el_nx_redu!=0:            #Check if Box can be created
+                         #Get Vertnumbers
+                         n0 = n+(capnr*(el_nx_redu*el_ny_redu*el_nz_redu))
+                         n1 = n0+el_nz_redu
+                         n2 = n1+el_nz_redu*el_nx_redu
+                         n3 = n0+el_nz_redu*el_nx_redu
+                         n4 = n0+1
+                         n5 = n4+el_nz_redu
+                         n6 = n5+el_nz_redu*el_nx_redu
+                         n7 = n4+el_nz_redu*el_nx_redu
+                         #Created Polygon Box
+                         hexagrid.insert_next_cell(12,[n0,n1,n2,n3,n4,n5,n6,n7])
              
-                    i+=1
+                     i+=1
         
         
         #Store Arrays in Vtk conform Datastructures

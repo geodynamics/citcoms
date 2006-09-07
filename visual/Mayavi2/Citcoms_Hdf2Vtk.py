@@ -260,14 +260,14 @@ def citcom2vtk(t):
             botm_mean=0.0
     
             if surface:
-                for i in xrange(ny):
+                for i in xrange(nx):
                     surf_mean += numpy.mean(hdf_surface_topography[i])
                 surf_mean = surf_mean/ny
 
             if bottom:
-                for i in xrange(ny):
+                for i in xrange(nx):
                     botm_mean += numpy.mean(hdf_bottom_topography[i])
-                botm_mean = botm_mean/ny
+                botm_mean = botm_mean/nx
         
         
         
@@ -281,8 +281,8 @@ def citcom2vtk(t):
         
         #Read Surface and Bottom Data   
         if bottom==True or surface == True:
-            for i in xrange(ny):
-                for j in xrange(nx):
+            for i in xrange(nx):
+                for j in xrange(ny):
                     
                     
                     if bottom==True:
@@ -351,23 +351,23 @@ def citcom2vtk(t):
             j=1    #Counts Y Direction
             k=1    #Counts Z Direction
     
-            for n in xrange(((el_nx_redu*el_ny_redu*el_nz_redu)-(el_nz_redu*el_ny_redu))):
+            for n in xrange((el_nx_redu*el_ny_redu*el_nz_redu)-(el_nz_redu*el_nx_redu)):
                 if (i%el_nz_redu)==0:            #X-Values!!!
                     j+=1                 #Count Y-Values
         
-                if (j%el_ny_redu)==0:
+                if (j%el_nx_redu)==0:
                     k+=1                #Count Z-Values
                   
-                if i%el_nz_redu!=0 and j%el_ny_redu!=0:            #Check if Box can be created
+                if i%el_nz_redu!=0 and j%el_nx_redu!=0:            #Check if Box can be created
                     #Get Vertnumbers
                     n0 = n+(capnr*(el_nx_redu*el_ny_redu*el_nz_redu))
-                    n1 = n0+1
-                    n2 = n1+el_nz_redu
-                    n3 = n0+el_nz_redu
-                    n4 = n0+(el_ny_redu*el_nz_redu)
-                    n5 = n4+1
-                    n6 = n4+el_nz_redu+1
-                    n7 = n4+el_nz_redu
+                    n1 = n0+el_nz_redu
+                    n2 = n1+el_nz_redu*el_nx_redu
+                    n3 = n0+el_nz_redu*el_nx_redu
+                    n4 = n0+1
+                    n5 = n4+el_nz_redu
+                    n6 = n5+el_nz_redu*el_nx_redu
+                    n7 = n4+el_nz_redu*el_nx_redu
 
                     #Created Polygon Box
                     polygons3d.append([n0,n1,n2,n3,n4,n5,n6,n7]) #Hexahedron VTK Representation
@@ -378,8 +378,8 @@ def citcom2vtk(t):
             if bottom==True or surface==True:
                 #Connectivity for 2d-Data      
                 i=1
-                for n in xrange((nx)*(ny) - nx):
-                    if i%nx!=0 :
+                for n in xrange((nx)*(ny) - ny):
+                    if i%ny!=0 :
                         n0 = n+(capnr*((nx)*(ny)))
                         n1 = n0+1
                         n2 = n0+ny

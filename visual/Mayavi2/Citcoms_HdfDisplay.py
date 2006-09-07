@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 try:
     import wxversion
     wxversion.ensureMinimal('2.6')
@@ -26,10 +25,11 @@ class HdfDisplay(Mayavi):
         from enthought.mayavi.modules import surface, glyph , axes, outline, orientation_axes, scalar_cut_plane  
         from enthought.mayavi.sources.vtk_data_source import VTKDataSource 
         from enthought.tvtk.api import tvtk
+        #citcomS Filter and Modules
         from plugins.CitcomSHDFUgrid import CitcomSHDFUgrid
         from plugins.filter.CitcomSshowCaps import CitcomSshowCaps
         from plugins.filter.CitcomSreduce import CitcomSreduce
-        #import filter.CitcomSSphere
+        
         import re
         
         
@@ -123,6 +123,7 @@ if __name__ == '__main__':
         if opt in ('-x','--nx_redu'):
             try:
                 mc.nx_redu = int(arg)
+                print "Reducing Grid Size to x:",mc.nx_redu
             except ValueError:
                 print "x is not a number..."
                 sys.exit(1)
@@ -130,6 +131,7 @@ if __name__ == '__main__':
         if opt in ('-y','--ny_redu'):
             try:
                 mc.ny_redu = int(arg)
+                print "Reducing Grid Size to y:",mc.ny_redu
             except ValueError:
                 print "y is not a number..."
                 sys.exit(1)
@@ -137,9 +139,10 @@ if __name__ == '__main__':
         if opt in ('-z','--nz_redu'):
             try:
                 mc.nz_redu = int(arg)
+                print "Reducing Grid Size to z:",mc.nz_redu
+        
             except ValueError:
                 print "z is not a number..."
                 sys.exit(1)
         
-    print "Reducing Grid Size to x:",mc.nx_redu,"y:",mc.ny_redu,"z:",mc.nz_redu
     mc.main()
