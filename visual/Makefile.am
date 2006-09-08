@@ -43,7 +43,7 @@ dist_bin_SCRIPTS = \
 	getcoord.sh \
 	getlog.sh \
 	getsurf.sh \
-	h52combined.py \
+	h5tocap.py \
 	miff2avi \
 	miff2mpg \
 	parser.py \
