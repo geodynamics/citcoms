@@ -180,7 +180,11 @@ void h5output_open(struct All_variables *E)
 
     int cap;
     int caps = E->sphere.caps;
-    int nprocx, nprocy, nprocz;
+    int nprocx = E->parallel.nprocx;
+    int nprocy = E->parallel.nprocy;
+    int nprocz = E->parallel.nprocz;
+    int procs_per_cap;
+
 
     /*
      * MPI variables
@@ -298,8 +302,9 @@ void h5output_open(struct All_variables *E)
         /********************************************************************
          * Create connectivity dataset                                      *
          ********************************************************************/
+        procs_per_cap = nprocx * nprocy * nprocz;
         if (E->output.connectivity == 1)
-            h5create_connectivity(cap_group, E->mesh.nel);
+            h5create_connectivity(cap_group, E->lmesh.nel * procs_per_cap);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
@@ -350,10 +355,6 @@ void h5output_open(struct All_variables *E)
     E->hdf5.count = 0; // TODO: for restart, initialize to last value
 
     /* Determine current cap and remember it */
-
-    nprocx = E->parallel.nprocx;
-    nprocy = E->parallel.nprocy;
-    nprocz = E->parallel.nprocz;
 
     cap = (E->parallel.me) / (nprocx * nprocy * nprocz);
     E->hdf5.capid = cap;
