@@ -439,7 +439,6 @@ static hid_t h5create_file(const char *filename,
     set_attribute_string(root, "TITLE", "CitcomS output");
     set_attribute_string(root, "CLASS", "GROUP");
     set_attribute_string(root, "VERSION", "1.0");
-    set_attribute_string(root, "FILTERS", FILTERS_P);
     set_attribute_string(root, "PYTABLES_FORMAT_VERSION", "1.5");
 
     /* release resources */
@@ -466,7 +465,6 @@ static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint)
     set_attribute_string(group_id, "TITLE", "CitcomS HDF5 group");
     set_attribute_string(group_id, "CLASS", "GROUP");
     set_attribute_string(group_id, "VERSION", "1.0");
-    set_attribute_string(group_id, "FILTERS", FILTERS_P);
     set_attribute_string(group_id, "PYTABLES_FORMAT_VERSION", "1.5");
 
     return group_id;
@@ -972,7 +970,6 @@ static herr_t h5create_time(hid_t loc_id)
 
     set_attribute_int(dataset, "AUTOMATIC_INDEX", 1);
     set_attribute_int(dataset, "REINDEX", 1);
-    set_attribute_string(dataset, "FILTERS_INDEX", FILTERS_P);
 
     /* Release resources */
     status = H5Pclose(dcpl_id);
