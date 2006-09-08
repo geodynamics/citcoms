@@ -49,6 +49,7 @@ def find_prefix(h5file):
 def convert(h5file, prefix, frame):
     f = tables.openFile(h5file)
     try:
+        # get attribute 'caps' in the input group
         caps = int(f.root.input._v_attrs.caps)
         steps = f.root.time.col('step')
 
