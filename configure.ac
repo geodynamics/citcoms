@@ -40,6 +40,7 @@ AC_ARG_VAR(BSUB, [command to submit LSF batch jobs])
 AC_ARG_VAR(QSUB, [command to submit PBS batch jobs])
 AC_ARG_VAR(GLOBUSRUN, [command to submit Globus batch jobs])
 AC_ARG_VAR(BATCHTYPE, [default batch system (lsf, pbs, or globus)])
+AC_ARG_VAR(PHDF5_HOME, [home path to parallel HDF5 library])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
         [build Pyre modules @<:@default=yes@:>@])],
@@ -137,6 +138,9 @@ else
     CIT_HEADER_MPI
 fi
 if test "$want_hdf5" = yes; then
+    if test "$PHDF5_HOME"; then
+        CPPFLAGS="-I$PHDF5_HOME/include $CPPFLAGS"
+    fi
     AC_CHECK_HEADERS([hdf5.h],
                      [AC_DEFINE([HAVE_HDF5_H])],
                      [AC_MSG_ERROR([HDF5 header file "hdf5.h" not found!])])
@@ -158,27 +162,22 @@ if test -z "$LIBM"; then
 fi
 AC_SUBST(LIBM)
 
-AC_ARG_VAR(LIBHDF5, [HDF5 library])
 if test "$want_hdf5" = yes; then
-    if test -z "$LIBHDF5"; then
-        AC_CHECK_FUNC(H5Fopen, , [
-            AC_CHECK_LIB(hdf5, H5Fopen, [
-                LIBHDF5="-lhdf5"
-            ], [
-                AC_MSG_ERROR([HDF5 library not found; try setting LIBHDF5])
-            ])
-        ])
+    if test "$PHDF5_HOME"; then
+        LDFLAGS="-L$PHDF5_HOME/lib $LDFLAGS"
     fi
-    AC_CHECK_FUNC(H5Pset_dxpl_mpio, , [
-        AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [
-            have_phdf5="yes"
+    # Checks for basic HDF5 function
+    AC_CHECK_FUNC(H5Fopen, , [
+        AC_CHECK_LIB(hdf5, H5Fopen, [
+            LIBHDF5="-lhdf5"
+        ], [
+            AC_MSG_ERROR([HDF5 library not found; try setting PHDF5_HOME])
         ])
     ])
-    if test -z "$have_phdf5"; then
-        AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
-    fi
+    # Checks for HDF5 parallel-IO function
+    AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [have_phdf5="yes"],
+        AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel]))
 fi
-
 AC_SUBST(LIBHDF5)
 
 AC_CONFIG_FILES([Makefile
