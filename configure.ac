@@ -49,10 +49,9 @@ AC_ARG_WITH([pyre],
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
 AC_ARG_WITH([hdf5],
     [AC_HELP_STRING([--with-hdf5],
-        [enable HDF5 output @<:@default=yes@:>@])],
+        [enable HDF5 output @<:@default=auto@:>@])],
     [want_hdf5="$withval"],
-    [want_hdf5=yes])
-AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
+    [want_hdf5=auto])
 AC_ARG_ENABLE([embedding],
     [AC_HELP_STRING([--enable-embedding],
         [embed Python with CitcomS in a single executable @<:@default=yes@:>@])],
@@ -137,13 +136,19 @@ if test "$want_pyre" = yes; then
 else
     CIT_HEADER_MPI
 fi
-if test "$want_hdf5" = yes; then
+if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
     if test "$PHDF5_HOME"; then
         CPPFLAGS="-I$PHDF5_HOME/include $CPPFLAGS"
     fi
-    AC_CHECK_HEADERS([hdf5.h],
-                     [AC_DEFINE([HAVE_HDF5_H])],
-                     [AC_MSG_ERROR([HDF5 header file "hdf5.h" not found!])])
+    AC_CHECK_HEADERS([hdf5.h], [AC_DEFINE([HAVE_HDF5_H])], [HDF5NOTFOUND=1])
+    if test "$HDF5NOTFOUND"; then
+        if test "$want_hdf5" = auto; then
+            want_hdf5=no
+            echo Cannot find hdf5.h, disable HDF5 support
+        else
+            AC_MSG_ERROR([HDF5 header file "hdf5.h" not found!])
+        fi
+    fi
 fi
 AC_CHECK_HEADERS([malloc.h])
 
@@ -162,22 +167,39 @@ if test -z "$LIBM"; then
 fi
 AC_SUBST(LIBM)
 
-if test "$want_hdf5" = yes; then
+if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
     if test "$PHDF5_HOME"; then
         LDFLAGS="-L$PHDF5_HOME/lib $LDFLAGS"
     fi
     # Checks for basic HDF5 function
     AC_CHECK_FUNC(H5Fopen, , [
-        AC_CHECK_LIB(hdf5, H5Fopen, [
-            LIBHDF5="-lhdf5"
-        ], [
-            AC_MSG_ERROR([HDF5 library not found; try setting PHDF5_HOME])
-        ])
+        AC_CHECK_LIB(hdf5, H5Fopen, [LIBHDF5="-lhdf5"], [HDF5NOTFOUND=1])
     ])
-    # Checks for HDF5 parallel-IO function
-    AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [have_phdf5="yes"],
-        AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel]))
+    if test "$HDF5NOTFOUND"; then
+        if test "$want_hdf5" = auto; then
+            want_hdf5=no
+            echo Cannot find find HDF5 library, disable HDF5 support
+        else
+            AC_MSG_ERROR([HDF5 library not found; try setting PHDF5_HOME])
+        fi
+    fi
 fi
+if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
+    # Checks for HDF5 parallel-IO function
+    AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [have_phdf5="yes"], [HDF5NOTFOUND=1])
+    if test "$HDF5NOTFOUND"; then
+        if test "$want_hdf5" = auto; then
+            want_hdf5=no
+            echo Cannot find find parallel HDF5 library, disable HDF5 support
+        else
+            AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
+        fi
+    fi
+    if test "$want_hdf5" = auto; then
+	want_hdf5=yes
+    fi
+fi
+AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AC_SUBST(LIBHDF5)
 
 AC_CONFIG_FILES([Makefile
@@ -197,5 +219,22 @@ if test "$want_pyre" = yes; then
 fi
 
 AC_OUTPUT
+
+# report configuration summary
+echo -e "\n\n"
+echo "================ Configuration Summary ================"
+echo -e "\t PYTHON: " $PYTHON
+echo -e "\t PYTHONPATH: " $PYTHONPATH
+echo -e "\t LAUNCHER: " $LAUNCHER
+echo -e "\t MPIRUN: " $MPIRUN
+echo -e "\t MPICC: " $MPICC
+echo -e "\t MPICXX: " $MPICXX
+echo -e "\t CFLAGS: " $CFLAGS
+echo -e "\t CPPFLAGS: " $CPPFLAGS
+echo -e "\t LDFLAGS: " $LDFLAGS
+echo -e "\t CXXFLAGS: " $CXXFLAGS
+echo -e "\t with-pyre: " $want_pyre
+echo -e "\t with-hdf5: " $want_hdf5
+echo
 
 dnl end of configure.ac
