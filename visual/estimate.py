@@ -168,14 +168,13 @@ def main():
                    vector2d + scalar2d + \
                    scalar1d
 
-    connectivity = f * caps * nel * 8
-
-    coord       = caps * scalar3d
-    velocity    = steps * caps * vector3d
-    temperature = steps * caps * scalar3d
-    viscosity   = steps * caps * scalar3d
-    pressure    = steps * caps * scalar3d
-    stress      = steps * caps * tensor3d
+    connectivity = f * nel * 8
+    coord        = caps * scalar3d
+    velocity     = steps * caps * vector3d
+    temperature  = steps * caps * scalar3d
+    viscosity    = steps * caps * scalar3d
+    pressure     = steps * caps * scalar3d
+    stress       = steps * caps * tensor3d
 
     surf_coord       = caps * vector2d
     surf_velocity    = steps * caps * vector2d

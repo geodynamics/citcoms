@@ -130,7 +130,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_surf_botm_coord(E);
         h5output_have_coord(E);
         h5output_material(E);
-        if(E->output.connectivity == 1)
+        if(E->output.connectivity == 1 && E->hdf5.capid == 0)
             h5output_connectivity(E);
     }
 
@@ -267,16 +267,23 @@ void h5output_open(struct All_variables *E)
     h5allocate_field(E, SCALAR_FIELD, 1, 1, dtype, &(E->hdf5.scalar1d));
 
 
-    /*
-     * Create time table (to store nondimensional and cpu times)
-     */
-
+    /********************************************************************
+     * Create time table (to store nondimensional and cpu times)        *
+     ********************************************************************/
     h5create_time(file_id);
 
 
-    /*
-     * Create necessary groups and arrays
-     */
+    /********************************************************************
+     * Create connectivity dataset                                      *
+     ********************************************************************/
+    procs_per_cap = nprocx * nprocy * nprocz;
+    if (E->output.connectivity == 1)
+        h5create_connectivity(file_id, E->lmesh.nel * procs_per_cap);
+
+
+    /********************************************************************
+     * Create necessary groups and arrays                               *
+     ********************************************************************/
     for(cap = 0; cap < caps; cap++)
     {
         cap_name = E->hdf5.cap_names[cap];
@@ -298,13 +305,6 @@ void h5output_open(struct All_variables *E)
 
         if (E->output.stress == 1)
             h5create_stress(cap_group, E->hdf5.tensor3d);
-
-        /********************************************************************
-         * Create connectivity dataset                                      *
-         ********************************************************************/
-        procs_per_cap = nprocx * nprocy * nprocz;
-        if (E->output.connectivity == 1)
-            h5create_connectivity(cap_group, E->lmesh.nel * procs_per_cap);
 
         /********************************************************************
          * Create /cap/surf/ group                                          *
@@ -2001,7 +2001,7 @@ void h5output_connectivity(struct All_variables *E)
         data[8*e+7] = ien[8]-1;
     }
 
-    dataset = H5Dopen(E->hdf5.cap_group, "connectivity");
+    dataset = H5Dopen(E->hdf5.file_id, "connectivity");
 
     status = h5write_dataset(dataset, H5T_NATIVE_INT, data, rank, memdims,
                              offset, stride, count, block);
