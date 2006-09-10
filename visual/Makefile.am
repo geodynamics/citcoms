@@ -109,7 +109,12 @@ install-nodist_visualDATA: $(nodist_visual_DATA)
 	  chmod 644 "$(DESTDIR)$(visualdir)/$$f"; \
 	done
 
+if COND_HDF5
+    bin_PROGRAMS = h5tocap
+    h5tocap_SOURCES = h5tocap.c
+    h5tocap_LDADD = $(LIBHDF5)
+endif
+
 CLEANFILES = $(nodist_visual_DATA)
 EXTRA_DIST = $(visual_templates)
-
 ## end of Makefile.am

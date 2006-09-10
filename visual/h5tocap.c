@@ -48,14 +48,14 @@ typedef struct field_t
 } field_t;
 
 
+static herr_t read_steps(hid_t file_id, int **steps, int *numsteps);
+
 static cap_t *open_cap(hid_t file_id, int capid);
 static herr_t close_cap(cap_t *cap);
 
-
 static field_t *open_field(cap_t *cap, const char *name);
-static herr_t read_field(cap_t *cap, field_t *field, int timestep);
+static herr_t read_field(cap_t *cap, field_t *field, int frame);
 static herr_t close_field(field_t *field);
-
 
 static herr_t get_attribute_str(hid_t obj_id, const char *attr_name, char **data);
 static herr_t get_attribute_int(hid_t input, const char *name, int *val);
@@ -79,14 +79,17 @@ int main(int argc, char *argv[])
     int caps;
     cap_t **cap;
 
-    int step;
+    int t;
     int n, i, j, k;
     int nodex, nodey, nodez;
 
-    int t;
-    int timesteps;
-
+    int step;
     int *steps;
+    int numsteps;
+
+    int frame;
+    int *frames;
+    int timesteps;
     char *endptr;
 
     field_t *coord;
@@ -105,7 +108,7 @@ int main(int argc, char *argv[])
     
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -115,7 +118,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
     {
-        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -131,27 +134,59 @@ int main(int argc, char *argv[])
     }
 
     /*
-     * Read step(s) from argv[2:]
+     * Read steps from file
      */
-    
-    /* Allocate at least one step (we know argc >= 2) */
-    timesteps = (argc == 2) ? 1 : (argc-2);
-    steps = (int *)malloc(timesteps * sizeof(int));
 
-    /* By default, use zeroth step (might be overwritten) */
-    steps[0] = 0;
+    status = read_steps(h5file, &steps, &numsteps);
 
-    /* Convert argv[2:] into int array */
-    for(n = 2; n < argc; n++)
+    if (argc > 2)
     {
-        steps[n-2] = (int)strtol(argv[n], &endptr, 10);
-        if (!(argv[n][0] != '\0' && *endptr == '\0'))
+        if (strcmp(argv[2], "-l") == 0)
         {
-            fprintf(stderr, "Error: Could not parse step \"%s\"\n", argv[n]);
+            printf("Found %d frames in file \"%s\"\n\n", numsteps, argv[1]);
+            printf("\tsteps = [");
+            for (n = 0; n < numsteps; n++)
+                printf(" %d%c", steps[n], ((n<numsteps-1) ? ',' : ' '));
+            printf("]\n\n");
+            status = H5Fclose(h5file);
             return EXIT_FAILURE;
         }
     }
 
+    /*
+     * Read frame(s) from argv[2:]
+     */
+    
+    /* Allocate at least one step (we know argc >= 2) */
+    timesteps = (argc == 2) ? 1 : (argc-2);
+    frames = (int *)malloc(timesteps * sizeof(int));
+
+    /* By default, use zeroth step (might be overwritten) */
+    frames[0] = 0;
+
+    /* Convert argv[2:] into int array */
+    for(n = 2; n < argc; n++)
+    {
+        frames[n-2] = (int)strtol(argv[n], &endptr, 10);
+        if (!(argv[n][0] != '\0' && *endptr == '\0'))
+        {
+            fprintf(stderr, "Error: Could not parse step \"%s\"\n", argv[n]);
+            status = H5Fclose(h5file);
+            return EXIT_FAILURE;
+        }
+    }
+
+    /* Validate frames */
+    for(t = 0; t < timesteps; t++)
+    {
+        if (frames[t] >= numsteps)
+        {
+            fprintf(stderr, "Error: Requested frame %d is not in range "
+                    "[0,%d]\n", frames[t], numsteps-1);
+            status = H5Fclose(h5file);
+            return EXIT_FAILURE;
+        }
+    }
 
     /************************************************************************
      * Get mesh parameters.                                                 *
@@ -204,7 +239,8 @@ int main(int argc, char *argv[])
     for(t = 0; t < timesteps; t++)
     {
         /* Determine step */
-        step = steps[t];
+        frame = frames[t];
+        step  = steps[frames[t]];
 
         /* Iterate over caps */
         for(id = 0; id < caps; id++)
@@ -217,9 +253,9 @@ int main(int argc, char *argv[])
 
             /* Read data from HDF5 file. */
             read_field(cap[id], coord, 0);
-            read_field(cap[id], velocity, step);
-            read_field(cap[id], temperature, step);
-            read_field(cap[id], viscosity, step);
+            read_field(cap[id], velocity, frame);
+            read_field(cap[id], temperature, frame);
+            read_field(cap[id], viscosity, frame);
 
             /* Traverse data in Citcom order */
             n = 0;
@@ -261,10 +297,42 @@ int main(int argc, char *argv[])
     status = H5Fclose(h5file);
 
     free(steps);
+    free(frames);
 
     return EXIT_SUCCESS;
 }
 
+static herr_t read_steps(hid_t file_id, int **steps, int *numsteps)
+{
+    int rank;
+    hsize_t dims;
+    
+    hid_t typeid;
+    hid_t dataspace;
+    hid_t dataset;
+
+    herr_t status;
+
+    dataset = H5Dopen(file_id, "time");
+    
+    dataspace = H5Dget_space(dataset);
+
+    typeid = H5Tcreate(H5T_COMPOUND, sizeof(int));
+    status = H5Tinsert(typeid, "step", 0, H5T_NATIVE_INT);
+
+    rank = H5Sget_simple_extent_dims(dataspace, &dims, NULL);
+
+    *numsteps = (int)dims;
+    *steps = (int *)malloc(dims * sizeof(int));
+    
+    status = H5Dread(dataset, typeid, H5S_ALL, H5S_ALL, H5P_DEFAULT, *steps);
+    
+    status = H5Tclose(typeid);
+    status = H5Sclose(dataspace);
+    status = H5Dclose(dataset);
+
+    return 0;
+}
 
 static cap_t *open_cap(hid_t file_id, int capid)
 {
@@ -382,7 +450,7 @@ static field_t *open_field(cap_t *cap, const char *name)
 }
 
 
-static herr_t read_field(cap_t *cap, field_t *field, int timestep)
+static herr_t read_field(cap_t *cap, field_t *field, int frame)
 {
     hid_t dataset;
     hid_t filespace;
@@ -407,12 +475,12 @@ static herr_t read_field(cap_t *cap, field_t *field, int timestep)
 
     if (field->maxdims[0] == H5S_UNLIMITED)
     {
-        field->offset[0] = timestep;
+        field->offset[0] = frame;
         field->count[0]  = 1;
     }
 
     /* DEBUG
-    printf("Reading step %d on field %s with offset (", timestep, field->name);
+    printf("Reading frame %d on field %s with offset (", frame, field->name);
     for(d = 0; d < field->rank; d++) printf("%d,", (int)(field->offset[d]));
     printf(") and count (");
     for(d = 0; d < field->rank; d++) printf("%d,", (int)(field->count[d]));
