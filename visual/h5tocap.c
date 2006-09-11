@@ -1,5 +1,5 @@
 /*
- * h5tocombined.c by Luis Armendariz.
+ * h5tocap.c by Luis Armendariz.
  * Copyright (C) 2006, California Institute of Technology.
  *
  * This program is free software; you can redistribute it and/or modify
