@@ -139,30 +139,25 @@ int main(int argc, char *argv[])
 
     status = read_steps(h5file, &steps, &numsteps);
 
-    if (argc > 2)
+    if (argc == 2)
     {
-        if (strcmp(argv[2], "-l") == 0)
-        {
-            printf("Found %d frames in file \"%s\"\n\n", numsteps, argv[1]);
-            printf("\tsteps = [");
-            for (n = 0; n < numsteps; n++)
-                printf(" %d%c", steps[n], ((n<numsteps-1) ? ',' : ' '));
-            printf("]\n\n");
-            status = H5Fclose(h5file);
-            return EXIT_FAILURE;
-        }
+        printf("Found %d frames in the file \"%s\"\n\n", numsteps, argv[1]);
+        printf("Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
+        printf("\tPlease specify frames in the range [0,%d]\n", numsteps-1);
+
+        status = H5Fclose(h5file);
+        free(steps);
+
+        return EXIT_FAILURE;
     }
 
     /*
      * Read frame(s) from argv[2:]
      */
     
-    /* Allocate at least one step (we know argc >= 2) */
-    timesteps = (argc == 2) ? 1 : (argc-2);
+    /* Allocate at least one step (we know argc > 2) */
+    timesteps = argc-2;
     frames = (int *)malloc(timesteps * sizeof(int));
-
-    /* By default, use zeroth step (might be overwritten) */
-    frames[0] = 0;
 
     /* Convert argv[2:] into int array */
     for(n = 2; n < argc; n++)
