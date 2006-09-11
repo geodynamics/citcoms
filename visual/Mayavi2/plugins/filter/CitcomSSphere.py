@@ -1,8 +1,25 @@
+"""Creates points os a specified cap with a specified resolution.
+"""
+
+# Author: Martin Weier
+#Copyright (C) 2006  California Institute of Technology
+#This program is free software; you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation; either version 2 of the License, or
+#any later version.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
 from math import sqrt,acos,pi,atan, atan2, sin, cos
 
 
 class CitcomSSphere:
-    
+    #Cointains corner points for each cap.
     lookup_table = [( (0.013497673906385899, 0.0, 0.54983437061309814) ,
                       (0.0077419690787792206, 0.4505336582660675, 0.31537202000617981) ,
                       (0.45813989639282227, 0.0, 0.30431538820266724) ,

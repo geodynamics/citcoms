@@ -104,30 +104,27 @@ class CitcomSshowCaps(Filter):
         This method is invoked (automatically) when any of the inputs
         sends a `data_changed` event.
         """
-        self.update()
+	fil = self.ugrid_filter
+        fil.update()
         # Propagate the data_changed event.
         self.data_changed = True
 
     ######################################################################
     # Non-public interface
     ######################################################################
-    def _lower_threshold_changed(self, old_value, new_value):
+    def _lower_threshold_changed(self,old_value, new_value):
         """Callback interface for the lower threshold slider"""
-        if new_value>=self.upper_threshold:
-            new_value=self.upper_threshold-1
         fil = self.ugrid_filter
-        fil.point_minimum = new_value*(self.n)
+        fil.point_minimum = (self.lower_threshold)*(self.n)
         fil.update()
         self.data_changed = True
         
+        
     def _upper_threshold_changed(self, old_value, new_value):
         """Callback interface for the upper threshold slider"""
-        if new_value<=self.lower_threshold:
-            new_value=self.lower_threshold+1
         fil = self.ugrid_filter
-        fil.point_maximum = new_value*(self.n)
+        fil.point_maximum = self.upper_threshold*(self.n)
         fil.update()
         self.data_changed = True
-       
-
+      
    

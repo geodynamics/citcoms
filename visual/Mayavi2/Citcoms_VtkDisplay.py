@@ -79,10 +79,6 @@ class VtkDisplay(Mayavi):
         scap = CitcomSshowCaps()
         script.add_filter(scap)
         
-        #Orientation Axes
-        oa = orientation_axes.OrientationAxes()
-        script.add_module(oa)
-        
         #Show ScalarCutPlane
         scp = scalar_cut_plane.ScalarCutPlane()
         script.add_module(scp)
@@ -94,10 +90,12 @@ class VtkDisplay(Mayavi):
         #Shows Glyph on reduce grid
         gly = glyph.Glyph()
         gly.glyph.glyph_source.scale = 0.082
-        gly.glyph.scale_mode = 'data_scaling_off'
-        gly.glyph.color_mode = 'no_coloring'
+        gly.glyph.scale_mode = 'scale_by_scalar'
+        gly.glyph.color_mode = 'color_by_scalar'
         script.add_module(gly)
-        
+        mm = gly.module_manager
+        mm.scalar_lut_manager.use_default_range = False
+        mm.scalar_lut_manager.data_range = 0.0, 1.0
         ################### Create CORE ################################
         #Load VTK Data Sets
         sphere = tvtk.SphereSource()

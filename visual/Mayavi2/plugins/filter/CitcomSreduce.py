@@ -39,18 +39,16 @@ class CitcomSreduce(Filter):
     probe_filter = Instance(tvtk.ProbeFilter, ())
 
     citcomsgrid = CitcomSSphere()
+    sphere = Instance(tvtk.SphereSource,())
     
     # Upper threshold (this is a dynamic trait that is changed when
     # input data changes).
-    Radius = Range(0.0, 1.0, 0.0,
-                            desc='adjust radius')
+    Radius = Range(0.0, 1.0, 0.0, desc='adjust radius')
     
-    theta = Range(0, 40, 10,
-                            desc='the theta resolution')
-    phi = Range(0, 40, 10,
-                            desc='the upper threshold of the filter')
+    theta = Range(0, 40, 3, desc='the theta resolution')
+    phi = Range(0, 40, 3, desc='the upper threshold of the filter')
 
-    Selected_Source = Enum( 'Sphere', 'CitcomSGrid',)
+    Selected_Source = Enum(  'Sphere','CitcomSGrid',)
     
     radius_max = Float(1.0)
     set_radius_max = Button('Set Radius Max')
@@ -83,6 +81,9 @@ class CitcomSreduce(Filter):
         dependent on upstream sources and filters.
         """
         # Just setup the default output of this filter.
+        s = self.sphere
+        s.set(radius=0.0,theta_resolution=20,phi_resolution=20)
+        self.probe_filter.input = s.output
         self.outputs = [self.probe_filter.output]
     
     def update_pipeline(self):

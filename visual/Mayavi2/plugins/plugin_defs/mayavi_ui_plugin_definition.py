@@ -1,9 +1,9 @@
 """The MayaVi plugin definition.
 
 """
-# Author: Prabhu Ramachandran <prabhu_r@users.sf.net>
-# Copyright (c) 2005, Enthought, Inc.
-# License: BSD Style.
+# Author: Martin Weier
+# Copyright (c) 2006, California Institute of Technology
+# License: GPL Style
 
 # Enthought library imports.
 from enthought.envisage import PluginDefinition, get_using_workbench

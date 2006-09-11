@@ -1,7 +1,8 @@
 """This source manages a CitcomS Hdf file given to it.  
 """
 # Author: Martin Weier
-# Copyright (c) 
+# Copyright (c) 2006, California Institute of Technology
+# License: GPL Style
 
 # Enthought library imports.
 from enthought.traits import Trait, TraitPrefixList, Instance, Int, Str, Button
