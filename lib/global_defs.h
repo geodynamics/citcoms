@@ -580,12 +580,8 @@ struct MONITOR {
     float  vdotv;
     float  nond_av_heat_fl;
     float  nond_av_adv_hfl;
-    float  cpu_time_at_start;
-    float  cpu_time_at_last_cycle;
-    float  cpu_time_elapsed;
-    float  cpu_time_on_vp_it;
-    float  cpu_time_on_forces;
-    float  cpu_time_on_mg_maps;
+    double cpu_time_at_start;
+    double cpu_time_at_last_cycle;
     float  tpgkmag;
     float  grvkmag;
 
