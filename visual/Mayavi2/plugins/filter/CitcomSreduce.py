@@ -45,8 +45,8 @@ class CitcomSreduce(Filter):
     # input data changes).
     Radius = Range(0.0, 1.0, 0.0, desc='adjust radius')
     
-    theta = Range(0, 40, 3, desc='the theta resolution')
-    phi = Range(0, 40, 3, desc='the upper threshold of the filter')
+    theta = Range(3, 40, 3, desc='the theta resolution')
+    phi = Range(3, 40, 3, desc='the upper threshold of the filter')
 
     Selected_Source = Enum(  'Sphere','CitcomSGrid',)
     
@@ -201,7 +201,7 @@ class CitcomSreduce(Filter):
     
     def _phi_changed(self, new_value):
         fil = self.probe_filter
-        self._calc_grid(self.Radius,self.phi,new_value)
+        self._calc_grid(self.Radius,self.theta,new_value)
         fil.update()
         self.data_changed = True
         
