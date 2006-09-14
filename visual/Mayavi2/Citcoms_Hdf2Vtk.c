@@ -111,6 +111,7 @@ static void write_vtk_shell(coordinates_t coordinates[], hexahedron_t connectivi
 static void write_vtk_surface(coordinates_t coordinates[], vtk_pixel_t connectivity[], 
 						float heatflux[], coordinates_t velocity[],
 						int timestep,int nodex,int nodey,int nodez,int caps, char* filename_prefix);
+void print_help(void);
 
 int main(int argc, char *argv[])
 {
@@ -179,7 +180,7 @@ int main(int argc, char *argv[])
     
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
+        fprintf(stderr, "Usage: run with -h to get help\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -253,14 +254,10 @@ int main(int argc, char *argv[])
 				
 				case '?':
             		errflg++;
+					print_help();
 				break;
         	}
     }
-	
-    if (errflg==1) {
-        fprintf(stderr, "usage: . . . \n");
-        exit(2);
-    	}
 		
     for ( ; optind < argc; optind++) {
         if (access(argv[optind], R_OK)) {
@@ -1356,4 +1353,23 @@ for(i=0;i<nodes;i++)
 	f = f+topo->data[i];
 	}
 return (float) f/nodes;
+}
+
+
+void print_help(void){
+printf("Converts CitcomS HDF5 file to VTK\n");
+printf("-p, --path [path to hdf] \n\t Specify input file.\n");
+printf("-o, --output [output filename] \n\t Specify the path to the folder for output files.\n");
+printf("-i, --initial [initial timestep] \n\t Specify initial timestep to export. If not \n \
+	\t specified script starts exporting from timestep 0.\n");
+printf("-t, --timestep [max timestep] \n\t Specify to which timestep you want to export. If not\n \
+    \t specified export all all timestep starting from intial timestep.\n");
+printf("-x, --nx_reduce [nx] \n\t Set new nx to reduce output grid.\n");
+printf("-y, --ny_reduce [ny] \n\t Set new ny to reduce output grid.\n");
+printf("-z, --nz_reduce [nz] \n\t Set new nz to reduce output grid.\n");
+printf("-b, --bottom \n\t Set to export Bottom information to Vtk file.\n");
+printf("-s, --surface \n\t Set to export Surface information to Vtk file.\n");
+printf("-c, --createtopo \n\t Set to create topography information in bottom and surface Vtk file.\n");
+printf("-a, --ascii \n\t Create Vtk ASCII encoded files instead if binary.\n");
+printf("-h, --help, -? \n\t Print this help.\n");
 }
