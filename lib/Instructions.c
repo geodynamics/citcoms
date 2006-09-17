@@ -31,6 +31,8 @@
 
 #include <math.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/errno.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
@@ -267,6 +269,7 @@ void read_initial_settings(struct All_variables *E)
      Default is no information recorded (apart from special things for given applications.
   */
 
+  input_string("datadir",E->control.data_dir,".",m);
   input_string("datafile",E->control.data_file,"initialize",m);
   input_string("datafile_old",E->control.old_P_file,"initialize",m);
 
@@ -929,7 +932,7 @@ void open_log(struct All_variables *E)
   char logfile[255];
 
   E->fp = NULL;
-  sprintf(logfile,"%s.log",E->control.data_file);
+  sprintf(logfile,"%s/%s.log",E->control.data_dir, E->control.data_file);
   E->fp = output_open(logfile);
 
   return;
@@ -942,7 +945,7 @@ void open_time(struct All_variables *E)
 
   E->fptime = NULL;
   if (E->parallel.me == 0) {
-    sprintf(timeoutput,"%s.time",E->control.data_file);
+    sprintf(timeoutput,"%s/%s.time",E->control.data_dir, E->control.data_file);
     E->fptime = output_open(timeoutput);
   }
 
@@ -956,7 +959,8 @@ void open_info(struct All_variables *E)
 
   E->fp_out = NULL;
   if (E->control.verbose) {
-    sprintf(output_file,"%s.info.%d",E->control.data_file,E->parallel.me);
+      sprintf(output_file,"%s/%d/%s.info.%d",E->control.data_dir,
+	      E->parallel.me, E->control.data_file, E->parallel.me);
     E->fp_out = output_open(output_file);
   }
 
@@ -1018,9 +1022,49 @@ void output_parse_optional(struct  All_variables *E)
     return;
 }
 
+/* check whether E->control.data_file contains a path */
+void chkdatafile(struct  All_variables *E)
+{
+  void parallel_process_termination();
+
+  char *found;
+
+  found = strchr(E->control.data_file, '/');
+  if (found) {
+      fprintf(stderr, "error in input parameter: datafile='%s' contains '/'\n", E->control.data_file);
+      parallel_process_termination();
+  }
+}
+
+
+void mkdatadir(struct  All_variables *E)
+{
+  void parallel_process_termination();
+
+  int err;
+  char newdir[110];
+
+  err = mkdir(E->control.data_dir, 0755);
+  if (err && errno != EEXIST) {
+      /* if error occured and the directory is not exisitng */
+      fprintf(stderr, "Cannot make new directory '%s'\n", E->control.data_dir);
+      parallel_process_termination();
+  }
+  sprintf(newdir, "%s/%d", E->control.data_dir, E->parallel.me);
+  err = mkdir(newdir, 0755);
+  if (err && errno != EEXIST) {
+      /* if error occured and the directory is not exisitng */
+      fprintf(stderr, "Cannot make new directory '%s'\n", newdir);
+      parallel_process_termination();
+  }
+}
+
 
 void output_init(struct  All_variables *E)
 {
+  chkdatafile(E);
+  mkdatadir(E);
+
   open_log(E);
   open_time(E);
   open_info(E);

@@ -613,6 +613,7 @@ struct CONTROL {
     char Ahat_is_good[MAX_LEVELS];  /* general information controlling program flow */
 
     char old_P_file[100];
+    char data_dir[100];
     char data_file[100];
     char post_topo_file[100];
     char slabgeoid_file[100];

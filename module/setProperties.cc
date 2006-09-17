@@ -379,6 +379,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     if (not m)
 	std::cout << "#Solver.inventory:" << std::endl;
 
+    getStringProperty(properties, "datadir", E->control.data_dir, m);
     getStringProperty(properties, "datafile", E->control.data_file, m);
     getStringProperty(properties, "datafile_old", E->control.old_P_file, m);
 

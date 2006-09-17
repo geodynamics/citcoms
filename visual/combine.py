@@ -29,7 +29,7 @@
 '''
 Combine the pasted Citcom Data
 
-usage: combine.py modelname timestep nodex nodey nodez ncap nprocx nprocy nprocz
+usage: combine.py datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz
 '''
 
 class Combine(object):
@@ -44,8 +44,8 @@ class Combine(object):
 
     def readData(self, filename):
         fp = file(filename, 'r')
-        # header
-        fp.readline()
+        header = fp.readline()
+        #print header
         return fp.readlines()
 
 
@@ -91,7 +91,9 @@ class Combine(object):
 
     def write(self, filename, grid):
         fp = file(filename, 'w')
-        fp.write('%d x %d x %d\n' % (grid['nox'], grid['noy'], grid['noz']))
+        header = '%d x %d x %d\n' % (grid['nox'], grid['noy'], grid['noz'])
+        #print header
+        fp.write(header)
 	fp.writelines(self.saved)
         return
 

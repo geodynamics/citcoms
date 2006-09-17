@@ -31,26 +31,26 @@
 #              2) the list of ip has the same order as the MPI machinefile
 
 if [ -z $4 ]; then
-    echo "Usage:" `basename $0` modeldir modelname timestep ip1 [ip2 ... ]
+    echo "Usage:" `basename $0` datadir datafile timestep ip1 [ip2 ... ]
     exit
 fi
 
 paste_exe=`which pasteCitcomData.sh`
 cwd=`pwd`
-modeldir=$1
-modelname=$2
+datadir=$1
+datafile=$2
 timestep=$3
-n=0
+rank=0
 
 while [ "$4" ]
 do
-    cmd_paste="$paste_exe $modelname $n $timestep"
-    cmd_copy="cp $modelname.$n.$timestep $cwd"
+    cmd_paste="$paste_exe $datafile $rank $timestep"
+    cmd_copy="cp $datafile.$rank.$timestep $cwd"
 
     if [ $4 == $HOSTNAME -o $4 == "localhost" ]; then
-	cd $modeldir && $cmd_paste && $cmd_copy
+	cd $datadir/$rank && $cmd_paste && $cmd_copy
     else
- 	rsh $4 "cd $modeldir && $cmd_paste && $cmd_copy"
+ 	rsh $4 "cd $datadir/$rank && $cmd_paste && $cmd_copy"
     fi
 
     shift

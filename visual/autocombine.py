@@ -47,11 +47,8 @@ if __name__ == '__main__':
     parser = Parser()
     parser.read(inputfile)
 
+    datadir = parser.getstr('datadir')
     datafile = parser.getstr('datafile')
-    import os.path
-    modeldir, modelname = os.path.split(datafile)
-    modeldir = os.path.abspath(modeldir)
-    #print modeldir, modelname
 
     nodex = parser.getint('nodex')
     nodey = parser.getint('nodey')
@@ -66,6 +63,6 @@ if __name__ == '__main__':
     nodelist = combine.machinefile2nodes(machinefile, totalnodes)
 
     for timestep in sys.argv[3:]:
-        combine.combine(nodelist, modeldir, modelname, int(timestep),
+        combine.combine(nodelist, datadir, datafile, int(timestep),
                         nodex, nodey, nodez,
                         ncap, nprocx, nprocy, nprocz)

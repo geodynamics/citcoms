@@ -1,5 +1,6 @@
 # specify output files
-datafile="/scratch/TAN2/fulltest"
+datadir="/scratch"
+datafile="fulltest"
 
 
 # specify input files

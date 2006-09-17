@@ -29,7 +29,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py <machinefile | node-list> model-dir model-name timestep nodex nodey nodez ncap nprocx nprocy nprocz
+Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz
 '''
 
 
@@ -60,28 +60,28 @@ def machinefile2nodes(machinefile, totalnodes):
 
 
 
-def combine(nodes, modeldir, modelname, timestep, nodex, nodey, nodez,
+def combine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
             ncap, nprocx, nprocy, nprocz):
     import os
 
     # paste
-    cmd = 'batchpaste.sh %(modeldir)s %(modelname)s %(timestep)d %(nodes)s' \
+    cmd = 'batchpaste.sh %(datadir)s %(datafile)s %(timestep)d %(nodes)s' \
           % vars()
     print cmd
     os.system(cmd)
 
     # combine
-    cmd = 'combine.py %(modelname)s %(timestep)d %(nodex)d %(nodey)d %(nodez)d %(ncap)d %(nprocx)d %(nprocy)d %(nprocz)d' % vars()
+    cmd = 'combine.py %(datafile)s %(timestep)d %(nodex)d %(nodey)d %(nodez)d %(ncap)d %(nprocx)d %(nprocy)d %(nprocz)d' % vars()
     print cmd
     os.system(cmd)
 
     # delete
-    cmd = 'rm %(modelname)s.[0-9]*.%(timestep)d' % vars()
+    cmd = 'rm %(datafile)s.[0-9]*.%(timestep)d' % vars()
     print cmd
     os.system(cmd)
 
     # create .general file
-    cmd = 'dxgeneral.sh %(modelname)s.cap*.%(timestep)d' % vars()
+    cmd = 'dxgeneral.sh %(datafile)s.cap*.%(timestep)d' % vars()
     print cmd
     os.system(cmd)
 
@@ -97,8 +97,8 @@ if __name__ == '__main__':
         sys.exit(1)
 
     machinefile = sys.argv[1]
-    modeldir = sys.argv[2]
-    modelname = sys.argv[3]
+    datadir = sys.argv[2]
+    datafile = sys.argv[3]
     timestep = int(sys.argv[4])
     nodex = int(sys.argv[5])
     nodey = int(sys.argv[6])
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     totalnodes = nprocx * nprocy * nprocz * ncap
     nodelist = machinefile2nodes(machinefile, totalnodes)
 
-    combine(nodelist, modeldir, modelname, timestep, nodex, nodey, nodez,
+    combine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
             ncap, nprocx, nprocy, nprocz)
 
 

@@ -29,15 +29,21 @@
 # processor into a single file.
 
 if [ -z $3 ]; then
-    echo "  usage:" `basename $0` modelname processor_no time_step
+    echo "  usage:" `basename $0` datafile processor_rank timestep
     exit
 fi
 
-line=`cat $1.velo.$2.$3 | wc -l`
+datafile=$1
+rank=$2
+step=$3
+
+line=`cat $datafile.velo.$rank.$step | wc -l`
 let line=line-1
 #echo $line
 
-tail -n $line $1.velo.$2.$3 | paste -d' ' $1.coord.$2 - $1.visc.$2.$3 > $1.$2.$3
+tail -n $line $datafile.velo.$rank.$step \
+  | paste -d' ' $datafile.coord.$rank - $datafile.visc.$rank.$step \
+    > $datafile.$rank.$step
 
 
 # version

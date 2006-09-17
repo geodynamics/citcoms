@@ -265,6 +265,8 @@ class Solver(Component):
         tracer = pyre.inventory.facility("tracer", factory=Tracer)
         visc = pyre.inventory.facility("visc", factory=Visc)
 
+        datadir = pyre.inventory.str("datadir", default=".")
+
         rayleigh = pyre.inventory.float("rayleigh", default=1e+05)
         Q0 = pyre.inventory.float("Q0", default=0.0)
 

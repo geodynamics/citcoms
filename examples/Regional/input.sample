@@ -1,5 +1,6 @@
 # specify output files
-datafile="/scratch/regtest"
+datadir="/scratch"
+datafile="regtest"
 
 
 # specify input files

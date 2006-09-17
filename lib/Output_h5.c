@@ -217,8 +217,8 @@ void h5output_open(struct All_variables *E)
      */
 
     /* determine filename */
-    strncpy(E->hdf5.filename, E->control.data_file, (size_t)99);
-    strncat(E->hdf5.filename, ".h5", (size_t)99);
+    snprintf(E->hdf5.filename, (size_t)100, "%s/%s.h5", E->control.data_dir,
+	     E->control.data_file);
 
     /* set up file creation property list with defaults */
     fcpl_id = H5P_DEFAULT;
@@ -1378,7 +1378,7 @@ void h5output_pressure(struct All_variables *E, int cycles)
             }
         }
     }
-    
+
     /* write to dataset */
     cap_group = E->hdf5.cap_group;
     dataset = H5Dopen(cap_group, "pressure");
@@ -1504,7 +1504,7 @@ void h5output_surf_botm_coord(struct All_variables *E)
         status    = h5write_field(dataset, field);
         status    = H5Dclose(dataset);
     }
-    
+
     if ((E->output.botm == 1) && (pz == 0))
     {
         k = 0;
@@ -1575,7 +1575,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             dataset = H5Dopen(cap_group, "surf/heatflux");
             status  = H5Dextend(dataset, scalar->dims);
             status  = H5Dclose(dataset);
-            
+
             dataset = H5Dopen(cap_group, "surf/topography");
             status  = H5Dextend(dataset, scalar->dims);
             status  = H5Dclose(dataset);
@@ -1589,7 +1589,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             dataset = H5Dopen(cap_group, "botm/heatflux");
             status  = H5Dextend(dataset, scalar->dims);
             status  = H5Dclose(dataset);
-            
+
             dataset = H5Dopen(cap_group, "botm/topography");
             status  = H5Dextend(dataset, scalar->dims);
             status  = H5Dclose(dataset);
@@ -1647,7 +1647,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             topo = E->slice.freesurf[1];
         else
             topo = E->slice.tpg[1];
-        
+
         /* topography data */
         for(i = 0; i < mx; i++)
         {
@@ -1767,7 +1767,7 @@ void h5output_average(struct All_variables *E, int cycles)
     hid_t cap_group;
     hid_t dataset;
     herr_t status;
-    
+
     float vx, vy, vz;
     float *S1[NCS], *S2[NCS], *S3[NCS];
 
@@ -2005,9 +2005,9 @@ void h5output_connectivity(struct All_variables *E)
 
     status = h5write_dataset(dataset, H5T_NATIVE_INT, data, rank, memdims,
                              offset, stride, count, block);
-    
+
     status = H5Dclose(dataset);
-    
+
     free(data);
 }
 
@@ -2167,6 +2167,7 @@ void h5output_meta(struct All_variables *E)
      * Solver.inventory
      */
 
+    status = set_attribute_string(input, "datadir", E->control.data_dir);
     status = set_attribute_string(input, "datafile", E->control.data_file);
     status = set_attribute_string(input, "datafile_old", E->control.old_P_file);
 
