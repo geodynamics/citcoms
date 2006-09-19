@@ -257,7 +257,8 @@ void h5output_open(struct All_variables *E)
     h5allocate_field(E, VECTOR_FIELD, 2, 0, dtype, &(E->hdf5.const_vector2d));
     h5allocate_field(E, SCALAR_FIELD, 1, 0, dtype, &(E->hdf5.const_scalar1d));
 
-    h5allocate_field(E, TENSOR_FIELD, 3, 1, dtype, &(E->hdf5.tensor3d));
+    if (E->output.stress == 1)
+        h5allocate_field(E, TENSOR_FIELD, 3, 1, dtype, &(E->hdf5.tensor3d));
 
     h5allocate_field(E, VECTOR_FIELD, 3, 1, dtype, &(E->hdf5.vector3d));
     h5allocate_field(E, VECTOR_FIELD, 2, 1, dtype, &(E->hdf5.vector2d));
