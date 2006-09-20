@@ -51,7 +51,6 @@ extern "C" {
     void construct_bdry_det (struct All_variables*);
     void construct_surface (struct All_variables*);
     void get_initial_elapsed_time(struct All_variables*);
-    int get_process_identifier();
     void lith_age_init(struct All_variables *E);
     void mass_matrix(struct All_variables*);
     void output_init(struct All_variables*);
@@ -73,8 +72,6 @@ void sphere_launch(struct All_variables *E)
 
     E->monitor.cpu_time_at_last_cycle =
         E->monitor.cpu_time_at_start = CPU_time0();
-
-    E->control.PID = get_process_identifier();
 
     output_init(E);
     (E->problem_derived_values)(E);   /* call this before global_derived_  */

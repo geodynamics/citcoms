@@ -48,8 +48,6 @@
 
 void read_instructions(struct All_variables *E, char *filename)
 {
-    int get_process_identifier();
-
     void allocate_common_vars();
     void common_initial_fields();
     void read_initial_settings();
@@ -96,8 +94,6 @@ void read_instructions(struct All_variables *E, char *filename)
         E->monitor.cpu_time_at_start = CPU_time0();
 
     set_signal();
-
-    E->control.PID=get_process_identifier();
 
     /* ==================================================
        Initialize from the command line

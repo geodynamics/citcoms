@@ -31,6 +31,8 @@
 
 struct All_variables* citcom_init(MPI_Comm *world)
 {
+  int get_process_identifier();
+
   struct All_variables *E;
   int rank, nproc;
 
@@ -39,6 +41,7 @@ struct All_variables* citcom_init(MPI_Comm *world)
   MPI_Comm_rank(*world, &rank);
   MPI_Comm_size(*world, &nproc);
 
+  E->control.PID = get_process_identifier();
   E->parallel.world = *world;
   E->parallel.nproc = nproc;
   E->parallel.me = rank;
