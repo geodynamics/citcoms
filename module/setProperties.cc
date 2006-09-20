@@ -70,11 +70,12 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     std::ofstream *out = get_output_stream(E->parallel.me, E->control.PID);
     *out << "[CitcomS.solver.tsolver]" << std::endl;
 
-    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, out);
-
     getScalarProperty(properties, "ADV", E->advection.ADVECTION, out);
-    getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep, out);
+    getScalarProperty(properties, "filter_temp", E->control.filter_temperature, out);
+
     getScalarProperty(properties, "finetunedt", E->advection.fine_tune_dt, out);
+    getScalarProperty(properties, "fixed_timestep", E->advection.fixed_timestep, out);
+    getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, out);
 
     getScalarProperty(properties, "adv_sub_iterations", E->advection.temp_iterations, out);
     getScalarProperty(properties, "maxadvtime", E->advection.max_dimensionless_time, out);
@@ -82,7 +83,6 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     getScalarProperty(properties, "aug_lagr", E->control.augmented_Lagr, out);
     getScalarProperty(properties, "aug_number", E->control.augmented, out);
 
-    getScalarProperty(properties, "filter_temp", E->control.filter_temperature, out);
 
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
@@ -124,12 +124,11 @@ PyObject * pyCitcom_BC_set_properties(PyObject *self, PyObject *args)
     *out << "[CitcomS.solver.bc]" << std::endl;
 
     getScalarProperty(properties, "side_sbcs", E->control.side_sbcs, out);
+    getScalarProperty(properties, "pseudo_free_surf", E->control.pseudo_free_surf, out);
 
     getScalarProperty(properties, "topvbc", E->mesh.topvbc, out);
     getScalarProperty(properties, "topvbxval", E->control.VBXtopval, out);
     getScalarProperty(properties, "topvbyval", E->control.VBYtopval, out);
-
-    getScalarProperty(properties, "pseudo_free_surf", E->control.pseudo_free_surf, out);
 
     getScalarProperty(properties, "botvbc", E->mesh.botvbc, out);
     getScalarProperty(properties, "botvbxval", E->control.VBXbotval, out);
@@ -459,6 +458,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     *out << "[CitcomS.mesher]" << std::endl;
 
     getScalarProperty(properties, "nproc_surf", E->parallel.nprocxy, out);
+
     getScalarProperty(properties, "nprocx", E->parallel.nprocx, out);
     getScalarProperty(properties, "nprocy", E->parallel.nprocy, out);
     getScalarProperty(properties, "nprocz", E->parallel.nprocz, out);
@@ -501,7 +501,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     E->sphere.max_connections = 6;
 
     if (E->parallel.nprocxy == 12) {
-
+	// full spherical version
 	E->sphere.caps = 12;
 
 	int i, j;
@@ -540,7 +540,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 	}
 
     } else {
-
+	// regional version
 	E->sphere.caps = 1;
 
 	getScalarProperty(properties, "theta_min", E->control.theta_min, out);
@@ -631,7 +631,7 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     *out << "[CitcomS.solver.visc]" << std::endl;
 
     getStringProperty(properties, "Viscosity", E->viscosity.STRUCTURE, out);
-    if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)
+    if (strcmp(E->viscosity.STRUCTURE,"system") == 0)
 	E->viscosity.FROM_SYSTEM = 1;
     else
 	E->viscosity.FROM_SYSTEM = 0;
@@ -703,6 +703,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     std::ofstream *out = get_output_stream(E->parallel.me, E->control.PID);
     *out << "[CitcomS.solver.vsolver]" << std::endl;
 
+    getStringProperty(properties, "Solver", E->control.SOLVER_TYPE, out);
     getScalarProperty(properties, "node_assemble", E->control.NASSEMBLE, out);
     getScalarProperty(properties, "precond", E->control.precondition, out);
 

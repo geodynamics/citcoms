@@ -34,13 +34,6 @@ class Advection_diffusion(CitcomComponent):
 
     def __init__(self, name, facility):
         CitcomComponent.__init__(self, name, facility)
-        self.inventory.ADV = True
-
-        self.inventory.adv_sub_iterations = 2
-        self.inventory.maxadvtime = 10
-
-        self.inventory.aug_lagr = True
-        self.inventory.aug_number = 2.0e3
         return
 
 
@@ -93,11 +86,18 @@ class Advection_diffusion(CitcomComponent):
 
         import pyre.inventory as prop
 
+        ADV = prop.bool("ADV", default=True)
+        filter_temp = prop.bool("filter_temp", default=True)
 
-        inputdiffusivity = prop.float("inputdiffusivity", default=1)
         fixed_timestep = prop.float("fixed_timestep", default=0.0)
         finetunedt = prop.float("finetunedt", default=0.9)
-        filter_temp = prop.bool("filter_temp", default=True)
+        inputdiffusivity = prop.float("inputdiffusivity", default=1)
+
+        adv_sub_iterations = prop.int("adv_sub_iterations", default=2)
+        maxadvtime = prop.float("maxadvtime", default=10.0)
+
+        aug_lagr = prop.bool("aug_lagr", default=True)
+        aug_number = prop.float("aug_number", default=2.0e3)
 
 
 

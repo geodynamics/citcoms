@@ -33,9 +33,6 @@ class Visc(CitcomComponent):
 
     def __init__(self, name="visc", facility="visc"):
         CitcomComponent.__init__(self, name, facility)
-
-        self.inventory.Viscosity = "system"
-        self.inventory.visc_smooth_method = 3
         return
 
 
@@ -43,7 +40,7 @@ class Visc(CitcomComponent):
     def setProperties(self):
 
         from CitcomSLib import Visc_set_properties
-        
+
         inv = self.inventory
         inv.visc0 = map(float, inv.visc0)
         inv.viscE = map(float, inv.viscE)
@@ -52,7 +49,7 @@ class Visc(CitcomComponent):
         inv.sdepv_expt = map(float, inv.sdepv_expt)
 
         Visc_set_properties(self.all_variables, inv)
-        
+
         return
 
 
@@ -70,7 +67,8 @@ class Visc(CitcomComponent):
         import pyre.inventory
 
 
-
+        Viscosity = pyre.inventory.str("Viscosity", default="system")
+        visc_smooth_method = pyre.inventory.int("visc_smooth_method", default=3)
         VISC_UPDATE = pyre.inventory.bool("VISC_UPDATE", default=True)
 
         num_mat = pyre.inventory.int("num_mat", default=4)

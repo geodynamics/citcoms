@@ -57,7 +57,6 @@ class Const(CitcomComponent):
         from pyre.units.pressure import Pa
         from pyre.units.energy import J
 
-        #radius = pyre.inventory.float("radius", default=6371.0*km)
         #ref_density = pyre.inventory.float("ref_density", default=3500.0*kg/m**3)
         #thermdiff = pyre.inventory.float("thermdiff", default=1.0e-6*m**2/s)
         #gravacc = pyre.inventory.float("gravacc", default=10.0*m/s**2)
@@ -72,8 +71,7 @@ class Const(CitcomComponent):
         #depth_d_double_prime = pyre.inventory.float("depth_d_double_prime", default=2691e3*m)
         #depth_cmb = pyre.inventory.float("depth_cmb", default=2891e3*m)
 
-	    # everything in SI units
-        radius = pyre.inventory.float("radius", default=6371.0e3)
+        # everything in SI units
         layerd = pyre.inventory.float("layerd", default=6371.0e3)
         density = pyre.inventory.float("density", default=3500.0)
         thermdiff = pyre.inventory.float("thermdiff", default=1.0e-6)
