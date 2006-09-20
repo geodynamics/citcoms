@@ -116,9 +116,11 @@ class IC(CitcomComponent):
         perturblayer = pyre.inventory.slice("perturblayer", default=[5])
         perturbmag = pyre.inventory.list("perturbmag", default=[0.05])
 
-        # for tic_method=1
+        # for tic_method=1 and tic_method=2
         half_space_age = pyre.inventory.float("half_space_age", default=40,
                               validator=pyre.inventory.greater(1e-3))
+
+        # for tic_method=2
         blob_center = pyre.inventory.list("blob_center", default=[-999., -999., -999.])
         blob_radius = pyre.inventory.float("blob_radius", default=0.063)
         blob_dT = pyre.inventory.float("blob_dT", default=0.18)
