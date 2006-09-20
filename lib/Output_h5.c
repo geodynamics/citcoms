@@ -2040,7 +2040,6 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute(input, "finetunedt", H5T_NATIVE_FLOAT, &(E->advection.fine_tune_dt));
 
     status = set_attribute(input, "adv_sub_iterations", H5T_NATIVE_INT, &(E->advection.temp_iterations));
-    status = set_attribute(input, "maxadvtime", H5T_NATIVE_FLOAT, &(E->advection.max_dimensionless_time));
 
     status = set_attribute(input, "aug_lagr", H5T_NATIVE_INT, &(E->control.augmented_Lagr));
     status = set_attribute(input, "aug_number", H5T_NATIVE_DOUBLE, &(E->control.augmented));

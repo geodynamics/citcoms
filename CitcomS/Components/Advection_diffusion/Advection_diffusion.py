@@ -94,7 +94,6 @@ class Advection_diffusion(CitcomComponent):
         inputdiffusivity = prop.float("inputdiffusivity", default=1)
 
         adv_sub_iterations = prop.int("adv_sub_iterations", default=2)
-        maxadvtime = prop.float("maxadvtime", default=10.0)
 
         aug_lagr = prop.bool("aug_lagr", default=True)
         aug_number = prop.float("aug_number", default=2.0e3)

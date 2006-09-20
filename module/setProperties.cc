@@ -78,7 +78,6 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     getScalarProperty(properties, "inputdiffusivity", E->control.inputdiff, out);
 
     getScalarProperty(properties, "adv_sub_iterations", E->advection.temp_iterations, out);
-    getScalarProperty(properties, "maxadvtime", E->advection.max_dimensionless_time, out);
 
     getScalarProperty(properties, "aug_lagr", E->control.augmented_Lagr, out);
     getScalarProperty(properties, "aug_number", E->control.augmented, out);
