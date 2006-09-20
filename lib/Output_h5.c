@@ -2033,30 +2033,30 @@ void h5output_meta(struct All_variables *E)
      * Advection_diffusion.inventory
      */
 
-    status = set_attribute(input, "inputdiffusivity", H5T_NATIVE_FLOAT, &(E->control.inputdiff));
-
     status = set_attribute(input, "ADV", H5T_NATIVE_INT, &(E->advection.ADVECTION));
-    status = set_attribute(input, "fixed_timestep", H5T_NATIVE_FLOAT, &(E->advection.fixed_timestep));
+    status = set_attribute(input, "filter_temp", H5T_NATIVE_INT, &(E->control.filter_temperature));
+
     status = set_attribute(input, "finetunedt", H5T_NATIVE_FLOAT, &(E->advection.fine_tune_dt));
+    status = set_attribute(input, "fixed_timestep", H5T_NATIVE_FLOAT, &(E->advection.fixed_timestep));
+    status = set_attribute(input, "inputdiffusivity", H5T_NATIVE_FLOAT, &(E->control.inputdiff));
 
     status = set_attribute(input, "adv_sub_iterations", H5T_NATIVE_INT, &(E->advection.temp_iterations));
 
     status = set_attribute(input, "aug_lagr", H5T_NATIVE_INT, &(E->control.augmented_Lagr));
     status = set_attribute(input, "aug_number", H5T_NATIVE_DOUBLE, &(E->control.augmented));
 
-    status = set_attribute(input, "filter_temp", H5T_NATIVE_INT, &(E->control.filter_temperature));
 
     /*
      * BC.inventory
      */
 
     status = set_attribute(input, "side_sbcs", H5T_NATIVE_INT, &(E->control.side_sbcs));
+    status = set_attribute(input, "pseudo_free_surf", H5T_NATIVE_INT, &(E->control.pseudo_free_surf));
 
     status = set_attribute(input, "topvbc", H5T_NATIVE_INT, &(E->mesh.topvbc));
     status = set_attribute(input, "topvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXtopval));
     status = set_attribute(input, "topvbyval", H5T_NATIVE_FLOAT, &(E->control.VBYtopval));
 
-    status = set_attribute(input, "pseudo_free_surf", H5T_NATIVE_INT, &(E->control.pseudo_free_surf));
 
     status = set_attribute(input, "botvbc", H5T_NATIVE_INT, &(E->mesh.botvbc));
     status = set_attribute(input, "botvbxval", H5T_NATIVE_FLOAT, &(E->control.VBXbotval));
@@ -2084,10 +2084,12 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute(input, "cp", H5T_NATIVE_FLOAT, &(E->data.Cp));
     status = set_attribute(input, "wdensity", H5T_NATIVE_FLOAT, &(E->data.density_above));
     status = set_attribute(input, "surftemp", H5T_NATIVE_FLOAT, &(E->data.surf_temp));
+
     status = set_attribute(input, "z_lith", H5T_NATIVE_FLOAT, &(E->viscosity.zlith));
     status = set_attribute(input, "z_410", H5T_NATIVE_FLOAT, &(E->viscosity.z410));
     status = set_attribute(input, "z_lmantle", H5T_NATIVE_FLOAT, &(E->viscosity.zlm));
     status = set_attribute(input, "z_cmb", H5T_NATIVE_FLOAT, &(E->viscosity.zcmb));
+
     status = set_attribute(input, "layer_km", H5T_NATIVE_FLOAT, &(E->data.layer_km));
     status = set_attribute(input, "radius_km", H5T_NATIVE_FLOAT, &(E->data.radius_km));
     status = set_attribute(input, "scalev", H5T_NATIVE_FLOAT, &(E->data.scalev));
@@ -2186,6 +2188,7 @@ void h5output_meta(struct All_variables *E)
      */
 
     status = set_attribute(input, "nproc_surf", H5T_NATIVE_INT, &(E->parallel.nprocxy));
+
     status = set_attribute(input, "nprocx", H5T_NATIVE_INT, &(E->parallel.nprocx));
     status = set_attribute(input, "nprocy", H5T_NATIVE_INT, &(E->parallel.nprocy));
     status = set_attribute(input, "nprocz", H5T_NATIVE_INT, &(E->parallel.nprocz));
@@ -2285,6 +2288,7 @@ void h5output_meta(struct All_variables *E)
      * Incompressible.inventory
      */
 
+    status = set_attribute_string(input, "Solver", E->control.SOLVER_TYPE);
     status = set_attribute(input, "node_assemble", H5T_NATIVE_INT, &(E->control.NASSEMBLE));
     status = set_attribute(input, "precond", H5T_NATIVE_INT, &(E->control.precondition));
 
