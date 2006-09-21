@@ -48,9 +48,9 @@ do
     cmd_copy="cp $datafile.$rank.$timestep $cwd"
 
     if [ $4 == $HOSTNAME -o $4 == "localhost" ]; then
-        cd $datadir && $cmd_paste && $cmd_copy
+        cd $datadir/$rank && $cmd_paste && $cmd_copy
     else
-        rsh $4 "cd $datadir && $cmd_paste && $cmd_copy"
+        rsh $4 "cd $datadir/$rank && $cmd_paste && $cmd_copy"
     fi
 
     shift

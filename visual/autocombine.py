@@ -31,9 +31,20 @@
 usage: autocombine.py machinefile inputfile step1 [step2 [...] ]
 '''
 
+# default values for CitcomS input
+defaults = {'output_format': 'ascii-local',
+            'datadir': '.',
+            'nprocx': 1,
+            'nprocy': 1,
+            'nprocz': 1,
+            'nodex': 9,
+            'nodey': 9,
+            'nodez': 9}
+
 if __name__ == '__main__':
 
-    import sys, os
+    import sys
+    import batchcombine
 
     if len(sys.argv) < 4:
         print __doc__
@@ -41,14 +52,30 @@ if __name__ == '__main__':
 
     machinefile = sys.argv[1]
     inputfile = sys.argv[2]
+    timesteps = [int(i) for i in sys.argv[3:]]
 
     # parse input
     from parser import Parser
-    parser = Parser()
+    parser = Parser(defaults)
     parser.read(inputfile)
 
-    datadir = parser.getstr('datadir')
+    output_format = parser.getstr('output_format')
     datafile = parser.getstr('datafile')
+
+    if output_format == 'ascii-local':
+        import os.path
+        modeldir, modelname = os.path.split(datafile)
+        #print modeldir, modelname
+        datadir = os.path.abspath(modeldir)
+        datafile = modelname
+        combine_fn = batchcombine.combine
+    elif output_format == 'ascii':
+        datadir = parser.getstr('datadir')
+        combine_fn = batchcombine.combine2
+    else:
+        print "Error: don't know how to combine the output", \
+              "(output_format=%s)" % output_format
+        sys.exit(1)
 
     nodex = parser.getint('nodex')
     nodey = parser.getint('nodey')
@@ -58,11 +85,10 @@ if __name__ == '__main__':
     nprocy = parser.getint('nprocy')
     nprocz = parser.getint('nprocz')
 
-    import batchcombine as combine
     totalnodes = nprocx * nprocy * nprocz * ncap
-    nodelist = combine.machinefile2nodes(machinefile, totalnodes)
+    nodelist = batchcombine.machinefile2nodes(machinefile, totalnodes)
 
-    for timestep in sys.argv[3:]:
-        combine.combine(nodelist, datadir, datafile, int(timestep),
-                        nodex, nodey, nodez,
-                        ncap, nprocx, nprocy, nprocz)
+    for timestep in timesteps:
+        combine_fn(nodelist, datadir, datafile, timestep,
+                   nodex, nodey, nodez,
+                   ncap, nprocx, nprocy, nprocz)
