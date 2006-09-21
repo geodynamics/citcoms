@@ -211,8 +211,11 @@ class Parser(object):
             if not line:
                 break
             lineno = lineno + 1
-            # blank line?
+            # skip blank lines
             if string.strip(line) == '':
+                continue
+            # skip lines starting with '['
+            if line[0] == '[':
                 continue
             # remove anything after '#'
             line = string.split(line, '#')[0]
