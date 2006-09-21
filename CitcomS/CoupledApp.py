@@ -48,6 +48,17 @@ class CoupledApp(BaseApplication):
 
 
 
+    def _configure(self):
+        BaseApplication._configure(self)
+        s1 = self.inventory.solver1.inventory.mesher.inventory
+        nproc1 = s1.nproc_surf * s1.nprocx * s1.nprocy * s1.nprocz
+        s2 = self.inventory.solver2.inventory.mesher.inventory
+        nproc2 = s2.nproc_surf * s2.nprocx * s2.nprocy * s2.nprocz
+        self.inventory.launcher.nodes = nproc1 + nproc2
+        return
+
+
+
     def initialize(self):
         layout = self.inventory.layout
         layout.initialize(self)
