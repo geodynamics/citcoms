@@ -1761,62 +1761,25 @@ void h5output_have_coord(struct All_variables *E)
 void h5output_average(struct All_variables *E, int cycles)
 {
     /* horizontal average output of temperature and rms velocity */
-    void return_horiz_ave_f();
+    void compute_horiz_avg();
 
     int cap;
     hid_t cap_group;
     hid_t dataset;
     herr_t status;
 
-    float vx, vy, vz;
-    float *S1[NCS], *S2[NCS], *S3[NCS];
-
     field_t *field;
 
     int k;
-    int n, nz;
-    int m, mz;
+    int mz;
 
 
     field = E->hdf5.scalar1d;
 
-    nz = E->lmesh.noz;
     mz = field->block[1];
 
-
-    /*
-     * calculate horizontal averages
-     */
-
-    S1[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
-    S2[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
-    S3[1] = (float *)malloc((E->lmesh.nno + 1) * sizeof(float));
-
-    for(n = 1; n < E->lmesh.nno; n++)
-    {
-        vx = E->sphere.cap[1].V[1][n];
-        vy = E->sphere.cap[1].V[2][n];
-        vz = E->sphere.cap[1].V[3][n];
-
-        S1[1][n] = E->T[1][n];
-        S2[1][n] = vx*vx + vy*vy;
-        S3[1][n] = vz*vz;
-    }
-
-    return_horiz_ave_f(E, S1, E->Have.T);
-    return_horiz_ave_f(E, S2, E->Have.V[1]);
-    return_horiz_ave_f(E, S3, E->Have.V[2]);
-
-    free((void *)S1[1]);
-    free((void *)S2[1]);
-    free((void *)S3[1]);
-
-    for(k = 1; k <= E->lmesh.noz; k++)
-    {
-        E->Have.V[1][k] = sqrt(E->Have.V[1][k]);
-        E->Have.V[2][k] = sqrt(E->Have.V[2][k]);
-    }
-
+    /* calculate horizontal averages */
+    compute_horiz_avg(E);
 
     /* extend all datasets -- collective I/O call */
     for(cap = 0; cap < E->sphere.caps; cap++)
