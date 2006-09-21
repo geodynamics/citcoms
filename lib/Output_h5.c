@@ -217,8 +217,7 @@ void h5output_open(struct All_variables *E)
      */
 
     /* determine filename */
-    snprintf(E->hdf5.filename, (size_t)100, "%s/%s.h5", E->control.data_dir,
-	     E->control.data_file);
+    snprintf(E->hdf5.filename, (size_t)100, "%s.h5", E->control.data_file);
 
     /* set up file creation property list with defaults */
     fcpl_id = H5P_DEFAULT;

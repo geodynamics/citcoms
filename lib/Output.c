@@ -110,8 +110,7 @@ void output_coord(struct All_variables *E)
   char output_file[255];
   FILE *fp1;
 
-  sprintf(output_file,"%s/%d/%s.coord.%d",E->control.data_dir,E->parallel.me,
-	  E->control.data_file,E->parallel.me);
+  sprintf(output_file,"%s.coord.%d",E->control.data_file,E->parallel.me);
   fp1 = output_open(output_file);
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
@@ -133,8 +132,8 @@ void output_visc(struct All_variables *E, int cycles)
   FILE *fp1;
   int lev = E->mesh.levmax;
 
-  sprintf(output_file,"%s/%d/%s.visc.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+  sprintf(output_file,"%s.visc.%d.%d", E->control.data_file,
+	  E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
 
@@ -156,8 +155,8 @@ void output_velo(struct All_variables *E, int cycles)
   char output_file[255];
   FILE *fp1;
 
-  sprintf(output_file,"%s/%d/%s.velo.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+  sprintf(output_file,"%s.velo.%d.%d", E->control.data_file,
+	  E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
@@ -186,8 +185,8 @@ void output_surf_botm(struct All_variables *E, int cycles)
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
-    sprintf(output_file,"%s/%d/%s.surf.%d.%d",E->control.data_dir,
-	    E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+    sprintf(output_file,"%s.surf.%d.%d", E->control.data_file,
+	    E->parallel.me, cycles);
     fp2 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
@@ -208,8 +207,8 @@ void output_surf_botm(struct All_variables *E, int cycles)
 
 
   if (E->output.botm && (E->parallel.me_loc[3]==0)) {
-    sprintf(output_file,"%s/%d/%s.botm.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+    sprintf(output_file,"%s.botm.%d.%d", E->control.data_file,
+	    E->parallel.me, cycles);
     fp2 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
@@ -232,8 +231,8 @@ void output_stress(struct All_variables *E, int cycles)
   char output_file[255];
   FILE *fp1;
 
-  sprintf(output_file,"%s/%d/%s.stress.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+  sprintf(output_file,"%s.stress.%d.%d", E->control.data_file,
+	  E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
@@ -298,8 +297,8 @@ void output_average(struct All_variables *E, int cycles)
   // only the first nprocz processors need to output
 
   if (E->parallel.me<E->parallel.nprocz)  {
-    sprintf(output_file,"%s/%d/%s.average.%d.%d",E->control.data_dir,
-	    E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+    sprintf(output_file,"%s.average.%d.%d", E->control.data_file,
+	    E->parallel.me, cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
         fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
@@ -318,8 +317,7 @@ void output_mat(struct All_variables *E)
   char output_file[255];
   FILE* fp;
 
-  sprintf(output_file,"%s/%d/%s.mat.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me);
+  sprintf(output_file,"%s.mat.%d", E->control.data_file,E->parallel.me);
   fp = output_open(output_file);
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
@@ -339,8 +337,8 @@ void output_pressure(struct All_variables *E, int cycles)
   char output_file[255];
   FILE *fp1;
 
-  sprintf(output_file,"%s/%d/%s.pressure.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+  sprintf(output_file,"%s.pressure.%d.%d", E->control.data_file,
+	  E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
@@ -364,8 +362,8 @@ void output_tracer(struct All_variables *E, int cycles)
   char output_file[255];
   FILE *fp1;
 
-  sprintf(output_file,"%s/%d/%s.tracer.%d.%d",E->control.data_dir,
-	  E->parallel.me, E->control.data_file, E->parallel.me, cycles);
+  sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
+	  E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
   fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);

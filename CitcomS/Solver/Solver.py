@@ -238,7 +238,7 @@ class Solver(Component):
 
     class Inventory(Component.Inventory):
 
-        import pyre.inventory
+        import pyre.inventory as inv
 
         # component modules
         import CitcomS.Components.Advection_diffusion as Advection_diffusion
@@ -254,30 +254,34 @@ class Solver(Component):
         from CitcomS.Components.Visc import Visc
 
 
-        tsolver = pyre.inventory.facility("tsolver", factory=Advection_diffusion.temperature_diffadv)
-        vsolver = pyre.inventory.facility("vsolver", factory=Stokes_solver.incompressibleNewtonian)
+        tsolver = inv.facility("tsolver",
+                               factory=Advection_diffusion.temperature_diffadv)
+        vsolver = inv.facility("vsolver",
+                               factory=Stokes_solver.incompressibleNewtonian)
 
-        bc = pyre.inventory.facility("bc", factory=BC)
-        const = pyre.inventory.facility("const", factory=Const)
-        ic = pyre.inventory.facility("ic", factory=IC)
-        param = pyre.inventory.facility("param", factory=Param)
-        phase = pyre.inventory.facility("phase", factory=Phase)
-        tracer = pyre.inventory.facility("tracer", factory=Tracer)
-        visc = pyre.inventory.facility("visc", factory=Visc)
+        bc = inv.facility("bc", factory=BC)
+        const = inv.facility("const", factory=Const)
+        ic = inv.facility("ic", factory=IC)
+        param = inv.facility("param", factory=Param)
+        phase = inv.facility("phase", factory=Phase)
+        tracer = inv.facility("tracer", factory=Tracer)
+        visc = inv.facility("visc", factory=Visc)
 
-        datadir = pyre.inventory.str("datadir", default=".")
+        datadir = inv.str("datadir", default=".")
 
-        rayleigh = pyre.inventory.float("rayleigh", default=1e+05)
-        Q0 = pyre.inventory.float("Q0", default=0.0)
+        rayleigh = inv.float("rayleigh", default=1e+05)
+        Q0 = inv.float("Q0", default=0.0)
 
-        stokes_flow_only = pyre.inventory.bool("stokes_flow_only", default=False)
+        stokes_flow_only = inv.bool("stokes_flow_only", default=False)
 
-        output_format = pyre.inventory.str("output_format", default="ascii",
-                            validator=pyre.inventory.choice(["ascii", "hdf5"]))
-        output_optional = pyre.inventory.str("output_optional", default="")
+        output_format = inv.str("output_format", default="ascii-local",
+                                validator=inv.choice(["ascii-local",
+                                                      "ascii",
+                                                      "hdf5"]))
+        output_optional = inv.str("output_optional", default="")
 
-        verbose = pyre.inventory.bool("verbose", default=False)
-        see_convergence = pyre.inventory.bool("see_convergence", default=True)
+        verbose = inv.bool("verbose", default=False)
+        see_convergence = inv.bool("see_convergence", default=True)
 
 
 # version

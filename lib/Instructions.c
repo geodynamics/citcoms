@@ -144,7 +144,7 @@ void read_instructions(struct All_variables *E, char *filename)
 
     check_bc_consistency(E);
 
-    construct_masks(E);		/* order is important here */
+    construct_masks(E);         /* order is important here */
     construct_id(E);
     construct_lm(E);
 
@@ -160,7 +160,7 @@ void read_instructions(struct All_variables *E, char *filename)
     general_stokes_solver_setup(E);
 
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
-				   CPU_time0()-E->monitor.cpu_time_at_start);
+                                   CPU_time0()-E->monitor.cpu_time_at_start);
 
     construct_surf_det (E);
     construct_bdry_det (E);
@@ -422,7 +422,7 @@ void allocate_common_vars(E)
   elx  = E->lmesh.elx;
   ely  = E->lmesh.ely;
 
-  E->P[j]	 = (double *) malloc((npno+1)*sizeof(double));
+  E->P[j]        = (double *) malloc((npno+1)*sizeof(double));
   E->T[j]        = (double *) malloc((nno+1)*sizeof(double));
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
   E->edot[j]     = (float *) malloc((nno+1)*sizeof(float));
@@ -616,14 +616,14 @@ void allocate_velocity_vars(E)
 
     if(E->control.tracer==1)  {
       for(i=1;i<=E->mesh.nsd;i++)     {
-	E->GV[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
-	E->GV1[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
-	E->V[j][i]=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
+        E->GV[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
+        E->GV1[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
+        E->V[j][i]=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
 
-	for(k=0;k<(E->lmesh.nno+1)*E->parallel.nproc;k++)   {
-	  E->GV[j][i][k]=0.0;
-	  E->GV1[j][i][k]=0.0;
-	}
+        for(k=0;k<(E->lmesh.nno+1)*E->parallel.nproc;k++)   {
+          E->GV[j][i][k]=0.0;
+          E->GV1[j][i][k]=0.0;
+        }
       }
     }
 
@@ -639,7 +639,7 @@ void allocate_velocity_vars(E)
 
       E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l]+2)*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
-	  E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
+          E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
       E->zero_resid[l][j] = (int *) malloc((k+2)*sizeof(int));
       E->parallel.Skip_id[l][j] = (int *) malloc((k+2)*sizeof(int));
 
@@ -715,7 +715,7 @@ void global_default_values(E)
   E->sphere.ro = 1.0;
   E->sphere.ri = 0.5;
 
-  E->control.precondition = 0;	/* for larger visc contrasts turn this back on  */
+  E->control.precondition = 0;  /* for larger visc contrasts turn this back on  */
   E->control.vprecondition = 1;
 
   E->mesh.toptbc = 1; /* fixed t */
@@ -749,7 +749,7 @@ void global_default_values(E)
   E->data.surf_temp = 0.0;
   E->data.youngs_mod = 1.0e11;
   E->data.Te = 0.0;
-  E->data.T_sol0 = 1373.0;	/* Dave's values 1991 (for the earth) */
+  E->data.T_sol0 = 1373.0;      /* Dave's values 1991 (for the earth) */
   E->data.Tsurf = 273.0;
   E->data.dTsol_dz = 3.4e-3 ;
   E->data.dTsol_dF = 440.0;
@@ -781,17 +781,17 @@ void check_bc_consistency(E)
   for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     for(i=1;i<=E->lmesh.nno;i++)    {
       if ((E->node[j][i] & VBX) && (E->node[j][i] & SBX))
-	printf("Inconsistent x velocity bc at %d\n",i);
+        printf("Inconsistent x velocity bc at %d\n",i);
       if ((E->node[j][i] & VBZ) && (E->node[j][i] & SBZ))
-	printf("Inconsistent z velocity bc at %d\n",i);
+        printf("Inconsistent z velocity bc at %d\n",i);
       if ((E->node[j][i] & VBY) && (E->node[j][i] & SBY))
-	printf("Inconsistent y velocity bc at %d\n",i);
+        printf("Inconsistent y velocity bc at %d\n",i);
       if ((E->node[j][i] & TBX) && (E->node[j][i] & FBX))
-	printf("Inconsistent x temperature bc at %d\n",i);
+        printf("Inconsistent x temperature bc at %d\n",i);
       if ((E->node[j][i] & TBZ) && (E->node[j][i] & FBZ))
-	printf("Inconsistent z temperature bc at %d\n",i);
+        printf("Inconsistent z temperature bc at %d\n",i);
       if ((E->node[j][i] & TBY) && (E->node[j][i] & FBY))
-	printf("Inconsistent y temperature bc at %d\n",i);
+        printf("Inconsistent y temperature bc at %d\n",i);
       }
     }          /* end for j */
 
@@ -799,12 +799,12 @@ void check_bc_consistency(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
       for(i=1;i<=E->lmesh.NNO[lev];i++)        {
         if ((E->NODE[lev][j][i] & VBX) && (E->NODE[lev][j][i]  & SBX))
-	  printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
-	if ((E->NODE[lev][j][i] & VBZ) && (E->NODE[lev][j][i]  & SBZ))
-	  printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
-	if ((E->NODE[lev][j][i] & VBY) && (E->NODE[lev][j][i]  & SBY))
-	  printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
-	/* Tbc's not applicable below top level */
+          printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
+        if ((E->NODE[lev][j][i] & VBZ) && (E->NODE[lev][j][i]  & SBZ))
+          printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
+        if ((E->NODE[lev][j][i] & VBY) && (E->NODE[lev][j][i]  & SBY))
+          printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
+        /* Tbc's not applicable below top level */
         }
 
     }   /* end for  j and lev */
@@ -910,13 +910,13 @@ void initial_velocity(E)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nnov;i++)   {
-	E->sphere.cap[m].V[1][i]=0.0;
-	E->sphere.cap[m].V[2][i]=0.0;
+        E->sphere.cap[m].V[1][i]=0.0;
+        E->sphere.cap[m].V[2][i]=0.0;
         E->sphere.cap[m].V[3][i]=0.0;
-	E->sphere.cap[m].Vprev[1][i]=0.0;
-	E->sphere.cap[m].Vprev[2][i]=0.0;
+        E->sphere.cap[m].Vprev[1][i]=0.0;
+        E->sphere.cap[m].Vprev[2][i]=0.0;
         E->sphere.cap[m].Vprev[3][i]=0.0;
-	}
+        }
 
     return;
 }
@@ -928,7 +928,7 @@ void open_log(struct All_variables *E)
   char logfile[255];
 
   E->fp = NULL;
-  sprintf(logfile,"%s/%s.log",E->control.data_dir, E->control.data_file);
+  sprintf(logfile,"%s.log", E->control.data_file);
   E->fp = output_open(logfile);
 
   return;
@@ -941,7 +941,7 @@ void open_time(struct All_variables *E)
 
   E->fptime = NULL;
   if (E->parallel.me == 0) {
-    sprintf(timeoutput,"%s/%s.time",E->control.data_dir, E->control.data_file);
+    sprintf(timeoutput,"%s.time", E->control.data_file);
     E->fptime = output_open(timeoutput);
   }
 
@@ -955,8 +955,7 @@ void open_info(struct All_variables *E)
 
   E->fp_out = NULL;
   if (E->control.verbose) {
-      sprintf(output_file,"%s/%d/%s.info.%d",E->control.data_dir,
-	      E->parallel.me, E->control.data_file, E->parallel.me);
+      sprintf(output_file,"%s.info.%d", E->control.data_file, E->parallel.me);
     E->fp_out = output_open(output_file);
   }
 
@@ -984,34 +983,34 @@ void output_parse_optional(struct  All_variables *E)
     E->output.average = 0;
 
     while(1) {
-	/* get next field */
-	prev = strsep(&next, ",");
+        /* get next field */
+        prev = strsep(&next, ",");
 
-	/* break if no more field */
-	if(prev == NULL) break;
+        /* break if no more field */
+        if(prev == NULL) break;
 
-	/* strip off leading and trailing whitespaces */
-	prev = strip(prev);
+        /* strip off leading and trailing whitespaces */
+        prev = strip(prev);
 
-	/* skip empty field */
-	if (strlen(prev) == 0) continue;
+        /* skip empty field */
+        if (strlen(prev) == 0) continue;
 
-	/* fprintf(stderr, "### %s: %s\n", prev, next); */
-    if(strcmp(prev, "connectivity")==0)
-        E->output.connectivity = 1;
-	else if(strcmp(prev, "stress")==0)
-	    E->output.stress = 1;
-	else if(strcmp(prev, "pressure")==0)
-	    E->output.pressure = 1;
-	else if(strcmp(prev, "surf")==0)
-	    E->output.surf = 1;
-	else if(strcmp(prev, "botm")==0)
-	    E->output.botm = 1;
-	else if(strcmp(prev, "average")==0)
-	    E->output.average = 1;
-	else
-	    if(E->parallel.me == 0)
-		fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);
+        /* fprintf(stderr, "### %s: %s\n", prev, next); */
+        if(strcmp(prev, "connectivity")==0)
+            E->output.connectivity = 1;
+        else if(strcmp(prev, "stress")==0)
+            E->output.stress = 1;
+        else if(strcmp(prev, "pressure")==0)
+            E->output.pressure = 1;
+        else if(strcmp(prev, "surf")==0)
+            E->output.surf = 1;
+        else if(strcmp(prev, "botm")==0)
+            E->output.botm = 1;
+        else if(strcmp(prev, "average")==0)
+            E->output.average = 1;
+        else
+            if(E->parallel.me == 0)
+                fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);
 
     }
 
@@ -1024,12 +1023,21 @@ void chkdatafile(struct  All_variables *E)
   void parallel_process_termination();
 
   char *found;
+  char newdatafile[100];
 
+  fprintf(stderr, "datafile is %s\n", E->control.data_file);
   found = strchr(E->control.data_file, '/');
   if (found) {
       fprintf(stderr, "error in input parameter: datafile='%s' contains '/'\n", E->control.data_file);
       parallel_process_termination();
   }
+
+  /* prepend the path to data_file */
+  sprintf(newdatafile, "%s/%d/%s", E->control.data_dir, E->parallel.me,
+           E->control.data_file);
+  strcpy(E->control.data_file, newdatafile);
+  fprintf(stderr, "datafile is %s\n", E->control.data_file);
+
 }
 
 
@@ -1058,30 +1066,33 @@ void mkdatadir(struct  All_variables *E)
 
 void output_init(struct  All_variables *E)
 {
-  chkdatafile(E);
-  mkdatadir(E);
-
-  open_log(E);
-  open_time(E);
-  open_info(E);
-
-  output_parse_optional(E);
-
-  //DEBUG
-  //strcpy(E->output.format, "hdf5");
-  //fprintf(stderr, "output format is %s\n", E->output.format);
-  if (strcmp(E->output.format, "ascii") == 0)
-    E->problem_output = output;
-  else if (strcmp(E->output.format, "hdf5") == 0)
-    E->problem_output = h5output;
-  else {
-    // indicate error here
-    if (E->parallel.me == 0) {
-        fprintf(stderr, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
-        fprintf(E->fp, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
+    //DEBUG
+    //strcpy(E->output.format, "hdf5");
+    //fprintf(stderr, "output format is %s\n", E->output.format);
+    if (strcmp(E->output.format, "ascii-local") == 0)
+        E->problem_output = output;
+    else if (strcmp(E->output.format, "ascii") == 0) {
+        chkdatafile(E);
+        mkdatadir(E);
+        E->problem_output = output;
     }
-    parallel_process_termination(E);
-  }
+    else if (strcmp(E->output.format, "hdf5") == 0)
+        E->problem_output = h5output;
+    else {
+        // indicate error here
+        if (E->parallel.me == 0) {
+            fprintf(stderr, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
+            fprintf(E->fp, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
+        }
+        parallel_process_termination(E);
+    }
+
+    open_log(E);
+    open_time(E);
+    open_info(E);
+
+    output_parse_optional(E);
+
 }
 
 
