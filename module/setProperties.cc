@@ -771,7 +771,7 @@ void getStringProperty(PyObject* properties, char* attribute,
     }
 
     strcpy(value, PyString_AsString(prop));
-    *out << '"' << value << '"' << std::endl;
+    *out << value << std::endl;
 
     return;
 }
