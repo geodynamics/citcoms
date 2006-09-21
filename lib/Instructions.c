@@ -269,7 +269,7 @@ void read_initial_settings(struct All_variables *E)
   input_string("datafile",E->control.data_file,"initialize",m);
   input_string("datafile_old",E->control.old_P_file,"initialize",m);
 
-  input_string("output_format",E->output.format,"ascii",m);
+  input_string("output_format",E->output.format,"ascii-local",m);
   input_string("output_optional",E->output.optional,"",m);
 
   input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
