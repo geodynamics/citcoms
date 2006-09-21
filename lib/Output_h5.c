@@ -382,13 +382,20 @@ void h5output_close(struct All_variables *E)
     status = H5Fclose(E->hdf5.file_id);
 
     /* close fields (deallocate buffers) */
+
     h5close_field(&(E->hdf5.const_vector3d));
     h5close_field(&(E->hdf5.const_vector2d));
+    h5close_field(&(E->hdf5.const_scalar1d));
+
+    if (E->hdf5.tensor3d != NULL)
+        h5close_field(&(E->hdf5.tensor3d));
+
     h5close_field(&(E->hdf5.vector3d));
     h5close_field(&(E->hdf5.vector2d));
     h5close_field(&(E->hdf5.scalar3d));
     h5close_field(&(E->hdf5.scalar2d));
     h5close_field(&(E->hdf5.scalar1d));
+
 #endif
 }
 
@@ -1098,6 +1105,10 @@ void h5extend_time_dimension(struct All_variables *E)
 
     for(i = 0; i < 6; i++)
     {
+        /* check for optional fields */
+        if (field[i] == NULL)
+            continue;
+
         /* increase extent of time dimension in file dataspace */
         field[i]->dims[0] += 1;
         field[i]->maxdims[0] += 1;
