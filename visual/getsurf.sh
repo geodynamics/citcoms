@@ -45,7 +45,14 @@ let proc=nprocz-1
 while [ "$5" ]
 do
     cmd_copy="cp $modelname.surf.$proc.$timestep $cwd"
-    rsh $5 "cd $modeldir; $cmd_copy"
+
+    if [ $5 == $HOSTNAME -o $5 == "localhost" ]; then
+        # using subshell, so that our working directory is unchanged
+	(cd $modeldir; $cmd_copy)
+    else
+	rsh $5 "cd $modeldir; $cmd_copy"
+    fi
+
     shift
     let proc=proc+nprocz
 done
