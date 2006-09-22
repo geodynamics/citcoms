@@ -278,7 +278,7 @@ class Solver(Component):
                                 validator=inv.choice(["ascii-local",
                                                       "ascii",
                                                       "hdf5"]))
-        output_optional = inv.str("output_optional", default="")
+        output_optional = inv.str("output_optional", default="surf,botm")
 
         verbose = inv.bool("verbose", default=False)
         see_convergence = inv.bool("see_convergence", default=True)
