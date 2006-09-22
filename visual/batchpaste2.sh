@@ -48,13 +48,14 @@ do
     cmd_copy="cp $datafile.$rank.$timestep $cwd"
 
     if [ $4 == $HOSTNAME -o $4 == "localhost" ]; then
-        cd $datadir/$rank && $cmd_paste && $cmd_copy
+        # using subshell, so that our working directory is unchanged
+        (cd $datadir/$rank && $cmd_paste && $cmd_copy)
     else
         rsh $4 "cd $datadir/$rank && $cmd_paste && $cmd_copy"
     fi
 
     shift
-    let n=n+1
+    let rank=rank+1
 done
 
 
