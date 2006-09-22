@@ -52,27 +52,14 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
-    try:
-        nodelist = file(machinefile).readlines()
-    except IOError:
-        nodelist = machinefile.split()
-
-    # check the length of nodelist
-    totalnodes = nprocx * nprocy * nprocz * ncap
-    n = len(nodelist)
-    if not n == totalnodes:
-        print 'WARNING: length of machinefile does not match number of processors'
-        if (totalnodes > n) and ((totalnodes % n) == 0):
-            # try to match number of processors by duplicating nodelist
-            nodelist *= (totalnodes / n)
-        else:
-            print 'ERROR: incorrect machinefile size'
-            sys.exit(1)
-
     # generate a string of machine names
-    nodes = ''
-    for n in range(nprocz-1, totalnodes, nprocz):
-        nodes += '%s ' % nodelist[n].strip()
+    from batchcombine import machinefile2nodes
+    totalnodes = nprocx * nprocy * nprocz * ncap
+    nodes = machinefile2nodes(machinefile, totalnodes)
+
+    # extract machines at the surface
+    tmp = nodes.split()[(nprocz-1)::nprocz]
+    nodes = ' '.join(tmp)
 
     # get coordinate, if necessary
     coord_exist = True
@@ -95,10 +82,13 @@ if __name__ == '__main__':
     print cmd
     os.system(cmd)
 
-    # delete
-    cmd = 'rm %(modelname)s.surf.[0-9]*.%(timestep)d' % vars()
-    print cmd
-    os.system(cmd)
+    # delete modelname.surf.* files, only if the originial data is not
+    # stored in the current directory, ie. if velofile exists
+    velofile = '%(modelname)s.velo.0.%(timestep)d' % vars()
+    if not os.path.exists(velofile):
+        cmd = 'rm %(modelname)s.surf.[0-9]*.%(timestep)d' % vars()
+        print cmd
+        os.system(cmd)
 
     # create .general file
     cmd = 'dxgeneralsurf.sh %(modelname)s.surf[0-9]*.%(timestep)d' % vars()
