@@ -124,3 +124,9 @@ if __name__ == '__main__':
     layers = [ int(x) for x in sys.argv[2:] ]
 
     zslice(prefix, *layers)
+
+
+# version
+# $Id$
+
+# End of file

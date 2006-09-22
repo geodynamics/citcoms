@@ -125,3 +125,7 @@ if __name__ == '__main__':
         convert(h5file, file_prefix, frame)
 
 
+# version
+# $Id$
+
+# End of file

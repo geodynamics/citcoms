@@ -84,3 +84,9 @@ ppmtoy4m -F $FOPTION:1 $TMPDIR/frame.ppm | mpeg2enc -o $OOPTION --video-bitrate 
 #png2yuv -n $(( FRAMES+1 )) -f30 -L0 -Ip -j $TMPDIR/frame.$NUMFMT.png | mpeg2enc -o $OOPTION --video-bitrate 1151 --format 3 --motion-search-radius 32 --no-constraints
 
 rm -rf $TMPDIR
+
+
+# version
+# $Id$
+
+# End of file

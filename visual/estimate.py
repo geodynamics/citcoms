@@ -87,9 +87,9 @@ def main():
     opts, args = getopt.getopt(sys.argv[1:], "hac:t:x:y:z:",
         ['help','full','regional','caps=','steps=','nodex=','nodey=','nodez=',
          'all','connectivity','stress','pressure','surf','botm','average'])
-    
+
     for opt,arg in opts:
-        
+
         if opt in ('-h','--help'):
             print __doc__
             sys.exit(1)
@@ -109,7 +109,7 @@ def main():
             nodey = int(arg)
         if opt in ('-z','--nodez'):
             nodez = int(arg)
-        
+
         if opt in ('-a','--all'):
             for k in out:
                 out[k] = True
@@ -125,7 +125,7 @@ def main():
             out['botm'] = True
         if opt == '--average':
             out['average'] = True
-    
+
     if not caps or not steps or not nodex or not nodey or not nodez:
         print "Enter the following quantities:\n"
 
@@ -134,13 +134,13 @@ def main():
 
     if not steps:
         steps = int(raw_input('\tsteps = '))
-    
+
     if not nodex:
         nodex = int(raw_input('\tnodex = '))
-    
+
     if not nodey:
         nodey = int(raw_input('\tnodey = '))
-    
+
     if not nodez:
         nodez = int(raw_input('\tnodez = '))
 
@@ -276,3 +276,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# version
+# $Id$
+
+# End of file

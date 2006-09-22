@@ -104,3 +104,7 @@ ppmtoy4m -F $FOPTION:1 $TMPDIR/frame.ppm | yuv2lav -q 100 -f a -o $OOPTION
 
 rm -rf $TMPDIR
 
+# version
+# $Id$
+
+# End of file

@@ -32,7 +32,8 @@
 Read and parse input file which consists of 'name=value' pairs. Note that
 'name =value', `name= value', or 'name = value' is not allowed, i.e. space
 is not allowed on either sides of the eqaul sign. 'name' is case-sensitive.
-Blank lines, anything after `#', and just about everything else is ignored.
+Blank lines, lines starting with '[', anything after `#', and just about
+everything else is ignored.
 
 Intrinsic defaults can be specified by passing them into the constructor as
 a dictionary.
@@ -265,3 +266,7 @@ if __name__ == '__main__':
             break
 
 
+# version
+# $Id$
+
+# End of file
