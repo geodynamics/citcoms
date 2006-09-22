@@ -1111,7 +1111,6 @@ void h5extend_time_dimension(struct All_variables *E)
 
         /* increase extent of time dimension in file dataspace */
         field[i]->dims[0] += 1;
-        field[i]->maxdims[0] += 1;
 
         /* increment hyperslab offset */
         field[i]->offset[0] += 1;
