@@ -1025,7 +1025,6 @@ void chkdatafile(struct  All_variables *E)
   char *found;
   char newdatafile[100];
 
-  fprintf(stderr, "datafile is %s\n", E->control.data_file);
   found = strchr(E->control.data_file, '/');
   if (found) {
       fprintf(stderr, "error in input parameter: datafile='%s' contains '/'\n", E->control.data_file);
@@ -1036,7 +1035,6 @@ void chkdatafile(struct  All_variables *E)
   sprintf(newdatafile, "%s/%d/%s", E->control.data_dir, E->parallel.me,
            E->control.data_file);
   strcpy(E->control.data_file, newdatafile);
-  fprintf(stderr, "datafile is %s\n", E->control.data_file);
 
 }
 
