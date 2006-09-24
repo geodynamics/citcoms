@@ -405,6 +405,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
 
     getStringProperty(properties, "datadir", E->control.data_dir, out);
     getStringProperty(properties, "datafile", E->control.data_file, out);
+    getStringProperty(properties, "datadir_old", E->control.data_dir_old, out);
     getStringProperty(properties, "datafile_old", E->control.old_P_file, out);
 
     getScalarProperty(properties, "rayleigh", E->control.Atemp, out);

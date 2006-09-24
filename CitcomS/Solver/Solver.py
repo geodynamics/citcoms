@@ -268,6 +268,7 @@ class Solver(Component):
         visc = inv.facility("visc", factory=Visc)
 
         datadir = inv.str("datadir", default=".")
+        datadir_old = inv.str("datadir_old", default=".")
 
         rayleigh = inv.float("rayleigh", default=1e+05)
         Q0 = inv.float("Q0", default=0.0)

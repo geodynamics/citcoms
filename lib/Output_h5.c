@@ -2143,6 +2143,7 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute_string(input, "datadir", E->control.data_dir);
     status = set_attribute_string(input, "datafile", E->control.data_file);
+    status = set_attribute_string(input, "datadir_old", E->control.data_dir_old);
     status = set_attribute_string(input, "datafile_old", E->control.old_P_file);
 
     status = set_attribute(input, "rayleigh", H5T_NATIVE_FLOAT, &(E->control.Atemp));

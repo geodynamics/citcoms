@@ -267,6 +267,7 @@ void read_initial_settings(struct All_variables *E)
 
   input_string("datadir",E->control.data_dir,".",m);
   input_string("datafile",E->control.data_file,"initialize",m);
+  input_string("datadir_old",E->control.data_dir_old,"initialize",m);
   input_string("datafile_old",E->control.old_P_file,"initialize",m);
 
   input_string("output_format",E->output.format,"ascii-local",m);
@@ -1036,6 +1037,18 @@ void chkdatafile(struct  All_variables *E)
            E->control.data_file);
   strcpy(E->control.data_file, newdatafile);
 
+  if (E->control.restart) {
+      found = strchr(E->control.old_P_file, '/');
+      if (found) {
+	  fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
+	  parallel_process_termination();
+      }
+
+      /* prepend the path to old_P_file */
+      sprintf(newdatafile, "%s/%d/%s", E->control.data_dir_old, E->parallel.me,
+	      E->control.old_P_file);
+      strcpy(E->control.old_P_file, newdatafile);
+  }
 }
 
 
