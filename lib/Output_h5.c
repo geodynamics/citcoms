@@ -129,7 +129,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_coord(E);
         h5output_surf_botm_coord(E);
         h5output_have_coord(E);
-        h5output_material(E);
+        //h5output_material(E);
         if(E->output.connectivity == 1 && E->hdf5.capid == 0)
             h5output_connectivity(E);
     }

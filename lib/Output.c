@@ -59,7 +59,7 @@ void output(struct All_variables *E, int cycles)
 
   if (cycles == 0) {
     output_coord(E);
-    output_mat(E);
+    //output_mat(E);
   }
 
   output_velo(E, cycles);
