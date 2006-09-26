@@ -79,6 +79,7 @@ INCLUDES = \
 
 sources = \
 	CitcomSmodule.cc \
+	CitcomSmodule.h \
 	advdiffu.cc \
 	advdiffu.h \
 	bindings.cc \

@@ -52,6 +52,7 @@ nodist_dxmacro_DATA = \
 dxmacro_templates = \
 	CitcomSFullImport.net.in \
 	CitcomSImport.net.in \
+	CitcomSImportHDF5.net.in \
 	CitcomSSurfaceHeatflux.net.in \
 	CitcomSSurfaceImport.net.in \
 	CitcomSSurfaceTopo.net.in \

@@ -109,7 +109,7 @@ install-binSCRIPTS: $(bin_SCRIPTS)
 	    chmod +x "$(DESTDIR)$(bindir)/$$f"; \
 	  else :; fi; \
 	done
-EXTRA_DIST = citcoms.in
+EXTRA_DIST = citcoms.in coupledcitcoms.in
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + libExchanger +
 # ExchangerLibmodule + embedded Python interpreter)

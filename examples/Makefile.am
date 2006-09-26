@@ -24,12 +24,12 @@
 # $Id$
 
 EXTRA_DIST = \
-	Cookbook1/cookbook1.sh \
-	Cookbook2/cookbook2.sh \
-	Cookbook3/cookbook3.sh \
-	Cookbook4/cookbook4.sh \
+	Cookbook1/cookbook1.cfg \
+	Cookbook2/cookbook2.cfg \
+	Cookbook3/cookbook3.cfg \
+	Cookbook4/cookbook4.cfg \
 	Cookbook4/coor.dat \
-	Cookbook5/cookbook5.sh \
+	Cookbook5/cookbook5.cfg \
 	Cookbook5/coor.dat \
 	Cookbook5/restart_files/cookbook5.velo.0.0 \
 	Cookbook5/restart_files/cookbook5.velo.1.0 \
@@ -167,10 +167,11 @@ EXTRA_DIST = \
 	Cookbook5/velocity/bvel.dat71 \
 	Cookbook5/velocity/bvel.dat8 \
 	Cookbook5/velocity/bvel.dat9 \
-	Cookbook7/cookbook7.sh \
+	Cookbook7/cookbook7.cfg \
 	Cookbook7/coord.dat \
 	Cookbook7/README \
-	example1.sh \
+	example0.cfg \
+	example1.cfg \
 	Full/input.sample \
 	Full/machine.sample \
 	Full/velbc/README \

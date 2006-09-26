@@ -95,6 +95,7 @@ sources = \
 	Size_does_matter.c \
 	Solver_conj_grad.c \
 	Solver_multigrid.c \
+	solver.h \
 	sphere_communication.h \
 	Sphere_harmonics.c \
 	Sphere_util.c \
