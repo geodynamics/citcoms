@@ -28,6 +28,7 @@ bin_PROGRAMS = CitcomSFull CitcomSRegional
 bin_SCRIPTS =
 
 abs_top_srcdir = @abs_top_srcdir@
+abs_top_builddir = @abs_top_builddir@
 abs_builddir = @abs_builddir@
 
 if COND_PYRE
@@ -43,8 +44,18 @@ if COND_EMBEDDING
 else
     INTERPRETER = $(PYTHON)
     noinstINTERPRETER = $(PYTHON)
-    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_srcdir)/module/.libs:$(abs_top_srcdir)/module/Exchanger/.libs
+    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_builddir)/module/.libs:$(abs_top_builddir)/module/Exchanger/.libs
     libCitcomS = $(top_builddir)/lib/libCitcomS.la
+endif
+
+if COND_EXCHANGER
+    MAYBE_EXCHANGER_CPPFLAGS = -DWITH_EXCHANGER
+    MAYBE_EXCHANGER_INCLUDES = -I$(top_srcdir)/module/Exchanger
+    MAYBE_EXCHANGER_LDADD = $(top_builddir)/module/Exchanger/libExchangerLibmodule.a
+else
+    MAYBE_EXCHANGER_CPPFLAGS =
+    MAYBE_EXCHANGER_INCLUDES =
+    MAYBE_EXCHANGER_LDADD =
 endif
 
 endif
@@ -58,7 +69,8 @@ INCLUDES = \
 if COND_PYRE
 INCLUDES += \
 	-I$(top_srcdir)/module \
-	-I$(top_srcdir)/module/Exchanger \
+	$(MAYBE_EXCHANGER_INCLUDES) \
+	$(PYTHON_EGG_CPPFLAGS) \
 	-I$(PYTHON_INCDIR)
 endif
 
@@ -101,10 +113,11 @@ EXTRA_DIST = citcoms.in
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + libExchanger +
 # ExchangerLibmodule + embedded Python interpreter)
+pycitcoms_CPPFLAGS = $(MAYBE_EXCHANGER_CPPFLAGS)
 pycitcoms_SOURCES = pycitcoms.cc
 pycitcoms_LDADD = \
 	$(top_builddir)/module/libPyxMPImodule.a \
-	$(top_builddir)/module/Exchanger/libExchangerLibmodule.a \
+	$(MAYBE_EXCHANGER_LDADD) \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(libCitcomS) \
 	$(LIBHDF5) \
@@ -113,7 +126,7 @@ pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES)
 	@rm -f pycitcoms$(EXEEXT)
 	$(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
 		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
-		-lExchanger -l_mpimodule -ljournal \
+		$(PYTHON_EGG_LDFLAGS) \
 		$(PYTHON_BLDLIBRARY) \
 		$(MPILIBS) \
 		$(FCLIBS) \

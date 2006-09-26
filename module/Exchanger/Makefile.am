@@ -42,14 +42,14 @@ libExchangerLibmodule_a_SOURCES = $(sources)
 ExchangerLibmodule_la_LDFLAGS = -module -release $(VERSION)
 ExchangerLibmodule_la_LIBADD = \
 	$(top_builddir)/lib/libCitcomS.la \
-	-lExchanger \
-	-l_mpimodule -ljournal
+	$(PYTHON_EGG_LDFLAGS)
 ExchangerLibmodule_la_SOURCES = $(sources)
 
 CXX = $(MPICXX)
 CXXLD = @CXX@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
+	$(PYTHON_EGG_CPPFLAGS) \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 

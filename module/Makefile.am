@@ -23,7 +23,10 @@
 
 # $Id$
 
-SUBDIRS = Exchanger
+if COND_EXCHANGER
+    MAYBE_EXCHANGER = Exchanger
+endif
+SUBDIRS = $(MAYBE_EXCHANGER)
 
 noinst_LIBRARIES =
 pyexec_LTLIBRARIES =
@@ -53,7 +56,8 @@ endif
 CitcomSLibmodule_la_LDFLAGS = -module -release $(VERSION)
 CitcomSLibmodule_la_LIBADD = \
 	$(top_builddir)/lib/libCitcomS.la \
-	-l_mpimodule -ljournal $(MPILIBS)
+	$(PYTHON_EGG_LDFLAGS) \
+	$(MPILIBS)
 CitcomSLibmodule_la_SOURCES = $(sources)
 
 PyxMPImodule_la_LDFLAGS = -module -release $(VERSION)
@@ -67,6 +71,7 @@ CXX = $(MPICXX)
 INCLUDES = \
 	-I$(top_srcdir)/module/Regional \
 	-I$(top_srcdir)/lib \
+	$(PYTHON_EGG_CPPFLAGS) \
 	-I$(PYTHON_INCDIR) \
 	$(MPIINCLUDES)
 

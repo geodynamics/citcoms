@@ -30,13 +30,17 @@
 #include <stdio.h>
 #include <mpi.h>
 #include "CitcomSmodule.h"
+#ifdef WITH_EXCHANGER
 #include "Exchangermodule.h"
+#endif
 
 PyMODINIT_FUNC initPyxMPI(void);
 
 struct _inittab inittab[] = {
     { "PyxMPI", initPyxMPI },
+#ifdef WITH_EXCHANGER
     { "ExchangerLib", initExchangerLib },
+#endif
     { "CitcomSLib", initCitcomSLib },
     { 0, 0 }
 };

@@ -35,11 +35,6 @@ AM_INIT_AUTOMAKE([foreign])
 # 'configure' options
 AC_ARG_VAR(PYTHON, [Python interpreter])
 AC_ARG_VAR(PYTHONPATH, [Python module search path])
-AC_ARG_VAR(MPIRUN, [command to run MPI programs])
-AC_ARG_VAR(BSUB, [command to submit LSF batch jobs])
-AC_ARG_VAR(QSUB, [command to submit PBS batch jobs])
-AC_ARG_VAR(GLOBUSRUN, [command to submit Globus batch jobs])
-AC_ARG_VAR(BATCHTYPE, [default batch system (lsf, pbs, or globus)])
 AC_ARG_VAR(PHDF5_HOME, [home path to parallel HDF5 library])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
@@ -47,6 +42,11 @@ AC_ARG_WITH([pyre],
     [want_pyre="$withval"],
     [want_pyre=yes])
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
+AC_ARG_WITH([exchanger],
+    [AC_HELP_STRING([--with-exchanger],
+        [use Exchanger @<:@default=auto@:>@])],
+    [want_exchanger="$withval"],
+    [want_exchanger=auto])
 AC_ARG_WITH([hdf5],
     [AC_HELP_STRING([--with-hdf5],
         [enable HDF5 output @<:@default=auto@:>@])],
@@ -59,48 +59,35 @@ AC_ARG_ENABLE([embedding],
     [want_embedding=yes])
 AM_CONDITIONAL([COND_EMBEDDING], [test "$want_embedding" = yes])
 
-# Checks for programs.
 if test "$want_pyre" = yes; then
+    # Check for Python.
     AM_PATH_PYTHON([2.3])
     CIT_PYTHON_SYSCONFIG
-    AC_PATH_PROG([MPIRUN], [mpirun])
-    if test -z "$MPIRUN"; then
-        AC_PATH_PROG([MPIRUN], [mpiexec])
-        if test -z "$MPIRUN"; then
-            AC_MSG_ERROR([program 'mpirun' not found])
-        fi
+
+    # Checks for Python modules and packages.
+    CIT_CHECK_PYTHON_EGG([pythia >= 0.8-1.0dev-r4617, < 0.8-2.0a, == dev])
+    if test "$want_exchanger" != no; then
+        CIT_CHECK_PYTHON_EGG([Exchanger >= 1.0, < 2.0a],
+                             [ # found
+                                 if test "$want_exchanger" = auto; then
+                                     want_exchanger=yes
+                                 fi
+                             ], [ # not found
+                                 if test "$want_exchanger" = auto; then
+                                     want_exchanger=no
+                                     AC_MSG_WARN(['Exchanger' package not found; disabling Exchanger support])
+                                 else
+                                     AC_MSG_ERROR(['Exchanger' package not found])
+                                 fi
+			     ])
     fi
-    AC_PATH_PROG([BSUB], [bsub])
-    AC_PATH_PROG([QSUB], [qsub])
-    AC_PATH_PROG([GLOBUSRUN], [globusrun])
-    if test -z "$BATCHTYPE"; then
-        if test -n "$BSUB"; then
-            LAUNCHER="lsf"
-        elif test -n "$QSUB"; then
-            LAUNCHER="pbs"
-        elif test -n "$GLOBUSRUN"; then
-            LAUNCHER="globus"
-        else
-            if $MPIRUN --help 2>&1 | grep machinefile >/dev/null; then
-                LAUNCHER="mpich"
-            elif $MPIRUN --invalid 2>&1 | grep softness >/dev/null; then
-                # MPICH2
-                LAUNCHER="mpich"
-            else
-                LAUNCHER="lam-mpi"
-            fi
-        fi
-        test -z "$BSUB" && BSUB="bsub"
-        test -z "$QSUB" && QSUB="qsub"
-        test -z "$GLOBUSRUN" && GLOBUSRUN="globusrun"
-    else
-        case "$BATCHTYPE" in
-            lsf | pbs | globus) LAUNCHER=$BATCHTYPE ;;
-            *) AC_MSG_ERROR([BATCHTYPE=$BATCHTYPE is invalid]) ;;
-        esac
-    fi
-    AC_SUBST([LAUNCHER])
+    CIT_PYTHON_EGG_FLAGS
+else
+    want_exchanger=no
 fi
+AM_CONDITIONAL([COND_EXCHANGER], [test "$want_exchanger" = yes])
+
+# Checks for programs.
 CIT_PROG_MPICC
 CIT_PROG_MPICXX
 CC=$MPICC
@@ -110,14 +97,6 @@ if test "$want_pyre" = yes; then
     AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
 fi
 AC_PROG_LIBTOOL
-
-# Checks for Python modules and packages.
-if test "$want_pyre" = yes; then
-    PYTHONPATH="${pythondir}:${pyexecdir}${PYTHONPATH:+:${PYTHONPATH}}"; export PYTHONPATH
-    CIT_PATH_PYTHIA([0.8], [mpi])
-    CIT_PATH_EXCHANGER([1.0])
-    AC_SUBST([PYTHONPATH])
-fi
 
 # Checks for libraries.
 if test "$want_pyre" = yes; then
@@ -136,7 +115,7 @@ if test "$want_pyre" = yes; then
 else
     CIT_HEADER_MPI
 fi
-if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
+if test "$want_hdf5" != no; then
     if test "$PHDF5_HOME"; then
         CPPFLAGS="-I$PHDF5_HOME/include $CPPFLAGS"
     fi
@@ -144,7 +123,7 @@ if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
     if test "$HDF5NOTFOUND"; then
         if test "$want_hdf5" = auto; then
             want_hdf5=no
-            echo Cannot find hdf5.h, disable HDF5 support
+            AC_MSG_WARN([Cannot find hdf5.h, disabling HDF5 support])
         else
             AC_MSG_ERROR([HDF5 header file "hdf5.h" not found!])
         fi
@@ -167,7 +146,7 @@ if test -z "$LIBM"; then
 fi
 AC_SUBST(LIBM)
 
-if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
+if test "$want_hdf5" != no; then
     if test "$PHDF5_HOME"; then
         LDFLAGS="-L$PHDF5_HOME/lib $LDFLAGS"
     fi
@@ -178,19 +157,19 @@ if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
     if test "$HDF5NOTFOUND"; then
         if test "$want_hdf5" = auto; then
             want_hdf5=no
-            echo Cannot find find HDF5 library, disable HDF5 support
+            AC_MSG_WARN([Cannot find HDF5 library, disabling HDF5 support])
         else
             AC_MSG_ERROR([HDF5 library not found; try setting PHDF5_HOME])
         fi
     fi
 fi
-if test "$want_hdf5" = yes -o "$want_hdf5" = auto; then
+if test "$want_hdf5" != no; then
     # Checks for HDF5 parallel-IO function
     AC_CHECK_LIB(hdf5, H5Pset_dxpl_mpio, [have_phdf5="yes"], [HDF5NOTFOUND=1])
     if test "$HDF5NOTFOUND"; then
         if test "$want_hdf5" = auto; then
             want_hdf5=no
-            echo Cannot find find parallel HDF5 library, disable HDF5 support
+            AC_MSG_WARN([Cannot find parallel HDF5 library, disabling HDF5 support])
         else
             AC_MSG_ERROR([Need Parallel HDF5; try compiling HDF5 with --enable-parallel])
         fi
@@ -214,10 +193,6 @@ AC_CONFIG_FILES([Makefile
                  visual/Makefile
                  visual/OpenDXMacro/Makefile])
 
-if test "$want_pyre" = yes; then
-    AC_CONFIG_SUBDIRS([pythia-0.8 Exchanger])
-fi
-
 AC_OUTPUT
 
 # report configuration summary
@@ -234,6 +209,7 @@ echo -e "\t CPPFLAGS: " $CPPFLAGS
 echo -e "\t LDFLAGS: " $LDFLAGS
 echo -e "\t CXXFLAGS: " $CXXFLAGS
 echo -e "\t with-pyre: " $want_pyre
+echo -e "\t with-exchanger: " $want_exchanger
 echo -e "\t with-hdf5: " $want_hdf5
 echo
 
