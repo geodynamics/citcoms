@@ -38,7 +38,6 @@ class Output(CitcomComponent):
 
 
     def setProperties(self):
-        print 'in output.py'
         from CitcomSLib import Output_set_properties
         Output_set_properties(self.all_variables, self.inventory)
         return
