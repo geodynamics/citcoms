@@ -33,6 +33,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "parsing.h"
 #include "output.h"
 
 void output_coord(struct All_variables *);
@@ -52,6 +53,16 @@ extern void get_STD_topo(struct All_variables *, float**, float**,
 			 float**, float**, int);
 
 /**********************************************************************/
+
+void output_common_input(struct All_variables *E)
+{
+    int m = E->parallel.me;
+
+    input_string("output_format", E->output.format, "ascii-local",m);
+    input_string("output_optional", E->output.optional, "surf,botm",m);
+
+}
+
 
 
 void output(struct All_variables *E, int cycles)

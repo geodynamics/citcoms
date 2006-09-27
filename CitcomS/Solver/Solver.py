@@ -88,6 +88,7 @@ class Solver(Component):
         inv.bc.initialize(all_variables)
         inv.const.initialize(all_variables)
         inv.ic.initialize(all_variables)
+        inv.output.initialize(all_variables)
         inv.param.initialize(all_variables)
         inv.phase.initialize(all_variables)
         inv.tracer.initialize(all_variables)
@@ -222,6 +223,7 @@ class Solver(Component):
         inv.bc.setProperties()
         inv.const.setProperties()
         inv.ic.setProperties()
+        inv.output.setProperties()
         inv.param.setProperties()
         inv.phase.setProperties()
         inv.tracer.setProperties()
@@ -248,6 +250,7 @@ class Solver(Component):
         from CitcomS.Components.BC import BC
         from CitcomS.Components.Const import Const
         from CitcomS.Components.IC import IC
+        from CitcomS.Components.Output import Output
         from CitcomS.Components.Param import Param
         from CitcomS.Components.Phase import Phase
         from CitcomS.Components.Tracer import Tracer
@@ -262,6 +265,7 @@ class Solver(Component):
         bc = inv.facility("bc", factory=BC)
         const = inv.facility("const", factory=Const)
         ic = inv.facility("ic", factory=IC)
+        output = inv.facility("output", factory=Output)
         param = inv.facility("param", factory=Param)
         phase = inv.facility("phase", factory=Phase)
         tracer = inv.facility("tracer", factory=Tracer)
@@ -274,12 +278,6 @@ class Solver(Component):
         Q0 = inv.float("Q0", default=0.0)
 
         stokes_flow_only = inv.bool("stokes_flow_only", default=False)
-
-        output_format = inv.str("output_format", default="ascii-local",
-                                validator=inv.choice(["ascii-local",
-                                                      "ascii",
-                                                      "hdf5"]))
-        output_optional = inv.str("output_optional", default="surf,botm")
 
         verbose = inv.bool("verbose", default=False)
         see_convergence = inv.bool("see_convergence", default=True)

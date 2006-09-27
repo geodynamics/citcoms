@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 
+void output_h5_input(struct All_variables *);
 void h5output(struct All_variables *, int);
 
 void h5output_open(struct All_variables *);

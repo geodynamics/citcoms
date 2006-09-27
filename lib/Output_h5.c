@@ -35,6 +35,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "parsing.h"
 #include "output_h5.h"
 
 #ifdef USE_HDF5
@@ -108,6 +109,31 @@ static herr_t h5close_field(field_t **field);
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
+
+
+/****************************************************************************
+ * Functions that read input parameters for legacy CitcomS                   *
+ ****************************************************************************/
+
+void output_h5_input(struct All_variables *E)
+{
+#ifdef USE_HDF5
+    int m = E->parallel.me;
+
+    input_int("cb_block_size", &(E->output.cb_block_size), "1048576", m);
+    input_int("cb_buffer_size", &(E->output.cb_buffer_size), "4194304", m);
+
+    input_int("sieve_buf_size", &(E->output.sieve_buf_size), "1048576", m);
+
+    input_int("outupt_alignment", &(E->output.alignment), "262144", m);
+    input_int("outupt_alignment_threshold", &(E->output.alignment_threshold), "524288", m);
+
+    input_int("cache_mdc_nelmts", &(E->output.cache_mdc_nelmts), "10330", m);
+    input_int("cache_rdcc_nelmts", &(E->output.cache_rdcc_nelmts), "521", m);
+    input_int("cache_rdcc_nbytes", &(E->output.cache_rdcc_nbytes), "1048576", m);
+
+#endif
+}
 
 
 /****************************************************************************

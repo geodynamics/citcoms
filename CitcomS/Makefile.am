@@ -35,6 +35,7 @@ nobase_pkgpython_PYTHON = \
 	Components/Const.py \
 	Components/HackedConfigParser.py \
 	Components/IC.py \
+	Components/Output.py \
 	Components/Launchers.py \
 	Components/Param.py \
 	Components/Phase.py \

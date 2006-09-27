@@ -46,6 +46,10 @@ extern char pyCitcom_IC_set_properties__doc__[];
 extern char pyCitcom_IC_set_properties__name__[];
 extern PyObject * pyCitcom_IC_set_properties(PyObject *, PyObject *);
 
+extern char pyCitcom_Output_set_properties__doc__[];
+extern char pyCitcom_Output_set_properties__name__[];
+extern PyObject * pyCitcom_Output_set_properties(PyObject *, PyObject *);
+
 extern char pyCitcom_Param_set_properties__doc__[];
 extern char pyCitcom_Param_set_properties__name__[];
 extern PyObject * pyCitcom_Param_set_properties(PyObject *, PyObject *);

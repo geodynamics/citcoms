@@ -270,9 +270,6 @@ void read_initial_settings(struct All_variables *E)
   input_string("datadir_old",E->control.data_dir_old,"initialize",m);
   input_string("datafile_old",E->control.old_P_file,"initialize",m);
 
-  input_string("output_format",E->output.format,"ascii-local",m);
-  input_string("output_optional",E->output.optional,"surf,botm",m);
-
   input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
   input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
   input_int("mgunity",&(E->mesh.mgunity),"1",m);
@@ -382,6 +379,8 @@ void read_initial_settings(struct All_variables *E)
     / (E->data.density * E->data.grav_acc * E->data.therm_exp)
     / (E->data.layer_km * E->data.layer_km * E->data.layer_km * 1e9);
 
+  output_common_input(E);
+  output_h5_input(E);
   phase_change_input(E);
   lith_age_input(E);
   viscosity_input(E);

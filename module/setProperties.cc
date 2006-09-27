@@ -285,6 +285,52 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
 
 
+char pyCitcom_Output_set_properties__doc__[] = "";
+char pyCitcom_Output_set_properties__name__[] = "Output_set_properties";
+
+PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
+{
+    PyObject *obj, *properties;
+
+    if (!PyArg_ParseTuple(args, "OO:Output_set_properties",
+			  &obj, &properties))
+        return NULL;
+
+    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+
+    int m = E->parallel.me;
+    std::ofstream *out = get_output_stream(E->parallel.me, E->control.PID);
+    *out << "[CitcomS.solver.output]" << std::endl;
+
+    getStringProperty(properties, "output_format", E->output.format, out);
+    getStringProperty(properties, "output_optional", E->output.optional, out);
+
+    getScalarProperty(properties, "cb_block_size", E->output.cb_block_size, out);
+    getScalarProperty(properties, "cb_buffer_size", E->output.cb_buffer_size, out);
+
+    getScalarProperty(properties, "sieve_buf_size", E->output.sieve_buf_size, out);
+
+    getScalarProperty(properties, "outupt_alignment", E->output.alignment, out);
+    getScalarProperty(properties, "outupt_alignment_threshold", E->output.alignment_threshold, out);
+
+    getScalarProperty(properties, "cache_mdc_nelmts", E->output.cache_mdc_nelmts, out);
+    getScalarProperty(properties, "cache_rdcc_nelmts", E->output.cache_rdcc_nelmts, out);
+    getScalarProperty(properties, "cache_rdcc_nbytes", E->output.cache_rdcc_nbytes, out);
+
+    *out << std::endl;
+    out->close();
+    delete out;
+
+    if (PyErr_Occurred())
+	return NULL;
+
+    Py_INCREF(Py_None);
+    return Py_None;
+
+}
+
+
+
 char pyCitcom_Param_set_properties__doc__[] = "";
 char pyCitcom_Param_set_properties__name__[] = "Param_set_properties";
 
@@ -412,9 +458,6 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     getScalarProperty(properties, "Q0", E->control.Q0, out);
 
     getScalarProperty(properties, "stokes_flow_only", E->control.stokes, out);
-
-    getStringProperty(properties, "output_format", E->output.format, out);
-    getStringProperty(properties, "output_optional", E->output.optional, out);
 
     getScalarProperty(properties, "verbose", E->control.verbose, out);
     getScalarProperty(properties, "see_convergence", E->control.print_convergence, out);

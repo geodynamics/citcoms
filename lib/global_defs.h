@@ -792,6 +792,23 @@ struct DATA {
 struct Output {
     char format[20];  /* ascii-local, ascii or hdf5 */
     char optional[1000]; /* comma-delimited list of objects to output */
+
+    /* size of collective buffer used by MPI-IO */
+    int cb_block_size;
+    int cb_buffer_size;
+
+    /* size of data sieve buffer used by HDF5 */
+    int sieve_buf_size;
+
+    /* memory alignment used by HDF5 */
+    int alignment;
+    int alignment_threshold;
+
+    /* cache for chunked dataset used by HDF5 */
+    int cache_mdc_nelmts;
+    int cache_rdcc_nelmts;
+    int cache_rdcc_nbytes;
+
     int connectivity; /* whether to output connectivity */
     int stress;       /* whether to output stress */
     int pressure;     /* whether to output pressure */

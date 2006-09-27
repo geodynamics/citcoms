@@ -237,6 +237,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_IC_set_properties__doc__},
 
+    {pyCitcom_Output_set_properties__name__,
+     pyCitcom_Output_set_properties,
+     METH_VARARGS,
+     pyCitcom_Output_set_properties__doc__},
+
     {pyCitcom_Param_set_properties__name__,
      pyCitcom_Param_set_properties,
      METH_VARARGS,
