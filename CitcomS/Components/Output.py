@@ -65,8 +65,8 @@ class Output(CitcomComponent):
         sieve_buf_size = inv.int("sieve_buf_size", default=mega1)
 
         # memory alignment used by HDF5
-        outupt_alignment = inv.int("outupt_alignment", default=mega1/4)
-        outupt_alignment_threshold = inv.int("outupt_alignment_threshold",
+        output_alignment = inv.int("output_alignment", default=mega1/4)
+        output_alignment_threshold = inv.int("output_alignment_threshold",
                                         default=mega1/2)
 
         # cache for chunked dataset used by HDF5

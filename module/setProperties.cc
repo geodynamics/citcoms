@@ -310,8 +310,8 @@ PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
 
     getScalarProperty(properties, "sieve_buf_size", E->output.sieve_buf_size, out);
 
-    getScalarProperty(properties, "outupt_alignment", E->output.alignment, out);
-    getScalarProperty(properties, "outupt_alignment_threshold", E->output.alignment_threshold, out);
+    getScalarProperty(properties, "output_alignment", E->output.alignment, out);
+    getScalarProperty(properties, "output_alignment_threshold", E->output.alignment_threshold, out);
 
     getScalarProperty(properties, "cache_mdc_nelmts", E->output.cache_mdc_nelmts, out);
     getScalarProperty(properties, "cache_rdcc_nelmts", E->output.cache_rdcc_nelmts, out);
