@@ -85,27 +85,18 @@ struct HDF5_TIME
 
 struct HDF5_INFO
 {
-    /* Keep track of how many times we call h5output() */
-    int count;
-
     /* Keep a reference to the open hdf5 output file */
     char filename[100];
     hid_t file_id;
 
-    /* Cap ID and group for current process */
-    int capid;
-    hid_t cap_group;
+    /* Keep a reference to the MPI_Info object */
+    MPI_Info mpi_info;
 
-    /* Group names under which to store the appropriate data,
-     * represented by an array of strings. For a regional
-     * model, only cap_names[0] should be used.
-     */
-    char cap_names[12][7];
+    /* Cap ID for current process */
+    int cap;
 
-    /* HDF5 group identifiers for all caps. For a regional model,
-     * only cap_groups[0] should be used.
-     */
-    hid_t cap_groups[12];
+    /* Keep track of how many times we call h5output() */
+    int count;
 
     /* Data structures to use in dataset writes...
      * 
@@ -134,4 +125,9 @@ struct HDF5_INFO
     field_t *scalar2d;          /* shape (tdim,xdim,ydim) */
     field_t *scalar1d;          /* shape (tdim,zdim) */
 
+    /* For list of extendible (time dependent) fields */
+    field_t *field[6];
+
+    /* Actual data buffer -- shared over all fields! */
+    float *data;
 };
