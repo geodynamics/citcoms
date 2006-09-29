@@ -32,6 +32,8 @@
 
 void regional_lith_age_read_files(struct All_variables *E, int output)
 {
+  float find_age_in_MY();
+
   FILE *fp1, *fp2;
   float age, newage1, newage2;
   char output_file1[255],output_file2[255];

@@ -50,7 +50,7 @@ void read_mat_from_file(E)
 {
   float find_age_in_MY();
 
-  int nn,m,i,j,k,kk,el,lev,els;
+  int nn,m,i,j,k,kk,el,lev,els,cap;
   int elx,ely,elz,e,elg,emax,gmax;
   float *VIP1,*VIP2;
 
@@ -64,6 +64,8 @@ void read_mat_from_file(E)
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
+
+  fprintf(stderr,"inside read_mat_from_files\n");
 
   elx=E->lmesh.elx;
   elz=E->lmesh.elz;
@@ -94,33 +96,38 @@ void read_mat_from_file(E)
     nage=age1/1.;
     newage1=1.*nage;
 
-    sprintf(output_file,"%s%0.0f",E->control.mat_file,newage1);
-    if(E->parallel.me==0)
-      fprintf(E->fp,"%s %f %s\n","newage1",newage1,output_file);
-    fp1=fopen(output_file,"r");
-    if (fp1 == NULL) {
-      fprintf(E->fp,"(Problem_related #1) Cannot open %s\n",output_file);
-      exit(8);
-    }
+    for(m=1;m<=E->sphere.caps_per_proc;m++) {
+       cap = E->sphere.capid[m] - 1; /* capid: 1-12 */
+       fprintf(stderr,"Problem_related cap=%d\n",cap);
 
-    newage2=newage1+1.;
-    sprintf(output_file,"%s%0.0f",E->control.mat_file,newage2);
-    if(E->parallel.me==0)
-      fprintf(E->fp,"%s %f %s\n","newage2",newage2,output_file);
-    fp2=fopen(output_file,"r");
-    if (fp2 == NULL) {
-      fprintf(E->fp,"(Problem_related #2) Cannot open %s\n",output_file);
-      exit(8);
-    }
+       sprintf(output_file,"%s%0.0f.%d",E->control.mat_file,newage1,cap);
+       fprintf(E->fp,"%s %f %s\n","open mat file newage1",newage1,output_file);
+       fp1=fopen(output_file,"r");
+       if (fp1 == NULL) {
+         fprintf(E->fp,"(Problem_related #1) Cannot open %s\n",output_file);
+         exit(8);
+        }
+
+       newage2=newage1+1.;
+       sprintf(output_file,"%s%0.0f.%d",E->control.mat_file,newage2,cap);
+       fprintf(E->fp,"%s %f %s\n","open mat file newage2",newage2,output_file);
+       fp2=fopen(output_file,"r");
+       if (fp2 == NULL) {
+         fprintf(E->fp,"(Problem_related #2) Cannot open %s\n",output_file);
+         exit(8);
+       }
+    } /*end m */
 
     for(i=1;i<=gmax;i++)  {
-      fscanf(fp1,"%d %f", &nn,&(VIP1[i]));
-      fscanf(fp2,"%d %f", &nn,&(VIP2[i]));
+         fscanf(fp1,"%d %f", &nn,&(VIP1[i]));
+         fscanf(fp2,"%d %f", &nn,&(VIP2[i]));
     }
 
     fclose(fp1);
     fclose(fp2);
 
+    fprintf(stderr,"lmesh.exs=%d\n",E->lmesh.exs);
+    fprintf(stderr,"lmesh.eys=%d\n",E->lmesh.eys);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for (k=1;k<=ely;k++)

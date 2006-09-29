@@ -51,7 +51,6 @@ void full_read_input_files_for_timesteps(E,action,output)
 
     const int dims=E->mesh.nsd;
 
-
     nox=E->mesh.nox;
     noy=E->mesh.noy;
     noz=E->mesh.noz;
@@ -74,8 +73,11 @@ void full_read_input_files_for_timesteps(E,action,output)
       pos_age = 1;
     }
 
+    fprintf(stderr,"inside full... caps_per_proc=%d\n",E->sphere.caps_per_proc);
+
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       cap = E->sphere.capid[m] - 1;  /* capid: 1-12 */
+      fprintf(stderr,"inside full... cap=%d\n",cap);
 
       switch (action) { /* set up files to open */
 
