@@ -130,7 +130,7 @@ if __name__ == '__main__':
             data = cb.readData(filename)
             cb.join(data, n, grid, cap)
 
-        filename = '%s.cap%d.%d' % (prefix, i, step)
+        filename = '%s.cap%02d.%d' % (prefix, i, step)
         print 'writing', filename
         cb.write(filename, grid)
 
