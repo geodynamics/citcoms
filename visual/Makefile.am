@@ -51,32 +51,32 @@ dist_bin_SCRIPTS = \
 	zslice.py
 
 nobase_dist_visual_DATA = \
-	samples/fulltest.cap0.0 \
-	samples/fulltest.cap0.0.general \
-	samples/fulltest.cap1.0 \
-	samples/fulltest.cap10.0 \
-	samples/fulltest.cap10.0.general \
-	samples/fulltest.cap1.0.general \
-	samples/fulltest.cap11.0 \
-	samples/fulltest.cap11.0.general \
-	samples/fulltest.cap2.0 \
-	samples/fulltest.cap2.0.general \
-	samples/fulltest.cap3.0 \
-	samples/fulltest.cap3.0.general \
-	samples/fulltest.cap4.0 \
-	samples/fulltest.cap4.0.general \
-	samples/fulltest.cap5.0 \
-	samples/fulltest.cap5.0.general \
-	samples/fulltest.cap6.0 \
-	samples/fulltest.cap6.0.general \
-	samples/fulltest.cap7.0 \
-	samples/fulltest.cap7.0.general \
-	samples/fulltest.cap8.0 \
-	samples/fulltest.cap8.0.general \
-	samples/fulltest.cap9.0 \
-	samples/fulltest.cap9.0.general \
-	samples/regtest.cap0.0 \
-	samples/regtest.cap0.0.general \
+	samples/fulltest.cap00.100 \
+	samples/fulltest.cap00.100.general \
+	samples/fulltest.cap01.100 \
+	samples/fulltest.cap10.100 \
+	samples/fulltest.cap10.100.general \
+	samples/fulltest.cap01.100.general \
+	samples/fulltest.cap11.100 \
+	samples/fulltest.cap11.100.general \
+	samples/fulltest.cap02.100 \
+	samples/fulltest.cap02.100.general \
+	samples/fulltest.cap03.100 \
+	samples/fulltest.cap03.100.general \
+	samples/fulltest.cap04.100 \
+	samples/fulltest.cap04.100.general \
+	samples/fulltest.cap05.100 \
+	samples/fulltest.cap05.100.general \
+	samples/fulltest.cap06.100 \
+	samples/fulltest.cap06.100.general \
+	samples/fulltest.cap07.100 \
+	samples/fulltest.cap07.100.general \
+	samples/fulltest.cap08.100 \
+	samples/fulltest.cap08.100.general \
+	samples/fulltest.cap09.100 \
+	samples/fulltest.cap09.100.general \
+	samples/regtest.cap00.100 \
+	samples/regtest.cap00.100.general \
 	visFull.cfg \
 	visRegional.cfg \
 	visRegionalSurface.cfg
