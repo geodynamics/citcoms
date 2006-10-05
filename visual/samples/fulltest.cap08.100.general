@@ -1,4 +1,4 @@
-file = regtest.cap0.0
+file = fulltest.cap08.100
 grid = 9 x 9 x 9
 format = ascii
 interleaving = field
