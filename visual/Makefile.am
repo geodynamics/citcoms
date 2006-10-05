@@ -54,11 +54,7 @@ nobase_dist_visual_DATA = \
 	samples/fulltest.cap00.100 \
 	samples/fulltest.cap00.100.general \
 	samples/fulltest.cap01.100 \
-	samples/fulltest.cap10.100 \
-	samples/fulltest.cap10.100.general \
 	samples/fulltest.cap01.100.general \
-	samples/fulltest.cap11.100 \
-	samples/fulltest.cap11.100.general \
 	samples/fulltest.cap02.100 \
 	samples/fulltest.cap02.100.general \
 	samples/fulltest.cap03.100 \
@@ -75,6 +71,10 @@ nobase_dist_visual_DATA = \
 	samples/fulltest.cap08.100.general \
 	samples/fulltest.cap09.100 \
 	samples/fulltest.cap09.100.general \
+	samples/fulltest.cap10.100 \
+	samples/fulltest.cap10.100.general \
+	samples/fulltest.cap11.100 \
+	samples/fulltest.cap11.100.general \
 	samples/regtest.cap00.100 \
 	samples/regtest.cap00.100.general \
 	visFull.cfg \
