@@ -37,7 +37,7 @@ int Emergency_stop;
 
 
 
-void interuption()
+void interuption(int signal_number)
 {
   if (Emergency_stop)
     parallel_process_termination();
