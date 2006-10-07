@@ -25,13 +25,24 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-'''Convert the HDF5 output file to ASCII file(s), with the format of the
+'''
+Convert the CitcomS HDF5 output file to ASCII file(s), with the format of the
 combined cap files
 
-usage: h5tocap.py h5file frame1 [frame2 [...] ]
+usage: h5tocap.py h5file step1 [step2 [...] ]
 '''
 
-import tables
+import sys
+
+try:
+    import tables
+except ImportError, exc:
+    print "Import Error:", exc
+    print """
+This script needs the 'PyTables' extension package.
+Please install the package before running the script, or you can use the
+'h5tocap' program."""
+    sys.exit(1)
 
 
 def find_prefix(h5file):
@@ -46,32 +57,37 @@ def find_prefix(h5file):
 
 
 
-def convert(h5file, prefix, frame):
-    f = tables.openFile(h5file)
-    try:
-        # get attribute 'caps' in the input group
-        caps = int(f.root.input._v_attrs.caps)
-        steps = f.root.time.col('step')
+def convert(h5fid, prefix, step):
+    root = h5fid.root
 
-        # loop through all the caps
-        for cap in range(caps):
-            cap_no = 'cap%02d' % cap
-            group = getattr(f.root, cap_no)
+    # get attribute 'caps' in the input group
+    caps = int(root.input._v_attrs.caps)
+    frame = get_frame(root, step)
 
-            x = group.coord
-            v = group.velocity[frame,:]
-            t = group.temperature[frame,:]
-            visc = group.viscosity[frame,:]
+    # loop through all the caps
+    for cap in range(caps):
+        cap_no = 'cap%02d' % cap
 
-            outputfile = '%s.%s.%d' % (prefix, cap_no, steps[frame])
+        x = root.coord[cap, :]
+        v = root.velocity[frame, cap, :]
+        t = root.temperature[frame, cap, :]
+        visc = root.viscosity[frame, cap, :]
 
-            print 'writing to', outputfile, '...'
-            output(outputfile, x, v, t, visc)
+        outputfile = '%s.%s.%d' % (prefix, cap_no, step)
 
-    finally:
-        f.close()
+        print 'writing to', outputfile, '...'
+        output(outputfile, x, v, t, visc)
 
     return
+
+
+
+def get_frame(root, step):
+    steps = list(root.time.col('step'))
+    try:
+        return steps.index(step)
+    except ValueError:
+        raise ValueError("step %d is not in the dataset" % step)
 
 
 
@@ -107,7 +123,7 @@ def output(outputfile, x, v, t, visc):
 
 
 if __name__ == '__main__':
-    import sys
+    import sys, os.path
 
     if len(sys.argv) < 3:
         print __doc__
@@ -115,14 +131,20 @@ if __name__ == '__main__':
 
 
     h5file = sys.argv[1]
-    file_prefix = find_prefix(h5file)
+    # remove the pathname and '.h5' suffix, if present
+    file_prefix = find_prefix(os.path.basename(h5file))
 
-    frames = [ int(x) for x in sys.argv[2:] ]
+    steps = [ int(x) for x in sys.argv[2:] ]
 
-
-    for frame in frames:
-        # write to outputfile
-        convert(h5file, file_prefix, frame)
+    fid = tables.openFile(h5file)
+    try:
+        for step in steps:
+            try:
+                convert(fid, file_prefix, step)
+            except ValueError, exc:
+                print "Error: ", exc
+    finally:
+        fid.close()
 
 
 # version
