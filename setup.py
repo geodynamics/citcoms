@@ -20,12 +20,12 @@ if setuptools.bootstrap_install_from:
     requirements.append(setuptools.bootstrap_install_from)
     setuptools.bootstrap_install_from = None
 
-requirements.append('pythia >= 0.8-1.0dev-r4617, < 0.8-2.0a, == dev')
+requirements.append('pythia >= 0.8-1.0b1, < 0.8-2.0a')
 
 setuptools.setup(
     script_args = (
     ['easy_install',
-     '--find-links=svn://geodynamics.org/cig/cs/pythia/trunk#egg=pythia-dev'] +
+     '--find-links=http://www.geodynamics.org/cig/software/packages/Eggs/'] +
     sys.argv[1:] +
     requirements
     )

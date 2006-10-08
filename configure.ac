@@ -65,7 +65,7 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
 
     # Checks for Python modules and packages.
-    CIT_CHECK_PYTHON_EGG([pythia >= 0.8-1.0dev-r4617, < 0.8-2.0a, == dev])
+    CIT_CHECK_PYTHON_EGG([pythia >= 0.8-1.0b1, < 0.8-2.0a])
     if test "$want_exchanger" != no; then
         CIT_CHECK_PYTHON_EGG([Exchanger >= 1.0, < 2.0a],
                              [ # found
