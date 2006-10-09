@@ -212,6 +212,7 @@ void visc_from_T(E,EEta,propogate)
     int m,i,j,k,l,z,jj,kk,imark;
     float zero,e_6,one,eta0,Tave,depth,temp,tempa,temp1,TT[9];
     float zzz,zz[9];
+    float visc1, visc2, tempa_exp;
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
     const int nel = E->lmesh.nel;
@@ -308,6 +309,53 @@ void visc_from_T(E,EEta,propogate)
               EEta[m][ (i-1)*vpts + jj ] = tempa*E->VIP[m][i]*
                 exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
                          / (E->viscosity.T[l-1]+temp) );
+
+	    }
+        }
+      break;
+
+
+    case 5:
+
+      /* same as rheol 3, except alternative margin, VIP, formulation */
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=nel;i++)   {
+          l = E->mat[m][i];
+          tempa = E->viscosity.N0[l-1];
+          j = 0;
+
+          for(kk=1;kk<=ends;kk++) {
+            TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+            zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+          }
+
+          for(jj=1;jj<=vpts;jj++) {
+            temp=0.0;
+            zzz=0.0;
+            for(kk=1;kk<=ends;kk++)   {
+              TT[kk]=max(TT[kk],zero);
+              temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+              zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+            }
+
+            if(E->control.mat_control==0)
+              EEta[m][ (i-1)*vpts + jj ] = tempa*
+		exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
+		     - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
+
+            if(E->control.mat_control==1) {
+               visc1 = E->VIP[m][i];
+               visc2 = 2.0/(1./visc1 + 1.);
+               tempa_exp = tempa*
+	          exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
+		     - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
+               visc1 = tempa*E->viscosity.max_value;
+               if(tempa_exp > visc1) tempa_exp=visc1;
+               EEta[m][ (i-1)*vpts + jj ] = visc2*tempa_exp;
+               /* if(E->parallel.me == 0 && visc1 < 1.0e-03)
+                  fprintf(stderr,"%f  %f   %e  %e  %e\n",zzz,temp,visc1,visc2,
+                          EEta[m][ (i-1)*vpts + jj ]); */
+              }
 
 	    }
         }

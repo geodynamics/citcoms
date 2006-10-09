@@ -65,8 +65,6 @@ void read_mat_from_file(E)
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
 
-  fprintf(stderr,"inside read_mat_from_files\n");
-
   elx=E->lmesh.elx;
   elz=E->lmesh.elz;
   ely=E->lmesh.ely;
@@ -98,7 +96,6 @@ void read_mat_from_file(E)
 
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
        cap = E->sphere.capid[m] - 1; /* capid: 1-12 */
-       fprintf(stderr,"Problem_related cap=%d\n",cap);
 
        sprintf(output_file,"%s%0.0f.%d",E->control.mat_file,newage1,cap);
        fprintf(E->fp,"%s %f %s\n","open mat file newage1",newage1,output_file);
@@ -125,9 +122,6 @@ void read_mat_from_file(E)
 
     fclose(fp1);
     fclose(fp2);
-
-    fprintf(stderr,"lmesh.exs=%d\n",E->lmesh.exs);
-    fprintf(stderr,"lmesh.eys=%d\n",E->lmesh.eys);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for (k=1;k<=ely;k++)
