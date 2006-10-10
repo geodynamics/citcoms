@@ -1,11 +1,6 @@
 /*
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- *<LicenseText>
- *
- * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
- * Clint Conrad, Michael Gurnis, and Eun-seo Choi.
- * Copyright (C) 1994-2005, California Institute of Technology.
+ * Output_h5.c by Luis Armendariz and Eh Tan.
+ * Copyright (C) 1994-2006, California Institute of Technology.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *</LicenseText>
- *
- *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
 /* Routines to write the output of the finite element cycles
@@ -38,16 +29,46 @@
 #include "parsing.h"
 #include "output_h5.h"
 
-#ifdef USE_HDF5
-#include "pytables.h"
-#endif
 
+#ifdef USE_HDF5
 
 /****************************************************************************
- * Function prototypes                                                      *
+ * Prototypes for functions local to this file. They are conditionally      *
+ * included only when the HDF5 library is available.                        *
  ****************************************************************************/
 
-#ifdef USE_HDF5
+/* for creation of HDF5 objects (wrapped for compatibility with PyTables) */
+static hid_t h5create_file(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint);
+static herr_t h5create_dataset(hid_t loc_id, const char *name, const char *title, hid_t type_id, int rank, hsize_t *dims, hsize_t *maxdims, hsize_t *chunkdims);
+
+/* for creation of field and other dataset objects */
+static herr_t h5allocate_field(struct All_variables *E, enum field_class_t field_class, int nsd, int time, hid_t dtype, field_t **field);
+static herr_t h5create_field(hid_t loc_id, field_t *field, const char *name, const char *title);
+static herr_t h5create_time(hid_t loc_id);
+static herr_t h5create_connectivity(hid_t loc_id, int nel);
+
+/* for writing to datasets */
+static herr_t h5write_dataset(hid_t dset_id, hid_t mem_type_id, const void *data, int rank, hsize_t *memdims, hsize_t *offset, hsize_t *stride, hsize_t *count, hsize_t *block, int collective, int dowrite);
+static herr_t h5write_field(hid_t dset_id, field_t *field, int collective, int dowrite);
+
+/* for releasing resources from field object */
+static herr_t h5close_field(field_t **field);
+
+/* for writing to HDF5 attributes */
+static herr_t find_attribute(hid_t loc_id, const char *attr_name);
+herr_t set_attribute_string(hid_t obj_id, const char *attr_name, const char *attr_data);
+herr_t set_attribute(hid_t obj_id, const char *attr_name, hid_t type_id, const void *data);
+herr_t set_attribute_float(hid_t obj_id, const char *attr_name, float x);
+herr_t set_attribute_double(hid_t obj_id, const char *attr_name, double x);
+herr_t set_attribute_int(hid_t obj_id, const char *attr_name, int n);
+herr_t set_attribute_long(hid_t obj_id, const char *attr_name, long n);
+herr_t set_attribute_llong(hid_t obj_id, const char *attr_name, long long n);
+herr_t set_attribute_array(hid_t obj_id, const char *attr_name, size_t rank, hsize_t *dims, hid_t type_id, const void *data);
+herr_t set_attribute_vector(hid_t obj_id, const char *attr_name, hsize_t dim, hid_t type_id, const void *data);
+herr_t set_attribute_int_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const int *data);
+herr_t set_attribute_float_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const float *data);
+herr_t set_attribute_double_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const double *data);
 
 /* constant data (only for first cycle) */
 void h5output_meta(struct All_variables *);
@@ -69,55 +90,11 @@ void h5output_surf_botm(struct All_variables *, int);
 void h5output_average(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
-/* for creation of HDF5 objects (wrapped for PyTables compatibility) */
-static hid_t h5create_file(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
-static hid_t h5create_group(hid_t loc_id, const char *name, size_t size_hint);
-static herr_t h5create_dataset(hid_t loc_id, const char *name, const char *title, hid_t type_id, int rank, hsize_t *dims, hsize_t *maxdims, hsize_t *chunkdims);
-
-/* for creation of field and other dataset objects */
-static herr_t h5allocate_field(struct All_variables *E, enum field_class_t field_class, int nsd, int time, hid_t dtype, field_t **field);
-static herr_t h5create_field(hid_t loc_id, field_t *field, const char *name, const char *title);
-static herr_t h5create_time(hid_t loc_id);
-static herr_t h5create_connectivity(hid_t loc_id, int nel);
-
-/* for writing to datasets */
-static herr_t h5write_dataset(hid_t dset_id, hid_t mem_type_id, const void *data, int rank, hsize_t *memdims, hsize_t *offset, hsize_t *stride, hsize_t *count, hsize_t *block, int collective, int dowrite);
-static herr_t h5write_field(hid_t dset_id, field_t *field, int collective, int dowrite);
-
-/* for releasing resources */
-static herr_t h5close_field(field_t **field);
-
-
 #endif
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
-
-
-/****************************************************************************
- * Function to read input parameters for legacy CitcomS                     *
- ****************************************************************************/
-
-void h5input_params(struct All_variables *E)
-{
-#ifdef USE_HDF5
-    int m = E->parallel.me;
-
-    input_int("cb_block_size", &(E->output.cb_block_size), "1048576", m);
-    input_int("cb_buffer_size", &(E->output.cb_buffer_size), "4194304", m);
-
-    input_int("sieve_buf_size", &(E->output.sieve_buf_size), "1048576", m);
-
-    input_int("output_alignment", &(E->output.alignment), "262144", m);
-    input_int("output_alignment_threshold", &(E->output.alignment_threshold), "524288", m);
-
-    input_int("cache_mdc_nelmts", &(E->output.cache_mdc_nelmts), "10330", m);
-    input_int("cache_rdcc_nelmts", &(E->output.cache_rdcc_nelmts), "521", m);
-    input_int("cache_rdcc_nbytes", &(E->output.cache_rdcc_nbytes), "1048576", m);
-
-#endif
-}
 
 
 /****************************************************************************
@@ -165,6 +142,33 @@ void h5output(struct All_variables *E, int cycles)
 
     /* Call this last (for timing information) */
     h5output_time(E, cycles);
+
+#endif
+}
+
+
+/****************************************************************************
+ * Function to read input parameters for legacy CitcomS                     *
+ ****************************************************************************/
+
+void h5input_params(struct All_variables *E)
+{
+#ifdef USE_HDF5
+    int m = E->parallel.me;
+
+    /* TODO: use non-optimized defaults to avoid unnecessary failures */
+
+    input_int("cb_block_size", &(E->output.cb_block_size), "1048576", m);
+    input_int("cb_buffer_size", &(E->output.cb_buffer_size), "4194304", m);
+
+    input_int("sieve_buf_size", &(E->output.sieve_buf_size), "1048576", m);
+
+    input_int("output_alignment", &(E->output.alignment), "262144", m);
+    input_int("output_alignment_threshold", &(E->output.alignment_threshold), "524288", m);
+
+    input_int("cache_mdc_nelmts", &(E->output.cache_mdc_nelmts), "10330", m);
+    input_int("cache_rdcc_nelmts", &(E->output.cache_rdcc_nelmts), "521", m);
+    input_int("cache_rdcc_nbytes", &(E->output.cache_rdcc_nbytes), "1048576", m);
 
 #endif
 }
@@ -466,6 +470,8 @@ void h5output_close(struct All_variables *E)
 
 /*****************************************************************************
  * Private functions to simplify certain tasks in the h5output_*() functions *
+ * The rest of the file can now be hidden from the compiler, when HDF5       *
+ * is not enabled.                                                           *
  *****************************************************************************/
 
 #ifdef USE_HDF5
@@ -838,100 +844,6 @@ static herr_t h5create_field(hid_t loc_id,
     return status;
 }
 
-static herr_t h5create_connectivity(hid_t loc_id, int nel)
-{
-    hid_t dataset;
-    hid_t dataspace;
-    herr_t status;
-
-    hsize_t dims[2];
-
-    dims[0] = nel;
-    dims[1] = 8;
-
-    /* Create the dataspace */
-    dataspace = H5Screate_simple(2, dims, NULL);
-
-    /* Create the dataset */
-    dataset = H5Dcreate(loc_id, "connectivity", H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
-
-    /* Write necessary attributes for PyTables compatibility */
-    set_attribute_string(dataset, "TITLE", "Node connectivity");
-    set_attribute_string(dataset, "CLASS", "ARRAY");
-    set_attribute_string(dataset, "FLAVOR", "numpy");
-    set_attribute_string(dataset, "VERSION", "2.3");
-
-    status = H5Sclose(dataspace);
-    status = H5Dclose(dataset);
-    return 0;
-}
-
-static herr_t h5create_time(hid_t loc_id)
-{
-    hid_t dataset;      /* dataset identifier */
-    hid_t datatype;     /* row datatype identifier */
-    hid_t dataspace;    /* memory dataspace */
-    hid_t dcpl_id;      /* dataset creation property list identifier */
-    herr_t status;
-
-    hsize_t dim = 0;
-    hsize_t maxdim = H5S_UNLIMITED;
-    hsize_t chunkdim = 1;
-
-    /* Create the memory data type */
-    datatype = H5Tcreate(H5T_COMPOUND, sizeof(struct HDF5_TIME));
-    status = H5Tinsert(datatype, "step", HOFFSET(struct HDF5_TIME, step), H5T_NATIVE_INT);
-    status = H5Tinsert(datatype, "time", HOFFSET(struct HDF5_TIME, time), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "time_step", HOFFSET(struct HDF5_TIME, time_step), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "cpu", HOFFSET(struct HDF5_TIME, cpu), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "cpu_step", HOFFSET(struct HDF5_TIME, cpu_step), H5T_NATIVE_FLOAT);
-
-    /* Create the dataspace */
-    dataspace = H5Screate_simple(1, &dim, &maxdim);
-
-    /* Modify dataset creation properties (enable chunking) */
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    status  = H5Pset_chunk(dcpl_id, 1, &chunkdim);
-
-    /* Create the dataset */
-    dataset = H5Dcreate(loc_id, "time", datatype, dataspace, dcpl_id);
-
-    /*
-     * Write necessary attributes for PyTables compatibility
-     */
-
-    set_attribute_string(dataset, "TITLE", "Timing table");
-    set_attribute_string(dataset, "CLASS", "TABLE");
-    set_attribute_string(dataset, "FLAVOR", "numpy");
-    set_attribute_string(dataset, "VERSION", "2.6");
-
-    set_attribute_llong(dataset, "NROWS", 0);
-
-    set_attribute_string(dataset, "FIELD_0_NAME", "step");
-    set_attribute_string(dataset, "FIELD_1_NAME", "time");
-    set_attribute_string(dataset, "FIELD_2_NAME", "time_step");
-    set_attribute_string(dataset, "FIELD_3_NAME", "cpu");
-    set_attribute_string(dataset, "FIELD_4_NAME", "cpu_step");
-
-    set_attribute_double(dataset, "FIELD_0_FILL", 0);
-    set_attribute_double(dataset, "FIELD_1_FILL", 0);
-    set_attribute_double(dataset, "FIELD_2_FILL", 0);
-    set_attribute_double(dataset, "FIELD_3_FILL", 0);
-    set_attribute_double(dataset, "FIELD_4_FILL", 0);
-
-    set_attribute_int(dataset, "AUTOMATIC_INDEX", 1);
-    set_attribute_int(dataset, "REINDEX", 1);
-
-    /* Release resources */
-    status = H5Pclose(dcpl_id);
-    status = H5Sclose(dataspace);
-    status = H5Tclose(datatype);
-    status = H5Dclose(dataset);
-
-    return 0;
-}
-
-
 
 static herr_t h5write_dataset(hid_t dset_id,
                               hid_t mem_type_id,
@@ -1054,14 +966,12 @@ static herr_t h5close_field(field_t **field)
         }
 }
 
-#endif
 
 
 /****************************************************************************
- * Functions to save specific physical quantities as HDF5 arrays.           *
+ * The following functions are used to save specific physical quantities    *
+ * from CitcomS into HDF5 arrays.                                           *
  ****************************************************************************/
-
-#ifdef USE_HDF5
 
 /* This function extends the time dimension of all time-varying field
  * objects. Before any data gets written to a dataset, one should perform
@@ -1673,77 +1583,37 @@ void h5output_average(struct All_variables *E, int cycles)
     status = H5Dclose(dataset);
 }
 
-void h5output_time(struct All_variables *E, int cycles)
+
+/****************************************************************************
+ * Create and output /connectivity dataset                                  *
+ ****************************************************************************/
+
+static herr_t h5create_connectivity(hid_t loc_id, int nel)
 {
-    double CPU_time0();
-
-    hid_t dataset;      /* dataset identifier */
-    hid_t datatype;     /* row datatype identifier */
-    hid_t dataspace;    /* memory dataspace */
-    hid_t filespace;    /* file dataspace */
-    hid_t dxpl_id;      /* data transfer property list identifier */
-
+    hid_t dataset;
+    hid_t dataspace;
     herr_t status;
 
-    hsize_t dim;
-    hsize_t offset;
-    hsize_t count;
+    hsize_t dims[2];
 
-    struct HDF5_TIME row;
+    dims[0] = nel;
+    dims[1] = 8;
 
-    double current_time = CPU_time0();
+    /* Create the dataspace */
+    dataspace = H5Screate_simple(2, dims, NULL);
 
+    /* Create the dataset */
+    dataset = H5Dcreate(loc_id, "connectivity", H5T_NATIVE_INT, dataspace, H5P_DEFAULT);
 
-    /* Prepare data */
-    row.step = cycles;
-    row.time = E->monitor.elapsed_time;
-    row.time_step = E->advection.timestep;
-    row.cpu = current_time - E->monitor.cpu_time_at_start;
-    row.cpu_step = current_time - E->monitor.cpu_time_at_last_cycle;
+    /* Write necessary attributes for PyTables compatibility */
+    set_attribute_string(dataset, "TITLE", "Node connectivity");
+    set_attribute_string(dataset, "CLASS", "ARRAY");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.3");
 
-    /* Get dataset */
-    dataset = H5Dopen(E->hdf5.file_id, "time");
-
-    /* Extend dataset -- note this is a collective call */
-    dim = E->hdf5.count;
-    status = H5Dextend(dataset, &dim);
-
-    /* Get datatype */
-    datatype = H5Dget_type(dataset);
-
-    /* Define memory dataspace */
-    dim = 1;
-    dataspace = H5Screate_simple(1, &dim, NULL);
-
-    /* Get file dataspace */
-    filespace = H5Dget_space(dataset);
-
-    /* Hyperslab selection parameters */
-    offset = E->hdf5.count-1;
-    count  = 1;
-
-    /* Select hyperslab in file dataspace */
-    status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                                 &offset, NULL, &count, NULL);
-
-    /* Create property list for independent dataset write */
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
-
-    /* Write to hyperslab selection */
-    if (E->parallel.me == 0)
-        status = H5Dwrite(dataset, datatype, dataspace, filespace,
-                          dxpl_id, &row);
-
-    /* Update NROWS attribute (for PyTables) */
-    set_attribute_llong(dataset, "NROWS", E->hdf5.count);
-
-    /* Release resources */
-    status = H5Pclose(dxpl_id);
-    status = H5Sclose(filespace);
     status = H5Sclose(dataspace);
-    status = H5Tclose(datatype);
     status = H5Dclose(dataset);
+    return 0;
 }
 
 void h5output_connectivity(struct All_variables *E)
@@ -1822,9 +1692,154 @@ void h5output_connectivity(struct All_variables *E)
     }
 }
 
+
+/****************************************************************************
+ * Create and output /time dataset                                          *
+ ****************************************************************************/
+
+static herr_t h5create_time(hid_t loc_id)
+{
+    hid_t dataset;      /* dataset identifier */
+    hid_t datatype;     /* row datatype identifier */
+    hid_t dataspace;    /* memory dataspace */
+    hid_t dcpl_id;      /* dataset creation property list identifier */
+    herr_t status;
+
+    hsize_t dim = 0;
+    hsize_t maxdim = H5S_UNLIMITED;
+    hsize_t chunkdim = 1;
+
+    /* Create the memory data type */
+    datatype = H5Tcreate(H5T_COMPOUND, sizeof(struct HDF5_TIME));
+    status = H5Tinsert(datatype, "step", HOFFSET(struct HDF5_TIME, step), H5T_NATIVE_INT);
+    status = H5Tinsert(datatype, "time", HOFFSET(struct HDF5_TIME, time), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "time_step", HOFFSET(struct HDF5_TIME, time_step), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "cpu", HOFFSET(struct HDF5_TIME, cpu), H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "cpu_step", HOFFSET(struct HDF5_TIME, cpu_step), H5T_NATIVE_FLOAT);
+
+    /* Create the dataspace */
+    dataspace = H5Screate_simple(1, &dim, &maxdim);
+
+    /* Modify dataset creation properties (enable chunking) */
+    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
+    status  = H5Pset_chunk(dcpl_id, 1, &chunkdim);
+
+    /* Create the dataset */
+    dataset = H5Dcreate(loc_id, "time", datatype, dataspace, dcpl_id);
+
+    /*
+     * Write necessary attributes for PyTables compatibility
+     */
+
+    set_attribute_string(dataset, "TITLE", "Timing table");
+    set_attribute_string(dataset, "CLASS", "TABLE");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.6");
+
+    set_attribute_llong(dataset, "NROWS", 0);
+
+    set_attribute_string(dataset, "FIELD_0_NAME", "step");
+    set_attribute_string(dataset, "FIELD_1_NAME", "time");
+    set_attribute_string(dataset, "FIELD_2_NAME", "time_step");
+    set_attribute_string(dataset, "FIELD_3_NAME", "cpu");
+    set_attribute_string(dataset, "FIELD_4_NAME", "cpu_step");
+
+    set_attribute_double(dataset, "FIELD_0_FILL", 0);
+    set_attribute_double(dataset, "FIELD_1_FILL", 0);
+    set_attribute_double(dataset, "FIELD_2_FILL", 0);
+    set_attribute_double(dataset, "FIELD_3_FILL", 0);
+    set_attribute_double(dataset, "FIELD_4_FILL", 0);
+
+    set_attribute_int(dataset, "AUTOMATIC_INDEX", 1);
+    set_attribute_int(dataset, "REINDEX", 1);
+
+    /* Release resources */
+    status = H5Pclose(dcpl_id);
+    status = H5Sclose(dataspace);
+    status = H5Tclose(datatype);
+    status = H5Dclose(dataset);
+
+    return 0;
+}
+
+void h5output_time(struct All_variables *E, int cycles)
+{
+    double CPU_time0();
+
+    hid_t dataset;      /* dataset identifier */
+    hid_t datatype;     /* row datatype identifier */
+    hid_t dataspace;    /* memory dataspace */
+    hid_t filespace;    /* file dataspace */
+    hid_t dxpl_id;      /* data transfer property list identifier */
+
+    herr_t status;
+
+    hsize_t dim;
+    hsize_t offset;
+    hsize_t count;
+
+    struct HDF5_TIME row;
+
+    double current_time = CPU_time0();
+
+
+    /* Prepare data */
+    row.step = cycles;
+    row.time = E->monitor.elapsed_time;
+    row.time_step = E->advection.timestep;
+    row.cpu = current_time - E->monitor.cpu_time_at_start;
+    row.cpu_step = current_time - E->monitor.cpu_time_at_last_cycle;
+
+    /* Get dataset */
+    dataset = H5Dopen(E->hdf5.file_id, "time");
+
+    /* Extend dataset -- note this is a collective call */
+    dim = E->hdf5.count;
+    status = H5Dextend(dataset, &dim);
+
+    /* Get datatype */
+    datatype = H5Dget_type(dataset);
+
+    /* Define memory dataspace */
+    dim = 1;
+    dataspace = H5Screate_simple(1, &dim, NULL);
+
+    /* Get file dataspace */
+    filespace = H5Dget_space(dataset);
+
+    /* Hyperslab selection parameters */
+    offset = E->hdf5.count-1;
+    count  = 1;
+
+    /* Select hyperslab in file dataspace */
+    status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
+                                 &offset, NULL, &count, NULL);
+
+    /* Create property list for independent dataset write */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+
+    /* Write to hyperslab selection */
+    if (E->parallel.me == 0)
+        status = H5Dwrite(dataset, datatype, dataspace, filespace,
+                          dxpl_id, &row);
+
+    /* Update NROWS attribute (for PyTables) */
+    set_attribute_llong(dataset, "NROWS", E->hdf5.count);
+
+    /* Release resources */
+    status = H5Pclose(dxpl_id);
+    status = H5Sclose(filespace);
+    status = H5Sclose(dataspace);
+    status = H5Tclose(datatype);
+    status = H5Dclose(dataset);
+}
+
+
 
 /****************************************************************************
- * Input parameters and other information                                   *
+ * Save most CitcomS input parameters, and other information, as            *
+ * attributes in a group called /input                                      *
  ****************************************************************************/
 
 void h5output_meta(struct All_variables *E)
@@ -2124,4 +2139,315 @@ void h5output_meta(struct All_variables *E)
     status = H5Gclose(input);
 }
 
-#endif
+/****************************************************************************
+ * Some of the following functions were based from the H5ATTR.c             *
+ * source file in PyTables, which is a BSD-licensed python extension        *
+ * for accessing HDF5 files.                                                *
+ *                                                                          *
+ * The copyright notice is hereby retained.                                 *
+ *                                                                          *
+ * NCSA HDF                                                                 *
+ * Scientific Data Technologies                                             *
+ * National Center for Supercomputing Applications                          *
+ * University of Illinois at Urbana-Champaign                               *
+ * 605 E. Springfield, Champaign IL 61820                                   *
+ *                                                                          *
+ * For conditions of distribution and use, see the accompanying             *
+ * hdf/COPYING file.                                                        *
+ *                                                                          *
+ * Modified versions of H5LT for getting and setting attributes for open    *
+ * groups and leaves.                                                       *
+ * F. Altet 2005/09/29                                                      *
+ *                                                                          *
+ ****************************************************************************/
+
+/* Function  : find_attr
+ * Purpose   : operator function used by find_attribute
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Date      : June 21, 2001
+ */
+static herr_t find_attr(hid_t loc_id, const char *name, void *op_data)
+{
+    /* Define a default zero value for return. This will cause the
+     * iterator to continue if the palette attribute is not found yet.
+     */
+
+    int ret = 0;
+
+    char *attr_name = (char *)op_data;
+
+    /* Shut the compiler up */
+    loc_id = loc_id;
+
+    /* Define a positive value for return value if the attribute was
+     * found. This will cause the iterator to immediately return that
+     * positive value, indicating short-circuit success
+     */
+
+    if(strcmp(name, attr_name) == 0)
+        ret = 1;
+
+    return ret;
+}
+
+/* Function  : find_attribute
+ * Purpose   : Inquires if an attribute named attr_name exists attached
+ *             attached to the object loc_id.
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Date      : June 21, 2001
+ *
+ * Comments:
+ *  The function uses H5Aiterate with the operator function find_attr
+ *
+ * Return:
+ *
+ *  Success: The return value of the first operator that returns
+ *           non-zero, or zero if all members were processed with no
+ *           operator returning non-zero.
+ *
+ *  Failure: Negative if something goes wrong within the library,
+ *           or the negative value returned by one of the operators.
+ */
+static herr_t find_attribute(hid_t loc_id, const char *attr_name)
+{
+    unsigned int attr_num;
+    herr_t ret;
+
+    attr_num = 0;
+    ret = H5Aiterate(loc_id, &attr_num, find_attr, (void *)attr_name);
+
+    return ret;
+}
+
+
+/* Function: set_attribute_string
+ * Purpose : Creates and writes a string attribute named attr_name
+ *           and attaches it to the object specified by obj_id
+ * Return  : Success 0, Failure -1
+ * Comments: If the attribute already exists, it is overwritten.
+ */
+herr_t set_attribute_string(hid_t obj_id,
+                            const char *attr_name,
+                            const char *attr_data)
+{
+    hid_t   attr_type;
+    hid_t   attr_size;
+    hid_t   attr_space_id;
+    hid_t   attr_id;
+    int     has_attr;
+    herr_t  status;
+
+    /* Create the attribute */
+    attr_type = H5Tcopy(H5T_C_S1);
+    if (attr_type < 0) goto out;
+
+    attr_size = strlen(attr_data) + 1;  /* extra null term */
+
+    status = H5Tset_size(attr_type, (size_t)attr_size);
+    if (status < 0) goto out;
+
+    status = H5Tset_strpad(attr_type, H5T_STR_NULLTERM);
+    if (status < 0) goto out;
+
+    attr_space_id = H5Screate(H5S_SCALAR);
+    if (status < 0) goto out;
+
+    /* Verify if the attribute already exists */
+    has_attr = find_attribute(obj_id, attr_name);
+
+    /* The attribute already exists, delete it */
+    if (has_attr == 1)
+    {
+        status = H5Adelete(obj_id, attr_name);
+        if (status < 0) goto out;
+    }
+
+    /* Create and write the attribute */
+
+    attr_id = H5Acreate(obj_id, attr_name, attr_type, attr_space_id,
+                        H5P_DEFAULT);
+    if(attr_id < 0) goto out;
+
+    status = H5Awrite(attr_id, attr_type, attr_data);
+    if(status < 0) goto out;
+
+    status = H5Aclose(attr_id);
+    if(status < 0) goto out;
+
+    status = H5Sclose(attr_space_id);
+    if(status < 0) goto out;
+
+    status = H5Tclose(attr_type);
+    if(status < 0) goto out;
+
+
+    return 0;
+
+out:
+    return -1;
+}
+
+
+/* Function  : set_attribute
+ * Purpose   : Private function used by
+ *             set_attribute_int and set_attribute_float
+ * Return    : Success 0, Failure -1
+ * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Date      : July 25, 2001
+ */
+herr_t set_attribute(hid_t obj_id,
+                     const char *attr_name,
+                     hid_t type_id,
+                     const void *data)
+{
+    hid_t space_id, attr_id;
+    herr_t status;
+
+    int has_attr;
+
+    /* Create the data space for the attribute. */
+    space_id = H5Screate(H5S_SCALAR);
+    if (space_id < 0) goto out;
+
+    /* Verify if the attribute already exists */
+    has_attr = find_attribute(obj_id, attr_name);
+    if (has_attr == 1)
+    {
+        /* The attribute already exists. Delete it. */
+        status = H5Adelete(obj_id, attr_name);
+        if(status < 0) goto out;
+    }
+
+    /* Create the attribute. */
+    attr_id = H5Acreate(obj_id, attr_name, type_id, space_id, H5P_DEFAULT);
+    if (attr_id < 0) goto out;
+
+    /* Write the attribute data. */
+    status = H5Awrite(attr_id, type_id, data);
+    if (status < 0) goto out;
+
+    /* Close the attribute. */
+    status = H5Aclose(attr_id);
+    if (status < 0) goto out;
+
+    /* Close the data space. */
+    status = H5Sclose(space_id);
+    if (status < 0) goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+herr_t set_attribute_float(hid_t obj_id, const char *attr_name, float x)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_FLOAT, &x);
+}
+
+herr_t set_attribute_double(hid_t obj_id, const char *attr_name, double x)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_DOUBLE, &x);
+}
+
+herr_t set_attribute_int(hid_t obj_id, const char *attr_name, int n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_INT, &n);
+}
+
+herr_t set_attribute_long(hid_t obj_id, const char *attr_name, long n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_LONG, &n);
+}
+
+herr_t set_attribute_llong(hid_t obj_id, const char *attr_name, long long n)
+{
+    return set_attribute(obj_id, attr_name, H5T_NATIVE_LLONG, &n);
+}
+
+/* Function: set_attribute_array
+ * Purpose : write an array attribute
+ * Return  : Success 0, Failure -1
+ * Date    : July 25, 2001
+ */
+herr_t set_attribute_array(hid_t obj_id,
+                           const char *attr_name,
+                           size_t rank,
+                           hsize_t *dims,
+                           hid_t type_id,
+                           const void *data)
+{
+    hid_t space_id, attr_id;
+    herr_t status;
+
+    int has_attr;
+
+    /* Create the data space for the attribute. */
+    space_id = H5Screate_simple(rank, dims, NULL);
+    if (space_id < 0) goto out;
+
+    /* Verify if the attribute already exists. */
+    has_attr = find_attribute(obj_id, attr_name);
+    if (has_attr == 1)
+    {
+        /* The attribute already exists. Delete it. */
+        status = H5Adelete(obj_id, attr_name);
+        if (status < 0) goto out;
+    }
+
+    /* Create the attribute. */
+    attr_id = H5Acreate(obj_id, attr_name, type_id, space_id, H5P_DEFAULT);
+    if (attr_id < 0) goto out;
+
+    /* Write the attribute data. */
+    status = H5Awrite(attr_id, type_id, data);
+    if (status < 0) goto out;
+
+    /* Close the attribute. */
+    status = H5Aclose(attr_id);
+    if (status < 0) goto out;
+
+    /* Close the dataspace. */
+    status = H5Sclose(space_id);
+    if (status < 0) goto out;
+
+    return 0;
+
+out:
+    return -1;
+}
+
+herr_t set_attribute_vector(hid_t obj_id,
+                            const char *attr_name,
+                            hsize_t dim,
+                            hid_t type_id,
+                            const void *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, type_id, data);
+}
+
+herr_t set_attribute_int_vector(hid_t obj_id,
+                                const char *attr_name,
+                                hsize_t dim,
+                                const int *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_INT, data);
+}
+
+herr_t set_attribute_float_vector(hid_t obj_id,
+                                  const char *attr_name,
+                                  hsize_t dim,
+                                  const float *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_FLOAT, data);
+}
+
+herr_t set_attribute_double_vector(hid_t obj_id,
+                                   const char *attr_name,
+                                   hsize_t dim,
+                                   const double *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_DOUBLE, data);
+}
+
+#endif  /* #ifdef USE_HDF5 */
