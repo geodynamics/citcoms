@@ -109,8 +109,8 @@ void output_h5_input(struct All_variables *E)
 
     input_int("sieve_buf_size", &(E->output.sieve_buf_size), "1048576", m);
 
-    input_int("outupt_alignment", &(E->output.alignment), "262144", m);
-    input_int("outupt_alignment_threshold", &(E->output.alignment_threshold), "524288", m);
+    input_int("output_alignment", &(E->output.alignment), "262144", m);
+    input_int("output_alignment_threshold", &(E->output.alignment_threshold), "524288", m);
 
     input_int("cache_mdc_nelmts", &(E->output.cache_mdc_nelmts), "10330", m);
     input_int("cache_rdcc_nelmts", &(E->output.cache_rdcc_nelmts), "521", m);
