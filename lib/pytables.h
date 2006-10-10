@@ -46,6 +46,9 @@ herr_t set_attribute_long(hid_t obj_id, const char *attr_name, long n);
 herr_t set_attribute_llong(hid_t obj_id, const char *attr_name, long long n);
 herr_t set_attribute_array(hid_t obj_id, const char *attr_name, size_t rank, hsize_t *dims, hid_t type_id, const void *data);
 herr_t set_attribute_vector(hid_t obj_id, const char *attr_name, hsize_t dim, hid_t type_id, const void *data);
+herr_t set_attribute_int_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const int *data);
+herr_t set_attribute_float_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const float *data);
+herr_t set_attribute_double_vector(hid_t obj_id, const char *attr_name, hsize_t dim, const double *data);
 
 
 #ifdef __cplusplus

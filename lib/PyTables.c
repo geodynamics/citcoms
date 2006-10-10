@@ -283,5 +283,28 @@ herr_t set_attribute_vector(hid_t obj_id,
     return set_attribute_array(obj_id, attr_name, 1, &dim, type_id, data);
 }
 
+herr_t set_attribute_int_vector(hid_t obj_id,
+                                const char *attr_name,
+                                hsize_t dim,
+                                const int *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_INT, data);
+}
+
+herr_t set_attribute_float_vector(hid_t obj_id,
+                                  const char *attr_name,
+                                  hsize_t dim,
+                                  const float *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_FLOAT, data);
+}
+
+herr_t set_attribute_double_vector(hid_t obj_id,
+                                   const char *attr_name,
+                                   hsize_t dim,
+                                   const double *data)
+{
+    return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_DOUBLE, data);
+}
 
 #endif  /* #ifdef USE_HDF5 */
