@@ -404,10 +404,10 @@ void h5output_open(struct All_variables *E)
         status = H5Gclose(botm_group);
     }
 
-    /* Create /average group */
+    /* Create /have/ group */
     if(E->output.average == 1)
     {
-        avg_group = h5create_group(file_id, "average", (size_t)0);
+        avg_group = h5create_group(file_id, "have", (size_t)0);
         h5create_field(avg_group, const_scalar1d, "coord", "radial coordinates of horizontal planes");
         h5create_field(avg_group, scalar1d, "temperature", "horizontal temperature average");
         h5create_field(avg_group, scalar1d, "velocity_xy", "horizontal Vxy average (rms)");
@@ -1608,7 +1608,7 @@ void h5output_have_coord(struct All_variables *E)
     {
         for(k = 0; k < mz; k++)
             field->data[k] = E->sx[1][3][k+1];
-        dataset = H5Dopen(E->hdf5.file_id, "/average/coord");
+        dataset = H5Dopen(E->hdf5.file_id, "/have/coord");
         status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
         status = H5Dclose(dataset);
     }
@@ -1649,7 +1649,7 @@ void h5output_average(struct All_variables *E, int cycles)
     /* temperature horizontal average */
     for(k = 0; k < mz; k++)
         field->data[k] = E->Have.T[k+1];
-    dataset = H5Dopen(file_id, "/average/temperature");
+    dataset = H5Dopen(file_id, "/have/temperature");
     status = H5Dextend(dataset, field->dims);
     status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
     status = H5Dclose(dataset);
@@ -1657,7 +1657,7 @@ void h5output_average(struct All_variables *E, int cycles)
     /* Vxy horizontal average (rms) */
     for(k = 0; k < mz; k++)
         field->data[k] = E->Have.V[1][k+1];
-    dataset = H5Dopen(file_id, "/average/velocity_xy");
+    dataset = H5Dopen(file_id, "/have/velocity_xy");
     status = H5Dextend(dataset, field->dims);
     status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
     status = H5Dclose(dataset);
@@ -1665,7 +1665,7 @@ void h5output_average(struct All_variables *E, int cycles)
     /* Vz horizontal average (rms) */
     for(k = 0; k < mz; k++)
         field->data[k] = E->Have.V[2][k+1];
-    dataset = H5Dopen(file_id, "/average/velocity_z");
+    dataset = H5Dopen(file_id, "/have/velocity_z");
     status = H5Dextend(dataset, field->dims);
     status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
     status = H5Dclose(dataset);
