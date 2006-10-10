@@ -380,7 +380,7 @@ void read_initial_settings(struct All_variables *E)
     / (E->data.layer_km * E->data.layer_km * E->data.layer_km * 1e9);
 
   output_common_input(E);
-  output_h5_input(E);
+  h5input_params(E);
   phase_change_input(E);
   lith_age_input(E);
   viscosity_input(E);

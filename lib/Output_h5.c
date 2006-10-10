@@ -96,10 +96,10 @@ extern void get_STD_topo(struct All_variables *, float**, float**, float**, floa
 
 
 /****************************************************************************
- * Functions that read input parameters for legacy CitcomS                   *
+ * Function to read input parameters for legacy CitcomS                     *
  ****************************************************************************/
 
-void output_h5_input(struct All_variables *E)
+void h5input_params(struct All_variables *E)
 {
 #ifdef USE_HDF5
     int m = E->parallel.me;
