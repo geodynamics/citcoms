@@ -228,7 +228,6 @@ void h5output_open(struct All_variables *E)
     hid_t fcpl_id;      /* file creation property list identifier */
     hid_t fapl_id;      /* file access property list identifier */
 
-    hid_t data_group;   /* group identifier */
     hid_t surf_group;   /* group identifier for top cap surface */
     hid_t botm_group;   /* group identifier for bottom cap surface */
     hid_t avg_group;    /* group identifier for horizontal averages */
@@ -372,17 +371,20 @@ void h5output_open(struct All_variables *E)
     h5create_field(file_id, scalar3d, "temperature", "temperature values on nodes");
     h5create_field(file_id, scalar3d, "viscosity", "viscosity values on nodes");
 
+    /* Create /pressure dataset */
     if (E->output.pressure == 1)
         h5create_field(file_id, scalar3d, "pressure", "pressure values on nodes");
 
+    /* Create /stress dataset */
     if (E->output.stress == 1)
         h5create_field(file_id, tensor3d, "stress", "stress values on nodes");
 
+    /* Create /connectivity dataset */
     procs_per_cap = nprocx * nprocy * nprocz;
     if (E->output.connectivity == 1)
-        h5create_connectivity(data_group, E->lmesh.nel * procs_per_cap);
+        h5create_connectivity(file_id, E->lmesh.nel * procs_per_cap);
 
-    /* Create /surf/ group */
+    /* Create /surf/ group*/
     if (E->output.surf == 1)
     {
         surf_group = h5create_group(file_id, "surf", (size_t)0);
