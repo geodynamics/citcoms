@@ -1,5 +1,4 @@
-// -*- C++ -*-
-// 
+/* 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //<LicenseText>
@@ -24,18 +23,17 @@
 //</LicenseText>
 // 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+*/ 
 
 #if !defined(pyCitcom_bindings_h)
 #define pyCitcom_bindings_h
 
-// the method table
+/* the method table */
 
 extern struct PyMethodDef pyCitcom_methods[];
 
 #endif
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

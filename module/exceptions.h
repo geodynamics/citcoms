@@ -1,5 +1,4 @@
-// -*- C++ -*-
-// 
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //<LicenseText>
@@ -24,18 +23,17 @@
 //</LicenseText>
 // 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+*/ 
 
 #if !defined(pyCitcom_exceptions_h)
 #define pyCitcom_exceptions_h
 
-// exceptions
+/* exceptions */
 
 extern PyObject *pyCitcom_runtimeError;
 
 #endif
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

@@ -37,9 +37,9 @@ class Param(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Param_set_properties
-        Param_set_properties(self.all_variables, self.inventory)
+        Param_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

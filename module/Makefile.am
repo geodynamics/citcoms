@@ -33,22 +33,19 @@ pyexec_LTLIBRARIES =
 
 if COND_EMBEDDING
     # static library
-    noinst_LIBRARIES += libCitcomSLibmodule.a libPyxMPImodule.a
+    noinst_LIBRARIES += libCitcomSLibmodule.a
 else
     # extension module (libtool)
-    pyexec_LTLIBRARIES += CitcomSLibmodule.la PyxMPImodule.la
+    pyexec_LTLIBRARIES += CitcomSLibmodule.la
 endif
 
 # static libraries
 
-libCitcomSLibmodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
+libCitcomSLibmodule_a_CFLAGS = $(AM_CFLAGS) # hack for automake
 libCitcomSLibmodule_a_SOURCES = $(sources)
 
-libPyxMPImodule_a_CFLAGS = $(AM_CXXFLAGS) # hack for automake
-libPyxMPImodule_a_SOURCES = PyxMPI/PyxMPI.c
-
 if COND_HDF5
-    libCitcomSLibmodule_a_CXXFLAGS += -DUSE_HDF5
+    libCitcomSLibmodule_a_CFLAGS += -DUSE_HDF5
 endif
 
 # extension modules (libtool)
@@ -60,14 +57,9 @@ CitcomSLibmodule_la_LIBADD = \
 	$(MPILIBS)
 CitcomSLibmodule_la_SOURCES = $(sources)
 
-PyxMPImodule_la_LDFLAGS = -module -release $(VERSION)
-PyxMPImodule_la_LIBADD =
-PyxMPImodule_la_SOURCES = PyxMPI/PyxMPI.c
-
 # compiler settings
 
 CC = $(MPICC)
-CXX = $(MPICXX)
 INCLUDES = \
 	-I$(top_srcdir)/module/Regional \
 	-I$(top_srcdir)/lib \
@@ -78,25 +70,26 @@ INCLUDES = \
 # sources
 
 sources = \
-	CitcomSmodule.cc \
+	CitcomSmodule.c \
 	CitcomSmodule.h \
-	advdiffu.cc \
+	advdiffu.c \
 	advdiffu.h \
-	bindings.cc \
+	bindings.c \
 	bindings.h \
-	exceptions.cc \
+	exceptions.c \
 	exceptions.h \
-	initial_conditions.cc \
+	getProperty.h \
+	initial_conditions.c \
 	initial_conditions.h \
-	mesher.cc \
+	mesher.c \
 	mesher.h \
-	misc.cc \
+	misc.c \
 	misc.h \
-	outputs.cc \
+	outputs.c \
 	outputs.h \
-	setProperties.cc \
+	setProperties.c \
 	setProperties.h \
-	stokes_solver.cc \
+	stokes_solver.c \
 	stokes_solver.h
 
 ## end of Makefile.am

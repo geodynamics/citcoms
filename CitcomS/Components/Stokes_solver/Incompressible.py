@@ -70,9 +70,9 @@ class Incompressible(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Incompressible_set_properties
-        Incompressible_set_properties(self.all_variables, self.inventory)
+        Incompressible_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

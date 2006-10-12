@@ -36,9 +36,8 @@ if COND_PYRE
 bin_SCRIPTS += citcoms coupledcitcoms
 
 if COND_EMBEDDING
-    bin_PROGRAMS += pycitcoms
-    INTERPRETER = $(bindir)/pycitcoms
-    noinstINTERPRETER = $(abs_builddir)/pycitcoms
+    INTERPRETER = $(bindir)/$(PYCITCOMS)
+    noinstINTERPRETER = $(abs_builddir)/$(PYCITCOMS)
     noinstPYTHONPATH = $(abs_top_srcdir)
     libCitcomS = $(top_builddir)/lib/libCitcomS.a
 else
@@ -49,13 +48,13 @@ else
 endif
 
 if COND_EXCHANGER
-    MAYBE_EXCHANGER_CPPFLAGS = -DWITH_EXCHANGER
+    bin_PROGRAMS += pycppcitcoms
+    PYCITCOMS = pycppcitcoms
     MAYBE_EXCHANGER_INCLUDES = -I$(top_srcdir)/module/Exchanger
-    MAYBE_EXCHANGER_LDADD = $(top_builddir)/module/Exchanger/libExchangerLibmodule.a
 else
-    MAYBE_EXCHANGER_CPPFLAGS =
+    bin_PROGRAMS += pycitcoms
+    PYCITCOMS = pycitcoms
     MAYBE_EXCHANGER_INCLUDES =
-    MAYBE_EXCHANGER_LDADD =
 endif
 
 endif
@@ -110,22 +109,37 @@ install-binSCRIPTS: $(bin_SCRIPTS)
 	  else :; fi; \
 	done
 EXTRA_DIST = citcoms.in coupledcitcoms.in
+CLEANFILES = $(bin_SCRIPTS)
 
-# pycitcoms (libCitcomS + CitcomSLibmodule + libExchanger +
-# ExchangerLibmodule + embedded Python interpreter)
-pycitcoms_CPPFLAGS = $(MAYBE_EXCHANGER_CPPFLAGS)
-pycitcoms_SOURCES = pycitcoms.cc
+# pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
+pycitcoms_SOURCES = pycitcoms.c
 pycitcoms_LDADD = \
-	$(top_builddir)/module/libPyxMPImodule.a \
-	$(MAYBE_EXCHANGER_LDADD) \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(libCitcomS) \
 	$(LIBHDF5) \
 	$(LIBM)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)
-	$(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
 		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
+		$(PYTHON_EGG_LDFLAGS) \
+		$(PYTHON_BLDLIBRARY) \
+		$(MPILIBS) \
+		$(FCLIBS) \
+		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
+		$(LIBS) \
+		$(PYTHON_LDLAST)
+
+# pycppcitcoms (libCitcomS + CitcomSLibmodule + libExchanger +
+# ExchangerLibmodule + embedded Python interpreter)
+pycppcitcoms_SOURCES = pycppcitcoms.cc
+pycppcitcoms_LDADD = \
+	$(top_builddir)/module/Exchanger/libExchangerLibmodule.a \
+	$(pycitcoms_LDADD)
+pycppcitcoms$(EXEEXT): $(pycppcitcoms_OBJECTS) $(pycppcitcoms_DEPENDENCIES) 
+	@rm -f pycitcoms$(EXEEXT)
+	$(CXXLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+		$(pycppcitcoms_LDFLAGS) $(pycppcitcoms_OBJECTS) $(pycppcitcoms_LDADD) \
 		$(PYTHON_EGG_LDFLAGS) \
 		$(PYTHON_BLDLIBRARY) \
 		$(MPILIBS) \

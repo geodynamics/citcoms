@@ -38,9 +38,9 @@ class Advection_diffusion(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Advection_diffusion_set_properties
-        Advection_diffusion_set_properties(self.all_variables, self.inventory)
+        Advection_diffusion_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

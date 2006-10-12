@@ -58,9 +58,9 @@ class Sphere(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Sphere_set_properties
-        Sphere_set_properties(self.all_variables, self.inventory)
+        Sphere_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

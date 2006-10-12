@@ -37,9 +37,9 @@ class BC(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import BC_set_properties
-        BC_set_properties(self.all_variables, self.inventory)
+        BC_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

@@ -1,32 +1,33 @@
 
-# This is not a normal 'setup.py' script; it is provided as a
-# convenience to install Python packages required by CitcomS.  For
-# instructions on installing CitcomS itself, see the file INSTALL.
+from ez_setup import use_setuptools
+use_setuptools()
 
-try:
-    # If setuptools 0.6b1 or later is installed, run with it.
-    from pkg_resources import require
-    require("setuptools>=0.6b1")
-except:
-    from ez_setup import use_setuptools
-    use_setuptools()
+from setuptools import setup, find_packages
 
-import setuptools
-import sys
+setup(
+    
+    name = 'CitcomS', 
+    version = '2.1',
 
-requirements = []
+    zip_safe = False,
+    packages = find_packages(),
+    
+    #setup_requires = [
+    #'merlin',
+    #],
+    install_requires = [
+    'pythia[pyre,mpi] >= 0.8.1.0b2, < 0.8-2.0a, == dev',
+    ],
+    extras_require = {
+    'Exchanger': ['Exchanger >= 1.0, < 2.0a'],
+    },
 
-if setuptools.bootstrap_install_from:
-    requirements.append(setuptools.bootstrap_install_from)
-    setuptools.bootstrap_install_from = None
+    author = 'Louis Moresi, et al.',
+    author_email = 'cig-mc@geodynamics.org',
+    description = """A finite element mantle convection code.""",
+    long_description = """CitcomS is a finite element code designed to solve thermal convection problems relevant to Earth's mantle. Written in C, the code runs on a variety of parallel processing computers, including shared and distributed memory platforms.""",
+    license = 'GPL',
+    url = 'http://www.geodynamics.org/cig/software/packages/citcoms/',
+    download_url = 'http://crust.geodynamics.org/~leif/shipping/', # temporary
 
-requirements.append('pythia >= 0.8-1.0b1, < 0.8-2.0a')
-
-setuptools.setup(
-    script_args = (
-    ['easy_install',
-     '--find-links=http://www.geodynamics.org/cig/software/packages/Eggs/'] +
-    sys.argv[1:] +
-    requirements
-    )
 )

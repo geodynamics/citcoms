@@ -30,8 +30,7 @@
 #include "global_defs.h"
 #include "parallel_related.h"
 
-// Setup global mesh parameters
-//
+/* Setup global mesh parameters */
 void full_global_derived_values(E)
   struct All_variables *E;
 {
@@ -116,9 +115,9 @@ void full_global_derived_values(E)
   E->sphere.snel = E->sphere.ely*E->sphere.elx;
   E->sphere.nsf = E->sphere.noy*E->sphere.nox;
 
-  // Myr
+  /* Myr */
   E->data.scalet = (E->data.layer_km*1e3*E->data.layer_km*1e3/E->data.therm_diff)/(1.e6*365.25*24*3600);
-  // cm/yr
+  /* cm/yr */
   E->data.scalev = (E->data.layer_km*1e3/E->data.therm_diff)/(100*365.25*24*3600);
   E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
 
@@ -296,7 +295,7 @@ void full_construct_tic_from_input(struct All_variables *E)
       if ( (kk < 1) || (kk >= gnoz) ) continue;
 
       k = kk - E->lmesh.nzs + 1;
-      if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
+      if ( (k < 1) || (k >= noz) ) continue; /* if layer k is not inside this proc. */
       if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0
 	  && E->sphere.capid[1] == 1 )
 	fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);

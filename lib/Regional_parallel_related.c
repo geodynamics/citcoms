@@ -179,7 +179,7 @@ static void set_vertical_communicator(struct All_variables *E)
   if (!processors)
     fprintf(stderr,"no memory!!\n");
 
-  m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
+  m = E->sphere.capid[1] - 1;  /* assume 1 cap per proc. */
   i = E->parallel.me_loc[1];
   j = E->parallel.me_loc[2];
 
@@ -522,7 +522,7 @@ void regional_parallel_communication_routs_v(E)
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
-          //E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((i==1)?1:-1)*nproczl;
+          /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((i==1)?1:-1)*nproczl; */
 	  dir = ( (i==1)? 1 : -1);
           E->parallel.PROCESSOR[lev][m].pass[kkk]=E->parallel.loc2proc_map[cap][lx-dir][ly][lz];
 
@@ -557,7 +557,7 @@ void regional_parallel_communication_routs_v(E)
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
-          //E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl;
+          /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl; */
 	  dir = ( (k==1)? 1 : -1);
           E->parallel.PROCESSOR[lev][m].pass[kkk]=E->parallel.loc2proc_map[cap][lx][ly-dir][lz];
 
@@ -592,7 +592,7 @@ void regional_parallel_communication_routs_v(E)
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
-          //E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((j==1)?1:-1);
+          /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((j==1)?1:-1);*/
 	  dir = ( (j==1)? 1 : -1);
           E->parallel.PROCESSOR[lev][m].pass[kkk]=E->parallel.loc2proc_map[cap][lx][ly][lz-dir];
 

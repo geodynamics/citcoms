@@ -102,7 +102,7 @@ void setup_parser(E,filename)
     /* for now, read one filename from the command line, we'll parse that ! */
 
 
-	// this section moved to main()
+    /* this section moved to main() */
 /*     if (ac < 2)   { */
 /* 	fprintf(stderr,"Usage: citcom PARAMETERFILE\n"); */
 /* 	exit(10); */

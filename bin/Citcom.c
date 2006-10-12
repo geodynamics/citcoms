@@ -38,6 +38,9 @@
 
 extern int Emergency_stop;
 
+void full_solver_init(struct All_variables *E);
+void regional_solver_init(struct All_variables *E);
+
 int main(argc,argv)
      int argc;
      char **argv;

@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 
 #if !defined(pyCitcom_setProperties_h)
@@ -81,7 +80,6 @@ extern PyObject * pyCitcom_Incompressible_set_properties(PyObject *, PyObject *)
 
 #endif
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

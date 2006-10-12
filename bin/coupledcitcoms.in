@@ -36,21 +36,10 @@ for directory in path:
     if directory:
         directory = os.path.abspath(directory)
         sys.path.insert(1, directory)
-
-from PyxMPI import MPI_Init, MPI_Finalize
-
-inParallel = False
-for arg in sys.argv:
-    if arg == "--mode=worker":
-        inParallel = True
-        MPI_Init(sys.argv)
-        break
+import pythia
 
 from CitcomS.CoupledApp import CoupledApp
 app = CoupledApp()
 app.run()
-
-if inParallel:
-    MPI_Finalize()
 
 #  end of file 

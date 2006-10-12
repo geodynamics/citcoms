@@ -38,9 +38,9 @@ class Const(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Const_set_properties
-        Const_set_properties(self.all_variables, self.inventory)
+        Const_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

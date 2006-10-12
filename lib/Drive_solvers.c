@@ -35,7 +35,7 @@ float global_fvdot();
 float vnorm_nonnewt();
 
 
-//***********************************************************
+/************************************************************/
 
 void general_stokes_solver_setup(struct All_variables *E)
 {
@@ -133,14 +133,14 @@ void general_stokes_solver(struct All_variables *E)
 
       count++;
 
-    } //end while
+    } /*end while*/
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       free((void *) oldU[m]);
       free((void *) delta_U[m]);
     }
 
-  } //end if SDEPV
+  } /*end if SDEPV*/
 
   return;
 }
@@ -226,13 +226,13 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
 			  count++;
 
-		  } //end while
+		  } /*end while */
 		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 			  free((void *) oldU[m]);
 			  free((void *) delta_U[m]);
 		  }
 
-	  } //end if SDEPV
+	  } /*end if SDEPV */
 	  E->monitor.topo_loop++;
   }
   get_STD_freesurf(E,E->slice.freesurf);

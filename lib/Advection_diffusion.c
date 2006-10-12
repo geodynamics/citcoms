@@ -39,7 +39,7 @@
 
 extern int Emergency_stop;
 
-//struct el { double gpt[9]; };
+/*struct el { double gpt[9]; }; */
 void set_diffusion_timestep(struct All_variables *E);
 
 /* ============================================

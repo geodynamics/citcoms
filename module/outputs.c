@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,12 +23,11 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #include <portinfo>
 #include <Python.h>
-#include <cstdio>
-#include <iostream>
+#include <stdio.h>
 
 #include "outputs.h"
 
@@ -37,11 +35,7 @@
 #include "output.h"
 
 
-extern "C" {
-
-    void output_finalize(struct  All_variables *E);
-
-}
+void output_finalize(struct  All_variables *E);
 
 
 char pyCitcom_output__doc__[] = "";
@@ -50,12 +44,13 @@ char pyCitcom_output__name__[] = "output";
 PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
     int cycles;
 
     if (!PyArg_ParseTuple(args, "Oi:output", &obj, &cycles))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     (E->problem_output)(E, cycles);
 
@@ -71,12 +66,13 @@ char pyCitcom_output_finalize__name__[] = "output_finalize";
 PyObject * pyCitcom_output_finalize(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
     int cycles;
 
     if (!PyArg_ParseTuple(args, "O:output_finalize", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     output_finalize(E);
 
@@ -91,12 +87,13 @@ char pyCitcom_output_time__name__[] = "output_time";
 PyObject * pyCitcom_output_time(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
     int cycles;
 
     if (!PyArg_ParseTuple(args, "Oi:output_time", &obj, &cycles))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     output_time(E, cycles);
 
@@ -106,7 +103,6 @@ PyObject * pyCitcom_output_time(PyObject *self, PyObject *args)
 }
 
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

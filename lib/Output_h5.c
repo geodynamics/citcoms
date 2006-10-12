@@ -116,7 +116,7 @@ void h5output(struct All_variables *E, int cycles)
         h5output_coord(E);
         h5output_surf_botm_coord(E);
         h5output_have_coord(E);
-        //h5output_material(E);
+        /*h5output_material(E);*/
         h5output_connectivity(E);
     }
 
@@ -565,7 +565,7 @@ static herr_t h5create_dataset(hid_t loc_id,
     dataspace = H5Screate_simple(rank, dims, maxdims);
     if (dataspace < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         return -1;
     }
 
@@ -575,14 +575,14 @@ static herr_t h5create_dataset(hid_t loc_id,
         /* modify dataset creation properties to enable chunking */
         dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
         status = H5Pset_chunk(dcpl_id, rank, chunkdims);
-        //status = H5Pset_fill_value(dcpl_id, H5T_NATIVE_FLOAT, &fillvalue);
+        /*status = H5Pset_fill_value(dcpl_id, H5T_NATIVE_FLOAT, &fillvalue);*/
     }
 
     /* create the dataset */
     dataset = H5Dcreate(loc_id, name, type_id, dataspace, dcpl_id);
     if (dataset < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         return -1;
     }
 
@@ -735,7 +735,7 @@ static herr_t h5allocate_field(struct All_variables *E,
             (*field)->chunkdims[t] = 1;
 
             /* hyperslab selection parameters */
-            (*field)->offset[t] = -1;   // increment before using!
+            (*field)->offset[t] = -1;   /* increment before using! */
             (*field)->stride[t] = 1;
             (*field)->count[t]  = 1;
             (*field)->block[t]  = 1;
@@ -823,7 +823,7 @@ static herr_t h5allocate_field(struct All_variables *E,
                 (*field)->n *= (*field)->block[dim];
 
         /* finally, allocate buffer */
-        //(*field)->data = (float *)malloc((*field)->n * sizeof(float));
+        /*(*field)->data = (float *)malloc((*field)->n * sizeof(float));*/
 
         return 0;
     }
@@ -866,7 +866,7 @@ static herr_t h5write_dataset(hid_t dset_id,
     memspace = H5Screate_simple(rank, memdims, NULL);
     if (memspace < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         return -1;
     }
 
@@ -874,7 +874,7 @@ static herr_t h5write_dataset(hid_t dset_id,
     filespace = H5Dget_space(dset_id);
     if (filespace < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         H5Sclose(memspace);
         return -1;
     }
@@ -884,7 +884,7 @@ static herr_t h5write_dataset(hid_t dset_id,
                                  offset, stride, count, block);
     if (status < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         status = H5Sclose(filespace);
         status = H5Sclose(memspace);
         return -1;
@@ -894,7 +894,7 @@ static herr_t h5write_dataset(hid_t dset_id,
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     if (dxpl_id < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         status = H5Sclose(filespace);
         status = H5Sclose(memspace);
         return -1;
@@ -907,7 +907,7 @@ static herr_t h5write_dataset(hid_t dset_id,
 
     if (status < 0)
     {
-        //TODO: print error
+        /*TODO: print error*/
         status = H5Pclose(dxpl_id);
         status = H5Sclose(filespace);
         status = H5Sclose(memspace);
@@ -920,7 +920,7 @@ static herr_t h5write_dataset(hid_t dset_id,
         status = H5Dwrite(dset_id, mem_type_id, memspace, filespace, dxpl_id, data);
         if (status < 0)
         {
-            //TODO: print error
+            /*TODO: print error*/
             H5Pclose(dxpl_id);
             H5Sclose(filespace);
             H5Sclose(memspace);
@@ -961,7 +961,7 @@ static herr_t h5close_field(field_t **field)
             free((*field)->stride);
             free((*field)->count);
             free((*field)->block);
-            //free((*field)->data);
+            /*free((*field)->data);*/
             free(*field);
         }
 }

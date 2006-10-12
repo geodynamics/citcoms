@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #if !defined(pyCitcom_mesher_h)
 #define pyCitcom_mesher_h
@@ -32,19 +31,16 @@
 
 extern char pyCitcom_full_sphere_launch__name__[];
 extern char pyCitcom_full_sphere_launch__doc__[];
-extern "C"
 PyObject * pyCitcom_full_sphere_launch(PyObject *, PyObject *);
 
 
 extern char pyCitcom_regional_sphere_launch__name__[];
 extern char pyCitcom_regional_sphere_launch__doc__[];
-extern "C"
 PyObject * pyCitcom_regional_sphere_launch(PyObject *, PyObject *);
 
 
 #endif
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

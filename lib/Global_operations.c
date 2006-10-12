@@ -596,7 +596,7 @@ float  vnorm_nonnewt(E,dU,U,lev)
  temp=0.0;
 for (m=1;m<=E->sphere.caps_per_proc;m++)
   for (e=1;e<=nel;e++)
-    //if (E->mat[m][e]==1)
+   /*if (E->mat[m][e]==1)*/
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
 	 node = E->IEN[lev][m][e].node[a];

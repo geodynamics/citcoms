@@ -37,7 +37,7 @@ class CitcomComponent(Component):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         return
 
 

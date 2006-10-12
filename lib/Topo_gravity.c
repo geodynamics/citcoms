@@ -83,7 +83,7 @@ void get_STD_freesurf(struct All_variables *E,float **freesurf)
 		for(m=1;m<=E->sphere.caps_per_proc;m++)
 			for(snode=1;snode<=E->lmesh.nsf;snode++) {
 				node = E->surf_node[m][snode];
-				//freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;
+				/*freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;*/
 				freesurf[m][snode] += E->sphere.cap[m].V[3][node]*E->advection.timestep;
 			}
 	return;

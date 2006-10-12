@@ -1,5 +1,4 @@
-// -*- C++ -*-
-// 
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 // 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// 
+*/ 
 
 #include <portinfo>
 #include <Python.h>
@@ -36,32 +35,31 @@
 
 char pyCitcomS_module__doc__[] = "";
 
-// Initialization function for the module (*must* be called initCitcomSLib)
-extern "C"
+/* Initialization function for the module (*must* be called initCitcomSLib) */
 void
 initCitcomSLib()
 {
-    // create the module and add the functions
-    PyObject * m = Py_InitModule4(
+    PyObject *m, *d;
+    /* create the module and add the functions */
+    m = Py_InitModule4(
         "CitcomSLib", pyCitcom_methods,
         pyCitcomS_module__doc__, 0, PYTHON_API_VERSION);
 
-    // get its dictionary
-    PyObject * d = PyModule_GetDict(m);
+    /* get its dictionary */
+    d = PyModule_GetDict(m);
 
-    // check for errors
+    /* check for errors */
     if (PyErr_Occurred()) {
         Py_FatalError("can't initialize module CitcomSLib");
     }
 
-    // install the module exceptions
+    /* install the module exceptions */
     pyCitcom_runtimeError = PyErr_NewException("CitcomSLib.runtime", 0, 0);
     PyDict_SetItemString(d, "RuntimeException", pyCitcom_runtimeError);
 
     return;
 }
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

@@ -827,7 +827,7 @@ struct All_variables {
 #include "solver.h"
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
-//#include "temperature_descriptions.h"
+    /*#include "temperature_descriptions.h"*/
 #include "advection.h"
 #include "tracer_defs.h"
 

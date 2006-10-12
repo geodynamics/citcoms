@@ -30,8 +30,7 @@
 #include "global_defs.h"
 #include "parallel_related.h"
 
-// Setup global mesh parameters
-//
+/* Setup global mesh parameters */
 void regional_global_derived_values(E)
      struct All_variables *E;
 
@@ -123,9 +122,9 @@ void regional_global_derived_values(E)
 /* Scaling from dimensionless units to Millions of years for input velocity
    and time, timdir is the direction of time for advection. CPC 6/25/00 */
 
-    // Myr
+    /* Myr */
     E->data.scalet = (E->data.layer_km*1e3*E->data.layer_km*1e3/E->data.therm_diff)/(1.e6*365.25*24*3600);
-    // cm/yr
+    /* cm/yr */
     E->data.scalev = (E->data.layer_km*1e3/E->data.therm_diff)/(100*365.25*24*3600);
     E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
 
@@ -371,7 +370,7 @@ void regional_construct_tic_from_input(struct All_variables *E)
       if ( (kk < 1) || (kk >= gnoz) ) continue;
 
       k = kk - E->lmesh.nzs + 1;
-      if ( (k < 1) || (k >= noz) ) continue; // if layer k is not inside this proc.
+      if ( (k < 1) || (k >= noz) ) continue; /* if layer k is not inside this proc. */
       if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0)
 
       for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -421,7 +420,7 @@ void regional_construct_tic_from_input(struct All_variables *E)
     y_center = r_center * sin(fi_center) * sin(theta_center);
     z_center = r_center * cos(fi_center);
 
-    // compute temperature field according to nodal coordinate
+    /* compute temperature field according to nodal coordinate */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(k=1;k<=E->lmesh.noy;k++)
             for(j=1;j<=E->lmesh.nox;j++)

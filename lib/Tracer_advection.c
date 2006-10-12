@@ -249,7 +249,7 @@ void tracer_advection(E)
       zmin=E->Tracer.z_space[1];
       zmax=E->Tracer.z_space[noz];
       
-      //fprintf(stderr,"%d %d\n", E->parallel.nprocx, E->parallel.loc2proc_map[0][0][1][0]);
+      /*fprintf(stderr,"%d %d\n", E->parallel.nprocx, E->parallel.loc2proc_map[0][0][1][0]);*/
       
       /*** comment by Tan2 1/25/2005
            Copy the velocity array. 
@@ -274,10 +274,11 @@ void tracer_advection(E)
 	n_y=0;
 	n_z=0;
 
-	//printf("%s %d %s %d %s %f\n","La pasul",E->monitor.solution_cycles, "Procesorul", E->parallel.me, "advecteaza tracerul",E->Tracer.tracer_y[n]);
+	/*printf("%s %d %s %d %s %f\n","La pasul",E->monitor.solution_cycles, "Procesorul", E->parallel.me, "advecteaza tracerul",E->Tracer.tracer_y[n]);
 	
 	//printf("%d %d %d %f %f %f %f\n", E->monitor.solution_cycles, E->parallel.me,E->Tracer.LOCAL_NUM_TRACERS,E->Tracer.itcolor[n],E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
 	//printf("%d %d %d %f %f %f %f\n", E->monitor.solution_cycles, E->parallel.me,E->Tracer.LOCAL_NUM_TRACERS,tr_color[n],tr_x[n],tr_y[n],tr_z[n]);
+        */
 
 	/*  mid point method uses 2 iterations */
 	
@@ -362,8 +363,9 @@ void tracer_advection(E)
 	    node8 = n_z+1 + n_x*noz + n_y*noz*nox;
 
 	    
-	    //	printf("%d %d %d %d %d %d %d %d %d\n",E->parallel.me, node1,node2,node3,node4,node5,node6,node7,node8);
+	    /*	printf("%d %d %d %d %d %d %d %d %d\n",E->parallel.me, node1,node2,node3,node4,node5,node6,node7,node8);
 	    //printf("%d %f %f %f %f %f %f %f %f\n", E->parallel.me, E->GV[1][2][node1], E->GV[1][2][node2], E->GV[1][2][node3], E->GV[1][2][node4], E->GV[1][2][node5], E->GV[1][2][node6], E->GV[1][2][node7], E->GV[1][2][node8]);
+            */
 
 	    /*** comment by Tan2 1/25/2005
 		 Interpolate the velocity on the tracer position

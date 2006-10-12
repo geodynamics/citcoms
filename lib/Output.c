@@ -70,7 +70,7 @@ void output(struct All_variables *E, int cycles)
 
   if (cycles == 0) {
     output_coord(E);
-    //output_mat(E);
+    /*output_mat(E);*/
   }
 
   output_velo(E, cycles);
@@ -100,7 +100,7 @@ FILE* output_open(char *filename)
 {
   FILE *fp1;
 
-  // if filename is empty, output to stderr.
+  /* if filename is empty, output to stderr. */
   if (*filename) {
     fp1 = fopen(filename,"w");
     if (!fp1) {
@@ -272,10 +272,10 @@ void output_average(struct All_variables *E, int cycles)
   char output_file[255];
   FILE *fp1;
 
-  // compute horizontal average here....
+  /* compute horizontal average here.... */
   compute_horiz_avg(E);
 
-  // only the first nprocz processors need to output
+  /* only the first nprocz processors need to output */
 
   if (E->parallel.me<E->parallel.nprocz)  {
     sprintf(output_file,"%s.average.%d.%d", E->control.data_file,

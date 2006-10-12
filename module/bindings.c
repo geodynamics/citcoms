@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #include <portinfo>
 #include <Python.h>
@@ -34,26 +33,26 @@
 #include "advdiffu.h"
 #include "initial_conditions.h"
 #include "mesher.h"
-#include "misc.h"          // miscellaneous methods
+#include "misc.h"
 #include "outputs.h"
 #include "setProperties.h"
 #include "stokes_solver.h"
 
 
-// the method table
+/* the method table */
 
 struct PyMethodDef pyCitcom_methods[] = {
 
-    // dummy entry for testing
+    /* dummy entry for testing */
     {pyCitcom_copyright__name__,
      pyCitcom_copyright,
      METH_VARARGS,
      pyCitcom_copyright__doc__},
 
 
-    //////////////////////////////////////////////////////////////////////////
+    /*////////////////////////////////////////////////////////////////////////
     // This section is for testing or temporatory implementation
-    //////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////*/
 
     {pyCitcom_return1_test__name__,
      pyCitcom_return1_test,
@@ -71,11 +70,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_read_instructions__doc__},
 
 
-    //////////////////////////////////////////////////////////////////////////
+    /*////////////////////////////////////////////////////////////////////////
     // This section is for finished implementation
-    //////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////*/
 
-    // from misc.h
+    /* from misc.h */
 
     {pyCitcom_citcom_init__name__,
      pyCitcom_citcom_init,
@@ -137,7 +136,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_return_t__doc__},
 
-    // from advdiffu.h
+    /* from advdiffu.h */
 
     {pyCitcom_PG_timestep_init__name__,
      pyCitcom_PG_timestep_init,
@@ -159,7 +158,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_stable_timestep__doc__},
 
-    // from initial_conditions.h
+    /* from initial_conditions.h */
 
     {pyCitcom_ic_constructTemperature__name__,
      pyCitcom_ic_constructTemperature,
@@ -186,7 +185,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_ic_initViscosity__doc__},
 
-    // from mesher.h
+    /* from mesher.h */
 
     {pyCitcom_full_sphere_launch__name__,
      pyCitcom_full_sphere_launch,
@@ -198,7 +197,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_regional_sphere_launch__doc__},
 
-    // from outputs.h
+    /* from outputs.h */
 
     {pyCitcom_output__name__,
      pyCitcom_output,
@@ -215,7 +214,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_output_time__doc__},
 
-    // from setProperties.h
+    /* from setProperties.h */
 
     {pyCitcom_Advection_diffusion_set_properties__name__,
      pyCitcom_Advection_diffusion_set_properties,
@@ -277,7 +276,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_Incompressible_set_properties__doc__},
 
-    // from stokes_solver.h
+    /* from stokes_solver.h */
 
     {pyCitcom_assemble_forces__name__,
      pyCitcom_assemble_forces,
@@ -334,11 +333,10 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_solve_constrained_flow_iterative_pseudo_surf__doc__},
 
-// Sentinel
+    /* Sentinel */
     {0, 0, 0, 0}
 };
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

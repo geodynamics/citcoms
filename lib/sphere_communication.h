@@ -26,7 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-// static const int cap_connections11[14][7] =
+/*static const int cap_connections11[14][7] =*/
 static const int cap_connections[14][7] =
     {   {0, 0, 0, 0, 0, 0, 0},
         {0, 4,11,10, 2, 7,12},
@@ -43,7 +43,7 @@ static const int cap_connections[14][7] =
         {0, 2, 9,11, 3, 1, 6},
         {0, 0, 0, 0, 0, 0, 0}   };
 
-// static const int cap_connections22[50][9] =
+/* static const int cap_connections22[50][9] =
 //     {   {0, 0, 0, 0, 0, 0, 0, 0, 0},
 // 	{0,13, 2,37, 3,25, 4,14,39},
 // 	{0, 1,41,39, 4,37,43, 3, 0},
@@ -94,6 +94,7 @@ static const int cap_connections[14][7] =
 // 	{0, 8,48,45,10, 6,12, 0,46},
 // 	{0,47,36,46,12,45,24,10,35},
 // 	{0, 0, 0, 0, 0, 0, 0, 0, 0}   };
+*/
 
       /* give case # (1-6) for given # of caps per proc */ 
 static const int cases[14] = 

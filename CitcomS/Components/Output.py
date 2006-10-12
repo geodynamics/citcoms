@@ -37,9 +37,9 @@ class Output(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Output_set_properties
-        Output_set_properties(self.all_variables, self.inventory)
+        Output_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

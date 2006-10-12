@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #include <portinfo>
 #include <Python.h>
@@ -35,39 +34,36 @@
 #include "global_defs.h"
 #include "parallel_related.h"
 
-extern "C" {
 
-    void allocate_common_vars(struct All_variables*);
-    void allocate_velocity_vars(struct All_variables*);
-    void check_bc_consistency(struct All_variables*);
-    void construct_id(struct All_variables*);
-    void construct_ien(struct All_variables*);
-    void construct_lm(struct All_variables*);
-    void construct_masks(struct All_variables*);
-    void construct_mat_group(struct All_variables*);
-    void construct_shape_functions(struct All_variables*);
-    void construct_sub_element(struct All_variables*);
-    void construct_surf_det (struct All_variables*);
-    void construct_bdry_det (struct All_variables*);
-    void construct_surface (struct All_variables*);
-    void get_initial_elapsed_time(struct All_variables*);
-    void lith_age_init(struct All_variables *E);
-    void mass_matrix(struct All_variables*);
-    void output_init(struct All_variables*);
-    void read_mat_from_file(struct All_variables*);
-    void set_elapsed_time(struct All_variables*);
-    void set_sphere_harmonics (struct All_variables*);
-    void set_starting_age(struct All_variables*);
-    void tracer_initial_settings(struct All_variables*);
-    double CPU_time0();
-
-}
+void allocate_common_vars(struct All_variables*);
+void allocate_velocity_vars(struct All_variables*);
+void check_bc_consistency(struct All_variables*);
+void construct_id(struct All_variables*);
+void construct_ien(struct All_variables*);
+void construct_lm(struct All_variables*);
+void construct_masks(struct All_variables*);
+void construct_mat_group(struct All_variables*);
+void construct_shape_functions(struct All_variables*);
+void construct_sub_element(struct All_variables*);
+void construct_surf_det (struct All_variables*);
+void construct_bdry_det (struct All_variables*);
+void construct_surface (struct All_variables*);
+void get_initial_elapsed_time(struct All_variables*);
+void lith_age_init(struct All_variables *E);
+void mass_matrix(struct All_variables*);
+void output_init(struct All_variables*);
+void read_mat_from_file(struct All_variables*);
+void set_elapsed_time(struct All_variables*);
+void set_sphere_harmonics (struct All_variables*);
+void set_starting_age(struct All_variables*);
+void tracer_initial_settings(struct All_variables*);
+double CPU_time0();
 
 
 
 
 void sphere_launch(struct All_variables *E)
-    // copied from read_instructions()
+    /* copied from read_instructions() */
 {
 
     E->monitor.cpu_time_at_last_cycle =
@@ -144,11 +140,12 @@ char pyCitcom_full_sphere_launch__name__[] = "full_sphere_launch";
 PyObject * pyCitcom_full_sphere_launch(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:full_sphere_launch", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     sphere_launch(E);
 
@@ -164,11 +161,12 @@ char pyCitcom_regional_sphere_launch__name__[] = "regional_sphere_launch";
 PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:regional_sphere_launch", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     sphere_launch(E);
 
@@ -178,7 +176,6 @@ PyObject * pyCitcom_regional_sphere_launch(PyObject *self, PyObject *args)
 
 
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

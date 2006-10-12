@@ -42,6 +42,13 @@ class BaseApplication(Application):
 
 
 
+    def _init(self):
+        Application._init(self)
+        self.nodes = self.getNodes()
+        return
+
+
+
     def main(self, *args, **kwds):
         self.initialize()
         self.reportConfiguration()
@@ -90,51 +97,10 @@ where <facility> is the facility to which the component is bound; e.g.:
 
 
 
-    def initializeCurator(self, curator, registry):
-        from Components.CodecConfig import CodecConfig
-        cfg = CodecConfig()
-        curator.registerCodecs(cfg)
-        return super(BaseApplication, self).initializeCurator(curator, registry)
-
-
-
-    def collectUserInput(self, registry):
-        # read INI-style .cfg files
-        import journal
-        error = journal.error(self.name)
-        from Components.CodecConfig import CodecConfig
-        curator = self.getCurator()
-        configRegistry = curator.getTraits(self.name, extraDepositories=[], encoding='cfg')
-        self.updateConfiguration(configRegistry)
-        # read parameter files given on the command line
-        from os.path import isfile, splitext
-        for arg in self.argv:
-            if isfile(arg):
-                base, ext = splitext(arg)
-                encoding = ext[1:] # NYI: not quite
-                codec = self.getCurator().codecs.get(encoding)
-                if codec:
-                    shelf = codec.open(base)
-                    paramRegistry = shelf['inventory'].getFacility(self.name)
-                    if paramRegistry:
-                        self.updateConfiguration(paramRegistry)
-                else:
-                    error.log("unknown encoding: %s" % ext)
-            else:
-                error.log("cannot open '%s'" % arg)
-        return
-
-
-
 
     class Inventory(Application.Inventory):
 
         import pyre.inventory
-
-        import Controller
-        import Solver
-
-        launcher = pyre.inventory.facility("launcher", default="mpich")
 
         steps = pyre.inventory.int("steps", default=1)
 

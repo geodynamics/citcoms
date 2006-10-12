@@ -26,39 +26,10 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 
-#include <Python.h>
-#include <stdio.h>
-#include <mpi.h>
-#include "CitcomSmodule.h"
-#ifdef WITH_EXCHANGER
 #include "Exchangermodule.h"
-#endif
 
-PyMODINIT_FUNC initPyxMPI(void);
+#define WITH_EXCHANGER
 
-struct _inittab inittab[] = {
-    { "PyxMPI", initPyxMPI },
-#ifdef WITH_EXCHANGER
-    { "ExchangerLib", initExchangerLib },
-#endif
-    { "CitcomSLib", initCitcomSLib },
-    { 0, 0 }
-};
-
-void dummy()
-{
-    int flag;
-    MPI_Initialized(&flag);
-}
-
-int main(int argc, char **argv)
-{
-    /* add our extension module */
-    if (PyImport_ExtendInittab(inittab) == -1) {
-        fprintf(stderr, "%s: PyImport_ExtendInittab failed! Exiting...\n", argv[0]);
-        return 1;
-    }
-    return Py_Main(argc, argv);
-}
+#include "pycitcoms.c"
 
 // End of file

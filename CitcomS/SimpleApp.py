@@ -43,12 +43,10 @@ class SimpleApp(BaseApplication):
 
 
 
-    def _configure(self):
-        BaseApplication._configure(self)
+    def getNodes(self):
         s = self.inventory.solver.inventory.mesher.inventory
         nproc = s.nproc_surf * s.nprocx * s.nprocy * s.nprocz
-        self.inventory.launcher.nodes = nproc
-        return
+        return nproc
 
 
 

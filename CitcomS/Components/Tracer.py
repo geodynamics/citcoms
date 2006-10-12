@@ -45,9 +45,9 @@ class Tracer(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
         from CitcomSLib import Tracer_set_properties
-        Tracer_set_properties(self.all_variables, self.inventory)
+        Tracer_set_properties(self.all_variables, self.inventory, stream)
         return
 
 

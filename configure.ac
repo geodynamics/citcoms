@@ -65,7 +65,7 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
 
     # Checks for Python modules and packages.
-    CIT_CHECK_PYTHON_EGG([pythia >= 0.8-1.0b1, < 0.8-2.0a])
+    CIT_CHECK_PYTHON_EGG([pythia >= 0.8.1.0b2, < 0.8-2.0a])
     if test "$want_exchanger" != no; then
         CIT_CHECK_PYTHON_EGG([Exchanger >= 1.0, < 2.0a],
                              [ # found
@@ -96,10 +96,13 @@ if test "$want_pyre" = yes; then
     CIT_PROG_PYCONFIG
     AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
 fi
+# We don't need Fortran.
+AC_PROVIDE([AC_PROG_F77])
 AC_PROG_LIBTOOL
+AC_LANG(C)
 
 # Checks for libraries.
-if test "$want_pyre" = yes; then
+if test "$want_exchanger" = yes; then
     AC_LANG_PUSH(C++)
     CIT_CHECK_LIB_MPI
     AC_LANG_POP(C++)
@@ -108,7 +111,7 @@ else
 fi
 
 # Checks for header files.
-if test "$want_pyre" = yes; then
+if test "$want_exchanger" = yes; then
     AC_LANG_PUSH(C++)
     CIT_HEADER_MPI
     AC_LANG_POP(C++)
@@ -200,14 +203,16 @@ echo -e "\n\n"
 echo "================ Configuration Summary ================"
 echo -e "\t PYTHON: " $PYTHON
 echo -e "\t PYTHONPATH: " $PYTHONPATH
-echo -e "\t LAUNCHER: " $LAUNCHER
-echo -e "\t MPIRUN: " $MPIRUN
 echo -e "\t MPICC: " $MPICC
-echo -e "\t MPICXX: " $MPICXX
+if test "$want_exchanger" = yes; then
+   echo -e "\t MPICXX: " $MPICXX
+fi
 echo -e "\t CFLAGS: " $CFLAGS
 echo -e "\t CPPFLAGS: " $CPPFLAGS
 echo -e "\t LDFLAGS: " $LDFLAGS
-echo -e "\t CXXFLAGS: " $CXXFLAGS
+if test "$want_exchanger" = yes; then
+    echo -e "\t CXXFLAGS: " $CXXFLAGS
+fi
 echo -e "\t with-pyre: " $want_pyre
 echo -e "\t with-exchanger: " $want_exchanger
 echo -e "\t with-hdf5: " $want_hdf5

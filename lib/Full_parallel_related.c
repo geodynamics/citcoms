@@ -215,7 +215,7 @@ static void set_vertical_communicator(struct All_variables *E)
 
   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-  m = E->sphere.capid[1] - 1;  // assume 1 cap per proc.
+  m = E->sphere.capid[1] - 1;  /* assume 1 cap per proc. */
   i = E->parallel.me_loc[1];
   j = E->parallel.me_loc[2];
 

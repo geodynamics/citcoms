@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,7 +23,7 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #include <portinfo>
 #include <Python.h>
@@ -38,29 +37,26 @@
 #include "citcom_init.h"
 #include "advection_diffusion.h"
 
-extern "C" {
 
-    void full_solver_init(struct All_variables*);
-    void regional_solver_init(struct All_variables*);
+void full_solver_init(struct All_variables*);
+void regional_solver_init(struct All_variables*);
 
-    double return1_test();
-    void read_instructions(struct All_variables*, char*);
-    double CPU_time0();
+double return1_test();
+void read_instructions(struct All_variables*, char*);
+double CPU_time0();
 
-    void global_default_values(struct All_variables*);
-    void parallel_process_termination();
-    void read_mat_from_file(struct All_variables*);
-    void read_velocity_boundary_from_file(struct All_variables*);
-    void set_signal();
-    void tracer_advection(struct All_variables*);
-    void velocities_conform_bcs(struct All_variables*, double **);
+void global_default_values(struct All_variables*);
+void parallel_process_termination();
+void read_mat_from_file(struct All_variables*);
+void read_velocity_boundary_from_file(struct All_variables*);
+void set_signal();
+void tracer_advection(struct All_variables*);
+void velocities_conform_bcs(struct All_variables*, double **);
 
-}
 
-#include "mpi/Communicator.h"
-#include "mpi/Group.h"
+#include "mpi/pympi.h"
 
-// copyright
+/* copyright */
 
 char pyCitcom_copyright__doc__[] = "";
 char pyCitcom_copyright__name__[] = "copyright";
@@ -69,21 +65,21 @@ static char pyCitcom_copyright_note[] =
 "CitcomS python module: Copyright (c) 1998-2003 California Institute of Technology";
 
 
-PyObject * pyCitcom_copyright(PyObject *, PyObject *)
+PyObject * pyCitcom_copyright(PyObject *self, PyObject *args)
 {
   return Py_BuildValue("s", pyCitcom_copyright_note);
 }
 
-//////////////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////////////
 // This section is for testing or temporatory implementation
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////*/
 
 
 
 char pyCitcom_return1_test__doc__[] = "";
 char pyCitcom_return1_test__name__[] = "return1_test";
 
-PyObject * pyCitcom_return1_test(PyObject *, PyObject *)
+PyObject * pyCitcom_return1_test(PyObject *self, PyObject *args)
 {
     double a;
     a = return1_test();
@@ -97,16 +93,17 @@ char pyCitcom_read_instructions__name__[] = "read_instructions";
 PyObject * pyCitcom_read_instructions(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
     char *filename;
 
     if (!PyArg_ParseTuple(args, "Os:read_instructions", &obj, &filename))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     read_instructions(E, filename);
 
-    // test
+    /* test */
     fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
 
     Py_INCREF(Py_None);
@@ -117,44 +114,42 @@ PyObject * pyCitcom_read_instructions(PyObject *self, PyObject *args)
 char pyCitcom_CPU_time__doc__[] = "";
 char pyCitcom_CPU_time__name__[] = "CPU_time";
 
-PyObject * pyCitcom_CPU_time(PyObject *, PyObject *)
+PyObject * pyCitcom_CPU_time(PyObject *self, PyObject *args)
 {
     return Py_BuildValue("d", CPU_time0());
 }
 
 
-//////////////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////////////
 // This section is for finished implementation
-//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////*/
 
 char pyCitcom_citcom_init__doc__[] = "";
 char pyCitcom_citcom_init__name__[] = "citcom_init";
 
 PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
 {
-    PyObject *Obj;
+    PyObject *obj, *cobj;
+    struct All_variables* E;
+    PyMPICommObject *pycomm;
+    MPI_Comm world;
 
-    if (!PyArg_ParseTuple(args, "O:citcom_init", &Obj))
+    if (!PyArg_ParseTuple(args, "O:citcom_init", &obj))
         return NULL;
 
-    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
-    if (comm == NULL)
-        return PyErr_Format(pyCitcom_runtimeError,
-                            "%s: 'mpi::Communicator *' argument is null",
-                            pyCitcom_citcom_init__name__);
+    pycomm = (PyMPICommObject *)obj;
+    world = pycomm->comm;
 
-    MPI_Comm world = comm->handle();
+    /* Allocate global pointer E */
+    E = citcom_init(&world);
 
-    // Allocate global pointer E
-    struct All_variables* E = citcom_init(&world);
-
-    // if E is NULL, raise an exception here.
+    /* if E is NULL, raise an exception here. */
     if (E == NULL)
         return PyErr_Format(pyCitcom_runtimeError,
                             "%s: 'libCitcomSCommon.citcom_init' failed",
                             pyCitcom_citcom_init__name__);
 
-    PyObject *cobj = PyCObject_FromVoidPtr(E, NULL);
+    cobj = PyCObject_FromVoidPtr(E, NULL);
 
     return Py_BuildValue("O", cobj);
 }
@@ -163,14 +158,15 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
 char pyCitcom_full_solver_init__doc__[] = "";
 char pyCitcom_full_solver_init__name__[] = "full_solver_init";
 
-PyObject * pyCitcom_full_solver_init(PyObject *, PyObject *args)
+PyObject * pyCitcom_full_solver_init(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:full_solver_init", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     full_solver_init(E);
 
@@ -182,14 +178,15 @@ PyObject * pyCitcom_full_solver_init(PyObject *, PyObject *args)
 char pyCitcom_regional_solver_init__doc__[] = "";
 char pyCitcom_regional_solver_init__name__[] = "regional_solver_init";
 
-PyObject * pyCitcom_regional_solver_init(PyObject *, PyObject *args)
+PyObject * pyCitcom_regional_solver_init(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:regional_solver_init", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     regional_solver_init(E);
 
@@ -201,14 +198,15 @@ PyObject * pyCitcom_regional_solver_init(PyObject *, PyObject *args)
 char pyCitcom_global_default_values__doc__[] = "";
 char pyCitcom_global_default_values__name__[] = "global_default_values";
 
-PyObject * pyCitcom_global_default_values(PyObject *, PyObject *args)
+PyObject * pyCitcom_global_default_values(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:global_default_values", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     global_default_values(E);
 
@@ -220,7 +218,7 @@ PyObject * pyCitcom_global_default_values(PyObject *, PyObject *args)
 char pyCitcom_set_signal__doc__[] = "";
 char pyCitcom_set_signal__name__[] = "set_signal";
 
-PyObject * pyCitcom_set_signal(PyObject *, PyObject *)
+PyObject * pyCitcom_set_signal(PyObject *self, PyObject *args)
 {
     set_signal();
 
@@ -235,11 +233,12 @@ char pyCitcom_velocities_conform_bcs__name__[] = "velocities_conform_bcs";
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:velocities_conform_bcs", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     velocities_conform_bcs(E, E->U);
 
@@ -254,11 +253,12 @@ char pyCitcom_BC_update_plate_velocity__name__[] = "BC_update_plate_velocity";
 PyObject * pyCitcom_BC_update_plate_velocity(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:BC_update_plate_velocity", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
@@ -274,11 +274,12 @@ char pyCitcom_Tracer_tracer_advection__name__[] = "Tracer_tracer_advection";
 PyObject * pyCitcom_Tracer_tracer_advection(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:Tracer_tracer_advection", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     if(E->control.tracer==1)
       tracer_advection(E);
@@ -294,11 +295,12 @@ char pyCitcom_Visc_update_material__name__[] = "Visc_update_material";
 PyObject * pyCitcom_Visc_update_material(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:Visc_update_material", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);
@@ -314,11 +316,12 @@ char pyCitcom_return_dt__name__[] = "return_dt";
 PyObject * pyCitcom_return_dt(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:return_dt", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     return Py_BuildValue("f", E->advection.timestep);
 }
@@ -330,11 +333,12 @@ char pyCitcom_return_step__name__[] = "return_step";
 PyObject * pyCitcom_return_step(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:return_step", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     return Py_BuildValue("i", E->advection.timesteps);
 }
@@ -346,22 +350,22 @@ char pyCitcom_return_t__name__[] = "return_t";
 PyObject * pyCitcom_return_t(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:return_t", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     return Py_BuildValue("f", E->monitor.elapsed_time);
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
+/*////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////*/
 
 
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

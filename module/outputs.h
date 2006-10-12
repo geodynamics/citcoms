@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,29 +23,25 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #if !defined(pyCitcom_outputs_h)
 #define pyCitcom_outputs_h
 
 extern char pyCitcom_output__name__[];
 extern char pyCitcom_output__doc__[];
-extern "C"
 PyObject * pyCitcom_output(PyObject *, PyObject *);
 
 extern char pyCitcom_output_finalize__name__[];
 extern char pyCitcom_output_finalize__doc__[];
-extern "C"
 PyObject * pyCitcom_output_finalize(PyObject *, PyObject *);
 
 extern char pyCitcom_output_time__name__[];
 extern char pyCitcom_output_time__doc__[];
-extern "C"
 PyObject * pyCitcom_output_time(PyObject *, PyObject *);
 
 #endif
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

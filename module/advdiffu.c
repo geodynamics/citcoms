@@ -1,5 +1,4 @@
-// -*- C++ -*-
-//
+/*
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
@@ -24,20 +23,19 @@
 //</LicenseText>
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+*/
 
 #include <portinfo>
 #include <Python.h>
-#include <cstdio>
+#include <stdio.h>
 
 #include "advdiffu.h"
 
 #include "global_defs.h"
 #include "advection_diffusion.h"
 
-extern "C" {
-    void set_convection_defaults(struct All_variables *);
-}
+
+extern void set_convection_defaults(struct All_variables *);
 
 
 char pyCitcom_PG_timestep_init__doc__[] = "";
@@ -45,11 +43,12 @@ char pyCitcom_PG_timestep_init__name__[] = "PG_timestep_init";
 PyObject * pyCitcom_PG_timestep_init(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:PG_timestep_init", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     PG_timestep_init(E);
 
@@ -64,11 +63,12 @@ PyObject * pyCitcom_PG_timestep_solve(PyObject *self, PyObject *args)
 {
     PyObject *obj;
     double dt;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "Od:PG_timestep_solve", &obj, &dt))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     E->monitor.solution_cycles++;
     if(E->monitor.solution_cycles>E->control.print_convergence)
@@ -87,16 +87,17 @@ char pyCitcom_set_convection_defaults__name__[] = "set_convection_defaults";
 PyObject * pyCitcom_set_convection_defaults(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:set_convection_defaults", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     E->control.CONVECTION = 1;
     set_convection_defaults(E);
 
-    // copied from advection_diffusion_parameters()
+    /* copied from advection_diffusion_parameters() */
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
     E->advection.last_sub_iterations = 1;
@@ -113,11 +114,12 @@ char pyCitcom_stable_timestep__name__[] = "stable_timestep";
 PyObject * pyCitcom_stable_timestep(PyObject *self, PyObject *args)
 {
     PyObject *obj;
+    struct All_variables* E;
 
     if (!PyArg_ParseTuple(args, "O:stable_timestep", &obj))
         return NULL;
 
-    struct All_variables* E = static_cast<struct All_variables*>(PyCObject_AsVoidPtr(obj));
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
 
     std_timestep(E);
@@ -128,7 +130,6 @@ PyObject * pyCitcom_stable_timestep(PyObject *self, PyObject *args)
 
 
 
-// version
-// $Id$
+/* $Id$ */
 
-// End of file
+/* End of file */

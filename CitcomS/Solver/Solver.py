@@ -97,7 +97,12 @@ class Solver(Component):
         global_default_values(self.all_variables)
         set_signal()
 
-        self.setProperties()
+        #pid = self.all_variables.control.PID
+        from os import getpid
+        pid = getpid()
+        stream = open("pid%d.cfg" % pid, "w")
+        self.setProperties(stream)
+        stream.close()
 
         self.restart = self.inventory.ic.inventory.restart
 
@@ -209,25 +214,25 @@ class Solver(Component):
         return
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
 
         from CitcomSLib import Solver_set_properties
 
-        Solver_set_properties(self.all_variables, self.inventory)
+        Solver_set_properties(self.all_variables, self.inventory, stream)
 
 	inv = self.inventory
-        inv.mesher.setProperties()
-        inv.tsolver.setProperties()
-        inv.vsolver.setProperties()
+        inv.mesher.setProperties(stream)
+        inv.tsolver.setProperties(stream)
+        inv.vsolver.setProperties(stream)
 
-        inv.bc.setProperties()
-        inv.const.setProperties()
-        inv.ic.setProperties()
-        inv.output.setProperties()
-        inv.param.setProperties()
-        inv.phase.setProperties()
-        inv.tracer.setProperties()
-        inv.visc.setProperties()
+        inv.bc.setProperties(stream)
+        inv.const.setProperties(stream)
+        inv.ic.setProperties(stream)
+        inv.output.setProperties(stream)
+        inv.param.setProperties(stream)
+        inv.phase.setProperties(stream)
+        inv.tracer.setProperties(stream)
+        inv.visc.setProperties(stream)
 
         return
 

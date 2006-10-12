@@ -33,6 +33,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
+#include <ctype.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
@@ -441,7 +442,7 @@ void allocate_common_vars(E)
   E->slice.vort[j]     = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.shflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.bhflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
-  //  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf)
+  /*  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf) */
   E->slice.freesurf[j]    = (float *)malloc((nsf+2)*sizeof(float));
 
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
@@ -875,7 +876,7 @@ void common_initial_fields(E)
 {
     void initial_pressure();
     void initial_velocity();
-    //void read_viscosity_option();
+    /*void read_viscosity_option();*/
     void initial_viscosity();
 
     report(E,"Initialize pressure field");
@@ -883,7 +884,7 @@ void common_initial_fields(E)
     report(E,"Initialize velocity field");
     initial_velocity(E);
     report(E,"Initialize viscosity field");
-    //get_viscosity_option(E);
+    /*get_viscosity_option(E);*/
     initial_viscosity(E);
 
     return;
@@ -1076,9 +1077,9 @@ void mkdatadir(struct  All_variables *E)
 
 void output_init(struct  All_variables *E)
 {
-    //DEBUG
+    /*DEBUG
     //strcpy(E->output.format, "hdf5");
-    //fprintf(stderr, "output format is %s\n", E->output.format);
+    //fprintf(stderr, "output format is %s\n", E->output.format);*/
     if (strcmp(E->output.format, "ascii-local") == 0)
         E->problem_output = output;
     else if (strcmp(E->output.format, "ascii") == 0) {
@@ -1089,7 +1090,7 @@ void output_init(struct  All_variables *E)
     else if (strcmp(E->output.format, "hdf5") == 0)
         E->problem_output = h5output;
     else {
-        // indicate error here
+        /* indicate error here */
         if (E->parallel.me == 0) {
             fprintf(stderr, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
             fprintf(E->fp, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
@@ -1120,7 +1121,7 @@ void output_finalize(struct  All_variables *E)
   if (E->fp_out)
     fclose(E->fp_out);
 
-  // close HDF5 output
+  /* close HDF5 output */
   if (strcmp(E->output.format, "hdf5") == 0)
     h5output_close(E);
 
@@ -1140,7 +1141,7 @@ char* strip(char *input)
 
     str[++end] = 0;
 
-    // trim leading whitespace
+    /* trim leading whitespace */
     while(isspace(*str))
         str++;
 

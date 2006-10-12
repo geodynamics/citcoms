@@ -1,4 +1,4 @@
-/*
+/* 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 
 //<LicenseText>
@@ -25,17 +25,34 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */ 
 
-#ifndef pyCitcom_CitcomSmodule_h
-#define pyCitcom_CitcomSmodule_h
-
-#ifdef __cplusplus
-extern "C"
+#include <Python.h>
+#include <stdio.h>
+#include <mpi.h>
+#include "CitcomSmodule.h"
+#ifdef WITH_EXCHANGER
+#include "Exchangermodule.h"
 #endif
-void
-initCitcomSLib();
 
-/* $Id: advdiffu.h 3983 2006-07-07 22:35:14Z leif $ */
+/* include the implementation of _mpi */
+#include "mpi/_mpi.c"
 
-#endif /* pyCitcom_CitcomSmodule_h */
+struct _inittab inittab[] = {
+    { "_mpi", init_mpi },
+#ifdef WITH_EXCHANGER
+    { "ExchangerLib", initExchangerLib },
+#endif
+    { "CitcomSLib", initCitcomSLib },
+    { 0, 0 }
+};
+
+int main(int argc, char **argv)
+{
+    /* add our extension module */
+    if (PyImport_ExtendInittab(inittab) == -1) {
+        fprintf(stderr, "%s: PyImport_ExtendInittab failed! Exiting...\n", argv[0]);
+        return 1;
+    }
+    return Py_Main(argc, argv);
+}
 
 /* End of file */

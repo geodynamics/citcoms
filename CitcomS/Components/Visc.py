@@ -37,7 +37,7 @@ class Visc(CitcomComponent):
 
 
 
-    def setProperties(self):
+    def setProperties(self, stream):
 
         from CitcomSLib import Visc_set_properties
 
@@ -48,7 +48,7 @@ class Visc(CitcomComponent):
         inv.viscZ = map(float, inv.viscZ)
         inv.sdepv_expt = map(float, inv.sdepv_expt)
 
-        Visc_set_properties(self.all_variables, inv)
+        Visc_set_properties(self.all_variables, inv, stream)
 
         return
 
