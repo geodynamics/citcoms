@@ -176,7 +176,6 @@ ADV=on
 fixed_timestep=0.0
 finetunedt=0.7
 adv_sub_iterations=2
-maxadvtime=10.
 
 precond=on
 aug_lagr=on
