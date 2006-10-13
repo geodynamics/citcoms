@@ -68,8 +68,8 @@ void regional_set_3dsphere_defaults(E)
   E->sphere.caps = 1;
   E->sphere.max_connections = 6;
 
-  input_double("radius_outer",&(E->sphere.ro),"essential",m);
-  input_double("radius_inner",&(E->sphere.ri),"essential",m);
+  input_double("radius_outer",&(E->sphere.ro),"1",m);
+  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
 
   input_double("theta_min",&(E->control.theta_min),"essential",m);
   input_double("theta_max",&(E->control.theta_max),"essential",m);

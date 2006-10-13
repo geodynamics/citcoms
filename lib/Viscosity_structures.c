@@ -52,7 +52,7 @@ void viscosity_system_input(struct All_variables *E)
 
   /* read in information */
   input_boolean("VISC_UPDATE",&(E->viscosity.update_allowed),"on",m);
-  input_int("rheol",&(E->viscosity.RHEOL),"essential",m);
+  input_int("rheol",&(E->viscosity.RHEOL),"3",m);
   input_int("num_mat",&(E->viscosity.num_mat),"1",m);
   input_float_vector("visc0",E->viscosity.num_mat,(E->viscosity.N0),m);
 

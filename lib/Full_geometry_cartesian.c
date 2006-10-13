@@ -72,8 +72,8 @@ void full_set_3dsphere_defaults(E)
   E->sphere.caps = 12;
   E->sphere.max_connections = 6;
 
-  input_double("radius_outer",&(E->sphere.ro),"essential",m);
-  input_double("radius_inner",&(E->sphere.ri),"essential",m);
+  input_double("radius_outer",&(E->sphere.ro),"1",m);
+  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
 
   offset = 10.0/180.0*M_PI;
 
