@@ -6,7 +6,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *  
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -23,18 +23,10 @@
 #include "hdf5.h"
 
 
-typedef struct cap_t
-{
-    int id;
-    char name[8];
-    hid_t group;
-} cap_t;
-
-
 typedef struct field_t
 {
     const char *name;
-    
+
     int rank;
     hsize_t *dims;
     hsize_t *maxdims;
@@ -49,12 +41,10 @@ typedef struct field_t
 
 
 static herr_t read_steps(hid_t file_id, int **steps, int *numsteps);
+static int step2frame(int *steps, int numsteps, int step);
 
-static cap_t *open_cap(hid_t file_id, int capid);
-static herr_t close_cap(cap_t *cap);
-
-static field_t *open_field(cap_t *cap, const char *name);
-static herr_t read_field(cap_t *cap, field_t *field, int frame);
+static field_t *open_field(hid_t group, const char *name);
+static herr_t read_field(hid_t group, field_t *field, int frame, int cap);
 static herr_t close_field(field_t *field);
 
 static herr_t get_attribute_str(hid_t obj_id, const char *attr_name, char **data);
@@ -75,9 +65,8 @@ int main(int argc, char *argv[])
     hid_t input;
     herr_t status;
 
-    int id;
+    int cap;
     int caps;
-    cap_t **cap;
 
     int t;
     int n, i, j, k;
@@ -105,10 +94,10 @@ int main(int argc, char *argv[])
     /*
      * HDF5 file must be specified as first argument.
      */
-    
+
     if (argc < 2)
     {
-        fprintf(stderr, "Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -118,7 +107,7 @@ int main(int argc, char *argv[])
 
     if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0)
     {
-        fprintf(stderr, "Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
+        fprintf(stderr, "Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
         return EXIT_FAILURE;
     }
 
@@ -142,8 +131,9 @@ int main(int argc, char *argv[])
     if (argc == 2)
     {
         printf("Found %d frames in the file \"%s\"\n\n", numsteps, argv[1]);
-        printf("Usage: %s file.h5 [frame1 [frame2 [...]]]\n", argv[0]);
-        printf("\tPlease specify frames in the range [0,%d]\n", numsteps-1);
+        printf("Usage: %s file.h5 [step1 [step2 [...]]]\n", argv[0]);
+        printf("\tPlease specify steps in the range [%d,%d]\n",
+	       steps[0], steps[numsteps-1]);
 
         status = H5Fclose(h5file);
         free(steps);
@@ -152,9 +142,9 @@ int main(int argc, char *argv[])
     }
 
     /*
-     * Read frame(s) from argv[2:]
+     * Read step(s) from argv[2:]
      */
-    
+
     /* Allocate at least one step (we know argc > 2) */
     timesteps = argc-2;
     frames = (int *)malloc(timesteps * sizeof(int));
@@ -162,7 +152,17 @@ int main(int argc, char *argv[])
     /* Convert argv[2:] into int array */
     for(n = 2; n < argc; n++)
     {
-        frames[n-2] = (int)strtol(argv[n], &endptr, 10);
+	int step = (int)strtol(argv[n], &endptr, 10);
+        frames[n-2] = step2frame(steps, numsteps, step);
+	/* Validate frames */
+        if (frames[n-2] >= numsteps || frames[n-2] < 0)
+        {
+            fprintf(stderr, "Error: Cannot find requested step %d in file\n",
+                    step);
+            status = H5Fclose(h5file);
+            return EXIT_FAILURE;
+        }
+
         if (!(argv[n][0] != '\0' && *endptr == '\0'))
         {
             fprintf(stderr, "Error: Could not parse step \"%s\"\n", argv[n]);
@@ -171,17 +171,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* Validate frames */
-    for(t = 0; t < timesteps; t++)
-    {
-        if (frames[t] >= numsteps)
-        {
-            fprintf(stderr, "Error: Requested frame %d is not in range "
-                    "[0,%d]\n", frames[t], numsteps-1);
-            status = H5Fclose(h5file);
-            return EXIT_FAILURE;
-        }
-    }
 
     /************************************************************************
      * Get mesh parameters.                                                 *
@@ -207,23 +196,13 @@ int main(int argc, char *argv[])
 
 
     /************************************************************************
-     * Open all available cap groups.                                       *
-     ************************************************************************/
-
-    cap = (cap_t **)malloc(caps * sizeof(cap_t *));
-
-    for(id = 0; id < caps; id++)
-        cap[id] = open_cap(h5file, id);
-
-
-    /************************************************************************
      * Create fields using cap00 datasets as a template.                    *
      ************************************************************************/
 
-    coord       = open_field(cap[0], "coord");
-    velocity    = open_field(cap[0], "velocity");
-    temperature = open_field(cap[0], "temperature");
-    viscosity   = open_field(cap[0], "viscosity");
+    coord       = open_field(h5file, "coord");
+    velocity    = open_field(h5file, "velocity");
+    temperature = open_field(h5file, "temperature");
+    viscosity   = open_field(h5file, "viscosity");
 
 
     /************************************************************************
@@ -238,19 +217,19 @@ int main(int argc, char *argv[])
         step  = steps[frames[t]];
 
         /* Iterate over caps */
-        for(id = 0; id < caps; id++)
+        for(cap = 0; cap < caps; cap++)
         {
-            snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, id, step);
+            snprintf(filename, (size_t)99, "%s.cap%02d.%d", datafile, cap, step);
             fprintf(stderr, "Writing %s\n", filename);
 
             file = fopen(filename, "w");
             fprintf(file, "%d x %d x %d\n", nodex, nodey, nodez);
 
             /* Read data from HDF5 file. */
-            read_field(cap[id], coord, 0);
-            read_field(cap[id], velocity, frame);
-            read_field(cap[id], temperature, frame);
-            read_field(cap[id], viscosity, frame);
+            read_field(h5file, coord, 0, cap);
+            read_field(h5file, velocity, frame, cap);
+            read_field(h5file, temperature, frame, cap);
+            read_field(h5file, viscosity, frame, cap);
 
             /* Traverse data in Citcom order */
             n = 0;
@@ -260,7 +239,8 @@ int main(int argc, char *argv[])
                 {
                     for(k = 0; k < nodez; k++)
                     {
-                        fprintf(file, "%g %g %g %g %g %g %g %g\n",
+                        n = k + j*nodez + i*nodez*nodey;
+                        fprintf(file, "%.6e %.6e %.6e %.6e %.6e %.6e %.6e %.6e\n",
                                 coord->data[3*n+0],
                                 coord->data[3*n+1],
                                 coord->data[3*n+2],
@@ -269,8 +249,6 @@ int main(int argc, char *argv[])
                                 velocity->data[3*n+2],
                                 temperature->data[n],
                                 viscosity->data[n]);
-
-                        n++;    /* n = k + i*nodez + j*nodez*nodex */
                     }
                 }
             }
@@ -280,10 +258,6 @@ int main(int argc, char *argv[])
     }
 
     /* Release resources. */
-
-    for(id = 0; id < caps; id++)
-        status = close_cap(cap[id]);
-    free(cap);
 
     status = close_field(coord);
     status = close_field(velocity);
@@ -301,7 +275,7 @@ static herr_t read_steps(hid_t file_id, int **steps, int *numsteps)
 {
     int rank;
     hsize_t dims;
-    
+
     hid_t typeid;
     hid_t dataspace;
     hid_t dataset;
@@ -309,7 +283,7 @@ static herr_t read_steps(hid_t file_id, int **steps, int *numsteps)
     herr_t status;
 
     dataset = H5Dopen(file_id, "time");
-    
+
     dataspace = H5Dget_space(dataset);
 
     typeid = H5Tcreate(H5T_COMPOUND, sizeof(int));
@@ -319,9 +293,9 @@ static herr_t read_steps(hid_t file_id, int **steps, int *numsteps)
 
     *numsteps = (int)dims;
     *steps = (int *)malloc(dims * sizeof(int));
-    
+
     status = H5Dread(dataset, typeid, H5S_ALL, H5S_ALL, H5P_DEFAULT, *steps);
-    
+
     status = H5Tclose(typeid);
     status = H5Sclose(dataspace);
     status = H5Dclose(dataset);
@@ -329,37 +303,17 @@ static herr_t read_steps(hid_t file_id, int **steps, int *numsteps)
     return 0;
 }
 
-static cap_t *open_cap(hid_t file_id, int capid)
+static int step2frame(int *steps, int numsteps, int step)
 {
-    cap_t *cap;
-    cap = (cap_t *)malloc(sizeof(cap_t));
-    cap->id = capid;
-    snprintf(cap->name, (size_t)7, "cap%02d", capid);
-    cap->group = H5Gopen(file_id, cap->name);
-    if (cap->group < 0)
+    int i;
+    for (i=0; i<numsteps; i++)
     {
-        free(cap);
-        return NULL;
+	if (steps[i] == step) return i;
     }
-    return cap;
+    return -1;
 }
 
-
-static herr_t close_cap(cap_t *cap)
-{
-    herr_t status;
-    if (cap != NULL)
-    {
-        cap->id = -1;
-        cap->name[0] = '\0';
-        status = H5Gclose(cap->group);
-        free(cap);
-    }
-    return 0;
-}
-
-
-static field_t *open_field(cap_t *cap, const char *name)
+static field_t *open_field(hid_t group, const char *name)
 {
     hid_t dataset;
     hid_t dataspace;
@@ -370,7 +324,7 @@ static field_t *open_field(cap_t *cap, const char *name)
 
     field_t *field;
 
-    if (cap == NULL)
+    if (group < 0)
         return NULL;
 
 
@@ -384,7 +338,7 @@ static field_t *open_field(cap_t *cap, const char *name)
     field->maxdims = NULL;
     field->n = 0;
 
-    dataset = H5Dopen(cap->group, name);
+    dataset = H5Dopen(group, name);
     if(dataset < 0)
     {
         free(field);
@@ -427,10 +381,10 @@ static field_t *open_field(cap_t *cap, const char *name)
 
     field->n = 1;
     if (field->maxdims[0] == H5S_UNLIMITED)
-        for(d = 1; d < rank; d++)
+        for(d = 2; d < rank; d++)
             field->n *= field->dims[d];
     else
-        for(d = 0; d < rank; d++)
+        for(d = 1; d < rank; d++)
             field->n *= field->dims[d];
 
     field->data = (float *)malloc(field->n * sizeof(float));
@@ -445,7 +399,7 @@ static field_t *open_field(cap_t *cap, const char *name)
 }
 
 
-static herr_t read_field(cap_t *cap, field_t *field, int frame)
+static herr_t read_field(hid_t group, field_t *field, int frame, int cap)
 {
     hid_t dataset;
     hid_t filespace;
@@ -454,10 +408,10 @@ static herr_t read_field(cap_t *cap, field_t *field, int frame)
 
     int d;
 
-    if (cap == NULL || field == NULL)
+    if (group < 0 || field == NULL)
         return -1;
 
-    dataset = H5Dopen(cap->group, field->name);
+    dataset = H5Dopen(group, field->name);
 
     if (dataset < 0)
         return -1;
@@ -471,6 +425,13 @@ static herr_t read_field(cap_t *cap, field_t *field, int frame)
     if (field->maxdims[0] == H5S_UNLIMITED)
     {
         field->offset[0] = frame;
+        field->count[0]  = 1;
+        field->offset[1] = cap;
+        field->count[1]  = 1;
+    }
+    else
+    {
+        field->offset[0] = cap;
         field->count[0]  = 1;
     }
 
@@ -492,7 +453,7 @@ static herr_t read_field(cap_t *cap, field_t *field, int frame)
 
     status = H5Dread(dataset, H5T_NATIVE_FLOAT, memspace,
                      filespace, H5P_DEFAULT, field->data);
-    
+
     status = H5Sclose(filespace);
     status = H5Sclose(memspace);
     status = H5Dclose(dataset);
