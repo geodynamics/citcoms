@@ -1869,9 +1869,6 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute_int(input, "adv_sub_iterations", E->advection.temp_iterations);
 
-    status = set_attribute_int(input, "aug_lagr", E->control.augmented_Lagr);
-    status = set_attribute_double(input, "aug_number", E->control.augmented);
-
 
     /*
      * BC.inventory
@@ -2130,6 +2127,9 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_int(input, "vlowstep", E->control.v_steps_low);
     status = set_attribute_int(input, "vhighstep", E->control.v_steps_high);
     status = set_attribute_int(input, "piterations", E->control.p_iterations);
+
+    status = set_attribute_int(input, "aug_lagr", E->control.augmented_Lagr);
+    status = set_attribute_double(input, "aug_number", E->control.augmented);
 
     /* status = set_attribute(input, "", H5T_NATIVE_, &(E->)); */
 

@@ -95,9 +95,6 @@ class Advection_diffusion(CitcomComponent):
 
         adv_sub_iterations = prop.int("adv_sub_iterations", default=2)
 
-        aug_lagr = prop.bool("aug_lagr", default=True)
-        aug_number = prop.float("aug_number", default=2.0e3)
-
 
 
 # version

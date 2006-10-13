@@ -99,6 +99,8 @@ class Incompressible(CitcomComponent):
         vhighstep = prop.int("vhighstep", default=3)
         piterations = prop.int("piterations", default=1000)
 
+        aug_lagr = prop.bool("aug_lagr", default=True)
+        aug_number = prop.float("aug_number", default=2.0e3)
 
 # version
 __id__ = "$Id$"

@@ -103,9 +103,6 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
 
     getIntProperty(properties, "adv_sub_iterations", E->advection.temp_iterations, fp);
 
-    getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);
-    getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
-
 
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
@@ -740,6 +737,9 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "vlowstep", E->control.v_steps_low, fp);
     getIntProperty(properties, "vhighstep", E->control.v_steps_high, fp);
     getIntProperty(properties, "piterations", E->control.p_iterations, fp);
+
+    getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);
+    getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
 
     PUTS(("\n"));
 
