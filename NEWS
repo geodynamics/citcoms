@@ -1,14 +1,44 @@
-CitComS.py NEWS -- history of user-visible changes.  2005-09-30
+CitComS.py NEWS -- history of user-visible changes.  2006-09-18
 
 Please send CitComS.py bug reports to cig-mc@geodynamics.org.
+
+
+Version 2.1.0
+
+* Imporved build procedure. The CitComS executable embeds python
+  interpreter by default and is staticly linked with MPI library,
+  which improves the portability of the code. 
+
+* New input format (INI-styled .cfg)
+
+* No need to specify launcher.nodes anymore, it is calculated from the mesher
+  properties.
+
+* Support of binary format output (using HDF5 library).
+
+* Additional data output (including: stress, pressure, and horizontal average)
+  can be enabled/disabled by changing the input parameters.
+
+* Fixes for several bugs: issue 30, 35, 42, 44 and 55. See the Geodynamics
+  Roundup issue tracker (http://geodynamics.org/roundup) and the file
+  ChangeLog for details. Important bug fixes include:
+
+  - Inconsistent times in C and Pyre. When 'fixed_timestep' is set
+    and the grid resolution is insufficient, the Pyre part of CitComS
+    could give the wrong model time. (Issue 35)
+
+  - Accidental deletion of surf files by batchsurf.py. batchsurf.py is a script
+    to combine the surf files. If the current working directory happens to be
+    the output directory of CitcomS, the script would delete the original surf
+    files. (Issue 55)
 
 
 Version 2.0.2
 
 * Fixes for several minor bugs: issues 7, 8, 9, 10, 11, 12, and 13.
-Most of these are installation-related.  See the Geodynamics Roundup
-issue tracker (http://geodynamics.org/roundup) and the file ChangeLog
-for details.
+  Most of these are installation-related.  See the Geodynamics Roundup
+  issue tracker (http://geodynamics.org/roundup) and the file ChangeLog
+  for details.
 
 
 
