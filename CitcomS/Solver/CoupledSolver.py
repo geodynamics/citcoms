@@ -44,17 +44,24 @@ class CoupledSolver(Solver):
 
 
     def initialize(self, application):
+        print self.name, 'enter initialize'
         Solver.initialize(self, application)
+        print self.name, self.all_variables
 
         self.coupler = application.coupler
         self.myPlus = application.myPlus
         self.remotePlus = application.remotePlus
 
+        self.restart = self.inventory.ic.inventory.restart
+        self.ic_initTemperature = self.inventory.ic.initTemperature
+
         self.coupler.initialize(self)
+        print self.name, 'exit initialize'
         return
 
 
     def launch(self, application):
+        print self.name, 'enter launch'
         self._setup()
 
         self.coupler.launch(self)
@@ -62,12 +69,13 @@ class CoupledSolver(Solver):
         ic = self.inventory.ic
         if not (ic.inventory.restart or ic.inventory.post_p):
             # switch the default initTemperature to coupled version
-            ic.initTemperature = self.exchanger.initTemperature
+            ic.initTemperature = self.coupler.initTemperature
 
         # initial conditions
         ic.launch()
 
         self.solveVelocities()
+        print self.name, 'exit launch'
         return
 
 
@@ -125,7 +133,7 @@ class CoupledSolver(Solver):
 
         # for coupled run, output spacing is determined by coupled_steps
         if (not (step % monitoringFrequency)) or (
-            not (self.coupler.exchanger.coupled_steps % monitoringFrequency)):
+            not (self.coupler.coupled_steps % monitoringFrequency)):
             output(self.all_variables, step)
 
         output_time(self.all_variables, step)
