@@ -43,7 +43,7 @@ void output_visc_prepare(struct All_variables *, float **);
 void output_visc(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
-void output_average(struct All_variables *, int);
+void output_horiz_avg(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 
@@ -89,8 +89,8 @@ void output(struct All_variables *E, int cycles)
   if (E->output.pressure == 1)
     output_pressure(E, cycles);
 
-  if (E->output.average == 1)
-      output_average(E, cycles);
+  if (E->output.horiz_avg == 1)
+      output_horiz_avg(E, cycles);
 
   return;
 }
@@ -263,7 +263,7 @@ void output_stress(struct All_variables *E, int cycles)
 }
 
 
-void output_average(struct All_variables *E, int cycles)
+void output_horiz_avg(struct All_variables *E, int cycles)
 {
   /* horizontal average output of temperature and rms velocity*/
   void compute_horiz_avg();
@@ -278,7 +278,7 @@ void output_average(struct All_variables *E, int cycles)
   /* only the first nprocz processors need to output */
 
   if (E->parallel.me<E->parallel.nprocz)  {
-    sprintf(output_file,"%s.average.%d.%d", E->control.data_file,
+    sprintf(output_file,"%s.horiz_avg.%d.%d", E->control.data_file,
 	    E->parallel.me, cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {

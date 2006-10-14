@@ -981,7 +981,7 @@ void output_parse_optional(struct  All_variables *E)
     E->output.pressure = 0;
     E->output.surf = 0;
     E->output.botm = 0;
-    E->output.average = 0;
+    E->output.horiz_avg = 0;
 
     while(1) {
         /* get next field */
@@ -1007,8 +1007,8 @@ void output_parse_optional(struct  All_variables *E)
             E->output.surf = 1;
         else if(strcmp(prev, "botm")==0)
             E->output.botm = 1;
-        else if(strcmp(prev, "average")==0)
-            E->output.average = 1;
+        else if(strcmp(prev, "horiz_avg")==0)
+            E->output.horiz_avg = 1;
         else
             if(E->parallel.me == 0)
                 fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);

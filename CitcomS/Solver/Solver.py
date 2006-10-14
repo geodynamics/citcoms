@@ -66,7 +66,6 @@ class Solver(Component):
 
 
     def initialize(self, application):
-
         from CitcomSLib import citcom_init, global_default_values, set_signal
 
         comm = application.solverCommunicator
@@ -206,6 +205,7 @@ class Solver(Component):
     def save(self, monitoringFrequency):
         step = self.step
 
+        output_time(self.all_variables, step)
         # output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):
             output(self.all_variables, step)

@@ -87,7 +87,7 @@ void h5output_pressure(struct All_variables *, int);
 void h5output_stress(struct All_variables *, int);
 void h5output_tracer(struct All_variables *, int);
 void h5output_surf_botm(struct All_variables *, int);
-void h5output_average(struct All_variables *, int);
+void h5output_horiz_avg(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
 #endif
@@ -137,8 +137,8 @@ void h5output(struct All_variables *E, int cycles)
     if(E->output.pressure == 1)
         h5output_pressure(E, cycles);
 
-    if (E->output.average == 1)
-        h5output_average(E, cycles);
+    if (E->output.horiz_avg == 1)
+        h5output_horiz_avg(E, cycles);
 
     /* Call this last (for timing information) */
     h5output_time(E, cycles);
@@ -190,7 +190,7 @@ void h5output_open(struct All_variables *E)
     /*
      * Citcom variables
      */
-    
+
     int cap;
     int caps = E->sphere.caps;
     int nprocx = E->parallel.nprocx;
@@ -218,7 +218,7 @@ void h5output_open(struct All_variables *E)
     /*
      * MPI variables
      */
-    
+
     MPI_Comm comm = E->parallel.world;
     MPI_Info info = MPI_INFO_NULL;
     int ierr;
@@ -411,7 +411,7 @@ void h5output_open(struct All_variables *E)
     }
 
     /* Create /horiz_avg/ group */
-    if(E->output.average == 1)
+    if(E->output.horiz_avg == 1)
     {
         avg_group = h5create_group(file_id, "horiz_avg", (size_t)0);
         h5create_field(avg_group, const_scalar1d, "coord", "radial coordinates of horizontal planes");
@@ -748,7 +748,7 @@ static herr_t h5allocate_field(struct All_variables *E,
             (*field)->maxdims[s] = E->sphere.caps;
             if (t >= 0)
                 (*field)->chunkdims[s] = E->sphere.caps;
-            
+
             /* hyperslab selection parameters */
             (*field)->offset[s] = E->parallel.me / (nprocx*nprocy*nprocz);
             (*field)->stride[s] = 1;
@@ -1516,7 +1516,7 @@ void h5output_have_coord(struct All_variables *E)
 
     mz = field->block[1];
 
-    if (E->output.average == 1)
+    if (E->output.horiz_avg == 1)
     {
         for(k = 0; k < mz; k++)
             field->data[k] = E->sx[1][3][k+1];
@@ -1527,7 +1527,7 @@ void h5output_have_coord(struct All_variables *E)
 
 }
 
-void h5output_average(struct All_variables *E, int cycles)
+void h5output_horiz_avg(struct All_variables *E, int cycles)
 {
     /* horizontal average output of temperature and rms velocity */
     void compute_horiz_avg();

@@ -814,7 +814,7 @@ struct Output {
     int pressure;     /* whether to output pressure */
     int surf;         /* whether to output surface data */
     int botm;         /* whether to output bottom data */
-    int average;      /* whether to output horizontal averaged profile */
+    int horiz_avg;    /* whether to output horizontal averaged profile */
 };
 
 

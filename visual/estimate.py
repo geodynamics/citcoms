@@ -18,7 +18,7 @@ Options are:
                 [ --pressure ]
                 [ --surf ]
                 [ --botm ]
-                [ --average ]
+                [ --horiz_avg ]
 
 Examples:
 
@@ -76,7 +76,7 @@ def main():
         'pressure': False,
         'surf': False,
         'botm': False,
-        'average': False,
+        'horiz_avg': False,
     }
     caps = None
     steps = None
@@ -86,7 +86,7 @@ def main():
 
     opts, args = getopt.getopt(sys.argv[1:], "hac:t:x:y:z:",
         ['help','full','regional','caps=','steps=','nodex=','nodey=','nodez=',
-         'all','connectivity','stress','pressure','surf','botm','average'])
+         'all','connectivity','stress','pressure','surf','botm','horiz_avg'])
 
     for opt,arg in opts:
 
@@ -123,8 +123,8 @@ def main():
             out['surf'] = True
         if opt == '--botm':
             out['botm'] = True
-        if opt == '--average':
-            out['average'] = True
+        if opt == '--horiz_avg':
+            out['horiz_avg'] = True
 
     if not caps or not steps or not nodex or not nodey or not nodez:
         print "Enter the following quantities:\n"
@@ -202,7 +202,7 @@ def main():
         total += surf_total
     if out['botm']:
         total += surf_total
-    if out['average']:
+    if out['horiz_avg']:
         total += have_total
 
     hr = 33
@@ -243,11 +243,11 @@ def main():
         print "botm/velocity        %s" % ps(surf_velocity)
         print "botm/heatflux        %s" % ps(surf_heatflux)
         print "botm/topography      %s" % ps(surf_topography)
-    if out['average']:
-        print "average/coord        %s" % ps(have_coord)
-        print "average/temperature  %s" % ps(have_temp)
-        print "average/horiz_velo   %s" % ps(have_vxy)
-        print "average/vert_velo    %s" % ps(have_vz)
+    if out['horiz_avg']:
+        print "horiz_avg/coord        %s" % ps(have_coord)
+        print "horiz_avg/temperature  %s" % ps(have_temp)
+        print "horiz_avg/horiz_velo   %s" % ps(have_vxy)
+        print "horiz_avg/vert_velo    %s" % ps(have_vz)
     if True:
         print "-" * hr
         print "total                %s" % ps(total)
@@ -270,8 +270,8 @@ def main():
         print "surf          %s" % pc(surf_total,total)
     if out['botm']:
         print "botm          %s" % pc(surf_total,total)
-    if out['average']:
-        print "average       %s" % pc(have_total,total)
+    if out['horiz_avg']:
+        print "horiz_avg       %s" % pc(have_total,total)
 
 
 if __name__ == '__main__':
