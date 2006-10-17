@@ -25,7 +25,6 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-#include <portinfo>
 #include <Python.h>
 #include <stddef.h>
 #include <stdio.h>

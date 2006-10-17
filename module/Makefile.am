@@ -23,53 +23,11 @@
 
 # $Id$
 
-if COND_EXCHANGER
-    MAYBE_EXCHANGER = Exchanger
-endif
-SUBDIRS = $(MAYBE_EXCHANGER)
+noinst_LIBRARIES = libCitcomSLib.a
 
-noinst_LIBRARIES =
-pyexec_LTLIBRARIES =
+CitcomSLib_a_CPPFLAGS = -I$(top_srcdir)/lib
 
-if COND_EMBEDDING
-    # static library
-    noinst_LIBRARIES += libCitcomSLibmodule.a
-else
-    # extension module (libtool)
-    pyexec_LTLIBRARIES += CitcomSLibmodule.la
-endif
-
-# static libraries
-
-libCitcomSLibmodule_a_CFLAGS = $(AM_CFLAGS) # hack for automake
-libCitcomSLibmodule_a_SOURCES = $(sources)
-
-if COND_HDF5
-    libCitcomSLibmodule_a_CFLAGS += -DUSE_HDF5
-endif
-
-# extension modules (libtool)
-
-CitcomSLibmodule_la_LDFLAGS = -module -release $(VERSION)
-CitcomSLibmodule_la_LIBADD = \
-	$(top_builddir)/lib/libCitcomS.la \
-	$(PYTHON_EGG_LDFLAGS) \
-	$(MPILIBS)
-CitcomSLibmodule_la_SOURCES = $(sources)
-
-# compiler settings
-
-CC = $(MPICC)
-INCLUDES = \
-	-I$(top_srcdir)/module/Regional \
-	-I$(top_srcdir)/lib \
-	$(PYTHON_EGG_CPPFLAGS) \
-	-I$(PYTHON_INCDIR) \
-	$(MPIINCLUDES)
-
-# sources
-
-sources = \
+CitcomSLib_a_SOURCES = \
 	CitcomSmodule.c \
 	CitcomSmodule.h \
 	advdiffu.c \

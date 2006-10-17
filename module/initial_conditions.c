@@ -25,7 +25,6 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-#include <portinfo>
 #include <Python.h>
 #include "exceptions.h"
 #include "initial_conditions.h"

@@ -23,19 +23,95 @@
 
 # $Id$
 
-ACLOCAL_AMFLAGS = -I ./m4
+SUBDIRS =
+DIST_SUBDIRS = examples tests visual
+MERLIN_SUBDIRS = module
 
-if COND_PYRE
-    MAYBE_PYRE = CitcomS etc examples module tests visual
-endif
+bin_PROGRAMS = CitcomSFull CitcomSRegional
 
-SUBDIRS = $(MAYBE_PYTHIA) $(MAYBE_EXCHANGER) lib $(MAYBE_PYRE) bin
-DIST_SUBDIRS = \
-	$(MAYBE_DIST_PYTHIA) $(MAYBE_DIST_EXCHANGER) \
-	lib bin \
-	CitcomS etc examples module tests visual
+CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
+CitcomSFull_LDADD = libCitcomS.a
+
+CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
+CitcomSRegional_LDADD = libCitcomS.a
+
+noinst_LIBRARIES = libCitcomS.a
+
+libCitcomS_a_CPPFLAGS = -I$(top_srcdir)/lib
+libCitcomS_a_SOURCES = \
+	lib/Advection_diffusion.c \
+	lib/advection_diffusion.h \
+	lib/advection.h \
+	lib/BC_util.c \
+	lib/Citcom_init.c \
+	lib/citcom_init.h \
+	lib/Construct_arrays.c \
+	lib/Convection.c \
+	lib/convection_variables.h \
+	lib/Drive_solvers.c \
+	lib/drive_solvers.h \
+	lib/Element_calculations.c \
+	lib/element_definitions.h \
+	lib/General_matrix_functions.c \
+	lib/global_defs.h \
+	lib/Global_operations.c \
+	lib/hdf5_related.h \
+	lib/Initial_temperature.c \
+	lib/initial_temperature.h \
+	lib/Instructions.c \
+	lib/Interuption.c \
+	lib/interuption.h \
+	lib/lith_age.h \
+	lib/Lith_age.c \
+	lib/Nodal_mesh.c \
+	lib/Output.c \
+	lib/output.h \
+	lib/Output_h5.c \
+	lib/output_h5.h \
+	lib/Pan_problem_misc_functions.c \
+	lib/parallel_related.h \
+	lib/Parallel_util.c \
+	lib/Parsing.c \
+	lib/parsing.h \
+	lib/Phase_change.c \
+	lib/phase_change.h \
+	lib/Problem_related.c \
+	lib/Process_buoyancy.c \
+	lib/Shape_functions.c \
+	lib/Size_does_matter.c \
+	lib/Solver_conj_grad.c \
+	lib/Solver_multigrid.c \
+	lib/solver.h \
+	lib/sphere_communication.h \
+	lib/Sphere_harmonics.c \
+	lib/Sphere_util.c \
+	lib/Stokes_flow_Incomp.c \
+	lib/temperature_descriptions.h \
+	lib/Topo_gravity.c \
+	lib/Tracer_advection.c \
+	lib/tracer_defs.h \
+	lib/viscosity_descriptions.h \
+	lib/Viscosity_structures.c \
+	lib/Full_boundary_conditions.c \
+	lib/Full_geometry_cartesian.c \
+	lib/Full_lith_age_read_files.c \
+	lib/Full_parallel_related.c \
+	lib/Full_read_input_from_files.c \
+	lib/Full_solver.c \
+	lib/Full_sphere_related.c \
+	lib/Full_version_dependent.c \
+	lib/Regional_boundary_conditions.c \
+	lib/Regional_geometry_cartesian.c \
+	lib/Regional_lith_age_read_files.c \
+	lib/Regional_parallel_related.c \
+	lib/Regional_read_input_from_files.c \
+	lib/Regional_solver.c \
+	lib/Regional_sphere_related.c \
+	lib/Regional_version_dependent.c
 
 EXTRA_DIST = \
-	doc/CitComS.doxyconf
+	lib/Obsolete.c \
+	lib/Full_obsolete.c \
+	lib/Regional_obsolete.c
 
 ## end of Makefile.am

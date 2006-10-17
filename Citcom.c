@@ -38,8 +38,7 @@
 
 extern int Emergency_stop;
 
-void full_solver_init(struct All_variables *E);
-void regional_solver_init(struct All_variables *E);
+void solver_init(struct All_variables *E);
 
 int main(argc,argv)
      int argc;
@@ -78,12 +77,8 @@ int main(argc,argv)
 
   world = MPI_COMM_WORLD;
   E = citcom_init(&world);             /* allocate global E and do initializaion here */
-
-#ifdef CITCOMS_SOLVER_FULL
-  full_solver_init(E);
-#else
-  regional_solver_init(E);
-#endif
+  
+  solver_init(E);
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);

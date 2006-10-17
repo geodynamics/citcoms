@@ -23,23 +23,8 @@
 
 # $Id$
 
-# C++ tests
-TESTS = $(EXTRA_PROGRAMS)
-INSTALL_TESTS = $(EXTRA_PROGRAMS)
-EXTRA_PROGRAMS = array2d
-array2d_SOURCES = array2d.cc
-PYTHON_BLDLIBRARY = -lpython$(PYTHON_VERSION)
-INCLUDES = \
-	-I$(top_srcdir)/lib/Common \
-	$(MPIINCLUDES)
-LDADD = \
-	-lExchanger \
-	-l_mpimodule -ljournal \
-	$(PYTHON_BLDLIBRARY) \
-	$(MPILIBS)
-CC = $(MPICC)
-
 EXTRA_DIST = \
+	array2d.cc \
 	asap.py \
 	exchange.py \
 	hrothgar.py \

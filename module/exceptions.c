@@ -25,7 +25,6 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */ 
 
-#include <portinfo>
 #include <Python.h>
 
 PyObject *pyCitcom_runtimeError = 0;
