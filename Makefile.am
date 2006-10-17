@@ -29,9 +29,11 @@ MERLIN_SUBDIRS = module
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
 
+CitcomSFull_CPPFLAGS = -I$(top_srcdir)/lib
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
 CitcomSFull_LDADD = libCitcomS.a
 
+CitcomSRegional_CPPFLAGS = -I$(top_srcdir)/lib
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
 CitcomSRegional_LDADD = libCitcomS.a
 
