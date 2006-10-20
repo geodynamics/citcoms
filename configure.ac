@@ -35,11 +35,11 @@ AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r]
 AC_PROG_RANLIB
 
 # Checks for libraries.
-AC_SEARCH_LIBS([MPI_Init], [mpi mpich])
+AC_SEARCH_LIBS([MPI_Init], [mpi mpich], [], [AC_MSG_ERROR([MPI library not found])])
 AC_SEARCH_LIBS([sqrt], [m])
 
 # Checks for header files.
-AC_CHECK_HEADER([mpi.h])
+AC_CHECK_HEADER([mpi.h], [], [AC_MSG_ERROR([header 'mpi.h' not found])])
 AC_CHECK_HEADERS([malloc.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
