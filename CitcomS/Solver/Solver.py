@@ -39,7 +39,7 @@ class Solver(Component):
 
         self.all_variables = None
         self.communicator = None
-	self.start_cpu_time = 0
+        self.start_cpu_time = 0
         return
 
 
@@ -70,15 +70,15 @@ class Solver(Component):
 
         comm = application.solverCommunicator
         all_variables = citcom_init(comm.handle())
-	self.communicator = comm
+        self.communicator = comm
         self.all_variables = all_variables
 
         self.initializeSolver()
 
         # information about clock time
-	self.start_cpu_time = CPU_time()
+        self.start_cpu_time = CPU_time()
 
-	inv = self.inventory
+        inv = self.inventory
 
         inv.mesher.initialize(all_variables)
         inv.tsolver.initialize(all_variables)
@@ -205,7 +205,6 @@ class Solver(Component):
     def save(self, monitoringFrequency):
         step = self.step
 
-        output_time(self.all_variables, step)
         # output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):
             output(self.all_variables, step)
@@ -220,7 +219,7 @@ class Solver(Component):
 
         Solver_set_properties(self.all_variables, self.inventory, stream)
 
-	inv = self.inventory
+        inv = self.inventory
         inv.mesher.setProperties(stream)
         inv.tsolver.setProperties(stream)
         inv.vsolver.setProperties(stream)
