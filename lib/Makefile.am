@@ -52,7 +52,6 @@ libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
 libCitcomS_a_SOURCES = $(sources)
 
 # shared library (libtool)
-libCitcomS_la_LIBADD = $(LIBM) $(LIBHDF5)
 libCitcomS_la_LDFLAGS = -release $(VERSION)
 libCitcomS_la_SOURCES = $(sources)
 

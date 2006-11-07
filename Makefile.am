@@ -60,9 +60,9 @@ endif
 
 
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
-CitcomSFull_LDADD = $(top_builddir)/lib/libCitcomS.a $(LIBHDF5)
+CitcomSFull_LDADD = $(top_builddir)/lib/libCitcomS.a
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
-CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.a $(LIBHDF5)
+CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.a
 
 
 
@@ -121,9 +121,7 @@ CLEANFILES = $(bin_SCRIPTS)
 pycitcoms_SOURCES = pycitcoms.c
 pycitcoms_LDADD = \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
-	$(libCitcomS) \
-	$(LIBHDF5) \
-	$(LIBM)
+	$(libCitcomS)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)
 	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
