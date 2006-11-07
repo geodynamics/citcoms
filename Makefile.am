@@ -23,97 +23,118 @@
 
 # $Id$
 
-SUBDIRS =
-DIST_SUBDIRS = examples tests visual
-MERLIN_SUBDIRS = module
 
-bin_PROGRAMS = CitcomSFull CitcomSRegional
+ACLOCAL_AMFLAGS = -I ./m4
 
-CitcomSFull_CPPFLAGS = -I$(top_srcdir)/lib
+if COND_PYRE
+    MAYBE_PYRE = CitcomS etc examples module tests visual
+endif
+
+SUBDIRS = lib $(MAYBE_PYRE)
+
+
+INCLUDES = -I$(top_srcdir)/lib
+
+AM_CPPFLAGS =
+if COND_HDF5
+    AM_CPPFLAGS += -DUSE_HDF5
+endif
+
+
+if COND_PYRE
+
+if COND_EMBEDDING
+    bin_PROGRAMS = pycitcoms
+else
+    bin_PROGRAMS =
+endif
+
+    bin_SCRIPTS = citcoms
+else
+    bin_PROGRAMS = CitcomSFull CitcomSRegional
+    bin_SCRIPTS =
+endif
+
+
+######## legacy drivers ########
+
+
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
-CitcomSFull_LDADD = libCitcomS.a
-
-CitcomSRegional_CPPFLAGS = -I$(top_srcdir)/lib
+CitcomSFull_LDADD = $(top_builddir)/lib/libCitcomS.a $(LIBHDF5)
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
-CitcomSRegional_LDADD = libCitcomS.a
+CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.a $(LIBHDF5)
 
-noinst_LIBRARIES = libCitcomS.a
 
-libCitcomS_a_CPPFLAGS = -I$(top_srcdir)/lib
-libCitcomS_a_SOURCES = \
-	lib/Advection_diffusion.c \
-	lib/advection_diffusion.h \
-	lib/advection.h \
-	lib/BC_util.c \
-	lib/Citcom_init.c \
-	lib/citcom_init.h \
-	lib/Construct_arrays.c \
-	lib/Convection.c \
-	lib/convection_variables.h \
-	lib/Drive_solvers.c \
-	lib/drive_solvers.h \
-	lib/Element_calculations.c \
-	lib/element_definitions.h \
-	lib/General_matrix_functions.c \
-	lib/global_defs.h \
-	lib/Global_operations.c \
-	lib/hdf5_related.h \
-	lib/Initial_temperature.c \
-	lib/initial_temperature.h \
-	lib/Instructions.c \
-	lib/Interuption.c \
-	lib/interuption.h \
-	lib/lith_age.h \
-	lib/Lith_age.c \
-	lib/Nodal_mesh.c \
-	lib/Output.c \
-	lib/output.h \
-	lib/Output_h5.c \
-	lib/output_h5.h \
-	lib/Pan_problem_misc_functions.c \
-	lib/parallel_related.h \
-	lib/Parallel_util.c \
-	lib/Parsing.c \
-	lib/parsing.h \
-	lib/Phase_change.c \
-	lib/phase_change.h \
-	lib/Problem_related.c \
-	lib/Process_buoyancy.c \
-	lib/Shape_functions.c \
-	lib/Size_does_matter.c \
-	lib/Solver_conj_grad.c \
-	lib/Solver_multigrid.c \
-	lib/solver.h \
-	lib/sphere_communication.h \
-	lib/Sphere_harmonics.c \
-	lib/Sphere_util.c \
-	lib/Stokes_flow_Incomp.c \
-	lib/temperature_descriptions.h \
-	lib/Topo_gravity.c \
-	lib/Tracer_advection.c \
-	lib/tracer_defs.h \
-	lib/viscosity_descriptions.h \
-	lib/Viscosity_structures.c \
-	lib/Full_boundary_conditions.c \
-	lib/Full_geometry_cartesian.c \
-	lib/Full_lith_age_read_files.c \
-	lib/Full_parallel_related.c \
-	lib/Full_read_input_from_files.c \
-	lib/Full_solver.c \
-	lib/Full_sphere_related.c \
-	lib/Full_version_dependent.c \
-	lib/Regional_boundary_conditions.c \
-	lib/Regional_geometry_cartesian.c \
-	lib/Regional_lith_age_read_files.c \
-	lib/Regional_parallel_related.c \
-	lib/Regional_read_input_from_files.c \
-	lib/Regional_solver.c \
-	lib/Regional_sphere_related.c \
-	lib/Regional_version_dependent.c
 
-EXTRA_DIST = \
-	lib/Obsolete.c \
-	lib/Full_obsolete.c \
-	lib/Regional_obsolete.c
+######## pyrized driver ########
+
+
+abs_top_srcdir = @abs_top_srcdir@
+abs_top_builddir = @abs_top_builddir@
+abs_builddir = @abs_builddir@
+
+
+if COND_EMBEDDING
+    INTERPRETER = $(bindir)/pycitcoms
+    noinstINTERPRETER = $(abs_builddir)/pycitcoms
+    noinstPYTHONPATH = $(abs_top_srcdir)
+    libCitcomS = $(top_builddir)/lib/libCitcomS.a
+else
+    INTERPRETER = $(PYTHON)
+    noinstINTERPRETER = $(PYTHON)
+    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_builddir)/module/.libs
+    libCitcomS = $(top_builddir)/lib/libCitcomS.la
+endif
+
+if COND_PYRE
+INCLUDES += \
+	-I$(top_srcdir)/module \
+	$(PYTHON_EGG_CPPFLAGS) \
+	-I$(PYTHON_INCDIR)
+endif
+
+
+# citcoms (top-level Python script)
+do_build = sed -e s%[@]INTERPRETER[@]%$(noinstINTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(noinstPYTHONPATH)%g
+do_install = sed -e s%[@]INTERPRETER[@]%$(INTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(PYTHONPATH)%g
+citcoms: $(srcdir)/citcoms.in Makefile
+	$(do_build) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+	chmod +x $@
+install-binSCRIPTS: $(bin_SCRIPTS)
+	@$(NORMAL_INSTALL)
+	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
+	@list='$(bin_SCRIPTS)'; for p in $$list; do \
+	  if test -f "$$p.in"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f $$d$$p.in; then \
+	    f=`echo "$$p" | sed 's|^.*/||;$(transform)'`; \
+	    echo " $(do_install) '$$d$$p.in' > '$(DESTDIR)$(bindir)/$$f'"; \
+	    $(do_install) "$$d$$p.in" > "$(DESTDIR)$(bindir)/$$f"; \
+	    echo " chmod +x '$(DESTDIR)$(bindir)/$$f'"; \
+	    chmod +x "$(DESTDIR)$(bindir)/$$f"; \
+	  else :; fi; \
+	done
+EXTRA_DIST = citcoms.in
+CLEANFILES = $(bin_SCRIPTS)
+
+
+# pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
+pycitcoms_SOURCES = pycitcoms.c
+pycitcoms_LDADD = \
+	$(top_builddir)/module/libCitcomSLibmodule.a \
+	$(libCitcomS) \
+	$(LIBHDF5) \
+	$(LIBM)
+pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
+	@rm -f pycitcoms$(EXEEXT)
+	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
+		$(PYTHON_EGG_LDFLAGS) \
+		$(PYTHON_BLDLIBRARY) \
+		$(MPILIBS) \
+		$(FCLIBS) \
+		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
+		$(LIBS) \
+		$(PYTHON_LDLAST)
+
 
 ## end of Makefile.am

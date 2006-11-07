@@ -1,7 +1,6 @@
-// -*- C++ -*-
-//
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+/* 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// 
 //<LicenseText>
 //
 // CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
@@ -22,34 +21,32 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //</LicenseText>
-//
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
+// 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/ 
 
-#include <portinfo>
-#include "Exchanger/Spherical2Cartesian.h"
-#include "SIUnit.h"
-#include "Convertor.h"
-#include "journal/diagnostics.h"
+#include <Python.h>
+#include <stdio.h>
+#include <mpi.h>
+#include "CitcomSmodule.h"
 
+/* include the implementation of _mpi */
+#include "mpi/_mpi.c"
 
-void Convertor::init(bool dimensional, bool transformational,
-		     const All_variables* E)
+struct _inittab inittab[] = {
+    { "_mpi", init_mpi },
+    { "CitcomSLib", initCitcomSLib },
+    { 0, 0 }
+};
+
+int main(int argc, char **argv)
 {
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-
-    if(dimensional)
-	si = new SIUnit(E);
-
-    if(transformational)
-	cart = new Exchanger::Spherical2Cartesian();
-
-    inited = true;
+    /* add our extension module */
+    if (PyImport_ExtendInittab(inittab) == -1) {
+        fprintf(stderr, "%s: PyImport_ExtendInittab failed! Exiting...\n", argv[0]);
+        return 1;
+    }
+    return Py_Main(argc, argv);
 }
 
-
-// version
-// $Id$
-
-// End of file
+/* End of file */

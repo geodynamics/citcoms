@@ -101,7 +101,7 @@ install-nodist_visualDATA: $(nodist_visual_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(visualdir)" || $(mkdir_p) "$(DESTDIR)$(visualdir)"
 	@list='$(nodist_visual_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  if test -f "$$p.in"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
 	  echo " $(do_install) '$$d$$p.in' > '$(DESTDIR)$(visualdir)/$$f'"; \
 	  $(do_install) "$$d$$p.in" > "$(DESTDIR)$(visualdir)/$$f"; \
