@@ -55,8 +55,24 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
 
     # Checks for Python modules and packages.
-    CIT_CHECK_PYTHON_EGG([pythia >= 0.8.1.0b2, < 0.8.2a])
-    CIT_PYTHON_EGG_FLAGS
+    AC_MSG_NOTICE([checking/downloading Python dependencies])
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py install_deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+          [],
+          [AC_MSG_FAILURE([cannot check/download Python dependencies])])
+
+    AC_MSG_CHECKING([for egg-related flags])
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+          [AC_MSG_RESULT(ok)
+           eval `cat egg-flags.sh`
+           rm -f egg-flags.sh
+          ],
+          [AC_MSG_RESULT(failed)
+          AC_MSG_FAILURE([cannot scan Python eggs for flags])])
+
+    AC_SUBST(PYTHON_EGG_CFLAGS)
+    AC_SUBST(PYTHON_EGG_CPPFLAGS)
+    AC_SUBST(PYTHON_EGG_LDFLAGS)
+
 fi
 
 # Checks for programs.
