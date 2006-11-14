@@ -26,9 +26,24 @@
 */ 
 
 #include <Python.h>
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <mpi.h>
 #include "CitcomSmodule.h"
+
+#define COMMAND \
+"import sys; " \
+"path = sys.argv[1]; " \
+"requires = sys.argv[2]; " \
+"entry = sys.argv[3]; " \
+"path = path.split(':'); " \
+"path.extend(sys.path); " \
+"sys.path = path; " \
+"from pyre.util import loadObject; " \
+"entry = loadObject(entry); " \
+"entry(sys.argv[3:], kwds={'requires': requires})"
 
 /* include the implementation of _mpi */
 #include "mpi/_mpi.c"
@@ -41,12 +56,47 @@ struct _inittab inittab[] = {
 
 int main(int argc, char **argv)
 {
+    int status;
+    
+#ifdef USE_MPI
+    /* initialize MPI */
+    if (MPI_Init(&argc, &argv) != MPI_SUCCESS) {
+        fprintf(stderr, "%s: MPI_Init failed! Exiting ...", argv[0]);
+        return 1;
+    }
+#endif
+    
     /* add our extension module */
     if (PyImport_ExtendInittab(inittab) == -1) {
         fprintf(stderr, "%s: PyImport_ExtendInittab failed! Exiting...\n", argv[0]);
         return 1;
     }
-    return Py_Main(argc, argv);
+    
+    if (argc < 3 || strcmp(argv[1], "--pyre-start") != 0) {
+        return Py_Main(argc, argv);
+    }
+    
+    /* make sure 'sys.executable' is set to the path of this program  */
+    Py_SetProgramName(argv[0]);
+    
+    /* initialize Python */
+    Py_Initialize();
+    
+    /* initialize sys.argv */
+    PySys_SetArgv(argc - 1, argv + 1);
+    
+    /* run the Python command */
+    status = PyRun_SimpleString(COMMAND) != 0;
+    
+    /* shut down Python */
+    Py_Finalize();
+    
+#ifdef USE_MPI
+    /* shut down MPI */
+    MPI_Finalize();
+#endif
+    
+    return status;
 }
 
 /* End of file */

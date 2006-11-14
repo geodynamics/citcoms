@@ -27,6 +27,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
+__requires__ = "CitcomS"
 
 # re-create the PYTHONPATH at 'configure' time
 import os.path, sys
@@ -36,7 +37,6 @@ for directory in path:
     if directory:
         directory = os.path.abspath(directory)
         sys.path.insert(1, directory)
-import pythia
 
 from CitcomS.SimpleApp import SimpleApp
 app = SimpleApp()

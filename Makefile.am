@@ -44,7 +44,7 @@ endif
 if COND_PYRE
 
 if COND_EMBEDDING
-    bin_PROGRAMS = pycitcoms
+    bin_PROGRAMS = pycitcoms mpipycitcoms
 else
     bin_PROGRAMS =
 endif
@@ -128,8 +128,23 @@ pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES)
 		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
 		$(PYTHON_EGG_LDFLAGS) \
 		$(PYTHON_BLDLIBRARY) \
-		$(MPILIBS) \
-		$(FCLIBS) \
+		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
+		$(LIBS) \
+		$(PYTHON_LDLAST)
+
+
+# pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
+mpipycitcoms_SOURCES = pycitcoms.c
+mpipycitcoms_CFLAGS = -DUSE_MPI
+mpipycitcoms_LDADD = \
+	$(top_builddir)/module/libCitcomSLibmodule.a \
+	$(libCitcomS)
+mpipycitcoms$(EXEEXT): $(mpipycitcoms_OBJECTS) $(mpipycitcoms_DEPENDENCIES) 
+	@rm -f mpipycitcoms$(EXEEXT)
+	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+		$(mpipycitcoms_LDFLAGS) $(mpipycitcoms_OBJECTS) $(mpipycitcoms_LDADD) \
+		$(PYTHON_EGG_LDFLAGS) \
+		$(PYTHON_BLDLIBRARY) \
 		$(PYTHON_LIBS) $(PYTHON_MODLIBS) $(PYTHON_SYSLIBS) \
 		$(LIBS) \
 		$(PYTHON_LDLAST)
