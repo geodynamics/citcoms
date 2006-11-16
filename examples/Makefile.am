@@ -23,7 +23,9 @@
 
 # $Id$
 
-EXTRA_DIST = \
+examplesdir = $(pkgdatadir)/examples
+
+nobase_dist_examples_DATA = \
 	Cookbook1/cookbook1.cfg \
 	Cookbook2/cookbook2.cfg \
 	Cookbook3/cookbook3.cfg \
@@ -167,9 +169,9 @@ EXTRA_DIST = \
 	Cookbook5/velocity/bvel.dat71 \
 	Cookbook5/velocity/bvel.dat8 \
 	Cookbook5/velocity/bvel.dat9 \
-	Cookbook7/cookbook7.cfg \
-	Cookbook7/coord.dat \
-	Cookbook7/README \
+	Cookbook6/cookbook6.cfg \
+	Cookbook6/coord.dat \
+	Cookbook6/README \
 	example0.cfg \
 	example1.cfg \
 	Full/input.sample \
