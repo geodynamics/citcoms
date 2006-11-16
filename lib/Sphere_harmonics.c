@@ -7,6 +7,8 @@
 #include "global_defs.h"
 #include <stdlib.h>
 
+static void compute_sphereh_table(struct All_variables *);
+
 /*   ======================================================================
      ======================================================================  */
 
@@ -15,7 +17,6 @@ void set_sphere_harmonics(E)
 
 {
     int m,node,ll,mm,i,j;
-    static void compute_sphereh_table();
 
     i=0;
     for (ll=0;ll<=E->output.llmax;ll++)
@@ -330,10 +331,3 @@ double get_angle(x,xx)
 
     return (angle);
 }
-
-
-#if 0
-
-
-
-#endif
