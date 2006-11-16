@@ -31,18 +31,16 @@ if COND_HDF5
     AM_CPPFLAGS += -DUSE_HDF5
 endif
 
+bin_PROGRAMS = CitcomSFull CitcomSRegional
 
 if COND_PYRE
 
 if COND_EMBEDDING
-    bin_PROGRAMS = pycitcoms mpipycitcoms
-else
-    bin_PROGRAMS =
+    bin_PROGRAMS += pycitcoms mpipycitcoms
 endif
 
     bin_SCRIPTS = citcoms
 else
-    bin_PROGRAMS = CitcomSFull CitcomSRegional
     bin_SCRIPTS =
 endif
 
