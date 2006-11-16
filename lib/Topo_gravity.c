@@ -30,6 +30,9 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+static void geoid_from_buoyancy();
+static void geoid_from_topography();
+
 
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
@@ -405,9 +408,6 @@ void compute_geoid(E, harm_geoid, harm_tpgt, harm_tpgb)
      struct All_variables *E;
      float *harm_geoid[2], *harm_tpgt[2], *harm_tpgb[2];
 {
-    static void geoid_from_buoyancy();
-    static void geoid_from_topography();
-
     int ll, mm, p;
 
     for (ll=1;ll<=E->output.llmax;ll++)
