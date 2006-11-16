@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Functions to assemble the element k matrices and the element f vector.
@@ -77,7 +77,7 @@ void assemble_forces(E,penalty)
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->temp);
+  thermal_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
@@ -123,7 +123,7 @@ void assemble_forces_pseudo_surf(E,penalty)
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->temp);
+  thermal_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
@@ -765,7 +765,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   for(p=0;p<n;p++) elt_f[p] = 0.0;
 
   for(p=1;p<=ends;p++)
-    force[p] = E->temp[m][E->ien[m][el].node[p]];
+    force[p] = E->buoyancy[m][E->ien[m][el].node[p]];
 
   for(j=1;j<=vpts;j++)       {   /*compute force at each int point */
     force_at_gs[j] = 0.0;

@@ -318,8 +318,389 @@ void get_ele_visc(E, EV,m)
 
 
 /* ==========================================================  */
-/*                                                             */
+/*  From Sphere_harmonics.c                                    */
 /* =========================================================== */
+
+
+
+/* This function construct sph harm tables on a regular grid */
+/* for inverse interpolation                                 */
+
+static void  compute_sphereh_int_table(E)
+     struct All_variables *E;
+{
+    int i,j;
+    double t,f;
+    double dth,dfi,sqrt_multis();
+
+    E->sphere.con = (double *)malloc((E->sphere.hindice+3)*sizeof(double));
+    for (ll=0;ll<=E->output.llmax;ll++)
+	for (mm=0;mm<=ll;mm++)   {
+	    E->sphere.con[E->sphere.hindex[ll][mm]] =
+		sqrt( (2.0-((mm==0)?1.0:0.0))*(2*ll+1)/(4.0*M_PI) )
+		*sqrt_multis(ll+mm,ll-mm);  /* which is sqrt((ll-mm)!/(ll+mm)!) */
+	}
+
+    E->sphere.tablenplm   = (double **) malloc((E->sphere.nox+1)
+					       *sizeof(double*));
+    for (i=1;i<=E->sphere.nox;i++)
+	E->sphere.tablenplm[i]= (double *)malloc((E->sphere.hindice+3)
+						 *sizeof(double));
+
+    E->sphere.tablencosf  = (double **) malloc((E->sphere.noy+1)
+					       *sizeof(double*));
+    E->sphere.tablensinf  = (double **) malloc((E->sphere.noy+1)
+					       *sizeof(double*));
+    for (i=1;i<=E->sphere.noy;i++)   {
+	E->sphere.tablencosf[i]= (double *)malloc((E->output.llmax+3)
+						  *sizeof(double));
+	E->sphere.tablensinf[i]= (double *)malloc((E->output.llmax+3)
+						  *sizeof(double));
+    }
+
+    E->sphere.sx[1] = (double *) malloc((E->sphere.nsf+1)*sizeof(double));
+    E->sphere.sx[2] = (double *) malloc((E->sphere.nsf+1)*sizeof(double));
+
+    dth = M_PI/E->sphere.elx;
+    dfi = 2.0*M_PI/E->sphere.ely;
+
+    for (j=1;j<=E->sphere.noy;j++)
+	for (i=1;i<=E->sphere.nox;i++) {
+	    node = i+(j-1)*E->sphere.nox;
+	    E->sphere.sx[1][node] = dth*(i-1);
+	    E->sphere.sx[2][node] = dfi*(j-1);
+	}
+
+    for (j=1;j<=E->sphere.nox;j++)  {
+	t=E->sphere.sx[1][j];
+	for (ll=0;ll<=E->output.llmax;ll++)
+	    for (mm=0;mm<=ll;mm++)  {
+		p = E->sphere.hindex[ll][mm];
+		E->sphere.tablenplm[j][p] = modified_plgndr_a(ll,mm,t) ;
+	    }
+    }
+    for (j=1;j<=E->sphere.noy;j++)  {
+	node = 1+(j-1)*E->sphere.nox;
+	f=E->sphere.sx[2][node];
+	for (mm=0;mm<=E->output.llmax;mm++)   {
+	    E->sphere.tablencosf[j][mm] = cos( (double)(mm)*f );
+	    E->sphere.tablensinf[j][mm] = sin( (double)(mm)*f );
+	}
+    }
+}
+
+
+/* ================================================
+   for a given node, this routine gives which cap and element
+   the node is in.
+   ================================================*/
+void construct_interp_net(E)
+     struct All_variables *E;
+{
+
+    void parallel_process_termination();
+    void parallel_process_sync();
+    int ii,jj,es,i,j,m,el,node;
+    int locate_cap(),locate_element();
+    double x[4],t,f;
+
+    const int ends=4;
+
+    for (i=1;i<=E->sphere.nox;i++)
+	for (j=1;j<=E->sphere.noy;j++)   {
+	    node = i+(j-1)*E->sphere.nox;
+	    E->sphere.int_cap[node]=0;
+	    E->sphere.int_ele[node]=0;
+	}
+
+
+    for (i=1;i<=E->sphere.nox;i++)
+	for (j=1;j<=E->sphere.noy;j++)   {
+	    node = i+(j-1)*E->sphere.nox;
+
+	    /* first find which cap this node (i,j) is in  */
+	    t = E->sphere.sx[1][node];
+	    f = E->sphere.sx[2][node];
+
+	    x[1] = sin(t)*cos(f);  /* radius does not matter */
+	    x[2] = sin(t)*sin(f);
+	    x[3] = cos(t);
+
+
+	    fprintf(E->fp,"mmm0=%d\n",node);
+
+	    m = locate_cap(E,x);
+
+	    fprintf(E->fp,"mmm=%d\n",m);
+
+	    if (m>0)  {
+		el = locate_element(E,m,x,node);        /* bottom element */
+
+		if (el<=0)    {
+		    fprintf(stderr,"!!! Processor %d cannot find the right element in cap %d\n",E->parallel.me,m);
+		    parallel_process_termination();
+		}
+
+		E->sphere.int_cap[node]=m;
+		E->sphere.int_ele[node]=el;
+
+	    }
+	}        /* end for i and j */
+
+    parallel_process_sync(E);
+
+    return;
+}
+
+/* ================================================
+   locate the cap for node (i,j)
+   ================================================*/
+
+int locate_cap(E,x)
+     struct All_variables *E;
+     double x[4];
+{
+
+    int ia[5],i,m,mm;
+    double xx[4],angle[5],angle1[5];
+    double get_angle();
+    double area1,rr;
+    const double e_7=1.e-7;
+    static int been_here=0;
+
+    mm = 0;
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+	ia[1] = 1;
+	ia[2] = E->lmesh.noz*E->lmesh.nox-E->lmesh.noz+1;
+	ia[3] = E->lmesh.nno-E->lmesh.noz+1;
+	ia[4] = ia[3]-E->lmesh.noz*(E->lmesh.nox-1);
+
+	for (i=1;i<=4;i++)  {
+	    xx[1] = E->x[m][1][ia[i]]/E->sx[m][3][ia[1]];
+	    xx[2] = E->x[m][2][ia[i]]/E->sx[m][3][ia[1]];
+	    xx[3] = E->x[m][3][ia[i]]/E->sx[m][3][ia[1]];
+	    angle[i] = get_angle(x,xx);    /* get angle between (i,j) and other four*/
+	    angle1[i]=E->sphere.angle[m][i];
+	}
+
+	area1 = area_of_sphere_triag(angle[1],angle[2],angle1[1])
+	    + area_of_sphere_triag(angle[2],angle[3],angle1[2])
+	    + area_of_sphere_triag(angle[3],angle[4],angle1[3])
+	    + area_of_sphere_triag(angle[4],angle[1],angle1[4]);
+
+	if ( fabs ((area1-E->sphere.area[m])/E->sphere.area[m]) <e_7 ) {
+	    mm = m;
+	    return (mm);
+        }
+    }
+
+    return (mm);
+}
+
+/* ================================================
+   locate the element containing the node (i,j) with coord x.
+   The radius is assumed to be 1 in computing the areas.
+   NOTE:  The returned element el is for the bottom layer.
+   ================================================*/
+
+int locate_element(E,m,x,ne)
+     struct All_variables *E;
+     double x[4];
+int m,ne;
+{
+
+    int el_temp,el,es,el_located,level,lev,lev_plus,el_plus,es_plus,i,j,node;
+    double area,area1,areamin;
+    double area_of_5points();
+    const double e_7=1.e-7;
+    const double e_6=1.e6;
+
+    el_located = 0;
+
+
+    level=E->mesh.levmin;
+    for (es=1;es<=E->lmesh.SNEL[level];es++)              {
+
+	el = (es-1)*E->lmesh.ELZ[level]+1;
+	area1 = area_of_5points (E,level,m,el,x,ne);
+	area = E->sphere.area1[level][m][es];
+
+	if(fabs ((area1-area)/area) <e_7 ) {
+	    for (lev=E->mesh.levmin;lev<E->mesh.levmax;lev++)  {
+		lev_plus = lev + 1;
+		j=1;
+		areamin = e_6;
+		do {
+		    el_plus = E->EL[lev][m][el].sub[j];
+
+		    es_plus = (el_plus-1)/E->lmesh.ELZ[lev_plus]+1;
+
+		    area1 = area_of_5points(E,lev_plus,m,el_plus,x,ne);
+		    area = E->sphere.area1[lev_plus][m][es_plus];
+
+		    if(fabs(area1-area)<areamin) {
+			areamin=fabs(area1-area);
+			el_temp = el_plus;
+		    }
+		    j++;
+		}  while (j<5 && fabs((area1-area)/area) > e_7);
+		el = el_plus;
+		/* if exit with ..>e_7, pick the best one*/
+		if (fabs((area1-area)/area) > e_7) el = el_temp;
+	    }      /* end for loop lev         */
+	    el_located = el;
+	}    /* end for if */
+
+	if(el_located)  break;
+    }    /* end for es at the coarsest level  */
+
+    return (el_located);
+}
+
+/* ===============================================================
+   interpolate nodal T's within cap m and element el onto node with
+   coordinate x[3] which is derived from a regular mesh and within
+   the element el. NOTE the radius of x[3] is the inner radius.
+   =============================================================== */
+
+float sphere_interpolate_point(E,T,m,el,x,ne)
+     struct All_variables *E;
+     float **T;
+     double x[4];
+int m,el,ne;
+{
+    double to,fo,y[4],yy[4][5],dxdy[4][4];
+    double a1,b1,c1,d1,a2,b2,c2,d2,a,b,c,xx1,yy1,y1,y2;
+    float ta,t[5];
+    int es,snode,i,j,node;
+
+    const int oned=4;
+    const double e_7=1.e-7;
+    const double four=4.0;
+    const double two=2.0;
+    const double one=1.0;
+    const double pt25=0.25;
+
+    /* first rotate the coord such that the center of element is
+       the pole   */
+
+    es = (el-1)/E->lmesh.elz+1;
+
+    to = E->eco[m][el].centre[1];
+    fo = E->eco[m][el].centre[2];
+
+    dxdy[1][1] = cos(to)*cos(fo);
+    dxdy[1][2] = cos(to)*sin(fo);
+    dxdy[1][3] = -sin(to);
+    dxdy[2][1] = -sin(fo);
+    dxdy[2][2] = cos(fo);
+    dxdy[2][3] = 0.0;
+    dxdy[3][1] = sin(to)*cos(fo);
+    dxdy[3][2] = sin(to)*sin(fo);
+    dxdy[3][3] = cos(to);
+
+    for(i=1;i<=oned;i++) {         /* nodes */
+	node = E->ien[m][el].node[i];
+	snode = E->sien[m][es].node[i];
+	t[i] = T[m][snode];
+	for (j=1;j<=E->mesh.nsd;j++)
+	    yy[j][i] = E->x[m][1][node]*dxdy[j][1]
+                + E->x[m][2][node]*dxdy[j][2]
+                + E->x[m][3][node]*dxdy[j][3];
+    }
+
+    for (j=1;j<=E->mesh.nsd;j++)
+	y[j] = x[1]*dxdy[j][1] + x[2]*dxdy[j][2] + x[3]*dxdy[j][3];
+
+    /* then for node y, determine its coordinates xx1,yy1
+       in the parental element in the isoparametric element system*/
+
+    a1 = yy[1][1] + yy[1][2] + yy[1][3] + yy[1][4];
+    b1 = yy[1][3] + yy[1][2] - yy[1][1] - yy[1][4];
+    c1 = yy[1][3] + yy[1][1] - yy[1][2] - yy[1][4];
+    d1 = yy[1][3] + yy[1][4] - yy[1][1] - yy[1][2];
+    a2 = yy[2][1] + yy[2][2] + yy[2][3] + yy[2][4];
+    b2 = yy[2][3] + yy[2][2] - yy[2][1] - yy[2][4];
+    c2 = yy[2][3] + yy[2][1] - yy[2][2] - yy[2][4];
+    d2 = yy[2][3] + yy[2][4] - yy[2][1] - yy[2][2];
+
+    a = d2*c1;
+    b = a2*c1+b1*d2-d1*c2-d1*b2-four*c1*y[2];
+    c=four*c2*y[1]-c2*a1-a1*b2+four*b2*y[1]-four*b1*y[2]+a2*b1;
+
+    if (fabs(a)<e_7)  {
+	yy1 = -c/b;
+	xx1 = (four*y[1]-a1-d1*yy1)/(b1+c1*yy1);
+    }
+    else  {
+	y1= (-b+sqrt(b*b-four*a*c))/(two*a);
+	y2= (-b-sqrt(b*b-four*a*c))/(two*a);
+	if (fabs(y1)>fabs(y2))
+	    yy1 = y2;
+	else
+	    yy1 = y1;
+	xx1 = (four*y[1]-a1-d1*yy1)/(b1+c1*yy1);
+    }
+
+    /* now we can calculate T at x[4] using shape function */
+
+    ta = ((one-xx1)*(one-yy1)*t[1]+(one+xx1)*(one-yy1)*t[2]+
+          (one+xx1)*(one+yy1)*t[3]+(one-xx1)*(one+yy1)*t[4])*pt25;
+
+    /*if(fabs(xx1)>1.5 || fabs(yy1)>1.5)fprintf(E->fp_out,"ME= %d %d %d %g %g %g %g %g %g %g\n",ne,m,es,t[1],t[2],t[3],t[4],ta,xx1,yy1);
+     */
+    return (ta);
+}
+
+/* ===================================================================
+   do the interpolation on sphere for data T, which is needed for both
+   spherical harmonic expansion and graphics
+   =================================================================== */
+
+void sphere_interpolate(E,T,TG)
+     struct All_variables *E;
+     float **T,*TG;
+{
+
+    float sphere_interpolate_point();
+    void gather_TG_to_me0();
+    void parallel_process_termination();
+
+    int ii,jj,es,i,j,m,el,node;
+    double x[4],t,f;
+
+    const int ends=4;
+
+    TG[0] = 0.0;
+    for (i=1;i<=E->sphere.nox;i++)
+	for (j=1;j<=E->sphere.noy;j++)   {
+	    node = i+(j-1)*E->sphere.nox;
+	    TG[node] = 0.0;
+	    /* first find which cap this node (i,j) is in  */
+
+	    m = E->sphere.int_cap[node];
+	    el = E->sphere.int_ele[node];
+
+	    if (m>0 && el>0)   {
+		t = E->sphere.sx[1][node];
+		f = E->sphere.sx[2][node];
+
+		x[1] = E->sx[1][3][1]*sin(t)*cos(f);
+		x[2] = E->sx[1][3][1]*sin(t)*sin(f);
+		x[3] = E->sx[1][3][1]*cos(t);
+
+		TG[node] = sphere_interpolate_point(E,T,m,el,x,node);
+
+	    }
+
+	}        /* end for i and j */
+
+    gather_TG_to_me0(E,TG);
+
+    return;
+}
+
 
 
 /* version */

@@ -232,7 +232,6 @@ struct HarmBc {
 
 struct Shape_function_dA  {
   double vpt[8+1];
-  double spt[4+1];
   double ppt[1+1]; };
 
 struct Shape_function1_dA  {
@@ -249,7 +248,6 @@ struct Shape_function1 	{
 
 struct Shape_function 	{
     double vpt[8*8];  /* node & gauss pt */
-    double spt[8*4];  /* node & gauss pt */
     double ppt[8*1];  };
 
 struct Shape_function_dx 	{
@@ -327,9 +325,13 @@ struct Parallel {
     int total_surf_proc;
     int ****loc2proc_map;
 
+
+#if 0
     int nproc_sph[3];
     int me_sph;
     int me_loc_sph[3];
+#endif
+
 
     int redundant[MAX_LEVELS];
     int idb;
@@ -374,6 +376,22 @@ struct SPHERE   {
   int caps_per_proc;
   int capid[NCS];
   int max_connections;
+  int *hindex[100];
+  int hindice;
+  float *harm_tpgt[2];
+  float *harm_tpgb[2];
+  float *harm_geoid[2];
+
+  double **tablenplm;
+  double **tablencosf;
+  double **tablensinf;
+
+  double **tablesplm[NCS];
+  double **tablescosf[NCS];
+  double **tablessinf[NCS];
+
+    /**/
+#if 0
   int nox;
   int noy;
   int noz;
@@ -384,22 +402,19 @@ struct SPHERE   {
   int elz;
   int snel;
   int llmax;
+
   int *int_cap;
   int *int_ele;
-  int *hindex[100];
-  int hindice;
-  float *harm_tpgt[2];
-  float *harm_tpgb[2];
   float *harm_slab[2];
   float *harm_velp[2];
   float *harm_velt[2];
   float *harm_divg[2];
   float *harm_vort[2];
   float *harm_visc[2];
-  float *harm_geoid[2];
   double *sx[4];
-  double *con;
   double *det[5];
+  double *con;
+
   double *tableplm[181];
   double *tablecosf[361];
   double *tablesinf[361];
@@ -408,7 +423,9 @@ struct SPHERE   {
   double *tableplm_n[182];
   double *tablecosf_n[362];
   double *tablesinf_n[362];
+    /**/
   struct SIEN *sien;
+#endif
 
   double area[NCS];
   double angle[NCS][5];
@@ -422,7 +439,6 @@ struct SPHERE   {
 
   float *radius;
   int slab_layers;
-  int output_llmax;
 
 
   int lnox;
@@ -793,6 +809,8 @@ struct Output {
     char format[20];  /* ascii-local, ascii or hdf5 */
     char optional[1000]; /* comma-delimited list of objects to output */
 
+    int llmax;  /* max degree of spherical harmonics output */
+
     /* size of collective buffer used by MPI-IO */
     int cb_block_size;
     int cb_buffer_size;
@@ -814,6 +832,7 @@ struct Output {
     int pressure;     /* whether to output pressure */
     int surf;         /* whether to output surface data */
     int botm;         /* whether to output bottom data */
+    int geoid;        /* whether to output geoid/topo spherial harmonics */
     int horiz_avg;    /* whether to output horizontal averaged profile */
 };
 

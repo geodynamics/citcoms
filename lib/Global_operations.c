@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <mpi.h>
@@ -325,6 +325,7 @@ float *sphc,*sphs;
  temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
  sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
 
+ /* pack */
  jumpp = E->sphere.hindice;
  total = E->sphere.hindice*2+3;
  for (j=0;j<E->sphere.hindice;j++)   {
@@ -332,8 +333,10 @@ float *sphc,*sphs;
    sphcs[j+jumpp] = sphs[j];
  }
 
+ /* sum across processors in horizontal direction */
  MPI_Allreduce(sphcs,temp,total,MPI_FLOAT,MPI_SUM,E->parallel.horizontal_comm);
 
+ /* unpack */
  for (j=0;j<E->sphere.hindice;j++)   {
    sphc[j] = temp[j];
    sphs[j] = temp[j+jumpp];
@@ -613,4 +616,44 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
   temp1 = sqrt(temp2/temp1);
 
   return (temp1);
-  }
+}
+
+
+void sum_across_depth_sph1(E,sphc,sphs)
+     struct All_variables *E;
+     float *sphc,*sphs;
+{
+    int jumpp,total,j;
+
+    float *sphcs,*temp;
+
+    if (E->parallel.nprocz > 1)  {
+	total = E->sphere.hindice*2+3;
+	temp = (float *) malloc(total*sizeof(float));
+	sphcs = (float *) malloc(total*sizeof(float));
+
+	/* pack sphc[] and sphs[] into sphcs[] */
+	jumpp = E->sphere.hindice;
+	for (j=0;j<E->sphere.hindice;j++)   {
+	    sphcs[j] = sphc[j];
+	    sphcs[j+jumpp] = sphs[j];
+	}
+
+	/* sum across processors in z direction */
+	MPI_Allreduce(sphcs, temp, total, MPI_FLOAT, MPI_SUM,
+		      E->parallel.vertical_comm);
+
+	/* unpack */
+	for (j=0;j<E->sphere.hindice;j++)   {
+	    sphc[j] = temp[j];
+	    sphs[j] = temp[j+jumpp];
+	}
+
+	free(temp);
+	free(sphcs);
+    }
+
+
+    return;
+}
+

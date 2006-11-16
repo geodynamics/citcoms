@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -238,15 +238,14 @@ int solve_del2_u(E,d0,F,acc,high_lev)
     counts =0;
     if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
     if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-    valid = (residual < acc)?1:0;
 
-    while (!valid) {
+    do {
       residual=multi_grid(E,d0,F,acc,high_lev);
       valid = (residual < acc)?1:0;
       counts ++;
       if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
       if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-    }
+    }  while (!valid);
 
     cycles = counts;
   }

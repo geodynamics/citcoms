@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /*
@@ -710,7 +710,7 @@ char * filen;
     }
     fprintf(fp1,"lmaxx=%.4e lminx=%.4e for %s\n",maxx,minx,filen);
     fprintf(fp1," ll   mm     cos      sin \n");
-    for (ll=0;ll<=E->sphere.output_llmax;ll++)
+    for (ll=0;ll<=E->output.llmax;ll++)
       for(mm=0;mm<=ll;mm++)  {
         i = E->sphere.hindex[ll][mm];
         fprintf(fp1,"%3d %3d %.4e %.4e \n",ll,mm,sphc[i],sphs[i]);
@@ -926,8 +926,8 @@ void process_new_velocity(E,ii)
     int m,i,it;
 
 
-    E->monitor.length_scale = E->data.layer_km/E->mesh.layer[2]; /* km */
-    E->monitor.time_scale = pow(E->data.layer_km*1000.0,2.0)/   /* Million years */
+    E->monitor.length_scale = E->data.radius_km/E->mesh.layer[2]; /* km */
+    E->monitor.time_scale = pow(E->data.radius_km*1000.0,2.0)/   /* Million years */
       (E->data.therm_diff*3600.0*24.0*365.25*1.0e6);
 
     if ( (ii == 0) || ((ii % E->control.record_every) == 0)

@@ -87,6 +87,7 @@ void h5output_pressure(struct All_variables *, int);
 void h5output_stress(struct All_variables *, int);
 void h5output_tracer(struct All_variables *, int);
 void h5output_surf_botm(struct All_variables *, int);
+void h5output_geoid(struct All_variables *, int);
 void h5output_horiz_avg(struct All_variables *, int);
 void h5output_time(struct All_variables *, int);
 
@@ -131,6 +132,9 @@ void h5output(struct All_variables *E, int cycles)
         h5output_tracer(E, cycles);
 
     /* optional output below */
+    if(E->output.geoid == 1)
+        h5output_geoid(E, cycles);
+
     if(E->output.stress == 1)
         h5output_stress(E, cycles);
 
@@ -1583,6 +1587,17 @@ void h5output_horiz_avg(struct All_variables *E, int cycles)
     status = H5Dclose(dataset);
 }
 
+/****************************************************************************
+ * Spherical harmonics coefficients                                         *
+ ****************************************************************************/
+void h5output_geoid(struct All_variables *E, int cycles)
+{
+
+    /* TODO: write geoid to h5file */
+}
+
+
+
 
 /****************************************************************************
  * Create and output /connectivity dataset                                  *
@@ -1914,7 +1929,6 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_float(input, "z_lmantle", E->viscosity.zlm);
     status = set_attribute_float(input, "z_cmb", E->viscosity.zcmb);
 
-    status = set_attribute_float(input, "layer_km", E->data.layer_km);
     status = set_attribute_float(input, "radius_km", E->data.radius_km);
     status = set_attribute_float(input, "scalev", E->data.scalev);
     status = set_attribute_float(input, "scalet", E->data.scalet);
@@ -2005,6 +2019,8 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute_string(input, "output_format", E->output.format);
     status = set_attribute_string(input, "output_optional", E->output.optional);
+    status = set_attribute_int(input, "output_ll_max", E->output.llmax);
+
     status = set_attribute_int(input, "verbose", E->control.verbose);
     status = set_attribute_int(input, "see_convergence", E->control.print_convergence);
 
@@ -2069,11 +2085,6 @@ void h5output_meta(struct All_variables *E)
         status = set_attribute_double(input, "fi_min", E->control.fi_min);
         status = set_attribute_double(input, "fi_max", E->control.fi_max);
     }
-
-    status = set_attribute_int(input, "ll_max", E->sphere.llmax);
-    status = set_attribute_int(input, "nlong", E->sphere.noy);
-    status = set_attribute_int(input, "nlati", E->sphere.nox);
-    status = set_attribute_int(input, "output_ll_max", E->sphere.output_llmax);
 
     /*
      * Tracer.inventory

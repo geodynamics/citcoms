@@ -189,6 +189,7 @@ void read_initial_settings(struct All_variables *E)
   void set_convection_defaults();
   void set_cg_defaults();
   void set_mg_defaults();
+  float tmp;
   int m=E->parallel.me;
 
   /* first the problem type (defines subsequent behaviour) */
@@ -308,10 +309,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("reset_startage",&(E->control.reset_startage),"0",m);
   input_int("zero_elapsed_time",&(E->control.zero_elapsed_time),"0",m);
 
-  input_int("ll_max",&(E->sphere.llmax),"1",m);
-  input_int("nlong",&(E->sphere.noy),"1",m);
-  input_int("nlati",&(E->sphere.nox),"1",m);
-  input_int("output_ll_max",&(E->sphere.output_llmax),"1",m);
+  input_int("output_ll_max",&(E->output.llmax),"1",m);
 
   input_int("topvbc",&(E->mesh.topvbc),"0",m);
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
@@ -363,22 +361,25 @@ void read_initial_settings(struct All_variables *E)
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
-  input_float("layerd",&(E->data.layer_km),"6371.0",m);
   input_float("gravacc",&(E->data.grav_acc),"9.81",m);
-  input_float("thermexp",&(E->data.therm_exp),"3.28e-5",m);
+  input_float("thermexp",&(E->data.therm_exp),"3.0e-5",m);
   input_float("cp",&(E->data.Cp),"1200.0",m);
-  input_float("thermdiff",&(E->data.therm_diff),"8.0e-7",m);
+  input_float("thermdiff",&(E->data.therm_diff),"1.0e-6",m);
   input_float("density",&(E->data.density),"3340.0",m);
-  input_float("wdensity",&(E->data.density_above),"1030.0",m);
+  input_float("density_above",&(E->data.density_above),"1030.0",m);
+  input_float("density_below",&(E->data.density_below),"6600.0",m);
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
   input_float("surftemp",&(E->data.surf_temp),"273.0",m);
+
+  input_float("radius",&tmp,"6371e3.0",m);
+  E->data.radius_km = tmp / 1e3;
 
   E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
 
   E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
     * E->data.ref_viscosity
     / (E->data.density * E->data.grav_acc * E->data.therm_exp)
-    / (E->data.layer_km * E->data.layer_km * E->data.layer_km * 1e9);
+    / (E->data.radius_km * E->data.radius_km * E->data.radius_km * 1e9);
 
   output_common_input(E);
   h5input_params(E);
@@ -427,6 +428,7 @@ void allocate_common_vars(E)
   E->T[j]        = (double *) malloc((nno+1)*sizeof(double));
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
   E->edot[j]     = (float *) malloc((nno+1)*sizeof(float));
+  E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
   E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
@@ -502,8 +504,9 @@ void allocate_common_vars(E)
     }
   }
 
- for(i=0;i<=E->sphere.llmax;i++)
-  E->sphere.hindex[i] = (int *)  malloc((E->sphere.llmax+3)*sizeof(int));
+ for(i=0;i<=E->output.llmax;i++)
+  E->sphere.hindex[i] = (int *) malloc((E->output.llmax+3)
+				       *sizeof(int));
 
 
  for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
@@ -728,7 +731,6 @@ void global_default_values(E)
   E->control.VBXbotval=0.0;
   E->control.VBYbotval=0.0;
 
-  E->data.layer_km = 2890.0; /* Earth, whole mantle defaults */
   E->data.radius_km = 6370.0; /* Earth, whole mantle defaults */
   E->data.grav_acc = 9.81;
   E->data.therm_diff = 1.0e-6;
@@ -981,6 +983,7 @@ void output_parse_optional(struct  All_variables *E)
     E->output.pressure = 0;
     E->output.surf = 0;
     E->output.botm = 0;
+    E->output.geoid = 0;
     E->output.horiz_avg = 0;
 
     while(1) {
@@ -1007,6 +1010,15 @@ void output_parse_optional(struct  All_variables *E)
             E->output.surf = 1;
         else if(strcmp(prev, "botm")==0)
             E->output.botm = 1;
+        else if(strcmp(prev, "geoid")==0)
+	    if (E->parallel.nprocxy != 12) {
+		fprintf(stderr, "Warning: geoid calculation only works in full version. Disabled\n");
+	    }
+	    else {
+		/* geoid calculation requires surface and CMB topo */
+		/* make sure the topos are available!              */
+		E->output.geoid  = 1;
+	    }
         else if(strcmp(prev, "horiz_avg")==0)
             E->output.horiz_avg = 1;
         else

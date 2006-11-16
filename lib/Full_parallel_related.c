@@ -274,6 +274,9 @@ void full_parallel_domain_decomp0(struct All_variables *E)
   E->lmesh.snel = E->lmesh.elx*E->lmesh.ely;
 
 
+
+
+#if 0
   i = cases[E->sphere.caps_per_proc];
 
   E->parallel.nproc_sph[1] = incases3[i].xy[0];
@@ -296,6 +299,9 @@ void full_parallel_domain_decomp0(struct All_variables *E)
 
   E->sphere.lexs = E->sphere.lelx * E->parallel.me_loc_sph[1];
   E->sphere.leys = E->sphere.lely * E->parallel.me_loc_sph[2];
+
+#endif
+
 
 
 

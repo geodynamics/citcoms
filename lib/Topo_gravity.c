@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <stdio.h>
@@ -77,23 +77,23 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
 
 void get_STD_freesurf(struct All_variables *E,float **freesurf)
 {
-	int node,snode,m;
+        int node,snode,m;
 
-	if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
-		for(m=1;m<=E->sphere.caps_per_proc;m++)
-			for(snode=1;snode<=E->lmesh.nsf;snode++) {
-				node = E->surf_node[m][snode];
-				/*freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;*/
-				freesurf[m][snode] += E->sphere.cap[m].V[3][node]*E->advection.timestep;
-			}
-	return;
+        if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
+                for(m=1;m<=E->sphere.caps_per_proc;m++)
+                        for(snode=1;snode<=E->lmesh.nsf;snode++) {
+                                node = E->surf_node[m][snode];
+                                /*freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;*/
+                                freesurf[m][snode] += E->sphere.cap[m].V[3][node]*E->advection.timestep;
+                        }
+        return;
 }
 
 
 void allocate_STD_mem(struct All_variables *E,
-		      float** SXX, float** SYY, float** SZZ,
-		      float** SXY, float** SXZ, float** SZY,
-		      float** divv, float** vorv)
+                      float** SXX, float** SYY, float** SZZ,
+                      float** SXY, float** SXZ, float** SZY,
+                      float** divv, float** vorv)
 {
   int m, i;
 
@@ -125,9 +125,9 @@ void allocate_STD_mem(struct All_variables *E,
 
 
 void free_STD_mem(struct All_variables *E,
-		  float** SXX, float** SYY, float** SZZ,
-		  float** SXY, float** SXZ, float** SZY,
-		  float** divv, float** vorv)
+                  float** SXX, float** SYY, float** SZZ,
+                  float** SXY, float** SXZ, float** SZY,
+                  float** divv, float** vorv)
 {
   int m;
   for(m=1;m<=E->sphere.caps_per_proc;m++)        {
@@ -177,9 +177,9 @@ void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY)
 
 
 void compute_nodal_stress(struct All_variables *E,
-			  float** SXX, float** SYY, float** SZZ,
-			  float** SXY, float** SXZ, float** SZY,
-			  float** divv, float** vorv)
+                          float** SXX, float** SYY, float** SZZ,
+                          float** SXY, float** SXZ, float** SZY,
+                          float** divv, float** vorv)
 {
   void get_global_shape_fn();
   void velo_from_element();
@@ -216,57 +216,57 @@ void compute_nodal_stress(struct All_variables *E,
       velo_from_element(E,VV,m,e,sphere_key);
 
       for(j=1;j<=vpts;j++)  {
-	pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
-	Vxyz[1][j] = 0.0;
-	Vxyz[2][j] = 0.0;
-	Vxyz[3][j] = 0.0;
-	Vxyz[4][j] = 0.0;
-	Vxyz[5][j] = 0.0;
-	Vxyz[6][j] = 0.0;
-	Vxyz[7][j] = 0.0;
-	Vxyz[8][j] = 0.0;
+        pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
+        Vxyz[1][j] = 0.0;
+        Vxyz[2][j] = 0.0;
+        Vxyz[3][j] = 0.0;
+        Vxyz[4][j] = 0.0;
+        Vxyz[5][j] = 0.0;
+        Vxyz[6][j] = 0.0;
+        Vxyz[7][j] = 0.0;
+        Vxyz[8][j] = 0.0;
       }
 
       for(i=1;i<=ends;i++) {
-	tww[i] = 0.0;
-	for(j=1;j<=vpts;j++)
-	  tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
-	    * E->N.vpt[GNVINDEX(i,j)];
+        tww[i] = 0.0;
+        for(j=1;j<=vpts;j++)
+          tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
+            * E->N.vpt[GNVINDEX(i,j)];
       }
 
       for(j=1;j<=vpts;j++)   {
-	for(i=1;i<=ends;i++)   {
-	  Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
-			+ VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-	  Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
-			 + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
-			+ VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-	  Vxyz[3][j]+= VV[3][i]*GNx.vpt[GNVXINDEX(2,i,j)];
+        for(i=1;i<=ends;i++)   {
+          Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+                        + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+          Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
+                         + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+                        + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+          Vxyz[3][j]+= VV[3][i]*GNx.vpt[GNVXINDEX(2,i,j)];
 
-	  Vxyz[4][j]+=( (VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)]
-			 - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
-			+ VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
-	  Vxyz[5][j]+=VV[1][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-								      *GNx.vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
-	  Vxyz[6][j]+=VV[2][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-								      *GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
-	  Vxyz[7][j]+=rtf[3][j] * (
-				   VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
-				   + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
-				   + VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
-	  Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
-	    ( VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
-	      + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
-	      - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
-	}
-	Sxx += 2.0 * pre[j] * Vxyz[1][j];
-	Syy += 2.0 * pre[j] * Vxyz[2][j];
-	Szz += 2.0 * pre[j] * Vxyz[3][j];
-	Sxy += pre[j] * Vxyz[4][j];
-	Sxz += pre[j] * Vxyz[5][j];
-	Szy += pre[j] * Vxyz[6][j];
-	div += Vxyz[7][j]*dOmega.vpt[j];
-	vor += Vxyz[8][j]*dOmega.vpt[j];
+          Vxyz[4][j]+=( (VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)]
+                         - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+                        + VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
+          Vxyz[5][j]+=VV[1][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+                                                                      *GNx.vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
+          Vxyz[6][j]+=VV[2][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+                                                                      *GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
+          Vxyz[7][j]+=rtf[3][j] * (
+                                   VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+                                   + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
+                                   + VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
+          Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
+            ( VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
+              + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
+              - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
+        }
+        Sxx += 2.0 * pre[j] * Vxyz[1][j];
+        Syy += 2.0 * pre[j] * Vxyz[2][j];
+        Szz += 2.0 * pre[j] * Vxyz[3][j];
+        Sxy += pre[j] * Vxyz[4][j];
+        Sxz += pre[j] * Vxyz[5][j];
+        Szy += pre[j] * Vxyz[6][j];
+        div += Vxyz[7][j]*dOmega.vpt[j];
+        vor += Vxyz[8][j]*dOmega.vpt[j];
       }
 
       Sxx /= E->eco[m][e].area;
@@ -283,15 +283,15 @@ void compute_nodal_stress(struct All_variables *E,
       Syy -= E->P[m][e];  /* add the pressure term */
 
       for(i=1;i<=ends;i++) {
-	node = E->ien[m][e].node[i];
-	SZZ[m][node] += tww[i] * Szz;
-	SXX[m][node] += tww[i] * Sxx;
-	SYY[m][node] += tww[i] * Syy;
-	SXY[m][node] += tww[i] * Sxy;
-	SXZ[m][node] += tww[i] * Sxz;
-	SZY[m][node] += tww[i] * Szy;
-	divv[m][node]+= tww[i] * div;
-	vorv[m][node]+= tww[i] * vor;
+        node = E->ien[m][e].node[i];
+        SZZ[m][node] += tww[i] * Szz;
+        SXX[m][node] += tww[i] * Sxx;
+        SYY[m][node] += tww[i] * Syy;
+        SXY[m][node] += tww[i] * Sxy;
+        SXZ[m][node] += tww[i] * Sxz;
+        SZY[m][node] += tww[i] * Szy;
+        divv[m][node]+= tww[i] * div;
+        vorv[m][node]+= tww[i] * vor;
       }
 
     }    /* end for el */
@@ -350,57 +350,272 @@ void stress_conform_bcs(struct All_variables *E)
   int m, i, j, k, n, d;
   const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
   const int stress_index[4][4] = { {0, 0, 0, 0},
-				   {0, 1, 4, 5},
-				   {0, 4, 2, 6},
-				   {0, 5, 6, 3} };
+                                   {0, 1, 4, 5},
+                                   {0, 4, 2, 6},
+                                   {0, 5, 6, 3} };
 
   if(E->control.side_sbcs) {
 
     for(m=1; m<=E->sphere.caps_per_proc; m++)
       for(i=1; i<=E->lmesh.noy; i++)
         for(j=1; j<=E->lmesh.nox; j++)
-	  for(k=1; k<=E->lmesh.noz; k++) {
-	    n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-	    for(d=1; d<=E->mesh.nsd; d++)
-	      if(E->node[m][n] & sbc_flag[d]) {
-		if(i==1)
-		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_WEST][d][ E->sbc.node[m][n] ];
-		if(i==E->lmesh.noy)
-		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_EAST][d][ E->sbc.node[m][n] ];
-		if(j==1)
-		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_NORTH][d][ E->sbc.node[m][n] ];
-		if(j==E->lmesh.nox)
-		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_SOUTH][d][ E->sbc.node[m][n] ];
-		if(k==1)
-		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_BOTTOM][d][ E->sbc.node[m][n] ];
-		if(k==E->lmesh.noz)
-		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_TOP][d][ E->sbc.node[m][n] ];
-	      }
-	  }
+          for(k=1; k<=E->lmesh.noz; k++) {
+            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+            for(d=1; d<=E->mesh.nsd; d++)
+              if(E->node[m][n] & sbc_flag[d]) {
+                if(i==1)
+                  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_WEST][d][ E->sbc.node[m][n] ];
+                if(i==E->lmesh.noy)
+                  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_EAST][d][ E->sbc.node[m][n] ];
+                if(j==1)
+                  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_NORTH][d][ E->sbc.node[m][n] ];
+                if(j==E->lmesh.nox)
+                  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sbc.SB[m][SIDE_SOUTH][d][ E->sbc.node[m][n] ];
+                if(k==1)
+                  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_BOTTOM][d][ E->sbc.node[m][n] ];
+                if(k==E->lmesh.noz)
+                  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sbc.SB[m][SIDE_TOP][d][ E->sbc.node[m][n] ];
+              }
+          }
 
   } else {
 
     for(m=1; m<=E->sphere.caps_per_proc; m++)
       for(i=1; i<=E->lmesh.noy; i++)
         for(j=1; j<=E->lmesh.nox; j++)
-	  for(k=1; k<=E->lmesh.noz; k++) {
-	    n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-	    for(d=1; d<=E->mesh.nsd; d++)
-	      if(E->node[m][n] & sbc_flag[d]) {
-		if(i==1 || i==E->lmesh.noy)
-		  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
-		if(j==1 || j==E->lmesh.nox)
-		  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
-		if(k==1 || k==E->lmesh.noz)
-		  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
-	      }
-	  }
+          for(k=1; k<=E->lmesh.noz; k++) {
+            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+            for(d=1; d<=E->mesh.nsd; d++)
+              if(E->node[m][n] & sbc_flag[d]) {
+                if(i==1 || i==E->lmesh.noy)
+                  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
+                if(j==1 || j==E->lmesh.nox)
+                  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
+                if(k==1 || k==E->lmesh.noz)
+                  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+              }
+          }
   }
 }
 
 
 /* ===================================================================
    ===================================================================  */
+void compute_geoid(E, harm_geoid, harm_tpgt, harm_tpgb)
+     struct All_variables *E;
+     float *harm_geoid[2], *harm_tpgt[2], *harm_tpgb[2];
+{
+    static void geoid_from_buoyancy();
+    static void geoid_from_topography();
+
+    int ll, mm, p;
+
+    for (ll=1;ll<=E->output.llmax;ll++)
+        for (mm=0;mm<=ll;mm++)   {
+            p = E->sphere.hindex[ll][mm];
+            harm_geoid[0][p] = 0.0;
+            harm_geoid[1][p] = 0.0;
+        }
+
+    geoid_from_buoyancy(E, harm_geoid);
+    geoid_from_topography(E, harm_geoid, harm_tpgt, harm_tpgb);
+}
+
+
+static void geoid_from_buoyancy(E, harm_geoid)
+     struct All_variables *E;
+     float *harm_geoid[2];
+{
+    int m,k,ll,mm,node,i,j,p,noz,snode;
+    float *TT[NCS],radius,*geoid[2],dlayer,con1,con2,scaling2,scaling;
+    void sphere_expansion();
+    void sum_across_depth_sph1();
+
+    /* scale for buoyancy */
+    scaling2 = -E->data.therm_exp*E->data.ref_temperature*E->data.density/E->control.Atemp;
+    /* scale for geoid */
+    scaling = 1.0e6*4.0*M_PI*E->data.radius_km*E->data.radius_km*
+        E->data.grav_const/E->data.grav_acc;
+
+    /* buoyancy of one layer */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+
+    /* sin coeff */
+    geoid[0] = (float*)malloc((E->sphere.hindice+1)*sizeof(float));
+    /* cos coeff */
+    geoid[1] = (float*)malloc((E->sphere.hindice+1)*sizeof(float));
+
+    /* loop over each layer */
+    for(k=1;k<E->lmesh.noz;k++)  {
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=E->lmesh.noy;i++)
+                for(j=1;j<=E->lmesh.nox;j++)  {
+                    node=k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+                    p = j + (i-1)*E->lmesh.nox;
+                    TT[m][p] = (E->buoyancy[m][node]+E->buoyancy[m][node+1])*0.5*scaling2;
+                }
+
+        /* expand TT into spherical harmonics */
+        sphere_expansion(E,TT,geoid[0],geoid[1]);
+
+        /* thickness of the layer */
+        dlayer = (E->sx[1][3][k+1]-E->sx[1][3][k]);
+
+        /* radius of the layer */
+        radius = (E->sx[1][3][k+1]+E->sx[1][3][k])*0.5;
+
+        /* contribution of buoyancy at this layer */
+        for (ll=1;ll<=E->output.llmax;ll++)
+            for (mm=0;mm<=ll;mm++)   {
+                con1 = scaling/(2.0*ll+1.0)*dlayer;
+                con2 = pow(radius,((double)(ll+2)));
+
+                p = E->sphere.hindex[ll][mm];
+                harm_geoid[0][p] += con1*con2*geoid[0][p];
+                harm_geoid[1][p] += con1*con2*geoid[1][p];
+            }
+
+        //if(E->parallel.me==0)  fprintf(stderr,"layer %d %.5e %g %g %g\n",k,radius,dlayer,con1,con2);
+    }
+
+    /* accumulate geoid from all layers to the surface (top processors) */
+    sum_across_depth_sph1(E, harm_geoid[0], harm_geoid[1]);
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        free ((void *)TT[m]);
+
+    free ((void *)geoid[0]);
+    free ((void *)geoid[1]);
+    return;
+}
+
+
+
+static void geoid_from_topography(E, harm_geoid, harm_tpgt, harm_tpgb)
+     struct All_variables *E;
+     float *harm_geoid[2], *harm_tpgt[2], *harm_tpgb[2];
+{
+
+    float *geoid[2],con1,con2,scaling,den_contrast1,den_contrast2,stress_scaling,topo_scaling1,topo_scaling2;
+    int i,j,k,ll,mm,s;
+    void sum_across_depth_sph1();
+    void sphere_expansion();
+
+    geoid[0] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
+    geoid[1] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
+
+    for (i=0;i<E->sphere.hindice;i++)   {
+        geoid[0][i] = 0.0;
+        geoid[1][i] = 0.0;
+    }
+
+    stress_scaling = E->data.ref_viscosity*E->data.therm_diff/
+        (E->data.radius_km*E->data.radius_km*1e6);
+
+    /* density across surface */
+    den_contrast1 = (E->data.density-E->data.density_above);
+    /* density across CMB */
+    den_contrast2 = (E->data.density_below-E->data.density);
+
+    /* scale for surface and CMB topo */
+    topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc);
+    topo_scaling2 = stress_scaling / (den_contrast2*E->data.grav_acc);
+
+    /* scale for geoid */
+    scaling = 1.0e3*4.0*M_PI*E->data.radius_km*
+        E->data.grav_const/E->data.grav_acc;
+
+
+    if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
+        /* dimensionalize surface topography and
+           expand into spherical harmonics */
+        for(j=1;j<=E->sphere.caps_per_proc;j++)
+            for(i=1;i<=E->lmesh.nsf;i++)   {
+                E->slice.tpg[j][i] = E->slice.tpg[j][i]*topo_scaling1;
+            }
+        sphere_expansion(E,E->slice.tpg,E->sphere.harm_tpgt[0],
+                         E->sphere.harm_tpgt[1]);
+    }
+    //print_field_spectral_regular(E,TL,E->sphere.harm_tpgt[0],E->sphere.harm_tpgt[1],E->parallel.nprocz-1,0,"tpgt");
+
+
+
+
+    if (E->parallel.me_loc[3]==0) {
+        /* dimensionalize CMB topography and
+           expand into spherical harmonics */
+        for(j=1;j<=E->sphere.caps_per_proc;j++)
+            for(i=1;i<=E->lmesh.nsf;i++)   {
+                E->slice.tpgb[j][i] = E->slice.tpgb[j][i]*topo_scaling2;
+            }
+        sphere_expansion(E,E->slice.tpgb,E->sphere.harm_tpgb[0],
+                         E->sphere.harm_tpgb[1]);
+    }
+    //print_field_spectral_regular(E,TL,E->sphere.harm_tpgb[0],E->sphere.harm_tpgb[1],0,0,"tpgb");
+
+
+
+
+
+    if (E->parallel.me_loc[3] == E->parallel.nprocz-1)
+        for (ll=2;ll<=E->output.llmax;ll++)   {
+            con1 = scaling/(2.0*ll+1.0);
+            for (mm=0;mm<=ll;mm++)   {
+                i = E->sphere.hindex[ll][mm];
+                geoid[0][i]+= E->sphere.harm_tpgt[0][i]*con1*den_contrast1;
+                geoid[1][i]+= E->sphere.harm_tpgt[1][i]*con1*den_contrast1;
+            }
+        }
+
+
+
+
+    if (E->parallel.me_loc[3] == 0)
+        for (ll=2;ll<=E->output.llmax;ll++)   {
+            con1 = scaling/(2.0*ll+1.0);
+            con2 = pow(E->sphere.ri,((double)(ll+2)));
+            for (mm=0;mm<=ll;mm++)   {
+                i = E->sphere.hindex[ll][mm];
+                geoid[0][i]+= E->sphere.harm_tpgb[0][i]*con1*con2*den_contrast2;
+                geoid[1][i]+= E->sphere.harm_tpgb[1][i]*con1*con2*den_contrast2;
+            }
+        }
+
+    /* accumulate geoid to the surface (top processors) */
+    sum_across_depth_sph1(E,geoid[0],geoid[1]);
+
+    // add to the geoid coeff
+    for (ll=2;ll<=E->output.llmax;ll++)
+        for (mm=0;mm<=ll;mm++)   {
+            i = E->sphere.hindex[ll][mm];
+            harm_geoid[0][i]+= geoid[0][i];
+            harm_geoid[1][i]+= geoid[1][i];
+        }
+
+
+
+#if 0
+    E->sphere.harm_geoid[0][0]=0.0;
+    E->sphere.harm_geoid[1][0]=0.0;
+    E->sphere.harm_geoid[0][1]=0.0;
+    E->sphere.harm_geoid[1][1]=0.0;
+    E->sphere.harm_geoid[0][2]=0.0;
+    E->sphere.harm_geoid[1][2]=0.0;  /* zero the 00 10 11 */
+
+    inv_sphere_harmonics(E,E->sphere.harm_geoid[0],E->sphere.harm_geoid[1],TL,E->parallel.nprocz-1);
+
+    print_field_spectral_regular(E,TL,E->sphere.harm_geoid[0],E->sphere.harm_geoid[1],E->parallel.nprocz-1,1,"geoid");
+#endif
+
+
+
+    free ((void *)geoid[0]);
+    free ((void *)geoid[1]);
+
+    return;
+}
 
 /* ===================================================================
    Consistent boundary flux method for stress ... Zhong,Gurnis,Hulbert
@@ -508,23 +723,23 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*               resb[m] -= eltkb[ends*dims*m+l] * eub[l]; */
 /*               } */
 
-	    /* Put relevant (vertical & surface) parts of element residual into surface residual */
+            /* Put relevant (vertical & surface) parts of element residual into surface residual */
 
 /*       for(m=1;m<=ends;m++) {    */  /* for bottom elements */
 /*          switch (m) { */
 /*              case 2: */
-/* 		    RL[j][E->sien[j][els].node[1]] += resb[(m-1)*dims+1];   */
-/* 		    break; */
+/*                  RL[j][E->sien[j][els].node[1]] += resb[(m-1)*dims+1];   */
+/*                  break; */
 /*              case 3: */
-/* 		    RL[j][E->sien[j][els].node[2]] += resb[(m-1)*dims+1];   */
-/* 		    break; */
+/*                  RL[j][E->sien[j][els].node[2]] += resb[(m-1)*dims+1];   */
+/*                  break; */
 /*              case 7: */
-/* 		    RL[j][E->sien[j][els].node[3]] += resb[(m-1)*dims+1];   */
-/* 		    break; */
+/*                  RL[j][E->sien[j][els].node[3]] += resb[(m-1)*dims+1];   */
+/*                  break; */
 /*              case 6: */
-/* 		    RL[j][E->sien[j][els].node[4]] += resb[(m-1)*dims+1];   */
-/* 		    break; */
-/* 		    } */
+/*                  RL[j][E->sien[j][els].node[4]] += resb[(m-1)*dims+1];   */
+/*                  break; */
+/*                  } */
 /*              } */
 
 
@@ -565,7 +780,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*                 dGammax.vpt[GMVGAMMA(1,n)] * l_1d[n].weight[dims-1] */
 /*                 * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)]; */
 /*              eltTL[m-1] +=  */
-/*      	        dGammabx.vpt[GMVGAMMA(1+dims,n)]*l_1d[n].weight[dims-1] */
+/*                      dGammabx.vpt[GMVGAMMA(1+dims,n)]*l_1d[n].weight[dims-1] */
 /*                 * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)]; */
 /*              } */
 /*           } */
