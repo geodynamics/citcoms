@@ -72,14 +72,15 @@ class Const(CitcomComponent):
         #depth_cmb = pyre.inventory.float("depth_cmb", default=2891e3*m)
 
         # everything in SI units
-        layerd = pyre.inventory.float("layerd", default=6371.0e3)
-        density = pyre.inventory.float("density", default=3500.0)
+        radius = pyre.inventory.float("radius", default=6371.0e3)
+        density = pyre.inventory.float("density", default=3340.0)
         thermdiff = pyre.inventory.float("thermdiff", default=1.0e-6)
-        gravacc = pyre.inventory.float("gravacc", default=10.0)
+        gravacc = pyre.inventory.float("gravacc", default=9.81)
         thermexp = pyre.inventory.float("thermexp", default=3.0e-5)
         refvisc = pyre.inventory.float("refvisc", default=1.0e21)
-        cp = pyre.inventory.float("cp", default=1250.0)
-        wdensity = pyre.inventory.float("wdensity", default=0.0)
+        cp = pyre.inventory.float("cp", default=1200.0)
+        density_above = pyre.inventory.float("density_above", default=1030.0)
+        density_below = pyre.inventory.float("density_below", default=6600.0)
         surftemp = pyre.inventory.float("surftemp", default=273.0)
 
         z_lith = pyre.inventory.float("z_lith", default=0.014)

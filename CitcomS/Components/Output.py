@@ -54,6 +54,10 @@ class Output(CitcomComponent):
                                                       "hdf5"]))
         output_optional = inv.str("output_optional", default="surf,botm")
 
+        # max. degree for spherical harmonics output
+        output_ll_max = pyre.inventory.int("output_ll_max", default=20)
+
+
         mega1 = 1024*1024
         #megaq = 256*1024
 

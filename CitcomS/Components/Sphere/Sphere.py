@@ -85,14 +85,6 @@ class Sphere(CitcomComponent):
         radius_outer = pyre.inventory.float("radius_outer", default=1.0)
         radius_inner = pyre.inventory.float("radius_inner", default=0.55)
 
-	    # these parameters are for spherical harmonics output
-	    # put them here temporalily
-        ll_max = pyre.inventory.int("ll_max", default=20)
-        nlong = pyre.inventory.int("nlong", default=361)
-        nlati = pyre.inventory.int("nlati", default=181)
-        output_ll_max = pyre.inventory.int("output_ll_max", default=20)
-
-
 
 
 # version
