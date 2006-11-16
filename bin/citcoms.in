@@ -30,13 +30,14 @@
 __requires__ = "CitcomS"
 
 # re-create the PYTHONPATH at 'configure' time
-import os.path, sys
+import os.path, sys, site
 path = '@PYTHONPATH@'.split(':')
 path.reverse()
 for directory in path:
     if directory:
         directory = os.path.abspath(directory)
         sys.path.insert(1, directory)
+        site.addsitedir(directory)
 
 from CitcomS.SimpleApp import SimpleApp
 app = SimpleApp()

@@ -27,7 +27,7 @@ dnl</LicenseText>
 AC_PREREQ(2.59)
 AC_INIT([CitcomS], [2.1.0], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
-AC_CONFIG_SRCDIR([Citcom.c])
+AC_CONFIG_SRCDIR([bin/Citcom.c])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
@@ -55,19 +55,25 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
 
     # Checks for Python modules and packages.
+
+    save_PYTHONPATH="$PYTHONPATH"
+    PYTHONPATH="`pwd`:$PYTHONPATH"; export PYTHONPATH
+
     AC_MSG_NOTICE([checking/downloading Python dependencies])
-    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py install_deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [],
           [AC_MSG_FAILURE([cannot check/download Python dependencies])])
 
     AC_MSG_CHECKING([for egg-related flags])
-    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [AC_MSG_RESULT(ok)
            eval `cat egg-flags.sh`
            rm -f egg-flags.sh
           ],
           [AC_MSG_RESULT(failed)
           AC_MSG_FAILURE([cannot scan Python eggs for flags])])
+
+    PYTHONPATH="$save_PYTHONPATH"
 
     AC_SUBST(PYTHON_EGG_CFLAGS)
     AC_SUBST(PYTHON_EGG_CPPFLAGS)
@@ -103,6 +109,7 @@ CIT_CHECK_HEADER_HDF5
 AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" != no])
 
 AC_CONFIG_FILES([Makefile
+                 bin/Makefile
                  CitcomS/Makefile
                  etc/Makefile
                  examples/Makefile
