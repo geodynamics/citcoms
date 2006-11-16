@@ -187,14 +187,15 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
 
     PUTS(("[CitcomS.solver.const]\n"));
 
-    getFloatProperty(properties, "layerd", radius, fp);
+    getFloatProperty(properties, "radius", radius, fp);
     getFloatProperty(properties, "density", E->data.density, fp);
     getFloatProperty(properties, "thermdiff", E->data.therm_diff, fp);
     getFloatProperty(properties, "gravacc", E->data.grav_acc, fp);
     getFloatProperty(properties, "thermexp", E->data.therm_exp, fp);
     getFloatProperty(properties, "refvisc", E->data.ref_viscosity, fp);
     getFloatProperty(properties, "cp", E->data.Cp, fp);
-    getFloatProperty(properties, "wdensity", E->data.density_above, fp);
+    getFloatProperty(properties, "density_above", E->data.density_above, fp);
+    getFloatProperty(properties, "density_below", E->data.density_below, fp);
     getFloatProperty(properties, "surftemp", E->data.surf_temp, fp);
 
     E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
@@ -208,8 +209,7 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "z_cmb", E->viscosity.zcmb, fp); /* this is used as the D" phase change depth */
 
     /* convert meter to kilometer */
-    E->data.layer_km = radius / 1e3;
-    E->data.radius_km = E->data.layer_km;
+    E->data.radius_km = radius / 1e3;
 
     PUTS(("\n"));
 
@@ -309,6 +309,8 @@ PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
 
     getStringProperty(properties, "output_format", E->output.format, fp);
     getStringProperty(properties, "output_optional", E->output.optional, fp);
+
+    getIntProperty(properties, "output_ll_max", E->output.llmax, fp);
 
     getIntProperty(properties, "cb_block_size", E->output.cb_block_size, fp);
     getIntProperty(properties, "cb_buffer_size", E->output.cb_buffer_size, fp);
@@ -590,11 +592,6 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 	E->sphere.cap[1].fi[4] = E->control.fi_max;
     }
 
-    getIntProperty(properties, "ll_max", E->sphere.llmax, fp);
-    getIntProperty(properties, "nlong", E->sphere.noy, fp);
-    getIntProperty(properties, "nlati", E->sphere.nox, fp);
-    getIntProperty(properties, "output_ll_max", E->sphere.output_llmax, fp);
-
     E->mesh.layer[1] = 1;
     E->mesh.layer[2] = 1;
     E->mesh.layer[3] = 1;
@@ -774,7 +771,7 @@ int _getStringProperty(PyObject* properties, char* attribute,
         return -1;
     if (-1 == PyString_AsStringAndSize(prop, &buffer, &length))
         return -1;
-        
+
     if (length >= (Py_ssize_t)valueSize) {
         PyErr_Format(PyExc_ValueError,
                      "value of '%s' cannot exceed %zu characters in length",
