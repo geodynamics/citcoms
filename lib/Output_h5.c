@@ -249,12 +249,8 @@ static void h5output_const(struct All_variables *E)
     h5output_meta(E);
     h5output_coord(E);
     h5output_connectivity(E);
-    /* TODO: figure out the best place to put these coord...*/
-    if (0) {
-    h5output_surf_botm_coord(E);
-    h5output_have_coord(E);
     /*h5output_material(E);*/
-    }
+
     h5output_close(E);
 }
 
@@ -268,9 +264,11 @@ static void h5output_timedep(struct All_variables *E, int cycles)
 
     h5output_open(E, filename);
 
+    h5output_time(E, cycles);
     h5output_velocity(E, cycles);
     h5output_temperature(E, cycles);
     h5output_viscosity(E, cycles);
+
     h5output_surf_botm(E, cycles);
 
     /* output tracer location if using tracer */
@@ -287,11 +285,8 @@ static void h5output_timedep(struct All_variables *E, int cycles)
     if(E->output.pressure == 1)
         h5output_pressure(E, cycles);
 
-    //if (E->output.horiz_avg == 1)
-    //  h5output_horiz_avg(E, cycles);
-
-    /* Call this last (for timing information) */
-    //h5output_time(E, cycles);
+    if (E->output.horiz_avg == 1)
+	h5output_horiz_avg(E, cycles);
 
     h5output_close(E);
 
@@ -314,7 +309,7 @@ static void h5output_open(struct All_variables *E, char *filename)
     MPI_Comm comm = E->parallel.world;
     MPI_Info info = MPI_INFO_NULL;
     int ierr;
-
+    char tmp[100];
 
     /*
      * HDF5 variables
@@ -343,9 +338,10 @@ static void h5output_open(struct All_variables *E, char *filename)
     ierr = MPI_Info_create(&info);
     ierr = MPI_Info_set(info, "access_style", "write_once");
     ierr = MPI_Info_set(info, "collective_buffering", "true");
-    /*TODO: change the fixed values */
-    ierr = MPI_Info_set(info, "cb_block_size", "1048576");
-    ierr = MPI_Info_set(info, "cb_buffer_size", "4194304");
+    snprintf(tmp, (size_t)100, "%d", E->output.cb_block_size);
+    ierr = MPI_Info_set(info, "cb_block_size", tmp);
+    snprintf(tmp, (size_t)100, "%d", E->output.cb_buffer_size);
+    ierr = MPI_Info_set(info, "cb_buffer_size", tmp);
 
     /* set up file access property list with parallel I/O access */
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -383,96 +379,6 @@ static void h5output_close(struct All_variables *E)
     /* close file */
     status = H5Fclose(E->hdf5.file_id);
 }
-
-
-/* and create any necessary groups,
- * arrays, and attributes. It should also initialize the hyperslab parameters
- * that will be used for future dataset writes (c.f. field_t objects). */
-static void temp(struct All_variables *E)
-{
-    /*
-     * Citcom variables
-     */
-
-    int nprocx = E->parallel.nprocx;
-    int nprocy = E->parallel.nprocy;
-    int nprocz = E->parallel.nprocz;
-    int procs_per_cap;
-
-
-    /*
-     * Field variables
-     */
-
-    field_t *tensor3d;
-    field_t *vector3d;
-    field_t *vector2d;
-    field_t *scalar3d;
-    field_t *scalar2d;
-    field_t *scalar1d;
-
-
-
-    /*
-     * HDF5 variables
-     */
-
-    hid_t file_id = E->hdf5.file_id;      /* HDF5 file identifier */
-
-    hid_t surf_group;   /* group identifier for top cap surface */
-    hid_t botm_group;   /* group identifier for bottom cap surface */
-    hid_t avg_group;    /* group identifier for horizontal averages */
-
-    herr_t status;
-
-
-
-    /********************************************************************
-     * Create time table (to store nondimensional and cpu times)        *
-     ********************************************************************/
-/*     h5create_time(file_id); */
-
-    /********************************************************************
-     * Create necessary groups and arrays                               *
-     ********************************************************************/
-
-    /* Create /surf/ group*/
-    if (E->output.surf == 1)
-    {
-        surf_group = h5create_group(file_id, "surf", (size_t)0);
-        h5create_field(surf_group, vector2d, "coord", "top surface coordinates");
-        h5create_field(surf_group, vector2d, "velocity", "top surface velocity");
-        h5create_field(surf_group, scalar2d, "heatflux", "top surface heatflux");
-        h5create_field(surf_group, scalar2d, "topography", "top surface topography");
-        status = H5Gclose(surf_group);
-    }
-
-    /* Create /botm/ group */
-    if (E->output.botm == 1)
-    {
-        botm_group = h5create_group(file_id, "botm", (size_t)0);
-        h5create_field(botm_group, vector2d, "coord", "bottom surface coordinates");
-        h5create_field(botm_group, vector2d, "velocity", "bottom surface velocity");
-        h5create_field(botm_group, scalar2d, "heatflux", "bottom surface heatflux");
-        h5create_field(botm_group, scalar2d, "topography", "bottom surface topography");
-        status = H5Gclose(botm_group);
-    }
-
-    /* Create /horiz_avg/ group */
-    if(E->output.horiz_avg == 1)
-    {
-        avg_group = h5create_group(file_id, "horiz_avg", (size_t)0);
-        h5create_field(avg_group, scalar1d, "coord", "radial coordinates of horizontal planes");
-        h5create_field(avg_group, scalar1d, "temperature", "horizontal temperature average");
-        h5create_field(avg_group, scalar1d, "velocity_xy", "horizontal Vxy average (rms)");
-        h5create_field(avg_group, scalar1d, "velocity_z", "horizontal Vz average (rms)");
-        status = H5Gclose(avg_group);
-    }
-
-}
-
-
-
 
 
 /****************************************************************************
@@ -843,6 +749,8 @@ void h5output_surf_botm_coord(struct All_variables *E)
 void h5output_surf_botm(struct All_variables *E, int cycles)
 {
     hid_t file_id;
+    hid_t surf_group;   /* group identifier for top cap surface */
+    hid_t botm_group;   /* group identifier for bottom cap surface */
     hid_t dataset;
     herr_t status;
     field_t *scalar;
@@ -879,6 +787,16 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
      ********************************************************************/
     if (E->output.surf == 1)
     {
+	/* Create /surf/ group*/
+        surf_group = h5create_group(file_id, "surf", (size_t)0);
+        h5create_field(surf_group, E->hdf5.vector2d, "velocity",
+		       "top surface velocity");
+        h5create_field(surf_group, E->hdf5.scalar2d, "heatflux",
+		       "top surface heatflux");
+        h5create_field(surf_group, E->hdf5.scalar2d, "topography",
+		       "top surface topography");
+        status = H5Gclose(surf_group);
+
         /* radial index */
         k = nz-1;
 
@@ -907,6 +825,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
                 scalar->data[m] = E->slice.shflux[1][n+1];
             }
         }
+
         dataset = H5Dopen(file_id, "/surf/heatflux");
         status = h5write_field(dataset, scalar, 0, (pz == nprocz-1));
         status = H5Dclose(dataset);
@@ -938,6 +857,16 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
      ********************************************************************/
     if (E->output.botm == 1)
     {
+	/* Create /botm/ group */
+        botm_group = h5create_group(file_id, "botm", (size_t)0);
+        h5create_field(botm_group, E->hdf5.vector2d, "velocity",
+		       "bottom surface velocity");
+        h5create_field(botm_group, E->hdf5.scalar2d, "heatflux",
+		       "bottom surface heatflux");
+        h5create_field(botm_group, E->hdf5.scalar2d, "topography",
+		       "bottom surface topography");
+        status = H5Gclose(botm_group);
+
         /* radial index */
         k = 0;
 
@@ -1027,6 +956,7 @@ void h5output_horiz_avg(struct All_variables *E, int cycles)
     void compute_horiz_avg();
 
     hid_t file_id;
+    hid_t avg_group;    /* group identifier for horizontal averages */
     hid_t dataset;
     herr_t status;
 
@@ -1047,6 +977,16 @@ void h5output_horiz_avg(struct All_variables *E, int cycles)
 
     /* calculate horizontal averages */
     compute_horiz_avg(E);
+
+    /* Create /horiz_avg/ group */
+    avg_group = h5create_group(file_id, "horiz_avg", (size_t)0);
+    h5create_field(avg_group, E->hdf5.scalar1d, "temperature",
+		   "horizontal temperature average");
+    h5create_field(avg_group, E->hdf5.scalar1d, "velocity_xy",
+		   "horizontal Vxy average (rms)");
+    h5create_field(avg_group, E->hdf5.scalar1d, "velocity_z",
+		   "horizontal Vz average (rms)");
+    status = H5Gclose(avg_group);
 
     /*
      * note that only the first nprocz processes need to output
@@ -1268,6 +1208,17 @@ static herr_t h5create_time(hid_t loc_id)
 }
 
 void h5output_time(struct All_variables *E, int cycles)
+{
+    hid_t root;
+    herr_t status;
+
+    root = H5Gopen(E->hdf5.file_id, "/");
+    status = set_attribute_float(root, "time", E->monitor.elapsed_time);
+    status = set_attribute_float(root, "timestep", cycles);
+    status = H5Gclose(root);
+}
+
+void dead(struct All_variables *E, int cycles)
 {
     double CPU_time0();
 
