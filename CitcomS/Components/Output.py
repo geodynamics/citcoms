@@ -55,7 +55,7 @@ class Output(CitcomComponent):
         output_optional = inv.str("output_optional", default="surf,botm")
 
         # max. degree for spherical harmonics output
-        output_ll_max = pyre.inventory.int("output_ll_max", default=20)
+        output_ll_max = inv.int("output_ll_max", default=20)
 
 
         mega1 = 1024*1024
