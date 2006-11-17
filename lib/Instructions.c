@@ -1122,8 +1122,6 @@ void output_init(struct  All_variables *E)
 
 void output_finalize(struct  All_variables *E)
 {
-  void h5output_close(struct  All_variables *E);
-
   if (E->fp)
     fclose(E->fp);
 
@@ -1132,10 +1130,6 @@ void output_finalize(struct  All_variables *E)
 
   if (E->fp_out)
     fclose(E->fp_out);
-
-  /* close HDF5 output */
-  if (strcmp(E->output.format, "hdf5") == 0)
-    h5output_close(E);
 
 }
 

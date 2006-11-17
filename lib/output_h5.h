@@ -33,11 +33,9 @@
 extern "C" {
 #endif
 
+    void h5output_allocate_memory(struct All_variables *);
 void h5input_params(struct All_variables *);
 void h5output(struct All_variables *, int);
-
-void h5output_open(struct All_variables *);
-void h5output_close(struct All_variables *);
 
 #ifdef __cplusplus
 }
