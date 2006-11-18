@@ -41,7 +41,7 @@
 "path = path.split(':'); " \
 "path.extend(sys.path); " \
 "sys.path = path; " \
-"from pyre.util import loadObject; " \
+"from merlin import loadObject; " \
 "entry = loadObject(entry); " \
 "entry(sys.argv[3:], kwds={'requires': requires})"
 
