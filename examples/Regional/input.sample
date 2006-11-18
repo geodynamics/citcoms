@@ -190,7 +190,7 @@ aug_number=2.0e3
 
 
 # Age information
-start_age=40.0
+start_age=4.0
 reset_startage=0
 
 

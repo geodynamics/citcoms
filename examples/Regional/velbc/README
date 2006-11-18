@@ -8,4 +8,4 @@ First, untar the given 'velbc_regional.tar.gz'.
 Each of the velbc files has the following naming scheme: {root}{age}.
 
 {root} is 'velbc_full' in this example, but can be defined by 'file_vbcs' in the input file.
-{age} is each million years from 'start_age' defined in the input file to 0 M.y. In this example, the start_age is 40 (M.a.)
+{age} is each million years from 'start_age' defined in the input file to 0 M.y. In this example, the start_age is 4 (M.a.)
