@@ -33,6 +33,41 @@
 #ifdef USE_HDF5
 
 /****************************************************************************
+ * Structs for HDF5 output                                                  *
+ ****************************************************************************/
+
+enum field_class_t
+{
+    SCALAR_FIELD = 0,
+    VECTOR_FIELD = 1,
+    TENSOR_FIELD = 2
+};
+
+struct field_t
+{
+    /* field datatype (in file) */
+    hid_t dtype;
+
+    /* field dataspace (in file) */
+    int rank;
+    hsize_t *dims;
+    hsize_t *maxdims;
+    hsize_t *chunkdims;
+
+    /* hyperslab selection parameters */
+    hsize_t *offset;
+    hsize_t *stride;
+    hsize_t *count;
+    hsize_t *block;
+
+    /* number of data points in buffer */
+    int n;
+    float *data;
+
+};
+
+
+/****************************************************************************
  * Prototypes for functions local to this file. They are conditionally      *
  * included only when the HDF5 library is available.                        *
  ****************************************************************************/
@@ -52,7 +87,6 @@ static herr_t h5create_dataset(hid_t loc_id, const char *name, const char *title
 /* for creation of field and other dataset objects */
 static herr_t h5allocate_field(struct All_variables *E, enum field_class_t field_class, int nsd, hid_t dtype, field_t **field);
 static herr_t h5create_field(hid_t loc_id, field_t *field, const char *name, const char *title);
-static herr_t h5create_time(hid_t loc_id);
 static herr_t h5create_connectivity(hid_t loc_id, int nel);
 
 /* for writing to datasets */
@@ -86,7 +120,6 @@ void h5output_material(struct All_variables *);
 void h5output_connectivity(struct All_variables *);
 
 /* time-varying data */
-void h5extend_time_dimension(struct All_variables *);
 void h5output_velocity(struct All_variables *, int);
 void h5output_temperature(struct All_variables *, int);
 void h5output_viscosity(struct All_variables *, int);
@@ -103,6 +136,7 @@ void h5output_time(struct All_variables *, int);
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
+extern void compute_geoid(struct All_variables *, float**, float**, float**);
 
 
 /****************************************************************************
@@ -152,25 +186,19 @@ void h5output_allocate_memory(struct All_variables *E)
     h5allocate_field(E, SCALAR_FIELD, 2, dtype, &scalar2d);
     h5allocate_field(E, SCALAR_FIELD, 1, dtype, &scalar1d);
 
-    /* reuse largest buffer */
+    /* allocate buffer */
     if (E->output.stress == 1)
-    {
-        tensor3d->data = (float *)malloc((tensor3d->n) * sizeof(float));
-        vector3d->data = tensor3d->data;
-        vector2d->data = tensor3d->data;
-        scalar3d->data = tensor3d->data;
-        scalar2d->data = tensor3d->data;
-        scalar1d->data = tensor3d->data;
-    }
+	E->hdf5.data = (float *)malloc((tensor3d->n) * sizeof(float));
     else
-    {
-        tensor3d->data = NULL;
-        vector3d->data = (float *)malloc((vector3d->n) * sizeof(float));
-        vector2d->data = vector3d->data;
-        scalar3d->data = vector3d->data;
-        scalar2d->data = vector3d->data;
-        scalar1d->data = vector3d->data;
-    }
+	E->hdf5.data = (float *)malloc((vector3d->n) * sizeof(float));
+
+    /* reuse buffer */
+    tensor3d->data = E->hdf5.data;
+    vector3d->data = E->hdf5.data;
+    vector2d->data = E->hdf5.data;
+    scalar3d->data = E->hdf5.data;
+    scalar2d->data = E->hdf5.data;
+    scalar1d->data = E->hdf5.data;
 
     E->hdf5.tensor3d = tensor3d;
     E->hdf5.vector3d = vector3d;
@@ -198,9 +226,7 @@ void h5output(struct All_variables *E, int cycles)
     exit(8);
 #else
     if (cycles == 0) {
-	/* TODO: find a better location to call this function... */
-	h5output_allocate_memory(E);
-	h5output_const(E);
+        h5output_const(E);
     }
     h5output_timedep(E, cycles);
 #endif
@@ -260,7 +286,7 @@ static void h5output_timedep(struct All_variables *E, int cycles)
 
     /* determine filename */
     snprintf(filename, (size_t)100, "%s.%d.h5",
-	     E->control.data_file, cycles);
+             E->control.data_file, cycles);
 
     h5output_open(E, filename);
 
@@ -286,7 +312,7 @@ static void h5output_timedep(struct All_variables *E, int cycles)
         h5output_pressure(E, cycles);
 
     if (E->output.horiz_avg == 1)
-	h5output_horiz_avg(E, cycles);
+        h5output_horiz_avg(E, cycles);
 
     h5output_close(E);
 
@@ -385,14 +411,6 @@ static void h5output_close(struct All_variables *E)
  * The following functions are used to save specific physical quantities    *
  * from CitcomS into HDF5 arrays.                                           *
  ****************************************************************************/
-
-/* This function extends the time dimension of all time-varying field
- * objects. Before any data gets written to a dataset, one should perform
- * a collective call to H5Dextend(dataset, field->dims).
- */
-void h5extend_time_dimension(struct All_variables *E)
-{
-}
 
 
 /****************************************************************************
@@ -787,14 +805,14 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
      ********************************************************************/
     if (E->output.surf == 1)
     {
-	/* Create /surf/ group*/
+        /* Create /surf/ group*/
         surf_group = h5create_group(file_id, "surf", (size_t)0);
         h5create_field(surf_group, E->hdf5.vector2d, "velocity",
-		       "top surface velocity");
+                       "top surface velocity");
         h5create_field(surf_group, E->hdf5.scalar2d, "heatflux",
-		       "top surface heatflux");
+                       "top surface heatflux");
         h5create_field(surf_group, E->hdf5.scalar2d, "topography",
-		       "top surface topography");
+                       "top surface topography");
         status = H5Gclose(surf_group);
 
         /* radial index */
@@ -857,14 +875,14 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
      ********************************************************************/
     if (E->output.botm == 1)
     {
-	/* Create /botm/ group */
+        /* Create /botm/ group */
         botm_group = h5create_group(file_id, "botm", (size_t)0);
         h5create_field(botm_group, E->hdf5.vector2d, "velocity",
-		       "bottom surface velocity");
+                       "bottom surface velocity");
         h5create_field(botm_group, E->hdf5.scalar2d, "heatflux",
-		       "bottom surface heatflux");
+                       "bottom surface heatflux");
         h5create_field(botm_group, E->hdf5.scalar2d, "topography",
-		       "bottom surface topography");
+                       "bottom surface topography");
         status = H5Gclose(botm_group);
 
         /* radial index */
@@ -981,11 +999,11 @@ void h5output_horiz_avg(struct All_variables *E, int cycles)
     /* Create /horiz_avg/ group */
     avg_group = h5create_group(file_id, "horiz_avg", (size_t)0);
     h5create_field(avg_group, E->hdf5.scalar1d, "temperature",
-		   "horizontal temperature average");
+                   "horizontal temperature average");
     h5create_field(avg_group, E->hdf5.scalar1d, "velocity_xy",
-		   "horizontal Vxy average (rms)");
+                   "horizontal Vxy average (rms)");
     h5create_field(avg_group, E->hdf5.scalar1d, "velocity_z",
-		   "horizontal Vz average (rms)");
+                   "horizontal Vz average (rms)");
     status = H5Gclose(avg_group);
 
     /*
@@ -1019,8 +1037,114 @@ void h5output_horiz_avg(struct All_variables *E, int cycles)
  ****************************************************************************/
 void h5output_geoid(struct All_variables *E, int cycles)
 {
+    struct HDF5_GEOID
+    {
+        int ll;
+        int mm;
+        float geoid_sin;
+        float geoid_cos;
+        float tpgt_sin;
+        float tpgt_cos;
+    } *row;
 
-    /* TODO: write geoid to h5file */
+
+    hid_t dataset;      /* dataset identifier */
+    hid_t datatype;     /* row datatype identifier */
+    hid_t dataspace;    /* memory dataspace */
+    hid_t dxpl_id;      /* data transfer property list identifier */
+
+    herr_t status;
+
+    hsize_t rank = 1;
+    hsize_t dim = E->sphere.hindice;
+    int i, ll, mm;
+
+    /* Create the memory data type */
+    datatype = H5Tcreate(H5T_COMPOUND, sizeof(struct HDF5_GEOID));
+    status = H5Tinsert(datatype, "degree", HOFFSET(struct HDF5_GEOID, ll),
+                       H5T_NATIVE_INT);
+    status = H5Tinsert(datatype, "order", HOFFSET(struct HDF5_GEOID, mm),
+                       H5T_NATIVE_INT);
+    status = H5Tinsert(datatype, "geoid_sin",
+                       HOFFSET(struct HDF5_GEOID, geoid_sin),
+                       H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "geoid_cos",
+                       HOFFSET(struct HDF5_GEOID, geoid_cos),
+                       H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "tpgt_sin",
+                       HOFFSET(struct HDF5_GEOID, tpgt_sin),
+                       H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "tpgt_cos",
+                       HOFFSET(struct HDF5_GEOID, tpgt_cos),
+                       H5T_NATIVE_FLOAT);
+
+    /* Create the dataspace */
+    dataspace = H5Screate_simple(rank, &dim, NULL);
+
+    /* Create the dataset */
+    dataset = H5Dcreate(E->hdf5.file_id, "geoid", datatype,
+                        dataspace, H5P_DEFAULT);
+
+    /*
+     * Write necessary attributes for PyTables compatibility
+     */
+
+    set_attribute_string(dataset, "TITLE", "Geoid table");
+    set_attribute_string(dataset, "CLASS", "TABLE");
+    set_attribute_string(dataset, "FLAVOR", "numpy");
+    set_attribute_string(dataset, "VERSION", "2.6");
+
+    set_attribute_llong(dataset, "NROWS", dim);
+
+    set_attribute_string(dataset, "FIELD_0_NAME", "degree");
+    set_attribute_string(dataset, "FIELD_1_NAME", "order");
+    set_attribute_string(dataset, "FIELD_2_NAME", "geoid_sin");
+    set_attribute_string(dataset, "FIELD_3_NAME", "geoid_cos");
+    set_attribute_string(dataset, "FIELD_4_NAME", "tpgt_sin");
+    set_attribute_string(dataset, "FIELD_5_NAME", "tpgt_cos");
+
+    set_attribute_double(dataset, "FIELD_0_FILL", 0);
+    set_attribute_double(dataset, "FIELD_1_FILL", 0);
+    set_attribute_double(dataset, "FIELD_2_FILL", 0);
+    set_attribute_double(dataset, "FIELD_3_FILL", 0);
+    set_attribute_double(dataset, "FIELD_4_FILL", 0);
+    set_attribute_double(dataset, "FIELD_5_FILL", 0);
+
+    /* Create property list for independent dataset write */
+    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
+    status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
+
+    compute_geoid(E, E->sphere.harm_geoid,
+                  E->sphere.harm_tpgt, E->sphere.harm_tpgb);
+
+    if (E->parallel.me == 0) {
+        /* Prepare data */
+        row = (struct HDF5_GEOID *) malloc((E->sphere.hindice)
+                                           * sizeof(struct HDF5_GEOID));
+        i = 0;
+        for(ll = 0; ll <= E->output.llmax; ll++)
+            for(mm = 0; mm <= ll; mm++) {
+                row[i].ll = ll;
+                row[i].mm = mm;
+                row[i].geoid_sin = E->sphere.harm_geoid[0][i];
+                row[i].geoid_cos = E->sphere.harm_geoid[1][i];
+                row[i].tpgt_sin = E->sphere.harm_tpgt[0][i];
+                row[i].tpgt_cos = E->sphere.harm_tpgt[1][i];
+                i ++;
+            }
+
+        /* write data */
+        status = H5Dwrite(dataset, datatype, dataspace, H5S_ALL,
+                          dxpl_id, row);
+
+        free(row);
+    }
+
+    /* Release resources */
+    status = H5Pclose(dxpl_id);
+    status = H5Sclose(dataspace);
+    status = H5Tclose(datatype);
+    status = H5Dclose(dataset);
 }
 
 
@@ -1122,7 +1246,7 @@ void h5output_connectivity(struct All_variables *E)
             data[8*e+7] = ien[8]-1;
         }
 
-	/* Create /connectivity dataset */
+        /* Create /connectivity dataset */
         h5create_connectivity(E->hdf5.file_id, E->lmesh.nel * procs_per_cap);
 
         dataset = H5Dopen(E->hdf5.file_id, "/connectivity");
@@ -1139,73 +1263,9 @@ void h5output_connectivity(struct All_variables *E)
 
 
 /****************************************************************************
- * Create and output /time dataset                                          *
+ * Create and output /time and /timstep attributes                          *
  ****************************************************************************/
 
-static herr_t h5create_time(hid_t loc_id)
-{
-    hid_t dataset;      /* dataset identifier */
-    hid_t datatype;     /* row datatype identifier */
-    hid_t dataspace;    /* memory dataspace */
-    hid_t dcpl_id;      /* dataset creation property list identifier */
-    herr_t status;
-
-    hsize_t dim = 0;
-    hsize_t maxdim = H5S_UNLIMITED;
-    hsize_t chunkdim = 1;
-
-    /* Create the memory data type */
-    datatype = H5Tcreate(H5T_COMPOUND, sizeof(struct HDF5_TIME));
-    status = H5Tinsert(datatype, "step", HOFFSET(struct HDF5_TIME, step), H5T_NATIVE_INT);
-    status = H5Tinsert(datatype, "time", HOFFSET(struct HDF5_TIME, time), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "time_step", HOFFSET(struct HDF5_TIME, time_step), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "cpu", HOFFSET(struct HDF5_TIME, cpu), H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "cpu_step", HOFFSET(struct HDF5_TIME, cpu_step), H5T_NATIVE_FLOAT);
-
-    /* Create the dataspace */
-    dataspace = H5Screate_simple(1, &dim, &maxdim);
-
-    /* Modify dataset creation properties (enable chunking) */
-    dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
-    status  = H5Pset_chunk(dcpl_id, 1, &chunkdim);
-
-    /* Create the dataset */
-    dataset = H5Dcreate(loc_id, "time", datatype, dataspace, dcpl_id);
-
-    /*
-     * Write necessary attributes for PyTables compatibility
-     */
-
-    set_attribute_string(dataset, "TITLE", "Timing table");
-    set_attribute_string(dataset, "CLASS", "TABLE");
-    set_attribute_string(dataset, "FLAVOR", "numpy");
-    set_attribute_string(dataset, "VERSION", "2.6");
-
-    set_attribute_llong(dataset, "NROWS", 0);
-
-    set_attribute_string(dataset, "FIELD_0_NAME", "step");
-    set_attribute_string(dataset, "FIELD_1_NAME", "time");
-    set_attribute_string(dataset, "FIELD_2_NAME", "time_step");
-    set_attribute_string(dataset, "FIELD_3_NAME", "cpu");
-    set_attribute_string(dataset, "FIELD_4_NAME", "cpu_step");
-
-    set_attribute_double(dataset, "FIELD_0_FILL", 0);
-    set_attribute_double(dataset, "FIELD_1_FILL", 0);
-    set_attribute_double(dataset, "FIELD_2_FILL", 0);
-    set_attribute_double(dataset, "FIELD_3_FILL", 0);
-    set_attribute_double(dataset, "FIELD_4_FILL", 0);
-
-    set_attribute_int(dataset, "AUTOMATIC_INDEX", 1);
-    set_attribute_int(dataset, "REINDEX", 1);
-
-    /* Release resources */
-    status = H5Pclose(dcpl_id);
-    status = H5Sclose(dataspace);
-    status = H5Tclose(datatype);
-    status = H5Dclose(dataset);
-
-    return 0;
-}
 
 void h5output_time(struct All_variables *E, int cycles)
 {
@@ -1217,80 +1277,6 @@ void h5output_time(struct All_variables *E, int cycles)
     status = set_attribute_float(root, "timestep", cycles);
     status = H5Gclose(root);
 }
-
-void dead(struct All_variables *E, int cycles)
-{
-    double CPU_time0();
-
-    hid_t dataset;      /* dataset identifier */
-    hid_t datatype;     /* row datatype identifier */
-    hid_t dataspace;    /* memory dataspace */
-    hid_t filespace;    /* file dataspace */
-    hid_t dxpl_id;      /* data transfer property list identifier */
-
-    herr_t status;
-
-    hsize_t dim;
-    hsize_t offset;
-    hsize_t count;
-
-    struct HDF5_TIME row;
-
-    double current_time = CPU_time0();
-
-
-    /* Prepare data */
-    row.step = cycles;
-    row.time = E->monitor.elapsed_time;
-    row.time_step = E->advection.timestep;
-    row.cpu = current_time - E->monitor.cpu_time_at_start;
-    row.cpu_step = current_time - E->monitor.cpu_time_at_last_cycle;
-
-    /* Get dataset */
-    dataset = H5Dopen(E->hdf5.file_id, "time");
-
-    /* Extend dataset -- note this is a collective call */
-    dim = 1; //E->hdf5.count;
-    status = H5Dextend(dataset, &dim);
-
-    /* Get datatype */
-    datatype = H5Dget_type(dataset);
-
-    /* Define memory dataspace */
-    dim = 1;
-    dataspace = H5Screate_simple(1, &dim, NULL);
-
-    /* Get file dataspace */
-    filespace = H5Dget_space(dataset);
-
-    /* Hyperslab selection parameters */
-    offset = 1; //E->hdf5.count-1;
-    count  = 1;
-
-    /* Select hyperslab in file dataspace */
-    status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,
-                                 &offset, NULL, &count, NULL);
-
-    /* Create property list for independent dataset write */
-    dxpl_id = H5Pcreate(H5P_DATASET_XFER);
-    status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
-
-    /* Write to hyperslab selection */
-    if (E->parallel.me == 0)
-        status = H5Dwrite(dataset, datatype, dataspace, filespace,
-                          dxpl_id, &row);
-
-    /* Update NROWS attribute (for PyTables) */
-    set_attribute_llong(dataset, "NROWS", 1); //E->hdf5.count);
-
-    /* Release resources */
-    status = H5Pclose(dxpl_id);
-    status = H5Sclose(filespace);
-    status = H5Sclose(dataspace);
-    status = H5Tclose(datatype);
-    status = H5Dclose(dataset);
-}
-
 
 
 /****************************************************************************
@@ -1904,28 +1890,25 @@ static herr_t h5allocate_field(struct All_variables *E,
         /* count number of data points */
         (*field)->n = 1;
         for(dim = 0; dim < rank; dim++)
-	    (*field)->n *= (*field)->block[dim];
-
-        /* finally, allocate buffer */
-        /*(*field)->data = (float *)malloc((*field)->n * sizeof(float));*/
+            (*field)->n *= (*field)->block[dim];
 
 
-	if(E->control.verbose) {
-	    fprintf(E->fp_out, "creating dataset: rank=%d  size=%d\n",
-		    rank, (*field)->n);
-	    fprintf(E->fp_out, "  s=%d  x=%d  y=%d  z=%d  c=%d\n",
-		    s, x, y, z, c);
-	    fprintf(E->fp_out, "\tdim\tmaxdim\toffset\tstride\tcount\tblock\n");
-	    for(dim = 0; dim < rank; dim++) {
-		fprintf(E->fp_out, "\t%d\t%d\t%d\t%d\t%d\t%d\n",
-			(int) (*field)->dims[dim],
-			(int) (*field)->maxdims[dim],
-			(int) (*field)->offset[dim],
-			(int) (*field)->stride[dim],
-			(int) (*field)->count[dim],
-			(int) (*field)->block[dim]);
-	    }
-	}
+        if(E->control.verbose) {
+            fprintf(E->fp_out, "creating dataset: rank=%d  size=%d\n",
+                    rank, (*field)->n);
+            fprintf(E->fp_out, "  s=%d  x=%d  y=%d  z=%d  c=%d\n",
+                    s, x, y, z, c);
+            fprintf(E->fp_out, "\tdim\tmaxdim\toffset\tstride\tcount\tblock\n");
+            for(dim = 0; dim < rank; dim++) {
+                fprintf(E->fp_out, "\t%d\t%d\t%d\t%d\t%d\t%d\n",
+                        (int) (*field)->dims[dim],
+                        (int) (*field)->maxdims[dim],
+                        (int) (*field)->offset[dim],
+                        (int) (*field)->stride[dim],
+                        (int) (*field)->count[dim],
+                        (int) (*field)->block[dim]);
+            }
+        }
         return 0;
     }
 

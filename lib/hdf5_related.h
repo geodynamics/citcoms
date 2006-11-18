@@ -44,44 +44,8 @@
  *
  */
 
-enum field_class_t
-{
-    SCALAR_FIELD = 0,
-    VECTOR_FIELD = 1,
-    TENSOR_FIELD = 2
-};
-
-typedef struct field_t
-{
-    /* field datatype (in file) */
-    hid_t dtype;
-
-    /* field dataspace (in file) */
-    int rank;
-    hsize_t *dims;
-    hsize_t *maxdims;
-    hsize_t *chunkdims;
-
-    /* hyperslab selection parameters */
-    hsize_t *offset;
-    hsize_t *stride;
-    hsize_t *count;
-    hsize_t *block;
-
-    /* number of data points in buffer */
-    int n;
-    float *data;
-
-} field_t;
-
-struct HDF5_TIME
-{
-    int step;
-    float time;
-    float time_step;
-    float cpu;
-    float cpu_step;
-};
+/* Forward declaration of private struct */
+typedef struct field_t field_t;
 
 struct HDF5_INFO
 {

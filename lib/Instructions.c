@@ -582,8 +582,8 @@ void allocate_common_vars(E)
 
   }         /* end for cap j  */
 
-
-
+  if (strcmp(E->output.format, "hdf5") == 0)
+      h5output_allocate_memory(E);
 
   return;
   }
