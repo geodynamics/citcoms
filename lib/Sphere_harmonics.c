@@ -190,7 +190,7 @@ void compute_angle_surf_area (E)
 
 		E->sphere.area1[lev][m][es] = area_sphere_cap(angle);
 
-		fprintf(E->fp_out,"lev%d %d %.6e %.6e %.6e %.6e %.6e\n",lev,es,angle[1],angle[2],angle[3],angle[4],E->sphere.area1[lev][m][es]);
+/* 		fprintf(E->fp_out,"lev%d %d %.6e %.6e %.6e %.6e %.6e\n",lev,es,angle[1],angle[2],angle[3],angle[4],E->sphere.area1[lev][m][es]); */
 
 	    }  /* end for lev and es */
 
