@@ -181,8 +181,6 @@ nobase_dist_examples_DATA = \
 	Regional/input.sample \
 	Regional/machines.sample \
 	Regional/velbc/README \
-	Regional/velbc/velbc_regional40 \
-	Regional/velbc/velbc_regional41 \
 	Regional/velbc/velbc_regional.tar.gz
 
 ## end of Makefile.am
