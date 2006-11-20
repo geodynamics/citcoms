@@ -101,6 +101,7 @@ void sphere_expansion(E,TG,sphc,sphs)
 static void  compute_sphereh_table(E)
      struct All_variables *E;
 {
+    double modified_plgndr_a();
 
     int m,node,ll,mm,i,j,p;
     double t,f;
