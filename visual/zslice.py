@@ -46,53 +46,63 @@ outout:
   prefix.z###
 """
 
-all = ('zslice')
+all = ('zslice', 'zslicefile')
+
+
+def zslicefile(prefix, layer):
+    return '%s.z%03d' % (prefix, layer)
+
 
 def zslice(prefix, *ilayers):
 
     from math import pi
     r2d = 180.0 / pi
 
-    # open input file and read header
-    input = open(prefix)
-    nodex, nodey, nodez = input.readline().split('x')
+    ## open input file and read header
+    infile = open(prefix)
+    nodex, nodey, nodez = infile.readline().split('x')
     nodez = int(nodez)
     #print nodez, ilayers
 
+    ## validate ilayers
     layers = check_layers(ilayers, nodez)
     nlayer = len(layers)
 
-    # allocate arrays
+    ## allocate arrays
     output = range(nlayer)
     lines = range(nodez)
 
-    # open output files
+    ## open output files
     for i in range(nlayer):
-        zfile = '%s.z%03d' % (prefix, layers[i])
+        zfile = zslicefile(prefix, layers[i])
         output[i] = open(zfile, 'w')
 
-    while 1:
-        for j in range(nodez):
-            lines[j] = input.readline()
+    try:
+        while 1:
+            ## read nodez lines
+            for j in range(nodez):
+                lines[j] = infile.readline()
 
-        # file is empty or EOF?
-        if not lines[nodez-1]:
-            break
+            ## file is empty or EOF?
+            if not lines[nodez-1]:
+                break
 
+            for i in range(nlayer):
+                layer = layers[i]
+
+                ## spilt the first 3 columns only, the rest will be
+                ## output as-is
+                data = lines[layer].split(' ', 3)
+                lat = 90 - float(data[0])*r2d
+                lon = float(data[1])*r2d
+                output[i].write( '%f %f %s' % (lon, lat, data[3]) )
+
+        infile.close()
+
+    finally:
         for i in range(nlayer):
-            layer = layers[i]
+            output[i].close()
 
-            # spilt the first 3 columns only, the rest will be
-            # output as-is
-            data = lines[layer].split(' ', 3)
-            lat = 90 - float(data[0])*r2d
-            lon = float(data[1])*r2d
-            output[i].write( '%f %f %s' % (lon, lat, data[3]) )
-
-    input.close()
-
-    for i in range(nlayer):
-        output[i].close()
 
     return
 
@@ -100,10 +110,10 @@ def zslice(prefix, *ilayers):
 
 def check_layers(layers, nodez):
     if layers == ():
-        # if empty, we will slice every layer
+        ## if empty, we will slice every layer
         layers = range(nodez)
     else:
-        # otherwise, check bounds of layers
+        ## otherwise, check bounds of layers
         for layer in layers:
             if not (0<= layer < nodez):
                 raise ValueError, 'layer out of range (0-%d)' % (nodez - 1)
@@ -112,7 +122,7 @@ def check_layers(layers, nodez):
 
 
 
-# if run as a script
+## if run as a script
 if __name__ == '__main__':
     import sys
 
