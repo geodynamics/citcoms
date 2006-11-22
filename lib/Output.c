@@ -249,9 +249,11 @@ void output_geoid(struct All_variables *E, int cycles)
     FILE *fp1;
 
     compute_geoid(E, E->sphere.harm_geoid,
-                  E->sphere.harm_tpgt, E->sphere.harm_tpgb);
+                  E->sphere.harm_geoid_from_bncy,
+                  E->sphere.harm_geoid_from_tpgt,
+                  E->sphere.harm_geoid_from_tpgb);
 
-    if (E->parallel.me == 0)  {
+    if (E->parallel.me == (E->parallel.nprocz-1))  {
         sprintf(output_file, "%s.geoid.%d.%d", E->control.data_file,
                 E->parallel.me, cycles);
         fp1 = output_open(output_file);
@@ -264,10 +266,15 @@ void output_geoid(struct All_variables *E, int cycles)
         for (ll=0; ll<=E->output.llmax; ll++)
             for(mm=0; mm<=ll; mm++)  {
                 p = E->sphere.hindex[ll][mm];
-                fprintf(fp1,"%d %d %.4e %.4e %.4e %.4e\n",
+                fprintf(fp1,"%d %d %.4e %.4e %.4e %.4e %.4e %.4e\n",
                         ll, mm,
-                        E->sphere.harm_geoid[0][p], E->sphere.harm_geoid[1][p],
-                        E->sphere.harm_tpgt[0][p], E->sphere.harm_tpgt[1][p]);
+                        E->sphere.harm_geoid[0][p],
+                        E->sphere.harm_geoid[1][p],
+                        E->sphere.harm_geoid_from_tpgt[0][p],
+                        E->sphere.harm_geoid_from_tpgt[1][p],
+                        E->sphere.harm_geoid_from_bncy[0][p],
+                        E->sphere.harm_geoid_from_bncy[1][p]);
+
             }
 
         fclose(fp1);

@@ -136,7 +136,8 @@ void h5output_time(struct All_variables *, int);
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
-extern void compute_geoid(struct All_variables *, float**, float**, float**);
+extern void compute_geoid(struct All_variables *, float**, float**,
+                          float**, float**);
 
 
 /****************************************************************************
@@ -188,9 +189,9 @@ void h5output_allocate_memory(struct All_variables *E)
 
     /* allocate buffer */
     if (E->output.stress == 1)
-	E->hdf5.data = (float *)malloc((tensor3d->n) * sizeof(float));
+        E->hdf5.data = (float *)malloc((tensor3d->n) * sizeof(float));
     else
-	E->hdf5.data = (float *)malloc((vector3d->n) * sizeof(float));
+        E->hdf5.data = (float *)malloc((vector3d->n) * sizeof(float));
 
     /* reuse buffer */
     tensor3d->data = E->hdf5.data;
@@ -1041,10 +1042,12 @@ void h5output_geoid(struct All_variables *E, int cycles)
     {
         int ll;
         int mm;
-        float geoid_sin;
-        float geoid_cos;
+        float total_sin;
+        float total_cos;
         float tpgt_sin;
         float tpgt_cos;
+        float bncy_sin;
+        float bncy_cos;
     } *row;
 
 
@@ -1065,17 +1068,23 @@ void h5output_geoid(struct All_variables *E, int cycles)
                        H5T_NATIVE_INT);
     status = H5Tinsert(datatype, "order", HOFFSET(struct HDF5_GEOID, mm),
                        H5T_NATIVE_INT);
-    status = H5Tinsert(datatype, "geoid_sin",
-                       HOFFSET(struct HDF5_GEOID, geoid_sin),
+    status = H5Tinsert(datatype, "total_sin",
+                       HOFFSET(struct HDF5_GEOID, total_sin),
                        H5T_NATIVE_FLOAT);
-    status = H5Tinsert(datatype, "geoid_cos",
-                       HOFFSET(struct HDF5_GEOID, geoid_cos),
+    status = H5Tinsert(datatype, "total_cos",
+                       HOFFSET(struct HDF5_GEOID, total_cos),
                        H5T_NATIVE_FLOAT);
     status = H5Tinsert(datatype, "tpgt_sin",
                        HOFFSET(struct HDF5_GEOID, tpgt_sin),
                        H5T_NATIVE_FLOAT);
     status = H5Tinsert(datatype, "tpgt_cos",
                        HOFFSET(struct HDF5_GEOID, tpgt_cos),
+                       H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "bncy_sin",
+                       HOFFSET(struct HDF5_GEOID, bncy_sin),
+                       H5T_NATIVE_FLOAT);
+    status = H5Tinsert(datatype, "bncy_cos",
+                       HOFFSET(struct HDF5_GEOID, bncy_cos),
                        H5T_NATIVE_FLOAT);
 
     /* Create the dataspace */
@@ -1098,10 +1107,12 @@ void h5output_geoid(struct All_variables *E, int cycles)
 
     set_attribute_string(dataset, "FIELD_0_NAME", "degree");
     set_attribute_string(dataset, "FIELD_1_NAME", "order");
-    set_attribute_string(dataset, "FIELD_2_NAME", "geoid_sin");
-    set_attribute_string(dataset, "FIELD_3_NAME", "geoid_cos");
+    set_attribute_string(dataset, "FIELD_2_NAME", "total_sin");
+    set_attribute_string(dataset, "FIELD_3_NAME", "total_cos");
     set_attribute_string(dataset, "FIELD_4_NAME", "tpgt_sin");
     set_attribute_string(dataset, "FIELD_5_NAME", "tpgt_cos");
+    set_attribute_string(dataset, "FIELD_6_NAME", "bncy_sin");
+    set_attribute_string(dataset, "FIELD_7_NAME", "bncy_cos");
 
     set_attribute_double(dataset, "FIELD_0_FILL", 0);
     set_attribute_double(dataset, "FIELD_1_FILL", 0);
@@ -1109,13 +1120,17 @@ void h5output_geoid(struct All_variables *E, int cycles)
     set_attribute_double(dataset, "FIELD_3_FILL", 0);
     set_attribute_double(dataset, "FIELD_4_FILL", 0);
     set_attribute_double(dataset, "FIELD_5_FILL", 0);
+    set_attribute_double(dataset, "FIELD_6_FILL", 0);
+    set_attribute_double(dataset, "FIELD_7_FILL", 0);
 
     /* Create property list for independent dataset write */
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
     compute_geoid(E, E->sphere.harm_geoid,
-                  E->sphere.harm_tpgt, E->sphere.harm_tpgb);
+                  E->sphere.harm_geoid_from_bncy,
+                  E->sphere.harm_geoid_from_tpgt,
+                  E->sphere.harm_geoid_from_tpgb);
 
     if (E->parallel.me == 0) {
         /* Prepare data */
@@ -1126,10 +1141,12 @@ void h5output_geoid(struct All_variables *E, int cycles)
             for(mm = 0; mm <= ll; mm++) {
                 row[i].ll = ll;
                 row[i].mm = mm;
-                row[i].geoid_sin = E->sphere.harm_geoid[0][i];
-                row[i].geoid_cos = E->sphere.harm_geoid[1][i];
-                row[i].tpgt_sin = E->sphere.harm_tpgt[0][i];
-                row[i].tpgt_cos = E->sphere.harm_tpgt[1][i];
+                row[i].total_sin = E->sphere.harm_geoid[0][i];
+                row[i].total_cos = E->sphere.harm_geoid[1][i];
+                row[i].tpgt_sin = E->sphere.harm_geoid_from_tpgt[0][i];
+                row[i].tpgt_cos = E->sphere.harm_geoid_from_tpgt[1][i];
+                row[i].bncy_sin = E->sphere.harm_geoid_from_bncy[0][i];
+                row[i].bncy_cos = E->sphere.harm_geoid_from_bncy[1][i];
                 i ++;
             }
 

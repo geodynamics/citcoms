@@ -404,21 +404,27 @@ void stress_conform_bcs(struct All_variables *E)
 
 /* ===================================================================
    ===================================================================  */
-void compute_geoid(E, harm_geoid, harm_tpgt, harm_tpgb)
+void compute_geoid(E, harm_geoid,  harm_geoid_from_bncy,
+                   harm_geoid_from_tpgt, harm_geoid_from_tpgb)
+
      struct All_variables *E;
-     float *harm_geoid[2], *harm_tpgt[2], *harm_tpgb[2];
+     float *harm_geoid[2], *harm_geoid_from_bncy[2];
+     float *harm_geoid_from_tpgt[2], *harm_geoid_from_tpgb[2];
 {
-    int ll, mm, p;
+    int i, p;
 
-    for (ll=1;ll<=E->output.llmax;ll++)
-        for (mm=0;mm<=ll;mm++)   {
-            p = E->sphere.hindex[ll][mm];
-            harm_geoid[0][p] = 0.0;
-            harm_geoid[1][p] = 0.0;
-        }
+    geoid_from_buoyancy(E, harm_geoid_from_bncy);
+    geoid_from_topography(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
 
-    geoid_from_buoyancy(E, harm_geoid);
-    geoid_from_topography(E, harm_geoid, harm_tpgt, harm_tpgb);
+    if (E->parallel.me == (E->parallel.nprocz-1))  {
+        for (i = 0; i < 2; i++)
+            for (p = 0; p <= E->sphere.hindice; p++) {
+                harm_geoid[i][p] = harm_geoid_from_bncy[i][p]
+                                 + harm_geoid_from_tpgt[i][p]
+                                 + harm_geoid_from_tpgb[i][p];
+            }
+    }
+
 }
 
 
@@ -493,30 +499,27 @@ static void geoid_from_buoyancy(E, harm_geoid)
 
 
 
-static void geoid_from_topography(E, harm_geoid, harm_tpgt, harm_tpgb)
+static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
      struct All_variables *E;
-     float *harm_geoid[2], *harm_tpgt[2], *harm_tpgb[2];
+     float *geoid_tpgt[2], *geoid_tpgb[2];
 {
-
-    float *geoid[2],con1,con2,scaling,den_contrast1,den_contrast2,stress_scaling,topo_scaling1,topo_scaling2;
+    float con1,con2,scaling,den_contrast1,den_contrast2,stress_scaling,topo_scaling1,topo_scaling2;
     int i,j,k,ll,mm,s;
+    float *tpgt[2], *tpgb[2];
     void sum_across_depth_sph1();
     void sphere_expansion();
 
-    geoid[0] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
-    geoid[1] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
-
-    for (i=0;i<E->sphere.hindice;i++)   {
-        geoid[0][i] = 0.0;
-        geoid[1][i] = 0.0;
+    for (i=0; i<2; i++) {
+        tpgt[i] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
+        tpgb[i] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
     }
 
     stress_scaling = E->data.ref_viscosity*E->data.therm_diff/
         (E->data.radius_km*E->data.radius_km*1e6);
 
-    /* density across surface */
+    /* density contrast across surface */
     den_contrast1 = (E->data.density-E->data.density_above);
-    /* density across CMB */
+    /* density contrast across CMB */
     den_contrast2 = (E->data.density_below-E->data.density);
 
     /* scale for surface and CMB topo */
@@ -527,95 +530,63 @@ static void geoid_from_topography(E, harm_geoid, harm_tpgt, harm_tpgb)
     scaling = 1.0e3*4.0*M_PI*E->data.radius_km*
         E->data.grav_const/E->data.grav_acc;
 
+    if (E->parallel.me_loc[3] == E->parallel.nprocz-1) {
+        /* expand surface topography into sph. harm. */
+        sphere_expansion(E, E->slice.tpg, tpgt[0], tpgt[1]);
 
-    if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
-        /* dimensionalize surface topography and
-           expand into spherical harmonics */
-        for(j=1;j<=E->sphere.caps_per_proc;j++)
-            for(i=1;i<=E->lmesh.nsf;i++)   {
-                E->slice.tpg[j][i] = E->slice.tpg[j][i]*topo_scaling1;
+        /* dimensionalize surface topography */
+        for (j=0; j<2; j++)
+            for (i=0; i<E->sphere.hindice; i++) {
+                tpgt[j][i] *= topo_scaling1;
             }
-        sphere_expansion(E,E->slice.tpg,E->sphere.harm_tpgt[0],
-                         E->sphere.harm_tpgt[1]);
-    }
-    //print_field_spectral_regular(E,TL,E->sphere.harm_tpgt[0],E->sphere.harm_tpgt[1],E->parallel.nprocz-1,0,"tpgt");
 
-
-
-
-    if (E->parallel.me_loc[3]==0) {
-        /* dimensionalize CMB topography and
-           expand into spherical harmonics */
-        for(j=1;j<=E->sphere.caps_per_proc;j++)
-            for(i=1;i<=E->lmesh.nsf;i++)   {
-                E->slice.tpgb[j][i] = E->slice.tpgb[j][i]*topo_scaling2;
-            }
-        sphere_expansion(E,E->slice.tpgb,E->sphere.harm_tpgb[0],
-                         E->sphere.harm_tpgb[1]);
-    }
-    //print_field_spectral_regular(E,TL,E->sphere.harm_tpgb[0],E->sphere.harm_tpgb[1],0,0,"tpgb");
-
-
-
-
-
-    if (E->parallel.me_loc[3] == E->parallel.nprocz-1)
-        for (ll=2;ll<=E->output.llmax;ll++)   {
-            con1 = scaling/(2.0*ll+1.0);
-            for (mm=0;mm<=ll;mm++)   {
-                i = E->sphere.hindex[ll][mm];
-                geoid[0][i]+= E->sphere.harm_tpgt[0][i]*con1*den_contrast1;
-                geoid[1][i]+= E->sphere.harm_tpgt[1][i]*con1*den_contrast1;
+        /* compute geoid due to surface topo, skip degree-0 and 1 term */
+        for (j=0; j<2; j++)
+            for (ll=2; ll<=E->output.llmax; ll++)   {
+                con1 = den_contrast1 * scaling / (2.0*ll + 1.0);
+                for (mm=0; mm<=ll; mm++)   {
+                    i = E->sphere.hindex[ll][mm];
+                    geoid_tpgt[j][i] = tpgt[j][i] * con1;
             }
         }
+    }
 
 
+    if (E->parallel.me_loc[3] == 0) {
+        /* expand bottom topography into sph. harm. */
+        sphere_expansion(E, E->slice.tpgb, tpgb[0], tpgb[1]);
 
-
-    if (E->parallel.me_loc[3] == 0)
-        for (ll=2;ll<=E->output.llmax;ll++)   {
-            con1 = scaling/(2.0*ll+1.0);
-            con2 = pow(E->sphere.ri,((double)(ll+2)));
-            for (mm=0;mm<=ll;mm++)   {
-                i = E->sphere.hindex[ll][mm];
-                geoid[0][i]+= E->sphere.harm_tpgb[0][i]*con1*con2*den_contrast2;
-                geoid[1][i]+= E->sphere.harm_tpgb[1][i]*con1*con2*den_contrast2;
+        /* dimensionalize bottom topography */
+        for (j=0; j<2; j++)
+            for (i=0; i<E->sphere.hindice; i++) {
+                tpgb[j][i] *= topo_scaling2;
+            }
+        /* compute geoid due to bottom topo, skip degree-0 and 1 term */
+        for (j=0; j<2; j++)
+            for (ll=2; ll<=E->output.llmax; ll++)   {
+                con1 = den_contrast2 * scaling / (2.0*ll + 1.0);
+                con2 = con1 * pow(E->sphere.ri, ((double)(ll+2)));
+                for (mm=0; mm<=ll; mm++)   {
+                    i = E->sphere.hindex[ll][mm];
+                    geoid_tpgb[j][i] = tpgb[j][i] * con2;
             }
         }
+    }
+
 
     /* accumulate geoid to the surface (top processors) */
-    sum_across_depth_sph1(E,geoid[0],geoid[1]);
-
-    // add to the geoid coeff
-    for (ll=2;ll<=E->output.llmax;ll++)
-        for (mm=0;mm<=ll;mm++)   {
-            i = E->sphere.hindex[ll][mm];
-            harm_geoid[0][i]+= geoid[0][i];
-            harm_geoid[1][i]+= geoid[1][i];
-        }
+    sum_across_depth_sph1(E, geoid_tpgb[0], geoid_tpgb[1]);
 
 
-
-#if 0
-    E->sphere.harm_geoid[0][0]=0.0;
-    E->sphere.harm_geoid[1][0]=0.0;
-    E->sphere.harm_geoid[0][1]=0.0;
-    E->sphere.harm_geoid[1][1]=0.0;
-    E->sphere.harm_geoid[0][2]=0.0;
-    E->sphere.harm_geoid[1][2]=0.0;  /* zero the 00 10 11 */
-
-    inv_sphere_harmonics(E,E->sphere.harm_geoid[0],E->sphere.harm_geoid[1],TL,E->parallel.nprocz-1);
-
-    print_field_spectral_regular(E,TL,E->sphere.harm_geoid[0],E->sphere.harm_geoid[1],E->parallel.nprocz-1,1,"geoid");
-#endif
-
-
-
-    free ((void *)geoid[0]);
-    free ((void *)geoid[1]);
+    for (j=0; j<2; j++) {
+        free ((void *) tpgt[j]);
+        free ((void *) tpgb[j]);
+    }
 
     return;
 }
+
+
 
 /* ===================================================================
    Consistent boundary flux method for stress ... Zhong,Gurnis,Hulbert
