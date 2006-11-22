@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /*   Functions which solve for the velocity and pressure fields using Uzawa-type iteration loop.  */
@@ -155,6 +155,7 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   double *dvector();
 
   double time0,time,CPU_time0();
+  float dpressure,dvelocity;
 
   void assemble_div_u();
   void assemble_del2_u();
@@ -238,7 +239,12 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
     fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
   }
 
-  while( (valid) && (count < *steps_max) && ( E->monitor.incompressibility >= E->control.tole_comp ) )  {
+  dpressure = 1.0;
+  dvelocity = 1.0;
+
+  while( (valid) && (count < *steps_max) &&
+	 (E->monitor.incompressibility >= E->control.tole_comp) &&
+	 (dpressure >= imp) && (dvelocity >= imp) )  {
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(j=1;j<=npno;j++)
@@ -288,12 +294,21 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
     assemble_div_u(E,V,F,lev);
     E->monitor.vdotv = global_vdot(E,V,V,E->mesh.levmax);
     E->monitor.incompressibility = sqrt((gneq/gnpno)*(1.0e-32+global_pdot(E,F,F,lev)/(1.0e-32+E->monitor.vdotv)));
+    dpressure = alpha * sqrt(global_pdot(E,s2,s2,lev)
+			     / (1.0e-32 + global_pdot(E,P,P,lev)));
+    dvelocity = alpha * sqrt(global_vdot(E,E->u1,E->u1,lev)
+			     / (1.0e-32 + E->monitor.vdotv));
 
     count++;
     if (E->control.print_convergence && E->parallel.me==0)  {
-      fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
-      fflush(E->fp);
-      fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+      fprintf(E->fp, "AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+	      " and dp/p=%.3e for step %d\n",
+	      count, CPU_time0()-time0, E->monitor.incompressibility,
+	      dvelocity, dpressure, E->monitor.solution_cycles);
+      fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+	      " and dp/p=%.3e for step %d\n",
+	      count, CPU_time0()-time0, E->monitor.incompressibility,
+	      dvelocity, dpressure, E->monitor.solution_cycles);
     }
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)    {
