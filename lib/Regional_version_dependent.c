@@ -114,14 +114,6 @@ void regional_global_derived_values(E)
 
       }
 
-#if 0
-    E->sphere.elx = E->sphere.nox-1;
-    E->sphere.ely = E->sphere.noy-1;
-    E->sphere.snel = E->sphere.ely*E->sphere.elx;
-    E->sphere.nsf = E->sphere.noy*E->sphere.nox;
-#endif
-
-
 /* Scaling from dimensionless units to Millions of years for input velocity
    and time, timdir is the direction of time for advection. CPC 6/25/00 */
 

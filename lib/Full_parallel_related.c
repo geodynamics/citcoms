@@ -273,38 +273,6 @@ void full_parallel_domain_decomp0(struct All_variables *E)
   E->lmesh.nsf = E->lmesh.nno/E->lmesh.noz;
   E->lmesh.snel = E->lmesh.elx*E->lmesh.ely;
 
-
-
-
-#if 0
-  i = cases[E->sphere.caps_per_proc];
-
-  E->parallel.nproc_sph[1] = incases3[i].xy[0];
-  E->parallel.nproc_sph[2] = incases3[i].xy[1];
-
-  E->sphere.lelx = E->sphere.elx/E->parallel.nproc_sph[1];
-  E->sphere.lely = E->sphere.ely/E->parallel.nproc_sph[2];
-  E->sphere.lsnel = E->sphere.lely*E->sphere.lelx;
-  E->sphere.lnox = E->sphere.lelx + 1;
-  E->sphere.lnoy = E->sphere.lely + 1;
-  E->sphere.lnsf = E->sphere.lnox*E->sphere.lnoy;
-
-/* NOTE: These are for spherical harmonics - they may not be correct! CPC */
-  for (i=0;i<=E->parallel.nprocz-1;i++)
-    if (E->parallel.me_loc[3] == i)    {
-      E->parallel.me_sph = (E->parallel.me-i)/E->parallel.nprocz;
-      E->parallel.me_loc_sph[1] = E->parallel.me_sph%E->parallel.nproc_sph[1];
-      E->parallel.me_loc_sph[2] = E->parallel.me_sph/E->parallel.nproc_sph[1];
-      }
-
-  E->sphere.lexs = E->sphere.lelx * E->parallel.me_loc_sph[1];
-  E->sphere.leys = E->sphere.lely * E->parallel.me_loc_sph[2];
-
-#endif
-
-
-
-
   for(i=E->mesh.levmax;i>=E->mesh.levmin;i--)   {
 
      if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {

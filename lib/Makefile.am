@@ -103,7 +103,6 @@ sources = \
 	Sphere_harmonics.c \
 	Sphere_util.c \
 	Stokes_flow_Incomp.c \
-	temperature_descriptions.h \
 	Topo_gravity.c \
 	Tracer_advection.c \
 	tracer_defs.h \

@@ -111,14 +111,6 @@ void full_global_derived_values(E)
   }
 
 
-#if 0
-  E->sphere.elx = E->sphere.nox-1;
-  E->sphere.ely = E->sphere.noy-1;
-  E->sphere.snel = E->sphere.ely*E->sphere.elx;
-  E->sphere.nsf = E->sphere.noy*E->sphere.nox;
-#endif
-
-
 
   /* Myr */
   E->data.scalet = (E->data.radius_km*1e3*E->data.radius_km*1e3/E->data.therm_diff)/(1.e6*365.25*24*3600);

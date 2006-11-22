@@ -95,10 +95,7 @@ extern "C" {
 #endif
 
 #define MAX_LEVELS 12   /* max. number of multigrid levels */
-#define MAX_F    10
-#define MAX_S    30
 #define NCS      14   /* max. number of sphere caps */
-#define MAXP 20      /* max. number of plates */
 
 typedef float higher_precision;  /* matrix coeffs etc */
 typedef double higher_precision1; /* intermediate calculations for finding above coeffs */
@@ -118,115 +115,6 @@ struct SBC {
   /* stress (traction) boundary conditions */
   int *node[NCS];
   double *SB[NCS][7][4];
-};
-
-
-struct Rect {
-    int numb;
-    char overlay[40];
-    float x1[40];
-    float x2[40];
-    float z1[40];
-    float z2[40];
-    float y1[40];
-    float y2[40];
-    float halfw[40];
-    float mag[40];
-};
-
-
-struct Circ {
-    int numb;
-    char overlay[40];
-    float x[40];
-    float z[40];
-    float y[40];
-    float rad[40];
-    float mag[40];
-    float halfw[40];
-};
-
-
-struct Harm {
-    int numb;
-    int harms;
-    char overlay[40];
-    float off[40];
-    float x1[40];
-    float x2[40];
-    float z1[40];
-    float z2[40];
-    float y1[40];
-    float y2[40];
-    float kx[20][40];
-    float kz[20][40];
-    float ky[20][40];
-    float ka[20][40];
-    float phx[20][40];
-    float phz[20][40];
-    float phy[20][40];
-};
-
-struct Erfc {
- int numb;
-
-
-};
-
-struct RectBc {
-    int numb;
-    char norm[40];
-    float intercept[40];
-    float x1[40];
-    float x2[40];
-    float z1[40];
-    float z2[40];
-    float halfw[40];
-    float mag[40];
-};
-
-
-struct CircBc {
-    int numb;
-    char norm[40];
-    float intercept[40];
-    float x[40];
-    float z[40];
-    float rad[40];
-    float mag[40];
-    float halfw[40];
-};
-
-
-struct PolyBc {
-    int numb;
-    int order;
-    char norm[40];
-    float intercept[40];
-    float x1[40];
-    float x2[40];
-    float z1[40];
-    float z2[40];
-    float ax[20][40];
-    float az[20][40];
-};
-
-
-struct HarmBc {
-    int numb;
-    int harms;
-    char norm[40];
-    float off[40];
-    float intercept[40];
-    float x1[40];
-    float x2[40];
-    float z1[40];
-    float z2[40];
-    float kx[20][40];
-    float kz[20][40];
-    float ka[20][40];
-    float phx[20][40];
-    float phz[20][40];
 };
 
 
@@ -269,19 +157,8 @@ struct CCX 	{
 struct EG {
     higher_precision g[24][1]; };
 
-struct EK2 {
-    double k[8*8]; };
-
 struct EK {
     double k[24*24]; };
-
-struct MEK {
-    double nint[9]; };
-
-struct NK {
-    higher_precision *k;
-    int *map;
-};
 
 struct COORD {
     float centre[4];
@@ -293,14 +170,15 @@ struct SUBEL {
 
 struct ID  {
     int doff[4];	}; /* can  be 1 or 2 or 3 */
+
 struct IEN {
     int node[9];	};
+
 struct FNODE {
     float node[9];	};
+
 struct SIEN {
     int node[5];	};
-struct LM  {
-    struct { int doff[4]; } node[9]; } ;
 
 struct BOUND  {
     int bound[8];	};
@@ -324,13 +202,6 @@ struct Parallel {
 
     int total_surf_proc;
     int ****loc2proc_map;
-
-
-#if 0
-    int nproc_sph[3];
-    int me_sph;
-    int me_loc_sph[3];
-#endif
 
 
     int redundant[MAX_LEVELS];
@@ -391,43 +262,6 @@ struct SPHERE   {
   double **tablescosf[NCS];
   double **tablessinf[NCS];
 
-    /**/
-#if 0
-  int nox;
-  int noy;
-  int noz;
-  int nsf;
-  int nno;
-  int elx;
-  int ely;
-  int elz;
-  int snel;
-  int llmax;
-
-  int *int_cap;
-  int *int_ele;
-  float *harm_slab[2];
-  float *harm_velp[2];
-  float *harm_velt[2];
-  float *harm_divg[2];
-  float *harm_vort[2];
-  float *harm_visc[2];
-  double *sx[4];
-  double *det[5];
-  double *con;
-
-  double *tableplm[181];
-  double *tablecosf[361];
-  double *tablesinf[361];
-  double tablesint[181];
-
-  double *tableplm_n[182];
-  double *tablecosf_n[362];
-  double *tablesinf_n[362];
-    /**/
-  struct SIEN *sien;
-#endif
-
   double area[NCS];
   double angle[NCS][5];
   double *area1[MAX_LEVELS][NCS];
@@ -438,21 +272,6 @@ struct SPHERE   {
   double ro,ri;
   struct CAP cap[NCS];
 
-  float *radius;
-  int slab_layers;
-
-
-  int lnox;
-  int lnoy;
-  int lnoz;
-  int lnsf;
-  int lnno;
-  int lelx;
-  int lely;
-  int lelz;
-  int lsnel;
-  int lexs;
-  int leys;
   };
 
 
@@ -562,11 +381,6 @@ struct SLICE {    /* horizontally sliced data, including topography */
     float *vort[NCS];
     float *freesurf[NCS];
   };
-
-struct BAVE {
-    float T;
-    float Vi;
-    double V[4]; };
 
 
 struct MONITOR {
@@ -847,7 +661,6 @@ struct All_variables {
 #include "solver.h"
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
-    /*#include "temperature_descriptions.h"*/
 #include "advection.h"
 #include "tracer_defs.h"
 
@@ -859,7 +672,6 @@ struct All_variables {
     struct HDF5_INFO hdf5;
 #endif
     struct HAVE Have;
-    struct BAVE Bulkave;
     struct MESH_DATA mesh;
     struct MESH_DATA lmesh;
     struct CONTROL control;
@@ -937,9 +749,6 @@ struct All_variables {
 
     float *age[NCS];	/* nodal weightings */
     float *age_t;
-
-    struct LM *lm[NCS];
-    struct LM *LMD[MAX_LEVELS][NCS];
 
     struct Shape_function1 M; /* master-element shape funtions */
     struct Shape_function1_dx Mx;
