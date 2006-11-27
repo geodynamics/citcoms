@@ -48,9 +48,8 @@ class Output(CitcomComponent):
 
         import pyre.inventory as inv
 
-        output_format = inv.str("output_format", default="ascii-local",
-                                validator=inv.choice(["ascii-local",
-                                                      "ascii",
+        output_format = inv.str("output_format", default="ascii",
+                                validator=inv.choice(["ascii",
                                                       "hdf5"]))
         output_optional = inv.str("output_optional", default="surf,botm")
 

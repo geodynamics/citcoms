@@ -443,10 +443,15 @@ struct CONTROL {
     char B_is_good[MAX_LEVELS];  /* general information controlling program flow */
     char Ahat_is_good[MAX_LEVELS];  /* general information controlling program flow */
 
-    char data_dir[100];
-    char data_file[100];
-    char data_dir_old[100];
-    char old_P_file[100];
+    char data_prefix[50];
+    char data_prefix_old[50];
+
+    char data_dir[150];
+    char data_dir_old[150];
+
+    char data_file[200];
+    char old_P_file[200];
+
     char post_topo_file[100];
     char slabgeoid_file[100];
 
@@ -621,7 +626,7 @@ struct DATA {
 };
 
 struct Output {
-    char format[20];  /* ascii-local, ascii or hdf5 */
+    char format[20];  /* ascii or hdf5 */
     char optional[1000]; /* comma-delimited list of objects to output */
 
     int llmax;  /* max degree of spherical harmonics output */

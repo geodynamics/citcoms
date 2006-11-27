@@ -445,9 +445,9 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     PUTS(("[CitcomS.solver]\n"));
 
     getStringProperty(properties, "datadir", E->control.data_dir, fp);
-    getStringProperty(properties, "datafile", E->control.data_file, fp);
+    getStringProperty(properties, "datafile", E->control.data_prefix, fp);
     getStringProperty(properties, "datadir_old", E->control.data_dir_old, fp);
-    getStringProperty(properties, "datafile_old", E->control.old_P_file, fp);
+    getStringProperty(properties, "datafile_old", E->control.data_prefix_old, fp);
 
     getFloatProperty(properties, "rayleigh", E->control.Atemp, fp);
     getFloatProperty(properties, "Q0", E->control.Q0, fp);

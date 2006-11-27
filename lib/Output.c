@@ -59,7 +59,7 @@ void output_common_input(struct All_variables *E)
 {
     int m = E->parallel.me;
 
-    input_string("output_format", E->output.format, "ascii-local",m);
+    input_string("output_format", E->output.format, "ascii",m);
     input_string("output_optional", E->output.optional, "surf,botm",m);
 
 }

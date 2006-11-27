@@ -31,8 +31,10 @@
 
 #include <math.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
+#include <unistd.h>
 #include <ctype.h>
 #include "element_definitions.h"
 #include "global_defs.h"
@@ -46,6 +48,9 @@
 #include "parsing.h"
 #include "phase_change.h"
 #include "interuption.h"
+
+extern void parallel_process_termination();
+
 
 void read_instructions(struct All_variables *E, char *filename)
 {
@@ -267,10 +272,10 @@ void read_initial_settings(struct All_variables *E)
      Default is no information recorded (apart from special things for given applications.
   */
 
-  input_string("datadir",E->control.data_dir,".",m);
-  input_string("datafile",E->control.data_file,"initialize",m);
-  input_string("datadir_old",E->control.data_dir_old,"initialize",m);
-  input_string("datafile_old",E->control.old_P_file,"initialize",m);
+  input_string("datadir",E->control.data_dir,"",m);
+  input_string("datafile",E->control.data_prefix,"initialize",m);
+  input_string("datadir_old",E->control.data_dir_old,"",m);
+  input_string("datafile_old",E->control.data_prefix_old,"initialize",m);
 
   input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
   input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
@@ -762,7 +767,7 @@ void global_default_values(E)
 
   /* THIRD: you forgot and then went home, let's see if we can help out */
 
-    sprintf(E->control.data_file,"citcom.tmp.%d",getpid());
+    sprintf(E->control.data_prefix,"citcom.tmp.%d",getpid());
 
     E->control.NASSEMBLE = 0;
 
@@ -926,7 +931,7 @@ void initial_velocity(E)
 
 
 
-void open_log(struct All_variables *E)
+static void open_log(struct All_variables *E)
 {
   char logfile[255];
 
@@ -938,7 +943,7 @@ void open_log(struct All_variables *E)
 }
 
 
-void open_time(struct All_variables *E)
+static void open_time(struct All_variables *E)
 {
   char timeoutput[255];
 
@@ -952,7 +957,7 @@ void open_time(struct All_variables *E)
 }
 
 
-void open_info(struct All_variables *E)
+static void open_info(struct All_variables *E)
 {
   char output_file[255];
 
@@ -966,7 +971,7 @@ void open_info(struct All_variables *E)
 }
 
 
-void output_parse_optional(struct  All_variables *E)
+static void output_parse_optional(struct  All_variables *E)
 {
     char* strip(char*);
 
@@ -1030,58 +1035,102 @@ void output_parse_optional(struct  All_variables *E)
     return;
 }
 
-/* check whether E->control.data_file contains a path */
-void chkdatafile(struct  All_variables *E)
+/* check whether E->control.data_file contains a path seperator */
+static void chk_prefix(struct  All_variables *E)
 {
-  void parallel_process_termination();
-
   char *found;
-  char newdatafile[100];
 
-  found = strchr(E->control.data_file, '/');
+  found = strchr(E->control.data_prefix, '/');
   if (found) {
       fprintf(stderr, "error in input parameter: datafile='%s' contains '/'\n", E->control.data_file);
       parallel_process_termination();
   }
 
-  /* prepend the path to data_file */
-  sprintf(newdatafile, "%s/%d/%s", E->control.data_dir, E->parallel.me,
-           E->control.data_file);
-  strcpy(E->control.data_file, newdatafile);
-
   if (E->control.restart) {
-      found = strchr(E->control.old_P_file, '/');
+      found = strchr(E->control.data_prefix_old, '/');
       if (found) {
 	  fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
 	  parallel_process_termination();
       }
-
-      /* prepend the path to old_P_file */
-      sprintf(newdatafile, "%s/%d/%s", E->control.data_dir_old, E->parallel.me,
-	      E->control.old_P_file);
-      strcpy(E->control.old_P_file, newdatafile);
   }
 }
 
 
-void mkdatadir(struct  All_variables *E)
+/* search src and substitue the 1st occurance of target by value */
+static void expand_str(char *src, size_t max_size,
+		       const char *target, const char *value)
 {
-  void parallel_process_termination();
+    char *pos, *end, *tmp;
 
+    /* is target a substring of src? */
+    pos = strstr(src, target);
+    if (pos != NULL) {
+	/* the end char of target */
+	end = pos + strlen(target);
+
+	/* make a copy of the 2nd part of the original string */
+	tmp = strndup(end, max_size);
+
+	/* terminate src at pos */
+	*pos = '\0';
+
+	/* src + value + end */
+	strncat(src, value, max_size);
+	strncat(src, tmp, max_size);
+
+	free(tmp);
+    }
+}
+
+static void expand_datadir(struct All_variables *E, char *datadir)
+{
+    char *found, *err;
+    char tmp[150];
+    int diff;
+    FILE *pipe;
+    const char str1[] = "%HOSTNAME";
+    const char str2[] = "%RANK";
+    const char str3[] = "%DATADIR";
+    const char str3_prog[] = "citcoms_datadir";
+
+    /* expand str1 by machine's hostname */
+    found = strstr(datadir, str1);
+    if (found) {
+	gethostname(tmp, 100);
+	expand_str(datadir, 150, str1, tmp);
+    }
+
+    /* expand str2 by MPI rank */
+    found = strstr(datadir, str2);
+    if (found) {
+	sprintf(tmp, "%d", E->parallel.me);
+	expand_str(datadir, 150, str2, tmp);
+    }
+
+    /* expand str3 by the result of the external program */
+    diff = strcmp(datadir, str3);
+    if (!diff) {
+	pipe = popen(str3_prog, "r");
+	err = fgets(tmp, 150, pipe);
+	pclose(stdout);
+	if (err != NULL)
+	    sscanf(tmp, " %s", datadir);
+	else {
+	    fprintf(stderr, "Cannot get datadir from command '%s'\n", str3_prog);
+	    parallel_process_termination();
+	}
+    }
+}
+
+
+void mkdatadir(const char *dir)
+{
   int err;
-  char newdir[110];
 
-  err = mkdir(E->control.data_dir, 0755);
+  err = mkdir(dir, 0755);
   if (err && errno != EEXIST) {
       /* if error occured and the directory is not exisitng */
-      fprintf(stderr, "Cannot make new directory '%s'\n", E->control.data_dir);
-      parallel_process_termination();
-  }
-  sprintf(newdir, "%s/%d", E->control.data_dir, E->parallel.me);
-  err = mkdir(newdir, 0755);
-  if (err && errno != EEXIST) {
-      /* if error occured and the directory is not exisitng */
-      fprintf(stderr, "Cannot make new directory '%s'\n", newdir);
+      fprintf(stderr, "Cannot make new directory '%s'\n", dir);
       parallel_process_termination();
   }
 }
@@ -1089,14 +1138,23 @@ void mkdatadir(struct  All_variables *E)
 
 void output_init(struct  All_variables *E)
 {
-    /*DEBUG
-    //strcpy(E->output.format, "hdf5");
-    //fprintf(stderr, "output format is %s\n", E->output.format);*/
-    if (strcmp(E->output.format, "ascii-local") == 0)
-        E->problem_output = output;
-    else if (strcmp(E->output.format, "ascii") == 0) {
-        chkdatafile(E);
-        mkdatadir(E);
+    chk_prefix(E);
+    expand_datadir(E, E->control.data_dir);
+    mkdatadir(E->control.data_dir);
+    snprintf(E->control.data_file, 200, "%s/%s", E->control.data_dir,
+	     E->control.data_prefix);
+
+    if (E->control.restart) {
+	expand_datadir(E, E->control.data_dir_old);
+	snprintf(E->control.old_P_file, 200, "%s/%s", E->control.data_dir_old,
+		 E->control.data_prefix_old);
+    }
+
+    open_log(E);
+    open_time(E);
+    open_info(E);
+
+    if (strcmp(E->output.format, "ascii") == 0) {
         E->problem_output = output;
     }
     else if (strcmp(E->output.format, "hdf5") == 0)
@@ -1104,18 +1162,13 @@ void output_init(struct  All_variables *E)
     else {
         /* indicate error here */
         if (E->parallel.me == 0) {
-            fprintf(stderr, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
-            fprintf(E->fp, "wrong output_format, must be either 'ascii-local', 'ascii' or 'hdf5'\n");
+            fprintf(stderr, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
+            fprintf(E->fp, "wrong output_format, must be either 'ascii' or 'hdf5'\n");
         }
         parallel_process_termination(E);
     }
 
-    open_log(E);
-    open_time(E);
-    open_info(E);
-
     output_parse_optional(E);
-
 }
 
 
