@@ -272,7 +272,7 @@ void read_initial_settings(struct All_variables *E)
      Default is no information recorded (apart from special things for given applications.
   */
 
-  input_string("datadir",E->control.data_dir,"",m);
+  input_string("datadir",E->control.data_dir,".",m);
   input_string("datafile",E->control.data_prefix,"initialize",m);
   input_string("datadir_old",E->control.data_dir_old,"",m);
   input_string("datafile_old",E->control.data_prefix_old,"initialize",m);

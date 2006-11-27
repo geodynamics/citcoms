@@ -275,7 +275,7 @@ class Solver(Component):
         tracer = inv.facility("tracer", factory=Tracer)
         visc = inv.facility("visc", factory=Visc)
 
-        datadir = inv.str("datadir", default="")
+        datadir = inv.str("datadir", default=".")
         datadir_old = inv.str("datadir_old", default="")
 
         rayleigh = inv.float("rayleigh", default=1e+05)
