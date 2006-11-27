@@ -35,27 +35,24 @@ if [ -z $4 ]; then
     exit
 fi
 
-paste_exe=`which pasteCitcomData.sh`
+paste_exe=`which execpaste.py`
 cwd=`pwd`
 datadir=$1
 datafile=$2
 timestep=$3
 rank=0
 
-while [ "$4" ]
+while [ x"$4" != "x" ]
 do
-    cmd_paste="$paste_exe $datafile $rank $timestep"
-    cmd_copy="cp $datafile.$rank.$timestep $cwd"
-
-    if [ $4 == $HOSTNAME -o $4 == "localhost" ]; then
-        # using subshell, so that our working directory is unchanged
-        (cd $datadir && $cmd_paste && $cmd_copy)
+    cmd_paste="$paste_exe $datadir $datafile $rank $timestep $cwd"
+    if [ $4 = $HOSTNAME -o  $4 = "localhost" ]; then
+	$cmd_paste
     else
-        rsh $4 "cd $datadir && $cmd_paste && $cmd_copy"
+        rsh $4 "$cmd_paste"
     fi
 
     shift
-    let rank=rank+1
+    rank=$(($rank+1))
 done
 
 

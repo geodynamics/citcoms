@@ -40,6 +40,8 @@ dist_bin_SCRIPTS = \
 	combinesurf.py \
 	dxgeneral.sh \
 	dxgeneralsurf.sh \
+	estimate.py \
+	execpaste.py \
 	getcoord.sh \
 	getlog.sh \
 	getsurf.sh \
@@ -48,6 +50,8 @@ dist_bin_SCRIPTS = \
 	miff2mpg \
 	parser.py \
 	pasteCitcomData.sh \
+	plot_annulus.py \
+	plot_layer.py \
 	zslice.py
 
 nobase_dist_visual_DATA = \

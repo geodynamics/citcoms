@@ -89,35 +89,6 @@ def combine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
 
 
-def combine2(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-             ncap, nprocx, nprocy, nprocz):
-    import os
-
-    # paste
-    cmd = 'batchpaste2.sh %(datadir)s %(datafile)s %(timestep)d %(nodes)s' \
-          % vars()
-    print cmd
-    os.system(cmd)
-
-    # combine
-    cmd = 'combine.py %(datafile)s %(timestep)d %(nodex)d %(nodey)d %(nodez)d %(ncap)d %(nprocx)d %(nprocy)d %(nprocz)d' % vars()
-    print cmd
-    os.system(cmd)
-
-    # delete
-    cmd = 'rm %(datafile)s.[0-9]*.%(timestep)d' % vars()
-    print cmd
-    os.system(cmd)
-
-    # create .general file
-    cmd = 'dxgeneral.sh %(datafile)s.cap*.%(timestep)d' % vars()
-    print cmd
-    os.system(cmd)
-
-    return
-
-
-
 if __name__ == '__main__':
 
     import sys

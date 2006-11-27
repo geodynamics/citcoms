@@ -32,8 +32,7 @@ usage: autocombine.py machinefile inputfile step1 [step2 [...] ]
 '''
 
 # default values for CitcomS input
-defaults = {'output_format': 'ascii-local',
-            'datadir': '.',
+defaults = {'output_format': 'ascii',
             'nprocx': 1,
             'nprocy': 1,
             'nprocz': 1,
@@ -44,7 +43,7 @@ defaults = {'output_format': 'ascii-local',
 if __name__ == '__main__':
 
     import sys
-    import batchcombine
+    import batchcombine as bc
 
     if len(sys.argv) < 4:
         print __doc__
@@ -59,20 +58,11 @@ if __name__ == '__main__':
     parser = Parser(defaults)
     parser.read(inputfile)
 
-    output_format = parser.getstr('output_format')
+    datadir = parser.getstr('datadir')
     datafile = parser.getstr('datafile')
+    output_format = parser.getstr('output_format')
 
-    if output_format == 'ascii-local':
-        import os.path
-        modeldir, modelname = os.path.split(datafile)
-        #print modeldir, modelname
-        datadir = os.path.abspath(modeldir)
-        datafile = modelname
-        combine_fn = batchcombine.combine
-    elif output_format == 'ascii':
-        datadir = parser.getstr('datadir')
-        combine_fn = batchcombine.combine2
-    else:
+    if output_format != 'ascii':
         print "Error: don't know how to combine the output", \
               "(output_format=%s)" % output_format
         sys.exit(1)
@@ -86,10 +76,10 @@ if __name__ == '__main__':
     nprocz = parser.getint('nprocz')
 
     totalnodes = nprocx * nprocy * nprocz * ncap
-    nodelist = batchcombine.machinefile2nodes(machinefile, totalnodes)
+    nodelist = bc.machinefile2nodes(machinefile, totalnodes)
 
     for timestep in timesteps:
-        combine_fn(nodelist, datadir, datafile, timestep,
+        bc.combine(nodelist, datadir, datafile, timestep,
                    nodex, nodey, nodez,
                    ncap, nprocx, nprocy, nprocz)
 
