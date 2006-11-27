@@ -38,7 +38,8 @@ rank=$2
 step=$3
 
 line=`cat $datafile.velo.$rank.$step | wc -l`
-let line=line-1
+#echo $line
+line=$(($line - 1))
 #echo $line
 
 tail -n $line $datafile.velo.$rank.$step \
