@@ -66,7 +66,7 @@ perturbm=1
 
 # Boundary Conditions
 topvbc=0
-     topvbxval=0.0 
+     topvbxval=0.0
      topvbyval=0.0
 botvbc=0
      botvbxval=0.0
@@ -104,7 +104,7 @@ Solver=cgrad node_assemble=1
 # for material above z_410,     mat = 2;
 # for material above z_lmantle, mat = 3;
 # for material below z_lmantle, mat = 4;
-z_lith=0.0007848		
+z_lith=0.0007848
 z_410=0.03924			#also depth of 410-phase change
 z_lmantle=0.06435		#also depth of 670-phase change
 z_cmb=0.439			#     depth of another phase change
@@ -149,15 +149,15 @@ widthcmb=0.0058
 
 
 # Dimensional Information
-layerd=6371e3
+radius=6371e3
 density=3500.0
 thermdiff=1.0e-6
 gravacc=10.0
 thermexp=3.0e-5
 refvisc=1e21
 cp=1250
-wdensity=0.0
-
+density_above=0.0
+density_below=6600.0
 
 # Data input and program debugging
 DESCRIBE=off
