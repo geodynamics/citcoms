@@ -31,18 +31,18 @@ from Sphere import Sphere
 class FullSphere(Sphere):
 
 
-    def __init__(self, name, facility):
-        Sphere.__init__(self, name, facility)
-	self.inventory.nproc_surf = 12
-        return
-
-
-
     def launch(self):
         from CitcomSLib import full_sphere_launch
         full_sphere_launch(self.all_variables)
 	return
 
+
+
+    class Inventory(Sphere.Inventory):
+
+        import pyre.inventory
+        
+        nproc_surf = pyre.inventory.int("nproc_surf", default=12)
 
 
 

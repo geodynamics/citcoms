@@ -31,13 +31,6 @@ from Sphere import Sphere
 class RegionalSphere(Sphere):
 
 
-    def __init__(self, name, facility):
-        Sphere.__init__(self, name, facility)
-	self.inventory.nproc_surf = 1
-        return
-
-
-
     def launch(self):
         from CitcomSLib import regional_sphere_launch
         regional_sphere_launch(self.all_variables)
@@ -49,6 +42,7 @@ class RegionalSphere(Sphere):
 
         import pyre.inventory
 
+        nproc_surf = pyre.inventory.int("nproc_surf", default=1)
 
         # used only in Regional version, not in Full version
         theta_min = pyre.inventory.float("theta_min", default=1.0708)

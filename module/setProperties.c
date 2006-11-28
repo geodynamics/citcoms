@@ -489,7 +489,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
     fp = get_output_stream(out, E);
 
-    PUTS(("[CitcomS.mesher]\n"));
+    PUTS(("[CitcomS.solver.mesher]\n"));
 
     getIntProperty(properties, "nproc_surf", E->parallel.nprocxy, fp);
 
@@ -751,12 +751,10 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
 FILE *get_output_stream(PyObject *out, struct All_variables*E)
 {
-    int mute;
-
-    mute = E->parallel.me;
-    if (mute)
-	return NULL;
-    return PyFile_AsFile(out);
+    if (PyFile_Check(out)) {
+        return PyFile_AsFile(out);
+    }
+    return NULL;
 }
 
 

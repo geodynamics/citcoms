@@ -41,6 +41,12 @@ class IC(CitcomComponent):
 
         from CitcomSLib import IC_set_properties
 
+        inv = self.inventory
+        inv.perturbmag = map(float, inv.perturbmag)
+        inv.perturbl = map(int, inv.perturbl)
+        inv.perturbm = map(int, inv.perturbm)
+        inv.blob_center = map(float, inv.blob_center)
+
         IC_set_properties(self.all_variables, self.inventory, stream)
 
         return

@@ -360,6 +360,40 @@ PyObject * pyCitcom_return_t(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_return_rank__doc__[] = "";
+char pyCitcom_return_rank__name__[] = "return_rank";
+
+PyObject * pyCitcom_return_rank(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:return_rank", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    return Py_BuildValue("i", E->parallel.me);
+}
+
+
+char pyCitcom_return_pid__doc__[] = "";
+char pyCitcom_return_pid__name__[] = "return_pid";
+
+PyObject * pyCitcom_return_pid(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:return_pid", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    return Py_BuildValue("i", E->control.PID);
+}
+
+
 /*////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////*/
 

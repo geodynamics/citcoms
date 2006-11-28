@@ -108,6 +108,16 @@ extern char pyCitcom_return_t__doc__[];
 PyObject * pyCitcom_return_t(PyObject *, PyObject *);
 
 
+extern char pyCitcom_return_rank__name__[];
+extern char pyCitcom_return_rank__doc__[];
+PyObject * pyCitcom_return_rank(PyObject *, PyObject *);
+
+
+extern char pyCitcom_return_pid__name__[];
+extern char pyCitcom_return_pid__doc__[];
+PyObject * pyCitcom_return_pid(PyObject *, PyObject *);
+
+
 #endif
 
 /* $Id$ */

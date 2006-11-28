@@ -96,12 +96,15 @@ class Solver(Component):
         global_default_values(self.all_variables)
         set_signal()
 
-        #pid = self.all_variables.control.PID
-        from os import getpid
-        pid = getpid()
-        stream = open("pid%d.cfg" % pid, "w")
+        from CitcomSLib import return_rank, return_pid
+        rank = return_rank(self.all_variables)
+        if rank == 0:
+            pid = return_pid(self.all_variables)
+            stream = open("pid%d.cfg" % pid, "w")
+        else:
+            stream = None
+        
         self.setProperties(stream)
-        stream.close()
 
         self.restart = self.inventory.ic.inventory.restart
 

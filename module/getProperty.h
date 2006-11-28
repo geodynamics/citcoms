@@ -98,7 +98,7 @@ int getTYPEVectorProperty(PyObject* properties, char* attribute,
         }
         
 	if (fp)
-            fprintf(fp, FORMAT "%s", vector[i], (i == len ? "" : ","));
+            fprintf(fp, "%s" FORMAT, (i ? "," : ""), vector[i]);
     }
 
     if (fp)
