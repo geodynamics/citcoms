@@ -40,7 +40,7 @@ for directory in path:
         site.addsitedir(directory)
 
 from CitcomS.SimpleApp import SimpleApp
-app = SimpleApp()
-app.run()
+from pyre.applications import start
+start(applicationClass=SimpleApp)
 
 #  end of file 

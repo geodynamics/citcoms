@@ -111,7 +111,6 @@ class CoupledApp(BaseApplication):
 #        self._info.line("    full name: %r" % self.inventory.fullname)
 
         self._info.line("  facilities:")
-        self._info.line("    journal: %r" % self.inventory.journal.name)
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    solver1: %r" % self.inventory.solver1.name)
@@ -159,14 +158,6 @@ class CoupledApp(BaseApplication):
 
         steps = pyre.inventory.int("steps", default=1)
 
-
-
-
-# main
-if __name__ == "__main__":
-
-    app = CoupledApp("CitcomS")
-    app.run()
 
 
 

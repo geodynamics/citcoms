@@ -81,7 +81,6 @@ class SimpleApp(BaseApplication):
         #self._info.line("    full name: %r" % self.inventory.fullname)
 
         self._info.line("  facilities:")
-        self._info.line("    journal: %r" % self.inventory.journal.name)
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    solver: %r" % self.solver.name)
@@ -99,15 +98,6 @@ class SimpleApp(BaseApplication):
 
         controller = pyre.inventory.facility("controller", factory=Controller.controller)
         solver = pyre.inventory.facility("solver", factory=Solver.regionalSolver)
-
-
-
-
-# main
-if __name__ == "__main__":
-
-    app = SimpleApp("CitcomS")
-    app.run()
 
 
 
