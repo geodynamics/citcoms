@@ -1,9 +1,15 @@
-CitComS.py NEWS -- history of user-visible changes.  2006-09-18
+CitComS.py NEWS -- history of user-visible changes.  2006-11-27
 
 Please send CitComS.py bug reports to cig-mc@geodynamics.org.
 
 
 Version 2.1.0
+
+* A new input parameter "datadir" specifies the path of output files. The
+  "datafile" input parameter (cannot contain path) specifies the filename
+  prefix of the output files. In v2.0.x and before, "datafile" is used to
+  specify the path and filename prefix of output files. This change is not
+  backward compatible. Users need to change their old input file to run it.
 
 * Imporved build procedure. The CitComS executable embeds python
   interpreter by default and is staticly linked with MPI library,
@@ -16,8 +22,14 @@ Version 2.1.0
 
 * Support of binary format output (using HDF5 library).
 
-* Additional data output (including: stress, pressure, and horizontal average)
-  can be enabled/disabled by changing the input parameters.
+* Additional data output (including: geoid, stress, pressure, and horizontal
+  average) can be enabled/disabled by changing the input parameters.
+
+* Scripts (using GMT commands) to plot 2-D cross sections of temperature field.
+
+* Added/removed a few input parameters (all in solver.const component) for
+  computing geoid. Removed "layerd" and "wdensity" and added "radius", 
+  "density_above" and "density_below".
 
 * Fixes for several bugs: issue 30, 35, 42, 44 and 55. See the Geodynamics
   Roundup issue tracker (http://geodynamics.org/roundup) and the file
