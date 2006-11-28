@@ -32,6 +32,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
 #include <unistd.h>
@@ -1060,25 +1061,29 @@ static void chk_prefix(struct  All_variables *E)
 static void expand_str(char *src, size_t max_size,
 		       const char *target, const char *value)
 {
-    char *pos, *end, *tmp;
+    char *pos, *end, *new_end;
+    size_t end_len, value_len;
 
     /* is target a substring of src? */
     pos = strstr(src, target);
     if (pos != NULL) {
-	/* the end char of target */
+        value_len = strlen(value);
+
+	/* the end part of the original string... */
 	end = pos + strlen(target);
+        /* ...and where it is going */
+        new_end = pos + value_len;
+        end_len = strlen(end);
+        if (new_end + end_len >= src + max_size) {
+            /* too long */
+            return;
+        }
 
-	/* make a copy of the 2nd part of the original string */
-	tmp = strndup(end, max_size);
+	/* move the end part of the original string */
+        memmove(new_end, end, end_len + 1); /* incl. null byte */
 
-	/* terminate src at pos */
-	*pos = '\0';
-
-	/* src + value + end */
-	strncat(src, value, max_size);
-	strncat(src, tmp, max_size);
-
-	free(tmp);
+        /* insert the value */
+        memcpy(pos, value, value_len);
     }
 }
 
