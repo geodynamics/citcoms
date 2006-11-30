@@ -114,9 +114,8 @@ install-nodist_visualDATA: $(nodist_visual_DATA)
 	done
 
 if COND_HDF5
-    bin_PROGRAMS = h5tocap h5steps
+    bin_PROGRAMS = h5tocap
     h5tocap_SOURCES = h5tocap.c
-    h5steps_SOURCES = h5steps.c
 endif
 
 CLEANFILES = $(nodist_visual_DATA)
