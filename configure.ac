@@ -56,28 +56,31 @@ if test "$want_pyre" = yes; then
 
     # Checks for Python modules and packages.
 
+    builddir=`pwd`
     save_PYTHONPATH="$PYTHONPATH"
-    PYTHONPATH="`pwd`:$PYTHONPATH"; export PYTHONPATH
+    PYTHONPATH="$builddir:$PYTHONPATH"; export PYTHONPATH
+    cd $srcdir
 
     AC_MSG_NOTICE([downloading missing Python dependencies])
-    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -zmaxd deps >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py install_deps -zmaxd $builddir/deps >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [],
           [AC_MSG_FAILURE([cannot download missing Python dependencies])])
 
     AC_MSG_NOTICE([building Python dependencies])
-    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -H None -f deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py develop -H None -f $builddir/deps -x -d $builddir >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [],
           [AC_MSG_FAILURE([building Python dependencies])])
 
     AC_MSG_CHECKING([for egg-related flags])
-    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [AC_MSG_RESULT(ok)
-           eval `cat egg-flags.sh`
+           . egg-flags.sh
            rm -f egg-flags.sh
           ],
           [AC_MSG_RESULT(failed)
           AC_MSG_FAILURE([cannot scan Python eggs for flags])])
 
+    cd $builddir
     PYTHONPATH="$save_PYTHONPATH"
     PYTHONPATH="${pythondir}:${pyexecdir}${save_PYTHONPATH:+:${save_PYTHONPATH}}"
 

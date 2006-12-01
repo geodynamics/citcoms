@@ -58,7 +58,6 @@ CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.a
 ######## pyrized driver ########
 
 
-abs_top_srcdir = @abs_top_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_builddir = @abs_builddir@
 
@@ -66,12 +65,12 @@ abs_builddir = @abs_builddir@
 if COND_EMBEDDING
     INTERPRETER = $(bindir)/pycitcoms
     noinstINTERPRETER = $(abs_builddir)/pycitcoms
-    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_builddir)
+    noinstPYTHONPATH = $(abs_top_builddir)
     libCitcomS = $(top_builddir)/lib/libCitcomS.a
 else
     INTERPRETER = $(PYTHON)
     noinstINTERPRETER = $(PYTHON)
-    noinstPYTHONPATH = $(abs_top_srcdir):$(abs_top_builddir):$(abs_top_builddir)/module/.libs
+    noinstPYTHONPATH = $(abs_top_builddir):$(abs_top_builddir)/module/.libs
     libCitcomS = $(top_builddir)/lib/libCitcomS.la
 endif
 
