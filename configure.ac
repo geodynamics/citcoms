@@ -71,6 +71,9 @@ if test "$want_pyre" = yes; then
           [],
           [AC_MSG_FAILURE([building Python dependencies])])
 
+    # When builddir == srcdir, this causes an infinite regress.
+    rm -f CitcomS.egg-link
+
     AC_MSG_CHECKING([for egg-related flags])
     AS_IF([AC_TRY_COMMAND([$PYTHON setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [AC_MSG_RESULT(ok)
