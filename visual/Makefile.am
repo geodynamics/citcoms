@@ -55,6 +55,8 @@ dist_bin_SCRIPTS = \
 	zslice.py
 
 nobase_dist_visual_DATA = \
+	samples/cookbook1.h5 \
+	samples/cookbook1.100.h5 \
 	samples/fulltest.cap00.100 \
 	samples/fulltest.cap00.100.general \
 	samples/fulltest.cap01.100 \
