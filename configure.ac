@@ -59,10 +59,15 @@ if test "$want_pyre" = yes; then
     save_PYTHONPATH="$PYTHONPATH"
     PYTHONPATH="`pwd`:$PYTHONPATH"; export PYTHONPATH
 
-    AC_MSG_NOTICE([checking/downloading Python dependencies])
-    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AC_MSG_NOTICE([downloading missing Python dependencies])
+    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -zmaxd deps >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [],
-          [AC_MSG_FAILURE([cannot check/download Python dependencies])])
+          [AC_MSG_FAILURE([cannot download missing Python dependencies])])
+
+    AC_MSG_NOTICE([building Python dependencies])
+    AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py install_deps -H None -f deps -x -d . >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+          [],
+          [AC_MSG_FAILURE([building Python dependencies])])
 
     AC_MSG_CHECKING([for egg-related flags])
     AS_IF([AC_TRY_COMMAND([$PYTHON $srcdir/setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
@@ -74,7 +79,9 @@ if test "$want_pyre" = yes; then
           AC_MSG_FAILURE([cannot scan Python eggs for flags])])
 
     PYTHONPATH="$save_PYTHONPATH"
+    PYTHONPATH="${pythondir}:${pyexecdir}${save_PYTHONPATH:+:${save_PYTHONPATH}}"
 
+    AC_SUBST(PYTHONPATH)
     AC_SUBST(PYTHON_EGG_CFLAGS)
     AC_SUBST(PYTHON_EGG_CPPFLAGS)
     AC_SUBST(PYTHON_EGG_LDFLAGS)

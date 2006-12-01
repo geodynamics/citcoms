@@ -33,4 +33,9 @@ endif
 SUBDIRS = lib $(MAYBE_PYRE) bin
 
 
+install-data-hook:
+	$(PYTHON) $(top_srcdir)/setup.py install_deps -H None -f $(top_builddir)/deps --prefix=$(prefix)
+	$(PYTHON) $(top_srcdir)/setup.py egg_info -e $(pythondir)
+
+
 ## end of Makefile.am
