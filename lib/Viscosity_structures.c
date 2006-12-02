@@ -224,11 +224,57 @@ void visc_from_T(E,EEta,propogate)
 
     switch (E->viscosity.RHEOL)   {
     case 1:
-      if (E->parallel.me==0) fprintf(stderr,"not supported for rheol=1\n");
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=nel;i++)   {
+	  l = E->mat[m][i];
+
+	  if(E->control.mat_control==0)
+	      tempa = E->viscosity.N0[l-1];
+	  else if(E->control.mat_control==1)
+	      tempa = E->viscosity.N0[l-1]*E->VIP[m][i];
+
+	  for(kk=1;kk<=ends;kk++) {
+	    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+	  }
+
+	  for(jj=1;jj<=vpts;jj++) {
+	    temp=0.0;
+	    for(kk=1;kk<=ends;kk++)   {
+	      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+	    }
+
+	    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		exp( E->viscosity.E[l-1] * (E->viscosity.T[l-1] - temp));
+
+	  }
+	}
       break;
 
     case 2:
-      if (E->parallel.me==0) fprintf(stderr,"not supported for rheol=2\n");
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=nel;i++)   {
+	  l = E->mat[m][i];
+
+	  if(E->control.mat_control==0)
+	      tempa = E->viscosity.N0[l-1];
+	  else if(E->control.mat_control==1)
+	      tempa = E->viscosity.N0[l-1]*E->VIP[m][i];
+
+	  for(kk=1;kk<=ends;kk++) {
+	    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+	  }
+
+	  for(jj=1;jj<=vpts;jj++) {
+	    temp=0.0;
+	    for(kk=1;kk<=ends;kk++)   {
+	      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+	    }
+
+	    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		exp( -temp / E->viscosity.T[l-1]);
+
+	  }
+	}
       break;
 
     case 3:
