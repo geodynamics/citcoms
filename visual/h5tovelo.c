@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
      * HDF5 file must be specified as first argument.
      */
 
-    if (argc < 2 || argc > 3)
+    if (argc < 3 || argc > 4)
     {
 	fputs(usage, stderr);
         return EXIT_FAILURE;
