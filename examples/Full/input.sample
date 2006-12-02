@@ -2,6 +2,9 @@
 datadir="/scratch"
 datafile="fulltest"
 
+output_format=ascii
+output_optional=surf,botm
+output_ll_max=20
 
 # specify input files
 # Important: when file_vbcs is 1, make sure topvbc is also turned on.
@@ -23,9 +26,15 @@ tracer_file=""
 
 # processors, mesh grid information
 nproc_surf=12
-nprocx=1 nprocy=1 nprocz=1
-nodex=9 nodey=9 nodez=9
-mgunitx=8 mgunity=8 mgunitz=8
+nprocx=1
+nprocy=1
+nprocz=1
+nodex=9
+nodey=9
+nodez=9
+mgunitx=8
+mgunity=8
+mgunitz=8
 levels=1
 
 
@@ -37,6 +46,7 @@ radius_outer=1.0
 # restart info
 restart=0
 post_p=0
+datadir_old="."
 datafile_old=""
 solution_cycles_init=0
 zero_elapsed_time=1
@@ -50,11 +60,11 @@ storage_spacing=1
 cpu_limits_in_seconds=360000000
 
 # Initial conditions
-num_perturbations=5
-perturbmag=0.02,0.05,0.08,0.05,0.02
-perturbl=2,2,2,2,2
-perturbm=2,2,2,2,2
-perturblayer=5,10,16,22,27
+num_perturbations=1
+perturbmag=0.05
+perturbl=2
+perturbm=2
+perturblayer=5
 
 
 # Boundary Conditions
@@ -89,7 +99,8 @@ Q0=0
 Problem=convection
 Geometry=sphere
 Spacing=regular
-Solver=cgrad node_assemble=1
+Solver=cgrad
+node_assemble=1
 
 
 # Depth Information
@@ -120,8 +131,10 @@ SDEPV=off
 sdepv_expt=1,1,1,1
 sdepv_misfit=0.020
 
-VMIN=on visc_min=1.0e0
-VMAX=on visc_max=1.0e1
+VMIN=on
+visc_min=1.0e0
+VMAX=on
+visc_max=1.0e1
 
 
 # Phase Change Information
@@ -186,10 +199,4 @@ aug_number=2.0e3
 # Age information
 start_age=4.0
 reset_startage=0
-
-
-# Spherical harmonics information
-ll_max=20
-output_ll_max=20
-nlong=361	nlati=181
 
