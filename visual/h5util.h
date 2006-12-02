@@ -38,8 +38,8 @@ typedef struct field_t
 } field_t;
 
 
-field_t *open_field(hid_t cap, const char *name);
-herr_t read_field(hid_t cap, field_t *field, int iii);
+field_t *open_field(hid_t group, const char *name);
+herr_t read_field(hid_t group, field_t *field, int cap);
 herr_t close_field(field_t *field);
 
 herr_t get_attribute_str(hid_t obj_id, const char *attr_name, char **data);

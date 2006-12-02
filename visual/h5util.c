@@ -26,7 +26,7 @@ static herr_t get_attribute(hid_t obj_id, const char *attr_name, hid_t mem_type_
 static herr_t get_attribute_mem(hid_t obj_id, const char *attr_name, hid_t mem_type_id, void *data);
 
 
-field_t *open_field(hid_t file_id, const char *name)
+field_t *open_field(hid_t group, const char *name)
 {
     hid_t dataset;
     hid_t dataspace;
@@ -37,7 +37,7 @@ field_t *open_field(hid_t file_id, const char *name)
 
     field_t *field;
 
-    if (file_id < 0)
+    if (group < 0)
         return NULL;
 
 
@@ -51,7 +51,7 @@ field_t *open_field(hid_t file_id, const char *name)
     field->maxdims = NULL;
     field->n = 0;
 
-    dataset = H5Dopen(file_id, name);
+    dataset = H5Dopen(group, name);
     if(dataset < 0)
     {
         free(field);
@@ -110,7 +110,7 @@ field_t *open_field(hid_t file_id, const char *name)
 }
 
 
-herr_t read_field(hid_t file_id, field_t *field, int iii)
+herr_t read_field(hid_t group, field_t *field, int cap)
 {
     hid_t dataset;
     hid_t filespace;
@@ -119,15 +119,15 @@ herr_t read_field(hid_t file_id, field_t *field, int iii)
 
     int d;
 
-    if (file_id < 0 || field == NULL)
+    if (group < 0 || field == NULL)
         return -1;
 
-    dataset = H5Dopen(file_id, field->name);
+    dataset = H5Dopen(group, field->name);
 
     if (dataset < 0)
         return -1;
 
-    field->offset[0] = iii;
+    field->offset[0] = cap;
     field->count[0] = 1;
     for(d = 1; d < field->rank; d++)
     {
@@ -136,8 +136,8 @@ herr_t read_field(hid_t file_id, field_t *field, int iii)
     }
 
 
-    /* DEBUG */
-    printf("Reading cap %d on field %s with offset (", iii, field->name);
+    /* DEBUG
+    printf("Reading cap %d on field %s with offset (", cap, field->name);
     for(d = 0; d < field->rank; d++) printf("%d,", (int)(field->offset[d]));
     printf(") and count (");
     for(d = 0; d < field->rank; d++) printf("%d,", (int)(field->count[d]));
