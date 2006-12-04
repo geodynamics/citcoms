@@ -1,4 +1,7 @@
-###############################################################################
+"""
+This module customizes the MayaVi2 UI and adds callbacks to the CitcomS
+visualization plugins.
+"""
 
 # Enthought library imports.
 from enthought.envisage.workbench.action.action_plugin_definition import \
@@ -24,7 +27,7 @@ citcoms_menu = Menu(
 # old name: enthought.mayavi.plugins.OpenCitcomSFILES.OpenCitcomSVTKFILE
 citcoms_open_vtk = Action(
     id          = "OpenCitcomsVTKFile",
-    class_name  = "citcoms_display.mayavi_actions.OpenVTK",
+    class_name  = "citcoms_display.actions.OpenVTKAction",
     name        = "&CitcomS VTK file",
     #image      = "images/new_scene.png",
     tooltip     = "Open a CitcomS VTK data file",
@@ -36,7 +39,7 @@ citcoms_open_vtk = Action(
 # old name: enthought.mayavi.plugins.OpenCitcomSFILES.OpenCitcomSHDFFILE
 citcoms_open_hdf = Action(
     id          = "OpenCitcomsHDF5File",
-    class_name  = "citcoms_display.mayavi_actions.OpenHDF5",
+    class_name  = "citcoms_display.actions.OpenHDF5Action",
     name        = "CitcomS &HDF5 file",
     #image      = "images/new_scene.png",
     tooltip     = "Open a CitcomS HDF5 data file",
