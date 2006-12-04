@@ -11,8 +11,8 @@ Version 2.1.0
   specify the path and filename prefix of output files. This change is not
   backward compatible. Users need to change their old input file to run it.
 
-* Imporved build procedure. The CitComS executable embeds python
-  interpreter by default and is staticly linked with MPI library,
+* Improved build procedure. The CitComS executable embeds python
+  interpreter by default and is statically linked with MPI library,
   which improves the portability of the code. 
 
 * New input format (INI-styled .cfg)
