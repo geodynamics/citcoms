@@ -66,18 +66,18 @@ def great_circle_proj():
     from math import pi, sin, cos, tan, atan
     while 1:
         text = '''Choose method to specify great circle path:
-          (1) a center and an azimuth
-          (2) a center and another point on the path
-          (3) a center and a rotation pole position\n'''
+          (1) a starting point and an azimuth
+          (2) a starting point and another point on the path
+          (3) a starting point and a rotation pole position\n'''
         option = int(raw_input(text))
 
         if 1 <= option <= 3:
-            lon = float(raw_input('Center longitude: '))
-            lat = float(raw_input('Center latitude: '))
-            center = '-C%f/%f -L-180/180' % (lon, lat)
+            lon = float(raw_input('Starting point longitude: '))
+            lat = float(raw_input('Starting point latitude: '))
+            spoint = '-C%f/%f -L-180/180' % (lon, lat)
             if option == 1:
                 az = float(raw_input('Azimuth (in degrees clockwise from north): '))
-                proj = '%s -A%f' % (center, az)
+                proj = '%s -A%f' % (spoint, az)
                 break
 
             if option == 2:
@@ -90,7 +90,7 @@ def great_circle_proj():
                 delta = (elon - lon) / r2d
                 if abs(lat) == 90:
                     ## on the pole
-                    print 'pole cannot be the center.'
+                    print 'pole cannot be the starting point.'
                     continue
                 elif (elon - lon) % 180 == 0:
                     ## on the same meridian
@@ -102,13 +102,13 @@ def great_circle_proj():
                     az = atan((sin(a)/tan(b) - cos(a)*cos(delta)) / sin(delta))
                     az = 90 - r2d * az
 
-                proj = '%s -A%f' % (center, az)
+                proj = '%s -A%f' % (spoint, az)
                 break
 
             if option == 3:
                 lon = float(raw_input('Pole longitude: '))
                 lat = float(raw_input('Pole latitude: '))
-                proj = '%s -T%f/%f' % (center, lon, lat)
+                proj = '%s -T%f/%f' % (spoint, lon, lat)
                 break
 
         else:
