@@ -247,3 +247,5 @@ static void output(const char *filename, field_t *coord, field_t *velocity,
     fclose(file);
 }
 
+/* vim:noet:ts=8 sw=8
+ */
