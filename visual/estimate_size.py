@@ -1,4 +1,30 @@
 #!/usr/bin/env python
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#<LicenseText>
+#
+# estimate_size.py by Luis Armendariz
+# Copyright (C) 2002-2005, California Institute of Technology.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#</LicenseText>
+#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
 """
 This script estimates the size of the output from CitcomS,
@@ -6,30 +32,30 @@ assuming binary floating point data.
 
 Options are:
 
-    estimate.py [ --help | -h ]
-                [ --steps <number> | -t <number> ]
-                [ --nodex <number> | -x <number> ]
-                [ --nodey <number> | -y <number> ]
-                [ --nodez <number> | -z <number> ]
-                [ --caps  <number> | -c <number> | --full | --regional ]
-                [ --all | -a ]
-                [ --connectivity ]
-                [ --stress ]
-                [ --pressure ]
-                [ --surf ]
-                [ --botm ]
-                [ --horiz_avg ]
+    estimate_size.py [ --help | -h ]
+                     [ --steps <number> | -t <number> ]
+                     [ --nodex <number> | -x <number> ]
+                     [ --nodey <number> | -y <number> ]
+                     [ --nodez <number> | -z <number> ]
+                     [ --caps  <number> | -c <number> | --full | --regional ]
+                     [ --all | -a ]
+                     [ --connectivity ]
+                     [ --stress ]
+                     [ --pressure ]
+                     [ --surf ]
+                     [ --botm ]
+                     [ --horiz_avg ]
 
 Examples:
 
-    python estimate.py
-    python estimate.py --all
-    python estimate.py --full --all --steps=100 --nodex=33 --nodey=33 -z65
-    python estimate.py --regional --surf --botm --pressure
-    python estimate.py --regional --pressure --stress -x55 -y55 -z43
-    python estimate.py --caps=12 --steps 100 -x 33 -y 33 -z 33 --stress
-    python estimate.py -c12 -t100 -x33 -y33 -z33 -a
-    python estimate.py --help
+    python estimate_size.py
+    python estimate_size.py --all
+    python estimate_size.py --full --all --steps=100 --nodex=33 --nodey=33 -z65
+    python estimate_size.py --regional --surf --botm --pressure
+    python estimate_size.py --regional --pressure --stress -x55 -y55 -z43
+    python estimate_size.py --caps=12 --steps 100 -x 33 -y 33 -z 33 --stress
+    python estimate_size.py -c12 -t100 -x33 -y33 -z33 -a
+    python estimate_size.py --help
 """
 
 def TiB(x):
@@ -176,19 +202,17 @@ def main():
     pressure     = steps * caps * scalar3d
     stress       = steps * caps * tensor3d
 
-    surf_coord       = caps * vector2d
     surf_velocity    = steps * caps * vector2d
     surf_temperature = steps * caps * scalar2d
     surf_heatflux    = steps * caps * scalar2d
     surf_topography  = steps * caps * scalar2d
-    surf_total       = surf_coord + surf_velocity + surf_temperature + \
+    surf_total       = surf_velocity + surf_temperature + \
                        surf_heatflux + surf_topography
 
-    have_coord = caps * scalar1d
     have_temp  = steps * caps * scalar1d
     have_vxy   = steps * caps * scalar1d
     have_vz    = steps * caps * scalar1d
-    have_total = have_coord + have_temp + have_vxy + have_vz
+    have_total = have_temp + have_vxy + have_vz
 
     total  = coord + velocity + temperature + viscosity
 
@@ -234,17 +258,14 @@ def main():
     if out['stress']:
         print "stress               %s" % ps(stress)
     if out['surf']:
-        print "surf/coord           %s" % ps(surf_coord)
         print "surf/velocity        %s" % ps(surf_velocity)
         print "surf/heatflux        %s" % ps(surf_heatflux)
         print "surf/topography      %s" % ps(surf_topography)
     if out['botm']:
-        print "botm/coord           %s" % ps(surf_coord)
         print "botm/velocity        %s" % ps(surf_velocity)
         print "botm/heatflux        %s" % ps(surf_heatflux)
         print "botm/topography      %s" % ps(surf_topography)
     if out['horiz_avg']:
-        print "horiz_avg/coord        %s" % ps(have_coord)
         print "horiz_avg/temperature  %s" % ps(have_temp)
         print "horiz_avg/horiz_velo   %s" % ps(have_vxy)
         print "horiz_avg/vert_velo    %s" % ps(have_vz)
