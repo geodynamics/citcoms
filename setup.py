@@ -13,7 +13,7 @@ setup(
     packages = find_packages(),
     
     install_requires = [
-    'pythia[mpi] >= 0.8.1.0b7, < 0.8.2a',
+    'pythia[mpi] >= 0.8.1.0, < 0.8.2a',
     ],
 
     author = 'Louis Moresi, et al.',

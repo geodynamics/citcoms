@@ -32,6 +32,9 @@ endif
 
 SUBDIRS = lib $(MAYBE_PYRE) bin
 
+EXTRA_DIST = \
+	setup.py \
+	archimedes/__init__.py
 
 install-data-hook:
 	$(PYTHON) $(top_srcdir)/setup.py install_deps -H None -f $(top_builddir)/deps --prefix=$(prefix)
