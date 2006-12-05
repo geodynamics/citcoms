@@ -40,7 +40,7 @@ dist_bin_SCRIPTS = \
 	combinesurf.py \
 	dxgeneral.sh \
 	dxgeneralsurf.sh \
-	estimate.py \
+	estimate_size.py \
 	execpaste.py \
 	getcoord.sh \
 	getlog.sh \
