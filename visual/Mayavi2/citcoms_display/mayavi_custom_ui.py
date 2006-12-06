@@ -51,7 +51,7 @@ citcoms_open_hdf = Action(
 # old name: enthought.mayavi.plugins.CitcomSFilterActions.CitcomSshowCaps
 citcoms_cap_filter = Action(
     id          = "CitcomsCapFilter",
-    class_name  = "citcoms_display.mayavi_filters.ShowCapsFilter",
+    class_name  = "citcoms_display.actions.ShowCapsFilterAction",
     name        = "&Show Citcom Caps",
     #image      = "images/new_scene.png",
     tooltip     = "Display a specified range of caps",
@@ -62,7 +62,7 @@ citcoms_cap_filter = Action(
 # old name: enthought.mayavi.plugins.CitcomSFilterActions.CitcomSreduce
 citcoms_reduce_filter = Action(
     id          = "CitcomsReduceFilter",
-    class_name  = "citcoms_display.mayavi_filters.ReduceFilter",
+    class_name  = "citcoms_display.actions.ReduceFilterAction",
     name        = "&Reduce CitcomS grid",
     #image      = "images/new_scene.png",
     tooltip     = "Display a ReduceGrid for interpolation",

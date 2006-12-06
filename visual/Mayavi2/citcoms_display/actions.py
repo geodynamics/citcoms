@@ -1,3 +1,22 @@
+"""
+Actions for MayaVi2 UI
+"""
+
+#Author: Martin Weier
+#Copyright (C) 2006  California Institute of Technology
+#This program is free software; you can redistribute it and/or modify
+#it under the terms of the GNU General Public License as published by
+#the Free Software Foundation; either version 2 of the License, or
+#any later version.
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+
+
 # Standard library imports
 from os.path import isfile
 
@@ -11,8 +30,9 @@ from enthought.mayavi.action.common import WorkbenchAction, get_imayavi  # TODO:
 
 
 class OpenVTKAction(WorkbenchAction):
-    """ Open a VTK file. """
-
+    """
+    Open a VTK file.
+    """
     def perform(self):
         """Performs the action. """
         wildcard = 'VTK files (*.vtk)|*.vtk|' + FileDialog.WILDCARD_ALL
@@ -34,8 +54,9 @@ class OpenVTKAction(WorkbenchAction):
 
 
 class OpenHDF5Action(WorkbenchAction):
-    """ Open an HDF5 file. """
-
+    """
+    Open an HDF5 file.
+    """
     def perform(self):
         """ Performs the action. """
         wildcard = 'HDF5 files (*.h5)|*.h5|' + FileDialog.WILDCARD_ALL
@@ -54,4 +75,29 @@ class OpenHDF5Action(WorkbenchAction):
             else:
                 error("File '%s' does not exist!" % dialog.path, parent)
         return
+
+
+class ReduceFilterAction(WorkbenchAction):
+    """
+    Add a ReduceFilter to the mayavi pipeline.
+    """
+    def perform(self):
+        """ Performs the action. """
+        from citcoms_display.plugins.ReduceFilter import ReduceFilter
+        f = ReduceFilter()
+        mv = get_imayavi(self.window)
+        mv.add_filter(f)
+
+
+class ShowCapsFilterAction(WorkbenchAction):
+    """
+    Add a ShowCapsFilter to the mayavi pipeline
+    """
+    def perform(self):
+        """ Performs the action. """
+        from citcoms_display.plugins.ShowCapsFilter import ShowCapsFilter
+        f = ShowCapsFilter()
+        mv = get_imayavi(self.window)
+        mv.add_filter(f)
+
 
