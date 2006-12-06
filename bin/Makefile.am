@@ -65,12 +65,12 @@ abs_builddir = @abs_builddir@
 if COND_EMBEDDING
     INTERPRETER = $(bindir)/pycitcoms
     noinstINTERPRETER = $(abs_builddir)/pycitcoms
-    noinstPYTHONPATH = $(abs_top_builddir)
+    noinstPYTHONPATH = $(abs_top_builddir)/python
     libCitcomS = $(top_builddir)/lib/libCitcomS.a
 else
     INTERPRETER = $(PYTHON)
     noinstINTERPRETER = $(PYTHON)
-    noinstPYTHONPATH = $(abs_top_builddir):$(abs_top_builddir)/module/.libs
+    noinstPYTHONPATH = $(abs_top_builddir)/python:$(abs_top_builddir)/module/.libs
     libCitcomS = $(top_builddir)/lib/libCitcomS.la
 endif
 

@@ -58,7 +58,7 @@ if test "$want_pyre" = yes; then
 
     builddir=`pwd`
     save_PYTHONPATH="$PYTHONPATH"
-    PYTHONPATH="$builddir:$PYTHONPATH"; export PYTHONPATH
+    PYTHONPATH="$builddir/python:$PYTHONPATH"; export PYTHONPATH
     cd $srcdir
 
     AC_MSG_NOTICE([downloading missing Python dependencies])
@@ -67,12 +67,9 @@ if test "$want_pyre" = yes; then
           [AC_MSG_FAILURE([cannot download missing Python dependencies])])
 
     AC_MSG_NOTICE([building Python dependencies])
-    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py develop -H None -f $builddir/deps -x -d $builddir >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py develop -H None -f $builddir/deps -x -d $builddir/python >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
           [],
           [AC_MSG_FAILURE([building Python dependencies])])
-
-    # When builddir == srcdir, this causes an infinite regress.
-    rm -f CitcomS.egg-link
 
     AC_MSG_CHECKING([for egg-related flags])
     AS_IF([AC_TRY_COMMAND([$PYTHON setup.py egg_flags >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],

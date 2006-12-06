@@ -37,8 +37,10 @@ EXTRA_DIST = \
 	archimedes/__init__.py
 
 install-data-hook:
-	$(PYTHON) $(top_srcdir)/setup.py install_deps -H None -f $(top_builddir)/deps --prefix=$(prefix)
-	$(PYTHON) $(top_srcdir)/setup.py egg_info -e $(pythondir)
+	top_builddir=`$(am__cd) $(top_builddir) && pwd` && \
+		cd $(top_srcdir) && \
+		$(PYTHON) setup.py install_deps -H None -f $$top_builddir/deps --prefix=$(prefix) && \
+		$(PYTHON) setup.py egg_info -e $(pythondir)
 
 
 ## end of Makefile.am
