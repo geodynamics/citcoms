@@ -36,6 +36,7 @@ dist_bin_SCRIPTS = \
 	batchcombine.py \
 	batchpaste.sh \
 	batchsurf.py \
+	citcoms_datadir \
 	combine.py \
 	combinesurf.py \
 	dxgeneral.sh \
@@ -55,6 +56,28 @@ dist_bin_SCRIPTS = \
 	zslice.py
 
 nobase_dist_visual_DATA = \
+	Mayavi2/plugins/plugin_defs/mayavi_ui_plugin_definition.py \
+	Mayavi2/plugins/CitcomHDFThread.py \
+	Mayavi2/plugins/filter/CitcomSFilterActions.py \
+	Mayavi2/plugins/filter/CitcomSSphere.py \
+	Mayavi2/plugins/filter/CitcomSreduce.py \
+	Mayavi2/plugins/filter/CitcomSshowCaps.py \
+	Mayavi2/plugins/filter/CitcomSshowSurface.py \
+	Mayavi2/plugins/filter/__init__.py \
+	Mayavi2/plugins/CitcomSHDFUgrid.py \
+	Mayavi2/plugins/__init__.py \
+	Mayavi2/plugins/CitcomS_hdf_file_reader.py \
+	Mayavi2/plugins/CitcomS_vtk_file_reader.py \
+	Mayavi2/plugins/OpenCitcomSFILES.py \
+	Mayavi2/__init__.py \
+	Mayavi2/Citcoms_HdfDisplay.py \
+	Mayavi2/Citcoms_Hdf2Vtk.py \
+	Mayavi2/citcoms_display/mayavi_custom_ui.py \
+	Mayavi2/citcoms_display/__init__.py \
+	Mayavi2/citcoms_display/actions.py \
+	Mayavi2/Citcoms_VtkDisplay.py \
+	Mayavi2/Citcoms_Hdf2Vtk.c \
+	Mayavi2/README \
 	samples/cookbook1.h5 \
 	samples/cookbook1.100.h5 \
 	samples/fulltest.cap00.100 \
@@ -117,8 +140,8 @@ install-nodist_visualDATA: $(nodist_visual_DATA)
 
 if COND_HDF5
     bin_PROGRAMS = h5tocap h5tovelo
-    h5tocap_SOURCES = h5tocap.c h5util.c
-    h5tovelo_SOURCES = h5tovelo.c h5util.c
+    h5tocap_SOURCES = h5tocap.c h5util.c h5util.h
+    h5tovelo_SOURCES = h5tovelo.c h5util.c h5util.h
     h5tovelo_LDADD = $(LIBHDF5)
 endif
 

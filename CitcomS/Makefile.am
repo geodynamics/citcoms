@@ -48,6 +48,7 @@ nobase_pkgpython_PYTHON = \
 	CoupledApp.py \
 	Coupler/__init__.py \
 	Coupler/ContainingCoupler.py \
+	Coupler/Coupler.py \
 	Coupler/EmbeddedCoupler.py \
 	Coupler/Inlet.py \
 	Coupler/Outlet.py \
