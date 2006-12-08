@@ -83,6 +83,7 @@ class CitcomSHDFFileReader(Source):
 
     # Our view.
     view = View(Group(#Item(name='current_timestep'),
+                      #Item(name='filename'), # how to disable editing?
                       Item(name='nx_redu', label='Grid Size in X'),
                       Item(name='ny_redu', label='Grid Size in Y'),
                       Item(name='nz_redu', label='Grid Size in Z'),
@@ -204,11 +205,13 @@ class CitcomSHDFFileReader(Source):
     def tno_get_label(self, node):
         """ Gets the label to display for a specified object.
         """
-        ret = "CitcomS HDF5 Data (not initialized)"
+        import os.path
+        par, file = os.path.split(self.filename)
         if self.data:
-            typ = self.data.__class__.__name__
-            ret = "CitcomS HDF5 Data (step %d)" % self.timestep
-        return ret
+            msg = "ready"
+        else:
+            msg = "not initialized"
+        return "%s (%s)" % (file, msg)
 
     ######################################################################
     # Non-public interface

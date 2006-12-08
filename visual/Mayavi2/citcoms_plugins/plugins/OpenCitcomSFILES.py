@@ -21,15 +21,15 @@ class OpenCitcomSHDFFILE(WorkbenchAction):
 
     def perform(self):
         """ Performs the action. """
-        wildcard = 'HDF files (*.h5)|*.h5|' + FileDialog.WILDCARD_ALL
+        wildcard = 'HDF5 timestep files (*.*.h5)|*.*.h5|' + FileDialog.WILDCARD_ALL
         parent = self.window.control
         dialog = FileDialog(parent=parent,
-                            title='Open CitcomS HDF5 file',
+                            title='Open CitcomS HDF5 timestep file',
                             action='open', wildcard=wildcard
                             )
         if dialog.open() == OK:
             if not isfile(dialog.path):
-                error("File '%s' does not exist!"%dialog.path, parent)
+                error("File '%s' does not exist!" % dialog.path, parent)
                 return
             from citcoms_plugins.plugins.CitcomS_hdf_file_reader import CitcomSHDFFileReader
             r = CitcomSHDFFileReader()
