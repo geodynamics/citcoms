@@ -32,6 +32,7 @@ dxmacrodir = $(visualdir)/OpenDXMacro
 abs_builddir = @abs_builddir@
 
 dist_bin_SCRIPTS = \
+	mayavi2_citcoms_display.py \
 	autocombine.py \
 	batchcombine.py \
 	batchpaste.sh \
@@ -67,7 +68,6 @@ nobase_dist_visual_DATA = \
 	Mayavi2/citcoms_plugins/plugins/filter/CitcomSSphere.py \
 	Mayavi2/citcoms_plugins/plugins/filter/CitcomsCapFilter.py \
 	Mayavi2/citcoms_plugins/plugins/filter/CitcomsReduceFilter.py \
-	Mayavi2/citcoms_plugins/Citcoms_HdfDisplay.py \
 	Mayavi2/citcoms_plugins/utils.py \
 	Mayavi2/citcoms_plugins/custom_ui.py \
 	Mayavi2/citcoms_plugins/README \
