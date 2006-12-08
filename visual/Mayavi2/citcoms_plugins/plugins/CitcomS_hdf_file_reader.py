@@ -19,7 +19,6 @@ from CitcomSHDFUgrid import CitcomSHDFUgrid
 from enthought.mayavi.core.source import Source
 from enthought.mayavi.core.common import handle_children_state
 from enthought.mayavi.sources.vtk_xml_file_reader import get_all_attributes
-from CitcomHDFThread import CitcomSHdf2UGridThread
 
 import tables
 import re
@@ -234,20 +233,9 @@ class CitcomSHDFFileReader(Source):
     def _read_data_fired(self):
         """Callback for the Button to read the data"""
         
-        
         self.data = self.citcomshdftougrid.initialize(self.filename,self.timestep,self.nx_redu,self.ny_redu,self.nz_redu)
         self.temperature = self.citcomshdftougrid.get_vtk_temperature()
         self.viscosity = self.citcomshdftougrid.get_vtk_viscosity()
-        
-        ##New Thread Code
-        #thread1 = CitcomSHdf2UGridThread()
-        #thread2 = CitcomSProgressBar()
-        
-        #thread1.set_citcomsreader(self.filename,self.current_timestep,self.nx_redu,self.ny_redu,self.nz_redu,self.thread_callback)
-        #progress = thread1.get_ref()
-        #thread1.start()
-        #thread2.set_ref(progress)
-        #thread2.start()
         
         self.data_changed = True
         self._update_data()

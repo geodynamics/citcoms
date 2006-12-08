@@ -27,8 +27,7 @@ class HdfDisplay(Mayavi):
         from enthought.tvtk.api import tvtk
         #CitcomS Filter and Modules
         from citcoms_plugins.plugins.CitcomSHDFUgrid import CitcomSHDFUgrid
-        from citcoms_plugins.plugins.filter.CitcomSshowCaps import CitcomSshowCaps
-        from citcoms_plugins.plugins.filter.CitcomSreduce import CitcomSreduce
+        from citcoms_plugins.plugins.filter.CitcomsCapFilter import CitcomsCapFilter
         
         import re
         
@@ -53,7 +52,7 @@ class HdfDisplay(Mayavi):
         script.new_scene()     
         script.add_source(data)
              
-        scap = CitcomSshowCaps()
+        scap = CitcomsCapFilter()
         script.add_filter(scap)
         
         #Show ScalarCutPlane

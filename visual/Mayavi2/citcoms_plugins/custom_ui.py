@@ -13,27 +13,18 @@ open_citcoms_hdf = Action(
 )
 
 citcoms_cap_filter = Action(
-    id          = ID + ".plugins.filter.CitcomSFilterActions.CitcomSshowCaps",
-    class_name  = ID + ".plugins.filter.CitcomSFilterActions.CitcomSshowCaps",
-    name        = "CitcomS &ShowCaps",
+    id          = ID + ".plugins.filter.CitcomSFilterActions.AddCitcomsCapFilter",
+    class_name  = ID + ".plugins.filter.CitcomSFilterActions.AddCitcomsCapFilter",
+    name        = "Citcom&S Cap Filter",
     tooltip     = "Display a specified range of caps",
     description = "Display a specified range of caps",
-    locations   = [Location(path="MenuBar/VisualizeMenu/FiltersMenu/additions"),]
-)
-
-citcoms_reduce_filter = Action(
-    id          = ID + ".plugins.filter.CitcomSFilterActions.CitcomSreduce",
-    class_name  = ID + ".plugins.filter.CitcomSFilterActions.CitcomSreduce",
-    name        = "CitcomS &Reduce",
-    tooltip     = "Display a Reduce Grid for interpolation",
-    description = "Display a Reduce Grid for interpolation",
     locations   = [Location(path="MenuBar/VisualizeMenu/FiltersMenu/additions"),]
 )
 
 action_set = WorkbenchActionSet(
     id      = ID + '.action_set',
     name    = 'CitcomsActionSet',
-    actions = [open_citcoms_hdf, citcoms_cap_filter, citcoms_reduce_filter,]
+    actions = [open_citcoms_hdf, citcoms_cap_filter]
 )
 
 ###############################################################################

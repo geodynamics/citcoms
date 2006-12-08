@@ -19,7 +19,7 @@
 # Local imports.
 from enthought.mayavi.action.common import WorkbenchAction, get_imayavi
 
-class CitcomSreduce(WorkbenchAction):
+class AddCitcomsReduceFilter(WorkbenchAction):
     """ An action that starts a delaunay 2d filter. """
 
     ###########################################################################
@@ -33,7 +33,7 @@ class CitcomSreduce(WorkbenchAction):
         mv = get_imayavi(self.window)
         mv.add_filter(f)
 
-class CitcomSshowCaps(WorkbenchAction):
+class AddCitcomsCapFilter(WorkbenchAction):
     """ An action that starts a delaunay 2d filter. """
 
     ###########################################################################
@@ -42,7 +42,7 @@ class CitcomSshowCaps(WorkbenchAction):
 
     def perform(self):
         """ Performs the action. """
-        from CitcomSshowCaps import CitcomSshowCaps
-        f = CitcomSshowCaps()
+        from CitcomsCapFilter import CitcomsCapFilter
+        f = CitcomsCapFilter()
         mv = get_imayavi(self.window)
         mv.add_filter(f)

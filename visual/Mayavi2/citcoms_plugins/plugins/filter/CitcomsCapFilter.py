@@ -26,9 +26,9 @@ from enthought.mayavi.core.filter import Filter
 
 
 ######################################################################
-# `Threshold` class.
+# `CitcomsCapFilter` class.
 ######################################################################
-class CitcomSshowCaps(Filter):
+class CitcomsCapFilter(Filter):
 
     # The version of this class.  Used for persistence.
     __version__ = 0
