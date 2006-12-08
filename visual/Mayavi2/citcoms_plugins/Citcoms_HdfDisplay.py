@@ -59,11 +59,7 @@ class HdfDisplay(Mayavi):
         scp = scalar_cut_plane.ScalarCutPlane()
         script.add_module(scp)
         
-        #Add filter for a reduce grid
-        #redu = CitcomSreduce()
-        ##redu.setvalues(nx,ny,nz)
-        #script.add_filter(redu)
-       
+        # Display glyphs on vector field
         gly = glyph.Glyph()
         gly.glyph.glyph_source.scale = 0.082
         gly.glyph.scale_mode = 'scale_by_scalar'
