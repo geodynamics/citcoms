@@ -1,3 +1,8 @@
+
+This directory contains the original visualization plugins
+written by Martin Weier.
+
+################################################################
 Citcoms_Hdf2Vtk.py is a program to convert CitcomS Hdf files
 to Vtk files. To run it please make sure that you have
 - pyvtk 0.4.66 or above
