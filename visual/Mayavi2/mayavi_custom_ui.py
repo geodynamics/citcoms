@@ -1,1 +1,1 @@
-from citcoms_display.custom_ui import requires, extensions
+from citcoms_plugins.custom_ui import requires, extensions
