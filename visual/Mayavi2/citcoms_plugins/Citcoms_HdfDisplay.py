@@ -25,10 +25,10 @@ class HdfDisplay(Mayavi):
         from enthought.mayavi.modules import surface, glyph , axes, outline, orientation_axes, scalar_cut_plane  
         from enthought.mayavi.sources.vtk_data_source import VTKDataSource 
         from enthought.tvtk.api import tvtk
-        #citcomS Filter and Modules
-        from plugins.CitcomSHDFUgrid import CitcomSHDFUgrid
-        from plugins.filter.CitcomSshowCaps import CitcomSshowCaps
-        from plugins.filter.CitcomSreduce import CitcomSreduce
+        #CitcomS Filter and Modules
+        from citcoms_plugins.plugins.CitcomSHDFUgrid import CitcomSHDFUgrid
+        from citcoms_plugins.plugins.filter.CitcomSshowCaps import CitcomSshowCaps
+        from citcoms_plugins.plugins.filter.CitcomSreduce import CitcomSreduce
         
         import re
         
@@ -42,7 +42,7 @@ class HdfDisplay(Mayavi):
         
         #Read Hdf file
         src_hdf = CitcomSHDFUgrid()
-        hexgrid = src_hdf.initialize(self.filename,self.timestep,self.nx_redu,self.ny_redu,self.nz_redu)
+        hexgrid = src_hdf.initialize(self.filename, self.timestep, self.nx_redu, self.ny_redu, self.nz_redu)
         radius_inner = src_hdf._radius_inner
         data = VTKDataSource()
         data.data = hexgrid
@@ -56,15 +56,14 @@ class HdfDisplay(Mayavi):
         scap = CitcomSshowCaps()
         script.add_filter(scap)
         
-        
         #Show ScalarCutPlane
         scp = scalar_cut_plane.ScalarCutPlane()
         script.add_module(scp)
         
         #Add filter for a reduce grid
-        redu = CitcomSreduce()
-        #redu.setvalues(nx,ny,nz)
-        script.add_filter(redu)
+        #redu = CitcomSreduce()
+        ##redu.setvalues(nx,ny,nz)
+        #script.add_filter(redu)
        
         gly = glyph.Glyph()
         gly.glyph.glyph_source.scale = 0.082
@@ -72,8 +71,9 @@ class HdfDisplay(Mayavi):
         gly.glyph.color_mode = 'color_by_scalar'
         script.add_module(gly)
         mm = gly.module_manager
-        mm.scalar_lut_manager.use_default_range = False
-        mm.scalar_lut_manager.data_range = 0.0, 1.0
+        #mm.scalar_lut_manager.use_default_range = False
+        #mm.scalar_lut_manager.data_range = 0.0, 1.0
+
         ################### Create CORE ################################
         #Load VTK Data Sets
         sphere = tvtk.SphereSource()
@@ -91,26 +91,20 @@ class HdfDisplay(Mayavi):
         surf_module.actor.property.color = orange
         script.add_module(surf_module)
         
-        
          # to create the rendering scene
          ## your stuff here
 
 if __name__ == '__main__':
     mc = HdfDisplay()
-    if len(sys.argv)>=3:
+    if len(sys.argv) > 1:
         mc.filename = sys.argv[1]
-        try:
-            mc.timestep = int(sys.argv[2])
-        except ValueError:
-            print "Timestep is not a number."
-            sys.exit(1)
         if not isfile(mc.filename):
             print "File not found."
             sys.exit(1)
-            
     else:
-        print "[filename] [timestep] -x [Reduce Grid Size X] -y [Reduce Grid Size X] -z [Reduce Grid Size Z]"
+        print "Usage: %s [filename] -x [Reduced Grid Size X] -y [Reduced Grid Size X] -z [Reduced Grid Size Z]" % sys.argv[0]
         sys.exit(0)
+
    ##parse for reduction factors 
     try:
         opts, args = getopt(sys.argv[3:], "x:y:z:", ['x=','y=','z='])

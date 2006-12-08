@@ -37,7 +37,7 @@ class CitcomSHDFUgrid:
     _nz_redu = None
     _radius_inner = None
     _radius_outer = None
-    timesteps = None
+    #timesteps = None
     frequency = None
     
     progress = 0
@@ -86,7 +86,7 @@ class CitcomSHDFUgrid:
     
     
     
-    def __citcom2vtk(self,t,f,nproc_surf,nx_redu,ny_redu,nz_redu):
+    def __citcom2vtk(self,f,ft,nproc_surf,nx_redu,ny_redu,nz_redu):
         """Method to convert one timestep from a hdf file to a Vtk file. This Method is used
         by the method initialize. Initialize reads the necessary meta information from the hdf file"""
         
@@ -111,7 +111,7 @@ class CitcomSHDFUgrid:
         for capnr in xrange(nproc_surf):
           
            
-            cap = f.root._f_getChild("cap%02d" % capnr)
+            #cap = f.root._f_getChild("cap%02d" % capnr)
     
             temp_coords =  [] # reset Coordinates, Velocity, Temperature Sequence
             temp_vel = []     
@@ -119,10 +119,16 @@ class CitcomSHDFUgrid:
             temp_visc = []
     
             #Information from hdf
-            hdf_coords = cap.coord[:]
-            hdf_velocity = cap.velocity[t]
-            hdf_temperature = cap.temperature[t]
-            hdf_viscosity = cap.viscosity[t]
+            #hdf_coords = cap.coord[:]
+            #hdf_velocity = cap.velocity[t]
+            #hdf_temperature = cap.temperature[t]
+            #hdf_viscosity = cap.viscosity[t]
+
+            hdf_coords = f.root.coord[capnr]
+            hdf_velocity = ft.root.velocity[capnr]
+            hdf_temperature = ft.root.temperature[capnr]
+            hdf_viscosity = ft.root.viscosity[capnr]
+
     
 
             #Create Iterator to change data representation
@@ -149,7 +155,6 @@ class CitcomSHDFUgrid:
       
                         ordered_temperature.append(float(hdf_temperature[i_redu,j_redu,k_redu]))
                         ordered_viscosity.append(float(hdf_viscosity[i_redu,j_redu,k_redu]))
-                
                     
                         vel_colat, vel_lon , vel_r = map(float,hdf_velocity[i_redu,j_redu,k_redu])
                         x_velo, y_velo, z_velo = self.velocity2cart(vel_colat,vel_lon,vel_r, colat,lon , r)
@@ -214,12 +219,26 @@ class CitcomSHDFUgrid:
     def initialize(self,filename,timestep,nx_redu,ny_redu,nz_redu):
         """Call this method to convert a Citcoms Hdf file to a Vtk file"""
         
+        from citcoms_plugins.utils import parsemodel
+        (step, modelname, metafile, fullpath) = parsemodel(filename)
+
+        if not fullpath:
+            # try to load step=0
+            import os.path
+            step = 0
+            pardir, mfilename = os.path.split(metafile)
+            fullpath = os.path.join(pardir, "%s.%d.h5" % (modelname, step))
+
+        
         #Read meta-inforamtion
-        hdf=tables.openFile(filename,'r')
+        hdf = tables.openFile(metafile, 'r')
+        hdf_t = tables.openFile(fullpath, 'r')
+
         self._nx = int(hdf.root.input._v_attrs.nodex)
         self._ny = int(hdf.root.input._v_attrs.nodey)
         self._nz = int(hdf.root.input._v_attrs.nodez)
         
+
         #Clip against boundaries
         if nx_redu>=0 or nx_redu>=self._nx:
             nx_redu = self._nx-1
@@ -234,13 +253,14 @@ class CitcomSHDFUgrid:
         self._nz_redu = nz_redu
         
         #Number of Timesteps in scene   
-        self.timesteps = int(hdf.root.time.nrows)
+        #self.timesteps = int(hdf.root.time.nrows)
+
         #Number of caps
         nproc_surf = int(hdf.root.input._v_attrs.nproc_surf)
         #Store the Inner Radius. Import if we want to create a core
         self._radius_inner = self._radius_inner = float(hdf.root.input._v_attrs.radius_inner)
         #start computation
-        hexgrid = self.__citcom2vtk(timestep,hdf,nproc_surf,nx_redu,ny_redu,nz_redu)
+        hexgrid = self.__citcom2vtk(hdf, hdf_t, nproc_surf,nx_redu,ny_redu,nz_redu)
         
         hdf.close()
         self.progress = -1

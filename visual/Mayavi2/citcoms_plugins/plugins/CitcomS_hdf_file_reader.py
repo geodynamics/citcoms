@@ -11,21 +11,22 @@ from enthought.traits.ui.menu import OKButton
 from enthought.persistence.state_pickler \
      import gzip_string, gunzip_string, set_state
 from enthought.tvtk.api import tvtk
-from enthought.mayavi.plugins.CitcomSHDFUgrid import CitcomSHDFUgrid
-from CitcomHDFThread import *
+
+from citcoms_plugins.utils import parsemodel
+from CitcomSHDFUgrid import CitcomSHDFUgrid
 
 # Local imports.
 from enthought.mayavi.core.source import Source
 from enthought.mayavi.core.common import handle_children_state
 from enthought.mayavi.sources.vtk_xml_file_reader import get_all_attributes
-from CitcomHDFThread import *
+from CitcomHDFThread import CitcomSHdf2UGridThread
 
 import tables
 import re
 
 
 ######################################################################
-# `CitcomSVTKDataSource` class
+# `CitcomSHDFFileReader` class
 ######################################################################
 class CitcomSHDFFileReader(Source):
 
@@ -38,7 +39,9 @@ class CitcomSHDFFileReader(Source):
     data = Instance(tvtk.DataSet)
     # Class to convert Hdf to Vtk Unstructured Grid Objects
     citcomshdftougrid = CitcomSHDFUgrid()
-    current_timestep = Int(0)
+
+    timestep = Int(0)
+
     #To support changing the Scalar values in Mayavi2
     temperature = Instance(tvtk.FloatArray())
     viscosity = Instance(tvtk.FloatArray())
@@ -54,10 +57,10 @@ class CitcomSHDFFileReader(Source):
     nz_redu = Int()
     
     #Number of timesteps in Hdf
-    timesteps = Int()
+    #timesteps = Int()
     
     #Button to trigger the process of reading a timestep
-    read_timestep = Button('Read timestep')
+    read_data = Button('Read data')
     filename = Str()
     
     ########################################
@@ -80,21 +83,19 @@ class CitcomSHDFFileReader(Source):
     ########################################
 
     # Our view.
-    view = View(Group(Item(name='current_timestep'),
-                      Item(name='nx_redu'),
-                      Item(name='ny_redu'),
-                      Item(name='nz_redu'),
-                      Item(name='read_timestep', style='simple', label='Simple'),
+    view = View(Group(#Item(name='current_timestep'),
+                      Item(name='nx_redu', label='Grid Size in X'),
+                      Item(name='ny_redu', label='Grid Size in Y'),
+                      Item(name='nz_redu', label='Grid Size in Z'),
+                      Item(name='read_data', style='simple', label='Simple'),
                       Item(name='point_scalars_name'),
                       Item(name='point_vectors_name'),
                       Item(name='point_tensors_name'),
-                      Item(name='cell_scalars_name'),
-                      Item(name='cell_vectors_name'),
-                      Item(name='cell_tensors_name'),
-                      
-                      ),
-                      
-                     )
+                      #Item(name='cell_scalars_name'),
+                      #Item(name='cell_vectors_name'),
+                      #Item(name='cell_tensors_name'),
+                     ),
+               )
     
     ######################################################################
     # `object` interface
@@ -125,7 +126,10 @@ class CitcomSHDFFileReader(Source):
                 msg = 'Could not find file at %s\n'%file_name
                 msg += 'Please move the file there and try again.'
                 raise IOError, msg
-        
+            
+            (step, modelname, metafilepath, filepath) = parsemodel(file_name)
+            file_name = metafilepath
+            
             self.filename = file_name
         
             #self.data = self.citcomshdftougrid.initialize(self.filename,0,0,0,0,False,False)
@@ -134,7 +138,8 @@ class CitcomSHDFFileReader(Source):
             self.ny = int(f.root.input._v_attrs.nodey)
             self.nz = int(f.root.input._v_attrs.nodez)
         
-            self.timesteps = int(f.root.time.nrows)
+            #self.timesteps = int(f.root.time.nrows)
+
             f.close()
             self.data = self.citcomshdftougrid.initialize(self.filename,self.current_timestep,self.nx_redu,self.ny_redu,self.nz_redu)
             self.data_changed = True
@@ -174,7 +179,13 @@ class CitcomSHDFFileReader(Source):
         self.filename = file_name
         
         #self.data = self.citcomshdftougrid.initialize(self.filename,0,0,0,0,False,False)
-        f = tables.openFile(file_name,'r')
+        from citcoms_plugins.utils import parsemodel
+
+        (step, modelname, coordpath, filepath) = parsemodel(file_name)
+        if step is None:
+            step = 0
+
+        f = tables.openFile(coordpath,'r')
         self.nx = int(f.root.input._v_attrs.nodex)
         self.ny = int(f.root.input._v_attrs.nodey)
         self.nz = int(f.root.input._v_attrs.nodez)
@@ -183,7 +194,8 @@ class CitcomSHDFFileReader(Source):
         self.ny_redu = self.ny
         self.nz_redu = self.nz
         
-        self.timesteps = int(f.root.time.nrows)
+        self.timestep = step
+        #self.timesteps = int(f.root.time.nrows)
         f.close()
         
         
@@ -193,10 +205,10 @@ class CitcomSHDFFileReader(Source):
     def tno_get_label(self, node):
         """ Gets the label to display for a specified object.
         """
-        ret = "CitcomS HDF Data (uninitialized)"
+        ret = "CitcomS HDF5 Data (not initialized)"
         if self.data:
             typ = self.data.__class__.__name__
-            ret = "CitcomS HDF Data (%d)"%self.current_timestep
+            ret = "CitcomS HDF5 Data (step %d)" % self.timestep
         return ret
 
     ######################################################################
@@ -216,14 +228,14 @@ class CitcomSHDFFileReader(Source):
         """Callback for the current timestep input box"""
         if new_value < 0:
             self.current_timestep = 0
-        if new_value > self.timesteps:
-            self.current_timestep = self.timesteps-1
+        #if new_value > self.timesteps:
+        #    self.current_timestep = self.timesteps-1
     
-    def _read_timestep_fired(self):
-        """Callback for the Button to read one timestep"""
+    def _read_data_fired(self):
+        """Callback for the Button to read the data"""
         
         
-        self.data = self.citcomshdftougrid.initialize(self.filename,self.current_timestep,self.nx_redu,self.ny_redu,self.nz_redu)
+        self.data = self.citcomshdftougrid.initialize(self.filename,self.timestep,self.nx_redu,self.ny_redu,self.nz_redu)
         self.temperature = self.citcomshdftougrid.get_vtk_temperature()
         self.viscosity = self.citcomshdftougrid.get_vtk_viscosity()
         
