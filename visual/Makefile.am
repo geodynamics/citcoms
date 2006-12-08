@@ -56,6 +56,23 @@ dist_bin_SCRIPTS = \
 	zslice.py
 
 nobase_dist_visual_DATA = \
+	Mayavi2/citcoms_plugins/__init__.py \
+	Mayavi2/citcoms_plugins/plugins/__init__.py \
+	Mayavi2/citcoms_plugins/plugins/CitcomS_hdf_file_reader.py \
+	Mayavi2/citcoms_plugins/plugins/CitcomSHDFUgrid.py \
+	Mayavi2/citcoms_plugins/plugins/OpenCitcomSFILES.py \
+	Mayavi2/citcoms_plugins/plugins/filter/CitcomSFilterActions.py \
+	Mayavi2/citcoms_plugins/plugins/filter/__init__.py \
+	Mayavi2/citcoms_plugins/plugins/filter/CitcomSshowSurface.py \
+	Mayavi2/citcoms_plugins/plugins/filter/CitcomSSphere.py \
+	Mayavi2/citcoms_plugins/plugins/filter/CitcomsCapFilter.py \
+	Mayavi2/citcoms_plugins/plugins/filter/CitcomsReduceFilter.py \
+	Mayavi2/citcoms_plugins/Citcoms_HdfDisplay.py \
+	Mayavi2/citcoms_plugins/utils.py \
+	Mayavi2/citcoms_plugins/custom_ui.py \
+	Mayavi2/citcoms_plugins/README \
+	Mayavi2/README \
+	Mayavi2/mayavi_custom_ui.py \
 	samples/cookbook1.h5 \
 	samples/cookbook1.100.h5 \
 	samples/fulltest.cap00.100 \
