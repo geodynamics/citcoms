@@ -45,7 +45,7 @@ rank=0
 while [ x"$4" != "x" ]
 do
     cmd_paste="$paste_exe $datadir $datafile $rank $timestep $cwd"
-    if [ $4 = $HOSTNAME -o  $4 = "localhost" ]; then
+    if [ x"$4" = x"$HOSTNAME" -o  $4 = "localhost" ]; then
 	$cmd_paste
     else
         rsh $4 "$cmd_paste"
