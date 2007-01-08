@@ -166,6 +166,10 @@ os.system(command)
 botlayer = 0
 toplayer = nodez - 1
 
+## min/max values to truncate temperature field
+tmin = 0
+tmax = 1
+
 bounds = '0/360/-90/90'
 xsectfile = '%s.xsect.%d.xyz' % (modelname, step)
 out = open(xsectfile,'w')
@@ -183,7 +187,8 @@ for layer in range(botlayer, toplayer+1):
     if not os.path.isfile(grdfile):
         command = '''
 cut -d' ' -f1,2,6 %(all_zfiles)s | \
-    surface -I%(az_resolution)s -G%(grdfile)s -R%(bounds)s -N1
+    surface -I%(az_resolution)s -G%(grdfile)s -R%(bounds)s -N1 \
+            -Ll%(tmin)d -Lu%(tmax)d
 ''' % vars()
         os.system(command)
 
@@ -239,7 +244,8 @@ resolution = '%f/%f' % (az_resolution, r_resolution)
 yshift = mapwidth * 1.2
 
 command = '''
-surface %(xsectfile)s -G%(grdfile2)s -I%(resolution)s -R%(bounds2)s
+surface %(xsectfile)s -G%(grdfile2)s -I%(resolution)s -R%(bounds2)s \
+        -Ll%(tmin)d -Lu%(tmax)d
 
 grdimage %(grdfile2)s -C%(cptfile)s -JP%(mapwidth)fa -B30ns -R%(bounds2)s -X0.2 -Y-%(yshift)f -P -O >> %(psfile)s
 

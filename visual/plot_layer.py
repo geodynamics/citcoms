@@ -144,9 +144,15 @@ psfile = '%s.%d.z%03d.ps' % (modelname, step, layer)
 ## 7. plot the colorbar
 ## 8. remove the grdfile and cptfile
 #######################################################################
+
+## min/max values to truncate temperature field
+tmin = 0
+tmax = 1
+
 command = '''
 cut -d' ' -f1,2,6 %(all_zfiles)s | \
-    surface -I%(resolution)s -G%(grdfile)s -R%(bounds)s
+    surface -I%(resolution)s -G%(grdfile)s -R%(bounds)s \
+            -Ll%(tmin)d -Lu%(tmax)d
 
 makecpt -Cpolar -T0/1/.1 > %(cptfile)s
 
