@@ -230,7 +230,7 @@ void set_starting_age(E)
       age_in_MY = E->control.start_age + E->monitor.elapsed_time*E->data.scalet;
    }
 
-      if (((age_in_MY+e_4) < 0.0) && (E->monitor.solution_cycles <= 1)) {
+      if (((age_in_MY+e_4) < 0.0) && (E->monitor.solution_cycles < 1)) {
         if (E->parallel.me == 0) fprintf(stderr,"Age = %g Ma, Initial age should not be negative!\n",age_in_MY);
 	exit(11);
       }
