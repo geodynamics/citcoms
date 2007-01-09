@@ -364,6 +364,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
+  input_float("dissipation",&(E->control.Di),"0.0",m);
+  input_float("gruneisen",&(E->control.gruneisen),"0.0",m);
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);

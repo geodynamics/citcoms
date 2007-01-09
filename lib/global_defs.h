@@ -468,6 +468,7 @@ struct CONTROL {
     int post_p;
     int post_topo;
     int SLAB;
+    int compressible;
 
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
@@ -515,6 +516,9 @@ struct CONTROL {
     float sob_tolerance;
 
     float Atemp;
+    float Di;
+    float gruneisen;
+
     float inputdiff;
     float VBXtopval;
     float VBXbotval;

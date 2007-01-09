@@ -191,6 +191,7 @@ void compute_nodal_stress(struct All_variables *E,
   int i,j,e,node,m;
 
   float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
+  double dilation[9];
   double pre[9],tww[9],rtf[4][9];
   double velo_scaling, stress_scaling;
 
@@ -220,6 +221,7 @@ void compute_nodal_stress(struct All_variables *E,
 
       for(j=1;j<=vpts;j++)  {
         pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
+        dilation[j] = 0.0;
         Vxyz[1][j] = 0.0;
         Vxyz[2][j] = 0.0;
         Vxyz[3][j] = 0.0;
@@ -262,14 +264,22 @@ void compute_nodal_stress(struct All_variables *E,
               + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
               - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
         }
-        Sxx += 2.0 * pre[j] * Vxyz[1][j];
-        Syy += 2.0 * pre[j] * Vxyz[2][j];
-        Szz += 2.0 * pre[j] * Vxyz[3][j];
-        Sxy += pre[j] * Vxyz[4][j];
-        Sxz += pre[j] * Vxyz[5][j];
-        Szy += pre[j] * Vxyz[6][j];
-        div += Vxyz[7][j]*dOmega.vpt[j];
-        vor += Vxyz[8][j]*dOmega.vpt[j];
+      }
+
+      if(E->control.gruneisen > 0) {
+          for(j=1;j<=vpts;j++)
+              dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) * 2.0 / 3.0;
+      }
+
+      for(j=1;j<=vpts;j++)   {
+          Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]);
+          Syy += 2.0 * pre[j] * (Vxyz[2][j] - dilation[j]);
+          Szz += 2.0 * pre[j] * (Vxyz[3][j] - dilation[j]);
+          Sxy += pre[j] * Vxyz[4][j];
+          Sxz += pre[j] * Vxyz[5][j];
+          Szy += pre[j] * Vxyz[6][j];
+          div += Vxyz[7][j]*dOmega.vpt[j];
+          vor += Vxyz[8][j]*dOmega.vpt[j];
       }
 
       Sxx /= E->eco[m][e].area;
@@ -676,8 +686,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 /*          eu [m*dims+2] = VV[3][m+1]; */
 /*          } */
 
-/*       get_elt_k(E,el,eltk,lev,j); */
-/*       get_elt_k(E,elb,eltkb,lev,j); */
+/*       get_elt_k(E,el,eltk,lev,j,1); */
+/*       get_elt_k(E,elb,eltkb,lev,j,1); */
 /*       get_elt_f(E,el,eltf,0,j); */
 /*       get_elt_f(E,elb,eltfb,0,j); */
 /*       get_elt_g(E,el,eltg,lev,j); */

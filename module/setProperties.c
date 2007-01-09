@@ -450,6 +450,8 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     getStringProperty(properties, "datafile_old", E->control.data_prefix_old, fp);
 
     getFloatProperty(properties, "rayleigh", E->control.Atemp, fp);
+    getFloatProperty(properties, "dissipation", E->control.Di, fp);
+    getFloatProperty(properties, "gruneisen", E->control.gruneisen, fp);
     getFloatProperty(properties, "Q0", E->control.Q0, fp);
 
     getIntProperty(properties, "stokes_flow_only", E->control.stokes, fp);

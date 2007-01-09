@@ -103,7 +103,7 @@ class Solver(Component):
             stream = open("pid%d.cfg" % pid, "w")
         else:
             stream = None
-        
+
         self.setProperties(stream)
 
         self.restart = self.inventory.ic.inventory.restart
@@ -282,6 +282,8 @@ class Solver(Component):
         datadir_old = inv.str("datadir_old", default="")
 
         rayleigh = inv.float("rayleigh", default=1e+05)
+        dissipation = inv.float("dissipation", default=0.0)
+        gruneisen = inv.float("gruneisen", default=0.0)
         Q0 = inv.float("Q0", default=0.0)
 
         stokes_flow_only = inv.bool("stokes_flow_only", default=False)

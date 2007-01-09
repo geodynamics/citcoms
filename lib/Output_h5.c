@@ -1458,6 +1458,8 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_string(input, "datafile_old", E->control.old_P_file);
 
     status = set_attribute_float(input, "rayleigh", E->control.Atemp);
+    status = set_attribute_float(input, "dissipation", E->control.Di);
+    status = set_attribute_float(input, "gruneisen", E->control.gruneisen);
     status = set_attribute_float(input, "Q0", E->control.Q0);
 
     status = set_attribute_int(input, "stokes_flow_only", E->control.stokes);
