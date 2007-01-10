@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
@@ -129,10 +129,8 @@ void apply_side_sbc(struct All_variables *E)
 void thermal_buoyancy(struct All_variables *E, double **buoy)
 {
     int i,m;
-    double temp,*H;
-    void remove_horiz_ave();
-
-    H = (double *)malloc( (E->lmesh.noz+1)*sizeof(double));
+    double temp;
+    void remove_horiz_ave2(struct All_variables*, double**);
 
     temp = E->control.Atemp;
 
@@ -144,9 +142,7 @@ void thermal_buoyancy(struct All_variables *E, double **buoy)
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
 
-    remove_horiz_ave(E,buoy,H,0);
-    free ((void *) H);
-
+    remove_horiz_ave2(E, buoy);
     return;
 }
 

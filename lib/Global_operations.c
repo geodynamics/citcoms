@@ -64,7 +64,17 @@ void remove_horiz_ave(E,X,H,store_or_not)
 	}
 
    return;
-  }
+}
+
+
+void remove_horiz_ave2(struct All_variables *E, double **X)
+{
+    double *H;
+
+    H = (double *)malloc( (E->lmesh.noz+1)*sizeof(double));
+    remove_horiz_ave(E, X, H, 0);
+    free ((void *) H);
+}
 
 
 void return_horiz_ave(E,X,H)
