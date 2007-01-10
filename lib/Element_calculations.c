@@ -32,6 +32,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "material_properties.h"
 
 
 
@@ -77,6 +78,7 @@ void assemble_forces(E,penalty)
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
+  density(E, E->rho);
   thermal_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {

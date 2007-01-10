@@ -43,6 +43,7 @@
 #include "citcom_init.h"
 #include "initial_temperature.h"
 #include "lith_age.h"
+#include "material_properties.h"
 #include "output.h"
 #include "output_h5.h"
 #include "parallel_related.h"
@@ -467,6 +468,10 @@ void allocate_common_vars(E)
 
   }         /* end for cap j  */
 
+  /* density field */
+  E->rho      = (double *) malloc((nno+1)*sizeof(double));
+
+  /* horizontal average */
   E->Have.T         = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[1]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[2]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
@@ -585,6 +590,7 @@ void allocate_common_vars(E)
   for(i=1;i<=E->lmesh.npno;i++)
       E->P[j][i] = 0.0;
 
+  mat_prop_allocate(E);
   phase_change_allocate(E);
   set_up_nonmg_aliases(E,j);
 

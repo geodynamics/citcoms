@@ -725,6 +725,7 @@ struct All_variables {
     double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
 
     double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
+    double *rho, *rhoref, *thermexp;
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];
