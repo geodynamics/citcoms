@@ -266,7 +266,7 @@ void compute_nodal_stress(struct All_variables *E,
         }
       }
 
-      if(E->control.gruneisen > 0) {
+      if(E->control.inv_gruneisen > 0) {
           for(j=1;j<=vpts;j++)
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) * 2.0 / 3.0;
       }

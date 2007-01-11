@@ -32,6 +32,7 @@
 
 #include "global_defs.h"
 #include "parallel_related.h"
+#include "material_properties.h"
 
 
 void allocate_common_vars(struct All_variables*);
@@ -116,6 +117,7 @@ void sphere_launch(struct All_variables *E)
     construct_sub_element(E);
     construct_shape_functions(E);
 
+    reference_state(E);
     mass_matrix(E);
 
     construct_surf_det (E);

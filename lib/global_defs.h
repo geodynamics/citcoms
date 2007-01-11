@@ -515,9 +515,12 @@ struct CONTROL {
 
     float sob_tolerance;
 
+    /* Rayleigh # */
     float Atemp;
+    /* Dissipation # */
     float Di;
-    float gruneisen;
+    /* inverse of Gruneisen parameter */
+    float inv_gruneisen;
 
     float inputdiff;
     float VBXtopval;
@@ -724,8 +727,10 @@ struct All_variables {
 
     double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
 
+    double *rho;
+    double *rho_ref, *thermexp_ref, *T_ref;
+
     double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
-    double *rho, *rhoref, *thermexp;
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];

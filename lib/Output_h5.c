@@ -1310,6 +1310,7 @@ void h5output_meta(struct All_variables *E)
     int rank;
     hsize_t *dims;
     double *data;
+    float tmp;
 
     input = h5create_group(E->hdf5.file_id, "input", (size_t)0);
 
@@ -1459,7 +1460,12 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute_float(input, "rayleigh", E->control.Atemp);
     status = set_attribute_float(input, "dissipation", E->control.Di);
-    status = set_attribute_float(input, "gruneisen", E->control.gruneisen);
+    status = set_attribute_float(input, "gruneisen",
+				 ((abs(E->control.inv_gruneisen) > 1e-6)?
+				  1/E->control.inv_gruneisen :
+				  E->control.inv_gruneisen
+				  )
+				 );
     status = set_attribute_float(input, "Q0", E->control.Q0);
 
     status = set_attribute_int(input, "stokes_flow_only", E->control.stokes);

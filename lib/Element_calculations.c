@@ -78,8 +78,9 @@ void assemble_forces(E,penalty)
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  density(E, E->rho);
   thermal_buoyancy(E,E->buoyancy);
+  //chemical_buoyancy(E,E->buoyancy);
+  //buoyancy_to_density(E, E->buoyancy, E->rho);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
@@ -291,7 +292,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
       bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-    if(E->control.gruneisen > 0)
+    if(E->control.inv_gruneisen > 0)
       for(i=1;i<=dims;i++)
         for(j=1;j<=dims;j++)
           for(i1=1;i1<=6;i1++)

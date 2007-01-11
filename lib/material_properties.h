@@ -28,5 +28,8 @@
 
 
 void mat_prop_allocate(struct All_variables *E);
+void reference_state(struct All_variables *E);
+
+
 void density(struct All_variables *E, double *rho);
 

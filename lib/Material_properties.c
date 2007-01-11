@@ -30,6 +30,8 @@
 #include "config.h"
 #endif
 
+#include <math.h>
+
 #include "global_defs.h"
 #include "material_properties.h"
 
@@ -39,13 +41,39 @@ void mat_prop_allocate(struct All_variables *E)
     int noz = E->lmesh.noz;
     int nno = E->lmesh.nno;
 
-    /* reference density profile */
-    E->rhoref   = (double *) malloc((noz+1)*sizeof(double));
+    /* reference profile of density */
+    E->rho_ref = (double *) malloc((noz+1)*sizeof(double));
 
-    /* coefficient of thermal expansion */
-    E->thermexp = (double *) malloc((noz+1)*sizeof(double));
+    /* reference profile of coefficient of thermal expansion */
+    E->thermexp_ref = (double *) malloc((noz+1)*sizeof(double));
+
+    /* reference profile of temperature */
+    E->T_ref = (double *) malloc((noz+1)*sizeof(double));
+}
 
 
+void reference_state(struct All_variables *E)
+{
+    int noz = E->lmesh.noz;
+    int i;
+    double r, z, tmp, T0;
+
+    tmp = E->control.Di * E->control.inv_gruneisen;
+    T0 = E->data.surf_temp / E->data.ref_temperature;
+
+    for(i=1; i<=noz; i++) {
+	r = E->sx[1][3][i];
+	z = 1 - r;
+	E->rho_ref[i] = exp(tmp*z);
+	E->thermexp_ref[i] = 1;
+	E->T_ref[i] = T0 * (exp(E->control.Di * z) - 1);
+    }
+
+    for(i=1; i<=noz; i++) {
+	fprintf(stderr, "%d %f %f %f %f\n",
+		i, E->sx[1][3][i], 1-E->sx[1][3][i],
+		E->rho_ref[i], E->thermexp_ref[i]);
+    }
 }
 
 
@@ -57,14 +85,3 @@ void density(struct All_variables *E, double *rho)
     }
 
 }
-
-
-void thermal_expansion(struct All_variables *E, double *thermexp)
-{
-    int i;
-    for(i=1; i<=E->lmesh.noz; i++) {
-	thermexp[i] = 1;
-    }
-}
-
-
