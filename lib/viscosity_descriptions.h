@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,18 +22,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* in this file define the contents of the VISC_OPT data structure
-   which is used to store information used to create predefined 
+   which is used to store information used to create predefined
    viscosity fields, those determined from prior input, those
    related to temperature/pressure/stress/anything else. */
 
 
 struct VISC_OPT {
     void (* update_viscosity)();
-  
+
     int update_allowed;		/* determines whether visc field can evolve */
     int EQUIVDD;			/* Whatever the structure, average in the end */
     int equivddopt;
@@ -41,13 +41,13 @@ struct VISC_OPT {
     int proflocy;
     int SMOOTH;
     int smooth_cycles;
-  
+
 
     char STRUCTURE[20];		/* which option to determine viscosity field, one of .... */
     int FROM_SYSTEM;
     int FROM_FILE;
     int FROM_SPECS;
-  
+
 				/* System ... */
     int RHEOL;			/* 1,2 */
     int rheol_layers;
@@ -65,6 +65,14 @@ struct VISC_OPT {
     int FREEZE;
     float freeze_thresh;
     float freeze_value;
+
+    int channel;
+    int wedge;
+
+    float lv_min_radius;
+    float lv_max_radius;
+    float lv_channel_thickness;
+    float lv_reduction;
 
     int MAX;
     float max_value;
@@ -89,7 +97,7 @@ struct VISC_OPT {
     float weak_blobz[40];
     float weak_blobwidth[40];
     float weak_blobmag[40];
-   
+
     int weak_zones;
     float weak_zonex1[40];
     float weak_zoney1[40];
@@ -97,14 +105,14 @@ struct VISC_OPT {
     float weak_zonex2[40];
     float weak_zoney2[40];
     float weak_zonez2[40];
-  
+
     float weak_zonewidth[40];
     float weak_zonemag[40];
-  
+
     int guess;
     char old_file[100];
 				/* Specification info */
-  
+
 				/* Prespecified viscosity parameters */
     char VISC_OPT[20];
 
@@ -121,10 +129,10 @@ struct VISC_OPT {
     float cosx_epsilon;
     float cosx_k;
     int cosx_exp;
- 
+
     int EXPX;
     float expx_epsilon;
- 
+
     /* MODULE BASED VISCOSITY VARIATIONS */
 
     int RESDEPV;
@@ -133,5 +141,5 @@ struct VISC_OPT {
     int CHEMDEPV;
     float CH0[40];
     float CHEMeta0[40];
-  
+
 } viscosity;
