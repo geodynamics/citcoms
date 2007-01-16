@@ -265,6 +265,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
                                num_perturb, fp);
     }
     else if (E->convection.tic_method == 1) {
+        getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
     }
     else if (E->convection.tic_method == 2) {
         getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
