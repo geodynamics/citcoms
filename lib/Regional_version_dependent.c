@@ -387,6 +387,16 @@ void regional_construct_tic_from_input(struct All_variables *E)
 
   }
   else if (E->convection.tic_method == 1) {
+      /* set up a top thermal boundary layer */
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+          for(i=1;i<=noy;i++)
+              for(j=1;j<=nox;j++)
+                  for(k=1;k<=noz;k++) {
+                      node=k+(j-1)*noz+(i-1)*nox*noz;
+                      r1=E->sx[m][3][node];
+                      temp = 0.2*(E->sphere.ro-r1) * 0.5/sqrt(E->convection.half_space_age/E->data.scalet);
+                      E->T[m][node] = E->control.TBCbotval*erf(temp);
+                  }
 
   }
   else if (E->convection.tic_method == 2) {
