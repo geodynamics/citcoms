@@ -52,7 +52,7 @@ Modified by Lijie in 1998 and by Vlad and Eh in 2005 for CitcomS
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void mean_elem_coord(struct All_variables *E);
+static void mean_elem_coord(struct All_variables *E);
 
 void regional_tracer_setup(struct All_variables *E)
 {
@@ -206,7 +206,7 @@ void regional_tracer_setup(struct All_variables *E)
         }
     }   /* end of m  */
 
-mean_elem_coord(E);
+    mean_elem_coord(E);
 
     return;
 
