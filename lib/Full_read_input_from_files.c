@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -166,8 +166,8 @@ void full_read_input_files_for_timesteps(E,action,output)
 		E->sphere.cap[m].VB[3][nodel] = 0.0;
 	      }
 	      else { /* negative ages - don't do the interpolation */
-		E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg];
-		E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg];
+		E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg] * E->data.scalev;
+		E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg] * E->data.scalev;
 		E->sphere.cap[m].VB[3][nodel] = 0.0;
 	      }
 	    }
