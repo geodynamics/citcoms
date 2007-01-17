@@ -251,7 +251,7 @@ void read_initial_settings(struct All_variables *E)
     set_mg_defaults(E);}
   else
     { if (E->parallel.me==0) fprintf(stderr,"Unable to determine how to solve, specify Solver=VALID_OPTION \n");
-    exit(0);
+    parallel_process_termination();
     }
 
 
