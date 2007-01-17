@@ -667,7 +667,11 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                     FI_LOCAL_ELEM_T = E->Tracer.FI_LOC_ELEM_T[n];
                     R_LOCAL_ELEM_T = E->Tracer.R_LOC_ELEM_T[n];
 
-                    if((R_LOCAL_ELEM >= R_LOCAL_ELEM_T) && (R_LOCAL_ELEM <= R_LOCAL_ELEM_T+E->viscosity.lv_channel_thickness)) {
+                    if((R_LOCAL_ELEM >= R_LOCAL_ELEM_T) &&
+                       (R_LOCAL_ELEM <= R_LOCAL_ELEM_T+E->viscosity.lv_channel_thickness) &&
+                       (FI_LOCAL_ELEM == FI_LOCAL_ELEM_T) &&
+                       (THETA_LOCAL_ELEM == THETA_LOCAL_ELEM_T)) {
+
                         F[i] = E->viscosity.lv_reduction;
 
                     }
@@ -700,7 +704,9 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                     R_LOCAL_ELEM_T = E->Tracer.R_LOC_ELEM_T[n];
 
 
-                    if(R_LOCAL_ELEM >= R_LOCAL_ELEM_T) {
+                    if((R_LOCAL_ELEM >= R_LOCAL_ELEM_T) &&
+                       (FI_LOCAL_ELEM == FI_LOCAL_ELEM_T) &&
+                       (THETA_LOCAL_ELEM == THETA_LOCAL_ELEM_T)) {
 
                         F[i] = E->viscosity.lv_reduction;
                     }
