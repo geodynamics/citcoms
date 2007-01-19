@@ -106,8 +106,8 @@ sources = \
 	Sphere_util.c \
 	Stokes_flow_Incomp.c \
 	Topo_gravity.c \
-	Tracer_advection.c \
 	tracer_defs.h \
+	Tracer_setup.c \
 	viscosity_descriptions.h \
 	Viscosity_structures.c \
 	Full_boundary_conditions.c \
@@ -125,6 +125,7 @@ sources = \
 	Regional_read_input_from_files.c \
 	Regional_solver.c \
 	Regional_sphere_related.c \
+	Regional_tracer_advection.c \
 	Regional_version_dependent.c
 
 EXTRA_DIST = \

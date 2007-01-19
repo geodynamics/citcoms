@@ -25,24 +25,43 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct Tracer {
+/*
 
-float *tracer_x;
-float *tracer_y;
-float *tracer_z;
-float *itcolor;
-float *x_space, *z_space, *y_space;
-int NUM_TRACERS;
-int LOCAL_NUM_TRACERS;
+  Tracer_setup.c
 
-int *LOCAL_ELEMENT;
+      A program which initiates the distribution of tracers
+      and advects those tracers in a time evolving velocity field.
+      Called and used from the CitCOM finite element code.
+      Written 2/96 M. Gurnis for Citcom in cartesian geometry
+      Modified by Lijie in 1998 and by Vlad and Eh in 2005 for CitcomS
 
-float *THETA_LOC_ELEM;
-float *FI_LOC_ELEM;
-float *R_LOC_ELEM;
+*/
 
-float *THETA_LOC_ELEM_T;
-float *FI_LOC_ELEM_T;
-float *R_LOC_ELEM_T;
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-} r;
+#include "global_defs.h"
+#include "parsing.h"
+
+
+void tracer_input(struct All_variables *E)
+{
+  int m=E->parallel.me;
+
+  input_int("tracer",&(E->control.tracer),"0",m);
+  input_string("tracer_file",E->control.tracer_file,"tracer.dat",m);
+}
+
+
+void tracer_initial_settings(E)
+     struct All_variables *E;
+{
+   void regional_tracer_setup();
+   void regional_tracer_advection();
+
+   if(E->parallel.nprocxy == 1) {
+       E->problem_tracer_setup = regional_tracer_setup;
+       E->problem_tracer_advection = regional_tracer_advection;
+   }
+}

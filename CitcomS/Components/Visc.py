@@ -84,6 +84,14 @@ class Visc(CitcomComponent):
         sdepv_expt = pyre.inventory.list("sdepv_expt", default=[1, 1, 1, 1])
         sdepv_misfit = pyre.inventory.float("sdepv_misfit", default=0.02)
 
+        low_visc_channel = pyre.inventory.bool("low_visc_channel", default=False)
+        low_visc_wedge = pyre.inventory.bool("low_visc_wedge", default=False)
+
+        lv_min_radius = pyre.inventory.float("lv_min_radius", default=0.9764)
+        lv_max_radius = pyre.inventory.float("lv_max_radius", default=0.9921)
+        lv_channel_thickness = pyre.inventory.float("lv_channel_thickness", default=0.0047)
+        lv_reduction = pyre.inventory.float("lv_reduction", default=0.5)
+
         VMIN = pyre.inventory.bool("VMIN", default=False)
         visc_min = pyre.inventory.float("visc_min", default=1.0e-3)
 

@@ -184,7 +184,7 @@ void * Malloc1(bytes,file,line)
     ptr = malloc((size_t)bytes);
     if (ptr == (void *)NULL) {
 	fprintf(stderr,"Memory: cannot allocate another %d bytes \n(line %d of file %s)\n",bytes,line,file);
-	exit(0);
+	parallel_process_termination();
     }
 
     return(ptr);
@@ -246,7 +246,7 @@ int read_previous_field(E,field,name,abbr)
 	fprintf(E->fp,"Unable to open the required file `%s' (this is fatal)",filename);
 	fflush(E->fp);
 
-	exit(1);
+	parallel_process_termination();
     }
 
 

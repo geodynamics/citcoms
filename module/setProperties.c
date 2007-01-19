@@ -265,6 +265,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
                                num_perturb, fp);
     }
     else if (E->convection.tic_method == 1) {
+        getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
     }
     else if (E->convection.tic_method == 2) {
         getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
@@ -693,6 +694,14 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "sdepv_misfit", E->viscosity.sdepv_misfit, fp);
     getFloatVectorProperty(properties, "sdepv_expt",
                            E->viscosity.sdepv_expt, num_mat, fp);
+
+    getIntProperty(properties, "low_visc_channel", E->viscosity.channel, fp);
+    getIntProperty(properties, "low_visc_wedge", E->viscosity.wedge, fp);
+
+    getFloatProperty(properties, "lv_min_radius", E->viscosity.lv_min_radius, fp);
+    getFloatProperty(properties, "lv_max_radius", E->viscosity.lv_max_radius, fp);
+    getFloatProperty(properties, "lv_channel_thickness", E->viscosity.lv_channel_thickness, fp);
+    getFloatProperty(properties, "lv_reduction", E->viscosity.lv_reduction, fp);
 
     getIntProperty(properties, "VMIN", E->viscosity.MIN, fp);
     getFloatProperty(properties, "visc_min", E->viscosity.min_value, fp);

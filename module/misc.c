@@ -281,7 +281,7 @@ PyObject * pyCitcom_Tracer_tracer_advection(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     if(E->control.tracer==1)
-      tracer_advection(E);
+        E->problem_tracer_advection(E);
 
     Py_INCREF(Py_None);
     return Py_None;
