@@ -811,6 +811,91 @@ void phase_change_cmb(E,B,B_b)
   return;
 }
 
+
+/* ==========================================================  */
+/*  From Nodal_mesh.c                                          */
+/* =========================================================== */
+
+void flogical_mesh_to_real(E,data,level)
+     struct All_variables *E;
+     float *data;
+     int level;
+
+{ int i,j,n1,n2;
+
+  return;
+}
+
+
+void p_to_centres(E,PN,P,lev)
+     struct All_variables *E;
+     float **PN;
+     double **P;
+     int lev;
+
+{  int p,element,node,j,m;
+   double weight;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(p=1;p<=E->lmesh.NEL[lev];p++)
+      P[m][p] = 0.0;
+
+   weight=1.0/((double)enodes[E->mesh.nsd]) ;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(p=1;p<=E->lmesh.NEL[lev];p++)
+      for(j=1;j<=enodes[E->mesh.nsd];j++)
+        P[m][p] += PN[m][E->IEN[lev][m][p].node[j]] * weight;
+
+   return;
+   }
+
+
+void v_to_intpts(E,VN,VE,lev)
+  struct All_variables *E;
+  float **VN,**VE;
+  int lev;
+  {
+
+   int m,e,i,j,k;
+   const int nsd=E->mesh.nsd;
+   const int vpts=vpoints[nsd];
+   const int ends=enodes[nsd];
+
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
+   for(e=1;e<=E->lmesh.NEL[lev];e++)
+     for(i=1;i<=vpts;i++)                 {
+        VE[m][(e-1)*vpts + i] = 0.0;
+        for(j=1;j<=ends;j++)
+          VE[m][(e-1)*vpts + i] += VN[m][E->IEN[lev][m][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
+        }
+
+   return;
+  }
+
+
+void visc_to_intpts(E,VN,VE,lev)
+   struct All_variables *E;
+   float **VN,**VE;
+   int lev;
+   {
+
+   int m,e,i,j,k;
+   const int nsd=E->mesh.nsd;
+   const int vpts=vpoints[nsd];
+   const int ends=enodes[nsd];
+
+ for (m=1;m<=E->sphere.caps_per_proc;m++)
+   for(e=1;e<=E->lmesh.NEL[lev];e++)
+     for(i=1;i<=vpts;i++) {
+        VE[m][(e-1)*vpts + i] = 0.0;
+	for(j=1;j<=ends;j++)
+          VE[m][(e-1)*vpts + i] += log(VN[m][E->IEN[lev][m][e].node[j]]) *  E->N.vpt[GNVINDEX(j,i)];
+        VE[m][(e-1)*vpts + i] = exp(VE[m][(e-1)*vpts + i]);
+        }
+
+  }
+
 /* version */
 /* $Id$ */
 
