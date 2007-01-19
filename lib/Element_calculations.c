@@ -577,14 +577,55 @@ void build_diagonal_of_Ahat(E)
     return;
 }
 
+
+
+
+/* compute div(rho_ref*V) = div(V) + Vz*d(ln(rho_ref))/dz */
+
+static void assemble_dlnrho(struct All_variables *E, double *dlnrhodr,
+			    double **U, double **result, int level)
+{
+    int e, nz, j3, a, b, m;
+
+    const int nel = E->lmesh.NEL[level];
+    const int ends = enodes[E->mesh.nsd];
+    const int dims = E->mesh.nsd;
+    double tmp;
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+        for(e=1; e<=nel; e++) {
+            nz = ((e-1) % E->lmesh.elz) + 1;
+            tmp = dlnrhodr[nz] / ends;
+            for(a=1; a<=ends; a++) {
+                b = E->IEN[level][m][e].node[a];
+                j3 = E->ID[level][m][b].doff[3];
+                result[m][e] +=  tmp * U[m][j3];
+	    }
+        }
+
+    return;
+}
+
+
+
+
+void assemble_div_rho_u(struct All_variables *E,
+                        double **U, double **result, int level)
+{
+    void assemble_div_u();
+    assemble_div_u(E, U, result, level);
+    assemble_dlnrho(E, E->dlnrhodr, U, result, level);
+
+    return;
+}
+
+
 /* ==========================================
    Assemble a div_u vector element by element
    ==========================================  */
 
-void assemble_div_u(E,U,divU,level)
-     struct All_variables *E;
-     double **U,**divU;
-     int level;
+void assemble_div_u(struct All_variables *E,
+                    double **U, double **divU, int level)
 {
     int e,j1,j2,j3,p,a,b,m;
 
@@ -611,9 +652,9 @@ void assemble_div_u(E,U,divU,level)
 	    }
 	 }
 
-
     return;
 }
+
 
 
 /* ==========================================

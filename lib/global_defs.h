@@ -729,6 +729,7 @@ struct All_variables {
 
     double *rho;
     double *rho_ref, *thermexp_ref, *T_ref;
+    double *dlnrhodr;
 
     double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];

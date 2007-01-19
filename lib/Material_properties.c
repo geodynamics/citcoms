@@ -40,6 +40,7 @@ void mat_prop_allocate(struct All_variables *E)
 {
     int noz = E->lmesh.noz;
     int nno = E->lmesh.nno;
+    int nel = E->lmesh.nel;
 
     /* reference profile of density */
     E->rho_ref = (double *) malloc((noz+1)*sizeof(double));
@@ -49,12 +50,16 @@ void mat_prop_allocate(struct All_variables *E)
 
     /* reference profile of temperature */
     E->T_ref = (double *) malloc((noz+1)*sizeof(double));
+
+    /* reference profile of d(ln(rho_ref))/dr */
+    E->dlnrhodr = (double *) malloc((nel+1)*sizeof(double));
 }
 
 
 void reference_state(struct All_variables *E)
 {
     int noz = E->lmesh.noz;
+    int nel = E->lmesh.nel;
     int i;
     double r, z, tmp, T0;
 
@@ -69,11 +74,17 @@ void reference_state(struct All_variables *E)
 	E->T_ref[i] = T0 * (exp(E->control.Di * z) - 1);
     }
 
-    for(i=1; i<=noz; i++) {
-	fprintf(stderr, "%d %f %f %f %f\n",
-		i, E->sx[1][3][i], 1-E->sx[1][3][i],
-		E->rho_ref[i], E->thermexp_ref[i]);
+    for(i=1; i<=nel; i++) {
+        // TODO: dln(rho)/dr
+        E->dlnrhodr[i] = - tmp;
     }
+
+    if(E->parallel.me < E->parallel.nprocz)
+        for(i=1; i<=noz; i++) {
+            fprintf(stderr, "%d %f %f %f %f\n",
+                    i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
+                    E->rho_ref[i], E->thermexp_ref[i]);
+        }
 }
 
 
