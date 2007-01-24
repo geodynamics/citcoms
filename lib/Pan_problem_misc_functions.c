@@ -138,7 +138,7 @@ void thermal_buoyancy(struct All_variables *E, double **buoy)
 	for(i=1;i<=E->lmesh.nno;i++) {
 	    int nz = ((i-1) % E->lmesh.noz) + 1;
 	    buoy[m][i] =  temp * E->rho_ref[nz] * E->thermexp_ref[nz]
-		* (E->T[m][i] - E->T_ref[nz]);
+		* E->T[m][i];
 	}
 
     phase_change_apply_410(E, buoy);
