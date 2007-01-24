@@ -896,6 +896,75 @@ void visc_to_intpts(E,VN,VE,lev)
 
   }
 
+
+/* ==========================================================  */
+/*  From Pan_problem_misc_functions.c                          */
+/* =========================================================== */
+
+double SIN_D(x)
+     double x;
+{
+#if defined(__osf__)
+  return sind(x);
+#else
+  return sin((x/180.0) * M_PI);
+#endif
+
+}
+
+double COT_D(x)
+     double x;
+{
+#if defined(__osf__)
+  return cotd(x);
+#else
+  return tan(((90.0-x)/180.0) * M_PI);
+#endif
+
+}
+
+
+/* non-runaway malloc */
+
+void * Malloc1(bytes,file,line)
+    int bytes;
+    char *file;
+    int line;
+{
+    void *ptr;
+
+    ptr = malloc((size_t)bytes);
+    if (ptr == (void *)NULL) {
+	fprintf(stderr,"Memory: cannot allocate another %d bytes \n(line %d of file %s)\n",bytes,line,file);
+	parallel_process_termination();
+    }
+
+    return(ptr);
+}
+
+
+/* returns the out of plane component of the cross product of
+   the two vectors assuming that one is looking AGAINST the
+   direction of the axis of D, anti-clockwise angles
+   are positive (are you sure ?), and the axes are ordered 2,3 or 1,3 or 1,2 */
+
+
+float cross2d(x11,x12,x21,x22,D)
+    float x11,x12,x21,x22;
+    int D;
+{
+  float temp;
+   if(1==D)
+       temp = ( x11*x22-x12*x21);
+   if(2==D)
+       temp = (-x11*x22+x12*x21);
+   if(3==D)
+       temp = ( x11*x22-x12*x21);
+
+   return(temp);
+}
+
+
 /* version */
 /* $Id$ */
 

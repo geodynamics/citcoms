@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -81,8 +81,6 @@ void general_stokes_solver(struct All_variables *E)
   const int vpts = vpoints[E->mesh.nsd];
   const int dims = E->mesh.nsd;
   const int addi_dof = additional_dof[dims];
-
-  E->monitor.elapsed_time_vsoln = E->monitor.elapsed_time;
 
   velocities_conform_bcs(E,E->U);
 
@@ -171,8 +169,6 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   const int vpts = vpoints[E->mesh.nsd];
   const int dims = E->mesh.nsd;
   const int addi_dof = additional_dof[dims];
-
-  E->monitor.elapsed_time_vsoln = E->monitor.elapsed_time;
 
   velocities_conform_bcs(E,E->U);
 

@@ -720,9 +720,6 @@ void global_default_values(E)
     E->control.CHEMISTRY_MODULE = 0;
 
     E->control.GRID_TYPE=1;
-    E->mesh.hwidth[1]=E->mesh.hwidth[2]=E->mesh.hwidth[3]=1.0; /* divide by this one ! */
-    E->mesh.magnitude[1]=E->mesh.magnitude[2]=E->mesh.magnitude[3]=0.0;
-    E->mesh.offset[1]=E->mesh.offset[2]=E->mesh.offset[3]=0.0;
 
   E->parallel.nprocx=1; E->parallel.nprocz=1; E->parallel.nprocy=1;
 

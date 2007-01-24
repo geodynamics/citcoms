@@ -289,33 +289,24 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int NEQ[MAX_LEVELS];
     int NNO[MAX_LEVELS];
     int NNOV[MAX_LEVELS];
-    int NLNO[MAX_LEVELS];
     int NPNO[MAX_LEVELS];
     int NEL[MAX_LEVELS];
     int NOX[MAX_LEVELS];
     int NOZ[MAX_LEVELS];
     int NOY[MAX_LEVELS];
-    int NMX[MAX_LEVELS];
     int ELX[MAX_LEVELS];
     int ELZ[MAX_LEVELS];
     int ELY[MAX_LEVELS];
-    int LNDS[MAX_LEVELS];
-    int LELS[MAX_LEVELS];
     int SNEL[MAX_LEVELS];
-    int neqd;
     int neq;
     int nno;
     int nnov;
-    int nlno;
     int npno;
     int nel;
     int snel;
     int elx;
     int elz;
     int ely;
-    int nnx[4]; /* general form of ... */
-    int gnox;
-    int gelx;
     int nox;
     int noz;
     int noy;
@@ -331,7 +322,6 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int NXS[MAX_LEVELS];
     int NYS[MAX_LEVELS];
     int NZS[MAX_LEVELS];
-    int nmx;
     int nsf; /* nodes for surface observables */
     int toptbc;
     int bottbc;
@@ -339,25 +329,10 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int botvbc;
     int sidevbc;
 
-    char topvbc_file[100];
-    char botvbc_file[100];
-    char sidevbc_file[100];
-    char gridfile[4][100];
-
 
     int periodic_x;
     int periodic_y;
     float layer[4];			/* dimensionless dimensions */
-    float lidz;
-    float bl1width[4],bl2width[4],bl1mag[4],bl2mag[4];
-    float hwidth[4],magnitude[4],offset[4],width[4]; /* grid compression information */
-    int fnodal_malloc_size;
-    int dnodal_malloc_size;
-    int feqn_malloc_size;
-    int deqn_malloc_size;
-    int bandwidth;
-    int null_source;
-    int null_sink;
     int matrix_size[MAX_LEVELS];
 
 } ;
@@ -384,53 +359,20 @@ struct SLICE {    /* horizontally sliced data, including topography */
 
 
 struct MONITOR {
-    char node_output[100][6];  /* recording the format of the output data */
-    char sobs_output[100][6];  /* recording the format of the output data */
-    int node_output_cols;
-    int sobs_output_cols;
-
     int solution_cycles;
     int solution_cycles_init;
 
     int stop_topo_loop;
     int topo_loop;
 
-    float  time_scale;
-    float  length_scale;
-    float  viscosity_scale;
-    float  geoscale;
-    float  tpgscale;
-    float  grvscale;
-
-    float  delta_v_last_soln;
     float  elapsed_time;
-    float  elapsed_time_vsoln;
-    float  elapsed_time_vsoln1;
-    float  reference_stress;
     float  incompressibility;
     float  vdotv;
-    float  nond_av_heat_fl;
-    float  nond_av_adv_hfl;
     double cpu_time_at_start;
     double cpu_time_at_last_cycle;
-    float  tpgkmag;
-    float  grvkmag;
 
-    float  Nusselt;
-    float  Vmax;
-    float  Vsrms;
-    float  Vrms;
-    float  Vrms_surface;
-    float  Vrms_base;
-    float  F_surface;
-    float  F_base;
-    float  Frat_surface;
-    float  Frat_base;
     float  T_interior;
     float  T_maxvaried;
-    float  Sigma_max;
-    float  Sigma_interior;
-    float  Vi_average;
 
 };
 
