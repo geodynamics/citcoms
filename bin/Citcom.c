@@ -77,7 +77,7 @@ int main(argc,argv)
 
   world = MPI_COMM_WORLD;
   E = citcom_init(&world);             /* allocate global E and do initializaion here */
-  
+
   solver_init(E);
 
   start_time = time = CPU_time0();
@@ -121,11 +121,18 @@ int main(argc,argv)
   }
 
   while ( E->control.keep_going   &&  (Emergency_stop == 0) )   {
+
+    /* The next few lines of code were replaced by
+     * pyCitcom_PG_timestep_solve() in Pyre version.
+     * If you modify here, make sure its Pyre counterpart
+     * is modified as well */
     E->monitor.solution_cycles++;
     if(E->monitor.solution_cycles>E->control.print_convergence)
       E->control.print_convergence=1;
 
     (E->next_buoyancy_field)(E);
+    /* */
+
 
     if(((E->advection.total_timesteps < E->advection.max_total_timesteps) &&
 	(E->advection.timesteps < E->advection.max_timesteps)) ||

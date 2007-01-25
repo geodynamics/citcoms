@@ -181,15 +181,6 @@ void advection_diffusion_parameters(E)
     /* Set intial values, defaults & read parameters*/
     int m=E->parallel.me;
 
-    E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
-    E->advection.total_timesteps = 1;
-    E->advection.sub_iterations = 1;
-    E->advection.last_sub_iterations = 1;
-    E->advection.gamma = 0.5;
-    E->advection.dt_reduced = 1.0;
-
-    E->monitor.T_maxvaried = 1.05;
-
     input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
 
     input_int("minstep",&(E->advection.min_timesteps),"1",m);
@@ -230,6 +221,7 @@ void PG_timestep(struct All_variables *E)
 {
   static int been_here = 0;
 
+  /* TODO: get rid of static variable */
   if (been_here++ ==0)    {
     PG_timestep_init(E);
   }

@@ -93,8 +93,8 @@ class Solver(Component):
         inv.tracer.initialize(all_variables)
         inv.visc.initialize(all_variables)
 
-        global_default_values(self.all_variables)
         set_signal()
+        global_default_values(self.all_variables)
 
         from CitcomSLib import return_rank, return_pid
         rank = return_rank(self.all_variables)
@@ -103,7 +103,7 @@ class Solver(Component):
             stream = open("pid%d.cfg" % pid, "w")
         else:
             stream = None
-        
+
         self.setProperties(stream)
 
         self.restart = self.inventory.ic.inventory.restart

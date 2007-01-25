@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -33,47 +33,57 @@
 
 void full_set_2dc_defaults(E)
      struct All_variables *E;
-{ 
+{
 
   E->mesh.nsd = 2;
   E->mesh.dof = 2;
-  
+
 }
 
 
-void full_set_2pt5dc_defaults(E)  
+void full_set_2pt5dc_defaults(E)
     struct All_variables *E;
-{ 
+{
 
   E->mesh.nsd = 2;
   E->mesh.dof = 3;
- 
+
 }
 
 void full_set_3dc_defaults(E)
      struct All_variables *E;
-{ 
+{
 
   E->mesh.nsd = 3;
   E->mesh.dof = 3;
- 
+
 }
 
 void full_set_3dsphere_defaults(E)
      struct All_variables *E;
-{ 
+{
+  void full_set_3dsphere_defaults2(struct All_variables *);
+  int m=E->parallel.me;
+
+  input_double("radius_outer",&(E->sphere.ro),"1",m);
+  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
+
+  full_set_3dsphere_defaults2(E);
+
+  return;
+}
+
+
+void full_set_3dsphere_defaults2(struct All_variables *E)
+{
   int i,j;
   double offset;
-  int m=E->parallel.me;
 
   E->mesh.nsd = 3;
   E->mesh.dof = 3;
 
   E->sphere.caps = 12;
   E->sphere.max_connections = 6;
-
-  input_double("radius_outer",&(E->sphere.ro),"1",m);
-  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
 
   offset = 10.0/180.0*M_PI;
 
@@ -111,4 +121,4 @@ void full_set_3dsphere_defaults(E)
     }
 
   return;
- }
+}
