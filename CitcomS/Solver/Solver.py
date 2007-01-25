@@ -282,7 +282,7 @@ class Solver(Component):
         datadir_old = inv.str("datadir_old", default="")
 
         rayleigh = inv.float("rayleigh", default=1e+05)
-        dissipation = inv.float("dissipation", default=0.0)
+        dissipation_number = inv.float("dissipation_number", default=0.0)
         gruneisen = inv.float("gruneisen", default=0.0)
         Q0 = inv.float("Q0", default=0.0)
 

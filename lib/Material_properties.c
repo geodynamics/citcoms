@@ -63,7 +63,7 @@ void reference_state(struct All_variables *E)
     int i;
     double r, z, tmp, T0;
 
-    tmp = E->control.Di * E->control.inv_gruneisen;
+    tmp = E->control.disptn_number * E->control.inv_gruneisen;
     T0 = E->data.surf_temp / E->data.ref_temperature;
 
     for(i=1; i<=noz; i++) {
@@ -71,7 +71,7 @@ void reference_state(struct All_variables *E)
 	z = 1 - r;
 	E->rho_ref[i] = exp(tmp*z);
 	E->thermexp_ref[i] = 1;
-	E->T_ref[i] = T0 * (exp(E->control.Di * z) - 1);
+	E->T_ref[i] = T0 * (exp(E->control.disptn_number * z) - 1);
     }
 
     for(i=1; i<=nel; i++) {

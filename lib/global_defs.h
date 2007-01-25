@@ -460,7 +460,7 @@ struct CONTROL {
     /* Rayleigh # */
     float Atemp;
     /* Dissipation # */
-    float Di;
+    float disptn_number;
     /* inverse of Gruneisen parameter */
     float inv_gruneisen;
 

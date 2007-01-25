@@ -372,7 +372,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
-  input_float("dissipation",&(E->control.Di),"0.0",m);
+  input_float("dissipation_number",&(E->control.disptn_number),"0.0",m);
   input_float("gruneisen",&(tmp),"0.0",m);
   if(abs(tmp) > 1e-6)
       E->control.inv_gruneisen = 1/tmp;

@@ -1459,7 +1459,7 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_string(input, "datafile_old", E->control.old_P_file);
 
     status = set_attribute_float(input, "rayleigh", E->control.Atemp);
-    status = set_attribute_float(input, "dissipation", E->control.Di);
+    status = set_attribute_float(input, "dissipation_number", E->control.disptn_number);
     status = set_attribute_float(input, "gruneisen",
 				 ((abs(E->control.inv_gruneisen) > 1e-6)?
 				  1/E->control.inv_gruneisen :
