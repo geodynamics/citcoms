@@ -219,13 +219,6 @@ return;
 
 void PG_timestep(struct All_variables *E)
 {
-  static int been_here = 0;
-
-  /* TODO: get rid of static variable */
-  if (been_here++ ==0)    {
-    PG_timestep_init(E);
-  }
-
   std_timestep(E);
 
   PG_timestep_solve(E);

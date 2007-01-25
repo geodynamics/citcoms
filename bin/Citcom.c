@@ -58,6 +58,7 @@ int main(argc,argv)
   void read_mat_from_file();
   void open_time();
   void output_finalize();
+  void PG_timestep_init();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -119,6 +120,8 @@ int main(argc,argv)
 
     parallel_process_termination();
   }
+
+  (E->next_buoyancy_field_init)(E);
 
   while ( E->control.keep_going   &&  (Emergency_stop == 0) )   {
 

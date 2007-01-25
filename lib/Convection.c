@@ -39,8 +39,8 @@
 void set_convection_defaults(E)
      struct All_variables *E;
 {
-    void PG_timestep_with_melting();
     void PG_timestep();
+    void PG_timestep_init();
     void read_convection_settings();
     void convection_derived_values();
     void convection_allocate_memory();
@@ -58,6 +58,7 @@ void set_convection_defaults(E)
     E->monitor.T_maxvaried = 1.05;
 
     E->next_buoyancy_field = PG_timestep;
+    E->next_buoyancy_field_init = PG_timestep_init;
     E->special_process_new_buoyancy = twiddle_thumbs;
     E->problem_settings = read_convection_settings;
     E->problem_derived_values = convection_derived_values;

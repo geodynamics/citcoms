@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,21 +22,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
 
-/*
-static double weightIJ[5][5] =
-        {       { 0.0,    0.0,    0.0,    0.0,    0.0 },
-		{ 0.0, 0.5625, 0.1875, 0.0625, 0.1875 },
-		{ 0.0, 0.1875, 0.5625, 0.1875, 0.0625 },
-		{ 0.0, 0.0625, 0.1875, 0.5625, 0.1875 },
-		{ 0.0, 0.1875, 0.0625, 0.1875, 0.5625 } };
-*/
 
 void set_mg_defaults(E)
      struct All_variables *E;
