@@ -720,6 +720,7 @@ struct All_variables {
     void (* build_forcing_term)(void*);
     void (* iterative_solver)(void*);
     void (* next_buoyancy_field)(void*);
+    void (* next_buoyancy_field_init)(void*);
     void (* obtain_gravity)(void*);
     void (* problem_settings)(void*);
     void (* problem_derived_values)(void*);

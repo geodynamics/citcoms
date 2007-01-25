@@ -1,5 +1,5 @@
 /*
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 //<LicenseText>
 //
@@ -22,7 +22,7 @@
 //
 //</LicenseText>
 //
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
 #include <Python.h>
@@ -69,12 +69,18 @@ PyObject * pyCitcom_PG_timestep_solve(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
+    /* This function replaces some code in Citcom.c
+     * If you modify here, make sure its counterpart
+     * is modified as well */
     E->monitor.solution_cycles++;
     if(E->monitor.solution_cycles>E->control.print_convergence)
 	E->control.print_convergence=1;
 
+    /* Since dt may be modified in Pyre, we need to update
+     * E->advection.timestep again */
     E->advection.timestep = dt;
-    PG_timestep_solve(E);
+
+    (E->next_buoyancy_field)(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -95,13 +101,6 @@ PyObject * pyCitcom_set_convection_defaults(PyObject *self, PyObject *args)
 
     E->control.CONVECTION = 1;
     set_convection_defaults(E);
-
-    /* copied from advection_diffusion_parameters() */
-    E->advection.total_timesteps = 1;
-    E->advection.sub_iterations = 1;
-    E->advection.last_sub_iterations = 1;
-    E->advection.gamma = 0.5;
-    E->monitor.T_maxvaried = 1.05;
 
     Py_INCREF(Py_None);
     return Py_None;

@@ -103,14 +103,6 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     getIntProperty(properties, "adv_sub_iterations", E->advection.temp_iterations, fp);
 
 
-    E->advection.total_timesteps = 1;
-    E->advection.sub_iterations = 1;
-    E->advection.last_sub_iterations = 1;
-    E->advection.gamma = 0.5;
-    E->advection.dt_reduced = 1.0;
-
-    E->monitor.T_maxvaried = 1.05;
-
     PUTS(("\n"));
 
     Py_INCREF(Py_None);
@@ -485,6 +477,8 @@ char pyCitcom_Sphere_set_properties__name__[] = "Sphere_set_properties";
 
 PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 {
+    void full_set_3dsphere_defaults2(struct All_variables *);
+
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
@@ -537,66 +531,17 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getDoubleProperty(properties, "radius_outer", E->sphere.ro, fp);
     getDoubleProperty(properties, "radius_inner", E->sphere.ri, fp);
 
-    E->mesh.nsd = 3;
-    E->mesh.dof = 3;
-    E->sphere.max_connections = 6;
 
     if (E->parallel.nprocxy == 12) {
-	int i, j;
-	double offset = 10.0/180.0*M_PI;
-	/* full spherical version */
-	E->sphere.caps = 12;
-
-	for (i=1;i<=4;i++)  {
-	    E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
-	    E->sphere.cap[(i-1)*3+1].theta[2] = M_PI/4.0+offset;
-	    E->sphere.cap[(i-1)*3+1].theta[3] = M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+1].theta[4] = M_PI/4.0+offset;
-	    E->sphere.cap[(i-1)*3+1].fi[1] = 0.0;
-	    E->sphere.cap[(i-1)*3+1].fi[2] = (i-1)*M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+1].fi[3] = (i-1)*M_PI/2.0 + M_PI/4.0;
-	    E->sphere.cap[(i-1)*3+1].fi[4] = i*M_PI/2.0;
-
-	    E->sphere.cap[(i-1)*3+2].theta[1] = M_PI/4.0+offset;
-	    E->sphere.cap[(i-1)*3+2].theta[2] = M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+2].theta[3] = 3*M_PI/4.0-offset;
-	    E->sphere.cap[(i-1)*3+2].theta[4] = M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+2].fi[1] = i*M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+2].fi[2] = i*M_PI/2.0 - M_PI/4.0;
-	    E->sphere.cap[(i-1)*3+2].fi[3] = i*M_PI/2.0;
-	    E->sphere.cap[(i-1)*3+2].fi[4] = i*M_PI/2.0 + M_PI/4.0;
-	}
-
-	for (i=1;i<=4;i++)  {
-	    j = (i-1)*3;
-	    if (i==1) j=12;
-	    E->sphere.cap[j].theta[1] = M_PI/2.0;
-	    E->sphere.cap[j].theta[2] = 3*M_PI/4.0-offset;
-	    E->sphere.cap[j].theta[3] = M_PI;
-	    E->sphere.cap[j].theta[4] = 3*M_PI/4.0-offset;
-	    E->sphere.cap[j].fi[1] = (i-1)*M_PI/2.0 + M_PI/4.0;
-	    E->sphere.cap[j].fi[2] = (i-1)*M_PI/2.0;
-	    E->sphere.cap[j].fi[3] = 0.0;
-	    E->sphere.cap[j].fi[4] = i*M_PI/2.0;
-	}
-
-    } else {
-	/* regional version */
-	E->sphere.caps = 1;
-
+        full_set_3dsphere_defaults2(E);
+    }
+    else {
 	getDoubleProperty(properties, "theta_min", E->control.theta_min, fp);
 	getDoubleProperty(properties, "theta_max", E->control.theta_max, fp);
 	getDoubleProperty(properties, "fi_min", E->control.fi_min, fp);
 	getDoubleProperty(properties, "fi_max", E->control.fi_max, fp);
 
-	E->sphere.cap[1].theta[1] = E->control.theta_min;
-	E->sphere.cap[1].theta[2] = E->control.theta_max;
-	E->sphere.cap[1].theta[3] = E->control.theta_max;
-	E->sphere.cap[1].theta[4] = E->control.theta_min;
-	E->sphere.cap[1].fi[1] = E->control.fi_min;
-	E->sphere.cap[1].fi[2] = E->control.fi_min;
-	E->sphere.cap[1].fi[3] = E->control.fi_max;
-	E->sphere.cap[1].fi[4] = E->control.fi_max;
+        regional_set_3dsphere_defaults2(E);
     }
 
     E->mesh.layer[1] = 1;

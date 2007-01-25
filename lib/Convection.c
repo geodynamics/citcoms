@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Assumes parameter list is opened and reads the things it needs.
@@ -39,8 +39,8 @@
 void set_convection_defaults(E)
      struct All_variables *E;
 {
-    void PG_timestep_with_melting();
     void PG_timestep();
+    void PG_timestep_init();
     void read_convection_settings();
     void convection_derived_values();
     void convection_allocate_memory();
@@ -48,7 +48,17 @@ void set_convection_defaults(E)
     void convection_initial_fields();
     void twiddle_thumbs();
 
+    E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
+    E->advection.total_timesteps = 1;
+    E->advection.sub_iterations = 1;
+    E->advection.last_sub_iterations = 1;
+    E->advection.gamma = 0.5;
+    E->advection.dt_reduced = 1.0;
+
+    E->monitor.T_maxvaried = 1.05;
+
     E->next_buoyancy_field = PG_timestep;
+    E->next_buoyancy_field_init = PG_timestep_init;
     E->special_process_new_buoyancy = twiddle_thumbs;
     E->problem_settings = read_convection_settings;
     E->problem_derived_values = convection_derived_values;
@@ -57,11 +67,6 @@ void set_convection_defaults(E)
     E->problem_initial_fields = convection_initial_fields;
     E->problem_update_node_positions = twiddle_thumbs;
     E->problem_update_bcs = twiddle_thumbs;
-
-/*     sprintf(E->control.which_data_files,"Temp,Strf,Pres"); */
-/*     sprintf(E->control.which_horiz_averages,"Temp,Visc,Vrms"); */
-/*     sprintf(E->control.which_running_data,"Step,Time,"); */
-/*     sprintf(E->control.which_observable_data,"Shfl"); */
 
     return;
 }

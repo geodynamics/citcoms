@@ -51,67 +51,38 @@
 #include "phase_change.h"
 #include "interuption.h"
 
-extern void parallel_process_termination();
+void parallel_process_termination();
+void allocate_common_vars(struct All_variables*);
+void allocate_velocity_vars(struct All_variables*);
+void check_bc_consistency(struct All_variables*);
+void construct_id(struct All_variables*);
+void construct_ien(struct All_variables*);
+void construct_lm(struct All_variables*);
+void construct_masks(struct All_variables*);
+void construct_mat_group(struct All_variables*);
+void construct_shape_functions(struct All_variables*);
+void construct_sub_element(struct All_variables*);
+void construct_surf_det (struct All_variables*);
+void construct_bdry_det (struct All_variables*);
+void construct_surface (struct All_variables*);
+void get_initial_elapsed_time(struct All_variables*);
+void lith_age_init(struct All_variables *E);
+void mass_matrix(struct All_variables*);
+void output_init(struct All_variables*);
+void read_mat_from_file(struct All_variables*);
+void set_elapsed_time(struct All_variables*);
+void set_sphere_harmonics (struct All_variables*);
+void set_starting_age(struct All_variables*);
+void tracer_initial_settings(struct All_variables*);
+double CPU_time0();
 
 
-void read_instructions(struct All_variables *E, char *filename)
+
+void initial_mesh_solver_setup(struct All_variables *E)
 {
-    void allocate_common_vars();
-    void common_initial_fields();
-    void read_initial_settings();
-    void tracer_initial_settings();
-    void global_default_values();
-    void construct_ien();
-    void construct_surface();
-    void construct_masks();
-    void construct_shape_functions();
-    void construct_id();
-    void construct_lm();
-    void construct_sub_element();
-    void mass_matrix();
-    void construct_node_ks();
-    void construct_node_maps();
-    void read_mat_from_file();
-    void construct_mat_group();
-    void set_up_nonmg_aliases();
-    void check_bc_consistency();
-    void allocate_velocity_vars();
-    void construct_c3x3matrix();
-    void construct_surf_det ();
-    void construct_bdry_det ();
-    void set_sphere_harmonics ();
-    void general_stokes_solver_setup();
-
-    void setup_parser();
-    void shutdown_parser();
-    void output_init();
-
-    void get_initial_elapsed_time();
-    void set_starting_age();
-    void set_elapsed_time();
-
-
-    double CPU_time0();
-    double global_vdot();
-
-    /* =====================================================
-       Global interuption handling routine defined once here
-       =====================================================  */
 
     E->monitor.cpu_time_at_last_cycle =
         E->monitor.cpu_time_at_start = CPU_time0();
-
-    set_signal();
-
-    /* ==================================================
-       Initialize from the command line
-       from startup files. (See Parsing.c).
-       ==================================================  */
-
-    setup_parser(E,filename);
-
-    global_default_values(E);
-    read_initial_settings(E);
 
     output_init(E);
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
@@ -134,8 +105,8 @@ void read_instructions(struct All_variables *E, char *filename)
     (E->solver.node_locations)(E);
 
     if(E->control.tracer==1) {
-      tracer_initial_settings(E);
-      (E->problem_tracer_setup)(E);
+	tracer_initial_settings(E);
+	(E->problem_tracer_setup)(E);
     }
 
     allocate_velocity_vars(E);
@@ -144,15 +115,14 @@ void read_instructions(struct All_variables *E, char *filename)
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
 
-    if(E->control.lith_age) {
-      lith_age_init(E);
-    }
+    if(E->control.lith_age)
+        lith_age_init(E);
 
     (E->problem_boundary_conds)(E);
 
     check_bc_consistency(E);
 
-    construct_masks(E);         /* order is important here */
+    construct_masks(E);		/* order is important here */
     construct_id(E);
     construct_lm(E);
 
@@ -164,13 +134,10 @@ void read_instructions(struct All_variables *E, char *filename)
 
     reference_state(E);
 
-/*    construct_c3x3matrix(E);       */  /* this matrix results from spherical geometry*/
+    /* this matrix results from spherical geometry */
+    /* construct_c3x3matrix(E); */
+
     mass_matrix(E);
-
-    general_stokes_solver_setup(E);
-
-    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
-                                   CPU_time0()-E->monitor.cpu_time_at_start);
 
     construct_surf_det (E);
     construct_bdry_det (E);
@@ -181,6 +148,44 @@ void read_instructions(struct All_variables *E, char *filename)
       read_mat_from_file(E);
     else
       construct_mat_group(E);
+
+}
+
+
+void read_instructions(struct All_variables *E, char *filename)
+{
+
+    void common_initial_fields();
+    void read_initial_settings();
+    void global_default_values();
+    void general_stokes_solver_setup();
+    void initial_mesh_solver_setup();
+
+    void setup_parser();
+    void shutdown_parser();
+
+    /* =====================================================
+       Global interuption handling routine defined once here
+       =====================================================  */
+
+    set_signal();
+
+    /* ==================================================
+       Initialize from the command line
+       from startup files. (See Parsing.c).
+       ==================================================  */
+
+    setup_parser(E,filename);
+
+    global_default_values(E);
+    read_initial_settings(E);
+
+    initial_mesh_solver_setup(E);
+
+    general_stokes_solver_setup(E);
+
+    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
+                                   CPU_time0()-E->monitor.cpu_time_at_start);
 
     (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
     common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
