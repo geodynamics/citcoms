@@ -37,11 +37,8 @@
 void v_from_vector(E)
      struct All_variables *E;
 {
-    int i,eqn1,eqn2,eqn3,m,node;
-    float sint,cost,sinf,cosf;
-
+    int m,node;
     const int nno = E->lmesh.nno;
-    const int level=E->mesh.levmax;
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for(node=1;node<=nno;node++)     {
@@ -55,24 +52,6 @@ void v_from_vector(E)
             if (E->node[m][node] & VBZ)
                 E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
         }
-        for (i=1;i<=E->lmesh.nno;i++)  {
-            eqn1 = E->id[m][i].doff[1];
-            eqn2 = E->id[m][i].doff[2];
-            eqn3 = E->id[m][i].doff[3];
-            sint = E->SinCos[level][m][0][i];
-            sinf = E->SinCos[level][m][1][i];
-            cost = E->SinCos[level][m][2][i];
-            cosf = E->SinCos[level][m][3][i];
-            E->temp[m][eqn1] = E->sphere.cap[m].V[1][i]*cost*cosf
-                - E->sphere.cap[m].V[2][i]*sinf
-                + E->sphere.cap[m].V[3][i]*sint*cosf;
-            E->temp[m][eqn2] = E->sphere.cap[m].V[1][i]*cost*sinf
-                + E->sphere.cap[m].V[2][i]*cosf
-                + E->sphere.cap[m].V[3][i]*sint*sinf;
-            E->temp[m][eqn3] = -E->sphere.cap[m].V[1][i]*sint
-                + E->sphere.cap[m].V[3][i]*cost;
-
-        }
     }
 
     return;
@@ -81,11 +60,10 @@ void v_from_vector(E)
 void v_from_vector_pseudo_surf(E)
      struct All_variables *E;
 {
-    int i,eqn1,eqn2,eqn3,m,node;
-    float sint,cost,sinf,cosf;
+    int m,node;
 
     const int nno = E->lmesh.nno;
-    const int level=E->mesh.levmax;
+    const int dofs = E->mesh.dof;
     double sum_V = 0.0, sum_dV = 0.0, rel_error = 0.0, global_max_error = 0.0;
     double tol_error = 1.0e-03;
 
@@ -118,24 +96,6 @@ void v_from_vector_pseudo_surf(E)
         if(E->parallel.me==0)
             fprintf(stderr,"global_max_error=%e stop_topo_loop=%d\n",global_max_error,E->monitor.stop_topo_loop);
 
-        for (i=1;i<=E->lmesh.nno;i++)  {
-            eqn1 = E->id[m][i].doff[1];
-            eqn2 = E->id[m][i].doff[2];
-            eqn3 = E->id[m][i].doff[3];
-            sint = E->SinCos[level][m][0][i];
-            sinf = E->SinCos[level][m][1][i];
-            cost = E->SinCos[level][m][2][i];
-            cosf = E->SinCos[level][m][3][i];
-            E->temp[m][eqn1] = E->sphere.cap[m].V[1][i]*cost*cosf
-                - E->sphere.cap[m].V[2][i]*sinf
-                + E->sphere.cap[m].V[3][i]*sint*cosf;
-            E->temp[m][eqn2] = E->sphere.cap[m].V[1][i]*cost*sinf
-                + E->sphere.cap[m].V[2][i]*cosf
-                + E->sphere.cap[m].V[3][i]*sint*sinf;
-            E->temp[m][eqn3] = -E->sphere.cap[m].V[1][i]*sint
-                + E->sphere.cap[m].V[3][i]*cost;
-
-        }
     }
 
     return;
@@ -147,9 +107,12 @@ void velo_from_element(E,VV,m,el,sphere_key)
      float VV[4][9];
      int m,el,sphere_key;
 {
-
     int a, node;
+    float sint, cost, sinf, cosf;
+    const int dims=E->mesh.nsd;
     const int ends=enodes[E->mesh.nsd];
+    const int nno=E->lmesh.nno;
+    const int lev=E->mesh.levmax;
 
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
@@ -158,15 +121,25 @@ void velo_from_element(E,VV,m,el,sphere_key)
             VV[2][a] = E->sphere.cap[m].V[2][node];
             VV[3][a] = E->sphere.cap[m].V[3][node];
         }
-    else
+    else {
         for(a=1;a<=ends;a++)   {
             node = E->ien[m][el].node[a];
-            VV[1][a] = E->temp[m][E->id[m][node].doff[1]];
-            VV[2][a] = E->temp[m][E->id[m][node].doff[2]];
-            VV[3][a] = E->temp[m][E->id[m][node].doff[3]];
-        }
 
-    return;
+            sint = E->SinCos[lev][m][0][node];
+            sinf = E->SinCos[lev][m][1][node];
+            cost = E->SinCos[lev][m][2][node];
+            cosf = E->SinCos[lev][m][3][node];
+
+            VV[1][a] = E->sphere.cap[m].V[1][node]*cost*cosf
+                - E->sphere.cap[m].V[2][node]*sinf
+                + E->sphere.cap[m].V[3][node]*sint*cosf;
+            VV[2][a] = E->sphere.cap[m].V[1][node]*cost*sinf
+                + E->sphere.cap[m].V[2][node]*cosf
+                + E->sphere.cap[m].V[3][node]*sint*sinf;
+            VV[3][a] = -E->sphere.cap[m].V[1][node]*sint
+                + E->sphere.cap[m].V[3][node]*cost;
+        }
+    }
 }
 
 
