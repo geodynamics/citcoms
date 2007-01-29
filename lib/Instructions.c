@@ -141,8 +141,11 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     set_sphere_harmonics (E);
 
-    if(E->control.mat_control)
+    if(E->control.mat_control) {
+      if(E->parallel.me ==0) fprintf(stderr,"IN Instructions.c\n");
+      fflush(stderr);
       read_mat_from_file(E);
+     }
     else
       construct_mat_group(E);
 

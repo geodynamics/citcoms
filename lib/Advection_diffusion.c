@@ -168,6 +168,13 @@ void PG_timestep_solve(struct All_variables *E)
     free((void *) T1[m] );
     free((void *) Tdot1[m] );
   }
+
+  if(E->control.lith_age) {
+      lith_age_conform_tbc(E);
+      assimilate_lith_conform_bcs(E);
+  }
+
+
   return;
 }
 

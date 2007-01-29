@@ -52,8 +52,11 @@ void temperatures_conform_bcs(E)
   void assimilate_lith_conform_bcs2(struct All_variables *);
 
   if(E->control.lith_age) {
+    /*
+    This sequence now moved to end of PG_time_step_solve
     lith_age_conform_tbc(E);
     assimilate_lith_conform_bcs(E);
+    */
     }
   else
     temperatures_conform_bcs2(E);
