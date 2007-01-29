@@ -341,7 +341,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 
 
   /* NOW SET THE TEMPERATURES IN THE LITHOSPHERE IF CHANGING EVERY TIME STEP */
-  if(E->monitor.solution_cycles>1 && E->control.lith_age_time)   {
+  if(E->monitor.solution_cycles>0 && E->control.lith_age_time)   {
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++)
