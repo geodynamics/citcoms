@@ -485,48 +485,97 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
 
-    double edot[4][4],dudx[4][4],rtf[4][9];
-    float VV[4][9];
 
-    int e,i,p,q,n,nel,k;
 
+    double edot[4][4], rtf[4][9];
+    float VV[4][9], Vxyz[7][9], dilation[9];
+
+    int e, i, j, p, q, n;
+
+    const int nel = E->lmesh.nel;
     const int dims = E->mesh.nsd;
     const int ends = enodes[dims];
     const int lev = E->mesh.levmax;
-    const int nno = E->lmesh.nno;
-    const int vpts = vpoints[dims];
-    const int sphere_key = 0;
+    const int ppts = ppoints[dims];
+    const int sphere_key = 1;
 
-    nel = E->lmesh.nel;
 
-    for(e=1;e<=nel;e++) {
+    for(e=1; e<=nel; e++) {
 
-        get_global_shape_fn(E,e,&GN,&GNx,&dOmega,2,sphere_key,rtf,lev,m);
+        /* get shape function on presure gauss points */
+        get_global_shape_fn(E, e, &GN, &GNx, &dOmega, 2,
+                                sphere_key, rtf, lev, m);
 
-        velo_from_element(E,VV,m,e,sphere_key);
+        velo_from_element(E, VV, m, e, sphere_key);
 
-        for(p=1;p<=dims;p++)
-            for(q=1;q<=dims;q++)
-                dudx[p][q] = 0.0;
 
-        for(i=1;i<=ends;i++)
-            for(p=1;p<=dims;p++)
-                for(q=1;q<=dims;q++)
-                    dudx[p][q] += VV[p][i] * GNx.ppt[GNPXINDEX(q-1,i,1)];
+        /* Vxyz is the strain rate vector, whose relationship with
+         * the strain rate tensor (e) is that:
+         *    Vxyz[1] = e11
+         *    Vxyz[2] = e22
+         *    Vxyz[3] = e33
+         *    Vxyz[4] = 2*e12
+         *    Vxyz[5] = 2*e13
+         *    Vxyz[6] = 2*e23
+         * where 1 is theta, 2 is phi, and 3 is r
+         */
+        for(j=1; j<=ppts; j++) {
+            Vxyz[1][j] = 0.0;
+            Vxyz[2][j] = 0.0;
+            Vxyz[3][j] = 0.0;
+            Vxyz[4][j] = 0.0;
+            Vxyz[5][j] = 0.0;
+            Vxyz[6][j] = 0.0;
+        }
 
-        for(p=1;p<=dims;p++)
-            for(q=1;q<=dims;q++)
-                edot[p][q] = dudx[p][q] + dudx[q][p];
+        for(j=1; j<=ppts; j++) {
+            for(i=1; i<=ends; i++) {
+                Vxyz[1][j] += (VV[1][i] * GNx.ppt[GNPXINDEX(0, i, j)]
+                               + VV[3][i] * E->N.ppt[GNPINDEX(i, j)])
+                    * rtf[3][j];
+                Vxyz[2][j] += ((VV[2][i] * GNx.ppt[GNPXINDEX(1, i, j)]
+                                + VV[1][i] * E->N.ppt[GNPINDEX(i, j)]
+                                * cos(rtf[1][j])) / sin(rtf[1][j])
+                               + VV[3][i] * E->N.ppt[GNPINDEX(i, j)])
+                    * rtf[3][j];
+                Vxyz[3][j] += VV[3][i] * GNx.ppt[GNPXINDEX(2, i, j)];
 
-        if (dims==2)
-            EEDOT[e] = edot[1][1]*edot[1][1] + edot[2][2]*edot[2][2]
-                + edot[1][2]*edot[1][2]*2.0;
+                Vxyz[4][j] += ((VV[1][i] * GNx.ppt[GNPXINDEX(1, i, j)]
+                                - VV[2][i] * E->N.ppt[GNPINDEX(i, j)]
+                                * cos(rtf[1][j])) / sin(rtf[1][j])
+                               + VV[2][i] * GNx.ppt[GNPXINDEX(0, i, j)])
+                    * rtf[3][j];
+                Vxyz[5][j] += VV[1][i] * GNx.ppt[GNPXINDEX(2, i, j)]
+                    + rtf[3][j] * (VV[3][i] * GNx.ppt[GNPXINDEX(0, i, j)]
+                                   - VV[1][i] * E->N.ppt[GNPINDEX(i, j)]);
+                Vxyz[6][j] += VV[2][i] * GNx.ppt[GNPXINDEX(2, i, j)]
+                    + rtf[3][j] * (VV[3][i]
+                                   * GNx.ppt[GNPXINDEX(1, i, j)]
+                                   / sin(rtf[1][j])
+                                   - VV[2][i] * E->N.ppt[GNPINDEX(i, j)]);
+            }
+        }
 
-        else if (dims==3)
-            EEDOT[e] = edot[1][1]*edot[1][1] + edot[1][2]*edot[1][2]*2.0
-                + edot[2][2]*edot[2][2] + edot[2][3]*edot[2][3]*2.0
-                + edot[3][3]*edot[3][3] + edot[1][3]*edot[1][3]*2.0;
+        edot[1][1] = edot[2][2] = edot[3][3] = 0;
+        edot[1][2] = edot[1][3] = edot[2][3] = 0;
 
+        /* edot is 2 * (the deviatoric strain rate tensor) */
+        for(j=1; j<=ppts; j++) {
+            edot[1][1] += 2.0 * Vxyz[1][j];
+            edot[2][2] += 2.0 * Vxyz[2][j];
+            edot[3][3] += 2.0 * Vxyz[3][j];
+            edot[1][2] += Vxyz[4][j];
+            edot[1][3] += Vxyz[5][j];
+            edot[2][3] += Vxyz[6][j];
+        }
+
+        /* TODO: figure out why 2.0 factor is here */
+        EEDOT[e] = edot[1][1] * edot[1][1]
+            + edot[1][2] * edot[1][2] * 2.0
+            + edot[2][2] * edot[2][2]
+            + edot[2][3] * edot[2][3] * 2.0
+            + edot[3][3] * edot[3][3]
+            + edot[1][3] * edot[1][3] * 2.0;
     }
 
     if(SQRT)
