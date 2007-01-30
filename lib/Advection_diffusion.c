@@ -286,6 +286,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
      int bc;
      unsigned int **FLAGS;
 {
+    void process_heating();
     void get_global_shape_fn();
     void pg_shape_fn();
     void element_residual();
@@ -305,36 +306,39 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
     const int ends=enodes[dims];
     const int sphere_key = 0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nno;i++)
- 	 DTdot[m][i] = 0.0;
+    /* adiabatic and dissipative heating*/
+    process_heating(E);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
-       for(el=1;el<=E->lmesh.nel;el++)    {
+        for(i=1;i<=E->lmesh.nno;i++)
+            DTdot[m][i] = 0.0;
 
-          velo_from_element(E,VV,m,el,sphere_key);
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+        for(el=1;el<=E->lmesh.nel;el++)    {
 
-	  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
+            velo_from_element(E,VV,m,el,sphere_key);
 
-          pg_shape_fn(E,el,&PG,&GNx,VV,diff,m);
-          element_residual(E,el,PG,GNx,dOmega,VV,T,Tdot,Q0,Eres,diff,E->sphere.cap[m].TB,FLAGS,m);
+            get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
 
-        for(a=1;a<=ends;a++) {
-	    a1 = E->ien[m][el].node[a];
-	    DTdot[m][a1] += Eres[a];
-           }
+            pg_shape_fn(E,el,&PG,&GNx,VV,diff,m);
+            element_residual(E,el,PG,GNx,dOmega,VV,T,Tdot,Q0,Eres,diff,E->sphere.cap[m].TB,FLAGS,m);
+
+            for(a=1;a<=ends;a++) {
+                a1 = E->ien[m][el].node[a];
+                DTdot[m][a1] += Eres[a];
+            }
 
         } /* next element */
 
     (E->exchange_node_d)(E,DTdot,E->mesh.levmax);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nno;i++) {
-        if(!(E->node[m][i] & (TBX | TBY | TBZ)))
-	  DTdot[m][i] *= E->Mass[m][i];         /* lumped mass matrix */
-	else
-	  DTdot[m][i] = 0.0;         /* lumped mass matrix */
-      }
+        for(i=1;i<=E->lmesh.nno;i++) {
+            if(!(E->node[m][i] & (TBX | TBY | TBZ)))
+                DTdot[m][i] *= E->Mass[m][i];         /* lumped mass matrix */
+            else
+                DTdot[m][i] = 0.0;         /* lumped mass matrix */
+        }
 
     return;
 }
@@ -729,4 +733,166 @@ void filter(struct All_variables *E)
 		}
 
 	return;
+}
+
+
+static void process_visc_heating(struct All_variables *E, int m,
+                                 double *heating, double *total_heating)
+{
+    int e, i;
+    double visc, temp;
+    const int vpts = vpoints[E->mesh.nsd];
+
+    temp = E->control.disptn_number / E->control.Atemp;
+
+    strain_rate_2_inv(E, m, heating, 0);
+
+    *total_heating = 0;
+
+    for(e=1; e<=E->lmesh.nel; e++) {
+        visc = 0.0;
+        for(i = 1; i <= vpts; i++)
+            visc += E->EVi[m][(e-1)*vpts + i];
+        visc = visc / vpts;
+
+        heating[e] *= temp * visc;
+        *total_heating += heating[e] * E->eco[m][e].area;
+    }
+    return;
+}
+
+
+static void process_adi_heating(struct All_variables *E, int m,
+                                double *heating, double *total_heating)
+{
+    int e, ee, i, j;
+    double temp;
+    const int ends = enodes[E->mesh.nsd];
+
+    *total_heating = 0;
+
+    for(e=1; e<=E->lmesh.nel; e++) {
+        ee = (e - 1) % E->lmesh.elz + 1;
+
+        temp = 0.0;
+        for(i=1; i<=ends; i++) {
+            j = E->ien[m][e].node[i];
+            temp += E->V[m][3][j] * (E->T[m][j] + E->data.surf_temp);
+        }
+        temp = temp * E->control.disptn_number / ends;
+
+        heating[e] = temp * (E->refstate.expansivity[ee] + E->refstate.expansivity[ee + 1]) * 0.5;
+        *total_heating += heating[e] * E->eco[m][e].area;
+    }
+
+    return;
+}
+
+
+static void latent_heating(struct All_variables *E, int m,
+                           double *heating_latent, double *heating_adi,
+                           float **B, float Ra, float clapeyron,
+                           float depth, float transT, float width)
+{
+    double temp1, temp2, temp3;
+    int e, i, j;
+    const int ends = enodes[E->mesh.nsd];
+
+    temp1 = 2.0 * width * clapeyron * Ra / E->control.Atemp;
+
+    for(e=1; e<=E->lmesh.nel; e++) {
+        temp2 = 0;
+        temp3 = 0;
+        for(i=1; i<=ends; i++) {
+            j = E->ien[m][e].node[i];
+            temp2 += temp1 * (1.0 - B[m][j]) * B[m][j]
+                * E->V[m][3][j] * (E->T[m][j] + E->data.surf_temp)
+                * E->control.disptn_number;
+            temp3 += temp1 * clapeyron * (1.0 - B[m][j])
+                * B[m][j] * (E->T[m][j] + E->data.surf_temp)
+                * E->control.disptn_number;
+        }
+        temp2 = temp2 / ends;
+        temp3 = temp3 / ends;
+        heating_adi[e] += temp2;
+        heating_latent[e] += temp3;
+    }
+    return;
+}
+
+
+static void process_latent_heating(struct All_variables *E, int m,
+                                   double *heating_latent, double *heating_adi)
+{
+    int e;
+
+    if(E->control.Ra_410 != 0 || E->control.Ra_670 != 0.0 ||
+       E->control.Ra_cmb != 0) {
+        for(e=1; e<=E->lmesh.nel; e++)
+            heating_latent[e] = 1.0;
+    }
+
+    if(E->control.Ra_410 != 0.0) {
+        latent_heating(E, m, heating_latent, heating_adi,
+                       E->Fas410, E->control.Ra_410,
+                       E->control.clapeyron410, E->viscosity.z410,
+                       E->control.transT410, E->control.width410);
+
+    }
+
+    if(E->control.Ra_670 != 0.0) {
+        latent_heating(E, m, heating_latent, heating_adi,
+                       E->Fas670, E->control.Ra_670,
+                       E->control.clapeyron670, E->viscosity.zlm,
+                       E->control.transT670, E->control.width670);
+    }
+
+    if(E->control.Ra_cmb != 0.0) {
+        latent_heating(E, m, heating_latent, heating_adi,
+                       E->Fascmb, E->control.Ra_cmb,
+                       E->control.clapeyroncmb, E->viscosity.zcmb,
+                       E->control.transTcmb, E->control.widthcmb);
+    }
+
+
+    if(E->control.Ra_410 != 0 || E->control.Ra_670 != 0.0 ||
+       E->control.Ra_cmb != 0) {
+        for(e=1; e<=E->lmesh.nel; e++)
+            heating_latent[e] = 1.0 / heating_latent[e];
+    }
+
+    return;
+}
+
+
+
+void process_heating(struct All_variables *E)
+{
+    int m;
+    double temp1, temp2;
+    double total_visc_heating[NCS], total_adi_heating[NCS];
+    FILE *fp;
+    char filename[250];
+
+    const int dims = E->mesh.nsd;
+    const int ends = enodes[dims];
+    const int vpts = vpoints[dims];
+
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        process_visc_heating(E, m, E->heating_visc[m], &(total_visc_heating[m]));
+        process_adi_heating(E, m, E->heating_adi[m], &(total_adi_heating[m]));
+        process_latent_heating(E, m, E->heating_latent[m], E->heating_adi[m]);
+    }
+
+    /* compute total amount of visc/adi heating over all processors */
+    MPI_Allreduce(&(total_visc_heating[1]), &temp1, E->sphere.caps_per_proc,
+                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
+    MPI_Allreduce(&(total_adi_heating[1]), &temp2, E->sphere.caps_per_proc,
+                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+    if(E->parallel.me == 0)
+        fprintf(E->fp, "Total_heating(adi, visc): %g %g\n", temp2, temp1);
+
+    return;
 }

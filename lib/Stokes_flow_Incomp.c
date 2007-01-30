@@ -393,8 +393,8 @@ static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
     r0dotrt = alpha = omega = 0;
 
     while( (valid) && (count < *steps_max) &&
-           ((E->monitor.incompressibility >= E->control.tole_comp) ||
-            (dpressure >= imp) || (dvelocity >= imp)) )  {
+           ((E->monitor.incompressibility >= E->control.tole_comp) &&
+            (dpressure >= imp) && (dvelocity >= imp)) )  {
 
 
 

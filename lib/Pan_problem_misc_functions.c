@@ -140,8 +140,8 @@ void thermal_buoyancy(struct All_variables *E, double **buoy)
             /* We don't need to substract adiabatic T profile from T here,
              * since the horizontal average of buoy will be removed.
              */
-	    buoy[m][i] =  temp * E->rho_ref[nz] * E->thermexp_ref[nz]
-		* E->T[m][i];
+	    buoy[m][i] =  temp * E->refstate.rho[nz]
+                * E->refstate.expansivity[nz] * E->T[m][i];
 	}
 
     phase_change_apply_410(E, buoy);

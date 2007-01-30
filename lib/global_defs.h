@@ -539,6 +539,15 @@ struct CONTROL {
 
 };
 
+
+struct REF_STATE {
+    double *rho;
+    double *expansivity;
+    double *Tadi;
+    double *dlnrhodr;
+};
+
+
 struct DATA {
     float  layer_km;
     float  radius_km;
@@ -639,8 +648,6 @@ struct All_variables {
     struct SBC sbc;
     struct Output output;
 
-    int filed[20];
-
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
     struct SIEN *sien[NCS];
@@ -662,6 +669,9 @@ struct All_variables {
     struct CC element_Cc;
     struct CCX element_Ccx;
 
+    struct REF_STATE refstate;
+
+
     higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
     int *Node_map [MAX_LEVELS][NCS];
     int *Node_eqn [MAX_LEVELS][NCS];
@@ -670,8 +680,9 @@ struct All_variables {
     double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
 
     double *rho;
-    double *rho_ref, *thermexp_ref, *T_ref;
-    double *dlnrhodr;
+    double *heating_adi[NCS];
+    double *heating_visc[NCS];
+    double *heating_latent[NCS];
 
     double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];

@@ -219,6 +219,16 @@ void compute_nodal_stress(struct All_variables *E,
 
       velo_from_element(E,VV,m,e,sphere_key);
 
+      /* Vxyz is the strain rate vector, whose relationship with
+       * the strain rate tensor (e) is that:
+       *    Vxyz[1] = e11
+       *    Vxyz[2] = e22
+       *    Vxyz[3] = e33
+       *    Vxyz[4] = 2*e12
+       *    Vxyz[5] = 2*e13
+       *    Vxyz[6] = 2*e23
+       * where 1 is theta, 2 is phi, and 3 is r
+       */
       for(j=1;j<=vpts;j++)  {
         pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
         dilation[j] = 0.0;
@@ -268,7 +278,7 @@ void compute_nodal_stress(struct All_variables *E,
 
       if(E->control.inv_gruneisen > 0) {
           for(j=1;j<=vpts;j++)
-              dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) * 2.0 / 3.0;
+              dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
 
       for(j=1;j<=vpts;j++)   {
@@ -291,9 +301,10 @@ void compute_nodal_stress(struct All_variables *E,
       div /= E->eco[m][e].area;
       vor /= E->eco[m][e].area;
 
-      Szz -= E->P[m][e];  /* add the pressure term */
-      Sxx -= E->P[m][e];  /* add the pressure term */
-      Syy -= E->P[m][e];  /* add the pressure term */
+      /* add the pressure term */
+      Szz -= E->P[m][e];
+      Sxx -= E->P[m][e];
+      Syy -= E->P[m][e];
 
       for(i=1;i<=ends;i++) {
         node = E->ien[m][e].node[i];

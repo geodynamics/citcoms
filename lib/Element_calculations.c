@@ -614,7 +614,7 @@ void assemble_div_rho_u(struct All_variables *E,
 {
     void assemble_div_u();
     assemble_div_u(E, U, result, level);
-    assemble_dlnrho(E, E->dlnrhodr, U, result, level);
+    assemble_dlnrho(E, E->refstate.dlnrhodr, U, result, level);
 
     return;
 }

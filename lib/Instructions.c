@@ -468,6 +468,10 @@ void allocate_common_vars(E)
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
 
+  E->heating_adi[j]    = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
+
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);
 
@@ -594,6 +598,10 @@ void allocate_common_vars(E)
   for(i=1;i<=E->lmesh.nel;i++)   {
       E->mat[j][i]=1;
       E->VIP[j][i]=1.0;
+
+      E->heating_adi[j][i] = 0;
+      E->heating_visc[j][i] = 0;
+      E->heating_latent[j][i] = 1.0; //TODO: why 1?
   }
 
   for(i=1;i<=E->lmesh.npno;i++)

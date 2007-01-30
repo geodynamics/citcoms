@@ -43,16 +43,16 @@ void mat_prop_allocate(struct All_variables *E)
     int nel = E->lmesh.nel;
 
     /* reference profile of density */
-    E->rho_ref = (double *) malloc((noz+1)*sizeof(double));
+    E->refstate.rho = (double *) malloc((noz+1)*sizeof(double));
 
     /* reference profile of coefficient of thermal expansion */
-    E->thermexp_ref = (double *) malloc((noz+1)*sizeof(double));
+    E->refstate.expansivity = (double *) malloc((noz+1)*sizeof(double));
 
     /* reference profile of temperature */
-    E->T_ref = (double *) malloc((noz+1)*sizeof(double));
+    E->refstate.Tadi = (double *) malloc((noz+1)*sizeof(double));
 
     /* reference profile of d(ln(rho_ref))/dr */
-    E->dlnrhodr = (double *) malloc((nel+1)*sizeof(double));
+    E->refstate.dlnrhodr = (double *) malloc((nel+1)*sizeof(double));
 }
 
 
@@ -65,25 +65,29 @@ void reference_state(struct All_variables *E)
 
     tmp = E->control.disptn_number * E->control.inv_gruneisen;
     T0 = E->data.surf_temp / E->data.ref_temperature;
+    if(E->parallel.me == 0)
+        fprintf(stderr, "Di=%f, gamma=%f, surf_temp=%f, dT=%f\n",
+                E->control.disptn_number, 1/E->control.inv_gruneisen,
+                E->data.surf_temp, E->data.ref_temperature);
 
     for(i=1; i<=noz; i++) {
 	r = E->sx[1][3][i];
 	z = 1 - r;
-	E->rho_ref[i] = exp(tmp*z);
-	E->thermexp_ref[i] = 1;
-	E->T_ref[i] = T0 * (exp(E->control.disptn_number * z) - 1);
+	E->refstate.rho[i] = exp(tmp*z);
+	E->refstate.expansivity[i] = 1;
+	E->refstate.Tadi[i] = T0 * (exp(E->control.disptn_number * z) - 1);
     }
 
     for(i=1; i<=nel; i++) {
         // TODO: dln(rho)/dr
-        E->dlnrhodr[i] = - tmp;
+        E->refstate.dlnrhodr[i] = - tmp;
     }
 
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=noz; i++) {
             fprintf(stderr, "%d %f %f %f %f\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->rho_ref[i], E->thermexp_ref[i]);
+                    E->refstate.rho[i], E->refstate.Tadi[i]);
         }
 }
 
