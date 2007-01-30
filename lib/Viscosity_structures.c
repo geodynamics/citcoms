@@ -408,18 +408,22 @@ void visc_from_T(E,EEta,propogate)
                                  - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
 
                     if(E->control.mat_control==1) {
-                        visc1 = E->VIP[m][i];
+                     /* visc1 = E->VIP[m][i];
                         visc2 = 2.0/(1./visc1 + 1.);
                         tempa_exp = tempa*
-                            exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
-                                 - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
+	                exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
+		           - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
                         visc1 = tempa*E->viscosity.max_value;
                         if(tempa_exp > visc1) tempa_exp=visc1;
                         EEta[m][ (i-1)*vpts + jj ] = visc2*tempa_exp;
-                        /* if(E->parallel.me == 0 && visc1 < 1.0e-03)
-                           fprintf(stderr,"%f  %f   %e  %e  %e\n",zzz,temp,visc1,visc2,
-                           EEta[m][ (i-1)*vpts + jj ]); */
-                    }
+                     */
+                       visc1 = E->VIP[m][i];
+                       visc2 = tempa*
+	               exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
+		          - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
+                       if(visc1 <= 0.95) visc2=visc1;
+                       EEta[m][ (i-1)*vpts + jj ] = visc2;
+                      }
 
                 }
             }

@@ -48,8 +48,17 @@ void full_read_input_files_for_timesteps(E,action,output)
     int nox,noz,noy,nnn,nox1,noz1,noy1,lev;
     int i,ii,ll,m,mm,j,k,n,nodeg,nodel,node,cap;
     int intage, pos_age;
+    int nodea;
+    int nn,el;
 
     const int dims=E->mesh.nsd;
+
+    int elx,ely,elz,elg,emax;
+    float *VIP1,*VIP2;
+    int *LL1, *LL2;
+
+    int llayer;
+    int layers();
 
     nox=E->mesh.nox;
     noy=E->mesh.noy;
@@ -58,6 +67,12 @@ void full_read_input_files_for_timesteps(E,action,output)
     noz1=E->lmesh.noz;
     noy1=E->lmesh.noy;
     lev=E->mesh.levmax;
+
+    elx=E->lmesh.elx;
+    elz=E->lmesh.elz;
+    ely=E->lmesh.ely;
+
+    emax=E->mesh.elx*E->mesh.elz*E->mesh.ely;
 
     age=find_age_in_MY(E);
 
@@ -103,7 +118,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 	}
 	break;
 
-      case 2:  /* read ages for lithosphere tempperature boundary conditions */
+      case 2:  /* read ages for lithosphere tempperature assimilation */
 	sprintf(output_file1,"%s%0.0f.%d",E->control.lith_age_file,newage1,cap);
 	sprintf(output_file2,"%s%0.0f.%d",E->control.lith_age_file,newage2,cap);
 	fp1=fopen(output_file1,"r");
@@ -126,6 +141,33 @@ void full_read_input_files_for_timesteps(E,action,output)
 	  else
 	    fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
 	}
+	break;
+
+      case 3:  /* read element materials */
+
+	sprintf(output_file1,"%s%0.0f.%d",E->control.mat_file,newage1,cap);
+	sprintf(output_file2,"%s%0.0f.%d",E->control.mat_file,newage2,cap);
+	fp1=fopen(output_file1,"r");
+	if (fp1 == NULL) {
+          fprintf(E->fp,"(Problem_related #8) Cannot open %s\n",output_file1);
+          exit(8);
+	}
+	if (pos_age) {
+	  fp2=fopen(output_file2,"r");
+	  if (fp2 == NULL) {
+	    fprintf(E->fp,"(Problem_related #9) Cannot open %s\n",output_file2);
+	    exit(8);
+	  }
+	}
+	if((E->parallel.me==0) && (output==1))   {
+	  fprintf(E->fp,"Mat: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+	  fprintf(E->fp,"Mat: File1 = %s\n",output_file1);
+	  if (pos_age)
+	    fprintf(E->fp,"Mat: File2 = %s\n",output_file2);
+	  else
+	    fprintf(E->fp,"Mat: File2 = No file inputted (negative age)\n");
+	}
+
 	break;
 
       } /* end switch */
@@ -178,7 +220,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 	}
 	break;
 
-      case 2:  /* ages for lithosphere temperature boundary conditions */
+      case 2:  /* ages for lithosphere temperature assimilation */
 	for(i=1;i<=noy;i++)
 	  for(j=1;j<=nox;j++) {
 	    node=j+(i-1)*nox;
@@ -193,6 +235,53 @@ void full_read_input_files_for_timesteps(E,action,output)
 	  }
 	fclose(fp1);
 	if (pos_age) fclose(fp2);
+	break;
+
+      case 3:  /* read element materials */
+
+        VIP1 = (float*) malloc ((emax+1)*sizeof(float));
+        VIP2 = (float*) malloc ((emax+1)*sizeof(float));
+        LL1 = (int*) malloc ((emax+1)*sizeof(int));
+        LL2 = (int*) malloc ((emax+1)*sizeof(int));
+
+
+        /* probably can be safely removed */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+          for (el=1; el<=elx*ely*elz; el++)  {
+            nodea = E->ien[m][el].node[2];
+            llayer = layers(E,m,nodea);
+            if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
+              E->mat[m][el] = llayer;
+            }
+          }
+          for(i=1;i<=emax;i++)  {
+               fscanf(fp1,"%d %d %f", &nn,&(LL1[i]),&(VIP1[i]));
+               fscanf(fp2,"%d %d %f", &nn,&(LL2[i]),&(VIP2[i]));
+          }
+
+          fclose(fp1);
+          fclose(fp2);
+
+          for (m=1;m<=E->sphere.caps_per_proc;m++) {
+            for (k=1;k<=ely;k++)   {
+              for (i=1;i<=elx;i++)   {
+                for (j=1;j<=elz;j++)  {
+                  el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
+                  elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
+
+                  E->VIP[m][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
+                  E->mat[m][el] = LL1[elg];
+
+                }     /* end for j  */
+              }     /*  end for i */
+            }     /*  end for k  */
+          }     /*  end for m  */
+
+         free ((void *) VIP1);
+         free ((void *) VIP2);
+         free ((void *) LL1);
+         free ((void *) LL2);
+
 	break;
 
       } /* end switch */
