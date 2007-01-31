@@ -748,11 +748,13 @@ static void process_visc_heating(struct All_variables *E, int m,
 {
     int e, i;
     double visc, temp;
+    float *strain_sqr;
     const int vpts = vpoints[E->mesh.nsd];
 
+    strain_sqr = (float*) malloc((E->lmesh.nel+1)*sizeof(float));
     temp = E->control.disptn_number / E->control.Atemp;
 
-    strain_rate_2_inv(E, m, heating, 0);
+    strain_rate_2_inv(E, m, strain_sqr, 0);
 
     *total_heating = 0;
 
@@ -762,9 +764,11 @@ static void process_visc_heating(struct All_variables *E, int m,
             visc += E->EVi[m][(e-1)*vpts + i];
         visc = visc / vpts;
 
-        heating[e] *= temp * visc;
+        heating[e] = temp * visc * strain_sqr[e];
         *total_heating += heating[e] * E->eco[m][e].area;
     }
+
+    free(strain_sqr);
     return;
 }
 
@@ -784,7 +788,7 @@ static void process_adi_heating(struct All_variables *E, int m,
         temp = 0.0;
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
-            temp += E->V[m][3][j] * (E->T[m][j] + E->data.surf_temp);
+            temp += E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->data.surf_temp);
         }
         temp = temp * E->control.disptn_number / ends;
 
@@ -813,7 +817,7 @@ static void latent_heating(struct All_variables *E, int m,
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
             temp2 += temp1 * (1.0 - B[m][j]) * B[m][j]
-                * E->V[m][3][j] * (E->T[m][j] + E->data.surf_temp)
+                * E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->data.surf_temp)
                 * E->control.disptn_number;
             temp3 += temp1 * clapeyron * (1.0 - B[m][j])
                 * B[m][j] * (E->T[m][j] + E->data.surf_temp)
