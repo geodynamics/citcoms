@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
@@ -64,10 +64,14 @@ void tic_input(struct All_variables *E)
         - blob_center: A comma-separated list of three float numbers.
         - blob_radius: A dmensionless length, typically a fraction
                        of the Earth's radius.
-        - blob_dT    : Dimensionless temperature.            */
+        - blob_dT    : Dimensionless temperature.
+
+     When tic_method is 3, the temperature is a linear profile + perturbation
+     for whole mantle.
+  */
 
 
-  if (E->convection.tic_method == 0) {
+  if (E->convection.tic_method == 0 || E->convection.tic_method == 3 ) {
     /* This part put a temperature anomaly at depth where the global
        node number is equal to load_depth. The horizontal pattern of
        the anomaly is given by spherical harmonic ll & mm. */

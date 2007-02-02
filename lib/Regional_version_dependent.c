@@ -445,6 +445,44 @@ void regional_construct_tic_from_input(struct All_variables *E)
                       E->T[m][node] += amp * exp(-1.0*distance/radius);
                 }
   }
+  else if (E->convection.tic_method == 3) {
+    /* set up a linear temperature profile first */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=noy;i++)
+	for(j=1;j<=nox;j++)
+	  for(k=1;k<=noz;k++) {
+	    node=k+(j-1)*noz+(i-1)*nox*noz;
+	    r1=E->sx[m][3][node];
+	    E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
+	  }
+
+    /* This part put a temperature anomaly for whole mantle. The horizontal
+       pattern of the anomaly is given by spherical harmonic ll & mm. */
+
+    for (p=0; p<E->convection.number_of_perturbations; p++) {
+      mm = E->convection.perturb_mm[p];
+      ll = E->convection.perturb_ll[p];
+      con = E->convection.perturb_mag[p];
+      kk = E->convection.load_depth[p];
+
+      if ( (kk < 1) || (kk >= gnoz) ) continue;
+
+      if (E->parallel.me == 0)
+	fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
+
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+	for(i=1;i<=noy;i++)
+	  for(j=1;j<=nox;j++)
+            for(k=1;k<=noz;k++) {
+	      node=k+(j-1)*noz+(i-1)*nox*noz;
+	      t1=E->sx[m][1][node];
+	      f1=E->sx[m][2][node];
+	      r1=E->sx[m][3][node];
+              E->T[m][node] += con*(cos(mm*f1)+sin(mm*f1))
+                  *sin(M_PI*(r1-E->sphere.ri)/(E->sphere.ro-E->sphere.ri));
+	  }
+    }
+  }
 
   temperatures_conform_bcs(E);
 
