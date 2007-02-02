@@ -106,9 +106,11 @@ class Solver(Component):
 
         # XXX: This is a heck
         # Write controller inventory to pid file
-        print >> stream, "[CitcomS.controller]"
-        print >> stream, "monitoringFrequency=%d" % application.controller.inventory.monitoringFrequency
-        print >> stream
+        if stream:
+            print >> stream, "[CitcomS.controller]"
+            print >> stream, ("monitoringFrequency=%d" % 
+                application.controller.inventory.monitoringFrequency)
+            print >> stream
 
         self.setProperties(stream)
 
