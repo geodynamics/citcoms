@@ -154,11 +154,7 @@ void full_node_locations(E)
           fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
           exit(8);
 	}
-      fscanf(fp1,"%s%d",a,&i);
-      if (i != E->mesh.noz ) {
-          fprintf(E->fp,"(Nodal_mesh.c #2) inconsistent file length: %s\n",output_file);
-          exit(8);
-      }
+      fscanf(fp1,"%s %d",a,&i);
       for (k=1;k<=E->mesh.noz;k++)  {
 	fscanf(fp1,"%d %f",&nn,&tt1);
 	rr[k]=tt1;
@@ -319,9 +315,8 @@ void full_construct_tic_from_input(struct All_variables *E)
 	    E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
 	  }
 
-    /* This part put a temperature anomaly at depth where the global
-       node number is equal to load_depth. The horizontal pattern of
-       the anomaly is given by spherical harmonic ll & mm. */
+    /* This part put a temperature anomaly for whole mantle. The horizontal
+       pattern of the anomaly is given by spherical harmonic ll & mm. */
 
     for (p=0; p<E->convection.number_of_perturbations; p++) {
       mm = E->convection.perturb_mm[p];
