@@ -195,7 +195,8 @@ void advection_diffusion_parameters(E)
     input_int("maxtotstep",&(E->advection.max_total_timesteps),"1000000",m);
     input_float("finetunedt",&(E->advection.fine_tune_dt),"0.9",m);
     input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
-    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,2,nomax",m);
+    input_float("adv_gamma",&(E->advection.gamma),"0.5",m);
+    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,1,nomax",m);
 
     input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
