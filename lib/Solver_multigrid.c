@@ -256,12 +256,9 @@ void project_viscosity(E)
     sl_minus = lv -1;
 
     if (E->viscosity.smooth_cycles==1)  {
-/*      visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
+      visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
       project_scalar(E,lv,viscU,viscD);
-      visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);  */
-
-      project_scalar(E,lv,E->VI[lv],E->VI[sl_minus]);
-      visc_from_nodes_to_gint(E,E->VI[sl_minus],E->EVI[sl_minus],sl_minus);
+      visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
       }
     else if (E->viscosity.smooth_cycles==2)   {
       visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);
