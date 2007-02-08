@@ -195,7 +195,8 @@ void advection_diffusion_parameters(E)
     input_int("maxtotstep",&(E->advection.max_total_timesteps),"1000000",m);
     input_float("finetunedt",&(E->advection.fine_tune_dt),"0.9",m);
     input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
-    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,2,nomax",m);
+    input_float("adv_gamma",&(E->advection.gamma),"0.5",m);
+    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,1,nomax",m);
 
     input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
@@ -311,7 +312,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
     const int dims=E->mesh.nsd;
     const int dofs=E->mesh.dof;
     const int ends=enodes[dims];
-    const int sphere_key = 0;
+    const int sphere_key = 1;
 
     /* adiabatic and dissipative heating*/
     process_heating(E);
@@ -325,10 +326,14 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
 
             velo_from_element(E,VV,m,el,sphere_key);
 
-            get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
+            get_global_shape_fn(E, el, &GN, &GNx, &dOmega, 0,
+                                sphere_key, rtf, E->mesh.levmax, m);
 
-            pg_shape_fn(E,el,&PG,&GNx,VV,diff,m);
-            element_residual(E,el,PG,GNx,dOmega,VV,T,Tdot,Q0,Eres,diff,E->sphere.cap[m].TB,FLAGS,m);
+            pg_shape_fn(E, el, &PG, &GNx, VV,
+                        rtf, diff, m);
+            element_residual(E, el, PG, GNx, dOmega, VV, T, Tdot,
+                             Q0, Eres, rtf, diff, E->sphere.cap[m].TB,
+                             FLAGS, m);
 
             for(a=1;a<=ends;a++) {
                 a1 = E->ien[m][el].node[a];
@@ -356,30 +361,24 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
    Petrov-Galerkin shape functions for a given element
    =================================================== */
 
-void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
+void pg_shape_fn(E,el,PG,GNx,VV,rtf,diffusion,m)
      struct All_variables *E;
      int el,m;
      struct Shape_function *PG;
      struct Shape_function_dx *GNx;
      float VV[4][9];
+     double rtf[4][9];
      double diffusion;
 
 {
-    int i,j,node;
+    int i,j;
     int *ienm;
 
     double uc1,uc2,uc3;
-    double u1,u2,u3;
-    double aa,bb,cc,uxse,ueta,ufai,xse,eta,fai,dx1,dx2,dx3,adiff,rr1;
+    double u1,u2,u3,sint[9];
+    double uxse,ueta,ufai,xse,eta,fai,adiff;
 
     double prod1,unorm,twodiff;
-
-    const int dims=E->mesh.nsd;
-    const int dofs=E->mesh.dof;
-    const int lev=E->mesh.levmax;
-    const int nno=E->lmesh.nno;
-    const int ends=enodes[E->mesh.nsd];
-    const int vpts=vpoints[E->mesh.nsd];
 
     ienm=E->ien[m][el].node;
 
@@ -393,63 +392,21 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
       uc3 +=  E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
       }
 
-    dx1=0.25*(E->x[m][1][ienm[3]]+E->x[m][1][ienm[4]]
-             +E->x[m][1][ienm[7]]+E->x[m][1][ienm[8]]
-             -E->x[m][1][ienm[1]]-E->x[m][1][ienm[2]]
-             -E->x[m][1][ienm[5]]-E->x[m][1][ienm[6]]);
-    dx2=0.25*(E->x[m][2][ienm[3]]+E->x[m][2][ienm[4]]
-             +E->x[m][2][ienm[7]]+E->x[m][2][ienm[8]]
-             -E->x[m][2][ienm[1]]-E->x[m][2][ienm[2]]
-             -E->x[m][2][ienm[5]]-E->x[m][2][ienm[6]]);
-    dx3=0.25*(E->x[m][3][ienm[3]]+E->x[m][3][ienm[4]]
-             +E->x[m][3][ienm[7]]+E->x[m][3][ienm[8]]
-             -E->x[m][3][ienm[1]]-E->x[m][3][ienm[2]]
-             -E->x[m][3][ienm[5]]-E->x[m][3][ienm[6]]);
-    uxse = fabs(uc1*dx1+uc2*dx2+uc3*dx3);
+    uxse = fabs(uc1*E->eco[m][el].size[1]);
+    ueta = fabs(uc2*E->eco[m][el].size[2]);
+    ufai = fabs(uc3*E->eco[m][el].size[3]);
 
-    dx1=0.25*(E->x[m][1][ienm[2]]+E->x[m][1][ienm[3]]
-             +E->x[m][1][ienm[6]]+E->x[m][1][ienm[7]]
-             -E->x[m][1][ienm[1]]-E->x[m][1][ienm[4]]
-             -E->x[m][1][ienm[5]]-E->x[m][1][ienm[8]]);
-    dx2=0.25*(E->x[m][2][ienm[2]]+E->x[m][2][ienm[3]]
-             +E->x[m][2][ienm[6]]+E->x[m][2][ienm[7]]
-             -E->x[m][2][ienm[1]]-E->x[m][2][ienm[4]]
-             -E->x[m][2][ienm[5]]-E->x[m][2][ienm[8]]);
-    dx3=0.25*(E->x[m][3][ienm[2]]+E->x[m][3][ienm[3]]
-             +E->x[m][3][ienm[6]]+E->x[m][3][ienm[7]]
-             -E->x[m][3][ienm[1]]-E->x[m][3][ienm[4]]
-             -E->x[m][3][ienm[5]]-E->x[m][3][ienm[8]]);
-    ueta = fabs(uc1*dx1+uc2*dx2+uc3*dx3);
-
-    dx1=0.25*(E->x[m][1][ienm[5]]+E->x[m][1][ienm[6]]
-             +E->x[m][1][ienm[7]]+E->x[m][1][ienm[8]]
-             -E->x[m][1][ienm[1]]-E->x[m][1][ienm[2]]
-             -E->x[m][1][ienm[3]]-E->x[m][1][ienm[4]]);
-    dx2=0.25*(E->x[m][2][ienm[5]]+E->x[m][2][ienm[6]]
-             +E->x[m][2][ienm[7]]+E->x[m][2][ienm[8]]
-             -E->x[m][2][ienm[1]]-E->x[m][2][ienm[2]]
-             -E->x[m][2][ienm[3]]-E->x[m][2][ienm[4]]);
-    dx3=0.25*(E->x[m][3][ienm[5]]+E->x[m][3][ienm[6]]
-             +E->x[m][3][ienm[7]]+E->x[m][3][ienm[8]]
-             -E->x[m][3][ienm[1]]-E->x[m][3][ienm[2]]
-             -E->x[m][3][ienm[3]]-E->x[m][3][ienm[4]]);
-    ufai = fabs(uc1*dx1+uc2*dx2+uc3*dx3);
-
-/*    xse = (uxse>twodiff)? (1.0-twodiff/uxse):0.0;
+    xse = (uxse>twodiff)? (1.0-twodiff/uxse):0.0;
     eta = (ueta>twodiff)? (1.0-twodiff/ueta):0.0;
     fai = (ufai>twodiff)? (1.0-twodiff/ufai):0.0;
-*/
 
-    aa = 2.0*uxse/twodiff;
-    bb = 2.0*ueta/twodiff;
-    cc = 2.0*ufai/twodiff;
-    xse = (1.0+exp(-aa))/(1.0-exp(-aa))-twodiff/uxse;
-    eta = (1.0+exp(-bb))/(1.0-exp(-bb))-twodiff/ueta;
-    fai = (1.0+exp(-cc))/(1.0-exp(-cc))-twodiff/ufai;
 
     unorm = uc1*uc1 + uc2*uc2 + uc3*uc3;
 
     adiff = (unorm>0.000001)?( (uxse*xse+ueta*eta+ufai*fai)/(2.0*unorm) ):0.0;
+
+    for(i=1;i<=VPOINTS3D;i++)
+       sint[i] = rtf[3][i]/sin(rtf[1][i]);
 
     for(i=1;i<=VPOINTS3D;i++) {
        u1 = u2 = u3 = 0.0;
@@ -460,9 +417,9 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
 	    }
 
        for(j=1;j<=ENODES3D;j++) {
-            prod1 = (u1 * GNx->vpt[GNVXINDEX(0,j,i)] +
-                     u2 * GNx->vpt[GNVXINDEX(1,j,i)] +
-                    u3 * GNx->vpt[GNVXINDEX(2,j,i)] ) ;
+            prod1 = (u1 * GNx->vpt[GNVXINDEX(0,j,i)]*rtf[3][i] +
+                     u2 * GNx->vpt[GNVXINDEX(1,j,i)]*sint[i] +
+                     u3 * GNx->vpt[GNVXINDEX(2,j,i)] ) ;
 
 	    PG->vpt[GNVINDEX(j,i)] = E->N.vpt[GNVINDEX(j,i)] + adiff * prod1;
 	    }
@@ -478,7 +435,7 @@ void pg_shape_fn(E,el,PG,GNx,VV,diffusion,m)
    Used to correct the Tdot term.
    =========================================  */
 
-void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS,m)
+void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,FLAGS,m)
      struct All_variables *E;
      int el,m;
      struct Shape_function PG;
@@ -488,6 +445,7 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
      double **field,**fielddot;
      struct SOURCES Q0;
      double Eres[9];
+     double rtf[4][9];
      double diff;
      float **BC;
      unsigned int **FLAGS;
@@ -496,7 +454,7 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
     double dT[9];
-    double tx1[9],tx2[9],tx3[9];
+    double tx1[9],tx2[9],tx3[9],sint[9];
     double v1[9],v2[9],v3[9];
     double adv_dT,t2[4];
     double T,DT;
@@ -523,6 +481,9 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
       v3[i] = tx3[i]=  0.0;
       }
 
+    for(i=1;i<=vpts;i++)
+        sint[i] = rtf[3][i]/sin(rtf[1][i]);
+
     for(j=1;j<=ends;j++)       {
       node = E->ien[m][el].node[j];
       T = field[m][node];
@@ -533,8 +494,8 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
 
       for(i=1;i<=vpts;i++)  {
 		  dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
-		  tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T;
-		  tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T;
+		  tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T * rtf[3][i];
+		  tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T * sint[i];
 	 	  tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T;
 		  sfn = E->N.vpt[GNVINDEX(j,i)];
 		  v1[i] += VV[1][j] * sfn;
@@ -560,8 +521,8 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,diff,BC,FLAGS
 	  Eres[j] -=
 	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
 	    * (dT[i] - Q + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
- 	    + diff*dOmega.vpt[i] * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i] +
-				    GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i] +
+ 	    + diff*dOmega.vpt[i] * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
+				    GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
 				    GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
       }
     }

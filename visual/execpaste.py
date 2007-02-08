@@ -55,12 +55,18 @@ paste_exe = "pasteCitcomData.sh"
 
 ## expand datadir
 s = "%HOSTNAME"
-if s in datadir:
+try:
+    datadir.index(s)
+except: pass
+else:
     from socket import gethostname
     datadir = datadir.replace(s, gethostname())
 
 s = "%RANK"
-if s in datadir:
+try:
+    datadir.index(s)
+except: pass
+else:
     datadir = datadir.replace(s, rank)
 
 if datadir == "%DATADIR":

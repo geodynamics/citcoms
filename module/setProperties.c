@@ -98,9 +98,10 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
 
     getFloatProperty(properties, "finetunedt", E->advection.fine_tune_dt, fp);
     getFloatProperty(properties, "fixed_timestep", E->advection.fixed_timestep, fp);
-    getFloatProperty(properties, "inputdiffusivity", E->control.inputdiff, fp);
-
+    getFloatProperty(properties, "adv_gamma", E->advection.gamma, fp);
     getIntProperty(properties, "adv_sub_iterations", E->advection.temp_iterations, fp);
+
+    getFloatProperty(properties, "inputdiffusivity", E->control.inputdiff, fp);
 
 
     PUTS(("\n"));
@@ -237,7 +238,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
     getIntProperty(properties, "tic_method", E->convection.tic_method, fp);
 
-    if (E->convection.tic_method == 0) {
+    if (E->convection.tic_method == 0 || E->convection.tic_method == 3) {
 	int num_perturb;
 
 	getIntProperty(properties, "num_perturbations", num_perturb, fp);

@@ -90,9 +90,11 @@ class Advection_diffusion(CitcomComponent):
 
         fixed_timestep = prop.float("fixed_timestep", default=0.0)
         finetunedt = prop.float("finetunedt", default=0.9)
+        adv_gamma = prop.float("adv_gamma", default=0.5)
+        adv_sub_iterations = prop.int("adv_sub_iterations", default=2)
+
         inputdiffusivity = prop.float("inputdiffusivity", default=1)
 
-        adv_sub_iterations = prop.int("adv_sub_iterations", default=2)
 
 
 
