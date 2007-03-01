@@ -1882,8 +1882,7 @@ void lost_souls(E)
       {
 	  ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
 	  fprintf(E->trace.fpt,"cap: %d proc %d TNUM: %d ithatcap: %d\n",
-		  ithiscap,E->parallel.me,kk,ithatcap,
-		  E->parallel.PROCESSOR[lev][j].pass[kk]);
+		  ithiscap,E->parallel.me,kk,ithatcap);
 
       }
       fflush(E->trace.fpt);
@@ -6194,7 +6193,7 @@ void get_cartesian_velocity_field(E)
 /* phi and theta are within the proper degree range.                    */
 
 void keep_in_sphere(E,x,y,z,theta,phi,rad)
-     struct All_variable *E;
+     struct All_variables *E;
      double *x;
      double *y;
      double *z;
