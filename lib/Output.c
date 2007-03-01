@@ -80,8 +80,9 @@ void output(struct All_variables *E, int cycles)
   output_surf_botm(E, cycles);
 
   /* output tracer location if using tracer */
-  if(E->control.tracer==1)
-    output_tracer(E, cycles);
+  //TODO: output_tracer() is not working for full version of tracers
+  //if(E->control.tracer==1)
+  //output_tracer(E, cycles);
 
   /* optiotnal output below */
   /* compute and output geoid (in spherical harmonics coeff) */

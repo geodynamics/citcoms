@@ -142,6 +142,19 @@ double TOP_RAD[101][13];
 double BOTTOM_RAD[101][13];
 int ITOP[101][13];
 
+    double xcap[13][5];
+    double ycap[13][5];
+    double zcap[13][5];
+    double theta_cap[13][5];
+    double phi_cap[13][5];
+    double rad_cap[13][5];
+
+    double cos_theta[13][5];
+    double sin_theta[13][5];
+    double cos_phi[13][5];
+    double sin_phi[13][5];
+
+
 /* compositional information */
 int *ieltrac[13];
 double *celtrac[13];

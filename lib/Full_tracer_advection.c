@@ -26,15 +26,14 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-#include<math.h>
+#include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
+#include "parallel_related.h"
 
-
-void parallel_process_sync();
-void parallel_process_termination();
-double CPU_time0();
+static void get_neighboring_caps(struct All_variables *E);
+static void pdebug(struct All_variables *E, int i);
 
 /******* FULL TRACER INPUT *********************/
 
@@ -304,6 +303,7 @@ void full_tracer_setup(E)
 	}
 
     setup_shared_cap_information(E);
+
     if (E->trace.itracer_restart==0) make_tracer_array(E);
     else if (E->trace.itracer_restart==-1) read_tracer_file(E);
     else if (E->trace.itracer_restart==1) restart_tracers(E);
@@ -313,7 +313,6 @@ void full_tracer_setup(E)
 	    fflush(E->trace.fpt);
 	    exit(10);
 	}
-
 
     /* flush and wait for not real reason but it can't hurt */
     fflush(E->trace.fpt);
@@ -525,14 +524,14 @@ void tracer_post_processing(E)
 
     static int been_here=0;
 
-    if (E->trace.itracer_type==1) get_bulk_composition(E);
+    //if (E->trace.itracer_type==1) get_bulk_composition(E);
 
     if ( ((E->monitor.solution_cycles % E->control.record_every)==0) || (been_here==0))
 	{
 	    //TODO: calling this function will crash CitcomS
 	    //write_radial_horizontal_averages(E);
 	    write_tracers(E,1);
-	    if (E->trace.itracer_type==1) write_compositional_field(E);
+	    //if (E->trace.itracer_type==1) write_compositional_field(E);
 	}
     if ( ((E->monitor.solution_cycles % E->trace.iwrite_tracers_every)==0) &&
 	 ((E->monitor.solution_cycles!=E->control.restart)&&(E->monitor.solution_cycles!=0) ))
@@ -553,7 +552,7 @@ void tracer_post_processing(E)
 		}
 	}
 
-    fprintf(E->trace.fpt,"Error fraction: %f  (composition: %f)\n",E->trace.error_fraction,E->trace.bulk_composition);
+/*     fprintf(E->trace.fpt,"Error fraction: %f  (composition: %f)\n",E->trace.error_fraction,E->trace.bulk_composition); */
 
 
 
@@ -741,10 +740,10 @@ void write_tracers(E,iflag)
     for(j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    fprintf(fpcomp,"%6d %6d %.5e %.5e %.5e %d\n",E->trace.itrac[j][0],
-		    E->monitor.solution_cycles,E->monitor.elapsed_time,
-		    E->trace.bulk_composition,
-		    E->trace.initial_bulk_composition,j);
+/* 	    fprintf(fpcomp,"%6d %6d %.5e %.5e %.5e %d\n",E->trace.itrac[j][0], */
+/* 		    E->monitor.solution_cycles,E->monitor.elapsed_time, */
+/* 		    E->trace.bulk_composition, */
+/* 		    E->trace.initial_bulk_composition,j); */
 
 	    comp=0.0;
 	    for (kk=1;kk<=E->trace.itrac[j][0];kk++)
@@ -1681,6 +1680,7 @@ void find_tracers(E)
 		    E->trace.istat_ichoice[j][kk]=0;
 		}
 
+	    //TODO: use while-loop instead of for-loop
 	    /* important to index by it, not kk */
 
 	    it=0;
@@ -1874,7 +1874,7 @@ void lost_souls(E)
 
 
     /* For testing, remove this */
-
+    /*
       for (j=1;j<=E->sphere.caps_per_proc;j++)
       {
       ithiscap=E->sphere.capid[j];
@@ -1887,7 +1887,7 @@ void lost_souls(E)
       }
       fflush(E->trace.fpt);
       }
-
+    */
 
 
     /* Pre communication */
@@ -1915,7 +1915,7 @@ void lost_souls(E)
 			{
 
 			    ithatcap=ithiscap;
-			    icheck=icheck_cap(E,ithatcap,x,y,z,rad);
+			    icheck=icheck_cap(E,0,x,y,z,rad);
 			    if (icheck==1) goto foundit;
 
 			}
@@ -1925,7 +1925,7 @@ void lost_souls(E)
 		    for (pp=1;pp<=E->parallel.TNUM_PASS[lev][j];pp++)
 			{
 			    ithatcap=E->parallel.PROCESSOR[lev][j].pass[pp]+1;
-			    icheck=icheck_cap(E,ithatcap,x,y,z,rad);
+			    icheck=icheck_cap(E,pp,x,y,z,rad);
 			    if (icheck==1) goto foundit;
 			}
 
@@ -1935,7 +1935,7 @@ void lost_souls(E)
 			{
 			    fprintf(E->trace.fpt,"Error(lost souls)-should not be here\n");
 			    fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",x,y,z,rad);
-			    icheck=icheck_cap(E,ithiscap,x,y,z,rad);
+			    icheck=icheck_cap(E,0,x,y,z,rad);
 			    if (icheck==1) fprintf(E->trace.fpt," icheck here!\n");
 			    else fprintf(E->trace.fpt,"icheck not here!\n");
 			    fflush(E->trace.fpt);
@@ -4123,122 +4123,20 @@ void setup_shared_cap_information(E)
      struct All_variables *E;
 {
 
-    int node[5];
-    int nox,noy,noz;
-    int ithiscap;
+    int noz;
     int j;
-    int kk;
     int nroot;
     int nproc;
-    int irootcap;
 
-    double x,y,z;
-    double theta,phi,rad;
     double diff;
 
     static double eps=0.0001;
 
-    void sphere_to_cart();
+    get_neighboring_caps(E);
 
 
-    nox=E->lmesh.nox;
-    noy=E->lmesh.noy;
-    noz=E->lmesh.noz;
-
-    node[1]=nox*noz*(noy-1)+noz;
-    node[2]=noz;
-    node[3]=noz*nox;
-    node[4]=noz*nox*noy;
-
-    /* determine coords of cap surface nodes */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    ithiscap=E->sphere.capid[j];
-
-	    E->trace.XCAP[ithiscap][0]=0.0;
-	    E->trace.YCAP[ithiscap][0]=0.0;
-	    E->trace.ZCAP[ithiscap][0]=0.0;
-	    E->trace.THETA_CAP[ithiscap][0]=0.0;
-	    E->trace.PHI_CAP[ithiscap][0]=0.0;
-	    E->trace.RAD_CAP[ithiscap][0]=0.0;
-
-	    for (kk=1;kk<=4;kk++)
-		{
-
-		    theta=E->sx[j][1][node[kk]];
-		    phi=E->sx[j][2][node[kk]];
-		    rad=E->sphere.ro;
-
-		    sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
-
-		    E->trace.XCAP[ithiscap][kk]=x;
-		    E->trace.YCAP[ithiscap][kk]=y;
-		    E->trace.ZCAP[ithiscap][kk]=z;
-		    E->trace.THETA_CAP[ithiscap][kk]=theta;
-		    E->trace.PHI_CAP[ithiscap][kk]=phi;
-		    E->trace.RAD_CAP[ithiscap][kk]=rad;
-		    E->trace.COS_THETA[ithiscap][kk]=cos(theta);
-		    E->trace.SIN_THETA[ithiscap][kk]=sin(theta);
-		    E->trace.COS_PHI[ithiscap][kk]=cos(phi);
-		    E->trace.SIN_PHI[ithiscap][kk]=sin(phi);
-
-		}
-
-	}
-
-
-    /* broadcast information */
-
-    parallel_process_sync(E);
     nproc=E->parallel.nproc;
-
-    for (nroot=0;nroot<=(nproc-1);nroot++)
-	{
-
-	    for (j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-
-
-		    irootcap=E->sphere.capid[j];
-
-
-		    MPI_Bcast(&irootcap,1,MPI_INT,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.XCAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.YCAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.ZCAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.THETA_CAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.PHI_CAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.RAD_CAP[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.COS_THETA[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.SIN_THETA[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.COS_PHI[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(E->trace.SIN_PHI[irootcap],5,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		}
-	}
-
-    /* Share some processor information */
-
-    parallel_process_sync(E);
-
-    if (nproc>100)
-	{
-	    fprintf(E->trace.fpt,"Error(setup_shared_cap)-should increase arrays TOP AND BOTTOM_RAD\n");
-	    fflush(E->trace.fpt);
-	    parallel_process_termination();
-	}
+    noz=E->lmesh.noz;
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
@@ -4478,9 +4376,9 @@ void make_tracer_array(E)
 		    if (rad<E->sx[j][3][1]) goto next_try;
 
 
-		    /* check if in cap */
+		    /* check if in current cap */
 
-		    ival=icheck_cap(E,ithiscap,x,y,z,rad);
+		    ival=icheck_cap(E,0,x,y,z,rad);
 
 		    if (ival!=1) goto next_try;
 
@@ -4608,7 +4506,7 @@ void read_tracer_file(E)
 		    if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,j,rad);
 		    if (icheck!=1) goto next_tracer;
 
-		    icheck=icheck_cap(E,ithiscap,x,y,z,rad);
+		    icheck=icheck_cap(E,0,x,y,z,rad);
 		    if (icheck==0) goto next_tracer;
 
 		    /* if still here, tracer is in processor domain */
@@ -4979,15 +4877,15 @@ int icheck_cap(E,icap,x,y,z,rad)
     for (kk=1;kk<=4;kk++)
 	{
 
-	    rnode[kk][1]=E->trace.XCAP[icap][kk];
-	    rnode[kk][2]=E->trace.YCAP[icap][kk];
-	    rnode[kk][3]=E->trace.ZCAP[icap][kk];
-	    rnode[kk][4]=E->trace.THETA_CAP[icap][kk];
-	    rnode[kk][5]=E->trace.PHI_CAP[icap][kk];
-	    rnode[kk][6]=E->trace.COS_THETA[icap][kk];
-	    rnode[kk][7]=E->trace.SIN_THETA[icap][kk];
-	    rnode[kk][8]=E->trace.COS_PHI[icap][kk];
-	    rnode[kk][9]=E->trace.SIN_PHI[icap][kk];
+	    rnode[kk][1]=E->trace.xcap[icap][kk];
+	    rnode[kk][2]=E->trace.ycap[icap][kk];
+	    rnode[kk][3]=E->trace.zcap[icap][kk];
+	    rnode[kk][4]=E->trace.theta_cap[icap][kk];
+	    rnode[kk][5]=E->trace.phi_cap[icap][kk];
+	    rnode[kk][6]=E->trace.cos_theta[icap][kk];
+	    rnode[kk][7]=E->trace.sin_theta[icap][kk];
+	    rnode[kk][8]=E->trace.cos_phi[icap][kk];
+	    rnode[kk][9]=E->trace.sin_phi[icap][kk];
 	}
 
 
@@ -5479,7 +5377,7 @@ int iget_element(E,j,iprevious_element,x,y,z,theta,phi,rad)
 
     /* check if still in cap */
 
-    ival=icheck_cap(E,E->sphere.capid[j],x,y,z,rad);
+    ival=icheck_cap(E,0,x,y,z,rad);
     if (ival==0)
 	{
 	    return -99;
@@ -6766,8 +6664,127 @@ void read_comp(E)
 }
 
 
+/******************* get_neighboring_caps ************************************/
+/*                                                                           */
+/* Communicate with neighboring processors to get their cap boundaries,      */
+/* which is later used by icheck_cap()                                       */
+/*                                                                           */
+
+static void get_neighboring_caps(struct All_variables *E)
+{
+    void sphere_to_cart();
+
+    const int ncorners = 4; /* # of top corner nodes */
+    int i, j, n, d, kk, lev, idb;
+    int num_ngb, neighbor_proc, tag;
+    MPI_Status status[200];
+    MPI_Request request[200];
+
+    int node[ncorners];
+    double xx[ncorners*3], rr[12][ncorners*3];
+    int nox,noy,noz,dims;
+    double x,y,z;
+    double theta,phi,rad;
+
+    dims=E->mesh.nsd;
+    nox=E->lmesh.nox;
+    noy=E->lmesh.noy;
+    noz=E->lmesh.noz;
+
+    node[0]=nox*noz*(noy-1)+noz;
+    node[1]=noz;
+    node[2]=noz*nox;
+    node[3]=noz*nox*noy;
+
+    lev = E->mesh.levmax;
+    tag = 45;
+
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+
+        /* loop over top corners to get their coordinates */
+        n = 0;
+        for (i=0; i<ncorners; i++) {
+            for (d=0; d<dims; d++) {
+                xx[n] = E->sx[j][d+1][node[i]];
+                n++;
+            }
+        }
+
+        idb = 0;
+        num_ngb = E->parallel.TNUM_PASS[lev][j];
+        for (kk=1; kk<=num_ngb; kk++) {
+            neighbor_proc = E->parallel.PROCESSOR[lev][j].pass[kk];
+
+            MPI_Isend(xx, n, MPI_DOUBLE, neighbor_proc,
+                      tag, E->parallel.world, &request[idb]);
+            idb++;
+
+            MPI_Irecv(rr[kk], n, MPI_DOUBLE, neighbor_proc,
+                      tag, E->parallel.world, &request[idb]);
+            idb++;
+        }
+
+        /* Storing the current cap information */
+	for (i=0; i<n; i++)
+	    rr[0][i] = xx[i];
+
+        /* Wait for non-blocking calls to complete */
+
+        MPI_Waitall(idb, request, status);
+
+        /* Storing the received cap information
+         * XXX: this part assumes:
+         *      1) E->sphere.caps_per_proc==1
+         *      2) E->mesh.nsd==3
+         */
+        for (kk=0; kk<=num_ngb; kk++) {
+            for (i=1; i<=ncorners; i++) {
+                theta = rr[kk][(i-1)*dims];
+                phi = rr[kk][(i-1)*dims+1];
+                rad = rr[kk][(i-1)*dims+2];
+
+                sphere_to_cart(E, theta, phi, rad, &x, &y, &z);
+
+                E->trace.xcap[kk][i] = x;
+                E->trace.ycap[kk][i] = y;
+                E->trace.zcap[kk][i] = z;
+                E->trace.theta_cap[kk][i] = theta;
+                E->trace.phi_cap[kk][i] = phi;
+                E->trace.rad_cap[kk][i] = rad;
+                E->trace.cos_theta[kk][i] = cos(theta);
+                E->trace.sin_theta[kk][i] = sin(theta);
+                E->trace.cos_phi[kk][i] = cos(phi);
+                E->trace.sin_phi[kk][i] = sin(phi);
+            }
+        } /* end kk, number of neighbors */
+
+        /* debugging output */
+        for (kk=0; kk<=num_ngb; kk++) {
+            for (i=1; i<=ncorners; i++) {
+                fprintf(E->trace.fpt, "pass=%d corner=%d sx=(%g, %g, %g)\n",
+                        kk, i,
+                        E->trace.theta_cap[kk][i],
+                        E->trace.phi_cap[kk][i],
+                        E->trace.rad_cap[kk][i]);
+            }
+        }
+        fflush(E->trace.fpt);
+
+    }
+
+    return;
+}
 
 
+/**** PDEBUG ***********************************************************/
+static void pdebug(struct All_variables *E, int i)
+{
 
+    fprintf(E->trace.fpt,"HERE (Before Sync): %d\n",i);
+    fflush(E->trace.fpt);
+    parallel_process_sync(E);
+    fprintf(E->trace.fpt,"HERE (After Sync): %d\n",i);
+    fflush(E->trace.fpt);
 
-
+    return;
+}
