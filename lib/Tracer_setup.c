@@ -47,21 +47,33 @@
 
 void tracer_input(struct All_variables *E)
 {
+  void full_tracer_input();
   int m=E->parallel.me;
 
   input_int("tracer",&(E->control.tracer),"0",m);
-  input_string("tracer_file",E->control.tracer_file,"tracer.dat",m);
+  if(E->control.tracer) {
+      if(E->parallel.nprocxy == 1)
+	  input_string("tracer_file",E->control.tracer_file,"tracer.dat",m);
+      else
+	  full_tracer_input(E);
+  }
 }
 
 
 void tracer_initial_settings(E)
      struct All_variables *E;
 {
+   void full_tracer_setup();
+   void full_tracer_advection();
    void regional_tracer_setup();
    void regional_tracer_advection();
 
    if(E->parallel.nprocxy == 1) {
        E->problem_tracer_setup = regional_tracer_setup;
        E->problem_tracer_advection = regional_tracer_advection;
+   }
+   else {
+       E->problem_tracer_setup = full_tracer_setup;
+       E->problem_tracer_advection = full_tracer_advection;
    }
 }

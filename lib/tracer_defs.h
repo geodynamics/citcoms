@@ -96,14 +96,6 @@ double *oldel[13];
 double *Have_C;
 double *Havel_tracers;
 
-/* tracer fileter */
-int itrace_filter;
-int itrace_filter_every;
-double trace_filter_uplimit;
-double trace_filter_downlimit;
-double *trace_filter_toprad[13];
-
-
 
 int ilater[13];
 int ilatersize[13];

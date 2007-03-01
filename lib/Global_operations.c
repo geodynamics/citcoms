@@ -228,6 +228,74 @@ void return_horiz_ave_f(E,X,H)
   }
 
 
+/******* RETURN ELEMENTWISE HORIZ AVE ********************************/
+/*                                                                   */
+/* This function is similar to return_horiz_ave in the citcom code   */
+/* however here, elemental horizontal averages are given rather than */
+/* nodal averages. Also note, here is average per element            */
+
+void return_elementwise_horiz_ave(E,X,H)
+     struct All_variables *E;
+     double **X, *H;
+{
+
+  int m,i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
+  int sizeofH;
+  int elz2;
+  double *Have,*temp;
+
+  sizeofH = (2*E->lmesh.elz+2)*sizeof(double);
+
+  Have = (double *)malloc(sizeofH);
+  temp = (double *)malloc(sizeofH);
+
+  noz = E->lmesh.noz;
+  noy = E->lmesh.noy;
+  elz = E->lmesh.elz;
+  elx = E->lmesh.elx;
+  ely = E->lmesh.ely;
+  elz2 = 2*elz;
+
+  for (i=0;i<=(elz*2+1);i++)
+  {
+    temp[i]=0.0;
+  }
+
+  for (i=1;i<=elz;i++)
+  {
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+    {
+      for (k=1;k<=ely;k++)
+      {
+        for (j=1;j<=elx;j++)
+        {
+          el = i + (j-1)*elz + (k-1)*elx*elz;
+          temp[i] += X[m][el]*E->ECO[E->mesh.levmax][m][el].area;
+          temp[i+elz] += E->ECO[E->mesh.levmax][m][el].area;
+        }
+      }
+    }
+  }
+
+
+
+/* determine which processors should get the message from me for
+               computing the layer averages */
+
+  MPI_Allreduce(temp,Have,elz2+1,MPI_DOUBLE,MPI_SUM,E->parallel.horizontal_comm);
+
+  for (i=1;i<=elz;i++) {
+    if(Have[i+elz] != 0.0)
+       H[i] = Have[i]/Have[i+elz];
+    }
+
+
+  free ((void *) Have);
+  free ((void *) temp);
+
+  return;
+}
+
 float return_bulk_value(E,Z,average)
      struct All_variables *E;
      float **Z;
@@ -279,7 +347,7 @@ float return_bulk_value(E,Z,average)
 
 /************ RETURN BULK VALUE_D *****************************************/
 /*                                                                        */
-/* Same as Citcom function but allowing double instead of float.          */
+/* Same as return_bulk_value but allowing double instead of float.        */
 /* I think when integer average =1, volume average is returned.           */
 /*         when integer average =0, integral is returned.           */
 
@@ -293,11 +361,17 @@ double return_bulk_value_d(E,Z,average)
     void get_global_shape_fn();
     void float_global_operation();
 
+    double rtf[4][9];
     int n,i,j,el,m;
     double volume,integral,volume1,integral1;
 
+    struct Shape_function GN;
+    struct Shape_function_dx GNx;
+    struct Shape_function_dA dOmega;
+
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
+    const int sphere_key=1;
 
     volume1=0.0;
     integral1=0.0;
@@ -305,120 +379,25 @@ double return_bulk_value_d(E,Z,average)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
        for (el=1;el<=E->lmesh.nel;el++)  {
 
+	  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
                 n = E->ien[m][el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->GDA[E->mesh.levmax][m][el].vpt[j-1];
-                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->GDA[E->mesh.levmax][m][el].vpt[j-1];
+                volume1 += E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j-1];
+                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j-1];
                 }
 
           }
 
 
-    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
-    MPI_Allreduce(&integral1,&integral,1,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+    MPI_Allreduce(&integral1,&integral,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
     if(average && volume != 0.0)
            integral /= volume;
 
 
     return((double)integral);
-}
-
-/******* RETURN ELEMENTWISE HORIZ AVE ********************************/
-/*                                                                   */
-/* This function is similar to return_horiz_ave in the citcom code   */
-/* however here, elemental horizontal averages are given rather than */
-/* nodal averages. Also note, here is average per element            */
-
-void return_elementwise_horiz_ave(E,X,H)
-     struct All_variables *E;
-     double **X, *H;
-{
-
-  int m,i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
-  int sizeofH;
-  int elz2;
-  int *processors;
-  double *Have,*temp;
-
-  MPI_Comm world, horizon_p;
-  MPI_Group world_g, horizon_g;
-
-  sizeofH = (2*E->lmesh.elz+2)*sizeof(double);
-
-  processors = (int *)malloc((E->parallel.nprocxy+2)*sizeof(int));
-  Have = (double *)malloc(sizeofH);
-  temp = (double *)malloc(sizeofH);
-
-  noz = E->lmesh.noz;
-  noy = E->lmesh.noy;
-  elz = E->lmesh.elz;
-  elx = E->lmesh.elx;
-  ely = E->lmesh.ely;
-  elz2 = 2*elz;
-
-  for (i=0;i<=(elz*2+1);i++)
-  {
-    temp[i]=0.0;
-  }
-
-  for (i=1;i<=elz;i++)
-  {
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-    {
-      for (k=1;k<=ely;k++)
-      {
-        for (j=1;j<=elx;j++)
-        {
-          el = i + (j-1)*elz + (k-1)*elx*elz;
-          temp[i] += X[m][el]*E->ECO[E->mesh.levmax][m][el].area;
-          temp[i+elz] += E->ECO[E->mesh.levmax][m][el].area;
-        }
-      }
-    }
-  }
-
-
-
-/* determine which processors should get the message from me for
-               computing the layer averages */
-
-  nproc = 0;
-  for (j=0;j<E->parallel.nprocxy;j++) {
-    d = E->parallel.me_loc[3] + j*E->parallel.nprocz;
-    processors[nproc] =  d;
-    nproc ++;
-    }
-
-  if (nproc>0)  {
-    world = MPI_COMM_WORLD;
-    MPI_Comm_group(world, &world_g);
-    MPI_Group_incl(world_g, nproc, processors, &horizon_g);
-    MPI_Comm_create(world, horizon_g, &horizon_p);
-
-    MPI_Allreduce(temp,Have,elz2+1,MPI_DOUBLE,MPI_SUM,horizon_p);
-
-    MPI_Comm_free (&horizon_p);
-    MPI_Group_free(&horizon_g);
-    MPI_Group_free(&world_g);
-
-    }
-  else
-    for (i=1;i<=elz2;i++)
-      Have[i] = temp[i];
-
-  for (i=1;i<=elz;i++) {
-    if(Have[i+elz] != 0.0)
-       H[i] = Have[i]/Have[i+elz];
-    }
-
-
-  free ((void *) Have);
-  free ((void *) temp);
-  free ((void *) processors);
-
-  return;
 }
 
 /* ================================================== */

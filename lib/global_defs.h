@@ -660,6 +660,7 @@ struct Output {
 #ifdef USE_HDF5
 #include "hdf5_related.h"
 #endif
+#include "tracer_defs.h"
 
 struct All_variables {
 
@@ -667,7 +668,6 @@ struct All_variables {
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "advection.h"
-#include "tracer_defs.h"
 
     FILE *fp;
     FILE *fptime;

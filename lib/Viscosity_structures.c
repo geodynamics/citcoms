@@ -167,23 +167,22 @@ void get_system_viscosity(E,propogate,evisc,visc)
                         evisc[m][(i-1)*vpts + j] = E->viscosity.min_value;
     }
 
-    /*
-      if (E->control.verbose)  {
+    if (E->control.verbose)  {
       fprintf(E->fp_out,"output_evisc \n");
       for(m=1;m<=E->sphere.caps_per_proc;m++) {
-      fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[m]);
+        fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[m]);
       for(i=1;i<=E->lmesh.nel;i++)
-      fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[m][i],evisc[m][(i-1)*vpts+1],evisc[m][(i-1)*vpts+7]);
+          fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[m][i],evisc[m][(i-1)*vpts+1],evisc[m][(i-1)*vpts+7]);
       }
       fflush(E->fp_out);
-      }
-    */
+    }
 
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
 
     visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);
 
-    /*    visc_to_node_interpolate(E,evisc,visc);
+    /*
+        visc_to_node_interpolate(E,evisc,visc);
      */
 
     /*    for(m=1;m<=E->sphere.caps_per_proc;m++) {

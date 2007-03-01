@@ -154,10 +154,10 @@ int main(argc,argv)
       parallel_process_termination();
     }
 
-    general_stokes_solver(E);
-
     if(E->control.tracer==1)
       (E->problem_tracer_advection)(E);
+
+    general_stokes_solver(E);
 
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
 	(E->problem_output)(E, E->monitor.solution_cycles);

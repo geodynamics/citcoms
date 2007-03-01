@@ -33,6 +33,7 @@
 
 
 void construct_tic(struct All_variables*);
+void debug_tic(struct All_variables*);
 void initial_pressure(struct All_variables*);
 void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
@@ -56,6 +57,9 @@ PyObject * pyCitcom_ic_constructTemperature(PyObject *self, PyObject *args)
     report(E,"Initialize temperature field");
     construct_tic(E);
 
+    if(E->control.verbose)
+        debug_tic(E);
+    
     Py_INCREF(Py_None);
     return Py_None;
 }

@@ -103,11 +103,6 @@ void initial_mesh_solver_setup(struct All_variables *E)
            /* physical domain */
     (E->solver.node_locations)(E);
 
-    if(E->control.tracer==1) {
-	tracer_initial_settings(E);
-	(E->problem_tracer_setup)(E);
-    }
-
     allocate_velocity_vars(E);
 
     get_initial_elapsed_time(E);  /* Get elapsed time from restart run*/
@@ -140,6 +135,11 @@ void initial_mesh_solver_setup(struct All_variables *E)
     construct_bdry_det (E);
 
     set_sphere_harmonics (E);
+
+    if(E->control.tracer==1) {
+	tracer_initial_settings(E);
+	(E->problem_tracer_setup)(E);
+    }
 
     if(E->control.mat_control) {
       if(E->parallel.me ==0) fprintf(stderr,"IN Instructions.c\n");
