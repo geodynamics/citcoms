@@ -1720,6 +1720,10 @@ void find_tracers(E)
 
 	} /* end j */
 
+
+    /* fprintf(E->trace.fpt,"tracer# old:%d new:%d\n", */
+    /*         num_tracers, E->trace.itrac[1][0]); */
+
     /* Now take care of tracers that exited cap */
 
     /* REMOVE */
@@ -1727,7 +1731,7 @@ void find_tracers(E)
       parallel_process_termination();
     */
 
-	lost_souls(E);
+    lost_souls(E);
 
     /* Free later arrays */
 
@@ -1816,7 +1820,10 @@ void lost_souls(E)
 
     int number_of_caps=12;
     int lev=E->mesh.levmax;
+    int num_ngb;
 
+    /* Note, if for some reason, the number of neighbors exceeds */
+    /* 50, which is unlikely, the MPI arrays must be increased.  */
     MPI_Status status[200];
     MPI_Request request[200];
     MPI_Status status1;
@@ -1827,21 +1834,30 @@ void lost_souls(E)
     parallel_process_sync(E);
     fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
-    /* Note, if for some reason, the number of neighbors exceeds */
-    /* 50, which is unlikely, the MPI arrays must be increased.  */
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 	    E->trace.istat_isend=E->trace.ilater[j];
 	}
 
-    /* initialize isend and ireceive */
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+	for (kk=1; kk<=E->trace.istat_isend; kk++) {
+	    fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
+		    E->trace.rlater[j][0][kk],
+		    E->trace.rlater[j][1][kk],
+		    E->trace.rlater[j][2][kk]);
+	}
+	fflush(E->trace.fpt);
+    }
 
+    /* initialize isend and ireceive */
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
+            /* # of neighbors in the horizontal plane */
+            num_ngb = E->parallel.TNUM_PASS[lev][j];
 	    isize[j]=E->trace.ilater[j]*E->trace.number_of_tracer_quantities;
-	    for (kk=1;kk<=number_of_caps;kk++) isend[j][kk]=0;
-	    for (kk=1;kk<=number_of_caps;kk++) ireceive[j][kk]=0;
+	    for (kk=1;kk<=num_ngb;kk++) isend[j][kk]=0;
+	    for (kk=1;kk<=num_ngb;kk++) ireceive[j][kk]=0;
 	}
 
     /* Allocate Maximum Memory to Send Arrays */
@@ -1849,7 +1865,7 @@ void lost_souls(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    itemp_size=max(isize[j],1);
 
@@ -1860,16 +1876,16 @@ void lost_souls(E)
 		    exit(10);
 		}
 
-	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
-		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
-		    if ((send[j][ithatcap]=(double *)malloc(itemp_size*sizeof(double)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
+            num_ngb = E->parallel.TNUM_PASS[lev][j];
+	    for (kk=1;kk<=num_ngb;kk++)
+                {
+                    if ((send[j][kk]=(double *)malloc(itemp_size*sizeof(double)))==NULL)
+                        {
+                            fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
+                            fflush(E->trace.fpt);
+                            exit(10);
+                        }
+                }
 	}
 
 
@@ -1897,9 +1913,6 @@ void lost_souls(E)
 
 	    /* transfer tracers from rlater to send */
 
-
-	    ithiscap=E->sphere.capid[j];
-
 	    numtracers=E->trace.ilater[j];
 
 	    for (kk=1;kk<=numtracers;kk++)
@@ -1913,9 +1926,8 @@ void lost_souls(E)
 
 		    if (E->parallel.nprocz>1)
 			{
-
-			    ithatcap=ithiscap;
-			    icheck=icheck_cap(E,0,x,y,z,rad);
+			    ithatcap=0;
+			    icheck=icheck_cap(E,ithatcap,x,y,z,rad);
 			    if (icheck==1) goto foundit;
 
 			}
@@ -1924,8 +1936,8 @@ void lost_souls(E)
 
 		    for (pp=1;pp<=E->parallel.TNUM_PASS[lev][j];pp++)
 			{
-			    ithatcap=E->parallel.PROCESSOR[lev][j].pass[pp]+1;
-			    icheck=icheck_cap(E,pp,x,y,z,rad);
+			    ithatcap=pp;
+			    icheck=icheck_cap(E,ithatcap,x,y,z,rad);
 			    if (icheck==1) goto foundit;
 			}
 
@@ -1965,14 +1977,12 @@ void lost_souls(E)
 
     /* idb is the request array index variable */
     /* Each send and receive has a request variable */
-    /* Also, tags are sent which ensure send and recieve are coordinated. */
-    /* E->parallel.mst[i][j]=E->parallel.mst[j][i] */
 
     idb=0;
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    /* if tracer is in same cap (nprocz>1) */
 
@@ -1983,39 +1993,17 @@ void lost_souls(E)
 
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
+		    ithatcap=kk;
 
 		    /* if neighbor cap is in another processor, send information via MPI */
 
 		    idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-		    if (idestination_proc!=E->parallel.me)
-			{
+                    idb++;
+                    MPI_Isend(&isend[j][ithatcap],1,MPI_INT,idestination_proc,
+                              11,E->parallel.world,
+                              &request[idb-1]);
 
-			    idb++;
-			    MPI_Isend(&isend[j][ithatcap],1,MPI_INT,idestination_proc,
-				      11,E->parallel.world,
-				      &request[idb-1]);
-
-			} /* end if */
-
-		    /* if neighbor cap is in the same processor (i.e. less than 12 procs) */
-
-		    else if (idestination_proc==E->parallel.me)
-			{
-			    for (pp=1;pp<=E->sphere.caps_per_proc;pp++)
-				{
-				    if (E->sphere.capid[pp]==ithatcap)
-					{
-					    ireceive[pp][ithiscap]=isend[j][ithatcap];
-					    goto found_other_cap;
-					}
-				}
-
-			} /* end else if */
-		    ;
-		found_other_cap:
-		    ;
 		} /* end kk, number of neighbors */
 
 	} /* end j, caps per proc */
@@ -2024,11 +2012,9 @@ void lost_souls(E)
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
-
-	    ithiscap=E->sphere.capid[j];
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
+		    ithatcap=kk;
 
 		    /* if neighbor cap is in another processor, receive information via MPI */
 
@@ -2053,14 +2039,13 @@ void lost_souls(E)
 
     /* Testing, should remove */
 
-      for (j=1;j<=E->sphere.caps_per_proc;j++)
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
       {
-      ithiscap=E->sphere.capid[j];
       for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
       {
-	  ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
-      fprintf(E->trace.fpt,"cap: %d send %d to cap %d\n",ithiscap,isend[j][ithatcap],ithatcap);
-      fprintf(E->trace.fpt,"cap: %d rec  %d from cap %d\n",ithiscap,ireceive[j][ithatcap],ithatcap);
+          isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
+          fprintf(E->trace.fpt,"j: %d send %d to cap %d\n",j,isend[j][kk],isource_proc);
+          fprintf(E->trace.fpt,"j: %d rec  %d from cap %d\n",j,ireceive[j][kk],isource_proc);
       }
       }
 
@@ -2069,7 +2054,8 @@ void lost_souls(E)
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
-	    for (ithatcap=1;ithatcap<=number_of_caps;ithatcap++)
+            num_ngb = E->parallel.TNUM_PASS[lev][j];
+	    for (ithatcap=1;ithatcap<=num_ngb;ithatcap++)
 		{
 		    isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
@@ -2089,8 +2075,7 @@ void lost_souls(E)
     idb=0;
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
-
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    /* same cap */
 
@@ -2110,47 +2095,18 @@ void lost_souls(E)
 
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
-
-		    /* if neighbor cap is in another processor, send information via MPI */
+		    ithatcap=kk;
 
 		    idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
 		    isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
-		    if (idestination_proc!=E->parallel.me)
-			{
+                    idb++;
 
-			    idb++;
+                    MPI_Isend(send[j][ithatcap],isize[j],MPI_DOUBLE,idestination_proc,
+                              11,E->parallel.world,
+                              &request[idb-1]);
 
-
-			    MPI_Isend(send[j][ithatcap],isize[j],MPI_DOUBLE,idestination_proc,
-				      11,E->parallel.world,
-				      &request[idb-1]);
-
-			} /* end if */
-
-		    /* if neighbor cap is in the same processor (i.e. less than 12 procs) */
-
-		    else if (idestination_proc==E->parallel.me)
-			{
-			    for (pp=1;pp<=E->sphere.caps_per_proc;pp++)
-				{
-				    if (E->sphere.capid[pp]==ithatcap)
-					{
-
-					    for (mm=1;mm<=isize[j];mm++)
-						{
-						    receive[pp][ithiscap][mm]=send[j][ithatcap][mm];
-						}
-					    goto found_other_cap2;
-					}
-				}
-
-			} /* end else if */
-
-		found_other_cap2:
-		    ;
 		} /* end kk, number of neighbors */
 
 	} /* end j, caps per proc */
@@ -2161,27 +2117,20 @@ void lost_souls(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
-
-		    /* if neighbor cap is in another processor, receive information via MPI */
+		    ithatcap=kk;
 
 		    isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-		    if (idestination_proc!=E->parallel.me)
-			{
+                    idb++;
 
-			    idb++;
+                    isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
-			    isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
-
-			    MPI_Irecv(receive[j][ithatcap],isize[j],MPI_DOUBLE,isource_proc,
-				      11,E->parallel.world,
-				      &request[idb-1]);
-
-			} /* end if */
+                    MPI_Irecv(receive[j][ithatcap],isize[j],MPI_DOUBLE,isource_proc,
+                              11,E->parallel.world,
+                              &request[idb-1]);
 
 		} /* end kk, number of neighbors */
 
@@ -2201,11 +2150,11 @@ void lost_souls(E)
 	{
 	    isum[j]=0;
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
+		    ithatcap=kk;
 		    isum[j]=isum[j]+ireceive[j][ithatcap];
 		}
 	    if (E->parallel.nprocz>1) isum[j]=isum[j]+ireceive[j][ithiscap];
@@ -2238,14 +2187,14 @@ void lost_souls(E)
 
 	    irec_position=0;
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    /* horizontal neighbors */
 
 	    for (ihorizontal_neighbor=1;ihorizontal_neighbor<=E->parallel.TNUM_PASS[lev][j];ihorizontal_neighbor++)
 		{
 
-		    ithatcap=E->parallel.PROCESSOR[lev][ithiscap].pass[ihorizontal_neighbor]+1;
+		    ithatcap=ihorizontal_neighbor;
 
 		    for (pp=1;pp<=ireceive[j][ithatcap];pp++)
 			{
@@ -2586,7 +2535,7 @@ void lost_souls(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
+	    ithiscap=0;
 
 	    free(REC[j]);
 
@@ -2594,15 +2543,11 @@ void lost_souls(E)
 
 	    for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++)
 		{
-		    ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
+		    ithatcap=kk;
 
 		    free(send[j][ithatcap]);
-
-		}
-
-	    for (ithatcap=1;ithatcap<=number_of_caps;ithatcap++)
-		{
 		    free(receive[j][ithatcap]);
+
 		}
 
 	}
