@@ -46,3 +46,128 @@ float *FI_LOC_ELEM_T;
 float *R_LOC_ELEM_T;
 
 } r;
+
+
+struct TRACE{
+
+FILE *fpt;
+
+FILE *fp_error_fraction;
+FILE *fp_composition;
+
+char tracer_file[200];
+
+int number_of_advection_quantities;
+int number_of_extra_quantities;
+int number_of_tracer_quantities;
+int itracer_warnings;
+
+int itracing;
+int itracer_type;
+int ianalytical_tracer_test;
+int icompositional_rheology;
+int ibuoy_type;
+int itracer_restart;
+int icartesian_or_spherical_input;
+int itperel;
+int itracer_advection_scheme;
+int itracer_interpolation_scheme;
+int iwrite_tracers_every;
+int ireset_initial_composition;
+
+int itracsize[13];
+int *itrac[13];
+
+double buoyancy_ratio;
+double z_interface;
+double compositional_rheology_prefactor;
+double box_cushion;
+double *rtrac[13][100];
+double *etrac[13][100];
+double *rlater[13][100];
+/*
+double **rtrac[13];
+double **etrac[13];
+double **rlater[13];
+*/
+double *oldel[13];
+
+/* horizontally averaged */
+double *Have_C;
+double *Havel_tracers;
+
+/* tracer fileter */
+int itrace_filter;
+int itrace_filter_every;
+double trace_filter_uplimit;
+double trace_filter_downlimit;
+double *trace_filter_toprad[13];
+
+
+
+int ilater[13];
+int ilatersize[13];
+
+/* regular mesh parameters */
+int numtheta[13];
+int numphi[13];
+unsigned int numregel[13];
+unsigned int numregnodes[13];
+double deltheta[13];
+double delphi[13];
+double thetamax[13];
+double thetamin[13];
+double phimax[13];
+double phimin[13];
+int *regnodetoel[13];
+int *regtoel[13][5];
+
+
+/* statistical parameters */
+int istat_ichoice[13][5];
+int istat_isend;
+int istat_iempty;
+int istat1;
+int istat_elements_checked;
+int ilast_tracer_count;
+double stat_time_start_trace;
+double stat_time_end_trace;
+double stat_trace_time;
+double stat_stokes_time;
+
+/* Mesh information */
+double XCAP[13][5];
+double YCAP[13][5];
+double ZCAP[13][5];
+double THETA_CAP[13][5];
+double PHI_CAP[13][5];
+double RAD_CAP[13][5];
+double COS_THETA[13][5];
+double SIN_THETA[13][5];
+double COS_PHI[13][5];
+double SIN_PHI[13][5];
+double TOP_RAD[101][13];
+double BOTTOM_RAD[101][13];
+int ITOP[101][13];
+
+/* compositional information */
+int *ieltrac[13];
+double *celtrac[13];
+double *comp_el[13];
+double *comp_node[13];
+
+/* gnomonic shape functions */
+double *UV[13][3];
+double cos_theta_f;
+double sin_theta_f;
+double *shape_coefs[13][3][10];
+
+double *DSinCos[13][4];
+
+double *V0_cart[13][4];
+
+double initial_bulk_composition;
+double bulk_composition;
+double error_fraction;
+
+};

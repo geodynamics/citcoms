@@ -685,7 +685,10 @@ struct All_variables {
     struct SLICE slice;
     struct Parallel parallel;
     struct SPHERE sphere;
+    /* for regional tracer*/
     struct Tracer Tracer;
+    /* for global tracer*/
+    struct TRACE trace;
     struct Bdry boundary;
     struct SBC sbc;
     struct Output output;
