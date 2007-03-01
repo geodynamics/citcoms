@@ -55,11 +55,69 @@ class Tracer(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.inventory
+        import pyre.inventory as inv
 
 
-        tracer = pyre.inventory.bool("tracer", default=False)
-        tracer_file = pyre.inventory.str("tracer_file", default="tracer.dat")
+        tracer = inv.bool("tracer", default=False)
+
+        # tracer_restart=-1 (read from file) TODO: rename to tracer_init_method
+        # tracer_restart=0 (generate array)
+        # tracer_restart=1 (read from scratch disks)
+        tracer_restart = inv.int("tracer_restart", default=0)
+
+        # (tracer_restart == 0)
+        tracers_per_element = inv.int("tracers_per_element", default=10)
+        # TODO: remove
+        z_interface = inv.float("z_interface", default=0.5)
+
+        # (tracer_restart == -1 or 1)
+        tracer_file = inv.str("tracer_file", default="tracer.dat")
+
+        # icartesian_or_spherical=0 (cartesian coordinate input) */
+        # icartesian_or_spherical=1 (spherical coordinate input) */
+        cartesian_or_spherical_input = inv.int("cartesian_or_spherical_input",
+                                               default=1)
+
+        # Advection Scheme
+
+        # itracer_advection_scheme=1
+        #     (simple predictor corrector -uses only V(to))
+        # itracer_advection_scheme=2
+        #     (predictor-corrector - uses V(to) and V(to+dt))
+        tracer_advection_scheme = inv.int("tracer_advection_scheme", default=1)
+
+        # Interpolation Scheme
+        # itracer_interpolation_scheme=1 (gnometric projection)
+        # itracer_interpolation_scheme=2 (simple average, not implemented) TODO:remove
+        tracer_interpolation_scheme = inv.int("tracer_interpolation_scheme",
+                                              default=1)
+
+        # Regular grid parameters
+        regular_grid_deltheta = inv.float("regular_grid_deltheta", default=1.0)
+        regular_grid_delphi = inv.float("regular_grid_delphi", default=1.0)
+
+        # Analytical Test Function
+        analytical_tracer_test = inv.int("analytical_tracer_test", default=0)
+
+        # itracer_type=0 passive
+        # itracer_type=1 active
+        tracer_type = inv.int("tracer_type", default=1)
+
+        # ibuoy_type=0 (absolute method, not implemented)
+        # ibuoy_type=1 (ratio method)
+        buoy_type = inv.int("buoy_type", default=1)
+        buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
+        reset_initial_composition = inv.bool("reset_initial_composition",
+                                             default=False)
+
+        # compositional_rheology=1 (not implemented in this version, TODO:remove)
+        compositional_rheology = inv.bool("compositional_rheology",
+                                          default=False)
+        compositional_prefactor = inv.float("compositional_prefactor",
+                                            default=1.0)
+
+        # Output frequency TODO: remove
+        write_tracers_every = inv.int("write_tracers_every", default=1000000)
 
 
 

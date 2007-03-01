@@ -112,10 +112,10 @@ void full_tracer_input(E)
     E->trace.icartesian_or_spherical_input=0;
     if (E->trace.itracer_restart==-1)
 	{
-	    sprintf(E->trace.tracer_file,"tracer.in");
-	    input_string("tracer_file",E->trace.tracer_file,"tracer.in",m);
+	    sprintf(E->trace.tracer_file,"tracer.dat");
+	    input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
 
-	    input_int("cartesian_or_spherical_input",&(E->trace.icartesian_or_spherical_input),"10,0,nomax",m);
+	    input_int("cartesian_or_spherical_input",&(E->trace.icartesian_or_spherical_input),"1,0,nomax",m);
 
 	}
 
@@ -140,7 +140,7 @@ void full_tracer_input(E)
 
     E->trace.itracer_advection_scheme=2;
     input_int("tracer_advection_scheme",&(E->trace.itracer_advection_scheme),
-	      "100,0,nomax",m);
+	      "2,0,nomax",m);
 
     if (E->trace.itracer_advection_scheme==1)
 	{
@@ -167,7 +167,7 @@ void full_tracer_input(E)
 
     E->trace.itracer_interpolation_scheme=1;
     input_int("tracer_interpolation_scheme",&(E->trace.itracer_interpolation_scheme),
-	      "100,0,nomax",m);
+	      "1,0,nomax",m);
     if (E->trace.itracer_interpolation_scheme<1 || E->trace.itracer_interpolation_scheme>2)
 	{
 	    fprintf(stderr,"Sorry, only interpolation scheme 1 and 2 available\n");
@@ -189,7 +189,7 @@ void full_tracer_input(E)
 
     E->trace.ianalytical_tracer_test=0;
     input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
-	      "100,0,nomax",m);
+	      "0,0,nomax",m);
 
     return;
 }

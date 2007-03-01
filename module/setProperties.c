@@ -559,6 +559,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
+    double tmp;
 
     if (!PyArg_ParseTuple(args, "OOO:Tracer_set_properties",
 			  &obj, &properties, &out))
@@ -570,8 +571,39 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     PUTS(("[CitcomS.solver.tracer]\n"));
 
     getIntProperty(properties, "tracer", E->control.tracer, fp);
-    getStringProperty(properties, "tracer_file", E->control.tracer_file, fp);
 
+    if(E->parallel.nprocxy == 1) {
+        // TODO: change to E->tracer.tracer_file..
+        getStringProperty(properties, "tracer_file", E->control.tracer_file, fp);
+    }
+    else if(E->parallel.nprocxy == 12) {
+        getIntProperty(properties, "tracer_restart", E->trace.itracer_restart, fp);
+
+        getIntProperty(properties, "tracers_per_element", E->trace.itperel, fp);
+        getDoubleProperty(properties, "z_interface", E->trace.z_interface, fp);
+
+        getStringProperty(properties, "tracer_file", E->trace.tracer_file, fp);
+        getIntProperty(properties, "cartesian_or_spherical_input", E->trace.icartesian_or_spherical_input, fp);
+
+        getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
+        getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
+
+        getDoubleProperty(properties, "regular_grid_deltheta", tmp, fp);
+        E->trace.deltheta[0] = tmp;
+        getDoubleProperty(properties, "regular_grid_delphi", tmp, fp);
+        E->trace.delphi[0] = tmp;
+        getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
+
+        getIntProperty(properties, "tracer_type", E->trace.itracer_type, fp);
+        getIntProperty(properties, "buoy_type", E->trace.ibuoy_type, fp);
+        getDoubleProperty(properties, "buoyancy_ratio", E->trace.buoyancy_ratio, fp);
+        getIntProperty(properties, "reset_initial_composition", E->trace.ireset_initial_composition, fp);
+        getIntProperty(properties, "compositional_rheology", E->trace.icompositional_rheology, fp);
+        getDoubleProperty(properties, "compositional_prefactor", E->trace.compositional_rheology_prefactor, fp);
+
+        getIntProperty(properties, "write_tracers_every", E->trace.iwrite_tracers_every, fp);
+
+    }
     PUTS(("\n"));
 
     Py_INCREF(Py_None);
