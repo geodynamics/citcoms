@@ -128,20 +128,6 @@ double stat_trace_time;
 double stat_stokes_time;
 
 /* Mesh information */
-double XCAP[13][5];
-double YCAP[13][5];
-double ZCAP[13][5];
-double THETA_CAP[13][5];
-double PHI_CAP[13][5];
-double RAD_CAP[13][5];
-double COS_THETA[13][5];
-double SIN_THETA[13][5];
-double COS_PHI[13][5];
-double SIN_PHI[13][5];
-double TOP_RAD[101][13];
-double BOTTOM_RAD[101][13];
-int ITOP[101][13];
-
     double xcap[13][5];
     double ycap[13][5];
     double zcap[13][5];

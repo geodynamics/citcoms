@@ -204,7 +204,6 @@ void full_tracer_setup(E)
     void write_trace_instructions();
     void viscosity_checks();
     void make_tracer_array();
-    void setup_shared_cap_information();
     void initialize_old_composition();
     void fill_composition();
     void find_tracers();
@@ -302,7 +301,7 @@ void full_tracer_setup(E)
 	    parallel_process_termination();
 	}
 
-    setup_shared_cap_information(E);
+    get_neighboring_caps(E);
 
     if (E->trace.itracer_restart==0) make_tracer_array(E);
     else if (E->trace.itracer_restart==-1) read_tracer_file(E);
@@ -1814,7 +1813,6 @@ void lost_souls(E)
     double *REC[13];
 
     int iget_element();
-    int icheck_that_processor_shell();
     int icheck_cap();
     void expand_tracer_arrays();
 
@@ -2301,7 +2299,6 @@ void lost_souls(E)
 				    irad=ireceive_position+2;
 
 				    rad=REC[j][irad];
-
 
 				    ival=icheck_that_processor_shell(E,j,ithat_processor,rad);
 
@@ -4063,60 +4060,6 @@ void write_trace_instructions(E)
 }
 
 
-/************** SETUP SHARED CAP INFORMATION ***************/
-void setup_shared_cap_information(E)
-     struct All_variables *E;
-{
-
-    int noz;
-    int j;
-    int nroot;
-    int nproc;
-
-    double diff;
-
-    static double eps=0.0001;
-
-    get_neighboring_caps(E);
-
-
-    nproc=E->parallel.nproc;
-    noz=E->lmesh.noz;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    E->trace.BOTTOM_RAD[E->parallel.me][j]=E->sx[j][3][1];
-	    E->trace.TOP_RAD[E->parallel.me][j]=E->sx[j][3][noz];
-
-	    diff=fabs(E->sx[j][3][noz]-E->sphere.ro);
-
-	    if (diff<=eps) E->trace.ITOP[E->parallel.me][j]=1;
-	    else E->trace.ITOP[E->parallel.me][j]=0;
-
-
-	}
-
-    /* broadcast */
-
-    for (nroot=0;nroot<=(nproc-1);nroot++)
-	{
-	    for (j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-
-
-		    MPI_Bcast(&E->trace.BOTTOM_RAD[nroot][j],1,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-		    MPI_Bcast(&E->trace.TOP_RAD[nroot][j],1,MPI_DOUBLE,
-			      nroot,E->parallel.world);
-
-
-		}
-	}
-
-    return;
-}
-
 /************** RESTART TRACERS ******************************************/
 /*                                                                       */
 /* This function restarts tracers written from previous calculation      */
@@ -4548,6 +4491,7 @@ void sphere_to_cart(E,theta,phi,rad,x,y,z)
     return;
 }
 
+
 /********* ICHECK THAT PROCESSOR SHELL ********/
 /*                                            */
 /* Checks whether a given radius is within    */
@@ -4559,47 +4503,40 @@ void sphere_to_cart(E,theta,phi,rad,x,y,z)
 /* is at the surface (then both boundaries are   */
 /* included).                                    */
 
-
 int icheck_that_processor_shell(E,j,nprocessor,rad)
      struct All_variables *E;
      int j;
      int nprocessor;
      double rad;
 {
+    int icheck_processor_shell();
+    int me = E->parallel.me;
 
+    /* nprocessor is right on top of me */
+    if (nprocessor == me+1) {
+        if (icheck_processor_shell(E, j, rad) == 0) return 1;
+        else return 0;
+    }
 
-    double top_r,bottom_r;
+    /* nprocessor is right on bottom of me */
+    if (nprocessor == me-1) {
+        if (icheck_processor_shell(E, j, rad) == -99) return 1;
+        else return 0;
+    }
 
-    top_r=E->trace.TOP_RAD[nprocessor][j];
-    bottom_r=E->trace.BOTTOM_RAD[nprocessor][j];
-
-
-    /* First check bottom */
-
-    if (rad<bottom_r) return 0;
-
-    /* Check top */
-
-
-    if (E->trace.ITOP[nprocessor][j]==1)
-	{
-	    if (rad<=top_r) return 1;
-	}
-    else
-	{
-	    if (rad<top_r) return 1;
-	}
-
-    /* If here, means point is above processor */
-
-    return 0;
+    /* Shouldn't be here */
+    fprintf(E->trace.fpt, "Should not be here\n");
+    fprintf(E->trace.fpt, "Error(check_shell) nprocessor: %d, radius: %f\n",
+            nprocessor, rad);
+    fflush(E->trace.fpt);
+    exit(10);
 }
 
 
 /********** ICHECK PROCESSOR SHELL *************/
-/* returns -99 if rad is below correct shell  */
-/* returns 0 if rad is above correct shell    */
-/* returns 1 if correct shell                 */
+/* returns -99 if rad is below current shell  */
+/* returns 0 if rad is above current shell    */
+/* returns 1 if rad is within current shell   */
 /*                                            */
 /* Shell, here, refers to processor shell     */
 /*                                            */
@@ -4614,58 +4551,30 @@ int icheck_processor_shell(E,j,rad)
 
 {
 
-    static int top=0;
-    static int bottom=0;
-    static int been_here=0;
-    double eps=0.0000001;
+    const int noz = E->lmesh.noz;
+    const int nprocz = E->parallel.nprocz;
+    double top_r, bottom_r;
+
+    if (nprocz==1) return 1;
+
+    top_r = E->sx[j][3][noz];
+    bottom_r = E->sx[j][3][1];
+
+    /* First check bottom */
+
+    if (rad<bottom_r) return -99;
 
 
-    if (E->parallel.nprocz==1) return 1;
+    /* Check top */
 
-    if (been_here==0)
-	{
-	    if ((E->sx[j][3][1]-eps)<E->sphere.ri) bottom=1;
-	    if ((E->sx[j][3][E->lmesh.noz]+eps)>E->sphere.ro) top=1;
-	    been_here++;
-	}
+    if (rad<top_r) return 1;
 
-    if (top==1)
-	{
-	    if (rad>=E->sx[j][3][1])
-		{
-		    return 1;
-		}
-	    return -99;
-	}
+    /* top processor */
 
-    if (bottom==1)
-	{
-	    if (rad<E->sx[j][3][E->lmesh.noz])
-		{
-		    return 1;
-		}
-	    return 0;
-	}
+    if ( (rad<=top_r) && (E->parallel.me_loc[3]==nprocz-1) ) return 1;
 
-    if ((rad>=E->sx[j][3][1])&&(rad<E->sx[j][3][E->lmesh.noz]))
-	{
-	    return 1;
-	}
-    if (rad>=E->sx[j][3][E->lmesh.noz])
-	{
-	    return 0;
-	}
-    if (rad<E->sx[j][3][1])
-	{
-	    return -99;
-	}
-
-
-    fprintf(E->trace.fpt,"Should not be here\n");
-    fprintf(E->trace.fpt,"Error(check_shell) radius: %f\n",rad);
-    fflush(E->trace.fpt);
-    exit(10);
-
+    /* If here, means point is above processor */
+    return 0;
 }
 
 /******* ICHECK ELEMENT *************************************/
