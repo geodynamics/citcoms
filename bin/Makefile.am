@@ -49,9 +49,9 @@ endif
 
 
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
-CitcomSFull_LDADD = $(top_builddir)/lib/libCitcomS.a
+CitcomSFull_LDADD = $(libCitcomS)
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
-CitcomSRegional_LDADD = $(top_builddir)/lib/libCitcomS.a
+CitcomSRegional_LDADD = $(libCitcomS)
 
 
 
