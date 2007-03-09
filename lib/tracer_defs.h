@@ -45,7 +45,7 @@ float *THETA_LOC_ELEM_T;
 float *FI_LOC_ELEM_T;
 float *R_LOC_ELEM_T;
 
-} r;
+};
 
 
 struct TRACE{
@@ -63,24 +63,17 @@ int number_of_tracer_quantities;
 int itracer_warnings;
 
 int itracing;
-int itracer_type;
 int ianalytical_tracer_test;
-int icompositional_rheology;
-int ibuoy_type;
-int itracer_restart;
-int icartesian_or_spherical_input;
+int ic_method;
 int itperel;
 int itracer_advection_scheme;
 int itracer_interpolation_scheme;
-int iwrite_tracers_every;
-int ireset_initial_composition;
+
+int icompositional_rheology;
 
 int itracsize[13];
 int *itrac[13];
 
-double buoyancy_ratio;
-double z_interface;
-double compositional_rheology_prefactor;
 double box_cushion;
 double *rtrac[13][100];
 double *etrac[13][100];
@@ -122,10 +115,6 @@ int istat_iempty;
 int istat1;
 int istat_elements_checked;
 int ilast_tracer_count;
-double stat_time_start_trace;
-double stat_time_end_trace;
-double stat_trace_time;
-double stat_stokes_time;
 
 /* Mesh information */
     double xcap[13][5];
@@ -152,8 +141,6 @@ double *UV[13][3];
 double cos_theta_f;
 double sin_theta_f;
 double *shape_coefs[13][3][10];
-
-double *DSinCos[13][4];
 
 double *V0_cart[13][4];
 

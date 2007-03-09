@@ -359,7 +359,6 @@ double return_bulk_value_d(E,Z,average)
 
 {
     void get_global_shape_fn();
-    void float_global_operation();
 
     double rtf[4][9];
     int n,i,j,el,m;

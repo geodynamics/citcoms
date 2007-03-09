@@ -51,7 +51,8 @@ class Output(CitcomComponent):
         output_format = inv.str("output_format", default="ascii",
                                 validator=inv.choice(["ascii",
                                                       "hdf5"]))
-        output_optional = inv.str("output_optional", default="surf,botm")
+        output_optional = inv.str("output_optional",
+                                  default="surf,botm,tracer,comp_el")
 
         # max. degree for spherical harmonics output
         output_ll_max = inv.int("output_ll_max", default=20)

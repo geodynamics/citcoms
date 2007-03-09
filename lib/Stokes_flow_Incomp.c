@@ -420,7 +420,7 @@ void velo_from_element(E,VV,m,el,sphere_key)
   {
 
   int a, node;
-  float sint, cost, sinf, cosf;
+  double sint, cost, sinf, cosf;
   const int dims=E->mesh.nsd;
   const int ends=enodes[E->mesh.nsd];
   const int nno=E->lmesh.nno;

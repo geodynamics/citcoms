@@ -60,23 +60,20 @@ class Tracer(CitcomComponent):
 
         tracer = inv.bool("tracer", default=False)
 
-        # tracer_restart=-1 (read from file) TODO: rename to tracer_init_method
-        # tracer_restart=0 (generate array)
-        # tracer_restart=1 (read from scratch disks)
-        tracer_restart = inv.int("tracer_restart", default=0)
+        # tracer_ic_method=0 (random generated array)
+        # tracer_ic_method=1 (all proc read the same file)
+        # tracer_ic_method=2 (each proc reads its restart file)
+        tracer_ic_method = inv.int("tracer_ic_method", default=0)
 
-        # (tracer_restart == 0)
+        # (tracer_ic_method == 0)
         tracers_per_element = inv.int("tracers_per_element", default=10)
-        # TODO: remove
-        z_interface = inv.float("z_interface", default=0.5)
 
-        # (tracer_restart == -1 or 1)
+        # (tracer_ic_method == 1)
         tracer_file = inv.str("tracer_file", default="tracer.dat")
 
-        # icartesian_or_spherical=0 (cartesian coordinate input) */
-        # icartesian_or_spherical=1 (spherical coordinate input) */
-        cartesian_or_spherical_input = inv.int("cartesian_or_spherical_input",
-                                               default=1)
+
+        # TODO: remove
+        z_interface = inv.float("z_interface", default=0.5)
 
         # Advection Scheme
 
@@ -99,9 +96,7 @@ class Tracer(CitcomComponent):
         # Analytical Test Function
         analytical_tracer_test = inv.int("analytical_tracer_test", default=0)
 
-        # itracer_type=0 passive
-        # itracer_type=1 active
-        tracer_type = inv.int("tracer_type", default=1)
+        chemical_buoyancy = inv.int("chemical_buoyancy", default=1)
 
         # ibuoy_type=0 (absolute method, not implemented)
         # ibuoy_type=1 (ratio method)
@@ -115,9 +110,6 @@ class Tracer(CitcomComponent):
                                           default=False)
         compositional_prefactor = inv.float("compositional_prefactor",
                                             default=1.0)
-
-        # Output frequency TODO: remove
-        write_tracers_every = inv.int("write_tracers_every", default=1000000)
 
 
 

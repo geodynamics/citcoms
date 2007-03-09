@@ -73,7 +73,6 @@ void set_elapsed_time(struct All_variables*);
 void set_sphere_harmonics (struct All_variables*);
 void set_starting_age(struct All_variables*);
 void tracer_initial_settings(struct All_variables*);
-double CPU_time0();
 
 
 
@@ -208,7 +207,7 @@ void read_initial_settings(struct All_variables *E)
 
   /* first the problem type (defines subsequent behaviour) */
 
-  input_string("Problem",E->control.PROBLEM_TYPE,NULL,m);
+  input_string("Problem",E->control.PROBLEM_TYPE,"convection",m);
   if ( strcmp(E->control.PROBLEM_TYPE,"convection") == 0)  {
     E->control.CONVECTION = 1;
     set_convection_defaults(E);
@@ -226,7 +225,7 @@ void read_initial_settings(struct All_variables *E)
     set_convection_defaults(E);
   }
 
-  input_string("Geometry",E->control.GEOMETRY,NULL,m);
+  input_string("Geometry",E->control.GEOMETRY,"sphere",m);
   if ( strcmp(E->control.GEOMETRY,"cart2d") == 0)
     { E->control.CART2D = 1;
     (E->solver.set_2dc_defaults)(E);}
@@ -247,7 +246,7 @@ void read_initial_settings(struct All_variables *E)
     E->control.CART2D = 1;
     (E->solver.set_2dc_defaults)(E); }
 
-  input_string("Solver",E->control.SOLVER_TYPE,NULL,m);
+  input_string("Solver",E->control.SOLVER_TYPE,"cgrad",m);
   if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0)
     { E->control.CONJ_GRAD = 1;
     set_cg_defaults(E);}
@@ -496,7 +495,7 @@ void allocate_common_vars(E)
       }
 
     for(d=0;d<=3;d++)
-      E->SinCos[i][j][d]  = (float *)  malloc((nno+1)*sizeof(float));
+      E->SinCos[i][j][d]  = (double *)  malloc((nno+1)*sizeof(double));
 
     E->IEN[i][j] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
     E->EL[i][j]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
@@ -999,6 +998,9 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.botm = 0;
     E->output.geoid = 0;
     E->output.horiz_avg = 0;
+    E->output.tracer = 0;
+    E->output.comp_el = 0;
+    E->output.comp_nd = 0;
 
     while(1) {
         /* get next field */
@@ -1035,6 +1037,12 @@ static void output_parse_optional(struct  All_variables *E)
 	    }
         else if(strcmp(prev, "horiz_avg")==0)
             E->output.horiz_avg = 1;
+        else if(strcmp(prev, "tracer")==0)
+            E->output.tracer = 1;
+        else if(strcmp(prev, "comp_el")==0)
+            E->output.comp_el = 1;
+        else if(strcmp(prev, "comp_nd")==0)
+            E->output.comp_nd = 1;
         else
             if(E->parallel.me == 0)
                 fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);

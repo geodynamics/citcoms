@@ -99,7 +99,7 @@ void viscosity_input(struct All_variables *E)
 {
     int m = E->parallel.me;
 
-    input_string("Viscosity",E->viscosity.STRUCTURE,NULL,m);
+    input_string("Viscosity",E->viscosity.STRUCTURE,"system",m);
     input_int ("visc_smooth_method",&(E->viscosity.smooth_cycles),"0",m);
 
     if ( strcmp(E->viscosity.STRUCTURE,"system") == 0)

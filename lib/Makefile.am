@@ -62,6 +62,7 @@ sources = \
 	BC_util.c \
 	Citcom_init.c \
 	citcom_init.h \
+	Composition_related.c \
 	Construct_arrays.c \
 	Convection.c \
 	convection_variables.h \

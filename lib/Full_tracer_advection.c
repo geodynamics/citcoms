@@ -31,9 +31,21 @@
 #include "global_defs.h"
 #include "parsing.h"
 #include "parallel_related.h"
+#include "composition_related.h"
 
 static void get_neighboring_caps(struct All_variables *E);
 static void pdebug(struct All_variables *E, int i);
+
+static void fix_radius(struct All_variables *E,
+                       double *radius, double *theta, double *phi,
+                       double *x, double *y, double *z);
+static void fix_theta_phi(double *theta, double *phi);
+static void fix_phi(double *phi);
+static void predict_tracers(struct All_variables *E);
+static void correct_tracers(struct All_variables *E);
+static int isum_tracers(struct All_variables *E);
+
+
 
 /******* FULL TRACER INPUT *********************/
 
@@ -43,94 +55,28 @@ void full_tracer_input(E)
 {
     int m = E->parallel.me;
 
-    /* itracer_type=0 passive */
-    /* itracer_type=1 active */
+    /* Initial condition, this option is ignored if E->control.restart is 1,
+    *  ie. restarted from a previous run */
+    /* tracer_ic_method=0 (random generated array) */
+    /* tracer_ic_method=1 (all proc read the same file) */
+    /* tracer_ic_method=2 (each proc reads its restart file) */
+    if(E->control.restart)
+        E->trace.ic_method = 2;
+    else {
+        input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
 
-    E->trace.itracer_type=1;
-    input_int("tracer_type",&(E->trace.itracer_type),"1,0,nomax",m);
-
-    /* Restart options */
-
-    /* itracer_restart=-1 (read from file) */
-    /* itracer_restart=0 (generate array) */
-    /* itracer_restart=1 (read from scratch disks) */
-
-    E->trace.itracer_restart=0;
-    input_int("tracer_restart",&(E->trace.itracer_restart),"0,0,nomax",m);
-
-    /* Active tracer inputs */
-
-    if (E->trace.itracer_type==1)
-	{
-
-	    E->trace.buoyancy_ratio=1.0;
-	    input_double("buoyancy_ratio",&(E->trace.buoyancy_ratio),"1.0",m);
-
-	    E->trace.ireset_initial_composition=1;
-	    if (E->trace.itracer_restart==1)
-		{
-		    E->trace.ireset_initial_composition=0;
-		    input_int("reset_initial_composition",&(E->trace.ireset_initial_composition),"0",m);
-		}
-
-	    /* compositional rheology */
-
-	    /* ibuoy_type=1 (ratio method) */
-
-	    E->trace.ibuoy_type=1;
-	    input_int("buoy_type",&(E->trace.ibuoy_type),"1,0,nomax",m);
-	    if (E->trace.ibuoy_type!=1)
-		{
-		    fprintf(stderr,"Terror-Sorry, only ratio method allowed now\n");
-		    fflush(stderr);
-		    parallel_process_termination();
-		}
-
-	}
-
-    /* icompositional_rheology=0 (off) */
-    /* icompositional_rheology=1 (on) */
-
-    E->trace.icompositional_rheology=0;
-    input_int("compositional_rheology",
-	      &(E->trace.icompositional_rheology),"1,0,nomax",m);
-
-    E->trace.compositional_rheology_prefactor=1.0;
-
-    if (E->trace.icompositional_rheology>0)
-	{
-	    input_double("compositional_prefactor",
-			 &(E->trace.compositional_rheology_prefactor),"1.0",m);
-	}
-
-    /* ibuoy_type=0 (absolute method) */
-
-    /* icartesian_or_spherical=0 (cartesian coordinate input) */
-    /* icartesian_or_spherical=1 (spherical coordinate input) */
-
-    E->trace.icartesian_or_spherical_input=0;
-    if (E->trace.itracer_restart==-1)
-	{
-	    sprintf(E->trace.tracer_file,"tracer.dat");
-	    input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
-
-	    input_int("cartesian_or_spherical_input",&(E->trace.icartesian_or_spherical_input),"1,0,nomax",m);
-
-	}
-
-
-    if (E->trace.itracer_restart==0)
-	{
-	    E->trace.itperel=10;
+        if (E->trace.ic_method==0)
 	    input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
-
-	    E->trace.z_interface=0.5;
-	    input_double("z_interface",&(E->trace.z_interface),"0.5",m);
-	}
-
-    if (E->trace.itracer_restart==1)
-	{
-	}
+        else if (E->trace.ic_method==1)
+	    input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
+        else if (E->trace.ic_method==2) {
+        }
+        else {
+	    fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
+	    fflush(stderr);
+	    parallel_process_termination();
+        }
+    }
 
     /* Advection Scheme */
 
@@ -154,11 +100,6 @@ void full_tracer_input(E)
 	    parallel_process_termination();
 	}
 
-
-    /* Output Options */
-
-    E->trace.iwrite_tracers_every=1000000;
-    input_int("write_tracers_every",&(E->trace.iwrite_tracers_every),"1000000,0,nomax",m);
 
     /* Interpolation Scheme */
     /* itracer_interpolation_scheme=1 (gnometric projection) */
@@ -190,6 +131,8 @@ void full_tracer_input(E)
     input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
 	      "0,0,nomax",m);
 
+
+    composition_input(E);
     return;
 }
 
@@ -205,9 +148,7 @@ void full_tracer_setup(E)
     void viscosity_checks();
     void make_tracer_array();
     void initialize_old_composition();
-    void fill_composition();
     void find_tracers();
-    void setup_dsincos();
     void make_regular_grid();
     void initialize_tracer_elements();
     void define_uv_space();
@@ -222,7 +163,7 @@ void full_tracer_setup(E)
     E->trace.itracing=1;
 
     /* some obscure initial parameters */
-
+    /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
     /* AKMA turn this back on after debugging */
@@ -231,14 +172,15 @@ void full_tracer_setup(E)
     /* Determine number of tracer quantities */
 
     /* advection_quantites - those needed for advection */
-
+    // TODO: generalize it
     if (E->trace.itracer_advection_scheme==1) E->trace.number_of_advection_quantities=12;
     if (E->trace.itracer_advection_scheme==2) E->trace.number_of_advection_quantities=12;
 
     /* extra_quantities - used for composition, etc.    */
     /* (can be increased for additional science i.e. tracing chemistry */
 
-    if (E->trace.itracer_type==1) E->trace.number_of_extra_quantities=1;
+    // TODO: how to move this part to Composition_related.c?
+    if (E->composition.ichemical_buoyancy==1) E->trace.number_of_extra_quantities=1;
     else E->trace.number_of_extra_quantities=0;
 
     E->trace.number_of_tracer_quantities=E->trace.number_of_advection_quantities +
@@ -256,10 +198,6 @@ void full_tracer_setup(E)
     sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,m);
     E->trace.fpt=fopen(output_file,"w");
 
-    /* reset time counters */
-
-    E->trace.stat_trace_time=0.0;
-    E->trace.stat_stokes_time=0.0;
 
     /* reset statistical counters */
 
@@ -295,17 +233,26 @@ void full_tracer_setup(E)
 
     if (E->sphere.caps_per_proc>1)
 	{
-	    fprintf(E->trace.fpt,"This code has not been tested or tried for multiple caps per processor!\n");
-	    fprintf(E->trace.fpt,"I would certainly do some testing first \n");
+	    fprintf(E->trace.fpt,"This code does not work for multiple caps per processor!\n");
 	    fflush(E->trace.fpt);
 	    parallel_process_termination();
 	}
 
     get_neighboring_caps(E);
 
-    if (E->trace.itracer_restart==0) make_tracer_array(E);
-    else if (E->trace.itracer_restart==-1) read_tracer_file(E);
-    else if (E->trace.itracer_restart==1) restart_tracers(E);
+    if (E->trace.ic_method==0) {
+        make_tracer_array(E);
+
+        if (E->composition.ichemical_buoyancy==1)
+            init_tracer_composition(E);
+    }
+    else if (E->trace.ic_method==1) {
+        read_tracer_file(E);
+
+        if (E->composition.ichemical_buoyancy==1)
+            init_tracer_composition(E);
+    }
+    else if (E->trace.ic_method==2) restart_tracers(E);
     else
 	{
 	    fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
@@ -317,8 +264,6 @@ void full_tracer_setup(E)
     fflush(E->trace.fpt);
     parallel_process_sync(E);
 
-
-    setup_dsincos(E);
 
     if (E->trace.itracer_interpolation_scheme==1)
 	{
@@ -342,19 +287,19 @@ void full_tracer_setup(E)
 
     find_tracers(E);
 
-    check_sum(E);
+    /* total number of tracers  */
 
-    if (E->trace.itracer_type==1 && E->trace.ibuoy_type==1)
-	{
-	    initialize_old_composition(E);
-	    fill_composition(E);
-	}
+    E->trace.ilast_tracer_count = isum_tracers(E);
+    fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
 
     if (E->trace.ianalytical_tracer_test==1)
 	{
+	    //TODO: walk into this code...
 	    analytical_test(E);
 	    parallel_process_termination();
 	}
+
+    composition_setup(E);
 
     tracer_post_processing(E);
 
@@ -373,30 +318,19 @@ void full_tracer_advection(E)
      struct All_variables *E;
 {
 
-    static double start_time;
-    static double end_time;
-
-    void fill_composition();
-    void thermal_buoyancy();
     void check_sum();
     void tracer_post_processing();
     void write_tracers();
-    void predict_tracers();
-    void correct_tracers();
-    double CPU_time0();
 
-
-    start_time=CPU_time0();
-
-    E->trace.stat_trace_time=0.0;
 
     fprintf(E->trace.fpt,"STEP %d\n",E->monitor.solution_cycles);
     fflush(E->trace.fpt);
 
     /* presave last timesteps tracers as preback */
-
+    //TODO: use system("mv oldfile oldfile.bak\n") instead
     if  ( (E->monitor.solution_cycles % E->control.record_every)==0) {
-	write_tracers(E,3);
+        //TODO: migrate to output_tracer
+	//write_tracers(E,3);
     }
 
     /* advect tracers */
@@ -404,105 +338,19 @@ void full_tracer_advection(E)
     predict_tracers(E);
     correct_tracers(E);
 
-    if (E->trace.itracer_type==1) {
+    check_sum(E);
+
+    //TODO: move
+    if (E->composition.ichemical_buoyancy==1) {
 	fill_composition(E);
     }
 
-    end_time=CPU_time0();
-    E->trace.stat_trace_time=E->trace.stat_trace_time+(end_time-start_time);
-
-    check_sum(E);
     tracer_post_processing(E);
 
     return;
 }
 
-void tracing(E,itimes_here_this_step)
-     struct All_variables *E;
-     int itimes_here_this_step;
-{
 
-
-    static double start_time;
-    static double end_time;
-
-    void fill_composition();
-    void thermal_buoyancy();
-    void check_sum();
-    void tracer_post_processing();
-    void write_tracers();
-    void predict_tracers();
-    void correct_tracers();
-    double CPU_time0();
-
-
-    parallel_process_sync(E);
-    start_time=CPU_time0();
-
-    if (itimes_here_this_step==1)
-	{
-
-	    E->trace.stat_trace_time=0.0;
-
-	    fprintf(E->trace.fpt,"STEP %d\n",E->monitor.solution_cycles);
-	    fflush(E->trace.fpt);
-
-	    /* presave last timesteps tracers as preback */
-
-	    if  ( (E->monitor.solution_cycles % E->control.record_every)==0)
-		{
-		    write_tracers(E,3);
-		}
-	}
-    else if (itimes_here_this_step==2)
-	{
-	    E->trace.stat_stokes_time=start_time-end_time;
-	}
-
-    /* advect tracers */
-
-    if (itimes_here_this_step==1)
-	{
-	    if (E->trace.itracer_advection_scheme==1)
-		{
-		    predict_tracers(E);
-		    correct_tracers(E);
-		}
-	    else if (E->trace.itracer_advection_scheme==2)
-		{
-		    predict_tracers(E);
-		}
-	}
-    else if (itimes_here_this_step==2)
-	{
-	    if (E->trace.itracer_advection_scheme==1)
-		{
-		}
-	    else if (E->trace.itracer_advection_scheme==2)
-		{
-		    correct_tracers(E);
-		}
-	}
-
-
-
-    if (E->trace.itracer_type==1)
-	{
-	    fill_composition(E);
-	}
-
-    end_time=CPU_time0();
-    E->trace.stat_trace_time=E->trace.stat_trace_time+(end_time-start_time);
-
-
-    if (itimes_here_this_step==2)
-	{
-	    check_sum(E);
-	    tracer_post_processing(E);
-	}
-
-    return;
-}
 
 /********* TRACER POST PROCESSING ****************************************/
 
@@ -517,25 +365,24 @@ void tracer_post_processing(E)
     double trace_fraction,total_time;
 
     void get_bulk_composition();
-    void write_compositional_field();
     void write_tracers();
-    void write_radial_horizontal_averages();
 
     static int been_here=0;
 
-    //if (E->trace.itracer_type==1) get_bulk_composition(E);
+    //TODO: fix this function
+    //if (E->composition.ichemical_buoyancy==1) get_bulk_composition(E);
 
     if ( ((E->monitor.solution_cycles % E->control.record_every)==0) || (been_here==0))
 	{
-	    //TODO: calling this function will crash CitcomS
-	    //write_radial_horizontal_averages(E);
-	    write_tracers(E,1);
-	    //if (E->trace.itracer_type==1) write_compositional_field(E);
+            //TODO: migrate to output_tracer
+	    //write_tracers(E,1);
 	}
-    if ( ((E->monitor.solution_cycles % E->trace.iwrite_tracers_every)==0) &&
-	 ((E->monitor.solution_cycles!=E->control.restart)&&(E->monitor.solution_cycles!=0) ))
+
+    //TODO: move to Output.c
+    if ( ((E->monitor.solution_cycles!=E->control.restart)&&(E->monitor.solution_cycles!=0) ))
 	{
-	    write_tracers(E,2);
+            //TODO: migrate to output_tracer
+	    //write_tracers(E,2);
 	}
 
 
@@ -544,7 +391,7 @@ void tracer_post_processing(E)
 	{
 	    fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
 	    fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
-	    if (E->trace.itracer_type==1)
+	    if (E->composition.ichemical_buoyancy==1)
 		{
 		    fprintf(E->trace.fpt,"Empty elements filled with old compositional values: %d (%f percent)\n",
 			    E->trace.istat_iempty,(100.0*E->trace.istat_iempty/E->lmesh.nel));
@@ -563,12 +410,12 @@ void tracer_post_processing(E)
     E->trace.istat1=0;
 
     /* compositional and error fraction data files */
-
+    //TODO: move
     if (E->parallel.me==0)
 	{
 	    if (been_here==0)
 		{
-		    if (E->trace.itracer_type==1)
+		    if (E->composition.ichemical_buoyancy==1)
 			{
 			    sprintf(output_file,"%s.error_fraction.data",E->control.data_file);
 			    E->trace.fp_error_fraction=fopen(output_file,"w");
@@ -578,8 +425,9 @@ void tracer_post_processing(E)
 			}
 		}
 
-	    if (E->trace.itracer_type==1)
+	    if (E->composition.ichemical_buoyancy==1)
 		{
+                    //TODO: to be init'd
 		    fprintf(E->trace.fp_error_fraction,"%e %e\n",E->monitor.elapsed_time,E->trace.error_fraction);
 		    fprintf(E->trace.fp_composition,"%e %e\n",E->monitor.elapsed_time,E->trace.bulk_composition);
 
@@ -590,108 +438,10 @@ void tracer_post_processing(E)
 	}
 
 
-    convection_time=E->trace.stat_stokes_time;
-    tracer_time=E->trace.stat_trace_time;
-
-    total_time=convection_time+tracer_time;
-    trace_fraction=tracer_time/total_time;
-
-    if (been_here!=0)
-	{
-	    fprintf(E->trace.fpt,"CPU time:  Convection: %f Tracing: %f (%f percent) Total: %f\n",
-		    convection_time,tracer_time,trace_fraction*100.0,total_time);
-
-	}
 
     fflush(E->trace.fpt);
 
     if (been_here==0) been_here++;
-
-    return;
-}
-
-/*********** WRITE RADIAL HORIZONTAL AVERAGES ***************************/
-/*                                                                      */
-/* This function writes the radial distribution of tracers              */
-/* (horizontally averaged)                                              */
-
-void write_radial_horizontal_averages(E)
-     struct All_variables *E;
-{
-
-    char output_file[200];
-
-    int j;
-    int kk;
-    double halfpoint;
-    double *reltrac[13];
-
-    static int been_here=0;
-
-    void return_horiz_ave();
-    void return_elementwise_horiz_ave();
-
-    FILE *fp2;
-
-    if (been_here==0)
-	{
-	    E->trace.Have_C=(double *)malloc((E->lmesh.noz+2)*sizeof(double));
-	    E->trace.Havel_tracers=(double *)malloc((E->lmesh.elz+2)*sizeof(double));
-	}
-
-    /* Tracers */
-
-    /* first, change from int to double */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-	    reltrac[j]=(double *) malloc((E->lmesh.nel+1)*sizeof(double));
-	    for (kk=1;kk<=E->lmesh.nel;kk++)
-		{
-		    reltrac[j][kk]=(1.0*E->trace.ieltrac[j][kk]);
-		}
-	}
-
-    return_elementwise_horiz_ave(E,reltrac,E->trace.Havel_tracers);
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-	    free(reltrac[j]);
-	}
-
-    if (E->parallel.me<E->parallel.nprocz)
-	{
-	    sprintf(output_file,"%s.ave_tracers.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
-	    fp2=fopen(output_file,"w");
-	    for(kk=1;kk<=E->lmesh.elz;kk++)
-		{
-		    halfpoint=0.5*(E->sx[1][3][kk+1]+E->sx[1][3][kk]);
-		    fprintf(fp2,"%.4e %.4e\n",halfpoint,E->trace.Havel_tracers[kk]);
-		}
-	    fclose(fp2);
-	}
-
-    /* Composition */
-
-    if (E->trace.itracer_type==1)
-	{
-	    return_horiz_ave(E,E->trace.comp_node,E->trace.Have_C);
-
-
-	    if (E->parallel.me<E->parallel.nprocz)
-		{
-		    sprintf(output_file,"%s.ave_c.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
-		    fp2=fopen(output_file,"w");
-		    for(kk=1;kk<=E->lmesh.noz;kk++)
-			{
-			    fprintf(fp2,"%.4e %.4e\n",E->sx[1][3][kk],E->trace.Have_C[kk]);
-			}
-		    fclose(fp2);
-
-		}
-	}
-
-    been_here++;
 
     return;
 }
@@ -738,7 +488,7 @@ void write_tracers(E,iflag)
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)
 	{
-
+	    //TODO: move
 /* 	    fprintf(fpcomp,"%6d %6d %.5e %.5e %.5e %d\n",E->trace.itrac[j][0], */
 /* 		    E->monitor.solution_cycles,E->monitor.elapsed_time, */
 /* 		    E->trace.bulk_composition, */
@@ -751,13 +501,13 @@ void write_tracers(E,iflag)
 		    phi=E->trace.rtrac[j][1][kk];
 		    rad=E->trace.rtrac[j][2][kk];
 
-		    if (E->trace.itracer_type==1)
+		    if (E->composition.ichemical_buoyancy==1)
 			{
 			    comp=E->trace.etrac[j][0][kk];
 			    fprintf(fpcomp,"%.12e %.12e %.12e %.12e \n",theta,phi,rad,comp);
 			    fflush(fpcomp);
 			}
-		    else if (E->trace.itracer_type==0)
+		    else if (E->composition.ichemical_buoyancy==0)
 			{
 			    fprintf(fpcomp,"%.12e %.12e %.12e \n",theta,phi,rad);
 			    fflush(fpcomp);
@@ -780,169 +530,6 @@ void write_tracers(E,iflag)
 }
 
 
-
-
-
-/********** WRITE COMPOSITIONAL FIELD ***********************************/
-
-void write_compositional_field(E)
-     struct All_variables *E;
-{
-
-    char output_file1[1000];
-    char output_file2[1000];
-
-    int j,i;
-
-    FILE *fp1;
-    FILE *fp2;
-
-
-    /* comp */
-
-    sprintf(output_file1,"%s.comp.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
-
-    fp1=fopen(output_file1,"w");
-
-    fprintf(fp1,"%d %d %.5e %.5e %.5e\n",E->monitor.solution_cycles,E->lmesh.nno,E->monitor.elapsed_time,
-	    E->trace.initial_bulk_composition,E->trace.bulk_composition);
-
-
-    for(j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-
-	    for(i=1;i<=E->lmesh.nno;i++)
-		{
-		    fprintf(fp1,"%.6e\n",E->trace.comp_node[j][i]);
-		}
-	}
-
-    fflush(fp1);
-
-    /* OLDCOMP */
-
-    sprintf(output_file2,"%s.OLDCOMP.%d",E->control.data_file,E->parallel.me);
-    fp2=fopen(output_file2,"w");
-    fprintf(fp2,"%d %d %.5e \n",E->lmesh.nel,E->monitor.solution_cycles,E->monitor.elapsed_time);
-    for(j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-	    fprintf(fp2,"%d %d\n",j,E->lmesh.nel);
-	    for(i=1;i<=E->lmesh.nel;i++)
-		{
-		    fprintf(fp2,"%.6e\n",E->trace.oldel[j][i]);
-		}
-	}
-    fflush(fp2);
-
-    if ( ((E->monitor.solution_cycles % E->trace.iwrite_tracers_every)==0) &&
-	 ((E->monitor.solution_cycles!=E->control.restart)&&(E->monitor.solution_cycles!=0) ))
-	{
-	    sprintf(output_file2,"%s.OLDCOMP.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
-	    fp2=fopen(output_file2,"w");
-	    fprintf(fp2,"%d %d %.5e \n",E->lmesh.nel,E->monitor.solution_cycles,E->monitor.elapsed_time);
-	    for(j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-		    fprintf(fp2,"%d %d\n",j,E->lmesh.nel);
-		    for(i=1;i<=E->lmesh.nel;i++)
-			{
-			    fprintf(fp2,"%.6e\n",E->trace.oldel[j][i]);
-			}
-		}
-
-	}
-    fflush(fp2);
-
-
-
-    return;
-}
-
-/*********** GET BULK COMPOSITION *******************************/
-
-void get_bulk_composition(E)
-     struct All_variables *E;
-
-{
-
-    char output_file[200];
-    char input_s[1000];
-
-    double return_bulk_value_d();
-    double volume;
-    double rdum1;
-    double rdum2;
-    double rdum3;
-
-    int ival=0;
-    int idum1;
-    int istep;
-
-
-    FILE *fp;
-
-    static int been_here=0;
-
-
-    /* ival=0 returns integral not average */
-
-    volume=return_bulk_value_d(E,E->trace.comp_node,ival);
-
-    E->trace.bulk_composition=volume;
-
-    /* Here we assume if restart = -1 or 0 tracers are reset          */
-    /*                if restart = 1 tracers may or may not be reset  */
-    /*                   (read initial composition from file)         */
-
-
-    if (been_here==0)
-	{
-	    if (E->trace.ireset_initial_composition==1)
-		{
-		    E->trace.initial_bulk_composition=volume;
-		}
-	    else
-		{
-
-		    if (E->trace.itracer_restart!=1)
-			{
-			    fprintf(E->trace.fpt,"ERROR(bulk composition)-wrong reset,restart combo\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-
-		    sprintf(output_file,"%s.comp.%d.%d",E->control.old_P_file,
-			    E->parallel.me,E->monitor.solution_cycles);
-
-		    fp=fopen(output_file,"r");
-		    fgets(input_s,200,fp);
-		    sscanf(input_s,"%d %d %lf %lf %lf",
-			   &istep,&idum1,&rdum1,&rdum2,&rdum3);
-
-		    E->trace.initial_bulk_composition=rdum2;
-		    fclose(fp);
-
-		    if (istep!=E->monitor.solution_cycles)
-			{
-			    fprintf(E->trace.fpt,"ERROR(get_bulk_composition) %d %d\n",
-				    istep,E->monitor.solution_cycles);
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-	}
-
-    E->trace.error_fraction=((volume-E->trace.initial_bulk_composition)/
-			     E->trace.initial_bulk_composition);
-
-    parallel_process_sync(E);
-
-    been_here++;
-    return;
-}
-
-
 /*********** PREDICT TRACERS **********************************************/
 /*                                                                        */
 /* This function predicts tracers performing an euler step                */
@@ -956,8 +543,7 @@ void get_bulk_composition(E)
 /*                                                                        */
 
 
-void predict_tracers(E)
-     struct All_variables *E;
+static void predict_tracers(struct All_variables *E)
 {
 
     int numtracers;
@@ -1069,8 +655,7 @@ void predict_tracers(E)
 /*                                                                        */
 
 
-void correct_tracers(E)
-     struct All_variables *E;
+static void correct_tracers(struct All_variables *E)
 {
 
     int j;
@@ -1255,7 +840,7 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
 
     int maxlevel=E->mesh.levmax;
 
-    static double eps=-1e-4;
+    const double eps=-1e-4;
 
     void get_radial_shape();
     void sphere_to_cart();
@@ -1469,7 +1054,7 @@ void get_radial_shape(E,j,nelem,rad,shaperad)
     int node1,node5;
     double rad1,rad5,f1,f2,delrad;
 
-    static double eps=1e-6;
+    const double eps=1e-6;
     double top_bound=1.0+eps;
     double bottom_bound=0.0-eps;
 
@@ -2819,14 +2404,20 @@ void make_regular_grid(E)
     int icheck_element_column();
     int icheck_column_neighbors();
     void sphere_to_cart();
-    void fix_theta();
-    void fix_phi();
 
-    static double two_pi=2.0*M_PI;
+    const double two_pi=2.0*M_PI;
 
     elz=E->lmesh.elz;
 
     nelsurf=E->lmesh.elx*E->lmesh.ely;
+
+    //TODO: find the bounding box of the mesh, if the box is too close to
+    // to core, set a flag (rotated_reggrid) to true and rotate the
+    // bounding box to the equator. Generate the regular grid with the new
+    // bounding box. The rotation should be a simple one, e.g.
+    // (theta, phi) -> (??)
+    // Whenever the regular grid is used, check the flat (rotated_reggrid),
+    // if true, rotate the checkpoint as well.
 
     /* note, mesh is rotated along theta 22.5 degrees divided by elx. */
     /* We at least want that much expansion here! Otherwise, theta min */
@@ -3429,12 +3020,12 @@ int icheck_column_neighbors(E,j,nel,x,y,z,rad)
     int icheck_element_column();
 
     /*
-      static int number_of_neighbors=24;
+      const int number_of_neighbors=24;
     */
 
     /* maybe faster to only check inner ring */
 
-    static int number_of_neighbors=8;
+    const int number_of_neighbors=8;
 
     elx=E->lmesh.elx;
     ely=E->lmesh.ely;
@@ -3522,444 +3113,30 @@ int icheck_all_columns(E,j,x,y,z,rad)
 }
 
 
-/************ INITIALIZE OLD COMPOSITION ************************/
-void initialize_old_composition(E)
-     struct All_variables *E;
-{
-
-    char output_file[200];
-    char input_s[1000];
-
-    int ibottom_node;
-    int kk;
-    int istep;
-    int idum;
-    int j;
-
-    double zbottom;
-    double time;
-
-    FILE *fp;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    if ((E->trace.oldel[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
-		{
-		    fprintf(E->trace.fpt,"ERROR(fill old composition)-no memory 324c\n");
-		    fflush(E->trace.fpt);
-		    exit(10);
-		}
-	}
-
-
-    if ((E->trace.itracer_restart==0)||(E->trace.itracer_restart==-1))
-	{
-	    for (j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-		    for (kk=1;kk<=E->lmesh.nel;kk++)
-			{
-
-			    ibottom_node=E->ien[j][kk].node[1];
-			    zbottom=E->sx[j][3][ibottom_node];
-
-			    if (zbottom<E->trace.z_interface) E->trace.oldel[j][kk]=1.0;
-			    if (zbottom>=E->trace.z_interface) E->trace.oldel[j][kk]=0.0;
-
-			} /* end kk */
-		} /* end j */
-	}
-
-
-    /* Else read from file */
-
-
-    else if (E->trace.itracer_restart==1)
-	{
-
-	    /* first look for backing file */
-
-
-	    sprintf(output_file,"%s.OLDCOMP.%d.%d",E->control.old_P_file,E->parallel.me,E->control.restart);
-	    if ( (fp=fopen(output_file,"r"))==NULL)
-		{
-		    sprintf(output_file,"%s.OLDCOMP.%d",E->control.old_P_file,E->parallel.me);
-
-		    if ( (fp=fopen(output_file,"r"))==NULL)
-			{
-			    fprintf(E->trace.fpt,"AKMerror(Initialize Old Composition)-OLDCOMP NOT EXIST\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-
-	    fgets(input_s,200,fp);
-	    sscanf(input_s,"%d %d %lf",&idum,&istep,&time);
-
-	    if (istep!=E->control.restart)
-		{
-		    fprintf(E->trace.fpt,"Error(initialize old comp) %d %d\n",
-			    istep,E->monitor.solution_cycles);
-		    fflush(E->trace.fpt);
-		    parallel_process_termination();
-		}
-	    for(j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-		    fgets(input_s,200,fp);
-		    for (kk=1;kk<=E->lmesh.nel;kk++)
-			{
-			    fgets(input_s,200,fp);
-			    sscanf(input_s,"%lf",&E->trace.oldel[j][kk]);
-			}
-		}
-
-	    fclose(fp);
-
-	} /* endif */
-
-
-
-    return;
-}
-
-/************ FILL COMPOSITION ************************/
-void fill_composition(E)
-     struct All_variables *E;
-{
-
-    void compute_elemental_composition_ratio_method();
-    void map_composition_to_nodes();
-
-    /* Currently, only the ratio method works here.                */
-    /* Will have to come back here to include the absolute method. */
-
-    /* ratio method */
-
-    if (E->trace.ibuoy_type==1)
-	{
-	    compute_elemental_composition_ratio_method(E);
-	}
-
-    /* absolute method */
-
-    if (E->trace.ibuoy_type!=1)
-	{
-	    fprintf(E->trace.fpt,"Error(compute...)-only ratio method now\n");
-	    fflush(E->trace.fpt);
-	    exit(10);
-	}
-
-    /* Map elemental composition to nodal points */
-
-    map_composition_to_nodes(E);
-
-    return;
-}
-
-/*********** COMPUTE ELEMENTAL COMPOSITION RATIO METHOD ***/
-/*                                                        */
-/* This function computes the composition per element.    */
-/* This function computes the composition per element.    */
-/* Integer array ieltrac stores tracers per element.      */
-/* Double array celtrac stores the sum of tracer composition */
-
-void compute_elemental_composition_ratio_method(E)
-     struct All_variables *E;
-{
-
-    int kk;
-    int numtracers;
-    int nelem;
-    int j;
-    int iempty=0;
-
-    double comp;
-
-    static int been_here=0;
-
-    if (been_here==0)
-	{
-	    for (j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-
-		    if ((E->trace.ieltrac[j]=(int *)malloc((E->lmesh.nel+1)*sizeof(int)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 5u83a\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		    if ((E->trace.celtrac[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 58hy8\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		    if ((E->trace.comp_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 8989y\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-
-	    been_here++;
-
-	}
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    /* first zero arrays */
-
-	    for (kk=1;kk<=E->lmesh.nel;kk++)
-		{
-		    E->trace.ieltrac[j][kk]=0;
-		    E->trace.celtrac[j][kk]=0.0;
-		}
-
-	    numtracers=E->trace.itrac[j][0];
-
-	    /* Fill ieltrac and celtrac */
-
-
-	    for (kk=1;kk<=numtracers;kk++)
-		{
-
-		    nelem=E->trace.itrac[j][kk];
-		    E->trace.ieltrac[j][nelem]++;
-
-		    comp=E->trace.etrac[j][0][kk];
-
-		    if (comp>1.0000001)
-			{
-			    fprintf(E->trace.fpt,"ERROR(compute elemental)-not ready for comp>1 yet (%f)(tr. %d) \n",comp,kk);
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-
-		    E->trace.celtrac[j][nelem]=E->trace.celtrac[j][nelem]+comp;
-
-		}
-
-	    /* Check for empty entries and compute ratio.  */
-	    /* If no tracers are in an element, use previous composition */
-
-	    iempty=0;
-
-	    for (kk=1;kk<=E->lmesh.nel;kk++)
-		{
-
-		    if (E->trace.ieltrac[j][kk]==0)
-			{
-			    iempty++;
-			    E->trace.comp_el[j][kk]=E->trace.oldel[j][kk];
-			}
-		    else if (E->trace.ieltrac[j][kk]>0)
-			{
-			    E->trace.comp_el[j][kk]=E->trace.celtrac[j][kk]/(1.0*E->trace.ieltrac[j][kk]);
-			}
-
-		    if (E->trace.comp_el[j][kk]>(1.000001) || E->trace.comp_el[j][kk]<(-0.000001))
-			{
-			    fprintf(E->trace.fpt,"ERROR(compute elemental)-noway (3u5hd)\n");
-			    fprintf(E->trace.fpt,"COMPEL: %f (%d)(%d)\n",E->trace.comp_el[j][kk],kk,E->trace.ieltrac[j][kk]);
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-	    if (iempty>0)
-		{
-
-		    /*
-		      fprintf(E->trace.fpt,"%d empty elements filled with old values (%f percent)\n",iempty, (100.0*iempty/E->lmesh.nel));
-		      fflush(E->trace.fpt);
-		    */
-
-		    if ((1.0*iempty/E->lmesh.nel)>0.80)
-			{
-			    fprintf(E->trace.fpt,"WARNING(compute_elemental...)-number of tracers is REALLY LOW\n");
-			    fflush(E->trace.fpt);
-			    if (E->trace.itracer_warnings==1) exit(10);
-			}
-		}
-
-	    /* Fill oldel */
-
-
-	    for (kk=1;kk<=E->lmesh.nel;kk++)
-		{
-		    E->trace.oldel[j][kk]=E->trace.comp_el[j][kk];
-		}
-
-	} /* end j */
-
-    E->trace.istat_iempty=E->trace.istat_iempty+iempty;
-
-    return;
-}
-
-/********** MAP COMPOSITION TO NODES ****************/
-/*                                                  */
-
-
-void map_composition_to_nodes(E)
-     struct All_variables *E;
-{
-
-    int kk;
-    int nelem, nodenum;
-    int j;
-
-
-    static int been_here=0;
-
-    if (been_here==0)
-	{
-
-	    for (j=1;j<=E->sphere.caps_per_proc;j++)
-		{
-
-		    if ((E->trace.comp_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"AKM(map_compostion_to_nodes)-no memory 983rk\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-
-	    been_here++;
-	}
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-
-	    /* first, initialize node array */
-
-	    for (kk=1;kk<=E->lmesh.nno;kk++)
-		{
-		    E->trace.comp_node[j][kk]=0.0;
-		}
-
-	    /* Loop through all elements */
-
-	    for (nelem=1;nelem<=E->lmesh.nel;nelem++)
-		{
-
-		    /* for each element, loop through element nodes */
-
-		    /* weight composition */
-
-		    for (nodenum=1;nodenum<=8;nodenum++)
-			{
-
-			    E->trace.comp_node[j][E->ien[j][nelem].node[nodenum]] +=
-				E->trace.comp_el[j][nelem]*
-				E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
-
-			}
-
-		} /* end nelem */
-	} /* end j */
-
-    /* akm modified exchange node routine for doubles */
-
-    (E->exchange_node_d)(E,E->trace.comp_node,E->mesh.levmax);
-
-    /* Divide by nodal volume */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-	    for (kk=1;kk<=E->lmesh.nno;kk++)
-		{
-		    E->trace.comp_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
-		}
-
-	    /* testing */
-	    /*
-	      for (kk=1;kk<=E->lmesh.nel;kk++)
-	      {
-	      fprintf(E->trace.fpt,"%d %f\n",kk,E->trace.comp_el[j][kk]);
-	      }
-
-	      for (kk=1;kk<=E->lmesh.nno;kk++)
-	      {
-	      fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->trace.comp_node[j][kk]);
-	      }
-	    */
-
-
-	} /* end j */
-
-    return;
-}
 
 /**** WRITE TRACE INSTRUCTIONS ***************/
 void write_trace_instructions(E)
      struct All_variables *E;
 {
-
-
-
-
     fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
     fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
 
-    if (E->trace.itracer_type==0)
-	{
-	    fprintf(E->trace.fpt,"Passive Tracers\n");
-	}
-
-    if (E->trace.itracer_type==1)
-	{
-	    fprintf(E->trace.fpt,"Active Tracers\n");
-	    if (E->trace.ibuoy_type==1) fprintf(E->trace.fpt,"Ratio Method\n");
-	    if (E->trace.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
-	    fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->trace.buoyancy_ratio);
-
-	    if (E->trace.ireset_initial_composition==0)
-		{
-		    fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
-		}
-	    else
-		{
-		    fprintf(E->trace.fpt,"Resetting initial composition\n");
-		}
-
-	    fflush(E->trace.fpt);
-	    fflush(stderr);
-
-	}
-
-    if (E->trace.itracer_restart==0)
+    if (E->trace.ic_method==0)
 	{
 	    fprintf(E->trace.fpt,"Generating New Tracer Array\n");
 	    fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
-	    if (E->trace.itracer_type==1)
+	    /* TODO: move
+	    if (E->composition.ichemical_buoyancy==1)
 		{
-		    fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
+		    fprintf(E->trace.fpt,"Interface Height: %f\n",E->composition.z_interface);
 		}
+	    */
 	}
-    if (E->trace.itracer_restart==-1)
+    if (E->trace.ic_method==1)
 	{
 	    fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
-	    if (E->trace.icartesian_or_spherical_input==0)
-		{
-		    fprintf(E->trace.fpt,"Coordinates are read as Cartesian\n");
-		    fprintf(E->trace.fpt,"  x,y,z format\n");
-		}
-	    else if (E->trace.icartesian_or_spherical_input==1)
-		{
-		    fprintf(E->trace.fpt,"Coordinates are read as Spherical\n");
-		    fprintf(E->trace.fpt,"  theta,phi,rad format\n");
-		}
-	    else
-		{
-		    fprintf(E->trace.fpt,"ERROR-Cartesian or Spherical input ?\n");
-		    fflush(E->trace.fpt);
-		    parallel_process_termination();
-		}
 	}
-    if (E->trace.itracer_restart==1)
+    if (E->trace.ic_method==2)
 	{
 	    fprintf(E->trace.fpt,"Restarting Tracers\n");
 	}
@@ -4004,20 +3181,6 @@ void write_trace_instructions(E)
 	    parallel_process_termination();
 	}
 
-    fprintf(E->trace.fpt,"Writing Tracers to File every %d steps\n",
-	    E->trace.iwrite_tracers_every);
-
-
-    if (E->trace.icompositional_rheology==0)
-	{
-	    fprintf(E->trace.fpt,"Compositional Rheology - OFF\n");
-	}
-    else if (E->trace.icompositional_rheology>0)
-	{
-	    fprintf(E->trace.fpt,"Compositional Rheology - ON\n");
-	    fprintf(E->trace.fpt,"Compositional Prefactor: %f\n",
-		    E->trace.compositional_rheology_prefactor);
-	}
 
     /* regular grid stuff */
 
@@ -4056,6 +3219,7 @@ void write_trace_instructions(E)
 	    fflush(stderr);
 	}
 
+    write_composition_instructions(E);
     return;
 }
 
@@ -4073,7 +3237,7 @@ void restart_tracers(E)
     char input_s[1000];
 
     int j,kk;
-    int idum1,istep;
+    int idum1,ncolumns;
     int numtracers;
 
     double rdum1;
@@ -4088,22 +3252,14 @@ void restart_tracers(E)
     FILE *fp1;
 
 
-    /* first try old storage file */
-
-    sprintf(output_file,"%s.tracers.%d.%d",E->control.old_P_file,E->parallel.me,E->control.restart);
-
-    /* if not, try last backing file */
+    sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
 
     if ( (fp1=fopen(output_file,"r"))==NULL)
-	{
-	    sprintf(output_file,"%s.tracers.%d",E->control.old_P_file,E->parallel.me);
-	    if ( (fp1=fopen(output_file,"r"))==NULL)
-		{
-		    fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
-		    fflush(E->trace.fpt);
-		    exit(10);
-		}
-	}
+        {
+            fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
+            fflush(E->trace.fpt);
+            exit(10);
+        }
 
     fprintf(stderr,"Restarting Tracers from %s\n",output_file);
     fflush(stderr);
@@ -4112,19 +3268,20 @@ void restart_tracers(E)
     for(j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 	    fgets(input_s,200,fp1);
-	    sscanf(input_s,"%d %d %lf %lf %lf %d",
-		   &numtracers,&istep,&rdum1,&E->trace.bulk_composition,&E->trace.initial_bulk_composition,&idum1);
+	    sscanf(input_s,"%d %d %d %lf",
+		   &idum1, &numtracers, &ncolumns, &rdum1);
 
-
-
-	    /* some error control */
-
-	    if (istep!=E->control.restart)
-		{
-		    fprintf(E->trace.fpt,"ERROR(restart tracers)- step? %d %d\n",istep,E->control.restart);
-		    fflush(E->trace.fpt);
-		    exit(10);
-		}
+            /* some error control */
+            if (E->composition.ichemical_buoyancy==0 && ncolumns!=3) {
+                fprintf(E->trace.fpt,"ERROR(restart tracers)-wrong # of columns\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+            if (E->composition.ichemical_buoyancy==1 && ncolumns!=4) {
+                fprintf(E->trace.fpt,"ERROR(restart tracers)-wrong # of columns\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
 
 	    /* allocate memory for tracer arrays */
 
@@ -4135,11 +3292,12 @@ void restart_tracers(E)
 		{
 		    comp=0.0;
 		    fgets(input_s,200,fp1);
-		    if (E->trace.itracer_type==0)
+		    if (E->composition.ichemical_buoyancy==0)
 			{
 			    sscanf(input_s,"%lf %lf %lf\n",&theta,&phi,&rad);
 			}
-		    else if (E->trace.itracer_type==1)
+		    //TODO: move
+		    else if (E->composition.ichemical_buoyancy==1)
 			{
 			    sscanf(input_s,"%lf %lf %lf %lf\n",&theta,&phi,&rad,&comp);
 			}
@@ -4162,7 +3320,8 @@ void restart_tracers(E)
 		    E->trace.rtrac[j][3][kk]=x;
 		    E->trace.rtrac[j][4][kk]=y;
 		    E->trace.rtrac[j][5][kk]=z;
-		    if (E->trace.itracer_type==1) E->trace.etrac[j][0][kk]=comp;
+		    //TODO: move
+		    if (E->composition.ichemical_buoyancy==1) E->trace.etrac[j][0][kk]=comp;
 
 		}
 
@@ -4186,7 +3345,6 @@ void make_tracer_array(E)
     int kk;
     int tracers_cap;
     int j;
-    int ithiscap;
     int ival;
     int number_of_tries=0;
     int max_tries;
@@ -4210,14 +3368,9 @@ void make_tracer_array(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
-
-
 	    processor_fraction=( ( pow(E->sx[j][3][E->lmesh.noz],3.0)-pow(E->sx[j][3][1],3.0))/
 				 (pow(E->sphere.ro,3.0)-pow(E->sphere.ri,3.0)));
-
-	    tracers_cap=((E->lmesh.nel*E->parallel.nprocz)*E->trace.itperel
-			 *processor_fraction);
+	    tracers_cap=E->mesh.nel*E->trace.itperel*processor_fraction;
 	    /*
 	      fprintf(stderr,"AA: proc frac: %f (%d) %d %d %f %f\n",processor_fraction,tracers_cap,E->lmesh.nel,E->parallel.nprocz, E->sx[j][3][E->lmesh.noz],E->sx[j][3][1]);
 	    */
@@ -4286,13 +3439,6 @@ void make_tracer_array(E)
 		    E->trace.rtrac[j][4][kk]=y;
 		    E->trace.rtrac[j][5][kk]=z;
 
-
-		    if (E->trace.itracer_type==1)
-			{
-			    if (rad<=E->trace.z_interface) E->trace.etrac[j][0][kk]=1.0;
-			    if (rad>E->trace.z_interface) E->trace.etrac[j][0][kk]=0.0;
-			}
-
 		next_try:
 		    ;
 		} /* end while */
@@ -4323,7 +3469,6 @@ void read_tracer_file(E)
     int icheck;
     int iestimate;
     int icushion;
-    int ithiscap;
     int j;
 
     int icheck_cap();
@@ -4357,10 +3502,6 @@ void read_tracer_file(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
 
-	    ithiscap=E->sphere.capid[j];
-
-	    E->trace.itracsize[j]=iestimate;
-
 	    initialize_tracer_arrays(E,j,iestimate);
 
 	    for (kk=1;kk<=number_of_tracers;kk++)
@@ -4368,20 +3509,10 @@ void read_tracer_file(E)
 		    fgets(input_s,200,fptracer);
 		    sscanf(input_s,"%lf %lf %lf",&rdum1,&rdum2,&rdum3);
 
-		    if (E->trace.icartesian_or_spherical_input==0)
-			{
-			    x=rdum1;
-			    y=rdum2;
-			    z=rdum3;
-			    cart_to_sphere(E,x,y,z,&theta,&phi,&rad);
-			}
-		    if (E->trace.icartesian_or_spherical_input==1)
-			{
-			    theta=rdum1;
-			    phi=rdum2;
-			    rad=rdum3;
-			    sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
-			}
+                    theta=rdum1;
+                    phi=rdum2;
+                    rad=rdum3;
+                    sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
 
 
 		    /* make sure theta, phi is in range, and radius is within bounds */
@@ -4410,15 +3541,6 @@ void read_tracer_file(E)
 		    E->trace.rtrac[j][3][E->trace.itrac[j][0]]=x;
 		    E->trace.rtrac[j][4][E->trace.itrac[j][0]]=y;
 		    E->trace.rtrac[j][5][E->trace.itrac[j][0]]=z;
-
-		    /* Assign composition for active tracers */
-
-		    if (E->trace.itracer_type==1)
-			{
-			    if (rad<=E->trace.z_interface) E->trace.etrac[j][0][kk]=1.0;
-			    if (rad>E->trace.z_interface) E->trace.etrac[j][0][kk]=0.0;
-			}
-
 
 		next_tracer:
 		    ;
@@ -4654,21 +3776,11 @@ int icheck_element_column(E,j,nel,x,y,z,rad)
     double test_point[4];
     double rnode[5][10];
 
+    int lev = E->mesh.levmax;
     int ival;
     int kk;
     int node;
     int icheck_bounds();
-
-
-    /* AKMA REMOVE FOR SPEED */
-
-    if ((nel<1) || (nel>E->lmesh.nel) )
-	{
-	    fprintf(E->trace.fpt,"ERROR(icheck element column)-Weird nel: %d\n",nel);
-	    fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",x,y,z,rad);
-	    fflush(E->trace.fpt);
-	    exit(10);
-	}
 
 
     E->trace.istat_elements_checked++;
@@ -4687,10 +3799,10 @@ int icheck_element_column(E,j,nel,x,y,z,rad)
 	    rnode[kk][4]=E->sx[j][1][node];
 	    rnode[kk][5]=E->sx[j][2][node];
 
-	    rnode[kk][6]=E->trace.DSinCos[j][2][node]; /* cos(theta) */
-	    rnode[kk][7]=E->trace.DSinCos[j][0][node]; /* sin(theta) */
-	    rnode[kk][8]=E->trace.DSinCos[j][3][node]; /* cos(phi) */
-	    rnode[kk][9]=E->trace.DSinCos[j][1][node]; /* sin(phi) */
+	    rnode[kk][6]=E->SinCos[lev][j][2][node]; /* cos(theta) */
+	    rnode[kk][7]=E->SinCos[lev][j][0][node]; /* sin(theta) */
+	    rnode[kk][8]=E->SinCos[lev][j][3][node]; /* cos(phi) */
+	    rnode[kk][9]=E->SinCos[lev][j][1][node]; /* sin(phi) */
 
 	}
 
@@ -4958,100 +4070,43 @@ void crossit(cross,A,B)
     return;
 }
 
-/*******************************************************************/
-/* Function SETUP DSINCOS                                          */
-/*                                                                 */
-/* open memory for and fill DSinCos */
-/* similar as E.SinCos but double instead of float */
-/* DSinCos[cap][0][node]=sint */
-/* DSinCos[cap][1][node]=sinf */
-/* DSinCos[cap][2][node]=cost */
-/* DSinCos[cap][3][node]=cosf */
-/*                                                                 */
-
-void setup_dsincos(E)
-     struct All_variables *E;
-{
-
-    int j,kk;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-	{
-	    for (kk=0;kk<=3;kk++)
-		{
-		    if ((E->trace.DSinCos[j][kk]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL)
-			{
-			    fprintf(E->trace.fpt,"ERROR(setup_dsincos)-not enough memory(ib)\n");
-			    fflush(E->trace.fpt);
-			    exit(10);
-			}
-		}
-	    for (kk=1;kk<=(E->lmesh.nno);kk++)
-		{
-		    E->trace.DSinCos[j][0][kk]=sin(E->sx[j][1][kk]);
-		    E->trace.DSinCos[j][1][kk]=sin(E->sx[j][2][kk]);
-		    E->trace.DSinCos[j][2][kk]=cos(E->sx[j][1][kk]);
-		    E->trace.DSinCos[j][3][kk]=cos(E->sx[j][2][kk]);
-		}
-
-	} /* end each cap */
-
-    return;
-}
 
 /************ FIX RADIUS ********************************************/
 /* This function moves particles back in bounds if they left     */
 /* during advection                                              */
 
-void fix_radius(E,radius,theta,phi,x,y,z)
-     struct All_variables *E;
-     double *radius;
-     double *theta;
-     double *phi;
-     double *x;
-     double *y;
-     double *z;
-
+static void fix_radius(struct All_variables *E,
+                       double *radius, double *theta, double *phi,
+                       double *x, double *y, double *z)
 {
-
     double sint,cost,sinf,cosf,rad;
+    double max_radius, min_radius;
 
-    static int been_here=0;
-    static double max_radius;
-    static double min_radius;
+    max_radius = E->sphere.ro - E->trace.box_cushion;
+    min_radius = E->sphere.ri + E->trace.box_cushion;
 
-    if (been_here==0)
-	{
-	    max_radius=E->sphere.ro-E->trace.box_cushion;
-	    min_radius=E->sphere.ri+E->trace.box_cushion;
-	    been_here++;
-	}
-
-    if (*radius > max_radius)
-	{
-	    *radius=max_radius;
-	    rad=max_radius;
-	    cost=cos(*theta);
-	    sint=sqrt(1.0-cost*cost);
-	    cosf=cos(*phi);
-	    sinf=sin(*phi);
-	    *x=rad*sint*cosf;
-	    *y=rad*sint*sinf;
-	    *z=rad*cost;
-	}
-    if (*radius < min_radius)
-	{
-	    *radius=min_radius;
-	    rad=min_radius;
-	    cost=cos(*theta);
-	    sint=sqrt(1.0-cost*cost);
-	    cosf=cos(*phi);
-	    sinf=sin(*phi);
-	    *x=rad*sint*cosf;
-	    *y=rad*sint*sinf;
-	    *z=rad*cost;
-	}
-
+    if (*radius > max_radius) {
+        *radius=max_radius;
+        rad=max_radius;
+        cost=cos(*theta);
+        sint=sqrt(1.0-cost*cost);
+        cosf=cos(*phi);
+        sinf=sin(*phi);
+        *x=rad*sint*cosf;
+        *y=rad*sint*sinf;
+        *z=rad*cost;
+    }
+    if (*radius < min_radius) {
+        *radius=min_radius;
+        rad=min_radius;
+        cost=cos(*theta);
+        sint=sqrt(1.0-cost*cost);
+        cosf=cos(*phi);
+        sinf=sin(*phi);
+        *x=rad*sint*cosf;
+        *y=rad*sint*sinf;
+        *z=rad*cost;
+    }
 
     return;
 }
@@ -5064,45 +4119,38 @@ void fix_radius(E,radius,theta,phi,x,y,z)
 /* between 0 and 2 PI                                             */
 /*                                                                */
 
-void fix_phi(phi)
-     double *phi;
-
+static void fix_phi(double *phi)
 {
+    const double two_pi=2.0*M_PI;
 
-    static double two_pi=2.0*M_PI;
+    double d2 = floor(*phi / two_pi);
 
-
- do_again:
-
-    if (*phi<0.0) *phi=*phi+two_pi;
-    else if (*phi>=two_pi) *phi=*phi-two_pi;
-
-    if ((*phi<0.0) || (*phi >=two_pi)) goto do_again;
-
+    *phi -= two_pi * d2;
 
     return;
 }
 
 /******************************************************************/
-/* FIX THETA                                                      */
+/* FIX THETA PHI                                                  */
 /*                                                                */
 /* This function constrains the value of theta to be              */
-/* between 0 and  PI                                              */
+/* between 0 and  PI, and                                         */
+/* this function constrains the value of phi to be                */
+/* between 0 and 2 PI                                             */
 /*                                                                */
-void fix_theta(theta)
-     double *theta;
+static void fix_theta_phi(double *theta, double *phi)
 {
+    const double two_pi=2.0*M_PI;
+    double d, d2;
 
-    static double two_pi=2.0*M_PI;
+    d = floor(*theta/M_PI);
 
- do_again2:
+    *theta -= M_PI * d;
+    *phi += M_PI * d;
 
-    if (*theta<0.0) *theta=fabs(*theta);
-    else if (*theta>M_PI) *theta=two_pi-*theta;
+    d2 = floor(*phi / two_pi);
 
-    if ((*theta<0.0) || (*theta >M_PI)) goto do_again2;
-
-
+    *phi -= two_pi * d2;
 
     return;
 }
@@ -5697,6 +4745,7 @@ void define_uv_space(E)
 
 	    for (kk=1;kk<=2;kk++)
 		{
+                    //TODO: allocate for surface nodes only to save memory
 		    if ((E->trace.UV[j][kk]=(double *)malloc((numnodes+1)*sizeof(double)))==NULL)
 			{
 			    fprintf(E->trace.fpt,"Error(define uv)-not enough memory(a)\n");
@@ -5786,6 +4835,7 @@ void determine_shape_coefficients(E)
 		{
 		    for (kk=1;kk<=9;kk++)
 			{
+                            //TODO: allocate for surface elements only to save memory
 			    if ((E->trace.shape_coefs[j][iwedge][kk]=
 				 (double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
 				{
@@ -5884,6 +4934,7 @@ void get_cartesian_velocity_field(E)
 
     int j,m,i;
     int kk;
+    int lev = E->mesh.levmax;
 
     double sint,sinf,cost,cosf;
     double v_theta,v_phi,v_rad;
@@ -5915,10 +4966,10 @@ void get_cartesian_velocity_field(E)
 
 	    for (i=1;i<=E->lmesh.nno;i++)
 		{
-		    sint=E->trace.DSinCos[m][0][i];
-		    sinf=E->trace.DSinCos[m][1][i];
-		    cost=E->trace.DSinCos[m][2][i];
-		    cosf=E->trace.DSinCos[m][3][i];
+		    sint=E->SinCos[lev][m][0][i];
+		    sinf=E->SinCos[lev][m][1][i];
+		    cost=E->SinCos[lev][m][2][i];
+		    cosf=E->SinCos[lev][m][3][i];
 
 		    v_theta=E->sphere.cap[m].V[1][i];
 		    v_phi=E->sphere.cap[m].V[2][i];
@@ -5953,14 +5004,8 @@ void keep_in_sphere(E,x,y,z,theta,phi,rad)
      double *phi;
      double *rad;
 {
-
-    void fix_radius();
-    void fix_theta();
-    void fix_phi();
-
+    fix_theta_phi(theta, phi);
     fix_radius(E,rad,theta,phi,x,y,z);
-    fix_theta(theta);
-    fix_phi(phi);
 
     return;
 }
@@ -5975,19 +5020,7 @@ void check_sum(E)
 
     int number,iold_number;
 
-    static int been_here=0;
-
-    int isum_tracers();
-
     number=isum_tracers(E);
-
-    if (been_here==0)
-	{
-	    E->trace.ilast_tracer_count=number;
-	    fprintf(E->trace.fpt,"Sum of Tracers: %d\n",number);
-	    been_here++;
-	    return;
-	}
 
     iold_number=E->trace.ilast_tracer_count;
 
@@ -6008,8 +5041,7 @@ void check_sum(E)
 /*                                                                       */
 /* This function uses MPI to sum all tracers and returns number of them. */
 
-int isum_tracers(E)
-     struct All_variables *E;
+static int isum_tracers(struct All_variables *E)
 {
 
 
@@ -6460,60 +5492,6 @@ void analytical_test_function(E,theta,phi,rad,vel_s,vel_c)
     vel_c[2]=vy;
     vel_c[3]=vz;
 
-    return;
-}
-
-
-/******************* READ COMP ***********************************************/
-/*                                                                           */
-/* This function is similar to read_temp. It is used to read the composition */
-/* from file for post-proceesing.                                            */
-
-void read_comp(E)
-     struct All_variables *E;
-{
-    int i,ii,m,mm,ll;
-    char output_file[255],input_s[1000];
-
-    double g;
-    FILE *fp;
-
-
-
-    ii = E->monitor.solution_cycles;
-    sprintf(output_file,"%s.comp.%d.%d",E->control.old_P_file,E->parallel.me,ii);
-
-    if ((fp=fopen(output_file,"r"))==NULL)
-        {
-	    fprintf(stderr,"ERROR(read_temp) - %s not found\n",output_file);
-	    fflush(stderr);
-	    exit(10);
-        }
-
-    fgets(input_s,1000,fp);
-    sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        {
-	    E->trace.comp_node[m]=(double *)malloc((E->lmesh.nno+1)*sizeof(double));
-
-	    fgets(input_s,1000,fp);
-	    sscanf(input_s,"%d %d",&ll,&mm);
-	    for(i=1;i<=E->lmesh.nno;i++)
-		{
-		    if (fgets(input_s,1000,fp)==NULL)
-			{
-			    fprintf(stderr,"ERROR(read_comp) -data for node %d not found\n",i);
-			    fflush(stderr);
-			    exit(10);
-			}
-		    sscanf(input_s,"%lf",&g);
-		    E->trace.comp_node[m][i] = g;
-
-		}
-        }
-
-    fclose (fp);
     return;
 }
 

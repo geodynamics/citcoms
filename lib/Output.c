@@ -36,6 +36,8 @@
 #include "parsing.h"
 #include "output.h"
 
+void output_comp_nd(struct All_variables *, int);
+void output_comp_el(struct All_variables *, int);
 void output_coord(struct All_variables *);
 void output_mat(struct All_variables *);
 void output_velo(struct All_variables *, int);
@@ -60,7 +62,7 @@ void output_common_input(struct All_variables *E)
     int m = E->parallel.me;
 
     input_string("output_format", E->output.format, "ascii",m);
-    input_string("output_optional", E->output.optional, "surf,botm",m);
+    input_string("output_optional", E->output.optional, "surf,botm,tracer,comp_el",m);
 
 }
 
@@ -79,11 +81,6 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  /* output tracer location if using tracer */
-  //TODO: output_tracer() is not working for full version of tracers
-  //if(E->control.tracer==1)
-  //output_tracer(E, cycles);
-
   /* optiotnal output below */
   /* compute and output geoid (in spherical harmonics coeff) */
   if (E->output.geoid == 1)
@@ -97,6 +94,15 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.horiz_avg == 1)
       output_horiz_avg(E, cycles);
+
+  if(E->output.tracer == 1 && E->control.tracer == 1)
+      output_tracer(E, cycles);
+
+  if (E->output.comp_nd == 1 && E->composition.on)
+      output_comp_nd(E, cycles);
+
+  if (E->output.comp_el == 1 && E->composition.on)
+          output_comp_el(E, cycles);
 
   return;
 }
@@ -387,7 +393,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
 void output_tracer(struct All_variables *E, int cycles)
 {
-  int n;
+  int j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
 
@@ -395,15 +401,121 @@ void output_tracer(struct All_variables *E, int cycles)
           E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
-  fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+  //TODO: unify
 
-  for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++)   {
-    fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
+  if(E->parallel.nprocxy==1) {
+      /* regional model */
+      fprintf(fp1,"%d %d %.5e\n", cycles, E->Tracer.LOCAL_NUM_TRACERS,
+              E->monitor.elapsed_time);
+
+      for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++)   {
+          fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
+      }
+  }
+  else {
+      /* global model */
+      if (E->composition.ichemical_buoyancy==1)
+          ncolumns = 4;
+      else if (E->composition.ichemical_buoyancy==0)
+          ncolumns = 3;
+
+      for(j=1;j<=E->sphere.caps_per_proc;j++) {
+          fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.itrac[j][0],
+                  ncolumns, E->monitor.elapsed_time);
+
+          if (E->composition.ichemical_buoyancy==1) {
+              for(n=1;n<=E->trace.itrac[j][0];n++) {
+                  fprintf(fp1,"%.12e %.12e %.12e %.12e\n",
+                          E->trace.rtrac[j][0][n],
+                          E->trace.rtrac[j][1][n],
+                          E->trace.rtrac[j][2][n],
+                          E->trace.etrac[j][0][n]);
+              }
+          }
+          else if (E->composition.ichemical_buoyancy==0) {
+              for(n=1;n<=E->trace.itrac[j][0];n++) {
+                  fprintf(fp1,"%.12e %.12e %.12e\n",
+                          E->trace.rtrac[j][0][n],
+                          E->trace.rtrac[j][1][n],
+                          E->trace.rtrac[j][2][n]);
+              }
+          }
+
+      }
   }
 
   fclose(fp1);
-
   return;
+}
+
+
+void output_comp_nd(struct All_variables *E, int cycles)
+{
+    int i, j;
+    char output_file[255];
+    FILE *fp1;
+
+    sprintf(output_file,"%s.comp_nd.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1 = output_open(output_file);
+
+    //TODO: unify
+
+    if(E->parallel.nprocxy==1) {
+    }
+    else {
+        fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
+                cycles, E->lmesh.nno,
+                E->monitor.elapsed_time,
+                E->trace.initial_bulk_composition,
+                E->trace.bulk_composition);
+
+        for(j=1;j<=E->sphere.caps_per_proc;j++) {
+	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
+	    for(i=1;i<=E->lmesh.nno;i++) {
+                fprintf(fp1,"%.6e\n",E->trace.comp_node[j][i]);
+            }
+	}
+
+    }
+
+    fclose(fp1);
+    return;
+}
+
+
+void output_comp_el(struct All_variables *E, int cycles)
+{
+    int i, j;
+    char output_file[255];
+    FILE *fp1;
+
+    sprintf(output_file,"%s.comp_el.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1 = output_open(output_file);
+
+    //TODO: unify
+
+    if(E->parallel.nprocxy==1) {
+    }
+    else {
+        fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
+                cycles, E->lmesh.nel,
+                E->monitor.elapsed_time,
+                E->trace.initial_bulk_composition,
+                E->trace.bulk_composition);
+
+        for(j=1;j<=E->sphere.caps_per_proc;j++) {
+	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+	    for(i=1;i<=E->lmesh.nel;i++) {
+                fprintf(fp1,"%.6e\n",E->trace.oldel[j][i]);
+            }
+	}
+
+    }
+
+    fclose(fp1);
+    return;
 }
 
 

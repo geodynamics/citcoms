@@ -68,16 +68,16 @@ void assemble_forces(E,penalty)
   double elt_f[24];
   int m,a,e,i;
 
+  void get_buoyancy();
   void get_elt_f();
   void get_elt_tr();
   void strip_bcs_from_residual();
-  void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->buoyancy);
+  get_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
@@ -114,16 +114,16 @@ void assemble_forces_pseudo_surf(E,penalty)
   double elt_f[24];
   int m,a,e,i;
 
+  void get_buoyancy();
   void get_elt_f();
   void get_elt_tr_pseudo_surf();
   void strip_bcs_from_residual();
-  void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->buoyancy);
+  get_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 

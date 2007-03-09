@@ -796,10 +796,95 @@ void print_field_spectral_regular(E,TG,sphc,sphs,proc_loc,filen)
 
 
 /*************************************************************************/
-/* from                                                                  */
+/* from Full_tracer_advection.c                                          */
 /*************************************************************************/
 
 
+
+/*                                                                      */
+/* This function writes the radial distribution of tracers              */
+/* (horizontally averaged)                                              */
+
+void write_radial_horizontal_averages(E)
+     struct All_variables *E;
+{
+
+    char output_file[200];
+
+    int j;
+    int kk;
+    double halfpoint;
+    double *reltrac[13];
+
+    static int been_here=0;
+
+    void return_horiz_ave();
+    void return_elementwise_horiz_ave();
+
+    FILE *fp2;
+
+    if (been_here==0)
+	{
+	    E->trace.Have_C=(double *)malloc((E->lmesh.noz+2)*sizeof(double));
+	    E->trace.Havel_tracers=(double *)malloc((E->lmesh.elz+2)*sizeof(double));
+	}
+
+    /* Tracers */
+
+    /* first, change from int to double */
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+	{
+	    reltrac[j]=(double *) malloc((E->lmesh.nel+1)*sizeof(double));
+	    for (kk=1;kk<=E->lmesh.nel;kk++)
+		{
+		    reltrac[j][kk]=(1.0*E->trace.ieltrac[j][kk]);
+		}
+	}
+
+    return_elementwise_horiz_ave(E,reltrac,E->trace.Havel_tracers);
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+	{
+	    free(reltrac[j]);
+	}
+
+    if (E->parallel.me<E->parallel.nprocz)
+	{
+	    sprintf(output_file,"%s.ave_tracers.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
+	    fp2=fopen(output_file,"w");
+	    for(kk=1;kk<=E->lmesh.elz;kk++)
+		{
+		    halfpoint=0.5*(E->sx[1][3][kk+1]+E->sx[1][3][kk]);
+		    fprintf(fp2,"%.4e %.4e\n",halfpoint,E->trace.Havel_tracers[kk]);
+		}
+	    fclose(fp2);
+	}
+
+    /* Composition */
+
+    if (E->composition.chemical_buoyancy==1)
+	{
+	    return_horiz_ave(E,E->trace.comp_node,E->trace.Have_C);
+
+
+	    if (E->parallel.me<E->parallel.nprocz)
+		{
+		    sprintf(output_file,"%s.ave_c.%d.%d",E->control.data_file,E->parallel.me,E->monitor.solution_cycles);
+		    fp2=fopen(output_file,"w");
+		    for(kk=1;kk<=E->lmesh.noz;kk++)
+			{
+			    fprintf(fp2,"%.4e %.4e\n",E->sx[1][3][kk],E->trace.Have_C[kk]);
+			}
+		    fclose(fp2);
+
+		}
+	}
+
+    been_here++;
+
+    return;
+}
 
 
 /*************************************************************************/

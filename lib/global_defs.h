@@ -493,6 +493,7 @@ struct CONTROL {
     int read_slabgeoid;
 
     int pseudo_free_surf;
+
     int tracer;
 
     double theta_min, theta_max, fi_min, fi_max;
@@ -654,6 +655,35 @@ struct Output {
     int botm;         /* whether to output bottom data */
     int geoid;        /* whether to output geoid/topo spherial harmonics */
     int horiz_avg;    /* whether to output horizontal averaged profile */
+    int tracer;       /* whether to output tracer coordinate */
+    int comp_el;      /* whether to output composition at elements */
+    int comp_nd;      /* whether to output composition at nodes */
+
+};
+
+
+struct COMPOSITION {
+
+    int ichemical_buoyancy;
+    int icompositional_rheology;
+
+    /* if any of the above flags is true, turn this flag on */
+    int on;
+
+    double buoyancy_ratio;
+    int ireset_initial_composition;
+    int ibuoy_type;
+    int *ieltrac[13];
+    double *celtrac[13];
+    double *comp_el[13];
+    double *comp_node[13];
+    double initial_bulk_composition;
+    double bulk_composition;
+    double error_fraction;
+
+    double z_interface;
+
+    double compositional_rheology_prefactor;
 };
 
 
@@ -685,15 +715,18 @@ struct All_variables {
     struct SLICE slice;
     struct Parallel parallel;
     struct SPHERE sphere;
-    /* for regional tracer*/
-    struct Tracer Tracer;
-    /* for global tracer*/
-    struct TRACE trace;
     struct Bdry boundary;
     struct SBC sbc;
     struct Output output;
 
-    int filed[20];
+    /* for regional tracer*/
+    struct Tracer Tracer;
+
+    /* for global tracer*/
+    struct TRACE trace;
+
+    /* for chemical convection & composition rheology */
+    struct COMPOSITION composition;
 
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
@@ -733,7 +766,7 @@ struct All_variables {
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
-    float *SinCos[MAX_LEVELS][NCS][4];
+    double *SinCos[MAX_LEVELS][NCS][4];
     float *TT;
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
