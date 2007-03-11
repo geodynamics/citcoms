@@ -585,12 +585,14 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
             getIntProperty(properties, "tracer_ic_method",
                            E->trace.ic_method, fp);
 
-            if (E->trace.ic_method==0)
+            if (E->trace.ic_method==0) {
                 getIntProperty(properties, "tracers_per_element",
                                E->trace.itperel, fp);
-            else if (E->trace.ic_method==1)
+            }
+            else if (E->trace.ic_method==1) {
                 getStringProperty(properties, "tracer_file",
                                   E->trace.tracer_file, fp);
+            }
             else if (E->trace.ic_method==2) {
             }
             else {
@@ -600,7 +602,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
             }
         }
 
-        getIntProperty(properties, "tracer_types", E->trace.ntypes, fp);
+        getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
         getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
         getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
@@ -627,6 +629,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
         if (E->composition.icompositional_rheology==1) {
             getDoubleProperty(properties, "compositional_prefactor", E->composition.compositional_rheology_prefactor, fp);
         }
+
     }
     PUTS(("\n"));
 

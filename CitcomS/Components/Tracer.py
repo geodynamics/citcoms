@@ -71,8 +71,12 @@ class Tracer(CitcomComponent):
         # (tracer_ic_method == 1)
         tracer_file = inv.str("tracer_file", default="tracer.dat")
 
-        # How many types of tracers, must be >= 1
-        tracer_types = inv.int("tracer_types", default=1)
+        # How many flavors of tracers
+        # If tracer_flavors > 0, each element will report the number of
+        # tracers of each flavor inside it. This information can be used
+        # later for many purposes. One of it is to compute composition,
+        # either using absolute method or ratio method.
+        tracer_flavors = inv.int("tracer_flavors", default=0)
 
 
         # Advection Scheme

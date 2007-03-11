@@ -91,12 +91,6 @@ void composition_input(struct All_variables *E)
 
 void composition_setup(struct All_variables *E)
 {
-    int j;
-
-    E->composition.on = 0;
-    if (E->composition.ichemical_buoyancy==1 ||
-        E->composition.icompositional_rheology)
-        E->composition.on = 1;
 
     if (E->composition.on) {
         allocate_composition_memory(E);
@@ -117,7 +111,7 @@ void init_tracer_composition(struct All_variables *E)
         number_of_tracers = E->trace.ntracers[j];
         for (kk=1;kk<=number_of_tracers;kk++) {
             rad = E->trace.basicq[j][2][kk];
-
+            //TODO: generalize init flavors
             if (rad<=E->composition.z_interface) E->trace.extraq[j][0][kk]=1.0;
             if (rad>E->composition.z_interface) E->trace.extraq[j][0][kk]=0.0;
         }
@@ -128,6 +122,16 @@ void init_tracer_composition(struct All_variables *E)
 
 void write_composition_instructions(struct All_variables *E)
 {
+
+    E->composition.on = 0;
+    if (E->composition.ichemical_buoyancy==1 ||
+        E->composition.icompositional_rheology)
+        E->composition.on = 1;
+
+    if (E->composition.on && E->trace.nflavors < 1) {
+        fprintf(E->trace.fpt, "Tracer flavors must be greater than 1 to track composition\n");
+        parallel_process_termination();
+    }
 
     if (E->composition.ichemical_buoyancy==0)
             fprintf(E->trace.fpt,"Passive Tracers\n");
@@ -141,6 +145,8 @@ void write_composition_instructions(struct All_variables *E)
 
     fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
 
+    if (E->composition.ichemical_buoyancy==1)
+        fprintf(E->trace.fpt,"Interface Height: %f\n",E->composition.z_interface);
 
     if (E->composition.ireset_initial_composition==0)
         fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
@@ -173,7 +179,7 @@ void fill_composition(struct All_variables *E)
     /* XXX: Currently, only the ratio method works here.           */
     /* Will have to come back here to include the absolute method. */
 
-    accumulate_tracers_in_element(E);
+    //count_tracers_of_flavors(E);
 
 
     /* ratio method */
@@ -219,24 +225,6 @@ static void allocate_composition_memory(struct All_variables *E)
         }
     }
 
-    if (E->composition.ibuoy_type==1) {
-        /* allocat memory for tracer ratio method */
-
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-            if ((E->composition.ieltrac[j]=(int *)malloc((E->lmesh.nel+1)*sizeof(int)))==NULL) {
-                fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 5u83a\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-            if ((E->composition.celtrac[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 58hy8\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-            }
-        }
-    }
-
     return;
 }
 
@@ -267,67 +255,48 @@ static void initialize_old_composition(struct All_variables *E)
 
     FILE *fp;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
+    if ((E->trace.ic_method==0)||(E->trace.ic_method==1)) {
+        for (j=1;j<=E->sphere.caps_per_proc;j++) {
+            for (kk=1;kk<=E->lmesh.nel;kk++) {
 
-            if ((E->composition.oldel[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(fill old composition)-no memory 324c\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-        }
+                ibottom_node=E->ien[j][kk].node[1];
+                zbottom=E->sx[j][3][ibottom_node];
 
+                if (zbottom<E->composition.z_interface) E->composition.comp_el[j][kk]=1.0;
+                if (zbottom>=E->composition.z_interface) E->composition.comp_el[j][kk]=0.0;
 
-    if ((E->trace.ic_method==0)||(E->trace.ic_method==1))
-        {
-            for (j=1;j<=E->sphere.caps_per_proc;j++)
-                {
-                    for (kk=1;kk<=E->lmesh.nel;kk++)
-                        {
-
-                            ibottom_node=E->ien[j][kk].node[1];
-                            zbottom=E->sx[j][3][ibottom_node];
-
-                            if (zbottom<E->composition.z_interface) E->composition.oldel[j][kk]=1.0;
-                            if (zbottom>=E->composition.z_interface) E->composition.oldel[j][kk]=0.0;
-
-                        } /* end kk */
-                } /* end j */
-        }
+            } /* end kk */
+        } /* end j */
+    }
 
 
     /* Else read from file */
 
 
-    else if (E->trace.ic_method==2)
-        {
+    else if (E->trace.ic_method==2) {
 
-            /* first look for backing file */
+        /* first look for backing file */
 
-            sprintf(output_file,"%s.comp_el.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
-            if ( (fp=fopen(output_file,"r"))==NULL)
-                {
-                    fprintf(E->trace.fpt,"AKMerror(Initialize Old Composition)-FILE NOT EXIST: %s\n", output_file);
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
+        sprintf(output_file,"%s.comp_el.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
+        if ( (fp=fopen(output_file,"r"))==NULL) {
+            fprintf(E->trace.fpt,"AKMerror(Initialize Old Composition)-FILE NOT EXIST: %s\n", output_file);
+            fflush(E->trace.fpt);
+            exit(10);
+        }
 
+        fgets(input_s,200,fp);
+
+        for(j=1;j<=E->sphere.caps_per_proc;j++) {
             fgets(input_s,200,fp);
+            for (kk=1;kk<=E->lmesh.nel;kk++) {
+                fgets(input_s,200,fp);
+                sscanf(input_s,"%lf",&E->composition.comp_el[j][kk]);
+            }
+        }
 
-            for(j=1;j<=E->sphere.caps_per_proc;j++)
-                {
-                    fgets(input_s,200,fp);
-                    for (kk=1;kk<=E->lmesh.nel;kk++)
-                        {
-                            fgets(input_s,200,fp);
-                            sscanf(input_s,"%lf",&E->composition.oldel[j][kk]);
-                        }
-                }
+        fclose(fp);
 
-            fclose(fp);
-
-        } /* endif */
+    } /* endif */
 
 
 
@@ -337,108 +306,57 @@ static void initialize_old_composition(struct All_variables *E)
 /*********** COMPUTE ELEMENTAL COMPOSITION RATIO METHOD ***/
 /*                                                        */
 /* This function computes the composition per element.    */
-/* Integer array ieltrac stores tracers per element.      */
-/* Double array celtrac stores the sum of tracer composition */
+/* The concentration of material i in an element is       */
+/* defined as:                                            */
+/*   (# of tracers of flavor i) / (# of all tracers)      */
 
 static void compute_elemental_composition_ratio_method(struct All_variables *E)
 {
-
-    int kk;
-    int numtracers;
-    int nelem;
-    int j;
-    int iempty=0;
-
-    double comp;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-
-            /* first zero arrays */
-
-            for (kk=1;kk<=E->lmesh.nel;kk++)
-                {
-                    E->composition.ieltrac[j][kk]=0;
-                    E->composition.celtrac[j][kk]=0.0;
-                }
-
-            numtracers=E->trace.ntracers[j];
-
-            /* Fill ieltrac and celtrac */
+    int j, e, flavor, numtracers;
+    int iempty = 0;
 
 
-            for (kk=1;kk<=numtracers;kk++)
-                {
+    /* XXX: currently only two composition is supported */
+    if (E->trace.nflavors != 2) {
+        fprintf(E->trace.fpt, "Sorry - Only two flavors of tracers is supported\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
 
-                    nelem=E->trace.ielement[j][kk];
-                    E->composition.ieltrac[j][nelem]++;
 
-                    comp=E->trace.extraq[j][0][kk];
-
-                    if (comp>1.0000001)
-                        {
-                            fprintf(E->trace.fpt,"ERROR(compute elemental)-not ready for comp>1 yet (%f)(tr. %d) \n",comp,kk);
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-
-                    E->composition.celtrac[j][nelem]=E->composition.celtrac[j][nelem]+comp;
-
-                }
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+        for (e=1; e<=E->lmesh.nel; e++) {
+            numtracers = 0;
+            for (flavor=0; flavor<E->trace.nflavors; flavor++)
+                numtracers += E->trace.ntracer_flavor[j][flavor][e];
 
             /* Check for empty entries and compute ratio.  */
-            /* If no tracers are in an element, use previous composition */
+            /* If no tracers are in an element, skip this element, */
+            /* use previous composition. */
+            if (numtracers == 0) {
+                iempty++;
+                continue;
+            }
 
-            iempty=0;
-
-            for (kk=1;kk<=E->lmesh.nel;kk++)
-                {
-
-                    if (E->composition.ieltrac[j][kk]==0)
-                        {
-                            iempty++;
-                            E->composition.comp_el[j][kk]=E->composition.oldel[j][kk];
-                        }
-                    else if (E->composition.ieltrac[j][kk]>0)
-                        {
-                            E->composition.comp_el[j][kk]=E->composition.celtrac[j][kk]/(1.0*E->composition.ieltrac[j][kk]);
-                        }
-
-                    if (E->composition.comp_el[j][kk]>(1.000001) || E->composition.comp_el[j][kk]<(-0.000001))
-                        {
-                            fprintf(E->trace.fpt,"ERROR(compute elemental)-noway (3u5hd)\n");
-                            fprintf(E->trace.fpt,"COMPEL: %f (%d)(%d)\n",E->composition.comp_el[j][kk],kk,E->composition.ieltrac[j][kk]);
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-                }
-            if (iempty>0)
-                {
-
-                    /*
-                      fprintf(E->trace.fpt,"%d empty elements filled with old values (%f percent)\n",iempty, (100.0*iempty/E->lmesh.nel));
-                      fflush(E->trace.fpt);
-                    */
-
-                    if ((1.0*iempty/E->lmesh.nel)>0.80)
-                        {
-                            fprintf(E->trace.fpt,"WARNING(compute_elemental...)-number of tracers is REALLY LOW\n");
-                            fflush(E->trace.fpt);
-                            if (E->trace.itracer_warnings==1) exit(10);
-                        }
-                }
-
-            /* Fill oldel */
+            /* XXX: generalize for more than one composition */
+            flavor = 1;
+            E->composition.comp_el[j][e] =
+                E->trace.ntracer_flavor[j][flavor][e] / (double)numtracers;
+        }
 
 
-            for (kk=1;kk<=E->lmesh.nel;kk++)
-                {
-                    E->composition.oldel[j][kk]=E->composition.comp_el[j][kk];
-                }
+        if (iempty) {
 
-        } /* end j */
+            if ((1.0*iempty/E->lmesh.nel)>0.80) {
+                fprintf(E->trace.fpt,"WARNING(compute_elemental...)-number of tracers is REALLY LOW\n");
+                fflush(E->trace.fpt);
+                if (E->trace.itracer_warnings==1) exit(10);
+            }
+        }
 
-    E->trace.istat_iempty=E->trace.istat_iempty+iempty;
+    } /* end j */
+
+    E->trace.istat_iempty += iempty;
 
     return;
 }

@@ -501,7 +501,7 @@ void output_comp_el(struct All_variables *E, int cycles)
         for(j=1;j<=E->sphere.caps_per_proc;j++) {
 	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
 	    for(i=1;i<=E->lmesh.nel;i++) {
-                fprintf(fp1,"%.6e\n",E->composition.oldel[j][i]);
+                fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
             }
 	}
 

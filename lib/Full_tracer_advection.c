@@ -33,7 +33,7 @@
 #include "parallel_related.h"
 #include "composition_related.h"
 
-void accumulate_tracers_in_element(struct All_variables *E);
+void count_tracers_of_flavors(struct All_variables *E);
 
 static void get_neighboring_caps(struct All_variables *E);
 static void pdebug(struct All_variables *E, int i);
@@ -82,8 +82,12 @@ void full_tracer_input(E)
     }
 
 
-    /* How many types of tracers, must be >= 1 */
-    input_int("tracer_types",&(E->trace.ntypes),"1,1,nomax",m);
+    /* How many flavors of tracers */
+    /* If tracer_flavors > 0, each element will report the number of
+     * tracers of each flavor inside it. This information can be used
+     * later for many purposes. One of it is to compute composition,
+     * either using absolute method or ratio method. */
+    input_int("tracer_flavors",&(E->trace.nflavors),"0,0,nomax",m);
 
 
 
@@ -191,11 +195,11 @@ void full_tracer_setup(E)
     if (E->trace.itracer_advection_scheme==1) E->trace.number_of_basic_quantities=12;
     if (E->trace.itracer_advection_scheme==2) E->trace.number_of_basic_quantities=12;
 
-    /* extra_quantities - used for composition, etc.    */
+    /* extra_quantities - used for flavors, composition, etc.    */
     /* (can be increased for additional science i.e. tracing chemistry */
 
     E->trace.number_of_extra_quantities = 0;
-    if (E->composition.ichemical_buoyancy==1)
+    if (E->trace.nflavors > 0)
         E->trace.number_of_extra_quantities += 1;
 
 
@@ -205,7 +209,7 @@ void full_tracer_setup(E)
 
 
     /* Fixed positions in tracer array */
-    /* Comp is always in extraq position 0  */
+    /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
     /* Other positions may be used depending on advection scheme and/or science being done */
 
@@ -242,7 +246,21 @@ void full_tracer_setup(E)
 
     write_trace_instructions(E);
 
+
+    /* Gnometric projection for velocity interpolation */
+    if (E->trace.itracer_interpolation_scheme==1) {
+        define_uv_space(E);
+        determine_shape_coefficients(E);
+    }
+
+
+    /* The bounding box of neiboring processors */
     get_neighboring_caps(E);
+
+
+    /* Fine-grained regular grid to search tracers */
+    make_regular_grid(E);
+
 
     if (E->trace.ic_method==0) {
         make_tracer_array(E);
@@ -250,13 +268,10 @@ void full_tracer_setup(E)
         if (E->composition.ichemical_buoyancy==1)
             init_tracer_composition(E);
     }
-    else if (E->trace.ic_method==1) {
+    else if (E->trace.ic_method==1)
         read_tracer_file(E);
-
-        if (E->composition.ichemical_buoyancy==1)
-            init_tracer_composition(E);
-    }
-    else if (E->trace.ic_method==2) restart_tracers(E);
+    else if (E->trace.ic_method==2)
+        restart_tracers(E);
     else
         {
             fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
@@ -264,22 +279,12 @@ void full_tracer_setup(E)
             exit(10);
         }
 
-    /* flush and wait for not real reason but it can't hurt */
-    fflush(E->trace.fpt);
-    parallel_process_sync(E);
 
+    /* total number of tracers  */
 
-    if (E->trace.itracer_interpolation_scheme==1) {
-        define_uv_space(E);
-        determine_shape_coefficients(E);
-    }
+    E->trace.ilast_tracer_count = isum_tracers(E);
+    fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
 
-
-    /* flush and wait for not real reason but it can't hurt */
-    fflush(E->trace.fpt);
-    parallel_process_sync(E);
-
-    make_regular_grid(E);
 
     /* flush and wait for not real reason but it can't hurt */
     fflush(E->trace.fpt);
@@ -290,10 +295,12 @@ void full_tracer_setup(E)
 
     find_tracers(E);
 
-    /* total number of tracers  */
 
-    E->trace.ilast_tracer_count = isum_tracers(E);
-    fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
+    /* count # of tracers of each flavor */
+
+    if (E->trace.nflavors > 0)
+        count_tracers_of_flavors(E);
+
 
     if (E->trace.ianalytical_tracer_test==1) {
         //TODO: walk into this code...
@@ -333,8 +340,10 @@ void full_tracer_advection(E)
 
     check_sum(E);
 
-    //TODO: move
-    if (E->composition.ichemical_buoyancy==1) {
+    if (E->trace.nflavors > 0)
+        count_tracers_of_flavors(E);
+
+    if (E->composition.on) {
         fill_composition(E);
     }
 
@@ -1082,6 +1091,18 @@ void initialize_tracer_arrays(E,j,number_of_tracers)
             exit(10);
         }
     }
+
+    if (E->trace.nflavors > 0) {
+        E->trace.ntracer_flavor[j]=(int **)malloc(E->trace.nflavors*sizeof(int*));
+        for (kk=0;kk<E->trace.nflavors;kk++) {
+            if ((E->trace.ntracer_flavor[j][kk]=(int *)malloc(E->lmesh.nel*sizeof(int)))==NULL) {
+                fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+        }
+    }
+
 
     fprintf(E->trace.fpt,"Physical size of tracer arrays (max_ntracers): %d\n",
             E->trace.max_ntracers[j]);
@@ -3013,12 +3034,6 @@ void write_trace_instructions(E)
         {
             fprintf(E->trace.fpt,"Generating New Tracer Array\n");
             fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
-            /* TODO: move
-            if (E->composition.ichemical_buoyancy==1)
-                {
-                    fprintf(E->trace.fpt,"Interface Height: %f\n",E->composition.z_interface);
-                }
-            */
         }
     if (E->trace.ic_method==1)
         {
@@ -3029,11 +3044,7 @@ void write_trace_instructions(E)
             fprintf(E->trace.fpt,"Restarting Tracers\n");
         }
 
-    fprintf(E->trace.fpt,"Number of tracer types: %d", E->trace.ntypes);
-    if (E->trace.ntypes < 1) {
-        fprintf(E->trace.fpt, "Tracer types shouldn't be less than 1\n");
-        parallel_process_termination();
-    }
+    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
 
     if (E->trace.itracer_advection_scheme==1)
         {
@@ -3347,12 +3358,12 @@ void read_tracer_file(E)
 
     char input_s[1000];
 
-    int number_of_tracers;
+    int number_of_tracers, ncolumns;
     int kk;
     int icheck;
     int iestimate;
     int icushion;
-    int j;
+    int i, j;
 
     int icheck_cap();
     int icheck_processor_shell();
@@ -3365,7 +3376,7 @@ void read_tracer_file(E)
 
     double x,y,z;
     double theta,phi,rad;
-    double rdum1,rdum2,rdum3;
+    double extra[100];
 
     FILE *fptracer;
 
@@ -3373,8 +3384,17 @@ void read_tracer_file(E)
     fprintf(E->trace.fpt,"Opening %s\n",E->trace.tracer_file);
 
     fgets(input_s,200,fptracer);
-    sscanf(input_s,"%d",&number_of_tracers);
-    fprintf(E->trace.fpt,"%d Tracers in file \n",number_of_tracers);
+    sscanf(input_s,"%d %d",&number_of_tracers,&ncolumns);
+    fprintf(E->trace.fpt,"%d Tracers, %d columns in file \n",
+            number_of_tracers, ncolumns);
+
+    /* some error control */
+    if (E->trace.number_of_extra_quantities+3 != ncolumns) {
+        fprintf(E->trace.fpt,"ERROR(read tracer file)-wrong # of columns\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
 
     /* initially size tracer arrays to number of tracers divided by processors */
 
@@ -3388,11 +3408,20 @@ void read_tracer_file(E)
 
         for (kk=1;kk<=number_of_tracers;kk++) {
             fgets(input_s,200,fptracer);
-            sscanf(input_s,"%lf %lf %lf",&rdum1,&rdum2,&rdum3);
+            if (E->trace.number_of_extra_quantities==0) {
+                sscanf(input_s,"%lf %lf %lf\n",&theta,&phi,&rad);
+            }
+            else if (E->trace.number_of_extra_quantities==1) {
+                sscanf(input_s,"%lf %lf %lf %lf\n",&theta,&phi,&rad,&extra[0]);
+            }
+            /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
+            /* this part has to be changed... */
+            else {
+                fprintf(E->trace.fpt,"ERROR(restart tracers)-huh?\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
 
-            theta=rdum1;
-            phi=rdum2;
-            rad=rdum3;
             sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
 
 
@@ -3422,6 +3451,9 @@ void read_tracer_file(E)
             E->trace.basicq[j][3][E->trace.ntracers[j]]=x;
             E->trace.basicq[j][4][E->trace.ntracers[j]]=y;
             E->trace.basicq[j][5][E->trace.ntracers[j]]=z;
+
+            for (i=0; i<E->trace.number_of_extra_quantities; i++)
+                E->trace.extraq[j][i][E->trace.ntracers[j]]=extra[i];
 
         } /* end kk, number of tracers */
 
@@ -5325,39 +5357,48 @@ void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
 
 
 
-/********************************************************************/
-/* This function computes the number of tracers in each element.    */
-/* Each tracer can be of different "type", which is the 0th index   */
-/* of extraq. How to interprete "type" is left for the application. */
+/***********************************************************************/
+/* This function computes the number of tracers in each element.       */
+/* Each tracer can be of different "flavors", which is the 0th index   */
+/* of extraq. How to interprete "flavor" is left for the application.  */
 
-void accumulate_tracers_in_element(struct All_variables *E)
+void count_tracers_of_flavors(struct All_variables *E)
 {
-    /* how many types of tracers? */
-    // TODO: fix to 1, generalized it later
-    const int itypes = 1;
-    int kk;
-    int numtracers;
-    int nelem;
-    int j;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    int j, flavor, e, kk;
+    int numtracers;
+
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
 
         /* first zero arrays */
-        for (kk=1;kk<=E->lmesh.nel;kk++) {
-        }
+        for (flavor=0; flavor<E->trace.nflavors; flavor++)
+            for (e=1; e<=E->lmesh.nel; e++)
+                E->trace.ntracer_flavor[j][flavor][e] = 0;
 
         numtracers=E->trace.ntracers[j];
 
         /* Fill arrays */
-        for (kk=1;kk<=numtracers;kk++) {
-
-            nelem=E->trace.ielement[j][kk];
-
-            //E->composition.itypes[j][nelem]++;
-
-
+        for (kk=1; kk<=numtracers; kk++) {
+            e = E->trace.ielement[j][kk];
+            flavor = E->trace.extraq[j][0][kk];
+            E->trace.ntracer_flavor[j][flavor][e]++;
         }
     }
+
+    /* debug */
+    /**
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+        for (e=1; e<=E->lmesh.nel; e++) {
+            fprintf(E->trace.fpt, "element=%d ntracer_flaver =", e);
+            for (flavor=0; flavor<E->trace.nflavors; flavor++) {
+                fprintf(E->trace.fpt, " %d",
+                        E->trace.ntracer_flavor[j][flavor][e]);
+            }
+            fprintf(E->trace.fpt, "\n");
+        }
+    }
+    fflush(E->trace.fpt);
+    /**/
 
     return;
 }

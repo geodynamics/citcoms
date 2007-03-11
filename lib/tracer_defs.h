@@ -82,9 +82,9 @@ struct TRACE{
     int ilater[13];
     double *rlater[13][100];
 
-    /* tracer types */
-    int ntypes;
-    int *ntracer_in_element[13];
+    /* tracer flavors */
+    int nflavors;
+    int **ntracer_flavor[13];
 
     /* regular mesh parameters */
     int numtheta[13];
