@@ -674,6 +674,7 @@ struct COMPOSITION {
     int ireset_initial_composition;
     int ibuoy_type;
     int *ieltrac[13];
+    double *oldel[13];
     double *celtrac[13];
     double *comp_el[13];
     double *comp_node[13];

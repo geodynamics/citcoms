@@ -71,9 +71,9 @@ class Tracer(CitcomComponent):
         # (tracer_ic_method == 1)
         tracer_file = inv.str("tracer_file", default="tracer.dat")
 
+        # How many types of tracers, must be >= 1
+        tracer_types = inv.int("tracer_types", default=1)
 
-        # TODO: remove
-        z_interface = inv.float("z_interface", default=0.5)
 
         # Advection Scheme
 
@@ -104,6 +104,9 @@ class Tracer(CitcomComponent):
         buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
         reset_initial_composition = inv.bool("reset_initial_composition",
                                              default=False)
+        # TODO: remove
+        z_interface = inv.float("z_interface", default=0.5)
+
 
         # compositional_rheology=1 (not implemented in this version, TODO:remove)
         compositional_rheology = inv.bool("compositional_rheology",

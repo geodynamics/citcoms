@@ -145,7 +145,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       temp2 = E->composition.buoyancy_ratio * temp;
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)
-           buoy[m][i] -= temp2 * E->trace.comp_node[m][i];
+           buoy[m][i] -= temp2 * E->composition.comp_node[m][i];
     }
 
     phase_change_apply_410(E, buoy);

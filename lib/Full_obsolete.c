@@ -838,7 +838,7 @@ void write_radial_horizontal_averages(E)
 	    reltrac[j]=(double *) malloc((E->lmesh.nel+1)*sizeof(double));
 	    for (kk=1;kk<=E->lmesh.nel;kk++)
 		{
-		    reltrac[j][kk]=(1.0*E->trace.ieltrac[j][kk]);
+		    reltrac[j][kk]=(1.0*E->composition.ieltrac[j][kk]);
 		}
 	}
 
@@ -865,7 +865,7 @@ void write_radial_horizontal_averages(E)
 
     if (E->composition.chemical_buoyancy==1)
 	{
-	    return_horiz_ave(E,E->trace.comp_node,E->trace.Have_C);
+	    return_horiz_ave(E,E->composition.comp_node,E->trace.Have_C);
 
 
 	    if (E->parallel.me<E->parallel.nprocz)

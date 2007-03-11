@@ -27,96 +27,89 @@
  */
 struct Tracer {
 
-float *tracer_x;
-float *tracer_y;
-float *tracer_z;
-float *itcolor;
-float *x_space, *z_space, *y_space;
-int NUM_TRACERS;
-int LOCAL_NUM_TRACERS;
+    float *tracer_x;
+    float *tracer_y;
+    float *tracer_z;
+    float *itcolor;
+    float *x_space, *z_space, *y_space;
+    int NUM_TRACERS;
+    int LOCAL_NUM_TRACERS;
 
-int *LOCAL_ELEMENT;
+    int *LOCAL_ELEMENT;
 
-float *THETA_LOC_ELEM;
-float *FI_LOC_ELEM;
-float *R_LOC_ELEM;
+    float *THETA_LOC_ELEM;
+    float *FI_LOC_ELEM;
+    float *R_LOC_ELEM;
 
-float *THETA_LOC_ELEM_T;
-float *FI_LOC_ELEM_T;
-float *R_LOC_ELEM_T;
+    float *THETA_LOC_ELEM_T;
+    float *FI_LOC_ELEM_T;
+    float *R_LOC_ELEM_T;
 
 };
 
 
 struct TRACE{
 
-FILE *fpt;
+    FILE *fpt;
 
-FILE *fp_error_fraction;
-FILE *fp_composition;
+    FILE *fp_error_fraction;
+    FILE *fp_composition;
 
-char tracer_file[200];
+    char tracer_file[200];
 
-int number_of_advection_quantities;
-int number_of_extra_quantities;
-int number_of_tracer_quantities;
-int itracer_warnings;
+    int itracer_warnings;
+    int ianalytical_tracer_test;
+    int ic_method;
+    int itperel;
+    int itracer_advection_scheme;
+    int itracer_interpolation_scheme;
 
-int itracing;
-int ianalytical_tracer_test;
-int ic_method;
-int itperel;
-int itracer_advection_scheme;
-int itracer_interpolation_scheme;
+    double box_cushion;
 
-int icompositional_rheology;
+    /* tracer arrays */
+    int number_of_basic_quantities;
+    int number_of_extra_quantities;
+    int number_of_tracer_quantities;
 
-int itracsize[13];
-int *itrac[13];
+    double *basicq[13][100];
+    double *extraq[13][100];
 
-double box_cushion;
-double *rtrac[13][100];
-double *etrac[13][100];
-double *rlater[13][100];
-/*
-double **rtrac[13];
-double **etrac[13];
-double **rlater[13];
-*/
-double *oldel[13];
+    int ntracers[13];
+    int max_ntracers[13];
+    int *ielement[13];
 
-/* horizontally averaged */
-double *Have_C;
-double *Havel_tracers;
+    int ilatersize[13];
+    int ilater[13];
+    double *rlater[13][100];
 
+    /* tracer types */
+    int ntypes;
+    int *ntracer_in_element[13];
 
-int ilater[13];
-int ilatersize[13];
-
-/* regular mesh parameters */
-int numtheta[13];
-int numphi[13];
-unsigned int numregel[13];
-unsigned int numregnodes[13];
-double deltheta[13];
-double delphi[13];
-double thetamax[13];
-double thetamin[13];
-double phimax[13];
-double phimin[13];
-int *regnodetoel[13];
-int *regtoel[13][5];
+    /* regular mesh parameters */
+    int numtheta[13];
+    int numphi[13];
+    unsigned int numregel[13];
+    unsigned int numregnodes[13];
+    double deltheta[13];
+    double delphi[13];
+    double thetamax[13];
+    double thetamin[13];
+    double phimax[13];
+    double phimin[13];
+    int *regnodetoel[13];
+    int *regtoel[13][5];
 
 
-/* statistical parameters */
-int istat_ichoice[13][5];
-int istat_isend;
-int istat_iempty;
-int istat1;
-int istat_elements_checked;
-int ilast_tracer_count;
+    /* statistical parameters */
+    int istat_ichoice[13][5];
+    int istat_isend;
+    int istat_iempty;
+    int istat1;
+    int istat_elements_checked;
+    int ilast_tracer_count;
 
-/* Mesh information */
+    /* Mesh information */
     double xcap[13][5];
     double ycap[13][5];
     double zcap[13][5];
@@ -130,22 +123,16 @@ int ilast_tracer_count;
     double sin_phi[13][5];
 
 
-/* compositional information */
-int *ieltrac[13];
-double *celtrac[13];
-double *comp_el[13];
-double *comp_node[13];
+    /* gnomonic shape functions */
+    double *UV[13][3];
+    double cos_theta_f;
+    double sin_theta_f;
+    double *shape_coefs[13][3][10];
 
-/* gnomonic shape functions */
-double *UV[13][3];
-double cos_theta_f;
-double sin_theta_f;
-double *shape_coefs[13][3][10];
+    double *V0_cart[13][4];
 
-double *V0_cart[13][4];
-
-double initial_bulk_composition;
-double bulk_composition;
-double error_fraction;
+    double initial_bulk_composition;
+    double bulk_composition;
+    double error_fraction;
 
 };

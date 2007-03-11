@@ -600,8 +600,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
             }
         }
 
-
-        getDoubleProperty(properties, "z_interface", E->composition.z_interface, fp);
+        getIntProperty(properties, "tracer_types", E->trace.ntypes, fp);
 
         getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
         getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
@@ -612,14 +611,22 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
         E->trace.delphi[0] = tmp;
         getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
 
+
         getIntProperty(properties, "chemical_buoyancy",
                        E->composition.ichemical_buoyancy, fp);
-        getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
-        getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
-        getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
-        getIntProperty(properties, "compositional_rheology", E->trace.icompositional_rheology, fp);
-        getDoubleProperty(properties, "compositional_prefactor", E->composition.compositional_rheology_prefactor, fp);
 
+        if (E->composition.ichemical_buoyancy==1) {
+            getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
+            getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
+            getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
+            getDoubleProperty(properties, "z_interface", E->composition.z_interface, fp);
+        }
+
+        getIntProperty(properties, "compositional_rheology", E->composition.icompositional_rheology, fp);
+
+        if (E->composition.icompositional_rheology==1) {
+            getDoubleProperty(properties, "compositional_prefactor", E->composition.compositional_rheology_prefactor, fp);
+        }
     }
     PUTS(("\n"));
 

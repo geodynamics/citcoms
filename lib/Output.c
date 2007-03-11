@@ -393,7 +393,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
 void output_tracer(struct All_variables *E, int cycles)
 {
-  int j, n, ncolumns;
+  int i, j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
 
@@ -414,31 +414,24 @@ void output_tracer(struct All_variables *E, int cycles)
   }
   else {
       /* global model */
-      if (E->composition.ichemical_buoyancy==1)
-          ncolumns = 4;
-      else if (E->composition.ichemical_buoyancy==0)
-          ncolumns = 3;
+      ncolumns = 3 + E->trace.number_of_extra_quantities;
 
       for(j=1;j<=E->sphere.caps_per_proc;j++) {
-          fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.itrac[j][0],
+          fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
                   ncolumns, E->monitor.elapsed_time);
 
-          if (E->composition.ichemical_buoyancy==1) {
-              for(n=1;n<=E->trace.itrac[j][0];n++) {
-                  fprintf(fp1,"%.12e %.12e %.12e %.12e\n",
-                          E->trace.rtrac[j][0][n],
-                          E->trace.rtrac[j][1][n],
-                          E->trace.rtrac[j][2][n],
-                          E->trace.etrac[j][0][n]);
+          for(n=1;n<=E->trace.ntracers[j];n++) {
+              /* write basic quantities (coordinate) */
+              fprintf(fp1,"%.12e %.12e %.12e",
+                      E->trace.basicq[j][0][n],
+                      E->trace.basicq[j][1][n],
+                      E->trace.basicq[j][2][n]);
+
+              /* write extra quantities */
+              for (i=0; i<E->trace.number_of_extra_quantities; i++) {
+                  fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
               }
-          }
-          else if (E->composition.ichemical_buoyancy==0) {
-              for(n=1;n<=E->trace.itrac[j][0];n++) {
-                  fprintf(fp1,"%.12e %.12e %.12e\n",
-                          E->trace.rtrac[j][0][n],
-                          E->trace.rtrac[j][1][n],
-                          E->trace.rtrac[j][2][n]);
-              }
+              fprintf(fp1, "\n");
           }
 
       }
@@ -473,7 +466,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
         for(j=1;j<=E->sphere.caps_per_proc;j++) {
 	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
 	    for(i=1;i<=E->lmesh.nno;i++) {
-                fprintf(fp1,"%.6e\n",E->trace.comp_node[j][i]);
+                fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
             }
 	}
 
@@ -508,7 +501,7 @@ void output_comp_el(struct All_variables *E, int cycles)
         for(j=1;j<=E->sphere.caps_per_proc;j++) {
 	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
 	    for(i=1;i<=E->lmesh.nel;i++) {
-                fprintf(fp1,"%.6e\n",E->trace.oldel[j][i]);
+                fprintf(fp1,"%.6e\n",E->composition.oldel[j][i]);
             }
 	}
 
