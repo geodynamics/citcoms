@@ -36,7 +36,7 @@
 static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
 static void init_composition(struct All_variables *E);
-static void initialize_old_composition(struct All_variables *E);
+static void check_initial_composition(struct All_variables *E);
 static void map_composition_to_nodes(struct All_variables *E);
 
 
@@ -64,8 +64,6 @@ void composition_input(struct All_variables *E)
 
         input_int("reset_initial_composition",
                   &(E->composition.ireset_initial_composition),"0",m);
-
-        input_double("z_interface",&(E->composition.z_interface),"0.5",m);
 
     }
 
@@ -101,25 +99,6 @@ void composition_setup(struct All_variables *E)
 }
 
 
-void init_tracer_composition(struct All_variables *E)
-{
-    int j, kk, number_of_tracers;
-    double rad;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-        number_of_tracers = E->trace.ntracers[j];
-        for (kk=1;kk<=number_of_tracers;kk++) {
-            rad = E->trace.basicq[j][2][kk];
-            //TODO: generalize init flavors
-            if (rad<=E->composition.z_interface) E->trace.extraq[j][0][kk]=1.0;
-            if (rad>E->composition.z_interface) E->trace.extraq[j][0][kk]=0.0;
-        }
-    }
-    return;
-}
-
-
 void write_composition_instructions(struct All_variables *E)
 {
 
@@ -144,9 +123,6 @@ void write_composition_instructions(struct All_variables *E)
     if (E->composition.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
 
     fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
-
-    if (E->composition.ichemical_buoyancy==1)
-        fprintf(E->trace.fpt,"Interface Height: %f\n",E->composition.z_interface);
 
     if (E->composition.ireset_initial_composition==0)
         fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
@@ -232,77 +208,30 @@ static void allocate_composition_memory(struct All_variables *E)
 static void init_composition(struct All_variables *E)
 {
     if (E->composition.ichemical_buoyancy==1 && E->composition.ibuoy_type==1) {
-        initialize_old_composition(E);
         fill_composition(E);
+        check_initial_composition(E);
         init_bulk_composition(E);
     }
     return;
 }
 
 
-/************ INITIALIZE OLD COMPOSITION ************************/
-static void initialize_old_composition(struct All_variables *E)
+static void check_initial_composition(struct All_variables *E)
 {
-
-    char output_file[200];
-    char input_s[1000];
-
-    int ibottom_node;
-    int kk;
-    int j;
-
-    double zbottom;
-    double time;
-
-    FILE *fp;
-
-    if ((E->trace.ic_method==0)||(E->trace.ic_method==1)) {
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (kk=1;kk<=E->lmesh.nel;kk++) {
-
-                ibottom_node=E->ien[j][kk].node[1];
-                zbottom=E->sx[j][3][ibottom_node];
-
-                if (zbottom<E->composition.z_interface) E->composition.comp_el[j][kk]=1.0;
-                if (zbottom>=E->composition.z_interface) E->composition.comp_el[j][kk]=0.0;
-
-            } /* end kk */
-        } /* end j */
-    }
-
-
-    /* Else read from file */
-
-
-    else if (E->trace.ic_method==2) {
-
-        /* first look for backing file */
-
-        sprintf(output_file,"%s.comp_el.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
-        if ( (fp=fopen(output_file,"r"))==NULL) {
-            fprintf(E->trace.fpt,"AKMerror(Initialize Old Composition)-FILE NOT EXIST: %s\n", output_file);
+    /* check empty element if using ratio method */
+    if (E->composition.ibuoy_type == 1) {
+        if (E->trace.istat_iempty) {
+            fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
             fflush(E->trace.fpt);
+            fprintf(stderr,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
             exit(10);
         }
-
-        fgets(input_s,200,fp);
-
-        for(j=1;j<=E->sphere.caps_per_proc;j++) {
-            fgets(input_s,200,fp);
-            for (kk=1;kk<=E->lmesh.nel;kk++) {
-                fgets(input_s,200,fp);
-                sscanf(input_s,"%lf",&E->composition.comp_el[j][kk]);
-            }
-        }
-
-        fclose(fp);
-
-    } /* endif */
-
-
+    }
 
     return;
 }
+
+
 
 /*********** COMPUTE ELEMENTAL COMPOSITION RATIO METHOD ***/
 /*                                                        */

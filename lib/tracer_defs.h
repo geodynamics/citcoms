@@ -83,6 +83,9 @@ struct TRACE{
     int nflavors;
     int **ntracer_flavor[13];
 
+    int ic_method_for_flavors;
+    double z_interface;
+
     /* regular mesh parameters */
     int numtheta[13];
     int numphi[13];

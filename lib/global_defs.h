@@ -681,8 +681,6 @@ struct COMPOSITION {
     double bulk_composition;
     double error_fraction;
 
-    double z_interface;
-
     double compositional_rheology_prefactor;
 };
 

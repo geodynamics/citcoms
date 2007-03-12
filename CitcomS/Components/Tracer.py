@@ -77,6 +77,8 @@ class Tracer(CitcomComponent):
         # later for many purposes. One of it is to compute composition,
         # either using absolute method or ratio method.
         tracer_flavors = inv.int("tracer_flavors", default=0)
+        ic_method_for_flavors = inv.int("ic_method_for_flavors", default=0)
+        z_interface = inv.float("z_interface", default=0.7)
 
 
         # Advection Scheme
@@ -108,8 +110,6 @@ class Tracer(CitcomComponent):
         buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
         reset_initial_composition = inv.bool("reset_initial_composition",
                                              default=False)
-        # TODO: remove
-        z_interface = inv.float("z_interface", default=0.5)
 
 
         # compositional_rheology=1 (not implemented in this version, TODO:remove)

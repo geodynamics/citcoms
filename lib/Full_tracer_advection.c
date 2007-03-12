@@ -47,6 +47,7 @@ static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void make_tracer_array(struct All_variables *E);
+static void init_tracer_flavors(struct All_variables *E);
 
 
 
@@ -89,6 +90,10 @@ void full_tracer_input(E)
      * either using absolute method or ratio method. */
     input_int("tracer_flavors",&(E->trace.nflavors),"0,0,nomax",m);
 
+
+    input_int("ic_method_for_flavors",&(E->trace.ic_method_for_flavors),"0,0,nomax",m);
+    if (E->trace.ic_method_for_flavors == 0)
+        input_double("z_interface",&(E->trace.z_interface),"0.7",m);
 
 
     /* Advection Scheme */
@@ -259,12 +264,8 @@ void full_tracer_setup(E)
     make_regular_grid(E);
 
 
-    if (E->trace.ic_method==0) {
+    if (E->trace.ic_method==0)
         make_tracer_array(E);
-
-        if (E->composition.ichemical_buoyancy==1)
-            init_tracer_composition(E);
-    }
     else if (E->trace.ic_method==1)
         read_tracer_file(E);
     else if (E->trace.ic_method==2)
@@ -3008,6 +3009,19 @@ void write_trace_instructions(E)
 
     fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
 
+    if (E->trace.nflavors && E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
+        if (E->trace.ic_method_for_flavors == 0) {
+            fprintf(E->trace.fpt,"Layered tracer flavors\n");
+            fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
+        }
+        else {
+            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+
     if (E->trace.itracer_advection_scheme==1)
         {
             fprintf(E->trace.fpt,"\nSimple predictor-corrector method used\n");
@@ -3302,6 +3316,11 @@ static void make_tracer_array(struct All_variables *E)
 
 
     }/* end j */
+
+
+    /* Initialize tracer flavors */
+    if (E->trace.nflavors) init_tracer_flavors(E);
+
 
     fprintf(stderr,"DONE Making Tracer Array (%d)\n",E->parallel.me);
     fflush(stderr);
@@ -5252,6 +5271,28 @@ void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
     return;
 }
 
+
+
+static void init_tracer_flavors(struct All_variables *E)
+{
+    int j, kk, number_of_tracers;
+    double rad;
+
+    if (E->trace.ic_method_for_flavors == 0) {
+        for (j=1;j<=E->sphere.caps_per_proc;j++) {
+
+            number_of_tracers = E->trace.ntracers[j];
+            for (kk=1;kk<=number_of_tracers;kk++) {
+                rad = E->trace.basicq[j][2][kk];
+
+                if (rad<=E->trace.z_interface) E->trace.extraq[j][0][kk]=1.0;
+                if (rad>E->trace.z_interface) E->trace.extraq[j][0][kk]=0.0;
+            }
+        }
+    }
+
+    return;
+}
 
 
 /***********************************************************************/

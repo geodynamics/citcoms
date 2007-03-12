@@ -604,6 +604,10 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
 
         getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
+        getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
+        if (E->trace.ic_method_for_flavors == 0)
+            getDoubleProperty(properties, "z_interface", E->trace.z_interface, fp);
+
         getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
         getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
 
@@ -621,7 +625,6 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
             getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
             getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
             getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
-            getDoubleProperty(properties, "z_interface", E->composition.z_interface, fp);
         }
 
         getIntProperty(properties, "compositional_rheology", E->composition.icompositional_rheology, fp);
