@@ -363,26 +363,17 @@ void tracer_post_processing(E)
     double convection_time,tracer_time;
     double trace_fraction,total_time;
 
-    void get_bulk_composition();
-
-    static int been_here=0;
-
-
 
     fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
-    if (been_here!=0)
-        {
-            fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
-            fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
-            if (E->composition.ichemical_buoyancy==1)
-                {
-                    fprintf(E->trace.fpt,"Empty elements filled with old compositional values: %d (%f percent)\n",
-                            E->trace.istat_iempty,(100.0*E->trace.istat_iempty/E->lmesh.nel));
-                }
-        }
 
-/*     fprintf(E->trace.fpt,"Error fraction: %f  (composition: %f)\n",E->trace.error_fraction,E->trace.bulk_composition); */
+    fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
 
+    fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
+
+    if (E->composition.ichemical_buoyancy==1) {
+        fprintf(E->trace.fpt,"Empty elements filled with old compositional values: %d (%f percent)\n",
+                E->trace.istat_iempty,(100.0*E->trace.istat_iempty)/E->lmesh.nel);
+    }
 
 
     /* reset statistical counters */
@@ -394,23 +385,16 @@ void tracer_post_processing(E)
 
     /* compositional and error fraction data files */
     //TODO: move
-    if (E->parallel.me==0)
-        {
-            if (E->composition.ichemical_buoyancy==1)
-                {
-                    //TODO: to be init'd
-                    fprintf(E->fp,"composition: %e %e\n",E->monitor.elapsed_time,E->composition.bulk_composition);
-                    fprintf(E->fp,"composition_error_fraction: %e %e\n",E->monitor.elapsed_time,E->composition.error_fraction);
-
-                }
+    if (E->parallel.me==0) {
+        if (E->composition.ichemical_buoyancy==1) {
+            fprintf(E->fp,"composition: %e %e\n",E->monitor.elapsed_time,E->composition.bulk_composition);
+            fprintf(E->fp,"composition_error_fraction: %e %e\n",E->monitor.elapsed_time,E->composition.error_fraction);
 
         }
 
-
+    }
 
     fflush(E->trace.fpt);
-
-    if (been_here==0) been_here++;
 
     return;
 }
@@ -453,58 +437,56 @@ static void predict_tracers(struct All_variables *E)
     dt=E->advection.timestep;
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
-            numtracers=E->trace.ntracers[j];
+        numtracers=E->trace.ntracers[j];
 
-            for (kk=1;kk<=numtracers;kk++)
-                {
+        for (kk=1;kk<=numtracers;kk++) {
 
-                    theta0=E->trace.basicq[j][0][kk];
-                    phi0=E->trace.basicq[j][1][kk];
-                    rad0=E->trace.basicq[j][2][kk];
-                    x0=E->trace.basicq[j][3][kk];
-                    y0=E->trace.basicq[j][4][kk];
-                    z0=E->trace.basicq[j][5][kk];
+            theta0=E->trace.basicq[j][0][kk];
+            phi0=E->trace.basicq[j][1][kk];
+            rad0=E->trace.basicq[j][2][kk];
+            x0=E->trace.basicq[j][3][kk];
+            y0=E->trace.basicq[j][4][kk];
+            z0=E->trace.basicq[j][5][kk];
 
-                    nelem=E->trace.ielement[j][kk];
-                    get_velocity(E,j,nelem,theta0,phi0,rad0,velocity_vector);
+            nelem=E->trace.ielement[j][kk];
+            get_velocity(E,j,nelem,theta0,phi0,rad0,velocity_vector);
 
-                    x_pred=x0+velocity_vector[1]*dt;
-                    y_pred=y0+velocity_vector[2]*dt;
-                    z_pred=z0+velocity_vector[3]*dt;
+            x_pred=x0+velocity_vector[1]*dt;
+            y_pred=y0+velocity_vector[2]*dt;
+            z_pred=z0+velocity_vector[3]*dt;
 
 
-                    /* keep in box */
+            /* keep in box */
 
-                    cart_to_sphere(E,x_pred,y_pred,z_pred,&theta_pred,&phi_pred,&rad_pred);
-                    keep_in_sphere(E,&x_pred,&y_pred,&z_pred,&theta_pred,&phi_pred,&rad_pred);
+            cart_to_sphere(E,x_pred,y_pred,z_pred,&theta_pred,&phi_pred,&rad_pred);
+            keep_in_sphere(E,&x_pred,&y_pred,&z_pred,&theta_pred,&phi_pred,&rad_pred);
 
-                    /* Current Coordinates are always kept in positions 0-5. */
+            /* Current Coordinates are always kept in positions 0-5. */
 
-                    E->trace.basicq[j][0][kk]=theta_pred;
-                    E->trace.basicq[j][1][kk]=phi_pred;
-                    E->trace.basicq[j][2][kk]=rad_pred;
-                    E->trace.basicq[j][3][kk]=x_pred;
-                    E->trace.basicq[j][4][kk]=y_pred;
-                    E->trace.basicq[j][5][kk]=z_pred;
+            E->trace.basicq[j][0][kk]=theta_pred;
+            E->trace.basicq[j][1][kk]=phi_pred;
+            E->trace.basicq[j][2][kk]=rad_pred;
+            E->trace.basicq[j][3][kk]=x_pred;
+            E->trace.basicq[j][4][kk]=y_pred;
+            E->trace.basicq[j][5][kk]=z_pred;
 
-                    /* Fill in original coords (positions 6-8) */
+            /* Fill in original coords (positions 6-8) */
 
-                    E->trace.basicq[j][6][kk]=x0;
-                    E->trace.basicq[j][7][kk]=y0;
-                    E->trace.basicq[j][8][kk]=z0;
+            E->trace.basicq[j][6][kk]=x0;
+            E->trace.basicq[j][7][kk]=y0;
+            E->trace.basicq[j][8][kk]=z0;
 
-                    /* Fill in original velocities (positions 9-11) */
+            /* Fill in original velocities (positions 9-11) */
 
-                    E->trace.basicq[j][9][kk]=velocity_vector[1];  /* Vx */
-                    E->trace.basicq[j][10][kk]=velocity_vector[2];  /* Vy */
-                    E->trace.basicq[j][11][kk]=velocity_vector[3];  /* Vz */
+            E->trace.basicq[j][9][kk]=velocity_vector[1];  /* Vx */
+            E->trace.basicq[j][10][kk]=velocity_vector[2];  /* Vy */
+            E->trace.basicq[j][11][kk]=velocity_vector[3];  /* Vz */
 
 
-                } /* end kk, predicting tracers */
-        } /* end caps */
+        } /* end kk, predicting tracers */
+    } /* end caps */
 
     /* find new tracer elements and caps */
 
@@ -554,59 +536,52 @@ static void correct_tracers(struct All_variables *E)
 
     dt=E->advection.timestep;
 
-    if ((E->parallel.me==0) && (E->trace.itracer_advection_scheme==2) )
-        {
-            fprintf(stderr,"AA:Correcting Tracers\n");
-            fflush(stderr);
-        }
 
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+        for (kk=1;kk<=E->trace.ntracers[j];kk++) {
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-            for (kk=1;kk<=E->trace.ntracers[j];kk++)
-                {
+            theta_pred=E->trace.basicq[j][0][kk];
+            phi_pred=E->trace.basicq[j][1][kk];
+            rad_pred=E->trace.basicq[j][2][kk];
+            x_pred=E->trace.basicq[j][3][kk];
+            y_pred=E->trace.basicq[j][4][kk];
+            z_pred=E->trace.basicq[j][5][kk];
 
-                    theta_pred=E->trace.basicq[j][0][kk];
-                    phi_pred=E->trace.basicq[j][1][kk];
-                    rad_pred=E->trace.basicq[j][2][kk];
-                    x_pred=E->trace.basicq[j][3][kk];
-                    y_pred=E->trace.basicq[j][4][kk];
-                    z_pred=E->trace.basicq[j][5][kk];
+            x0=E->trace.basicq[j][6][kk];
+            y0=E->trace.basicq[j][7][kk];
+            z0=E->trace.basicq[j][8][kk];
 
-                    x0=E->trace.basicq[j][6][kk];
-                    y0=E->trace.basicq[j][7][kk];
-                    z0=E->trace.basicq[j][8][kk];
+            Vx0=E->trace.basicq[j][9][kk];
+            Vy0=E->trace.basicq[j][10][kk];
+            Vz0=E->trace.basicq[j][11][kk];
 
-                    Vx0=E->trace.basicq[j][9][kk];
-                    Vy0=E->trace.basicq[j][10][kk];
-                    Vz0=E->trace.basicq[j][11][kk];
+            nelem=E->trace.ielement[j][kk];
 
-                    nelem=E->trace.ielement[j][kk];
+            get_velocity(E,j,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
 
-                    get_velocity(E,j,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
+            Vx_pred=velocity_vector[1];
+            Vy_pred=velocity_vector[2];
+            Vz_pred=velocity_vector[3];
 
-                    Vx_pred=velocity_vector[1];
-                    Vy_pred=velocity_vector[2];
-                    Vz_pred=velocity_vector[3];
+            x_cor=x0 + dt * 0.5*(Vx0+Vx_pred);
+            y_cor=y0 + dt * 0.5*(Vy0+Vy_pred);
+            z_cor=z0 + dt * 0.5*(Vz0+Vz_pred);
 
-                    x_cor=x0 + dt * 0.5*(Vx0+Vx_pred);
-                    y_cor=y0 + dt * 0.5*(Vy0+Vy_pred);
-                    z_cor=z0 + dt * 0.5*(Vz0+Vz_pred);
+            cart_to_sphere(E,x_cor,y_cor,z_cor,&theta_cor,&phi_cor,&rad_cor);
+            keep_in_sphere(E,&x_cor,&y_cor,&z_cor,&theta_cor,&phi_cor,&rad_cor);
 
-                    cart_to_sphere(E,x_cor,y_cor,z_cor,&theta_cor,&phi_cor,&rad_cor);
-                    keep_in_sphere(E,&x_cor,&y_cor,&z_cor,&theta_cor,&phi_cor,&rad_cor);
+            /* Fill in Current Positions (other positions are no longer important) */
 
-                    /* Fill in Current Positions (other positions are no longer important) */
+            E->trace.basicq[j][0][kk]=theta_cor;
+            E->trace.basicq[j][1][kk]=phi_cor;
+            E->trace.basicq[j][2][kk]=rad_cor;
+            E->trace.basicq[j][3][kk]=x_cor;
+            E->trace.basicq[j][4][kk]=y_cor;
+            E->trace.basicq[j][5][kk]=z_cor;
 
-                    E->trace.basicq[j][0][kk]=theta_cor;
-                    E->trace.basicq[j][1][kk]=phi_cor;
-                    E->trace.basicq[j][2][kk]=rad_cor;
-                    E->trace.basicq[j][3][kk]=x_cor;
-                    E->trace.basicq[j][4][kk]=y_cor;
-                    E->trace.basicq[j][5][kk]=z_cor;
+        } /* end kk, correcting tracers */
+    } /* end caps */
 
-                } /* end kk, correcting tracers */
-        } /* end caps */
     /* find new tracer elements and caps */
 
     find_tracers(E);
@@ -1038,6 +1013,9 @@ void initialize_tracer_arrays(E,j,number_of_tracers)
         fflush(E->trace.fpt);
         exit(10);
     }
+    for (kk=1;kk<=E->trace.max_ntracers[j];kk++)
+        E->trace.ielement[j][kk]=-99;
+
 
     for (kk=0;kk<E->trace.number_of_basic_quantities;kk++) {
         if ((E->trace.basicq[j][kk]=(double *)malloc(E->trace.max_ntracers[j]*sizeof(double)))==NULL) {
@@ -1106,23 +1084,7 @@ void find_tracers(E)
     void lost_souls();
     void sphere_to_cart();
 
-    static int been_here=0;
-
     time_stat1=CPU_time0();
-
-
-    if (been_here==0)
-        {
-            for (j=1;j<=E->sphere.caps_per_proc;j++)
-                {
-                    for (kk=1;kk<=E->trace.ntracers[j];kk++)
-                        {
-                            E->trace.ielement[j][kk]=-99;
-                        }
-                }
-            been_here++;
-        }
-
 
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
@@ -1283,7 +1245,7 @@ void lost_souls(E)
     MPI_Request request[200];
     MPI_Status status1;
     MPI_Status status2;
-    static int itag=1;
+    int itag=1;
 
 
     parallel_process_sync(E);
@@ -5278,6 +5240,10 @@ static void init_tracer_flavors(struct All_variables *E)
     int j, kk, number_of_tracers;
     double rad;
 
+
+    /* ic_method_for_flavors == 0 (layerd structure) */
+    /* any tracer above z_interface is of flavor 0   */
+    /* any tracer below z_interface is of flavor 1   */
     if (E->trace.ic_method_for_flavors == 0) {
         for (j=1;j<=E->sphere.caps_per_proc;j++) {
 

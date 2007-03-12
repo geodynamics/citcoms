@@ -155,9 +155,6 @@ void fill_composition(struct All_variables *E)
     /* XXX: Currently, only the ratio method works here.           */
     /* Will have to come back here to include the absolute method. */
 
-    //count_tracers_of_flavors(E);
-
-
     /* ratio method */
 
     if (E->composition.ibuoy_type==1) {
