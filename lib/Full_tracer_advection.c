@@ -156,7 +156,6 @@ void full_tracer_setup(E)
 {
 
     char output_file[200];
-    int m;
     void write_trace_instructions();
     void viscosity_checks();
     void initialize_old_composition();
@@ -179,7 +178,19 @@ void full_tracer_setup(E)
     }
 
 
-    m=E->parallel.me;
+    /* open tracing output file */
+
+    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
+    E->trace.fpt=fopen(output_file,"w");
+
+
+    /* reset statistical counters */
+
+    E->trace.istat_isend=0;
+    E->trace.istat_iempty=0;
+    E->trace.istat_elements_checked=0;
+    E->trace.istat1=0;
+
 
     /* some obscure initial parameters */
     /* This parameter specifies how close a tracer can get to the boundary */
@@ -191,9 +202,7 @@ void full_tracer_setup(E)
     /* Determine number of tracer quantities */
 
     /* advection_quantites - those needed for advection */
-    // TODO: generalize it
-    if (E->trace.itracer_advection_scheme==1) E->trace.number_of_basic_quantities=12;
-    if (E->trace.itracer_advection_scheme==2) E->trace.number_of_basic_quantities=12;
+    E->trace.number_of_basic_quantities=12;
 
     /* extra_quantities - used for flavors, composition, etc.    */
     /* (can be increased for additional science i.e. tracing chemistry */
@@ -213,18 +222,6 @@ void full_tracer_setup(E)
     /* Current coordinates are always kept in basicq positions 0-5 */
     /* Other positions may be used depending on advection scheme and/or science being done */
 
-    /* open tracing output file */
-
-    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,m);
-    E->trace.fpt=fopen(output_file,"w");
-
-
-    /* reset statistical counters */
-
-    E->trace.istat_isend=0;
-    E->trace.istat_iempty=0;
-    E->trace.istat_elements_checked=0;
-    E->trace.istat1=0;
 
     /* Some error control regarding size of pointer arrays */
 
@@ -464,25 +461,12 @@ static void predict_tracers(struct All_variables *E)
     double velocity_vector[4];
 
     void get_velocity();
-    void get_cartesian_velocity_field();
     void cart_to_sphere();
     void keep_in_sphere();
     void find_tracers();
 
-    static int been_here=0;
 
     dt=E->advection.timestep;
-
-    /* if advection scheme is 2, don't have to calculate cartesian velocity again */
-    /* (already did after last stokes calculation, unless this is first step)     */
-
-    if ((been_here==0) && (E->trace.itracer_advection_scheme==2))
-        {
-            get_cartesian_velocity_field(E);
-            been_here++;
-        }
-
-    if (E->trace.itracer_advection_scheme==1) get_cartesian_velocity_field(E);
 
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
@@ -579,7 +563,6 @@ static void correct_tracers(struct All_variables *E)
     double Vx_pred,Vy_pred,Vz_pred;
 
     void get_velocity();
-    void get_cartesian_velocity_field();
     void cart_to_sphere();
     void keep_in_sphere();
     void find_tracers();
@@ -591,15 +574,6 @@ static void correct_tracers(struct All_variables *E)
         {
             fprintf(stderr,"AA:Correcting Tracers\n");
             fflush(stderr);
-        }
-
-
-    /* If scheme==1, use same velocity (t=0)      */
-    /* Else if scheme==2, use new velocity (t=dt) */
-
-    if (E->trace.itracer_advection_scheme==2)
-        {
-            get_cartesian_velocity_field(E);
         }
 
 
@@ -734,11 +708,13 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
     int kk;
     int ival;
     int itry;
+    int sphere_key = 0;
 
     double u,v;
     double shape2d[4];
     double shaperad[3];
     double shape[7];
+    double VV[4][9];
     double vx[7],vy[7],vz[7];
     double x,y,z;
 
@@ -751,6 +727,7 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
     void sphere_to_cart();
     void spherical_to_uv();
     void get_2dshape();
+    void velo_from_element_d();
     int iget_element();
     int icheck_element();
     int icheck_column_neighbors();
@@ -839,50 +816,52 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
     shape[5]=shaperad[2]*shape2d[2];
     shape[6]=shaperad[2]*shape2d[3];
 
+    /* get cartesian velocity */
+    velo_from_element_d(E, VV, j, nelem, sphere_key);
+
     /* depending on wedge, set up velocity points */
 
     if (iwedge==1)
         {
-            vx[1]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[1]];
-            vx[1]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[1]];
-            vx[2]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[2]];
-            vx[3]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[3]];
-            vx[4]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[5]];
-            vx[5]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[6]];
-            vx[6]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[7]];
-            vy[1]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[1]];
-            vy[2]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[2]];
-            vy[3]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[3]];
-            vy[4]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[5]];
-            vy[5]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[6]];
-            vy[6]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[7]];
-            vz[1]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[1]];
-            vz[2]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[2]];
-            vz[3]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[3]];
-            vz[4]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[5]];
-            vz[5]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[6]];
-            vz[6]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[7]];
+            vx[1]=VV[1][1];
+            vx[2]=VV[1][2];
+            vx[3]=VV[1][3];
+            vx[4]=VV[1][5];
+            vx[5]=VV[1][6];
+            vx[6]=VV[1][7];
+            vy[1]=VV[2][1];
+            vy[2]=VV[2][2];
+            vy[3]=VV[2][3];
+            vy[4]=VV[2][5];
+            vy[5]=VV[2][6];
+            vy[6]=VV[2][7];
+            vz[1]=VV[3][1];
+            vz[2]=VV[3][2];
+            vz[3]=VV[3][3];
+            vz[4]=VV[3][5];
+            vz[5]=VV[3][6];
+            vz[6]=VV[3][7];
         }
     if (iwedge==2)
         {
-            vx[1]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[1]];
-            vx[2]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[3]];
-            vx[3]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[4]];
-            vx[4]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[5]];
-            vx[5]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[7]];
-            vx[6]=E->trace.V0_cart[j][1][E->IEN[maxlevel][j][nelem].node[8]];
-            vy[1]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[1]];
-            vy[2]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[3]];
-            vy[3]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[4]];
-            vy[4]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[5]];
-            vy[5]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[7]];
-            vy[6]=E->trace.V0_cart[j][2][E->IEN[maxlevel][j][nelem].node[8]];
-            vz[1]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[1]];
-            vz[2]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[3]];
-            vz[3]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[4]];
-            vz[4]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[5]];
-            vz[5]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[7]];
-            vz[6]=E->trace.V0_cart[j][3][E->IEN[maxlevel][j][nelem].node[8]];
+            vx[1]=VV[1][1];
+            vx[2]=VV[1][3];
+            vx[3]=VV[1][4];
+            vx[4]=VV[1][5];
+            vx[5]=VV[1][7];
+            vx[6]=VV[1][8];
+            vy[1]=VV[2][1];
+            vy[2]=VV[2][3];
+            vy[3]=VV[2][4];
+            vy[4]=VV[2][5];
+            vy[5]=VV[2][7];
+            vy[6]=VV[2][8];
+            vz[1]=VV[3][1];
+            vz[2]=VV[3][3];
+            vz[3]=VV[3][4];
+            vz[4]=VV[3][5];
+            vz[5]=VV[3][7];
+            vz[6]=VV[3][8];
         }
 
     velocity_vector[1]=vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
@@ -4833,72 +4812,6 @@ void determine_shape_coefficients(E)
     return;
 }
 
-/****************** GET CARTESIAN VELOCITY FIELD **************************************/
-/*                                                                                    */
-/* This function computes the cartesian velocity field from the spherical             */
-/* velocity field computed from main Citcom code.                                     */
-
-void get_cartesian_velocity_field(E)
-     struct All_variables *E;
-{
-
-    int j,m,i;
-    int kk;
-    int lev = E->mesh.levmax;
-
-    double sint,sinf,cost,cosf;
-    double v_theta,v_phi,v_rad;
-    double vx,vy,vz;
-
-    static int been_here=0;
-
-    if (been_here==0)
-        {
-            for (j=1;j<=E->sphere.caps_per_proc;j++)
-                {
-                    for (kk=1;kk<=3;kk++)
-                        {
-                            if ((E->trace.V0_cart[j][kk]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL)
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(get_cartesian_velocity)-no memory 82hd7\n");
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-                        }
-                }
-
-            been_here++;
-        }
-
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-        {
-
-            for (i=1;i<=E->lmesh.nno;i++)
-                {
-                    sint=E->SinCos[lev][m][0][i];
-                    sinf=E->SinCos[lev][m][1][i];
-                    cost=E->SinCos[lev][m][2][i];
-                    cosf=E->SinCos[lev][m][3][i];
-
-                    v_theta=E->sphere.cap[m].V[1][i];
-                    v_phi=E->sphere.cap[m].V[2][i];
-                    v_rad=E->sphere.cap[m].V[3][i];
-
-
-
-                    vx=v_theta*cost*cosf-v_phi*sinf+v_rad*sint*cosf;
-                    vy=v_theta*cost*sinf+v_phi*cosf+v_rad*sint*sinf;
-                    vz=-v_theta*sint+v_rad*cost;
-
-                    E->trace.V0_cart[m][1][i]=vx;
-                    E->trace.V0_cart[m][2][i]=vy;
-                    E->trace.V0_cart[m][3][i]=vz;
-                }
-        }
-
-    return;
-}
 
 /*********** KEEP IN SPHERE *********************************************/
 /*                                                                      */

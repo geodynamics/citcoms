@@ -454,3 +454,46 @@ void velo_from_element(E,VV,m,el,sphere_key)
   }
   return;
   }
+
+
+void velo_from_element_d(E,VV,m,el,sphere_key)
+  struct All_variables *E;
+  double VV[4][9];
+  int el,m,sphere_key;
+{
+
+  int a, node;
+  double sint, cost, sinf, cosf;
+  const int dims=E->mesh.nsd;
+  const int ends=enodes[E->mesh.nsd];
+  const int nno=E->lmesh.nno;
+  const int lev=E->mesh.levmax;
+
+  if (sphere_key)
+    for(a=1;a<=ends;a++)   {
+      node = E->ien[m][el].node[a];
+      VV[1][a] = E->sphere.cap[m].V[1][node];
+      VV[2][a] = E->sphere.cap[m].V[2][node];
+      VV[3][a] = E->sphere.cap[m].V[3][node];
+      }
+  else {
+    for(a=1;a<=ends;a++)   {
+      node = E->ien[m][el].node[a];
+
+      sint = E->SinCos[lev][m][0][node];
+      sinf = E->SinCos[lev][m][1][node];
+      cost = E->SinCos[lev][m][2][node];
+      cosf = E->SinCos[lev][m][3][node];
+
+      VV[1][a] = E->sphere.cap[m].V[1][node]*cost*cosf
+          - E->sphere.cap[m].V[2][node]*sinf
+          + E->sphere.cap[m].V[3][node]*sint*cosf;
+      VV[2][a] = E->sphere.cap[m].V[1][node]*cost*sinf
+          + E->sphere.cap[m].V[2][node]*cosf
+          + E->sphere.cap[m].V[3][node]*sint*sinf;
+      VV[3][a] = -E->sphere.cap[m].V[1][node]*sint
+          + E->sphere.cap[m].V[3][node]*cost;
+      }
+  }
+  return;
+}

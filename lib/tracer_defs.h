@@ -129,8 +129,6 @@ struct TRACE{
     double sin_theta_f;
     double *shape_coefs[13][3][10];
 
-    double *V0_cart[13][4];
-
     double initial_bulk_composition;
     double bulk_composition;
     double error_fraction;
