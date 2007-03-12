@@ -276,7 +276,6 @@ void full_tracer_setup(E)
             exit(10);
         }
 
-
     /* total number of tracers  */
 
     E->trace.ilast_tracer_count = isum_tracers(E);
@@ -367,8 +366,6 @@ void tracer_post_processing(E)
 
     static int been_here=0;
 
-    //TODO: fix this function
-    if (E->composition.ichemical_buoyancy==1) get_bulk_composition(E);
 
 
     fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
@@ -3194,6 +3191,7 @@ void restart_tracers(E)
         fflush(E->trace.fpt);
 
     }
+    fclose(fp1);
 
 
     return;

@@ -234,6 +234,7 @@ static void init_composition(struct All_variables *E)
     if (E->composition.ichemical_buoyancy==1 && E->composition.ibuoy_type==1) {
         initialize_old_composition(E);
         fill_composition(E);
+        init_bulk_composition(E);
     }
     return;
 }
@@ -425,9 +426,7 @@ static void map_composition_to_nodes(struct All_variables *E)
 
 /*********** GET BULK COMPOSITION *******************************/
 
-void get_bulk_composition(E)
-     struct All_variables *E;
-
+void init_bulk_composition(struct All_variables *E)
 {
 
     char output_file[200];
@@ -446,63 +445,53 @@ void get_bulk_composition(E)
 
     FILE *fp;
 
-    static int been_here=0;
-
 
     /* ival=0 returns integral not average */
 
+    volume = return_bulk_value_d(E,E->composition.comp_node,ival);
+
+    E->composition.bulk_composition = volume;
+    E->composition.initial_bulk_composition = volume;
+
+
+    /* If retarting tracers, the initital bulk composition is read from file */
+    if (E->trace.ic_method == 2 &&
+        !E->composition.ireset_initial_composition) {
+
+        sprintf(output_file,"%s.comp_el.%d.%d",E->control.old_P_file,
+                E->parallel.me, E->monitor.solution_cycles);
+
+        fp=fopen(output_file,"r");
+        fgets(input_s,200,fp);
+        sscanf(input_s,"%d %d %lf %lf %lf",
+               &istep,&idum1,&rdum1,&rdum2,&rdum3);
+
+        E->composition.initial_bulk_composition = rdum2;
+        fclose(fp);
+
+    }
+
+    return;
+}
+
+
+void get_bulk_composition(E)
+     struct All_variables *E;
+
+{
+
+    double return_bulk_value_d();
+    double volume;
+    const ival = 0;
+
+    /* ival=0 returns integral not average */
     volume=return_bulk_value_d(E,E->composition.comp_node,ival);
 
     E->composition.bulk_composition=volume;
 
-    /* Here we assume if restart = 1 or 0 tracers are reset          */
-    /*                if restart = 2 tracers may or may not be reset  */
-    /*                   (read initial composition from file)         */
-
-    //TODO: figure out how to remove been_here
-    if (been_here==0)
-        {
-            if (E->composition.ireset_initial_composition==1)
-                {
-                    E->composition.initial_bulk_composition=volume;
-                }
-            else
-                {
-
-                    if (E->trace.ic_method!=2)
-                        {
-                            fprintf(E->trace.fpt,"ERROR(bulk composition)-wrong reset,restart combo\n");
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-
-                    sprintf(output_file,"%s.comp.%d.%d",E->control.old_P_file,
-                            E->parallel.me,E->monitor.solution_cycles);
-
-                    fp=fopen(output_file,"r");
-                    fgets(input_s,200,fp);
-                    sscanf(input_s,"%d %d %lf %lf %lf",
-                           &istep,&idum1,&rdum1,&rdum2,&rdum3);
-
-                    E->composition.initial_bulk_composition=rdum2;
-                    fclose(fp);
-
-                    if (istep!=E->monitor.solution_cycles)
-                        {
-                            fprintf(E->trace.fpt,"ERROR(get_bulk_composition) %d %d\n",
-                                    istep,E->monitor.solution_cycles);
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-                }
-        }
-
     E->composition.error_fraction=((volume-E->composition.initial_bulk_composition)/
                              E->composition.initial_bulk_composition);
 
-    parallel_process_sync(E);
-
-    been_here++;
     return;
 }
 
