@@ -113,10 +113,10 @@ class Tracer(CitcomComponent):
 
 
         # compositional_rheology=1 (not implemented in this version, TODO:remove)
-        compositional_rheology = inv.bool("compositional_rheology",
-                                          default=False)
-        compositional_prefactor = inv.float("compositional_prefactor",
-                                            default=1.0)
+        #compositional_rheology = inv.bool("compositional_rheology",
+        #                                  default=False)
+        #compositional_prefactor = inv.float("compositional_prefactor",
+        #                                    default=1.0)
 
 
 

@@ -72,7 +72,7 @@ void composition_input(struct All_variables *E)
 
     /* icompositional_rheology=0 (off) */
     /* icompositional_rheology=1 (on) */
-
+    /*
     input_int("compositional_rheology",
               &(E->composition.icompositional_rheology),"1,0,nomax",m);
 
@@ -81,6 +81,7 @@ void composition_input(struct All_variables *E)
                      &(E->composition.compositional_rheology_prefactor),
                      "1.0",m);
     }
+    */
 
     return;
 }
@@ -130,7 +131,7 @@ void write_composition_instructions(struct All_variables *E)
         fprintf(E->trace.fpt,"Resetting initial composition\n");
 
 
-
+    /*
     if (E->composition.icompositional_rheology==0) {
         fprintf(E->trace.fpt,"Compositional Rheology - OFF\n");
     }
@@ -139,7 +140,7 @@ void write_composition_instructions(struct All_variables *E)
         fprintf(E->trace.fpt,"Compositional Prefactor: %f\n",
                 E->composition.compositional_rheology_prefactor);
     }
-
+    */
 
     fflush(E->trace.fpt);
     fflush(stderr);

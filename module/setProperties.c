@@ -627,12 +627,13 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
             getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
         }
 
+        /*
         getIntProperty(properties, "compositional_rheology", E->composition.icompositional_rheology, fp);
 
         if (E->composition.icompositional_rheology==1) {
             getDoubleProperty(properties, "compositional_prefactor", E->composition.compositional_rheology_prefactor, fp);
         }
-
+        */
     }
     PUTS(("\n"));
 
