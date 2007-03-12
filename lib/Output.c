@@ -460,8 +460,8 @@ void output_comp_nd(struct All_variables *E, int cycles)
         fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
                 cycles, E->lmesh.nno,
                 E->monitor.elapsed_time,
-                E->trace.initial_bulk_composition,
-                E->trace.bulk_composition);
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
 
         for(j=1;j<=E->sphere.caps_per_proc;j++) {
 	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
@@ -495,8 +495,8 @@ void output_comp_el(struct All_variables *E, int cycles)
         fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
                 cycles, E->lmesh.nel,
                 E->monitor.elapsed_time,
-                E->trace.initial_bulk_composition,
-                E->trace.bulk_composition);
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
 
         for(j=1;j<=E->sphere.caps_per_proc;j++) {
 	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);

@@ -52,9 +52,6 @@ struct TRACE{
 
     FILE *fpt;
 
-    FILE *fp_error_fraction;
-    FILE *fp_composition;
-
     char tracer_file[200];
 
     int itracer_warnings;
@@ -128,9 +125,5 @@ struct TRACE{
     double cos_theta_f;
     double sin_theta_f;
     double *shape_coefs[13][3][10];
-
-    double initial_bulk_composition;
-    double bulk_composition;
-    double error_fraction;
 
 };

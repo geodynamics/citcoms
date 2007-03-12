@@ -368,7 +368,7 @@ void tracer_post_processing(E)
     static int been_here=0;
 
     //TODO: fix this function
-    //if (E->composition.ichemical_buoyancy==1) get_bulk_composition(E);
+    if (E->composition.ichemical_buoyancy==1) get_bulk_composition(E);
 
 
     fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
@@ -398,26 +398,12 @@ void tracer_post_processing(E)
     //TODO: move
     if (E->parallel.me==0)
         {
-            if (been_here==0)
-                {
-                    if (E->composition.ichemical_buoyancy==1)
-                        {
-                            sprintf(output_file,"%s.error_fraction.data",E->control.data_file);
-                            E->trace.fp_error_fraction=fopen(output_file,"w");
-
-                            sprintf(output_file,"%s.composition.data",E->control.data_file);
-                            E->trace.fp_composition=fopen(output_file,"w");
-                        }
-                }
-
             if (E->composition.ichemical_buoyancy==1)
                 {
                     //TODO: to be init'd
-                    fprintf(E->trace.fp_error_fraction,"%e %e\n",E->monitor.elapsed_time,E->trace.error_fraction);
-                    fprintf(E->trace.fp_composition,"%e %e\n",E->monitor.elapsed_time,E->trace.bulk_composition);
+                    fprintf(E->fp,"composition: %e %e\n",E->monitor.elapsed_time,E->composition.bulk_composition);
+                    fprintf(E->fp,"composition_error_fraction: %e %e\n",E->monitor.elapsed_time,E->composition.error_fraction);
 
-                    fflush(E->trace.fp_error_fraction);
-                    fflush(E->trace.fp_composition);
                 }
 
         }
