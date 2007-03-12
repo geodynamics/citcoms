@@ -170,6 +170,7 @@ void PG_timestep_solve(struct All_variables *E)
   }
 
   if(E->control.lith_age) {
+      if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
       lith_age_conform_tbc(E);
       assimilate_lith_conform_bcs(E);
   }

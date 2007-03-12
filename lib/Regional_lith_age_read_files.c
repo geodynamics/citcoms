@@ -42,6 +42,7 @@ void regional_lith_age_read_files(struct All_variables *E, int output)
   int i,j,node;
   int intage, pos_age;
 
+
   nox=E->mesh.nox;
   noy=E->mesh.noy;
   noz=E->mesh.noz;
@@ -51,6 +52,9 @@ void regional_lith_age_read_files(struct All_variables *E, int output)
   lev=E->mesh.levmax;
 
   age=find_age_in_MY(E);
+  if(E->parallel.me==0) {
+     fprintf(stderr,"INSIDE regional_lith_age_read_files, age= %g\n",age);
+  }
 
   if (age < 0.0) { /* age is negative -> use age=0 for input files */
     intage = 0;
