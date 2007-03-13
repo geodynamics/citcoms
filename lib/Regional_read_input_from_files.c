@@ -117,6 +117,30 @@ void regional_read_input_files_for_timesteps(E,action,output)
       }
       break;
 
+      case 2:  /* read ages for lithosphere temperature assimilation */
+        sprintf(output_file1,"%s%0.0f",E->control.lith_age_file,newage1);
+        sprintf(output_file2,"%s%0.0f",E->control.lith_age_file,newage2);
+        fp1=fopen(output_file1,"r");
+        if (fp1 == NULL) {
+          fprintf(E->fp,"(Problem_related #6) Cannot open %s\n",output_file1);
+          exit(8);
+        }
+        if (pos_age) {
+          fp2=fopen(output_file2,"r");
+          if (fp2 == NULL) {
+            fprintf(E->fp,"(Problem_related #7) Cannot open %s\n",output_file2);            exit(8);
+          }
+        }
+        if((E->parallel.me==0) && (output==1))   {
+          fprintf(E->fp,"Age: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+          fprintf(E->fp,"Age: File1 = %s\n",output_file1);
+          if (pos_age)
+            fprintf(E->fp,"Age: File2 = %s\n",output_file2);
+          else
+            fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
+        }
+        break;
+
       case 3:  /* read element materials */
 
         sprintf(output_file1,"%s%0.0f.0",E->control.mat_file,newage1);
@@ -189,6 +213,23 @@ void regional_read_input_files_for_timesteps(E,action,output)
           free ((void *) VB2[i]);
       }
       break;
+
+      case 2:  /* ages for lithosphere temperature assimilation */
+        for(i=1;i<=noy;i++)
+          for(j=1;j<=nox;j++) {
+            node=j+(i-1)*nox;
+            fscanf(fp1,"%f",&inputage1);
+            if (pos_age) { /* positive ages - we must interpolate */
+              fscanf(fp2,"%f",&inputage2);
+              E->age_t[node] = (inputage1 + (inputage2-inputage1)/(newage2-newage1)*(age-newage1))/E->data.scalet;
+            }
+            else { /* negative ages - don't do the interpolation */
+              E->age_t[node] = inputage1;
+            }
+          }
+        fclose(fp1);
+        if (pos_age) fclose(fp2);
+        break;
 
       case 3:  /* read element materials */
 

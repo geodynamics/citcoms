@@ -118,7 +118,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 	}
 	break;
 
-      case 2:  /* read ages for lithosphere tempperature assimilation */
+      case 2:  /* read ages for lithosphere temperature assimilation */
 	sprintf(output_file1,"%s%0.0f.%d",E->control.lith_age_file,newage1,cap);
 	sprintf(output_file2,"%s%0.0f.%d",E->control.lith_age_file,newage2,cap);
 	fp1=fopen(output_file1,"r");
