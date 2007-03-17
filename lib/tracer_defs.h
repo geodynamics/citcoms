@@ -25,27 +25,10 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-struct Tracer {
 
-    float *tracer_x;
-    float *tracer_y;
-    float *tracer_z;
-    float *itcolor;
-    float *x_space, *z_space, *y_space;
-    int NUM_TRACERS;
-    int LOCAL_NUM_TRACERS;
 
-    int *LOCAL_ELEMENT;
-
-    float *THETA_LOC_ELEM;
-    float *FI_LOC_ELEM;
-    float *R_LOC_ELEM;
-
-    float *THETA_LOC_ELEM_T;
-    float *FI_LOC_ELEM_T;
-    float *R_LOC_ELEM_T;
-
-};
+/* forward declaration */
+struct All_variables;
 
 
 struct TRACE{
@@ -86,21 +69,6 @@ struct TRACE{
     int ic_method_for_flavors;
     double z_interface;
 
-    /* regular mesh parameters */
-    int numtheta[13];
-    int numphi[13];
-    unsigned int numregel[13];
-    unsigned int numregnodes[13];
-    double deltheta[13];
-    double delphi[13];
-    double thetamax[13];
-    double thetamin[13];
-    double phimax[13];
-    double phimin[13];
-    int *regnodetoel[13];
-    int *regtoel[13][5];
-
-
     /* statistical parameters */
     int istat_ichoice[13][5];
     int istat_isend;
@@ -123,10 +91,52 @@ struct TRACE{
     double sin_phi[13][5];
 
 
+
+    /*********************/
+    /* for globall model */
+    /*********************/
+
+    /* regular mesh parameters */
+    int numtheta[13];
+    int numphi[13];
+    unsigned int numregel[13];
+    unsigned int numregnodes[13];
+    double deltheta[13];
+    double delphi[13];
+    double thetamax[13];
+    double thetamin[13];
+    double phimax[13];
+    double phimin[13];
+    int *regnodetoel[13];
+    int *regtoel[13][5];
+
     /* gnomonic shape functions */
     double *UV[13][3];
     double cos_theta_f;
     double sin_theta_f;
     double *shape_coefs[13][3][10];
 
+
+
+
+    /**********************/
+    /* for regional model */
+    /**********************/
+
+    double *x_space;
+    double *y_space;
+    double *z_space;
+
+
+
+
+    /*********************/
+    /* function pointers */
+    /*********************/
+
+    int (* iget_element)(struct All_variables*, int, int,
+                         double, double, double, double, double, double);
+
+    void (* get_velocity)(struct All_variables*, int, int,
+                          double, double, double, double*);
 };

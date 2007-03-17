@@ -401,40 +401,26 @@ void output_tracer(struct All_variables *E, int cycles)
           E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
-  //TODO: unify
+  ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  if(E->parallel.nprocxy==1) {
-      /* regional model */
-      fprintf(fp1,"%d %d %.5e\n", cycles, E->Tracer.LOCAL_NUM_TRACERS,
-              E->monitor.elapsed_time);
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+              ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++)   {
-          fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
-      }
-  }
-  else {
-      /* global model */
-      ncolumns = 3 + E->trace.number_of_extra_quantities;
+      for(n=1;n<=E->trace.ntracers[j];n++) {
+          /* write basic quantities (coordinate) */
+          fprintf(fp1,"%.12e %.12e %.12e",
+                  E->trace.basicq[j][0][n],
+                  E->trace.basicq[j][1][n],
+                  E->trace.basicq[j][2][n]);
 
-      for(j=1;j<=E->sphere.caps_per_proc;j++) {
-          fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
-                  ncolumns, E->monitor.elapsed_time);
-
-          for(n=1;n<=E->trace.ntracers[j];n++) {
-              /* write basic quantities (coordinate) */
-              fprintf(fp1,"%.12e %.12e %.12e",
-                      E->trace.basicq[j][0][n],
-                      E->trace.basicq[j][1][n],
-                      E->trace.basicq[j][2][n]);
-
-              /* write extra quantities */
-              for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-                  fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
-              }
-              fprintf(fp1, "\n");
+          /* write extra quantities */
+          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
+              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
           }
-
+          fprintf(fp1, "\n");
       }
+
   }
 
   fclose(fp1);
@@ -452,23 +438,17 @@ void output_comp_nd(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file);
 
-    //TODO: unify
+    fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
+            cycles, E->lmesh.nno,
+            E->monitor.elapsed_time,
+            E->composition.initial_bulk_composition,
+            E->composition.bulk_composition);
 
-    if(E->parallel.nprocxy==1) {
-    }
-    else {
-        fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
-                cycles, E->lmesh.nno,
-                E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
-
-        for(j=1;j<=E->sphere.caps_per_proc;j++) {
-	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
-	    for(i=1;i<=E->lmesh.nno;i++) {
-                fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
-            }
-	}
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
+        for(i=1;i<=E->lmesh.nno;i++) {
+            fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
+        }
 
     }
 
@@ -487,24 +467,17 @@ void output_comp_el(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file);
 
-    //TODO: unify
+    fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
+            cycles, E->lmesh.nel,
+            E->monitor.elapsed_time,
+            E->composition.initial_bulk_composition,
+            E->composition.bulk_composition);
 
-    if(E->parallel.nprocxy==1) {
-    }
-    else {
-        fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
-                cycles, E->lmesh.nel,
-                E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
-
-        for(j=1;j<=E->sphere.caps_per_proc;j++) {
-	    fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
-	    for(i=1;i<=E->lmesh.nel;i++) {
-                fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
-            }
-	}
-
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        for(i=1;i<=E->lmesh.nel;i++) {
+            fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
+        }
     }
 
     fclose(fp1);

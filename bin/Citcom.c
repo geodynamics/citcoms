@@ -59,6 +59,7 @@ int main(argc,argv)
   void open_time();
   void output_finalize();
   void PG_timestep_init();
+  void tracer_advection();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -116,7 +117,7 @@ int main(argc,argv)
   if (E->control.stokes)  {
 
     if(E->control.tracer==1)
-      (E->problem_tracer_advection)(E);
+      tracer_advection(E);
 
     parallel_process_termination();
   }
@@ -155,7 +156,7 @@ int main(argc,argv)
     }
 
     if(E->control.tracer==1)
-      (E->problem_tracer_advection)(E);
+      tracer_advection(E);
 
     general_stokes_solver(E);
 

@@ -702,6 +702,8 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 
 static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 {
+    //TODO: fix this
+#if 0
     int i, n;
     float THETA_LOCAL_ELEM_T, THETA_LOCAL_ELEM, FI_LOCAL_ELEM_T, FI_LOCAL_ELEM, R_LOCAL_ELEM_T, R_LOCAL_ELEM;
 
@@ -732,13 +734,15 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
             }
         }
     }
-
+#endif
 }
 
 
 
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 {
+    //TODO: fix this
+#if 0
     int i, n;
     float THETA_LOCAL_ELEM_T, THETA_LOCAL_ELEM, FI_LOCAL_ELEM_T, FI_LOCAL_ELEM, R_LOCAL_ELEM_T, R_LOCAL_ELEM;
 
@@ -766,4 +770,5 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
             }
         }
     }
+#endif
 }

@@ -572,41 +572,47 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
 
     getIntProperty(properties, "tracer", E->control.tracer, fp);
 
-    if(E->parallel.nprocxy == 1) {
-        // TODO: change to E->tracer.tracer_file..
-        getStringProperty(properties, "tracer_file", E->control.tracer_file, fp);
-    }
-    else if(E->parallel.nprocxy == 12) {
+    if(E->control.restart)
+        E->trace.ic_method = 2;
+    else {
 
-        if(E->control.restart)
-            E->trace.ic_method = 2;
-        else {
+        getIntProperty(properties, "tracer_ic_method",
+                       E->trace.ic_method, fp);
 
-            getIntProperty(properties, "tracer_ic_method",
-                           E->trace.ic_method, fp);
-
-            if (E->trace.ic_method==0) {
-                getIntProperty(properties, "tracers_per_element",
-                               E->trace.itperel, fp);
-            }
-            else if (E->trace.ic_method==1) {
-                getStringProperty(properties, "tracer_file",
-                                  E->trace.tracer_file, fp);
-            }
-            else if (E->trace.ic_method==2) {
-            }
-            else {
-                fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
-                fflush(stderr);
-                parallel_process_termination();
-            }
+        if (E->trace.ic_method==0) {
+            getIntProperty(properties, "tracers_per_element",
+                           E->trace.itperel, fp);
         }
+        else if (E->trace.ic_method==1) {
+            getStringProperty(properties, "tracer_file",
+                              E->trace.tracer_file, fp);
+        }
+        else if (E->trace.ic_method==2) {
+        }
+        else {
+            fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
+            fflush(stderr);
+            parallel_process_termination();
+        }
+    }
 
-        getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
+    getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
-        getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
-        if (E->trace.ic_method_for_flavors == 0)
-            getDoubleProperty(properties, "z_interface", E->trace.z_interface, fp);
+    getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
+    if (E->trace.ic_method_for_flavors == 0)
+        getDoubleProperty(properties, "z_interface", E->trace.z_interface, fp);
+
+    getIntProperty(properties, "chemical_buoyancy",
+                   E->composition.ichemical_buoyancy, fp);
+
+    if (E->composition.ichemical_buoyancy==1) {
+        getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
+        getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
+        getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
+    }
+
+
+    if(E->parallel.nprocxy == 12) {
 
         getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
         getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
@@ -617,15 +623,6 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
         E->trace.delphi[0] = tmp;
         getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
 
-
-        getIntProperty(properties, "chemical_buoyancy",
-                       E->composition.ichemical_buoyancy, fp);
-
-        if (E->composition.ichemical_buoyancy==1) {
-            getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
-            getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
-            getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
-        }
 
         /*
         getIntProperty(properties, "compositional_rheology", E->composition.icompositional_rheology, fp);

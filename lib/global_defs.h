@@ -525,8 +525,6 @@ struct CONTROL {
     int coor;
     char coor_file[100];
 
-    char tracer_file[100];
-
     int lith_age;
     int lith_age_time;
     int lith_age_old_cycles;
@@ -717,10 +715,6 @@ struct All_variables {
     struct SBC sbc;
     struct Output output;
 
-    /* for regional tracer*/
-    struct Tracer Tracer;
-
-    /* for global tracer*/
     struct TRACE trace;
 
     /* for chemical convection & composition rheology */
@@ -810,7 +804,6 @@ struct All_variables {
     void (* problem_update_node_positions)(void*);
     void (* problem_initial_fields)(void*);
     void (* problem_tracer_setup)(void*);
-    void (* problem_tracer_advection)(void*);
     void (* problem_tracer_output)(void*, int);
     void (* problem_update_bcs)(void*);
     void (* special_process_new_velocity)(void*);

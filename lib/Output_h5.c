@@ -1536,7 +1536,7 @@ void h5output_meta(struct All_variables *E)
      */
 
     status = set_attribute_int(input, "tracer", E->control.tracer);
-    status = set_attribute_string(input, "tracer_file", E->control.tracer_file);
+    status = set_attribute_string(input, "tracer_file", E->trace.tracer_file);
 
     /*
      * Visc.inventory

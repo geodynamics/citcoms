@@ -887,6 +887,182 @@ void write_radial_horizontal_averages(E)
 }
 
 
+/****** ICHECK REGULAR NEIGHBORS *****************************/
+/*                                                           */
+/* This function searches the regular element neighborhood.  */
+
+/* This function is no longer used!                          */
+
+int icheck_regular_neighbors(E,j,ntheta,nphi,x,y,z,theta,phi,rad)
+     struct All_variables *E;
+     int j,ntheta,nphi;
+     double x,y,z;
+     double theta,phi,rad;
+{
+
+    int new_ntheta,new_nphi;
+    int kk,pp;
+    int iregel;
+    int ival;
+    int imap[5];
+    int ichoice;
+    int irange;
+
+    int iquick_element_column_search();
+
+    fprintf(E->trace.fpt,"ERROR(icheck_regular_neighbors)-this subroutine is no longer used !\n");
+    fflush(E->trace.fpt);
+    exit(10);
+
+    irange=2;
+
+    for (kk=-irange;kk<=irange;kk++)
+        {
+            for (pp=-irange;pp<=irange;pp++)
+                {
+                    new_ntheta=ntheta+kk;
+                    new_nphi=nphi+pp;
+                    if ( (new_ntheta>0)&&(new_ntheta<=E->trace.numtheta[j])&&(new_nphi>0)&&(new_nphi<=E->trace.numphi[j]) )
+                        {
+                            iregel=new_ntheta+(new_nphi-1)*E->trace.numtheta[j];
+                            if ((iregel>0) && (iregel<=E->trace.numregel[j]))
+                                {
+                                    ival=iquick_element_column_search(E,j,iregel,new_ntheta,new_nphi,x,y,z,theta,phi,rad,imap,&ichoice);
+                                    if (ival>0) return ival;
+                                }
+                        }
+                }
+        }
+
+
+    return -99;
+}
+
+
+/****** IQUICK ELEMENT SEARCH *****************************/
+/*                                                        */
+/* This function does a quick regular to real element     */
+/* map check. Element number, if found, is returned.      */
+/* Otherwise, -99 is returned.                            */
+/* Pointers to imap and ichoice are used because they may */
+/* prove to be convenient.                                */
+/* This routine is no longer used                         */
+
+int iquick_element_column_search(E,j,iregel,ntheta,nphi,x,y,z,theta,phi,rad,imap,ich)
+     struct All_variables *E;
+     int j,iregel;
+     int ntheta,nphi;
+     double x,y,z,theta,phi,rad;
+     int *imap;
+     int *ich;
+{
+
+    int iregnode[5];
+    int kk,pp;
+    int nel,ival;
+    int ichoice;
+    int icount;
+    int itemp1;
+    int itemp2;
+
+    int icheck_element_column();
+
+    fprintf(E->trace.fpt,"ERROR(iquick element)-this routine is no longer used!\n");
+    fflush(E->trace.fpt);
+    exit(10);
+
+    /* REMOVE*/
+    /*
+      ichoice=*ich;
+
+      fprintf(E->trace.fpt,"AA: ichoice: %d\n",ichoice);
+      fflush(E->trace.fpt);
+    */
+
+    /* find regular nodes on regular element */
+
+    /*
+      iregnode[1]=iregel+(nphi-1);
+      iregnode[2]=iregel+nphi;
+      iregnode[3]=iregel+nphi+E->trace.numtheta[j]+1;
+      iregnode[4]=iregel+nphi+E->trace.numtheta[j];
+    */
+
+    itemp1=iregel+nphi;
+    itemp2=itemp1+E->trace.numtheta[j];
+
+    iregnode[1]=itemp1-1;
+    iregnode[2]=itemp1;
+    iregnode[3]=itemp2+1;
+    iregnode[4]=itemp2;
+
+    for (kk=1;kk<=4;kk++)
+        {
+            if ((iregnode[kk]<1) || (iregnode[kk]>E->trace.numregnodes[j]) )
+                {
+                    fprintf(E->trace.fpt,"ERROR(iquick)-weird regnode %d\n",iregnode[kk]);
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+        }
+
+    /* find number of choices */
+
+    ichoice=0;
+    icount=0;
+    for (kk=1;kk<=4;kk++)
+        {
+            if (E->trace.regnodetoel[j][iregnode[kk]]<=0) goto next_corner;
+
+            icount++;
+            for (pp=1;pp<=(kk-1);pp++)
+                {
+                    if (E->trace.regnodetoel[j][iregnode[kk]]==E->trace.regnodetoel[j][iregnode[pp]]) goto next_corner;
+                }
+            ichoice++;
+            imap[ichoice]=E->trace.regnodetoel[j][iregnode[kk]];
+
+
+        next_corner:
+            ;
+        } /* end kk */
+
+    *ich=ichoice;
+
+    /* statistical counter */
+
+    E->trace.istat_ichoice[j][ichoice]++;
+
+    if (ichoice==0) return -99;
+
+    /* Here, no check is performed if all 4 corners */
+    /* lie within a given element.                  */
+    /* It may be possible (not sure) but unlikely   */
+    /* that the tracer is still not in that element */
+
+    /* Decided to comment this out. */
+    /* May not be valid for large regular grids. */
+    /*
+     */
+    /* AKMA */
+
+    if ((ichoice==1)&&(icount==4)) return imap[1];
+
+    /* check others */
+
+    for (kk=1;kk<=ichoice;kk++)
+        {
+            nel=imap[kk];
+            ival=icheck_element_column(E,j,nel,x,y,z,rad);
+            if (ival>0) return nel;
+        }
+
+    /* if still here, no element was found */
+
+    return -99;
+}
+
+
 /*************************************************************************/
 /* from                                                                  */
 /*************************************************************************/
