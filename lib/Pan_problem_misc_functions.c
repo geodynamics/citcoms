@@ -141,7 +141,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         buoy[m][i] =  temp * E->T[m][i];
 
     /* chemical buoyancy */
-    if(E->composition.ichemical_buoyancy==1) {
+    if(E->control.tracer && E->composition.ichemical_buoyancy==1) {
       temp2 = E->composition.buoyancy_ratio * temp;
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)
