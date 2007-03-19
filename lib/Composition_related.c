@@ -36,6 +36,7 @@
 static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
 static void init_composition(struct All_variables *E);
+static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
 static void map_composition_to_nodes(struct All_variables *E);
 
@@ -72,6 +73,7 @@ void composition_input(struct All_variables *E)
 
     /* icompositional_rheology=0 (off) */
     /* icompositional_rheology=1 (on) */
+    E->composition.icompositional_rheology = 0;
     /*
     input_int("compositional_rheology",
               &(E->composition.icompositional_rheology),"1,0,nomax",m);
@@ -108,42 +110,44 @@ void write_composition_instructions(struct All_variables *E)
         E->composition.icompositional_rheology)
         E->composition.on = 1;
 
-    if (E->composition.on && E->trace.nflavors < 1) {
-        fprintf(E->trace.fpt, "Tracer flavors must be greater than 1 to track composition\n");
-        parallel_process_termination();
-    }
+    if (E->composition.on) {
 
-    if (E->composition.ichemical_buoyancy==0)
+        if (E->trace.nflavors < 1) {
+            fprintf(E->trace.fpt, "Tracer flavors must be greater than 1 to track composition\n");
+            parallel_process_termination();
+        }
+
+        if (E->composition.ichemical_buoyancy==0)
             fprintf(E->trace.fpt,"Passive Tracers\n");
 
-    if (E->composition.ichemical_buoyancy==1)
-        fprintf(E->trace.fpt,"Active Tracers\n");
+        if (E->composition.ichemical_buoyancy==1)
+            fprintf(E->trace.fpt,"Active Tracers\n");
 
 
-    if (E->composition.ibuoy_type==1) fprintf(E->trace.fpt,"Ratio Method\n");
-    if (E->composition.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
+        if (E->composition.ibuoy_type==1) fprintf(E->trace.fpt,"Ratio Method\n");
+        if (E->composition.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
 
-    fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
+        fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
 
-    if (E->composition.ireset_initial_composition==0)
-        fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
-    else
-        fprintf(E->trace.fpt,"Resetting initial composition\n");
+        if (E->composition.ireset_initial_composition==0)
+            fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
+        else
+            fprintf(E->trace.fpt,"Resetting initial composition\n");
 
 
-    /*
-    if (E->composition.icompositional_rheology==0) {
-        fprintf(E->trace.fpt,"Compositional Rheology - OFF\n");
+        /*
+        if (E->composition.icompositional_rheology==0) {
+            fprintf(E->trace.fpt,"Compositional Rheology - OFF\n");
+        }
+        else if (E->composition.icompositional_rheology>0) {
+            fprintf(E->trace.fpt,"Compositional Rheology - ON\n");
+            fprintf(E->trace.fpt,"Compositional Prefactor: %f\n",
+            E->composition.compositional_rheology_prefactor);
+        }
+        */
+
+        fflush(E->trace.fpt);
     }
-    else if (E->composition.icompositional_rheology>0) {
-        fprintf(E->trace.fpt,"Compositional Rheology - ON\n");
-        fprintf(E->trace.fpt,"Compositional Prefactor: %f\n",
-                E->composition.compositional_rheology_prefactor);
-    }
-    */
-
-    fflush(E->trace.fpt);
-    fflush(stderr);
 
     return;
 }
@@ -187,13 +191,13 @@ static void allocate_composition_memory(struct All_variables *E)
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
         if ((E->composition.comp_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(compute_elemental_composition)-no memory 8989y\n");
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
             fflush(E->trace.fpt);
             exit(10);
         }
 
         if ((E->composition.comp_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(map_compostion_to_nodes)-no memory 983rk\n");
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
             fflush(E->trace.fpt);
             exit(10);
         }
@@ -335,7 +339,7 @@ static void map_composition_to_nodes(struct All_variables *E)
             E->composition.comp_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
 
         /* testing */
-        /*
+        /**
         for (kk=1;kk<=E->lmesh.nel;kk++) {
             fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][kk]);
         }
@@ -343,7 +347,8 @@ static void map_composition_to_nodes(struct All_variables *E)
         for (kk=1;kk<=E->lmesh.nno;kk++) {
             fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][kk]);
         }
-        */
+        fflush(E->trace.fpt);
+        /**/
 
     } /* end j */
 
@@ -353,7 +358,7 @@ static void map_composition_to_nodes(struct All_variables *E)
 
 /*********** GET BULK COMPOSITION *******************************/
 
-void init_bulk_composition(struct All_variables *E)
+static void init_bulk_composition(struct All_variables *E)
 {
 
     char output_file[200];
@@ -402,14 +407,12 @@ void init_bulk_composition(struct All_variables *E)
 }
 
 
-void get_bulk_composition(E)
-     struct All_variables *E;
-
+void get_bulk_composition(struct All_variables *E)
 {
 
     double return_bulk_value_d();
     double volume;
-    const ival = 0;
+    const int ival = 0;
 
     /* ival=0 returns integral not average */
     volume=return_bulk_value_d(E,E->composition.comp_node,ival);

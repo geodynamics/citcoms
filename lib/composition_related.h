@@ -28,6 +28,5 @@
 void composition_input(struct All_variables *E);
 void composition_setup(struct All_variables *E);
 void write_composition_instructions(struct All_variables *E);
-void init_bulk_composition(struct All_variables *E);
 void fill_composition(struct All_variables *E);
-
+void get_bulk_composition(struct All_variables *E);
