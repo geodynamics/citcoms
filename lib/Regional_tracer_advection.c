@@ -123,26 +123,10 @@ void regional_tracer_setup(struct All_variables *E)
     /* The bounding box of neiboring processors */
     get_neighboring_caps(E);
 
-
-    if (E->trace.ic_method==0)
-        make_tracer_array(E);
-    else if (E->trace.ic_method==1)
-        read_tracer_file(E);
-    else if (E->trace.ic_method==2)
-        restart_tracers(E);
-    else {
-        fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
-
-    /* total number of tracers  */
-
-    E->trace.ilast_tracer_count = isum_tracers(E);
-    fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
-
-
     make_mesh_ijk(E);
+
+
+    initialize_tracers(E);
 
 
     /* find elements */

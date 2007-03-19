@@ -1250,6 +1250,34 @@ void count_tracers_of_flavors(struct All_variables *E)
 
 
 
+void initialize_tracers(struct All_variables *E)
+{
+    void make_tracer_array();
+    void read_tracer_file();
+    void restart_tracers();
+    int isum_tracers();
+
+    if (E->trace.ic_method==0)
+        make_tracer_array(E);
+    else if (E->trace.ic_method==1)
+        read_tracer_file(E);
+    else if (E->trace.ic_method==2)
+        restart_tracers(E);
+    else {
+        fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+
+    /* total number of tracers  */
+
+    E->trace.ilast_tracer_count = isum_tracers(E);
+    fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
+
+    return;
+}
+
+
 /************** MAKE TRACER ARRAY ********************************/
 /* Here, each processor will generate tracers somewhere          */
 /* in the sphere - check if its in this cap  - then check radial */
