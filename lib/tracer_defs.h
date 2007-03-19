@@ -139,4 +139,8 @@ struct TRACE{
 
     void (* get_velocity)(struct All_variables*, int, int,
                           double, double, double, double*);
+
+    void (* keep_within_bounds)(struct All_variables*,
+                                double*, double*, double*,
+                                double*, double*, double*);
 };

@@ -382,11 +382,11 @@ double return_bulk_value_d(E,Z,average)
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
                 n = E->ien[m][el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j-1];
-                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j-1];
-                }
+                volume1 += E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
+                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
+            }
 
-          }
+       }
 
 
     MPI_Allreduce(&volume1  ,&volume  ,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -394,7 +394,6 @@ double return_bulk_value_d(E,Z,average)
 
     if(average && volume != 0.0)
            integral /= volume;
-
 
     return((double)integral);
 }

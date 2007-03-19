@@ -41,8 +41,17 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "composition_related.h"
 
+
+static void write_trace_instructions(struct All_variables *E);
 static void make_mesh_ijk(struct All_variables *E);
+static void put_lost_tracers(struct All_variables *E,
+                             int *send_size, double *send,
+                             int kk, int j);
+static void put_found_tracers(struct All_variables *E,
+                              int recv_size, double *recv,
+                              int j);
 
 
 void regional_tracer_setup(struct All_variables *E)
@@ -120,6 +129,8 @@ void regional_tracer_setup(struct All_variables *E)
         parallel_process_termination();
     }
 
+    write_trace_instructions(E);
+
     /* The bounding box of neiboring processors */
     get_neighboring_caps(E);
 
@@ -142,6 +153,66 @@ void regional_tracer_setup(struct All_variables *E)
 
     composition_setup(E);
     tracer_post_processing(E);
+
+    return;
+}
+
+
+/**** WRITE TRACE INSTRUCTIONS ***************/
+static void write_trace_instructions(struct All_variables *E)
+{
+    fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
+    fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
+
+    if (E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Generating New Tracer Array\n");
+        fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
+    }
+    if (E->trace.ic_method==1) {
+        fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
+    }
+    if (E->trace.ic_method==2) {
+        fprintf(E->trace.fpt,"Restarting Tracers\n");
+    }
+
+    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
+
+    if (E->trace.nflavors && E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
+        if (E->trace.ic_method_for_flavors == 0) {
+            fprintf(E->trace.fpt,"Layered tracer flavors\n");
+            fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
+        }
+        else {
+            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+
+
+
+    /* more obscure stuff */
+
+    fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
+    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
+            E->trace.number_of_basic_quantities);
+    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
+            E->trace.number_of_extra_quantities);
+    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
+            E->trace.number_of_tracer_quantities);
+
+
+
+    if (E->trace.itracer_warnings==0) {
+        fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fflush(E->trace.fpt);
+        fflush(stderr);
+    }
+
+    write_composition_instructions(E);
+
 
     return;
 }
@@ -226,7 +297,7 @@ static void make_mesh_ijk(struct All_variables *E)
 
 int regional_iget_element(struct All_variables *E,
 			  int m, int iprevious_element,
-			  double x, double y, double z,
+			  double dummy1, double dummy2, double dummy3,
 			  double theta, double phi, double rad)
 {
     int e, i, j, k;
@@ -237,7 +308,7 @@ int regional_iget_element(struct All_variables *E,
     ely = E->lmesh.ely;
     elz = E->lmesh.elz;
 
-    //TODO: take care of upper bound
+    //TODO: take care of south west bound
 
 
     /* Search neighboring elements if the previous element is known */
@@ -329,8 +400,8 @@ int regional_icheck_cap(struct All_variables *E, int icap,
     double theta_min, theta_max;
     double phi_min, phi_max;
 
-    /* corner 2 is the lower-left corner */
-    /* corner 4 is the upper-right corner */
+    /* corner 2 is the north-west corner */
+    /* corner 4 is the south-east corner */
 
     theta_min = E->trace.theta_cap[icap][2];
     theta_max = E->trace.theta_cap[icap][4];
@@ -342,7 +413,7 @@ int regional_icheck_cap(struct All_variables *E, int icap,
         (phi >= phi_min) && (phi < phi_max))
         return 1;
 
-    //TODO: deal with upper right bounds
+    //TODO: deal with south west bounds
     return 0;
 }
 
@@ -478,75 +549,467 @@ void regional_get_velocity(struct All_variables *E,
 }
 
 
-void regional_put_lost_tracers(struct All_variables *E,
-                               int isend[13][13], double *send[13][13])
+void regional_keep_within_bounds(struct All_variables *E,
+                                 double *x, double *y, double *z,
+                                 double *theta, double *phi, double *rad)
 {
-    int j, kk, pp;
-    int numtracers, ithatcap, icheck;
-    int isend_position, ipos;
+    void sphere_to_cart();
+    int changed = 0;
+
+    if (*theta > E->control.theta_max - E->trace.box_cushion) {
+        *theta = E->control.theta_max - E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*theta < E->control.theta_min + E->trace.box_cushion) {
+        *theta = E->control.theta_min + E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*phi > E->control.fi_max - E->trace.box_cushion) {
+        *phi = E->control.fi_max - E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*phi < E->control.fi_min + E->trace.box_cushion) {
+        *phi = E->control.fi_min + E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*rad > E->sphere.ro - E->trace.box_cushion) {
+        *rad = E->sphere.ro - E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*rad < E->sphere.ri + E->trace.box_cushion) {
+        *rad = E->sphere.ri + E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (changed)
+        sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
+
+
+    return;
+}
+
+
+void regional_lost_souls(struct All_variables *E)
+{
+    /* This part only works if E->sphere.caps_per_proc==1 */
+    const int j = 1;
     int lev = E->mesh.levmax;
+
+    int i, d, kk;
+    int max_send_size, isize, itemp_size;
+
+    int ngbr_rank[6+1];
+
+    double bounds[3][2];
+    double *send[2];
+    double *recv[2];
+
+    void expand_tracer_arrays();
+    int icheck_that_processor_shell();
+
+    int ipass;
+
+    MPI_Status status[4];
+    MPI_Request request[4];
+
+
+    E->trace.istat_isend = E->trace.ilater[j];
+
+    /* the bounding box */
+    for (d=0; d<E->mesh.nsd; d++) {
+        bounds[d][0] = E->sx[j][d+1][1];
+        bounds[d][1] = E->sx[j][d+1][E->lmesh.nno];
+    }
+
+    /* set up ranks for neighboring procs */
+    /* if ngbr_rank is -1, there is no neighbor on this side */
+    ipass = 1;
+    for (kk=1; kk<=6; kk++) {
+        if (E->parallel.NUM_PASS[lev][j].bound[kk] == 1) {
+            ngbr_rank[kk] = E->parallel.PROCESSOR[lev][j].pass[ipass];
+            ipass++;
+        }
+        else {
+            ngbr_rank[kk] = -1;
+        }
+    }
+
+    /* debug *
+    for (kk=1; kk<=E->trace.istat_isend; kk++) {
+        fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
+                E->trace.rlater[j][0][kk],
+                E->trace.rlater[j][1][kk],
+                E->trace.rlater[j][2][kk]);
+    }
+
+    for (d=0; d<E->mesh.nsd; d++) {
+        fprintf(E->trace.fpt, "bounds(dim=%d) = (%e, %e)\n",
+                d, bounds[d][0], bounds[d][1]);
+    }
+
+    for (kk=1; kk<=6; kk++) {
+        fprintf(E->trace.fpt, "pass=%d  neighbor_rank=%d\n",
+                kk, ngbr_rank[kk]);
+    }
+    fflush(E->trace.fpt);
+    parallel_process_sync(E);
+    /**/
+
+
+    /* Allocate Maximum Memory to Send Arrays */
+    max_send_size = max(2*E->trace.ilater[j], E->trace.ntracers[j]/100);
+    itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
+
+    if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
+        == NULL) {
+        fprintf(E->trace.fpt,"Error(lost souls)-no memory (u388)\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+    if ((send[1] = (double *)malloc(itemp_size*sizeof(double)))
+        == NULL) {
+        fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
+
+    for (d=0; d<E->mesh.nsd; d++) {
+        int original_size = E->trace.ilater[j];
+        int idb;
+        int kk = 1;
+        int isend[2], irecv[2];
+        isend[0] = isend[1] = 0;
+
+
+        /* move out-of-bound tracers to send array */
+        while (kk<=E->trace.ilater[j]) {
+            double coord;
+
+            /* Is the tracer within the bounds in the d-th dimension */
+            coord = E->trace.rlater[j][d][kk];
+
+            if (coord < bounds[d][0]) {
+                put_lost_tracers(E, &(isend[0]), send[0], kk, j);
+            }
+            else if (coord >= bounds[d][1]) {
+                put_lost_tracers(E, &(isend[1]), send[1], kk, j);
+            }
+            else {
+                /* check next tracer */
+                kk++;
+            }
+
+            /* reallocate send if size too small */
+            if ((isend[0] > max_send_size - 5) ||
+                (isend[1] > max_send_size - 5)) {
+
+                isize = max_send_size + max_send_size/4 + 10;
+                itemp_size = isize * E->trace.number_of_tracer_quantities;
+
+                if ((send[0] = (double *)realloc(send[0],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
+                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (s4)\n");
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+                if ((send[1] = (double *)realloc(send[1],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
+                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (s5)\n");
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+
+                fprintf(E->trace.fpt,"Expanding physical memory of send to "
+                        "%d from %d\n",
+                        isize, max_send_size);
+
+                max_send_size = isize;
+            }
+
+
+        } /* end of while kk */
+
+
+        /* check the total # of tracers is conserved */
+        if ((isend[0] + isend[1] + E->trace.ilater[j]) != original_size) {
+            fprintf(E->trace.fpt, "original_size: %d, rlater_size: %d, "
+                    "send_size: %d\n",
+                    original_size, E->trace.ilater[j], kk);
+        }
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            for (kk=0; kk<isend[i]; kk++) {
+                fprintf(E->trace.fpt, "dim:%d side:%d kk=%d coord[kk]=%e\n",
+                        d, i, kk,
+                        send[i][kk*E->trace.number_of_tracer_quantities+d]);
+            }
+        }
+        fflush(E->trace.fpt);
+        /**/
+
+
+        /* Send info to other processors regarding number of send tracers */
+
+        /* check whether there is a neighbor in this pass*/
+        idb = 0;
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                MPI_Isend(&isend[i], 1, MPI_INT, target_rank,
+                          11, E->parallel.world, &request[idb++]);
+
+                MPI_Irecv(&irecv[i], 1, MPI_INT, target_rank,
+                          11, E->parallel.world, &request[idb++]);
+            }
+            else {
+                irecv[i] = 0;
+            }
+        } /* end of for i */
+
+
+        /* Wait for non-blocking calls to complete */
+        MPI_Waitall(idb, request, status);
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                fprintf(E->trace.fpt, "%d: %d send %d to proc %d\n",
+                        d, i, isend[i], target_rank);
+                fprintf(E->trace.fpt, "%d: %d recv %d from proc %d\n",
+                        d, i, irecv[i], target_rank);
+            }
+        }
+        parallel_process_sync(E);
+        /**/
+
+        /* Allocate memory in receive arrays */
+        for (i=0; i<2; i++) {
+            isize = irecv[i] * E->trace.number_of_tracer_quantities;
+            itemp_size = max(1, isize);
+
+            if ((recv[i] = (double *)malloc(itemp_size*sizeof(double)))
+                == NULL) {
+                fprintf(E->trace.fpt, "Error(lost souls)-no memory (c721)\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+        }
+
+
+        /* Now, send the tracers to proper procs */
+        idb = 0;
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                isize = isend[i] * E->trace.number_of_tracer_quantities;
+                MPI_Isend(send[i], isize, MPI_DOUBLE, target_rank,
+                          12, E->parallel.world, &request[idb++]);
+
+                isize = irecv[i] * E->trace.number_of_tracer_quantities;
+                MPI_Irecv(recv[i], isize, MPI_DOUBLE, target_rank,
+                          12, E->parallel.world, &request[idb++]);
+
+            }
+        }
+
+
+        /* Wait for non-blocking calls to complete */
+        MPI_Waitall(idb, request, status);
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            for (kk=1; kk<=irecv[i]; kk++) {
+                fprintf(E->trace.fpt, "recv: %d %e %e %e\n",
+                        kk,
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities],
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+1],
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+2]);
+            }
+        }
+        fflush(E->trace.fpt);
+        parallel_process_sync(E);
+        /**/
+
+        /* put the received tracers */
+        for (i=0; i<2; i++) {
+            put_found_tracers(E, irecv[i], recv[i], j);
+        }
+
+
+        free(recv[0]);
+        free(recv[1]);
+
+    } /* end of for d */
+
+
+    /* rlater should be empty by now */
+    if (E->trace.ilater[j] > 0) {
+        fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
+        for (kk=1; kk<=E->trace.ilater[j]; kk++) {
+            fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
+                    E->trace.rlater[j][0][kk],
+                    E->trace.rlater[j][1][kk],
+                    E->trace.rlater[j][2][kk]);
+        }
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
+
+    /* Free Arrays */
+
+    free(send[0]);
+    free(send[1]);
+
+    return;
+}
+
+
+static void put_lost_tracers(struct All_variables *E,
+                             int *send_size, double *send,
+                             int kk, int j)
+{
+    int ilast_tracer, isend_position, ipos;
+    int pp;
+
+    /* move the tracer from rlater to send */
+    isend_position = (*send_size) * E->trace.number_of_tracer_quantities;
+
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        ipos = isend_position + pp;
+        send[ipos] = E->trace.rlater[j][pp][kk];
+    }
+    (*send_size)++;
+
+    /* eject the tracer from rlater */
+    ilast_tracer = E->trace.ilater[j];
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        E->trace.rlater[j][pp][kk] = E->trace.rlater[j][pp][ilast_tracer];
+    }
+    E->trace.ilater[j]--;
+
+    return;
+}
+
+
+/****************************************************************/
+/* Put the received tracers in basiq & extraq, if within bounds */
+/* Otherwise, append to rlater for sending to another proc      */
+
+static void put_found_tracers(struct All_variables *E,
+                              int recv_size, double *recv,
+                              int j)
+{
+    void expand_tracer_arrays();
+    void expand_later_array();
+    int icheck_processor_shell();
+
+    int kk, pp;
+    int ipos, ilast, inside, iel;
     double theta, phi, rad;
 
+    for (kk=0; kk<recv_size; kk++) {
+        ipos = kk * E->trace.number_of_tracer_quantities;
+        theta = recv[ipos];
+        phi = recv[ipos + 1];
+        rad = recv[ipos + 2];
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+        /* check whether this tracer is inside this proc */
+        /* check radius first, since it is cheaper       */
+        inside = icheck_processor_shell(E, j, rad);
+        if (inside == 1)
+            inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
+        else
+            inside = 0;
 
-        /* transfer tracers from rlater to send */
+        /** debug **
+        fprintf(E->trace.fpt, "kk=%d, inside=%d, xx=(%e, %e, %e)\n",
+                kk, inside, theta, phi, rad);
+        fprintf(E->trace.fpt, "before: %d %d\n",
+                E->trace.ilater[j], E->trace.ntracers[j]);
+        /**/
 
-        numtracers = E->trace.ilater[j];
+        if (inside) {
 
-        for (kk=1; kk<=numtracers; kk++) {
-            theta = E->trace.rlater[j][0][kk];
-            phi = E->trace.rlater[j][1][kk];
-            rad = E->trace.rlater[j][2][kk];
+            E->trace.ntracers[j]++;
+            ilast = E->trace.ntracers[j];
 
+            if (E->trace.ntracers[j] > (E->trace.max_ntracers[j]-5))
+                expand_tracer_arrays(E, j);
 
-            /* first check same cap if nprocz>1 */
+            for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
+                E->trace.basicq[j][pp][ilast] = recv[ipos+pp];
 
-            if (E->parallel.nprocz>1) {
-                ithatcap = 0;
-                icheck = regional_icheck_cap(E, ithatcap, theta, phi, rad, rad);
-                if (icheck == 1) goto foundit;
-
-            }
-
-            /* check neighboring caps */
-
-            for (pp=1; pp<=E->parallel.TNUM_PASS[lev][j]; pp++) {
-                ithatcap = pp;
-                icheck = regional_icheck_cap(E, ithatcap, theta, phi, rad, rad);
-                if (icheck == 1) goto foundit;
-            }
+            ipos += E->trace.number_of_basic_quantities;
+            for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
+                E->trace.extraq[j][pp][ilast] = recv[ipos+pp];
 
 
-            /* should not be here */
-            if (icheck!=1) {
-                fprintf(E->trace.fpt,"Error(lost souls)-should not be here\n");
-                fprintf(E->trace.fpt,"theta: %f phi: %f rad: %f\n",
-                        theta,phi,rad);
-                icheck = regional_icheck_cap(E, 0, theta, phi, rad,rad);
-                if (icheck == 1) fprintf(E->trace.fpt," icheck here!\n");
-                else fprintf(E->trace.fpt,"icheck not here!\n");
+            /* found the element */
+            iel = regional_iget_element(E, j, -99, 0, 0, 0, theta, phi, rad);
+
+            if (iel<1) {
+                fprintf(E->trace.fpt, "Error(regional lost souls) - "
+                        "element not here?\n");
+                fprintf(E->trace.fpt, "theta, phi, rad: %f %f %f\n",
+                        theta, phi, rad);
                 fflush(E->trace.fpt);
                 exit(10);
             }
 
-        foundit:
+            E->trace.ielement[j][ilast] = iel;
 
-            isend[j][ithatcap]++;
+        }
+        else {
+            if (E->trace.ilatersize[j]==0) {
 
-            /* assign tracer to send */
+                E->trace.ilatersize[j]=E->trace.max_ntracers[j]/5;
 
-            isend_position=(isend[j][ithatcap]-1)*E->trace.number_of_tracer_quantities;
+                for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
+                    if ((E->trace.rlater[j][kk]=(double *)malloc(E->trace.ilatersize[j]*sizeof(double)))==NULL) {
+                        fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
+                        fflush(E->trace.fpt);
+                        exit(10);
+                    }
+                }
+            } /* end first particle initiating memory allocation */
 
-            for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
-                ipos=isend_position+pp;
-                send[j][ithatcap][ipos]=E->trace.rlater[j][pp][kk];
-            }
+            E->trace.ilater[j]++;
+            ilast = E->trace.ilater[j];
 
-        } /* end kk, assigning tracers */
+            if (E->trace.ilater[j] > (E->trace.ilatersize[j]-5))
+                expand_later_array(E, j);
 
-    } /* end j */
+            for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
+                E->trace.rlater[j][pp][ilast] = recv[ipos+pp];
+        } /* end of if-else */
 
+        /** debug **
+        fprintf(E->trace.fpt, "after: %d %d\n",
+                E->trace.ilater[j], E->trace.ntracers[j]);
+        fflush(E->trace.fpt);
+        /**/
+
+    } /* end of for kk */
 
     return;
 }
