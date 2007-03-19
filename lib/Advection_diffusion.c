@@ -51,7 +51,6 @@ void set_diffusion_timestep(struct All_variables *E);
 void PG_timestep_init(struct All_variables *E)
 {
 
-  E->advection.timesteps = 0;
   set_diffusion_timestep(E);
 
   return;
