@@ -44,17 +44,29 @@
 #include "parsing.h"
 
 void tracer_post_processing(struct All_variables *E);
+void count_tracers_of_flavors(struct All_variables *E);
 
 
 static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
-void count_tracers_of_flavors(struct All_variables *E);
+static void lost_souls(struct All_variables *E);
+static void make_tracer_array(struct All_variables *E);
+static void generate_random_tracers(struct All_variables *E,
+                                    int tracers_cap, int j);
+static void read_tracer_file(struct All_variables *E);
+static void restart_tracers(struct All_variables *E);
 static void check_sum(struct All_variables *E);
-int isum_tracers(struct All_variables *E);
-static void put_lost_tracers(struct All_variables *E,
-                             int isend[13][13], double *send[13][13]);
-int icheck_that_processor_shell(struct All_variables *E,
-                                int j, int nprocessor, double rad);
+static int isum_tracers(struct All_variables *E);
+static void init_tracer_flavors(struct All_variables *E);
+static void initialize_tracer_arrays(struct All_variables *E,
+                                     int j, int number_of_tracers);
+static void expand_tracer_arrays(struct All_variables *E, int j);
+static void reduce_tracer_arrays(struct All_variables *E);
+static void put_away_later(struct All_variables *E, int j, int it);
+static void expand_later_array(struct All_variables *E, int j);
+static void eject_tracer(struct All_variables *E, int j, int it);
+static int icheck_that_processor_shell(struct All_variables *E,
+                                       int j, int nprocessor, double rad);
 
 
 void tracer_input(struct All_variables *E)
@@ -455,7 +467,6 @@ void find_tracers(struct All_variables *E)
     void put_away_later();
     void eject_tracer();
     void reduce_tracer_arrays();
-    void lost_souls();
     void sphere_to_cart();
 
     time_stat1=CPU_time0();
@@ -552,7 +563,7 @@ void find_tracers(struct All_variables *E)
 /*  ireceive[j][n]=number of tracers this processor cap is receiving from cap n */
 
 
-void lost_souls(struct All_variables *E)
+static void lost_souls(struct All_variables *E)
 {
     int ithiscap;
     int ithatcap=1;
@@ -1252,10 +1263,6 @@ void count_tracers_of_flavors(struct All_variables *E)
 
 void initialize_tracers(struct All_variables *E)
 {
-    void make_tracer_array();
-    void read_tracer_file();
-    void restart_tracers();
-    int isum_tracers();
 
     if (E->trace.ic_method==0)
         make_tracer_array(E);
@@ -1282,7 +1289,7 @@ void initialize_tracers(struct All_variables *E)
 /* Here, each processor will generate tracers somewhere          */
 /* in the sphere - check if its in this cap  - then check radial */
 
-void make_tracer_array(struct All_variables *E)
+static void make_tracer_array(struct All_variables *E)
 {
 
     int tracers_cap;
@@ -1325,8 +1332,8 @@ void make_tracer_array(struct All_variables *E)
 
 
 
-void generate_random_tracers(struct All_variables *E,
-                             int tracers_cap, int j)
+static void generate_random_tracers(struct All_variables *E,
+                                    int tracers_cap, int j)
 {
     void cart_to_sphere();
     void keep_in_sphere();
@@ -1415,8 +1422,7 @@ void generate_random_tracers(struct All_variables *E,
 /* All processors read the same input file, then sort out which ones    */
 /* belong.                                                              */
 
-void read_tracer_file(E)
-     struct All_variables *E;
+static void read_tracer_file(struct All_variables *E)
 {
 
     char input_s[1000];
@@ -1549,8 +1555,7 @@ void read_tracer_file(E)
 /* This function restarts tracers written from previous calculation      */
 /* and the tracers are read as seperate files for each processor domain. */
 
-void restart_tracers(E)
-     struct All_variables *E;
+static void restart_tracers(struct All_variables *E)
 {
 
     char output_file[200];
@@ -1679,11 +1684,12 @@ static void check_sum(struct All_variables *E)
     return;
 }
 
+
 /************* ISUM TRACERS **********************************************/
 /*                                                                       */
 /* This function uses MPI to sum all tracers and returns number of them. */
 
-int isum_tracers(struct All_variables *E)
+static int isum_tracers(struct All_variables *E)
 {
     int imycount;
     int iallcount;
@@ -1746,7 +1752,7 @@ void sphere_to_cart(struct All_variables *E,
 
 
 
-void init_tracer_flavors(struct All_variables *E)
+static void init_tracer_flavors(struct All_variables *E)
 {
     int j, kk, number_of_tracers;
     double rad;
@@ -1888,8 +1894,8 @@ void get_neighboring_caps(struct All_variables *E)
 /*                                                                            */
 /* This function allocates memories to tracer arrays.                         */
 
-void initialize_tracer_arrays(struct All_variables *E,
-                              int j, int number_of_tracers)
+static void initialize_tracer_arrays(struct All_variables *E,
+                                     int j, int number_of_tracers)
 {
 
     int kk;
@@ -1950,7 +1956,7 @@ void initialize_tracer_arrays(struct All_variables *E,
 
 /****** EXPAND TRACER ARRAYS *****************************************/
 
-void expand_tracer_arrays(struct All_variables *E, int j)
+static void expand_tracer_arrays(struct All_variables *E, int j)
 {
 
     int inewsize;
@@ -1999,7 +2005,7 @@ void expand_tracer_arrays(struct All_variables *E, int j)
 
 /****** REDUCE  TRACER ARRAYS *****************************************/
 
-void reduce_tracer_arrays(struct All_variables *E)
+static void reduce_tracer_arrays(struct All_variables *E)
 {
 
     int inewsize;
@@ -2071,7 +2077,7 @@ void reduce_tracer_arrays(struct All_variables *E)
 /* ilatersize is the physical memory and       */
 /* ilater is the number of tracers             */
 
-void put_away_later(struct All_variables *E, int j, int it)
+static void put_away_later(struct All_variables *E, int j, int it)
 {
     int kk;
     void expand_later_array();
@@ -2115,7 +2121,7 @@ void put_away_later(struct All_variables *E, int j, int it)
 
 /****** EXPAND LATER ARRAY *****************************************/
 
-void expand_later_array(struct All_variables *E, int j)
+static void expand_later_array(struct All_variables *E, int j)
 {
 
     int inewsize;
@@ -2148,7 +2154,7 @@ void expand_later_array(struct All_variables *E, int j)
 
 /***** EJECT TRACER ************************************************/
 
-void eject_tracer(struct All_variables *E, int j, int it)
+static void eject_tracer(struct All_variables *E, int j, int it)
 {
 
     int ilast_tracer;
@@ -2229,8 +2235,8 @@ int icheck_processor_shell(struct All_variables *E,
 /* is at the surface (then both boundaries are   */
 /* included).                                    */
 
-int icheck_that_processor_shell(struct All_variables *E,
-                                int j, int nprocessor, double rad)
+static int icheck_that_processor_shell(struct All_variables *E,
+                                       int j, int nprocessor, double rad)
 {
     int icheck_processor_shell();
     int me = E->parallel.me;

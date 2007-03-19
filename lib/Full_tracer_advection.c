@@ -33,15 +33,64 @@
 #include "parallel_related.h"
 #include "composition_related.h"
 
-void get_neighboring_caps(struct All_variables *E);
-static void pdebug(struct All_variables *E, int i);
-
+static void gnomonic_interpolation(struct All_variables *E,
+                                   int j, int nelem,
+                                   double theta, double phi, double rad,
+                                   double *velocity_vector);
+static void get_2dshape(struct All_variables *E,
+                        int j, int nelem,
+                        double u, double v,
+                        int iwedge, double * shape2d);
+static void get_radial_shape(struct All_variables *E,
+                             int j, int nelem,
+                             double rad, double *shaperad);
+static void spherical_to_uv(struct All_variables *E, int j,
+                            double theta, double phi,
+                            double *u, double *v);
+static void make_regular_grid(struct All_variables *E);
+static void write_trace_instructions(struct All_variables *E);
+static int icheck_column_neighbors(struct All_variables *E,
+                                   int j, int nel,
+                                   double x, double y, double z,
+                                   double rad);
+static int icheck_all_columns(struct All_variables *E,
+                              int j,
+                              double x, double y, double z,
+                              double rad);
+static int icheck_element(struct All_variables *E,
+                          int j, int nel,
+                          double x, double y, double z,
+                          double rad);
+static int icheck_shell(struct All_variables *E,
+                        int nel, double rad);
+static int icheck_element_column(struct All_variables *E,
+                                 int j, int nel,
+                                 double x, double y, double z,
+                                 double rad);
+static int icheck_bounds(struct All_variables *E,
+                         double *test_point,
+                         double *rnode1, double *rnode2,
+                         double *rnode3, double *rnode4);
+static double findradial(struct All_variables *E, double *vec,
+                         double cost, double sint,
+                         double cosf, double sinf);
+static void makevector(double *vec, double xf, double yf, double zf,
+                       double x0, double y0, double z0);
+static void crossit(double *cross, double *A, double *B);
 static void fix_radius(struct All_variables *E,
                        double *radius, double *theta, double *phi,
                        double *x, double *y, double *z);
-static void fix_theta_phi(double *theta, double *phi);
 static void fix_phi(double *phi);
-void init_tracer_flavors(struct All_variables *E);
+static void fix_theta_phi(double *theta, double *phi);
+static int iget_radial_element(struct All_variables *E,
+                               int j, int iel,
+                               double rad);
+static int iget_regel(struct All_variables *E, int j,
+                      double theta, double phi,
+                      int *ntheta, int *nphi);
+static void define_uv_space(struct All_variables *E);
+static void determine_shape_coefficients(struct All_variables *E);
+static void pdebug(struct All_variables *E, int i);
 
 
 
@@ -92,20 +141,10 @@ void full_tracer_setup(struct All_variables *E)
 {
 
     char output_file[200];
-    void write_trace_instructions();
-    void viscosity_checks();
-    void initialize_old_composition();
+    void get_neighboring_caps();
+    void initialize_tracers();
     void find_tracers();
-    void make_regular_grid();
-    void make_tracer_array();
-    void initialize_tracer_elements();
-    void define_uv_space();
-    void determine_shape_coefficients();
-    void read_tracer_file();
     void analytical_test();
-    void tracer_post_processing();
-    void restart_tracers();
-    int isum_tracers();
 
     /* Some error control */
 
@@ -301,8 +340,6 @@ void full_get_velocity(struct All_variables *E,
                        double *velocity_vector)
 {
 
-    void gnomonic_interpolation();
-
     /* gnomonic projection */
 
     if (E->trace.itracer_interpolation_scheme==1)
@@ -359,11 +396,10 @@ void full_get_velocity(struct All_variables *E,
 /*         6        7               6            8                             */
 
 
-void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
-     struct All_variables *E;
-     int j,nelem;
-     double theta,phi,rad;
-     double *velocity_vector;
+static void gnomonic_interpolation(struct All_variables *E,
+                                   int j, int nelem,
+                                   double theta, double phi, double rad,
+                                   double *velocity_vector)
 {
 
     int iwedge,inum;
@@ -385,13 +421,8 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
 
     const double eps=-1e-4;
 
-    void get_radial_shape();
     void sphere_to_cart();
-    void spherical_to_uv();
-    void get_2dshape();
     void velo_from_element_d();
-    int icheck_element();
-    int icheck_column_neighbors();
 
 
     /* find u and v using spherical coordinates */
@@ -545,13 +576,10 @@ void gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector)
 /* triangular elements. (See Cuvelier, Segal, and              */
 /* van Steenhoven, 1986).                                      */
 
-
-void get_2dshape(E,j,nelem,u,v,iwedge,shape2d)
-     struct All_variables *E;
-     int j,nelem,iwedge;
-     double u,v;
-     double * shape2d;
-
+static void get_2dshape(struct All_variables *E,
+                        int j, int nelem,
+                        double u, double v,
+                        int iwedge, double * shape2d)
 {
 
     double a0,a1,a2;
@@ -588,12 +616,9 @@ void get_2dshape(E,j,nelem,u,v,iwedge,shape2d)
 /*                                                             */
 /* This function determines radial shape functions at rad      */
 
-void get_radial_shape(E,j,nelem,rad,shaperad)
-     struct All_variables *E;
-     int j,nelem;
-     double rad;
-     double * shaperad;
-
+static void get_radial_shape(struct All_variables *E,
+                             int j, int nelem,
+                             double rad, double *shaperad)
 {
 
     int node1,node5;
@@ -649,13 +674,9 @@ void get_radial_shape(E,j,nelem,rad,shaperad)
 /* This function transforms theta and phi to new coords       */
 /* u and v using gnomonic projection.                          */
 
-void spherical_to_uv(E,j,theta,phi,u,v)
-     struct All_variables *E;
-     int j;
-     double theta,phi;
-     double *u;
-     double *v;
-
+static void spherical_to_uv(struct All_variables *E, int j,
+                            double theta, double phi,
+                            double *u, double *v)
 {
 
     double theta_f;
@@ -696,8 +717,7 @@ void spherical_to_uv(E,j,theta,phi,u,v)
 /* This function generates the finer regular grid which is    */
 /* mapped to real elements                                    */
 
-void make_regular_grid(E)
-     struct All_variables *E;
+static void make_regular_grid(struct All_variables *E)
 {
 
     int j;
@@ -741,9 +761,6 @@ void make_regular_grid(E)
     double *fmin;
     double *fmax;
 
-    int icheck_all_columns();
-    int icheck_element_column();
-    int icheck_column_neighbors();
     void sphere_to_cart();
 
     const double two_pi=2.0*M_PI;
@@ -1341,8 +1358,7 @@ void make_regular_grid(E)
 
 
 /**** WRITE TRACE INSTRUCTIONS ***************/
-void write_trace_instructions(E)
-     struct All_variables *E;
+static void write_trace_instructions(struct All_variables *E)
 {
     fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
     fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
@@ -1464,10 +1480,10 @@ void write_trace_instructions(E)
 /* This function check whether a point is in a neighboring    */
 /* column. Neighbor surface element number is returned        */
 
-int icheck_column_neighbors(E,j,nel,x,y,z,rad)
-     struct All_variables *E;
-     int j,nel;
-     double x,y,z,rad;
+static int icheck_column_neighbors(struct All_variables *E,
+                                   int j, int nel,
+                                   double x, double y, double z,
+                                   double rad)
 {
 
     int ival;
@@ -1475,8 +1491,6 @@ int icheck_column_neighbors(E,j,nel,x,y,z,rad)
     int elx,ely,elz;
     int elxz;
     int kk;
-
-    int icheck_element_column();
 
     /*
       const int number_of_neighbors=24;
@@ -1546,15 +1560,14 @@ int icheck_column_neighbors(E,j,nel,x,y,z,rad)
 /* a point (x,y,z) is found. The surface element is returned  */
 /* else -99 if can't be found.                                */
 
-int icheck_all_columns(E,j,x,y,z,rad)
-     struct All_variables *E;
-     int j;
-     double x,y,z,rad;
+static int icheck_all_columns(struct All_variables *E,
+                              int j,
+                              double x, double y, double z,
+                              double rad)
 {
 
     int icheck;
     int nel;
-    int icheck_element_column();
 
     int elz=E->lmesh.elz;
     int numel=E->lmesh.nel;
@@ -1578,15 +1591,13 @@ int icheck_all_columns(E,j,x,y,z,rad)
 /* This function serves to determine if a point lies within */
 /* a given element                                          */
 
-int icheck_element(E,j,nel,x,y,z,rad)
-     struct All_variables *E;
-     int nel,j;
-     double x,y,z,rad;
+static int icheck_element(struct All_variables *E,
+                          int j, int nel,
+                          double x, double y, double z,
+                          double rad)
 {
 
     int icheck;
-    int icheck_element_column();
-    int icheck_shell();
 
     icheck=icheck_shell(E,nel,rad);
     if (icheck==0)
@@ -1604,16 +1615,15 @@ int icheck_element(E,j,nel,x,y,z,rad)
     return 1;
 }
 
+
 /********  ICHECK SHELL ************************************/
 /*                                                         */
 /* This function serves to check whether a point lies      */
 /* within the proper radial shell of a given element       */
 /* note: j set to 1; shouldn't depend on cap               */
 
-int icheck_shell(E,nel,rad)
-     struct All_variables *E;
-     int nel;
-     double rad;
+static int icheck_shell(struct All_variables *E,
+                        int nel, double rad)
 {
 
     int ival;
@@ -1641,10 +1651,10 @@ int icheck_shell(E,nel,rad)
 /* This function serves to determine if a point lies within */
 /* a given element's column                                 */
 
-int icheck_element_column(E,j,nel,x,y,z,rad)
-     struct All_variables *E;
-     int nel,j;
-     double x,y,z,rad;
+static int icheck_element_column(struct All_variables *E,
+                                 int j, int nel,
+                                 double x, double y, double z,
+                                 double rad)
 {
 
     double test_point[4];
@@ -1654,7 +1664,6 @@ int icheck_element_column(E,j,nel,x,y,z,rad)
     int ival;
     int kk;
     int node;
-    int icheck_bounds();
 
 
     E->trace.istat_elements_checked++;
@@ -1707,7 +1716,6 @@ int full_icheck_cap(struct All_variables *E, int icap,
 
     int ival;
     int kk;
-    int icheck_bounds();
 
     /* surface coords of cap nodes */
 
@@ -1760,13 +1768,10 @@ int full_icheck_cap(struct All_variables *E, int icap,
 /*    which will force it to lie in one element   */
 /*    or cap                                      */
 
-int icheck_bounds(E,test_point,rnode1,rnode2,rnode3,rnode4)
-     struct All_variables *E;
-     double *test_point;
-     double *rnode1;
-     double *rnode2;
-     double *rnode3;
-     double *rnode4;
+static int icheck_bounds(struct All_variables *E,
+                         double *test_point,
+                         double *rnode1, double *rnode2,
+                         double *rnode3, double *rnode4)
 {
 
     int number_of_tries=0;
@@ -1789,9 +1794,6 @@ int icheck_bounds(E,test_point,rnode1,rnode2,rnode3,rnode4)
     double tiny, eps;
     double x,y,z;
 
-    double findradial();
-    void makevector();
-    void crossit();
     double myatan();
 
     /* make vectors from node to node */
@@ -1891,11 +1893,9 @@ int icheck_bounds(E,test_point,rnode1,rnode2,rnode3,rnode4)
 /*                                                                          */
 /* This function finds the radial component of a Cartesian vector           */
 
-
-double findradial(E,vec,cost,sint,cosf,sinf)
-     struct All_variables *E;
-     double *vec;
-     double cost,sint,cosf,sinf;
+static double findradial(struct All_variables *E, double *vec,
+                         double cost, double sint,
+                         double cosf, double sinf)
 {
     double radialparti,radialpartj,radialpartk;
     double radial;
@@ -1913,9 +1913,8 @@ double findradial(E,vec,cost,sint,cosf,sinf)
 
 /******************MAKEVECTOR*********************************************************/
 
-void makevector(vec,xf,yf,zf,x0,y0,z0)
-     double *vec;
-     double xf,yf,zf,x0,y0,z0;
+static void makevector(double *vec, double xf, double yf, double zf,
+                       double x0, double y0, double z0)
 {
 
     vec[1]=xf-x0;
@@ -1928,10 +1927,7 @@ void makevector(vec,xf,yf,zf,x0,y0,z0)
 
 /********************CROSSIT********************************************************/
 
-void crossit(cross,A,B)
-     double *cross;
-     double *A;
-     double *B;
+static void crossit(double *cross, double *A, double *B)
 {
 
     cross[1]=A[2]*B[3]-A[3]*B[2];
@@ -2051,9 +2047,6 @@ int full_iget_element(struct All_variables *E,
     int elx,ely,elz,elxz;
     int ifinal_iel;
     int nelem;
-
-    int iget_regel();
-    int iget_radial_element();
 
     elx=E->lmesh.elx;
     ely=E->lmesh.ely;
@@ -2244,10 +2237,9 @@ int full_iget_element(struct All_variables *E,
 /* This function returns the proper radial element, given    */
 /* an element (iel) from the column.                         */
 
-int iget_radial_element(E,j,iel,rad)
-     struct All_variables *E;
-     int j,iel;
-     double rad;
+static int iget_radial_element(struct All_variables *E,
+                               int j, int iel,
+                               double rad)
 {
 
     int elz=E->lmesh.elz;
@@ -2297,12 +2289,9 @@ int iget_radial_element(E,j,iel,rad)
 /* exists. If not found, returns -99.                            */
 /* npi and ntheta are modified for later use                     */
 
-int iget_regel(E,j,theta,phi,ntheta,nphi)
-     struct All_variables *E;
-     int j;
-     double theta, phi;
-     int *ntheta;
-     int *nphi;
+static int iget_regel(struct All_variables *E, int j,
+                      double theta, double phi,
+                      int *ntheta, int *nphi)
 {
 
     int iregel;
@@ -2346,9 +2335,7 @@ int iget_regel(E,j,theta,phi,ntheta,nphi)
 /* UV[j][1][node]=u                                             */
 /* UV[j][2][node]=v                                             */
 
-void define_uv_space(E)
-     struct All_variables *E;
-
+static void define_uv_space(struct All_variables *E)
 {
 
     int kk,j;
@@ -2429,8 +2416,7 @@ void define_uv_space(E)
 /*                                                             */
 /* shape_coefs[cap][wedge][3 shape functions*3 coefs][nelems]  */
 
-void determine_shape_coefficients(E)
-     struct All_variables *E;
+static void determine_shape_coefficients(struct All_variables *E)
 {
 
     int j,nelem,iwedge,kk;
