@@ -624,6 +624,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
         getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
 
 
+        E->composition.icompositional_rheology = 0;
         /*
         getIntProperty(properties, "compositional_rheology", E->composition.icompositional_rheology, fp);
 
