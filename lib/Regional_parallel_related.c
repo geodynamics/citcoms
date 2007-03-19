@@ -459,7 +459,7 @@ void regional_parallel_communication_routs_v(E)
   {
 
   int m,i,ii,j,k,l,node,el,elt,lnode,jj,doff,target_cap;
-  int lev,elx,elz,ely,nno,nox,noz,noy,p,kkk,kk,kf,kkkp;
+  int lev,elx,elz,ely,nno,nox,noz,noy,kkk,kk,kf,kkkp;
   int me, nproczl,nprocxl,nprocyl;
   int temp_dims,addi_doff;
   int cap,lx,ly,lz,dir;
@@ -497,9 +497,9 @@ void regional_parallel_communication_routs_v(E)
         else if(E->parallel.me_loc[1]==nprocxl-1 && i==2)
           E->parallel.NUM_PASS[lev][m].bound[ii] = 0;
 
-        for (p=1;p<=E->parallel.NUM_PASS[lev][m].bound[ii];p++)  {
+        if (E->parallel.NUM_PASS[lev][m].bound[ii] == 1)  {
           kkk ++;
-              /* determine the pass ID for ii-th boundary and p-th pass */
+              /* determine the pass ID for ii-th boundary and kkk-th pass */
 
           /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((i==1)?1:-1)*nproczl; */
 	  dir = ( (i==1)? 1 : -1);
@@ -519,7 +519,7 @@ void regional_parallel_communication_routs_v(E)
 
               E->parallel.NUM_NEQ[lev][m].pass[kkk] = jj;
 
-          }   /* end for loop p */
+          }   /* end if */
             }  /* end for i */
 
 
@@ -531,10 +531,10 @@ void regional_parallel_communication_routs_v(E)
         else if(E->parallel.me_loc[2]==nprocyl-1 && k==2)
           E->parallel.NUM_PASS[lev][m].bound[ii] = 0;
 
-        for (p=1;p<=E->parallel.NUM_PASS[lev][m].bound[ii];p++)  {
+        if(E->parallel.NUM_PASS[lev][m].bound[ii] == 1)  {
 
           kkk ++;
-              /* determine the pass ID for ii-th boundary and p-th pass */
+              /* determine the pass ID for ii-th boundary and kkk-th pass */
 
           /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl; */
 	  dir = ( (k==1)? 1 : -1);
@@ -554,7 +554,7 @@ void regional_parallel_communication_routs_v(E)
 
               E->parallel.NUM_NEQ[lev][m].pass[kkk] = jj;
 
-          }   /* end for loop p */
+          }   /* end if */
 
             }  /* end for k */
 
@@ -567,9 +567,9 @@ void regional_parallel_communication_routs_v(E)
         else if(E->parallel.me_loc[3]==nproczl-1 && j==2)
           E->parallel.NUM_PASS[lev][m].bound[ii] = 0;
 
-        for (p=1;p<=E->parallel.NUM_PASS[lev][m].bound[ii];p++)  {
+        if(E->parallel.NUM_PASS[lev][m].bound[ii] == 1)  {
           kkk ++;
-              /* determine the pass ID for ii-th boundary and p-th pass */
+              /* determine the pass ID for ii-th boundary and kkk-th pass */
 
           /*E->parallel.PROCESSOR[lev][m].pass[kkk]=me-((j==1)?1:-1);*/
 	  dir = ( (j==1)? 1 : -1);
@@ -589,7 +589,7 @@ void regional_parallel_communication_routs_v(E)
 
               E->parallel.NUM_NEQ[lev][m].pass[kkk] = jj;
 
-          }   /* end for loop p */
+          }   /* end if */
 
             }     /* end for j */
 
