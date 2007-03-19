@@ -972,7 +972,22 @@ void mass_matrix(E)
    }        /* lev */
 
 
+  /* compute volume of this processor mesh and the whole mesh */
+  E->lmesh.volume = 0;
+  E->mesh.volume = 0;
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+      for(e=1;e<=E->lmesh.nel;e++)
+          E->lmesh.volume += E->eco[m][e].area;
+
+  MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+
+
  if (E->control.verbose)  {
+   fprintf(E->fp_out, "rank=%d my_volume=%e total_volume=%e\n",
+           E->parallel.me, E->lmesh.volume, E->mesh.volume);
+
    for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
      fprintf(E->fp_out,"output_mass lev=%d\n",lev);
      for (m=1;m<=E->sphere.caps_per_proc;m++)   {

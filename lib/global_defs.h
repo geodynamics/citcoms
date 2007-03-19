@@ -351,6 +351,7 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     float lidz;
     float bl1width[4],bl2width[4],bl1mag[4],bl2mag[4];
     float hwidth[4],magnitude[4],offset[4],width[4]; /* grid compression information */
+    double volume;
     int fnodal_malloc_size;
     int dnodal_malloc_size;
     int feqn_malloc_size;

@@ -1250,6 +1250,53 @@ void count_tracers_of_flavors(struct All_variables *E)
 
 
 
+/************** MAKE TRACER ARRAY ********************************/
+/* Here, each processor will generate tracers somewhere          */
+/* in the sphere - check if its in this cap  - then check radial */
+
+void make_tracer_array(struct All_variables *E)
+{
+
+    int tracers_cap;
+    int j;
+    double processor_fraction;
+
+    void generate_random_tracers();
+    void init_tracer_flavors();
+
+    if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
+    fflush(stderr);
+
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+
+        processor_fraction=E->lmesh.volume/E->mesh.volume;
+        tracers_cap=E->mesh.nel*E->trace.itperel*processor_fraction;
+        /*
+          fprintf(stderr,"AA: proc frac: %f (%d) %d %d %f %f\n",processor_fraction,tracers_cap,E->lmesh.nel,E->parallel.nprocz, E->sx[j][3][E->lmesh.noz],E->sx[j][3][1]);
+        */
+
+        fprintf(E->trace.fpt,"\nGenerating %d Tracers\n",tracers_cap);
+
+        generate_random_tracers(E, tracers_cap, j);
+
+
+
+    }/* end j */
+
+
+    /* Initialize tracer flavors */
+    if (E->trace.nflavors) init_tracer_flavors(E);
+
+
+    fprintf(stderr,"DONE Making Tracer Array (%d)\n",E->parallel.me);
+    fflush(stderr);
+
+    return;
+}
+
+
+
 void generate_random_tracers(struct All_variables *E,
                              int tracers_cap, int j)
 {

@@ -41,7 +41,6 @@ static void fix_radius(struct All_variables *E,
                        double *x, double *y, double *z);
 static void fix_theta_phi(double *theta, double *phi);
 static void fix_phi(double *phi);
-static void make_tracer_array(struct All_variables *E);
 void init_tracer_flavors(struct All_variables *E);
 
 
@@ -98,6 +97,7 @@ void full_tracer_setup(struct All_variables *E)
     void initialize_old_composition();
     void find_tracers();
     void make_regular_grid();
+    void make_tracer_array();
     void initialize_tracer_elements();
     void define_uv_space();
     void determine_shape_coefficients();
@@ -1473,54 +1473,6 @@ void write_trace_instructions(E)
     write_composition_instructions(E);
     return;
 }
-
-
-/************** MAKE TRACER ARRAY ********************************/
-/* Here, each cap will generate tracers somewhere                */
-/* in the sphere - check if its in this cap  - then check radial */
-
-static void make_tracer_array(struct All_variables *E)
-{
-
-    int tracers_cap;
-    int j;
-    double processor_fraction;
-
-    void generate_random_tracers();
-
-    if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
-    fflush(stderr);
-
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-        processor_fraction=( ( pow(E->sx[j][3][E->lmesh.noz],3.0)-pow(E->sx[j][3][1],3.0))/
-                             (pow(E->sphere.ro,3.0)-pow(E->sphere.ri,3.0)));
-        tracers_cap=E->mesh.nel*E->trace.itperel*processor_fraction;
-        /*
-          fprintf(stderr,"AA: proc frac: %f (%d) %d %d %f %f\n",processor_fraction,tracers_cap,E->lmesh.nel,E->parallel.nprocz, E->sx[j][3][E->lmesh.noz],E->sx[j][3][1]);
-        */
-
-        fprintf(E->trace.fpt,"\nGenerating %d Tracers\n",tracers_cap);
-
-        generate_random_tracers(E, tracers_cap, j);
-
-
-
-    }/* end j */
-
-
-    /* Initialize tracer flavors */
-    if (E->trace.nflavors) init_tracer_flavors(E);
-
-
-    fprintf(stderr,"DONE Making Tracer Array (%d)\n",E->parallel.me);
-    fflush(stderr);
-
-    return;
-}
-
-
 
 
 /*********  ICHECK COLUMN NEIGHBORS ***************************/

@@ -124,11 +124,8 @@ void regional_tracer_setup(struct All_variables *E)
     get_neighboring_caps(E);
 
 
-    if (E->trace.ic_method==0) {
-        fprintf(E->trace.fpt,"Not ready for this inputs yet, tracer_ic_method=%d\n", E->trace.ic_method);
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
+    if (E->trace.ic_method==0)
+        make_tracer_array(E);
     else if (E->trace.ic_method==1)
         read_tracer_file(E);
     else if (E->trace.ic_method==2)
