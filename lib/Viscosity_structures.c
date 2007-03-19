@@ -660,12 +660,8 @@ void visc_to_node_interpolate(E,evisc,visc)
 
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 {
-    int i,j,jj,k,m,n,mm,ii,nn;
-    float temp1,temp2,*vvvis;
-
-    float THETA_LOCAL_ELEM_T, THETA_LOCAL_ELEM, FI_LOCAL_ELEM_T, FI_LOCAL_ELEM, R_LOCAL_ELEM_T, R_LOCAL_ELEM;
+    int i,j,m;
     const int vpts = vpoints[E->mesh.nsd];
-
     float *F;
 
     F = (float *)malloc((E->lmesh.nel+1)*sizeof(float));
@@ -702,73 +698,123 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 
 static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 {
-    //TODO: fix this
-#if 0
-    int i, n;
-    float THETA_LOCAL_ELEM_T, THETA_LOCAL_ELEM, FI_LOCAL_ELEM_T, FI_LOCAL_ELEM, R_LOCAL_ELEM_T, R_LOCAL_ELEM;
+    int i, ii, k, m, e, ee;
+    int nz_min[NCS], nz_max[NCS];
+    const int flavor = 0;
+    double rad_mean, rr;
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        /* find index of radius corresponding to lv_min_radius */
+        for(e=1; e<=E->lmesh.elz; e++) {
+            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                              E->sx[m][3][E->ien[m][e].node[8]]);
+            if(rad_mean >= E->viscosity.lv_min_radius) break;
+        }
+        nz_min[m] = e;
+
+        /* find index of radius corresponding to lv_max_radius */
+        for(e=E->lmesh.elz; e>=1; e--) {
+            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                              E->sx[m][3][E->ien[m][e].node[8]]);
+            if(rad_mean <= E->viscosity.lv_max_radius) break;
+        }
+        nz_max[m] = e;
+    }
 
 
-    for(i=1 ; i<=E->lmesh.nel ; i++) {
-        THETA_LOCAL_ELEM = E->Tracer.THETA_LOC_ELEM[i];
-        FI_LOCAL_ELEM = E->Tracer.FI_LOC_ELEM[i];
-        R_LOCAL_ELEM = E->Tracer.R_LOC_ELEM[i];
 
-        if (R_LOCAL_ELEM >= E->viscosity.lv_min_radius && R_LOCAL_ELEM <= E->viscosity.lv_max_radius) {
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
+            for(i=nz_min[m]; i<=nz_max[m]; i++) {
+                e = (k-1)*E->lmesh.elz + i;
 
-            for(n=1 ; n<=E->Tracer.LOCAL_NUM_TRACERS ; n++) {
-                if (E->Tracer.tracer_z[n] <= E->viscosity.lv_max_radius && E->Tracer.tracer_z[n] >= E->viscosity.lv_min_radius) {
-                    THETA_LOCAL_ELEM_T = E->Tracer.THETA_LOC_ELEM_T[n];
-                    FI_LOCAL_ELEM_T = E->Tracer.FI_LOC_ELEM_T[n];
-                    R_LOCAL_ELEM_T = E->Tracer.R_LOC_ELEM_T[n];
+                rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                                  E->sx[m][3][E->ien[m][e].node[8]]);
 
-                    if((R_LOCAL_ELEM >= R_LOCAL_ELEM_T) &&
-                       (R_LOCAL_ELEM <= R_LOCAL_ELEM_T+E->viscosity.lv_channel_thickness) &&
-                       (FI_LOCAL_ELEM == FI_LOCAL_ELEM_T) &&
-                       (THETA_LOCAL_ELEM == THETA_LOCAL_ELEM_T)) {
+                /* loop over elements below e */
+                for(ii=i; ii>=nz_min[m]; ii--) {
+                    ee = (k-1)*E->lmesh.elz + ii;
 
-                        F[i] = E->viscosity.lv_reduction;
+                    rr = 0.5 * (E->sx[m][3][E->ien[m][ee].node[1]] +
+                                E->sx[m][3][E->ien[m][ee].node[8]]);
 
-                    }
+                    /* if ee has tracers in it and is within the channel */
+                    if((E->trace.ntracer_flavor[m][flavor][ee] > 0) &&
+                       (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
+                           F[e] = E->viscosity.lv_reduction;
+                           break;
+                       }
                 }
-
             }
         }
     }
-#endif
-}
 
+
+    /** debug **
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+        for(e=1; e<=E->lmesh.nel; e++)
+            fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
+    /**/
+
+    return;
+}
 
 
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 {
-    //TODO: fix this
-#if 0
-    int i, n;
-    float THETA_LOCAL_ELEM_T, THETA_LOCAL_ELEM, FI_LOCAL_ELEM_T, FI_LOCAL_ELEM, R_LOCAL_ELEM_T, R_LOCAL_ELEM;
+    int i, ii, k, m, e, ee;
+    int nz_min[NCS], nz_max[NCS];
+    const int flavor = 0;
+    double rad_mean, rr;
 
-    for(i=1 ; i<=E->lmesh.nel ; i++) {
-        THETA_LOCAL_ELEM = E->Tracer.THETA_LOC_ELEM[i];
-        FI_LOCAL_ELEM = E->Tracer.FI_LOC_ELEM[i];
-        R_LOCAL_ELEM = E->Tracer.R_LOC_ELEM[i];
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        /* find index of radius corresponding to lv_min_radius */
+        for(e=1; e<=E->lmesh.elz; e++) {
+            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                              E->sx[m][3][E->ien[m][e].node[8]]);
+            if(rad_mean >= E->viscosity.lv_min_radius) break;
+        }
+        nz_min[m] = e;
 
-        if (R_LOCAL_ELEM <= E->viscosity.lv_max_radius && R_LOCAL_ELEM >= E->viscosity.lv_min_radius) {
+        /* find index of radius corresponding to lv_max_radius */
+        for(e=E->lmesh.elz; e>=1; e--) {
+            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                              E->sx[m][3][E->ien[m][e].node[8]]);
+            if(rad_mean <= E->viscosity.lv_max_radius) break;
+        }
+        nz_max[m] = e;
+    }
 
-            for(n=1 ; n<=E->Tracer.LOCAL_NUM_TRACERS ; n++) {
-                if (E->Tracer.tracer_z[n] <= E->viscosity.lv_max_radius && E->Tracer.tracer_z[n] >= E->viscosity.lv_min_radius) {
-                    THETA_LOCAL_ELEM_T = E->Tracer.THETA_LOC_ELEM_T[n];
-                    FI_LOCAL_ELEM_T = E->Tracer.FI_LOC_ELEM_T[n];
-                    R_LOCAL_ELEM_T = E->Tracer.R_LOC_ELEM_T[n];
 
 
-                    if((R_LOCAL_ELEM >= R_LOCAL_ELEM_T) &&
-                       (FI_LOCAL_ELEM == FI_LOCAL_ELEM_T) &&
-                       (THETA_LOCAL_ELEM == THETA_LOCAL_ELEM_T)) {
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
+            for(i=nz_min[m]; i<=nz_max[m]; i++) {
+                e = (k-1)*E->lmesh.elz + i;
 
-                        F[i] = E->viscosity.lv_reduction;
+                rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
+                                  E->sx[m][3][E->ien[m][e].node[8]]);
+
+                /* loop over elements below e */
+                for(ii=i; ii>=nz_min[m]; ii--) {
+                    ee = (k-1)*E->lmesh.elz + ii;
+
+                    /* if ee has tracers in it */
+                    if(E->trace.ntracer_flavor[m][flavor][ee] > 0) {
+                        F[e] = E->viscosity.lv_reduction;
+                        break;
                     }
                 }
             }
         }
     }
-#endif
+
+
+    /** debug **
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+        for(e=1; e<=E->lmesh.nel; e++)
+            fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
+    /**/
+
+    return;
 }
