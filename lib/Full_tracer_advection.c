@@ -255,12 +255,15 @@ void full_tracer_setup(struct All_variables *E)
 
 void full_lost_souls(struct All_variables *E)
 {
+    /* This code works only if E->sphere.caps_per_proc==1 */
+    const int j = 1;
+
     int ithiscap;
     int ithatcap=1;
     int isend[13][13];
     int ireceive[13][13];
     int isize[13];
-    int kk,pp,j;
+    int kk,pp;
     int mm;
     int numtracers;
     int icheck=0;
@@ -276,7 +279,6 @@ void full_lost_souls(struct All_variables *E)
     int ival;
     int ithat_processor;
     int ireceive_position;
-    int ihorizontal_neighbor;
     int ivertical_neighbor;
     int ilast_receiver_position;
     int it;
@@ -302,7 +304,7 @@ void full_lost_souls(struct All_variables *E)
 
     int number_of_caps=12;
     int lev=E->mesh.levmax;
-    int num_ngb;
+    int num_ngb = E->parallel.TNUM_PASS[lev][j];
 
     /* Note, if for some reason, the number of neighbors exceeds */
     /* 50, which is unlikely, the MPI arrays must be increased.  */
@@ -317,66 +319,54 @@ void full_lost_souls(struct All_variables *E)
     fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        E->trace.istat_isend=E->trace.ilater[j];
-    }
+    E->trace.istat_isend=E->trace.ilater[j];
 
 
-    /* debug *
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1; kk<=E->trace.istat_isend; kk++) {
-            fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
-                    E->trace.rlater[j][0][kk],
-                    E->trace.rlater[j][1][kk],
-                    E->trace.rlater[j][2][kk]);
-        }
-        fflush(E->trace.fpt);
+    /* debug */
+    for (kk=1; kk<=E->trace.istat_isend; kk++) {
+        fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
+                E->trace.rlater[j][0][kk],
+                E->trace.rlater[j][1][kk],
+                E->trace.rlater[j][2][kk]);
     }
+    fflush(E->trace.fpt);
     /**/
 
 
     /* initialize isend and ireceive */
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        /* # of neighbors in the horizontal plane */
-        num_ngb = E->parallel.TNUM_PASS[lev][j];
-        isize[j]=E->trace.ilater[j]*E->trace.number_of_tracer_quantities;
-        for (kk=0;kk<=num_ngb;kk++) isend[j][kk]=0;
-        for (kk=0;kk<=num_ngb;kk++) ireceive[j][kk]=0;
-    }
+    /* # of neighbors in the horizontal plane */
+    isize[j]=E->trace.ilater[j]*E->trace.number_of_tracer_quantities;
+    for (kk=0;kk<=num_ngb;kk++) isend[j][kk]=0;
+    for (kk=0;kk<=num_ngb;kk++) ireceive[j][kk]=0;
 
     /* Allocate Maximum Memory to Send Arrays */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    itemp_size=max(isize[j],1);
 
-        itemp_size=max(isize[j],1);
-
-        num_ngb = E->parallel.TNUM_PASS[lev][j];
-        for (kk=0;kk<=num_ngb;kk++) {
-            if ((send[j][kk]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
-                fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
+    for (kk=0;kk<=num_ngb;kk++) {
+        if ((send[j][kk]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
+            fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
+            fflush(E->trace.fpt);
+            exit(10);
         }
     }
 
 
     /* debug *
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        ithiscap=E->sphere.capid[j];
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk]+1;
-            fprintf(E->trace.fpt,"cap: %d proc %d TNUM: %d ithatcap: %d\n",
-                    ithiscap,E->parallel.me,kk,ithatcap);
+    ithiscap=E->sphere.capid[j];
+    for (kk=1;kk<=num_ngb;kk++) {
+        ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk];
+        fprintf(E->trace.fpt,"cap: %d me %d TNUM: %d rank: %d\n",
+                ithiscap,E->parallel.me,kk,ithatcap);
 
-        }
-        fflush(E->trace.fpt);
     }
+    fflush(E->trace.fpt);
     /**/
 
 
     /* Pre communication */
     full_put_lost_tracers(E, isend, send);
+
 
     /* Send info to other processors regarding number of send tracers */
 
@@ -384,145 +374,91 @@ void full_lost_souls(struct All_variables *E)
     /* Each send and receive has a request variable */
 
     idb=0;
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    ithiscap=0;
 
-        ithiscap=0;
+    /* if tracer is in same cap (nprocz>1) */
 
-        /* if tracer is in same cap (nprocz>1) */
+    if (E->parallel.nprocz>1) {
+        ireceive[j][ithiscap]=isend[j][ithiscap];
+    }
 
-        if (E->parallel.nprocz>1) {
-            ireceive[j][ithiscap]=isend[j][ithiscap];
-        }
+    for (kk=1;kk<=num_ngb;kk++) {
+        idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
+        MPI_Isend(&isend[j][kk],1,MPI_INT,idestination_proc,
+                  11,E->parallel.world,&request[idb++]);
 
-            /* if neighbor cap is in another processor, send information via MPI */
+        MPI_Irecv(&ireceive[j][kk],1,MPI_INT,idestination_proc,
+                  11,E->parallel.world,&request[idb++]);
 
-            idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-
-            idb++;
-            MPI_Isend(&isend[j][ithatcap],1,MPI_INT,idestination_proc,
-                      11,E->parallel.world,
-                      &request[idb-1]);
-
-        } /* end kk, number of neighbors */
-
-    } /* end j, caps per proc */
-
-    /* Receive tracer count info */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
-
-            /* if neighbor cap is in another processor, receive information via MPI */
-
-            isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-
-            if (idestination_proc!=E->parallel.me) {
-
-                idb++;
-                MPI_Irecv(&ireceive[j][ithatcap],1,MPI_INT,isource_proc,
-                          11,E->parallel.world,
-                          &request[idb-1]);
-
-            } /* end if */
-
-        } /* end kk, number of neighbors */
-    } /* end j, caps per proc */
+    } /* end kk, number of neighbors */
 
     /* Wait for non-blocking calls to complete */
 
     MPI_Waitall(idb,request,status);
 
-    /* Testing, should remove */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
+    /** debug **/
+    for (kk=0;kk<=num_ngb;kk++) {
+        if(kk==0)
+            isource_proc=E->parallel.me;
+        else
             isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-            fprintf(E->trace.fpt,"j: %d send %d to cap %d\n",j,isend[j][kk],isource_proc);
-            fprintf(E->trace.fpt,"j: %d rec  %d from cap %d\n",j,ireceive[j][kk],isource_proc);
-        }
-    }
 
+        fprintf(E->trace.fpt,"%d send %d to proc %d\n",
+                E->parallel.me,isend[j][kk],isource_proc);
+        fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
+                E->parallel.me,ireceive[j][kk],isource_proc);
+    }
+    /**/
 
     /* Allocate memory in receive arrays */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        num_ngb = E->parallel.TNUM_PASS[lev][j];
-        for (ithatcap=1;ithatcap<=num_ngb;ithatcap++) {
-            isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
+    for (ithatcap=0;ithatcap<=num_ngb;ithatcap++) {
+        isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
-            itemp_size=max(1,isize[j]);
+        itemp_size=max(1,isize[j]);
 
-            if ((receive[j][ithatcap]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
-                fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
+        if ((receive[j][ithatcap]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
+            fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
+            fflush(E->trace.fpt);
+            exit(10);
         }
-    } /* end j */
+    }
 
     /* Now, send the tracers to proper caps */
 
     idb=0;
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        ithiscap=0;
+    ithiscap=0;
 
-        /* same cap */
+    /* same cap */
 
-        if (E->parallel.nprocz>1) {
+    if (E->parallel.nprocz>1) {
 
-            ithatcap=ithiscap;
-            isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
-            for (mm=0;mm<=(isize[j]-1);mm++) {
-                receive[j][ithatcap][mm]=send[j][ithatcap][mm];
-            }
-
+        ithatcap=ithiscap;
+        isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
+        for (mm=0;mm<isize[j];mm++) {
+            receive[j][ithatcap][mm]=send[j][ithatcap][mm];
         }
 
-        /* neighbor caps */
+    }
 
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
+    /* neighbor caps */
 
-            idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
+    for (kk=1;kk<=num_ngb;kk++) {
+        idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-            isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
+        isize[j]=isend[j][kk]*E->trace.number_of_tracer_quantities;
 
-            idb++;
+        MPI_Isend(send[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
+                  11,E->parallel.world,&request[idb++]);
 
-            MPI_Isend(send[j][ithatcap],isize[j],MPI_DOUBLE,idestination_proc,
-                      11,E->parallel.world,
-                      &request[idb-1]);
+        isize[j]=ireceive[j][kk]*E->trace.number_of_tracer_quantities;
 
-        } /* end kk, number of neighbors */
+        MPI_Irecv(receive[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
+                  11,E->parallel.world,&request[idb++]);
 
-    } /* end j, caps per proc */
-
-
-    /* Receive tracers */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-        ithiscap=0;
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
-
-            isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-
-            idb++;
-
-            isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
-
-            MPI_Irecv(receive[j][ithatcap],isize[j],MPI_DOUBLE,isource_proc,
-                      11,E->parallel.world,
-                      &request[idb-1]);
-
-        } /* end kk, number of neighbors */
-
-    } /* end j, caps per proc */
+    } /* end kk, number of neighbors */
 
     /* Wait for non-blocking calls to complete */
 
@@ -534,98 +470,56 @@ void full_lost_souls(struct All_variables *E)
 
     /* Sum up size of receive arrays (all tracers sent to this processor) */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        isum[j]=0;
+    isum[j]=0;
 
-        ithiscap=0;
+    ithiscap=0;
 
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
-            isum[j]=isum[j]+ireceive[j][ithatcap];
-        }
-        if (E->parallel.nprocz>1) isum[j]=isum[j]+ireceive[j][ithiscap];
-
-        itracers_subject_to_vertical_transport[j]=isum[j];
+    for (kk=0;kk<=num_ngb;kk++) {
+        isum[j]=isum[j]+ireceive[j][kk];
     }
+
+    itracers_subject_to_vertical_transport[j]=isum[j];
+
 
     /* Allocate Memory for REC array */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
-        isize[j]=max(isize[j],1);
-        if ((REC[j]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"Error(lost souls)-no memory (g323)\n");
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-        REC[j][0]=0.0;
+    isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
+    isize[j]=max(isize[j],1);
+    if ((REC[j]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
+        fprintf(E->trace.fpt,"Error(lost souls)-no memory (g323)\n");
+        fflush(E->trace.fpt);
+        exit(10);
     }
 
+
     /* Put Received tracers in REC */
+    irec[j]=0;
 
+    irec_position=0;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    for (kk=0;kk<=num_ngb;kk++) {
 
-        irec[j]=0;
+        ithatcap=kk;
 
-        irec_position=0;
+        for (pp=0;pp<ireceive[j][ithatcap];pp++) {
+            irec[j]++;
+            ipos=pp*E->trace.number_of_tracer_quantities;
 
-        ithiscap=0;
+            for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
+                ipos2=ipos+mm;
+                REC[j][irec_position]=receive[j][ithatcap][ipos2];
 
-        /* horizontal neighbors */
+                irec_position++;
 
-        for (ihorizontal_neighbor=1;ihorizontal_neighbor<=E->parallel.TNUM_PASS[lev][j];ihorizontal_neighbor++) {
+            } /* end mm (cycling tracer quantities) */
+        } /* end pp (cycling tracers) */
+    } /* end kk (cycling neighbors) */
 
-            ithatcap=ihorizontal_neighbor;
-
-            for (pp=1;pp<=ireceive[j][ithatcap];pp++) {
-                irec[j]++;
-                ipos=(pp-1)*E->trace.number_of_tracer_quantities;
-
-                for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
-                    ipos2=ipos+mm;
-                    REC[j][irec_position]=receive[j][ithatcap][ipos2];
-
-                    irec_position++;
-
-                } /* end mm (cycling tracer quantities) */
-            } /* end pp (cycling tracers) */
-        } /* end ihorizontal_neighbors (cycling neighbors) */
-
-        /* for tracers in the same cap (nprocz>1) */
-
-        if (E->parallel.nprocz>1) {
-            ithatcap=ithiscap;
-            for (pp=1;pp<=ireceive[j][ithatcap];pp++) {
-                irec[j]++;
-                ipos=(pp-1)*E->trace.number_of_tracer_quantities;
-
-                for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
-                    ipos2=ipos+mm;
-
-                    REC[j][irec_position]=receive[j][ithatcap][ipos2];
-
-                    irec_position++;
-
-                } /* end mm (cycling tracer quantities) */
-
-            } /* end pp (cycling tracers) */
-
-        } /* endif nproc>1 */
-
-    } /* end j (cycling caps) */
 
     /* Done filling REC */
 
 
-
     /* VERTICAL COMMUNICATION */
-
-    /* Note: For generality, I assume that both multiple */
-    /* caps per processor as well as multiple processors */
-    /* in the radial direction. These are probably       */
-    /* inconsistent parameter choices for the regular    */
-    /* CitcomS code.                                     */
 
     if (E->parallel.nprocz>1) {
 
@@ -633,194 +527,188 @@ void full_lost_souls(struct All_variables *E)
         /* Make send_z the size of receive array (max size) */
         /* (No dynamic reallocation of send_z necessary)    */
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-                isize[j]=itracers_subject_to_vertical_transport[j]*E->trace.number_of_tracer_quantities;
-                isize[j]=max(isize[j],1);
+        for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
+            isize[j]=itracers_subject_to_vertical_transport[j]*E->trace.number_of_tracer_quantities;
+            isize[j]=max(isize[j],1);
 
-                if ((send_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                                }
+            if ((send_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
+                fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
+                fflush(E->trace.fpt);
+                exit(10);
             }
-        } /* end j */
+        }
 
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
+        for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
 
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
+            ithat_processor=E->parallel.PROCESSORz[lev].pass[ivertical_neighbor];
 
-                ithat_processor=E->parallel.PROCESSORz[lev].pass[ivertical_neighbor];
+            /* initialize isend_z and ireceive_z array */
 
-                /* initialize isend_z and ireceive_z array */
+            isend_z[j][ivertical_neighbor]=0;
+            ireceive_z[j][ivertical_neighbor]=0;
 
-                isend_z[j][ivertical_neighbor]=0;
-                ireceive_z[j][ivertical_neighbor]=0;
+            /* sort through receive array and check radius */
 
-                /* sort through receive array and check radius */
+            it=0;
+            num_tracers=irec[j];
+            for (kk=1;kk<=num_tracers;kk++) {
 
-                it=0;
-                num_tracers=irec[j];
-                for (kk=1;kk<=num_tracers;kk++) {
+                ireceive_position=it*E->trace.number_of_tracer_quantities;
+                it++;
 
-                    it++;
+                irad=ireceive_position+2;
 
-                    ireceive_position=((it-1)*E->trace.number_of_tracer_quantities);
+                rad=REC[j][irad];
 
-                    irad=ireceive_position+2;
-
-                    rad=REC[j][irad];
-
-                    ival=icheck_that_processor_shell(E,j,ithat_processor,rad);
+                ival=icheck_that_processor_shell(E,j,ithat_processor,rad);
 
 
-                    /* if tracer is in other shell, take out of receive array and give to send_z*/
+                /* if tracer is in other shell, take out of receive array and give to send_z*/
 
-                    if (ival==1) {
-
-                        isend_z[j][ivertical_neighbor]++;
-
-                        isend_position=(isend_z[j][ivertical_neighbor]-1)*E->trace.number_of_tracer_quantities;
-
-                        ilast_receiver_position=(irec[j]-1)*E->trace.number_of_tracer_quantities;
-
-                        for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
-                            ipos=ireceive_position+mm;
-                            ipos2=isend_position+mm;
-
-                            send_z[j][ivertical_neighbor][ipos2]=REC[j][ipos];
+                if (ival==1) {
 
 
-                            /* eject tracer info from REC array, and replace with last tracer in array */
+                    isend_position=isend_z[j][ivertical_neighbor]*E->trace.number_of_tracer_quantities;
+                    isend_z[j][ivertical_neighbor]++;
 
-                            ipos3=ilast_receiver_position+mm;
-                            REC[j][ipos]=REC[j][ipos3];
+                    ilast_receiver_position=(irec[j]-1)*E->trace.number_of_tracer_quantities;
 
-                        }
+                    for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
+                        ipos=ireceive_position+mm;
+                        ipos2=isend_position+mm;
 
-                        it--;
-                        irec[j]--;
+                        send_z[j][ivertical_neighbor][ipos2]=REC[j][ipos];
 
-                    } /* end if ival===1 */
 
-                    /* Otherwise, leave tracer */
+                        /* eject tracer info from REC array, and replace with last tracer in array */
 
-                } /* end kk (cycling through tracers) */
+                        ipos3=ilast_receiver_position+mm;
+                        REC[j][ipos]=REC[j][ipos3];
 
-            } /* end ivertical_neighbor */
+                    }
 
-        } /* end j */
+                    it--;
+                    irec[j]--;
+
+                } /* end if ival===1 */
+
+                /* Otherwise, leave tracer */
+
+            } /* end kk (cycling through tracers) */
+
+        } /* end ivertical_neighbor */
 
 
         /* Send arrays are now filled.                         */
         /* Now send send information to vertical processor neighbor */
+        idb=0;
+        for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
+            idestination_proc = E->parallel.PROCESSORz[lev].pass[kk];
+            MPI_Isend(&isend_z[j][kk],1,MPI_INT,idestination_proc,
+                      14,E->parallel.world,&request[idb++]);
 
-                MPI_Sendrecv(&isend_z[j][ivertical_neighbor],1,MPI_INT,
-                             E->parallel.PROCESSORz[lev].pass[ivertical_neighbor],itag,
-                             &ireceive_z[j][ivertical_neighbor],1,MPI_INT,
-                             E->parallel.PROCESSORz[lev].pass[ivertical_neighbor],
-                             itag,E->parallel.world,&status1);
+            MPI_Irecv(&ireceive_z[j][kk],1,MPI_INT,idestination_proc,
+                      14,E->parallel.world,&request[idb++]);
 
-                /* for testing - remove */
-                /*
-                  fprintf(E->trace.fpt,"PROC: %d IVN: %d (P: %d) SEND: %d REC: %d\n",
-                  E->parallel.me,ivertical_neighbor,E->parallel.PROCESSORz[lev].pass[ivertical_neighbor],
-                  isend_z[j][ivertical_neighbor],ireceive_z[j][ivertical_neighbor]);
-                  fflush(E->trace.fpt);
-                */
+        } /* end ivertical_neighbor */
 
-            } /* end ivertical_neighbor */
+        /* Wait for non-blocking calls to complete */
 
-        } /* end j */
+        MPI_Waitall(idb,request,status);
+
+
+        /** debug **
+        for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
+            fprintf(E->trace.fpt, "PROC: %d IVN: %d (P: %d) "
+                    "SEND: %d REC: %d\n",
+                    E->parallel.me,kk,E->parallel.PROCESSORz[lev].pass[kk],
+                    isend_z[j][kk],ireceive_z[j][kk]);
+        }
+        fflush(E->trace.fpt);
+        /**/
 
 
         /* Allocate memory to receive_z arrays */
 
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-                isize[j]=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
-                isize[j]=max(isize[j],1);
+        for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
+            isize[j]=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
+            isize[j]=max(isize[j],1);
 
-                if ((receive_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (t590)\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
+            if ((receive_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
+                fprintf(E->trace.fpt,"Error(lost souls)-no memory (t590)\n");
+                fflush(E->trace.fpt);
+                exit(10);
             }
-        } /* end j */
+        }
 
         /* Send Tracers */
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
-                isize_send=isend_z[j][ivertical_neighbor]*E->trace.number_of_tracer_quantities;
-                isize_receive=ireceive_z[j][ivertical_neighbor]*E->trace.number_of_tracer_quantities;
+        idb=0;
+        for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
 
-                MPI_Sendrecv(send_z[j][ivertical_neighbor],isize_send,
-                             MPI_DOUBLE,
-                             E->parallel.PROCESSORz[lev].pass[ivertical_neighbor],itag+1,
-                             receive_z[j][ivertical_neighbor],isize_receive,
-                             MPI_DOUBLE,
-                             E->parallel.PROCESSORz[lev].pass[ivertical_neighbor],
-                             itag+1,E->parallel.world,&status2);
+            idestination_proc = E->parallel.PROCESSORz[lev].pass[kk];
 
-            }
+            isize_send=isend_z[j][kk]*E->trace.number_of_tracer_quantities;
+
+            MPI_Isend(send_z[j][kk],isize_send,MPI_DOUBLE,idestination_proc,
+                      15,E->parallel.world,&request[idb++]);
+
+            isize_receive=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
+
+            MPI_Irecv(receive_z[j][kk],isize_receive,MPI_DOUBLE,idestination_proc,
+                      15,E->parallel.world,&request[idb++]);
         }
+
+        /* Wait for non-blocking calls to complete */
+
+        MPI_Waitall(idb,request,status);
+
 
         /* Put tracers into REC array */
 
         /* First, reallocate memory to REC */
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            isum[j]=0;
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
-                isum[j]=isum[j]+ireceive_z[j][ivertical_neighbor];
-            }
+        isum[j]=0;
+        for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
+            isum[j]=isum[j]+ireceive_z[j][ivertical_neighbor];
+        }
 
-            isum[j]=isum[j]+irec[j];
+        isum[j]=isum[j]+irec[j];
 
-            isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
+        isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
 
-            if (isize[j]>0) {
-                if ((REC[j]=(double *)realloc(REC[j],isize[j]*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (i981)\n");
-                    fprintf(E->trace.fpt,"isize: %d\n",isize[j]);
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
+        if (isize[j]>0) {
+            if ((REC[j]=(double *)realloc(REC[j],isize[j]*sizeof(double)))==NULL) {
+                fprintf(E->trace.fpt,"Error(lost souls)-no memory (i981)\n");
+                fprintf(E->trace.fpt,"isize: %d\n",isize[j]);
+                fflush(E->trace.fpt);
+                exit(10);
             }
         }
 
 
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
+        for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
 
-                for (kk=1;kk<=ireceive_z[j][ivertical_neighbor];kk++) {
-                    irec[j]++;
+            for (kk=0;kk<ireceive_z[j][ivertical_neighbor];kk++) {
 
-                    irec_position=(irec[j]-1)*E->trace.number_of_tracer_quantities;
-                    ireceive_position=(kk-1)*E->trace.number_of_tracer_quantities;
+                irec_position=irec[j]*E->trace.number_of_tracer_quantities;
+                irec[j]++;
+                ireceive_position=kk*E->trace.number_of_tracer_quantities;
 
-                    for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
-                        REC[j][irec_position+mm]=receive_z[j][ivertical_neighbor][ireceive_position+mm];
-                    }
+                for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
+                    REC[j][irec_position+mm]=receive_z[j][ivertical_neighbor][ireceive_position+mm];
                 }
-
             }
+
         }
 
         /* Free Vertical Arrays */
-
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
-            for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
-                free(send_z[j][ivertical_neighbor]);
-                free(receive_z[j][ivertical_neighbor]);
-            }
+        for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
+            free(send_z[j][ivertical_neighbor]);
+            free(receive_z[j][ivertical_neighbor]);
         }
 
     } /* endif nprocz>1 */
@@ -830,45 +718,43 @@ void full_lost_souls(struct All_variables *E)
     /* Put away tracers */
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1;kk<=irec[j];kk++) {
-            E->trace.ntracers[j]++;
+    for (kk=0;kk<irec[j];kk++) {
+        E->trace.ntracers[j]++;
 
-            if (E->trace.ntracers[j]>(E->trace.max_ntracers[j]-5)) expand_tracer_arrays(E,j);
+        if (E->trace.ntracers[j]>(E->trace.max_ntracers[j]-5)) expand_tracer_arrays(E,j);
 
-            ireceive_position=(kk-1)*E->trace.number_of_tracer_quantities;
+        ireceive_position=kk*E->trace.number_of_tracer_quantities;
 
-            for (mm=0;mm<=(E->trace.number_of_basic_quantities-1);mm++) {
-                ipos=ireceive_position+mm;
+        for (mm=0;mm<E->trace.number_of_basic_quantities;mm++) {
+            ipos=ireceive_position+mm;
 
-                E->trace.basicq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
-            }
-            for (mm=0;mm<=(E->trace.number_of_extra_quantities-1);mm++) {
-                ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
-
-                E->trace.extraq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
-            }
-
-            theta=E->trace.basicq[j][0][E->trace.ntracers[j]];
-            phi=E->trace.basicq[j][1][E->trace.ntracers[j]];
-            rad=E->trace.basicq[j][2][E->trace.ntracers[j]];
-            x=E->trace.basicq[j][3][E->trace.ntracers[j]];
-            y=E->trace.basicq[j][4][E->trace.ntracers[j]];
-            z=E->trace.basicq[j][5][E->trace.ntracers[j]];
-
-
-            iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
-
-            if (iel<1) {
-                fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
-                fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",x,y,z,theta,phi,rad);
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-
-            E->trace.ielement[j][E->trace.ntracers[j]]=iel;
-
+            E->trace.basicq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
         }
+        for (mm=0;mm<E->trace.number_of_extra_quantities;mm++) {
+            ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
+
+            E->trace.extraq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
+        }
+
+        theta=E->trace.basicq[j][0][E->trace.ntracers[j]];
+        phi=E->trace.basicq[j][1][E->trace.ntracers[j]];
+        rad=E->trace.basicq[j][2][E->trace.ntracers[j]];
+        x=E->trace.basicq[j][3][E->trace.ntracers[j]];
+        y=E->trace.basicq[j][4][E->trace.ntracers[j]];
+        z=E->trace.basicq[j][5][E->trace.ntracers[j]];
+
+
+        iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
+
+        if (iel<1) {
+            fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
+            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",x,y,z,theta,phi,rad);
+            fflush(E->trace.fpt);
+            exit(10);
+        }
+
+        E->trace.ielement[j][E->trace.ntracers[j]]=iel;
+
     }
 
     fprintf(E->trace.fpt,"Freeing memory in lost_souls()\n");
@@ -877,21 +763,11 @@ void full_lost_souls(struct All_variables *E)
 
     /* Free Arrays */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    free(REC[j]);
 
-        ithiscap=0;
-
-        free(REC[j]);
-
-        free(send[j][ithiscap]);
-
-        for (kk=1;kk<=E->parallel.TNUM_PASS[lev][j];kk++) {
-            ithatcap=kk;
-
-            free(send[j][ithatcap]);
-            free(receive[j][ithatcap]);
-
-        }
+    for (kk=0;kk<=num_ngb;kk++) {
+        free(send[j][kk]);
+        free(receive[j][kk]);
 
     }
     fprintf(E->trace.fpt,"Leaving lost_souls()\n");
@@ -904,70 +780,68 @@ void full_lost_souls(struct All_variables *E)
 static void full_put_lost_tracers(struct All_variables *E,
                                   int isend[13][13], double *send[13][13])
 {
-    int j, kk, pp;
+    const int j = 1;
+    int kk, pp;
     int numtracers, ithatcap, icheck;
     int isend_position, ipos;
     int lev = E->mesh.levmax;
     double theta, phi, rad;
     double x, y, z;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    /* transfer tracers from rlater to send */
 
-        /* transfer tracers from rlater to send */
+    numtracers=E->trace.ilater[j];
 
-        numtracers=E->trace.ilater[j];
+    for (kk=1;kk<=numtracers;kk++) {
+        rad=E->trace.rlater[j][2][kk];
+        x=E->trace.rlater[j][3][kk];
+        y=E->trace.rlater[j][4][kk];
+        z=E->trace.rlater[j][5][kk];
 
-        for (kk=1;kk<=numtracers;kk++) {
-            rad=E->trace.rlater[j][2][kk];
-            x=E->trace.rlater[j][3][kk];
-            y=E->trace.rlater[j][4][kk];
-            z=E->trace.rlater[j][5][kk];
+        /* first check same cap if nprocz>1 */
 
-            /* first check same cap if nprocz>1 */
+        if (E->parallel.nprocz>1) {
+            ithatcap=0;
+            icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
+            if (icheck==1) goto foundit;
 
-            if (E->parallel.nprocz>1) {
-                ithatcap=0;
-                icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
-                if (icheck==1) goto foundit;
+        }
 
-            }
+        /* check neighboring caps */
 
-            /* check neighboring caps */
-
-            for (pp=1;pp<=E->parallel.TNUM_PASS[lev][j];pp++) {
-                ithatcap=pp;
-                icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
-                if (icheck==1) goto foundit;
-            }
+        for (pp=1;pp<=E->parallel.TNUM_PASS[lev][j];pp++) {
+            ithatcap=pp;
+            icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
+            if (icheck==1) goto foundit;
+        }
 
 
-            /* should not be here */
-            if (icheck!=1) {
-                fprintf(E->trace.fpt,"Error(lost souls)-should not be here\n");
-                fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",x,y,z,rad);
-                icheck=full_icheck_cap(E,0,x,y,z,rad);
-                if (icheck==1) fprintf(E->trace.fpt," icheck here!\n");
-                else fprintf(E->trace.fpt,"icheck not here!\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
+        /* should not be here */
+        if (icheck!=1) {
+            fprintf(E->trace.fpt,"Error(lost souls)-should not be here\n");
+            fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",x,y,z,rad);
+            icheck=full_icheck_cap(E,0,x,y,z,rad);
+            if (icheck==1) fprintf(E->trace.fpt," icheck here!\n");
+            else fprintf(E->trace.fpt,"icheck not here!\n");
+            fflush(E->trace.fpt);
+            exit(10);
+        }
 
-        foundit:
+    foundit:
 
-            isend[j][ithatcap]++;
+        isend[j][ithatcap]++;
 
-            /* assign tracer to send */
+        /* assign tracer to send */
 
-            isend_position=(isend[j][ithatcap]-1)*E->trace.number_of_tracer_quantities;
+        isend_position=(isend[j][ithatcap]-1)*E->trace.number_of_tracer_quantities;
 
-            for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
-                ipos=isend_position+pp;
-                send[j][ithatcap][ipos]=E->trace.rlater[j][pp][kk];
-            }
+        for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
+            ipos=isend_position+pp;
+            send[j][ithatcap][ipos]=E->trace.rlater[j][pp][kk];
+        }
 
-        } /* end kk, assigning tracers */
+    } /* end kk, assigning tracers */
 
-    } /* end j */
     return;
 }
 
