@@ -146,7 +146,8 @@ void get_system_viscosity(E,propogate,evisc,visc)
         visc_from_S(E,evisc,propogate);
 
 
-    apply_low_visc_wedge_channel(E, evisc);
+    if(E->viscosity.channel || E->viscosity.wedge)
+        apply_low_visc_wedge_channel(E, evisc);
 
 
     /* min/max cut-off */
@@ -660,9 +661,24 @@ void visc_to_node_interpolate(E,evisc,visc)
 
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 {
+    void parallel_process_termination();
+
     int i,j,m;
     const int vpts = vpoints[E->mesh.nsd];
     float *F;
+
+    /* low viscosity channel/wedge require tracers to work */
+    if(E->control.tracer == 0) {
+        if(E->parallel.me == 0) {
+            fprintf(stderr, "Error: low viscosity channel/wedge is turned on, "
+                   "but tracer is off!\n");
+            fprintf(E->fp, "Error: low viscosity channel/wedge is turned on, "
+                   "but tracer is off!\n");
+            fflush(E->fp);
+        }
+        parallel_process_termination();
+    }
+
 
     F = (float *)malloc((E->lmesh.nel+1)*sizeof(float));
     for(i=1 ; i<=E->lmesh.nel ; i++)
