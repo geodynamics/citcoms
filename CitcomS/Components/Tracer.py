@@ -81,20 +81,6 @@ class Tracer(CitcomComponent):
         z_interface = inv.float("z_interface", default=0.7)
 
 
-        # Advection Scheme
-
-        # itracer_advection_scheme=1
-        #     (simple predictor corrector -uses only V(to))
-        # itracer_advection_scheme=2
-        #     (predictor-corrector - uses V(to) and V(to+dt))
-        tracer_advection_scheme = inv.int("tracer_advection_scheme", default=1)
-
-        # Interpolation Scheme
-        # itracer_interpolation_scheme=1 (gnometric projection)
-        # itracer_interpolation_scheme=2 (simple average, not implemented) TODO:remove
-        tracer_interpolation_scheme = inv.int("tracer_interpolation_scheme",
-                                              default=1)
-
         # Regular grid parameters
         regular_grid_deltheta = inv.float("regular_grid_deltheta", default=1.0)
         regular_grid_delphi = inv.float("regular_grid_delphi", default=1.0)

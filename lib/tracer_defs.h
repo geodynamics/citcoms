@@ -41,7 +41,6 @@ struct TRACE{
     int ianalytical_tracer_test;
     int ic_method;
     int itperel;
-    int itracer_advection_scheme;
     int itracer_interpolation_scheme;
 
     double box_cushion;

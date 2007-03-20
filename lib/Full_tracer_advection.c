@@ -33,10 +33,6 @@
 #include "parallel_related.h"
 #include "composition_related.h"
 
-static void gnomonic_interpolation(struct All_variables *E,
-                                   int j, int nelem,
-                                   double theta, double phi, double rad,
-                                   double *velocity_vector);
 static void get_2dshape(struct All_variables *E,
                         int j, int nelem,
                         double u, double v,
@@ -102,20 +98,6 @@ void full_tracer_input(struct All_variables *E)
 {
     int m = E->parallel.me;
 
-
-    /* Interpolation Scheme */
-    /* itracer_interpolation_scheme=1 (gnometric projection) */
-    /* itracer_interpolation_scheme=2 (simple average) */
-
-    E->trace.itracer_interpolation_scheme=1;
-    input_int("tracer_interpolation_scheme",&(E->trace.itracer_interpolation_scheme),
-              "1,0,nomax",m);
-    if (E->trace.itracer_interpolation_scheme<1 || E->trace.itracer_interpolation_scheme>2)
-        {
-            fprintf(stderr,"Sorry, only interpolation scheme 1 and 2 available\n");
-            fflush(stderr);
-            parallel_process_termination();
-        }
 
     /* Regular grid parameters */
     /* (first fill uniform del[0] value) */
@@ -198,7 +180,7 @@ void full_tracer_setup(struct All_variables *E)
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
-    /* Other positions may be used depending on advection scheme and/or science being done */
+    /* Other positions may be used depending on science being done */
 
 
     /* Some error control regarding size of pointer arrays */
@@ -223,10 +205,8 @@ void full_tracer_setup(struct All_variables *E)
 
 
     /* Gnometric projection for velocity interpolation */
-    if (E->trace.itracer_interpolation_scheme==1) {
-        define_uv_space(E);
-        determine_shape_coefficients(E);
-    }
+    define_uv_space(E);
+    determine_shape_coefficients(E);
 
 
     /* The bounding box of neiboring processors */
@@ -993,75 +973,45 @@ static void full_put_lost_tracers(struct All_variables *E,
 
 
 /******** GET VELOCITY ***************************************/
+/********************** GNOMONIC INTERPOLATION *******************************/
+/*                                                                           */
+/* This function interpolates tracer velocity using gnominic interpolation.  */
+/* Real theta,phi,rad space is transformed into u,v space. This transformation */
+/* maps great circles into straight lines. Here, elements boundaries are     */
+/* assumed to be great circle planes (not entirely true, it is actually only */
+/* the nodal arrangement that lies upon great circles).  Element boundaries  */
+/* are then mapped into planes.  The element is then divided into 2 wedges   */
+/* in which standard shape functions are used to interpolate velocity.       */
+/* This transformation was found on the internet (refs were difficult to     */
+/* to obtain). It was tested that nodal configuration is indeed transformed  */
+/* into straight lines.                                                      */
+/* The transformations require a reference point along each cap. Here, the   */
+/* midpoint is used.                                                         */
+/* Radial and azimuthal shape functions are decoupled. First find the shape  */
+/* functions associated with the 2D surface plane, then apply radial shape   */
+/* functions.                                                                */
+/*                                                                           */
+/* Wedge information:                                                        */
+/*                                                                           */
+/*        Wedge 1                  Wedge 2                                   */
+/*        _______                  _______                                   */
+/*                                                                           */
+/*    wedge_node  real_node      wedge_node  real_node                       */
+/*    ----------  ---------      ----------  ---------                       */
+/*                                                                           */
+/*         1        1               1            1                           */
+/*         2        2               2            3                           */
+/*         3        3               3            4                           */
+/*         4        5               4            5                           */
+/*         5        6               5            7                           */
+/*         6        7               6            8                           */
+
 
 void full_get_velocity(struct All_variables *E,
                        int j, int nelem,
                        double theta, double phi, double rad,
                        double *velocity_vector)
 {
-
-    /* gnomonic projection */
-
-    if (E->trace.itracer_interpolation_scheme==1)
-        {
-            gnomonic_interpolation(E,j,nelem,theta,phi,rad,velocity_vector);
-        }
-    else if (E->trace.itracer_interpolation_scheme==2)
-        {
-            fprintf(E->trace.fpt,"Error(get velocity)-not ready for simple average interpolation scheme\n");
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    else
-        {
-            fprintf(E->trace.fpt,"Error(get velocity)-not ready for other interpolation schemes\n");
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-
-    return;
-}
-
-/********************** GNOMONIC INTERPOLATION *********************************/
-/*                                                                             */
-/* This function interpolates tracer velocity using gnominic interpolation.    */
-/* Real theta,phi,rad space is transformed into u,v space. This transformation */
-/* maps great circles into straight lines. Here, elements boundaries are       */
-/* assumed to be great circle planes (not entirely true, it is actually only   */
-/* the nodal arrangement that lies upon great circles).  Element boundaries    */
-/* are then mapped into planes.  The element is then divided into 2 wedges     */
-/* in which standard shape functions are used to interpolate velocity.         */
-/* This transformation was found on the internet (refs were difficult to       */
-/* to obtain). It was tested that nodal configuration is indeed transformed    */
-/* into straight lines.                                                        */
-/* The transformations require a reference point along each cap. Here, the     */
-/* midpoint is used.                                                           */
-/* Radial and azimuthal shape functions are decoupled. First find the shape    */
-/* functions associated with the 2D surface plane, then apply radial shape     */
-/* functions.                                                                  */
-/*                                                                             */
-/* Wedge information:                                                          */
-/*                                                                             */
-/*        Wedge 1                  Wedge 2                                     */
-/*        _______                  _______                                     */
-/*                                                                             */
-/*    wedge_node  real_node      wedge_node  real_node                         */
-/*    ----------  ---------      ----------  ---------                         */
-/*                                                                             */
-/*         1        1               1            1                             */
-/*         2        2               2            3                             */
-/*         3        3               3            4                             */
-/*         4        5               4            5                             */
-/*         5        6               5            7                             */
-/*         6        7               6            8                             */
-
-
-static void gnomonic_interpolation(struct All_variables *E,
-                                   int j, int nelem,
-                                   double theta, double phi, double rad,
-                                   double *velocity_vector)
-{
-
     int iwedge,inum;
     int kk;
     int ival;
@@ -2051,46 +2001,6 @@ static void write_trace_instructions(struct All_variables *E)
             parallel_process_termination();
         }
     }
-
-    if (E->trace.itracer_advection_scheme==1)
-        {
-            fprintf(E->trace.fpt,"\nSimple predictor-corrector method used\n");
-            fprintf(E->trace.fpt,"(Uses only velocity at to) \n");
-            fprintf(E->trace.fpt,"(xf=x0+0.5*dt*(v(x0,y0,z0) + v(xp,yp,zp))\n\n");
-        }
-    else if (E->trace.itracer_advection_scheme==2)
-        {
-            fprintf(E->trace.fpt,"\nPredictor-corrector method used\n");
-            fprintf(E->trace.fpt,"(Uses only velocity at to and to+dt) \n");
-            fprintf(E->trace.fpt,"(xf=x0+0.5*dt*(v(x0,y0,z0,to) + v(xp,yp,zp,to+dt))\n\n");
-        }
-    else
-        {
-            fprintf(E->trace.fpt,"Sorry-Other Advection Schemes are Unavailable %d\n",E->trace.itracer_advection_scheme);
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
-
-    if (E->trace.itracer_interpolation_scheme==1)
-        {
-            fprintf(E->trace.fpt,"\nGreat Circle Projection Interpolation Scheme \n");
-        }
-    else if (E->trace.itracer_interpolation_scheme==2)
-        {
-            fprintf(E->trace.fpt,"\nSimple Averaging Interpolation Scheme \n");
-            fprintf(E->trace.fpt,"\n(Not that great of a scheme!) \n");
-
-            fprintf(E->trace.fpt,"Sorry-Other Interpolation Schemes are Unavailable\n");
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-
-        }
-    else
-        {
-            fprintf(E->trace.fpt,"Sorry-Other Interpolation Schemes are Unavailable\n");
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
 
 
     /* regular grid stuff */

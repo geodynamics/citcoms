@@ -108,7 +108,7 @@ void regional_tracer_setup(struct All_variables *E)
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
-    /* Other positions may be used depending on advection scheme and/or science being done */
+    /* Other positions may be used depending on science being done */
 
 
     /* Some error control regarding size of pointer arrays */

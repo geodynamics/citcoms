@@ -614,9 +614,6 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
 
     if(E->parallel.nprocxy == 12) {
 
-        getIntProperty(properties, "tracer_advection_scheme", E->trace.itracer_advection_scheme, fp);
-        getIntProperty(properties, "tracer_interpolation_scheme", E->trace.itracer_interpolation_scheme, fp);
-
         getDoubleProperty(properties, "regular_grid_deltheta", tmp, fp);
         E->trace.deltheta[0] = tmp;
         getDoubleProperty(properties, "regular_grid_delphi", tmp, fp);

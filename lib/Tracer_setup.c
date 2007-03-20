@@ -116,27 +116,6 @@ void tracer_input(struct All_variables *E)
             input_double("z_interface",&(E->trace.z_interface),"0.7",m);
 
 
-        /* Advection Scheme */
-
-        /* itracer_advection_scheme=1 (simple predictor corrector -uses only V(to)) */
-        /* itracer_advection_scheme=2 (predictor-corrector - uses V(to) and V(to+dt)) */
-
-        E->trace.itracer_advection_scheme=2;
-        input_int("tracer_advection_scheme",&(E->trace.itracer_advection_scheme),
-                  "2,0,nomax",m);
-
-        if (E->trace.itracer_advection_scheme==1)
-            {}
-        else if (E->trace.itracer_advection_scheme==2)
-            {}
-        else {
-            fprintf(stderr,"Sorry, only advection scheme 1 and 2 available (%d)\n",E->trace.itracer_advection_scheme);
-            fflush(stderr);
-            parallel_process_termination();
-        }
-
-
-
 
         if(E->parallel.nprocxy == 12)
             full_tracer_input(E);
@@ -268,7 +247,6 @@ void tracer_post_processing(struct All_variables *E)
 /*                                                                        */
 /* Note positions used in tracer array                                    */
 /* [positions 0-5 are always fixed with current coordinates               */
-/*  regardless of advection scheme].                                      */
 /*  Positions 6-8 contain original Cartesian coordinates.                 */
 /*  Positions 9-11 contain original Cartesian velocities.                 */
 /*                                                                        */
@@ -364,7 +342,6 @@ static void predict_tracers(struct All_variables *E)
 /*                                                                        */
 /* Note positions used in tracer array                                    */
 /* [positions 0-5 are always fixed with current coordinates               */
-/*  regardless of advection scheme].                                      */
 /*  Positions 6-8 contain original Cartesian coordinates.                 */
 /*  Positions 9-11 contain original Cartesian velocities.                 */
 /*                                                                        */
