@@ -64,8 +64,8 @@ static void restart_tracers(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
-static void initialize_tracer_arrays(struct All_variables *E,
-                                     int j, int number_of_tracers);
+static void allocate_tracer_arrays(struct All_variables *E,
+                                   int j, int number_of_tracers);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
@@ -664,7 +664,6 @@ static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j)
 {
     void cart_to_sphere();
-    void initialize_tracer_arrays();
 
     int kk;
     int ival;
@@ -677,7 +676,7 @@ static void generate_random_tracers(struct All_variables *E,
     double random1,random2,random3;
 
 
-    initialize_tracer_arrays(E,j,tracers_cap);
+    allocate_tracer_arrays(E,j,tracers_cap);
 
 
     /* Tracers are placed randomly in cap */
@@ -763,7 +762,6 @@ static void read_tracer_file(struct All_variables *E)
 
     int icheck_processor_shell();
     int isum_tracers();
-    void initialize_tracer_arrays();
     void sphere_to_cart();
     void cart_to_sphere();
     void expand_tracer_arrays();
@@ -798,7 +796,7 @@ static void read_tracer_file(struct All_variables *E)
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
-        initialize_tracer_arrays(E,j,iestimate);
+        allocate_tracer_arrays(E,j,iestimate);
 
         for (kk=1;kk<=number_of_tracers;kk++) {
             fgets(input_s,200,fptracer);
@@ -896,7 +894,6 @@ static void restart_tracers(struct All_variables *E)
     double extra[100];
     double x,y,z;
 
-    void initialize_tracer_arrays();
     void sphere_to_cart();
 
     FILE *fp1;
@@ -933,7 +930,7 @@ static void restart_tracers(struct All_variables *E)
 
         /* allocate memory for tracer arrays */
 
-        initialize_tracer_arrays(E,j,numtracers);
+        allocate_tracer_arrays(E,j,numtracers);
         E->trace.ntracers[j]=numtracers;
 
         for (kk=1;kk<=numtracers;kk++) {
@@ -1219,8 +1216,8 @@ void get_neighboring_caps(struct All_variables *E)
 /*                                                                            */
 /* This function allocates memories to tracer arrays.                         */
 
-static void initialize_tracer_arrays(struct All_variables *E,
-                                     int j, int number_of_tracers)
+static void allocate_tracer_arrays(struct All_variables *E,
+                                   int j, int number_of_tracers)
 {
 
     int kk;
