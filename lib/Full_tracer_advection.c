@@ -127,7 +127,6 @@ void full_tracer_setup(struct All_variables *E)
     char output_file[200];
     void get_neighboring_caps();
     void initialize_tracers();
-    void find_tracers();
     void analytical_test();
 
     /* Some error control */
@@ -218,16 +217,6 @@ void full_tracer_setup(struct All_variables *E)
 
 
     initialize_tracers(E);
-
-    /* find elements */
-
-    find_tracers(E);
-
-
-    /* count # of tracers of each flavor */
-
-    if (E->trace.nflavors > 0)
-        count_tracers_of_flavors(E);
 
 
     if (E->trace.ianalytical_tracer_test==1) {

@@ -56,6 +56,8 @@ static void put_found_tracers(struct All_variables *E,
 
 void regional_tracer_setup(struct All_variables *E)
 {
+    void initialize_tracers();
+
     char output_file[255];
 
     /* Some error control */
@@ -138,17 +140,6 @@ void regional_tracer_setup(struct All_variables *E)
 
 
     initialize_tracers(E);
-
-
-    /* find elements */
-
-    find_tracers(E);
-
-
-    /* count # of tracers of each flavor */
-
-    if (E->trace.nflavors > 0)
-        count_tracers_of_flavors(E);
 
 
     composition_setup(E);

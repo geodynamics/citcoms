@@ -51,9 +51,10 @@ int icheck_that_processor_shell(struct All_variables *E,
 void expand_later_array(struct All_variables *E, int j);
 void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
-void count_tracers_of_flavors(struct All_variables *E);
 
 
+static void find_tracers(struct All_variables *E);
+static void count_tracers_of_flavors(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
 static void make_tracer_array(struct All_variables *E);
@@ -268,7 +269,6 @@ static void predict_tracers(struct All_variables *E)
     double velocity_vector[4];
 
     void cart_to_sphere();
-    void find_tracers();
 
 
     dt=E->advection.timestep;
@@ -366,7 +366,6 @@ static void correct_tracers(struct All_variables *E)
     double Vx_pred,Vy_pred,Vz_pred;
 
     void cart_to_sphere();
-    void find_tracers();
 
 
     dt=E->advection.timestep;
@@ -431,7 +430,7 @@ static void correct_tracers(struct All_variables *E)
 /* other processor domains if necessary.                       */
 /* Array ielement is filled with elemental values.                */
 
-void find_tracers(struct All_variables *E)
+static void find_tracers(struct All_variables *E)
 {
 
     int iel;
@@ -546,7 +545,7 @@ void find_tracers(struct All_variables *E)
 /* Each tracer can be of different "flavors", which is the 0th index   */
 /* of extraq. How to interprete "flavor" is left for the application.  */
 
-void count_tracers_of_flavors(struct All_variables *E)
+static void count_tracers_of_flavors(struct All_variables *E)
 {
 
     int j, flavor, e, kk;
@@ -608,6 +607,17 @@ void initialize_tracers(struct All_variables *E)
 
     E->trace.ilast_tracer_count = isum_tracers(E);
     fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
+
+
+    /* find elements */
+
+    find_tracers(E);
+
+
+    /* count # of tracers of each flavor */
+
+    if (E->trace.nflavors > 0)
+        count_tracers_of_flavors(E);
 
     return;
 }
