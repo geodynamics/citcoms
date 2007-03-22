@@ -234,9 +234,15 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   convergent=0;
 
   if (E->control.print_convergence && E->parallel.me==0)  {
-    fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+    fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+            " and dp/p=%.3e for step %d\n",
+            count, CPU_time0()-time0, E->monitor.incompressibility,
+            0.0, 0.0, E->monitor.solution_cycles);
     fflush(E->fp);
-    fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e for step %d\n",count,CPU_time0()-time0,E->monitor.incompressibility,E->monitor.solution_cycles); /**/
+    fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+            " and dp/p=%.3e for step %d\n",
+            count, CPU_time0()-time0, E->monitor.incompressibility,
+            0.0, 0.0, E->monitor.solution_cycles);
   }
 
   dpressure = 1.0;
