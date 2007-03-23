@@ -1127,12 +1127,11 @@ void get_neighboring_caps(struct All_variables *E)
     MPI_Request request[200];
 
     int node[ncorners];
-    double xx[ncorners*3], rr[12][ncorners*3];
-    int nox,noy,noz,dims;
+    double xx[ncorners*2], rr[12][ncorners*2];
+    int nox,noy,noz;
     double x,y,z;
     double theta,phi,rad;
 
-    dims=E->mesh.nsd;
     nox=E->lmesh.nox;
     noy=E->lmesh.noy;
     noz=E->lmesh.noz;
@@ -1150,7 +1149,7 @@ void get_neighboring_caps(struct All_variables *E)
         /* loop over top corners to get their coordinates */
         n = 0;
         for (i=0; i<ncorners; i++) {
-            for (d=0; d<dims; d++) {
+            for (d=0; d<2; d++) {
                 xx[n] = E->sx[j][d+1][node[i]];
                 n++;
             }
@@ -1184,10 +1183,11 @@ void get_neighboring_caps(struct All_variables *E)
          *      2) E->mesh.nsd==3
          */
         for (kk=0; kk<=num_ngb; kk++) {
+            n = 0;
             for (i=1; i<=ncorners; i++) {
-                theta = rr[kk][(i-1)*dims];
-                phi = rr[kk][(i-1)*dims+1];
-                rad = rr[kk][(i-1)*dims+2];
+                theta = rr[kk][n++];
+                phi = rr[kk][n++];
+                rad = E->sphere.ro;
 
                 sphere_to_cart(E, theta, phi, rad, &x, &y, &z);
 
@@ -1206,9 +1206,15 @@ void get_neighboring_caps(struct All_variables *E)
 
         /* debugging output *
         for (kk=0; kk<=num_ngb; kk++) {
+            if (kk==0)
+                neighbor_proc = E->parallel.me;
+            else
+                neighbor_proc = E->parallel.PROCESSOR[lev][1].pass[kk];
+
             for (i=1; i<=ncorners; i++) {
-                fprintf(E->trace.fpt, "pass=%d corner=%d sx=(%g, %g, %g)\n",
-                        kk, i,
+                fprintf(E->trace.fpt, "pass=%d rank=%d corner=%d "
+                        "sx=(%g, %g, %g)\n",
+                        kk, neighbor_proc, i,
                         E->trace.theta_cap[kk][i],
                         E->trace.phi_cap[kk][i],
                         E->trace.rad_cap[kk][i]);
