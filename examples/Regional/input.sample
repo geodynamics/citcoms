@@ -151,6 +151,23 @@ VMAX=on
 visc_max=1.0e1
 
 
+# Tracer information
+tracer=off
+
+tracer_ic_method=0
+tracers_per_element=10
+tracer_file="tracer.dat"
+
+tracer_flavors=0
+ic_method_for_flavors=0
+z_interface=0.700000
+
+chemical_buoyancy=on
+buoy_type=1
+buoyancy_ratio=1.0
+reset_initial_composition=off
+
+
 # Phase Change Information
 Ra_410=0.0
 clapeyron410=0.0235
