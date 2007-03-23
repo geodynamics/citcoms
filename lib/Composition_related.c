@@ -371,8 +371,7 @@ static void init_bulk_composition(struct All_variables *E)
     double rdum3;
 
     int ival=0;
-    int idum1;
-    int istep;
+    int idum0, idum1;
 
 
     FILE *fp;
@@ -396,7 +395,7 @@ static void init_bulk_composition(struct All_variables *E)
         fp=fopen(output_file,"r");
         fgets(input_s,200,fp);
         sscanf(input_s,"%d %d %lf %lf %lf",
-               &istep,&idum1,&rdum1,&rdum2,&rdum3);
+               &idum0,&idum1,&rdum1,&rdum2,&rdum3);
 
         E->composition.initial_bulk_composition = rdum2;
         fclose(fp);

@@ -438,14 +438,13 @@ void output_comp_nd(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file);
 
-    fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
-            cycles, E->lmesh.nno,
-            E->monitor.elapsed_time,
-            E->composition.initial_bulk_composition,
-            E->composition.bulk_composition);
-
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nno);
+        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+                j, E->lmesh.nel,
+                E->monitor.elapsed_time,
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
+
         for(i=1;i<=E->lmesh.nno;i++) {
             fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
         }
@@ -467,14 +466,13 @@ void output_comp_el(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file);
 
-    fprintf(fp1,"%d %d %.5e %.5e %.5e\n",
-            cycles, E->lmesh.nel,
-            E->monitor.elapsed_time,
-            E->composition.initial_bulk_composition,
-            E->composition.bulk_composition);
-
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+                j, E->lmesh.nel,
+                E->monitor.elapsed_time,
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
+
         for(i=1;i<=E->lmesh.nel;i++) {
             fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
         }
