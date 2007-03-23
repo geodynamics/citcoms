@@ -112,8 +112,8 @@ void full_tracer_input(struct All_variables *E)
     /* Analytical Test Function */
 
     E->trace.ianalytical_tracer_test=0;
-    input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
-              "0,0,nomax",m);
+    /* input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
+              "0,0,nomax",m); */
 
 
     return;

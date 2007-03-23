@@ -86,9 +86,9 @@ class Tracer(CitcomComponent):
         regular_grid_delphi = inv.float("regular_grid_delphi", default=1.0)
 
         # Analytical Test Function
-        analytical_tracer_test = inv.int("analytical_tracer_test", default=0)
+        #analytical_tracer_test = inv.int("analytical_tracer_test", default=0)
 
-        chemical_buoyancy = inv.int("chemical_buoyancy", default=1)
+        chemical_buoyancy = inv.bool("chemical_buoyancy", default=True)
 
         # ibuoy_type=0 (absolute method, not implemented)
         # ibuoy_type=1 (ratio method)

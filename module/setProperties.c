@@ -618,7 +618,9 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
         E->trace.deltheta[0] = tmp;
         getDoubleProperty(properties, "regular_grid_delphi", tmp, fp);
         E->trace.delphi[0] = tmp;
-        getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
+
+        E->trace.ianalytical_tracer_test = 0;
+        //getIntProperty(properties, "analytical_tracer_test", E->trace.ianalytical_tracer_test, fp);
 
 
         E->composition.icompositional_rheology = 0;
