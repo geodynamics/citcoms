@@ -138,6 +138,13 @@ SDEPV=off
 sdepv_expt=1,1,1,1
 sdepv_misfit=0.020
 
+low_visc_channel=off
+low_visc_wedge=off
+lv_min_radius=0.9764
+lv_max_radius=0.9921
+lv_channel_thickness=0.0047
+lv_reduction=0.5
+
 VMIN=on
 visc_min=1.0e0
 VMAX=on
