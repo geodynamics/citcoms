@@ -1,3 +1,11 @@
+2007-03-26 18:45  tan2
+
+	* lib/Makefile.am: Forgot to add a header file to the file list
+
+2007-03-26 18:25  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r6403
+
 2007-03-26 18:20  tan2
 
 	* visual/plot_annulus.py: Set the length unit to cm to fit within
