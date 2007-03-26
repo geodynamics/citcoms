@@ -109,7 +109,7 @@ for cap in range(caps):
 #######################################################################
 
 ## width of the plot
-mapwidth = 8.0
+mapwidth = 6.0
 
 if caps == 1:
     ## find min/max of the coordinate
@@ -156,7 +156,7 @@ cut -d' ' -f1,2,6 %(all_zfiles)s | \
 
 makecpt -Cpolar -T0/1/.1 > %(cptfile)s
 
-grdimage %(grdfile)s -C%(cptfile)s -Bg90 -R%(bounds)s -J%(proj)s -X1.5 -Y5.0 -P -K > %(psfile)s
+grdimage %(grdfile)s -C%(cptfile)s -Bg90 -R%(bounds)s -J%(proj)s -X1 -Y2.0 -P -K > %(psfile)s
 
 pscoast -R%(bounds)s -J%(proj)s -Bg90 -W -Dc -K -O >> %(psfile)s
 
