@@ -68,7 +68,8 @@ def great_circle_proj():
         text = '''Choose method to specify great circle path:
           (1) a starting point and an azimuth
           (2) a starting point and another point on the path
-          (3) a starting point and a rotation pole position\n'''
+          (3) a starting point and a rotation pole position
+[1/2/3]: '''
         option = int(raw_input(text))
 
         if 1 <= option <= 3:
@@ -221,6 +222,8 @@ cbyshift = cbarh / 2
 grdfile = '%s.%d.z%03d.tgrd' % (modelname, step, int(nodez/2))
 command = '''
 makecpt -Cpolar -T0/1/.1 > %(cptfile)s
+
+gmtset MEASURE_UNIT cm
 
 grdimage %(grdfile)s -C%(cptfile)s -Bg360 -R%(bounds)s -J%(proj)s -X1.5 -Y%(yshift)f -P -K > %(psfile)s
 
