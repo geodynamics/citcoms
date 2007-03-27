@@ -1,3 +1,17 @@
+2007-03-27 04:37  tan2
+
+	* NEWS, configure.ac, doc/manual/citcoms.lyx: Updated NEWS for the
+	  upcoming 2.2.1
+
+2007-03-27 04:20  tan2
+
+	* examples/Makefile.am: Forgot to add cookbook7.cfg to the file
+	  list
+
+2007-03-26 18:48  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r6409
+
 2007-03-26 18:45  tan2
 
 	* lib/Makefile.am: Forgot to add a header file to the file list
