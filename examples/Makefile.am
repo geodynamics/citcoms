@@ -172,6 +172,7 @@ nobase_dist_examples_DATA = \
 	Cookbook6/cookbook6.cfg \
 	Cookbook6/coord.dat \
 	Cookbook6/README \
+	Cookbook7/cookbook7.cfg \
 	example0.cfg \
 	example1.cfg \
 	Full/input.sample \
