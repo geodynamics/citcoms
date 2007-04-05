@@ -33,12 +33,31 @@ usage: autocombine.py machinefile inputfile step1 [step2 [...] ]
 
 # default values for CitcomS input
 defaults = {'output_format': 'ascii',
+            'output_optional': 'surf,botm',
             'nprocx': 1,
             'nprocy': 1,
             'nprocz': 1,
             'nodex': 9,
             'nodey': 9,
             'nodez': 9}
+
+
+
+def normalize_optional(output_optional):
+    fields = []
+
+    for opt in output_optional.split(','):
+        ## remove the leading/trailing whitespaces
+        opt = opt.strip()
+
+        ## retain fields that are node-based
+        if opt in ('pressure', 'stress', 'comp_nd'):
+            fields.append(opt)
+
+
+    return ','.join(fields)
+
+
 
 if __name__ == '__main__':
 
@@ -67,6 +86,9 @@ if __name__ == '__main__':
               "(output_format=%s)" % output_format
         sys.exit(1)
 
+    output_optional = parser.getstr('output_optional')
+    optional_fields = normalize_optional(output_optional)
+
     nodex = parser.getint('nodex')
     nodey = parser.getint('nodey')
     nodez = parser.getint('nodez')
@@ -76,12 +98,13 @@ if __name__ == '__main__':
     nprocz = parser.getint('nprocz')
 
     totalnodes = nprocx * nprocy * nprocz * ncap
-    nodelist = bc.machinefile2nodes(machinefile, totalnodes)
+    nodelist = bc.machinefile2nodelist(machinefile, totalnodes)
 
     for timestep in timesteps:
-        bc.combine(nodelist, datadir, datafile, timestep,
-                   nodex, nodey, nodez,
-                   ncap, nprocx, nprocy, nprocz)
+        bc.batchcombine(nodelist, datadir, datafile, timestep,
+                        nodex, nodey, nodez,
+                        ncap, nprocx, nprocy, nprocz,
+                        optional_fields)
 
 
 
