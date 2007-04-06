@@ -1,3 +1,702 @@
+2007-03-27 04:37  tan2
+
+	* NEWS, configure.ac, doc/manual/citcoms.lyx: Updated NEWS for the
+	  upcoming 2.2.1
+
+2007-03-27 04:20  tan2
+
+	* examples/Makefile.am: Forgot to add cookbook7.cfg to the file
+	  list
+
+2007-03-26 18:48  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r6409
+
+2007-03-26 18:45  tan2
+
+	* lib/Makefile.am: Forgot to add a header file to the file list
+
+2007-03-26 18:25  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r6403
+
+2007-03-26 18:20  tan2
+
+	* visual/plot_annulus.py: Set the length unit to cm to fit within
+	  the page
+
+2007-03-26 18:11  tan2
+
+	* visual/plot_layer.py: Changed the size of gmt plots to fit within
+	  the page
+
+2007-03-26 18:05  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: restored edits to
+	  stable copy; regen pdf, images showing
+
+2007-03-26 06:01  tan2
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: Enlarged the
+	  figure of cookbook7. Rephrased the description of the
+	  low-viscosity-zone parameters, per Sue's suggestion.
+
+2007-03-26 00:23  sue
+
+	* doc/manual/citcoms.pdf: chasing down image problem
+
+2007-03-25 23:07  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: changed verbage
+	  in History 1.2, paragraphs on version 2.1, to past tense, since
+	  notes on 2.2 should be only ones in present tense \c
+
+2007-03-25 22:55  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: edits of new
+	  copy; attempt to fix an image that is not displaying, still
+	  unresolved
+
+2007-03-24 23:05  tan2
+
+	* doc/manual/citcoms.lyx: Finished Cookbook7
+
+2007-03-24 23:03  tan2
+
+	* README, configure.ac, setup.py: Changed the version number to 2.2
+
+2007-03-24 00:02  tan2
+
+	* examples/Cookbook7, examples/Cookbook7/cookbook7.cfg: Added new
+	  cookbook7
+
+2007-03-23 22:21  tan2
+
+	* NEWS, doc/manual/citcoms.lyx: Updated the NEWS for v2.2.0
+
+2007-03-23 22:21  tan2
+
+	* doc/manual/citcoms.lyx, examples/Full/input.sample,
+	  examples/Regional/input.sample: Added new parameter 'adv_gamme'
+	  to the manual and input samples. Documented a new tic_method=3
+
+2007-03-23 21:06  tan2
+
+	* doc/manual/citcoms.lyx: Added description to the tracer and
+	  composition input/output files
+
+2007-03-23 20:40  tan2
+
+	* doc/manual/citcoms.lyx, examples/Full/input.sample,
+	  examples/Regional/input.sample: Added the tracer parameters to
+	  the manual and sample input files
+
+2007-03-23 20:39  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Full_tracer_advection.c,
+	  module/setProperties.c: Disable the parameter
+	  "analytical_tracer_test", and make "chemical_buoyancy" a boolean
+
+2007-03-23 19:37  tan2
+
+	* doc/manual/citcoms.lyx, examples/Full/input.sample,
+	  examples/Regional/input.sample: Added the low-visc-zone
+	  parameters to the manual and the sample input files
+
+2007-03-23 05:31  tan2
+
+	* doc/manual/graphics/cookbook7.jpg: Added the image for cookbook7
+	  (thermo-chemical convection
+
+2007-03-23 05:30  tan2
+
+	* doc/manual/citcoms.lyx, doc/manual/graphics/cookbook6.eps,
+	  doc/manual/graphics/cookbook7.eps: When I renamed the old
+	  Cookbook7/ directory to Cookbook6/, I forgot to rename
+	  cookbook7.eps to cookbook6.eps. Now it is done.
+
+2007-03-23 05:25  tan2
+
+	* doc/manual/graphics/cookbook6.2.eps,
+	  doc/manual/graphics/cookbook6.eps: These two EPS files are the
+	  leftover of an old cookbook
+
+2007-03-23 05:22  tan2
+
+	* lib/Tracer_setup.c: Gather theta and phi only in
+	  get_neighboring_caps()
+
+2007-03-23 05:21  tan2
+
+	* lib/Composition_related.c, lib/Output.c: Changed the header
+	  format of comp_* output to be consistent with other data files
+
+2007-03-22 22:11  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf,
+	  doc/manual/graphics/citcoms_cover-layers.pdf,
+	  doc/manual/graphics/citcoms_cover.pdf: added bib entry per eh,
+	  changed cover to citcoms (rem .py), changed to 2.2.0, todo
+	  notation removed; regen pdf
+
+2007-03-22 19:58  tan2
+
+	* lib/Stokes_flow_Incomp.c: Make the output of 1st iteration
+	  consistent with later iterations
+
+2007-03-22 19:57  tan2
+
+	* lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c: Calling find_tracers() and
+	  count_tracers_of_flavors() in initialize_tracers(), so that the
+	  former two functions can become static/private
+
+2007-03-22 19:55  tan2
+
+	* lib/Tracer_setup.c: Renamed initialize_tracer_arrays() to
+	  allocate_tracer_arrays()
+
+2007-03-21 22:46  tan2
+
+	* doc/manual/citcoms.lyx: Updated the version number to 2.2.0
+
+2007-03-21 22:46  tan2
+
+	* doc/manual/citcoms.lyx: Updated the dependency information
+
+2007-03-21 22:46  tan2
+
+	* doc/manual/citcoms.lyx: Added chemical Rayleigh number to the
+	  equations
+
+2007-03-21 22:45  tan2
+
+	* doc/manual/citcoms.lyx: Added history of v2.2 release
+
+2007-03-21 22:45  tan2
+
+	* doc/manual/citcoms.lyx: Added citation to McNamara & Zhong 2004
+
+2007-03-21 19:30  tan2
+
+	* lib/Full_tracer_advection.c: Added a safeguard against nprocx or
+	  nprocy greater than 1
+
+2007-03-20 06:34  tan2
+
+	* lib/Full_tracer_advection.c: full_lost_souls() now works for
+	  nprocz>1 as well
+
+2007-03-20 06:27  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Full_tracer_advection.c,
+	  lib/Regional_tracer_advection.c, lib/Tracer_setup.c,
+	  lib/tracer_defs.h, module/setProperties.c: Removed the
+	  'tracer_interpolation_scheme' and 'tracer_advection_scheme'
+	  parameters
+
+2007-03-20 06:26  tan2
+
+	* lib/Viscosity_structures.c: Reporting error if low viscosity
+	  channel/wedge is turned on, but tracer is turned off
+
+2007-03-19 23:49  tan2
+
+	* lib/Full_tracer_advection.c, lib/Global_operations.c,
+	  lib/Regional_parallel_related.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c, lib/tracer_defs.h: lost_souls() cannot be
+	  shared by both versions. The parallel communications of both
+	  versions are too different. So, the original lost_souls() is
+	  renamed to full_lost_souls(). A new regional_lost_souls() is
+	  implemented. This code has been tested in 3x3x3 processors,
+	  running over 100 timesteps. The number of total tracers is
+	  conserved.
+
+2007-03-19 23:44  tan2
+
+	* module/setProperties.c: Init'd
+	  E->composition.icompositional_rheology to 0
+
+2007-03-19 23:42  tan2
+
+	* lib/Composition_related.c, lib/composition_related.h: * Init'd
+	  E->composition.icompositional_rheology to 0 * Write composition
+	  instruction only if it is turned on * Clean up the code a bit
+
+2007-03-19 23:29  tan2
+
+	* lib/Composition_related.c: Removing read_comp(), which is not
+	  used anymore
+
+2007-03-19 23:25  tan2
+
+	* CitcomS/Solver/Solver.py: Advect the tracers right after
+	  temperature advection, before solving velocity
+
+2007-03-19 23:08  tan2
+
+	* lib/Regional_parallel_related.c: Replaced for-loop by an if,
+	  which matchs the intention better
+
+2007-03-19 22:53  tan2
+
+	* lib/Advection_diffusion.c, lib/Convection.c: Init'd
+	  advection.timestep and advection.timesteps earlier. The time
+	  output uses these parameters.
+
+2007-03-19 22:51  tan2
+
+	* lib/Viscosity_structures.c: Reimplemented my version of
+	  low_viscosity_channel_factor() and low_viscosity_wedge_factor()
+
+2007-03-19 22:50  tan2
+
+	* lib/Full_tracer_advection.c, lib/Tracer_setup.c: Clean up the
+	  function prototype declaration
+
+2007-03-19 22:48  tan2
+
+	* lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c: Moving tracer initialization code to a
+	  function
+
+2007-03-19 22:45  tan2
+
+	* lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Size_does_matter.c, lib/Tracer_setup.c, lib/global_defs.h:
+	  Compute the volume of the mesh, use it to estimate the # of
+	  tracers in the proc. make_tracer_array() now works for both
+	  versions
+
+2007-03-17 00:38  tan2
+
+	* lib/Pan_problem_misc_functions.c: Apply chemical buoyancy only
+	  when using tracer
+
+2007-03-17 00:21  tan2
+
+	* bin/Citcom.c, lib/Full_obsolete.c, lib/Full_tracer_advection.c,
+	  lib/Output.c, lib/Output_h5.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h, lib/tracer_defs.h, module/misc.c,
+	  module/setProperties.c: Merged the regional and global tracer
+	  codes.
+	  
+	  Basically, Vlad's code is mostly gone and is replaced by Allen's
+	  and mine code. A few functions, eg. analytical_test(),
+	  low_viscosity_*_factor(), are disabled, need to work on them
+	  later.
+
+2007-03-15 02:51  leif
+
+	* CitcomS/BaseApplication.py: Removed broken usage() method.
+	  (Pythia v0.8.1.3 will have a reasonable default for this method.)
+
+2007-03-13 00:56  gurnis
+
+	* lib/Full_read_input_from_files.c,
+	  lib/Regional_lith_age_read_files.c,
+	  lib/Regional_read_input_from_files.c: Refactored the regional
+	  parts of the code so that the age grids are read in from the same
+	  code as are the velocity and material files. Moved the guts of
+	  Regional_lith_age_read_files.c to
+	  Regional_read_input_from_files.c. This nearly makes the structure
+	  of Full and Regional the same -- refactoring that Leif initiated
+	  last year
+
+2007-03-12 23:27  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  module/setProperties.c: Commented out code about
+	  compositional_rheology, which is not implemented
+
+2007-03-12 23:11  tan2
+
+	* lib/Composition_related.c, lib/Full_tracer_advection.c: Removed
+	  static variables, added some code documentation
+
+2007-03-12 22:14  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  lib/Full_tracer_advection.c, lib/composition_related.h,
+	  lib/global_defs.h, lib/tracer_defs.h, module/setProperties.c: A
+	  new input parameter "ic_method_for_flavors", to specify which way
+	  to initialize the flavors when the tracers are init'd randomly
+	  
+	  Currrently, only ic_method_for_flavors=0 is allowed, which
+	  produces a layered structure, any tracer above z_interface is of
+	  flavor 0, below z_interface is of flavor 1.
+
+2007-03-12 22:07  tan2
+
+	* lib/Composition_related.c, lib/Full_tracer_advection.c,
+	  lib/composition_related.h: Initial bulk composition
+
+2007-03-12 22:06  tan2
+
+	* lib/Full_tracer_advection.c, lib/Output.c, lib/tracer_defs.h:
+	  Output the total composition information to the log file, get rid
+	  of extra file handles in trace struct
+
+2007-03-12 22:05  tan2
+
+	* lib/Full_tracer_advection.c, lib/Stokes_flow_Incomp.c,
+	  lib/tracer_defs.h: Compute the Cartesian velocity on the fly, not
+	  storing it in a seperated array
+
+2007-03-12 20:08  gurnis
+
+	* lib/Advection_diffusion.c, lib/Lith_age.c,
+	  lib/Regional_lith_age_read_files.c,
+	  lib/Regional_read_input_from_files.c: Modified
+	  Regional_read_input_from_files.c so that it now opens and reads
+	  in material files. Material files are organized by elements.
+	  Previsouly only worked for Full
+
+2007-03-11 05:27  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  lib/Full_tracer_advection.c, lib/Output.c, lib/global_defs.h,
+	  lib/tracer_defs.h, module/setProperties.c: A new way to compute
+	  composition.
+	  
+	  Each tracer has a "flavor" (can only be either 0 or 1 currently).
+	  In the ratio method, the composition of an element is determined
+	  by: (# of tracers of flavor i)/(# of total tracers)
+
+2007-03-11 05:20  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  lib/Full_obsolete.c, lib/Full_tracer_advection.c, lib/Output.c,
+	  lib/Pan_problem_misc_functions.c, lib/global_defs.h,
+	  lib/tracer_defs.h, module/setProperties.c: * Unifying output for
+	  extra tracer quantities * Renamed rtrac to basicq, etrac to
+	  extraq, to match the basic/extra quantities for advection *
+	  Renamed itrac to ielement, itracsize to ielementsize,
+	  ielementsize to max_ntracers * A new member for the # of tracers
+	  * Removed some unused members in trace struct * Untabify and
+	  indent the code
+
+2007-03-09 00:26  tan2
+
+	* AUTHORS: Add Vlad to the author list
+
+2007-03-09 00:25  tan2
+
+	* AUTHORS, CitcomS/Components/Output.py,
+	  CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  lib/Element_calculations.c, lib/Full_obsolete.c,
+	  lib/Full_tracer_advection.c, lib/Global_operations.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Output.c,
+	  lib/Pan_problem_misc_functions.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/composition_related.h,
+	  lib/global_defs.h, lib/tracer_defs.h, module/setProperties.c: A
+	  big patch for tracers and composition:
+	  
+	  * Seperating composition codes from tracer codes, several struct
+	  members in E->trace are moved to E->composition * Add chemical
+	  buoyancy term * Renamed thermal_buoyancy() to get_buoyancy() to
+	  reflect the fact that this function computes buoyancy according
+	  to temperature/composition/phase * Fix and optimize the fix_*()
+	  functions * Remove some static variables, or converte them to
+	  const * Change the type of E->SinCos from float to double, and
+	  replace E->trace.DSinCos * Provide default values for "required"
+	  input parameters * Renamed tracer_restart to tracer_ic_method,
+	  also remapped the options * Removed option for Cartesian tracer
+	  input and trace.iwrite_tracers_every * Replaced
+	  trace.itracer_type by composition.ichemical_buoyancy * Optionally
+	  output tracers and composition fields
+
+2007-03-08 00:35  leif
+
+	* bin/Makefile.am: Minor Makefile fix I made while working on
+	  Nemesis (i.e. with embedding disabled).
+
+2007-03-02 00:09  tan2
+
+	* lib/Full_tracer_advection.c, lib/tracer_defs.h: * Simplified
+	  checking in the radial direction * Removed obsolete variables in
+	  trace struct
+
+2007-03-01 21:23  tan2
+
+	* lib/Full_tracer_advection.c: Finally, exchanging tracers between
+	  processors works, at least in 12-proc cases
+
+2007-03-01 21:21  tan2
+
+	* lib/Full_tracer_advection.c, lib/Output.c, lib/tracer_defs.h: *
+	  Communicate cap boundary information with neighboring processors.
+	  This information will be used in icheck_cap() later * Update
+	  icheck_cap() for our paralleism * Disable composition-related
+	  output
+
+2007-03-01 21:17  tan2
+
+	* lib/Full_tracer_advection.c: Fixed two errors reported by icc
+
+2007-03-01 21:16  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Full_tracer_advection.c,
+	  module/setProperties.c: * Create pyre inventory for tracer input
+	  * Changed the default values of some tracer parameters to be
+	  consistent with pyre inventory
+
+2007-03-01 21:15  tan2
+
+	* bin/Citcom.c, lib/Full_tracer_advection.c,
+	  lib/Full_version_dependent.c, lib/Global_operations.c,
+	  lib/Instructions.c, lib/Tracer_setup.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h, lib/tracer_defs.h,
+	  module/initial_conditions.c: Migrating the tracer code (not
+	  finished)
+
+2007-03-01 21:02  tan2
+
+	* lib/Full_tracer_advection.c, lib/Global_operations.c,
+	  lib/Makefile.am, lib/global_defs.h, lib/tracer_defs.h: Copied
+	  from Allen McNamara's tracer code. The code will fail to compile
+
+2007-02-16 17:44  leif
+
+	* module/Exchanger: Resurrected Exchanger source.
+
+2007-02-08 00:15  tan2
+
+	* lib/Advection_diffusion.c: Spherical version of the temperature
+	  solver
+
+2007-02-08 00:14  tan2
+
+	* visual/execpaste.py: Removed the use of a new feature in python
+	  2.4 ("substring" in "string")
+
+2007-02-06 02:23  tan2
+
+	* CitcomS/Components/Advection_diffusion/Advection_diffusion.py,
+	  lib/Advection_diffusion.c, lib/Convection.c,
+	  module/setProperties.c: Added input parameters that controlling
+	  the predictor-corrector scheme
+
+2007-02-06 02:22  tan2
+
+	* lib/Full_version_dependent.c: Fixed a bug when reading coor_file
+	  in full CitcomS
+
+2007-02-06 02:22  tan2
+
+	* lib/Solver_multigrid.c: Changed smoothing method for viscosity to
+	  be consistent with CitcomCU
+
+2007-02-02 23:30  tan2
+
+	* CitcomS/Components/IC.py, lib/Full_version_dependent.c,
+	  lib/Initial_temperature.c, lib/Regional_version_dependent.c,
+	  module/setProperties.c: A new option for initial temperature,
+	  which is used in Shijie's benchmark
+	  
+	  When tic_method==3, the initial temperature is a linear profile
+	  plus mag * modified_plgndr_a(ll, mm, theta) * (cos(mm*phi) +
+	  sin(mm*phi)) * sin(M_PI * (r - E->sphere.ri) / (E->sphere.ro -
+	  E->sphere.ri))
+
+2007-02-02 20:10  tan2
+
+	* CitcomS/Solver/Solver.py: Disable pid output for processors of
+	  rank>0
+
+2007-01-31 20:46  tan2
+
+	* CitcomS/Solver/Solver.py: Removed spaces around the equal sign
+	  when writing pid file, which confused parser.py
+
+2007-01-30 21:16  leif
+
+	* configure.ac: Moved Python egg stuff into our Autoconf macro
+	  library.
+
+2007-01-30 19:29  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: added spaces
+	  after = in sec b.2; redid table in c.4.9 prev updated by eh;
+	  regen pdf
+
+2007-01-30 19:04  tan2
+
+	* lib/Viscosity_structures.c: Compute the 2nd invariant of strain
+	  rate tensor in spherical coordinate
+
+2007-01-29 20:51  gurnis
+
+	* lib/Full_read_input_from_files.c: The functionality of this
+	  routine is now expanded so that for evey time step the element
+	  materials are read in. The code for determining the material file
+	  names and opening the file name and then reading in the element
+	  files is placed in the same code that the age grids and velocity
+	  files are processed. Obviously, reading in materials currently
+	  only works for Full; fill be working on Regional next.
+
+2007-01-29 20:46  gurnis
+
+	* lib/Advection_diffusion.c, lib/BC_util.c, lib/Instructions.c,
+	  lib/Problem_related.c: Changed the seequence placement in the
+	  time step when the age grids are assimilated into the temperature
+	  field. Previously, going back to the original code contributed by
+	  CC, the assimilation occurred avery time the temperature BCs were
+	  set (meaning multiple times in a PC loop). Now assimilation
+	  happens only once at the end of the time step. This is placed at
+	  the end of the routine PG_time_step_solve. Once we have worked
+	  with this some more, we will want to expose this code at a higher
+	  level so that assimulation will work properly from either plain C
+	  code or the Pyre version. Currently only tested with Full.
+
+2007-01-29 20:37  gurnis
+
+	* lib/Lith_age.c: A minor change so that restart now works properly
+	  when lith_age=1. Now restart from old temperature fields appear
+	  to work without any obvious corruption of the Temp field. Only
+	  tested with Full.
+
+2007-01-29 20:32  gurnis
+
+	* lib/Viscosity_structures.c: Small change for rheol=5 to use
+	  harmonic mean when element materials are read in. Also, this
+	  involved a minor conflict resolution with Eh s recent change to
+	  this file
+
+2007-01-26 21:32  tan2
+
+	* CitcomS/Solver/Solver.py: Write controller inventory to pid file.
+	  This is a heck!
+
+2007-01-25 23:30  tan2
+
+	* lib/Stokes_flow_Incomp.c: Compute the velocity in Cartesian coord
+	  on the fly.
+	  
+	  The previous code computed and stored the Cartesian velocity in
+	  E->temp in v_from_vector() and accessed E->temp in
+	  velo_from_element. This is bug prone. E->temp is a temporary
+	  array and should be used for storage.
+	  
+	  Also, in previous code, if E->sphere.cap[m].V is modified, one
+	  has to recompute E->temp. Otherwise, the Cartesian velocity will
+	  be incorrect.
+
+2007-01-25 01:38  tan2
+
+	* CitcomS/Components/Advection_diffusion/Advection_diffusion.py,
+	  bin/Citcom.c, lib/Advection_diffusion.c, lib/Convection.c,
+	  lib/Solver_multigrid.c, lib/global_defs.h: Get rid of static
+	  variables
+
+2007-01-25 00:57  tan2
+
+	* CitcomS/Solver/Solver.py, bin/Citcom.c,
+	  lib/Advection_diffusion.c, lib/Convection.c,
+	  lib/Full_geometry_cartesian.c, lib/Instructions.c,
+	  lib/Regional_geometry_cartesian.c, module/advdiffu.c,
+	  module/mesher.c, module/setProperties.c: Refactoring various
+	  functions to simplify their pyre counterpart
+
+2007-01-17 20:02  tan2
+
+	* lib/Viscosity_structures.c: Fixed a bug in locating elements
+	  right above tracers
+
+2007-01-17 01:54  tan2
+
+	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced
+	  'exit(0)' with correct MPI exit, related to issue69
+
+2007-01-16 20:37  tan2
+
+	* lib/Full_read_input_from_files.c,
+	  lib/Regional_read_input_from_files.c: Fixed issue77 - velocity
+	  b.c not scaled correctly when age becomes negative
+
+2007-01-16 19:49  tan2
+
+	* CitcomS/Components/IC.py, module/setProperties.c: Read input
+	  parameter 'half_space_age' when tic_method=1
+
+2007-01-16 18:50  tan2
+
+	* lib/Regional_tracer_advection.c: Fixed incorrect prototype
+
+2007-01-16 18:43  tan2
+
+	* lib/Regional_version_dependent.c: When "tic_method=1", the
+	  temperature is isothermal (== bottom b.c.) with a uniformly cold
+	  plate (thickness specified by 'half_space_age')
+
+2007-01-16 17:41  tan2
+
+	* CitcomS/Components/Visc.py, lib/Regional_tracer_advection.c,
+	  lib/Viscosity_structures.c, lib/viscosity_descriptions.h,
+	  module/setProperties.c: Tracer-defined rheology -- low viscosity
+	  channel/wedge
+
+2007-01-15 21:42  tan2
+
+	* lib/Makefile.am, lib/Regional_tracer_advection.c,
+	  lib/Tracer_advection.c, lib/Tracer_setup.c, lib/tracer_defs.h,
+	  module/misc.c: Added regional (passive) tracers
+
+2007-01-09 21:11  tan2
+
+	* lib/Problem_related.c: Fix for time-invariant velocity boundary
+	  conditions, issue75
+
+2007-01-08 23:09  tan2
+
+	* doc/manual/citcoms.lyx: Another document fix for issue75, related
+	  to "how to specify time-invariant velocity boundary conditions?"
+
+2007-01-08 22:19  tan2
+
+	* doc/manual/citcoms.lyx: 1. Fixed a reference error, "Section 1.6"
+	  should be "Equation 1.6" 2. Velocity BC input and geoid output
+	  are dimensional. The units were undocumented in previous release.
+	  This fix the issue75. 3. More information about geoid output: the
+	  meaning of each column and how to compute the geoid field.
+
+2007-01-08 22:19  tan2
+
+	* visual/plot_annulus.py, visual/plot_layer.py: Truncate the
+	  temperature grd file at specified min/max
+	  
+	  Sometimes the temperature field has overshoot/undershoot, which
+	  would be leave a blank area in the contour plot. This is a simple
+	  workaround.
+
+2007-01-05 22:33  tan2
+
+	* visual/batchpaste.sh: Fix for issue73 "problems with
+	  autocombine.py in single workstation mode"
+	  
+	  $HOSTNAME is not defined in the non-interactive shell in Ubuntu
+	  6.10. Need to put a quote around it.
+
+2007-01-05 00:06  leif
+
+	* Makefile.am: Fix for issue72: "'make install' broken for
+	  non-pyred CitcomS".
+
+2006-12-20 22:13  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: added note about
+	  updating to 2.10.3
+
+2006-12-09 00:26  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r5565
+
+2006-12-09 00:22  sue
+
+	* doc/manual/citcoms.lyx, doc/manual/citcoms.pdf: gurnis final
+	  changes; image resize; ready for release
+
 2006-12-08 23:50  sue
 
 	* doc/manual/citcoms.lyx: small text changes; image resize

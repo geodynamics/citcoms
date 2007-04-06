@@ -166,13 +166,16 @@ static float solve_Ahat_p_fhat_BA(struct All_variables *E,
     assemble_div_u(E, V, r1, lev);
     residual = incompressibility_residual(E, V, r1);
 
-    if (E->control.print_convergence && E->parallel.me==0) {
-        fprintf(E->fp, "AhatP (%03d) after %g seconds with div/v=%.3e "
-                "for step %d\n", count, CPU_time0()-time0,
-                E->monitor.incompressibility, E->monitor.solution_cycles);
-        fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e "
-                "for step %d\n", count, CPU_time0()-time0,
-                E->monitor.incompressibility, E->monitor.solution_cycles);
+    if (E->control.print_convergence && E->parallel.me==0)  {
+        fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e "
+                "dv/v=%.3e and dp/p=%.3e for step %d\n",
+                count, CPU_time0()-time0, E->monitor.incompressibility,
+                0.0, 0.0, E->monitor.solution_cycles);
+        fflush(E->fp);
+        fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e "
+                "dv/v=%.3e and dp/p=%.3e for step %d\n",
+                count, CPU_time0()-time0, E->monitor.incompressibility,
+                0.0, 0.0, E->monitor.solution_cycles);
     }
 
 
@@ -375,13 +378,16 @@ static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
             rt[m][j] = r1[m][j];
 
 
-    if (E->control.print_convergence && E->parallel.me==0) {
-        fprintf(E->fp, "AhatP (%03d) after %g seconds with div/v=%.3e "
-                "for step %d\n", count, CPU_time0()-time0,
-                E->monitor.incompressibility, E->monitor.solution_cycles);
-        fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e "
-                "for step %d\n", count, CPU_time0()-time0,
-                E->monitor.incompressibility, E->monitor.solution_cycles);
+    if (E->control.print_convergence && E->parallel.me==0)  {
+        fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e "
+                "dv/v=%.3e and dp/p=%.3e for step %d\n",
+                count, CPU_time0()-time0, E->monitor.incompressibility,
+                0.0, 0.0, E->monitor.solution_cycles);
+        fflush(E->fp);
+        fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e "
+                "dv/v=%.3e and dp/p=%.3e for step %d\n",
+                count, CPU_time0()-time0, E->monitor.incompressibility,
+                0.0, 0.0, E->monitor.solution_cycles);
     }
 
 

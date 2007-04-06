@@ -35,15 +35,13 @@ dist_bin_SCRIPTS = \
 	mayavi2_citcoms_display.py \
 	autocombine.py \
 	batchcombine.py \
-	batchpaste.sh \
 	batchsurf.py \
 	citcoms_datadir \
 	combine.py \
 	combinesurf.py \
-	dxgeneral.sh \
+	dxgeneral.py \
 	dxgeneralsurf.sh \
 	estimate_size.py \
-	execpaste.py \
 	getcoord.sh \
 	getlog.sh \
 	getsurf.sh \
@@ -51,7 +49,7 @@ dist_bin_SCRIPTS = \
 	miff2avi \
 	miff2mpg \
 	parser.py \
-	pasteCitcomData.sh \
+	pasteCitcomData.py \
 	plot_annulus.py \
 	plot_layer.py \
 	zslice.py

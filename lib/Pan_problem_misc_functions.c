@@ -126,10 +126,10 @@ void apply_side_sbc(struct All_variables *E)
 }
 
 
-void thermal_buoyancy(struct All_variables *E, double **buoy)
+void get_buoyancy(struct All_variables *E, double **buoy)
 {
     int i,m;
-    double temp;
+    double temp,temp2;
     void remove_horiz_ave2(struct All_variables*, double**);
 
     temp = E->control.Atemp;
@@ -143,6 +143,14 @@ void thermal_buoyancy(struct All_variables *E, double **buoy)
 	    buoy[m][i] =  temp * E->refstate.rho[nz]
                 * E->refstate.expansivity[nz] * E->T[m][i];
 	}
+
+    /* chemical buoyancy */
+    if(E->control.tracer && E->composition.ichemical_buoyancy==1) {
+      temp2 = E->composition.buoyancy_ratio * temp;
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=E->lmesh.nno;i++)
+           buoy[m][i] -= temp2 * E->composition.comp_node[m][i];
+    }
 
     phase_change_apply_410(E, buoy);
     phase_change_apply_670(E, buoy);

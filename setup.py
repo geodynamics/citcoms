@@ -7,7 +7,7 @@ from merlin import setup, find_packages
 setup(
     
     name = 'CitcomS', 
-    version = '2.1',
+    version = '2.2',
 
     zip_safe = False,
     packages = find_packages(),

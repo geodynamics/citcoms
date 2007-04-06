@@ -55,11 +55,54 @@ class Tracer(CitcomComponent):
     class Inventory(CitcomComponent.Inventory):
 
 
-        import pyre.inventory
+        import pyre.inventory as inv
 
 
-        tracer = pyre.inventory.bool("tracer", default=False)
-        tracer_file = pyre.inventory.str("tracer_file", default="tracer.dat")
+        tracer = inv.bool("tracer", default=False)
+
+        # tracer_ic_method=0 (random generated array)
+        # tracer_ic_method=1 (all proc read the same file)
+        # tracer_ic_method=2 (each proc reads its restart file)
+        tracer_ic_method = inv.int("tracer_ic_method", default=0)
+
+        # (tracer_ic_method == 0)
+        tracers_per_element = inv.int("tracers_per_element", default=10)
+
+        # (tracer_ic_method == 1)
+        tracer_file = inv.str("tracer_file", default="tracer.dat")
+
+        # How many flavors of tracers
+        # If tracer_flavors > 0, each element will report the number of
+        # tracers of each flavor inside it. This information can be used
+        # later for many purposes. One of it is to compute composition,
+        # either using absolute method or ratio method.
+        tracer_flavors = inv.int("tracer_flavors", default=0)
+        ic_method_for_flavors = inv.int("ic_method_for_flavors", default=0)
+        z_interface = inv.float("z_interface", default=0.7)
+
+
+        # Regular grid parameters
+        regular_grid_deltheta = inv.float("regular_grid_deltheta", default=1.0)
+        regular_grid_delphi = inv.float("regular_grid_delphi", default=1.0)
+
+        # Analytical Test Function
+        #analytical_tracer_test = inv.int("analytical_tracer_test", default=0)
+
+        chemical_buoyancy = inv.bool("chemical_buoyancy", default=True)
+
+        # ibuoy_type=0 (absolute method, not implemented)
+        # ibuoy_type=1 (ratio method)
+        buoy_type = inv.int("buoy_type", default=1)
+        buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
+        reset_initial_composition = inv.bool("reset_initial_composition",
+                                             default=False)
+
+
+        # compositional_rheology=1 (not implemented in this version, TODO:remove)
+        #compositional_rheology = inv.bool("compositional_rheology",
+        #                                  default=False)
+        #compositional_prefactor = inv.float("compositional_prefactor",
+        #                                    default=1.0)
 
 
 

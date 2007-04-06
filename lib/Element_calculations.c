@@ -69,17 +69,16 @@ void assemble_forces(E,penalty)
   double elt_f[24];
   int m,a,e,i;
 
+  void get_buoyancy();
   void get_elt_f();
   void get_elt_tr();
   void strip_bcs_from_residual();
-  void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->buoyancy);
-  //chemical_buoyancy(E,E->buoyancy);
+  get_buoyancy(E,E->buoyancy);
   //buoyancy_to_density(E, E->buoyancy, E->rho);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
@@ -117,16 +116,16 @@ void assemble_forces_pseudo_surf(E,penalty)
   double elt_f[24];
   int m,a,e,i;
 
+  void get_buoyancy();
   void get_elt_f();
   void get_elt_tr_pseudo_surf();
   void strip_bcs_from_residual();
-  void thermal_buoyancy();
 
   const int neq=E->lmesh.neq;
   const int nel=E->lmesh.nel;
   const int lev=E->mesh.levmax;
 
-  thermal_buoyancy(E,E->buoyancy);
+  get_buoyancy(E,E->buoyancy);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
@@ -594,12 +593,12 @@ static void assemble_dlnrho(struct All_variables *E, double *dlnrhodr,
 
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(e=1; e<=nel; e++) {
-            nz = ((e-1) % E->lmesh.elz) + 1;
-            tmp = dlnrhodr[nz] / ends;
+            //nz = ((e-1) % E->lmesh.elz) + 1;
+            //tmp = dlnrhodr[e] / ends;
             for(a=1; a<=ends; a++) {
                 b = E->IEN[level][m][e].node[a];
                 j3 = E->ID[level][m][b].doff[3];
-                result[m][e] +=  tmp * U[m][j3];
+                result[m][e] +=  dlnrhodr[e] * U[m][j3];
 	    }
         }
 

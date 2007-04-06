@@ -78,10 +78,34 @@ void reference_state(struct All_variables *E)
 	E->refstate.Tadi[i] = T0 * (exp(E->control.disptn_number * z) - 1);
     }
 
-    for(i=1; i<=nel; i++) {
-        // TODO: dln(rho)/dr
-        E->refstate.dlnrhodr[i] = - tmp;
+    if (tmp) {
+        for(i=1; i<=nel; i++) {
+            // TODO: dln(rho)/dr
+            //E->refstate.dlnrhodr[i] = - tmp;
+            int a, p, j3;
+            int m = 1;
+            int lev = E->mesh.levmax;
+            int dims = E->mesh.nsd;
+            int nz = ((i-1) % E->lmesh.elz) + 1;
+            double rho_mean = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
+            double rho[9], tmp;
+
+            rho[1] = rho[2] = rho[3] = rho[4] = E->sx[1][3][nz]*E->refstate.rho[nz];
+            rho[5] = rho[6] = rho[7] = rho[8] = E->sx[1][3][nz+1]*E->refstate.rho[nz+1];
+
+            tmp = 0.0;
+            for(a=1; a<=8; a++) {
+                p = (a-1)*dims;
+                tmp += E->elt_del[lev][m][i].g[p+2][0] * rho[a];
+            }
+            E->refstate.dlnrhodr[i] = tmp / rho_mean;
+
+        }
     }
+    else {
+        for(i=1; i<=nel; i++) E->refstate.dlnrhodr[i] = 0;
+    }
+
 
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=noz; i++) {
@@ -89,6 +113,14 @@ void reference_state(struct All_variables *E)
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
                     E->refstate.rho[i], E->refstate.Tadi[i]);
         }
+
+    if(E->parallel.me < E->parallel.nprocz)
+        for(i=1; i<=E->lmesh.elz; i++) {
+            fprintf(stderr, "%d %f\n",
+                    i+E->lmesh.nzs-1, E->refstate.dlnrhodr[i]);
+        }
+
+    //parallel_process_termination();
 }
 
 

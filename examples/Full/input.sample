@@ -131,10 +131,37 @@ SDEPV=off
 sdepv_expt=1,1,1,1
 sdepv_misfit=0.020
 
+low_visc_channel=off
+low_visc_wedge=off
+lv_min_radius=0.9764
+lv_max_radius=0.9921
+lv_channel_thickness=0.0047
+lv_reduction=0.5
+
 VMIN=on
 visc_min=1.0e0
 VMAX=on
 visc_max=1.0e1
+
+
+# Tracer information
+tracer=off
+
+tracer_ic_method=0
+tracers_per_element=10
+tracer_file="tracer.dat"
+
+tracer_flavors=0
+ic_method_for_flavors=0
+z_interface=0.700000
+
+regular_grid_deltheta=1.0
+regular_grid_delphi=1.0
+
+chemical_buoyancy=on
+buoy_type=1
+buoyancy_ratio=1.0
+reset_initial_composition=off
 
 
 # Phase Change Information
@@ -190,6 +217,7 @@ ADV=on
 fixed_timestep=0.0
 finetunedt=0.7
 adv_sub_iterations=2
+adv_gamma=0.5
 
 precond=on
 aug_lagr=on

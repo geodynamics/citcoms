@@ -35,7 +35,17 @@ Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex
 
 
 def machinefile2nodes(machinefile, totalnodes):
+    nodelist = machinefile2nodelist(machinefile, totalnodes)
+    nodes = nodelist2nodes(nodelist)
+    return nodes
 
+
+
+def machinefile2nodelist(machinefile, totalnodes):
+    '''Read the machinefile to get a list of machine names. If machinefile
+    is not readable, treat it as a string containing the machine names.
+    Return the list of machine names. The length of the list is totalnodes.
+    '''
     try:
         nodelist = file(machinefile).readlines()
     except IOError:
@@ -51,39 +61,79 @@ def machinefile2nodes(machinefile, totalnodes):
         else:
             raise ValueError, 'incorrect machinefile size'
 
+    return nodelist
+
+
+
+def nodelist2nodes(nodelist):
     # generate a string of machine names
-    nodes = ''
-    for node in nodelist:
-        nodes += '%s ' % node.strip()
+    nodes = ' '.join([x.strip() for x in nodelist])
 
     return nodes
 
 
 
-def combine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-            ncap, nprocx, nprocy, nprocz):
-    import os
+def batchpaste(datadir, datafile, opts, timestep, nodes):
+    from socket import gethostname
+    hostname = gethostname()
 
+    import os
+    cwd = os.getcwd()
+
+    for rank, node in enumerate(nodes):
+        if node == 'localhost' or node == hostname:
+            # local paste
+            import pasteCitcomData
+            pasteCitcomData.run(datadir, datafile, opts, rank, timestep, cwd)
+
+        else:
+            # remote paste
+
+            # replace 'rsh' with 'ssh' if necessary
+            remote_shell = 'rsh'
+
+            cmd = '%(remote_shell)s %(node)s pasteCitcomData.py %(datadir)s %(datafile)s %(opts)s %(rank)d %(timestep)d %(cwd)s' % vars()
+            os.system(cmd)
+
+    return
+
+
+
+def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
+                 ncap, nprocx, nprocy, nprocz, optional_fields):
     # paste
-    cmd = 'batchpaste.sh %(datadir)s %(datafile)s %(timestep)d %(nodes)s' \
-          % vars()
-    print cmd
-    os.system(cmd)
+    opts0 = 'coord,velo,visc'
+    opts1 = optional_fields
+
+    batchpaste(datadir, datafile, opts0, timestep, nodes)
+    batchpaste(datadir, datafile, opts1, timestep, nodes)
 
     # combine
-    cmd = 'combine.py %(datafile)s %(timestep)d %(nodex)d %(nodey)d %(nodez)d %(ncap)d %(nprocx)d %(nprocy)d %(nprocz)d' % vars()
-    print cmd
-    os.system(cmd)
+    import combine
+    combine.combine(datafile, opts0, timestep, nodex, nodey, nodez,
+                        ncap, nprocx, nprocy, nprocz)
+    combine.combine(datafile, opts1, timestep, nodex, nodey, nodez,
+                    ncap, nprocx, nprocy, nprocz)
 
-    # delete
-    cmd = 'rm %(datafile)s.[0-9]*.%(timestep)d' % vars()
-    print cmd
-    os.system(cmd)
+    # delete pasted files
+    import glob
+    filenames = glob.glob('%(datafile)s.*.%(timestep)d.pasted' % vars())
+
+    import os
+    for filename in filenames:
+        os.remove(filename)
+
 
     # create .general file
-    cmd = 'dxgeneral.sh %(datafile)s.cap*.%(timestep)d' % vars()
-    print cmd
-    os.system(cmd)
+    import dxgeneral
+    combined_files0 = []
+    combined_files1 = []
+    for cap in range(ncap):
+        combined_files0.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
+        combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
+
+    dxgeneral.write(opts0, combined_files0)
+    dxgeneral.write(opts1, combined_files1)
 
     return
 
@@ -110,10 +160,10 @@ if __name__ == '__main__':
     nprocz = int(sys.argv[11])
 
     totalnodes = nprocx * nprocy * nprocz * ncap
-    nodelist = machinefile2nodes(machinefile, totalnodes)
+    nodelist = machinefile2nodelist(machinefile, totalnodes)
 
-    combine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
-            ncap, nprocx, nprocy, nprocz)
+    batchcombine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
+                 ncap, nprocx, nprocy, nprocz)
 
 
 

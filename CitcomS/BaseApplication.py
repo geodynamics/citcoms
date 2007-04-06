@@ -65,19 +65,6 @@ class BaseApplication(Application):
 
 
 
-    def usage(self):
-        print 'usage: citcoms [<property>=<value>] [<facility>.<property>=<value>] ...'
-        self.showUsage()
-        print """\
-For more information about a particular component:
-  --<facility>.help-properties
-  --<facility>.help-components
-where <facility> is the facility to which the component is bound; e.g.:
-  %(name)s --launcher.help-properties""" % locals()
-        return
-
-
-
     def _getPrivateDepositoryLocations(self):
         from os.path import dirname, isdir, join
         list = []

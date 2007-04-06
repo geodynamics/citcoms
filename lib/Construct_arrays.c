@@ -694,13 +694,10 @@ void construct_stiffness_B_matrix(E)
   void construct_node_maps();
   void construct_node_ks();
   void construct_elt_ks();
-  void construct_elt_gs();
   void rebuild_BI_on_boundary();
 
   if (E->control.NMULTIGRID)
     project_viscosity(E);
-
-  construct_elt_gs(E);
 
   if (E->control.NMULTIGRID || E->control.NASSEMBLE) {
     construct_node_ks(E);

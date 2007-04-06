@@ -26,17 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-/*
 
-Regional_tracer_advection.c
-
-A program which initiates the distribution of tracers
-and advects those tracers in a time evolving velocity field.
-Called and used from the CitCOM finite element code.
-Written 2/96 M. Gurnis for Citcom in cartesian geometry
-Modified by Lijie in 1998 and by Vlad and Eh in 2005 for CitcomS
-
-*/
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,772 +41,966 @@ Modified by Lijie in 1998 and by Vlad and Eh in 2005 for CitcomS
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "composition_related.h"
 
-static void mean_elem_coord(struct All_variables *E);
+
+static void write_trace_instructions(struct All_variables *E);
+static void make_mesh_ijk(struct All_variables *E);
+static void put_lost_tracers(struct All_variables *E,
+                             int *send_size, double *send,
+                             int kk, int j);
+static void put_found_tracers(struct All_variables *E,
+                              int recv_size, double *recv,
+                              int j);
+
 
 void regional_tracer_setup(struct All_variables *E)
 {
-    int i,j,k,node;
-    int m,ntr;
-    int n_x,n_y,n_z;
-    int node1,node2,node3,node4,node5,node6,node7,node8;
-    int local_element;
-    float THETA_LOC_ELEM,FI_LOC_ELEM,R_LOC_ELEM;
-    float idummy,xdummy,ydummy,zdummy;
-    FILE *fp;
-    int nox,noy,noz;
-    char output_file[255];
-    MPI_Comm world;
-    MPI_Status status;
+    void initialize_tracers();
 
-    n_x=0;
-    n_y=0;
-    n_z=0;
+    char output_file[255];
+
+    /* Some error control */
+
+    if (E->sphere.caps_per_proc>1) {
+            fprintf(stderr,"This code does not work for multiple caps per processor!\n");
+            parallel_process_termination();
+    }
+
+
+    /* open tracing output file */
+
+    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
+    E->trace.fpt=fopen(output_file,"w");
+
+
+    /* reset statistical counters */
+
+    E->trace.istat_isend=0;
+    E->trace.istat_iempty=0;
+    E->trace.istat_elements_checked=0;
+    E->trace.istat1=0;
+
+
+    /* some obscure initial parameters */
+    /* This parameter specifies how close a tracer can get to the boundary */
+    E->trace.box_cushion=0.00001;
+
+    /* AKMA turn this back on after debugging */
+    E->trace.itracer_warnings=1;
+
+    /* Determine number of tracer quantities */
+
+    /* advection_quantites - those needed for advection */
+    E->trace.number_of_basic_quantities=12;
+
+    /* extra_quantities - used for flavors, composition, etc.    */
+    /* (can be increased for additional science i.e. tracing chemistry */
+
+    E->trace.number_of_extra_quantities = 0;
+    if (E->trace.nflavors > 0)
+        E->trace.number_of_extra_quantities += 1;
+
+
+    E->trace.number_of_tracer_quantities =
+        E->trace.number_of_basic_quantities +
+        E->trace.number_of_extra_quantities;
+
+
+    /* Fixed positions in tracer array */
+    /* Flavor is always in extraq position 0  */
+    /* Current coordinates are always kept in basicq positions 0-5 */
+    /* Other positions may be used depending on science being done */
+
+
+    /* Some error control regarding size of pointer arrays */
+
+    if (E->trace.number_of_basic_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of basic in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_extra_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of extraq in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_tracer_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of rlater in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+
+    write_trace_instructions(E);
+
+    /* The bounding box of neiboring processors */
+    get_neighboring_caps(E);
+
+    make_mesh_ijk(E);
+
+
+    initialize_tracers(E);
+
+
+    composition_setup(E);
+    tracer_post_processing(E);
+
+    return;
+}
+
+
+/**** WRITE TRACE INSTRUCTIONS ***************/
+static void write_trace_instructions(struct All_variables *E)
+{
+    fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
+    fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
+
+    if (E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Generating New Tracer Array\n");
+        fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
+    }
+    if (E->trace.ic_method==1) {
+        fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
+    }
+    if (E->trace.ic_method==2) {
+        fprintf(E->trace.fpt,"Restarting Tracers\n");
+    }
+
+    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
+
+    if (E->trace.nflavors && E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
+        if (E->trace.ic_method_for_flavors == 0) {
+            fprintf(E->trace.fpt,"Layered tracer flavors\n");
+            fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
+        }
+        else {
+            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+
+
+
+    /* more obscure stuff */
+
+    fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
+    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
+            E->trace.number_of_basic_quantities);
+    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
+            E->trace.number_of_extra_quantities);
+    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
+            E->trace.number_of_tracer_quantities);
+
+
+
+    if (E->trace.itracer_warnings==0) {
+        fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fflush(E->trace.fpt);
+        fflush(stderr);
+    }
+
+    write_composition_instructions(E);
+
+
+    return;
+}
+
+
+static void make_mesh_ijk(struct All_variables *E)
+{
+    int m,i,j,k,node;
+    int nox,noy,noz;
 
     nox=E->lmesh.nox;
     noy=E->lmesh.noy;
     noz=E->lmesh.noz;
 
-    sprintf(output_file,"%s",E->control.tracer_file);
-    fp=fopen(output_file,"r");
-    if (fp == NULL) {
-        fprintf(E->fp,"(Tracer_advection #1) Cannot open %s\n", output_file);
-        exit(8);
-    }
-    fscanf(fp,"%d",&(E->Tracer.NUM_TRACERS));
-
-    E->Tracer.tracer_x=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    E->Tracer.tracer_y=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    E->Tracer.tracer_z=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    E->Tracer.itcolor=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-
-    E->Tracer.x_space=(float*) malloc((nox+1)*sizeof(float));
-    E->Tracer.y_space=(float*) malloc((noy+1)*sizeof(float));
-    E->Tracer.z_space=(float*) malloc((noz+1)*sizeof(float));
-
-    E->Tracer.LOCAL_ELEMENT=(int*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(int));
-
-    /* for rheology stuff */
-
-    E->Tracer.THETA_LOC_ELEM=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
-    E->Tracer.FI_LOC_ELEM=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
-    E->Tracer.R_LOC_ELEM=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
-
-    E->Tracer.THETA_LOC_ELEM_T=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    E->Tracer.FI_LOC_ELEM_T=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    E->Tracer.R_LOC_ELEM_T=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-
-
-
-    /***comment by Vlad 03/15/2005
-        each processor holds its own number of tracers
-    ***/
-
-    ntr=1;
-    for(i=1;i<=E->Tracer.NUM_TRACERS;i++) {
-        fscanf(fp,"%f %f %f %f", &idummy, &xdummy, &ydummy, &zdummy);
-        if(xdummy >= E->sx[1][1][1] && xdummy <= E->sx[1][1][nox*noy*noz]) {
-	    if(ydummy >= E->sx[1][2][1] && ydummy <= E->sx[1][2][nox*noy*noz])  {
-                if(zdummy >= E->sx[1][3][1] && zdummy <= E->sx[1][3][nox*noy*noz])  {
-                    E->Tracer.itcolor[ntr]=idummy;
-                    E->Tracer.tracer_x[ntr]=xdummy;
-                    E->Tracer.tracer_y[ntr]=ydummy;
-                    E->Tracer.tracer_z[ntr]=zdummy;
-                    ntr++;
-                }
-	    }
-        }
-    }
-
-    /***comment by Vlad 3/30/2005
-        E->Tracer.LOCAL_NUM_TRACERS is the initial number
-        of tracers in each processor
-    ***/
-
-    E->Tracer.LOCAL_NUM_TRACERS=ntr-1;
-
-
+    E->trace.x_space=(double*) malloc(nox*sizeof(double));
+    E->trace.y_space=(double*) malloc(noy*sizeof(double));
+    E->trace.z_space=(double*) malloc(noz*sizeof(double));
 
     /***comment by Vlad 1/26/2005
         reading the local mesh coordinate
     ***/
 
-
-
     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for(i=1;i<=nox;i++)
-	    {
-                j=1;
-                k=1;
-                node=k+(i-1)*noz+(j-1)*nox*noz;
-                E->Tracer.x_space[i]=E->sx[m][1][node];
-	    }
+        for(i=0;i<nox;i++)
+	    E->trace.x_space[i]=E->sx[m][1][i*noz+1];
 
-        for(j=1;j<=noy;j++)
-	    {
-                i=1;
-                k=1;
-                node=k+(i-1)*noz+(j-1)*nox*noz;
-                E->Tracer.y_space[j]=E->sx[m][2][node];
-	    }
+        for(j=0;j<noy;j++)
+	    E->trace.y_space[j]=E->sx[m][2][j*nox*noz+1];
 
-        for(k=1;k<=noz;k++)
-	    {
-                i=1;
-                j=1;
-                node=k+(i-1)*noz+(j-1)*nox*noz;
-                E->Tracer.z_space[k]=E->sx[m][3][node];
-            }
+        for(k=0;k<noz;k++)
+	    E->trace.z_space[k]=E->sx[m][3][k+1];
 
     }   /* end of m  */
 
-        /***comment by Vlad 04/20/2006
-            reading the local element eight nodes coordinate,
-            then computing the mean element coordinates
-        ***/
 
+    /* debug *
+    for(i=0;i<nox;i++)
+	fprintf(E->trace.fpt, "i=%d x=%e\n", i, E->trace.x_space[i]);
+    for(j=0;j<noy;j++)
+	fprintf(E->trace.fpt, "j=%d y=%e\n", j, E->trace.y_space[j]);
+    for(k=0;k<noz;k++)
+	fprintf(E->trace.fpt, "k=%d z=%e\n", k, E->trace.z_space[k]);
 
+    /**
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 0));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 1));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 2));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 3));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 4));
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for(j=1;j<=(noy-1);j++) {
-            for(i=1;i<=(nox-1);i++) {
-                for(k=1;k<=(noz-1);k++) {
-                    n_x=i;
-                    n_y=j;
-                    n_z=k;
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 0));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 1));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 2));
 
-                    node1 = n_z + (n_x-1)*noz + (n_y-1)*noz*nox;
-                    node2 = n_z + n_x*noz + (n_y-1)*noz*nox;
-                    node3 = n_z+1  + (n_x-1)*noz + (n_y-1)*noz*nox;
-                    node4 = n_z+1  + n_x*noz + (n_y-1)*noz*nox;
-                    node5 = n_z + (n_x-1)*noz + n_y*noz*nox;
-                    node6 = n_z + n_x*noz + n_y*noz*nox;
-                    node7 = n_z+1 + (n_x-1)*noz + n_y*noz*nox;
-                    node8 = n_z+1 + n_x*noz + n_y*noz*nox;
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 2));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 3));
+    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 4));
 
-                    /* for rheology stuff */
-                    local_element=node1-(n_x-1)-(n_y-1)*(nox+noz-1);
-
-                    E->Tracer.THETA_LOC_ELEM[local_element]=(E->sx[m][1][node1]+E->sx[m][1][node2])/2;
-                    E->Tracer.FI_LOC_ELEM[local_element]=(E->sx[m][2][node1]+E->sx[m][2][node5])/2;
-                    E->Tracer.R_LOC_ELEM[local_element]=(E->sx[m][3][node1]+E->sx[m][3][node3])/2;
-
-                }
-            }
-        }
-    }   /* end of m  */
-
-    mean_elem_coord(E);
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.5));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.1));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.55));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.0));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.551));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.99));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.75));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.775));
+    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
+    parallel_process_termination();
+    /**/
 
     return;
-
 }
 
 
+/********** IGET ELEMENT *****************************************/
+/*                                                               */
+/* This function returns the the real element for a given point. */
+/* Returns -99 in not in this cap.                               */
+/* iprevious_element, if known, is the last known element. If    */
+/* it is not known, input a negative number.                     */
 
-
-void regional_tracer_advection(struct All_variables *E)
+int regional_iget_element(struct All_variables *E,
+			  int m, int iprevious_element,
+			  double dummy1, double dummy2, double dummy3,
+			  double theta, double phi, double rad)
 {
-    int i,j,k,l,m,n,o,p;
-    int n_x,n_y,n_z;
-    int node1,node2,node3,node4,node5,node6,node7,node8;
-    int nno,nox,noy,noz;
-    int iteration;
-    float x_tmp, y_tmp, z_tmp;
-    float volume, tr_dx, tr_dy, tr_dz, dx, dy, dz;
-    float w1,w2,w3,w4,w5,w6,w7,w8;
-    float tr_v[NCS][4];
-    MPI_Comm world;
-    MPI_Status status[4];
-    MPI_Status status_count;
-    MPI_Request request[4];
-    float xmin,xmax,ymin,ymax,zmin,zmax;
+    int e, i, j, k;
+    int ii, jj, kk;
+    int elx, ely, elz;
 
-    float x_global_min,x_global_max,y_global_min,y_global_max,z_global_min,z_global_max;
+    elx = E->lmesh.elx;
+    ely = E->lmesh.ely;
+    elz = E->lmesh.elz;
+
+    //TODO: take care of south west bound
 
 
-    float *tr_color_1,*tr_x_1,*tr_y_1,*tr_z_1;
-    float *tr_color_new[13],*tr_x_new[13],*tr_y_new[13],*tr_z_new[13];
-    int *Left_proc_list,*Right_proc_list;
-    int *jump_new,*count_new;
-    int *jj;
+    /* Search neighboring elements if the previous element is known */
+    if (iprevious_element > 0) {
+	e = iprevious_element - 1;
+	k = e % elz;
+	i = (e / elz) % elx;
+	j = e / (elz*elx);
 
-    int proc;
-    int Previous_num_tracers,Current_num_tracers;
-    int locx,locy,locz;
-    int left,right,up,down,back,front;
-    int temp_tracers;
+	ii = isearch_neighbors(E->trace.x_space, elx+1, theta, i);
+	jj = isearch_neighbors(E->trace.y_space, ely+1, phi, j);
+	kk = isearch_neighbors(E->trace.z_space, elz+1, rad, k);
 
-
-    world=E->parallel.world;
-
-
-    nox=E->lmesh.nox;
-    noy=E->lmesh.noy;
-    noz=E->lmesh.noz;
-    nno=nox*noy*noz;
-
-    Left_proc_list=(int*) malloc(6*sizeof(int));
-    Right_proc_list=(int*) malloc(6*sizeof(int));
-    jump_new=(int*) malloc(6*sizeof(int));
-    count_new=(int*) malloc(6*sizeof(int));
-    jj=(int*) malloc(6*sizeof(int));
-
-    tr_x_1=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    tr_y_1=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    tr_z_1=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-    tr_color_1=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-
-    for(i=0;i<=11;i++){
-	tr_color_new[i]=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-	tr_x_new[i]=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-	tr_y_new[i]=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
-	tr_z_new[i]=(float*) malloc((E->Tracer.NUM_TRACERS+1)*sizeof(float));
+        if (ii>=0 && jj>=0 && kk>=0)
+            return jj*elx*elz + ii*elz + kk + 1;
     }
 
+    /* Search all elements if either the previous element is unknown */
+    /* or failed to find in the neighboring elements                 */
+    ii = isearch_all(E->trace.x_space, elx+1, theta);
+    jj = isearch_all(E->trace.y_space, ely+1, phi);
+    kk = isearch_all(E->trace.z_space, elz+1, rad);
 
-    /*** comment by Vlad 3/25/2005
-         This part of code gets the bounding box of the local mesh.
+    if (ii<0 || jj<0 || kk<0)
+        return -99;
+
+    return jj*elx*elz + ii*elz + kk + 1;
+}
+
+
+/* array is an ordered array of length nsize               */
+/* return an index i, such that array[i] <= a < array[i+1] */
+/* return -1 if not found.                                 */
+/* Note that -1 is returned if a == array[nsize-1]         */
+int isearch_all(double *array, int nsize, double a)
+{
+    int high, i, low;
+
+    /* check the min/max bound */
+    if ((a < array[0]) || (a >= array[nsize-1]))
+        return -1;
+
+    /* binary search */
+    for (low=0, high=nsize-1; high-low>1;) {
+        i = (high+low) / 2;
+        if ( a < array[i] ) high = i;
+        else low = i;
+    }
+
+    return low;
+}
+
+
+/* Similar the isearch_all(), but with a hint */
+int isearch_neighbors(double *array, int nsize,
+                      double a, int hint)
+{
+    /* search the nearest neighbors only */
+    const int number_of_neighbors = 3;
+    int neighbors[5];
+    int n, i;
+
+    neighbors[0] = hint;
+    neighbors[1] = hint-1;
+    neighbors[2] = hint+1;
+    neighbors[3] = hint-2;
+    neighbors[4] = hint+2;
+
+
+    /**/
+    for (n=0; n<number_of_neighbors; n++) {
+        i = neighbors[n];
+        if ((i >= 0) && (i < nsize-1) &&
+            (a >= array[i]) && (a < array[i+1]))
+            return i;
+    }
+
+    return -1;
+}
+
+
+/*                                                          */
+/* This function serves to determine if a point lies within */
+/* a given cap                                              */
+/*                                                          */
+int regional_icheck_cap(struct All_variables *E, int icap,
+                        double theta, double phi, double rad, double junk)
+{
+    double theta_min, theta_max;
+    double phi_min, phi_max;
+
+    /* corner 2 is the north-west corner */
+    /* corner 4 is the south-east corner */
+
+    theta_min = E->trace.theta_cap[icap][2];
+    theta_max = E->trace.theta_cap[icap][4];
+
+    phi_min = E->trace.phi_cap[icap][2];
+    phi_max = E->trace.phi_cap[icap][4];
+
+    if ((theta >= theta_min) && (theta < theta_max) &&
+        (phi >= phi_min) && (phi < phi_max))
+        return 1;
+
+    //TODO: deal with south west bounds
+    return 0;
+}
+
+
+static void get_shape_functions(struct All_variables *E,
+                                double w[9], int nelem,
+                                double theta, double phi, double rad)
+{
+    int e, i, j, k;
+    int elx, ely, elz;
+    double tr_dx, tr_dy, tr_dz;
+    double dx, dy, dz;
+    double volume;
+
+    elx = E->lmesh.elx;
+    ely = E->lmesh.ely;
+    elz = E->lmesh.elz;
+
+    e = nelem - 1;
+    k = e % elz;
+    i = (e / elz) % elx;
+    j = e / (elz*elx);
+
+
+   /*** comment by Tan2 1/25/2005
+         Find the element that contains the tracer.
+
+       node(i)     tracer              node(i+1)
+         |           *                    |
+         <----------->
+         tr_dx
+
+         <-------------------------------->
+         dx
     ***/
 
-    xmin=E->Tracer.x_space[1];
-    xmax=E->Tracer.x_space[nox];
-    ymin=E->Tracer.y_space[1];
-    ymax=E->Tracer.y_space[noy];
-    zmin=E->Tracer.z_space[1];
-    zmax=E->Tracer.z_space[noz];
+    tr_dx = theta - E->trace.x_space[i];
+    dx = E->trace.x_space[i+1] - E->trace.x_space[i];
 
-    /*fprintf(stderr,"%d %d\n", E->parallel.nprocx, E->parallel.loc2proc_map[0][0][1][0]);*/
+    tr_dy = phi - E->trace.y_space[j];
+    dy = E->trace.y_space[j+1] - E->trace.y_space[j];
+
+    tr_dz = rad - E->trace.z_space[k];
+    dz = E->trace.z_space[k+1] - E->trace.z_space[k];
+
+
 
     /*** comment by Tan2 1/25/2005
-         Copy the velocity array.
+         Calculate shape functions from tr_dx, tr_dy, tr_dz
+         This assumes linear element
     ***/
 
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)   {
-	for(i=1;i<=nno;i++)
-            for(j=1;j<=3;j++)   {
-                E->GV[m][j][i]=E->sphere.cap[m].V[j][i];
-            }
-    }
+    /* compute volumetic weighting functions */
+    volume = dx*dz*dy;
 
-    /*** comment by vlad 03/17/2005
-         advecting tracers in each processor
+    w[1] = (dx-tr_dx) * (dy-tr_dy) * (dz-tr_dz) / volume;
+    w[2] = tr_dx      * (dy-tr_dy) * (dz-tr_dz) / volume;
+    w[3] = tr_dx      * tr_dy      * (dz-tr_dz) / volume;
+    w[4] = (dx-tr_dx) * tr_dy      * (dz-tr_dz) / volume;
+    w[5] = (dx-tr_dx) * (dy-tr_dy) * tr_dz      / volume;
+    w[6] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
+    w[7] = tr_dx      * tr_dy      * tr_dz      / volume;
+    w[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
+
+    /** debug **
+    fprintf(E->trace.fpt, "dr=(%e,%e,%e)  tr_dr=(%e,%e,%e)\n",
+            dx, dy, dz, tr_dx, tr_dy, tr_dz);
+    fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e %e %e\n",
+            w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]);
+    fprintf(E->trace.fpt, "sum(shp): %e\n",
+            w[1]+ w[2]+ w[3]+ w[4]+ w[5]+ w[6]+ w[7]+ w[8]);
+    fflush(E->trace.fpt);
+    /**/
+    return;
+}
+
+
+
+/******** GET VELOCITY ***************************************/
+
+void regional_get_velocity(struct All_variables *E,
+                           int m, int nelem,
+                           double theta, double phi, double rad,
+                           double *velocity_vector)
+{
+    void velo_from_element_d();
+
+    double weight[9], VV[4][9], tmp;
+    int n, d, node;
+    const int sphere_key = 0;
+
+    /* get shape functions at (theta, phi, rad) */
+    get_shape_functions(E, weight, nelem, theta, phi, rad);
+
+
+    /* get cartesian velocity */
+    velo_from_element_d(E, VV, m, nelem, sphere_key);
+
+
+    /*** comment by Tan2 1/25/2005
+         Interpolate the velocity on the tracer position
     ***/
 
+    for(d=1; d<=3; d++)
+        velocity_vector[d] = 0;
 
-    for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++) {
 
-        n_x=0;
-	n_y=0;
-	n_z=0;
-
-
-	/*  mid point method uses 2 iterations */
-
-        x_tmp=E->Tracer.tracer_x[n];
-        y_tmp=E->Tracer.tracer_y[n];
-        z_tmp=E->Tracer.tracer_z[n];
-
-	for(iteration=1;iteration<=2;iteration++)
-            {
-
-
-                /*** comment by Tan2 1/25/2005
-                     Find the element that contains the tracer.
-
-                     nodex      n_x                 n_x+1
-                     |           *                    |
-                     <----------->
-                     tr_dx
-
-                     <-------------------------------->
-                     dx
-                ***/
-
-                for(i=1;i<nox;i++) {
-                    if(x_tmp >= E->Tracer.x_space[i] && x_tmp <= E->Tracer.x_space[i+1]) {
-                        tr_dx=x_tmp-E->Tracer.x_space[i];
-                        dx=E->Tracer.x_space[i+1]-E->Tracer.x_space[i];
-                        n_x=i;
-
-                        E->Tracer.THETA_LOC_ELEM_T[n]=(E->Tracer.x_space[i+1]+E->Tracer.x_space[i])/2;
-                    }
-                }
-
-                for(j=1;j<noy;j++) {
-                    if(y_tmp >= E->Tracer.y_space[j] && y_tmp <= E->Tracer.y_space[j+1]) {
-                        tr_dy=y_tmp-E->Tracer.y_space[j];
-                        dy=E->Tracer.y_space[j+1]-E->Tracer.y_space[j];
-                        n_y=j;
-
-                        E->Tracer.FI_LOC_ELEM_T[n]=(E->Tracer.y_space[j+1]+E->Tracer.y_space[j])/2;
-
-                    }
-                }
-
-                for(k=1;k<noz;k++) {
-                    if(z_tmp >= E->Tracer.z_space[k] && z_tmp <= E->Tracer.z_space[k+1]) {
-                        tr_dz=z_tmp-E->Tracer.z_space[k];
-                        dz=E->Tracer.z_space[k+1]-E->Tracer.z_space[k];
-                        n_z=k;
-
-                        E->Tracer.R_LOC_ELEM_T[n]=(E->Tracer.z_space[k+1]+E->Tracer.z_space[k])/2;
-
-                    }
-                }
-
-                //fprintf(stderr,"tracer: %d %f %f %f\n",n,E->Tracer.THETA_LOC_ELEM_T[n],E->Tracer.FI_LOC_ELEM_T[n],E->Tracer.R_LOC_ELEM_T[n]);
-
-
-                /*** comment by Tan2 1/25/2005
-                     Calculate shape functions from tr_dx, tr_dy, tr_dz
-                     This assumes linear element
-                ***/
-
-
-                /* compute volumetic weighting functions */
-                w1=tr_dx*tr_dz*tr_dy;
-                w2=(dx-tr_dx)*tr_dz*tr_dy;
-                w3=tr_dx*(dz-tr_dz)*tr_dy;
-                w4=(dx-tr_dx)*(dz-tr_dz)*tr_dy;
-                w5=tr_dx*tr_dz*(dy-tr_dy);
-                w6=(dx-tr_dx)*tr_dz*(dy-tr_dy);
-                w7=tr_dx*(dz-tr_dz)*(dy-tr_dy);
-                w8=(dx-tr_dx)*(dz-tr_dz)*(dy-tr_dy);
-
-
-                volume=dx*dz*dy;
-
-
-                /*** comment by Tan2 1/25/2005
-                     Calculate the 8 node numbers of current element
-                ***/
-
-                node1 = n_z + (n_x-1)*noz + (n_y-1)*noz*nox;
-                node2 = n_z + n_x*noz + (n_y-1)*noz*nox;
-                node3 = n_z+1  + (n_x-1)*noz + (n_y-1)*noz*nox;
-                node4 = n_z+1  + n_x*noz + (n_y-1)*noz*nox;
-                node5 = n_z + (n_x-1)*noz + n_y*noz*nox;
-                node6 = n_z + n_x*noz + n_y*noz*nox;
-                node7 = n_z+1 + (n_x-1)*noz + n_y*noz*nox;
-                node8 = n_z+1 + n_x*noz + n_y*noz*nox;
-
-
-                /*	printf("%d %d %d %d %d %d %d %d %d\n",E->parallel.me, node1,node2,node3,node4,node5,node6,node7,node8);
-                //printf("%d %f %f %f %f %f %f %f %f\n", E->parallel.me, E->GV[1][2][node1], E->GV[1][2][node2], E->GV[1][2][node3], E->GV[1][2][node4], E->GV[1][2][node5], E->GV[1][2][node6], E->GV[1][2][node7], E->GV[1][2][node8]);
-                */
-
-                /*** comment by Tan2 1/25/2005
-                     Interpolate the velocity on the tracer position
-                ***/
-
-                for(m=1;m<=E->sphere.caps_per_proc;m++)   {
-                    for(j=1;j<=3;j++)   {
-                        tr_v[m][j]=w8*E->GV[m][j][node1]
-                            +w7*E->GV[m][j][node2]
-                            +w6*E->GV[m][j][node3]
-                            +w5*E->GV[m][j][node4]
-                            +w4*E->GV[m][j][node5]
-                            +w3*E->GV[m][j][node6]
-                            +w2*E->GV[m][j][node7]
-                            +w1*E->GV[m][j][node8];
-                        tr_v[m][j]=tr_v[m][j]/volume;
-
-                    }
-
-
-
-                    E->Tracer.LOCAL_ELEMENT[n]=node1-(n_x-1)-(n_y-1)*(nox+noz-1);
-
-
-
-
-                    //fprintf(stderr,"%s %d %s %d %f %f %f %f\n", "The tracer no:", n,"is in element no:", E->Tracer.LOCAL_ELEMENT[n], E->Tracer.y_space[n_y], E->Tracer.tracer_y[n], E->Tracer.FI_LOC_ELEM[515], E->Tracer.y_space[n_y+1]);
-
-
-
-
-
-                    /*** comment by Tan2 1/25/2005
-                         advect tracer using mid-point method (2nd order accuracy)
-                    ***/
-
-                    /* mid point method */
-
-                    if(iteration == 1) {
-                        x_tmp = x_tmp + (E->advection.timestep/2.0)*tr_v[m][1]/E->Tracer.z_space[n_z];
-                        y_tmp = y_tmp + (E->advection.timestep/2.0)*tr_v[m][2]/(E->Tracer.z_space[n_z]*sin(E->Tracer.x_space[n_x]));
-                        z_tmp = z_tmp + (E->advection.timestep/2.0)*tr_v[m][3];
-                    }
-                    if( iteration == 2) {
-                        E->Tracer.tracer_x[n] += E->advection.timestep*tr_v[m][1]/E->Tracer.z_space[n_z];
-                        E->Tracer.tracer_y[n] += E->advection.timestep*tr_v[m][2]/(E->Tracer.z_space[n_z]*sin(E->Tracer.x_space[n_x]));
-                        E->Tracer.tracer_z[n] += E->advection.timestep*tr_v[m][3];
-
-
-                        //fprintf(stderr,"%d %d %f %f %f %f %f %f\n", E->parallel.me, E->monitor.solution_cycles, E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n], tr_v[m][1],tr_v[m][2],tr_v[m][3]);
-
-
-                    }
-
-
-
-                }   /*  end of m  */
-
-
-            } /* end of iteration loop */
-
-
-        /*** Comment by Vlad 12/15/2005
-             Put the tracers back in the box if they go out
-        ***/
-
-        /*** Comment by Vlad 12/15/2005
-             get the bounding box of the global mesh
-        ***/
-
-        x_global_min = E->control.theta_min;
-        x_global_max = E->control.theta_max;
-        y_global_min = E->control.fi_min;
-        y_global_max = E->control.fi_max;
-        z_global_min = E->sphere.ri;
-        z_global_max = E->sphere.ro;
-
-        //printf("%f %f %f %f %f %f\n", E->sphere.cap[1].theta[1],E->sphere.cap[1].theta[3],E->sphere.cap[1].fi[1],E->sphere.cap[1].fi[3],E->sphere.ri,E->sphere.ro);
-
-        if(E->Tracer.tracer_x[n] > x_global_max)
-            E->Tracer.tracer_x[n] = x_global_max;
-        if(E->Tracer.tracer_x[n] < x_global_min)
-            E->Tracer.tracer_x[n] = x_global_min;
-        if(E->Tracer.tracer_y[n] > y_global_max)
-            E->Tracer.tracer_y[n] = y_global_max;
-        if(E->Tracer.tracer_y[n] < y_global_min)
-            E->Tracer.tracer_y[n] = y_global_min;
-        if(E->Tracer.tracer_z[n] > z_global_max)
-            E->Tracer.tracer_z[n] = z_global_max;
-        if(E->Tracer.tracer_z[n] < z_global_min)
-            E->Tracer.tracer_z[n] = z_global_min;
-
-
-
-    }/* end of tracer loop */
-
-    /*** Comment by Vlad 3/25/2005
-         MPI for the tracer-advection code
-    ***/
-
-
-    m = 0;
-
-    locx = E->parallel.me_loc[1];
-    locy = E->parallel.me_loc[2];
-    locz = E->parallel.me_loc[3];
-
-    /* Am I the left-most proc.? If not, who is on my left? */
-    if (locy == 0)
-	left = -1;
-    else
-	left = E->parallel.loc2proc_map[m][locx][locy-1][locz];
-
-    /* Am I the right-most proc.? If not, who is on my right? */
-    if (locy == E->parallel.nprocy-1)
-	right = -1;
-    else
-	right = E->parallel.loc2proc_map[m][locx][locy+1][locz];
-
-    /* Am I the lower-most proc.? If not, who is beneath me? */
-    if (locz == 0)
-	down = -1;
-    else
-	down = E->parallel.loc2proc_map[m][locx][locy][locz-1];
-
-    /* Am I the upper-most proc.? If not, who is above me? */
-    if (locz == E->parallel.nprocz-1)
-	up = -1;
-    else
-	up = E->parallel.loc2proc_map[m][locx][locy][locz+1];
-
-    /* Am I the back-most proc.? If not, who is behind me? */
-    if (locx == 0)
-	back = -1;
-    else
-        back = E->parallel.loc2proc_map[m][locx-1][locy][locz];
-
-    /* Am I the front-most proc.? If not, who is in front of me? */
-    if (locx == E->parallel.nprocx-1)
-	front = -1;
-    else
-	front = E->parallel.loc2proc_map[m][locx+1][locy][locz];
-
-
-    Left_proc_list[0]=left;
-    Left_proc_list[1]=right;
-    Left_proc_list[2]=down;
-    Left_proc_list[3]=up;
-    Left_proc_list[4]=back;
-    Left_proc_list[5]=front;
-
-    Right_proc_list[0]=right;
-    Right_proc_list[1]=left;
-    Right_proc_list[2]=up;
-    Right_proc_list[3]=down;
-    Right_proc_list[4]=front;
-    Right_proc_list[5]=back;
-
-    jump_new[0]=0;
-    jump_new[1]=0;
-    jump_new[2]=0;
-    jump_new[3]=0;
-    jump_new[4]=0;
-    jump_new[5]=0;
-
-    count_new[0]=0;
-    count_new[1]=0;
-    count_new[2]=0;
-    count_new[3]=0;
-    count_new[4]=0;
-    count_new[5]=0;
-
-    jj[0]=1;
-    jj[1]=0;
-    jj[2]=3;
-    jj[3]=2;
-    jj[4]=5;
-    jj[5]=4;
-
-    temp_tracers=0;
-    Current_num_tracers=0;
-
-    for(i=0;i<=11;i++){
-        for(j=0;j<=E->Tracer.NUM_TRACERS;j++){
-            tr_color_new[i][j]=999;
-            tr_x_new[i][j]=999;
-            tr_y_new[i][j]=999;
-            tr_z_new[i][j]=999;
-
-            tr_color_1[j]=999;
-            tr_x_1[j]=999;
-            tr_y_1[j]=999;
-            tr_z_1[j]=999;
-        }
+    for(d=1; d<=3; d++) {
+        for(n=1; n<=8; n++)
+            velocity_vector[d] += VV[d][n] * weight[n];
     }
 
 
-    i=0;
-    j=0;
-    k=0;
-    l=0;
-    m=0;
-    o=0;
-    p=0;
-
-
-    for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++){
-
-        if(E->Tracer.tracer_y[n]>ymax) {
-            /* excluding Nan */
-            if(E->Tracer.tracer_y[n]+100 != 100) {
-                tr_color_new[0][i]=E->Tracer.itcolor[n];
-                tr_x_new[0][i]=E->Tracer.tracer_x[n];
-                tr_y_new[0][i]=E->Tracer.tracer_y[n];
-                tr_z_new[0][i]=E->Tracer.tracer_z[n];
-                i++;
-                jump_new[0]=i;
-            }
-        }
-        else if(E->Tracer.tracer_y[n]<ymin) {
-            if(E->Tracer.tracer_y[n]+100 != 100) {
-                tr_color_new[1][j]=E->Tracer.itcolor[n];
-                tr_x_new[1][j]=E->Tracer.tracer_x[n];
-                tr_y_new[1][j]=E->Tracer.tracer_y[n];
-                tr_z_new[1][j]=E->Tracer.tracer_z[n];
-                j++;
-                jump_new[1]=j;
-            }
-        }
-        else if(E->Tracer.tracer_z[n]>zmax) {
-            if(E->Tracer.tracer_z[n]+100 != 100) {
-                tr_color_new[2][k]=E->Tracer.itcolor[n];
-                tr_x_new[2][k]=E->Tracer.tracer_x[n];
-                tr_y_new[2][k]=E->Tracer.tracer_y[n];
-                tr_z_new[2][k]=E->Tracer.tracer_z[n];
-                k++;
-                jump_new[2]=k;
-            }
-        }
-        else if(E->Tracer.tracer_z[n]<zmin) {
-            if(E->Tracer.tracer_z[n]+100 != 100) {
-                tr_color_new[3][l]=E->Tracer.itcolor[n];
-                tr_x_new[3][l]=E->Tracer.tracer_x[n];
-                tr_y_new[3][l]=E->Tracer.tracer_y[n];
-                tr_z_new[3][l]=E->Tracer.tracer_z[n];
-                l++;
-                jump_new[3]=l;
-            }
-        }
-
-        else if(E->Tracer.tracer_x[n]>xmax) {
-            if(E->Tracer.tracer_x[n]+100 != 100) {
-                tr_color_new[4][m]=E->Tracer.itcolor[n];
-                tr_x_new[4][m]=E->Tracer.tracer_x[n];
-                tr_y_new[4][m]=E->Tracer.tracer_y[n];
-                tr_z_new[4][m]=E->Tracer.tracer_z[n];
-                m++;
-                jump_new[4]=m;
-            }
-        }
-        else if(E->Tracer.tracer_x[n]<xmin) {
-            if(E->Tracer.tracer_x[n]+100 != 100) {
-                tr_color_new[5][o]=E->Tracer.itcolor[n];
-                tr_x_new[5][o]=E->Tracer.tracer_x[n];
-                tr_y_new[5][o]=E->Tracer.tracer_y[n];
-                tr_z_new[5][o]=E->Tracer.tracer_z[n];
-                o++;
-                jump_new[5]=o;
-            }
-        }
-
-        else {
-            tr_color_1[p]=E->Tracer.itcolor[n];
-            tr_x_1[p]=E->Tracer.tracer_x[n];
-            tr_y_1[p]=E->Tracer.tracer_y[n];
-            tr_z_1[p]=E->Tracer.tracer_z[n];
-            p++;
-        }
+    /** debug **
+    for(d=1; d<=3; d++) {
+        fprintf(E->trace.fpt, "VV: %e %e %e %e %e %e %e %e: %e\n",
+                VV[d][1], VV[d][2], VV[d][3], VV[d][4],
+                VV[d][5], VV[d][6], VV[d][7], VV[d][8],
+                velocity_vector[d]);
     }
 
-    Previous_num_tracers=E->Tracer.LOCAL_NUM_TRACERS;
-    Current_num_tracers=Previous_num_tracers-jump_new[0]-jump_new[1]-jump_new[2]-jump_new[3]-jump_new[4]-jump_new[5];
+    tmp = 0;
+    for(n=1; n<=8; n++)
+        tmp += E->sx[m][1][E->ien[m][nelem].node[n]] * weight[n];
 
-    /* compact the remaining tracer */
-    for(p=1;p<=Current_num_tracers;p++){
-	E->Tracer.itcolor[p]=tr_color_1[p-1];
-	E->Tracer.tracer_x[p]=tr_x_1[p-1];
-	E->Tracer.tracer_y[p]=tr_y_1[p-1];
-	E->Tracer.tracer_z[p]=tr_z_1[p-1];
+    fprintf(E->trace.fpt, "THETA: %e -> %e\n", theta, tmp);
+
+    fflush(E->trace.fpt);
+    /**/
+
+    return;
+}
+
+
+void regional_keep_within_bounds(struct All_variables *E,
+                                 double *x, double *y, double *z,
+                                 double *theta, double *phi, double *rad)
+{
+    void sphere_to_cart();
+    int changed = 0;
+
+    if (*theta > E->control.theta_max - E->trace.box_cushion) {
+        *theta = E->control.theta_max - E->trace.box_cushion;
+        changed = 1;
     }
 
-
-    for(i=0;i<=5;i++){
-
-	j=jj[i];
-
-        if (Left_proc_list[i] >= 0) {
-            proc=Left_proc_list[i];
-            MPI_Irecv(tr_color_new[i+6], E->Tracer.NUM_TRACERS, MPI_FLOAT, proc, 11+i, world, &request[0]);
-            MPI_Irecv(tr_x_new[i+6], E->Tracer.NUM_TRACERS, MPI_FLOAT, proc, 12+i, world, &request[1]);
-            MPI_Irecv(tr_y_new[i+6], E->Tracer.NUM_TRACERS, MPI_FLOAT, proc, 13+i, world, &request[2]);
-            MPI_Irecv(tr_z_new[i+6], E->Tracer.NUM_TRACERS, MPI_FLOAT, proc, 14+i, world, &request[3]);
-        }
-
-        if (Right_proc_list[i] >= 0) {
-            proc=Right_proc_list[i];
-            MPI_Send(tr_color_new[i], jump_new[i], MPI_FLOAT, proc, 11+i, world);
-            MPI_Send(tr_x_new[i], jump_new[i], MPI_FLOAT, proc, 12+i, world);
-            MPI_Send(tr_y_new[i], jump_new[i], MPI_FLOAT, proc, 13+i, world);
-            MPI_Send(tr_z_new[i], jump_new[i], MPI_FLOAT, proc, 14+i, world);
-        }
-
-        if (Left_proc_list[i] >= 0) {
-            MPI_Waitall(4, request, status);
-            status_count = status[0];
-            MPI_Get_count(&status_count, MPI_FLOAT, &count_new[i]);
-        }
-
-
-	temp_tracers=temp_tracers+count_new[i]-jump_new[i];
-	E->Tracer.LOCAL_NUM_TRACERS=Previous_num_tracers+temp_tracers;
-
-
-        /* append the tracers */
-
-	if(i <= 1){
-            for(n=Current_num_tracers+count_new[j];n<=Current_num_tracers+count_new[i]+count_new[j]-1;n++) {
-                m=Current_num_tracers+count_new[j];
-                E->Tracer.itcolor[n+1]=tr_color_new[i+6][n-m];
-                E->Tracer.tracer_x[n+1]=tr_x_new[i+6][n-m];
-                E->Tracer.tracer_y[n+1]=tr_y_new[i+6][n-m];
-                E->Tracer.tracer_z[n+1]=tr_z_new[i+6][n-m];
-
-            }
-	}
-
-
-	else if (i <= 3) {
-            for(n=Current_num_tracers+count_new[0]+count_new[1]+count_new[j];n<=Current_num_tracers+count_new[0]+count_new[1]+count_new[i]+count_new[j]-1;n++) {
-                m=Current_num_tracers+count_new[0]+count_new[1]+count_new[j];
-                E->Tracer.itcolor[n+1]=tr_color_new[i+6][n-m];
-                E->Tracer.tracer_x[n+1]=tr_x_new[i+6][n-m];
-                E->Tracer.tracer_y[n+1]=tr_y_new[i+6][n-m];
-                E->Tracer.tracer_z[n+1]=tr_z_new[i+6][n-m];
-
-            }
-	}
-
-	else  {
-            for(n=Current_num_tracers+count_new[0]+count_new[1]+count_new[2]+count_new[3]+count_new[j];n<=E->Tracer.LOCAL_NUM_TRACERS-1;n++) {
-                m=Current_num_tracers+count_new[0]+count_new[1]+count_new[2]+count_new[3]+count_new[j];
-                E->Tracer.itcolor[n+1]=tr_color_new[i+6][n-m];
-                E->Tracer.tracer_x[n+1]=tr_x_new[i+6][n-m];
-                E->Tracer.tracer_y[n+1]=tr_y_new[i+6][n-m];
-                E->Tracer.tracer_z[n+1]=tr_z_new[i+6][n-m];
-
-            }
-	}
-
-
+    if (*theta < E->control.theta_min + E->trace.box_cushion) {
+        *theta = E->control.theta_min + E->trace.box_cushion;
+        changed = 1;
     }
 
-
-    free (tr_color_1);
-    free (tr_x_1);
-    free (tr_y_1);
-    free (tr_z_1);
-    for(i=0;i<=11;i++) {
-	free (tr_color_new[i]);
-	free (tr_x_new[i]);
-	free (tr_y_new[i]);
-	free (tr_z_new[i]);
+    if (*phi > E->control.fi_max - E->trace.box_cushion) {
+        *phi = E->control.fi_max - E->trace.box_cushion;
+        changed = 1;
     }
+
+    if (*phi < E->control.fi_min + E->trace.box_cushion) {
+        *phi = E->control.fi_min + E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*rad > E->sphere.ro - E->trace.box_cushion) {
+        *rad = E->sphere.ro - E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (*rad < E->sphere.ri + E->trace.box_cushion) {
+        *rad = E->sphere.ri + E->trace.box_cushion;
+        changed = 1;
+    }
+
+    if (changed)
+        sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
 
 
     return;
 }
 
 
-
-/*avoid 1st time step problem with E->Tracer.THETA_LOC_ELEM_T[n],E->Tracer.FI_LOC_ELEM_T[n],E->Tracer.R_LOC_ELEM_T[n] */
-
-static void mean_elem_coord(struct All_variables *E)
+void regional_lost_souls(struct All_variables *E)
 {
-    int n, i, j, k;
-    float x_tmp, y_tmp, z_tmp;
+    /* This part only works if E->sphere.caps_per_proc==1 */
+    const int j = 1;
+    int lev = E->mesh.levmax;
 
-    for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++) {
-        x_tmp=E->Tracer.tracer_x[n];
-        y_tmp=E->Tracer.tracer_y[n];
-        z_tmp=E->Tracer.tracer_z[n];
+    int i, d, kk;
+    int max_send_size, isize, itemp_size;
 
-        for(i=1;i<E->lmesh.nox;i++) {
-            if(x_tmp >= E->Tracer.x_space[i] && x_tmp <= E->Tracer.x_space[i+1]) {
-                E->Tracer.THETA_LOC_ELEM_T[n]=(E->Tracer.x_space[i+1]+E->Tracer.x_space[i])/2;
-            }
+    int ngbr_rank[6+1];
+
+    double bounds[3][2];
+    double *send[2];
+    double *recv[2];
+
+    void expand_tracer_arrays();
+    int icheck_that_processor_shell();
+
+    int ipass;
+
+    MPI_Status status[4];
+    MPI_Request request[4];
+
+
+    E->trace.istat_isend = E->trace.ilater[j];
+
+    /* the bounding box */
+    for (d=0; d<E->mesh.nsd; d++) {
+        bounds[d][0] = E->sx[j][d+1][1];
+        bounds[d][1] = E->sx[j][d+1][E->lmesh.nno];
+    }
+
+    /* set up ranks for neighboring procs */
+    /* if ngbr_rank is -1, there is no neighbor on this side */
+    ipass = 1;
+    for (kk=1; kk<=6; kk++) {
+        if (E->parallel.NUM_PASS[lev][j].bound[kk] == 1) {
+            ngbr_rank[kk] = E->parallel.PROCESSOR[lev][j].pass[ipass];
+            ipass++;
         }
-
-        for(j=1;j<E->lmesh.noy;j++) {
-            if(y_tmp >= E->Tracer.y_space[j] && y_tmp <= E->Tracer.y_space[j+1]) {
-                E->Tracer.FI_LOC_ELEM_T[n]=(E->Tracer.y_space[j+1]+E->Tracer.y_space[j])/2;
-
-            }
-        }
-
-        for(k=1;k<E->lmesh.noz;k++) {
-            if(z_tmp >= E->Tracer.z_space[k] && z_tmp <= E->Tracer.z_space[k+1]) {
-                E->Tracer.R_LOC_ELEM_T[n]=(E->Tracer.z_space[k+1]+E->Tracer.z_space[k])/2;
-
-            }
+        else {
+            ngbr_rank[kk] = -1;
         }
     }
+
+    /* debug *
+    for (kk=1; kk<=E->trace.istat_isend; kk++) {
+        fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
+                E->trace.rlater[j][0][kk],
+                E->trace.rlater[j][1][kk],
+                E->trace.rlater[j][2][kk]);
+    }
+
+    for (d=0; d<E->mesh.nsd; d++) {
+        fprintf(E->trace.fpt, "bounds(dim=%d) = (%e, %e)\n",
+                d, bounds[d][0], bounds[d][1]);
+    }
+
+    for (kk=1; kk<=6; kk++) {
+        fprintf(E->trace.fpt, "pass=%d  neighbor_rank=%d\n",
+                kk, ngbr_rank[kk]);
+    }
+    fflush(E->trace.fpt);
+    parallel_process_sync(E);
+    /**/
+
+
+    /* Allocate Maximum Memory to Send Arrays */
+    max_send_size = max(2*E->trace.ilater[j], E->trace.ntracers[j]/100);
+    itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
+
+    if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
+        == NULL) {
+        fprintf(E->trace.fpt,"Error(lost souls)-no memory (u388)\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+    if ((send[1] = (double *)malloc(itemp_size*sizeof(double)))
+        == NULL) {
+        fprintf(E->trace.fpt,"Error(lost souls)-no memory (u389)\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
+
+    for (d=0; d<E->mesh.nsd; d++) {
+        int original_size = E->trace.ilater[j];
+        int idb;
+        int kk = 1;
+        int isend[2], irecv[2];
+        isend[0] = isend[1] = 0;
+
+
+        /* move out-of-bound tracers to send array */
+        while (kk<=E->trace.ilater[j]) {
+            double coord;
+
+            /* Is the tracer within the bounds in the d-th dimension */
+            coord = E->trace.rlater[j][d][kk];
+
+            if (coord < bounds[d][0]) {
+                put_lost_tracers(E, &(isend[0]), send[0], kk, j);
+            }
+            else if (coord >= bounds[d][1]) {
+                put_lost_tracers(E, &(isend[1]), send[1], kk, j);
+            }
+            else {
+                /* check next tracer */
+                kk++;
+            }
+
+            /* reallocate send if size too small */
+            if ((isend[0] > max_send_size - 5) ||
+                (isend[1] > max_send_size - 5)) {
+
+                isize = max_send_size + max_send_size/4 + 10;
+                itemp_size = isize * E->trace.number_of_tracer_quantities;
+
+                if ((send[0] = (double *)realloc(send[0],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
+                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (s4)\n");
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+                if ((send[1] = (double *)realloc(send[1],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
+                    fprintf(E->trace.fpt,"Error(lost souls)-no memory (s5)\n");
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+
+                fprintf(E->trace.fpt,"Expanding physical memory of send to "
+                        "%d from %d\n",
+                        isize, max_send_size);
+
+                max_send_size = isize;
+            }
+
+
+        } /* end of while kk */
+
+
+        /* check the total # of tracers is conserved */
+        if ((isend[0] + isend[1] + E->trace.ilater[j]) != original_size) {
+            fprintf(E->trace.fpt, "original_size: %d, rlater_size: %d, "
+                    "send_size: %d\n",
+                    original_size, E->trace.ilater[j], kk);
+        }
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            for (kk=0; kk<isend[i]; kk++) {
+                fprintf(E->trace.fpt, "dim:%d side:%d kk=%d coord[kk]=%e\n",
+                        d, i, kk,
+                        send[i][kk*E->trace.number_of_tracer_quantities+d]);
+            }
+        }
+        fflush(E->trace.fpt);
+        /**/
+
+
+        /* Send info to other processors regarding number of send tracers */
+
+        /* check whether there is a neighbor in this pass*/
+        idb = 0;
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                MPI_Isend(&isend[i], 1, MPI_INT, target_rank,
+                          11, E->parallel.world, &request[idb++]);
+
+                MPI_Irecv(&irecv[i], 1, MPI_INT, target_rank,
+                          11, E->parallel.world, &request[idb++]);
+            }
+            else {
+                irecv[i] = 0;
+            }
+        } /* end of for i */
+
+
+        /* Wait for non-blocking calls to complete */
+        MPI_Waitall(idb, request, status);
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                fprintf(E->trace.fpt, "%d: %d send %d to proc %d\n",
+                        d, i, isend[i], target_rank);
+                fprintf(E->trace.fpt, "%d: %d recv %d from proc %d\n",
+                        d, i, irecv[i], target_rank);
+            }
+        }
+        parallel_process_sync(E);
+        /**/
+
+        /* Allocate memory in receive arrays */
+        for (i=0; i<2; i++) {
+            isize = irecv[i] * E->trace.number_of_tracer_quantities;
+            itemp_size = max(1, isize);
+
+            if ((recv[i] = (double *)malloc(itemp_size*sizeof(double)))
+                == NULL) {
+                fprintf(E->trace.fpt, "Error(lost souls)-no memory (c721)\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+        }
+
+
+        /* Now, send the tracers to proper procs */
+        idb = 0;
+        for (i=0; i<2; i++) {
+            int target_rank;
+            kk = d*2 + i + 1;
+            target_rank = ngbr_rank[kk];
+            if (target_rank >= 0) {
+                isize = isend[i] * E->trace.number_of_tracer_quantities;
+                MPI_Isend(send[i], isize, MPI_DOUBLE, target_rank,
+                          12, E->parallel.world, &request[idb++]);
+
+                isize = irecv[i] * E->trace.number_of_tracer_quantities;
+                MPI_Irecv(recv[i], isize, MPI_DOUBLE, target_rank,
+                          12, E->parallel.world, &request[idb++]);
+
+            }
+        }
+
+
+        /* Wait for non-blocking calls to complete */
+        MPI_Waitall(idb, request, status);
+
+
+        /** debug **
+        for (i=0; i<2; i++) {
+            for (kk=1; kk<=irecv[i]; kk++) {
+                fprintf(E->trace.fpt, "recv: %d %e %e %e\n",
+                        kk,
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities],
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+1],
+                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+2]);
+            }
+        }
+        fflush(E->trace.fpt);
+        parallel_process_sync(E);
+        /**/
+
+        /* put the received tracers */
+        for (i=0; i<2; i++) {
+            put_found_tracers(E, irecv[i], recv[i], j);
+        }
+
+
+        free(recv[0]);
+        free(recv[1]);
+
+    } /* end of for d */
+
+
+    /* rlater should be empty by now */
+    if (E->trace.ilater[j] > 0) {
+        fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
+        for (kk=1; kk<=E->trace.ilater[j]; kk++) {
+            fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
+                    E->trace.rlater[j][0][kk],
+                    E->trace.rlater[j][1][kk],
+                    E->trace.rlater[j][2][kk]);
+        }
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
+
+    /* Free Arrays */
+
+    free(send[0]);
+    free(send[1]);
+
+    return;
+}
+
+
+static void put_lost_tracers(struct All_variables *E,
+                             int *send_size, double *send,
+                             int kk, int j)
+{
+    int ilast_tracer, isend_position, ipos;
+    int pp;
+
+    /* move the tracer from rlater to send */
+    isend_position = (*send_size) * E->trace.number_of_tracer_quantities;
+
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        ipos = isend_position + pp;
+        send[ipos] = E->trace.rlater[j][pp][kk];
+    }
+    (*send_size)++;
+
+    /* eject the tracer from rlater */
+    ilast_tracer = E->trace.ilater[j];
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        E->trace.rlater[j][pp][kk] = E->trace.rlater[j][pp][ilast_tracer];
+    }
+    E->trace.ilater[j]--;
+
+    return;
+}
+
+
+/****************************************************************/
+/* Put the received tracers in basiq & extraq, if within bounds */
+/* Otherwise, append to rlater for sending to another proc      */
+
+static void put_found_tracers(struct All_variables *E,
+                              int recv_size, double *recv,
+                              int j)
+{
+    void expand_tracer_arrays();
+    void expand_later_array();
+    int icheck_processor_shell();
+
+    int kk, pp;
+    int ipos, ilast, inside, iel;
+    double theta, phi, rad;
+
+    for (kk=0; kk<recv_size; kk++) {
+        ipos = kk * E->trace.number_of_tracer_quantities;
+        theta = recv[ipos];
+        phi = recv[ipos + 1];
+        rad = recv[ipos + 2];
+
+        /* check whether this tracer is inside this proc */
+        /* check radius first, since it is cheaper       */
+        inside = icheck_processor_shell(E, j, rad);
+        if (inside == 1)
+            inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
+        else
+            inside = 0;
+
+        /** debug **
+        fprintf(E->trace.fpt, "kk=%d, inside=%d, xx=(%e, %e, %e)\n",
+                kk, inside, theta, phi, rad);
+        fprintf(E->trace.fpt, "before: %d %d\n",
+                E->trace.ilater[j], E->trace.ntracers[j]);
+        /**/
+
+        if (inside) {
+
+            E->trace.ntracers[j]++;
+            ilast = E->trace.ntracers[j];
+
+            if (E->trace.ntracers[j] > (E->trace.max_ntracers[j]-5))
+                expand_tracer_arrays(E, j);
+
+            for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
+                E->trace.basicq[j][pp][ilast] = recv[ipos+pp];
+
+            ipos += E->trace.number_of_basic_quantities;
+            for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
+                E->trace.extraq[j][pp][ilast] = recv[ipos+pp];
+
+
+            /* found the element */
+            iel = regional_iget_element(E, j, -99, 0, 0, 0, theta, phi, rad);
+
+            if (iel<1) {
+                fprintf(E->trace.fpt, "Error(regional lost souls) - "
+                        "element not here?\n");
+                fprintf(E->trace.fpt, "theta, phi, rad: %f %f %f\n",
+                        theta, phi, rad);
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+
+            E->trace.ielement[j][ilast] = iel;
+
+        }
+        else {
+            if (E->trace.ilatersize[j]==0) {
+
+                E->trace.ilatersize[j]=E->trace.max_ntracers[j]/5;
+
+                for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
+                    if ((E->trace.rlater[j][kk]=(double *)malloc(E->trace.ilatersize[j]*sizeof(double)))==NULL) {
+                        fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
+                        fflush(E->trace.fpt);
+                        exit(10);
+                    }
+                }
+            } /* end first particle initiating memory allocation */
+
+            E->trace.ilater[j]++;
+            ilast = E->trace.ilater[j];
+
+            if (E->trace.ilater[j] > (E->trace.ilatersize[j]-5))
+                expand_later_array(E, j);
+
+            for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
+                E->trace.rlater[j][pp][ilast] = recv[ipos+pp];
+        } /* end of if-else */
+
+        /** debug **
+        fprintf(E->trace.fpt, "after: %d %d\n",
+                E->trace.ilater[j], E->trace.ntracers[j]);
+        fflush(E->trace.fpt);
+        /**/
+
+    } /* end of for kk */
+
     return;
 }

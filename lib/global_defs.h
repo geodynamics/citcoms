@@ -333,6 +333,7 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int periodic_x;
     int periodic_y;
     float layer[4];			/* dimensionless dimensions */
+    double volume;
     int matrix_size[MAX_LEVELS];
 
 } ;
@@ -436,6 +437,7 @@ struct CONTROL {
     int read_slabgeoid;
 
     int pseudo_free_surf;
+
     int tracer;
 
     double theta_min, theta_max, fi_min, fi_max;
@@ -472,8 +474,6 @@ struct CONTROL {
 
     int coor;
     char coor_file[100];
-
-    char tracer_file[100];
 
     int lith_age;
     int lith_age_time;
@@ -612,12 +612,40 @@ struct Output {
     int botm;         /* whether to output bottom data */
     int geoid;        /* whether to output geoid/topo spherial harmonics */
     int horiz_avg;    /* whether to output horizontal averaged profile */
+    int tracer;       /* whether to output tracer coordinate */
+    int comp_el;      /* whether to output composition at elements */
+    int comp_nd;      /* whether to output composition at nodes */
+
+};
+
+
+struct COMPOSITION {
+
+    int ichemical_buoyancy;
+    int icompositional_rheology;
+
+    /* if any of the above flags is true, turn this flag on */
+    int on;
+
+    double buoyancy_ratio;
+    int ireset_initial_composition;
+    int ibuoy_type;
+
+    double *comp_el[13];
+    double *comp_node[13];
+
+    double initial_bulk_composition;
+    double bulk_composition;
+    double error_fraction;
+
+    double compositional_rheology_prefactor;
 };
 
 
 #ifdef USE_HDF5
 #include "hdf5_related.h"
 #endif
+#include "tracer_defs.h"
 
 struct All_variables {
 
@@ -625,7 +653,6 @@ struct All_variables {
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "advection.h"
-#include "tracer_defs.h"
 
     FILE *fp;
     FILE *fptime;
@@ -643,10 +670,14 @@ struct All_variables {
     struct SLICE slice;
     struct Parallel parallel;
     struct SPHERE sphere;
-    struct Tracer Tracer;
     struct Bdry boundary;
     struct SBC sbc;
     struct Output output;
+
+    struct TRACE trace;
+
+    /* for chemical convection & composition rheology */
+    struct COMPOSITION composition;
 
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
@@ -694,7 +725,7 @@ struct All_variables {
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
-    float *SinCos[MAX_LEVELS][NCS][4];
+    double *SinCos[MAX_LEVELS][NCS][4];
     float *TT;
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
@@ -740,7 +771,6 @@ struct All_variables {
     void (* problem_update_node_positions)(void*);
     void (* problem_initial_fields)(void*);
     void (* problem_tracer_setup)(void*);
-    void (* problem_tracer_advection)(void*);
     void (* problem_tracer_output)(void*, int);
     void (* problem_update_bcs)(void*);
     void (* special_process_new_velocity)(void*);

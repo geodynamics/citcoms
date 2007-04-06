@@ -108,7 +108,7 @@ class Solver(Component):
         # Write controller inventory to pid file
         if stream:
             print >> stream, "[CitcomS.controller]"
-            print >> stream, ("monitoringFrequency=%d" % 
+            print >> stream, ("monitoringFrequency=%d" %
                 application.controller.inventory.monitoringFrequency)
             print >> stream
 
@@ -157,14 +157,14 @@ class Solver(Component):
 
 
 
-    def solveTemperature(self, dt):
+    def advectTemperature(self, dt):
         tsolver = self.inventory.tsolver
         tsolver.run(dt)
         return
 
 
 
-    def solveAdditional(self):
+    def advectTracers(self):
         self.inventory.tracer.run()
         return
 
@@ -183,9 +183,9 @@ class Solver(Component):
 
 
     def advance(self, dt):
-        self.solveTemperature(dt)
+        self.advectTemperature(dt)
+        self.advectTracers()
         self.solveVelocities()
-        self.solveAdditional()
         return
 
 

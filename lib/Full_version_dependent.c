@@ -307,9 +307,13 @@ void full_construct_tic_from_input(struct All_variables *E)
 	  for(k=1;k<=noz;k++) {
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
 	    r1=E->sx[m][3][node];
-	    E->T[m][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
-	  }
-
+        E->T[m][node] = (E->control.TBCtopval*E->sphere.ro 
+                         - E->control.TBCbotval*E->sphere.ri) 
+                        / (E->sphere.ro - E->sphere.ri)
+                      + (E->control.TBCbotval - E->control.TBCtopval)
+                        * E->sphere.ro * E->sphere.ri / r1
+                        / (E->sphere.ro - E->sphere.ri);
+      }
     /* This part put a temperature anomaly for whole mantle. The horizontal
        pattern of the anomaly is given by spherical harmonic ll & mm. */
 

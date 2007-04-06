@@ -75,6 +75,7 @@ void lith_age_init(struct All_variables *E)
   gnox=E->mesh.nox;
   gnoy=E->mesh.noy;
 
+  if (E->parallel.me == 0 ) fprintf(stderr,"INSIDE lith_age_init\n");
   E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
 
   if(E->control.lith_age_time==1)   {
@@ -287,6 +288,7 @@ void lith_age_conform_tbc(struct All_variables *E)
       output = 1;
       E->control.lith_age_old_cycles = E->monitor.solution_cycles;
     }
+    if (E->parallel.me == 0) fprintf(stderr,"INSIDE lith_age_conform_tbc\n");
     (E->solver.lith_age_read_files)(E,output);
   }
 

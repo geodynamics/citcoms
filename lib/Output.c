@@ -36,6 +36,8 @@
 #include "parsing.h"
 #include "output.h"
 
+void output_comp_nd(struct All_variables *, int);
+void output_comp_el(struct All_variables *, int);
 void output_coord(struct All_variables *);
 void output_mat(struct All_variables *);
 void output_velo(struct All_variables *, int);
@@ -61,7 +63,7 @@ void output_common_input(struct All_variables *E)
     int m = E->parallel.me;
 
     input_string("output_format", E->output.format, "ascii",m);
-    input_string("output_optional", E->output.optional, "surf,botm",m);
+    input_string("output_optional", E->output.optional, "surf,botm,tracer,comp_el",m);
 
 }
 
@@ -80,10 +82,6 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  /* output tracer location if using tracer */
-  if(E->control.tracer==1)
-    output_tracer(E, cycles);
-
   if(E->control.disptn_number != 0)
     output_heating(E, cycles);
 
@@ -100,6 +98,15 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.horiz_avg == 1)
       output_horiz_avg(E, cycles);
+
+  if(E->output.tracer == 1 && E->control.tracer == 1)
+      output_tracer(E, cycles);
+
+  if (E->output.comp_nd == 1 && E->composition.on)
+      output_comp_nd(E, cycles);
+
+  if (E->output.comp_el == 1 && E->composition.on)
+          output_comp_el(E, cycles);
 
   return;
 }
@@ -390,7 +397,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
 void output_tracer(struct All_variables *E, int cycles)
 {
-  int n;
+  int i, j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
 
@@ -398,15 +405,85 @@ void output_tracer(struct All_variables *E, int cycles)
           E->parallel.me, cycles);
   fp1 = output_open(output_file);
 
-  fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+  ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  for(n=1;n<=E->Tracer.LOCAL_NUM_TRACERS;n++)   {
-    fprintf(fp1,"%.4e %.4e %.4e %.4e\n", E->Tracer.itcolor[n], E->Tracer.tracer_x[n],E->Tracer.tracer_y[n],E->Tracer.tracer_z[n]);
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+              ncolumns, E->monitor.elapsed_time);
+
+      for(n=1;n<=E->trace.ntracers[j];n++) {
+          /* write basic quantities (coordinate) */
+          fprintf(fp1,"%.12e %.12e %.12e",
+                  E->trace.basicq[j][0][n],
+                  E->trace.basicq[j][1][n],
+                  E->trace.basicq[j][2][n]);
+
+          /* write extra quantities */
+          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
+              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
+          }
+          fprintf(fp1, "\n");
+      }
+
   }
 
   fclose(fp1);
-
   return;
+}
+
+
+void output_comp_nd(struct All_variables *E, int cycles)
+{
+    int i, j;
+    char output_file[255];
+    FILE *fp1;
+
+    sprintf(output_file,"%s.comp_nd.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+                j, E->lmesh.nel,
+                E->monitor.elapsed_time,
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
+
+        for(i=1;i<=E->lmesh.nno;i++) {
+            fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
+        }
+
+    }
+
+    fclose(fp1);
+    return;
+}
+
+
+void output_comp_el(struct All_variables *E, int cycles)
+{
+    int i, j;
+    char output_file[255];
+    FILE *fp1;
+
+    sprintf(output_file,"%s.comp_el.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1 = output_open(output_file);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+                j, E->lmesh.nel,
+                E->monitor.elapsed_time,
+                E->composition.initial_bulk_composition,
+                E->composition.bulk_composition);
+
+        for(i=1;i<=E->lmesh.nel;i++) {
+            fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
+        }
+    }
+
+    fclose(fp1);
+    return;
 }
 
 

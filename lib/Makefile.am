@@ -62,6 +62,8 @@ sources = \
 	BC_util.c \
 	Citcom_init.c \
 	citcom_init.h \
+	Composition_related.c \
+	composition_related.h \
 	Construct_arrays.c \
 	Convection.c \
 	convection_variables.h \
@@ -117,6 +119,7 @@ sources = \
 	Full_read_input_from_files.c \
 	Full_solver.c \
 	Full_sphere_related.c \
+	Full_tracer_advection.c \
 	Full_version_dependent.c \
 	Regional_boundary_conditions.c \
 	Regional_geometry_cartesian.c \
