@@ -25,9 +25,7 @@
 
 EXTRA_DIST = \
 	array2d.cc \
-	asap.py \
 	exchange.py \
-	hrothgar.py \
 	signon.py \
 	test1.sh \
 	test2.sh \
