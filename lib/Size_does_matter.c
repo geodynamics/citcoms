@@ -870,7 +870,7 @@ void construct_c3x3matrix(E)
 void mass_matrix(struct All_variables *E)
 {
     int m,node,i,nint,e,lev;
-    int n[9];
+    int n[9], nz;
     void get_global_shape_fn();
     double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
     struct Shape_function GN;
@@ -959,8 +959,6 @@ void mass_matrix(struct All_variables *E)
                             *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
                 }
 
-                /* lumped mass matrix, equivalent to tmass in ConMan */
-                /* missing density*(heat capcity)? */
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
                     E->MASS[lev][m][E->IEN[lev][m][e].node[node]] += temp[node];
 
@@ -981,6 +979,39 @@ void mass_matrix(struct All_variables *E)
                 E->MASS[lev][m][node] = 1.0/E->MASS[lev][m][node];
 
     } /* end of for lev */
+
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++) {
+
+        for(node=1;node<=E->lmesh.nno;node++)
+            E->TMass[m][node] = 0.0;
+
+        for(e=1;e<=E->lmesh.nel;e++)  {
+            get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,
+                                sphere_key,rtf,E->mesh.levmax,m);
+
+            for(node=1;node<=enodes[E->mesh.nsd];node++) {
+                temp[node] = 0.0;
+                nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
+                for(nint=1;nint<=vpts;nint++) {
+                    /* XXX: missing heat capcity */
+                    temp[node] += E->refstate.rho[nz]
+                        * dOmega.vpt[nint]
+                        * g_point[nint].weight[E->mesh.nsd-1]
+                        * E->N.vpt[GNVINDEX(node,nint)]; /* int Na dV */
+                }
+            }
+
+            /* lumped mass matrix, equivalent to tmass in ConMan */
+            for(node=1;node<=enodes[E->mesh.nsd];node++)
+                E->TMass[m][E->ien[m][e].node[node]] += temp[node];
+
+        } /* end of for e */
+    } /* end of for m */
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+        for(node=1;node<=E->lmesh.nno;node++)
+            E->TMass[m][node] = 1.0 / E->TMass[m][node];
 
 
     /* compute volume of this processor mesh and the whole mesh */
@@ -1008,6 +1039,12 @@ void mass_matrix(struct All_variables *E)
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
                     fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
             }
+        }
+
+        for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+            fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
+            for (node=1;node<=E->lmesh.nno;node++)
+                fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[m][node]);
         }
         fflush(E->fp_out);
     }

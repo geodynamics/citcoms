@@ -347,7 +347,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++) {
             if(!(E->node[m][i] & (TBX | TBY | TBZ)))
-                DTdot[m][i] *= E->Mass[m][i];         /* lumped mass matrix */
+                DTdot[m][i] *= E->TMass[m][i];         /* lumped mass matrix */
             else
                 DTdot[m][i] = 0.0;         /* lumped mass matrix */
         }
