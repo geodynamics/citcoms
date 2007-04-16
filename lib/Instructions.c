@@ -220,7 +220,6 @@ void read_initial_settings(struct All_variables *E)
 
   else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0) {
     E->control.CONVECTION = 1;
-    E->control.CHEMISTRY_MODULE=1;
     set_convection_defaults(E);
   }
 
@@ -702,12 +701,8 @@ void global_default_values(E)
 
   E->control.v_steps_low = 10;
   E->control.v_steps_upper = 1;
-  E->control.max_res_red_each_p_mg = 1.0e-3;
   E->control.accuracy = 1.0e-6;
   E->control.vaccuracy = 1.0e-8;
-  E->control.true_vcycle=0;
-  E->control.depth_dominated=0;
-  E->control.eqn_zigzag=0;
   E->control.verbose=0; /* debugging/profiles */
 
   /* SECOND: values for which an obvious default setting is useful */
@@ -716,11 +711,9 @@ void global_default_values(E)
   E->control.ORTHOZ = 1; /* for orthogonal meshes by default */
 
 
-    E->control.KERNEL = 0;
     E->control.stokes=0;
     E->control.restart=0;
     E->control.CONVECTION = 0;
-    E->control.SLAB = 0;
     E->control.CART2D = 0;
     E->control.CART3D = 0;
     E->control.CART2pt5D = 0;
@@ -731,10 +724,6 @@ void global_default_values(E)
     E->control.COMPRESS = 1;
     E->control.augmented_Lagr = 0;
     E->control.augmented = 0.0;
-
-    /* Default: all optional modules set to `off' */
-    E->control.MELTING_MODULE = 0;
-    E->control.CHEMISTRY_MODULE = 0;
 
     E->control.GRID_TYPE=1;
 
@@ -752,7 +741,6 @@ void global_default_values(E)
   E->sphere.ri = 0.5;
 
   E->control.precondition = 0;  /* for larger visc contrasts turn this back on  */
-  E->control.vprecondition = 1;
 
   E->mesh.toptbc = 1; /* fixed t */
   E->mesh.bottbc = 1;

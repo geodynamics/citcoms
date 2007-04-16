@@ -268,7 +268,7 @@ struct SPHERE   {
   double *angle1[MAX_LEVELS][NCS][5];
 
   double dircos[4][4];
-  double *R[MAX_LEVELS],*R_redundant;
+  double *R[MAX_LEVELS];
   double ro,ri;
   struct CAP cap[NCS];
 
@@ -383,8 +383,6 @@ struct CONTROL {
     char output_written_external_command[500];   /* a unix command to run when output files have been created */
 
     int ORTHO,ORTHOZ;   /* indicates levels of mesh symmetry */
-    char B_is_good[MAX_LEVELS];  /* general information controlling program flow */
-    char Ahat_is_good[MAX_LEVELS];  /* general information controlling program flow */
 
     char data_prefix[50];
     char data_prefix_old[50];
@@ -395,22 +393,12 @@ struct CONTROL {
     char data_file[200];
     char old_P_file[200];
 
-    char post_topo_file[100];
-    char slabgeoid_file[100];
-
-    char which_data_files[1000];
-    char which_horiz_averages[1000];
-    char which_running_data[1000];
-    char which_observable_data[1000];
-
     char PROBLEM_TYPE[20]; /* one of ... */
-    int KERNEL;
     int CONVECTION;
     int stokes;
     int restart;
     int post_p;
     int post_topo;
-    int SLAB;
     int compressible;
 
     char GEOMETRY[20]; /* one of ... */
@@ -431,10 +419,6 @@ struct CONTROL {
     int COMPRESS;
     int AVS;
     int CONMAN;
-
-    int read_density;
-    int read_slab;
-    int read_slabgeoid;
 
     int pseudo_free_surf;
 
@@ -490,26 +474,16 @@ struct CONTROL {
     float TBCbotval;
 
     float Q0;
-    float jrelax;
 
     int precondition;
-    int vprecondition;
     int keep_going;
     int v_steps_low;
     int v_steps_high;
     int v_steps_upper;
-    int max_vel_iterations;
     int p_iterations;
-    int max_same_visc;
-    float max_res_red_each_p_mg;
-    float sub_stepping_factor;
     int mg_cycle;
-    int true_vcycle;
     int down_heavy;
     int up_heavy;
-    int depth_dominated;
-    int eqn_viscosity;
-    int eqn_zigzag;
     int verbose;
 
     int side_sbcs;
@@ -529,13 +503,6 @@ struct CONTROL {
 
     int print_convergence;
     int sdepv_print_convergence;
-
-     /* modules */
-    int MELTING_MODULE;
-    int CHEMISTRY_MODULE;
-
-  /* for embedded setting */
-  int embedded;
 
 };
 
@@ -684,8 +651,6 @@ struct All_variables {
     struct SIEN *sien[NCS];
     struct ID *id[NCS];
     struct COORD *ECO[MAX_LEVELS][NCS];
-    struct IEN *IEN_redundant[NCS];
-    struct ID *ID_redundant[NCS];
     struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
     struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS][NCS];
@@ -719,14 +684,12 @@ struct All_variables {
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];
-    float *NP[NCS],*edot[NCS],*Mass[NCS],*tw[NCS];
+    float *NP[NCS],*edot[NCS],*Mass[NCS];
     float *MASS[MAX_LEVELS][NCS];
-    double *ZZ;
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
-    float *TT;
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
     float *stress[NCS];
@@ -736,7 +699,6 @@ struct All_variables {
 
     float *Vi[NCS],*EVi[NCS];
     float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
-    float *TW[MAX_LEVELS][NCS];	/* nodal weightings */
 
     int num_zero_resid[MAX_LEVELS][NCS];
     int *zero_resid[MAX_LEVELS][NCS];
