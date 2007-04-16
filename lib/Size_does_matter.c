@@ -867,141 +867,152 @@ void construct_c3x3matrix(E)
     Na be delta(a,b)
     ========================================== */
 
-void mass_matrix(E)
-     struct All_variables *E;
+void mass_matrix(struct All_variables *E)
+{
+    int m,node,i,nint,e,lev;
+    int n[9];
+    void get_global_shape_fn();
+    double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
+    struct Shape_function GN;
+    struct Shape_function_dA dOmega;
+    struct Shape_function_dx GNx;
 
-{ int m,node,i,nint,e,lev;
-  int n[9];
-  void get_global_shape_fn();
-  double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
-  struct Shape_function GN;
-  struct Shape_function_dA dOmega;
-  struct Shape_function_dx GNx;
+    const int vpts=vpoints[E->mesh.nsd];
+    const int sphere_key=1;
 
-  const int vpts=vpoints[E->mesh.nsd];
-  const int sphere_key=1;
+    /* ECO .size can also be defined here */
 
-  /* ECO .size can also be defined here */
+    for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
+        for (m=1;m<=E->sphere.caps_per_proc;m++)   {
 
- for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+            for(node=1;node<=E->lmesh.NNO[lev];node++)
+                E->MASS[lev][m][node] = 0.0;
 
-    for(node=1;node<=E->lmesh.NNO[lev];node++)
-      E->MASS[lev][m][node] = 0.0;
+            for(e=1;e<=E->lmesh.NEL[lev];e++)  {
 
-    for(e=1;e<=E->lmesh.NEL[lev];e++)  {
+                get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
 
-      get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
+                area = centre[1] = centre[2] = centre[3] = 0.0;
 
-      area = centre[1] = centre[2] = centre[3] = 0.0;
+                for(node=1;node<=enodes[E->mesh.nsd];node++)
+                    n[node] = E->IEN[lev][m][e].node[node];
 
-      for(node=1;node<=enodes[E->mesh.nsd];node++)
-           n[node] = E->IEN[lev][m][e].node[node];
+                for(i=1;i<=E->mesh.nsd;i++)  {
+                    for(node=1;node<=enodes[E->mesh.nsd];node++)
+                        centre[i] += E->X[lev][m][i][n[node]];
 
-      for(i=1;i<=E->mesh.nsd;i++)  {
-        for(node=1;node<=enodes[E->mesh.nsd];node++)
-           centre[i] += E->X[lev][m][i][E->IEN[lev][m][e].node[node]];
+                    centre[i] = centre[i]/enodes[E->mesh.nsd];
+                }     /* end for i */
 
-    	centre[i] = centre[i]/enodes[E->mesh.nsd];
-        }     /* end for i */
+                /* dx3=radius, dx1=theta, dx2=phi */
+                dx3 = sqrt(centre[1]*centre[1]+centre[2]*centre[2]+centre[3]*centre[3]);
+                dx1 = acos( centre[3]/dx3 );
+                dx2 = myatan(centre[2],centre[1]);
 
-      dx3 = sqrt(centre[1]*centre[1]+centre[2]*centre[2]+centre[3]*centre[3]);
-      dx1 = acos( centre[3]/dx3 );
-      dx2 = myatan(centre[2],centre[1]);
+                /* center of this element in the spherical coordinate */
+                E->ECO[lev][m][e].centre[1] = dx1;
+                E->ECO[lev][m][e].centre[2] = dx2;
+                E->ECO[lev][m][e].centre[3] = dx3;
 
-      E->ECO[lev][m][e].centre[1] = dx1;
-      E->ECO[lev][m][e].centre[2] = dx2;
-      E->ECO[lev][m][e].centre[3] = dx3;
+                /* delta(theta) of this element */
+                dx1 = max( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
+                           fabs(E->SX[lev][m][1][n[2]]-E->SX[lev][m][1][n[4]]) );
 
-      dx1 = max( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
-                 fabs(E->SX[lev][m][1][n[2]]-E->SX[lev][m][1][n[4]]) );
-      E->ECO[lev][m][e].size[1] = dx1*E->ECO[lev][m][e].centre[3];
+                /* length of this element in the theta-direction */
+                E->ECO[lev][m][e].size[1] = dx1*E->ECO[lev][m][e].centre[3];
 
-      dx1 = fabs(E->SX[lev][m][2][n[3]]-E->SX[lev][m][2][n[1]]);
-      if (dx1>M_PI)
-        dx1 = min(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
-              max(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
+                /* delta(phi) of this element */
+                dx1 = fabs(E->SX[lev][m][2][n[3]]-E->SX[lev][m][2][n[1]]);
+                if (dx1>M_PI)
+                    dx1 = min(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
+                        max(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
 
-      dx2 = fabs(E->SX[lev][m][2][n[2]]-E->SX[lev][m][2][n[4]]);
-      if (dx2>M_PI)
-        dx2 = min(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
-              max(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
+                dx2 = fabs(E->SX[lev][m][2][n[2]]-E->SX[lev][m][2][n[4]]);
+                if (dx2>M_PI)
+                    dx2 = min(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
+                        max(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
 
-      dx2 = max(dx1,dx2);
+                dx2 = max(dx1,dx2);
 
-      E->ECO[lev][m][e].size[2] = dx2*E->ECO[lev][m][e].centre[3]
-                                 *sin(E->ECO[lev][m][e].centre[1]);
+                /* length of this element in the phi-direction */
+                E->ECO[lev][m][e].size[2] = dx2*E->ECO[lev][m][e].centre[3]
+                    *sin(E->ECO[lev][m][e].centre[1]);
 
-      dx3 = 0.25*(
-            fabs(E->SX[lev][m][3][n[5]]+E->SX[lev][m][3][n[6]]
-                +E->SX[lev][m][3][n[7]]+E->SX[lev][m][3][n[8]]
-                -E->SX[lev][m][3][n[1]]-E->SX[lev][m][3][n[2]]
-                -E->SX[lev][m][3][n[3]]-E->SX[lev][m][3][n[4]]));
+                /* delta(radius) of this element */
+                dx3 = 0.25*(fabs(E->SX[lev][m][3][n[5]]+E->SX[lev][m][3][n[6]]
+                                 +E->SX[lev][m][3][n[7]]+E->SX[lev][m][3][n[8]]
+                                 -E->SX[lev][m][3][n[1]]-E->SX[lev][m][3][n[2]]
+                                 -E->SX[lev][m][3][n[3]]-E->SX[lev][m][3][n[4]]));
 
-      E->ECO[lev][m][e].size[3] = dx3;
+                /* length of this element in the radius-direction */
+                E->ECO[lev][m][e].size[3] = dx3;
 
-      for(nint=1;nint<=vpts;nint++)
-        area += g_point[nint].weight[E->mesh.nsd-1] * dOmega.vpt[nint];
-      E->ECO[lev][m][e].area = area;
+                /* volume (area in 2D) of this element */
+                for(nint=1;nint<=vpts;nint++)
+                    area += g_point[nint].weight[E->mesh.nsd-1] * dOmega.vpt[nint];
+                E->ECO[lev][m][e].area = area;
 
-      for(node=1;node<=enodes[E->mesh.nsd];node++)  {
-        temp[node] = 0.0;
-        for(nint=1;nint<=vpts;nint++)
-          temp[node] += dOmega.vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
-                       *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
+                for(node=1;node<=enodes[E->mesh.nsd];node++)  {
+                    temp[node] = 0.0;
+                    for(nint=1;nint<=vpts;nint++)
+                        temp[node] += dOmega.vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
+                            *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
+                }
+
+                /* lumped mass matrix, equivalent to tmass in ConMan */
+                /* missing density*(heat capcity)? */
+                for(node=1;node<=enodes[E->mesh.nsd];node++)
+                    E->MASS[lev][m][E->IEN[lev][m][e].node[node]] += temp[node];
+
+                /* weight of each node, equivalent to pmass in ConMan */
+                for(node=1;node<=enodes[E->mesh.nsd];node++)
+                    E->TWW[lev][m][e].node[node] = temp[node];
+
+
+            } /* end of ele*/
+
+        } /* end of for m */
+
+        if (E->control.NMULTIGRID||E->control.EMULTIGRID||E->mesh.levmax==lev)
+            (E->exchange_node_f)(E,E->MASS[lev],lev);
+
+        for (m=1;m<=E->sphere.caps_per_proc;m++)
+            for(node=1;node<=E->lmesh.NNO[lev];node++)
+                E->MASS[lev][m][node] = 1.0/E->MASS[lev][m][node];
+
+    } /* end of for lev */
+
+
+    /* compute volume of this processor mesh and the whole mesh */
+    E->lmesh.volume = 0;
+    E->mesh.volume = 0;
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+        for(e=1;e<=E->lmesh.nel;e++)
+            E->lmesh.volume += E->eco[m][e].area;
+
+    MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE,
+                  MPI_SUM, E->parallel.world);
+
+
+    if (E->control.verbose)  {
+        fprintf(E->fp_out, "rank=%d my_volume=%e total_volume=%e\n",
+                E->parallel.me, E->lmesh.volume, E->mesh.volume);
+
+        for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
+            fprintf(E->fp_out,"output_mass lev=%d\n",lev);
+            for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+                fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
+                for(e=1;e<=E->lmesh.NEL[lev];e++)
+                    fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][m][e].area);
+                for (node=1;node<=E->lmesh.NNO[lev];node++)
+                    fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
+            }
         }
+        fflush(E->fp_out);
+    }
 
-      for(node=1;node<=enodes[E->mesh.nsd];node++)
-         E->MASS[lev][m][E->IEN[lev][m][e].node[node]] += temp[node];
-
-      for(node=1;node<=enodes[E->mesh.nsd];node++)
-         E->TWW[lev][m][e].node[node] = temp[node];
-
-
-      } /* end of ele*/
-
-    }        /* m */
-
-  if (E->control.NMULTIGRID||E->control.EMULTIGRID||E->mesh.levmax==lev)
-     (E->exchange_node_f)(E,E->MASS[lev],lev);
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(node=1;node<=E->lmesh.NNO[lev];node++)
-      E->MASS[lev][m][node] = 1.0/E->MASS[lev][m][node];
-
-   }        /* lev */
-
-
-  /* compute volume of this processor mesh and the whole mesh */
-  E->lmesh.volume = 0;
-  E->mesh.volume = 0;
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(e=1;e<=E->lmesh.nel;e++)
-          E->lmesh.volume += E->eco[m][e].area;
-
-  MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
-
-
-
- if (E->control.verbose)  {
-   fprintf(E->fp_out, "rank=%d my_volume=%e total_volume=%e\n",
-           E->parallel.me, E->lmesh.volume, E->mesh.volume);
-
-   for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
-     fprintf(E->fp_out,"output_mass lev=%d\n",lev);
-     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-       fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
-       for(e=1;e<=E->lmesh.NEL[lev];e++)
-         fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][m][e].area);
-       for (node=1;node<=E->lmesh.NNO[lev];node++)
-	 fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
-     }
-   }
-   fflush(E->fp_out);
- }
-
- return;
+    return;
 }
 
 
