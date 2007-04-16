@@ -713,23 +713,26 @@ static void process_visc_heating(struct All_variables *E, int m,
     const int vpts = vpoints[E->mesh.nsd];
 
     strain_sqr = (float*) malloc((E->lmesh.nel+1)*sizeof(float));
-    temp = E->control.disptn_number / E->control.Atemp;
+    temp = E->control.disptn_number / E->control.Atemp / vpts;
 
     strain_rate_2_inv(E, m, strain_sqr, 0);
-
-    *total_heating = 0;
 
     for(e=1; e<=E->lmesh.nel; e++) {
         visc = 0.0;
         for(i = 1; i <= vpts; i++)
             visc += E->EVi[m][(e-1)*vpts + i];
-        visc = visc / vpts;
 
         heating[e] = temp * visc * strain_sqr[e];
-        *total_heating += heating[e] * E->eco[m][e].area;
     }
 
     free(strain_sqr);
+
+
+    /* sum up */
+    *total_heating = 0;
+    for(e=1; e<=E->lmesh.nel; e++)
+        *total_heating += heating[e] * E->eco[m][e].area;
+
     return;
 }
 
@@ -737,25 +740,31 @@ static void process_visc_heating(struct All_variables *E, int m,
 static void process_adi_heating(struct All_variables *E, int m,
                                 double *heating, double *total_heating)
 {
-    int e, ee, i, j;
-    double temp;
+    int e, ez, i, j;
+    double temp, temp2;
     const int ends = enodes[E->mesh.nsd];
 
-    *total_heating = 0;
-
+    temp2 = E->control.disptn_number / ends;
     for(e=1; e<=E->lmesh.nel; e++) {
-        ee = (e - 1) % E->lmesh.elz + 1;
+        ez = (e - 1) % E->lmesh.elz + 1;
 
         temp = 0.0;
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
-            temp += E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->data.surf_temp);
+            temp += E->sphere.cap[m].V[3][j]
+                * (E->T[m][j] + E->data.surf_temp);
         }
-        temp = temp * E->control.disptn_number / ends;
 
-        heating[e] = temp * (E->refstate.expansivity[ee] + E->refstate.expansivity[ee + 1]) * 0.5;
-        *total_heating += heating[e] * E->eco[m][e].area;
+        /* XXX: missing gravity */
+        heating[e] = temp * temp2 * 0.25
+            * (E->refstate.expansivity[ez] + E->refstate.expansivity[ez + 1])
+            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1]);
     }
+
+    /* sum up */
+    *total_heating = 0;
+    for(e=1; e<=E->lmesh.nel; e++)
+        *total_heating += heating[e] * E->eco[m][e].area;
 
     return;
 }
