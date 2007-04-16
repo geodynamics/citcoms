@@ -475,6 +475,9 @@ void allocate_common_vars(E)
   E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
   E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
 
+  /* lump mass matrix for the energy eqn */
+  E->TMass[j] = (double *) malloc((nno+1)*sizeof(double));
+
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);
 
