@@ -128,7 +128,7 @@ void apply_side_sbc(struct All_variables *E)
 
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
-    int i,m;
+    int i,j,m;
     double temp,temp2;
     void remove_horiz_ave2(struct All_variables*, double**);
 
@@ -155,6 +155,14 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     phase_change_apply_410(E, buoy);
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
+
+    /* convert density to buoyancy */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+	for(i=1;i<=E->lmesh.noz;i++)
+            for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+                int n = j*E->lmesh.noz + i;
+                buoy[m][n] *= E->refstate.gravity[i];
+            }
 
     remove_horiz_ave2(E, buoy);
     return;

@@ -32,13 +32,39 @@
 #include "global_defs.h"
 
 
-void construct_tic(struct All_variables*);
-void debug_tic(struct All_variables*);
+void initialize_tracers(struct All_variables*);
+void init_composition(struct All_variables*);
 void initial_pressure(struct All_variables*);
 void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
 void report(struct All_variables*, char* str);
-void restart_tic(struct All_variables*);
+void read_checkpoint(struct All_variables*);
+
+
+char pyCitcom_ic_init_tracer_composition__doc__[] = "";
+char pyCitcom_ic_init_tracer_composition__name__[] = "init_tracer_composition";
+
+PyObject * pyCitcom_ic_init_tracer_composition(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:init_tracer_composition", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    if (E->control.tracer==1) {
+        initialize_tracers(E);
+
+        if (E->composition.on)
+            init_composition(E);
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 
 
 char pyCitcom_ic_constructTemperature__doc__[] = "";
@@ -54,33 +80,7 @@ PyObject * pyCitcom_ic_constructTemperature(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    report(E,"Initialize temperature field");
-    construct_tic(E);
-
-    if(E->control.verbose)
-        debug_tic(E);
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyCitcom_ic_restartTemperature__doc__[] = "";
-char pyCitcom_ic_restartTemperature__name__[] = "restartTemperature";
-
-PyObject * pyCitcom_ic_restartTemperature(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    struct All_variables* E;
-
-    if (!PyArg_ParseTuple(args, "O:restartTemperature", &obj))
-        return NULL;
-
-    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
-
-    report(E,"Initialize temperature field");
-    restart_tic(E);
+    (E->problem_initial_fields)(E);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -147,6 +147,27 @@ PyObject * pyCitcom_ic_initViscosity(PyObject *self, PyObject *args)
 
     report(E,"Initialize viscosity field");
     initial_viscosity(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
+char pyCitcom_ic_readCheckpoint__doc__[] = "";
+char pyCitcom_ic_readCheckpoint__name__[] = "readCheckpoint";
+
+PyObject * pyCitcom_ic_readCheckpoint(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:readCheckpoint", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    read_checkpoint(E);
 
     Py_INCREF(Py_None);
     return Py_None;

@@ -102,6 +102,28 @@ PyObject * pyCitcom_output_time(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_output_checkpoint__doc__[] = "";
+char pyCitcom_output_checkpoint__name__[] = "output_checkpoint";
+
+PyObject * pyCitcom_output_checkpoint(PyObject *self, PyObject *args)
+{
+    void read_checkpoint(struct All_variables*);
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:output_checkpoint", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    output_checkpoint(E);
+
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 /* $Id$ */
 
 /* End of file */

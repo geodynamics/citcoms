@@ -532,4 +532,3 @@ void output_time(struct All_variables *E, int cycles)
 
   return;
 }
-

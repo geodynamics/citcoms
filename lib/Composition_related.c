@@ -35,7 +35,6 @@
 
 static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
-static void init_composition(struct All_variables *E);
 static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
 static void map_composition_to_nodes(struct All_variables *E);
@@ -92,11 +91,7 @@ void composition_input(struct All_variables *E)
 
 void composition_setup(struct All_variables *E)
 {
-
-    if (E->composition.on) {
-        allocate_composition_memory(E);
-        init_composition(E);
-    }
+    allocate_composition_memory(E);
 
     return;
 }
@@ -207,7 +202,7 @@ static void allocate_composition_memory(struct All_variables *E)
 }
 
 
-static void init_composition(struct All_variables *E)
+void init_composition(struct All_variables *E)
 {
     if (E->composition.ichemical_buoyancy==1 && E->composition.ibuoy_type==1) {
         fill_composition(E);
@@ -386,6 +381,7 @@ static void init_bulk_composition(struct All_variables *E)
 
 
     /* If retarting tracers, the initital bulk composition is read from file */
+    // XXX: remove
     if (E->trace.ic_method == 2 &&
         !E->composition.ireset_initial_composition) {
 

@@ -994,8 +994,8 @@ void mass_matrix(struct All_variables *E)
                 temp[node] = 0.0;
                 nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
                 for(nint=1;nint<=vpts;nint++) {
-                    /* XXX: missing heat capcity */
                     temp[node] += E->refstate.rho[nz]
+                        * E->refstate.capacity[nz]
                         * dOmega.vpt[nint]
                         * g_point[nint].weight[E->mesh.nsd-1]
                         * E->N.vpt[GNVINDEX(node,nint)]; /* int Na dV */

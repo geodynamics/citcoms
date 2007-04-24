@@ -462,6 +462,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     E->advection.min_timesteps = 1;
     E->advection.max_timesteps = 1;
     E->advection.max_total_timesteps = 1;
+    E->control.checkpoint_frequency = 1;
     E->control.record_every = 1;
     E->control.record_all_until = 1;
 

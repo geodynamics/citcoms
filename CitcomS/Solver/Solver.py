@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomSLib import CPU_time, output, output_time, return_dt, return_t, return_step
+from CitcomSLib import CPU_time, output, output_time, output_checkpoint, return_dt, return_t, return_step
 from pyre.components.Component import Component
 import journal
 
@@ -110,6 +110,8 @@ class Solver(Component):
             print >> stream, "[CitcomS.controller]"
             print >> stream, ("monitoringFrequency=%d" %
                 application.controller.inventory.monitoringFrequency)
+            print >> stream, ("checkpointFrequency=%d" %
+                application.controller.inventory.checkpointFrequency)
             print >> stream
 
         self.setProperties(stream)
@@ -117,17 +119,25 @@ class Solver(Component):
         self.restart = self.inventory.ic.inventory.restart
 
         self.ic_initTemperature = self.inventory.ic.initTemperature
+
+        self._setup()
+
         return
 
 
     def launch(self, application):
-        self._setup()
+        if self.restart:
+            from CitcomSLib import readCheckpoint
+            readCheckpoint(self.all_variables)
 
-        # initial conditions
-        ic = self.inventory.ic
-        ic.launch()
+            # XXX: if post_processing
+            # calling post_processing() and terminate
+        else:
+            # initial conditions
+            ic = self.inventory.ic
+            ic.launch()
 
-        self.solveVelocities()
+            self.solveVelocities()
         return
 
 
@@ -221,6 +231,14 @@ class Solver(Component):
             output(self.all_variables, step)
 
         output_time(self.all_variables, step)
+        return
+
+
+    def checkpoint(self, checkpointFrequency):
+        step = self.step
+
+        if not (step % checkpointFrequency):
+            output_checkpoint(self.all_variables)
         return
 
 

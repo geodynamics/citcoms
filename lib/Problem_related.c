@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -66,6 +66,8 @@ void get_initial_elapsed_time(E)
     char output_file[255],input_s[1000];
 
     E->monitor.elapsed_time = 0.0;
+
+#if 0
     if ((E->control.restart || E->control.post_p))    {
 	sprintf(output_file, "%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
         fp=fopen(output_file,"r");
@@ -77,7 +79,7 @@ void get_initial_elapsed_time(E)
         sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
      fclose(fp);
       } /* end control.restart */
-
+#endif
    return;
 }
 

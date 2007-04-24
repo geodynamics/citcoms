@@ -51,6 +51,8 @@ int icheck_that_processor_shell(struct All_variables *E,
 void expand_later_array(struct All_variables *E, int j);
 void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
+void allocate_tracer_arrays(struct All_variables *E,
+                            int j, int number_of_tracers);
 
 
 static void find_tracers(struct All_variables *E);
@@ -65,8 +67,6 @@ static void restart_tracers(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
-static void allocate_tracer_arrays(struct All_variables *E,
-                                   int j, int number_of_tracers);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
@@ -1246,8 +1246,8 @@ void get_neighboring_caps(struct All_variables *E)
 /*                                                                            */
 /* This function allocates memories to tracer arrays.                         */
 
-static void allocate_tracer_arrays(struct All_variables *E,
-                                   int j, int number_of_tracers)
+void allocate_tracer_arrays(struct All_variables *E,
+                            int j, int number_of_tracers)
 {
 
     int kk;

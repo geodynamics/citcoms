@@ -54,6 +54,7 @@ class IC(CitcomComponent):
 
 
     def launch(self):
+        self.initTracer()
         self.initTemperature()
         self.initPressure()
         self.initVelocity()
@@ -61,13 +62,15 @@ class IC(CitcomComponent):
         return
 
 
+    def initTracer(self):
+        from CitcomSLib import init_tracer_composition
+        init_tracer_composition(self.all_variables)
+        return
+
 
     def initTemperature(self):
-        from CitcomSLib import constructTemperature, restartTemperature
-        if self.inventory.restart:
-            restartTemperature(self.all_variables)
-        else:
-            constructTemperature(self.all_variables)
+        from CitcomSLib import constructTemperature
+        constructTemperature(self.all_variables)
         return
 
 

@@ -145,6 +145,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 	(E->problem_tracer_setup)(E);
     }
 
+    /* TODO: move to initial_conditions() */
     if(E->control.mat_control) {
       if(E->parallel.me ==0) fprintf(stderr,"IN Instructions.c\n");
       fflush(stderr);
@@ -158,12 +159,8 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
 void read_instructions(struct All_variables *E, char *filename)
 {
-
-    void common_initial_fields();
     void read_initial_settings();
     void global_default_values();
-    void general_stokes_solver_setup();
-    void initial_mesh_solver_setup();
 
     void setup_parser();
     void shutdown_parser();
@@ -184,22 +181,51 @@ void read_instructions(struct All_variables *E, char *filename)
     global_default_values(E);
     read_initial_settings(E);
 
-    initial_mesh_solver_setup(E);
-
-    general_stokes_solver_setup(E);
-
-    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
-                                   CPU_time0()-E->monitor.cpu_time_at_start);
-
-    (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
-    common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
-
     shutdown_parser(E);
 
     return;
 }
 
 
+/* This function is replaced by CitcomS.Solver._setup() */
+void initial_setup(struct All_variables *E)
+{
+    void general_stokes_solver_setup();
+    void initial_mesh_solver_setup();
+
+    initial_mesh_solver_setup(E);
+
+    general_stokes_solver_setup(E);
+
+    (E->next_buoyancy_field_init)(E);
+
+
+    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
+                                   CPU_time0()-E->monitor.cpu_time_at_start);
+
+    return;
+}
+
+
+/* This function is replaced by CitcomS.Components.IC.launch()*/
+void initial_conditions(struct All_variables *E)
+{
+    void initialize_tracers();
+    void init_composition();
+    void common_initial_fields();
+
+    if (E->control.tracer==1) {
+        initialize_tracers(E);
+
+        if (E->composition.on)
+            init_composition(E);
+    }
+
+    (E->problem_initial_fields)(E);   /* temperature/chemistry/melting etc */
+    common_initial_fields(E);  /* velocity/pressure/viscosity (viscosity must be done LAST) */
+
+    return;
+}
 
 
 void read_initial_settings(struct All_variables *E)
@@ -362,6 +388,7 @@ void read_initial_settings(struct All_variables *E)
   input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
 
   input_int("storage_spacing",&(E->control.record_every),"10",m);
+  input_int("checkpointFrequency",&(E->control.checkpoint_frequency),"100",m);
   input_int("cpu_limits_in_seconds",&(E->control.record_all_until),"5",m);
 
   input_boolean("precond",&(E->control.precondition),"off",m);
@@ -896,6 +923,7 @@ void record(E,string)
    ============================================================= */
 
 
+/* This function is replaced by CitcomS.Components.IC.launch()*/
 void common_initial_fields(E)
     struct All_variables *E;
 {
@@ -914,7 +942,8 @@ void common_initial_fields(E)
 
     return;
 
-   }
+}
+
 /* ========================================== */
 
 void initial_pressure(E)
@@ -939,9 +968,6 @@ void initial_velocity(E)
         E->sphere.cap[m].V[1][i]=0.0;
         E->sphere.cap[m].V[2][i]=0.0;
         E->sphere.cap[m].V[3][i]=0.0;
-        E->sphere.cap[m].Vprev[1][i]=0.0;
-        E->sphere.cap[m].Vprev[2][i]=0.0;
-        E->sphere.cap[m].Vprev[3][i]=0.0;
         }
 
     return;

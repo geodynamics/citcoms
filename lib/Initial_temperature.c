@@ -139,14 +139,13 @@ void tic_input(struct All_variables *E)
 
 
 
+/* This function is replaced by CitcomS.Components.IC.initTemperature()*/
 void convection_initial_temperature(struct All_variables *E)
 {
-  if (E->control.restart)
-    restart_tic(E);
-  else if (E->control.post_p)
-    restart_tic(E);
-  else
-    construct_tic(E);
+  void report();
+
+  report(E,"Initialize temperature field");
+  construct_tic(E);
 
   /* Note: it is the callee's responsibility to conform tbc. */
   /* like a call to temperatures_conform_bcs(E); */
@@ -161,14 +160,7 @@ void convection_initial_temperature(struct All_variables *E)
 
 void restart_tic(struct All_variables *E)
 {
-  /*
-  if (E->control.lith_age)
-    lith_age_restart_tic(E);
-  else
-  */
-  restart_tic_from_file(E);
-
-  return;
+    return;
 }
 
 
@@ -219,7 +211,7 @@ void restart_tic_from_file(struct All_variables *E)
   }
 
   if (E->parallel.me==0)
-    fprintf(E->fp,"Reading %s for restarted temperature\n",output_file);
+    fprintf(E->fp,"Reading %s for initial temperature\n",output_file);
 
   fgets(input_s,1000,fp);
   sscanf(input_s,"%d %d %f",&ll,&mm,&restart_elapsed_time);
@@ -231,15 +223,13 @@ void restart_tic_from_file(struct All_variables *E)
       fgets(input_s,1000,fp);
       sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
 
-      /*  E->sphere.cap[m].V[1][i] = d;
-	  E->sphere.cap[m].V[1][i] = e;
-	  E->sphere.cap[m].V[1][i] = f;  */
+      /* Truncate the temperature to be within (0,1). */
+      /* This might not be desirable in some situations. */
       E->T[m][i] = max(0.0,min(g,1.0));
     }
   }
   fclose (fp);
 
-  temperatures_conform_bcs(E);
   return;
 }
 

@@ -56,7 +56,6 @@ static void put_found_tracers(struct All_variables *E,
 
 void regional_tracer_setup(struct All_variables *E)
 {
-    void initialize_tracers();
 
     char output_file[255];
 
@@ -138,12 +137,7 @@ void regional_tracer_setup(struct All_variables *E)
 
     make_mesh_ijk(E);
 
-
-    initialize_tracers(E);
-
-
     composition_setup(E);
-    tracer_post_processing(E);
 
     return;
 }

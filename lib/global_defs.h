@@ -498,6 +498,7 @@ struct CONTROL {
     int total_iteration_cycles;
     int total_v_solver_calls;
 
+    int checkpoint_frequency;
     int record_every;
     int record_all_until;
 
@@ -510,6 +511,9 @@ struct CONTROL {
 struct REF_STATE {
     double *rho;
     double *expansivity;
+    double *capacity;
+    double *conductivity;
+    double *gravity;
     double *Tadi;
     double *dlnrhodr;
 };

@@ -126,7 +126,6 @@ void full_tracer_setup(struct All_variables *E)
 
     char output_file[200];
     void get_neighboring_caps();
-    void initialize_tracers();
     void analytical_test();
 
     /* Some error control */
@@ -216,17 +215,14 @@ void full_tracer_setup(struct All_variables *E)
     make_regular_grid(E);
 
 
-    initialize_tracers(E);
-
-
     if (E->trace.ianalytical_tracer_test==1) {
         //TODO: walk into this code...
         analytical_test(E);
         parallel_process_termination();
     }
 
-    composition_setup(E);
-    tracer_post_processing(E);
+    if (E->composition.on)
+        composition_setup(E);
 
     return;
 }

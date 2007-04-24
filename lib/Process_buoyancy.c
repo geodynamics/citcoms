@@ -107,6 +107,7 @@ void heat_flux(E)
       uT = 0.0;
       area = 0.0;
       for(i=1;i<=vpts;i++)   {
+        /* XXX: missing unit conversion, heat capacity and conductivity */
         uT += u[i]*T[i]*dOmega.vpt[i] + dTdz[i]*dOmega.vpt[i];
         }
 

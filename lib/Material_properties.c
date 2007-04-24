@@ -48,6 +48,15 @@ void mat_prop_allocate(struct All_variables *E)
     /* reference profile of coefficient of thermal expansion */
     E->refstate.expansivity = (double *) malloc((noz+1)*sizeof(double));
 
+    /* reference profile of heat capacity */
+    E->refstate.capacity = (double *) malloc((noz+1)*sizeof(double));
+
+    /* reference profile of thermal conductivity */
+    E->refstate.conductivity = (double *) malloc((noz+1)*sizeof(double));
+
+    /* reference profile of gravity */
+    E->refstate.gravity = (double *) malloc((noz+1)*sizeof(double));
+
     /* reference profile of temperature */
     E->refstate.Tadi = (double *) malloc((noz+1)*sizeof(double));
 
@@ -75,6 +84,9 @@ void reference_state(struct All_variables *E)
 	z = 1 - r;
 	E->refstate.rho[i] = exp(tmp*z);
 	E->refstate.expansivity[i] = 1;
+	E->refstate.capacity[i] = 1;
+	E->refstate.conductivity[i] = 1;
+	E->refstate.gravity[i] = 1;
 	E->refstate.Tadi[i] = T0 * (exp(E->control.disptn_number * z) - 1);
     }
 
