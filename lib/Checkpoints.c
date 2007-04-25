@@ -54,9 +54,11 @@ void output_checkpoint(struct All_variables *E)
     char output_file[255];
     FILE *fp1;
 
-    sprintf(output_file, "%s.chkpt.%d", E->control.data_file, E->parallel.me);
+    sprintf(output_file, "%s.chkpt.%d.%d", E->control.data_file,
+            E->parallel.me, E->monitor.solution_cycles);
 
-    backup_file(output_file);
+    /* Disable the backup since the filename is unique. */
+    /* backup_file(output_file); */
 
     fp1 = fopen(output_file, "wb");
 
@@ -89,8 +91,8 @@ void read_checkpoint(struct All_variables *E)
     FILE *fp;
 
     /* open the checkpoint file */
-    snprintf(output_file, 254, "%s.chkpt.%d",
-             E->control.old_P_file, E->parallel.me);
+    snprintf(output_file, 254, "%s.chkpt.%d.%d", E->control.old_P_file,
+             E->parallel.me, E->monitor.solution_cycles_init);
     fp = fopen(output_file, "rb");
     if(fp == NULL) {
         fprintf(stderr, "Cannot open file: %s\n", output_file);
@@ -179,7 +181,8 @@ static void general_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->sphere.caps_per_proc), sizeof(int), 1, fp);
 
     /* write timing information */
-    fwrite(&(E->advection.timesteps), sizeof(int), 1, fp);
+    fwrite(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
+    fwrite(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
     fwrite(&(E->advection.timestep), sizeof(float), 1, fp);
 
     return;
@@ -211,10 +214,12 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
     }
 
     /* read timing information */
-    fread(&(E->advection.timesteps), sizeof(int), 1, fp);
+    fread(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
+    fread(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
     fread(&(E->advection.timestep), sizeof(float), 1, fp);
 
-    E->monitor.solution_cycles = E->advection.timesteps;
+    E->advection.timesteps = E->monitor.solution_cycles;
+
     return;
 }
 
