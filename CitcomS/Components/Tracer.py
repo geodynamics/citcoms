@@ -62,7 +62,7 @@ class Tracer(CitcomComponent):
 
         # tracer_ic_method=0 (random generated array)
         # tracer_ic_method=1 (all proc read the same file)
-        # tracer_ic_method=2 (each proc reads its restart file)
+        # tracer_ic_method=2 (each proc reads its own file)
         tracer_ic_method = inv.int("tracer_ic_method", default=0)
 
         # (tracer_ic_method == 0)
@@ -94,6 +94,8 @@ class Tracer(CitcomComponent):
         # ibuoy_type=1 (ratio method)
         buoy_type = inv.int("buoy_type", default=1)
         buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
+
+        # This is not used anymore and is left here for backward compatibility
         reset_initial_composition = inv.bool("reset_initial_composition",
                                              default=False)
 

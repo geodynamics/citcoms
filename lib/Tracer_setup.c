@@ -63,7 +63,7 @@ static void make_tracer_array(struct All_variables *E);
 static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j);
 static void read_tracer_file(struct All_variables *E);
-static void restart_tracers(struct All_variables *E);
+static void read_old_tracer_file(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
@@ -80,27 +80,21 @@ void tracer_input(struct All_variables *E)
     input_int("tracer",&(E->control.tracer),"0",m);
     if(E->control.tracer) {
 
-        /* Initial condition, this option is ignored if E->control.restart is 1,
-         *  ie. restarted from a previous run */
         /* tracer_ic_method=0 (random generated array) */
         /* tracer_ic_method=1 (all proc read the same file) */
-        /* tracer_ic_method=2 (each proc reads its restart file) */
-        if(E->control.restart)
-            E->trace.ic_method = 2;
-        else {
-            input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
+        /* tracer_ic_method=2 (each proc reads its own file) */
+        input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
 
-            if (E->trace.ic_method==0)
-                input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
-            else if (E->trace.ic_method==1)
-                input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
-            else if (E->trace.ic_method==2) {
-            }
-            else {
-                fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
-                fflush(stderr);
-                parallel_process_termination();
-            }
+        if (E->trace.ic_method==0)
+            input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
+        else if (E->trace.ic_method==1)
+            input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
+        else if (E->trace.ic_method==2) {
+        }
+        else {
+            fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
+            fflush(stderr);
+            parallel_process_termination();
         }
 
 
@@ -596,7 +590,7 @@ void initialize_tracers(struct All_variables *E)
     else if (E->trace.ic_method==1)
         read_tracer_file(E);
     else if (E->trace.ic_method==2)
-        restart_tracers(E);
+        read_old_tracer_file(E);
     else {
         fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
         fflush(E->trace.fpt);
@@ -833,7 +827,7 @@ static void read_tracer_file(struct All_variables *E)
             /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
             /* this part has to be changed... */
             else {
-                fprintf(E->trace.fpt,"ERROR(restart tracers)-huh?\n");
+                fprintf(E->trace.fpt,"ERROR(read tracer file)-huh?\n");
                 fflush(E->trace.fpt);
                 exit(10);
             }
@@ -898,12 +892,12 @@ static void read_tracer_file(struct All_variables *E)
 }
 
 
-/************** RESTART TRACERS ******************************************/
+/************** READ OLD TRACER FILE *************************************/
 /*                                                                       */
-/* This function restarts tracers written from previous calculation      */
+/* This function read tracers written from previous calculation          */
 /* and the tracers are read as seperate files for each processor domain. */
 
-static void restart_tracers(struct All_variables *E)
+static void read_old_tracer_file(struct All_variables *E)
 {
 
     char output_file[200];
@@ -923,7 +917,7 @@ static void restart_tracers(struct All_variables *E)
     FILE *fp1;
 
     if (E->trace.number_of_extra_quantities>99) {
-        fprintf(E->trace.fpt,"ERROR(restart_tracers)-increase size of extra[]\n");
+        fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-increase size of extra[]\n");
         fflush(E->trace.fpt);
         parallel_process_termination();
     }
@@ -931,12 +925,12 @@ static void restart_tracers(struct All_variables *E)
     sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
 
     if ( (fp1=fopen(output_file,"r"))==NULL) {
-        fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
+        fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-file not found %s\n",output_file);
         fflush(E->trace.fpt);
         exit(10);
     }
 
-    fprintf(stderr,"Restarting Tracers from %s\n",output_file);
+    fprintf(stderr,"Read old tracers from %s\n",output_file);
     fflush(stderr);
 
 
@@ -947,7 +941,7 @@ static void restart_tracers(struct All_variables *E)
 
         /* some error control */
         if (E->trace.number_of_extra_quantities+3 != ncolumns) {
-            fprintf(E->trace.fpt,"ERROR(restart tracers)-wrong # of columns\n");
+            fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-wrong # of columns\n");
             fflush(E->trace.fpt);
             exit(10);
         }
@@ -968,7 +962,7 @@ static void restart_tracers(struct All_variables *E)
             /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
             /* this part has to be changed... */
             else {
-                fprintf(E->trace.fpt,"ERROR(restart tracers)-huh?\n");
+                fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-huh?\n");
                 fflush(E->trace.fpt);
                 exit(10);
             }

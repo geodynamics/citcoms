@@ -1850,7 +1850,7 @@ static void write_trace_instructions(struct All_variables *E)
         }
     if (E->trace.ic_method==2)
         {
-            fprintf(E->trace.fpt,"Restarting Tracers\n");
+            fprintf(E->trace.fpt,"Reading individual tracer files\n");
         }
 
     fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
