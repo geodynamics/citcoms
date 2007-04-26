@@ -116,17 +116,13 @@ class Solver(Component):
 
         self.setProperties(stream)
 
-        self.restart = self.inventory.ic.inventory.restart
-
-        self.ic_initTemperature = self.inventory.ic.initTemperature
-
         self._setup()
 
         return
 
 
     def launch(self, application):
-        if self.restart:
+        if self.inventory.ic.inventory.restart:
             from CitcomSLib import readCheckpoint
             readCheckpoint(self.all_variables)
 
