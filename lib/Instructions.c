@@ -106,7 +106,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     allocate_velocity_vars(E);
 
-    get_initial_elapsed_time(E);  /* Get elapsed time from restart run*/
+    get_initial_elapsed_time(E);  /* Set elapsed time */
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
 

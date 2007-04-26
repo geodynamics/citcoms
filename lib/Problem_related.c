@@ -55,32 +55,15 @@ void read_mat_from_file(E)
 
 
 /*=======================================================================
-  Open restart file to get initial elapsed time, or calculate the right value
+  Set initial elapsed time to 0
 =========================================================================*/
 
 void get_initial_elapsed_time(E)
   struct All_variables *E;
 {
-    FILE *fp;
-    int ll, mm;
-    char output_file[255],input_s[1000];
-
     E->monitor.elapsed_time = 0.0;
 
-#if 0
-    if ((E->control.restart || E->control.post_p))    {
-	sprintf(output_file, "%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
-        fp=fopen(output_file,"r");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Problem_related #8) Cannot open %s\n",output_file);
-          exit(8);
-	}
-        fgets(input_s,1000,fp);
-        sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
-     fclose(fp);
-      } /* end control.restart */
-#endif
-   return;
+    return;
 }
 
 /*=======================================================================
