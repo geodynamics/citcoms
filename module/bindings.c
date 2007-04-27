@@ -169,6 +169,11 @@ struct PyMethodDef pyCitcom_methods[] = {
 
     /* from initial_conditions.h */
 
+    {pyCitcom_ic_initialize_material__name__,
+     pyCitcom_ic_initialize_material,
+     METH_VARARGS,
+     pyCitcom_ic_initialize_material__doc__},
+
     {pyCitcom_ic_init_tracer_composition__name__,
      pyCitcom_ic_init_tracer_composition,
      METH_VARARGS,

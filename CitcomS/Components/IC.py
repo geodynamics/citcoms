@@ -54,11 +54,18 @@ class IC(CitcomComponent):
 
 
     def launch(self):
+        self.initMaterial()
         self.initTracer()
         self.initTemperature()
         self.initPressure()
         self.initVelocity()
         self.initViscosity()
+        return
+
+
+    def initMaterial(self):
+        from CitcomSLib import initialize_material
+        initialize_material(self.all_variables)
         return
 
 

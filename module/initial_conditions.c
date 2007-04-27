@@ -32,6 +32,7 @@
 #include "global_defs.h"
 
 
+void initialize_material(struct All_variables*);
 void initialize_tracers(struct All_variables*);
 void init_composition(struct All_variables*);
 void initial_pressure(struct All_variables*);
@@ -39,6 +40,27 @@ void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
 void report(struct All_variables*, char* str);
 void read_checkpoint(struct All_variables*);
+
+
+char pyCitcom_ic_initialize_material__doc__[] = "";
+char pyCitcom_ic_initialize_material__name__[] = "initialize_material";
+
+PyObject * pyCitcom_ic_initialize_material(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:initialize_material", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    initialize_material(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
 
 
 char pyCitcom_ic_init_tracer_composition__doc__[] = "";

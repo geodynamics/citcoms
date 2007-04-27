@@ -87,6 +87,8 @@ void output_checkpoint(struct All_variables *E)
 
 void read_checkpoint(struct All_variables *E)
 {
+    void initialize_material(struct All_variables *E);
+
     char output_file[255];
     FILE *fp;
 
@@ -101,6 +103,9 @@ void read_checkpoint(struct All_variables *E)
 
     /* check mesh information in the checkpoint file */
     read_general_checkpoint(E, fp);
+
+    /* init E->mat */
+    initialize_material(E);
 
     /* read tracer/composition information in the checkpoint file */
     if(E->control.tracer) {
@@ -184,6 +189,7 @@ static void general_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
     fwrite(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
     fwrite(&(E->advection.timestep), sizeof(float), 1, fp);
+    fwrite(&(E->control.start_age), sizeof(float), 1, fp);
 
     return;
 }
@@ -217,6 +223,7 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
     fread(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
     fread(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
     fread(&(E->advection.timestep), sizeof(float), 1, fp);
+    fread(&(E->control.start_age), sizeof(float), 1, fp);
 
     E->advection.timesteps = E->monitor.solution_cycles;
 

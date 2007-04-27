@@ -29,6 +29,11 @@
 #define pyCitcom_initial_conditions_h
 
 
+extern char pyCitcom_ic_initialize_material__name__[];
+extern char pyCitcom_ic_initialize_material__doc__[];
+PyObject * pyCitcom_ic_initialize_material(PyObject *, PyObject *);
+
+
 extern char pyCitcom_ic_init_tracer_composition__name__[];
 extern char pyCitcom_ic_init_tracer_composition__doc__[];
 PyObject * pyCitcom_ic_init_tracer_composition(PyObject *, PyObject *);

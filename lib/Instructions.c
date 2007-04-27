@@ -60,7 +60,6 @@ void construct_id(struct All_variables*);
 void construct_ien(struct All_variables*);
 void construct_lm(struct All_variables*);
 void construct_masks(struct All_variables*);
-void construct_mat_group(struct All_variables*);
 void construct_shape_functions(struct All_variables*);
 void construct_sub_element(struct All_variables*);
 void construct_surf_det (struct All_variables*);
@@ -70,7 +69,6 @@ void get_initial_elapsed_time(struct All_variables*);
 void lith_age_init(struct All_variables *E);
 void mass_matrix(struct All_variables*);
 void output_init(struct All_variables*);
-void read_mat_from_file(struct All_variables*);
 void set_elapsed_time(struct All_variables*);
 void set_sphere_harmonics (struct All_variables*);
 void set_starting_age(struct All_variables*);
@@ -145,15 +143,6 @@ void initial_mesh_solver_setup(struct All_variables *E)
 	(E->problem_tracer_setup)(E);
     }
 
-    /* TODO: move to initial_conditions() */
-    if(E->control.mat_control) {
-      if(E->parallel.me ==0) fprintf(stderr,"IN Instructions.c\n");
-      fflush(stderr);
-      read_mat_from_file(E);
-     }
-    else
-      construct_mat_group(E);
-
 }
 
 
@@ -207,12 +196,26 @@ void initial_setup(struct All_variables *E)
 }
 
 
+void initialize_material(struct All_variables *E)
+{
+    void construct_mat_group();
+    void read_mat_from_file();
+
+    if(E->control.mat_control)
+        read_mat_from_file(E);
+    else
+        construct_mat_group(E);
+}
+
+
 /* This function is replaced by CitcomS.Components.IC.launch()*/
 void initial_conditions(struct All_variables *E)
 {
     void initialize_tracers();
     void init_composition();
     void common_initial_fields();
+
+    initialize_material(E);
 
     if (E->control.tracer==1) {
         initialize_tracers(E);
