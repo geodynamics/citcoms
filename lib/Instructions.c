@@ -1102,7 +1102,8 @@ static void chk_prefix(struct  All_variables *E)
       parallel_process_termination();
   }
 
-  if (E->control.restart) {
+  if (E->control.restart || E->control.post_p ||
+      E->convection.tic_method == -1) {
       found = strchr(E->control.data_prefix_old, '/');
       if (found) {
 	  fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
@@ -1204,7 +1205,8 @@ void output_init(struct  All_variables *E)
     snprintf(E->control.data_file, 200, "%s/%s", E->control.data_dir,
 	     E->control.data_prefix);
 
-    if (E->control.restart) {
+    if (E->control.restart || E->control.post_p ||
+        E->convection.tic_method == -1) {
 	expand_datadir(E, E->control.data_dir_old);
 	snprintf(E->control.old_P_file, 200, "%s/%s", E->control.data_dir_old,
 		 E->control.data_prefix_old);
