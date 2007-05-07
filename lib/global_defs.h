@@ -599,7 +599,6 @@ struct COMPOSITION {
     int on;
 
     double buoyancy_ratio;
-    int ireset_initial_composition;
     int ibuoy_type;
 
     double *comp_el[13];
