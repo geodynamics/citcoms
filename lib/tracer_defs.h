@@ -66,7 +66,7 @@ struct TRACE{
     int **ntracer_flavor[13];
 
     int ic_method_for_flavors;
-    double z_interface;
+    double *z_interface;
 
     /* statistical parameters */
     int istat_ichoice[13][5];

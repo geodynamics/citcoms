@@ -46,6 +46,11 @@ class Tracer(CitcomComponent):
 
 
     def setProperties(self, stream):
+        # convert lists of strings to lists of ints/floats
+        inv = self.inventory
+        inv.z_interface = map(float, inv.z_interface)
+        inv.buoyancy_ratio = map(float, inv.buoyancy_ratio)
+
         from CitcomSLib import Tracer_set_properties
         Tracer_set_properties(self.all_variables, self.inventory, stream)
         return
@@ -78,7 +83,7 @@ class Tracer(CitcomComponent):
         # either using absolute method or ratio method.
         tracer_flavors = inv.int("tracer_flavors", default=0)
         ic_method_for_flavors = inv.int("ic_method_for_flavors", default=0)
-        z_interface = inv.float("z_interface", default=0.7)
+        z_interface = inv.list("z_interface", default=[0.7])
 
 
         # Regular grid parameters
@@ -93,7 +98,7 @@ class Tracer(CitcomComponent):
         # ibuoy_type=0 (absolute method, not implemented)
         # ibuoy_type=1 (ratio method)
         buoy_type = inv.int("buoy_type", default=1)
-        buoyancy_ratio = inv.float("buoyancy_ratio", default=1.0)
+        buoyancy_ratio = inv.list("buoyancy_ratio", default=[1.0])
 
         # This is not used anymore and is left here for backward compatibility
         reset_initial_composition = inv.bool("reset_initial_composition",

@@ -434,7 +434,7 @@ void output_tracer(struct All_variables *E, int cycles)
 
 void output_comp_nd(struct All_variables *E, int cycles)
 {
-    int i, j;
+    int i, j, k;
     char output_file[255];
     FILE *fp1;
 
@@ -443,14 +443,21 @@ void output_comp_nd(struct All_variables *E, int cycles)
     fp1 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+        fprintf(fp1,"%3d %7d %.5e",
                 j, E->lmesh.nel,
-                E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
+                E->monitor.elapsed_time);
+        for(i=0;i<E->composition.ncomp;i++) {
+            fprintf(fp1," %.5e %.5e",
+                    E->composition.initial_bulk_composition[i],
+                    E->composition.bulk_composition[i]);
+        }
+        fprintf(fp1,"\n");
 
         for(i=1;i<=E->lmesh.nno;i++) {
-            fprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
+            for(k=0;k<E->composition.ncomp;k++) {
+                fprintf(fp1,"%.6e ",E->composition.comp_node[j][k][i]);
+            }
+            fprintf(fp1,"\n");
         }
 
     }
@@ -462,7 +469,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
 
 void output_comp_el(struct All_variables *E, int cycles)
 {
-    int i, j;
+    int i, j, k;
     char output_file[255];
     FILE *fp1;
 
@@ -471,14 +478,21 @@ void output_comp_el(struct All_variables *E, int cycles)
     fp1 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
+        fprintf(fp1,"%3d %7d %.5e",
                 j, E->lmesh.nel,
-                E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
+                E->monitor.elapsed_time);
+        for(i=0;i<E->composition.ncomp;i++) {
+            fprintf(fp1," %.5e %.5e",
+                    E->composition.initial_bulk_composition[i],
+                    E->composition.bulk_composition[i]);
+        }
+        fprintf(fp1,"\n");
 
-        for(i=1;i<=E->lmesh.nel;i++) {
-            fprintf(fp1,"%.6e\n",E->composition.comp_el[j][i]);
+        for(i=1;i<=E->lmesh.nno;i++) {
+            for(k=0;k<E->composition.ncomp;k++) {
+                fprintf(fp1,"%.6e ",E->composition.comp_el[j][k][i]);
+            }
+            fprintf(fp1,"\n");
         }
     }
 

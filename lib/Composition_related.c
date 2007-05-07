@@ -42,15 +42,13 @@ static void map_composition_to_nodes(struct All_variables *E);
 
 void composition_input(struct All_variables *E)
 {
+    int i;
     int m = E->parallel.me;
 
     input_int("chemical_buoyancy",&(E->composition.ichemical_buoyancy),
               "1,0,nomax",m);
 
     if (E->composition.ichemical_buoyancy==1) {
-
-        input_double("buoyancy_ratio",
-                     &(E->composition.buoyancy_ratio),"1.0",m);
 
         /* ibuoy_type=0 (absolute method) */
         /* ibuoy_type=1 (ratio method) */
@@ -61,6 +59,21 @@ void composition_input(struct All_variables *E)
             fflush(stderr);
             parallel_process_termination();
         }
+
+        if (E->composition.ibuoy_type==0)
+            E->composition.ncomp = E->trace.nflavors;
+        else if (E->composition.ibuoy_type==1)
+            E->composition.ncomp = E->trace.nflavors - 1;
+
+        E->composition.buoyancy_ratio = (double*) malloc(E->composition.ncomp
+                                                         *sizeof(double));
+
+        /* default values .... */
+        for (i=0; i<E->composition.ncomp; i++)
+            E->composition.buoyancy_ratio[i] = 1.0;
+
+        input_double_vector("buoyancy_ratio", E->composition.ncomp,
+                            E->composition.buoyancy_ratio,m);
 
     }
 
@@ -96,6 +109,7 @@ void composition_setup(struct All_variables *E)
 
 void write_composition_instructions(struct All_variables *E)
 {
+    int k;
 
     E->composition.on = 0;
     if (E->composition.ichemical_buoyancy==1 ||
@@ -119,7 +133,9 @@ void write_composition_instructions(struct All_variables *E)
         if (E->composition.ibuoy_type==1) fprintf(E->trace.fpt,"Ratio Method\n");
         if (E->composition.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
 
-        fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
+        for(k=0; k<E->composition.ncomp; k++) {
+            fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio[k]);
+        }
 
         /*
         if (E->composition.icompositional_rheology==0) {
@@ -171,21 +187,40 @@ void fill_composition(struct All_variables *E)
 
 static void allocate_composition_memory(struct All_variables *E)
 {
-    int j;
+    int i, j;
+
+    for (i=0; i<E->composition.ncomp; i++) {
+        E->composition.bulk_composition = (double*) malloc(E->composition.ncomp*sizeof(double));
+        E->composition.initial_bulk_composition = (double*) malloc(E->composition.ncomp*sizeof(double));
+        E->composition.error_fraction = (double*) malloc(E->composition.ncomp*sizeof(double));
+    }
 
     /* allocat memory for composition fields at the nodes and elements */
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        if ((E->composition.comp_el[j]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
+        if ((E->composition.comp_el[j]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8987y\n");
+            fflush(E->trace.fpt);
+            exit(10);
+        }
+        if ((E->composition.comp_node[j]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8988y\n");
             fflush(E->trace.fpt);
             exit(10);
         }
 
-        if ((E->composition.comp_node[j]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
-            fflush(E->trace.fpt);
-            exit(10);
+        for (i=0; i<E->composition.ncomp; i++) {
+            if ((E->composition.comp_el[j][i]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
+                fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+
+            if ((E->composition.comp_node[j][i]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
+                fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
         }
     }
 
@@ -230,16 +265,8 @@ static void check_initial_composition(struct All_variables *E)
 
 static void compute_elemental_composition_ratio_method(struct All_variables *E)
 {
-    int j, e, flavor, numtracers;
+    int i, j, e, flavor, numtracers;
     int iempty = 0;
-
-
-    /* XXX: currently only two composition is supported */
-    if (E->trace.nflavors != 2) {
-        fprintf(E->trace.fpt, "Sorry - Only two flavors of tracers is supported\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
 
 
     for (j=1; j<=E->sphere.caps_per_proc; j++) {
@@ -256,10 +283,11 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
                 continue;
             }
 
-            /* XXX: generalize for more than one composition */
-            flavor = 1;
-            E->composition.comp_el[j][e] =
-                E->trace.ntracer_flavor[j][flavor][e] / (double)numtracers;
+            for(i=0;i<E->composition.ncomp;i++) {
+                flavor = i + 1;
+                E->composition.comp_el[j][i][e] =
+                    E->trace.ntracer_flavor[j][flavor][e] / (double)numtracers;
+            }
         }
 
 
@@ -285,8 +313,8 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
 
 static void map_composition_to_nodes(struct All_variables *E)
 {
-
-    int kk;
+    double *tmp[NCS];
+    int i, n, kk;
     int nelem, nodenum;
     int j;
 
@@ -294,8 +322,10 @@ static void map_composition_to_nodes(struct All_variables *E)
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
         /* first, initialize node array */
-        for (kk=1;kk<=E->lmesh.nno;kk++)
-            E->composition.comp_node[j][kk]=0.0;
+        for(i=0;i<E->composition.ncomp;i++) {
+            for (kk=1;kk<=E->lmesh.nno;kk++)
+                E->composition.comp_node[j][i][kk]=0.0;
+        }
 
         /* Loop through all elements */
         for (nelem=1;nelem<=E->lmesh.nel;nelem++) {
@@ -305,34 +335,42 @@ static void map_composition_to_nodes(struct All_variables *E)
             /* weight composition */
 
             for (nodenum=1;nodenum<=8;nodenum++) {
+                n = E->ien[j][nelem].node[nodenum];
+                for(i=0;i<E->composition.ncomp;i++) {
 
-                E->composition.comp_node[j][E->ien[j][nelem].node[nodenum]] +=
-                    E->composition.comp_el[j][nelem]*
-                    E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
-
+                    E->composition.comp_node[j][i][n] +=
+                        E->composition.comp_el[j][i][nelem]*
+                        E->TWW[E->mesh.levmax][j][nelem].node[nodenum];
+                }
             }
 
         } /* end nelem */
     } /* end j */
 
+    for(i=0;i<E->composition.ncomp;i++) {
+        for (j=1;j<=E->sphere.caps_per_proc;j++)
+            tmp[j] = E->composition.comp_node[j][i];
 
-    (E->exchange_node_d)(E,E->composition.comp_node,E->mesh.levmax);
-
+        (E->exchange_node_d)(E,tmp,E->mesh.levmax);
+    }
 
     /* Divide by nodal volume */
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1;kk<=E->lmesh.nno;kk++)
-            E->composition.comp_node[j][kk] *= E->MASS[E->mesh.levmax][j][kk];
+        for(i=0;i<E->composition.ncomp;i++)
+            for (kk=1;kk<=E->lmesh.nno;kk++)
+                E->composition.comp_node[j][i][kk] *= E->MASS[E->mesh.levmax][j][kk];
 
         /* testing */
         /**
-        for (kk=1;kk<=E->lmesh.nel;kk++) {
-            fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][kk]);
-        }
+        for(i=0;i<E->composition.ncomp;i++)
+            for (kk=1;kk<=E->lmesh.nel;kk++) {
+                fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][i][kk]);
+            }
 
-        for (kk=1;kk<=E->lmesh.nno;kk++) {
-            fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][kk]);
-        }
+        for(i=0;i<E->composition.ncomp;i++)
+            for (kk=1;kk<=E->lmesh.nno;kk++) {
+                fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][i][kk]);
+            }
         fflush(E->trace.fpt);
         /**/
 
@@ -349,14 +387,22 @@ static void init_bulk_composition(struct All_variables *E)
 
     double return_bulk_value_d();
     double volume;
-    int ival=0;
+    double *tmp[NCS];
+    int i, m;
+    const int ival=0;
 
-    /* ival=0 returns integral not average */
 
-    volume = return_bulk_value_d(E,E->composition.comp_node,ival);
+    for (i=0; i<E->composition.ncomp; i++) {
 
-    E->composition.bulk_composition = volume;
-    E->composition.initial_bulk_composition = volume;
+        for (m=1;m<=E->sphere.caps_per_proc;m++)
+            tmp[m] = E->composition.comp_node[m][i];
+
+        /* ival=0 returns integral not average */
+        volume = return_bulk_value_d(E,tmp,ival);
+
+        E->composition.bulk_composition[i] = volume;
+        E->composition.initial_bulk_composition[i] = volume;
+    }
 
     return;
 }
@@ -367,15 +413,22 @@ void get_bulk_composition(struct All_variables *E)
 
     double return_bulk_value_d();
     double volume;
+    double *tmp[NCS];
+    int i, m;
     const int ival = 0;
 
-    /* ival=0 returns integral not average */
-    volume=return_bulk_value_d(E,E->composition.comp_node,ival);
+    for (i=0; i<E->composition.ncomp; i++) {
 
-    E->composition.bulk_composition=volume;
+        for (m=1;m<=E->sphere.caps_per_proc;m++)
+            tmp[m] = E->composition.comp_node[m][i];
 
-    E->composition.error_fraction=((volume-E->composition.initial_bulk_composition)/
-                             E->composition.initial_bulk_composition);
+        /* ival=0 returns integral not average */
+        volume = return_bulk_value_d(E,tmp,ival);
+
+        E->composition.bulk_composition[i] = volume;
+
+        E->composition.error_fraction[i] = (volume - E->composition.initial_bulk_composition[i]) / E->composition.initial_bulk_composition[i];
+    }
 
     return;
 }

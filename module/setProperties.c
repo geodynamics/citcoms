@@ -71,6 +71,10 @@ int _getFloatVectorProperty(PyObject* properties, char* attribute,
                             float* vector, int len, FILE* fp);
 #define getFloatVectorProperty(p, a, v, l, o) if (-1 == _getFloatVectorProperty(p, a, v, l, o)) return NULL
 
+int _getDoubleVectorProperty(PyObject* properties, char* attribute,
+                             double* vector, int len, FILE* fp);
+#define getDoubleVectorProperty(p, a, v, l, o) if (-1 == _getDoubleVectorProperty(p, a, v, l, o)) return NULL
+
 
 /*==============================================================*/
 
@@ -601,15 +605,28 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
     getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
-    if (E->trace.ic_method_for_flavors == 0)
-        getDoubleProperty(properties, "z_interface", E->trace.z_interface, fp);
+    if (E->trace.ic_method_for_flavors == 0) {
+        E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
+                                                *sizeof(double));
+
+        getDoubleVectorProperty(properties, "z_interface", E->trace.z_interface, E->trace.nflavors-1, fp);
+    }
 
     getIntProperty(properties, "chemical_buoyancy",
                    E->composition.ichemical_buoyancy, fp);
 
     if (E->composition.ichemical_buoyancy==1) {
         getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
-        getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
+
+        if (E->composition.ibuoy_type==0)
+            E->composition.ncomp = E->trace.nflavors;
+        else if (E->composition.ibuoy_type==1)
+            E->composition.ncomp = E->trace.nflavors - 1;
+
+        E->composition.buoyancy_ratio = (double*) malloc(E->composition.ncomp
+                                                         *sizeof(double));
+
+        getDoubleVectorProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, E->composition.ncomp, fp);
     }
 
 

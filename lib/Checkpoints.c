@@ -335,20 +335,25 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
 static void composition_checkpoint(struct All_variables *E, FILE *fp)
 {
-    int m;
+    int i, m;
 
     write_sentinel(fp);
 
-    fwrite(&(E->composition.bulk_composition), sizeof(double), 1, fp);
-    fwrite(&(E->composition.initial_bulk_composition), sizeof(double), 1, fp);
+    fwrite(&(E->composition.ncomp), sizeof(int), 1, fp);
+    fwrite(E->composition.bulk_composition, sizeof(double),
+           E->composition.ncomp, fp);
+    fwrite(E->composition.initial_bulk_composition, sizeof(double),
+           E->composition.ncomp, fp);
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fwrite(E->composition.comp_el[m], sizeof(double),
-               E->lmesh.nel+1, fp);
+        for(i=0; i<E->composition.ncomp; i++)
+            fwrite(E->composition.comp_el[m][i], sizeof(double),
+                   E->lmesh.nel+1, fp);
     }
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fwrite(E->composition.comp_node[m], sizeof(double),
-               E->lmesh.nno+1, fp);
+        for(i=0; i<E->composition.ncomp; i++)
+            fwrite(E->composition.comp_node[m][i], sizeof(double),
+                   E->lmesh.nno+1, fp);
     }
 
     return;
@@ -358,30 +363,43 @@ static void composition_checkpoint(struct All_variables *E, FILE *fp)
 static void read_composition_checkpoint(struct All_variables *E, FILE *fp)
 {
     double tmp;
-    int m;
+    int m, i, itmp;
 
     read_sentinel(fp, E->parallel.me);
 
-    fread(&tmp, sizeof(double), 1, fp);
-    E->composition.bulk_composition = tmp;
+    fread(&itmp, sizeof(int), 1, fp);
+    if (itmp != E->composition.ncomp) {
+        fprintf(stderr, "Error in reading checkpoint file: ncomp, me=%d\n",
+                E->parallel.me);
+        fprintf(stderr, "%d\n", itmp);
+        exit(-1);
+    }
 
-    fread(&tmp, sizeof(double), 1, fp);
-    E->composition.initial_bulk_composition = tmp;
+    fread(E->composition.bulk_composition, sizeof(double),
+          E->composition.ncomp, fp);
+
+    fread(E->composition.initial_bulk_composition, sizeof(double),
+          E->composition.ncomp, fp);
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fread(E->composition.comp_el[m], sizeof(double),
-              E->lmesh.nel+1, fp);
+        for(i=0; i<E->composition.ncomp; i++)
+            fread(E->composition.comp_el[m][i], sizeof(double),
+                  E->lmesh.nel+1, fp);
     }
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fread(E->composition.comp_node[m], sizeof(double),
-              E->lmesh.nno+1, fp);
+        for(i=0; i<E->composition.ncomp; i++)
+            fread(E->composition.comp_node[m][i], sizeof(double),
+                  E->lmesh.nno+1, fp);
     }
 
     /* preventing uninitialized access */
     E->trace.istat_iempty = 0;
-    E->composition.error_fraction = E->composition.bulk_composition
-        / E->composition.initial_bulk_composition - 1.0;
+
+    for (i=0; i<E->composition.ncomp; i++) {
+        E->composition.error_fraction[i] = E->composition.bulk_composition[i]
+        / E->composition.initial_bulk_composition[i] - 1.0;
+    }
 
     return;
 }

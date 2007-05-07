@@ -598,15 +598,16 @@ struct COMPOSITION {
     /* if any of the above flags is true, turn this flag on */
     int on;
 
-    double buoyancy_ratio;
     int ibuoy_type;
+    int ncomp;
+    double *buoyancy_ratio;
 
-    double *comp_el[13];
-    double *comp_node[13];
+    double **comp_el[13];
+    double **comp_node[13];
 
-    double initial_bulk_composition;
-    double bulk_composition;
-    double error_fraction;
+    double *initial_bulk_composition;
+    double *bulk_composition;
+    double *error_fraction;
 
     double compositional_rheology_prefactor;
 };
