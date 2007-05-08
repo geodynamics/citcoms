@@ -29,7 +29,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz
+Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [ncompositions]
 '''
 
 
@@ -100,7 +100,8 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
 
 
 def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, optional_fields):
+                 ncap, nprocx, nprocy, nprocz, optional_fields,
+                 ncompositions=0):
     # paste
     opts0 = 'coord,velo,visc'
     opts1 = optional_fields
@@ -132,8 +133,8 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
         combined_files0.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
         combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
 
-    dxgeneral.write(opts0, combined_files0)
-    dxgeneral.write(opts1, combined_files1)
+    dxgeneral.write(opts0, 0, combined_files0)
+    dxgeneral.write(opts1, ncompositions, combined_files1)
 
     return
 
@@ -143,7 +144,7 @@ if __name__ == '__main__':
 
     import sys
 
-    if not len(sys.argv) == 12:
+    if len(sys.argv) < 12:
         print __doc__
         sys.exit(1)
 
@@ -159,11 +160,16 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
+    if len(sys.argv) < 13:
+        ncompositions = 0
+    else:
+        ncompositions = int(sys.argv[12])
+
     totalnodes = nprocx * nprocy * nprocz * ncap
     nodelist = machinefile2nodelist(machinefile, totalnodes)
 
     batchcombine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz)
+                 ncap, nprocx, nprocy, nprocz, ncompositions)
 
 
 

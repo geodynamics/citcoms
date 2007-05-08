@@ -28,13 +28,13 @@
 
 '''Create OpenDX .general file for combined Citcom Data
 
-  Usage: dxgeneral.py combined_fields file1 [file2 [...]]
+  Usage: dxgeneral.py combined_fields ncompositions file1 [file2 [...]]
 '''
 
 import os, sys
 
 
-def write(opts, filenames):
+def write(opts, ncomp, filenames):
 
     for filename in filenames:
         if not os.path.exists(filename):
@@ -47,7 +47,7 @@ def write(opts, filenames):
         f = open(outfile, 'w')
 
         try:
-            write_general_file(f, filename, opts, shape)
+            write_general_file(f, filename, opts, shape, ncomp)
         finally:
             f.close()
 
@@ -65,7 +65,7 @@ def get_shape(filename):
 
 
 
-def write_general_file(f, filename, opts, shape):
+def write_general_file(f, filename, opts, shape, ncomp):
 
     template = '''file = %(filename)s
 grid = %(shape_str)s
@@ -96,6 +96,10 @@ end
               'velo': '3-vector, scalar',
               'visc': 'scalar'}
 
+    # 'comp_nd' needs special treatment
+    if ncomp > 1:
+        struct['comp_nd'] = '%d-vector' % ncomp
+
     # mapping from opt name to data type
     type = {'comp_nd': 'float',
             'coord': 'float',
@@ -108,6 +112,7 @@ end
     opt_struct = []
     opt_type = []
     for opt in opts.split(','):
+        opt = opt.strip()
         opt_field.append(field[opt])
         opt_struct.append(struct[opt])
         opt_type.append(type[opt])
@@ -129,9 +134,10 @@ if __name__ == '__main__':
         sys.exit(1)
 
     opts = sys.argv[1]
-    filenames = sys.argv[2:]
+    ncomp = int(sys.argv[2])
+    filenames = sys.argv[3:]
 
-    write(opts, filenames)
+    write(opts, ncomp, filenames)
 
 
 # End of file

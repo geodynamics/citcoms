@@ -443,11 +443,11 @@ void output_comp_nd(struct All_variables *E, int cycles)
     fp1 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d %.5e",
+        fprintf(fp1,"%3d %7d %.5e %d\n",
                 j, E->lmesh.nel,
-                E->monitor.elapsed_time);
+                E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
-            fprintf(fp1," %.5e %.5e",
+            fprintf(fp1,"%.5e %.5e ",
                     E->composition.initial_bulk_composition[i],
                     E->composition.bulk_composition[i]);
         }
@@ -478,11 +478,11 @@ void output_comp_el(struct All_variables *E, int cycles)
     fp1 = output_open(output_file);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d %.5e",
+        fprintf(fp1,"%3d %7d %.5e %d\n",
                 j, E->lmesh.nel,
-                E->monitor.elapsed_time);
+                E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
-            fprintf(fp1," %.5e %.5e",
+            fprintf(fp1,"%.5e %.5e ",
                     E->composition.initial_bulk_composition[i],
                     E->composition.bulk_composition[i]);
         }

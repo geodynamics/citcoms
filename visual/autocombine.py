@@ -34,6 +34,8 @@ usage: autocombine.py machinefile inputfile step1 [step2 [...] ]
 # default values for CitcomS input
 defaults = {'output_format': 'ascii',
             'output_optional': 'surf,botm',
+            'buoy_type': 1,
+            'tracer_flavors': 2,
             'nprocx': 1,
             'nprocy': 1,
             'nprocz': 1,
@@ -89,6 +91,19 @@ if __name__ == '__main__':
     output_optional = parser.getstr('output_optional')
     optional_fields = normalize_optional(output_optional)
 
+    buoy_type = parser.getint('buoy_type')
+    nflavors = parser.getint('tracer_flavors')
+    if buoy_type == 0:
+        ncompositions = nflavors
+    elif buoy_type == 1:
+        ncompositions = nflavors - 1
+    else:
+        print "Error: don't know how to combine the output", \
+              "(buoy_type=%d)" % buoy_type
+        sys.exit(1)
+
+
+
     nodex = parser.getint('nodex')
     nodey = parser.getint('nodey')
     nodez = parser.getint('nodez')
@@ -104,7 +119,7 @@ if __name__ == '__main__':
         bc.batchcombine(nodelist, datadir, datafile, timestep,
                         nodex, nodey, nodez,
                         ncap, nprocx, nprocy, nprocz,
-                        optional_fields)
+                        optional_fields, ncompositions)
 
 
 
