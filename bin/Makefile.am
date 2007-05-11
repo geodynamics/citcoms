@@ -40,7 +40,7 @@ if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms mpipycitcoms
 endif
 if COND_EXCHANGER
-    LINK = $(CXXLINK)
+    PYLINK = $(CXXLINK)
     bin_SCRIPTS += coupledcitcoms
     MAYBE_WITH_EXCHANGER = -DWITH_EXCHANGER
 if COND_EMBEDDING
@@ -49,6 +49,7 @@ else
     MAYBE_EXCHANGER_MODULE = $(top_builddir)/module/Exchanger/ExchangerLibmodule.la
 endif
 else
+    PYLINK = $(LINK)
     MAYBE_WITH_EXCHANGER =
     MAYBE_EXCHANGER_MODULE =
 endif
@@ -131,7 +132,7 @@ pycitcoms_LDADD = \
 	$(libCitcomS)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)
-	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+	$(PYLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
 		$(pycitcoms_LDFLAGS) $(pycitcoms_OBJECTS) $(pycitcoms_LDADD) \
 		$(PYTHON_EGG_LDFLAGS) \
 		$(PYTHON_BLDLIBRARY) \
@@ -149,7 +150,7 @@ mpipycitcoms_LDADD = \
 	$(libCitcomS)
 mpipycitcoms$(EXEEXT): $(mpipycitcoms_OBJECTS) $(mpipycitcoms_DEPENDENCIES) 
 	@rm -f mpipycitcoms$(EXEEXT)
-	$(LINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
+	$(PYLINK) $(PYTHON_LDFLAGS) $(PYTHON_LINKFORSHARED) \
 		$(mpipycitcoms_LDFLAGS) $(mpipycitcoms_OBJECTS) $(mpipycitcoms_LDADD) \
 		$(PYTHON_EGG_LDFLAGS) \
 		$(PYTHON_BLDLIBRARY) \
