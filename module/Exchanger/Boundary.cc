@@ -26,7 +26,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <vector>
 #include "global_defs.h"
 #include "journal/diagnostics.h"

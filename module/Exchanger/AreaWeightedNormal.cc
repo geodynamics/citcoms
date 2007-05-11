@@ -26,7 +26,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <cmath>
 #include <iostream>
 #include "global_defs.h"

@@ -48,6 +48,11 @@ AC_ARG_ENABLE([embedding],
     [want_embedding=yes])
 AM_CONDITIONAL([COND_EMBEDDING], [test "$want_embedding" = yes])
 CIT_ARG_HDF5([auto])
+AC_ARG_WITH([exchanger],
+    [AC_HELP_STRING([--with-exchanger],
+        [use Exchanger @<:@default=auto@:>@])],
+    [want_exchanger="$withval"],
+    [want_exchanger=auto])
 
 if test "$want_pyre" = yes; then
     # Check for Python.
@@ -56,13 +61,22 @@ if test "$want_pyre" = yes; then
 
     # Check for Python modules and packages.
     CIT_PYTHON_EGG_SETUP
+else
+    if test "$want_exchanger" = yes; then
+        AC_MSG_ERROR([Exchanger requires Pyre])
+    fi
+    want_exchanger=no
 fi
 
 # Checks for programs.
 AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])
+AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlc++_r xlC_r xlC icpc ecpc pgCC])
 if test "$want_pyre" = yes; then
     CIT_PROG_PYCONFIG
     AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
+    # Compile C as C++.
+    dnl CC="$CXX"
+    dnl CFLAGS="$CXXFLAGS"
 fi
 # We don't need Fortran.
 AC_PROVIDE([AC_PROG_F77])
@@ -71,19 +85,63 @@ AC_PROG_LIBTOOL
 # Checks for libraries.
 AC_SEARCH_LIBS([MPI_Init], [mpi mpich], [], [AC_MSG_ERROR([MPI library not found])])
 AC_SEARCH_LIBS([sqrt], [m])
+
 CIT_CHECK_LIB_HDF5
 CIT_CHECK_LIB_HDF5_PARALLEL
+
+if test "$want_exchanger" != no; then
+    save_CC="$CC"
+    save_CFLAGS="$CFLAGS"
+    save_LIBS="$LIBS"
+    CC="$CXX"
+    CFLAGS="$CXXFLAGS"
+    LIBS="$PYTHON_EGG_LDFLAGS $PYTHON_BLDLIBRARY $PYTHON_LIBS $PYTHON_MODLIBS $PYTHON_SYSLIBS $LIBS"
+    AC_CHECK_FUNC([PyExchanger_exchangeBoundedBox], [], [
+        if test "$want_exchanger" = auto; then
+            want_exchanger=no
+            AC_MSG_WARN([Exchanger library not found; disabling Exchanger support])
+        else
+            AC_MSG_ERROR([Exchanger library not found])
+        fi
+    ])
+    CC="$save_CC"
+    CFLAGS="$save_CFLAGS"
+    LIBS="$save_LIBS"
+fi
 
 # Checks for header files.
 AC_CHECK_HEADER([mpi.h], [], [AC_MSG_ERROR([header 'mpi.h' not found])])
 AC_CHECK_HEADERS([malloc.h])
 CIT_CHECK_HEADER_HDF5
 
+AC_LANG_PUSH(C++)
+if test "$want_exchanger" != no; then
+    save_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$PYTHON_EGG_CPPFLAGS $CPPFLAGS"
+    AC_CHECK_HEADERS([Exchanger/DIM.h], [], [
+        if test "$want_exchanger" = auto; then
+            want_exchanger=no
+            AC_MSG_WARN([header 'Exchanger/DIM.h' not found; disabling Exchanger support])
+        else
+            AC_MSG_ERROR([header 'Exchanger/DIM.h' not found])
+        fi
+    ])
+    CPPFLAGS="$save_CPPFLAGS"
+fi
+AC_LANG_POP()
+
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
 
-AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" != no])
+if test "$want_hdf5" != no; then
+    want_hdf5=yes
+fi
+if test "$want_exchanger" != no; then
+    want_exchanger=yes
+fi
+AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
+AM_CONDITIONAL([COND_EXCHANGER], [test "$want_exchanger" = yes])
 
 AC_CONFIG_FILES([Makefile
                  bin/Makefile
@@ -92,6 +150,7 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  lib/Makefile
                  module/Makefile
+                 module/Exchanger/Makefile
                  tests/Makefile
                  visual/Makefile
                  visual/OpenDXMacro/Makefile])
@@ -108,6 +167,7 @@ echo -e "\t CFLAGS: " $CFLAGS
 echo -e "\t CPPFLAGS: " $CPPFLAGS
 echo -e "\t LDFLAGS: " $LDFLAGS
 echo -e "\t with-pyre: " $want_pyre
+echo -e "\t with-exchanger: " $want_exchanger
 echo -e "\t with-hdf5: " $want_hdf5
 echo
 

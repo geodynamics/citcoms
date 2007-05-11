@@ -26,7 +26,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <Python.h>
 
 PyObject *pyExchanger_runtimeError = 0;

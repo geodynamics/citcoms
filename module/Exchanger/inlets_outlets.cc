@@ -26,10 +26,9 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <Python.h>
 #include "mpi.h"
-#include "mpi/Communicator.h"
 #include "inlets_outlets.h"
 
 ///////////////////////////////////////////////////////////////////////////////

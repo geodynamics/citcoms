@@ -26,10 +26,10 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <Python.h>
 #include "mpi.h"
-#include "mpi/Communicator.h"
+#include "mpi/pympi.h"
 #include "global_bbox.h"
 #include "global_defs.h"
 #include "initTemperature.h"
@@ -223,9 +223,9 @@ PyObject * PyCitcomSExchanger_CitcomSource_create(PyObject *self, PyObject *args
 			  &obj2, &obj3, &obj4))
         return NULL;
 
-    mpi::Communicator* temp = static_cast<mpi::Communicator*>
-	                      (PyCObject_AsVoidPtr(obj1));
-    MPI_Comm comm = temp->handle();
+    PyMPICommObject* temp = static_cast<PyMPICommObject*>
+                            (PyCObject_AsVoidPtr(obj1));
+    MPI_Comm comm = temp->comm;
 
     BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));
     BoundedBox* bbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj3));

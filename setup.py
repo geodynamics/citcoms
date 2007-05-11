@@ -2,7 +2,18 @@
 from archimedes import use_merlin
 use_merlin()
 
-from merlin import setup, find_packages
+from merlin import setup, find_packages, require
+
+install_requires = ['pythia[mpi] >= 0.8.1.0, < 0.8.2a']
+
+# Use Exchanger if it's available.
+exchanger = "Exchanger >= 1, < 2a"
+try:
+    require(exchanger)
+except Exception, e:
+    pass
+else:
+    install_requires.append(exchanger)
 
 setup(
     
@@ -12,9 +23,7 @@ setup(
     zip_safe = False,
     packages = find_packages(),
     
-    install_requires = [
-    'pythia[mpi] >= 0.8.1.0, < 0.8.2a',
-    ],
+    install_requires = install_requires,
 
     author = 'Louis Moresi, et al.',
     author_email = 'cig-mc@geodynamics.org',

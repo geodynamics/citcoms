@@ -24,7 +24,7 @@
 //
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-#include <portinfo>
+#include "config.h"
 #include <cmath>
 #include "global_defs.h"
 #include "global_bbox.h"

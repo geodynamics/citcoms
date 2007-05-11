@@ -23,6 +23,12 @@
 
 # $Id$
 
+if COND_EXCHANGER
+    MAYBE_EXCHANGER = Exchanger
+endif
+
+SUBDIRS = $(MAYBE_EXCHANGER)
+
 noinst_LIBRARIES =
 pyexec_LTLIBRARIES =
 

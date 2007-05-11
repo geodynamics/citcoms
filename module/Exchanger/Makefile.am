@@ -45,8 +45,6 @@ ExchangerLibmodule_la_LIBADD = \
 	$(PYTHON_EGG_LDFLAGS)
 ExchangerLibmodule_la_SOURCES = $(sources)
 
-CXX = $(MPICXX)
-CXXLD = @CXX@
 INCLUDES = \
 	-I$(top_srcdir)/lib \
 	$(PYTHON_EGG_CPPFLAGS) \

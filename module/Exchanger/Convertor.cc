@@ -26,7 +26,7 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include "Exchanger/Spherical2Cartesian.h"
 #include "SIUnit.h"
 #include "Convertor.h"

@@ -34,13 +34,26 @@ endif
 bin_PROGRAMS = CitcomSFull CitcomSRegional
 
 if COND_PYRE
+    bin_SCRIPTS = citcoms
 
 if COND_EMBEDDING
     bin_PROGRAMS += pycitcoms mpipycitcoms
 endif
-
-    bin_SCRIPTS = citcoms
+if COND_EXCHANGER
+    LINK = $(CXXLINK)
+    bin_SCRIPTS += coupledcitcoms
+    MAYBE_WITH_EXCHANGER = -DWITH_EXCHANGER
+if COND_EMBEDDING
+    MAYBE_EXCHANGER_MODULE = $(top_builddir)/module/Exchanger/libExchangerLibmodule.a
 else
+    MAYBE_EXCHANGER_MODULE = $(top_builddir)/module/Exchanger/ExchangerLibmodule.la
+endif
+else
+    MAYBE_WITH_EXCHANGER =
+    MAYBE_EXCHANGER_MODULE =
+endif
+else
+
     bin_SCRIPTS =
 endif
 
@@ -77,6 +90,7 @@ endif
 if COND_PYRE
 INCLUDES += \
 	-I$(top_srcdir)/module \
+	-I$(top_srcdir)/module/Exchanger \
 	$(PYTHON_EGG_CPPFLAGS) \
 	-I$(PYTHON_INCDIR)
 endif
@@ -87,6 +101,9 @@ do_build = sed -e s%[@]INTERPRETER[@]%$(noinstINTERPRETER)%g -e s%[@]PYTHONPATH[
 do_install = sed -e s%[@]INTERPRETER[@]%$(INTERPRETER)%g -e s%[@]PYTHONPATH[@]%$(PYTHONPATH)%g
 citcoms: $(srcdir)/citcoms.in Makefile
 	$(do_build) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
+	chmod +x $@
+coupledcitcoms: $(srcdir)/coupledcitcoms.in Makefile
+	$(do_build) < $(srcdir)/coupledcitcoms.in > $@ || (rm -f $@ && exit 1)
 	chmod +x $@
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
@@ -101,14 +118,16 @@ install-binSCRIPTS: $(bin_SCRIPTS)
 	    chmod +x "$(DESTDIR)$(bindir)/$$f"; \
 	  else :; fi; \
 	done
-EXTRA_DIST = citcoms.in
+EXTRA_DIST = citcoms.in coupledcitcoms.in
 CLEANFILES = $(bin_SCRIPTS)
 
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
-pycitcoms_SOURCES = pycitcoms.c
+pycitcoms_SOURCES = pycitcoms.c dummy.cc
+pycitcoms_CFLAGS = $(MAYBE_WITH_EXCHANGER)
 pycitcoms_LDADD = \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
+	$(MAYBE_EXCHANGER_MODULE) \
 	$(libCitcomS)
 pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES) 
 	@rm -f pycitcoms$(EXEEXT)
@@ -122,10 +141,11 @@ pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES)
 
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
-mpipycitcoms_SOURCES = pycitcoms.c
-mpipycitcoms_CFLAGS = -DUSE_MPI
+mpipycitcoms_SOURCES = pycitcoms.c dummy.cc
+mpipycitcoms_CFLAGS = -DUSE_MPI $(MAYBE_WITH_EXCHANGER)
 mpipycitcoms_LDADD = \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
+	$(MAYBE_EXCHANGER_MODULE) \
 	$(libCitcomS)
 mpipycitcoms$(EXEEXT): $(mpipycitcoms_OBJECTS) $(mpipycitcoms_DEPENDENCIES) 
 	@rm -f mpipycitcoms$(EXEEXT)

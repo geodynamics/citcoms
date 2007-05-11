@@ -29,7 +29,9 @@
 #ifndef pyCitcom_Exchangermodule_h
 #define pyCitcom_Exchangermodule_h
 
+#ifdef __cplusplus
 extern "C"
+#endif
 void
 initExchangerLib();
 

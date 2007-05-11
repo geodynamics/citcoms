@@ -26,12 +26,12 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
+#include "config.h"
 #include <Python.h>
 //#include <iostream>
 //#include <fstream>
 #include "mpi.h"
-#include "mpi/Communicator.h"
+#include "mpi/pympi.h"
 #include "misc.h"
 
 extern "C" {
@@ -70,8 +70,8 @@ PyObject * PyCitcomSExchanger_FinereturnE(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:FinereturnE", &Obj))
         return NULL;
 
-    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
-    MPI_Comm world = comm->handle();
+    PyMPICommObject* comm = (PyMPICommObject *) PyCObject_AsVoidPtr(Obj);
+    MPI_Comm world = comm->comm;
 
     All_variables *E = citcom_init(&world);
 
@@ -103,8 +103,8 @@ PyObject * PyCitcomSExchanger_CoarsereturnE(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:CoarsereturnE", &Obj))
         return NULL;
 
-    mpi::Communicator * comm = (mpi::Communicator *) PyCObject_AsVoidPtr(Obj);
-    MPI_Comm world = comm->handle();
+    PyMPICommObject* comm = (PyMPICommObject *) PyCObject_AsVoidPtr(Obj);
+    MPI_Comm world = comm->comm;
 
     All_variables *E = citcom_init(&world);
 

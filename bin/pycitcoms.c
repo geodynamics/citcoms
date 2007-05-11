@@ -32,6 +32,9 @@
 #include <string.h>
 #include <mpi.h>
 #include "CitcomSmodule.h"
+#ifdef WITH_EXCHANGER
+#include "Exchangermodule.h"
+#endif
 
 #define COMMAND \
 "import sys; " \
@@ -51,6 +54,9 @@
 struct _inittab inittab[] = {
     { "_mpi", init_mpi },
     { "CitcomSLib", initCitcomSLib },
+#ifdef WITH_EXCHANGER
+    { "ExchangerLib", initExchangerLib },
+#endif
     { 0, 0 }
 };
 
