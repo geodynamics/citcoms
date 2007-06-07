@@ -107,13 +107,13 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
     opts1 = optional_fields
 
     batchpaste(datadir, datafile, opts0, timestep, nodes)
-    batchpaste(datadir, datafile, opts1, timestep, nodes)
+    if opts1: batchpaste(datadir, datafile, opts1, timestep, nodes)
 
     # combine
     import combine
     combine.combine(datafile, opts0, timestep, nodex, nodey, nodez,
                         ncap, nprocx, nprocy, nprocz)
-    combine.combine(datafile, opts1, timestep, nodex, nodey, nodez,
+    if opts1: combine.combine(datafile, opts1, timestep, nodex, nodey, nodez,
                     ncap, nprocx, nprocy, nprocz)
 
     # delete pasted files
@@ -131,10 +131,10 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
     combined_files1 = []
     for cap in range(ncap):
         combined_files0.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
-        combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
+        if opts1: combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
 
     dxgeneral.write(opts0, 0, combined_files0)
-    dxgeneral.write(opts1, ncompositions, combined_files1)
+    if opts1: dxgeneral.write(opts1, ncompositions, combined_files1)
 
     return
 
