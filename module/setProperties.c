@@ -841,7 +841,7 @@ int _getStringProperty(PyObject* properties, char* attribute,
 #define CTYPE float
 #define PyTYPE_AsCTYPE PyFloat_AsDouble
 #define MESSAGE "a float is required"
-#define FORMAT "%f"
+#define FORMAT "%g"
 #include "getProperty.h"
 
 
@@ -859,7 +859,7 @@ int _getStringProperty(PyObject* properties, char* attribute,
 #define CTYPE double
 #define PyTYPE_AsCTYPE PyFloat_AsDouble
 #define MESSAGE "a float is required"
-#define FORMAT "%f"
+#define FORMAT "%g"
 #include "getProperty.h"
 
 
