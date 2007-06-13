@@ -682,23 +682,37 @@ static void generate_random_tracers(struct All_variables *E,
 
     double x,y,z;
     double theta,phi,rad;
-    double dmin,dmax;
+    double xmin,xmax,ymin,ymax,zmin,zmax;
     double random1,random2,random3;
 
 
     allocate_tracer_arrays(E,j,tracers_cap);
 
+    /* Finding the min/max of the cartesian coordinates. */
+    /* One must loop over E->X to find the min/max, since the 8 corner */
+    /* nodes may not be the min/max. */
+    xmin = ymin = zmin = E->sphere.ro;
+    xmax = ymax = zmax = -E->sphere.ro;
+    for (kk=1; kk<=E->lmesh.nno; kk++) {
+        x = E->x[j][1][kk];
+        y = E->x[j][2][kk];
+        z = E->x[j][3][kk];
+
+        xmin = ((xmin < x) ? xmin : x);
+        xmax = ((xmax > x) ? xmax : x);
+        ymin = ((ymin < y) ? ymin : y);
+        ymax = ((ymax > y) ? ymax : y);
+        zmin = ((zmin < z) ? zmin : z);
+        zmax = ((zmax > z) ? zmax : z);
+    }
 
     /* Tracers are placed randomly in cap */
     /* (intentionally using rand() instead of srand() )*/
 
-    dmin=-1.0*E->sphere.ro;
-    dmax=E->sphere.ro;
-
     while (E->trace.ntracers[j]<tracers_cap) {
 
         number_of_tries++;
-        max_tries=500*tracers_cap;
+        max_tries=100*tracers_cap;
 
         if (number_of_tries>max_tries) {
             fprintf(E->trace.fpt,"Error(make_tracer_array)-too many tries?\n");
@@ -712,9 +726,9 @@ static void generate_random_tracers(struct All_variables *E,
         random2=(1.0*rand())/(1.0*RAND_MAX);
         random3=(1.0*rand())/(1.0*RAND_MAX);
 
-        x=dmin+random1*(dmax-dmin);
-        y=dmin+random2*(dmax-dmin);
-        z=dmin+random3*(dmax-dmin);
+        x=xmin+random1*(xmax-xmin);
+        y=ymin+random2*(ymax-ymin);
+        z=zmin+random3*(zmax-zmin);
 
         /* first check if within shell */
 

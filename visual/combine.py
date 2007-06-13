@@ -35,26 +35,38 @@ usage: combine.py datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz
 class Combine(object):
 
 
-    def __init__(self, grid):
+    def __init__(self, nodex, nodey, nodez, nprocx, nprocy, nprocz):
+        self.nodex = nodex
+        self.nodey = nodey
+        self.nodez = nodez
+
+        self.nprocx = nprocx
+        self.nprocy = nprocy
+        self.nprocz = nprocz
+
         # data storage
-        self.saved = range(grid['nox'] * grid['noy'] * grid['noz'])
+        self.saved = range(nodex * nodey * nodez)
         return
 
 
 
-    def readData(self, filename):
+    def readData(self, filename, headlines=1):
         fp = file(filename, 'r')
-        header = fp.readline()
-        #print header
+
+        # discard the header
+        for i in range(headlines):
+            header = fp.readline()
+            #print header
+
         return fp.readlines()
 
 
 
-    def join(self, data, me, grid, cap):
+    def join(self, data, me):
         # processor geometry
-        nprocx = int(cap['nprocx'])
-        nprocy = int(cap['nprocy'])
-        nprocz = int(cap['nprocz'])
+        nprocx = self.nprocx
+        nprocy = self.nprocy
+        nprocz = self.nprocz
 
         mylocz = me % nprocz
         mylocx = ((me - mylocz) / nprocz) % nprocx
@@ -62,26 +74,26 @@ class Combine(object):
         #print me, mylocx, mylocy, mylocz
 
         # mesh geometry
-        nox = int(grid['nox'])
-        noy = int(grid['noy'])
-        noz = int(grid['noz'])
+        nodex = self.nodex
+        nodey = self.nodey
+        nodez = self.nodez
 
-        mynox = 1 + (nox-1)/nprocx
-        mynoy = 1 + (noy-1)/nprocy
-        mynoz = 1 + (noz-1)/nprocz
+        mynodex = 1 + (nodex-1)/nprocx
+        mynodey = 1 + (nodey-1)/nprocy
+        mynodez = 1 + (nodez-1)/nprocz
 
-        if not len(data) == mynox * mynoy * mynoz:
-            raise ValueError, "data size"
+        if not len(data) == mynodex * mynodey * mynodez:
+            raise ValueError, "incorrect data size"
 
-        mynxs = (mynox - 1) * mylocx
-        mynys = (mynoy - 1) * mylocy
-        mynzs = (mynoz - 1) * mylocz
+        mynxs = (mynodex - 1) * mylocx
+        mynys = (mynodey - 1) * mylocy
+        mynzs = (mynodez - 1) * mylocz
 
         n = 0
-        for i in range(mynys, mynys+mynoy):
-            for j in range(mynxs, mynxs + mynox):
-                for k in range(mynzs, mynzs + mynoz):
-                    m = k + j * noz + i * nox * noz
+        for i in range(mynys, mynys+mynodey):
+            for j in range(mynxs, mynxs + mynodex):
+                for k in range(mynzs, mynzs + mynodez):
+                    m = k + j * nodez + i * nodex * nodez
                     self.saved[m] = data[n]
                     n += 1
 
@@ -89,13 +101,37 @@ class Combine(object):
 
 
 
-    def write(self, filename, grid):
+    def write(self, filename):
         fp = file(filename, 'w')
-        header = '%d x %d x %d\n' % (grid['nox'], grid['noy'], grid['noz'])
+        header = '%d x %d x %d\n' % (self.nodex, self.nodey, self.nodez)
         #print header
         fp.write(header)
 	fp.writelines(self.saved)
         return
+
+
+
+##############################################
+
+
+def combine(prefix, opts, step, nodex, nodey, nodez,
+            ncap, nprocx, nprocy, nprocz):
+    nproc_per_cap = nprocx * nprocy * nprocz
+    for i in range(ncap):
+        cb = Combine(nodex, nodey, nodez, nprocx, nprocy, nprocz)
+        for n in range(i * nproc_per_cap, (i+1) * nproc_per_cap):
+            filename = '%s.%s.%d.%d.pasted' % (prefix, opts, n, step)
+            print 'reading', filename
+            data = cb.readData(filename, 0)
+            cb.join(data, n)
+
+        if opts == 'coord,velo,visc':
+            filename = '%s.cap%02d.%d' % (prefix, i, step)
+        else:
+            filename = '%s.opt%02d.%d' % (prefix, i, step)
+
+        print 'writing', filename
+        cb.write(filename)
 
 
 
@@ -110,29 +146,17 @@ if __name__ == '__main__':
     prefix = sys.argv[1]
     step = int(sys.argv[2])
 
-    grid = {}
-    grid['nox'] = int(sys.argv[3])
-    grid['noy'] = int(sys.argv[4])
-    grid['noz'] = int(sys.argv[5])
+    nodex = int(sys.argv[3])
+    nodey = int(sys.argv[4])
+    nodez = int(sys.argv[5])
 
     ncap = int(sys.argv[6])
-    cap = {}
-    cap['nprocx'] = int(sys.argv[7])
-    cap['nprocy'] = int(sys.argv[8])
-    cap['nprocz'] = int(sys.argv[9])
+    nprocx = int(sys.argv[7])
+    nprocy = int(sys.argv[8])
+    nprocz = int(sys.argv[9])
 
-    nproc_per_cap = cap['nprocx'] * cap['nprocy'] * cap['nprocz']
-    for i in range(ncap):
-        cb = Combine(grid)
-        for n in range(i * nproc_per_cap, (i+1) * nproc_per_cap):
-            filename = '%s.%d.%d' % (prefix, n, step)
-            print 'reading', filename
-            data = cb.readData(filename)
-            cb.join(data, n, grid, cap)
-
-        filename = '%s.cap%02d.%d' % (prefix, i, step)
-        print 'writing', filename
-        cb.write(filename, grid)
+    combine(prefix, step, nodex, nodey, nodez,
+            ncap, nprocx, nprocy, nprocz)
 
 
 # version
