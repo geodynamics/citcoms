@@ -466,6 +466,12 @@ static void geoid_from_buoyancy(E, harm_geoid)
     /* cos coeff */
     geoid[1] = (float*)malloc((E->sphere.hindice+1)*sizeof(float));
 
+    /* reset arrays */
+    for (p = 0; p <= E->sphere.hindice; p++) {
+        harm_geoid[0][p] = 0;
+        harm_geoid[1][p] = 0;
+    }
+
     /* loop over each layer */
     for(k=1;k<E->lmesh.noz;k++)  {
         buoy2rho = scaling2 * E->refstate.rho[k]
