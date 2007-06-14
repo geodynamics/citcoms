@@ -29,7 +29,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [ncompositions]
+Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [fields [ncompositions]]
 '''
 
 
@@ -73,7 +73,7 @@ def nodelist2nodes(nodelist):
 
 
 
-def batchpaste(datadir, datafile, opts, timestep, nodes):
+def batchpaste(datadir, datafile, fields, timestep, nodes):
     from socket import gethostname
     hostname = gethostname()
 
@@ -84,7 +84,7 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
         if node == 'localhost' or node == hostname:
             # local paste
             import pasteCitcomData
-            pasteCitcomData.run(datadir, datafile, opts, rank, timestep, cwd)
+            pasteCitcomData.run(datadir, datafile, fields, rank, timestep, cwd)
 
         else:
             # remote paste
@@ -92,7 +92,7 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
             # replace 'rsh' with 'ssh' if necessary
             remote_shell = 'rsh'
 
-            cmd = '%(remote_shell)s %(node)s pasteCitcomData.py %(datadir)s %(datafile)s %(opts)s %(rank)d %(timestep)d %(cwd)s' % vars()
+            cmd = '%(remote_shell)s %(node)s pasteCitcomData.py %(datadir)s %(datafile)s %(fields)s %(rank)d %(timestep)d %(cwd)s' % vars()
             os.system(cmd)
 
     return
@@ -100,20 +100,15 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
 
 
 def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, optional_fields,
-                 ncompositions=0):
+                 ncap, nprocx, nprocy, nprocz, fields,
+                 ncompositions):
     # paste
-    opts0 = 'coord,velo,visc'
-    opts1 = optional_fields
-
-    batchpaste(datadir, datafile, opts0, timestep, nodes)
-    if opts1: batchpaste(datadir, datafile, opts1, timestep, nodes)
+    batchpaste(datadir, datafile, fields, timestep, nodes)
 
     # combine
     import combine
-    combine.combine(datafile, opts0, timestep, nodex, nodey, nodez,
-                        ncap, nprocx, nprocy, nprocz)
-    if opts1: combine.combine(datafile, opts1, timestep, nodex, nodey, nodez,
+    combine.combine(datafile, fields, timestep,
+                    nodex, nodey, nodez,
                     ncap, nprocx, nprocy, nprocz)
 
     # delete pasted files
@@ -127,14 +122,15 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # create .general file
     import dxgeneral
-    combined_files0 = []
-    combined_files1 = []
+    combined_files = []
+    if fields == 'coord,velo,visc':
+        fmt = '%(datafile)s.cap%(cap)02d.%(timestep)d'
+    else:
+        fmt = '%(datafile)s.opt%(cap)02d.%(timestep)d'
     for cap in range(ncap):
-        combined_files0.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
-        if opts1: combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
+        combined_files.append(fmt % vars())
 
-    dxgeneral.write(opts0, 0, combined_files0)
-    if opts1: dxgeneral.write(opts1, ncompositions, combined_files1)
+    dxgeneral.write(fields, ncompositions, combined_files)
 
     return
 
@@ -144,7 +140,7 @@ if __name__ == '__main__':
 
     import sys
 
-    if len(sys.argv) < 12:
+    if not (12 <= len(sys.argv) <= 14):
         print __doc__
         sys.exit(1)
 
@@ -160,16 +156,21 @@ if __name__ == '__main__':
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
 
-    if len(sys.argv) < 13:
-        ncompositions = 0
+    if len(sys.argv) >= 13:
+        fields = sys.argv[12]
     else:
-        ncompositions = int(sys.argv[12])
+        fields = 'coord,velo,visc'
+
+    if len(sys.argv) == 14:
+        ncompositions = int(sys.argv[13])
+    else:
+        ncompositions = 0
 
     totalnodes = nprocx * nprocy * nprocz * ncap
     nodelist = machinefile2nodelist(machinefile, totalnodes)
 
     batchcombine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, ncompositions)
+                 ncap, nprocx, nprocy, nprocz, fields, ncompositions)
 
 
 
