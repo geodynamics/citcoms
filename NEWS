@@ -3,6 +3,22 @@ CitComS.py NEWS -- history of user-visible changes.  2006-12-04
 Please send CitComS.py bug reports to cig-mc@geodynamics.org.
 
 
+Version 2.2.2
+
+* A bug in geoid calculation is fixed. The buoyancy contribution on geoid
+  was not correctly zeroed before every geoid calculation. This caused the
+  geoid at former timestep accumulated over the later timestep. (Issue
+  114)
+
+* The pressure, stress, and composition output, if enabled, will be combined
+  by "autocombine.py" script as well. The combined output is stored in
+  opt-files, similar to the cap-files. (Issue 99)
+
+* Generating random tracers is sped up. This should avoid a potential problem
+  of "too many tries?" error when the domain size of a processor is much
+  smaller (<1%) than the size of the whole sphere.
+  
+
 Version 2.2.1
 
 * One example, Cookbook7, was missing in v2.2.0.
@@ -20,7 +36,7 @@ Version 2.2.0
 * New feature to use the tracers to define the low viscosity wedges/channels
   in the subduction zones (code donated by Vlad Manea).
 
-* Fixes of sevearal bugs: issue 72, 73, 75, 77 and 81. See the Geodynamics
+* Fixes of several bugs: issue 72, 73, 75, 77 and 81. See the Geodynamics
   Roundup issue tracker (http://geodynamics.org/roundup) and the file 
   ChangeLog for details. Important bug fixes include:
 
