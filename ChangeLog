@@ -1,3 +1,40 @@
+2007-06-14 22:58  tan2
+
+	* NEWS, configure.ac: Update NEWS and configure.ac for v2.2.2
+	  release
+
+2007-06-14 21:39  tan2
+
+	* lib/Topo_gravity.c: Porting r7245 from trunk -- Zeroing geoid
+	  arrays before every geoid calculation. This fixes issue114
+
+2007-06-14 17:57  tan2
+
+	* visual/autocombine.py, visual/batchcombine.py,
+	  visual/pasteCitcomData.py: Porting r7236 from trunk
+
+2007-06-14 01:37  tan2
+
+	* visual/pasteCitcomData.py: Porting r7221 from trunk -- Fixing
+	  issue111: Expanding %RANK in autocombine.py
+
+2007-06-13 00:02  tan2
+
+	* module/setProperties.c: Merging r7137 from trunk
+
+2007-06-13 00:02  tan2
+
+	* lib/Tracer_setup.c, tests/Makefile.am, tests/asap.py,
+	  tests/hrothgar.py, visual/Makefile.am, visual/autocombine.py,
+	  visual/batchcombine.py, visual/batchpaste.sh, visual/combine.py,
+	  visual/dxgeneral.py, visual/dxgeneral.sh, visual/execpaste.py,
+	  visual/pasteCitcomData.py, visual/pasteCitcomData.sh: Merging
+	  r6509-6850 from trunk
+
+2007-06-12 23:49  tan2
+
+	* .: A branch for bug-fix
+
 2007-03-27 04:37  tan2
 
 	* NEWS, configure.ac, doc/manual/citcoms.lyx: Updated NEWS for the
