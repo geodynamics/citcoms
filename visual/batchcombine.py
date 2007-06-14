@@ -29,7 +29,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz
+Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [fields]
 '''
 
 
@@ -73,7 +73,7 @@ def nodelist2nodes(nodelist):
 
 
 
-def batchpaste(datadir, datafile, opts, timestep, nodes):
+def batchpaste(datadir, datafile, fields, timestep, nodes):
     from socket import gethostname
     hostname = gethostname()
 
@@ -84,7 +84,7 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
         if node == 'localhost' or node == hostname:
             # local paste
             import pasteCitcomData
-            pasteCitcomData.run(datadir, datafile, opts, rank, timestep, cwd)
+            pasteCitcomData.run(datadir, datafile, fields, rank, timestep, cwd)
 
         else:
             # remote paste
@@ -92,7 +92,7 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
             # replace 'rsh' with 'ssh' if necessary
             remote_shell = 'rsh'
 
-            cmd = '%(remote_shell)s %(node)s pasteCitcomData.py %(datadir)s %(datafile)s %(opts)s %(rank)d %(timestep)d %(cwd)s' % vars()
+            cmd = '%(remote_shell)s %(node)s pasteCitcomData.py %(datadir)s %(datafile)s %(fields)s %(rank)d %(timestep)d %(cwd)s' % vars()
             os.system(cmd)
 
     return
@@ -100,20 +100,17 @@ def batchpaste(datadir, datafile, opts, timestep, nodes):
 
 
 def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, optional_fields):
+                 ncap, nprocx, nprocy, nprocz, fields):
     # paste
-    opts0 = 'coord,velo,visc'
-    opts1 = optional_fields
+    batchpaste(datadir, datafile, fields, timestep, nodes)
 
-    batchpaste(datadir, datafile, opts0, timestep, nodes)
-    batchpaste(datadir, datafile, opts1, timestep, nodes)
 
     # combine
     import combine
-    combine.combine(datafile, opts0, timestep, nodex, nodey, nodez,
-                        ncap, nprocx, nprocy, nprocz)
-    combine.combine(datafile, opts1, timestep, nodex, nodey, nodez,
+    combine.combine(datafile, fields, timestep,
+                    nodex, nodey, nodez,
                     ncap, nprocx, nprocy, nprocz)
+
 
     # delete pasted files
     import glob
@@ -126,14 +123,11 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # create .general file
     import dxgeneral
-    combined_files0 = []
-    combined_files1 = []
+    combined_files = []
     for cap in range(ncap):
-        combined_files0.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
-        combined_files1.append('%(datafile)s.opt%(cap)02d.%(timestep)d' % vars())
+        combined_files.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
 
-    dxgeneral.write(opts0, combined_files0)
-    dxgeneral.write(opts1, combined_files1)
+    dxgeneral.write(fields, combined_files)
 
     return
 
@@ -143,7 +137,7 @@ if __name__ == '__main__':
 
     import sys
 
-    if not len(sys.argv) == 12:
+    if not (12 <= len(sys.argv) <= 13):
         print __doc__
         sys.exit(1)
 
@@ -158,12 +152,16 @@ if __name__ == '__main__':
     nprocx = int(sys.argv[9])
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
+    if len(sys.argv) == 13:
+        fields = sys.argv[12]
+    else:
+        fields = 'coord,velo,visc'
 
     totalnodes = nprocx * nprocy * nprocz * ncap
     nodelist = machinefile2nodelist(machinefile, totalnodes)
 
     batchcombine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz)
+                 ncap, nprocx, nprocy, nprocz, fields)
 
 
 

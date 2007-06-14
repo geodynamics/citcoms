@@ -29,25 +29,26 @@
 '''
 Paste CitcomS data together
 
-  Usage: pasteCitcomData.py datadir datafile infix1,infix2[,...] rank step save_dir
+  Usage: pasteCitcomData.py datadir datafile field1,field2[,...] rank step save_dir
 
 datadir:   directory of the output files
 datafile:  prefix of the output files
-infix1, infix2, ...: the infix to be pasted (e.g.: coord, velo)
+field1, field2, ...: the fields to be pasted (e.g.: coord, velo)
 rank:      MPI rank of the output
 step:      time step of the output
 save_dir:  directory for the pasted file
 '''
 
 
-def run(datadir, datafile, opts, rank, step, save_dir):
+def run(datadir, datafile, fields, rank, step, save_dir):
 
     datadir = expand_datadir(datadir, rank)
-    outfile = '%s/%s.%s.%d.%d.pasted' % (save_dir, datafile, opts, rank, step)
+    outfile = '%s/%s.%s.%d.%d.pasted' % (save_dir, datafile, fields,
+                                         rank, step)
     f = open(outfile, 'w')
 
     try:
-        paste(datadir, datafile, opts, rank, step, f)
+        paste(datadir, datafile, fields, rank, step, f)
     finally:
         f.close()
 
@@ -55,13 +56,13 @@ def run(datadir, datafile, opts, rank, step, save_dir):
 
 
 
-def paste(datadir, datafile, opts, rank, step, stream=None):
+def paste(datadir, datafile, fields, rank, step, stream=None):
     if stream is None:
         import sys
         stream = sys.stdout
 
     files = []
-    for infix in opts.split(','):
+    for infix in fields.split(','):
         f = open_file(datadir, datafile, infix, rank, step)
         strip_headerlines(f, infix)
         files.append(f)
@@ -161,12 +162,12 @@ if __name__ == '__main__':
 
     datadir = sys.argv[1]
     datafile = sys.argv[2]
-    opts = sys.argv[3]
+    fields = sys.argv[3]
     rank = int(sys.argv[4])
     step = int(sys.argv[5])
     save_dir = sys.argv[6]
 
-    run(datadir, datafile, opts, rank, step, save_dir)
+    run(datadir, datafile, fields, rank, step, save_dir)
 
 
 # End of file
