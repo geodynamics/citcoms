@@ -42,6 +42,7 @@ save_dir:  directory for the pasted file
 
 def run(datadir, datafile, opts, rank, step, save_dir):
 
+    datadir = expand_datadir(datadir, rank)
     outfile = '%s/%s.%s.%d.%d.pasted' % (save_dir, datafile, opts, rank, step)
     f = open(outfile, 'w')
 
@@ -70,7 +71,7 @@ def paste(datadir, datafile, opts, rank, step, stream=None):
 
 
 
-def expand_datadir(datadir):
+def expand_datadir(datadir, rank):
     '''Expand the special strings in datadir
     '''
 
@@ -89,7 +90,7 @@ def expand_datadir(datadir):
         datadir.index(s)
     except: pass
     else:
-        datadir = datadir.replace(s, rank)
+        datadir = datadir.replace(s, str(rank))
 
     ##
     if datadir == "%DATADIR":
@@ -158,7 +159,7 @@ if __name__ == '__main__':
         sys.exit()
 
 
-    datadir = expand_datadir(sys.argv[1])
+    datadir = sys.argv[1]
     datafile = sys.argv[2]
     opts = sys.argv[3]
     rank = int(sys.argv[4])
