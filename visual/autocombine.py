@@ -101,10 +101,18 @@ if __name__ == '__main__':
     nodelist = bc.machinefile2nodelist(machinefile, totalnodes)
 
     for timestep in timesteps:
+        # combining coord, velo, temp, and visc
         bc.batchcombine(nodelist, datadir, datafile, timestep,
                         nodex, nodey, nodez,
                         ncap, nprocx, nprocy, nprocz,
-                        optional_fields)
+                        'coord,velo,visc')
+
+        # combining optional fields, if necessary
+        if optional_fields:
+            bc.batchcombine(nodelist, datadir, datafile, timestep,
+                            nodex, nodey, nodez,
+                            ncap, nprocx, nprocy, nprocz,
+                            optional_fields)
 
 
 
