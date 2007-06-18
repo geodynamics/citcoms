@@ -80,27 +80,23 @@ void tracer_input(struct All_variables *E)
     input_int("tracer",&(E->control.tracer),"0",m);
     if(E->control.tracer) {
 
-        /* Initial condition, this option is ignored if E->control.restart is 1,
-         *  ie. restarted from a previous run */
         /* tracer_ic_method=0 (random generated array) */
         /* tracer_ic_method=1 (all proc read the same file) */
         /* tracer_ic_method=2 (each proc reads its restart file) */
-        if(E->control.restart)
-            E->trace.ic_method = 2;
-        else {
-            input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
+        input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
 
-            if (E->trace.ic_method==0)
-                input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
-            else if (E->trace.ic_method==1)
-                input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
-            else if (E->trace.ic_method==2) {
-            }
-            else {
-                fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
-                fflush(stderr);
-                parallel_process_termination();
-            }
+        if (E->trace.ic_method==0)
+            input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
+        else if (E->trace.ic_method==1)
+            input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
+        else if (E->trace.ic_method==2) {
+            /* Use 'datadir_old', 'datafile_old', and 'solution_cycles_init' */
+            /* to form the filename */
+        }
+        else {
+            fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
+            fflush(stderr);
+            parallel_process_termination();
         }
 
 
