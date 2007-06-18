@@ -31,14 +31,20 @@ def solver():
     import CitcomS.Solver as SolverComponent
     return SolverComponent.regionalSolver()
 
-def coarse():
-    return solver()
 
-def fine():
-    return solver()
+def csolver():
+
+    import CitcomS.Solver as SolverComponent
+    return SolverComponent.coupledRegionalSolver('csolver', 'csolver')
+
+
+def esolver():
+
+    import CitcomS.Solver as SolverComponent
+    return SolverComponent.coupledRegionalSolver('esolver', 'esolver')
 
 
 # version
 __id__ = "$Id$"
 
-# End of file 
+# End of file

@@ -27,10 +27,6 @@
 #
 
 
-def layout(name="layout", facility="layout"):
-    return Layout(name, facility)
-
-
 from pyre.components.Component import Component
 
 
@@ -40,10 +36,10 @@ class Layout(Component):
     def __init__(self, name, facility):
         Component.__init__(self, name, facility)
 
-        self.comm1 = None
-        self.comm2 = None
-        self.comm1Plus = []
-        self.comm2Plus = []
+        self.ccomm = None
+        self.ecomm = None
+        self.ccommPlus = []
+        self.ecommPlus = []
 
         self.comm = None
         self.rank = 0
@@ -71,14 +67,7 @@ class Layout(Component):
 
 
     def verify(self, application):
-        size = self.nodes
-        nodes = application.inventory.launcher.inventory.nodes
-        if nodes != size:
-            import journal
-            firewall = journal.firewall("layout")
-            firewall.log("processor count mismatch: %d != %d" % (nodes, size))
-
-        if nodes < 2:
+        if self.nodes < 2:
             import journal
             firewall = journal.firewall("layout")
             firewall.log("'%s' requires at least 2 processors"
@@ -96,19 +85,19 @@ class Layout(Component):
     def createCommunicators(self):
         world = self.comm
         myrank = world.rank
-        comm1Group = self.inventory.comm1
-        comm2Group = self.inventory.comm2
+        ccommGroup = self.inventory.ccomm
+        ecommGroup = self.inventory.ecomm
 
         # communicator for solvers
-        self.comm1 = world.include(comm1Group)
-        self.comm2 = world.include(comm2Group)
+        self.ccomm = world.include(ccommGroup)
+        self.ecomm = world.include(ecommGroup)
 
         # communicator for inter-solver communication
-        for node in comm1Group:
-            self.comm2Plus.append(world.include(comm2Group + [node]))
+        for node in ccommGroup:
+            self.ecommPlus.append(world.include(ecommGroup + [node]))
 
-        for node in comm2Group:
-            self.comm1Plus.append(world.include(comm1Group + [node]))
+        for node in ecommGroup:
+            self.ccommPlus.append(world.include(ccommGroup + [node]))
 
         return
 
@@ -118,8 +107,8 @@ class Layout(Component):
 
         import pyre.inventory
 
-        comm1 = pyre.inventory.slice("comm1", default=range(12))
-        comm2 = pyre.inventory.slice("comm2", default=[12])
+        ccomm = pyre.inventory.slice("ccomm", default=range(12))
+        ecomm = pyre.inventory.slice("ecomm", default=[12])
 
 
 

@@ -53,7 +53,8 @@ class Coupler(Component):
 
 
     def initialize(self, solver):
-        self.selectModule()
+        import ExchangerLib
+        self.module = ExchangerLib
         self.communicator = solver.communicator
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
@@ -73,24 +74,18 @@ class Coupler(Component):
         return
 
 
-    def selectModule(self):
-        import ExchangerLib
-        self.module = ExchangerLib
-        return
-
-
     def modifyT(self, bbox):
         self.module.modifyT(bbox, self.all_variables)
         return
 
 
     def preVSolverRun(self):
-        # do nothing, overridden by FGE
+        # do nothing, overridden by EmbeddedCoupler
         return
 
 
     def postVSolverRun(self):
-        # do nothing, overridden by CGE
+        # do nothing, overridden by ContainingCoupler
         return
 
 
@@ -132,8 +127,7 @@ class Coupler(Component):
 
         import pyre.inventory as prop
 
-
-
+        # updating the temperature field in the containing solver or not
         two_way_communication = prop.bool("two_way_communication", default=True)
 
         # if dimensional is True, quantities exchanged are dimensional

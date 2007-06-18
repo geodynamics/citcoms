@@ -49,9 +49,9 @@ class CoupledApp(BaseApplication):
 
 
     def getNodes(self):
-        s1 = self.inventory.solver1.inventory.mesher.inventory
+        s1 = self.inventory.csolver.inventory.mesher.inventory
         nproc1 = s1.nproc_surf * s1.nprocx * s1.nprocy * s1.nprocz
-        s2 = self.inventory.solver2.inventory.mesher.inventory
+        s2 = self.inventory.esolver.inventory.mesher.inventory
         nproc2 = s2.nproc_surf * s2.nprocx * s2.nprocy * s2.nprocz
         return nproc1 + nproc2
 
@@ -71,20 +71,20 @@ class CoupledApp(BaseApplication):
 
     def findLayout(self, layout):
 
-        if layout.comm1:
-            self.controller = self.inventory.controller1
-            self.solver = self.inventory.solver1
-            self.coupler = self.inventory.coupler1
-            self.solverCommunicator = layout.comm1
-            self.myPlus = layout.comm1Plus
-            self.remotePlus = layout.comm2Plus
-        elif layout.comm2:
-            self.controller = self.inventory.controller2
-            self.solver = self.inventory.solver2
-            self.coupler = self.inventory.coupler2
-            self.solverCommunicator = layout.comm2
-            self.myPlus = layout.comm2Plus
-            self.remotePlus = layout.comm1Plus
+        if layout.ccomm:
+            self.controller = self.inventory.ccontroller
+            self.solver = self.inventory.csolver
+            self.coupler = self.inventory.ccoupler
+            self.solverCommunicator = layout.ccomm
+            self.myPlus = layout.ccommPlus
+            self.remotePlus = layout.ecommPlus
+        elif layout.ecomm:
+            self.controller = self.inventory.econtroller
+            self.solver = self.inventory.esolver
+            self.coupler = self.inventory.ecoupler
+            self.solverCommunicator = layout.ecomm
+            self.myPlus = layout.ecommPlus
+            self.remotePlus = layout.ccommPlus
         else:
             import journal
             journal.warning(self.name).log("node '%d' is an orphan"
@@ -113,12 +113,12 @@ class CoupledApp(BaseApplication):
         self._info.line("  facilities:")
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
-        self._info.line("    solver1: %r" % self.inventory.solver1.name)
-        self._info.line("    solver2: %r" % self.inventory.solver2.name)
-        self._info.line("    controller1: %r" % self.inventory.controller1.name)
-        self._info.line("    controller2: %r" % self.inventory.controller2.name)
-        self._info.line("    coupler1: %r" % self.inventory.coupler1.name)
-        self._info.line("    coupler2: %r" % self.inventory.coupler2.name)
+        self._info.line("    csolver: %r" % self.inventory.csolver.name)
+        self._info.line("    esolver: %r" % self.inventory.esolver.name)
+        self._info.line("    ccontroller: %r" % self.inventory.ccontroller.name)
+        self._info.line("    econtroller: %r" % self.inventory.econtroller.name)
+        self._info.line("    ccoupler: %r" % self.inventory.ccoupler.name)
+        self._info.line("    ecoupler: %r" % self.inventory.ecoupler.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
 
         return
@@ -134,27 +134,28 @@ class CoupledApp(BaseApplication):
         import Coupler
         import Layout
 
-        controller1 = pyre.inventory.facility(name="controller1",
+        ccontroller = pyre.inventory.facility(name="ccontroller",
                                               factory=Controller.controller,
-                                              args=("ccontroller","controller1"))
-        controller2 = pyre.inventory.facility(name="controller2",
+                                              args=("ccontroller","ccontroller"))
+        econtroller = pyre.inventory.facility(name="econtroller",
                                               factory=Controller.controller,
-                                              args=("econtroller","controller2"))
-        coupler1 = pyre.inventory.facility("coupler1",
+                                              args=("econtroller","econtroller"))
+        ccoupler = pyre.inventory.facility("ccoupler",
                                            factory=Coupler.containingcoupler,
-                                           args=("ccoupler","coupler1"))
-        coupler2 = pyre.inventory.facility("coupler2",
+                                           args=("ccoupler","ccoupler"))
+        ecoupler = pyre.inventory.facility("ecoupler",
                                            factory=Coupler.embeddedcoupler,
-                                           args=("ecoupler","coupler2"))
+                                           args=("ecoupler","ecoupler"))
 
-        solver1 = pyre.inventory.facility("solver1",
-                                          factory=Solver.coupledRegionalSolver,
-                                          args=("csolver", "solver1"))
-        solver2 = pyre.inventory.facility("solver2",
+        csolver = pyre.inventory.facility("csolver",
+                                          factory=Solver.coupledFullSolver,
+                                          args=("csolver", "csolver"))
+        esolver = pyre.inventory.facility("esolver",
                                        factory=Solver.coupledRegionalSolver,
-                                       args=("esolver", "solver2"))
+                                       args=("esolver", "esolver"))
 
-        layout = pyre.inventory.facility("layout", factory=Layout.layout)
+        layout = pyre.inventory.facility("layout", factory=Layout.Layout,
+                                         args=("layout", "layout"))
 
         steps = pyre.inventory.int("steps", default=1)
 
