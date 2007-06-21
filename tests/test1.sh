@@ -28,7 +28,8 @@
 
 # functional test of exchanger
 # 12-proc coarse-grid exchanger, 1-proc fine-grid exchanger
-
+#
+#
 
 OUTPUT=zzz
 TEMPFILE=/tmp/$USER/tmptest1
