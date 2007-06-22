@@ -572,28 +572,23 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
 
     getIntProperty(properties, "tracer", E->control.tracer, fp);
 
-    if(E->control.restart)
-        E->trace.ic_method = 2;
+    getIntProperty(properties, "tracer_ic_method",
+                   E->trace.ic_method, fp);
+
+    if (E->trace.ic_method==0) {
+        getIntProperty(properties, "tracers_per_element",
+                       E->trace.itperel, fp);
+    }
+    else if (E->trace.ic_method==1) {
+        getStringProperty(properties, "tracer_file",
+                          E->trace.tracer_file, fp);
+    }
+    else if (E->trace.ic_method==2) {
+    }
     else {
-
-        getIntProperty(properties, "tracer_ic_method",
-                       E->trace.ic_method, fp);
-
-        if (E->trace.ic_method==0) {
-            getIntProperty(properties, "tracers_per_element",
-                           E->trace.itperel, fp);
-        }
-        else if (E->trace.ic_method==1) {
-            getStringProperty(properties, "tracer_file",
-                              E->trace.tracer_file, fp);
-        }
-        else if (E->trace.ic_method==2) {
-        }
-        else {
-            fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
-            fflush(stderr);
-            parallel_process_termination();
-        }
+        fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
+        fflush(stderr);
+        parallel_process_termination();
     }
 
     getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
