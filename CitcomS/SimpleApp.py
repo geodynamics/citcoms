@@ -44,6 +44,7 @@ class SimpleApp(BaseApplication):
 
 
     def getNodes(self):
+        # compute the required # of processors for MPI
         s = self.inventory.solver.inventory.mesher.inventory
         nproc = s.nproc_surf * s.nprocx * s.nprocy * s.nprocz
         return nproc
@@ -51,7 +52,7 @@ class SimpleApp(BaseApplication):
 
 
     def initialize(self):
-        layout = self.findLayout()
+        self.findLayout()
 
         self.controller.initialize(self)
         return

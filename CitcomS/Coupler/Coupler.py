@@ -35,7 +35,6 @@ class Coupler(Component):
     def __init__(self, name, facility):
         Component.__init__(self, name, facility)
 
-        self.module = None
         self.mesh = None
         self.all_variables = None
         self.communicator = None
@@ -53,8 +52,6 @@ class Coupler(Component):
 
 
     def initialize(self, solver):
-        import ExchangerLib
-        self.module = ExchangerLib
         self.communicator = solver.communicator
         self.srcComm = solver.myPlus
         self.numSrc = len(self.srcComm)
@@ -75,7 +72,8 @@ class Coupler(Component):
 
 
     def modifyT(self, bbox):
-        self.module.modifyT(bbox, self.all_variables)
+        from ExchangerLib import modifyT
+        modifyT(bbox, self.all_variables)
         return
 
 

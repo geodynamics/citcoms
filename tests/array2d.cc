@@ -26,11 +26,10 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include <portinfo>
 #include <string>
 #include <mpi.h>
 #include "journal/diagnostics.h"
-#include "Array2D.h"
+#include "Exchanger/Array2D.h"
 
 using namespace std;
 using namespace Exchanger;

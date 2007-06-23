@@ -70,7 +70,7 @@ PyObject * PyCitcomSExchanger_FinereturnE(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:FinereturnE", &Obj))
         return NULL;
 
-    PyMPICommObject* comm = (PyMPICommObject *) PyCObject_AsVoidPtr(Obj);
+    PyMPICommObject* comm = (PyMPICommObject *)Obj;
     MPI_Comm world = comm->comm;
 
     All_variables *E = citcom_init(&world);
@@ -103,7 +103,7 @@ PyObject * PyCitcomSExchanger_CoarsereturnE(PyObject *, PyObject *args)
     if (!PyArg_ParseTuple(args, "O:CoarsereturnE", &Obj))
         return NULL;
 
-    PyMPICommObject* comm = (PyMPICommObject *) PyCObject_AsVoidPtr(Obj);
+    PyMPICommObject* comm = (PyMPICommObject *)Obj;
     MPI_Comm world = comm->comm;
 
     All_variables *E = citcom_init(&world);

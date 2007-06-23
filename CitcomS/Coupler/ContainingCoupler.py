@@ -43,6 +43,7 @@ class ContainingCoupler(Coupler):
 
 
     def initialize(self, solver):
+        print self.name, 'entering initialize'
         Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
@@ -56,25 +57,26 @@ class ContainingCoupler(Coupler):
         self.source["BC"] = range(self.numSrc)
         self.BC = range(self.numSrc)
 
-        self.module.initConvertor(self.inventory.dimensional,
-                                  self.inventory.transformational,
-                                  self.all_variables)
+        from ExchangerLib import initConvertor
+        initConvertor(self.inventory.dimensional,
+                      self.inventory.transformational,
+                      self.all_variables)
 
+        print self.name, 'leaving initialize'
         return
 
 
     def createMesh(self):
-        self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
-        self.remoteBBox = self.module.exchangeBoundedBox(
-                                          self.globalBBox,
-                                          self.communicator.handle(),
-                                          self.srcComm[0].handle(),
-                                          self.srcComm[0].size - 1)
-        self.interior, self.myBBox = self.module.createInterior(
-                                                     self.remoteBBox,
-                                                     self.all_variables)
+        from ExchangerLib import createGlobalBoundedBox, exchangeBoundedBox, createInterior, createEmptyBoundary
+        self.globalBBox = createGlobalBoundedBox(self.all_variables)
+        self.remoteBBox = exchangeBoundedBox(self.globalBBox,
+                                             self.communicator.handle(),
+                                             self.srcComm[0].handle(),
+                                             self.srcComm[0].size - 1)
+        self.interior, self.myBBox = createInterior(self.remoteBBox,
+                                                    self.all_variables)
         for i in range(len(self.boundary)):
-            self.boundary[i] = self.module.createEmptyBoundary()
+            self.boundary[i] = createEmptyBoundary()
 
         return
 
@@ -88,24 +90,26 @@ class ContainingCoupler(Coupler):
 
 
     def createSource(self):
+        from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.numSrc),
                               self.srcComm,
                               self.boundary):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["BC"][i] = self.module.CitcomSource_create(comm.handle(),
-                                                                   sinkRank,
-                                                                   b,
-                                                                   self.myBBox,
-                                                                   self.all_variables)
+            self.source["BC"][i] = CitcomSource_create(comm.handle(),
+                                                       sinkRank,
+                                                       b,
+                                                       self.myBBox,
+                                                       self.all_variables)
 
         return
 
 
     def createSink(self):
-        self.sink["Intr"] = self.module.Sink_create(self.sinkComm.handle(),
-                                                    self.numSrc,
-                                                    self.interior)
+        from ExchangerLib import Sink_create
+        self.sink["Intr"] = Sink_create(self.sinkComm.handle(),
+                                        self.numSrc,
+                                        self.interior)
         return
 
 
@@ -134,28 +138,30 @@ class ContainingCoupler(Coupler):
             # send temperature to FGE and postprocess
             self.restartTemperature()
         else:
-            self.module.initTemperature(self.remoteBBox,
-                                        self.all_variables)
+            from ExchangerLib import initTemperature
+            initTemperature(self.remoteBBox,
+                            self.all_variables)
         return
 
 
     def restartTemperature(self):
+        from ExchangerLib import createEmptyInterior, CitcomSource_create
         interior = range(self.numSrc)
         source = range(self.numSrc)
 
         for i in range(len(interior)):
-            interior[i] = self.module.createEmptyInterior()
+            interior[i] = createEmptyInterior()
 
         for i, comm, b in zip(range(self.numSrc),
                               self.srcComm,
                               interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            source[i] = self.module.CitcomSource_create(comm.handle(),
-                                                        sinkRank,
-                                                        b,
-                                                        self.myBBox,
-                                                        self.all_variables)
+            source[i] = CitcomSource_create(comm.handle(),
+                                            sinkRank,
+                                            b,
+                                            self.myBBox,
+                                            self.all_variables)
 
         import Outlet
         for i, src in zip(range(self.numSrc), source):
@@ -176,7 +182,7 @@ class ContainingCoupler(Coupler):
         return
 
 
-    def NewStep(self):
+    def newStep(self):
         if self.inventory.two_way_communication:
             # receive temperture field from FGE
             self.II.recv()
@@ -191,20 +197,22 @@ class ContainingCoupler(Coupler):
 
 
     def stableTimestep(self, dt):
-        new_dt = self.module.exchangeTimestep(dt,
-                                              self.communicator.handle(),
-                                              self.srcComm[0].handle(),
-                                              self.srcComm[0].size - 1)
+        from ExchangerLib import exchangeTimestep
+        new_dt = exchangeTimestep(dt,
+                                  self.communicator.handle(),
+                                  self.srcComm[0].handle(),
+                                  self.srcComm[0].size - 1)
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, dt, new_dt)
         return dt
 
 
     def exchangeSignal(self, signal):
-        newsgnl = self.module.exchangeSignal(signal,
-                                             self.communicator.handle(),
-                                             self.srcComm[0].handle(),
-                                             self.srcComm[0].size - 1)
+        from ExchangerLib import exchangeSignal
+        newsgnl = exchangeSignal(signal,
+                                 self.communicator.handle(),
+                                 self.srcComm[0].handle(),
+                                 self.srcComm[0].size - 1)
         return newsgnl
 
 

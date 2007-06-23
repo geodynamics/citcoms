@@ -223,8 +223,7 @@ PyObject * PyCitcomSExchanger_CitcomSource_create(PyObject *self, PyObject *args
 			  &obj2, &obj3, &obj4))
         return NULL;
 
-    PyMPICommObject* temp = static_cast<PyMPICommObject*>
-                            (PyCObject_AsVoidPtr(obj1));
+    PyMPICommObject* temp = (PyMPICommObject*)obj1;
     MPI_Comm comm = temp->comm;
 
     BoundedMesh* b = static_cast<BoundedMesh*>(PyCObject_AsVoidPtr(obj2));

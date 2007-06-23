@@ -56,17 +56,17 @@ SVTOutlet::~SVTOutlet()
 
 void SVTOutlet::send()
 {
-//     journal::debug_t debug("CitcomS-Exchanger");
-//     debug << journal::loc(__HERE__) << journal::end;
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::at(__HERE__) << journal::endl;
 
     source.interpolateStress(s);
-//     s.print("CitcomS-SVTOutlet-S");
+    s.print("CitcomS-SVTOutlet-S");
 
     source.interpolateVelocity(v);
-//     v.print("CitcomS-SVTOutlet-V");
+    v.print("CitcomS-SVTOutlet-V");
 
     source.interpolateTemperature(t);
-//     t.print("CitcomS-SVTOutlet-T");
+    t.print("CitcomS-SVTOutlet-T");
 
     Exchanger::Convertor& convertor = Convertor::instance();
     //convertor.stress(s, source.getX());

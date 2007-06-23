@@ -122,7 +122,7 @@ class CoupledSolver(Solver):
     def endSimulation(self):
         self._avgCPUTime()
         # write even if not sync'd
-        output(self.all_variables, step)
+        output(self.all_variables, self.step)
         self.finalize()
         return
 

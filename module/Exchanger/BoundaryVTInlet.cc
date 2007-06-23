@@ -44,7 +44,7 @@ BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
     awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 }
 
 
@@ -57,7 +57,7 @@ BoundaryVTInlet::~BoundaryVTInlet()
 void BoundaryVTInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::loc(__HERE__) << journal::end;
+    debug << journal::at(__HERE__) << journal::endl;
 
     VTInlet::recv();
 

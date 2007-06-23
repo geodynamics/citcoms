@@ -45,6 +45,7 @@ class EmbeddedCoupler(Coupler):
 
 
     def initialize(self, solver):
+        print self.name, 'entering initialize'
         Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
@@ -57,29 +58,36 @@ class EmbeddedCoupler(Coupler):
         self.source["Intr"] = range(self.numSrc)
         self.II = range(self.numSrc)
 
-        self.module.initConvertor(self.inventory.dimensional,
-                                  self.inventory.transformational,
-                                  self.all_variables)
+        # the embedded solver should set its solver.bc.side_sbcs to on
+        # otherwise, we have to stop
+        if not solver.inventory.bc.inventory.side_sbcs:
+            raise SystemExit('\n\nError: esolver.bc.side_sbcs must be on!\n\n\n')
 
+        from ExchangerLib import initConvertor
+        initConvertor(self.inventory.dimensional,
+                      self.inventory.transformational,
+                      self.all_variables)
+
+        print self.name, 'leaving initialize'
         return
 
 
     def createMesh(self):
+        from ExchangerLib import createGlobalBoundedBox, exchangeBoundedBox, createBoundary, createEmptyInterior
         inv = self.inventory
-        self.globalBBox = self.module.createGlobalBoundedBox(self.all_variables)
+        self.globalBBox = createGlobalBoundedBox(self.all_variables)
         mycomm = self.communicator
-        self.remoteBBox = self.module.exchangeBoundedBox(self.globalBBox,
-                                                         mycomm.handle(),
-                                                         self.sinkComm.handle(),
-                                                         0)
-        self.boundary, self.myBBox = self.module.createBoundary(
-                                                     self.all_variables,
-                                                     inv.excludeTop,
-                                                     inv.excludeBottom)
+        self.remoteBBox = exchangeBoundedBox(self.globalBBox,
+                                             mycomm.handle(),
+                                             self.sinkComm.handle(),
+                                             0)
+        self.boundary, self.myBBox = createBoundary(self.all_variables,
+                                                    inv.excludeTop,
+                                                    inv.excludeBottom)
 
         if inv.two_way_communication:
             for i in range(len(self.interior)):
-                self.interior[i] = self.module.createEmptyInterior()
+                self.interior[i] = createEmptyInterior()
 
         return
 
@@ -93,24 +101,25 @@ class EmbeddedCoupler(Coupler):
 
 
     def createSink(self):
-        self.sink["BC"] = self.module.Sink_create(self.sinkComm.handle(),
-                                                  self.numSrc,
-                                                  self.boundary)
+        from ExchangerLib import Sink_create
+        self.sink["BC"] = Sink_create(self.sinkComm.handle(),
+                                      self.numSrc,
+                                      self.boundary)
         return
 
 
     def createSource(self):
+        from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.numSrc),
                               self.srcComm,
                               self.interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["Intr"][i] = self.module.CitcomSource_create(
-                                                     comm.handle(),
-                                                     sinkRank,
-                                                     b,
-                                                     self.myBBox,
-                                                     self.all_variables)
+            self.source["Intr"][i] = CitcomSource_create(comm.handle(),
+                                                         sinkRank,
+                                                         b,
+                                                         self.myBBox,
+                                                         self.all_variables)
 
         return
 
@@ -151,17 +160,19 @@ class EmbeddedCoupler(Coupler):
             # receive temperature from CGE and postprocess
             self.restartTemperature()
         else:
-            self.module.initTemperature(self.globalBBox,
-                                        self.all_variables)
+            from ExchangerLib import initTemperature
+            initTemperature(self.globalBBox,
+                            self.all_variables)
         return
 
 
     def restartTemperature(self):
-        interior, bbox = self.module.createInterior(self.remoteBBox,
-                                                    self.all_variables)
-        sink = self.module.Sink_create(self.sinkComm.handle(),
-                                       self.numSrc,
-                                       interior)
+        from ExchangerLib import createInterior, Sink_create
+        interior, bbox = createInterior(self.remoteBBox,
+                                        self.all_variables)
+        sink = Sink_create(self.sinkComm.handle(),
+                           self.numSrc,
+                           interior)
         import Inlet
         inlet = Inlet.TInlet(interior, sink, self.all_variables)
         inlet.recv()
@@ -181,7 +192,7 @@ class EmbeddedCoupler(Coupler):
         return
 
 
-    def NewStep(self):
+    def newStep(self):
         if self.inventory.two_way_communication:
             if self.catchup:
                 # send temperture field to CGE
@@ -207,12 +218,13 @@ class EmbeddedCoupler(Coupler):
 
 
     def stableTimestep(self, dt):
+        from ExchangerLib import exchangeTimestep
         if self.catchup:
             mycomm = self.communicator
-            self.cge_t = self.module.exchangeTimestep(dt,
-                                                      mycomm.handle(),
-                                                      self.sinkComm.handle(),
-                                                      0)
+            self.cge_t = exchangeTimestep(dt,
+                                          mycomm.handle(),
+                                          self.sinkComm.handle(),
+                                          0)
             self.fge_t = 0
             self.catchup = False
 
@@ -235,11 +247,12 @@ class EmbeddedCoupler(Coupler):
 
 
     def exchangeSignal(self, signal):
+        from ExchangerLib import exchangeSignal
         mycomm = self.communicator
-        newsgnl = self.module.exchangeSignal(signal,
-                                             mycomm.handle(),
-                                             self.sinkComm.handle(),
-                                             0)
+        newsgnl = exchangeSignal(signal,
+                                 mycomm.handle(),
+                                 self.sinkComm.handle(),
+                                 0)
         return newsgnl
 
 

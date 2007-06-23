@@ -72,6 +72,7 @@ class CoupledApp(BaseApplication):
     def findLayout(self, layout):
 
         if layout.ccomm:
+            # This process belongs to the containing solver
             self.controller = self.inventory.ccontroller
             self.solver = self.inventory.csolver
             self.coupler = self.inventory.ccoupler
@@ -79,6 +80,7 @@ class CoupledApp(BaseApplication):
             self.myPlus = layout.ccommPlus
             self.remotePlus = layout.ecommPlus
         elif layout.ecomm:
+            # This process belongs to the embedded solver
             self.controller = self.inventory.econtroller
             self.solver = self.inventory.esolver
             self.coupler = self.inventory.ecoupler
@@ -86,6 +88,7 @@ class CoupledApp(BaseApplication):
             self.myPlus = layout.ecommPlus
             self.remotePlus = layout.ccommPlus
         else:
+            # This process doesn't belong to any solver
             import journal
             journal.warning(self.name).log("node '%d' is an orphan"
                                            % layout.rank)
