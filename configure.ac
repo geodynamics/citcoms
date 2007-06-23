@@ -165,6 +165,8 @@ echo -e "\t PYTHONPATH: " $PYTHONPATH
 echo -e "\t CC: " $CC
 echo -e "\t CFLAGS: " $CFLAGS
 echo -e "\t CPPFLAGS: " $CPPFLAGS
+echo -e "\t CXX: " $CXX
+echo -e "\t CXXFLAGS: " $CXXFLAGS
 echo -e "\t LDFLAGS: " $LDFLAGS
 echo -e "\t with-pyre: " $want_pyre
 echo -e "\t with-exchanger: " $want_exchanger
