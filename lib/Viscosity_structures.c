@@ -180,7 +180,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
 
-    visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);
+    /*visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);*/
 
     /*
         visc_to_node_interpolate(E,evisc,visc);
