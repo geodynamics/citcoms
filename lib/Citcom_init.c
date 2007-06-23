@@ -46,7 +46,8 @@ struct All_variables* citcom_init(MPI_Comm *world)
   E->parallel.nproc = nproc;
   E->parallel.me = rank;
 
-  /*fprintf(stderr,"%d in %d processpors\n", rank, nproc); */
+  /* fprintf(stderr,"%d in %d processpors, E at %p pid=%d\n",
+          rank, nproc, E, E->control.PID); */
 
   E->monitor.solution_cycles=0;
   E->control.keep_going=1;
