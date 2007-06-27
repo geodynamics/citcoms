@@ -60,6 +60,8 @@ class Controller(Component):
 
 
     def launch(self, app):
+        '''Setup initial conditions.
+        '''
         # 0th step
         self.solver.launch(app)
 
@@ -78,13 +80,13 @@ class Controller(Component):
 
         while 1:
 
-            # notify solvers we are starting a new timestep
+            # notify solver we are starting a new timestep
             self.startTimestep()
 
             # compute an acceptable timestep
             dt = self.stableTimestep()
 
-            # advance
+            # advance to the next step by dt
             self.advance(dt)
 
             # notify solver we finished a timestep

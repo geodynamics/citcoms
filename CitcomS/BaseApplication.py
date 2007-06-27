@@ -35,6 +35,8 @@ class BaseApplication(Application):
 
 
     def __init__(self, name="CitcomS"):
+        '''Constructor. Inventory object is not initialized yet.
+        '''
         Application.__init__(self, name)
 
         self._info = journal.debug("application")
@@ -43,13 +45,19 @@ class BaseApplication(Application):
 
 
     def _init(self):
+        '''Called by mpi.Application.__init__(). Inventory object becomes available.
+        '''
         Application._init(self)
+
+        # self.nodes is the # of CPUs for this simulation
         self.nodes = self.getNodes()
         return
 
 
 
     def main(self, *args, **kwds):
+        '''The entry point, like main() in C.
+        '''
         self.initialize()
         self.reportConfiguration()
         self.launch()
@@ -58,6 +66,8 @@ class BaseApplication(Application):
 
 
     def launch(self):
+        '''Start the computation.
+        '''
         self.controller.launch(self)
 
         self.controller.march(steps=self.inventory.steps)
@@ -66,6 +76,8 @@ class BaseApplication(Application):
 
 
     def _getPrivateDepositoryLocations(self):
+        '''Find the location of *.odb files.
+        '''
         from os.path import dirname, isdir, join
         list = []
         etc = join(dirname(dirname(__file__)), 'etc')

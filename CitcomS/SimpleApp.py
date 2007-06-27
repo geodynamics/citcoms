@@ -44,7 +44,8 @@ class SimpleApp(BaseApplication):
 
 
     def getNodes(self):
-        # compute the required # of processors for MPI
+        '''Compute the required # of processors for MPI.
+        '''
         s = self.inventory.solver.inventory.mesher.inventory
         nproc = s.nproc_surf * s.nprocx * s.nprocy * s.nprocz
         return nproc
@@ -52,6 +53,8 @@ class SimpleApp(BaseApplication):
 
 
     def initialize(self):
+        '''Setup the problem.
+        '''
         self.findLayout()
 
         self.controller.initialize(self)
@@ -60,6 +63,8 @@ class SimpleApp(BaseApplication):
 
 
     def findLayout(self):
+        '''Assign controller/solver/communicator to this process.
+        '''
         self.controller = self.inventory.controller
         self.solver = self.inventory.solver
         import mpi
@@ -98,6 +103,10 @@ class SimpleApp(BaseApplication):
         import Solver
 
         controller = pyre.inventory.facility("controller", factory=Controller.controller)
+
+        # solver can be either "regional" (component name for Solver.regionalSolver,
+        # defined in ../etc/regional.odb) or "full" (component name for
+        # Solver.fullSolver, defined in ../etc/full.odb)
         solver = pyre.inventory.facility("solver", factory=Solver.regionalSolver)
 
 

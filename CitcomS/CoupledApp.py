@@ -49,10 +49,15 @@ class CoupledApp(BaseApplication):
 
 
     def getNodes(self):
+        # csolver requires nproc1 CPUs to run
         s1 = self.inventory.csolver.inventory.mesher.inventory
         nproc1 = s1.nproc_surf * s1.nprocx * s1.nprocy * s1.nprocz
+
+        # esolver requires nproc2 CPUs to run
         s2 = self.inventory.esolver.inventory.mesher.inventory
         nproc2 = s2.nproc_surf * s2.nprocx * s2.nprocy * s2.nprocz
+
+        # the whole application requires nproc1+nproc2 CPUs
         return nproc1 + nproc2
 
 
@@ -70,7 +75,8 @@ class CoupledApp(BaseApplication):
 
 
     def findLayout(self, layout):
-
+        '''Assigning controller/solver/coupler/communicator to this processor.
+        '''
         if layout.ccomm:
             # This process belongs to the containing solver
             self.controller = self.inventory.ccontroller

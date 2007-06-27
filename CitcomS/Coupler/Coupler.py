@@ -45,7 +45,7 @@ class Coupler(Component):
         self.sink = {}
         self.source = {}
 
-        self.catchup = True
+        self.synchronized = True
         self.done = False
         self.coupled_steps = 1
         return
@@ -62,6 +62,7 @@ class Coupler(Component):
 
 
     def launch(self, solver):
+        # these functions are defined in the subclass
         self.createMesh()
         self.createSourceSink()
         self.createBC()
@@ -72,6 +73,7 @@ class Coupler(Component):
 
 
     def modifyT(self, bbox):
+        # modify read-in temperature field
         from ExchangerLib import modifyT
         modifyT(bbox, self.all_variables)
         return
@@ -88,34 +90,36 @@ class Coupler(Component):
 
 
     def endTimestep(self, steps, done):
+        # exchange predefined signal btwn couplers
+        # the signal is used to sync the timesteps
         KEEP_WAITING_SIGNAL = 0
         NEW_STEP_SIGNAL = 1
         END_SIMULATION_SIGNAL = 2
 
         if done:
             sent = END_SIMULATION_SIGNAL
-        elif self.catchup:
+        elif self.synchronized:
             sent = NEW_STEP_SIGNAL
         else:
             sent = KEEP_WAITING_SIGNAL
 
         while 1:
-            signal = self.exchangeSignal(sent)
+            recv = self.exchangeSignal(sent)
 
-            if done or (signal == END_SIMULATION_SIGNAL):
+            if done or (recv == END_SIMULATION_SIGNAL):
                 done = True
                 break
-            elif signal == KEEP_WAITING_SIGNAL:
+            elif recv == KEEP_WAITING_SIGNAL:
                 pass
-            elif signal == NEW_STEP_SIGNAL:
-                if self.catchup:
+            elif recv == NEW_STEP_SIGNAL:
+                if self.synchronized:
                     #print self.name, 'exchanging timestep =', steps
                     self.coupled_steps = self.exchangeSignal(steps)
                     #print self.name, 'exchanged timestep =', self.coupled_steps
                 break
             else:
                 raise ValueError, \
-                      "Unexpected signal value, singnal = %d" % signal
+                      "Unexpected signal value, singnal = %d" % recv
 
         return done
 
@@ -130,7 +134,9 @@ class Coupler(Component):
 
         # if dimensional is True, quantities exchanged are dimensional
         dimensional = prop.bool("dimensional", default=True)
-        # if transformational is True, quantities exchanged are in standard coordiate system
+
+        # if transformational is True, quantities exchanged are in standard
+        # (ie. Cartesian) coordinate system
         transformational = prop.bool("transformational", default=True)
 
 

@@ -58,6 +58,8 @@ class Layout(Component):
 
 
     def discover(self):
+        '''Find the size/rank of the whole application.
+        '''
         import mpi
         self.comm = mpi.world()
         self.rank = self.comm.rank
@@ -83,19 +85,24 @@ class Layout(Component):
 
 
     def createCommunicators(self):
+        '''Create various communicators for solvers and couplers
+        '''
         world = self.comm
         myrank = world.rank
         ccommGroup = self.inventory.ccomm
         ecommGroup = self.inventory.ecomm
 
-        # communicator for solvers
+        # Communicator for solvers
         self.ccomm = world.include(ccommGroup)
         self.ecomm = world.include(ecommGroup)
 
-        # communicator for inter-solver communication
+        # Communicator for inter-solver communication
+        # Each node in ccommGroup will form a communicator
+        # with the nodes in ecommGroup
         for node in ccommGroup:
             self.ecommPlus.append(world.include(ecommGroup + [node]))
 
+        # Ditto for each node ccommGroup
         for node in ecommGroup:
             self.ccommPlus.append(world.include(ccommGroup + [node]))
 
@@ -107,7 +114,10 @@ class Layout(Component):
 
         import pyre.inventory
 
+        # The containing solver will run on these nodes
         ccomm = pyre.inventory.slice("ccomm", default=range(12))
+
+        # The embedded solver will run on these nodes
         ecomm = pyre.inventory.slice("ecomm", default=[12])
 
 

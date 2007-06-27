@@ -43,38 +43,49 @@ class ContainingCoupler(Coupler):
 
 
     def initialize(self, solver):
-        print self.name, 'entering initialize'
         Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
-
         self.restart = solver.restart
         if self.restart:
             self.ic_initTemperature = solver.ic_initTemperature
 
 	self.all_variables = solver.all_variables
+
+        # allocate space for exchanger objects
         self.boundary = range(self.numSrc)
         self.source["BC"] = range(self.numSrc)
         self.BC = range(self.numSrc)
 
+        # init'd Convertor singleton, this must be done before any other
+        # exchanger call
         from ExchangerLib import initConvertor
         initConvertor(self.inventory.dimensional,
                       self.inventory.transformational,
                       self.all_variables)
 
-        print self.name, 'leaving initialize'
         return
 
 
     def createMesh(self):
+        '''Create BoundedMesh objects.
+        '''
         from ExchangerLib import createGlobalBoundedBox, exchangeBoundedBox, createInterior, createEmptyBoundary
+
+        # the bounding box of the mesh on this solver
         self.globalBBox = createGlobalBoundedBox(self.all_variables)
+
+        # the bounding box of the mesh on the other solver
         self.remoteBBox = exchangeBoundedBox(self.globalBBox,
                                              self.communicator.handle(),
                                              self.srcComm[0].handle(),
                                              self.srcComm[0].size - 1)
+
+        # the nodes within remoteBBox
         self.interior, self.myBBox = createInterior(self.remoteBBox,
                                                     self.all_variables)
+
+        # an empty boundary object, which will be filled by a remote boundary obj.
         for i in range(len(self.boundary)):
             self.boundary[i] = createEmptyBoundary()
 
@@ -82,6 +93,7 @@ class ContainingCoupler(Coupler):
 
 
     def createSourceSink(self):
+        # create source first, then sink. The order is important.
         self.createSource()
 
         if self.inventory.two_way_communication:
@@ -90,6 +102,7 @@ class ContainingCoupler(Coupler):
 
 
     def createSource(self):
+        # the source obj's will send boundary conditions to a remote sink
         from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.numSrc),
                               self.srcComm,
@@ -106,6 +119,7 @@ class ContainingCoupler(Coupler):
 
 
     def createSink(self):
+        # the sink obj. will receive interior temperature from remote sources
         from ExchangerLib import Sink_create
         self.sink["Intr"] = Sink_create(self.sinkComm.handle(),
                                         self.numSrc,
@@ -114,6 +128,8 @@ class ContainingCoupler(Coupler):
 
 
     def createBC(self):
+        # boundary conditions will be sent by SVTOutlet, which sends
+        # stress, velocity, and temperature
         import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["BC"]):
@@ -123,6 +139,7 @@ class ContainingCoupler(Coupler):
 
 
     def createII(self):
+        # interior temperature will be received by TInlet
         import Inlet
         self.II = Inlet.TInlet(self.interior,
                                self.sink["Intr"],
@@ -135,7 +152,7 @@ class ContainingCoupler(Coupler):
             # read-in restarted temperature field
             self.ic_initTemperature()
             del self.ic_initTemperature
-            # send temperature to FGE and postprocess
+            # send temperature to EmbeddedCoupler and postprocess
             self.restartTemperature()
         else:
             from ExchangerLib import initTemperature
@@ -169,22 +186,25 @@ class ContainingCoupler(Coupler):
             outlet.send()
 
         # Any modification of read-in temperature is done here
-        # Note: modifyT is called after sending unmodified T to FGE.
-        # If T is modified before sending, FGE's T will lose sharp feature.
-        # FGE has to call modifyT too to ensure consistent T field.
+        # Note: modifyT is called after sending unmodified T to EmbeddedCoupler.
+        # If T is modified before sending, EmbeddedCoupler's T will lose sharp
+        # feature.
+        # EmbeddedCoupler has to call modifyT too to ensure consistent T field.
         self.modifyT(self.remoteBBox)
 
         return
 
 
     def postVSolverRun(self):
+        # send computed velocity to ECPLR for its BCs
         self.applyBoundaryConditions()
         return
 
 
     def newStep(self):
+        # update the temperature field in the overlapping region
         if self.inventory.two_way_communication:
-            # receive temperture field from FGE
+            # receive temperture field from EmbeddedCoupler
             self.II.recv()
             self.II.impose()
         return

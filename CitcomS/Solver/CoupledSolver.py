@@ -44,9 +44,7 @@ class CoupledSolver(Solver):
 
 
     def initialize(self, application):
-        print self.name, 'enter initialize'
         Solver.initialize(self, application)
-        print self.name, self.all_variables
 
         self.coupler = application.coupler
         self.myPlus = application.myPlus
@@ -56,12 +54,10 @@ class CoupledSolver(Solver):
         self.ic_initTemperature = self.inventory.ic.initTemperature
 
         self.coupler.initialize(self)
-        print self.name, 'exit initialize'
         return
 
 
     def launch(self, application):
-        print self.name, 'enter launch'
         self._setup()
 
         self.coupler.launch(self)
@@ -75,12 +71,12 @@ class CoupledSolver(Solver):
         ic.launch()
 
         self.solveVelocities()
-        print self.name, 'exit launch'
         return
 
 
 
     def solveVelocities(self):
+        # sync boundary conditions before/after vsolver
         vsolver = self.inventory.vsolver
         self.coupler.preVSolverRun()
         vsolver.run()
@@ -89,8 +85,8 @@ class CoupledSolver(Solver):
 
 
 
-    def solveAdditional(self):
-        # override Solver.solveAdditional, since tracer module
+    def advectTracers(self):
+        # override Solver.advectTracers to do nothing, since tracer module
         # doesn't work in coupled run
         return
 
@@ -98,6 +94,8 @@ class CoupledSolver(Solver):
 
     def newStep(self):
         Solver.newStep(self)
+
+        # sync the temperature field
         self.coupler.newStep()
         return
 

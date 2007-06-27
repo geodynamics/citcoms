@@ -33,19 +33,25 @@ class EmbeddedCoupler(Coupler):
 
     def __init__(self, name, facility):
         Coupler.__init__(self, name, facility)
-        self.cge_t = 0
-        self.fge_t = 0
+
+        # time of containing coupler
+        self.ccplr_t = 0
+
+        # time of embedded coupler
+        self.ecplr_t = 0
+
+        # whether to apply boundary conditions
         self.toApplyBC = True
 
         # exchanged information is non-dimensional
         self.inventory.dimensional = False
+
         # exchanged information is in spherical coordinate
         self.inventory.transformational = False
         return
 
 
     def initialize(self, solver):
-        print self.name, 'entering initialize'
         Coupler.initialize(self, solver)
 
 	# restart and use temperautre field of previous run?
@@ -54,6 +60,8 @@ class EmbeddedCoupler(Coupler):
             self.ic_initTemperature = solver.ic_initTemperature
 
 	self.all_variables = solver.all_variables
+
+        # allocate space for exchanger objects
         self.interior = range(self.numSrc)
         self.source["Intr"] = range(self.numSrc)
         self.II = range(self.numSrc)
@@ -63,28 +71,38 @@ class EmbeddedCoupler(Coupler):
         if not solver.inventory.bc.inventory.side_sbcs:
             raise SystemExit('\n\nError: esolver.bc.side_sbcs must be on!\n\n\n')
 
+        # init'd Convertor singleton, this must be done before any other
+        # exchanger call
         from ExchangerLib import initConvertor
         initConvertor(self.inventory.dimensional,
                       self.inventory.transformational,
                       self.all_variables)
 
-        print self.name, 'leaving initialize'
         return
 
 
     def createMesh(self):
+        '''Create BoundedMesh objects.
+        '''
         from ExchangerLib import createGlobalBoundedBox, exchangeBoundedBox, createBoundary, createEmptyInterior
         inv = self.inventory
+
+        # the bounding box of the mesh on this solver
         self.globalBBox = createGlobalBoundedBox(self.all_variables)
+
+        # the bounding box of the mesh on the other solver
         mycomm = self.communicator
         self.remoteBBox = exchangeBoundedBox(self.globalBBox,
                                              mycomm.handle(),
                                              self.sinkComm.handle(),
                                              0)
+
+        # the nodes on the boundary, top and bottom boundaries are special
         self.boundary, self.myBBox = createBoundary(self.all_variables,
                                                     inv.excludeTop,
                                                     inv.excludeBottom)
 
+        # an empty interior object, which will be filled by a remote interior obj.
         if inv.two_way_communication:
             for i in range(len(self.interior)):
                 self.interior[i] = createEmptyInterior()
@@ -93,6 +111,7 @@ class EmbeddedCoupler(Coupler):
 
 
     def createSourceSink(self):
+        # create sink first, then source. The order is important.
         self.createSink()
 
         if self.inventory.two_way_communication:
@@ -101,6 +120,7 @@ class EmbeddedCoupler(Coupler):
 
 
     def createSink(self):
+        # the sink obj. will receive boundary conditions from remote sources
         from ExchangerLib import Sink_create
         self.sink["BC"] = Sink_create(self.sinkComm.handle(),
                                       self.numSrc,
@@ -109,6 +129,7 @@ class EmbeddedCoupler(Coupler):
 
 
     def createSource(self):
+        # the source obj's will send interior temperature to a remote sink
         from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.numSrc),
                               self.srcComm,
@@ -125,28 +146,17 @@ class EmbeddedCoupler(Coupler):
 
 
     def createBC(self):
+        # boundary conditions will be recv. by SVTInlet, which receives
+        # stress, velocity, and temperature
         import Inlet
         self.BC = Inlet.SVTInlet(self.boundary,
                                  self.sink["BC"],
                                  self.all_variables)
-        '''
-        if self.inventory.incompressibility:
-            self.BC = Inlet.BoundaryVTInlet(self.communicator,
-                                            self.boundary,
-                                            self.sink["BC"],
-                                            self.all_variables,
-                                            "VT")
-            import journal
-            journal.info("incompressibility").activate()
-        else:
-            self.BC = Inlet.SVTInlet(self.boundary,
-                                    self.sink["BC"],
-                                    self.all_variables)
-        '''
         return
 
 
     def createII(self):
+        # interior temperature will be sent by TOutlet
         import Outlet
         for i, src in zip(range(self.numSrc),
                           self.source["Intr"]):
@@ -157,7 +167,7 @@ class EmbeddedCoupler(Coupler):
 
     def initTemperature(self):
         if self.restart:
-            # receive temperature from CGE and postprocess
+            # receive temperature from CCPLR and postprocess
             self.restartTemperature()
         else:
             from ExchangerLib import initTemperature
@@ -179,23 +189,24 @@ class EmbeddedCoupler(Coupler):
         inlet.impose()
 
         # Any modification of read-in temperature is done here
-        # Note: modifyT is called after receiving unmodified T from CGE.
-        # If T is modified before sending, FGE's T will lose sharp feature.
-        # CGE has to call modifyT too to ensure consistent T field.
+        # Note: modifyT is called after receiving unmodified T from CCPLR.
+        # If T is modified before sending, ECPLR's T will lose sharp feature.
+        # CCPLR has to call modifyT too to ensure consistent T field.
         self.modifyT(self.globalBBox)
 
         return
 
 
     def preVSolverRun(self):
+        # apply bc before solving the velocity
         self.applyBoundaryConditions()
         return
 
 
     def newStep(self):
         if self.inventory.two_way_communication:
-            if self.catchup:
-                # send temperture field to CGE
+            if self.synchronized:
+                # send temperture field to CCPLR
                 for ii in self.II:
                     ii.send()
 
@@ -210,8 +221,8 @@ class EmbeddedCoupler(Coupler):
 
         self.BC.impose()
 
-        # applyBC only when previous step is a catchup step
-        if self.catchup:
+        # applyBC only when previous step is sync'd
+        if self.synchronized:
             self.toApplyBC = True
 
         return
@@ -219,30 +230,31 @@ class EmbeddedCoupler(Coupler):
 
     def stableTimestep(self, dt):
         from ExchangerLib import exchangeTimestep
-        if self.catchup:
+        if self.synchronized:
             mycomm = self.communicator
-            self.cge_t = exchangeTimestep(dt,
+            self.ccplr_t = exchangeTimestep(dt,
                                           mycomm.handle(),
                                           self.sinkComm.handle(),
                                           0)
-            self.fge_t = 0
-            self.catchup = False
+            self.ecplr_t = 0
+            self.synchronized = False
 
-        self.fge_t += dt
+        self.ecplr_t += dt
         old_dt = dt
 
-        if self.fge_t >= self.cge_t:
-            dt = dt - (self.fge_t - self.cge_t)
-            self.fge_t = self.cge_t
-            self.catchup = True
-            #print "FGE: CATCHUP!"
+        # clipping oversized ecplr_t
+        if self.ecplr_t >= self.ccplr_t:
+            dt = dt - (self.ecplr_t - self.ccplr_t)
+            self.ecplr_t = self.ccplr_t
+            self.synchronized = True
+            #print "ECPLR: SYNCHRONIZED!"
 
         # store timestep for interpolating boundary velocities
-        self.BC.storeTimestep(self.fge_t, self.cge_t)
+        self.BC.storeTimestep(self.ecplr_t, self.ccplr_t)
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)
-        #print "cge_t = %g  fge_t = %g" % (self.cge_t, self.fge_t)
+        #print "ccplr_t = %g  ecplr_t = %g" % (self.ccplr_t, self.ecplr_t)
         return dt
 
 
@@ -261,11 +273,11 @@ class EmbeddedCoupler(Coupler):
 
         import pyre.inventory as prop
 
-
-
+        # excluding nodes in top boundary? (used if vbc is read from file)
         excludeTop = prop.bool("excludeTop", default=False)
+
+        # excluding nodes in bottom boundary?
         excludeBottom = prop.bool("excludeBottom", default=False)
-        incompressibility = prop.bool("incompressibility", default=True)
 
 
 
