@@ -51,7 +51,6 @@ class Layout(Component):
     def initialize(self, application):
         self.discover()
         self.verify(application)
-        self.allocateNodes()
         self.createCommunicators()
         return
 
@@ -69,17 +68,44 @@ class Layout(Component):
 
 
     def verify(self, application):
+        # check do we have at least 2 processor
         if self.nodes < 2:
             import journal
             firewall = journal.firewall("layout")
             firewall.log("'%s' requires at least 2 processors"
                          % application.name)
 
+        containing_group = self.inventory.containing_group
+        embedded_group = self.inventory.embedded_group
+
+        # check no duplicated elements in the group
+        self.check_duplicated(containing_group)
+        self.check_duplicated(embedded_group)
+
+        # check the two groups are disjoint
+        self.check_disjoint(containing_group, embedded_group)
+
         return
 
 
 
-    def allocateNodes(self):
+    def check_duplicated(self, group):
+        s = set(group)
+        if len(s) != len(group):
+            import journal
+            firewall = journal.firewall("layout")
+            firewall.log('Duplicated element in group: %s' % group)
+        return
+
+
+
+    def check_disjoint(self, group0, group1):
+        s0 = set(group0)
+        s1 = set(group1)
+        if s0.intersection(s1):
+            import journal
+            firewall = journal.firewall("layout")
+            firewall.log('Groups are not disjoint: %s and %s' % (group0, group1))
         return
 
 
@@ -88,23 +114,23 @@ class Layout(Component):
         '''Create various communicators for solvers and couplers
         '''
         world = self.comm
-        myrank = world.rank
-        ccommGroup = self.inventory.ccomm
-        ecommGroup = self.inventory.ecomm
+        myrank = self.rank
+        containing_group = self.inventory.containing_group
+        embedded_group = self.inventory.embedded_group
 
         # Communicator for solvers
-        self.ccomm = world.include(ccommGroup)
-        self.ecomm = world.include(ecommGroup)
+        self.ccomm = world.include(containing_group)
+        self.ecomm = world.include(embedded_group)
 
         # Communicator for inter-solver communication
-        # Each node in ccommGroup will form a communicator
-        # with the nodes in ecommGroup
-        for node in ccommGroup:
-            self.ecommPlus.append(world.include(ecommGroup + [node]))
+        # Each node in containing_group will form a communicator
+        # with the nodes in embedded_group
+        for node in containing_group:
+            self.ecommPlus.append(world.include(embedded_group + [node]))
 
-        # Ditto for each node ccommGroup
-        for node in ecommGroup:
-            self.ccommPlus.append(world.include(ccommGroup + [node]))
+        # Ditto for each node containing_group
+        for node in embedded_group:
+            self.ccommPlus.append(world.include(containing_group + [node]))
 
         return
 
@@ -115,10 +141,12 @@ class Layout(Component):
         import pyre.inventory
 
         # The containing solver will run on these nodes
-        ccomm = pyre.inventory.slice("ccomm", default=range(12))
+        containing_group = pyre.inventory.slice("containing_group",
+                                                default=range(12))
 
         # The embedded solver will run on these nodes
-        ecomm = pyre.inventory.slice("ecomm", default=[12])
+        embedded_group = pyre.inventory.slice("embedded_group",
+                                              default=[12])
 
 
 
