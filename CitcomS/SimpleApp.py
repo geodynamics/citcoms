@@ -90,7 +90,7 @@ class SimpleApp(BaseApplication):
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    solver: %r" % self.solver.name)
-        self._info.line("    controller: %r" % self.controller.name)
+        self._info.log("    controller: %r" % self.controller.name)
 
         return
 
