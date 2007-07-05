@@ -2,7 +2,7 @@
 #
 #
 #
-#
+#need to work on myPlus and remotePlus
 #
 #
 #
@@ -106,6 +106,24 @@ class CoupledA(BaseApplication):
     
     def report Configuration(self):
 
+        rank = self.comm.rank
+
+        if rank != 0:
+            return
+
+        self._info.line("configuration:")
+
+        self._info.line("  facilities:")
+        self._info.line("    launcher: %r" % self.inventory.launcher.name)
+
+        self._info.line("    csolver: %r" % self.inventory.csolver.name)
+        self._info.line("    esolver: %r" % self.inventory.esolver.name)
+        self._info.line("    ccontroller: %r" % self.inventory.ccontroller.name)
+        self._info.line("    econtroller: %r" % self.inventory.econtroller.name)
+        self._info.line("    ccoupler: %r" % self.inventory.ccoupler.name)
+        self._info.line("    ecoupler: %r" % self.inventory.ecoupler.name)
+        self._info.line("    layout: %r" % self.inventory.layout.name)
+    
         return
 
     class Invertory(BaseApplication.Inventory):
@@ -147,7 +165,7 @@ class CoupledA(BaseApplication):
                                        factory=Solver.coupledRegionalSolver,
                                        args=("esolver", "esolver"))
 
-        layout = pyre.inventory.facility("layout", factory=Layout.Layout,
+        layout = pyre.inventory.facility("layout", factory=MultiLayout.MultiLayout,
                                          args=("layout", "layout"))
 
         steps = pyre.inventory.int("steps", default=1)
