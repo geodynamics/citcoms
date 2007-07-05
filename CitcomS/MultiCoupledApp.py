@@ -74,9 +74,9 @@ class CoupledA(BaseApplication):
   
         elif layout.ecomm1:
             # This process belongs to the embedded solver
-            self.controller = self.inventory.econtroller
-            self.solver = self.inventory.esolver
-            self.coupler = self.inventory.ecoupler
+            self.controller = self.inventory.econtroller1
+            self.solver = self.inventory.esolver1
+            self.coupler = self.inventory.ecoupler1
             self.solverCommunicator = layout.ecomm1
             #self.myPlus = layout.ecommPlus
             #self.remotePlus = layout.ccommPlus
@@ -84,9 +84,9 @@ class CoupledA(BaseApplication):
 
         elif layout.ecomm2:
             # This process belongs to the embedded solver
-            self.controller = self.inventory.econtroller
-            self.solver = self.inventory.esolver
-            self.coupler = self.inventory.ecoupler
+            self.controller = self.inventory.econtroller2
+            self.solver = self.inventory.esolver2
+            self.coupler = self.inventory.ecoupler2
             self.solverCommunicator = layout.ecomm2
             #self.myPlus = layout.ecommPlus
             #self.remotePlus = layout.ccommPlus
@@ -119,20 +119,31 @@ class CoupledA(BaseApplication):
         ccontroller = pyre.inventory.facility(name="ccontroller",
                                               factory=Controller.controller,
                                               args=("ccontroller","ccontroller"))
-        econtroller = pyre.inventory.facility(name="econtroller",
+        econtroller1 = pyre.inventory.facility(name="econtroller1",
                                               factory=Controller.controller,
                                               args=("econtroller","econtroller"))
+        econtroller2 = pyre.inventory.facility(name="econtroller2",
+                                              factory=Controller.controller,
+                                              args=("econtroller","econtroller"))
+
+
         ccoupler = pyre.inventory.facility("ccoupler",
                                            factory=Coupler.containingcoupler,
                                            args=("ccoupler","ccoupler"))
-        ecoupler = pyre.inventory.facility("ecoupler",
+        ecoupler1 = pyre.inventory.facility("ecoupler1",
+                                           factory=Coupler.embeddedcoupler,
+                                           args=("ecoupler","ecoupler"))
+        ecoupler2 = pyre.inventory.facility("ecoupler2",
                                            factory=Coupler.embeddedcoupler,
                                            args=("ecoupler","ecoupler"))
 
         csolver = pyre.inventory.facility("csolver",
                                           factory=Solver.coupledFullSolver,
                                           args=("csolver", "csolver"))
-        esolver = pyre.inventory.facility("esolver",
+        esolver1 = pyre.inventory.facility("esolver1",
+                                       factory=Solver.coupledRegionalSolver,
+                                       args=("esolver", "esolver"))
+        esolver2 = pyre.inventory.facility("esolver2",
                                        factory=Solver.coupledRegionalSolver,
                                        args=("esolver", "esolver"))
 
