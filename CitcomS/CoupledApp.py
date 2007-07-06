@@ -128,7 +128,7 @@ class CoupledApp(BaseApplication):
         self._info.line("    econtroller: %r" % self.inventory.econtroller.name)
         self._info.line("    ccoupler: %r" % self.inventory.ccoupler.name)
         self._info.line("    ecoupler: %r" % self.inventory.ecoupler.name)
-        self._info.line("    layout: %r" % self.inventory.layout.name)
+        self._info.log("    layout: %r" % self.inventory.layout.name)
 
         return
 
