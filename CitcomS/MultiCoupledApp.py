@@ -10,34 +10,33 @@
 #
 #
 
-from BasApplication import Base Application
+from BaseApplication import BaseApplication
 import journal
 
-class CoupledA(BaseApplication):
+class MultiCoupledApp(BaseApplication):
 
 
     def __init__(self, name="MultiCoupledCitcomS"):
         BaseApplication.__init__(self, name)
-        
+
         self.solver = None
-        self.solverCommunicator = None 
+        self.solverCommunicator = None
 
         # list of communicators used to pass imformation between solvers
-        self.myPlus = [] 
-        self.remotePlus = [] 
+        self.myPlus = []
+        self.remotePlus = []
 
         # containing solver need to do more communication
         self.myPlus2 = []
         self.remotePlus2 = []
 
-        
-        self.comm = None 
+
+        self.comm = None
         self.rank = 0
         self.nodes = 0
-        
 
-        
         return
+
 
     def getNodes(self):
         # csolver requires nproc1 CPUs to run
@@ -49,22 +48,23 @@ class CoupledA(BaseApplication):
         nproc2 = s2.nproc_surf * s2.nprocx * s2.nprocy * s2.nprocz
 
         # esolver2 requires nproc3 CPUs to run
-        s3 = self.inventory.esolver2.inventory.mecher.inventory
-        nproc3 = s3.nproc_surf * s3.nprox * s3.nprocy * s3.nprocz
-        
+        s3 = self.inventory.esolver2.inventory.mesher.inventory
+        nproc3 = s3.nproc_surf * s3.nprocx * s3.nprocy * s3.nprocz
+
         return nproc1 + nproc2 + nproc3
 
+
     def initialize(self):
-        
+
         layout = self.inventory.layout
         layout.initialize(self)
 
         self.findLayout(layout)
 
-        self.comtroller.initialize(self)
-        
+        self.controller.initialize(self)
 
         return
+
 
     def findLayout(self, layout):
 
@@ -78,8 +78,8 @@ class CoupledA(BaseApplication):
             self.remotePlus = layout.ecommPlus1
             self.myPlus2 = layout.ccommPlus2
             self.remotePlus2 = layout.ecommPlus2
-            
-  
+
+
         elif layout.ecomm1:
             # This process belongs to the embedded solver1
             self.controller = self.inventory.econtroller1
@@ -88,7 +88,7 @@ class CoupledA(BaseApplication):
             self.solverCommunicator = layout.ecomm1
             self.myPlus = layout.ecommPlus1
             self.remotePlus = layout.ccommPlus1
- 
+
 
         elif layout.ecomm2:
             # This process belongs to the embedded solver2
@@ -98,7 +98,7 @@ class CoupledA(BaseApplication):
             self.solverCommunicator = layout.ecomm2
             self.myPlus = layout.ecommPlus2
             self.remotePlus = layout.ccommPlus2
-     
+
         else:
             # This process doesn't belong to any solver
             import journal
@@ -111,8 +111,8 @@ class CoupledA(BaseApplication):
 
         return
 
-    
-    def report Configuration(self):
+
+    def reportConfiguration(self):
 
         rank = self.comm.rank
 
@@ -134,47 +134,48 @@ class CoupledA(BaseApplication):
         self._info.line("    ecoupler1: %r" % self.inventory.ecoupler1.name)
         self._info.line("    ecoupler2: %r" % self.inventory.ecoupler2.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
-    
+
         return
 
-    class Invertory(BaseApplication.Inventory):
+
+    class Inventory(BaseApplication.Inventory):
 
         import pyre.inventory
 
         import Controller
         import Solver
         import Coupler
-        import Layout
+        import MultiLayout
 
         ccontroller = pyre.inventory.facility(name="ccontroller",
                                               factory=Controller.controller,
                                               args=("ccontroller","ccontroller"))
         econtroller1 = pyre.inventory.facility(name="econtroller1",
-                                              factory=Controller.controller,
-                                              args=("econtroller","econtroller"))
+                                               factory=Controller.controller,
+                                               args=("econtroller","econtroller"))
         econtroller2 = pyre.inventory.facility(name="econtroller2",
-                                              factory=Controller.controller,
-                                              args=("econtroller","econtroller"))
+                                               factory=Controller.controller,
+                                               args=("econtroller","econtroller"))
 
         ccoupler = pyre.inventory.facility("ccoupler",
                                            factory=Coupler.containingcoupler,
                                            args=("ccoupler","ccoupler"))
         ecoupler1 = pyre.inventory.facility("ecoupler1",
-                                           factory=Coupler.embeddedcoupler,
-                                           args=("ecoupler","ecoupler"))
+                                            factory=Coupler.embeddedcoupler,
+                                            args=("ecoupler","ecoupler"))
         ecoupler2 = pyre.inventory.facility("ecoupler2",
-                                           factory=Coupler.embeddedcoupler,
-                                           args=("ecoupler","ecoupler"))
+                                            factory=Coupler.embeddedcoupler,
+                                            args=("ecoupler","ecoupler"))
 
         csolver = pyre.inventory.facility("csolver",
                                           factory=Solver.coupledFullSolver,
                                           args=("csolver", "csolver"))
         esolver1 = pyre.inventory.facility("esolver1",
-                                       factory=Solver.coupledRegionalSolver,
-                                       args=("esolver", "esolver"))
+                                           factory=Solver.coupledRegionalSolver,
+                                           args=("esolver", "esolver"))
         esolver2 = pyre.inventory.facility("esolver2",
-                                       factory=Solver.coupledRegionalSolver,
-                                       args=("esolver", "esolver"))
+                                           factory=Solver.coupledRegionalSolver,
+                                           args=("esolver", "esolver"))
 
         layout = pyre.inventory.facility("layout", factory=MultiLayout.MultiLayout,
                                          args=("layout", "layout"))
@@ -182,6 +183,8 @@ class CoupledA(BaseApplication):
         steps = pyre.inventory.int("steps", default=1)
 
 
-        
+# version
+__id__ = "$Id$"
+
 # End of file
-        
+

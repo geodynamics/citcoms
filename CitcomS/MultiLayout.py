@@ -6,13 +6,13 @@
 #
 
 
-from pyre.components.Compenent import Component
+from Layout import Layout
 
-class MultiLayout(Component):
+class MultiLayout(Layout):
 
 
-    def __init(self, name, facility):
-        Compoent.__init__(self, name, facility)
+    def __init__(self, name, facility):
+        Layout.__init__(self, name, facility)
 
         # flag indicating that we are using
         # containing communicator
@@ -24,12 +24,12 @@ class MultiLayout(Component):
 
         # flag indicating that we are using
         # embedded comminicator2
-         self.ecomm2 = None
+        self.ecomm2 = None
 
         # list of communicators created to pass imformation
         # between different solvers
-        self.ccomPlus1 = []
-        self.ccomPlus2 = []
+        self.ccommPlus1 = []
+        self.ccommPlus2 = []
         self.ecommPlus1 = []
         self.ecommPlus2 = []
 
@@ -38,23 +38,10 @@ class MultiLayout(Component):
         self.nodes = 0
         return
 
-    def initialize(self, application):
-        self.discover()
-        self.verify(application)
-        self.createCommunicators()
-        return
-
-    def discover(self):
-        #Find the size and rank of the whole application
-        import mpi
-        self.comm = mpi.world()
-        self.rank = self.comm.rank
-        self.nodes = self.comm.size
-        return
 
     def verify(self, application):
         # check that we have at least 3 processor
-        if self.nodes <3:
+        if self.nodes < 3:
             import journal
             firewall = journal.firewall("MultiLayout")
             firewall.log("'%s' requires at least 3 processors" \
@@ -77,25 +64,7 @@ class MultiLayout(Component):
 
         return
 
-    
-    def check_duplicated(self, group):
-        s = set(group)
-        if len(s) != len(group):
-            import journal
-            firewall = journal.firewall("layout")
-            firewall.log('Duplicated element in group: %s' % group)
-        return
-            
-            
-     def check_disjoint(self, group0, group1):
-        s0 = set(group0)
-        s1 = set(group1)
-        if s0.intersection(s1):
-            import journal
-            firewall = journal.firewall("layout")
-            firewall.log('Groups are not disjoint: %s and %s' % (group0, group1))
-        return
-          
+
 
     def createCommunicators(self):
         # Create communicators for solvers and couplerd
@@ -115,7 +84,7 @@ class MultiLayout(Component):
         # ecommPlus1 is a list of communicators, with each communicator
         # contains a node in embedded_group1 and the whole containing_group
 
-        # ecommPlus2 is similar 
+        # ecommPlus2 is similar
         for node in containing_group:
             self.ecommPlus1.append(world.include(embedded_group1 + [node]))
             self.ecommPlus2.append(world.include(embedded_group2 + [node]))
@@ -125,27 +94,31 @@ class MultiLayout(Component):
 
         # commPlus2 is similar
         for node in embedded_group1:
-            self.ccommPlus.append(world.include(containing_group + [node]))
+            self.ccommPlus1.append(world.include(containing_group + [node]))
         for node in embedded_group2:
-            self.ccommPlus.append(world.include(containing_group + [node]))
+            self.ccommPlus2.append(world.include(containing_group + [node]))
 
         return
-       
-    class Inventory(Component.Inventory):
+
+
+    class Inventory(Layout.Inventory):
 
         import pyre.inventory
 
         # The containing solver will run on these nodes
         containing_group = pyre.inventory.slice("containing_group",
-                                                default=range(11))
+                                                default=range(12))
 
         # The embedded solver1 will run on these nodes
-        embedded_group1 = pyre.inventory.slice("embedded_group",
-                                              default=[11])
+        embedded_group1 = pyre.inventory.slice("embedded_group1",
+                                               default=[12])
 
         # The embedded solver2 will run on these nodes
-        embedded_group2 = pyre.inventory.slice("embedded_group",
-                                              default=[12])
+        embedded_group2 = pyre.inventory.slice("embedded_group2",
+                                               default=[13])
 
+
+# version
+__id__ = "$Id$"
 
 # End of file
