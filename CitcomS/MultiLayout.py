@@ -14,15 +14,15 @@ class MultiLayout(Component):
     def __init(self, name, facility):
         Compoent.__init__(self, name, facility)
 
-        # flag specifying that we are using
+        # flag indicating that we are using
         # containing communicator
         self.ccomm = None
 
-        # flag specifying that we are using
+        # flag indicating that we are using
         # embedded comminicator1
         self.ecomm1 = None
 
-        # flag specifying that we are using
+        # flag indicating that we are using
         # embedded comminicator2
          self.ecomm2 = None
 

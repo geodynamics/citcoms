@@ -2,7 +2,7 @@
 #
 #
 #
-#need to work on myPlus and remotePlus
+# need corresponding coupler controller solver
 #
 #
 #
@@ -22,10 +22,15 @@ class CoupledA(BaseApplication):
         self.solver = None
         self.solverCommunicator = None 
 
-        #list of communicators used to pass imformation between solvers
+        # list of communicators used to pass imformation between solvers
         self.myPlus = [] 
         self.remotePlus = [] 
 
+        # containing solver need to do more communication
+        self.myPlus2 = []
+        self.remotePlus2 = []
+
+        
         self.comm = None 
         self.rank = 0
         self.nodes = 0
@@ -54,7 +59,7 @@ class CoupledA(BaseApplication):
         layout = self.inventory.layout
         layout.initialize(self)
 
-        seelf.findLayout(layout)
+        self.findLayout(layout)
 
         self.comtroller.initialize(self)
         
@@ -69,27 +74,30 @@ class CoupledA(BaseApplication):
             self.solver = self.inventory.csolver
             self.coupler = self.inventory.ccoupler
             self.solverCommunicator = layout.ccomm
-            #self.myPlus = layout.ccommPlus
-            #self.remotePlus = layout.ecommPlus
+            self.myPlus = layout.ccommPlus1
+            self.remotePlus = layout.ecommPlus1
+            self.myPlus2 = layout.ccommPlus2
+            self.remotePlus2 = layout.ecommPlus2
+            
   
         elif layout.ecomm1:
-            # This process belongs to the embedded solver
+            # This process belongs to the embedded solver1
             self.controller = self.inventory.econtroller1
             self.solver = self.inventory.esolver1
             self.coupler = self.inventory.ecoupler1
             self.solverCommunicator = layout.ecomm1
-            #self.myPlus = layout.ecommPlus
-            #self.remotePlus = layout.ccommPlus
+            self.myPlus = layout.ecommPlus1
+            self.remotePlus = layout.ccommPlus1
  
 
         elif layout.ecomm2:
-            # This process belongs to the embedded solver
+            # This process belongs to the embedded solver2
             self.controller = self.inventory.econtroller2
             self.solver = self.inventory.esolver2
             self.coupler = self.inventory.ecoupler2
             self.solverCommunicator = layout.ecomm2
-            #self.myPlus = layout.ecommPlus
-            #self.remotePlus = layout.ccommPlus
+            self.myPlus = layout.ecommPlus2
+            self.remotePlus = layout.ccommPlus2
      
         else:
             # This process doesn't belong to any solver
@@ -117,11 +125,14 @@ class CoupledA(BaseApplication):
         self._info.line("    launcher: %r" % self.inventory.launcher.name)
 
         self._info.line("    csolver: %r" % self.inventory.csolver.name)
-        self._info.line("    esolver: %r" % self.inventory.esolver.name)
+        self._info.line("    esolver1: %r" % self.inventory.esolver1.name)
+        self._info.line("    esolver2: %r" % self.inventory.esolver2.name)
         self._info.line("    ccontroller: %r" % self.inventory.ccontroller.name)
-        self._info.line("    econtroller: %r" % self.inventory.econtroller.name)
+        self._info.line("    econtroller1: %r" % self.inventory.econtroller1.name)
+        self._info.line("    econtroller2: %r" % self.inventory.econtroller2.name)
         self._info.line("    ccoupler: %r" % self.inventory.ccoupler.name)
-        self._info.line("    ecoupler: %r" % self.inventory.ecoupler.name)
+        self._info.line("    ecoupler1: %r" % self.inventory.ecoupler1.name)
+        self._info.line("    ecoupler2: %r" % self.inventory.ecoupler2.name)
         self._info.line("    layout: %r" % self.inventory.layout.name)
     
         return
@@ -134,6 +145,7 @@ class CoupledA(BaseApplication):
         import Solver
         import Coupler
         import Layout
+
         ccontroller = pyre.inventory.facility(name="ccontroller",
                                               factory=Controller.controller,
                                               args=("ccontroller","ccontroller"))
@@ -143,7 +155,6 @@ class CoupledA(BaseApplication):
         econtroller2 = pyre.inventory.facility(name="econtroller2",
                                               factory=Controller.controller,
                                               args=("econtroller","econtroller"))
-
 
         ccoupler = pyre.inventory.facility("ccoupler",
                                            factory=Coupler.containingcoupler,
