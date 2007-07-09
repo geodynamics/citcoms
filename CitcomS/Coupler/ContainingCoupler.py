@@ -33,36 +33,21 @@ class ContainingCoupler(Coupler):
 
     def __init__(self, name, facility):
         Coupler.__init__(self, name, facility)
-
-        # exchanged information is non-dimensional
-        self.inventory.dimensional = False
-        # exchanged information is in spherical coordinate
-        self.inventory.transformational = False
-
         return
 
 
     def initialize(self, solver):
         Coupler.initialize(self, solver)
 
-	# restart and use temperautre field of previous run?
+        # restart and use temperautre field of previous run?
         self.restart = solver.restart
         if self.restart:
             self.ic_initTemperature = solver.ic_initTemperature
 
-	self.all_variables = solver.all_variables
-
         # allocate space for exchanger objects
-        self.boundary = range(self.numSrc)
-        self.source["BC"] = range(self.numSrc)
-        self.BC = range(self.numSrc)
-
-        # init'd Convertor singleton, this must be done before any other
-        # exchanger call
-        from ExchangerLib import initConvertor
-        initConvertor(self.inventory.dimensional,
-                      self.inventory.transformational,
-                      self.all_variables)
+        self.remoteBdryList = range(self.remoteSize)
+        self.source["BC"] = range(self.remoteSize)
+        self.BC = range(self.remoteSize)
 
         return
 
@@ -86,8 +71,8 @@ class ContainingCoupler(Coupler):
                                                     self.all_variables)
 
         # an empty boundary object, which will be filled by a remote boundary obj.
-        for i in range(len(self.boundary)):
-            self.boundary[i] = createEmptyBoundary()
+        for i in range(self.remoteSize):
+            self.remoteBdryList[i] = createEmptyBoundary()
 
         return
 
@@ -104,9 +89,9 @@ class ContainingCoupler(Coupler):
     def createSource(self):
         # the source obj's will send boundary conditions to a remote sink
         from ExchangerLib import CitcomSource_create
-        for i, comm, b in zip(range(self.numSrc),
+        for i, comm, b in zip(range(self.remoteSize),
                               self.srcComm,
-                              self.boundary):
+                              self.remoteBdryList):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
             self.source["BC"][i] = CitcomSource_create(comm.handle(),
@@ -122,7 +107,7 @@ class ContainingCoupler(Coupler):
         # the sink obj. will receive interior temperature from remote sources
         from ExchangerLib import Sink_create
         self.sink["Intr"] = Sink_create(self.sinkComm.handle(),
-                                        self.numSrc,
+                                        self.remoteSize,
                                         self.interior)
         return
 
@@ -131,7 +116,7 @@ class ContainingCoupler(Coupler):
         # boundary conditions will be sent by SVTOutlet, which sends
         # stress, velocity, and temperature
         import Outlet
-        for i, src in zip(range(self.numSrc),
+        for i, src in zip(range(self.remoteSize),
                           self.source["BC"]):
             self.BC[i] = Outlet.SVTOutlet(src,
                                           self.all_variables)
@@ -163,13 +148,13 @@ class ContainingCoupler(Coupler):
 
     def restartTemperature(self):
         from ExchangerLib import createEmptyInterior, CitcomSource_create
-        interior = range(self.numSrc)
-        source = range(self.numSrc)
+        interior = range(self.remoteSize)
+        source = range(self.remoteSize)
 
         for i in range(len(interior)):
             interior[i] = createEmptyInterior()
 
-        for i, comm, b in zip(range(self.numSrc),
+        for i, comm, b in zip(range(self.remoteSize),
                               self.srcComm,
                               interior):
             # sink is always in the last rank of a communicator
@@ -181,7 +166,7 @@ class ContainingCoupler(Coupler):
                                             self.all_variables)
 
         import Outlet
-        for i, src in zip(range(self.numSrc), source):
+        for i, src in zip(range(self.remoteSize), source):
             outlet = Outlet.TOutlet(src, self.all_variables)
             outlet.send()
 

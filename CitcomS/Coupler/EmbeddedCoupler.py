@@ -42,12 +42,6 @@ class EmbeddedCoupler(Coupler):
 
         # whether to apply boundary conditions
         self.toApplyBC = True
-
-        # exchanged information is non-dimensional
-        self.inventory.dimensional = False
-
-        # exchanged information is in spherical coordinate
-        self.inventory.transformational = False
         return
 
 
@@ -59,24 +53,15 @@ class EmbeddedCoupler(Coupler):
         if self.restart:
             self.ic_initTemperature = solver.ic_initTemperature
 
-	self.all_variables = solver.all_variables
-
         # allocate space for exchanger objects
-        self.interior = range(self.numSrc)
-        self.source["Intr"] = range(self.numSrc)
-        self.II = range(self.numSrc)
+        self.remoteIntrList = range(self.remoteSize)
+        self.source["Intr"] = range(self.remoteSize)
+        self.II = range(self.remoteSize)
 
         # the embedded solver should set its solver.bc.side_sbcs to on
         # otherwise, we have to stop
         if not solver.inventory.bc.inventory.side_sbcs:
             raise SystemExit('\n\nError: esolver.bc.side_sbcs must be on!\n\n\n')
-
-        # init'd Convertor singleton, this must be done before any other
-        # exchanger call
-        from ExchangerLib import initConvertor
-        initConvertor(self.inventory.dimensional,
-                      self.inventory.transformational,
-                      self.all_variables)
 
         return
 
@@ -104,8 +89,8 @@ class EmbeddedCoupler(Coupler):
 
         # an empty interior object, which will be filled by a remote interior obj.
         if inv.two_way_communication:
-            for i in range(len(self.interior)):
-                self.interior[i] = createEmptyInterior()
+            for i in range(self.remoteSize):
+                self.remoteIntrList[i] = createEmptyInterior()
 
         return
 
@@ -123,7 +108,7 @@ class EmbeddedCoupler(Coupler):
         # the sink obj. will receive boundary conditions from remote sources
         from ExchangerLib import Sink_create
         self.sink["BC"] = Sink_create(self.sinkComm.handle(),
-                                      self.numSrc,
+                                      self.remoteSize,
                                       self.boundary)
         return
 
@@ -131,9 +116,9 @@ class EmbeddedCoupler(Coupler):
     def createSource(self):
         # the source obj's will send interior temperature to a remote sink
         from ExchangerLib import CitcomSource_create
-        for i, comm, b in zip(range(self.numSrc),
+        for i, comm, b in zip(range(self.remoteSize),
                               self.srcComm,
-                              self.interior):
+                              self.remoteIntrList):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
             self.source["Intr"][i] = CitcomSource_create(comm.handle(),
@@ -158,7 +143,7 @@ class EmbeddedCoupler(Coupler):
     def createII(self):
         # interior temperature will be sent by TOutlet
         import Outlet
-        for i, src in zip(range(self.numSrc),
+        for i, src in zip(range(self.remoteSize),
                           self.source["Intr"]):
             self.II[i] = Outlet.TOutlet(src,
                                         self.all_variables)
@@ -181,7 +166,7 @@ class EmbeddedCoupler(Coupler):
         interior, bbox = createInterior(self.remoteBBox,
                                         self.all_variables)
         sink = Sink_create(self.sinkComm.handle(),
-                           self.numSrc,
+                           self.remoteSize,
                            interior)
         import Inlet
         inlet = Inlet.TInlet(interior, sink, self.all_variables)

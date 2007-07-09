@@ -35,12 +35,11 @@ class Coupler(Component):
     def __init__(self, name, facility):
         Component.__init__(self, name, facility)
 
-        self.mesh = None
         self.all_variables = None
         self.communicator = None
         self.srcComm = []
         self.sinkComm = None
-        self.numSrc = 0
+        self.remoteSize = 0
 
         self.sink = {}
         self.source = {}
@@ -54,10 +53,22 @@ class Coupler(Component):
     def initialize(self, solver):
         self.communicator = solver.communicator
         self.srcComm = solver.myPlus
-        self.numSrc = len(self.srcComm)
+
+        # number of processors in the remote solver
+        self.remoteSize = len(self.srcComm)
 
         # only one of remotePlus is sinkComm
         self.sinkComm = solver.remotePlus[self.communicator.rank]
+
+        self.all_variables = solver.all_variables
+
+        # init'd Convertor singleton, this must be done before any other
+        # exchanger call
+        from ExchangerLib import initConvertor
+        initConvertor(self.inventory.dimensional,
+                      self.inventory.transformational,
+                      self.all_variables)
+
         return
 
 
@@ -133,11 +144,11 @@ class Coupler(Component):
         two_way_communication = prop.bool("two_way_communication", default=True)
 
         # if dimensional is True, quantities exchanged are dimensional
-        dimensional = prop.bool("dimensional", default=True)
+        dimensional = prop.bool("dimensional", default=False)
 
         # if transformational is True, quantities exchanged are in standard
         # (ie. Cartesian) coordinate system
-        transformational = prop.bool("transformational", default=True)
+        transformational = prop.bool("transformational", default=False)
 
 
 
