@@ -48,6 +48,11 @@ class EmbeddedCoupler(Coupler):
     def initialize(self, solver):
         Coupler.initialize(self, solver)
 
+        # the embedded solver should set its solver.bc.side_sbcs to on
+        # otherwise, we have to stop
+        assert solver.inventory.bc.inventory.side_sbcs == True, \
+               'Error: esolver.bc.side_sbcs must be on!'
+
 	# restart and use temperautre field of previous run?
         self.restart = solver.restart
         if self.restart:
@@ -55,13 +60,8 @@ class EmbeddedCoupler(Coupler):
 
         # allocate space for exchanger objects
         self.remoteIntrList = range(self.remoteSize)
-        self.source["Intr"] = range(self.remoteSize)
-        self.II = range(self.remoteSize)
-
-        # the embedded solver should set its solver.bc.side_sbcs to on
-        # otherwise, we have to stop
-        if not solver.inventory.bc.inventory.side_sbcs:
-            raise SystemExit('\n\nError: esolver.bc.side_sbcs must be on!\n\n\n')
+        self.sourceList = range(self.remoteSize)
+        self.outletList = range(self.remoteSize)
 
         return
 
@@ -107,9 +107,11 @@ class EmbeddedCoupler(Coupler):
     def createSink(self):
         # the sink obj. will receive boundary conditions from remote sources
         from ExchangerLib import Sink_create
-        self.sink["BC"] = Sink_create(self.sinkComm.handle(),
-                                      self.remoteSize,
-                                      self.boundary)
+        # the sink will communicate with the source in ContainingCoupler
+        # during creation stage
+        self.sink = Sink_create(self.sinkComm.handle(),
+                                self.remoteSize,
+                                self.boundary)
         return
 
 
@@ -117,15 +119,18 @@ class EmbeddedCoupler(Coupler):
         # the source obj's will send interior temperature to a remote sink
         from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.remoteSize),
-                              self.srcComm,
+                              self.srcCommList,
                               self.remoteIntrList):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["Intr"][i] = CitcomSource_create(comm.handle(),
-                                                         sinkRank,
-                                                         b,
-                                                         self.myBBox,
-                                                         self.all_variables)
+
+            # the sources will communicate with the sink in ContainingCoupler
+            # during creation stage
+            self.sourceList[i] = CitcomSource_create(comm.handle(),
+                                                     sinkRank,
+                                                     b,
+                                                     self.myBBox,
+                                                     self.all_variables)
 
         return
 
@@ -134,9 +139,9 @@ class EmbeddedCoupler(Coupler):
         # boundary conditions will be recv. by SVTInlet, which receives
         # stress, velocity, and temperature
         import Inlet
-        self.BC = Inlet.SVTInlet(self.boundary,
-                                 self.sink["BC"],
-                                 self.all_variables)
+        self.inlet = Inlet.SVTInlet(self.boundary,
+                                    self.sink,
+                                    self.all_variables)
         return
 
 
@@ -144,9 +149,8 @@ class EmbeddedCoupler(Coupler):
         # interior temperature will be sent by TOutlet
         import Outlet
         for i, src in zip(range(self.remoteSize),
-                          self.source["Intr"]):
-            self.II[i] = Outlet.TOutlet(src,
-                                        self.all_variables)
+                          self.sourceList):
+            self.outletList[i] = Outlet.TOutlet(src, self.all_variables)
         return
 
 
@@ -184,7 +188,16 @@ class EmbeddedCoupler(Coupler):
 
     def preVSolverRun(self):
         # apply bc before solving the velocity
-        self.applyBoundaryConditions()
+        if self.toApplyBC:
+            self.inlet.recv()
+
+            self.toApplyBC = False
+
+        self.inlet.impose()
+
+        # applyBC only when previous step is sync'd
+        if self.synchronized:
+            self.toApplyBC = True
         return
 
 
@@ -192,25 +205,11 @@ class EmbeddedCoupler(Coupler):
         if self.inventory.two_way_communication:
             if self.synchronized:
                 # send temperture field to CCPLR
-                for ii in self.II:
-                    ii.send()
+                for outlet in self.outletList:
+                    outlet.send()
 
         return
 
-
-    def applyBoundaryConditions(self):
-        if self.toApplyBC:
-            self.BC.recv()
-
-            self.toApplyBC = False
-
-        self.BC.impose()
-
-        # applyBC only when previous step is sync'd
-        if self.synchronized:
-            self.toApplyBC = True
-
-        return
 
 
     def stableTimestep(self, dt):
@@ -218,24 +217,25 @@ class EmbeddedCoupler(Coupler):
         if self.synchronized:
             mycomm = self.communicator
             self.ccplr_t = exchangeTimestep(dt,
-                                          mycomm.handle(),
-                                          self.sinkComm.handle(),
-                                          0)
+                                            mycomm.handle(),
+                                            self.sinkComm.handle(),
+                                            0)
             self.ecplr_t = 0
             self.synchronized = False
 
-        self.ecplr_t += dt
         old_dt = dt
 
         # clipping oversized ecplr_t
-        if self.ecplr_t >= self.ccplr_t:
-            dt = dt - (self.ecplr_t - self.ccplr_t)
+        if self.ecplr_t + dt >= self.ccplr_t:
+            dt = self.ccplr_t - self.ecplr_t
             self.ecplr_t = self.ccplr_t
             self.synchronized = True
             #print "ECPLR: SYNCHRONIZED!"
+        else:
+            self.ecplr_t += dt
 
         # store timestep for interpolating boundary velocities
-        self.BC.storeTimestep(self.ecplr_t, self.ccplr_t)
+        self.inlet.storeTimestep(self.ecplr_t, self.ccplr_t)
 
         #print "%s - old dt = %g   exchanged dt = %g" % (
         #       self.__class__, old_dt, dt)

@@ -37,12 +37,9 @@ class Coupler(Component):
 
         self.all_variables = None
         self.communicator = None
-        self.srcComm = []
+        self.srcCommList = []
         self.sinkComm = None
         self.remoteSize = 0
-
-        self.sink = {}
-        self.source = {}
 
         self.synchronized = True
         self.done = False
@@ -52,10 +49,10 @@ class Coupler(Component):
 
     def initialize(self, solver):
         self.communicator = solver.communicator
-        self.srcComm = solver.myPlus
+        self.srcCommList = solver.myPlus
 
         # number of processors in the remote solver
-        self.remoteSize = len(self.srcComm)
+        self.remoteSize = len(self.srcCommList)
 
         # only one of remotePlus is sinkComm
         self.sinkComm = solver.remotePlus[self.communicator.rank]

@@ -46,8 +46,8 @@ class ContainingCoupler(Coupler):
 
         # allocate space for exchanger objects
         self.remoteBdryList = range(self.remoteSize)
-        self.source["BC"] = range(self.remoteSize)
-        self.BC = range(self.remoteSize)
+        self.sourceList = range(self.remoteSize)
+        self.outletList = range(self.remoteSize)
 
         return
 
@@ -63,8 +63,8 @@ class ContainingCoupler(Coupler):
         # the bounding box of the mesh on the other solver
         self.remoteBBox = exchangeBoundedBox(self.globalBBox,
                                              self.communicator.handle(),
-                                             self.srcComm[0].handle(),
-                                             self.srcComm[0].size - 1)
+                                             self.srcCommList[0].handle(),
+                                             self.srcCommList[0].size - 1)
 
         # the nodes within remoteBBox
         self.interior, self.myBBox = createInterior(self.remoteBBox,
@@ -90,15 +90,18 @@ class ContainingCoupler(Coupler):
         # the source obj's will send boundary conditions to a remote sink
         from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.remoteSize),
-                              self.srcComm,
+                              self.srcCommList,
                               self.remoteBdryList):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
-            self.source["BC"][i] = CitcomSource_create(comm.handle(),
-                                                       sinkRank,
-                                                       b,
-                                                       self.myBBox,
-                                                       self.all_variables)
+
+            # the sources will communicate with the sink in EmbeddedCoupler
+            # during creation stage
+            self.sourceList[i] = CitcomSource_create(comm.handle(),
+                                                     sinkRank,
+                                                     b,
+                                                     self.myBBox,
+                                                     self.all_variables)
 
         return
 
@@ -106,9 +109,12 @@ class ContainingCoupler(Coupler):
     def createSink(self):
         # the sink obj. will receive interior temperature from remote sources
         from ExchangerLib import Sink_create
-        self.sink["Intr"] = Sink_create(self.sinkComm.handle(),
-                                        self.remoteSize,
-                                        self.interior)
+
+        # the sink will communicate with the source in EmbeddedCoupler
+        # during creation stage
+        self.sink = Sink_create(self.sinkComm.handle(),
+                                self.remoteSize,
+                                self.interior)
         return
 
 
@@ -117,18 +123,17 @@ class ContainingCoupler(Coupler):
         # stress, velocity, and temperature
         import Outlet
         for i, src in zip(range(self.remoteSize),
-                          self.source["BC"]):
-            self.BC[i] = Outlet.SVTOutlet(src,
-                                          self.all_variables)
+                          self.sourceList):
+            self.outletList[i] = Outlet.SVTOutlet(src, self.all_variables)
         return
 
 
     def createII(self):
         # interior temperature will be received by TInlet
         import Inlet
-        self.II = Inlet.TInlet(self.interior,
-                               self.sink["Intr"],
-                               self.all_variables)
+        self.inlet = Inlet.TInlet(self.interior,
+                                  self.sink,
+                                  self.all_variables)
         return
 
 
@@ -155,7 +160,7 @@ class ContainingCoupler(Coupler):
             interior[i] = createEmptyInterior()
 
         for i, comm, b in zip(range(self.remoteSize),
-                              self.srcComm,
+                              self.srcCommList,
                               interior):
             # sink is always in the last rank of a communicator
             sinkRank = comm.size - 1
@@ -182,7 +187,8 @@ class ContainingCoupler(Coupler):
 
     def postVSolverRun(self):
         # send computed velocity to ECPLR for its BCs
-        self.applyBoundaryConditions()
+        for outlet in self.outletList:
+            outlet.send()
         return
 
 
@@ -190,25 +196,23 @@ class ContainingCoupler(Coupler):
         # update the temperature field in the overlapping region
         if self.inventory.two_way_communication:
             # receive temperture field from EmbeddedCoupler
-            self.II.recv()
-            self.II.impose()
-        return
-
-
-    def applyBoundaryConditions(self):
-        for bc in self.BC:
-            bc.send()
+            self.inlet.recv()
+            self.inlet.impose()
         return
 
 
     def stableTimestep(self, dt):
         from ExchangerLib import exchangeTimestep
-        new_dt = exchangeTimestep(dt,
-                                  self.communicator.handle(),
-                                  self.srcComm[0].handle(),
-                                  self.srcComm[0].size - 1)
+        remote_dt = exchangeTimestep(dt,
+                                     self.communicator.handle(),
+                                     self.srcCommList[0].handle(),
+                                     self.srcCommList[0].size - 1)
+
+        assert remote_dt < dt, \
+               'Size of dt in the esolver is greater than dt in the csolver!'
+
         #print "%s - old dt = %g   exchanged dt = %g" % (
-        #       self.__class__, dt, new_dt)
+        #       self.__class__, dt, remote_dt)
         return dt
 
 
@@ -216,8 +220,8 @@ class ContainingCoupler(Coupler):
         from ExchangerLib import exchangeSignal
         newsgnl = exchangeSignal(signal,
                                  self.communicator.handle(),
-                                 self.srcComm[0].handle(),
-                                 self.srcComm[0].size - 1)
+                                 self.srcCommList[0].handle(),
+                                 self.srcCommList[0].size - 1)
         return newsgnl
 
 
