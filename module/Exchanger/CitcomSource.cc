@@ -67,6 +67,8 @@ CitcomSource::CitcomSource(MPI_Comm comm,
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
+    // mesh is empty right now, will receive the node coordinate from sink,
+    // will use interpolator to find out which nodes are inside this proc.
     init(mesh, mybbox);
 }
 

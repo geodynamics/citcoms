@@ -54,7 +54,12 @@ CitcomInterpolator::CitcomInterpolator(const BoundedMesh& boundedMesh,
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
+    // for each node in boundedMesh, find whether it is inside this
+    // processor, if yes, find which element it is inside and
+    // calculate the shape functions
     init(boundedMesh, meshNode);
+
+    // testing the shape functions
     selfTest(boundedMesh, meshNode);
 
     elem_.print("CitcomS-CitcomInterpolator-elem");

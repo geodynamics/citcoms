@@ -55,7 +55,10 @@ Boundary::Boundary(const All_variables* E,
     nodeID_.reserve(maxNodes);
     normal_.reserve(maxNodes);
 
+    // find out which nodes belong to the boundary and fill X_ with them
     initX(E, excludeTop, excludeBottom);
+
+    // define the tight bounding box of the boundary
     initBBox(E);
     bbox_.print("CitcomS-Boundary-BBox");
 
@@ -78,6 +81,7 @@ void Boundary::initBBox(const All_variables *E)
 {
     bbox_ = tightBBox();
 
+    // XXX: this is a hack
     bbox_[0][2] = E->sphere.ri;
     bbox_[1][2] = E->sphere.ro;
 }
@@ -100,16 +104,16 @@ void Boundary::initX(const All_variables* E,
 		    appendNode(E, node, normalFlag);
 		}
 	}
-    } 
+    }
     else
 	addSidewalls(E, itop, 0);
 
-    
+
     const int ibottom = 1;
 
     if(E->parallel.me_loc[3] == 0)
 	if(!excludeBottom) {
-	    
+
 	    for(int k=1; k<=E->lmesh.noy; k++)
 		for(int j=1; j<=E->lmesh.nox; j++) {
 		    std::vector<int> normalFlag(Exchanger::DIM,0);
@@ -118,7 +122,7 @@ void Boundary::initX(const All_variables* E,
 		    int node = ijk2node(E, ibottom, j, k);
 		    appendNode(E, node, normalFlag);
 		}
-	} 
+	}
 	else
 	    addSidewalls(E, ibottom, -1);
     else

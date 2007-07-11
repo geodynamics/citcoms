@@ -67,6 +67,7 @@ SVTInlet::SVTInlet(const Boundary& boundary,
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
+    // set CitcomS boundary flags
     setVBCFlag();
     setTBCFlag();
 
@@ -88,9 +89,11 @@ void SVTInlet::recv()
     t.swap(t_old);
     v.swap(v_old);
 
+    // receive the fields from outlet
     sink.recv(t, v);
     sink.recv(s);
 
+    // convert back to CitcomS' units and coordinate system
     Exchanger::Convertor& convertor = Convertor::instance();
     convertor.xtemperature(t);
     convertor.xvelocity(v, sink.getX());
@@ -107,7 +110,10 @@ void SVTInlet::impose()
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
+    // impose normal velocity and shear stress as BC for momentum eqn.
     imposeSV();
+
+    // impose temperature BC for energy eqn.
     imposeT();
 }
 

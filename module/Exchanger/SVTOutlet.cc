@@ -59,6 +59,7 @@ void SVTOutlet::send()
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
+    // interpolate the required fields
     source.interpolateStress(s);
     s.print("CitcomS-SVTOutlet-S");
 
@@ -68,11 +69,13 @@ void SVTOutlet::send()
     source.interpolateTemperature(t);
     t.print("CitcomS-SVTOutlet-T");
 
+    // convert to SI units and Cartesian coordinate system, if desired
     Exchanger::Convertor& convertor = Convertor::instance();
     //convertor.stress(s, source.getX());
     convertor.velocity(v, source.getX());
     convertor.temperature(t);
 
+    // send the fields to inlet
     source.send(t, v);
     source.send(s);
 }
