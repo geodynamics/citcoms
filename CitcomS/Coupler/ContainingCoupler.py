@@ -53,8 +53,8 @@ class ContainingCoupler(Coupler):
 
 
     def createMesh(self):
-        '''Create BoundedMesh objects.
-        '''
+        # Create BoundedMesh objects.
+     
         from ExchangerLib import createGlobalBoundedBox, exchangeBoundedBox, createInterior, createEmptyBoundary
 
         # the bounding box of the mesh on this solver
