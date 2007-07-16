@@ -14,15 +14,12 @@ class MultiLayout(Layout):
     def __init__(self, name, facility):
         Layout.__init__(self, name, facility)
 
-        # flag indicating that we are using
         # containing communicator
         self.ccomm = None
 
-        # flag indicating that we are using
         # embedded comminicator1
         self.ecomm1 = None
 
-        # flag indicating that we are using
         # embedded comminicator2
         self.ecomm2 = None
 
