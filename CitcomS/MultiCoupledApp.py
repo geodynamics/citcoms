@@ -152,30 +152,30 @@ class MultiCoupledApp(BaseApplication):
                                               args=("ccontroller","ccontroller"))
         econtroller1 = pyre.inventory.facility(name="econtroller1",
                                                factory=Controller.controller,
-                                               args=("econtroller","econtroller"))
+                                               args=("econtroller1","econtroller1"))
         econtroller2 = pyre.inventory.facility(name="econtroller2",
                                                factory=Controller.controller,
-                                               args=("econtroller","econtroller"))
+                                               args=("econtroller2","econtroller2"))
 
         ccoupler = pyre.inventory.facility("ccoupler",
-                                           factory=Coupler.containingcoupler,
+                                           factory=Coupler.multicontainingcoupler,
                                            args=("ccoupler","ccoupler"))
         ecoupler1 = pyre.inventory.facility("ecoupler1",
                                             factory=Coupler.embeddedcoupler,
-                                            args=("ecoupler","ecoupler"))
+                                            args=("ecoupler1","ecoupler1"))
         ecoupler2 = pyre.inventory.facility("ecoupler2",
                                             factory=Coupler.embeddedcoupler,
-                                            args=("ecoupler","ecoupler"))
+                                            args=("ecoupler2","ecoupler2"))
 
         csolver = pyre.inventory.facility("csolver",
-                                          factory=Solver.coupledFullSolver,
+                                          factory=Solver.multicoupledRegionalSolver,
                                           args=("csolver", "csolver"))
         esolver1 = pyre.inventory.facility("esolver1",
-                                           factory=Solver.coupledRegionalSolver,
-                                           args=("esolver", "esolver"))
+                                           factory=Solver.multicoupledRegionalSolver,
+                                           args=("esolver1", "esolver1"))
         esolver2 = pyre.inventory.facility("esolver2",
-                                           factory=Solver.coupledRegionalSolver,
-                                           args=("esolver", "esolver"))
+                                           factory=Solver.multicoupledRegionalSolver,
+                                           args=("esolver2", "esolver2"))
 
         layout = pyre.inventory.facility("layout", factory=MultiLayout.MultiLayout,
                                          args=("layout", "layout"))
@@ -187,4 +187,3 @@ class MultiCoupledApp(BaseApplication):
 __id__ = "$Id$"
 
 # End of file
-

@@ -37,6 +37,11 @@ def embeddedcoupler(name, facility):
     return EmbeddedCoupler(name, facility)
 
 
+def multicontainingcoupler(name, facility):
+    from MultiC_Coupler import MultiC_Coupler
+    return MultiC_Coupler(name, facility)
+
+
 # version
 __id__ = "$Id$"
 

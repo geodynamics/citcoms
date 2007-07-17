@@ -6,7 +6,7 @@
 
 from ContainingCoupler import ContainingCoupler
 
-class MultiC_coupler(ContainingCoupler):
+class MultiC_Coupler(ContainingCoupler):
 
 
     def __init__(self, name, facility):
@@ -26,9 +26,9 @@ class MultiC_coupler(ContainingCoupler):
         # number of processors in the remote solver2
         self.remoteSize2 = len(self.srcCommList2)
 
-        # only one of remotePlus2 is sinkComm2 
+        # only one of remotePlus2 is sinkComm2
         self.sinkComm2 = solver.remotePlus2[self.communicator.rank]
-                
+
         # allocate space
         self.remoteBdryList2 = range(self.remoteSize2)
         self.sourceList2 = range(self.remoteSize2)
@@ -40,9 +40,11 @@ class MultiC_coupler(ContainingCoupler):
 
     def createMesh(self):
         # Create BoundedMesh objects.
+        from ExchangerLib import exchangeBoundedBox, createInterior, createEmptyBoundary
+
 
         ContainingCoupler.createMesh(self)
-        
+
         # the bounding box of the mesh on remote solver2
         self.remoteBBox2 = \
                          exchangeBoundedBox(self.globalBBox,
@@ -59,15 +61,15 @@ class MultiC_coupler(ContainingCoupler):
         # which will be filled by a remote boundary obj.
         for i in range(self.remoteSize2):
             self.remoteBdryList2[i] = createEmptyBoundary()
-    
-        
+
+
         return
 
 
     def createSource(self):
 
         ContainingCoupler.createSource(self)
-        
+
         # the source objects will send boundary conditions to remote sink2
         from ExchangerLib import CitcomSource_create
         for i, comm, b in zip(range(self.remoteSize2),
@@ -83,7 +85,7 @@ class MultiC_coupler(ContainingCoupler):
                                                      b,
                                                      self.myBBox2,
                                                      self.all_variables)
-        
+
         return
 
 
@@ -102,7 +104,7 @@ class MultiC_coupler(ContainingCoupler):
                                 self.interior2)
         return
 
-    
+
     def createBC(self):
 
         ContainingCoupler.createBC(self)
@@ -115,7 +117,7 @@ class MultiC_coupler(ContainingCoupler):
             self.outletList2[i] = Outlet.SVTOutlet(src, self.all_variables)
         return
 
-     def createII(self):
+    def createII(self):
 
         ContainingCoupler.createII(self)
 
@@ -126,14 +128,14 @@ class MultiC_coupler(ContainingCoupler):
                                   self.sink2,
                                   self.all_variables)
         return
-   
+
 
     # initTemperature
 
     # restartTemperature
 
     # modifyT
-    
+
     def postVSolverRun(self):
 
         ContainingCoupler.postVSolverRun(self)
@@ -143,7 +145,7 @@ class MultiC_coupler(ContainingCoupler):
             outlet.send()
         return
 
-    
+
     def newStep(self):
 
         ContainingCoupler.newStep(self)
@@ -154,7 +156,7 @@ class MultiC_coupler(ContainingCoupler):
             self.inlet2.recv()
             self.inlet2.impose()
         return
-    
+
     def stableTimestep(self, dt):
         #used by controller
 
@@ -205,20 +207,22 @@ class MultiC_coupler(ContainingCoupler):
 
         while 1:
             recv = self.exchangeSignal(sent)
-            recv2= self.exchangeSignal2sent)
+            recv2= self.exchangeSignal2(sent)
 
-            if done or (recv == END_SIMULATION_SIGNAL)
-            or (recv == END_SIMULATION_SIGNAL):
+            if done or (recv == END_SIMULATION_SIGNAL) or \
+               (recv2 == END_SIMULATION_SIGNAL):
                 done = True
                 break
-            elif (recv == KEEP_WAITING_SIGNAL)
-            or(recv2 == KEEP_WAITING_SIGNAL):
+            elif (recv == KEEP_WAITING_SIGNAL) or \
+                 (recv2 == KEEP_WAITING_SIGNAL):
                 pass
-            elif (recv == NEW_STEP_SIGNAL)
-            and (recv == NEW_STEP_SIGNAL):
+            elif (recv == NEW_STEP_SIGNAL) and \
+                 (recv2 == NEW_STEP_SIGNAL):
+                sent = NEW_STEP_SIGNAL
                 if self.synchronized:
                     #print self.name, 'exchanging timestep =', steps
                     self.coupled_steps = self.exchangeSignal(steps)
+                    self.coupled_steps2 = self.exchangeSignal2(steps)
                     #print self.name, 'exchanged timestep =', self.coupled_steps
                 break
             else:
@@ -226,15 +230,11 @@ class MultiC_coupler(ContainingCoupler):
                       "Unexpected signal value, singnal = %d" % recv
 
         return done
-    
-    class Inventory(ContainingCoupler.Inventory):
 
-        
+
+
 # version
 
-__id__ = "$Id:$"
+__id__ = "$Id$"
 
 # End of file
-
-
-        
