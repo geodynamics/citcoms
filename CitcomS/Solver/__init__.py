@@ -40,6 +40,18 @@ def coupledRegionalSolver(name, facility):
 
 
 
+def multicoupledFullSolver(name, facility):
+    from MultiC_FullSolver import MultiC_FullSolver
+    return MultiC_FullSolver(name, facility)
+
+
+
+def multicoupledRegionalSolver(name, facility):
+    from MultiC_RegionalSolver import MultiC_RegionalSolver
+    return MultiC_RegionalSolver(name, facility)
+
+
+
 def fullSolver(name='full', facility='solver'):
     from FullSolver import FullSolver
     return FullSolver(name, facility)
