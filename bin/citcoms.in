@@ -39,8 +39,33 @@ for directory in path:
         sys.path.insert(1, directory)
         site.addsitedir(directory)
 
-from CitcomS.SimpleApp import SimpleApp
-from pyre.applications import start
-start(applicationClass=SimpleApp)
 
-#  end of file 
+# Decide which application to run. The default is the single-solver (uncoupled)
+# application, which is right choice in most situaction.
+#
+# If the first command line argument is '--coupled' or '--multicoupled',
+# a different application (for coupled models) will be used. In this case, the
+# first command line argument will be removed, so it won't be interpreted as
+# an input parameter by the application.
+
+if len(sys.argv) < 2:
+    # no command line argument, use SimpleApp, a single solver application
+    from CitcomS.SimpleApp import SimpleApp as App
+elif sys.argv[1] == '--coupled':
+    # a dual solver application
+    from CitcomS.CoupledApp import CoupledApp as App
+    del sys.argv[1]
+elif sys.argv[1] == '--multicoupled':
+    # a triple solver application
+    from CitcomS.MultiCoupledApp import MultiCoupledApp as App
+    del sys.argv[1]
+else:
+    # use SimpleApp by default
+    from CitcomS.SimpleApp import SimpleApp as App
+
+
+# start the application
+from pyre.applications import start
+start(applicationClass=App)
+
+#  end of file

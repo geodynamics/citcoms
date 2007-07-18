@@ -41,7 +41,6 @@ if COND_EMBEDDING
 endif
 if COND_EXCHANGER
     PYLINK = $(CXXLINK)
-    bin_SCRIPTS += coupledcitcoms
     MAYBE_WITH_EXCHANGER = -DWITH_EXCHANGER
 if COND_EMBEDDING
     MAYBE_EXCHANGER_MODULE = $(top_builddir)/module/Exchanger/libExchangerLibmodule.a
@@ -103,9 +102,6 @@ do_install = sed -e s%[@]INTERPRETER[@]%$(INTERPRETER)%g -e s%[@]PYTHONPATH[@]%$
 citcoms: $(srcdir)/citcoms.in Makefile
 	$(do_build) < $(srcdir)/citcoms.in > $@ || (rm -f $@ && exit 1)
 	chmod +x $@
-coupledcitcoms: $(srcdir)/coupledcitcoms.in Makefile
-	$(do_build) < $(srcdir)/coupledcitcoms.in > $@ || (rm -f $@ && exit 1)
-	chmod +x $@
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
@@ -119,7 +115,7 @@ install-binSCRIPTS: $(bin_SCRIPTS)
 	    chmod +x "$(DESTDIR)$(bindir)/$$f"; \
 	  else :; fi; \
 	done
-EXTRA_DIST = citcoms.in coupledcitcoms.in
+EXTRA_DIST = citcoms.in
 CLEANFILES = $(bin_SCRIPTS)
 
 
