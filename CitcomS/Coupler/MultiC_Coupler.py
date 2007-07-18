@@ -34,7 +34,6 @@ class MultiC_Coupler(ContainingCoupler):
         self.sourceList2 = range(self.remoteSize2)
         self.outletList2 = range(self.remoteSize2)
 
-        ###
         return
 
 
@@ -197,38 +196,45 @@ class MultiC_Coupler(ContainingCoupler):
         KEEP_WAITING_SIGNAL = 0
         NEW_STEP_SIGNAL = 1
         END_SIMULATION_SIGNAL = 2
+        BIG_NEW_STEP_SIGNAL = 3
 
-        if done:
-            sent = END_SIMULATION_SIGNAL
-        elif self.synchronized:
-            sent = NEW_STEP_SIGNAL
-        else:
-            sent = KEEP_WAITING_SIGNAL
+        sent = NEW_STEP_SIGNAL
 
-        while 1:
+        KEEP_WAITING_FLAG = True
+       
+        while KEEP_WAITING_FLAG:
+
+            #receive signals
             recv = self.exchangeSignal(sent)
             recv2= self.exchangeSignal2(sent)
 
+            # determining what to send
             if done or (recv == END_SIMULATION_SIGNAL) or \
                (recv2 == END_SIMULATION_SIGNAL):
+                # end the simulation    
+                sent = END_SIMULATION_SIGNAL
                 done = True
-                break
+                KEEP_WAITING_FLAG = False
             elif (recv == KEEP_WAITING_SIGNAL) or \
                  (recv2 == KEEP_WAITING_SIGNAL):
-                pass
+                sent = NEW_STEP_SIGNAL
             elif (recv == NEW_STEP_SIGNAL) and \
                  (recv2 == NEW_STEP_SIGNAL):
-                sent = NEW_STEP_SIGNAL
-                if self.synchronized:
-                    #print self.name, 'exchanging timestep =', steps
-                    self.coupled_steps = self.exchangeSignal(steps)
-                    self.coupled_steps2 = self.exchangeSignal2(steps)
-                    #print self.name, 'exchanged timestep =', self.coupled_steps
-                break
+                # tell the embedded couplers to keep going
+                sent = BIG_NEW_STEP_SIGNAL
+                #print self.name, 'exchanging timestep =', steps
+                self.coupled_steps = self.exchangeSignal(steps)
+                self.coupled_steps2 = self.exchangeSignal2(steps)
+                #print self.name, 'exchanged timestep =', self.coupled_steps
+                KEEP_WAITING_FLAG = False
             else:
                 raise ValueError, \
                       "Unexpected signal value, singnal = %d" % recv
 
+            # send instructions to embedded couplers
+            recv = self.exchangeSignal(sent)
+            recv2= self.exchangeSignal2(sent)
+ 
         return done
 
 
