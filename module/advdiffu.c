@@ -80,7 +80,7 @@ PyObject * pyCitcom_PG_timestep_solve(PyObject *self, PyObject *args)
      * E->advection.timestep again */
     E->advection.timestep = dt;
 
-    (E->next_buoyancy_field)(E);
+    PG_timestep_solve(E);
 
     Py_INCREF(Py_None);
     return Py_None;
