@@ -33,7 +33,7 @@ import journal
 class CoupledApp(BaseApplication):
 
 
-    def __init__(self, name="CoupledCitcomS"):
+    def __init__(self, name="CitcomS"):
         BaseApplication.__init__(self, name)
 
         self.solver = None

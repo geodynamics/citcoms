@@ -16,7 +16,7 @@ import journal
 class MultiCoupledApp(BaseApplication):
 
 
-    def __init__(self, name="MultiCoupledCitcomS"):
+    def __init__(self, name="CitcomS"):
         BaseApplication.__init__(self, name)
 
         self.solver = None
