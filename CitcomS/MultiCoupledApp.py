@@ -161,10 +161,10 @@ class MultiCoupledApp(BaseApplication):
                                            factory=Coupler.multicontainingcoupler,
                                            args=("ccoupler","ccoupler"))
         ecoupler1 = pyre.inventory.facility("ecoupler1",
-                                            factory=Coupler.embeddedcoupler,
+                                            factory=Coupler.multiembeddedcoupler,
                                             args=("ecoupler1","ecoupler1"))
         ecoupler2 = pyre.inventory.facility("ecoupler2",
-                                            factory=Coupler.embeddedcoupler,
+                                            factory=Coupler.multiembeddedcoupler,
                                             args=("ecoupler2","ecoupler2"))
 
         csolver = pyre.inventory.facility("csolver",

@@ -174,8 +174,8 @@ class MultiC_Coupler(ContainingCoupler):
         assert remote_dt2 < dt, \
                'Size of dt in the esolver is greater than dt in the csolver2!'
 
-        #print "%s - old dt = %g   exchanged dt = %g" % (
-        #       self.__class__, dt, remote_dt)
+        print "%s - old dt = %g   exchanged dt = %g" % (
+               self.__class__, dt, remote_dt)
         return dt
 
     def exchangeSignal2(self, signal):
@@ -187,9 +187,6 @@ class MultiC_Coupler(ContainingCoupler):
         return newsgnl
 
     def endTimestep(self, steps, done):
-        #########################################
-        ##  fundamentally changed revision
-        #########################################
 
         # exchange predefined signal btwn couplers
         # the signal is used to sync the timesteps
@@ -207,6 +204,10 @@ class MultiC_Coupler(ContainingCoupler):
             #receive signals
             recv = self.exchangeSignal(sent)
             recv2= self.exchangeSignal2(sent)
+            #print "#####"
+            #print "recv= %d " % recv, "recv2 = %d" %  recv2
+            #print "#####"
+
 
             # determining what to send
             if done or (recv == END_SIMULATION_SIGNAL) or \
@@ -223,8 +224,6 @@ class MultiC_Coupler(ContainingCoupler):
                 # tell the embedded couplers to keep going
                 sent = BIG_NEW_STEP_SIGNAL
                 #print self.name, 'exchanging timestep =', steps
-                self.coupled_steps = self.exchangeSignal(steps)
-                self.coupled_steps2 = self.exchangeSignal2(steps)
                 #print self.name, 'exchanged timestep =', self.coupled_steps
                 KEEP_WAITING_FLAG = False
             else:
@@ -234,6 +233,17 @@ class MultiC_Coupler(ContainingCoupler):
             # send instructions to embedded couplers
             recv = self.exchangeSignal(sent)
             recv2= self.exchangeSignal2(sent)
+            #print "#####"
+            #print "sent = %d " % sent
+            #print "#####"
+            #import sys
+            #sys.stdout.flush()
+
+            # this must be put here because it use the same
+            # exchangeSignal function. The order of function calls matters.
+            if sent == BIG_NEW_STEP_SIGNAL:
+                self.coupled_steps = self.exchangeSignal(steps)
+                self.coupled_steps2 = self.exchangeSignal2(steps)
  
         return done
 

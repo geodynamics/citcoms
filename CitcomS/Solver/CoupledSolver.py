@@ -106,6 +106,7 @@ class CoupledSolver(Solver):
 
         # negotiate with other solver(s)
         dt = self.coupler.stableTimestep(dt)
+        print "solver received dt = %g" %dt
         return dt
 
 

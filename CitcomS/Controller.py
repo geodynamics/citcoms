@@ -85,7 +85,8 @@ class Controller(Component):
 
             # compute an acceptable timestep
             dt = self.stableTimestep()
-
+            print "controller received dt = %g" %dt
+            print "self.step = %g" %self.step
             # advance to the next step by dt
             self.advance(dt)
 

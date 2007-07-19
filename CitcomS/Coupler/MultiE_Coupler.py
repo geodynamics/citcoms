@@ -26,10 +26,16 @@ class MultiE_Coupler(EmbeddedCoupler):
             sent = KEEP_WAITING_SIGNAL
 
         while 1:
+
+            #print "*****" , self.name
             # send signal
             recv = self.exchangeSignal(sent)
+            #print "ecplr send %d" % sent
+
             # receive instruction
             recv = self.exchangeSignal(sent)
+            #print "ecplr receive %d" % recv
+            #print "*****"
 
             # determine what to do
             if done or (recv == END_SIMULATION_SIGNAL):
@@ -41,7 +47,7 @@ class MultiE_Coupler(EmbeddedCoupler):
                     pass
                 else:
                     break
-             elif recv == BIG_NEW_STEP_SIGNAL:
+            elif recv == BIG_NEW_STEP_SIGNAL:
                 assert self.synchronized, \
                        "embedded coupler not synchronized on a big step"
                 #print self.name, 'exchanging timestep =', steps
