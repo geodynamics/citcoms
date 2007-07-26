@@ -117,7 +117,8 @@ end
         opt_struct.append(struct[opt])
         opt_type.append(type[opt])
 
-    shape_str = ' x '.join([str(x) for x in shape])
+    # swap the order of shape for correct connectivity
+    shape_str = '%d x %d x %d' % (shape[1], shape[0], shape[2])
     opt_field_str = ', '.join(opt_field)
     opt_struct_str = ', '.join(opt_struct)
     opt_type_str = ', '.join(opt_type)
