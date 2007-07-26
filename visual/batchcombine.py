@@ -107,9 +107,9 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # combine
     import combine
-    combine.combine(datafile, fields, timestep,
-                    nodex, nodey, nodez,
-                    ncap, nprocx, nprocy, nprocz)
+    combined_files = combine.combine(datafile, fields, timestep,
+                                     nodex, nodey, nodez,
+                                     ncap, nprocx, nprocy, nprocz)
 
     # delete pasted files
     import glob
@@ -122,14 +122,6 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # create .general file
     import dxgeneral
-    combined_files = []
-    if fields == 'coord,velo,visc':
-        fmt = '%(datafile)s.cap%(cap)02d.%(timestep)d'
-    else:
-        fmt = '%(datafile)s.opt%(cap)02d.%(timestep)d'
-    for cap in range(ncap):
-        combined_files.append(fmt % vars())
-
     dxgeneral.write(fields, ncompositions, combined_files)
 
     return
