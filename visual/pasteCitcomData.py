@@ -122,7 +122,7 @@ def strip_headerlines(f, infix):
     # how many header lines for each infix
     headers = {'coord': 1,
                'botm': 1,
-               'comp_nd': 1,
+               'comp_nd': 2,
                'pressure': 2,
                'stress': 2,
                'surf': 1,
