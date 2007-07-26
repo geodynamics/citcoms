@@ -116,6 +116,7 @@ class Combine(object):
 
 def combine(prefix, opts, step, nodex, nodey, nodez,
             ncap, nprocx, nprocy, nprocz):
+    combined_files = []
     nproc_per_cap = nprocx * nprocy * nprocz
     for i in range(ncap):
         cb = Combine(nodex, nodey, nodez, nprocx, nprocy, nprocz)
@@ -132,7 +133,9 @@ def combine(prefix, opts, step, nodex, nodey, nodez,
 
         print 'writing', filename
         cb.write(filename)
+        combined_files.append(filename)
 
+    return combined_files
 
 
 if __name__ == '__main__':

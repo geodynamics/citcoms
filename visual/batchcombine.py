@@ -107,9 +107,9 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # combine
     import combine
-    combine.combine(datafile, fields, timestep,
-                    nodex, nodey, nodez,
-                    ncap, nprocx, nprocy, nprocz)
+    combined_files = combine.combine(datafile, fields, timestep,
+                                     nodex, nodey, nodez,
+                                     ncap, nprocx, nprocy, nprocz)
 
 
     # delete pasted files
@@ -123,10 +123,6 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # create .general file
     import dxgeneral
-    combined_files = []
-    for cap in range(ncap):
-        combined_files.append('%(datafile)s.cap%(cap)02d.%(timestep)d' % vars())
-
     dxgeneral.write(fields, combined_files)
 
     return
