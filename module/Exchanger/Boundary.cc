@@ -46,7 +46,6 @@ Boundary::Boundary(const All_variables* E,
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
-
     // boundary = all - interior
     int maxNodes = E->lmesh.nno - (E->lmesh.nox-2)
 	                         * (E->lmesh.noy-2)
@@ -104,6 +103,8 @@ void Boundary::initX(const All_variables* E,
 		    appendNode(E, node, normalFlag);
 		}
 	}
+	else
+	    addSidewalls(E, itop, 1);
     }
     else
 	addSidewalls(E, itop, 0);
@@ -111,9 +112,8 @@ void Boundary::initX(const All_variables* E,
 
     const int ibottom = 1;
 
-    if(E->parallel.me_loc[3] == 0)
+    if(E->parallel.me_loc[3] == 0) {
 	if(!excludeBottom) {
-
 	    for(int k=1; k<=E->lmesh.noy; k++)
 		for(int j=1; j<=E->lmesh.nox; j++) {
 		    std::vector<int> normalFlag(Exchanger::DIM,0);
@@ -125,6 +125,7 @@ void Boundary::initX(const All_variables* E,
 	}
 	else
 	    addSidewalls(E, ibottom, -1);
+    }
     else
 	addSidewalls(E, ibottom, 0);
 
