@@ -38,10 +38,10 @@
 static float solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max);
-static float solve_Ahat_p_fhat_BA(struct All_variables *E,
+static float solve_Ahat_p_fhat_CG(struct All_variables *E,
                                   double **V, double **P, double **F,
                                   double imp, int *steps_max);
-static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
+static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max);
 static double initial_vel_residual(struct All_variables *E,
@@ -105,9 +105,9 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
     float residual;
 
     if(E->control.inv_gruneisen < 1e-6)
-        residual = solve_Ahat_p_fhat_BA(E, V, P, F, imp, steps_max);
+        residual = solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
     else
-        residual = solve_Ahat_p_fhat_TALA(E, V, P, F, imp, steps_max);
+        residual = solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
 
     return(residual);
 }
@@ -117,7 +117,7 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
  * conjugate gradient (CG) iterations
  */
 
-static float solve_Ahat_p_fhat_BA(struct All_variables *E,
+static float solve_Ahat_p_fhat_CG(struct All_variables *E,
                                   double **V, double **P, double **F,
                                   double imp, int *steps_max)
 {
@@ -309,7 +309,7 @@ static float solve_Ahat_p_fhat_BA(struct All_variables *E,
  * bi-conjugate gradient stablized (BiCG-stab)iterations
  */
 
-static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
+static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max)
 {
