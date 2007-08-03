@@ -291,15 +291,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
       bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-    if(E->control.inv_gruneisen > 0)
-      for(i=1;i<=dims;i++)
-        for(j=1;j<=dims;j++)
-          for(i1=1;i1<=6;i1++)
-            for(j1=1;j1<=6;j1++)
-	      for(k=1;k<=VPOINTS3D;k++)
-		bdbmu[i][j] +=
-                  W[k]*d2[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
-    else
+    if(E->control.inv_gruneisen < 1e-6)
       for(i=1;i<=dims;i++)
         for(j=1;j<=dims;j++)
           for(i1=1;i1<=6;i1++)
@@ -307,6 +299,15 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
 	      for(k=1;k<=VPOINTS3D;k++)
 		bdbmu[i][j] +=
                   W[k]*d1[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
+
+    else
+      for(i=1;i<=dims;i++)
+        for(j=1;j<=dims;j++)
+          for(i1=1;i1<=6;i1++)
+            for(j1=1;j1<=6;j1++)
+	      for(k=1;k<=VPOINTS3D;k++)
+		bdbmu[i][j] +=
+                  W[k]*d2[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
 
 
 		/**/
