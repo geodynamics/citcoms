@@ -407,8 +407,10 @@ void read_initial_settings(struct All_variables *E)
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
   input_float("dissipation_number",&(E->control.disptn_number),"0.0",m);
   input_float("gruneisen",&(tmp),"0.0",m);
-  if(abs(tmp) > 1e-6)
+  if(fabs(tmp) > 1e-6)
       E->control.inv_gruneisen = 1/tmp;
+  else
+      E->control.inv_gruneisen = 0;
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);

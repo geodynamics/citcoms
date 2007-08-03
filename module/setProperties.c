@@ -451,8 +451,10 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "rayleigh", E->control.Atemp, fp);
     getFloatProperty(properties, "dissipation_number", E->control.disptn_number, fp);
     getFloatProperty(properties, "gruneisen", tmp, fp);
-    if(abs(tmp) > 1e-6)
-	E->control.inv_gruneisen = 1/tmp;
+    if(fabs(tmp) > 1e-6)
+	E->control.inv_gruneisen = 1.0/tmp;
+    else
+        E->control.inv_gruneisen = 0;
 
     getFloatProperty(properties, "Q0", E->control.Q0, fp);
 
