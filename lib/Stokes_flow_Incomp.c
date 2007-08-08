@@ -239,9 +239,9 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
             count, CPU_time0()-time0, E->monitor.incompressibility,
             0.0, 0.0, E->monitor.solution_cycles);
     fflush(E->fp);
-    fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+    fprintf(stderr,"AhatP (%03d) after %.3f seconds with v=%.3e div/v=%.3e dv/v=%.3e"
             " and dp/p=%.3e for step %d\n",
-            count, CPU_time0()-time0, E->monitor.incompressibility,
+            count, CPU_time0()-time0, E->monitor.vdotv ,E->monitor.incompressibility,
             0.0, 0.0, E->monitor.solution_cycles);
   }
 
@@ -311,9 +311,9 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
 	      " and dp/p=%.3e for step %d\n",
 	      count, CPU_time0()-time0, E->monitor.incompressibility,
 	      dvelocity, dpressure, E->monitor.solution_cycles);
-      fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e dv/v=%.3e"
+      fprintf(stderr, "AhatP (%03d) after %.3f seconds with v=%.3e div/v=%.3e dv/v=%.3e"
 	      " and dp/p=%.3e for step %d\n",
-	      count, CPU_time0()-time0, E->monitor.incompressibility,
+	      count, CPU_time0()-time0, E->monitor.vdotv,E->monitor.incompressibility,
 	      dvelocity, dpressure, E->monitor.solution_cycles);
     }
 

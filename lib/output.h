@@ -43,4 +43,7 @@ FILE* output_open(char *);
 }
 #endif
 
+#ifdef USE_GZDIR
+void gzdir_output(struct All_variables *, int );
+#endif
 #endif

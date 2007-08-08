@@ -85,6 +85,7 @@ sources = \
 	Nodal_mesh.c \
 	Output.c \
 	output.h \
+	Output_gzdir.c \
 	Output_h5.c \
 	output_h5.h \
 	Pan_problem_misc_functions.c \

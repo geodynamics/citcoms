@@ -151,7 +151,7 @@ void PG_timestep_solve(struct All_variables *E)
 
   if(E->control.filter_temperature)
     filter(E);
-
+  
   /*   time0= CPU_time0()-time1; */
   /*     if(E->control.verbose) */
   /*       fprintf(E->fp_out,"time=%f\n",time0); */

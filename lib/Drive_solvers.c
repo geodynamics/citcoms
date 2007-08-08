@@ -95,7 +95,7 @@ void general_stokes_solver(struct All_variables *E)
 
   solve_constrained_flow_iterative(E);
 
-  if (E->viscosity.SDEPV) {
+  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
@@ -118,13 +118,15 @@ void general_stokes_solver(struct All_variables *E)
       Udot_mag  = sqrt(global_fvdot(E,oldU,oldU,E->mesh.levmax));
       dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
 
+	    
       if(E->parallel.me==0){
-	fprintf(stderr,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
-	fprintf(E->fp,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
+	fprintf(stderr,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
+		dUdot_mag,Udot_mag,count);
+	fprintf(E->fp,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
+		dUdot_mag,Udot_mag,count);
 	fflush(E->fp);
       }
-
-      if (count>50 || dUdot_mag>E->viscosity.sdepv_misfit)
+      if ((count>50) || (dUdot_mag<E->viscosity.sdepv_misfit))
 	break;
 
       get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
@@ -140,7 +142,7 @@ void general_stokes_solver(struct All_variables *E)
       free((void *) delta_U[m]);
     }
 
-  } /*end if SDEPV*/
+  } /*end if SDEPV or PDEPV */
 
   return;
 }
@@ -188,7 +190,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 	  }
 	  solve_constrained_flow_iterative_pseudo_surf(E);
 
-	  if (E->viscosity.SDEPV) {
+	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
 		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 			  delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
@@ -217,7 +219,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 				  fflush(E->fp);
 			  }
 
-			  if (count>50 || dUdot_mag>E->viscosity.sdepv_misfit)
+			  if (count>50 || dUdot_mag<E->viscosity.sdepv_misfit) 
 				  break;
 
 			  get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
@@ -232,7 +234,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 			  free((void *) delta_U[m]);
 		  }
 
-	  } /*end if SDEPV */
+	  } /*end if SDEPV or PDEPV */
 	  E->monitor.topo_loop++;
   }
   get_STD_freesurf(E,E->slice.freesurf);

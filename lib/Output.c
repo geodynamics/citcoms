@@ -64,6 +64,14 @@ void output_common_input(struct All_variables *E)
     input_string("output_format", E->output.format, "ascii",m);
     input_string("output_optional", E->output.optional, "surf,botm,tracer,comp_el",m);
 
+    /* gzdir type of I/O */
+    if(strcmp(E->output.format, "gzdir") == 0){
+      input_boolean("gzdir_vtkio",&(E->output.gzdir_vtkio),"off",m);
+      E->output.gzdir_vtkbase_init = 0;
+      E->output.gzdir_vtkbase_save = 1; /* should we save the basis vectors? (memory!) */
+      fprintf(stderr,"gzdir: vtkio: %i save basis vectors: %i\n",
+	      E->output.gzdir_vtkio,E->output.gzdir_vtkbase_save);
+    }
 }
 
 
@@ -76,6 +84,7 @@ void output(struct All_variables *E, int cycles)
     /*output_mat(E);*/
   }
 
+  
   output_velo(E, cycles);
   output_visc(E, cycles);
 

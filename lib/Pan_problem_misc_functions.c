@@ -51,6 +51,12 @@
 #include "phase_change.h"
 #include "parallel_related.h"
 
+void calc_cbase_at_tp(float , float , float *);
+void rtp2xyz(float , float , float, float *);
+void convert_pvec_to_cvec(float ,float , float , float *,float *);
+void *safe_malloc (size_t );
+
+
 
 int get_process_identifier()
 {
@@ -384,4 +390,73 @@ double myatan(y,x)
 double return1_test()
 {
  return 1.0;
+}
+
+/* convert r,theta,phi system to cartesian, xout[3] */
+void rtp2xyz(float r, float theta, float phi, float *xout)
+{
+  float rst;
+  rst = r * sin(theta);
+  xout[0] = rst * cos(phi);	/* x */
+  xout[1] = rst * sin(phi); 	/* y */
+  xout[2] = r * cos(theta);
+}
+
+
+/* compute base vectors for conversion of polar to cartesian vectors
+   base[9]
+*/
+void calc_cbase_at_tp(float theta, float phi, float *base)
+{
+
+
+ double ct,cp,st,sp;
+  
+ ct=cos(theta);
+ cp=cos(phi);
+ st=sin(theta);
+ sp=sin(phi);
+ /* r */
+ base[0]= st * cp;
+ base[1]= st * sp;
+ base[2]= ct;
+ /* theta */
+ base[3]= ct * cp;
+ base[4]= ct * sp;
+ base[5]= -st;
+ /* phi */
+ base[6]= -sp;
+ base[7]= cp;
+ base[8]= 0.0;
+}
+
+/* given a base from calc_cbase_at_tp, convert a polar vector to
+   cartesian */
+void convert_pvec_to_cvec(float vr,float vt, 
+			  float vp, float *base,
+			  float *cvec)
+{
+  int i;
+  for(i=0;i<3;i++){
+    cvec[i]  = base[i]  * vr;
+    cvec[i] += base[3+i]* vt;
+    cvec[i] += base[6+i]* vp;
+  }
+}
+/* 
+   like malloc, but with test 
+
+   similar to Malloc1 but I didn't like the int as argument
+   
+*/
+void *safe_malloc (size_t size)
+{
+  void *tmp;
+  
+  if ((tmp = malloc(size)) == NULL) {
+    fprintf(stderr, "safe_malloc: could not allocate memory, %.3f MB\n", 
+	    (float)size/(1024*1024.));
+    parallel_process_termination();
+  }
+  return (tmp);
 }
