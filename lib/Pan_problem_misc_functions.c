@@ -55,6 +55,7 @@ void calc_cbase_at_tp(float , float , float *);
 void rtp2xyz(float , float , float, float *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
+void myerror(struct All_variables *,char *);
 
 
 
@@ -147,7 +148,8 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         buoy[m][i] =  temp * E->T[m][i];
 
     /* chemical buoyancy */
-    if(E->control.tracer && E->composition.ichemical_buoyancy==1) {
+    if(E->control.tracer && 
+       (E->composition.ichemical_buoyancy)) {
       temp2 = E->composition.buoyancy_ratio * temp;
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)
@@ -392,7 +394,11 @@ double return1_test()
  return 1.0;
 }
 
-/* convert r,theta,phi system to cartesian, xout[3] */
+/* convert r,theta,phi system to cartesian, xout[3] 
+   there's a double version of this in Tracer_setup called
+   sphere_to_cart
+
+*/
 void rtp2xyz(float r, float theta, float phi, float *xout)
 {
   float rst;
@@ -459,4 +465,14 @@ void *safe_malloc (size_t size)
     parallel_process_termination();
   }
   return (tmp);
+}
+/* error handling routine, TWB */
+
+void myerror(struct All_variables *E,char *message)
+{
+  E->control.verbose = 1;
+  record(E,message);
+  fprintf(stderr,"node %3i: error: %s\n",
+	  E->parallel.me,message);
+  parallel_process_termination();
 }

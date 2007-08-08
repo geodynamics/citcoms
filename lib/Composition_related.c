@@ -45,10 +45,11 @@ void composition_input(struct All_variables *E)
 {
     int m = E->parallel.me;
 
-    input_int("chemical_buoyancy",&(E->composition.ichemical_buoyancy),
-              "1,0,nomax",m);
+    input_boolean("chemical_buoyancy",
+		  &(E->composition.ichemical_buoyancy),
+		  "1,0,nomax",m);
 
-    if (E->composition.ichemical_buoyancy==1) {
+    if (E->composition.ichemical_buoyancy) {
 
         input_double("buoyancy_ratio",
                      &(E->composition.buoyancy_ratio),"1.0",m);
@@ -106,7 +107,7 @@ void write_composition_instructions(struct All_variables *E)
 {
 
     E->composition.on = 0;
-    if (E->composition.ichemical_buoyancy==1 ||
+    if (E->composition.ichemical_buoyancy ||
         E->composition.icompositional_rheology)
         E->composition.on = 1;
 
@@ -117,15 +118,16 @@ void write_composition_instructions(struct All_variables *E)
             parallel_process_termination();
         }
 
-        if (E->composition.ichemical_buoyancy==0)
-            fprintf(E->trace.fpt,"Passive Tracers\n");
+        if (!E->composition.ichemical_buoyancy)
+	  fprintf(E->trace.fpt,"Passive Tracers\n");
+	else
+	  fprintf(E->trace.fpt,"Active Tracers\n");
 
-        if (E->composition.ichemical_buoyancy==1)
-            fprintf(E->trace.fpt,"Active Tracers\n");
 
-
-        if (E->composition.ibuoy_type==1) fprintf(E->trace.fpt,"Ratio Method\n");
-        if (E->composition.ibuoy_type==0) fprintf(E->trace.fpt,"Absolute Method\n");
+        if (E->composition.ibuoy_type==1) 
+	  fprintf(E->trace.fpt,"Ratio Method\n");
+        if (E->composition.ibuoy_type==0) 
+	  fprintf(E->trace.fpt,"Absolute Method\n");
 
         fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
 
@@ -209,12 +211,13 @@ static void allocate_composition_memory(struct All_variables *E)
 
 static void init_composition(struct All_variables *E)
 {
-    if (E->composition.ichemical_buoyancy==1 && E->composition.ibuoy_type==1) {
-        fill_composition(E);
-        check_initial_composition(E);
-        init_bulk_composition(E);
-    }
-    return;
+  if (E->composition.ichemical_buoyancy && 
+      E->composition.ibuoy_type) {
+    fill_composition(E);
+    check_initial_composition(E);
+    init_bulk_composition(E);
+  }
+  return;
 }
 
 
@@ -226,7 +229,7 @@ static void check_initial_composition(struct All_variables *E)
             fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
             fflush(E->trace.fpt);
             fprintf(stderr,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
-            exit(10);
+	    if (E->trace.itracer_warnings==1) exit(10);	/* made this consistent with tracer advection */
         }
     }
 

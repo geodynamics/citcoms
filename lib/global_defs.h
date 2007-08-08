@@ -659,11 +659,9 @@ struct Output {
     int comp_nd;      /* whether to output composition at nodes */
 
 
-#ifdef USE_GZDIR
-  /* flags only used by GZDIR */
+  /* flags used by GZDIR */
   int gzdir_vtkio,gzdir_vtkbase_init,gzdir_vtkbase_save;
   float *gzdir_vtkbase;
-#endif
 };
 
 

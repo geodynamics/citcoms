@@ -305,21 +305,23 @@ void full_lost_souls(struct All_variables *E)
 
 
     parallel_process_sync(E);
-    fprintf(E->trace.fpt, "Entering lost_souls()\n");
+    if(E->control.verbose)
+      fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
     E->trace.istat_isend=E->trace.ilater[j];
-
-
     /* debug */
-    for (kk=1; kk<=E->trace.istat_isend; kk++) {
+    if(E->control.verbose){
+      for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
                 E->trace.rlater[j][0][kk],
                 E->trace.rlater[j][1][kk],
                 E->trace.rlater[j][2][kk]);
+      }
+      fflush(E->trace.fpt);
     }
-    fflush(E->trace.fpt);
     /**/
+
 
 
     /* initialize isend and ireceive */
@@ -388,16 +390,18 @@ void full_lost_souls(struct All_variables *E)
 
 
     /** debug **/
-    for (kk=0;kk<=num_ngb;kk++) {
+    if(E->control.verbose){
+      for (kk=0;kk<=num_ngb;kk++) {
         if(kk==0)
-            isource_proc=E->parallel.me;
+	  isource_proc=E->parallel.me;
         else
-            isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-
-        fprintf(E->trace.fpt,"%d send %d to proc %d\n",
-                E->parallel.me,isend[j][kk],isource_proc);
-        fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
-                E->parallel.me,ireceive[j][kk],isource_proc);
+	  isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
+	
+	fprintf(E->trace.fpt,"%d send %d to proc %d\n",
+		E->parallel.me,isend[j][kk],isource_proc);
+	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
+		E->parallel.me,ireceive[j][kk],isource_proc);
+      }
     }
     /**/
 
@@ -745,9 +749,10 @@ void full_lost_souls(struct All_variables *E)
         E->trace.ielement[j][E->trace.ntracers[j]]=iel;
 
     }
-
-    fprintf(E->trace.fpt,"Freeing memory in lost_souls()\n");
-    fflush(E->trace.fpt);
+    if(E->control.verbose){
+      fprintf(E->trace.fpt,"Freeing memory in lost_souls()\n");
+      fflush(E->trace.fpt);
+    }
     parallel_process_sync(E);
 
     /* Free Arrays */
@@ -759,8 +764,10 @@ void full_lost_souls(struct All_variables *E)
         free(receive[j][kk]);
 
     }
-    fprintf(E->trace.fpt,"Leaving lost_souls()\n");
-    fflush(E->trace.fpt);
+    if(E->control.verbose){
+      fprintf(E->trace.fpt,"Leaving lost_souls()\n");
+      fflush(E->trace.fpt);
+    }
 
     return;
 }
@@ -1865,6 +1872,13 @@ static void write_trace_instructions(struct All_variables *E)
             fprintf(E->trace.fpt,"Layered tracer flavors\n");
             fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
         }
+#ifdef USE_GGRD
+	else if(E->trace.ic_method_for_flavors == 1) {
+            fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
+            fprintf(E->trace.fpt,"file: %s top %i layeres\n",E->trace.ggrd_file,
+		    E->trace.ggrd_layers);
+	}
+#endif
         else {
             fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
             fflush(E->trace.fpt);

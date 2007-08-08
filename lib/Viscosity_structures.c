@@ -167,11 +167,8 @@ void get_system_viscosity(E,propogate,evisc,visc)
     if(E->viscosity.SDEPV)
         visc_from_S(E,evisc,propogate);
 
-    if(E->viscosity.PDEPV){	/* "plasticity" */
-      //visc_from_P(E,evisc);
-      if(E->parallel.me == 0)
-	fprintf(stderr,"PDEPV switched off to test the stress dependent loop\n");
-    }
+    if(E->viscosity.PDEPV)	/* "plasticity" */
+      visc_from_P(E,evisc);
 
 
     if(E->viscosity.channel || E->viscosity.wedge)
@@ -269,7 +266,7 @@ void visc_from_T(E,EEta,propogate)
     imark = 0;
 
     switch (E->viscosity.RHEOL)   {
-    case 1:
+    case 1:			/* eta = N_0 exp( E * (T_0 - T))  */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
@@ -296,7 +293,7 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
-    case 2:
+    case 2:			/* eta = N_0 exp(-T/T_0) */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
@@ -323,37 +320,33 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
-    case 3:
+    case 3:			/* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) */
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
-                tempa = E->viscosity.N0[l-1];
+		if(E->control.mat_control) /* switch moved up here TWB */
+		  tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l-1];
                 j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
-                    zzz=0.0;
-                    for(kk=1;kk<=ends;kk++)   {
-                        TT[kk]=max(TT[kk],zero);
-                        temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
-                        zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    for(kk=1;kk<=ends;kk++)   {	/* took out
+						   computation of
+						   depth, not
+						   needed TWB */
+		      TT[kk]=max(TT[kk],zero);
+		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
-
-                    if(E->control.mat_control==0)
-                        EEta[m][ (i-1)*vpts + jj ] = tempa*
-                            exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
-                                 - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
-
-                    if(E->control.mat_control==1)
-                        EEta[m][ (i-1)*vpts + jj ] = tempa*E->VIP[m][i]*
-                            exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
-                                 - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
+		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		      exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
+			   - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
                 }
             }
         break;
@@ -363,7 +356,11 @@ void visc_from_T(E,EEta,propogate)
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
-                tempa = E->viscosity.N0[l-1];
+		if(E->control.mat_control) /* moved this up here TWB */
+		  tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l-1];
+
                 j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
@@ -389,25 +386,16 @@ void visc_from_T(E,EEta,propogate)
                        so: E->viscosity.E = Ea/R*DT ; E->viscosity.Z = Va/R*DT
                        p = zzz and E->viscosity.T = T0/DT */
 
-
-                    if(E->control.mat_control==0)
-                        EEta[m][ (i-1)*vpts + jj ] = tempa*
-                            exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
-                                 / (E->viscosity.T[l-1]+temp) );
-
-
-
-                    if(E->control.mat_control==1)
-                        EEta[m][ (i-1)*vpts + jj ] = tempa*E->VIP[m][i]*
-                            exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
-                                 / (E->viscosity.T[l-1]+temp) );
-
+		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		      exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
+			   / (E->viscosity.T[l-1]+temp) );
+		    
                 }
             }
         break;
 
 
-    case 5:
+    case 5:			/* this still needs to be documented, who wrote this? */
 
         /* same as rheol 3, except alternative margin, VIP, formulation */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -457,6 +445,39 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
+
+    case 6:			/* eta = N_0 exp(E(T_0-T) + (1-z) Z_0 ) */
+      
+        for(m=1;m <= E->sphere.caps_per_proc;m++)
+	  for(i=1;i <= nel;i++)   {
+	    l = E->mat[m][i];
+	    if(E->control.mat_control) 
+	      tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
+	    else
+	      tempa = E->viscosity.N0[l-1];
+	    j = 0;
+	    
+	    for(kk=1;kk<=ends;kk++) {
+	      TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+	      zz[kk] = (1.0 - E->sx[m][3][E->ien[m][i].node[kk]]);
+	    }
+	    
+	    for(jj=1;jj <= vpts;jj++) {
+	      temp=0.0;zzz=0.0;
+	      for(kk=1;kk <= ends;kk++)   {
+		TT[kk]=max(TT[kk],zero);
+		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+	      }
+	      //fprintf(stderr,"N0 %11g T %11g T0 %11g E %11g 1-z %11g Z %11g\n",
+	      //	      tempa,temp,E->viscosity.T[l-1],E->viscosity.E[l-1], zzz ,E->viscosity.Z[l-1] );
+	      EEta[m][ (i-1)*vpts + jj ] = tempa*
+		exp( E->viscosity.E[l-1]*(E->viscosity.T[l-1] - temp) +
+		     zzz *  E->viscosity.Z[l-1] );
+	    }
+	  }
+        break;
+	
 
 
 

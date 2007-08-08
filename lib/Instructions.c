@@ -631,7 +631,7 @@ void allocate_velocity_vars(E)
     for(i=0;i<=E->lmesh.neq;i++)
       E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
 
-    if(E->control.tracer==1)  {
+    if(E->control.tracer == 1)  {
       for(i=1;i<=E->mesh.nsd;i++)     {
         E->GV[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
         E->GV1[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));

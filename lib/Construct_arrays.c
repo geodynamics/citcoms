@@ -30,6 +30,8 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+int layers_r(struct All_variables *,float );
+
 /*========================================================
   Function to make the IEN array for a mesh of given
   dimension. IEN is an externally defined structure array
@@ -746,24 +748,32 @@ void construct_mat_group(E)
 
 
 int layers(E,m,node)
-    struct All_variables *E;
-    int m,node;
+     struct All_variables *E;
+     int m,node;
 {
-    float zlith, z410, zlm;
-
-    int llayers = 0;
-    zlith=E->viscosity.zlith;
-    z410=E->viscosity.z410;
-    zlm=E->viscosity.zlm;
-
-    if (E->sx[m][3][node]>(E->sphere.ro-zlith))
-      llayers = 1;
-    else if ((E->sx[m][3][node])>(E->sphere.ro-z410) && E->sx[m][3][node]<=(E->sphere.ro-zlith))
-      llayers = 2;
-    else if ((E->sx[m][3][node])>(E->sphere.ro-zlm) && E->sx[m][3][node]<=(E->sphere.ro-z410))
-      llayers = 3;
-    else
-      llayers = 4;
-
-    return (llayers);
-  }
+  return(layers_r(E,E->sx[m][3][node]));
+}
+/* took this apart to allow call from other subroutines */
+int layers_r(E,r)
+     struct All_variables *E;
+     float r;
+{
+  float zlith, z410, zlm;
+  
+  int llayers = 0;
+  zlith = E->viscosity.zlith;
+  z410  = E->viscosity.z410;
+  zlm   = E->viscosity.zlm;
+  
+  if (r > (E->sphere.ro-zlith))
+    llayers = 1;
+  else if ((r > (E->sphere.ro-z410))&& 
+	   (r  <= (E->sphere.ro-zlith)))
+    llayers = 2;
+  else if ((r > (E->sphere.ro-zlm)) && 
+	   (r <= (E->sphere.ro-z410)))
+    llayers = 3;
+  else
+    llayers = 4;
+  return (llayers);
+}

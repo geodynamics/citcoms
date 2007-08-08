@@ -27,6 +27,7 @@
  */
 
 
+
 /* forward declaration */
 struct All_variables;
 
@@ -67,6 +68,11 @@ struct TRACE{
 
     int ic_method_for_flavors;
     double z_interface;
+  
+  char ggrd_file[255];		/* for grd input */
+  int ggrd_layers;
+
+
 
     /* statistical parameters */
     int istat_ichoice[13][5];

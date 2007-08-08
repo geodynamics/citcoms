@@ -208,6 +208,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   int count,counts,cycles,convergent,valid;
   int i, neq, gneq,m;
 
+  char message[200];
+
   double CPU_time0(),initial_time,time;
   double residual,prior_residual,r0;
   double *D1[NCS], *r[NCS], *Au[NCS];
@@ -236,15 +238,21 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   else  {
 
     counts =0;
-    if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-    if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+    if(E->parallel.me==0){	/* output */
+      snprintf(message,200,"resi = %.6e for iter %d acc %.6e",residual,counts,acc);
+      record(E,message);
+      report(E,message);
+    }
 
     do {
       residual=multi_grid(E,d0,F,acc,high_lev);
       valid = (residual < acc)?1:0;
       counts ++;
-      if(E->parallel.me==0) fprintf(stderr,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
-      if(E->parallel.me==0) fprintf(E->fp,"resi = %.6e for iter %d acc %.6e\n",residual,counts,acc);
+      if(E->parallel.me==0){	/* output  */
+	snprintf(message,200,"resi = %.6e for iter %d acc %.6e",residual,counts,acc);
+	record(E,message);
+	report(E,message);
+      }
     }  while (!valid);
 
     cycles = counts;

@@ -45,6 +45,9 @@
 #include "parallel_related.h"
 #include "composition_related.h"
 
+#ifdef USE_GGRD
+void ggrd_init_tracer_flavors(struct All_variables *);
+#endif
 
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
@@ -77,7 +80,7 @@ void tracer_input(struct All_variables *E)
     void full_tracer_input();
     int m=E->parallel.me;
 
-    input_int("tracer",&(E->control.tracer),"0",m);
+    input_boolean("tracer",&(E->control.tracer),"0",m);
     if(E->control.tracer) {
 
         /* tracer_ic_method=0 (random generated array) */
@@ -85,8 +88,9 @@ void tracer_input(struct All_variables *E)
         /* tracer_ic_method=2 (each proc reads its restart file) */
         input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
 
-        if (E->trace.ic_method==0)
+        if (E->trace.ic_method==0){
             input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
+	}
         else if (E->trace.ic_method==1)
             input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
         else if (E->trace.ic_method==2) {
@@ -108,9 +112,22 @@ void tracer_input(struct All_variables *E)
         input_int("tracer_flavors",&(E->trace.nflavors),"0,0,nomax",m);
 
 
-        input_int("ic_method_for_flavors",&(E->trace.ic_method_for_flavors),"0,0,nomax",m);
-        if (E->trace.ic_method_for_flavors == 0)
-            input_double("z_interface",&(E->trace.z_interface),"0.7",m);
+        input_int("ic_method_for_flavors",
+		  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
+        switch(E->trace.ic_method_for_flavors){
+	case 0:			/* layer */
+	  input_double("z_interface",&(E->trace.z_interface),"0.7",m);
+	  break;
+	case 1:			/* from grid in top n materials */
+	  input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
+	  input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
+	  break;
+	default:
+	  fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
+	  parallel_process_termination();
+	  break;
+	}
+   
 
 
 
@@ -119,6 +136,7 @@ void tracer_input(struct All_variables *E)
 
 
         composition_input(E);
+
     }
 
     return;
@@ -162,7 +180,7 @@ void tracer_initial_settings(struct All_variables *E)
 
 void tracer_advection(struct All_variables *E)
 {
-
+  if(E->control.verbose)
     fprintf(E->trace.fpt,"STEP %d\n",E->monitor.solution_cycles);
 
     /* advect tracers */
@@ -197,12 +215,13 @@ void tracer_post_processing(struct All_variables *E)
     double convection_time,tracer_time;
     double trace_fraction,total_time;
 
+    if(E->control.verbose){
+      fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
 
-    fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
+      fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
 
-    fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
-
-    fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
+      fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
+    }
 
 
     /* reset statistical counters */
@@ -215,6 +234,7 @@ void tracer_post_processing(struct All_variables *E)
     /* compositional and error fraction data files */
     //TODO: move
     if (E->composition.on) {
+      if(E->control.verbose)
         fprintf(E->trace.fpt,"Empty elements filled with old compositional "
                 "values: %d (%f percent)\n", E->trace.istat_iempty,
                 (100.0*E->trace.istat_iempty)/E->lmesh.nel);
@@ -529,8 +549,8 @@ static void find_tracers(struct All_variables *E)
     reduce_tracer_arrays(E);
 
     time_stat2=CPU_time0();
-
-    fprintf(E->trace.fpt,"AA: time for find tracers: %f\n", time_stat2-time_stat1);
+    if(E->control.verbose)
+      fprintf(E->trace.fpt,"AA: time for find tracers: %f\n", time_stat2-time_stat1);
 
     return;
 }
@@ -1099,21 +1119,39 @@ static void init_tracer_flavors(struct All_variables *E)
     int j, kk, number_of_tracers;
     double rad;
 
+    switch(E->trace.ic_method_for_flavors){
+    case 0:
+      /* ic_method_for_flavors == 0 (layered structure) */
+      /* any tracer above z_interface is of flavor 0    */
+      /* any tracer below z_interface is of flavor 1    */
+      for (j=1;j<=E->sphere.caps_per_proc;j++) {
+	
+	number_of_tracers = E->trace.ntracers[j];
+	for (kk=1;kk<=number_of_tracers;kk++) {
+	  rad = E->trace.basicq[j][2][kk];
+	  
+	  if (rad<=E->trace.z_interface) E->trace.extraq[j][0][kk]=1.0;
+	  if (rad>E->trace.z_interface) E->trace.extraq[j][0][kk]=0.0;
+	}
+      }
+      break;
 
-    /* ic_method_for_flavors == 0 (layered structure) */
-    /* any tracer above z_interface is of flavor 0    */
-    /* any tracer below z_interface is of flavor 1    */
-    if (E->trace.ic_method_for_flavors == 0) {
-        for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    case 1:			/* from grd in top n layers */
+#ifndef USE_GGRD
+      fprintf(stderr,"ic_method_for_flavors %i requires the ggrd routines from hc, -DUSE_GGRD\n",
+	      E->trace.ic_method_for_flavors);
+      parallel_process_termination();
+#else
+      ggrd_init_tracer_flavors(E);
+#endif
+      break;
 
-            number_of_tracers = E->trace.ntracers[j];
-            for (kk=1;kk<=number_of_tracers;kk++) {
-                rad = E->trace.basicq[j][2][kk];
 
-                if (rad<=E->trace.z_interface) E->trace.extraq[j][0][kk]=1.0;
-                if (rad>E->trace.z_interface) E->trace.extraq[j][0][kk]=0.0;
-            }
-        }
+    default:
+      
+      fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
+      parallel_process_termination();
+      break;
     }
 
     return;

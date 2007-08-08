@@ -464,7 +464,7 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   char output_file[255];
   gzFile *fp1;
 
-  snprintf(output_file,255,"%s/%d/stress.%d.%d", E->control.data_dir,
+  snprintf(output_file,255,"%s/%d/stress.%d.%d.gz", E->control.data_dir,
 	  cycles,E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
 
@@ -540,7 +540,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
   char output_file[255];
   gzFile *fp1;
 
-  snprintf(output_file,255,"%s/%d/pressure.%d.%d", E->control.data_dir,cycles,
+  snprintf(output_file,255,"%s/%d/pressure.%d.%d.gz", E->control.data_dir,cycles,
           E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
 
@@ -565,7 +565,7 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   char output_file[255];
   gzFile *fp1;
 
-  snprintf(output_file,255,"%s/%d/tracer.%d.%d", E->control.data_dir,
+  snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz", E->control.data_dir,
 	  cycles,
           E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
@@ -578,14 +578,14 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 
       for(n=1;n<=E->trace.ntracers[j];n++) {
           /* write basic quantities (coordinate) */
-          gzprintf(fp1,"%.12e %.12e %.12e",
+          gzprintf(fp1,"%9.5e %9.5e %9.5e",
                   E->trace.basicq[j][0][n],
                   E->trace.basicq[j][1][n],
                   E->trace.basicq[j][2][n]);
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
+              gzprintf(fp1," %9.5e", E->trace.extraq[j][i][n]);
           }
           gzprintf(fp1, "\n");
       }
@@ -603,7 +603,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
     char output_file[255];
     gzFile *fp1;
 
-    snprintf(output_file,255,"%s/%d/comp_nd.%d.%d", 
+    snprintf(output_file,255,"%s/%d/comp_nd.%d.%d.gz", 
 	    E->control.data_dir,
 	    cycles,
             E->parallel.me, cycles);
@@ -633,7 +633,7 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
     char output_file[255];
     gzFile *fp1;
 
-    snprintf(output_file,255,"%s/%d/comp_el.%d.%d", E->control.data_dir,
+    snprintf(output_file,255,"%s/%d/comp_el.%d.%d.gz", E->control.data_dir,
 	    cycles,E->parallel.me, cycles);
     fp1 = gzdir_output_open(output_file,"w");
 
