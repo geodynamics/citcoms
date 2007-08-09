@@ -59,6 +59,9 @@ void viscosity_system_input(struct All_variables *E)
 
 
     }
+    for(i=0;i<10;i++)
+      E->viscosity.cdepv_ff[i] = 1.0; /* flavor factors for CDEPV */
+
 
     /* read in information */
     input_boolean("VISC_UPDATE",&(E->viscosity.update_allowed),"on",m);
@@ -95,6 +98,21 @@ void viscosity_system_input(struct All_variables *E)
     if(E->viscosity.PDEPV || E->viscosity.SDEPV)
       input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);
     
+
+    input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+    if(E->viscosity.CDEPV){	/* compositional viscosity */
+      if(!E->control.tracer)
+	myerror(E,"error: CDEPV requires tracers, but tracer is off");
+      if(E->trace.nflavors > 10)
+	myerror(E,"error: too many flavors for CDEPV");
+      /* read in flavor factors */
+      input_float_vector("cdepv_ff",E->trace.nflavors,
+			 (E->viscosity.cdepv_ff),m);
+      /* and take the log because we're using a geometric avg */
+      for(i=0;i<E->trace.nflavors;i++)
+	E->viscosity.cdepv_ff[i] = log(E->viscosity.cdepv_ff[i]);
+    }
+
 
     input_boolean("low_visc_channel",&(E->viscosity.channel),"off",m);
     input_boolean("low_visc_wedge",&(E->viscosity.wedge),"off",m);
@@ -146,12 +164,16 @@ void get_system_viscosity(E,propogate,evisc,visc)
     void visc_from_mat();
     void visc_from_T();
     void visc_from_S();
+
+    void visc_from_P();
+    void visc_from_C();
+
     void apply_viscosity_smoother();
     void visc_to_node_interpolate();
     void visc_from_nodes_to_gint();
     void visc_from_gint_to_nodes();
 
-    void visc_from_P();
+
 
     int i,j,m;
     float temp1,temp2,*vvvis;
@@ -164,13 +186,22 @@ void get_system_viscosity(E,propogate,evisc,visc)
     else
         visc_from_mat(E,evisc);
 
-    if(E->viscosity.SDEPV)
-        visc_from_S(E,evisc,propogate);
+    if(E->viscosity.CDEPV)	/* compositional prefactor */
+      visc_from_C(E,evisc);
 
+    if(E->viscosity.SDEPV)
+      visc_from_S(E,evisc,propogate);
+    
     if(E->viscosity.PDEPV)	/* "plasticity" */
       visc_from_P(E,evisc);
 
 
+    /* i think this should me placed differently i.e.  before the
+       stress dependence but I won't change it because it's by 
+       someone else
+
+       TWB 
+    */
     if(E->viscosity.channel || E->viscosity.wedge)
         apply_low_visc_wedge_channel(E, evisc);
 
@@ -617,7 +648,52 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
     return;
 }
 
+/* 
 
+multiply with compositional factor which is determined by a geometric
+mean average from the tracer composition, assuming two flavors and
+compositions between zero and unity
+
+*/
+void visc_from_C( E, EEta)
+     struct All_variables *E;
+     float **EEta;
+{
+  float comp,comp_fac,CC[9],tcomp;
+  double vmean,cc_loc;
+  int m,l,z,jj,kk,i;
+  
+  const int vpts = vpoints[E->mesh.nsd];
+  const int nel = E->lmesh.nel;
+  const int ends = enodes[E->mesh.nsd];
+  if(E->trace.nflavors != 2)
+    myerror(E,"sorry, CDEPV only supports two flavors");
+
+  for(m=1;m <= E->sphere.caps_per_proc;m++)  {
+
+    for(i = 1; i <= nel; i++){
+      /* determine composition of each of the nodes of the
+	 element */
+      for(kk = 1; kk <= ends; kk++){
+	CC[kk] = E->composition.comp_node[m][E->ien[m][i].node[kk]];
+	if(CC[kk] < 0)CC[kk]=0.0;
+	if(CC[kk] > 1)CC[kk]=1.0;
+      }
+      for(jj = 1; jj <= vpts; jj++){
+	/* compute mean composition  */
+	cc_loc = 0.0;
+	for(kk = 1; kk <= ends; kk++)
+	  cc_loc += CC[kk] * E->N.vpt[GNVINDEX(kk, jj)];
+	
+	/* geometric mean of viscosity */
+	vmean = exp(cc_loc  * E->viscosity.cdepv_ff[1] + 
+		    (1.0-cc_loc) * E->viscosity.cdepv_ff[0]);
+	/* multiply the viscosity with this prefactor */
+	EEta[m][ (i-1)*vpts + jj ] *= vmean;
+      } /* end jj loop */
+    } /* end el loop */
+  } /* end cap */
+}
 
 void strain_rate_2_inv(E,m,EEDOT,SQRT)
      struct All_variables *E;

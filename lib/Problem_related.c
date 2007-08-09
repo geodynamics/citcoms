@@ -30,6 +30,10 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+#ifdef USE_GZDIR
+int open_file_zipped(char *, FILE **,struct All_variables *);
+void gzip_file(char *);
+#endif
 /*=======================================================================
   read velocity vectors at the top surface from files
 =========================================================================*/
@@ -62,23 +66,43 @@ void get_initial_elapsed_time(E)
   struct All_variables *E;
 {
     FILE *fp;
-    int ll, mm;
+    int ll, mm,rezip;
     char output_file[255],input_s[1000];
 
     E->monitor.elapsed_time = 0.0;
     if ((E->control.restart || E->control.post_p))    {
-	sprintf(output_file, "%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
-        fp=fopen(output_file,"r");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Problem_related #8) Cannot open %s\n",output_file);
-          exit(8);
-	}
-        fgets(input_s,1000,fp);
-        sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
-     fclose(fp);
-      } /* end control.restart */
 
-   return;
+#ifdef USE_GZDIR		/* gzdir output */
+      if(strcmp(E->output.format, "gzdir") == 0){
+	if(E->output.gzdir_vtkio)
+	  sprintf(output_file, "%s/%d/t.%d.%d",
+		  E->control.data_dir_old,E->monitor.solution_cycles_init,E->parallel.me,E->monitor.solution_cycles_init);
+	else
+	  sprintf(output_file, "%s/%d/velo.%d.%d",
+		  E->control.data_dir_old,E->monitor.solution_cycles_init,E->parallel.me,E->monitor.solution_cycles_init);
+      }else{
+	sprintf(output_file, "%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
+      }
+      rezip = open_file_zipped(output_file,&fp,E);
+#else  /* all others */
+      sprintf(output_file, "%s.velo.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
+      fp=fopen(output_file,"r");
+#endif
+
+      if (fp == NULL) {
+	fprintf(E->fp,"(Problem_related #8) Cannot open %s\n",output_file);
+	exit(8);
+      }
+      fgets(input_s,1000,fp);
+      sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
+      fclose(fp);
+#ifdef USE_GZDIR
+      if(rezip)
+	gzip_file(output_file);
+#endif
+    } /* end control.restart */
+    
+    return;
 }
 
 /*=======================================================================

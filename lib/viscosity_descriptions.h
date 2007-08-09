@@ -86,6 +86,8 @@ struct VISC_OPT {
     float sdepv_trns[40];
 
 
+  int CDEPV;			/* compositional viscosity */
+  float cdepv_ff[10];		/*  flavor factors */
 
   int PDEPV;			/* "plasticity" law parameters */
   float pdepv_a[40], pdepv_b[40], pdepv_y[40],pdepv_offset;

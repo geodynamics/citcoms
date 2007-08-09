@@ -65,11 +65,15 @@ void gzdir_output_tracer(struct All_variables *, int);
 void gzdir_output_pressure(struct All_variables *, int);
 
 
+void restart_tic_from_gzdir_file(struct All_variables *);
+
 void calc_cbase_at_tp(float , float , float *);
 void rtp2xyz(float , float , float, float *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
 
+int open_file_zipped(char *, FILE **,struct All_variables *);
+void gzip_file(char *);
 
 
 extern void parallel_process_termination();
@@ -127,13 +131,15 @@ void gzdir_output(struct All_variables *E, int cycles)
   if (E->output.horiz_avg == 1)
       gzdir_output_horiz_avg(E, cycles);
 
-  if(E->output.tracer == 1 && E->control.tracer == 1)
+  if(E->control.tracer){
+    if(E->output.tracer || (cycles == E->advection.max_timesteps))
       gzdir_output_tracer(E, cycles);
+  }
 
-  if (E->output.comp_nd == 1 && E->composition.on)
+  if (E->output.comp_nd && E->composition.on)
       gzdir_output_comp_nd(E, cycles);
 
-  if (E->output.comp_el == 1 && E->composition.on)
+  if (E->output.comp_el && E->composition.on)
           gzdir_output_comp_el(E, cycles);
 
   return;
@@ -544,7 +550,8 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
           E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
 
-  gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+  gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,
+	   E->monitor.elapsed_time);
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     gzprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
@@ -565,9 +572,9 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   char output_file[255];
   gzFile *fp1;
 
-  snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz", E->control.data_dir,
-	  cycles,
-          E->parallel.me, cycles);
+  snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz", 
+	   E->control.data_dir,cycles,
+	   E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
 
   ncolumns = 3 + E->trace.number_of_extra_quantities;
@@ -617,7 +624,8 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
                 E->composition.bulk_composition);
 
         for(i=1;i<=E->lmesh.nno;i++) {
-            gzprintf(fp1,"%.6e\n",E->composition.comp_node[j][i]);
+            gzprintf(fp1,"%.6e\n",
+		     E->composition.comp_node[j][i]);
         }
 
     }
@@ -653,7 +661,127 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
     return;
 }
 
+/* 
 
+restart facility for zipped/VTK style , will init temperature
+
+*/
+void restart_tic_from_gzdir_file(struct All_variables *E)
+{
+  int ii, ll, mm,rezip;
+  float restart_elapsed_time;
+  int i, m;
+  char output_file[255], input_s[1000];
+  FILE *fp;
+
+  float v1, v2, v3, g;
+
+  ii = E->monitor.solution_cycles_init;
+
+  if(E->output.gzdir_vtkio) {	/* VTK I/O */
+   snprintf(output_file,255,"%s/%d/t.%d.%d",
+	    E->control.data_dir_old,
+	    ii,E->parallel.me,ii);
+  }else{			/* old output */
+    snprintf(output_file,255,"%s/%d/velo.%d.%d",
+	     E->control.data_dir_old,ii,
+	     E->parallel.me,ii);
+  }
+  /* open file */
+  rezip = open_file_zipped(output_file,&fp,E);
+  if (E->parallel.me==0)
+    fprintf(E->fp,"restart_tic_from_gzdir_file: using  %s for restarted temperature\n",
+	    output_file);
+  
+  if(fscanf(fp,"%i %i %f",&ll,&mm,&restart_elapsed_time) != 3)
+    myerror(E,"restart vtkl read error 0");
+ 
+  if(E->output.gzdir_vtkio) {	/* VTK */
+    for(m=1;m <= E->sphere.caps_per_proc;m++) {
+      if(fscanf(fp,"%i %i",&ll,&mm) != 2)
+	myerror(E,"restart vtkl read error 1");
+      for(i=1;i<=E->lmesh.nno;i++)  
+	if(fscanf(fp,"%f",&(E->T[m][i]))!=1)
+	  myerror(E,"restart vtkl read error 2");
+    }
+  }else{			/* old style velo */
+    for(m=1;m <= E->sphere.caps_per_proc;m++) {
+      fscanf(fp,"%i %i",&ll,&mm);
+      for(i=1;i<=E->lmesh.nno;i++)  {
+	fscanf(fp,"%f %f %f %f",&v1,&v2,&v3,&g);
+	/*  E->sphere.cap[m].V[1][i] = v1;
+	    E->sphere.cap[m].V[1][i] = v2;
+	    E->sphere.cap[m].V[1][i] = v3;  */
+	//E->T[m][i] = max(0.0,min(g,1.0));
+	E->T[m][i] = g;
+      }
+    }
+  }
+  fclose (fp);
+  if(rezip)			/* rezip */
+    gzip_file(output_file);
+ 
+  temperatures_conform_bcs(E);
+  return;
+}
+
+
+/* 
+   
+tries to open 'name'. if name exists, out will be pointer to file and
+return 0. if name doesn't exist, will check for name.gz.  if this
+exists, will unzip and open, and return 1
+
+the idea is to preserve the initial file state
+
+*/
+int open_file_zipped(char *name, FILE **in,
+		     struct All_variables *E)
+{
+  char mstring[1000];
+  *in = fopen(name,"r");
+  if (*in == NULL) {
+    /* 
+       unzipped file not found
+    */
+    snprintf(mstring,1000,"%s.gz",name);
+    *in= fopen(mstring,"r");
+    if(*in != NULL){		
+      /* 
+	 zipped version was found 
+      */
+      fclose(*in);
+      snprintf(mstring,1000,"gunzip -f %s.gz",name); /* brutal */
+      system(mstring);	/* unzip */
+      /* open unzipped file for read */
+      *in = fopen(name,"r");
+      if(*in == NULL)
+	myerror("open_file_zipped: unzipping error",E);
+      return 1;
+    }else{
+      /* 
+	 no file, either zipped or unzipped
+      */
+      snprintf(mstring,1000,"no files %s and %s.gz were found, exiting",
+	       name,name);
+      myerror(E,mstring);
+      return 0;
+    }
+  }else{
+    /* 
+       file was found unzipped  
+    */
+    return 0;
+  }
+}
+
+/* compress a file using the sytem command  */
+void gzip_file(char *output_file)
+{
+  char command_string[300];
+  snprintf(command_string,300,"gzip -f %s",output_file); /* brutal */
+  system(command_string);	
+}
 
 
 #endif /* gzdir switch */

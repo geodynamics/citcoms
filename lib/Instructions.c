@@ -398,9 +398,12 @@ void read_initial_settings(struct All_variables *E)
   h5input_params(E);
   phase_change_input(E);
   lith_age_input(E);
-  viscosity_input(E);
+
   tic_input(E);
   tracer_input(E);
+
+  viscosity_input(E);		/* moved the viscosity input behind
+				   the tracer input */
 
   (E->problem_settings)(E);
 

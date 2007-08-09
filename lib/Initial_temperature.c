@@ -40,6 +40,9 @@ void temperatures_conform_bcs();
 void debug_tic(struct All_variables *);
 void restart_tic_from_file(struct All_variables *);
 
+#ifdef USE_GZDIR
+void restart_tic_from_gzdir_file(struct All_variables *);
+#endif
 
 
 void tic_input(struct All_variables *E)
@@ -166,7 +169,12 @@ void restart_tic(struct All_variables *E)
     lith_age_restart_tic(E);
   else
   */
-  restart_tic_from_file(E);
+#ifdef USE_GZDIR
+  if(strcmp(E->output.format, "gzdir") == 0)
+    restart_tic_from_gzdir_file(E);
+  else
+#endif
+    restart_tic_from_file(E);
 
   return;
 }

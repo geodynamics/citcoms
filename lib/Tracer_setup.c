@@ -48,6 +48,10 @@
 #ifdef USE_GGRD
 void ggrd_init_tracer_flavors(struct All_variables *);
 #endif
+#ifdef USE_GZDIR
+int open_file_zipped(char *, FILE **,struct All_variables *);
+void gzip_file(char *);
+#endif
 
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
@@ -925,7 +929,7 @@ static void restart_tracers(struct All_variables *E)
     char output_file[200];
     char input_s[1000];
 
-    int i,j,kk;
+    int i,j,kk,rezip;
     int idum1,ncolumns;
     int numtracers;
 
@@ -944,13 +948,30 @@ static void restart_tracers(struct All_variables *E)
         parallel_process_termination();
     }
 
-    sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
 
+
+    /* deal with different output formats */
+#ifdef USE_GZDIR
+    if(strcmp(E->output.format, "gzdir") == 0){
+      sprintf(output_file,"%s/%d/tracer.%d.%d",
+	      E->control.data_dir_old,E->monitor.solution_cycles_init,E->parallel.me,E->monitor.solution_cycles_init);
+      rezip = open_file_zipped(output_file,&fp1,E);
+    }else{
+      sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
+      if ( (fp1=fopen(output_file,"r"))==NULL) {
+        fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
+        fflush(E->trace.fpt);
+        exit(10);
+      }
+    }
+#else
+    sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
     if ( (fp1=fopen(output_file,"r"))==NULL) {
         fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
         fflush(E->trace.fpt);
         exit(10);
     }
+#endif
 
     fprintf(stderr,"Restarting Tracers from %s\n",output_file);
     fflush(stderr);
@@ -1012,7 +1033,11 @@ static void restart_tracers(struct All_variables *E)
 
     }
     fclose(fp1);
-
+#ifdef USE_GZDIR
+    if(strcmp(E->output.format, "gzdir") == 0)
+      if(rezip)			/* rezip */
+	gzip_file(output_file);
+#endif
 
     return;
 }
