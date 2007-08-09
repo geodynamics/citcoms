@@ -56,6 +56,7 @@ void allocate_common_vars(struct All_variables*);
 void allocate_velocity_vars(struct All_variables*);
 void check_bc_consistency(struct All_variables*);
 void construct_elt_gs(struct All_variables*);
+void construct_elt_cs(struct All_variables*);
 void construct_id(struct All_variables*);
 void construct_ien(struct All_variables*);
 void construct_lm(struct All_variables*);
@@ -125,6 +126,8 @@ void initial_mesh_solver_setup(struct All_variables *E)
     construct_sub_element(E);
     construct_shape_functions(E);
     construct_elt_gs(E);
+    if(E->control.inv_gruneisen != 0)
+        construct_elt_cs(E);
 
     reference_state(E);
 
@@ -407,10 +410,14 @@ void read_initial_settings(struct All_variables *E)
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
   input_float("dissipation_number",&(E->control.disptn_number),"0.0",m);
   input_float("gruneisen",&(tmp),"0.0",m);
-  if(fabs(tmp) > 1e-6)
+  /* special case: if tmp==0, set gruneisen as inf */
+  if(tmp != 0)
       E->control.inv_gruneisen = 1/tmp;
   else
       E->control.inv_gruneisen = 0;
+
+  input_int("compress_iter_maxstep",&(E->control.compress_iter_maxstep),"100",m);
+  input_float("relative_err_accuracy",&(E->control.relative_err_accuracy),"0.01",m);
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
@@ -595,10 +602,13 @@ void allocate_common_vars(E)
        E->ELEMENT[i][j][k] = 0;
     /*ccccc*/
 
-    E->elt_del[i][j]=(struct EG *)  malloc((nel+1)*sizeof(struct EG));
+    E->elt_del[i][j] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
 
-    E->EVI[i][j] = (float *)        malloc((nel+2)*vpoints[E->mesh.nsd]*sizeof(float));
-    E->BPI[i][j]    = (double *)    malloc((npno+1)*sizeof(double));
+    if(E->control.inv_gruneisen != 0)
+        E->elt_c[i][j] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
+
+    E->EVI[i][j] = (float *) malloc((nel+2)*vpoints[E->mesh.nsd]*sizeof(float));
+    E->BPI[i][j] = (double *) malloc((npno+1)*sizeof(double));
 
     E->ID[i][j]  = (struct ID *)    malloc((nno+2)*sizeof(struct ID));
     E->VI[i][j]  = (float *)        malloc((nno+2)*sizeof(float));

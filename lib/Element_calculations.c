@@ -168,60 +168,61 @@ void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
     const int vpts = VPOINTS3D;
     const int ends = ENODES3D;
 
-    double ra[9], si[9], ct[9];
+    double ra[9], isi[9], ct[9];
+    double gnx0, gnx1, gnx2, shp, cc1, cc2, cc3;
 
     for(k=1;k<=vpts;k++) {
 	ra[k] = rtf[3][k];
-	si[k] = sin(rtf[1][k]);
-	ct[k] = cos(rtf[1][k])/si[k];
+	isi[k] = 1.0 / sin(rtf[1][k]);
+	ct[k] = cos(rtf[1][k]) * isi[k];
     }
 
     for(n=1;n<=dims;n++)
-	for(k=1;k<=vpts;k++)
-	    for(a=1;a<=ends;a++) {
-		ba[a][k][n][1]=
-		    (GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
-		     + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(1,n,1,a,k)]
-		     + N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
-		     )*ra[k];
+        for(a=1;a<=ends;a++)
+            for(k=1;k<=vpts;k++) {
+                gnx0 = GNx->vpt[GNVXINDEX(0,a,k)];
+                gnx1 = GNx->vpt[GNVXINDEX(1,a,k)];
+                gnx2 = GNx->vpt[GNVXINDEX(2,a,k)];
+                shp  = N->vpt[GNVINDEX(a,k)];
+                cc1 = cc->vpt[BVINDEX(1,n,a,k)];
+                cc2 = cc->vpt[BVINDEX(2,n,a,k)];
+                cc3 = cc->vpt[BVINDEX(3,n,a,k)];
 
-		ba[a][k][n][2]=
-		    (N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(1,n,a,k)]*ct[k]
-		     + N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
-		     +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
-		       + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(2,n,2,a,k)]
-		       )/si[k]
-		     )*ra[k];
+		ba[a][k][n][1] = ( gnx0 * cc1
+                                   + shp * ccx->vpt[BVXINDEX(1,n,1,a,k)]
+                                   + shp * cc3 ) * ra[k];
 
-		ba[a][k][n][3]=
-		    GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(3,n,a,k)];
+		ba[a][k][n][2] = ( shp * cc1 * ct[k]
+                                   + shp * cc3
+                                   + ( gnx1 * cc2
+                                       + shp * ccx->vpt[BVXINDEX(2,n,2,a,k)] )
+                                   * isi[k] ) * ra[k];
 
-		ba[a][k][n][4]=
-		    (GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
-		     + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(2,n,1,a,k)]
-		     - N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(2,n,a,k)]*ct[k]
-		     +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
-		       + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(1,n,2,a,k)]
-		       )/si[k]
-		     )*ra[k];
+		ba[a][k][n][3] = gnx2 * cc3;
 
-		ba[a][k][n][5]=
-		    GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
-		    +(GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
-		      + N->vpt[GNVINDEX(a,k)]*(ccx->vpt[BVXINDEX(3,n,1,a,k)]
-					       - cc->vpt[BVINDEX(1,n,a,k)])
-		      )*ra[k];
+		ba[a][k][n][4] = ( gnx0 * cc2
+                                   + shp * ccx->vpt[BVXINDEX(2,n,1,a,k)]
+                                   - shp * cc2 * ct[k]
+                                   + ( gnx1 * cc1
+                                       + shp * ccx->vpt[BVXINDEX(1,n,2,a,k)] )
+                                   * isi[k] ) * ra[k];
 
-		ba[a][k][n][6]=
-		    GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
-		    -ra[k]*N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
-		    +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
-		      + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(3,n,2,a,k)]
-		      )/si[k]*ra[k];
+		ba[a][k][n][5] = gnx2 * cc1
+                               + ( gnx0 * cc3
+                                   + shp * ( ccx->vpt[BVXINDEX(3,n,1,a,k)]
+                                             - cc1 ) ) * ra[k];
+
+		ba[a][k][n][6] = gnx2 * cc2
+                               - ra[k] * shp * cc2
+                               + ( gnx1 * cc3
+                                   + shp * ccx->vpt[BVXINDEX(3,n,2,a,k)] )
+                               * isi[k] * ra[k];
 	    }
 
-  return;
+    return;
 }
+
+
 
 /*==============================================================
   Function to supply the element k matrix for a given element e.
@@ -238,6 +239,10 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
 
     int a,b,i,j,i1,j1,k;
     double rtf[4][9],W[9];
+
+    const double two = 2.0;
+    const double two_thirds = 2.0/3.0;
+
     void get_global_shape_fn();
     void construct_c3x3matrix_el();
     struct Shape_function GN;
@@ -247,22 +252,6 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
     /* d1 and d2 are the elastic coefficient matrix for incompressible
        and compressible creeping flow, respectively */
-    const double d1[7][7] =
-	{ {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-	  {0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-	  {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0},
-	  {0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0},
-	  {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0},
-	  {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0},
-	  {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0} };
-    const double d2[7][7] =
-	{ {0.,       0.,       0.,       0., 0., 0., 0.},
-	  {0., 2.-2./3.,   -2./3.,   -2./3., 0., 0., 0.},
-	  {0.,   -2./3., 2.-2./3.,   -2./3., 0., 0., 0.},
-	  {0.,   -2./3.,   -2./3., 2.-2./3., 0., 0., 0.},
-	  {0.,       0.,       0.,       0., 1., 0., 0.},
-	  {0.,       0.,       0.,       0., 0., 1., 0.},
-	  {0.,       0.,       0.,       0., 0., 0., 1.} };
 
     const int nn=loc_mat_size[E->mesh.nsd];
     const int vpts = VPOINTS3D;
@@ -291,23 +280,23 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
       bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-    if(E->control.inv_gruneisen < 1e-6)
       for(i=1;i<=dims;i++)
         for(j=1;j<=dims;j++)
-          for(i1=1;i1<=6;i1++)
-            for(j1=1;j1<=6;j1++)
-	      for(k=1;k<=VPOINTS3D;k++)
-		bdbmu[i][j] +=
-                  W[k]*d1[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
+	  for(k=1;k<=VPOINTS3D;k++)
+              bdbmu[i][j] += W[k] * ( two * ( ba[a][k][i][1]*ba[b][k][j][1] +
+                                              ba[a][k][i][2]*ba[b][k][j][2] +
+                                              ba[a][k][i][3]*ba[b][k][j][3] ) +
+                                      ba[a][k][i][4]*ba[b][k][j][4] +
+                                      ba[a][k][i][5]*ba[b][k][j][5] +
+                                      ba[a][k][i][6]*ba[b][k][j][6] );
 
-    else
-      for(i=1;i<=dims;i++)
-        for(j=1;j<=dims;j++)
-          for(i1=1;i1<=6;i1++)
-            for(j1=1;j1<=6;j1++)
-	      for(k=1;k<=VPOINTS3D;k++)
-		bdbmu[i][j] +=
-                  W[k]*d2[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
+      if(E->control.inv_gruneisen != 0)
+        for(i=1;i<=dims;i++)
+          for(j=1;j<=dims;j++)
+	    for(k=1;k<=VPOINTS3D;k++)
+		bdbmu[i][j] -= W[k] * two_thirds *
+                    ( ba[a][k][i][1] + ba[a][k][i][2] + ba[a][k][i][3] ) *
+                    ( ba[b][k][j][1] + ba[b][k][j][2] + ba[b][k][j][3] );
 
 
 		/**/
@@ -578,28 +567,32 @@ void build_diagonal_of_Ahat(E)
 }
 
 
+/* =====================================================
+   Assemble grad(rho_ref*ez)*V element by element.
+   Note that the storage is not zero'd before assembling.
+   =====================================================  */
 
-
-/* compute div(rho_ref*V) = div(V) + Vz*d(ln(rho_ref))/dz */
-
-static void assemble_dlnrho(struct All_variables *E, double *dlnrhodr,
-			    double **U, double **result, int level)
+void assemble_c_u(struct All_variables *E,
+                  double **U, double **result, int level)
 {
-    int e, nz, j3, a, b, m;
+    int e,j1,j2,j3,p,a,b,m;
 
     const int nel = E->lmesh.NEL[level];
     const int ends = enodes[E->mesh.nsd];
     const int dims = E->mesh.nsd;
-    double tmp;
+    const int npno = E->lmesh.NPNO[level];
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(e=1; e<=nel; e++) {
-            //nz = ((e-1) % E->lmesh.elz) + 1;
-            //tmp = dlnrhodr[e] / ends;
-            for(a=1; a<=ends; a++) {
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(a=1;a<=ends;a++) {
+            p = (a-1)*dims;
+            for(e=1;e<=nel;e++) {
                 b = E->IEN[level][m][e].node[a];
-                j3 = E->ID[level][m][b].doff[3];
-                result[m][e] +=  dlnrhodr[e] * U[m][j3];
+                j1= E->ID[level][m][b].doff[1];
+                j2= E->ID[level][m][b].doff[2];
+                j3= E->ID[level][m][b].doff[3];
+                result[m][e] += E->elt_c[level][m][e].c[p  ][0] * U[m][j1]
+                              + E->elt_c[level][m][e].c[p+1][0] * U[m][j2]
+                              + E->elt_c[level][m][e].c[p+2][0] * U[m][j3];
 	    }
         }
 
@@ -608,13 +601,17 @@ static void assemble_dlnrho(struct All_variables *E, double *dlnrhodr,
 
 
 
+/* =====================================================
+   Assemble div(rho_ref*V) = div(V) + grad(rho_ref*ez)*V
+   element by element
+   =====================================================  */
 
 void assemble_div_rho_u(struct All_variables *E,
                         double **U, double **result, int level)
 {
     void assemble_div_u();
     assemble_div_u(E, U, result, level);
-    assemble_dlnrho(E, E->refstate.dlnrhodr, U, result, level);
+    assemble_c_u(E, U, result, level);
 
     return;
 }
@@ -758,6 +755,56 @@ double assemble_dAhatp_entry(E,e,level,m)
       }
 
 return(divU);  }
+
+
+/*==============================================================
+  Function to supply the element c matrix for a given element e.
+  ==============================================================  */
+
+void get_elt_c(struct All_variables *E, int el,
+               higher_precision elt_c[24][1], int lev, int m)
+{
+    void get_global_shape_fn();
+    void construct_c3x3matrix_el();
+    int p, a, i;
+    double temp, beta, x[4];
+
+    struct Shape_function GN;
+    struct Shape_function_dx GNx;
+    struct Shape_function_dA dOmega;
+    double rtf[4][9];
+
+    const int dims = E->mesh.nsd;
+    const int ends = enodes[dims];
+    const int sphere_key = 1;
+
+    get_global_shape_fn(E,el,&GN,&GNx,&dOmega,2,sphere_key,rtf,lev,m);
+
+    if ((el-1)%E->lmesh.ELZ[lev]==0)
+        construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
+
+    temp = p_point[1].weight[dims-1] * dOmega.ppt[1];
+    beta = E->control.disptn_number * E->control.inv_gruneisen;
+
+    for(a=1;a<=ends;a++) {
+        for (i=1;i<=dims;i++) {
+#if 1
+            /* hard coded dln(rho)/dr here */
+
+            x[i] = - beta * E->N.ppt[GNPINDEX(a,1)]
+                * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
+#else
+            /* compute dln(rho)/dr from rho(r) here */
+            /* XXX */
+#endif
+        }
+        p=dims*(a-1);
+        elt_c[p  ][0] = -x[1] * temp;
+        elt_c[p+1][0] = -x[2] * temp;
+        elt_c[p+2][0] = -x[3] * temp;
+    }
+    return;
+}
 
 
 /*==============================================================

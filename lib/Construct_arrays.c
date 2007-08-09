@@ -681,6 +681,30 @@ void construct_elt_gs(E)
 }
 
 
+/*==============================================
+  For compressible cases, construct c matrix,
+  where  c = \frac{d rho_r}{dr} / rho_r * u_r
+  ==============================================*/
+
+void construct_elt_cs(struct All_variables *E)
+{
+    int m, el, lev;
+    void get_elt_c();
+
+/*     if(E->control.verbose && E->parallel.me==0) */
+/*         fprintf(stderr,"storing elt c matrices\n"); */
+
+    for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(el=1;el<=E->lmesh.NEL[lev];el++) {
+                get_elt_c(E,el,E->elt_c[lev][m][el].c,lev,m);
+            }
+
+
+    return;
+}
+
+
 /* ==============================================================
  routine for constructing stiffness and node_maps
  ============================================================== */

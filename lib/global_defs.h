@@ -157,6 +157,9 @@ struct CCX 	{
 struct EG {
     higher_precision g[24][1]; };
 
+struct EC {
+    higher_precision c[24][1]; };
+
 struct EK {
     double k[24*24]; };
 
@@ -399,7 +402,6 @@ struct CONTROL {
     int restart;
     int post_p;
     int post_topo;
-    int compressible;
 
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
@@ -445,10 +447,18 @@ struct CONTROL {
 
     /* Rayleigh # */
     float Atemp;
+
     /* Dissipation # */
     float disptn_number;
+
     /* inverse of Gruneisen parameter */
     float inv_gruneisen;
+
+    /**/
+    float relative_err_accuracy;
+
+    /**/
+    int compress_iter_maxstep;
 
     float inputdiff;
     float VBXtopval;
@@ -515,7 +525,6 @@ struct REF_STATE {
     double *conductivity;
     double *gravity;
     double *Tadi;
-    double *dlnrhodr;
 };
 
 
@@ -660,6 +669,7 @@ struct All_variables {
     struct ID *ID[MAX_LEVELS][NCS];
     struct SUBEL *EL[MAX_LEVELS][NCS];
     struct EG *elt_del[MAX_LEVELS][NCS];
+    struct EC *elt_c[MAX_LEVELS][NCS];
     struct EK *elt_k[MAX_LEVELS][NCS];
     struct CC *cc[NCS];
     struct CCX *ccx[NCS];
