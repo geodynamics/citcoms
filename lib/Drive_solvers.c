@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -31,8 +31,8 @@
 #include "global_defs.h"
 #include "drive_solvers.h"
 
-float global_fvdot();
-float vnorm_nonnewt();
+double global_vdot();
+double vnorm_nonnewt();
 
 
 /************************************************************/
@@ -62,9 +62,6 @@ void general_stokes_solver(struct All_variables *E)
   void velocities_conform_bcs();
   void assemble_forces();
   void sphere_harmonics_layer();
-  double global_vdot(),kineticE_radial();
-  float global_fvdot();
-  float vnorm_nonnewt();
   void get_system_viscosity();
 
   float vmag;
@@ -72,7 +69,7 @@ void general_stokes_solver(struct All_variables *E)
   double Udot_mag, dUdot_mag;
   int m,count,i,j,k;
 
-  float *oldU[NCS], *delta_U[NCS];
+  double *oldU[NCS], *delta_U[NCS];
 
   const int nno = E->lmesh.nno;
   const int nel = E->lmesh.nel;
@@ -98,8 +95,8 @@ void general_stokes_solver(struct All_variables *E)
   if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
-      oldU[m] = (float *)malloc((neq+2)*sizeof(float));
+      delta_U[m] = (double *)malloc((neq+2)*sizeof(double));
+      oldU[m] = (double *)malloc((neq+2)*sizeof(double));
       for(i=0;i<=neq;i++)
 	oldU[m][i]=0.0;
     }
@@ -115,10 +112,10 @@ void general_stokes_solver(struct All_variables *E)
 	  oldU[m][i] = E->U[m][i];
 	}
 
-      Udot_mag  = sqrt(global_fvdot(E,oldU,oldU,E->mesh.levmax));
+      Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
       dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
 
-	    
+
       if(E->parallel.me==0){
 	fprintf(stderr,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
 		dUdot_mag,Udot_mag,count);
@@ -153,8 +150,6 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   void construct_stiffness_B_matrix();
   void velocities_conform_bcs();
   void assemble_forces_pseudo_surf();
-  float global_fvdot();
-  float vnorm_nonnewt();
   void get_system_viscosity();
   void std_timestep();
   void get_STD_freesurf(struct All_variables *, float**);
@@ -164,7 +159,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   double Udot_mag, dUdot_mag;
   int m,count,i,j,k,topo_loop;
 
-  float *oldU[NCS], *delta_U[NCS];
+  double *oldU[NCS], *delta_U[NCS];
 
   const int nno = E->lmesh.nno;
   const int nel = E->lmesh.nel;
@@ -193,8 +188,8 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
 		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-			  delta_U[m] = (float *)malloc((neq+2)*sizeof(float));
-			  oldU[m] = (float *)malloc((neq+2)*sizeof(float));
+			  delta_U[m] = (double *)malloc((neq+2)*sizeof(double));
+			  oldU[m] = (double *)malloc((neq+2)*sizeof(double));
 			  for(i=0;i<=neq;i++)
 				  oldU[m][i]=0.0;
 		  }
@@ -210,7 +205,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 					  oldU[m][i] = E->U[m][i];
 				  }
 
-			  Udot_mag  = sqrt(global_fvdot(E,oldU,oldU,E->mesh.levmax));
+			  Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
 			  dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
 
 			  if(E->parallel.me==0){
@@ -219,7 +214,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 				  fflush(E->fp);
 			  }
 
-			  if (count>50 || dUdot_mag<E->viscosity.sdepv_misfit) 
+			  if (count>50 || dUdot_mag<E->viscosity.sdepv_misfit)
 				  break;
 
 			  get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);

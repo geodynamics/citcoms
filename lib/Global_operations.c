@@ -704,12 +704,12 @@ float Tmax(E,T)
   }
 
 
-float  vnorm_nonnewt(E,dU,U,lev)
+double  vnorm_nonnewt(E,dU,U,lev)
   struct All_variables *E;
-  float **dU,**U;
+  double **dU,**U;
   int lev;
 {
- float temp1,temp2,dtemp,temp;
+ double temp1,temp2,dtemp,temp;
  int a,e,i,m,node;
  const int dims = E->mesh.nsd;
  const int ends = enodes[dims];
@@ -730,8 +730,8 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
          }
 
 
-  MPI_Allreduce(&dtemp, &temp2,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
-  MPI_Allreduce(&temp, &temp1,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&dtemp, &temp2,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&temp, &temp1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   temp1 = sqrt(temp2/temp1);
 
