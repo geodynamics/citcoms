@@ -952,7 +952,7 @@ static void restart_tracers(struct All_variables *E)
 
     /* deal with different output formats */
 #ifdef USE_GZDIR
-    if(strcmp(E->output.format, "gzdir") == 0){
+    if(strcmp(E->output.format, "ascii-gz") == 0){
       sprintf(output_file,"%s/%d/tracer.%d.%d",
 	      E->control.data_dir_old,E->monitor.solution_cycles_init,E->parallel.me,E->monitor.solution_cycles_init);
       rezip = open_file_zipped(output_file,&fp1,E);
@@ -1034,7 +1034,7 @@ static void restart_tracers(struct All_variables *E)
     }
     fclose(fp1);
 #ifdef USE_GZDIR
-    if(strcmp(E->output.format, "gzdir") == 0)
+    if(strcmp(E->output.format, "ascii-gz") == 0)
       if(rezip)			/* rezip */
 	gzip_file(output_file);
 #endif

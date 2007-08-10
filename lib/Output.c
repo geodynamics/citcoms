@@ -65,7 +65,7 @@ void output_common_input(struct All_variables *E)
     input_string("output_optional", E->output.optional, "surf,botm,tracer,comp_el",m);
 
     /* gzdir type of I/O */
-    if(strcmp(E->output.format, "gzdir") == 0){
+    if(strcmp(E->output.format, "ascii-gz") == 0){
       input_boolean("gzdir_vtkio",&(E->output.gzdir_vtkio),"off",m);
       E->output.gzdir_vtkbase_init = 0;
       E->output.gzdir_vtkbase_save = 1; /* should we save the basis vectors? (memory!) */

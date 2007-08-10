@@ -947,7 +947,7 @@ static void open_log(struct All_variables *E)
   char logfile[255];
 
   E->fp = NULL;
-  if (strcmp(E->output.format, "gzdir") == 0)
+  if (strcmp(E->output.format, "ascii-gz") == 0)
     sprintf(logfile,"%s/log", E->control.data_dir);
   else
     sprintf(logfile,"%s.log", E->control.data_file);
@@ -963,7 +963,7 @@ static void open_time(struct All_variables *E)
 
   E->fptime = NULL;
   if (E->parallel.me == 0) {
-  if (strcmp(E->output.format, "gzdir") == 0)
+  if (strcmp(E->output.format, "ascii-gz") == 0)
     sprintf(timeoutput,"%s/time", E->control.data_dir);
   else
     sprintf(timeoutput,"%s.time", E->control.data_file);
@@ -980,7 +980,7 @@ static void open_info(struct All_variables *E)
 
   E->fp_out = NULL;
   if (E->control.verbose) {
-  if (strcmp(E->output.format, "gzdir") == 0)
+  if (strcmp(E->output.format, "ascii-gz") == 0)
     sprintf(output_file,"%s/info.%d", E->control.data_dir, E->parallel.me);
   else
     sprintf(output_file,"%s.info.%d", E->control.data_file, E->parallel.me);
@@ -1195,13 +1195,13 @@ void output_init(struct  All_variables *E)
     else if (strcmp(E->output.format, "hdf5") == 0)
         E->problem_output = h5output;
 #ifdef USE_GZDIR
-    else if (strcmp(E->output.format, "gzdir") == 0)
+    else if (strcmp(E->output.format, "ascii-gz") == 0)
         E->problem_output = gzdir_output;
     else {
         /* indicate error here */
         if (E->parallel.me == 0) {
-            fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', or 'gzdir'\n");
-            fprintf(E->fp, "wrong output_format, must be  'ascii', 'hdf5', or 'gzdir'\n");
+            fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', or 'ascii-gz'\n");
+            fprintf(E->fp, "wrong output_format, must be  'ascii', 'hdf5', or 'ascii-gz'\n");
         }
         parallel_process_termination(E);
     }
@@ -1209,8 +1209,8 @@ void output_init(struct  All_variables *E)
     else {
         /* indicate error here */
         if (E->parallel.me == 0) {
-            fprintf(stderr, "wrong output_format, must be 'ascii' or 'gzdir' (USE_GZDIR undefined)\n");
-            fprintf(E->fp, "wrong output_format, must be 'ascii' or 'gzdir' (USE_GZDIR undefined)\n");
+            fprintf(stderr, "wrong output_format, must be 'ascii' or 'hdf5' (USE_GZDIR undefined)\n");
+            fprintf(E->fp, "wrong output_format, must be 'ascii' or 'hdf5' (USE_GZDIR undefined)\n");
         }
         parallel_process_termination(E);
     }

@@ -170,7 +170,7 @@ void restart_tic(struct All_variables *E)
   else
   */
 #ifdef USE_GZDIR
-  if(strcmp(E->output.format, "gzdir") == 0)
+  if(strcmp(E->output.format, "ascii-gz") == 0)
     restart_tic_from_gzdir_file(E);
   else
 #endif

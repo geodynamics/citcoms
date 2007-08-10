@@ -73,7 +73,7 @@ void get_initial_elapsed_time(E)
     if ((E->control.restart || E->control.post_p))    {
 
 #ifdef USE_GZDIR		/* gzdir output */
-      if(strcmp(E->output.format, "gzdir") == 0){
+      if(strcmp(E->output.format, "ascii-gz") == 0){
 	if(E->output.gzdir_vtkio)
 	  sprintf(output_file, "%s/%d/t.%d.%d",
 		  E->control.data_dir_old,E->monitor.solution_cycles_init,E->parallel.me,E->monitor.solution_cycles_init);
