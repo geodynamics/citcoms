@@ -134,10 +134,10 @@ void solve_constrained_flow_iterative_pseudo_surf(E)
 
 /*  ==========================================================================  */
 
-float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
+float solve_Ahat_p_fhat(E,V,P,FF,imp,steps_max)
 
      struct All_variables *E;
-     double **V,**P,**F;
+     double **V,**P,**FF;
      double imp;
      int *steps_max;
 
@@ -145,7 +145,7 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   int m,i,j,k,ii,count,convergent,valid,problems,lev,lev_low,npno,neq,steps;
   int gnpno,gneq;
 
-  double *r1[NCS],*R[NCS];
+  double *r1[NCS],*F[NCS];
   double *r0[NCS],*r2[NCS],*z0[NCS],*z1[NCS],*s1[NCS],*s2[NCS],*Ah[NCS];
   double *shuffle[NCS];
   double alpha,delta,s2dotAhat,r0dotr0,r1dotz1;
@@ -173,6 +173,8 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     npno=E->lmesh.npno;
     neq=E->lmesh.neq;
+    F[m] = (double *)malloc((neq+1)*sizeof(double));
+
     r0[m] = (double *)malloc((npno+1)*sizeof(double));
     r1[m] = (double *)malloc((npno+1)*sizeof(double));
     r2[m] = (double *)malloc((npno+1)*sizeof(double));
@@ -180,7 +182,12 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
     z1[m] = (double *)malloc((npno+1)*sizeof(double));
     s1[m] = (double *)malloc((npno+1)*sizeof(double));
     s2[m] = (double *)malloc((npno+1)*sizeof(double));
-    }
+  }
+
+  /* Copy the original force vector. FF shouldn't be modified. */
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=0;i<neq;i++)
+          F[m][i] = FF[m][i];
 
 
   problems=0;
@@ -205,13 +212,13 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=0;i<neq;i++)
-      F[m][i] = F[m][i] - E->u1[m][i];
+      F[m][i] -= E->u1[m][i];
 
   assemble_del2_u(E,V,E->u1,lev,1);
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=0;i<neq;i++)
-      F[m][i] = F[m][i] - E->u1[m][i];
+      F[m][i] -= E->u1[m][i];
 
   strip_bcs_from_residual(E,F,lev);
 
@@ -333,6 +340,7 @@ float solve_Ahat_p_fhat(E,V,P,F,imp,steps_max)
   }
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+    free((void *) F[m]);
     free((void *) r0[m]);
     free((void *) r1[m]);
     free((void *) r2[m]);
