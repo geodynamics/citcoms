@@ -136,10 +136,8 @@ void apply_side_sbc(struct All_variables *E)
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
     int i,m;
-    double temp,temp2,*H;
-    void remove_horiz_ave();
-
-    H = (double *)malloc( (E->lmesh.noz+1)*sizeof(double));
+    double temp,temp2;
+    void remove_horiz_ave2(struct All_variables*, double**);
 
     temp = E->control.Atemp;
 
@@ -148,7 +146,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         buoy[m][i] =  temp * E->T[m][i];
 
     /* chemical buoyancy */
-    if(E->control.tracer && 
+    if(E->control.tracer &&
        (E->composition.ichemical_buoyancy)) {
       temp2 = E->composition.buoyancy_ratio * temp;
       for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -160,8 +158,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
 
-    remove_horiz_ave(E,buoy,H,0);
-    free ((void *) H);
+    remove_horiz_ave2(E,buoy);
 
     return;
 }
@@ -394,7 +391,7 @@ double return1_test()
  return 1.0;
 }
 
-/* convert r,theta,phi system to cartesian, xout[3] 
+/* convert r,theta,phi system to cartesian, xout[3]
    there's a double version of this in Tracer_setup called
    sphere_to_cart
 
@@ -417,7 +414,7 @@ void calc_cbase_at_tp(float theta, float phi, float *base)
 
 
  double ct,cp,st,sp;
-  
+
  ct=cos(theta);
  cp=cos(phi);
  st=sin(theta);
@@ -438,7 +435,7 @@ void calc_cbase_at_tp(float theta, float phi, float *base)
 
 /* given a base from calc_cbase_at_tp, convert a polar vector to
    cartesian */
-void convert_pvec_to_cvec(float vr,float vt, 
+void convert_pvec_to_cvec(float vr,float vt,
 			  float vp, float *base,
 			  float *cvec)
 {
@@ -449,18 +446,18 @@ void convert_pvec_to_cvec(float vr,float vt,
     cvec[i] += base[6+i]* vp;
   }
 }
-/* 
-   like malloc, but with test 
+/*
+   like malloc, but with test
 
    similar to Malloc1 but I didn't like the int as argument
-   
+
 */
 void *safe_malloc (size_t size)
 {
   void *tmp;
-  
+
   if ((tmp = malloc(size)) == NULL) {
-    fprintf(stderr, "safe_malloc: could not allocate memory, %.3f MB\n", 
+    fprintf(stderr, "safe_malloc: could not allocate memory, %.3f MB\n",
 	    (float)size/(1024*1024.));
     parallel_process_termination();
   }
