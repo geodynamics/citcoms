@@ -505,7 +505,18 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,F
 	  Q += Q0.Q[i] * exp(-Q0.lambda[i] * (E->monitor.elapsed_time+Q0.t_offset));
 */
 
+    /* heat production */
     Q = E->control.Q0;
+
+    /* should we add a compositional contribution? */
+    if(E->control.tracer_enriched){
+      
+      /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
+	 between  */
+      Q *= (1.0 - E->composition.comp_el[m][el]);
+      Q += E->composition.comp_el[m][el] * E->control.Q0ER;
+    }
+
 
     /* construct residual from this information */
 

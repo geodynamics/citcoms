@@ -29,6 +29,7 @@
 
 #include "global_defs.h"
 #include "parallel_related.h"
+void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
 
 /* Setup global mesh parameters */
 void regional_global_derived_values(E)
@@ -161,41 +162,49 @@ void regional_node_locations(E)
   noz=E->mesh.noz;
 
 
-  if(E->control.coor==1)    {
-      sprintf(output_file,"%s",E->control.coor_file);
-      fp1=fopen(output_file,"r");
-	if (fp1 == NULL) {
-          fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
-          exit(8);
-	}
-
-      fscanf(fp1,"%s %d",a,&i);
-      for(i=1;i<=nox;i++)
+  if(E->control.coor==1)    {	/* get nodal levels from file */
+    sprintf(output_file,"%s",E->control.coor_file);
+    fp1=fopen(output_file,"r");
+    if (fp1 == NULL) {
+      fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
+      exit(8);
+    }
+    
+    fscanf(fp1,"%s %d",a,&i);
+    for(i=1;i<=nox;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
-
-      fscanf(fp1,"%s %d",a,&i);
-      for(i=1;i<=noy;i++)
+    
+    fscanf(fp1,"%s %d",a,&i);
+    for(i=1;i<=noy;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
-
-      fscanf(fp1,"%s %d",a,&i);
-      for (k=1;k<=E->mesh.noz;k++)  {
+    
+    fscanf(fp1,"%s %d",a,&i);
+    for (k=1;k<=E->mesh.noz;k++)  {
       fscanf(fp1,"%d %f",&nn,&tt1);
       rr[k]=tt1;
-      }
-      E->sphere.ri = rr[1];
-      E->sphere.ro = rr[E->mesh.noz];
-
-      fclose(fp1);
-
-   }
-
-    else {
-      dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
-      for (k=1;k<=E->mesh.noz;k++)  {
-      rr[k] = E->sphere.ri + (k-1)*dr;
-      }
-
     }
+    E->sphere.ri = rr[1];
+    E->sphere.ro = rr[E->mesh.noz];
+    
+    fclose(fp1);
+    
+  } else if(E->control.coor==0) {			
+    /* default: regular node spacing */
+    dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
+    for (k=1;k<=E->mesh.noz;k++)  {
+      rr[k] = E->sphere.ri + (k-1)*dr;
+    }
+  } else if(E->control.coor==2){
+    /* higher radial spacing in top and bottom fractions */
+    get_r_spacing_fine(rr, (double)E->sphere.ri,(double)E->sphere.ro,
+		       E->mesh.noz,(double)E->control.coor_refine[0] ,
+		       (double)E->control.coor_refine[1] ,
+		       (double)E->control.coor_refine[2] ,
+		       (double)E->control.coor_refine[3],E);
+
+  } else {
+    myerror(E,"regional_version_dependent: coor mode not implemented");
+  }
 
 
 

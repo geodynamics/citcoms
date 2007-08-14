@@ -49,6 +49,7 @@ void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
+FILE* output_open_mode(char *, char *);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -66,11 +67,16 @@ void output_common_input(struct All_variables *E)
 
     /* gzdir type of I/O */
     if(strcmp(E->output.format, "ascii-gz") == 0){
-      input_boolean("gzdir_vtkio",&(E->output.gzdir_vtkio),"off",m);
-      E->output.gzdir_vtkbase_init = 0;
-      E->output.gzdir_vtkbase_save = 1; /* should we save the basis vectors? (memory!) */
+      /* 
+	 vtk_io = 1: write files for post-processing into VTK 
+	 vtk_io = 2: write legacy VTK file straight
+
+      */
+      input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"0",m);
+      E->output.gzdir.vtk_base_init = 0;
+      E->output.gzdir.vtk_base_save = 1; /* should we save the basis vectors? (memory!) */
       //fprintf(stderr,"gzdir: vtkio: %i save basis vectors: %i\n",
-      //      E->output.gzdir_vtkio,E->output.gzdir_vtkbase_save);
+      //      E->output.gzdir.vtk_io,E->output.gzdir.vtk_base_save);
     }
 }
 
@@ -119,13 +125,18 @@ void output(struct All_variables *E, int cycles)
 
 FILE* output_open(char *filename)
 {
+  return output_open_mode(filename,"w");
+}
+FILE* output_open_mode(char *filename, char *mode)
+{
   FILE *fp1;
 
   /* if filename is empty, output to stderr. */
   if (*filename) {
-    fp1 = fopen(filename,"w");
+    fp1 = fopen(filename,mode);
     if (!fp1) {
-      fprintf(stderr,"Cannot open file '%s'\n",filename);
+      fprintf(stderr,"Cannot open file '%s' for '%s'\n",
+	      filename,mode);
       parallel_process_termination();
     }
   }

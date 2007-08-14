@@ -56,6 +56,8 @@ void rtp2xyz(float , float , float, float *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
 void myerror(struct All_variables *,char *);
+void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,
+			struct All_variables *);
 
 
 
@@ -472,4 +474,50 @@ void myerror(struct All_variables *E,char *message)
   fprintf(stderr,"node %3i: error: %s\n",
 	  E->parallel.me,message);
   parallel_process_termination();
+}
+
+/* 
+
+
+
+attempt to space rr[1...nz] such that bfrac*nz nodes will be within the lower
+brange fraction of (ro-ri), and similar for the top layer
+
+*/
+void get_r_spacing_fine(double *rr, double ri, double ro,
+			int nz,double brange, double bfrac,
+			double trange, double tfrac,
+			struct All_variables *E)
+{
+  int k,klim,nb,nt,nm;
+  double drb,dr0,drt,dr,drm,range,r,mrange;
+  range = ro-ri;		/* original range */
+  mrange = 1 - brange - trange;
+  if(mrange <= 0)
+    myerror(E,"get_r_spacing_fine: bottom and top range too large");
+
+  brange *= range;		/* bottom */
+  trange *= range;		/* top */
+  mrange *= range;		/* middle */
+  
+  nb = nz * bfrac;
+  nt = nz * tfrac;
+  nm = nz-nb-nt;  
+  if((nm < 1)||(nt < 2)||(nb < 2))
+    myerror(E,"get_r_spacing_fine: refinement out of bounds");
+  
+  drb = brange/(nb-1);
+  drt = trange/(nt-1);
+  drm = mrange / (nm  + 1);
+  
+  for(r=ri,k=1;k<=nb;k++,r+=drb){
+    rr[k] = r;
+  }
+  klim = nz-nt+1;
+  for(r=r-drb+drm;k < klim;k++,r+=drm){
+    rr[k] = r;
+  }
+  for(;k <= nz;k++,r+=drt){
+    rr[k] = r;
+  }
 }

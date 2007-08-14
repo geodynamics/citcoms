@@ -161,7 +161,7 @@ if(E->control.coor==1)   {
   free ((void *)fi1[lev]   );
    }
 
- }
+}
 
 else if(E->control.coor==0)   {
 
@@ -243,6 +243,9 @@ else if(E->control.coor==0)   {
   free ((void *)SX[1]);
   free ((void *)tt);
   free ((void *)ff);
+}else{
+  myerror(E,"regional_sphere_related: coor setting not implemented");
+
 }
 
   return;

@@ -30,23 +30,53 @@
 
 /* 
 
-this version uses gzipped, ascii output to subdirectories
+this version uses gzipped, ascii output to subdirectories for the
+ascii-gz option
+
+if, additionally, gzdir.vtk_io = 1, will write different format files
+                                   for post-processing into VTK
+
+		  gzdir.vtk_io = 2, will try to write VTK straight (experimental)
+
+		  the VTK output is the "legacy" type, requires that
+		  all processors see the same filesystem, and will
+		  likely lead to a bottleneck for larg CPU
+		  computations as each processor has to wait til the
+		  previous is done.
 
 TWB
 
 */
-
 #ifdef USE_GZDIR
+
+
+//#define ASCII_DEBUG
 
 #include <zlib.h>
 
-
+#define BE_WERROR {myerror(E,"write error be output");}
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
 #include "output.h"
+/* Big endian crap */
+#include <string.h>
+#include <malloc.h>
+
+void be_flipit(void *, void *, size_t );
+void be_flip_byte_order(void *, size_t );
+int be_is_little_endian(void);
+int be_write_float_to_file(float *, int , FILE *);
+int be_write_int_to_file(int *, int , FILE *);
+void myfprintf(FILE *,char *);
+
+/*  */
+FILE* output_open_mode(char *, char *);
+void get_vtk_filename(char *,int,struct All_variables *);
+
 
 gzFile *gzdir_output_open(char *,char *);
 void gzdir_output(struct All_variables *, int );
@@ -54,7 +84,7 @@ void gzdir_output_comp_nd(struct All_variables *, int);
 void gzdir_output_comp_el(struct All_variables *, int);
 void gzdir_output_coord(struct All_variables *);
 void gzdir_output_mat(struct All_variables *);
-void gzdir_output_velo(struct All_variables *, int);
+void gzdir_output_velo_temp(struct All_variables *, int);
 void gzdir_output_visc_prepare(struct All_variables *, float **);
 void gzdir_output_visc(struct All_variables *, int);
 void gzdir_output_surf_botm(struct All_variables *, int);
@@ -87,32 +117,30 @@ extern void get_STD_topo(struct All_variables *, float**, float**,
 void gzdir_output(struct All_variables *E, int cycles)
 {
   char output_dir[255];
-  
   if (cycles == 0) {
     /* initial I/O */
     
     gzdir_output_coord(E);
     /*gzdir_output_mat(E);*/
   }
+
   /* 
      make a new directory for all the other output 
      
-     I thought I could just have the first proc do this and sync, but
-     the syncing didn't work ?!
-
+     (all procs need to do that, because we might be using a local tmp
+     dir)
+     
   */
-  //if(E->parallel.me == 0){
-    /* make a directory */
-    snprintf(output_dir,255,"%s/%d",
-	    E->control.data_dir,cycles);
-    mkdatadir(output_dir);
-    //  }
-  /* and wait for the other jobs */
-    //  parallel_process_sync();
+  /* make a directory */
+  snprintf(output_dir,255,"%s/%d",E->control.data_dir,cycles);
+  mkdatadir(output_dir);
+
 
   /* output */
 
-  gzdir_output_velo(E, cycles);
+  gzdir_output_velo_temp(E, cycles); /* don't move this around,
+					else new VTK output won't
+					work */
   gzdir_output_visc(E, cycles);
 
   gzdir_output_surf_botm(E, cycles);
@@ -132,7 +160,8 @@ void gzdir_output(struct All_variables *E, int cycles)
       gzdir_output_horiz_avg(E, cycles);
 
   if(E->control.tracer){
-    if(E->output.tracer || (cycles == E->advection.max_timesteps))
+    if(E->output.tracer || 
+       (cycles == E->advection.max_timesteps))
       gzdir_output_tracer(E, cycles);
   }
 
@@ -166,206 +195,449 @@ gzFile *gzdir_output_open(char *filename,char *mode)
 
 void gzdir_output_coord(struct All_variables *E)
 {
-  int i, j, offset;
-  char output_file[255];
-  float locx[3];
-  gzFile *fp1;
-  /* 
-     don't use data file name
-  */
-  snprintf(output_file,255,"%s/coord.%d.gz",
-	  E->control.data_dir,E->parallel.me);
-  fp1 = gzdir_output_open(output_file,"w");
+  int i, j, offset,ix[9],out;
+  char output_file[255],ostring[255],message[255];
+  float x[3];
+  gzFile *gz1;
+  FILE *fp1;
+  
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc, mpi_inmsg, mpi_success_message = 1;
+  if(E->output.gzdir.vtk_io == 2){
 
-  /* nodal coordinates */
-  for(j=1;j<=E->sphere.caps_per_proc;j++)     {
-    gzprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)
-      gzprintf(fp1,"%.6e %.6e %.6e\n",
-	      E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
-  }
-
-  gzclose(fp1);
-
-
-  if(E->output.gzdir_vtkio){
+    parallel_process_sync(E);
     /* 
+       new VTK output, write directly to a VTK file
+       this will get deleted from 
+
+       output_finalize(struct  All_variables *E)
+
        
-    output of Cartesian coordinates and element connectivitiy for
-    vtk visualization
-    
     */
-    /* 
-       nodal coordinates in Cartesian
-    */
-    snprintf(output_file,255,"%s/vtk_ecor.%d.gz",
-	    E->control.data_dir,E->parallel.me);
-    fp1 = gzdir_output_open(output_file,"w");
+    E->output.gzdir.vtk_ocount = -1;
+    snprintf(output_file,255,"%s/vtk_geo",E->control.data_dir);
+    if(E->parallel.me == 0){
+
+      /* log times */
+      snprintf(message,255,
+	       "%s/vtk_time.log",E->control.data_dir);
+      E->output.gzdir.vtk_fp = output_open_mode(message,"w");
+
+
+      /* start geo file */
+      fp1 = output_open_mode(output_file,"w");
+      myfprintf(fp1,"# vtk DataFile Version 2.0\n");
+      myfprintf(fp1,"model name, extra info\n");
+#ifdef ASCII_DEBUG
+      myfprintf(fp1,"ASCII\n");
+#else
+      myfprintf(fp1,"BINARY\n");
+#endif
+      myfprintf(fp1,"DATASET UNSTRUCTURED_GRID\n");
+      sprintf(message,"POINTS %i float\n", /* total number of nodes */
+	      E->lmesh.nno * E->parallel.nproc * 
+	      E->sphere.caps_per_proc);
+      myfprintf(fp1,message);
+    }else{
+      /* if not first, wait for previous */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      /* open for append */
+      fp1 = output_open_mode(output_file,"a");
+    }
+    out = 0;
+    /* write nodal coordinate to file, big endian */
     for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nno;i++) {
-	rtp2xyz(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],locx);
-	gzprintf(fp1,"%9.6f %9.6f %9.6f\n",
-		 locx[0],locx[1],locx[2]);
+	x[0]=E->x[j][1][i];x[1]=E->x[j][2][i];x[2]=E->x[j][3][i];
+	if(be_write_float_to_file(x,3,fp1) != 3)BE_WERROR;
+	out++;
       }
     }
-    gzclose(fp1);
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){/* send to next if not last*/
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    }
     /* 
-       connectivity for all elements
+       node numbers for all the elements 
     */
+    parallel_process_sync(E);
+    if(E->parallel.me == 0){	
+      fp1 = output_open_mode(output_file,"a");
+      j = E->parallel.nproc * E->lmesh.nel * 
+	E->sphere.caps_per_proc; /* total number of elements */
+      sprintf(message,"CELLS %i %i\n", /* number of elements
+				      total number of int entries
+				      
+				   */
+	      j,j*(enodes[E->mesh.nsd]+1));
+      myfprintf(fp1,message);
+    }else{
+      /* if not first, wait for previous */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      fp1 = output_open_mode(output_file,"a");
+    }
+    /* 
+       write CELL element nodes 
+    */
+    if(enodes[E->mesh.nsd] != 8)
+      myerror(E,"vtk error, only eight node hexes supported");
     offset = E->lmesh.nno * E->parallel.me - 1;
-    snprintf(output_file,255,"%s/vtk_econ.%d.gz",
-	    E->control.data_dir,E->parallel.me);
-    fp1 = gzdir_output_open(output_file,"w");
+    ix[0] = enodes[E->mesh.nsd];
     for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nel;i++) {
-	gzprintf(fp1,"%2i\t",enodes[E->mesh.nsd]);
-	if(enodes[E->mesh.nsd] != 8){
-	  gzprintf(stderr,"gzdir: Output: error, only eight node hexes supported");
-	  parallel_process_termination();
-	}
 	/* 
 	   need to add offset according to the processor for global
 	   node numbers
 	*/
-	gzprintf(fp1,"%6i %6i %6i %6i %6i %6i %6i %6i\n",
-		 E->ien[j][i].node[1]+offset,E->ien[j][i].node[2]+offset,
-		 E->ien[j][i].node[3]+offset,E->ien[j][i].node[4]+offset,
-		 E->ien[j][i].node[5]+offset,E->ien[j][i].node[6]+offset,
-		 E->ien[j][i].node[7]+offset,E->ien[j][i].node[8]+offset);
+	ix[1]= E->ien[j][i].node[1]+offset;ix[2] = E->ien[j][i].node[2]+offset;
+	ix[3]= E->ien[j][i].node[3]+offset;ix[4] = E->ien[j][i].node[4]+offset;
+	ix[5]= E->ien[j][i].node[5]+offset;ix[6] = E->ien[j][i].node[6]+offset;
+	ix[7]= E->ien[j][i].node[7]+offset;ix[8] = E->ien[j][i].node[8]+offset;
+	if(be_write_int_to_file(ix,9,fp1)!=9)BE_WERROR;
       }
     }
-    gzclose(fp1);
-  } /* end vtkio */
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1)
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    /* 
+       add the cell type flags
+    */
+    parallel_process_sync(E);
 
-
+    if(E->parallel.me == 0){
+      fp1 = output_open_mode(output_file,"a");
+      j=E->parallel.nproc*E->lmesh.nel*E->sphere.caps_per_proc;
+      sprintf(message,"CELL_TYPES %i\n",j); /* number of elements*/
+      myfprintf(fp1,message);
+      ix[0] = 12;
+      for(i=0;i<j;i++)
+	if(be_write_int_to_file(ix,1,fp1)!=1)BE_WERROR;
+      fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+      report(E,"vtk_io: vtk geometry done\n");
+    }
+    /* done straight VTK  */
+  }else{
+    /* 
+       
+    either zipped regular, or old VTK type for post-processing
+    
+    */
+    /* 
+       don't use data file name
+    */
+    snprintf(output_file,255,"%s/coord.%d.gz",
+	   E->control.data_dir,E->parallel.me);
+    gz1 = gzdir_output_open(output_file,"w");
+    
+    /* nodal coordinates */
+    for(j=1;j<=E->sphere.caps_per_proc;j++)     {
+      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++)
+	gzprintf(gz1,"%.6e %.6e %.6e\n",
+		 E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+    }
+    
+    gzclose(gz1);
+    if(E->output.gzdir.vtk_io){
+      /* 
+	 
+      output of Cartesian coordinates and element connectivitiy for
+      vtk visualization
+      
+      */
+      /* 
+	 nodal coordinates in Cartesian
+      */
+      snprintf(output_file,255,"%s/vtk_ecor.%d.gz",
+	       E->control.data_dir,E->parallel.me);
+      gz1 = gzdir_output_open(output_file,"w");
+      for(j=1;j <= E->sphere.caps_per_proc;j++)     {
+	for(i=1;i <= E->lmesh.nno;i++) {
+	  gzprintf(gz1,"%9.6f %9.6f %9.6f\n", /* cartesian nodal coordinates */
+		   E->x[j][1][i],E->x[j][2][i],E->x[j][3][i]);
+	}
+      }
+      gzclose(gz1);
+      /* 
+	 connectivity for all elements
+      */
+      offset = E->lmesh.nno * E->parallel.me - 1;
+      snprintf(output_file,255,"%s/vtk_econ.%d.gz",
+	       E->control.data_dir,E->parallel.me);
+      gz1 = gzdir_output_open(output_file,"w");
+      for(j=1;j <= E->sphere.caps_per_proc;j++)     {
+	for(i=1;i <= E->lmesh.nel;i++) {
+	  gzprintf(gz1,"%2i\t",enodes[E->mesh.nsd]);
+	  if(enodes[E->mesh.nsd] != 8){
+	    gzprintf(stderr,"gzdir: Output: error, only eight node hexes supported");
+	    parallel_process_termination();
+	  }
+	  /* 
+	     need to add offset according to the processor for global
+	     node numbers
+	  */
+	  gzprintf(gz1,"%6i %6i %6i %6i %6i %6i %6i %6i\n",
+		   E->ien[j][i].node[1]+offset,E->ien[j][i].node[2]+offset,
+		   E->ien[j][i].node[3]+offset,E->ien[j][i].node[4]+offset,
+		   E->ien[j][i].node[5]+offset,E->ien[j][i].node[6]+offset,
+		   E->ien[j][i].node[7]+offset,E->ien[j][i].node[8]+offset);
+	}
+      }
+      gzclose(gz1);
+    } /* end vtkio = 1  */
+  }
 
   return;
 }
 
+/* 
 
+this needs to be called first before any of the other stuff if VTK
+straight output is chosen
+
+
+*/
+void gzdir_output_velo_temp(struct All_variables *E, int cycles)
+{
+  int i, j, k,os;
+  char output_file[255],output_file2[255],message[255];
+  float cvec[3];
+  gzFile *gzout;
+  FILE *fp1;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+
+
+  if(E->output.gzdir.vtk_io){	/* all VTK modes need basis vectors */
+
+    os = E->lmesh.nno*9;
+    
+    if((!E->output.gzdir.vtk_base_init) ||(!E->output.gzdir.vtk_base_save)){
+      if(!E->output.gzdir.vtk_base_init)
+	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os*E->sphere.caps_per_proc);
+      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
+	for(i=1;i <= E->lmesh.nno;i++,k += 9){
+	  /* cartesian basis vectors at theta, phi */
+	  calc_cbase_at_tp(E->sx[j][1][i],E->sx[j][2][i],(E->output.gzdir.vtk_base+k));
+	}
+      }
+      E->output.gzdir.vtk_base_init = 1;
+    }
+  }
+
+  if(E->output.gzdir.vtk_io == 2){
+    parallel_process_sync(E);
+
+    /* 
+
+    straight VTK output, always need to start here!
+    
+    */
+    E->output.gzdir.vtk_ocount++;
+    get_vtk_filename(output_file,E->output.gzdir.vtk_ocount,E);
+    /* 
+       
+    start with temperature
+
+    */
+    if(E->parallel.me == 0){
+      /* copy geo file over to start out vtk file */
+      snprintf(output_file2,255,"cp %s/vtk_geo %s",
+	       E->control.data_dir,output_file);
+      system(output_file2);
+      /* should we do something to check if this has worked? */
+
+      /* write a time log */
+      fprintf(E->output.gzdir.vtk_fp,"%12i %12i %12.6e %s\n",
+	      E->output.gzdir.vtk_ocount,cycles,E->monitor.elapsed_time,output_file);
+
+      /*  */
+      fp1 = output_open_mode(output_file,"a");
+      sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->parallel.nproc*E->sphere.caps_per_proc);
+      myfprintf(fp1,message);
+      myfprintf(fp1,"SCALARS temperature float 1\n");
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{
+      /* if not first, wait for previous */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 7, MPI_COMM_WORLD, &mpi_stat);
+      /* open for append */
+      fp1 = output_open_mode(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++) /* print the temperatures */
+      for(i=1;i<=E->lmesh.nno;i++){
+	cvec[0] = E->T[j][i];	
+	if(be_write_float_to_file(cvec,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 7, MPI_COMM_WORLD);
+    }else{
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, 0, 6, MPI_COMM_WORLD); /* tell m=0 to go ahead */
+    }
+    /* 
+       velocities second
+    */
+    if(E->parallel.me == 0){	
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, E->parallel.nproc-1 , 6, MPI_COMM_WORLD, &mpi_stat);
+      fp1 = output_open_mode(output_file,"a"); /* append velocities */
+      sprintf(message,"VECTORS velocity float\n");myfprintf(fp1,message);
+    }else{
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 5, MPI_COMM_WORLD, &mpi_stat);
+      fp1 = output_open_mode(output_file,"a");
+    }
+    for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
+      for(i=1;i<=E->lmesh.nno;i++,k += 9) {
+	convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],
+			     (E->output.gzdir.vtk_base+k),cvec);
+	if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
+      }
+    }
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 5, MPI_COMM_WORLD);
+    }else{
+      fprintf(stderr,"vtk_io: geo, temp, & vel writtend to %s\n",output_file);
+    }
+    /* new VTK velo and temp done */
+  }else{
+    /* 
+
+    modified zipped output
+
+    */
+    /*
+      
+    
+    temperatures are printed along with velocities for old type of
+    output
+    
+    if VTK is selected, will generate a separate temperature file
+    
+    */
+    if(E->output.gzdir.vtk_io) {
+      /* 
+	 for VTK, only print temperature 
+      */
+      snprintf(output_file2,255,"%s/%d/t.%d.%d",
+	       E->control.data_dir,
+	       cycles,E->parallel.me,cycles);
+    }else{				/* vel + T */
+      snprintf(output_file2,255,"%s/%d/velo.%d.%d",
+	       E->control.data_dir,cycles,
+	       E->parallel.me,cycles);
+    }
+    snprintf(output_file,255,"%s.gz",output_file2); /* add the .gz */
+    
+    gzout = gzdir_output_open(output_file,"w");
+    gzprintf(gzout,"%d %d %.5e\n",
+	     cycles,E->lmesh.nno,E->monitor.elapsed_time);
+    for(j=1; j<= E->sphere.caps_per_proc;j++)     {
+      gzprintf(gzout,"%3d %7d\n",j,E->lmesh.nno);
+      if(E->output.gzdir.vtk_io){
+	/* VTK */
+	for(i=1;i<=E->lmesh.nno;i++)           
+	  gzprintf(gzout,"%.6e\n",E->T[j][i]); 
+      } else {			
+	/* old */
+	for(i=1;i<=E->lmesh.nno;i++)           
+	  gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
+		   E->sphere.cap[j].V[1][i],
+		   E->sphere.cap[j].V[2][i],
+		   E->sphere.cap[j].V[3][i],E->T[j][i]); 
+      }
+    }
+    gzclose(gzout);
+    if(E->output.gzdir.vtk_io){
+      /* 
+	 write Cartesian velocities to file 
+      */
+      snprintf(output_file,255,"%s/%d/vtk_v.%d.%d.gz",
+	       E->control.data_dir,cycles,E->parallel.me,cycles);
+      gzout = gzdir_output_open(output_file,"w");
+      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
+	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
+	  /* convert r,theta,phi vector to x,y,z at base location */
+	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],
+			       E->sphere.cap[j].V[1][i],
+			       E->sphere.cap[j].V[2][i],
+			       (E->output.gzdir.vtk_base+k),cvec);
+	  /* output of cartesian vector */
+	  gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
+		   cvec[0],cvec[1],cvec[2]);
+	}
+      }
+      gzclose(gzout);
+      
+     }
+  } /* end gzipped and old VTK out */
+  if(E->output.gzdir.vtk_io){	/* all VTK modes */
+    /* free memory */
+    if(!E->output.gzdir.vtk_base_save)
+      free(E->output.gzdir.vtk_base);
+  }
+  return;
+}
+
+/* 
+   viscosity 
+*/
 void gzdir_output_visc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
-  gzFile *fp1;
+  gzFile *gz1;
+  FILE *fp1;
   int lev = E->mesh.levmax;
+  float ftmp;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
 
-  snprintf(output_file,255,
-	   "%s/%d/visc.%d.%d.gz", E->control.data_dir,
-	  cycles,E->parallel.me, cycles);
-  fp1 = gzdir_output_open(output_file,"w");
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-    gzprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)
-      gzprintf(fp1,"%.4e\n",E->VI[lev][j][i]);
-  }
+  if(E->output.gzdir.vtk_io != 2){ /* old output */
+    snprintf(output_file,255,
+	     "%s/%d/visc.%d.%d.gz", E->control.data_dir,
+	     cycles,E->parallel.me, cycles);
+    gz1 = gzdir_output_open(output_file,"w");
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++)
+	gzprintf(gz1,"%.4e\n",E->VI[lev][j][i]);
+    }
+    
+    gzclose(gz1);
+  }else{
+    parallel_process_sync(E);
   
-  gzclose(fp1);
-
+    /* new legacy VTK */
+    get_vtk_filename(output_file,E->output.gzdir.vtk_ocount,E);
+    if(E->parallel.me == 0){	
+      fp1 = output_open_mode(output_file,"a");
+      myfprintf(fp1,"SCALARS log10(visc) float 1\n");
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{
+      /* if not first, wait for previous */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      /* open for append */
+      fp1 = output_open_mode(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++)     
+      for(i=1;i<=E->lmesh.nno;i++){
+	ftmp = log10(E->VI[lev][j][i]);	
+	if(fabs(ftmp) < 5e-7)ftmp = 0.0;
+	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    }
+  }
   return;
 }
 
-
-void gzdir_output_velo(struct All_variables *E, int cycles)
-{
-  int i, j, k,os;
-  char output_file[255],output_file2[255];
-  float cvec[3];
-  gzFile *gzout;
-  /*
-    
-
-  temperatures are printed along with velocities for old type of
-  output
-
-  if VTK is selected, will generate a separate temperature file
-  
-  */
-  if(E->output.gzdir_vtkio) {
-    /* 
-       for VTK, only print temperature 
-    */
-    snprintf(output_file2,255,"%s/%d/t.%d.%d",
-	    E->control.data_dir,
-	    cycles,E->parallel.me,cycles);
-  }else{				/* vel + T */
-    snprintf(output_file2,255,"%s/%d/velo.%d.%d",
-	    E->control.data_dir,cycles,
-	    E->parallel.me,cycles);
-  }
-  snprintf(output_file,255,"%s.gz",output_file2); /* add the .gz */
-
-  gzout = gzdir_output_open(output_file,"w");
-  gzprintf(gzout,"%d %d %.5e\n",
-	   cycles,E->lmesh.nno,E->monitor.elapsed_time);
-  for(j=1; j<= E->sphere.caps_per_proc;j++)     {
-    gzprintf(gzout,"%3d %7d\n",j,E->lmesh.nno);
-    if(E->output.gzdir_vtkio){
-      /* VTK */
-      for(i=1;i<=E->lmesh.nno;i++)           
-	gzprintf(gzout,"%.6e\n",E->T[j][i]); 
-    } else {			
-      /* old */
-      for(i=1;i<=E->lmesh.nno;i++)           
-	gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
-		 E->sphere.cap[j].V[1][i],
-		 E->sphere.cap[j].V[2][i],
-		 E->sphere.cap[j].V[3][i],E->T[j][i]); 
-    }
-  }
-  gzclose(gzout);
-  if(E->output.gzdir_vtkio){
-    /* 
-       cartesian velocity output  
-    */
-    os = E->lmesh.nno*9;
-    /* 
-       get base vectors if first pass or if we're not saving
-    */
-    if((!E->output.gzdir_vtkbase_init) ||
-       (!E->output.gzdir_vtkbase_save)){
-      if(!E->output.gzdir_vtkbase_init){
-	/* allocate */
-	E->output.gzdir_vtkbase = (float *)
-	  safe_malloc(sizeof(float)*os*E->sphere.caps_per_proc);
-      }
-      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-	for(i=1;i <= E->lmesh.nno;i++,k += 9){
-	  /* cartesian basis vectors at theta, phi */
-	  calc_cbase_at_tp(E->sx[j][1][i],
-			   E->sx[j][2][i],
-			   (E->output.gzdir_vtkbase+k));
-	}
-      }
-      E->output.gzdir_vtkbase_init = 1;
-    }
-    /* 
-       write Cartesian velocities to file 
-    */
-    snprintf(output_file,255,"%s/%d/vtk_v.%d.%d.gz",
-	    E->control.data_dir,cycles,E->parallel.me,cycles);
-    gzout = gzdir_output_open(output_file,"w");
-    for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-      for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	/* convert r,theta,phi vector to x,y,z at base location */
-	convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],
-			     E->sphere.cap[j].V[1][i],
-			     E->sphere.cap[j].V[2][i],
-			     (E->output.gzdir_vtkbase+k),cvec);
-	/* output of cartesian vector */
-	gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
-		 cvec[0],cvec[1],cvec[2]);
-      }
-    }
-    gzclose(gzout);
-    
-    /* free memory */
-    if(!E->output.gzdir_vtkbase_save)
-      free(E->output.gzdir_vtkbase);
-  }
-
-  return;
-}
 
 
 void gzdir_output_surf_botm(struct All_variables *E, int cycles)
@@ -543,24 +815,47 @@ void gzdir_output_mat(struct All_variables *E)
 void gzdir_output_pressure(struct All_variables *E, int cycles)
 {
   int i, j;
+  float ftmp;
   char output_file[255];
-  gzFile *fp1;
+  gzFile *gz1;
+  FILE *fp1;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
 
-  snprintf(output_file,255,"%s/%d/pressure.%d.%d.gz", E->control.data_dir,cycles,
-          E->parallel.me, cycles);
-  fp1 = gzdir_output_open(output_file,"w");
-
-  gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,
-	   E->monitor.elapsed_time);
-
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-    gzprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-    for(i=1;i<=E->lmesh.nno;i++)
-      gzprintf(fp1,"%.6e\n",E->NP[j][i]);
+  if(E->output.gzdir.vtk_io != 2){ /* old */
+    snprintf(output_file,255,"%s/%d/pressure.%d.%d.gz", E->control.data_dir,cycles,
+	     E->parallel.me, cycles);
+    gz1 = gzdir_output_open(output_file,"w");
+    gzprintf(gz1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++)
+	gzprintf(gz1,"%.6e\n",E->NP[j][i]);
+    }
+    gzclose(gz1);
+  }else{/* new legacy VTK */
+    parallel_process_sync(E);
+    get_vtk_filename(output_file,E->output.gzdir.vtk_ocount,E);
+    if(E->parallel.me == 0){	
+      fp1 = output_open_mode(output_file,"a");
+      myfprintf(fp1,"SCALARS pressure float 1\n");
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      fp1 = output_open_mode(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++)     
+      for(i=1;i<=E->lmesh.nno;i++){
+	ftmp = E->NP[j][i];	
+	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    }
   }
-
-  gzclose(fp1);
-
   return;
 }
 
@@ -606,32 +901,54 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 
 void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 {
-    int i, j;
-    char output_file[255];
-    gzFile *fp1;
-
+  int i, j;
+  char output_file[255];
+  gzFile *gz1;
+  FILE *fp1;
+  float ftmp;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+  
+  if(E->output.gzdir.vtk_io != 2){
     snprintf(output_file,255,"%s/%d/comp_nd.%d.%d.gz", 
-	    E->control.data_dir,
-	    cycles,
-            E->parallel.me, cycles);
-    fp1 = gzdir_output_open(output_file,"w");
-
+	     E->control.data_dir,cycles,
+	     E->parallel.me, cycles);
+    gz1 = gzdir_output_open(output_file,"w");
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        gzprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
-                j, E->lmesh.nel,
-                E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
-
-        for(i=1;i<=E->lmesh.nno;i++) {
-            gzprintf(fp1,"%.6e\n",
-		     E->composition.comp_node[j][i]);
-        }
-
+      gzprintf(gz1,"%3d %7d %.5e %.5e %.5e\n",
+	       j, E->lmesh.nel,
+	       E->monitor.elapsed_time,
+	       E->composition.initial_bulk_composition,
+	       E->composition.bulk_composition);
+      for(i=1;i<=E->lmesh.nno;i++) {
+	gzprintf(gz1,"%.6e\n",E->composition.comp_node[j][i]);
+      }
     }
-
-    gzclose(fp1);
-    return;
+    gzclose(gz1);
+  }else{/* new legacy VTK */
+    parallel_process_sync(E);
+    get_vtk_filename(output_file,E->output.gzdir.vtk_ocount,E);
+    if(E->parallel.me == 0){	
+      fp1 = output_open_mode(output_file,"a");
+      myfprintf(fp1,"SCALARS composition float 1\n");
+      myfprintf(fp1,"LOOKUP_TABLE default\n");
+    }else{
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      fp1 = output_open_mode(output_file,"a");
+    }
+    for(j=1; j<= E->sphere.caps_per_proc;j++)     
+      for(i=1;i<=E->lmesh.nno;i++){
+	ftmp = E->composition.comp_node[j][i];	
+	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+      }
+    fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    }
+  }
+  return;
 }
 
 
@@ -678,7 +995,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 
   ii = E->monitor.solution_cycles_init;
 
-  if(E->output.gzdir_vtkio) {	/* VTK I/O */
+  if(E->output.gzdir.vtk_io) {	/* VTK I/O */
    snprintf(output_file,255,"%s/%d/t.%d.%d",
 	    E->control.data_dir_old,
 	    ii,E->parallel.me,ii);
@@ -696,7 +1013,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
   if(fscanf(fp,"%i %i %f",&ll,&mm,&restart_elapsed_time) != 3)
     myerror(E,"restart vtkl read error 0");
  
-  if(E->output.gzdir_vtkio) {	/* VTK */
+  if(E->output.gzdir.vtk_io) {	/* VTK */
     for(m=1;m <= E->sphere.caps_per_proc;m++) {
       if(fscanf(fp,"%i %i",&ll,&mm) != 2)
 	myerror(E,"restart vtkl read error 1");
@@ -784,4 +1101,135 @@ void gzip_file(char *output_file)
 }
 
 
+
+
+void get_vtk_filename(char *output_file,int cycles,struct All_variables *E)
+{
+  snprintf(output_file,255,"%s/d.%08i.vtk",E->control.data_dir,cycles);
+}
+
+
+
+
+/* 
+
+
+big endian I/O (needed for vtk)
+
+
+*/
+
+/* 
+
+write the x[n] array to file, making sure it is written big endian
+
+*/
+int be_write_float_to_file(float *x, int n, FILE *out)
+{
+  int i,nout;
+  static size_t len = sizeof(float);
+  size_t bsize;
+  float ftmp;
+#ifdef ASCII_DEBUG
+  for(i=0;i<n;i++) 
+    fprintf(out,"%11g ",x[i]); 
+  fprintf(out,"\n");
+  nout = n;
+#else
+  /* 
+     do we need to flip? 
+  */
+  if(be_is_little_endian()){
+    nout = 0;
+    for(i=0;i < n;i++){
+      ftmp = x[i];
+      be_flip_byte_order((void *)(&ftmp),len);
+      nout += fwrite(&ftmp,len,(size_t)1,out);		/* write to file */
+    }
+  }else{			/* operate on x */
+    nout = fwrite(x,len,(size_t)n,out);		/* write to file */
+  }
+#endif
+  return nout;
+}
+int be_write_int_to_file(int *x, int n, FILE *out)
+{
+  int i,nout;
+  static size_t len = sizeof(int);
+  size_t bsize;
+  int itmp;
+#ifdef ASCII_DEBUG
+  for(i=0;i<n;i++) 
+    fprintf(out,"%11i ",x[i]); 
+  fprintf(out,"\n");
+  nout = n;
+#else
+  /* 
+     do we need to flip? 
+  */
+  if(be_is_little_endian()){
+    nout = 0;
+    for(i=0;i < n;i++){
+      itmp = x[i];
+      be_flip_byte_order((void *)(&itmp),len);
+      nout += fwrite(&itmp,len,(size_t)1,out);		/* write to file */
+    }
+  }else{			/* operate on x */
+    nout = fwrite(x,len,(size_t)n,out);		/* write to file */
+  }
+#endif
+  return nout;
+}
+
+
+/* does this make a difference? nope, didn't, and why would it */
+void myfprintf(FILE *out,char *string)
+{
+#ifdef ASCII_DEBUG
+  fprintf(out,string);
+#else
+  fwrite(string, sizeof(char), strlen(string), out);
+#endif
+}
+
+int be_is_little_endian(void)
+{
+  static const unsigned long a = 1;
+  return *(const unsigned char *)&a;
+}
+
+/* 
+
+
+flip endian-ness
+
+
+*/
+/* 
+
+flip endianness of x
+
+*/
+void be_flip_byte_order(void *x, size_t len)
+{
+  void *copy;
+  int i;
+  copy = (void *)malloc(len);	/* don't check here for speed */
+  memcpy(copy,x,len);
+  be_flipit(x,copy,len);
+  free(copy);
+}
+
+/* this should not be called with (i,i,size i) */
+void be_flipit(void *d, void *s, size_t len)
+{
+  unsigned char *dest = d;
+  unsigned char *src  = s;
+  src += len - 1;
+  for (; len; len--)
+    *dest++ = *src--;
+}
+
+
+#undef BE_WERROR
 #endif /* gzdir switch */

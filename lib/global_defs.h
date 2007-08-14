@@ -496,6 +496,7 @@ struct CONTROL {
     int pseudo_free_surf;
 
     int tracer;
+    int tracer_enriched;
 
     double theta_min, theta_max, fi_min, fi_max;
     float start_age;
@@ -524,6 +525,7 @@ struct CONTROL {
     float VBYbotval;
 
     int coor;
+  float coor_refine[4];
     char coor_file[100];
 
     int lith_age;
@@ -541,6 +543,8 @@ struct CONTROL {
     float TBCbotval;
 
     float Q0;
+    float Q0ER;
+  
     float jrelax;
 
     int precondition;
@@ -625,6 +629,15 @@ struct DATA {
     float   timedir;
 };
 
+  /* for gzdir  */
+struct gzd_struc{
+  int vtk_io,vtk_base_init,vtk_base_save,
+    vtk_ocount;
+  float *vtk_base;
+  FILE *vtk_fp;
+
+};
+
 struct Output {
     char format[20];  /* ascii or hdf5 */
     char optional[1000]; /* comma-delimited list of objects to output */
@@ -660,8 +673,7 @@ struct Output {
 
 
   /* flags used by GZDIR */
-  int gzdir_vtkio,gzdir_vtkbase_init,gzdir_vtkbase_save;
-  float *gzdir_vtkbase;
+  struct gzd_struc gzdir;
 };
 
 

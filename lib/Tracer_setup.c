@@ -82,9 +82,22 @@ static void eject_tracer(struct All_variables *E, int j, int it);
 void tracer_input(struct All_variables *E)
 {
     void full_tracer_input();
+    char message[100];
     int m=E->parallel.me;
 
-    input_boolean("tracer",&(E->control.tracer),"0",m);
+    input_boolean("tracer",&(E->control.tracer),"off",m);
+    input_boolean("tracer_enriched",
+		  &(E->control.tracer_enriched),"off",m);
+    if(E->control.tracer_enriched){
+      if(!E->control.tracer)	/* check here so that we can get away
+				   with only one if statement in
+				   Advection_diffusion */
+	myerror(E,"need to switch on tracers for tracer_enriched");
+      input_float("Q0_enriched",&(E->control.Q0ER),"0.0",m);
+      snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g",
+	       E->control.Q0,E->control.Q0ER);
+      report(E,message);
+    }
     if(E->control.tracer) {
 
         /* tracer_ic_method=0 (random generated array) */

@@ -30,6 +30,8 @@
 #include "global_defs.h"
 #include "parallel_related.h"
 
+void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
+
 /* Setup global mesh parameters */
 void full_global_derived_values(E)
   struct All_variables *E;
@@ -147,28 +149,39 @@ void full_node_locations(E)
   rr = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
   RR = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
 
-  if(E->control.coor==1)    {
-      sprintf(output_file,"%s",E->control.coor_file);
-      fp1=fopen(output_file,"r");
-	if (fp1 == NULL) {
-          fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
-          exit(8);
-	}
-      fscanf(fp1,"%s %d",a,&i);
-      for (k=1;k<=E->mesh.noz;k++)  {
-	fscanf(fp1,"%d %f",&nn,&tt1);
-	rr[k]=tt1;
-      }
 
-      fclose(fp1);
-  }
-  else {
+  switch(E->control.coor){
+  case 2:
+    /* higher radial spacing in top and bottom fractions */
+    get_r_spacing_fine(rr, (double)E->sphere.ri,(double)E->sphere.ro,
+		       E->mesh.noz,(double)E->control.coor_refine[0] ,
+		       (double)E->control.coor_refine[1] ,
+		       (double)E->control.coor_refine[2] ,
+		       (double)E->control.coor_refine[3], E);
+    break;
+  case 1:			/* read nodal radii from file */
+    sprintf(output_file,"%s",E->control.coor_file);
+    fp1=fopen(output_file,"r");
+    if (fp1 == NULL) {
+      fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
+      exit(8);
+    }
+    fscanf(fp1,"%s %d",a,&i);
+    for (k=1;k<=E->mesh.noz;k++)  {
+      fscanf(fp1,"%d %f",&nn,&tt1);
+      rr[k]=tt1;
+    }
+    
+    fclose(fp1);
+    break;
+  default:
     /* generate uniform mesh in radial direction */
     dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
-
+    
     for (k=1;k<=E->mesh.noz;k++)  {
       rr[k] = E->sphere.ri + (k-1)*dr;
     }
+    break;
   }
 
   for (i=1;i<=E->lmesh.noz;i++)  {

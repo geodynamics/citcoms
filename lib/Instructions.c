@@ -291,6 +291,13 @@ void read_initial_settings(struct All_variables *E)
   input_int("levels",&(E->mesh.levels),"0",m);
 
   input_int("coor",&(E->control.coor),"0",m);
+  if(E->control.coor == 2){	/* refinement */
+    E->control.coor_refine[0] = 0.10; /* bottom 10% */
+    E->control.coor_refine[1] = 0.15; /* get 15% of the nodes */
+    E->control.coor_refine[2] = 0.10; /* top 10% */
+    E->control.coor_refine[3] = 0.20; /* get 20% of the nodes */
+    input_float_vector("coor_refine",4,E->control.coor_refine,m);
+  }
   input_string("coor_file",E->control.coor_file,"",m);
 
   input_int("nprocx",&(E->parallel.nprocx),"1",m);
@@ -374,6 +381,8 @@ void read_initial_settings(struct All_variables *E)
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
+  /* Q0_enriched gets read in Tracer_setup.c */
+
   input_float("gravacc",&(E->data.grav_acc),"9.81",m);
   input_float("thermexp",&(E->data.therm_exp),"3.0e-5",m);
   input_float("cp",&(E->data.Cp),"1200.0",m);
@@ -1223,6 +1232,7 @@ void output_init(struct  All_variables *E)
 
 void output_finalize(struct  All_variables *E)
 {
+  char message[255];
   if (E->fp)
     fclose(E->fp);
 
@@ -1232,6 +1242,20 @@ void output_finalize(struct  All_variables *E)
   if (E->fp_out)
     fclose(E->fp_out);
 
+  /* 
+     remove VTK geo file in case we used that for IO (we'll only do
+     this for one processor, since this IO option requires shared
+     filesystems anyway
+  */
+  if((E->parallel.me == 0) && (E->output.gzdir.vtk_io == 2)&&
+     (strcmp(E->output.format, "ascii-gz") == 0)){
+    /* delete the vtk geo pre-file */
+    snprintf(message,255,"rm -f %s/vtk_geo",
+	     E->control.data_dir);
+    system(message);
+    /* close the log */
+    fclose(E->output.gzdir.vtk_fp);
+  }
 }
 
 

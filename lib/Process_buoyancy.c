@@ -35,7 +35,7 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
-
+#include <math.h>		/* for sqrt */
 
 
 void post_processing(struct All_variables *E)
