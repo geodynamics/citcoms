@@ -54,6 +54,8 @@ class IC(CitcomComponent):
 
 
     def launch(self):
+        self.initMaterial()
+        self.initTracer()
         self.initTemperature()
         self.initPressure()
         self.initVelocity()
@@ -61,13 +63,21 @@ class IC(CitcomComponent):
         return
 
 
+    def initMaterial(self):
+        from CitcomSLib import initialize_material
+        initialize_material(self.all_variables)
+        return
+
+
+    def initTracer(self):
+        from CitcomSLib import init_tracer_composition
+        init_tracer_composition(self.all_variables)
+        return
+
 
     def initTemperature(self):
-        from CitcomSLib import constructTemperature, restartTemperature
-        if self.inventory.restart:
-            restartTemperature(self.all_variables)
-        else:
-            constructTemperature(self.all_variables)
+        from CitcomSLib import constructTemperature
+        constructTemperature(self.all_variables)
         return
 
 
@@ -106,7 +116,7 @@ class IC(CitcomComponent):
         zero_elapsed_time = pyre.inventory.bool("zero_elapsed_time", default=True)
 
         tic_method = pyre.inventory.int("tic_method", default=0,
-                            validator=pyre.inventory.choice([0, 1, 2, 3]))
+                            validator=pyre.inventory.choice([-1, 0, 1, 2, 3]))
 
         # for tic_method=0 or 3
         num_perturbations = pyre.inventory.int("num_perturbations", default=1,

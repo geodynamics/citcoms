@@ -487,7 +487,7 @@ struct CONTROL {
 
     float Q0;
     float Q0ER;
-  
+
     int precondition;
     int keep_going;
     int v_steps_low;
@@ -511,6 +511,7 @@ struct CONTROL {
     int total_iteration_cycles;
     int total_v_solver_calls;
 
+    int checkpoint_frequency;
     int record_every;
     int record_all_until;
 
@@ -622,7 +623,6 @@ struct COMPOSITION {
     int on;
 
     double buoyancy_ratio;
-    int ireset_initial_composition;
     int ibuoy_type;
 
     double *comp_el[13];

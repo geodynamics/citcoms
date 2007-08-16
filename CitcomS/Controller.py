@@ -67,6 +67,8 @@ class Controller(Component):
 
         # do io for 0th step
         self.save()
+
+        ### XXX: if stokes: advection tracers and terminate
         return
 
 
@@ -145,6 +147,7 @@ class Controller(Component):
 
     def save(self):
         self.solver.save(self.inventory.monitoringFrequency)
+        self.solver.checkpoint(self.inventory.checkpointFrequency)
         return
 
 
@@ -154,3 +157,4 @@ class Controller(Component):
         import pyre.inventory
 
         monitoringFrequency = pyre.inventory.int("monitoringFrequency", default=100)
+        checkpointFrequency = pyre.inventory.int("checkpointFrequency", default=100)

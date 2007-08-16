@@ -56,7 +56,6 @@ static void put_found_tracers(struct All_variables *E,
 
 void regional_tracer_setup(struct All_variables *E)
 {
-    void initialize_tracers();
 
     char output_file[255];
 
@@ -138,12 +137,7 @@ void regional_tracer_setup(struct All_variables *E)
 
     make_mesh_ijk(E);
 
-
-    initialize_tracers(E);
-
-
     composition_setup(E);
-    tracer_post_processing(E);
 
     return;
 }
@@ -163,7 +157,7 @@ static void write_trace_instructions(struct All_variables *E)
         fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
     }
     if (E->trace.ic_method==2) {
-        fprintf(E->trace.fpt,"Restarting Tracers\n");
+        fprintf(E->trace.fpt,"Read individual tracer files\n");
     }
 
     fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);

@@ -60,6 +60,8 @@ sources = \
 	advection_diffusion.h \
 	advection.h \
 	BC_util.c \
+	Checkpoints.c \
+	checkpoints.h \
 	Citcom_init.c \
 	citcom_init.h \
 	Composition_related.c \

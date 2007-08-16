@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
@@ -36,7 +36,7 @@
 #include "lith_age.h"
 
 float find_age_in_MY();
-void lith_age_restart_conform_tbc(struct All_variables *E);
+void lith_age_update_tbc(struct All_variables *E);
 
 
 void lith_age_input(struct All_variables *E)
@@ -104,7 +104,7 @@ void lith_age_init(struct All_variables *E)
 }
 
 
-void lith_age_restart_tic(struct All_variables *E)
+void lith_age_construct_tic(struct All_variables *E)
 {
   int i, j, k, m, node, nodeg;
   int nox, noy, noz, gnox, gnoy, gnoz;
@@ -134,15 +134,16 @@ void lith_age_restart_tic(struct All_variables *E)
 	    }
 	}
 
-  /* modify temperature BC to be concorded with restarted T */
-  lith_age_restart_conform_tbc(E);
+  /* modify temperature BC to be concorded with read in T */
+  lith_age_update_tbc(E);
+
   temperatures_conform_bcs(E);
 
   return;
 }
 
 
-void lith_age_restart_conform_tbc(struct All_variables *E)
+void lith_age_update_tbc(struct All_variables *E)
 {
   int i, j, k, m, node;
   int nox, noy, noz;
@@ -169,14 +170,6 @@ void lith_age_restart_conform_tbc(struct All_variables *E)
 	  }
 	}
 
-  return;
-}
-
-
-
-void lith_age_construct_tic(struct All_variables *E)
-{
-  lith_age_restart_tic(E);
   return;
 }
 

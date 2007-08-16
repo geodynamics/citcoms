@@ -58,6 +58,8 @@ int icheck_that_processor_shell(struct All_variables *E,
 void expand_later_array(struct All_variables *E, int j);
 void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
+void allocate_tracer_arrays(struct All_variables *E,
+                            int j, int number_of_tracers);
 
 
 static void find_tracers(struct All_variables *E);
@@ -68,12 +70,10 @@ static void make_tracer_array(struct All_variables *E);
 static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j);
 static void read_tracer_file(struct All_variables *E);
-static void restart_tracers(struct All_variables *E);
+static void read_old_tracer_file(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
-static void allocate_tracer_arrays(struct All_variables *E,
-                                   int j, int number_of_tracers);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
@@ -144,7 +144,7 @@ void tracer_input(struct All_variables *E)
 	  parallel_process_termination();
 	  break;
 	}
-   
+
 
 
 
@@ -629,7 +629,7 @@ void initialize_tracers(struct All_variables *E)
     else if (E->trace.ic_method==1)
         read_tracer_file(E);
     else if (E->trace.ic_method==2)
-        restart_tracers(E);
+        read_old_tracer_file(E);
     else {
         fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
         fflush(E->trace.fpt);
@@ -866,7 +866,7 @@ static void read_tracer_file(struct All_variables *E)
             /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
             /* this part has to be changed... */
             else {
-                fprintf(E->trace.fpt,"ERROR(restart tracers)-huh?\n");
+                fprintf(E->trace.fpt,"ERROR(read tracer file)-huh?\n");
                 fflush(E->trace.fpt);
                 exit(10);
             }
@@ -931,12 +931,12 @@ static void read_tracer_file(struct All_variables *E)
 }
 
 
-/************** RESTART TRACERS ******************************************/
+/************** READ OLD TRACER FILE *************************************/
 /*                                                                       */
-/* This function restarts tracers written from previous calculation      */
+/* This function read tracers written from previous calculation          */
 /* and the tracers are read as seperate files for each processor domain. */
 
-static void restart_tracers(struct All_variables *E)
+static void read_old_tracer_file(struct All_variables *E)
 {
 
     char output_file[200];
@@ -956,7 +956,7 @@ static void restart_tracers(struct All_variables *E)
     FILE *fp1;
 
     if (E->trace.number_of_extra_quantities>99) {
-        fprintf(E->trace.fpt,"ERROR(restart_tracers)-increase size of extra[]\n");
+        fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-increase size of extra[]\n");
         fflush(E->trace.fpt);
         parallel_process_termination();
     }
@@ -972,7 +972,7 @@ static void restart_tracers(struct All_variables *E)
     }else{
       sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
       if ( (fp1=fopen(output_file,"r"))==NULL) {
-        fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
+        fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-gziped file not found %s\n",output_file);
         fflush(E->trace.fpt);
         exit(10);
       }
@@ -980,13 +980,13 @@ static void restart_tracers(struct All_variables *E)
 #else
     sprintf(output_file,"%s.tracer.%d.%d",E->control.old_P_file,E->parallel.me,E->monitor.solution_cycles_init);
     if ( (fp1=fopen(output_file,"r"))==NULL) {
-        fprintf(E->trace.fpt,"ERROR(restart tracers)-file not found %s\n",output_file);
+        fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-file not found %s\n",output_file);
         fflush(E->trace.fpt);
         exit(10);
     }
 #endif
 
-    fprintf(stderr,"Restarting Tracers from %s\n",output_file);
+    fprintf(stderr,"Read old tracers from %s\n",output_file);
     fflush(stderr);
 
 
@@ -997,7 +997,7 @@ static void restart_tracers(struct All_variables *E)
 
         /* some error control */
         if (E->trace.number_of_extra_quantities+3 != ncolumns) {
-            fprintf(E->trace.fpt,"ERROR(restart tracers)-wrong # of columns\n");
+            fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-wrong # of columns\n");
             fflush(E->trace.fpt);
             exit(10);
         }
@@ -1018,7 +1018,7 @@ static void restart_tracers(struct All_variables *E)
             /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
             /* this part has to be changed... */
             else {
-                fprintf(E->trace.fpt,"ERROR(restart tracers)-huh?\n");
+                fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-huh?\n");
                 fflush(E->trace.fpt);
                 exit(10);
             }
@@ -1163,11 +1163,11 @@ static void init_tracer_flavors(struct All_variables *E)
       /* any tracer above z_interface is of flavor 0    */
       /* any tracer below z_interface is of flavor 1    */
       for (j=1;j<=E->sphere.caps_per_proc;j++) {
-	
+
 	number_of_tracers = E->trace.ntracers[j];
 	for (kk=1;kk<=number_of_tracers;kk++) {
 	  rad = E->trace.basicq[j][2][kk];
-	  
+
 	  if (rad<=E->trace.z_interface) E->trace.extraq[j][0][kk]=1.0;
 	  if (rad>E->trace.z_interface) E->trace.extraq[j][0][kk]=0.0;
 	}
@@ -1186,7 +1186,7 @@ static void init_tracer_flavors(struct All_variables *E)
 
 
     default:
-      
+
       fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
       parallel_process_termination();
       break;
@@ -1318,8 +1318,8 @@ void get_neighboring_caps(struct All_variables *E)
 /*                                                                            */
 /* This function allocates memories to tracer arrays.                         */
 
-static void allocate_tracer_arrays(struct All_variables *E,
-                                   int j, int number_of_tracers)
+void allocate_tracer_arrays(struct All_variables *E,
+                            int j, int number_of_tracers)
 {
 
     int kk;

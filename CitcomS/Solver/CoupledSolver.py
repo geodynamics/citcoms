@@ -58,7 +58,10 @@ class CoupledSolver(Solver):
 
 
     def launch(self, application):
-        self._setup()
+
+        #TODO: checkpoint doesn't contain coupler information yet
+        if self.restart:
+            pass
 
         self.coupler.launch(self)
 
@@ -86,7 +89,7 @@ class CoupledSolver(Solver):
 
 
     def advectTracers(self):
-        # override Solver.advectTracers to do nothing, since tracer module
+        # override Solver.advectTracers, since tracer module
         # doesn't work in coupled run
         return
 
@@ -139,6 +142,13 @@ class CoupledSolver(Solver):
         return
 
 
+    def checkpoint(self, checkpointFrequency):
+        Solver.checkpoint(self, checkpointFrequency)
+
+        if not (self.step % checkpointFrequency):
+            #TODO: checkpoint for coupler
+            pass
+        return
 
 
 

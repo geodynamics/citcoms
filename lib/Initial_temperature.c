@@ -38,7 +38,7 @@ void temperatures_conform_bcs();
 
 #include "initial_temperature.h"
 void debug_tic(struct All_variables *);
-void restart_tic_from_file(struct All_variables *);
+void read_tic_from_file(struct All_variables *);
 
 #ifdef USE_GZDIR
 void restart_tic_from_gzdir_file(struct All_variables *);
@@ -56,6 +56,9 @@ void tic_input(struct All_variables *E)
   input_int("tic_method", &(E->convection.tic_method), "0,0,2", m);
   /* When tic_method is 0 (default), the temperature is a linear profile +
      perturbation at some layers.
+
+     When tic_method is -1, the temperature is read in from the
+     [datafile_old].velo.[rank].[solution_cycles_init] files.
 
      When tic_method is 1, the temperature is isothermal (== bottom b.c.) +
      uniformly cold plate (thickness specified by 'half_space_age').
@@ -109,7 +112,8 @@ void tic_input(struct All_variables *E)
       E->convection.load_depth[0] = (noz+1)/2;
     }
 
-  } else if (E->convection.tic_method == 1) {
+  }
+  else if (E->convection.tic_method == 1) {
 
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
 
@@ -142,50 +146,31 @@ void tic_input(struct All_variables *E)
 
 
 
+/* This function is replaced by CitcomS.Components.IC.initTemperature()*/
 void convection_initial_temperature(struct All_variables *E)
 {
-  if (E->control.restart)
-    restart_tic(E);
-  else if (E->control.post_p)
-    restart_tic(E);
+  void report();
+
+  report(E,"Initialize temperature field");
+
+  if (E->control.lith_age)
+    lith_age_construct_tic(E);
+  else if (E->convection.tic_method == -1) {
+#ifdef USE_GZDIR
+      if(strcmp(E->output.format, "ascii-gz") == 0)
+          restart_tic_from_gzdir_file(E);
+      else
+#endif
+          read_tic_from_file(E);
+  }
   else
-    construct_tic(E);
+    (E->solver.construct_tic_from_input)(E);
 
   /* Note: it is the callee's responsibility to conform tbc. */
   /* like a call to temperatures_conform_bcs(E); */
 
   if (E->control.verbose)
     debug_tic(E);
-
-  return;
-}
-
-
-
-void restart_tic(struct All_variables *E)
-{
-  /*
-  if (E->control.lith_age)
-    lith_age_restart_tic(E);
-  else
-  */
-#ifdef USE_GZDIR
-  if(strcmp(E->output.format, "ascii-gz") == 0)
-    restart_tic_from_gzdir_file(E);
-  else
-#endif
-    restart_tic_from_file(E);
-
-  return;
-}
-
-
-void construct_tic(struct All_variables *E)
-{
-  if (E->control.lith_age)
-    lith_age_construct_tic(E);
-  else
-    (E->solver.construct_tic_from_input)(E);
 
   return;
 }
@@ -208,10 +193,12 @@ void debug_tic(struct All_variables *E)
 
 
 
-void restart_tic_from_file(struct All_variables *E)
+void read_tic_from_file(struct All_variables *E)
 {
+  void temperatures_conform_bcs();
+
   int ii, ll, mm;
-  float restart_elapsed_time;
+  float tt;
   int i, m;
   char output_file[255], input_s[1000];
   FILE *fp;
@@ -227,10 +214,10 @@ void restart_tic_from_file(struct All_variables *E)
   }
 
   if (E->parallel.me==0)
-    fprintf(E->fp,"Reading %s for restarted temperature\n",output_file);
+    fprintf(E->fp,"Reading %s for initial temperature\n",output_file);
 
   fgets(input_s,1000,fp);
-  sscanf(input_s,"%d %d %f",&ll,&mm,&restart_elapsed_time);
+  sscanf(input_s,"%d %d %f",&ll,&mm,&tt);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fgets(input_s,1000,fp);
@@ -239,15 +226,15 @@ void restart_tic_from_file(struct All_variables *E)
       fgets(input_s,1000,fp);
       sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
 
-      /*  E->sphere.cap[m].V[1][i] = d;
-	  E->sphere.cap[m].V[1][i] = e;
-	  E->sphere.cap[m].V[1][i] = f;  */
+      /* Truncate the temperature to be within (0,1). */
+      /* This might not be desirable in some situations. */
       E->T[m][i] = max(0.0,min(g,1.0));
     }
   }
   fclose (fp);
 
   temperatures_conform_bcs(E);
+
   return;
 }
 

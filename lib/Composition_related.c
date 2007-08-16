@@ -35,7 +35,6 @@
 
 static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
-static void init_composition(struct All_variables *E);
 static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
 static void map_composition_to_nodes(struct All_variables *E);
@@ -64,9 +63,6 @@ void composition_input(struct All_variables *E)
             parallel_process_termination();
         }
 
-        input_int("reset_initial_composition",
-                  &(E->composition.ireset_initial_composition),"0",m);
-
     }
 
 
@@ -93,11 +89,7 @@ void composition_input(struct All_variables *E)
 
 void composition_setup(struct All_variables *E)
 {
-
-    if (E->composition.on) {
-        allocate_composition_memory(E);
-        init_composition(E);
-    }
+    allocate_composition_memory(E);
 
     return;
 }
@@ -130,12 +122,6 @@ void write_composition_instructions(struct All_variables *E)
 	  fprintf(E->trace.fpt,"Absolute Method\n");
 
         fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio);
-
-        if (E->composition.ireset_initial_composition==0)
-            fprintf(E->trace.fpt,"Using old initial composition from tracer files\n");
-        else
-            fprintf(E->trace.fpt,"Resetting initial composition\n");
-
 
         /*
         if (E->composition.icompositional_rheology==0) {
@@ -209,7 +195,7 @@ static void allocate_composition_memory(struct All_variables *E)
 }
 
 
-static void init_composition(struct All_variables *E)
+void init_composition(struct All_variables *E)
 {
   if (E->composition.ichemical_buoyancy && 
       E->composition.ibuoy_type) {
@@ -364,21 +350,9 @@ static void map_composition_to_nodes(struct All_variables *E)
 static void init_bulk_composition(struct All_variables *E)
 {
 
-    char output_file[200];
-    char input_s[1000];
-
     double return_bulk_value_d();
     double volume;
-    double rdum1;
-    double rdum2;
-    double rdum3;
-
     int ival=0;
-    int idum0, idum1;
-
-
-    FILE *fp;
-
 
     /* ival=0 returns integral not average */
 
@@ -386,24 +360,6 @@ static void init_bulk_composition(struct All_variables *E)
 
     E->composition.bulk_composition = volume;
     E->composition.initial_bulk_composition = volume;
-
-
-    /* If retarting tracers, the initital bulk composition is read from file */
-    if (E->trace.ic_method == 2 &&
-        !E->composition.ireset_initial_composition) {
-
-        sprintf(output_file,"%s.comp_el.%d.%d",E->control.old_P_file,
-                E->parallel.me, E->monitor.solution_cycles);
-
-        fp=fopen(output_file,"r");
-        fgets(input_s,200,fp);
-        sscanf(input_s,"%d %d %lf %lf %lf",
-               &idum0,&idum1,&rdum1,&rdum2,&rdum3);
-
-        E->composition.initial_bulk_composition = rdum2;
-        fclose(fp);
-
-    }
 
     return;
 }

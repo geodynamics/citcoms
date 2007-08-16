@@ -169,15 +169,20 @@ struct PyMethodDef pyCitcom_methods[] = {
 
     /* from initial_conditions.h */
 
+    {pyCitcom_ic_initialize_material__name__,
+     pyCitcom_ic_initialize_material,
+     METH_VARARGS,
+     pyCitcom_ic_initialize_material__doc__},
+
+    {pyCitcom_ic_init_tracer_composition__name__,
+     pyCitcom_ic_init_tracer_composition,
+     METH_VARARGS,
+     pyCitcom_ic_init_tracer_composition__doc__},
+
     {pyCitcom_ic_constructTemperature__name__,
      pyCitcom_ic_constructTemperature,
      METH_VARARGS,
      pyCitcom_ic_constructTemperature__doc__},
-
-    {pyCitcom_ic_restartTemperature__name__,
-     pyCitcom_ic_restartTemperature,
-     METH_VARARGS,
-     pyCitcom_ic_restartTemperature__doc__},
 
     {pyCitcom_ic_initPressure__name__,
      pyCitcom_ic_initPressure,
@@ -193,6 +198,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_ic_initViscosity,
      METH_VARARGS,
      pyCitcom_ic_initViscosity__doc__},
+
+    {pyCitcom_ic_readCheckpoint__name__,
+     pyCitcom_ic_readCheckpoint,
+     METH_VARARGS,
+     pyCitcom_ic_readCheckpoint__doc__},
 
     /* from mesher.h */
 
@@ -222,6 +232,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_output_time,
      METH_VARARGS,
      pyCitcom_output_time__doc__},
+
+    {pyCitcom_output_checkpoint__name__,
+     pyCitcom_output_checkpoint,
+     METH_VARARGS,
+     pyCitcom_output_checkpoint__doc__},
 
     /* from setProperties.h */
 

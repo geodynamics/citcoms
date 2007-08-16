@@ -465,6 +465,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     E->advection.min_timesteps = 1;
     E->advection.max_timesteps = 1;
     E->advection.max_total_timesteps = 1;
+    E->control.checkpoint_frequency = 1;
     E->control.record_every = 1;
     E->control.record_all_until = 1;
 
@@ -612,7 +613,6 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     if (E->composition.ichemical_buoyancy==1) {
         getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
         getDoubleProperty(properties, "buoyancy_ratio", E->composition.buoyancy_ratio, fp);
-        getIntProperty(properties, "reset_initial_composition", E->composition.ireset_initial_composition, fp);
     }
 
 

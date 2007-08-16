@@ -35,6 +35,7 @@
 #include "citcom_init.h"
 #include "output.h"
 #include "parallel_related.h"
+#include "checkpoints.h"
 
 extern int Emergency_stop;
 
@@ -48,6 +49,8 @@ int main(argc,argv)
   void general_stokes_solver();
   void general_stokes_solver_pseudo_surf();
   void read_instructions();
+  void initial_setup();
+  void initial_conditions();
   void solve_constrained_flow();
   void solve_derived_velocities();
   void process_temp_field();
@@ -84,6 +87,7 @@ int main(argc,argv)
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);
+  initial_setup(E);
 
   cpu_time_on_vp_it = CPU_time0();
   initial_time = cpu_time_on_vp_it - time;
@@ -94,19 +98,27 @@ int main(argc,argv)
     fflush(E->fp);
   }
 
-  if (E->control.post_p)   {
-    post_processing(E);
-    parallel_process_termination();
-  }
+  /* This if-block is replaced by CitcomS.Solver.launch()*/
+  if (E->control.restart || E->control.post_p) {
+      read_checkpoint(E);
 
-  if(E->control.pseudo_free_surf) {
-    if(E->mesh.topvbc == 2)
-	    general_stokes_solver_pseudo_surf(E);
-    else
-	    assert(0);
+      if (E->control.post_p) {
+          post_processing(E);
+          parallel_process_termination();
+      }
   }
-  else
-    general_stokes_solver(E);
+  else {
+      initial_conditions(E);
+
+      if(E->control.pseudo_free_surf) {
+          if(E->mesh.topvbc == 2)
+              general_stokes_solver_pseudo_surf(E);
+          else
+              assert(0);
+      }
+      else
+          general_stokes_solver(E);
+  }
 
   (E->problem_output)(E, E->monitor.solution_cycles);
 
@@ -121,8 +133,6 @@ int main(argc,argv)
 
     parallel_process_termination();
   }
-
-  (E->next_buoyancy_field_init)(E);
 
   while ( E->control.keep_going   &&  (Emergency_stop == 0) )   {
 
@@ -166,6 +176,10 @@ int main(argc,argv)
 
     /* information about simulation time and wall clock time */
     output_time(E, E->monitor.solution_cycles);
+
+    if ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) {
+	output_checkpoint(E);
+    }
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);

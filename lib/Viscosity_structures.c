@@ -234,21 +234,9 @@ void get_system_viscosity(E,propogate,evisc,visc)
       fflush(E->fp_out);
     }
 
+    /* interpolate from gauss quadrature points to node points for output */
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
 
-    /*visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);*/
-
-    /*
-        visc_to_node_interpolate(E,evisc,visc);
-     */
-
-    /*    for(m=1;m<=E->sphere.caps_per_proc;m++) {
-          for(i=1;i<=E->lmesh.nel;i++)
-          if (i%E->lmesh.elz==0) {
-          fprintf(E->fp_out,"%.4e %.4e %.4e %5d %2d\n",E->eco[m][i].centre[1],E->eco[m][i].centre[2],log10(evisc[m][(i-1)*vpts+1]),i,E->mat[m][i]);
-
-	  }
-          }  */
     return;
 }
 

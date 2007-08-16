@@ -40,6 +40,10 @@ extern char pyCitcom_output_time__name__[];
 extern char pyCitcom_output_time__doc__[];
 PyObject * pyCitcom_output_time(PyObject *, PyObject *);
 
+extern char pyCitcom_output_checkpoint__name__[];
+extern char pyCitcom_output_checkpoint__doc__[];
+PyObject * pyCitcom_output_checkpoint(PyObject *, PyObject *);
+
 #endif
 
 /* $Id$ */

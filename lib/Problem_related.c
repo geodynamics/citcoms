@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -70,7 +70,8 @@ void get_initial_elapsed_time(E)
     char output_file[255],input_s[1000];
 
     E->monitor.elapsed_time = 0.0;
-    if ((E->control.restart || E->control.post_p))    {
+
+    if (E->convection.tic_method == -1) {
 
 #ifdef USE_GZDIR		/* gzdir output */
       if(strcmp(E->output.format, "ascii-gz") == 0){
@@ -100,8 +101,8 @@ void get_initial_elapsed_time(E)
       if(rezip)
 	gzip_file(output_file);
 #endif
-    } /* end control.restart */
-    
+    } /* end if tic_method */
+
     return;
 }
 
