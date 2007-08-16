@@ -224,6 +224,75 @@ void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
 
 
 /*==============================================================
+  Function to supply the element strain-displacement matrix Ba at pressure
+  quadrature points, which is used to compute strain rate
+  ==============================================================  */
+
+void get_ba_p(struct Shape_function *N, struct Shape_function_dx *GNx,
+              struct CC *cc, struct CCX *ccx, double rtf[4][9],
+              int dims, double ba[9][9][4][7])
+{
+    int k, a, n;
+    const int ppts = PPOINTS3D;
+    const int ends = ENODES3D;
+
+    double ra[9], isi[9], ct[9];
+    double gnx0, gnx1, gnx2, shp, cc1, cc2, cc3;
+
+    for(k=1;k<=ppts;k++) {
+        ra[k] = rtf[3][k];
+        isi[k] = 1.0 / sin(rtf[1][k]);
+        ct[k] = cos(rtf[1][k]) * isi[k];
+    }
+
+    for(k=1;k<=ppts;k++)
+        for(a=1;a<=ends;a++) {
+            gnx0 = GNx->ppt[GNPXINDEX(0,a,k)];
+            gnx1 = GNx->ppt[GNPXINDEX(1,a,k)];
+            gnx2 = GNx->ppt[GNPXINDEX(2,a,k)];
+            shp  = N->ppt[GNPINDEX(a,k)];
+            for(n=1;n<=dims;n++) {
+                cc1 = cc->ppt[BPINDEX(1,n,a,k)];
+                cc2 = cc->ppt[BPINDEX(2,n,a,k)];
+                cc3 = cc->ppt[BPINDEX(3,n,a,k)];
+
+        ba[a][k][n][1] = ( gnx0 * cc1
+                           + shp * ccx->ppt[BPXINDEX(1,n,1,a,k)]
+                           + shp * cc3 ) * ra[k];
+
+        ba[a][k][n][2] = ( shp * cc1 * ct[k]
+                           + shp * cc3
+                           + ( gnx1 * cc2
+                               + shp * ccx->ppt[BPXINDEX(2,n,2,a,k)] )
+                           * isi[k] ) * ra[k];
+
+        ba[a][k][n][3] = gnx2 * cc3;
+
+        ba[a][k][n][4] = ( gnx0 * cc2
+                           + shp * ccx->ppt[BPXINDEX(2,n,1,a,k)]
+                           - shp * cc2 * ct[k]
+                           + ( gnx1 * cc1
+                               + shp * ccx->ppt[BPXINDEX(1,n,2,a,k)] )
+                           * isi[k] ) * ra[k];
+
+        ba[a][k][n][5] = gnx2 * cc1
+                       + ( gnx0 * cc3
+                           + shp * ( ccx->ppt[BPXINDEX(3,n,1,a,k)]
+                                     - cc1 ) ) * ra[k];
+
+        ba[a][k][n][6] = gnx2 * cc2
+                       - ra[k] * shp * cc2
+                       + ( gnx1 * cc3
+                           + shp * ccx->ppt[BPXINDEX(3,n,2,a,k)] )
+                       * isi[k] * ra[k];
+            }
+        }
+    return;
+}
+
+
+
+/*==============================================================
   Function to supply the element k matrix for a given element e.
   ==============================================================  */
 
@@ -249,8 +318,6 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     struct Shape_function_dx GNx;
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
-    /* d1 and d2 are the elastic coefficient matrix for incompressible
-       and compressible creeping flow, respectively */
 
     const int nn=loc_mat_size[E->mesh.nsd];
     const int vpts = VPOINTS3D;
