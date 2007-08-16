@@ -35,68 +35,6 @@ nobase_dist_examples_DATA = \
 	Cookbook5/coor.dat \
 	Cookbook5/restart_files/cookbook5.velo.0.0 \
 	Cookbook5/restart_files/cookbook5.velo.1.0 \
-	Cookbook5/restart_files/cookbook5.velo.10.0 \
-	Cookbook5/restart_files/cookbook5.velo.11.0 \
-	Cookbook5/restart_files/cookbook5.velo.12.0 \
-	Cookbook5/restart_files/cookbook5.velo.13.0 \
-	Cookbook5/restart_files/cookbook5.velo.14.0 \
-	Cookbook5/restart_files/cookbook5.velo.15.0 \
-	Cookbook5/restart_files/cookbook5.velo.16.0 \
-	Cookbook5/restart_files/cookbook5.velo.17.0 \
-	Cookbook5/restart_files/cookbook5.velo.18.0 \
-	Cookbook5/restart_files/cookbook5.velo.19.0 \
-	Cookbook5/restart_files/cookbook5.velo.2.0 \
-	Cookbook5/restart_files/cookbook5.velo.20.0 \
-	Cookbook5/restart_files/cookbook5.velo.21.0 \
-	Cookbook5/restart_files/cookbook5.velo.22.0 \
-	Cookbook5/restart_files/cookbook5.velo.23.0 \
-	Cookbook5/restart_files/cookbook5.velo.24.0 \
-	Cookbook5/restart_files/cookbook5.velo.25.0 \
-	Cookbook5/restart_files/cookbook5.velo.26.0 \
-	Cookbook5/restart_files/cookbook5.velo.27.0 \
-	Cookbook5/restart_files/cookbook5.velo.28.0 \
-	Cookbook5/restart_files/cookbook5.velo.29.0 \
-	Cookbook5/restart_files/cookbook5.velo.3.0 \
-	Cookbook5/restart_files/cookbook5.velo.30.0 \
-	Cookbook5/restart_files/cookbook5.velo.31.0 \
-	Cookbook5/restart_files/cookbook5.velo.32.0 \
-	Cookbook5/restart_files/cookbook5.velo.33.0 \
-	Cookbook5/restart_files/cookbook5.velo.34.0 \
-	Cookbook5/restart_files/cookbook5.velo.35.0 \
-	Cookbook5/restart_files/cookbook5.velo.36.0 \
-	Cookbook5/restart_files/cookbook5.velo.37.0 \
-	Cookbook5/restart_files/cookbook5.velo.38.0 \
-	Cookbook5/restart_files/cookbook5.velo.39.0 \
-	Cookbook5/restart_files/cookbook5.velo.4.0 \
-	Cookbook5/restart_files/cookbook5.velo.40.0 \
-	Cookbook5/restart_files/cookbook5.velo.41.0 \
-	Cookbook5/restart_files/cookbook5.velo.42.0 \
-	Cookbook5/restart_files/cookbook5.velo.43.0 \
-	Cookbook5/restart_files/cookbook5.velo.44.0 \
-	Cookbook5/restart_files/cookbook5.velo.45.0 \
-	Cookbook5/restart_files/cookbook5.velo.46.0 \
-	Cookbook5/restart_files/cookbook5.velo.47.0 \
-	Cookbook5/restart_files/cookbook5.velo.48.0 \
-	Cookbook5/restart_files/cookbook5.velo.49.0 \
-	Cookbook5/restart_files/cookbook5.velo.5.0 \
-	Cookbook5/restart_files/cookbook5.velo.50.0 \
-	Cookbook5/restart_files/cookbook5.velo.51.0 \
-	Cookbook5/restart_files/cookbook5.velo.52.0 \
-	Cookbook5/restart_files/cookbook5.velo.53.0 \
-	Cookbook5/restart_files/cookbook5.velo.54.0 \
-	Cookbook5/restart_files/cookbook5.velo.55.0 \
-	Cookbook5/restart_files/cookbook5.velo.56.0 \
-	Cookbook5/restart_files/cookbook5.velo.57.0 \
-	Cookbook5/restart_files/cookbook5.velo.58.0 \
-	Cookbook5/restart_files/cookbook5.velo.59.0 \
-	Cookbook5/restart_files/cookbook5.velo.6.0 \
-	Cookbook5/restart_files/cookbook5.velo.60.0 \
-	Cookbook5/restart_files/cookbook5.velo.61.0 \
-	Cookbook5/restart_files/cookbook5.velo.62.0 \
-	Cookbook5/restart_files/cookbook5.velo.63.0 \
-	Cookbook5/restart_files/cookbook5.velo.7.0 \
-	Cookbook5/restart_files/cookbook5.velo.8.0 \
-	Cookbook5/restart_files/cookbook5.velo.9.0 \
 	Cookbook5/velocity/bvel.dat0 \
 	Cookbook5/velocity/bvel.dat1 \
 	Cookbook5/velocity/bvel.dat10 \
