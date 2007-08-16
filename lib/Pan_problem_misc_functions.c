@@ -143,6 +143,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 
     temp = E->control.Atemp;
 
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++) {
         int nz = ((i-1) % E->lmesh.noz) + 1;
         /* We don't need to substract adiabatic T profile from T here,
@@ -425,7 +426,7 @@ void myerror(struct All_variables *E,char *message)
   parallel_process_termination();
 }
 
-/* 
+/*
 
 
 
@@ -448,17 +449,17 @@ void get_r_spacing_fine(double *rr, double ri, double ro,
   brange *= range;		/* bottom */
   trange *= range;		/* top */
   mrange *= range;		/* middle */
-  
+
   nb = nz * bfrac;
   nt = nz * tfrac;
-  nm = nz-nb-nt;  
+  nm = nz-nb-nt;
   if((nm < 1)||(nt < 2)||(nb < 2))
     myerror(E,"get_r_spacing_fine: refinement out of bounds");
-  
+
   drb = brange/(nb-1);
   drt = trange/(nt-1);
   drm = mrange / (nm  + 1);
-  
+
   for(r=ri,k=1;k<=nb;k++,r+=drb){
     rr[k] = r;
   }

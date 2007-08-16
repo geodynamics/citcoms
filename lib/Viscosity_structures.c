@@ -748,6 +748,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             Vxyz[4][j] = 0.0;
             Vxyz[5][j] = 0.0;
             Vxyz[6][j] = 0.0;
+            dilation[j] = 0.0;
         }
 
         for(j=1; j<=ppts; j++) {
@@ -778,12 +779,10 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             }
         }
 
-        if(E->control.inv_gruneisen > 0)
+        if(E->control.inv_gruneisen != 0) {
             for(j=1; j<=ppts; j++)
                 dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
-        else
-            for(j=1; j<=ppts; j++)
-                dilation[j] = 0;
+        }
 
         edot[1][1] = edot[2][2] = edot[3][3] = 0;
         edot[1][2] = edot[1][3] = edot[2][3] = 0;

@@ -56,8 +56,6 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
    if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
      get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
 
-/*    topo_scaling1=1.0/((E->data.density-E->data.density_above)*E->data.grav_acc); */
-/*    topo_scaling2=1.0/((E->data.density_below-E->data.density)*E->data.grav_acc); */
 
    topo_scaling1 = topo_scaling2 = 1.0;
 
@@ -276,7 +274,7 @@ void compute_nodal_stress(struct All_variables *E,
         }
       }
 
-      if(E->control.inv_gruneisen > 0) {
+      if(E->control.inv_gruneisen != 0) {
           for(j=1;j<=vpts;j++)
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
@@ -329,12 +327,6 @@ void compute_nodal_stress(struct All_variables *E,
   (E->exchange_node_f)(E,SZY,lev);
   (E->exchange_node_f)(E,divv,lev);
   (E->exchange_node_f)(E,vorv,lev);
-
-  /*    stress_scaling = 1.0e-6*E->data.ref_viscosity*E->data.therm_diff/ */
-  /*                       (E->data.radius_km*E->data.radius_km); */
-
-  /*    velo_scaling = 100.*365.*24.*3600.*1.0e-3*E->data.therm_diff/E->data.radius_km; */
-  /* cm/yr */
 
   stress_scaling = velo_scaling = 1.0;
 
@@ -455,6 +447,7 @@ static void geoid_from_buoyancy(E, harm_geoid)
 {
     int m,k,ll,mm,node,i,j,p,noz,snode;
     float *TT[NCS],radius,*geoid[2],dlayer,con1,con2,scaling2,scaling;
+    double buoy2rho;
     void sphere_expansion();
     void sum_across_depth_sph1();
 
@@ -481,13 +474,15 @@ static void geoid_from_buoyancy(E, harm_geoid)
 
     /* loop over each layer */
     for(k=1;k<E->lmesh.noz;k++)  {
-
+        buoy2rho = scaling2 * E->refstate.rho[k]
+            * E->refstate.expansivity[k] / E->refstate.gravity[k];
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=E->lmesh.noy;i++)
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node=k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
                     p = j + (i-1)*E->lmesh.nox;
-                    TT[m][p] = (E->buoyancy[m][node]+E->buoyancy[m][node+1])*0.5*scaling2;
+                    TT[m][p] = (E->buoyancy[m][node]+E->buoyancy[m][node+1])
+                        * 0.5 * buoy2rho;
                 }
 
         /* expand TT into spherical harmonics */
@@ -545,17 +540,13 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
         (E->data.radius_km*E->data.radius_km*1e6);
 
     /* density contrast across surface */
-    den_contrast1 = (E->data.density-E->data.density_above);
+    den_contrast1 = (E->data.density-E->data.density_above)*E->refstate.rho[E->lmesh.noz];
     /* density contrast across CMB */
-    den_contrast2 = (E->data.density_below-E->data.density);
+    den_contrast2 = (E->data.density_below-E->data.density)*E->refstate.rho[1];
 
     /* scale for surface and CMB topo */
-    topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc);
-    topo_scaling2 = stress_scaling / (den_contrast2*E->data.grav_acc);
-
-    /* scale for geoid */
-    scaling = 1.0e3*4.0*M_PI*E->data.radius_km*
-        E->data.grav_const/E->data.grav_acc;
+    topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc*E->refstate.gravity[E->lmesh.noz]);
+    topo_scaling2 = stress_scaling / (den_contrast2*E->data.grav_acc*E->refstate.gravity[1]);
 
     if (E->parallel.me_loc[3] == E->parallel.nprocz-1) {
         /* expand surface topography into sph. harm. */
@@ -566,6 +557,10 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
             for (i=0; i<E->sphere.hindice; i++) {
                 tpgt[j][i] *= topo_scaling1;
             }
+
+        /* scale for geoid */
+        scaling = 1.0e3 * 4.0 * M_PI * E->data.radius_km * E->data.grav_const
+            / (E->data.grav_acc * E->refstate.gravity[E->lmesh.noz]);
 
         /* compute geoid due to surface topo, skip degree-0 and 1 term */
         for (j=0; j<2; j++)
@@ -588,6 +583,11 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
             for (i=0; i<E->sphere.hindice; i++) {
                 tpgb[j][i] *= topo_scaling2;
             }
+
+        /* scale for geoid */
+        scaling = 1.0e3 * 4.0 * M_PI * E->data.radius_km * E->data.grav_const
+            / (E->data.grav_acc * E->refstate.gravity[1]);
+
         /* compute geoid due to bottom topo, skip degree-0 and 1 term */
         for (j=0; j<2; j++)
             for (ll=2; ll<=E->output.llmax; ll++)   {

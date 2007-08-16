@@ -38,12 +38,15 @@
 static float solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max);
-static float solve_Ahat_p_fhat_BA(struct All_variables *E,
+static float solve_Ahat_p_fhat_CG(struct All_variables *E,
                                   double **V, double **P, double **F,
                                   double imp, int *steps_max);
-static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
+static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max);
+static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
+                                      double **V, double **P, double **F,
+                                      double imp, int *steps_max);
 static double initial_vel_residual(struct All_variables *E,
                                    double **V, double **P, double **F,
                                    double imp);
@@ -104,24 +107,26 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
 {
     float residual;
 
-    if(E->control.inv_gruneisen < 1e-6)
-        residual = solve_Ahat_p_fhat_BA(E, V, P, F, imp, steps_max);
-    else
-        residual = solve_Ahat_p_fhat_TALA(E, V, P, F, imp, steps_max);
+    if(E->control.inv_gruneisen == 0)
+        residual = solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
+    else {
+        residual = solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
+        //residual = solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
+    }
 
     return(residual);
 }
 
 
-/* Solve incompressible Stokes flow (Boussinesq Approximation) using
+/* Solve incompressible Stokes flow using
  * conjugate gradient (CG) iterations
  */
 
-static float solve_Ahat_p_fhat_BA(struct All_variables *E,
+static float solve_Ahat_p_fhat_CG(struct All_variables *E,
                                   double **V, double **P, double **F,
                                   double imp, int *steps_max)
 {
-    int m, i, j, count, valid, lev, npno, neq;
+    int m, j, count, valid, lev, npno, neq;
     int gnpno, gneq;
 
     double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS];
@@ -134,6 +139,7 @@ static float solve_Ahat_p_fhat_BA(struct All_variables *E,
     double time0, CPU_time0();
     float dpressure, dvelocity;
 
+    void assemble_c_u();
     void assemble_div_u();
     void assemble_del2_u();
     void assemble_grad_p();
@@ -158,12 +164,27 @@ static float solve_Ahat_p_fhat_BA(struct All_variables *E,
     time0 = CPU_time0();
     count = 0;
 
+    if(E->control.inv_gruneisen != 0) {
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(j=1;j<=npno;j++)
+                r2[m][j] = 0.0;
+
+        assemble_c_u(E, V, r2, lev);
+    }
+
     /* calculate the initial velocity residual */
     v_res = initial_vel_residual(E, V, P, F, imp);
 
 
-    /* initial residual r1 = div(V) */
+    /* initial residual r1 = div(V) or r1 = div(rho*V) if compressible */
     assemble_div_u(E, V, r1, lev);
+
+    if(E->control.inv_gruneisen != 0)
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(j=1;j<=npno;j++) {
+                r1[m][j] += r2[m][j];
+            }
+
     residual = incompressibility_residual(E, V, r1);
 
     if (E->control.print_convergence && E->parallel.me==0)  {
@@ -305,15 +326,15 @@ static float solve_Ahat_p_fhat_BA(struct All_variables *E,
     return(residual);
 }
 
-/* Solve incompressible Stokes flow (Boussinesq Approximation) using
- * bi-conjugate gradient stablized (BiCG-stab)iterations
+/* Solve compressible Stokes flow using
+ * bi-conjugate gradient stablized (BiCG-stab) iterations
  */
 
-static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
+static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max)
 {
-    void assemble_div_u();
+    void assemble_div_rho_u();
     void assemble_del2_u();
     void assemble_grad_p();
     void strip_bcs_from_residual();
@@ -325,7 +346,7 @@ static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
 
     int gnpno, gneq;
     int npno, neq;
-    int m, i, j, count, lev;
+    int m, j, count, lev;
     int valid;
 
     double alpha, beta, omega;
@@ -575,6 +596,86 @@ static float solve_Ahat_p_fhat_TALA(struct All_variables *E,
 
 }
 
+
+/* Solve compressible Stokes flow using
+ * conjugate gradient (CG) iterations with an outer iteration
+ */
+
+static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
+                                      double **V, double **P, double **FF,
+                                      double imp, int *steps_max)
+{
+    int m, i;
+    int cycles, num_of_loop;
+    double residual;
+    double relative_err_v, relative_err_p;
+    double *F[NCS],*old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
+
+    const int npno = E->lmesh.npno;
+    const int neq = E->lmesh.neq;
+    const int lev = E->mesh.levmax;
+
+    double global_vdot(),global_pdot();
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+    	F[m] = (double *)malloc((neq+1)*sizeof(double));
+    	old_v[m] = (double *)malloc((neq+1)*sizeof(double));
+    	diff_v[m] = (double *)malloc((neq+1)*sizeof(double));
+    	old_p[m] = (double *)malloc((npno+1)*sizeof(double));
+    	diff_p[m] = (double *)malloc((npno+1)*sizeof(double));
+    }
+
+    cycles = E->control.p_iterations;
+
+    residual = 1.0;
+    relative_err_v = 1.0;
+    relative_err_p = 1.0;
+    num_of_loop = 0;
+
+    while((relative_err_v >= E->control.relative_err_accuracy ||
+           relative_err_p >= E->control.relative_err_accuracy) &&
+          num_of_loop <= E->control.compress_iter_maxstep) {
+
+        for (m=1;m<=E->sphere.caps_per_proc;m++) {
+            /* copy the original force vector since we need to keep it intact between iterations */
+            for(i=0;i<neq;i++) F[m][i] = FF[m][i];
+            for(i=0;i<neq;i++) old_v[m][i] = V[m][i];
+            for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
+        }
+
+        residual = solve_Ahat_p_fhat_CG(E,V,P,F,E->control.accuracy,&cycles);
+
+        for (m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=0;i<neq;i++) diff_v[m][i] = V[m][i] - old_v[m][i];
+
+        relative_err_v = sqrt( global_vdot(E,diff_v,diff_v,lev) /
+                               (1.0e-32 + global_vdot(E,V,V,lev)) );
+
+        for (m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=npno;i++) diff_p[m][i] = P[m][i] - old_p[m][i];
+
+        relative_err_p = sqrt( global_pdot(E,diff_p,diff_p,lev) /
+                               (1.0e-32 + global_pdot(E,P,P,lev)) );
+
+        num_of_loop++;
+
+        if(E->parallel.me == 0) {
+            fprintf(stderr, "Relative error err_v / v = %e and err_p / p = %e after %d loops\n\n", relative_err_v, relative_err_p, num_of_loop);
+            fprintf(E->fp, "Relative error err_v / v = %e and err_p / p = %e after %d loops\n\n", relative_err_v, relative_err_p, num_of_loop);
+        }
+
+    } /* end of while */
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+    	free((void *) F[m]);
+    	free((void *) old_v[m]);
+    	free((void *) old_p[m]);
+	free((void *) diff_v[m]);
+	free((void *) diff_p[m]);
+    }
+
+    return(residual);
+}
 
 
 static double initial_vel_residual(struct All_variables *E,
