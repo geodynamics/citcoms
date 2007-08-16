@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 #include <math.h>
@@ -343,7 +343,7 @@ void construct_node_ks(E)
 
         for(element=1;element<=nel;element++) {
 
-	    get_elt_k(E,element,elt_K,level,m);
+	    get_elt_k(E,element,elt_K,level,m,0);
 
 	    if (E->control.augmented_Lagr)
 	         get_aug_k(E,element,elt_K,level,m);
@@ -635,7 +635,7 @@ void construct_elt_ks(E)
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
-	    get_elt_k(E,el,E->elt_k[lev][m][el].k,lev,m);  /* not for penalty */
+	    get_elt_k(E,el,E->elt_k[lev][m][el].k,lev,m,0);
 
 	    if (E->control.augmented_Lagr)
 	        get_aug_k(E,el,E->elt_k[lev][m][el].k,lev,m);
@@ -696,13 +696,10 @@ void construct_stiffness_B_matrix(E)
   void construct_node_maps();
   void construct_node_ks();
   void construct_elt_ks();
-  void construct_elt_gs();
   void rebuild_BI_on_boundary();
 
   if (E->control.NMULTIGRID)
     project_viscosity(E);
-
-  construct_elt_gs(E);
 
   if (E->control.NMULTIGRID || E->control.NASSEMBLE) {
     construct_node_ks(E);
@@ -759,18 +756,18 @@ int layers_r(E,r)
      float r;
 {
   float zlith, z410, zlm;
-  
+
   int llayers = 0;
   zlith = E->viscosity.zlith;
   z410  = E->viscosity.z410;
   zlm   = E->viscosity.zlm;
-  
+
   if (r > (E->sphere.ro-zlith))
     llayers = 1;
-  else if ((r > (E->sphere.ro-z410))&& 
+  else if ((r > (E->sphere.ro-z410))&&
 	   (r  <= (E->sphere.ro-zlith)))
     llayers = 2;
-  else if ((r > (E->sphere.ro-zlm)) && 
+  else if ((r > (E->sphere.ro-zlm)) &&
 	   (r <= (E->sphere.ro-z410)))
     llayers = 3;
   else

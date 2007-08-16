@@ -48,11 +48,11 @@ void set_convection_defaults(E)
     void convection_initial_fields();
     void twiddle_thumbs();
 
-    E->advection.timestep = 0.0;
-    E->advection.timesteps = 0;
+    E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */
     E->advection.total_timesteps = 1;
     E->advection.sub_iterations = 1;
     E->advection.last_sub_iterations = 1;
+    E->advection.gamma = 0.5;
     E->advection.dt_reduced = 1.0;
 
     E->monitor.T_maxvaried = 1.05;

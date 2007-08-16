@@ -268,7 +268,7 @@ struct SPHERE   {
   double *angle1[MAX_LEVELS][NCS][5];
 
   double dircos[4][4];
-  double *R[MAX_LEVELS],*R_redundant;
+  double *R[MAX_LEVELS];
   double ro,ri;
   struct CAP cap[NCS];
 
@@ -289,33 +289,24 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int NEQ[MAX_LEVELS];
     int NNO[MAX_LEVELS];
     int NNOV[MAX_LEVELS];
-    int NLNO[MAX_LEVELS];
     int NPNO[MAX_LEVELS];
     int NEL[MAX_LEVELS];
     int NOX[MAX_LEVELS];
     int NOZ[MAX_LEVELS];
     int NOY[MAX_LEVELS];
-    int NMX[MAX_LEVELS];
     int ELX[MAX_LEVELS];
     int ELZ[MAX_LEVELS];
     int ELY[MAX_LEVELS];
-    int LNDS[MAX_LEVELS];
-    int LELS[MAX_LEVELS];
     int SNEL[MAX_LEVELS];
-    int neqd;
     int neq;
     int nno;
     int nnov;
-    int nlno;
     int npno;
     int nel;
     int snel;
     int elx;
     int elz;
     int ely;
-    int nnx[4]; /* general form of ... */
-    int gnox;
-    int gelx;
     int nox;
     int noz;
     int noy;
@@ -331,7 +322,6 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int NXS[MAX_LEVELS];
     int NYS[MAX_LEVELS];
     int NZS[MAX_LEVELS];
-    int nmx;
     int nsf; /* nodes for surface observables */
     int toptbc;
     int bottbc;
@@ -339,26 +329,11 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int botvbc;
     int sidevbc;
 
-    char topvbc_file[100];
-    char botvbc_file[100];
-    char sidevbc_file[100];
-    char gridfile[4][100];
-
 
     int periodic_x;
     int periodic_y;
     float layer[4];			/* dimensionless dimensions */
-    float lidz;
-    float bl1width[4],bl2width[4],bl1mag[4],bl2mag[4];
-    float hwidth[4],magnitude[4],offset[4],width[4]; /* grid compression information */
     double volume;
-    int fnodal_malloc_size;
-    int dnodal_malloc_size;
-    int feqn_malloc_size;
-    int deqn_malloc_size;
-    int bandwidth;
-    int null_source;
-    int null_sink;
     int matrix_size[MAX_LEVELS];
 
 } ;
@@ -385,53 +360,20 @@ struct SLICE {    /* horizontally sliced data, including topography */
 
 
 struct MONITOR {
-    char node_output[100][6];  /* recording the format of the output data */
-    char sobs_output[100][6];  /* recording the format of the output data */
-    int node_output_cols;
-    int sobs_output_cols;
-
     int solution_cycles;
     int solution_cycles_init;
 
     int stop_topo_loop;
     int topo_loop;
 
-    float  time_scale;
-    float  length_scale;
-    float  viscosity_scale;
-    float  geoscale;
-    float  tpgscale;
-    float  grvscale;
-
-    float  delta_v_last_soln;
     float  elapsed_time;
-    float  elapsed_time_vsoln;
-    float  elapsed_time_vsoln1;
-    float  reference_stress;
     float  incompressibility;
     float  vdotv;
-    float  nond_av_heat_fl;
-    float  nond_av_adv_hfl;
     double cpu_time_at_start;
     double cpu_time_at_last_cycle;
-    float  tpgkmag;
-    float  grvkmag;
 
-    float  Nusselt;
-    float  Vmax;
-    float  Vsrms;
-    float  Vrms;
-    float  Vrms_surface;
-    float  Vrms_base;
-    float  F_surface;
-    float  F_base;
-    float  Frat_surface;
-    float  Frat_base;
     float  T_interior;
     float  T_maxvaried;
-    float  Sigma_max;
-    float  Sigma_interior;
-    float  Vi_average;
 
 };
 
@@ -441,8 +383,6 @@ struct CONTROL {
     char output_written_external_command[500];   /* a unix command to run when output files have been created */
 
     int ORTHO,ORTHOZ;   /* indicates levels of mesh symmetry */
-    char B_is_good[MAX_LEVELS];  /* general information controlling program flow */
-    char Ahat_is_good[MAX_LEVELS];  /* general information controlling program flow */
 
     char data_prefix[50];
     char data_prefix_old[50];
@@ -453,22 +393,13 @@ struct CONTROL {
     char data_file[200];
     char old_P_file[200];
 
-    char post_topo_file[100];
-    char slabgeoid_file[100];
-
-    char which_data_files[1000];
-    char which_horiz_averages[1000];
-    char which_running_data[1000];
-    char which_observable_data[1000];
-
     char PROBLEM_TYPE[20]; /* one of ... */
-    int KERNEL;
     int CONVECTION;
     int stokes;
     int restart;
     int post_p;
     int post_topo;
-    int SLAB;
+    int compressible;
 
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
@@ -488,10 +419,6 @@ struct CONTROL {
     int COMPRESS;
     int AVS;
     int CONMAN;
-
-    int read_density;
-    int read_slab;
-    int read_slabgeoid;
 
     int pseudo_free_surf;
 
@@ -517,7 +444,13 @@ struct CONTROL {
 
     float sob_tolerance;
 
+    /* Rayleigh # */
     float Atemp;
+    /* Dissipation # */
+    float disptn_number;
+    /* inverse of Gruneisen parameter */
+    float inv_gruneisen;
+
     float inputdiff;
     float VBXtopval;
     float VBXbotval;
@@ -545,26 +478,15 @@ struct CONTROL {
     float Q0;
     float Q0ER;
   
-    float jrelax;
-
     int precondition;
-    int vprecondition;
     int keep_going;
     int v_steps_low;
     int v_steps_high;
     int v_steps_upper;
-    int max_vel_iterations;
     int p_iterations;
-    int max_same_visc;
-    float max_res_red_each_p_mg;
-    float sub_stepping_factor;
     int mg_cycle;
-    int true_vcycle;
     int down_heavy;
     int up_heavy;
-    int depth_dominated;
-    int eqn_viscosity;
-    int eqn_zigzag;
     int verbose;
 
     int side_sbcs;
@@ -585,14 +507,19 @@ struct CONTROL {
     int print_convergence;
     int sdepv_print_convergence;
 
-     /* modules */
-    int MELTING_MODULE;
-    int CHEMISTRY_MODULE;
-
-  /* for embedded setting */
-  int embedded;
-
 };
+
+
+struct REF_STATE {
+    double *rho;
+    double *expansivity;
+    double *capacity;
+    double *conductivity;
+    double *gravity;
+    double *Tadi;
+    double *dlnrhodr;
+};
+
 
 struct DATA {
     float  layer_km;
@@ -742,8 +669,6 @@ struct All_variables {
     struct SIEN *sien[NCS];
     struct ID *id[NCS];
     struct COORD *ECO[MAX_LEVELS][NCS];
-    struct IEN *IEN_redundant[NCS];
-    struct ID *ID_redundant[NCS];
     struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
     struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS][NCS];
@@ -758,6 +683,9 @@ struct All_variables {
     struct CC element_Cc;
     struct CCX element_Ccx;
 
+    struct REF_STATE refstate;
+
+
     higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
     int *Node_map [MAX_LEVELS][NCS];
     int *Node_eqn [MAX_LEVELS][NCS];
@@ -765,18 +693,22 @@ struct All_variables {
 
     double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
 
+    double *rho;
+    double *heating_adi[NCS];
+    double *heating_visc[NCS];
+    double *heating_latent[NCS];
+
     double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];
-    float *NP[NCS],*edot[NCS],*Mass[NCS],*tw[NCS];
+    float *NP[NCS],*edot[NCS],*Mass[NCS];
     float *MASS[MAX_LEVELS][NCS];
-    double *ZZ;
+    double *TMass[NCS];
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
-    float *TT;
     float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
     float *stress[NCS];
@@ -786,7 +718,6 @@ struct All_variables {
 
     float *Vi[NCS],*EVi[NCS];
     float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
-    float *TW[MAX_LEVELS][NCS];	/* nodal weightings */
 
     int num_zero_resid[MAX_LEVELS][NCS];
     int *zero_resid[MAX_LEVELS][NCS];

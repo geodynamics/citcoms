@@ -137,15 +137,20 @@ void apply_side_sbc(struct All_variables *E)
 
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
-    int i,m;
+    int i,j,m;
     double temp,temp2;
     void remove_horiz_ave2(struct All_variables*, double**);
 
     temp = E->control.Atemp;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nno;i++)
-        buoy[m][i] =  temp * E->T[m][i];
+    for(i=1;i<=E->lmesh.nno;i++) {
+        int nz = ((i-1) % E->lmesh.noz) + 1;
+        /* We don't need to substract adiabatic T profile from T here,
+         * since the horizontal average of buoy will be removed.
+         */
+        buoy[m][i] =  temp * E->refstate.rho[nz]
+            * E->refstate.expansivity[nz] * E->T[m][i];
+    }
 
     /* chemical buoyancy */
     if(E->control.tracer &&
@@ -160,50 +165,17 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
 
+     /* convert density to buoyancy */
+     for(m=1;m<=E->sphere.caps_per_proc;m++)
+       for(i=1;i<=E->lmesh.noz;i++)
+             for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+                 int n = j*E->lmesh.noz + i;
+                 buoy[m][n] *= E->refstate.gravity[i];
+             }
+
     remove_horiz_ave2(E,buoy);
 
     return;
-}
-
-double SIN_D(x)
-     double x;
-{
-#if defined(__osf__)
-  return sind(x);
-#else
-  return sin((x/180.0) * M_PI);
-#endif
-
-}
-
-double COT_D(x)
-     double x;
-{
-#if defined(__osf__)
-  return cotd(x);
-#else
-  return tan(((90.0-x)/180.0) * M_PI);
-#endif
-
-}
-
-
-/* non-runaway malloc */
-
-void * Malloc1(bytes,file,line)
-    int bytes;
-    char *file;
-    int line;
-{
-    void *ptr;
-
-    ptr = malloc((size_t)bytes);
-    if (ptr == (void *)NULL) {
-	fprintf(stderr,"Memory: cannot allocate another %d bytes \n(line %d of file %s)\n",bytes,line,file);
-	parallel_process_termination();
-    }
-
-    return(ptr);
 }
 
 
@@ -229,8 +201,6 @@ int read_previous_field(E,field,name,abbr)
     char *name, *abbr;
 {
     int input_string();
-
-    float cross2d();
 
     char discard[5001];
     char *token;
@@ -348,27 +318,6 @@ int read_previous_field(E,field,name,abbr)
     return(1);
 }
 
-
-/* returns the out of plane component of the cross product of
-   the two vectors assuming that one is looking AGAINST the
-   direction of the axis of D, anti-clockwise angles
-   are positive (are you sure ?), and the axes are ordered 2,3 or 1,3 or 1,2 */
-
-
-float cross2d(x11,x12,x21,x22,D)
-    float x11,x12,x21,x22;
-    int D;
-{
-  float temp;
-   if(1==D)
-       temp = ( x11*x22-x12*x21);
-   if(2==D)
-       temp = (-x11*x22+x12*x21);
-   if(3==D)
-       temp = ( x11*x22-x12*x21);
-
-   return(temp);
-}
 
 /* =================================================
   my version of arc tan

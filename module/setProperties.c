@@ -428,6 +428,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
+    float tmp;
 
     if (!PyArg_ParseTuple(args, "OOO:Solver_set_properties",
 			  &obj, &properties, &out))
@@ -444,6 +445,11 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     getStringProperty(properties, "datafile_old", E->control.data_prefix_old, fp);
 
     getFloatProperty(properties, "rayleigh", E->control.Atemp, fp);
+    getFloatProperty(properties, "dissipation_number", E->control.disptn_number, fp);
+    getFloatProperty(properties, "gruneisen", tmp, fp);
+    if(abs(tmp) > 1e-6)
+        E->control.inv_gruneisen = 1/tmp;
+
     getFloatProperty(properties, "Q0", E->control.Q0, fp);
 
     getIntProperty(properties, "stokes_flow_only", E->control.stokes, fp);

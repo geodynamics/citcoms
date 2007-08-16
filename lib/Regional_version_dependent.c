@@ -64,21 +64,13 @@ void regional_global_derived_values(E)
    if(E->mesh.nsd != 3)
       E->mesh.noy = 1;
 
-   E->mesh.nnx[1] = E->mesh.nox;
-   E->mesh.nnx[2] = E->mesh.noy;
-   E->mesh.nnx[3] = E->mesh.noz;
    E->mesh.elx = E->mesh.nox-1;
    E->mesh.ely = E->mesh.noy-1;
    E->mesh.elz = E->mesh.noz-1;
 
-   E->mesh.nno = E->sphere.caps;
-   for(d=1;d<=E->mesh.nsd;d++)
-      E->mesh.nno *= E->mesh.nnx[d];
+   E->mesh.nno = E->sphere.caps*E->mesh.nox*E->mesh.noy*E->mesh.noz;
 
-/*
    E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
-*/
-   E->mesh.nel = E->mesh.elx*E->mesh.elz*E->mesh.ely;
 
    E->mesh.nnov = E->mesh.nno;
 

@@ -82,22 +82,22 @@ void viscosity_system_input(struct All_variables *E)
     if (E->viscosity.SDEPV) {
       input_float_vector("sdepv_expt",E->viscosity.num_mat,(E->viscosity.sdepv_expt),m);
     }
-    
+
 
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;
-      
+
       input_boolean("pdepv_eff",&(E->viscosity.pdepv_eff),"on",m);
       input_float_vector("pdepv_a",E->viscosity.num_mat,(E->viscosity.pdepv_a),m);
       input_float_vector("pdepv_b",E->viscosity.num_mat,(E->viscosity.pdepv_b),m);
       input_float_vector("pdepv_y",E->viscosity.num_mat,(E->viscosity.pdepv_y),m);
-  
+
       input_float("pdepv_offset",&(E->viscosity.pdepv_offset),"0.0",m);
     }
     if(E->viscosity.PDEPV || E->viscosity.SDEPV)
       input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);
-    
+
 
     input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
     if(E->viscosity.CDEPV){	/* compositional viscosity */
@@ -191,16 +191,16 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
     if(E->viscosity.SDEPV)
       visc_from_S(E,evisc,propogate);
-    
+
     if(E->viscosity.PDEPV)	/* "plasticity" */
       visc_from_P(E,evisc);
 
 
     /* i think this should me placed differently i.e.  before the
-       stress dependence but I won't change it because it's by 
+       stress dependence but I won't change it because it's by
        someone else
 
-       TWB 
+       TWB
     */
     if(E->viscosity.channel || E->viscosity.wedge)
         apply_low_visc_wedge_channel(E, evisc);
@@ -420,7 +420,7 @@ void visc_from_T(E,EEta,propogate)
 		    EEta[m][ (i-1)*vpts + jj ] = tempa*
 		      exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
 			   / (E->viscosity.T[l-1]+temp) );
-		    
+
                 }
             }
         break;
@@ -478,21 +478,21 @@ void visc_from_T(E,EEta,propogate)
 
 
     case 6:			/* eta = N_0 exp(E(T_0-T) + (1-z) Z_0 ) */
-      
+
         for(m=1;m <= E->sphere.caps_per_proc;m++)
 	  for(i=1;i <= nel;i++)   {
 	    l = E->mat[m][i];
-	    if(E->control.mat_control) 
+	    if(E->control.mat_control)
 	      tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
 	    else
 	      tempa = E->viscosity.N0[l-1];
 	    j = 0;
-	    
+
 	    for(kk=1;kk<=ends;kk++) {
 	      TT[kk] = E->T[m][E->ien[m][i].node[kk]];
 	      zz[kk] = (1.0 - E->sx[m][3][E->ien[m][i].node[kk]]);
 	    }
-	    
+
 	    for(jj=1;jj <= vpts;jj++) {
 	      temp=0.0;zzz=0.0;
 	      for(kk=1;kk <= ends;kk++)   {
@@ -508,7 +508,7 @@ void visc_from_T(E,EEta,propogate)
 	    }
 	  }
         break;
-	
+
 
 
 
@@ -551,35 +551,35 @@ void visc_from_S(E,EEta,propogate)
     return;
 }
 
-void visc_from_P(E,EEta) /* "plasticity" implementation 
-			    
-			 viscosity will be limited by a yield stress 
-			 
+void visc_from_P(E,EEta) /* "plasticity" implementation
+
+			 viscosity will be limited by a yield stress
+
 			 \sigma_y  = min(a + b * (1-r), y)
-			 
+
 			 where a,b,y are parameters input via pdepv_a,b,y
-			 
-			 and 
-			 
-			 \eta_y = \sigma_y / (2 \eps_II) 
-			 
+
+			 and
+
+			 \eta_y = \sigma_y / (2 \eps_II)
+
 			 where \eps_II is the second invariant. Then
-			 
+
 			 \eta_eff = (\eta_0 \eta_y)/(\eta_0 + \eta_y)
-			 
+
 			 for pdepv_eff = 1
-			 
-			 or 
+
+			 or
 
 			 \eta_eff = min(\eta_0,\eta_y)
-			 
+
 			 for pdepv_eff = 0
-			 
+
 			 where \eta_0 is the regular viscosity
-			 
-			 
+
+
 			 TWB
-			 
+
 			 */
      struct All_variables *E;
      float **EEta;
@@ -596,14 +596,14 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
     eedot = (float *) malloc((2+nel)*sizeof(float));
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-      
+
       if(E->viscosity.pdepv_visited){
 
         strain_rate_2_inv(E,m,eedot,1);	/* get second invariant for all elements */
 
       }else{
 	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
-	  eedot[e] = 1.0e-5; 
+	  eedot[e] = 1.0e-5;
 	if(m == E->sphere.caps_per_proc)
 	  E->viscosity.pdepv_visited = 1;
       }
@@ -614,13 +614,13 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 
 	for(kk=1;kk <= ends;kk++) /* nodal depths */
 	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); /* for depth, zz = 1 - r */
-	
+
 	for(jj=1;jj <= vpts;jj++){ /* loop through integration points */
 
 	  zzz = 0.0;		/* get mean depth of integration point */
-	  for(kk=1;kk<=ends;kk++)   
+	  for(kk=1;kk<=ends;kk++)
 	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
-	  
+
 	  /* depth dependent yield stress */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
 
@@ -629,12 +629,12 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 
 	  /* yield viscosity */
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
- 
 
-	  if(E->viscosity.pdepv_eff){ 
+
+	  if(E->viscosity.pdepv_eff){
 	    /* two dashpots in series */
 	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
-	  }else{		
+	  }else{
 	    /* min viscosities*/
 	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
@@ -648,7 +648,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
     return;
 }
 
-/* 
+/*
 
 multiply with compositional factor which is determined by a geometric
 mean average from the tracer composition, assuming two flavors and
@@ -662,7 +662,7 @@ void visc_from_C( E, EEta)
   float comp,comp_fac,CC[9],tcomp;
   double vmean,cc_loc;
   int m,l,z,jj,kk,i;
-  
+
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
   const int ends = enodes[E->mesh.nsd];
@@ -684,9 +684,9 @@ void visc_from_C( E, EEta)
 	cc_loc = 0.0;
 	for(kk = 1; kk <= ends; kk++)
 	  cc_loc += CC[kk] * E->N.vpt[GNVINDEX(kk, jj)];
-	
+
 	/* geometric mean of viscosity */
-	vmean = exp(cc_loc  * E->viscosity.cdepv_ff[1] + 
+	vmean = exp(cc_loc  * E->viscosity.cdepv_ff[1] +
 		    (1.0-cc_loc) * E->viscosity.cdepv_ff[0]);
 	/* multiply the viscosity with this prefactor */
 	EEta[m][ (i-1)*vpts + jj ] *= vmean;
@@ -778,14 +778,21 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             }
         }
 
+        if(E->control.inv_gruneisen > 0)
+            for(j=1; j<=ppts; j++)
+                dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
+        else
+            for(j=1; j<=ppts; j++)
+                dilation[j] = 0;
+
         edot[1][1] = edot[2][2] = edot[3][3] = 0;
         edot[1][2] = edot[1][3] = edot[2][3] = 0;
 
         /* edot is 2 * (the deviatoric strain rate tensor) */
         for(j=1; j<=ppts; j++) {
-            edot[1][1] += 2.0 * Vxyz[1][j];
-            edot[2][2] += 2.0 * Vxyz[2][j];
-            edot[3][3] += 2.0 * Vxyz[3][j];
+            edot[1][1] += 2.0 * (Vxyz[1][j] - dilation[j]);
+            edot[2][2] += 2.0 * (Vxyz[2][j] - dilation[j]);
+            edot[3][3] += 2.0 * (Vxyz[3][j] - dilation[j]);
             edot[1][2] += Vxyz[4][j];
             edot[1][3] += Vxyz[5][j];
             edot[2][3] += Vxyz[6][j];

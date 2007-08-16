@@ -926,10 +926,6 @@ void process_new_velocity(E,ii)
     int m,i,it;
 
 
-    E->monitor.length_scale = E->data.radius_km/E->mesh.layer[2]; /* km */
-    E->monitor.time_scale = pow(E->data.radius_km*1000.0,2.0)/   /* Million years */
-      (E->data.therm_diff*3600.0*24.0*365.25*1.0e6);
-
     if ( (ii == 0) || ((ii % E->control.record_every) == 0)
 		|| E->control.DIRECTII)     {
       get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,ii);

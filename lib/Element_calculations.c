@@ -32,6 +32,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "material_properties.h"
 
 
 
@@ -152,21 +153,90 @@ void assemble_forces_pseudo_surf(E,penalty)
   return;
 }
 
+
+/*==============================================================
+  Function to supply the element strain-displacement matrix Ba,
+  which is used to compute element stiffness matrix
+  ==============================================================  */
+
+void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
+       struct CC *cc, struct CCX *ccx, double rtf[4][9],
+       int dims, double ba[9][9][4][7])
+{
+    int k, a, n;
+    const int vpts = VPOINTS3D;
+    const int ends = ENODES3D;
+
+    double ra[9], si[9], ct[9];
+
+    for(k=1;k<=vpts;k++) {
+   ra[k] = rtf[3][k];
+   si[k] = sin(rtf[1][k]);
+   ct[k] = cos(rtf[1][k])/si[k];
+    }
+
+    for(n=1;n<=dims;n++)
+   for(k=1;k<=vpts;k++)
+       for(a=1;a<=ends;a++) {
+       ba[a][k][n][1]=
+           (GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
+            + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(1,n,1,a,k)]
+            + N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
+            )*ra[k];
+
+       ba[a][k][n][2]=
+           (N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(1,n,a,k)]*ct[k]
+            + N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
+            +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
+              + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(2,n,2,a,k)]
+              )/si[k]
+            )*ra[k];
+
+       ba[a][k][n][3]=
+           GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(3,n,a,k)];
+
+       ba[a][k][n][4]=
+           (GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
+            + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(2,n,1,a,k)]
+            - N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(2,n,a,k)]*ct[k]
+            +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
+              + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(1,n,2,a,k)]
+              )/si[k]
+            )*ra[k];
+
+       ba[a][k][n][5]=
+           GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(1,n,a,k)]
+           +(GNx->vpt[GNVXINDEX(0,a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
+             + N->vpt[GNVINDEX(a,k)]*(ccx->vpt[BVXINDEX(3,n,1,a,k)]
+                          - cc->vpt[BVINDEX(1,n,a,k)])
+             )*ra[k];
+
+       ba[a][k][n][6]=
+           GNx->vpt[GNVXINDEX(2,a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
+           -ra[k]*N->vpt[GNVINDEX(a,k)]*cc->vpt[BVINDEX(2,n,a,k)]
+           +(GNx->vpt[GNVXINDEX(1,a,k)]*cc->vpt[BVINDEX(3,n,a,k)]
+             + N->vpt[GNVINDEX(a,k)]*ccx->vpt[BVXINDEX(3,n,2,a,k)]
+             )/si[k]*ra[k];
+       }
+
+  return;
+}
+
 /*==============================================================
   Function to supply the element k matrix for a given element e.
   ==============================================================  */
 
-void get_elt_k(E,el,elt_k,lev,m)
+void get_elt_k(E,el,elt_k,lev,m,iconv)
      struct All_variables *E;
      int el,m;
      double elt_k[24*24];
-     int lev;
+     int lev, iconv;
 {
     double bdbmu[4][4];
     int pn,qn,ad,bd;
 
-    int a,b,i,j,j1,k,n;
-    double rtf[4][9],W[9],ra[9],si[9],ct[9];
+    int a,b,i,j,i1,j1,k;
+    double rtf[4][9],W[9];
     void get_global_shape_fn();
     void construct_c3x3matrix_el();
     struct Shape_function GN;
@@ -174,16 +244,34 @@ void get_elt_k(E,el,elt_k,lev,m)
     struct Shape_function_dx GNx;
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
+    /* d1 and d2 are the elastic coefficient matrix for incompressible
+       and compressible creeping flow, respectively */
+    const double d1[7][7] =
+   { {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+     {0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+     {0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0},
+     {0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0},
+     {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0} };
+    const double d2[7][7] =
+   { {0.,       0.,       0.,       0., 0., 0., 0.},
+     {0., 2.-2./3.,   -2./3.,   -2./3., 0., 0., 0.},
+     {0.,   -2./3., 2.-2./3.,   -2./3., 0., 0., 0.},
+     {0.,   -2./3.,   -2./3., 2.-2./3., 0., 0., 0.},
+     {0.,       0.,       0.,       0., 1., 0., 0.},
+     {0.,       0.,       0.,       0., 0., 1., 0.},
+     {0.,       0.,       0.,       0., 0., 0., 1.} };
 
     const int nn=loc_mat_size[E->mesh.nsd];
-    const int vpts=vpoints[E->mesh.nsd];
-    const int ends=enodes[E->mesh.nsd];
+    const int vpts = VPOINTS3D;
+    const int ends = ENODES3D;
     const int dims=E->mesh.nsd;
     const int sphere_key = 1;
 
     get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
 
-    if ((el-1)%E->lmesh.ELZ[lev]==0)
+    if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,0);
 
     /* Note N[a].gauss_pt[n] is the value of shape fn a at the nth gaussian
@@ -191,70 +279,39 @@ void get_elt_k(E,el,elt_k,lev,m)
 
     for(k=1;k<=vpts;k++) {
       W[k]=g_point[k].weight[dims-1]*dOmega.vpt[k]*E->EVI[lev][m][(el-1)*vpts+k];
+    }
 
-     ra[k] = rtf[3][k];
-     si[k] = sin(rtf[1][k]);
-     ct[k] = cos(rtf[1][k])/si[k];
-     }
-
-
-  for(k=1;k<=VPOINTS3D;k++)
-    for(a=1;a<=ends;a++)
-      for(n=1;n<=dims;n++)   {
-        ba[a][k][n][1]=
-          (GNx.vpt[GNVXINDEX(0,a,k)]*E->element_Cc.vpt[BVINDEX(1,n,a,k)]
-          + E->N.vpt[GNVINDEX(a,k)]*E->element_Ccx.vpt[BVXINDEX(1,n,1,a,k)]
-          + E->N.vpt[GNVINDEX(a,k)]*E->element_Cc.vpt[BVINDEX(3,n,a,k)])*ra[k];
-
-        ba[a][k][n][2]=
-          (E->N.vpt[GNVINDEX(a,k)]*E->element_Cc.vpt[BVINDEX(1,n,a,k)]*ct[k]
-          + E->N.vpt[GNVINDEX(a,k)]*E->element_Cc.vpt[BVINDEX(3,n,a,k)]
-          +(GNx.vpt[GNVXINDEX(1,a,k)]*E->element_Cc.vpt[BVINDEX(2,n,a,k)]
-          + E->N.vpt[GNVINDEX(a,k)]*E->element_Ccx.vpt[BVXINDEX(2,n,2,a,k)])
-            /si[k])*ra[k];
-
-        ba[a][k][n][3]=
-          GNx.vpt[GNVXINDEX(2,a,k)]*E->element_Cc.vpt[BVINDEX(3,n,a,k)];
-
-        ba[a][k][n][4]=
-          (GNx.vpt[GNVXINDEX(0,a,k)]*E->element_Cc.vpt[BVINDEX(2,n,a,k)]
-         + E->N.vpt[GNVINDEX(a,k)]*E->element_Ccx.vpt[BVXINDEX(2,n,1,a,k)]
-         - E->N.vpt[GNVINDEX(a,k)]*E->element_Cc.vpt[BVINDEX(2,n,a,k)]*ct[k]
-         +(GNx.vpt[GNVXINDEX(1,a,k)]*E->element_Cc.vpt[BVINDEX(1,n,a,k)]
-         + E->N.vpt[GNVINDEX(a,k)]*E->element_Ccx.vpt[BVXINDEX(1,n,2,a,k)])
-          /si[k])*ra[k];
-
-        ba[a][k][n][5]=
-          GNx.vpt[GNVXINDEX(2,a,k)]*E->element_Cc.vpt[BVINDEX(1,n,a,k)]
-         +(GNx.vpt[GNVXINDEX(0,a,k)]*E->element_Cc.vpt[BVINDEX(3,n,a,k)]
-         + E->N.vpt[GNVINDEX(a,k)]*(E->element_Ccx.vpt[BVXINDEX(3,n,1,a,k)]
-         - E->element_Cc.vpt[BVINDEX(1,n,a,k)]))*ra[k];
-
-        ba[a][k][n][6]=
-          GNx.vpt[GNVXINDEX(2,a,k)]*E->element_Cc.vpt[BVINDEX(2,n,a,k)]
-         -ra[k]*E->N.vpt[GNVINDEX(a,k)]*E->element_Cc.vpt[BVINDEX(2,n,a,k)]
-         +(GNx.vpt[GNVXINDEX(1,a,k)]*E->element_Cc.vpt[BVINDEX(3,n,a,k)]
-         + E->N.vpt[GNVINDEX(a,k)]*E->element_Ccx.vpt[BVXINDEX(3,n,2,a,k)])
-         /si[k]*ra[k];
-        }
+    get_ba(&(E->N), &GNx, &E->element_Cc, &E->element_Ccx,
+           rtf, E->mesh.nsd, ba);
 
   for(a=1;a<=ends;a++)
     for(b=a;b<=ends;b++)   {
-      ad=dims*(a-1);
-      bd=dims*(b-1);
-
       bdbmu[1][1]=bdbmu[1][2]=bdbmu[1][3]=
       bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
       bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
+    if(E->control.inv_gruneisen > 0)
       for(i=1;i<=dims;i++)
         for(j=1;j<=dims;j++)
-          for(j1=1;j1<=6;j1++)
-            for(k=1;k<=VPOINTS3D;k++)
-              bdbmu[i][j] +=
-                W[k]*((j1>3)?1.0:2.0)*ba[a][k][i][j1]*ba[b][k][j][j1];
+          for(i1=1;i1<=6;i1++)
+            for(j1=1;j1<=6;j1++)
+          for(k=1;k<=VPOINTS3D;k++)
+        bdbmu[i][j] +=
+                  W[k]*d2[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
+    else
+      for(i=1;i<=dims;i++)
+        for(j=1;j<=dims;j++)
+          for(i1=1;i1<=6;i1++)
+            for(j1=1;j1<=6;j1++)
+          for(k=1;k<=VPOINTS3D;k++)
+        bdbmu[i][j] +=
+                  W[k]*d1[i1][j1]*ba[a][k][i][i1]*ba[b][k][j][j1];
 
-		/**/
+
+      /**/
+      ad=dims*(a-1);
+      bd=dims*(b-1);
+
       pn=ad*nn+bd;
       qn=bd*nn+ad;
 
@@ -518,14 +575,55 @@ void build_diagonal_of_Ahat(E)
     return;
 }
 
+
+
+
+/* compute div(rho_ref*V) = div(V) + Vz*d(ln(rho_ref))/dz */
+
+static void assemble_dlnrho(struct All_variables *E, double *dlnrhodr,
+               double **U, double **result, int level)
+{
+    int e, nz, j3, a, b, m;
+
+    const int nel = E->lmesh.NEL[level];
+    const int ends = enodes[E->mesh.nsd];
+    const int dims = E->mesh.nsd;
+    double tmp;
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+        for(e=1; e<=nel; e++) {
+            //nz = ((e-1) % E->lmesh.elz) + 1;
+            //tmp = dlnrhodr[e] / ends;
+            for(a=1; a<=ends; a++) {
+                b = E->IEN[level][m][e].node[a];
+                j3 = E->ID[level][m][b].doff[3];
+                result[m][e] +=  dlnrhodr[e] * U[m][j3];
+       }
+        }
+
+    return;
+}
+
+
+
+
+void assemble_div_rho_u(struct All_variables *E,
+                        double **U, double **result, int level)
+{
+    void assemble_div_u();
+    assemble_div_u(E, U, result, level);
+    assemble_dlnrho(E, E->refstate.dlnrhodr, U, result, level);
+
+    return;
+}
+
+
 /* ==========================================
    Assemble a div_u vector element by element
    ==========================================  */
 
-void assemble_div_u(E,U,divU,level)
-     struct All_variables *E;
-     double **U,**divU;
-     int level;
+void assemble_div_u(struct All_variables *E,
+                    double **U, double **divU, int level)
 {
     int e,j1,j2,j3,p,a,b,m;
 
@@ -551,7 +649,6 @@ void assemble_div_u(E,U,divU,level)
 	                + E->elt_del[level][m][e].g[p+2][0] * U[m][j3];
 	    }
 	 }
-
 
     return;
 }
@@ -793,7 +890,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
             nodeb=E->ien[m][el].node[b];
             if ((E->node[m][nodeb]&type)&&(E->sphere.cap[m].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
-                get_elt_k(E,el,elt_k,E->mesh.levmax,m);
+                get_elt_k(E,el,elt_k,E->mesh.levmax,m,1);
                 got_elt_k = 1;
                 }
               q = dims*(b-1)+j-1;

@@ -43,6 +43,7 @@
 #include "citcom_init.h"
 #include "initial_temperature.h"
 #include "lith_age.h"
+#include "material_properties.h"
 #include "output.h"
 #include "output_h5.h"
 #include "parallel_related.h"
@@ -54,6 +55,7 @@ void parallel_process_termination();
 void allocate_common_vars(struct All_variables*);
 void allocate_velocity_vars(struct All_variables*);
 void check_bc_consistency(struct All_variables*);
+void construct_elt_gs(struct All_variables*);
 void construct_id(struct All_variables*);
 void construct_ien(struct All_variables*);
 void construct_lm(struct All_variables*);
@@ -124,6 +126,9 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     construct_sub_element(E);
     construct_shape_functions(E);
+    construct_elt_gs(E);
+
+    reference_state(E);
 
     /* this matrix results from spherical geometry */
     /* construct_c3x3matrix(E); */
@@ -215,7 +220,6 @@ void read_initial_settings(struct All_variables *E)
 
   else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0) {
     E->control.CONVECTION = 1;
-    E->control.CHEMISTRY_MODULE=1;
     set_convection_defaults(E);
   }
 
@@ -378,6 +382,10 @@ void read_initial_settings(struct All_variables *E)
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
+  input_float("dissipation_number",&(E->control.disptn_number),"0.0",m);
+  input_float("gruneisen",&(tmp),"0.0",m);
+  if(abs(tmp) > 1e-6)
+      E->control.inv_gruneisen = 1/tmp;
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);
@@ -475,6 +483,13 @@ void allocate_common_vars(E)
   E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
 
+  E->heating_adi[j]    = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
+
+  /* lump mass matrix for the energy eqn */
+  E->TMass[j] = (double *) malloc((nno+1)*sizeof(double));
+
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);
 
@@ -484,6 +499,10 @@ void allocate_common_vars(E)
 
   }         /* end for cap j  */
 
+  /* density field */
+  E->rho      = (double *) malloc((nno+1)*sizeof(double));
+
+  /* horizontal average */
   E->Have.T         = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[1]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[2]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
@@ -597,11 +616,16 @@ void allocate_common_vars(E)
   for(i=1;i<=E->lmesh.nel;i++)   {
       E->mat[j][i]=1;
       E->VIP[j][i]=1.0;
+
+      E->heating_adi[j][i] = 0;
+      E->heating_visc[j][i] = 0;
+      E->heating_latent[j][i] = 1.0; //TODO: why 1?
   }
 
   for(i=1;i<=E->lmesh.npno;i++)
       E->P[j][i] = 0.0;
 
+  mat_prop_allocate(E);
   phase_change_allocate(E);
   set_up_nonmg_aliases(E,j);
 
@@ -692,12 +716,8 @@ void global_default_values(E)
 
   E->control.v_steps_low = 10;
   E->control.v_steps_upper = 1;
-  E->control.max_res_red_each_p_mg = 1.0e-3;
   E->control.accuracy = 1.0e-6;
   E->control.vaccuracy = 1.0e-8;
-  E->control.true_vcycle=0;
-  E->control.depth_dominated=0;
-  E->control.eqn_zigzag=0;
   E->control.verbose=0; /* debugging/profiles */
 
   /* SECOND: values for which an obvious default setting is useful */
@@ -706,11 +726,9 @@ void global_default_values(E)
   E->control.ORTHOZ = 1; /* for orthogonal meshes by default */
 
 
-    E->control.KERNEL = 0;
     E->control.stokes=0;
     E->control.restart=0;
     E->control.CONVECTION = 0;
-    E->control.SLAB = 0;
     E->control.CART2D = 0;
     E->control.CART3D = 0;
     E->control.CART2pt5D = 0;
@@ -722,14 +740,7 @@ void global_default_values(E)
     E->control.augmented_Lagr = 0;
     E->control.augmented = 0.0;
 
-    /* Default: all optional modules set to `off' */
-    E->control.MELTING_MODULE = 0;
-    E->control.CHEMISTRY_MODULE = 0;
-
     E->control.GRID_TYPE=1;
-    E->mesh.hwidth[1]=E->mesh.hwidth[2]=E->mesh.hwidth[3]=1.0; /* divide by this one ! */
-    E->mesh.magnitude[1]=E->mesh.magnitude[2]=E->mesh.magnitude[3]=0.0;
-    E->mesh.offset[1]=E->mesh.offset[2]=E->mesh.offset[3]=0.0;
 
   E->parallel.nprocx=1; E->parallel.nprocz=1; E->parallel.nprocy=1;
 
@@ -745,7 +756,6 @@ void global_default_values(E)
   E->sphere.ri = 0.5;
 
   E->control.precondition = 0;  /* for larger visc contrasts turn this back on  */
-  E->control.vprecondition = 1;
 
   E->mesh.toptbc = 1; /* fixed t */
   E->mesh.bottbc = 1;

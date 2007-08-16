@@ -83,6 +83,8 @@ sources = \
 	interuption.h \
 	lith_age.h \
 	Lith_age.c \
+	Material_properties.c \
+	material_properties.h \
 	Nodal_mesh.c \
 	Output.c \
 	output.h \

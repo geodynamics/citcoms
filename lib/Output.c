@@ -49,6 +49,7 @@ void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
+void output_heating(struct All_variables *, int);
 FILE* output_open_mode(char *, char *);
 
 extern void parallel_process_termination();
@@ -90,11 +91,14 @@ void output(struct All_variables *E, int cycles)
     /*output_mat(E);*/
   }
 
-  
+
   output_velo(E, cycles);
   output_visc(E, cycles);
 
   output_surf_botm(E, cycles);
+
+  if(E->control.disptn_number != 0)
+    output_heating(E, cycles);
 
   /* optiotnal output below */
   /* compute and output geoid (in spherical harmonics coeff) */
@@ -499,6 +503,30 @@ void output_comp_el(struct All_variables *E, int cycles)
     }
 
     fclose(fp1);
+    return;
+}
+
+
+void output_heating(struct All_variables *E, int cycles)
+{
+    int j, e;
+    char output_file[255];
+    FILE *fp1;
+
+    sprintf(output_file,"%s.heating.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1 = output_open(output_file);
+
+    fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        for(e=1; e<=E->lmesh.nel; e++)
+            fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
+                    E->heating_visc[j][e], E->heating_latent[j][e]);
+    }
+    fclose(fp1);
+
     return;
 }
 

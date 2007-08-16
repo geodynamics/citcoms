@@ -79,8 +79,6 @@ void general_stokes_solver(struct All_variables *E)
   const int dims = E->mesh.nsd;
   const int addi_dof = additional_dof[dims];
 
-  E->monitor.elapsed_time_vsoln = E->monitor.elapsed_time;
-
   velocities_conform_bcs(E,E->U);
 
   assemble_forces(E,0);
@@ -168,8 +166,6 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   const int vpts = vpoints[E->mesh.nsd];
   const int dims = E->mesh.nsd;
   const int addi_dof = additional_dof[dims];
-
-  E->monitor.elapsed_time_vsoln = E->monitor.elapsed_time;
 
   velocities_conform_bcs(E,E->U);
 
