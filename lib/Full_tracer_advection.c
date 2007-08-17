@@ -1836,6 +1836,8 @@ static void make_regular_grid(struct All_variables *E)
 /**** WRITE TRACE INSTRUCTIONS ***************/
 static void write_trace_instructions(struct All_variables *E)
 {
+    int i;
+
     fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
     fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
 
@@ -1866,7 +1868,8 @@ static void write_trace_instructions(struct All_variables *E)
         fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
         if (E->trace.ic_method_for_flavors == 0) {
             fprintf(E->trace.fpt,"Layered tracer flavors\n");
-            fprintf(E->trace.fpt,"Interface Height: %f\n",E->trace.z_interface);
+            for (i=0; i<E->trace.nflavors-1; i++)
+                fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
         }
 #ifdef USE_GGRD
 	else if(E->trace.ic_method_for_flavors == 1) {
@@ -1881,6 +1884,15 @@ static void write_trace_instructions(struct All_variables *E)
             parallel_process_termination();
         }
     }
+
+    for (i=0; i<E->trace.nflavors-2; i++) {
+        if (E->trace.z_interface[i] < E->trace.z_interface[i+1]) {
+            fprintf(E->trace.fpt,"Sorry - The %d-th z_interface is smaller than the next one.\n", i);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+
 
 
     /* regular grid stuff */

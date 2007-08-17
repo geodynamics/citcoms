@@ -84,6 +84,7 @@ void tracer_input(struct All_variables *E)
     void full_tracer_input();
     char message[100];
     int m=E->parallel.me;
+    int i;
 
     input_boolean("tracer",&(E->control.tracer),"off",m);
     input_boolean("tracer_enriched",
@@ -133,7 +134,13 @@ void tracer_input(struct All_variables *E)
 		  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
         switch(E->trace.ic_method_for_flavors){
 	case 0:			/* layer */
-	  input_double("z_interface",&(E->trace.z_interface),"0.7",m);
+          E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
+                                                  *sizeof(double));
+          for(i=0; i<E->trace.nflavors-1; i++)
+              E->trace.z_interface[i] = 0.7;
+
+          input_double_vector("z_interface", E->trace.nflavors-1,
+                              E->trace.z_interface, m);
 	  break;
 	case 1:			/* from grid in top n materials */
 	  input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
@@ -227,10 +234,7 @@ void tracer_advection(struct All_variables *E)
 
 void tracer_post_processing(struct All_variables *E)
 {
-    char output_file[200];
-
-    double convection_time,tracer_time;
-    double trace_fraction,total_time;
+    int i;
 
     if(E->control.verbose){
       fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
@@ -261,8 +265,16 @@ void tracer_post_processing(struct All_variables *E)
         get_bulk_composition(E);
 
         if (E->parallel.me==0) {
-            fprintf(E->fp,"composition: %e %e\n",E->monitor.elapsed_time,E->composition.bulk_composition);
-            fprintf(E->fp,"composition_error_fraction: %e %e\n",E->monitor.elapsed_time,E->composition.error_fraction);
+
+            fprintf(E->fp,"composition: %e",E->monitor.elapsed_time);
+            for (i=0; i<E->composition.ncomp; i++)
+                fprintf(E->fp," %e", E->composition.bulk_composition[i]);
+            fprintf(E->fp,"\n");
+
+            fprintf(E->fp,"composition_error_fraction: %e",E->monitor.elapsed_time);
+            for (i=0; i<E->composition.ncomp; i++)
+                fprintf(E->fp," %e", E->composition.error_fraction[i]);
+            fprintf(E->fp,"\n");
 
         }
 
@@ -1155,21 +1167,29 @@ void sphere_to_cart(struct All_variables *E,
 static void init_tracer_flavors(struct All_variables *E)
 {
     int j, kk, number_of_tracers;
+    int i;
+    double flavor;
     double rad;
 
     switch(E->trace.ic_method_for_flavors){
     case 0:
       /* ic_method_for_flavors == 0 (layered structure) */
-      /* any tracer above z_interface is of flavor 0    */
-      /* any tracer below z_interface is of flavor 1    */
+      /* any tracer above z_interface[i] is of flavor i */
+      /* any tracer below z_interface is of flavor (nflavors-1) */
       for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
 	number_of_tracers = E->trace.ntracers[j];
 	for (kk=1;kk<=number_of_tracers;kk++) {
 	  rad = E->trace.basicq[j][2][kk];
 
-	  if (rad<=E->trace.z_interface) E->trace.extraq[j][0][kk]=1.0;
-	  if (rad>E->trace.z_interface) E->trace.extraq[j][0][kk]=0.0;
+          flavor = E->trace.nflavors - 1;
+          for (i=0; i<E->trace.nflavors-1; i++) {
+              if (rad > E->trace.z_interface[i]) {
+                  flavor = i;
+                  break;
+              }
+          }
+          E->trace.extraq[j][0][kk] = flavor;
 	}
       }
       break;

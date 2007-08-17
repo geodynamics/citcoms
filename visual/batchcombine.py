@@ -29,7 +29,7 @@
 '''
 Paste and combine Citcom data
 
-Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [fields]
+Usage: batchcombine.py <machinefile | node-list> datadir datafile timestep nodex nodey nodez ncap nprocx nprocy nprocz [fields [ncompositions]]
 '''
 
 
@@ -100,7 +100,8 @@ def batchpaste(datadir, datafile, fields, timestep, nodes):
 
 
 def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, fields):
+                 ncap, nprocx, nprocy, nprocz, fields,
+                 ncompositions):
     # paste
     batchpaste(datadir, datafile, fields, timestep, nodes)
 
@@ -123,7 +124,7 @@ def batchcombine(nodes, datadir, datafile, timestep, nodex, nodey, nodez,
 
     # create .general file
     import dxgeneral
-    dxgeneral.write(fields, combined_files)
+    dxgeneral.write(fields, ncompositions, combined_files)
 
     return
 
@@ -133,7 +134,7 @@ if __name__ == '__main__':
 
     import sys
 
-    if not (12 <= len(sys.argv) <= 13):
+    if not (12 <= len(sys.argv) <= 14):
         print __doc__
         sys.exit(1)
 
@@ -148,16 +149,20 @@ if __name__ == '__main__':
     nprocx = int(sys.argv[9])
     nprocy = int(sys.argv[10])
     nprocz = int(sys.argv[11])
-    if len(sys.argv) == 13:
+
+    fields = 'coord,velo,visc'
+    ncompositions = 0
+    if len(sys.argv) >= 13:
         fields = sys.argv[12]
-    else:
-        fields = 'coord,velo,visc'
+
+        if len(sys.argv) == 14:
+            ncompositions = int(sys.argv[13])
 
     totalnodes = nprocx * nprocy * nprocz * ncap
     nodelist = machinefile2nodelist(machinefile, totalnodes)
 
     batchcombine(nodelist, datadir, datafile, timestep, nodex, nodey, nodez,
-                 ncap, nprocx, nprocy, nprocz, fields)
+                 ncap, nprocx, nprocy, nprocz, fields, ncompositions)
 
 
 

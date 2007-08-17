@@ -156,10 +156,12 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     /* chemical buoyancy */
     if(E->control.tracer &&
        (E->composition.ichemical_buoyancy)) {
-      temp2 = E->composition.buoyancy_ratio * temp;
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)
-           buoy[m][i] -= temp2 * E->composition.comp_node[m][i];
+        for(j=0;j<E->composition.ncomp;j++) {
+            temp2 = E->composition.buoyancy_ratio[j] * temp;
+            for(m=1;m<=E->sphere.caps_per_proc;m++)
+                for(i=1;i<=E->lmesh.nno;i++)
+                    buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+        }
     }
 
     phase_change_apply_410(E, buoy);

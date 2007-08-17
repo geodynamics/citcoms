@@ -67,10 +67,10 @@ struct TRACE{
     int **ntracer_flavor[13];
 
     int ic_method_for_flavors;
-    double z_interface;
-  
-  char ggrd_file[255];		/* for grd input */
-  int ggrd_layers;
+    double *z_interface;
+
+    char ggrd_file[255];		/* for grd input */
+    int ggrd_layers;
 
 
 
