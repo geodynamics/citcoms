@@ -68,8 +68,8 @@ void output_common_input(struct All_variables *E)
 
     /* gzdir type of I/O */
     if(strcmp(E->output.format, "ascii-gz") == 0){
-      /* 
-	 vtk_io = 1: write files for post-processing into VTK 
+      /*
+	 vtk_io = 1: write files for post-processing into VTK
 	 vtk_io = 2: write legacy VTK file straight
 
       */

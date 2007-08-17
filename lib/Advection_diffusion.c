@@ -516,11 +516,14 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,F
 
     /* should we add a compositional contribution? */
     if(E->control.tracer_enriched){
-      
-      /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
-	 between  */
-      Q *= (1.0 - E->composition.comp_el[m][el]);
-      Q += E->composition.comp_el[m][el] * E->control.Q0ER;
+      /* XXX: change Q and Q0 to be a vector of ncomp elements */
+      for(j=0;j<E->composition.ncomp;j++) {
+
+        /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
+           between  */
+        Q *= (1.0 - E->composition.comp_el[m][j][el]);
+        Q += E->composition.comp_el[m][j][el] * E->control.Q0ER;
+      }
     }
 
 

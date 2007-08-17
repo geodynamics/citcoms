@@ -649,7 +649,7 @@ void visc_from_C( E, EEta)
 {
   float comp,comp_fac,CC[9],tcomp;
   double vmean,cc_loc;
-  int m,l,z,jj,kk,i;
+  int m,l,z,j,jj,kk,i;
 
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
@@ -659,11 +659,13 @@ void visc_from_C( E, EEta)
 
   for(m=1;m <= E->sphere.caps_per_proc;m++)  {
 
+    /* XXX: change cdepv_ff to be a vector of ncomp elements */
+    for(j=0;j<E->composition.ncomp;j++) {
     for(i = 1; i <= nel; i++){
       /* determine composition of each of the nodes of the
 	 element */
       for(kk = 1; kk <= ends; kk++){
-	CC[kk] = E->composition.comp_node[m][E->ien[m][i].node[kk]];
+	CC[kk] = E->composition.comp_node[m][j][E->ien[m][i].node[kk]];
 	if(CC[kk] < 0)CC[kk]=0.0;
 	if(CC[kk] > 1)CC[kk]=1.0;
       }
@@ -680,6 +682,7 @@ void visc_from_C( E, EEta)
 	EEta[m][ (i-1)*vpts + jj ] *= vmean;
       } /* end jj loop */
     } /* end el loop */
+    } /* end ncomp loop */
   } /* end cap */
 }
 
