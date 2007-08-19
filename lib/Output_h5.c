@@ -1463,7 +1463,7 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_float(input, "gruneisen",
                                  (E->control.inv_gruneisen == 0)?
                                   1.0/E->control.inv_gruneisen :
-                                  E->control.inv_gruneisen));
+				 E->control.inv_gruneisen);
     status = set_attribute_float(input, "Q0", E->control.Q0);
 
     status = set_attribute_int(input, "stokes_flow_only", E->control.stokes);

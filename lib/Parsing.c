@@ -114,8 +114,7 @@ void setup_parser(E,filename)
       exit(11);
     }
 
-    unique_copy_file(E,filename,"copy");
-
+ 
 
   /* now the parameter file is open, read into memory */
 
@@ -167,6 +166,12 @@ void setup_parser(E,filename)
   VERBOSE=i;
   DESCRIBE=j;
   BEGINNER=k;
+
+  /* make this an optional behavior */
+  input_boolean("copy_input_file",&k,"on",m);
+  if(k)
+    unique_copy_file(E,filename,"copy");
+
 
 }
 

@@ -74,8 +74,7 @@ void set_elapsed_time(struct All_variables*);
 void set_sphere_harmonics (struct All_variables*);
 void set_starting_age(struct All_variables*);
 void tracer_initial_settings(struct All_variables*);
-
-
+void get_vtk_filename(char *,int,struct All_variables *,int);
 
 void initial_mesh_solver_setup(struct All_variables *E)
 {
@@ -1285,7 +1284,7 @@ void output_init(struct  All_variables *E)
 
 void output_finalize(struct  All_variables *E)
 {
-  char message[255];
+  char message[255],files[255];
   if (E->fp)
     fclose(E->fp);
 
@@ -1296,18 +1295,20 @@ void output_finalize(struct  All_variables *E)
     fclose(E->fp_out);
 
   /*
-     remove VTK geo file in case we used that for IO (we'll only do
-     this for one processor, since this IO option requires shared
-     filesystems anyway
+     remove VTK geo file in case we used that for IO 
   */
-  if((E->parallel.me == 0) && (E->output.gzdir.vtk_io == 2)&&
+  if((E->output.gzdir.vtk_io != 1) && 
      (strcmp(E->output.format, "ascii-gz") == 0)){
-    /* delete the vtk geo pre-file */
-    snprintf(message,255,"rm -f %s/vtk_geo",
-	     E->control.data_dir);
-    system(message);
-    /* close the log */
-    fclose(E->output.gzdir.vtk_fp);
+    if((E->output.gzdir.vtk_io == 3)||(E->parallel.me == 0)){
+      /* delete the geo files */
+      get_vtk_filename(files,1,E,0);
+      sprintf(message,"rm %s",files);system(message);
+      fprintf(stderr,"%s",message);
+      if(E->parallel.me == 0){
+	/* close the log */
+	fclose(E->output.gzdir.vtk_fp);
+      }
+    }
   }
 }
 

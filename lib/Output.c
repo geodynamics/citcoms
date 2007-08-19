@@ -70,7 +70,8 @@ void output_common_input(struct All_variables *E)
     if(strcmp(E->output.format, "ascii-gz") == 0){
       /*
 	 vtk_io = 1: write files for post-processing into VTK
-	 vtk_io = 2: write legacy VTK file straight
+	 vtk_io = 2: write serial legacy VTK file
+	 vtk_io = 3: write paralle legacy VTK file
 
       */
       input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"0",m);
@@ -510,7 +511,8 @@ void output_comp_el(struct All_variables *E, int cycles)
 
         for(i=1;i<=E->lmesh.nno;i++) {
             for(k=0;k<E->composition.ncomp;k++) {
-                fprintf(fp1,"%.6e ",E->composition.comp_el[j][k][i]);
+                fprintf(fp1,"%.6e ",
+			E->composition.comp_el[j][k][i]);
             }
             fprintf(fp1,"\n");
         }
