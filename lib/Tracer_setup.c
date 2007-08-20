@@ -90,6 +90,8 @@ void tracer_input(struct All_variables *E)
     input_boolean("tracer_enriched",
 		  &(E->control.tracer_enriched),"off",m);
     if(E->control.tracer_enriched){
+      if(E->composition.ncomp != 1)
+	myerror(E,"enriched tracers cannot deal with more than one composition");
       if(!E->control.tracer)	/* check here so that we can get away
 				   with only one if statement in
 				   Advection_diffusion */
