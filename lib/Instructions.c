@@ -1294,10 +1294,11 @@ void output_finalize(struct  All_variables *E)
   if (E->fp_out)
     fclose(E->fp_out);
 
+#ifdef USE_GZDIR
   /*
-     remove VTK geo file in case we used that for IO 
+     remove VTK geo file in case we used that for IO
   */
-  if((E->output.gzdir.vtk_io != 1) && 
+  if((E->output.gzdir.vtk_io != 1) &&
      (strcmp(E->output.format, "ascii-gz") == 0)){
     if((E->output.gzdir.vtk_io == 3)||(E->parallel.me == 0)){
       /* delete the geo files */
@@ -1310,6 +1311,7 @@ void output_finalize(struct  All_variables *E)
       }
     }
   }
+#endif
 }
 
 
