@@ -123,13 +123,13 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
  */
 
 static float solve_Ahat_p_fhat_CG(struct All_variables *E,
-                                  double **V, double **P, double **F,
+                                  double **V, double **P, double **FF,
                                   double imp, int *steps_max)
 {
     int m, j, count, valid, lev, npno, neq;
     int gnpno, gneq;
 
-    double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS];
+    double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *F[NCS];
     double *shuffle[NCS];
     double alpha, delta, r0dotz0, r1dotz1;
     double residual, v_res;
@@ -154,6 +154,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     lev = E->mesh.levmax;
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)   {
+        F[m] = (double *)malloc((neq+1)*sizeof(double));
         r1[m] = (double *)malloc((npno+1)*sizeof(double));
         r2[m] = (double *)malloc((npno+1)*sizeof(double));
         z1[m] = (double *)malloc((npno+1)*sizeof(double));
@@ -164,6 +165,15 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     time0 = CPU_time0();
     count = 0;
 
+
+    /* copy the original force vector since we need to keep it intact
+       between iterations */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(j=1;j<=neq;j++)
+            F[m][j] = FF[m][j];
+
+
+    /* calculate the contribution of compressibility in the continuity eqn */
     if(E->control.inv_gruneisen != 0) {
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(j=1;j<=npno;j++)
@@ -172,13 +182,16 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
         assemble_c_u(E, V, r2, lev);
     }
 
+
     /* calculate the initial velocity residual */
     v_res = initial_vel_residual(E, V, P, F, imp);
 
 
-    /* initial residual r1 = div(V) or r1 = div(rho*V) if compressible */
+    /* initial residual r1 = div(V) */
     assemble_div_u(E, V, r1, lev);
 
+
+    /* add the contribution of compressibility to the initial residual */
     if(E->control.inv_gruneisen != 0)
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(j=1;j<=npno;j++) {
@@ -314,6 +327,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     } /* end loop for conjugate gradient */
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        free((void *) F[m]);
         free((void *) r1[m]);
         free((void *) r2[m]);
         free((void *) z1[m]);
@@ -602,14 +616,14 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
  */
 
 static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
-                                      double **V, double **P, double **FF,
+                                      double **V, double **P, double **F,
                                       double imp, int *steps_max)
 {
     int m, i;
     int cycles, num_of_loop;
     double residual;
     double relative_err_v, relative_err_p;
-    double *F[NCS],*old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
+    double *old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
 
     const int npno = E->lmesh.npno;
     const int neq = E->lmesh.neq;
@@ -618,7 +632,6 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_vdot(),global_pdot();
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    	F[m] = (double *)malloc((neq+1)*sizeof(double));
     	old_v[m] = (double *)malloc((neq+1)*sizeof(double));
     	diff_v[m] = (double *)malloc((neq+1)*sizeof(double));
     	old_p[m] = (double *)malloc((npno+1)*sizeof(double));
@@ -637,8 +650,6 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
           num_of_loop <= E->control.compress_iter_maxstep) {
 
         for (m=1;m<=E->sphere.caps_per_proc;m++) {
-            /* copy the original force vector since we need to keep it intact between iterations */
-            for(i=0;i<neq;i++) F[m][i] = FF[m][i];
             for(i=0;i<neq;i++) old_v[m][i] = V[m][i];
             for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
         }
@@ -667,7 +678,6 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     } /* end of while */
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    	free((void *) F[m]);
     	free((void *) old_v[m]);
     	free((void *) old_p[m]);
 	free((void *) diff_v[m]);
