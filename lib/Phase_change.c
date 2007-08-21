@@ -164,6 +164,12 @@ static void calc_phase_change(struct All_variables *E,
   pt5 = 0.5;
   one = 1.0;
 
+  /* TODO: compute pressure with reference density */
+  /* disable phase change in compressible flow for now */
+  if(E->control.inv_gruneisen != 0) {
+      myerror(E, "Error: phase change is not implemented in compressible flow.");
+  }
+
   for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     for(i=1;i<=E->lmesh.nno;i++)  {
       e_pressure = (E->sphere.ro-E->sx[m][3][i]) - depth

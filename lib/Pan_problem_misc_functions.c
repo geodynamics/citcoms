@@ -141,6 +141,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     double temp,temp2;
     void remove_horiz_ave2(struct All_variables*, double**);
 
+    /* Rayleigh number */
     temp = E->control.Atemp;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -157,6 +158,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     if(E->control.tracer &&
        (E->composition.ichemical_buoyancy)) {
         for(j=0;j<E->composition.ncomp;j++) {
+            /* TODO: how to scale chemical buoyancy wrt reference density? */
             temp2 = E->composition.buoyancy_ratio[j] * temp;
             for(m=1;m<=E->sphere.caps_per_proc;m++)
                 for(i=1;i<=E->lmesh.nno;i++)
@@ -164,6 +166,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         }
     }
 
+    /* TODO: phase change function doesn't know about reference density */
     phase_change_apply_410(E, buoy);
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
