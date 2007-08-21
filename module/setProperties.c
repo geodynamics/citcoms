@@ -773,8 +773,15 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);
     getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
 
-    getIntProperty(properties, "compress_iter_maxstep", E->control.compress_iter_maxstep, fp);
-    getFloatProperty(properties, "relative_err_accuracy", E->control.relative_err_accuracy, fp);
+    if(E->control.inv_gruneisen != 0) {
+        /* which compressible solver to use: "cg" or "bicg" */
+        getStringProperty(properties, "uzawa", E->control.uzawa, fp);
+        if(strcmp(E->control.uzawa, "cg") == 0) {
+            /* more convergence parameters for "cg" */
+            getIntProperty(properties, "compress_iter_maxstep", E->control.compress_iter_maxstep, fp);
+            getFloatProperty(properties, "relative_err_accuracy", E->control.relative_err_accuracy, fp);
+        }
+    }
 
     PUTS(("\n"));
 

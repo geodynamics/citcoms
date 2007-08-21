@@ -422,8 +422,20 @@ void read_initial_settings(struct All_variables *E)
   else
       E->control.inv_gruneisen = 0;
 
-  input_int("compress_iter_maxstep",&(E->control.compress_iter_maxstep),"100",m);
-  input_float("relative_err_accuracy",&(E->control.relative_err_accuracy),"0.01",m);
+  if(E->control.inv_gruneisen != 0) {
+      /* which compressible solver to use: "cg" or "bicg" */
+      input_string("uzawa",E->control.uzawa,"cg",m);
+      if(strcmp(E->control.uzawa, "cg") == 0) {
+          /* more convergence parameters for "cg" */
+          input_int("compress_iter_maxstep",&(E->control.compress_iter_maxstep),"100",m);
+          input_float("relative_err_accuracy",&(E->control.relative_err_accuracy),"0.001",m);
+      }
+      else if(strcmp(E->control.uzawa, "bicg") == 0) {
+      }
+      else
+          myerror(E, "Error: unknown Uzawa iteration\n");
+  }
+
 
   /* data section */
   input_float("Q0",&(E->control.Q0),"0.0",m);

@@ -35,6 +35,8 @@
 #include "global_defs.h"
 #include <stdlib.h>
 
+void myerror(struct All_variables *,char *);
+
 static float solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max);
@@ -110,8 +112,12 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
     if(E->control.inv_gruneisen == 0)
         residual = solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
     else {
-        residual = solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
-        //residual = solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
+        if(strcmp(E->control.uzawa, "cg") == 0)
+            residual = solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
+        else if(strcmp(E->control.uzawa, "bicg") == 0)
+            residual = solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
+        else
+            myerror(E, "Error: unknown Uzawa iteration\n");
     }
 
     return(residual);

@@ -461,6 +461,8 @@ struct CONTROL {
     /**/
     int compress_iter_maxstep;
 
+    char uzawa[20];
+
     float inputdiff;
     float VBXtopval;
     float VBXbotval;
