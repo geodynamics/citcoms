@@ -448,8 +448,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         /* r1dotrt = <r1, rt> */
         r1dotrt = global_pdot(E, r1, rt, lev);
         if(r1dotrt == 0.0) {
-            /* TODO: can we resume the computation even when BiCGstab failed?
-             */
+            /* XXX: can we resume the computation when BiCGstab failed? */
             fprintf(E->fp, "BiCGstab method failed!!\n");
             fprintf(stderr, "BiCGstab method failed!!\n");
             parallel_process_termination();
@@ -496,14 +495,6 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         for(m=1; m<=E->sphere.caps_per_proc; m++)
             for(j=1; j<=npno; j++)
                 s0[m][j] = r1[m][j] - alpha * v0[m][j];
-
-
-        /* stop iteration if norm(s) is small enough */
-        if(global_pdot(E, s0, s0, lev) < imp*gnpno) {
-            // is the check correct?
-            // update solution, TODO
-            //break;
-        }
 
 
         /* preconditioner BPI ~= inv(K), st = BPI*s0 */
@@ -760,7 +751,7 @@ static double incompressibility_residual(struct All_variables *E,
     int lev = E->mesh.levmax;
     double tmp1, tmp2;
 
-    /* incompressiblity residual = norm(F) / norm(V) */
+    /* incompressiblity residual = norm(r) / norm(V) */
 
     tmp1 = global_vdot(E, V, V, lev);
     tmp2 = global_pdot(E, r, r, lev);
