@@ -457,7 +457,7 @@ static void geoid_from_buoyancy(E, harm_geoid)
     scaling = 1.0e6*4.0*M_PI*E->data.radius_km*E->data.radius_km*
         E->data.grav_const/E->data.grav_acc;
 
-    /* buoyancy of one layer */
+    /* density of one layer */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
@@ -474,8 +474,7 @@ static void geoid_from_buoyancy(E, harm_geoid)
 
     /* loop over each layer */
     for(k=1;k<E->lmesh.noz;k++)  {
-        buoy2rho = scaling2 * E->refstate.rho[k]
-            * E->refstate.expansivity[k] / E->refstate.gravity[k];
+        buoy2rho = scaling2 / E->refstate.gravity[k];
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=E->lmesh.noy;i++)
                 for(j=1;j<=E->lmesh.nox;j++)  {
@@ -494,7 +493,7 @@ static void geoid_from_buoyancy(E, harm_geoid)
         /* radius of the layer */
         radius = (E->sx[1][3][k+1]+E->sx[1][3][k])*0.5;
 
-        /* contribution of buoyancy at this layer */
+        /* geoid contribution of density at this layer */
         for (ll=1;ll<=E->output.llmax;ll++)
             for (mm=0;mm<=ll;mm++)   {
                 con1 = scaling/(2.0*ll+1.0)*dlayer;
@@ -545,8 +544,8 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
     den_contrast2 = (E->data.density_below-E->data.density)*E->refstate.rho[1];
 
     /* scale for surface and CMB topo */
-    topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc*E->refstate.gravity[E->lmesh.noz]);
-    topo_scaling2 = stress_scaling / (den_contrast2*E->data.grav_acc*E->refstate.gravity[1]);
+    topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc);
+    topo_scaling2 = stress_scaling / (den_contrast2*E->data.grav_acc);
 
     if (E->parallel.me_loc[3] == E->parallel.nprocz-1) {
         /* expand surface topography into sph. harm. */
@@ -560,7 +559,7 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
 
         /* scale for geoid */
         scaling = 1.0e3 * 4.0 * M_PI * E->data.radius_km * E->data.grav_const
-            / (E->data.grav_acc * E->refstate.gravity[E->lmesh.noz]);
+            / E->data.grav_acc;
 
         /* compute geoid due to surface topo, skip degree-0 and 1 term */
         for (j=0; j<2; j++)
