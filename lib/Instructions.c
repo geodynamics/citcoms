@@ -140,7 +140,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     set_sphere_harmonics (E);
 
-    if(E->control.tracer==1) {
+    if(E->control.tracer) {
 	tracer_initial_settings(E);
 	(E->problem_tracer_setup)(E);
     }
@@ -1316,7 +1316,6 @@ void output_finalize(struct  All_variables *E)
       /* delete the geo files */
       get_vtk_filename(files,1,E,0);
       sprintf(message,"rm %s",files);system(message);
-      fprintf(stderr,"%s",message);
       if(E->parallel.me == 0){
 	/* close the log */
 	fclose(E->output.gzdir.vtk_fp);

@@ -69,6 +69,7 @@ sources = \
 	Construct_arrays.c \
 	Convection.c \
 	convection_variables.h \
+	Determine_net_rotation.c \
 	Drive_solvers.c \
 	drive_solvers.h \
 	Element_calculations.c \

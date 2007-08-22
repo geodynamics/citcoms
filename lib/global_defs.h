@@ -575,6 +575,8 @@ struct gzd_struc{
   float *vtk_base;
   FILE *vtk_fp;
 
+  int rnr;			/* remove net rotation? */
+
 };
 
 struct Output {

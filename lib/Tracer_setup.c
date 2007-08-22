@@ -90,16 +90,21 @@ void tracer_input(struct All_variables *E)
     input_boolean("tracer_enriched",
 		  &(E->control.tracer_enriched),"off",m);
     if(E->control.tracer_enriched){
-      if(E->composition.ncomp != 1)
-	myerror(E,"enriched tracers cannot deal with more than one composition");
       if(!E->control.tracer)	/* check here so that we can get away
 				   with only one if statement in
 				   Advection_diffusion */
 	myerror(E,"need to switch on tracers for tracer_enriched");
       input_float("Q0_enriched",&(E->control.Q0ER),"0.0",m);
-      snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g",
+      snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g (only one composition!)",
 	       E->control.Q0,E->control.Q0ER);
       report(E,message);
+      //
+      // this check doesn't work at this point in the code, and we didn't want to put it into every call to 
+      // Advection diffusion
+      //
+      //if(E->composition.ncomp != 1)
+      //myerror(E,"enriched tracers cannot deal with more than one composition yet");
+
     }
     if(E->control.tracer) {
 

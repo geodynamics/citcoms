@@ -75,6 +75,7 @@ void output_common_input(struct All_variables *E)
 
       */
       input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"0",m);
+      input_boolean("gzdir_rnr",&(E->output.gzdir.rnr),"off",m); /* remove net rotation? */
       E->output.gzdir.vtk_base_init = 0;
       E->output.gzdir.vtk_base_save = 1; /* should we save the basis vectors? (memory!) */
       //fprintf(stderr,"gzdir: vtkio: %i save basis vectors: %i\n",
