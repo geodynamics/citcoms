@@ -98,7 +98,7 @@ PyObject * pyCitcom_Advection_diffusion_set_properties(PyObject *self, PyObject 
     PUTS(("[CitcomS.solver.tsolver]\n"));
 
     getIntProperty(properties, "ADV", E->advection.ADVECTION, fp);
-    getIntProperty(properties, "filter_temp", E->control.filter_temperature, fp);
+    getIntProperty(properties, "filter_temp", E->advection.filter_temperature, fp);
     getIntProperty(properties, "monitor_max_T", E->advection.monitor_max_T, fp);
 
     getFloatProperty(properties, "finetunedt", E->advection.fine_tune_dt, fp);

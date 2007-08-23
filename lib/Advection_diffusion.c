@@ -161,7 +161,7 @@ void PG_timestep_solve(struct All_variables *E)
 
 
   /* filter temperature to remove over-/under-shoot */
-  if(E->control.filter_temperature)
+  if(E->advection.filter_temperature)
     filter(E);
 
 
@@ -203,6 +203,7 @@ void advection_diffusion_parameters(E)
     int m=E->parallel.me;
 
     input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
+    input_boolean("filter_temp",&(E->advection.filter_temperature),"on",m);
     input_boolean("monitor_max_T",&(E->advection.monitor_max_T),"on",m);
 
     input_int("minstep",&(E->advection.min_timesteps),"1",m);

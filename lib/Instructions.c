@@ -380,7 +380,6 @@ void read_initial_settings(struct All_variables *E)
   input_int("bottbc",&(E->mesh.bottbc),"1",m);
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
-  input_int("filter_temp",&(E->control.filter_temperature),"1",m);
 
   input_boolean("side_sbcs",&(E->control.side_sbcs),"off",m);
 

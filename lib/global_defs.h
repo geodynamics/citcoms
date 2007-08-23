@@ -470,7 +470,7 @@ struct CONTROL {
     float VBYbotval;
 
     int coor;
-  float coor_refine[4];
+    float coor_refine[4];
     char coor_file[100];
 
     int lith_age;
@@ -479,7 +479,6 @@ struct CONTROL {
     float lith_age_depth;
     float lith_age_mantle_temp;
 
-    int filter_temperature;
     int temperature_bound_adj;
     float depth_bound_adj;
     float width_bound_adj;

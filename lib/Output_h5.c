@@ -1321,7 +1321,7 @@ void h5output_meta(struct All_variables *E)
      */
 
     status = set_attribute_int(input, "ADV", E->advection.ADVECTION);
-    status = set_attribute_int(input, "filter_temp", E->control.filter_temperature);
+    status = set_attribute_int(input, "filter_temp", E->advection.filter_temperature);
 
     status = set_attribute_float(input, "finetunedt", E->advection.fine_tune_dt);
     status = set_attribute_float(input, "fixed_timestep", E->advection.fixed_timestep);

@@ -27,6 +27,8 @@
  */
 struct ADVECTION {
   int ADVECTION;
+  int filter_temperature;
+  int monitor_max_T;
 
   float gamma;
   float timestep;
@@ -44,7 +46,6 @@ struct ADVECTION {
   int temp_iterations;
   int sub_iterations;
   int last_sub_iterations;
-  int monitor_max_T;
 
 } advection;
 
