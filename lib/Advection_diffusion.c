@@ -568,16 +568,16 @@ static void element_residual(struct All_variables *E, int el,
 	    DT = fielddot[m][node];
 
       for(i=1;i<=vpts;i++)  {
-		  dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
-		  tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T * rtf[3][i];
-		  tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T * sint[i];
-	 	  tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T;
-		  sfn = E->N.vpt[GNVINDEX(j,i)];
-		  v1[i] += VV[1][j] * sfn;
-		  v2[i] += VV[2][j] * sfn;
-		  v3[i] += VV[3][j] * sfn;
-	      }
+          dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
+          tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T * rtf[3][i];
+          tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T * sint[i];
+          tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T;
+          sfn = E->N.vpt[GNVINDEX(j,i)];
+          v1[i] += VV[1][j] * sfn;
+          v2[i] += VV[2][j] * sfn;
+          v3[i] += VV[3][j] * sfn;
       }
+    }
 
 /*    Q=0.0;
     for(i=0;i<Q0.number;i++)
@@ -873,15 +873,8 @@ static void process_latent_heating(struct All_variables *E, int m,
 static void process_heating(struct All_variables *E)
 {
     int m;
-    double temp1, temp2;
     double total_visc_heating[NCS], total_adi_heating[NCS];
-    FILE *fp;
-    char filename[250];
-
-    const int dims = E->mesh.nsd;
-    const int ends = enodes[dims];
-    const int vpts = vpoints[dims];
-
+    double temp1, temp2, temp3, temp4;
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         process_visc_heating(E, m, E->heating_visc[m], &(total_visc_heating[m]));
@@ -890,13 +883,22 @@ static void process_heating(struct All_variables *E)
     }
 
     /* compute total amount of visc/adi heating over all processors */
-    MPI_Allreduce(&(total_visc_heating[1]), &temp1, E->sphere.caps_per_proc,
-                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
-    MPI_Allreduce(&(total_adi_heating[1]), &temp2, E->sphere.caps_per_proc,
-                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
+    temp3 = temp4 = 0;
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        MPI_Allreduce(&(total_visc_heating[m]), &temp1,
+                      E->sphere.caps_per_proc,
+                      MPI_DOUBLE, MPI_SUM, E->parallel.world);
+        MPI_Allreduce(&(total_adi_heating[m]), &temp2,
+                      E->sphere.caps_per_proc,
+                      MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+        temp3 += temp1;
+        temp4 += temp2;
+    }
 
     if(E->parallel.me == 0)
-        fprintf(E->fp, "Total_heating(adi, visc): %g %g\n", temp2, temp1);
+        fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                E->monitor.solution_cycles, temp3, temp4);
 
     return;
 }
