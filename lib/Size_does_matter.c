@@ -872,7 +872,7 @@ void mass_matrix(struct All_variables *E)
     int m,node,i,nint,e,lev;
     int n[9], nz;
     void get_global_shape_fn();
-    double myatan(),rtf[4][9],area,centre[4],temp[9],dx1,dx2,dx3;
+    double myatan(),rtf[4][9],area,centre[4],temp[9],temp2[9],dx1,dx2,dx3;
     struct Shape_function GN;
     struct Shape_function_dA dOmega;
     struct Shape_function_dx GNx;
@@ -990,15 +990,24 @@ void mass_matrix(struct All_variables *E)
             get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,
                                 sphere_key,rtf,E->mesh.levmax,m);
 
+            for(nint=1;nint<=vpts;nint++)
+                temp2[nint] = 0.0;
+
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
-                temp[node] = 0.0;
                 nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
                 for(nint=1;nint<=vpts;nint++) {
-                    temp[node] += E->refstate.rho[nz]
+                    temp2[nint] = E->refstate.rho[nz]
                         * E->refstate.heat_capacity[nz]
+                        * E->N.vpt[GNVINDEX(node,nint)];
+                }
+            }
+
+            for(node=1;node<=enodes[E->mesh.nsd];node++) {
+                temp[node] = 0.0;
+                for(nint=1;nint<=vpts;nint++) {
+                    temp[node] += temp2[nint]
                         * dOmega.vpt[nint]
-                        * g_point[nint].weight[E->mesh.nsd-1]
-                        * E->N.vpt[GNVINDEX(node,nint)]; /* int Na dV */
+                        * g_point[nint].weight[E->mesh.nsd-1];
                 }
             }
 
