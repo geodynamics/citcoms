@@ -98,25 +98,29 @@ void PG_timestep_solve(struct All_variables *E)
 
   E->advection.timesteps++;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-    Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-  }
-
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for (i=1;i<=E->lmesh.nno;i++)   {
-      T1[m][i] = E->T[m][i];
-      Tdot1[m][i] = E->Tdot[m][i];
-    }
+    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
-  /* get the max temperature for old T */
-  T_interior1 = Tmaxd(E,E->T);
+
+  if(E->advection.monitor_max_T) {
+     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+         T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+         Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+     }
+
+     for(m=1;m<=E->sphere.caps_per_proc;m++)
+         for (i=1;i<=E->lmesh.nno;i++)   {
+             T1[m][i] = E->T[m][i];
+             Tdot1[m][i] = E->Tdot[m][i];
+         }
+
+     /* get the max temperature for old T */
+     T_interior1 = Tmaxd(E,E->T);
+  }
 
   E->advection.dt_reduced = 1.0;
   E->advection.last_sub_iterations = 1;
 
-/*   time1= CPU_time0(); */
 
   do {
     E->advection.timestep *= E->advection.dt_reduced;
@@ -134,28 +138,32 @@ void PG_timestep_solve(struct All_variables *E)
       }
     }
 
-    /* get the max temperature for new T */
-    E->monitor.T_interior = Tmaxd(E,E->T);
+    if(E->advection.monitor_max_T) {
+        /* get the max temperature for new T */
+        E->monitor.T_interior = Tmaxd(E,E->T);
 
-    if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for (i=1;i<=E->lmesh.nno;i++)   {
-	  E->T[m][i] = T1[m][i];
-	  E->Tdot[m][i] = Tdot1[m][i];
-	}
-      iredo = 1;
-      E->advection.dt_reduced *= 0.5;
-      E->advection.last_sub_iterations ++;
+        /* if the max temperature changes too much, restore the old
+         * temperature field, calling the temperature solver using
+         * half of the timestep size */
+        if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
+            for(m=1;m<=E->sphere.caps_per_proc;m++)
+                for (i=1;i<=E->lmesh.nno;i++)   {
+                    E->T[m][i] = T1[m][i];
+                    E->Tdot[m][i] = Tdot1[m][i];
+                }
+            iredo = 1;
+            E->advection.dt_reduced *= 0.5;
+            E->advection.last_sub_iterations ++;
+        }
     }
 
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
 
+
+  /* filter temperature to remove over-/under-shoot */
   if(E->control.filter_temperature)
     filter(E);
 
-  /*   time0= CPU_time0()-time1; */
-  /*     if(E->control.verbose) */
-  /*       fprintf(E->fp_out,"time=%f\n",time0); */
 
   E->advection.total_timesteps++;
   E->monitor.elapsed_time += E->advection.timestep;
@@ -165,8 +173,13 @@ void PG_timestep_solve(struct All_variables *E)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     free((void *) DTdot[m] );
-    free((void *) T1[m] );
-    free((void *) Tdot1[m] );
+  }
+
+  if(E->advection.monitor_max_T) {
+      for(m=1;m<=E->sphere.caps_per_proc;m++) {
+          free((void *) T1[m] );
+          free((void *) Tdot1[m] );
+      }
   }
 
   if(E->control.lith_age) {
@@ -190,6 +203,7 @@ void advection_diffusion_parameters(E)
     int m=E->parallel.me;
 
     input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
+    input_boolean("monitor_max_T",&(E->advection.monitor_max_T),"on",m);
 
     input_int("minstep",&(E->advection.min_timesteps),"1",m);
     input_int("maxstep",&(E->advection.max_timesteps),"1000",m);

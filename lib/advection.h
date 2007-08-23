@@ -44,7 +44,7 @@ struct ADVECTION {
   int temp_iterations;
   int sub_iterations;
   int last_sub_iterations;
-
+  int monitor_max_T;
 
 } advection;
 
