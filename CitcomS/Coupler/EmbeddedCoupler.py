@@ -216,7 +216,7 @@ class EmbeddedCoupler(Coupler):
         from ExchangerLib import exchangeTimestep
 
         if self.synchronized:
-            print "start new big step"
+            #print "start new big step"
             mycomm = self.communicator
             self.ccplr_t = exchangeTimestep(old_dt,
                                             mycomm.handle(),
@@ -230,19 +230,19 @@ class EmbeddedCoupler(Coupler):
 
         # clipping oversized ecplr_t
         if self.ecplr_t >= self.ccplr_t:
-            print "** clip dt **"
-            print "dt = %g, ecplr_t = %g, ccplr_t = %g" %(dt, self.ecplr_t, self.ccplr_t)
+            #print "** clip dt **"
+            #print "dt = %g, ecplr_t = %g, ccplr_t = %g" %(dt, self.ecplr_t, self.ccplr_t)
             dt = dt - (self.ecplr_t - self.ccplr_t)
             self.ecplr_t = self.ccplr_t
             self.synchronized = True
-            print self.name, " SYNCHRONIZED!"
+            #print self.name, " SYNCHRONIZED!"
 
         # store timestep for interpolating boundary velocities
         self.inlet.storeTimestep(self.ecplr_t, self.ccplr_t)
 
-        print "%s -   old dt = %g   exchanged dt = %g" % (
-               self.name, old_dt, dt)
-        print "ccplr_t = %g  ecplr_t = %g" % (self.ccplr_t, self.ecplr_t)
+        #print "%s -   old dt = %g   exchanged dt = %g" % (
+        #       self.name, old_dt, dt)
+        #print "ccplr_t = %g  ecplr_t = %g" % (self.ccplr_t, self.ecplr_t)
         return dt
 
 

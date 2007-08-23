@@ -174,8 +174,8 @@ class MultiC_Coupler(ContainingCoupler):
         assert remote_dt2 < dt, \
                'Size of dt in the esolver is greater than dt in the csolver2!'
 
-        print "%s - old dt = %g   exchanged dt = %g" % (
-               self.__class__, dt, remote_dt)
+        #print "%s - old dt = %g   exchanged dt = %g" % (
+        #       self.__class__, dt, remote_dt)
         return dt
 
     def exchangeSignal2(self, signal):

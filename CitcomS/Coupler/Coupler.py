@@ -48,6 +48,13 @@ class Coupler(Component):
 
 
     def initialize(self, solver):
+
+        # when monitor_max_T is on, the timestep size might get changed
+        # inside the tsolver, which will cause trouble in coupler
+        # synchronization.
+        assert solver.inventory.tsolver.inventory.monitor_max_T == False, \
+               'Error: solver.tsolver.monitor_max_T must be off!'
+
         self.communicator = solver.communicator
         self.srcCommList = solver.myPlus
 
