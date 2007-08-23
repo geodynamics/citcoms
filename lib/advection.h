@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,12 +22,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 struct ADVECTION {
   int ADVECTION;
- 
+
   float gamma;
   float timestep;
   float diff_timestep;
@@ -35,25 +35,17 @@ struct ADVECTION {
   float dt_reduced;
   float fixed_timestep;
   float max_dimensionless_time;
- 
-  int min_timesteps;  
+
+  int min_timesteps;
   int max_timesteps;
   int max_total_timesteps;
   int timesteps;
   int total_timesteps;
   int temp_iterations;
-  int max_substeps;
   int sub_iterations;
-  int last_sub_iterations; 
+  int last_sub_iterations;
 
-  float vel_substep_aggression;
-  float temp_updatedness;
-  float visc_updatedness;
 
-  float lid_defining_velocity;
-  float sub_layer_sample_level;
-
- 
- } advection;
+} advection;
 
 

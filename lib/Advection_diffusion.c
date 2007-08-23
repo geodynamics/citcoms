@@ -201,14 +201,8 @@ void advection_diffusion_parameters(E)
 
     input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
 
-/*     input_float("sub_tolerance",&(E->advection.vel_substep_aggression),"0.005",m);   */
-/*     input_int("maxsub",&(E->advection.max_substeps),"25",m); */
 
-/*     input_float("liddefvel",&(E->advection.lid_defining_velocity),"0.01",m); */
-/*     input_float("sublayerfrac",&(E->advection.sub_layer_sample_level),"0.5",m);             */
-
-
-  return;
+    return;
 }
 
 void advection_diffusion_allocate_memory(E)
