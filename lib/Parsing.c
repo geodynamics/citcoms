@@ -188,11 +188,11 @@ void shutdown_parser(E)
 
 
 add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory */
-     register char *name, *value;	/* if necessary */
+     char *name, *value;	/* if necessary */
 {
   struct arglist *alptr;
   int len;
-  register char *ptr;
+  char *ptr;
 
   /* check arglist memory */
   if(NLIST >= LISTMAX)
@@ -232,8 +232,8 @@ add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory *
 }
 
 int compute_parameter_hash_table(s)
-     register char *s;
-{ register int h;
+     char *s;
+{ int h;
 
   h= s[0];
   if(s[1])

@@ -37,10 +37,32 @@
 #include "advection_diffusion.h"
 #include "parsing.h"
 
-extern int Emergency_stop;
-
-/*struct el { double gpt[9]; }; */
-void set_diffusion_timestep(struct All_variables *E);
+static void set_diffusion_timestep(struct All_variables *E);
+static void predictor(struct All_variables *E, double **field,
+                      double **fielddot);
+static void corrector(struct All_variables *E, double **field,
+                      double **fielddot, double **Dfielddot);
+static void pg_solver(struct All_variables *E,
+                      double **T, double **Tdot, double **DTdot,
+                      struct SOURCES Q0,
+                      double diff, int bc, unsigned int **FLAGS);
+static void pg_shape_fn(struct All_variables *E, int el,
+                        struct Shape_function *PG,
+                        struct Shape_function_dx *GNx,
+                        float VV[4][9], double rtf[4][9],
+                        double diffusion, int m);
+static void element_residual(struct All_variables *E, int el,
+                             struct Shape_function PG,
+                             struct Shape_function_dx GNx,
+                             struct Shape_function_dA dOmega,
+                             float VV[4][9],
+                             double **field, double **fielddot,
+                             struct SOURCES Q0,
+                             double Eres[9], double rtf[4][9],
+                             double diff, float **BC,
+                             unsigned int **FLAGS, int m);
+static void filter(struct All_variables *E);
+static void process_heating(struct All_variables *E);
 
 /* ============================================
    Generic adv-diffusion for temperature field.
@@ -48,6 +70,47 @@ void set_diffusion_timestep(struct All_variables *E);
 
 
 /***************************************************************/
+
+void advection_diffusion_parameters(struct All_variables *E)
+{
+
+    /* Set intial values, defaults & read parameters*/
+    int m=E->parallel.me;
+
+    input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
+    input_boolean("filter_temp",&(E->advection.filter_temperature),"on",m);
+    input_boolean("monitor_max_T",&(E->advection.monitor_max_T),"on",m);
+
+    input_int("minstep",&(E->advection.min_timesteps),"1",m);
+    input_int("maxstep",&(E->advection.max_timesteps),"1000",m);
+    input_int("maxtotstep",&(E->advection.max_total_timesteps),"1000000",m);
+    input_float("finetunedt",&(E->advection.fine_tune_dt),"0.9",m);
+    input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
+    input_float("adv_gamma",&(E->advection.gamma),"0.5",m);
+    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,1,nomax",m);
+
+    input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
+
+
+    return;
+}
+
+
+void advection_diffusion_allocate_memory(struct All_variables *E)
+{
+  int i,m;
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+    E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+
+    for(i=1;i<=E->lmesh.nno;i++)
+      E->Tdot[m][i]=0.0;
+    }
+
+  return;
+}
+
+
 void PG_timestep_init(struct All_variables *E)
 {
 
@@ -57,27 +120,78 @@ void PG_timestep_init(struct All_variables *E)
 }
 
 
-void set_diffusion_timestep(struct All_variables *E)
+void PG_timestep(struct All_variables *E)
 {
-  float diff_timestep, ts;
-  int m, el, d;
+    void std_timestep();
+    void PG_timestep_solve();
 
-  float global_fmin();
+    std_timestep(E);
 
-  diff_timestep = 1.0e8;
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(el=1;el<=E->lmesh.nel;el++)  {
-      for(d=1;d<=E->mesh.nsd;d++)    {
-	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
-	diff_timestep = min(diff_timestep,ts);
-      }
+    PG_timestep_solve(E);
+
+    return;
+}
+
+
+
+/* =====================================================
+   Obtain largest possible timestep (no melt considered)
+   =====================================================  */
+
+
+void std_timestep(struct All_variables *E)
+{
+    int i,d,n,nel,el,node,m;
+
+    float global_fmin();
+    void velo_from_element();
+
+    float adv_timestep;
+    float ts,uc1,uc2,uc3,uc,size,step,VV[4][9];
+
+    const int dims=E->mesh.nsd;
+    const int dofs=E->mesh.dof;
+    const int nno=E->lmesh.nno;
+    const int lev=E->mesh.levmax;
+    const int ends=enodes[dims];
+    const int sphere_key = 1;
+
+    nel=E->lmesh.nel;
+
+    if(E->advection.fixed_timestep != 0.0) {
+      E->advection.timestep = E->advection.fixed_timestep;
+      return;
     }
 
-  diff_timestep = global_fmin(E,diff_timestep);
-/*   diff_timestep = ((3==dims)? 0.125:0.25) * diff_timestep; */
-  E->advection.diff_timestep = 0.5 * diff_timestep;
+    adv_timestep = 1.0e8;
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(el=1;el<=nel;el++) {
 
-  return;
+	velo_from_element(E,VV,m,el,sphere_key);
+
+	uc=uc1=uc2=uc3=0.0;
+	for(i=1;i<=ENODES3D;i++) {
+	  uc1 += E->N.ppt[GNPINDEX(i,1)]*VV[1][i];
+	  uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
+	  uc3 += E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
+        }
+	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
+
+	step = (0.5/uc);
+	adv_timestep = min(adv_timestep,step);
+      }
+
+    adv_timestep = E->advection.dt_reduced * adv_timestep;
+
+    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
+				 E->advection.diff_timestep);
+
+    E->advection.timestep = global_fmin(E,adv_timestep);
+
+/*     if (E->parallel.me==0) */
+/*       fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep); */
+
+    return;
 }
 
 
@@ -85,13 +199,7 @@ void PG_timestep_solve(struct All_variables *E)
 {
 
   double Tmaxd();
-  double CPU_time0();
-  void filter();
-  void predictor();
-  void corrector();
-  void pg_solver();
   void temperatures_conform_bcs();
-  double Tmaxd();
   int i,m,psc_pass,iredo;
   double time0,time1,T_interior1;
   double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
@@ -192,54 +300,27 @@ void PG_timestep_solve(struct All_variables *E)
   return;
 }
 
+
 /***************************************************************/
 
-void advection_diffusion_parameters(E)
-     struct All_variables *E;
-
+static void set_diffusion_timestep(struct All_variables *E)
 {
+  float diff_timestep, ts;
+  int m, el, d;
 
-    /* Set intial values, defaults & read parameters*/
-    int m=E->parallel.me;
+  float global_fmin();
 
-    input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
-    input_boolean("filter_temp",&(E->advection.filter_temperature),"on",m);
-    input_boolean("monitor_max_T",&(E->advection.monitor_max_T),"on",m);
-
-    input_int("minstep",&(E->advection.min_timesteps),"1",m);
-    input_int("maxstep",&(E->advection.max_timesteps),"1000",m);
-    input_int("maxtotstep",&(E->advection.max_total_timesteps),"1000000",m);
-    input_float("finetunedt",&(E->advection.fine_tune_dt),"0.9",m);
-    input_float("fixed_timestep",&(E->advection.fixed_timestep),"0.0",m);
-    input_float("adv_gamma",&(E->advection.gamma),"0.5",m);
-    input_int("adv_sub_iterations",&(E->advection.temp_iterations),"2,1,nomax",m);
-
-    input_float("inputdiffusivity",&(E->control.inputdiff),"1.0",m);
-
-
-    return;
-}
-
-void advection_diffusion_allocate_memory(E)
-     struct All_variables *E;
-
-{ int i,m;
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-
-    for(i=1;i<=E->lmesh.nno;i++)
-      E->Tdot[m][i]=0.0;
+  diff_timestep = 1.0e8;
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(el=1;el<=E->lmesh.nel;el++)  {
+      for(d=1;d<=E->mesh.nsd;d++)    {
+	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
+	diff_timestep = min(diff_timestep,ts);
+      }
     }
 
-return;
-}
-
-void PG_timestep(struct All_variables *E)
-{
-  std_timestep(E);
-
-  PG_timestep_solve(E);
+  diff_timestep = global_fmin(E,diff_timestep);
+  E->advection.diff_timestep = 0.5 * diff_timestep;
 
   return;
 }
@@ -249,10 +330,8 @@ void PG_timestep(struct All_variables *E)
    predictor and corrector steps.
    ============================== */
 
-void predictor(E,field,fielddot)
-     struct All_variables *E;
-     double **field,**fielddot;
-
+static void predictor(struct All_variables *E, double **field,
+                      double **fielddot)
 {
   int node,m;
   double multiplier;
@@ -268,10 +347,9 @@ void predictor(E,field,fielddot)
   return;
 }
 
-void corrector(E,field,fielddot,Dfielddot)
-     struct All_variables *E;
-     double **field,**fielddot,**Dfielddot;
 
+static void corrector(struct All_variables *E, double **field,
+                      double **fielddot, double **Dfielddot)
 {
   int node,m;
   double multiplier;
@@ -285,7 +363,8 @@ void corrector(E,field,fielddot,Dfielddot)
     }
 
   return;
- }
+}
+
 
 /* ===================================================
    The solution step -- determine residual vector from
@@ -296,18 +375,12 @@ void corrector(E,field,fielddot,Dfielddot)
    =================================================== */
 
 
-void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
-     struct All_variables *E;
-     double **T,**Tdot,**DTdot;
-     struct SOURCES Q0;
-     double diff;
-     int bc;
-     unsigned int **FLAGS;
+static void pg_solver(struct All_variables *E,
+                      double **T, double **Tdot, double **DTdot,
+                      struct SOURCES Q0,
+                      double diff, int bc, unsigned int **FLAGS)
 {
-    void process_heating();
     void get_global_shape_fn();
-    void pg_shape_fn();
-    void element_residual();
     void velo_from_element();
 
     int el,e,a,i,a1,m;
@@ -372,15 +445,11 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
    Petrov-Galerkin shape functions for a given element
    =================================================== */
 
-void pg_shape_fn(E,el,PG,GNx,VV,rtf,diffusion,m)
-     struct All_variables *E;
-     int el,m;
-     struct Shape_function *PG;
-     struct Shape_function_dx *GNx;
-     float VV[4][9];
-     double rtf[4][9];
-     double diffusion;
-
+static void pg_shape_fn(struct All_variables *E, int el,
+                        struct Shape_function *PG,
+                        struct Shape_function_dx *GNx,
+                        float VV[4][9], double rtf[4][9],
+                        double diffusion, int m)
 {
     int i,j;
     int *ienm;
@@ -437,7 +506,7 @@ void pg_shape_fn(E,el,PG,GNx,VV,rtf,diffusion,m)
        }
 
    return;
- }
+}
 
 
 
@@ -446,21 +515,16 @@ void pg_shape_fn(E,el,PG,GNx,VV,rtf,diffusion,m)
    Used to correct the Tdot term.
    =========================================  */
 
-void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,FLAGS,m)
-     struct All_variables *E;
-     int el,m;
-     struct Shape_function PG;
-     struct Shape_function_dA dOmega;
-     struct Shape_function_dx GNx;
-     float VV[4][9];
-     double **field,**fielddot;
-     struct SOURCES Q0;
-     double Eres[9];
-     double rtf[4][9];
-     double diff;
-     float **BC;
-     unsigned int **FLAGS;
-
+static void element_residual(struct All_variables *E, int el,
+                             struct Shape_function PG,
+                             struct Shape_function_dx GNx,
+                             struct Shape_function_dA dOmega,
+                             float VV[4][9],
+                             double **field, double **fielddot,
+                             struct SOURCES Q0,
+                             double Eres[9], double rtf[4][9],
+                             double diff, float **BC,
+                             unsigned int **FLAGS, int m)
 {
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
@@ -470,7 +534,7 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,F
     double adv_dT,t2[4];
     double T,DT;
 
-    register double prod,sfn;
+    double prod,sfn;
     struct Shape_function1 GM;
     struct Shape_function1_dA dGamma;
     double temp;
@@ -596,71 +660,7 @@ void element_residual(E,el,PG,GNx,dOmega,VV,field,fielddot,Q0,Eres,rtf,diff,BC,F
 }
 
 
-
-
-/* =====================================================
-   Obtain largest possible timestep (no melt considered)
-   =====================================================  */
-
-
-void std_timestep(E)
-     struct All_variables *E;
-{
-    int i,d,n,nel,el,node,m;
-
-    float global_fmin();
-    void velo_from_element();
-
-    float adv_timestep;
-    float ts,uc1,uc2,uc3,uc,size,step,VV[4][9];
-
-    const int dims=E->mesh.nsd;
-    const int dofs=E->mesh.dof;
-    const int nno=E->lmesh.nno;
-    const int lev=E->mesh.levmax;
-    const int ends=enodes[dims];
-    const int sphere_key = 1;
-
-    nel=E->lmesh.nel;
-
-    if(E->advection.fixed_timestep != 0.0) {
-      E->advection.timestep = E->advection.fixed_timestep;
-      return;
-    }
-
-    adv_timestep = 1.0e8;
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(el=1;el<=nel;el++) {
-
-	velo_from_element(E,VV,m,el,sphere_key);
-
-	uc=uc1=uc2=uc3=0.0;
-	for(i=1;i<=ENODES3D;i++) {
-	  uc1 += E->N.ppt[GNPINDEX(i,1)]*VV[1][i];
-	  uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
-	  uc3 += E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
-        }
-	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
-
-	step = (0.5/uc);
-	adv_timestep = min(adv_timestep,step);
-      }
-
-    adv_timestep = E->advection.dt_reduced * adv_timestep;
-
-    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
-				 E->advection.diff_timestep);
-
-    E->advection.timestep = global_fmin(E,adv_timestep);
-
-/*     if (E->parallel.me==0) */
-/*       fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep); */
-
-    return;
-  }
-
-
-void filter(struct All_variables *E)
+static void filter(struct All_variables *E)
 {
 	double Tsum0,Tmin,Tmax,Tsum1,TDIST,TDIST1;
 	int m,i,TNUM,TNUM1;
@@ -870,7 +870,7 @@ static void process_latent_heating(struct All_variables *E, int m,
 
 
 
-void process_heating(struct All_variables *E)
+static void process_heating(struct All_variables *E)
 {
     int m;
     double temp1, temp2;
