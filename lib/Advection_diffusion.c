@@ -127,7 +127,7 @@ void PG_timestep_solve(struct All_variables *E)
       predictor(E,E->T,E->Tdot);
 
       for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
-        /* XXX: replace inputdiff with refstate.conductivity */
+        /* XXX: replace inputdiff with refstate.thermal_conductivity */
 	pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
 	corrector(E,E->T,E->Tdot,DTdot);
 	temperatures_conform_bcs(E);
@@ -330,7 +330,7 @@ void pg_solver(E,T,Tdot,DTdot,Q0,diff,bc,FLAGS)
           get_global_shape_fn(E, el, &GN, &GNx, &dOmega, 0,
                               sphere_key, rtf, E->mesh.levmax, m);
 
-          /* XXX: replace diff with refstate.conductivity */
+          /* XXX: replace diff with refstate.thermal_conductivity */
           pg_shape_fn(E, el, &PG, &GNx, VV,
                       rtf, diff, m);
           element_residual(E, el, PG, GNx, dOmega, VV, T, Tdot,
@@ -771,7 +771,7 @@ static void process_adi_heating(struct All_variables *E, int m,
 
         /* XXX: missing gravity */
         heating[e] = temp * temp2 * 0.25
-            * (E->refstate.expansivity[ez] + E->refstate.expansivity[ez + 1])
+            * (E->refstate.thermal_expansivity[ez] + E->refstate.thermal_expansivity[ez + 1])
             * (E->refstate.rho[ez] + E->refstate.rho[ez + 1]);
     }
 

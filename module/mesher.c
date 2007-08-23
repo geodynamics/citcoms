@@ -32,7 +32,6 @@
 
 #include "global_defs.h"
 #include "parallel_related.h"
-#include "material_properties.h"
 
 
 extern void initial_mesh_solver_setup(struct All_variables *);

@@ -525,9 +525,9 @@ struct CONTROL {
 
 struct REF_STATE {
     double *rho;
-    double *expansivity;
-    double *capacity;
-    double *conductivity;
+    double *thermal_expansivity;
+    double *heat_capacity;
+    double *thermal_conductivity;
     double *gravity;
     double *Tadi;
 };
