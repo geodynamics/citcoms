@@ -144,6 +144,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     /* Rayleigh number */
     temp = E->control.Atemp;
 
+    /* thermal buoyancy */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++) {
         int nz = ((i-1) % E->lmesh.noz) + 1;
@@ -166,7 +167,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         }
     }
 
-    /* TODO: phase change function doesn't know about reference density */
+    /* phase change buoyancy */
     phase_change_apply_410(E, buoy);
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);

@@ -158,26 +158,25 @@ static void calc_phase_change(struct All_variables *E,
 			      float Ra, float clapeyron,
 			      float depth, float transT, float width)
 {
-  int i,j,k,n,ns,m;
-  float e_pressure,pt5,one;
+  int i,j,k,n,ns,m,nz;
+  float e_pressure,pt5,one,dz;
 
   pt5 = 0.5;
   one = 1.0;
 
-  /* TODO: compute pressure with reference density */
-  /* disable phase change in compressible flow for now */
-  if(E->control.inv_gruneisen != 0) {
-      myerror(E, "Error: phase change is not implemented in compressible flow.");
-  }
-
   for(m=1;m<=E->sphere.caps_per_proc;m++)     {
+    /* compute phase function B, the concentration of the high pressure
+     * phase. B is between 0 and 1. */
     for(i=1;i<=E->lmesh.nno;i++)  {
-      e_pressure = (E->sphere.ro-E->sx[m][3][i]) - depth
-	- clapeyron*(E->T[m][i]-transT);
+        nz = ((i-1) % E->lmesh.noz) + 1;
+        dz = (E->sphere.ro-E->sx[m][3][i]) - depth;
+        e_pressure = dz * E->refstate.rho[nz] * E->refstate.gravity[nz]
+            - clapeyron * (E->T[m][i] - transT);
 
-      B[m][i] = pt5*(one+tanh(width*e_pressure));
+        B[m][i] = pt5 * (one + tanh(width * e_pressure));
     }
 
+    /* compute the phase boundary, defined as the depth where B==0.5 */
     ns = 0;
     for (k=1;k<=E->lmesh.noy;k++)
       for (j=1;j<=E->lmesh.nox;j++)  {
