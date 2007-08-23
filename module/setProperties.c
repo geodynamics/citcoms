@@ -609,7 +609,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
     getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
-    if (E->trace.ic_method_for_flavors == 0) {
+    if (E->trace.nflavors > 1 && E->trace.ic_method_for_flavors == 0) {
         E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
                                                 *sizeof(double));
 
@@ -619,7 +619,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "chemical_buoyancy",
                    E->composition.ichemical_buoyancy, fp);
 
-    if (E->composition.ichemical_buoyancy==1) {
+    if (E->control.tracer && E->composition.ichemical_buoyancy==1) {
         getIntProperty(properties, "buoy_type", E->composition.ibuoy_type, fp);
 
         if (E->composition.ibuoy_type==0)

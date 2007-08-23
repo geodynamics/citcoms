@@ -49,7 +49,7 @@ void composition_input(struct All_variables *E)
 		  &(E->composition.ichemical_buoyancy),
 		  "1,0,nomax",m);
 
-    if (E->composition.ichemical_buoyancy) {
+    if (E->control.tracer && E->composition.ichemical_buoyancy) {
 
         /* ibuoy_type=0 (absolute method) */
         /* ibuoy_type=1 (ratio method) */

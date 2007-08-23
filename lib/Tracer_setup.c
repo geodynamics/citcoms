@@ -139,26 +139,29 @@ void tracer_input(struct All_variables *E)
 
         input_int("ic_method_for_flavors",
 		  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
-        switch(E->trace.ic_method_for_flavors){
-	case 0:			/* layer */
-          E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
-                                                  *sizeof(double));
-          for(i=0; i<E->trace.nflavors-1; i++)
-              E->trace.z_interface[i] = 0.7;
 
-          input_double_vector("z_interface", E->trace.nflavors-1,
-                              E->trace.z_interface, m);
-	  break;
-	case 1:			/* from grid in top n materials */
-	  input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
-	  input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
-	  break;
-	default:
-	  fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
-	  parallel_process_termination();
-	  break;
-	}
 
+        if (E->trace.nflavors > 1) {
+            switch(E->trace.ic_method_for_flavors){
+            case 0:			/* layer */
+                E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
+                                                        *sizeof(double));
+                for(i=0; i<E->trace.nflavors-1; i++)
+                    E->trace.z_interface[i] = 0.7;
+
+                input_double_vector("z_interface", E->trace.nflavors-1,
+                                    E->trace.z_interface, m);
+                break;
+            case 1:			/* from grid in top n materials */
+                input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
+                input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
+                break;
+            default:
+                fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
+                parallel_process_termination();
+                break;
+            }
+        }
 
 
 
