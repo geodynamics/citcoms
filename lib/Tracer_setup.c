@@ -61,6 +61,10 @@ void tracer_post_processing(struct All_variables *E);
 void allocate_tracer_arrays(struct All_variables *E,
                             int j, int number_of_tracers);
 
+int full_icheck_cap(struct All_variables *E, int icap,
+                    double x, double y, double z, double rad);
+int regional_icheck_cap(struct All_variables *E, int icap,
+                        double x, double y, double z, double rad);
 
 static void find_tracers(struct All_variables *E);
 static void count_tracers_of_flavors(struct All_variables *E);
@@ -82,6 +86,8 @@ static void eject_tracer(struct All_variables *E, int j, int it);
 void tracer_input(struct All_variables *E)
 {
     void full_tracer_input();
+    void myerror();
+    void report();
     char message[100];
     int m=E->parallel.me;
     int i;
@@ -99,7 +105,7 @@ void tracer_input(struct All_variables *E)
 	       E->control.Q0,E->control.Q0ER);
       report(E,message);
       //
-      // this check doesn't work at this point in the code, and we didn't want to put it into every call to 
+      // this check doesn't work at this point in the code, and we didn't want to put it into every call to
       // Advection diffusion
       //
       //if(E->composition.ncomp != 1)
@@ -729,7 +735,6 @@ static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j)
 {
     void cart_to_sphere();
-
     int kk;
     int ival;
     int number_of_tries=0;

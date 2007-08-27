@@ -434,6 +434,8 @@ void *safe_malloc (size_t size)
 
 void myerror(struct All_variables *E,char *message)
 {
+  void record();
+
   E->control.verbose = 1;
   record(E,message);
   fprintf(stderr,"node %3i: error: %s\n",

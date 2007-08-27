@@ -488,6 +488,7 @@ char pyCitcom_Sphere_set_properties__name__[] = "Sphere_set_properties";
 PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
 {
     void full_set_3dsphere_defaults2(struct All_variables *);
+    void regional_set_3dsphere_defaults2(struct All_variables *);
 
     PyObject *obj, *properties, *out;
     struct All_variables *E;
@@ -575,6 +576,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     struct All_variables *E;
     FILE *fp;
     double tmp;
+    void parallel_process_termination();
 
     if (!PyArg_ParseTuple(args, "OOO:Tracer_set_properties",
 			  &obj, &properties, &out))

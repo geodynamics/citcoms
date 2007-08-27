@@ -204,6 +204,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   double conj_grad();
   double multi_grid();
   double global_vdot();
+  void record();
+  void report();
 
   int count,counts,cycles,convergent,valid;
   int i, neq, gneq,m;

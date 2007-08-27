@@ -30,7 +30,6 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-int layers_r(struct All_variables *,float );
 
 /*========================================================
   Function to make the IEN array for a mesh of given
@@ -741,39 +740,6 @@ void construct_stiffness_B_matrix(E)
   return;
 }
 
-/* ==============================================================
- construct array mat
- ============================================================== */
-void construct_mat_group(E)
-     struct All_variables *E;
-{
-
-  int m,i,j,k,kk,el,lev,a,nodea,els,llayer;
-
-  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
-  const int ends=enodes[dims];
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    for(el=1;el<=E->lmesh.nel;el++) {
-      E->mat[m][el] = 1;
-      nodea = E->ien[m][el].node[2];
-      llayer = layers(E,m,nodea);
-      if (llayer)  {
-	E->mat[m][el] = llayer;
-      }
-    }
-  }
-
-  return;
-}
-
-
-int layers(E,m,node)
-     struct All_variables *E;
-     int m,node;
-{
-  return(layers_r(E,E->sx[m][3][node]));
-}
 /* took this apart to allow call from other subroutines */
 int layers_r(E,r)
      struct All_variables *E;
@@ -798,3 +764,39 @@ int layers_r(E,r)
     llayers = 4;
   return (llayers);
 }
+
+
+int layers(E,m,node)
+     struct All_variables *E;
+     int m,node;
+{
+  return(layers_r(E,E->sx[m][3][node]));
+}
+
+
+/* ==============================================================
+ construct array mat
+ ============================================================== */
+void construct_mat_group(E)
+     struct All_variables *E;
+{
+  int m,i,j,k,kk,el,lev,a,nodea,els,llayer;
+
+  const int dims=E->mesh.nsd,dofs=E->mesh.dof;
+  const int ends=enodes[dims];
+
+  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+    for(el=1;el<=E->lmesh.nel;el++) {
+      E->mat[m][el] = 1;
+      nodea = E->ien[m][el].node[2];
+      llayer = layers(E,m,nodea);
+      if (llayer)  {
+	E->mat[m][el] = llayer;
+      }
+    }
+  }
+
+  return;
+}
+
+

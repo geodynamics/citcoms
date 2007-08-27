@@ -146,6 +146,7 @@ void regional_node_locations(E)
   void rotate_mesh ();
   void compute_angle_surf_area ();
   void parallel_process_termination();
+  void myerror();
 
   rr = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
   RR = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
@@ -161,15 +162,15 @@ void regional_node_locations(E)
       fprintf(E->fp,"(Nodal_mesh.c #1) Cannot open %s\n",output_file);
       exit(8);
     }
-    
+
     fscanf(fp1,"%s %d",a,&i);
     for(i=1;i<=nox;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
-    
+
     fscanf(fp1,"%s %d",a,&i);
     for(i=1;i<=noy;i++)
       fscanf(fp1,"%d %f",&nn,&tt1);
-    
+
     fscanf(fp1,"%s %d",a,&i);
     for (k=1;k<=E->mesh.noz;k++)  {
       fscanf(fp1,"%d %f",&nn,&tt1);
@@ -177,10 +178,10 @@ void regional_node_locations(E)
     }
     E->sphere.ri = rr[1];
     E->sphere.ro = rr[E->mesh.noz];
-    
+
     fclose(fp1);
-    
-  } else if(E->control.coor==0) {			
+
+  } else if(E->control.coor==0) {
     /* default: regular node spacing */
     dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
     for (k=1;k<=E->mesh.noz;k++)  {

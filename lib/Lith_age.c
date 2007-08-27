@@ -110,6 +110,7 @@ void lith_age_construct_tic(struct All_variables *E)
   int nox, noy, noz, gnox, gnoy, gnoz;
   double r1, temp;
   float age;
+  void temperatures_conform_bcs();
 
   noy=E->lmesh.noy;
   nox=E->lmesh.nox;

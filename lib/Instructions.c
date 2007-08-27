@@ -74,7 +74,10 @@ void set_elapsed_time(struct All_variables*);
 void set_sphere_harmonics (struct All_variables*);
 void set_starting_age(struct All_variables*);
 void tracer_initial_settings(struct All_variables*);
+void tracer_input(struct All_variables*);
+void viscosity_input(struct All_variables*);
 void get_vtk_filename(char *,int,struct All_variables *,int);
+void myerror(struct All_variables *,char *);
 
 void initial_mesh_solver_setup(struct All_variables *E)
 {

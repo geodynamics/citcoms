@@ -89,6 +89,8 @@ static void determine_shape_coefficients(struct All_variables *E);
 static void full_put_lost_tracers(struct All_variables *E,
                                   int isend[13][13], double *send[13][13]);
 void pdebug(struct All_variables *E, int i);
+int full_icheck_cap(struct All_variables *E, int icap,
+                    double x, double y, double z, double rad);
 
 
 
@@ -392,7 +394,7 @@ void full_lost_souls(struct All_variables *E)
 	  isource_proc=E->parallel.me;
         else
 	  isource_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
-	
+
 	fprintf(E->trace.fpt,"%d send %d to proc %d\n",
 		E->parallel.me,isend[j][kk],isource_proc);
 	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
@@ -2497,7 +2499,7 @@ int full_iget_element(struct All_variables *E,
                       double x, double y, double z,
                       double theta, double phi, double rad)
 {
-
+    int icheck_processor_shell();
     int iregel;
     int iel;
     int ntheta,nphi;

@@ -200,6 +200,8 @@ void PG_timestep_solve(struct All_variables *E)
 
   double Tmaxd();
   void temperatures_conform_bcs();
+  void lith_age_conform_tbc();
+  void assimilate_lith_conform_bcs();
   int i,m,psc_pass,iredo;
   double time0,time1,T_interior1;
   double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
@@ -730,6 +732,7 @@ static void filter(struct All_variables *E)
 static void process_visc_heating(struct All_variables *E, int m,
                                  double *heating, double *total_heating)
 {
+    void strain_rate_2_inv();
     int e, i;
     double visc, temp;
     float *strain_sqr;
@@ -802,24 +805,22 @@ static void latent_heating(struct All_variables *E, int m,
     int e, i, j;
     const int ends = enodes[E->mesh.nsd];
 
-    temp1 = 2.0 * width * clapeyron * Ra / E->control.Atemp;
+    temp1 = 2.0 * width * clapeyron * Ra / E->control.Atemp / ends;
 
     for(e=1; e<=E->lmesh.nel; e++) {
         temp2 = 0;
         temp3 = 0;
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
-            temp2 += temp1 * (1.0 - B[m][j]) * B[m][j]
+            temp2 += (1.0 - B[m][j]) * B[m][j]
                 * E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->data.surf_temp)
                 * E->control.disptn_number;
-            temp3 += temp1 * clapeyron * (1.0 - B[m][j])
+            temp3 += clapeyron * (1.0 - B[m][j])
                 * B[m][j] * (E->T[m][j] + E->data.surf_temp)
                 * E->control.disptn_number;
         }
-        temp2 = temp2 / ends;
-        temp3 = temp3 / ends;
-        heating_adi[e] += temp2;
-        heating_latent[e] += temp3;
+        heating_adi[e] += temp2 * temp1;
+        heating_latent[e] += temp3 * temp1;
     }
     return;
 }

@@ -40,6 +40,7 @@ double vnorm_nonnewt();
 void general_stokes_solver_setup(struct All_variables *E)
 {
   int i, m;
+  void construct_node_maps();
 
   if (E->control.NMULTIGRID || E->control.NASSEMBLE)
     construct_node_maps(E);

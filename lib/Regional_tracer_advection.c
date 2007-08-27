@@ -42,6 +42,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "composition_related.h"
+#include "parallel_related.h"
 
 
 static void write_trace_instructions(struct All_variables *E);
@@ -52,12 +53,16 @@ static void put_lost_tracers(struct All_variables *E,
 static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv,
                               int j);
+int isearch_neighbors(double *array, int nsize,
+                      double a, int hint);
+int isearch_all(double *array, int nsize, double a);
 
 
 void regional_tracer_setup(struct All_variables *E)
 {
 
     char output_file[255];
+    void get_neighboring_caps();
 
     /* Some error control */
 

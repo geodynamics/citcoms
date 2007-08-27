@@ -36,6 +36,9 @@
 #include "global_defs.h"
 #include "parsing.h"
 
+
+void myerror(struct All_variables *,char *);
+
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
@@ -169,8 +172,6 @@ void get_system_viscosity(E,propogate,evisc,visc)
     void visc_from_C();
 
     void apply_viscosity_smoother();
-    void visc_to_node_interpolate();
-    void visc_from_nodes_to_gint();
     void visc_from_gint_to_nodes();
 
 
@@ -658,7 +659,7 @@ void visc_from_C( E, EEta)
     myerror(E,"sorry, CDEPV only supports two flavors");
   if(E->composition.ncomp != 1)
     myerror(E,"CDEPV only supports one composition yet");
-  
+
   for(m=1;m <= E->sphere.caps_per_proc;m++)  {
     for(i = 1; i <= nel; i++){
       /* determine composition of each of the nodes of the
@@ -673,7 +674,7 @@ void visc_from_C( E, EEta)
 	cc_loc = 0.0;
 	for(kk = 1; kk <= ends; kk++)
 	  cc_loc += CC[kk] * E->N.vpt[GNVINDEX(kk, jj)];
-	
+
 	/* geometric mean of viscosity */
 	vmean = exp(cc_loc  * E->viscosity.cdepv_ff[1] +
 		    (1.0-cc_loc) * E->viscosity.cdepv_ff[0]);
@@ -691,6 +692,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 {
     void get_global_shape_fn();
     void velo_from_element();
+    void construct_c3x3matrix_el();
     void get_ba_p();
 
     struct Shape_function GN;
@@ -824,76 +826,6 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     else
 	for(e=1;e<=nel;e++)
 	    EEDOT[e] *=  0.5;
-
-    return;
-}
-
-
-
-void visc_to_node_interpolate(E,evisc,visc)
-     struct All_variables *E;
-     float **evisc,**visc;
-{
-
-    /*  void exchange_node_f(); */
-    /*  void get_global_shape_fn(); */
-    /*  void return_horiz_ave_f(); */
-    /*  void sphere_interpolate(); */
-    /*  void print_interpolated(); */
-    /*  void gather_TG_to_me0(); */
-    /*  void parallel_process_termination(); */
-    /*  int i,j,k,e,node,snode,m,nel2; */
-    /*    FILE *fp; */
-    /*    char output_file[255]; */
-
-    /*  float *TG,t,f,rad, Szz; */
-
-    /*  double time1,CPU_time0(),tww[9],rtf[4][9]; */
-
-    /*  struct Shape_function GN; */
-    /*  struct Shape_function_dA dOmega; */
-    /*  struct Shape_function_dx GNx; */
-
-    /*  const int dims=E->mesh.nsd,dofs=E->mesh.dof; */
-    /*  const int vpts=vpoints[dims]; */
-    /*  const int ppts=ppoints[dims]; */
-    /*  const int ends=enodes[dims]; */
-    /*  const int nno=E->lmesh.nno; */
-    /*  const int lev=E->mesh.levmax; */
-
-
-    /*     TG =(float *)malloc((E->sphere.nsf+1)*sizeof(float)); */
-    /*     for (i=E->sphere.nox;i>=1;i--) */
-    /*       for (j=1;j<=E->sphere.noy;j++)  { */
-    /*            node = i + (j-1)*E->sphere.nox; */
-    /* 	   TG[node] = 0.0; */
-    /*   	   m = E->sphere.int_cap[node]; */
-    /* 	   e = E->sphere.int_ele[node]; */
-
-    /* 	   if (m>0 && e>0) { */
-    /* 	      e=e+E->lmesh.elz-1; */
-    /* 	      TG[node] = log10(evisc[m][(e-1)*vpts+1]); */
-    /* 	      } */
-    /* 	   } */
-
-    /*     gather_TG_to_me0(E,TG); */
-
-    /*     if (E->parallel.me==E->parallel.nprocz-1)  { */
-    /*      sprintf(output_file,"%s.evisc_intp",E->control.data_file); */
-    /*      fp=fopen(output_file,"w"); */
-
-    /*     rad = 180/M_PI; */
-    /*     for (i=E->sphere.nox;i>=1;i--) */
-    /*       for (j=1;j<=E->sphere.noy;j++)  { */
-    /*            node = i + (j-1)*E->sphere.nox; */
-    /*            t = 90-E->sphere.sx[1][node]*rad; */
-    /* 	   f = E->sphere.sx[2][node]*rad; */
-    /* 	   fprintf (fp,"%.3e %.3e %.4e\n",f,t,TG[node]); */
-    /* 	   } */
-    /*       fclose(fp); */
-    /*      } */
-
-    /*  free((void *)TG); */
 
     return;
 }

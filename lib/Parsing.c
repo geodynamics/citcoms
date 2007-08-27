@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /* Routines which read filenames from the command line and
@@ -36,6 +36,7 @@
 #include <string.h>
 #endif
 #include "global_defs.h"
+#include "parsing.h"
 
 #define MAXLINE		1024	/* max length of line in input file */
 #define MAXNAME		64	/* max length of name */
@@ -85,11 +86,15 @@ int VERBOSE = 0;
 int DESCRIBE = 0;
 int BEGINNER = 0;
 
+int interpret_control_string();
+
+
 void setup_parser(E,filename)
      struct All_variables *E;
      char *filename;
 {
     void unique_copy_file();
+    void add_to_parameter_list();
 
     FILE * fp;
     char *pl,*pn,*pv;
@@ -114,7 +119,7 @@ void setup_parser(E,filename)
       exit(11);
     }
 
- 
+
 
   /* now the parameter file is open, read into memory */
 
@@ -187,12 +192,14 @@ void shutdown_parser(E)
 }
 
 
-add_to_parameter_list(name,value)	/* add an entry to arglist, expanding memory */
+/* add an entry to arglist, expanding memory */
+void add_to_parameter_list(name,value)
      char *name, *value;	/* if necessary */
 {
   struct arglist *alptr;
   int len;
   char *ptr;
+  int compute_parameter_hash_table();
 
   /* check arglist memory */
   if(NLIST >= LISTMAX)
@@ -256,7 +263,6 @@ int input_int(name,value,interpret,m)
      int m;
 
 {
-    int interpret_control_string();
     struct arglist *alptr;
     int h, found;
     char  *str;
@@ -325,7 +331,7 @@ int input_string(name,value,Default,m)  /* in the case of a string default=NULL 
      char *Default;
      int m;
 {
-    char *sptr;
+  char *sptr;
   struct arglist *alptr;
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;
@@ -378,7 +384,8 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
      int *value;
      char *interpret;
      int m;
-{ char *sptr;
+{
+  char *sptr;
   struct arglist *alptr;
   int h, hno, hyes, found;
   char line[MAXLINE], *str, *noname;

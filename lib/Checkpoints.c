@@ -27,6 +27,7 @@
  */
 
 #include <sys/file.h>
+#include <unistd.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 

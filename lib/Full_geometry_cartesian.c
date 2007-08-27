@@ -28,7 +28,7 @@
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
-
+#include "parsing.h"
 
 
 void full_set_2dc_defaults(E)

@@ -26,7 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-/* 
+/*
 
 routines to determine the net rotation velocity of the whole model
 
@@ -40,6 +40,7 @@ TWB
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "parallel_related.h"
 #include "parsing.h"
 #include "output.h"
 
@@ -51,12 +52,12 @@ void xyz2rtp(float ,float ,float ,float *);
 void *safe_malloc (size_t );
 double determine_model_net_rotation(struct All_variables *,double *);
 
-/* 
+/*
 
 determine the mean net rotation of the velocities at all layers
 
 
-modeled after horizontal layer average routines 
+modeled after horizontal layer average routines
 
 */
 double determine_model_net_rotation(struct All_variables *E,double *omega)
@@ -73,17 +74,17 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   elz = E->lmesh.elz;elx = E->lmesh.elx;ely = E->lmesh.ely;
 
   elz9 = elz*9;
-  
+
   acoef =  (double *)safe_malloc(elz9*sizeof(double));
   coef =   (double *)safe_malloc(elz9*sizeof(double));
   lomega = (double *)safe_malloc(3*elz*sizeof(double));
 
   for (i=1;i <= elz;i++)  {	/* loop through depths */
-    
+
     /* zero out coef for init */
     determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,0,(coef+(i-1)*9),&ddummy);
-    
-    if (i==elz) 
+
+    if (i==elz)
       top = 1;
     else
       top = 0;
@@ -118,7 +119,7 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
             lnode[2] = E->ien[m][el].node[6];
             lnode[3] = E->ien[m][el].node[7];
             lnode[4] = E->ien[m][el].node[8];
-	    
+
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
 		vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(1,nint)];
@@ -137,10 +138,10 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 	  /* add */
 	  determine_netr_tp(xp[0],xp[1],xp[2],v[0],v[1],1,(coef+(i-1)*9),&ddummy);
 	}  /* end of j  and k, and m  */
-    
+
   }        /* Done for i */
-  /* 
-     sum it all up 
+  /*
+     sum it all up
   */
   MPI_Allreduce(coef,acoef,elz9,MPI_DOUBLE,MPI_SUM,E->parallel.horizontal_comm);
 
@@ -164,9 +165,9 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
     //  fprintf(stderr,"NR layer %5i (%11g - %11g, %11g): |%11g %11g %11g| = %11g\n",
     //	      i+1,r1,r2,vtmp,lomega[i*3+0],lomega[i*3+1],lomega[i*3+2],lamp);
     /*  */
-    for(i1=0;i1<3;i1++)		
+    for(i1=0;i1<3;i1++)
       omega[i1] += lomega[i*3+i1] * vtmp;
-    vw += vtmp;		
+    vw += vtmp;
   }
   for(i1=0;i1 < 3;i1++)
     omega[i1] /= vw;
@@ -175,12 +176,12 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   free ((void *) coef);
   free ((void *) lomega);
 
-  
+
   oamp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
   return oamp;
 }
 
-/* 
+/*
 
 
 
@@ -220,11 +221,11 @@ double determine_netr_tp(float r,float theta,float phi,
       coslon=cos(phi);
       sinlat=cos(theta);
       sinlon=sin(phi);
-      
+
       rx=coslat*coslon*r;
       ry=coslat*sinlon*r;
       rz=sinlat*r;
-      
+
       rzu=sinlat;
 
       a = -rz*rzu*sinlon-ry*coslat;
@@ -233,7 +234,7 @@ double determine_netr_tp(float r,float theta,float phi,
       d = -rz*sinlon;
       e = -ry*rzu*coslon+rx*rzu*sinlon;
       f =  ry*sinlon+rx*coslon;
-      
+
       c9[0] += a*a+b*b;
       c9[1] += a*c+b*d;
       c9[2] += a*e+b*f;
@@ -275,9 +276,9 @@ double determine_netr_tp(float r,float theta,float phi,
 }
 
 //
-//     subtract a net rotation component from a velocity 
-//     field given as v_theta (velt) and v_phi (velp) on 
-//      
+//     subtract a net rotation component from a velocity
+//     field given as v_theta (velt) and v_phi (velp) on
+//
 
 void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *omega)
 {
@@ -294,11 +295,11 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
   ry = coslat*sinlon*r;
   rz = sinlat*r;
 
-  
+
   vx = omega[1]*rz - omega[2]*ry;
   vy = omega[2]*rx - omega[0]*rz;
   vz = omega[0]*ry - omega[1]*rx;
-  
+
   tx =  sinlat*coslon;		/* theta basis vectors */
   ty =  sinlat*sinlon;
   tz = -coslat;
@@ -316,7 +317,7 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
 }
 
 
-  
+
 //
 //      PROGRAM -OrbScore-: COMPARES OUTPUT FROM -SHELLS-
 //                          WITH DATA FROM GEODETI// NETWORKS,
@@ -353,11 +354,11 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
 //     OR REMOVES THIS MESSAGE OR THE COPYRIGHT MESSAGE.
 //   IT MAY NOT BE RESOLD FOR MORE THAN THE COST OF REPRODUCTION
 //      AND MAILING.
-//     
+//
 
 
 
-/* 
+/*
 
 matrix solvers from numerical recipes
 
@@ -369,11 +370,11 @@ void hc_ludcmp_3x3(double a[3][3],int *indx)
   int i,imax=0,j,k;
   double big,dum,sum,temp;
   double vv[3];
-  
+
   for (i=0;i < 3;i++) {
     big=0.0;
     for (j=0;j < 3;j++)
-      if ((temp = fabs(a[i][j])) > big) 
+      if ((temp = fabs(a[i][j])) > big)
 	big=temp;
     if (fabs(big) < 5e-15) {
       fprintf(stderr,"hc_ludcmp_3x3: singular matrix in routine, big: %g\n",
@@ -388,7 +389,7 @@ void hc_ludcmp_3x3(double a[3][3],int *indx)
   for (j=0;j < 3;j++) {
     for (i=0;i < j;i++) {
       sum = a[i][j];
-      for (k=0;k < i;k++) 
+      for (k=0;k < i;k++)
 	sum -= a[i][k] * a[k][j];
       a[i][j]=sum;
     }
@@ -412,11 +413,11 @@ void hc_ludcmp_3x3(double a[3][3],int *indx)
       vv[imax]=vv[j];
     }
     indx[j]=imax;
-    if (fabs(a[j][j]) < 5e-15) 
+    if (fabs(a[j][j]) < 5e-15)
       a[j][j] = NR_TINY;
     if (j != 2) {
       dum=1.0/(a[j][j]);
-      for (i=j+1;i < 3;i++) 
+      for (i=j+1;i < 3;i++)
 	a[i][j] *= dum;
     }
   }
@@ -431,15 +432,15 @@ void hc_lubksb_3x3(double a[3][3], int *indx, double *b)
     sum = b[ip];
     b[ip]=b[i];
     if (ii)
-      for (j=ii-1;j <= i-1;j++) 
+      for (j=ii-1;j <= i-1;j++)
 	sum -= a[i][j]*b[j];
-    else if (fabs(sum) > 5e-15) 
+    else if (fabs(sum) > 5e-15)
       ii = i+1;
     b[i]=sum;
   }
   for (i=2;i>=0;i--) {
     sum=b[i];
-    for (j=i+1;j < 3;j++) 
+    for (j=i+1;j < 3;j++)
       sum -= a[i][j]*b[j];
     b[i] = sum/a[i][i];
   }
