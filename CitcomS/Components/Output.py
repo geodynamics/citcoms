@@ -50,9 +50,15 @@ class Output(CitcomComponent):
 
         output_format = inv.str("output_format", default="ascii",
                                 validator=inv.choice(["ascii",
+                                                      "ascii-gz",
                                                       "hdf5"]))
         output_optional = inv.str("output_optional",
                                   default="surf,botm,tracer,comp_el")
+
+        # experimental vtk output
+        gzdir_vtkio = inv.int("gzdir_vtkio", default=0)
+        # remove net rotation
+        gzdir_rnr = inv.bool("gzdir_rnr", default=False)
 
         # max. degree for spherical harmonics output
         output_ll_max = inv.int("output_ll_max", default=20)

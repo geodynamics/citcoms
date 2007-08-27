@@ -399,8 +399,9 @@ static void pg_solver(struct All_variables *E,
     const int ends=enodes[dims];
     const int sphere_key = 1;
 
-    /* adiabatic and dissipative heating*/
-    process_heating(E);
+    /* adiabatic, dissipative and latent heating*/
+    if(E->control.disptn_number != 0)
+        process_heating(E);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++)

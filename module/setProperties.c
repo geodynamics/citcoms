@@ -31,7 +31,7 @@
 #include <string.h>
 #include <math.h>
 #include "global_defs.h"
-
+#include "parallel_related.h"
 #include "setProperties.h"
 
 
@@ -75,6 +75,9 @@ int _getDoubleVectorProperty(PyObject* properties, char* attribute,
                              double* vector, int len, FILE* fp);
 #define getDoubleVectorProperty(p, a, v, l, o) if (-1 == _getDoubleVectorProperty(p, a, v, l, o)) return NULL
 
+
+void myerror(struct All_variables *,char *);
+void report(struct All_variables *,char *);
 
 /*==============================================================*/
 
@@ -308,6 +311,12 @@ PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
 
     getStringProperty(properties, "output_format", E->output.format, fp);
     getStringProperty(properties, "output_optional", E->output.optional, fp);
+
+    getIntProperty(properties, "gzdir_vtkio", E->output.gzdir.vtk_io, fp);
+    getIntProperty(properties, "gzdir_rnr", E->output.gzdir.rnr, fp);
+    E->output.gzdir.vtk_base_init = 0;
+    /* should we save the basis vectors? (memory!) */
+    E->output.gzdir.vtk_base_save = 1;
 
     getIntProperty(properties, "output_ll_max", E->output.llmax, fp);
 
@@ -576,7 +585,7 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     struct All_variables *E;
     FILE *fp;
     double tmp;
-    void parallel_process_termination();
+    char message[100];
 
     if (!PyArg_ParseTuple(args, "OOO:Tracer_set_properties",
 			  &obj, &properties, &out))
@@ -588,6 +597,17 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     PUTS(("[CitcomS.solver.tracer]\n"));
 
     getIntProperty(properties, "tracer", E->control.tracer, fp);
+
+    getIntProperty(properties, "tracer_enriched", E->control.tracer_enriched, fp);
+    if(E->control.tracer_enriched) {
+        if(!E->control.tracer)
+            myerror(E,"need to switch on tracers for tracer_enriched");
+
+        getFloatProperty(properties, "Q0_enriched", E->control.Q0ER, fp);
+        snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g (only one composition!)",
+                 E->control.Q0,E->control.Q0ER);
+        report(E,message);
+    }
 
     getIntProperty(properties, "tracer_ic_method",
                    E->trace.ic_method, fp);
@@ -611,11 +631,26 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "tracer_flavors", E->trace.nflavors, fp);
 
     getIntProperty(properties, "ic_method_for_flavors", E->trace.ic_method_for_flavors, fp);
-    if (E->trace.nflavors > 1 && E->trace.ic_method_for_flavors == 0) {
-        E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
-                                                *sizeof(double));
 
-        getDoubleVectorProperty(properties, "z_interface", E->trace.z_interface, E->trace.nflavors-1, fp);
+    if (E->trace.nflavors > 1) {
+        switch(E->trace.ic_method_for_flavors){
+        case 0:			/* layer */
+            E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
+                                                    *sizeof(double));
+
+            getDoubleVectorProperty(properties, "z_interface", E->trace.z_interface, E->trace.nflavors-1, fp);
+            break;
+        case 1:			/* from grid in top n materials */
+            /* file from which to read */
+            getStringProperty(properties, "ictracer_grd_file", E->trace.ggrd_file, fp);
+            /* which top layers to use */
+            getIntProperty(properties, "ictracer_grd_layers", E->trace.ggrd_layers, fp);
+            break;
+        default:
+            fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
+            parallel_process_termination();
+            break;
+        }
     }
 
     getIntProperty(properties, "chemical_buoyancy",
@@ -672,7 +707,7 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
-    int num_mat;
+    int num_mat, i;
 
     if (!PyArg_ParseTuple(args, "OOO:Visc_set_properties",
 			  &obj, &properties, &out))
@@ -715,9 +750,37 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
                            E->viscosity.Z, num_mat, fp);
 
     getIntProperty(properties, "SDEPV", E->viscosity.SDEPV, fp);
-    getFloatProperty(properties, "sdepv_misfit", E->viscosity.sdepv_misfit, fp);
     getFloatVectorProperty(properties, "sdepv_expt",
                            E->viscosity.sdepv_expt, num_mat, fp);
+
+    getIntProperty(properties, "PDEPV", E->viscosity.PDEPV, fp);
+    if (E->viscosity.PDEPV) {
+        E->viscosity.pdepv_visited = 0;
+        getIntProperty(properties, "pdepv_eff", E->viscosity.pdepv_eff, fp);
+        getFloatVectorProperty(properties, "pdepv_a",
+                               E->viscosity.pdepv_a, num_mat, fp);
+        getFloatVectorProperty(properties, "pdepv_b",
+                               E->viscosity.pdepv_b, num_mat, fp);
+        getFloatVectorProperty(properties, "pdepv_y",
+                               E->viscosity.pdepv_y, num_mat, fp);
+        getFloatProperty(properties, "pdepv_offset", E->viscosity.pdepv_offset, fp);
+    }
+    if(E->viscosity.PDEPV || E->viscosity.SDEPV)
+        getFloatProperty(properties, "sdepv_misfit", E->viscosity.sdepv_misfit, fp);
+
+    getIntProperty(properties, "CDEPV", E->viscosity.CDEPV, fp);
+    if(E->viscosity.CDEPV){	/* compositional viscosity */
+        if(!E->control.tracer)
+            myerror(E,"error: CDEPV requires tracers, but tracer is off");
+        if(E->trace.nflavors > 10)
+            myerror(E,"error: too many flavors for CDEPV");
+        /* read in flavor factors */
+        getFloatVectorProperty(properties, "cdepv_ff",
+                               E->viscosity.cdepv_ff, E->trace.nflavors, fp);
+        /* and take the log because we're using a geometric avg */
+        for(i=0;i<E->trace.nflavors;i++)
+            E->viscosity.cdepv_ff[i] = log(E->viscosity.cdepv_ff[i]);
+    }
 
     getIntProperty(properties, "low_visc_channel", E->viscosity.channel, fp);
     getIntProperty(properties, "low_visc_wedge", E->viscosity.wedge, fp);

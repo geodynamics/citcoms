@@ -82,9 +82,16 @@ class Tracer(CitcomComponent):
         # later for many purposes. One of it is to compute composition,
         # either using absolute method or ratio method.
         tracer_flavors = inv.int("tracer_flavors", default=0)
+
+        # How to initialize tracer flavors
         ic_method_for_flavors = inv.int("ic_method_for_flavors", default=0)
         z_interface = inv.list("z_interface", default=[0.7])
+        ictracer_grd_file = inv.str("ictracer_grd_file", default="")
+        ictracer_grd_layers = inv.int("ictracer_grd_layers", default=2)
 
+        # Enriched internal heat production
+        tracer_enriched = inv.bool("tracer_enriched", default=False)
+        Q0_enriched = inv.float("Q0_enriched", default=0.0)
 
         # Regular grid parameters
         regular_grid_deltheta = inv.float("regular_grid_deltheta", default=1.0)

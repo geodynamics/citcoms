@@ -47,6 +47,10 @@ class Visc(CitcomComponent):
         inv.viscT = map(float, inv.viscT)
         inv.viscZ = map(float, inv.viscZ)
         inv.sdepv_expt = map(float, inv.sdepv_expt)
+        inv.pdepv_a = map(float, inv.pdepv_a)
+        inv.pdepv_b = map(float, inv.pdepv_b)
+        inv.pdepv_y = map(float, inv.pdepv_y)
+        inv.cdepv_ff = map(float, inv.cdepv_ff)
 
         Visc_set_properties(self.all_variables, inv, stream)
 
@@ -82,7 +86,17 @@ class Visc(CitcomComponent):
 
         SDEPV = pyre.inventory.bool("SDEPV", default=False)
         sdepv_expt = pyre.inventory.list("sdepv_expt", default=[1, 1, 1, 1])
-        sdepv_misfit = pyre.inventory.float("sdepv_misfit", default=0.02)
+        sdepv_misfit = pyre.inventory.float("sdepv_misfit", default=0.001)
+
+        PDEPV = pyre.inventory.bool("PDEPV", default=False)
+        pdepv_eff = pyre.inventory.bool("pdepv_eff", default=True)
+        pdepv_a= pyre.inventory.list("pdepv_a", default=[1e20, 1e20, 1e20, 1e20])
+        pdepv_b= pyre.inventory.list("pdepv_b", default=[0, 0, 0, 0])
+        pdepv_y= pyre.inventory.list("pdepv_y", default=[1e20, 1e20, 1e20, 1e20])
+        pdepv_offset = pyre.inventory.float("pdepv_offset", default=0.0)
+
+        CDEPV = pyre.inventory.bool("CDEPV", default=False)
+        cdepv_ff= pyre.inventory.list("cdepv_ff", default=[1])
 
         low_visc_channel = pyre.inventory.bool("low_visc_channel", default=False)
         low_visc_wedge = pyre.inventory.bool("low_visc_wedge", default=False)
