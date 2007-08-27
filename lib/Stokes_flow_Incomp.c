@@ -175,7 +175,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     /* copy the original force vector since we need to keep it intact
        between iterations */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(j=1;j<=neq;j++)
+        for(j=0;j<neq;j++)
             F[m][j] = FF[m][j];
 
 
