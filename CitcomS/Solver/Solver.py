@@ -301,7 +301,7 @@ class Solver(Component):
         visc = inv.facility("visc", factory=Visc)
 
         datadir = inv.str("datadir", default=".")
-        datadir_old = inv.str("datadir_old", default="")
+        datadir_old = inv.str("datadir_old", default=".")
 
         rayleigh = inv.float("rayleigh", default=1e+05)
         dissipation_number = inv.float("dissipation_number", default=0.0)
