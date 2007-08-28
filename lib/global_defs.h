@@ -455,6 +455,9 @@ struct CONTROL {
     /* inverse of Gruneisen parameter */
     float inv_gruneisen;
 
+    /* surface temperature */
+    float surface_temp;
+
     /**/
     float relative_err_accuracy;
 
@@ -552,7 +555,6 @@ struct DATA {
     float   melt_viscosity;
     float   permeability;
     float   grav_const;
-    float  surf_temp;
     float   youngs_mod;
     float   Te;
     float   ref_temperature;

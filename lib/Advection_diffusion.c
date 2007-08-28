@@ -540,7 +540,8 @@ static void element_residual(struct All_variables *E, int el,
     double prod,sfn;
     struct Shape_function1 GM;
     struct Shape_function1_dA dGamma;
-    double temp;
+    double temp,rho,heating;
+    int nz;
 
     void get_global_1d_shape_fn();
 
@@ -600,6 +601,14 @@ static void element_residual(struct All_variables *E, int el,
       Q += E->composition.comp_el[m][0][el] * E->control.Q0ER;
     }
 
+    nz = ((el-1) % E->lmesh.noz) + 1;
+    rho = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
+
+    if(E->control.disptn_number == 0)
+        heating = rho * Q;
+    else
+        heating = (rho * Q - E->heating_adi[m][el] + E->heating_visc[m][el])
+            * E->heating_latent[m][el];
 
     /* construct residual from this information */
 
@@ -610,7 +619,7 @@ static void element_residual(struct All_variables *E, int el,
 	for(i=1;i<=vpts;i++)
 	  Eres[j] -=
 	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
-	    * (dT[i] - Q + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
+	    * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
  	    + diff*dOmega.vpt[i] * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
 				    GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
 				    GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
@@ -621,7 +630,7 @@ static void element_residual(struct All_variables *E, int el,
       for(j=1;j<=ends;j++) {
 	Eres[j]=0.0;
 	for(i=1;i<=vpts;i++)
-	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i] * (dT[i] - Q + v1[i] * tx1[i] + v2[i] * tx2[i] + v3[i] * tx3[i]);
+	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i] * (dT[i] - heating + v1[i] * tx1[i] + v2[i] * tx2[i] + v3[i] * tx3[i]);
       }
     }
 
@@ -731,7 +740,7 @@ static void filter(struct All_variables *E)
 
 
 static void process_visc_heating(struct All_variables *E, int m,
-                                 double *heating, double *total_heating)
+                                 double *heating)
 {
     void strain_rate_2_inv();
     int e, i;
@@ -754,18 +763,12 @@ static void process_visc_heating(struct All_variables *E, int m,
 
     free(strain_sqr);
 
-
-    /* sum up */
-    *total_heating = 0;
-    for(e=1; e<=E->lmesh.nel; e++)
-        *total_heating += heating[e] * E->eco[m][e].area;
-
     return;
 }
 
 
 static void process_adi_heating(struct All_variables *E, int m,
-                                double *heating, double *total_heating)
+                                double *heating)
 {
     int e, ez, i, j;
     double temp, temp2;
@@ -779,19 +782,14 @@ static void process_adi_heating(struct All_variables *E, int m,
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
             temp += E->sphere.cap[m].V[3][j]
-                * (E->T[m][j] + E->data.surf_temp);
+                * (E->T[m][j] + E->control.surface_temp);
         }
 
-        /* XXX: missing gravity */
-        heating[e] = temp * temp2 * 0.25
+        heating[e] = temp * temp2 * 0.125
             * (E->refstate.thermal_expansivity[ez] + E->refstate.thermal_expansivity[ez + 1])
-            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1]);
+            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
+            * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
     }
-
-    /* sum up */
-    *total_heating = 0;
-    for(e=1; e<=E->lmesh.nel; e++)
-        *total_heating += heating[e] * E->eco[m][e].area;
 
     return;
 }
@@ -814,10 +812,10 @@ static void latent_heating(struct All_variables *E, int m,
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
             temp2 += (1.0 - B[m][j]) * B[m][j]
-                * E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->data.surf_temp)
+                * E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->control.surface_temp)
                 * E->control.disptn_number;
             temp3 += clapeyron * (1.0 - B[m][j])
-                * B[m][j] * (E->T[m][j] + E->data.surf_temp)
+                * B[m][j] * (E->T[m][j] + E->control.surface_temp)
                 * E->control.disptn_number;
         }
         heating_adi[e] += temp2 * temp1;
@@ -832,11 +830,9 @@ static void process_latent_heating(struct All_variables *E, int m,
 {
     int e;
 
-    if(E->control.Ra_410 != 0 || E->control.Ra_670 != 0.0 ||
-       E->control.Ra_cmb != 0) {
-        for(e=1; e<=E->lmesh.nel; e++)
-            heating_latent[e] = 1.0;
-    }
+    /* reset */
+    for(e=1; e<=E->lmesh.nel; e++)
+        heating_latent[e] = 1.0;
 
     if(E->control.Ra_410 != 0.0) {
         latent_heating(E, m, heating_latent, heating_adi,
@@ -871,36 +867,48 @@ static void process_latent_heating(struct All_variables *E, int m,
 }
 
 
+static double total_heating(struct All_variables *E, double **heating)
+{
+    int m, e;
+    double sum, total;
+
+    /* sum up within each processor */
+    sum = 0;
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        for(e=1; e<=E->lmesh.nel; e++)
+            sum += heating[m][e] * E->eco[m][e].area;
+    }
+
+    /* sum up for all processors */
+    MPI_Allreduce(&sum, &total, 1,
+                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+    return total;
+}
+
 
 static void process_heating(struct All_variables *E)
 {
     int m;
-    double total_visc_heating[NCS], total_adi_heating[NCS];
-    double temp1, temp2, temp3, temp4;
+    double total_visc_heating, total_adi_heating;
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        process_visc_heating(E, m, E->heating_visc[m], &(total_visc_heating[m]));
-        process_adi_heating(E, m, E->heating_adi[m], &(total_adi_heating[m]));
+        process_visc_heating(E, m, E->heating_visc[m]);
+        process_adi_heating(E, m, E->heating_adi[m]);
         process_latent_heating(E, m, E->heating_latent[m], E->heating_adi[m]);
     }
 
     /* compute total amount of visc/adi heating over all processors */
-    temp3 = temp4 = 0;
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        MPI_Allreduce(&(total_visc_heating[m]), &temp1,
-                      E->sphere.caps_per_proc,
-                      MPI_DOUBLE, MPI_SUM, E->parallel.world);
-        MPI_Allreduce(&(total_adi_heating[m]), &temp2,
-                      E->sphere.caps_per_proc,
-                      MPI_DOUBLE, MPI_SUM, E->parallel.world);
-
-        temp3 += temp1;
-        temp4 += temp2;
-    }
+    total_visc_heating = total_heating(E, E->heating_visc);
+    total_adi_heating = total_heating(E, E->heating_adi);
 
     if(E->parallel.me == 0)
         fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
-                E->monitor.solution_cycles, temp3, temp4);
+                E->monitor.solution_cycles,
+                total_visc_heating, total_adi_heating);
+        fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                E->monitor.solution_cycles,
+                total_visc_heating, total_adi_heating);
 
     return;
 }

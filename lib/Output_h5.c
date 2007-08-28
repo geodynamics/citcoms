@@ -1368,7 +1368,6 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_float(input, "cp", E->data.Cp);
     status = set_attribute_float(input, "density_above", E->data.density_above);
     status = set_attribute_float(input, "density_below", E->data.density_below);
-    status = set_attribute_float(input, "surftemp", E->data.surf_temp);
 
     status = set_attribute_float(input, "z_lith", E->viscosity.zlith);
     status = set_attribute_float(input, "z_410", E->viscosity.z410);
@@ -1464,6 +1463,7 @@ void h5output_meta(struct All_variables *E)
                                  (E->control.inv_gruneisen == 0)?
                                   1.0/E->control.inv_gruneisen :
 				 E->control.inv_gruneisen);
+    status = set_attribute_float(input, "surfaceT", E->control.surface_temp);
     status = set_attribute_float(input, "Q0", E->control.Q0);
 
     status = set_attribute_int(input, "stokes_flow_only", E->control.stokes);

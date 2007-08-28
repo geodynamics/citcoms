@@ -81,7 +81,6 @@ class Const(CitcomComponent):
         cp = pyre.inventory.float("cp", default=1200.0)
         density_above = pyre.inventory.float("density_above", default=1030.0)
         density_below = pyre.inventory.float("density_below", default=6600.0)
-        surftemp = pyre.inventory.float("surftemp", default=273.0)
 
         z_lith = pyre.inventory.float("z_lith", default=0.014)
         z_410 = pyre.inventory.float("z_410", default=0.06435)

@@ -71,11 +71,7 @@ void reference_state(struct All_variables *E)
     double r, z, beta, T0;
 
     beta = E->control.disptn_number * E->control.inv_gruneisen;
-    T0 = E->data.surf_temp / E->data.ref_temperature;
-    if(E->parallel.me == 0)
-        fprintf(stderr, "Di=%e, gamma=%e, surf_temp=%e, dT=%e\n",
-                E->control.disptn_number, 1.0/E->control.inv_gruneisen,
-                E->data.surf_temp, E->data.ref_temperature);
+    T0 = E->control.surface_temp / E->data.ref_temperature;
 
     /* All refstate variables (except Tadi) must be 1 at the surface.
      * Otherwise, the scaling of eqns in the code might not be correct. */

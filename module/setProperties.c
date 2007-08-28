@@ -197,7 +197,6 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "cp", E->data.Cp, fp);
     getFloatProperty(properties, "density_above", E->data.density_above, fp);
     getFloatProperty(properties, "density_below", E->data.density_below, fp);
-    getFloatProperty(properties, "surftemp", E->data.surf_temp, fp);
 
     E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
     E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
@@ -467,6 +466,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
     else
         E->control.inv_gruneisen = 0;
 
+    getFloatProperty(properties, "surfaceT", E->control.surface_temp, fp);
     getFloatProperty(properties, "Q0", E->control.Q0, fp);
 
     getIntProperty(properties, "stokes_flow_only", E->control.stokes, fp);

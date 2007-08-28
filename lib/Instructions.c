@@ -438,11 +438,11 @@ void read_initial_settings(struct All_variables *E)
           myerror(E, "Error: unknown Uzawa iteration\n");
   }
 
-
-  /* data section */
+  input_float("surfaceT",&(E->control.surface_temp),"0.1",m);
   input_float("Q0",&(E->control.Q0),"0.0",m);
   /* Q0_enriched gets read in Tracer_setup.c */
 
+  /* data section */
   input_float("gravacc",&(E->data.grav_acc),"9.81",m);
   input_float("thermexp",&(E->data.therm_exp),"3.0e-5",m);
   input_float("cp",&(E->data.Cp),"1200.0",m);
@@ -451,7 +451,6 @@ void read_initial_settings(struct All_variables *E)
   input_float("density_above",&(E->data.density_above),"1030.0",m);
   input_float("density_below",&(E->data.density_below),"6600.0",m);
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
-  input_float("surftemp",&(E->data.surf_temp),"273.0",m);
 
   input_float("radius",&tmp,"6371e3.0",m);
   E->data.radius_km = tmp / 1e3;
@@ -674,7 +673,7 @@ void allocate_common_vars(E)
 
       E->heating_adi[j][i] = 0;
       E->heating_visc[j][i] = 0;
-      E->heating_latent[j][i] = 1.0; //TODO: why 1?
+      E->heating_latent[j][i] = 1.0;
   }
 
   for(i=1;i<=E->lmesh.npno;i++)
@@ -839,7 +838,6 @@ void global_default_values(E)
   E->data.gas_const = 8.3;
   E->data.surf_heat_flux = 4.4e-2;
   E->data.grav_const = 6.673e-11;
-  E->data.surf_temp = 0.0;
   E->data.youngs_mod = 1.0e11;
   E->data.Te = 0.0;
   E->data.T_sol0 = 1373.0;      /* Dave's values 1991 (for the earth) */
