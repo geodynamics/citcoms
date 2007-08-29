@@ -50,7 +50,6 @@ void output_horiz_avg(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
-FILE* output_open_mode(char *, char *);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
@@ -129,11 +128,7 @@ void output(struct All_variables *E, int cycles)
 }
 
 
-FILE* output_open(char *filename)
-{
-  return output_open_mode(filename,"w");
-}
-FILE* output_open_mode(char *filename, char *mode)
+FILE* output_open(char *filename, char *mode)
 {
   FILE *fp1;
 
@@ -160,7 +155,7 @@ void output_coord(struct All_variables *E)
   FILE *fp1;
 
   sprintf(output_file,"%s.coord.%d",E->control.data_file,E->parallel.me);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
@@ -183,7 +178,7 @@ void output_visc(struct All_variables *E, int cycles)
 
   sprintf(output_file,"%s.visc.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
@@ -206,7 +201,7 @@ void output_velo(struct All_variables *E, int cycles)
 
   sprintf(output_file,"%s.velo.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
@@ -238,7 +233,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
     sprintf(output_file,"%s.surf.%d.%d", E->control.data_file,
             E->parallel.me, cycles);
-    fp2 = output_open(output_file);
+    fp2 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
         /* choose either STD topo or pseudo-free-surf topo */
@@ -260,7 +255,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
   if (E->output.botm && (E->parallel.me_loc[3]==0)) {
     sprintf(output_file,"%s.botm.%d.%d", E->control.data_file,
             E->parallel.me, cycles);
-    fp2 = output_open(output_file);
+    fp2 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
@@ -291,7 +286,7 @@ void output_geoid(struct All_variables *E, int cycles)
     if (E->parallel.me == (E->parallel.nprocz-1))  {
         sprintf(output_file, "%s.geoid.%d.%d", E->control.data_file,
                 E->parallel.me, cycles);
-        fp1 = output_open(output_file);
+        fp1 = output_open(output_file, "w");
 
         /* write headers */
         fprintf(fp1, "%d %d %.5e\n", cycles, E->output.llmax,
@@ -326,7 +321,7 @@ void output_stress(struct All_variables *E, int cycles)
 
   sprintf(output_file,"%s.stress.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
@@ -381,7 +376,7 @@ void output_mat(struct All_variables *E)
   FILE* fp;
 
   sprintf(output_file,"%s.mat.%d", E->control.data_file,E->parallel.me);
-  fp = output_open(output_file);
+  fp = output_open(output_file, "w");
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)
@@ -402,7 +397,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
   sprintf(output_file,"%s.pressure.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
@@ -427,7 +422,7 @@ void output_tracer(struct All_variables *E, int cycles)
 
   sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
@@ -464,7 +459,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
 
     sprintf(output_file,"%s.comp_nd.%d.%d", E->control.data_file,
             E->parallel.me, cycles);
-    fp1 = output_open(output_file);
+    fp1 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fprintf(fp1,"%3d %7d %.5e %d\n",
@@ -499,7 +494,7 @@ void output_comp_el(struct All_variables *E, int cycles)
 
     sprintf(output_file,"%s.comp_el.%d.%d", E->control.data_file,
             E->parallel.me, cycles);
-    fp1 = output_open(output_file);
+    fp1 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fprintf(fp1,"%3d %7d %.5e %d\n",
@@ -534,7 +529,7 @@ void output_heating(struct All_variables *E, int cycles)
 
     sprintf(output_file,"%s.heating.%d.%d", E->control.data_file,
             E->parallel.me, cycles);
-    fp1 = output_open(output_file);
+    fp1 = output_open(output_file, "w");
 
     fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 

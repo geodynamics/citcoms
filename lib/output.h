@@ -38,7 +38,7 @@ void output(struct All_variables *, int);
 void output_time(struct All_variables *, int);
 void output_checkpoint(struct All_variables *);
 
-FILE* output_open(char *);
+FILE* output_open(char *, char *);
 
 #ifdef __cplusplus
 }

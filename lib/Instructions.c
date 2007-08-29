@@ -1031,7 +1031,12 @@ static void open_log(struct All_variables *E)
     sprintf(logfile,"%s/log", E->control.data_dir);
   else
     sprintf(logfile,"%s.log", E->control.data_file);
-  E->fp = output_open(logfile);
+
+  if (E->control.restart || E->control.post_p)
+      /* append the log file if restart */
+      E->fp = output_open(logfile, "a");
+  else
+      E->fp = output_open(logfile, "w");
 
   return;
 }
@@ -1047,7 +1052,12 @@ static void open_time(struct All_variables *E)
     sprintf(timeoutput,"%s/time", E->control.data_dir);
   else
     sprintf(timeoutput,"%s.time", E->control.data_file);
-    E->fptime = output_open(timeoutput);
+
+  if (E->control.restart || E->control.post_p)
+      /* append the time file if restart */
+      E->fptime = output_open(timeoutput, "a");
+  else
+      E->fptime = output_open(timeoutput, "w");
   }
 
   return;
@@ -1064,7 +1074,7 @@ static void open_info(struct All_variables *E)
     sprintf(output_file,"%s/info.%d", E->control.data_dir, E->parallel.me);
   else
     sprintf(output_file,"%s.info.%d", E->control.data_file, E->parallel.me);
-    E->fp_out = output_open(output_file);
+  E->fp_out = output_open(output_file, "w");
   }
 
   return;

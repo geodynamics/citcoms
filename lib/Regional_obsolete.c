@@ -741,7 +741,7 @@ void output_velo_related(E,file_number)
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)      {
     sprintf(output_file,"%s.surf.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp2 = output_open(output_file);
+    fp2 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
@@ -756,7 +756,7 @@ void output_velo_related(E,file_number)
 
   if (E->parallel.me_loc[3]==0)      {
     sprintf(output_file,"%s.botm.%d.%d",E->control.data_file,E->parallel.me,cycles);
-    fp2 = output_open(output_file);
+    fp2 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
@@ -771,7 +771,7 @@ void output_velo_related(E,file_number)
   /* remove horizontal average output   by Tan2 Mar. 1 2002  */
 /*    if (E->parallel.me<E->parallel.nprocz)  { */
 /*      sprintf(output_file,"%s.ave_r.%d.%d",E->control.data_file,E->parallel.me,cycles); */
-/*      fp2 = output_open(output_file); */
+/*      fp2 = output_open(output_file, "w"); */
 /*  	if (fp2 == NULL) { */
 /*            fprintf(E->fp,"(Output.c #6) Cannot open %s\n",output_file); */
 /*            exit(8); */
@@ -851,7 +851,7 @@ void output_visc(struct All_variables *E, int cycles)
   float *VE[NCS];
 
   sprintf(output_file,"%s.visc.%d.%d",E->control.data_file,E->parallel.me,cycles);
-  fp1 = output_open(output_file);
+  fp1 = output_open(output_file, "w");
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     VE[m]=(float *)malloc((1+E->lmesh.nno)*sizeof(float));

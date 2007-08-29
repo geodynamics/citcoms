@@ -750,7 +750,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             /* When the element is close to the poles, use a more
              * precise method to compute the strain rate. */
 
-            if ((e-1)%E->lmesh.ELZ[lev]==0) {
+            if ((e-1)%E->lmesh.elz==0) {
                 construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
             }
 
@@ -761,7 +761,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
                 for(p=1;p<=6;p++)
                     for(i=1;i<=ends;i++)
                         for(q=1;q<=dims;q++) {
-                            Vxyz[p][j] += ba[i][j][p][q] * VV[q][i];
+                            Vxyz[p][j] += ba[i][j][q][p] * VV[q][i];
                         }
 
         }
