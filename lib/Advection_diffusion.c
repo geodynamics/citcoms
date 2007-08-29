@@ -902,13 +902,13 @@ static void process_heating(struct All_variables *E)
     total_visc_heating = total_heating(E, E->heating_visc);
     total_adi_heating = total_heating(E, E->heating_adi);
 
-    if(E->parallel.me == 0)
+    if(E->parallel.me == 0) {
         fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
                 E->monitor.solution_cycles,
                 total_visc_heating, total_adi_heating);
         fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
                 E->monitor.solution_cycles,
                 total_visc_heating, total_adi_heating);
-
+    }
     return;
 }
