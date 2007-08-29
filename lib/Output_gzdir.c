@@ -739,8 +739,9 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
   char output_file[255];
   gzFile *fp2;
   float *topo;
-
-  heat_flux(E);
+  if(E->output.write_q_files == 0) /* else, the heat flux will have
+				      been computed already */
+    heat_flux(E);
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
@@ -1144,6 +1145,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	/*  E->sphere.cap[m].V[1][i] = v1;
 	    E->sphere.cap[m].V[1][i] = v2;
 	    E->sphere.cap[m].V[1][i] = v3;  */
+	/* I don't like that  */
 	//E->T[m][i] = max(0.0,min(g,1.0));
 	E->T[m][i] = g;
       }

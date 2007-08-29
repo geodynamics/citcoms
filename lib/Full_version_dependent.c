@@ -29,6 +29,9 @@
 
 #include "global_defs.h"
 #include "parallel_related.h"
+#ifdef USE_GGRD
+void ggrd_full_temp_init(struct All_variables *);
+#endif
 
 void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
 
@@ -270,8 +273,9 @@ void full_construct_tic_from_input(struct All_variables *E)
   gnoz=E->mesh.noz;
 
 
-  if (E->convection.tic_method == 0) {
+  switch (E->convection.tic_method){
 
+  case 0:
 
     /* set up a linear temperature profile first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -311,8 +315,10 @@ void full_construct_tic_from_input(struct All_variables *E)
 	    E->T[m][node] += con*modified_plgndr_a(ll,mm,t1)*cos(mm*f1);
 	  }
     }
-  }
-  else if (E->convection.tic_method == 3) {
+    break;
+
+  case 3:
+    
     /* set up a linear temperature profile first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
@@ -354,9 +360,22 @@ void full_construct_tic_from_input(struct All_variables *E)
                   *sin(M_PI*(r1-E->sphere.ri)/(E->sphere.ro-E->sphere.ri));
 	  }
     }
-  }
-  else if (E->convection.tic_method == 1) {
-
+    break;
+  case 1:
+  case 2:
+    break;
+  case 4:
+#ifdef USE_GGRD
+    ggrd_full_temp_init(E);
+#else
+    fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
+    parallel_process_termination();
+#endif
+    break;
+  default:			/* unknown option */
+    fprintf(stderr,"Invalid value of 'tic_method'\n");
+    parallel_process_termination();
+    break;
   }
 
   temperatures_conform_bcs(E);

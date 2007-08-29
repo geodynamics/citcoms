@@ -74,10 +74,15 @@ void tic_input(struct All_variables *E)
 
      When tic_method is 3, the temperature is a linear profile + perturbation
      for whole mantle.
+
+     tic_method is 4: read in initial temperature distribution from a set of netcdf grd
+                      files. this required the GGRD extension to be compiled in 
+
   */
 
-
-  if (E->convection.tic_method == 0 || E->convection.tic_method == 3 ) {
+  switch(E->convection.tic_method){
+  case 0:
+  case 3:
     /* This part put a temperature anomaly at depth where the global
        node number is equal to load_depth. The horizontal pattern of
        the anomaly is given by spherical harmonic ll & mm. */
@@ -111,14 +116,14 @@ void tic_input(struct All_variables *E)
       E->convection.perturb_ll[0] = 2;
       E->convection.load_depth[0] = (noz+1)/2;
     }
-
-  }
-  else if (E->convection.tic_method == 1) {
+    
+    break;
+  case 1:			/* case 1 */
 
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
+    break;
 
-  }
-  else if (E->convection.tic_method == 2) {
+  case 2:			/* case 2 */
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
     if( ! input_float_vector("blob_center", 3, E->convection.blob_center, m)) {
       assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
@@ -135,10 +140,38 @@ void tic_input(struct All_variables *E)
     }
     input_float("blob_radius", &(E->convection.blob_radius), "0.063,0.0,1.0", m);
     input_float("blob_dT", &(E->convection.blob_dT), "0.18,nomin,nomax", m);
-  }
-  else {
+    break;
+  case 4:
+    /* 
+       case 4: initial temp from grd files 
+    */
+#ifdef USE_GGRD
+    /* read in some more parameters */
+    /* scale the anomalies with PREM densities */
+    input_boolean("ggrd_tinit_scale_with_prem",&(E->convection.ggrd_tinit_scale_with_prem),"off",E->parallel.me);
+    /* scaling factor for the grids */
+    input_double("ggrd_tinit_scale",&(E->convection.ggrd_tinit_scale),"1.0",E->parallel.me); /* scale */
+    /* temperature offset factor */
+    input_double("ggrd_tinit_offset",&(E->convection.ggrd_tinit_offset),"0.0",E->parallel.me); /* offset */
+    /* grid name, without the .i.grd suffix */
+    input_string("ggrd_tinit_gfile",E->convection.ggrd_tinit_gfile,"",E->parallel.me); /* grids */
+    input_string("ggrd_tinit_dfile",E->convection.ggrd_tinit_dfile,"",E->parallel.me); /* depth.dat
+											  layers
+											  of
+											  grids*/
+    /* override temperature boundary condition? */
+    input_boolean("ggrd_tinit_override_tbc",&(E->convection.ggrd_tinit_override_tbc),"off",E->parallel.me);
+    input_string("ggrd_tinit_prem_file",E->convection.prem.model_filename,"", E->parallel.me); /* PREM model filename */
+#else
+    fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
+    parallel_process_termination();
+#endif
+
+    break;
+  default:			/* unknown option */
     fprintf(stderr,"Invalid value of 'tic_method'\n");
     parallel_process_termination();
+    break;
   }
 
   return;

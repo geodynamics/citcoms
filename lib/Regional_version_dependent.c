@@ -31,6 +31,10 @@
 #include "parallel_related.h"
 void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
 
+#ifdef USE_GGRD
+void ggrd_reg_temp_init(struct All_variables *);
+#endif
+
 /* Setup global mesh parameters */
 void regional_global_derived_values(E)
      struct All_variables *E;
@@ -333,6 +337,14 @@ void regional_construct_tic_from_input(struct All_variables *E)
   int mm, ll;
   double con, temp;
 
+  double theta_center;
+  double fi_center;
+  double r_center;
+  double radius;
+  double amp;
+  double x_center,y_center,z_center;
+  double theta,fi,r,x,y,z,distance;
+
   double tlen = M_PI / (E->control.theta_max - E->control.theta_min);
   double flen = M_PI / (E->control.fi_max - E->control.fi_min);
 
@@ -341,8 +353,8 @@ void regional_construct_tic_from_input(struct All_variables *E)
   noz=E->lmesh.noz;
   gnoz=E->mesh.noz;
 
-  if (E->convection.tic_method == 0) {
-
+  switch (E->convection.tic_method){
+  case 0:
 
     /* set up a linear temperature profile first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -387,8 +399,9 @@ void regional_construct_tic_from_input(struct All_variables *E)
 	  }
     }
 
-  }
-  else if (E->convection.tic_method == 1) {
+    break;
+  case 1:
+    
       /* set up a top thermal boundary layer */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
           for(i=1;i<=noy;i++)
@@ -400,19 +413,19 @@ void regional_construct_tic_from_input(struct All_variables *E)
                       E->T[m][node] = E->control.TBCbotval*erf(temp);
                   }
 
-  }
-  else if (E->convection.tic_method == 2) {
-    double temp;
-    double theta_center = E->convection.blob_center[0];
-    double fi_center = E->convection.blob_center[1];
-    double r_center = E->convection.blob_center[2];
-    double radius = E->convection.blob_radius;
-    double amp = E->convection.blob_dT;
-	double x_center,y_center,z_center;
-	double theta,fi,r,x,y,z,distance;
+      break;
 
-	fprintf(stderr,"center=%e %e %e radius=%e dT=%e\n",theta_center,fi_center,r_center,radius,amp);
-	/* set up a thermal boundary layer first */
+  case 2:
+
+    
+    theta_center = E->convection.blob_center[0];
+    fi_center = E->convection.blob_center[1];
+    r_center = E->convection.blob_center[2];
+    radius = E->convection.blob_radius;
+    amp = E->convection.blob_dT;
+    
+    fprintf(stderr,"center=%e %e %e radius=%e dT=%e\n",theta_center,fi_center,r_center,radius,amp);
+    /* set up a thermal boundary layer first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
         for(j=1;j<=nox;j++)
@@ -446,8 +459,9 @@ void regional_construct_tic_from_input(struct All_variables *E)
                     if (distance < radius)
                       E->T[m][node] += amp * exp(-1.0*distance/radius);
                 }
-  }
-  else if (E->convection.tic_method == 3) {
+    break;
+  case 3:
+
     /* set up a linear temperature profile first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
@@ -484,7 +498,23 @@ void regional_construct_tic_from_input(struct All_variables *E)
                   *sin(M_PI*(r1-E->sphere.ri)/(E->sphere.ro-E->sphere.ri));
 	  }
     }
+    break;
+  case 4:			/* from grd files */
+#ifdef USE_GGRD
+    ggrd_reg_temp_init(E);
+#else
+    fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
+    parallel_process_termination();
+#endif
+    break;
+    
+  default:			/* unknown option */
+    fprintf(stderr,"Invalid value of 'tic_method'\n");
+    parallel_process_termination();
+    break;
   }
+ 
+  
 
   temperatures_conform_bcs(E);
 

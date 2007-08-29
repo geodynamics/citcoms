@@ -45,6 +45,8 @@ the ggrd subroutines of the hc package
 void ggrd_init_tracer_flavors(struct All_variables *);
 int layers_r(struct All_variables *,float );
 void myerror(struct All_variables *,char *);
+void ggrd_full_temp_init(struct All_variables *);
+void ggrd_reg_temp_init(struct All_variables *);
 
 /* 
 
@@ -135,16 +137,219 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 }
 
 
+/* 
+
+initialize temperatures from grd files for spherical geometry
+
+*/
+
+void ggrd_full_temp_init(struct All_variables *E)
+{
+  
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+  double temp1,tbot,tgrad,tmean,tadd,rho_prem;
+
+  int i,j,k,m,node,noxnoz,nox,noy,noz;
+
+  noy=E->lmesh.noy;
+  nox=E->lmesh.nox;
+  noz=E->lmesh.noz;
+  noxnoz = nox * noz;
+
+  if(E->parallel.me == 0)  
+    fprintf(stderr,"ggrd_full_temp_init: using GMT grd files for temperatures\n");
+  /* 
+     
+  
+  read in tempeatures/density from GMT grd files
+  
+  
+  */
+  /* 
+     
+  begin MPI synchronization part
+  
+  */
+  if(E->parallel.me > 0){
+    /* 
+       wait for the previous processor 
+    */
+    mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
+		      0, MPI_COMM_WORLD, &mpi_stat);
+  }
+  
+  if(E->convection.ggrd_tinit_scale_with_prem){/* initialize PREM */
+    if(prem_read_model(E->convection.prem.model_filename,
+		       &E->convection.prem, (E->parallel.me==0)))
+      myerror(E,"PREM init error");
+  }
+  /* 
+     initialize the GMT grid files 
+  */
+  E->convection.ggrd_tinit_d[0].init = FALSE;
+  if(ggrd_grdtrack_init_general(TRUE,E->convection.ggrd_tinit_gfile, 
+				E->convection.ggrd_tinit_dfile,"-L", /* this could also be -Lg for global */
+				E->convection.ggrd_tinit_d,(E->parallel.me == 0),
+				FALSE))
+    myerror(E,"grd init error");
+  if(E->parallel.me <  E->parallel.nproc-1){
+    /* tell the next processor to go ahead with the init step	*/
+    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+  }else{
+    fprintf(stderr,"ggrd_full_temp_init: last processor (%i) done with grd init\n",
+	    E->parallel.me);
+  }     
+  /* 
+     
+  interpolate densities to temperature given PREM variations
+  
+  */
+  if(E->mesh.bottbc == 1){
+    /* bottom has specified temperature */
+    tbot =  E->control.TBCbotval;
+  }else{
+    /* 
+       bottom has specified heat flux start with unity bottom temperature
+    */ 
+    tbot = 1.0;
+  }
+  /* 
+     mean temp is (top+bot)/2 + offset 
+  */
+  tmean = (tbot + E->control.TBCtopval)/2.0 +  E->convection.ggrd_tinit_offset;
 
 
+  for(m=1;m <= E->sphere.caps_per_proc;m++)
+    for(i=1;i <= noy;i++)  
+      for(j=1;j <= nox;j++) 
+	for(k=1;k <= noz;k++)  {
+	  /* node numbers */
+	  node=k+(j-1)*noz+(i-1)*noxnoz;
+
+	  /* 
+	     get interpolated velocity anomaly 
+	  */
+	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],
+					    (double)E->sx[m][1][node],
+					    (double)E->sx[m][2][node],
+					    E->convection.ggrd_tinit_d,&tadd,
+					    FALSE))
+	    myerror(E,"ggrd_full_temp_init");
+	  if(E->convection.ggrd_tinit_scale_with_prem){
+	    /* 
+	       get the PREM density at r for additional scaling  
+	    */
+	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->convection.prem);
+	    if(rho_prem < 3200.0)
+	      rho_prem = 3200.0; /* we don't want the density of water */
+	    /* 
+	       assign temperature 
+	    */
+	    E->T[m][node] = tmean + tadd * E->convection.ggrd_tinit_scale * 
+	      rho_prem / E->data.density;
+	  }else{
+	    /* no PREM scaling */
+	    E->T[m][node] = tmean + tadd * E->convection.ggrd_tinit_scale;
+	  }
+
+	  if(E->convection.ggrd_tinit_override_tbc){
+	    if((k == 1) && (E->mesh.bottbc == 1)){ /* bottom TBC */
+	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
+	      E->sphere.cap[m].TB[2][node] =  E->T[m][node];
+	      E->sphere.cap[m].TB[3][node] =  E->T[m][node];
+	    }
+	    if((k == noz) && (E->mesh.toptbc == 1)){ /* top TBC */
+	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
+	      E->sphere.cap[m].TB[2][node] =  E->T[m][node];
+	      E->sphere.cap[m].TB[3][node] =  E->T[m][node];
+	    }
+	  }
+	  
+	  //if(E->convection.ggrd_tinit_limit_unity)
+	    /* limit to >0 */
+	    //E->T[m][node] = min(max(E->T[m][node], 0.0),1.0);
+	}
+  /* 
+     free the structure, not needed anymore since T should now
+     change internally
+  */
+  ggrd_grdtrack_free_gstruc(E->convection.ggrd_tinit_d);
+  /* 
+     end temperature/density from GMT grd init
+  */
+
+}
 
 
+/* 
 
+initialize temperatures from grd files for spherical geometry, regional version
+(this is identical to global version but for flags for GMT interpolation)
+*/
+void ggrd_reg_temp_init(struct All_variables *E)
+{
 
-
-
-
-
+  MPI_Status mpi_stat;
+  int mpi_rc, mpi_inmsg, mpi_success_message = 1;
+  double temp1,tbot,tgrad,tmean,tadd,rho_prem;
+  int i,j,k,m,ii,node,noxnoz,nox,noz,noy;
+  noy=E->lmesh.noy;
+  nox=E->lmesh.nox;
+  noz=E->lmesh.noz;
+  noxnoz = nox * noz;
+  if(E->parallel.me==0)  
+    fprintf(stderr,"ggrd_reg_temp_init: using GMT grd files for temperatures\n");
+  if(E->parallel.me > 0)
+    mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+  if(E->convection.ggrd_tinit_scale_with_prem){
+    if(prem_read_model(E->convection.prem.model_filename,&E->convection.prem, (E->parallel.me==0)))
+      myerror(E,"prem error");
+  }
+  if(ggrd_grdtrack_init_general(TRUE,E->convection.ggrd_tinit_gfile, 
+				E->convection.ggrd_tinit_dfile,"", /* this part differnent from global */
+				E->convection.ggrd_tinit_d,(E->parallel.me==0),
+				FALSE))
+    myerror(E,"grdtrack init error");
+  if(E->parallel.me <  E->parallel.nproc-1){
+    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+  }else{
+    fprintf(stderr,"ggrd_reg_temp_init: last processor (%i) done with grd init\n",
+	    E->parallel.me);
+  }
+  tmean = (E->control.TBCbotval + E->control.TBCtopval)/2.0 + E->convection.ggrd_tinit_offset;
+  for(m=1;m <= E->sphere.caps_per_proc;m++)
+    for(i=1;i <= noy;i++)  
+      for(j=1;j <= nox;j++) 
+	for(k=1;k <= noz;k++)  {
+	  node=k+(j-1)*noz+(i-1)*noxnoz;
+	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],(double)E->sx[m][1][node],
+					    (double)E->sx[m][2][node],E->convection.ggrd_tinit_d,&tadd,FALSE))
+	    myerror(E,"ggrd_reg_temp_init");
+	  if(E->convection.ggrd_tinit_scale_with_prem){
+	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->convection.prem);
+	    if(rho_prem < 3200.0)
+	      rho_prem = 3200.0; 
+	    E->T[m][node] = tmean + tadd * E->convection.ggrd_tinit_scale * rho_prem / E->data.density;
+	  }else{
+	    E->T[m][node] = tmean + tadd * E->convection.ggrd_tinit_scale;
+	  }
+	  if(E->convection.ggrd_tinit_override_tbc){
+	    if((k == 1) && (E->mesh.bottbc == 1)){ /* bottom TBC */
+	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
+	      E->sphere.cap[m].TB[2][node] = E->T[m][node];
+	      E->sphere.cap[m].TB[3][node] = E->T[m][node];
+	    }
+	    if((k == noz) && (E->mesh.toptbc == 1)){ /* top TBC */
+	      E->sphere.cap[m].TB[1][node] = E->T[m][node];
+	      E->sphere.cap[m].TB[2][node] = E->T[m][node];
+	      E->sphere.cap[m].TB[3][node] = E->T[m][node];
+	    }
+	  }
+	}
+  ggrd_grdtrack_free_gstruc(E->convection.ggrd_tinit_d);
+}
 
 
 

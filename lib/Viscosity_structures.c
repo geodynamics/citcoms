@@ -652,6 +652,7 @@ void visc_from_C( E, EEta)
   double vmean,cc_loc;
   int m,l,z,jj,kk,i;
 
+
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
   const int ends = enodes[E->mesh.nsd];

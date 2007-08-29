@@ -169,6 +169,9 @@ int main(argc,argv)
       tracer_advection(E);
 
     general_stokes_solver(E);
+    if(E->output.write_q_files)
+      if ((E->monitor.solution_cycles % E->output.write_q_files)==0) 
+	heat_flux(E);
 
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
 	(E->problem_output)(E, E->monitor.solution_cycles);

@@ -39,6 +39,11 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include "mpi.h"
 
+#ifdef USE_GGRD
+#include "hc.h"
+#endif
+
+
 #ifdef USE_HDF5
 #include "hdf5.h"
 #endif
@@ -48,6 +53,9 @@ to functions across the whole filespace of CITCOM.
 extern "C" {
 
 #else
+
+
+
 
 /* Macros */
 #define max(A,B) (((A) > (B)) ? (A) : (B))
@@ -382,10 +390,11 @@ struct MONITOR {
 
 struct CONTROL {
     int PID;
-
+  
     char output_written_external_command[500];   /* a unix command to run when output files have been created */
-
-    int ORTHO,ORTHOZ;   /* indicates levels of mesh symmetry */
+  
+  /* this clashed with a GMT definition of ORTHO TWB */
+  int CITCOM_ORTHO,CITCOM_ORTHOZ;   /* indicates levels of mesh symmetry */
 
     char data_prefix[50];
     char data_prefix_old[50];
@@ -616,6 +625,10 @@ struct Output {
 
   /* flags used by GZDIR */
   struct gzd_struc gzdir;
+
+
+  int write_q_files;
+  FILE *fpqt,*fpqb;		/* additional heat flux output */
 };
 
 

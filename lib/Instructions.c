@@ -78,6 +78,8 @@ void tracer_input(struct All_variables*);
 void viscosity_input(struct All_variables*);
 void get_vtk_filename(char *,int,struct All_variables *,int);
 void myerror(struct All_variables *,char *);
+void open_qfiles(struct All_variables *) ;
+
 
 void initial_mesh_solver_setup(struct All_variables *E)
 {
@@ -404,6 +406,13 @@ void read_initial_settings(struct All_variables *E)
   input_int("storage_spacing",&(E->control.record_every),"10",m);
   input_int("checkpointFrequency",&(E->control.checkpoint_frequency),"100",m);
   input_int("cpu_limits_in_seconds",&(E->control.record_all_until),"5",m);
+  input_int("write_q_files",&(E->output.write_q_files),"0",m);/* write additional
+								 heat flux files? */
+  if(E->output.write_q_files){	/* make sure those get written at
+				   least as often as velocities */
+    E->output.write_q_files = min(E->output.write_q_files,E->control.record_every);
+  }
+
 
   input_boolean("precond",&(E->control.precondition),"off",m);
   input_int("mg_cycle",&(E->control.mg_cycle),"2,0,nomax",m);
@@ -776,8 +785,8 @@ void global_default_values(E)
 
   /* SECOND: values for which an obvious default setting is useful */
 
-  E->control.ORTHO = 1; /* for orthogonal meshes by default */
-  E->control.ORTHOZ = 1; /* for orthogonal meshes by default */
+  E->control.CITCOM_ORTHO = 1; /* for orthogonal meshes by default */
+  E->control.CITCOM_ORTHOZ = 1; /* for orthogonal meshes by default */
 
 
     E->control.stokes=0;
@@ -1061,6 +1070,31 @@ static void open_info(struct All_variables *E)
   return;
 }
 
+void open_qfiles(struct All_variables *E) /* additional heat
+					     flux output */
+{
+  char output_file[255];
+
+  /* only one CPU will write to those */
+
+  /* top heat flux and other stat quantities */
+  if (strcmp(E->output.format, "ascii-gz") == 0)
+    sprintf(output_file,"%s/qt.dat", E->control.data_dir);
+  else
+    sprintf(output_file,"%s.qt.dat", E->control.data_file);
+  E->output.fpqt = output_open(output_file);
+  /* bottom heat flux and other stat quantities */
+  if (strcmp(E->output.format, "ascii-gz") == 0)
+    sprintf(output_file,"%s/qb.dat", E->control.data_dir);
+  else
+    sprintf(output_file,"%s.qb.dat", E->control.data_file);
+  E->output.fpqb = output_open(output_file);
+
+  
+
+  return;
+}
+
 
 static void output_parse_optional(struct  All_variables *E)
 {
@@ -1261,6 +1295,11 @@ void output_init(struct  All_variables *E)
     open_log(E);
     open_time(E);
     open_info(E);
+    if(E->output.write_q_files)
+      open_qfiles(E);
+    else{
+      E->output.fpqt = E->output.fpqb = NULL;
+    }
 
     if (strcmp(E->output.format, "ascii") == 0) {
         E->problem_output = output;
@@ -1305,6 +1344,12 @@ void output_finalize(struct  All_variables *E)
 
   if (E->fp_out)
     fclose(E->fp_out);
+  
+  if(E->output.fpqt)
+    fclose(E->output.fpqt);
+  if(E->output.fpqb)
+    fclose(E->output.fpqb);
+
 
 #ifdef USE_GZDIR
   /*

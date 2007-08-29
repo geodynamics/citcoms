@@ -796,8 +796,11 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
     mx = scalar->block[1];
     my = scalar->block[2];
 
+    if(E->output.write_q_files == 0) /* else, the heat flux will have
+				      been computed already */
+      heat_flux(E);
 
-    heat_flux(E);
+
     get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
 
 
