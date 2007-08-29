@@ -88,23 +88,8 @@ nobase_dist_examples_DATA = \
 	Cookbook5/velocity/bvel.dat54 \
 	Cookbook5/velocity/bvel.dat55 \
 	Cookbook5/velocity/bvel.dat56 \
-	Cookbook5/velocity/bvel.dat57 \
-	Cookbook5/velocity/bvel.dat58 \
-	Cookbook5/velocity/bvel.dat59 \
 	Cookbook5/velocity/bvel.dat6 \
-	Cookbook5/velocity/bvel.dat60 \
-	Cookbook5/velocity/bvel.dat61 \
-	Cookbook5/velocity/bvel.dat62 \
-	Cookbook5/velocity/bvel.dat63 \
-	Cookbook5/velocity/bvel.dat64 \
-	Cookbook5/velocity/bvel.dat65 \
-	Cookbook5/velocity/bvel.dat66 \
-	Cookbook5/velocity/bvel.dat67 \
-	Cookbook5/velocity/bvel.dat68 \
-	Cookbook5/velocity/bvel.dat69 \
 	Cookbook5/velocity/bvel.dat7 \
-	Cookbook5/velocity/bvel.dat70 \
-	Cookbook5/velocity/bvel.dat71 \
 	Cookbook5/velocity/bvel.dat8 \
 	Cookbook5/velocity/bvel.dat9 \
 	Cookbook6/cookbook6.cfg \
