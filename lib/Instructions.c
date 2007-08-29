@@ -1076,20 +1076,27 @@ void open_qfiles(struct All_variables *E) /* additional heat
   char output_file[255];
 
   /* only one CPU will write to those */
-
-  /* top heat flux and other stat quantities */
-  if (strcmp(E->output.format, "ascii-gz") == 0)
-    sprintf(output_file,"%s/qt.dat", E->control.data_dir);
-  else
-    sprintf(output_file,"%s.qt.dat", E->control.data_file);
-  E->output.fpqt = output_open(output_file);
-  /* bottom heat flux and other stat quantities */
-  if (strcmp(E->output.format, "ascii-gz") == 0)
-    sprintf(output_file,"%s/qb.dat", E->control.data_dir);
-  else
-    sprintf(output_file,"%s.qb.dat", E->control.data_file);
-  E->output.fpqb = output_open(output_file);
-
+  if((E->parallel.me_loc[3] == E->parallel.nprocz-1) &&
+     (E->parallel.me==E->parallel.nprocz-1)){
+    /* top heat flux and other stat quantities */
+    if (strcmp(E->output.format, "ascii-gz") == 0)
+      sprintf(output_file,"%s/qt.dat", E->control.data_dir);
+    else
+      sprintf(output_file,"%s.qt.dat", E->control.data_file);
+    E->output.fpqt = output_open(output_file);
+  }else{
+    E->output.fpqt = NULL;
+  }
+  if (E->parallel.me_loc[3] == 0)    {
+    /* bottom heat flux and other stat quantities */
+    if (strcmp(E->output.format, "ascii-gz") == 0)
+      sprintf(output_file,"%s/qb.dat", E->control.data_dir);
+    else
+      sprintf(output_file,"%s.qb.dat", E->control.data_file);
+    E->output.fpqb = output_open(output_file);
+  }else{
+    E->output.fpqb = NULL;
+  }
   
 
   return;
