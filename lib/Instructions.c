@@ -113,6 +113,16 @@ void initial_mesh_solver_setup(struct All_variables *E)
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
     set_elapsed_time(E);         /* reset to elapsed time to zero, if desired */
 
+
+    /* open the heatflow files here because we need to know about loc_me */
+    if(E->output.write_q_files)
+      open_qfiles(E);
+    else{
+      E->output.fpqt = E->output.fpqb = NULL;
+    }
+
+
+
     if(E->control.lith_age)
         lith_age_init(E);
 
@@ -1312,12 +1322,7 @@ void output_init(struct  All_variables *E)
     open_log(E);
     open_time(E);
     open_info(E);
-    if(E->output.write_q_files)
-      open_qfiles(E);
-    else{
-      E->output.fpqt = E->output.fpqb = NULL;
-    }
-
+   
     if (strcmp(E->output.format, "ascii") == 0) {
         E->problem_output = output;
     }

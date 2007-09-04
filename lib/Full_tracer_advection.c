@@ -157,7 +157,7 @@ void full_tracer_setup(struct All_variables *E)
     E->trace.box_cushion=0.00001;
 
     /* AKMA turn this back on after debugging */
-    E->trace.itracer_warnings=1;
+    input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",E->parallel.me);
 
     /* Determine number of tracer quantities */
 

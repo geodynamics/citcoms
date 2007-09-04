@@ -708,6 +708,8 @@ static double initial_vel_residual(struct All_variables *E,
                 v_res, gneq);
         fprintf(stderr, "initial residue of momentum equation F %.9e %d\n",
                 v_res, gneq);
+	if(fabs(v_res) < 1e-7)
+	  myerror(E,"something is probably wrong, zero residual of initial load vector?");
     }
 
 
