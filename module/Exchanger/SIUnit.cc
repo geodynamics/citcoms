@@ -37,7 +37,7 @@ SIUnit::SIUnit(const All_variables* E) :
     length_factor = E->data.radius_km * 1000.;
     velocity_factor = E->data.therm_diff / length_factor;
     temperature_factor = E->data.ref_temperature;
-    temperature_offset = E->data.surf_temp;
+    temperature_offset = E->control.surface_temp * temperature_factor;
     time_factor = length_factor / velocity_factor;
     traction_factor = E->data.ref_viscosity * E->data.therm_diff;
     stress_factor = E->data.ref_viscosity * E->data.therm_diff / (length_factor*length_factor);
