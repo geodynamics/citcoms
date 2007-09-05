@@ -83,6 +83,7 @@ void viscosity_system_input(struct All_variables *E)
     E->viscosity.sdepv_misfit = 1.0;
     input_boolean("SDEPV",&(E->viscosity.SDEPV),"off",m);
     if (E->viscosity.SDEPV) {
+      E->viscosity.pdepv_visited = 0;
       input_float_vector("sdepv_expt",E->viscosity.num_mat,(E->viscosity.sdepv_expt),m);
     }
 
@@ -526,7 +527,13 @@ void visc_from_S(E,EEta,propogate)
     two = 2.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        strain_rate_2_inv(E,m,eedot,1);	/* should there be a check if velocities have been computed here? */
+
+        /* get second invariant for all elements */
+        strain_rate_2_inv(E,m,eedot,1);
+
+        /* eedot cannot be too small, or the viscosity will go to inf */
+	for(e=1;e<=nel;e++)
+            eedot[e] = max(eedot[e], 1.0e-16);
 
         for(e=1;e<=nel;e++)   {
             exponent1= one/E->viscosity.sdepv_expt[E->mat[m][e]-1];
