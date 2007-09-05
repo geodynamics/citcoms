@@ -149,7 +149,7 @@ void un_inject_vector(E,start_lev,AD,AU)
     assert(start_lev != E->mesh.levmax  /* un_injection */);
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=neq;i++)
+      for(i=1;i<neq;i++)
 	AU[m][i]=0.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -460,7 +460,7 @@ void project_vector(E,start_lev,AU,AD,ic)
       from_rtf_to_xyz(E,start_lev,AU,E->temp);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=0;i<=neq_minus;i++)
+      for(i=0;i<neq_minus;i++)
         E->temp1[m][i] = 0.0;
 
                 /* smooth in xyz coordinates */

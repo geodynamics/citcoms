@@ -434,7 +434,7 @@ if (E->control.verbose) {
         fprintf(E->fp_out,"ii=%d   %d %d \n",ii,i,E->parallel.NODE[lev][m][i].bound[ii]);
 
     lnode=0;
-    for (node=1;node<=E->lmesh.nno;node++)
+    for (node=1;node<=E->lmesh.NNO[lev];node++)
       if((E->NODE[lev][m][node] & SKIP)) {
         lnode++;
         fprintf(E->fp_out,"skip %d %d \n",lnode,node);

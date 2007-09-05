@@ -454,7 +454,7 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
         fwrite(E->NP[m], sizeof(float), E->lmesh.nno+1, fp);
 
         /* velocity at equation points */
-        fwrite(E->U[m], sizeof(double), E->lmesh.neq+2, fp);
+        fwrite(E->U[m], sizeof(double), E->lmesh.neq, fp);
 
         /* viscosity at quadrature points and node points */
         fwrite(E->EVI[lev][m], sizeof(float),
@@ -484,7 +484,7 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
         fread(E->NP[m], sizeof(float), E->lmesh.nno+1, fp);
 
         /* velocity at equation points */
-        fread(E->U[m], sizeof(double), E->lmesh.neq+2, fp);
+        fread(E->U[m], sizeof(double), E->lmesh.neq, fp);
 
         /* viscosity at quadrature points and node points */
         fread(E->EVI[lev][m], sizeof(float),

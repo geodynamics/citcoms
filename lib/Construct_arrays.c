@@ -254,12 +254,12 @@ void construct_node_maps(E)
        noy = E->lmesh.NOY[lev];
        nox = E->lmesh.NOX[lev];
        max_eqn = 14*dims;
-       matrix = max_eqn*(nno+3);
+       matrix = max_eqn*nno;
 
-       E->Node_map[lev][m]=(int *) malloc ((matrix+3)*sizeof(int));
+       E->Node_map[lev][m]=(int *) malloc (matrix*sizeof(int));
 
-       for(i=0;i<=matrix;i++)
-	   E->Node_map[lev][m][i] = neq+1;  /* DANGER !!! */
+       for(i=0;i<matrix;i++)
+	   E->Node_map[lev][m][i] = neq;  /* neq indicates an invalid eqn # */
 
        for (ii=1;ii<=noy;ii++)
        for (jj=1;jj<=nox;jj++)
@@ -290,12 +290,20 @@ void construct_node_maps(E)
                }
          }
 
-       E->Eqn_k1[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
-       E->Eqn_k2[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
-       E->Eqn_k3[lev][m] = (higher_precision *)malloc((matrix+5)*sizeof(higher_precision));
+       E->Eqn_k1[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k2[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k3[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
 
-       E->mesh.matrix_size[lev] = matrix + 1;
-       }         /* end for level and m */
+       E->mesh.matrix_size[lev] = matrix;
+
+       if(E->control.verbose) {
+           fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, m);
+           fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
+           for(i=0;i<matrix;i++)
+               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][m][i]);
+       }
+
+    }         /* end for level and m */
 
     return;
 }
@@ -332,9 +340,9 @@ void construct_node_ks(E)
         neq=E->lmesh.NEQ[level];
         nel=E->lmesh.NEL[level];
         nno=E->lmesh.NNO[level];
-	for(i=0;i<=(neq+1);i++)
+	for(i=0;i<neq;i++)
 	    E->BI[level][m][i] = zero;
-        for(i=0;i<=E->mesh.matrix_size[level];i++) {
+        for(i=0;i<E->mesh.matrix_size[level];i++) {
             E->Eqn_k1[level][m][i] = zero;
             E->Eqn_k2[level][m][i] = zero;
             E->Eqn_k3[level][m][i] = zero;
@@ -464,7 +472,7 @@ void rebuild_BI_on_boundary(E)
 
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for(j=0;j<E->lmesh.NEQ[level];j++)
+        for(j=0;j<=E->lmesh.NEQ[level];j++)
             E->temp[m][j]=0.0;
 
         for(i=1;i<=E->lmesh.NNO[level];i++)  {

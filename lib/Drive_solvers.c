@@ -94,9 +94,9 @@ void general_stokes_solver(struct All_variables *E)
   if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      delta_U[m] = (double *)malloc((neq+2)*sizeof(double));
-      oldU[m] = (double *)malloc((neq+2)*sizeof(double));
-      for(i=0;i<=neq;i++)
+      delta_U[m] = (double *)malloc(neq*sizeof(double));
+      oldU[m] = (double *)malloc(neq*sizeof(double));
+      for(i=0;i<neq;i++)
 	oldU[m][i]=0.0;
     }
 
@@ -185,9 +185,9 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
 		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-			  delta_U[m] = (double *)malloc((neq+2)*sizeof(double));
-			  oldU[m] = (double *)malloc((neq+2)*sizeof(double));
-			  for(i=0;i<=neq;i++)
+			  delta_U[m] = (double *)malloc(neq*sizeof(double));
+			  oldU[m] = (double *)malloc(neq*sizeof(double));
+			  for(i=0;i<neq;i++)
 				  oldU[m][i]=0.0;
 		  }
 

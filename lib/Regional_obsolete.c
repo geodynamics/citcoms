@@ -96,7 +96,7 @@ int lev;
 
     processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-    SD = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
+    SD = (double *)malloc((E->lmesh.NEQ[lev])*sizeof(double));
 
 
     rootid = E->parallel.me_sph*E->parallel.nprocz; /* which is the bottom cpu */
@@ -168,7 +168,7 @@ int lev;
 
     processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-    RV = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
+    RV = (double *)malloc((E->lmesh.NEQ[lev])*sizeof(double));
 
 
     rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */

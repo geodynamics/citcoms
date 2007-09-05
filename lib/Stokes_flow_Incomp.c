@@ -160,7 +160,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     lev = E->mesh.levmax;
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)   {
-        F[m] = (double *)malloc((neq+1)*sizeof(double));
+        F[m] = (double *)malloc(neq*sizeof(double));
         r1[m] = (double *)malloc((npno+1)*sizeof(double));
         r2[m] = (double *)malloc((npno+1)*sizeof(double));
         z1[m] = (double *)malloc((npno+1)*sizeof(double));
@@ -398,7 +398,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         st[m] = (double *)malloc((npno+1)*sizeof(double));
         t0[m] = (double *)malloc((npno+1)*sizeof(double));
 
-        u0[m] = (double *)malloc((neq+1)*sizeof(double));
+        u0[m] = (double *)malloc(neq*sizeof(double));
     }
 
     time0 = CPU_time0();
@@ -629,8 +629,8 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_vdot(),global_pdot();
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    	old_v[m] = (double *)malloc((neq+1)*sizeof(double));
-    	diff_v[m] = (double *)malloc((neq+1)*sizeof(double));
+    	old_v[m] = (double *)malloc(neq*sizeof(double));
+    	diff_v[m] = (double *)malloc(neq*sizeof(double));
     	old_p[m] = (double *)malloc((npno+1)*sizeof(double));
     	diff_p[m] = (double *)malloc((npno+1)*sizeof(double));
     }

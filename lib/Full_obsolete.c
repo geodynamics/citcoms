@@ -93,7 +93,7 @@ void parallel_domain_decomp2(E,GX)
 
    processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-   SD = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
+   SD = (double *)malloc((E->lmesh.NEQ[lev])*sizeof(double));
 
 
    rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */
@@ -127,7 +127,7 @@ void parallel_domain_decomp2(E,GX)
            MPI_Send(SD,E->lmesh.NEQ[lev],MPI_DOUBLE,processors[d],rootid,E->parallel.world);
 	   }
         else
-           for (i=0;i<=E->lmesh.NEQ[lev];i++)
+           for (i=0;i<E->lmesh.NEQ[lev];i++)
 	      AUo[m][i] = SD[i];
         }
     else
@@ -164,7 +164,7 @@ void parallel_domain_decomp2(E,GX)
 
    processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-   RV = (double *)malloc((E->lmesh.NEQ[lev]+2)*sizeof(double));
+   RV = (double *)malloc((E->lmesh.NEQ[lev])*sizeof(double));
 
 
    rootid = E->parallel.me_sph*E->parallel.nprocz;    /* which is the bottom cpu */

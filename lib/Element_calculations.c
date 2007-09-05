@@ -525,7 +525,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
      for(e=0;e<=neq;e++)
 	Au[m][e]=0.0;
 
-     u[m][neq]=0.0;
+     u[m][neq] = 0.0;
 
      for(e=1;e<=nno;e++)     {
 
@@ -543,15 +543,12 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        B3=E->Eqn_k3[level][m]+(e-1)*max_eqn;
 
        for(i=3;i<max_eqn;i++)  {
-         if (C[i] != neq+1) {
 	  UU = u[m][C[i]];
   	  Au[m][eqn1] += B1[i]*UU;
   	  Au[m][eqn2] += B2[i]*UU;
   	  Au[m][eqn3] += B3[i]*UU;
-          }
        }
        for(i=0;i<max_eqn;i++)
-	 if (C[i] != neq+1)
           Au[m][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
        }     /* end for e */
@@ -740,7 +737,7 @@ void assemble_grad_p(E,P,gradP,lev)
     nel=E->lmesh.NEL[lev];
     neq=E->lmesh.NEQ[lev];
 
-    for(i=0;i<=neq;i++)
+    for(i=0;i<neq;i++)
       gradP[m][i] = 0.0;
 
     for(e=1;e<=nel;e++) {

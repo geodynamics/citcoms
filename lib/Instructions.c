@@ -725,10 +725,10 @@ void allocate_velocity_vars(E)
     E->lmesh.neq = E->lmesh.nnov * E->mesh.nsd;
 
     E->temp[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->temp1[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->F[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->U[j] = (double *) malloc((E->lmesh.neq+2)*sizeof(double));
-    E->u1[j] = (double *) malloc((E->lmesh.neq+2)*sizeof(double));
+    E->temp1[j] = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->F[j] = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->U[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
+    E->u1[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
 
 
     for(i=1;i<=E->mesh.nsd;i++) {
@@ -737,7 +737,7 @@ void allocate_velocity_vars(E)
       E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
     }
 
-    for(i=0;i<=E->lmesh.neq;i++)
+    for(i=0;i<E->lmesh.neq;i++)
       E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
 
     if(E->control.tracer == 1)  {
@@ -763,13 +763,13 @@ void allocate_velocity_vars(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)   {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
 
-      E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l]+2)*sizeof(double));
+      E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
           E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
       E->zero_resid[l][j] = (int *) malloc((k+2)*sizeof(int));
       E->parallel.Skip_id[l][j] = (int *) malloc((k+2)*sizeof(int));
 
-      for(i=0;i<E->lmesh.NEQ[l]+2;i++) {
+      for(i=0;i<E->lmesh.NEQ[l];i++) {
          E->BI[l][j][i]=0.0;
          }
 
@@ -1152,6 +1152,9 @@ static void output_parse_optional(struct  All_variables *E)
 
         /* break if no more field */
         if(prev == NULL) break;
+
+        /* skip if empty */
+        if(prev[0] == '\0') continue;
 
         /* strip off leading and trailing whitespaces */
         prev = strip(prev);

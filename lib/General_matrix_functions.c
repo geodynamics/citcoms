@@ -199,7 +199,6 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   void n_assemble_del2_u();
   void strip_bcs_from_residual();
   void gauss_seidel();
-  void jacobi();
 
   double conj_grad();
   double multi_grid();
@@ -305,7 +304,6 @@ double multi_grid(E,d1,F,acc,hl)
     void project_vector();
     int m,i,j,Vn,Vnmax,cycles;
     double alpha,beta;
-    void jacobi();
     void gauss_seidel();
     void element_gauss_seidel();
     void e_assemble_del2_u();
@@ -330,12 +328,12 @@ double multi_grid(E,d1,F,acc,hl)
 
     for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
       for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-	del_vel[i][m]=(double *)malloc((E->lmesh.NEQ[i] + 2)*sizeof(double));
-	AU[i][m] = (double *)malloc((E->lmesh.NEQ[i] + 2)*sizeof(double));
-	vel[i][m]=(double *)malloc((E->lmesh.NEQ[i]+2)*sizeof(double));
-	res[i][m]=(double *)malloc((E->lmesh.NEQ[i]+2)*sizeof(double));
+	del_vel[i][m]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	AU[i][m] = (double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	vel[i][m]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	res[i][m]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
 	if (i<E->mesh.levmax)
-	  fl[i][m]=(double *)malloc((E->lmesh.NEQ[i]+2)*sizeof(double));
+	  fl[i][m]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
       }
 
     Vnmax = E->control.mg_cycle;
@@ -479,11 +477,11 @@ double conj_grad(E,d0,F,acc,cycles,level)
     steps = *cycles;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-      r0[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      r1[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      r2[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      z0[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      z1[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+      r0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      r1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      r2[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      z0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      z1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
       p1[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
       p2[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
       Ap[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
@@ -611,7 +609,7 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     steps=*cycles;
 
     for (m=1;m<=E->sphere.caps_per_proc;m++) {
-      dd[m] = (double *)malloc((neq+1)*sizeof(double));
+      dd[m] = (double *)malloc(neq*sizeof(double));
       vis[m] = (int *)malloc((nno+1)*sizeof(int));
     }
     elt_k=(double *)malloc((24*24)*sizeof(double));
@@ -736,125 +734,6 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     return;
 }
 
-void jacobi(E,d0,F,Ad,acc,cycles,level,guess)
-     struct All_variables *E;
-     double **d0;
-     double **F,**Ad;
-     double acc;
-     int *cycles;
-     int level;
-     int guess;
-{
-
-    int count,i,j,k,l,m,ns,steps;
-    int *C;
-    int eqn1,eqn2,eqn3,gneq;
-
-    void n_assemble_del2_u();
-
-    double sum1,sum2,sum3,residual,global_vdot(),U1,U2,U3;
-
-    double *r1[NCS];
-
-    higher_precision *B1,*B2,*B3;
-
-
-    const int dims=E->mesh.nsd;
-    const int ends=enodes[dims];
-    const int n=loc_mat_size[E->mesh.nsd];
-    const int neq=E->lmesh.NEQ[level];
-    const int num_nodes=E->lmesh.NNO[level];
-    const int nox=E->lmesh.NOX[level];
-    const int noz=E->lmesh.NOY[level];
-    const int noy=E->lmesh.NOZ[level];
-    const int max_eqn=14*dims;
-
-    gneq = E->mesh.NEQ[level];
-
-    steps=*cycles;
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      r1[m] = (double *)malloc((E->lmesh.neq+1)*sizeof(double));
-
-    if(guess) {
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	d0[m][neq]=0.0;
-      n_assemble_del2_u(E,d0,Ad,level,1);
-    }
-    else
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++) {
-	    d0[m][i]=Ad[m][i]=0.0;
-	}
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=0;i<neq;i++)
-        r1[m][i]=F[m][i]-Ad[m][i];
-
-
-    count = 0;
-
-   while (count < steps)   {
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)  {
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-            d0[m][eqn1] += r1[m][eqn1]*E->BI[level][m][eqn1];
-            d0[m][eqn2] += r1[m][eqn2]*E->BI[level][m][eqn2];
-            d0[m][eqn3] += r1[m][eqn3]*E->BI[level][m][eqn3];
-            }
-
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++)
-	    Ad[m][i]=0.0;
-
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)  {
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-	    U1 = d0[m][eqn1];
-	    U2 = d0[m][eqn2];
-	    U3 = d0[m][eqn3];
-
-            C=E->Node_map[level][m]+(i-1)*max_eqn;
-	    B1=E->Eqn_k1[level][m]+(i-1)*max_eqn;
-	    B2=E->Eqn_k2[level][m]+(i-1)*max_eqn;
- 	    B3=E->Eqn_k3[level][m]+(i-1)*max_eqn;
-
-            for(j=3;j<max_eqn;j++)  {
-               Ad[m][eqn1] += B1[j]*d0[m][C[j]];
-               Ad[m][eqn2] += B2[j]*d0[m][C[j]];
-               Ad[m][eqn3] += B3[j]*d0[m][C[j]];
-               }
-
-	    for(j=0;j<max_eqn;j++) {
-		    Ad[m][C[j]]  += B1[j]*U1 +  B2[j]*U2 +  B3[j]*U3;
-		}
-	    }       /* end for i and m */
-
-      (E->solver.exchange_id_d)(E, Ad, level);
-
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++)
-	    r1[m][i] = F[m][i] - Ad[m][i];
-
-   /*   residual = sqrt(global_vdot(E,r1,r1,level))/gneq;
-
-   if(E->parallel.me==0)fprintf(stderr,"residuall =%.5e for %d\n",residual,count);
-*/	count++;
-    }
-
-   *cycles=count;
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      free((double*) r1[m]);
-
-    return;
-
-    }
-
 
 /* ============================================================================
    Multigrid Gauss-Seidel relaxation scheme which requires the storage of local
@@ -903,13 +782,11 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     sor = 1.3;
 
     if(guess) {
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	d0[m][neq]=0.0;
       n_assemble_del2_u(E,d0,Ad,level,1);
     }
     else
       for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<=neq;i++) {
+	for(i=0;i<neq;i++) {
 	    d0[m][i]=Ad[m][i]=zeroo;
 	}
 
@@ -920,6 +797,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(j=0;j<=E->lmesh.NEQ[level];j++)
           E->temp[m][j] = zeroo;
+
+      for (m=1;m<=E->sphere.caps_per_proc;m++)
+          Ad[m][neq] = zeroo;
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(i=1;i<=E->lmesh.NNO[level];i++)
@@ -1010,8 +890,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 */
       }
 
-  /*   parallel_process_termination();
-*/
     *cycles=count;
     return;
 
