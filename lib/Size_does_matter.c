@@ -990,25 +990,15 @@ void mass_matrix(struct All_variables *E)
             get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,
                                 sphere_key,rtf,E->mesh.levmax,m);
 
-            for(nint=1;nint<=vpts;nint++)
-                temp2[nint] = 0.0;
-
-            for(node=1;node<=enodes[E->mesh.nsd];node++) {
-                nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
-                for(nint=1;nint<=vpts;nint++) {
-                    temp2[nint] = E->refstate.rho[nz]
-                        * E->refstate.heat_capacity[nz]
-                        * E->N.vpt[GNVINDEX(node,nint)];
-                }
-            }
-
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
                 temp[node] = 0.0;
-                for(nint=1;nint<=vpts;nint++) {
-                    temp[node] += temp2[nint]
+                nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
+                for(nint=1;nint<=vpts;nint++)
+                    temp[node] += E->refstate.rho[nz]
+                        * E->refstate.heat_capacity[nz]
                         * dOmega.vpt[nint]
-                        * g_point[nint].weight[E->mesh.nsd-1];
-                }
+                        * g_point[nint].weight[E->mesh.nsd-1]
+                        * E->N.vpt[GNVINDEX(node,nint)];
             }
 
             /* lumped mass matrix, equivalent to tmass in ConMan */
@@ -1018,6 +1008,7 @@ void mass_matrix(struct All_variables *E)
         } /* end of for e */
     } /* end of for m */
 
+    (E->exchange_node_d)(E,E->TMass,E->mesh.levmax);
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for(node=1;node<=E->lmesh.nno;node++)
             E->TMass[m][node] = 1.0 / E->TMass[m][node];

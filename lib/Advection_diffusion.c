@@ -246,25 +246,31 @@ void PG_timestep_solve(struct All_variables *E)
 	corrector(E,E->T,E->Tdot,DTdot);
 	temperatures_conform_bcs(E);
       }
-    }
 
-    if(E->advection.monitor_max_T) {
-        /* get the max temperature for new T */
-        E->monitor.T_interior = Tmaxd(E,E->T);
+      if(E->advection.monitor_max_T) {
+          /* get the max temperature for new T */
+          E->monitor.T_interior = Tmaxd(E,E->T);
 
-        /* if the max temperature changes too much, restore the old
-         * temperature field, calling the temperature solver using
-         * half of the timestep size */
-        if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
-                for (i=1;i<=E->lmesh.nno;i++)   {
-                    E->T[m][i] = T1[m][i];
-                    E->Tdot[m][i] = Tdot1[m][i];
-                }
-            iredo = 1;
-            E->advection.dt_reduced *= 0.5;
-            E->advection.last_sub_iterations ++;
-        }
+          /* if the max temperature changes too much, restore the old
+           * temperature field, calling the temperature solver using
+           * half of the timestep size */
+          if (E->monitor.T_interior/T_interior1 > E->monitor.T_maxvaried) {
+              if(E->parallel.me==0) {
+                  fprintf(stderr, "max T varied from %e to %e\n",
+                          T_interior1, E->monitor.T_interior);
+                  fprintf(E->fp, "max T varied from %e to %e\n",
+                          T_interior1, E->monitor.T_interior);
+              }
+              for(m=1;m<=E->sphere.caps_per_proc;m++)
+                  for (i=1;i<=E->lmesh.nno;i++)   {
+                      E->T[m][i] = T1[m][i];
+                      E->Tdot[m][i] = Tdot1[m][i];
+                  }
+              iredo = 1;
+              E->advection.dt_reduced *= 0.5;
+              E->advection.last_sub_iterations ++;
+          }
+      }
     }
 
   }  while ( iredo==1 && E->advection.last_sub_iterations <= 5);
@@ -601,7 +607,7 @@ static void element_residual(struct All_variables *E, int el,
       Q += E->composition.comp_el[m][0][el] * E->control.Q0ER;
     }
 
-    nz = ((el-1) % E->lmesh.noz) + 1;
+    nz = ((el-1) % E->lmesh.elz) + 1;
     rho = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
 
     if(E->control.disptn_number == 0)
