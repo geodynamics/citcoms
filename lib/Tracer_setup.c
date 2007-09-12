@@ -742,6 +742,7 @@ static void generate_random_tracers(struct All_variables *E,
     double theta,phi,rad;
     double xmin,xmax,ymin,ymax,zmin,zmax;
     double random1,random2,random3;
+    double u, v, s, r;
 
 
     allocate_tracer_arrays(E,j,tracers_cap);
@@ -769,29 +770,24 @@ static void generate_random_tracers(struct All_variables *E,
 
     while (E->trace.ntracers[j]<tracers_cap) {
 
-        number_of_tries++;
-        max_tries=100*tracers_cap;
+        do {
+            /* pick two uniformly distributed random numbers in [-1;1] */
+            u = -1 + drand48()*2;
+            v = -1 + drand48()*2;
+            s = u*u + v*v;
+            /* length has to be <= 1 */
+        } while(s > 1);
+        r = 2.0 * sqrt(1.0-s);
 
-        if (number_of_tries>max_tries) {
-            fprintf(E->trace.fpt,"Error(make_tracer_array)-too many tries?\n");
-            fprintf(E->trace.fpt,"%d %d %d\n",max_tries,number_of_tries,RAND_MAX);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
+        /* cartesian coordinates */
+        x = u * r;
+        y = v * r;
+        z = 2.0*s -1 ;
 
-#if 1
-        random1=drand48();
-        random2=drand48();
-        random3=drand48();
-#else
-        random1=(1.0*rand())/(1.0*RAND_MAX);
-        random2=(1.0*rand())/(1.0*RAND_MAX);
-        random3=(1.0*rand())/(1.0*RAND_MAX);
-#endif
-
-        x=xmin+random1*(xmax-xmin);
-        y=ymin+random2*(ymax-ymin);
-        z=zmin+random3*(zmax-zmin);
+        /* skip if outside the bounding box */
+        if ((x < xmin) || (x > xmax)) continue;
+        if ((y < ymin) || (y > ymax)) continue;
+        if ((z < zmin) || (z > zmax)) continue;
 
         /* first check if within shell */
 

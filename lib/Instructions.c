@@ -1145,6 +1145,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.tracer = 0;
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
+    E->output.heating = 0;
 
     while(1) {
         /* get next field */
@@ -1190,6 +1191,8 @@ static void output_parse_optional(struct  All_variables *E)
             E->output.comp_el = 1;
         else if(strcmp(prev, "comp_nd")==0)
             E->output.comp_nd = 1;
+        else if(strcmp(prev, "heating")==0)
+            E->output.heating = 1;
         else
             if(E->parallel.me == 0)
                 fprintf(stderr, "Warning: unknown field for output_optional: %s\n", prev);
@@ -1325,7 +1328,7 @@ void output_init(struct  All_variables *E)
     open_log(E);
     open_time(E);
     open_info(E);
-   
+
     if (strcmp(E->output.format, "ascii") == 0) {
         E->problem_output = output;
     }

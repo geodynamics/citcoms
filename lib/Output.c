@@ -98,31 +98,32 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  if(E->control.disptn_number != 0)
-    output_heating(E, cycles);
-
   /* optiotnal output below */
+
   /* compute and output geoid (in spherical harmonics coeff) */
-  if (E->output.geoid == 1)
+  if (E->output.geoid)
       output_geoid(E, cycles);
 
-  if (E->output.stress == 1)
+  if (E->output.stress)
     output_stress(E, cycles);
 
-  if (E->output.pressure == 1)
+  if (E->output.pressure)
     output_pressure(E, cycles);
 
-  if (E->output.horiz_avg == 1)
+  if (E->output.horiz_avg)
       output_horiz_avg(E, cycles);
 
-  if(E->output.tracer == 1 && E->control.tracer == 1)
+  if(E->output.tracer && E->control.tracer)
       output_tracer(E, cycles);
 
-  if (E->output.comp_nd == 1 && E->composition.on)
+  if (E->output.comp_nd && E->composition.on)
       output_comp_nd(E, cycles);
 
-  if (E->output.comp_el == 1 && E->composition.on)
-          output_comp_el(E, cycles);
+  if (E->output.comp_el && E->composition.on)
+      output_comp_el(E, cycles);
+
+  if(E->output.heating && E->control.disptn_number != 0)
+      output_heating(E, cycles);
 
   return;
 }

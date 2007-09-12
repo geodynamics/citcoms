@@ -95,6 +95,7 @@ void gzdir_output_stress(struct All_variables *, int);
 void gzdir_output_horiz_avg(struct All_variables *, int);
 void gzdir_output_tracer(struct All_variables *, int);
 void gzdir_output_pressure(struct All_variables *, int);
+void gzdir_output_heating(struct All_variables *, int);
 
 
 void sub_netr(float, float, float, float *, float *, double *);
@@ -154,16 +155,16 @@ void gzdir_output(struct All_variables *E, int cycles)
 
   /* optiotnal output below */
   /* compute and output geoid (in spherical harmonics coeff) */
-  if (E->output.geoid == 1)
+  if (E->output.geoid)
       gzdir_output_geoid(E, cycles);
 
-  if (E->output.stress == 1)
+  if (E->output.stress)
     gzdir_output_stress(E, cycles);
 
-  if (E->output.pressure == 1)
+  if (E->output.pressure)
     gzdir_output_pressure(E, cycles);
 
-  if (E->output.horiz_avg == 1)
+  if (E->output.horiz_avg)
       gzdir_output_horiz_avg(E, cycles);
 
   if(E->control.tracer){
@@ -176,7 +177,10 @@ void gzdir_output(struct All_variables *E, int cycles)
       gzdir_output_comp_nd(E, cycles);
 
   if (E->output.comp_el && E->composition.on)
-          gzdir_output_comp_el(E, cycles);
+      gzdir_output_comp_el(E, cycles);
+
+  if(E->output.heating && E->control.disptn_number != 0)
+      gzdir_output_heating(E, cycles);
 
   return;
 }
@@ -1082,6 +1086,31 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
     gzclose(fp1);
     return;
 }
+
+
+void output_heating(struct All_variables *E, int cycles)
+{
+    int j, e;
+    char output_file[255];
+    FILE *fp1;
+
+    snprintf(output_file,255,"%s/%d/heating.%d.%d.gz", E->control.data_dir,
+	    cycles,E->parallel.me, cycles);
+    fp1 = gzdir_output_open(output_file,"w");
+
+    gzfprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+        gzfprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        for(e=1; e<=E->lmesh.nel; e++)
+            gzfprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
+                      E->heating_visc[j][e], E->heating_latent[j][e]);
+    }
+    gzclose(fp1);
+
+    return;
+}
+
 
 /*
 

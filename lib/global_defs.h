@@ -390,9 +390,9 @@ struct MONITOR {
 
 struct CONTROL {
     int PID;
-  
+
     char output_written_external_command[500];   /* a unix command to run when output files have been created */
-  
+
   /* this clashed with a GMT definition of ORTHO TWB */
   int CITCOM_ORTHO,CITCOM_ORTHOZ;   /* indicates levels of mesh symmetry */
 
@@ -621,6 +621,7 @@ struct Output {
     int tracer;       /* whether to output tracer coordinate */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */
+    int heating;      /* whether to output heating terms at elements */
 
 
   /* flags used by GZDIR */
