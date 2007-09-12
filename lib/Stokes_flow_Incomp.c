@@ -351,7 +351,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
  */
 
 static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
-                                    double **V, double **P, double **F,
+                                    double **V, double **P, double **FF,
                                     double imp, int *steps_max)
 {
     void assemble_div_rho_u();
@@ -373,6 +373,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double r0dotrt, r1dotrt;
     double residual, dpressure, dvelocity;
 
+    double *F[NCS];
     double *r1[NCS], *r2[NCS], *pt[NCS], *p1[NCS], *p2[NCS];
     double *rt[NCS], *v0[NCS], *s0[NCS], *st[NCS], *t0[NCS];
     double *u0[NCS];
@@ -387,6 +388,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     lev = E->mesh.levmax;
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)   {
+        F[m] = (double *)malloc(neq*sizeof(double));
         r1[m] = (double *)malloc((npno+1)*sizeof(double));
         r2[m] = (double *)malloc((npno+1)*sizeof(double));
         pt[m] = (double *)malloc((npno+1)*sizeof(double));
@@ -403,6 +405,13 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     time0 = CPU_time0();
     count = 0;
+
+    /* copy the original force vector since we need to keep it intact
+       between iterations */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(j=0;j<neq;j++)
+            F[m][j] = FF[m][j];
+
 
     /* calculate the initial velocity residual */
     v_res = initial_vel_residual(E, V, P, F, imp);
@@ -587,6 +596,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
+    	free((void *) F[m]);
         free((void *) r1[m]);
         free((void *) r2[m]);
         free((void *) pt[m]);
