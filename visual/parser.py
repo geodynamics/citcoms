@@ -171,7 +171,8 @@ class Parser(object):
 
     def getstr(self, option):
         v = self.get(option)
-        if v[0] == v[-1] and v[0] in '"\'':
+        # stripping quotation marks
+        if v and v[0] == v[-1] and v[0] in '"\'':
             v = v[1:-1]
         return v
 
