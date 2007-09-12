@@ -670,6 +670,8 @@ void initialize_tracers(struct All_variables *E)
 
     E->trace.ilast_tracer_count = isum_tracers(E);
     fprintf(E->trace.fpt, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
+    if(E->parallel.me==0)
+        fprintf(stderr, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
 
 
     /* find elements */
@@ -777,10 +779,15 @@ static void generate_random_tracers(struct All_variables *E,
             exit(10);
         }
 
-
+#if 1
+        random1=drand48();
+        random2=drand48();
+        random3=drand48();
+#else
         random1=(1.0*rand())/(1.0*RAND_MAX);
         random2=(1.0*rand())/(1.0*RAND_MAX);
         random3=(1.0*rand())/(1.0*RAND_MAX);
+#endif
 
         x=xmin+random1*(xmax-xmin);
         y=ymin+random2*(ymax-ymin);

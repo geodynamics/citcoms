@@ -283,6 +283,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             /* use previous composition. */
             if (numtracers == 0) {
                 iempty++;
+                fprintf(E->trace.fpt, "No tracer in element %d!\n", e);
                 continue;
             }
 

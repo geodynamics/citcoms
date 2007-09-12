@@ -2656,7 +2656,6 @@ int full_iget_element(struct All_variables *E,
     if (E->trace.istat1%100==0)
         {
             fprintf(E->trace.fpt,"Checked all elements %d times already this turn\n",E->trace.istat1);
-            fprintf(stderr,"Checked all elements %d times already this turn\n",E->trace.istat1);
             fflush(E->trace.fpt);
         }
     if (iel>0)
