@@ -90,9 +90,6 @@ void regional_tracer_setup(struct All_variables *E)
     /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
-    /* AKMA turn this back on after debugging */
-    E->trace.itracer_warnings=1;
-
     /* Determine number of tracer quantities */
 
     /* advection_quantites - those needed for advection */
@@ -209,7 +206,6 @@ static void write_trace_instructions(struct All_variables *E)
         fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
         fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
         fflush(E->trace.fpt);
-        fflush(stderr);
     }
 
     write_composition_instructions(E);

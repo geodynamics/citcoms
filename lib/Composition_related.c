@@ -250,7 +250,7 @@ static void check_initial_composition(struct All_variables *E)
             fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
             fflush(E->trace.fpt);
             fprintf(stderr,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
-	    if (E->trace.itracer_warnings==1) exit(10);	/* made this consistent with tracer advection */
+	    if (E->trace.itracer_warnings) exit(10);	/* made this consistent with tracer advection */
         }
     }
 
@@ -299,7 +299,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             if ((1.0*iempty/E->lmesh.nel)>0.80) {
                 fprintf(E->trace.fpt,"WARNING(compute_elemental...)-number of tracers is REALLY LOW\n");
                 fflush(E->trace.fpt);
-                if (E->trace.itracer_warnings==1) exit(10);
+                if (E->trace.itracer_warnings) exit(10);
             }
         }
 

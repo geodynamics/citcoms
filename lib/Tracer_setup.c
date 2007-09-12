@@ -100,6 +100,7 @@ void tracer_input(struct All_variables *E)
 				   with only one if statement in
 				   Advection_diffusion */
 	myerror(E,"need to switch on tracers for tracer_enriched");
+
       input_float("Q0_enriched",&(E->control.Q0ER),"0.0",m);
       snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g (only one composition!)",
 	       E->control.Q0,E->control.Q0ER);
@@ -130,7 +131,6 @@ void tracer_input(struct All_variables *E)
         }
         else {
             fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
-            fflush(stderr);
             parallel_process_termination();
         }
 
@@ -169,6 +169,8 @@ void tracer_input(struct All_variables *E)
             }
         }
 
+        /* Warning level */
+        input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",m);
 
 
         if(E->parallel.nprocxy == 12)
@@ -699,8 +701,6 @@ static void make_tracer_array(struct All_variables *E)
     void init_tracer_flavors();
 
     if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
-    fflush(stderr);
-
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
@@ -721,10 +721,6 @@ static void make_tracer_array(struct All_variables *E)
 
     /* Initialize tracer flavors */
     if (E->trace.nflavors) init_tracer_flavors(E);
-
-
-    fprintf(stderr,"DONE Making Tracer Array (%d)\n",E->parallel.me);
-    fflush(stderr);
 
     return;
 }
@@ -1014,7 +1010,6 @@ static void read_old_tracer_file(struct All_variables *E)
 #endif
 
     fprintf(stderr,"Read old tracers from %s\n",output_file);
-    fflush(stderr);
 
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
@@ -1103,7 +1098,8 @@ static void check_sum(struct All_variables *E)
         fprintf(E->trace.fpt,"ERROR(check_sum)-break in conservation %d %d\n",
                 number,iold_number);
         fflush(E->trace.fpt);
-        parallel_process_termination();
+        if (E->trace.itracer_warnings)
+            parallel_process_termination();
     }
 
     E->trace.ilast_tracer_count = number;

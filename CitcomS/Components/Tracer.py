@@ -89,6 +89,9 @@ class Tracer(CitcomComponent):
         ictracer_grd_file = inv.str("ictracer_grd_file", default="")
         ictracer_grd_layers = inv.int("ictracer_grd_layers", default=2)
 
+        # Warning level
+        itracer_warnings = inv.bool("itracer_warnings", default=True)
+
         # Enriched internal heat production
         tracer_enriched = inv.bool("tracer_enriched", default=False)
         Q0_enriched = inv.float("Q0_enriched", default=0.0)

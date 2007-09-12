@@ -156,9 +156,6 @@ void full_tracer_setup(struct All_variables *E)
     /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
-    /* AKMA turn this back on after debugging */
-    input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",E->parallel.me);
-
     /* Determine number of tracer quantities */
 
     /* advection_quantites - those needed for advection */
@@ -1265,7 +1262,6 @@ static void make_regular_grid(struct All_variables *E)
     start_time=CPU_time0();
 
     if (E->parallel.me==0) fprintf(stderr,"Generating Regular Grid\n");
-    fflush(stderr);
 
 
     /* for each cap, determine theta and phi bounds, watch out near poles  */
@@ -1346,8 +1342,7 @@ static void make_regular_grid(struct All_variables *E)
                             ((1.0*numregel)/(1.0*E->lmesh.nel)) );
                     fprintf(stderr," Should reduce size of regular mesh\n");
                     fflush(E->trace.fpt);
-                    fflush(stderr);
-                    if (E->trace.itracer_warnings==1) exit(10);
+                    if (E->trace.itracer_warnings) exit(10);
                 }
 
             /* print some output */
@@ -1388,7 +1383,6 @@ static void make_regular_grid(struct All_variables *E)
 
             parallel_process_sync(E);
             if (E->parallel.me==0) fprintf(stderr,"Beginning Mapping\n");
-            fflush(stderr);
 
             /* Generate temporary arrays of max and min values for each surface element */
 
@@ -1597,7 +1591,6 @@ static void make_regular_grid(struct All_variables *E)
 
 
     if (E->parallel.me==0) fprintf(stderr,"Beginning Regtoel submapping \n");
-    fflush(stderr);
 
     /* AKMA decided it would be more efficient to have reg element choice array */
     /* rather than reg node array as used before          */
@@ -1808,7 +1801,6 @@ static void make_regular_grid(struct All_variables *E)
     parallel_process_sync(E);
 
     if (E->parallel.me==0) fprintf(stderr,"Mapping completed (%f seconds)\n",CPU_time0()-start_time);
-    fflush(stderr);
 
     /* Print out information regarding regular/real element coverage */
 
@@ -1820,8 +1812,7 @@ static void make_regular_grid(struct All_variables *E)
             fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
             fprintf(E->trace.fpt," (stats done on regular elements that were used)\n");
             fprintf(E->trace.fpt,"Ichoice is number of real elements touched by a regular element\n");
-            fprintf(E->trace.fpt,"  (ichoice=1 is optimal)\n");
-            fprintf(E->trace.fpt,"  (if ichoice=0, no elements are touched by regular element)\n");
+            fprintf(E->trace.fpt,"  (ichoice=0 is optimal)\n");
             fprintf(E->trace.fpt,"Ichoice=0: %f percent\n",(100.0*istat_ichoice[j][0])/(1.0*isum));
             fprintf(E->trace.fpt,"Ichoice=1: %f percent\n",(100.0*istat_ichoice[j][1])/(1.0*isum));
             fprintf(E->trace.fpt,"Ichoice=2: %f percent\n",(100.0*istat_ichoice[j][2])/(1.0*isum));
@@ -1931,7 +1922,6 @@ static void write_trace_instructions(struct All_variables *E)
             fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
             fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
             fflush(E->trace.fpt);
-            fflush(stderr);
         }
 
     write_composition_instructions(E);
@@ -2490,7 +2480,7 @@ static void fix_theta_phi(double *theta, double *phi)
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
-/* Returns -99 in not in this cap.                               */
+/* Returns -99 if not in this cap.                               */
 /* iprevious_element, if known, is the last known element. If    */
 /* it is not known, input a negative number.                     */
 
@@ -2526,8 +2516,6 @@ int full_iget_element(struct All_variables *E,
             ival=icheck_processor_shell(E,j,rad);
             if (ival!=1) return -99;
         }
-
-    /* First check previous element */
 
     /* do quick search to see if element can be easily found. */
     /* note that element may still be out of this cap, but    */
@@ -2662,7 +2650,7 @@ int full_iget_element(struct All_variables *E,
       fprintf(E->trace.fpt,"  PREVIOUS ELEMENT: %d \n",iprevious_element);
       fprintf(E->trace.fpt,"  x,y,z,theta,phi,rad: %f %f %f   %f %f %f\n",x,y,z,theta,phi,rad);
       fflush(E->trace.fpt);
-      if (E->trace.itracer_warnings==1) exit(10);
+      if (E->trace.itracer_warnings) exit(10);
     */
 
     if (E->trace.istat1%100==0)
@@ -2670,7 +2658,6 @@ int full_iget_element(struct All_variables *E,
             fprintf(E->trace.fpt,"Checked all elements %d times already this turn\n",E->trace.istat1);
             fprintf(stderr,"Checked all elements %d times already this turn\n",E->trace.istat1);
             fflush(E->trace.fpt);
-            fflush(stderr);
         }
     if (iel>0)
         {
@@ -2681,7 +2668,7 @@ int full_iget_element(struct All_variables *E,
     /* if still here, there is a problem */
 
     fprintf(E->trace.fpt,"Error(full_iget_element) - element not found\n");
-    fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %f %f %f %f %f %d\n",
+    fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %.15e %.15e %.15e %.15e %.15e %d\n",
             x,y,z,theta,phi,iregel);
     fflush(E->trace.fpt);
     exit(10);
@@ -2810,7 +2797,6 @@ static void define_uv_space(struct All_variables *E)
     double theta_f,phi_f;
 
     if (E->parallel.me==0) fprintf(stderr,"Setting up UV space\n");
-    fflush(stderr);
 
     numnodes=E->lmesh.nno;
 
@@ -2899,7 +2885,6 @@ static void determine_shape_coefficients(struct All_variables *E)
     /* for simplicity, it is done for every element              */
 
     if (E->parallel.me==0) fprintf(stderr," Determining Shape Coefficients\n");
-    fflush(stderr);
 
     for (j=1;j<=E->sphere.caps_per_proc;j++)
         {
@@ -3063,7 +3048,6 @@ void analytical_test(E)
     fprintf(E->trace.fpt,"Starting Analytical Test\n");
     if (E->parallel.me==0) fprintf(stderr,"Starting Analytical Test\n");
     fflush(E->trace.fpt);
-    fflush(stderr);
 
     /* Reset Box cushion to 0 */
 
@@ -3112,7 +3096,7 @@ void analytical_test(E)
                 {
                     fprintf(E->trace.fpt,"Warning(analytical)-too many tracers to print!\n");
                     fflush(E->trace.fpt);
-                    if (E->trace.itracer_warnings==1) exit(10);
+                    if (E->trace.itracer_warnings) exit(10);
                 }
         }
 
@@ -3177,7 +3161,6 @@ void analytical_test(E)
     /* Get ready for comparison to Runge-Kutte (only works for one tracer) */
 
     fflush(E->trace.fpt);
-    fflush(stderr);
     parallel_process_sync(E);
 
     fprintf(E->trace.fpt,"\n\nComparison to Runge-Kutte\n");
@@ -3200,7 +3183,6 @@ void analytical_test(E)
             fprintf(E->trace.fpt,"(Note: RK comparison only appropriate for one tracing particle (%d here) \n",number);
             if (E->parallel.me==0) fprintf(stderr,"(Note: RK comparison only appropriate for one tracing particle (%d here) \n",number);
             fflush(E->trace.fpt);
-            fflush(stderr);
             parallel_process_termination();
         }
 
@@ -3278,7 +3260,6 @@ void analytical_test(E)
         }
 
     fflush(E->trace.fpt);
-    fflush(stderr);
 #endif
     return;
 }
