@@ -58,7 +58,7 @@ void mat_prop_allocate(struct All_variables *E)
     E->refstate.gravity = (double *) malloc((noz+1)*sizeof(double));
 
     /* reference profile of temperature */
-    E->refstate.Tadi = (double *) malloc((noz+1)*sizeof(double));
+    /*E->refstate.Tadi = (double *) malloc((noz+1)*sizeof(double));*/
 
 }
 
@@ -68,14 +68,14 @@ void reference_state(struct All_variables *E)
     int noz = E->lmesh.noz;
     int nel = E->lmesh.nel;
     int i;
-    double r, z, beta, T0;
+    double r, z, beta;
 
     beta = E->control.disptn_number * E->control.inv_gruneisen;
-    T0 = E->control.surface_temp / E->data.ref_temperature;
 
     /* All refstate variables (except Tadi) must be 1 at the surface.
      * Otherwise, the scaling of eqns in the code might not be correct. */
 
+    /* Adams-Williamson EoS */
     for(i=1; i<=noz; i++) {
 	r = E->sx[1][3][i];
 	z = 1 - r;
@@ -84,21 +84,21 @@ void reference_state(struct All_variables *E)
 	E->refstate.heat_capacity[i] = 1;
 	E->refstate.thermal_conductivity[i] = 1;
 	E->refstate.gravity[i] = 1;
-	E->refstate.Tadi[i] = T0 * (exp(E->control.disptn_number * z) - 1);
+	/*E->refstate.Tadi[i] = (E->control.adiabaticT0 + E->control.surface_temp) * exp(E->control.disptn_number * z) - E->control.surface_temp;*/
     }
 
     if(E->parallel.me == 0) {
-        fprintf(stderr, "nz  radius   depth    rho          Tadi\n");
-        fprintf(E->fp, "nz  radius   depth    rho          Tadi\n");
+        fprintf(stderr, "nz  radius   depth    rho\n");
+        fprintf(E->fp, "nz  radius   depth    rho\n");
     }
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=noz; i++) {
-            fprintf(stderr, "%d %f %f %e %e\n",
+            fprintf(stderr, "%d %f %f %e\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i], E->refstate.Tadi[i]);
-            fprintf(E->fp, "%d %f %f %e %e\n",
+                    E->refstate.rho[i]);
+            fprintf(E->fp, "%d %f %f %e\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i], E->refstate.Tadi[i]);
+                    E->refstate.rho[i]);
         }
 
 }

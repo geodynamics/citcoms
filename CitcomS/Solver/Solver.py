@@ -307,6 +307,7 @@ class Solver(Component):
         dissipation_number = inv.float("dissipation_number", default=0.0)
         gruneisen = inv.float("gruneisen", default=0.0)
         surfaceT = inv.float("surfaceT", default=0.1)
+        #adiabaticT0 = inv.float("adiabaticT0", default=0.4)
         Q0 = inv.float("Q0", default=0.0)
 
         stokes_flow_only = inv.bool("stokes_flow_only", default=False)

@@ -467,6 +467,9 @@ struct CONTROL {
     /* surface temperature */
     float surface_temp;
 
+    /* adiabatic temperature extrapolated to the surface */
+    /* float adiabaticT0; */
+
     /**/
     float relative_err_accuracy;
 
@@ -540,7 +543,7 @@ struct REF_STATE {
     double *heat_capacity;
     double *thermal_conductivity;
     double *gravity;
-    double *Tadi;
+    /*double *Tadi;*/
 };
 
 

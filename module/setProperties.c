@@ -467,6 +467,7 @@ PyObject * pyCitcom_Solver_set_properties(PyObject *self, PyObject *args)
         E->control.inv_gruneisen = 0;
 
     getFloatProperty(properties, "surfaceT", E->control.surface_temp, fp);
+    /*getFloatProperty(properties, "adiabaticT0", E->control.adiabaticT0, fp);*/
     getFloatProperty(properties, "Q0", E->control.Q0, fp);
 
     getIntProperty(properties, "stokes_flow_only", E->control.stokes, fp);

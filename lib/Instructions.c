@@ -458,6 +458,7 @@ void read_initial_settings(struct All_variables *E)
   }
 
   input_float("surfaceT",&(E->control.surface_temp),"0.1",m);
+  /*input_float("adiabaticT0",&(E->control.adiabaticT0),"0.4",m);*/
   input_float("Q0",&(E->control.Q0),"0.0",m);
   /* Q0_enriched gets read in Tracer_setup.c */
 
