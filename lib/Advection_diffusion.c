@@ -827,26 +827,24 @@ static void latent_heating(struct All_variables *E, int m,
                            float **B, float Ra, float clapeyron,
                            float depth, float transT, float width)
 {
-    double temp1, temp2, temp3;
+    double temp, temp1, temp2, temp3;
     int e, i, j;
     const int ends = enodes[E->mesh.nsd];
 
-    temp1 = 2.0 * width * clapeyron * Ra / E->control.Atemp / ends;
+    temp1 = 2.0 * width * clapeyron * Ra * E->control.disptn_number / E->control.Atemp / ends;
 
     for(e=1; e<=E->lmesh.nel; e++) {
         temp2 = 0;
         temp3 = 0;
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
-            temp2 += (1.0 - B[m][j]) * B[m][j]
-                * E->sphere.cap[m].V[3][j] * (E->T[m][j] + E->control.surface_temp)
-                * E->control.disptn_number;
-            temp3 += clapeyron * (1.0 - B[m][j])
-                * B[m][j] * (E->T[m][j] + E->control.surface_temp)
-                * E->control.disptn_number;
+            temp = (1.0 - B[m][j]) * B[m][j]
+                * (E->T[m][j] + E->control.surface_temp);
+            temp2 += temp * E->sphere.cap[m].V[3][j];
+            temp3 += temp;
         }
         heating_adi[e] += temp2 * temp1;
-        heating_latent[e] += temp3 * temp1;
+        heating_latent[e] += clapeyron * temp3 * temp1;
     }
     return;
 }
