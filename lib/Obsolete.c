@@ -75,7 +75,7 @@ void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
           }
 
       if (cof[3][3]!=0.0)
-        jacobian = sqrt(abs(determinant(cof,E->mesh.nsd)))/cof[3][3];
+        jacobian = sqrt(fabs(determinant(cof,E->mesh.nsd)))/cof[3][3];
 
       dGammax->vpt[k] = jacobian;
 

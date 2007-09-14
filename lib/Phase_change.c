@@ -101,7 +101,7 @@ void phase_change_input(struct All_variables *E)
 
 void phase_change_apply_410(struct All_variables *E, double **buoy)
 {
-  if (abs(E->control.Ra_410) > 1e-10) {
+  if (fabs(E->control.Ra_410) > 1e-10) {
     phase_change_apply(E, buoy, E->Fas410, E->Fas410_b, E->control.Ra_410,
 		       E->control.clapeyron410, E->viscosity.z410,
 		       E->control.transT410, E->control.width410);
@@ -112,7 +112,7 @@ void phase_change_apply_410(struct All_variables *E, double **buoy)
 
 void phase_change_apply_670(struct All_variables *E, double **buoy)
 {
-  if (abs(E->control.Ra_670) > 1e-10)
+  if (fabs(E->control.Ra_670) > 1e-10)
     phase_change_apply(E, buoy, E->Fas670, E->Fas670_b, E->control.Ra_670,
 		       E->control.clapeyron670, E->viscosity.zlm,
 		       E->control.transT670, E->control.width670);
@@ -122,7 +122,7 @@ void phase_change_apply_670(struct All_variables *E, double **buoy)
 
 void phase_change_apply_cmb(struct All_variables *E, double **buoy)
 {
-  if (abs(E->control.Ra_cmb) > 1e-10)
+  if (fabs(E->control.Ra_cmb) > 1e-10)
     phase_change_apply(E, buoy, E->Fascmb, E->Fascmb_b, E->control.Ra_cmb,
 		       E->control.clapeyroncmb, E->viscosity.zcmb,
 		       E->control.transTcmb, E->control.widthcmb);
