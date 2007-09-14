@@ -678,70 +678,77 @@ static void element_residual(struct All_variables *E, int el,
 }
 
 
+/* This function filters the temperature field. The temperature above   */
+/* Tmax0(==1.0) and Tmin0(==0.0) is removed, while conserving the total */
+/* energy. See Lenardic and Kaula, JGR, 1993.                           */
 static void filter(struct All_variables *E)
 {
-	double Tsum0,Tmin,Tmax,Tsum1,TDIST,TDIST1;
-	int m,i,TNUM,TNUM1;
-	double Tmax1,Tmin1;
-	int lev;
+    double Tsum0,Tmin,Tmax,Tsum1,TDIST,TDIST1;
+    int m,i,TNUM,TNUM1;
+    double Tmax1,Tmin1;
+    int lev;
 
-	Tsum0= Tsum1= 0.0;
-	Tmin= Tmax= 0.0;
-	Tmin1= Tmax1= 0.0;
-	TNUM= TNUM1= 0;
-	TDIST= TDIST1= 0.0;
+    /* min and max temperature for filtering */
+    const double Tmin0 = 0.0;
+    const double Tmax0 = 1.0;
 
-	lev=E->mesh.levmax;
+    Tsum0= Tsum1= 0.0;
+    Tmin= Tmax= 0.0;
+    Tmin1= Tmax1= 0.0;
+    TNUM= TNUM1= 0;
+    TDIST= TDIST1= 0.0;
 
-	for(m=1;m<=E->sphere.caps_per_proc;m++)
-		for(i=1;i<=E->lmesh.nno;i++)  {
+    lev=E->mesh.levmax;
 
-			/* compute sum(T) before filtering, skipping nodes
-			   that's shared by another processor */
-		  	if(!(E->NODE[lev][m][i] & SKIP))
-				Tsum0 +=E->T[m][i];
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=E->lmesh.nno;i++)  {
 
-			  /* remove overshoot. This is crude!!!  */
-			  if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
-			  if(E->T[m][i]<0.0) E->T[m][i]=0.0;
-			  if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
-			  if(E->T[m][i]>1.0) E->T[m][i]=1.0;
+            /* compute sum(T) before filtering, skipping nodes
+               that's shared by another processor */
+            if(!(E->NODE[lev][m][i] & SKIP))
+                Tsum0 +=E->T[m][i];
 
-		}
+            /* remove overshoot */
+            if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
+            if(E->T[m][i]<Tmin0) E->T[m][i]=Tmin0;
+            if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
+            if(E->T[m][i]>Tmax0) E->T[m][i]=Tmax0;
 
-	/* find global max/min of temperature */
-	MPI_Allreduce(&Tmin,&Tmin1,1,MPI_DOUBLE,MPI_MIN,E->parallel.world);
-	MPI_Allreduce(&Tmax,&Tmax1,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
+        }
 
-	for(m=1;m<=E->sphere.caps_per_proc;m++)
-		for(i=1;i<=E->lmesh.nno;i++)  {
-			/* remvoe undershoot. This is crude!!! */
-			if(E->T[m][i]<=abs(Tmin1))   E->T[m][i]=0.0;
-			if(E->T[m][i]>=(2-Tmax1))   E->T[m][i]=1.0;
+    /* find global max/min of temperature */
+    MPI_Allreduce(&Tmin,&Tmin1,1,MPI_DOUBLE,MPI_MIN,E->parallel.world);
+    MPI_Allreduce(&Tmax,&Tmax1,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
 
-			/* sum(T) after filtering */
-			if (!(E->NODE[lev][m][i] & SKIP))  {
-				Tsum1+=E->T[m][i];
-				if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)  TNUM++;
-			}
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=E->lmesh.nno;i++)  {
+            /* remvoe undershoot */
+            if(E->T[m][i]<=abs(2*Tmin0-Tmin1))   E->T[m][i]=Tmin0;
+            if(E->T[m][i]>=(2*Tmax0-Tmax1))   E->T[m][i]=Tmax0;
 
-		}
+            /* sum(T) after filtering */
+            if (!(E->NODE[lev][m][i] & SKIP))  {
+                Tsum1+=E->T[m][i];
+                if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0)  TNUM++;
+            }
 
-	/* find the difference of sum(T) before/after the filtering */
-	TDIST=Tsum0-Tsum1;
-	MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-	MPI_Allreduce(&TNUM,&TNUM1,1,MPI_INT,MPI_SUM,E->parallel.world);
-	TDIST=TDIST1/TNUM1;
+        }
 
-	/* keep sum(T) the same before/after the filtering by distributing
-	   the difference back to nodes */
-	for(m=1;m<=E->sphere.caps_per_proc;m++)
-		for(i=1;i<=E->lmesh.nno;i++)   {
-			if(E->T[m][i]!=0.0 && E->T[m][i]!=1.0)
-				E->T[m][i] +=TDIST;
-		}
+    /* find the difference of sum(T) before/after the filtering */
+    TDIST=Tsum0-Tsum1;
+    MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+    MPI_Allreduce(&TNUM,&TNUM1,1,MPI_INT,MPI_SUM,E->parallel.world);
+    TDIST=TDIST1/TNUM1;
 
-	return;
+    /* keep sum(T) the same before/after the filtering by distributing
+       the difference back to nodes */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=E->lmesh.nno;i++)   {
+            if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0)
+                E->T[m][i] +=TDIST;
+        }
+
+    return;
 }
 
 
