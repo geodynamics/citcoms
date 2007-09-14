@@ -625,10 +625,11 @@ static void element_residual(struct All_variables *E, int el,
 	for(i=1;i<=vpts;i++)
 	  Eres[j] -=
 	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
-	    * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
- 	    + diff*dOmega.vpt[i] * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
-				    GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
-				    GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
+              * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
+              + diff * dOmega.vpt[i] * E->heating_latent[m][el]
+              * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
+                 GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
+                 GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
       }
     }
 
@@ -636,7 +637,8 @@ static void element_residual(struct All_variables *E, int el,
       for(j=1;j<=ends;j++) {
 	Eres[j]=0.0;
 	for(i=1;i<=vpts;i++)
-	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i] * (dT[i] - heating + v1[i] * tx1[i] + v2[i] * tx2[i] + v3[i] * tx3[i]);
+	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
+              * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i]);
       }
     }
 
