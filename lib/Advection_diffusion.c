@@ -684,9 +684,10 @@ static void element_residual(struct All_variables *E, int el,
 static void filter(struct All_variables *E)
 {
     double Tsum0,Tmin,Tmax,Tsum1,TDIST,TDIST1;
-    int m,i,TNUM,TNUM1;
+    int m,i;
     double Tmax1,Tmin1;
-    int lev;
+    double *rhocp, sum_rhocp, total_sum_rhocp;
+    int lev, nz;
 
     /* min and max temperature for filtering */
     const double Tmin0 = 0.0;
@@ -695,18 +696,23 @@ static void filter(struct All_variables *E)
     Tsum0= Tsum1= 0.0;
     Tmin= Tmax= 0.0;
     Tmin1= Tmax1= 0.0;
-    TNUM= TNUM1= 0;
     TDIST= TDIST1= 0.0;
+    sum_rhocp = 0.0;
 
     lev=E->mesh.levmax;
 
+    rhocp = (double *)malloc((E->lmesh.noz+1)*sizeof(double));
+    for(i=1;i<=E->lmesh.noz;i++)
+        rhocp[i] = E->refstate.rho[i] * E->refstate.heat_capacity[i];
+
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)  {
+            nz = ((i-1) % E->lmesh.noz) + 1;
 
-            /* compute sum(T) before filtering, skipping nodes
+            /* compute sum(rho*cp*T) before filtering, skipping nodes
                that's shared by another processor */
             if(!(E->NODE[lev][m][i] & SKIP))
-                Tsum0 +=E->T[m][i];
+                Tsum0 += E->T[m][i]*rhocp[nz];
 
             /* remove overshoot */
             if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
@@ -722,25 +728,30 @@ static void filter(struct All_variables *E)
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)  {
+            nz = ((i-1) % E->lmesh.noz) + 1;
+
             /* remvoe undershoot */
-            if(E->T[m][i]<=abs(2*Tmin0-Tmin1))   E->T[m][i]=Tmin0;
+            if(E->T[m][i]<=fabs(2*Tmin0-Tmin1))   E->T[m][i]=Tmin0;
             if(E->T[m][i]>=(2*Tmax0-Tmax1))   E->T[m][i]=Tmax0;
 
-            /* sum(T) after filtering */
+            /* sum(rho*cp*T) after filtering */
             if (!(E->NODE[lev][m][i] & SKIP))  {
-                Tsum1+=E->T[m][i];
-                if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0)  TNUM++;
+                Tsum1 += E->T[m][i]*rhocp[nz];
+                if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0) {
+                    sum_rhocp += rhocp[nz];
+                }
+
             }
 
         }
 
-    /* find the difference of sum(T) before/after the filtering */
+    /* find the difference of sum(rho*cp*T) before/after the filtering */
     TDIST=Tsum0-Tsum1;
     MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-    MPI_Allreduce(&TNUM,&TNUM1,1,MPI_INT,MPI_SUM,E->parallel.world);
-    TDIST=TDIST1/TNUM1;
+    MPI_Allreduce(&sum_rhocp,&total_sum_rhocp,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+    TDIST=TDIST1/total_sum_rhocp;
 
-    /* keep sum(T) the same before/after the filtering by distributing
+    /* keep sum(rho*cp*T) the same before/after the filtering by distributing
        the difference back to nodes */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)   {
@@ -748,6 +759,7 @@ static void filter(struct All_variables *E)
                 E->T[m][i] +=TDIST;
         }
 
+    free(rhocp);
     return;
 }
 
