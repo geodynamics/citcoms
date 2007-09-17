@@ -38,6 +38,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E);
 static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
 static void map_composition_to_nodes(struct All_variables *E);
+static void fill_composition_from_neighbors(struct All_variables *E);
 
 
 void composition_input(struct All_variables *E)
@@ -248,9 +249,17 @@ static void check_initial_composition(struct All_variables *E)
     if (E->composition.ibuoy_type == 1) {
         if (E->trace.istat_iempty) {
             fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
+
+            /* if there are only a few empty elements, using neighboring */
+            /* elements to determine the initial composition.            */
+            if ((1e5*E->trace.istat_iempty) < E->lmesh.nel) {
+                fprintf(E->trace.fpt,"Using neighboring element for initial composition...\n");
+                fill_composition_from_neighbors(E);
+            }
+            else if (E->trace.itracer_warnings)
+                exit(10);
+
             fflush(E->trace.fpt);
-            fprintf(stderr,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
-	    if (E->trace.itracer_warnings) exit(10);	/* made this consistent with tracer advection */
         }
     }
 
@@ -380,6 +389,65 @@ static void map_composition_to_nodes(struct All_variables *E)
 
     } /* end j */
 
+    return;
+}
+
+
+/****************************************************************/
+
+static void fill_composition_from_neighbors(struct All_variables *E)
+{
+    int i, j, k, e, ee, n, flavor, numtracers, count;
+    double sum;
+    const int n_nghbrs = 4;
+    int nghbrs[n_nghbrs];
+    int *is_empty;
+
+    /* index shift for neighboring elements in horizontal direction */
+    nghbrs[0] = E->lmesh.elz;
+    nghbrs[1] = -E->lmesh.elz;
+    nghbrs[2] = E->lmesh.elz * E->lmesh.elx;
+    nghbrs[3] = -E->lmesh.elz * E->lmesh.elx;
+
+    is_empty = (int *)calloc(E->lmesh.nel+1, sizeof(int));
+
+    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+        /* which element is empty? */
+        for (e=1; e<=E->lmesh.nel; e++) {
+            numtracers = 0;
+            for (flavor=0; flavor<E->trace.nflavors; flavor++)
+                numtracers += E->trace.ntracer_flavor[j][flavor][e];
+
+            if (numtracers == 0)
+                is_empty[e] = 1;
+        }
+
+        /* using the average comp_el from neighboring elements */
+        for (e=1; e<=E->lmesh.nel; e++) {
+            if(is_empty[e]) {
+                count = 0;
+                sum = 0.0;
+                for(n=0; n<n_nghbrs; n++) {
+                    ee = e + nghbrs[n];
+                    /* is ee a valid element number and the elemnt is not empty? */
+                    if((ee>0) && (ee<=E->lmesh.nel) && (!is_empty[ee])) {
+                        count++;
+                        sum += E->composition.comp_el[j][i][ee];
+                    }
+                }
+
+                if(count == 0) {
+                    fprintf(E->trace.fpt,"Error(fill_composition_from_neighbors)-all neighboring elements are empty\n");
+                    fflush(E->trace.fpt);
+                    exit(10);
+                }
+
+                E->composition.comp_el[j][i][e] = sum / count;
+            }
+        }
+    }
+
+    free(is_empty);
     return;
 }
 
