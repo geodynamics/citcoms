@@ -248,18 +248,16 @@ static void check_initial_composition(struct All_variables *E)
     /* check empty element if using ratio method */
     if (E->composition.ibuoy_type == 1) {
         if (E->trace.istat_iempty) {
-            fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW\n");
+            fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW, %d elements contain no tracer\n", E->trace.istat_iempty);
 
             /* if there are only a few empty elements, using neighboring */
             /* elements to determine the initial composition.            */
-            if ((1e5*E->trace.istat_iempty) < E->lmesh.nel) {
-                fprintf(E->trace.fpt,"Using neighboring element for initial composition...\n");
+            if ((1e4*E->trace.istat_iempty) < E->lmesh.nel)
                 fill_composition_from_neighbors(E);
-            }
-            else if (E->trace.itracer_warnings)
+            else if (E->trace.itracer_warnings) {
+                fflush(E->trace.fpt);
                 exit(10);
-
-            fflush(E->trace.fpt);
+            }
         }
     }
 
@@ -292,7 +290,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             /* use previous composition. */
             if (numtracers == 0) {
                 iempty++;
-                fprintf(E->trace.fpt, "No tracer in element %d!\n", e);
+                /* fprintf(E->trace.fpt, "No tracer in element %d!\n", e); */
                 continue;
             }
 
@@ -398,10 +396,12 @@ static void map_composition_to_nodes(struct All_variables *E)
 static void fill_composition_from_neighbors(struct All_variables *E)
 {
     int i, j, k, e, ee, n, flavor, numtracers, count;
-    double sum;
+    double *sum;
     const int n_nghbrs = 4;
     int nghbrs[n_nghbrs];
     int *is_empty;
+
+    fprintf(E->trace.fpt,"Using neighboring elements for initial composition...\n");
 
     /* index shift for neighboring elements in horizontal direction */
     nghbrs[0] = E->lmesh.elz;
@@ -410,6 +410,7 @@ static void fill_composition_from_neighbors(struct All_variables *E)
     nghbrs[3] = -E->lmesh.elz * E->lmesh.elx;
 
     is_empty = (int *)calloc(E->lmesh.nel+1, sizeof(int));
+    sum = (double *)malloc(E->composition.ncomp * sizeof(double));
 
     for (j=1; j<=E->sphere.caps_per_proc; j++) {
         /* which element is empty? */
@@ -426,13 +427,16 @@ static void fill_composition_from_neighbors(struct All_variables *E)
         for (e=1; e<=E->lmesh.nel; e++) {
             if(is_empty[e]) {
                 count = 0;
-                sum = 0.0;
+                for (i=0; i<E->composition.ncomp; i++)
+                    sum[i] = 0.0;
+
                 for(n=0; n<n_nghbrs; n++) {
                     ee = e + nghbrs[n];
                     /* is ee a valid element number and the elemnt is not empty? */
                     if((ee>0) && (ee<=E->lmesh.nel) && (!is_empty[ee])) {
                         count++;
-                        sum += E->composition.comp_el[j][i][ee];
+                        for (i=0; i<E->composition.ncomp; i++)
+                            sum[i] += E->composition.comp_el[j][i][ee];
                     }
                 }
 
@@ -442,12 +446,17 @@ static void fill_composition_from_neighbors(struct All_variables *E)
                     exit(10);
                 }
 
-                E->composition.comp_el[j][i][e] = sum / count;
+                for (i=0; i<E->composition.ncomp; i++)
+                    E->composition.comp_el[j][i][e] = sum[i] / count;
             }
         }
     }
 
     free(is_empty);
+    free(sum);
+
+    fprintf(E->trace.fpt,"Done.\n");
+    fflush(E->trace.fpt);
     return;
 }
 
