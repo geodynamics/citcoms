@@ -258,7 +258,7 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
         fwrite(E->trace.ielement[m], sizeof(int),
                E->trace.ntracers[m]+1, fp);
         for(i=0; i<E->trace.nflavors; i++) {
-            fwrite(E->trace.ntracer_flavor[m][i], sizeof(double),
+            fwrite(E->trace.ntracer_flavor[m][i], sizeof(int),
                    E->lmesh.nel+1, fp);
         }
     }
@@ -325,7 +325,7 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
         fread(E->trace.ielement[m], sizeof(int),
               E->trace.ntracers[m]+1, fp);
         for(i=0; i<E->trace.nflavors; i++) {
-            fread(E->trace.ntracer_flavor[m][i], sizeof(double),
+            fread(E->trace.ntracer_flavor[m][i], sizeof(int),
                   E->lmesh.nel+1, fp);
         }
     }
