@@ -139,7 +139,8 @@ void regional_tracer_setup(struct All_variables *E)
 
     make_mesh_ijk(E);
 
-    composition_setup(E);
+    if (E->composition.on)
+        composition_setup(E);
 
     return;
 }
