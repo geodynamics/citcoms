@@ -60,6 +60,7 @@ if test "$want_pyre" = yes; then
     CIT_PYTHON_SYSCONFIG
 
     # Check for Python modules and packages.
+    export want_exchanger
     CIT_PYTHON_EGG_SETUP
 else
     if test "$want_exchanger" = yes; then
@@ -116,6 +117,7 @@ CIT_CHECK_HEADER_HDF5
 
 AC_LANG_PUSH(C++)
 if test "$want_exchanger" != no; then
+    CIT_HEADER_MPI
     save_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$PYTHON_EGG_CPPFLAGS $CPPFLAGS"
     AC_CHECK_HEADERS([Exchanger/DIM.h], [], [

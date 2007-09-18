@@ -6,13 +6,19 @@ from merlin import setup, find_packages, require
 
 install_requires = ['pythia[mpi] >= 0.8.1.0, < 0.8.2a']
 
-# Use Exchanger if it's available.
+import os
+want_exchanger = os.environ.get('want_exchanger', 'auto')
 exchanger = "Exchanger >= 1, < 2a"
-try:
-    require(exchanger)
-except Exception, e:
-    pass
-else:
+if want_exchanger == 'auto':
+    # Use Exchanger if it's available.
+    try:
+        require(exchanger)
+    except Exception, e:
+        pass
+    else:
+        install_requires.append(exchanger)
+elif want_exchanger == 'yes':
+    # Require Exchanger.
     install_requires.append(exchanger)
 
 setup(
