@@ -640,7 +640,7 @@ void allocate_common_vars(E)
     E->CC[i][j] =(struct CC *)  malloc((1)*sizeof(struct CC));
     E->CCX[i][j]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
     /* Test */
-    E->ELEMENT[i][j] = (unsigned int *) malloc ((nel+2)*sizeof(unsigned int));
+    E->ELEMENT[i][j] = (unsigned int *) malloc ((nel+1)*sizeof(unsigned int));
 
     for (k=1;k<=nel;k++)
        E->ELEMENT[i][j][k] = 0;
@@ -651,12 +651,12 @@ void allocate_common_vars(E)
     if(E->control.inv_gruneisen != 0)
         E->elt_c[i][j] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
 
-    E->EVI[i][j] = (float *) malloc((nel+2)*vpoints[E->mesh.nsd]*sizeof(float));
+    E->EVI[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
     E->BPI[i][j] = (double *) malloc((npno+1)*sizeof(double));
 
-    E->ID[i][j]  = (struct ID *)    malloc((nno+2)*sizeof(struct ID));
-    E->VI[i][j]  = (float *)        malloc((nno+2)*sizeof(float));
-    E->NODE[i][j] = (unsigned int *)malloc((nno+2)*sizeof(unsigned int));
+    E->ID[i][j]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
+    E->VI[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
+    E->NODE[i][j] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
     nxyz = max(nox*noz,nox*noy);
     nxyz = 2*max(nxyz,noz*noy);
@@ -815,6 +815,9 @@ void global_default_values(E)
     E->control.augmented = 0.0;
 
     E->control.GRID_TYPE=1;
+
+    E->contro.tracer = 0;
+    E->composition.on = 0;
 
   E->parallel.nprocx=1; E->parallel.nprocz=1; E->parallel.nprocy=1;
 
