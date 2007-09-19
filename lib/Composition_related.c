@@ -113,7 +113,6 @@ void write_composition_instructions(struct All_variables *E)
 {
     int k;
 
-    E->composition.on = 0;
     if (E->composition.ichemical_buoyancy ||
         E->composition.icompositional_rheology)
         E->composition.on = 1;

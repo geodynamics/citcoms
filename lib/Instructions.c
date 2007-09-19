@@ -816,7 +816,7 @@ void global_default_values(E)
 
     E->control.GRID_TYPE=1;
 
-    E->contro.tracer = 0;
+    E->control.tracer = 0;
     E->composition.on = 0;
 
   E->parallel.nprocx=1; E->parallel.nprocz=1; E->parallel.nprocy=1;
