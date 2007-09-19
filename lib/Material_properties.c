@@ -96,9 +96,6 @@ void reference_state(struct All_variables *E)
             fprintf(stderr, "%d %f %f %e\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
                     E->refstate.rho[i]);
-            fprintf(E->fp, "%d %f %f %e\n",
-                    i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i]);
         }
 
 }
