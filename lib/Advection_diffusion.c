@@ -439,9 +439,9 @@ static void pg_solver(struct All_variables *E,
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
-        if(!(E->node[m][i] & (TBX | TBY | TBZ)))
+        if(!(E->node[m][i] & (TBX | TBY | TBZ))){
 	  DTdot[m][i] *= E->TMass[m][i];         /* lumped mass matrix */
-	else
+	}	else
 	  DTdot[m][i] = 0.0;         /* lumped mass matrix */
       }
 

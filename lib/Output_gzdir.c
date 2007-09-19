@@ -1088,22 +1088,22 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 }
 
 
-void output_heating(struct All_variables *E, int cycles)
+void gzdir_output_heating(struct All_variables *E, int cycles)
 {
     int j, e;
     char output_file[255];
-    FILE *fp1;
+    gzFile *fp1;
 
     snprintf(output_file,255,"%s/%d/heating.%d.%d.gz", E->control.data_dir,
 	    cycles,E->parallel.me, cycles);
     fp1 = gzdir_output_open(output_file,"w");
 
-    gzfprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
+    gzprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        gzfprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        gzprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
         for(e=1; e<=E->lmesh.nel; e++)
-            gzfprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
+            gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
                       E->heating_visc[j][e], E->heating_latent[j][e]);
     }
     gzclose(fp1);
