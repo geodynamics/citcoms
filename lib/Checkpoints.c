@@ -246,6 +246,8 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         fwrite(&(E->trace.ntracers[m]), sizeof(int), 1, fp);
 
+    /* the 0-th element of basicq/extraq/ntracer_flavor is not init'd
+     * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(i=0; i<E->trace.number_of_basic_quantities; i++) {
             fwrite(E->trace.basicq[m][i], sizeof(double),
@@ -346,6 +348,8 @@ static void composition_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(E->composition.initial_bulk_composition, sizeof(double),
            E->composition.ncomp, fp);
 
+    /* the 0-th element of comp_el/comp_node is not init'd
+     * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(i=0; i<E->composition.ncomp; i++)
             fwrite(E->composition.comp_el[m][i], sizeof(double),
@@ -427,6 +431,8 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
 
     read_sentinel(fp, E->parallel.me);
 
+    /* the 0-th element of T/Tdot is not init'd
+     * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         fread(E->T[m], sizeof(double), E->lmesh.nno+1, fp);
         fread(E->Tdot[m], sizeof(double), E->lmesh.nno+1, fp);
@@ -446,6 +452,8 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->monitor.vdotv), sizeof(float), 1, fp);
     fwrite(&(E->monitor.incompressibility), sizeof(float), 1, fp);
 
+    /* the 0-th element of P/NP/EVI/VI is not init'd
+     * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points and nodes */
         /* Writing E->NP instead of calling p_to_nodes() because p_to_nodes()
@@ -458,8 +466,8 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
 
         /* viscosity at quadrature points and node points */
         fwrite(E->EVI[lev][m], sizeof(float),
-               (E->lmesh.nel+2)*vpoints[E->mesh.nsd], fp);
-        fwrite(E->VI[lev][m], sizeof(float), E->lmesh.nno+2, fp);
+               (E->lmesh.nel+1)*vpoints[E->mesh.nsd], fp);
+        fwrite(E->VI[lev][m], sizeof(float), E->lmesh.nno+1, fp);
     }
 
     return;
