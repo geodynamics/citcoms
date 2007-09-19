@@ -226,9 +226,11 @@ void output_surf_botm(struct All_variables *E, int cycles)
   FILE* fp2;
   float *topo;
 
-  if(E->output.write_q_files == 0) /* else, the heat flux will have
-				      been computed already */
-    heat_flux(E);
+  if((E->output.write_q_files == 0) || (cycles == 0) ||
+     (cycles % E->output.write_q_files)!=0)
+      heat_flux(E);
+  /* else, the heat flux will have been computed already */
+
   get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {

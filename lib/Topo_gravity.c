@@ -561,6 +561,15 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
         scaling = 1.0e3 * 4.0 * M_PI * E->data.radius_km * E->data.grav_const
             / E->data.grav_acc;
 
+        /* zero degree-0 and 1 term */
+        geoid_tpgt[0][E->sphere.hindex[0][0]]
+            = geoid_tpgt[0][E->sphere.hindex[1][0]]
+            = geoid_tpgt[0][E->sphere.hindex[1][1]]
+            = geoid_tpgt[1][E->sphere.hindex[0][0]]
+            = geoid_tpgt[1][E->sphere.hindex[1][0]]
+            = geoid_tpgt[1][E->sphere.hindex[1][1]]
+            = 0.0;
+
         /* compute geoid due to surface topo, skip degree-0 and 1 term */
         for (j=0; j<2; j++)
             for (ll=2; ll<=E->output.llmax; ll++)   {
@@ -586,6 +595,15 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
         /* scale for geoid */
         scaling = 1.0e3 * 4.0 * M_PI * E->data.radius_km * E->data.grav_const
             / (E->data.grav_acc * E->refstate.gravity[1]);
+
+        /* zero degree-0 and 1 term */
+        geoid_tpgb[0][E->sphere.hindex[0][0]]
+            = geoid_tpgb[0][E->sphere.hindex[1][0]]
+            = geoid_tpgb[0][E->sphere.hindex[1][1]]
+            = geoid_tpgb[1][E->sphere.hindex[0][0]]
+            = geoid_tpgb[1][E->sphere.hindex[1][0]]
+            = geoid_tpgb[1][E->sphere.hindex[1][1]]
+            = 0.0;
 
         /* compute geoid due to bottom topo, skip degree-0 and 1 term */
         for (j=0; j<2; j++)
