@@ -546,7 +546,7 @@ static void element_residual(struct All_variables *E, int el,
     double prod,sfn;
     struct Shape_function1 GM;
     struct Shape_function1_dA dGamma;
-    double temp,rho,heating;
+    double temp,rho,cp,heating;
     int nz;
 
     void get_global_1d_shape_fn();
@@ -609,6 +609,7 @@ static void element_residual(struct All_variables *E, int el,
 
     nz = ((el-1) % E->lmesh.elz) + 1;
     rho = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
+    cp = 0.5 * (E->refstate.heat_capacity[nz] + E->refstate.heat_capacity[nz+1]);
 
     if(E->control.disptn_number == 0)
         heating = rho * Q;
@@ -625,7 +626,8 @@ static void element_residual(struct All_variables *E, int el,
 	for(i=1;i<=vpts;i++)
 	  Eres[j] -=
 	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
-              * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])
+              * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
+                 - heating )
               + diff * dOmega.vpt[i] * E->heating_latent[m][el]
               * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
                  GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
