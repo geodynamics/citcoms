@@ -796,10 +796,6 @@ void global_default_values(E)
 
   /* SECOND: values for which an obvious default setting is useful */
 
-  E->control.CITCOM_ORTHO = 1; /* for orthogonal meshes by default */
-  E->control.CITCOM_ORTHOZ = 1; /* for orthogonal meshes by default */
-
-
     E->control.stokes=0;
     E->control.restart=0;
     E->control.CONVECTION = 0;
@@ -810,7 +806,6 @@ void global_default_values(E)
     E->control.CONJ_GRAD = 0;
     E->control.NMULTIGRID = 0;
     E->control.EMULTIGRID = 0;
-    E->control.COMPRESS = 1;
     E->control.augmented_Lagr = 0;
     E->control.augmented = 0.0;
 

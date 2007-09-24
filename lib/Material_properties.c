@@ -52,7 +52,7 @@ void mat_prop_allocate(struct All_variables *E)
     E->refstate.heat_capacity = (double *) malloc((noz+1)*sizeof(double));
 
     /* reference profile of thermal conductivity */
-    E->refstate.thermal_conductivity = (double *) malloc((noz+1)*sizeof(double));
+    /*E->refstate.thermal_conductivity = (double *) malloc((noz+1)*sizeof(double));*/
 
     /* reference profile of gravity */
     E->refstate.gravity = (double *) malloc((noz+1)*sizeof(double));
@@ -82,14 +82,13 @@ void reference_state(struct All_variables *E)
 	E->refstate.rho[i] = exp(beta*z);
 	E->refstate.thermal_expansivity[i] = 1;
 	E->refstate.heat_capacity[i] = 1;
-	E->refstate.thermal_conductivity[i] = 1;
+	/*E->refstate.thermal_conductivity[i] = 1;*/
 	E->refstate.gravity[i] = 1;
 	/*E->refstate.Tadi[i] = (E->control.adiabaticT0 + E->control.surface_temp) * exp(E->control.disptn_number * z) - E->control.surface_temp;*/
     }
 
     if(E->parallel.me == 0) {
         fprintf(stderr, "nz  radius   depth    rho\n");
-        fprintf(E->fp, "nz  radius   depth    rho\n");
     }
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=noz; i++) {

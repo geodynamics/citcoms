@@ -265,10 +265,6 @@ struct SPHERE   {
   float *harm_geoid_from_tpgt[2];
   float *harm_geoid_from_tpgb[2];
 
-  double **tablenplm;
-  double **tablencosf;
-  double **tablensinf;
-
   double **tablesplm[NCS];
   double **tablescosf[NCS];
   double **tablessinf[NCS];
@@ -283,7 +279,7 @@ struct SPHERE   {
   double ro,ri;
   struct CAP cap[NCS];
 
-  };
+};
 
 
 struct MESH_DATA {/* general information concerning the fe mesh */
@@ -391,11 +387,6 @@ struct MONITOR {
 struct CONTROL {
     int PID;
 
-    char output_written_external_command[500];   /* a unix command to run when output files have been created */
-
-  /* this clashed with a GMT definition of ORTHO TWB */
-  int CITCOM_ORTHO,CITCOM_ORTHOZ;   /* indicates levels of mesh symmetry */
-
     char data_prefix[50];
     char data_prefix_old[50];
 
@@ -427,9 +418,6 @@ struct CONTROL {
 
     char NODE_SPACING[20]; /* turns into ... */
     int GRID_TYPE;
-    int COMPRESS;
-    int AVS;
-    int CONMAN;
 
     int pseudo_free_surf;
 
@@ -445,8 +433,6 @@ struct CONTROL {
     float Ra_410,clapeyron410,transT410,width410;
     float Ra_cmb,clapeyroncmb,transTcmb,widthcmb;
 
-    int dfact;
-    double penalty;
     int augmented_Lagr;
     double augmented;
     int NASSEMBLE;
@@ -541,7 +527,7 @@ struct REF_STATE {
     double *rho;
     double *thermal_expansivity;
     double *heat_capacity;
-    double *thermal_conductivity;
+    /*double *thermal_conductivity;*/
     double *gravity;
     /*double *Tadi;*/
 };
