@@ -68,7 +68,9 @@ TWB
 #include "output.h"
 /* Big endian crap */
 #include <string.h>
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 
 void be_flipit(void *, void *, size_t );
 void be_flip_byte_order(void *, size_t );

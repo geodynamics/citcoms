@@ -144,6 +144,12 @@ if test "$want_exchanger" != no; then
 fi
 AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AM_CONDITIONAL([COND_EXCHANGER], [test "$want_exchanger" = yes])
+AC_SEARCH_LIBS([gzopen], [z], [
+		CPPFLAGS="-DUSE_GZDIR $CPPFLAGS"
+		LDFLAGS="-lz $LDFLAGS"
+		], [
+    AC_MSG_WARN([GZip library not found; disabling gzip support; try setting LDFLAGS to enable it])
+])
 
 AC_CONFIG_FILES([Makefile
                  bin/Makefile
