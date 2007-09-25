@@ -358,6 +358,11 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
 
     PUTS(("[CitcomS.solver.param]\n"));
 
+    getIntProperty(properties, "reference_state", E->refstate.choice, fp);
+    if(E->refstate.choice == 0) {
+        getStringProperty(properties, "refstate_file", E->refstate.filename, fp);
+    }
+
     getIntProperty(properties, "file_vbcs", E->control.vbcs_file, fp);
     getStringProperty(properties, "vel_bound_file", E->control.velocity_boundary_file, fp);
 

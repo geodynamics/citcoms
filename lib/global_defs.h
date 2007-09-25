@@ -524,6 +524,8 @@ struct CONTROL {
 
 
 struct REF_STATE {
+    int choice;
+    char filename[200];
     double *rho;
     double *thermal_expansivity;
     double *heat_capacity;
