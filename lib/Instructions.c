@@ -1387,7 +1387,7 @@ void output_finalize(struct  All_variables *E)
   /*
      remove VTK geo file in case we used that for IO
   */
-  if((E->output.gzdir.vtk_io != 1) &&
+  if((E->output.gzdir.vtk_io != 0) &&
      (strcmp(E->output.format, "ascii-gz") == 0)){
     if((E->output.gzdir.vtk_io == 3)||(E->parallel.me == 0)){
       /* delete the geo files */
