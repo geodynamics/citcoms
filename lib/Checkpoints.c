@@ -28,14 +28,13 @@
 
 #include <sys/file.h>
 #include <unistd.h>
-#include "element_definitions.h"
 #include "global_defs.h"
+#include "composition_related.h"
 
 /* Private function prototypes */
 static void backup_file(const char *output_file);
 static void write_sentinel(FILE *fp);
 static void read_sentinel(FILE *fp, int me);
-static void general_checkpoint(struct All_variables *E, FILE *fp);
 
 static void general_checkpoint(struct All_variables *E, FILE *fp);
 static void tracer_checkpoint(struct All_variables *E, FILE *fp);
@@ -67,6 +66,12 @@ void output_checkpoint(struct All_variables *E)
     /* this must be the first to be checkpointed */
     general_checkpoint(E, fp1);
 
+    /* checkpoint for energy equation */
+    energy_checkpoint(E, fp1);
+
+    /* checkpoint for momentum equation */
+    momentum_checkpoint(E, fp1);
+
     /* checkpoint for tracer/composition */
     if(E->control.tracer) {
         tracer_checkpoint(E, fp1);
@@ -74,12 +79,6 @@ void output_checkpoint(struct All_variables *E)
         if(E->composition.on)
             composition_checkpoint(E, fp1);
     }
-
-    /* checkpoint for energy equation */
-    energy_checkpoint(E, fp1);
-
-    /* checkpoint for momentum equation */
-    momentum_checkpoint(E, fp1);
 
     fclose(fp1);
     return;
@@ -89,6 +88,7 @@ void output_checkpoint(struct All_variables *E)
 void read_checkpoint(struct All_variables *E)
 {
     void initialize_material(struct All_variables *E);
+    void initial_viscosity(struct All_variables *E);
 
     char output_file[255];
     FILE *fp;
@@ -108,6 +108,12 @@ void read_checkpoint(struct All_variables *E)
     /* init E->mat */
     initialize_material(E);
 
+    /* read energy information in the checkpoint file */
+    read_energy_checkpoint(E, fp);
+
+    /* read momentum information in the checkpoint file */
+    read_momentum_checkpoint(E, fp);
+
     /* read tracer/composition information in the checkpoint file */
     if(E->control.tracer) {
         read_tracer_checkpoint(E, fp);
@@ -116,13 +122,11 @@ void read_checkpoint(struct All_variables *E)
             read_composition_checkpoint(E, fp);
     }
 
-    /* read energy information in the checkpoint file */
-    read_energy_checkpoint(E, fp);
-
-    /* read momentum information in the checkpoint file */
-    read_momentum_checkpoint(E, fp);
-
     fclose(fp);
+
+    /* finally, init viscosity */
+    initial_viscosity(E);
+
     return;
 }
 
@@ -157,7 +161,7 @@ static void write_sentinel(FILE *fp)
 static void read_sentinel(FILE *fp, int me)
 {
     int i, a[4];
-    char nonzero = 0;
+    int nonzero = 0;
 
     fread(a, sizeof(int), 4, fp);
 
@@ -246,10 +250,10 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         fwrite(&(E->trace.ntracers[m]), sizeof(int), 1, fp);
 
-    /* the 0-th element of basicq/extraq/ntracer_flavor is not init'd
+    /* the 0-th element of basicq/extraq/ielement is not init'd
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->trace.number_of_basic_quantities; i++) {
+        for(i=0; i<6; i++) {
             fwrite(E->trace.basicq[m][i], sizeof(double),
                    E->trace.ntracers[m]+1, fp);
         }
@@ -259,10 +263,6 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
         }
         fwrite(E->trace.ielement[m], sizeof(int),
                E->trace.ntracers[m]+1, fp);
-        for(i=0; i<E->trace.nflavors; i++) {
-            fwrite(E->trace.ntracer_flavor[m][i], sizeof(int),
-                   E->lmesh.nel+1, fp);
-        }
     }
 
     return;
@@ -271,6 +271,7 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
 
 static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 {
+    void count_tracers_of_flavors(struct All_variables *E);
     void allocate_tracer_arrays();
 
     int m, i, itmp;
@@ -316,7 +317,7 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
     /* read tracer data */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->trace.number_of_basic_quantities; i++) {
+        for(i=0; i<6; i++) {
             fread(E->trace.basicq[m][i], sizeof(double),
                   E->trace.ntracers[m]+1, fp);
         }
@@ -326,11 +327,10 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
         }
         fread(E->trace.ielement[m], sizeof(int),
               E->trace.ntracers[m]+1, fp);
-        for(i=0; i<E->trace.nflavors; i++) {
-            fread(E->trace.ntracer_flavor[m][i], sizeof(int),
-                  E->lmesh.nel+1, fp);
-        }
     }
+
+    /* init E->trace.ntracer_flavor */
+    count_tracers_of_flavors(E);
 
     return;
 }
@@ -348,17 +348,12 @@ static void composition_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(E->composition.initial_bulk_composition, sizeof(double),
            E->composition.ncomp, fp);
 
-    /* the 0-th element of comp_el/comp_node is not init'd
+    /* the 0-th element of comp_el is not init'd
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(i=0; i<E->composition.ncomp; i++)
             fwrite(E->composition.comp_el[m][i], sizeof(double),
                    E->lmesh.nel+1, fp);
-    }
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->composition.ncomp; i++)
-            fwrite(E->composition.comp_node[m][i], sizeof(double),
-                   E->lmesh.nno+1, fp);
     }
 
     return;
@@ -392,11 +387,8 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp)
                   E->lmesh.nel+1, fp);
     }
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->composition.ncomp; i++)
-            fread(E->composition.comp_node[m][i], sizeof(double),
-                  E->lmesh.nno+1, fp);
-    }
+    /* init E->composition.comp_node */
+    map_composition_to_nodes(E);
 
     /* preventing uninitialized access */
     E->trace.istat_iempty = 0;
@@ -455,19 +447,11 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
     /* the 0-th element of P/NP/EVI/VI is not init'd
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* Pressure at equation points and nodes */
-        /* Writing E->NP instead of calling p_to_nodes() because p_to_nodes()
-         * contains parallel communication */
+        /* Pressure at equation points */
         fwrite(E->P[m], sizeof(double), E->lmesh.npno+1, fp);
-        fwrite(E->NP[m], sizeof(float), E->lmesh.nno+1, fp);
 
         /* velocity at equation points */
         fwrite(E->U[m], sizeof(double), E->lmesh.neq, fp);
-
-        /* viscosity at quadrature points and node points */
-        fwrite(E->EVI[lev][m], sizeof(float),
-               (E->lmesh.nel+1)*vpoints[E->mesh.nsd], fp);
-        fwrite(E->VI[lev][m], sizeof(float), E->lmesh.nno+1, fp);
     }
 
     return;
@@ -477,6 +461,7 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
 static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 {
     void v_from_vector();
+    void p_to_nodes();
 
     int m, i;
     int lev = E->mesh.levmax;
@@ -487,24 +472,20 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
     fread(&(E->monitor.incompressibility), sizeof(float), 1, fp);
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* Pressure at equation points and nodes */
+        /* Pressure at equation points */
         fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp);
-        fread(E->NP[m], sizeof(float), E->lmesh.nno+1, fp);
 
         /* velocity at equation points */
         fread(E->U[m], sizeof(double), E->lmesh.neq, fp);
-
-        /* viscosity at quadrature points and node points */
-        fread(E->EVI[lev][m], sizeof(float),
-              (E->lmesh.nel+2)*vpoints[E->mesh.nsd], fp);
-        fread(E->VI[lev][m], sizeof(float), E->lmesh.nno+2, fp);
     }
 
     /* update velocity array */
     v_from_vector(E);
 
+    /* init E->NP */
+    p_to_nodes(E, E->P, E->NP, lev);
+
     return;
 }
-
 
 

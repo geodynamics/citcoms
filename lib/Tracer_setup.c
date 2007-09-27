@@ -60,6 +60,7 @@ void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
 void allocate_tracer_arrays(struct All_variables *E,
                             int j, int number_of_tracers);
+void count_tracers_of_flavors(struct All_variables *E);
 
 int full_icheck_cap(struct All_variables *E, int icap,
                     double x, double y, double z, double rad);
@@ -67,7 +68,6 @@ int regional_icheck_cap(struct All_variables *E, int icap,
                         double x, double y, double z, double rad);
 
 static void find_tracers(struct All_variables *E);
-static void count_tracers_of_flavors(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
 static void make_tracer_array(struct All_variables *E);
@@ -608,7 +608,7 @@ static void find_tracers(struct All_variables *E)
 /* Each tracer can be of different "flavors", which is the 0th index   */
 /* of extraq. How to interprete "flavor" is left for the application.  */
 
-static void count_tracers_of_flavors(struct All_variables *E)
+void count_tracers_of_flavors(struct All_variables *E)
 {
 
     int j, flavor, e, kk;

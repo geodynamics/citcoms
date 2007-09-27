@@ -37,7 +37,6 @@ static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
 static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
-static void map_composition_to_nodes(struct All_variables *E);
 static void fill_composition_from_neighbors(struct All_variables *E);
 
 
@@ -321,7 +320,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
 /*                                                  */
 
 
-static void map_composition_to_nodes(struct All_variables *E)
+void map_composition_to_nodes(struct All_variables *E)
 {
     double *tmp[NCS];
     int i, n, kk;
