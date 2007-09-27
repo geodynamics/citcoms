@@ -63,6 +63,7 @@ int main(argc,argv)
   void output_finalize();
   void PG_timestep_init();
   void tracer_advection();
+  void heat_flux();
 
   float dot();
   float cpu_time_on_vp_it;
@@ -170,7 +171,7 @@ int main(argc,argv)
 
     general_stokes_solver(E);
     if(E->output.write_q_files)
-      if ((E->monitor.solution_cycles % E->output.write_q_files)==0) 
+      if ((E->monitor.solution_cycles % E->output.write_q_files)==0)
 	heat_flux(E);
 
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {

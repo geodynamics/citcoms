@@ -65,12 +65,14 @@ TWB
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
+#include "parallel_related.h"
 #include "output.h"
 /* Big endian crap */
 #include <string.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+
 
 void be_flipit(void *, void *, size_t );
 void be_flip_byte_order(void *, size_t );
@@ -115,7 +117,9 @@ int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);
 
 
-extern void parallel_process_termination();
+extern void temperatures_conform_bcs(struct All_variables *);
+extern void myerror(struct All_variables *,char *);
+extern void mkdatadir(const char *);
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**,
                          float**, float**, int);
@@ -1165,7 +1169,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
       if(fscanf(fp,"%i %i",&ll,&mm) != 2)
 	myerror(E,"restart vtkl read error 1");
       for(i=1;i<=E->lmesh.nno;i++)
-	if(fscanf(fp,"%f",&(E->T[m][i]))!=1)
+	if(fscanf(fp,"%lf",&(E->T[m][i]))!=1)
 	  myerror(E,"restart vtkl read error 2");
     }
     break;
@@ -1223,7 +1227,7 @@ int open_file_zipped(char *name, FILE **in,
       /* open unzipped file for read */
       *in = fopen(name,"r");
       if(*in == NULL)
-	myerror("open_file_zipped: unzipping error",E);
+          myerror(E,"open_file_zipped: unzipping error");
       return 1;
     }else{
       /*
