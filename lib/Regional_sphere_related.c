@@ -164,7 +164,7 @@ if(E->control.coor==1)   {
 
 }
 
-else if(E->control.coor==0)   {
+ else if((E->control.coor==0) || (E->control.coor==2))   {
 
   /*
   for(i=1;i<=5;i++)  {
@@ -244,9 +244,6 @@ else if(E->control.coor==0)   {
   free ((void *)SX[1]);
   free ((void *)tt);
   free ((void *)ff);
-}else{
-  myerror(E,"regional_sphere_related: coor setting not implemented");
-
 }
 
   return;

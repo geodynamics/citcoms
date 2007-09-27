@@ -59,6 +59,8 @@ class Sphere(CitcomComponent):
 
 
     def setProperties(self, stream):
+        self.inventory.coor_refine = map(float, self.inventory.coor_refine)
+
         from CitcomSLib import Sphere_set_properties
         Sphere_set_properties(self.all_variables, self.inventory, stream)
         return
@@ -74,7 +76,9 @@ class Sphere(CitcomComponent):
         nprocy = pyre.inventory.int("nprocy", default=1)
         nprocz = pyre.inventory.int("nprocz", default=1)
 
-        coor = pyre.inventory.bool("coor", default=False)
+        coor = pyre.inventory.int("coor", default=0)
+        coor_refine = pyre.inventory.list("coor_refine", 
+                                          default=[0.1,0.15,0.1,0.2])
         coor_file = pyre.inventory.str("coor_file", default="coor.dat")
 
         nodex = pyre.inventory.int("nodex", default=9)

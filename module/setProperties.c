@@ -532,6 +532,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     }
 
     getIntProperty(properties, "coor", E->control.coor, fp);
+    getFloatVectorProperty(properties, "coor_refine", E->control.coor_refine, 4, fp);
     getStringProperty(properties, "coor_file", E->control.coor_file, fp);
 
     getIntProperty(properties, "nodex", E->mesh.nox, fp);
