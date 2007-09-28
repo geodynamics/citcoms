@@ -1156,10 +1156,12 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
   }
   /* open file */
   rezip = open_file_zipped(output_file,&fp,E);
-  if (E->parallel.me==0)
+  if (E->parallel.me==0){
+    fprintf(stderr,"restart_tic_from_gzdir_file: using  %s for restarted temperature\n",
+	    output_file);
     fprintf(E->fp,"restart_tic_from_gzdir_file: using  %s for restarted temperature\n",
 	    output_file);
-
+  }
   if(fscanf(fp,"%i %i %f",&ll,&mm,&restart_elapsed_time) != 3)
     myerror(E,"restart vtkl read error 0");
 
@@ -1168,9 +1170,11 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
     for(m=1;m <= E->sphere.caps_per_proc;m++) {
       if(fscanf(fp,"%i %i",&ll,&mm) != 2)
 	myerror(E,"restart vtkl read error 1");
-      for(i=1;i<=E->lmesh.nno;i++)
-	if(fscanf(fp,"%lf",&(E->T[m][i]))!=1)
+      for(i=1;i<=E->lmesh.nno;i++){
+	if(fscanf(fp,"%f",&g) != 1)
 	  myerror(E,"restart vtkl read error 2");
+	E->T[m][i] = g;
+      }
     }
     break;
   default:			/* old style velo */

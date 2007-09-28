@@ -361,10 +361,11 @@ void full_construct_tic_from_input(struct All_variables *E)
 	  }
     }
     break;
+  case -1:
   case 1:
   case 2:
     break;
-  case 4:
+  case 4:			/* read initial temp from grd grd files */
 #ifdef USE_GGRD
     ggrd_full_temp_init(E);
 #else

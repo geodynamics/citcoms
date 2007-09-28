@@ -81,6 +81,8 @@ void tic_input(struct All_variables *E)
   */
 
   switch(E->convection.tic_method){
+  case -1:			/* restart from file */
+    break;
   case 0:
   case 3:
     /* This part put a temperature anomaly at depth where the global
