@@ -96,6 +96,20 @@ nobase_dist_examples_DATA = \
 	Cookbook6/coord.dat \
 	Cookbook6/README \
 	Cookbook7/cookbook7.cfg \
+	Cookbook8/cookbook8.cfg \
+	Cookbook8/coord.dat \
+	Cookbook8/restart/cookbook8.chkpt.0.9000 \
+	Cookbook8/restart/cookbook8.chkpt.1.9000 \
+	Cookbook8/restart/cookbook8.chkpt.2.9000 \ 
+	Cookbook8/restart/cookbook8.chkpt.3.9000 \
+	Cookbook8/restart/cookbook8.chkpt.4.9000 \
+	Cookbook8/restart/cookbook8.chkpt.5.9000 \
+	Cookbook8/restart/cookbook8.chkpt.6.9000 \
+	Cookbook8/restart/cookbook8.chkpt.7.9000 \
+	Cookbook8/restart/cookbook8.chkpt.8.9000 \
+	Cookbook8/restart/cookbook8.chkpt.9.9000 \
+	Cookbook8/restart/cookbook8.chkpt.10.9000 \
+	Cookbook8/restart/cookbook8.chkpt.11.9000 \
 	example0.cfg \
 	example1.cfg \
 	Full/input.sample \
