@@ -33,8 +33,8 @@ nobase_dist_examples_DATA = \
 	Cookbook4/coor.dat \
 	Cookbook5/cookbook5.cfg \
 	Cookbook5/coor.dat \
-	Cookbook5/restart_files/cookbook5.velo.0.0 \
-	Cookbook5/restart_files/cookbook5.velo.1.0 \
+	Cookbook5/ic/cookbook5.velo.0.0 \
+	Cookbook5/ic/cookbook5.velo.1.0 \
 	Cookbook5/velocity/bvel.dat0 \
 	Cookbook5/velocity/bvel.dat1 \
 	Cookbook5/velocity/bvel.dat10 \
