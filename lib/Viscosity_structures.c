@@ -422,6 +422,7 @@ void visc_from_T(E,EEta,propogate)
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
+
                 tempa = E->viscosity.N0[l-1];
                 j = 0;
 
@@ -602,11 +603,16 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  eedot[e] = 1.0e-5;
 	if(m == E->sphere.caps_per_proc)
 	  E->viscosity.pdepv_visited = 1;
+	if(E->parallel.me == 0){
+	  for(e=0;e < E->viscosity.num_mat;e++)
+	    fprintf(stderr,"num mat: %i a: %g b: %g y: %g\n",
+		    e,E->viscosity.pdepv_a[e],E->viscosity.pdepv_b[e],E->viscosity.pdepv_y[e]);
+	}
       }
 
-      for(e=1;e<=nel;e++)   {	/* loop through all elements */
+      for(e=1;e <= nel;e++)   {	/* loop through all elements */
 
-	l = E->mat[m][e];	/* material of this element */
+	l = E->mat[m][e] -1 ;	/* material of this element */
 
 	for(kk=1;kk <= ends;kk++) /* nodal depths */
 	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); /* for depth, zz = 1 - r */
@@ -634,7 +640,9 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	    /* min viscosities*/
 	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
-	  //fprintf(stderr,"%11g %11g %11g %11g %11g\n",eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
+	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
+	  //zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
+	  //eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
 	  EEta[m][(e-1)*vpts + jj] = eta_new;
         } /* end integration point loop */
       }	/* end element loop */
