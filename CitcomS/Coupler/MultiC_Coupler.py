@@ -1,4 +1,30 @@
 #!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#<LicenseText>
+#
+# CitcomS.py by Eh Tan, Eun-seo Choi, and Pururav Thoutireddy.
+# Copyright (C) 2002-2005, California Institute of Technology.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#</LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
 
 #
 #containing coupler with more than one coupled embedded coupler
@@ -129,9 +155,7 @@ class MultiC_Coupler(ContainingCoupler):
         return
 
 
-    # initTemperature
-
-    # restartTemperature
+    # exchangeTemperature
 
     # modifyT
 
@@ -198,7 +222,7 @@ class MultiC_Coupler(ContainingCoupler):
         sent = NEW_STEP_SIGNAL
 
         KEEP_WAITING_FLAG = True
-       
+
         while KEEP_WAITING_FLAG:
 
             #receive signals
@@ -212,7 +236,7 @@ class MultiC_Coupler(ContainingCoupler):
             # determining what to send
             if done or (recv == END_SIMULATION_SIGNAL) or \
                (recv2 == END_SIMULATION_SIGNAL):
-                # end the simulation    
+                # end the simulation
                 sent = END_SIMULATION_SIGNAL
                 done = True
                 KEEP_WAITING_FLAG = False
@@ -244,7 +268,7 @@ class MultiC_Coupler(ContainingCoupler):
             if sent == BIG_NEW_STEP_SIGNAL:
                 self.coupled_steps = self.exchangeSignal(steps)
                 self.coupled_steps2 = self.exchangeSignal2(steps)
- 
+
         return done
 
 
