@@ -86,7 +86,7 @@ class Advection_diffusion(CitcomComponent):
         import pyre.inventory as prop
 
         ADV = prop.bool("ADV", default=True)
-        filter_temp = prop.bool("filter_temp", default=True)
+        filter_temp = prop.bool("filter_temp", default=False)
         monitor_max_T = prop.bool("monitor_max_T", default=True)
 
         fixed_timestep = prop.float("fixed_timestep", default=0.0)

@@ -78,7 +78,7 @@ void advection_diffusion_parameters(struct All_variables *E)
     int m=E->parallel.me;
 
     input_boolean("ADV",&(E->advection.ADVECTION),"on",m);
-    input_boolean("filter_temp",&(E->advection.filter_temperature),"on",m);
+    input_boolean("filter_temp",&(E->advection.filter_temperature),"off",m);
     input_boolean("monitor_max_T",&(E->advection.monitor_max_T),"on",m);
 
     input_int("minstep",&(E->advection.min_timesteps),"1",m);
