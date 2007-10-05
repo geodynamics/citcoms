@@ -105,7 +105,7 @@ class Incompressible(CitcomComponent):
         uzawa = prop.str("uzawa", default="cg",
                          validator=prop.choice(["cg", "bicg"]))
         compress_iter_maxstep = prop.int("compress_iter_maxstep", default=100)
-        relative_err_accuracy = prop.float("relative_err_accuracy", default=0.01)
+        relative_err_accuracy = prop.float("relative_err_accuracy", default=0.001)
 
 # version
 __id__ = "$Id$"
