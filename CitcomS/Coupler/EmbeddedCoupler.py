@@ -53,11 +53,6 @@ class EmbeddedCoupler(Coupler):
         assert solver.inventory.bc.inventory.side_sbcs == True, \
                'Error: esolver.bc.side_sbcs must be on!'
 
-	# restart and use temperautre field of previous run?
-        self.restart = solver.restart
-        if self.restart:
-            self.ic_initTemperature = solver.ic_initTemperature
-
         # allocate space for exchanger objects
         self.remoteIntrList = range(self.remoteSize)
         self.sourceList = range(self.remoteSize)
@@ -84,8 +79,8 @@ class EmbeddedCoupler(Coupler):
 
         # the nodes on the boundary, top and bottom boundaries are special
         self.boundary, self.myBBox = createBoundary(self.all_variables,
-                                                    inv.excludeTop,
-                                                    inv.excludeBottom)
+                                                    inv.exclude_top,
+                                                    inv.exclude_bottom)
 
         # an empty interior object, which will be filled by a remote interior obj.
         if inv.two_way_communication:
@@ -155,17 +150,16 @@ class EmbeddedCoupler(Coupler):
 
 
     def initTemperature(self):
-        if self.restart:
-            # receive temperature from CCPLR and postprocess
-            self.restartTemperature()
-        else:
-            from ExchangerLib import initTemperature
-            initTemperature(self.globalBBox,
-                            self.all_variables)
+        from ExchangerLib import initTemperature
+        initTemperature(self.globalBBox,
+                        self.all_variables)
         return
 
 
-    def restartTemperature(self):
+    def exchangeTemperature(self):
+        if not self.inventory.exchange_initial_temperature:
+            return
+
         from ExchangerLib import createInterior, Sink_create
         interior, bbox = createInterior(self.remoteBBox,
                                         self.all_variables)
@@ -181,7 +175,7 @@ class EmbeddedCoupler(Coupler):
         # Note: modifyT is called after receiving unmodified T from CCPLR.
         # If T is modified before sending, ECPLR's T will lose sharp feature.
         # CCPLR has to call modifyT too to ensure consistent T field.
-        self.modifyT(self.globalBBox)
+        #self.modifyT(self.globalBBox)
 
         return
 
@@ -262,10 +256,10 @@ class EmbeddedCoupler(Coupler):
         import pyre.inventory as prop
 
         # excluding nodes in top boundary? (used if vbc is read from file)
-        excludeTop = prop.bool("excludeTop", default=False)
+        exclude_top = prop.bool("exclude_top", default=False)
 
         # excluding nodes in bottom boundary?
-        excludeBottom = prop.bool("excludeBottom", default=False)
+        exclude_bottom = prop.bool("exclude_bottom", default=False)
 
 
 

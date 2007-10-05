@@ -146,6 +146,10 @@ class Coupler(Component):
 
         # updating the temperature field in the containing solver or not
         two_way_communication = prop.bool("two_way_communication", default=True)
+        # insuring consistent inititial temperature fields at the overlapping
+        # domain or not
+        exchange_initial_temperature = prop.bool("exchange_initial_temperature",
+                                                 default=True)
 
         # if dimensional is True, quantities exchanged are dimensional
         dimensional = prop.bool("dimensional", default=False)
@@ -153,7 +157,6 @@ class Coupler(Component):
         # if transformational is True, quantities exchanged are in standard
         # (ie. Cartesian) coordinate system
         transformational = prop.bool("transformational", default=False)
-
 
 
 

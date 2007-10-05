@@ -50,30 +50,26 @@ class CoupledSolver(Solver):
         self.myPlus = application.myPlus
         self.remotePlus = application.remotePlus
 
-        self.restart = self.inventory.ic.inventory.restart
-        self.ic_initTemperature = self.inventory.ic.initTemperature
-
         self.coupler.initialize(self)
         return
 
 
     def launch(self, application):
-
         #TODO: checkpoint doesn't contain coupler information yet
-        if self.restart:
-            pass
-
         self.coupler.launch(self)
 
-        ic = self.inventory.ic
-        if not (ic.inventory.restart or ic.inventory.post_p):
-            # switch the default initTemperature to coupled version
-            ic.initTemperature = self.coupler.initTemperature
+        if self.inventory.ic.inventory.restart:
+            from CitcomSLib import readCheckpoint
+            readCheckpoint(self.all_variables)
+        else:
+            # initial conditions
+            ic = self.inventory.ic
+            ic.launch()
 
-        # initial conditions
-        ic.launch()
+            # insure consistent temperature fields across solvers
+            self.coupler.exchangeTemperature()
 
-        self.solveVelocities()
+            self.solveVelocities()
         return
 
 

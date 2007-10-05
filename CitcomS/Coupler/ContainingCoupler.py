@@ -39,11 +39,6 @@ class ContainingCoupler(Coupler):
     def initialize(self, solver):
         Coupler.initialize(self, solver)
 
-        # restart and use temperautre field of previous run?
-        self.restart = solver.restart
-        if self.restart:
-            self.ic_initTemperature = solver.ic_initTemperature
-
         # allocate space for exchanger objects
         self.remoteBdryList = range(self.remoteSize)
         self.sourceList = range(self.remoteSize)
@@ -138,20 +133,16 @@ class ContainingCoupler(Coupler):
 
 
     def initTemperature(self):
-        if self.restart:
-            # read-in restarted temperature field
-            self.ic_initTemperature()
-            del self.ic_initTemperature
-            # send temperature to EmbeddedCoupler and postprocess
-            self.restartTemperature()
-        else:
-            from ExchangerLib import initTemperature
-            initTemperature(self.remoteBBox,
-                            self.all_variables)
+        from ExchangerLib import initTemperature
+        initTemperature(self.remoteBBox,
+                        self.all_variables)
         return
 
 
-    def restartTemperature(self):
+    def exchangeTemperature(self):
+        if not self.inventory.exchange_initial_temperature:
+            return
+
         from ExchangerLib import createEmptyInterior, CitcomSource_create
         interior = range(self.remoteSize)
         source = range(self.remoteSize)
@@ -180,7 +171,7 @@ class ContainingCoupler(Coupler):
         # If T is modified before sending, EmbeddedCoupler's T will lose sharp
         # feature.
         # EmbeddedCoupler has to call modifyT too to ensure consistent T field.
-        self.modifyT(self.remoteBBox)
+        #self.modifyT(self.remoteBBox)
 
         return
 
