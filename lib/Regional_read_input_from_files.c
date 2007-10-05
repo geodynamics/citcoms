@@ -60,7 +60,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     int llayer;
     int layers();
 
-    if( E->parallel.me == 0) fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps   action=%d\n",action);
+    /* if( E->parallel.me == 0) fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps   action=%d\n",action); */
 
     nox=E->mesh.nox;
     noy=E->mesh.noy;
