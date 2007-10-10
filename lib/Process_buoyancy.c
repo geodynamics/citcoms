@@ -166,9 +166,14 @@ void heat_flux(E)
     } */
     if (E->parallel.me==E->parallel.nprocz-1) {
       fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
-      /*fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]);*/
-      if(E->output.write_q_files)
-	fprintf(E->output.fpqt,"%.5e %.5e\n",E->monitor.elapsed_time,sum_h[0]);
+      /* XXX */
+      fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]); /* commented this back in TWB , why was it out in the first place? */
+
+      if(E->output.write_q_files > 0){
+	/* format: time heat_flow sqrt(v.v)  */
+	fprintf(E->output.fpqt,"%13.5e %13.5e %13.5e\n",E->monitor.elapsed_time,sum_h[0],sqrt(E->monitor.vdotv));
+	fflush(E->output.fpqt);
+      }
     }
   }
 
@@ -178,8 +183,11 @@ void heat_flux(E)
     if (E->parallel.me==0) {
       fprintf(stderr,"bottom heat flux= %f\n",sum_h[2]);
       fprintf(E->fp,"bottom heat flux= %f\n",sum_h[2]);
-      if(E->output.write_q_files)
-	fprintf(E->output.fpqb,"%.5e %.5e\n",E->monitor.elapsed_time,sum_h[2]);
+      if(E->output.write_q_files > 0){
+	fprintf(E->output.fpqb,"%13.5e %13.5e %13.5e\n",
+		E->monitor.elapsed_time,sum_h[2],sqrt(E->monitor.vdotv));
+	fflush(E->output.fpqb);
+      }
 
     }
   }

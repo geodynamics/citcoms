@@ -341,13 +341,35 @@ void read_initial_settings(struct All_variables *E)
   input_int("levels",&(E->mesh.levels),"0",m);
 
   input_int("coor",&(E->control.coor),"0",m);
-  if(E->control.coor == 2){	/* refinement */
+  if(E->control.coor == 2){	
+    /* 
+       refinement in two layers 
+    */
+    /* number of refinement layers */
     E->control.coor_refine[0] = 0.10; /* bottom 10% */
     E->control.coor_refine[1] = 0.15; /* get 15% of the nodes */
     E->control.coor_refine[2] = 0.10; /* top 10% */
     E->control.coor_refine[3] = 0.20; /* get 20% of the nodes */
     input_float_vector("coor_refine",4,E->control.coor_refine,m);
-  }
+  }else if(E->control.coor == 3){
+    /* 
+       
+    refinement CitcomCU style, by reading in layers, e.g.
+
+	r_grid_layers=3		# minus 1 is number of layers with uniform grid in r
+	rr=0.5,0.75,1.0 	#    starting and ending r coodinates
+	nr=1,37,97		#    starting and ending node in r direction
+
+    */
+    input_int("r_grid_layers", &(E->control.rlayers), "1",m);
+    if(E->control.rlayers > 20)
+      myerror(E,"number of rlayers out of bounds (20) for coor = 3");
+    /* layers radii */
+    input_float_vector("rr", E->control.rlayers, (E->control.rrlayer),m);
+    /* associated node numbers */
+    input_int_vector("nr", E->control.rlayers, (E->control.nrlayer),m);
+   }
+  
   input_string("coor_file",E->control.coor_file,"",m);
 
   input_int("nprocx",&(E->parallel.nprocx),"1",m);
@@ -369,10 +391,16 @@ void read_initial_settings(struct All_variables *E)
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
 
   /* for layers    */
-  input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m);
+  /* 
+
+  these boundaries are a little wacko 
+     
+
+  */
+  input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* does this ever get used? */
   input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m);
-  input_float("z_410",&(E->viscosity.z410),"0.225",m);
-  input_float("z_lith",&(E->viscosity.zlith),"0.225",m);
+  input_float("z_410",&(E->viscosity.z410),"0.225",m); /* 0.06434, more like it */
+  input_float("z_lith",&(E->viscosity.zlith),"0.225",m); /* 0.0157, more like it */
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
@@ -388,6 +416,9 @@ void read_initial_settings(struct All_variables *E)
   input_float("botvbxval",&(E->control.VBXbotval),"0.0",m);
   input_float("topvbyval",&(E->control.VBYtopval),"0.0",m);
   input_float("botvbyval",&(E->control.VBYbotval),"0.0",m);
+
+
+  input_float("T_interior_max_for_exit",&(E->monitor.T_interior_max_for_exit),"1.5",m);
 
   input_int("pseudo_free_surf",&(E->control.pseudo_free_surf),"0",m);
 

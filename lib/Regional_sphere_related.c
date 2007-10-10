@@ -72,52 +72,55 @@ void regional_coord_of_cap(E,m,icap)
   temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
 
-if(E->control.coor==1)   {
-  for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)  {
-  theta1[i] = (float *)malloc((temp+1)*sizeof(float));
-  fi1[i]    = (float *)malloc((temp+1)*sizeof(float));
-  }
+  if(E->control.coor==1) {
 
-  temp = E->mesh.NOY[E->mesh.levmax]*E->mesh.NOX[E->mesh.levmax];
+    /* read in node locations from file */
 
-  sprintf(output_file,"%s",E->control.coor_file);
-  fp=fopen(output_file,"r");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Sphere_related #1) Cannot open %s\n",output_file);
-          exit(8);
-	}
-
-  fscanf(fp,"%s %d",a,&nn);
-   for(i=1;i<=gnox;i++) {
-     fscanf(fp,"%d %e",&nn,&theta1[E->mesh.gridmax][i]);
-   }
-  E->control.theta_min = theta1[E->mesh.gridmax][1];
-  E->control.theta_max = theta1[E->mesh.gridmax][gnox];
-
-  fscanf(fp,"%s %d",a,&nn);
-   for(i=1;i<=gnoy;i++)  {
-     fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]);
+    for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)  {
+      theta1[i] = (float *)malloc((temp+1)*sizeof(float));
+      fi1[i]    = (float *)malloc((temp+1)*sizeof(float));
     }
-  E->control.fi_min = fi1[E->mesh.gridmax][1];
-  E->control.fi_max = fi1[E->mesh.gridmax][gnox];
+    
+    temp = E->mesh.NOY[E->mesh.levmax]*E->mesh.NOX[E->mesh.levmax];
+    
+    sprintf(output_file,"%s",E->control.coor_file);
+    fp=fopen(output_file,"r");
+    if (fp == NULL) {
+      fprintf(E->fp,"(Sphere_related #1) Cannot open %s\n",output_file);
+      exit(8);
+    }
 
-  fclose(fp);
-
-
-  for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
-
-  if (E->control.NMULTIGRID||E->control.EMULTIGRID)
+    fscanf(fp,"%s %d",a,&nn);
+    for(i=1;i<=gnox;i++) {
+      fscanf(fp,"%d %e",&nn,&theta1[E->mesh.gridmax][i]);
+    }
+    E->control.theta_min = theta1[E->mesh.gridmax][1];
+    E->control.theta_max = theta1[E->mesh.gridmax][gnox];
+    
+    fscanf(fp,"%s %d",a,&nn);
+    for(i=1;i<=gnoy;i++)  {
+      fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]);
+    }
+    E->control.fi_min = fi1[E->mesh.gridmax][1];
+    E->control.fi_max = fi1[E->mesh.gridmax][gnox];
+    
+    fclose(fp);
+    
+    
+    for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
+      
+      if (E->control.NMULTIGRID||E->control.EMULTIGRID)
         step = (int) pow(2.0,(double)(E->mesh.levmax-lev));
-    else
+      else
         step = 1;
-
-     for (i=1;i<=E->mesh.NOX[lev];i++)
-         theta1[lev][i] = theta1[E->mesh.gridmax][(i-1)*step+1];
-
-     for (i=1;i<=E->mesh.NOY[lev];i++)
-         fi1[lev][i] = fi1[E->mesh.gridmax][(i-1)*step+1];
-
-  }
+      
+      for (i=1;i<=E->mesh.NOX[lev];i++)
+	theta1[lev][i] = theta1[E->mesh.gridmax][(i-1)*step+1];
+      
+      for (i=1;i<=E->mesh.NOY[lev];i++)
+	fi1[lev][i] = fi1[E->mesh.gridmax][(i-1)*step+1];
+      
+    }
 
 
   for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
@@ -162,9 +165,9 @@ if(E->control.coor==1)   {
   free ((void *)fi1[lev]   );
    }
 
-}
-
- else if((E->control.coor==0) || (E->control.coor==2))   {
+  } /* end of coord = 1 */
+  
+ else if((E->control.coor==0) || (E->control.coor==2)|| (E->control.coor==3))   {
 
   /*
   for(i=1;i<=5;i++)  {

@@ -472,11 +472,13 @@ void visc_from_T(E,EEta,propogate)
 
         for(m=1;m <= E->sphere.caps_per_proc;m++)
 	  for(i=1;i <= nel;i++)   {
-	    l = E->mat[m][i];
+
+	    l = E->mat[m][i] - 1;
+
 	    if(E->control.mat_control)
-	      tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
+	      tempa = E->viscosity.N0[l] * E->VIP[m][i];
 	    else
-	      tempa = E->viscosity.N0[l-1];
+	      tempa = E->viscosity.N0[l];
 	    j = 0;
 
 	    for(kk=1;kk<=ends;kk++) {
@@ -491,11 +493,11 @@ void visc_from_T(E,EEta,propogate)
 		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
 		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	      }
-	      //fprintf(stderr,"N0 %11g T %11g T0 %11g E %11g 1-z %11g Z %11g\n",
-	      //	      tempa,temp,E->viscosity.T[l-1],E->viscosity.E[l-1], zzz ,E->viscosity.Z[l-1] );
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
-		exp( E->viscosity.E[l-1]*(E->viscosity.T[l-1] - temp) +
-		     zzz *  E->viscosity.Z[l-1] );
+		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
+		     zzz *  E->viscosity.Z[l]);
+	      //fprintf(stderr,"N0 %11g T %11g T0 %11g E %11g z %11g km Z %11g mat: %i log10(eta): %11g\n",
+	      //      tempa,temp,E->viscosity.T[l],E->viscosity.E[l], zzz *6371 ,E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
 	    }
 	  }
         break;

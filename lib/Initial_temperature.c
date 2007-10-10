@@ -151,16 +151,15 @@ void tic_input(struct All_variables *E)
     /* read in some more parameters */
     /* scale the anomalies with PREM densities */
     input_boolean("ggrd_tinit_scale_with_prem",&(E->convection.ggrd_tinit_scale_with_prem),"off",E->parallel.me);
-    /* scaling factor for the grids */
+    /* limit T to 0...1 */
+    input_boolean("ggrd_tinit_limit_trange",&(E->convection.ggrd_tinit_limit_trange),"on",E->parallel.me);
+   /* scaling factor for the grids */
     input_double("ggrd_tinit_scale",&(E->convection.ggrd_tinit_scale),"1.0",E->parallel.me); /* scale */
     /* temperature offset factor */
     input_double("ggrd_tinit_offset",&(E->convection.ggrd_tinit_offset),"0.0",E->parallel.me); /* offset */
     /* grid name, without the .i.grd suffix */
     input_string("ggrd_tinit_gfile",E->convection.ggrd_tinit_gfile,"",E->parallel.me); /* grids */
-    input_string("ggrd_tinit_dfile",E->convection.ggrd_tinit_dfile,"",E->parallel.me); /* depth.dat
-											  layers
-											  of
-											  grids*/
+    input_string("ggrd_tinit_dfile",E->convection.ggrd_tinit_dfile,"",E->parallel.me); /* depth.dat layers of grids*/
     /* override temperature boundary condition? */
     input_boolean("ggrd_tinit_override_tbc",&(E->convection.ggrd_tinit_override_tbc),"off",E->parallel.me);
     input_string("ggrd_tinit_prem_file",E->convection.prem.model_filename,"", E->parallel.me); /* PREM model filename */

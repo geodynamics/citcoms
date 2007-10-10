@@ -29,8 +29,10 @@
 
 #include "global_defs.h"
 #include "parallel_related.h"
-void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
 
+void get_r_spacing_fine(double *,struct All_variables *);
+void get_r_spacing_at_levels(double *,struct All_variables *);
+ 
 #ifdef USE_GGRD
 void ggrd_reg_temp_init(struct All_variables *);
 #endif
@@ -159,7 +161,16 @@ void regional_node_locations(E)
   noz=E->mesh.noz;
 
 
-  if(E->control.coor==1)    {	/* get nodal levels from file */
+  switch(E->control.coor)    {	
+  case 0:
+    /* default: regular node spacing */
+    dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
+    for (k=1;k<=E->mesh.noz;k++)  {
+      rr[k] = E->sphere.ri + (k-1)*dr;
+    }
+    break;
+  case 1:
+    /* get nodal levels from file */
     sprintf(output_file,"%s",E->control.coor_file);
     fp1=fopen(output_file,"r");
     if (fp1 == NULL) {
@@ -184,23 +195,18 @@ void regional_node_locations(E)
     E->sphere.ro = rr[E->mesh.noz];
 
     fclose(fp1);
-
-  } else if(E->control.coor==0) {
-    /* default: regular node spacing */
-    dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
-    for (k=1;k<=E->mesh.noz;k++)  {
-      rr[k] = E->sphere.ri + (k-1)*dr;
-    }
-  } else if(E->control.coor==2){
+    break;
+  case 2:
     /* higher radial spacing in top and bottom fractions */
-    get_r_spacing_fine(rr, (double)E->sphere.ri,(double)E->sphere.ro,
-		       E->mesh.noz,(double)E->control.coor_refine[0] ,
-		       (double)E->control.coor_refine[1] ,
-		       (double)E->control.coor_refine[2] ,
-		       (double)E->control.coor_refine[3],E);
-
-  } else {
+    get_r_spacing_fine(rr, E);
+    break;
+   case 3:
+     /*  assign radial spacing CitcomCU style */
+     get_r_spacing_at_levels(rr,E);
+    break;
+ default:
     myerror(E,"regional_version_dependent: coor mode not implemented");
+    break;
   }
 
 

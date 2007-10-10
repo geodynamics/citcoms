@@ -56,9 +56,9 @@ void rtp2xyz(float , float , float, float *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
 void myerror(struct All_variables *,char *);
-void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,
-			struct All_variables *);
 void xyz2rtp(float ,float ,float ,float *);
+void get_r_spacing_fine(double *,struct All_variables *);
+void get_r_spacing_at_levels(double *,struct All_variables *);
 
 
 int get_process_identifier()
@@ -443,6 +443,8 @@ void myerror(struct All_variables *E,char *message)
   parallel_process_termination();
 }
 
+
+
 /*
 
 
@@ -450,15 +452,21 @@ void myerror(struct All_variables *E,char *message)
 attempt to space rr[1...nz] such that bfrac*nz nodes will be within the lower
 brange fraction of (ro-ri), and similar for the top layer
 
+function below is more general
+
 */
-void get_r_spacing_fine(double *rr, double ri, double ro,
-			int nz,double brange, double bfrac,
-			double trange, double tfrac,
-			struct All_variables *E)
+void get_r_spacing_fine(double *rr, struct All_variables *E)
 {
   int k,klim,nb,nt,nm;
-  double drb,dr0,drt,dr,drm,range,r,mrange;
-  range = ro-ri;		/* original range */
+  double drb,dr0,drt,dr,drm,range,r,mrange, brange,bfrac,trange, tfrac;
+  
+  brange = (double)E->control.coor_refine[0];
+  bfrac =  (double)E->control.coor_refine[1];
+  trange = (double)E->control.coor_refine[2];
+  tfrac = (double)E->control.coor_refine[3];
+
+  range = (double) E->sphere.ro - E->sphere.ri;		/* original range */
+
   mrange = 1 - brange - trange;
   if(mrange <= 0)
     myerror(E,"get_r_spacing_fine: bottom and top range too large");
@@ -467,9 +475,9 @@ void get_r_spacing_fine(double *rr, double ri, double ro,
   trange *= range;		/* top */
   mrange *= range;		/* middle */
 
-  nb = nz * bfrac;
-  nt = nz * tfrac;
-  nm = nz-nb-nt;
+  nb = E->mesh.noz * bfrac;
+  nt = E->mesh.noz * tfrac;
+  nm = E->mesh.noz - nb - nt;
   if((nm < 1)||(nt < 2)||(nb < 2))
     myerror(E,"get_r_spacing_fine: refinement out of bounds");
 
@@ -477,14 +485,55 @@ void get_r_spacing_fine(double *rr, double ri, double ro,
   drt = trange/(nt-1);
   drm = mrange / (nm  + 1);
 
-  for(r=ri,k=1;k<=nb;k++,r+=drb){
+  for(r=E->sphere.ri,k=1;k<=nb;k++,r+=drb){
     rr[k] = r;
   }
-  klim = nz-nt+1;
+  klim = E->mesh.noz - nt + 1;
   for(r=r-drb+drm;k < klim;k++,r+=drm){
     rr[k] = r;
   }
-  for(;k <= nz;k++,r+=drt){
+  for(;k <= E->mesh.noz;k++,r+=drt){
     rr[k] = r;
   }
+}
+/* 
+
+
+get r spacing at radial locations and node numbers as specified
+CitcomCU style
+
+rr[1...E->mesh.noz]
+
+
+e.g.:
+
+	r_grid_layers=3		# minus 1 is number of layers with uniform grid in r
+	rr=0.5,0.75,1.0 	#    starting and ending r coodinates
+	nr=1,37,97		#    starting and ending node in r direction
+
+*/
+void get_r_spacing_at_levels(double *rr,struct All_variables *E)
+{
+  double ddr;
+  int k,j;
+  /* do some sanity checks */
+  if(E->control.nrlayer[0] != 1)
+    myerror(E,"first node for coor=3 should be unity");
+  if(E->control.nrlayer[E->control.rlayers-1] != E->mesh.noz)
+      myerror(E,"last node for coor = 3 input should match max nr z nodes");
+  if(fabs(E->control.rrlayer[0] -E->sphere.ri) > 1e-6)
+    myerror(E,"inner layer for coor=3 input should be inner radius");
+  if(fabs(E->control.rrlayer[ E->control.rlayers-1] - E->sphere.ro)>1e-6)
+    myerror(E,"outer layer for coor=3 input should be inner radius");
+  if(E->control.rlayers < 2)
+    myerror(E,"number of rlayers needs to be at leats two for coor = 3");
+
+  rr[1] =  E->control.rrlayer[0];
+  for(j = 1; j < E->control.rlayers; j++){
+    ddr = (E->control.rrlayer[j] - E->control.rrlayer[j - 1]) / 
+      (E->control.nrlayer[j] - E->control.nrlayer[j - 1]);
+    for(k = E->control.nrlayer[j-1]+1;k <= E->control.nrlayer[j];k++)
+      rr[k] = rr[k-1]+ddr;
+    }
+  
 }

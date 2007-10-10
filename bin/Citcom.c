@@ -161,7 +161,7 @@ int main(argc,argv)
       E->control.keep_going = 0;
     }
 
-    if (E->monitor.T_interior>1.5)  {
+    if (E->monitor.T_interior > E->monitor.T_interior_max_for_exit)  {
       fprintf(E->fp,"quit due to maxT = %.4e sub_iteration%d\n",E->monitor.T_interior,E->advection.last_sub_iterations);
       parallel_process_termination();
     }

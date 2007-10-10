@@ -749,31 +749,48 @@ void construct_stiffness_B_matrix(E)
 }
 
 /* took this apart to allow call from other subroutines */
+
+/* 
+
+
+determine layer number based on radial coordinate r
+
+if E->viscosity.z... set to Earth values, then
+
+1: lithosphere
+2: 100-410
+3: 410-660
+4: lower mantle
+
+*/
 int layers_r(E,r)
      struct All_variables *E;
      float r;
 {
-  float zlith, z410, zlm;
+  float rlith, r410, rlm;
 
   int llayers = 0;
-  zlith = E->viscosity.zlith;
-  z410  = E->viscosity.z410;
-  zlm   = E->viscosity.zlm;
+  /* 
+     the z-values, as read in, are non-dimensionalized depth
+     convert to radii
 
-  if (r > (E->sphere.ro-zlith))
+  */
+  rlith = E->sphere.ro - E->viscosity.zlith; /* lithosphere */
+  r410  = E->sphere.ro - E->viscosity.z410;
+  rlm   = E->sphere.ro - E->viscosity.zlm;
+
+  if (r > rlith)		/* in lithospherre */
     llayers = 1;
-  else if ((r > (E->sphere.ro-z410))&&
-	   (r  <= (E->sphere.ro-zlith)))
+  else if ((r > r410)&& (r  <= rlith)) /* in asthenosphere 100...410 km */
     llayers = 2;
-  else if ((r > (E->sphere.ro-zlm)) &&
-	   (r <= (E->sphere.ro-z410)))
+  else if ((r > rlm) && (r <= r410)) /* in transition zone, 410 - 660 km */
     llayers = 3;
-  else
+  else				/* lower mantle */
     llayers = 4;
   return (llayers);
 }
 
-
+/* determine layer number of node "node" of cap "m" */
 int layers(E,m,node)
      struct All_variables *E;
      int m,node;
@@ -784,6 +801,10 @@ int layers(E,m,node)
 
 /* ==============================================================
  construct array mat
+
+
+
+
  ============================================================== */
 void construct_mat_group(E)
      struct All_variables *E;

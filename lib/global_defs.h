@@ -382,6 +382,8 @@ struct MONITOR {
     float  T_interior;
     float  T_maxvaried;
 
+  float T_interior_max_for_exit;
+
 };
 
 struct CONTROL {
@@ -472,6 +474,9 @@ struct CONTROL {
 
     int coor;
     float coor_refine[4];
+  float rrlayer[20];
+  int nrlayer[20],rlayers;
+
     char coor_file[100];
 
     int lith_age;

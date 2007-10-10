@@ -33,7 +33,8 @@
 void ggrd_full_temp_init(struct All_variables *);
 #endif
 
-void get_r_spacing_fine(double *, double , double ,int ,double , double ,double , double,struct All_variables *);
+void get_r_spacing_fine(double *,struct All_variables *);
+void get_r_spacing_at_levels(double *,struct All_variables *);
 
 /* Setup global mesh parameters */
 void full_global_derived_values(E)
@@ -149,13 +150,13 @@ void full_node_locations(E)
 
 
   switch(E->control.coor){
-  case 2:
-    /* higher radial spacing in top and bottom fractions */
-    get_r_spacing_fine(rr, (double)E->sphere.ri,(double)E->sphere.ro,
-		       E->mesh.noz,(double)E->control.coor_refine[0] ,
-		       (double)E->control.coor_refine[1] ,
-		       (double)E->control.coor_refine[2] ,
-		       (double)E->control.coor_refine[3], E);
+  case 0:
+    /* generate uniform mesh in radial direction */
+    dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
+    
+    for (k=1;k <= E->mesh.noz;k++)  {
+      rr[k] = E->sphere.ri + (k-1)*dr;
+    }
     break;
   case 1:			/* read nodal radii from file */
     sprintf(output_file,"%s",E->control.coor_file);
@@ -172,20 +173,26 @@ void full_node_locations(E)
     
     fclose(fp1);
     break;
+  case 2:
+    /* higher radial spacing in top and bottom fractions */
+    get_r_spacing_fine(rr,E);
+    break;
+  case 3:
+    /* assign radial spacing CitcomCU style */
+    get_r_spacing_at_levels(rr,E);
+    break;
   default:
-    /* generate uniform mesh in radial direction */
-    dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
-    
-    for (k=1;k<=E->mesh.noz;k++)  {
-      rr[k] = E->sphere.ri + (k-1)*dr;
-    }
+    myerror(E,"coor flag undefined in Full_version_dependent");
     break;
   }
-
+  
   for (i=1;i<=E->lmesh.noz;i++)  {
-      k = E->lmesh.nzs+i-1;
-      RR[i] = rr[k];
-      }
+    k = E->lmesh.nzs+i-1;
+    RR[i] = rr[k];
+
+
+  }
+
 
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
 
