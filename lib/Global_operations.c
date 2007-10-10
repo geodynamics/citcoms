@@ -787,3 +787,103 @@ void sum_across_depth_sph1(E,sphc,sphs)
     return;
 }
 
+
+void remove_rigid_rot(struct All_variables *E)
+{
+    void velo_from_element_d();
+    double myatan();
+    double wx, wy, wz, v_theta, v_phi;
+    double vx[9], vy[9], vz[9];
+    double r, t, f;
+
+    double exyz[4], fxyz[4];
+
+    int m, e, i, k, j, node;
+
+    const int nno = E->lmesh.nno;
+    const int ends = ENODES3D;
+    const int ppts = PPOINTS3D;
+    const int vpts = VPOINTS3D;
+    const int sphere_key = 1;
+    double VV[4][9];
+    double rot, fr, tr;
+
+    /* Note: no need to weight in rho(r) here. */
+    double moment_of_inertia = (8.0*M_PI/15.0)*
+        (pow(E->sphere.ro,(double)5.0) - pow(E->sphere.ri,(double)5.0));
+
+    /* compute and add angular momentum components */
+
+    exyz[1] = exyz[2] = exyz[3] = 0.0;
+    fxyz[1] = fxyz[2] = fxyz[3] = 0.0;
+
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++) {
+
+        for (e=1;e<=E->lmesh.nel;e++) {
+
+            t = E->eco[m][e].centre[1];
+            f = E->eco[m][e].centre[2];
+            r = E->eco[m][e].centre[3];
+
+            velo_from_element(E,VV,m,e,sphere_key);
+
+            for (j=1;j<=ppts;j++)   {
+                vx[j] = 0.0;
+                vy[j] = 0.0;
+            }
+
+            for (j=1;j<=ppts;j++)   {
+                for (i=1;i<=ends;i++)   {
+                    vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)];
+                    vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)];
+                }
+            }
+
+            wx = -r*vy[1];
+            wy = r*vx[1];
+
+            exyz[1] += (wx*cos(t)*cos(f)-wy*sin(f)) * E->eco[m][e].area;
+            exyz[2] += (wx*cos(t)*sin(f)+wy*cos(f)) * E->eco[m][e].area;
+            exyz[3] -= (wx*sin(t)                 ) * E->eco[m][e].area;
+        }
+    } /* end cap */
+
+    MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+
+    fxyz[1] = fxyz[1] / moment_of_inertia;
+    fxyz[2] = fxyz[2] / moment_of_inertia;
+    fxyz[3] = fxyz[3] / moment_of_inertia;
+
+
+    rot = sqrt(fxyz[1]*fxyz[1] + fxyz[2]*fxyz[2] + fxyz[3]*fxyz[3]);
+    fr = myatan(fxyz[2], fxyz[1]);
+    tr = acos(fxyz[3] / rot);
+
+    if (E->parallel.me==0) {
+            fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+    }
+
+
+    /* remove rigid rotation */
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+        for (node=1;node<=nno;node++)   {
+
+            v_theta = E->sx[m][3][node] * rot * sin(tr)
+                * sin(fr - E->sx[m][2][node]);
+            v_phi = E->sx[m][3][node] * rot
+                * ( sin(E->sx[m][1][node]) * cos(tr)
+                    - cos(E->sx[m][1][node]) * sin(tr)
+                    * cos(fr-E->sx[m][2][node]) );
+
+            E->sphere.cap[m].V[1][node] -= v_theta;
+            E->sphere.cap[m].V[2][node] -= v_phi;
+
+        }
+    }
+
+
+    return;
+
+}

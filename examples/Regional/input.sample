@@ -226,6 +226,7 @@ precond=on
 aug_lagr=on
 aug_number=2.0e3
 
+remove_rigid_rotation=on
 
 # Age information
 start_age=4.0

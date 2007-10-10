@@ -848,6 +848,8 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);
     getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
 
+    getIntProperty(properties, "remove_rigid_rotation", E->control.remove_rigid_rotation, fp);
+
     if(E->control.inv_gruneisen != 0) {
         /* which compressible solver to use: "cg" or "bicg" */
         getStringProperty(properties, "uzawa", E->control.uzawa, fp);

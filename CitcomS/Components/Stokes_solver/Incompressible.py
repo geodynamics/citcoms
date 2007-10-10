@@ -106,6 +106,7 @@ class Incompressible(CitcomComponent):
                          validator=prop.choice(["cg", "bicg"]))
         compress_iter_maxstep = prop.int("compress_iter_maxstep", default=100)
         relative_err_accuracy = prop.float("relative_err_accuracy", default=0.001)
+        remove_rigid_rotation = prop.bool("remove_rigid_rotation", default=True)
 
 # version
 __id__ = "$Id$"

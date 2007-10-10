@@ -501,6 +501,7 @@ struct CONTROL {
     int up_heavy;
     int verbose;
 
+    int remove_rigid_rotation;
     int side_sbcs;
     int vbcs_file;
     int mat_control;

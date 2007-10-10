@@ -64,6 +64,7 @@ void general_stokes_solver(struct All_variables *E)
   void assemble_forces();
   void sphere_harmonics_layer();
   void get_system_viscosity();
+  void remove_rigid_rot();
 
   float vmag;
 
@@ -140,6 +141,10 @@ void general_stokes_solver(struct All_variables *E)
 
   } /*end if SDEPV or PDEPV */
 
+  /* remove the rigid rotation component from the velocity solution */
+  if(E->sphere.caps == 12 && E->control.remove_rigid_rotation)
+      remove_rigid_rot(E);
+
   return;
 }
 
@@ -151,6 +156,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   void assemble_forces_pseudo_surf();
   void get_system_viscosity();
   void std_timestep();
+  void remove_rigid_rot();
   void get_STD_freesurf(struct All_variables *, float**);
 
   float vmag;
@@ -229,6 +235,11 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 	  } /*end if SDEPV or PDEPV */
 	  E->monitor.topo_loop++;
   }
+
+  /* remove the rigid rotation component from the velocity solution */
+  if(E->sphere.caps == 12 && E->control.remove_rigid_rotation)
+      remove_rigid_rot(E);
+
   get_STD_freesurf(E,E->slice.freesurf);
 
   return;

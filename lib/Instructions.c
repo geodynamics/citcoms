@@ -416,6 +416,8 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("aug_lagr",&(E->control.augmented_Lagr),"off",m);
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
+  input_boolean("remove_rigid_rotation",&(E->control.remove_rigid_rotation),"on",m);
+
   input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
 
   input_int("storage_spacing",&(E->control.record_every),"10",m);
