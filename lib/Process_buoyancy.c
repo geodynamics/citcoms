@@ -166,8 +166,7 @@ void heat_flux(E)
     } */
     if (E->parallel.me==E->parallel.nprocz-1) {
       fprintf(stderr,"surface heat flux= %f\n",sum_h[0]);
-      /* XXX */
-      fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]); /* commented this back in TWB , why was it out in the first place? */
+      //fprintf(E->fp,"surface heat flux= %f\n",sum_h[0]); //commented out because E->fp is only on CPU 0 
 
       if(E->output.write_q_files > 0){
 	/* format: time heat_flow sqrt(v.v)  */
