@@ -55,7 +55,14 @@ Boundary::Boundary(const All_variables* E,
     normal_.reserve(maxNodes);
 
     // find out which nodes belong to the boundary and fill X_ with them
-    initX(E, excludeTop, excludeBottom);
+    // XXX: only implemented for regional model
+    if (E->parallel.nprocxy == 1)
+        initX(E, excludeTop, excludeBottom);
+    else {
+        journal::error_t error("CitcomS-Boundary");
+        error << "Boundary is not implemented for full solver (yet)."
+              << journal::endl;
+    }
 
     // define the tight bounding box of the boundary
     initBBox(E);
