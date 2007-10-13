@@ -81,7 +81,8 @@ void tic_input(struct All_variables *E)
   */
 
   switch(E->convection.tic_method){
-  case -1:			/* restart from file */
+  case -1:			/* restart from file, no other options
+				   needed */
     break;
   case 0:
   case 3:
@@ -189,7 +190,8 @@ void convection_initial_temperature(struct All_variables *E)
 
   if (E->control.lith_age)
     lith_age_construct_tic(E);
-  else if (E->convection.tic_method == -1) {
+  else if (E->control.restart == 2) {
+    /* read restart info for T from file */
 #ifdef USE_GZDIR
       if(strcmp(E->output.format, "ascii-gz") == 0)
           restart_tic_from_gzdir_file(E);

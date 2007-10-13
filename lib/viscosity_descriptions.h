@@ -81,7 +81,7 @@ struct VISC_OPT {
 
     int SDEPV;
     float sdepv_misfit;
-    int sdepv_normalize;
+    int sdepv_normalize,sdepv_visited;
     float sdepv_expt[40];
     float sdepv_trns[40];
 
