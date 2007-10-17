@@ -787,6 +787,9 @@ void sum_across_depth_sph1(E,sphc,sphs)
     return;
 }
 
+/*
+ * remove rigid body rotation from the velocity
+ */
 
 void remove_rigid_rot(struct All_variables *E)
 {
@@ -861,7 +864,8 @@ void remove_rigid_rot(struct All_variables *E)
     tr = acos(fxyz[3] / rot);
 
     if (E->parallel.me==0) {
-            fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+        fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+        fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
     }
 
 

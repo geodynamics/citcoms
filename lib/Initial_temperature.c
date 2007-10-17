@@ -76,12 +76,12 @@ void tic_input(struct All_variables *E)
      for whole mantle.
 
      tic_method is 4: read in initial temperature distribution from a set of netcdf grd
-                      files. this required the GGRD extension to be compiled in 
+                      files. this required the GGRD extension to be compiled in
 
   */
 
   switch(E->convection.tic_method){
-  case -1:			/* restart from file */
+  case -1:	/* read from file, no other options needed */
     break;
   case 0:
   case 3:
@@ -118,7 +118,7 @@ void tic_input(struct All_variables *E)
       E->convection.perturb_ll[0] = 2;
       E->convection.load_depth[0] = (noz+1)/2;
     }
-    
+
     break;
   case 1:			/* case 1 */
 
@@ -144,8 +144,8 @@ void tic_input(struct All_variables *E)
     input_float("blob_dT", &(E->convection.blob_dT), "0.18,nomin,nomax", m);
     break;
   case 4:
-    /* 
-       case 4: initial temp from grd files 
+    /*
+       case 4: initial temp from grd files
     */
 #ifdef USE_GGRD
     /* read in some more parameters */
@@ -190,6 +190,7 @@ void convection_initial_temperature(struct All_variables *E)
   if (E->control.lith_age)
     lith_age_construct_tic(E);
   else if (E->convection.tic_method == -1) {
+      /* read temperature from file */
 #ifdef USE_GZDIR
       if(strcmp(E->output.format, "ascii-gz") == 0)
           restart_tic_from_gzdir_file(E);

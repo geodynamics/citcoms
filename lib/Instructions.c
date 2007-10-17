@@ -341,9 +341,9 @@ void read_initial_settings(struct All_variables *E)
   input_int("levels",&(E->mesh.levels),"0",m);
 
   input_int("coor",&(E->control.coor),"0",m);
-  if(E->control.coor == 2){	
-    /* 
-       refinement in two layers 
+  if(E->control.coor == 2){
+    /*
+       refinement in two layers
     */
     /* number of refinement layers */
     E->control.coor_refine[0] = 0.10; /* bottom 10% */
@@ -352,8 +352,8 @@ void read_initial_settings(struct All_variables *E)
     E->control.coor_refine[3] = 0.20; /* get 20% of the nodes */
     input_float_vector("coor_refine",4,E->control.coor_refine,m);
   }else if(E->control.coor == 3){
-    /* 
-       
+    /*
+
     refinement CitcomCU style, by reading in layers, e.g.
 
 	r_grid_layers=3		# minus 1 is number of layers with uniform grid in r
@@ -369,7 +369,7 @@ void read_initial_settings(struct All_variables *E)
     /* associated node numbers */
     input_int_vector("nr", E->control.rlayers, (E->control.nrlayer),m);
    }
-  
+
   input_string("coor_file",E->control.coor_file,"",m);
 
   input_int("nprocx",&(E->parallel.nprocx),"1",m);
@@ -386,15 +386,16 @@ void read_initial_settings(struct All_variables *E)
 
   input_int("stokes_flow_only",&(E->control.stokes),"0",m);
 
-  input_int("restart",&(E->control.restart),"0",m);
+  /* restart from checkpoint file */
+  input_boolean("restart",&(E->control.restart),"off",m);
   input_int("post_p",&(E->control.post_p),"0",m);
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
 
   /* for layers    */
-  /* 
+  /*
 
-  these boundaries are a little wacko 
-     
+  these boundaries are a little wacko
+
 
   */
   input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* does this ever get used? */
@@ -1251,8 +1252,8 @@ static void chk_prefix(struct  All_variables *E)
   }
 
   if (E->control.restart || E->control.post_p ||
-      E->convection.tic_method == -1 ||
-      (E->control.tracer && E->trace.ic_method == 2)) {
+      (E->convection.tic_method == -1) ||
+      (E->control.tracer && (E->trace.ic_method == 2))) {
       found = strchr(E->control.data_prefix_old, '/');
       if (found) {
 	  fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
@@ -1355,8 +1356,8 @@ void output_init(struct  All_variables *E)
 	     E->control.data_prefix);
 
     if (E->control.restart || E->control.post_p ||
-        E->convection.tic_method == -1 ||
-        (E->control.tracer && E->trace.ic_method == 2)) {
+        (E->convection.tic_method == -1) ||
+        (E->control.tracer && (E->trace.ic_method == 2))) {
 	expand_datadir(E, E->control.data_dir_old);
 	snprintf(E->control.old_P_file, 200, "%s/%s", E->control.data_dir_old,
 		 E->control.data_prefix_old);
