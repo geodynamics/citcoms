@@ -68,7 +68,7 @@ void general_stokes_solver(struct All_variables *E)
 
   float vmag;
 
-  double Udot_mag, dUdot_mag;
+  double Udot_mag, dUdot_mag,omega[3];
   int m,count,i,j,k;
 
   double *oldU[NCS], *delta_U[NCS];
@@ -104,7 +104,8 @@ void general_stokes_solver(struct All_variables *E)
     Udot_mag=dUdot_mag=0.0;
     count=1;
 
-    while (1) {
+    while (1) {    
+     
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for (i=0;i<neq;i++) {
@@ -123,13 +124,13 @@ void general_stokes_solver(struct All_variables *E)
 		dUdot_mag,Udot_mag,count);
 	fflush(E->fp);
       }
-      if ((count>50) || (dUdot_mag<E->viscosity.sdepv_misfit))
+      if ((count>50) || (dUdot_mag < E->viscosity.sdepv_misfit))
 	break;
-
+      
       get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
       construct_stiffness_B_matrix(E);
       solve_constrained_flow_iterative(E);
-
+      
       count++;
 
     } /*end while*/
