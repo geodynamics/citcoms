@@ -81,8 +81,12 @@ int main(argc,argv)
     parallel_process_termination();
   }
 
+
+
+  /* this section reads input, allocates memory, and set some initial values;
+   *  replaced by CitcomS.Controller.initialize() */
   world = MPI_COMM_WORLD;
-  E = citcom_init(&world);             /* allocate global E and do initializaion here */
+  E = citcom_init(&world); /* allocate global E and do initializaion here */
 
   solver_init(E);
 
@@ -99,8 +103,13 @@ int main(argc,argv)
     fflush(E->fp);
   }
 
-  /* This if-block is replaced by CitcomS.Solver.launch()*/
+
+
+  /* this section sets the initial condition;
+   * replaced by CitcomS.Controller.launch() */
   if (E->control.restart || E->control.post_p) {
+      /* the initial condition is from previous checkpoint */
+
       read_checkpoint(E);
 
       if (E->control.post_p) {
@@ -109,6 +118,8 @@ int main(argc,argv)
       }
   }
   else {
+      /* regular init, or read T from file only */
+
       initial_conditions(E);
 
       if(E->control.pseudo_free_surf) {
@@ -126,7 +137,12 @@ int main(argc,argv)
   /* information about simulation time and wall clock time */
   output_time(E, E->monitor.solution_cycles);
 
+  output_checkpoint(E);
 
+
+
+  /* this section stops the computation if only computes stokes' problem
+   * no counterpart in pyre */
   if (E->control.stokes)  {
 
     if(E->control.tracer==1)
@@ -135,7 +151,12 @@ int main(argc,argv)
     parallel_process_termination();
   }
 
-  while ( E->control.keep_going   &&  (Emergency_stop == 0) )   {
+
+
+
+  /* this section advances the time step;
+   * replaced by CitcomS.Controller.march() */
+  while ( E->control.keep_going   &&  (Emergency_stop == 0) ) {
 
     /* The next few lines of code were replaced by
      * pyCitcom_PG_timestep_solve() in Pyre version.
@@ -211,7 +232,8 @@ int main(argc,argv)
 
 
 
-
+  /* this section prints time accounting;
+   * no counterpart in pyre */
   if (E->parallel.me == 0)  {
     fprintf(stderr,"cycles=%d\n",E->monitor.solution_cycles);
     cpu_time_on_vp_it=CPU_time0()-cpu_time_on_vp_it;
