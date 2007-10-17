@@ -90,7 +90,7 @@ width_bound_adj=0.087270
 
 # miscellaneous information
 stokes_flow_only=0
-inputdiffusicity=0.00100
+inputdiffusicity=1.0
 rayleigh=5.0e06
 Q0=0
 
