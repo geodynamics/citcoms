@@ -109,7 +109,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 	      x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
 	      x[1] += E->x[m][2][lnode[d]] * vtmp;
 	      x[2] += E->x[m][3][lnode[d]] * vtmp;
-	      
               v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp; /* theta */
               v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp; /* phi */
 	      vw += dGamma.vpt[GMVGAMMA(0,nint)];
@@ -127,7 +126,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 		x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
 		x[1] += E->x[m][2][lnode[d]] * vtmp;
 		x[2] += E->x[m][3][lnode[d]] * vtmp;
-		/*  */
 		v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp;
 		v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp;
 		vw += dGamma.vpt[GMVGAMMA(1,nint)];
@@ -151,8 +149,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 
   /* depth range */
   rr = E->sx[1][3][E->ien[1][elz].node[5]] - E->sx[1][3][E->ien[1][1].node[1]];
-  if(rr < 1e-7)
-    myerror(E,"rr error in net r determine");
   vw = 0.0;
   for (i=0;i < elz;i++) {	/* regular 0..n-1 loop */
     /* solve layer NR */
@@ -173,21 +169,15 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
       omega[i1] += lomega[i*3+i1] * vtmp;
     vw += vtmp;
   }
-  if(fabs(vw) > 1e-8)		/* when would it be zero? */
-    for(i1=0;i1 < 3;i1++)
-      omega[i1] /= vw;
-  else
-    for(i1=0;i1 < 3;i1++)
-      omega[i1] = 0.0;
+  for(i1=0;i1 < 3;i1++)
+    omega[i1] /= vw;
+
   free ((void *) acoef);
   free ((void *) coef);
   free ((void *) lomega);
 
 
   oamp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
-  if(E->parallel.me == 0)
-    fprintf(stderr,"determined net rotation of | %.4e %.4e %.4e | = %.4e\n",
-	    omega[0],omega[1],omega[2],oamp);
   return oamp;
 }
 
@@ -226,7 +216,7 @@ double determine_netr_tp(float r,float theta,float phi,
     amp = 0.0;
     break;
   case 1:			/* add this velocity */
-    if((fabs(theta) > 1e-5) &&(fabs(theta-M_PI) > 1e-5)){
+    if((fabs(theta) > 1e-6) &&(fabs(theta-M_PI)>1e-6)){
       coslat=sin(theta);
       coslon=cos(phi);
       sinlat=cos(theta);
@@ -242,8 +232,7 @@ double determine_netr_tp(float r,float theta,float phi,
       b = -rz*coslon;
       c =  rz*rzu*coslon+rx*coslat;
       d = -rz*sinlon;
-      e = -ry*rzu*coslon+rx*rzu*sinlon;      
-
+      e = -ry*rzu*coslon+rx*rzu*sinlon;
       f =  ry*sinlon+rx*coslon;
 
       c9[0] += a*a+b*b;
@@ -252,7 +241,7 @@ double determine_netr_tp(float r,float theta,float phi,
       c9[3] += c*c+d*d;
       c9[4] += c*e+d*f;
       c9[5] += e*e+f*f;
-      
+
       c9[6] += a*velt+b*velp;
       c9[7] += c*velt+d*velp;
       c9[8] += e*velt+f*velp;
@@ -273,7 +262,6 @@ double determine_netr_tp(float r,float theta,float phi,
     omega[0] = c9[6];
     omega[1] = c9[7];
     omega[2] = c9[8];
-
     /* solve solution*/
     hc_ludcmp_3x3(coef,ind);
     hc_lubksb_3x3(coef,ind,omega);
@@ -289,7 +277,7 @@ double determine_netr_tp(float r,float theta,float phi,
 
 //
 //     subtract a net rotation component from a velocity
-//     field given as v_theta (velt) and v_phi (velp)
+//     field given as v_theta (velt) and v_phi (velp) on
 //
 
 void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *omega)
@@ -324,8 +312,8 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
   vphi = vx * px + vy * py;
 
   /* remove */
-  *velt = *velt - vtheta;
-  *velp = *velp - vphi;
+  *velt -= vtheta;
+  *velp -= vphi;
 }
 
 

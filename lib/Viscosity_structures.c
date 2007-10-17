@@ -42,7 +42,6 @@ void myerror(struct All_variables *,char *);
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
-void parallel_process_termination();
 
 
 void viscosity_system_input(struct All_variables *E)
@@ -84,7 +83,7 @@ void viscosity_system_input(struct All_variables *E)
     E->viscosity.sdepv_misfit = 1.0;
     input_boolean("SDEPV",&(E->viscosity.SDEPV),"off",m);
     if (E->viscosity.SDEPV) {
-      E->viscosity.sdepv_visited = 0;
+      E->viscosity.pdepv_visited = 0;
       input_float_vector("sdepv_expt",E->viscosity.num_mat,(E->viscosity.sdepv_expt),m);
     }
 
@@ -105,12 +104,9 @@ void viscosity_system_input(struct All_variables *E)
 
 
     input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
-    if(E->viscosity.CDEPV){
-      /* compositional viscosity */
-      if(E->control.tracer < 1){
-	fprintf(stderr,"error: CDEPV requires tracers, but tracer is off\n");
-	parallel_process_termination();
-      }
+    if(E->viscosity.CDEPV){	/* compositional viscosity */
+      if(!E->control.tracer)
+	myerror(E,"error: CDEPV requires tracers, but tracer is off");
       if(E->trace.nflavors > 10)
 	myerror(E,"error: too many flavors for CDEPV");
       /* read in flavor factors */
@@ -534,20 +530,13 @@ void visc_from_S(E,EEta,propogate)
     two = 2.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-      if(E->viscosity.sdepv_visited){
-	
+
         /* get second invariant for all elements */
         strain_rate_2_inv(E,m,eedot,1);
-      }else{
-	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
-	  eedot[e] = 1.0;
-	E->viscosity.sdepv_visited = 1;
 
-      }
         /* eedot cannot be too small, or the viscosity will go to inf */
-	for(e=1;e<=nel;e++){
-	  eedot[e] = max(eedot[e], 1.0e-16);
-	}
+	for(e=1;e<=nel;e++)
+            eedot[e] = max(eedot[e], 1.0e-16);
 
         for(e=1;e<=nel;e++)   {
             exponent1= one/E->viscosity.sdepv_expt[E->mat[m][e]-1];
@@ -613,10 +602,10 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 
       }else{
 	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
-	  eedot[e] = 1.0;
+	  eedot[e] = 1.0e-5;
 	if(m == E->sphere.caps_per_proc)
 	  E->viscosity.pdepv_visited = 1;
-	if((E->parallel.me == 0)&&(E->control.verbose)){
+	if(E->parallel.me == 0){
 	  for(e=0;e < E->viscosity.num_mat;e++)
 	    fprintf(stderr,"num mat: %i a: %g b: %g y: %g\n",
 		    e,E->viscosity.pdepv_a[e],E->viscosity.pdepv_b[e],E->viscosity.pdepv_y[e]);

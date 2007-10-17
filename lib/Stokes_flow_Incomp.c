@@ -137,7 +137,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
     double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *F[NCS];
     double *shuffle[NCS];
-    double alpha, delta, r0dotz0, r1dotz1,sq_vdotv;
+    double alpha, delta, r0dotz0, r1dotz1;
     double residual, v_res;
 
     double global_vdot(), global_pdot();
@@ -206,18 +206,15 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
     residual = incompressibility_residual(E, V, r1);
 
-
-    sq_vdotv = sqrt(E->monitor.vdotv);
-
     if (E->control.print_convergence && E->parallel.me==0)  {
-        fprintf(E->fp,"AhatP (%03d) after %6.2f s v=%.3e div/v=%.3e "
+        fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e "
                 "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                count, CPU_time0()-time0, E->monitor.incompressibility,
                 0.0, 0.0, E->monitor.solution_cycles);
         fflush(E->fp);
-        fprintf(stderr,"AhatP (%03d) after %6.2f s v=%.3e div/v=%.3e "
+        fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e "
                 "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                count, CPU_time0()-time0, E->monitor.incompressibility,
                 0.0, 0.0, E->monitor.solution_cycles);
     }
 
@@ -307,16 +304,14 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
         count++;
 
-	sq_vdotv = sqrt(E->monitor.vdotv);
-
         if(E->control.print_convergence && E->parallel.me==0) {
-            fprintf(E->fp, "AhatP (%03d) after %6.2f s v=%.3e  div/v=%.3e "
+            fprintf(E->fp, "AhatP (%03d) after %g seconds with div/v=%.3e "
                     "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                    count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                    count, CPU_time0()-time0, E->monitor.incompressibility,
                     dvelocity, dpressure, E->monitor.solution_cycles);
-            fprintf(stderr, "AhatP (%03d) after %6.2f s v=%.3e div/v=%.3e "
+            fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e "
                     "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                    count, CPU_time0()-time0, sq_vdotv, E->monitor.incompressibility,
+                    count, CPU_time0()-time0, E->monitor.incompressibility,
                     dvelocity, dpressure, E->monitor.solution_cycles);
         }
 
@@ -374,7 +369,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     int m, j, count, lev;
     int valid;
 
-    double alpha, beta, omega,sq_vdotv;
+    double alpha, beta, omega;
     double r0dotrt, r1dotrt;
     double residual, dpressure, dvelocity;
 
@@ -433,18 +428,15 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
             rt[m][j] = r1[m][j];
 
 
-    sq_vdotv = sqrt(E->monitor.vdotv);
-
-
     if (E->control.print_convergence && E->parallel.me==0)  {
-        fprintf(E->fp,"AhatP (%03d) after %g s, v=%.3e div/v=%.3e "
+        fprintf(E->fp,"AhatP (%03d) after %g seconds with div/v=%.3e "
                 "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                count, CPU_time0()-time0, E->monitor.incompressibility,
                 0.0, 0.0, E->monitor.solution_cycles);
         fflush(E->fp);
-        fprintf(stderr,"AhatP (%03d) after %g s, v=%.3e div/v=%.3e "
+        fprintf(stderr,"AhatP (%03d) after %g seconds with div/v=%.3e "
                 "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                count, CPU_time0()-time0, E->monitor.incompressibility,
                 0.0, 0.0, E->monitor.solution_cycles);
     }
 
@@ -573,17 +565,15 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
 
         count++;
-	
-	sq_vdotv = sqrt(E->monitor.vdotv);
 
         if(E->control.print_convergence && E->parallel.me==0) {
-            fprintf(E->fp, "AhatP (%03d) after %g s, v=%.3e, div/v=%.3e "
+            fprintf(E->fp, "AhatP (%03d) after %g seconds with div/v=%.3e "
                     "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                    count, CPU_time0()-time0, sq_vdotv ,E->monitor.incompressibility,
+                    count, CPU_time0()-time0, E->monitor.incompressibility,
                     dvelocity, dpressure, E->monitor.solution_cycles);
-            fprintf(stderr, "AhatP (%03d) after %g s, v=%.3e div/v=%.3e "
+            fprintf(stderr, "AhatP (%03d) after %g seconds with div/v=%.3e "
                     "dv/v=%.3e and dp/p=%.3e for step %d\n",
-                    count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
+                    count, CPU_time0()-time0, E->monitor.incompressibility,
                     dvelocity, dpressure, E->monitor.solution_cycles);
         }
 

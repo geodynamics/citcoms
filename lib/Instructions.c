@@ -84,7 +84,6 @@ void open_qfiles(struct All_variables *) ;
 void initial_mesh_solver_setup(struct All_variables *E)
 {
 
-
     E->monitor.cpu_time_at_last_cycle =
         E->monitor.cpu_time_at_start = CPU_time0();
 
@@ -184,6 +183,7 @@ void read_instructions(struct All_variables *E, char *filename)
        ==================================================  */
 
     setup_parser(E,filename);
+
     global_default_values(E);
     read_initial_settings(E);
 
@@ -385,7 +385,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("see_convergence",&(E->control.print_convergence),"off",m);
 
   input_int("stokes_flow_only",&(E->control.stokes),"0",m);
-  /* 1: restart from checkpoint file 2: restart from tic style file */
+
   input_int("restart",&(E->control.restart),"0",m);
   input_int("post_p",&(E->control.post_p),"0",m);
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
@@ -526,19 +526,16 @@ void read_initial_settings(struct All_variables *E)
   lith_age_input(E);
 
   tic_input(E);
-
   tracer_input(E);
 
   viscosity_input(E);		/* moved the viscosity input behind
 				   the tracer input */
-
 
   (E->problem_settings)(E);
 
 
   return;
 }
-
 
 
 /* ===================================
@@ -1082,7 +1079,7 @@ static void open_log(struct All_variables *E)
   else
     sprintf(logfile,"%s.log", E->control.data_file);
 
-  if (E->control.restart || E->control.post_p )
+  if (E->control.restart || E->control.post_p)
       /* append the log file if restart */
       E->fp = output_open(logfile, "a");
   else
@@ -1103,7 +1100,7 @@ static void open_time(struct All_variables *E)
   else
     sprintf(timeoutput,"%s.time", E->control.data_file);
 
-  if (E->control.restart || E->control.post_p )
+  if (E->control.restart || E->control.post_p)
       /* append the time file if restart */
       E->fptime = output_open(timeoutput, "a");
   else
@@ -1253,13 +1250,14 @@ static void chk_prefix(struct  All_variables *E)
       parallel_process_termination();
   }
 
-  if ((E->control.restart==1) || E->control.post_p  ||
-      (E->control.tracer && (E->trace.ic_method == 2))) {
-    found = strchr(E->control.data_prefix_old, '/');
-    if (found) {
-      fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
-      parallel_process_termination();
-    }
+  if (E->control.restart || E->control.post_p ||
+      E->convection.tic_method == -1 ||
+      (E->control.tracer && E->trace.ic_method == 2)) {
+      found = strchr(E->control.data_prefix_old, '/');
+      if (found) {
+	  fprintf(stderr, "error in input parameter: datafile_old='%s' contains '/'\n", E->control.data_file);
+	  parallel_process_termination();
+      }
   }
 }
 
@@ -1357,7 +1355,7 @@ void output_init(struct  All_variables *E)
 	     E->control.data_prefix);
 
     if (E->control.restart || E->control.post_p ||
-        (E->convection.tic_method == -1) ||
+        E->convection.tic_method == -1 ||
         (E->control.tracer && E->trace.ic_method == 2)) {
 	expand_datadir(E, E->control.data_dir_old);
 	snprintf(E->control.old_P_file, 200, "%s/%s", E->control.data_dir_old,

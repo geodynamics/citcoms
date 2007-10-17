@@ -127,12 +127,12 @@ extern void get_STD_topo(struct All_variables *, float**, float**,
 /**********************************************************************/
 
 
-void gzdir_output(struct All_variables *E, int out_cycles)
+void gzdir_output(struct All_variables *E, int cycles)
 {
   char output_dir[255];
-  if (out_cycles == 0 ){
+  if (cycles == 0) {
     /* initial I/O */
-    
+
     gzdir_output_coord(E);
     /*gzdir_output_mat(E);*/
   }
@@ -145,48 +145,48 @@ void gzdir_output(struct All_variables *E, int out_cycles)
 
   */
   /* make a directory */
-  snprintf(output_dir,255,"%s/%d",E->control.data_dir,out_cycles);
+  snprintf(output_dir,255,"%s/%d",E->control.data_dir,cycles);
 
   mkdatadir(output_dir);
 
 
   /* output */
 
-  gzdir_output_velo_temp(E, out_cycles); /* don't move this around,
+  gzdir_output_velo_temp(E, cycles); /* don't move this around,
 					else new VTK output won't
 					work */
-  gzdir_output_visc(E, out_cycles);
+  gzdir_output_visc(E, cycles);
 
-  gzdir_output_surf_botm(E, out_cycles);
+  gzdir_output_surf_botm(E, cycles);
 
   /* optiotnal output below */
   /* compute and output geoid (in spherical harmonics coeff) */
   if (E->output.geoid)
-      gzdir_output_geoid(E, out_cycles);
+      gzdir_output_geoid(E, cycles);
 
   if (E->output.stress)
-    gzdir_output_stress(E, out_cycles);
+    gzdir_output_stress(E, cycles);
 
   if (E->output.pressure)
-    gzdir_output_pressure(E, out_cycles);
+    gzdir_output_pressure(E, cycles);
 
   if (E->output.horiz_avg)
-      gzdir_output_horiz_avg(E, out_cycles);
+      gzdir_output_horiz_avg(E, cycles);
 
   if(E->control.tracer){
     if(E->output.tracer ||
-       (out_cycles == E->advection.max_timesteps))
-      gzdir_output_tracer(E, out_cycles);
+       (cycles == E->advection.max_timesteps))
+      gzdir_output_tracer(E, cycles);
   }
 
   if (E->output.comp_nd && E->composition.on)
-      gzdir_output_comp_nd(E, out_cycles);
+      gzdir_output_comp_nd(E, cycles);
 
   if (E->output.comp_el && E->composition.on)
-      gzdir_output_comp_el(E, out_cycles);
+      gzdir_output_comp_el(E, cycles);
 
   if(E->output.heating && E->control.disptn_number != 0)
-      gzdir_output_heating(E, out_cycles);
+      gzdir_output_heating(E, cycles);
 
   return;
 }
@@ -470,9 +470,6 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
   }
 
   if(E->output.gzdir.rnr){	/* remove the whole model net rotation */
-    if((E->control.remove_rigid_rotation)&&
-       (E->parallel.me == 0))	/* that's not too terrible but wastes time */
-      fprintf(stderr,"WARNING: both gzdir.rnr and remove_rigid_rotation are switched on!\n");
     oamp = determine_model_net_rotation(E,omega);
     if(E->parallel.me == 0)
       fprintf(stderr,"gzdir_output_velo_temp: removing net rotation: |%8.3e, %8.3e, %8.3e| = %8.3e\n",
@@ -550,13 +547,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       if(E->output.gzdir.rnr){
 	/* remove NR */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  vcorr[0] = E->sphere.cap[j].V[1][i]; /* vtheta */
-	  vcorr[1] = E->sphere.cap[j].V[2][i]; /* vphi */
-	  /* remove the velocity that corresponds to a net rotation of omega[0..2] at location
-	     r,t,p from the t,p velocities in vcorr[0..1]
-	  */
+	  vcorr[0] = E->sphere.cap[j].V[1][i];
+	  vcorr[1] = E->sphere.cap[j].V[2][i];
 	  sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
-
 	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],vcorr[0],vcorr[1],
 			       (E->output.gzdir.vtk_base+k),cvec);
 	  if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
@@ -1171,11 +1164,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
   }
   if(fscanf(fp,"%i %i %f",&ll,&mm,&restart_elapsed_time) != 3)
     myerror(E,"restart vtkl read error 0");
-  if(mm != E->lmesh.nno){
-    fprintf(stderr,"%i %i\n",mm, E->lmesh.nno);
-    myerror(E,"lmesh.nno mismatch in restart files");
-  }
-  
+
   switch(E->output.gzdir.vtk_io) {
   case 1: /* VTK */
     for(m=1;m <= E->sphere.caps_per_proc;m++) {
@@ -1184,10 +1173,6 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
       for(i=1;i<=E->lmesh.nno;i++){
 	if(fscanf(fp,"%f",&g) != 1)
 	  myerror(E,"restart vtkl read error 2");
-	if(!finite(g)){
-	  fprintf(stderr,"WARNING: found a NaN in input temperatures\n");
-	  g=0.0;
-	}
 	E->T[m][i] = g;
       }
     }
@@ -1212,7 +1197,6 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
     gzip_file(output_file);
 
   temperatures_conform_bcs(E);
-  
   return;
 }
 

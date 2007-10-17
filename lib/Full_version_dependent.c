@@ -368,7 +368,7 @@ void full_construct_tic_from_input(struct All_variables *E)
 	  }
     }
     break;
-  case -1:			
+  case -1:
   case 1:
   case 2:
     break;

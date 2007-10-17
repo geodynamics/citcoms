@@ -32,11 +32,6 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-
-void velo_from_element(struct All_variables *,float [4][9],int ,int ,int);
-
-
-
 /* ===============================================
    strips horizontal average from nodal field X.
    Assumes orthogonal mesh, otherwise, horizontals
@@ -791,16 +786,12 @@ void sum_across_depth_sph1(E,sphc,sphs)
 
     return;
 }
-/* 
 
-remove rigid rotation every time step
-
- */
 
 void remove_rigid_rot(struct All_variables *E)
 {
-
-      double myatan();
+    void velo_from_element_d();
+    double myatan();
     double wx, wy, wz, v_theta, v_phi;
     double vx[9], vy[9], vz[9];
     double r, t, f;
@@ -814,8 +805,7 @@ void remove_rigid_rot(struct All_variables *E)
     const int ppts = PPOINTS3D;
     const int vpts = VPOINTS3D;
     const int sphere_key = 1;
-  
-    float VV[4][9];
+    double VV[4][9];
     double rot, fr, tr;
 
     /* Note: no need to weight in rho(r) here. */
@@ -832,7 +822,7 @@ void remove_rigid_rot(struct All_variables *E)
 
         for (e=1;e<=E->lmesh.nel;e++) {
 
-	    t = E->eco[m][e].centre[1];
+            t = E->eco[m][e].centre[1];
             f = E->eco[m][e].centre[2];
             r = E->eco[m][e].centre[3];
 
@@ -845,12 +835,11 @@ void remove_rigid_rot(struct All_variables *E)
 
             for (j=1;j<=ppts;j++)   {
                 for (i=1;i<=ends;i++)   {
-		  
                     vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)];
                     vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)];
                 }
             }
-	    
+
             wx = -r*vy[1];
             wy = r*vx[1];
 
@@ -873,7 +862,6 @@ void remove_rigid_rot(struct All_variables *E)
 
     if (E->parallel.me==0) {
             fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
-            fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
     }
 
 

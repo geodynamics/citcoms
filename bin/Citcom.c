@@ -68,7 +68,7 @@ int main(argc,argv)
   float dot();
   float cpu_time_on_vp_it;
 
-  int cpu_total_seconds,k, *temp,out_cycles;
+  int cpu_total_seconds,k, *temp;
   double CPU_time0(),time,initial_time,start_time,avaimem();
 
   struct All_variables *E;
@@ -88,7 +88,6 @@ int main(argc,argv)
 
   start_time = time = CPU_time0();
   read_instructions(E, argv[1]);
-
   initial_setup(E);
 
   cpu_time_on_vp_it = CPU_time0();
@@ -101,16 +100,16 @@ int main(argc,argv)
   }
 
   /* This if-block is replaced by CitcomS.Solver.launch()*/
-  if ((E->control.restart == 1) || E->control.post_p) {
+  if (E->control.restart || E->control.post_p) {
       read_checkpoint(E);
 
       if (E->control.post_p) {
           post_processing(E);
           parallel_process_termination();
       }
-  }else {
-    /* regular init, or restart from T only */
-    initial_conditions(E);
+  }
+  else {
+      initial_conditions(E);
 
       if(E->control.pseudo_free_surf) {
           if(E->mesh.topvbc == 2)
@@ -122,22 +121,11 @@ int main(argc,argv)
           general_stokes_solver(E);
   }
 
-  if(strcmp(E->output.format, "ascii-gz") == 0){ /* gzdir output likes continuous cycle numbering
-						    in output files didn't want to change elsewhere 
-						    since sometimes cycles == 0
-						    is used to test for inits TWB
-						 */
-    if(!E->control.restart) { /* no restart */
-      /* first step */
-      (E->problem_output)(E, E->monitor.solution_cycles);
-      output_time(E,  E->monitor.solution_cycles);
-    }
-  }else{
-    /* regular output */
-    (E->problem_output)(E, E->monitor.solution_cycles);
-    /* information about simulation time and wall clock time */
-    output_time(E, E->monitor.solution_cycles);
-  }
+  (E->problem_output)(E, E->monitor.solution_cycles);
+
+  /* information about simulation time and wall clock time */
+  output_time(E, E->monitor.solution_cycles);
+
 
   if (E->control.stokes)  {
 
@@ -182,28 +170,20 @@ int main(argc,argv)
       tracer_advection(E);
 
     general_stokes_solver(E);
-  
-    /* the output cycle counter is cumulative for VTK IO TWB */
-    if(strcmp(E->output.format, "ascii-gz") == 0) /* vtk output */
-      if(E->control.restart) /* restart */
-	out_cycles = E->monitor.solution_cycles + E->monitor.solution_cycles_init;
-      else
-	out_cycles = E->monitor.solution_cycles ;
-    else			/* other output */
-      out_cycles = E->monitor.solution_cycles ;
-    
-    
     if(E->output.write_q_files)
-      if ((out_cycles % E->output.write_q_files)==0)
+      if ((E->monitor.solution_cycles % E->output.write_q_files)==0)
 	heat_flux(E);
-    if ((out_cycles % E->control.record_every)==0) 
-      (E->problem_output)(E, out_cycles);
+
+    if ((E->monitor.solution_cycles % E->control.record_every)==0) {
+	(E->problem_output)(E, E->monitor.solution_cycles);
+    }
 
     /* information about simulation time and wall clock time */
-    output_time(E, out_cycles);
+    output_time(E, E->monitor.solution_cycles);
 
-    if ((out_cycles % E->control.checkpoint_frequency)==0) 
-      output_checkpoint(E);
+    if ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) {
+	output_checkpoint(E);
+    }
 
     if(E->control.mat_control==1)
       read_mat_from_file(E);
@@ -233,13 +213,13 @@ int main(argc,argv)
 
 
   if (E->parallel.me == 0)  {
-    fprintf(stderr,"cycles=%d\n",out_cycles);
+    fprintf(stderr,"cycles=%d\n",E->monitor.solution_cycles);
     cpu_time_on_vp_it=CPU_time0()-cpu_time_on_vp_it;
     fprintf(stderr,"Average cpu time taken for velocity step = %f\n",
-	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-(E->control.restart ? (1):(0)))));
+	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
     fprintf(E->fp,"Initialization overhead = %f\n",initial_time);
     fprintf(E->fp,"Average cpu time taken for velocity step = %f\n",
-	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-(E->control.restart ? (1):(0)))));
+	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
 
   output_finalize(E);
