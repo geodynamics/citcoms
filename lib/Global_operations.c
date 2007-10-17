@@ -826,7 +826,7 @@ void remove_rigid_rot(struct All_variables *E)
             f = E->eco[m][e].centre[2];
             r = E->eco[m][e].centre[3];
 
-            velo_from_element(E,VV,m,e,sphere_key);
+            velo_from_element_d(E,VV,m,e,sphere_key);
 
             for (j=1;j<=ppts;j++)   {
                 vx[j] = 0.0;
