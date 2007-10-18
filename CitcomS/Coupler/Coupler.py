@@ -74,8 +74,8 @@ class Coupler(Component):
         # init'd Convertor singleton, this must be done before any other
         # exchanger call
         from ExchangerLib import initConvertor
-        initConvertor(self.inventory.dimensional,
-                      self.inventory.transformational,
+        initConvertor(self.inventory.si_unit,
+                      self.inventory.cartesian,
                       self.all_variables)
 
         return
@@ -156,12 +156,12 @@ class Coupler(Component):
         exchange_initial_temperature = prop.bool("exchange_initial_temperature",
                                                  default=True)
 
-        # if dimensional is True, quantities exchanged are dimensional
-        dimensional = prop.bool("dimensional", default=False)
+        # if si_unit is True, quantities exchanged are in SI units
+        si_unit = prop.bool("si_unit", default=False)
 
-        # if transformational is True, quantities exchanged are in standard
+        # if cartesion is True, quantities exchanged are in standard
         # (ie. Cartesian) coordinate system
-        transformational = prop.bool("transformational", default=False)
+        cartesian = prop.bool("cartesian", default=False)
 
 
 

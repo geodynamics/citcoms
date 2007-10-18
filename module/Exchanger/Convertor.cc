@@ -33,16 +33,16 @@
 #include "journal/diagnostics.h"
 
 
-void Convertor::init(bool dimensional, bool transformational,
+void Convertor::init(bool si_unit, bool cartesian,
 		     const All_variables* E)
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
-    if(dimensional)
+    if(si_unit)
 	si = new SIUnit(E);
 
-    if(transformational)
+    if(cartesian)
 	cart = new Exchanger::Spherical2Cartesian();
 
     inited = true;

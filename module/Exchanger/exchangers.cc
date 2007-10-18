@@ -155,15 +155,15 @@ char PyCitcomSExchanger_initConvertor__name__[] = "initConvertor";
 PyObject * PyCitcomSExchanger_initConvertor(PyObject *, PyObject *args)
 {
    PyObject *obj1;
-   int dimensional, transformational;
+   int si_unit, cartesian;
 
    if (!PyArg_ParseTuple(args, "iiO:initConvertor",
-			 &dimensional, &transformational, &obj1))
+			 &si_unit, &cartesian, &obj1))
         return NULL;
 
     All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
 
-    Convertor::init(dimensional, transformational, E);
+    Convertor::init(si_unit, cartesian, E);
 
     Py_INCREF(Py_None);
     return Py_None;

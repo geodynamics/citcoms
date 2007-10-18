@@ -43,7 +43,7 @@ class Convertor : public Exchanger::Convertor {
 public:
     ~Convertor();
 
-    static void init(bool dimensional, bool transformational,
+    static void init(bool si_unit, bool cartesian,
 		     const All_variables* E);
 
 private:
