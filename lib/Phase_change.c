@@ -36,11 +36,11 @@
 static void phase_change_apply(struct All_variables *E, double **buoy,
 			       float **B, float **B_b,
 			       float Ra, float clapeyron,
-			       float depth, float transT, float width);
+			       float depth, float transT, float inv_width);
 static void calc_phase_change(struct All_variables *E,
 			      float **B, float **B_b,
 			      float Ra, float clapeyron,
-			      float depth, float transT, float width);
+			      float depth, float transT, float inv_width);
 static void debug_phase_change(struct All_variables *E, float **B);
 
 
@@ -66,33 +66,34 @@ void phase_change_allocate(struct All_variables *E)
 void phase_change_input(struct All_variables *E)
 {
   int m = E->parallel.me;
+  float width;
 
   /* for phase change 410km  */
   input_float("Ra_410",&(E->control.Ra_410),"0.0",m);
   input_float("clapeyron410",&(E->control.clapeyron410),"0.0",m);
   input_float("transT410",&(E->control.transT410),"0.0",m);
-  input_float("width410",&(E->control.width410),"0.0",m);
+  input_float("width410",&width,"0.0",m);
 
-  if (E->control.width410!=0.0)
-    E->control.width410 = 1.0/E->control.width410;
+  if (width!=0.0)
+    E->control.inv_width410 = 1.0/width;
 
   /* for phase change 670km   */
   input_float("Ra_670",&(E->control.Ra_670),"0.0",m);
   input_float("clapeyron670",&(E->control.clapeyron670),"0.0",m);
   input_float("transT670",&(E->control.transT670),"0.0",m);
-  input_float("width670",&(E->control.width670),"0.0",m);
+  input_float("width670",&width,"0.0",m);
 
-  if (E->control.width670!=0.0)
-    E->control.width670 = 1.0/E->control.width670;
+  if (width!=0.0)
+    E->control.inv_width670 = 1.0/width;
 
   /* for phase change CMB  */
   input_float("Ra_cmb",&(E->control.Ra_cmb),"0.0",m);
   input_float("clapeyroncmb",&(E->control.clapeyroncmb),"0.0",m);
   input_float("transTcmb",&(E->control.transTcmb),"0.0",m);
-  input_float("widthcmb",&(E->control.widthcmb),"0.0",m);
+  input_float("widthcmb",&width,"0.0",m);
 
-  if (E->control.widthcmb!=0.0)
-    E->control.widthcmb = 1.0/E->control.widthcmb;
+  if (width!=0.0)
+    E->control.inv_widthcmb = 1.0/width;
 
 
   return;
@@ -104,7 +105,7 @@ void phase_change_apply_410(struct All_variables *E, double **buoy)
   if (E->control.Ra_410 != 0.0)
     phase_change_apply(E, buoy, E->Fas410, E->Fas410_b, E->control.Ra_410,
 		       E->control.clapeyron410, E->viscosity.z410,
-		       E->control.transT410, E->control.width410);
+		       E->control.transT410, E->control.inv_width410);
   return;
 }
 
@@ -114,7 +115,7 @@ void phase_change_apply_670(struct All_variables *E, double **buoy)
   if (E->control.Ra_670 != 0.0)
     phase_change_apply(E, buoy, E->Fas670, E->Fas670_b, E->control.Ra_670,
 		       E->control.clapeyron670, E->viscosity.zlm,
-		       E->control.transT670, E->control.width670);
+		       E->control.transT670, E->control.inv_width670);
   return;
 }
 
@@ -124,7 +125,7 @@ void phase_change_apply_cmb(struct All_variables *E, double **buoy)
   if (E->control.Ra_cmb != 0.0)
     phase_change_apply(E, buoy, E->Fascmb, E->Fascmb_b, E->control.Ra_cmb,
 		       E->control.clapeyroncmb, E->viscosity.zcmb,
-		       E->control.transTcmb, E->control.widthcmb);
+		       E->control.transTcmb, E->control.inv_widthcmb);
   return;
 }
 
@@ -132,18 +133,18 @@ void phase_change_apply_cmb(struct All_variables *E, double **buoy)
 static void phase_change_apply(struct All_variables *E, double **buoy,
 			       float **B, float **B_b,
 			       float Ra, float clapeyron,
-			       float depth, float transT, float width)
+			       float depth, float transT, float inv_width)
 {
   int m, i;
 
-  calc_phase_change(E, B, B_b, Ra, clapeyron, depth, transT, width);
+  calc_phase_change(E, B, B_b, Ra, clapeyron, depth, transT, inv_width);
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
       buoy[m][i] -= Ra * B[m][i];
 
   if (E->control.verbose) {
-    fprintf(E->fp_out, "Ra=%f, clapeyron=%f, depth=%f, transT=%f, width=%f\n",
-	    Ra, clapeyron, depth, transT, width);
+    fprintf(E->fp_out, "Ra=%f, clapeyron=%f, depth=%f, transT=%f, inv_width=%f\n",
+	    Ra, clapeyron, depth, transT, inv_width);
     debug_phase_change(E,B);
     fflush(E->fp_out);
   }
@@ -155,7 +156,7 @@ static void phase_change_apply(struct All_variables *E, double **buoy,
 static void calc_phase_change(struct All_variables *E,
 			      float **B, float **B_b,
 			      float Ra, float clapeyron,
-			      float depth, float transT, float width)
+			      float depth, float transT, float inv_width)
 {
   int i,j,k,n,ns,m,nz;
   float e_pressure,pt5,one,dz;
@@ -172,7 +173,7 @@ static void calc_phase_change(struct All_variables *E,
         e_pressure = dz * E->refstate.rho[nz] * E->refstate.gravity[nz]
             - clapeyron * (E->T[m][i] - transT);
 
-        B[m][i] = pt5 * (one + tanh(width * e_pressure));
+        B[m][i] = pt5 * (one + tanh(inv_width * e_pressure));
     }
 
     /* compute the phase boundary, defined as the depth where B==0.5 */

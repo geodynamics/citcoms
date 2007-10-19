@@ -827,13 +827,13 @@ static void process_adi_heating(struct All_variables *E, int m,
 static void latent_heating(struct All_variables *E, int m,
                            double *heating_latent, double *heating_adi,
                            float **B, float Ra, float clapeyron,
-                           float depth, float transT, float width)
+                           float depth, float transT, float inv_width)
 {
     double temp, temp1, temp2, temp3;
     int e, i, j;
     const int ends = enodes[E->mesh.nsd];
 
-    temp1 = 2.0 * width * clapeyron * Ra * E->control.disptn_number / E->control.Atemp / ends;
+    temp1 = 2.0 * inv_width * clapeyron * Ra * E->control.disptn_number / E->control.Atemp / ends;
 
     for(e=1; e<=E->lmesh.nel; e++) {
         temp2 = 0;
@@ -865,7 +865,7 @@ static void process_latent_heating(struct All_variables *E, int m,
         latent_heating(E, m, heating_latent, heating_adi,
                        E->Fas410, E->control.Ra_410,
                        E->control.clapeyron410, E->viscosity.z410,
-                       E->control.transT410, E->control.width410);
+                       E->control.transT410, E->control.inv_width410);
 
     }
 
@@ -873,14 +873,14 @@ static void process_latent_heating(struct All_variables *E, int m,
         latent_heating(E, m, heating_latent, heating_adi,
                        E->Fas670, E->control.Ra_670,
                        E->control.clapeyron670, E->viscosity.zlm,
-                       E->control.transT670, E->control.width670);
+                       E->control.transT670, E->control.inv_width670);
     }
 
     if(E->control.Ra_cmb != 0.0) {
         latent_heating(E, m, heating_latent, heating_adi,
                        E->Fascmb, E->control.Ra_cmb,
                        E->control.clapeyroncmb, E->viscosity.zcmb,
-                       E->control.transTcmb, E->control.widthcmb);
+                       E->control.transTcmb, E->control.inv_widthcmb);
     }
 
 

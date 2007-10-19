@@ -395,6 +395,7 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
+    float width;
 
     if (!PyArg_ParseTuple(args, "OOO:Phase_set_properties",
 			  &obj, &properties, &out))
@@ -408,26 +409,26 @@ PyObject * pyCitcom_Phase_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "Ra_410", E->control.Ra_410, fp);
     getFloatProperty(properties, "clapeyron410", E->control.clapeyron410, fp);
     getFloatProperty(properties, "transT410", E->control.transT410, fp);
-    getFloatProperty(properties, "width410", E->control.width410, fp);
+    getFloatProperty(properties, "width410", width, fp);
 
-    if (E->control.width410!=0.0)
-	E->control.width410 = 1.0/E->control.width410;
+    if (width!=0.0)
+	E->control.inv_width410 = 1.0 / width;
 
     getFloatProperty(properties, "Ra_670", E->control.Ra_670 , fp);
     getFloatProperty(properties, "clapeyron670", E->control.clapeyron670, fp);
     getFloatProperty(properties, "transT670", E->control.transT670, fp);
-    getFloatProperty(properties, "width670", E->control.width670, fp);
+    getFloatProperty(properties, "width670", width, fp);
 
-    if (E->control.width670!=0.0)
-	E->control.width670 = 1.0/E->control.width670;
+    if (width!=0.0)
+	E->control.inv_width670 = 1.0 / width;
 
     getFloatProperty(properties, "Ra_cmb", E->control.Ra_cmb, fp);
     getFloatProperty(properties, "clapeyroncmb", E->control.clapeyroncmb, fp);
     getFloatProperty(properties, "transTcmb", E->control.transTcmb, fp);
-    getFloatProperty(properties, "widthcmb", E->control.widthcmb, fp);
+    getFloatProperty(properties, "widthcmb", width, fp);
 
-    if (E->control.widthcmb!=0.0)
-	E->control.widthcmb = 1.0/E->control.widthcmb;
+    if (width!=0.0)
+	E->control.inv_widthcmb = 1.0 / width;
 
     PUTS(("\n"));
 

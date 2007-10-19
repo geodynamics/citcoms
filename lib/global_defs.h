@@ -431,9 +431,9 @@ struct CONTROL {
     int reset_startage;
     int zero_elapsed_time;
 
-    float Ra_670,clapeyron670,transT670,width670;
-    float Ra_410,clapeyron410,transT410,width410;
-    float Ra_cmb,clapeyroncmb,transTcmb,widthcmb;
+    float Ra_670,clapeyron670,transT670,inv_width670;
+    float Ra_410,clapeyron410,transT410,inv_width410;
+    float Ra_cmb,clapeyroncmb,transTcmb,inv_widthcmb;
 
     int augmented_Lagr;
     double augmented;
