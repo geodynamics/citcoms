@@ -1,3 +1,1524 @@
+2007-10-22 20:26  tan2
+
+	* NEWS: Updated NEWS
+
+2007-10-22 19:46  tan2
+
+	* AUTHORS, configure.ac: Minor update
+
+2007-10-22 19:44  tan2
+
+	* INSTALL, README: Simpilify INSTALL
+
+2007-10-22 19:03  tan2
+
+	* lib/Advection_diffusion.c: Eliminated unnecessary computation
+
+2007-10-22 19:03  tan2
+
+	* lib/Advection_diffusion.c: Variable material properties in latent
+	  heat correction on adiabatic cooling
+
+2007-10-22 19:02  tan2
+
+	* lib/Advection_diffusion.c, lib/Phase_change.c: Added some
+	  comments
+
+2007-10-19 19:24  tan2
+
+	* lib/Advection_diffusion.c, lib/Phase_change.c, lib/global_defs.h,
+	  module/setProperties.c: Renamed control.width* ->
+	  control.inv_width* for clarity
+
+2007-10-18 18:53  tan2
+
+	* CitcomS/Coupler/Coupler.py, module/Exchanger/Convertor.cc,
+	  module/Exchanger/Convertor.h, module/Exchanger/exchangers.cc:
+	  Renamed coupler inventory: dimensional -> si_unit and
+	  transformational -> cartesian
+
+2007-10-17 22:44  tan2
+
+	* examples/Cookbook5/cookbook5.cfg,
+	  examples/Cookbook9/cookbook9.cfg: Minor change in the examples
+
+2007-10-17 20:56  tan2
+
+	* bin/Citcom.c: Added comments on where C code is replaced by
+	  python code in Citcom.c
+
+2007-10-17 20:55  tan2
+
+	* lib/Determine_net_rotation.c, lib/Drive_solvers.c,
+	  lib/Output_gzdir.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/viscosity_descriptions.h: Put the
+	  rest of r8111 back
+
+2007-10-17 20:33  tan2
+
+	* examples/Full/input.sample, examples/Regional/input.sample: Fixed
+	  input diffusivity parameter in the examples, from r8111.
+
+2007-10-17 20:32  tan2
+
+	* lib/Drive_solvers.c, lib/Global_operations.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c:
+	  Added back minor modification from r8111
+
+2007-10-17 18:40  tan2
+
+	* examples/Cookbook9/cookbook9.cfg: Fixed a typo in the example
+
+2007-10-17 18:36  tan2
+
+	* lib/Global_operations.c: Fixed a bug in remove_rigid_rot()
+
+2007-10-17 18:35  tan2
+
+	* bin/Citcom.c, examples/Full/input.sample,
+	  lib/Determine_net_rotation.c, lib/Drive_solvers.c,
+	  lib/Full_version_dependent.c, lib/Global_operations.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/viscosity_descriptions.h: Roll
+	  back r8111, reading velo files for init. temperature stays as
+	  tic_method=-1. Other changes in r8111 will be put back later.
+
+2007-10-13 19:07  becker
+
+	* bin/Citcom.c, examples/Full/input.sample,
+	  lib/Determine_net_rotation.c, lib/Drive_solvers.c,
+	  lib/Full_version_dependent.c, lib/Global_operations.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/viscosity_descriptions.h: Fixed
+	  rigid rotation code bug. Added restart=2 option which will not
+	  use checkpoints, but tic_method=-1 style temperature input
+	  (formally realized via tic_method=-1, but this should be cleaner)
+	  fixed input diffusivity parameter in full example file.
+
+2007-10-12 20:24  tan2
+
+	* tests/coupled.cfg: Turn off monitor_max_T in the test
+
+2007-10-12 20:23  tan2
+
+	* module/Exchanger/Boundary.cc: Boundary class is for regional
+	  model only, add a checking for it.
+
+2007-10-11 01:23  tan2
+
+	* examples/Cookbook9, examples/Cookbook9/cookbook9.cfg,
+	  examples/Cookbook9/ic, examples/Cookbook9/ic/cntn.velo.0.0,
+	  examples/Cookbook9/ic/cntn.velo.1.0,
+	  examples/Cookbook9/ic/embd.velo.0.0,
+	  examples/Cookbook9/ic/embd.velo.1.0, examples/Cookbook9/velocity,
+	  examples/Cookbook9/velocity/bvel.dat0,
+	  examples/Cookbook9/velocity/bvel.dat1, examples/Makefile.am:
+	  Cookbook 9: nested solver coupling + coor_refine + tsolver tuning
+
+2007-10-11 00:03  becker
+
+	* lib/Process_buoyancy.c: Wiser now, commented in the E->fp output
+
+2007-10-10 23:40  becker
+
+	* bin/Citcom.c, lib/Construct_arrays.c,
+	  lib/Full_version_dependent.c, lib/Ggrd_handling.c,
+	  lib/Initial_temperature.c, lib/Instructions.c,
+	  lib/Pan_problem_misc_functions.c, lib/Process_buoyancy.c,
+	  lib/Regional_sphere_related.c, lib/Regional_version_dependent.c,
+	  lib/Viscosity_structures.c, lib/convection_variables.h,
+	  lib/global_defs.h: Added coor=3 option for radial node spacing a
+	  la CitcomCU. Streamlined ggrd temperature init. Added file flush
+	  to heat flow output.
+
+2007-10-10 21:00  tan2
+
+	* CitcomS/Coupler/Coupler.py: Add an assertion
+
+2007-10-10 20:11  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  examples/Cookbook8/cookbook8.cfg, examples/Full/input.sample,
+	  examples/Regional/input.sample, lib/Drive_solvers.c,
+	  lib/Global_operations.c, lib/Instructions.c, lib/global_defs.h,
+	  module/setProperties.c: Remove rigid body rotation from the
+	  velocity solution from global model.
+	  
+	  A input parameter 'solver.vsolver.remove_rigid_rotation', default
+	  to on, indicate whether to remove the rigid body rotation. For
+	  free-slip model, this parameter should be on. For model with
+	  imposed plate velocity, it is advised to turn off this parameter.
+
+2007-10-05 20:02  tan2
+
+	* CitcomS/Coupler/ContainingCoupler.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Coupler/EmbeddedCoupler.py,
+	  CitcomS/Solver/CoupledSolver.py: Renamed excludeTop ->
+	  exclude_top, and excludeBottom -> exclude_bottom. (No other
+	  CitcomS parameter uses CamelCase.)
+	  
+	  Reworked the interaction of initial temperature and coupling.
+	  Created a new parameter exchange_initial_temperature.
+
+2007-10-05 20:00  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py: Strengthen
+	  the default convergence criterion for the 3rd iteration in
+	  compressible cg solver
+
+2007-10-05 19:58  tan2
+
+	* lib/Regional_read_input_from_files.c: Disable a debugging output
+
+2007-10-05 19:58  tan2
+
+	* CitcomS/Coupler/MultiC_Coupler.py,
+	  CitcomS/Coupler/MultiE_Coupler.py: Add licence text to the
+	  multi-couplers
+
+2007-10-05 19:57  tan2
+
+	* CitcomS/Components/Advection_diffusion/Advection_diffusion.py,
+	  lib/Advection_diffusion.c: Turn off filter_temp by default since
+	  it's not in the energy equation
+
+2007-10-04 19:35  becker
+
+	* lib/Viscosity_structures.c: Fxied material assignment bug in
+	  PDEPV (0 vs. 1 array issue...)
+
+2007-10-01 20:38  tan2
+
+	* examples/Cookbook1/cookbook1.cfg,
+	  examples/Cookbook2/cookbook2.cfg,
+	  examples/Cookbook4/cookbook4.cfg,
+	  examples/Cookbook5/cookbook5.cfg, examples/Cookbook5/ic,
+	  examples/Cookbook5/restart_files,
+	  examples/Cookbook6/cookbook6.cfg,
+	  examples/Cookbook7/cookbook7.cfg, examples/Makefile.am,
+	  examples/example1.cfg: Updated the cookbook scripts
+
+2007-10-01 19:26  tan2
+
+	* examples/Cookbook8, examples/Cookbook8/cookbook8.cfg,
+	  examples/Cookbook8/coord.dat, examples/Cookbook8/restart,
+	  examples/Cookbook8/restart/cookbook8.chkpt.0.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.1.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.10.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.11.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.2.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.3.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.4.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.5.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.6.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.7.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.8.9000,
+	  examples/Cookbook8/restart/cookbook8.chkpt.9.9000,
+	  examples/Makefile.am: Added Cookbook8 for compressible model +
+	  geoid + checkpoint + vsolver tuning
+
+2007-09-28 23:36  becker
+
+	* lib/Full_version_dependent.c, lib/Initial_temperature.c,
+	  lib/Output_gzdir.c: Fixed restart I/O bug in Output_gzdir.
+
+2007-09-27 19:33  tan2
+
+	* bin/Citcom.c, lib/Output_gzdir.c: Added function prototype and
+	  fixed a few errors
+
+2007-09-27 19:07  tan2
+
+	* lib/Checkpoints.c, lib/Composition_related.c, lib/Tracer_setup.c,
+	  lib/composition_related.h: Shrink the size of checkpoint files
+
+2007-09-27 19:07  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py,
+	  lib/Regional_sphere_related.c, module/setProperties.c: Enable
+	  coor_refine for regional model, only radial coordinate is refined
+
+2007-09-25 19:40  tan2
+
+	* lib/Instructions.c: Fixed a bug in vtkio
+
+2007-09-25 01:31  tan2
+
+	* CitcomS/Components/Param.py, lib/Instructions.c,
+	  lib/Material_properties.c, lib/global_defs.h,
+	  module/setProperties.c: Introducing choice of reference state:
+	  
+	  When solver.param.reference_state=0, the reference state is read
+	  from a file (solver.param.refstate_file)
+	  
+	  When solver.param.reference_state=1 (default), the reference
+	  state is calculated using Adams-Williamson equation of state.
+
+2007-09-24 21:29  tan2
+
+	* configure.ac, lib/Output_gzdir.c: Detect the presence of libz and
+	  enable ascii-gz at configure time
+
+2007-09-24 21:28  tan2
+
+	* lib/Instructions.c, lib/Material_properties.c, lib/global_defs.h:
+	  Comment out varialbe thermal conductivity. Removed unused struct
+	  members.
+
+2007-09-24 21:28  tan2
+
+	* lib/Advection_diffusion.c: Multiply rho*cp to DT/dt
+
+2007-09-19 20:34  tan2
+
+	* lib/Material_properties.c: Don't write to log file, since only
+	  rank-0 proc can access it
+
+2007-09-19 20:34  tan2
+
+	* lib/Composition_related.c, lib/Instructions.c: Set default value
+	  for tracer/composition flags earlier
+
+2007-09-19 20:33  tan2
+
+	* lib/Checkpoints.c: Shrink the size of arrays
+
+2007-09-19 20:31  tan2
+
+	* lib/Instructions.c: Shrink the size of arrays
+
+2007-09-19 20:30  tan2
+
+	* lib/Output.c, lib/Output_gzdir.c, lib/Output_h5.c,
+	  lib/Topo_gravity.c: Fixed uninit'd heat flux and geoid arrays
+	  bugs, as reported by valgrind
+
+2007-09-19 00:28  becker
+
+	* lib/Advection_diffusion.c, lib/Output_gzdir.c: Minor bug fix in
+	  Output_gzidir, output_heating function didn't work.
+
+2007-09-18 23:08  tan2
+
+	* lib/Checkpoints.c: Fixed a memory bug in checkpoint
+
+2007-09-18 23:07  tan2
+
+	* lib/Regional_tracer_advection.c: Setup composition for regional
+	  model
+
+2007-09-18 01:52  leif
+
+	* configure.ac, setup.py: Fix for Issue129: "CitcomS configured
+	  without exchanger still links with -lExchanger". Also, use
+	  CIT_HEADER_MPI so that configuring --with-exchanger using MPICH2
+	  works (see Issue14 and Issue57).
+
+2007-09-17 20:30  tan2
+
+	* lib/Composition_related.c: Generalized init. composition from
+	  neighbors for multi-component composition
+
+2007-09-17 19:07  tan2
+
+	* lib/Composition_related.c: Using neighboring elements to
+	  determine the initial composition, if only a few elements are
+	  empty.
+
+2007-09-15 00:17  tan2
+
+	* lib/Tracer_setup.c: Revert accidental commit in part of r7957
+
+2007-09-14 23:39  tan2
+
+	* lib/Advection_diffusion.c, lib/Phase_change.c: Rearranged
+	  computation of latent heat and the test condition of phase change
+
+2007-09-14 23:11  tan2
+
+	* lib/Advection_diffusion.c: Added the contribution of latent heat
+	  to the diffusion term
+
+2007-09-14 23:11  tan2
+
+	* lib/Obsolete.c, lib/Phase_change.c: Replace abs() by fabs()
+
+2007-09-14 23:10  tan2
+
+	* lib/Advection_diffusion.c: Consevert energy (sum of rho*cp*T)
+	  instead of temperature (sum of T) in the Lenardic filter, also
+	  fixed a long-standing bug (abs -> fabs)
+
+2007-09-14 23:09  tan2
+
+	* lib/Advection_diffusion.c: Changed the magic numbers (0.0 and
+	  1.0) to const variables, reindent the code.
+
+2007-09-13 22:36  tan2
+
+	* CitcomS/Solver/Solver.py, lib/Instructions.c,
+	  lib/Material_properties.c, lib/global_defs.h,
+	  module/setProperties.c: Comment out adiabatic temperature profile
+	  for now, since it is not used in the code.
+
+2007-09-12 19:24  tan2
+
+	* visual/parser.py: Fixed a problem when the input string is empty
+
+2007-09-12 19:24  tan2
+
+	* lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Tracer_setup.c, lib/global_defs.h: Added heating file to
+	  optional output
+
+2007-09-12 19:24  tan2
+
+	* lib/Stokes_flow_Incomp.c: Keep the load vector intact in the bicg
+	  solver
+
+2007-09-12 19:23  tan2
+
+	* lib/Composition_related.c, lib/Full_tracer_advection.c,
+	  lib/Tracer_setup.c: Using drand48() instead of rand() to improve
+	  the quality of random tracers. Added some debugging output if the
+	  tracer count is low.
+
+2007-09-12 19:22  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Composition_related.c,
+	  lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c, module/setProperties.c: Add new input boolean
+	  parameter 'itracer_warnings'. Default to on. When it is off, the
+	  exit condition of tracer is relaxed.
+
+2007-09-12 19:19  tan2
+
+	* lib/Stokes_flow_Incomp.c: Removed the test for F=0 load vector
+	  bug. The bug was fixed in r7940.
+
+2007-09-07 22:53  tan2
+
+	* lib/Advection_diffusion.c, lib/Size_does_matter.c: Fixed tsolver.
+	  
+	  Fixed a bug in TMass and another in convert element # to nz.
+
+2007-09-05 22:35  tan2
+
+	* lib/Checkpoints.c, lib/Construct_arrays.c, lib/Drive_solvers.c,
+	  lib/Element_calculations.c, lib/Full_obsolete.c,
+	  lib/Full_parallel_related.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Obsolete.c, lib/Regional_obsolete.c,
+	  lib/Regional_parallel_related.c, lib/Solver_multigrid.c,
+	  lib/Stokes_flow_Incomp.c: Fixed a few memory problems.
+	  
+	  Shrink the size of several arrays related to Stokes eqn.
+	  
+	  Moved jacobi() to Obsolete.c
+
+2007-09-05 22:21  tan2
+
+	* module/Exchanger/SIUnit.cc: Forgot to update surfacee_tem
+
+2007-09-05 22:20  tan2
+
+	* lib/Viscosity_structures.c: Set the min of 2nd strain rate
+	  invariant to 1e-16 to prevent infinite viscosity when SDEPV=on
+
+2007-09-05 22:20  tan2
+
+	* lib/Convection.c: Init'd timestep variables
+
+2007-09-04 23:09  becker
+
+	* lib/Full_tracer_advection.c, lib/Instructions.c,
+	  lib/Stokes_flow_Incomp.c: Added test for F=0 load vector bug,
+	  moved open_qfiles to after set_elapsed time.
+
+2007-08-29 23:50  tan2
+
+	* examples/Makefile.am: Forgot to update the makefile
+
+2007-08-29 23:39  tan2
+
+	* examples/Cookbook5/velocity/bvel.dat57,
+	  examples/Cookbook5/velocity/bvel.dat58,
+	  examples/Cookbook5/velocity/bvel.dat59,
+	  examples/Cookbook5/velocity/bvel.dat60,
+	  examples/Cookbook5/velocity/bvel.dat61,
+	  examples/Cookbook5/velocity/bvel.dat62,
+	  examples/Cookbook5/velocity/bvel.dat63,
+	  examples/Cookbook5/velocity/bvel.dat64,
+	  examples/Cookbook5/velocity/bvel.dat65,
+	  examples/Cookbook5/velocity/bvel.dat66,
+	  examples/Cookbook5/velocity/bvel.dat67,
+	  examples/Cookbook5/velocity/bvel.dat68,
+	  examples/Cookbook5/velocity/bvel.dat69,
+	  examples/Cookbook5/velocity/bvel.dat70,
+	  examples/Cookbook5/velocity/bvel.dat71: Removed unused velocity
+	  bc files
+
+2007-08-29 23:18  tan2
+
+	* doc/CitcomS, doc: Restructing the repository layout for CitcomS
+	  documentation
+
+2007-08-29 20:55  tan2
+
+	* lib/Instructions.c: Forgot to update r7902
+
+2007-08-29 20:48  tan2
+
+	* lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Regional_obsolete.c, lib/Viscosity_structures.c,
+	  lib/output.h: Replaced output_open() with output_open_mode()
+	  
+	  Append the log and time files if restarting
+
+2007-08-29 20:47  tan2
+
+	* lib/Advection_diffusion.c: Minor fix
+
+2007-08-29 01:46  becker
+
+	* lib/Instructions.c: Missed to merge one modification after the
+	  conflict.
+
+2007-08-29 00:51  becker
+
+	* bin/Citcom.c, lib/Full_version_dependent.c, lib/Ggrd_handling.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Output_h5.c, lib/Process_buoyancy.c,
+	  lib/Regional_version_dependent.c, lib/Viscosity_structures.c,
+	  lib/convection_variables.h, lib/global_defs.h: When checking in
+	  my changes, I had to resolve a conflict for lib/Instructions.c by
+	  hand, which I hope I did properly. Here are my changes:
+	  
+	  - renamed CONTOL structure members ORTHO and ORTHOZ to
+	  CITCOM_ORTHO and CITCOM_ORTHOZ Those were never used and
+	  conflicted with definitions in GMT gmt.h
+	  
+	  - Added a higher frequency heat flow output option like so:
+	  
+	  write_q_files=1 # option to write heat flux to files qt.dat and
+	  qb.dat # at intervals smaller than storage_spacing (0)
+	  
+	  - Added the capability to read in initial temperatures from
+	  netcdf grd files, if -USE_GGRD is used. Lot of options, like so:
+	  
+	  # # read initial temperature conditions from grd files (default
+	  values in parentheses) # tic_method=4 # read initial temperature
+	  from netcdf GRD files (off)
+	  
+	  ggrd_tinit_scale_with_prem=off # scale the temperature with PREM
+	  densities (off)
+	  
+	  ggrd_tinit_scale=1.0 # scaling factor to apply to read in scalars
+	  f (1.0)
+	  
+	  ggrd_tinit_offset=-0.5 # offset, T = f * scale + offset + tm
+	  (0.0) # where tm is the mean between top and bottom TBC values #
+	  if the bottom is flux, will use 1 for bottom TBC value
+	  
+	  ggrd_tinit_gfile="../../data/tomography/s20a_smean_new_age/t" #
+	  prefix of grd files, will # try to read t.1.grd, t.2.grd ...
+	  t.n.grd # where n is the number of layers in the depth file
+	  ggrd_tinit_dfile="../../data/tomography/s20a_smean_new_age/tdepth.dat"
+	  # file with layer depths in km from bottom up
+	  
+	  ggrd_tinit_prem_file="../../progs/src/hc-svn/prem/prem.dat" #
+	  PREM data file ggrd_tinit_override_tbc=on # override temperature
+	  boundary conditions (off)
+
+2007-08-28 01:10  tan2
+
+	* CitcomS/Solver/Solver.py, lib/Instructions.c: Defaulting
+	  datadir_old to the current directory
+
+2007-08-28 01:09  tan2
+
+	* CitcomS/Components/Const.py, CitcomS/Solver/Solver.py,
+	  lib/Advection_diffusion.c, lib/Instructions.c,
+	  lib/Material_properties.c, lib/Output_h5.c, lib/global_defs.h,
+	  module/setProperties.c: Added various heating term to the energy
+	  equation.
+	  
+	  A new input parameter: solver.surfaceT for non-dimensional
+	  surface temperature.
+	  
+	  Removed old (and unused) input parameter: solver.const.surf_temp.
+
+2007-08-27 19:34  tan2
+
+	* lib/Stokes_flow_Incomp.c: Fixed a index bug in stokes solver
+
+2007-08-27 19:34  tan2
+
+	* CitcomS/Components/Output.py, CitcomS/Components/Tracer.py,
+	  CitcomS/Components/Visc.py, lib/Advection_diffusion.c,
+	  module/setProperties.c: Add pyre input for new parameters
+	  introduced by TWB
+
+2007-08-27 19:34  tan2
+
+	* lib/Advection_diffusion.c, lib/Checkpoints.c,
+	  lib/Construct_arrays.c, lib/Determine_net_rotation.c,
+	  lib/Drive_solvers.c, lib/Full_geometry_cartesian.c,
+	  lib/Full_lith_age_read_files.c, lib/Full_tracer_advection.c,
+	  lib/General_matrix_functions.c, lib/Instructions.c,
+	  lib/Lith_age.c, lib/Pan_problem_misc_functions.c, lib/Parsing.c,
+	  lib/Regional_lith_age_read_files.c,
+	  lib/Regional_sphere_related.c, lib/Regional_tracer_advection.c,
+	  lib/Regional_version_dependent.c, lib/Tracer_setup.c,
+	  lib/Viscosity_structures.c, lib/output.h, module/setProperties.c:
+	  Clean up the code and declared function prototypes to avoid
+	  compiler warnings
+
+2007-08-23 20:20  tan2
+
+	* lib/Advection_diffusion.c: Compute total visc and adi heating
+
+2007-08-23 20:19  tan2
+
+	* lib/Advection_diffusion.c, lib/Parsing.c: Minor refactoring
+
+2007-08-23 20:18  tan2
+
+	* lib/Pan_problem_misc_functions.c, lib/Phase_change.c: Compute
+	  phase change wrt reference density and gravity profiles.
+
+2007-08-23 20:18  tan2
+
+	* lib/Composition_related.c, lib/Tracer_setup.c,
+	  module/setProperties.c: Avoid reading unused input parameters
+
+2007-08-23 20:17  tan2
+
+	* CitcomS/Controller.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Coupler/EmbeddedCoupler.py,
+	  CitcomS/Coupler/MultiC_Coupler.py,
+	  CitcomS/Solver/CoupledSolver.py: assert
+	  solver.tsolver.monitor_max_T is off in coupled run and remove
+	  debugging output
+
+2007-08-23 20:16  tan2
+
+	* lib/Advection_diffusion.c, lib/Instructions.c, lib/Output_h5.c,
+	  lib/advection.h, lib/global_defs.h, module/setProperties.c:
+	  Renamed E->control.filter_temperature to
+	  E->advection.filter_temperature
+
+2007-08-23 20:16  tan2
+
+	* CitcomS/Components/Advection_diffusion/Advection_diffusion.py,
+	  lib/Advection_diffusion.c, lib/advection.h,
+	  module/setProperties.c: Added new input parameter
+	  solver.tsolver.monitor_max_T
+	  
+	  When it is on (default), if the max temperature changes too much
+	  between timestep, the temperature field is restored at the
+	  tsolver is called using half of the timestep size.
+
+2007-08-23 20:15  tan2
+
+	* lib/Advection_diffusion.c, lib/advection.h: Removed unused var.
+	  in struct advection
+
+2007-08-23 20:14  tan2
+
+	* lib/Size_does_matter.c: A new way to compute TMass
+
+2007-08-23 20:14  tan2
+
+	* lib/Advection_diffusion.c, lib/Material_properties.c,
+	  lib/Pan_problem_misc_functions.c, lib/Process_buoyancy.c,
+	  lib/Size_does_matter.c, lib/global_defs.h, module/mesher.c: Minor
+	  refactoring: add comments, rename variables
+
+2007-08-22 01:00  becker
+
+	* lib/Advection_diffusion.c, lib/Determine_net_rotation.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Pan_problem_misc_functions.c,
+	  lib/Tracer_setup.c, lib/global_defs.h: Added an option to remove
+	  net rotations of the whole model before ascii-gz output. This
+	  might be something of interest for other output options as well,
+	  but is still experimental. Obvisouly, NR motions could be removed
+	  in a post-processing step, but it is useful to monitor how those
+	  develop during a model run. (Particularly pronounced for strong
+	  lateral viscosity variations based on composition.)
+
+2007-08-21 22:42  tan2
+
+	* lib/Stokes_flow_Incomp.c: Removed the 2nd exit condition for bicg
+	  solver because the convergence criterion is hard to determine.
+
+2007-08-21 22:41  tan2
+
+	* lib/Topo_gravity.c: Fixed the scaling constants in geoid
+	  calculation with reference state
+
+2007-08-21 22:41  tan2
+
+	* lib/Pan_problem_misc_functions.c, lib/Phase_change.c: Disable
+	  phase change in compressible flow
+
+2007-08-21 20:28  tan2
+
+	* AUTHORS: Added Wei Leng to author list
+
+2007-08-21 20:27  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  lib/Instructions.c, lib/Stokes_flow_Incomp.c, lib/global_defs.h,
+	  module/setProperties.c: A new input parameter to specify which
+	  compressible solver
+	  
+	  If solver.vsolver.uzawa == "cg", Wei Leng's implementation is
+	  used. If solver.vsolver.uzawa == "bicg", Eh Tan's implementation
+	  is used.
+
+2007-08-21 20:26  tan2
+
+	* lib/Stokes_flow_Incomp.c: Refactored non-newtonian stokes solver
+	  and iter-CG compressible stokes solver
+
+2007-08-20 19:44  becker
+
+	* lib/Viscosity_structures.c: Forgot this file.
+
+2007-08-20 18:11  tan2
+
+	* lib/Instructions.c: Added #ifdef block around vtk_io in
+	  output_finalize()
+
+2007-08-20 00:11  becker
+
+	* lib/Advection_diffusion.c, lib/Tracer_setup.c: Made CDEPV and
+	  Q0.enriched work only with ncomp=1 for now.
+
+2007-08-19 23:54  becker
+
+	* lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Output_h5.c, lib/Parsing.c: - merged changes with Eh's
+	  additions
+	  
+	  - added coor=2 option (for full citcom) to assign finer radial
+	  node spacing to top and lower layers of shell. The
+	  coor_refine=0.1,0.15,0.1,0.2 parameter specifies the radius
+	  fraction of the bottom layer [0], the fraction of the nodes in
+	  this layer [1], the top layer fraction [2], and the top layer
+	  node fraction [3]. I.e. the defaults will put 15% of all nz nodes
+	  into the 10% lower layer, 20% in the top 10% upper layer, and the
+	  rest in between.
+	  
+	  - renamed gzipped output option ascii-gz
+	  
+	  - built in restart facilities for temperature and tracers when
+	  using gzdir I/O
+	  
+	  - added a composition viscosity function, CDEPV, based on two
+	  tracer flavors
+	  
+	  - for this to work, I had to move viscosity_input() *behind*
+	  tic_input() and tracer_input() in instructions
+	  
+	  - added tracer_enriched option. If tracer = on and
+	  tracer_enriched = on, will reader Q0_enriched and vary the
+	  element heat production between Q0 for C = 0 and Q0_enriched for
+	  C = 1. I.e. this only works if C varies between 0 and 1.
+	  
+	  - added an experimental option to write to a single VTK file
+	  (note caveats!) if ascii-gz is activated
+	  
+	  gzdir_vtkio = 2, will try to write VTK straight (experimental)
+	  
+	  the VTK output is of the "legacy", serial type, and requires that
+	  all processors see the same filesystem. This will likely lead to
+	  a bottleneck for larg CPU computations as each processor has to
+	  wait til the previous is done.
+
+2007-08-17 21:41  tan2
+
+	* tests/checkpoint/run.sh: Added excutable permission to testing
+	  shell script
+
+2007-08-17 21:39  tan2
+
+	* tests/checkpoint/restart.cfg: Added comments to restart example
+
+2007-08-17 18:35  tan2
+
+	* lib/Advection_diffusion.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Viscosity_structures.c: Converting TWB's ascii-gz and vtkio
+	  output and CDEPV and tracer_enriched for multi-component chemical
+	  convection.
+
+2007-08-17 18:33  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Checkpoints.c,
+	  lib/Composition_related.c, lib/Full_tracer_advection.c,
+	  lib/Output.c, lib/Pan_problem_misc_functions.c,
+	  lib/Regional_tracer_advection.c, lib/Tracer_setup.c,
+	  lib/global_defs.h, lib/tracer_defs.h, module/setProperties.c,
+	  tests/checkpoint/tracer.cfg, visual/autocombine.py,
+	  visual/batchcombine.py, visual/dxgeneral.py: Multi-component
+	  chemical convection.
+	  
+	  By setting tracer_flavors > 2, one can enable multi-component
+	  chemical convection. See tests/checkpoint/tracer.cfg for example
+	  input.
+
+2007-08-16 21:36  tan2
+
+	* CitcomS/Components/IC.py, CitcomS/Components/Tracer.py,
+	  CitcomS/Controller.py, CitcomS/Solver/CoupledSolver.py,
+	  CitcomS/Solver/Solver.py, bin/Citcom.c,
+	  examples/Cookbook5/cookbook5.cfg, lib/Checkpoints.c,
+	  lib/Composition_related.c, lib/Full_tracer_advection.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Lith_age.c,
+	  lib/Makefile.am, lib/Output.c, lib/Problem_related.c,
+	  lib/Regional_tracer_advection.c, lib/Tracer_setup.c,
+	  lib/Viscosity_structures.c, lib/checkpoints.h, lib/global_defs.h,
+	  lib/initial_temperature.h, lib/lith_age.h, module/bindings.c,
+	  module/initial_conditions.c, module/initial_conditions.h,
+	  module/outputs.c, module/outputs.h, module/setProperties.c,
+	  tests/checkpoint, tests/checkpoint/restart.cfg,
+	  tests/checkpoint/run.sh, tests/checkpoint/tracer.cfg: Merging the
+	  checkpoint branch to trunk.
+	  
+	  The checkpoint file is called [datafile].chkpt.[rank].[step] and
+	  is outputed with an interval of controller.checkpointFrequency.
+	  
+	  To read back the checkpoint file, set solver.ic.restart=on. The
+	  old checkpoint file,
+	  [datafile_old].chkpt.[rank].[solution_cycles_init] will be read
+	  in.
+	  
+	  The old way of restarting (read in temperature from the velo
+	  files) will still be available through solver.ic.tic_method=-1.
+	  
+	  Setting solver.tracer.ic_method=2 will read the old *.tracer.*
+	  files as before, but the composition field will be calculated
+	  according to the tracers, not read from the *.comp_el.* files.
+	  The parameter solver.tracer.reset_initial_composition becomes
+	  obsolete.
+
+2007-08-16 20:10  tan2
+
+	* lib/Element_calculations.c, lib/Viscosity_structures.c: When the
+	  element is close to the poles, use a more precise method to
+	  compute the strain rate.
+
+2007-08-16 19:38  tan2
+
+	* lib/Material_properties.c, lib/material_properties.h: Forgot to
+	  add two files to the repository
+
+2007-08-16 19:28  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  lib/Construct_arrays.c, lib/Element_calculations.c,
+	  lib/Instructions.c, lib/Output_h5.c,
+	  lib/Pan_problem_misc_functions.c, lib/Stokes_flow_Incomp.c,
+	  lib/Topo_gravity.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h, module/setProperties.c,
+	  visual/pasteCitcomData.py: Merging compressible branch to trunk.
+	  
+	  The TALA solver is working. Two new input parameters:
+	  dissipation_number and gruneisen.
+
+2007-08-16 01:42  tan2
+
+	* examples/Cookbook5/cookbook5.cfg,
+	  examples/Cookbook5/restart_files/cookbook5.velo.0.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.1.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.10.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.11.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.12.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.13.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.14.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.15.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.16.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.17.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.18.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.19.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.2.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.20.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.21.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.22.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.23.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.24.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.25.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.26.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.27.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.28.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.29.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.3.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.30.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.31.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.32.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.33.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.34.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.35.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.36.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.37.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.38.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.39.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.4.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.40.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.41.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.42.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.43.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.44.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.45.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.46.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.47.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.48.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.49.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.5.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.50.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.51.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.52.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.53.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.54.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.55.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.56.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.57.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.58.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.59.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.6.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.60.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.61.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.62.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.63.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.7.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.8.0,
+	  examples/Cookbook5/restart_files/cookbook5.velo.9.0,
+	  examples/Makefile.am: Updated Cookbook5 so that it uses only 2
+	  processors.
+
+2007-08-16 00:27  tan2
+
+	* CitcomS/Solver/Solver.py, lib/Advection_diffusion.c,
+	  lib/Construct_arrays.c, lib/Convection.c, lib/Drive_solvers.c,
+	  lib/Element_calculations.c, lib/Full_version_dependent.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Obsolete.c,
+	  lib/Output.c, lib/Output_h5.c, lib/Pan_problem_misc_functions.c,
+	  lib/Process_buoyancy.c, lib/Regional_obsolete.c,
+	  lib/Regional_version_dependent.c, lib/Size_does_matter.c,
+	  lib/Stokes_flow_Incomp.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h, module/mesher.c,
+	  module/setProperties.c: Merging compressible branch (up to r6584)
+	  to trunk.
+
+2007-08-14 03:33  becker
+
+	* lib/Advection_diffusion.c, lib/Full_version_dependent.c,
+	  lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Pan_problem_misc_functions.c, lib/Problem_related.c,
+	  lib/Process_buoyancy.c, lib/Regional_sphere_related.c,
+	  lib/Regional_version_dependent.c, lib/Tracer_setup.c,
+	  lib/global_defs.h: - added coor=2 option (for full citcom) to
+	  assign finer radial node spacing to top and lower layers of
+	  shell. The coor_refine=0.1,0.15,0.1,0.2 parameters specify the
+	  radius fraction of the bottom layer [0], the fraction of the
+	  nodes in this layer [1], the top layer fraction [2], and the top
+	  layer node fraction [3]. I.e. the defaults will put 15% of all nz
+	  nodes into the 10% lower layer, 20% in the top 10% upper layer,
+	  and the rest in between.
+	  
+	  - renamed gzipped output version with sub-directory storage
+	  ascii-gz
+	  
+	  - built in restart facilities for temperature and tracers when
+	  using ascii-gz I/O with vtkio != 2
+	  
+	  - added a composition viscosity function, CDEPV, based on two
+	  tracer flavors
+	  
+	  - for this to work, I had to move viscosity_input() *behind*
+	  tic_input() and tracer_input() in instructions
+	  
+	  - added tracer_enriched option for internal heating. If tracer =
+	  on and tracer_enriched = on, will reader Q0_enriched and vary the
+	  element heat production between Q0 for C = 0 and Q0_enriched for
+	  C = 1. I.e. this only works if C varies between 0 and 1.
+	  
+	  - added an option to write from all processros to a single VTK
+	  file, if ascii-gz is activated, and vtkio = 2. The VTK output is
+	  of the "legacy", serial, single-file type, and requires that all
+	  processors see the same filesystem.
+	  
+	  This will lead to a bottleneck for large # of CPU computations as
+	  each processor has to wait til the previous is done.
+	  
+	  More efficient I/O should be possible by using the distributed
+	  storage version of VTK, but I have no clue how this works.
+	  Anyone?
+
+2007-08-13 22:55  tan2
+
+	* lib/Global_operations.c, lib/Nodal_mesh.c, lib/Obsolete.c,
+	  lib/Pan_problem_misc_functions.c, lib/Stokes_flow_Incomp.c: Minor
+	  refactoring, clean-up and moving functions between files
+
+2007-08-13 21:43  tan2
+
+	* lib/Obsolete.c, lib/Phase_change.c: Moved obsolete functions
+	  phae_change_* from Phase_change.c to Obsolete.c and declared
+	  private functions to be static
+
+2007-08-10 23:56  tan2
+
+	* AUTHORS: Update the author list
+
+2007-08-10 23:56  sue
+
+	* doc/manual/citcoms.lyx: additions per becker, tan2
+
+2007-08-10 23:44  tan2
+
+	* lib/Drive_solvers.c, lib/Global_operations.c: Fixed two
+	  type-mismatch errors. Issue127 is fixed by this change and r7802.
+
+2007-08-10 23:43  tan2
+
+	* lib/Stokes_flow_Incomp.c: Prevent the original force vector being
+	  modified by Uzawa solver. This is needed for the non-Newtonian
+	  iterations.
+
+2007-08-10 20:51  becker
+
+	* lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c,
+	  lib/Problem_related.c, lib/Tracer_setup.c: - renamed gzipped
+	  output option ascii-gz
+	  
+	  - built in restart facilities for temperature and tracers when
+	  using gzdir I/O
+	  
+	  - added a composition viscosity function, CDEPV, based on two
+	  tracer flavors
+	  
+	  - for this to work, I had to move viscosity_input() *behind*
+	  tic_input() and tracer_input() in instructions
+
+2007-08-09 01:27  becker
+
+	* lib/Initial_temperature.c, lib/Instructions.c,
+	  lib/Output_gzdir.c, lib/Problem_related.c, lib/Tracer_setup.c,
+	  lib/Viscosity_structures.c, lib/viscosity_descriptions.h: - added
+	  a compositional viscosity function, CDEPV, based on two tracer
+	  flavors
+	  
+	  - for this to work, I had to move viscosity_input() *behind*
+	  tic_input() and tracer_input() in Instructions.c
+	  
+	  - built in restart facilities for temperature and tracers when
+	  using gzdir I/O
+
+2007-08-08 22:55  becker
+
+	* doc/manual/citcoms.lyx, lib/Composition_related.c,
+	  lib/Construct_arrays.c, lib/Full_tracer_advection.c,
+	  lib/General_matrix_functions.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Pan_problem_misc_functions.c,
+	  lib/Tracer_setup.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h, lib/tracer_defs.h: - added new routine
+	  Ggrd_handling which will take care of netcdf grd input. For now,
+	  only the tracer innitial conditions can be set by using, for
+	  example,
+	  
+	  ictracer_grd_layers=2 ictracer_grd_file="tmask.grd"
+	  
+	  for this to work, the ggrd libraries from HC, as well as the
+	  -lgmt and -lnetcdf need to be linked, and -DUSE_GGRD needs to be
+	  defined on compile time.
+	  
+	  - rewrote TDEPV viscosity options 3 and 4 slightly to make them
+	  more efficient
+	  
+	  - added TDEPV viscosity option 6
+	  
+	  eta = N_0 exp(E(T_0-T) + (1-z) Z_0 )
+	  
+	  - took layers subroutine in Construct_arrays.c apart to allow
+	  calling the same function in a more flexible from other
+	  subroutines
+	  
+	  - addded error handling routine "myerror" to
+	  Pan_problem_misc_functions
+	  
+	  - made the output behavior of the multigrid solver convergence
+	  parameters consisent with verbosity setting (ie. use report
+	  instead of always stderr output)
+	  
+	  - changed tracer input parameter "tracer" and "chemical_buoyancy"
+	  to boolean routine for added flexibility (I hope)
+	  
+	  - made check_initial_composition consistent with tracer
+	  advection, exits after warning only for
+	  E->trace.itracer_warnings==1
+	  
+	  - debugging output in Full_tracer_advection.c and Tracer_setup
+	  only gets printed to file for E->control.verbose == 1
+	  
+	  - fixed some typos in Output_gzdir (that might have been
+	  introduced by asynchronous svn updating or something like that)
+
+2007-08-08 16:41  becker
+
+	* lib/Output_gzdir.c: Forgot to actually add the new file that is
+	  needed for gzipped and "vtk" I/O.
+
+2007-08-08 05:58  becker
+
+	* lib/Advection_diffusion.c, lib/Drive_solvers.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Output.c,
+	  lib/Pan_problem_misc_functions.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h, lib/output.h,
+	  lib/viscosity_descriptions.h: - added functions rtp2xyz,
+	  calc_cbase_at_tp, and convert_pvec_to_cvec for spherical to
+	  Cartesian vector conversion to Pan_problem_functions.c
+	  
+	  Added "safe_malloc" to the same file because I didn't like the
+	  way Malloc1 uses int as arguments (64 bit issues).
+	  
+	  - added support for gzipped ascii output into subdirectories of
+	  data_dir, option gzdir. To use, need to compile with USE_GZDIR
+	  and link with the -lz zlib libraries. Within gzdir output mode,
+	  selected by
+	  
+	  output_format=gzdir user can define vtk I/O (gzdir_vtkio=1) to
+	  write Cartesian coordinates and velocities that are easy to
+	  combine to a single vtk file in a post-processing step.
+	  
+	  If gzlib_vtkio=0 the gzdir output option is meant to be identical
+	  to the original ascii output, but files are all gzipped on the
+	  fly, and the output that changes with each cycle is placed into
+	  subdirectories of data_dir/ called data_dir/cycles/ For gzdir
+	  I/O, data_name is not used at all, all single output files are
+	  placed in the data_dir/ directory without prefix.
+	  
+	  - added a new rheology option, PDEPV, for pseudo-plasticity and
+	  added a corresponding description to the manual.
+	  
+	  - Modified Drive_solver stderr output to show v.v, and not only
+	  dv.dv/v.v
+
+2007-08-02 22:44  luis
+
+	* .gitignore: Ignore most files generated by build system
+
+2007-07-27 23:33  hlin
+
+	* module/Exchanger/Boundary.cc: M Boundary.cc fixed a bug on topbc
+
+2007-07-26 00:20  tan2
+
+	* examples/Cookbook5/cookbook5.cfg: Fixed a typo, which was
+	  introduced in svn r5399
+
+2007-07-26 00:13  tan2
+
+	* visual/batchcombine.py, visual/combine.py: Fixed a bug that
+	  *opt*.general files are mistakenly named. This bug is introduced
+	  by svn r7236
+
+2007-07-25 23:19  tan2
+
+	* visual/dxgeneral.py: Fixed a bug in ordering of mesh nodes. The
+	  bug was introduced in svn r6510.
+
+2007-07-23 19:50  hlin
+
+	* tests/coupled.cfg, tests/multicoupled.cfg: M
+	  tests/multicoupled.cfg M tests/coupled.cfg
+	  
+	  The code has passed a test on a regional containing solver.
+	  Timestep will sync and initial condition will match.
+	  
+	  Going to use a full containing solver with embedded solvers at
+	  Hawaii and Reunion in next revision.
+
+2007-07-20 21:52  hlin
+
+	* tests/coupled.cfg: M coupled.cfg alligned nodes in the solvers
+	  for comparing velocity directly.
+
+2007-07-19 18:51  tan2
+
+	* module/advdiffu.c: Fixed a bug in setting stable timestep
+
+2007-07-19 18:51  tan2
+
+	* CitcomS/CoupledApp.py, CitcomS/MultiCoupledApp.py,
+	  tests/coupled.cfg, tests/multicoupled.cfg: Changed the name
+	  attribute of all application classes to 'CitcomS'. This allows
+	  the users to specify the same launcher parameters for all
+	  application in their ~/.pyre/CitcomS/CitcomS.cfg.
+
+2007-07-19 18:37  hlin
+
+	* CitcomS/Controller.py, CitcomS/Coupler/EmbeddedCoupler.py,
+	  CitcomS/Coupler/MultiC_Coupler.py,
+	  CitcomS/Coupler/MultiE_Coupler.py, CitcomS/Coupler/__init__.py,
+	  CitcomS/MultiCoupledApp.py, CitcomS/Solver/CoupledSolver.py: M
+	  trunk/CitcomS/Coupler/MultiE_Coupler.py M
+	  trunk/CitcomS/Coupler/__init__.py M
+	  trunk/CitcomS/Coupler/EmbeddedCoupler.py M
+	  trunk/CitcomS/Coupler/MultiC_Coupler.py M
+	  trunk/CitcomS/Solver/CoupledSolver.py M
+	  trunk/CitcomS/Controller.py M trunk/CitcomS/MultiCoupledApp.py
+	  
+	  solved the synchronization issue. There are some bugs in the log
+	  of time.
+
+2007-07-18 23:06  hlin
+
+	* CitcomS/Coupler/MultiC_Coupler.py,
+	  CitcomS/Coupler/MultiE_Coupler.py: A Coupler/MultiE_Coupler.py M
+	  Coupler/MultiC_Coupler.py
+	  
+	  Fixed the synchronization part. Need to test on it. Now Embedded
+	  Couplers will wait until containing coupler make a decision.
+
+2007-07-18 21:01  tan2
+
+	* bin/Makefile.am, bin/citcoms.in, bin/coupledcitcoms.in: Unify
+	  bin/citcoms with bin/coupledcitcoms scripts. Users can run
+	  'bin/citcoms --coupled' to launch a coupled run and 'bin/citcoms
+	  --multicoupled' to launch a multicoupled run.
+
+2007-07-17 22:49  tan2
+
+	* tests/multicoupled.cfg: An input file for multicoupled run
+
+2007-07-17 22:48  tan2
+
+	* CitcomS/Coupler/MultiC_Coupler.py, CitcomS/Coupler/__init__.py,
+	  CitcomS/MultiCoupledApp.py: Fixed a few typos and attached
+	  MultiC_Coupler as the default factory for the ccoupler facility
+
+2007-07-17 22:48  tan2
+
+	* CitcomS/Solver/MultiC_FullSolver.py,
+	  CitcomS/Solver/MultiC_RegionalSolver.py,
+	  CitcomS/Solver/MultiC_Solver.py, CitcomS/Solver/__init__.py:
+	  Simplified the MultiC_*Solver classes
+
+2007-07-16 23:45  hlin
+
+	* CitcomS/Solver/MultiC_FullSolver.py,
+	  CitcomS/Solver/MultiC_RegionalSolver.py,
+	  CitcomS/Solver/MultiC_Solver.py: A
+	  Solver/MultiC_RegionalSolver.py A Solver/MultiC_FullSolver.py A
+	  Solver/MultiC_Solver.py
+	  
+	  ideally these files works as the solvers I needed for the
+	  project.
+
+2007-07-16 21:21  hlin
+
+	* CitcomS/Coupler/MultiC_Coupler.py, CitcomS/MultiLayout.py: M
+	  CitcomS/MultiLayout.py trivial comment change
+	  
+	  M CitcomS/Coupler/MultiC_Coupler.py a nearly complete version.
+	  Although I am not sure how most of the things works , I managed
+	  to create a copy of everything.initTemperature,
+	  restartTemperature , and modifyT not defined.
+
+2007-07-13 23:24  hlin
+
+	* CitcomS/Coupler/ContainingCoupler.py: M
+	  Coupler/ContainingCoupler.py trivial modification on comments
+
+2007-07-13 23:23  hlin
+
+	* CitcomS/Coupler/MultiC_Coupler.py: M Coupler/MultiC_Coupler.py
+	  add __init__, initialize, createMesh some of createMesh are
+	  commented out because I do not understand it.
+
+2007-07-13 21:09  hlin
+
+	* CitcomS/Coupler/MultiC_Coupler.py: A Coupler/MultiC_Coupler.py
+	  It's a child of Containing Coupler It has nothing now.
+
+2007-07-11 20:17  tan2
+
+	* module/Exchanger/Boundary.cc,
+	  module/Exchanger/CitcomInterpolator.cc,
+	  module/Exchanger/CitcomSource.cc, module/Exchanger/SVTInlet.cc,
+	  module/Exchanger/SVTOutlet.cc: Added some comments
+
+2007-07-10 20:08  tan2
+
+	* CitcomS/Coupler/ContainingCoupler.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Coupler/EmbeddedCoupler.py: Renamed variables for
+	  clarification
+
+2007-07-09 22:03  tan2
+
+	* CitcomS/Coupler/ContainingCoupler.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Coupler/EmbeddedCoupler.py: Small changes in *Coupler
+	  class. * consolidated __init__() and initialize() * renamed
+	  numSrc -> remoteSize, boundary -> remoteBdryList, interior ->
+	  remoteIntrList * defaulted the dimensional and transformational
+	  properties to False
+
+2007-07-06 20:48  tan2
+
+	* CitcomS/MultiCoupledApp.py, CitcomS/MultiLayout.py: Added
+	  svn:keywords Id
+
+2007-07-06 20:46  tan2
+
+	* CitcomS/MultiCoupledApp.py, CitcomS/MultiLayout.py: Debugged
+	  MultiLayout.initialize() and MultiCoupledApp.findLayout(). Fixed
+	  some typos.
+
+2007-07-06 18:00  tan2
+
+	* CitcomS/CoupledApp.py: Using log() instead of line() to flush the
+	  journal buffer, otherwise no output at all.
+
+2007-07-06 17:50  hlin
+
+	* CitcomS/MultiCoupledApp.py, CitcomS/MultiLayout.py: fix myPlus
+	  and remotePlus and report in MultiCoupledApp edit some comments
+	  in MultiLayout
+
+2007-07-05 23:45  hlin
+
+	* CitcomS/MultiCoupledApp.py, CitcomS/MultiLayout.py: add
+	  MultiLayout not sure about number of processor, currently assign
+	  1-10 for ccom 11 for ecom1, and 12 for ecom2
+
+2007-07-05 22:36  hlin
+
+	* CitcomS/MultiCoupledApp.py:
+
+2007-07-05 20:49  hlin
+
+	* CitcomS/MultiCoupledApp.py:
+
+2007-07-04 00:02  hlin
+
+	* CitcomS/MultiCoupledApp.py: a draft for multicoupled application
+
+2007-07-02 22:21  tan2
+
+	* doc/manual/citcoms.lyx: Removing outdated and redundant
+	  documentation
+
+2007-07-02 22:21  tan2
+
+	* CitcomS/SimpleApp.py: Using log() instead of line() to flush the
+	  journal buffer, otherwise no output at all.
+
+2007-06-28 19:35  tan2
+
+	* CitcomS/Layout.py, tests/coupled.cfg: Renamed ccomm ->
+	  containing_group and ecomm -> embedded_group. Added more checks
+	  to the groups
+
+2007-06-27 01:04  tan2
+
+	* CitcomS/BaseApplication.py, CitcomS/Controller.py,
+	  CitcomS/CoupledApp.py, CitcomS/Coupler/ContainingCoupler.py,
+	  CitcomS/Coupler/Coupler.py, CitcomS/Coupler/EmbeddedCoupler.py,
+	  CitcomS/Layout.py, CitcomS/SimpleApp.py,
+	  CitcomS/Solver/CoupledSolver.py: Added/updated a bunch of
+	  comments, renamed variables
+
+2007-06-26 00:37  tan2
+
+	* doc/manual/graphics/citcoms_cover-layers.pdf,
+	  doc/manual/graphics/citcoms_cover.pdf: Added mime-type property
+	  to the PDF files
+
+2007-06-23 00:33  tan2
+
+	* CitcomS/CoupledApp.py, CitcomS/Coupler/ContainingCoupler.py,
+	  CitcomS/Coupler/Coupler.py, CitcomS/Coupler/EmbeddedCoupler.py,
+	  CitcomS/SimpleApp.py, CitcomS/Solver/CoupledSolver.py,
+	  module/Exchanger/BoundaryVTInlet.cc,
+	  module/Exchanger/CitcomSource.cc, module/Exchanger/SVTOutlet.cc,
+	  module/Exchanger/exchangers.cc, module/Exchanger/misc.cc,
+	  tests/array2d.cc, tests/coupled.cfg: Giving
+	  Exchanger/Coupler/CoupledApp as new life. The testing script
+	  tests/coupled.cfg finished successfully.
+
+2007-06-23 00:30  tan2
+
+	* lib/Citcom_init.c: Useful debuggin output, but disabled
+
+2007-06-23 00:29  tan2
+
+	* configure.ac: Print CXX and CXXFLAGS after finishing configure
+
+2007-06-23 00:28  tan2
+
+	* lib/Viscosity_structures.c: Removed the back-and-forth
+	  interpolation of viscosity, which smoothes the viscosity field
+	  unnecessarily
+
+2007-06-22 23:43  tan2
+
+	* module/setProperties.c: Forgot to commit module/setProperties.c
+	  in r7289. This should fix issue115 in the pyre version also.
+
+2007-06-22 04:36  leif
+
+	* .: Added BuildBot config.
+
+2007-06-21 22:35  hlin
+
+	* tests/test1.sh: Resolved the conflict
+
+2007-06-21 22:25  tan2
+
+	* tests/test1.sh: Preparing a conflict test, again
+
+2007-06-21 22:22  tan2
+
+	* tests/test1.sh: Preparing a conflict test, again
+
+2007-06-21 22:19  tan2
+
+	* tests/test1.sh: Preparing a conflict test
+
+2007-06-18 23:21  tan2
+
+	* CitcomS/CoupledApp.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Layout.py, etc/full.odb, etc/regional.odb: Renamed 'XXX1'
+	  -> 'cXXX' and 'XXX2' -> 'eXXX'
+
+2007-06-18 23:06  tan2
+
+	* lib/Instructions.c, lib/Tracer_setup.c: Fixing issue115:
+	  interference between restart=1 & tracer_ic_method
+	  
+	  Previously, when "restart" is set, tracer_ic_method will be set
+	  to 2 (restart tracers) by the code. Now, these two options are
+	  independent.
+
+2007-06-15 18:01  leif
+
+	* bin/dummy.cc: Fix for problem with GCC 3.4.5 (observed on
+	  CITerra):
+	  
+	  mv: cannot stat `.deps/dummy.Tpo': No such file or directory
+
+2007-06-14 21:38  tan2
+
+	* lib/Topo_gravity.c: Zeroing geoid arrays before every geoid
+	  calculation. This fixes issue114
+
+2007-06-14 17:55  tan2
+
+	* visual/autocombine.py, visual/batchcombine.py,
+	  visual/pasteCitcomData.py: A better fix for issue110
+
+2007-06-14 01:36  tan2
+
+	* visual/pasteCitcomData.py: Fixing issue111: Expanding %RANK in
+	  autocombine.py
+
+2007-06-13 17:55  hlin
+
+	* tests/test1.sh: A trivial change
+
+2007-06-12 00:05  tan2
+
+	* module/setProperties.c: Fixing issue112
+
+2007-05-11 20:19  leif
+
+	* bin/Makefile.am: Fixed LINK problem w/Automake.
+
+2007-05-11 02:02  leif
+
+	* CitcomS/CoupledApp.py, bin/Makefile.am, bin/coupledcitcoms.in,
+	  bin/dummy.cc, bin/pycitcoms.c, configure.ac,
+	  module/Exchanger/AreaWeightedNormal.cc,
+	  module/Exchanger/Boundary.cc,
+	  module/Exchanger/BoundaryVTInlet.cc,
+	  module/Exchanger/CitcomInterpolator.cc,
+	  module/Exchanger/CitcomSource.cc, module/Exchanger/Convertor.cc,
+	  module/Exchanger/Exchangermodule.cc,
+	  module/Exchanger/Exchangermodule.h, module/Exchanger/Interior.cc,
+	  module/Exchanger/Makefile.am, module/Exchanger/SIUnit.cc,
+	  module/Exchanger/SInlet.cc, module/Exchanger/SVTInlet.cc,
+	  module/Exchanger/SVTOutlet.cc, module/Exchanger/TInlet.cc,
+	  module/Exchanger/TOutlet.cc, module/Exchanger/VOutlet.cc,
+	  module/Exchanger/VTInlet.cc, module/Exchanger/VTOutlet.cc,
+	  module/Exchanger/bindings.cc, module/Exchanger/exceptions.cc,
+	  module/Exchanger/exchangers.cc, module/Exchanger/global_bbox.cc,
+	  module/Exchanger/initTemperature.cc,
+	  module/Exchanger/inlets_outlets.cc, module/Exchanger/misc.cc,
+	  module/Makefile.am, setup.py: Build with Exchanger, if available.
+	  The Exchanger package will be automatically detected if it is
+	  installed on your PYTHONPATH. The preprocessor & link flags for
+	  compiling/linking with Exchanger are handled automatically.
+	  
+	  To my chagrin, this change increases the CitcomS language count
+	  back up to 3 again (C, C++, Python). Even with the aid of the
+	  'cproto' tool, it would take many hours of work to make the C
+	  code in 'lib' compile using a C++ compiler.
+
+2007-04-11 00:40  tan2
+
+	* tests/Makefile.am: Forgot to update the makefile in r6541
+
+2007-04-10 21:59  tan2
+
+	* lib/Tracer_setup.c: Finding the min/max of the Cartesian
+	  coordinates. The min/max values provide the bounding box for
+	  random tracer generation. This will speed up the tracer
+	  generation, and should avoid a potential problem of "too many
+	  tries?" error when the domain size of a processor is much smaller
+	  (<1%) than the size of the whole sphere.
+
+2007-04-10 21:58  tan2
+
+	* tests/asap.py, tests/hrothgar.py: Removed obsolete pyre
+	  components in tests/
+
+2007-04-05 22:21  tan2
+
+	* visual/Makefile.am, visual/autocombine.py,
+	  visual/batchcombine.py, visual/batchpaste.sh, visual/combine.py,
+	  visual/dxgeneral.py, visual/dxgeneral.sh, visual/execpaste.py,
+	  visual/pasteCitcomData.py, visual/pasteCitcomData.sh: Adding the
+	  ability to combine optional fields to the post-processing
+	  scripts.
+	  
+	  autocombine.py will read the parameter 'output_optional' from the
+	  cfg file and combine the optional fields (can be pressure,
+	  stress, comp_nd, or a combination of the three) into a file. The
+	  file is named similar to the cap file, with 'cap' replaced by
+	  'opt'. A .general file is also created, which describes the
+	  content, shape, and structure of the opt file.
+
+2007-03-27 20:54  sue
+
+	* doc/manual/graphics/citcoms_cover-layers.pdf: standardized
+	  typefaces on cover
+
+2007-03-27 06:51  sue
+
+	* doc/manual/citcoms.pdf,
+	  doc/manual/graphics/citcoms_cover-layers.pdf,
+	  doc/manual/graphics/citcoms_cover.pdf: changed version to 2.2.1
+	  per tan2
+
+2007-03-27 04:39  tan2
+
+	* ChangeLog: Regenerated ChangeLog upto r6417
+
 2007-03-27 04:37  tan2
 
 	* NEWS, configure.ac, doc/manual/citcoms.lyx: Updated NEWS for the
