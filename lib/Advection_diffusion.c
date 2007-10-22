@@ -62,7 +62,7 @@ static void element_residual(struct All_variables *E, int el,
                              double diff, float **BC,
                              unsigned int **FLAGS, int m);
 static void filter(struct All_variables *E);
-static void process_heating(struct All_variables *E);
+static void process_heating(struct All_variables *E, int psc_pass);
 
 /* ============================================
    Generic adv-diffusion for temperature field.
@@ -241,6 +241,10 @@ void PG_timestep_solve(struct All_variables *E)
       predictor(E,E->T,E->Tdot);
 
       for(psc_pass=0;psc_pass<E->advection.temp_iterations;psc_pass++)   {
+        /* adiabatic, dissipative and latent heating*/
+        if(E->control.disptn_number != 0)
+          process_heating(E, psc_pass);
+
         /* XXX: replace inputdiff with refstate.thermal_conductivity */
 	pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
 	corrector(E,E->T,E->Tdot,DTdot);
@@ -404,10 +408,6 @@ static void pg_solver(struct All_variables *E,
     const int dofs=E->mesh.dof;
     const int ends=enodes[dims];
     const int sphere_key = 1;
-
-    /* adiabatic, dissipative and latent heating*/
-    if(E->control.disptn_number != 0)
-        process_heating(E);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++)
@@ -776,7 +776,7 @@ static void process_visc_heating(struct All_variables *E, int m,
     int e, i;
     double visc, temp;
     float *strain_sqr;
-    const int vpts = vpoints[E->mesh.nsd];
+    const int vpts = VPOINTS3D;
 
     strain_sqr = (float*) malloc((E->lmesh.nel+1)*sizeof(float));
     temp = E->control.disptn_number / E->control.Atemp / vpts;
@@ -802,7 +802,7 @@ static void process_adi_heating(struct All_variables *E, int m,
 {
     int e, ez, i, j;
     double matprop, temp1, temp2;
-    const int ends = enodes[E->mesh.nsd];
+    const int ends = ENODES3D;
 
     temp2 = E->control.disptn_number / ends;
     for(e=1; e<=E->lmesh.nel; e++) {
@@ -834,7 +834,7 @@ static void latent_heating(struct All_variables *E, int m,
 {
     double temp, temp0, temp1, temp2, temp3, matprop;
     int e, ez, i, j;
-    const int ends = enodes[E->mesh.nsd];
+    const int ends = ENODES3D;
 
     temp0 = 2.0 * inv_width * clapeyron * E->control.disptn_number * Ra / E->control.Atemp / ends;
     temp1 = temp0 * clapeyron;
@@ -929,28 +929,36 @@ static double total_heating(struct All_variables *E, double **heating)
 }
 
 
-static void process_heating(struct All_variables *E)
+static void process_heating(struct All_variables *E, int psc_pass)
 {
     int m;
     double total_visc_heating, total_adi_heating;
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        process_visc_heating(E, m, E->heating_visc[m]);
+        if(psc_pass == 0) {
+            /* visc heating does not change between psc_pass, compute only
+             * at first psc_pass */
+            process_visc_heating(E, m, E->heating_visc[m]);
+        }
         process_adi_heating(E, m, E->heating_adi[m]);
         process_latent_heating(E, m, E->heating_latent[m], E->heating_adi[m]);
     }
 
-    /* compute total amount of visc/adi heating over all processors */
-    total_visc_heating = total_heating(E, E->heating_visc);
-    total_adi_heating = total_heating(E, E->heating_adi);
+    /* compute total amount of visc/adi heating over all processors
+     * only at last psc_pass */
+    if(psc_pass == (E->advection.temp_iterations-1)) {
+        total_visc_heating = total_heating(E, E->heating_visc);
+        total_adi_heating = total_heating(E, E->heating_adi);
 
-    if(E->parallel.me == 0) {
-        fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
-                E->monitor.solution_cycles,
-                total_visc_heating, total_adi_heating);
-        fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
-                E->monitor.solution_cycles,
-                total_visc_heating, total_adi_heating);
+        if(E->parallel.me == 0) {
+            fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                    E->monitor.solution_cycles,
+                    total_visc_heating, total_adi_heating);
+            fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                    E->monitor.solution_cycles,
+                    total_visc_heating, total_adi_heating);
+        }
     }
+
     return;
 }
