@@ -614,6 +614,7 @@ static void element_residual(struct All_variables *E, int el,
     if(E->control.disptn_number == 0)
         heating = rho * Q;
     else
+        /* E->heating_latent is actually the inverse of latent heating */
         heating = (rho * Q - E->heating_adi[m][el] + E->heating_visc[m][el])
             * E->heating_latent[m][el];
 

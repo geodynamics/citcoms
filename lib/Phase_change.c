@@ -170,6 +170,9 @@ static void calc_phase_change(struct All_variables *E,
     for(i=1;i<=E->lmesh.nno;i++)  {
         nz = ((i-1) % E->lmesh.noz) + 1;
         dz = (E->sphere.ro-E->sx[m][3][i]) - depth;
+        /*XXX: dz*rho[nz]*g[nz] is only a approximation for the reduced
+         * pressure, a more accurate formula is:
+         *   integral(rho(z)*g(z)*dz) from depth_ph to current depth   */
         e_pressure = dz * E->refstate.rho[nz] * E->refstate.gravity[nz]
             - clapeyron * (E->T[m][i] - transT);
 
