@@ -1,10 +1,10 @@
-We are pleased to announce the version 2.2 release of CitComS.py.
+We are pleased to announce the version 3.0 release of CitComS.py.
 
-See the file INSTALL for building and installation instructions.
+See the file INSTALL and the manual for building and installation instructions.
 
 See the file NEWS for new features and bug fixes of this release.
 
 Please send all bug reports by electronic mail to:
     cig-mc@geodynamics.org
 
-CitComS.py is free software.  See the file COPYING for copying conditions.
+CitcomS is free software.  See the file COPYING for copying conditions.
