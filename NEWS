@@ -1,6 +1,56 @@
 CitComS.py NEWS -- history of user-visible changes.  2006-12-04
 
-Please send CitComS.py bug reports to cig-mc@geodynamics.org.
+Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
+
+Version 3.0.0b
+
+* Two implementations of compressible convection under Truncated An-elastic
+  Liquid Approximation are available, one by Wei Leng and Shijie Zhong and
+  the other by Eh Tan. See Cookbook 8 in the manual for more details.
+
+* The computation can be resumed from previous checkpoints. See Cookbook 8
+  in the manual for more details.
+
+* The chemical convection can handle multi-component composition.
+
+* The non-Newtonian Stokes' solver was not working properly and is fixed.
+
+* The viscosity can be composition dependent or pseudo-plastic (contributed
+  by Thorsten Becker).
+
+* The ASCII output can be compressed on-the-fly (contributed by Thorsten
+  Becker).
+
+* An easier way for radial mesh refinement is available (contributed by
+  Thorsten Becker). See Cookbook 9 in the manual for more details.
+
+* An exchanger package for nested solver coupling is available. See Cookbook
+  9 in the manual for more details.
+
+* The rigid body rotation component is removed from the velocity (contributed
+  by Shijie Zhong).
+
+* A new parameter can disable monitoring of maximum temperature. See Cookbook
+  9 in the manual for more details.
+
+* Several other changes are not backward compatible. A few of them will 
+  affect the solution, and others are changes in input parameters only. See
+  Section 1.2 in the manual for the details.
+
+
+Version 2.2.2
+
+* A bug in geoid calculation is fixed. The buoyancy contribution on geoid
+  was not correctly zeroed before every geoid calculation. This caused the
+  geoid at former timestep accumulated over the later timestep. (Issue 114)
+
+* The pressure, stress, and composition output, if enabled, will be combined
+  by "autocombine.py" script as well. The combined output is stored in
+  opt-files, similar to the cap-files. (Issue 99)
+
+* Generating random tracers is sped up. This should avoid a potential problem
+  of "too many tries?" error when the domain size of a processor is much
+  smaller (<1%) than the size of the whole sphere.
 
 
 Version 2.2.1
