@@ -801,24 +801,26 @@ static void process_adi_heating(struct All_variables *E, int m,
                                 double *heating)
 {
     int e, ez, i, j;
-    double temp, temp2;
+    double matprop, temp1, temp2;
     const int ends = enodes[E->mesh.nsd];
 
     temp2 = E->control.disptn_number / ends;
     for(e=1; e<=E->lmesh.nel; e++) {
         ez = (e - 1) % E->lmesh.elz + 1;
+        matprop = 0.125
+            * (E->refstate.thermal_expansivity[ez] +
+               E->refstate.thermal_expansivity[ez + 1])
+            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
+            * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
 
-        temp = 0.0;
+        temp1 = 0.0;
         for(i=1; i<=ends; i++) {
             j = E->ien[m][e].node[i];
-            temp += E->sphere.cap[m].V[3][j]
+            temp1 += E->sphere.cap[m].V[3][j]
                 * (E->T[m][j] + E->control.surface_temp);
         }
 
-        heating[e] = temp * temp2 * 0.125
-            * (E->refstate.thermal_expansivity[ez] + E->refstate.thermal_expansivity[ez + 1])
-            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
-            * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
+        heating[e] = matprop * temp1 * temp2;
     }
 
     return;
@@ -830,13 +832,21 @@ static void latent_heating(struct All_variables *E, int m,
                            float **B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
 {
-    double temp, temp1, temp2, temp3;
-    int e, i, j;
+    double temp, temp0, temp1, temp2, temp3, matprop;
+    int e, ez, i, j;
     const int ends = enodes[E->mesh.nsd];
 
-    temp1 = 2.0 * inv_width * clapeyron * Ra * E->control.disptn_number / E->control.Atemp / ends;
+    temp0 = 2.0 * inv_width * clapeyron * E->control.disptn_number * Ra / E->control.Atemp / ends;
+    temp1 = temp0 * clapeyron;
 
     for(e=1; e<=E->lmesh.nel; e++) {
+        ez = (e - 1) % E->lmesh.elz + 1;
+        matprop = 0.125
+            * (E->refstate.thermal_expansivity[ez] +
+               E->refstate.thermal_expansivity[ez + 1])
+            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
+            * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
+
         temp2 = 0;
         temp3 = 0;
         for(i=1; i<=ends; i++) {
@@ -846,8 +856,12 @@ static void latent_heating(struct All_variables *E, int m,
             temp2 += temp * E->sphere.cap[m].V[3][j];
             temp3 += temp;
         }
-        heating_adi[e] += temp2 * temp1;
-        heating_latent[e] += clapeyron * temp3 * temp1;
+
+        /* correction on the adiabatic cooling term */
+        heating_adi[e] += matprop * temp2 * temp0;
+
+        /* correction on the DT/Dt term */
+        heating_latent[e] += temp3 * temp1;
     }
     return;
 }
