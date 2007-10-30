@@ -30,10 +30,6 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-static void geoid_from_buoyancy();
-static void geoid_from_topography();
-
-
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
     float **tpg,**tpgb;
@@ -417,34 +413,18 @@ void stress_conform_bcs(struct All_variables *E)
 
 /* ===================================================================
    ===================================================================  */
-void compute_geoid(E, harm_geoid,  harm_geoid_from_bncy,
-                   harm_geoid_from_tpgt, harm_geoid_from_tpgb)
 
-     struct All_variables *E;
-     float *harm_geoid[2], *harm_geoid_from_bncy[2];
-     float *harm_geoid_from_tpgt[2], *harm_geoid_from_tpgb[2];
+static void geoid_from_buoyancy(struct All_variables *E,
+                                float *harm_geoid[2])
 {
-    int i, p;
+    /* Compute the geoid due to internal density distribution.
+     *
+     * geoid(ll,mm) = 4*pi*G*R*R*dlayer*(r^ll+2)*rho(ll,mm)/g/(2*ll+1)
+     *
+     * E->buoyancy needs to be converted to density (-therm_exp*ref_T/Ra/g)
+     * and dimensionalized (data.density).
+     */
 
-    geoid_from_buoyancy(E, harm_geoid_from_bncy);
-    geoid_from_topography(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
-
-    if (E->parallel.me == (E->parallel.nprocz-1))  {
-        for (i = 0; i < 2; i++)
-            for (p = 0; p <= E->sphere.hindice; p++) {
-                harm_geoid[i][p] = harm_geoid_from_bncy[i][p]
-                                 + harm_geoid_from_tpgt[i][p]
-                                 + harm_geoid_from_tpgb[i][p];
-            }
-    }
-
-}
-
-
-static void geoid_from_buoyancy(E, harm_geoid)
-     struct All_variables *E;
-     float *harm_geoid[2];
-{
     int m,k,ll,mm,node,i,j,p,noz,snode;
     float *TT[NCS],radius,*geoid[2],dlayer,con1,con2,scaling2,scaling;
     double buoy2rho;
@@ -453,7 +433,7 @@ static void geoid_from_buoyancy(E, harm_geoid)
 
     /* scale for buoyancy */
     scaling2 = -E->data.therm_exp*E->data.ref_temperature*E->data.density/E->control.Atemp;
-    /* scale for geoid */
+    /* */
     scaling = 1.0e6*4.0*M_PI*E->data.radius_km*E->data.radius_km*
         E->data.grav_const/E->data.grav_acc;
 
@@ -520,10 +500,21 @@ static void geoid_from_buoyancy(E, harm_geoid)
 
 
 
-static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
-     struct All_variables *E;
-     float *geoid_tpgt[2], *geoid_tpgb[2];
+static void geoid_from_topography(struct All_variables *E,
+                                  float *geoid_tpgt[2],
+                                  float *geoid_tpgb[2])
 {
+    /* Compute the geoid due to surface and CMB dynamic topography.
+     *
+     * geoid(ll,mm) = 4*pi*G*R*delta_rho*topo(ll,mm)/g/(2*ll+1)
+     *
+     * E->slice.tpg is essentailly non-dimensional stress(rr) and need
+     * to be dimensionalized by stress_scaling/(delta_rho*g).
+     *
+     * In theory, the degree-0 and 1 coefficients of topography must be 0.
+     * The geoid coefficents for these degrees are ingnored as a result.
+     */
+
     float con1,con2,scaling,den_contrast1,den_contrast2,stress_scaling,topo_scaling1,topo_scaling2;
     int i,j,k,ll,mm,s;
     float *tpgt[2], *tpgb[2];
@@ -538,10 +529,10 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
     stress_scaling = E->data.ref_viscosity*E->data.therm_diff/
         (E->data.radius_km*E->data.radius_km*1e6);
 
-    /* density contrast across surface */
-    den_contrast1 = (E->data.density-E->data.density_above)*E->refstate.rho[E->lmesh.noz];
-    /* density contrast across CMB */
-    den_contrast2 = (E->data.density_below-E->data.density)*E->refstate.rho[1];
+    /* density contrast across surface, need to dimensionalize reference density */
+    den_contrast1 = E->data.density*E->refstate.rho[E->lmesh.noz] - E->data.density_above;
+    /* density contrast across CMB, need to dimensionalize reference density */
+    den_contrast2 = E->data.density_below - E->data.density*E->refstate.rho[1];
 
     /* scale for surface and CMB topo */
     topo_scaling1 = stress_scaling / (den_contrast1*E->data.grav_acc);
@@ -630,6 +621,30 @@ static void geoid_from_topography(E, geoid_tpgt, geoid_tpgb)
     return;
 }
 
+
+
+void compute_geoid(E, harm_geoid,  harm_geoid_from_bncy,
+                   harm_geoid_from_tpgt, harm_geoid_from_tpgb)
+
+     struct All_variables *E;
+     float *harm_geoid[2], *harm_geoid_from_bncy[2];
+     float *harm_geoid_from_tpgt[2], *harm_geoid_from_tpgb[2];
+{
+    int i, p;
+
+    geoid_from_buoyancy(E, harm_geoid_from_bncy);
+    geoid_from_topography(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
+
+    if (E->parallel.me == (E->parallel.nprocz-1))  {
+        for (i = 0; i < 2; i++)
+            for (p = 0; p <= E->sphere.hindice; p++) {
+                harm_geoid[i][p] = harm_geoid_from_bncy[i][p]
+                                 + harm_geoid_from_tpgt[i][p]
+                                 + harm_geoid_from_tpgb[i][p];
+            }
+    }
+
+}
 
 
 /* ===================================================================
