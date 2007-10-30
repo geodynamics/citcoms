@@ -132,11 +132,15 @@ install-nodist_visualDATA: $(nodist_visual_DATA)
 	done
 
 if COND_HDF5
-    bin_PROGRAMS = h5tocap h5tovelo
+    bin_PROGRAMS = h5tocap h5tovelo project_geoid
     h5tocap_SOURCES = h5tocap.c h5util.c h5util.h
     h5tovelo_SOURCES = h5tovelo.c h5util.c h5util.h
     h5tovelo_LDADD = $(LIBHDF5)
+else
+    bin_PROGRAMS = project_geoid
 endif
+
+project_geoid_SOURCES = project_geoid.c
 
 CLEANFILES = $(nodist_visual_DATA)
 EXTRA_DIST = $(visual_templates)
