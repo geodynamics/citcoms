@@ -153,7 +153,7 @@ void full_node_locations(E)
   case 0:
     /* generate uniform mesh in radial direction */
     dr = (E->sphere.ro-E->sphere.ri)/(E->mesh.noz-1);
-    
+
     for (k=1;k <= E->mesh.noz;k++)  {
       rr[k] = E->sphere.ri + (k-1)*dr;
     }
@@ -170,7 +170,7 @@ void full_node_locations(E)
       fscanf(fp1,"%d %f",&nn,&tt1);
       rr[k]=tt1;
     }
-    
+
     fclose(fp1);
     break;
   case 2:
@@ -185,7 +185,7 @@ void full_node_locations(E)
     myerror(E,"coor flag undefined in Full_version_dependent");
     break;
   }
-  
+
   for (i=1;i<=E->lmesh.noz;i++)  {
     k = E->lmesh.nzs+i-1;
     RR[i] = rr[k];
@@ -325,20 +325,20 @@ void full_construct_tic_from_input(struct All_variables *E)
     break;
 
   case 3:
-    
-    /* set up a linear temperature profile first */
+
+    /* set up a conductive temperature profile first */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++)
 	  for(k=1;k<=noz;k++) {
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
 	    r1=E->sx[m][3][node];
-        E->T[m][node] = (E->control.TBCtopval*E->sphere.ro 
-                         - E->control.TBCbotval*E->sphere.ri) 
-                        / (E->sphere.ro - E->sphere.ri)
-                      + (E->control.TBCbotval - E->control.TBCtopval)
-                        * E->sphere.ro * E->sphere.ri / r1
-                        / (E->sphere.ro - E->sphere.ri);
+            E->T[m][node] = (E->control.TBCtopval*E->sphere.ro
+                             - E->control.TBCbotval*E->sphere.ri)
+                / (E->sphere.ro - E->sphere.ri)
+                + (E->control.TBCbotval - E->control.TBCtopval)
+                * E->sphere.ro * E->sphere.ri / r1
+                / (E->sphere.ro - E->sphere.ri);
       }
     /* This part put a temperature anomaly for whole mantle. The horizontal
        pattern of the anomaly is given by spherical harmonic ll & mm. */
