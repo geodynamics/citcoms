@@ -209,7 +209,7 @@ see_convergence=1
 mg_cycle=1
 down_heavy=3
 up_heavy=3
-vlowstep=500
+vlowstep=1000
 vhighstep=3
 
 piterations=375
