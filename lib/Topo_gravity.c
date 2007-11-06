@@ -443,12 +443,12 @@ static void geoid_from_buoyancy(struct All_variables *E,
         TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* sin coeff */
-    geoid[0] = (float*)malloc((E->sphere.hindice+2)*sizeof(float));
+    geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
     /* cos coeff */
-    geoid[1] = (float*)malloc((E->sphere.hindice+2)*sizeof(float));
+    geoid[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
 
     /* reset arrays */
-    for (p = 0; p <= E->sphere.hindice; p++) {
+    for (p = 0; p < E->sphere.hindice; p++) {
         harm_geoid[0][p] = 0;
         harm_geoid[1][p] = 0;
     }
@@ -525,8 +525,8 @@ static void geoid_from_topography(struct All_variables *E,
     void sphere_expansion();
 
     for (i=0; i<2; i++) {
-        tpgt[i] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
-        tpgb[i] = (float *)malloc((E->sphere.hindice+2)*sizeof(float));
+        tpgt[i] = (float *)malloc(E->sphere.hindice*sizeof(float));
+        tpgb[i] = (float *)malloc(E->sphere.hindice*sizeof(float));
     }
 
     stress_scaling = E->data.ref_viscosity*E->data.therm_diff/
@@ -645,7 +645,7 @@ void compute_geoid(E, harm_geoid,  harm_geoid_from_bncy,
 
     if (E->parallel.me == (E->parallel.nprocz-1))  {
         for (i = 0; i < 2; i++)
-            for (p = 0; p <= E->sphere.hindice; p++) {
+            for (p = 0; p < E->sphere.hindice; p++) {
                 harm_geoid[i][p] = harm_geoid_from_bncy[i][p]
                                  + harm_geoid_from_tpgt[i][p]
                                  + harm_geoid_from_tpgb[i][p];

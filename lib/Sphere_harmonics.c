@@ -30,10 +30,10 @@ void set_sphere_harmonics(E)
     /* spherical harmonic coeff (0=cos, 1=sin)
        for surface topo, cmb topo and geoid */
     for (i=0;i<=1;i++)   {
-        E->sphere.harm_geoid[i]=(float*)malloc((E->sphere.hindice+2)*sizeof(float));
-        E->sphere.harm_geoid_from_bncy[i]=(float*)malloc((E->sphere.hindice+2)*sizeof(float));
-        E->sphere.harm_geoid_from_tpgt[i]=(float*)malloc((E->sphere.hindice+2)*sizeof(float));
-        E->sphere.harm_geoid_from_tpgb[i]=(float*)malloc((E->sphere.hindice+2)*sizeof(float));
+        E->sphere.harm_geoid[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+        E->sphere.harm_geoid_from_bncy[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+        E->sphere.harm_geoid_from_tpgt[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+        E->sphere.harm_geoid_from_tpgb[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
     }
 
     compute_sphereh_table(E);
@@ -114,9 +114,9 @@ static void  compute_sphereh_table(E)
         E->sphere.tablessinf[m] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
 
         for (i=1;i<=E->lmesh.nsf;i++)   {
-            E->sphere.tablesplm[m][i]= (double *)malloc((E->sphere.hindice+3)*sizeof(double));
-            E->sphere.tablescosf[m][i]= (double *)malloc((E->output.llmax+3)*sizeof(double));
-            E->sphere.tablessinf[m][i]= (double *)malloc((E->output.llmax+3)*sizeof(double));
+            E->sphere.tablesplm[m][i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
+            E->sphere.tablescosf[m][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
+            E->sphere.tablessinf[m][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
         }
     }
 

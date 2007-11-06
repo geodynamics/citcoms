@@ -452,12 +452,12 @@ float *sphc,*sphs;
  int jumpp,total,j,d;
  float *sphcs,*temp;
 
- temp = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
- sphcs = (float *) malloc((E->sphere.hindice*2+3)*sizeof(float));
+ temp = (float *) malloc((E->sphere.hindice*2)*sizeof(float));
+ sphcs = (float *) malloc((E->sphere.hindice*2)*sizeof(float));
 
  /* pack */
  jumpp = E->sphere.hindice;
- total = E->sphere.hindice*2+3;
+ total = E->sphere.hindice*2;
  for (j=0;j<E->sphere.hindice;j++)   {
    sphcs[j] = sphc[j];
    sphcs[j+jumpp] = sphs[j];
@@ -758,7 +758,7 @@ void sum_across_depth_sph1(E,sphc,sphs)
     float *sphcs,*temp;
 
     if (E->parallel.nprocz > 1)  {
-	total = E->sphere.hindice*2+3;
+	total = E->sphere.hindice*2;
 	temp = (float *) malloc(total*sizeof(float));
 	sphcs = (float *) malloc(total*sizeof(float));
 

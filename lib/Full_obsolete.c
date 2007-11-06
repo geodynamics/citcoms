@@ -423,12 +423,12 @@ void sum_across_depth_sph(E,sphc,sphs,dest_proc)
  if (E->parallel.nprocz==1)   return;
 
  jumpp = E->sphere.hindice;
- nsl = E->sphere.hindice*2+3;
+ nsl = E->sphere.hindice*2;
  me = E->parallel.me;
 
- TG = ( float *)malloc((nsl+1)*sizeof(float));
+ TG = ( float *)malloc(nsl*sizeof(float));
  if (E->parallel.me_loc[3]==dest_proc)
-      RG = ( float *)malloc((nsl+1)*sizeof(float));
+      RG = ( float *)malloc(nsl*sizeof(float));
 
  for (i=0;i<E->sphere.hindice;i++)   {
     TG[i] = sphc[i];
@@ -481,11 +481,11 @@ void sum_across_surf_sph(E,TG,loc_proc)
 
  if (E->parallel.nprocxy==1)   return;
 
- nsl = E->sphere.hindice*2+2;
+ nsl = E->sphere.hindice*2;
  me = E->parallel.me;
 
  for (i=1;i<E->parallel.nprocxy*E->parallel.surf_proc_per_cap;i++)
-    RG[i] = ( float *)malloc((nsl+1)*sizeof(float));
+    RG[i] = ( float *)malloc(nsl*sizeof(float));
 
 
  idb=0;
@@ -524,7 +524,6 @@ void sum_across_surf_sph(E,TG,loc_proc)
  return;
  }
 
-#endif
 
 
 
