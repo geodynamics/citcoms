@@ -91,15 +91,14 @@ void get_sph_harm_coeff(char *filename, sph_harm* coeff)
 
 
     /* read in the geoid coefficients */
-    index = 0;
-    for(index=0; index<=coeff->len; index++) {
+    for(index=0; index<coeff->len; index++) {
         fgets(buffer, 255, fp);
         sscanf(buffer, "%d %d %f %f %f %f %f %f",
                &(coeff->ll[index]), &(coeff->mm[index]),
                &(coeff->clm[index]), &(coeff->slm[index]),
                &fjunk0, &fjunk1, &fjunk2, &fjunk3);
         /*
-        fprintf(stderr, "%d %d %e %e\n",
+        fprintf(stderr, "%d %d %d %e %e\n", index,
                 coeff->ll[index], coeff->mm[index],
                 coeff->clm[index], coeff->slm[index]);
         */
@@ -256,6 +255,9 @@ void project_sph_harm_to_mesh(sph_harm *coeff, field *geoid)
         }
     }
 
+    free(cosm);
+    free(sinm);
+
     return;
 }
 
@@ -298,14 +300,14 @@ int main(int argc, char **argv)
     int ntheta, nphi;
 
     /* check the input */
-    if(argc == 0) {
+    if(argc == 1) {
         print_help();
         return 1;
     }
 
     if(argc != 5) {
         fputs("Not enought input parameters provided!\n"
-              "Run without arguments to see usage.\n", stderr);
+              "Run command with no argument for usage.\n", stderr);
         return 1;
     }
 
