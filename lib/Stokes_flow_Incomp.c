@@ -241,10 +241,9 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     }
 
 
-    valid = 1;
     r0dotz0 = 0;
 
-    while( (valid) && (count < *steps_max) &&
+    while( (count < *steps_max) &&
            (E->monitor.incompressibility >= E->control.tole_comp) &&
            (dpressure >= imp) && (dvelocity >= imp) )  {
 
@@ -277,6 +276,10 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
         /* solve K*u1 = grad(s2) for u1 */
         assemble_grad_p(E, s2, F, lev);
         valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
+        if(!valid && (E->parallel.me==0)) {
+            fputs("Warning: solver not converging! 1\n", stderr);
+            fputs("Warning: solver not converging! 1\n", E->fp);
+        }
         strip_bcs_from_residual(E, E->u1, lev);
 
 
@@ -458,7 +461,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     valid = 1;
     r0dotrt = alpha = omega = 0;
 
-    while( (valid) && (count < *steps_max) &&
+    while( (count < *steps_max) &&
            ((E->monitor.incompressibility >= E->control.tole_comp) &&
             (dpressure >= imp) && (dvelocity >= imp)) )  {
 
@@ -498,7 +501,10 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         /* solve K*u0 = grad(pt) for u1 */
         assemble_grad_p(E, pt, F, lev);
         valid = solve_del2_u(E, u0, F, imp*v_res, lev);
-        if(!valid) fprintf(stderr, "not valid 1\n");
+        if(!valid && (E->parallel.me==0)) {
+            fputs("Warning: solver not converging! 1\n", stderr);
+            fputs("Warning: solver not converging! 1\n", E->fp);
+        }
         strip_bcs_from_residual(E, u0, lev);
 
 
@@ -525,7 +531,10 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         /* solve K*u1 = grad(st) for u1 */
         assemble_grad_p(E, st, F, lev);
         valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
-        if(!valid) fprintf(stderr, "not valid 2\n");
+        if(!valid && (E->parallel.me==0)) {
+            fputs("Warning: solver not converging! 2\n", stderr);
+            fputs("Warning: solver not converging! 2\n", E->fp);
+        }
         strip_bcs_from_residual(E, E->u1, lev);
 
 
@@ -714,7 +723,7 @@ static double initial_vel_residual(struct All_variables *E,
     int neq = E->lmesh.neq;
     int gneq = E->mesh.neq;
     int lev = E->mesh.levmax;
-    int i, m;
+    int i, m, valid;
     double v_res;
 
     v_res = sqrt(global_vdot(E, F, F, lev) / gneq);
@@ -742,7 +751,11 @@ static double initial_vel_residual(struct All_variables *E,
 
 
     /* solve K*u1 = F for u1 */
-    solve_del2_u(E, E->u1, F, imp*v_res, lev);
+    valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
+    if(!valid && (E->parallel.me==0)) {
+        fputs("Warning: solver not converging! 0\n", stderr);
+        fputs("Warning: solver not converging! 0\n", E->fp);
+    }
     strip_bcs_from_residual(E, E->u1, lev);
 
 
