@@ -1,3 +1,12 @@
+2007-11-08 21:36  tan2
+
+	* examples/Makefile.am: Removed binary checkpoint files from
+	  makefile, as the file size is too big for distribution.
+
+2007-11-08 21:17  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8240
+
 2007-11-08 19:19  tan2
 
 	* configure.ac: Update the version number
