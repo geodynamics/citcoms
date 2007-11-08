@@ -1426,7 +1426,7 @@ void output_finalize(struct  All_variables *E)
     if((E->output.gzdir.vtk_io == 3)||(E->parallel.me == 0)){
       /* delete the geo files */
       get_vtk_filename(files,1,E,0);
-      sprintf(message,"rm %s",files);system(message);
+      remove(files);
       if(E->parallel.me == 0){
 	/* close the log */
 	fclose(E->output.gzdir.vtk_fp);

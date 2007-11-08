@@ -80,7 +80,10 @@ void unique_copy_file(E,name,comment)
    if (E->parallel.me==0) {
     sprintf(unique_name,"%06d.%s-%s",E->control.PID,comment,name);
     sprintf(command,"cp -f %s %s\n",name,unique_name);
+#if 0
+    /* disable copying file, since some MPI implementation doesn't support it */
     system(command);
+#endif
     }
 
 }
@@ -459,7 +462,7 @@ void get_r_spacing_fine(double *rr, struct All_variables *E)
 {
   int k,klim,nb,nt,nm;
   double drb,dr0,drt,dr,drm,range,r,mrange, brange,bfrac,trange, tfrac;
-  
+
   brange = (double)E->control.coor_refine[0];
   bfrac =  (double)E->control.coor_refine[1];
   trange = (double)E->control.coor_refine[2];
@@ -496,7 +499,7 @@ void get_r_spacing_fine(double *rr, struct All_variables *E)
     rr[k] = r;
   }
 }
-/* 
+/*
 
 
 get r spacing at radial locations and node numbers as specified
@@ -530,10 +533,10 @@ void get_r_spacing_at_levels(double *rr,struct All_variables *E)
 
   rr[1] =  E->control.rrlayer[0];
   for(j = 1; j < E->control.rlayers; j++){
-    ddr = (E->control.rrlayer[j] - E->control.rrlayer[j - 1]) / 
+    ddr = (E->control.rrlayer[j] - E->control.rrlayer[j - 1]) /
       (E->control.nrlayer[j] - E->control.nrlayer[j - 1]);
     for(k = E->control.nrlayer[j-1]+1;k <= E->control.nrlayer[j];k++)
       rr[k] = rr[k-1]+ddr;
     }
-  
+
 }
