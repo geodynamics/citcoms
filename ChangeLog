@@ -1,3 +1,14 @@
+2007-11-08 22:31  tan2
+
+	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced a
+	  system call by std C library remove() and disabled another system
+	  call (backup input file). Partially fixed issue130. All remaining
+	  system calls are in lib/Output_gzdir.c.
+
+2007-11-08 21:38  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8242
+
 2007-11-08 21:36  tan2
 
 	* examples/Makefile.am: Removed binary checkpoint files from
