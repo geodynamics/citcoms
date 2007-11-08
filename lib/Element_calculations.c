@@ -828,13 +828,13 @@ void get_elt_c(struct All_variables *E, int el,
 {
     void get_global_shape_fn();
     void construct_c3x3matrix_el();
-    int p, a, i;
-    double temp, beta, x[4];
+    int p, a, i, j, nz;
+    double temp, beta, rho_avg, x[4];
 
     struct Shape_function GN;
     struct Shape_function_dx GNx;
     struct Shape_function_dA dOmega;
-    double rtf[4][9];
+    double rtf[4][9], rho[9];
 
     const int dims = E->mesh.nsd;
     const int ends = enodes[dims];
@@ -846,25 +846,54 @@ void get_elt_c(struct All_variables *E, int el,
         construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
 
     temp = p_point[1].weight[dims-1] * dOmega.ppt[1];
-    beta = E->control.disptn_number * E->control.inv_gruneisen;
 
-    for(a=1;a<=ends;a++) {
-        for (i=1;i<=dims;i++) {
-#if 1
-            /* hard coded dln(rho)/dr here */
+    switch (E->refstate.choice) {
+    case 1:
+        /* the reference state is computed by rho=exp((1-r)Di/gamma) */
+        /* so d(rho)/dr/rho == -Di/gamma */
 
-            x[i] = - beta * E->N.ppt[GNPINDEX(a,1)]
-                * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
-#else
-            /* compute dln(rho)/dr from rho(r) here */
-            /* XXX */
-#endif
+        beta = - E->control.disptn_number * E->control.inv_gruneisen;
+
+        for(a=1;a<=ends;a++) {
+            for (i=1;i<=dims;i++) {
+                x[i] = E->N.ppt[GNPINDEX(a,1)]
+                    * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
+            }
+            p=dims*(a-1);
+            elt_c[p  ][0] = -x[1] * temp * beta;
+            elt_c[p+1][0] = -x[2] * temp * beta;
+            elt_c[p+2][0] = -x[3] * temp * beta;
         }
-        p=dims*(a-1);
-        elt_c[p  ][0] = -x[1] * temp;
-        elt_c[p+1][0] = -x[2] * temp;
-        elt_c[p+2][0] = -x[3] * temp;
+        break;
+    default:
+        /* compute d(rho)/dr/rho from rho(r) */
+
+        for(a=1;a<=ends;a++) {
+            j = E->IEN[lev][m][el].node[a];
+            nz = (j - 1) % E->lmesh.noz + 1;
+            rho[a] = E->refstate.rho[nz];
+        }
+
+        rho_avg = 0;
+        for(a=1;a<=ends;a++) {
+            rho_avg += rho[a];
+        }
+        rho_avg /= ends;
+
+        for(a=1;a<=ends;a++) {
+            for (i=1;i<=dims;i++) {
+                x[i] = rho[a] * GNx.ppt[GNPXINDEX(2,a,1)]
+                    * E->N.ppt[GNPINDEX(a,1)]
+                    * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
+            }
+            p=dims*(a-1);
+            elt_c[p  ][0] = -x[1] * temp / rho_avg;
+            elt_c[p+1][0] = -x[2] * temp / rho_avg;
+            elt_c[p+2][0] = -x[3] * temp / rho_avg;
+        }
+
     }
+
     return;
 }
 

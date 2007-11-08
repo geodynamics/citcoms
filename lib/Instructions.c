@@ -137,13 +137,13 @@ void initial_mesh_solver_setup(struct All_variables *E)
     (E->solver.parallel_communication_routs_v)(E);
     (E->solver.parallel_communication_routs_s)(E);
 
+    reference_state(E);
+
     construct_sub_element(E);
     construct_shape_functions(E);
     construct_elt_gs(E);
     if(E->control.inv_gruneisen != 0)
         construct_elt_cs(E);
-
-    reference_state(E);
 
     /* this matrix results from spherical geometry */
     /* construct_c3x3matrix(E); */
@@ -1426,7 +1426,7 @@ void output_finalize(struct  All_variables *E)
     if((E->output.gzdir.vtk_io == 3)||(E->parallel.me == 0)){
       /* delete the geo files */
       get_vtk_filename(files,1,E,0);
-      sprintf(message,"rm %s",files);system(message);
+      remove(files);
       if(E->parallel.me == 0){
 	/* close the log */
 	fclose(E->output.gzdir.vtk_fp);

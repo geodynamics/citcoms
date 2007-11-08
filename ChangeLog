@@ -1,3 +1,130 @@
+2007-11-08 22:31  tan2
+
+	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced a
+	  system call by std C library remove() and disabled another system
+	  call (backup input file). Partially fixed issue130. All remaining
+	  system calls are in lib/Output_gzdir.c.
+
+2007-11-08 21:38  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8242
+
+2007-11-08 21:36  tan2
+
+	* examples/Makefile.am: Removed binary checkpoint files from
+	  makefile, as the file size is too big for distribution.
+
+2007-11-08 21:17  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8240
+
+2007-11-08 19:19  tan2
+
+	* configure.ac: Update the version number
+
+2007-11-08 19:18  tan2
+
+	* NEWS: Update NEWS
+
+2007-11-08 19:18  tan2
+
+	* examples/Cookbook5/cookbook5.cfg: Dereased the timestep size to
+	  reduce artifacts in advection
+
+2007-11-07 19:52  tan2
+
+	* examples/Cookbook4/cookbook4.cfg: Decreased the # of processors.
+	  This is the only way I can reproduce single-cell convection as in
+	  the manual.
+
+2007-11-07 19:52  tan2
+
+	* CitcomS/Components/Output.py, lib/Output.c: Removed comp_el from
+	  default output, since it is not required for restart anymore.
+
+2007-11-07 19:51  tan2
+
+	* lib/Stokes_flow_Incomp.c: Print a warning when matrix eqn solver
+	  not converging
+
+2007-11-06 23:18  tan2
+
+	* examples/Cookbook7/cookbook7.cfg: Added cgrad solver convergence
+	  parameters, increased buoyancy_ratio and lower the # of steps
+
+2007-11-06 23:18  tan2
+
+	* examples/Cookbook6/cookbook6.cfg: Removed unused multigrid
+	  parameters
+
+2007-11-06 23:18  tan2
+
+	* examples/Full/input.sample, examples/Regional/input.sample:
+	  Increase vlowstep to match the default value in pyre
+
+2007-11-06 23:17  tan2
+
+	* visual/project_geoid.c: Fixed a few memory errors
+
+2007-11-06 01:04  tan2
+
+	* lib/Output.c: Init'd some variables about vtk_io, which might be
+	  accessed with uninit'd values in output_finalize()
+
+2007-11-06 01:04  tan2
+
+	* lib/Full_obsolete.c, lib/Global_operations.c, lib/Obsolete.c,
+	  lib/Sphere_harmonics.c, lib/Topo_gravity.c: Shrank the size of
+	  sph. harm arrays
+
+2007-11-06 01:03  tan2
+
+	* lib/Regional_obsolete.c: Removed functions related sph. harm in
+	  lib/Regional_obsolete.c
+
+2007-11-06 01:03  tan2
+
+	* lib/Topo_gravity.c: Scaled topo with variable gravity. Fixed an
+	  error in comment. Rearranged computation.
+
+2007-11-01 23:33  tan2
+
+	* lib/Full_version_dependent.c: Fixed an error in comment
+
+2007-11-01 23:33  tan2
+
+	* lib/Stokes_flow_Incomp.c: Print dv/v=dp/p=1.0 for the 1st Uzawa
+	  iteraion
+
+2007-10-30 22:29  tan2
+
+	* visual/Makefile.am: Minor modification
+
+2007-10-30 21:54  tan2
+
+	* visual/Makefile.am: Added the C program project_geoid to the
+	  makefile
+
+2007-10-30 21:53  tan2
+
+	* visual/project_geoid.c: A post-processing program to project
+	  geoid coefficents onto a regular (longitude, latitude) mesh
+
+2007-10-30 21:50  tan2
+
+	* lib/Topo_gravity.c: Fixed a bug in dimensionalizing density.
+	  Provided the formula of geoid calculation in the comments.
+	  Rearranged the order of functions.
+
+2007-10-30 21:49  tan2
+
+	* lib/Element_calculations.c, lib/Instructions.c: Compute
+	  d(rho)/dr/rho from rho(r)
+
+2007-10-22 20:57  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8170
+
 2007-10-22 20:26  tan2
 
 	* NEWS: Updated NEWS

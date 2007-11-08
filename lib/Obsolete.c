@@ -333,7 +333,7 @@ static void  compute_sphereh_int_table(E)
     double t,f;
     double dth,dfi,sqrt_multis();
 
-    E->sphere.con = (double *)malloc((E->sphere.hindice+3)*sizeof(double));
+    E->sphere.con = (double *)malloc(E->sphere.hindice*sizeof(double));
     for (ll=0;ll<=E->output.llmax;ll++)
 	for (mm=0;mm<=ll;mm++)   {
 	    E->sphere.con[E->sphere.hindex[ll][mm]] =
@@ -344,7 +344,7 @@ static void  compute_sphereh_int_table(E)
     E->sphere.tablenplm   = (double **) malloc((E->sphere.nox+1)
 					       *sizeof(double*));
     for (i=1;i<=E->sphere.nox;i++)
-	E->sphere.tablenplm[i]= (double *)malloc((E->sphere.hindice+3)
+	E->sphere.tablenplm[i]= (double *)malloc(E->sphere.hindice
 						 *sizeof(double));
 
     E->sphere.tablencosf  = (double **) malloc((E->sphere.noy+1)

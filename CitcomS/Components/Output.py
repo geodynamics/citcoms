@@ -53,7 +53,7 @@ class Output(CitcomComponent):
                                                       "ascii-gz",
                                                       "hdf5"]))
         output_optional = inv.str("output_optional",
-                                  default="surf,botm,tracer,comp_el")
+                                  default="surf,botm,tracer")
 
         # experimental vtk output
         gzdir_vtkio = inv.int("gzdir_vtkio", default=0)

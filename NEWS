@@ -2,40 +2,52 @@ CitComS.py NEWS -- history of user-visible changes.  2006-12-04
 
 Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
 
-Version 3.0.0b
+Version 3.0.0
 
-* Two implementations of compressible convection under Truncated An-elastic
-  Liquid Approximation are available, one by Wei Leng and Shijie Zhong and
-  the other by Eh Tan. See Cookbook 8 in the manual for more details.
+This release of CitcomS (3.0) contains many new features, including:
 
-* The computation can be resumed from previous checkpoints. See Cookbook 8
-  in the manual for more details.
+* two implementations of compressible convection, one by Wei Leng and Shijie
+  Zhong and the other by Eh Tan (Cookbook 8);
 
-* The chemical convection can handle multi-component composition.
+* the ability to resume computation from previous checkpoints (Cookbook 8);
 
-* The non-Newtonian Stokes' solver was not working properly and is fixed.
+* multi-component chemical convection;
 
-* The viscosity can be composition dependent or pseudo-plastic (contributed
-  by Thorsten Becker).
+* a fixed non-Newtonian solver;
 
-* The ASCII output can be compressed on-the-fly (contributed by Thorsten
-  Becker).
+* an exchanger package for solver coupling (Cookbook 9);
 
-* An easier way for radial mesh refinement is available (contributed by
-  Thorsten Becker). See Cookbook 9 in the manual for more details.
+* removing the rigid body rotation component from the velocity by Shijie
+  Zhong (Cookbook 8);
 
-* An exchanger package for nested solver coupling is available. See Cookbook
-  9 in the manual for more details.
+* an option to disable monitoring of maximum temperature (Cookbook 9);
 
-* The rigid body rotation component is removed from the velocity (contributed
-  by Shijie Zhong).
+* a rheology option for pseudo-plasiticity, composition dependent viscosity
+  and heat generation, compressed ASCII output, and an easier way for mesh
+  refinement for the radial coordinate by Thorsten Becker.
 
-* A new parameter can disable monitoring of maximum temperature. See Cookbook
-  9 in the manual for more details.
 
-* Several other changes are not backward compatible. A few of them will 
-  affect the solution, and others are changes in input parameters only. See
-  Section 1.2 in the manual for the details.
+There are additional seven backward-incompatible changes. Among them, the
+first four will affect the results. The same input file will produce slightly
+different results in v3.0.0 than in v2.2.2.
+
+* the viscosity field at element level is not smoothed (this might slow down
+  the convergence but will represent the viscosity field more accurately);
+
+* the Lenardic filter on temperature is disabled by default;
+
+* the rigid body rotation component is removed from the velocity by default;
+
+* use of a better pseudo-random number generator to generate the initial
+  tracer;
+
+* the type of input parameter coor is changed from a boolean to an integer;
+
+* setting restart=on will resume the computation from the checkpoint files and
+  will not need the tracer files (the old way of reading  initial temperature
+  from velo files can be achieved by tic_method=-1);
+
+* the input parameter reset_initial_composition becomes obsolete.  
 
 
 Version 2.2.2
