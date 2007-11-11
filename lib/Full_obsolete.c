@@ -527,6 +527,7 @@ void sum_across_surf_sph(E,TG,loc_proc)
 
 
 
+
 void set_communication_sphereh(E)
  struct All_variables *E;
  {

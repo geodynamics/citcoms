@@ -106,6 +106,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
     number_of_tracers = E->trace.ntracers[j];
     for (kk=1;kk <= number_of_tracers;kk++) {
       rad = E->trace.basicq[j][2][kk]; /* tracer radius */
+
+
       if(layers_r(E,rad) <= E->trace.ggrd_layers){
 	/* 
 	   in top layers 
@@ -127,7 +129,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	E->trace.extraq[j][0][kk]= indbl;
       }else{
 	/* below */
-	E->trace.extraq[j][0][kk]=0.0;
+	E->trace.extraq[j][0][kk] = 0.0;
       }
     }
   }
@@ -135,6 +137,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   /* free grd structure */
   ggrd_grdtrack_free_gstruc(ggrd_ict);
   report(E,"ggrd tracer init done");
+  if(E->parallel.me == 0)
+    fprintf(stderr,"ggrd tracer init OK\n");
 }
 
 void ggrd_full_temp_init(struct All_variables *E)

@@ -39,6 +39,8 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include "mpi.h"
 
+
+
 #ifdef USE_GGRD
 #include "hc.h"
 #endif
@@ -802,5 +804,8 @@ struct All_variables {
 #ifdef __cplusplus
 }
 #endif
+
+
+
 
 #endif

@@ -39,6 +39,7 @@
 static void read_refstate(struct All_variables *E);
 static void adams_williamson_eos(struct All_variables *E);
 
+int layers_r(struct All_variables *,float);
 
 void mat_prop_allocate(struct All_variables *E)
 {
@@ -94,13 +95,13 @@ void reference_state(struct All_variables *E)
     }
 
     if(E->parallel.me == 0) {
-        fprintf(stderr, "nz  radius   depth    rho\n");
+      fprintf(stderr, "   nz     radius      depth    rho              layer\n");
     }
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=E->lmesh.noz; i++) {
-            fprintf(stderr, "%d %f %f %e\n",
+            fprintf(stderr, "%6d %11f %11f %11e %5i\n",
                     i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i]);
+                    E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
         }
 
     return;

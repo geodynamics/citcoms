@@ -30,6 +30,8 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+int layers_r(struct All_variables *,float );
+
 
 /*========================================================
   Function to make the IEN array for a mesh of given
@@ -767,23 +769,17 @@ int layers_r(E,r)
      struct All_variables *E;
      float r;
 {
-  float rlith, r410, rlm;
-
   int llayers = 0;
   /* 
      the z-values, as read in, are non-dimensionalized depth
      convert to radii
 
   */
-  rlith = E->sphere.ro - E->viscosity.zlith; /* lithosphere */
-  r410  = E->sphere.ro - E->viscosity.z410;
-  rlm   = E->sphere.ro - E->viscosity.zlm;
-
-  if (r > rlith)		/* in lithospherre */
+  if (r      > (E->sphere.ro - E->viscosity.zlith))		/* in lithospherre */
     llayers = 1;
-  else if ((r > r410)&& (r  <= rlith)) /* in asthenosphere 100...410 km */
+  else if (r > (E->sphere.ro - E->viscosity.z410)) /* in asthenosphere 100...410 km */
     llayers = 2;
-  else if ((r > rlm) && (r <= r410)) /* in transition zone, 410 - 660 km */
+  else if (r > (E->sphere.ro - E->viscosity.zlm)) /* in transition zone, 410 - 660 km */
     llayers = 3;
   else				/* lower mantle */
     llayers = 4;
