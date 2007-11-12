@@ -52,8 +52,6 @@ INCLUDES = \
 	$(MPIINCLUDES)
 
 sources = \
-	AreaWeightedNormal.cc \
-	AreaWeightedNormal.h \
 	bindings.cc \
 	bindings.h \
 	Boundary.cc \
@@ -67,6 +65,7 @@ sources = \
 	exceptions.cc \
 	exceptions.h \
 	Exchangermodule.cc \
+	Exchangermodule.h \
 	exchangers.cc \
 	exchangers.h \
 	global_bbox.cc \
@@ -98,6 +97,8 @@ sources = \
 	VTOutlet.cc \
 	VTOutlet.h
 EXTRA_DIST = \
+	AreaWeightedNormal.cc \
+	AreaWeightedNormal.h \
 	BoundaryVTInlet.cc \
 	BoundaryVTInlet.h
 
