@@ -1,3 +1,16 @@
+2007-11-12 22:42  tan2
+
+    * NEWS, configure.ac: Updated the version number and file NEWS
+
+2007-11-12 22:38  tan2
+
+    * module/Exchanger/Makefile.am: Added mishing header file to the
+      makefile, also avoided compiling unused code.
+
+2007-11-08 14:41  tan2
+
+    * ChangLog: Updated file ChangeLog to r8244
+                                                                                
 2007-11-08 22:31  tan2
 
 	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced a
