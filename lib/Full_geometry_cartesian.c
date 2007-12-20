@@ -85,7 +85,9 @@ void full_set_3dsphere_defaults2(struct All_variables *E)
   E->sphere.caps = 12;
   E->sphere.max_connections = 6;
 
-  offset = 10.0/180.0*M_PI;
+  /* adjust the corner coordinates so that the size (surface area) of
+     each cap is about the same. */
+  offset = 9.736/180.0*M_PI;
 
   for (i=1;i<=4;i++)  {
     E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
