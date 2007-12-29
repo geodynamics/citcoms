@@ -1141,7 +1141,10 @@ void open_qfiles(struct All_variables *E) /* additional heat
       sprintf(output_file,"%s/qt.dat", E->control.data_dir);
     else
       sprintf(output_file,"%s.qt.dat", E->control.data_file);
-    E->output.fpqt = output_open(output_file, "w");
+    if(E->control.restart)
+      E->output.fpqt = output_open(output_file, "a"); /* append for restart */
+    else
+      E->output.fpqt = output_open(output_file, "w");
   }else{
     E->output.fpqt = NULL;
   }
@@ -1151,7 +1154,10 @@ void open_qfiles(struct All_variables *E) /* additional heat
       sprintf(output_file,"%s/qb.dat", E->control.data_dir);
     else
       sprintf(output_file,"%s.qb.dat", E->control.data_file);
-    E->output.fpqb = output_open(output_file, "w");
+    if(E->control.restart)
+      E->output.fpqb = output_open(output_file, "a"); /* append */
+    else
+      E->output.fpqb = output_open(output_file, "w");
   }else{
     E->output.fpqb = NULL;
   }

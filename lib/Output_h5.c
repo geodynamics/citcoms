@@ -1440,26 +1440,17 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_float(input, "Ra_410", E->control.Ra_410);
     status = set_attribute_float(input, "clapeyron410", E->control.clapeyron410);
     status = set_attribute_float(input, "transT410", E->control.transT410);
-    status = set_attribute_float(input, "width410",
-                                 (E->control.inv_width410 == 0)?
-                                 E->control.inv_width410 :
-				 1.0/E->control.inv_width410);
+    status = set_attribute_float(input, "width410", E->control.width410);
 
     status = set_attribute_float(input, "Ra_670", E->control.Ra_670);
     status = set_attribute_float(input, "clapeyron670", E->control.clapeyron670);
     status = set_attribute_float(input, "transT670", E->control.transT670);
-    status = set_attribute_float(input, "width670",
-                                 (E->control.inv_width670 == 0)?
-                                 E->control.inv_width670 :
-				 1.0/E->control.inv_width670);
+    status = set_attribute_float(input, "width670", E->control.width670);
 
     status = set_attribute_float(input, "Ra_cmb", E->control.Ra_cmb);
     status = set_attribute_float(input, "clapeyroncmb", E->control.clapeyroncmb);
     status = set_attribute_float(input, "transTcmb", E->control.transTcmb);
-    status = set_attribute_float(input, "widthcmb",
-                                 (E->control.inv_widthcmb == 0)?
-                                 E->control.inv_widthcmb :
-				 1.0/E->control.inv_widthcmb);
+    status = set_attribute_float(input, "widthcmb", E->control.widthcmb);
 
     /*
      * Solver.inventory

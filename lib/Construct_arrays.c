@@ -661,7 +661,7 @@ void construct_elt_ks(E)
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
 	       if(E->BI[lev][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->mesh.NEQ[lev]);
                assert( E->BI[lev][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-               E->BI[lev][m][j]  = (double) 1.0/E->BI[lev][m][j];
+               E->BI[lev][m][j]  = (float) 1.0/E->BI[lev][m][j];
 	       }
 
     }       /* end for level */

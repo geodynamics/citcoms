@@ -1834,6 +1834,13 @@ static void write_trace_instructions(struct All_variables *E)
     fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
     fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
 
+
+    if ((E->parallel.nprocx > 1)  || (E->parallel.nprocy > 1)) {
+            fprintf(E->trace.fpt,"Sorry - Tracer code does not (yet) work if nprocx or nprocy is greater than 1\n");
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+    }
+
     if (E->trace.ic_method==0)
         {
             fprintf(E->trace.fpt,"Generating New Tracer Array\n");

@@ -229,6 +229,22 @@ void regional_node_locations(E)
     }          /* lev   */
 
 
+/*    do not need to rotate for the mesh grid for one regional problem   */
+
+
+  ro = -0.5*(M_PI/4.0)/E->lmesh.elx;
+  fo = 0.0;
+
+  E->sphere.dircos[1][1] = cos(ro)*cos(fo);
+  E->sphere.dircos[1][2] = cos(ro)*sin(fo);
+  E->sphere.dircos[1][3] = -sin(ro);
+  E->sphere.dircos[2][1] = -sin(fo);
+  E->sphere.dircos[2][2] = cos(fo);
+  E->sphere.dircos[2][3] = 0.0;
+  E->sphere.dircos[3][1] = sin(ro)*cos(fo);
+  E->sphere.dircos[3][2] = sin(ro)*sin(fo);
+  E->sphere.dircos[3][3] = cos(ro);
+
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
      regional_coord_of_cap(E,j,0);
      }
@@ -246,6 +262,12 @@ void regional_node_locations(E)
     }
     fflush(E->fp_out);
   }
+                   /* rotate the mesh to avoid two poles on mesh points */
+/*
+  for (j=1;j<=E->sphere.caps_per_proc;j++)   {
+     rotate_mesh(E,j,0);
+     }
+*/
 
   compute_angle_surf_area (E);   /* used for interpolation */
 

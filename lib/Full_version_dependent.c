@@ -126,39 +126,6 @@ void full_global_derived_values(E)
 }
 
 
-
-/* =================================================
-  rotate the mesh by a rotation matrix
- =================================================*/
-static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
-                             int m, int icap)
-{
-    int i,lev;
-    double t[4], myatan();
-
-    for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
-        for (i=1;i<=E->lmesh.NNO[lev];i++) {
-            t[0] = E->X[lev][m][1][i]*dircos[1][1]+
-                E->X[lev][m][2][i]*dircos[1][2]+
-                E->X[lev][m][3][i]*dircos[1][3];
-            t[1] = E->X[lev][m][1][i]*dircos[2][1]+
-                E->X[lev][m][2][i]*dircos[2][2]+
-                E->X[lev][m][3][i]*dircos[2][3];
-            t[2] = E->X[lev][m][1][i]*dircos[3][1]+
-                E->X[lev][m][2][i]*dircos[3][2]+
-                E->X[lev][m][3][i]*dircos[3][3];
-
-            E->X[lev][m][1][i] = t[0];
-            E->X[lev][m][2][i] = t[1];
-            E->X[lev][m][3][i] = t[2];
-            E->SX[lev][m][1][i] = acos(t[2]/E->SX[lev][m][3][i]);
-            E->SX[lev][m][2][i] = myatan(t[1],t[0]);
-        }
-    }    /* lev */
-
-    return;
-}
-
 /* =================================================
    Standard node positions including mesh refinement
 
@@ -169,7 +136,6 @@ void full_node_locations(E)
 {
   int i,j,k,ii,lev;
   double ro,dr,*rr,*RR,fo;
-  double dircos[4][4];
   float tt1;
   int step,nn;
   char output_file[255], a[255];
@@ -243,53 +209,29 @@ void full_node_locations(E)
   free ((void *) rr);
   free ((void *) RR);
 
+  ro = -0.5*(M_PI/4.0)/E->mesh.elx;
+  fo = 0.0;
+
+  E->sphere.dircos[1][1] = cos(ro)*cos(fo);
+  E->sphere.dircos[1][2] = cos(ro)*sin(fo);
+  E->sphere.dircos[1][3] = -sin(ro);
+  E->sphere.dircos[2][1] = -sin(fo);
+  E->sphere.dircos[2][2] = cos(fo);
+  E->sphere.dircos[2][3] = 0.0;
+  E->sphere.dircos[3][1] = sin(ro)*cos(fo);
+  E->sphere.dircos[3][2] = sin(ro)*sin(fo);
+  E->sphere.dircos[3][3] = cos(ro);
+
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
      ii = E->sphere.capid[j];
      full_coord_of_cap(E,j,ii);
      }
 
-
-  if (E->control.verbose) {
-      for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
-          fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
-          for (j=1;j<=E->sphere.caps_per_proc;j++)
-              for (i=1;i<=E->lmesh.NNO[lev];i++)
-                  if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
-      }
-      fflush(E->fp_out);
-  }
-
   /* rotate the mesh to avoid two poles on mesh points */
-
-  ro = -0.5*(M_PI/4.0)/E->mesh.elx;
-  fo = 0.0;
-
-  dircos[1][1] = cos(ro)*cos(fo);
-  dircos[1][2] = cos(ro)*sin(fo);
-  dircos[1][3] = -sin(ro);
-  dircos[2][1] = -sin(fo);
-  dircos[2][2] = cos(fo);
-  dircos[2][3] = 0.0;
-  dircos[3][1] = sin(ro)*cos(fo);
-  dircos[3][2] = sin(ro)*sin(fo);
-  dircos[3][3] = cos(ro);
-
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
      ii = E->sphere.capid[j];
-     full_rotate_mesh(E,dircos,j,ii);
+     rotate_mesh(E,j,ii);
      }
-
-  if (E->control.verbose) {
-      for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
-          fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
-          for (j=1;j<=E->sphere.caps_per_proc;j++)
-              for (i=1;i<=E->lmesh.NNO[lev];i++)
-                  if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
-      }
-      fflush(E->fp_out);
-  }
 
   compute_angle_surf_area (E);   /* used for interpolation */
 
@@ -301,6 +243,22 @@ void full_node_locations(E)
         E->SinCos[lev][j][2][i] = cos(E->SX[lev][j][1][i]);
         E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]);
         }
+
+  /*
+if (E->control.verbose) {
+  for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
+    fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+      for (i=1;i<=E->lmesh.NNO[lev];i++)
+        if(i%E->lmesh.NOZ[lev]==1)
+             fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
+      }
+  fflush(E->fp_out);
+}
+  */
+
+
+
   return;
 }
 
