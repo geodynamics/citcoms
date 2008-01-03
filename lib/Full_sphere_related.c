@@ -25,6 +25,8 @@
  * 
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+
 /* Functions relating to the building and use of mesh locations ... */
 
 
@@ -33,40 +35,180 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void full_coord_of_cap(E,m,icap)
-   struct All_variables *E;
-   int icap,m;
-  {
 
-  int i,j,k,lev,temp,elx,ely,nox,noy,noz,node,nodes;
-  int lelx,lely,lnox,lnoy,lnoz;
-  double x[5],y[5],z[5],xx[5],yy[5],zz[5];
-  double *theta1,*fi1,*theta2,*fi2,*theta,*fi,*SX[2];
+/**************************************************************/
+/* This function transforms theta and phi to new coords       */
+/* u and v using gnomonic projection.                         */
+/* See http://mathworld.wolfram.com/GnomonicProjection.html   */
+
+void spherical_to_uv2(double center[2], int len,
+                      double *theta, double *phi,
+                      double *u, double *v)
+{
+    double theta_f, phi_f;
+    double cos_tf, sin_tf;
+    double cosc, cost, sint, cosp2, sinp2;
+    int i;
+
+    /* theta_f and phi_f are the reference points at the midpoint of the cap */
+
+    theta_f = center[0];
+    phi_f = center[1];
+
+    cos_tf = cos(theta_f);
+    sin_tf = sin(theta_f);
+
+    for(i=0; i<len; i++) {
+        cost = cos(theta[i]);
+        sint = sin(theta[i]);
+
+        cosp2 = cos(phi[i] - phi_f);
+        sinp2 = sin(phi[i] - phi_f);
+
+        cosc = cos_tf * cost + sin_tf * sint * cosp2;
+        cosc = 1.0 / cosc;
+
+        u[i] = sint * sinp2 * cosc;
+        v[i] = (sin_tf * cost - cos_tf * sint * cosp2) * cosc;
+    }
+    return;
+}
+
+
+/**************************************************************/
+/* This function transforms u and v to spherical coord        */
+/* theta and phi using inverse gnomonic projection.           */
+/* See http://mathworld.wolfram.com/GnomonicProjection.html   */
+
+void uv_to_spherical(double center[2], int len,
+                     double *u, double *v,
+                     double *theta, double *phi)
+{
+    double theta_f, phi_f, cos_tf, sin_tf;
+    double x, y, r, c;
+    double cosc, sinc;
+    int i;
+
+    /* theta_f and phi_f are the reference points at the midpoint of the cap */
+
+    theta_f = center[0];
+    phi_f = center[1];
+
+    cos_tf = cos(theta_f);
+    sin_tf = sin(theta_f);
+
+    for(i=0; i<len; i++) {
+        x = u[i];
+        y = v[i];
+        r = sqrt(x*x + y*y);
+
+        /* special case: r=0, then (u,v) is the reference point */
+        if(r == 0) {
+            theta[i] = theta_f;
+            phi[i] = phi_f;
+            continue;
+        }
+
+        /* c = atan(r); cosc = cos(c); sinc = sin(c);*/
+        cosc = 1.0 / sqrt(1 + r*r);
+        sinc = sqrt(1 - cosc*cosc);
+
+        theta[i] = acos(cosc * cos_tf +
+                        y * sinc * sin_tf / r);
+        phi[i] = phi_f + atan(x * sinc /
+                              (r * sin_tf * cosc - y * cos_tf * sinc));
+    }
+    return;
+}
+
+
+/* Find the intersection point of two lines    */
+/* The lines are: (x[0], y[0]) to (x[1], y[1]) */
+/*                (x[2], y[2]) to (x[3], y[3]) */
+/* If found, the intersection point is stored  */
+/*           in (px, py) and return 1          */
+/* If not found, return 0                      */
+
+static int find_intersection(double *x, double *y,
+                             double *px, double *py)
+{
+    double a1, b1, c1;
+    double a2, b2, c2;
+    double denom;
+
+    a1 = y[1] - y[0];
+    b1 = x[0] - x[1];
+    c1 = x[1]*y[0] - x[0]*y[1];
+
+    a2 = y[3] - y[2];
+    b2 = x[2] - x[3];
+    c2 = x[3]*y[2] - x[2]*y[3];
+
+    denom = a1*b2 - a2*b1;
+    if (denom == 0) return 0; /* the lines are parallel! */
+
+    *px = (b1*c2 - b2*c1)/denom;
+    *py = (a2*c1 - a1*c2)/denom;
+    return 1;
+}
+
+
+void full_coord_of_cap(struct All_variables *E, int m, int icap)
+{
+  int i, j, k, lev, temp, elx, ely, nox, noy, noz;
+  int node, snode;
+  int lelx, lely, lnox, lnoy, lnoz;
+  int ok;
+  double x[5], y[5], z[5], referencep[2];
+  double *theta0, *fi0;
+  double *tt1,  *tt2, *tt3, *tt4, *ff1, *ff2, *ff3, *ff4;
+  double *u1, *u2, *u3, *u4, *v1, *v2, *v3, *v4;
+  double *px, *py, *qx, *qy;
+  double theta, fi, cost, sint, cosf, sinf;
+  double a, b;
   double myatan();
 
   void even_divide_arc12();
 
   temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
-  theta1 = (double *)malloc((temp+1)*sizeof(double));
-  fi1    = (double *)malloc((temp+1)*sizeof(double));
-  theta2 = (double *)malloc((temp+1)*sizeof(double));
-  fi2    = (double *)malloc((temp+1)*sizeof(double));
-  theta  = (double *)malloc((temp+1)*sizeof(double));
-  fi     = (double *)malloc((temp+1)*sizeof(double));
+  theta0 = (double *)malloc((temp+1)*sizeof(double));
+  fi0    = (double *)malloc((temp+1)*sizeof(double));
 
-  temp = E->mesh.NOY[E->mesh.levmax]*E->mesh.NOX[E->mesh.levmax]; /* allocate enough for the entire cap */
+  tt1    = (double *)malloc((temp+1)*sizeof(double));
+  tt2    = (double *)malloc((temp+1)*sizeof(double));
+  tt3    = (double *)malloc((temp+1)*sizeof(double));
+  tt4    = (double *)malloc((temp+1)*sizeof(double));
 
-  SX[0]  = (double *)malloc((temp+1)*sizeof(double));
-  SX[1]  = (double *)malloc((temp+1)*sizeof(double));
+  ff1    = (double *)malloc((temp+1)*sizeof(double));
+  ff2    = (double *)malloc((temp+1)*sizeof(double));
+  ff3    = (double *)malloc((temp+1)*sizeof(double));
+  ff4    = (double *)malloc((temp+1)*sizeof(double));
 
+  u1     = (double *)malloc((temp+1)*sizeof(double));
+  u2     = (double *)malloc((temp+1)*sizeof(double));
+  u3     = (double *)malloc((temp+1)*sizeof(double));
+  u4     = (double *)malloc((temp+1)*sizeof(double));
+
+  v1     = (double *)malloc((temp+1)*sizeof(double));
+  v2     = (double *)malloc((temp+1)*sizeof(double));
+  v3     = (double *)malloc((temp+1)*sizeof(double));
+  v4     = (double *)malloc((temp+1)*sizeof(double));
+
+  temp = E->mesh.NOY[E->mesh.levmax] * E->mesh.NOX[E->mesh.levmax];
+  px = malloc((temp+1)*sizeof(double));
+  py = malloc((temp+1)*sizeof(double));
+  qx = malloc((temp+1)*sizeof(double));
+  qy = malloc((temp+1)*sizeof(double));
+
+  /* 4 corners of the cap */
   for (i=1;i<=4;i++)    {
      x[i] = sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
      y[i] = sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
      z[i] = cos(E->sphere.cap[icap].theta[i]);
-     }
-  
-  for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
+  }
+
+  for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
 
      elx = E->lmesh.ELX[lev]*E->parallel.nprocx;
      ely = E->lmesh.ELY[lev]*E->parallel.nprocy;
@@ -78,67 +220,176 @@ void full_coord_of_cap(E,m,icap)
      lnox = lelx+1;
      lnoy = lely+1;
      lnoz = E->lmesh.NOZ[lev];
-        /* evenly divide arc linking 1 and 2, and the arc linking 4 and 3 */
 
-     even_divide_arc12(elx,x[1],y[1],z[1],x[2],y[2],z[2],theta1,fi1);
-     even_divide_arc12(elx,x[4],y[4],z[4],x[3],y[3],z[3],theta2,fi2);
+     /* evenly divide arc linking 1 and 2 */
+     even_divide_arc12(elx,x[1],y[1],z[1],x[2],y[2],z[2],theta0,fi0);
 
-     for (j=1;j<=nox;j++)   {
+     /* pick up only points within this processor */
+     for (j=0, i=E->lmesh.nxs; j<lnox; j++, i++) {
+         tt1[j] = theta0[i];
+         ff1[j] = fi0[i];
+     }
 
-         /* pick up the two ends  */
-        xx[1] = sin(theta1[j])*cos(fi1[j]);
-        yy[1] = sin(theta1[j])*sin(fi1[j]);
-        zz[1] = cos(theta1[j]);
-        xx[2] = sin(theta2[j])*cos(fi2[j]);
-        yy[2] = sin(theta2[j])*sin(fi2[j]);
-        zz[2] = cos(theta2[j]);
+     /* evenly divide arc linking 4 and 3 */
+     even_divide_arc12(elx,x[4],y[4],z[4],x[3],y[3],z[3],theta0,fi0);
 
+     /* pick up only points within this processor */
+     for (j=0, i=E->lmesh.nxs; j<lnox; j++, i++) {
+         tt2[j] = theta0[i];
+         ff2[j] = fi0[i];
+     }
 
-        even_divide_arc12(ely,xx[1],yy[1],zz[1],xx[2],yy[2],zz[2],theta,fi);
+     /* evenly divide arc linking 1 and 4 */
+     even_divide_arc12(ely,x[1],y[1],z[1],x[4],y[4],z[4],theta0,fi0);
 
-        for (k=1;k<=noy;k++)   {
-           nodes = j + (k-1)*nox;
-           SX[0][nodes] = theta[k];
-           SX[1][nodes] = fi[k];
-           }
+     /* pick up only points within this processor */
+     for (k=0, i=E->lmesh.nys; k<lnoy; k++, i++) {
+         tt3[k] = theta0[i];
+         ff3[k] = fi0[i];
+     }
 
+     /* evenly divide arc linking 2 and 3 */
+     even_divide_arc12(ely,x[2],y[2],z[2],x[3],y[3],z[3],theta0,fi0);
 
-        }       /* end for j */
+     /* pick up only points within this processor */
+     for (k=0, i=E->lmesh.nys; k<lnoy; k++, i++) {
+         tt4[k] = theta0[i];
+         ff4[k] = fi0[i];
+     }
 
-                /* get the coordinates for the entire cap  */
+     /* compute the intersection point of these great circles */
+     /* the point is first found in u-v space and project back */
+     /* to theta-phi space later */
 
-        for (j=1;j<=lnox;j++)
-          for (k=1;k<=lnoy;k++)          {
-             nodes = (j+(E->lmesh.NXS[lev]-1))+(k-1+(E->lmesh.NYS[lev]-1))*nox;
-             for (i=1;i<=lnoz;i++)          {
-                node = i + (j-1)*lnoz + (k-1)*lnox*lnoz;
+     referencep[0] = E->sphere.cap[icap].theta[2];
+     referencep[1] = E->sphere.cap[icap].fi[2];
 
-                     /*   theta,fi,and r coordinates   */
-                E->SX[lev][m][1][node] = SX[0][nodes];
-                E->SX[lev][m][2][node] = SX[1][nodes];
-                E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+     spherical_to_uv2(referencep, lnox, tt1, ff1, u1, v1);
+     spherical_to_uv2(referencep, lnox, tt2, ff2, u2, v2);
+     spherical_to_uv2(referencep, lnoy, tt3, ff3, u3, v3);
+     spherical_to_uv2(referencep, lnoy, tt4, ff4, u4, v4);
 
-                     /*   x,y,and z oordinates   */
-                E->X[lev][m][1][node] = 
-                            E->sphere.R[lev][i]*sin(SX[0][nodes])*cos(SX[1][nodes]);
-                E->X[lev][m][2][node] = 
-                            E->sphere.R[lev][i]*sin(SX[0][nodes])*sin(SX[1][nodes]);
-                E->X[lev][m][3][node] = 
-                            E->sphere.R[lev][i]*cos(SX[0][nodes]);
-                }
+     snode = 0;
+     for(k=0; k<lnoy; k++) {
+         x[2] = u3[k];
+         y[2] = v3[k];
+
+         x[3] = u4[k];
+         y[3] = v4[k];
+
+         for(j=0; j<lnox; j++) {
+             x[0] = u1[j];
+             y[0] = v1[j];
+
+             x[1] = u2[j];
+             y[1] = v2[j];
+
+             ok = find_intersection(x, y, &a, &b);
+             if(!ok) {
+                 fprintf(stderr, "Error(Full_coord_of_cap): cannot find intersection point!\n");
+                 exit(10);
              }
 
-     }       /* end for lev */
+             px[snode] = a;
+             py[snode] = b;
+             snode++;
+         }
+     }
 
-  free ((void *)SX[0]);
-  free ((void *)SX[1]);
-  free ((void *)theta );
-  free ((void *)theta1);
-  free ((void *)theta2);
-  free ((void *)fi    );
-  free ((void *)fi1   );
-  free ((void *)fi2   );
+     uv_to_spherical(referencep, snode, px, py, qx, qy);
+
+     /* replace (qx, qy) by (tt?, ff?) for points on the edge */
+     if(E->parallel.me_loc[2] == 0) {
+         /* x boundary */
+         for(k=0; k<lnox; k++) {
+             i = k;
+             qx[i] = tt1[k];
+             qy[i] = ff1[k];
+         }
+     }
+
+     if(E->parallel.me_loc[2] == E->parallel.nprocy-1) {
+         /* x boundary */
+         for(k=0; k<lnox; k++) {
+             i = k + (lnoy - 1) * lnox;
+             qx[i] = tt2[k];
+             qy[i] = ff2[k];
+         }
+     }
+
+     if(E->parallel.me_loc[1] == 0) {
+         /* y boundary */
+         for(k=0; k<lnoy; k++) {
+             i = k * lnox;
+             qx[i] = tt3[k];
+             qy[i] = ff3[k];
+         }
+     }
+
+     if(E->parallel.me_loc[1] == E->parallel.nprocx-1) {
+         /* y boundary */
+         for(k=0; k<lnoy; k++) {
+             i = (k + 1) * lnox - 1;
+             qx[i] = tt4[k];
+             qy[i] = ff4[k];
+         }
+     }
+
+     /* store the node location in spherical and cartesian coordinates */
+     for (k=0; k<snode; k++) {
+         theta = qx[k];
+         fi = qy[k];
+
+         cost = cos(theta);
+         sint = sin(theta);
+         cosf = cos(fi);
+         sinf = sin(fi);
+
+         for (i=1; i<=lnoz; i++) {
+             node = i + k*lnoz;
+
+             /*   theta,fi,and r coordinates   */
+             E->SX[lev][m][1][node] = theta;
+             E->SX[lev][m][2][node] = fi;
+             E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+
+             /*   x,y,and z oordinates   */
+             E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
+             E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
+             E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
+         }
+     }
+
+  } /* end for lev */
+
+  free ((void *)theta0);
+  free ((void *)fi0   );
+
+  free ((void *)tt1   );
+  free ((void *)tt2   );
+  free ((void *)tt3   );
+  free ((void *)tt4   );
+
+  free ((void *)ff1   );
+  free ((void *)ff2   );
+  free ((void *)ff3   );
+  free ((void *)ff4   );
+
+  free ((void *)u1    );
+  free ((void *)u2    );
+  free ((void *)u3    );
+  free ((void *)u4    );
+
+  free ((void *)v1    );
+  free ((void *)v2    );
+  free ((void *)v3    );
+  free ((void *)v4    );
+
+  free ((void *)px    );
+  free ((void *)py    );
+  free ((void *)qx    );
+  free ((void *)qy    );
 
   return;
-  }
+}
 
