@@ -29,7 +29,6 @@
 
 /* Functions relating to the building and use of mesh locations ... */
 
-
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
@@ -50,7 +49,7 @@ void spherical_to_uv2(double center[2], int len,
     double cosc, cost, sint, cosp2, sinp2;
     int i;
 
-    /* theta_f and phi_f are the reference points at the midpoint of the cap */
+    /* theta_f and phi_f are the reference points of the cap */
 
     theta_f = center[0];
     phi_f = center[1];
@@ -159,7 +158,8 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   int node, snode;
   int lelx, lely, lnox, lnoy, lnoz;
   int ok;
-  double x[5], y[5], z[5], referencep[2];
+  double x[5], y[5], z[5], center[3], referencep[2];
+  double xx[5], yy[5];
   double *theta0, *fi0;
   double *tt1,  *tt2, *tt3, *tt4, *ff1, *ff2, *ff3, *ff4;
   double *u1, *u2, *u3, *u4, *v1, *v2, *v3, *v4;
@@ -170,7 +170,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 
   void even_divide_arc12();
 
-  temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
+  temp = max(E->mesh.noy, E->mesh.nox);
 
   theta0 = (double *)malloc((temp+1)*sizeof(double));
   fi0    = (double *)malloc((temp+1)*sizeof(double));
@@ -195,33 +195,53 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   v3     = (double *)malloc((temp+1)*sizeof(double));
   v4     = (double *)malloc((temp+1)*sizeof(double));
 
-  temp = E->mesh.NOY[E->mesh.levmax] * E->mesh.NOX[E->mesh.levmax];
+  temp = E->mesh.noy * E->mesh.nox;
   px = malloc((temp+1)*sizeof(double));
   py = malloc((temp+1)*sizeof(double));
   qx = malloc((temp+1)*sizeof(double));
   qy = malloc((temp+1)*sizeof(double));
 
-  /* 4 corners of the cap */
+  /* 4 corners of the cap in Cartesian coordinates */
+  /* the order of corners is: */
+  /*  1 - 4 */
+  /*  |   | */
+  /*  2 - 3 */
+  center[0] = center[1] = center[2] = 0;
   for (i=1;i<=4;i++)    {
      x[i] = sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
      y[i] = sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
      z[i] = cos(E->sphere.cap[icap].theta[i]);
+     center[0] += x[i];
+     center[1] += y[i];
+     center[2] += z[i];
   }
+  center[0] *= 0.25;
+  center[1] *= 0.25;
+  center[2] *= 0.25;
+
+  /* use the center as the reference point for gnomonic projection */
+  referencep[0] = acos(center[2] /
+                       sqrt(center[0]*center[0] +
+                            center[1]*center[1] +
+                            center[2]*center[2]));;
+  referencep[1] = myatan(center[1], center[0]);
 
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
 
+     /* # of elements/nodes per cap */
      elx = E->lmesh.ELX[lev]*E->parallel.nprocx;
      ely = E->lmesh.ELY[lev]*E->parallel.nprocy;
      nox = elx+1;
      noy = ely+1;
 
+     /* # of elements/nodes per processor */
      lelx = E->lmesh.ELX[lev];
      lely = E->lmesh.ELY[lev];
      lnox = lelx+1;
      lnoy = lely+1;
      lnoz = E->lmesh.NOZ[lev];
 
-     /* evenly divide arc linking 1 and 2 */
+     /* evenly divide arc linking corner 1 and 2 */
      even_divide_arc12(elx,x[1],y[1],z[1],x[2],y[2],z[2],theta0,fi0);
 
      /* pick up only points within this processor */
@@ -230,7 +250,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
          ff1[j] = fi0[i];
      }
 
-     /* evenly divide arc linking 4 and 3 */
+     /* evenly divide arc linking corner 4 and 3 */
      even_divide_arc12(elx,x[4],y[4],z[4],x[3],y[3],z[3],theta0,fi0);
 
      /* pick up only points within this processor */
@@ -239,7 +259,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
          ff2[j] = fi0[i];
      }
 
-     /* evenly divide arc linking 1 and 4 */
+     /* evenly divide arc linking corner 1 and 4 */
      even_divide_arc12(ely,x[1],y[1],z[1],x[4],y[4],z[4],theta0,fi0);
 
      /* pick up only points within this processor */
@@ -248,7 +268,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
          ff3[k] = fi0[i];
      }
 
-     /* evenly divide arc linking 2 and 3 */
+     /* evenly divide arc linking corner 2 and 3 */
      even_divide_arc12(ely,x[2],y[2],z[2],x[3],y[3],z[3],theta0,fi0);
 
      /* pick up only points within this processor */
@@ -261,9 +281,6 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
      /* the point is first found in u-v space and project back */
      /* to theta-phi space later */
 
-     referencep[0] = E->sphere.cap[icap].theta[2];
-     referencep[1] = E->sphere.cap[icap].fi[2];
-
      spherical_to_uv2(referencep, lnox, tt1, ff1, u1, v1);
      spherical_to_uv2(referencep, lnox, tt2, ff2, u2, v2);
      spherical_to_uv2(referencep, lnoy, tt3, ff3, u3, v3);
@@ -271,22 +288,24 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 
      snode = 0;
      for(k=0; k<lnoy; k++) {
-         x[2] = u3[k];
-         y[2] = v3[k];
+         xx[2] = u3[k];
+         yy[2] = v3[k];
 
-         x[3] = u4[k];
-         y[3] = v4[k];
+         xx[3] = u4[k];
+         yy[3] = v4[k];
 
          for(j=0; j<lnox; j++) {
-             x[0] = u1[j];
-             y[0] = v1[j];
+             xx[0] = u1[j];
+             yy[0] = v1[j];
 
-             x[1] = u2[j];
-             y[1] = v2[j];
+             xx[1] = u2[j];
+             yy[1] = v2[j];
 
              ok = find_intersection(x, y, &a, &b);
              if(!ok) {
-                 fprintf(stderr, "Error(Full_coord_of_cap): cannot find intersection point!\n");
+                 fprintf(stderr, "Error(Full_coord_of_cap): cannot find intersection point! rank=%d, nx=%d, ny=%d\n", E->parallel.me, j, k);
+		 fprintf(stderr, "L1: (%g, %g)-(%g, %g)  L2 (%g, %g)-(%g, %g)\n",
+                         xx[0],yy[0],xx[1],yy[1],xx[2],yy[2],xx[3],yy[3]);
                  exit(10);
              }
 
