@@ -301,7 +301,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
              xx[1] = u2[j];
              yy[1] = v2[j];
 
-             ok = find_intersection(x, y, &a, &b);
+             ok = find_intersection(xx, yy, &a, &b);
              if(!ok) {
                  fprintf(stderr, "Error(Full_coord_of_cap): cannot find intersection point! rank=%d, nx=%d, ny=%d\n", E->parallel.me, j, k);
 		 fprintf(stderr, "L1: (%g, %g)-(%g, %g)  L2 (%g, %g)-(%g, %g)\n",
