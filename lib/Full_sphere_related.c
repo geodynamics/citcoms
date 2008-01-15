@@ -155,8 +155,9 @@ static int find_intersection(double *x, double *y,
 void full_coord_of_cap(struct All_variables *E, int m, int icap)
 {
   int i, j, k, lev, temp, elx, ely, nox, noy, noz;
-  int node, snode;
-  int lelx, lely, lnox, lnoy, lnoz;
+  int node, snode, ns, step;
+  int lelx, lely, lnox, lnoy;
+  int lvnox, lvnoy, lvnoz;
   int ok;
   double x[5], y[5], z[5], center[3], referencep[2];
   double xx[5], yy[5];
@@ -226,7 +227,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
                             center[2]*center[2]));;
   referencep[1] = myatan(center[1], center[0]);
 
-  for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
+  lev = E->mesh.levmax;
 
      /* # of elements/nodes per cap */
      elx = E->lmesh.ELX[lev]*E->parallel.nprocx;
@@ -239,7 +240,6 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
      lely = E->lmesh.ELY[lev];
      lnox = lelx+1;
      lnoy = lely+1;
-     lnoz = E->lmesh.NOZ[lev];
 
      /* evenly divide arc linking corner 1 and 2 */
      even_divide_arc12(elx,x[1],y[1],z[1],x[2],y[2],z[2],theta0,fi0);
@@ -301,7 +301,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
              xx[1] = u2[j];
              yy[1] = v2[j];
 
-             ok = find_intersection(x, y, &a, &b);
+             ok = find_intersection(xx, yy, &a, &b);
              if(!ok) {
                  fprintf(stderr, "Error(Full_coord_of_cap): cannot find intersection point! rank=%d, nx=%d, ny=%d\n", E->parallel.me, j, k);
 		 fprintf(stderr, "L1: (%g, %g)-(%g, %g)  L2 (%g, %g)-(%g, %g)\n",
@@ -354,31 +354,41 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
          }
      }
 
-     /* store the node location in spherical and cartesian coordinates */
-     for (k=0; k<snode; k++) {
-         theta = qx[k];
-         fi = qy[k];
 
-         cost = cos(theta);
-         sint = sin(theta);
-         cosf = cos(fi);
-         sinf = sin(fi);
 
-         for (i=1; i<=lnoz; i++) {
-             node = i + k*lnoz;
+   for (lev=E->mesh.levmax, step=1; lev>=E->mesh.levmin; lev--, step*=2) {
+      /* store the node location in spherical and cartesian coordinates */
 
-             /*   theta,fi,and r coordinates   */
-             E->SX[lev][m][1][node] = theta;
-             E->SX[lev][m][2][node] = fi;
-             E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+      lvnox = E->lmesh.NOX[lev];
+      lvnoy = E->lmesh.NOY[lev];
+      lvnoz = E->lmesh.NOZ[lev];
 
-             /*   x,y,and z oordinates   */
-             E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
-             E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
-             E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
-         }
-     }
+      node = 1;
+      for (k=0; k<lvnoy; k++) {
+          for (j=0, ns=step*lnoy*k; j<lvnox; j++, ns+=step) {
+              theta = qx[ns];
+              fi = qy[ns];
 
+              cost = cos(theta);
+              sint = sin(theta);
+              cosf = cos(fi);
+              sinf = sin(fi);
+
+              for (i=1; i<=lvnoz; i++) {
+                  /*   theta,fi,and r coordinates   */
+                  E->SX[lev][m][1][node] = theta;
+                  E->SX[lev][m][2][node] = fi;
+                  E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+
+                  /*   x,y,and z oordinates   */
+                  E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
+                  E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
+                  E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
+
+                  node++;
+              }
+          }
+      }
   } /* end for lev */
 
   free ((void *)theta0);
