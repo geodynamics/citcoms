@@ -63,8 +63,6 @@ void regional_tracer_setup(struct All_variables *E)
 
     char output_file[255];
     void get_neighboring_caps();
-    double CPU_time0();
-    double begin_time = CPU_time0();
 
     /* Some error control */
 
@@ -143,9 +141,6 @@ void regional_tracer_setup(struct All_variables *E)
 
     if (E->composition.on)
         composition_setup(E);
-
-    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
-            CPU_time0() - begin_time);
 
     return;
 }
@@ -620,8 +615,6 @@ void regional_lost_souls(struct All_variables *E)
     MPI_Status status[4];
     MPI_Request request[4];
 
-    double CPU_time0();
-    double begin_time = CPU_time0();
 
     E->trace.istat_isend = E->trace.ilater[j];
 
@@ -885,7 +878,6 @@ void regional_lost_souls(struct All_variables *E)
     free(send[0]);
     free(send[1]);
 
-    E->trace.lost_souls_time += CPU_time0() - begin_time;
     return;
 }
 

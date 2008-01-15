@@ -654,13 +654,6 @@ struct COMPOSITION {
 };
 
 
-struct GNOMONIC {
-    /* gnomonic projected coordinate */
-    double u;
-    double v;
-};
-
-
 #ifdef USE_HDF5
 #include "hdf5_related.h"
 #endif
@@ -697,8 +690,6 @@ struct All_variables {
 
     /* for chemical convection & composition rheology */
     struct COMPOSITION composition;
-
-    struct GNOMONIC *gnomonic;
 
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */

@@ -82,13 +82,6 @@ struct TRACE{
     int istat_elements_checked;
     int ilast_tracer_count;
 
-
-    /* timing information */
-    double advection_time;
-    double find_tracers_time;
-    double lost_souls_time;
-
-
     /* Mesh information */
     double xcap[13][5];
     double ycap[13][5];
@@ -123,6 +116,9 @@ struct TRACE{
     int *regtoel[13][5];
 
     /* gnomonic shape functions */
+    double *UV[13][3];
+    double cos_theta_f;
+    double sin_theta_f;
     double *shape_coefs[13][3][10];
 
 
