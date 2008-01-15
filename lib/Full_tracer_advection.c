@@ -129,6 +129,8 @@ void full_tracer_setup(struct All_variables *E)
     char output_file[200];
     void get_neighboring_caps();
     void analytical_test();
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
     /* Some error control */
 
@@ -201,7 +203,7 @@ void full_tracer_setup(struct All_variables *E)
     write_trace_instructions(E);
 
 
-    /* Gnometric projection for velocity interpolation */
+    /* Gnometric projection for velocity interpolation and find elements */
     define_uv_space(E);
     determine_shape_coefficients(E);
 
@@ -222,6 +224,9 @@ void full_tracer_setup(struct All_variables *E)
 
     if (E->composition.on)
         composition_setup(E);
+
+    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
+            CPU_time0() - begin_time);
 
     return;
 }
@@ -285,6 +290,9 @@ void full_lost_souls(struct All_variables *E)
 
     void expand_tracer_arrays();
     int icheck_that_processor_shell();
+
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
     int number_of_caps=12;
     int lev=E->mesh.levmax;
@@ -764,6 +772,7 @@ void full_lost_souls(struct All_variables *E)
       fflush(E->trace.fpt);
     }
 
+    E->trace.lost_souls_time += CPU_time0() - begin_time;
     return;
 }
 
@@ -837,8 +846,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 }
 
 
-/******** GET VELOCITY ***************************************/
-/********************** GNOMONIC INTERPOLATION *******************************/
+/************************ GET VELOCITY ***************************************/
 /*                                                                           */
 /* This function interpolates tracer velocity using gnominic interpolation.  */
 /* Real theta,phi,rad space is transformed into u,v space. This transformation */
@@ -851,7 +859,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 /* to obtain). It was tested that nodal configuration is indeed transformed  */
 /* into straight lines.                                                      */
 /* The transformations require a reference point along each cap. Here, the   */
-/* midpoint is used.                                                         */
+/* first point is used.                                                      */
 /* Radial and azimuthal shape functions are decoupled. First find the shape  */
 /* functions associated with the 2D surface plane, then apply radial shape   */
 /* functions.                                                                */
@@ -878,7 +886,7 @@ void full_get_velocity(struct All_variables *E,
                        double *velocity_vector)
 {
     int iwedge,inum;
-    int kk;
+    int i, kk;
     int ival;
     int itry;
     int sphere_key = 0;
@@ -938,8 +946,10 @@ void full_get_velocity(struct All_variables *E,
                     fprintf(E->trace.fpt,"shape %f %f %f\n",shape2d[1],shape2d[2],shape2d[3]);
                     fprintf(E->trace.fpt,"u %f v %f element: %d \n",u,v, nelem);
                     fprintf(E->trace.fpt,"Element uv boundaries: \n");
-                    for(kk=1;kk<=4;kk++)
-                        fprintf(E->trace.fpt,"%d: U: %f V:%f\n",kk,E->trace.UV[j][1][E->ien[j][nelem].node[kk]],E->trace.UV[j][2][E->ien[j][nelem].node[kk]]);
+                    for(kk=1;kk<=4;kk++) {
+                        i = (E->ien[j][nelem].node[kk] - 1) / E->lmesh.noz + 1;
+                        fprintf(E->trace.fpt,"%d: U: %f V:%f\n",kk,E->gnomonic[i].u,E->gnomonic[i].v);
+                    }
                     fprintf(E->trace.fpt,"theta: %f phi: %f rad: %f\n",theta,phi,rad);
                     fprintf(E->trace.fpt,"Element theta-phi boundaries: \n");
                     for(kk=1;kk<=4;kk++)
@@ -1058,28 +1068,30 @@ static void get_2dshape(struct All_variables *E,
 {
 
     double a0,a1,a2;
+    /* convert nelem to surface element number */
+    int n = (nelem - 1) / E->lmesh.elz + 1;
 
     /* shape function 1 */
 
-    a0=E->trace.shape_coefs[j][iwedge][1][nelem];
-    a1=E->trace.shape_coefs[j][iwedge][2][nelem];
-    a2=E->trace.shape_coefs[j][iwedge][3][nelem];
+    a0=E->trace.shape_coefs[j][iwedge][1][n];
+    a1=E->trace.shape_coefs[j][iwedge][2][n];
+    a2=E->trace.shape_coefs[j][iwedge][3][n];
 
     shape2d[1]=a0+a1*u+a2*v;
 
     /* shape function 2 */
 
-    a0=E->trace.shape_coefs[j][iwedge][4][nelem];
-    a1=E->trace.shape_coefs[j][iwedge][5][nelem];
-    a2=E->trace.shape_coefs[j][iwedge][6][nelem];
+    a0=E->trace.shape_coefs[j][iwedge][4][n];
+    a1=E->trace.shape_coefs[j][iwedge][5][n];
+    a2=E->trace.shape_coefs[j][iwedge][6][n];
 
     shape2d[2]=a0+a1*u+a2*v;
 
     /* shape function 3 */
 
-    a0=E->trace.shape_coefs[j][iwedge][7][nelem];
-    a1=E->trace.shape_coefs[j][iwedge][8][nelem];
-    a2=E->trace.shape_coefs[j][iwedge][9][nelem];
+    a0=E->trace.shape_coefs[j][iwedge][7][n];
+    a1=E->trace.shape_coefs[j][iwedge][8][n];
+    a2=E->trace.shape_coefs[j][iwedge][9][n];
 
     shape2d[3]=a0+a1*u+a2*v;
 
@@ -1103,8 +1115,8 @@ static void get_radial_shape(struct All_variables *E,
     double top_bound=1.0+eps;
     double bottom_bound=0.0-eps;
 
-    node1=E->IEN[E->mesh.levmax][j][nelem].node[1];
-    node5=E->IEN[E->mesh.levmax][j][nelem].node[5];
+    node1=E->ien[j][nelem].node[1];
+    node5=E->ien[j][nelem].node[5];
 
     rad1=E->sx[j][3][node1];
     rad5=E->sx[j][3][node5];
@@ -1160,13 +1172,12 @@ static void spherical_to_uv(struct All_variables *E, int j,
     double cos_theta_f,sin_theta_f;
     double cost,sint,cosp2,sinp2;
 
-    /* theta_f and phi_f are the reference points at the midpoint of the cap */
+    /* theta_f and phi_f are the reference points at the 1st node of the cap */
 
-    theta_f=E->trace.UV[j][1][0];
-    phi_f=E->trace.UV[j][2][0];
+    phi_f = E->sx[j][2][1];
 
-    cos_theta_f=E->trace.cos_theta_f;
-    sin_theta_f=E->trace.sin_theta_f;
+    cos_theta_f = E->gnomonic[0].u;
+    sin_theta_f = E->gnomonic[0].v;
 
     cost=cos(theta);
     /*
@@ -2775,77 +2786,56 @@ static int iget_regel(struct All_variables *E, int j,
 /* This function defines nodal points as orthodrome coordinates */
 /* u and v.  In uv space, great circles form straight lines.    */
 /* This is used for interpolation method 1                      */
-/* UV[j][1][node]=u                                             */
-/* UV[j][2][node]=v                                             */
+/* E->gnomonic[node].u = u                                      */
+/* E->gnomonic[node].v = v                                      */
 
 static void define_uv_space(struct All_variables *E)
 {
+    const int j = 1;
+    const int lev = E->mesh.levmax;
+    const int refnode = 1;
+    int i, n;
 
-    int kk,j;
-    int midnode;
-    int numnodes,node;
+    double u, v, cosc, theta_f, phi_f, dphi, cosd;
+    double *cost, *sint, *cosf, *sinf;
 
-    double u,v,cosc,theta,phi;
-    double theta_f,phi_f;
+    if ((E->gnomonic = malloc((E->lmesh.nsf+1)*sizeof(struct GNOMONIC)))
+        == NULL) {
+        fprintf(stderr,"Error(define uv)-not enough memory(a)\n");
+        exit(10);
+    }
 
-    if (E->parallel.me==0) fprintf(stderr,"Setting up UV space\n");
+    sint = E->SinCos[lev][j][0];
+    sinf = E->SinCos[lev][j][1];
+    cost = E->SinCos[lev][j][2];
+    cosf = E->SinCos[lev][j][3];
 
-    numnodes=E->lmesh.nno;
+    /* uv space requires a reference point, using the 1st node */
 
-    /* open memory for uv space coords */
+    theta_f = E->sx[j][1][refnode];
+    phi_f = E->sx[j][2][refnode];
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
+    /* store cos(theta_f) and sin(theta_f) */
+    E->gnomonic[0].u = cost[refnode];
+    E->gnomonic[0].v = sint[refnode];
 
-            for (kk=1;kk<=2;kk++)
-                {
-                    //TODO: allocate for surface nodes only to save memory
-                    if ((E->trace.UV[j][kk]=(double *)malloc((numnodes+1)*sizeof(double)))==NULL)
-                        {
-                            fprintf(E->trace.fpt,"Error(define uv)-not enough memory(a)\n");
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-                }
+    /* convert each nodal point to u and v */
 
-            /* uv space requires a reference point */
-            /* UV[j][1][0]=fixed theta */
-            /* UV[j][2][0]=fixed phi */
+    for (i=1, n=1; i<=E->lmesh.nsf; i++, n+=E->lmesh.noz) {
+        dphi = E->sx[j][2][n] - phi_f;
+        cosd = cos(dphi);
+        cosc = cost[refnode] * cost[n] + sint[refnode] * sint[n] * cosd;
+        u = sint[n] * sin(dphi) / cosc;
+        v = (sint[refnode] * cost[n] - cost[refnode] * sint[n] * cosd)
+            / cosc;
 
-
-            midnode=numnodes/2;
-
-            E->trace.UV[j][1][0]=E->sx[j][1][midnode];
-            E->trace.UV[j][2][0]=E->sx[j][2][midnode];
-
-            theta_f=E->sx[j][1][midnode];
-            phi_f=E->sx[j][2][midnode];
-
-            E->trace.cos_theta_f=cos(theta_f);
-            E->trace.sin_theta_f=sin(theta_f);
-
-            /* convert each nodal point to u and v */
-
-            for (node=1;node<=numnodes;node++)
-                {
-                    theta=E->sx[j][1][node];
-                    phi=E->sx[j][2][node];
-
-                    cosc=cos(theta_f)*cos(theta)+sin(theta_f)*sin(theta)*
-                        cos(phi-phi_f);
-                    u=sin(theta)*sin(phi-phi_f)/cosc;
-                    v=(sin(theta_f)*cos(theta)-cos(theta_f)*sin(theta)*cos(phi-phi_f))/cosc;
-
-                    E->trace.UV[j][1][node]=u;
-                    E->trace.UV[j][2][node]=v;
-
-                }
-
-
-        }/*end cap */
+        E->gnomonic[i].u = u;
+        E->gnomonic[i].v = v;
+    }
 
     return;
 }
+
 
 /***************************************************************/
 /* DETERMINE SHAPE COEFFICIENTS                                */
@@ -2860,117 +2850,96 @@ static void define_uv_space(struct All_variables *E)
 
 static void determine_shape_coefficients(struct All_variables *E)
 {
+    const int j = 1;
+    int nelem, iwedge, kk, i;
+    int snode;
 
-    int j,nelem,iwedge,kk;
-    int node;
+    double u[5], v[5];
+    double x1 = 0.0;
+    double x2 = 0.0;
+    double x3 = 0.0;
+    double y1 = 0.0;
+    double y2 = 0.0;
+    double y3 = 0.0;
+    double delta, a0, a1, a2;
 
-    double u[5],v[5];
-    double x1=0.0;
-    double x2=0.0;
-    double x3=0.0;
-    double y1=0.0;
-    double y2=0.0;
-    double y3=0.0;
-    double delta,a0,a1,a2;
+    /* first, allocate memory */
 
-    /* really only have to do this for each surface element, but */
-    /* for simplicity, it is done for every element              */
+    for(iwedge=1; iwedge<=2; iwedge++) {
+        for (kk=1; kk<=9; kk++) {
+            if ((E->trace.shape_coefs[j][iwedge][kk] =
+                 (double *)malloc((E->lmesh.snel+1)*sizeof(double))) == NULL) {
+                fprintf(E->trace.fpt,"ERROR(find shape coefs)-not enough memory(a)\n");
+                fflush(E->trace.fpt);
+                exit(10);
+            }
+        }
+    }
 
-    if (E->parallel.me==0) fprintf(stderr," Determining Shape Coefficients\n");
+    for (i=1, nelem=1; i<=E->lmesh.snel; i++, nelem+=E->lmesh.elz) {
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
+        /* find u,v of local nodes at one radius  */
 
-            /* first, allocate memory */
+        for(kk=1; kk<=4; kk++) {
+            snode = (E->ien[j][nelem].node[kk]-1) / E->lmesh.noz + 1;
+            u[kk] = E->gnomonic[snode].u;
+            v[kk] = E->gnomonic[snode].v;
+        }
 
-            for(iwedge=1;iwedge<=2;iwedge++)
-                {
-                    for (kk=1;kk<=9;kk++)
-                        {
-                            //TODO: allocate for surface elements only to save memory
-                            if ((E->trace.shape_coefs[j][iwedge][kk]=
-                                 (double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL)
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(find shape coefs)-not enough memory(a)\n");
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-                        }
-                }
+        for(iwedge=1; iwedge<=2; iwedge++) {
 
-            for (nelem=1;nelem<=E->lmesh.nel;nelem++)
-                {
+            if (iwedge == 1) {
+                x1 = u[1];
+                x2 = u[2];
+                x3 = u[3];
+                y1 = v[1];
+                y2 = v[2];
+                y3 = v[3];
+            }
+            if (iwedge == 2) {
+                x1 = u[1];
+                x2 = u[3];
+                x3 = u[4];
+                y1 = v[1];
+                y2 = v[3];
+                y3 = v[4];
+            }
 
-                    /* find u,v of local nodes at one radius  */
+            /* shape function 1 */
 
-                    for(kk=1;kk<=4;kk++)
-                        {
-                            node=E->IEN[E->mesh.levmax][j][nelem].node[kk];
-                            u[kk]=E->trace.UV[j][1][node];
-                            v[kk]=E->trace.UV[j][2][node];
-                        }
+            delta = (x3-x2)*(y1-y2)-(y2-y3)*(x2-x1);
+            a0 = (x2*y3-x3*y2)/delta;
+            a1 = (y2-y3)/delta;
+            a2 = (x3-x2)/delta;
 
-                    for(iwedge=1;iwedge<=2;iwedge++)
-                        {
+            E->trace.shape_coefs[j][iwedge][1][i] = a0;
+            E->trace.shape_coefs[j][iwedge][2][i] = a1;
+            E->trace.shape_coefs[j][iwedge][3][i] = a2;
 
+            /* shape function 2 */
 
-                            if (iwedge==1)
-                                {
-                                    x1=u[1];
-                                    x2=u[2];
-                                    x3=u[3];
-                                    y1=v[1];
-                                    y2=v[2];
-                                    y3=v[3];
-                                }
-                            if (iwedge==2)
-                                {
-                                    x1=u[1];
-                                    x2=u[3];
-                                    x3=u[4];
-                                    y1=v[1];
-                                    y2=v[3];
-                                    y3=v[4];
-                                }
+            delta = (x3-x1)*(y2-y1)-(y1-y3)*(x1-x2);
+            a0 = (x1*y3-x3*y1)/delta;
+            a1 = (y1-y3)/delta;
+            a2 = (x3-x1)/delta;
 
-                            /* shape function 1 */
+            E->trace.shape_coefs[j][iwedge][4][i] = a0;
+            E->trace.shape_coefs[j][iwedge][5][i] = a1;
+            E->trace.shape_coefs[j][iwedge][6][i] = a2;
 
-                            delta=(x3-x2)*(y1-y2)-(y2-y3)*(x2-x1);
-                            a0=(x2*y3-x3*y2)/delta;
-                            a1=(y2-y3)/delta;
-                            a2=(x3-x2)/delta;
+            /* shape function 3 */
 
-                            E->trace.shape_coefs[j][iwedge][1][nelem]=a0;
-                            E->trace.shape_coefs[j][iwedge][2][nelem]=a1;
-                            E->trace.shape_coefs[j][iwedge][3][nelem]=a2;
+            delta = (x1-x2)*(y3-y2)-(y2-y1)*(x2-x3);
+            a0 = (x2*y1-x1*y2)/delta;
+            a1 = (y2-y1)/delta;
+            a2 = (x1-x2)/delta;
 
-                            /* shape function 2 */
+            E->trace.shape_coefs[j][iwedge][7][i] = a0;
+            E->trace.shape_coefs[j][iwedge][8][i] = a1;
+            E->trace.shape_coefs[j][iwedge][9][i] = a2;
 
-                            delta=(x3-x1)*(y2-y1)-(y1-y3)*(x1-x2);
-                            a0=(x1*y3-x3*y1)/delta;
-                            a1=(y1-y3)/delta;
-                            a2=(x3-x1)/delta;
-
-                            E->trace.shape_coefs[j][iwedge][4][nelem]=a0;
-                            E->trace.shape_coefs[j][iwedge][5][nelem]=a1;
-                            E->trace.shape_coefs[j][iwedge][6][nelem]=a2;
-
-                            /* shape function 3 */
-
-                            delta=(x1-x2)*(y3-y2)-(y2-y1)*(x2-x3);
-                            a0=(x2*y1-x1*y2)/delta;
-                            a1=(y2-y1)/delta;
-                            a2=(x1-x2)/delta;
-
-                            E->trace.shape_coefs[j][iwedge][7][nelem]=a0;
-                            E->trace.shape_coefs[j][iwedge][8][nelem]=a1;
-                            E->trace.shape_coefs[j][iwedge][9][nelem]=a2;
-
-
-                        } /* end wedge */
-                } /* end elem */
-        } /* end cap */
-
+        } /* end wedge */
+    } /* end elem */
 
     return;
 }
