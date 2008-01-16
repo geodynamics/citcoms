@@ -116,9 +116,6 @@ struct TRACE{
     int *regtoel[13][5];
 
     /* gnomonic shape functions */
-    double *UV[13][3];
-    double cos_theta_f;
-    double sin_theta_f;
     double *shape_coefs[13][3][10];
 
 
