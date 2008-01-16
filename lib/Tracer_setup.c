@@ -196,6 +196,10 @@ void tracer_initial_settings(struct All_variables *E)
    void regional_get_velocity();
    int regional_iget_element();
 
+   E->trace.advection_time = 0;
+   E->trace.find_tracers_time = 0;
+   E->trace.lost_souls_time = 0;
+
    if(E->parallel.nprocxy == 1) {
        E->problem_tracer_setup = regional_tracer_setup;
 
@@ -222,8 +226,8 @@ void tracer_initial_settings(struct All_variables *E)
 
 void tracer_advection(struct All_variables *E)
 {
-  if(E->control.verbose)
-    fprintf(E->trace.fpt,"STEP %d\n",E->monitor.solution_cycles);
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
     /* advect tracers */
     predict_tracers(E);
@@ -241,6 +245,8 @@ void tracer_advection(struct All_variables *E)
         fill_composition(E);
     }
 
+    E->trace.advection_time += CPU_time0() - begin_time;
+
     tracer_post_processing(E);
 
     return;
@@ -254,26 +260,32 @@ void tracer_post_processing(struct All_variables *E)
 {
     int i;
 
-    if(E->control.verbose){
-      fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
-
-      fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
-
-      fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
-    }
-
-
     /* reset statistical counters */
 
     E->trace.istat_isend=0;
     E->trace.istat_elements_checked=0;
     E->trace.istat1=0;
 
+    fprintf(E->trace.fpt, "STEP %d\n", E->monitor.solution_cycles);
 
-    /* compositional and error fraction data files */
-    //TODO: move
-    if (E->composition.on) {
-      if(E->control.verbose)
+    fprintf(E->trace.fpt, "Tracer advecting takes %f seconds.\n",
+            E->trace.advection_time);
+    fprintf(E->trace.fpt, "|--Tracer finding takes %f seconds.\n",
+            E->trace.find_tracers_time);
+    fprintf(E->trace.fpt, "  |--Tracer exchanging takes %f seconds.\n",
+            E->trace.lost_souls_time);
+
+
+    if(E->control.verbose){
+      fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
+
+      fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
+
+      fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
+
+      /* compositional and error fraction data files */
+      //TODO: move
+      if (E->composition.on) {
         fprintf(E->trace.fpt,"Empty elements filled with old compositional "
                 "values: %d (%f percent)\n", E->trace.istat_iempty,
                 (100.0*E->trace.istat_iempty)/E->lmesh.nel);
@@ -295,11 +307,10 @@ void tracer_post_processing(struct All_variables *E)
             fprintf(E->fp,"\n");
 
         }
-
+      }
     }
 
     fflush(E->trace.fpt);
-
     return;
 }
 
@@ -515,7 +526,8 @@ static void find_tracers(struct All_variables *E)
     void full_lost_souls();
     void regional_lost_souls();
 
-    time_stat1=CPU_time0();
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
@@ -595,9 +607,7 @@ static void find_tracers(struct All_variables *E)
 
     reduce_tracer_arrays(E);
 
-    time_stat2=CPU_time0();
-    if(E->control.verbose)
-      fprintf(E->trace.fpt,"AA: time for find tracers: %f\n", time_stat2-time_stat1);
+    E->trace.find_tracers_time += CPU_time0() - begin_time;
 
     return;
 }
