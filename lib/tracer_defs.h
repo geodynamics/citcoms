@@ -82,6 +82,13 @@ struct TRACE{
     int istat_elements_checked;
     int ilast_tracer_count;
 
+
+    /* timing information */
+    double advection_time;
+    double find_tracers_time;
+    double lost_souls_time;
+
+
     /* Mesh information */
     double xcap[13][5];
     double ycap[13][5];

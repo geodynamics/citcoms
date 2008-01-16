@@ -129,6 +129,8 @@ void full_tracer_setup(struct All_variables *E)
     char output_file[200];
     void get_neighboring_caps();
     void analytical_test();
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
     /* Some error control */
 
@@ -223,6 +225,9 @@ void full_tracer_setup(struct All_variables *E)
     if (E->composition.on)
         composition_setup(E);
 
+    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
+            CPU_time0() - begin_time);
+
     return;
 }
 
@@ -285,6 +290,9 @@ void full_lost_souls(struct All_variables *E)
 
     void expand_tracer_arrays();
     int icheck_that_processor_shell();
+
+    double CPU_time0();
+    double begin_time = CPU_time0();
 
     int number_of_caps=12;
     int lev=E->mesh.levmax;
@@ -764,6 +772,7 @@ void full_lost_souls(struct All_variables *E)
       fflush(E->trace.fpt);
     }
 
+    E->trace.lost_souls_time += CPU_time0() - begin_time;
     return;
 }
 
