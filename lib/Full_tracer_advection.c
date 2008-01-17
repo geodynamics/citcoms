@@ -2799,7 +2799,7 @@ static void define_uv_space(struct All_variables *E)
     double u, v, cosc, theta_f, phi_f, dphi, cosd;
     double *cost, *sint, *cosf, *sinf;
 
-    if ((E->gnomonic = malloc((E->lmesh.nsf+1)*sizeof(struct GNOMONIC)))
+    if ((E->gnomonic = malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
         == NULL) {
         fprintf(stderr,"Error(define uv)-not enough memory(a)\n");
         exit(10);

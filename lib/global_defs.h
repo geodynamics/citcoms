@@ -654,7 +654,7 @@ struct COMPOSITION {
 };
 
 
-struct GNOMONIC {
+struct CITCOM_GNOMONIC {
     /* gnomonic projected coordinate */
     double u;
     double v;
@@ -698,7 +698,7 @@ struct All_variables {
     /* for chemical convection & composition rheology */
     struct COMPOSITION composition;
 
-    struct GNOMONIC *gnomonic;
+    struct CITCOM_GNOMONIC *gnomonic;
 
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
