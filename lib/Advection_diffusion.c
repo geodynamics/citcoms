@@ -392,7 +392,7 @@ static void pg_solver(struct All_variables *E,
                       struct SOURCES *Q0,
                       double diff, int bc, unsigned int **FLAGS)
 {
-    void get_rtf_vpts();
+    void get_rtf_at_vpts();
     void velo_from_element();
 
     int el,e,a,i,a1,m;
@@ -416,7 +416,7 @@ static void pg_solver(struct All_variables *E,
 
           velo_from_element(E,VV,m,el,sphere_key);
 
-          get_rtf_vpts(E, m, lev, el, rtf);
+          get_rtf_at_vpts(E, m, lev, el, rtf);
 
           /* XXX: replace diff with refstate.thermal_conductivity */
           pg_shape_fn(E, el, &PG, &(E->gNX[m][el]), VV,

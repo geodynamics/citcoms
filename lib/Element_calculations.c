@@ -311,7 +311,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const double two = 2.0;
     const double two_thirds = 2.0/3.0;
 
-    void get_rtf_vpts();
+    void get_rtf_at_vpts();
     void construct_c3x3matrix_el();
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
@@ -321,7 +321,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const int ends = ENODES3D;
     const int dims=E->mesh.nsd;
 
-    get_rtf_vpts(E, m, lev, el, rtf);
+    get_rtf_at_vpts(E, m, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,0);
@@ -898,7 +898,7 @@ void get_elt_g(E,el,elt_del,lev,m)
      int lev;
 
 {
-   void get_rtf_ppts();
+   void get_rtf_at_ppts();
    void construct_c3x3matrix_el();
    int p,a,i;
    double ra,ct,si,x[4],rtf[4][9];
@@ -912,7 +912,7 @@ void get_elt_g(E,el,elt_del,lev,m)
    if ((el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
 
-   get_rtf_ppts(E, m, lev, el, rtf);
+   get_rtf_at_ppts(E, m, lev, el, rtf);
 
    temp=p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
 

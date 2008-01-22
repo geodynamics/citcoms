@@ -719,7 +719,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
      float *EEDOT;
      int m,SQRT;
 {
-    void get_rtf_ppts();
+    void get_rtf_at_ppts();
     void velo_from_element();
     void construct_c3x3matrix_el();
     void get_ba_p();
@@ -743,7 +743,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 
     for(e=1; e<=nel; e++) {
 
-        get_rtf_ppts(E, m, lev, e, rtf);
+        get_rtf_at_ppts(E, m, lev, e, rtf);
         velo_from_element(E, VV, m, e, sphere_key);
         GNx = &(E->gNX[m][e]);
 

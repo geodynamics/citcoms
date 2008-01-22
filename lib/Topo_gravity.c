@@ -178,7 +178,7 @@ void compute_nodal_stress(struct All_variables *E,
                           float** SXY, float** SXZ, float** SZY,
                           float** divv, float** vorv)
 {
-  void get_rtf_vpts();
+  void get_rtf_at_vpts();
   void velo_from_element();
   void stress_conform_bcs();
 
@@ -209,7 +209,7 @@ void compute_nodal_stress(struct All_variables *E,
       div = 0.0;
       vor = 0.0;
 
-      get_rtf_vpts(E, m, lev, e, rtf);
+      get_rtf_at_vpts(E, m, lev, e, rtf);
       velo_from_element(E,VV,m,e,sphere_key);
       dOmega = &(E->gDA[m][e]);
       GNx = &(E->gNX[m][e]);

@@ -195,7 +195,7 @@ void construct_shape_function_derivatives(struct All_variables *E)
 }
 
 
-void get_rtf_vpts(struct All_variables *E, int m, int lev, int el,
+void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
                   double rtf[4][9])
 {
     int i, k, d;
@@ -225,7 +225,7 @@ void get_rtf_vpts(struct All_variables *E, int m, int lev, int el,
 }
 
 
-void get_rtf_ppts(struct All_variables *E, int m, int lev, int el,
+void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
                   double rtf[4][9])
 {
     int i, k, d;
