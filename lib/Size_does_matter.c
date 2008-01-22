@@ -42,187 +42,217 @@ void twiddle_thumbs(yawn,scratch_groin)
 
   return; }
 
-
-/*	==================================================================================
-	Function to give the global shape function from the local: Assumes ORTHOGONAL MESH
-	==================================================================================      */
-
-void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
-     struct All_variables *E;
-     int el,m;
-     struct Shape_function *GN;
-     struct Shape_function_dx *GNx;
-     struct Shape_function_dA *dOmega;
-     int pressure,lev,sphere;
-     double rtf[4][9];
-{
-  int i,j,k,d,e;
-  double jacobian;
-  double determinant();
-  double cofactor(),myatan();
-  void   form_rtf_bc();
-
-  struct Shape_function_dx LGNx;
-
-  double dxda[4][4],cof[4][4],x[4],bc[4][4];
-
-
-  const int dims=E->mesh.nsd;
-  const int ends=enodes[dims];
-  const int vpts=vpoints[dims];
-  const int ppts=ppoints[dims];
-
-
-  if(pressure < 2) {
-    for(k=1;k<=vpts;k++) {       /* all of the vpoints */
-      for(d=1;d<=dims;d++)  {
-        x[d]=0.0;
-        for(e=1;e<=dims;e++)
-          dxda[d][e]=0.0;
-        }
-
-      for(d=1;d<=dims;d++)
-        for(i=1;i<=ends;i++)
-          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]*
-                E->N.vpt[GNVINDEX(i,k)];
-
-      for(d=1;d<=dims;d++)
-	for(e=1;e<=dims;e++)
-	  for(i=1;i<=ends;i++)
-            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
-               * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
-
-      jacobian = determinant(dxda,E->mesh.nsd);
-      dOmega->vpt[k] = jacobian;
-
-      for(d=1;d<=dims;d++)
-        for(e=1;e<=dims;e++)
-          cof[d][e]=cofactor(dxda,d,e,dims);
-
-      if (sphere)   {
-
-        form_rtf_bc(k,x,rtf,bc);
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)         {
-            LGNx.vpt[GNVXINDEX(d-1,j,k)] = 0.0;
-            for(e=1;e<=dims;e++)
-              LGNx.vpt[GNVXINDEX(d-1,j,k)] +=
-                 E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
-
-            LGNx.vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
-            }
-
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)         {
-            GNx->vpt[GNVXINDEX(d-1,j,k)] =
-                bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
-              + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
-              + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
-            }
-        }
-      else  {
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)         {
-            GNx->vpt[GNVXINDEX(d-1,j,k)] = 0.0;
-            for(e=1;e<=dims;e++)
-              GNx->vpt[GNVXINDEX(d-1,j,k)] +=
-                 E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
-
-            GNx->vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
-            }
-        }
-      }     /* end for k */
-    }    /* end for pressure */
-
-  if(pressure > 0 && pressure < 3) {
-    for(k=1;k<=ppts;k++)         {   /* all of the ppoints */
-      for(d=1;d<=dims;d++) {
-        x[d]=0.0;
-        for(e=1;e<=dims;e++)
-          dxda[d][e]=0.0;
-        }
-
-      for(d=1;d<=dims;d++)
-        for(i=1;i<=ends;i++)
-          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
-                 *E->N.ppt[GNPINDEX(i,k)];
-
-      for(d=1;d<=dims;d++)
-	for(e=1;e<=dims;e++)
-	  for(i=1;i<=ends;i++)
-            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
-                     * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
-
-      jacobian = determinant(dxda,E->mesh.nsd);
-      dOmega->ppt[k] = jacobian;
-
-      for(d=1;d<=dims;d++)
-        for(e=1;e<=dims;e++)
-          cof[d][e]=cofactor(dxda,d,e,E->mesh.nsd);
-
-      if (sphere)   {
-        form_rtf_bc(k,x,rtf,bc);
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)  {
-            LGNx.ppt[GNPXINDEX(d-1,j,k)]=0.0;
-            for(e=1;e<=dims;e++)
-              LGNx.ppt[GNPXINDEX(d-1,j,k)] +=
-                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
-	    LGNx.ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
-            }
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)         {
-            GNx->ppt[GNPXINDEX(d-1,j,k)]
-             = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
-             + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
-             + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
-          }
-        }
-
-      else  {
-        for(j=1;j<=ends;j++)
-          for(d=1;d<=dims;d++)  {
-            GNx->ppt[GNPXINDEX(d-1,j,k)]=0.0;
-            for(e=1;e<=dims;e++)
-              GNx->ppt[GNPXINDEX(d-1,j,k)] +=
-                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
-	    GNx->ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
-            }
-        }
-
-      }              /* end for k int */
-    }      /* end for pressure */
-
-
-  return;
-}
-
 /*   ======================================================================
      ======================================================================  */
 
-void form_rtf_bc(k,x,rtf,bc)
- int k;
- double x[4],rtf[4][9],bc[4][4];
- {
+static void form_rtf_bc(int k, double x[4],
+                        double rtf[4][9], double bc[4][4])
+{
+    double myatan();
 
-  double myatan();
+    rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+    rtf[1][k] = acos(x[3]*rtf[3][k]);
+    rtf[2][k] = myatan(x[2],x[1]);
 
-      rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-      rtf[1][k] = acos(x[3]*rtf[3][k]);
-      rtf[2][k] = myatan(x[2],x[1]);
+    bc[1][1] = x[3]*cos(rtf[2][k]);
+    bc[1][2] = x[3]*sin(rtf[2][k]);
+    bc[1][3] = -sin(rtf[1][k])/rtf[3][k];
+    bc[2][1] = -x[2];
+    bc[2][2] = x[1];
+    bc[2][3] = 0.0;
+    bc[3][1] = x[1]*rtf[3][k];
+    bc[3][2] = x[2]*rtf[3][k];
+    bc[3][3] = x[3]*rtf[3][k];
 
-      bc[1][1] = x[3]*cos(rtf[2][k]);
-      bc[1][2] = x[3]*sin(rtf[2][k]);
-      bc[1][3] = -sin(rtf[1][k])/rtf[3][k];
-      bc[2][1] = -x[2];
-      bc[2][2] = x[1];
-      bc[2][3] = 0.0;
-      bc[3][1] = x[1]*rtf[3][k];
-      bc[3][2] = x[2]*rtf[3][k];
-      bc[3][3] = x[3]*rtf[3][k];
+    return;
+}
 
-  return;
-  }
+
+static void get_global_shape_fn_sph(struct All_variables *E,
+                                    int m, int lev, int el)
+{
+    int i,j,k,d,e;
+    double jacobian;
+    double determinant();
+    double cofactor(),myatan();
+    void   form_rtf_bc();
+
+    struct Shape_function_dx LGNx;
+
+    double dxda[4][4], cof[4][4], x[4], rtf[4][9], bc[4][4];
+
+    const int dims = E->mesh.nsd;
+    const int ends = ENODES3D;
+    const int vpts = VPOINTS3D;
+    const int ppts = PPOINTS3D;
+
+
+    for(k=1;k<=vpts;k++) {       /* all of the vpoints */
+        for(d=1;d<=dims;d++)  {
+            x[d]=0.0;
+            for(e=1;e<=dims;e++)
+                dxda[d][e]=0.0;
+        }
+
+        for(d=1;d<=dims;d++)
+            for(i=1;i<=ends;i++)
+                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                    * E->N.vpt[GNVINDEX(i,k)];
+
+        for(d=1;d<=dims;d++)
+            for(e=1;e<=dims;e++)
+                for(i=1;i<=ends;i++)
+                    dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+                        * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
+
+        jacobian = determinant(dxda, E->mesh.nsd);
+        E->GDA[lev][m][el].vpt[k] = jacobian;
+
+        for(d=1;d<=dims;d++)
+            for(e=1;e<=dims;e++)
+                cof[d][e]=cofactor(dxda,d,e,dims);
+
+        form_rtf_bc(k,x,rtf,bc);
+        for(j=1;j<=ends;j++)
+            for(d=1;d<=dims;d++)         {
+                LGNx.vpt[GNVXINDEX(d-1,j,k)] = 0.0;
+                for(e=1;e<=dims;e++)
+                    LGNx.vpt[GNVXINDEX(d-1,j,k)] +=
+                        E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
+
+                LGNx.vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
+            }
+
+        for(j=1;j<=ends;j++)
+            for(d=1;d<=dims;d++)         {
+                E->GNX[lev][m][el].vpt[GNVXINDEX(d-1,j,k)]
+                    = bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
+                    + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
+                    + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
+            }
+    }     /* end for k */
+
+    for(k=1;k<=ppts;k++) {   /* all of the ppoints */
+        for(d=1;d<=dims;d++) {
+            x[d]=0.0;
+            for(e=1;e<=dims;e++)
+                dxda[d][e]=0.0;
+        }
+
+        for(d=1;d<=dims;d++)
+            for(i=1;i<=ends;i++)
+                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                    * E->N.ppt[GNPINDEX(i,k)];
+
+        for(d=1;d<=dims;d++)
+            for(e=1;e<=dims;e++)
+                for(i=1;i<=ends;i++)
+                    dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+                        * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
+
+        jacobian = determinant(dxda,E->mesh.nsd);
+        E->GDA[lev][m][el].ppt[k] = jacobian;
+
+        for(d=1;d<=dims;d++)
+            for(e=1;e<=dims;e++)
+                cof[d][e]=cofactor(dxda,d,e,E->mesh.nsd);
+
+        form_rtf_bc(k,x,rtf,bc);
+        for(j=1;j<=ends;j++)
+            for(d=1;d<=dims;d++)  {
+                LGNx.ppt[GNPXINDEX(d-1,j,k)]=0.0;
+                for(e=1;e<=dims;e++)
+                    LGNx.ppt[GNPXINDEX(d-1,j,k)] +=
+                        E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
+                LGNx.ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
+            }
+        for(j=1;j<=ends;j++)
+            for(d=1;d<=dims;d++)         {
+                E->GNX[lev][m][el].ppt[GNPXINDEX(d-1,j,k)]
+                    = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
+                    + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
+                    + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
+            }
+
+    }              /* end for k int */
+
+
+    return;
+}
+
+
+void construct_shape_function_derivatives(struct All_variables *E)
+{
+    int m, lev, el;
+
+    for (m=1; m<=E->sphere.caps_per_proc; m++)
+        for(lev=E->mesh.levmax; lev>=E->mesh.levmin; lev--)
+            for(el=1; el<=E->lmesh.NEL[lev]; el++) {
+                get_global_shape_fn_sph(E, m, lev, el);
+            }
+
+    return;
+}
+
+
+void get_rtf_vpts(struct All_variables *E, int m, int lev, int el,
+                  double rtf[4][9])
+{
+    int i, k, d;
+    double x[4];
+
+    double myatan();
+
+    const int dims = E->mesh.nsd;
+    const int ends = ENODES3D;
+    const int vpts = VPOINTS3D;
+
+    for(k=1;k<=vpts;k++) {       /* all of the vpoints */
+        for(d=1;d<=dims;d++)
+            x[d]=0.0;
+
+        for(d=1;d<=dims;d++)
+            for(i=1;i<=ends;i++)
+                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                    * E->N.vpt[GNVINDEX(i,k)];
+
+        rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+        rtf[1][k] = acos(x[3]*rtf[3][k]);
+        rtf[2][k] = myatan(x[2],x[1]);
+    }
+
+    return;
+}
+
+
+void get_rtf_ppts(struct All_variables *E, int m, int lev, int el,
+                  double rtf[4][9])
+{
+    int i, k, d;
+    double x[4];
+
+    double myatan();
+
+    const int dims = E->mesh.nsd;
+    const int ends = ENODES3D;
+    const int ppts = PPOINTS3D;
+
+    for(k=1;k<=ppts;k++) {   /* all of the ppoints */
+        for(d=1;d<=dims;d++)
+            x[d]=0.0;
+
+        for(d=1;d<=dims;d++)
+            for(i=1;i<=ends;i++)
+                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                    * E->N.ppt[GNPINDEX(i,k)];
+
+        rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
+        rtf[1][k] = acos(x[3]*rtf[3][k]);
+        rtf[2][k] = myatan(x[2],x[1]);
+    }
+
+    return;
+}
 
 
 void get_side_x_cart(struct All_variables *E, double xx[4][5],
@@ -871,14 +901,9 @@ void mass_matrix(struct All_variables *E)
 {
     int m,node,i,nint,e,lev;
     int n[9], nz;
-    void get_global_shape_fn();
-    double myatan(),rtf[4][9],area,centre[4],temp[9],temp2[9],dx1,dx2,dx3;
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
+    double myatan(),area,centre[4],temp[9],temp2[9],dx1,dx2,dx3;
 
     const int vpts=vpoints[E->mesh.nsd];
-    const int sphere_key=1;
 
     /* ECO .size can also be defined here */
 
@@ -889,8 +914,6 @@ void mass_matrix(struct All_variables *E)
                 E->MASS[lev][m][node] = 0.0;
 
             for(e=1;e<=E->lmesh.NEL[lev];e++)  {
-
-                get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
 
                 area = centre[1] = centre[2] = centre[3] = 0.0;
 
@@ -949,13 +972,13 @@ void mass_matrix(struct All_variables *E)
 
                 /* volume (area in 2D) of this element */
                 for(nint=1;nint<=vpts;nint++)
-                    area += g_point[nint].weight[E->mesh.nsd-1] * dOmega.vpt[nint];
+                    area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][m][e].vpt[nint];
                 E->ECO[lev][m][e].area = area;
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)  {
                     temp[node] = 0.0;
                     for(nint=1;nint<=vpts;nint++)
-                        temp[node] += dOmega.vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
+                        temp[node] += E->GDA[lev][m][e].vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
                             *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
                 }
 
@@ -987,16 +1010,13 @@ void mass_matrix(struct All_variables *E)
             E->TMass[m][node] = 0.0;
 
         for(e=1;e<=E->lmesh.nel;e++)  {
-            get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,
-                                sphere_key,rtf,E->mesh.levmax,m);
-
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
                 temp[node] = 0.0;
                 nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
                 for(nint=1;nint<=vpts;nint++)
                     temp[node] += E->refstate.rho[nz]
                         * E->refstate.heat_capacity[nz]
-                        * dOmega.vpt[nint]
+                        * E->gDA[m][e].vpt[nint]
                         * g_point[nint].weight[E->mesh.nsd-1]
                         * E->N.vpt[GNVINDEX(node,nint)];
             }

@@ -44,7 +44,7 @@ static void corrector(struct All_variables *E, double **field,
                       double **fielddot, double **Dfielddot);
 static void pg_solver(struct All_variables *E,
                       double **T, double **Tdot, double **DTdot,
-                      struct SOURCES Q0,
+                      struct SOURCES *Q0,
                       double diff, int bc, unsigned int **FLAGS);
 static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
@@ -52,12 +52,12 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         float VV[4][9], double rtf[4][9],
                         double diffusion, int m);
 static void element_residual(struct All_variables *E, int el,
-                             struct Shape_function PG,
-                             struct Shape_function_dx GNx,
-                             struct Shape_function_dA dOmega,
+                             struct Shape_function *PG,
+                             struct Shape_function_dx *GNx,
+                             struct Shape_function_dA *dOmega,
                              float VV[4][9],
                              double **field, double **fielddot,
-                             struct SOURCES Q0,
+                             struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
                              unsigned int **FLAGS, int m);
@@ -246,7 +246,7 @@ void PG_timestep_solve(struct All_variables *E)
           process_heating(E, psc_pass);
 
         /* XXX: replace inputdiff with refstate.thermal_conductivity */
-	pg_solver(E,E->T,E->Tdot,DTdot,E->convection.heat_sources,E->control.inputdiff,1,E->node);
+	pg_solver(E,E->T,E->Tdot,DTdot,&(E->convection.heat_sources),E->control.inputdiff,1,E->node);
 	corrector(E,E->T,E->Tdot,DTdot);
 	temperatures_conform_bcs(E);
       }
@@ -389,10 +389,10 @@ static void corrector(struct All_variables *E, double **field,
 
 static void pg_solver(struct All_variables *E,
                       double **T, double **Tdot, double **DTdot,
-                      struct SOURCES Q0,
+                      struct SOURCES *Q0,
                       double diff, int bc, unsigned int **FLAGS)
 {
-    void get_global_shape_fn();
+    void get_rtf_vpts();
     void velo_from_element();
 
     int el,e,a,i,a1,m;
@@ -400,14 +400,12 @@ static void pg_solver(struct All_variables *E,
     float VV[4][9];
 
     struct Shape_function PG;
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
 
     const int dims=E->mesh.nsd;
     const int dofs=E->mesh.dof;
     const int ends=enodes[dims];
     const int sphere_key = 1;
+    const int lev=E->mesh.levmax;
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++)
@@ -418,13 +416,13 @@ static void pg_solver(struct All_variables *E,
 
           velo_from_element(E,VV,m,el,sphere_key);
 
-          get_global_shape_fn(E, el, &GN, &GNx, &dOmega, 0,
-                              sphere_key, rtf, E->mesh.levmax, m);
+          get_rtf_vpts(E, m, lev, el, rtf);
 
           /* XXX: replace diff with refstate.thermal_conductivity */
-          pg_shape_fn(E, el, &PG, &GNx, VV,
+          pg_shape_fn(E, el, &PG, &(E->gNX[m][el]), VV,
                       rtf, diff, m);
-          element_residual(E, el, PG, GNx, dOmega, VV, T, Tdot,
+          element_residual(E, el, &PG, &(E->gNX[m][el]), &(E->gDA[m][el]),
+                           VV, T, Tdot,
                            Q0, Eres, rtf, diff, E->sphere.cap[m].TB,
                            FLAGS, m);
 
@@ -435,7 +433,7 @@ static void pg_solver(struct All_variables *E,
 
         } /* next element */
 
-    (E->exchange_node_d)(E,DTdot,E->mesh.levmax);
+    (E->exchange_node_d)(E,DTdot,lev);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
@@ -525,12 +523,12 @@ static void pg_shape_fn(struct All_variables *E, int el,
    =========================================  */
 
 static void element_residual(struct All_variables *E, int el,
-                             struct Shape_function PG,
-                             struct Shape_function_dx GNx,
-                             struct Shape_function_dA dOmega,
+                             struct Shape_function *PG,
+                             struct Shape_function_dx *GNx,
+                             struct Shape_function_dA *dOmega,
                              float VV[4][9],
                              double **field, double **fielddot,
-                             struct SOURCES Q0,
+                             struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
                              unsigned int **FLAGS, int m)
@@ -579,9 +577,9 @@ static void element_residual(struct All_variables *E, int el,
 
       for(i=1;i<=vpts;i++)  {
           dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
-          tx1[i] += GNx.vpt[GNVXINDEX(0,j,i)] * T * rtf[3][i];
-          tx2[i] += GNx.vpt[GNVXINDEX(1,j,i)] * T * sint[i];
-          tx3[i] += GNx.vpt[GNVXINDEX(2,j,i)] * T;
+          tx1[i] += GNx->vpt[GNVXINDEX(0,j,i)] * T * rtf[3][i];
+          tx2[i] += GNx->vpt[GNVXINDEX(1,j,i)] * T * sint[i];
+          tx3[i] += GNx->vpt[GNVXINDEX(2,j,i)] * T;
           sfn = E->N.vpt[GNVINDEX(j,i)];
           v1[i] += VV[1][j] * sfn;
           v2[i] += VV[2][j] * sfn;
@@ -591,7 +589,7 @@ static void element_residual(struct All_variables *E, int el,
 
 /*    Q=0.0;
     for(i=0;i<Q0.number;i++)
-	  Q += Q0.Q[i] * exp(-Q0.lambda[i] * (E->monitor.elapsed_time+Q0.t_offset));
+	  Q += Q0->Q[i] * exp(-Q0->lambda[i] * (E->monitor.elapsed_time+Q0->t_offset));
 */
 
     /* heat production */
@@ -626,13 +624,13 @@ static void element_residual(struct All_variables *E, int el,
 	Eres[j]=0.0;
 	for(i=1;i<=vpts;i++)
 	  Eres[j] -=
-	    PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
+	    PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
               * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
                  - heating )
-              + diff * dOmega.vpt[i] * E->heating_latent[m][el]
-              * (GNx.vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
-                 GNx.vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
-                 GNx.vpt[GNVXINDEX(2,j,i)]*tx3[i] );
+              + diff * dOmega->vpt[i] * E->heating_latent[m][el]
+              * (GNx->vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
+                 GNx->vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
+                 GNx->vpt[GNVXINDEX(2,j,i)]*tx3[i] );
       }
     }
 
@@ -640,7 +638,7 @@ static void element_residual(struct All_variables *E, int el,
       for(j=1;j<=ends;j++) {
 	Eres[j]=0.0;
 	for(i=1;i<=vpts;i++)
-	  Eres[j] -= PG.vpt[GNVINDEX(j,i)] * dOmega.vpt[i]
+	  Eres[j] -= PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
               * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i]);
       }
     }

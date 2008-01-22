@@ -719,14 +719,12 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
      float *EEDOT;
      int m,SQRT;
 {
-    void get_global_shape_fn();
+    void get_rtf_ppts();
     void velo_from_element();
     void construct_c3x3matrix_el();
     void get_ba_p();
 
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
+    struct Shape_function_dx *GNx;
 
     double edot[4][4], rtf[4][9];
     double theta;
@@ -745,11 +743,9 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 
     for(e=1; e<=nel; e++) {
 
-        /* get shape function on presure gauss points */
-        get_global_shape_fn(E, e, &GN, &GNx, &dOmega, 2,
-                                sphere_key, rtf, lev, m);
-
+        get_rtf_ppts(E, m, lev, e, rtf);
         velo_from_element(E, VV, m, e, sphere_key);
+        GNx = &(E->gNX[m][e]);
 
         theta = rtf[1][1];
 
@@ -782,7 +778,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
                 construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
             }
 
-            get_ba_p(&(E->N), &GNx, &E->element_Cc, &E->element_Ccx,
+            get_ba_p(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,
                      rtf, E->mesh.nsd, ba);
 
             for(j=1;j<=ppts;j++)
@@ -796,27 +792,27 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
         else {
             for(j=1; j<=ppts; j++) {
                 for(i=1; i<=ends; i++) {
-                    Vxyz[1][j] += (VV[1][i] * GNx.ppt[GNPXINDEX(0, i, j)]
+                    Vxyz[1][j] += (VV[1][i] * GNx->ppt[GNPXINDEX(0, i, j)]
                                    + VV[3][i] * E->N.ppt[GNPINDEX(i, j)])
                         * rtf[3][j];
-                    Vxyz[2][j] += ((VV[2][i] * GNx.ppt[GNPXINDEX(1, i, j)]
+                    Vxyz[2][j] += ((VV[2][i] * GNx->ppt[GNPXINDEX(1, i, j)]
                                     + VV[1][i] * E->N.ppt[GNPINDEX(i, j)]
                                     * cos(rtf[1][j])) / sin(rtf[1][j])
                                    + VV[3][i] * E->N.ppt[GNPINDEX(i, j)])
                         * rtf[3][j];
-                    Vxyz[3][j] += VV[3][i] * GNx.ppt[GNPXINDEX(2, i, j)];
+                    Vxyz[3][j] += VV[3][i] * GNx->ppt[GNPXINDEX(2, i, j)];
 
-                    Vxyz[4][j] += ((VV[1][i] * GNx.ppt[GNPXINDEX(1, i, j)]
+                    Vxyz[4][j] += ((VV[1][i] * GNx->ppt[GNPXINDEX(1, i, j)]
                                     - VV[2][i] * E->N.ppt[GNPINDEX(i, j)]
                                     * cos(rtf[1][j])) / sin(rtf[1][j])
-                                   + VV[2][i] * GNx.ppt[GNPXINDEX(0, i, j)])
+                                   + VV[2][i] * GNx->ppt[GNPXINDEX(0, i, j)])
                         * rtf[3][j];
-                    Vxyz[5][j] += VV[1][i] * GNx.ppt[GNPXINDEX(2, i, j)]
-                        + rtf[3][j] * (VV[3][i] * GNx.ppt[GNPXINDEX(0, i, j)]
+                    Vxyz[5][j] += VV[1][i] * GNx->ppt[GNPXINDEX(2, i, j)]
+                        + rtf[3][j] * (VV[3][i] * GNx->ppt[GNPXINDEX(0, i, j)]
                                        - VV[1][i] * E->N.ppt[GNPINDEX(i, j)]);
-                    Vxyz[6][j] += VV[2][i] * GNx.ppt[GNPXINDEX(2, i, j)]
+                    Vxyz[6][j] += VV[2][i] * GNx->ppt[GNPXINDEX(2, i, j)]
                         + rtf[3][j] * (VV[3][i]
-                                       * GNx.ppt[GNPXINDEX(1, i, j)]
+                                       * GNx->ppt[GNPXINDEX(1, i, j)]
                                        / sin(rtf[1][j])
                                        - VV[2][i] * E->N.ppt[GNPINDEX(i, j)]);
                 }

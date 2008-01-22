@@ -38,6 +38,162 @@
 /* =========================================================== */
 
 
+
+/*	==================================================================================
+	Function to give the global shape function from the local: Assumes ORTHOGONAL MESH
+	==================================================================================      */
+
+void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
+     struct All_variables *E;
+     int el,m;
+     struct Shape_function *GN;
+     struct Shape_function_dx *GNx;
+     struct Shape_function_dA *dOmega;
+     int pressure,lev,sphere;
+     double rtf[4][9];
+{
+  int i,j,k,d,e;
+  double jacobian;
+  double determinant();
+  double cofactor(),myatan();
+  void   form_rtf_bc();
+
+  struct Shape_function_dx LGNx;
+
+  double dxda[4][4],cof[4][4],x[4],bc[4][4];
+
+
+  const int dims=E->mesh.nsd;
+  const int ends=enodes[dims];
+  const int vpts=vpoints[dims];
+  const int ppts=ppoints[dims];
+
+
+  if(pressure < 2) {
+    for(k=1;k<=vpts;k++) {       /* all of the vpoints */
+      for(d=1;d<=dims;d++)  {
+        x[d]=0.0;
+        for(e=1;e<=dims;e++)
+          dxda[d][e]=0.0;
+        }
+
+      for(d=1;d<=dims;d++)
+        for(i=1;i<=ends;i++)
+          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]*
+                E->N.vpt[GNVINDEX(i,k)];
+
+      for(d=1;d<=dims;d++)
+	for(e=1;e<=dims;e++)
+	  for(i=1;i<=ends;i++)
+            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+               * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
+
+      jacobian = determinant(dxda,E->mesh.nsd);
+      dOmega->vpt[k] = jacobian;
+
+      for(d=1;d<=dims;d++)
+        for(e=1;e<=dims;e++)
+          cof[d][e]=cofactor(dxda,d,e,dims);
+
+      if (sphere)   {
+
+        form_rtf_bc(k,x,rtf,bc);
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)         {
+            LGNx.vpt[GNVXINDEX(d-1,j,k)] = 0.0;
+            for(e=1;e<=dims;e++)
+              LGNx.vpt[GNVXINDEX(d-1,j,k)] +=
+                 E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
+
+            LGNx.vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
+            }
+
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)         {
+            GNx->vpt[GNVXINDEX(d-1,j,k)] =
+                bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
+              + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
+              + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
+            }
+        }
+      else  {
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)         {
+            GNx->vpt[GNVXINDEX(d-1,j,k)] = 0.0;
+            for(e=1;e<=dims;e++)
+              GNx->vpt[GNVXINDEX(d-1,j,k)] +=
+                 E->Nx.vpt[GNVXINDEX(e-1,j,k)] *cof[e][d];
+
+            GNx->vpt[GNVXINDEX(d-1,j,k)] /= jacobian;
+            }
+        }
+      }     /* end for k */
+    }    /* end for pressure */
+
+  if(pressure > 0 && pressure < 3) {
+    for(k=1;k<=ppts;k++)         {   /* all of the ppoints */
+      for(d=1;d<=dims;d++) {
+        x[d]=0.0;
+        for(e=1;e<=dims;e++)
+          dxda[d][e]=0.0;
+        }
+
+      for(d=1;d<=dims;d++)
+        for(i=1;i<=ends;i++)
+          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                 *E->N.ppt[GNPINDEX(i,k)];
+
+      for(d=1;d<=dims;d++)
+	for(e=1;e<=dims;e++)
+	  for(i=1;i<=ends;i++)
+            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+                     * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
+
+      jacobian = determinant(dxda,E->mesh.nsd);
+      dOmega->ppt[k] = jacobian;
+
+      for(d=1;d<=dims;d++)
+        for(e=1;e<=dims;e++)
+          cof[d][e]=cofactor(dxda,d,e,E->mesh.nsd);
+
+      if (sphere)   {
+        form_rtf_bc(k,x,rtf,bc);
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)  {
+            LGNx.ppt[GNPXINDEX(d-1,j,k)]=0.0;
+            for(e=1;e<=dims;e++)
+              LGNx.ppt[GNPXINDEX(d-1,j,k)] +=
+                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
+	    LGNx.ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
+            }
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)         {
+            GNx->ppt[GNPXINDEX(d-1,j,k)]
+             = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
+             + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
+             + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
+          }
+        }
+
+      else  {
+        for(j=1;j<=ends;j++)
+          for(d=1;d<=dims;d++)  {
+            GNx->ppt[GNPXINDEX(d-1,j,k)]=0.0;
+            for(e=1;e<=dims;e++)
+              GNx->ppt[GNPXINDEX(d-1,j,k)] +=
+                E->Nx.ppt[GNPXINDEX(e-1,j,k)]*cof[e][d];
+	    GNx->ppt[GNPXINDEX(d-1,j,k)] /= jacobian;
+            }
+        }
+
+      }              /* end for k int */
+    }      /* end for pressure */
+
+
+  return;
+}
+
+
 void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
      struct All_variables *E;
      int el,nodal,m;

@@ -768,6 +768,11 @@ struct All_variables {
     float *age[NCS];	/* nodal weightings */
     float *age_t;
 
+    struct Shape_function_dx *GNX[MAX_LEVELS][NCS];
+    struct Shape_function_dA *GDA[MAX_LEVELS][NCS];
+    struct Shape_function_dx *gNX[NCS];
+    struct Shape_function_dA *gDA[NCS];
+
     struct Shape_function1 M; /* master-element shape funtions */
     struct Shape_function1_dx Mx;
     struct Shape_function N;

@@ -56,12 +56,7 @@ void heat_flux(E)
     float *flux[NCS],*SU[NCS],*RU[NCS];
     float VV[4][9],u[9],T[9],dTdz[9],area,uT;
     float *sum_h;
-    double rtf[4][9];
 
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
-    void get_global_shape_fn();
     void velo_from_element();
     void sum_across_surface();
     void return_horiz_ave();
@@ -74,7 +69,6 @@ void heat_flux(E)
     const int nno=E->lmesh.nno;
     const int lev = E->mesh.levmax;
     const int sphere_key=1;
-
 
   sum_h = (float *) malloc((5)*sizeof(float));
   for(i=0;i<=4;i++)
@@ -89,7 +83,6 @@ void heat_flux(E)
       }
 
     for(e=1;e<=E->lmesh.nel;e++) {
-      get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
 
       velo_from_element(E,VV,m,e,sphere_key);
 
@@ -100,7 +93,7 @@ void heat_flux(E)
         for(j=1;j<=ends;j++)  {
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
           T[i] += E->T[m][E->ien[m][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
-          dTdz[i] += -E->T[m][E->ien[m][e].node[j]]*GNx.vpt[GNVXINDEX(2,j,i)];
+          dTdz[i] += -E->T[m][E->ien[m][e].node[j]]*E->gNX[m][e].vpt[GNVXINDEX(2,j,i)];
           }
         }
 
@@ -108,7 +101,7 @@ void heat_flux(E)
       area = 0.0;
       for(i=1;i<=vpts;i++)   {
         /* XXX: missing unit conversion, heat capacity and thermal conductivity */
-        uT += u[i]*T[i]*dOmega.vpt[i] + dTdz[i]*dOmega.vpt[i];
+        uT += u[i]*T[i]*E->gDA[m][e].vpt[i] + dTdz[i]*E->gDA[m][e].vpt[i];
         }
 
       uT /= E->eco[m][e].area;

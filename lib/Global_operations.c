@@ -312,21 +312,11 @@ float return_bulk_value(E,Z,average)
      int average;
 
 {
-    void get_global_shape_fn();
-    void float_global_operation();
-
-    double rtf[4][9];
-
     int n,i,j,k,el,m;
     float volume,integral,volume1,integral1;
 
-    struct Shape_function GN;
-    struct Shape_function_dx GNx;
-    struct Shape_function_dA dOmega;
-
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
-    const int sphere_key=1;
 
     volume1=0.0;
     integral1=0.0;
@@ -334,13 +324,11 @@ float return_bulk_value(E,Z,average)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
        for (el=1;el<=E->lmesh.nel;el++)  {
 
-	  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
-
 	  for(j=1;j<=vpts;j++)
 	    for(i=1;i<=ends;i++) {
 		n = E->ien[m][el].node[i];
-		volume1 += E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
-		integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
+		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
+		integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
                 }
 
           }
@@ -368,19 +356,11 @@ double return_bulk_value_d(E,Z,average)
      int average;
 
 {
-    void get_global_shape_fn();
-
-    double rtf[4][9];
     int n,i,j,el,m;
     double volume,integral,volume1,integral1;
 
-    struct Shape_function GN;
-    struct Shape_function_dx GNx;
-    struct Shape_function_dA dOmega;
-
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
-    const int sphere_key=1;
 
     volume1=0.0;
     integral1=0.0;
@@ -388,12 +368,11 @@ double return_bulk_value_d(E,Z,average)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
        for (el=1;el<=E->lmesh.nel;el++)  {
 
-	  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
                 n = E->ien[m][el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
-                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * dOmega.vpt[j];
+                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
+                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
             }
 
        }

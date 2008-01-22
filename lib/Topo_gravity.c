@@ -178,7 +178,7 @@ void compute_nodal_stress(struct All_variables *E,
                           float** SXY, float** SXZ, float** SZY,
                           float** divv, float** vorv)
 {
-  void get_global_shape_fn();
+  void get_rtf_vpts();
   void velo_from_element();
   void stress_conform_bcs();
 
@@ -189,9 +189,8 @@ void compute_nodal_stress(struct All_variables *E,
   double pre[9],tww[9],rtf[4][9];
   double velo_scaling, stress_scaling;
 
-  struct Shape_function GN;
-  struct Shape_function_dA dOmega;
-  struct Shape_function_dx GNx;
+  struct Shape_function_dA *dOmega;
+  struct Shape_function_dx *GNx;
 
   const int dims=E->mesh.nsd;
   const int vpts=vpoints[dims];
@@ -209,9 +208,11 @@ void compute_nodal_stress(struct All_variables *E,
       Szy = 0.0;
       div = 0.0;
       vor = 0.0;
-      get_global_shape_fn(E,e,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
 
+      get_rtf_vpts(E, m, lev, e, rtf);
       velo_from_element(E,VV,m,e,sphere_key);
+      dOmega = &(E->gDA[m][e]);
+      GNx = &(E->gNX[m][e]);
 
       /* Vxyz is the strain rate vector, whose relationship with
        * the strain rate tensor (e) is that:
@@ -224,7 +225,7 @@ void compute_nodal_stress(struct All_variables *E,
        * where 1 is theta, 2 is phi, and 3 is r
        */
       for(j=1;j<=vpts;j++)  {
-        pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega.vpt[j];
+        pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega->vpt[j];
         dilation[j] = 0.0;
         Vxyz[1][j] = 0.0;
         Vxyz[2][j] = 0.0;
@@ -239,34 +240,34 @@ void compute_nodal_stress(struct All_variables *E,
       for(i=1;i<=ends;i++) {
         tww[i] = 0.0;
         for(j=1;j<=vpts;j++)
-          tww[i] += dOmega.vpt[j] * g_point[j].weight[E->mesh.nsd-1]
+          tww[i] += dOmega->vpt[j] * g_point[j].weight[E->mesh.nsd-1]
             * E->N.vpt[GNVINDEX(i,j)];
       }
 
       for(j=1;j<=vpts;j++)   {
         for(i=1;i<=ends;i++)   {
-          Vxyz[1][j]+=( VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+          Vxyz[1][j]+=( VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
                         + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[2][j]+=( (VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]
+          Vxyz[2][j]+=( (VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]
                          + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
                         + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[3][j]+= VV[3][i]*GNx.vpt[GNVXINDEX(2,i,j)];
+          Vxyz[3][j]+= VV[3][i]*GNx->vpt[GNVXINDEX(2,i,j)];
 
-          Vxyz[4][j]+=( (VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)]
+          Vxyz[4][j]+=( (VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)]
                          - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
-                        + VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
-          Vxyz[5][j]+=VV[1][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-                                                                      *GNx.vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
-          Vxyz[6][j]+=VV[2][i]*GNx.vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-                                                                      *GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
+                        + VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
+          Vxyz[5][j]+=VV[1][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+                                                                      *GNx->vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
+          Vxyz[6][j]+=VV[2][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+                                                                      *GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
           Vxyz[7][j]+=rtf[3][j] * (
-                                   VV[1][i]*GNx.vpt[GNVXINDEX(0,i,j)]
+                                   VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
                                    + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
-                                   + VV[2][i]*GNx.vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
+                                   + VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
           Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
-            ( VV[2][i]*GNx.vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
+            ( VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
               + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
-              - VV[1][i]*GNx.vpt[GNVXINDEX(1,i,j)] );
+              - VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)] );
         }
       }
 
@@ -282,8 +283,8 @@ void compute_nodal_stress(struct All_variables *E,
           Sxy += pre[j] * Vxyz[4][j];
           Sxz += pre[j] * Vxyz[5][j];
           Szy += pre[j] * Vxyz[6][j];
-          div += Vxyz[7][j]*dOmega.vpt[j];
-          vor += Vxyz[8][j]*dOmega.vpt[j];
+          div += Vxyz[7][j]*dOmega->vpt[j];
+          vor += Vxyz[8][j]*dOmega->vpt[j];
       }
 
       Sxx /= E->eco[m][e].area;

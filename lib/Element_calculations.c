@@ -311,11 +311,8 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const double two = 2.0;
     const double two_thirds = 2.0/3.0;
 
-    void get_global_shape_fn();
+    void get_rtf_vpts();
     void construct_c3x3matrix_el();
-    struct Shape_function GN;
-    struct Shape_function_dA dOmega;
-    struct Shape_function_dx GNx;
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
 
@@ -323,9 +320,8 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const int vpts = VPOINTS3D;
     const int ends = ENODES3D;
     const int dims=E->mesh.nsd;
-    const int sphere_key = 1;
 
-    get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,lev,m);
+    get_rtf_vpts(E, m, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,0);
@@ -334,10 +330,10 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
        quadrature point. Nx[d] is the derivative wrt x[d]. */
 
     for(k=1;k<=vpts;k++) {
-      W[k]=g_point[k].weight[dims-1]*dOmega.vpt[k]*E->EVI[lev][m][(el-1)*vpts+k];
+      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][(el-1)*vpts+k];
     }
 
-    get_ba(&(E->N), &GNx, &E->element_Cc, &E->element_Ccx,
+    get_ba(&(E->N), &(E->GNX[lev][m][el]), &E->element_Cc, &E->element_Ccx,
            rtf, E->mesh.nsd, ba);
 
   for(a=1;a<=ends;a++)
@@ -826,26 +822,19 @@ return(divU);  }
 void get_elt_c(struct All_variables *E, int el,
                higher_precision elt_c[24][1], int lev, int m)
 {
-    void get_global_shape_fn();
     void construct_c3x3matrix_el();
     int p, a, i, j, nz;
     double temp, beta, rho_avg, x[4];
 
-    struct Shape_function GN;
-    struct Shape_function_dx GNx;
-    struct Shape_function_dA dOmega;
-    double rtf[4][9], rho[9];
+    double rho[9];
 
     const int dims = E->mesh.nsd;
     const int ends = enodes[dims];
-    const int sphere_key = 1;
-
-    get_global_shape_fn(E,el,&GN,&GNx,&dOmega,2,sphere_key,rtf,lev,m);
 
     if ((el-1)%E->lmesh.ELZ[lev]==0)
         construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
 
-    temp = p_point[1].weight[dims-1] * dOmega.ppt[1];
+    temp = p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
 
     switch (E->refstate.choice) {
     case 1:
@@ -882,7 +871,7 @@ void get_elt_c(struct All_variables *E, int el,
 
         for(a=1;a<=ends;a++) {
             for (i=1;i<=dims;i++) {
-                x[i] = rho[a] * GNx.ppt[GNPXINDEX(2,a,1)]
+                x[i] = rho[a] * E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)]
                     * E->N.ppt[GNPINDEX(a,1)]
                     * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
             }
@@ -908,31 +897,24 @@ void get_elt_g(E,el,elt_del,lev,m)
      higher_precision elt_del[24][1];
      int lev;
 
-{  void get_global_shape_fn();
+{
+   void get_rtf_ppts();
    void construct_c3x3matrix_el();
    int p,a,i;
    double ra,ct,si,x[4],rtf[4][9];
    double temp;
 
-   struct Shape_function GN;
-   struct Shape_function_dA dOmega;
-   struct Shape_function_dx GNx;
-
    const int dims=E->mesh.nsd;
    const int ends=enodes[dims];
-   const int sphere_key = 1;
 
    /* Special case, 4/8 node bilinear cartesian square/cube element -> 1 pressure point */
-
-/*   es = (el-1)/E->lmesh.ELZ[lev]+1;  */
 
    if ((el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
 
-   get_global_shape_fn(E,el,&GN,&GNx,&dOmega,2,sphere_key,rtf,lev,m);
+   get_rtf_ppts(E, m, lev, el, rtf);
 
-
-   temp=p_point[1].weight[dims-1] * dOmega.ppt[1];
+   temp=p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
 
    ra = rtf[3][1];
    si = 1.0/sin(rtf[1][1]);
@@ -940,12 +922,12 @@ void get_elt_g(E,el,elt_del,lev,m)
 
    for(a=1;a<=ends;a++)      {
      for (i=1;i<=dims;i++)
-       x[i]=GNx.ppt[GNPXINDEX(2,a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)]
+       x[i]=E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)]
         + 2.0*ra*E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)]
-        + ra*(GNx.ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)]
+        + ra*(E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)]
         +E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(1,i,1,a,1)]
         +ct*E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)]
-        +si*(GNx.ppt[GNPXINDEX(1,a,1)]*E->element_Cc.ppt[BPINDEX(2,i,a,1)]
+        +si*(E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)]*E->element_Cc.ppt[BPINDEX(2,i,a,1)]
         +E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(2,i,2,a,1)]));
 
      p=dims*(a-1);
@@ -953,7 +935,7 @@ void get_elt_g(E,el,elt_del,lev,m)
      elt_del[p+1][0] = -x[2] * temp;
      elt_del[p+2][0] = -x[3] * temp;
 
-      /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,dOmega.ppt[1],GNx.ppt[GNPXINDEX(0,a,1)],GNx.ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
+      /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,E->GDA[lev][m][el].ppt[1],E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)],E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
       */
      }
 
@@ -978,24 +960,15 @@ void get_elt_f(E,el,elt_f,bcs,m)
   const unsigned int vbc_flag[] = {0, VBX, VBY, VBZ};
 
   double force[9],force_at_gs[9],elt_k[24*24];
-  double rtf[4][9];
 
-  void get_global_shape_fn();
   void construct_c3x3matrix_el();
-
-  struct Shape_function GN;
-  struct Shape_function_dA dOmega;
-  struct Shape_function_dx GNx;
 
   const int dims=E->mesh.nsd;
   const int n=loc_mat_size[dims];
   const int ends=enodes[dims];
   const int vpts=vpoints[dims];
-  const int sphere_key=1;
 
   es = (el-1)/E->lmesh.elz + 1;
-
-  get_global_shape_fn(E,el,&GN,&GNx,&dOmega,0,sphere_key,rtf,E->mesh.levmax,m);
 
   if ((el-1)%E->lmesh.elz==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,E->mesh.levmax,m,0);
@@ -1018,7 +991,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
         elt_f[p] += force_at_gs[j] * E->N.vpt[GNVINDEX(a,j)]
-           *dOmega.vpt[j]*g_point[j].weight[dims-1]
+           *E->gDA[m][el].vpt[j]*g_point[j].weight[dims-1]
            *E->element_Cc.vpt[BVINDEX(3,i,a,j)];
 
 	  /* imposed velocity terms */

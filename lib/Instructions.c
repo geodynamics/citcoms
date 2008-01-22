@@ -57,6 +57,7 @@ void allocate_velocity_vars(struct All_variables*);
 void check_bc_consistency(struct All_variables*);
 void construct_elt_gs(struct All_variables*);
 void construct_elt_cs(struct All_variables*);
+void construct_shape_function_derivatives(struct All_variables *E);
 void construct_id(struct All_variables*);
 void construct_ien(struct All_variables*);
 void construct_lm(struct All_variables*);
@@ -141,6 +142,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     construct_sub_element(E);
     construct_shape_functions(E);
+    construct_shape_function_derivatives(E);
     construct_elt_gs(E);
     if(E->control.inv_gruneisen != 0)
         construct_elt_cs(E);
@@ -644,6 +646,9 @@ void allocate_common_vars(E)
     for (k=1;k<=4;k++)
       E->sphere.angle1[i][j][k] = (double *) malloc((snel+1)*sizeof(double));
 
+    E->GNX[i][j] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
+    E->GDA[i][j] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
+
     E->MASS[i][j]     = (float *) malloc((nno+1)*sizeof(float));
     E->ECO[i][j] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
@@ -979,6 +984,8 @@ void set_up_nonmg_aliases(E,j)
   E->ccx[j] = E->CCX[E->mesh.levmax][j];
   E->Mass[j] = E->MASS[E->mesh.levmax][j];
   E->element[j] = E->ELEMENT[E->mesh.levmax][j];
+  E->gDA[j] = E->GDA[E->mesh.levmax][j];
+  E->gNX[j] = E->GNX[E->mesh.levmax][j];
 
   for (i=1;i<=E->mesh.nsd;i++)    {
     E->x[j][i] = E->X[E->mesh.levmax][j][i];
