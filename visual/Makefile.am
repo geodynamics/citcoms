@@ -55,50 +55,6 @@ dist_bin_SCRIPTS = \
 	zslice.py
 
 nobase_dist_visual_DATA = \
-	Mayavi2/citcoms_plugins/__init__.py \
-	Mayavi2/citcoms_plugins/plugins/__init__.py \
-	Mayavi2/citcoms_plugins/plugins/CitcomS_hdf_file_reader.py \
-	Mayavi2/citcoms_plugins/plugins/CitcomSHDFUgrid.py \
-	Mayavi2/citcoms_plugins/plugins/OpenCitcomSFILES.py \
-	Mayavi2/citcoms_plugins/plugins/filter/CitcomSFilterActions.py \
-	Mayavi2/citcoms_plugins/plugins/filter/__init__.py \
-	Mayavi2/citcoms_plugins/plugins/filter/CitcomSshowSurface.py \
-	Mayavi2/citcoms_plugins/plugins/filter/CitcomSSphere.py \
-	Mayavi2/citcoms_plugins/plugins/filter/CitcomsCapFilter.py \
-	Mayavi2/citcoms_plugins/plugins/filter/CitcomsReduceFilter.py \
-	Mayavi2/citcoms_plugins/utils.py \
-	Mayavi2/citcoms_plugins/custom_ui.py \
-	Mayavi2/citcoms_plugins/README \
-	Mayavi2/README \
-	Mayavi2/mayavi_custom_ui.py \
-	samples/cookbook1.h5 \
-	samples/cookbook1.100.h5 \
-	samples/fulltest.cap00.100 \
-	samples/fulltest.cap00.100.general \
-	samples/fulltest.cap01.100 \
-	samples/fulltest.cap01.100.general \
-	samples/fulltest.cap02.100 \
-	samples/fulltest.cap02.100.general \
-	samples/fulltest.cap03.100 \
-	samples/fulltest.cap03.100.general \
-	samples/fulltest.cap04.100 \
-	samples/fulltest.cap04.100.general \
-	samples/fulltest.cap05.100 \
-	samples/fulltest.cap05.100.general \
-	samples/fulltest.cap06.100 \
-	samples/fulltest.cap06.100.general \
-	samples/fulltest.cap07.100 \
-	samples/fulltest.cap07.100.general \
-	samples/fulltest.cap08.100 \
-	samples/fulltest.cap08.100.general \
-	samples/fulltest.cap09.100 \
-	samples/fulltest.cap09.100.general \
-	samples/fulltest.cap10.100 \
-	samples/fulltest.cap10.100.general \
-	samples/fulltest.cap11.100 \
-	samples/fulltest.cap11.100.general \
-	samples/regtest.cap00.100 \
-	samples/regtest.cap00.100.general \
 	visFull.cfg \
 	visRegional.cfg \
 	visRegionalSurface.cfg

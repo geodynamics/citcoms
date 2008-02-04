@@ -33,65 +33,6 @@ nobase_dist_examples_DATA = \
 	Cookbook4/coor.dat \
 	Cookbook5/cookbook5.cfg \
 	Cookbook5/coor.dat \
-	Cookbook5/ic/cookbook5.velo.0.0 \
-	Cookbook5/ic/cookbook5.velo.1.0 \
-	Cookbook5/velocity/bvel.dat0 \
-	Cookbook5/velocity/bvel.dat1 \
-	Cookbook5/velocity/bvel.dat10 \
-	Cookbook5/velocity/bvel.dat11 \
-	Cookbook5/velocity/bvel.dat12 \
-	Cookbook5/velocity/bvel.dat13 \
-	Cookbook5/velocity/bvel.dat14 \
-	Cookbook5/velocity/bvel.dat15 \
-	Cookbook5/velocity/bvel.dat16 \
-	Cookbook5/velocity/bvel.dat17 \
-	Cookbook5/velocity/bvel.dat18 \
-	Cookbook5/velocity/bvel.dat19 \
-	Cookbook5/velocity/bvel.dat2 \
-	Cookbook5/velocity/bvel.dat20 \
-	Cookbook5/velocity/bvel.dat21 \
-	Cookbook5/velocity/bvel.dat22 \
-	Cookbook5/velocity/bvel.dat23 \
-	Cookbook5/velocity/bvel.dat24 \
-	Cookbook5/velocity/bvel.dat25 \
-	Cookbook5/velocity/bvel.dat26 \
-	Cookbook5/velocity/bvel.dat27 \
-	Cookbook5/velocity/bvel.dat28 \
-	Cookbook5/velocity/bvel.dat29 \
-	Cookbook5/velocity/bvel.dat3 \
-	Cookbook5/velocity/bvel.dat30 \
-	Cookbook5/velocity/bvel.dat31 \
-	Cookbook5/velocity/bvel.dat32 \
-	Cookbook5/velocity/bvel.dat33 \
-	Cookbook5/velocity/bvel.dat34 \
-	Cookbook5/velocity/bvel.dat35 \
-	Cookbook5/velocity/bvel.dat36 \
-	Cookbook5/velocity/bvel.dat37 \
-	Cookbook5/velocity/bvel.dat38 \
-	Cookbook5/velocity/bvel.dat39 \
-	Cookbook5/velocity/bvel.dat4 \
-	Cookbook5/velocity/bvel.dat40 \
-	Cookbook5/velocity/bvel.dat41 \
-	Cookbook5/velocity/bvel.dat42 \
-	Cookbook5/velocity/bvel.dat43 \
-	Cookbook5/velocity/bvel.dat44 \
-	Cookbook5/velocity/bvel.dat45 \
-	Cookbook5/velocity/bvel.dat46 \
-	Cookbook5/velocity/bvel.dat47 \
-	Cookbook5/velocity/bvel.dat48 \
-	Cookbook5/velocity/bvel.dat49 \
-	Cookbook5/velocity/bvel.dat5 \
-	Cookbook5/velocity/bvel.dat50 \
-	Cookbook5/velocity/bvel.dat51 \
-	Cookbook5/velocity/bvel.dat52 \
-	Cookbook5/velocity/bvel.dat53 \
-	Cookbook5/velocity/bvel.dat54 \
-	Cookbook5/velocity/bvel.dat55 \
-	Cookbook5/velocity/bvel.dat56 \
-	Cookbook5/velocity/bvel.dat6 \
-	Cookbook5/velocity/bvel.dat7 \
-	Cookbook5/velocity/bvel.dat8 \
-	Cookbook5/velocity/bvel.dat9 \
 	Cookbook6/cookbook6.cfg \
 	Cookbook6/coord.dat \
 	Cookbook6/README \
@@ -99,21 +40,11 @@ nobase_dist_examples_DATA = \
 	Cookbook8/cookbook8.cfg \
 	Cookbook8/coord.dat \
     Cookbook9/cookbook9.cfg \
-    Cookbook9/ic/cntn.velo.0.0 \
-    Cookbook9/ic/cntn.velo.1.0 \
-    Cookbook9/ic/embd.velo.0.0 \
-    Cookbook9/ic/embd.velo.1.0 \
-    Cookbook9/velocity/bvel.dat0 \
-    Cookbook9/velocity/bvel.dat1 \
 	example0.cfg \
 	example1.cfg \
 	Full/input.sample \
 	Full/machine.sample \
-	Full/velbc/README \
-	Full/velbc/velbc_full.tar.gz \
 	Regional/input.sample \
-	Regional/machines.sample \
-	Regional/velbc/README \
-	Regional/velbc/velbc_regional.tar.gz
+	Regional/machines.sample
 
 ## end of Makefile.am

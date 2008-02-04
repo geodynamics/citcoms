@@ -123,6 +123,13 @@ PyObject * pyCitcom_CPU_time(PyObject *self, PyObject *args)
 // This section is for finished implementation
 ////////////////////////////////////////////////////////////////////////*/
 
+
+void deleteE(struct All_variables *E)
+{
+    free(E);
+}
+
+
 char pyCitcom_citcom_init__doc__[] = "";
 char pyCitcom_citcom_init__name__[] = "citcom_init";
 
@@ -148,9 +155,9 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
                             "%s: 'libCitcomSCommon.citcom_init' failed",
                             pyCitcom_citcom_init__name__);
 
-    cobj = PyCObject_FromVoidPtr(E, NULL);
+    cobj = PyCObject_FromVoidPtr(E, deleteE);
 
-    return Py_BuildValue("O", cobj);
+    return Py_BuildValue("N", cobj);
 }
 
 
