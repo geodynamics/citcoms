@@ -180,16 +180,13 @@ void tic_input(struct All_variables *E)
 
 
 
-/* This function is replaced by CitcomS.Components.IC.initTemperature()*/
 void convection_initial_temperature(struct All_variables *E)
 {
   void report();
 
   report(E,"Initialize temperature field");
 
-  if (E->control.lith_age)
-    lith_age_construct_tic(E);
-  else if (E->convection.tic_method == -1) {
+  if (E->convection.tic_method == -1) {
       /* read temperature from file */
 #ifdef USE_GZDIR
       if(strcmp(E->output.format, "ascii-gz") == 0)
@@ -198,6 +195,8 @@ void convection_initial_temperature(struct All_variables *E)
 #endif
           read_tic_from_file(E);
   }
+  else if (E->control.lith_age)
+    lith_age_construct_tic(E);
   else
     (E->solver.construct_tic_from_input)(E);
 
