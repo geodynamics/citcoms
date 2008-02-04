@@ -67,8 +67,9 @@ PyObject * PyCitcomSExchanger_createBoundary(PyObject *, PyObject *args)
     BoundedBox* bbox = const_cast<BoundedBox*>(&(b->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(b, deleteBoundary);
-    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
-    return Py_BuildValue("OO", cobj1, cobj2);
+    /* the memory of bbox is managed by b, no need to call its d'ctor */
+    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, NULL);
+    return Py_BuildValue("NN", cobj1, cobj2);
 }
 
 
@@ -80,7 +81,7 @@ PyObject * PyCitcomSExchanger_createEmptyBoundary(PyObject *, PyObject *args)
     Boundary* b = new Boundary();
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteBoundary);
-    return Py_BuildValue("O", cobj);
+    return Py_BuildValue("N", cobj);
 }
 
 
@@ -92,7 +93,7 @@ PyObject * PyCitcomSExchanger_createEmptyInterior(PyObject *, PyObject *args)
     Interior* b = new Interior();
 
     PyObject *cobj = PyCObject_FromVoidPtr(b, deleteInterior);
-    return Py_BuildValue("O", cobj);
+    return Py_BuildValue("N", cobj);
 }
 
 
@@ -122,7 +123,7 @@ PyObject * PyCitcomSExchanger_createGlobalBoundedBox(PyObject *, PyObject *args)
     bbox->print("CitcomS-GlobalBBox");
 
     PyObject *cobj = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
-    return Py_BuildValue("O", cobj);
+    return Py_BuildValue("N", cobj);
 }
 
 
@@ -144,8 +145,9 @@ PyObject * PyCitcomSExchanger_createInterior(PyObject *, PyObject *args)
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
-    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, deleteBoundedBox);
-    return Py_BuildValue("OO", cobj1, cobj2);
+    /* the memory of bbox is managed by i, no need to call its d'ctor */
+    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, NULL);
+    return Py_BuildValue("NN", cobj1, cobj2);
 }
 
 
@@ -233,7 +235,7 @@ PyObject * PyCitcomSExchanger_CitcomSource_create(PyObject *self, PyObject *args
     CitcomSource* source = new CitcomSource(comm, sinkRank, *b, *bbox, E);
 
     PyObject *cobj = PyCObject_FromVoidPtr(source, deleteCitcomSource);
-    return Py_BuildValue("O", cobj);
+    return Py_BuildValue("N", cobj);
 }
 
 
