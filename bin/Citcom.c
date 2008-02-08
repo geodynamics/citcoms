@@ -107,15 +107,19 @@ int main(argc,argv)
 
   /* this section sets the initial condition;
    * replaced by CitcomS.Controller.launch() */
-  if (E->control.restart || E->control.post_p) {
+  if (E->control.post_p) {
       /* the initial condition is from previous checkpoint */
-
       read_checkpoint(E);
 
-      if (E->control.post_p) {
-          post_processing(E);
-          parallel_process_termination();
-      }
+      /* the program will finish after post_processing */
+      post_processing(E);
+      (E->problem_output)(E, E->monitor.solution_cycles);
+      parallel_process_termination();
+  }
+
+  if (E->control.restart) {
+      /* the initial condition is from previous checkpoint */
+      read_checkpoint(E);
   }
   else {
       /* regular init, or read T from file only */

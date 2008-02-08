@@ -204,6 +204,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_ic_readCheckpoint__doc__},
 
+    {pyCitcom_ic_postProcessing__name__,
+     pyCitcom_ic_postProcessing,
+     METH_VARARGS,
+     pyCitcom_ic_postProcessing__doc__},
+
     /* from mesher.h */
 
     {pyCitcom_full_sphere_launch__name__,

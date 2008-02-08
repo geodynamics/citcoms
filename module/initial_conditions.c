@@ -38,9 +38,10 @@ void init_composition(struct All_variables*);
 void initial_pressure(struct All_variables*);
 void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
+void parallel_process_termination();
+void post_processing(struct All_variables*);
 void report(struct All_variables*, char* str);
 void read_checkpoint(struct All_variables*);
-
 
 char pyCitcom_ic_initialize_material__doc__[] = "";
 char pyCitcom_ic_initialize_material__name__[] = "initialize_material";
@@ -190,6 +191,28 @@ PyObject * pyCitcom_ic_readCheckpoint(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     read_checkpoint(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_ic_postProcessing__doc__[] = "";
+char pyCitcom_ic_postProcessing__name__[] = "postProcessing";
+
+PyObject * pyCitcom_ic_postProcessing(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:postProcessing", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    post_processing(E);
+    (E->problem_output)(E, E->monitor.solution_cycles);
+    parallel_process_termination();
 
     Py_INCREF(Py_None);
     return Py_None;

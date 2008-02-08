@@ -122,12 +122,17 @@ class Solver(Component):
 
 
     def launch(self, application):
+        if self.inventory.ic.inventory.post_p:
+            from CitcomSLib import readCheckpoint, postProcessing
+            readCheckpoint(self.all_variables)
+
+            # the program will finish after post_processing
+            postProcessing(self.all_variables)
+            return
+
         if self.inventory.ic.inventory.restart:
             from CitcomSLib import readCheckpoint
             readCheckpoint(self.all_variables)
-
-            # XXX: if post_processing
-            # calling post_processing() and terminate
         else:
             # initial conditions
             ic = self.inventory.ic

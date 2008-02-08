@@ -64,6 +64,11 @@ extern char pyCitcom_ic_readCheckpoint__doc__[];
 PyObject * pyCitcom_ic_readCheckpoint(PyObject *, PyObject *);
 
 
+extern char pyCitcom_ic_postProcessing__name__[];
+extern char pyCitcom_ic_postProcessing__doc__[];
+PyObject * pyCitcom_ic_postProcessing(PyObject *, PyObject *);
+
+
 #endif
 
 /* $Id$ */
