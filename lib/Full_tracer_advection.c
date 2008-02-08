@@ -169,6 +169,8 @@ void full_tracer_setup(struct All_variables *E)
     E->trace.number_of_extra_quantities = 0;
     if (E->trace.nflavors > 0)
         E->trace.number_of_extra_quantities += 1;
+    else if (E->trace.itracer_interpolate_fields)
+        E->trace.number_of_extra_quantities += 2;
 
 
     E->trace.number_of_tracer_quantities =

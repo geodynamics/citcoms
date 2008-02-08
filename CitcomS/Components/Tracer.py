@@ -92,6 +92,9 @@ class Tracer(CitcomComponent):
         # Warning level
         itracer_warnings = inv.bool("itracer_warnings", default=True)
 
+        # Interpolate convection fields onto the location of tracers
+        itracer_interpolate_fields = inv.int("itracer_interpolate_fields",
+                                              default=0)
         # Enriched internal heat production
         tracer_enriched = inv.bool("tracer_enriched", default=False)
         Q0_enriched = inv.float("Q0_enriched", default=0.0)
