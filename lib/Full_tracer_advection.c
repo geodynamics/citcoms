@@ -315,16 +315,14 @@ void full_lost_souls(struct All_variables *E)
 
 
     E->trace.istat_isend=E->trace.ilater[j];
-    /* debug */
-    if(E->control.verbose){
-      for (kk=1; kk<=E->trace.istat_isend; kk++) {
+    /** debug **
+    for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
                 E->trace.rlater[j][0][kk],
                 E->trace.rlater[j][1][kk],
                 E->trace.rlater[j][2][kk]);
-      }
-      fflush(E->trace.fpt);
     }
+    fflush(E->trace.fpt);
     /**/
 
 
@@ -348,7 +346,7 @@ void full_lost_souls(struct All_variables *E)
     }
 
 
-    /* debug *
+    /** debug **
     ithiscap=E->sphere.capid[j];
     for (kk=1;kk<=num_ngb;kk++) {
         ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk];
@@ -394,9 +392,8 @@ void full_lost_souls(struct All_variables *E)
     MPI_Waitall(idb,request,status);
 
 
-    /** debug **/
-    if(E->control.verbose){
-      for (kk=0;kk<=num_ngb;kk++) {
+    /** debug **
+    for (kk=0;kk<=num_ngb;kk++) {
         if(kk==0)
 	  isource_proc=E->parallel.me;
         else
@@ -406,7 +403,6 @@ void full_lost_souls(struct All_variables *E)
 		E->parallel.me,isend[j][kk],isource_proc);
 	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
 		E->parallel.me,ireceive[j][kk],isource_proc);
-      }
     }
     /**/
 
@@ -860,8 +856,6 @@ static void full_put_lost_tracers(struct All_variables *E,
 /* This transformation was found on the internet (refs were difficult to     */
 /* to obtain). It was tested that nodal configuration is indeed transformed  */
 /* into straight lines.                                                      */
-/* The transformations require a reference point along each cap. Here, the   */
-/* first point is used.                                                      */
 /* Radial and azimuthal shape functions are decoupled. First find the shape  */
 /* functions associated with the 2D surface plane, then apply radial shape   */
 /* functions.                                                                */
@@ -995,6 +989,11 @@ void full_get_velocity(struct All_variables *E,
     shape[5]=shaperad[2]*shape2d[2];
     shape[6]=shaperad[2]*shape2d[3];
 
+    /** debug **
+    fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
+            shape[1], shape[2], shape[3], shape[4], shape[5], shape[6]);
+    /**/
+
     /* get cartesian velocity */
     velo_from_element_d(E, VV, j, nelem, sphere_key);
 
@@ -1097,6 +1096,11 @@ static void get_2dshape(struct All_variables *E,
 
     shape2d[3]=a0+a1*u+a2*v;
 
+    /** debug **
+    fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
+            nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
+    /**/
+
     return;
 }
 
@@ -1167,16 +1171,14 @@ static void spherical_to_uv(struct All_variables *E, int j,
                             double theta, double phi,
                             double *u, double *v)
 {
-
-    double theta_f;
     double phi_f;
     double cosc;
     double cos_theta_f,sin_theta_f;
     double cost,sint,cosp2,sinp2;
 
-    /* theta_f and phi_f are the reference points at the 1st node of the cap */
+    /* theta_f and phi_f are the reference points of the cap */
 
-    phi_f = E->sx[j][2][1];
+    phi_f = E->gnomonic_reference_phi;
 
     cos_theta_f = E->gnomonic[0].u;
     sin_theta_f = E->gnomonic[0].v;
@@ -1195,6 +1197,11 @@ static void spherical_to_uv(struct All_variables *E, int j,
 
     *u=sint*sinp2*cosc;
     *v=(sin_theta_f*cost-cos_theta_f*sint*cosp2)*cosc;
+
+    /** debug **
+    fprintf(E->trace.fpt, "(%e %e) -> (%e %e)\n",
+            theta, phi, *u, *v);
+    /**/
 
     return;
 }
@@ -2795,7 +2802,7 @@ static void define_uv_space(struct All_variables *E)
 {
     const int j = 1;
     const int lev = E->mesh.levmax;
-    const int refnode = 1;
+    int refnode;
     int i, n;
 
     double u, v, cosc, theta_f, phi_f, dphi, cosd;
@@ -2812,14 +2819,26 @@ static void define_uv_space(struct All_variables *E)
     cost = E->SinCos[lev][j][2];
     cosf = E->SinCos[lev][j][3];
 
-    /* uv space requires a reference point, using the 1st node */
+    /* uv space requires a reference point */
+    /* use the point at middle of the cap */
+    refnode = 1 + E->lmesh.noz * ((E->lmesh.noy / 2) * E->lmesh.nox
+                                  + E->lmesh.nox / 2);
+    phi_f = E->gnomonic_reference_phi = E->sx[j][2][refnode];
 
+    /** debug **
     theta_f = E->sx[j][1][refnode];
-    phi_f = E->sx[j][2][refnode];
+    for (i=1; i<=E->lmesh.nsf; i++) {
+        fprintf(E->trace.fpt, "i=%d (%e %e %e %e)\n",
+                i, sint[i], sinf[i], cost[i], cosf[i]);
+    }
+    fprintf(E->trace.fpt, "%d %d %d ref=(%e %e)\n",
+            E->lmesh.noz, E->lmesh.nsf, refnode, theta_f, phi_f);
+    /**/
 
     /* store cos(theta_f) and sin(theta_f) */
     E->gnomonic[0].u = cost[refnode];
     E->gnomonic[0].v = sint[refnode];
+
 
     /* convert each nodal point to u and v */
 
@@ -2833,6 +2852,11 @@ static void define_uv_space(struct All_variables *E)
 
         E->gnomonic[i].u = u;
         E->gnomonic[i].v = v;
+
+        /** debug **
+        fprintf(E->trace.fpt, "n=%d ns=%d cosc=%e (%e %e) -> (%e %e)\n",
+                n, i, cosc, E->sx[j][1][n], E->sx[j][2][n], u, v);
+        /**/
     }
 
     return;
@@ -2939,6 +2963,20 @@ static void determine_shape_coefficients(struct All_variables *E)
             E->trace.shape_coefs[j][iwedge][7][i] = a0;
             E->trace.shape_coefs[j][iwedge][8][i] = a1;
             E->trace.shape_coefs[j][iwedge][9][i] = a2;
+
+            /** debug **
+            fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e, %e %e %e, %e %e %e)\n",
+                    nelem, i, iwedge,
+                    E->trace.shape_coefs[j][iwedge][1][i],
+                    E->trace.shape_coefs[j][iwedge][2][i],
+                    E->trace.shape_coefs[j][iwedge][3][i],
+                    E->trace.shape_coefs[j][iwedge][4][i],
+                    E->trace.shape_coefs[j][iwedge][5][i],
+                    E->trace.shape_coefs[j][iwedge][6][i],
+                    E->trace.shape_coefs[j][iwedge][7][i],
+                    E->trace.shape_coefs[j][iwedge][8][i],
+                    E->trace.shape_coefs[j][iwedge][9][i]);
+            /**/
 
         } /* end wedge */
     } /* end elem */

@@ -699,6 +699,7 @@ struct All_variables {
     struct COMPOSITION composition;
 
     struct CITCOM_GNOMONIC *gnomonic;
+    double gnomonic_reference_phi;
 
     struct COORD *eco[NCS];
     struct IEN *ien[NCS];  /* global */
