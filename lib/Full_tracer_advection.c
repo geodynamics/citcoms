@@ -843,10 +843,7 @@ static void full_put_lost_tracers(struct All_variables *E,
     return;
 }
 
-
-/************************ GET VELOCITY ***************************************/
-/*                                                                           */
-/* This function interpolates tracer velocity using gnominic interpolation.  */
+/************************ GET SHAPE FUNCTION *********************************/
 /* Real theta,phi,rad space is transformed into u,v space. This transformation */
 /* maps great circles into straight lines. Here, elements boundaries are     */
 /* assumed to be great circle planes (not entirely true, it is actually only */
@@ -875,33 +872,28 @@ static void full_put_lost_tracers(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-
-void full_get_velocity(struct All_variables *E,
-                       int j, int nelem,
-                       double theta, double phi, double rad,
-                       double *velocity_vector)
+void full_get_shape_functions(struct All_variables *E,
+                              double shp[9], int nelem,
+                              double theta, double phi, double rad)
 {
+    const int j = 1;
+
     int iwedge,inum;
     int i, kk;
     int ival;
     int itry;
-    int sphere_key = 0;
 
     double u,v;
     double shape2d[4];
     double shaperad[3];
     double shape[7];
-    double VV[4][9];
-    double vx[7],vy[7],vz[7];
     double x,y,z;
-
 
     int maxlevel=E->mesh.levmax;
 
     const double eps=-1e-4;
 
     void sphere_to_cart();
-    void velo_from_element_d();
 
 
     /* find u and v using spherical coordinates */
@@ -982,17 +974,75 @@ void full_get_velocity(struct All_variables *E,
 
     /* Sum of shape functions is 1                       */
 
-    shape[1]=shaperad[1]*shape2d[1];
-    shape[2]=shaperad[1]*shape2d[2];
-    shape[3]=shaperad[1]*shape2d[3];
-    shape[4]=shaperad[2]*shape2d[1];
-    shape[5]=shaperad[2]*shape2d[2];
-    shape[6]=shaperad[2]*shape2d[3];
+    shp[0]=iwedge;
+    shp[1]=shaperad[1]*shape2d[1];
+    shp[2]=shaperad[1]*shape2d[2];
+    shp[3]=shaperad[1]*shape2d[3];
+    shp[4]=shaperad[2]*shape2d[1];
+    shp[5]=shaperad[2]*shape2d[2];
+    shp[6]=shaperad[2]*shape2d[3];
 
     /** debug **
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
-            shape[1], shape[2], shape[3], shape[4], shape[5], shape[6]);
+            shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
     /**/
+
+    return;
+}
+
+
+double full_interpolate_data(struct All_variables *E,
+                             double shp[9], double data[9])
+{
+    int iwedge = shp[0];
+
+    if (iwedge==1)
+        return data[1]*shp[1] + data[2]*shp[2] + shp[3]*data[3]
+            + data[6]*shp[4] + data[6]*shp[5] + shp[7]*data[6];
+
+    if (iwedge==2)
+        return data[1]*shp[1] + data[3]*shp[2] + shp[4]*data[3]
+            + data[5]*shp[4] + data[7]*shp[5] + shp[8]*data[6];
+}
+
+
+/************************ GET VELOCITY ***************************************/
+/*                                                                           */
+/* This function interpolates tracer velocity using gnominic interpolation.  */
+/* The element is divided into 2 wedges in which standard shape functions    */
+/* are used to interpolate velocity.                                         */
+/*                                                                           */
+/* Wedge information:                                                        */
+/*                                                                           */
+/*        Wedge 1                  Wedge 2                                   */
+/*        _______                  _______                                   */
+/*                                                                           */
+/*    wedge_node  real_node      wedge_node  real_node                       */
+/*    ----------  ---------      ----------  ---------                       */
+/*                                                                           */
+/*         1        1               1            1                           */
+/*         2        2               2            3                           */
+/*         3        3               3            4                           */
+/*         4        5               4            5                           */
+/*         5        6               5            7                           */
+/*         6        7               6            8                           */
+
+void full_get_velocity(struct All_variables *E,
+                       int j, int nelem,
+                       double theta, double phi, double rad,
+                       double *velocity_vector)
+{
+    int iwedge;
+    const int sphere_key = 0;
+
+    double shape[9];
+    double VV[4][9];
+    double vx[7],vy[7],vz[7];
+
+    void velo_from_element_d();
+
+    full_get_shape_functions(E, shape, nelem, theta, phi, rad);
+    iwedge=shape[0];
 
     /* get cartesian velocity */
     velo_from_element_d(E, VV, j, nelem, sphere_key);

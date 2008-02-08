@@ -421,9 +421,9 @@ int regional_icheck_cap(struct All_variables *E, int icap,
 }
 
 
-static void get_shape_functions(struct All_variables *E,
-                                double w[9], int nelem,
-                                double theta, double phi, double rad)
+void regional_get_shape_functions(struct All_variables *E,
+                                  double shp[9], int nelem,
+                                  double theta, double phi, double rad)
 {
     int e, i, j, k;
     int elx, ely, elz;
@@ -473,27 +473,39 @@ static void get_shape_functions(struct All_variables *E,
     /* compute volumetic weighting functions */
     volume = dx*dz*dy;
 
-    w[1] = (dx-tr_dx) * (dy-tr_dy) * (dz-tr_dz) / volume;
-    w[2] = tr_dx      * (dy-tr_dy) * (dz-tr_dz) / volume;
-    w[3] = tr_dx      * tr_dy      * (dz-tr_dz) / volume;
-    w[4] = (dx-tr_dx) * tr_dy      * (dz-tr_dz) / volume;
-    w[5] = (dx-tr_dx) * (dy-tr_dy) * tr_dz      / volume;
-    w[6] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
-    w[7] = tr_dx      * tr_dy      * tr_dz      / volume;
-    w[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
+    shp[1] = (dx-tr_dx) * (dy-tr_dy) * (dz-tr_dz) / volume;
+    shp[2] = tr_dx      * (dy-tr_dy) * (dz-tr_dz) / volume;
+    shp[3] = tr_dx      * tr_dy      * (dz-tr_dz) / volume;
+    shp[4] = (dx-tr_dx) * tr_dy      * (dz-tr_dz) / volume;
+    shp[5] = (dx-tr_dx) * (dy-tr_dy) * tr_dz      / volume;
+    shp[6] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
+    shp[7] = tr_dx      * tr_dy      * tr_dz      / volume;
+    shp[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
 
     /** debug **
     fprintf(E->trace.fpt, "dr=(%e,%e,%e)  tr_dr=(%e,%e,%e)\n",
             dx, dy, dz, tr_dx, tr_dy, tr_dz);
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e %e %e\n",
-            w[1], w[2], w[3], w[4], w[5], w[6], w[7], w[8]);
+            shp[1], shp[2], shp[3], shp[4], shp[5], shp[6], shp[7], shp[8]);
     fprintf(E->trace.fpt, "sum(shp): %e\n",
-            w[1]+ w[2]+ w[3]+ w[4]+ w[5]+ w[6]+ w[7]+ w[8]);
+            shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]+ shp[8]);
     fflush(E->trace.fpt);
     /**/
     return;
 }
 
+
+double regional_interpolate_data(struct All_variables *E,
+                                 double shp[9], double data[9])
+{
+    int n;
+    double result = 0;
+
+    for(n=1; n<=8; n++)
+        result += data[n] * shp[n];
+
+    return result;
+}
 
 
 /******** GET VELOCITY ***************************************/
@@ -505,12 +517,12 @@ void regional_get_velocity(struct All_variables *E,
 {
     void velo_from_element_d();
 
-    double weight[9], VV[4][9], tmp;
+    double shp[9], VV[4][9], tmp;
     int n, d, node;
     const int sphere_key = 0;
 
     /* get shape functions at (theta, phi, rad) */
-    get_shape_functions(E, weight, nelem, theta, phi, rad);
+    regional_get_shape_functions(E, shp, nelem, theta, phi, rad);
 
 
     /* get cartesian velocity */
@@ -527,7 +539,7 @@ void regional_get_velocity(struct All_variables *E,
 
     for(d=1; d<=3; d++) {
         for(n=1; n<=8; n++)
-            velocity_vector[d] += VV[d][n] * weight[n];
+            velocity_vector[d] += VV[d][n] * shp[n];
     }
 
 
@@ -541,7 +553,7 @@ void regional_get_velocity(struct All_variables *E,
 
     tmp = 0;
     for(n=1; n<=8; n++)
-        tmp += E->sx[m][1][E->ien[m][nelem].node[n]] * weight[n];
+        tmp += E->sx[m][1][E->ien[m][nelem].node[n]] * shp[n];
 
     fprintf(E->trace.fpt, "THETA: %e -> %e\n", theta, tmp);
 
