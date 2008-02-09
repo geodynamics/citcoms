@@ -25,6 +25,7 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
 /*  Here are the routines which process the results of each buoyancy solution, and call
     any relevant output routines. Much of the information has probably been output along
     with the velocity field. (So the velocity vectors and other data are fully in sync).
@@ -35,11 +36,145 @@
 
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "output.h"
 #include <math.h>		/* for sqrt */
+
+
+
+static void output_interpolated_fields(struct All_variables *E)
+{
+    void full_get_shape_functions(struct All_variables *E,
+                                  double shp[9], int nelem,
+                                  double theta, double phi, double rad);
+    void regional_get_shape_functions(struct All_variables *E,
+                                      double shp[9], int nelem,
+                                      double theta, double phi, double rad);
+    double full_interpolate_data(struct All_variables *E,
+                                 double shp[9], double data[9]);
+    double regional_interpolate_data(struct All_variables *E,
+                                     double shp[9], double data[9]);
+    char output_file[256];
+    FILE *fp1;
+    const int m = 1;
+    int n, ncolumns, ncomp;
+    double *compositions;
+    double (*fields)[9];
+
+    snprintf(output_file, 255, "%s.intp_fields.%d",
+             E->control.data_file, E->parallel.me);
+    fp1 = output_open(output_file, "w");
+
+    ncomp = 0;
+    compositions = NULL;
+    if(E->composition.on) {
+        ncomp = E->composition.ncomp;
+        compositions = malloc(ncomp * sizeof(double));
+        if(compositions == NULL) {
+            fprintf(stderr, "output_interpolated_fields(): 2 not enough memory.\n");
+            exit(1);
+        }
+    }
+
+    switch(E->trace.itracer_interpolate_fields) {
+    case 1:
+    case 2:
+    case 3:
+        /* Format of the output --
+         * 1st line is the header:
+         *   [ntracers, model_type, ncolumns, ncompositions]
+         * the rest is data:
+         *   [flavor0, flavor1, radius, temperature, composition(s)]
+         */
+
+        ncolumns = 4;
+        if(E->composition.on) {
+            ncolumns += E->composition.ncomp;
+        }
+
+        /* allocate memory for fields that need to be interpolated,
+         * ie. excluding [flavor0, flavor1, radius] */
+        fields = malloc((ncolumns-3) * sizeof(fields));
+        if(fields == NULL) {
+            fprintf(stderr, "output_interpolated_fields(): 2 not enough memory.\n");
+            exit(1);
+        }
+
+        fprintf(fp1,"%d %d %d %d\n",
+                E->trace.ntracers[m], E->trace.itracer_interpolate_fields,
+                ncolumns, ncomp);
+
+
+        for(n=1; n<=E->trace.ntracers[m]; n++) {
+            int i, j, k;
+            int nelem;
+            double shpfn[9];
+            double theta, phi, rad;
+            double temperature;
+
+            nelem = E->trace.ielement[m][n];
+            theta = E->trace.basicq[m][0][n];
+            phi = E->trace.basicq[m][1][n];
+            rad = E->trace.basicq[m][2][n];
+
+            /* fetch element data for interpolation */
+            for(i=1; i<=ENODES3D; i++) {
+                int node = E->ien[m][nelem].node[i];
+                fields[0][i] = E->T[m][node];
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    fields[k][i] = E->composition.comp_node[m][j][node];
+            }
+
+            if(E->parallel.nprocxy == 12) {
+                full_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
+                temperature = full_interpolate_data(E, shpfn, fields[0]);
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    compositions[j] = full_interpolate_data(E, shpfn, fields[k]);
+            }
+            else {
+                regional_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
+                temperature = regional_interpolate_data(E, shpfn, fields[0]);
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    compositions[j] = regional_interpolate_data(E, shpfn, fields[k]);
+            }
+
+            fprintf(fp1,"%d %d %e %e",
+                    E->trace.extraq[m][0][n], E->trace.extraq[m][1][n],
+                    rad, temperature);
+
+            for(j=0; j<E->composition.ncomp; j++) {
+                fprintf(fp1," %e", compositions[j]);
+            }
+            fprintf(fp1, "\n");
+        }
+
+        free(fields);
+        break;
+    case 100:
+        /* user modification here */
+        ncolumns = 2;
+        break;
+    default:
+        if(E->parallel.me == 0) {
+            fprintf(stderr, "Paramter `itracer_interpolate_fields' has unknown value: %d", E->trace.itracer_interpolate_fields);
+            fprintf(E->fp, "Paramter `itracer_interpolate_fields' has unknown value: %d", E->trace.itracer_interpolate_fields);
+        }
+        parallel_process_termination();
+
+    }
+
+    if(!compositions)
+        free(compositions);
+
+    fclose(fp1);
+    return;
+}
 
 
 void post_processing(struct All_variables *E)
 {
+  if (E->trace.itracer_interpolate_fields && E->control.tracer)
+      output_interpolated_fields(E);
+
   return;
 }
 
