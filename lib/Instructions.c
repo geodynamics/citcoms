@@ -443,6 +443,40 @@ void read_initial_settings(struct All_variables *E)
   input_int("mat_control",&(E->control.mat_control),"0",m);
   input_string("mat_file",E->control.mat_file,"",m);
 
+#ifdef USE_GGRD
+  /* 
+     usage:
+     (a) 
+
+     ggrd_mat_control=2
+     ggrd_mat_file="weak.grd"
+
+     read in time-constant prefactors from weak.grd netcdf file that apply to top two E->mat layers
+
+     (b)
+
+     ggrd_mat_control=2
+     ggrd_mat_file="mythist"
+     ggrd_time_hist_file="mythist/times.dat"
+
+
+     time-dependent, will look for n files named
+     mythist/i/weak.grd where i = 1...n and n is the number of times as specified in ggrd_time_hist_file
+     which has time in Ma for n stages like so
+     
+     -60 -30
+     -30 -15
+     -15 0
+     
+  */
+  ggrd_init_master(&E->control.ggrd);
+  input_string("ggrd_time_hist_file",E->control.ggrd.time_hist.file,"",m); /* time history file, if not specified, will use constant VBCs and material grids */
+  input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
+  input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
+  if(E->control.ggrd.mat_control) /* this will override mat_control setting */
+    E->control.mat_control = 1;
+#endif
+
   input_int("nodex",&(E->mesh.nox),"essential",m);
   input_int("nodez",&(E->mesh.noz),"essential",m);
   input_int("nodey",&(E->mesh.noy),"essential",m);

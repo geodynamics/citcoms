@@ -511,6 +511,9 @@ struct CONTROL {
     int side_sbcs;
     int vbcs_file;
     int mat_control;
+#ifdef USE_GGRD
+  struct ggrd_master ggrd;
+#endif
     double accuracy;
     double vaccuracy;
     char velocity_boundary_file[1000];

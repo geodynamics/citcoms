@@ -444,12 +444,12 @@ void visc_from_T(E,EEta,propogate)
                         zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    if(E->control.mat_control==0)
+                    if(E->control.mat_control==0){
                         EEta[m][ (i-1)*vpts + jj ] = tempa*
                             exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
                                  - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
 
-                    if(E->control.mat_control==1) {
+                    }else{
                      /* visc1 = E->VIP[m][i];
                         visc2 = 2.0/(1./visc1 + 1.);
                         tempa_exp = tempa*
@@ -501,7 +501,7 @@ void visc_from_T(E,EEta,propogate)
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
 	      //fprintf(stderr,"N0 %11g T %11g T0 %11g E %11g z %11g km Z %11g mat: %i log10(eta): %11g\n",
-	      //      tempa,temp,E->viscosity.T[l],E->viscosity.E[l], zzz *6371 ,E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
+	      //tempa,temp,E->viscosity.T[l],E->viscosity.E[l], zzz *6371 ,E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
 	    }
 	  }
         break;

@@ -51,17 +51,7 @@ struct CONVECTION { /* information controlling convection problems */
 	}  heat_sources;
 
 
-#ifdef USE_GGRD
-  /* for temperature init from grd files */
-  int ggrd_tinit,ggrd_tinit_scale_with_prem;
-  int ggrd_tinit_override_tbc,ggrd_tinit_limit_trange;
-  double ggrd_tinit_scale,ggrd_tinit_offset,ggrd_vstage_transition;
-  char ggrd_tinit_gfile[1000];
-  char ggrd_tinit_dfile[1000];
-  struct ggrd_gt ggrd_tinit_d[1];
-  struct ggrd_t ggrd_time_hist;
-  struct prem_model prem; 
-#endif
+
 
 } convection;
 

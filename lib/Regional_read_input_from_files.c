@@ -142,7 +142,9 @@ void regional_read_input_files_for_timesteps(E,action,output)
         break;
 
       case 3:  /* read element materials */
-
+#ifdef USE_GGRD
+	if(!E->control.ggrd.mat_control){
+#endif
         sprintf(output_file1,"%s%0.0f.0",E->control.mat_file,newage1);
         sprintf(output_file2,"%s%0.0f.0",E->control.mat_file,newage2);
         fp1=fopen(output_file1,"r");
@@ -166,6 +168,10 @@ void regional_read_input_files_for_timesteps(E,action,output)
             fprintf(E->fp,"Mat: File2 = No file inputted (negative age)\n");
         }
 
+#ifdef USE_GGRD
+	}
+#endif
+	break;
     } /* end switch */
 
 
@@ -232,6 +238,11 @@ void regional_read_input_files_for_timesteps(E,action,output)
         break;
 
       case 3:  /* read element materials */
+#ifdef USE_GGRD
+	if(E->control.ggrd.mat_control){
+	  ggrd_read_mat_from_file(E, 0);
+	}else{
+#endif
 
         VIP1 = (float*) malloc ((emax+1)*sizeof(float));
         VIP2 = (float*) malloc ((emax+1)*sizeof(float));
@@ -271,7 +282,10 @@ void regional_read_input_files_for_timesteps(E,action,output)
          free ((void *) VIP2);
          free ((void *) LL1);
          free ((void *) LL2);
-
+#ifdef USE_GGRD
+	} /* end of branch if allowing for ggrd handling */
+#endif
+	break;
     } /* end switch */
 
    return;

@@ -210,12 +210,17 @@ int main(argc,argv)
 	output_checkpoint(E);
     }
 
-    if(E->control.mat_control==1)
-      read_mat_from_file(E);
-    /*
-      else
-      construct_mat_group(E);
+    /* 
+       make sure that E->mat always gets initialized as a function of depth
+       the previous version would not call construct_mat_group if E->control.mat_control != 1
+       
+       i intend to restore default behavior here
+       
+       TWB 
+
     */
+    initialize_material(E);
+
 
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
