@@ -2524,16 +2524,15 @@ static void fix_phi(double *phi)
 static void fix_theta_phi(double *theta, double *phi)
 {
     const double two_pi=2.0*M_PI;
-    double d, d2;
 
-    d = floor(*theta/M_PI);
+    fix_phi(theta);
 
-    *theta -= M_PI * d;
-    *phi += M_PI * d;
+    if (*theta > M_PI) {
+        *theta = two_pi - *theta;
+        *phi += M_PI;
+    }
 
-    d2 = floor(*phi / two_pi);
-
-    *phi -= two_pi * d2;
+    fix_phi(phi);
 
     return;
 }
