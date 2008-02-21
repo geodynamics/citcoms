@@ -348,12 +348,8 @@ struct MESH_DATA {/* general information concerning the fe mesh */
 
 struct HAVE {    /* horizontal averages */
     float *T;
-    float *Vi;
-    float *Rho;
-    float *f;
-    float *F;
-    float *vrms;
     float *V[4];
+    float **C;
 };
 
 struct SLICE {    /* horizontally sliced data, including topography */

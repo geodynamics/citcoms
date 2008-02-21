@@ -337,7 +337,7 @@ void compute_horiz_avg(struct All_variables *E)
 {
     void return_horiz_ave_f();
 
-    int m, i;
+    int m, n, i;
     float *S1[NCS],*S2[NCS],*S3[NCS];
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)      {
@@ -359,6 +359,16 @@ void compute_horiz_avg(struct All_variables *E)
     return_horiz_ave_f(E,S2,E->Have.V[1]);
     return_horiz_ave_f(E,S3,E->Have.V[2]);
 
+    if (E->composition.on) {
+        for(n=0; n<E->composition.ncomp; n++) {
+            for(m=1;m<=E->sphere.caps_per_proc;m++) {
+                for(i=1;i<=E->lmesh.nno;i++)
+                    S1[m][i] = E->composition.comp_node[m][n][i];
+            }
+            return_horiz_ave_f(E,S1,E->Have.C[n]);
+        }
+    }
+
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
 	free((void *)S1[m]);
 	free((void *)S2[m]);
@@ -370,4 +380,5 @@ void compute_horiz_avg(struct All_variables *E)
 	E->Have.V[2][i] = sqrt(E->Have.V[2][i]);
     }
 
+    return;
 }
