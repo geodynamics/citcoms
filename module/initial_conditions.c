@@ -211,8 +211,6 @@ PyObject * pyCitcom_ic_postProcessing(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     post_processing(E);
-    (E->problem_output)(E, E->monitor.solution_cycles);
-    parallel_process_termination();
 
     Py_INCREF(Py_None);
     return Py_None;

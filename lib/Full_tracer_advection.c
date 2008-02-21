@@ -995,12 +995,15 @@ double full_interpolate_data(struct All_variables *E,
     int iwedge = shp[0];
 
     if (iwedge==1)
-        return data[1]*shp[1] + data[2]*shp[2] + shp[3]*data[3]
-            + data[6]*shp[4] + data[6]*shp[5] + shp[7]*data[6];
+        return data[1]*shp[1] + data[2]*shp[2] + data[3]*shp[3]
+            + data[5]*shp[4] + data[6]*shp[5] + data[7]*shp[6];
 
     if (iwedge==2)
-        return data[1]*shp[1] + data[3]*shp[2] + shp[4]*data[3]
-            + data[5]*shp[4] + data[7]*shp[5] + shp[8]*data[6];
+        return data[1]*shp[1] + data[3]*shp[2] + data[4]*shp[3]
+            + data[5]*shp[4] + data[7]*shp[5] + data[8]*shp[6];
+
+    fprintf(stderr, "full_interpolate_data: shouldn't be here\n");
+    exit(2);
 }
 
 

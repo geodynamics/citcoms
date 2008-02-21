@@ -68,6 +68,10 @@ class Controller(Component):
         # do io for 0th step
         self.save()
 
+        if self.solver.inventory.ic.inventory.post_p:
+            self.endSimulation()
+            raise SystemExit()
+
         ### XXX: if stokes: advection tracers and terminate
         return
 
