@@ -652,11 +652,7 @@ void allocate_common_vars(E)
   E->Have.T         = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[1]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
   E->Have.V[2]      = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
-  if (E->composition.on) {
-      E->Have.C = (float **)malloc((E->composition.ncomp)*sizeof(float*));
-      for(i=0; i<E->composition.ncomp; i++)
-          E->Have.C[i] = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
-  }
+
  for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
   E->sphere.R[i] = (double *)  malloc((E->lmesh.NOZ[i]+1)*sizeof(double));
   for (j=1;j<=E->sphere.caps_per_proc;j++)  {

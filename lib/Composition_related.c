@@ -196,6 +196,14 @@ static void allocate_composition_memory(struct All_variables *E)
         E->composition.error_fraction = (double*) malloc(E->composition.ncomp*sizeof(double));
     }
 
+
+    /* for horizontal average */
+    E->Have.C = (float **)malloc((E->composition.ncomp+1)*sizeof(float*));
+    for (i=0; i<E->composition.ncomp; i++) {
+        E->Have.C[i] = (float *)malloc((E->lmesh.noz+2)*sizeof(float));
+    }
+
+
     /* allocat memory for composition fields at the nodes and elements */
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
@@ -223,6 +231,7 @@ static void allocate_composition_memory(struct All_variables *E)
                 exit(10);
             }
         }
+
     }
 
     return;

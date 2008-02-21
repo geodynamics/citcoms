@@ -877,7 +877,7 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 
 void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 {
-  /* horizontal average output of temperature and rms velocity*/
+  /* horizontal average output of temperature, composition and rms velocity*/
   void compute_horiz_avg();
 
   int j;
@@ -894,7 +894,14 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1=gzdir_output_open(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
-        gzprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+
+        if (E->composition.on) {
+            int n;
+            for(n=0; n<E->composition.ncomp; n++)
+                gzprintf(fp1," %.4e", E->Have.C[n][j]);
+        }
+        fprintf(fp1,"\n");
     }
     gzclose(fp1);
   }
