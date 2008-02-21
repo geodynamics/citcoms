@@ -76,7 +76,7 @@ static void crossit(double *cross, double *A, double *B);
 static void fix_radius(struct All_variables *E,
                        double *radius, double *theta, double *phi,
                        double *x, double *y, double *z);
-static void fix_phi(double *phi);
+static void fix_angle(double *angle);
 static void fix_theta_phi(double *theta, double *phi);
 static int iget_radial_element(struct All_variables *E,
                                int j, int iel,
@@ -1513,8 +1513,8 @@ static void make_regular_grid(struct All_variables *E)
                     phi_max=phi_max+half_diff;
                     phi_min=phi_min-half_diff;
 
-                    fix_phi(&phi_max);
-                    fix_phi(&phi_min);
+                    fix_angle(&phi_max);
+                    fix_angle(&phi_min);
 
                     if (phi_min>phi_max)
                         {
@@ -2496,19 +2496,19 @@ static void fix_radius(struct All_variables *E,
 
 
 /******************************************************************/
-/* FIX PHI                                                        */
+/* FIX ANGLE                                                      */
 /*                                                                */
-/* This function constrains the value of phi to be                */
+/* This function constrains the value of angle to be              */
 /* between 0 and 2 PI                                             */
 /*                                                                */
 
-static void fix_phi(double *phi)
+static void fix_angle(double *angle)
 {
-    const double two_pi=2.0*M_PI;
+    const double two_pi = 2.0*M_PI;
 
-    double d2 = floor(*phi / two_pi);
+    double d2 = floor(*angle / two_pi);
 
-    *phi -= two_pi * d2;
+    *angle -= two_pi * d2;
 
     return;
 }
@@ -2525,14 +2525,14 @@ static void fix_theta_phi(double *theta, double *phi)
 {
     const double two_pi=2.0*M_PI;
 
-    fix_phi(theta);
+    fix_angle(theta);
 
     if (*theta > M_PI) {
         *theta = two_pi - *theta;
         *phi += M_PI;
     }
 
-    fix_phi(phi);
+    fix_angle(phi);
 
     return;
 }
