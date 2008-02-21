@@ -78,6 +78,7 @@ static void read_old_tracer_file(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
+static void free_tracer_arrays(struct All_variables *E, int j);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
@@ -665,9 +666,8 @@ void count_tracers_of_flavors(struct All_variables *E)
 
 
 
-void initialize_tracers(struct All_variables *E)
+static void get_new_tracers(struct All_variables *E)
 {
-
     if (E->trace.ic_method==0)
         make_tracer_array(E);
     else if (E->trace.ic_method==1)
@@ -692,12 +692,35 @@ void initialize_tracers(struct All_variables *E)
 
     find_tracers(E);
 
+    return;
+}
+
+void initialize_tracers(struct All_variables *E)
+{
+    get_new_tracers(E);
 
     /* count # of tracers of each flavor */
 
     if (E->trace.nflavors > 0)
         count_tracers_of_flavors(E);
 
+    return;
+}
+
+
+void dump_and_get_new_tracers_to_interpolate_fields(struct All_variables *E)
+{
+    int j;
+
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+        free_tracer_arrays(E, j);
+
+    E->trace.number_of_extra_quantities = 2;
+    E->trace.number_of_tracer_quantities =
+        E->trace.number_of_basic_quantities +
+        E->trace.number_of_extra_quantities;
+
+    get_new_tracers(E);
     return;
 }
 
@@ -863,7 +886,6 @@ static void read_tracer_file(struct All_variables *E)
 
     int read_double_vector(FILE *in, int num_columns, double *fields);
     int icheck_processor_shell();
-    int isum_tracers();
     void sphere_to_cart();
     void cart_to_sphere();
     void expand_tracer_arrays();
@@ -875,7 +897,6 @@ static void read_tracer_file(struct All_variables *E)
     FILE *fptracer;
 
     fptracer=fopen(E->trace.tracer_file,"r");
-    fprintf(E->trace.fpt,"Opening %s\n",E->trace.tracer_file);
 
     fgets(input_s,200,fptracer);
     sscanf(input_s,"%d %d",&number_of_tracers,&ncolumns);
@@ -906,7 +927,7 @@ static void read_tracer_file(struct All_variables *E)
 
             len = read_double_vector(fptracer, ncol, buffer);
             if (len != ncol) {
-                fprintf(E->trace.fpt,"ERROR(read tracer file) - wrong input file format: %s\n", E->trace.tracer_file);
+                fprintf(E->trace.fpt,"ERROR(read tracer file) - wrong input file format: %d-th tracer in %s\n", kk, E->trace.tracer_file);
                 fflush(E->trace.fpt);
                 exit(10);
             }
@@ -956,6 +977,20 @@ static void read_tracer_file(struct All_variables *E)
 
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
                 E->trace.ntracers[j]);
+
+        /** debug **
+        for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
+            fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
+                    E->trace.basicq[j][0][kk],
+                    E->trace.basicq[j][1][kk],
+                    E->trace.basicq[j][2][kk]);
+            fprintf(E->trace.fpt, "   extraq=");
+            for (i=0; i<E->trace.number_of_extra_quantities; i++)
+                fprintf(E->trace.fpt, " %g", E->trace.extraq[j][i][kk]);
+            fprintf(E->trace.fpt, "\n");
+        }
+        fflush(E->trace.fpt);
+        /**/
 
     } /* end j */
 
@@ -1082,6 +1117,20 @@ static void read_old_tracer_file(struct All_variables *E)
                 E->trace.extraq[j][i][kk]=buffer[i+3];
 
         }
+
+        /** debug **
+        for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
+            fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
+                    E->trace.basicq[j][0][kk],
+                    E->trace.basicq[j][1][kk],
+                    E->trace.basicq[j][2][kk]);
+            fprintf(E->trace.fpt, "   extraq=");
+            for (i=0; i<E->trace.number_of_extra_quantities; i++)
+                fprintf(E->trace.fpt, " %g", E->trace.extraq[j][i][kk]);
+            fprintf(E->trace.fpt, "\n");
+        }
+        fflush(E->trace.fpt);
+        /**/
 
         fprintf(E->trace.fpt,"Read %d tracers from file %s\n",numtracers,output_file);
         fflush(E->trace.fpt);
@@ -1427,6 +1476,30 @@ void allocate_tracer_arrays(struct All_variables *E,
     return;
 }
 
+
+/****** FREE TRACER ARRAYS *****************************************/
+static void free_tracer_arrays(struct All_variables *E, int j)
+{
+    int kk;
+
+    if (E->trace.nflavors > 0) {
+        for (kk=0;kk<E->trace.nflavors;kk++)
+            free(E->trace.ntracer_flavor[j][kk]);
+        free(E->trace.ntracer_flavor[j]);
+    }
+
+    for (kk=0;kk<E->trace.number_of_extra_quantities;kk++)
+        free(E->trace.extraq[j][kk]);
+
+    for (kk=0;kk<E->trace.number_of_basic_quantities;kk++)
+        free(E->trace.basicq[j][kk]);
+
+    free(E->trace.ielement[j]);
+
+    E->trace.max_ntracers[j] = E->trace.ntracers[j] = 0;
+
+    return;
+}
 
 
 /****** EXPAND TRACER ARRAYS *****************************************/

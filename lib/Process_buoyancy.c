@@ -178,10 +178,13 @@ static void output_interpolated_fields(struct All_variables *E)
 
 void post_processing(struct All_variables *E)
 {
-  if (E->trace.itracer_interpolate_fields && E->control.tracer)
-      output_interpolated_fields(E);
+    void dump_and_get_new_tracers_to_interpolate_fields(struct All_variables *E);
 
-  return;
+    if (E->trace.itracer_interpolate_fields && E->control.tracer) {
+        dump_and_get_new_tracers_to_interpolate_fields(E);
+        output_interpolated_fields(E);
+    }
+    return;
 }
 
 
