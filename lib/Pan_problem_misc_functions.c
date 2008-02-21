@@ -189,6 +189,54 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 }
 
 
+/*
+ * Scan input str to get a double vector *values. The vector length is from
+ * input len. The input str contains white-space seperated numbers. Return
+ * the number of columns read (can be less than len).
+ */
+static int scan_double_vector(const char *str, int len, double *values)
+{
+    char *nptr, *endptr;
+    int i;
+
+    /* cast to avoid compiler warning */
+    nptr = endptr = (char *) str;
+
+    for (i = 0; i < len; ++i) {
+        values[i] = strtod(nptr, &endptr);
+        if (nptr == endptr) {
+            /* error: no conversion is performed */
+            return i;
+        }
+        nptr = endptr;
+    }
+
+    /** debug **
+    for (i = 0; i < len; ++i) fprintf(stderr, "%e, ", values[i]);
+    fprintf(stderr, "\n");
+    /**/
+    return len;
+}
+
+
+/*
+ * From input file, read a line, which contains white-space seperated numbers
+ * of lenght num_columns, store the numbers in a double array, return the
+ * number of columns read (can be less than num_columns).
+ */
+int read_double_vector(FILE *in, int num_columns, double *fields)
+{
+    char buffer[256], *p;
+
+    p = fgets(buffer, 255, in);
+    if (!p) {
+        return 0;
+    }
+
+    return scan_double_vector(buffer, num_columns, fields);
+}
+
+
 /* Read in a file containing previous values of a field. The input in the parameter
    file for this should look like: `previous_name_file=string' and `previous_name_column=int'
    where `name' is substituted by the argument of the function.

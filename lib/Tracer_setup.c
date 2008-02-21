@@ -861,6 +861,7 @@ static void read_tracer_file(struct All_variables *E)
     int icushion;
     int i, j;
 
+    int read_double_vector(FILE *in, int num_columns, double *fields);
     int icheck_processor_shell();
     int isum_tracers();
     void sphere_to_cart();
@@ -869,7 +870,7 @@ static void read_tracer_file(struct All_variables *E)
 
     double x,y,z;
     double theta,phi,rad;
-    double extra[100];
+    double buffer[100];
 
     FILE *fptracer;
 
@@ -900,20 +901,19 @@ static void read_tracer_file(struct All_variables *E)
         allocate_tracer_arrays(E,j,iestimate);
 
         for (kk=1;kk<=number_of_tracers;kk++) {
-            fgets(input_s,200,fptracer);
-            if (E->trace.number_of_extra_quantities==0) {
-                sscanf(input_s,"%lf %lf %lf\n",&theta,&phi,&rad);
-            }
-            else if (E->trace.number_of_extra_quantities==1) {
-                sscanf(input_s,"%lf %lf %lf %lf\n",&theta,&phi,&rad,&extra[0]);
-            }
-            /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
-            /* this part has to be changed... */
-            else {
-                fprintf(E->trace.fpt,"ERROR(read tracer file)-huh?\n");
+            int len, ncol;
+            ncol = 3 + E->trace.number_of_extra_quantities;
+
+            len = read_double_vector(fptracer, ncol, buffer);
+            if (len != ncol) {
+                fprintf(E->trace.fpt,"ERROR(read tracer file) - wrong input file format: %s\n", E->trace.tracer_file);
                 fflush(E->trace.fpt);
                 exit(10);
             }
+
+            theta = buffer[0];
+            phi = buffer[1];
+            rad = buffer[2];
 
             sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
 
@@ -950,7 +950,7 @@ static void read_tracer_file(struct All_variables *E)
             E->trace.basicq[j][5][E->trace.ntracers[j]]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[j][i][E->trace.ntracers[j]]=extra[i];
+                E->trace.extraq[j][i][E->trace.ntracers[j]]=buffer[i+3];
 
         } /* end kk, number of tracers */
 
@@ -992,8 +992,8 @@ static void read_old_tracer_file(struct All_variables *E)
 
     double rdum1;
     double theta,phi,rad;
-    double extra[100];
     double x,y,z;
+    double buffer[100];
 
     void sphere_to_cart();
 
@@ -1051,20 +1051,19 @@ static void read_old_tracer_file(struct All_variables *E)
         E->trace.ntracers[j]=numtracers;
 
         for (kk=1;kk<=numtracers;kk++) {
-            fgets(input_s,200,fp1);
-            if (E->trace.number_of_extra_quantities==0) {
-                sscanf(input_s,"%lf %lf %lf\n",&theta,&phi,&rad);
-            }
-            else if (E->trace.number_of_extra_quantities==1) {
-                sscanf(input_s,"%lf %lf %lf %lf\n",&theta,&phi,&rad,&extra[0]);
-            }
-            /* XXX: if E->trace.number_of_extra_quantities is greater than 1 */
-            /* this part has to be changed... */
-            else {
-                fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-huh?\n");
+            int len, ncol;
+            ncol = 3 + E->trace.number_of_extra_quantities;
+
+            len = read_double_vector(fp1, ncol, buffer);
+            if (len != ncol) {
+                fprintf(E->trace.fpt,"ERROR(read_old_tracer_file) - wrong input file format: %s\n", output_file);
                 fflush(E->trace.fpt);
                 exit(10);
             }
+
+            theta = buffer[0];
+            phi = buffer[1];
+            rad = buffer[2];
 
             sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
 
@@ -1080,7 +1079,7 @@ static void read_old_tracer_file(struct All_variables *E)
             E->trace.basicq[j][5][kk]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[j][i][kk]=extra[i];
+                E->trace.extraq[j][i][kk]=buffer[i+3];
 
         }
 
