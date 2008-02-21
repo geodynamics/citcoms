@@ -210,16 +210,11 @@ int main(argc,argv)
 	output_checkpoint(E);
     }
 
-    /* 
-       make sure that E->mat always gets initialized as a function of depth
-       the previous version would not call construct_mat_group if E->control.mat_control != 1
-       
-       i intend to restore default behavior here
-       
-       TWB 
-
-    */
-    initialize_material(E);
+    /* updating time-dependent material group
+     * if mat_control is 0, the material group has already been
+     * initialized in initial_conditions() */
+    if(E->control.mat_control==1)
+      read_mat_from_file(E);
 
 
     if(E->control.vbcs_file==1)
