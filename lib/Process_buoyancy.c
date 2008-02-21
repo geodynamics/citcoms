@@ -43,6 +43,7 @@
 
 static void output_interpolated_fields(struct All_variables *E)
 {
+    void compute_horiz_avg(struct All_variables *E);
     void full_get_shape_functions(struct All_variables *E,
                                   double shp[9], int nelem,
                                   double theta, double phi, double rad);
@@ -91,6 +92,9 @@ static void output_interpolated_fields(struct All_variables *E)
             ncolumns += E->composition.ncomp;
         }
 
+        /* get the horizontal average of temperature and composition */
+        compute_horiz_avg(E);
+
         /* allocate memory for fields that need to be interpolated,
          * ie. excluding [flavor0, flavor1, radius] */
         fields = malloc((ncolumns-3) * sizeof(fields));
@@ -119,9 +123,11 @@ static void output_interpolated_fields(struct All_variables *E)
             /* fetch element data for interpolation */
             for(i=1; i<=ENODES3D; i++) {
                 int node = E->ien[m][nelem].node[i];
-                fields[0][i] = E->T[m][node];
+                int nz = (node - 1) % E->lmesh.noz + 1;
+                fields[0][i] = E->T[m][node] - E->Have.T[nz];
                 for(j=0, k=1; j<E->composition.ncomp; j++, k++)
-                    fields[k][i] = E->composition.comp_node[m][j][node];
+                    fields[k][i] = E->composition.comp_node[m][j][node]
+                        - E->Have.C[j][nz];
             }
 
             if(E->parallel.nprocxy == 12) {
@@ -331,7 +337,7 @@ void heat_flux(E)
 
 
 /*
-  compute horizontal average of temperature and rms velocity
+  compute horizontal average of temperature, composition and rms velocity
 */
 void compute_horiz_avg(struct All_variables *E)
 {
