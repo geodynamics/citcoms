@@ -29,6 +29,9 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#ifdef USE_GGRD
+#include "ggrd_handling.h"
+#endif
 
 /*=======================================================================
   Calculate ages (MY) for opening input files -> material, ages, velocities
@@ -65,6 +68,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     nox=E->mesh.nox;
     noy=E->mesh.noy;
     noz=E->mesh.noz;
+
     nox1=E->lmesh.nox;
     noz1=E->lmesh.noz;
     noy1=E->lmesh.noy;
@@ -78,7 +82,8 @@ void regional_read_input_files_for_timesteps(E,action,output)
 
     age=find_age_in_MY(E);
 
-    if (age < 0.0) { /* age is negative -> use age=0 for input files */
+    if (age < 0.0) { /* age is negative -> use age=0 for input
+			files */
       intage = 0;
       newage2 = newage1 = 0.0;
       pos_age = 0;
@@ -91,8 +96,10 @@ void regional_read_input_files_for_timesteps(E,action,output)
     }
 
     switch (action) { /* set up files to open */
-
     case 1:  /* read velocity boundary conditions */
+#ifdef USE_GGRD
+      if(!E->control.ggrd.vtop_control){	/* regular input */
+#endif
       sprintf(output_file1,"%s%0.0f",E->control.velocity_boundary_file,newage1);
       sprintf(output_file2,"%s%0.0f",E->control.velocity_boundary_file,newage2);
       fp1=fopen(output_file1,"r");
@@ -115,9 +122,15 @@ void regional_read_input_files_for_timesteps(E,action,output)
         else
            fprintf(E->fp,"Velocity: File2 = No file inputted (negative age)\n");
       }
+#ifdef USE_GGRD
+      }	
+#endif
       break;
 
       case 2:  /* read ages for lithosphere temperature assimilation */
+#ifdef USE_GGRD
+      if(!E->control.ggrd.age_control){	/* regular input */
+#endif
         sprintf(output_file1,"%s%0.0f",E->control.lith_age_file,newage1);
         sprintf(output_file2,"%s%0.0f",E->control.lith_age_file,newage2);
         fp1=fopen(output_file1,"r");
@@ -139,6 +152,9 @@ void regional_read_input_files_for_timesteps(E,action,output)
           else
             fprintf(E->fp,"Age: File2 = No file inputted (negative age)\n");
         }
+#ifdef USE_GGRD
+      }	
+#endif
         break;
 
       case 3:  /* read element materials */
@@ -179,6 +195,11 @@ void regional_read_input_files_for_timesteps(E,action,output)
     switch (action) { /* Read the contents of files and average */
 
     case 1:  /* velocity boundary conditions */
+#ifdef USE_GGRD
+      if(E->control.ggrd.vtop_control){
+	ggrd_read_vtop_from_file(E, 0);
+      }else{
+#endif
       nnn=nox*noy;
       for(i=1;i<=dims;i++)  {
         VB1[i]=(float*) malloc ((nnn+1)*sizeof(float));
@@ -218,9 +239,19 @@ void regional_read_input_files_for_timesteps(E,action,output)
           free ((void *) VB1[i]);
           free ((void *) VB2[i]);
       }
+
+
+#ifdef USE_GGRD
+      } /* end of branch if allowing for ggrd handling */
+#endif
       break;
 
       case 2:  /* ages for lithosphere temperature assimilation */
+#ifdef USE_GGRD
+	if(E->control.ggrd.age_control){
+	  ggrd_read_age_from_file(E, 0);
+	}else{
+#endif
         for(i=1;i<=noy;i++)
           for(j=1;j<=nox;j++) {
             node=j+(i-1)*nox;
@@ -235,6 +266,9 @@ void regional_read_input_files_for_timesteps(E,action,output)
           }
         fclose(fp1);
         if (pos_age) fclose(fp2);
+#ifdef USE_GGRD
+	} /* end of branch if allowing for ggrd handling */
+#endif
         break;
 
       case 3:  /* read element materials */

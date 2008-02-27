@@ -43,6 +43,9 @@ void read_tic_from_file(struct All_variables *);
 #ifdef USE_GZDIR
 void restart_tic_from_gzdir_file(struct All_variables *);
 #endif
+#ifdef USE_GGRD
+#include "ggrd_handling.h"
+#endif
 
 
 void tic_input(struct All_variables *E)

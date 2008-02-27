@@ -444,7 +444,14 @@ void read_initial_settings(struct All_variables *E)
   input_string("mat_file",E->control.mat_file,"",m);
 
 #ifdef USE_GGRD
+
+
   /* 
+     
+  note that this part of the code might override mat_control, file_vbcs,
+     
+  MATERIAL CONTROL 
+
      usage:
      (a) 
 
@@ -460,21 +467,44 @@ void read_initial_settings(struct All_variables *E)
      ggrd_time_hist_file="mythist/times.dat"
 
 
-     time-dependent, will look for n files named
-     mythist/i/weak.grd where i = 1...n and n is the number of times as specified in ggrd_time_hist_file
-     which has time in Ma for n stages like so
+     time-dependent, will look for n files named mythist/i/weak.grd
+     where i = 1...n and n is the number of times as specified in
+     ggrd_time_hist_file which has time in Ma for n stages like so
+
+     -->age is positive, and forward marching in time decreases the age<--
      
-     -60 -30
-     -30 -15
-     -15 0
+     0 15
+     15 30
+     30 60
      
   */
   ggrd_init_master(&E->control.ggrd);
-  input_string("ggrd_time_hist_file",E->control.ggrd.time_hist.file,"",m); /* time history file, if not specified, will use constant VBCs and material grids */
-  input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
+  /* this is controlling velocities, material, and age */
+  /* time history file, if not specified, will use constant VBCs and material grids */
+  input_string("ggrd_time_hist_file",
+	       E->control.ggrd.time_hist.file,"",m); 
+  /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
+  input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); 
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
   if(E->control.ggrd.mat_control) /* this will override mat_control setting */
     E->control.mat_control = 1;
+
+  /* 
+     
+  surface velocity control, similar to material control above
+  
+  if time-dependent, will look for ggrd_vtop_file/i/v?.grd
+  if constant, will look for ggrd_vtop_file/v?.grd
+
+  where vp/vt.grd are Netcdf GRD files with East and South velocities in cm/yr
+  
+
+  */
+  input_int("ggrd_vtop_control",&(E->control.ggrd.vtop_control),"0",m); 
+  input_string("ggrd_vtop_dir",E->control.ggrd.vtop_dir,"",m); /* file to read prefactors from */
+  if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
+    E->control.vbcs_file = 1;
+
 #endif
 
   input_int("nodex",&(E->mesh.nox),"essential",m);

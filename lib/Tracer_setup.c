@@ -46,8 +46,9 @@
 #include "composition_related.h"
 
 #ifdef USE_GGRD
-void ggrd_init_tracer_flavors(struct All_variables *);
+#include "ggrd_handling.h"
 #endif
+
 #ifdef USE_GZDIR
 int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);

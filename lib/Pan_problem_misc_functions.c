@@ -57,6 +57,7 @@ void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
 void myerror(struct All_variables *,char *);
 void xyz2rtp(float ,float ,float ,float *);
+void xyz2rtpd(float ,float ,float ,double *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
 
@@ -421,6 +422,15 @@ void xyz2rtp(float x,float y,float z,float *rout)
   rout[0] = sqrt(tmp2);		/* r */
   rout[1] = atan2(sqrt(tmp1),z); /* theta */
   rout[2] = atan2(y,x);		/* phi */
+}
+void xyz2rtpd(float x,float y,float z,double *rout)
+{
+  double tmp1,tmp2;
+  tmp1 = (double)x*(double)x + (double)y*(double)y;
+  tmp2 = tmp1 + (double)z*(double)z;
+  rout[0] = sqrt(tmp2);		/* r */
+  rout[1] = atan2(sqrt(tmp1),(double)z); /* theta */
+  rout[2] = atan2((double)y,(double)x);		/* phi */
 }
 
 

@@ -48,6 +48,13 @@ void lith_age_input(struct All_variables *E)
   E->control.temperature_bound_adj = 0;
 
   input_int("lith_age",&(E->control.lith_age),"0",m);
+#ifdef USE_GGRD
+  input_int("ggrd_age_control",&(E->control.ggrd.age_control),"0",m); /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
+  if(E->control.ggrd.age_control){
+    E->control.lith_age = 1;	
+  }
+#endif
+
   input_float("mantle_temp",&(E->control.lith_age_mantle_temp),"1.0",m);
 
   if (E->control.lith_age) {
