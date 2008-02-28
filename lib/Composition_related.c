@@ -240,13 +240,30 @@ static void allocate_composition_memory(struct All_variables *E)
 
 void init_composition(struct All_variables *E)
 {
-  if (E->composition.ichemical_buoyancy &&
-      E->composition.ibuoy_type) {
-    fill_composition(E);
+    /* XXX: Currently, only the ratio method works here.           */
+    /* Will have to come back here to include the absolute method. */
+
+    /* ratio method */
+    if (E->composition.ibuoy_type==1) {
+        compute_elemental_composition_ratio_method(E);
+    }
+
+    /* absolute method */
+    if (E->composition.ibuoy_type!=1) {
+        fprintf(E->trace.fpt,"Error(compute...)-only ratio method now\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+
+    /* for empty elements */
     check_initial_composition(E);
+
+    /* Map elemental composition to nodal points */
+    map_composition_to_nodes(E);
+
     init_bulk_composition(E);
-  }
-  return;
+
+    return;
 }
 
 
@@ -255,16 +272,9 @@ static void check_initial_composition(struct All_variables *E)
     /* check empty element if using ratio method */
     if (E->composition.ibuoy_type == 1) {
         if (E->trace.istat_iempty) {
-            fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is REALLY LOW, %d elements contain no tracer\n", E->trace.istat_iempty);
-
-            /* if there are only a few empty elements, using neighboring */
-            /* elements to determine the initial composition.            */
-            if ((1e4*E->trace.istat_iempty) < E->lmesh.nel)
-                fill_composition_from_neighbors(E);
-            else if (E->trace.itracer_warnings) {
-                fflush(E->trace.fpt);
-                exit(10);
-            }
+            /* using the composition of neighboring elements to determine
+               the initial composition of empty elements. */
+            fill_composition_from_neighbors(E);
         }
     }
 
@@ -407,6 +417,8 @@ static void fill_composition_from_neighbors(struct All_variables *E)
     const int n_nghbrs = 4;
     int nghbrs[n_nghbrs];
     int *is_empty;
+
+    fprintf(E->trace.fpt,"WARNING(check_initial_composition)-number of tracers is low, %d elements contain no tracer initially\n", E->trace.istat_iempty);
 
     fprintf(E->trace.fpt,"Using neighboring elements for initial composition...\n");
 
