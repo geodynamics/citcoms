@@ -41,148 +41,6 @@ int epsilon[4][4] = {   /* Levi-Cita epsilon */
   {0, 1,-1, 1} };
 
 
-/*=====================================================================
-  Variable dimension matrix allocation  function from numerical recipes
-  Note: ANSII consistency requires some additional features !
-  =====================================================================  */
-
-double **dmatrix(nrl,nrh,ncl,nch)
-     int nrl,nrh,ncl,nch;
-{
-  int i,nrow = nrh-nrl+1,ncol=nch-ncl+1;
-  double **m;
-
-  /* allocate pointer to rows  */
-  m=(double **) malloc((nrow+1)* sizeof(double *));
-  m+=1;
-  m-= nrl;
-
-  /*  allocate rows and set the pointers accordingly   */
-  m[nrl] = (double *) malloc((nrow*ncol+1)* sizeof(double));
-  m[nrl] += 1;
-  m[nrl] -= ncl;
-
-  for(i=nrl+1;i<=nrh;i++)
-     m[i] = m[i-1] + ncol;
-
-  return(m);		}
-
-
-float **fmatrix(nrl,nrh,ncl,nch)
-     int nrl,nrh,ncl,nch;
-{
-  int i,nrow = nrh-nrl+1,ncol=nch-ncl+1;
-  float **m;
-
-  /* allocate pointer to rows  */
-  m=(float **) malloc((unsigned)((nrow+1)* sizeof(float *)));
-  m+=1;
-  m-= nrl;
-
-  /*  allocate rows and set the pointers accordingly   */
-  m[nrl] = (float *) malloc((unsigned)((nrow*ncol+1)* sizeof(float)));
-  m[nrl] += 1;
-  m[nrl] -= ncl;
-
-  for(i=nrl+1;i<=nrh;i++)
-     m[i] = m[i-1] + ncol;
-
-  return(m);		}
-
-
-void dfree_matrix(m,nrl,nrh,ncl,nch)
-     double **m;
-     int nrl,nrh,ncl,nch;
-{
-  int i;
-  for(i=nrh;i>=nrl;i--)
-    free((void *)(m[i] + ncl));
-  free((void *) (m+nrl));
-  return;
-}
-
-void ffree_matrix(m,nrl,nrh,ncl,nch)
-     float **m;
-     int nrl,nrh,ncl,nch;
-{
-  int i;
-  for(i=nrh;i>=nrl;i--)
-    free((void *)(m[i] + ncl));
-  free((void *) (m+nrl));
-  return;
-}
-
-/*=============================================================
-  Functions to allocate/remove space for variable sized vector.
-  =============================================================  */
-
-double *dvector(nl,nh)
-     int nl,nh;
-{
-  double *v;
-  v=(double *) malloc((unsigned) ( nh - nl +1)* sizeof(double));
-  return( v-nl );  }
-
-float *fvector(nl,nh)
-     int nl,nh;
-{
-  float *v;
-  v=(float *) malloc((unsigned) ( nh - nl +1)* sizeof(float));
-  return( v-nl );  }
-
-void dfree_vector(v,nl,nh)
-     double *v;
-     int nl,nh;
-{
-  free((char*) (v+nl));	}
-
-void ffree_vector(v,nl,nh)
-     float *v;
-     int nl,nh;
-{
-  free((char*) (v+nl));	}
-
-int *sivector(nl,nh)
-     int nl,nh;
-{
-  int *v;
-  v=(int*) malloc((unsigned)(nh-nl +1) * sizeof(int));
-  return (v-nl);
-}
-
-void sifree_vector(v,nl,nh)
-     int *v;
-     int nl,nh;
-{ free((char *) (v+nl));    }
-
-
-
-void dvcopy(E,A,B,a,b)
-     struct All_variables *E;
-     double **A,**B;
-     int a,b;
-
-{   int i,m;
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=a;i<=b;i++)
-      A[m][i] = B[m][i];
-
-    return; }
-
-void vcopy(A,B,a,b)
-     float *A,*B;
-     int a,b;
-
-{   int i;
-
-    for(i=a;i<=b;i++)
-      A[i] = B[i];
-
-    return; }
-
-
-
 /*  ===========================================================
     Iterative solver also using multigrid  ........
     ===========================================================  */
@@ -895,28 +753,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
 }
 
-void print_elt_k(E,a)
-     struct All_variables *E;
-     double a[24*24];
-
-{ int l,ll,n;
-
-  printf("elt k is ...\n");
-
-
-  n = loc_mat_size[E->mesh.nsd];
-
-  for(l=0;l<n;l++)
-    { fprintf(stderr,"\n");fflush(stderr);
-      for(ll=0;ll<n;ll++)
-	{ fprintf(stderr,"%s%.3e ",a[ll*n+l] >= 0.0 ? "+" : "",a[ll*n+l]);
-	  fflush(stderr);
-	}
-    }
-  fprintf(stderr,"\n"); fflush(stderr);
-
-  return; }
-
 
 double cofactor(A,i,j,n)
      double A[4][4];
@@ -924,7 +760,6 @@ double cofactor(A,i,j,n)
 
 { int k,l,p,q;
   double determinant();
-  double **dmatrix();
 
   double B[4][4]; /* because of recursive behaviour of det/cofac, need to use
 			       new copy of B at each 'n' level of this routine */
@@ -996,76 +831,6 @@ double gen_determinant(A,n)
 }
 
 
- float area_of_4node(x1,y1,x2,y2,x3,y3,x4,y4)
- float x1,y1,x2,y2,x3,y3,x4,y4;
-
- {
- float area;
-
- area = fabs(0.5*(x1*(y2-y4)+x2*(y4-y1)+x4*(y1-y2)))
-      + fabs(0.5*(x2*(y3-y4)+x3*(y4-y2)+x4*(y2-y3)));
-
- return area;
- }
-
-/* =====================================*/
- double sphere_h(l,m,t,f,ic)
- int l,m,ic;
- double t,f;
- {
-
- double plgndr_a(),sphere_hamonics;
-
- sphere_hamonics = 0.0;
- if (ic==0)
-    sphere_hamonics = cos(m*f)*plgndr_a(l,m,t);
- else if (m)
-    sphere_hamonics = sin(m*f)*plgndr_a(l,m,t);
-
- return sphere_hamonics;
- }
-
-/* =====================================*/
- double plgndr_a(l,m,t)
- int l,m;
- double t;
- {
-
-  int i,ll;
-  double x,fact,pll,pmm,pmmp1,somx2,plgndr;
-  const double two=2.0;
-  const double one=1.0;
-
-  x = cos(t);
-  pmm=one;
-  if(m>0) {
-    somx2=sqrt((one-x)*(one+x));
-    fact = one;
-    for (i=1;i<=m;i++)   {
-      pmm = -pmm*fact*somx2;
-      fact = fact + two;
-      }
-    }
-
-  if (l==m)
-     plgndr = pmm;
-  else  {
-     pmmp1 = x*(2*m+1)*pmm;
-     if(l==m+1)
-       plgndr = pmmp1;
-     else   {
-       for (ll=m+2;ll<=l;ll++)  {
-         pll = (x*(2*ll-1)*pmmp1-(ll+m-1)*pmm)/(ll-m);
-         pmm = pmmp1;
-         pmmp1 = pll;
-         }
-       plgndr = pll;
-       }
-     }
-
- return plgndr;
- }
-
 /* =====================================
  =====================================*/
  double modified_plgndr_a(l,m,t)
@@ -1119,47 +884,3 @@ double gen_determinant(A,n)
  return plgndr;
  }
 
- /* ===================================  */
-  double sqrt_multis(jj,ii)
-  int ii,jj;
- {
-  int i;
-  double sqrt_multisa;
-
-  sqrt_multisa = 1.0;
-  if(jj>ii)
-    for (i=jj;i>ii;i--)
-      sqrt_multisa *= 1.0/sqrt((double)i);
-
-  return sqrt_multisa;
-  }
-
- /* ===================================  */
-  double multis(ii)
-  int ii;
- {
-  int i;
-  double multisa;
-
-  multisa = 1.0;
-  if (ii)
-    for (i=2;i<=ii;i++)
-      multisa *= (double)i;
-
-  return multisa;
-  }
-
-
- /* ===================================  */
- int int_multis(ii)
- int ii;
- {
- int i,multisa;
-
- multisa = 1;
- if (ii)
-   for (i=2;i<=ii;i++)
-     multisa *= i;
-
- return multisa;
- }

@@ -636,7 +636,6 @@ void allocate_common_vars(E)
   E->P[j]        = (double *) malloc((npno+1)*sizeof(double));
   E->T[j]        = (double *) malloc((nno+1)*sizeof(double));
   E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
-  E->edot[j]     = (float *) malloc((nno+1)*sizeof(float));
   E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
@@ -644,8 +643,6 @@ void allocate_common_vars(E)
 
   for(i=1;i<=E->mesh.nsd;i++)
       E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
-
-  E->age[j]      = (float *)malloc((nsf+2)*sizeof(float));
 
   E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
@@ -747,12 +744,6 @@ void allocate_common_vars(E)
     nxyz = elx*ely;
     E->CC[i][j] =(struct CC *)  malloc((1)*sizeof(struct CC));
     E->CCX[i][j]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
-    /* Test */
-    E->ELEMENT[i][j] = (unsigned int *) malloc ((nel+1)*sizeof(unsigned int));
-
-    for (k=1;k<=nel;k++)
-       E->ELEMENT[i][j][k] = 0;
-    /*ccccc*/
 
     E->elt_del[i][j] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
 
@@ -849,18 +840,6 @@ void allocate_velocity_vars(E)
     for(i=0;i<E->lmesh.neq;i++)
       E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
 
-    if(E->control.tracer == 1)  {
-      for(i=1;i<=E->mesh.nsd;i++)     {
-        E->GV[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
-        E->GV1[j][i]=(float*) malloc(((E->lmesh.nno+1)*E->parallel.nproc+1)*sizeof(float));
-        E->V[j][i]=(float*) malloc((E->lmesh.nno+1)*sizeof(float));
-
-        for(k=0;k<(E->lmesh.nno+1)*E->parallel.nproc;k++)   {
-          E->GV[j][i][k]=0.0;
-          E->GV1[j][i][k]=0.0;
-        }
-      }
-    }
 
     for(k=1;k<=E->mesh.nsd;k++)
       for(i=1;i<=E->lmesh.nnov;i++)
@@ -1047,7 +1026,6 @@ void set_up_nonmg_aliases(E,j)
   E->cc[j] = E->CC[E->mesh.levmax][j];
   E->ccx[j] = E->CCX[E->mesh.levmax][j];
   E->Mass[j] = E->MASS[E->mesh.levmax][j];
-  E->element[j] = E->ELEMENT[E->mesh.levmax][j];
   E->gDA[j] = E->GDA[E->mesh.levmax][j];
   E->gNX[j] = E->GNX[E->mesh.levmax][j];
 

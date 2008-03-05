@@ -725,8 +725,6 @@ struct All_variables {
 
     higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
     int *Node_map [MAX_LEVELS][NCS];
-    int *Node_eqn [MAX_LEVELS][NCS];
-    int *Node_k_id[MAX_LEVELS][NCS];
 
     double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
 
@@ -735,18 +733,17 @@ struct All_variables {
     double *heating_visc[NCS];
     double *heating_latent[NCS];
 
-    double *P[NCS],*F[NCS],*H[NCS],*S[NCS],*U[NCS];
+    double *P[NCS],*F[NCS],*U[NCS];
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];
-    float *NP[NCS],*edot[NCS],*Mass[NCS];
+    float *NP[NCS],*Mass[NCS];
     float *MASS[MAX_LEVELS][NCS];
     double *TMass[NCS];
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
-    float *V[NCS][4],*GV[NCS][4],*GV1[NCS][4];
 
     float *stress[NCS];
     float *gstress[NCS];
@@ -761,11 +758,9 @@ struct All_variables {
     int *surf_element[NCS],*surf_node[NCS];
     int *mat[NCS];
     float *VIP[NCS];
-    unsigned int *ELEMENT[MAX_LEVELS][NCS],*NODE[MAX_LEVELS][NCS];
-    unsigned int *element[NCS],*node[NCS];
-    unsigned int *eqn[NCS],*EQN[MAX_LEVELS][NCS];
+    unsigned int *NODE[MAX_LEVELS][NCS];
+    unsigned int *node[NCS];
 
-    float *age[NCS];	/* nodal weightings */
     float *age_t;
 
     struct Shape_function_dx *GNX[MAX_LEVELS][NCS];
