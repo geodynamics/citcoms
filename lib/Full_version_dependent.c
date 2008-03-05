@@ -176,6 +176,7 @@ void full_node_locations(E)
   FILE *fp1;
 
   void full_coord_of_cap();
+  void rotate_mesh ();
   void compute_angle_surf_area ();
 
   rr = (double *)  malloc((E->mesh.noz+1)*sizeof(double));

@@ -272,17 +272,15 @@ void tracer_post_processing(struct All_variables *E)
     E->trace.istat_elements_checked=0;
     E->trace.istat1=0;
 
-    /* write timing information every 20 steps */
-    if ((E->monitor.solution_cycles % 20) == 0) {
-        fprintf(E->trace.fpt, "STEP %d\n", E->monitor.solution_cycles);
+    fprintf(E->trace.fpt, "STEP %d\n", E->monitor.solution_cycles);
 
-        fprintf(E->trace.fpt, "Advecting tracers takes %f seconds.\n",
-                E->trace.advection_time - E->trace.find_tracers_time);
-        fprintf(E->trace.fpt, "Finding element takes %f seconds.\n",
-                E->trace.find_tracers_time - E->trace.lost_souls_time);
-        fprintf(E->trace.fpt, "Exchanging lost tracers takes %f seconds.\n",
-                E->trace.lost_souls_time);
-    }
+    fprintf(E->trace.fpt, "Tracer advecting takes %f seconds.\n",
+            E->trace.advection_time);
+    fprintf(E->trace.fpt, "|--Tracer finding takes %f seconds.\n",
+            E->trace.find_tracers_time);
+    fprintf(E->trace.fpt, "  |--Tracer exchanging takes %f seconds.\n",
+            E->trace.lost_souls_time);
+
 
     if(E->control.verbose){
       fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
@@ -316,9 +314,9 @@ void tracer_post_processing(struct All_variables *E)
 
         }
       }
-      fflush(E->trace.fpt);
     }
 
+    fflush(E->trace.fpt);
     return;
 }
 

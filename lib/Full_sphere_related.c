@@ -154,7 +154,7 @@ static int find_intersection(double *x, double *y,
 
 void full_coord_of_cap(struct All_variables *E, int m, int icap)
 {
-  int i, j, k, lev, temp, elx, ely;
+  int i, j, k, lev, temp, elx, ely, nox, noy, noz;
   int node, snode, ns, step;
   int lelx, lely, lnox, lnoy;
   int lvnox, lvnoy, lvnoz;
@@ -232,6 +232,8 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
      /* # of elements/nodes per cap */
      elx = E->lmesh.ELX[lev]*E->parallel.nprocx;
      ely = E->lmesh.ELY[lev]*E->parallel.nprocy;
+     nox = elx+1;
+     noy = ely+1;
 
      /* # of elements/nodes per processor */
      lelx = E->lmesh.ELX[lev];

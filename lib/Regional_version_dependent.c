@@ -149,6 +149,7 @@ void regional_node_locations(E)
   FILE *fp1;
 
   void regional_coord_of_cap();
+  void rotate_mesh ();
   void compute_angle_surf_area ();
   void parallel_process_termination();
   void myerror();
