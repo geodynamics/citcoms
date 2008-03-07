@@ -1,15 +1,47 @@
+2008-03-07 19:33  tan2
+
+	* NEWS, configure.ac: Update NEWS and version number for v3.0.2
+
+2008-02-28 20:53  tan2
+
+	* lib/Composition_related.c: Removed artificial tolerance of empty
+	  elements. This greatly decreases the minimal number of tracers per
+	  element required for a given mesh. This fixed issue140.
+
+2008-02-28 20:51  tan2
+
+	* lib/Full_tracer_advection.c: Fixed issue139. Bug for tracers near
+	  South pole.
+
+2008-02-28 20:46  tan2
+
+	* lib/Initial_temperature.c: Fixed a regression reported by Lydia
+	  Dicaprio. The initial temperature should be constructured in this
+	  order: 1. if tic_method=-1, read from velo files. 2. if lith_age=1,
+	  read/constructed from lith_age files. 3. otherwise, call
+	  {full,regional}_construct_tic_from_input()
+
+2008-02-28 20:40  tan2
+
+	* lib/Output_h5.c: Fixing Issue131: Compilation error in
+	  CitcomS-3.0.1 HDF5 support.
+
+2007-11-12 23:03  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8281.
+
 2007-11-12 22:42  tan2
 
-    * NEWS, configure.ac: Updated the version number and file NEWS
+	* NEWS, configure.ac: Updated the version number and file NEWS
 
 2007-11-12 22:38  tan2
 
-    * module/Exchanger/Makefile.am: Added mishing header file to the
-      makefile, also avoided compiling unused code.
+	* module/Exchanger/Makefile.am: Added mishing header file to the
+	  makefile, also avoided compiling unused code.
 
 2007-11-08 14:41  tan2
 
-    * ChangLog: Updated file ChangeLog to r8244
+	* ChangLog: Updated file ChangeLog to r8244
                                                                                 
 2007-11-08 22:31  tan2
 
