@@ -58,7 +58,11 @@ int main(argc,argv)
   void vcopy();
   void construct_mat_group();
   void read_velocity_boundary_from_file();
+  void read_rayleigh_from_file();
   void read_mat_from_file();
+#ifdef USE_GGRD
+  void read_rayleigh_from_file();
+#endif
   void open_time();
   void output_finalize();
   void PG_timestep_init();
@@ -209,14 +213,15 @@ int main(argc,argv)
     if ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) {
 	output_checkpoint(E);
     }
-
     /* updating time-dependent material group
      * if mat_control is 0, the material group has already been
      * initialized in initial_conditions() */
     if(E->control.mat_control==1)
       read_mat_from_file(E);
-
-
+#ifdef USE_GGRD    
+    if(E->control.ggrd.ray_control)
+      read_rayleigh_from_file(E);
+#endif
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
     /*

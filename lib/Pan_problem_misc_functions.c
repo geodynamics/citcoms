@@ -150,42 +150,49 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 
     /* thermal buoyancy */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=E->lmesh.nno;i++) {
-        int nz = ((i-1) % E->lmesh.noz) + 1;
+      for(i=1;i<=E->lmesh.nno;i++) {
+	int nz = ((i-1) % E->lmesh.noz) + 1;
         /* We don't need to substract adiabatic T profile from T here,
          * since the horizontal average of buoy will be removed.
          */
         buoy[m][i] =  temp * E->refstate.rho[nz]
-            * E->refstate.thermal_expansivity[nz] * E->T[m][i];
-    }
-
+	  * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+      }
+    
     /* chemical buoyancy */
     if(E->control.tracer &&
        (E->composition.ichemical_buoyancy)) {
-        for(j=0;j<E->composition.ncomp;j++) {
-            /* TODO: how to scale chemical buoyancy wrt reference density? */
-            temp2 = E->composition.buoyancy_ratio[j] * temp;
+      for(j=0;j<E->composition.ncomp;j++) {
+	/* TODO: how to scale chemical buoyancy wrt reference density? */
+	temp2 = E->composition.buoyancy_ratio[j] * temp;
             for(m=1;m<=E->sphere.caps_per_proc;m++)
-                for(i=1;i<=E->lmesh.nno;i++)
-                    buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
-        }
+	      for(i=1;i<=E->lmesh.nno;i++)
+		buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+      }
     }
-
+#ifdef USE_GGRD
+    /* surface layer Rayleigh modification? */
+    if(E->control.ggrd.ray_control)
+      ggrd_adjust_tbl_rayleigh(E,buoy);
+#endif
     /* phase change buoyancy */
     phase_change_apply_410(E, buoy);
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
 
-     /* convert density to buoyancy */
-     for(m=1;m<=E->sphere.caps_per_proc;m++)
-       for(i=1;i<=E->lmesh.noz;i++)
-             for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
-                 int n = j*E->lmesh.noz + i;
-                 buoy[m][n] *= E->refstate.gravity[i];
-             }
+    /* convert density to buoyancy */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=E->lmesh.noz;i++)
+	for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+	  int n = j*E->lmesh.noz + i;
+	  buoy[m][n] *= E->refstate.gravity[i];
+	}
+    
+    
+
 
     remove_horiz_ave2(E,buoy);
-
+    
     return;
 }
 

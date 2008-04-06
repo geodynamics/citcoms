@@ -38,10 +38,11 @@ void ggrd_full_temp_init(struct All_variables *);
 void ggrd_reg_temp_init(struct All_variables *);
 void ggrd_temp_init_general(struct All_variables *,int);
 void ggrd_read_mat_from_file(struct All_variables *, int );
+void ggrd_read_ray_from_file(struct All_variables *, int );
 void ggrd_read_vtop_from_file(struct All_variables *, int );
 void ggrd_read_age_from_file(struct All_variables *, int );
 void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 float find_age_in_MY();
-
+void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
 

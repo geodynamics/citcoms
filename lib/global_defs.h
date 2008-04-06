@@ -33,17 +33,15 @@ This file contains the definitions of variables which are passed as arguments
 to functions across the whole filespace of CITCOM.
 #include this file everywhere !
 */
+#ifdef USE_GGRD
+#include "hc.h"
+#endif
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "mpi.h"
 
-
-
-#ifdef USE_GGRD
-#include "hc.h"
-#endif
 
 
 #ifdef USE_HDF5
@@ -509,6 +507,7 @@ struct CONTROL {
     int mat_control;
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
+  float *surface_rayleigh;
 #endif
     double accuracy;
     double vaccuracy;

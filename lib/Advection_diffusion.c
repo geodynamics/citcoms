@@ -30,10 +30,10 @@
      Brooks PhD thesis (Caltech) which refers back to Hughes, Liu and Brooks.  */
 
 #include <sys/types.h>
-#include <math.h>
+
 #include "element_definitions.h"
 #include "global_defs.h"
-
+#include <math.h>
 #include "advection_diffusion.h"
 #include "parsing.h"
 

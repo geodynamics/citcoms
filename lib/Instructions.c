@@ -205,9 +205,12 @@ void initial_setup(struct All_variables *E)
 
     general_stokes_solver_setup(E);
 
+#ifdef USE_GGRD    
+    if(E->control.ggrd.ray_control)
+      read_rayleigh_from_file(E);
+#endif
+
     (E->next_buoyancy_field_init)(E);
-
-
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
                                    CPU_time0()-E->monitor.cpu_time_at_start);
 
@@ -395,15 +398,18 @@ void read_initial_settings(struct All_variables *E)
 
   /* for layers    */
   /*
-
-  these boundaries are a little wacko
-
-
+  the default boundaries are a little off
   */
   input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* does this ever get used? */
   input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m);
   input_float("z_410",&(E->viscosity.z410),"0.225",m); /* 0.06434, more like it */
   input_float("z_lith",&(E->viscosity.zlith),"0.225",m); /* 0.0157, more like it */
+
+  /* to do: make layers more flexible and avoid duplication */
+  E->viscosity.zbase_layer[1] = E->viscosity.zlith;
+  E->viscosity.zbase_layer[2] = E->viscosity.z410;
+  E->viscosity.zbase_layer[3] = E->viscosity.zlm;
+  E->viscosity.zbase_layer[4] = E->viscosity.zcmb;
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
@@ -488,7 +494,15 @@ void read_initial_settings(struct All_variables *E)
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
   if(E->control.ggrd.mat_control) /* this will override mat_control setting */
     E->control.mat_control = 1;
+  /* 
+     
+  Surface layer Rayleigh number control, similar to above
 
+  */
+  input_int("ggrd_rayleigh_control",
+	    &(E->control.ggrd.ray_control),"0",m); 
+  input_string("ggrd_rayleigh_file",
+	       E->control.ggrd.ray_file,"",m); /* file to read prefactors from */
   /* 
      
   surface velocity control, similar to material control above
@@ -530,6 +544,7 @@ void read_initial_settings(struct All_variables *E)
 
 
   input_boolean("precond",&(E->control.precondition),"off",m);
+
   input_int("mg_cycle",&(E->control.mg_cycle),"2,0,nomax",m);
   input_int("down_heavy",&(E->control.down_heavy),"1,0,nomax",m);
   input_int("up_heavy",&(E->control.up_heavy),"1,0,nomax",m);
@@ -540,6 +555,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
   input_float("rayleigh",&(E->control.Atemp),"essential",m);
+
   input_float("dissipation_number",&(E->control.disptn_number),"0.0",m);
   input_float("gruneisen",&(tmp),"0.0",m);
   /* special case: if tmp==0, set gruneisen as inf */

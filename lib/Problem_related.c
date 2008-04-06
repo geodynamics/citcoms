@@ -44,7 +44,14 @@ void read_velocity_boundary_from_file(E)
     (E->solver.read_input_files_for_timesteps)(E,1,1); /* read velocity(1) and output(1) */
     return;
 }
-
+#ifdef USE_GGRD
+void read_rayleigh_from_file(E)
+     struct All_variables *E;
+{
+  (E->solver.read_input_files_for_timesteps)(E,4,1); /* read Rayleigh number for top layers */
+  return;
+}
+#endif
 /*=======================================================================
   construct material array
 =========================================================================*/

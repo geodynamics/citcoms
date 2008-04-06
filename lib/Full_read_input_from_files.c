@@ -188,7 +188,8 @@ void full_read_input_files_for_timesteps(E,action,output)
 	}
 #endif
 	break;
-
+	/* mode 4 is rayleigh control for GGRD, see below */
+	
       } /* end switch */
 
 
@@ -272,8 +273,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 #endif
 	break;
 
-      case 3:  /* read element materials */
-
+      case 3:  /* read element materials and Ray */
 #ifdef USE_GGRD
 	if(E->control.ggrd.mat_control){ /* use netcdf grids */
 	  ggrd_read_mat_from_file(E, 1);
@@ -325,6 +325,14 @@ void full_read_input_files_for_timesteps(E,action,output)
 	} /* end of branch if allowing for ggrd handling */
 #endif
 	break;
+      case 4:			/* material control */
+#ifdef USE_GGRD
+	if(E->control.ggrd.ray_control)
+	  ggrd_read_ray_from_file(E, 1);
+#else
+	myerror(E,"input_from_files: mode 4 only for GGRD");
+#endif
+      break;
 
       } /* end switch */
     } /* end for m */

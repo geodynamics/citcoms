@@ -61,6 +61,7 @@ struct VISC_OPT {
     float zlm;
     float z410;
     float zlith;
+  float zbase_layer[40];		/* make more flexible */
 
     int FREEZE;
     float freeze_thresh;
@@ -125,8 +126,12 @@ struct VISC_OPT {
     char VISC_OPT[20];
 
     int layers;			/* number of layers with properties .... */
-    float layer_depth[40];
-    float layer_visc[40];
+
+  /* those were unused?, see above with zbase_layer 
+     which should take over
+  */
+  //float layer_depth[40];
+  //float layer_visc[40];
 
     int SLABLVZ;			/* slab structure imposed on top of 3 layer structure */
     int slvzd1,slvzd2,slvzd3;	        /* layer thicknesses (nodes) */

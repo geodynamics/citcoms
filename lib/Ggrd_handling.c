@@ -385,8 +385,10 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     /* end init */
   }
   if(timedep || (!E->control.ggrd.mat_control_init)){
+    age = find_age_in_MY(E);
+    if(E->parallel.me == 0)
+      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: assigning at age %g\n",age);
     if(timedep){
-      age = find_age_in_MY(E);
       ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
 			 E->control.ggrd.time_hist.vstage_transition);
       interpolate = 1;
@@ -423,14 +425,14 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	      /* material */
 	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.mat+i1),&indbl,FALSE)){
 		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			  xloc[1],xloc[2]);
+			  rout[1],rout[2]);
 		  parallel_process_termination();
 	      }
 	      if(interpolate){
 		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],
 						 (E->control.ggrd.mat+i2),&indbl2,FALSE)){
 		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			  xloc[1],xloc[2]);
+			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
 		/* average smoothly between the two tectonic stages */
@@ -459,9 +461,130 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
       }	/* end elz loop */
     } /* end m loop */
   } /* end assignment loop */
-
+  if((!timedep) && (!E->control.ggrd.mat_control_init)){			/* forget the grid */
+    ggrd_grdtrack_free_gstruc(E->control.ggrd.mat);
+  }
   E->control.ggrd.mat_control_init = 1;
 } /* end mat control */
+
+
+/* 
+
+
+read in Rayleigh number prefactor from file, this will get assigned if 
+
+layer <= E->control.ggrd.ray_control
+
+
+*/
+void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
+{
+  MPI_Status mpi_stat;
+  int mpi_rc,timedep,interpolate;
+  int mpi_inmsg, mpi_success_message = 1;
+  int m,el,i,j,k,node,i1,i2,elxlz,elxlylz,ind;
+  int llayer,nox,noy,noz,nox1,noz1,noy1,lev,lselect,idim,elx,ely,elz;
+  char gmt_string[10],char_dummy;
+  double indbl,indbl2,age,f1,f2,vip,rout[3],xloc[4];
+  char tfilename[1000];
+  const int dims=E->mesh.nsd;
+  const int ends = enodes[dims];
+  /* dimensional ints */
+  nox=E->mesh.nox;noy=E->mesh.noy;noz=E->mesh.noz;
+  nox1=E->lmesh.nox;noz1=E->lmesh.noz;noy1=E->lmesh.noy;
+  elx=E->lmesh.elx;elz=E->lmesh.elz;ely=E->lmesh.ely;
+  elxlz = elx * elz;
+  elxlylz = elxlz * ely;
+  lev=E->mesh.levmax;
+  /* 
+     if we have not initialized the time history structure, do it now
+     any function can do that
+
+     we could only use the surface processors, but maybe the rayleigh
+     number is supposed to be changed at large depths
+  */
+  if(!E->control.ggrd.time_hist.init){
+    ggrd_init_thist_from_file(&E->control.ggrd.time_hist,
+			      E->control.ggrd.time_hist.file,TRUE,(E->parallel.me == 0));
+    E->control.ggrd.time_hist.init = 1;
+  }
+  timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
+  if(!E->control.ggrd.ray_control_init){
+    /* init step */
+    if(E->parallel.me==0)
+      fprintf(stderr,"ggrd_read_ray_from_file: initializing from %s\n",E->control.ggrd.ray_file);
+    if(is_global)		/* decide on GMT flag */
+      sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+    else
+      sprintf(gmt_string,"");
+    if(E->parallel.me > 0)	/* wait for previous processor */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
+			0, MPI_COMM_WORLD, &mpi_stat);
+    E->control.ggrd.ray = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+    for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
+      if(!timedep)		/* constant */
+	sprintf(tfilename,"%s",E->control.ggrd.ray_file);
+      else
+	sprintf(tfilename,"%s/%i/rayleigh.grd",E->control.ggrd.ray_file,i+1);
+      if(ggrd_grdtrack_init_general(FALSE,tfilename,&char_dummy,
+				    gmt_string,(E->control.ggrd.ray+i),(E->parallel.me == 0),FALSE))
+	myerror(E,"ggrd init error");
+    }
+    if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
+      mpi_rc = MPI_Send(&mpi_success_message, 1, 
+			MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    }else{
+      fprintf(stderr,"ggrd_read_ray_from_file: last processor done with ggrd ray init\n");
+    }
+    E->control.surface_rayleigh = (float *)malloc(sizeof(float)*(E->lmesh.nsf+2));
+    if(!E->control.surface_rayleigh)
+      myerror(E,"ggrd rayleigh mem error");
+  }
+  if(timedep || (!E->control.ggrd.ray_control_init)){
+    if(timedep){
+      age = find_age_in_MY(E);
+      ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+			 E->control.ggrd.time_hist.vstage_transition);
+      interpolate = 1;
+    }else{
+      interpolate = 0;i1 = 0;
+    }
+    if(E->parallel.me == 0)
+      fprintf(stderr,"ggrd_read_ray_from_ggrd_file: assigning at time %g\n",age);
+    for (m=1;m <= E->sphere.caps_per_proc;m++) {
+      /* loop through all surface nodes */
+      for (j=1;j <= E->lmesh.nsf;j++)  {	
+	node = j * E->lmesh.noz ; 
+	rout[1] = (double)E->sx[m][1][node];
+	rout[2] = (double)E->sx[m][2][node];
+	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,FALSE)){
+	  fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
+		  rout[1],rout[2]);
+	  parallel_process_termination();
+	}
+	//fprintf(stderr,"%i %i %g %g %g\n",j,E->lmesh.nsf,rout[1],rout[2],indbl);
+	if(interpolate){
+	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],
+					   (E->control.ggrd.ray+i2),&indbl2,FALSE)){
+	    fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
+		    rout[1],rout[2]);
+	    parallel_process_termination();
+	  }
+	  /* average smoothly between the two tectonic stages */
+	  vip = f1*indbl+f2*indbl2;
+	}else{
+	  vip = indbl;
+	}
+	E->control.surface_rayleigh[j] = vip;
+      }	/* end node loop */
+    } /* end cap loop */
+  } /* end assign loop */
+  if((!timedep) && (!E->control.ggrd.ray_control_init)){			/* forget the grid */
+    ggrd_grdtrack_free_gstruc(E->control.ggrd.ray);
+  }
+  E->control.ggrd.ray_control_init = 1;
+} /* end ray control */
+
 
 
 
@@ -491,7 +614,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
      if this file is not found, will use constant velocities
   */
   if(!E->control.ggrd.time_hist.init){/* init times, if available*/
-    ggrd_init_thist_from_file(&E->control.ggrd.time_hist,E->control.ggrd.time_hist.file,TRUE,(E->parallel.me == 0));
+    ggrd_init_thist_from_file(&E->control.ggrd.time_hist,E->control.ggrd.time_hist.file,
+			      TRUE,(E->parallel.me == 0));
     E->control.ggrd.time_hist.init = 1;
   }
   
@@ -500,9 +624,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   if(!E->control.ggrd.vtop_control_init){
     if(E->parallel.me==0)
       fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities\n");
-    if(is_global)		/* decide on GMT flag */
-      sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* global */
-    else
+    if(is_global){		/* decide on GMT flag */
+      //sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* periodic */
+      sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+    }else
       sprintf(gmt_string,"");
     /* 
        
@@ -541,12 +666,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     }
     /* end init */
   }
-  if((E->control.ggrd.time_hist.nvtimes > 1)||(!E->control.ggrd.vtop_control_init)){
+  if((E->control.ggrd.time_hist.nvtimes > 1)||
+     (!E->control.ggrd.vtop_control_init)){
+    age = find_age_in_MY(E);
     if(timedep){
       /* 
 	 interpolate by time 
       */
-      age = find_age_in_MY(E);
       if(age < 0){		/* Opposite of other method */
 	interpolate = 0;
 	/* present day should be last file*/
@@ -565,8 +691,11 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       interpolate = 0;		/* single timestep, use single file */
       i1 = 0;
       if(E->parallel.me == 0)
-	fprintf(stderr,"ggrd_read_vtop_from_file: constant velocity BC at age %g\n",age);
+	fprintf(stderr,"ggrd_read_vtop_from_file: constant velocity BC \n");
     }
+    if(E->parallel.me==0)
+      fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
+	      timedep,age);
     /* 
        loop through all elements and assign
     */
@@ -617,7 +746,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       }	/* end top proc branch */
     } /* end cap loop */
   } /* end assignment branch */
-
+  if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
+    ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
+    ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
+  }
   E->control.ggrd.vtop_control_init = 1;
 }
 
@@ -627,6 +759,59 @@ void ggrd_read_age_from_file(struct All_variables *E, int is_global)
 {
   myerror(E,"not implemented yet");
 } /* end age control */
+
+/* adjust Ra in top boundary layer  */
+void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
+			      double **buoy)
+{
+  int m,snode,node,i;
+  double xloc,fac,bnew;
+  if(!E->control.ggrd.ray_control_init)
+    myerror(E,"ggrd rayleigh not initialized, but in adjust tbl");
+  if(E->parallel.me == 0)
+    fprintf(stderr,"ggrd__adjust_tbl_rayleigh: adjusting Rayleigh in top %i layers\n",
+	    E->control.ggrd.ray_control);
+
+  /* 
+     need to scale buoy with the material determined rayleigh numbers
+  */
+  for(m=1;m <= E->sphere.caps_per_proc;m++){
+    for(snode=1;snode <= E->lmesh.nsf;snode++){ /* loop through surface nodes */
+      if(fabs(E->control.surface_rayleigh[snode]-1.0)>1e-6){
+	for(i=1;i <= E->lmesh.noz;i++){ /* go through depth layers */
+	  node = (snode-1)*E->lmesh.noz + i; /* global node number */
+	  if(layers(E,m,node) <= E->control.ggrd.ray_control){ 
+	    /* 
+	       node is in top layers 
+	    */
+	    /* depth factor, cos^2 tapered */
+	    xloc=1.0 + ((1 - E->sx[m][3][node]) - 
+			E->viscosity.zbase_layer[E->control.ggrd.ray_control])/
+	      E->viscosity.zbase_layer[E->control.ggrd.ray_control];
+	    fac = cos(xloc*1.5707963267);fac *= fac; /* cos^2
+							tapering,
+							factor
+							decrease from
+							1 at surface
+							to zero at
+							boundary */
+	    bnew = buoy[m][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
+	    /* debugging */
+	    //fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n",
+	    //	    (1 - E->sx[m][3][node])*6371,E->control.ggrd.ray_control,
+	    //	    E->viscosity.zbase_layer[E->control.ggrd.ray_control]*6371,
+	    //	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]);
+	    buoy[m][node] = fac * bnew + (1-fac)*buoy[m][node];
+	  }
+	}
+      }
+    }
+  }
+
+}
+
+
+
 #endif
 
 
