@@ -504,6 +504,7 @@ struct CONTROL {
     int remove_rigid_rotation;
     int side_sbcs;
     int vbcs_file;
+    int tbcs_file;
     int mat_control;
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
@@ -512,6 +513,7 @@ struct CONTROL {
     double accuracy;
     double vaccuracy;
     char velocity_boundary_file[1000];
+    char temperature_boundary_file[1000];
     char mat_file[1000];
     char lith_age_file[1000];
 
