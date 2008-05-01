@@ -1421,6 +1421,9 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_int(input, "file_vbcs", E->control.vbcs_file);
     status = set_attribute_string(input, "vel_bound_file", E->control.velocity_boundary_file);
 
+    status = set_attribute_int(input, "file_tbcs", E->control.tbcs_file);
+    status = set_attribute_string(input, "temp_bound_file", E->control.temperature_boundary_file);
+
     status = set_attribute_int(input, "mat_control", E->control.mat_control);
     status = set_attribute_string(input, "mat_file", E->control.mat_file);
 

@@ -441,6 +441,9 @@ void read_initial_settings(struct All_variables *E)
   input_int("file_vbcs",&(E->control.vbcs_file),"0",m);
   input_string("vel_bound_file",E->control.velocity_boundary_file,"",m);
 
+  input_int("file_tbcs",&(E->control.tbcs_file),"0",m);
+  input_string("temp_bound_file",E->control.temperature_boundary_file,"",m);
+
   input_int("reference_state",&(E->refstate.choice),"1",m);
   if(E->refstate.choice == 0) {
       input_string("refstate_file",E->refstate.filename,"refstate.dat",m);

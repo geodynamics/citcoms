@@ -56,6 +56,9 @@ class Param(CitcomComponent):
         file_vbcs = pyre.inventory.bool("file_vbcs", default=False)
         vel_bound_file = pyre.inventory.str("vel_bound_file", default="bvel.dat")
 
+        file_tbcs = pyre.inventory.bool("file_tbcs", default=False)
+        temp_bound_file = pyre.inventory.str("temp_bound_file", default="btemp.dat")
+
         mat_control = pyre.inventory.bool("mat_control", default=False)
         mat_file = pyre.inventory.str("mat_file", default="mat.dat")
 

@@ -366,6 +366,9 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "file_vbcs", E->control.vbcs_file, fp);
     getStringProperty(properties, "vel_bound_file", E->control.velocity_boundary_file, fp);
 
+    getIntProperty(properties, "file_tbcs", E->control.tbcs_file, fp);
+    getStringProperty(properties, "temp_bound_file", E->control.temperature_boundary_file, fp);
+
     getIntProperty(properties, "mat_control", E->control.mat_control, fp);
     getStringProperty(properties, "mat_file", E->control.mat_file, fp);
 
