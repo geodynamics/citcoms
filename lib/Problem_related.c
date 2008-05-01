@@ -63,6 +63,16 @@ void read_mat_from_file(E)
   return;
 
 }
+/*=======================================================================
+  read temperature at the top surface from files
+=========================================================================*/
+
+void read_temperature_boundary_from_file(E)
+     struct All_variables *E;
+{
+    (E->solver.read_input_files_for_timesteps)(E,5,1); /* read temperature(5) and output(1) */
+    return;
+}
 
 
 /*=======================================================================

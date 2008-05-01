@@ -420,51 +420,48 @@ void visc_from_T(E,EEta,propogate)
         break;
 
 
-    case 5:			/* this still needs to be documented, who wrote this? */
+    case 5:
 
         /* same as rheol 3, except alternative margin, VIP, formulation */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i];
-
                 tempa = E->viscosity.N0[l-1];
+                /* fprintf(stderr,"\nINSIDE visc_from_T, l=%d, tempa=%g",l,tempa);*/
                 j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                    /* zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]); */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
-                    zzz=0.0;
+                    /* zzz=0.0; */
                     for(kk=1;kk<=ends;kk++)   {
                         TT[kk]=max(TT[kk],zero);
                         temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
-                        zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                        /* zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)]; */
                     }
 
-                    if(E->control.mat_control==0){
+                    if(E->control.mat_control==0)
                         EEta[m][ (i-1)*vpts + jj ] = tempa*
                             exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
                                  - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
 
-                    }else{
-                     /* visc1 = E->VIP[m][i];
-                        visc2 = 2.0/(1./visc1 + 1.);
-                        tempa_exp = tempa*
-	                exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
-		           - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
-                        visc1 = tempa*E->viscosity.max_value;
-                        if(tempa_exp > visc1) tempa_exp=visc1;
-                        EEta[m][ (i-1)*vpts + jj ] = visc2*tempa_exp;
-                     */
-                       visc1 = E->VIP[m][i];
+                    if(E->control.mat_control==1) {
                        visc2 = tempa*
 	               exp( E->viscosity.E[l-1]/(temp+E->viscosity.T[l-1])
 		          - E->viscosity.E[l-1]/(one +E->viscosity.T[l-1]) );
-                       if(visc1 <= 0.95) visc2=visc1;
-                       EEta[m][ (i-1)*vpts + jj ] = visc2;
+                       if(E->viscosity.MAX) {
+                           if(visc2 > E->viscosity.max_value)
+                               visc2 = E->viscosity.max_value;
+                         }
+                       if(E->viscosity.MIN) {
+                           if(visc2 < E->viscosity.min_value)
+                               visc2 = E->viscosity.min_value;
+                         }
+                       EEta[m][ (i-1)*vpts + jj ] = E->VIP[m][i]*visc2;
                       }
 
                 }

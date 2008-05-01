@@ -224,6 +224,9 @@ int main(argc,argv)
 #endif
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
+
+    if(E->control.tbcs_file)
+      read_temperature_boundary_from_file(E);   
     /*
       else
       renew_top_velocity_boundary(E);

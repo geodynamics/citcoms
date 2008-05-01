@@ -47,7 +47,7 @@ void full_read_input_files_for_timesteps(E,action,output)
     FILE *fp1, *fp2;
     float age, newage1, newage2;
     char output_file1[255],output_file2[255];
-    float *VB1[4],*VB2[4], inputage1, inputage2;
+    float *TB1, *TB2, *VB1[4],*VB2[4], inputage1, inputage2;
     int nox,noz,noy,nnn,nox1,noz1,noy1,lev;
     int i,ii,ll,m,mm,j,k,n,nodeg,nodel,node,cap;
     int intage, pos_age;
@@ -189,6 +189,31 @@ void full_read_input_files_for_timesteps(E,action,output)
 #endif
 	break;
 	/* mode 4 is rayleigh control for GGRD, see below */
+
+      case 5:  /* read temperature boundary conditions, top surface */
+	sprintf(output_file1,"%s%0.0f.%d",E->control.temperature_boundary_file,newage1,cap);
+	sprintf(output_file2,"%s%0.0f.%d",E->control.temperature_boundary_file,newage2,cap);
+	fp1=fopen(output_file1,"r");
+	if (fp1 == NULL) {
+          fprintf(E->fp,"(Problem_related #10) Cannot open %s\n",output_file1);
+          exit(8);
+	}
+	if (pos_age) {
+	  fp2=fopen(output_file2,"r");
+	  if (fp2 == NULL) {
+	    fprintf(E->fp,"(Problem_related #11) Cannot open %s\n",output_file2);
+	    exit(8);
+	  }
+	}
+	if((E->parallel.me==0) && (output==1))   {
+	  fprintf(E->fp,"Surface Temperature: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+	  fprintf(E->fp,"Surface Temperature: File1 = %s\n",output_file1);
+	  if (pos_age)
+	    fprintf(E->fp,"Surface Temperature: File2 = %s\n",output_file2);
+	  else
+	    fprintf(E->fp,"Velocity: File2 = No file inputted (negative age)\n");
+	}
+	break;
 	
       } /* end switch */
 
@@ -285,13 +310,13 @@ void full_read_input_files_for_timesteps(E,action,output)
         LL2 = (int*) malloc ((emax+1)*sizeof(int));
 
 
-        /* probably can be safely removed */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
           for (el=1; el<=elx*ely*elz; el++)  {
             nodea = E->ien[m][el].node[2];
             llayer = layers(E,m,nodea);
             if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
               E->mat[m][el] = llayer;
+              fprintf(stderr,"\nINSIDE llayer=&d",llayer);
             }
           }
           for(i=1;i<=emax;i++)  {
@@ -310,7 +335,7 @@ void full_read_input_files_for_timesteps(E,action,output)
                   elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
 
                   E->VIP[m][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
-                  E->mat[m][el] = LL1[elg];
+                  /* E->mat[m][el] = LL1[elg]; */ /*get material numbers from radius internally */
 
                 }     /* end for j  */
               }     /*  end for i */
@@ -333,6 +358,41 @@ void full_read_input_files_for_timesteps(E,action,output)
 	myerror(E,"input_from_files: mode 4 only for GGRD");
 #endif
       break;
+
+      case 5:  /* read temperature boundary conditions, top surface */
+	nnn=nox*noy;
+	TB1=(float*) malloc ((nnn+1)*sizeof(float));
+	TB2=(float*) malloc ((nnn+1)*sizeof(float));
+
+	for(i=1;i<=nnn;i++)   {
+	  fscanf(fp1,"%f",&(TB1[i]));
+	  if (pos_age) {
+	    fscanf(fp2,"%f",&(TB2[i]));
+	  }
+        }
+	fclose(fp1);
+	if (pos_age) fclose(fp2);
+
+	if(E->parallel.me_loc[3]==E->parallel.nprocz-1 )  {
+          for(k=1;k<=noy1;k++)
+	    for(i=1;i<=nox1;i++)    {
+	      nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
+	      nodel = (k-1)*nox1*noz1 + (i-1)*noz1+noz1;
+	      if (pos_age) { /* positive ages - we must interpolate */
+		E->sphere.cap[m].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[m].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[m].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+	      }
+	      else { /* negative ages - don't do the interpolation */
+		E->sphere.cap[m].TB[1][nodel] = TB1[nodeg];
+		E->sphere.cap[m].TB[2][nodel] = TB1[nodeg];
+		E->sphere.cap[m].TB[3][nodel] = TB1[nodeg];
+	      }
+	    }
+	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
+        free ((void *) TB1);
+        free ((void *) TB2);
+	break;
 
       } /* end switch */
     } /* end for m */

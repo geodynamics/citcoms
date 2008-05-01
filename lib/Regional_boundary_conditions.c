@@ -143,6 +143,9 @@ void regional_temperature_boundary_conditions(E)
     if(E->mesh.toptbc == 1)    {
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,j);
+      if(E->control.tbcs_file)   {
+	  read_temperature_boundary_from_file(E);   /* read in the temperature boundary condition from file */
+	}
       }
     else   {
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,j);
