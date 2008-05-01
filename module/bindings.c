@@ -105,6 +105,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_velocities_conform_bcs__doc__},
 
+    {pyCitcom_BC_update_plate_temperature__name__,
+     pyCitcom_BC_update_plate_temperature,
+     METH_VARARGS,
+     pyCitcom_BC_update_plate_temperature__doc__},
+
     {pyCitcom_BC_update_plate_velocity__name__,
      pyCitcom_BC_update_plate_velocity,
      METH_VARARGS,

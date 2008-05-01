@@ -50,6 +50,12 @@ class BC(CitcomComponent):
         return
 
 
+    def updatePlateTemperature(self):
+        from CitcomSLib import BC_update_plate_temperature
+        BC_update_plate_temperature(self.all_variables)
+        return
+
+
 
     class Inventory(CitcomComponent.Inventory):
 

@@ -78,6 +78,11 @@ extern char pyCitcom_velocities_conform_bcs__doc__[];
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *, PyObject *);
 
 
+extern char pyCitcom_BC_update_plate_temperature__name__[];
+extern char pyCitcom_BC_update_plate_temperature__doc__[];
+PyObject * pyCitcom_BC_update_plate_temperature(PyObject *, PyObject *);
+
+
 extern char pyCitcom_BC_update_plate_velocity__name__[];
 extern char pyCitcom_BC_update_plate_velocity__doc__[];
 PyObject * pyCitcom_BC_update_plate_velocity(PyObject *, PyObject *);

@@ -203,6 +203,7 @@ class Solver(Component):
     def endTimestep(self, done):
         self.inventory.visc.updateMaterial()
         self.inventory.bc.updatePlateVelocity()
+        self.inventory.bc.updatePlateTemperature()
         return done
 
 

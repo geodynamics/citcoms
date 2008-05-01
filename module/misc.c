@@ -47,6 +47,7 @@ double CPU_time0();
 void global_default_values(struct All_variables*);
 void parallel_process_termination();
 void read_mat_from_file(struct All_variables*);
+void read_temperature_boundary_from_file(struct All_variables*);
 void read_velocity_boundary_from_file(struct All_variables*);
 void set_signal();
 void tracer_advection(struct All_variables*);
@@ -253,6 +254,27 @@ PyObject * pyCitcom_velocities_conform_bcs(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_BC_update_plate_temperature__doc__[] = "";
+char pyCitcom_BC_update_plate_temperature__name__[] = "BC_update_plate_temperature";
+
+PyObject * pyCitcom_BC_update_plate_temperature(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:BC_update_plate_temperature", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    if(E->control.tbcs_file==1)
+        read_temperature_boundary_from_file(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyCitcom_BC_update_plate_velocity__doc__[] = "";
 char pyCitcom_BC_update_plate_velocity__name__[] = "BC_update_plate_velocity";
 
@@ -267,7 +289,7 @@ PyObject * pyCitcom_BC_update_plate_velocity(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     if(E->control.vbcs_file==1)
-      read_velocity_boundary_from_file(E);
+        read_velocity_boundary_from_file(E);
 
     Py_INCREF(Py_None);
     return Py_None;
