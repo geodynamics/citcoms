@@ -366,6 +366,8 @@ void regional_read_input_files_for_timesteps(E,action,output)
 
       for(i=1;i<=nnn;i++)   {
          fscanf(fp1,"%f",&(TB1[i]));
+         /* if( E->parallel.me == 0)  
+        fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps TB1=%f %d\n",TB1[i],i); */
          if (pos_age) {
              fscanf(fp2,"%f",&(TB2[i]));
          }
@@ -381,7 +383,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
 		if (pos_age) { /* positive ages - we must interpolate */
                     E->sphere.cap[1].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
                     E->sphere.cap[1].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
-                    E->sphere.cap[1].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+                    E->sphere.cap[1].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
 		}
 		else { /* negative ages - don't do the interpolation */
                     E->sphere.cap[1].TB[1][nodel] = TB1[nodeg];
