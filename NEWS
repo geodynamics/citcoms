@@ -5,7 +5,7 @@ Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
 Trunk:
 
 * New capability to read in time- and geographic-dependent, top
-  surface boundary conditions
+  surface temperature boundary conditions
 
 Version 3.0.2
 ?
