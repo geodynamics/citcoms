@@ -365,7 +365,8 @@ void output_horiz_avg(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
-        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],
+		E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {
             int n;

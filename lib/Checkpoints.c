@@ -48,6 +48,7 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp);
 static void read_energy_checkpoint(struct All_variables *E, FILE *fp);
 static void read_momentum_checkpoint(struct All_variables *E, FILE *fp);
 
+void myerror(char *,struct All_variables *);
 
 void output_checkpoint(struct All_variables *E)
 {
@@ -101,7 +102,9 @@ void read_checkpoint(struct All_variables *E)
         fprintf(stderr, "Cannot open file: %s\n", output_file);
         exit(-1);
     }
-
+    if(E->parallel.me == 0)
+      fprintf(stderr,"read_checkpoint: restarting from %s\n",output_file);
+	
     /* check mesh information in the checkpoint file */
     read_general_checkpoint(E, fp);
 
@@ -216,7 +219,7 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
        (tmp[5] != E->parallel.nprocz) ||
        (tmp[6] != E->sphere.caps_per_proc)) {
 
-        fprintf(stderr, "Error in reading checkpoint file: mesh, me=%d\n",
+        fprintf(stderr, "Error in reading checkpoint file: mesh parameters mismatch, me=%d\n",
                 E->parallel.me);
         fprintf(stderr, "%d %d %d %d %d %d %d\n",
                 tmp[0], tmp[1], tmp[2], tmp[3],
@@ -225,10 +228,12 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
     }
 
     /* read timing information */
-    fread(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
-    fread(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
-    fread(&(E->advection.timestep), sizeof(float), 1, fp);
-    fread(&(E->control.start_age), sizeof(float), 1, fp);
+    tmp[0] = fread(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
+    tmp[0]+= fread(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
+    tmp[0]+= fread(&(E->advection.timestep), sizeof(float), 1, fp);
+    tmp[0]+= fread(&(E->control.start_age), sizeof(float), 1, fp);
+    if(tmp[0] != 4)
+      myerror("read_general_checkpoint: header error",E);
 
     E->advection.timesteps = E->monitor.solution_cycles;
 
@@ -426,8 +431,10 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
     /* the 0-th element of T/Tdot is not init'd
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fread(E->T[m], sizeof(double), E->lmesh.nno+1, fp);
-        fread(E->Tdot[m], sizeof(double), E->lmesh.nno+1, fp);
+      if(fread(E->T[m], sizeof(double), E->lmesh.nno+1, fp)!= E->lmesh.nno+1)
+	myerror("read_energy_checkpoint: error at T",E);
+      if(fread(E->Tdot[m], sizeof(double), E->lmesh.nno+1, fp)!=E->lmesh.nno+1)
+	myerror("read_energy_checkpoint: error at Tdot",E);
     }
 
     return;
@@ -468,15 +475,17 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 
     read_sentinel(fp, E->parallel.me);
 
-    fread(&(E->monitor.vdotv), sizeof(float), 1, fp);
-    fread(&(E->monitor.incompressibility), sizeof(float), 1, fp);
-
+    if(fread(&(E->monitor.vdotv), sizeof(float), 1, fp)!=1)
+      myerror("read_momentum_checkpoint: error at vdotv",E);
+    if(fread(&(E->monitor.incompressibility), sizeof(float), 1, fp)!=1)
+      myerror("read_momentum_checkpoint: error at incomp",E);
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points */
-        fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp);
-
+      if(fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp) !=  E->lmesh.npno+1)
+	myerror("read_momentum_checkpoint: error at P",E);
         /* velocity at equation points */
-        fread(E->U[m], sizeof(double), E->lmesh.neq, fp);
+      if(fread(E->U[m], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
+	myerror("read_momentum_checkpoint: error at U",E);
     }
 
     /* update velocity array */

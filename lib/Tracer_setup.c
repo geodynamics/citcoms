@@ -83,7 +83,7 @@ static void free_tracer_arrays(struct All_variables *E, int j);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
-
+int read_double_vector(FILE *, int , double *);
 
 void tracer_input(struct All_variables *E)
 {
@@ -887,7 +887,7 @@ static void read_tracer_file(struct All_variables *E)
     int icushion;
     int i, j;
 
-    int read_double_vector(FILE *in, int num_columns, double *fields);
+
     int icheck_processor_shell();
     void sphere_to_cart();
     void cart_to_sphere();

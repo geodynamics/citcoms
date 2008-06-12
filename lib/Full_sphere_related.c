@@ -158,18 +158,20 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   int node, snode, ns, step;
   int lelx, lely, lnox, lnoy;
   int lvnox, lvnoy, lvnoz;
-  int ok;
+  int ok,use_ellipse;
   double x[5], y[5], z[5], center[3], referencep[2];
   double xx[5], yy[5];
   double *theta0, *fi0;
   double *tt1,  *tt2, *tt3, *tt4, *ff1, *ff2, *ff3, *ff4;
   double *u1, *u2, *u3, *u4, *v1, *v2, *v3, *v4;
   double *px, *py, *qx, *qy;
-  double theta, fi, cost, sint, cosf, sinf;
+  double theta, fi, cost, sint, cosf, sinf, efac,rfac;
   double a, b;
   double myatan();
 
   void even_divide_arc12();
+  
+  use_ellipse = (fabs(E->data.ellipticity) > 5e-7)?(1):(0);
 
   temp = max(E->mesh.noy, E->mesh.nox);
 
@@ -208,13 +210,27 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   /*  |   | */
   /*  2 - 3 */
   center[0] = center[1] = center[2] = 0;
-  for (i=1;i<=4;i++)    {
-     x[i] = sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
-     y[i] = sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
-     z[i] = cos(E->sphere.cap[icap].theta[i]);
-     center[0] += x[i];
-     center[1] += y[i];
-     center[2] += z[i];
+  if(use_ellipse){
+    for (i=1;i<=4;i++)    {
+      
+      x[i] = E->data.ra * sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
+      y[i] = E->data.ra * sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
+      z[i] = E->data.rc * cos(E->sphere.cap[icap].theta[i]);
+      
+      center[0] += x[i];
+      center[1] += y[i];
+      center[2] += z[i];
+    }
+
+  }else{
+    for (i=1;i<=4;i++)    {
+      x[i] = sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
+      y[i] = sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
+      z[i] = cos(E->sphere.cap[icap].theta[i]);
+      center[0] += x[i];
+      center[1] += y[i];
+      center[2] += z[i];
+    }
   }
   center[0] *= 0.25;
   center[1] *= 0.25;
@@ -352,42 +368,86 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
          }
      }
 
+     
+     if(use_ellipse){		/* elliptical form */
+       
+       efac = E->data.ellipticity*(2.0 - E->data.ellipticity)/
+	 ((1.- E->data.ellipticity)*(1.-E->data.ellipticity));
 
-
-   for (lev=E->mesh.levmax, step=1; lev>=E->mesh.levmin; lev--, step*=2) {
-      /* store the node location in spherical and cartesian coordinates */
-
-      lvnox = E->lmesh.NOX[lev];
-      lvnoy = E->lmesh.NOY[lev];
-      lvnoz = E->lmesh.NOZ[lev];
-
-      node = 1;
-      for (k=0; k<lvnoy; k++) {
+       for (lev=E->mesh.levmax, step=1; lev>=E->mesh.levmin; lev--, step*=2) {
+	 /* store the node location in spherical and cartesian coordinates */
+	 
+	 lvnox = E->lmesh.NOX[lev];
+	 lvnoy = E->lmesh.NOY[lev];
+	 lvnoz = E->lmesh.NOZ[lev];
+	 
+	 node = 1;
+	 for (k=0; k<lvnoy; k++) {
           for (j=0, ns=step*lnoy*k; j<lvnox; j++, ns+=step) {
-              theta = qx[ns];
-              fi = qy[ns];
+	    theta = qx[ns];
+	    fi = qy[ns];
+	    
+	    cost = cos(theta);
 
-              cost = cos(theta);
-              sint = sin(theta);
-              cosf = cos(fi);
-              sinf = sin(fi);
-
-              for (i=1; i<=lvnoz; i++) {
-                  /*   theta,fi,and r coordinates   */
-                  E->SX[lev][m][1][node] = theta;
-                  E->SX[lev][m][2][node] = fi;
-                  E->SX[lev][m][3][node] = E->sphere.R[lev][i];
-
-                  /*   x,y,and z oordinates   */
-                  E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
-                  E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
-                  E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
-
-                  node++;
-              }
+	    rfac = E->data.ra*1./sqrt(1.0+efac*cost*cost);
+	    sint = sin(theta);
+	    cosf = cos(fi);
+	    sinf = sin(fi);
+	    
+	    for (i=1; i<=lvnoz; i++) {
+	      /*   theta,fi,and r coordinates   */
+	      E->SX[lev][m][1][node] = theta;
+	      E->SX[lev][m][2][node] = fi;
+	      E->SX[lev][m][3][node] = rfac * E->sphere.R[lev][i];
+	      
+	      /*   x,y,and z oordinates   */
+	      E->X[lev][m][1][node] = E->data.ra * E->sphere.R[lev][i]*sint*cosf;
+	      E->X[lev][m][2][node] = E->data.ra * E->sphere.R[lev][i]*sint*sinf;
+	      E->X[lev][m][3][node] = E->data.rc * E->sphere.R[lev][i]*cost;
+	      
+	      node++;
+	    }
           }
-      }
-  } /* end for lev */
+	 }
+       } /* end for lev */
+
+
+     }else{			/* spherical */
+       for (lev=E->mesh.levmax, step=1; lev>=E->mesh.levmin; lev--, step*=2) {
+	 /* store the node location in spherical and cartesian coordinates */
+	 
+	 lvnox = E->lmesh.NOX[lev];
+	 lvnoy = E->lmesh.NOY[lev];
+	 lvnoz = E->lmesh.NOZ[lev];
+	 
+	 node = 1;
+	 for (k=0; k<lvnoy; k++) {
+          for (j=0, ns=step*lnoy*k; j<lvnox; j++, ns+=step) {
+	    theta = qx[ns];
+	    fi = qy[ns];
+	    
+	    cost = cos(theta);
+	    sint = sin(theta);
+	    cosf = cos(fi);
+	    sinf = sin(fi);
+	    
+	    for (i=1; i<=lvnoz; i++) {
+	      /*   theta,fi,and r coordinates   */
+	      E->SX[lev][m][1][node] = theta;
+	      E->SX[lev][m][2][node] = fi;
+	      E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+	      
+	      /*   x,y,and z oordinates   */
+	      E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
+	      E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
+	      E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
+	      
+	      node++;
+	    }
+          }
+	 }
+       } /* end for lev */
+     }
 
   free ((void *)theta0);
   free ((void *)fi0   );

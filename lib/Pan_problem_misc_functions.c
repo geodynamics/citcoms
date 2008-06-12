@@ -61,6 +61,9 @@ void xyz2rtpd(float ,float ,float ,double *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
 
+#ifdef USE_GGRD
+void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
+#endif
 
 int get_process_identifier()
 {
@@ -141,17 +144,17 @@ void apply_side_sbc(struct All_variables *E)
 
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
-    int i,j,m;
-    double temp,temp2;
+    int i,j,m,n,nz;
+    double temp,temp2,rfac,cost2;
     void remove_horiz_ave2(struct All_variables*, double**);
-
+    //char filename[100];FILE *out;
     /* Rayleigh number */
     temp = E->control.Atemp;
 
     /* thermal buoyancy */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
-	int nz = ((i-1) % E->lmesh.noz) + 1;
+	nz = ((i-1) % E->lmesh.noz) + 1;
         /* We don't need to substract adiabatic T profile from T here,
          * since the horizontal average of buoy will be removed.
          */
@@ -180,13 +183,38 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     phase_change_apply_670(E, buoy);
     phase_change_apply_cmb(E, buoy);
 
-    /* convert density to buoyancy */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.noz;i++)
-	for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
-	  int n = j*E->lmesh.noz + i;
-	  buoy[m][n] *= E->refstate.gravity[i];
-	}
+    /* 
+       convert density to buoyancy 
+    */
+    if(fabs(E->data.rotm) > 5e-7){
+      /* 
+
+      rotational correction, the if should not add significant
+      computational burden
+
+      */
+      /* g= g_e (1+(5/2m-f)cos^2(t))  */
+      rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
+      /*  */
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+	for(i=1;i<=E->lmesh.noz;i++)
+	  for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+	    n = j*E->lmesh.noz + i;
+	    cost2 = cos(E->sx[m][1][n]); /* cos^2(theta) */
+	    cost2 = cost2*cost2;
+	    /* correct gravity for rotation */
+	    buoy[m][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
+	  }
+    }else{
+      /* default */
+      /* no latitude dependency of gravity */
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+	for(i=1;i<=E->lmesh.noz;i++)
+	  for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+	    n = j*E->lmesh.noz + i;
+	    buoy[m][n] *= E->refstate.gravity[i];
+	  }
+    }
     
     
 

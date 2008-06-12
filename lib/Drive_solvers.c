@@ -33,6 +33,8 @@
 
 double global_vdot();
 double vnorm_nonnewt();
+int need_visc_update(struct All_variables *);
+
 
 
 /************************************************************/
@@ -84,8 +86,7 @@ void general_stokes_solver(struct All_variables *E)
   velocities_conform_bcs(E,E->U);
 
   assemble_forces(E,0);
-
-  if(E->monitor.solution_cycles==0 || E->viscosity.update_allowed) {
+  if(need_visc_update(E)){
     get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
     construct_stiffness_B_matrix(E);
   }
@@ -150,6 +151,30 @@ void general_stokes_solver(struct All_variables *E)
   return;
 }
 
+int need_visc_update(struct All_variables *E)
+{
+  if(E->viscosity.update_allowed){
+    /* always update */
+    return 1;
+  }else{
+    /* deal with first time called */
+    if(E->control.restart){	
+      /* restart step - when this function is called, the cycle has
+	 already been incremented */
+      if(E->monitor.solution_cycles ==  E->monitor.solution_cycles_init + 1)
+	return 1;
+      else
+	return 0;
+    }else{
+      /* regular step */
+      if(E->monitor.solution_cycles == 0)
+	return 1;
+      else
+	return 0;
+    }
+  }
+}
+
 void general_stokes_solver_pseudo_surf(struct All_variables *E)
 {
   void solve_constrained_flow_iterative_pseudo_surf();
@@ -182,11 +207,10 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   E->monitor.topo_loop = 0;
   if(E->monitor.solution_cycles==0) std_timestep(E);
   while(E->monitor.stop_topo_loop == 0) {
-
 	  assemble_forces_pseudo_surf(E,0);
-	  if(E->monitor.solution_cycles==0 || E->viscosity.update_allowed) {
-		  get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
-		  construct_stiffness_B_matrix(E);
+	  if(need_visc_update(E)){
+	    get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
+	    construct_stiffness_B_matrix(E);
 	  }
 	  solve_constrained_flow_iterative_pseudo_surf(E);
 

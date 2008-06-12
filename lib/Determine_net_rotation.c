@@ -51,7 +51,7 @@ void hc_lubksb_3x3(double [3][3], int *, double *);
 void xyz2rtp(float ,float ,float ,float *);
 void *safe_malloc (size_t );
 double determine_model_net_rotation(struct All_variables *,double *);
-
+void myerror(struct All_variables *,char *);
 /*
 
 determine the mean net rotation of the velocities at all layers

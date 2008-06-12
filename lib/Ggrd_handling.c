@@ -44,6 +44,12 @@ the ggrd subroutines of the hc package
 #include "hc.h"			/* ggrd and hc packages */
 #include "ggrd_handling.h"
 
+void report(struct All_variables *,char *);
+int layers_r(struct All_variables *,float );
+void construct_mat_group(struct All_variables *);
+void temperatures_conform_bcs(struct All_variables *);
+int layers(struct All_variables *,int ,int );
+
 /* 
 
 assign tracer flavor based on its depth (within top n layers), 

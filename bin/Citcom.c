@@ -60,6 +60,7 @@ int main(argc,argv)
   void read_velocity_boundary_from_file();
   void read_rayleigh_from_file();
   void read_mat_from_file();
+  void read_temperature_boundary_from_file();
 #ifdef USE_GGRD
   void read_rayleigh_from_file();
 #endif
@@ -145,9 +146,10 @@ int main(argc,argv)
   /* information about simulation time and wall clock time */
   output_time(E, E->monitor.solution_cycles);
 
-  output_checkpoint(E);
-
-
+  if(!E->control.restart)	/* if we have not restarted, print new
+				   checkpoint, else leave as is to
+				   allow reusing directories */
+    output_checkpoint(E);
 
   /* this section stops the computation if only computes stokes' problem
    * no counterpart in pyre */
@@ -160,7 +162,7 @@ int main(argc,argv)
   }
 
 
-
+ 
 
   /* this section advances the time step;
    * replaced by CitcomS.Controller.march() */
@@ -210,7 +212,11 @@ int main(argc,argv)
     /* information about simulation time and wall clock time */
     output_time(E, E->monitor.solution_cycles);
 
-    if ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) {
+    /* print checkpoint every checkpoint_frequency, unless we have restarted,
+       then, we would like to avoid overwriting 
+    */
+    if ( ((E->monitor.solution_cycles % E->control.checkpoint_frequency)==0) &&
+	 ((!E->control.restart) || (E->monitor.solution_cycles != E->monitor.solution_cycles_init))){
 	output_checkpoint(E);
     }
     /* updating time-dependent material group

@@ -316,7 +316,7 @@ void full_read_input_files_for_timesteps(E,action,output)
             llayer = layers(E,m,nodea);
             if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
               E->mat[m][el] = llayer;
-              fprintf(stderr,"\nINSIDE llayer=&d",llayer);
+              fprintf(stderr,"\nINSIDE llayer=%d",llayer);
             }
           }
           for(i=1;i<=emax;i++)  {

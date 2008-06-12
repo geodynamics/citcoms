@@ -30,6 +30,8 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+void myerror(char *,struct All_variables *);
+
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
     float **tpg,**tpgb;
@@ -502,7 +504,13 @@ static void geoid_from_buoyancy(struct All_variables *E,
     return;
 }
 
+static void geoid_from_topography_self_g(struct All_variables *E,
+					 float *geoid_tpgt[2],
+					 float *geoid_tpgb[2])
+{
+  myerror("not implemented yet",E);
 
+}
 
 static void geoid_from_topography(struct All_variables *E,
                                   float *geoid_tpgt[2],
@@ -642,7 +650,10 @@ void compute_geoid(E, harm_geoid,  harm_geoid_from_bncy,
     int i, p;
 
     geoid_from_buoyancy(E, harm_geoid_from_bncy);
-    geoid_from_topography(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
+    if(E->control.self_gravitation)
+      geoid_from_topography_self_g(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
+    else
+      geoid_from_topography(E, harm_geoid_from_tpgt, harm_geoid_from_tpgb);
 
     if (E->parallel.me == (E->parallel.nprocz-1))  {
         for (i = 0; i < 2; i++)

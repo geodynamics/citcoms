@@ -36,6 +36,8 @@
 static void horizontal_bc();
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
+void read_temperature_boundary_from_file(struct All_variables *);
+
 
 /* ========================================== */
 

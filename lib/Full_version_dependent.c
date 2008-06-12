@@ -35,6 +35,7 @@ void ggrd_full_temp_init(struct All_variables *);
 
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
+void myerror(struct All_variables *,char *);
 
 /* Setup global mesh parameters */
 void full_global_derived_values(E)

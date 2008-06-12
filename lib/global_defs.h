@@ -459,6 +459,8 @@ struct CONTROL {
     /**/
     int compress_iter_maxstep;
 
+  int self_gravitation;		/* self gravitation */
+
     char uzawa[20];
 
     float inputdiff;
@@ -549,6 +551,8 @@ struct DATA {
     float   therm_exp;
     float   Cp;
     float  therm_diff;
+  float  ellipticity,ra,rc,rotm,j2,ge; /* for ellipticity tests: f, normalized a and c axes, 
+					rotational fraction m, J2, and norm gravity at the equator */
     float  therm_cond;
     float   density;
     float  res_density;

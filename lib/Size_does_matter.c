@@ -50,9 +50,9 @@ static void form_rtf_bc(int k, double x[4],
 {
     double myatan();
 
-    rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-    rtf[1][k] = acos(x[3]*rtf[3][k]);
-    rtf[2][k] = myatan(x[2],x[1]);
+    rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]); /* 1/r */
+    rtf[1][k] = acos(x[3]*rtf[3][k]); /* theta */
+    rtf[2][k] = myatan(x[2],x[1]); /* phi */
 
     bc[1][1] = x[3]*cos(rtf[2][k]);
     bc[1][2] = x[3]*sin(rtf[2][k]);
@@ -216,9 +216,9 @@ void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
                 x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
                     * E->N.vpt[GNVINDEX(i,k)];
 
-        rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-        rtf[1][k] = acos(x[3]*rtf[3][k]);
-        rtf[2][k] = myatan(x[2],x[1]);
+        rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]); /* 1/r */
+        rtf[1][k] = acos(x[3]*rtf[3][k]); /* theta */
+        rtf[2][k] = myatan(x[2],x[1]); /* phi */
     }
 
     return;

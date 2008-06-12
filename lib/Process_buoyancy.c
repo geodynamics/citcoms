@@ -39,6 +39,7 @@
 #include "output.h"
 #include <math.h>		/* for sqrt */
 
+void parallel_process_termination(void);
 
 
 static void output_interpolated_fields(struct All_variables *E)

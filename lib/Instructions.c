@@ -80,6 +80,7 @@ void viscosity_input(struct All_variables*);
 void get_vtk_filename(char *,int,struct All_variables *,int);
 void myerror(struct All_variables *,char *);
 void open_qfiles(struct All_variables *) ;
+void read_rayleigh_from_file(struct All_variables *);
 
 
 void initial_mesh_solver_setup(struct All_variables *E)
@@ -534,6 +535,8 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("remove_rigid_rotation",&(E->control.remove_rigid_rotation),"on",m);
 
   input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
+  
+  input_boolean("self_gravitation",&(E->control.self_gravitation),"off",m);
 
   input_int("storage_spacing",&(E->control.record_every),"10",m);
   input_int("checkpointFrequency",&(E->control.checkpoint_frequency),"100",m);
@@ -595,6 +598,36 @@ void read_initial_settings(struct All_variables *E)
   input_float("density_above",&(E->data.density_above),"1030.0",m);
   input_float("density_below",&(E->data.density_below),"6600.0",m);
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
+
+  /* f = (a-c)/a, where c is the short, a=b the long axis 
+     1/298.257 = 0.00335281317789691 for Earth at present day
+  */
+  input_float("ellipticity",&E->data.ellipticity,"0.0",m);
+  if(fabs(E->data.ellipticity) > 5e-7){
+    /* define ra and rc such that R=1 is the volume equivalanet */
+    E->data.ra = pow((1.-(double)E->data.ellipticity),(double)-1./3.); /* non dim long axis */
+    E->data.rc = 1./(E->data.ra * E->data.ra); /* non dim short axis */
+    if(E->parallel.me == 0)
+      fprintf(stderr,"WARNING: ellipticity: %.5e equivalent radii: r_a: %g r_b: %g\n",
+	      E->data.ellipticity,E->data.ra,E->data.rc);
+  }else{
+    E->data.ra = E->data.rc = 1.0;
+  }
+  /* 
+     centrifugal ratio between \omega^2 a^3/GM, 3.46775e-3 for the
+     Earth at present day
+  */
+  input_float("rotation_m",&E->data.rotm,"0.0",m);
+  if(fabs(E->data.rotm) > 5e-7){
+    /* J2 from flattening */
+    E->data.j2 = 2./3.*E->data.ellipticity*(1.-E->data.ellipticity/2.)-
+      E->data.rotm/3.*(1.-3./2.*E->data.rotm-2./7.*E->data.ellipticity);
+    /* normalized gravity at the equator */
+    E->data.ge = 1/(E->data.ra*E->data.ra)*(1+3./2.*E->data.j2-E->data.rotm);
+    if(E->parallel.me==0)
+      fprintf(stderr,"WARNING: rotational fraction m: %.5e J2: %.5e g_e: %g\n",
+	      E->data.rotm,E->data.j2,E->data.ge);
+  }
 
   input_float("radius",&tmp,"6371e3.0",m);
   E->data.radius_km = tmp / 1e3;
@@ -962,7 +995,9 @@ void global_default_values(E)
   E->data.permeability = 3.0e-10;
   E->data.gas_const = 8.3;
   E->data.surf_heat_flux = 4.4e-2;
-  E->data.grav_const = 6.673e-11;
+
+  E->data.grav_const = 6.6742e-11;
+
   E->data.youngs_mod = 1.0e11;
   E->data.Te = 0.0;
   E->data.T_sol0 = 1373.0;      /* Dave's values 1991 (for the earth) */

@@ -31,6 +31,7 @@
 #include "global_defs.h"
 
 int layers_r(struct All_variables *,float );
+int layers(struct All_variables *,int ,int );
 
 
 /*========================================================
@@ -765,9 +766,7 @@ if E->viscosity.z... set to Earth values, then
 4: lower mantle
 
 */
-int layers_r(E,r)
-     struct All_variables *E;
-     float r;
+int layers_r(struct All_variables *E,float r)
 {
   int llayers = 0;
   /* 
@@ -787,9 +786,7 @@ int layers_r(E,r)
 }
 
 /* determine layer number of node "node" of cap "m" */
-int layers(E,m,node)
-     struct All_variables *E;
-     int m,node;
+int layers(struct All_variables *E,int m,int node)
 {
   return(layers_r(E,E->sx[m][3][node]));
 }

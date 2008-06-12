@@ -103,10 +103,13 @@ void get_sph_harm_coeff(char *filename, sph_harm* coeff)
     /* read in the geoid coefficients */
     for(index=0; index<coeff->len; index++) {
         fgets(buffer, 255, fp);
-        sscanf(buffer, "%d %d %f %f %f %f %f %f",
-               &(coeff->ll[index]), &(coeff->mm[index]),
-               &(coeff->clm[index]), &(coeff->slm[index]),
-               &fjunk0, &fjunk1, &fjunk2, &fjunk3);
+        if(sscanf(buffer, "%d %d %f %f %f %f %f %f",
+		  &(coeff->ll[index]), &(coeff->mm[index]),
+		  &(coeff->clm[index]), &(coeff->slm[index]),
+		  &fjunk0, &fjunk1, &fjunk2, &fjunk3) != 8){
+	  fprintf(stderr,"read error l %i m %i \n",coeff->ll[index],coeff->mm[index]);
+	  exit(-1);
+	}
         /*
         fprintf(stderr, "%d %d %d %e %e\n", index,
                 coeff->ll[index], coeff->mm[index],
