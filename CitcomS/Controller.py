@@ -68,6 +68,11 @@ class Controller(Component):
         # do io for 0th step
         self.save()
 
+        # no need to write checkpoint files if restarting from
+        # old checkpoint
+        if not self.solver.inventory.ic.inventory.restart:
+            self.checkpoint()
+
         if self.solver.inventory.ic.inventory.post_p:
             self.endSimulation()
             raise SystemExit()
@@ -100,6 +105,7 @@ class Controller(Component):
 
             # do io
             self.save()
+            self.checkpoint()
 
             # are we done?
             if self.done:
@@ -150,6 +156,10 @@ class Controller(Component):
 
     def save(self):
         self.solver.save(self.inventory.monitoringFrequency)
+        return
+
+
+    def checkpoint(self):
         self.solver.checkpoint(self.inventory.checkpointFrequency)
         return
 
