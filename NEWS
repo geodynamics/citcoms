@@ -4,12 +4,17 @@ Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
 
 Trunk:
 
-* New capability to read in time- and geographic-dependent, top
-  surface temperature boundary conditions
+* Fixed a memory bug in visual/project_geoid.c, contributed by Thorsten
+  Becker.
 
+* New capability to read in time- and geographic-dependent, top surface
+  temperature boundary conditions, contributed by Mike Gurnis.
+
+
 Version 3.0.2
 ?
 
+
 Version 3.0.1
 
 * A header file for the exchanger was missing in v3.0.0.
