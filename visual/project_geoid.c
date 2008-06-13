@@ -52,10 +52,11 @@ void print_help()
         "\n"
         "Usage: project_geoid infile outfile n_latitude n_longitude\n"
         "\n"
-        "infile: CitcomS geoid file\n"
-        "outfile: file will contain 3 columns (longitude, latitude, geoid)\n"
-        "n_longitude: # of grid points in longitude direction for the mesh\n"
-        "n_latitude: # of grid points in latitudee direction for the mesh\n";
+        "infile: name of the CitcomS geoid file\n"
+        "outfile: name of the output file.\n"
+	"         This file will contain 3 columns (longitude, latitude, geoid)\n"
+        "n_latitude: # of grid points in latitudee direction for the mesh\n"
+        "n_longitude: # of grid points in longitude direction for the mesh\n";
 
     fputs(msg, stderr);
 
