@@ -164,7 +164,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     double global_vdot(), global_pdot();
 
     double time0, CPU_time0();
-    float dpressure, dvelocity;
+    double dpressure, dvelocity;
 
     void assemble_c_u();
     void assemble_div_u();
