@@ -74,7 +74,6 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   double *D1[NCS], *r[NCS], *Au[NCS];
 
   gneq  = E->mesh.NEQ[high_lev];
-  gneq  = E->mesh.neq;
   neq  = E->lmesh.NEQ[high_lev];
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
@@ -631,7 +630,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     const int nox=E->lmesh.NOX[level];
     const int noz=E->lmesh.NOY[level];
     const int noy=E->lmesh.NOZ[level];
-    const int gneq  = E->mesh.neq;
     const int max_eqn=14*dims;
 
     const double zeroo = 0.0;

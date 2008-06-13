@@ -72,12 +72,15 @@ void full_global_derived_values(E)
   E->mesh.ely = E->mesh.noy-1;
   E->mesh.elz = E->mesh.noz-1;
 
+  /* number of nodes, including overlaping nodes between processors */
   E->mesh.nno = E->sphere.caps*E->mesh.nox*E->mesh.noy*E->mesh.noz;
 
   E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
 
   E->mesh.nnov = E->mesh.nno;
 
+  /* this is a rough estimate for global neq, a more accurate neq will
+     be computed later. */
   E->mesh.neq = E->mesh.nnov*E->mesh.nsd;
 
   E->mesh.npno = E->mesh.nel;
@@ -99,7 +102,7 @@ void full_global_derived_values(E)
     E->mesh.ELX[i] = nox-1;
     E->mesh.ELY[i] = noy-1;
     E->mesh.ELZ[i] = noz-1;
-    E->mesh.NNO[i] = E->sphere.caps * nox * noz * noy;
+    E->mesh.NNO[i] = E->sphere.caps * (nox-1) * (noy-1) * noz;
     E->mesh.NEL[i] = E->sphere.caps * (nox-1) * (noz-1) * (noy-1);
     E->mesh.NPNO[i] = E->mesh.NEL[i] ;
     E->mesh.NOX[i] = nox;

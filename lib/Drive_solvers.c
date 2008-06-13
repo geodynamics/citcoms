@@ -77,7 +77,6 @@ void general_stokes_solver(struct All_variables *E)
 
   const int nno = E->lmesh.nno;
   const int nel = E->lmesh.nel;
-  const int nnov = E->lmesh.nnov;
   const int neq = E->lmesh.neq;
   const int vpts = vpoints[E->mesh.nsd];
   const int dims = E->mesh.nsd;
@@ -195,7 +194,6 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
   const int nno = E->lmesh.nno;
   const int nel = E->lmesh.nel;
-  const int nnov = E->lmesh.nnov;
   const int neq = E->lmesh.neq;
   const int vpts = vpoints[E->mesh.nsd];
   const int dims = E->mesh.nsd;

@@ -132,6 +132,7 @@ void construct_id(E)
 {
     int i,j,k;
     int eqn_count,node,nno;
+    int neq, gneq;
     unsigned int type,doff;
     int lev;
     void get_bcs_id_for_residual();
@@ -162,12 +163,18 @@ void construct_id(E)
 
       E->parallel.Skip_neq[lev][j] = i;
 
+      /* global # of unskipped eqn */
+      neq = E->lmesh.NEQ[lev] - E->parallel.Skip_neq[lev][j];
+      MPI_Allreduce(&neq, &gneq, 1, MPI_INT, MPI_SUM, E->parallel.world);
+      E->mesh.NEQ[lev] = gneq;
+
       get_bcs_id_for_residual(E,lev,j);
 
       }       /* end for j */
     }      /* end for lev */
 
     E->lmesh.neq = E->lmesh.NEQ[E->mesh.levmax];
+    E->mesh.neq = E->mesh.NEQ[E->mesh.levmax];
 
 /*     if (E->control.verbose) { */
 /*       fprintf(E->fp_out,"output_ID_arrays \n"); */
@@ -660,7 +667,7 @@ void construct_elt_ks(E)
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
-	       if(E->BI[lev][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->mesh.NEQ[lev]);
+	       if(E->BI[lev][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
                assert( E->BI[lev][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
                E->BI[lev][m][j]  = (double) 1.0/E->BI[lev][m][j];
 	       }

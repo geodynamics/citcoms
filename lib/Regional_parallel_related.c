@@ -411,18 +411,6 @@ void regional_parallel_domain_boundary_nodes(E)
       }       /* end for m */
     }   /* end for level */
 
-  /* count # of global nodes, ignoring overlapping nodes */
-  ii=0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for (node=1;node<=E->lmesh.nno;node++)
-      if(E->node[m][node] & SKIPS)
-        ++ii;
-
-  MPI_Allreduce(&ii, &node, 1, MPI_INT, MPI_SUM, E->parallel.world);
-
-  E->mesh.nno = E->lmesh.nno*E->parallel.nproc - node - 2*E->mesh.noz;
-  E->mesh.neq = E->mesh.nno*3;
-
 
 if (E->control.verbose) {
  fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);

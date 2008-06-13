@@ -419,62 +419,53 @@ void full_parallel_domain_boundary_nodes(E)
 
       E->parallel.NUM_NNO[lev][m].bound[ii] = lnode;
 
-         /* determine the overlapped nodes between caps or between proc */
+      /* determine the overlapped nodes between caps or between proc */
 
-    if (E->parallel.me_loc[3]!=E->parallel.nprocz-1 )
-      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[6];lnode++) {
-        node = E->parallel.NODE[lev][m][lnode].bound[6];
-        E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
-        }
-
-    if (E->sphere.capid[m]==12 && E->parallel.me_loc[1]==E->parallel.nprocx-1 && E->parallel.me_loc[2]==E->parallel.nprocy-1) /* back right of cap number 12 */
+      /* horizontal direction:
+         all nodes at right (ix==nox) and front (iy==1) faces
+         are skipped */
       for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[2];lnode++) {
-        node = E->parallel.NODE[lev][m][lnode].bound[2];
-        if (node<=nno-noz)  {
-           E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
-           if (E->parallel.me_loc[3]==E->parallel.nprocz-1 || node%noz!=0)
-             E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIPS;
-	   }
-        }
-    else
-      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[2];lnode++) {
-        node = E->parallel.NODE[lev][m][lnode].bound[2];
-        E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
-        if (E->parallel.me_loc[3]==E->parallel.nprocz-1 || node%noz!=0)
-          E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIPS;
-        }
+          node = E->parallel.NODE[lev][m][lnode].bound[2];
+          E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
+      }
 
-    if (E->sphere.capid[m]==1 && E->parallel.me_loc[1]==0 && E->parallel.me_loc[2]==0) /* front left of cap number 1 */
       for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[3];lnode++) {
-        node = E->parallel.NODE[lev][m][lnode].bound[3];
-        if (node>noz)  {
-           E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
-           if (E->parallel.me_loc[3]==E->parallel.nprocz-1 || node%noz!=0)
-             E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIPS;
-	   }
-        }
-    else
-      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[3];lnode++) {
-        node = E->parallel.NODE[lev][m][lnode].bound[3];
-        E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
-        if (E->parallel.me_loc[3]==E->parallel.nprocz-1 || node%noz!=0)
-           E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIPS;
-        }
+          node = E->parallel.NODE[lev][m][lnode].bound[3];
+          E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
+      }
+
+      /* nodes at N/S poles are skipped by all proc.
+         add them back here */
+
+      /* north pole is at the front left proc. of 1st cap */
+      if (E->sphere.capid[m] == 1 &&
+          E->parallel.me_loc[1] == 0 &&
+          E->parallel.me_loc[2] == 0)
+          for(j=1;j<=noz;j++) {
+              node = j;
+              E->NODE[lev][m][node] = E->NODE[lev][m][node] & ~SKIP;
+          }
+
+      /* south pole is at the back right proc. of final cap */
+      if (E->sphere.capid[m] == E->sphere.caps &&
+          E->parallel.me_loc[1] == E->parallel.nprocx-1 &&
+          E->parallel.me_loc[2] == E->parallel.nprocy-1)
+          for(j=1;j<=noz;j++) {
+              node = j*nox*noy;
+              E->NODE[lev][m][node] = E->NODE[lev][m][node] & ~SKIP;
+          }
+
+      /* radial direction is easy:
+         all top nodes except those at top processors are skipped */
+      if (E->parallel.me_loc[3]!=E->parallel.nprocz-1 )
+          for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][m].bound[6];lnode++) {
+              node = E->parallel.NODE[lev][m][lnode].bound[6];
+              E->NODE[lev][m][node] = E->NODE[lev][m][node] | SKIP;
+          }
 
       }       /* end for m */
     }   /* end for level */
 
- /* count # of global nodes, ignoring overlapping nodes */
- ii=0;
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for (node=1;node<=E->lmesh.nno;node++)
-      if(E->node[m][node] & SKIPS)
-        ++ii;
-
- MPI_Allreduce(&ii, &node , 1, MPI_INT,MPI_SUM, E->parallel.world);
-
- E->mesh.nno = E->lmesh.nno*E->parallel.nproc - node - 2*E->mesh.noz;
- E->mesh.neq = E->mesh.nno*3;
 
 if (E->control.verbose) {
  fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);

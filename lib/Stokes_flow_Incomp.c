@@ -154,7 +154,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
                                   double imp, int *steps_max)
 {
     int m, j, count, valid, lev, npno, neq;
-    int gnpno, gneq;
+    int gnpno;
 
     double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *F[NCS];
     double *shuffle[NCS];
@@ -175,7 +175,6 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     void parallel_process_termination();
 
     gnpno = E->mesh.npno;
-    gneq = E->mesh.neq;
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
@@ -381,7 +380,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double global_vdot(), global_pdot();
     double CPU_time0();
 
-    int gnpno, gneq;
+    int gnpno;
     int npno, neq;
     int m, j, count, lev;
     int valid;
@@ -399,7 +398,6 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double time0, v_res;
 
     gnpno = E->mesh.npno;
-    gneq = E->mesh.neq;
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
