@@ -86,22 +86,22 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   if(E->parallel.me > 0){	
     /* wait for previous processor */
     mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-		      0, MPI_COMM_WORLD, &mpi_stat);
+		      0, E->parallel.world, &mpi_stat);
   }
   if(ggrd_grdtrack_init_general(FALSE,E->trace.ggrd_file,
 				char_dummy,gmt_bc,
 				ggrd_ict,FALSE,FALSE)){
     myerror(E,"ggrd tracer init error");
   }
-  if(E->parallel.me <  E->parallel.nproc-1){ 
+  if(E->parallel.me <  E->parallel.nproc-1){
     /* tell the next proc to go ahead */
-    mpi_rc = MPI_Send(&mpi_success_message, 1, 
-		      MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    mpi_rc = MPI_Send(&mpi_success_message, 1,
+		      MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
   }else{
     report(E,"ggrd_init_tracer_flavors: last processor done with ggrd mat init");
   }
   /* init done */
-  
+
   /* assign values to each tracer based on grd file */
   for (j=1;j<=E->sphere.caps_per_proc;j++) {
     number_of_tracers = E->trace.ntracers[j];
@@ -110,11 +110,11 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 
 
       if(layers_r(E,rad) <= E->trace.ggrd_layers){
-	/* 
-	   in top layers 
+	/*
+	   in top layers
 	*/
-	phi =   E->trace.basicq[j][1][kk]; 
-	theta = E->trace.basicq[j][0][kk]; 
+	phi =   E->trace.basicq[j][1][kk];
+	theta = E->trace.basicq[j][0][kk];
 	/* interpolate from grid */
 	if(!ggrd_grdtrack_interpolate_tp((double)theta,(double)phi,
 					 ggrd_ict,&indbl,FALSE)){
@@ -153,7 +153,7 @@ void ggrd_reg_temp_init(struct All_variables *E)
 
 
 
-/* 
+/*
 
 initialize temperatures from grd files for spherical geometry
 
@@ -161,7 +161,7 @@ initialize temperatures from grd files for spherical geometry
 
 void ggrd_temp_init_general(struct All_variables *E,int is_global)
 {
-  
+
   MPI_Status mpi_stat;
   int mpi_rc;
   int mpi_inmsg, mpi_success_message = 1;
@@ -178,78 +178,78 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   noz=E->lmesh.noz;
   noxnoz = nox * noz;
 
-  if(E->parallel.me == 0)  
+  if(E->parallel.me == 0)
     fprintf(stderr,"ggrd_temp_init_general: using GMT grd files for temperatures, gmtflag: %s\n",gmt_string);
-  /* 
-     
-  
+  /*
+
+
   read in tempeatures/density from GMT grd files
-  
-  
+
+
   */
-  /* 
-     
+  /*
+
   begin MPI synchronization part
-  
+
   */
   if(E->parallel.me > 0){
-    /* 
-       wait for the previous processor 
+    /*
+       wait for the previous processor
     */
-    mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-		      0, MPI_COMM_WORLD, &mpi_stat);
+    mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
+		      0, E->parallel.world, &mpi_stat);
   }
-  
+
   if(E->control.ggrd.temp_init.scale_with_prem){/* initialize PREM */
     if(prem_read_model(E->control.ggrd.temp_init.prem.model_filename,
 		       &E->control.ggrd.temp_init.prem, (E->parallel.me == 0)))
       myerror(E,"PREM init error");
   }
-  /* 
-     initialize the GMT grid files 
+  /*
+     initialize the GMT grid files
   */
   E->control.ggrd.temp_init.d[0].init = FALSE;
-  if(ggrd_grdtrack_init_general(TRUE,E->control.ggrd.temp_init.gfile, 
-				E->control.ggrd.temp_init.dfile,gmt_string, 
+  if(ggrd_grdtrack_init_general(TRUE,E->control.ggrd.temp_init.gfile,
+				E->control.ggrd.temp_init.dfile,gmt_string,
 				E->control.ggrd.temp_init.d,(E->parallel.me == 0),
 				FALSE))
     myerror(E,"grd init error");
   if(E->parallel.me <  E->parallel.nproc-1){
     /* tell the next processor to go ahead with the init step	*/
-    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
   }else{
     fprintf(stderr,"ggrd_temp_init_general: last processor (%i) done with grd init\n",
 	    E->parallel.me);
-  }     
-  /* 
-     
+  }
+  /*
+
   interpolate densities to temperature given PREM variations
-  
+
   */
   if(E->mesh.bottbc == 1){
     /* bottom has specified temperature */
     tbot =  E->control.TBCbotval;
   }else{
-    /* 
+    /*
        bottom has specified heat flux start with unity bottom temperature
-    */ 
+    */
     tbot = 1.0;
   }
-  /* 
-     mean temp is (top+bot)/2 + offset 
+  /*
+     mean temp is (top+bot)/2 + offset
   */
   tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd.temp_init.offset;
 
 
   for(m=1;m <= E->sphere.caps_per_proc;m++)
-    for(i=1;i <= noy;i++)  
-      for(j=1;j <= nox;j++) 
+    for(i=1;i <= noy;i++)
+      for(j=1;j <= nox;j++)
 	for(k=1;k <= noz;k++)  {
 	  /* node numbers */
 	  node=k+(j-1)*noz+(i-1)*noxnoz;
 
-	  /* 
-	     get interpolated velocity anomaly 
+	  /*
+	     get interpolated velocity anomaly
 	  */
 	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],(double)E->sx[m][1][node],
 					    (double)E->sx[m][2][node],
@@ -257,16 +257,16 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 					    FALSE))
 	    myerror(E,"ggrd_temp_init_general");
 	  if(E->control.ggrd.temp_init.scale_with_prem){
-	    /* 
-	       get the PREM density at r for additional scaling  
+	    /*
+	       get the PREM density at r for additional scaling
 	    */
 	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp_init.prem);
 	    if(rho_prem < 3200.0)
 	      rho_prem = 3200.0; /* we don't want the density of water */
-	    /* 
-	       assign temperature 
+	    /*
+	       assign temperature
 	    */
-	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp_init.scale * 
+	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp_init.scale *
 	      rho_prem / E->data.density;
 	  }else{
 	    /* no PREM scaling */
@@ -293,24 +293,24 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 	    }
 	  }
 
-	  
+
 
 	}
-  /* 
+  /*
      free the structure, not needed anymore since T should now
      change internally
   */
   ggrd_grdtrack_free_gstruc(E->control.ggrd.temp_init.d);
-  /* 
+  /*
      end temperature/density from GMT grd init
   */
   temperatures_conform_bcs(E);
 }
 
-/* 
+/*
 
 
-read in material, i.e. viscosity prefactor from ggrd file, this will get assigned if 
+read in material, i.e. viscosity prefactor from ggrd file, this will get assigned if
 
 layer <=  E->control.ggrd.mat_control
 
@@ -336,11 +336,11 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
   elxlz = elx * elz;
   elxlylz = elxlz * ely;
   lev=E->mesh.levmax;
-  /* 
+  /*
      if we have not initialized the time history structure, do it now
   */
   if(!E->control.ggrd.time_hist.init){
-    /* 
+    /*
        init times, if available
     */
     ggrd_init_thist_from_file(&E->control.ggrd.time_hist,
@@ -358,15 +358,15 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
     else
       sprintf(gmt_string,"");
-    /* 
-       
+    /*
+
     initialization steps
-    
+
     */
     if(E->parallel.me > 0)	/* wait for previous processor */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-			0, MPI_COMM_WORLD, &mpi_stat);
-    /* 
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
+			0, E->parallel.world, &mpi_stat);
+    /*
        read in the material file(s)
     */
     E->control.ggrd.mat = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
@@ -381,13 +381,13 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	myerror(E,"ggrd init error");
     }
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
-      mpi_rc = MPI_Send(&mpi_success_message, 1, 
-			MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+      mpi_rc = MPI_Send(&mpi_success_message, 1,
+			MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
     }else{
       fprintf(stderr,"ggrd_read_mat_from_file: last processor done with ggrd mat init\n");
       fprintf(stderr,"ggrd_read_mat_from_file: WARNING: assuming a regular grid geometry\n");
     }
-    
+
     /* end init */
   }
   if(timedep || (!E->control.ggrd.mat_control_init)){
@@ -402,22 +402,22 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
       interpolate = 0;
       i1 = 0;
     }
-    /* 
+    /*
        loop through all elements and assign
     */
     for (m=1;m <= E->sphere.caps_per_proc;m++) {
       for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
 	if(E->mat[m][j] <= E->control.ggrd.mat_control ){
-	  /* 
-	     lithosphere or asthenosphere 
+	  /*
+	     lithosphere or asthenosphere
 	  */
 	  for (k=1;k <= ely;k++){
 	    for (i=1;i <= elx;i++)   {
 	      /* eq.(1) */
 	      el = j + (i-1) * elz + (k-1)*elxlz;
-	      /* 
-		 find average horizontal coordinate 
-		 
+	      /*
+		 find average horizontal coordinate
+
 		 (DO WE HAVE THIS STORED ALREADY, E.G. FROM PRESSURE
 		 EVAL FORM FUNCTION???)
 	      */
@@ -474,10 +474,10 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 } /* end mat control */
 
 
-/* 
+/*
 
 
-read in Rayleigh number prefactor from file, this will get assigned if 
+read in Rayleigh number prefactor from file, this will get assigned if
 
 layer <= E->control.ggrd.ray_control
 
@@ -502,7 +502,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
   elxlz = elx * elz;
   elxlylz = elxlz * ely;
   lev=E->mesh.levmax;
-  /* 
+  /*
      if we have not initialized the time history structure, do it now
      any function can do that
 
@@ -524,8 +524,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
     else
       sprintf(gmt_string,"");
     if(E->parallel.me > 0)	/* wait for previous processor */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-			0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
+			0, E->parallel.world, &mpi_stat);
     E->control.ggrd.ray = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
     for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
       if(!timedep)		/* constant */
@@ -537,8 +537,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
 	myerror(E,"ggrd init error");
     }
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
-      mpi_rc = MPI_Send(&mpi_success_message, 1, 
-			MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+      mpi_rc = MPI_Send(&mpi_success_message, 1,
+			MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
     }else{
       fprintf(stderr,"ggrd_read_ray_from_file: last processor done with ggrd ray init\n");
     }
@@ -559,8 +559,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
       fprintf(stderr,"ggrd_read_ray_from_ggrd_file: assigning at time %g\n",age);
     for (m=1;m <= E->sphere.caps_per_proc;m++) {
       /* loop through all surface nodes */
-      for (j=1;j <= E->lmesh.nsf;j++)  {	
-	node = j * E->lmesh.noz ; 
+      for (j=1;j <= E->lmesh.nsf;j++)  {
+	node = j * E->lmesh.noz ;
 	rout[1] = (double)E->sx[m][1][node];
 	rout[2] = (double)E->sx[m][2][node];
 	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,FALSE)){
@@ -609,13 +609,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   const int dims=E->mesh.nsd;
 
   nox1 = E->lmesh.nox;noz1=E->lmesh.noz;noy1=E->lmesh.noy;
-  nox1noz1 = nox1*noz1; 
+  nox1noz1 = nox1*noz1;
   lev = E->mesh.levmax;
 
   /* velocity scaling, assuming input is cm/yr  */
-  vscale = E->data.scalev * E->data.timedir; 
+  vscale = E->data.scalev * E->data.timedir;
 
-  /* 
+  /*
      if we have not initialized the time history structure, do it now
      if this file is not found, will use constant velocities
   */
@@ -624,7 +624,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 			      TRUE,(E->parallel.me == 0));
     E->control.ggrd.time_hist.init = 1;
   }
-  
+
   timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
 
   if(!E->control.ggrd.vtop_control_init){
@@ -635,15 +635,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
     }else
       sprintf(gmt_string,"");
-    /* 
-       
+    /*
+
     initialization steps
-    
+
     */
     if(E->parallel.me > 0)	/* wait for previous processor */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-			0, MPI_COMM_WORLD, &mpi_stat);
-    /* 
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
+			0, E->parallel.world, &mpi_stat);
+    /*
        read in the velocity file(s)
     */
     E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
@@ -664,8 +664,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	myerror(E,"ggrd init error vp");
     }
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
-      mpi_rc = MPI_Send(&mpi_success_message, 1, 
-			MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+      mpi_rc = MPI_Send(&mpi_success_message, 1,
+			MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
     }else{
       fprintf(stderr,"ggrd_read_vtop_from_file: last processor done with ggrd vtop BC init, %i timesteps\n",
 	      E->control.ggrd.time_hist.nvtimes);
