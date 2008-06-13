@@ -224,20 +224,22 @@ int main(argc,argv)
      * initialized in initial_conditions() */
     if(E->control.mat_control==1)
       read_mat_from_file(E);
-#ifdef USE_GGRD    
+
+#ifdef USE_GGRD
+    /* updating local rayleigh number */
+    /* To TWB: is this comment correct? */
+    /* no counterpart in pyre */
     if(E->control.ggrd.ray_control)
       read_rayleigh_from_file(E);
 #endif
+
+    /* updating plate velocity boundary condition */
     if(E->control.vbcs_file==1)
       read_velocity_boundary_from_file(E);
 
+    /* updating plate temperature boundary condition */
     if(E->control.tbcs_file)
       read_temperature_boundary_from_file(E);   
-    /*
-      else
-      renew_top_velocity_boundary(E);
-    */
-
 
 
     if (E->parallel.me == 0)  {
