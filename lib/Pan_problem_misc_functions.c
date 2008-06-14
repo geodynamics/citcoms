@@ -218,7 +218,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     
     
 
-
+    //if(E->control.remove_hor_buoy_avg)	/* XXX for testing purposes, remove? */
     remove_horiz_ave2(E,buoy);
     
     return;

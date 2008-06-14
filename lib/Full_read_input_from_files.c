@@ -352,6 +352,8 @@ void full_read_input_files_for_timesteps(E,action,output)
 	break;
       case 4:			/* material control */
 #ifdef USE_GGRD
+	/* read laterally varying rayleigh number prefactor from
+	   file */
 	if(E->control.ggrd.ray_control)
 	  ggrd_read_ray_from_file(E, 1);
 #else

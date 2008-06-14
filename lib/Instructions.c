@@ -206,7 +206,11 @@ void initial_setup(struct All_variables *E)
 
     general_stokes_solver_setup(E);
 
-#ifdef USE_GGRD    
+#ifdef USE_GGRD  
+    /* updating local rayleigh number (based on Netcdf grds, the
+       rayleigh number may be modified laterally in the surface
+       layers) */
+    /* no counterpart in pyre */
     if(E->control.ggrd.ray_control)
       read_rayleigh_from_file(E);
 #endif
@@ -391,6 +395,9 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("see_convergence",&(E->control.print_convergence),"off",m);
 
   input_int("stokes_flow_only",&(E->control.stokes),"0",m);
+
+  //input_boolean("remove_hor_buoy_avg",&(E->control.remove_hor_buoy_avg),"on",m);
+
 
   /* restart from checkpoint file */
   input_boolean("restart",&(E->control.restart),"off",m);

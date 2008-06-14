@@ -482,6 +482,10 @@ read in Rayleigh number prefactor from file, this will get assigned if
 layer <= E->control.ggrd.ray_control
 
 
+I.e. this function can be used to assign a laterally varying prefactor
+to the rayleigh number in the surface layers, e.g. to have a simple
+way to represent stationary, chemical heterogeneity
+
 */
 void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
 {

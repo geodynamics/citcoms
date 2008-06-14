@@ -476,6 +476,8 @@ struct CONTROL {
 
     char coor_file[100];
 
+  //int remove_hor_buoy_avg;
+
     int lith_age;
     int lith_age_time;
     int lith_age_old_cycles;

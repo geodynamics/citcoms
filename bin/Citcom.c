@@ -61,9 +61,7 @@ int main(argc,argv)
   void read_rayleigh_from_file();
   void read_mat_from_file();
   void read_temperature_boundary_from_file();
-#ifdef USE_GGRD
-  void read_rayleigh_from_file();
-#endif
+
   void open_time();
   void output_finalize();
   void PG_timestep_init();
@@ -226,8 +224,9 @@ int main(argc,argv)
       read_mat_from_file(E);
 
 #ifdef USE_GGRD
-    /* updating local rayleigh number */
-    /* To TWB: is this comment correct? */
+    /* updating local rayleigh number (based on Netcdf grds, the
+       rayleigh number may be modified laterally in the surface
+       layers) */
     /* no counterpart in pyre */
     if(E->control.ggrd.ray_control)
       read_rayleigh_from_file(E);

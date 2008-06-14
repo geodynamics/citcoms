@@ -45,6 +45,12 @@ void read_velocity_boundary_from_file(E)
     return;
 }
 #ifdef USE_GGRD
+/* 
+
+wrapper for ggrd functionality to read in netcdf grid files for
+laterally varying rayleigh number in the top layers 
+
+ */
 void read_rayleigh_from_file(E)
      struct All_variables *E;
 {
