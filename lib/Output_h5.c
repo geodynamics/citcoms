@@ -136,8 +136,7 @@ void h5output_time(struct All_variables *, int);
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
-extern void compute_geoid(struct All_variables *, float**, float**,
-                          float**, float**);
+extern void compute_geoid(struct All_variables *);
 
 
 /****************************************************************************
@@ -1131,10 +1130,7 @@ void h5output_geoid(struct All_variables *E, int cycles)
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     status = H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT);
 
-    compute_geoid(E, E->sphere.harm_geoid,
-                  E->sphere.harm_geoid_from_bncy,
-                  E->sphere.harm_geoid_from_tpgt,
-                  E->sphere.harm_geoid_from_tpgb);
+    compute_geoid(E);
 
     if (E->parallel.me == 0) {
         /* Prepare data */

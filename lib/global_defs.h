@@ -265,6 +265,9 @@ struct SPHERE   {
   float *harm_geoid_from_tpgt[2];
   float *harm_geoid_from_tpgb[2];
 
+  float *harm_tpgt[2];
+  float *harm_tpgb[2];
+
   double **tablesplm[NCS];
   double **tablescosf[NCS];
   double **tablessinf[NCS];

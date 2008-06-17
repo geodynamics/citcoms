@@ -826,10 +826,7 @@ void gzdir_output_geoid(struct All_variables *E, int cycles)
     char output_file[255];
     gzFile *fp1;
 
-    compute_geoid(E, E->sphere.harm_geoid,
-                  E->sphere.harm_geoid_from_bncy,
-                  E->sphere.harm_geoid_from_tpgt,
-                  E->sphere.harm_geoid_from_tpgb);
+    compute_geoid(E);
 
     if (E->parallel.me == (E->parallel.nprocz-1))  {
         snprintf(output_file, 255,

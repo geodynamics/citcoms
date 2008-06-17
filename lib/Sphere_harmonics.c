@@ -34,12 +34,67 @@ void set_sphere_harmonics(E)
         E->sphere.harm_geoid_from_bncy[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
         E->sphere.harm_geoid_from_tpgt[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
         E->sphere.harm_geoid_from_tpgb[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+
+        E->sphere.harm_tpgt[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+        E->sphere.harm_tpgb[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
     }
 
     compute_sphereh_table(E);
 
     return;
 }
+
+/* =====================================
+   Generalized Legendre polynomials
+   =====================================*/
+double modified_plgndr_a(int l, int m, double t)
+{
+    int i,ll;
+    double x,fact1,fact2,fact,pll,pmm,pmmp1,somx2,plgndr;
+    const double three=3.0;
+    const double two=2.0;
+    const double one=1.0;
+
+    x = cos(t);
+    pmm=one;
+    if(m>0) {
+        somx2=sqrt((one-x)*(one+x));
+        fact1= three;
+        fact2= two;
+        for (i=1;i<=m;i++)   {
+            fact=sqrt(fact1/fact2);
+            pmm = -pmm*fact*somx2;
+            fact1+=  two;
+            fact2+=  two;
+        }
+    }
+
+    if (l==m)
+        plgndr = pmm;
+    else  {
+        pmmp1 = x*sqrt(two*m+three)*pmm;
+        if(l==m+1)
+            plgndr = pmmp1;
+        else   {
+            for (ll=m+2;ll<=l;ll++)  {
+                fact1= sqrt((4.0*ll*ll-one)*(double)(ll-m)/(double)(ll+m));
+                fact2= sqrt((2.0*ll+one)*(ll-m)*(ll+m-one)*(ll-m-one)
+                            /(double)((two*ll-three)*(ll+m)));
+                pll = ( x*fact1*pmmp1-fact2*pmm)/(ll-m);
+                pmm = pmmp1;
+                pmmp1 = pll;
+            }
+            plgndr = pll;
+        }
+    }
+
+    plgndr /= sqrt(4.0*M_PI);
+
+    if (m!=0) plgndr *= sqrt(two);
+
+    return plgndr;
+}
+
 
 /* =========================================================
    expand the field TG into spherical harmonics
