@@ -105,8 +105,8 @@ static void  compute_sphereh_table(E)
     double modified_plgndr_a();
 
     int m,node,ll,mm,i,j,p;
-    double t,f;
-
+    double t,f,mmf;
+    
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         E->sphere.tablesplm[m]   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
@@ -126,8 +126,9 @@ static void  compute_sphereh_table(E)
             f=E->sx[m][2][node];
             t=E->sx[m][1][node];
             for (mm=0;mm<=E->output.llmax;mm++)   {
-                E->sphere.tablescosf[m][j][mm] = cos( (double)(mm)*f );
-                E->sphere.tablessinf[m][j][mm] = sin( (double)(mm)*f );
+	      mmf = (double)(mm)*f;
+                E->sphere.tablescosf[m][j][mm] = cos( mmf );
+                E->sphere.tablessinf[m][j][mm] = sin( mmf );
             }
 
             for (ll=0;ll<=E->output.llmax;ll++)

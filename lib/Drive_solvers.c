@@ -93,6 +93,7 @@ void general_stokes_solver(struct All_variables *E)
   solve_constrained_flow_iterative(E);
 
   if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
+    /* outer iterations for velocity dependent viscosity */
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       delta_U[m] = (double *)malloc(neq*sizeof(double));

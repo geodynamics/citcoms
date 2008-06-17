@@ -752,7 +752,7 @@ struct All_variables {
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
 
-    float *stress[NCS];
+  //float *stress[NCS];
     float *gstress[NCS];
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
     float *Fascmb[NCS],*Fascmb_b[NCS];

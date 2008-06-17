@@ -195,6 +195,11 @@ void construct_shape_function_derivatives(struct All_variables *E)
 }
 
 
+/* 
+
+gets r,theta,phi coordinates at the integration points
+
+ */
 void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
                   double rtf[4][9])
 {

@@ -698,7 +698,8 @@ void allocate_common_vars(E)
   E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
-  E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
+  // TWB do we need this anymore XXX
+  //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
   for(i=1;i<=E->mesh.nsd;i++)
       E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));

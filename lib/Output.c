@@ -251,7 +251,8 @@ void output_surf_botm(struct All_variables *E, int cycles)
         fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
-            fprintf(fp2,"%.4e %.4e %.4e %.4e\n",topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+            fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
+		    topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
         }
     }
     fclose(fp2);
@@ -267,7 +268,8 @@ void output_surf_botm(struct All_variables *E, int cycles)
       fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
-        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+        fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
+		E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
       }
     }
     fclose(fp2);

@@ -36,9 +36,10 @@ void set_mg_defaults(E)
   void solve_constrained_flow_iterative();
   void mg_allocate_vars();
 
-  E->solver_allocate_vars = mg_allocate_vars;
-  E->build_forcing_term = assemble_forces_iterative;
+  E->build_forcing_term =   assemble_forces_iterative;
   E->solve_stokes_problem = solve_constrained_flow_iterative;
+  E->solver_allocate_vars = mg_allocate_vars;
+
 
 return;
 }

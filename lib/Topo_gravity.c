@@ -41,7 +41,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     void allocate_STD_mem();
     void compute_nodal_stress();
     void free_STD_mem();
-    void get_surf_stress();
+    //void get_surf_stress();
 
     int node,snode,m;
     float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
@@ -51,8 +51,9 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 
-   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
-     get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
+    // not needed ? TWB XXX
+    //if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
+    //get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY);
 
 
    topo_scaling1 = topo_scaling2 = 1.0;
@@ -60,9 +61,10 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(snode=1;snode<=E->lmesh.nsf;snode++)   {
         node = E->surf_node[m][snode];
-        tpg[m][snode]  = -2*SZZ[m][node] + SZZ[m][node-1];
-        tpgb[m][snode] = 2*SZZ[m][node-E->lmesh.noz+1]-SZZ[m][node-E->lmesh.noz+2];
-        tpg[m][snode]  = tpg[m][snode]*topo_scaling1;
+        tpg[m][snode]  = -2*SZZ[m][node]               + SZZ[m][node-1];
+        tpgb[m][snode] =  2*SZZ[m][node-E->lmesh.noz+1]- SZZ[m][node-E->lmesh.noz+2];
+
+        tpg[m][snode]  =  tpg[m][snode] *topo_scaling1;
         tpgb[m][snode]  = tpgb[m][snode]*topo_scaling2;
 
         divg[m][snode] = 2*divv[m][node]-divv[m][node-1];
@@ -142,37 +144,37 @@ void free_STD_mem(struct All_variables *E,
 }
 
 
-void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY)
-  struct All_variables *E;
-  float **SXX,**SYY,**SZZ,**SXY,**SXZ,**SZY;
-{
-  int m,i,node,stride;
+/* void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY) */
+/*   struct All_variables *E; */
+/*   float **SXX,**SYY,**SZZ,**SXY,**SXZ,**SZY; */
+/* { */
+/*   int m,i,node,stride; */
 
-  stride = E->lmesh.nsf*6;
+/*   stride = E->lmesh.nsf*6; */
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for (node=1;node<=E->lmesh.nno;node++)
-      if ( (node%E->lmesh.noz)==0 )  {
-        i = node/E->lmesh.noz;
-        E->stress[m][(i-1)*6+1] = SXX[m][node];
-        E->stress[m][(i-1)*6+2] = SYY[m][node];
-        E->stress[m][(i-1)*6+3] = SZZ[m][node];
-        E->stress[m][(i-1)*6+4] = SXY[m][node];
-        E->stress[m][(i-1)*6+5] = SXZ[m][node];
-        E->stress[m][(i-1)*6+6] = SZY[m][node];
-        }
-     else if ( ((node+1)%E->lmesh.noz)==0 )  {
-        i = (node+1)/E->lmesh.noz;
-        E->stress[m][stride+(i-1)*6+1] = SXX[m][node];
-        E->stress[m][stride+(i-1)*6+2] = SYY[m][node];
-        E->stress[m][stride+(i-1)*6+3] = SZZ[m][node];
-        E->stress[m][stride+(i-1)*6+4] = SXY[m][node];
-        E->stress[m][stride+(i-1)*6+5] = SXZ[m][node];
-        E->stress[m][stride+(i-1)*6+6] = SZY[m][node];
-        }
+/*   for(m=1;m<=E->sphere.caps_per_proc;m++) */
+/*     for (node=1;node<=E->lmesh.nno;node++) */
+/*       if ( (node%E->lmesh.noz)==0 )  { */
+/*         i = node/E->lmesh.noz; */
+/*         E->stress[m][(i-1)*6+1] = SXX[m][node]; */
+/*         E->stress[m][(i-1)*6+2] = SYY[m][node]; */
+/*         E->stress[m][(i-1)*6+3] = SZZ[m][node]; */
+/*         E->stress[m][(i-1)*6+4] = SXY[m][node]; */
+/*         E->stress[m][(i-1)*6+5] = SXZ[m][node]; */
+/*         E->stress[m][(i-1)*6+6] = SZY[m][node]; */
+/*         } */
+/*      else if ( ((node+1)%E->lmesh.noz)==0 )  { */
+/*         i = (node+1)/E->lmesh.noz; */
+/*         E->stress[m][stride+(i-1)*6+1] = SXX[m][node]; */
+/*         E->stress[m][stride+(i-1)*6+2] = SYY[m][node]; */
+/*         E->stress[m][stride+(i-1)*6+3] = SZZ[m][node]; */
+/*         E->stress[m][stride+(i-1)*6+4] = SXY[m][node]; */
+/*         E->stress[m][stride+(i-1)*6+5] = SXZ[m][node]; */
+/*         E->stress[m][stride+(i-1)*6+6] = SZY[m][node]; */
+/*         } */
 
-  return;
-}
+/*   return; */
+/* } */
 
 
 void compute_nodal_stress(struct All_variables *E,
@@ -189,7 +191,7 @@ void compute_nodal_stress(struct All_variables *E,
   float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
   double dilation[9];
   double pre[9],tww[9],rtf[4][9];
-  double velo_scaling, stress_scaling;
+  double velo_scaling, stress_scaling, mass_fac;
 
   struct Shape_function_dA *dOmega;
   struct Shape_function_dx *GNx;
@@ -211,10 +213,14 @@ void compute_nodal_stress(struct All_variables *E,
       div = 0.0;
       vor = 0.0;
 
-      get_rtf_at_vpts(E, m, lev, e, rtf);
-      velo_from_element(E,VV,m,e,sphere_key);
-      dOmega = &(E->gDA[m][e]);
-      GNx = &(E->gNX[m][e]);
+      get_rtf_at_vpts(E, m, lev, e, rtf);// gets r,theta,phi coordinates at the integration points
+      velo_from_element(E,VV,m,e,sphere_key); /* assign node-global
+						 velocities to nodes
+						 local to the
+						 element */
+      dOmega = &(E->gDA[m][e]);	/* Jacobian at integration points */
+      GNx = &(E->gNX[m][e]);	/* derivatives of shape functions at
+				   integration points */
 
       /* Vxyz is the strain rate vector, whose relationship with
        * the strain rate tensor (e) is that:
@@ -241,13 +247,17 @@ void compute_nodal_stress(struct All_variables *E,
 
       for(i=1;i<=ends;i++) {
         tww[i] = 0.0;
-        for(j=1;j<=vpts;j++)
+        for(j=1;j<=vpts;j++)	/* weighting, consisting of Jacobian,
+				   Gauss weight and shape function,
+				   evaluated at integration points */
           tww[i] += dOmega->vpt[j] * g_point[j].weight[E->mesh.nsd-1]
             * E->N.vpt[GNVINDEX(i,j)];
       }
 
-      for(j=1;j<=vpts;j++)   {
-        for(i=1;i<=ends;i++)   {
+      /* integrate over element  */
+      for(j=1;j<=vpts;j++)   {	/* Gauss integration points */
+        for(i=1;i<=ends;i++)   { /* nodes in element loop */
+	  /* strain rate contributions from each node */
           Vxyz[1][j]+=( VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
                         + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
           Vxyz[2][j]+=( (VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]
@@ -273,22 +283,22 @@ void compute_nodal_stress(struct All_variables *E,
         }
       }
 
-      if(E->control.inv_gruneisen != 0) {
+      if(E->control.inv_gruneisen != 0) { /* isotropic component */
           for(j=1;j<=vpts;j++)
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
 
       for(j=1;j<=vpts;j++)   {
-          Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]);
+          Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]); /*  */
           Syy += 2.0 * pre[j] * (Vxyz[2][j] - dilation[j]);
           Szz += 2.0 * pre[j] * (Vxyz[3][j] - dilation[j]);
-          Sxy += pre[j] * Vxyz[4][j];
+          Sxy += pre[j] * Vxyz[4][j]; /*  */
           Sxz += pre[j] * Vxyz[5][j];
           Szy += pre[j] * Vxyz[6][j];
-          div += Vxyz[7][j]*dOmega->vpt[j];
-          vor += Vxyz[8][j]*dOmega->vpt[j];
+          div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
+          vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
       }
-
+      /* normalize by volume */
       Sxx /= E->eco[m][e].area;
       Syy /= E->eco[m][e].area;
       Szz /= E->eco[m][e].area;
@@ -304,7 +314,7 @@ void compute_nodal_stress(struct All_variables *E,
       Syy -= E->P[m][e];
 
       for(i=1;i<=ends;i++) {
-        node = E->ien[m][e].node[i];
+        node = E->ien[m][e].node[i]; /* assign to global nodes */
         SZZ[m][node] += tww[i] * Szz;
         SXX[m][node] += tww[i] * Sxx;
         SYY[m][node] += tww[i] * Syy;
@@ -331,14 +341,17 @@ void compute_nodal_stress(struct All_variables *E,
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++)   {
-      SZZ[m][node] = SZZ[m][node]*E->Mass[m][node]*stress_scaling;
-      SXX[m][node] = SXX[m][node]*E->Mass[m][node]*stress_scaling;
-      SYY[m][node] = SYY[m][node]*E->Mass[m][node]*stress_scaling;
-      SXY[m][node] = SXY[m][node]*E->Mass[m][node]*stress_scaling;
-      SXZ[m][node] = SXZ[m][node]*E->Mass[m][node]*stress_scaling;
-      SZY[m][node] = SZY[m][node]*E->Mass[m][node]*stress_scaling;
-      vorv[m][node] = vorv[m][node]*E->Mass[m][node]*velo_scaling;
-      divv[m][node] = divv[m][node]*E->Mass[m][node]*velo_scaling;
+      mass_fac = E->Mass[m][node]*stress_scaling;
+      SZZ[m][node] *= mass_fac;
+      SXX[m][node] *= mass_fac;
+      SYY[m][node] *= mass_fac;
+      SXY[m][node] *= mass_fac;
+      SXZ[m][node] *= mass_fac;
+      SZY[m][node] *= mass_fac;
+      
+      mass_fac = E->Mass[m][node]*velo_scaling;
+      vorv[m][node] *= mass_fac;
+      divv[m][node] *= mass_fac;
     }
 
   /* assign stress to all the nodes */
@@ -375,8 +388,11 @@ void stress_conform_bcs(struct All_variables *E)
       for(i=1; i<=E->lmesh.noy; i++)
         for(j=1; j<=E->lmesh.nox; j++)
           for(k=1; k<=E->lmesh.noz; k++) {
+
             n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+
             for(d=1; d<=E->mesh.nsd; d++)
+
               if(E->node[m][n] & sbc_flag[d]) {
                 if(i==1)
                   E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sbc.SB[m][SIDE_WEST][d][ E->sbc.node[m][n] ];
@@ -428,11 +444,15 @@ static void geoid_from_buoyancy(struct All_variables *E,
      * and dimensionalized (data.density). dlayer needs to be dimensionalized.
      */
 
-    int m,k,ll,mm,node,i,j,p,noz,snode;
-    float *TT[NCS],radius,*geoid[2],dlayer,con1,grav,scaling2,scaling;
+    int m,k,ll,mm,node,i,j,p,noz,snode,nxnz;
+    float *TT[NCS],radius,*geoid[2],dlayer,con1,grav,scaling2,scaling,radius_m;
     double buoy2rho;
     void sphere_expansion();
     void sum_across_depth_sph1();
+
+    /* some constants */
+    nxnz = E->lmesh.nox*E->lmesh.noz;
+    radius_m = E->data.radius_km*1e3;
 
     /* scale for buoyancy */
     scaling2 = -E->data.therm_exp*E->data.ref_temperature*E->data.density
@@ -464,7 +484,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=E->lmesh.noy;i++)
                 for(j=1;j<=E->lmesh.nox;j++)  {
-                    node=k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+                    node= k + (j-1)*E->lmesh.noz + (i-1)*nxnz;
                     p = j + (i-1)*E->lmesh.nox;
                     TT[m][p] = (E->buoyancy[m][node]+E->buoyancy[m][node+1])
                         * 0.5 * buoy2rho;
@@ -474,15 +494,14 @@ static void geoid_from_buoyancy(struct All_variables *E,
         sphere_expansion(E,TT,geoid[0],geoid[1]);
 
         /* thickness of the layer */
-        dlayer = (E->sx[1][3][k+1]-E->sx[1][3][k])*E->data.radius_km*1e3;
+        dlayer = (E->sx[1][3][k+1]-E->sx[1][3][k])*radius_m;
 
         /* mean radius of the layer */
         radius = (E->sx[1][3][k+1]+E->sx[1][3][k])*0.5;
 
         /* geoid contribution of density at this layer, ignore degree-0 term */
         for (ll=1;ll<=E->output.llmax;ll++) {
-            con1 = scaling * dlayer * pow(radius,((double)(ll+2)))
-                / (2.0*ll+1.0);
+            con1 = scaling * dlayer * pow(radius,((double)(ll+2))) / (2.0*ll+1.0);
             for (mm=0;mm<=ll;mm++)   {
                 p = E->sphere.hindex[ll][mm];
                 harm_geoid[0][p] += con1*geoid[0][p];

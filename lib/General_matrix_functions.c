@@ -88,12 +88,14 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   initial_time=CPU_time0();
 
   if (!(E->control.NMULTIGRID || E->control.EMULTIGRID)) {
+    /* conjugate gradient solution */
+
     cycles = E->control.v_steps_low;
     residual = conj_grad(E,d0,F,acc,&cycles,high_lev);
     valid = (residual < acc)? 1:0;
-  }
-
-  else  {
+  } else  {
+    
+    /* solve using multigrid  */
 
     counts =0;
     if(E->parallel.me==0){	/* output */
