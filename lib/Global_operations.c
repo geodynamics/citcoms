@@ -774,7 +774,7 @@ void remove_rigid_rot(struct All_variables *E)
 {
     void velo_from_element_d();
     double myatan();
-    double wx, wy, wz, v_theta, v_phi;
+    double wx, wy, wz, v_theta, v_phi, cos_t,sin_t,sin_f, cos_f;
     double vx[9], vy[9], vz[9];
     double r, t, f;
 
@@ -807,6 +807,8 @@ void remove_rigid_rot(struct All_variables *E)
             t = E->eco[m][e].centre[1];
             f = E->eco[m][e].centre[2];
             r = E->eco[m][e].centre[3];
+	    cos_t = cos(t);sin_t = sin(t);
+	    sin_f = sin(f);cos_f = cos(f);
 
             velo_from_element_d(E,VV,m,e,sphere_key);
 
@@ -825,9 +827,9 @@ void remove_rigid_rot(struct All_variables *E)
             wx = -r*vy[1];
             wy = r*vx[1];
 
-            exyz[1] += (wx*cos(t)*cos(f)-wy*sin(f)) * E->eco[m][e].area;
-            exyz[2] += (wx*cos(t)*sin(f)+wy*cos(f)) * E->eco[m][e].area;
-            exyz[3] -= (wx*sin(t)                 ) * E->eco[m][e].area;
+            exyz[1] += (wx*cos_t*cos_f-wy*sin_f) * E->eco[m][e].area;
+            exyz[2] += (wx*cos_t*sin_f+wy*cos_f) * E->eco[m][e].area;
+            exyz[3] -= (wx*sin_t               ) * E->eco[m][e].area;
         }
     } /* end cap */
 
@@ -850,15 +852,15 @@ void remove_rigid_rot(struct All_variables *E)
 
     /* remove rigid rotation */
 
+    sin_t = sin(tr) * rot;
+    cos_t = cos(tr) * rot;
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for (node=1;node<=nno;node++)   {
 
-            v_theta = E->sx[m][3][node] * rot * sin(tr)
-                * sin(fr - E->sx[m][2][node]);
-            v_phi = E->sx[m][3][node] * rot
-                * ( sin(E->sx[m][1][node]) * cos(tr)
-                    - cos(E->sx[m][1][node]) * sin(tr)
-                    * cos(fr-E->sx[m][2][node]) );
+            v_theta = E->sx[m][3][node] * sin_t * sin(fr - E->sx[m][2][node]);
+            v_phi =   E->sx[m][3][node] * 
+	      ( sin(E->sx[m][1][node]) * cos_t - 
+		cos(E->sx[m][1][node]) * sin_t * cos(fr-E->sx[m][2][node]) );
 
             E->sphere.cap[m].V[1][node] -= v_theta;
             E->sphere.cap[m].V[2][node] -= v_phi;
