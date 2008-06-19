@@ -766,6 +766,46 @@ void sum_across_depth_sph1(E,sphc,sphs)
     return;
 }
 
+
+/* ================================================== */
+/* ================================================== */
+void broadcast_vertical(struct All_variables *E,
+                        float *sphc, float *sphs,
+                        int root)
+{
+    int jumpp, total, j;
+    float *temp;
+
+    if(E->parallel.nprocz == 1) return;
+
+    jumpp = E->sphere.hindice;
+    total = E->sphere.hindice*2;
+    temp = (float *) malloc(total*sizeof(float));
+
+    if (E->parallel.me_loc[3] == root) {
+        /* pack */
+        for (j=0; j<E->sphere.hindice; j++)   {
+            temp[j] = sphc[j];
+            temp[j+jumpp] = sphs[j];
+        }
+    }
+
+    MPI_Bcast(temp, total, MPI_FLOAT, root, E->parallel.vertical_comm);
+
+    if (E->parallel.me_loc[3] != root) {
+        /* unpack */
+        for (j=0; j<E->sphere.hindice; j++)   {
+            sphc[j] = temp[j];
+            sphs[j] = temp[j+jumpp];
+        }
+    }
+
+    free((void *)temp);
+
+    return;
+}
+
+
 /*
  * remove rigid body rotation from the velocity
  */

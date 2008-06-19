@@ -34,6 +34,7 @@ void myerror(char *,struct All_variables *);
 void sphere_expansion(struct All_variables *, float **, float *, float *);
 void sphere_expansion();
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
+void broadcast_vertical(struct All_variables *, float *, float *, int);
 long double lg_pow(long double, int);
 
 
@@ -584,6 +585,10 @@ static void expand_topo_sph_harm(struct All_variables *E,
             }
     }
 
+    /* send arrays to all processors in the same vertical column */
+    broadcast_vertical(E, tpgb[0], tpgb[1], 0);
+    broadcast_vertical(E, tpgt[0], tpgt[1], E->parallel.nprocz-1);
+
     return;
 }
 
@@ -651,8 +656,9 @@ static void geoid_from_topography(struct All_variables *E,
         }
     }
 
-    /* accumulate geoid to the surface (top processors) */
-    sum_across_depth_sph1(E, geoid_tpgb[0], geoid_tpgb[1]);
+    /* send arrays to all processors in the same vertical column */
+    broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
+    broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
 
     return;
 }
@@ -759,6 +765,10 @@ static void geoid_from_topography_self_g(struct All_variables *E,
                                 b2*E->sphere.harm_tpgt[1][i]) / E->data.grav_acc;
         }
     }
+
+    /* send arrays to all processors in the same vertical column */
+    broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
+    broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
 
     free(stresst[0]);
     free(stresst[1]);
