@@ -1,7 +1,7 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 
 /**/
 struct sph_harm {
@@ -35,6 +35,16 @@ struct field {
 typedef struct field field;
 
 
+void allocate_field(field *);
+void project_sph_harm_to_mesh(sph_harm *, field *);
+void allocate_sph_harm(sph_harm *, int );
+void get_sph_harm_coeff(char *, sph_harm* );
+void get_mesh(mesh *, int , int );
+double modified_plgndr_a(int , int , double );
+void project_sph_harm_to_mesh(sph_harm *, field *);
+void write_projected_field(char *, field *);
+
+
 void print_help()
 {
     const char msg[] = ""
@@ -42,8 +52,9 @@ void print_help()
         "\n"
         "Usage: project_geoid infile outfile n_longitude n_latitude\n"
         "\n"
-        "infile: CitcomS geoid file\n"
-        "outfile: file will contain 3 columns (longitude, latitude, geoid)\n"
+        "infile: name of the CitcomS geoid file\n"
+        "outfile: name of the output file.\n"
+	"         This file will contain 3 columns (longitude, latitude, geoid)\n"
         "n_longitude: # of grid points in longitude direction for the mesh\n"
         "n_latitude: # of grid points in latitudee direction for the mesh\n";
 
@@ -76,6 +87,7 @@ void get_sph_harm_coeff(char *filename, sph_harm* coeff)
     if(fp == NULL) {
         snprintf(buffer, 255, "Error: cannot open file: %s\n", filename);
         fputs(buffer, stderr);
+        exit(-1);
     }
 
 
@@ -103,7 +115,7 @@ void get_sph_harm_coeff(char *filename, sph_harm* coeff)
                 coeff->clm[index], coeff->slm[index]);
         */
     }
-
+    
     return;
 }
 
@@ -151,16 +163,24 @@ void get_mesh(mesh *grid, int ntheta, int nphi)
 }
 
 
-void allocate_field(field* geoid)
+void allocate_field(field *geoid)
 {
     int i;
     mesh *grid = geoid->grid;
 
     /* allocate memory */
-    geoid->data = malloc(grid->ntheta * sizeof(float));
-    for(i=0; i<grid->ntheta; i++)
-        geoid->data[i] = calloc(grid->nphi, sizeof(float));
-
+    geoid->data = (float **)malloc(grid->ntheta * sizeof(float *));
+    if(!geoid->data){
+      fprintf(stderr,"mem error\n");
+      exit(-1);
+    }
+    for(i=0; i < grid->ntheta; i++){
+      geoid->data[i] = (float *)calloc(grid->nphi, sizeof(float));
+      if(!geoid->data[i]){
+	fprintf(stderr,"mem error\n");
+	exit(-1);
+      }
+    }
     return;
 }
 
@@ -229,11 +249,11 @@ void project_sph_harm_to_mesh(sph_harm *coeff, field *geoid)
 
     allocate_field(geoid);
 
-    cosm = malloc(grid->nphi * sizeof(float));
-    sinm = malloc(grid->nphi * sizeof(float));
+    cosm = (float *)malloc(grid->nphi * sizeof(float));
+    sinm = (float *)malloc(grid->nphi * sizeof(float));
 
     /* projecting */
-    for(index=0; index<coeff->len; index++) {
+    for(index=0; index < coeff->len; index++) {
         ll = coeff->ll[index];
         mm = coeff->mm[index];
 
@@ -242,15 +262,15 @@ void project_sph_harm_to_mesh(sph_harm *coeff, field *geoid)
             sinm[j] = sin(mm * grid->phi[j]);
         }
 
-        for(i=0; i<grid->ntheta; i++) {
+        for(i=0; i < grid->ntheta; i++) {
             /* val = Plm(theta) */
             val = modified_plgndr_a(ll, mm, grid->theta[i]);
 
-            for(j=0; j<grid->nphi; j++) {
+            for(j=0; j < grid->nphi; j++) {
                 /* data = val*(Clm*cos(m*phi) + Slm*sin(m*phi)) */
-                geoid->data[i][j] += val *
-                    (coeff->clm[index] * cosm[j] +
-                     coeff->slm[index] * sinm[j]);
+	      geoid->data[i][j] += val *
+		(coeff->clm[index] * cosm[j] +
+		 coeff->slm[index] * sinm[j]);
             }
         }
     }
@@ -313,8 +333,8 @@ int main(int argc, char **argv)
 
     /* we will use (theta, phi) in radian internally and will write the
      * result as (longitude, latitude) in degree later */
-    ntheta = strtol(argv[3], NULL, 10);
-    nphi = strtol(argv[4], NULL, 10);
+    nphi = strtol(argv[3], NULL, 10);
+    ntheta = strtol(argv[4], NULL, 10);
 
 
     /* create a uniform mesh of (theta, phi) with (ntheta * nphi) points */
