@@ -310,14 +310,16 @@ void construct_surf_det (E)
 
   const int oned = onedvpoints[E->mesh.nsd];
 
-  double xx[4][5],dxda[4][4];
+  double xx[4][5], dxda[4][4], r2;
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       E->surf_det[m][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
     }
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
+  for (m=1;m<=E->sphere.caps_per_proc;m++) {
+  r2 = 1.0 / (E->sx[m][3][E->lmesh.elz+1] * E->sx[m][3][E->lmesh.elz+1]);
+
   for (es=1;es<=E->lmesh.snel;es++)   {
     el = es * E->lmesh.elz;
     get_side_x_cart(E, xx, el, SIDE_TOP, m);
@@ -333,10 +335,12 @@ void construct_surf_det (E)
              dxda[d][e] += xx[e][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
       jacobian = determinant(dxda,E->mesh.nsd-1);
-      E->surf_det[m][k][es] = jacobian;
+
+      /* scale the jacobian so that it is defined on a unit sphere */
+      E->surf_det[m][k][es] = jacobian * r2;
       }
     }
-
+  }
   return;
 }
 

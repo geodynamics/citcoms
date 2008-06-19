@@ -104,11 +104,7 @@ void sphere_expansion(E,TG,sphc,sphs)
      float **TG,*sphc,*sphs;
 {
     int el,nint,d,p,i,m,j,es,mm,ll,rand();
-    //double t,f,sphere_h();
     void sum_across_surf_sph1();
-    void get_global_1d_shape_fn();
-    struct Shape_function1 M;
-    struct Shape_function1_dA dGamma;
 
     for (i=0;i<E->sphere.hindice;i++)    {
         sphc[i] = 0.0;
@@ -117,9 +113,6 @@ void sphere_expansion(E,TG,sphc,sphs)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for (es=1;es<=E->lmesh.snel;es++)   {
-            el = es*E->lmesh.elz;
-
-            get_global_1d_shape_fn(E,el,&M,&dGamma,1,m);
 
             for (ll=0;ll<=E->output.llmax;ll++)
                 for (mm=0; mm<=ll; mm++)   {
@@ -133,12 +126,12 @@ void sphere_expansion(E,TG,sphc,sphs)
                                 * E->sphere.tablesplm[m][j][p]
                                 * E->sphere.tablescosf[m][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * dGamma.vpt[GMVGAMMA(1,nint)];
+                                * E->surf_det[m][nint][es];
                             sphs[p] += TG[m][E->sien[m][es].node[d]]
                                 * E->sphere.tablesplm[m][j][p]
                                 * E->sphere.tablessinf[m][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * dGamma.vpt[GMVGAMMA(1,nint)];
+                                * E->surf_det[m][nint][es];
                         }
                     }
 
