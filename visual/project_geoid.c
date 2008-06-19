@@ -50,13 +50,13 @@ void print_help()
     const char msg[] = ""
         "Project the spherical harmonic coefficients to a regular mesh\n"
         "\n"
-        "Usage: project_geoid infile outfile n_latitude n_longitude\n"
+        "Usage: project_geoid infile outfile n_longitude n_latitude\n"
         "\n"
         "infile: name of the CitcomS geoid file\n"
         "outfile: name of the output file.\n"
 	"         This file will contain 3 columns (longitude, latitude, geoid)\n"
-        "n_latitude: # of grid points in latitudee direction for the mesh\n"
-        "n_longitude: # of grid points in longitude direction for the mesh\n";
+        "n_longitude: # of grid points in longitude direction for the mesh\n"
+        "n_latitude: # of grid points in latitudee direction for the mesh\n";
 
     fputs(msg, stderr);
 
@@ -87,6 +87,7 @@ void get_sph_harm_coeff(char *filename, sph_harm* coeff)
     if(fp == NULL) {
         snprintf(buffer, 255, "Error: cannot open file: %s\n", filename);
         fputs(buffer, stderr);
+        exit(-1);
     }
 
 
@@ -335,8 +336,8 @@ int main(int argc, char **argv)
 
     /* we will use (theta, phi) in radian internally and will write the
      * result as (longitude, latitude) in degree later */
-    ntheta = strtol(argv[3], NULL, 10);
-    nphi = strtol(argv[4], NULL, 10);
+    nphi = strtol(argv[3], NULL, 10);
+    ntheta = strtol(argv[4], NULL, 10);
 
 
     /* create a uniform mesh of (theta, phi) with (ntheta * nphi) points */
