@@ -264,7 +264,7 @@ void gzdir_output_coord(struct All_variables *E)
       myfprintf(fp1,message);
     }else{			/* serial output */
       /* if not first CPU, wait for previous before appending */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       /* open for append */
       fp1 = output_open(output_file,"a");
     }
@@ -282,7 +282,7 @@ void gzdir_output_coord(struct All_variables *E)
 					next one write */
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
       if(E->parallel.me <  E->parallel.nproc-1){/* send to next if not last*/
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
       /*
 	 node numbers for all the elements
@@ -305,7 +305,7 @@ void gzdir_output_coord(struct All_variables *E)
       myfprintf(fp1,message);
     }else{
       /* if not first, wait for previous */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
     /*
@@ -336,7 +336,7 @@ void gzdir_output_coord(struct All_variables *E)
     if(E->output.gzdir.vtk_io == 2){ /* serial IO */
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
       if(E->parallel.me <  E->parallel.nproc-1)
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       parallel_process_sync(E);
     }
     if((E->output.gzdir.vtk_io==3) || (E->parallel.me == 0) ){
@@ -515,7 +515,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       myfprintf(fp1,"LOOKUP_TABLE default\n");
     }else{
       /* if not first, wait for previous */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 7, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 7, E->parallel.world, &mpi_stat);
       /* open for append */
       fp1 = output_open(output_file,"a");
     }
@@ -528,9 +528,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     if(E->output.gzdir.vtk_io == 2){
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
       if(E->parallel.me <  E->parallel.nproc-1){
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 7, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 7, E->parallel.world);
       }else{
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, 0, 6, MPI_COMM_WORLD); /* tell m=0 to go ahead */
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, 0, 6, E->parallel.world); /* tell m=0 to go ahead */
       }
     }
     /*
@@ -538,12 +538,12 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     */
     if((E->output.gzdir.vtk_io == 3) || (E->parallel.me == 0)){
       if(E->output.gzdir.vtk_io == 2){
-	mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, E->parallel.nproc-1 , 6, MPI_COMM_WORLD, &mpi_stat);
+	mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, E->parallel.nproc-1 , 6, E->parallel.world, &mpi_stat);
 	fp1 = output_open(output_file,"a"); /* append velocities */
       }
       sprintf(message,"VECTORS velocity float\n");myfprintf(fp1,message);
     }else{
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 5, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 5, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
     for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
@@ -573,7 +573,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2){
       if(E->parallel.me <  E->parallel.nproc-1){
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 5, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 5, E->parallel.world);
       }else{
 	fprintf(stderr,"vtk_io: geo, temp, & vel writtend to %s\n",output_file);
       }
@@ -727,7 +727,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
       myfprintf(fp1,"LOOKUP_TABLE default\n");
     }else{
       /* if not first, wait for previous */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       /* open for append */
       fp1 = output_open(output_file,"a");
     }
@@ -740,7 +740,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2)
       if(E->parallel.me <  E->parallel.nproc-1){
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
   return;
@@ -956,7 +956,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
       myfprintf(fp1,"SCALARS pressure float 1\n");
       myfprintf(fp1,"LOOKUP_TABLE default\n");
     }else{
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
     for(j=1; j<= E->sphere.caps_per_proc;j++)
@@ -967,7 +967,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2)
       if(E->parallel.me <  E->parallel.nproc-1){
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
   return;
@@ -1055,7 +1055,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
       myfprintf(fp1,message);
       myfprintf(fp1,"LOOKUP_TABLE default\n");
     }else{			/* serial wait */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, MPI_COMM_WORLD, &mpi_stat);
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
     for(j=1; j<= E->sphere.caps_per_proc;j++)
@@ -1068,7 +1068,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2) /* serial */
       if(E->parallel.me <  E->parallel.nproc-1){
-	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
   return;

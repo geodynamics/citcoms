@@ -852,7 +852,7 @@ void remove_rigid_rot(struct All_variables *E)
         }
     } /* end cap */
 
-    MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,MPI_COMM_WORLD);
+    MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
     fxyz[1] = fxyz[1] / moment_of_inertia;
     fxyz[2] = fxyz[2] / moment_of_inertia;

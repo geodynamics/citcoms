@@ -59,9 +59,9 @@ Boundary::Boundary(const All_variables* E,
     if (E->parallel.nprocxy == 1)
         initX(E, excludeTop, excludeBottom);
     else {
-        journal::error_t error("CitcomS-Boundary");
-        error << "Boundary is not implemented for full solver (yet)."
-              << journal::endl;
+        journal::firewall_t firewall("CitcomS-Boundary");
+        firewall << "Boundary is not implemented for full solver (yet)."
+                 << journal::endl;
     }
 
     // define the tight bounding box of the boundary

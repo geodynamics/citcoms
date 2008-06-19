@@ -85,7 +85,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   if(E->parallel.me > 0){	
     /* wait for previous processor */
     mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-		      0, MPI_COMM_WORLD, &mpi_stat);
+		      0, E->parallel.world, &mpi_stat);
   }
   if(ggrd_grdtrack_init_general(FALSE,E->trace.ggrd_file,
 				char_dummy,gmt_bc,
@@ -95,7 +95,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   if(E->parallel.me <  E->parallel.nproc-1){ 
     /* tell the next proc to go ahead */
     mpi_rc = MPI_Send(&mpi_success_message, 1, 
-		      MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+		      MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
   }else{
     report(E,"ggrd_init_tracer_flavors: last processor done with ggrd mat init");
   }
@@ -188,7 +188,7 @@ void ggrd_temp_init_general(struct All_variables *E,char *gmtflag)
        wait for the previous processor 
     */
     mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 
-		      0, MPI_COMM_WORLD, &mpi_stat);
+		      0, E->parallel.world, &mpi_stat);
   }
   
   if(E->convection.ggrd_tinit_scale_with_prem){/* initialize PREM */
@@ -207,7 +207,7 @@ void ggrd_temp_init_general(struct All_variables *E,char *gmtflag)
     myerror(E,"grd init error");
   if(E->parallel.me <  E->parallel.nproc-1){
     /* tell the next processor to go ahead with the init step	*/
-    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, MPI_COMM_WORLD);
+    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
   }else{
     fprintf(stderr,"ggrd_temp_init_general: last processor (%i) done with grd init\n",
 	    E->parallel.me);
