@@ -402,14 +402,6 @@ void visc_from_T(E,EEta,propogate)
                         zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    /* The viscosity formulation (dimensional) is: visc=visc0*exp[(Ea+p*Va)/R*T]
-                       Typical values for dry upper mantle are: Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol
-                       T=T0+DT*T'; where DT - temperature contrast (from Rayleigh number)
-                       T' - nondimensional temperature; T0 - surface tempereture (273 K)
-                       T=DT*[(T0/DT) + T'] => visc=visc0*exp{(Ea+p*Va)/R*DT*[(T0/DT) + T']}
-                       visc=visc0*exp{[(Ea/R*DT) + (p*Va/R*DT)]/[(T0/DT) + T']}
-                       so: E->viscosity.E = Ea/R*DT ; E->viscosity.Z = Va/R*DT
-                       p = zzz and E->viscosity.T = T0/DT */
 
 		    EEta[m][ (i-1)*vpts + jj ] = tempa*
 		      exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
@@ -504,7 +496,66 @@ void visc_from_T(E,EEta,propogate)
         break;
 
 
+    case 7:
 
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i];
+		if(E->control.mat_control)
+		  tempa = E->viscosity.N0[l-1] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l-1];
+
+                j = 0;
+
+                for(kk=1;kk<=ends;kk++) {
+                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                        temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                        zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    /* The viscosity formulation (dimensional) is:
+                       visc=visc0*exp[(Ea+p*Va)/(R*T)]
+
+                       Typical values for dry upper mantle are:
+                       Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol
+
+                       T=DT*(T0+T');
+                       where DT - temperature contrast (from Rayleigh number)
+                       T' - nondimensional temperature;
+                       T0 - nondimensional surface tempereture;
+
+                       =>
+                       visc = visc0 * exp{(Ea+p*Va) / [R*DT*(T0 + T')]}
+                            = visc0 * exp{[Ea/(R*DT) + p*Va/(R*DT)] / (T0 + T')}
+
+                       so:
+                       E->viscosity.E = Ea/(R*DT);
+                       (1-r) = p/(rho*g);
+                       E->viscosity.Z = Va*rho*g/(R*DT);
+                       E->viscosity.T = T0;
+
+                       after normalizing visc=1 at T'=1 and r=r_CMB:
+                       visc=visc0*exp{ [viscE + (1-r)*viscZ] / (viscT+T')
+                                     - [viscE + (1-r_CMB)*viscZ] / (viscT+1) }
+                    */
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                        exp( (E->viscosity.E[l-1] +  E->viscosity.Z[l-1]*zzz )
+                             / (E->viscosity.T[l-1] + temp)
+                             - (E->viscosity.E[l-1] +
+                                E->viscosity.Z[l-1]*(one-E->sphere.ri) )
+                             / (E->viscosity.T[l-1] + one) );
+                }
+            }
+        break;
 
     }
 
