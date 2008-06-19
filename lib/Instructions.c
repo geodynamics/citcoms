@@ -850,6 +850,7 @@ void global_default_values(E)
 
     E->control.GRID_TYPE=1;
 
+    E->trace.fpt = NULL;
     E->control.tracer = 0;
     E->composition.on = 0;
 
@@ -1410,6 +1411,9 @@ void output_finalize(struct  All_variables *E)
 
   if (E->fp_out)
     fclose(E->fp_out);
+
+  if (E->trace.fpt)
+    fclose(E->trace.fpt);
 
   if(E->output.fpqt)
     fclose(E->output.fpqt);
