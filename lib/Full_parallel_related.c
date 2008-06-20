@@ -760,7 +760,7 @@ void full_parallel_communication_routs_v(E)
 
 void full_parallel_communication_routs_s(E)
   struct All_variables *E;
-  {
+{
 
   int i,ii,j,k,l,node,el,elt,lnode,jj,doff;
   int lev,nno,nox,noz,noy,kkk,kk,kf;
@@ -769,81 +769,77 @@ void full_parallel_communication_routs_s(E)
 
   const int dims=E->mesh.nsd;
 
-  /* This function is needed only for get_CBF_topo(), */
-  /* which is obsolete.             Tan2 Feb. 24 2002 */
-  return;
 
-
-/*   me = E->parallel.me; */
-/*   nprocz = E->parallel.nprocz; */
+  me = E->parallel.me;
+  nprocz = E->parallel.nprocz;
 
         /* determine the communications in horizontal direction        */
-/*   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)       { */
-/*     nox = E->lmesh.NOX[lev]; */
-/*     noz = E->lmesh.NOZ[lev]; */
-/*     noy = E->lmesh.NOY[lev]; */
+  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)       {
+    nox = E->lmesh.NOX[lev];
+    noz = E->lmesh.NOZ[lev];
+    noy = E->lmesh.NOY[lev];
 
-/*     for(m=1;m<=E->sphere.caps_per_proc;m++)    { */
-/*       j = E->sphere.capid[m]; */
+    for(m=1;m<=E->sphere.caps_per_proc;m++)    {
+      j = E->sphere.capid[m];
 
-/*       for (kkk=1;kkk<=E->parallel.TNUM_PASS[lev][m];kkk++) { */
-/*         if (kkk<=4) { */  /* first 4 communications are for planes */
-/*           ii = kkk; */
-/*           E->parallel.NUM_sNODE[lev][m].pass[kkk] =  */
-/*                            E->parallel.NUM_NNO[lev][m].bound[ii]/noz; */
+      for (kkk=1;kkk<=E->parallel.TNUM_PASS[lev][m];kkk++) {
+        if (kkk<=4) {  /* first 4 communications are for planes */
+          ii = kkk;
+          E->parallel.NUM_sNODE[lev][m].pass[kkk] =
+                           E->parallel.NUM_NNO[lev][m].bound[ii]/noz;
 
-/*           for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   { */
-/*             lnode = k; */
-/*             node = (E->parallel.NODE[lev][m][lnode].bound[ii]-1)/noz + 1; */
-/*             E->parallel.EXCHANGE_sNODE[lev][m][k].pass[kkk] = node; */
-/*             }  */ /* end for node k */
-/*           }    */   /* end for first 4 communications */
+          for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   {
+            lnode = k;
+            node = (E->parallel.NODE[lev][m][lnode].bound[ii]-1)/noz + 1;
+            E->parallel.EXCHANGE_sNODE[lev][m][k].pass[kkk] = node;
+            }  /* end for node k */
+          }      /* end for first 4 communications */
 
-/*         else  {    */      /* the last FOUR communications are for lines */
-/*           E->parallel.NUM_sNODE[lev][m].pass[kkk]=1; */
-/*           for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   { */
-/* 	    if (E->parallel.nprocx*E->parallel.nprocy > 1) { */ /* 4 or more horiz. proc*/
-/* 	      switch(kkk) { */
-/* 	      case 5: */
-/* 		ii = 1; */
-/* 		lnode = k; */
-/* 		break; */
-/* 	      case 6: */
-/* 		ii = 2; */
-/* 		lnode = k + (noy-1)*noz*noy; */
-/* 		break; */
-/* 	      case 7: */
-/* 		ii = 1; */
-/* 		lnode = k + (noy-1)*noz*noy; */
-/* 		break; */
-/* 	      case 8: */
-/* 		ii = 2; */
-/* 		lnode = k; */
-/* 		break; */
-/* 	      } */
-/* 	    } */
-/* 	    else { */ /* 1 or fewer horiz. processors per cap */
-/* 	      ii = kkk-4; */
-/* 	      if (j%3==2)  */       /* for the middle caps */
-/* 		lnode = k + ((ii==1)?1:0)*(noy-1)*noz*noy; */
-/* 	      else    */            /* for the caps linked to poles */
-/* 		lnode = k + ((ii==1)?0:1)*(noy-1)*noz*noy; */
-/* 	    } */
+        else  {         /* the last FOUR communications are for lines */
+          E->parallel.NUM_sNODE[lev][m].pass[kkk]=1;
+          for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   {
+	    if (E->parallel.nprocx*E->parallel.nprocy > 1) { /* 4 or more horiz. proc*/
+	      switch(kkk) {
+	      case 5:
+		ii = 1;
+		lnode = k;
+		break;
+	      case 6:
+		ii = 2;
+		lnode = k + (noy-1)*noz*noy;
+		break;
+	      case 7:
+		ii = 1;
+		lnode = k + (noy-1)*noz*noy;
+		break;
+	      case 8:
+		ii = 2;
+		lnode = k;
+		break;
+	      }
+	    }
+	    else { /* 1 or fewer horiz. processors per cap */
+	      ii = kkk-4;
+	      if (j%3==2)        /* for the middle caps */
+		lnode = k + ((ii==1)?1:0)*(noy-1)*noz*noy;
+	      else               /* for the caps linked to poles */
+		lnode = k + ((ii==1)?0:1)*(noy-1)*noz*noy;
+	    }
 
 
 
-/*             node = (E->parallel.NODE[lev][m][lnode].bound[ii]-1)/noz + 1; */
-/*             E->parallel.EXCHANGE_sNODE[lev][m][k].pass[kkk] = node; */
-/*             } */  /* end for node k */
-/*           } */  /* end for the last FOUR communications */
+            node = (E->parallel.NODE[lev][m][lnode].bound[ii]-1)/noz + 1;
+            E->parallel.EXCHANGE_sNODE[lev][m][k].pass[kkk] = node;
+            }  /* end for node k */
+          }  /* end for the last FOUR communications */
 
-/*         }   */ /* end for kkk  */
-/*       }    *//* end for m  */
+        }   /* end for kkk  */
+      }   /* end for m  */
 
-/*     }   */ /* end for lev  */
+    }   /* end for lev  */
 
-/*   return; */
-  }
+  return;
+}
 
 
 
@@ -1282,10 +1278,8 @@ static void exchange_node_f(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-static void exchange_snode_f(E, U1, U2, lev)
- struct All_variables *E;
- float **U1,**U2;
- int lev;
+void full_exchange_snode_f(struct All_variables *E, float **U1,
+                           float **U2, int lev)
  {
 
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];

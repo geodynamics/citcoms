@@ -891,10 +891,8 @@ static void exchange_node_f(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-static void exchange_snode_f(E, U1, U2, lev)
- struct All_variables *E;
- float **U1,**U2;
- int lev;
+void regional_exchange_snode_f(struct All_variables *E, float **U1,
+                               float **U2, int lev)
  {
 
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];
