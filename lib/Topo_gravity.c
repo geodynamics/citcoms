@@ -826,207 +826,205 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     float **H,**HB;
 
 {
-/*     void get_elt_k(); */
-/*     void get_elt_g(); */
-/*     void get_elt_f(); */
-/*     void get_global_1d_shape_fn(); */
-/*     void exchange_snode_f(); */
-/*     void velo_from_element(); */
+    void get_elt_k();
+    void get_elt_g();
+    void get_elt_f();
+    void get_global_1d_shape_fn_L();
+    void full_exchange_snode_f();
+    void regional_exchange_snode_f();
+    void velo_from_element();
 
-/*     int a,address,el,elb,els,node,nodeb,nodes,i,j,k,l,m,n,count; */
-/*     int nodel,nodem,nodesl,nodesm,nnsf,nel2; */
+    int a,address,el,elb,els,node,nodeb,nodes,i,j,k,l,m,n,count;
+    int nodel,nodem,nodesl,nodesm,nnsf,nel2;
 
-/*     struct Shape_function1 GM,GMb; */
-/*     struct Shape_function1_dA dGammax,dGammabx; */
+    struct Shape_function1 GM,GMb;
+    struct Shape_function1_dA dGammax,dGammabx;
 
-/*     float *eltTU,*eltTL,*SU[NCS],*SL[NCS],*RU[NCS],*RL[NCS]; */
-/*     float VV[4][9]; */
+    float *eltTU,*eltTL,*SU[NCS],*SL[NCS],*RU[NCS],*RL[NCS];
+    float VV[4][9];
 
-/*     double eltk[24*24],eltf[24]; */
-/*     double eltkb[24*24],eltfb[24]; */
-/*     double res[24],resb[24],eu[24],eub[24]; */
-/*     higher_precision eltg[24][1],eltgb[24][1]; */
+    double eltk[24*24],eltf[24];
+    double eltkb[24*24],eltfb[24];
+    double res[24],resb[24],eu[24],eub[24];
+    higher_precision eltg[24][1],eltgb[24][1];
 
-/*     const int dims=E->mesh.nsd; */
-/*     const int Tsize=5;   */ /* maximum values, applicable to 3d, harmless for 2d */
-/*     const int Ssize=4; */
-/*     const int ends=enodes[dims]; */
-/*     const int noz=E->lmesh.noz; */
-/*     const int noy=E->lmesh.noy; */
-/*     const int nno=E->lmesh.nno; */
-/*     const int onedv=onedvpoints[dims]; */
-/*     const int snode1=1,snode2=4,snode3=5,snode4=8; */
-/*     const int elz = E->lmesh.elz; */
-/*     const int ely = E->lmesh.ely; */
-/*     const int lev=E->mesh.levmax; */
-/*     const int sphere_key=1; */
+    const int dims=E->mesh.nsd;
+    const int Tsize=5;   /* maximum values, applicable to 3d, harmless for 2d */
+    const int Ssize=4;
+    const int ends=enodes[dims];
+    const int noz=E->lmesh.noz;
+    const int noy=E->lmesh.noy;
+    const int nno=E->lmesh.nno;
+    const int onedv=onedvpoints[dims];
+    const int snode1=1,snode2=4,snode3=5,snode4=8;
+    const int elz = E->lmesh.elz;
+    const int ely = E->lmesh.ely;
+    const int lev=E->mesh.levmax;
+    const int sphere_key=1;
 
-/*     const int lnsf=E->lmesh.nsf; */
+    const int lnsf=E->lmesh.nsf;
 
-/*     eltTU = (float *)malloc((1+Tsize)*sizeof(float));  */
-/*     eltTL = (float *)malloc((1+Tsize)*sizeof(float)); */
+    eltTU = (float *)malloc((1+Tsize)*sizeof(float));
+    eltTL = (float *)malloc((1+Tsize)*sizeof(float));
 
-/*   for(j=1;j<=E->sphere.caps_per_proc;j++)          { */
-/*     SU[j] = (float *)malloc((1+lnsf)*sizeof(float)); */
-/*     SL[j] = (float *)malloc((1+lnsf)*sizeof(float)); */
-/*     RU[j] = (float *)malloc((1+lnsf)*sizeof(float)); */
-/*     RL[j] = (float *)malloc((1+lnsf)*sizeof(float)); */
-/*     } */
+  for(j=1;j<=E->sphere.caps_per_proc;j++)          {
+    SU[j] = (float *)malloc((1+lnsf)*sizeof(float));
+    SL[j] = (float *)malloc((1+lnsf)*sizeof(float));
+    RU[j] = (float *)malloc((1+lnsf)*sizeof(float));
+    RL[j] = (float *)malloc((1+lnsf)*sizeof(float));
+    }
 
-/*   for(j=1;j<=E->sphere.caps_per_proc;j++)          { */
+  for(j=1;j<=E->sphere.caps_per_proc;j++)          {
 
-/*     for(i=0;i<=lnsf;i++) */
-/*       RU[j][i] = RL[j][i] = SU[j][i] = SL[j][i] = 0.0; */
+    for(i=0;i<=lnsf;i++)
+      RU[j][i] = RL[j][i] = SU[j][i] = SL[j][i] = 0.0;
 
     /* calculate the element residuals */
 
-/*     for(els=1;els<=E->lmesh.snel;els++) { */
-/*       el = E->surf_element[j][els]; */
-/*       elb = el + elz-1; */
+    for(els=1;els<=E->lmesh.snel;els++) {
+      el = E->surf_element[j][els];
+      elb = el - elz+1;
 
-/*       for(m=0;m<ends;m++) { */  /* for bottom elements no faults */
-/*           nodeb= E->ien[j][elb].node[m+1]; */
-/*           eub[m*dims  ] = E->sphere.cap[j].V[1][nodeb]; */
-/*           eub[m*dims+1] = E->sphere.cap[j].V[2][nodeb]; */
-/*           eub[m*dims+2] = E->sphere.cap[j].V[3][nodeb];  */
-/*           } */
+      velo_from_element(E,VV,j,elb,sphere_key);
 
-/*       velo_from_element(E,VV,j,el,sphere_key); */
+      for(m=0;m<ends;m++) {
+         eub [m*dims  ] = VV[1][m+1];
+         eub [m*dims+1] = VV[2][m+1];
+         eub [m*dims+2] = VV[3][m+1];
+         }
 
-/*       for(m=0;m<ends;m++) {   */
-/*          eu [m*dims  ] = VV[1][m+1]; */
-/*          eu [m*dims+1] = VV[2][m+1]; */
-/*          eu [m*dims+2] = VV[3][m+1]; */
-/*          } */
+      velo_from_element(E,VV,j,el,sphere_key);
 
-/*       get_elt_k(E,el,eltk,lev,j,1); */
-/*       get_elt_k(E,elb,eltkb,lev,j,1); */
-/*       get_elt_f(E,el,eltf,0,j); */
-/*       get_elt_f(E,elb,eltfb,0,j); */
-/*       get_elt_g(E,el,eltg,lev,j); */
-/*       get_elt_g(E,elb,eltgb,lev,j); */
+      for(m=0;m<ends;m++) {
+         eu [m*dims  ] = VV[1][m+1];
+         eu [m*dims+1] = VV[2][m+1];
+         eu [m*dims+2] = VV[3][m+1];
+         }
 
-/*       for(m=0;m<dims*ends;m++) { */
-/*             res[m]  = eltf[m]  - E->elt_del[lev][j][el].g[m][0]  * E->P[j][el]; */
-/*             resb[m] = eltfb[m] - E->elt_del[lev][j][elb].g[m][0]* E->P[j][elb]; */
-/*             } */
+      get_elt_f(E,elb,eltfb,1,j);
+      get_elt_f(E,el,eltf,1,j);
+      get_elt_k(E,elb,eltkb,lev,j,1);
+      get_elt_k(E,el,eltk,lev,j,1);
+//      get_elt_g(E,elb,eltgb,lev,j);
+//      get_elt_g(E,el,eltg,lev,j);
 
-/*       for(m=0;m<dims*ends;m++) */
-/*          for(l=0;l<dims*ends;l++) { */
-/*               res[m]  -= eltk[ends*dims*m+l]  * eu[l]; */
-/*               resb[m] -= eltkb[ends*dims*m+l] * eub[l]; */
-/*               } */
+      for(m=0;m<dims*ends;m++) {
+           res[m]  = eltf[m]  - E->elt_del[lev][j][el].g[m][0]  * E->P[j][el];
+           resb[m] = eltfb[m] - E->elt_del[lev][j][elb].g[m][0]* E->P[j][elb];
+//           res[m]  = eltf[m] - eltg[m][0]  * E->P[j][el];
+//           resb[m] = eltfb[m] - eltgb[m][0]* E->P[j][elb];
+            }
 
-            /* Put relevant (vertical & surface) parts of element residual into surface residual */
+      for(m=0;m<dims*ends;m++)
+         for(l=0;l<dims*ends;l++) {
+              res[m]  -= eltk[ends*dims*m+l]  * eu[l];
+              resb[m] -= eltkb[ends*dims*m+l] * eub[l];
+              }
 
-/*       for(m=1;m<=ends;m++) {    */  /* for bottom elements */
-/*          switch (m) { */
-/*              case 2: */
-/*                  RL[j][E->sien[j][els].node[1]] += resb[(m-1)*dims+1];   */
-/*                  break; */
-/*              case 3: */
-/*                  RL[j][E->sien[j][els].node[2]] += resb[(m-1)*dims+1];   */
-/*                  break; */
-/*              case 7: */
-/*                  RL[j][E->sien[j][els].node[3]] += resb[(m-1)*dims+1];   */
-/*                  break; */
-/*              case 6: */
-/*                  RL[j][E->sien[j][els].node[4]] += resb[(m-1)*dims+1];   */
-/*                  break; */
-/*                  } */
-/*              } */
+	    /* Put relevant (vertical & surface) parts of element residual into surface residual */
 
+      for(m=1;m<=ends;m++) {
+        if (m<=4)  {
+          switch (m) {
+             case 1:
+                nodes = E->sien[j][els].node[1];
+		break;
+             case 2:
+                nodes = E->sien[j][els].node[2];
+		break;
+             case 3:
+                nodes = E->sien[j][els].node[3];
+		break;
+             case 4:
+                nodes = E->sien[j][els].node[4];
+		break;
+	     }
+	     RL[j][nodes] += resb[(m-1)*dims+2];
+	  }
+        else   {
+           switch (m) {
+             case 5:
+                nodes = E->sien[j][els].node[1];
+                break;
+             case 6:
+                nodes = E->sien[j][els].node[2];
+                break;
+             case 7:
+                nodes = E->sien[j][els].node[3];
+                break;
+             case 8:
+                nodes = E->sien[j][els].node[4];
+                break;
+             }
+             RU[j][nodes] += res[(m-1)*dims+2];
+          }
+        }      /* end for m */
+      }
 
-/*       for(m=1;m<=ends;m++) { */
-/*          switch (m) { */
-/*              case 1: */
-/*                 nodes = E->sien[j][els].node[1]; */
-/*                 break; */
-/*              case 4: */
-/*                 nodes = E->sien[j][els].node[2]; */
-/*                 break; */
-/*              case 8: */
-/*                 nodes = E->sien[j][els].node[3]; */
-/*                 break; */
-/*              case 5: */
-/*                 nodes = E->sien[j][els].node[4]; */
-/*                 break; */
-/*              } */
-
-/*              RU[j][nodes] += res[(m-1)*dims+1];   */
-/*          }  */     /* end for m */
-/*       } */
 
     /* calculate the LHS */
 
-/*     for(els=1;els<=E->lmesh.snel;els++) { */
-/*        el = E->surf_element[j][els]; */
-/*        elb = el + elz-1; */
+    for(els=1;els<=E->lmesh.snel;els++) {
+       el = E->surf_element[j][els];
+       elb = el - elz+1;
 
-/*        get_global_1d_shape_fn(E,el,&GM,&dGammax,0,j); */
-/*        get_global_1d_shape_fn(E,elb,&GMb,&dGammabx,0,j); */
+       get_global_1d_shape_fn_L(E,el,&GM,&dGammax,1,j);
+       get_global_1d_shape_fn_L(E,elb,&GMb,&dGammabx,0,j);
 
-/*        for(m=1;m<=onedv;m++)        { */
-/*           eltTU[m-1] = 0.0; */
-/*           eltTL[m-1] = 0.0;  */
-/*           for(n=1;n<=onedv;n++)          { */
-/*              eltTU[m-1] +=  */
-/*                 dGammax.vpt[GMVGAMMA(1,n)] * l_1d[n].weight[dims-1] */
-/*                 * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)]; */
-/*              eltTL[m-1] +=  */
-/*                      dGammabx.vpt[GMVGAMMA(1+dims,n)]*l_1d[n].weight[dims-1] */
-/*                 * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)]; */
-/*              } */
-/*           } */
+       for(m=1;m<=onedv;m++)        {
+          eltTU[m-1] = 0.0;
+          eltTL[m-1] = 0.0;
+          for(n=1;n<=onedv;n++)          {
+             eltTU[m-1] +=
+                dGammax.vpt[GMVGAMMA(1,n)]
+                * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)];
+             eltTL[m-1] +=
+     	        dGammabx.vpt[GMVGAMMA(0,n)]
+                * E->L.vpt[GMVINDEX(m,n)] * E->L.vpt[GMVINDEX(m,n)];
+             }
+          }
 
-/*         for (m=1;m<=onedv;m++)  */    /* for bottom */
-/*             SL[m][E->sien[m][els].node[m]] += eltTL[m-1]; */
+        for (m=1;m<=onedv;m++)     /* for bottom */
+            SL[j][E->sien[j][els].node[m]] += eltTL[m-1];
 
-/*         for (m=1;m<=onedv;m++)  { */
-/*             if (m==1)  */
-/*                 a = 1; */
-/*             else if (m==2) */
-/*                 a = 4; */
-/*             else if (m==3) */
-/*                 a = 8; */
-/*             else if (m==4) */
-/*                 a = 5; */
+        for (m=1;m<=onedv;m++)
+            SU[j][E->sien[j][els].node[m]] += eltTU[m-1];
 
-/*             nodes = E->sien[m][els].node[m]; */
-/*             SU[m][E->sien[m][els].node[m]] += eltTU[m-1]; */
-/*             } */
-/*         } */
+        }
 
-/*       }  */     /* end for j */
+  }      /* end for j */
 
+  /* for bottom topography */
 
-/*     if (E->parallel.me_loc[3]==0)  {      */    /* for top topography */
-/*       for(i=1;i<=E->lmesh.nsf;i++)   */
+  if(E->sphere.caps == 12)
+      full_exchange_snode_f(E,RL,SL,E->mesh.levmax);
+  else
+      regional_exchange_snode_f(E,RL,SL,E->mesh.levmax);
 
-/*       exchange_snode_f(E,RU,SU,E->mesh.levmax); */
+  for (j=1;j<=E->sphere.caps_per_proc;j++)
+      for(i=1;i<=E->lmesh.nsf;i++)
+          HB[j][i] = RL[j][i]/SL[j][i];
 
-/*       for (j=1;j<=E->sphere.caps_per_proc;j++) */
-/*         for(i=1;i<=E->lmesh.nsf;i++) */
-/*           H[j][i] = -RU[j][i]/SU[j][i]; */
-/*       } */
+  /* for top topo */
+  if(E->sphere.caps == 12)
+      full_exchange_snode_f(E,RU,SU,E->mesh.levmax);
+  else
+      regional_exchange_snode_f(E,RU,SU,E->mesh.levmax);
 
-/*     if (E->parallel.me_loc[3]==E->parallel.nprocz-1)   {  */   /* for bottom topo */
-/*       exchange_snode_f(E,RL,SL,E->mesh.levmax); */
-/*       for (j=1;j<=E->sphere.caps_per_proc;j++) */
-/*         for(i=1;i<=E->lmesh.nsf;i++) */
-/*           HB[j][i] = -RL[j][i]/SL[j][i]; */
-/*       } */
+  for (j=1;j<=E->sphere.caps_per_proc;j++)
+      for(i=1;i<=E->lmesh.nsf;i++)
+          H[j][i] = RU[j][i]/SU[j][i];
 
-/*     free((void *)eltTU); */
-/*     free((void *)eltTL); */
-/*     for (j=1;j<=E->sphere.caps_per_proc;j++)   { */
-/*       free((void *)SU[j]); */
-/*       free((void *)SL[j]); */
-/*       free((void *)RU[j]); */
-/*       free((void *)RL[j]); */
-/*       } */
+    free((void *)eltTU);
+    free((void *)eltTL);
+    for (j=1;j<=E->sphere.caps_per_proc;j++)   {
+      free((void *)SU[j]);
+      free((void *)SL[j]);
+      free((void *)RU[j]);
+      free((void *)RL[j]);
+      }
     return;
- }
+}
 
 
 /* version */
