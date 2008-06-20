@@ -123,6 +123,7 @@ extern void mkdatadir(const char *);
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**,
                          float**, float**, int);
+extern void get_CBF_topo(struct All_variables *, float**, float**);
 
 /**********************************************************************/
 
@@ -774,7 +775,8 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
       heat_flux(E);
   /* else, the heat flux will have been computed already */
 
-  get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
+  //get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
+  get_CBF_topo(E,E->slice.tpg,E->slice.tpgb);
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
     snprintf(output_file,255,"%s/%d/surf.%d.%d.gz", E->control.data_dir,

@@ -136,6 +136,7 @@ void h5output_time(struct All_variables *, int);
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
+extern void get_CBF_topo(struct All_variables *, float**, float**);
 extern void compute_geoid(struct All_variables *);
 
 
@@ -801,8 +802,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
     /* else, the heat flux will have been computed already */
 
 
-    get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
-
+    //get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
+    get_CBF_topo(E, E->slice.tpg, E->slice.tpgb);
 
     /********************************************************************
      * Top surface                                                      *
