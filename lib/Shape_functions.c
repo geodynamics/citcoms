@@ -129,14 +129,19 @@ void construct_shape_functions(E)
   for(j=1;j<=onedvpoints[E->mesh.nsd];j++)
     for(k=1;k<=onedvpoints[E->mesh.nsd];k++)   {
        E->M.vpt[GMVINDEX(j,k)] = 1.0;
-       for(d=1;d<=E->mesh.nsd-1;d++)
+       E->L.vpt[GMVINDEX(j,k)] = 1.0;
+       for(d=1;d<=E->mesh.nsd-1;d++) {
           E->M.vpt[GMVINDEX(j,k)] *= lpoly(bb[d-1][j],s_point[k].x[d-1]);
-
+          E->L.vpt[GMVINDEX(j,k)] *= lpoly(bb[d-1][j],l_1d[k].x[d-1]);
+       }
        for(dd=1;dd<=E->mesh.nsd-1;dd++) {
           E->Mx.vpt[GMVXINDEX(dd-1,j,k)] = lpolydash(bb[dd-1][j],s_point[k].x[d-1]);
+          E->Lx.vpt[GMVXINDEX(dd-1,j,k)] = lpolydash(bb[dd-1][j],l_1d[k].x[d-1]);
           for(d=1;d<=E->mesh.nsd-1;d++)
-             if (d != dd)
+             if (d != dd) {
                 E->Mx.vpt[GMVXINDEX(dd-1,j,k)] *= lpoly(bb[d-1][j],s_point[k].x[d-1]);
+                E->Lx.vpt[GMVXINDEX(dd-1,j,k)] *= lpoly(bb[d-1][j],l_1d[k].x[d-1]);
+            }
           }
        }
 
