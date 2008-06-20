@@ -447,6 +447,70 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
   return;
 }
 
+/*   ======================================================================
+     ======================================================================  */
+void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
+     struct All_variables *E;
+     int el,top,m;
+     struct Shape_function1 *GM;
+     struct Shape_function1_dA *dGammax;
+{
+    int ii,i,k,d,e,node;
+
+    double jacobian;
+    double determinant();
+
+    const int oned = onedvpoints[E->mesh.nsd];
+
+    double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
+
+    to = E->eco[m][el].centre[1];
+    fo = E->eco[m][el].centre[2];
+
+    dxdy[1][1] = cos(to)*cos(fo);
+    dxdy[1][2] = cos(to)*sin(fo);
+    dxdy[1][3] = -sin(to);
+    dxdy[2][1] = -sin(fo);
+    dxdy[2][2] = cos(fo);
+    dxdy[2][3] = 0.0;
+    dxdy[3][1] = sin(to)*cos(fo);
+    dxdy[3][2] = sin(to)*sin(fo);
+    dxdy[3][3] = cos(to);
+
+    for (ii=0;ii<=top;ii++)   {   /* ii=0 for bottom and ii=1 for top */
+
+        for(i=1;i<=oned;i++) {     /* nodes */
+            e = i+ii*oned;
+            node = E->ien[m][el].node[e];
+            xx[1][i] = E->x[m][1][node]*dxdy[1][1]
+                + E->x[m][2][node]*dxdy[1][2]
+                + E->x[m][3][node]*dxdy[1][3];
+            xx[2][i] = E->x[m][1][node]*dxdy[2][1]
+                + E->x[m][2][node]*dxdy[2][2]
+                + E->x[m][3][node]*dxdy[2][3];
+            xx[3][i] = E->x[m][1][node]*dxdy[3][1]
+                + E->x[m][2][node]*dxdy[3][2]
+                + E->x[m][3][node]*dxdy[3][3];
+        }
+
+        for(k=1;k<=oned;k++)    { /* all of the vpoints*/
+
+            for(d=1;d<=E->mesh.nsd-1;d++)
+                for(e=1;e<=E->mesh.nsd-1;e++)
+                    dxda[d][e]=0.0;
+
+            for(i=1;i<=oned;i++)      /* nodes */
+                for(d=1;d<=E->mesh.nsd-1;d++)
+                    for(e=1;e<=E->mesh.nsd-1;e++)
+                        dxda[d][e] += xx[e][i]*E->Lx.vpt[GMVXINDEX(d-1,i,k)];
+
+            jacobian = determinant(dxda,E->mesh.nsd-1);
+            dGammax->vpt[GMVGAMMA(ii,k)] = jacobian;
+        }
+    }
+
+    return;
+}
 
 /*   ======================================================================
      For calculating pressure boundary term --- Choi, 11/13/02
