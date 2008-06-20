@@ -181,7 +181,6 @@ void full_node_locations(E)
 
   void full_coord_of_cap();
   void compute_angle_surf_area ();
-  void debug_sphere_expansion(struct All_variables *);
 
   rr = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
   RR = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
@@ -318,6 +317,7 @@ void full_construct_tic_from_input(struct All_variables *E)
   int mm, ll;
   double con;
   double modified_plgndr_a(int, int, double);
+  void debug_sphere_expansion(struct All_variables *);
   void temperatures_conform_bcs();
 
   noy=E->lmesh.noy;
