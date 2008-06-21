@@ -37,7 +37,7 @@ static void horizontal_bc();
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
 void read_temperature_boundary_from_file(struct All_variables *);
-
+void read_velocity_boundary_from_file(struct All_variables *);
 
 /* ========================================== */
 
@@ -46,7 +46,7 @@ void full_velocity_boundary_conditions(E)
 {
   void velocity_imp_vert_bc();
   void velocity_apply_periodicapply_periodic_bcs();
-  void read_velocity_boundary_from_file();
+
   void apply_side_sbc();
 
   int j,noz,lv;
@@ -54,7 +54,7 @@ void full_velocity_boundary_conditions(E)
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
       noz = E->mesh.NOZ[lv];
-      if(E->mesh.topvbc != 1) {
+      if(E->mesh.topvbc != 1) {	/* free slip top */
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
@@ -62,7 +62,7 @@ void full_velocity_boundary_conditions(E)
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
 	}
-      if(E->mesh.botvbc != 1) {
+      if(E->mesh.botvbc != 1) {	/* free slip bottom */
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
@@ -71,7 +71,7 @@ void full_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
         }
 
-      if(E->mesh.topvbc == 1) {
+      if(E->mesh.topvbc == 1) {	/* velocity/no slip BC */
         horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j);
@@ -79,11 +79,18 @@ void full_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
 
-        if(E->control.vbcs_file)
-          read_velocity_boundary_from_file(E);
-
-        }
-      if(E->mesh.botvbc == 1) {
+        if(E->control.vbcs_file){ /* this should either only be called
+				     once, or the input routines need
+				     to be told what to do for each
+				     multigrid level and cap. it might
+				     be easiest to call only once and
+				     have routines deal with multigrid
+				  */
+	  if((lv == E->mesh.gridmin) && (j == E->sphere.caps_per_proc))
+	     read_velocity_boundary_from_file(E);
+	}
+      }
+      if(E->mesh.botvbc == 1) {	/* velocity bottom BC */
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,VBY,1,lv,j);

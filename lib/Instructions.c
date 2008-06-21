@@ -85,7 +85,9 @@ void read_rayleigh_from_file(struct All_variables *);
 
 void initial_mesh_solver_setup(struct All_variables *E)
 {
-
+  int chatty;
+  chatty = ((E->parallel.me == 0)&&(E->control.verbose))?(1):(0);
+  
     E->monitor.cpu_time_at_last_cycle =
         E->monitor.cpu_time_at_start = CPU_time0();
 
@@ -99,17 +101,20 @@ void initial_mesh_solver_setup(struct All_variables *E)
     allocate_common_vars(E);
     (E->problem_allocate_vars)(E);
     (E->solver_allocate_vars)(E);
-
+    if(chatty)fprintf(stderr,"memory allocation done\n");
            /* logical domain */
     construct_ien(E);
     construct_surface(E);
     (E->solver.construct_boundary)(E);
     (E->solver.parallel_domain_boundary_nodes)(E);
+    if(chatty)fprintf(stderr,"parallel setup done\n");
 
            /* physical domain */
     (E->solver.node_locations)(E);
 
     allocate_velocity_vars(E);
+    if(chatty)fprintf(stderr,"velocity vars done\n");
+
 
     get_initial_elapsed_time(E);  /* Set elapsed time */
     set_starting_age(E);  /* set the starting age to elapsed time, if desired */
@@ -131,13 +136,17 @@ void initial_mesh_solver_setup(struct All_variables *E)
     (E->problem_boundary_conds)(E);
 
     check_bc_consistency(E);
+    if(chatty)fprintf(stderr,"boundary conditions done\n");
 
     construct_masks(E);		/* order is important here */
     construct_id(E);
     construct_lm(E);
+    if(chatty)fprintf(stderr,"id/lm done\n");
 
     (E->solver.parallel_communication_routs_v)(E);
+    if(chatty)fprintf(stderr,"v communications done\n");
     (E->solver.parallel_communication_routs_s)(E);
+    if(chatty)fprintf(stderr,"s communications done\n");
 
     reference_state(E);
 
@@ -156,13 +165,16 @@ void initial_mesh_solver_setup(struct All_variables *E)
     construct_surf_det (E);
     construct_bdry_det (E);
 
+    if(chatty)fprintf(stderr,"mass matrix, dets done\n");
+
     set_sphere_harmonics (E);
+
 
     if(E->control.tracer) {
 	tracer_initial_settings(E);
 	(E->problem_tracer_setup)(E);
     }
-
+    if(chatty)fprintf(stderr,"initial_mesh_solver_setup done\n");
 }
 
 
@@ -189,7 +201,6 @@ void read_instructions(struct All_variables *E, char *filename)
 
     global_default_values(E);
     read_initial_settings(E);
-
     shutdown_parser(E);
 
     return;
@@ -349,6 +360,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
   input_int("mgunity",&(E->mesh.mgunity),"1",m);
   input_int("levels",&(E->mesh.levels),"0",m);
+  if(E->mesh.levels > MAX_LEVELS)
+    myerror(E,"number of multigrid levels out of bound");
 
   input_int("coor",&(E->control.coor),"0",m);
   if(E->control.coor == 2){
@@ -530,6 +543,13 @@ void read_initial_settings(struct All_variables *E)
   if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
     E->control.vbcs_file = 1;
 
+  /* if set, will check the theta velocities from grid input for
+     scaled (internal non dim) values of > 1e9. if found, those nodes will
+     be set to free slip
+  */
+  input_boolean("allow_mixed_vbcs",&(E->control.ggrd_allow_mixed_vbcs),"off",m);
+
+
 #endif
 
   input_int("nodex",&(E->mesh.nox),"essential",m);
@@ -606,6 +626,13 @@ void read_initial_settings(struct All_variables *E)
   input_float("density_below",&(E->data.density_below),"6600.0",m);
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
 
+
+
+  /* 
+
+  ellipticity and rotation settings
+  
+  */
   /* f = (a-c)/a, where c is the short, a=b the long axis 
      1/298.257 = 0.00335281317789691 for Earth at present day
   */
@@ -614,9 +641,12 @@ void read_initial_settings(struct All_variables *E)
     /* define ra and rc such that R=1 is the volume equivalanet */
     E->data.ra = pow((1.-(double)E->data.ellipticity),(double)-1./3.); /* non dim long axis */
     E->data.rc = 1./(E->data.ra * E->data.ra); /* non dim short axis */
-    if(E->parallel.me == 0)
+    if(E->parallel.me == 0){
       fprintf(stderr,"WARNING: ellipticity: %.5e equivalent radii: r_a: %g r_b: %g\n",
 	      E->data.ellipticity,E->data.ra,E->data.rc);
+      if(E->control.remove_rigid_rotation)
+	fprintf(stderr,"WARNING: remove rigid rotations is switched on for elliptical run !!!\n");
+    }
   }else{
     E->data.ra = E->data.rc = 1.0;
   }

@@ -516,6 +516,7 @@ struct CONTROL {
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
   float *surface_rayleigh;
+  int ggrd_allow_mixed_vbcs;
 #endif
     double accuracy;
     double vaccuracy;

@@ -39,6 +39,7 @@ static void temperature_apply_periodic_bcs();
 static void velocity_refl_vert_bc();
 static void temperature_refl_vert_bc();
 void read_temperature_boundary_from_file(struct All_variables *);
+void read_velocity_boundary_from_file(struct All_variables *);
 
 /* ========================================== */
 
@@ -46,7 +47,6 @@ void regional_velocity_boundary_conditions(E)
      struct All_variables *E;
 {
   void velocity_imp_vert_bc();
-  void read_velocity_boundary_from_file();
   void renew_top_velocity_boundary();
   void apply_side_sbc();
 
@@ -73,7 +73,8 @@ void regional_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
 
 	if(E->control.vbcs_file)   {
-	  read_velocity_boundary_from_file(E);   /* read in the velocity boundary condition from file */
+	  if((lv == E->mesh.gridmin) && (j == E->sphere.caps_per_proc))
+	    read_velocity_boundary_from_file(E);   /* read in the velocity boundary condition from file */
 	}
       }
       else if(E->mesh.topvbc == 2) {

@@ -769,7 +769,6 @@ void full_parallel_communication_routs_s(E)
 
   const int dims=E->mesh.nsd;
 
-
   me = E->parallel.me;
   nprocz = E->parallel.nprocz;
 
@@ -797,6 +796,7 @@ void full_parallel_communication_routs_s(E)
 
         else  {         /* the last FOUR communications are for lines */
           E->parallel.NUM_sNODE[lev][m].pass[kkk]=1;
+
           for (k=1;k<=E->parallel.NUM_sNODE[lev][m].pass[kkk];k++)   {
 	    if (E->parallel.nprocx*E->parallel.nprocy > 1) { /* 4 or more horiz. proc*/
 	      switch(kkk) {
@@ -838,6 +838,7 @@ void full_parallel_communication_routs_s(E)
 
     }   /* end for lev  */
 
+        
   return;
 }
 

@@ -48,7 +48,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     float age, newage1, newage2;
     char output_file1[255],output_file2[255];
     float *TB1, *TB2, *VB1[4],*VB2[4], inputage1, inputage2;
-    int nox,noz,noy,nnn,nox1,noz1,noy1,lev;
+    int nox,noz,noy,nnn,nox1,noz1,noy1;
     int i,ii,ll,mm,j,k,n,nodeg,nodel,node;
     int intage, pos_age;
     int nodea;
@@ -73,7 +73,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     nox1=E->lmesh.nox;
     noz1=E->lmesh.noz;
     noy1=E->lmesh.noy;
-    lev=E->mesh.levmax;
+
 
     elx=E->lmesh.elx;
     elz=E->lmesh.elz;

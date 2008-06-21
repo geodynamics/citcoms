@@ -53,10 +53,15 @@ void tic_input(struct All_variables *E)
 
   int m = E->parallel.me;
   int noz = E->lmesh.noz;
-  int n;
+  int n,tmp;
 
 
   input_int("tic_method", &(E->convection.tic_method), "0,0,2", m);
+#ifdef USE_GGRD			/* for backward capability */
+  input_int("ggrd_tinit", &tmp, "0", m);
+  if(tmp)
+    E->convection.tic_method = 4; /*  */
+#endif  
   /* When tic_method is 0 (default), the temperature is a linear profile +
      perturbation at some layers.
 
@@ -151,7 +156,10 @@ void tic_input(struct All_variables *E)
        case 4: initial temp from grd files
     */
 #ifdef USE_GGRD
-    /* read in some more parameters */
+    /* 
+       read in some more parameters 
+
+    */
     /* scale the anomalies with PREM densities */
     input_boolean("ggrd_tinit_scale_with_prem",&(E->control.ggrd.temp_init.scale_with_prem),"off",E->parallel.me);
     /* limit T to 0...1 */

@@ -49,13 +49,14 @@ void full_global_derived_values(E)
   noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
 
   if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
+    /* multigrid set up */
     E->mesh.levmax = E->mesh.levels-1;
     E->mesh.gridmax = E->mesh.levmax;
     E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocx + 1;
     E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocy + 1;
     E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,((double)E->mesh.levmax))*E->parallel.nprocz + 1;
-  }
-  else   {
+  } else   {
+    /* regular, conjugate gradient setup */
     if (nox!=E->mesh.nox || noy!=E->mesh.noy || noz!=E->mesh.noz) {
       if (E->parallel.me==0)
 	fprintf(stderr,"inconsistent mesh for interpolation, quit the run\n");
