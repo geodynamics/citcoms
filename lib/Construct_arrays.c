@@ -120,6 +120,15 @@ void construct_surface( struct All_variables *E)
       E->surf_node[j][i] = i*E->lmesh.noz;
 
   }     /* end for cap j */
+
+  if(E->control.verbose) {
+    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+      for(e=1;e<=E->lmesh.snel;e++) {
+        fprintf(E->fp_out, "sien sel=%d node=%d %d %d %d\n",
+		e, E->sien[j][e].node[1], E->sien[j][e].node[2], E->sien[j][e].node[3], E->sien[j][e].node[4]);
+      }
+    }
+  }
 }
 
 
