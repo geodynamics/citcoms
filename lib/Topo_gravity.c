@@ -995,7 +995,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
   }      /* end for j */
 
   /* for bottom topography */
-
+  if(E->parallel.me_loc[3] == 0) {
   if(E->sphere.caps == 12)
       full_exchange_snode_f(E,RL,SL,E->mesh.levmax);
   else
@@ -1004,8 +1004,9 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
   for (j=1;j<=E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nsf;i++)
           HB[j][i] = RL[j][i]/SL[j][i];
-
+  }
   /* for top topo */
+  if(E->parallel.me_loc[3] == E->parallel.nprocz-1) {
   if(E->sphere.caps == 12)
       full_exchange_snode_f(E,RU,SU,E->mesh.levmax);
   else
@@ -1014,7 +1015,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
   for (j=1;j<=E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nsf;i++)
           H[j][i] = RU[j][i]/SU[j][i];
-
+  }
     free((void *)eltTU);
     free((void *)eltTL);
     for (j=1;j<=E->sphere.caps_per_proc;j++)   {
