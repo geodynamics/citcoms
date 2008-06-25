@@ -84,6 +84,16 @@ static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
 int read_double_vector(FILE *, int , double *);
+void cart_to_sphere(struct All_variables *,
+                    double , double , double ,
+                    double *, double *, double *);
+void sphere_to_cart(struct All_variables *,
+                    double , double , double ,
+                    double *, double *, double *);
+int icheck_processor_shell(struct All_variables *,
+                           int , double );
+
+
 
 void tracer_input(struct All_variables *E)
 {

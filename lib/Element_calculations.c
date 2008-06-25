@@ -34,6 +34,17 @@
 #include "global_defs.h"
 #include "material_properties.h"
 
+/* else, PGI would complain */
+void construct_side_c3x3matrix_el(struct All_variables *,int ,
+				  struct CC *,struct CCX *,
+				  int ,int ,int ,int );
+void construct_c3x3matrix(struct All_variables *);
+void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
+			      struct CCX *,int ,int ,int );
+void assemble_div_u(struct All_variables *,
+                    double **, double **, int );
+void get_elt_tr(struct All_variables *, int , int , double [24], int );
+void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
 
 
 void add_force(struct All_variables *E, int e, double elt_f[24], int m)
@@ -312,7 +323,6 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const double two_thirds = 2.0/3.0;
 
     void get_rtf_at_vpts();
-    void construct_c3x3matrix_el();
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
 
@@ -822,7 +832,7 @@ return(divU);  }
 void get_elt_c(struct All_variables *E, int el,
                higher_precision elt_c[24][1], int lev, int m)
 {
-    void construct_c3x3matrix_el();
+
     int p, a, i, j, nz;
     double temp, beta, rho_avg, x[4];
 
@@ -899,7 +909,6 @@ void get_elt_g(E,el,elt_del,lev,m)
 
 {
    void get_rtf_at_ppts();
-   void construct_c3x3matrix_el();
    int p,a,i;
    double ra,ct,si,x[4],rtf[4][9];
    double temp;
@@ -961,7 +970,6 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
   double force[9],force_at_gs[9],elt_k[24*24];
 
-  void construct_c3x3matrix_el();
 
   const int dims=E->mesh.nsd;
   const int n=loc_mat_size[dims];
@@ -1031,7 +1039,6 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
 void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
-	void construct_side_c3x3matrix_el();
 
 	const int dims=E->mesh.nsd;
 	const int ends1=enodes[dims-1];
@@ -1115,7 +1122,6 @@ void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], i
 
 void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
-	void construct_side_c3x3matrix_el();
 
 	const int dims=E->mesh.nsd;
 	const int ends1=enodes[dims-1];

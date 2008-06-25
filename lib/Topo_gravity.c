@@ -36,6 +36,20 @@ void sphere_expansion();
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);
 long double lg_pow(long double, int);
+void allocate_STD_mem(struct All_variables *E,
+                      float** , float** , float** ,
+                      float** , float** , float** ,
+                      float** , float** );
+void free_STD_mem(struct All_variables *E,
+                  float** , float** , float** ,
+                  float** , float** , float** ,
+                  float** , float** );
+void compute_nodal_stress(struct All_variables *,
+                          float** , float** , float** ,
+                          float** , float** , float** ,
+                          float** , float** );
+void stress_conform_bcs(struct All_variables *);
+
 
 
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)

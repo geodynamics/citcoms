@@ -81,6 +81,7 @@ void get_vtk_filename(char *,int,struct All_variables *,int);
 void myerror(struct All_variables *,char *);
 void open_qfiles(struct All_variables *) ;
 void read_rayleigh_from_file(struct All_variables *);
+void read_initial_settings(struct All_variables *);
 
 
 void initial_mesh_solver_setup(struct All_variables *E)
@@ -145,6 +146,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     (E->solver.parallel_communication_routs_v)(E);
     if(chatty)fprintf(stderr,"v communications done\n");
+
     (E->solver.parallel_communication_routs_s)(E);
     if(chatty)fprintf(stderr,"s communications done\n");
 

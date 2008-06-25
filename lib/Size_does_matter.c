@@ -555,11 +555,8 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
 
 /* ====================================================   */
 
-void construct_c3x3matrix_el (E,el,cc,ccx,lev,m,pressure)
-     struct All_variables *E;
-     struct CC *cc;
-     struct CCX *ccx;
-     int lev,el,m,pressure;
+void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
+			      struct CCX *ccx,int lev,int m,int pressure)
 {
   int a,i,j,k,d;
   double cofactor(),myatan();

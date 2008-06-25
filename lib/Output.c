@@ -102,10 +102,12 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  /* optiotnal output below */
+  /* opttional output below */
 
   /* compute and output geoid (in spherical harmonics coeff) */
-  if (E->output.geoid)
+  if (E->output.geoid)		/* this needs to be called after the
+				   surface and bottom topo has been
+				   computed! */
       output_geoid(E, cycles);
 
   if (E->output.stress)
@@ -312,6 +314,7 @@ void output_geoid(struct All_variables *E, int cycles)
                         E->sphere.harm_geoid_from_bncy[0][p],
                         E->sphere.harm_geoid_from_bncy[1][p]);
 
+                       
             }
 
         fclose(fp1);

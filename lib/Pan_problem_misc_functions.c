@@ -470,7 +470,8 @@ void xyz2rtpd(float x,float y,float z,double *rout)
 
 
 /* compute base vectors for conversion of polar to cartesian vectors
-   base[9]
+   base[9], i.e. those are the cartesian representation of the r,
+   theta, and phi basis vectors at theta, phi
 */
 void calc_cbase_at_tp(float theta, float phi, float *base)
 {
@@ -633,3 +634,4 @@ void get_r_spacing_at_levels(double *rr,struct All_variables *E)
     }
 
 }
+

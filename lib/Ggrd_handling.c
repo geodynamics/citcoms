@@ -598,7 +598,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
 
 /*  
 
-read velocity boundary conditions from netcdf grd files
+read surface velocity boundary conditions from netcdf grd files
 
 
 */
@@ -620,7 +620,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   /* global, top level number of nodes */
   noxg = E->lmesh.nox;nozg=E->lmesh.noz;noyg=E->lmesh.noy;
   noxgnozg = noxg*nozg;
-
+  
   /* velocity scaling, assuming input is cm/yr  */
   vscale = E->data.scalev * E->data.timedir;
   /*
@@ -632,12 +632,16 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 			      TRUE,(E->parallel.me == 0));
     E->control.ggrd.time_hist.init = 1;
   }
-
   timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
 
   if(!E->control.ggrd.vtop_control_init){
+    /* 
+       read in grd files (only needed for top processors, really, but
+       leave as is for now
+    */
     if(E->parallel.me==0)
-      fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities\n");
+      fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities for %s setup\n",
+	      is_global?("global"):("regional"));
     if(is_global){		/* decide on GMT flag */
       //sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* periodic */
       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
@@ -658,8 +662,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
     /* for detecting the actual max */
     E->control.ggrd.svt->bandlim = E->control.ggrd.svp->bandlim = 1e6;
-
     for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
+      /* 
+	 
+      by default, all velocity grids will be stored in memory, this
+      may or may not be ideal
+
+      */
       if(!timedep){ /* constant */
 	sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
 	sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
@@ -672,8 +681,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	myerror(E,"ggrd init error vt");
       if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
 				    gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE))
-	myerror(E,"ggrd init error vp");
-    }
+	myerror(E,"ggrd init error vp"); 
+    } /* all grids read */
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
       mpi_rc = MPI_Send(&mpi_success_message, 1,
 			MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
@@ -682,9 +691,11 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
     }
     /* end init */
-  }
+  } 
   if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
-    /* either first time around, or time-dependent */
+    /* 
+       either first time around, or time-dependent 
+    */
     age = find_age_in_MY(E);
     if(timedep){
       /* 
@@ -717,17 +728,18 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     /* if mixed BCs are allowed, need to reassign the boundary
        condition */
     if(E->control.ggrd_allow_mixed_vbcs){
-      if(E->parallel.me == 0)fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
+      if(E->parallel.me == 0)
+	fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
 
-      if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { /* top processor onlt */
-
+      if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { /* top processor only */
+	/* velocities larger than the cutoff will be assigned as free
+	   slip */
 	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
-
-	for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--){
-	  /* multigrid levels */
-	  noxl = E->lmesh.NOX[level];noyl = E->lmesh.NOY[level];nozl = E->lmesh.NOZ[level];
+	for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--){/* multigrid levels */
+	  noxl = E->lmesh.NOX[level];
+	  noyl = E->lmesh.NOY[level];
+	  nozl = E->lmesh.NOZ[level];
 	  noxlnozl = noxl*nozl;
-	  
 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	    nsuml[0] = nsuml[1] = 0;
 	    /* 
@@ -735,9 +747,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    */
 	    for(i=1;i<=noyl;i++){
 	      for(j=1;j<=noxl;j++) {
-
-		nodel =  j * nozl + (i-1)*noxlnozl; /* top node */
-
+		nodel =  j * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
+		/* node location */
 		rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
 		rout[2] = E->SX[level][m][2][nodel];
 		/* find vp */
@@ -774,33 +785,30 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		}
 	      }	/* end x loop */
 	    } /* end y loop */
-	    //fprintf(stderr,"cpu: %i - %i %i %i level: %i \t sum: %i %i\n",
-	    //	    E->parallel.me,E->parallel.me_loc[1],E->parallel.me_loc[2] ,E->parallel.me_loc[3] ,level,nsuml[0],nsuml[1]);
+	    /* sum up all assignments */
 	    MPI_Allreduce(nsuml,nsum,2,MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
-	    if(E->parallel.me == E->parallel.loc2proc_map[0][0][0][E->parallel.nprocz-1])
+	    if(E->parallel.me % E->parallel.nprocxy == 0)
 	      fprintf(stderr,"mixed velocity BC: multi grid level %2i : %7i fixed %7i free\n",level,nsum[1],nsum[0]);
 	  } /* cap */
 	} /* level */
-      }	/* proc */
-      /* end BC branch */
+      }	/* top proc branch */
     } /* end mixed BC assign */
     /* 
 
-    loop through all nodes and assign velocity boundary condition
+    now loop through all nodes and assign velocity boundary condition
     values
 
     */
-    if(E->parallel.me_loc[3] == E->parallel.nprocz-1 )  { /* if on top */
+    if(E->parallel.me_loc[3] == E->parallel.nprocz-1)  { /* if on top */
       for (m=1;m <= E->sphere.caps_per_proc;m++) {
-	nsuml[0] = nsuml[1] = 0;
+	nsuml[0] = nsuml[1] = 0; /* for debugging */
 
+	/* scaled cutoff velocity */
 	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
-
 	for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
 	  for(i=1;i <= noxg;i++)    {
-
-	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node */
-
+	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
+	    /*  */
 	    rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	    rout[2] = E->sx[m][2][nodel];
 	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
@@ -847,12 +855,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
 	  }
 	}	/* end surface node loop */
+	MPI_Allreduce(nsuml,nsum,2,MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
+	if(E->parallel.me % E->parallel.nprocxy == 0)
+	  fprintf(stderr,"mixed velocity BC val: %i fixed %i free\n",nsum[1],nsum[0]);
       }	/* end top proc branch */
     } /* end cap loop */
-
-    MPI_Allreduce(nsuml,nsum,2,MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
-    if(E->parallel.me == E->parallel.loc2proc_map[0][0][0][E->parallel.nprocz-1])
-      fprintf(stderr,"mixed velocity BC val: %i fixed %i free\n",nsum[1],nsum[0]);
+    /* sum up the contributions */
   } /* end assignment branch */
   
   if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */

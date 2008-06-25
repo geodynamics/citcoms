@@ -474,7 +474,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	    /* cartesian basis vectors at theta, phi
 	       correct theta for the normal to the elliptical surface
 	    */
-	    theta_g = 1.5707963267949 - atan2(1.0,tan(E->sx[j][1][i])*efac);
+	    theta_g = M_PI_2 - atan2(1.0,tan(E->sx[j][1][i])*efac);
 	    calc_cbase_at_tp(theta_g,E->sx[j][2][i],(E->output.gzdir.vtk_base+k));
 	  }
 	}

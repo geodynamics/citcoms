@@ -303,12 +303,11 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
   sinlat=cos(theta);
   sinlon=sin(phi);
 
-  rx = coslat*coslon*r;
+  rx = coslat*coslon*r;		/* location vector in Cartesian */
   ry = coslat*sinlon*r;
   rz = sinlat*r;
 
-
-  vx = omega[1]*rz - omega[2]*ry;
+  vx = omega[1]*rz - omega[2]*ry; /* cross product */
   vy = omega[2]*rx - omega[0]*rz;
   vz = omega[0]*ry - omega[1]*rx;
 
