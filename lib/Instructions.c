@@ -670,6 +670,9 @@ void read_initial_settings(struct All_variables *E)
     if(E->parallel.me==0)
       fprintf(stderr,"WARNING: rotational fraction m: %.5e J2: %.5e g_e: %g\n",
 	      E->data.rotm,E->data.j2,E->data.ge);
+    E->data.use_rotation_g = 1;
+  }else{
+    E->data.use_rotation_g = 0;
   }
 #else
   if(fabs(ell_tmp) > 5e-7){

@@ -31,6 +31,10 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#ifdef ALLOW_ELLIPTICAL
+double theta_g(double , struct All_variables *);
+#endif
+
 void calc_cbase_at_tp(float , float , float *);
 
 /* ===============================================
@@ -845,7 +849,11 @@ void remove_rigid_rot(struct All_variables *E)
     
     for (m=1;m<=E->sphere.caps_per_proc;m++) {
       for (e=1;e<=E->lmesh.nel;e++) {
+#ifdef ALLOW_ELLIPTICAL
+	t = theta_g(E->eco[m][e].centre[1],E);
+#else
 	t = E->eco[m][e].centre[1];
+#endif
 	f = E->eco[m][e].centre[2];
 	r = E->eco[m][e].centre[3];
 	

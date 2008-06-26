@@ -560,7 +560,7 @@ struct DATA {
 #ifdef ALLOW_ELLIPTICAL
   double  ellipticity, ra,rc,rotm,j2,ge,efac; /* for ellipticity tests: f, normalized a and c axes, 
 						 rotational fraction m, J2, and norm gravity at the equator */
-  int use_ellipse;
+  int use_ellipse,use_rotation_g;
 #endif
     float  therm_cond;
     float   density;

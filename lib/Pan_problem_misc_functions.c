@@ -147,11 +147,13 @@ void apply_side_sbc(struct All_variables *E)
 
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
-    int i,j,m,n,nz;
+    int i,j,m,n,nz,nxny;
     int lev = E->mesh.levmax;
     double temp,temp2,rfac,cost2;
     void remove_horiz_ave2(struct All_variables*, double**);
     //char filename[100];FILE *out;
+
+    nxny = E->lmesh.nox*E->lmesh.noy;
     /* Rayleigh number */
     temp = E->control.Atemp;
 
@@ -191,23 +193,23 @@ void get_buoyancy(struct All_variables *E, double **buoy)
        convert density to buoyancy 
     */
 #ifdef ALLOW_ELLIPTICAL
-    if(fabs(E->data.rotm) > 5e-7){
+    if(E->data.use_rotation_g){
       /* 
 
       rotational correction, the if should not add significant
       computational burden
 
       */
-      /* g= g_e (1+(5/2m-f)cos^2(t)) , not theta_g */
+      /* g= g_e (1+(5/2m-f) cos^2(theta)) , not theta_g */
       rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
       /*  */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=1;i<=E->lmesh.noz;i++)
-	  for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
-	    n = j*E->lmesh.noz + i;
-	    /* cos^2(theta) */
-	    cost2 = cos(E->sx[m][1][n]);
-	    cost2 = cost2*cost2;
+	for(j=0;j < nxny;j++) {
+	  for(i=1;i<=E->lmesh.noz;i++)
+	    n = j*E->lmesh.noz + i; /* this could be improved by only
+				       computing the cos as a function
+				       of lat, but leave for now  */
+	    cost2 = cos(E->sx[m][1][n]);cost2 = cost2*cost2;	    /* cos^2(theta) */
 	    /* correct gravity for rotation */
 	    buoy[m][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
 	  }
@@ -216,17 +218,17 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       /* default */
       /* no latitude dependency of gravity */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=1;i<=E->lmesh.noz;i++)
-	  for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
+	for(j=0;j < nxny;j++) {
+	  for(i=1;i<=E->lmesh.noz;i++){
 	    n = j*E->lmesh.noz + i;
 	    buoy[m][n] *= E->refstate.gravity[i];
 	  }
+	}
 #ifdef ALLOW_ELLIPTICAL
     }
 #endif    
     
 
-    //if(E->control.remove_hor_buoy_avg)	/* XXX for testing purposes, remove? */
     remove_horiz_ave2(E,buoy);
     
     return;
