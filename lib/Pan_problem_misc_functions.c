@@ -60,7 +60,10 @@ void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
-
+void calc_cbase_at_node(int , int , float *,struct All_variables *);
+#ifdef ALLOW_ELLIPTICAL
+double theta_g(double , struct All_variables *);
+#endif
 #ifdef USE_GGRD
 void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
 #endif
@@ -145,6 +148,7 @@ void apply_side_sbc(struct All_variables *E)
 void get_buoyancy(struct All_variables *E, double **buoy)
 {
     int i,j,m,n,nz;
+    int lev = E->mesh.levmax;
     double temp,temp2,rfac,cost2;
     void remove_horiz_ave2(struct All_variables*, double**);
     //char filename[100];FILE *out;
@@ -186,6 +190,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     /* 
        convert density to buoyancy 
     */
+#ifdef ALLOW_ELLIPTICAL
     if(fabs(E->data.rotm) > 5e-7){
       /* 
 
@@ -193,19 +198,21 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       computational burden
 
       */
-      /* g= g_e (1+(5/2m-f)cos^2(t))  */
+      /* g= g_e (1+(5/2m-f)cos^2(t)) , not theta_g */
       rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
       /*  */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 	for(i=1;i<=E->lmesh.noz;i++)
 	  for(j=0;j<E->lmesh.nox*E->lmesh.noy;j++) {
 	    n = j*E->lmesh.noz + i;
-	    cost2 = cos(E->sx[m][1][n]); /* cos^2(theta) */
+	    /* cos^2(theta) */
+	    cost2 = cos(E->sx[m][1][n]);
 	    cost2 = cost2*cost2;
 	    /* correct gravity for rotation */
 	    buoy[m][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
 	  }
     }else{
+#endif
       /* default */
       /* no latitude dependency of gravity */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
@@ -214,8 +221,9 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	    n = j*E->lmesh.noz + i;
 	    buoy[m][n] *= E->refstate.gravity[i];
 	  }
+#ifdef ALLOW_ELLIPTICAL
     }
-    
+#endif    
     
 
     //if(E->control.remove_hor_buoy_avg)	/* XXX for testing purposes, remove? */
@@ -497,6 +505,32 @@ void calc_cbase_at_tp(float theta, float phi, float *base)
  base[8]= 0.0;
 }
 
+/* calculate base at nodal locations where we have precomputed cos/sin */
+
+void calc_cbase_at_node(int cap, int node, float *base,struct All_variables *E)
+{
+  int lev ;
+  double ct,cp,st,sp;
+  lev = E->mesh.levmax;
+  st = E->SinCos[lev][cap][0][node]; /* for elliptical, sincos would be  corrected */
+  sp = E->SinCos[lev][cap][1][node];
+  ct = E->SinCos[lev][cap][2][node];
+  cp = E->SinCos[lev][cap][3][node];
+           
+  /* r */
+  base[0]= st * cp;
+  base[1]= st * sp;
+  base[2]= ct;
+  /* theta */
+  base[3]= ct * cp;
+  base[4]= ct * sp;
+  base[5]= -st;
+  /* phi */
+  base[6]= -sp;
+  base[7]= cp;
+  base[8]= 0.0;
+}
+
 /* given a base from calc_cbase_at_tp, convert a polar vector to
    cartesian */
 void convert_pvec_to_cvec(float vr,float vt,
@@ -635,3 +669,19 @@ void get_r_spacing_at_levels(double *rr,struct All_variables *E)
 
 }
 
+#ifdef ALLOW_ELLIPTICAL
+/* correct from spherical coordinate system theta to an ellipsoidal
+   theta_g which corresponds to the local base vector direction in
+   theta */
+double theta_g(double theta, struct All_variables *E)
+{
+  double tmp;
+
+  if(E->data.use_ellipse){
+    tmp = M_PI_2 - theta;
+    return M_PI_2 - atan2(tan(tmp),E->data.efac);
+  }else{
+    return theta;
+  }
+}
+#endif

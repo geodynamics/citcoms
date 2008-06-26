@@ -34,6 +34,7 @@
 #include "global_defs.h"
 
 
+/* get nodal spherical velocities from the solution vector */
 void v_from_vector(E)
      struct All_variables *E;
 {
@@ -99,7 +100,7 @@ void v_from_vector_pseudo_surf(E)
 
     return;
 }
-
+/* cartesian velocities within element, single prec version */
 void velo_from_element(E,VV,m,el,sphere_key)
      struct All_variables *E;
      float VV[4][9];
@@ -122,7 +123,7 @@ void velo_from_element(E,VV,m,el,sphere_key)
         for(a=1;a<=ends;a++)   {
             node = E->ien[m][el].node[a];
 
-            sint = E->SinCos[lev][m][0][node];
+            sint = E->SinCos[lev][m][0][node]; 
             sinf = E->SinCos[lev][m][1][node];
             cost = E->SinCos[lev][m][2][node];
             cosf = E->SinCos[lev][m][3][node];
@@ -140,7 +141,7 @@ void velo_from_element(E,VV,m,el,sphere_key)
     return;
 }
 
-
+/* double prec version */
 void velo_from_element_d(E,VV,m,el,sphere_key)
      struct All_variables *E;
      double VV[4][9];

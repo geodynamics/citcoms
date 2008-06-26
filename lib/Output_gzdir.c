@@ -80,6 +80,7 @@ int be_is_little_endian(void);
 int be_write_float_to_file(float *, int , FILE *);
 int be_write_int_to_file(int *, int , FILE *);
 void myfprintf(FILE *,char *);
+void calc_cbase_at_node(int , int , float *,struct All_variables *);
 
 /*  */
 void get_vtk_filename(char *,int,struct All_variables *,int);
@@ -443,8 +444,8 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 {
   int i, j, k,os;
   char output_file[255],output_file2[255],message[255],geo_file[255];
-  float cvec[3],vcorr[3],theta_g;
-  double omega[3],oamp,efac;
+  float cvec[3],vcorr[3];
+  double omega[3],oamp;
   gzFile *gzout;
   FILE *fp1;
   /* for dealing with several processors */
@@ -459,26 +460,12 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       /* either not computed, or need to compute anew */
       if(!E->output.gzdir.vtk_base_init) /* init space */
 	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os*E->sphere.caps_per_proc);
-      if(fabs(E->data.ellipticity) < 5e-7){
-	/* compute */
-	for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-	  for(i=1;i <= E->lmesh.nno;i++,k += 9){
-	    /* cartesian basis vectors at theta, phi */
-	    calc_cbase_at_tp(E->sx[j][1][i],E->sx[j][2][i],(E->output.gzdir.vtk_base+k));
-	  }
+      /* compute */
+      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
+	for(i=1;i <= E->lmesh.nno;i++,k += 9){
+	  /* cartesian basis vectors at theta, phi */
+	  calc_cbase_at_node(j,i,(E->output.gzdir.vtk_base+k),E);
 	}
-      }else{			/* ellipse */
-	efac = (1.-E->data.ellipticity)*(1.-E->data.ellipticity);
-	for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-	  for(i=1;i <= E->lmesh.nno;i++,k += 9){
-	    /* cartesian basis vectors at theta, phi
-	       correct theta for the normal to the elliptical surface
-	    */
-	    theta_g = M_PI_2 - atan2(1.0,tan(E->sx[j][1][i])*efac);
-	    calc_cbase_at_tp(theta_g,E->sx[j][2][i],(E->output.gzdir.vtk_base+k));
-	  }
-	}
-
       }
       E->output.gzdir.vtk_base_init = 1;
     }

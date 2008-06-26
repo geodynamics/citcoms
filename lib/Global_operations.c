@@ -815,14 +815,14 @@ void remove_rigid_rot(struct All_variables *E)
 {
     void velo_from_element_d();
     double myatan();
-    double wx, wy, wz, v_theta, v_phi, cos_t,sin_t,sin_f, cos_f;
+    double wx, wy, wz, v_theta, v_phi, cos_t,sin_t,sin_f, cos_f,frd;
     double vx[9], vy[9], vz[9];
     double r, t, f, efac,tg;
     float cart_base[9];
     double exyz[4], fxyz[4];
 
     int m, e, i, k, j, node;
-
+    const int lev = E->mesh.levmax;
     const int nno = E->lmesh.nno;
     const int ends = ENODES3D;
     const int ppts = PPOINTS3D;
@@ -837,136 +837,70 @@ void remove_rigid_rot(struct All_variables *E)
     double moment_of_inertia = (8.0*M_PI/15.0)*
         (pow(E->sphere.ro,(double)5.0) - pow(E->sphere.ri,(double)5.0));
 
+    /* compute and add angular momentum components */
+    
     exyz[1] = exyz[2] = exyz[3] = 0.0;
     fxyz[1] = fxyz[2] = fxyz[3] = 0.0;
     
-    if(fabs(E->data.ellipticity) < 5e-7){/* regular, spherical approach */
-
-      /* compute and add angular momentum components */
- 
-      for (m=1;m<=E->sphere.caps_per_proc;m++) {
-	for (e=1;e<=E->lmesh.nel;e++) {
-	  t = E->eco[m][e].centre[1];
-	  f = E->eco[m][e].centre[2];
-	  r = E->eco[m][e].centre[3];
-
-	  cos_t = cos(t);sin_t = sin(t);
-	  sin_f = sin(f);cos_f = cos(f);
+    
+    for (m=1;m<=E->sphere.caps_per_proc;m++) {
+      for (e=1;e<=E->lmesh.nel;e++) {
+	t = E->eco[m][e].centre[1];
+	f = E->eco[m][e].centre[2];
+	r = E->eco[m][e].centre[3];
 	
-	  velo_from_element_d(E,VV,m,e,sphere_key);
-	  for (j=1;j<=ppts;j++)   {
-	    vx[j] = 0.0;vy[j] = 0.0;
-	  }
-	  for (j=1;j<=ppts;j++)   {
-	    for (i=1;i<=ends;i++)   {
-	      vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)]; 
-	      vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)]; 
-	    }
-	  }
-	  wx = -r*vy[1];
-	  wy =  r*vx[1];
-	  exyz[1] += (wx*cos_t*cos_f-wy*sin_f) * E->eco[m][e].area; 
-	  exyz[2] += (wx*cos_t*sin_f+wy*cos_f) * E->eco[m][e].area;
-	  exyz[3] -= (wx*sin_t               ) * E->eco[m][e].area;
+	cos_t = cos(t);sin_t = sin(t);
+	sin_f = sin(f);cos_f = cos(f);
+	
+	/* get Cartesian, element local velocities */
+	velo_from_element_d(E,VV,m,e,sphere_key);
+	for (j=1;j<=ppts;j++)   {
+	  vx[j] = 0.0;vy[j] = 0.0;
 	}
-      } /* end cap */
-      
-      MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-      
-      fxyz[1] = fxyz[1] / moment_of_inertia;
-      fxyz[2] = fxyz[2] / moment_of_inertia;
-      fxyz[3] = fxyz[3] / moment_of_inertia;
-
-      rot = sqrt(fxyz[1]*fxyz[1] + fxyz[2]*fxyz[2] + fxyz[3]*fxyz[3]);
-      fr = myatan(fxyz[2], fxyz[1]);
-      tr = acos(fxyz[3] / rot);
-      
-      if (E->parallel.me==0) {
-        fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
-        fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
-      }
-      /* remove rigid rotation */
-      sin_t = sin(tr) * rot;
-      cos_t = cos(tr) * rot;
-      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for (node=1;node<=nno;node++)   {
-	  
-	  v_theta = E->sx[m][3][node] * sin_t * sin(fr - E->sx[m][2][node]);
-	  v_phi =   E->sx[m][3][node] * 
-	    ( sin(E->sx[m][1][node]) * cos_t - 
-	      cos(E->sx[m][1][node]) * sin_t * cos(fr - E->sx[m][2][node]) );
-	  
-	  E->sphere.cap[m].V[1][node] -= v_theta;
-	  E->sphere.cap[m].V[2][node] -= v_phi;
-	  
-        }
-      }
-    }else{
-      /* 
-	 ellipticity is non zero 
-      */
-      efac = (1.-E->data.ellipticity)*(1.-E->data.ellipticity);
-      for (m=1;m<=E->sphere.caps_per_proc;m++) {
-	for (e=1;e<=E->lmesh.nel;e++) {
-	  t = E->eco[m][e].centre[1];
-	  f = E->eco[m][e].centre[2];
-	  r = E->eco[m][e].centre[3];
-	  /* correct theta for ellipticity to get the right basis
-	     vector */
-	  tg = M_PI_2 - atan2(1.0,tan(t)*efac);	/* correct theta */
-	  cos_t = cos(tg);sin_t = sin(tg);
-	  
-	  sin_f = sin(f);cos_f = cos(f);
-	  velo_from_element_d(E,VV,m,e,sphere_key);
-	  for (j=1;j<=ppts;j++)   {
-	    vx[j] = 0.0;vy[j] = 0.0;
+	for (j=1;j<=ppts;j++)   {
+	  for (i=1;i<=ends;i++)   {
+	    vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)]; 
+	    vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)]; 
 	  }
-	  for (j=1;j<=ppts;j++)   {
-	    for (i=1;i<=ends;i++)   {
-	      vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)]; 
-	      vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)]; 
-	    }
-	  }
-	  wx = -r*vy[1];
-	  wy =  r*vx[1];
-	  exyz[1] += (wx*cos_t*cos_f-wy*sin_f) * E->eco[m][e].area; 
-	  exyz[2] += (wx*cos_t*sin_f+wy*cos_f) * E->eco[m][e].area;
-	  exyz[3] -= (wx*sin_t               ) * E->eco[m][e].area;
 	}
-      } /* end cap */
-      MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-      /* rotation vector in cart */
-      fxyz[1] /= moment_of_inertia;fxyz[2] /= moment_of_inertia;fxyz[3] /= moment_of_inertia;
-      /* just for display  */
-      rot = sqrt(fxyz[1]*fxyz[1] + fxyz[2]*fxyz[2] + fxyz[3]*fxyz[3]);
-      fr = myatan(fxyz[2], fxyz[1]);
-      tr = acos(fxyz[3] / rot);
-      if (E->parallel.me==0) {
-        fprintf(E->fp,"Rigid rotation el: %.5f: rot=%e tr=%e fr=%e\n",efac,rot,tr*180/M_PI,fr*180/M_PI);
-        fprintf(stderr,"Rigid rotation: el: %.5f: rot=%e tr=%e fr=%e\n",efac,rot,tr*180/M_PI,fr*180/M_PI);
+	wx = -r*vy[1];
+	wy =  r*vx[1];
+	exyz[1] += (wx*cos_t*cos_f-wy*sin_f) * E->eco[m][e].area; 
+	exyz[2] += (wx*cos_t*sin_f+wy*cos_f) * E->eco[m][e].area;
+	exyz[3] -= (wx*sin_t               ) * E->eco[m][e].area;
       }
+    } /* end cap */
+    
+    MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+    
+    fxyz[1] = fxyz[1] / moment_of_inertia;
+    fxyz[2] = fxyz[2] / moment_of_inertia;
+    fxyz[3] = fxyz[3] / moment_of_inertia;
+    
+    rot = sqrt(fxyz[1]*fxyz[1] + fxyz[2]*fxyz[2] + fxyz[3]*fxyz[3]);
+    fr = myatan(fxyz[2], fxyz[1]);
+    tr = acos(fxyz[3] / rot);
+    
+    if (E->parallel.me==0) {
+      fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+      fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+    }
+    /*
+      remove rigid rotation 
+    */
+    sin_t = sin(tr) * rot;
+    cos_t = cos(tr) * rot;
 
-      /* remove rigid rotation */
-      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for (node=1;node<=nno;node++)   {
-	  tg = M_PI_2 - atan2(1.0,tan(E->sx[m][1][node])*efac);
-	  calc_cbase_at_tp((float)tg,(float)E->sx[m][2][node],cart_base);/* cart rep of polar basis, 
-							      corrected for ellipticity */
-	  /* cross product for cartesian velocity */
-	  vx[0] = fxyz[2] * E->x[m][3][node] - fxyz[3] * E->x[m][2][node];
-	  vx[1] = fxyz[3] * E->x[m][1][node] - fxyz[1] * E->x[m][3][node];
-	  vx[2] = fxyz[1] * E->x[m][2][node] - fxyz[2] * E->x[m][1][node];
-	  /* project */
-
-	  v_theta = cart_base[3]*vx[0] +  cart_base[4]*vx[1] +  cart_base[5]*vx[2];
-	  v_phi   = cart_base[6]*vx[0] +  cart_base[7]*vx[1]; /* e_phi^z=0 */
-	  
-	  E->sphere.cap[m].V[1][node] -= v_theta;
-	  E->sphere.cap[m].V[2][node] -= v_phi;
-        }
+    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+      for (node=1;node<=nno;node++)   {
+	frd = fr - E->sx[m][2][node];
+	v_theta = E->sx[m][3][node] * sin_t * sin(frd);
+	v_phi =   E->sx[m][3][node] * 
+	  (  E->SinCos[lev][m][0][node] * cos_t - E->SinCos[lev][m][2][node]  * sin_t * cos(frd) );
+	
+	E->sphere.cap[m].V[1][node] -= v_theta;
+	E->sphere.cap[m].V[2][node] -= v_phi;
       }
-
-
     }
 
 

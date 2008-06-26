@@ -32,6 +32,8 @@ routines to determine the net rotation velocity of the whole model
 
 TWB
 
+These have been superceded by the routines in Global_opertations and can probably be removed 
+
 
 */
 

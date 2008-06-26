@@ -36,6 +36,9 @@ void ggrd_full_temp_init(struct All_variables *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
 void myerror(struct All_variables *,char *);
+#ifdef ALLOW_ELLIPTICAL
+double theta_g(double , struct All_variables *);
+#endif
 
 /* Setup global mesh parameters */
 void full_global_derived_values(E)
@@ -173,7 +176,7 @@ void full_node_locations(E)
      struct All_variables *E;
 {
   int i,j,k,ii,lev;
-  double ro,dr,*rr,*RR,fo;
+  double ro,dr,*rr,*RR,fo,tg;
   double dircos[4][4];
   float tt1;
   int step,nn;
@@ -296,15 +299,30 @@ void full_node_locations(E)
   }
 
   compute_angle_surf_area (E);   /* used for interpolation */
-
+#ifdef ALLOW_ELLIPTICAL
+  /* spherical or elliptical, correct theta to theta_g for local surface-normal theta  */
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-        E->SinCos[lev][j][0][i] = sin(E->SX[lev][j][1][i]);
-        E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]);
-        E->SinCos[lev][j][2][i] = cos(E->SX[lev][j][1][i]);
-        E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]);
-        }
+	tg = theta_g(E->SX[lev][j][1][i],E);
+	E->SinCos[lev][j][0][i] = sin(tg); /*  */
+	E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]);
+	E->SinCos[lev][j][2][i] = cos(tg);
+	E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]);
+      }
+#else
+  /* spherical */
+  for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
+    for (j=1;j<=E->sphere.caps_per_proc;j++)
+      for (i=1;i<=E->lmesh.NNO[lev];i++)  {
+	E->SinCos[lev][j][0][i] = sin(E->SX[lev][j][1][i]); /* sin(theta) */
+	E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]); /* sin(phi) */
+	E->SinCos[lev][j][2][i] = cos(E->SX[lev][j][1][i]); /* cos(theta) */
+	E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]); /* cos(phi) */
+      }
+
+#endif
+
   return;
 }
 

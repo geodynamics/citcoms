@@ -30,6 +30,9 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+#ifdef ALLOW_ELLIPTICAL
+double theta_g(double , struct All_variables *);
+#endif
 
 void twiddle_thumbs(yawn,scratch_groin)
      struct All_variables *yawn;
@@ -54,13 +57,13 @@ static void form_rtf_bc(int k, double x[4],
     rtf[1][k] = acos(x[3]*rtf[3][k]); /* theta */
     rtf[2][k] = myatan(x[2],x[1]); /* phi */
 
-    bc[1][1] = x[3]*cos(rtf[2][k]);
+    bc[1][1] = x[3]*cos(rtf[2][k]); /* theta */
     bc[1][2] = x[3]*sin(rtf[2][k]);
     bc[1][3] = -sin(rtf[1][k])/rtf[3][k];
-    bc[2][1] = -x[2];
+    bc[2][1] = -x[2];		/* phi basis vector */
     bc[2][2] = x[1];
     bc[2][3] = 0.0;
-    bc[3][1] = x[1]*rtf[3][k];
+    bc[3][1] = x[1]*rtf[3][k];	/*  */
     bc[3][2] = x[2]*rtf[3][k];
     bc[3][3] = x[3]*rtf[3][k];
 
@@ -267,7 +270,12 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5],
   int i, node, s;
   const int oned = onedvpoints[E->mesh.nsd];
 
-  to = E->eco[m][el].centre[1];
+#ifdef ALLOW_ELLIPTICAL
+  to = theta_g(E->eco[m][el].centre[1],E);
+#else
+  to = E->eco[m][el].centre[1];	
+#endif
+
   fo = E->eco[m][el].centre[2];
 
   dxdy[1][1] = cos(to)*cos(fo);
@@ -464,7 +472,11 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
 
     double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
 
-    to = E->eco[m][el].centre[1];
+#ifdef ALLOW_ELLIPTICAL
+    to = theta_g(E->eco[m][el].centre[1],E);
+#else
+    to = E->eco[m][el].centre[1]; 
+#endif
     fo = E->eco[m][el].centre[2];
 
     dxdy[1][1] = cos(to)*cos(fo);
@@ -558,7 +570,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
 void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 			      struct CCX *ccx,int lev,int m,int pressure)
 {
-  int a,i,j,k,d;
+  int a,i,j,k,d,lnode;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
@@ -579,10 +591,14 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
                    *E->N.vpt[GNVINDEX(a,k)];
 
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-      tt = acos(x[3]/rr);
-      ff = myatan(x[2],x[1]);
 
-      costt = cos(tt);
+      ff = myatan(x[2],x[1]);
+#ifdef ALLOW_ELLIPTICAL
+      tt = theta_g(acos(x[3]/rr),E);
+#else
+      tt = acos(x[3]/rr);
+#endif
+      costt = cos(tt);		
       cosff = cos(ff);
       sintt = sin(tt);
       sinff = sin(ff);
@@ -636,10 +652,14 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-        tt = acos(x[3]/rr);
-        ff = myatan(x[2],x[1]);
 
-        costt = cos(tt);
+        ff = myatan(x[2],x[1]);
+#ifdef ALLOW_ELLIPTICAL
+	tt = theta_g(acos(x[3]/rr),E);
+#else
+        tt = acos(x[3]/rr);
+#endif
+        costt = cos(tt);	
         cosff = cos(ff);
         sintt = sin(tt);
         sinff = sin(ff);
@@ -656,12 +676,12 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
         ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
         for(a=1;a<=ends;a++)   {
-          tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
-          ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
-          costt = cos(tt);
-          cosff = cos(ff);
-          sintt = sin(tt);
-          sinff = sin(ff);
+
+	  lnode = E->IEN[lev][m][el].node[a];
+	  sintt = E->SinCos[lev][m][0][lnode];
+	  sinff = E->SinCos[lev][m][1][lnode];
+	  costt = E->SinCos[lev][m][2][lnode];
+	  cosff = E->SinCos[lev][m][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -692,7 +712,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 				  struct CC *cc,struct CCX *ccx,
 				  int lev,int m,int pressure,int side)
 {
-  int a,aa,i,j,k,d;
+  int a,aa,i,j,k,d,lnode;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
@@ -717,8 +737,13 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
       tt = acos(x[3]/rr);
       ff = myatan(x[2],x[1]);
+#ifdef ALLOW_ELLIPTICAL
+      tt = theta_g(acos(x[3]/rr),E);
+#else
+      tt = acos(x[3]/rr);
+#endif
 
-      costt = cos(tt);
+      costt = cos(tt);		
       cosff = cos(ff);
       sintt = sin(tt);
       sinff = sin(ff);
@@ -736,12 +761,12 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 
       for(aa=1;aa<=ends;aa++) {
 	a=sidenodes[side][aa];
-	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
-	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
-	costt = cos(tt);
-	cosff = cos(ff);
-	sintt = sin(tt);
-	sinff = sin(ff);
+
+	lnode = E->IEN[lev][m][el].node[a];
+	sintt = E->SinCos[lev][m][0][lnode];
+	sinff = E->SinCos[lev][m][1][lnode];
+	costt = E->SinCos[lev][m][2][lnode];
+	cosff = E->SinCos[lev][m][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -770,9 +795,13 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
        	  *E->M.ppt[GMPINDEX(a,k)];
       }
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-      tt = acos(x[3]/rr);
       ff = myatan(x[2],x[1]);
 
+#ifdef ALLOW_ELLIPTICAL
+      tt = theta_g(acos(x[3]/rr),E);
+#else
+      tt = acos(x[3]/rr);	
+#endif
       costt = cos(tt);
       cosff = cos(ff);
       sintt = sin(tt);
@@ -791,12 +820,12 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 
       for(a=1;a<=ends;a++)   {
 	aa=sidenodes[side][a];
-	tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[aa]];
-	ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[aa]];
-	costt = cos(tt);
-	cosff = cos(ff);
-	sintt = sin(tt);
-	sinff = sin(ff);
+
+	lnode = E->IEN[lev][m][el].node[aa];
+	sintt = E->SinCos[lev][m][0][lnode];
+	sinff = E->SinCos[lev][m][1][lnode];
+	costt = E->SinCos[lev][m][2][lnode];
+	cosff = E->SinCos[lev][m][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -824,7 +853,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 void construct_c3x3matrix(E)
      struct All_variables *E;
 {
-  int m,a,i,j,k,d,es,el,nel_surface,lev;
+  int m,a,i,j,k,d,es,el,nel_surface,lev,lnode;
   double cofactor(),myatan();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
@@ -851,10 +880,14 @@ void construct_c3x3matrix(E)
                    *E->N.vpt[GNVINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-        tt = acos(x[3]/rr);
-        ff = myatan(x[2],x[1]);
+	ff = myatan(x[2],x[1]);
+#ifdef ALLOW_ELLIPTICAL
+	tt = theta_g(acos(x[3]/rr),E);
+#else
+	tt = acos(x[3]/rr);
+#endif
 
-        costt = cos(tt);
+        costt = cos(tt);	
         cosff = cos(ff);
         sintt = sin(tt);
         sinff = sin(ff);
@@ -871,12 +904,12 @@ void construct_c3x3matrix(E)
         ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
         for(a=1;a<=ends;a++)   {
-          tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
-          ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
-          costt = cos(tt);
-          cosff = cos(ff);
-          sintt = sin(tt);
-          sinff = sin(ff);
+
+	  lnode = E->IEN[lev][m][el].node[a];
+	  sintt = E->SinCos[lev][m][0][lnode];
+	  sinff = E->SinCos[lev][m][1][lnode];
+	  costt = E->SinCos[lev][m][2][lnode];
+	  cosff = E->SinCos[lev][m][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -905,10 +938,14 @@ void construct_c3x3matrix(E)
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
-        tt = acos(x[3]/rr);
-        ff = myatan(x[2],x[1]);
+	ff = myatan(x[2],x[1]);
+#ifdef ALLOW_ELLIPTICAL
+	tt = theta_g(acos(x[3]/rr),E);
+#else
+	tt = acos(x[3]/rr);
+#endif
 
-        costt = cos(tt);
+        costt = cos(tt);	
         cosff = cos(ff);
         sintt = sin(tt);
         sinff = sin(ff);
@@ -925,12 +962,13 @@ void construct_c3x3matrix(E)
         ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
         for(a=1;a<=ends;a++)   {
-          tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
-          ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
-          costt = cos(tt);
-          cosff = cos(ff);
-          sintt = sin(tt);
-          sinff = sin(ff);
+
+	  lnode = E->IEN[lev][m][el].node[a];
+	  sintt = E->SinCos[lev][m][0][lnode];
+	  sinff = E->SinCos[lev][m][1][lnode];
+	  costt = E->SinCos[lev][m][2][lnode];
+	  cosff = E->SinCos[lev][m][3][lnode];
+
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;

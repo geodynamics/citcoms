@@ -277,6 +277,7 @@ void read_initial_settings(struct All_variables *E)
   void set_cg_defaults();
   void set_mg_defaults();
   float tmp;
+  double ell_tmp;
   int m=E->parallel.me;
 
   /* first the problem type (defines subsequent behaviour) */
@@ -629,7 +630,8 @@ void read_initial_settings(struct All_variables *E)
   input_float("refvisc",&(E->data.ref_viscosity),"1.0e21",m);
 
 
-
+  input_double("ellipticity",&ell_tmp,"0.0",m);
+#ifdef ALLOW_ELLIPTICAL
   /* 
 
   ellipticity and rotation settings
@@ -638,25 +640,27 @@ void read_initial_settings(struct All_variables *E)
   /* f = (a-c)/a, where c is the short, a=b the long axis 
      1/298.257 = 0.00335281317789691 for Earth at present day
   */
-  input_float("ellipticity",&E->data.ellipticity,"0.0",m);
+  E->data.ellipticity = ell_tmp;
   if(fabs(E->data.ellipticity) > 5e-7){
+
     /* define ra and rc such that R=1 is the volume equivalanet */
-    E->data.ra = pow((1.-(double)E->data.ellipticity),(double)-1./3.); /* non dim long axis */
+    E->data.ra = pow((1.-E->data.ellipticity),-1./3.); /* non dim long axis */
     E->data.rc = 1./(E->data.ra * E->data.ra); /* non dim short axis */
+    E->data.efac = (1.-E->data.ellipticity)*(1.-E->data.ellipticity);
     if(E->parallel.me == 0){
-      fprintf(stderr,"WARNING: ellipticity: %.5e equivalent radii: r_a: %g r_b: %g\n",
+      fprintf(stderr,"WARNING: EXPERIMENTAL: ellipticity: %.5e equivalent radii: r_a: %g r_b: %g\n",
 	      E->data.ellipticity,E->data.ra,E->data.rc);
-      if(E->control.remove_rigid_rotation)
-	fprintf(stderr,"WARNING: remove rigid rotations is switched on for elliptical run !!!\n");
     }
+    E->data.use_ellipse = 1;
   }else{
-    E->data.ra = E->data.rc = 1.0;
+    E->data.ra = E->data.rc = E->data.efac=1.0;
+    E->data.use_ellipse = 0;
   }
   /* 
      centrifugal ratio between \omega^2 a^3/GM, 3.46775e-3 for the
      Earth at present day
   */
-  input_float("rotation_m",&E->data.rotm,"0.0",m);
+  input_double("rotation_m",&E->data.rotm,"0.0",m);
   if(fabs(E->data.rotm) > 5e-7){
     /* J2 from flattening */
     E->data.j2 = 2./3.*E->data.ellipticity*(1.-E->data.ellipticity/2.)-
@@ -667,7 +671,11 @@ void read_initial_settings(struct All_variables *E)
       fprintf(stderr,"WARNING: rotational fraction m: %.5e J2: %.5e g_e: %g\n",
 	      E->data.rotm,E->data.j2,E->data.ge);
   }
-
+#else
+  if(fabs(ell_tmp) > 5e-7){
+    myerror(E,"ellipticity not zero, but not compiled with ALLOW_ELLIPTICAL");
+  }
+#endif
   input_float("radius",&tmp,"6371e3.0",m);
   E->data.radius_km = tmp / 1e3;
 

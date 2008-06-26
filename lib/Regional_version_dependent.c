@@ -250,8 +250,10 @@ void regional_node_locations(E)
   }
 
   compute_angle_surf_area (E);   /* used for interpolation */
-
-
+#ifdef ALLOW_ELLIPTICAL
+  if(E->data.use_ellipse)
+    myerror("ellipticity not implemented for regional code",E);
+#endif
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
