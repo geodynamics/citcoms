@@ -873,9 +873,9 @@ void remove_rigid_rot(struct All_variables *E)
 	}
 	wx = -r*vy[1];
 	wy =  r*vx[1];
-	exyz[1] += (wx*cos_t*cos_f-wy*sin_f) * E->eco[m][e].area; 
-	exyz[2] += (wx*cos_t*sin_f+wy*cos_f) * E->eco[m][e].area;
-	exyz[3] -= (wx*sin_t               ) * E->eco[m][e].area;
+	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[m][e].area; 
+	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[m][e].area;
+	exyz[3] -= (wx*sin_t                 ) * E->eco[m][e].area;
       }
     } /* end cap */
     
@@ -896,9 +896,24 @@ void remove_rigid_rot(struct All_variables *E)
     /*
       remove rigid rotation 
     */
+#ifdef ALLOW_ELLIPTICAL
+    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
+      for (node=1;node<=nno;node++)   {
+	/* cartesian velocity = omega \cross r  */
+	vx[0] = fxyz[2]* E->x[m][3][node] - fxyz[3]*E->x[m][2][node];
+	vx[1] = fxyz[3]* E->x[m][1][node] - fxyz[1]*E->x[m][3][node];
+	vx[2] = fxyz[1]* E->x[m][2][node] - fxyz[2]*E->x[m][1][node];
+	/* project into theta, phi */
+	calc_cbase_at_node(m,node,cart_base,E);
+	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
+	v_phi   = vx[0]*cart_base[6] + vx[1]*cart_base[7];
+	E->sphere.cap[m].V[1][node] -= v_theta;
+	E->sphere.cap[m].V[2][node] -= v_phi;
+      }
+    }
+#else
     sin_t = sin(tr) * rot;
     cos_t = cos(tr) * rot;
-
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       for (node=1;node<=nno;node++)   {
 	frd = fr - E->sx[m][2][node];
@@ -910,7 +925,7 @@ void remove_rigid_rot(struct All_variables *E)
 	E->sphere.cap[m].V[2][node] -= v_phi;
       }
     }
-
+#endif
 
     return;
 
