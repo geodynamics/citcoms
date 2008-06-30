@@ -212,7 +212,7 @@ void h5output_allocate_memory(struct All_variables *E)
 }
 
 
-
+
 /****************************************************************************
  * Functions that control which data is saved to output file(s).            *
  * These represent possible choices for (E->output) function pointer.       *
@@ -233,7 +233,7 @@ void h5output(struct All_variables *E, int cycles)
 #endif
 }
 
-
+
 /****************************************************************************
  * Function to read input parameters for legacy CitcomS                     *
  ****************************************************************************/
@@ -261,7 +261,7 @@ void h5input_params(struct All_variables *E)
 #endif
 }
 
-
+
 #ifdef USE_HDF5
 
 static void h5output_const(struct All_variables *E)
@@ -284,13 +284,6 @@ static void h5output_const(struct All_variables *E)
 static void h5output_timedep(struct All_variables *E, int cycles)
 {
   char filename[100];
-  /* for stress computation */
-  void allocate_STD_mem();
-  void compute_nodal_stress();
-  void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
-  /*  */
 
     /* determine filename */
     snprintf(filename, (size_t)100, "%s.%d.h5",
@@ -314,11 +307,6 @@ static void h5output_timedep(struct All_variables *E, int cycles)
         h5output_geoid(E, cycles);
 
     if(E->output.stress == 1){
-      if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-	allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-	compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-	free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      }
       h5output_stress(E, cycles);
     }
     if(E->output.pressure == 1)
@@ -419,7 +407,7 @@ static void h5output_close(struct All_variables *E)
     status = H5Fclose(E->hdf5.file_id);
 }
 
-
+
 /****************************************************************************
  * The following functions are used to save specific physical quantities    *
  * from CitcomS into HDF5 arrays.                                           *
@@ -665,7 +653,20 @@ void h5output_stress(struct All_variables *E, int cycles)
     int i, j, k;
     int n, nx, ny, nz;
     int m, mx, my, mz;
-
+    /* for stress computation */
+    void allocate_STD_mem();
+    void compute_nodal_stress();
+    void free_STD_mem();
+    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+    float *divv[NCS],*vorv[NCS];
+    /*  */
+    
+    if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    }
+     
     field = E->hdf5.tensor3d;
 
     nx = E->lmesh.nox;
@@ -1183,7 +1184,7 @@ void h5output_geoid(struct All_variables *E, int cycles)
 
 
 
-
+
 /****************************************************************************
  * Create and output /connectivity dataset                                  *
  ****************************************************************************/
@@ -1295,7 +1296,7 @@ void h5output_connectivity(struct All_variables *E)
     }
 }
 
-
+
 /****************************************************************************
  * Create and output /time and /timstep attributes                          *
  ****************************************************************************/
@@ -1312,7 +1313,7 @@ void h5output_time(struct All_variables *E, int cycles)
     status = H5Gclose(root);
 }
 
-
+
 /****************************************************************************
  * Save most CitcomS input parameters, and other information, as            *
  * attributes in a group called /input                                      *
@@ -1631,7 +1632,7 @@ void h5output_meta(struct All_variables *E)
 }
 
 
-
+
 /*****************************************************************************
  * Private functions to simplify certain tasks in the h5output_*() functions *
  * The rest of the file can now be hidden from the compiler, when HDF5       *
@@ -2103,7 +2104,7 @@ static herr_t h5close_field(field_t **field)
 }
 
 
-
+
 /****************************************************************************
  * Some of the following functions were based from the H5ATTR.c             *
  * source file in PyTables, which is a BSD-licensed python extension        *

@@ -132,13 +132,6 @@ extern void get_CBF_topo(struct All_variables *, float**, float**);
 void gzdir_output(struct All_variables *E, int out_cycles)
 {
   char output_dir[255];
-  /* for stress computation */
-  void allocate_STD_mem();
-  void compute_nodal_stress();
-  void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
-  /*  */
 
   if (out_cycles == 0 ){
     /* initial I/O */
@@ -175,12 +168,7 @@ void gzdir_output(struct All_variables *E, int out_cycles)
       gzdir_output_geoid(E, out_cycles);
 
   if (E->output.stress){
-    if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-    }
-    gzdir_output_stress(E, out_cycles);
+      gzdir_output_stress(E, out_cycles);
   }
   if (E->output.pressure)
     gzdir_output_pressure(E, out_cycles);
@@ -870,6 +858,18 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   int m, node;
   char output_file[255];
   gzFile *fp1;
+  /* for stress computation */
+  void allocate_STD_mem();
+  void compute_nodal_stress();
+  void free_STD_mem();
+  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+  float *divv[NCS],*vorv[NCS];
+  /*  */
+  if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+  }
 
   snprintf(output_file,255,"%s/%d/stress.%d.%d.gz", E->control.data_dir,
 	  cycles,E->parallel.me, cycles);

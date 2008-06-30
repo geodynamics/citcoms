@@ -90,14 +90,7 @@ void output_common_input(struct All_variables *E)
 
 void output(struct All_variables *E, int cycles)
 {
-  /* for stress computation */
-  void allocate_STD_mem();
-  void compute_nodal_stress();
-  void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
-  /*  */
-  
+   
   if (cycles == 0) {
     output_coord(E);
     /*output_mat(E);*/
@@ -118,13 +111,7 @@ void output(struct All_variables *E, int cycles)
       output_geoid(E, cycles);
 
   if (E->output.stress){
-    if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-    }
-
-    output_stress(E, cycles);
+       output_stress(E, cycles);
   }
   if (E->output.pressure)
     output_pressure(E, cycles);
@@ -345,7 +332,18 @@ void output_stress(struct All_variables *E, int cycles)
   int m, node;
   char output_file[255];
   FILE *fp1;
-
+ /* for stress computation */
+  void allocate_STD_mem();
+  void compute_nodal_stress();
+  void free_STD_mem();
+  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+  float *divv[NCS],*vorv[NCS];
+  /*  */
+  if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+  }
   sprintf(output_file,"%s.stress.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
   fp1 = output_open(output_file, "w");
