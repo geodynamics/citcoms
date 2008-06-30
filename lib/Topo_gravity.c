@@ -50,7 +50,15 @@ void compute_nodal_stress(struct All_variables *,
                           float** , float** );
 void stress_conform_bcs(struct All_variables *);
 
+/* 
 
+compute the full stress tensor and the dynamic topo
+
+here, we only need szz, but leave in for potential stress output if
+removed, make sure to recompute in output routines
+
+
+ */
 
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
@@ -69,6 +77,8 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     float topo_scaling1, topo_scaling2;
 
     allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+
+    /* this one is for szz */
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 
     // not needed ? TWB XXX
@@ -835,6 +845,13 @@ void compute_geoid(E)
    used to solve for the velocity in the first place.
    ===================================================================  */
 
+
+/* 
+
+this routine does not require stress tensor computation, call
+separately if stress output is needed
+
+ */
 void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*/
     struct All_variables *E;
     float **H,**HB;

@@ -283,7 +283,14 @@ static void h5output_const(struct All_variables *E)
 
 static void h5output_timedep(struct All_variables *E, int cycles)
 {
-    char filename[100];
+  char filename[100];
+  /* for stress computation */
+  void allocate_STD_mem();
+  void compute_nodal_stress();
+  void free_STD_mem();
+  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+  float *divv[NCS],*vorv[NCS];
+  /*  */
 
     /* determine filename */
     snprintf(filename, (size_t)100, "%s.%d.h5",
@@ -306,9 +313,14 @@ static void h5output_timedep(struct All_variables *E, int cycles)
     if(E->output.geoid == 1)
         h5output_geoid(E, cycles);
 
-    if(E->output.stress == 1)
-        h5output_stress(E, cycles);
-
+    if(E->output.stress == 1){
+      if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+	allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+	compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+	free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      }
+      h5output_stress(E, cycles);
+    }
     if(E->output.pressure == 1)
         h5output_pressure(E, cycles);
 
@@ -802,8 +814,12 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
     /* else, the heat flux will have been computed already */
 
 
-    //get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
-    get_CBF_topo(E, E->slice.tpg, E->slice.tpgb);
+
+    if(E->control.use_cbf_topo){
+      get_CBF_topo(E, E->slice.tpg, E->slice.tpgb);
+    }else{
+      get_STD_topo(E, E->slice.tpg, E->slice.tpgb, E->slice.divg, E->slice.vort, cycles);
+    }
 
     /********************************************************************
      * Top surface                                                      *

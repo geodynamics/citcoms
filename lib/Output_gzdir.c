@@ -132,6 +132,14 @@ extern void get_CBF_topo(struct All_variables *, float**, float**);
 void gzdir_output(struct All_variables *E, int out_cycles)
 {
   char output_dir[255];
+  /* for stress computation */
+  void allocate_STD_mem();
+  void compute_nodal_stress();
+  void free_STD_mem();
+  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+  float *divv[NCS],*vorv[NCS];
+  /*  */
+
   if (out_cycles == 0 ){
     /* initial I/O */
     
@@ -166,9 +174,14 @@ void gzdir_output(struct All_variables *E, int out_cycles)
   if (E->output.geoid)
       gzdir_output_geoid(E, out_cycles);
 
-  if (E->output.stress)
+  if (E->output.stress){
+    if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    }
     gzdir_output_stress(E, out_cycles);
-
+  }
   if (E->output.pressure)
     gzdir_output_pressure(E, out_cycles);
 
@@ -762,8 +775,12 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
       heat_flux(E);
   /* else, the heat flux will have been computed already */
 
-  //get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
-  get_CBF_topo(E,E->slice.tpg,E->slice.tpgb);
+  if(E->control.use_cbf_topo){
+    get_CBF_topo(E,E->slice.tpg,E->slice.tpgb);
+  }else{
+    get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
+  }
+
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
     snprintf(output_file,255,"%s/%d/surf.%d.%d.gz", E->control.data_dir,

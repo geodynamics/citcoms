@@ -772,32 +772,35 @@ void construct_stiffness_B_matrix(E)
 /* 
 
 
-determine layer number based on radial coordinate r
+determine viscosity layer number based on radial coordinate r
 
-if E->viscosity.z... set to Earth values, then
+if E->viscosity.z... set to Earth values, and old, num_mat=4 style is
+used then
 
-1: lithosphere
-2: 100-410
-3: 410-660
-4: lower mantle
+1: lithosphere 2: 100-410 3: 410-660 and 4: lower mantle
+
+if z_layer is used, the layer numbers will refer to those read in with
+z_layer
 
 */
 int layers_r(struct All_variables *E,float r)
 {
-  int llayers = 0;
+  int llayers, i;
+  float rl;
   /* 
      the z-values, as read in, are non-dimensionalized depth
      convert to radii
 
   */
-  if (r      > (E->sphere.ro - E->viscosity.zlith))		/* in lithospherre */
-    llayers = 1;
-  else if (r > (E->sphere.ro - E->viscosity.z410)) /* in asthenosphere 100...410 km */
-    llayers = 2;
-  else if (r > (E->sphere.ro - E->viscosity.zlm)) /* in transition zone, 410 - 660 km */
-    llayers = 3;
-  else				/* lower mantle */
-    llayers = 4;
+  rl = r + E->sphere.ro;
+  llayers = 0;
+  for(i = 0;i < E->viscosity.num_mat;i++)
+    if(r > (E->sphere.ro - E->viscosity.zbase_layer[i])){
+      i++;
+      break;
+    }
+  llayers = i;
+  
   return (llayers);
 }
 

@@ -173,7 +173,7 @@ void tic_input(struct All_variables *E)
     input_string("ggrd_tinit_dfile",E->control.ggrd.temp_init.dfile,"",E->parallel.me); /* depth.dat layers of grids*/
     /* override temperature boundary condition? */
     input_boolean("ggrd_tinit_override_tbc",&(E->control.ggrd.temp_init.override_tbc),"off",E->parallel.me);
-    input_string("ggrd_tinit_prem_file",E->control.ggrd.temp_init.prem.model_filename,"", E->parallel.me); /* PREM model filename */
+    input_string("ggrd_tinit_prem_file",E->control.ggrd.temp_init.prem.model_filename,"hc/prem/prem.dat", E->parallel.me); /* PREM model filename */
 #else
     fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
     parallel_process_termination();

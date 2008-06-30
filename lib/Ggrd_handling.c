@@ -353,7 +353,8 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     /* assign the general depth dependent material group */
     construct_mat_group(E);
     if(E->parallel.me==0)
-      fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials\n");
+      fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to all above %g km\n",
+	      E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1]);
     if(is_global)		/* decide on GMT flag */
       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
     else
@@ -793,6 +794,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	} /* level */
       }	/* top proc branch */
     } /* end mixed BC assign */
+
     /* 
 
     now loop through all nodes and assign velocity boundary condition
@@ -904,8 +906,8 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 	    */
 	    /* depth factor, cos^2 tapered */
 	    xloc=1.0 + ((1 - E->sx[m][3][node]) - 
-			E->viscosity.zbase_layer[E->control.ggrd.ray_control])/
-	      E->viscosity.zbase_layer[E->control.ggrd.ray_control];
+			E->viscosity.zbase_layer[E->control.ggrd.ray_control-1])/
+	      E->viscosity.zbase_layer[E->control.ggrd.ray_control-1];
 	    fac = cos(xloc*1.5707963267);fac *= fac; /* cos^2
 							tapering,
 							factor
@@ -916,8 +918,8 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 	    bnew = buoy[m][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
 	    /* debugging */
 	    //fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n",
-	    //	    (1 - E->sx[m][3][node])*6371,E->control.ggrd.ray_control,
-	    //	    E->viscosity.zbase_layer[E->control.ggrd.ray_control]*6371,
+	    //	    (1 - E->sx[m][3][node])*E->data.radius_km,E->control.ggrd.ray_control,
+	    //	    E->viscosity.zbase_layer[E->control.ggrd.ray_control-1]*E->data.radius_km,
 	    //	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]);
 	    buoy[m][node] = fac * bnew + (1-fac)*buoy[m][node];
 	  }

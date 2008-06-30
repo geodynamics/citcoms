@@ -463,6 +463,7 @@ struct CONTROL {
     int compress_iter_maxstep;
 
   int self_gravitation;		/* self gravitation */
+  int use_cbf_topo;		/* use consistent dynamic topo method? */
 
     char uzawa[20];
 

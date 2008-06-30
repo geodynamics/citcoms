@@ -90,7 +90,14 @@ void output_common_input(struct All_variables *E)
 
 void output(struct All_variables *E, int cycles)
 {
-
+  /* for stress computation */
+  void allocate_STD_mem();
+  void compute_nodal_stress();
+  void free_STD_mem();
+  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
+  float *divv[NCS],*vorv[NCS];
+  /*  */
+  
   if (cycles == 0) {
     output_coord(E);
     /*output_mat(E);*/
@@ -110,9 +117,15 @@ void output(struct All_variables *E, int cycles)
 				   computed! */
       output_geoid(E, cycles);
 
-  if (E->output.stress)
-    output_stress(E, cycles);
+  if (E->output.stress){
+    if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
+      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    }
 
+    output_stress(E, cycles);
+  }
   if (E->output.pressure)
     output_pressure(E, cycles);
 
@@ -237,8 +250,12 @@ void output_surf_botm(struct All_variables *E, int cycles)
       heat_flux(E);
   /* else, the heat flux will have been computed already */
 
-  //get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
-  get_CBF_topo(E,E->slice.tpg,E->slice.tpgb);
+  if(E->control.use_cbf_topo){
+    get_CBF_topo(E,E->slice.tpg,E->slice.tpgb);
+
+  }else{
+    get_STD_topo(E,E->slice.tpg,E->slice.tpgb,E->slice.divg,E->slice.vort,cycles);
+  }
 
   if (E->output.surf && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) {
     sprintf(output_file,"%s.surf.%d.%d", E->control.data_file,

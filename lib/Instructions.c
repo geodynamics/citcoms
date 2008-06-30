@@ -147,9 +147,10 @@ void initial_mesh_solver_setup(struct All_variables *E)
     (E->solver.parallel_communication_routs_v)(E);
     if(chatty)fprintf(stderr,"v communications done\n");
 
-    (E->solver.parallel_communication_routs_s)(E);
-    if(chatty)fprintf(stderr,"s communications done\n");
-
+    if(E->control.use_cbf_topo){
+      (E->solver.parallel_communication_routs_s)(E);
+      if(chatty)fprintf(stderr,"s communications done\n");
+    }
     reference_state(E);
 
     construct_sub_element(E);
@@ -421,19 +422,36 @@ void read_initial_settings(struct All_variables *E)
   input_int("solution_cycles_init",&(E->monitor.solution_cycles_init),"0",m);
 
   /* for layers    */
-  /*
-  the default boundaries are a little off
-  */
-  input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* does this ever get used? */
-  input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m);
+
+  input_int("num_mat",&(E->viscosity.num_mat),"1",m); /* number of layers, moved
+							 from Viscosity_structures.c */
+  if(E->viscosity.num_mat > CITCOM_MAX_VISC_LAYER)
+    myerror(E,"too many viscosity layers as per num_mat, increase CITCOM_MAX_VISC_LAYER");
+
+  /* those are specific depth layers associated with phase
+     transitions, default values should be fixed */
+  input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* 0.45063569 */
+  input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m); /*0.10359441  */
   input_float("z_410",&(E->viscosity.z410),"0.225",m); /* 0.06434, more like it */
   input_float("z_lith",&(E->viscosity.zlith),"0.225",m); /* 0.0157, more like it */
 
-  /* to do: make layers more flexible and avoid duplication */
-  E->viscosity.zbase_layer[1] = E->viscosity.zlith;
-  E->viscosity.zbase_layer[2] = E->viscosity.z410;
-  E->viscosity.zbase_layer[3] = E->viscosity.zlm;
-  E->viscosity.zbase_layer[4] = E->viscosity.zcmb;
+
+  /* those are depth layers associated with viscosity or material
+     jumps, they may or may not be identical with the phase changes */
+  E->viscosity.zbase_layer[0] = E->viscosity.zbase_layer[1] = -999;
+  input_float_vector("z_layer",E->viscosity.num_mat,(E->viscosity.zbase_layer),m);
+  if((E->viscosity.zbase_layer[0] == E->viscosity.zbase_layer[1])&&
+     (fabs(E->viscosity.zbase_layer[1]+999) < 1e-5)){
+    /* 
+       no z_layer input found  
+    */
+    if(E->viscosity.num_mat != 4)
+      myerror(E,"error: either use z_layer for non dim layer depths, or set num_mat to four");
+    E->viscosity.zbase_layer[0] = E->viscosity.zlith;
+    E->viscosity.zbase_layer[1] = E->viscosity.z410;
+    E->viscosity.zbase_layer[2] = E->viscosity.zlm;
+    E->viscosity.zbase_layer[3] = E->viscosity.zcmb;
+  }
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
@@ -567,6 +585,8 @@ void read_initial_settings(struct All_variables *E)
   input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
   
   input_boolean("self_gravitation",&(E->control.self_gravitation),"off",m);
+  input_boolean("use_cbf_topo",&(E->control.use_cbf_topo),"off",m); /* make default on later XXX TWB */
+
 
   input_int("storage_spacing",&(E->control.record_every),"10",m);
   input_int("checkpointFrequency",&(E->control.checkpoint_frequency),"100",m);
