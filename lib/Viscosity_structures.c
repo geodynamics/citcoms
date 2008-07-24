@@ -78,6 +78,9 @@ void viscosity_system_input(struct All_variables *E)
         input_float_vector("viscT",E->viscosity.num_mat,(E->viscosity.T),m);
         input_float_vector("viscE",E->viscosity.num_mat,(E->viscosity.E),m);
         input_float_vector("viscZ",E->viscosity.num_mat,(E->viscosity.Z),m);
+	/* for viscosity 8 */
+        input_float("T_sol0",&(E->viscosity.T_sol0),"0.6",m);
+        input_float("ET_red",&(E->viscosity.ET_red),"0.1",m);
     }
 
 
@@ -279,7 +282,7 @@ void visc_from_T(E,EEta,propogate)
 {
     int m,i,j,k,l,z,jj,kk,imark;
     float zero,e_6,one,eta0,Tave,depth,temp,tempa,temp1,TT[9];
-    float zzz,zz[9];
+    float zzz,zz[9],dr;
     float visc1, visc2, tempa_exp;
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
@@ -463,7 +466,12 @@ void visc_from_T(E,EEta,propogate)
         break;
 
 
-    case 6:			/* eta = N_0 exp(E(T_0-T) + (1-z) Z_0 ) */
+    case 6:			/* 
+				   like case 1, but allowing for depth-dependence if Z_0 != 0
+				   
+				   eta = N_0 exp(E(T_0-T) + (1-z) Z_0 ) 
+
+				*/
 
         for(m=1;m <= E->sphere.caps_per_proc;m++)
 	  for(i=1;i <= nel;i++)   {
@@ -556,6 +564,52 @@ void visc_from_T(E,EEta,propogate)
                              - (E->viscosity.E[l] +
                                 E->viscosity.Z[l]*(one-E->sphere.ri) )
                              / (E->viscosity.T[l] + one) );
+                }
+            }
+        break;
+
+    case 8:			/* 
+				   eta0 = N_0 exp(E/(T+T_0) - E/(1+T_0)) 
+
+				   eta =       eta0 if T   < T_sol0 + 2(1-z)
+				   eta = ET_red*eta0 if T >= T_sol0 + 2(1-z)
+
+				   where z is normalized by layer
+				   thickness, and T_sol0 is something
+				   like 0.6, and ET_red = 0.1
+
+				*/
+      dr = E->sphere.ro - E->sphere.ri;
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+		if(E->control.mat_control) 
+		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l];
+                j = 0;
+
+                for(kk=1;kk<=ends;kk++) {
+		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+		  zz[kk] = E->sx[m][3][E->ien[m][i].node[kk]]; /* radius */
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {	
+		      TT[kk]=max(TT[kk],zero);
+		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
+		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];/* mean r */
+                    }
+		    /* convert to z, as defined to be unity at surface
+		       and zero at CMB */
+		    zzz = (zzz - E->sphere.ri)/dr;
+		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
+				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
+		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
+		      EEta[m][ (i-1)*vpts + jj ] = visc1;
+		    else
+		      EEta[m][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
                 }
             }
         break;

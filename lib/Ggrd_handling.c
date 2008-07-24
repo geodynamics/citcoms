@@ -118,8 +118,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	/* interpolate from grid */
 	if(!ggrd_grdtrack_interpolate_tp((double)theta,(double)phi,
 					 ggrd_ict,&indbl,FALSE)){
-	  snprintf(error,255,"ggrd_init_tracer_flavors: interpolation error at theta: %g phi: %g",
-		   theta,phi);
+	  snprintf(error,255,"ggrd_init_tracer_flavors: interpolation error at lon: %g lat: %g",
+		   phi*180/M_PI, 90-theta*180/M_PI);
 	  myerror(E,error);
 	}
 	/* limit to 0 or 1 */
@@ -608,8 +608,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
   int mpi_rc,interpolate,timedep;
-  int mpi_inmsg, mpi_success_message = 1,nsum[2];
-  int m,el,i,k,i1,i2,ind,nodel,j,nsuml[2],level;
+  int mpi_inmsg, mpi_success_message = 1;
+  int m,el,i,k,i1,i2,ind,nodel,j,level;
   int noxg,nozg,noyg,noxl,noyl,nozl,lselect,idim,noxgnozg,noxlnozl;
   char gmt_string[10],char_dummy;
   static int lc =0;			/* only for debugging */
@@ -617,61 +617,64 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   char tfilename1[1000],tfilename2[1000];
 
   const int dims=E->mesh.nsd;
-
+  if(E->mesh.topvbc != 1)
+    myerror(E,"ggrd_read_vtop_from_file: top velocity BCs, but topvbc is free slip");
   /* global, top level number of nodes */
   noxg = E->lmesh.nox;nozg=E->lmesh.noz;noyg=E->lmesh.noy;
   noxgnozg = noxg*nozg;
   
   /* velocity scaling, assuming input is cm/yr  */
   vscale = E->data.scalev * E->data.timedir;
-  /*
-     if we have not initialized the time history structure, do it now
-     if this file is not found, will use constant velocities
-  */
-  if(!E->control.ggrd.time_hist.init){/* init times, if available*/
-    ggrd_init_thist_from_file(&E->control.ggrd.time_hist,E->control.ggrd.time_hist.file,
-			      TRUE,(E->parallel.me == 0));
-    E->control.ggrd.time_hist.init = 1;
-  }
-  timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
-
-  if(!E->control.ggrd.vtop_control_init){
-    /* 
-       read in grd files (only needed for top processors, really, but
-       leave as is for now
-    */
-    if(E->parallel.me==0)
-      fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities for %s setup\n",
-	      is_global?("global"):("regional"));
-    if(is_global){		/* decide on GMT flag */
-      //sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* periodic */
-      sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
-    }else
-      sprintf(gmt_string,"");
+  
+  if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { 
+    
+    /* top processor only */
+    
     /*
-
-    initialization steps
-
+      if we have not initialized the time history structure, do it now
+      if this file is not found, will use constant velocities
     */
-    if(E->parallel.me > 0)	/* wait for previous processor */
-      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
-			0, E->parallel.world, &mpi_stat);
-    /*
-       read in the velocity file(s)
-    */
-    E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
-    E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
-    /* for detecting the actual max */
-    E->control.ggrd.svt->bandlim = E->control.ggrd.svp->bandlim = 1e6;
-    for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
+    if(!E->control.ggrd.time_hist.init){/* init times, if available*/
+      ggrd_init_thist_from_file(&E->control.ggrd.time_hist,E->control.ggrd.time_hist.file,
+				TRUE,(E->parallel.me == 0));
+      E->control.ggrd.time_hist.init = 1;
+    }
+    timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
+    
+    if(!E->control.ggrd.vtop_control_init){
       /* 
-	 
-      by default, all velocity grids will be stored in memory, this
-      may or may not be ideal
-
+	 read in grd files (only needed for top processors, really, but
+	 leave as is for now
       */
-      if(!timedep){ /* constant */
-	sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
+      if(E->parallel.me==0)
+	fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities for %s setup\n",
+		is_global?("global"):("regional"));
+      if(is_global){		/* decide on GMT flag */
+	//sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* periodic */
+	sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+      }else
+	sprintf(gmt_string,"");
+      /*
+	
+      initialization steps
+      
+      */
+      /*
+	read in the velocity file(s)
+      */
+      E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+      E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+      /* for detecting the actual max */
+      E->control.ggrd.svt->bandlim = E->control.ggrd.svp->bandlim = 1e6;
+      for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
+	/* 
+	   
+	by default, all velocity grids will be stored in memory, this
+	may or may not be ideal
+	
+	*/
+	if(!timedep){ /* constant */
+	  sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
 	sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
       } else {			/* f(t) */
 	sprintf(tfilename1,"%s/%i/vt.grd",E->control.ggrd.vtop_dir,i+1);
@@ -683,56 +686,51 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
 				    gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE))
 	myerror(E,"ggrd init error vp"); 
-    } /* all grids read */
-    if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
-      mpi_rc = MPI_Send(&mpi_success_message, 1,
-			MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
-    }else{
-      fprintf(stderr,"ggrd_read_vtop_from_file: last processor done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
-	      E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
-    }
-    /* end init */
-  } 
-  if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
-    /* 
-       either first time around, or time-dependent 
-    */
-    age = find_age_in_MY(E);
-    if(timedep){
+      } /* all grids read */
+      if(E->parallel.me == 0)
+	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
+		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
+    }/* end init */
+    if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
       /* 
-	 interpolate by time 
+	 either first time around, or time-dependent 
       */
-      if(age < 0){		/* Opposite of other method */
-	interpolate = 0;
-	/* present day should be last file*/
-	i1 = E->control.ggrd.time_hist.nvtimes - 1;
-	if(E->parallel.me == 0)
-	  fprintf(stderr,"ggrd_read_vtop_from_file: using present day vtop for age = %g\n",age);
+      age = find_age_in_MY(E);
+      if(timedep){
+	/* 
+	   interpolate by time 
+	*/
+	if(age < 0){		/* Opposite of other method */
+	  interpolate = 0;
+	  /* present day should be last file*/
+	  i1 = E->control.ggrd.time_hist.nvtimes - 1;
+	  if(E->parallel.me == 0)
+	    fprintf(stderr,"ggrd_read_vtop_from_file: using present day vtop for age = %g\n",age);
+	}else{
+	  /*  */
+	  ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+			     E->control.ggrd.time_hist.vstage_transition);
+	  interpolate = 1;
+	  if(E->parallel.me == 0)
+	    fprintf(stderr,"ggrd_read_vtop_from_file: interpolating vtop for age = %g\n",age);
+	}
+	
       }else{
-	/*  */
-	ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
-			   E->control.ggrd.time_hist.vstage_transition);
-	interpolate = 1;
+	interpolate = 0;		/* single timestep, use single file */
+	i1 = 0;
 	if(E->parallel.me == 0)
-	  fprintf(stderr,"ggrd_read_vtop_from_file: interpolating vtop for age = %g\n",age);
+	  fprintf(stderr,"ggrd_read_vtop_from_file: constant velocity BC \n");
       }
-
-    }else{
-      interpolate = 0;		/* single timestep, use single file */
-      i1 = 0;
-      if(E->parallel.me == 0)
-	fprintf(stderr,"ggrd_read_vtop_from_file: constant velocity BC \n");
-    }
-    if(E->parallel.me==0)
-      fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
-	       timedep,age); 
-    /* if mixed BCs are allowed, need to reassign the boundary
+      if(E->parallel.me==0)
+	fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
+		timedep,age); 
+      /* if mixed BCs are allowed, need to reassign the boundary
        condition */
-    if(E->control.ggrd_allow_mixed_vbcs){
-      if(E->parallel.me == 0)
-	fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
-
-      if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { /* top processor only */
+      if(E->control.ggrd_allow_mixed_vbcs){
+	if(E->parallel.me == 0)
+	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
+	
+	
 	/* velocities larger than the cutoff will be assigned as free
 	   slip */
 	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
@@ -742,7 +740,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	  nozl = E->lmesh.NOZ[level];
 	  noxlnozl = noxl*nozl;
 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
-	    nsuml[0] = nsuml[1] = 0;
 	    /* 
 	       loop through all horizontal nodes 
 	    */
@@ -775,21 +772,16 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
-		  nsuml[0]++;
 		}else{
 		  /* no slip */
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBX;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBY;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
-		  nsuml[1]++;
 		}
 	      }	/* end x loop */
 	    } /* end y loop */
 	    /* sum up all assignments */
-	    MPI_Allreduce(nsuml,nsum,2,MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
-	    if(E->parallel.me % E->parallel.nprocxy == 0)
-	      fprintf(stderr,"mixed velocity BC: multi grid level %2i : %7i fixed %7i free\n",level,nsum[1],nsum[0]);
 	  } /* cap */
 	} /* level */
       }	/* top proc branch */
@@ -801,74 +793,63 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     values
 
     */
-    if(E->parallel.me_loc[3] == E->parallel.nprocz-1)  { /* if on top */
-      for (m=1;m <= E->sphere.caps_per_proc;m++) {
-	nsuml[0] = nsuml[1] = 0; /* for debugging */
-
-	/* scaled cutoff velocity */
-	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
-	for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
-	  for(i=1;i <= noxg;i++)    {
-	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
-	    /*  */
-	    rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
-	    rout[2] = E->sx[m][2][nodel];
-	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
-					     vin1,FALSE)){
-	      fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
-		      rout[1],rout[2]);
-	      parallel_process_termination();
-	    }
-	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
-					     (vin1+1),FALSE)){
-	      fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
-		      rout[1],rout[2]);
-	      parallel_process_termination();
-	    }
-	    if(interpolate){	/* second time */
-	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,FALSE)){
-		fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			rout[1],rout[2]);
-		parallel_process_termination();
-	      }
-	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),FALSE)){
-		fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			rout[1],rout[2]);
-		parallel_process_termination();
-	      }
-	      vt = (f1*vin1[0] + f2*vin2[0])*vscale;
-	      vp = (f1*vin1[1] + f2*vin2[1])*vscale;
-	    }else{
-	      vt = vin1[0]*vscale;
-	      vp = vin1[1]*vscale;
-	    }
-	    if(fabs(vp) > cutoff){
-	      /* huge velocitie - free slip */
-	      E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
-	      E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
-	      nsuml[0]++;
-
-	    }else{
-	      /* regular no slip , assign velocities as BCs */
-	      E->sphere.cap[m].VB[1][nodel] = vt;	/* theta */
-	      E->sphere.cap[m].VB[2][nodel] = vp;	/* phi */
-	      nsuml[1]++;
-	    }
-	    E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+    for (m=1;m <= E->sphere.caps_per_proc;m++) {
+      /* scaled cutoff velocity */
+      cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+      for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
+	for(i=1;i <= noxg;i++)    {
+	  nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
+	  /*  */
+	  rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
+	  rout[2] = E->sx[m][2][nodel];
+	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
+					   vin1,FALSE)){
+	    fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
+		    rout[1],rout[2]);
+	    parallel_process_termination();
 	  }
-	}	/* end surface node loop */
-	MPI_Allreduce(nsuml,nsum,2,MPI_INT,MPI_SUM,E->parallel.horizontal_comm);
-	if(E->parallel.me % E->parallel.nprocxy == 0)
-	  fprintf(stderr,"mixed velocity BC val: %i fixed %i free\n",nsum[1],nsum[0]);
-      }	/* end top proc branch */
+	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
+					   (vin1+1),FALSE)){
+	    fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
+		    rout[1],rout[2]);
+	    parallel_process_termination();
+	  }
+	  if(interpolate){	/* second time */
+	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,FALSE)){
+	      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
+		      rout[1],rout[2]);
+	      parallel_process_termination();
+	    }
+	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),FALSE)){
+	      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
+		      rout[1],rout[2]);
+	      parallel_process_termination();
+	    }
+	    vt = (f1*vin1[0] + f2*vin2[0])*vscale;
+	    vp = (f1*vin1[1] + f2*vin2[1])*vscale;
+	  }else{
+	    vt = vin1[0]*vscale;
+	    vp = vin1[1]*vscale;
+	  }
+	  if(fabs(vp) > cutoff){
+	    /* huge velocitie - free slip */
+	    E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
+	    E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
+	  }else{
+	    /* regular no slip , assign velocities as BCs */
+	    E->sphere.cap[m].VB[1][nodel] = vt;	/* theta */
+	    E->sphere.cap[m].VB[2][nodel] = vp;	/* phi */
+	  }
+	  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+	}
+      }	/* end surface node loop */
     } /* end cap loop */
-    /* sum up the contributions */
-  } /* end assignment branch */
-  
-  if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
-    ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
-    ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
-  }
+
+    if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
+      ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
+      ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
+    }
+  } /* end top proc loop */
   E->control.ggrd.vtop_control_init = 1;
   if(E->parallel.me == 0)fprintf(stderr,"vtop from grd done: %i\n",lc++);
 }
@@ -917,10 +898,10 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 							boundary */
 	    bnew = buoy[m][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
 	    /* debugging */
-	    //fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n",
-	    //	    (1 - E->sx[m][3][node])*E->data.radius_km,E->control.ggrd.ray_control,
-	    //	    E->viscosity.zbase_layer[E->control.ggrd.ray_control-1]*E->data.radius_km,
-	    //	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]);
+	    /*   fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n", */
+	    /* 	    	    (1 - E->sx[m][3][node])*E->data.radius_km,E->control.ggrd.ray_control, */
+	    /* 	    	    E->viscosity.zbase_layer[E->control.ggrd.ray_control-1]*E->data.radius_km, */
+	    /* 	    	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]); */
 	    buoy[m][node] = fac * bnew + (1-fac)*buoy[m][node];
 	  }
 	}

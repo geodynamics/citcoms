@@ -207,6 +207,7 @@ int main(argc,argv)
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
 
+
     /* information about simulation time and wall clock time */
     output_time(E, E->monitor.solution_cycles);
 

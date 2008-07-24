@@ -654,7 +654,7 @@ void get_r_spacing_at_levels(double *rr,struct All_variables *E)
     myerror(E,"first node for coor=3 should be unity");
   if(E->control.nrlayer[E->control.rlayers-1] != E->mesh.noz)
       myerror(E,"last node for coor = 3 input should match max nr z nodes");
-  if(fabs(E->control.rrlayer[0] -E->sphere.ri) > 1e-6)
+  if(fabs(E->control.rrlayer[0] -E->sphere.ri) > 1e-5)
     myerror(E,"inner layer for coor=3 input should be inner radius");
   if(fabs(E->control.rrlayer[ E->control.rlayers-1] - E->sphere.ro)>1e-6)
     myerror(E,"outer layer for coor=3 input should be inner radius");

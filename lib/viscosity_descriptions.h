@@ -144,6 +144,9 @@ struct VISC_OPT {
     int EXPX;
     float expx_epsilon;
 
+  float ET_red,T_sol0;			/* for viscosity law 8 */
+
+
     /* MODULE BASED VISCOSITY VARIATIONS */
 
     int RESDEPV;

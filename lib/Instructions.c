@@ -87,8 +87,9 @@ void read_initial_settings(struct All_variables *);
 void initial_mesh_solver_setup(struct All_variables *E)
 {
   int chatty;
-  chatty = ((E->parallel.me == 0)&&(E->control.verbose))?(1):(0);
-  
+  //chatty = ((E->parallel.me == 0)&&(E->control.verbose))?(1):(0);
+  chatty = E->parallel.me == 0;
+
     E->monitor.cpu_time_at_last_cycle =
         E->monitor.cpu_time_at_start = CPU_time0();
 
@@ -148,7 +149,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
     if(chatty)fprintf(stderr,"v communications done\n");
 
     if(E->control.use_cbf_topo){
-      (E->solver.parallel_communication_routs_s)(E);
+      (E->solver.parallel_communication_routs_s)(E); 
       if(chatty)fprintf(stderr,"s communications done\n");
     }
     reference_state(E);
