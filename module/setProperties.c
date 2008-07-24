@@ -208,6 +208,11 @@ PyObject * pyCitcom_Const_set_properties(PyObject *self, PyObject *args)
     getFloatProperty(properties, "z_lmantle", E->viscosity.zlm, fp);
     getFloatProperty(properties, "z_cmb", E->viscosity.zcmb, fp); /* this is used as the D" phase change depth */
 
+    E->viscosity.zbase_layer[0] = E->viscosity.zlith;
+    E->viscosity.zbase_layer[1] = E->viscosity.z410;
+    E->viscosity.zbase_layer[2] = E->viscosity.zlm;
+    E->viscosity.zbase_layer[3] = E->viscosity.zcmb;
+    
     /* convert meter to kilometer */
     E->data.radius_km = radius / 1e3;
 
