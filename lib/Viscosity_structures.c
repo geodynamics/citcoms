@@ -270,7 +270,7 @@ void visc_from_mat(E,EEta)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nel;i++)
             for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-                EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ]=E->viscosity.N0[E->mat[m][i]-1];
+                EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1];
 
     return;
 }
@@ -499,8 +499,10 @@ void visc_from_T(E,EEta,propogate)
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
-	      //fprintf(stderr,"N0 %11g T %11g T0 %11g E %11g z %11g km Z %11g mat: %i log10(eta): %11g\n",
-	      //tempa,temp,E->viscosity.T[l],E->viscosity.E[l], zzz *E->data.radius_km ,E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
+	      //if(E->parallel.me == 0)
+	      //	fprintf(stderr,"z %11g km mat %i N0 %11g T %11g T0 %11g E %11g Z %11g mat: %i log10(eta): %11g\n",
+	      //		zzz *E->data.radius_km ,l+1,
+	      //	tempa,temp,E->viscosity.T[l],E->viscosity.E[l], E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
 	    }
 	  }
         break;

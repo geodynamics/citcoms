@@ -442,7 +442,7 @@ void read_initial_settings(struct All_variables *E)
   E->viscosity.zbase_layer[0] = E->viscosity.zbase_layer[1] = -999;
   input_float_vector("z_layer",E->viscosity.num_mat,(E->viscosity.zbase_layer),m);
   if((E->viscosity.zbase_layer[0] == E->viscosity.zbase_layer[1])&&
-     (fabs(E->viscosity.zbase_layer[1]+999) < 1e-5)){
+     (fabs(E->viscosity.zbase_layer[1]-999) < 1e-5)){
     /* 
        no z_layer input found  
     */
