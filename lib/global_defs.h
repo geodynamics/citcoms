@@ -262,6 +262,7 @@ struct SPHERE   {
   int hindice;
   float *harm_geoid[2];
   float *harm_geoid_from_bncy[2];
+  float *harm_geoid_from_bncy_botm[2];
   float *harm_geoid_from_tpgt[2];
   float *harm_geoid_from_tpgb[2];
 
