@@ -51,6 +51,7 @@ class Output(CitcomComponent):
         output_format = inv.str("output_format", default="ascii",
                                 validator=inv.choice(["ascii",
                                                       "ascii-gz",
+						      "vtk",
                                                       "hdf5"]))
         output_optional = inv.str("output_optional",
                                   default="surf,botm,tracer")
@@ -63,6 +64,8 @@ class Output(CitcomComponent):
         # max. degree for spherical harmonics output
         output_ll_max = inv.int("output_ll_max", default=20)
 
+        # self-gravitation, for geoid only
+        self_gravitation = inv.bool("self_gravitation", default=False)
 
         mega1 = 1024*1024
         #megaq = 256*1024

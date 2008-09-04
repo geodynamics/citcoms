@@ -323,6 +323,7 @@ PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
     E->output.gzdir.vtk_base_save = 1;
 
     getIntProperty(properties, "output_ll_max", E->output.llmax, fp);
+    getIntProperty(properties, "self_gravitation", E->control.self_gravitation, fp);
 
     getIntProperty(properties, "cb_block_size", E->output.cb_block_size, fp);
     getIntProperty(properties, "cb_buffer_size", E->output.cb_buffer_size, fp);
