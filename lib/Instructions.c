@@ -77,6 +77,7 @@ void set_starting_age(struct All_variables*);
 void tracer_initial_settings(struct All_variables*);
 void tracer_input(struct All_variables*);
 void viscosity_input(struct All_variables*);
+void vtk_output(struct All_variables*, int);
 void get_vtk_filename(char *,int,struct All_variables *,int);
 void myerror(struct All_variables *,char *);
 void open_qfiles(struct All_variables *) ;
@@ -1555,14 +1556,16 @@ void output_init(struct  All_variables *E)
     }
     else if (strcmp(E->output.format, "hdf5") == 0)
         E->problem_output = h5output;
+    else if (strcmp(E->output.format, "vtk") == 0)
+        E->problem_output = vtk_output;
 #ifdef USE_GZDIR
     else if (strcmp(E->output.format, "ascii-gz") == 0)
         E->problem_output = gzdir_output;
     else {
         /* indicate error here */
         if (E->parallel.me == 0) {
-            fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', or 'ascii-gz'\n");
-            fprintf(E->fp, "wrong output_format, must be  'ascii', 'hdf5', or 'ascii-gz'\n");
+            fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', 'ascii-gz' or 'vtk'\n");
+            fprintf(E->fp, "wrong output_format, must be  'ascii', 'hdf5' 'ascii-gz', or 'vtk'\n");
         }
         parallel_process_termination(E);
     }
@@ -1570,8 +1573,8 @@ void output_init(struct  All_variables *E)
     else {
         /* indicate error here */
         if (E->parallel.me == 0) {
-            fprintf(stderr, "wrong output_format, must be 'ascii' or 'hdf5' (USE_GZDIR undefined)\n");
-            fprintf(E->fp, "wrong output_format, must be 'ascii' or 'hdf5' (USE_GZDIR undefined)\n");
+            fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', or 'vtk' (USE_GZDIR undefined)\n");
+            fprintf(E->fp, "wrong output_format, must be 'ascii', 'hdf5', or 'vtk' (USE_GZDIR undefined)\n");
         }
         parallel_process_termination(E);
     }

@@ -94,6 +94,7 @@ sources = \
 	Output_gzdir.c \
 	Output_h5.c \
 	output_h5.h \
+	Output_vtk.c \
 	Pan_problem_misc_functions.c \
 	parallel_related.h \
 	Parallel_util.c \
