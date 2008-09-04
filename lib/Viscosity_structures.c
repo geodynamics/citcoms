@@ -783,40 +783,48 @@ void visc_from_C( E, EEta)
      struct All_variables *E;
      float **EEta;
 {
-  float comp,comp_fac,CC[9],tcomp;
-  double vmean,cc_loc;
-  int m,l,z,jj,kk,i;
+  double vmean,cc_loc[10],CC[10][9],cbackground;
+  int m,l,z,jj,kk,i,p,q;
 
 
   const int vpts = vpoints[E->mesh.nsd];
   const int nel = E->lmesh.nel;
   const int ends = enodes[E->mesh.nsd];
-  if(E->trace.nflavors != 2)
-    myerror(E,"sorry, CDEPV only supports two flavors");
-  if(E->composition.ncomp != 1)
-    myerror(E,"CDEPV only supports one composition yet");
 
   for(m=1;m <= E->sphere.caps_per_proc;m++)  {
     for(i = 1; i <= nel; i++){
       /* determine composition of each of the nodes of the
 	 element */
-      for(kk = 1; kk <= ends; kk++){
-	CC[kk] = E->composition.comp_node[m][0][E->ien[m][i].node[kk]];
-	if(CC[kk] < 0)CC[kk]=0.0;
-	if(CC[kk] > 1)CC[kk]=1.0;
-      }
-      for(jj = 1; jj <= vpts; jj++){
-	/* compute mean composition  */
-	cc_loc = 0.0;
-	for(kk = 1; kk <= ends; kk++)
-	  cc_loc += CC[kk] * E->N.vpt[GNVINDEX(kk, jj)];
+        for(p=0; p<E->composition.ncomp; p++) {
+            for(kk = 1; kk <= ends; kk++){
+                CC[p][kk] = E->composition.comp_node[m][p][E->ien[m][i].node[kk]];
+                if(CC[p][kk] < 0)CC[p][kk]=0.0;
+                if(CC[p][kk] > 1)CC[p][kk]=1.0;
+            }
+        }
+        for(jj = 1; jj <= vpts; jj++) {
+            /* concentration of background material */
+            cbackground = 1;
+            for(p=0; p<E->composition.ncomp; p++) {
+                /* compute mean composition  */
+                cc_loc[p] = 0.0;
+                for(kk = 1; kk <= ends; kk++) {
+                    cc_loc[p] += CC[p][kk] * E->N.vpt[GNVINDEX(kk, jj)];
+                }
+                cbackground -= cc_loc[p];
+            }
 
-	/* geometric mean of viscosity */
-	vmean = exp(cc_loc  * E->viscosity.cdepv_ff[1] +
-		    (1.0-cc_loc) * E->viscosity.cdepv_ff[0]);
-	/* multiply the viscosity with this prefactor */
-	EEta[m][ (i-1)*vpts + jj ] *= vmean;
-      } /* end jj loop */
+            /* geometric mean of viscosity */
+            vmean = cbackground * E->viscosity.cdepv_ff[0];
+            for(p=0; p<E->composition.ncomp; p++) {
+                vmean += cc_loc[p] * E->viscosity.cdepv_ff[p+1];
+            }
+            vmean = exp(vmean);
+
+            /* multiply the viscosity with this prefactor */
+            EEta[m][ (i-1)*vpts + jj ] *= vmean;
+
+        } /* end jj loop */
     } /* end el loop */
   } /* end cap */
 }
