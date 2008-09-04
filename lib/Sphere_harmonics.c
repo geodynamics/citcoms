@@ -32,6 +32,7 @@ void set_sphere_harmonics(E)
     for (i=0;i<=1;i++)   {
         E->sphere.harm_geoid[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
         E->sphere.harm_geoid_from_bncy[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
+        E->sphere.harm_geoid_from_bncy_botm[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
         E->sphere.harm_geoid_from_tpgt[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
         E->sphere.harm_geoid_from_tpgb[i]=(float*)malloc(E->sphere.hindice*sizeof(float));
 

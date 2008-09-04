@@ -464,7 +464,7 @@ void stress_conform_bcs(struct All_variables *E)
    ===================================================================  */
 
 static void geoid_from_buoyancy(struct All_variables *E,
-                                float *harm_geoid[2])
+                                float *harm_geoid[2], float *harm_geoidb[2])
 {
     /* Compute the geoid due to internal density distribution.
      *
@@ -476,6 +476,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
 
     int m,k,ll,mm,node,i,j,p,noz,snode,nxnz;
     float *TT[NCS],radius,*geoid[2],dlayer,con1,grav,scaling2,scaling,radius_m;
+    float cont, conb;
     double buoy2rho;
 
     /* some constants */
@@ -502,6 +503,8 @@ static void geoid_from_buoyancy(struct All_variables *E,
     for (p = 0; p < E->sphere.hindice; p++) {
         harm_geoid[0][p] = 0;
         harm_geoid[1][p] = 0;
+        harm_geoidb[0][p] = 0;
+        harm_geoidb[1][p] = 0;
     }
 
     /* loop over each layer, notice the range is [1,noz) */
@@ -514,6 +517,8 @@ static void geoid_from_buoyancy(struct All_variables *E,
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node= k + (j-1)*E->lmesh.noz + (i-1)*nxnz;
                     p = j + (i-1)*E->lmesh.nox;
+                    /* convert non-dimensional buoyancy to */
+                    /* dimensional density */
                     TT[m][p] = (E->buoyancy[m][node]+E->buoyancy[m][node+1])
                         * 0.5 * buoy2rho;
                 }
@@ -529,11 +534,16 @@ static void geoid_from_buoyancy(struct All_variables *E,
 
         /* geoid contribution of density at this layer, ignore degree-0 term */
         for (ll=1;ll<=E->output.llmax;ll++) {
-            con1 = scaling * dlayer * pow(radius,((double)(ll+2))) / (2.0*ll+1.0);
+            con1 = scaling * dlayer / (2.0*ll+1.0);
+            cont = pow(radius, ((double)(ll+2)));
+            conb = radius * pow(E->sphere.ri/radius, ((double)(ll)));
+
             for (mm=0;mm<=ll;mm++)   {
                 p = E->sphere.hindex[ll][mm];
-                harm_geoid[0][p] += con1*geoid[0][p];
-                harm_geoid[1][p] += con1*geoid[1][p];
+                harm_geoid[0][p] += con1*cont*geoid[0][p];
+                harm_geoid[1][p] += con1*cont*geoid[1][p];
+                harm_geoidb[0][p] += con1*conb*geoid[0][p];
+                harm_geoidb[1][p] += con1*conb*geoid[1][p];
             }
         }
 
@@ -542,6 +552,9 @@ static void geoid_from_buoyancy(struct All_variables *E,
 
     /* accumulate geoid from all layers to the surface (top processors) */
     sum_across_depth_sph1(E, harm_geoid[0], harm_geoid[1]);
+
+    /* accumulate geoid from all layers to the CMB (bottom processors) */
+    sum_across_depth_sph1(E, harm_geoidb[0], harm_geoidb[1]);
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         free ((void *)TT[m]);
@@ -691,7 +704,8 @@ static void geoid_from_topography(struct All_variables *E,
 static void geoid_from_topography_self_g(struct All_variables *E,
                                          float *tpgt[2],
                                          float *tpgb[2],
-                                         float *geoid_bycy[2],
+                                         float *geoid_bncy[2],
+                                         float *geoid_bncy_botm[2],
 					 float *geoid_tpgt[2],
 					 float *geoid_tpgb[2])
 {
@@ -704,9 +718,8 @@ static void geoid_from_topography_self_g(struct All_variables *E,
     double den_contrast1,den_contrast2,grav1,grav2;
     double topo2stress1, topo2stress2;
     long double con4, ri;
-    long double a1,b1,c1_0,c1_1,a2,b2,c2_0,c2_1,a11,a12,a21,a22,f1_0,f2_0,f1_1,f2_1;
+    long double a1,b1,c1_0,c1_1,a2,b2,c2_0,c2_1,a11,a12,a21,a22,f1_0,f2_0,f1_1,f2_1,denom;
     int i,j,k,ll,mm,s;
-    double *stresst[2], *stressb[2];
 
     ri = E->sphere.ri;
 
@@ -727,11 +740,6 @@ static void geoid_from_topography_self_g(struct All_variables *E,
 
     con4 = 4.0*M_PI*E->data.grav_const*E->data.radius_km*1000;
 
-    stresst[0] = (double *)calloc(E->sphere.hindice+2, sizeof(double));
-    stresst[1] = (double *)calloc(E->sphere.hindice+2, sizeof(double));
-    stressb[0] = (double *)calloc(E->sphere.hindice+2, sizeof(double));
-    stressb[1] = (double *)calloc(E->sphere.hindice+2, sizeof(double));
-
     /* reset arrays */
     for (i = 0; i < E->sphere.hindice; i++) {
         geoid_tpgt[0][i] = 0;
@@ -739,65 +747,62 @@ static void geoid_from_topography_self_g(struct All_variables *E,
     }
 
     for (ll=2;ll<=E->output.llmax;ll++)   {
+        // dimension: gravity
+        a1 = con4/(2*ll+1)*ri*lg_pow(ri,ll+1)*den_contrast2;
+        b1 = con4/(2*ll+1)*den_contrast1;
+        a2 = con4/(2*ll+1)*ri*den_contrast2;
+        b2 = con4/(2*ll+1)*lg_pow(ri,ll)*den_contrast1;
+
+        // dimension: rho*g
+        a11 = den_contrast1*E->data.grav_acc - E->data.density*b1;
+        a12 =                                - E->data.density*a1;
+        a21 =-den_contrast2*b2;
+        a22 = den_contrast2*(E->data.grav_acc-a2);
+
+        denom = 1.0L / (a11*a22 - a12*a21);
+
         for (mm=0;mm<=ll;mm++)   {
             i = E->sphere.hindex[ll][mm];
-            stresst[0][i] = -E->sphere.harm_tpgt[0][i]*den_contrast1*grav1;
-            stresst[1][i] = -E->sphere.harm_tpgt[1][i]*den_contrast1*grav1;
-            stressb[0][i] =  E->sphere.harm_tpgb[0][i]*den_contrast2*grav2;
-            stressb[1][i] =  E->sphere.harm_tpgb[1][i]*den_contrast2*grav2;
-
-            a1 = con4/(2*ll+1)*ri*lg_pow(ri,ll+1)*den_contrast2;
-            b1 = con4/(2*ll+1)*den_contrast1;
-            c1_0 = geoid_bycy[0][i]*E->data.grav_acc;
-
-            a2 = con4/(2*ll+1)*ri*den_contrast2;
-            b2 = con4/(2*ll+1)*lg_pow(ri,ll)*den_contrast1;
-            c2_0 = geoid_bycy[0][i]*E->data.grav_acc;
-
 
             // cos term
-            a11 = den_contrast1*E->data.grav_acc - E->data.density*b1;
-            a12 =                                - E->data.density*a1;
-            f1_0 = -stresst[0][i] + E->data.density*c1_0;
-            a21 =-den_contrast2*b2;
-            a22 = den_contrast2*(E->data.grav_acc-a2);
-            f2_0 = stressb[0][i] + den_contrast2*c2_0;
+            c1_0 = geoid_bncy[0][i]*E->data.density*grav1;
+            c2_0 = geoid_bncy_botm[0][i]*den_contrast2*grav2;
+            f1_0 = tpgt[0][i]*topo2stress1 + c1_0;
+            f2_0 = tpgb[0][i]*topo2stress2 + c2_0;
 
-            tpgt[0][i] = (f1_0*a22-f2_0*a12)/(a11*a22-a12*a21);
-            tpgb[0][i] = (f2_0*a11-f1_0*a21)/(a11*a22-a12*a21);
+            tpgt[0][i] = (f1_0*a22-f2_0*a12)*denom;
+            tpgb[0][i] = (f2_0*a11-f1_0*a21)*denom;
 
             // sin term
-            c1_1 = geoid_bycy[1][i]*E->data.grav_acc;
-            c2_1 = geoid_bycy[1][i]*E->data.grav_acc;
-            f1_1 =-stresst[1][i] + E->data.density*c1_1;
-            f2_1 = stressb[1][i] + den_contrast2*c2_1;
+            c1_1 = geoid_bncy[1][i]*E->data.density*grav1;
+            c2_1 = geoid_bncy_botm[1][i]*den_contrast2*grav2;
+            f1_1 = tpgt[1][i]*topo2stress1 + c1_1;
+            f2_1 = tpgb[1][i]*topo2stress2 + c2_1;
 
-            tpgt[1][i] = (f1_1*a22-f2_1*a12)/(a11*a22-a12*a21);
-            tpgb[1][i] = (f2_1*a11-f1_1*a21)/(a11*a22-a12*a21);
+            /* update topo with self-g */
+            tpgt[1][i] = (f1_1*a22-f2_1*a12)*denom;
+            tpgb[1][i] = (f2_1*a11-f1_1*a21)*denom;
 
 
-            // cos term
-            geoid_tpgt[0][i] = (a1*E->sphere.harm_tpgb[0][i] +
-                                b1*E->sphere.harm_tpgt[0][i]) / E->data.grav_acc;
-            geoid_tpgb[0][i] = (a2*E->sphere.harm_tpgb[0][i] +
-                                b2*E->sphere.harm_tpgt[0][i]) / E->data.grav_acc;
+            /* update geoid due to topo with self-g */
+            geoid_tpgt[0][i] = b1 * tpgt[0][i] / grav1;
+            geoid_tpgt[1][i] = b1 * tpgt[1][i] / grav1;
 
-            // sin term
-            geoid_tpgt[1][i] = (a1*E->sphere.harm_tpgb[1][i] +
-                                b1*E->sphere.harm_tpgt[1][i]) / E->data.grav_acc;
-            geoid_tpgb[1][i] = (a2*E->sphere.harm_tpgb[1][i] +
-                                b2*E->sphere.harm_tpgt[1][i]) / E->data.grav_acc;
+            geoid_tpgb[0][i] = a1 * tpgb[0][i] / grav1;
+            geoid_tpgb[1][i] = a1 * tpgb[1][i] / grav1;
+
+            /* the followings are geoid at the bottom due to topo, not used */
+            //geoidb_tpg[0][i] = (a2*tpgb[0][i] +
+            //                    b2*tpgt[0][i]) / grav2;
+
+            //geoidb_tpg[1][i] = (a2*tpgb[1][i] +
+            //                    b2*tpgt[1][i]) / grav2;
         }
     }
 
     /* send arrays to all processors in the same vertical column */
     broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
     broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
-
-    free(stresst[0]);
-    free(stresst[1]);
-    free(stressb[0]);
-    free(stressb[1]);
 
     return;
 }
@@ -809,13 +814,17 @@ void compute_geoid(E)
 {
     int i, p;
 
-    geoid_from_buoyancy(E, E->sphere.harm_geoid_from_bncy);
+    geoid_from_buoyancy(E, E->sphere.harm_geoid_from_bncy,
+                        E->sphere.harm_geoid_from_bncy_botm);
 
     expand_topo_sph_harm(E, E->sphere.harm_tpgt, E->sphere.harm_tpgb);
 
     if(E->control.self_gravitation)
-        geoid_from_topography_self_g(E, E->sphere.harm_tpgt, E->sphere.harm_tpgb,
+        geoid_from_topography_self_g(E,
+                                     E->sphere.harm_tpgt,
+                                     E->sphere.harm_tpgb,
                                      E->sphere.harm_geoid_from_bncy,
+                                     E->sphere.harm_geoid_from_bncy_botm,
                                      E->sphere.harm_geoid_from_tpgt,
                                      E->sphere.harm_geoid_from_tpgb);
     else
@@ -826,12 +835,14 @@ void compute_geoid(E)
     if (E->parallel.me == (E->parallel.nprocz-1))  {
         for (i = 0; i < 2; i++)
             for (p = 0; p < E->sphere.hindice; p++) {
-                E->sphere.harm_geoid[i][p] = E->sphere.harm_geoid_from_bncy[i][p]
-                                 + E->sphere.harm_geoid_from_tpgt[i][p]
-                                 + E->sphere.harm_geoid_from_tpgb[i][p];
+                E->sphere.harm_geoid[i][p]
+                    = E->sphere.harm_geoid_from_bncy[i][p]
+                    + E->sphere.harm_geoid_from_tpgt[i][p]
+                    + E->sphere.harm_geoid_from_tpgb[i][p];
             }
     }
 
+    return;
 }
 
 
