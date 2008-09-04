@@ -102,7 +102,7 @@ void regional_coord_of_cap(E,m,icap)
       fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]);
     }
     E->control.fi_min = fi1[E->mesh.gridmax][1];
-    E->control.fi_max = fi1[E->mesh.gridmax][gnox];
+    E->control.fi_max = fi1[E->mesh.gridmax][gnoy];
     
     fclose(fp);
     
