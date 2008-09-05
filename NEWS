@@ -2,6 +2,31 @@ CitcomS NEWS -- history of user-visible changes.  2008-03-07
 
 Please send CitcomS bug reports to cig-mc@geodynamics.org.
 
+Version 3.0.3
+
+* Fixed issue 158: incorrect E->control.fi_max with coor=1. In regional
+  model, when coor=1 is used and nodex is not equal to nodey, the maximum
+  value of phi coordinate is set incorrectly. These parts of the code are
+  affected:
+  - the initial temperature of regional model with tic_method 0 or 2.
+  - the tracer module of regional model.
+  - the lith_age module of regional model.
+
+* Fixed a bug in geoid when nprocz>1. The geoid contribution due to topography
+  would contain artitrary result if more than one processor in z direction is
+  used.
+
+* Fixed a dead-lock problem in full-regional coupling model.
+
+* visual/project_geoid.c: Fixed a typo in memory allocation that led
+  to core dump. Changed the order of input arguments to match the manual.
+
+* Closed *.tracer_log.* files before the program exits.
+
+More details can be found in CIG Issue Tracker
+(http://geodynamics.org/roundup/issues/).
+
+
 Version 3.0.2
 
 * Fixed a bug in HDF5 output which causes compilation error (Issue 131);
