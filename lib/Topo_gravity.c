@@ -30,6 +30,12 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
+void myerror(char *,struct All_variables *);
+void sphere_expansion(struct All_variables *, float **, float *, float *);
+void sum_across_depth_sph1(struct All_variables *, float *, float *);
+void broadcast_vertical(struct All_variables *, float *, float *, int);
+
+
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
     float **tpg,**tpgb;
@@ -616,10 +622,9 @@ static void geoid_from_topography(struct All_variables *E,
         }
     }
 
-
-    /* accumulate geoid to the surface (top processors) */
-    sum_across_depth_sph1(E, geoid_tpgb[0], geoid_tpgb[1]);
-
+    /* send arrays to all processors in the same vertical column */
+    broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
+    broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
 
     for (j=0; j<2; j++) {
         free ((void *) tpgt[j]);

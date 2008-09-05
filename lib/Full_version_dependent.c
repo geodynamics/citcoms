@@ -273,6 +273,7 @@ void full_construct_tic_from_input(struct All_variables *E)
   double con;
   double modified_plgndr_a(int, int, double);
   void temperatures_conform_bcs();
+  void debug_sphere_expansion(struct All_variables *);
 
   noy=E->lmesh.noy;
   nox=E->lmesh.nox;
@@ -388,6 +389,8 @@ void full_construct_tic_from_input(struct All_variables *E)
 
   temperatures_conform_bcs(E);
 
+  /* debugging the code of expanding spherical harmonics */
+  debug_sphere_expansion(E);
   return;
 }
 

@@ -49,11 +49,7 @@ void sphere_expansion(E,TG,sphc,sphs)
      float **TG,*sphc,*sphs;
 {
     int el,nint,d,p,i,m,j,es,mm,ll,rand();
-    //double t,f,sphere_h();
     void sum_across_surf_sph1();
-    void get_global_1d_shape_fn();
-    struct Shape_function1 M;
-    struct Shape_function1_dA dGamma;
 
     for (i=0;i<E->sphere.hindice;i++)    {
         sphc[i] = 0.0;
@@ -62,9 +58,6 @@ void sphere_expansion(E,TG,sphc,sphs)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for (es=1;es<=E->lmesh.snel;es++)   {
-            el = es*E->lmesh.elz;
-
-            get_global_1d_shape_fn(E,el,&M,&dGamma,1,m);
 
             for (ll=0;ll<=E->output.llmax;ll++)
                 for (mm=0; mm<=ll; mm++)   {
@@ -78,12 +71,12 @@ void sphere_expansion(E,TG,sphc,sphs)
                                 * E->sphere.tablesplm[m][j][p]
                                 * E->sphere.tablescosf[m][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * dGamma.vpt[GMVGAMMA(1,nint)];
+                                * E->surf_det[m][nint][es];
                             sphs[p] += TG[m][E->sien[m][es].node[d]]
                                 * E->sphere.tablesplm[m][j][p]
                                 * E->sphere.tablessinf[m][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * dGamma.vpt[GMVGAMMA(1,nint)];
+                                * E->surf_det[m][nint][es];
                         }
                     }
 
@@ -92,6 +85,51 @@ void sphere_expansion(E,TG,sphc,sphs)
         }
 
     sum_across_surf_sph1(E,sphc,sphs);
+
+    return;
+}
+
+
+void debug_sphere_expansion(struct All_variables *E)
+{
+    /* expand temperature field (which should be a sph. harm. load)
+     * and output the expansion coeff. to stderr
+     */
+    int m, i, j, k, p, node;
+    int ll, mm;
+    float *TT[NCS], *sph_harm[2];
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+        TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+
+    /* sin coeff */
+    sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+    /* cos coeff */
+    sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+
+    for(k=1;k<=E->lmesh.noz;k++)  {
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=E->lmesh.noy;i++)
+                for(j=1;j<=E->lmesh.nox;j++)  {
+                    node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+                    p = j + (i-1)*E->lmesh.nox;
+                    TT[m][p] = E->T[m][node];
+                }
+
+        /* expand TT into spherical harmonics */
+        sphere_expansion(E, TT, sph_harm[0], sph_harm[1]);
+
+        /* only the first nprocz CPU needs output */
+        if(E->parallel.me < E->parallel.nprocz) {
+            for (ll=0;ll<=E->output.llmax;ll++)
+                for (mm=0; mm<=ll; mm++)   {
+                    p = E->sphere.hindex[ll][mm];
+                    fprintf(stderr, "T expanded layer=%d ll=%d mm=%d -- %12g %12g\n",
+                            k+E->lmesh.nzs-1, ll, mm,
+                            sph_harm[0][p], sph_harm[1][p]);
+                }
+        }
+    }
 
     return;
 }
