@@ -1,3 +1,68 @@
+2008-09-05 23:59  tan2
+
+	* configure.ac, setup.py: Updated version number
+
+2008-09-05 23:37  tan2
+
+	* NEWS: Updated file NEWS for v3.0.3
+
+2008-09-05 20:25  tan2
+
+	* lib/Regional_sphere_related.c: Fixed issue 158: incorrect 
+	  E->control.fi_max with coor=1.
+
+2008-09-05 19:46  tan2
+
+	* lib/Full_version_dependent.c, lib/Global_operations.c,
+	  lib/Size_does_matter.c, lib/Sphere_harmonics.c,
+	  lib/Topo_gravity.c: Compute E->surf_det (top surface area, ie.
+	  surface jacobian, of an element) on a unit sphere. Use
+	  E->surf_det, instead of the surface jacobian returned by
+	  get_global_1d_shape_fn(), to expand spherical harmonics. The
+	  surface jacobian returned by get_global_1d_shape_fn() is defined
+	  at the top radius of the current mesh. When nprocz>1, the top
+	  radius is not the same as the outer radius of the sphere for
+	  processors. As a result, the spherical harmonics expansion gave
+	  incorrect result when nprocz>1 in the previous revisions.
+	  
+	  Send geoid arrays to vertical columns of
+	  processors. After this fix, the geoid output is the same for
+	  nprocz=1 and nprocz>1.
+	  
+	  Added debugging (but
+	  disabled) function for spherical harmonics expansion.
+
+2008-06-19 23:19  tan2
+
+	* lib/Ggrd_handling.c, lib/Global_operations.c,
+	  lib/Output_gzdir.c, module/Exchanger/Boundary.cc: Using firewall
+	  channel for the error to stop the code.
+	  
+	  Replaced MPI_COMM_WORLD by E->parallel.world.
+	  
+	  MPI_COMM_WORLD is the global communicator. E->parallel.world is
+	  the communicator for the current solver. These two are different
+	  in a coupled run. Before this fix, full-regional coupling will
+	  dead lock.
+	  
+2008-06-19 23:10  tan2
+
+	* visual/project_geoid.c: Checked the validity of input.
+	  
+2008-06-19 23:06  tan2
+
+	* visual/project_geoid.c: Fixed typo in memory allocation
+	  procedure that led to core dump. Fixed the order of input
+	  arguments to match the manual.
+	  
+2008-06-19 23:02  tan2
+
+	* lib/Instructions.c: Close trace_log files when finalizing.
+	  
+2008-03-07 19:48  tan2
+
+	* ChangeLog: Update ChangeLog upto r11290
+
 2008-03-07 19:33  tan2
 
 	* NEWS, configure.ac: Update NEWS and version number for v3.0.2
@@ -42,7 +107,7 @@
 2007-11-08 14:41  tan2
 
 	* ChangLog: Updated file ChangeLog to r8244
-                                                                                
+
 2007-11-08 22:31  tan2
 
 	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced a
