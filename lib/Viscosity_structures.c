@@ -580,6 +580,8 @@ void visc_from_T(E,EEta,propogate)
 				   thickness, and T_sol0 is something
 				   like 0.6, and ET_red = 0.1
 
+				   (same as case 3, but for viscosity reduction)
+
 				*/
       dr = E->sphere.ro - E->sphere.ri;
         for(m=1;m<=E->sphere.caps_per_proc;m++)

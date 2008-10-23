@@ -102,7 +102,8 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  /* opttional output below */
+
+  /* optional output below */
 
   /* compute and output geoid (in spherical harmonics coeff) */
   if (E->output.geoid)		/* this needs to be called after the
@@ -352,6 +353,7 @@ void output_stress(struct All_variables *E, int cycles)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
+    /* those are sorted like stt spp srr stp str srp  */
     for (node=1;node<=E->lmesh.nno;node++)
       fprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
               E->gstress[m][(node-1)*6+1],

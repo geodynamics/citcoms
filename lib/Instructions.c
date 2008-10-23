@@ -413,7 +413,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("verbose",&(E->control.verbose),"off",m);
   input_boolean("see_convergence",&(E->control.print_convergence),"off",m);
 
-  input_int("stokes_flow_only",&(E->control.stokes),"0",m);
+  input_boolean("stokes_flow_only",&(E->control.stokes),"off",m);
 
   //input_boolean("remove_hor_buoy_avg",&(E->control.remove_hor_buoy_avg),"on",m);
 
@@ -564,6 +564,26 @@ void read_initial_settings(struct All_variables *E)
   */
   input_int("ggrd_vtop_control",&(E->control.ggrd.vtop_control),"0",m); 
   input_string("ggrd_vtop_dir",E->control.ggrd.vtop_dir,"",m); /* file to read prefactors from */
+
+  /* 
+     read in omega[4] vector 
+
+     if omega[0] is > 0, will read in a code.grd file instead of
+     vp.grd/vt.grd and assign the Euler vector omega[1-3] to all
+     locations with that omega[0] code. The Euler pole is assumed to
+     be in deg/Myr
+
+     ggrd_vtop_omega=4,-0.0865166,0.277312,-0.571239
+
+     will assign the NUVEL-1A NNR Pacific plate rotation vector to all
+     points with code 4
+
+  */
+  E->control.ggrd_vtop_omega[0] = 0;
+  input_float_vector("ggrd_vtop_omega",4,E->control.ggrd_vtop_omega,m);
+  if(E->control.ggrd_vtop_omega[0] > 0)
+    E->control.ggrd.vtop_control = 1;
+
   if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
     E->control.vbcs_file = 1;
 

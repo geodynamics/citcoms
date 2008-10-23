@@ -408,9 +408,9 @@ void stress_conform_bcs(struct All_variables *E)
   int m, i, j, k, n, d;
   const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
   const int stress_index[4][4] = { {0, 0, 0, 0},
-                                   {0, 1, 4, 5},
-                                   {0, 4, 2, 6},
-                                   {0, 5, 6, 3} };
+                                   {0, 1, 4, 5}, /* N-S sides */
+                                   {0, 4, 2, 6}, /* E-W sides */
+                                   {0, 5, 6, 3} }; /* U-D sides */
 
   if(E->control.side_sbcs) {
 

@@ -519,6 +519,7 @@ struct CONTROL {
   struct ggrd_master ggrd;
   float *surface_rayleigh;
   int ggrd_allow_mixed_vbcs;
+  float ggrd_vtop_omega[4];
 #endif
     double accuracy;
     double vaccuracy;

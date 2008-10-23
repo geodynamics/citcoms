@@ -881,12 +881,12 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
     gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
     for (node=1;node<=E->lmesh.nno;node++)
       gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[m][(node-1)*6+1],
-              E->gstress[m][(node-1)*6+2],
-              E->gstress[m][(node-1)*6+3],
-              E->gstress[m][(node-1)*6+4],
-              E->gstress[m][(node-1)*6+5],
-              E->gstress[m][(node-1)*6+6]);
+              E->gstress[m][(node-1)*6+1], /*  stt */
+              E->gstress[m][(node-1)*6+2], /*  spp */
+              E->gstress[m][(node-1)*6+3], /*  srr */
+              E->gstress[m][(node-1)*6+4], /*  stp */
+              E->gstress[m][(node-1)*6+5], /*  str */
+              E->gstress[m][(node-1)*6+6]); /* srp */
   }
   gzclose(fp1);
 }

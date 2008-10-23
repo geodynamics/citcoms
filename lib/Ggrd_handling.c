@@ -31,6 +31,11 @@ routines that deal with GMT/netcdf grd I/O as supported through
 the ggrd subroutines of the hc package
 
 */
+#ifdef USE_GZDIR
+#include <zlib.h>
+gzFile *gzdir_output_open(char *,char *);
+
+#endif
 
 #include <math.h>
 #include "global_defs.h"
@@ -67,7 +72,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   MPI_Status mpi_stat;
   int mpi_rc;  
   int mpi_inmsg, mpi_success_message = 1;
-
+  static ggrd_boolean shift_to_pos_lon = FALSE;	/* this should not be needed anymore */
   report(E,"ggrd_init_tracer_flavors: ggrd mat init");
 
   /* 
@@ -93,6 +98,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 				ggrd_ict,FALSE,FALSE)){
     myerror(E,"ggrd tracer init error");
   }
+  /* shold we decide on shifting to positive longitudes, ie. 0...360? */
   if(E->parallel.me <  E->parallel.nproc-1){
     /* tell the next proc to go ahead */
     mpi_rc = MPI_Send(&mpi_success_message, 1,
@@ -117,7 +123,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	theta = E->trace.basicq[j][0][kk];
 	/* interpolate from grid */
 	if(!ggrd_grdtrack_interpolate_tp((double)theta,(double)phi,
-					 ggrd_ict,&indbl,FALSE)){
+					 ggrd_ict,&indbl,FALSE,shift_to_pos_lon)){
 	  snprintf(error,255,"ggrd_init_tracer_flavors: interpolation error at lon: %g lat: %g",
 		   phi*180/M_PI, 90-theta*180/M_PI);
 	  myerror(E,error);
@@ -168,6 +174,8 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   double temp1,tbot,tgrad,tmean,tadd,rho_prem;
   char gmt_string[10];
   int i,j,k,m,node,noxnoz,nox,noy,noz;
+  static ggrd_boolean shift_to_pos_lon = FALSE;
+  
   if(is_global)		/* decide on GMT flag */
     sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
   else
@@ -200,20 +208,21 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 		      0, E->parallel.world, &mpi_stat);
   }
 
-  if(E->control.ggrd.temp_init.scale_with_prem){/* initialize PREM */
-    if(prem_read_model(E->control.ggrd.temp_init.prem.model_filename,
-		       &E->control.ggrd.temp_init.prem, (E->parallel.me == 0)))
+  if(E->control.ggrd.temp.scale_with_prem){/* initialize PREM */
+    if(prem_read_model(E->control.ggrd.temp.prem.model_filename,
+		       &E->control.ggrd.temp.prem, (E->parallel.me == 0)))
       myerror(E,"PREM init error");
   }
   /*
      initialize the GMT grid files
   */
-  E->control.ggrd.temp_init.d[0].init = FALSE;
-  if(ggrd_grdtrack_init_general(TRUE,E->control.ggrd.temp_init.gfile,
-				E->control.ggrd.temp_init.dfile,gmt_string,
-				E->control.ggrd.temp_init.d,(E->parallel.me == 0),
+  E->control.ggrd.temp.d[0].init = FALSE;
+  if(ggrd_grdtrack_init_general(TRUE,E->control.ggrd.temp.gfile,
+				E->control.ggrd.temp.dfile,gmt_string,
+				E->control.ggrd.temp.d,(E->parallel.me == 0),
 				FALSE))
     myerror(E,"grd init error");
+  /*  */
   if(E->parallel.me <  E->parallel.nproc-1){
     /* tell the next processor to go ahead with the init step	*/
     mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
@@ -238,7 +247,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   /*
      mean temp is (top+bot)/2 + offset
   */
-  tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd.temp_init.offset;
+  tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd.temp.offset;
 
 
   for(m=1;m <= E->sphere.caps_per_proc;m++)
@@ -253,32 +262,37 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 	  */
 	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],(double)E->sx[m][1][node],
 					    (double)E->sx[m][2][node],
-					    E->control.ggrd.temp_init.d,&tadd,
-					    FALSE))
-	    myerror(E,"ggrd_temp_init_general");
-	  if(E->control.ggrd.temp_init.scale_with_prem){
+					    E->control.ggrd.temp.d,&tadd,
+					    FALSE,shift_to_pos_lon)){
+	    fprintf(stderr,"%g %g %g\n",E->sx[m][2][node]*57.29577951308232087,
+		    90-E->sx[m][1][node]*57.29577951308232087,(1-E->sx[m][3][node])*6371);
+		    
+	    myerror(E,"ggrd__temp_init_general: interpolation error");
+
+	  }
+	  if(E->control.ggrd.temp.scale_with_prem){
 	    /*
 	       get the PREM density at r for additional scaling
 	    */
-	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp_init.prem);
+	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp.prem);
 	    if(rho_prem < 3200.0)
 	      rho_prem = 3200.0; /* we don't want the density of water */
 	    /*
 	       assign temperature
 	    */
-	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp_init.scale *
+	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp.scale *
 	      rho_prem / E->data.density;
 	  }else{
 	    /* no PREM scaling */
-	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp_init.scale;
+	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp.scale;
 	  }
 
-	  if(E->control.ggrd.temp_init.limit_trange){
+	  if(E->control.ggrd.temp.limit_trange){
 	    /* limit to 0 < T < 1 ?*/
 	    E->T[m][node] = min(max(E->T[m][node], 0.0),1.0);
 	  }
 	  //fprintf(stderr,"z: %11g T: %11g\n",E->sx[m][3][node],E->T[m][node]);
-	  if(E->control.ggrd.temp_init.override_tbc){
+	  if(E->control.ggrd.temp.override_tbc){
 	    if((k == 1) && (E->mesh.bottbc == 1)){ /* bottom TBC */
 	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
 	      E->sphere.cap[m].TB[2][node] =  E->T[m][node];
@@ -300,7 +314,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
      free the structure, not needed anymore since T should now
      change internally
   */
-  ggrd_grdtrack_free_gstruc(E->control.ggrd.temp_init.d);
+  ggrd_grdtrack_free_gstruc(E->control.ggrd.temp.d);
   /*
      end temperature/density from GMT grd init
   */
@@ -326,7 +340,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
   char gmt_string[10],char_dummy;
   double indbl,indbl2,age,f1,f2,vip,rout[3],xloc[4];
   char tfilename[1000];
-
+  static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
   const int ends = enodes[dims];
 
@@ -430,16 +444,18 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	      xloc[1]/=4.;xloc[2]/=4.;xloc[3]/=4.;
 	      xyz2rtpd(xloc[1],xloc[2],xloc[3],rout);
 	      /* material */
-	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.mat+i1),&indbl,FALSE)){
-		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			  rout[1],rout[2]);
+	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.mat+i1),&indbl,
+					       FALSE,shift_to_pos_lon)){
+		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at lon: %g lat: %g\n",
+			  rout[2]*180/M_PI,90-rout[1]*180/M_PI);
 		  parallel_process_termination();
 	      }
 	      if(interpolate){
 		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],
-						 (E->control.ggrd.mat+i2),&indbl2,FALSE)){
-		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-			  rout[1],rout[2]);
+						 (E->control.ggrd.mat+i2),&indbl2,
+						 FALSE,shift_to_pos_lon)){
+		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at lon: %g lat: %g\n",
+			  rout[2]*180/M_PI,90-rout[1]*180/M_PI);
 		  parallel_process_termination();
 		}
 		/* average smoothly between the two tectonic stages */
@@ -498,6 +514,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
   char gmt_string[10],char_dummy;
   double indbl,indbl2,age,f1,f2,vip,rout[3],xloc[4];
   char tfilename[1000];
+  static ggrd_boolean shift_to_pos_lon = FALSE;
+
   const int dims=E->mesh.nsd;
   const int ends = enodes[dims];
   /* dimensional ints */
@@ -568,7 +586,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
 	node = j * E->lmesh.noz ;
 	rout[1] = (double)E->sx[m][1][node];
 	rout[2] = (double)E->sx[m][2][node];
-	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,FALSE)){
+	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,
+					 FALSE,shift_to_pos_lon)){
 	  fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
 		  rout[1],rout[2]);
 	  parallel_process_termination();
@@ -576,7 +595,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
 	//fprintf(stderr,"%i %i %g %g %g\n",j,E->lmesh.nsf,rout[1],rout[2],indbl);
 	if(interpolate){
 	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],
-					   (E->control.ggrd.ray+i2),&indbl2,FALSE)){
+					   (E->control.ggrd.ray+i2),&indbl2,
+					   FALSE,shift_to_pos_lon)){
 	    fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
 		    rout[1],rout[2]);
 	    parallel_process_termination();
@@ -604,31 +624,50 @@ read surface velocity boundary conditions from netcdf grd files
 
 */
 
+
+
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
-  int mpi_rc,interpolate,timedep;
+  int mpi_rc,interpolate,timedep,use_codes,code;
   int mpi_inmsg, mpi_success_message = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level;
-  int noxg,nozg,noyg,noxl,noyl,nozl,lselect,idim,noxgnozg,noxlnozl;
+  int noxg,nozg,noyg,noxl,noyl,nozl,lselect,idim,noxgnozg,noxlnozl,save_codes;
   char gmt_string[10],char_dummy;
   static int lc =0;			/* only for debugging */
-  double vin1[2],vin2[2],age,f1,f2,vp,vt,vscale,rout[3],cutoff;
+  double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
+    cos_theta,sin_phi,cos_phi;
   char tfilename1[1000],tfilename2[1000];
 
+  static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
+#ifdef USE_GZDIR
+  gzFile *fp1;
+#else
+  myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
+#endif
+  /* read in plate code files?  */
+  use_codes = (E->control.ggrd_vtop_omega[0] > 1e-7)?(1):(0);
+  save_codes = 0;
+  /*  */
   if(E->mesh.topvbc != 1)
     myerror(E,"ggrd_read_vtop_from_file: top velocity BCs, but topvbc is free slip");
   /* global, top level number of nodes */
   noxg = E->lmesh.nox;nozg=E->lmesh.noz;noyg=E->lmesh.noy;
   noxgnozg = noxg*nozg;
   
-  /* velocity scaling, assuming input is cm/yr  */
+  /* 
+     velocity scaling, assuming input is cm/yr  
+  */
   vscale = E->data.scalev * E->data.timedir;
-  
+  if(use_codes)
+    vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
   if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { 
     
-    /* top processor only */
+    /* 
+       TOP PROCESSORs ONLY 
+
+    */
     
     /*
       if we have not initialized the time history structure, do it now
@@ -650,10 +689,11 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities for %s setup\n",
 		is_global?("global"):("regional"));
       if(is_global){		/* decide on GMT flag */
-	//sprintf(gmt_string,GGRD_GMT_XPERIODIC_STRING); /* periodic */
+	//sprintf(gmt_string,""); /* periodic */
 	sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
       }else
 	sprintf(gmt_string,"");
+
       /*
 	
       initialization steps
@@ -674,26 +714,54 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	
 	*/
 	if(!timedep){ /* constant */
-	  sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
-	sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
-      } else {			/* f(t) */
-	sprintf(tfilename1,"%s/%i/vt.grd",E->control.ggrd.vtop_dir,i+1);
-	sprintf(tfilename2,"%s/%i/vp.grd",E->control.ggrd.vtop_dir,i+1);
+	  if(use_codes)
+	    sprintf(tfilename1,"%s/code.grd",E->control.ggrd.vtop_dir);
+	  else{
+	    sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
+	    sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
+	  }
+	} else {			/* f(t) */
+	  if(use_codes)
+	    sprintf(tfilename1,"%s/%i/code.grd",E->control.ggrd.vtop_dir,i+1);
+	  else{
+	    sprintf(tfilename1,"%s/%i/vt.grd",E->control.ggrd.vtop_dir,i+1);
+	    sprintf(tfilename2,"%s/%i/vp.grd",E->control.ggrd.vtop_dir,i+1);
+	  }
+	}
+	if(use_codes){
+	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
+					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE))
+	    myerror(E,"ggrd init error codes");
+
+	}else{
+	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
+					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE))
+	    myerror(E,"ggrd init error vt");
+	  if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
+					gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE))
+	    myerror(E,"ggrd init error vp"); 
+	}
+      }/* all grids read */
+      if(use_codes){
+	save_codes = 1;
+	snprintf(tfilename1,1000,"%s/codes.%d.gz", E->control.data_dir,E->parallel.me);
+	fp1 = gzdir_output_open(tfilename1,"w");
       }
-      if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
-				    gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE))
-	myerror(E,"ggrd init error vt");
-      if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
-				    gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE))
-	myerror(E,"ggrd init error vp"); 
-      } /* all grids read */
       if(E->parallel.me == 0)
-	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
-		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
-    }/* end init */
+	if(use_codes)
+	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
+		  E->control.ggrd_vtop_omega[1],
+		  E->control.ggrd_vtop_omega[2],
+		  E->control.ggrd_vtop_omega[3],
+		  (int)E->control.ggrd_vtop_omega[0]);
+	else
+	  fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
+		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
+    } /* end init */
+  
     if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
       /* 
-	 either first time around, or time-dependent 
+	 either first time around, or time-dependent assignment
       */
       age = find_age_in_MY(E);
       if(timedep){
@@ -719,14 +787,23 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	interpolate = 0;		/* single timestep, use single file */
 	i1 = 0;
 	if(E->parallel.me == 0)
-	  fprintf(stderr,"ggrd_read_vtop_from_file: constant velocity BC \n");
+	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
       }
       if(E->parallel.me==0)
 	fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
-		timedep,age); 
+		timedep,age);
+      
       /* if mixed BCs are allowed, need to reassign the boundary
-       condition */
+	 condition */
       if(E->control.ggrd_allow_mixed_vbcs){
+
+	/* 
+	   
+	mixed BC part
+
+	*/
+	if(use_codes)
+	  myerror(E,"cannot mix Euler velocities for plate codes and mixed vbcs");
 	if(E->parallel.me == 0)
 	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
 	
@@ -751,22 +828,23 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		rout[2] = E->SX[level][m][2][nodel];
 		/* find vp */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
-					       vin1,FALSE)){
+						 vin1,FALSE,shift_to_pos_lon)){
 		  fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
 			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
 		if(interpolate){	/* second time */
-		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),vin2,FALSE)){
+		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),vin2,
+						   FALSE,shift_to_pos_lon)){
 		    fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
 			    rout[1],rout[2]);
 		    parallel_process_termination();
 		  }
-		  vp = (f1*vin1[0] + f2*vin2[0]); /* unscaled! */
+		  v[2] = (f1*vin1[0] + f2*vin2[0]); /* vphi unscaled! */
 		}else{
-		  vp = vin1[0];
+		  v[2] = vin1[0]; /* vphi */
 		}
-		if(fabs(vp) > cutoff){
+		if(fabs(v[2]) > cutoff){
 		  /* free slip */
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
@@ -784,72 +862,118 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    /* sum up all assignments */
 	  } /* cap */
 	} /* level */
-      }	/* top proc branch */
-    } /* end mixed BC assign */
+      }	 /* end mixed BC assign */
 
-    /* 
-
-    now loop through all nodes and assign velocity boundary condition
-    values
-
-    */
-    for (m=1;m <= E->sphere.caps_per_proc;m++) {
-      /* scaled cutoff velocity */
-      cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
-      for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
-	for(i=1;i <= noxg;i++)    {
-	  nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
-	  /*  */
-	  rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
-	  rout[2] = E->sx[m][2][nodel];
-	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
-					   vin1,FALSE)){
-	    fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
-		    rout[1],rout[2]);
-	    parallel_process_termination();
-	  }
-	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
-					   (vin1+1),FALSE)){
-	    fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
-		    rout[1],rout[2]);
-	    parallel_process_termination();
-	  }
-	  if(interpolate){	/* second time */
-	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,FALSE)){
-	      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-		      rout[1],rout[2]);
-	      parallel_process_termination();
-	    }
-	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),FALSE)){
-	      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
-		      rout[1],rout[2]);
-	      parallel_process_termination();
-	    }
-	    vt = (f1*vin1[0] + f2*vin2[0])*vscale;
-	    vp = (f1*vin1[1] + f2*vin2[1])*vscale;
-	  }else{
-	    vt = vin1[0]*vscale;
-	    vp = vin1[1]*vscale;
-	  }
-	  if(fabs(vp) > cutoff){
-	    /* huge velocitie - free slip */
-	    E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
-	    E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
-	  }else{
-	    /* regular no slip , assign velocities as BCs */
-	    E->sphere.cap[m].VB[1][nodel] = vt;	/* theta */
-	    E->sphere.cap[m].VB[2][nodel] = vp;	/* phi */
-	  }
-	  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+      /* 
+	 
+      now loop through all nodes and assign velocity boundary condition
+      values
+      
+      */
+      for (m=1;m <= E->sphere.caps_per_proc;m++) {
+	/* scaled cutoff velocity */
+	if(!use_codes)		/* else, is not defined */
+	  cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+	else{
+	  cutoff = 1e30;
+	  if(save_codes)	/* those will be surface nodes only */
+	    gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
 	}
-      }	/* end surface node loop */
-    } /* end cap loop */
-
-    if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
-      ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
-      ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
+	for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
+	  for(i=1;i <= noxg;i++)    {
+	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
+	    /*  */
+	    rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
+	    rout[2] = E->sx[m][2][nodel];
+	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
+					     vin1,FALSE,shift_to_pos_lon)){
+	      fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
+		      rout[1],rout[2]);
+	      parallel_process_termination();
+	    }
+	    if(!use_codes)
+	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
+					       (vin1+1),FALSE,shift_to_pos_lon)){
+		fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
+			rout[1],rout[2]);
+		parallel_process_termination();
+	      }
+	    if(interpolate){	/* second time */
+	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,
+					       FALSE,shift_to_pos_lon)){
+		fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
+			rout[1],rout[2]);
+		parallel_process_termination();
+	      }
+	      if(!use_codes){
+		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),
+						 FALSE,shift_to_pos_lon)){
+		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
+			  rout[1],rout[2]);
+		  parallel_process_termination();
+		}
+		v[1] = (f1*vin1[0] + f2*vin2[0])*vscale; /* theta */
+		v[2] = (f1*vin1[1] + f2*vin2[1])*vscale; /* phi */
+	      }else{
+		v[1] = (f1*vin1[0] + f2*vin2[0]); /* theta */
+	      }
+	    }else{
+	      if(!use_codes){
+		v[1] = vin1[0]*vscale; /* theta */
+		v[2] = vin1[1]*vscale; /* phi */
+	      }else{
+		v[1] = vin1[0];	/* theta */
+	      }
+	    }
+	    if(use_codes){
+	      /* find code from v[1], theta */
+	      code = (int)(v[1] + 0.5);
+	      if(save_codes)	/* lon lat code */
+		gzprintf(fp1, "%9.4f %9.4f %i\n",
+			 rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
+	      if((int)E->control.ggrd_vtop_omega[0] == code){
+		/* within plate */
+		sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
+		sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
+  		/* compute spherical velocities in cm/yr at this
+		   location, assuming rotation pole is in deg/Myr */
+		vx[1]=E->control.ggrd_vtop_omega[2]*E->x[m][3][nodel] - E->control.ggrd_vtop_omega[3]*E->x[m][2][nodel]; 
+		vx[2]=E->control.ggrd_vtop_omega[3]*E->x[m][1][nodel] - E->control.ggrd_vtop_omega[1]*E->x[m][3][nodel]; 
+		vx[3]=E->control.ggrd_vtop_omega[1]*E->x[m][2][nodel] - E->control.ggrd_vtop_omega[2]*E->x[m][1][nodel]; 
+		/*  */
+		v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
+		v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phie */
+		/* scale */
+		v[1] *= vscale;v[2] *= vscale;
+	      }else{
+		v[1] = v[2] = 0.0;
+	      }
+	    }
+	    /* assign velociites */
+	    if(fabs(v[2]) > cutoff){
+	      /* huge velocitie - free slip */
+	      E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
+	      E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
+	    }else{
+	      /* regular no slip , assign velocities as BCs */
+	      E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
+	      E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
+	    }
+	    E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+	  }
+	}	/* end surface node loop */
+      } /* end cap loop */
+      
+      if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
+	ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
+	ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
+      }
+    } /* end assignment branch */
+    if(use_codes && save_codes){
+      save_codes = 0;
+      gzclose(fp1);
     }
-  } /* end top proc loop */
+  } /* end top proc branch */
   E->control.ggrd.vtop_control_init = 1;
   if(E->parallel.me == 0)fprintf(stderr,"vtop from grd done: %i\n",lc++);
 }
