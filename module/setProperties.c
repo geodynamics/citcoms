@@ -846,7 +846,6 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "precond", E->control.precondition, fp);
 
     getDoubleProperty(properties, "accuracy", E->control.accuracy, fp);
-    getFloatProperty(properties, "tole_compressibility", E->control.tole_comp, fp);
 
     getIntProperty(properties, "mg_cycle", E->control.mg_cycle, fp);
     getIntProperty(properties, "down_heavy", E->control.down_heavy, fp);
@@ -867,7 +866,6 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
         if(strcmp(E->control.uzawa, "cg") == 0) {
             /* more convergence parameters for "cg" */
             getIntProperty(properties, "compress_iter_maxstep", E->control.compress_iter_maxstep, fp);
-            getFloatProperty(properties, "relative_err_accuracy", E->control.relative_err_accuracy, fp);
         }
     }
 

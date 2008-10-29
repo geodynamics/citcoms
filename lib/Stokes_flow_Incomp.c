@@ -30,6 +30,7 @@
 /*   Functions which solve for the velocity and pressure fields using Uzawa-type iteration loop.  */
 
 #include <math.h>
+#include <string.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
@@ -37,23 +38,21 @@
 
 void myerror(struct All_variables *,char *);
 
-static float solve_Ahat_p_fhat(struct All_variables *E,
-                               double **V, double **P, double **F,
-                               double imp, int *steps_max);
-static float solve_Ahat_p_fhat_CG(struct All_variables *E,
-                                  double **V, double **P, double **F,
-                                  double imp, int *steps_max);
-static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
+static void solve_Ahat_p_fhat(struct All_variables *E,
+                              double **V, double **P, double **F,
+                              double imp, int *steps_max);
+static void solve_Ahat_p_fhat_CG(struct All_variables *E,
+                                 double **V, double **P, double **F,
+                                 double imp, int *steps_max);
+static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max);
-static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
+static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
-static double initial_vel_residual(struct All_variables *E,
-                                   double **V, double **P, double **F,
-                                   double imp);
-static double incompressibility_residual(struct All_variables *E,
-                                         double **V, double **r);
+static void initial_vel_residual(struct All_variables *E,
+                                 double **V, double **P, double **F,
+                                 double imp);
 
 
 /* Master loop for pressure and (hence) velocity field */
@@ -103,45 +102,85 @@ void solve_constrained_flow_iterative_pseudo_surf(E)
 
 /* ========================================================================= */
 
+static double momentum_eqn_residual(struct All_variables *E,
+                                    double **V, double **P, double **F)
+{
+    /* Compute the norm of (F - grad(P) - K*V)
+     * This norm is ~= E->monitor.momentum_residual */
+    void assemble_del2_u();
+    void assemble_grad_p();
+    void strip_bcs_from_residual();
+    double global_v_norm2();
+
+    int i, m;
+    double *r1[NCS], *r2[NCS];
+    double res;
+    const int lev = E->mesh.levmax;
+    const int neq = E->lmesh.neq;
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        r1[m] = malloc((neq+1)*sizeof(double));
+        r2[m] = malloc((neq+1)*sizeof(double));
+    }
+
+    /* r2 = F - grad(P) - K*V */
+    assemble_grad_p(E, P, E->u1, lev);
+    assemble_del2_u(E, V, r1, lev, 1);
+    for(m=1; m<=E->sphere.caps_per_proc; m++)
+        for(i=0; i<neq; i++)
+            r2[m][i] = F[m][i] - E->u1[m][i] - r1[m][i];
+
+    strip_bcs_from_residual(E, r2, lev);
+
+    res = sqrt(global_v_norm2(E, r2));
+
+    for(m=1; m<=E->sphere.caps_per_proc; m++) {
+        free(r1[m]);
+        free(r2[m]);
+    }
+    return(res);
+}
+
+
 static void print_convergence_progress(struct All_variables *E,
                                        int count, double time0,
-                                       double sq_vdotv,
-                                       double dvelocity, double dpressure)
+                                       double v_norm, double p_norm,
+                                       double dv, double dp,
+                                       double div)
 {
-    double CPU_time0();
+    double CPU_time0(), t;
+    t = CPU_time0() - time0;
 
-    fprintf(E->fp, "AhatP (%03d) after %6.2f s v=%.3e  div/v=%.3e "
-            "dv/v=%.3e and dp/p=%.3e for step %d\n",
-            count, CPU_time0()-time0, sq_vdotv,E->monitor.incompressibility,
-            dvelocity, dpressure, E->monitor.solution_cycles);
-    fprintf(stderr, "AhatP (%03d) after %6.2f s v=%.3e div/v=%.3e "
-            "dv/v=%.3e and dp/p=%.3e for step %d\n",
-            count, CPU_time0()-time0, sq_vdotv, E->monitor.incompressibility,
-            dvelocity, dpressure, E->monitor.solution_cycles);
+    fprintf(E->fp, "(%03d) %5.1f s v=%e p=%e "
+            "div/v=%.2e dv/v=%.2e dp/p=%.2e step %d\n",
+            count, t, v_norm, p_norm, div, dv, dp,
+            E->monitor.solution_cycles);
+    fprintf(stderr, "(%03d) %5.1f s v=%e p=%e "
+            "div/v=%.2e dv/v=%.2e dp/p=%.2e step %d\n",
+            count, t, v_norm, p_norm, div, dv, dp,
+            E->monitor.solution_cycles);
 
     return;
 }
 
 
 
-static float solve_Ahat_p_fhat(struct All_variables *E,
+static void solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max)
 {
-    float residual;
-
     if(E->control.inv_gruneisen == 0)
-        residual = solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
+        solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
     else {
         if(strcmp(E->control.uzawa, "cg") == 0)
-            residual = solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
+            solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
         else if(strcmp(E->control.uzawa, "bicg") == 0)
-            residual = solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
+            solve_Ahat_p_fhat_BiCG(E, V, P, F, imp, steps_max);
         else
             myerror(E, "Error: unknown Uzawa iteration\n");
     }
 
-    return(residual);
+    return;
 }
 
 
@@ -149,22 +188,25 @@ static float solve_Ahat_p_fhat(struct All_variables *E,
  * conjugate gradient (CG) iterations
  */
 
-static float solve_Ahat_p_fhat_CG(struct All_variables *E,
-                                  double **V, double **P, double **FF,
-                                  double imp, int *steps_max)
+static void solve_Ahat_p_fhat_CG(struct All_variables *E,
+                                 double **V, double **P, double **FF,
+                                 double imp, int *steps_max)
 {
     int m, j, count, valid, lev, npno, neq;
-    int gnpno;
 
-    double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *F[NCS];
+    double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *cu[NCS];
+    double *F[NCS];
     double *shuffle[NCS];
-    double alpha, delta, r0dotz0, r1dotz1,sq_vdotv;
-    double residual, v_res;
+    double alpha, delta, r0dotz0, r1dotz1;
+    double v_res;
 
-    double global_vdot(), global_pdot();
+    double global_pdot();
+    double global_v_norm2(), global_p_norm2(), global_div_norm2();
 
     double time0, CPU_time0();
-    double dpressure, dvelocity;
+    double v_norm, p_norm;
+    double dvelocity, dpressure;
+    int converging;
 
     void assemble_c_u();
     void assemble_div_u();
@@ -174,7 +216,6 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     int  solve_del2_u();
     void parallel_process_termination();
 
-    gnpno = E->mesh.npno;
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
@@ -186,11 +227,12 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
         z1[m] = (double *)malloc((npno+1)*sizeof(double));
         s1[m] = (double *)malloc((npno+1)*sizeof(double));
         s2[m] = (double *)malloc((npno+1)*sizeof(double));
+        cu[m] = (double *)malloc((npno+1)*sizeof(double));
     }
 
     time0 = CPU_time0();
     count = 0;
-
+    v_res = E->monitor.fdotf;
 
     /* copy the original force vector since we need to keep it intact
        between iterations */
@@ -203,14 +245,17 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     if(E->control.inv_gruneisen != 0) {
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(j=1;j<=npno;j++)
-                r2[m][j] = 0.0;
+                cu[m][j] = 0.0;
 
-        assemble_c_u(E, V, r2, lev);
+        assemble_c_u(E, V, cu, lev);
     }
 
 
     /* calculate the initial velocity residual */
-    v_res = initial_vel_residual(E, V, P, F, imp);
+    /* In the compressible case, the initial guess of P might be bad.
+     * Do not correct V with it. */
+    if(E->control.inv_gruneisen == 0)
+        initial_vel_residual(E, V, P, F, imp*v_res);
 
 
     /* initial residual r1 = div(V) */
@@ -221,31 +266,33 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
     if(E->control.inv_gruneisen != 0)
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(j=1;j<=npno;j++) {
-                r1[m][j] += r2[m][j];
+                r1[m][j] += cu[m][j];
             }
 
-    residual = incompressibility_residual(E, V, r1);
+    E->monitor.vdotv = global_v_norm2(E, V);
+    E->monitor.incompressibility = sqrt(global_div_norm2(E, r1)
+                                        / (1e-32 + E->monitor.vdotv));
 
-
-    sq_vdotv = sqrt(E->monitor.vdotv);
-
-    /* pressure and velocity corrections */
-    dpressure = 1.0;
+    v_norm = sqrt(E->monitor.vdotv);
+    p_norm = sqrt(E->monitor.pdotp);
     dvelocity = 1.0;
-
+    dpressure = 1.0;
+    converging = 0;
 
     if (E->control.print_convergence && E->parallel.me==0)  {
-        print_convergence_progress(E, count, time0, sq_vdotv,
-                                   dvelocity, dpressure);
+        print_convergence_progress(E, count, time0,
+                                   v_norm, p_norm,
+                                   dvelocity, dpressure,
+                                   E->monitor.incompressibility);
     }
 
 
     r0dotz0 = 0;
 
     while( (count < *steps_max) &&
-           (E->monitor.incompressibility >= E->control.tole_comp) &&
-           (dpressure >= imp) && (dvelocity >= imp) )  {
-
+           (E->monitor.incompressibility > imp) &&
+           (converging < 2) ) {
+        /* require two consecutive converging iterations to quit the while-loop */
 
         /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
@@ -287,11 +334,7 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
 
         /* alpha = <r1, z1> / <s2, F> */
-        if(valid)
-            /* alpha defined this way is the same as R&W */
-            alpha = r1dotz1 / global_pdot(E, s2, F, lev);
-        else
-            alpha = 0.0;
+        alpha = r1dotz1 / global_pdot(E, s2, F, lev);
 
 
         /* r2 = r1 - alpha * div(u1) */
@@ -313,22 +356,36 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
 
         /* compute velocity and incompressibility residual */
-        assemble_div_u(E, V, F, lev);
-        incompressibility_residual(E, V, F);
+        E->monitor.vdotv = global_v_norm2(E, V);
+        E->monitor.pdotp = global_p_norm2(E, P);
+        v_norm = sqrt(E->monitor.vdotv);
+        p_norm = sqrt(E->monitor.pdotp);
+        dvelocity = alpha * sqrt(global_v_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
+        dpressure = alpha * sqrt(global_v_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
 
-        /* compute velocity and pressure corrections */
-        dpressure = alpha * sqrt(global_pdot(E, s2, s2, lev)
-                                 / (1.0e-32 + global_pdot(E, P, P, lev)));
-        dvelocity = alpha * sqrt(global_vdot(E, E->u1, E->u1, lev)
-                                 / (1.0e-32 + E->monitor.vdotv));
+        /* how many consecutive converging iterations? */
+        if(dvelocity < imp && dpressure < imp)
+            converging++;
+        else
+            converging = 0;
+
+        assemble_div_u(E, V, z1, lev);
+        if(E->control.inv_gruneisen != 0)
+            for(m=1;m<=E->sphere.caps_per_proc;m++)
+                for(j=1;j<=npno;j++) {
+                    z1[m][j] += cu[m][j];
+            }
+        E->monitor.incompressibility = sqrt(global_div_norm2(E, z1)
+                                            / (1e-32 + E->monitor.vdotv));
 
         count++;
 
-	sq_vdotv = sqrt(E->monitor.vdotv);
 
         if (E->control.print_convergence && E->parallel.me==0)  {
-            print_convergence_progress(E, count, time0, sq_vdotv,
-                                       dvelocity, dpressure);
+            print_convergence_progress(E, count, time0,
+                                       v_norm, p_norm,
+                                       dvelocity, dpressure,
+                                       E->monitor.incompressibility);
         }
 
 
@@ -348,6 +405,14 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
 
     } /* end loop for conjugate gradient */
 
+    assemble_div_u(E, V, z1, lev);
+    if(E->control.inv_gruneisen != 0)
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(j=1;j<=npno;j++) {
+                z1[m][j] += cu[m][j];
+            }
+
+
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         free((void *) F[m]);
         free((void *) r1[m]);
@@ -355,20 +420,21 @@ static float solve_Ahat_p_fhat_CG(struct All_variables *E,
         free((void *) z1[m]);
         free((void *) s1[m]);
         free((void *) s2[m]);
+        free((void *) cu[m]);
     }
 
     *steps_max=count;
 
-    return(residual);
+    return;
 }
 
 /* Solve compressible Stokes flow using
  * bi-conjugate gradient stablized (BiCG-stab) iterations
  */
 
-static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
-                                    double **V, double **P, double **FF,
-                                    double imp, int *steps_max)
+static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
+                                   double **V, double **P, double **FF,
+                                   double imp, int *steps_max)
 {
     void assemble_div_rho_u();
     void assemble_del2_u();
@@ -377,17 +443,19 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     int  solve_del2_u();
     void parallel_process_termination();
 
-    double global_vdot(), global_pdot();
+    double global_pdot();
+    double global_v_norm2(), global_p_norm2(), global_div_norm2();
     double CPU_time0();
 
-    int gnpno;
     int npno, neq;
     int m, j, count, lev;
     int valid;
 
-    double alpha, beta, omega,sq_vdotv;
+    double alpha, beta, omega;
     double r0dotrt, r1dotrt;
-    double residual, dpressure, dvelocity;
+    double v_norm, p_norm;
+    double dvelocity, dpressure;
+    int converging;
 
     double *F[NCS];
     double *r1[NCS], *r2[NCS], *pt[NCS], *p1[NCS], *p2[NCS];
@@ -397,7 +465,6 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     double time0, v_res;
 
-    gnpno = E->mesh.npno;
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
@@ -420,6 +487,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     time0 = CPU_time0();
     count = 0;
+    v_res = E->monitor.fdotf;
 
     /* copy the original force vector since we need to keep it intact
        between iterations */
@@ -429,12 +497,29 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
 
     /* calculate the initial velocity residual */
-    v_res = initial_vel_residual(E, V, P, F, imp);
+    initial_vel_residual(E, V, P, F, imp*v_res);
 
 
     /* initial residual r1 = div(rho_ref*V) */
     assemble_div_rho_u(E, V, r1, lev);
-    residual = incompressibility_residual(E, V, r1);
+
+    E->monitor.vdotv = global_v_norm2(E, V);
+    E->monitor.incompressibility = sqrt(global_div_norm2(E, r1)
+                                        / (1e-32 + E->monitor.vdotv));
+
+    v_norm = sqrt(E->monitor.vdotv);
+    p_norm = sqrt(E->monitor.pdotp);
+    dvelocity = 1.0;
+    dpressure = 1.0;
+    converging = 0;
+
+
+    if (E->control.print_convergence && E->parallel.me==0)  {
+        print_convergence_progress(E, count, time0,
+                                   v_norm, p_norm,
+                                   dvelocity, dpressure,
+                                   E->monitor.incompressibility);
+    }
 
 
     /* initial conjugate residual rt = r1 */
@@ -443,27 +528,13 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
             rt[m][j] = r1[m][j];
 
 
-    sq_vdotv = sqrt(E->monitor.vdotv);
-
-    /* pressure and velocity corrections */
-    dpressure = 1.0;
-    dvelocity = 1.0;
-
-
-    if (E->control.print_convergence && E->parallel.me==0)  {
-        print_convergence_progress(E, count, time0, sq_vdotv,
-                                   dvelocity, dpressure);
-    }
-
-
     valid = 1;
     r0dotrt = alpha = omega = 0;
 
     while( (count < *steps_max) &&
-           ((E->monitor.incompressibility >= E->control.tole_comp) &&
-            (dpressure >= imp) && (dvelocity >= imp)) )  {
-
-
+           (E->monitor.incompressibility > imp) &&
+           (converging < 2) ) {
+        /* require two consecutive converging iterations to quit the while-loop */
 
         /* r1dotrt = <r1, rt> */
         r1dotrt = global_pdot(E, r1, rt, lev);
@@ -571,23 +642,31 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
 
         /* compute velocity and incompressibility residual */
-        assemble_div_rho_u(E, V, t0, lev);
-        incompressibility_residual(E, V, t0);
+        E->monitor.vdotv = global_v_norm2(E, V);
+        E->monitor.pdotp = global_p_norm2(E, P);
+        v_norm = sqrt(E->monitor.vdotv);
+        p_norm = sqrt(E->monitor.pdotp);
+        dvelocity = sqrt(global_v_norm2(E, F) / (1e-32 + E->monitor.vdotv));
+        dpressure = sqrt(global_v_norm2(E, s0) / (1e-32 + E->monitor.pdotp));
 
-        /* compute velocity and pressure corrections */
-        dpressure = sqrt( global_pdot(E, s0, s0, lev)
-                          / (1.0e-32 + global_pdot(E, P, P, lev)) );
-        dvelocity = sqrt( global_vdot(E, F, F, lev)
-                          / (1.0e-32 + E->monitor.vdotv) );
+        /* how many consecutive converging iterations? */
+        if(dvelocity < imp && dpressure < imp)
+            converging++;
+        else
+            converging = 0;
+
+        assemble_div_rho_u(E, V, t0, lev);
+        E->monitor.incompressibility = sqrt(global_div_norm2(E, t0)
+                                            / (1e-32 + E->monitor.vdotv));
 
 
         count++;
 
-	sq_vdotv = sqrt(E->monitor.vdotv);
-
         if(E->control.print_convergence && E->parallel.me==0) {
-            print_convergence_progress(E, count, time0, sq_vdotv,
-                                       dvelocity, dpressure);
+            print_convergence_progress(E, count, time0,
+                                       v_norm, p_norm,
+                                       dvelocity, dpressure,
+                                       E->monitor.incompressibility);
         }
 
 
@@ -626,7 +705,7 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     *steps_max=count;
 
-    return(residual);
+    return;
 
 }
 
@@ -635,21 +714,23 @@ static float solve_Ahat_p_fhat_BiCG(struct All_variables *E,
  * conjugate gradient (CG) iterations with an outer iteration
  */
 
-static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
-                                      double **V, double **P, double **F,
-                                      double imp, int *steps_max)
+static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
+                                     double **V, double **P, double **F,
+                                     double imp, int *steps_max)
 {
     int m, i;
     int cycles, num_of_loop;
-    double residual;
     double relative_err_v, relative_err_p;
     double *old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
+    double div_res;
 
     const int npno = E->lmesh.npno;
     const int neq = E->lmesh.neq;
     const int lev = E->mesh.levmax;
 
-    double global_vdot(),global_pdot();
+    double global_v_norm2(),global_p_norm2();
+    double global_div_norm2();
+    void assemble_div_rho_u();
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     	old_v[m] = (double *)malloc(neq*sizeof(double));
@@ -660,40 +741,47 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
 
     cycles = E->control.p_iterations;
 
-    residual = 1.0;
+    initial_vel_residual(E, V, P, F,
+                         imp * E->monitor.fdotf);
+
+    div_res = 1.0;
     relative_err_v = 1.0;
     relative_err_p = 1.0;
     num_of_loop = 0;
 
-    while((relative_err_v >= E->control.relative_err_accuracy ||
-           relative_err_p >= E->control.relative_err_accuracy) &&
-          num_of_loop <= E->control.compress_iter_maxstep) {
+    while((relative_err_v >= imp || relative_err_p >= imp) &&
+          (div_res > imp) &&
+          (num_of_loop <= E->control.compress_iter_maxstep)) {
 
         for (m=1;m<=E->sphere.caps_per_proc;m++) {
             for(i=0;i<neq;i++) old_v[m][i] = V[m][i];
             for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
         }
 
-        residual = solve_Ahat_p_fhat_CG(E,V,P,F,E->control.accuracy,&cycles);
+        solve_Ahat_p_fhat_CG(E, V, P, F, imp, &cycles);
+
+        /* compute norm of div(rho*V) */
+        assemble_div_rho_u(E, V, E->u1, lev);
+        div_res = sqrt(global_div_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
 
         for (m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=0;i<neq;i++) diff_v[m][i] = V[m][i] - old_v[m][i];
 
-        relative_err_v = sqrt( global_vdot(E,diff_v,diff_v,lev) /
-                               (1.0e-32 + global_vdot(E,V,V,lev)) );
+        relative_err_v = sqrt( global_v_norm2(E,diff_v) /
+                               (1.0e-32 + E->monitor.vdotv) );
 
         for (m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=npno;i++) diff_p[m][i] = P[m][i] - old_p[m][i];
 
-        relative_err_p = sqrt( global_pdot(E,diff_p,diff_p,lev) /
-                               (1.0e-32 + global_pdot(E,P,P,lev)) );
-
-        num_of_loop++;
+        relative_err_p = sqrt( global_p_norm2(E,diff_p) /
+                               (1.0e-32 + E->monitor.pdotp) );
 
         if(E->parallel.me == 0) {
-            fprintf(stderr, "Relative error err_v / v = %e and err_p / p = %e after %d loops\n\n", relative_err_v, relative_err_p, num_of_loop);
-            fprintf(E->fp, "Relative error err_v / v = %e and err_p / p = %e after %d loops\n\n", relative_err_v, relative_err_p, num_of_loop);
+            fprintf(stderr, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
+            fprintf(E->fp, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
         }
+
+        num_of_loop++;
 
     } /* end of while */
 
@@ -704,35 +792,22 @@ static float solve_Ahat_p_fhat_iterCG(struct All_variables *E,
 	free((void *) diff_p[m]);
     }
 
-    return(residual);
+    return;
 }
 
 
-static double initial_vel_residual(struct All_variables *E,
-                                   double **V, double **P, double **F,
-                                   double imp)
+static void initial_vel_residual(struct All_variables *E,
+                                 double **V, double **P, double **F,
+                                 double acc)
 {
     void assemble_del2_u();
     void assemble_grad_p();
     void strip_bcs_from_residual();
     int  solve_del2_u();
-    double global_vdot();
 
     int neq = E->lmesh.neq;
-    int gneq = E->mesh.neq;
     int lev = E->mesh.levmax;
     int i, m, valid;
-    double v_res;
-
-    v_res = sqrt(global_vdot(E, F, F, lev) / gneq);
-
-    if (E->parallel.me==0) {
-        fprintf(E->fp, "initial residue of momentum equation F %.9e %d\n",
-                v_res, gneq);
-        fprintf(stderr, "initial residue of momentum equation F %.9e %d\n",
-                v_res, gneq);
-    }
-
 
     /* F = F - grad(P) - K*V */
     assemble_grad_p(E, P, E->u1, lev);
@@ -749,7 +824,7 @@ static double initial_vel_residual(struct All_variables *E,
 
 
     /* solve K*u1 = F for u1 */
-    valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
+    valid = solve_del2_u(E, E->u1, F, acc, lev);
     if(!valid && (E->parallel.me==0)) {
         fputs("Warning: solver not converging! 0\n", stderr);
         fputs("Warning: solver not converging! 0\n", E->fp);
@@ -762,31 +837,5 @@ static double initial_vel_residual(struct All_variables *E,
         for(i=0; i<neq; i++)
             V[m][i] += E->u1[m][i];
 
-    return(v_res);
-}
-
-
-
-static double incompressibility_residual(struct All_variables *E,
-                                         double **V, double **r)
-{
-    double global_pdot();
-    double global_vdot();
-
-    int gnpno = E->mesh.npno;
-    int gneq = E->mesh.neq;
-    int lev = E->mesh.levmax;
-    double tmp1, tmp2;
-
-    /* incompressiblity residual = norm(r) / norm(V) */
-
-    tmp1 = global_vdot(E, V, V, lev);
-    tmp2 = global_pdot(E, r, r, lev);
-    E->monitor.incompressibility = sqrt((gneq / gnpno)
-                                        *( (1.0e-32 + tmp2)
-                                              / (1.0e-32 + tmp1) ));
-
-    E->monitor.vdotv = tmp1;
-
-    return(sqrt(tmp2/gnpno));;
+    return;
 }

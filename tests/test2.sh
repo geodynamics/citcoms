@@ -38,11 +38,7 @@ TEMPFILE=/tmp/$USER/tmptest2
 
 rm $FINE.* $COARSE.*
 
-
-coupledcitcoms.py  \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[101-118,120-129,131-170] \
---launcher.nodes=5 \
+../bin/citcoms --coupled \
 --layout.coarse=[0-3] \
 --layout.fine=[4] \
 --coarse=regional \
@@ -75,8 +71,7 @@ coupledcitcoms.py  \
 --fine.bc.bottbc=0 \
 --fine.bc.bottbcval=0 \
 --fine.vsolver.precond=False \
---fine.vsolver.accuracy=1e-9 \
---fine.vsolver.tole_compressibility=1e-6 \
+--fine.vsolver.accuracy=1e-4 \
 --fine.vsolver.piterations=8000 \
 --fine.vsolver.vlowstep=5000 \
 --fine.vsolver.vhighstep=10 \

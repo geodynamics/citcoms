@@ -52,7 +52,7 @@ AreaWeightedNormal::AreaWeightedNormal(const MPI_Comm& comm,
 				       const Sink& sink,
 				       const All_variables* E) :
     size_(boundary.size()),
-    toleranceOutflow_(E->control.tole_comp),
+    toleranceOutflow_(E->control.accuracy),
     nwght(size_, 0)
 {
     computeWeightedNormal(boundary, E);

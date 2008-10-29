@@ -105,8 +105,12 @@ extern "C" {
 #define MAX_LEVELS 12   /* max. number of multigrid levels */
 #define NCS      14   /* max. number of sphere caps */
 
-typedef float higher_precision;  /* matrix coeffs etc */
-typedef double higher_precision1; /* intermediate calculations for finding above coeffs */
+/* type of elt_del and elt_c arrays */
+#if 1
+    typedef float higher_precision;
+#else
+    typedef double higher_precision;
+#endif
 
 
 /* Common structures */
@@ -372,17 +376,19 @@ struct MONITOR {
     int stop_topo_loop;
     int topo_loop;
 
-    float  elapsed_time;
-    float  incompressibility;
-    float  vdotv;
+    double momentum_residual;
+    double incompressibility;
+    double fdotf;
+    double vdotv;
+    double pdotp;
+
     double cpu_time_at_start;
     double cpu_time_at_last_cycle;
+    float  elapsed_time;
 
-    float  T_interior;
-    float  T_maxvaried;
-
-  float T_interior_max_for_exit;
-
+    float T_interior;
+    float T_maxvaried;
+    float T_interior_max_for_exit;
 };
 
 struct CONTROL {
@@ -438,8 +444,6 @@ struct CONTROL {
     double augmented;
     int NASSEMBLE;
 
-    float tole_comp;
-
     float sob_tolerance;
 
     /* Rayleigh # */
@@ -456,9 +460,6 @@ struct CONTROL {
 
     /* adiabatic temperature extrapolated to the surface */
     /* float adiabaticT0; */
-
-    /**/
-    float relative_err_accuracy;
 
     /**/
     int compress_iter_maxstep;
@@ -522,7 +523,6 @@ struct CONTROL {
   float ggrd_vtop_omega[4];
 #endif
     double accuracy;
-    double vaccuracy;
     char velocity_boundary_file[1000];
     char temperature_boundary_file[1000];
     char mat_file[1000];
@@ -754,14 +754,14 @@ struct All_variables {
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1[NCS];
     double *temp[NCS],*temp1[NCS];
-    float *NP[NCS],*Mass[NCS];
-    float *MASS[MAX_LEVELS][NCS];
-    double *TMass[NCS];
+    double *Mass[NCS], *MASS[MAX_LEVELS][NCS];
+    double *TMass[NCS], *NMass[NCS];
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
 
+    float *NP[NCS];
   //float *stress[NCS];
     float *gstress[NCS];
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];

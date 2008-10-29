@@ -158,8 +158,7 @@ PyObject * PyCitcomSExchanger_CoarsereturnE(PyObject *, PyObject *args)
 
 void commonE(All_variables *E)
 {
-    E->control.accuracy = 1e-6;
-    E->control.tole_comp = 1e-7;
+    E->control.accuracy = 1e-4;
 
     E->parallel.nprocxy = 1;
 

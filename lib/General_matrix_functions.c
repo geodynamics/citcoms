@@ -65,7 +65,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   void report();
 
   int count,counts,cycles,convergent,valid;
-  int i, neq, gneq,m;
+  int i, neq, m;
 
   char message[200];
 
@@ -73,7 +73,6 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   double residual,prior_residual,r0;
   double *D1[NCS], *r[NCS], *Au[NCS];
 
-  gneq  = E->mesh.NEQ[high_lev];
   neq  = E->lmesh.NEQ[high_lev];
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
@@ -81,7 +80,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 	d0[m][i] = 0.0;
       }
 
-  r0=residual=sqrt(global_vdot(E,F,F,high_lev)/gneq);
+  r0=residual=sqrt(global_vdot(E,F,F,high_lev));
 
   prior_residual=2*residual;
   count = 0;
@@ -140,7 +139,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   count++;
 
-
+  E->monitor.momentum_residual = residual;
   E->control.total_iteration_cycles += count;
   E->control.total_v_solver_calls += 1;
 
@@ -282,7 +281,7 @@ double multi_grid(E,d1,F,acc,hl)
         d1[m][j]+=vel[levmax][m][j];
         }
 
-     residual = sqrt(global_vdot(E,F,F,hl)/E->mesh.NEQ[hl]);
+     residual = sqrt(global_vdot(E,F,F,hl));
 
       for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
         for(m=1;m<=E->sphere.caps_per_proc;m++) {
@@ -352,7 +351,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
         d0[m][i] = 0.0;
 	}
 
-    residual = sqrt(global_vdot(E,r1,r1,level)/E->mesh.NEQ[level]);
+    residual = sqrt(global_vdot(E,r1,r1,level));
 
     assert(residual != 0.0  /* initial residual for CG = 0.0 */);
     count = 0;
@@ -394,7 +393,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
 	    r2[m][i] = r1[m][i] - alpha * Ap[m][i];
 	    }
 
-	residual = sqrt(global_vdot(E,r2,r2,level)/E->mesh.NEQ[level]);
+	residual = sqrt(global_vdot(E,r2,r2,level));
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 	  shuffle[m] = r0[m]; r0[m] = r1[m]; r1[m] = r2[m]; r2[m] = shuffle[m];

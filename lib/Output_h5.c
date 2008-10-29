@@ -1610,7 +1610,6 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_int(input, "precond", E->control.precondition);
 
     status = set_attribute_double(input, "accuracy", E->control.accuracy);
-    status = set_attribute_float(input, "tole_compressibility", E->control.tole_comp);
 
     status = set_attribute_int(input, "mg_cycle", E->control.mg_cycle);
     status = set_attribute_int(input, "down_heavy", E->control.down_heavy);

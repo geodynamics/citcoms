@@ -605,8 +605,6 @@ void read_initial_settings(struct All_variables *E)
 
   input_boolean("remove_rigid_rotation",&(E->control.remove_rigid_rotation),"on",m);
 
-  input_float("tole_compressibility",&(E->control.tole_comp),"0.0",m);
-  
   input_boolean("self_gravitation",&(E->control.self_gravitation),"off",m);
   input_boolean("use_cbf_topo",&(E->control.use_cbf_topo),"off",m); /* make default on later XXX TWB */
 
@@ -649,7 +647,6 @@ void read_initial_settings(struct All_variables *E)
       if(strcmp(E->control.uzawa, "cg") == 0) {
           /* more convergence parameters for "cg" */
           input_int("compress_iter_maxstep",&(E->control.compress_iter_maxstep),"100",m);
-          input_float("relative_err_accuracy",&(E->control.relative_err_accuracy),"0.001",m);
       }
       else if(strcmp(E->control.uzawa, "bicg") == 0) {
       }
@@ -809,6 +806,9 @@ void allocate_common_vars(E)
   /* lump mass matrix for the energy eqn */
   E->TMass[j] = (double *) malloc((nno+1)*sizeof(double));
 
+  /* nodal mass */
+  E->NMass[j] = (double *) malloc((nno+1)*sizeof(double));
+
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);
 
@@ -856,7 +856,7 @@ void allocate_common_vars(E)
     E->GNX[i][j] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
     E->GDA[i][j] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
-    E->MASS[i][j]     = (float *) malloc((nno+1)*sizeof(float));
+    E->MASS[i][j]     = (double *) malloc((nno+1)*sizeof(double));
     E->ECO[i][j] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
     E->TWW[i][j] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
@@ -964,6 +964,11 @@ void allocate_velocity_vars(E)
 {
     int m,n,i,j,k,l;
 
+    E->monitor.incompressibility = 0;
+    E->monitor.fdotf = 0;
+    E->monitor.vdotv = 0;
+    E->monitor.pdotp = 0;
+
  m=0;
  n=1;
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
@@ -1023,8 +1028,7 @@ void global_default_values(E)
 
   E->control.v_steps_low = 10;
   E->control.v_steps_upper = 1;
-  E->control.accuracy = 1.0e-6;
-  E->control.vaccuracy = 1.0e-8;
+  E->control.accuracy = 1.0e-4;
   E->control.verbose=0; /* debugging/profiles */
 
   /* SECOND: values for which an obvious default setting is useful */

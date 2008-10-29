@@ -37,11 +37,7 @@ OUTPUT=zzz
 rm $FINE.* $COARSE.*
 
 
-./coupledcitcoms.sh  \
---launcher.nodes=4 \
---launcher.nodegen="n%03d" \
---launcher.nodelist=[171-172,171-172] \
-\
+../bin//citcoms --coupled  \
 --layout.coarse=[0-1] \
 --layout.fine=[2-3] \
 \
@@ -76,9 +72,7 @@ rm $FINE.* $COARSE.*
 --fine.bc.side_sbcs=on \
 \
 --coarse.vsolver.accuracy=1e-3 \
---coarse.vsolver.tole_compressibility=1e-3 \
 --fine.vsolver.accuracy=1e-3 \
---fine.vsolver.tole_compressibility=1e-3 \
 \
 --fge.excludeTop=on \
 --fge.excludeBottom=on \

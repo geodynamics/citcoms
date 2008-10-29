@@ -123,7 +123,7 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 {
     int i, j;
     double sint, sinf, cost, cosf;
-    float *V[3];
+    float *V[4];
     const int lev = E->mesh.levmax;
 
     fputs("        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"ascii\">\n", fp);
@@ -139,7 +139,7 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
             cost = E->SinCos[lev][j][2][i];
             cosf = E->SinCos[lev][j][3][i];
 
-            fprintf(fp, "%.6e %.6e %.6e %.6e\n",
+            fprintf(fp, "%.6e %.6e %.6e\n",
                     V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf,
                     V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf,
                     -V[1][i]*sint + V[3][i]*cost);

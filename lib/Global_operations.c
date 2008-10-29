@@ -583,7 +583,76 @@ double global_pdot(E,A,B,lev)
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
-  }
+}
+
+
+/* return ||V||^2 */
+double global_v_norm2(struct All_variables *E,  double **V)
+{
+    int i, m, d;
+    int eqn1, eqn2, eqn3;
+    double prod, temp;
+
+    temp = 0.0;
+    prod = 0.0;
+    for (m=1; m<=E->sphere.caps_per_proc; m++)
+        for (i=1; i<=E->lmesh.nno; i++) {
+            eqn1 = E->id[m][i].doff[1];
+            eqn2 = E->id[m][i].doff[2];
+            eqn3 = E->id[m][i].doff[3];
+            /* L2 norm  */
+            temp += (V[m][eqn1] * V[m][eqn1] +
+                     V[m][eqn2] * V[m][eqn2] +
+                     V[m][eqn3] * V[m][eqn3]) * E->NMass[m][i];
+        }
+
+    MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+    return (prod/E->mesh.volume);
+}
+
+
+/* return ||P||^2 */
+double global_p_norm2(struct All_variables *E,  double **P)
+{
+    int i, m;
+    double prod, temp;
+
+    temp = 0.0;
+    prod = 0.0;
+    for (m=1; m<=E->sphere.caps_per_proc; m++)
+        for (i=1; i<=E->lmesh.npno; i++) {
+            /* L2 norm */
+            temp += P[m][i] * P[m][i] * E->eco[m][i].area;
+        }
+
+    MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+    return (prod/E->mesh.volume);
+}
+
+
+/* return ||A||^2, where A_i is \int{div(u) d\Omega_i} */
+double global_div_norm2(struct All_variables *E,  double **A)
+{
+    int i, m;
+    double prod, temp;
+
+    temp = 0.0;
+    prod = 0.0;
+    for (m=1; m<=E->sphere.caps_per_proc; m++)
+        for (i=1; i<=E->lmesh.npno; i++) {
+            /* L2 norm of div(u) */
+            temp += A[m][i] * A[m][i] / E->eco[m][i].area;
+
+            /* L1 norm */
+            /*temp += fabs(A[m][i]);*/
+        }
+
+    MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
+
+    return (prod/E->mesh.volume);
+}
 
 
 double global_tdot_d(E,A,B,lev)

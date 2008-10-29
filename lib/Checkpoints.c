@@ -443,13 +443,14 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
 
 static void momentum_checkpoint(struct All_variables *E, FILE *fp)
 {
-    int m, i;
-    int lev = E->mesh.levmax;
+    int m;
+    float junk[2];
+    junk[0] = junk[1] = 0;
 
     write_sentinel(fp);
 
-    fwrite(&(E->monitor.vdotv), sizeof(float), 1, fp);
-    fwrite(&(E->monitor.incompressibility), sizeof(float), 1, fp);
+    /* for backward compatibility */
+    fwrite(junk, sizeof(float), 2, fp);
 
     /* the 0-th element of P/NP/EVI/VI is not init'd
      * and won't be used when read it. */
@@ -469,16 +470,18 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 {
     void v_from_vector();
     void p_to_nodes();
+    double global_v_norm2(), global_p_norm2();
 
-    int m, i;
+    int m;
     int lev = E->mesh.levmax;
+    float junk[2];
 
     read_sentinel(fp, E->parallel.me);
 
-    if(fread(&(E->monitor.vdotv), sizeof(float), 1, fp)!=1)
+    /* for backward compatibility */
+    if(fread(junk, sizeof(float), 2, fp)!=2)
       myerror("read_momentum_checkpoint: error at vdotv",E);
-    if(fread(&(E->monitor.incompressibility), sizeof(float), 1, fp)!=1)
-      myerror("read_momentum_checkpoint: error at incomp",E);
+
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points */
       if(fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp) !=  E->lmesh.npno+1)
@@ -487,6 +490,9 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
       if(fread(E->U[m], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
 	myerror("read_momentum_checkpoint: error at U",E);
     }
+
+    E->monitor.vdotv = global_v_norm2(E, E->U);
+    E->monitor.pdotp = global_p_norm2(E, E->P);
 
     /* update velocity array */
     v_from_vector(E);

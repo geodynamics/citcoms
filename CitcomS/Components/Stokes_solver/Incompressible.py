@@ -89,8 +89,7 @@ class Incompressible(CitcomComponent):
         node_assemble = prop.bool("node_assemble", default=True)
         precond = prop.bool("precond", default=True)
 
-        accuracy = prop.float("accuracy", default=1.0e-6)
-        tole_compressibility = prop.float("tole_compressibility", default=1.0e-7)
+        accuracy = prop.float("accuracy", default=1.0e-4)
         mg_cycle = prop.int("mg_cycle", default=1)
         down_heavy = prop.int("down_heavy", default=3)
         up_heavy = prop.int("up_heavy", default=3)
@@ -105,9 +104,11 @@ class Incompressible(CitcomComponent):
         uzawa = prop.str("uzawa", default="cg",
                          validator=prop.choice(["cg", "bicg"]))
         compress_iter_maxstep = prop.int("compress_iter_maxstep", default=100)
-        relative_err_accuracy = prop.float("relative_err_accuracy", default=0.001)
         remove_rigid_rotation = prop.bool("remove_rigid_rotation", default=True)
 
+        # Not used. Retained here for backward compatibility.
+        tole_compressibility = prop.float("tole_compressibility", default=1.0e-7)
+        relative_err_accuracy = prop.float("relative_err_accuracy", default=0.001)
 # version
 __id__ = "$Id$"
 
