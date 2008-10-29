@@ -106,6 +106,8 @@ extern "C" {
 #define NCS      14   /* max. number of sphere caps */
 
 /* type of elt_del and elt_c arrays */
+/* double precision doesn't help,
+ * probably due to the coordinate transformation c33matrix */
 #if 1
     typedef float higher_precision;
 #else
