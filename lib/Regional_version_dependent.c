@@ -74,7 +74,7 @@ void regional_global_derived_values(E)
    E->mesh.ely = E->mesh.noy-1;
    E->mesh.elz = E->mesh.noz-1;
 
-  /* number of nodes, including overlaping nodes between processors */
+  /* number of nodes, excluding overlaping nodes between processors */
    E->mesh.nno = E->sphere.caps*E->mesh.nox*E->mesh.noy*E->mesh.noz;
 
    E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
@@ -126,9 +126,12 @@ void regional_global_derived_values(E)
     E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
 
 
-    if(E->control.print_convergence && E->parallel.me==0)
-	fprintf(stderr,"Problem has %d x %d x %d nodes\n",E->mesh.nox,E->mesh.noz,E->mesh.noy);
-
+    if(E->control.print_convergence && E->parallel.me==0) {
+	fprintf(stderr,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+                E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
+	fprintf(E->fp,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+                E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
+    }
    return;
 }
 
