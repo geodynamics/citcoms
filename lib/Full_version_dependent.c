@@ -189,7 +189,6 @@ void full_node_locations(E)
 
   void full_coord_of_cap();
   void compute_angle_surf_area ();
-
   rr = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
   RR = (double *)  malloc((E->mesh.noz+1)*sizeof(double));
 
@@ -258,7 +257,6 @@ void full_node_locations(E)
      ii = E->sphere.capid[j];
      full_coord_of_cap(E,j,ii);
      }
-
 
   if (E->control.verbose) {
       for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {

@@ -202,6 +202,8 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   qx = malloc((temp+1)*sizeof(double));
   qy = malloc((temp+1)*sizeof(double));
 
+
+
   /* 4 corners of the cap in Cartesian coordinates */
   /* the order of corners is: */
   /*  1 - 4 */
@@ -241,6 +243,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
                             center[1]*center[1] +
                             center[2]*center[2]));;
   referencep[1] = myatan(center[1], center[0]);
+
 
   lev = E->mesh.levmax;
 
@@ -416,12 +419,12 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
        lvnox = E->lmesh.NOX[lev];
        lvnoy = E->lmesh.NOY[lev];
        lvnoz = E->lmesh.NOZ[lev];
-       
+
        node = 1;
        for (k=0; k<lvnoy; k++) {
 	 for (j=0, ns=step*lnoy*k; j<lvnox; j++, ns+=step) {
 	   theta = qx[ns];
-	   fi = qy[ns];
+	   fi =    qy[ns];
 	   
 	   cost = cos(theta);
 	   sint = sin(theta);
@@ -435,9 +438,9 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 	     E->SX[lev][m][3][node] = E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
-	     E->X[lev][m][1][node] = E->sphere.R[lev][i]*sint*cosf;
-	     E->X[lev][m][2][node] = E->sphere.R[lev][i]*sint*sinf;
-	     E->X[lev][m][3][node] = E->sphere.R[lev][i]*cost;
+	     E->X[lev][m][1][node]  = E->sphere.R[lev][i]*sint*cosf;
+	     E->X[lev][m][2][node]  = E->sphere.R[lev][i]*sint*sinf;
+	     E->X[lev][m][3][node]  = E->sphere.R[lev][i]*cost;
 	     
 	     node++;
 	   }
@@ -473,6 +476,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   free ((void *)py    );
   free ((void *)qx    );
   free ((void *)qy    );
+
 
   return;
 }

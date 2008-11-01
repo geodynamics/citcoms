@@ -286,7 +286,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                                    E->monitor.incompressibility);
     }
 
-
+  
     r0dotz0 = 0;
 
     while( (count < *steps_max) &&
@@ -304,7 +304,6 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
         r1dotz1 = global_pdot(E, r1, z1, lev);
         assert(r1dotz1 != 0.0  /* Division by zero in head of incompressibility iteration */);
 
-
         /* update search direction */
         if(count == 0)
             for (m=1; m<=E->sphere.caps_per_proc; m++)
@@ -317,7 +316,6 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                 for(j=1; j<=npno; j++)
                     s2[m][j] = z1[m][j] + delta * s1[m][j];
         }
-
 
         /* solve K*u1 = grad(s2) for u1 */
         assemble_grad_p(E, s2, F, lev);
@@ -361,7 +359,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
         v_norm = sqrt(E->monitor.vdotv);
         p_norm = sqrt(E->monitor.pdotp);
         dvelocity = alpha * sqrt(global_v_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
-        dpressure = alpha * sqrt(global_v_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
+        dpressure = alpha * sqrt(global_p_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
 
         /* how many consecutive converging iterations? */
         if(dvelocity < imp && dpressure < imp)
@@ -647,7 +645,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         v_norm = sqrt(E->monitor.vdotv);
         p_norm = sqrt(E->monitor.pdotp);
         dvelocity = sqrt(global_v_norm2(E, F) / (1e-32 + E->monitor.vdotv));
-        dpressure = sqrt(global_v_norm2(E, s0) / (1e-32 + E->monitor.pdotp));
+        dpressure = sqrt(global_p_norm2(E, s0) / (1e-32 + E->monitor.pdotp));
 
         /* how many consecutive converging iterations? */
         if(dvelocity < imp && dpressure < imp)

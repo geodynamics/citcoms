@@ -114,6 +114,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
            /* physical domain */
     (E->solver.node_locations)(E);
+    if(chatty)fprintf(stderr,"node locations done\n");
 
     allocate_velocity_vars(E);
     if(chatty)fprintf(stderr,"velocity vars done\n");
