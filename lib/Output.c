@@ -542,7 +542,7 @@ void output_comp_el(struct All_variables *E, int cycles)
         }
         fprintf(fp1,"\n");
 
-        for(i=1;i<=E->lmesh.nno;i++) {
+        for(i=1;i<=E->lmesh.nel;i++) {
             for(k=0;k<E->composition.ncomp;k++) {
                 fprintf(fp1,"%.6e ",
 			E->composition.comp_el[j][k][i]);
