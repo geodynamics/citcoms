@@ -58,9 +58,13 @@ def zslice(prefix, *ilayers):
     from math import pi
     r2d = 180.0 / pi
 
-    ## open input file and read header
-    infile = open(prefix)
-    nodex, nodey, nodez = infile.readline().split('x')
+    ## open cap file and read header
+    capfile = open(prefix)
+    try:
+        optfile = open(prefix.replace('cap', 'opt'))
+    except:
+        optfile = None
+    nodex, nodey, nodez = capfile.readline().split('x')
     nodez = int(nodez)
     #print nodez, ilayers
 
@@ -68,9 +72,14 @@ def zslice(prefix, *ilayers):
     layers = check_layers(ilayers, nodez)
     nlayer = len(layers)
 
+    ## read opt file header
+    if optfile is not None:
+        optfile.readline()
+
     ## allocate arrays
     output = range(nlayer)
     lines = range(nodez)
+    lines2 = range(nodez)
 
     ## open output files
     for i in range(nlayer):
@@ -81,7 +90,12 @@ def zslice(prefix, *ilayers):
         while 1:
             ## read nodez lines
             for j in range(nodez):
-                lines[j] = infile.readline()
+                lines[j] = capfile.readline().strip()
+
+                if optfile is not None:
+                    lines2[j] = optfile.readline().strip()
+                else:
+                    lines2[j] = ''
 
             ## file is empty or EOF?
             if not lines[nodez-1]:
@@ -93,11 +107,14 @@ def zslice(prefix, *ilayers):
                 ## spilt the first 3 columns only, the rest will be
                 ## output as-is
                 data = lines[layer].split(' ', 3)
+                data2 = lines2[layer]
                 lat = 90 - float(data[0])*r2d
                 lon = float(data[1])*r2d
-                output[i].write( '%f %f %s' % (lon, lat, data[3]) )
+                output[i].write( '%f %f %s %s\n' % (lon, lat, data[3], data2) )
 
-        infile.close()
+        capfile.close()
+        if optfile is not None:
+            optfile.close()
 
     finally:
         for i in range(nlayer):
