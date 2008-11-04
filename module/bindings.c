@@ -100,6 +100,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_set_signal__doc__},
 
+    {pyCitcom_check_settings_consistency__name__,
+     pyCitcom_check_settings_consistency,
+     METH_VARARGS,
+     pyCitcom_check_settings_consistency__doc__},
+
     {pyCitcom_velocities_conform_bcs__name__,
      pyCitcom_velocities_conform_bcs,
      METH_VARARGS,

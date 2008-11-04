@@ -73,6 +73,11 @@ extern char pyCitcom_set_signal__doc__[];
 PyObject * pyCitcom_set_signal(PyObject *, PyObject *);
 
 
+extern char pyCitcom_check_settings_consistency__name__[];
+extern char pyCitcom_check_settings_consistency__doc__[];
+PyObject * pyCitcom_check_settings_consistency(PyObject *, PyObject *);
+
+
 extern char pyCitcom_velocities_conform_bcs__name__[];
 extern char pyCitcom_velocities_conform_bcs__doc__[];
 PyObject * pyCitcom_velocities_conform_bcs(PyObject *, PyObject *);

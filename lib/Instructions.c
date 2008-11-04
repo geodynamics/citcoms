@@ -83,6 +83,7 @@ void myerror(struct All_variables *,char *);
 void open_qfiles(struct All_variables *) ;
 void read_rayleigh_from_file(struct All_variables *);
 void read_initial_settings(struct All_variables *);
+void check_settings_consistency(struct All_variables *);
 
 
 void initial_mesh_solver_setup(struct All_variables *E)
@@ -363,12 +364,24 @@ void read_initial_settings(struct All_variables *E)
   input_string("datadir_old",E->control.data_dir_old,".",m);
   input_string("datafile_old",E->control.data_prefix_old,"initialize",m);
 
-  input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
-  input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
-  input_int("mgunity",&(E->mesh.mgunity),"1",m);
+  input_int("nproc_surf",&(E->parallel.nprocxy),"1",m);
+  input_int("nprocx",&(E->parallel.nprocx),"1",m);
+  input_int("nprocy",&(E->parallel.nprocy),"1",m);
+  input_int("nprocz",&(E->parallel.nprocz),"1",m);
+
+  input_int("nodex",&(E->mesh.nox),"essential",m);
+  input_int("nodez",&(E->mesh.noz),"essential",m);
+  input_int("nodey",&(E->mesh.noy),"essential",m);
+
   input_int("levels",&(E->mesh.levels),"0",m);
-  if(E->mesh.levels > MAX_LEVELS)
-    myerror(E,"number of multigrid levels out of bound");
+
+  E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx /
+      (int) pow(2.0, E->mesh.levels - 1);
+  E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy /
+      (int) pow(2.0, E->mesh.levels - 1);
+  E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz /
+      (int) pow(2.0, E->mesh.levels - 1);
+
 
   input_int("coor",&(E->control.coor),"0",m);
   if(E->control.coor == 2){
@@ -401,11 +414,6 @@ void read_initial_settings(struct All_variables *E)
    }
 
   input_string("coor_file",E->control.coor_file,"",m);
-
-  input_int("nprocx",&(E->parallel.nprocx),"1",m);
-  input_int("nprocy",&(E->parallel.nprocy),"1",m);
-  input_int("nprocz",&(E->parallel.nprocz),"1",m);
-  input_int("nproc_surf",&(E->parallel.nprocxy),"1",m);
 
 
   input_boolean("node_assemble",&(E->control.NASSEMBLE),"off",m);
@@ -597,10 +605,6 @@ void read_initial_settings(struct All_variables *E)
 
 #endif
 
-  input_int("nodex",&(E->mesh.nox),"essential",m);
-  input_int("nodez",&(E->mesh.noz),"essential",m);
-  input_int("nodey",&(E->mesh.noy),"essential",m);
-
   input_boolean("aug_lagr",&(E->control.augmented_Lagr),"off",m);
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
@@ -743,8 +747,27 @@ void read_initial_settings(struct All_variables *E)
 
   (E->problem_settings)(E);
 
-
+  check_settings_consistency(E);
   return;
+}
+
+/* Checking the consistency of input parameters */
+void check_settings_consistency(struct All_variables *E)
+{
+    if (strcmp(E->control.SOLVER_TYPE, "cgrad") == 0) {
+        /* conjugate gradient has only one level */
+        if(E->mesh.levels != 1)
+            myerror(E, "Conjugate gradient solver is used. 'levels' must be 1.\n");
+    }
+    else {
+        /* multigrid solver needs two or more levels */
+        if(E->mesh.levels < 2)
+            myerror(E, "number of multigrid levels < 2\n");
+        if(E->mesh.levels > MAX_LEVELS)
+            myerror(E, "number of multigrid levels out of bound\n");
+    }
+
+    return;
 }
 
 

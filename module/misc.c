@@ -50,6 +50,7 @@ void read_mat_from_file(struct All_variables*);
 void read_temperature_boundary_from_file(struct All_variables*);
 void read_velocity_boundary_from_file(struct All_variables*);
 void set_signal();
+void check_settings_consistency(struct All_variables *);
 void tracer_advection(struct All_variables*);
 void velocities_conform_bcs(struct All_variables*, double **);
 
@@ -228,6 +229,26 @@ char pyCitcom_set_signal__name__[] = "set_signal";
 PyObject * pyCitcom_set_signal(PyObject *self, PyObject *args)
 {
     set_signal();
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+char pyCitcom_check_settings_consistency__doc__[] = "";
+char pyCitcom_check_settings_consistency__name__[] = "check_settings_consistency";
+
+PyObject * pyCitcom_check_settings_consistency(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:check_settings_consistency", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    check_settings_consistency(E);
 
     Py_INCREF(Py_None);
     return Py_None;

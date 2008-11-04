@@ -246,7 +246,7 @@ class Solver(Component):
 
     def setProperties(self, stream):
 
-        from CitcomSLib import Solver_set_properties
+        from CitcomSLib import Solver_set_properties, check_settings_consistency
 
         Solver_set_properties(self.all_variables, self.inventory, stream)
 
@@ -263,6 +263,8 @@ class Solver(Component):
         inv.phase.setProperties(stream)
         inv.tracer.setProperties(stream)
         inv.visc.setProperties(stream)
+
+        check_settings_consistency(self.all_variables);
 
         return
 
