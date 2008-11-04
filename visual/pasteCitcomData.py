@@ -39,6 +39,8 @@ step:      time step of the output
 save_dir:  directory for the pasted file
 '''
 
+import os
+
 
 def run(datadir, datafile, fields, rank, step, save_dir):
 
