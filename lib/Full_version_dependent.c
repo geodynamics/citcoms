@@ -77,6 +77,8 @@ void full_global_derived_values(E)
   E->mesh.elz = E->mesh.noz-1;
 
   /* number of nodes, excluding overlaping nodes between processors */
+  /* each cap has one row of nox and one row of noy overlapped, exclude these nodes.
+   * nodes at north/south poles are exclued by all caps, include them by 2*noz*/
   E->mesh.nno = E->sphere.caps*(E->mesh.nox-1)*(E->mesh.noy-1)*E->mesh.noz + 2*E->mesh.noz;
 
   E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
@@ -106,7 +108,7 @@ void full_global_derived_values(E)
     E->mesh.ELX[i] = nox-1;
     E->mesh.ELY[i] = noy-1;
     E->mesh.ELZ[i] = noz-1;
-    E->mesh.NNO[i] = E->sphere.caps * (nox-1) * (noy-1) * noz;
+    E->mesh.NNO[i] = E->sphere.caps * (nox-1) * (noy-1) * noz + 2 * noz;
     E->mesh.NEL[i] = E->sphere.caps * (nox-1) * (noz-1) * (noy-1);
     E->mesh.NPNO[i] = E->mesh.NEL[i] ;
     E->mesh.NOX[i] = nox;
