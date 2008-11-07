@@ -59,7 +59,6 @@ struct Solver {
     void (*read_input_files_for_timesteps)(struct All_variables *, int, int);
 
     /* Version_dependent.c */
-    void (*global_derived_values)(struct All_variables *);
     void (*node_locations)(struct All_variables *);
     void (*construct_tic_from_input)(struct All_variables *);
     void (*construct_boundary)(struct All_variables *);

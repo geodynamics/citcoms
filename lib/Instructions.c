@@ -84,6 +84,7 @@ void open_qfiles(struct All_variables *) ;
 void read_rayleigh_from_file(struct All_variables *);
 void read_initial_settings(struct All_variables *);
 void check_settings_consistency(struct All_variables *);
+void global_derived_values(struct All_variables *);
 
 
 void initial_mesh_solver_setup(struct All_variables *E)
@@ -97,7 +98,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     output_init(E);
     (E->problem_derived_values)(E);   /* call this before global_derived_  */
-    (E->solver.global_derived_values)(E);
+    global_derived_values(E);
 
     (E->solver.parallel_processor_setup)(E);   /* get # of proc in x,y,z */
     (E->solver.parallel_domain_decomp0)(E);  /* get local nel, nno, elx, nox et al */
@@ -284,6 +285,7 @@ void read_initial_settings(struct All_variables *E)
   float tmp;
   double ell_tmp;
   int m=E->parallel.me;
+  double levmax;
 
   /* first the problem type (defines subsequent behaviour) */
 
@@ -369,19 +371,28 @@ void read_initial_settings(struct All_variables *E)
   input_int("nprocy",&(E->parallel.nprocy),"1",m);
   input_int("nprocz",&(E->parallel.nprocz),"1",m);
 
-  input_int("nodex",&(E->mesh.nox),"essential",m);
-  input_int("nodez",&(E->mesh.noz),"essential",m);
-  input_int("nodey",&(E->mesh.noy),"essential",m);
+  if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0) {
+      input_int("nodex",&(E->mesh.nox),"essential",m);
+      input_int("nodez",&(E->mesh.noz),"essential",m);
+      input_int("nodey",&(E->mesh.noy),"essential",m);
 
-  input_int("levels",&(E->mesh.levels),"0",m);
+      E->mesh.mgunitx = E->mesh.nox - 1;
+      E->mesh.mgunity = E->mesh.noy - 1;
+      E->mesh.mgunitz = E->mesh.noz - 1;
+      E->mesh.levels = 1;
+  }
+  else {
+      input_int("mgunitx",&(E->mesh.mgunitx),"1",m);
+      input_int("mgunitz",&(E->mesh.mgunitz),"1",m);
+      input_int("mgunity",&(E->mesh.mgunity),"1",m);
 
-  E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx /
-      (int) pow(2.0, E->mesh.levels - 1);
-  E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy /
-      (int) pow(2.0, E->mesh.levels - 1);
-  E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz /
-      (int) pow(2.0, E->mesh.levels - 1);
+      input_int("levels",&(E->mesh.levels),"1",m);
 
+      levmax = E->mesh.levels - 1;
+      E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,levmax) * E->parallel.nprocx + 1;
+      E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,levmax) * E->parallel.nprocy + 1;
+      E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,levmax) * E->parallel.nprocz + 1;
+  }
 
   input_int("coor",&(E->control.coor),"0",m);
   if(E->control.coor == 2){
@@ -754,6 +765,7 @@ void read_initial_settings(struct All_variables *E)
 /* Checking the consistency of input parameters */
 void check_settings_consistency(struct All_variables *E)
 {
+
     if (strcmp(E->control.SOLVER_TYPE, "cgrad") == 0) {
         /* conjugate gradient has only one level */
         if(E->mesh.levels != 1)
@@ -768,6 +780,86 @@ void check_settings_consistency(struct All_variables *E)
     }
 
     return;
+}
+
+
+/* Setup global mesh parameters */
+void global_derived_values(struct All_variables *E)
+{
+    int d,i,nox,noz,noy;
+
+   E->mesh.levmax = E->mesh.levels-1;
+   E->mesh.gridmax = E->mesh.levmax;
+
+   E->mesh.elx = E->mesh.nox-1;
+   E->mesh.ely = E->mesh.noy-1;
+   E->mesh.elz = E->mesh.noz-1;
+
+   if(E->sphere.caps == 1) {
+       /* number of nodes, excluding overlaping nodes between processors */
+       E->mesh.nno = E->sphere.caps * E->mesh.nox * E->mesh.noy * E->mesh.noz;
+   }
+   else {
+       /* number of nodes, excluding overlaping nodes between processors */
+       /* each cap has one row of nox and one row of noy overlapped, exclude these nodes.
+        * nodes at north/south poles are exclued by all caps, include them by 2*noz*/
+       E->mesh.nno = E->sphere.caps * (E->mesh.nox-1) * (E->mesh.noy-1) * E->mesh.noz
+           + 2*E->mesh.noz;
+   }
+
+   E->mesh.nel = E->sphere.caps*E->mesh.elx*E->mesh.elz*E->mesh.ely;
+
+   E->mesh.nnov = E->mesh.nno;
+
+  /* this is a rough estimate for global neq, a more accurate neq will
+     be computed later. */
+   E->mesh.neq = E->mesh.nnov*E->mesh.nsd;
+
+   E->mesh.npno = E->mesh.nel;
+   E->mesh.nsf = E->mesh.nox*E->mesh.noy;
+
+   for(i=E->mesh.levmax;i>=E->mesh.levmin;i--) {
+      nox = E->mesh.mgunitx * (int) pow(2.0,(double)i)*E->parallel.nprocx + 1;
+      noy = E->mesh.mgunity * (int) pow(2.0,(double)i)*E->parallel.nprocy + 1;
+      noz = E->mesh.mgunitz * (int) pow(2.0,(double)i)*E->parallel.nprocz + 1;
+
+      E->mesh.ELX[i] = nox-1;
+      E->mesh.ELY[i] = noy-1;
+      E->mesh.ELZ[i] = noz-1;
+      if(E->sphere.caps == 1) {
+          E->mesh.NNO[i] = nox * noz * noy;
+      }
+      else {
+          E->mesh.NNO[i] = E->sphere.caps * (nox-1) * (noy-1) * noz + 2 * noz;
+      }
+      E->mesh.NEL[i] = E->sphere.caps * (nox-1) * (noz-1) * (noy-1);
+      E->mesh.NPNO[i] = E->mesh.NEL[i] ;
+      E->mesh.NOX[i] = nox;
+      E->mesh.NOZ[i] = noz;
+      E->mesh.NOY[i] = noy;
+
+      E->mesh.NNOV[i] = E->mesh.NNO[i];
+      E->mesh.NEQ[i] = E->mesh.nsd * E->mesh.NNOV[i] ;
+
+   }
+
+   /* Scaling from dimensionless units to Millions of years for input velocity
+      and time, timdir is the direction of time for advection. CPC 6/25/00 */
+
+    /* Myr */
+    E->data.scalet = (E->data.radius_km*1e3*E->data.radius_km*1e3/E->data.therm_diff)/(1.e6*365.25*24*3600);
+    /* cm/yr */
+    E->data.scalev = (E->data.radius_km*1e3/E->data.therm_diff)/(100*365.25*24*3600);
+    E->data.timedir = E->control.Atemp / fabs(E->control.Atemp);
+
+
+    if(E->control.print_convergence && E->parallel.me==0) {
+	fprintf(stderr,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+                E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
+	fprintf(E->fp,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+                E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
+    }
+   return;
 }
 
 

@@ -545,17 +545,29 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getFloatVectorProperty(properties, "coor_refine", E->control.coor_refine, 4, fp);
     getStringProperty(properties, "coor_file", E->control.coor_file, fp);
 
-    getIntProperty(properties, "nodex", E->mesh.nox, fp);
-    getIntProperty(properties, "nodey", E->mesh.noy, fp);
-    getIntProperty(properties, "nodez", E->mesh.noz, fp);
-    getIntProperty(properties, "levels", E->mesh.levels, fp);
+    if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0) {
+        getIntProperty(properties, "nodex", E->mesh.nox, fp);
+        getIntProperty(properties, "nodey", E->mesh.noy, fp);
+        getIntProperty(properties, "nodez", E->mesh.noz, fp);
 
-    E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx /
-	(int) pow(2.0, E->mesh.levels - 1);
-    E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy /
-	(int) pow(2.0, E->mesh.levels - 1);
-    E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz /
-	(int) pow(2.0, E->mesh.levels - 1);
+        E->mesh.mgunitx = E->mesh.nox - 1;
+        E->mesh.mgunity = E->mesh.noy - 1;
+        E->mesh.mgunitz = E->mesh.noz - 1;
+        E->mesh.levels = 1;
+    }
+    else {
+        double levmax;
+
+        getIntProperty(properties, "mgunitx", E->mesh.mgunitx, fp);
+        getIntProperty(properties, "mgunity", E->mesh.mgunity, fp);
+        getIntProperty(properties, "mgunitz", E->mesh.mgunitz, fp);
+        getIntProperty(properties, "levels", E->mesh.levels, fp);
+
+        levmax = E->mesh.levels - 1;
+        E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,levmax) * E->parallel.nprocx + 1;
+        E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,levmax) * E->parallel.nprocy + 1;
+        E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,levmax) * E->parallel.nprocz + 1;
+    }
 
     if (E->parallel.nprocxy == 12) {
 	if (E->mesh.nox != E->mesh.noy) {

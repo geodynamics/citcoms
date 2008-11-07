@@ -32,6 +32,9 @@ nprocz=1
 nodex=9
 nodey=9
 nodez=9
+mgunitx=8
+mgunity=8
+mgunitz=8
 levels=1
 
 

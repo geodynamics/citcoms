@@ -251,9 +251,9 @@ class Solver(Component):
         Solver_set_properties(self.all_variables, self.inventory, stream)
 
         inv = self.inventory
+        inv.vsolver.setProperties(stream)
         inv.mesher.setProperties(stream)
         inv.tsolver.setProperties(stream)
-        inv.vsolver.setProperties(stream)
 
         inv.bc.setProperties(stream)
         inv.const.setProperties(stream)

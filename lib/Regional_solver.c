@@ -55,7 +55,6 @@ void regional_exchange_id_d(struct All_variables *, double **, int);
 void regional_read_input_files_for_timesteps(struct All_variables *, int, int);
 
 /* Version_dependent.c */
-void regional_global_derived_values(struct All_variables *);
 void regional_node_locations(struct All_variables *);
 void regional_construct_tic_from_input(struct All_variables *);
 void regional_construct_boundary(struct All_variables *);
@@ -88,7 +87,6 @@ void regional_solver_init(struct All_variables *E)
     E->solver.read_input_files_for_timesteps = regional_read_input_files_for_timesteps;
 
     /* Version_dependent.c */
-    E->solver.global_derived_values = regional_global_derived_values;
     E->solver.node_locations = regional_node_locations;
     E->solver.construct_tic_from_input = regional_construct_tic_from_input;
     E->solver.construct_boundary = regional_construct_boundary;
