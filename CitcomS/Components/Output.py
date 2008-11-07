@@ -67,6 +67,9 @@ class Output(CitcomComponent):
         # self-gravitation, for geoid only
         self_gravitation = inv.bool("self_gravitation", default=False)
 
+        # compute stress/topography by consistent-boundary-flux method
+        use_cbf_topo = inv.bool("use_cbf_topo", default=False)
+
         mega1 = 1024*1024
         #megaq = 256*1024
 
