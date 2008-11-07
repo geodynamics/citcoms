@@ -233,6 +233,7 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
     PyObject *obj, *properties, *out;
     struct All_variables *E;
     FILE *fp;
+    int num_perturb;
 
     if (!PyArg_ParseTuple(args, "OOO:IC_set_properties",
 			  &obj, &properties, &out))
@@ -250,39 +251,31 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
 
     getIntProperty(properties, "tic_method", E->convection.tic_method, fp);
 
-    if (E->convection.tic_method == 0 || E->convection.tic_method == 3) {
-	int num_perturb;
+    getIntProperty(properties, "num_perturbations", num_perturb, fp);
+    if(num_perturb > PERTURB_MAX_LAYERS) {
+        fprintf(stderr, "'num_perturb' greater than allowed value, set to %d\n", PERTURB_MAX_LAYERS);
+        num_perturb = PERTURB_MAX_LAYERS;
+    }
+    E->convection.number_of_perturbations = num_perturb;
 
-	getIntProperty(properties, "num_perturbations", num_perturb, fp);
-	if(num_perturb > PERTURB_MAX_LAYERS) {
-	    fprintf(stderr, "'num_perturb' greater than allowed value, set to %d\n", PERTURB_MAX_LAYERS);
-	    num_perturb = PERTURB_MAX_LAYERS;
-	}
-	E->convection.number_of_perturbations = num_perturb;
+    getIntVectorProperty(properties, "perturbl", E->convection.perturb_ll,
+                         num_perturb, fp);
+    getIntVectorProperty(properties, "perturbm", E->convection.perturb_mm,
+                         num_perturb, fp);
+    getIntVectorProperty(properties, "perturblayer", E->convection.load_depth,
+                         num_perturb, fp);
+    getFloatVectorProperty(properties, "perturbmag", E->convection.perturb_mag,
+                           num_perturb, fp);
 
-	getIntVectorProperty(properties, "perturbl", E->convection.perturb_ll,
-                             num_perturb, fp);
-	getIntVectorProperty(properties, "perturbm", E->convection.perturb_mm,
-                             num_perturb, fp);
-	getIntVectorProperty(properties, "perturblayer", E->convection.load_depth,
-                             num_perturb, fp);
-	getFloatVectorProperty(properties, "perturbmag", E->convection.perturb_mag,
-                               num_perturb, fp);
+    getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
+    getFloatVectorProperty(properties, "blob_center", E->convection.blob_center, 3, fp);
+    if( E->convection.blob_center[0] == -999.0 && E->convection.blob_center[1] == -999.0 && E->convection.blob_center[2] == -999.0 ) {
+        E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+        E->convection.blob_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+        E->convection.blob_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
     }
-    else if (E->convection.tic_method == 1) {
-        getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
-    }
-    else if (E->convection.tic_method == 2) {
-        getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
-        getFloatVectorProperty(properties, "blob_center", E->convection.blob_center, 3, fp);
-        if( E->convection.blob_center[0] == -999.0 && E->convection.blob_center[1] == -999.0 && E->convection.blob_center[2] == -999.0 ) {
-            E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
-            E->convection.blob_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
-            E->convection.blob_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
-        }
-        getFloatProperty(properties, "blob_radius", E->convection.blob_radius, fp);
-        getFloatProperty(properties, "blob_dT", E->convection.blob_dT, fp);
-    }
+    getFloatProperty(properties, "blob_radius", E->convection.blob_radius, fp);
+    getFloatProperty(properties, "blob_dT", E->convection.blob_dT, fp);
 
     PUTS(("\n"));
 
