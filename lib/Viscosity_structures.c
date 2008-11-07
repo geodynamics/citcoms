@@ -382,7 +382,7 @@ void visc_from_T(E,EEta,propogate)
         break;
 
     case 4:
-
+        /* eta = N_0 exp( (E + (1-z)Z_0) / (T+T_0) ) */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -618,7 +618,21 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
+    case 100:
+        /* user-defined viscosity law goes here */
+        fprintf(stderr, "Need user definition for viscosity law: 'rheol=%d'\n",
+                E->viscosity.RHEOL);
+        parallel_process_termination();
+        break;
+
+    default:
+        /* unknown option */
+        fprintf(stderr, "Invalid value of 'rheol=%d'\n", E->viscosity.RHEOL);
+
+        parallel_process_termination();
+        break;
     }
+
 
     return;
 }
