@@ -60,7 +60,6 @@ struct Solver {
 
     /* Version_dependent.c */
     void (*node_locations)(struct All_variables *);
-    void (*construct_tic_from_input)(struct All_variables *);
     void (*construct_boundary)(struct All_variables *);
 
 } solver;

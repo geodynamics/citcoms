@@ -56,7 +56,6 @@ void full_read_input_files_for_timesteps(struct All_variables *, int, int);
 
 /* Version_dependent.c */
 void full_node_locations(struct All_variables *);
-void full_construct_tic_from_input(struct All_variables *);
 void full_construct_boundary(struct All_variables *);
 
 
@@ -88,7 +87,6 @@ void full_solver_init(struct All_variables *E)
 
     /* Version_dependent.c */
     E->solver.node_locations = full_node_locations;
-    E->solver.construct_tic_from_input = full_construct_tic_from_input;
     E->solver.construct_boundary = full_construct_boundary;
     
     return;

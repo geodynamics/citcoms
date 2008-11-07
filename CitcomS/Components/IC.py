@@ -115,8 +115,7 @@ class IC(CitcomComponent):
         solution_cycles_init = pyre.inventory.int("solution_cycles_init", default=0)
         zero_elapsed_time = pyre.inventory.bool("zero_elapsed_time", default=True)
 
-        tic_method = pyre.inventory.int("tic_method", default=0,
-                            validator=pyre.inventory.choice([-1, 0, 1, 2, 3]))
+        tic_method = pyre.inventory.int("tic_method", default=0)
 
         # for tic_method=0 or 3
         num_perturbations = pyre.inventory.int("num_perturbations", default=1,
