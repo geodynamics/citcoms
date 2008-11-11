@@ -62,6 +62,7 @@ void tic_input(struct All_variables *E)
 #endif
 
   input_int("tic_method", &(E->convection.tic_method), "0,0,2", m);
+
 #ifdef USE_GGRD			/* for backward capability */
   input_int("ggrd_tinit", &tmp, "0", m);
   if(tmp){
@@ -131,50 +132,54 @@ void tic_input(struct All_variables *E)
 
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
 
-    if( ! input_float_vector("blob_center", 3, E->convection.blob_center, m)) {
-      assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
-      if(E->sphere.caps == 12) { /* Full version: just quit here */
-        fprintf(stderr,"Missing input parameter: 'blob_center'.\n");
-        parallel_process_termination();
+    switch(E->convection.tic_method){
+    case 2:			/* blob */
+      if( ! input_float_vector("blob_centqer", 3, E->convection.blob_center, m)) {
+	assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
+	if(E->sphere.caps == 12) { /* Full version: just quit here */
+	  fprintf(stderr,"Missing input parameter: 'blob_center'.\n");
+	  parallel_process_termination();
+	}
+	else if(E->sphere.caps == 1) { /* Regional version: put the blob at the center */
+	  fprintf(stderr,"Missing input parameter: 'blob_center'. The blob will be placed at the center of the domain.\n");
+	  E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
+	  E->convection.blob_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
+	  E->convection.blob_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
+	}
       }
-      else if(E->sphere.caps == 1) { /* Regional version: put the blob at the center */
-        fprintf(stderr,"Missing input parameter: 'blob_center'. The blob will be placed at the center of the domain.\n");
-        E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
-        E->convection.blob_center[1] = 0.5*(E->control.fi_min+E->control.fi_max);
-        E->convection.blob_center[2] = 0.5*(E->sphere.ri+E->sphere.ro);
-      }
-    }
-    input_float("blob_radius", &(E->convection.blob_radius), "0.063,0.0,1.0", m);
-    input_float("blob_dT", &(E->convection.blob_dT), "0.18,nomin,nomax", m);
-
-    /*
-       case 4: initial temp from grd files
-    */
+      input_float("blob_radius", &(E->convection.blob_radius), "0.063,0.0,1.0", m);
+      input_float("blob_dT", &(E->convection.blob_dT), "0.18,nomin,nomax", m);
+      break;
+    case 4:
+      /*
+	case 4: initial temp from grd files
+      */
 #ifdef USE_GGRD
-    /* 
-       read in some more parameters 
-
-    */
-    /* scale the anomalies with PREM densities */
-    input_boolean("ggrd_tinit_scale_with_prem",&(E->control.ggrd.temp.scale_with_prem),"off",E->parallel.me);
-    /* limit T to 0...1 */
-    input_boolean("ggrd_tinit_limit_trange",&(E->control.ggrd.temp.limit_trange),"on",E->parallel.me);
-   /* scaling factor for the grids */
-    input_double("ggrd_tinit_scale",&(E->control.ggrd.temp.scale),"1.0",E->parallel.me); /* scale */
-    /* temperature offset factor */
-    input_double("ggrd_tinit_offset",&(E->control.ggrd.temp.offset),"0.0",E->parallel.me); /* offset */
-    /* grid name, without the .i.grd suffix */
-    input_string("ggrd_tinit_gfile",E->control.ggrd.temp.gfile,"",E->parallel.me); /* grids */
-    input_string("ggrd_tinit_dfile",E->control.ggrd.temp.dfile,"",E->parallel.me); /* depth.dat layers of grids*/
-    /* override temperature boundary condition? */
-    input_boolean("ggrd_tinit_override_tbc",&(E->control.ggrd.temp.override_tbc),"off",E->parallel.me);
-    input_string("ggrd_tinit_prem_file",E->control.ggrd.temp.prem.model_filename,"hc/prem/prem.dat", E->parallel.me); /* PREM model filename */
+      /* 
+	 read in some more parameters 
+	 
+      */
+      /* scale the anomalies with PREM densities */
+      input_boolean("ggrd_tinit_scale_with_prem",&(E->control.ggrd.temp.scale_with_prem),"off",E->parallel.me);
+      /* limit T to 0...1 */
+      input_boolean("ggrd_tinit_limit_trange",&(E->control.ggrd.temp.limit_trange),"on",E->parallel.me);
+      /* scaling factor for the grids */
+      input_double("ggrd_tinit_scale",&(E->control.ggrd.temp.scale),"1.0",E->parallel.me); /* scale */
+      /* temperature offset factor */
+      input_double("ggrd_tinit_offset",&(E->control.ggrd.temp.offset),"0.0",E->parallel.me); /* offset */
+      /* grid name, without the .i.grd suffix */
+      input_string("ggrd_tinit_gfile",E->control.ggrd.temp.gfile,"",E->parallel.me); /* grids */
+      input_string("ggrd_tinit_dfile",E->control.ggrd.temp.dfile,"",E->parallel.me); /* depth.dat layers of grids*/
+      /* override temperature boundary condition? */
+      input_boolean("ggrd_tinit_override_tbc",&(E->control.ggrd.temp.override_tbc),"off",E->parallel.me);
+      input_string("ggrd_tinit_prem_file",E->control.ggrd.temp.prem.model_filename,"hc/prem/prem.dat", E->parallel.me); /* PREM model filename */
 #else
-    fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
-    parallel_process_termination();
+      fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
+      parallel_process_termination();
 #endif
-
-  return;
+      break;
+    } /* no default needed */
+    return;
 }
 
 
