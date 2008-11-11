@@ -57,7 +57,9 @@ void tic_input(struct All_variables *E)
   int m = E->parallel.me;
   int noz = E->lmesh.noz;
   int n;
-
+#ifdef USE_GGRD
+  int tmp;
+#endif
 
   input_int("tic_method", &(E->convection.tic_method), "0,0,2", m);
 #ifdef USE_GGRD			/* for backward capability */
