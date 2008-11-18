@@ -743,6 +743,8 @@ static void geoid_from_topography_self_g(struct All_variables *E,
     /* reset arrays */
     for (i = 0; i < E->sphere.hindice; i++) {
         geoid_tpgt[0][i] = 0;
+        geoid_tpgt[1][i] = 0;
+        geoid_tpgb[0][i] = 0;
         geoid_tpgb[1][i] = 0;
     }
 
