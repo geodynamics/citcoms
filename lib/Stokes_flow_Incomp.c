@@ -207,7 +207,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     double v_norm, p_norm;
     double dvelocity, dpressure;
     int converging;
-
+    static int warned = FALSE;
     void assemble_c_u();
     void assemble_div_u();
     void assemble_del2_u();
@@ -215,6 +215,11 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     void strip_bcs_from_residual();
     int  solve_del2_u();
     void parallel_process_termination();
+
+    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
+      fprintf(stderr,"solve_Ahat_p_fhat_BiCG: WARNING: overriding pressure and div check\n");
+      warned = TRUE;
+    }
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -361,11 +366,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
         dvelocity = alpha * sqrt(global_v_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
         dpressure = alpha * sqrt(global_p_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
 
-        /* how many consecutive converging iterations? */
-        if(dvelocity < imp && dpressure < imp)
-            converging++;
-        else
-            converging = 0;
+       
 
         assemble_div_u(E, V, z1, lev);
         if(E->control.inv_gruneisen != 0)
@@ -385,7 +386,22 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                                        dvelocity, dpressure,
                                        E->monitor.incompressibility);
         }
+	if(E->control.only_check_vel_convergence){
+	  /* disregard pressure and div check */
+	  if(dvelocity < imp)
+            converging++;
+	  else
+            converging = 0;
+	  E->monitor.incompressibility = dvelocity;
+	}else{
+	  /* how many consecutive converging iterations? */
+	  if(dvelocity < imp && dpressure < imp)
+            converging++;
+	  else
+            converging = 0;
 
+
+	}
 
         /* shift array pointers */
         for(m=1; m<=E->sphere.caps_per_proc; m++) {
@@ -445,6 +461,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double global_v_norm2(), global_p_norm2(), global_div_norm2();
     double CPU_time0();
 
+    static int warned = FALSE;
+
     int npno, neq;
     int m, j, count, lev;
     int valid;
@@ -462,6 +480,11 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double *shuffle[NCS];
 
     double time0, v_res;
+
+    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
+      fprintf(stderr,"solve_Ahat_p_fhat_BiCG: WARNING: overriding pressure and div check\n");
+      warned = TRUE;
+    }
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -647,15 +670,14 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         dvelocity = sqrt(global_v_norm2(E, F) / (1e-32 + E->monitor.vdotv));
         dpressure = sqrt(global_p_norm2(E, s0) / (1e-32 + E->monitor.pdotp));
 
-        /* how many consecutive converging iterations? */
-        if(dvelocity < imp && dpressure < imp)
-            converging++;
-        else
-            converging = 0;
+
+	
 
         assemble_div_rho_u(E, V, t0, lev);
         E->monitor.incompressibility = sqrt(global_div_norm2(E, t0)
                                             / (1e-32 + E->monitor.vdotv));
+
+
 
 
         count++;
@@ -667,7 +689,24 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                        E->monitor.incompressibility);
         }
 
+	if(E->control.only_check_vel_convergence){
+	  /* 
 
+	  override pressure and compressibility check
+
+	  */
+	  if(dvelocity < imp)
+	    converging++;
+	  else
+	    converging =0;
+	  E->monitor.incompressibility = dvelocity;
+	}else{
+	  /* how many consecutive converging iterations? */
+	  if(dvelocity < imp && dpressure < imp)
+            converging++;
+	  else
+            converging = 0;
+	}
         /* shift array pointers */
         for(m=1; m<=E->sphere.caps_per_proc; m++) {
             shuffle[m] = p1[m];
@@ -721,7 +760,7 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double relative_err_v, relative_err_p;
     double *old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
     double div_res;
-
+    static int warned = FALSE;
     const int npno = E->lmesh.npno;
     const int neq = E->lmesh.neq;
     const int lev = E->mesh.levmax;
@@ -729,6 +768,10 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_v_norm2(),global_p_norm2();
     double global_div_norm2();
     void assemble_div_rho_u();
+    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
+      fprintf(stderr,"solve_Ahat_p_fhat_iterCG: WARNING: overriding pressure and div check\n");
+      warned = TRUE;
+    }
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     	old_v[m] = (double *)malloc(neq*sizeof(double));
@@ -778,7 +821,10 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
             fprintf(stderr, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
             fprintf(E->fp, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
         }
-
+	if(E->control.only_check_vel_convergence){
+	  /* override pressure and compressibility check */
+	  relative_err_p = div_res = relative_err_v;
+	}
         num_of_loop++;
 
     } /* end of while */

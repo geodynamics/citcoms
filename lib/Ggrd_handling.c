@@ -636,9 +636,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   char gmt_string[10],char_dummy;
   static int lc =0;			/* only for debugging */
   double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
-    cos_theta,sin_phi,cos_phi;
+    cos_theta,sin_phi,cos_phi,theta_max,theta_min;
   char tfilename1[1000],tfilename2[1000];
-
+  static pole_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
 #ifdef USE_GZDIR
@@ -758,7 +758,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
 		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
     } /* end init */
-  
+    
+    /* geographic bounds */
+    theta_max = (90-E->control.ggrd.svp[i1].south)*M_PI/180-1e-5;
+    theta_min = (90-E->control.ggrd.svp[i1].north)*M_PI/180+1e-5;
+    if((E->parallel.me ==0) && (is_global)){
+      fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
+	      E->control.ggrd.svp[i1].south,E->control.ggrd.svp[i1].north);
+    }
+
     if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
       /* 
 	 either first time around, or time-dependent assignment
@@ -789,10 +797,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	if(E->parallel.me == 0)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
       }
-      if(E->parallel.me==0)
+      
+      if(E->parallel.me==0){
 	fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
 		timedep,age);
-      
+
+      }
       /* if mixed BCs are allowed, need to reassign the boundary
 	 condition */
       if(E->control.ggrd_allow_mixed_vbcs){
@@ -825,6 +835,28 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		nodel =  j * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
 		/* node location */
 		rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
+		/* 
+
+		for global grid, shift theta if too close to poles
+		
+		*/
+		if((is_global)&&(rout[1] > theta_max)){
+		  if(!pole_warned){
+		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
+			    rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+		    pole_warned = TRUE;
+		  }
+		  rout[1] = theta_max;
+		}
+		if((is_global)&&(rout[1] < theta_min)){
+		  if(!pole_warned){
+		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
+			    rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
+		    pole_warned = TRUE;
+		  }
+		  rout[1] = theta_min;
+		}
+		/*  */
 		rout[2] = E->SX[level][m][2][nodel];
 		/* find vp */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
@@ -884,6 +916,30 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
 	    /*  */
 	    rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
+
+	    /* 
+
+	    for global grid, shift theta if too close to poles
+	    
+	    */
+	    if((is_global)&&(rout[1] > theta_max)){
+	      if(!pole_warned){
+		fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
+			rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+		pole_warned = TRUE;
+	      }
+	      rout[1] = theta_max;
+	    }
+	    if((is_global)&&(rout[1] < theta_min)){
+	      if(!pole_warned){
+		fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
+			rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
+		pole_warned = TRUE;
+	      }
+	      rout[1] = theta_min;
+	    }
+	    
+
 	    rout[2] = E->sx[m][2][nodel];
 	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
 					     vin1,FALSE,shift_to_pos_lon)){
