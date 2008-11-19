@@ -834,12 +834,11 @@ long double lg_pow(long double a, int n)
 {
     /* compute the value of "a" raised to the power of "n" */
     long double b = 1.0;
-    int i = 1;
+    int i;
 
-    do {
+    for(i=0; i<n; i++) {
         b = b*a;
-        i++;
-    } while (i<n);
+    }
 
     return(b);
 }
