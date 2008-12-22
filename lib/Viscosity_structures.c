@@ -561,10 +561,10 @@ void visc_from_T(E,EEta,propogate)
                     */
 
                     EEta[m][ (i-1)*vpts + jj ] = tempa*
-                        exp( (E->viscosity.E[l] +  E->viscosity.Z[l-1]*zzz )
+                        exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
                              / (E->viscosity.T[l] + temp)
                              - (E->viscosity.E[l] +
-                                E->viscosity.Z[l]*(one-E->sphere.ri) )
+                                E->viscosity.Z[l]*(E->sphere.ro-E->sphere.ri) )
                              / (E->viscosity.T[l] + one) );
                 }
             }
