@@ -780,6 +780,10 @@ void check_settings_consistency(struct All_variables *E)
             myerror(E, "number of multigrid levels out of bound\n");
     }
 
+    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence)) {
+        fprintf(stderr,"solve_Ahat_p_fhat: WARNING: overriding pressure and div check\n");
+    }
+
     return;
 }
 

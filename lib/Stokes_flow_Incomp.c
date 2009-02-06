@@ -207,7 +207,6 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     double v_norm, p_norm;
     double dvelocity, dpressure;
     int converging;
-    static int warned = FALSE;
     void assemble_c_u();
     void assemble_div_u();
     void assemble_del2_u();
@@ -215,11 +214,6 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     void strip_bcs_from_residual();
     int  solve_del2_u();
     void parallel_process_termination();
-
-    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
-      fprintf(stderr,"solve_Ahat_p_fhat_BiCG: WARNING: overriding pressure and div check\n");
-      warned = TRUE;
-    }
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -461,8 +455,6 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double global_v_norm2(), global_p_norm2(), global_div_norm2();
     double CPU_time0();
 
-    static int warned = FALSE;
-
     int npno, neq;
     int m, j, count, lev;
     int valid;
@@ -480,11 +472,6 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double *shuffle[NCS];
 
     double time0, v_res;
-
-    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
-      fprintf(stderr,"solve_Ahat_p_fhat_BiCG: WARNING: overriding pressure and div check\n");
-      warned = TRUE;
-    }
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -760,7 +747,6 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double relative_err_v, relative_err_p;
     double *old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
     double div_res;
-    static int warned = FALSE;
     const int npno = E->lmesh.npno;
     const int neq = E->lmesh.neq;
     const int lev = E->mesh.levmax;
@@ -768,10 +754,6 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_v_norm2(),global_p_norm2();
     double global_div_norm2();
     void assemble_div_rho_u();
-    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence) && (!warned)){
-      fprintf(stderr,"solve_Ahat_p_fhat_iterCG: WARNING: overriding pressure and div check\n");
-      warned = TRUE;
-    }
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     	old_v[m] = (double *)malloc(neq*sizeof(double));
