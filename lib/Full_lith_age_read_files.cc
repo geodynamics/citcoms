@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -22,16 +22,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *</LicenseText>
- * 
+ *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-#if !defined(CitcomS_parallel_related_h)
-#define CitcomS_parallel_related_h
 
-void parallel_process_termination();
-void parallel_process_sync(struct All_variables *E);
-double CPU_time0();
-void set_communication_sphereh(struct All_variables *E);
+#include "global_defs.h"
 
-#endif
+#include "cproto.h"
+
+void full_lith_age_read_files(struct All_variables *E, int output)
+{
+    full_read_input_files_for_timesteps(E,2,output); /*2 (=action) is for lith_age*/
+    return;
+}
+
+
+/* End of file */

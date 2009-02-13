@@ -26,12 +26,41 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-#if !defined(CitcomS_parallel_related_h)
-#define CitcomS_parallel_related_h
 
-void parallel_process_termination();
-void parallel_process_sync(struct All_variables *E);
-double CPU_time0();
-void set_communication_sphereh(struct All_variables *E);
+#include <mpi.h>
+#include <stdlib.h>
+#include "global_defs.h"
 
-#endif
+/* ============================================ */
+/* ============================================ */
+
+void parallel_process_termination()
+{
+
+  MPI_Finalize();
+  exit(8);
+  return;
+  }
+
+/* ============================================ */
+/* ============================================ */
+
+void parallel_process_sync(struct All_variables *E)
+{
+
+  MPI_Barrier(E->parallel.world);
+  return;
+  }
+
+
+/* ==========================   */
+
+ double CPU_time0()
+{
+    double time;
+ time = MPI_Wtime();
+ return (time);
+}
+
+
+/* End of file */

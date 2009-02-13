@@ -27,7 +27,7 @@ dnl</LicenseText>
 AC_PREREQ(2.59)
 AC_INIT([CitcomS], [3.0.1], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
-AC_CONFIG_SRCDIR([bin/Citcom.c])
+AC_CONFIG_SRCDIR([bin/Citcom.cc])
 AC_CONFIG_HEADER([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])

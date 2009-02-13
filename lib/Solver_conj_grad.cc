@@ -25,13 +25,38 @@
  * 
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+#include "element_definitions.h"
+#include "global_defs.h"
 
-#if !defined(CitcomS_parallel_related_h)
-#define CitcomS_parallel_related_h
+#include "cproto.h"
 
-void parallel_process_termination();
-void parallel_process_sync(struct All_variables *E);
-double CPU_time0();
-void set_communication_sphereh(struct All_variables *E);
+void set_cg_defaults(struct All_variables *E)
+{
+  E->build_forcing_term =   assemble_forces_iterative;
+  E->solve_stokes_problem = solve_constrained_flow_iterative;
+  E->solver_allocate_vars = cg_allocate_vars;
 
-#endif
+
+  return;
+}
+
+void cg_allocate_vars(struct All_variables *E)
+{ 
+  /* Nothing required ONLY by conj-grad stuff  */
+ /* printf("here here\n"); */
+
+  return;
+
+}
+
+void assemble_forces_iterative(struct All_variables *E)
+{ 
+  int i;
+
+  assemble_forces(E,0);
+
+  strip_bcs_from_residual(E,E->F,E->mesh.levmax);
+
+  return; 
+
+}

@@ -52,7 +52,7 @@ INCLUDES = \
 
 # static libraries
 
-libCitcomSLibmodule_a_CFLAGS = $(AM_CFLAGS) # hack for automake
+libCitcomSLibmodule_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
 libCitcomSLibmodule_a_SOURCES = $(sources)
 
 # extension modules (libtool)
@@ -66,26 +66,26 @@ CitcomSLibmodule_la_SOURCES = $(sources)
 # sources
 
 sources = \
-	CitcomSmodule.c \
+	CitcomSmodule.cc \
 	CitcomSmodule.h \
-	advdiffu.c \
+	advdiffu.cc \
 	advdiffu.h \
-	bindings.c \
+	bindings.cc \
 	bindings.h \
-	exceptions.c \
+	exceptions.cc \
 	exceptions.h \
 	getProperty.h \
-	initial_conditions.c \
+	initial_conditions.cc \
 	initial_conditions.h \
-	mesher.c \
+	mesher.cc \
 	mesher.h \
-	misc.c \
+	misc.cc \
 	misc.h \
-	outputs.c \
+	outputs.cc \
 	outputs.h \
-	setProperties.c \
+	setProperties.cc \
 	setProperties.h \
-	stokes_solver.c \
+	stokes_solver.cc \
 	stokes_solver.h
 
 ## end of Makefile.am

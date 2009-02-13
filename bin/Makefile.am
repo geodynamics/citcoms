@@ -48,7 +48,7 @@ else
     MAYBE_EXCHANGER_MODULE = $(top_builddir)/module/Exchanger/ExchangerLibmodule.la
 endif
 else
-    PYLINK = $(LINK)
+    PYLINK = $(CXXLINK)
     MAYBE_WITH_EXCHANGER =
     MAYBE_EXCHANGER_MODULE =
 endif
@@ -61,9 +61,9 @@ endif
 ######## legacy drivers ########
 
 
-CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
+CitcomSFull_SOURCES = Citcom.cc CitcomSFull.cc
 CitcomSFull_LDADD = $(libCitcomS)
-CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
+CitcomSRegional_SOURCES = Citcom.cc CitcomSRegional.cc
 CitcomSRegional_LDADD = $(libCitcomS)
 
 
@@ -120,8 +120,8 @@ CLEANFILES = $(bin_SCRIPTS)
 
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
-pycitcoms_SOURCES = pycitcoms.c dummy.cc
-pycitcoms_CFLAGS = $(MAYBE_WITH_EXCHANGER)
+pycitcoms_SOURCES = pycitcoms.cc dummy.cc
+pycitcoms_CXXFLAGS = $(MAYBE_WITH_EXCHANGER)
 pycitcoms_LDADD = \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(MAYBE_EXCHANGER_MODULE) \
@@ -138,8 +138,8 @@ pycitcoms$(EXEEXT): $(pycitcoms_OBJECTS) $(pycitcoms_DEPENDENCIES)
 
 
 # pycitcoms (libCitcomS + CitcomSLibmodule + embedded Python interpreter)
-mpipycitcoms_SOURCES = pycitcoms.c dummy.cc
-mpipycitcoms_CFLAGS = -DUSE_MPI $(MAYBE_WITH_EXCHANGER)
+mpipycitcoms_SOURCES = pycitcoms.cc dummy.cc
+mpipycitcoms_CXXFLAGS = -DUSE_MPI $(MAYBE_WITH_EXCHANGER)
 mpipycitcoms_LDADD = \
 	$(top_builddir)/module/libCitcomSLibmodule.a \
 	$(MAYBE_EXCHANGER_MODULE) \
