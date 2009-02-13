@@ -48,7 +48,7 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp);
 static void read_energy_checkpoint(struct All_variables *E, FILE *fp);
 static void read_momentum_checkpoint(struct All_variables *E, FILE *fp);
 
-void myerror(char *,struct All_variables *);
+void myerror(struct All_variables *, char *);
 
 void output_checkpoint(struct All_variables *E)
 {
@@ -233,7 +233,7 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
     tmp[0]+= fread(&(E->advection.timestep), sizeof(float), 1, fp);
     tmp[0]+= fread(&(E->control.start_age), sizeof(float), 1, fp);
     if(tmp[0] != 4)
-      myerror("read_general_checkpoint: header error",E);
+      myerror(E,"read_general_checkpoint: header error");
 
     E->advection.timesteps = E->monitor.solution_cycles;
 
@@ -432,9 +432,9 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
       if(fread(E->T[m], sizeof(double), E->lmesh.nno+1, fp)!= E->lmesh.nno+1)
-	myerror("read_energy_checkpoint: error at T",E);
+	myerror(E,"read_energy_checkpoint: error at T");
       if(fread(E->Tdot[m], sizeof(double), E->lmesh.nno+1, fp)!=E->lmesh.nno+1)
-	myerror("read_energy_checkpoint: error at Tdot",E);
+	myerror(E,"read_energy_checkpoint: error at Tdot");
     }
 
     return;
@@ -480,15 +480,15 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 
     /* for backward compatibility */
     if(fread(junk, sizeof(float), 2, fp)!=2)
-      myerror("read_momentum_checkpoint: error at vdotv",E);
+      myerror(E,"read_momentum_checkpoint: error at vdotv");
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points */
       if(fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp) !=  E->lmesh.npno+1)
-	myerror("read_momentum_checkpoint: error at P",E);
+	myerror(E,"read_momentum_checkpoint: error at P");
         /* velocity at equation points */
       if(fread(E->U[m], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
-	myerror("read_momentum_checkpoint: error at U",E);
+	myerror(E,"read_momentum_checkpoint: error at U");
     }
 
     E->monitor.vdotv = global_v_norm2(E, E->U);
