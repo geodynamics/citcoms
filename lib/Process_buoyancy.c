@@ -60,6 +60,7 @@ static void output_interpolated_fields(struct All_variables *E)
     const int m = 1;
     int n, ncolumns, ncomp;
     double *compositions;
+    double (*fields)[9];
 
     snprintf(output_file, 255, "%s.intp_fields.%d",
              E->control.data_file, E->parallel.me);
@@ -87,13 +88,6 @@ static void output_interpolated_fields(struct All_variables *E)
          *   [flavor0, flavor1, radius, temperature, composition(s)]
          */
 
-        if(E->parallel.me == 0) {
-            fprintf(E->fp, "Temperature contrast is %e Kelvin\n",
-                    E->data.ref_temperature);
-            fprintf(stderr, "Temperature contrast is %e Kelvin\n",
-                    E->data.ref_temperature);
-        }
-
         ncolumns = 4;
         if(E->composition.on) {
             ncolumns += E->composition.ncomp;
@@ -102,6 +96,14 @@ static void output_interpolated_fields(struct All_variables *E)
         /* get the horizontal average of temperature and composition */
         compute_horiz_avg(E);
 
+        /* allocate memory for fields that need to be interpolated,
+         * ie. excluding [flavor0, flavor1, radius] */
+        fields = malloc((ncolumns-3) * sizeof(fields));
+        if(fields == NULL) {
+            fprintf(stderr, "output_interpolated_fields(): 2 not enough memory.\n");
+            exit(1);
+        }
+
         fprintf(fp1,"%d %d %d %d\n",
                 E->trace.ntracers[m], E->trace.itracer_interpolate_fields,
                 ncolumns, ncomp);
@@ -109,9 +111,8 @@ static void output_interpolated_fields(struct All_variables *E)
 
         for(n=1; n<=E->trace.ntracers[m]; n++) {
             int i, j, k;
-            int nelem, flavor0, flavor1;
-            int node[9], nz[9];
-            double shpfn[9], data[9];
+            int nelem;
+            double shpfn[9];
             double theta, phi, rad;
             double temperature;
 
@@ -120,58 +121,32 @@ static void output_interpolated_fields(struct All_variables *E)
             phi = E->trace.basicq[m][1][n];
             rad = E->trace.basicq[m][2][n];
 
-            flavor0 = E->trace.extraq[m][0][n];
-            flavor1 = E->trace.extraq[m][1][n];
-
-            /* get shape functions at the tracer location */
-            if(E->parallel.nprocxy == 12)
-                full_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
-            else
-                regional_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
-
             /* fetch element data for interpolation */
             for(i=1; i<=ENODES3D; i++) {
-                node[i] = E->ien[m][nelem].node[i];
-                nz[i] = (node[i] - 1) % E->lmesh.noz + 1;
+                int node = E->ien[m][nelem].node[i];
+                int nz = (node - 1) % E->lmesh.noz + 1;
+                fields[0][i] = E->T[m][node] - E->Have.T[nz];
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    fields[k][i] = E->composition.comp_node[m][j][node]
+                        - E->Have.C[j][nz];
             }
 
-            for(i=1; i<=ENODES3D; i++) {
-                data[i] = E->T[m][node[i]] - E->Have.T[nz[i]];
+            if(E->parallel.nprocxy == 12) {
+                full_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
+                temperature = full_interpolate_data(E, shpfn, fields[0]);
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    compositions[j] = full_interpolate_data(E, shpfn, fields[k]);
+            }
+            else {
+                regional_get_shape_functions(E, shpfn, nelem, theta, phi, rad);
+                temperature = regional_interpolate_data(E, shpfn, fields[0]);
+                for(j=0, k=1; j<E->composition.ncomp; j++, k++)
+                    compositions[j] = regional_interpolate_data(E, shpfn, fields[k]);
             }
 
-            if(E->parallel.nprocxy == 12)
-                temperature = full_interpolate_data(E, shpfn, data);
-            else
-                temperature = regional_interpolate_data(E, shpfn, data);
-
-            /** debug **
-            fprintf(E->trace.fpt, "result: %e   data: %e %e %e %e %e %e %e %e\n",
-                    temperature, data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
-            /**/
-
-            for(j=0; j<E->composition.ncomp; j++) {
-                for(i=1; i<=ENODES3D; i++) {
-                    data[i] = E->composition.comp_node[m][j][node[i]]
-                        - E->Have.C[j][nz[i]];
-                }
-                if(E->parallel.nprocxy == 12)
-                    compositions[j] = full_interpolate_data(E, shpfn, data);
-                else
-                    compositions[j] = regional_interpolate_data(E, shpfn, data);
-
-                /** debug **
-                fprintf(E->trace.fpt, "result: %e   data: %e %e %e %e %e %e %e %e\n",
-                        compositions[j], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8]);
-                /**/
-            }
-
-            /* dimensionalize */
-            rad *= 1e3 * E->data.radius_km;
-            temperature *= E->data.ref_temperature;
-
-            /* output */
             fprintf(fp1,"%d %d %e %e",
-                    flavor0, flavor1, rad, temperature);
+                    E->trace.extraq[m][0][n], E->trace.extraq[m][1][n],
+                    rad, temperature);
 
             for(j=0; j<E->composition.ncomp; j++) {
                 fprintf(fp1," %e", compositions[j]);
@@ -179,6 +154,7 @@ static void output_interpolated_fields(struct All_variables *E)
             fprintf(fp1, "\n");
         }
 
+        free(fields);
         break;
     case 100:
         /* user modification here */
@@ -193,7 +169,7 @@ static void output_interpolated_fields(struct All_variables *E)
 
     }
 
-    if(E->composition.on)
+    if(!compositions)
         free(compositions);
 
     fclose(fp1);

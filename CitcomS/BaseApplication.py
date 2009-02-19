@@ -60,11 +60,7 @@ class BaseApplication(Application):
         '''
         self.initialize()
         self.reportConfiguration()
-
-        try:
-            self.launch()
-        except SystemExit:
-            pass
+        self.launch()
         return
 
 
