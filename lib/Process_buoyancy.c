@@ -205,7 +205,7 @@ void post_processing(struct All_variables *E)
 {
     void dump_and_get_new_tracers_to_interpolate_fields(struct All_variables *E);
 
-    if (E->control.tracer && E->trace.itracer_interpolate_fields) {
+    if (E->trace.itracer_interpolate_fields && E->control.tracer) {
         dump_and_get_new_tracers_to_interpolate_fields(E);
         output_interpolated_fields(E);
     }
