@@ -43,7 +43,6 @@ struct TRACE{
     int ic_method;
     int itperel;
     int itracer_interpolation_scheme;
-    int itracer_interpolate_fields;
 
     double box_cushion;
 

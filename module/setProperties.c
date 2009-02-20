@@ -677,7 +677,6 @@ PyObject * pyCitcom_Tracer_set_properties(PyObject *self, PyObject *args)
     }
 
     getIntProperty(properties, "itracer_warnings", E->trace.itracer_warnings, fp);
-    getIntProperty(properties, "itracer_interpolate_fields", E->trace.itracer_interpolate_fields, fp);
 
     getIntProperty(properties, "chemical_buoyancy",
                    E->composition.ichemical_buoyancy, fp);

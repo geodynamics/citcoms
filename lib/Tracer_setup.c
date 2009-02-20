@@ -184,10 +184,6 @@ void tracer_input(struct All_variables *E)
         input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",m);
 
 
-        /* Interpolate convection fields onto the location of tracers */
-        input_int("itracer_interpolate_fields",&(E->trace.itracer_interpolate_fields),"0",m);
-
-
         if(E->parallel.nprocxy == 12)
             full_tracer_input(E);
 
