@@ -73,10 +73,6 @@ class Controller(Component):
         if not self.solver.inventory.ic.inventory.restart:
             self.checkpoint()
 
-        if self.solver.inventory.ic.inventory.post_p:
-            self.endSimulation()
-            raise SystemExit()
-
         ### XXX: if stokes: advection tracers and terminate
         return
 
