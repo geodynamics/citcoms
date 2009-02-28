@@ -80,6 +80,7 @@ void composition_input(struct All_variables *E)
 
 
     /* compositional rheology */
+    /* what was this about? there is a CDEPV for compositional rheology TWB  */
 
     /* icompositional_rheology=0 (off) */
     /* icompositional_rheology=1 (on) */

@@ -1924,12 +1924,14 @@ static void write_trace_instructions(struct All_variables *E)
     if (E->trace.nflavors && E->trace.ic_method==0) {
         fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
         if (E->trace.ic_method_for_flavors == 0) {
+	  /* default mode 0 */
             fprintf(E->trace.fpt,"Layered tracer flavors\n");
             for (i=0; i<E->trace.nflavors-1; i++)
                 fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
         }
 #ifdef USE_GGRD
-	else if(E->trace.ic_method_for_flavors == 1) {
+	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 2)) {
+	  /* ggrd modes 1 and 2 (2 is override for restart) */
             fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
             fprintf(E->trace.fpt,"file: %s top %i layeres\n",E->trace.ggrd_file,
 		    E->trace.ggrd_layers);

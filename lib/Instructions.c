@@ -181,6 +181,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
     if(E->control.tracer) {
 	tracer_initial_settings(E);
 	(E->problem_tracer_setup)(E);
+	if(chatty)fprintf(stderr,"tracer setup done\n");
     }
     if(chatty)fprintf(stderr,"initial_mesh_solver_setup done\n");
 }
