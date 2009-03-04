@@ -1930,8 +1930,8 @@ static void write_trace_instructions(struct All_variables *E)
                 fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
         }
 #ifdef USE_GGRD
-	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 100)) {
-	  /* ggrd modes 1 and 100 (100  is override for restart) */
+	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
+	  /* ggrd modes 1 and 99 (99  is override for restart) */
             fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
             fprintf(E->trace.fpt,"file: %s top %i layeres\n",E->trace.ggrd_file,
 		    E->trace.ggrd_layers);

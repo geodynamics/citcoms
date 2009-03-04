@@ -123,7 +123,7 @@ int main(argc,argv)
   if (E->control.restart) {
       /* the initial condition is from previous checkpoint */
       read_checkpoint(E);
-      if(E->control.tracer && (E->trace.ic_method_for_flavors == 100)){
+      if(E->control.tracer && (E->trace.ic_method_for_flavors == 99)){
 	/* 
 	   if ggrd tracer input is selected, this will override
 	   existing tracers, or allow addition of tracers after
