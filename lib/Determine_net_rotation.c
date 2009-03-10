@@ -45,8 +45,11 @@ These have been superceded by the routines in Global_opertations and can probabl
 #include "parallel_related.h"
 #include "parsing.h"
 #include "output.h"
+
+#ifdef USE_GGRD
 void hc_ludcmp_3x3(HC_PREC [3][3],int,int *);
 void hc_lubksb_3x3(HC_PREC [3][3],int,int *,HC_PREC *);
+#endif
 
 double determine_netr_tp(float, float, float, float, float, int, double *, double *);
 void sub_netr(float, float, float, float *, float *, double *);
@@ -278,8 +281,10 @@ double determine_netr_tp(float r,float theta,float phi,
     omega[2] = c9[8];
 
     /* solve */
+#ifdef USE_GGRD
     hc_ludcmp_3x3(coef,n3,ind);
     hc_lubksb_3x3(coef,n3,ind,omega);
+#endif
     amp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
     break;
   default:
@@ -370,7 +375,7 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
 //      AND MAILING.
 //
 
-
+#ifdef USE_GGRD
 #define NR_TINY 1.0e-20;
 /* 
 
@@ -464,5 +469,5 @@ void hc_lubksb_3x3(HC_PREC a[3][3], int n,int *indx, HC_PREC *b)
   }
 }
 
-
+#endif
 
