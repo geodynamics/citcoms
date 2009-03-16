@@ -137,7 +137,11 @@ void gzdir_output(struct All_variables *E, int out_cycles)
     /* initial I/O */
     
     gzdir_output_coord(E);
+    output_domain(E);
     /*gzdir_output_mat(E);*/
+
+    if (E->output.coord_bin)
+        output_coord_bin(E);
   }
 
   /*

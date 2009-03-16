@@ -363,6 +363,8 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
         getStringProperty(properties, "refstate_file", E->refstate.filename, fp);
     }
 
+    getIntProperty(properties, "mineral_physics_model", E->control.mineral_physics_model, fp);
+
     getIntProperty(properties, "file_vbcs", E->control.vbcs_file, fp);
     getStringProperty(properties, "vel_bound_file", E->control.velocity_boundary_file, fp);
 

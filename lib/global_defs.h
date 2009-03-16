@@ -518,6 +518,7 @@ struct CONTROL {
     int vbcs_file;
     int tbcs_file;
     int mat_control;
+    int mineral_physics_model;
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
   float *surface_rayleigh;
@@ -635,6 +636,8 @@ struct Output {
     int botm;         /* whether to output bottom data */
     int geoid;        /* whether to output geoid/topo spherial harmonics */
     int horiz_avg;    /* whether to output horizontal averaged profile */
+    int seismic;      /* whether to output seismic velocity model */
+    int coord_bin;    /* whether to output coordinates in binary format */
     int tracer;       /* whether to output tracer coordinate */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */

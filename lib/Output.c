@@ -30,7 +30,9 @@
 
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <math.h>
+#include <mpi.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
@@ -93,7 +95,11 @@ void output(struct All_variables *E, int cycles)
    
   if (cycles == 0) {
     output_coord(E);
+    output_domain(E);
     /*output_mat(E);*/
+
+    if (E->output.coord_bin)
+        output_coord_bin(E);
   }
 
 
@@ -119,6 +125,9 @@ void output(struct All_variables *E, int cycles)
 
   if (E->output.horiz_avg)
       output_horiz_avg(E, cycles);
+
+  if (E->output.seismic)
+      output_seismic(E, cycles);
 
   if(E->output.tracer && E->control.tracer)
       output_tracer(E, cycles);
@@ -177,6 +186,109 @@ void output_coord(struct All_variables *E)
 }
 
 
+void output_domain(struct All_variables *E)
+{
+    /* This routine outputs the domain bounds in a single file. */
+    /* The file will be useful for external program to understand */
+    /* how the CitcomS mesh is domain decomposed. */
+
+    /* Note: rank-0 writes the domain bounds of all processors */
+
+    const int j = 1;
+    const int tag = 0;
+    const int receiver = 0;
+    const int nox = E->lmesh.nox;
+    const int noy = E->lmesh.noy;
+    const int noz = E->lmesh.noz;
+    const int corner_nodes[4] = {1,
+                                 1 + noz*(nox-1),
+                                 nox*noy*noz - (noz -1),
+                                 1 + noz*nox*(noy-1)};
+    /* Each line has so many columns:
+     * The columns are min(r) and max(r),
+     * then (theta, phi) of 4 bottom corners. */
+#define ncolumns 10
+
+    double buffer[ncolumns];
+
+    buffer[0] = E->sx[j][3][1];
+    buffer[1] = E->sx[j][3][noz];
+    buffer[2] = E->sx[j][1][corner_nodes[0]];
+    buffer[3] = E->sx[j][2][corner_nodes[0]];
+    buffer[4] = E->sx[j][1][corner_nodes[1]];
+    buffer[5] = E->sx[j][2][corner_nodes[1]];
+    buffer[6] = E->sx[j][1][corner_nodes[2]];
+    buffer[7] = E->sx[j][2][corner_nodes[2]];
+    buffer[8] = E->sx[j][1][corner_nodes[3]];
+    buffer[9] = E->sx[j][2][corner_nodes[3]];
+
+    if(E->parallel.me == 0) {
+        int i, rank;
+        char output_file[255];
+        FILE *fp1;
+        int32_t header[4];
+        MPI_Status status;
+
+        sprintf(output_file,"%s.domain",E->control.data_file);
+        fp1 = output_open(output_file, "wb");
+
+        /* header */
+        header[0] = E->parallel.nproc;
+        header[1] = ncolumns;
+        header[2] = 0x12345678;  /* guard */
+        header[3] = sizeof(int32_t);
+        fwrite(header, sizeof(int32_t), 4, fp1);
+
+        /* bounds of self */
+        fwrite(buffer, sizeof(double), ncolumns, fp1);
+
+        /* bounds of other processors */
+        for(rank=1; rank<E->parallel.nproc; rank++) {
+            MPI_Recv(buffer, ncolumns, MPI_DOUBLE, rank, tag, E->parallel.world, &status);
+            fwrite(buffer, sizeof(double), ncolumns, fp1);
+        }
+
+        fclose(fp1);
+    }
+    else {
+        MPI_Send(buffer, ncolumns, MPI_DOUBLE, receiver, tag, E->parallel.world);
+    }
+
+#undef ncolumns
+
+    return;
+}
+
+
+/* write coordinates in binary double */
+void output_coord_bin(struct All_variables *E)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.coord_bin.%d",E->control.data_file,E->parallel.me);
+  fp1 = output_open(output_file, "wb");
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      int32_t header[4];
+      header[0] = E->lmesh.nox;
+      header[1] = E->lmesh.noy;
+      header[2] = E->lmesh.noz;
+      header[3] = 0x12345678; /* guard */
+      fwrite(header, sizeof(int32_t), 4, fp1);
+
+      fwrite(&(E->x[j][1][1]), sizeof(double), E->lmesh.nno, fp1);
+      fwrite(&(E->x[j][2][1]), sizeof(double), E->lmesh.nno, fp1);
+      fwrite(&(E->x[j][3][1]), sizeof(double), E->lmesh.nno, fp1);
+  }
+
+  fclose(fp1);
+
+  return;
+}
+
+
 void output_visc(struct All_variables *E, int cycles)
 {
   int i, j;
@@ -216,7 +328,7 @@ void output_velo(struct All_variables *E, int cycles)
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
     fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++) {
-      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
+        fprintf(fp1,"%.6e %.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i],E->buoyancy[j][i]);
     }
   }
 
@@ -402,6 +514,46 @@ void output_horiz_avg(struct All_variables *E, int cycles)
   return;
 }
 
+
+
+void output_seismic(struct All_variables *E, int cycles)
+{
+    void compute_horiz_avg();
+    void compute_seismic_model(const struct All_variables*, double*, double*, double*);
+
+    char output_file[255];
+    FILE* fp;
+    int i, j;
+
+    double *rho, *vp, *vs;
+    const int len = 3 * E->lmesh.nno;
+
+    rho = malloc(len * sizeof(double));
+    vp = malloc(len * sizeof(double));
+    vs = malloc(len * sizeof(double));
+    if(rho==NULL || vp==NULL || vs==NULL) {
+        fprintf(stderr, "Error while allocating memory\n");
+        abort();
+    }
+
+    /* isotropic seismic velocity only */
+    /* XXX: update for anisotropy in the future */
+    compute_seismic_model(E, rho, vp, vs);
+
+    sprintf(output_file,"%s.seismic.%d.%d", E->control.data_file, E->parallel.me, cycles);
+    fp = output_open(output_file, "wb");
+
+    fwrite(rho, sizeof(double), E->lmesh.nno, fp);
+    fwrite(vp, sizeof(double), E->lmesh.nno, fp);
+    fwrite(vs, sizeof(double), E->lmesh.nno, fp);
+
+    fclose(fp);
+
+    free(rho);
+    free(vp);
+    free(vs);
+    return;
+}
 
 
 void output_mat(struct All_variables *E)

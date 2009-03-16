@@ -37,6 +37,9 @@ void output_common_input(struct All_variables *);
 void output(struct All_variables *, int);
 void output_time(struct All_variables *, int);
 void output_checkpoint(struct All_variables *);
+void output_coord_bin(struct All_variables *);
+void output_domain(struct All_variables *);
+void output_seismic(struct All_variables *, int);
 
 FILE* output_open(char *, char *);
 

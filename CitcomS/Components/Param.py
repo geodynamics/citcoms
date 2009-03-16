@@ -53,6 +53,8 @@ class Param(CitcomComponent):
         reference_state = pyre.inventory.int("reference_state", default=1)
         refstate_file = pyre.inventory.str("refstate_file", default="refstate.dat")
 
+        mineral_physics_model = pyre.inventory.int("mineral_physics_model", default=3)
+
         file_vbcs = pyre.inventory.bool("file_vbcs", default=False)
         vel_bound_file = pyre.inventory.str("vel_bound_file", default="bvel.dat")
 

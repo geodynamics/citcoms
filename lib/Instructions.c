@@ -525,6 +525,8 @@ void read_initial_settings(struct All_variables *E)
       input_string("refstate_file",E->refstate.filename,"refstate.dat",m);
   }
 
+  input_int("mineral_physics_model",&(E->control.mineral_physics_model),"1",m);
+
   input_int("mat_control",&(E->control.mat_control),"0",m);
   input_string("mat_file",E->control.mat_file,"",m);
 
@@ -1563,6 +1565,16 @@ static void output_parse_optional(struct  All_variables *E)
 	    }
         else if(strcmp(prev, "horiz_avg")==0)
             E->output.horiz_avg = 1;
+        else if(strcmp(prev, "seismic")==0) {
+            E->output.seismic = E->output.coord_bin = 1;
+
+            /* Total temperature contrast is important when computing seismic velocity,
+             * but it is derived from several parameters. Output it clearly. */
+            if(E->parallel.me==0) {
+                fprintf(stderr, "Total temperature contrast = %f K\n", E->data.ref_temperature);
+                fprintf(E->fp, "Total temperature contrast = %f K\n", E->data.ref_temperature);
+            }
+        }
         else if(strcmp(prev, "tracer")==0)
             E->output.tracer = 1;
         else if(strcmp(prev, "comp_el")==0)

@@ -228,6 +228,10 @@ void h5output(struct All_variables *E, int cycles)
 #else
     if (cycles == 0) {
         h5output_const(E);
+        output_domain(E);
+
+        if (E->output.coord_bin)
+            output_coord_bin(E);
     }
     h5output_timedep(E, cycles);
 #endif

@@ -104,6 +104,7 @@ sources = \
 	phase_change.h \
 	Problem_related.c \
 	Process_buoyancy.c \
+	Seismic_model.c \
 	Shape_functions.c \
 	Size_does_matter.c \
 	Solver_conj_grad.c \
