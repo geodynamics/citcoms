@@ -654,6 +654,42 @@ static void construct_tic_from_input(struct All_variables *E)
         add_perturbations_at_all_layers(E);
         break;
 
+    case 90:
+        /* for benchmarking purpose */
+        /* a constant temperature (0) + single perturbation at mid-layer
+           as a delta function in r */
+
+        if((E->parallel.nprocz % 2) == 0) {
+            if(E->parallel.me==0)
+                fprintf(stderr, "ERROR: tic_method=%d -- nprocz is even, cannot put perturbation on processor boundary!\n",
+                        E->convection.tic_method);
+
+            parallel_process_termination();
+        }
+
+        constant_temperature_profile(E, 0);
+
+        {
+            /* adjust the amplitude of perturbation, so that
+             * its integral in r is 1 */
+            int mid, k;
+
+            E->convection.number_of_perturbations = 1;
+
+            mid = (E->mesh.noz+1) / 2;
+            E->convection.load_depth[0] = mid;
+
+            k = mid - E->lmesh.nzs + 1; /* convert to local nz */
+            E->convection.perturb_mag[0] = 0;
+            if ( (k > 1) && (k < E->lmesh.noz) ) {
+                /* layer k is inside this proc. */
+                E->convection.perturb_mag[0] = 2 / (E->sx[1][3][k+1] - E->sx[1][3][k-1]);
+            }
+
+        }
+        add_perturbations_at_layers(E);
+        break;
+
     case 100:
         /* user-defined initial temperature goes here */
         fprintf(stderr,"Need user definition for initial temperture: 'tic_method=%d'\n",
