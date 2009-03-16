@@ -71,6 +71,15 @@ void regional_coord_of_cap(E,m,icap)
   nnproc=nprocyl*nprocxl*nproczl;
   temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
+  /* define the cap corners */
+  E->sphere.cap[1].theta[1] = E->control.theta_min;
+  E->sphere.cap[1].theta[2] = E->control.theta_max;
+  E->sphere.cap[1].theta[3] = E->control.theta_max;
+  E->sphere.cap[1].theta[4] = E->control.theta_min;
+  E->sphere.cap[1].fi[1] = E->control.fi_min;
+  E->sphere.cap[1].fi[2] = E->control.fi_min;
+  E->sphere.cap[1].fi[3] = E->control.fi_max;
+  E->sphere.cap[1].fi[4] = E->control.fi_max;
 
   if(E->control.coor==1) {
 
@@ -106,6 +115,15 @@ void regional_coord_of_cap(E,m,icap)
     
     fclose(fp);
     
+    /* redefine the cap corners */
+    E->sphere.cap[1].theta[1] = E->control.theta_min;
+    E->sphere.cap[1].theta[2] = E->control.theta_max;
+    E->sphere.cap[1].theta[3] = E->control.theta_max;
+    E->sphere.cap[1].theta[4] = E->control.theta_min;
+    E->sphere.cap[1].fi[1] = E->control.fi_min;
+    E->sphere.cap[1].fi[2] = E->control.fi_min;
+    E->sphere.cap[1].fi[3] = E->control.fi_max;
+    E->sphere.cap[1].fi[4] = E->control.fi_max;
     
     for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
       

@@ -29,6 +29,11 @@
 #define pyCitcom_mesher_h
 
 
+extern char pyCitcom_set_3dsphere_defaults__name__[];
+extern char pyCitcom_set_3dsphere_defaults__doc__[];
+PyObject * pyCitcom_set_3dsphere_defaults(PyObject *, PyObject *);
+
+
 extern char pyCitcom_full_sphere_launch__name__[];
 extern char pyCitcom_full_sphere_launch__doc__[];
 PyObject * pyCitcom_full_sphere_launch(PyObject *, PyObject *);

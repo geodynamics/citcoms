@@ -372,7 +372,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("nprocy",&(E->parallel.nprocy),"1",m);
   input_int("nprocz",&(E->parallel.nprocz),"1",m);
 
-  if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0) {
+  if (E->control.CONJ_GRAD) {
       input_int("nodex",&(E->mesh.nox),"essential",m);
       input_int("nodez",&(E->mesh.noz),"essential",m);
       input_int("nodey",&(E->mesh.noy),"essential",m);
@@ -393,6 +393,16 @@ void read_initial_settings(struct All_variables *E)
       E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,levmax) * E->parallel.nprocx + 1;
       E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,levmax) * E->parallel.nprocy + 1;
       E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,levmax) * E->parallel.nprocz + 1;
+  }
+
+  input_double("radius_outer",&(E->sphere.ro),"1",m);
+  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
+
+  if(E->sphere.caps == 1) {
+      input_double("theta_min",&(E->control.theta_min),"essential",m);
+      input_double("theta_max",&(E->control.theta_max),"essential",m);
+      input_double("fi_min",&(E->control.fi_min),"essential",m);
+      input_double("fi_max",&(E->control.fi_max),"essential",m);
   }
 
   input_int("coor",&(E->control.coor),"0",m);
@@ -768,7 +778,7 @@ void read_initial_settings(struct All_variables *E)
 void check_settings_consistency(struct All_variables *E)
 {
 
-    if (strcmp(E->control.SOLVER_TYPE, "cgrad") == 0) {
+    if (E->control.CONJ_GRAD) {
         /* conjugate gradient has only one level */
         if(E->mesh.levels != 1)
             myerror(E, "Conjugate gradient solver is used. 'levels' must be 1.\n");

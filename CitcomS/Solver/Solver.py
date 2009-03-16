@@ -78,6 +78,9 @@ class Solver(Component):
         # information about clock time
         self.start_cpu_time = CPU_time()
 
+        set_signal()
+        global_default_values(self.all_variables)
+
         inv = self.inventory
 
         inv.mesher.initialize(all_variables)
@@ -92,9 +95,6 @@ class Solver(Component):
         inv.phase.initialize(all_variables)
         inv.tracer.initialize(all_variables)
         inv.visc.initialize(all_variables)
-
-        set_signal()
-        global_default_values(self.all_variables)
 
         from CitcomSLib import return_rank, return_pid
         rank = return_rank(self.all_variables)

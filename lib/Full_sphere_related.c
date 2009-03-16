@@ -167,6 +167,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   double *px, *py, *qx, *qy;
   double theta, fi, cost, sint, cosf, sinf, efac2,rfac;
   double a, b;
+  double offset;
   double myatan();
 
   void even_divide_arc12();
@@ -202,6 +203,44 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   qx = malloc((temp+1)*sizeof(double));
   qy = malloc((temp+1)*sizeof(double));
 
+  /* define the cap corners */
+
+  /* adjust the corner coordinates so that the size (surface area) of
+     each cap is about the same. */
+  offset = 9.736/180.0*M_PI;
+
+  for (i=1;i<=4;i++)  {
+    E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
+    E->sphere.cap[(i-1)*3+1].theta[2] = M_PI/4.0+offset;
+    E->sphere.cap[(i-1)*3+1].theta[3] = M_PI/2.0;
+    E->sphere.cap[(i-1)*3+1].theta[4] = M_PI/4.0+offset;
+    E->sphere.cap[(i-1)*3+1].fi[1] = 0.0;
+    E->sphere.cap[(i-1)*3+1].fi[2] = (i-1)*M_PI/2.0;
+    E->sphere.cap[(i-1)*3+1].fi[3] = (i-1)*M_PI/2.0 + M_PI/4.0;
+    E->sphere.cap[(i-1)*3+1].fi[4] = i*M_PI/2.0;
+
+    E->sphere.cap[(i-1)*3+2].theta[1] = M_PI/4.0+offset;
+    E->sphere.cap[(i-1)*3+2].theta[2] = M_PI/2.0;
+    E->sphere.cap[(i-1)*3+2].theta[3] = 3*M_PI/4.0-offset;
+    E->sphere.cap[(i-1)*3+2].theta[4] = M_PI/2.0;
+    E->sphere.cap[(i-1)*3+2].fi[1] = i*M_PI/2.0;
+    E->sphere.cap[(i-1)*3+2].fi[2] = i*M_PI/2.0 - M_PI/4.0;
+    E->sphere.cap[(i-1)*3+2].fi[3] = i*M_PI/2.0;
+    E->sphere.cap[(i-1)*3+2].fi[4] = i*M_PI/2.0 + M_PI/4.0;
+    }
+
+  for (i=1;i<=4;i++)  {
+    j = (i-1)*3;
+    if (i==1) j=12;
+    E->sphere.cap[j].theta[1] = M_PI/2.0;
+    E->sphere.cap[j].theta[2] = 3*M_PI/4.0-offset;
+    E->sphere.cap[j].theta[3] = M_PI;
+    E->sphere.cap[j].theta[4] = 3*M_PI/4.0-offset;
+    E->sphere.cap[j].fi[1] = (i-1)*M_PI/2.0 + M_PI/4.0;
+    E->sphere.cap[j].fi[2] = (i-1)*M_PI/2.0;
+    E->sphere.cap[j].fi[3] = 0.0;
+    E->sphere.cap[j].fi[4] = i*M_PI/2.0;
+    }
 
 
   /* 4 corners of the cap in Cartesian coordinates */

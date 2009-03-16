@@ -221,6 +221,11 @@ struct PyMethodDef pyCitcom_methods[] = {
 
     /* from mesher.h */
 
+    {pyCitcom_set_3dsphere_defaults__name__,
+     pyCitcom_set_3dsphere_defaults,
+     METH_VARARGS,
+     pyCitcom_set_3dsphere_defaults__doc__},
+
     {pyCitcom_full_sphere_launch__name__,
      pyCitcom_full_sphere_launch,
      METH_VARARGS,

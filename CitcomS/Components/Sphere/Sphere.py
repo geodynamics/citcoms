@@ -31,6 +31,14 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 
 class Sphere(CitcomComponent):
 
+
+    def initialize(self, all_variables):
+        CitcomComponent.initialize(self, all_variables)
+        from CitcomSLib import set_3dsphere_defaults
+        set_3dsphere_defaults(self.all_variables)
+        return
+
+
     def run(self):
         start_time = CPU_time()
         self.launch()

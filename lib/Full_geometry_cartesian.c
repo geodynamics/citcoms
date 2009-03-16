@@ -62,65 +62,11 @@ void full_set_3dc_defaults(E)
 void full_set_3dsphere_defaults(E)
      struct All_variables *E;
 {
-  void full_set_3dsphere_defaults2(struct All_variables *);
-  int m=E->parallel.me;
-
-  input_double("radius_outer",&(E->sphere.ro),"1",m);
-  input_double("radius_inner",&(E->sphere.ri),"0.55",m);
-
-  full_set_3dsphere_defaults2(E);
-
-  return;
-}
-
-
-void full_set_3dsphere_defaults2(struct All_variables *E)
-{
-  int i,j;
-  double offset;
-
   E->mesh.nsd = 3;
   E->mesh.dof = 3;
 
   E->sphere.caps = 12;
   E->sphere.max_connections = 6;
-
-  /* adjust the corner coordinates so that the size (surface area) of
-     each cap is about the same. */
-  offset = 9.736/180.0*M_PI;
-
-  for (i=1;i<=4;i++)  {
-    E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
-    E->sphere.cap[(i-1)*3+1].theta[2] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+1].theta[3] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+1].theta[4] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+1].fi[1] = 0.0;
-    E->sphere.cap[(i-1)*3+1].fi[2] = (i-1)*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+1].fi[3] = (i-1)*M_PI/2.0 + M_PI/4.0;
-    E->sphere.cap[(i-1)*3+1].fi[4] = i*M_PI/2.0;
-
-    E->sphere.cap[(i-1)*3+2].theta[1] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+2].theta[2] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].theta[3] = 3*M_PI/4.0-offset;
-    E->sphere.cap[(i-1)*3+2].theta[4] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[1] = i*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[2] = i*M_PI/2.0 - M_PI/4.0;
-    E->sphere.cap[(i-1)*3+2].fi[3] = i*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[4] = i*M_PI/2.0 + M_PI/4.0;
-    }
-
-  for (i=1;i<=4;i++)  {
-    j = (i-1)*3;
-    if (i==1) j=12;
-    E->sphere.cap[j].theta[1] = M_PI/2.0;
-    E->sphere.cap[j].theta[2] = 3*M_PI/4.0-offset;
-    E->sphere.cap[j].theta[3] = M_PI;
-    E->sphere.cap[j].theta[4] = 3*M_PI/4.0-offset;
-    E->sphere.cap[j].fi[1] = (i-1)*M_PI/2.0 + M_PI/4.0;
-    E->sphere.cap[j].fi[2] = (i-1)*M_PI/2.0;
-    E->sphere.cap[j].fi[3] = 0.0;
-    E->sphere.cap[j].fi[4] = i*M_PI/2.0;
-    }
 
   return;
 }

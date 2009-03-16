@@ -38,6 +38,27 @@ extern void initial_mesh_solver_setup(struct All_variables *);
 
 
 
+char pyCitcom_set_3dsphere_defaults__doc__[] = "";
+char pyCitcom_set_3dsphere_defaults__name__[] = "set_3dsphere_defaults";
+
+PyObject * pyCitcom_set_3dsphere_defaults(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+
+    if (!PyArg_ParseTuple(args, "O:set_3dsphere_defaults", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    (E->solver.set_3dsphere_defaults)(E);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
+
 char pyCitcom_full_sphere_launch__doc__[] = "";
 char pyCitcom_full_sphere_launch__name__[] = "full_sphere_launch";
 

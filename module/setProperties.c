@@ -539,7 +539,7 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getFloatVectorProperty(properties, "coor_refine", E->control.coor_refine, 4, fp);
     getStringProperty(properties, "coor_file", E->control.coor_file, fp);
 
-    if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0) {
+    if (E->control.CONJ_GRAD) {
         getIntProperty(properties, "nodex", E->mesh.nox, fp);
         getIntProperty(properties, "nodey", E->mesh.noy, fp);
         getIntProperty(properties, "nodez", E->mesh.noz, fp);
@@ -575,16 +575,11 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getDoubleProperty(properties, "radius_inner", E->sphere.ri, fp);
 
 
-    if (E->parallel.nprocxy == 12) {
-        full_set_3dsphere_defaults2(E);
-    }
-    else {
+    if (E->sphere.caps == 1) {
 	getDoubleProperty(properties, "theta_min", E->control.theta_min, fp);
 	getDoubleProperty(properties, "theta_max", E->control.theta_max, fp);
 	getDoubleProperty(properties, "fi_min", E->control.fi_min, fp);
 	getDoubleProperty(properties, "fi_max", E->control.fi_max, fp);
-
-        regional_set_3dsphere_defaults2(E);
     }
 
     E->mesh.layer[1] = 1;
