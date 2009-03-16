@@ -31,13 +31,6 @@ from CitcomS.Components.CitcomComponent import CitcomComponent
 
 class Sphere(CitcomComponent):
 
-
-
-    def setup(self):
-        return
-
-
-
     def run(self):
         start_time = CPU_time()
         self.launch()
