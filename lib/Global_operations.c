@@ -881,7 +881,7 @@ void broadcast_vertical(struct All_variables *E,
 
 
 /*
- * remove rigid body rotation from the velocity
+ * remove rigid body rotation or angular momentum from the velocity
  */
 
 void remove_rigid_rot(struct All_variables *E)
@@ -903,12 +903,23 @@ void remove_rigid_rot(struct All_variables *E)
     const int sphere_key = 1;
     double VV[4][9];
     double rot, fr, tr;
+    double tmp, moment_of_inertia, rho;
 
 
+    if(E->control.remove_angular_momentum) {
+        moment_of_inertia = tmp = 0;
+        for (i=1;i<=E->lmesh.elz;i++)
+            tmp += (8.0*M_PI/15.0)*
+                0.5*(E->refstate.rho[i] + E->refstate.rho[i+1])*
+                (pow(E->sx[1][3][i+1],5.0) - pow(E->sx[1][3][i],5.0));
 
-    /* Note: no need to weight in rho(r) here. */
-    double moment_of_inertia = (8.0*M_PI/15.0)*
-        (pow(E->sphere.ro,(double)5.0) - pow(E->sphere.ri,(double)5.0));
+        MPI_Allreduce(&tmp, &moment_of_inertia, 1, MPI_DOUBLE,
+                      MPI_SUM, E->parallel.vertical_comm);
+    } else {
+         /* no need to weight in rho(r) here. */
+        moment_of_inertia = (8.0*M_PI/15.0)*
+            (pow(E->sphere.ro,5.0) - pow(E->sphere.ri,5.0));
+    }
 
     /* compute and add angular momentum components */
     
@@ -940,11 +951,19 @@ void remove_rigid_rot(struct All_variables *E)
 	    vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)]; 
 	  }
 	}
-	wx = -r*vy[1];
-	wy =  r*vx[1];
-	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[m][e].area; 
-	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[m][e].area;
-	exyz[3] -= (wx*sin_t                 ) * E->eco[m][e].area;
+
+        wx = -r*vy[1];
+        wy =  r*vx[1];
+
+        if(E->control.remove_angular_momentum) {
+            int nz = (e-1) % E->lmesh.elz + 1;
+            rho = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
+        } else {
+            rho = 1;
+        }
+	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[m][e].area * rho;
+	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[m][e].area * rho;
+	exyz[3] -= (wx*sin_t                 ) * E->eco[m][e].area * rho;
       }
     } /* end cap */
     
@@ -959,8 +978,13 @@ void remove_rigid_rot(struct All_variables *E)
     tr = acos(fxyz[3] / rot);
     
     if (E->parallel.me==0) {
-      fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
-      fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+        if(E->control.remove_angular_momentum) {
+            fprintf(E->fp,"Angular momentum: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+            fprintf(stderr,"Angular momentum: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+        } else {
+            fprintf(E->fp,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+            fprintf(stderr,"Rigid rotation: rot=%e tr=%e fr=%e\n",rot,tr*180/M_PI,fr*180/M_PI);
+        }
     }
     /*
       remove rigid rotation 

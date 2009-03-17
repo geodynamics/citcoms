@@ -903,7 +903,10 @@ static void read_tracer_file(struct All_variables *E)
     fptracer=fopen(E->trace.tracer_file,"r");
 
     fgets(input_s,200,fptracer);
-    sscanf(input_s,"%d %d",&number_of_tracers,&ncolumns);
+    if(sscanf(input_s,"%d %d",&number_of_tracers,&ncolumns) != 2) {
+        fprintf(stderr,"Error while reading file '%s'\n", E->trace.tracer_file);
+        exit(8);
+    }
     fprintf(E->trace.fpt,"%d Tracers, %d columns in file \n",
             number_of_tracers, ncolumns);
 
@@ -1074,8 +1077,12 @@ static void read_old_tracer_file(struct All_variables *E)
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fgets(input_s,200,fp1);
-        sscanf(input_s,"%d %d %d %lf",
-               &idum1, &numtracers, &ncolumns, &rdum1);
+        if(sscanf(input_s,"%d %d %d %lf",
+                  &idum1, &numtracers, &ncolumns, &rdum1) != 4) {
+            fprintf(stderr,"Error while reading file '%s'\n", output_file);
+            exit(8);
+        }
+
 
         /* some error control */
         if (E->trace.number_of_extra_quantities+3 != ncolumns) {

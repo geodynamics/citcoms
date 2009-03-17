@@ -105,6 +105,7 @@ class Incompressible(CitcomComponent):
                          validator=prop.choice(["cg", "bicg"]))
         compress_iter_maxstep = prop.int("compress_iter_maxstep", default=100)
         remove_rigid_rotation = prop.bool("remove_rigid_rotation", default=True)
+        remove_angular_momentum = prop.bool("remove_angular_momentum", default=True)
 
         # Not used. Retained here for backward compatibility.
         tole_compressibility = prop.float("tole_compressibility", default=1.0e-7)

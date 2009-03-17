@@ -633,6 +633,7 @@ void read_initial_settings(struct All_variables *E)
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
   input_boolean("remove_rigid_rotation",&(E->control.remove_rigid_rotation),"on",m);
+  input_boolean("remove_angular_momentum",&(E->control.remove_angular_momentum),"on",m);
 
   input_boolean("self_gravitation",&(E->control.self_gravitation),"off",m);
   input_boolean("use_cbf_topo",&(E->control.use_cbf_topo),"off",m); /* make default on later XXX TWB */

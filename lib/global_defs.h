@@ -514,6 +514,8 @@ struct CONTROL {
     int verbose;
 
     int remove_rigid_rotation;
+    int remove_angular_momentum;
+
     int side_sbcs;
     int vbcs_file;
     int tbcs_file;

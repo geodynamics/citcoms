@@ -144,7 +144,8 @@ void general_stokes_solver(struct All_variables *E)
   } /*end if SDEPV or PDEPV */
 
   /* remove the rigid rotation component from the velocity solution */
-  if((E->sphere.caps == 12) && E->control.remove_rigid_rotation) {
+  if((E->sphere.caps == 12) &&
+     (E->control.remove_rigid_rotation || E->control.remove_angular_momentum)) {
       remove_rigid_rot(E);
   }
 

@@ -861,6 +861,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
 
     getIntProperty(properties, "remove_rigid_rotation", E->control.remove_rigid_rotation, fp);
+    getIntProperty(properties, "remove_angular_momentum", E->control.remove_angular_momentum, fp);
 
     if(E->control.inv_gruneisen != 0) {
         /* which compressible solver to use: "cg" or "bicg" */

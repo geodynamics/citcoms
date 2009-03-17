@@ -477,7 +477,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
   }
 
   if(E->output.gzdir.rnr){	/* remove the whole model net rotation */
-    if((E->control.remove_rigid_rotation)&&
+    if((E->control.remove_rigid_rotation || E->control.remove_angular_momentum) &&
        (E->parallel.me == 0))	/* that's not too terrible but wastes time */
       fprintf(stderr,"WARNING: both gzdir.rnr and remove_rigid_rotation are switched on!\n");
     oamp = determine_model_net_rotation(E,omega);
