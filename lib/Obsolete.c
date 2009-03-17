@@ -1121,6 +1121,147 @@ float cross2d(x11,x12,x21,x22,D)
 }
 
 
+/* Read in a file containing previous values of a field. The input in the parameter
+   file for this should look like: `previous_name_file=string' and `previous_name_column=int'
+   where `name' is substituted by the argument of the function.
+
+   The file should have the standard CITCOM output format:
+     # HEADER LINES etc
+     index X Z Y ... field_value1 ...
+     index X Z Y ... field_value2 ...
+   where index is the node number, X Z Y are the coordinates and
+   the field value is in the column specified by the abbr term in the function argument
+
+   If the number of nodes OR the XZY coordinates for the node number (to within a small tolerance)
+   are not in agreement with the existing mesh, the data is interpolated.
+
+   */
+
+int read_previous_field(E,field,name,abbr)
+    struct All_variables *E;
+    float **field;
+    char *name, *abbr;
+{
+    int input_string();
+
+    char discard[5001];
+    char *token;
+    char *filename;
+    char *input_token;
+    FILE *fp;
+    int fnodesx,fnodesz,fnodesy;
+    int i,j,column,found,m;
+
+    float *X,*Z,*Y;
+
+    filename=(char *)malloc(500*sizeof(char));
+    input_token=(char *)malloc(1000*sizeof(char));
+
+    /* Define field name, read parameter file to determine file name and column number */
+
+    sprintf(input_token,"previous_%s_file",name);
+    if(!input_string(input_token,filename,"initialize",E->parallel.me)) {
+	fprintf(E->fp,"No previous %s information found in input file\n",name);fflush(E->fp);
+	return(0);   /* if not found, take no further action, return zero */
+    }
+
+
+    fprintf(E->fp,"Previous %s information is in file %s\n",name,filename);fflush(E->fp);
+
+    /* Try opening the file, fatal if this fails too */
+
+    if((fp=fopen(filename,"r")) == NULL) {
+	fprintf(E->fp,"Unable to open the required file `%s' (this is fatal)",filename);
+	fflush(E->fp);
+
+	parallel_process_termination();
+    }
+
+
+     /* Read header, get nodes xzy */
+
+    fgets(discard,4999,fp);
+    fgets(discard,4999,fp);
+    i=sscanf(discard,"# NODESX=%d NODESZ=%d NODESY=%d",&fnodesx,&fnodesz,&fnodesy);
+    if(i<3) {
+	fprintf(E->fp,"File %s is not in the correct format\n",filename);fflush(E->fp);
+	exit(1);
+    }
+
+    fgets(discard,4999,fp); /* largely irrelevant line */
+    fgets(discard,4999,fp);
+
+    /* this last line is the column headers, we need to search for the occurence of abbr to
+       find out the column to be read in */
+
+    if(strtok(discard,"|")==NULL) {
+	fprintf(E->fp,"Unable to deciphre the columns in the input file");fflush(E->fp);
+	exit(1);
+    }
+
+    found=0;
+    column=1;
+
+    while(found==0 && (token=strtok(NULL,"|")) != NULL) {
+	if(strstr(token,abbr)!=0)
+	    found=1;
+	column++;
+    }
+
+    if(found) {
+	fprintf(E->fp,"\t%s (%s) found in column %d\n",name,abbr,column);fflush(E->fp);
+    }
+    else {
+	fprintf(E->fp,"\t%s (%s) not found in file: %s\n",name,abbr,filename);fflush(E->fp);
+	exit(1);
+    }
+
+
+
+    /* Another fatal condition (not suitable for interpolation: */
+    if(((3!= E->mesh.nsd) && (fnodesy !=1)) || ((3==E->mesh.nsd) && (1==fnodesy))) {
+	fprintf(E->fp,"Input data for file `%s'  is of inappropriate dimension (not %dD)\n",filename,E->mesh.nsd);fflush(E->fp);
+	exit(1);
+    }
+
+    if(fnodesx != E->lmesh.nox || fnodesz != E->lmesh.noz || fnodesy != E->lmesh.noy) {
+       fprintf(stderr,"wrong dimension in the input temperature file!!!!\n");
+       exit(1);
+       }
+
+    X=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
+    Z=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
+    Y=(float *)malloc((2+fnodesx*fnodesz*fnodesy)*sizeof(float));
+
+   /* Format for reading the input file (including coordinates) */
+
+    sprintf(input_token," %%d %%e %%e %%e");
+    for(i=5;i<column;i++)
+	strcat(input_token," %*f");
+    strcat(input_token," %f");
+
+
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=fnodesx*fnodesz*fnodesy;i++) {
+	fgets(discard,4999,fp);
+	sscanf(discard,input_token,&j,&(X[i]),&(Z[i]),&(Y[i]),&field[m][i]);
+        }
+    /* check consistency & need for interpolation */
+
+    fclose(fp);
+
+
+    free((void *)X);
+    free((void *)Z);
+    free((void *)Y);
+    free((void *)filename);
+    free((void *)input_token);
+
+    return(1);
+}
+
+
+
 /* ==========================================================  */
 /*  From General_matrix_functions.c                            */
 /* =========================================================== */
