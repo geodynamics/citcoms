@@ -94,7 +94,10 @@ void regional_node_locations(E)
 
     fscanf(fp1,"%s %d",a,&i);
     for (k=1;k<=E->mesh.noz;k++)  {
-      fscanf(fp1,"%d %f",&nn,&tt1);
+      if(fscanf(fp1,"%d %f",&nn,&tt1) != 2) {
+        fprintf(stderr,"Error while reading file '%s'\n",output_file);
+        exit(8);
+      }
       rr[k]=tt1;
     }
     E->sphere.ri = rr[1];

@@ -129,15 +129,17 @@ static void read_refstate(struct All_variables *E)
 
     for(i=1; i<=E->lmesh.noz; i++) {
         fgets(buffer, 255, fp);
-        sscanf(buffer, "%lf %lf %lf %lf %lf %lf %lf\n",
-               &(E->refstate.rho[i]),
-               &(E->refstate.gravity[i]),
-               &(E->refstate.thermal_expansivity[i]),
-               &(E->refstate.heat_capacity[i]),
-               &not_used1,
-               &not_used2,
-               &not_used3);
-
+        if(sscanf(buffer, "%lf %lf %lf %lf %lf %lf %lf\n",
+                  &(E->refstate.rho[i]),
+                  &(E->refstate.gravity[i]),
+                  &(E->refstate.thermal_expansivity[i]),
+                  &(E->refstate.heat_capacity[i]),
+                  &not_used1,
+                  &not_used2,
+                  &not_used3) != 7) {
+            fprintf(stderr,"Error while reading file '%s'\n", E->refstate.filename);
+            exit(8);
+        }
         /**** debug ****
         fprintf(stderr, "%d %f %f %f %f\n",
                 i,

@@ -260,8 +260,10 @@ static void read_tic_from_file(struct All_variables *E)
     sscanf(input_s,"%d %d",&ll,&mm);
     for(i=1;i<=E->lmesh.nno;i++)  {
       fgets(input_s,1000,fp);
-      sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g));
-
+      if(sscanf(input_s,"%g %g %g %f",&(v1),&(v2),&(v3),&(g)) != 4) {
+        fprintf(stderr,"Error while reading file '%s'\n", output_file);
+        exit(8);
+      }
       /* Truncate the temperature to be within (0,1). */
       /* This might not be desirable in some situations. */
       E->T[m][i] = max(0.0,min(g,1.0));

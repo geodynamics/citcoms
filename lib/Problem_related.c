@@ -118,7 +118,10 @@ void get_initial_elapsed_time(E)
 	exit(8);
       }
       fgets(input_s,1000,fp);
-      sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time);
+      if(sscanf(input_s,"%d %d %f",&ll,&mm,&E->monitor.elapsed_time) != 3) {
+        fprintf(stderr,"Error while reading file '%s'\n", output_file);
+        exit(8);
+      }
       fclose(fp);
 #ifdef USE_GZDIR
       if(rezip)

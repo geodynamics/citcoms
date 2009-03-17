@@ -101,14 +101,20 @@ void regional_coord_of_cap(E,m,icap)
 
     fscanf(fp,"%s %d",a,&nn);
     for(i=1;i<=gnox;i++) {
-      fscanf(fp,"%d %e",&nn,&theta1[E->mesh.gridmax][i]);
+        if(fscanf(fp,"%d %e",&nn,&theta1[E->mesh.gridmax][i]) != 2) {
+            fprintf(E->fp,"Error while reading coor_file '%s'\n",output_file);
+            exit(8);
+        }
     }
     E->control.theta_min = theta1[E->mesh.gridmax][1];
     E->control.theta_max = theta1[E->mesh.gridmax][gnox];
     
     fscanf(fp,"%s %d",a,&nn);
     for(i=1;i<=gnoy;i++)  {
-      fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]);
+        if(fscanf(fp,"%d %e",&nn,&fi1[E->mesh.gridmax][i]) != 2) {
+            fprintf(E->fp,"Error while reading coor_file '%s'\n",output_file);
+            exit(8);
+        }
     }
     E->control.fi_min = fi1[E->mesh.gridmax][1];
     E->control.fi_max = fi1[E->mesh.gridmax][gnoy];

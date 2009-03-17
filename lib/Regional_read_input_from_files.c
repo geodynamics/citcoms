@@ -237,11 +237,17 @@ void regional_read_input_files_for_timesteps(E,action,output)
         VB2[i]=(float*) malloc ((nnn+1)*sizeof(float));
       }
       for(i=1;i<=nnn;i++)   {
-         fscanf(fp1,"%f %f",&(VB1[1][i]),&(VB1[2][i]));
+         if(fscanf(fp1,"%f %f",&(VB1[1][i]),&(VB1[2][i])) != 2) {
+           fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+           exit(8);
+         }
          VB1[1][i]=E->data.timedir*VB1[1][i];
          VB1[2][i]=E->data.timedir*VB1[2][i];
          if (pos_age) {
-             fscanf(fp2,"%f %f",&(VB2[1][i]),&(VB2[2][i]));
+             if(fscanf(fp2,"%f %f",&(VB2[1][i]),&(VB2[2][i])) != 2) {
+                 fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+                 exit(8);
+             }
              VB2[1][i]=E->data.timedir*VB2[1][i];
              VB2[2][i]=E->data.timedir*VB2[2][i];
          }
@@ -286,9 +292,15 @@ void regional_read_input_files_for_timesteps(E,action,output)
         for(i=1;i<=noy;i++)
           for(j=1;j<=nox;j++) {
             node=j+(i-1)*nox;
-            fscanf(fp1,"%f",&inputage1);
+            if(fscanf(fp1,"%f",&inputage1) != 1) {
+              fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+              exit(8);
+            }
             if (pos_age) { /* positive ages - we must interpolate */
-              fscanf(fp2,"%f",&inputage2);
+              if(fscanf(fp2,"%f",&inputage2) != 1) {
+                fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+                exit(8);
+              }
               E->age_t[node] = (inputage1 + (inputage2-inputage1)/(newage2-newage1)*(age-newage1))/E->data.scalet;
             }
             else { /* negative ages - don't do the interpolation */
@@ -322,8 +334,14 @@ void regional_read_input_files_for_timesteps(E,action,output)
             }
           }
           for(i=1;i<=emax;i++)  {
-               fscanf(fp1,"%d %d %f", &nn,&(LL1[i]),&(VIP1[i]));
-               fscanf(fp2,"%d %d %f", &nn,&(LL2[i]),&(VIP2[i]));
+              if(fscanf(fp1,"%d %d %f", &nn,&(LL1[i]),&(VIP1[i])) != 3) {
+                  fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+                  exit(8);
+              }
+              if(fscanf(fp2,"%d %d %f", &nn,&(LL2[i]),&(VIP2[i])) != 3) {
+                  fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+                  exit(8);
+              }
           }
 
           fclose(fp1);
@@ -365,11 +383,17 @@ void regional_read_input_files_for_timesteps(E,action,output)
       TB2=(float*) malloc ((nnn+1)*sizeof(float));
 
       for(i=1;i<=nnn;i++)   {
-         fscanf(fp1,"%f",&(TB1[i]));
+        if(fscanf(fp1,"%f",&(TB1[i])) != 1) {
+          fprintf(stderr,"Error while reading file '%s'\n",output_file1);
+          exit(8);
+        }
          /* if( E->parallel.me == 0)  
         fprintf(stderr, "\nINSIDE regional_read_input_files_for_timesteps TB1=%f %d\n",TB1[i],i); */
          if (pos_age) {
-             fscanf(fp2,"%f",&(TB2[i]));
+             if(fscanf(fp2,"%f",&(TB2[i])) != 1) {
+                 fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+                 exit(8);
+             }
          }
       }
       fclose(fp1);

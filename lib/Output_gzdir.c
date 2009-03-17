@@ -1224,7 +1224,8 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
     for(m=1;m <= E->sphere.caps_per_proc;m++) {
       fscanf(fp,"%i %i",&ll,&mm);
       for(i=1;i<=E->lmesh.nno;i++)  {
-	fscanf(fp,"%f %f %f %f",&v1,&v2,&v3,&g);
+        if(fscanf(fp,"%f %f %f %f",&v1,&v2,&v3,&g) != 4)
+	  myerror(E,"restart velo read error 1");
 	/*  E->sphere.cap[m].V[1][i] = v1;
 	    E->sphere.cap[m].V[1][i] = v2;
 	    E->sphere.cap[m].V[1][i] = v3;  */

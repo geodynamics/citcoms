@@ -103,7 +103,10 @@ void lith_age_init(struct All_variables *E)
     for(i=1;i<=gnoy;i++)
       for(j=1;j<=gnox;j++) {
 	node=j+(i-1)*gnox;
-	fscanf(fp1,"%f",&(E->age_t[node]));
+	if(fscanf(fp1,"%f",&(E->age_t[node])) != 1) {
+          fprintf(stderr,"Error while reading file '%s'\n",output_file);
+          exit(8);
+        }
 	E->age_t[node]=E->age_t[node]*E->data.scalet;
       }
     fclose(fp1);
