@@ -541,28 +541,42 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getFloatVectorProperty(properties, "coor_refine", E->control.coor_refine, 4, fp);
     getStringProperty(properties, "coor_file", E->control.coor_file, fp);
 
-    if (E->control.CONJ_GRAD) {
-        getIntProperty(properties, "nodex", E->mesh.nox, fp);
-        getIntProperty(properties, "nodey", E->mesh.noy, fp);
-        getIntProperty(properties, "nodez", E->mesh.noz, fp);
+    getIntProperty(properties, "nodex", E->mesh.nox, fp);
+    getIntProperty(properties, "nodey", E->mesh.noy, fp);
+    getIntProperty(properties, "nodez", E->mesh.noz, fp);
+    getIntProperty(properties, "levels", E->mesh.levels, fp);
 
+    if (E->control.CONJ_GRAD) {
+        if (E->mesh.levels != 1) {
+            fprintf(stderr, "!!! cgrad solver must have levels=1\n");
+            abort();
+        }
         E->mesh.mgunitx = E->mesh.nox - 1;
         E->mesh.mgunity = E->mesh.noy - 1;
         E->mesh.mgunitz = E->mesh.noz - 1;
-        E->mesh.levels = 1;
     }
     else {
         double levmax;
+        int nox, noy, noz;
 
-        getIntProperty(properties, "mgunitx", E->mesh.mgunitx, fp);
-        getIntProperty(properties, "mgunity", E->mesh.mgunity, fp);
-        getIntProperty(properties, "mgunitz", E->mesh.mgunitz, fp);
-        getIntProperty(properties, "levels", E->mesh.levels, fp);
-
+        if (E->mesh.levels <= 1) {
+            fprintf(stderr, "!!! multigrid solver must have levels>1\n");
+            abort();
+        }
         levmax = E->mesh.levels - 1;
-        E->mesh.nox = E->mesh.mgunitx * (int) pow(2.0,levmax) * E->parallel.nprocx + 1;
-        E->mesh.noy = E->mesh.mgunity * (int) pow(2.0,levmax) * E->parallel.nprocy + 1;
-        E->mesh.noz = E->mesh.mgunitz * (int) pow(2.0,levmax) * E->parallel.nprocz + 1;
+
+        E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx / pow(2.0, levmax);
+        E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy / pow(2.0, levmax);
+        E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz / pow(2.0, levmax);
+
+        nox = E->mesh.mgunitx * (int) pow(2.0,levmax) * E->parallel.nprocx + 1;
+        noy = E->mesh.mgunity * (int) pow(2.0,levmax) * E->parallel.nprocy + 1;
+        noz = E->mesh.mgunitz * (int) pow(2.0,levmax) * E->parallel.nprocz + 1;
+
+        if ((nox != E->mesh.nox) || (noy != E->mesh.noy) || (noz != E->mesh.noz)) {
+           fprintf(stderr, "!!! inconsistent mesh size and levels.\n");
+           abort();
+        }
     }
 
     if (E->parallel.nprocxy == 12) {

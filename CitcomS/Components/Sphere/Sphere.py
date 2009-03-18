@@ -85,10 +85,7 @@ class Sphere(CitcomComponent):
         nodex = pyre.inventory.int("nodex", default=9)
         nodey = pyre.inventory.int("nodey", default=9)
         nodez = pyre.inventory.int("nodez", default=9)
-        mgunitx = pyre.inventory.int("mgunitx", default=2)
-        mgunity = pyre.inventory.int("mgunity", default=2)
-        mgunitz = pyre.inventory.int("mgunitz", default=2)
-        levels = pyre.inventory.int("levels", default=3)
+        levels = pyre.inventory.int("levels", default=1)
 
         radius_outer = pyre.inventory.float("radius_outer", default=1.0)
         radius_inner = pyre.inventory.float("radius_inner", default=0.55)
