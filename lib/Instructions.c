@@ -660,6 +660,7 @@ void read_initial_settings(struct All_variables *E)
 
   input_int("vhighstep",&(E->control.v_steps_high),"1,0,nomax",m);
   input_int("vlowstep",&(E->control.v_steps_low),"250,0,nomax",m);
+  input_int("max_mg_cycles",&(E->control.max_mg_cycles),"50,0,nomax",m);
   input_int("piterations",&(E->control.p_iterations),"100,0,nomax",m);
 
   input_float("rayleigh",&(E->control.Atemp),"essential",m);

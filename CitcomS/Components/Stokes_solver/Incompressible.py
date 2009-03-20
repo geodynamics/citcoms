@@ -96,6 +96,7 @@ class Incompressible(CitcomComponent):
 
         vlowstep = prop.int("vlowstep", default=1000)
         vhighstep = prop.int("vhighstep", default=3)
+        max_mg_cycles = prop.int("max_mg_cycles", default=50)
         piterations = prop.int("piterations", default=1000)
 
         aug_lagr = prop.bool("aug_lagr", default=True)

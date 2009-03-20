@@ -869,6 +869,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
     getIntProperty(properties, "vlowstep", E->control.v_steps_low, fp);
     getIntProperty(properties, "vhighstep", E->control.v_steps_high, fp);
+    getIntProperty(properties, "max_mg_cycles", E->control.max_mg_cycles, fp);
     getIntProperty(properties, "piterations", E->control.p_iterations, fp);
 
     getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);

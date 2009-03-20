@@ -112,7 +112,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 	record(E,message);
 	report(E,message);
       }
-    }  while (!valid);
+    }  while (!valid && counts < E->control.max_mg_cycles);
 
     cycles = counts;
   }

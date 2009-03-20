@@ -509,6 +509,7 @@ struct CONTROL {
     int v_steps_upper;
     int p_iterations;
     int mg_cycle;
+    int max_mg_cycles;
     int down_heavy;
     int up_heavy;
     int verbose;
