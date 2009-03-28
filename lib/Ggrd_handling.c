@@ -74,7 +74,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   int mpi_inmsg, mpi_success_message = 1;
   static ggrd_boolean shift_to_pos_lon = FALSE;	/* this should not be needed anymore */
   report(E,"ggrd_init_tracer_flavors: ggrd mat init");
-
+  int only_one_layer,this_layer;
   /* 
      are we global?
   */
@@ -84,7 +84,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   }else{			/* regional */
     sprintf(gmt_bc,"");
   }
-    
+  only_one_layer = ((E->trace.ggrd_layers > 0)?(0):(1));
+
   /* 
      initialize the ggrd control 
   */
@@ -114,8 +115,9 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
     for (kk=1;kk <= number_of_tracers;kk++) {
       rad = E->trace.basicq[j][2][kk]; /* tracer radius */
 
-
-      if(layers_r(E,rad) <= E->trace.ggrd_layers){
+      this_layer = layers_r(E,rad);
+      if((only_one_layer && (this_layer == -E->trace.ggrd_layers)) ||
+	 ((!only_one_layer)&&(this_layer <= E->trace.ggrd_layers))){
 	/*
 	   in top layers
 	*/

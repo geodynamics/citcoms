@@ -1933,8 +1933,13 @@ static void write_trace_instructions(struct All_variables *E)
 	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
 	  /* ggrd modes 1 and 99 (99  is override for restart) */
             fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
-            fprintf(E->trace.fpt,"file: %s top %i layeres\n",E->trace.ggrd_file,
-		    E->trace.ggrd_layers);
+	    if( E->trace.ggrd_layers > 0)
+	      fprintf(E->trace.fpt,"file: %s top %i layers\n",E->trace.ggrd_file,
+		      E->trace.ggrd_layers);
+	    else
+	      fprintf(E->trace.fpt,"file: %s only layer %i\n",E->trace.ggrd_file,
+		      -E->trace.ggrd_layers);
+ 
 	}
 #endif
         else {

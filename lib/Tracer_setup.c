@@ -187,7 +187,12 @@ void tracer_input(struct All_variables *E)
 	      /* from grid in top n materials, this will override
 		 the checkpoint input */
 	      input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
-	      input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
+	      input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* 
+
+									      >0 : which top layers to use, layer <= ictracer_grd_layers
+									      <0 : only use one layer layer == -ictracer_grd_layers
+
+									      */
 	      break;
 	      
 #endif
