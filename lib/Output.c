@@ -518,15 +518,15 @@ void output_horiz_avg(struct All_variables *E, int cycles)
 
 void output_seismic(struct All_variables *E, int cycles)
 {
-    void compute_horiz_avg();
+    void get_prem(double, double*, double*, double*);
     void compute_seismic_model(const struct All_variables*, double*, double*, double*);
 
     char output_file[255];
     FILE* fp;
-    int i, j;
+    int i;
 
     double *rho, *vp, *vs;
-    const int len = 3 * E->lmesh.nno;
+    const int len = E->lmesh.nno;
 
     rho = malloc(len * sizeof(double));
     vp = malloc(len * sizeof(double));
@@ -548,6 +548,25 @@ void output_seismic(struct All_variables *E, int cycles)
     fwrite(vs, sizeof(double), E->lmesh.nno, fp);
 
     fclose(fp);
+
+#if 0
+    /** debug **/
+    sprintf(output_file,"%s.dv.%d.%d", E->control.data_file, E->parallel.me, cycles);
+    fp = output_open(output_file, "w");
+    fprintf(fp, "%d %d %.5e\n", cycles, E->lmesh.nno, E->monitor.elapsed_time);
+    for(i=0; i<E->lmesh.nno; i++) {
+        double vpr, vsr, rhor;
+        int nz = (i % E->lmesh.noz) + 1;
+        get_prem(E->sx[1][3][nz], &vpr, &vsr, &rhor);
+
+        fprintf(fp, "%.4e %.4e %.4e\n",
+                rho[i]/rhor - 1.0,
+                vp[i]/vpr - 1.0,
+                vs[i]/vsr - 1.0);
+
+    }
+    fclose(fp);
+#endif
 
     free(rho);
     free(vp);

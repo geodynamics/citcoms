@@ -37,25 +37,31 @@ void compute_horiz_avg(struct All_variables*);
  * Given a radius (non-dimensional),
  * returns Vp/Vs/rho (in km/s and g/cm^3) of PREM.
  */
-static void get_prem(double r, double *vp, double *vs, double *rho)
+void get_prem(double r, double *vp, double *vs, double *rho)
 {
 #define NUM_PREM_LAYERS 11
 
-    /* radius of various layers */
-    const double r_cmb = 0.54622508;
+/* some specfem flags */
+#define SUPPRESS_CRUSTAL_MESH 0
+#define ONE_CRUST 1
 
+    /* radius of various layers */
     const double prem_radius[NUM_PREM_LAYERS] =
-        {0.19164966,  /* ICB */
-         0.54622508,  /* CMB */
-         0.56976927,  /* top of D'' */
-         0.87898289,  /* 771 */
-         0.89483598,  /* 670 */
-         0.90582326,  /* 600 */
-         0.93721551,  /* 400 */
-         0.96546853,  /* 220 */
-         0.99617015,  /* Moho */
-         0.99764558,  /* middle crust */
-         1.00000000}; /* top surface */
+        {0.19164966253335425,  /* 0: ICB */
+         0.54622508240464607,  /* 1: CMB */
+         0.56976926699105324,  /* 2: top of D'' */
+         0.87898289122586726,  /* 3: 771 */
+         0.89483597551404803,  /* 4: 670 */
+         0.90582326165437133,  /* 5: 600 */
+         0.93721550776958096,  /* 6: 400 */
+         0.96546852927326954,  /* 7: 220 */
+         0.99617014597394449,  /* 8: Moho */
+         0.99764558154135929,  /* 9: middle crust */
+         1.00000000000000000}; /*10: top surface */
+
+    const int j_cmb = 1;
+    const int j_moho = 8;
+
 
     /* polynomial coefficients of PREM */
     const double prem_vs[NUM_PREM_LAYERS][4] =
@@ -102,10 +108,9 @@ static void get_prem(double r, double *vp, double *vs, double *rho)
     double r2, r3;
 
     /* make sure r is above CMB */
-    r = (r < r_cmb) ? r_cmb : r;
+    r = (r < prem_radius[j_cmb]) ? prem_radius[j_cmb] : r;
     r2 = r * r;
     r3 = r2 * r;
-
 
     /* find layer */
     for (j = 0; j < NUM_PREM_LAYERS; ++j)
@@ -113,6 +118,15 @@ static void get_prem(double r, double *vp, double *vs, double *rho)
 
     if (j < 0) j = 0;
     if (j >= NUM_PREM_LAYERS) j = NUM_PREM_LAYERS - 1;
+
+    if(SUPPRESS_CRUSTAL_MESH && j > j_moho) {
+        /* extend of Moho up to the surface instead of the crust */
+        j = 8;
+    }
+    if(ONE_CRUST && j > j_moho) {
+        /* replace mid-crust with upper crust */
+        j = 10;
+    }
 
     /* expand polynomials */
     *vp = prem_vp[j][0]
@@ -133,21 +147,23 @@ static void get_prem(double r, double *vp, double *vs, double *rho)
     /**/
 
 #undef NUM_PREM_LAYERS
+#undef SUPPRESS_CRUSTAL_MESH
+#undef ONE_CRUST
 
     return;
 }
 
 
 
-static void modified_Tramper_Vacher_Vlaar_PEPI2001(struct All_variables *E,
-                                                   double *rho, double *vp, double *vs)
+static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
+                                                    double *rho, double *vp, double *vs)
 {
 
     /* Table 2 in the paper, including quasi-harmonic and anelastic parts */
     const double dlnvpdt[3] = {-5.71e-5, 2.44e-8, -3.84e-12};
     const double dlnvsdt[3] = {-9.37e-5, 3.70e-8, -5.46e-12};
-    const double dlnvpdc[3] = {0.172, -0.098, 0.144};
-    const double dlnvsdc[3] = {0.150, -0.143, 0.192};
+    const double dlnvpdc[3] = {1.72e-1, -0.98e-4, 1.44e-8};
+    const double dlnvsdc[3] = {1.50e-1, -1.43e-4, 1.92e-8};
 
     const int m = 1;
     int i, j, nz;
@@ -166,11 +182,11 @@ static void modified_Tramper_Vacher_Vlaar_PEPI2001(struct All_variables *E,
     depthkm = malloc((E->lmesh.noz+1) * sizeof(double));
 
     for(nz=1; nz<=E->lmesh.noz; nz++) {
-        get_prem(E->sx[m][3][nz], &vpr[nz], &vsr[nz],  &rhor[nz]);
+        get_prem(E->sx[m][3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
         depthkm[nz] = (E->sphere.ro - E->sx[m][3][nz]) * E->data.radius_km;
     }
 
-    /* deviation from reference */
+    /* deviation from the reference */
     dC = 0;
     for(i=0; i<E->lmesh.nno; i++) {
         nz = (i % E->lmesh.noz) + 1;
@@ -189,7 +205,7 @@ static void modified_Tramper_Vacher_Vlaar_PEPI2001(struct All_variables *E,
                 dC = E->composition.comp_node[m][j][i+1] - E->Have.C[j][nz];
 
                 drho += dC * E->composition.buoyancy_ratio[j]
-                    * E->data.ref_temperature * E->data.therm_exp;
+                    * E->data.ref_temperature * E->data.therm_exp / E->refstate.rho[nz];
 
                 dvp += dC * (dlnvpdc[0] + dlnvpdc[1]*d + dlnvpdc[2]*d2);
                 dvs += dC * (dlnvsdc[0] + dlnvsdc[1]*d + dlnvsdc[2]*d2);
@@ -258,7 +274,7 @@ void compute_seismic_model(struct All_variables *E,
          * whole mantle.
          */
 
-        modified_Tramper_Vacher_Vlaar_PEPI2001(E, rho, vp, vs);
+        modified_Trampert_Vacher_Vlaar_PEPI2001(E, rho, vp, vs);
         break;
 
     case 100:
