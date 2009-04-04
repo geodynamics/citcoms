@@ -88,6 +88,7 @@ sources = \
 	Lith_age.c \
 	Material_properties.c \
 	material_properties.h \
+	Mineral_physics_models.c \
 	Nodal_mesh.c \
 	Output.c \
 	output.h \
@@ -104,7 +105,6 @@ sources = \
 	phase_change.h \
 	Problem_related.c \
 	Process_buoyancy.c \
-	Seismic_model.c \
 	Shape_functions.c \
 	Size_does_matter.c \
 	Solver_conj_grad.c \
