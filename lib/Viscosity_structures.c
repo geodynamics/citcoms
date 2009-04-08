@@ -253,6 +253,10 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
 void initial_viscosity(struct All_variables *E)
 {
+    void report(struct All_variables*, char*);
+
+    report(E,"Initialize viscosity field");
+
     if (E->viscosity.FROM_SYSTEM)
         get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 

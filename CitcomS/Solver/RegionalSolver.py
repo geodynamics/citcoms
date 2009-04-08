@@ -27,14 +27,13 @@
 #
 
 from Solver import Solver
-from CitcomSLib import regional_solver_init
-import journal
-
 
 class RegionalSolver(Solver):
 
 
     def initializeSolver(self):
+        from CitcomSLib import regional_solver_init
+        # define common aliases for full/regional functions
         regional_solver_init(self.all_variables)
 
 

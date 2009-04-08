@@ -62,7 +62,7 @@ class Controller(Component):
     def launch(self, app):
         '''Setup initial conditions.
         '''
-        # 0th step
+        # initial conditions and 0th step
         self.solver.launch(app)
 
         # do io for 0th step
@@ -80,6 +80,8 @@ class Controller(Component):
     def march(self, totalTime=0, steps=0):
         """explicit time loop"""
 
+        # special treatment for steps=1, where only 0th step is computed
+        # this means that one can never request a run with (0th, 1st) steps
         if (self.step + 1) >= steps:
             self.endSimulation()
             return

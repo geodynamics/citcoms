@@ -68,19 +68,26 @@ class Solver(Component):
     def initialize(self, application):
         from CitcomSLib import citcom_init, global_default_values, set_signal
 
+        # initialize the "struct All_variables E" in C
         comm = application.solverCommunicator
         all_variables = citcom_init(comm.handle())
         self.communicator = comm
         self.all_variables = all_variables
 
+        # defined in child classes
         self.initializeSolver()
 
         # information about clock time
         self.start_cpu_time = CPU_time()
 
+        # global interuption handling routine defined once here
         set_signal()
+
+        # default values for various parameters
         global_default_values(self.all_variables)
 
+
+        # read input parameters from file(s) and command line
         inv = self.inventory
 
         inv.mesher.initialize(all_variables)
@@ -114,9 +121,10 @@ class Solver(Component):
                 application.controller.inventory.checkpointFrequency)
             print >> stream
 
+        # passing the parameters to C
         self.setProperties(stream)
 
-        self._setup()
+        self.initial_setup()
 
         return
 
@@ -151,7 +159,7 @@ class Solver(Component):
         return
 
 
-    def _setup(self):
+    def initial_setup(self):
         mesher = self.inventory.mesher
         vsolver = self.inventory.vsolver
         tsolver = self.inventory.tsolver

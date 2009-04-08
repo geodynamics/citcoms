@@ -27,14 +27,13 @@
 #
 
 from CoupledSolver import CoupledSolver
-from CitcomSLib import regional_solver_init
-import journal
-
 
 class CoupledRegionalSolver(CoupledSolver):
 
 
     def initializeSolver(self):
+        from CitcomSLib import regional_solver_init
+        # define common aliases for full/regional functions
         regional_solver_init(self.all_variables)
 
 
@@ -56,6 +55,6 @@ class CoupledRegionalSolver(CoupledSolver):
 
 
 # version
-__id__ = "$Id: /local/coupler/CitcomS/Solver/RegionalSolver.py 995 2006-07-07T22:35:14.359825Z leif  $"
+__id__ = "$Id$"
 
 # End of file

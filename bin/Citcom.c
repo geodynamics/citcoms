@@ -49,31 +49,24 @@ int main(argc,argv)
 {	/* Functions called by main*/
   void general_stokes_solver();
   void general_stokes_solver_pseudo_surf();
+  void global_default_values();
   void read_instructions();
   void initial_setup();
   void initial_conditions();
-  void solve_constrained_flow();
-  void solve_derived_velocities();
-  void process_temp_field();
   void post_processing();
-  void vcopy();
-  void construct_mat_group();
   void read_velocity_boundary_from_file();
   void read_rayleigh_from_file();
   void read_mat_from_file();
   void read_temperature_boundary_from_file();
 
-  void open_time();
   void output_finalize();
-  void PG_timestep_init();
   void tracer_advection();
   void heat_flux();
 
-  float dot();
   float cpu_time_on_vp_it;
 
   int cpu_total_seconds,k,need_init_sol;
-  double CPU_time0(),time,initial_time,start_time,avaimem();
+  double CPU_time0(),time,initial_time,start_time;
 
   struct All_variables *E;
   MPI_Comm world;
@@ -88,14 +81,26 @@ int main(argc,argv)
 
 
   /* this section reads input, allocates memory, and set some initial values;
-   *  replaced by CitcomS.Controller.initialize() */
+   * replaced by CitcomS.Controller.initialize() and
+   * CitcomS.Solver.initialize() in Pyre. */
   world = MPI_COMM_WORLD;
   E = citcom_init(&world); /* allocate global E and do initializaion here */
 
+  /* define common aliases for full/regional functions */
   solver_init(E);
 
   start_time = time = CPU_time0();
+
+  /* Global interuption handling routine defined once here */
+  set_signal();
+
+  /* default values for various parameters */
+  global_default_values(E);
+
+  /* read input parameters from file */
   read_instructions(E, argv[1]);
+
+  /* create mesh, setup solvers etc. */
   initial_setup(E);
 
   cpu_time_on_vp_it = CPU_time0();
@@ -110,7 +115,8 @@ int main(argc,argv)
 
 
   /* this section sets the initial condition;
-   * replaced by CitcomS.Controller.launch() */
+   * replaced by CitcomS.Controller.launch() ->
+   * CitcomS.Solver.launch() in Pyre. */
   if (E->control.post_p) {
       /* the initial condition is from previous checkpoint */
       read_checkpoint(E);
@@ -183,7 +189,7 @@ int main(argc,argv)
  
 
   /* this section advances the time step;
-   * replaced by CitcomS.Controller.march() */
+   * replaced by CitcomS.Controller.march() in Pyre. */
   while ( E->control.keep_going   &&  (Emergency_stop == 0) ) {
 
     /* The next few lines of code were replaced by

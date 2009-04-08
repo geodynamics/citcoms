@@ -39,6 +39,7 @@ class BaseApplication(Application):
         '''
         Application.__init__(self, name)
 
+        # channel for debugging output
         self._info = journal.debug("application")
         return
 
@@ -49,7 +50,10 @@ class BaseApplication(Application):
         '''
         Application._init(self)
 
-        # self.nodes is the # of CPUs for this simulation
+        # self.nodes is the # of CPUs for this simulation, used by the
+        # scheduler and launcher
+        #
+        # self.getNodes is defined in the child classes
         self.nodes = self.getNodes()
         return
 
@@ -58,6 +62,8 @@ class BaseApplication(Application):
     def main(self, *args, **kwds):
         '''The entry point, like main() in C.
         '''
+        # self.initialize and self.reportConfiguration are defined
+        # in the child classes
         self.initialize()
         self.reportConfiguration()
         self.launch()
@@ -68,8 +74,11 @@ class BaseApplication(Application):
     def launch(self):
         '''Start the computation.
         '''
+
+        # initial conditions and the 0th step
         self.controller.launch(self)
 
+        # subsequent steps
         self.controller.march(steps=self.inventory.steps)
         return
 

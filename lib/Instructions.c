@@ -49,7 +49,6 @@
 #include "parallel_related.h"
 #include "parsing.h"
 #include "phase_change.h"
-#include "interuption.h"
 
 void parallel_process_termination();
 void allocate_common_vars(struct All_variables*);
@@ -196,19 +195,13 @@ void initial_mesh_solver_setup(struct All_variables *E)
 }
 
 
+/* This function is replaced by CitcomS.*.setProperties() in Pyre. */
 void read_instructions(struct All_variables *E, char *filename)
 {
     void read_initial_settings();
-    void global_default_values();
 
     void setup_parser();
     void shutdown_parser();
-
-    /* =====================================================
-       Global interuption handling routine defined once here
-       =====================================================  */
-
-    set_signal();
 
     /* ==================================================
        Initialize from the command line
@@ -216,8 +209,6 @@ void read_instructions(struct All_variables *E, char *filename)
        ==================================================  */
 
     setup_parser(E,filename);
-
-    global_default_values(E);
     read_initial_settings(E);
     shutdown_parser(E);
 
@@ -225,7 +216,7 @@ void read_instructions(struct All_variables *E, char *filename)
 }
 
 
-/* This function is replaced by CitcomS.Solver._setup() */
+/* This function is replaced by CitcomS.Solver.initial_setup() in Pyre. */
 void initial_setup(struct All_variables *E)
 {
     void general_stokes_solver_setup();
@@ -236,8 +227,6 @@ void initial_setup(struct All_variables *E)
     general_stokes_solver_setup(E);
 
     (E->next_buoyancy_field_init)(E);
-    if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
-                                   CPU_time0()-E->monitor.cpu_time_at_start);
 
     return;
 }
@@ -1210,7 +1199,8 @@ void global_default_values(E)
 
     E->control.record_all_until = 10000000;
 
-  return;  }
+  return;
+}
 
 
 /* =============================================================
@@ -1320,15 +1310,10 @@ void common_initial_fields(E)
 {
     void initial_pressure();
     void initial_velocity();
-    /*void read_viscosity_option();*/
     void initial_viscosity();
 
-    report(E,"Initialize pressure field");
     initial_pressure(E);
-    report(E,"Initialize velocity field");
     initial_velocity(E);
-    report(E,"Initialize viscosity field");
-    /*get_viscosity_option(E);*/
     initial_viscosity(E);
 
     return;
@@ -1341,6 +1326,7 @@ void initial_pressure(E)
      struct All_variables *E;
 {
     int i,m;
+    report(E,"Initialize pressure field");
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.npno;i++)
@@ -1353,6 +1339,7 @@ void initial_velocity(E)
      struct All_variables *E;
 {
     int i,m;
+    report(E,"Initialize velocity field");
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nnov;i++)   {

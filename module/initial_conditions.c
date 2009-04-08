@@ -26,7 +26,6 @@
 */
 
 #include <Python.h>
-#include "exceptions.h"
 #include "initial_conditions.h"
 
 #include "global_defs.h"
@@ -39,7 +38,6 @@ void initial_pressure(struct All_variables*);
 void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
 void post_processing(struct All_variables*);
-void report(struct All_variables*, char* str);
 void read_checkpoint(struct All_variables*);
 
 char pyCitcom_ic_initialize_material__doc__[] = "";
@@ -123,7 +121,6 @@ PyObject * pyCitcom_ic_initPressure(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    report(E,"Initialize pressure field");
     initial_pressure(E);
 
     Py_INCREF(Py_None);
@@ -145,7 +142,6 @@ PyObject * pyCitcom_ic_initVelocity(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    report(E,"Initialize velocity field");
     initial_velocity(E);
 
     Py_INCREF(Py_None);
@@ -167,7 +163,6 @@ PyObject * pyCitcom_ic_initViscosity(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    report(E,"Initialize viscosity field");
     initial_viscosity(E);
 
     Py_INCREF(Py_None);
