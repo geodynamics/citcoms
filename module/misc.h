@@ -48,6 +48,11 @@ extern char pyCitcom_citcom_init__name__[];
 PyObject * pyCitcom_citcom_init(PyObject *, PyObject *);
 
 
+extern char pyCitcom_citcom_finalize__doc__[];
+extern char pyCitcom_citcom_finalize__name__[];
+PyObject * pyCitcom_citcom_finalize(PyObject *, PyObject *);
+
+
 extern char pyCitcom_full_solver_init__doc__[];
 extern char pyCitcom_full_solver_init__name__[];
 PyObject * pyCitcom_full_solver_init(PyObject *, PyObject *);

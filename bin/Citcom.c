@@ -33,6 +33,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "citcom_init.h"
+#include "interuption.h"
 #include "output.h"
 #include "parallel_related.h"
 #include "checkpoints.h"
@@ -117,7 +118,8 @@ int main(argc,argv)
       /* the program will finish after post_processing */
       post_processing(E);
       (E->problem_output)(E, E->monitor.solution_cycles);
-      parallel_process_termination();
+
+      citcom_finalize(E, 0);
   }
 
   if (E->control.restart) {
@@ -155,6 +157,18 @@ int main(argc,argv)
           general_stokes_solver(E);
   }
 
+  /* stop the computation if only computes stokes' problem */
+  if (E->control.stokes)  {
+
+    if(E->control.tracer==1)
+      tracer_advection(E);
+
+    (E->problem_output)(E, E->monitor.solution_cycles);
+
+    citcom_finalize(E, 0);
+  }
+
+
   (E->problem_output)(E, E->monitor.solution_cycles);
 
   /* information about simulation time and wall clock time */
@@ -164,16 +178,6 @@ int main(argc,argv)
 				   checkpoint, else leave as is to
 				   allow reusing directories */
     output_checkpoint(E);
-
-  /* this section stops the computation if only computes stokes' problem
-   * no counterpart in pyre */
-  if (E->control.stokes)  {
-
-    if(E->control.tracer==1)
-      tracer_advection(E);
-
-    parallel_process_termination();
-  }
 
 
  
@@ -280,8 +284,7 @@ int main(argc,argv)
 	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
 
-  output_finalize(E);
-  parallel_process_termination();
+  citcom_finalize(E, 0);
 
   return(0);
 

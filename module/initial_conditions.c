@@ -38,7 +38,6 @@ void init_composition(struct All_variables*);
 void initial_pressure(struct All_variables*);
 void initial_velocity(struct All_variables*);
 void initial_viscosity(struct All_variables*);
-void parallel_process_termination();
 void post_processing(struct All_variables*);
 void report(struct All_variables*, char* str);
 void read_checkpoint(struct All_variables*);
@@ -211,8 +210,6 @@ PyObject * pyCitcom_ic_postProcessing(PyObject *self, PyObject *args)
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
     post_processing(E);
-    (E->problem_output)(E, E->monitor.solution_cycles);
-    parallel_process_termination();
 
     Py_INCREF(Py_None);
     return Py_None;

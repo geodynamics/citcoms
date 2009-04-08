@@ -65,6 +65,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_citcom_init__doc__},
 
+    {pyCitcom_citcom_finalize__name__,
+     pyCitcom_citcom_finalize,
+     METH_VARARGS,
+     pyCitcom_citcom_finalize__doc__},
+
     {pyCitcom_full_solver_init__name__,
      pyCitcom_full_solver_init,
      METH_VARARGS,
@@ -227,11 +232,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_output,
      METH_VARARGS,
      pyCitcom_output__doc__},
-
-    {pyCitcom_output_finalize__name__,
-     pyCitcom_output_finalize,
-     METH_VARARGS,
-     pyCitcom_output_finalize__doc__},
 
     {pyCitcom_output_time__name__,
      pyCitcom_output_time,

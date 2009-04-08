@@ -129,6 +129,27 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_citcom_finalize__doc__[] = "";
+char pyCitcom_citcom_finalize__name__[] = "citcom_finalize";
+
+PyObject * pyCitcom_citcom_finalize(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+    int status;
+
+    if (!PyArg_ParseTuple(args, "Oi:citcom_finalize", &obj, &status))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    citcom_finalize(E, status);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyCitcom_full_solver_init__doc__[] = "";
 char pyCitcom_full_solver_init__name__[] = "full_solver_init";
 

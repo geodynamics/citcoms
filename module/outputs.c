@@ -34,9 +34,6 @@
 #include "output.h"
 
 
-void output_finalize(struct  All_variables *E);
-
-
 char pyCitcom_output__doc__[] = "";
 char pyCitcom_output__name__[] = "output";
 
@@ -53,27 +50,6 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 
     (E->problem_output)(E, cycles);
 
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-char pyCitcom_output_finalize__doc__[] = "";
-char pyCitcom_output_finalize__name__[] = "output_finalize";
-
-PyObject * pyCitcom_output_finalize(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    struct All_variables* E;
-    int cycles;
-
-    if (!PyArg_ParseTuple(args, "O:output_finalize", &obj))
-        return NULL;
-
-    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
-
-    output_finalize(E);
 
     Py_INCREF(Py_None);
     return Py_None;

@@ -128,6 +128,8 @@ class Solver(Component):
 
             # the program will finish after post_processing
             postProcessing(self.all_variables)
+            self.save(1)
+            self.endSimulation()
             return
 
         if self.inventory.ic.inventory.restart:
@@ -139,6 +141,13 @@ class Solver(Component):
             ic.launch()
 
             self.solveVelocities()
+
+        # stop the computation if only computes stokes' problem
+        if self.inventory.stokes_flow_only:
+            self.advectTracers()
+            self.save(1)
+            self.endSimulation()
+
         return
 
 
@@ -204,7 +213,8 @@ class Solver(Component):
 
     def endSimulation(self):
         self._avgCPUTime()
-        self.finalize()
+        from CitcomSLib import citcom_finalize
+        citcom_finalize(self.all_variables, 0)
         return
 
 
@@ -261,12 +271,6 @@ class Solver(Component):
 
         check_settings_consistency(self.all_variables);
 
-        return
-
-
-    def finalize(self):
-        from CitcomSLib import output_finalize
-        output_finalize(self.all_variables)
         return
 
 

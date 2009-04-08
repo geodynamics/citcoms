@@ -26,6 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include <stdlib.h>
 #include "global_defs.h"
 #include "citcom_init.h"
 
@@ -56,4 +57,15 @@ struct All_variables* citcom_init(MPI_Comm *world)
   E->control.total_v_solver_calls=0;
 
   return(E);
+}
+
+
+void citcom_finalize(struct All_variables *E, int status)
+{
+    void output_finalize(struct All_variables*);
+    void parallel_process_finalize();
+
+    output_finalize(E);
+    parallel_process_finalize();
+    exit(status);
 }

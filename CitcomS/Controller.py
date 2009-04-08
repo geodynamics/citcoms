@@ -73,7 +73,6 @@ class Controller(Component):
         if not self.solver.inventory.ic.inventory.restart:
             self.checkpoint()
 
-        ### XXX: if stokes: advection tracers and terminate
         return
 
 

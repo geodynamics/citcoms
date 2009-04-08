@@ -120,7 +120,9 @@ class CoupledSolver(Solver):
         self._avgCPUTime()
         # write even if not sync'd
         output(self.all_variables, self.step)
-        self.finalize()
+
+        from CitcomSLib import citcom_finalize
+        citcom_finalize(self.all_variables, 0)
         return
 
 
