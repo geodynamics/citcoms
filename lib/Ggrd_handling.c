@@ -761,12 +761,14 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
     } /* end init */
     
-    /* geographic bounds */
-    theta_max = (90-E->control.ggrd.svp[i1].south)*M_PI/180-1e-5;
-    theta_min = (90-E->control.ggrd.svp[i1].north)*M_PI/180+1e-5;
+    /* 
+       geographic bounds 
+    */
+    theta_max = (90-E->control.ggrd.svp[0].south)*M_PI/180-1e-5;
+    theta_min = (90-E->control.ggrd.svp[0].north)*M_PI/180+1e-5;
     if((E->parallel.me ==0) && (is_global)){
       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
-	      E->control.ggrd.svp[i1].south,E->control.ggrd.svp[i1].north);
+	      E->control.ggrd.svp[0].south,E->control.ggrd.svp[0].north);
     }
 
     if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
