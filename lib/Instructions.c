@@ -183,6 +183,15 @@ void initial_mesh_solver_setup(struct All_variables *E)
 	(E->problem_tracer_setup)(E);
 	if(chatty)fprintf(stderr,"tracer setup done\n");
     }
+
+#ifdef USE_GGRD
+    /* updating local rayleigh number (based on Netcdf grds, the
+       rayleigh number may be modified laterally in the surface
+       layers) */
+    if(E->control.ggrd.ray_control)
+      read_rayleigh_from_file(E);
+#endif
+
     if(chatty)fprintf(stderr,"initial_mesh_solver_setup done\n");
 }
 
@@ -225,15 +234,6 @@ void initial_setup(struct All_variables *E)
     initial_mesh_solver_setup(E);
 
     general_stokes_solver_setup(E);
-
-#ifdef USE_GGRD  
-    /* updating local rayleigh number (based on Netcdf grds, the
-       rayleigh number may be modified laterally in the surface
-       layers) */
-    /* no counterpart in pyre */
-    if(E->control.ggrd.ray_control)
-      read_rayleigh_from_file(E);
-#endif
 
     (E->next_buoyancy_field_init)(E);
     if (E->parallel.me==0) fprintf(stderr,"time=%f\n",
