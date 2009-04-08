@@ -71,11 +71,6 @@ PyObject * pyCitcom_copyright(PyObject *self, PyObject *args)
   return Py_BuildValue("s", pyCitcom_copyright_note);
 }
 
-/*////////////////////////////////////////////////////////////////////////
-// This section is for testing or temporatory implementation
-////////////////////////////////////////////////////////////////////////*/
-
-
 
 char pyCitcom_return1_test__doc__[] = "";
 char pyCitcom_return1_test__name__[] = "return1_test";
@@ -88,30 +83,6 @@ PyObject * pyCitcom_return1_test(PyObject *self, PyObject *args)
 }
 
 
-char pyCitcom_read_instructions__doc__[] = "";
-char pyCitcom_read_instructions__name__[] = "read_instructions";
-
-PyObject * pyCitcom_read_instructions(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    struct All_variables* E;
-    char *filename;
-
-    if (!PyArg_ParseTuple(args, "Os:read_instructions", &obj, &filename))
-        return NULL;
-
-    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
-
-    read_instructions(E, filename);
-
-    /* test */
-    fprintf(stderr,"output file prefix: %s\n", E->control.data_file);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
 char pyCitcom_CPU_time__doc__[] = "";
 char pyCitcom_CPU_time__name__[] = "CPU_time";
 
@@ -119,11 +90,6 @@ PyObject * pyCitcom_CPU_time(PyObject *self, PyObject *args)
 {
     return Py_BuildValue("d", CPU_time0());
 }
-
-
-/*////////////////////////////////////////////////////////////////////////
-// This section is for finished implementation
-////////////////////////////////////////////////////////////////////////*/
 
 
 void deleteE(struct All_variables *E)

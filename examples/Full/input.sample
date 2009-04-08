@@ -98,7 +98,6 @@ Q0=0
 # required information
 Problem=convection
 Geometry=sphere
-Spacing=regular
 Solver=cgrad
 node_assemble=1
 

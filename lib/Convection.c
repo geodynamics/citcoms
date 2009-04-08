@@ -48,6 +48,8 @@ void set_convection_defaults(E)
     void convection_initial_fields();
     void twiddle_thumbs();
 
+    E->control.CONVECTION = 1;
+
     E->advection.timestep = 0.0;
     E->advection.timesteps = 0;
     E->advection.temp_iterations = 2; /* petrov-galerkin iterations: minimum value. */

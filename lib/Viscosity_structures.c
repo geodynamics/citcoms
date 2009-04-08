@@ -280,23 +280,22 @@ void visc_from_T(E,EEta,propogate)
      float **EEta;
      int propogate;
 {
-    int m,i,j,k,l,z,jj,kk,imark;
-    float zero,e_6,one,eta0,Tave,depth,temp,tempa,temp1,TT[9];
+    int m,i,k,l,z,jj,kk;
+    float zero,one,eta0,temp,tempa,TT[9];
     float zzz,zz[9],dr;
-    float visc1, visc2, tempa_exp;
+    float visc1, visc2;
     const int vpts = vpoints[E->mesh.nsd];
     const int ends = enodes[E->mesh.nsd];
     const int nel = E->lmesh.nel;
 
-    e_6 = 1.e-6;
     one = 1.0;
     zero = 0.0;
-    imark = 0;
 
-    /* consisntent handling : l is material number - 1 to allow
+    /* consistent handling : l is (material number - 1) to allow
        addressing viscosity arrays, which are all 0...n-1  */
     switch (E->viscosity.RHEOL)   {
-    case 1:			/* eta = N_0 exp( E * (T_0 - T))  */
+    case 1:
+        /* eta = N_0 exp( E * (T_0 - T))  */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -323,7 +322,8 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
-    case 2:			/* eta = N_0 exp(-T/T_0) */
+    case 2:
+        /* eta = N_0 exp(-T/T_0) */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -350,8 +350,8 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
-    case 3:			/* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) */
-
+    case 3:
+        /* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -359,7 +359,6 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
 		else
 		  tempa = E->viscosity.N0[l];
-                j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
 		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
@@ -391,8 +390,6 @@ void visc_from_T(E,EEta,propogate)
 		else
 		  tempa = E->viscosity.N0[l];
 
-                j = 0;
-
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[m][E->ien[m][i].node[kk]];
                     zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
@@ -419,26 +416,22 @@ void visc_from_T(E,EEta,propogate)
 
     case 5:
 
-        /* same as rheol 3, except alternative margin, VIP, formulation */
+        /* when mat_control=0, same as rheol 3,
+           when mat_control=1, applying viscosity cut-off before mat_control */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
                 tempa = E->viscosity.N0[l];
                 /* fprintf(stderr,"\nINSIDE visc_from_T, l=%d, tempa=%g",l+1,tempa);*/
-                j = 0;
-
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-                    /* zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]); */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
-                    /* zzz=0.0; */
                     for(kk=1;kk<=ends;kk++)   {
                         TT[kk]=max(TT[kk],zero);
                         temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
-                        /* zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)]; */
                     }
 
                     if(E->control.mat_control==0)
@@ -466,12 +459,10 @@ void visc_from_T(E,EEta,propogate)
         break;
 
 
-    case 6:			/* 
-				   like case 1, but allowing for depth-dependence if Z_0 != 0
-				   
-				   eta = N_0 exp(E(T_0-T) + (1-z) Z_0 ) 
-
-				*/
+    case 6:
+        /* like case 1, but allowing for depth-dependence if Z_0 != 0
+           eta = N_0 exp(E(T_0-T) + (1-z) Z_0 )
+        */
 
         for(m=1;m <= E->sphere.caps_per_proc;m++)
 	  for(i=1;i <= nel;i++)   {
@@ -482,7 +473,6 @@ void visc_from_T(E,EEta,propogate)
 	      tempa = E->viscosity.N0[l] * E->VIP[m][i];
 	    else
 	      tempa = E->viscosity.N0[l];
-	    j = 0;
 
 	    for(kk=1;kk<=ends;kk++) {
 	      TT[kk] = E->T[m][E->ien[m][i].node[kk]];
@@ -499,16 +489,43 @@ void visc_from_T(E,EEta,propogate)
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
-	      //if(E->parallel.me == 0)
-	      //	fprintf(stderr,"z %11g km mat %i N0 %11g T %11g T0 %11g E %11g Z %11g mat: %i log10(eta): %11g\n",
-	      //		zzz *E->data.radius_km ,l+1,
-	      //	tempa,temp,E->viscosity.T[l],E->viscosity.E[l], E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
+	      /*
+               if(E->parallel.me == 0)
+	         fprintf(stderr,"z %11g km mat %i N0 %11g T %11g T0 %11g E %11g Z %11g mat: %i log10(eta): %11g\n",
+                        zzz *E->data.radius_km ,l+1,
+                        tempa,temp,E->viscosity.T[l],E->viscosity.E[l], E->viscosity.Z[l],l+1,log10(EEta[m][ (i-1)*vpts + jj ]));
+              */
 	    }
 	  }
         break;
 
 
     case 7:
+        /* The viscosity formulation (dimensional) is:
+           visc=visc0*exp[(Ea+p*Va)/(R*T)]
+
+           Typical values for dry upper mantle are:
+           Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol
+
+           T=DT*(T0+T');
+           where DT - temperature contrast (from Rayleigh number)
+           T' - nondimensional temperature;
+           T0 - nondimensional surface tempereture;
+
+           =>
+           visc = visc0 * exp{(Ea+p*Va) / [R*DT*(T0 + T')]}
+                = visc0 * exp{[Ea/(R*DT) + p*Va/(R*DT)] / (T0 + T')}
+
+           so:
+           E->viscosity.E = Ea/(R*DT);
+           (1-r) = p/(rho*g);
+           E->viscosity.Z = Va*rho*g/(R*DT);
+           E->viscosity.T = T0;
+
+           after normalizing visc=1 at T'=1 and r=r_CMB:
+           visc = visc0*exp{ [viscE + (1-r)*viscZ] / (viscT+T')
+                - [viscE + (1-r_CMB)*viscZ] / (viscT+1) }
+        */
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
@@ -518,8 +535,6 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
 		else
 		  tempa = E->viscosity.N0[l];
-
-                j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[m][E->ien[m][i].node[kk]];
@@ -534,31 +549,6 @@ void visc_from_T(E,EEta,propogate)
                         zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    /* The viscosity formulation (dimensional) is:
-                       visc=visc0*exp[(Ea+p*Va)/(R*T)]
-
-                       Typical values for dry upper mantle are:
-                       Ea = 300 KJ/mol ; Va = 1.e-5 m^3/mol
-
-                       T=DT*(T0+T');
-                       where DT - temperature contrast (from Rayleigh number)
-                       T' - nondimensional temperature;
-                       T0 - nondimensional surface tempereture;
-
-                       =>
-                       visc = visc0 * exp{(Ea+p*Va) / [R*DT*(T0 + T')]}
-                            = visc0 * exp{[Ea/(R*DT) + p*Va/(R*DT)] / (T0 + T')}
-
-                       so:
-                       E->viscosity.E = Ea/(R*DT);
-                       (1-r) = p/(rho*g);
-                       E->viscosity.Z = Va*rho*g/(R*DT);
-                       E->viscosity.T = T0;
-
-                       after normalizing visc=1 at T'=1 and r=r_CMB:
-                       visc=visc0*exp{ [viscE + (1-r)*viscZ] / (viscT+T')
-                                     - [viscE + (1-r_CMB)*viscZ] / (viscT+1) }
-                    */
 
                     EEta[m][ (i-1)*vpts + jj ] = tempa*
                         exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
@@ -570,20 +560,21 @@ void visc_from_T(E,EEta,propogate)
             }
         break;
 
-    case 8:			/* 
-				   eta0 = N_0 exp(E/(T+T_0) - E/(1+T_0)) 
+    case 8:
+        /*
+          eta0 = N_0 exp(E/(T+T_0) - E/(1+T_0))
 
-				   eta =       eta0 if T   < T_sol0 + 2(1-z)
-				   eta = ET_red*eta0 if T >= T_sol0 + 2(1-z)
+          eta =        eta0 if T  < T_sol0 + 2(1-z)
+          eta = ET_red*eta0 if T >= T_sol0 + 2(1-z)
 
-				   where z is normalized by layer
-				   thickness, and T_sol0 is something
-				   like 0.6, and ET_red = 0.1
+          where z is normalized by layer
+          thickness, and T_sol0 is something
+          like 0.6, and ET_red = 0.1
 
-				   (same as case 3, but for viscosity reduction)
+          (same as case 3, but for viscosity reduction)
+        */
 
-				*/
-      dr = E->sphere.ro - E->sphere.ri;
+        dr = E->sphere.ro - E->sphere.ri;
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -591,7 +582,6 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
 		else
 		  tempa = E->viscosity.N0[l];
-                j = 0;
 
                 for(kk=1;kk<=ends;kk++) {
 		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];

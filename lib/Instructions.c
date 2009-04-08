@@ -291,67 +291,33 @@ void read_initial_settings(struct All_variables *E)
   /* first the problem type (defines subsequent behaviour) */
 
   input_string("Problem",E->control.PROBLEM_TYPE,"convection",m);
-  if ( strcmp(E->control.PROBLEM_TYPE,"convection") == 0)  {
-    E->control.CONVECTION = 1;
+  if ( strcmp(E->control.PROBLEM_TYPE,"convection") == 0)
     set_convection_defaults(E);
-  }
-
-  else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0) {
-    E->control.CONVECTION = 1;
+  else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0)
     set_convection_defaults(E);
-  }
-
   else {
     fprintf(E->fp,"Unable to determine problem type, assuming convection ... \n");
-    E->control.CONVECTION = 1;
     set_convection_defaults(E);
   }
 
   input_string("Geometry",E->control.GEOMETRY,"sphere",m);
-  if ( strcmp(E->control.GEOMETRY,"cart2d") == 0)
-    { E->control.CART2D = 1;
-    (E->solver.set_2dc_defaults)(E);}
-  else if ( strcmp(E->control.GEOMETRY,"axi") == 0)
-    { E->control.AXI = 1;
-    }
-  else if ( strcmp(E->control.GEOMETRY,"cart2pt5d") == 0)
-    { E->control.CART2pt5D = 1;
-    (E->solver.set_2pt5dc_defaults)(E);}
-  else if ( strcmp(E->control.GEOMETRY,"cart3d") == 0)
-    { E->control.CART3D = 1;
-    (E->solver.set_3dc_defaults)(E);}
-  else if ( strcmp(E->control.GEOMETRY,"sphere") == 0)
-    {
-      (E->solver.set_3dsphere_defaults)(E);}
-  else
-    { fprintf(E->fp,"Unable to determine geometry, assuming cartesian 2d ... \n");
-    E->control.CART2D = 1;
-    (E->solver.set_2dc_defaults)(E); }
+  if ( strcmp(E->control.GEOMETRY,"sphere") == 0)
+      (E->solver.set_3dsphere_defaults)(E);
+  else {
+    fprintf(E->fp,"Unable to determine geometry, assuming sphere 3d ... \n");
+    (E->solver.set_3dsphere_defaults)(E);
+  }
 
   input_string("Solver",E->control.SOLVER_TYPE,"cgrad",m);
   if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0)
     set_cg_defaults(E);
   else if ( strcmp(E->control.SOLVER_TYPE,"multigrid") == 0)
     set_mg_defaults(E);
-  else
-    { if (E->parallel.me==0) fprintf(stderr,"Unable to determine how to solve, specify Solver=VALID_OPTION \n");
+  else {
+    if (E->parallel.me==0) fprintf(stderr,"Unable to determine how to solve, specify Solver=VALID_OPTION \n");
     parallel_process_termination();
-    }
+  }
 
-
-  /* admin */
-
-  input_string("Spacing",E->control.NODE_SPACING,"regular",m);
-  if ( strcmp(E->control.NODE_SPACING,"regular") == 0)
-    E->control.GRID_TYPE = 1;
-  else if ( strcmp(E->control.NODE_SPACING,"bound_lyr") == 0)
-    E->control.GRID_TYPE = 2;
-  else if ( strcmp(E->control.NODE_SPACING,"region") == 0)
-    E->control.GRID_TYPE = 3;
-  else if ( strcmp(E->control.NODE_SPACING,"ortho_files") == 0)
-    E->control.GRID_TYPE = 4;
-  else
-    {  E->control.GRID_TYPE = 1; }
 
   /* Information on which files to print, which variables of the flow to calculate and print.
      Default is no information recorded (apart from special things for given applications.
@@ -1175,8 +1141,6 @@ void global_default_values(E)
     E->control.NMULTIGRID = 0;
     E->control.augmented_Lagr = 0;
     E->control.augmented = 0.0;
-
-    E->control.GRID_TYPE=1;
 
     E->trace.fpt = NULL;
     E->control.tracer = 0;

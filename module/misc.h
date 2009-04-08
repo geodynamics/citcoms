@@ -38,11 +38,6 @@ extern char pyCitcom_return1_test__doc__[];
 PyObject * pyCitcom_return1_test(PyObject *, PyObject *);
 
 
-extern char pyCitcom_read_instructions__name__[];
-extern char pyCitcom_read_instructions__doc__[];
-PyObject * pyCitcom_read_instructions(PyObject *, PyObject *);
-
-
 extern char pyCitcom_CPU_time__name__[];
 extern char pyCitcom_CPU_time__doc__[];
 PyObject * pyCitcom_CPU_time(PyObject *, PyObject *);

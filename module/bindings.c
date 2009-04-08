@@ -48,10 +48,7 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_copyright__doc__},
 
-
-    /*////////////////////////////////////////////////////////////////////////
-    // This section is for testing or temporatory implementation
-    ////////////////////////////////////////////////////////////////////////*/
+    /* from misc.h */
 
     {pyCitcom_return1_test__name__,
      pyCitcom_return1_test,
@@ -62,18 +59,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_CPU_time,
      METH_VARARGS,
      pyCitcom_CPU_time__doc__},
-
-    {pyCitcom_read_instructions__name__,
-     pyCitcom_read_instructions,
-     METH_VARARGS,
-     pyCitcom_read_instructions__doc__},
-
-
-    /*////////////////////////////////////////////////////////////////////////
-    // This section is for finished implementation
-    ////////////////////////////////////////////////////////////////////////*/
-
-    /* from misc.h */
 
     {pyCitcom_citcom_init__name__,
      pyCitcom_citcom_init,

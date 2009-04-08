@@ -99,7 +99,6 @@ PyObject * pyCitcom_set_convection_defaults(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    E->control.CONVECTION = 1;
     set_convection_defaults(E);
 
     Py_INCREF(Py_None);

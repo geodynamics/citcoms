@@ -410,7 +410,6 @@ struct CONTROL {
     int stokes;
     int restart;
     int post_p;
-    int post_topo;
 
     char GEOMETRY[20]; /* one of ... */
     int CART2D;
@@ -419,13 +418,8 @@ struct CONTROL {
     int AXI;
 
     char SOLVER_TYPE[20]; /* one of ... */
-    int DIRECT;
     int CONJ_GRAD;
     int NMULTIGRID;
-    int DIRECTII;
-
-    char NODE_SPACING[20]; /* turns into ... */
-    int GRID_TYPE;
 
     int pseudo_free_surf;
 
