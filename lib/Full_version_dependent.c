@@ -145,7 +145,7 @@ void full_node_locations(E)
 
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
 
-    if (E->control.NMULTIGRID||E->control.EMULTIGRID)
+    if (E->control.NMULTIGRID)
         step = (int) pow(2.0,(double)(E->mesh.levmax-lev));
     else
         step = 1;

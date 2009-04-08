@@ -362,11 +362,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_set_mg_defaults__doc__},
 
-    {pyCitcom_set_mg_el_defaults__name__,
-     pyCitcom_set_mg_el_defaults,
-     METH_VARARGS,
-     pyCitcom_set_mg_el_defaults__doc__},
-
     {pyCitcom_solve_constrained_flow_iterative__name__,
      pyCitcom_solve_constrained_flow_iterative,
      METH_VARARGS,

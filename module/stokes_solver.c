@@ -194,7 +194,6 @@ PyObject * pyCitcom_set_cg_defaults(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    E->control.CONJ_GRAD = 1;
     set_cg_defaults(E);
 
     Py_INCREF(Py_None);
@@ -216,29 +215,6 @@ PyObject * pyCitcom_set_mg_defaults(PyObject *self, PyObject *args)
 
     E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
 
-    E->control.NMULTIGRID = 1;
-    set_mg_defaults(E);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-
-
-char pyCitcom_set_mg_el_defaults__doc__[] = "";
-char pyCitcom_set_mg_el_defaults__name__[] = "set_mg_el_defaults";
-
-PyObject * pyCitcom_set_mg_el_defaults(PyObject *self, PyObject *args)
-{
-    PyObject *obj;
-    struct All_variables* E;
-
-    if (!PyArg_ParseTuple(args, "O:set_mg_el_defaults", &obj))
-        return NULL;
-
-    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
-
-    E->control.EMULTIGRID = 1;
     set_mg_defaults(E);
 
     Py_INCREF(Py_None);

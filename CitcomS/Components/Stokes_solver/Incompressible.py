@@ -47,13 +47,11 @@ class Incompressible(CitcomComponent):
 
     def initialize(self, all_variables):
         CitcomComponent.initialize(self, all_variables)
-        from CitcomSLib import set_cg_defaults, set_mg_defaults, set_mg_el_defaults
+        from CitcomSLib import set_cg_defaults, set_mg_defaults
         if self.inventory.Solver == "cgrad":
             set_cg_defaults(self.all_variables)
         elif self.inventory.Solver == "multigrid":
             set_mg_defaults(self.all_variables)
-        elif self.inventory.Solver == "multigrid-el":
-            set_mg_el_defaults(self.all_variables)
         return
 
 
@@ -84,8 +82,7 @@ class Incompressible(CitcomComponent):
 
         Solver = prop.str("Solver", default="cgrad",
                  validator=prop.choice(["cgrad",
-                                        "multigrid",
-                                        "multigrid-el"]))
+                                        "multigrid"]))
         node_assemble = prop.bool("node_assemble", default=True)
         precond = prop.bool("precond", default=True)
 

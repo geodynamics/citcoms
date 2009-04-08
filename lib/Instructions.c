@@ -330,14 +330,9 @@ void read_initial_settings(struct All_variables *E)
 
   input_string("Solver",E->control.SOLVER_TYPE,"cgrad",m);
   if ( strcmp(E->control.SOLVER_TYPE,"cgrad") == 0)
-    { E->control.CONJ_GRAD = 1;
-    set_cg_defaults(E);}
+    set_cg_defaults(E);
   else if ( strcmp(E->control.SOLVER_TYPE,"multigrid") == 0)
-    { E->control.NMULTIGRID = 1;
-    set_mg_defaults(E);}
-  else if ( strcmp(E->control.SOLVER_TYPE,"multigrid-el") == 0)
-    { E->control.EMULTIGRID = 1;
-    set_mg_defaults(E);}
+    set_mg_defaults(E);
   else
     { if (E->parallel.me==0) fprintf(stderr,"Unable to determine how to solve, specify Solver=VALID_OPTION \n");
     parallel_process_termination();
@@ -1178,7 +1173,6 @@ void global_default_values(E)
     E->control.AXI = 0;
     E->control.CONJ_GRAD = 0;
     E->control.NMULTIGRID = 0;
-    E->control.EMULTIGRID = 0;
     E->control.augmented_Lagr = 0;
     E->control.augmented = 0.0;
 

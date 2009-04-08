@@ -133,7 +133,7 @@ void regional_coord_of_cap(E,m,icap)
     
     for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
       
-      if (E->control.NMULTIGRID||E->control.EMULTIGRID)
+      if (E->control.NMULTIGRID)
         step = (int) pow(2.0,(double)(E->mesh.levmax-lev));
       else
         step = 1;

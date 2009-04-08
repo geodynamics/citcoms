@@ -68,11 +68,6 @@ extern char pyCitcom_set_mg_defaults__doc__[];
 PyObject * pyCitcom_set_mg_defaults(PyObject *, PyObject *);
 
 
-extern char pyCitcom_set_mg_el_defaults__name__[];
-extern char pyCitcom_set_mg_el_defaults__doc__[];
-PyObject * pyCitcom_set_mg_el_defaults(PyObject *, PyObject *);
-
-
 extern char pyCitcom_solve_constrained_flow_iterative__name__[];
 extern char pyCitcom_solve_constrained_flow_iterative__doc__[];
 PyObject * pyCitcom_solve_constrained_flow_iterative(PyObject *, PyObject *);

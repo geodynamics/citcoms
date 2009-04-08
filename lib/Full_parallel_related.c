@@ -275,7 +275,7 @@ void full_parallel_domain_decomp0(struct All_variables *E)
 
   for(i=E->mesh.levmax;i>=E->mesh.levmin;i--)   {
 
-     if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
+     if (E->control.NMULTIGRID)  {
         nox = E->lmesh.elx/(int)pow(2.0,(double)(E->mesh.levmax-i))+1;
         noy = E->lmesh.ely/(int)pow(2.0,(double)(E->mesh.levmax-i))+1;
         noz = E->lmesh.elz/(int)pow(2.0,(double)(E->mesh.levmax-i))+1;

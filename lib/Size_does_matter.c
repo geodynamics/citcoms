@@ -1107,7 +1107,7 @@ void mass_matrix(struct All_variables *E)
                 for(node=1;node<=E->lmesh.NNO[lev];node++)
                     E->NMass[m][node] = E->MASS[lev][m][node];
 
-        if (E->control.NMULTIGRID||E->control.EMULTIGRID||E->mesh.levmax==lev)
+        if (E->control.NMULTIGRID||E->mesh.levmax==lev)
             (E->exchange_node_d)(E,E->MASS[lev],lev);
 
         for (m=1;m<=E->sphere.caps_per_proc;m++)

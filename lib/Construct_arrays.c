@@ -614,7 +614,7 @@ void construct_sub_element(E)
 	  ely = E->lmesh.ELY[lev];
 	  elxu = 2 * elx;
 	  elzu = 2 * elz;
-          if (!(E->control.NMULTIGRID||E->control.EMULTIGRID))  {
+          if (!E->control.NMULTIGRID)  {
              elzu = 1;
              if (lev == E->mesh.levmax-1)
                  elzu = E->lmesh.ELZ[E->mesh.levmax];

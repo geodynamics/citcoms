@@ -86,7 +86,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
   count = 0;
   initial_time=CPU_time0();
 
-  if (!(E->control.NMULTIGRID || E->control.EMULTIGRID)) {
+  if (!E->control.NMULTIGRID) {
     /* conjugate gradient solution */
 
     cycles = E->control.v_steps_low;

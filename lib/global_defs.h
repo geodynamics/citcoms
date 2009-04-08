@@ -422,7 +422,6 @@ struct CONTROL {
     int DIRECT;
     int CONJ_GRAD;
     int NMULTIGRID;
-    int EMULTIGRID;
     int DIRECTII;
 
     char NODE_SPACING[20]; /* turns into ... */

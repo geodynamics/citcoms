@@ -241,7 +241,7 @@ void regional_parallel_domain_decomp0(struct All_variables *E)
 
   for(i=E->mesh.levmax;i>=E->mesh.levmin;i--)   {
 
-     if (E->control.NMULTIGRID||E->control.EMULTIGRID)  {
+     if (E->control.NMULTIGRID)  {
         nox = E->mesh.mgunitx * (int) pow(2.0,(double)i) + 1;
         noy = E->mesh.mgunity * (int) pow(2.0,(double)i) + 1;
         noz = E->lmesh.elz/(int)pow(2.0,(double)(E->mesh.levmax-i))+1;
