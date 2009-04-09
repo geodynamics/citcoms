@@ -165,12 +165,9 @@ int main(argc,argv)
 
   /* stop the computation if only computes stokes' problem */
   if (E->control.stokes)  {
-
     if(E->control.tracer==1)
       tracer_advection(E);
-
     (E->problem_output)(E, E->monitor.solution_cycles);
-
     citcom_finalize(E, 0);
   }
 
@@ -223,16 +220,14 @@ int main(argc,argv)
 
     if(E->control.tracer==1)
       tracer_advection(E);
-
     general_stokes_solver(E);
+
     if(E->output.write_q_files)
       if ((E->monitor.solution_cycles % E->output.write_q_files)==0)
 	heat_flux(E);
-
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
-
 
     /* information about simulation time and wall clock time */
     output_time(E, E->monitor.solution_cycles);
@@ -277,7 +272,6 @@ int main(argc,argv)
   }
 
 
-
   /* this section prints time accounting;
    * no counterpart in pyre */
   if (E->parallel.me == 0)  {
@@ -289,9 +283,7 @@ int main(argc,argv)
     fprintf(E->fp,"Average cpu time taken for velocity step = %f\n",
 	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
-
   citcom_finalize(E, 0);
-
   return(0);
 
 }

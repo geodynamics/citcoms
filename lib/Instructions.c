@@ -1705,21 +1705,16 @@ void output_finalize(struct  All_variables *E)
   char message[255],files[255];
   if (E->fp)
     fclose(E->fp);
-
   if (E->fptime)
     fclose(E->fptime);
-
   if (E->fp_out)
     fclose(E->fp_out);
-
   if (E->trace.fpt)
     fclose(E->trace.fpt);
-
   if(E->output.fpqt)
     fclose(E->output.fpqt);
   if(E->output.fpqb)
     fclose(E->output.fpqb);
-
 
 #ifdef USE_GZDIR
   /*
@@ -1733,7 +1728,8 @@ void output_finalize(struct  All_variables *E)
       remove(files);
       if(E->parallel.me == 0){
 	/* close the log */
-	fclose(E->output.gzdir.vtk_fp);
+	if(E->output.gzdir.vtk_fp)
+	  fclose(E->output.gzdir.vtk_fp);
       }
     }
   }
