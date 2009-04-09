@@ -31,7 +31,9 @@
 
 #include "mpi.h"
 
-extern struct All_variables* citcom_init(MPI_Comm *world);
+struct All_variables;
+
+struct All_variables* citcom_init(MPI_Comm *world);
 
 #endif
 

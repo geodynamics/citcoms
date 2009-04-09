@@ -25,6 +25,9 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "full_read_input_from_files.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
@@ -33,7 +36,9 @@
 #include "ggrd_handling.h"
 #endif
 
-#include "cproto.h"
+#include "construct_arrays.h"
+#include "pan_problem_misc_functions.h"
+#include "problem_related.h"
 
 /*=======================================================================
   Calculate ages (MY) for opening input files -> material, ages, velocities

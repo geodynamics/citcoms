@@ -36,26 +36,18 @@
 #include "citcom_init.h"
 #include "advection_diffusion.h"
 
-
-void full_solver_init(struct All_variables*);
-void regional_solver_init(struct All_variables*);
-
-double return1_test();
-void read_instructions(struct All_variables*, char*);
-double CPU_time0();
-
-void global_default_values(struct All_variables*);
-void parallel_process_termination();
-void read_mat_from_file(struct All_variables*);
-void read_temperature_boundary_from_file(struct All_variables*);
-void read_velocity_boundary_from_file(struct All_variables*);
-void set_signal();
-void check_settings_consistency(struct All_variables *);
-void tracer_advection(struct All_variables*);
-void velocities_conform_bcs(struct All_variables*, double **);
-
-
 #include "mpi/pympi.h"
+
+#include "bc_util.h"
+#include "full_solver.h"
+#include "instructions.h"
+#include "interuption.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "problem_related.h"
+#include "regional_solver.h"
+#include "tracer_setup.h"
+
 
 /* copyright */
 

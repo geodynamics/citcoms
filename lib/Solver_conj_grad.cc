@@ -25,10 +25,19 @@
  * 
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "solver_conj_grad.h"
+
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "element_calculations.h"
+#include "stokes_flow_incomp.h"
+
+
+static void cg_allocate_vars(struct All_variables *E);
+
 
 void set_cg_defaults(struct All_variables *E)
 {
@@ -40,7 +49,7 @@ void set_cg_defaults(struct All_variables *E)
   return;
 }
 
-void cg_allocate_vars(struct All_variables *E)
+static void cg_allocate_vars(struct All_variables *E)
 { 
   /* Nothing required ONLY by conj-grad stuff  */
  /* printf("here here\n"); */

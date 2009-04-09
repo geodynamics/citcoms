@@ -29,8 +29,13 @@
 #if !defined(CitcomS_advection_diffusion_h)
 #define CitcomS_advection_diffusion_h
 
+struct All_variables;
+
 void PG_timestep_init(struct All_variables *);
 void PG_timestep_solve(struct All_variables *);
 void std_timestep(struct All_variables *);
+void advection_diffusion_parameters(struct All_variables *);
+void advection_diffusion_allocate_memory(struct All_variables *);
+void PG_timestep(struct All_variables *);
 
 #endif

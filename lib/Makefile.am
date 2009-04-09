@@ -137,9 +137,4 @@ sources = \
 	Regional_tracer_advection.cc \
 	Regional_version_dependent.cc
 
-EXTRA_DIST = \
-	Obsolete.cc \
-	Full_obsolete.cc \
-	Regional_obsolete.cc
-
 ## end of Makefile.am

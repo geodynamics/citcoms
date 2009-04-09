@@ -25,16 +25,31 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "general_matrix_functions.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "element_calculations.h"
+#include "global_operations.h"
+#include "instructions.h"
+#include "solver_multigrid.h"
 
 #ifdef _UNICOS
 #include <fortran.h>
 #endif
+
+
+static double multi_grid(struct All_variables *E, double **d1, double **F, double acc, int hl);
+static double conj_grad(struct All_variables *E, double **d0, double **F, double acc, int *cycles, int level);
+static void element_gauss_seidel(struct All_variables *E, double **d0, double **F, double **Ad, double acc, int *cycles, int level, int guess);
+static void gauss_seidel(struct All_variables *E, double **d0, double **F, double **Ad, double acc, int *cycles, int level, int guess);
+static double gen_determinant(double **A, int n);
+
 
 int epsilon[4][4] = {   /* Levi-Cita epsilon */
   {0, 0, 0, 0},
@@ -141,7 +156,7 @@ int solve_del2_u(
    recursive multigrid function ....
    ================================= */
 
-double multi_grid(
+static double multi_grid(
     struct All_variables *E,
     double **d1,
     double **F,
@@ -287,7 +302,7 @@ double multi_grid(
     ===========================================================  */
 
 
-double conj_grad(
+static double conj_grad(
     struct All_variables *E,
     double **d0,
     double **F,
@@ -414,7 +429,7 @@ double conj_grad(
    versions
    =========================================================================================*/
 
-void element_gauss_seidel(
+static void element_gauss_seidel(
     struct All_variables *E,
     double **d0,
     double **F, double **Ad,
@@ -585,7 +600,7 @@ void element_gauss_seidel(
    time (Jacobi at a node). It does the job though.
    ============================================================================ */
 
-void gauss_seidel(
+static void gauss_seidel(
     struct All_variables *E,
     double **d0,
     double **F, double **Ad,
@@ -795,7 +810,7 @@ double determinant(
 /* recursive function to determine matrix determinant */
 
 #if 0
-double gen_determinant(
+static double gen_determinant(
     double **A,
     int n
     )

@@ -26,12 +26,20 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "checkpoints.h"
+
 #include <sys/file.h>
 #include <unistd.h>
 #include "global_defs.h"
 #include "composition_related.h"
 
-#include "cproto.h"
+#include "global_operations.h"
+#include "instructions.h"
+#include "nodal_mesh.h"
+#include "pan_problem_misc_functions.h"
+#include "tracer_setup.h"
+#include "viscosity_structures.h"
+
 
 /* Private function prototypes */
 static void backup_file(const char *output_file);
@@ -88,9 +96,6 @@ void output_checkpoint(struct All_variables *E)
 
 void read_checkpoint(struct All_variables *E)
 {
-    void initialize_material(struct All_variables *E);
-    void initial_viscosity(struct All_variables *E);
-
     char output_file[255];
     FILE *fp;
 

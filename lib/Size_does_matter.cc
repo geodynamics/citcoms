@@ -25,16 +25,29 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "size_does_matter.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "general_matrix_functions.h"
+#include "pan_problem_misc_functions.h"
 
 #ifdef ALLOW_ELLIPTICAL
 double theta_g(double , struct All_variables *);
 #endif
+
+static void get_side_x_cart(struct All_variables *E, double xx[4][5], int el, int side, int m);
+static void get_global_side_1d_shape_fn(struct All_variables *E, int el,
+                                        struct Shape_function1 *GM,
+                                        struct Shape_function1_dx *GMx,
+                                        struct Shape_function_side_dA *dGamma,
+                                        int side, int m);
+static void construct_c3x3matrix(struct All_variables *E);
+
 
 void twiddle_thumbs(struct All_variables *yawn)
 
@@ -254,8 +267,8 @@ void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
 }
 
 
-void get_side_x_cart(struct All_variables *E, double xx[4][5],
-		     int el, int side, int m)
+static void get_side_x_cart(struct All_variables *E, double xx[4][5],
+                            int el, int side, int m)
 {
   double to,fo,dxdy[4][4];
   int i, node, s;
@@ -515,7 +528,7 @@ void get_global_1d_shape_fn_L(
 /*   ======================================================================
      For calculating pressure boundary term --- Choi, 11/13/02
      ======================================================================  */
-void get_global_side_1d_shape_fn(
+static void get_global_side_1d_shape_fn(
     struct All_variables *E,
     int el,
     struct Shape_function1 *GM,
@@ -837,7 +850,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 
 
 /* ======================================= */
-void construct_c3x3matrix(struct All_variables *E)
+static void construct_c3x3matrix(struct All_variables *E)
 {
   int m,a,i,j,k,d,es,el,nel_surface,lev,lnode;
   double x[4],u[4][4],ux[3][4][4],ua[4][4];

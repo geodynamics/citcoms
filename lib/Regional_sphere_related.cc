@@ -27,6 +27,8 @@
  */
 /* Functions relating to the building and use of mesh locations ... */
 
+#include "regional_sphere_related.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"

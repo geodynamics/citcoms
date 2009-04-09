@@ -33,8 +33,8 @@
 #include "global_defs.h"
 #include "output.h"
 
-
-void output_finalize(struct  All_variables *E);
+#include "checkpoints.h"
+#include "instructions.h"
 
 
 char pyCitcom_output__doc__[] = "";

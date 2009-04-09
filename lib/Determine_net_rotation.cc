@@ -37,25 +37,25 @@ These have been superceded by the routines in Global_opertations and can probabl
 
 */
 
+#include "determine_net_rotation.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
-#include "parallel_related.h"
 #include "parsing.h"
 #include "output.h"
 
-#include "cproto.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "size_does_matter.h"
 
-double determine_netr_tp(float, float, float, float, float, int, double *, double *);
-void sub_netr(float, float, float, float *, float *, double *);
-void hc_ludcmp_3x3(double [3][3], int *);
-void hc_lubksb_3x3(double [3][3], int *, double *);
-void xyz2rtp(float ,float ,float ,float *);
-void *safe_malloc (size_t );
-double determine_model_net_rotation(struct All_variables *,double *);
-void myerror(struct All_variables *,char *);
+
+static double determine_netr_tp(float r, float theta, float phi, float velt, float velp, int mode, double *c9, double *omega);
+static void hc_ludcmp_3x3(double a[3][3], int *indx);
+static void hc_lubksb_3x3(double a[3][3], int *indx, double *b);
+
 /*
 
 determine the mean net rotation of the velocities at all layers
@@ -215,9 +215,9 @@ mode: 0 initialize
 */
 
 
-double determine_netr_tp(float r,float theta,float phi,
-			 float velt,float velp,int mode,
-			 double *c9,double *omega)
+static double determine_netr_tp(float r,float theta,float phi,
+                                float velt,float velp,int mode,
+                                double *c9,double *omega)
 {
   float coslat,coslon,sinlat,sinlon,rx,ry,rz,rate,rzu,a,b,c,d,e,f;
   int i,j,ind[3];
@@ -379,7 +379,7 @@ matrix solvers from numerical recipes
  */
 #define NR_TINY 1.0e-20;
 
-void hc_ludcmp_3x3(double a[3][3],int *indx)
+static void hc_ludcmp_3x3(double a[3][3],int *indx)
 {
   int i,imax=0,j,k;
   double big,dum,sum,temp;
@@ -437,7 +437,7 @@ void hc_ludcmp_3x3(double a[3][3],int *indx)
   }
 }
 #undef NR_TINY
-void hc_lubksb_3x3(double a[3][3], int *indx, double *b)
+static void hc_lubksb_3x3(double a[3][3], int *indx, double *b)
 {
   int i,ii=0,ip,j;
   double sum;

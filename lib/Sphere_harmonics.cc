@@ -1,5 +1,6 @@
 /* Functions relating to the building and use of mesh locations ... */
 
+#include "sphere_harmonics.h"
 
 #include <math.h>
 #include <sys/types.h>
@@ -7,9 +8,12 @@
 #include "global_defs.h"
 #include <stdlib.h>
 
-#include "cproto.h"
+#include "global_operations.h"
+
 
 static void compute_sphereh_table(struct All_variables *);
+static void debug_sphere_expansion(struct All_variables *E);
+
 
 /*   ======================================================================
      ======================================================================  */
@@ -146,7 +150,7 @@ void sphere_expansion(
 }
 
 
-void debug_sphere_expansion(struct All_variables *E)
+static void debug_sphere_expansion(struct All_variables *E)
 {
     /* expand temperature field (which should be a sph. harm. load)
      * and output the expansion coeff. to stderr

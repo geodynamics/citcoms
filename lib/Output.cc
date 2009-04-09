@@ -29,36 +29,33 @@
    and to turn them into a coherent suite  files  */
 
 
+#include "output.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
-#include "output.h"
 
-#include "cproto.h"
+#include "parallel_util.h"
+#include "process_buoyancy.h"
+#include "topo_gravity.h"
 
-void output_comp_nd(struct All_variables *, int);
-void output_comp_el(struct All_variables *, int);
-void output_coord(struct All_variables *);
-void output_mat(struct All_variables *);
-void output_velo(struct All_variables *, int);
-void output_visc_prepare(struct All_variables *, float **);
-void output_visc(struct All_variables *, int);
-void output_surf_botm(struct All_variables *, int);
-void output_geoid(struct All_variables *, int);
-void output_stress(struct All_variables *, int);
-void output_horiz_avg(struct All_variables *, int);
-void output_tracer(struct All_variables *, int);
-void output_pressure(struct All_variables *, int);
-void output_heating(struct All_variables *, int);
 
-extern void parallel_process_termination();
-extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**,
-                         float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
+static void output_comp_nd(struct All_variables *, int);
+static void output_comp_el(struct All_variables *, int);
+static void output_coord(struct All_variables *);
+static void output_mat(struct All_variables *);
+static void output_velo(struct All_variables *, int);
+static void output_visc(struct All_variables *, int);
+static void output_surf_botm(struct All_variables *, int);
+static void output_geoid(struct All_variables *, int);
+static void output_stress(struct All_variables *, int);
+static void output_horiz_avg(struct All_variables *, int);
+static void output_tracer(struct All_variables *, int);
+static void output_pressure(struct All_variables *, int);
+static void output_heating(struct All_variables *, int);
 
 /**********************************************************************/
 
@@ -159,7 +156,7 @@ FILE* output_open(char *filename, char *mode)
 }
 
 
-void output_coord(struct All_variables *E)
+static void output_coord(struct All_variables *E)
 {
   int i, j;
   char output_file[255];
@@ -180,7 +177,7 @@ void output_coord(struct All_variables *E)
 }
 
 
-void output_visc(struct All_variables *E, int cycles)
+static void output_visc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
@@ -204,7 +201,7 @@ void output_visc(struct All_variables *E, int cycles)
 }
 
 
-void output_velo(struct All_variables *E, int cycles)
+static void output_velo(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
@@ -229,7 +226,7 @@ void output_velo(struct All_variables *E, int cycles)
 }
 
 
-void output_surf_botm(struct All_variables *E, int cycles)
+static void output_surf_botm(struct All_variables *E, int cycles)
 {
   int i, j, s;
   char output_file[255];
@@ -291,7 +288,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
 }
 
 
-void output_geoid(struct All_variables *E, int cycles)
+static void output_geoid(struct All_variables *E, int cycles)
 {
     int ll, mm, p;
     char output_file[255];
@@ -330,7 +327,7 @@ void output_geoid(struct All_variables *E, int cycles)
 
 
 
-void output_stress(struct All_variables *E, int cycles)
+static void output_stress(struct All_variables *E, int cycles)
 {
   int m, node;
   char output_file[255];
@@ -366,7 +363,7 @@ void output_stress(struct All_variables *E, int cycles)
 }
 
 
-void output_horiz_avg(struct All_variables *E, int cycles)
+static void output_horiz_avg(struct All_variables *E, int cycles)
 {
   /* horizontal average output of temperature, composition and rms velocity*/
 
@@ -402,7 +399,7 @@ void output_horiz_avg(struct All_variables *E, int cycles)
 
 
 
-void output_mat(struct All_variables *E)
+static void output_mat(struct All_variables *E)
 {
   int m, el;
   char output_file[255];
@@ -422,7 +419,7 @@ void output_mat(struct All_variables *E)
 
 
 
-void output_pressure(struct All_variables *E, int cycles)
+static void output_pressure(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
@@ -447,7 +444,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
 
 
-void output_tracer(struct All_variables *E, int cycles)
+static void output_tracer(struct All_variables *E, int cycles)
 {
   int i, j, n, ncolumns;
   char output_file[255];
@@ -484,7 +481,7 @@ void output_tracer(struct All_variables *E, int cycles)
 }
 
 
-void output_comp_nd(struct All_variables *E, int cycles)
+static void output_comp_nd(struct All_variables *E, int cycles)
 {
     int i, j, k;
     char output_file[255];
@@ -519,7 +516,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
 }
 
 
-void output_comp_el(struct All_variables *E, int cycles)
+static void output_comp_el(struct All_variables *E, int cycles)
 {
     int i, j, k;
     char output_file[255];
@@ -554,7 +551,7 @@ void output_comp_el(struct All_variables *E, int cycles)
 }
 
 
-void output_heating(struct All_variables *E, int cycles)
+static void output_heating(struct All_variables *E, int cycles)
 {
     int j, e;
     char output_file[255];

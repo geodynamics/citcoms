@@ -26,9 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-struct All_variables;
-
-void regional_solver_init(struct All_variables *E);
+#include "regional_solver.h"
 
 void solver_init(struct All_variables *E)
 {

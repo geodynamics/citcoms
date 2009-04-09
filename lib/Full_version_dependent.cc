@@ -25,22 +25,17 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "full_version_dependent.h"
+
 #include <math.h>
 
 #include "global_defs.h"
-#include "parallel_related.h"
-#ifdef USE_GGRD
-void ggrd_full_temp_init(struct All_variables *);
-#endif
 
-void get_r_spacing_fine(double *,struct All_variables *);
-void get_r_spacing_at_levels(double *,struct All_variables *);
-void myerror(struct All_variables *,char *);
-#ifdef ALLOW_ELLIPTICAL
-double theta_g(double , struct All_variables *);
-#endif
-
-#include "cproto.h"
+#include "full_sphere_related.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "sphere_util.h"
 
 
 /* =================================================

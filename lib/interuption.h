@@ -26,5 +26,10 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#if !defined(CitcomS_interuption_h)
+#define CitcomS_interuption_h
+
 extern int Emergency_stop;
-extern void set_signal();
+extern void set_signal(void);
+
+#endif

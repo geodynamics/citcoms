@@ -39,38 +39,29 @@
       merged the two versions of tracer codes together.
 */
 
+#include "tracer_setup.h"
+
 #include <math.h>
 #include <string.h>
 #include "global_defs.h"
 #include "parsing.h"
-#include "parallel_related.h"
 #include "composition_related.h"
 
 #ifdef USE_GGRD
 #include "ggrd_handling.h"
 #endif
 
-#include "cproto.h"
+#include "full_tracer_advection.h"
+#include "instructions.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "regional_tracer_advection.h"
 
 
 #ifdef USE_GZDIR
 int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);
 #endif
-
-int icheck_that_processor_shell(struct All_variables *E,
-                                       int j, int nprocessor, double rad);
-void expand_later_array(struct All_variables *E, int j);
-void expand_tracer_arrays(struct All_variables *E, int j);
-void tracer_post_processing(struct All_variables *E);
-void allocate_tracer_arrays(struct All_variables *E,
-                            int j, int number_of_tracers);
-void count_tracers_of_flavors(struct All_variables *E);
-
-int full_icheck_cap(struct All_variables *E, int icap,
-                    double x, double y, double z, double rad);
-int regional_icheck_cap(struct All_variables *E, int icap,
-                        double x, double y, double z, double rad);
 
 static void find_tracers(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
@@ -86,16 +77,7 @@ static void init_tracer_flavors(struct All_variables *E);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
 static void eject_tracer(struct All_variables *E, int j, int it);
-int read_double_vector(FILE *, int , double *);
-void cart_to_sphere(struct All_variables *,
-                    double , double , double ,
-                    double *, double *, double *);
-void sphere_to_cart(struct All_variables *,
-                    double , double , double ,
-                    double *, double *, double *);
-int icheck_processor_shell(struct All_variables *,
-                           int , double );
-
+static void tracer_post_processing(struct All_variables *E);
 
 
 void tracer_input(struct All_variables *E)
@@ -258,7 +240,7 @@ void tracer_advection(struct All_variables *E)
 
 /********* TRACER POST PROCESSING ****************************************/
 
-void tracer_post_processing(struct All_variables *E)
+static void tracer_post_processing(struct All_variables *E)
 {
     int i;
 

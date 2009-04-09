@@ -28,6 +28,7 @@
 /* Assumes parameter list is opened and reads the things it needs.
    Variables are initialized etc, default values are set */
 
+#include "convection.h"
 
 #include <math.h>
 #include <sys/types.h>
@@ -36,7 +37,16 @@
 #include <stdlib.h> /* for "system" command */
 #include <strings.h>
 
-#include "cproto.h"
+#include "advection_diffusion.h"
+#include "initial_temperature.h"
+#include "size_does_matter.h"
+
+
+static void read_convection_settings(struct All_variables *E);
+static void convection_derived_values(struct All_variables *E);
+static void convection_allocate_memory(struct All_variables *E);
+static void convection_initial_fields(struct All_variables *E);
+static void convection_boundary_conditions(struct All_variables *E);
 
 
 void set_convection_defaults(struct All_variables *E)
@@ -66,7 +76,7 @@ void set_convection_defaults(struct All_variables *E)
     return;
 }
 
-void read_convection_settings(struct All_variables *E)
+static void read_convection_settings(struct All_variables *E)
 {
     /* parameters */
 
@@ -79,13 +89,13 @@ void read_convection_settings(struct All_variables *E)
    Any setup which relates only to the convection stuff goes in here
    ================================================================= */
 
-void convection_derived_values(struct All_variables *E)
+static void convection_derived_values(struct All_variables *E)
 {
 
   return;
 }
 
-void convection_allocate_memory(struct All_variables *E)
+static void convection_allocate_memory(struct All_variables *E)
 {
 
   advection_diffusion_allocate_memory(E);
@@ -95,7 +105,7 @@ void convection_allocate_memory(struct All_variables *E)
 
 /* ============================================ */
 
-void convection_initial_fields(struct All_variables *E)
+static void convection_initial_fields(struct All_variables *E)
 {
     convection_initial_temperature(E);
 
@@ -103,7 +113,7 @@ void convection_initial_fields(struct All_variables *E)
 
 /* =========================================== */
 
-void convection_boundary_conditions(struct All_variables *E)
+static void convection_boundary_conditions(struct All_variables *E)
 {
     (E->solver.velocity_boundary_conditions)(E);      /* universal */
     (E->solver.temperature_boundary_conditions)(E);

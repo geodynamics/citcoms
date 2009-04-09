@@ -26,19 +26,20 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "lith_age.h"
+
 #include <math.h>
 
 #include "global_defs.h"
 
 /*#include "age_related.h"*/
-#include "parallel_related.h"
 #include "parsing.h"
-#include "lith_age.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "parallel_util.h"
 
-float find_age_in_MY();
-void lith_age_update_tbc(struct All_variables *E);
+
+static void lith_age_update_tbc(struct All_variables *E);
 
 
 void lith_age_input(struct All_variables *E)
@@ -152,7 +153,7 @@ void lith_age_construct_tic(struct All_variables *E)
 }
 
 
-void lith_age_update_tbc(struct All_variables *E)
+static void lith_age_update_tbc(struct All_variables *E)
 {
   int i, j, k, m, node;
   int nox, noy, noz;

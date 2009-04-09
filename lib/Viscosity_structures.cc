@@ -29,6 +29,7 @@
    as a function of the run, as an initial condition or as specified from
    a previous file */
 
+#include "viscosity_structures.h"
 
 #include <math.h>
 #include <string.h>
@@ -37,18 +38,25 @@
 #include "global_defs.h"
 #include "parsing.h"
 
-#include "cproto.h"
+#include "element_calculations.h"
+#include "nodal_mesh.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "size_does_matter.h"
 
-
-void myerror(struct All_variables *,char *);
 
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
-void parallel_process_termination();
+static void viscosity_system_input(struct All_variables *E);
+static void visc_from_mat(struct All_variables *E, float **EEta);
+static void visc_from_T(struct All_variables *E, float **EEta, int propogate);
+static void visc_from_S(struct All_variables *E, float **EEta, int propogate);
+static void visc_from_P(struct All_variables *E, float **EEta);
+static void visc_from_C(struct All_variables *E, float **EEta);
 
 
-void viscosity_system_input(struct All_variables *E)
+static void viscosity_system_input(struct All_variables *E)
 {
     int m=E->parallel.me;
     int i;
@@ -252,7 +260,7 @@ void initial_viscosity(struct All_variables *E)
 }
 
 
-void visc_from_mat(
+static void visc_from_mat(
     struct All_variables *E,
     float **EEta
     )
@@ -268,7 +276,7 @@ void visc_from_mat(
     return;
 }
 
-void visc_from_T(
+static void visc_from_T(
     struct All_variables *E,
     float **EEta,
     int propogate
@@ -632,7 +640,7 @@ void visc_from_T(
 }
 
 
-void visc_from_S(
+static void visc_from_S(
     struct All_variables *E,
     float **EEta,
     int propogate
@@ -678,7 +686,7 @@ void visc_from_S(
     return;
 }
 
-void visc_from_P(     /* "plasticity" implementation
+static void visc_from_P(     /* "plasticity" implementation
 
 			 viscosity will be limited by a yield stress
 
@@ -788,7 +796,7 @@ mean average from the tracer composition, assuming two flavors and
 compositions between zero and unity
 
 */
-void visc_from_C(
+static void visc_from_C(
     struct All_variables *E,
     float **EEta
     )

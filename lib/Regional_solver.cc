@@ -26,38 +26,17 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "regional_solver.h"
 
 #include "global_defs.h"
 
+#include "regional_boundary_conditions.h"
+#include "regional_geometry_cartesian.h"
 
-/* Boundary_conditions.c */
-void regional_velocity_boundary_conditions(struct All_variables *);
-void regional_temperature_boundary_conditions(struct All_variables *);
-
-/* Geometry_cartesian.c */
-void regional_set_2dc_defaults(struct All_variables *);
-void regional_set_2pt5dc_defaults(struct All_variables *);
-void regional_set_3dc_defaults(struct All_variables *);
-void regional_set_3dsphere_defaults(struct All_variables *);
-
-/* Lith_age.c */
-void regional_lith_age_read_files(struct All_variables *, int);
-
-/* Parallel_related.c */
-void regional_parallel_processor_setup(struct All_variables *);
-void regional_parallel_domain_decomp0(struct All_variables *);
-void regional_parallel_domain_boundary_nodes(struct All_variables *);
-void regional_parallel_communication_routs_v(struct All_variables *);
-void regional_parallel_communication_routs_s(struct All_variables *);
-void regional_exchange_id_d(struct All_variables *, double **, int);
-
-/* Read_input_from_files.c */
-void regional_read_input_files_for_timesteps(struct All_variables *, int, int);
-
-/* Version_dependent.c */
-void regional_node_locations(struct All_variables *);
-void regional_construct_boundary(struct All_variables *);
-
+#include "regional_lith_age_read_files.h"
+#include "regional_parallel_related.h"
+#include "regional_read_input_from_files.h"
+#include "regional_version_dependent.h"
 
 void regional_solver_init(struct All_variables *E)
 {

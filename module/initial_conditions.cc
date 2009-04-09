@@ -31,17 +31,14 @@
 
 #include "global_defs.h"
 
+#include "checkpoints.h"
+#include "composition_related.h"
+#include "instructions.h"
+#include "parallel_util.h"
+#include "process_buoyancy.h"
+#include "tracer_setup.h"
+#include "viscosity_structures.h"
 
-void initialize_material(struct All_variables*);
-void initialize_tracers(struct All_variables*);
-void init_composition(struct All_variables*);
-void initial_pressure(struct All_variables*);
-void initial_velocity(struct All_variables*);
-void initial_viscosity(struct All_variables*);
-void parallel_process_termination();
-void post_processing(struct All_variables*);
-void report(struct All_variables*, char* str);
-void read_checkpoint(struct All_variables*);
 
 char pyCitcom_ic_initialize_material__doc__[] = "";
 char pyCitcom_ic_initialize_material__name__[] = "initialize_material";

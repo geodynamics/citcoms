@@ -26,6 +26,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "pan_problem_misc_functions.h"
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -49,26 +51,12 @@
 #endif
 
 #include "phase_change.h"
-#include "parallel_related.h"
 
-#include "cproto.h"
+#include "ggrd_handling.h"
+#include "instructions.h"
+#include "parallel_util.h"
+#include "parsing.h"
 
-void calc_cbase_at_tp(float , float , float *);
-void rtp2xyz(float , float , float, float *);
-void convert_pvec_to_cvec(float ,float , float , float *,float *);
-void *safe_malloc (size_t );
-void myerror(struct All_variables *,char *);
-void xyz2rtp(float ,float ,float ,float *);
-void xyz2rtpd(float ,float ,float ,double *);
-void get_r_spacing_fine(double *,struct All_variables *);
-void get_r_spacing_at_levels(double *,struct All_variables *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
-#ifdef ALLOW_ELLIPTICAL
-double theta_g(double , struct All_variables *);
-#endif
-#ifdef USE_GGRD
-void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
-#endif
 
 int get_process_identifier()
 {
@@ -302,7 +290,7 @@ int read_double_vector(FILE *in, int num_columns, double *fields)
 
    */
 
-int read_previous_field(
+static int read_previous_field(
     struct All_variables *E,
     float **field,
     char *name, char *abbr
@@ -452,7 +440,7 @@ double return1_test()
    sphere_to_cart
 
 */
-void rtp2xyz(float r, float theta, float phi, float *xout)
+static void rtp2xyz(float r, float theta, float phi, float *xout)
 {
   float rst;
   rst = r * sin(theta);
@@ -484,7 +472,7 @@ void xyz2rtpd(float x,float y,float z,double *rout)
    base[9], i.e. those are the cartesian representation of the r,
    theta, and phi basis vectors at theta, phi
 */
-void calc_cbase_at_tp(float theta, float phi, float *base)
+static void calc_cbase_at_tp(float theta, float phi, float *base)
 {
 
 

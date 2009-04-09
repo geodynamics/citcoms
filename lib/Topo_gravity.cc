@@ -25,32 +25,26 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "topo_gravity.h"
+
 #include <stdio.h>
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "element_calculations.h"
+#include "full_parallel_related.h"
+#include "general_matrix_functions.h"
+#include "global_operations.h"
+#include "nodal_mesh.h"
+#include "regional_parallel_related.h"
+#include "size_does_matter.h"
+#include "sphere_harmonics.h"
 
-void myerror(char *,struct All_variables *);
-void sphere_expansion(struct All_variables *, float **, float *, float *);
-void sphere_expansion();
-void sum_across_depth_sph1(struct All_variables *, float *, float *);
-void broadcast_vertical(struct All_variables *, float *, float *, int);
-long double lg_pow(long double, int);
-void allocate_STD_mem(struct All_variables *E,
-                      float** , float** , float** ,
-                      float** , float** , float** ,
-                      float** , float** );
-void free_STD_mem(struct All_variables *E,
-                  float** , float** , float** ,
-                  float** , float** , float** ,
-                  float** , float** );
-void compute_nodal_stress(struct All_variables *,
-                          float** , float** , float** ,
-                          float** , float** , float** ,
-                          float** , float** );
-void stress_conform_bcs(struct All_variables *);
+
+static void stress_conform_bcs(struct All_variables *E);
+
 
 /* 
 
@@ -397,7 +391,7 @@ void compute_nodal_stress(struct All_variables *E,
 
 
 
-void stress_conform_bcs(struct All_variables *E)
+static void stress_conform_bcs(struct All_variables *E)
 {
   int m, i, j, k, n, d;
   const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};

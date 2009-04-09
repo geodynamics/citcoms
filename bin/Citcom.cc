@@ -34,14 +34,19 @@
 #include "global_defs.h"
 #include "citcom_init.h"
 #include "output.h"
-#include "parallel_related.h"
+#include "parallel_util.h"
 #include "checkpoints.h"
 
-#include "cproto.h"
+#include "drive_solvers.h"
+#include "instructions.h"
+#include "interuption.h"
+#include "problem_related.h"
+#include "process_buoyancy.h"
+#include "tracer_setup.h"
 
-extern int Emergency_stop;
 
 void solver_init(struct All_variables *E);
+
 
 int main(int argc, char **argv)
 {	/* Functions called by main*/

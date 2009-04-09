@@ -29,12 +29,15 @@
 
 /* Functions relating to the building and use of mesh locations ... */
 
+#include "full_sphere_related.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "pan_problem_misc_functions.h"
+#include "sphere_util.h"
 
 
 /**************************************************************/

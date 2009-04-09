@@ -26,14 +26,19 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "full_tracer_advection.h"
+
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
-#include "parallel_related.h"
 #include "composition_related.h"
 
-#include "cproto.h"
+#include "nodal_mesh.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "tracer_setup.h"
+
 
 static void get_2dshape(struct All_variables *E,
                         int j, int nelem,
@@ -90,10 +95,13 @@ static void define_uv_space(struct All_variables *E);
 static void determine_shape_coefficients(struct All_variables *E);
 static void full_put_lost_tracers(struct All_variables *E,
                                   int isend[13][13], double *send[13][13]);
-void pdebug(struct All_variables *E, int i);
-int full_icheck_cap(struct All_variables *E, int icap,
-                    double x, double y, double z, double rad);
+static void pdebug(struct All_variables *E, int i);
 
+static void full_get_shape_functions(struct All_variables *E, double shp[9], int nelem, double theta, double phi, double rad);
+static double full_interpolate_data(struct All_variables *E, double shp[9], double data[9]);
+static void analytical_test(struct All_variables *E);
+static void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, double *x0_s, double *x0_c, double *xf_s, double *xf_c, double *vec);
+static void analytical_test_function(struct All_variables *E, double theta, double phi, double rad, double *vel_s, double *vel_c);
 
 
 /******* FULL TRACER INPUT *********************/
@@ -865,9 +873,9 @@ static void full_put_lost_tracers(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-void full_get_shape_functions(struct All_variables *E,
-                              double shp[9], int nelem,
-                              double theta, double phi, double rad)
+static void full_get_shape_functions(struct All_variables *E,
+                                     double shp[9], int nelem,
+                                     double theta, double phi, double rad)
 {
     const int j = 1;
 
@@ -981,8 +989,8 @@ void full_get_shape_functions(struct All_variables *E,
 }
 
 
-double full_interpolate_data(struct All_variables *E,
-                             double shp[9], double data[9])
+static double full_interpolate_data(struct All_variables *E,
+                                    double shp[9], double data[9])
 {
     int iwedge = (int)shp[0];
 
@@ -3043,7 +3051,7 @@ void full_keep_within_bounds(struct All_variables *E,
 /* This function (and the 2 following) are used to test advection of tracers by assigning */
 /* a test function (in "analytical_test_function").                                       */
 
-void analytical_test(struct All_variables *E)
+static void analytical_test(struct All_variables *E)
 
 {
 #if 0
@@ -3294,7 +3302,7 @@ void analytical_test(struct All_variables *E)
 
 /*************** ANALYTICAL RUNGE KUTTE ******************/
 /*                                                       */
-void analytical_runge_kutte(
+static void analytical_runge_kutte(
     struct All_variables *E,
     int nsteps,
     double dt,
@@ -3410,7 +3418,7 @@ void analytical_runge_kutte(
 /* vel_c[2] => velocity in y direction                      */
 /* vel_c[3] => velocity in z direction                      */
 
-void analytical_test_function(
+static void analytical_test_function(
     struct All_variables *E,
     double theta, double phi, double rad,
     double *vel_s,

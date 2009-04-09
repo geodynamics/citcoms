@@ -25,10 +25,11 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "regional_geometry_cartesian.h"
+
 #include "global_defs.h"
 #include "parsing.h"
-
-#include "cproto.h"
 
 void regional_set_2dc_defaults(struct All_variables *E)
 {

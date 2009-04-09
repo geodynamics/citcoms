@@ -31,29 +31,24 @@ routines that deal with GMT/netcdf grd I/O as supported through
 the ggrd subroutines of the hc package
 
 */
-#ifdef USE_GZDIR
-#include <zlib.h>
-gzFile *gzdir_output_open(char *,char *);
 
-#endif
+#include "ggrd_handling.h"
+
+#include "output_gzdir.h"
 
 #include <math.h>
 #include "global_defs.h"
 #include "parsing.h"
-#include "parallel_related.h"
 #include "composition_related.h"
 #include "element_definitions.h"
+
+#include "parallel_util.h"
 
 #ifdef USE_GGRD
 
 #include "hc.h"			/* ggrd and hc packages */
-#include "ggrd_handling.h"
 
-void report(struct All_variables *,char *);
-int layers_r(struct All_variables *,float );
-void construct_mat_group(struct All_variables *);
-void temperatures_conform_bcs(struct All_variables *);
-int layers(struct All_variables *,int ,int );
+static void ggrd_temp_init_general(struct All_variables *,int);
 
 /* 
 
@@ -165,7 +160,7 @@ initialize temperatures from grd files for spherical geometry
 
 */
 
-void ggrd_temp_init_general(struct All_variables *E,int is_global)
+static void ggrd_temp_init_general(struct All_variables *E,int is_global)
 {
 
   MPI_Status mpi_stat;

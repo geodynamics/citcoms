@@ -27,9 +27,10 @@
  */
 
 
-#include "global_defs.h"
+#include "full_lith_age_read_files.h"
 
-#include "cproto.h"
+#include "full_read_input_from_files.h"
+
 
 void full_lith_age_read_files(struct All_variables *E, int output)
 {

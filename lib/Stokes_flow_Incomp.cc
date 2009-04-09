@@ -29,6 +29,8 @@
 
 /*   Functions which solve for the velocity and pressure fields using Uzawa-type iteration loop.  */
 
+#include "stokes_flow_incomp.h"
+
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
@@ -36,9 +38,14 @@
 #include "global_defs.h"
 #include <stdlib.h>
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "element_calculations.h"
+#include "general_matrix_functions.h"
+#include "global_operations.h"
+#include "nodal_mesh.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
 
-void myerror(struct All_variables *,char *);
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
                               double **V, double **P, double **F,

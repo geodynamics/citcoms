@@ -26,6 +26,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "initial_temperature.h"
+
 #include <math.h>
 #include <assert.h>
 #include <string.h>
@@ -34,13 +36,12 @@
 #include "lith_age.h"
 #include "parsing.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "instructions.h"
+#include "parallel_util.h"
+#include "sphere_harmonics.h"
 
-void parallel_process_termination();
-void temperatures_conform_bcs(struct All_variables *);
-double modified_plgndr_a(int, int, double);
 
-#include "initial_temperature.h"
 static void debug_tic(struct All_variables *);
 static void read_tic_from_file(struct All_variables *);
 static void construct_tic_from_input(struct All_variables *);

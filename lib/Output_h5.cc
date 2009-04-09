@@ -22,12 +22,13 @@
  */
 
 
+#include "output_h5.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
-#include "output_h5.h"
 
 
 #ifdef USE_HDF5

@@ -33,14 +33,14 @@
     get output the next time around the velocity solver);
     */
 
+#include "process_buoyancy.h"
 
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>		/* for sqrt */
 
-#include "cproto.h"
-
-void parallel_process_termination(void);
+#include "global_operations.h"
+#include "nodal_mesh.h"
 
 
 void post_processing(struct All_variables *E)

@@ -26,7 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-
+#include "regional_tracer_advection.h"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -42,9 +42,10 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "composition_related.h"
-#include "parallel_related.h"
 
-#include "cproto.h"
+#include "nodal_mesh.h"
+#include "parallel_util.h"
+#include "tracer_setup.h"
 
 
 static void write_trace_instructions(struct All_variables *E);
@@ -55,9 +56,11 @@ static void put_lost_tracers(struct All_variables *E,
 static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv,
                               int j);
-int isearch_neighbors(double *array, int nsize,
-                      double a, int hint);
-int isearch_all(double *array, int nsize, double a);
+static int isearch_neighbors(double *array, int nsize,
+                             double a, int hint);
+static int isearch_all(double *array, int nsize, double a);
+static void regional_get_shape_functions(struct All_variables *E, double shp[9], int nelem, double theta, double phi, double rad);
+static double regional_interpolate_data(struct All_variables *E, double shp[9], double data[9]);
 
 
 void regional_tracer_setup(struct All_variables *E)
@@ -346,7 +349,7 @@ int regional_iget_element(struct All_variables *E,
 /* return an index i, such that array[i] <= a < array[i+1] */
 /* return -1 if not found.                                 */
 /* Note that -1 is returned if a == array[nsize-1]         */
-int isearch_all(double *array, int nsize, double a)
+static int isearch_all(double *array, int nsize, double a)
 {
     int high, i, low;
 
@@ -366,8 +369,8 @@ int isearch_all(double *array, int nsize, double a)
 
 
 /* Similar the isearch_all(), but with a hint */
-int isearch_neighbors(double *array, int nsize,
-                      double a, int hint)
+static int isearch_neighbors(double *array, int nsize,
+                             double a, int hint)
 {
     /* search the nearest neighbors only */
     const int number_of_neighbors = 3;
@@ -421,9 +424,9 @@ int regional_icheck_cap(struct All_variables *E, int icap,
 }
 
 
-void regional_get_shape_functions(struct All_variables *E,
-                                  double shp[9], int nelem,
-                                  double theta, double phi, double rad)
+static void regional_get_shape_functions(struct All_variables *E,
+                                         double shp[9], int nelem,
+                                         double theta, double phi, double rad)
 {
     int e, i, j, k;
     int elx, ely, elz;
@@ -495,8 +498,8 @@ void regional_get_shape_functions(struct All_variables *E,
 }
 
 
-double regional_interpolate_data(struct All_variables *E,
-                                 double shp[9], double data[9])
+static double regional_interpolate_data(struct All_variables *E,
+                                        double shp[9], double data[9])
 {
     int n;
     double result = 0;

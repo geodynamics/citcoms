@@ -28,10 +28,12 @@
 
 /* Common functions relating to the building and use of mesh locations ... */
 
+#include "sphere_util.h"
+
 #include <math.h>
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "pan_problem_misc_functions.h"
 
 /* =================================================
   this routine evenly divides the arc between points

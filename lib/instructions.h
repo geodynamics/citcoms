@@ -26,12 +26,24 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-#if !defined(CitcomS_parallel_related_h)
-#define CitcomS_parallel_related_h
+#if !defined(CitcomS_instructions_h)
+#define CitcomS_instructions_h
 
-void parallel_process_termination();
-void parallel_process_sync(struct All_variables *E);
-double CPU_time0();
-void set_communication_sphereh(struct All_variables *E);
+struct All_variables;
+
+void initial_mesh_solver_setup(struct All_variables *E);
+void read_instructions(struct All_variables *E, char *filename);
+void initial_setup(struct All_variables *E);
+void initialize_material(struct All_variables *E);
+void initial_conditions(struct All_variables *E);
+void check_settings_consistency(struct All_variables *E);
+void global_default_values(struct All_variables *E);
+void check_bc_consistency(struct All_variables *E);
+void report(struct All_variables *E, char *string);
+void record(struct All_variables *E, char *string);
+void initial_pressure(struct All_variables *E);
+void initial_velocity(struct All_variables *E);
+void mkdatadir(const char *dir);
+void output_finalize(struct All_variables *E);
 
 #endif

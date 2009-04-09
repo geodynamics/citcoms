@@ -33,8 +33,7 @@
 #include "global_defs.h"
 #include "advection_diffusion.h"
 
-
-extern void set_convection_defaults(struct All_variables *);
+#include "convection.h"
 
 
 char pyCitcom_PG_timestep_init__doc__[] = "";

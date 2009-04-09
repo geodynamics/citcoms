@@ -28,6 +28,7 @@
 /* Routine to process the output of the finite element cycles
    and to turn them into a coherent suite  files  */
 
+
 /*
 
 this version uses gzipped, ascii output to subdirectories for the
@@ -51,8 +52,9 @@ if, additionally, gzdir.vtk_io = 1, will write different format files
 TWB
 
 */
-#ifdef USE_GZDIR
+#include "output_gzdir.h"
 
+#ifdef USE_GZDIR
 
 //#define ASCII_DEBUG
 
@@ -65,7 +67,6 @@ TWB
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "parsing.h"
-#include "parallel_related.h"
 #include "output.h"
 /* Big endian crap */
 #include <string.h>
@@ -73,60 +74,38 @@ TWB
 #include <malloc.h>
 #endif
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "determine_net_rotation.h"
+#include "instructions.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "process_buoyancy.h"
+#include "topo_gravity.h"
 
 
-void be_flipit(void *, void *, size_t );
-void be_flip_byte_order(void *, size_t );
-int be_is_little_endian(void);
-int be_write_float_to_file(float *, int , FILE *);
-int be_write_int_to_file(int *, int , FILE *);
-void myfprintf(FILE *,char *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
+static void be_flipit(void *, void *, size_t );
+static void be_flip_byte_order(void *, size_t );
+static int be_is_little_endian(void);
+static int be_write_float_to_file(float *, int , FILE *);
+static int be_write_int_to_file(int *, int , FILE *);
+static void myfprintf(FILE *,char *);
 
 /*  */
-void get_vtk_filename(char *,int,struct All_variables *,int);
 
-gzFile *gzdir_output_open(char *,char *);
-void gzdir_output(struct All_variables *, int );
-void gzdir_output_comp_nd(struct All_variables *, int);
-void gzdir_output_comp_el(struct All_variables *, int);
-void gzdir_output_coord(struct All_variables *);
-void gzdir_output_mat(struct All_variables *);
-void gzdir_output_velo_temp(struct All_variables *, int);
-void gzdir_output_visc_prepare(struct All_variables *, float **);
-void gzdir_output_visc(struct All_variables *, int);
-void gzdir_output_surf_botm(struct All_variables *, int);
-void gzdir_output_geoid(struct All_variables *, int);
-void gzdir_output_stress(struct All_variables *, int);
-void gzdir_output_horiz_avg(struct All_variables *, int);
-void gzdir_output_tracer(struct All_variables *, int);
-void gzdir_output_pressure(struct All_variables *, int);
-void gzdir_output_heating(struct All_variables *, int);
+static void gzdir_output_comp_nd(struct All_variables *, int);
+static void gzdir_output_comp_el(struct All_variables *, int);
+static void gzdir_output_coord(struct All_variables *);
+static void gzdir_output_mat(struct All_variables *);
+static void gzdir_output_velo_temp(struct All_variables *, int);
+static void gzdir_output_visc(struct All_variables *, int);
+static void gzdir_output_surf_botm(struct All_variables *, int);
+static void gzdir_output_geoid(struct All_variables *, int);
+static void gzdir_output_stress(struct All_variables *, int);
+static void gzdir_output_horiz_avg(struct All_variables *, int);
+static void gzdir_output_tracer(struct All_variables *, int);
+static void gzdir_output_pressure(struct All_variables *, int);
+static void gzdir_output_heating(struct All_variables *, int);
 
-
-void sub_netr(float, float, float, float *, float *, double *);
-double determine_model_net_rotation(struct All_variables *,double *);
-
-
-void restart_tic_from_gzdir_file(struct All_variables *);
-
-void calc_cbase_at_tp(float , float , float *);
-void rtp2xyz(float , float , float, float *);
-void convert_pvec_to_cvec(float ,float , float , float *,float *);
-void *safe_malloc (size_t );
-
-int open_file_zipped(char *, FILE **,struct All_variables *);
-void gzip_file(char *);
-
-
-extern void temperatures_conform_bcs(struct All_variables *);
-extern void myerror(struct All_variables *,char *);
-extern void mkdatadir(const char *);
-extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**,
-                         float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
 
 /**********************************************************************/
 
@@ -220,7 +199,7 @@ initialization output of geometries, only called once
 
 
  */
-void gzdir_output_coord(struct All_variables *E)
+static void gzdir_output_coord(struct All_variables *E)
 {
   int i, j, offset,ix[9],out;
   char output_file[255],ostring[255],message[255];
@@ -443,7 +422,7 @@ is chosen
 
 
 */
-void gzdir_output_velo_temp(struct All_variables *E, int cycles)
+static void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 {
   int i, j, k,os;
   char output_file[255],output_file2[255],message[255],geo_file[255];
@@ -695,7 +674,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 /*
    viscosity
 */
-void gzdir_output_visc(struct All_variables *E, int cycles)
+static void gzdir_output_visc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
@@ -753,7 +732,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 
 
 
-void gzdir_output_surf_botm(struct All_variables *E, int cycles)
+static void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 {
   int i, j, s;
   char output_file[255];
@@ -815,7 +794,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 }
 
 
-void gzdir_output_geoid(struct All_variables *E, int cycles)
+static void gzdir_output_geoid(struct All_variables *E, int cycles)
 {
     int ll, mm, p;
     char output_file[255];
@@ -854,7 +833,7 @@ void gzdir_output_geoid(struct All_variables *E, int cycles)
 
 
 
-void gzdir_output_stress(struct All_variables *E, int cycles)
+static void gzdir_output_stress(struct All_variables *E, int cycles)
 {
   int m, node;
   char output_file[255];
@@ -890,7 +869,7 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 }
 
 
-void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
+static void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 {
   /* horizontal average output of temperature, composition and rms velocity*/
 
@@ -925,7 +904,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 
 
 /* only called once */
-void gzdir_output_mat(struct All_variables *E)
+static void gzdir_output_mat(struct All_variables *E)
 {
   int m, el;
   char output_file[255];
@@ -945,7 +924,7 @@ void gzdir_output_mat(struct All_variables *E)
 
 
 
-void gzdir_output_pressure(struct All_variables *E, int cycles)
+static void gzdir_output_pressure(struct All_variables *E, int cycles)
 {
   int i, j;
   float ftmp;
@@ -996,7 +975,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
 
 
 
-void gzdir_output_tracer(struct All_variables *E, int cycles)
+static void gzdir_output_tracer(struct All_variables *E, int cycles)
 {
   int i, j, n, ncolumns;
   char output_file[255];
@@ -1034,7 +1013,7 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 }
 
 
-void gzdir_output_comp_nd(struct All_variables *E, int cycles)
+static void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 {
   int i, j, k;
   char output_file[255],message[255];
@@ -1096,7 +1075,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 }
 
 
-void gzdir_output_comp_el(struct All_variables *E, int cycles)
+static void gzdir_output_comp_el(struct All_variables *E, int cycles)
 {
     int i, j, k;
     char output_file[255];
@@ -1125,7 +1104,7 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 }
 
 
-void gzdir_output_heating(struct All_variables *E, int cycles)
+static void gzdir_output_heating(struct All_variables *E, int cycles)
 {
     int j, e;
     char output_file[255];
@@ -1337,7 +1316,7 @@ big endian I/O (needed for vtk)
 write the x[n] array to file, making sure it is written big endian
 
 */
-int be_write_float_to_file(float *x, int n, FILE *out)
+static int be_write_float_to_file(float *x, int n, FILE *out)
 {
   int i,nout;
   static size_t len = sizeof(float);
@@ -1365,7 +1344,7 @@ int be_write_float_to_file(float *x, int n, FILE *out)
 #endif
   return nout;
 }
-int be_write_int_to_file(int *x, int n, FILE *out)
+static int be_write_int_to_file(int *x, int n, FILE *out)
 {
   int i,nout;
   static size_t len = sizeof(int);
@@ -1396,7 +1375,7 @@ int be_write_int_to_file(int *x, int n, FILE *out)
 
 
 /* does this make a difference? nope, didn't, and why would it */
-void myfprintf(FILE *out,char *string)
+static void myfprintf(FILE *out,char *string)
 {
 #ifdef ASCII_DEBUG
   fprintf(out,string);
@@ -1405,7 +1384,7 @@ void myfprintf(FILE *out,char *string)
 #endif
 }
 
-int be_is_little_endian(void)
+static int be_is_little_endian(void)
 {
   static const unsigned long a = 1;
   return *(const unsigned char *)&a;
@@ -1423,7 +1402,7 @@ flip endian-ness
 flip endianness of x
 
 */
-void be_flip_byte_order(void *x, size_t len)
+static void be_flip_byte_order(void *x, size_t len)
 {
   void *copy;
   int i;
@@ -1434,7 +1413,7 @@ void be_flip_byte_order(void *x, size_t len)
 }
 
 /* this should not be called with (i,i,size i) */
-void be_flipit(void *d, void *s, size_t len)
+static void be_flipit(void *d, void *s, size_t len)
 {
   unsigned char *dest = (unsigned char *)d;
   unsigned char *src  = (unsigned char *)s;

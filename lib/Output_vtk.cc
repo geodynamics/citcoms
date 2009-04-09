@@ -28,6 +28,7 @@
 /* Routine to process the output of the finite element cycles
    and to turn them into a coherent suite  files  */
 
+#include "output_vtk.h"
 
 #include <stdlib.h>
 #include <math.h>

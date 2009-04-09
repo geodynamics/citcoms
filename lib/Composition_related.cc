@@ -26,13 +26,15 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+
+#include "composition_related.h"
+
 #include <math.h>
 #include "global_defs.h"
 #include "parsing.h"
-#include "parallel_related.h"
-#include "composition_related.h"
 
-#include "cproto.h"
+#include "global_operations.h"
+#include "parallel_util.h"
 
 
 static void allocate_composition_memory(struct All_variables *E);

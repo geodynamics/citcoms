@@ -26,9 +26,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-struct All_variables;
-
-void full_solver_init(struct All_variables *E);
+#include "full_solver.h"
 
 void solver_init(struct All_variables *E)
 {

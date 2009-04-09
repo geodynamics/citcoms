@@ -25,6 +25,9 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "global_operations.h"
+
 #include <mpi.h>
 
 #include <math.h>
@@ -32,13 +35,28 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "nodal_mesh.h"
+#include "pan_problem_misc_functions.h"
+#include "size_does_matter.h"
+
 
 #ifdef ALLOW_ELLIPTICAL
 double theta_g(double , struct All_variables *);
 #endif
 
-void calc_cbase_at_tp(float , float , float *);
+
+static void remove_horiz_ave(struct All_variables *E, double **X, double *H, int store_or_not);
+static void return_horiz_ave(struct All_variables *E, double **X, double *H);
+static void return_elementwise_horiz_ave(struct All_variables *E, double **X, double *H);
+static float return_bulk_value(struct All_variables *E, float **Z, int average);
+static float find_max_horizontal(struct All_variables *E, double Tmax);
+static float global_fvdot(struct All_variables *E, float **A, float **B, int lev);
+static double kineticE_radial(struct All_variables *E, double **A, int lev);
+static double global_tdot_d(struct All_variables *E, double **A, double **B, int lev);
+static float global_tdot(struct All_variables *E, float **A, float **B, int lev);
+static double global_dmax(struct All_variables *E, double a);
+static float global_fmax(struct All_variables *E, double a);
+
 
 /* ===============================================
    strips horizontal average from nodal field X.
@@ -46,7 +64,7 @@ void calc_cbase_at_tp(float , float , float *);
    aren't & another method is required.
    =============================================== */
 
-void remove_horiz_ave(
+static void remove_horiz_ave(
     struct All_variables *E,
     double **X, double *H,
     int store_or_not
@@ -84,7 +102,7 @@ void remove_horiz_ave2(struct All_variables *E, double **X)
 }
 
 
-void return_horiz_ave(
+static void return_horiz_ave(
     struct All_variables *E,
     double **X, double *H
     )
@@ -251,7 +269,7 @@ void return_horiz_ave_f(
 /* however here, elemental horizontal averages are given rather than */
 /* nodal averages. Also note, here is average per element            */
 
-void return_elementwise_horiz_ave(
+static void return_elementwise_horiz_ave(
     struct All_variables *E,
     double **X, double *H
     )
@@ -314,7 +332,7 @@ void return_elementwise_horiz_ave(
   return;
 }
 
-float return_bulk_value(
+static float return_bulk_value(
     struct All_variables *E,
     float **Z,
     int average
@@ -396,7 +414,7 @@ double return_bulk_value_d(
 }
 
 /* ================================================== */
-float find_max_horizontal(
+static float find_max_horizontal(
     struct All_variables *E,
     float Tmax
     )
@@ -471,7 +489,7 @@ void sum_across_surf_sph1(
 /* ================================================== */
 
 
-float global_fvdot(
+static float global_fvdot(
     struct All_variables *E,
     float **A, float **B,
     int lev
@@ -504,7 +522,7 @@ float global_fvdot(
 }
 
 
-double kineticE_radial(
+static double kineticE_radial(
     struct All_variables *E,
     double **A,
     int lev
@@ -661,7 +679,7 @@ double global_div_norm2(struct All_variables *E,  double **A)
 }
 
 
-double global_tdot_d(
+static double global_tdot_d(
     struct All_variables *E,
     double **A, double **B,
     int lev
@@ -686,7 +704,7 @@ double global_tdot_d(
   return (prod);
   }
 
-float global_tdot(
+static float global_tdot(
     struct All_variables *E,
     float **A, double **B,
     int lev
@@ -721,7 +739,7 @@ float global_fmin(
   return (temp);
   }
 
-double global_dmax(
+static double global_dmax(
     struct All_variables *E,
     double a
     )
@@ -732,7 +750,7 @@ double global_dmax(
   }
 
 
-float global_fmax(
+static float global_fmax(
     struct All_variables *E,
     float a
     )

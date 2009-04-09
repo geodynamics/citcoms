@@ -29,6 +29,8 @@
 #if !defined(CitcomS_output_h5_h)
 #define CitcomS_output_h5_h
 
+struct All_variables;
+
 void h5output_allocate_memory(struct All_variables *);
 void h5input_params(struct All_variables *);
 void h5output(struct All_variables *, int);

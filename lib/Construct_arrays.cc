@@ -25,16 +25,22 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "construct_arrays.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#include "cproto.h"
+#include "element_calculations.h"
+#include "solver_multigrid.h"
 
 
-int layers_r(struct All_variables *,float );
-int layers(struct All_variables *,int ,int );
+static void get_bcs_id_for_residual(struct All_variables *E, int level, int m);
+static void construct_node_ks(struct All_variables *E);
+static void rebuild_BI_on_boundary(struct All_variables *E);
+static void construct_elt_ks(struct All_variables *E);
 
 
 /*========================================================
@@ -199,7 +205,7 @@ void construct_id(struct All_variables *E)
 
 
 
-void get_bcs_id_for_residual(struct All_variables *E, int level, int m)
+static void get_bcs_id_for_residual(struct All_variables *E, int level, int m)
 {
 
     int i,j;
@@ -324,7 +330,7 @@ void construct_node_maps(struct All_variables *E)
 }
 
 
-void construct_node_ks(struct All_variables *E)
+static void construct_node_ks(struct All_variables *E)
 {
     int m,level,i,j,k,e;
     int node,node1,eqn1,eqn2,eqn3,loc0,loc1,loc2,loc3,found,element,index,pp,qq;
@@ -334,11 +340,6 @@ void construct_node_ks(struct All_variables *E)
     double w1,w2,w3,ww1,ww2,ww3,zero;
 
     higher_precision *B1,*B2,*B3;
-
-    void get_elt_k();
-    void get_aug_k();
-    void build_diagonal_of_K();
-    void parallel_process_termination();
 
     const int dims=E->mesh.nsd,dofs=E->mesh.dof;
     const int ends=enodes[dims];
@@ -471,7 +472,7 @@ void construct_node_ks(struct All_variables *E)
     return;
 }
 
-void rebuild_BI_on_boundary(struct All_variables *E)
+static void rebuild_BI_on_boundary(struct All_variables *E)
 {
     int m,level,i,j;
     int eqn1,eqn2,eqn3;
@@ -633,12 +634,9 @@ void construct_sub_element(struct All_variables *E)
    }
 
 
-void construct_elt_ks(struct All_variables *E)
+static void construct_elt_ks(struct All_variables *E)
 {
     int e,el,lev,j,k,ii,m;
-    void get_elt_k();
-    void get_aug_k();
-    void build_diagonal_of_K();
 
     const int dims=E->mesh.nsd;
     const int n=loc_mat_size[E->mesh.nsd];
@@ -681,7 +679,6 @@ void construct_elt_ks(struct All_variables *E)
 
 void construct_elt_gs(struct All_variables *E)
 { int m,el,lev,a;
-  void get_elt_g();
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
@@ -707,7 +704,6 @@ void construct_elt_gs(struct All_variables *E)
 void construct_elt_cs(struct All_variables *E)
 {
     int m, el, lev;
-    void get_elt_c();
 
 /*     if(E->control.verbose && E->parallel.me==0) */
 /*         fprintf(stderr,"storing elt c matrices\n"); */
@@ -729,14 +725,6 @@ void construct_elt_cs(struct All_variables *E)
 
 void construct_stiffness_B_matrix(struct All_variables *E)
 {
-  void build_diagonal_of_K();
-  void build_diagonal_of_Ahat();
-  void project_viscosity();
-  void construct_node_maps();
-  void construct_node_ks();
-  void construct_elt_ks();
-  void rebuild_BI_on_boundary();
-
   if (E->control.NMULTIGRID)
     project_viscosity(E);
 

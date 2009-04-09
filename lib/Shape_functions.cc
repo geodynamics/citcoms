@@ -33,11 +33,16 @@
     and the element-data header file : element_definitions.h  but it should not be
     necessary to change the main calculation/setup/solving machinery.		 */
 
+#include "shape_functions.h"
+
 #include <math.h>
 #include "element_definitions.h"				
 #include "global_defs.h"
 
-#include "cproto.h"
+
+static double lpoly(int p, double y);
+static double lpolydash(int p, double y);
+
  
 /*  =======================================================
     Function creating shape_fn data in form of a structure
@@ -169,10 +174,10 @@ void construct_shape_functions(struct All_variables *E)
       }	 
 
 
-  return; }
+  return;
+}	
 
-		
-double lpoly(
+static double lpoly(
     int p, /*   selects lagrange polynomial , 1d: node p */
     double y /*   coordinate in given direction to evaluate poly */
     )
@@ -193,8 +198,8 @@ double lpoly(
 
   return(value);
 }
-	
-double lpolydash(
+
+static double lpolydash(
     int p,
     double y
     )

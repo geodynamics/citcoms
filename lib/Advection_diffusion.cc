@@ -29,15 +29,21 @@
      streamline-upwind methods. The process is basically as described in Alex
      Brooks PhD thesis (Caltech) which refers back to Hughes, Liu and Brooks.  */
 
+#include "advection_diffusion.h"
+
 #include <sys/types.h>
 
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
-#include "advection_diffusion.h"
 #include "parsing.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "global_operations.h"
+#include "lith_age.h"
+#include "nodal_mesh.h"
+#include "size_does_matter.h"
+#include "viscosity_structures.h"
 
 
 static void set_diffusion_timestep(struct All_variables *E);

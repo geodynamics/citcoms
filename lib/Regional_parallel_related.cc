@@ -25,6 +25,9 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "regional_parallel_related.h"
+
 #include <mpi.h>
 #include <math.h>
 
@@ -32,7 +35,7 @@
 #include "global_defs.h"
 #include "sphere_communication.h"
 
-#include "parallel_related.h"
+#include "parallel_util.h"
 
 
 static void set_horizontal_communicator(struct All_variables*);

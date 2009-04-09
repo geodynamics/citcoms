@@ -26,6 +26,12 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#if !defined(CitcomS_checkpoints_h)
+#define CitcomS_checkpoints_h
+
+struct All_variables;
 
 void output_checkpoint(struct All_variables *E);
 void read_checkpoint(struct All_variables *E);
+
+#endif

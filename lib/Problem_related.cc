@@ -25,16 +25,17 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "problem_related.h"
+
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#ifdef USE_GZDIR
-int open_file_zipped(char *, FILE **,struct All_variables *);
-void gzip_file(char *);
-#endif
+#include "output_gzdir.h"
+
 /*=======================================================================
   read velocity vectors at the top surface from files
 =========================================================================*/

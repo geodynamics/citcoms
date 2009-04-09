@@ -25,18 +25,25 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "drive_solvers.h"
+
 #include <math.h>
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
-#include "drive_solvers.h"
 
-#include "cproto.h"
+#include "advection_diffusion.h"
+#include "bc_util.h"
+#include "construct_arrays.h"
+#include "element_calculations.h"
+#include "global_operations.h"
+#include "stokes_flow_incomp.h"
+#include "topo_gravity.h"
+#include "viscosity_structures.h"
 
-double global_vdot();
-double vnorm_nonnewt();
-int need_visc_update(struct All_variables *);
 
+static int need_visc_update(struct All_variables *);
 
 
 /************************************************************/

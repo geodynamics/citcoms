@@ -31,8 +31,11 @@
 #include <string.h>
 #include <math.h>
 #include "global_defs.h"
-#include "parallel_related.h"
+#include "parallel_util.h"
 #include "setProperties.h"
+
+#include "instructions.h"
+#include "pan_problem_misc_functions.h"
 
 
 /* See PEP 353. */
@@ -75,9 +78,6 @@ int _getDoubleVectorProperty(PyObject* properties, char* attribute,
                              double* vector, int len, FILE* fp);
 #define getDoubleVectorProperty(p, a, v, l, o) if (-1 == _getDoubleVectorProperty(p, a, v, l, o)) return NULL
 
-
-void myerror(struct All_variables *,char *);
-void report(struct All_variables *,char *);
 
 /*==============================================================*/
 

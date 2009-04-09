@@ -25,19 +25,20 @@
  * 
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "interuption.h"
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "interuption.h"
+#include "parallel_util.h"
 
-void parallel_process_termination();
 
 int Emergency_stop;
 
 
-
-void interuption(int signal_number)
+static void interuption(int signal_number)
 {
   if (Emergency_stop)
     parallel_process_termination();

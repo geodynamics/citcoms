@@ -31,11 +31,8 @@
 #include "mesher.h"
 
 #include "global_defs.h"
-#include "parallel_related.h"
-
-
-extern void initial_mesh_solver_setup(struct All_variables *);
-
+#include "instructions.h"
+#include "parallel_util.h"
 
 
 char pyCitcom_full_sphere_launch__doc__[] = "";

@@ -26,10 +26,9 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "regional_lith_age_read_files.h"
 
-#include "global_defs.h"
-
-#include "cproto.h"
+#include "regional_read_input_from_files.h"
 
 void regional_lith_age_read_files(struct All_variables *E, int output)
 {

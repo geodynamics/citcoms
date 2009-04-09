@@ -26,7 +26,12 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "bc_util.h"
+
 #include "global_defs.h"
+
+
+static void temperatures_conform_bcs2(struct All_variables *);
 
 
 void strip_bcs_from_residual(struct All_variables *E, double **Res, int level)
@@ -44,9 +49,6 @@ void strip_bcs_from_residual(struct All_variables *E, double **Res, int level)
 
 void temperatures_conform_bcs(struct All_variables *E)
 {
-  void temperatures_conform_bcs2(struct All_variables *);
-  void assimilate_lith_conform_bcs2(struct All_variables *);
-
   if(E->control.lith_age) {
     /*
     This sequence now moved to end of PG_time_step_solve
@@ -60,7 +62,7 @@ void temperatures_conform_bcs(struct All_variables *E)
 }
 
 
-void temperatures_conform_bcs2(struct All_variables *E)
+static void temperatures_conform_bcs2(struct All_variables *E)
 {
   int j,node;
   unsigned int type;

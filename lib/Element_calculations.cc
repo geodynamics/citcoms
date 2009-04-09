@@ -29,28 +29,27 @@
    Note that for the regular grid case the calculation of k becomes repetitive
    to the point of redundancy. */
 
+#include "element_calculations.h"
+
 #include <math.h>
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "material_properties.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "global_operations.h"
+#include "pan_problem_misc_functions.h"
+#include "size_does_matter.h"
 
 
-/* else, PGI would complain */
-void construct_side_c3x3matrix_el(struct All_variables *,int ,
-				  struct CC *,struct CCX *,
-				  int ,int ,int ,int );
-void construct_c3x3matrix(struct All_variables *);
-void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
-			      struct CCX *,int ,int ,int );
-void assemble_div_u(struct All_variables *,
-                    double **, double **, int );
-void get_elt_tr(struct All_variables *, int , int , double [24], int );
-void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
+static void add_force(struct All_variables *E, int e, double elt_f[24], int m);
+static void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx, struct CC *cc, struct CCX *ccx, double rtf[4][9], int dims, double ba[9][9][4][7]);
+static double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m);
+static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m);
+static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m);
 
 
-void add_force(struct All_variables *E, int e, double elt_f[24], int m)
+static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
 {
   const int dims=E->mesh.nsd;
   const int ends=enodes[E->mesh.nsd];
@@ -170,9 +169,9 @@ void assemble_forces_pseudo_surf(struct All_variables *E, int penalty)
   quadrature points, which is used to compute element stiffness matrix
   ==============================================================  */
 
-void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
-       struct CC *cc, struct CCX *ccx, double rtf[4][9],
-       int dims, double ba[9][9][4][7])
+static void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
+                   struct CC *cc, struct CCX *ccx, double rtf[4][9],
+                   int dims, double ba[9][9][4][7])
 {
     int k, a, n;
     const int vpts = VPOINTS3D;
@@ -322,8 +321,6 @@ void get_elt_k(
 
     const double two = 2.0;
     const double two_thirds = 2.0/3.0;
-
-    void get_rtf_at_vpts();
 
     double ba[9][9][4][7]; /* integration points,node,3x6 matrix */
 
@@ -728,7 +725,6 @@ void assemble_grad_p(
     )
 {
   int m,e,i,j1,j2,j3,p,a,b,nel,neq;
-  void strip_bcs_from_residual();
 
   const int ends=enodes[E->mesh.nsd];
   const int dims=E->mesh.nsd;
@@ -769,7 +765,7 @@ return;
 }
 
 
-double assemble_dAhatp_entry(
+static double assemble_dAhatp_entry(
     struct All_variables *E,
     int e, int level, int m
     )
@@ -903,7 +899,6 @@ void get_elt_g(
     )
 
 {
-   void get_rtf_at_ppts();
    int p,a,i;
    double ra,ct,si,x[4],rtf[4][9];
    double temp;
@@ -1033,7 +1028,7 @@ void get_elt_f(
   Function to create the element force vector due to stress b.c.
   ================================================================= */
 
-void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
 
 	const int dims=E->mesh.nsd;
@@ -1116,7 +1111,7 @@ void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], i
 	}
 }
 
-void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
 
 	const int dims=E->mesh.nsd;

@@ -25,20 +25,18 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "regional_version_dependent.h"
+
 #include <math.h>
 
 #include "global_defs.h"
-#include "parallel_related.h"
 
-#include "cproto.h"
-
-
-void get_r_spacing_fine(double *,struct All_variables *);
-void get_r_spacing_at_levels(double *,struct All_variables *);
- 
-#ifdef USE_GGRD
-void ggrd_reg_temp_init(struct All_variables *);
-#endif
+#include "ggrd_handling.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "regional_sphere_related.h"
+#include "sphere_util.h"
 
 
 /* =================================================

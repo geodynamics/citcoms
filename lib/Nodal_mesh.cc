@@ -27,6 +27,7 @@
  */
 /* Functions relating to the building and use of mesh locations ... */
 
+#include "nodal_mesh.h"
 
 #include <math.h>
 #include <sys/types.h>

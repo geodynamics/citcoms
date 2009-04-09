@@ -25,13 +25,19 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "regional_boundary_conditions.h"
+
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
 
 #include "lith_age.h"
 
-#include "cproto.h"
+#include "bc_util.h"
+#include "pan_problem_misc_functions.h"
+#include "problem_related.h"
+
 
 /* ========================================== */
 
@@ -50,8 +56,6 @@ static void velocity_apply_periodic_bcs(struct All_variables *);
 static void temperature_apply_periodic_bcs(struct All_variables *);
 static void velocity_refl_vert_bc(struct All_variables *);
 static void temperature_refl_vert_bc(struct All_variables *);
-void read_temperature_boundary_from_file(struct All_variables *);
-void read_velocity_boundary_from_file(struct All_variables *);
 
 /* ========================================== */
 

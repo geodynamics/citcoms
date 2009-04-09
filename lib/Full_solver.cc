@@ -26,37 +26,16 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "full_solver.h"
 
 #include "global_defs.h"
 
-
-/* Boundary_conditions.c */
-void full_velocity_boundary_conditions(struct All_variables *);
-void full_temperature_boundary_conditions(struct All_variables *);
-
-/* Geometry_cartesian.c */
-void full_set_2dc_defaults(struct All_variables *);
-void full_set_2pt5dc_defaults(struct All_variables *);
-void full_set_3dc_defaults(struct All_variables *);
-void full_set_3dsphere_defaults(struct All_variables *);
-
-/* Lith_age.c */
-void full_lith_age_read_files(struct All_variables *, int);
-
-/* Parallel_related.c */
-void full_parallel_processor_setup(struct All_variables *);
-void full_parallel_domain_decomp0(struct All_variables *);
-void full_parallel_domain_boundary_nodes(struct All_variables *);
-void full_parallel_communication_routs_v(struct All_variables *);
-void full_parallel_communication_routs_s(struct All_variables *);
-void full_exchange_id_d(struct All_variables *, double **, int);
-
-/* Read_input_from_files.c */
-void full_read_input_files_for_timesteps(struct All_variables *, int, int);
-
-/* Version_dependent.c */
-void full_node_locations(struct All_variables *);
-void full_construct_boundary(struct All_variables *);
+#include "full_boundary_conditions.h"
+#include "full_geometry_cartesian.h"
+#include "full_lith_age_read_files.h"
+#include "full_parallel_related.h"
+#include "full_read_input_from_files.h"
+#include "full_version_dependent.h"
 
 
 void full_solver_init(struct All_variables *E)

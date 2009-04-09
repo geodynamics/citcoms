@@ -26,6 +26,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
+#include "material_properties.h"
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -33,13 +35,13 @@
 #include <math.h>
 
 #include "global_defs.h"
-#include "material_properties.h"
-#include "parallel_related.h"
+#include "parallel_util.h"
+
+#include "construct_arrays.h"
+
 
 static void read_refstate(struct All_variables *E);
 static void adams_williamson_eos(struct All_variables *E);
-
-int layers_r(struct All_variables *,float);
 
 void mat_prop_allocate(struct All_variables *E)
 {

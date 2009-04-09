@@ -25,13 +25,15 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "phase_change.h"
+
 #include <stdio.h>
 #include <math.h>
 #include <sys/types.h>
 #include "global_defs.h"
 
 #include "parsing.h"
-#include "phase_change.h"
 
 static void phase_change_apply(struct All_variables *E, double **buoy,
 			       float **B, float **B_b,

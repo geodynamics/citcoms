@@ -28,13 +28,14 @@
 /* Routines which read filenames from the command line and
    then parse the contents as parameters for citcom */
 
+#include "parsing.h"
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <string.h>
 #include "global_defs.h"
-#include "parsing.h"
 
-#include "cproto.h"
+#include "pan_problem_misc_functions.h"
 
 #define MAXLINE		1024	/* max length of line in input file */
 #define MAXNAME		64	/* max length of name */
@@ -84,7 +85,10 @@ int VERBOSE = 0;
 int DESCRIBE = 0;
 int BEGINNER = 0;
 
-int interpret_control_string();
+
+static void add_to_parameter_list(char *name, char *value);
+static int compute_parameter_hash_table(char *s);
+static int interpret_control_string(char *interpret, int *essential, double *Default, double *minvalue, double *maxvalue);
 
 
 void setup_parser(
@@ -187,7 +191,7 @@ void shutdown_parser(struct All_variables *E)
 
 
 /* add an entry to arglist, expanding memory */
-void add_to_parameter_list(
+static void add_to_parameter_list(
     char *name, char *value /* if necessary */
     )
 {
@@ -232,7 +236,7 @@ void add_to_parameter_list(
   NLIST++;
 }
 
-int compute_parameter_hash_table(char *s)
+static int compute_parameter_hash_table(char *s)
 { int h;
 
   h= s[0];
@@ -786,7 +790,7 @@ int input_double_vector(
    The function strtok does not work on linux machine
 */
 
-int interpret_control_string(
+static int interpret_control_string(
     char *interpret,
     int *essential,
     double *Default, double *minvalue, double *maxvalue

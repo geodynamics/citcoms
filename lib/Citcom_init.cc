@@ -26,13 +26,15 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-#include "global_defs.h"
 #include "citcom_init.h"
+
+#include "global_defs.h"
+
+#include "pan_problem_misc_functions.h"
+
 
 struct All_variables* citcom_init(MPI_Comm *world)
 {
-  int get_process_identifier();
-
   struct All_variables *E;
   int rank, nproc;
 

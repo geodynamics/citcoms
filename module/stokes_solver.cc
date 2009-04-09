@@ -34,20 +34,12 @@
 #include "global_defs.h"
 #include "drive_solvers.h"
 
-
-void assemble_forces(struct All_variables*, int);
-void construct_stiffness_B_matrix(struct All_variables*);
-void general_stokes_solver(struct All_variables *);
-void general_stokes_solver_setup(struct All_variables*);
-void get_system_viscosity(struct All_variables*, int, float**, float**);
-void set_cg_defaults(struct All_variables*);
-void set_mg_defaults(struct All_variables*);
-void solve_constrained_flow_iterative(struct All_variables*);
-
-void assemble_forces_pseudo_surf(struct All_variables*, int);
-void general_stokes_solver_pseudo_surf(struct All_variables *);
-void solve_constrained_flow_iterative_pseudo_surf(struct All_variables*);
-
+#include "construct_arrays.h"
+#include "element_calculations.h"
+#include "solver_conj_grad.h"
+#include "solver_multigrid.h"
+#include "stokes_flow_incomp.h"
+#include "viscosity_structures.h"
 
 
 char pyCitcom_assemble_forces__doc__[] = "";

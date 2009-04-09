@@ -25,11 +25,28 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
+
+#include "solver_multigrid.h"
+
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
 
-#include "cproto.h"
+#include "nodal_mesh.h"
+#include "solver_conj_grad.h"
+#include "stokes_flow_incomp.h"
+
+
+static void mg_allocate_vars(struct All_variables *E);
+static void inject_scalar(struct All_variables *E, int start_lev, float **AU, float **AD);
+static void inject_vector(struct All_variables *E, int start_lev, double **AU, double **AD);
+static void un_inject_vector(struct All_variables *E, int start_lev, double **AD, double **AU);
+static void inject_scalar_e(struct All_variables *E, int start_lev, float **AU, float **AD);
+static void project_scalar_e(struct All_variables *E, int start_lev, float **AU, float **AD);
+static void project_scalar(struct All_variables *E, int start_lev, float **AU, float **AD);
+static void from_xyz_to_rtf(struct All_variables *E, int level, double **xyz, double **rtf);
+static void from_rtf_to_xyz(struct All_variables *E, int level, double **rtf, double **xyz);
+static void fill_in_gaps(struct All_variables *E, double **temp, int level);
 
 
 void set_mg_defaults(struct All_variables *E)
@@ -54,7 +71,7 @@ void mg_allocate_vars(struct All_variables *E)
    just dropping values at shared grid points.
    ===================================================== */
 
-void inject_scalar(
+static void inject_scalar(
     struct All_variables *E,
     int start_lev,
     float **AU, float **AD  /* data on upper/lower mesh  */
@@ -84,7 +101,7 @@ void inject_scalar(
     return;
 }
 
-void inject_vector(
+static void inject_vector(
     struct All_variables *E,
     int start_lev,
     double **AU, double **AD /* data on upper/lower mesh  */
@@ -123,7 +140,7 @@ void inject_vector(
    just dropping values at shared grid points.
    ===================================================== */
 
-void un_inject_vector(
+static void un_inject_vector(
     struct All_variables *E,
     int start_lev,
     double **AD, double **AU  /* data on upper/lower mesh  */
@@ -276,7 +293,7 @@ void project_viscosity(struct All_variables *E)
 }
 
 /* ==================================================== */
-void inject_scalar_e(
+static void inject_scalar_e(
     struct All_variables *E,
     int start_lev,
     float **AU, float **AD /* data on upper/lower mesh  */
@@ -309,7 +326,7 @@ return;
 }
 
 /* ==================================================== */
-void project_scalar_e(
+static void project_scalar_e(
     struct All_variables *E,
     int start_lev,
     float **AU, float **AD /* data on upper/lower mesh  */
@@ -347,7 +364,7 @@ return;
 }
 
 /* ==================================================== */
-void project_scalar(
+static void project_scalar(
     struct All_variables *E,
     int start_lev,
     float **AU, float **AD /* data on upper/lower mesh  */
@@ -473,7 +490,7 @@ void project_vector(
  }
 
 /* ================================================= */
- void from_xyz_to_rtf(
+static void from_xyz_to_rtf(
      struct All_variables *E,
      int level,
      double **xyz, double **rtf
@@ -506,7 +523,7 @@ void project_vector(
  }
 
 /* ================================================= */
- void from_rtf_to_xyz(
+static void from_rtf_to_xyz(
      struct All_variables *E,
      int level,
      double **rtf, double **xyz
@@ -540,7 +557,7 @@ void project_vector(
  }
 
  /* ========================================================== */
- void fill_in_gaps(
+static void fill_in_gaps(
      struct All_variables *E,
      double **temp,
      int level

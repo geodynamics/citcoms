@@ -29,6 +29,8 @@
 /* allocated, temperature, viscosity, node locations and how to use */
 /* them all established. 8.29.92 or 29.8.92 depending on your nationality*/
 
+#include "instructions.h"
+
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -46,46 +48,37 @@
 #include "material_properties.h"
 #include "output.h"
 #include "output_h5.h"
-#include "parallel_related.h"
 #include "parsing.h"
 #include "phase_change.h"
 #include "interuption.h"
 
-#include "cproto.h"
+#include "composition_related.h"
+#include "construct_arrays.h"
+#include "convection.h"
+#include "drive_solvers.h"
+#include "output_gzdir.h"
+#include "output_vtk.h"
+#include "pan_problem_misc_functions.h"
+#include "parallel_util.h"
+#include "problem_related.h"
+#include "shape_functions.h"
+#include "size_does_matter.h"
+#include "solver_conj_grad.h"
+#include "solver_multigrid.h"
+#include "sphere_harmonics.h"
+#include "tracer_setup.h"
+#include "viscosity_structures.h"
 
-void allocate_common_vars(struct All_variables*);
-void allocate_velocity_vars(struct All_variables*);
-void check_bc_consistency(struct All_variables*);
-void construct_elt_gs(struct All_variables*);
-void construct_elt_cs(struct All_variables*);
-void construct_shape_function_derivatives(struct All_variables *E);
-void construct_id(struct All_variables*);
-void construct_ien(struct All_variables*);
-void construct_lm(struct All_variables*);
-void construct_masks(struct All_variables*);
-void construct_shape_functions(struct All_variables*);
-void construct_sub_element(struct All_variables*);
-void construct_surf_det (struct All_variables*);
-void construct_bdry_det (struct All_variables*);
-void construct_surface (struct All_variables*);
-void get_initial_elapsed_time(struct All_variables*);
-void lith_age_init(struct All_variables *E);
-void mass_matrix(struct All_variables*);
-void output_init(struct All_variables*);
-void set_elapsed_time(struct All_variables*);
-void set_sphere_harmonics (struct All_variables*);
-void set_starting_age(struct All_variables*);
-void tracer_initial_settings(struct All_variables*);
-void tracer_input(struct All_variables*);
-void viscosity_input(struct All_variables*);
-void vtk_output(struct All_variables*, int);
-void get_vtk_filename(char *,int,struct All_variables *,int);
-void myerror(struct All_variables *,char *);
-void open_qfiles(struct All_variables *) ;
-void read_rayleigh_from_file(struct All_variables *);
-void read_initial_settings(struct All_variables *);
-void check_settings_consistency(struct All_variables *);
-void global_derived_values(struct All_variables *);
+
+static void read_initial_settings(struct All_variables *E);
+static void global_derived_values(struct All_variables *E);
+static void allocate_common_vars(struct All_variables *E);
+static void allocate_velocity_vars(struct All_variables *E);
+static void set_up_nonmg_aliases(struct All_variables *E, int j);
+static void common_initial_fields(struct All_variables *E);
+static void open_qfiles(struct All_variables *E);
+static void output_init(struct All_variables *E);
+static char *strip(char *input);
 
 
 void initial_mesh_solver_setup(struct All_variables *E)
@@ -262,7 +255,7 @@ void initial_conditions(struct All_variables *E)
 }
 
 
-void read_initial_settings(struct All_variables *E)
+static void read_initial_settings(struct All_variables *E)
 {
   float tmp;
   double ell_tmp;
@@ -771,7 +764,7 @@ void check_settings_consistency(struct All_variables *E)
 
 
 /* Setup global mesh parameters */
-void global_derived_values(struct All_variables *E)
+static void global_derived_values(struct All_variables *E)
 {
     int d,i,nox,noz,noy;
 
@@ -855,7 +848,7 @@ void global_derived_values(struct All_variables *E)
    common to all problems follow ...
    ===================================  */
 
-void allocate_common_vars(struct All_variables *E)
+static void allocate_common_vars(struct All_variables *E)
 {
     int m,n,snel,nsf,elx,ely,nox,noy,noz,nno,nel,npno;
     int k,i,j,d,l,nno_l,npno_l,nozl,nnov_l,nxyz;
@@ -1058,7 +1051,7 @@ void allocate_common_vars(struct All_variables *E)
 
 /*  =========================================================  */
 
-void allocate_velocity_vars(struct All_variables *E)
+static void allocate_velocity_vars(struct All_variables *E)
 {
     int m,n,i,j,k,l;
 
@@ -1257,7 +1250,7 @@ void check_bc_consistency(struct All_variables *E)
 
 }
 
-void set_up_nonmg_aliases(struct All_variables *E, int j)
+static void set_up_nonmg_aliases(struct All_variables *E, int j)
 { /* Aliases for functions only interested in the highest mg level */
 
   int i;
@@ -1309,7 +1302,7 @@ void record(struct All_variables *E,char * string)
 
 
 /* This function is replaced by CitcomS.Components.IC.launch()*/
-void common_initial_fields(struct All_variables *E)
+static void common_initial_fields(struct All_variables *E)
 {
     report(E,"Initialize pressure field");
     initial_pressure(E);
@@ -1410,8 +1403,8 @@ static void open_info(struct All_variables *E)
   return;
 }
 
-void open_qfiles(struct All_variables *E) /* additional heat
-					     flux output */
+static void open_qfiles(struct All_variables *E) /* additional heat
+                                                    flux output */
 {
   char output_file[255];
 
@@ -1633,7 +1626,7 @@ void mkdatadir(const char *dir)
 }
 
 
-void output_init(struct  All_variables *E)
+static void output_init(struct  All_variables *E)
 {
     chk_prefix(E);
     expand_datadir(E, E->control.data_dir);
@@ -1728,7 +1721,7 @@ void output_finalize(struct  All_variables *E)
 }
 
 
-char* strip(char *input)
+static char* strip(char *input)
 {
     int end;
     char *str;
