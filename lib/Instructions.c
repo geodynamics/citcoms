@@ -327,9 +327,9 @@ void read_initial_settings(struct All_variables *E)
       input_int("nodez",&(E->mesh.noz),"essential",m);
       input_int("nodey",&(E->mesh.noy),"essential",m);
 
-      E->mesh.mgunitx = E->mesh.nox - 1;
-      E->mesh.mgunity = E->mesh.noy - 1;
-      E->mesh.mgunitz = E->mesh.noz - 1;
+      E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx;
+      E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy;
+      E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz;
       E->mesh.levels = 1;
   }
   else {

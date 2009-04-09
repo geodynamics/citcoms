@@ -551,9 +551,9 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
             fprintf(stderr, "!!! cgrad solver must have levels=1\n");
             abort();
         }
-        E->mesh.mgunitx = E->mesh.nox - 1;
-        E->mesh.mgunity = E->mesh.noy - 1;
-        E->mesh.mgunitz = E->mesh.noz - 1;
+        E->mesh.mgunitx = (E->mesh.nox - 1) / E->parallel.nprocx;
+        E->mesh.mgunity = (E->mesh.noy - 1) / E->parallel.nprocy;
+        E->mesh.mgunitz = (E->mesh.noz - 1) / E->parallel.nprocz;
     }
     else {
         double levmax;
