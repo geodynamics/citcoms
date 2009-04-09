@@ -108,7 +108,6 @@ void output(struct All_variables *E, int cycles)
 
   output_surf_botm(E, cycles);
 
-  if(E->parallel.me == 0)fprintf(stderr,"hello\n");
   /* optional output below */
 
   /* compute and output geoid (in spherical harmonics coeff) */
@@ -140,7 +139,7 @@ void output(struct All_variables *E, int cycles)
 
   if(E->output.heating && E->control.disptn_number != 0)
       output_heating(E, cycles);
-  if(E->parallel.me == 0)fprintf(stderr,"good bye\n");
+
   return;
 }
 
