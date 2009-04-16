@@ -55,8 +55,6 @@ void lith_age_input(struct All_variables *E)
   }
 #endif
 
-  input_float("mantle_temp",&(E->control.lith_age_mantle_temp),"1.0",m);
-
   if (E->control.lith_age) {
     input_int("lith_age_time",&(E->control.lith_age_time),"0",m);
     input_string("lith_age_file",E->control.lith_age_file,"",m);
@@ -137,11 +135,11 @@ void lith_age_construct_tic(struct All_variables *E)
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
-	  E->T[m][node] = E->control.lith_age_mantle_temp;
+	  E->T[m][node] = E->control.mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-	      E->T[m][node] = E->control.lith_age_mantle_temp * erf(temp);
+	      E->T[m][node] = E->control.mantle_temp * erf(temp);
 	    }
 	}
 
@@ -317,7 +315,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 	      if( ((E->sx[m][1][node]<=ttt2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[m][1][node]>=ttt3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
 		/* if < (width) from x bounds AND (depth) from top */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-		t0 = E->control.lith_age_mantle_temp * erf(temp);
+		t0 = E->control.mantle_temp * erf(temp);
 
 		/* keep the age the same! */
 		E->sphere.cap[m].TB[1][node]=t0;
@@ -331,7 +329,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 
 		/* keep the age the same! */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-		t0 = E->control.lith_age_mantle_temp * erf(temp);
+		t0 = E->control.mantle_temp * erf(temp);
 
 		E->sphere.cap[m].TB[1][node]=t0;
 		E->sphere.cap[m].TB[2][node]=t0;
@@ -366,7 +364,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 
 		/* set a new age from the file */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-		t0 = E->control.lith_age_mantle_temp * erf(temp);
+		t0 = E->control.mantle_temp * erf(temp);
 
 		E->sphere.cap[m].TB[1][node]=t0;
 		E->sphere.cap[m].TB[2][node]=t0;

@@ -82,7 +82,7 @@ void tic_input(struct All_variables *E)
      When tic_method is 2, (tic_method==1) + a hot blob. A user can specify
      the location and radius of the blob, and also the amplitude of temperature
      change in the blob relative to the ambient mantle temperautre
-     (E->control.lith_age_mantle_temp).
+     (E->control.mantle_temp).
         - blob_center: A comma-separated list of three float numbers.
         - blob_radius: A dmensionless length, typically a fraction
                        of the Earth's radius.
@@ -131,6 +131,8 @@ void tic_input(struct All_variables *E)
     }
 
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
+    input_float("mantle_temp",&(E->control.mantle_temp),"1.0",m);
+
 
     switch(E->convection.tic_method){
     case 2:			/* blob */
@@ -600,7 +602,7 @@ static void construct_tic_from_input(struct All_variables *E)
     case 2:
         /* T='mantle_temp' for whole mantle + cold lithosphere TBL
            + a spherical anomaly at lower center */
-        mantle_temperature = E->control.lith_age_mantle_temp;
+        mantle_temperature = E->control.mantle_temp;
         constant_temperature_profile(E, mantle_temperature);
         add_top_tbl(E, E->convection.half_space_age, mantle_temperature);
         add_spherical_anomaly(E);
@@ -629,7 +631,7 @@ static void construct_tic_from_input(struct All_variables *E)
         /* T='mantle_temp' for whole mantle + cold lithosphere TBL
            + perturbations at some layers */
 
-        mantle_temperature = E->control.lith_age_mantle_temp;
+        mantle_temperature = E->control.mantle_temp;
         constant_temperature_profile(E, mantle_temperature);
         add_top_tbl(E, E->convection.half_space_age, mantle_temperature);
         add_perturbations_at_all_layers(E);
@@ -639,7 +641,7 @@ static void construct_tic_from_input(struct All_variables *E)
         /* T='mantle_temp' for whole mantle + hot CMB TBL
            + perturbations at some layers */
 
-        mantle_temperature = E->control.lith_age_mantle_temp;
+        mantle_temperature = E->control.mantle_temp;
         constant_temperature_profile(E, mantle_temperature);
         add_bottom_tbl(E, E->convection.half_space_age, mantle_temperature);
         add_perturbations_at_all_layers(E);
@@ -649,7 +651,7 @@ static void construct_tic_from_input(struct All_variables *E)
         /* T='mantle_temp' for whole mantle + cold lithosphere TBL
            + hot CMB TBL + perturbations at some layers */
 
-        mantle_temperature = E->control.lith_age_mantle_temp;
+        mantle_temperature = E->control.mantle_temp;
         constant_temperature_profile(E, mantle_temperature);
         add_top_tbl(E, E->convection.half_space_age, mantle_temperature);
         add_bottom_tbl(E, E->convection.half_space_age, mantle_temperature);

@@ -268,6 +268,8 @@ PyObject * pyCitcom_IC_set_properties(PyObject *self, PyObject *args)
                            num_perturb, fp);
 
     getFloatProperty(properties, "half_space_age", E->convection.half_space_age, fp);
+    getFloatProperty(properties, "mantle_temp", E->control.mantle_temp, fp);
+
     getFloatVectorProperty(properties, "blob_center", E->convection.blob_center, 3, fp);
     if( E->convection.blob_center[0] == -999.0 && E->convection.blob_center[1] == -999.0 && E->convection.blob_center[2] == -999.0 ) {
         E->convection.blob_center[0] = 0.5*(E->control.theta_min+E->control.theta_max);
@@ -378,7 +380,6 @@ PyObject * pyCitcom_Param_set_properties(PyObject *self, PyObject *args)
     getStringProperty(properties, "lith_age_file", E->control.lith_age_file, fp);
     getIntProperty(properties, "lith_age_time", E->control.lith_age_time, fp);
     getFloatProperty(properties, "lith_age_depth", E->control.lith_age_depth, fp);
-    getFloatProperty(properties, "mantle_temp", E->control.lith_age_mantle_temp, fp);
 
     getFloatProperty(properties, "start_age", E->control.start_age, fp);
     getIntProperty(properties, "reset_startage", E->control.reset_startage, fp);

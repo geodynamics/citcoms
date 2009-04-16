@@ -1411,22 +1411,18 @@ void h5output_meta(struct All_variables *E)
 
     status = set_attribute_int(input, "tic_method", E->convection.tic_method);
 
-    if (E->convection.tic_method == 0)
+    n = E->convection.number_of_perturbations;
+    status = set_attribute_int(input, "num_perturbations", n);
+    status = set_attribute_int_vector(input, "perturbl", n, E->convection.perturb_ll);
+    status = set_attribute_int_vector(input, "perturbm", n, E->convection.perturb_mm);
+    status = set_attribute_int_vector(input, "perturblayer", n, E->convection.load_depth);
+    status = set_attribute_float_vector(input, "perturbmag", n, E->convection.perturb_mag);
+
+    status = set_attribute_float(input, "half_space_age", E->convection.half_space_age);
+    status = set_attribute_float(input, "mantle_temp", E->control.mantle_temp);
+
+    if (E->convection.tic_method == 2)
     {
-        n = E->convection.number_of_perturbations;
-        status = set_attribute_int(input, "num_perturbations", n);
-        status = set_attribute_int_vector(input, "perturbl", n, E->convection.perturb_ll);
-        status = set_attribute_int_vector(input, "perturbm", n, E->convection.perturb_mm);
-        status = set_attribute_int_vector(input, "perturblayer", n, E->convection.load_depth);
-        status = set_attribute_float_vector(input, "perturbmag", n, E->convection.perturb_mag);
-    }
-    else if (E->convection.tic_method == 1)
-    {
-        status = set_attribute_float(input, "half_space_age", E->convection.half_space_age);
-    }
-    else if (E->convection.tic_method == 2)
-    {
-        status = set_attribute_float(input, "half_space_age", E->convection.half_space_age);
         status = set_attribute_float_vector(input, "blob_center", 3, E->convection.blob_center);
         status = set_attribute_float(input, "blob_radius", E->convection.blob_radius);
         status = set_attribute_float(input, "blob_dT", E->convection.blob_dT);
@@ -1449,7 +1445,6 @@ void h5output_meta(struct All_variables *E)
     status = set_attribute_string(input, "lith_age_file", E->control.lith_age_file);
     status = set_attribute_int(input, "lith_age_time", E->control.lith_age_time);
     status = set_attribute_float(input, "lith_age_depth", E->control.lith_age_depth);
-    status = set_attribute_float(input, "mantle_temp", E->control.lith_age_mantle_temp);
 
     status = set_attribute_float(input, "start_age", E->control.start_age);
     status = set_attribute_int(input, "reset_startage", E->control.reset_startage);

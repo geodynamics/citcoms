@@ -304,7 +304,7 @@ void hot_blob_lith(const BoundedBox& bbox, All_variables* E)
     double z_center = r_center * cos(fi_center);
 
     // compute temperature field according to nodal coordinate
-    add_hot_blob_lith(E, x_center, y_center, z_center, d, E->control.lith_age_mantle_temp, 1.0-E->control.lith_age_mantle_temp);
+    add_hot_blob_lith(E, x_center, y_center, z_center, d, E->control.mantle_temp, 1.0-E->control.mantle_temp);
 }
 
 

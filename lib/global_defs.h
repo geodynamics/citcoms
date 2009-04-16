@@ -479,11 +479,12 @@ struct CONTROL {
 
   //int remove_hor_buoy_avg;
 
+    float mantle_temp;
+
     int lith_age;
     int lith_age_time;
     int lith_age_old_cycles;
     float lith_age_depth;
-    float lith_age_mantle_temp;
 
     int temperature_bound_adj;
     float depth_bound_adj;

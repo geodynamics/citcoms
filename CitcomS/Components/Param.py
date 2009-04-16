@@ -68,7 +68,6 @@ class Param(CitcomComponent):
         lith_age_file = pyre.inventory.str("lith_age_file", default="age.dat")
         lith_age_time = pyre.inventory.bool("lith_age_time", default=False)
         lith_age_depth = pyre.inventory.float("lith_age_depth", default=0.0314)
-        mantle_temp = pyre.inventory.float("mantle_temp", default=1.0)
 
         #DESCRIBE = pyre.inventory.bool("DESCRIBE", default=False)
         #BEGINNER = pyre.inventory.bool("BEGINNER", default=False)
