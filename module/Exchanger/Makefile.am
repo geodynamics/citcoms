@@ -26,6 +26,11 @@
 noinst_LIBRARIES =
 pyexec_LTLIBRARIES =
 
+AM_CPPFLAGS =
+if COND_HDF5
+    AM_CPPFLAGS += -DUSE_HDF5
+endif
+
 if COND_EMBEDDING
     # static library
     noinst_LIBRARIES += libExchangerLibmodule.a
