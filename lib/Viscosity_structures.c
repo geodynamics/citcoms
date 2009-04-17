@@ -355,7 +355,11 @@ void visc_from_T(E,EEta,propogate)
         break;
 
     case 3:
-        /* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) */
+        /* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) 
+
+	   where T is normalized to be within 0...1
+
+	 */
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
                 l = E->mat[m][i] - 1;
@@ -571,6 +575,8 @@ void visc_from_T(E,EEta,propogate)
           eta =        eta0 if T  < T_sol0 + 2(1-z)
           eta = ET_red*eta0 if T >= T_sol0 + 2(1-z)
 
+	  T is limited to lie between 0 and 1
+
           where z is normalized by layer
           thickness, and T_sol0 is something
           like 0.6, and ET_red = 0.1
@@ -611,6 +617,74 @@ void visc_from_T(E,EEta,propogate)
                 }
             }
         break;
+    case 9:
+        /* eta = N_0 exp(E/(T+T_0) - E/(1+T_0)) 
+
+	   like option 3, but T is allow to vary beyond 1 
+
+	 */
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+		if(E->control.mat_control) /* switch moved up here TWB */
+		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l];
+                for(kk=1;kk<=ends;kk++) 
+		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+		
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    for(kk=1;kk<=ends;kk++)
+		      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+			   - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
+                }
+            }
+        break;
+    case 10:
+        /*
+          eta0 = N_0 exp(E/(T+T_0) - E/(1+T_0))
+
+          eta =        eta0 if T  < T_sol0 + 2(1-z)
+          eta = ET_red*eta0 if T >= T_sol0 + 2(1-z)
+
+	  like rheol == 8, but T is not limited to lie between 0 and 1
+
+        */
+
+        dr = E->sphere.ro - E->sphere.ri;
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+		if(E->control.mat_control) 
+		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		else
+		  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+		  zz[kk] = E->sx[m][3][E->ien[m][i].node[kk]]; /* radius */
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {	
+		      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
+		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];/* mean r */
+                    }
+		    zzz = (zzz - E->sphere.ri)/dr;
+		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
+				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
+		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
+		      EEta[m][ (i-1)*vpts + jj ] = visc1;
+		    else
+		      EEta[m][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
+                }
+            }
+        break;
+	
 
     case 100:
         /* user-defined viscosity law goes here */
