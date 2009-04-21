@@ -54,6 +54,10 @@ AC_ARG_WITH([exchanger],
     [want_exchanger="$withval"],
     [want_exchanger=auto])
 
+# Checks for programs.
+AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])
+AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlc++_r xlC_r xlC icpc ecpc pgCC])
+
 if test "$want_pyre" = yes; then
     # Check for Python.
     AM_PATH_PYTHON([2.3])
@@ -64,6 +68,12 @@ if test "$want_pyre" = yes; then
     # Check for Python modules and packages.
     export want_exchanger
     CIT_PYTHON_EGG_SETUP
+
+    CIT_PROG_PYCONFIG
+    AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
+    # Compile C as C++.
+    dnl CC="$CXX"
+    dnl CFLAGS="$CXXFLAGS"
 else
     if test "$want_exchanger" = yes; then
         AC_MSG_ERROR([Exchanger requires Pyre])
@@ -71,16 +81,6 @@ else
     want_exchanger=no
 fi
 
-# Checks for programs.
-AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])
-AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlc++_r xlC_r xlC icpc ecpc pgCC])
-if test "$want_pyre" = yes; then
-    CIT_PROG_PYCONFIG
-    AC_SUBST([pkgsysconfdir], [\${sysconfdir}/$PACKAGE])
-    # Compile C as C++.
-    dnl CC="$CXX"
-    dnl CFLAGS="$CXXFLAGS"
-fi
 # We don't need Fortran.
 AC_PROVIDE([AC_PROG_F77])
 AC_PROG_LIBTOOL
