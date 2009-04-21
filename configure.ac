@@ -59,6 +59,8 @@ if test "$want_pyre" = yes; then
     AM_PATH_PYTHON([2.3])
     CIT_PYTHON_SYSCONFIG
 
+    CIT_CHECK_PYTHON_HEADER
+
     # Check for Python modules and packages.
     export want_exchanger
     CIT_PYTHON_EGG_SETUP
