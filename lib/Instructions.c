@@ -1286,7 +1286,7 @@ void report(E,string)
 void record(E,string)
      struct All_variables *E;
      char * string;
-{ if(E->control.verbose)
+{ if(E->control.verbose && E->fp)
     { fprintf(E->fp,"%s\n",string);
       fflush(E->fp);
     }
