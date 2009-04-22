@@ -182,6 +182,16 @@ static void write_trace_instructions(struct All_variables *E)
             for (i=0; i<E->trace.nflavors-1; i++)
                 fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
         }
+#ifdef USE_GGRD
+	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
+	  /* ggrd modes 1 and 99 (99 is override for restart) */
+	  fprintf(stderr,"ggrd regional flavors not implemented\n");
+          fprintf(E->trace.fpt,"ggrd not implemented et for regional, flavor method= %d\n",
+		  E->trace.ic_method_for_flavors);
+	  fflush(E->trace.fpt);
+	  parallel_process_termination();
+	}
+#endif
         else {
             fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
             fflush(E->trace.fpt);

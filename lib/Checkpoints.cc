@@ -124,10 +124,14 @@ void read_checkpoint(struct All_variables *E)
 
     /* read tracer/composition information in the checkpoint file */
     if(E->control.tracer) {
+      if(E->trace.ic_method_for_flavors == 99){
+	if(E->parallel.me == 0)
+	  fprintf(stderr,"ic_method_for_flavors = 99 will override checkpoint restart\n");
+      }else{
         read_tracer_checkpoint(E, fp);
-
         if(E->composition.on)
             read_composition_checkpoint(E, fp);
+      }
     }
 
     fclose(fp);

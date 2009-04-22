@@ -37,6 +37,7 @@
 #include "parallel_util.h"
 #include "checkpoints.h"
 
+#include "composition_related.h"
 #include "drive_solvers.h"
 #include "instructions.h"
 #include "interuption.h"
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
 {	/* Functions called by main*/
   float cpu_time_on_vp_it;
 
-  int cpu_total_seconds,k, *temp;
+  int cpu_total_seconds,k,need_init_sol;
   double time,initial_time,start_time;
 
   struct All_variables *E;
@@ -104,12 +105,28 @@ int main(int argc, char **argv)
   if (E->control.restart) {
       /* the initial condition is from previous checkpoint */
       read_checkpoint(E);
+      if(E->control.tracer && (E->trace.ic_method_for_flavors == 99)){
+	/* 
+	   if ggrd tracer input is selected, this will override
+	   existing tracers, or allow addition of tracers after
+	   restart from a thermal model
+	 
+	*/
+	initialize_tracers(E);
+        if (E->composition.on)
+	  init_composition(E);
+	need_init_sol = 1;
+      }else
+	need_init_sol = 0;
   }
   else {
       /* regular init, or read T from file only */
 
       initial_conditions(E);
-
+      need_init_sol = 1;	/*  */
+  }
+  if(need_init_sol){
+    /* find first solution */
       if(E->control.pseudo_free_surf) {
           if(E->mesh.topvbc == 2)
               general_stokes_solver_pseudo_surf(E);

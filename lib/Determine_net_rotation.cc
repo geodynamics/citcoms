@@ -53,8 +53,10 @@ These have been superceded by the routines in Global_opertations and can probabl
 
 
 static double determine_netr_tp(float r, float theta, float phi, float velt, float velp, int mode, double *c9, double *omega);
-static void hc_ludcmp_3x3(double a[3][3], int *indx);
-static void hc_lubksb_3x3(double a[3][3], int *indx, double *b);
+#ifdef USE_GGRD
+static void hc_ludcmp_3x3(HC_PREC [3][3],int,int *);
+static void hc_lubksb_3x3(HC_PREC [3][3],int,int *,HC_PREC *);
+#endif
 
 /*
 
@@ -221,6 +223,7 @@ static double determine_netr_tp(float r,float theta,float phi,
 {
   float coslat,coslon,sinlat,sinlon,rx,ry,rz,rate,rzu,a,b,c,d,e,f;
   int i,j,ind[3];
+  static int n3 = 3;
   double amp,coef[3][3];
   switch(mode){
   case 0:			/* initialize */
@@ -277,9 +280,11 @@ static double determine_netr_tp(float r,float theta,float phi,
     omega[1] = c9[7];
     omega[2] = c9[8];
 
-    /* solve solution*/
-    hc_ludcmp_3x3(coef,ind);
-    hc_lubksb_3x3(coef,ind,omega);
+    /* solve */
+#ifdef USE_GGRD
+    hc_ludcmp_3x3(coef,n3,ind);
+    hc_lubksb_3x3(coef,n3,ind,omega);
+#endif
     amp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
     break;
   default:
@@ -370,45 +375,46 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
 //      AND MAILING.
 //
 
+#ifdef USE_GGRD
+#define NR_TINY 1.0e-20;
+/* 
 
-
-/*
-
-matrix solvers from numerical recipes
+   matrix is always 3 x 3 , solution is for full system for n == 3,
+   for upper 2 x 2 only for n = 2
 
  */
-#define NR_TINY 1.0e-20;
-
-static void hc_ludcmp_3x3(double a[3][3],int *indx)
+static void hc_ludcmp_3x3(HC_PREC a[3][3],int n,int *indx)
 {
   int i,imax=0,j,k;
-  double big,dum,sum,temp;
-  double vv[3];
-
-  for (i=0;i < 3;i++) {
+  HC_PREC big,dum,sum,temp;
+  HC_PREC vv[3];
+  
+  for (i=0;i < n;i++) {
     big=0.0;
-    for (j=0;j < 3;j++)
-      if ((temp = fabs(a[i][j])) > big)
+    for (j=0;j < n;j++)
+      if ((temp = fabs(a[i][j])) > big) 
 	big=temp;
-    if (fabs(big) < 5e-15) {
+    if (fabs(big) < HC_EPS_PREC) {
       fprintf(stderr,"hc_ludcmp_3x3: singular matrix in routine, big: %g\n",
 	      big);
-      //hc_print_3x3(a,stderr);
-      for(j=0;j<3;j++)
-	fprintf(stderr,"%g %g %g\n",a[j][0],a[j][1],a[j][2]);
-      parallel_process_termination();
+      for(j=0;j <n;j++){
+	for(k=0;k<n;k++)
+	  fprintf(stderr,"%g ",a[j][k]);
+	fprintf(stderr,"\n");
+      }
+      exit(-1);
     }
     vv[i]=1.0/big;
   }
-  for (j=0;j < 3;j++) {
+  for (j=0;j < n;j++) {
     for (i=0;i < j;i++) {
       sum = a[i][j];
-      for (k=0;k < i;k++)
+      for (k=0;k < i;k++) 
 	sum -= a[i][k] * a[k][j];
       a[i][j]=sum;
     }
     big=0.0;
-    for (i=j;i < 3;i++) {
+    for (i=j;i < n;i++) {
       sum=a[i][j];
       for (k=0;k < j;k++)
 	sum -= a[i][k] * a[k][j];
@@ -419,7 +425,7 @@ static void hc_ludcmp_3x3(double a[3][3],int *indx)
       }
     }
     if (j != imax) {
-      for (k=0;k < 3;k++) {
+      for (k=0;k < n;k++) {
 	dum = a[imax][k];
 	a[imax][k]=a[j][k];
 	a[j][k]=dum;
@@ -427,36 +433,41 @@ static void hc_ludcmp_3x3(double a[3][3],int *indx)
       vv[imax]=vv[j];
     }
     indx[j]=imax;
-    if (fabs(a[j][j]) < 5e-15)
+    if (fabs(a[j][j]) < HC_EPS_PREC) 
       a[j][j] = NR_TINY;
     if (j != 2) {
       dum=1.0/(a[j][j]);
-      for (i=j+1;i < 3;i++)
+      for (i=j+1;i < n;i++) 
 	a[i][j] *= dum;
     }
   }
 }
+
 #undef NR_TINY
-static void hc_lubksb_3x3(double a[3][3], int *indx, double *b)
+static void hc_lubksb_3x3(HC_PREC a[3][3], int n,int *indx, HC_PREC *b)
 {
   int i,ii=0,ip,j;
-  double sum;
-  for (i=0;i < 3;i++) {
+  HC_PREC sum;
+  int nm1;
+  nm1 = n - 1;
+  for (i=0;i < n;i++) {
     ip = indx[i];
     sum = b[ip];
     b[ip]=b[i];
     if (ii)
-      for (j=ii-1;j <= i-1;j++)
+      for (j=ii-1;j <= i-1;j++) 
 	sum -= a[i][j]*b[j];
-    else if (fabs(sum) > 5e-15)
+    else if (fabs(sum)>HC_EPS_PREC) 
       ii = i+1;
     b[i]=sum;
   }
-  for (i=2;i>=0;i--) {
+  for (i=nm1;i>=0;i--) {
     sum=b[i];
-    for (j=i+1;j < 3;j++)
+    for (j=i+1;j < n;j++) 
       sum -= a[i][j]*b[j];
     b[i] = sum/a[i][i];
   }
 }
+
+#endif
 

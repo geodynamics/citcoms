@@ -136,6 +136,13 @@ void tracer_input(struct All_variables *E)
          * either using absolute method or ratio method. */
         input_int("tracer_flavors",&(E->trace.nflavors),"0,0,nomax",m);
 
+	/* 0: default from layers 
+	   1: from netcdf grds
+	   
+	   
+	   99: from grds, overriding checkpoints during restart
+	   (1 and 99 require ggrd)
+	*/
 
         input_int("ic_method_for_flavors",
 		  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
@@ -143,7 +150,9 @@ void tracer_input(struct All_variables *E)
 
         if (E->trace.nflavors > 1) {
             switch(E->trace.ic_method_for_flavors){
-            case 0:			/* layer */
+	      /* default method */
+            case 0:			
+	      /* flavors initialized from layers */
                 E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
                                                         *sizeof(double));
                 for(i=0; i<E->trace.nflavors-1; i++)
@@ -152,12 +161,21 @@ void tracer_input(struct All_variables *E)
                 input_double_vector("z_interface", E->trace.nflavors-1,
                                     E->trace.z_interface, m);
                 break;
-            case 1:			/* from grid in top n materials */
-                input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
-                input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
-                break;
+		/* 
+		   two grd init method, second will override restart
+		*/
+#ifdef USE_GGRD
+            case 1:
+	    case 99:		/* will override restart */
+	      /* from grid in top n materials, this will override
+		 the checkpoint input */
+	      input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
+	      input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* which top layers to use */
+	      break;
+	      
+#endif
             default:
-                fprintf(stderr,"ic_method_for_flavors %i undefined\n",E->trace.ic_method_for_flavors);
+                fprintf(stderr,"ic_method_for_flavors %i undefined (1 and 99 only for ggrd mode)\n",E->trace.ic_method_for_flavors);
                 parallel_process_termination();
                 break;
             }
@@ -1207,6 +1225,7 @@ static void init_tracer_flavors(struct All_variables *E)
       break;
 
     case 1:			/* from grd in top n layers */
+    case 99:			/* (will override restart) */
 #ifndef USE_GGRD
       fprintf(stderr,"ic_method_for_flavors %i requires the ggrd routines from hc, -DUSE_GGRD\n",
 	      E->trace.ic_method_for_flavors);
