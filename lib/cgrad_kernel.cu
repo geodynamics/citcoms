@@ -28,8 +28,6 @@ __device__ static const int loc_mat_size[] = {0,4,8,24};
 /*------------------------------------------------------------------------*/
 /* from Regional_parallel_related.c */
 
-/* XXX: full_exchange_id_d() */
-
 __device__ void regional_exchange_id_d(
     struct All_variables *E,
     double **U,
@@ -80,6 +78,19 @@ __device__ void regional_exchange_id_d(
         }
     
     return;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* from Full_parallel_related.c */
+
+__device__ void full_exchange_id_d(
+    struct All_variables *E,
+    double **U,
+    int lev
+    )
+{
+    /* XXX */
 }
 
 
@@ -166,8 +177,8 @@ __device__ void e_assemble_del2_u(
         }          /* end for e */
     }         /* end for m  */
     
-    if (0) {
-        (E->solver.exchange_id_d)(E, Au, level);
+    if (0) { /* XXX */
+        full_exchange_id_d(E, Au, level);
     } else {
         regional_exchange_id_d(E, Au, level);
     }
@@ -233,8 +244,8 @@ __device__ void n_assemble_del2_u(
         }     /* end for e */
     }     /* end for m */
     
-    if (0) {
-        (E->solver.exchange_id_d)(E, Au, level);
+    if (0) { /* XXX */
+        full_exchange_id_d(E, Au, level);
     } else {
         regional_exchange_id_d(E, Au, level);
     }
