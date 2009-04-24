@@ -480,6 +480,9 @@ void read_initial_settings(struct All_variables *E)
   input_int("mat_control",&(E->control.mat_control),"0",m);
   input_string("mat_file",E->control.mat_file,"",m);
 
+
+  input_boolean("precise_strain_rate",&(E->control.precise_strain_rate),"off",m);
+
 #ifdef USE_GGRD
 
 

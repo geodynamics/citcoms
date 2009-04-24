@@ -486,6 +486,8 @@ struct CONTROL {
     int lith_age_old_cycles;
     float lith_age_depth;
 
+  int precise_strain_rate; /* use proper computation for strain-rates in whole domain, not just poles */
+
     int temperature_bound_adj;
     float depth_bound_adj;
     float width_bound_adj;

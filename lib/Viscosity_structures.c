@@ -929,7 +929,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     double theta;
     double ba[9][9][4][7];
     float VV[4][9], Vxyz[7][9], dilation[9];
-
+    
     int e, i, j, p, q, n;
 
     const int nel = E->lmesh.nel;
@@ -938,7 +938,6 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     const int lev = E->mesh.levmax;
     const int ppts = ppoints[dims];
     const int sphere_key = 1;
-
 
     for(e=1; e<=nel; e++) {
 
@@ -969,9 +968,13 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             dilation[j] = 0.0;
         }
 
-        if ((theta < 0.09) || (theta > 3.05)) {
+        if ((E->control.precise_strain_rate) || (theta < 0.09) || (theta > 3.05)) {
             /* When the element is close to the poles, use a more
-             * precise method to compute the strain rate. */
+             * precise method to compute the strain rate. 
+	     
+	     if precise_strain_rate=on, will always choose this option
+
+	    */
 
             if ((e-1)%E->lmesh.elz==0) {
                 construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
