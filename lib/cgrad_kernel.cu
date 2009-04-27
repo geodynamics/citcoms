@@ -13,8 +13,6 @@
 /* XXX */
 #undef assert
 #define assert(c)
-#define malloc(n) (0)
-#define free(p)
 #endif
 
 
@@ -31,7 +29,8 @@ __device__ static const int loc_mat_size[] = {0,4,8,24};
 __device__ void regional_exchange_id_d(
     struct All_variables *E,
     double **U,
-    int lev
+    int lev,
+    double *memory
     )
 {
 
@@ -39,31 +38,17 @@ __device__ void regional_exchange_id_d(
     double *S[27],*R[27];
     int dimofk;
     
-    double *memory, *memoryPtr;
-    int memoryDim;
-
 #if 0 /* XXX */
     MPI_Status status;
 #endif
     
-    memoryDim = 0;
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
-        for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
-            memoryDim += 2 * (1+E->parallel.NUM_NEQ[lev][m].pass[k]);
-        }
-    }
-    memory = (double *)malloc(memoryDim*sizeof(double));
-
-    memoryPtr = memory;
     for (m=1;m<=E->sphere.caps_per_proc;m++)    {
         for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
             dimofk = 1+E->parallel.NUM_NEQ[lev][m].pass[k];
-            S[k] = memoryPtr; memoryPtr += dimofk;
-            R[k] = memoryPtr; memoryPtr += dimofk;
+            S[k] = memory; memory += dimofk;
+            R[k] = memory; memory += dimofk;
         }
     }
-    assert(memoryPtr == memory + memoryDim);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
@@ -85,8 +70,6 @@ __device__ void regional_exchange_id_d(
         }           /* for k */
     }     /* for m */         /* finish sending */
     
-    free(memory);
-    
     return;
 }
 
@@ -97,7 +80,8 @@ __device__ void regional_exchange_id_d(
 __device__ void full_exchange_id_d(
     struct All_variables *E,
     double **U,
-    int lev
+    int lev,
+    double *memory
     )
 {
     /* XXX */
@@ -131,7 +115,8 @@ __device__ void e_assemble_del2_u(
     struct All_variables *E,
     double **u, double **Au,
     int level,
-    int strip_bcs
+    int strip_bcs,
+    double *memory
     )
 {
     int  e,i,a,b,a1,a2,a3,ii,m,nodeb;
@@ -188,9 +173,9 @@ __device__ void e_assemble_del2_u(
     }         /* end for m  */
     
     if (0) { /* XXX */
-        full_exchange_id_d(E, Au, level);
+        full_exchange_id_d(E, Au, level, memory);
     } else {
-        regional_exchange_id_d(E, Au, level);
+        regional_exchange_id_d(E, Au, level, memory);
     }
 
     if(strip_bcs)
@@ -203,7 +188,8 @@ __device__ void n_assemble_del2_u(
     struct All_variables *E,
     double **u, double **Au,
     int level,
-    int strip_bcs
+    int strip_bcs,
+    double *memory
     )
 {
     int m, e,i;
@@ -255,9 +241,9 @@ __device__ void n_assemble_del2_u(
     }     /* end for m */
     
     if (0) { /* XXX */
-        full_exchange_id_d(E, Au, level);
+        full_exchange_id_d(E, Au, level, memory);
     } else {
-        regional_exchange_id_d(E, Au, level);
+        regional_exchange_id_d(E, Au, level, memory);
     }
 
     if (strip_bcs)
@@ -270,13 +256,14 @@ __device__ void assemble_del2_u(
     struct All_variables *E,
     double **u, double **Au,
     int level,
-    int strip_bcs
+    int strip_bcs,
+    double *memory
     )
 {
     if(E->control.NMULTIGRID||E->control.NASSEMBLE)
-        n_assemble_del2_u(E,u,Au,level,strip_bcs);
+        n_assemble_del2_u(E,u,Au,level,strip_bcs, memory);
     else
-        e_assemble_del2_u(E,u,Au,level,strip_bcs);
+        e_assemble_del2_u(E,u,Au,level,strip_bcs, memory);
 
     return;
 }
@@ -327,7 +314,8 @@ __device__ double conj_grad(
     double **F,
     double acc,
     int *cycles,
-    int level
+    int level,
+    double *memory
     )
 {
     double *r0[NCS],*r1[NCS],*r2[NCS];
@@ -343,29 +331,18 @@ __device__ double conj_grad(
     const int mem_lev=E->mesh.levmax;
     const int high_neq = E->lmesh.NEQ[level];
     
-    double *memory, *memoryPtr;
-    int memoryDim;
-
     steps = *cycles;
     
-    memoryDim = E->sphere.caps_per_proc *
-                (5 * E->lmesh.NEQ[mem_lev]  + /* r0,r1,r2,z0,z1 */
-                 3 * (1+E->lmesh.NEQ[mem_lev]) /* p1,p2,Ap */
-                    );
-    memory = (double *)malloc(memoryDim*sizeof(double));
-    
-    memoryPtr = memory;
     for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-        r0[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
-        r1[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
-        r2[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
-        z0[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
-        z1[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
-        p1[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
-        p2[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
-        Ap[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
+        r0[m] = memory; memory += E->lmesh.NEQ[mem_lev];
+        r1[m] = memory; memory += E->lmesh.NEQ[mem_lev];
+        r2[m] = memory; memory += E->lmesh.NEQ[mem_lev];
+        z0[m] = memory; memory += E->lmesh.NEQ[mem_lev];
+        z1[m] = memory; memory += E->lmesh.NEQ[mem_lev];
+        p1[m] = memory; memory += (1+E->lmesh.NEQ[mem_lev]);
+        p2[m] = memory; memory += (1+E->lmesh.NEQ[mem_lev]);
+        Ap[m] = memory; memory += (1+E->lmesh.NEQ[mem_lev]);
     }
-    assert(memoryPtr == memory + memoryDim);
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=0;i<high_neq;i++) {
@@ -400,7 +377,7 @@ __device__ double conj_grad(
 
         dotr0z0 = dotr1z1;
 
-        assemble_del2_u(E,p2,Ap,level,1);
+        assemble_del2_u(E,p2,Ap,level,1,memory);
 
         dotprod=global_vdot(E,p2,Ap,level);
 
@@ -432,8 +409,6 @@ __device__ double conj_grad(
 
     strip_bcs_from_residual(E,d0,level);
     
-    free(memory);
-
     return(residual);
 }
 
@@ -444,6 +419,7 @@ __global__ void solve_del2_u(
     double **F,
     double acc,
     int high_lev,
+    double *memory,
     int *valid
     )
 {
@@ -467,7 +443,7 @@ __global__ void solve_del2_u(
     /* conjugate gradient solution */
 
     cycles = E->control.v_steps_low;
-    residual = conj_grad(E,d0,F,acc,&cycles,high_lev);
+    residual = conj_grad(E,d0,F,acc,&cycles,high_lev,memory);
     *valid = (residual < acc)? 1:0;
 
     count++;
@@ -485,8 +461,32 @@ __global__ void solve_del2_u(
 __host__ int main() {
 #ifndef __CUDACC__
     if (0) {
+        struct All_variables *E;
+        const int levmax = E->mesh.levmax;
+        int m,k;
+        
+        double *memory;
+        int memoryDim;
         int valid;
-        solve_del2_u(0,0,0,0,0,&valid);
+
+        memoryDim = 0;
+        /* conj_grad */
+        memoryDim += E->sphere.caps_per_proc *
+                     (5 * E->lmesh.NEQ[levmax]  + /* r0,r1,r2,z0,z1 */
+                      3 * (1+E->lmesh.NEQ[levmax]) /* p1,p2,Ap */
+                         );
+        /* regional_exchange_id_d */
+        for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+            for (k=1;k<=E->parallel.TNUM_PASS[levmax][m];k++)  {
+                memoryDim += 2 * (1+E->parallel.NUM_NEQ[levmax][m].pass[k]); /* S,R */
+            }
+        }
+        
+        memory = (double *)malloc(memoryDim*sizeof(double));
+        
+        solve_del2_u(0,0,0,0,0,memory,&valid);
+        
+        free(memory);
     }
 #endif
     return 0;
