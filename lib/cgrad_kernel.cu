@@ -37,19 +37,33 @@ __device__ void regional_exchange_id_d(
 
     int j,m,k;
     double *S[27],*R[27];
-    int sizeofk;
- 
+    int dimofk;
+    
+    double *memory, *memoryPtr;
+    int memoryDim;
+
 #if 0 /* XXX */
     MPI_Status status;
 #endif
+    
+    memoryDim = 0;
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)    {
         for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
-            sizeofk = (1+E->parallel.NUM_NEQ[lev][m].pass[k])*sizeof(double);
-            S[k]=(double *)malloc( sizeofk );
-            R[k]=(double *)malloc( sizeofk );
+            memoryDim += 2 * (1+E->parallel.NUM_NEQ[lev][m].pass[k]);
         }
     }
+    memory = (double *)malloc(memoryDim*sizeof(double));
+
+    memoryPtr = memory;
+    for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+        for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
+            dimofk = 1+E->parallel.NUM_NEQ[lev][m].pass[k];
+            S[k] = memoryPtr; memoryPtr += dimofk;
+            R[k] = memoryPtr; memoryPtr += dimofk;
+        }
+    }
+    assert(memoryPtr == memory + memoryDim);
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
@@ -70,12 +84,8 @@ __device__ void regional_exchange_id_d(
 
         }           /* for k */
     }     /* for m */         /* finish sending */
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-        for (k=1;k<=E->parallel.TNUM_PASS[lev][m];k++)  {
-            free((void*) S[k]);
-            free((void*) R[k]);
-        }
+    
+    free(memory);
     
     return;
 }
@@ -332,19 +342,30 @@ __device__ double conj_grad(
 
     const int mem_lev=E->mesh.levmax;
     const int high_neq = E->lmesh.NEQ[level];
+    
+    double *memory, *memoryPtr;
+    int memoryDim;
 
     steps = *cycles;
-
+    
+    memoryDim = E->sphere.caps_per_proc *
+                (5 * E->lmesh.NEQ[mem_lev]  + /* r0,r1,r2,z0,z1 */
+                 3 * (1+E->lmesh.NEQ[mem_lev]) /* p1,p2,Ap */
+                    );
+    memory = (double *)malloc(memoryDim*sizeof(double));
+    
+    memoryPtr = memory;
     for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-        r0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-        r1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-        r2[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-        z0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-        z1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-        p1[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-        p2[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-        Ap[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+        r0[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
+        r1[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
+        r2[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
+        z0[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
+        z1[m] = memoryPtr; memoryPtr += E->lmesh.NEQ[mem_lev];
+        p1[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
+        p2[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
+        Ap[m] = memoryPtr; memoryPtr += (1+E->lmesh.NEQ[mem_lev]);
     }
+    assert(memoryPtr == memory + memoryDim);
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=0;i<high_neq;i++) {
@@ -410,17 +431,8 @@ __device__ double conj_grad(
     *cycles=count;
 
     strip_bcs_from_residual(E,d0,level);
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-        free((double*) r0[m]);
-        free((double*) r1[m]);
-        free((double*) r2[m]);
-        free((double*) z0[m]);
-        free((double*) z1[m]);
-        free((double*) p1[m]);
-        free((double*) p2[m]);
-        free((double*) Ap[m]);
-    }
+    
+    free(memory);
 
     return(residual);
 }
