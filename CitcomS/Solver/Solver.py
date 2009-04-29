@@ -144,13 +144,8 @@ class Solver(Component):
 
     def _setup(self):
         mesher = self.inventory.mesher
-        mesher.setup()
-
         vsolver = self.inventory.vsolver
-        vsolver.setup()
-
         tsolver = self.inventory.tsolver
-        tsolver.setup()
 
         # create mesh
         mesher.run()

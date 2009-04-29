@@ -51,7 +51,8 @@ class Advection_diffusion(CitcomComponent):
 
 
 
-    def setup(self):
+    def initialize(self, all_variables):
+        CitcomComponent.initialize(self, all_variables)
         from CitcomSLib import set_convection_defaults
         set_convection_defaults(self.all_variables)
 	return

@@ -45,8 +45,8 @@ class Incompressible(CitcomComponent):
 	return
 
 
-
-    def setup(self):
+    def initialize(self, all_variables):
+        CitcomComponent.initialize(self, all_variables)
         from CitcomSLib import set_cg_defaults, set_mg_defaults, set_mg_el_defaults
         if self.inventory.Solver == "cgrad":
             set_cg_defaults(self.all_variables)
