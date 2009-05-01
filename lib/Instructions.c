@@ -752,6 +752,13 @@ void check_settings_consistency(struct All_variables *E)
         fprintf(stderr,"solve_Ahat_p_fhat: WARNING: overriding pressure and div check\n");
     }
 
+    /* remove angular momentum/rigid rotation should only be done in free
+       convection of global models. */
+    if(E->sphere.caps == 12 &&
+       (E->control.remove_angular_momentum || E->control.remove_rigid_rotation) &&
+       (E->mesh.topvbc || E->mesh.botvbc || E->control.side_sbcs)) {
+        fprintf(stderr,"\nWARNING: The input parameters impose boundary velocity, but also remove angular momentum/rigid rotation!\n\n");
+    }
     return;
 }
 
