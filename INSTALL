@@ -7,8 +7,8 @@ Installation of CitcomS requires the following:
 
   * An MPI library
 
-  * Python 2.3 or greater (Python 2.4 or greater is required on 64-bit
-    machines), including header files, if using Pyre.
+  * If using Pyre, Python 2.3 or greater (Python 2.4 or greater is required 
+    on 64-bit machines), including header files (Python.h).
 
 
 The simplest way to compile this package is:
