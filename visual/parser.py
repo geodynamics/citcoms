@@ -221,6 +221,8 @@ class Parser(object):
                 continue
             # remove anything after '#'
             line = string.split(line, '#')[0]
+            # remove anything after ';'
+            line = string.split(line, ';')[0]
 
             # key/value pairs can be seperated by whitespaces
             for opt in string.split(line):
