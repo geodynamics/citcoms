@@ -263,8 +263,10 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   }
 
   /* remove the rigid rotation component from the velocity solution */
-  if(E->sphere.caps == 12 && E->control.remove_rigid_rotation)
+  if((E->sphere.caps == 12) &&
+     (E->control.remove_rigid_rotation || E->control.remove_angular_momentum)) {
       remove_rigid_rot(E);
+  }
 
   get_STD_freesurf(E,E->slice.freesurf);
 
