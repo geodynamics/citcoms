@@ -170,7 +170,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
     double *rhor, *vpr, *vsr, *depthkm;
     double d, d2, dT, dC, drho, dvp, dvs;
 
-    /* compute horizontal average, if not done yet */
+    /* compute horizontal average */
     if(!E->output.horiz_avg)
         compute_horiz_avg(E);
 
@@ -183,7 +183,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
 
     for(nz=1; nz<=E->lmesh.noz; nz++) {
         get_prem(E->sx[m][3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
-        depthkm[nz] = (E->sphere.ro - E->sx[m][3][nz]) * E->data.radius_km;
+        depthkm[nz] = (1.0 - E->sx[m][3][nz]) * E->data.radius_km;
     }
 
     /* deviation from the reference */
@@ -278,7 +278,7 @@ void compute_seismic_model(struct All_variables *E,
         break;
 
     case 100:
-        /* user-defined initial temperature goes here */
+        /* user-defined mineral physics model goes here */
         fprintf(stderr,"Need user definition for mineral physics model: 'mineral_physics_model=%d'\n",
                 E->control.mineral_physics_model);
         parallel_process_termination();
