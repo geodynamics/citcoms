@@ -24,7 +24,7 @@ elif want_exchanger == 'yes':
 setup(
     
     name = 'CitcomS', 
-    version = '2.2',
+    version = '3.1',
 
     zip_safe = False,
     packages = find_packages(),
