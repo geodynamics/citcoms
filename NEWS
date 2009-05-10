@@ -1,18 +1,89 @@
-CitComS.py NEWS -- history of user-visible changes.  2006-12-04
+CitcomS NEWS -- history of user-visible changes.  2009-05-10
 
 Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
 
-Trunk:
+Version 3.1.0
 
-* Fixed a memory bug in visual/project_geoid.c, contributed by Thorsten
-  Becker.
+* Allowing tracers in global model with nproc > 2.
 
-* New capability to read in time- and geographic-dependent, top surface
+* Adding self-gravitational effect on geoid, contributed by Shijie Zhong.
+
+* Adding Consistent-Boundary-Flux method to compute dynamic topography,
+  contributed by Shijie Zhong.
+
+* Adding GMT/netcdf grd input for surface velocity boundary conditions,
+  initial temperature, material dependence and local Rayleigh number in
+  surface layers, contributed by Thorsten Becker.
+
+* Adding capability to read in time- and geographic-dependent, top surface
   temperature boundary conditions, contributed by Mike Gurnis.
+
+* Allowing multi-component chemical viscosity.
+
+* Optimizing the speed. Cookbook 8 becomes 13% faster than v3.0.3.
+
+* Moving input parameter "mantle_temp" from [CitcomS.solver.param] to
+  [CitcomS.solver.ic] section.
+
+* Fixed several bugs in the code and manual. Important bug fix includes:
+
+  - A memory bug in visual/project_geoid.c, fixed by Thorsten Becker.
+
+  - Initial temperature for regional model when setting "tic_method=0" or 
+    "tic_method=1" does not match the documented behavior.
+
+  - Compiling with both HDF5 and Exchanger support will crash Cookbook 9
+    (Issue 528).
+
+  - Insufficient error checking when reading input files (Issue 265, reported
+    by Clint Conrad).
+
+  - Installation bug: Python.h and system header not properly checked by
+    configure script (Isse 45, reported by Vlad Manea and Ricardo Arevalo).
+
+  - Manual fixes: description of rheol=4 (Isse 152, reported by James Robert),
+    energy equation (Issue 162 & 164, reported by Dan Bower), documented all
+    "tic_method" and "rheol" options.
+
+
+Version 3.0.3
+
+* Fixed issue 158: incorrect E->control.fi_max with coor=1. In regional
+  model, when coor=1 is used and nodex is not equal to nodey, the maximum
+  value of phi coordinate is set incorrectly. These parts of the code are
+  affected:
+  - the initial temperature of regional model with tic_method 0 or 2.
+  - the tracer module of regional model.
+  - the lith_age module of regional model.
+
+* Fixed a bug in geoid when nprocz>1. The geoid contribution due to topography
+  would contain artitrary result if more than one processor in z direction is
+  used.
+
+* Fixed a dead-lock problem in full-regional coupling model.
+
+* visual/project_geoid.c: Fixed a typo in memory allocation that led
+  to core dump. Changed the order of input arguments to match the manual.
+
+* Closed *.tracer_log.* files before the program exits.
+
+More details can be found in CIG Issue Tracker
+(http://geodynamics.org/roundup/issues/).
 
 
 Version 3.0.2
-?
+
+* Fixed a bug in HDF5 output which causes compilation error (Issue 131);
+
+* Fixed a bug in normalizing the tracer coordinate (Issue 139);
+
+* Fixed a behavior regression when using lith_age=1 and tic_method=-1;
+
+* Greatly reduced the number of tracers per elemente that is required for
+  thermo-chemical convection (Issue 140).
+
+More details can be found in CIG Issue Tracker
+(http://geodynamics.org/roundup/issues/).
 
 
 Version 3.0.1
