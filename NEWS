@@ -4,11 +4,20 @@ Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
 
 Version 3.1.0
 
-* Allowing tracers in global model with nproc > 2.
+* Converting temperature and composition to seismic velocities. The seismic 
+  velocities output can be uploaded to CIG seismic portal for SPECFEM3D 
+  simulation to generate synthetic seismograms.
+ 
+* Allowing tracers in global model with nproc > 2 by changing the mesh 
+  slightly.
+
+* The convergence of Stokes solver is controlled by parameter "accuracy" in 
+  [CitcomS.solver.vsolver]. "tole_compressibility" is not used anymore. Also, 
+  the norms of div(u), u, and p are no longer dependent on the grid size.
 
 * Adding self-gravitational effect on geoid, contributed by Shijie Zhong.
 
-* Adding Consistent-Boundary-Flux method to compute dynamic topography,
+* Adding Consistent-Boundary-Flux (CBF) method to compute dynamic topography,
   contributed by Shijie Zhong.
 
 * Adding GMT/netcdf grd input for surface velocity boundary conditions,
@@ -29,8 +38,11 @@ Version 3.1.0
 
   - A memory bug in visual/project_geoid.c, fixed by Thorsten Becker.
 
-  - Initial temperature for regional model when setting "tic_method=0" or 
-    "tic_method=1" does not match the documented behavior.
+  - Initial temperature "tic_method=0" for regional model applied sinusoidal 
+    perturbations to 0th processor only.
+   
+  - Initial temperature "tic_method=1" for regional model generated a top 
+    thermal boundary layer 25x older than specfied by "half_space_age".
 
   - Compiling with both HDF5 and Exchanger support will crash Cookbook 9
     (Issue 528).
