@@ -248,7 +248,8 @@ void project_sph_harm_to_mesh(sph_harm *coeff, field *geoid)
     float val;
     float *cosm, *sinm;
     mesh *grid = geoid->grid;
-    /* double modified_plgndr_a(int, int, double); */
+
+    const int min_sph_degree_to_proj = 2;
 
     allocate_field(geoid);
 
@@ -256,9 +257,15 @@ void project_sph_harm_to_mesh(sph_harm *coeff, field *geoid)
     sinm = (float *)malloc(grid->nphi * sizeof(float));
 
     /* projecting */
+    printf("Expanding spherical harmonics from degree %d to %d\n",
+           min_sph_degree_to_proj, coeff->ll[coeff->len - 1]);
+
     for(index=0; index < coeff->len; index++) {
         ll = coeff->ll[index];
         mm = coeff->mm[index];
+
+        /* skipping small ll */
+        if(ll < min_sph_degree_to_proj) continue;
 
         for(j=0; j<grid->nphi; j++) {
             cosm[j] = cos(mm * grid->phi[j]);
