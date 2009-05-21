@@ -34,6 +34,8 @@ Version 3.1.0
 * Moving input parameter "mantle_temp" from [CitcomS.solver.param] to
   [CitcomS.solver.ic] section.
 
+* visual/project_geoid starts from degree-2 spherical harmonics.
+
 * Fixed several bugs in the code and manual. Important bug fix includes:
 
   - A memory bug in visual/project_geoid.c, fixed by Thorsten Becker.
