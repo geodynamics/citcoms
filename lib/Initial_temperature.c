@@ -134,7 +134,7 @@ void tic_input(struct All_variables *E)
     input_float("half_space_age", &(E->convection.half_space_age), "40.0,1e-3,nomax", m);
     input_float("mantle_temp",&(E->control.mantle_temp),"1.0",m);
 
-
+    
     switch(E->convection.tic_method){
     case 2:			/* blob */
       if( ! input_float_vector("blob_center", 3, E->convection.blob_center, m)) {
@@ -152,6 +152,7 @@ void tic_input(struct All_variables *E)
       }
       input_float("blob_radius", &(E->convection.blob_radius), "0.063,0.0,1.0", m);
       input_float("blob_dT", &(E->convection.blob_dT), "0.18,nomin,nomax", m);
+      input_boolean("blob_bc_persist",&(E->convection.blob_bc_persist),"off",m);
       break;
     case 4:
       /*
@@ -538,13 +539,17 @@ static void add_spherical_anomaly(struct All_variables *E)
     int nox, noy, noz;
 
     double theta_center, fi_center, r_center,x_center[4],dx[4];
-    double radius, amp;
-
+    double radius, amp, r1,rout,rin;
+    const double e_4 = 1e-4;
     double distance;
 
     noy = E->lmesh.noy;
     nox = E->lmesh.nox;
     noz = E->lmesh.noz;
+
+    rout = E->sphere.ro;
+    rin = E->sphere.ri;
+
 
     theta_center = E->convection.blob_center[0];
     fi_center    = E->convection.blob_center[1];
@@ -569,8 +574,19 @@ static void add_spherical_anomaly(struct All_variables *E)
 		    dx[3] = E->x[m][3][node] - x_center[3];
                     distance = sqrt(dx[1]*dx[1] + dx[2]*dx[2] + dx[3]*dx[3]);
 
-                    if (distance < radius)
-                        E->T[m][node] += amp * exp(-1.0*distance/radius);
+                    if (distance < radius){
+		      E->T[m][node] += amp * exp(-1.0*distance/radius);
+
+		      if(E->convection.blob_bc_persist){
+			r1 = E->sx[m][3][node];
+			if((fabs(r1 - rout) < e_4) || (fabs(r1 - rin) < e_4)){
+			  /* at bottom or top of box, assign as TBC */
+			  E->sphere.cap[m].TB[1][node]=E->T[m][node];
+			  E->sphere.cap[m].TB[2][node]=E->T[m][node];
+			  E->sphere.cap[m].TB[3][node]=E->T[m][node];
+			}
+		      }
+		    }
                 }
     return;
 }

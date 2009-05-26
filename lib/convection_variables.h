@@ -42,6 +42,7 @@ struct CONVECTION { /* information controlling convection problems */
   float blob_center[3];
   float blob_radius;
   float blob_dT;
+  int blob_bc_persist;
 
     struct SOURCES {
 	    int number;
