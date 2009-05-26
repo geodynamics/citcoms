@@ -37,6 +37,7 @@
 void parallel_process_termination();
 void temperatures_conform_bcs(struct All_variables *);
 double modified_plgndr_a(int, int, double);
+void rtp2xyzd(double,double,double,double *);
 
 #include "initial_temperature.h"
 static void debug_tic(struct All_variables *);
@@ -136,7 +137,7 @@ void tic_input(struct All_variables *E)
 
     switch(E->convection.tic_method){
     case 2:			/* blob */
-      if( ! input_float_vector("blob_centqer", 3, E->convection.blob_center, m)) {
+      if( ! input_float_vector("blob_center", 3, E->convection.blob_center, m)) {
 	assert( E->sphere.caps == 12 || E->sphere.caps == 1 );
 	if(E->sphere.caps == 12) { /* Full version: just quit here */
 	  fprintf(stderr,"Missing input parameter: 'blob_center'.\n");
@@ -536,28 +537,26 @@ static void add_spherical_anomaly(struct All_variables *E)
     int i, j ,k , m, node;
     int nox, noy, noz;
 
-    double theta_center, fi_center, r_center;
+    double theta_center, fi_center, r_center,x_center[4],dx[4];
     double radius, amp;
 
-    double x_center, y_center, z_center;
-    double x, y, z, distance;
+    double distance;
 
     noy = E->lmesh.noy;
     nox = E->lmesh.nox;
     noz = E->lmesh.noz;
 
     theta_center = E->convection.blob_center[0];
-    fi_center = E->convection.blob_center[1];
-    r_center = E->convection.blob_center[2];
-    radius = E->convection.blob_radius;
-    amp = E->convection.blob_dT;
+    fi_center    = E->convection.blob_center[1];
+    r_center     = E->convection.blob_center[2];
+    radius       = E->convection.blob_radius;
+    amp          = E->convection.blob_dT;
     
-    fprintf(stderr,"center=(%e %e %e) radius=%e dT=%e\n",
-            theta_center, fi_center, r_center, radius, amp);
-
-    x_center = r_center * sin(fi_center) * cos(theta_center);
-    y_center = r_center * sin(fi_center) * sin(theta_center);
-    z_center = r_center * cos(fi_center);
+    if(E->parallel.me == 0)
+      fprintf(stderr,"center=(%e %e %e) radius=%e dT=%e\n",
+	      theta_center, fi_center, r_center, radius, amp);
+    
+    rtp2xyzd(r_center, theta_center, fi_center, (x_center+1));
 
     /* compute temperature field according to nodal coordinate */
     for(m=1; m<=E->sphere.caps_per_proc; m++)
@@ -565,14 +564,10 @@ static void add_spherical_anomaly(struct All_variables *E)
             for(j=1; j<=nox;j ++)
                 for(k=1; k<=noz; k++) {
                     node = k + (j-1)*noz + (i-1)*nox*noz;
-
-                    x = E->x[m][1][node];
-                    y = E->x[m][2][node];
-                    z = E->x[m][3][node];
-
-                    distance = sqrt((x-x_center)*(x-x_center) +
-                                    (y-y_center)*(y-y_center) +
-                                    (z-z_center)*(z-z_center));
+		    dx[1] = E->x[m][1][node] - x_center[1];
+		    dx[2] = E->x[m][2][node] - x_center[2];
+		    dx[3] = E->x[m][3][node] - x_center[3];
+                    distance = sqrt(dx[1]*dx[1] + dx[2]*dx[2] + dx[3]*dx[3]);
 
                     if (distance < radius)
                         E->T[m][node] += amp * exp(-1.0*distance/radius);

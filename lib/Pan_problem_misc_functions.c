@@ -53,6 +53,7 @@
 
 void calc_cbase_at_tp(float , float , float *);
 void rtp2xyz(float , float , float, float *);
+void rtp2xyzd(double , double , double, double *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
 void *safe_malloc (size_t );
 void myerror(struct All_variables *,char *);
@@ -311,6 +312,15 @@ double return1_test()
    sphere_to_cart
 
 */
+void rtp2xyzd(double r, double theta, double phi, double *xout)
+{
+  double rst;
+  rst = r * sin(theta);
+  xout[0] = rst * cos(phi);	/* x */
+  xout[1] = rst * sin(phi); 	/* y */
+  xout[2] = r * cos(theta);
+}
+/* float version */
 void rtp2xyz(float r, float theta, float phi, float *xout)
 {
   float rst;
