@@ -26,6 +26,20 @@ enum {
 };
 
 
+struct octoterm {
+    /* an octoterm is 8 (ENODES) * 3 terms */
+    int e;
+    int a;
+    int offset;
+};
+
+
+struct matrix_mult {
+    int n; /* number of octoterms: 1, 2, 4, or 8 */
+    struct octoterm *ot;
+};
+
+
 struct Some_variables {
     int num_zero_resid;
     int *zero_resid;
@@ -57,6 +71,8 @@ struct Some_variables {
     double *memory;
     int memoryDim;
     
+    struct matrix_mult *mm; /* dim is 'neq' */
+    
     /* outputs */
     
     struct /*MONITOR*/ {
@@ -86,6 +102,143 @@ __device__ void strip_bcs_from_residual(
 
 /*------------------------------------------------------------------------*/
 /* from Element_calculations.c */
+
+static int e_tally(
+    struct Some_variables *E
+    )
+{
+    int  e,i,a,a1,a2,a3,ii,nTotal;
+
+    const int nel=E->lmesh.NEL;
+    const int neq=E->lmesh.NEQ;
+    
+    nTotal = 0;
+    for(i=0;i<neq;i++) {
+        E->mm[i].n = 0;
+    }
+
+    for(e=1;e<=nel;e++)   {
+        
+        for(a=1;a<=ENODES;a++) {
+            
+            ii = E->IEN[e].node[a];
+            a1 = E->ID[ii].doff[1];
+            a2 = E->ID[ii].doff[2];
+            a3 = E->ID[ii].doff[3];
+            
+            ++E->mm[a1].n;
+            ++E->mm[a2].n;
+            ++E->mm[a3].n;
+            nTotal += 3;
+            
+        }             /* end for loop a */
+
+    }          /* end for e */
+    
+    /* return the total number of octoterms */
+    return nTotal;
+}
+
+static void e_map(
+    struct Some_variables *E,
+    struct octoterm *ot
+    )
+{
+    int  e,i,a,a1,a2,a3,o1,o2,o3,ii;
+
+    const int nel=E->lmesh.NEL;
+    const int neq=E->lmesh.NEQ;
+
+    for(i=0;i<neq;i++) {
+        E->mm[i].ot = ot;
+        ot += E->mm[i].n;
+        E->mm[i].n = 0;
+    }
+
+    for(e=1;e<=nel;e++)   {
+        
+        for(a=1;a<=ENODES;a++) {
+            
+            ii = E->IEN[e].node[a];
+            a1 = E->ID[ii].doff[1];
+            a2 = E->ID[ii].doff[2];
+            a3 = E->ID[ii].doff[3];
+            
+            o1 = E->mm[a1].n++;
+            o2 = E->mm[a2].n++;
+            o3 = E->mm[a3].n++;
+            
+            E->mm[a1].ot[o1].e = e;
+            E->mm[a1].ot[o1].a = a;
+            E->mm[a1].ot[o1].offset = 0;
+            
+            E->mm[a2].ot[o2].e = e;
+            E->mm[a2].ot[o2].a = a;
+            E->mm[a2].ot[o2].offset = LOC_MAT_SIZE;
+            
+            E->mm[a3].ot[o3].e = e;
+            E->mm[a3].ot[o3].a = a;
+            E->mm[a3].ot[o3].offset = LOC_MAT_SIZE + LOC_MAT_SIZE;
+            
+        }             /* end for loop a */
+
+    }          /* end for e */
+    
+    return;
+}
+
+__device__ void dp_e_assemble_del2_u(
+    struct Some_variables *E,
+    double *u, double *Au,
+    int strip_bcs
+    )
+{
+    int  e,i,a,b,o,ii,nodeb,offset;
+    double sum;
+
+    const int neq=E->lmesh.NEQ;
+    
+    for (i = 0; i < neq; i++) {
+        
+        sum = 0.0;
+        
+        /* ENODES*ENODES = 8*8 = 64 threads per block */
+        /* XXX: 8*(8-n) wasted threads */
+        
+        for (o = 0; o < E->mm[i].n; o++) {
+            
+            e      = E->mm[i].ot[o].e;
+            a      = E->mm[i].ot[o].a;
+            offset = E->mm[i].ot[o].offset;
+            
+            for (b = 1; b <= ENODES; b++) {
+                
+                /* each thread computes three terms */
+
+                nodeb = E->IEN[e].node[b];
+                ii = (a*LOC_MAT_SIZE+b)*NSD-(NSD*LOC_MAT_SIZE+NSD);
+                
+                /* XXX: must reduce here */
+                sum +=
+                    E->elt_k[e].k[ii+offset] *
+                    u[E->ID[nodeb].doff[1]]
+                    + E->elt_k[e].k[ii+offset+1] *
+                    u[E->ID[nodeb].doff[2]]
+                    + E->elt_k[e].k[ii+offset+2] *
+                    u[E->ID[nodeb].doff[3]];
+                
+            }
+        }
+        
+        /* each block writes one element, Au[i] */
+        Au[i] = sum;
+    }
+
+    if (strip_bcs)
+        strip_bcs_from_residual(E,Au);
+
+    return;
+}
 
 __device__ void e_assemble_del2_u(
     struct Some_variables *E,
@@ -214,6 +367,8 @@ __device__ void assemble_del2_u(
 {
     if (E->control.NASSEMBLE)
         n_assemble_del2_u(E,u,Au,strip_bcs);
+    else if (1)
+        dp_e_assemble_del2_u(E,u,Au,strip_bcs);
     else
         e_assemble_del2_u(E,u,Au,strip_bcs);
 
@@ -403,6 +558,8 @@ __host__ int launch_solve_del2_u(
     )
 {
     struct Some_variables kE;
+    struct octoterm *ot;
+    int n_octoterms;
     
     assert_assumptions(E, high_lev);
     
@@ -438,6 +595,11 @@ __host__ int launch_solve_del2_u(
                  ;
     kE.memory = (double *)malloc(kE.memoryDim*sizeof(double));
     
+    kE.mm = (struct matrix_mult *)malloc(kE.lmesh.NEQ * sizeof(struct matrix_mult));
+    n_octoterms = e_tally(&kE);
+    ot = (struct octoterm *)malloc(n_octoterms * sizeof(struct octoterm));
+    e_map(&kE, ot);
+    
     /* zero outputs */
     kE.monitor.momentum_residual = 0.0;
     kE.valid = 0;
@@ -451,6 +613,8 @@ __host__ int launch_solve_del2_u(
     E->monitor.momentum_residual = kE.monitor.momentum_residual;
     
     free(kE.memory);
+    free(kE.mm);
+    free(ot);
     
     return kE.valid;
 }
