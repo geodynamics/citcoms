@@ -37,6 +37,7 @@ struct octoterm {
 struct matrix_mult {
     int n; /* number of octoterms: 1, 2, 4, or 8 */
     struct octoterm *ot;
+    int zero_res; /* boolean */
 };
 
 
@@ -115,6 +116,7 @@ static int e_tally(
     nTotal = 0;
     for(i=0;i<neq;i++) {
         E->mm[i].n = 0;
+        E->mm[i].zero_res = 0;
     }
 
     for(e=1;e<=nel;e++)   {
@@ -135,6 +137,10 @@ static int e_tally(
 
     }          /* end for e */
     
+    /* strip_bcs_from_residual */
+    for(i=1;i<=E->num_zero_resid;i++)
+        E->mm[E->zero_resid[i]].zero_res = 1;
+
     /* return the total number of octoterms */
     return nTotal;
 }
@@ -200,42 +206,49 @@ __device__ void dp_e_assemble_del2_u(
     
     for (i = 0; i < neq; i++) {
         
-        sum = 0.0;
-        
         /* ENODES*ENODES = 8*8 = 64 threads per block */
         /* XXX: 8*(8-n) wasted threads */
         
-        for (o = 0; o < E->mm[i].n; o++) {
+        sum = 0.0;
+        
+        if (strip_bcs && E->mm[i].zero_res) {
             
-            e      = E->mm[i].ot[o].e;
-            a      = E->mm[i].ot[o].a;
-            offset = E->mm[i].ot[o].offset;
+            /* no-op: Au[i] is zero */
+        
+        } else {
             
-            for (b = 1; b <= ENODES; b++) {
+            for (o = 0; o < E->mm[i].n; o++) {
                 
-                /* each thread computes three terms */
-
-                nodeb = E->IEN[e].node[b];
-                ii = (a*LOC_MAT_SIZE+b)*NSD-(NSD*LOC_MAT_SIZE+NSD);
+                e      = E->mm[i].ot[o].e;
+                a      = E->mm[i].ot[o].a;
+                offset = E->mm[i].ot[o].offset;
                 
-                /* XXX: must reduce here */
-                sum +=
-                    E->elt_k[e].k[ii+offset] *
-                    u[E->ID[nodeb].doff[1]]
-                    + E->elt_k[e].k[ii+offset+1] *
-                    u[E->ID[nodeb].doff[2]]
-                    + E->elt_k[e].k[ii+offset+2] *
-                    u[E->ID[nodeb].doff[3]];
+                for (b = 1; b <= ENODES; b++) {
+                    
+                    /* each thread computes three terms */
+                    
+                    nodeb = E->IEN[e].node[b];
+                    ii = (a*LOC_MAT_SIZE+b)*NSD-(NSD*LOC_MAT_SIZE+NSD);
+                    
+                    /* XXX: must reduce here */
+                    sum +=
+                        E->elt_k[e].k[ii+offset] *
+                        u[E->ID[nodeb].doff[1]]
+                        + E->elt_k[e].k[ii+offset+1] *
+                        u[E->ID[nodeb].doff[2]]
+                        + E->elt_k[e].k[ii+offset+2] *
+                        u[E->ID[nodeb].doff[3]];
+                    
+                }
                 
             }
+            
         }
         
         /* each block writes one element, Au[i] */
         Au[i] = sum;
-    }
 
-    if (strip_bcs)
-        strip_bcs_from_residual(E,Au);
+    }
 
     return;
 }
