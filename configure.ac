@@ -53,6 +53,12 @@ AC_ARG_WITH([exchanger],
         [use Exchanger @<:@default=auto@:>@])],
     [want_exchanger="$withval"],
     [want_exchanger=auto])
+AC_ARG_WITH([cuda],
+    [AC_HELP_STRING([--with-cuda],
+        [use CUDA @<:@default=no@:>@])],
+    [want_cuda="$withval"],
+    [want_cuda=no])
+AM_CONDITIONAL([COND_CUDA], [test "$want_cuda" = yes])
 
 # Checks for programs.
 AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])

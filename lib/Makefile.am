@@ -47,6 +47,17 @@ if COND_HDF5
     AM_CPPFLAGS += -DUSE_HDF5
 endif
 
+CUDA_SOURCES =
+
+if COND_CUDA
+AM_CPPFLAGS += -DUSE_CUDA
+
+.cu.o:
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libCitcomS_a_CFLAGS) $(CFLAGS) -c -o $@ $<
+
+CUDA_SOURCES += cgrad_kernel.cu
+endif
+
 # static library
 libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
 libCitcomS_a_SOURCES = $(sources)
@@ -136,7 +147,8 @@ sources = \
 	Regional_solver.c \
 	Regional_sphere_related.c \
 	Regional_tracer_advection.c \
-	Regional_version_dependent.c
+	Regional_version_dependent.c \
+	$(CUDA_SOURCES)
 
 EXTRA_DIST = \
 	Obsolete.c \

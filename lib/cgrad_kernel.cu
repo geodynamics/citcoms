@@ -5,16 +5,6 @@
 #include "global_defs.h"
 
 
-#ifdef __CUDACC__
-#undef assert
-#define assert(c)
-#else
-#define __device__ static inline
-#define __global__ static
-#define __host__
-#endif
-
-
 enum {
     LEVEL = 0,
     CAPS_PER_PROC = 1,
@@ -36,7 +26,7 @@ struct octoterm {
 
 struct matrix_mult {
     int n; /* number of octoterms: 1, 2, 4, or 8 */
-    struct octoterm *ot;
+    int ot_i; /* index of octoterm struct in 'ot' array */
     int zero_res; /* boolean */
 };
 
@@ -73,6 +63,8 @@ struct Some_variables {
     int memoryDim;
     
     struct matrix_mult *mm; /* dim is 'neq' */
+    int n_octoterms;
+    struct octoterm *ot;
     
     /* outputs */
     
@@ -87,7 +79,7 @@ struct Some_variables {
 /*------------------------------------------------------------------------*/
 /* from BC_util.c */
 
-__device__ void strip_bcs_from_residual(
+void strip_bcs_from_residual(
     struct Some_variables *E,
     double *Res
     )
@@ -102,7 +94,6 @@ __device__ void strip_bcs_from_residual(
 
 
 /*------------------------------------------------------------------------*/
-/* from Element_calculations.c */
 
 static int e_tally(
     struct Some_variables *E
@@ -146,17 +137,18 @@ static int e_tally(
 }
 
 static void e_map(
-    struct Some_variables *E,
-    struct octoterm *ot
+    struct Some_variables *E
     )
 {
     int  e,i,a,a1,a2,a3,o1,o2,o3,ii;
+    struct octoterm *ot;
 
     const int nel=E->lmesh.NEL;
     const int neq=E->lmesh.NEQ;
-
+    
+    ot = E->ot;
     for(i=0;i<neq;i++) {
-        E->mm[i].ot = ot;
+        E->mm[i].ot_i = ot - E->ot;
         ot += E->mm[i].n;
         E->mm[i].n = 0;
     }
@@ -174,17 +166,20 @@ static void e_map(
             o2 = E->mm[a2].n++;
             o3 = E->mm[a3].n++;
             
-            E->mm[a1].ot[o1].e = e;
-            E->mm[a1].ot[o1].a = a;
-            E->mm[a1].ot[o1].offset = 0;
+            ot = E->ot + E->mm[a1].ot_i + o1;
+            ot->e = e;
+            ot->a = a;
+            ot->offset = 0;
             
-            E->mm[a2].ot[o2].e = e;
-            E->mm[a2].ot[o2].a = a;
-            E->mm[a2].ot[o2].offset = LOC_MAT_SIZE;
+            ot = E->ot + E->mm[a2].ot_i + o2;
+            ot->e = e;
+            ot->a = a;
+            ot->offset = LOC_MAT_SIZE;
             
-            E->mm[a3].ot[o3].e = e;
-            E->mm[a3].ot[o3].a = a;
-            E->mm[a3].ot[o3].offset = LOC_MAT_SIZE + LOC_MAT_SIZE;
+            ot = E->ot + E->mm[a3].ot_i + o3;
+            ot->e = e;
+            ot->a = a;
+            ot->offset = LOC_MAT_SIZE + LOC_MAT_SIZE;
             
         }             /* end for loop a */
 
@@ -193,45 +188,63 @@ static void e_map(
     return;
 }
 
-__device__ void dp_e_assemble_del2_u(
+/* based on the function from Element_calculations.c */
+
+__global__ void e_assemble_del2_u(
     struct Some_variables *E,
     double *u, double *Au,
     int strip_bcs
     )
 {
     int  e,i,a,b,o,ii,nodeb,offset;
-    double sum;
-
-    const int neq=E->lmesh.NEQ;
+    struct octoterm *ot;
     
-    for (i = 0; i < neq; i++) {
+    /* ENODES*ENODES = 8*8 = 64 threads (2 warps) per block */
+    __shared__ double sum[ENODES*ENODES];
+    unsigned int tid = ENODES*threadIdx.y + threadIdx.x; /* 0 <= tid < 64 */
+    
+    do {
+        i = blockIdx.x; /* 0 <= i < E->lmesh.NEQ */
         
-        /* ENODES*ENODES = 8*8 = 64 threads per block */
-        /* XXX: 8*(8-n) wasted threads */
-        
-        sum = 0.0;
+        /***
+         * This is block 'i'.
+         */
         
         if (strip_bcs && E->mm[i].zero_res) {
             
             /* no-op: Au[i] is zero */
-        
+            sum[tid] = 0.0; /* but only sum[0] is used */
+            
+            /* XXX: How many blocks are wasted here? */
+            
         } else {
             
-            for (o = 0; o < E->mm[i].n; o++) {
+            o = threadIdx.x; /* 0 <= o < ENODES */
+            
+            if (o < E->mm[i].n) {
                 
-                e      = E->mm[i].ot[o].e;
-                a      = E->mm[i].ot[o].a;
-                offset = E->mm[i].ot[o].offset;
+                /****
+                 * This is thread group 'o' in block 'i'.
+                 * Each group of 8 threads handles one 'octoterm'.
+                 */
                 
-                for (b = 1; b <= ENODES; b++) {
+                ot = E->ot + E->mm[i].ot_i + o;
+                e      = ot->e;
+                a      = ot->a;
+                offset = ot->offset;
+                
+                do {
+                    b = threadIdx.y + 1; /* 1 <= b <= ENODES */
                     
-                    /* each thread computes three terms */
+                    /****
+                     * This is thread '(o, b)' in block 'i'.
+                     * Each thread computes three terms.
+                     */
                     
                     nodeb = E->IEN[e].node[b];
                     ii = (a*LOC_MAT_SIZE+b)*NSD-(NSD*LOC_MAT_SIZE+NSD);
                     
-                    /* XXX: must reduce here */
-                    sum +=
+                    sum[tid] =
                         E->elt_k[e].k[ii+offset] *
                         u[E->ID[nodeb].doff[1]]
                         + E->elt_k[e].k[ii+offset+1] *
@@ -239,151 +252,37 @@ __device__ void dp_e_assemble_del2_u(
                         + E->elt_k[e].k[ii+offset+2] *
                         u[E->ID[nodeb].doff[3]];
                     
-                }
+                } while (0);
                 
+            } else {
+                /* XXX: 8-n wasted threads per block go through here */
+                sum[tid] = 0.0;
             }
             
+            __syncthreads();
+            
+            /* Reduce the partial sums for this block.
+               Based on reduce2() in the CUDA SDK. */
+            for (unsigned int s = ENODES*ENODES / 2; s > 0; s >>= 1) 
+            {
+                if (tid < s) {
+                    sum[tid] += sum[tid + s];
+                }
+                /* XXX: This is unnecessary, since only a single
+                   "warp" is involved. */
+                __syncthreads();
+            }
         }
         
-        /* each block writes one element, Au[i] */
-        Au[i] = sum;
+        /* XXX: ??? */
+        __syncthreads();
 
-    }
-
-    return;
-}
-
-__device__ void e_assemble_del2_u(
-    struct Some_variables *E,
-    double *u, double *Au,
-    int strip_bcs
-    )
-{
-    int  e,i,a,b,a1,a2,a3,ii,nodeb;
-
-    const int nel=E->lmesh.NEL;
-    const int neq=E->lmesh.NEQ;
-
-    for(i=0;i<neq;i++)
-        Au[i] = 0.0;
-
-    for(e=1;e<=nel;e++)   {
-        for(a=1;a<=ENODES;a++) {
-            ii = E->IEN[e].node[a];
-            a1 = E->ID[ii].doff[1];
-            a2 = E->ID[ii].doff[2];
-            a3 = E->ID[ii].doff[3];
-            for(b=1;b<=ENODES;b++) {
-                nodeb = E->IEN[e].node[b];
-                ii = (a*LOC_MAT_SIZE+b)*NSD-(NSD*LOC_MAT_SIZE+NSD);
-                /* i=1, j=1,2 */
-                /* i=1, j=1,2,3 */
-                Au[a1] +=
-                    E->elt_k[e].k[ii] *
-                    u[E->ID[nodeb].doff[1]]
-                    + E->elt_k[e].k[ii+1] *
-                    u[E->ID[nodeb].doff[2]]
-                    + E->elt_k[e].k[ii+2] *
-                    u[E->ID[nodeb].doff[3]];
-                /* i=2, j=1,2,3 */
-                Au[a2] +=
-                    E->elt_k[e].k[ii+LOC_MAT_SIZE] *
-                    u[E->ID[nodeb].doff[1]]
-                    + E->elt_k[e].k[ii+LOC_MAT_SIZE+1] *
-                    u[E->ID[nodeb].doff[2]]
-                    + E->elt_k[e].k[ii+LOC_MAT_SIZE+2] *
-                    u[E->ID[nodeb].doff[3]];
-                /* i=3, j=1,2,3 */
-                Au[a3] +=
-                    E->elt_k[e].k[ii+LOC_MAT_SIZE+LOC_MAT_SIZE] *
-                    u[E->ID[nodeb].doff[1]]
-                    + E->elt_k[e].k[ii+LOC_MAT_SIZE+LOC_MAT_SIZE+1] *
-                    u[E->ID[nodeb].doff[2]]
-                    + E->elt_k[e].k[ii+LOC_MAT_SIZE+LOC_MAT_SIZE+2] *
-                    u[E->ID[nodeb].doff[3]];
-
-            }         /* end for loop b */
-        }             /* end for loop a */
-
-    }          /* end for e */
-    
-    if(strip_bcs)
-        strip_bcs_from_residual(E,Au);
-
-    return;
-}
-
-__device__ void n_assemble_del2_u(
-    struct Some_variables *E,
-    double *u, double *Au,
-    int strip_bcs
-    )
-{
-    int e,i;
-    int eqn1,eqn2,eqn3;
-
-    double UU,U1,U2,U3;
-
-    int *C;
-    higher_precision *B1,*B2,*B3;
-
-    const int neq=E->lmesh.NEQ;
-    const int nno=E->lmesh.NNO;
-    
-    /*
-     * Au = E->Eqn_k? * u
-     *  where E->Eqn_k? is the sparse stiffness matrix
-     */
-
-    for(e=0;e<=neq;e++)
-        Au[e]=0.0;
-
-    u[neq] = 0.0;
-
-    for(e=1;e<=nno;e++)     {
-
-        eqn1=E->ID[e].doff[1];
-        eqn2=E->ID[e].doff[2];
-        eqn3=E->ID[e].doff[3];
-
-        U1 = u[eqn1];
-        U2 = u[eqn2];
-        U3 = u[eqn3];
-
-        C=E->Node_map + (e-1)*MAX_EQN;
-        B1=E->Eqn_k1+(e-1)*MAX_EQN;
-        B2=E->Eqn_k2+(e-1)*MAX_EQN;
-        B3=E->Eqn_k3+(e-1)*MAX_EQN;
-
-        for(i=3;i<MAX_EQN;i++)  {
-            UU = u[C[i]];
-            Au[eqn1] += B1[i]*UU;
-            Au[eqn2] += B2[i]*UU;
-            Au[eqn3] += B3[i]*UU;
+        /* each block writes one element, Au[i], in global memory */
+        if (tid == 0) {
+            Au[i] = sum[0];
         }
-        for(i=0;i<MAX_EQN;i++)
-            Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
-    }     /* end for e */
-    
-    if (strip_bcs)
-        strip_bcs_from_residual(E,Au);
-
-    return;
-}
-
-__device__ void assemble_del2_u(
-    struct Some_variables *E,
-    double *u, double *Au,
-    int strip_bcs
-    )
-{
-    if (E->control.NASSEMBLE)
-        n_assemble_del2_u(E,u,Au,strip_bcs);
-    else if (1)
-        dp_e_assemble_del2_u(E,u,Au,strip_bcs);
-    else
-        e_assemble_del2_u(E,u,Au,strip_bcs);
+    } while (0);
 
     return;
 }
@@ -392,7 +291,7 @@ __device__ void assemble_del2_u(
 /*------------------------------------------------------------------------*/
 /* from Global_operations.c */
 
-__device__ double global_vdot(
+double global_vdot(
     struct Some_variables *E,
     double *A, double *B
     )
@@ -411,9 +310,64 @@ __device__ double global_vdot(
 
 
 /*------------------------------------------------------------------------*/
+
+static void construct_E(
+    struct Some_variables **d_E,
+    struct Some_variables *s_E, /* host's shadow copy of d_E */
+    struct Some_variables *E
+    )
+{
+    /* construct a copy of 'E' in device memory */
+    
+    int neq = E->lmesh.NEQ;
+    int nno = E->lmesh.NNO;
+    int nel = E->lmesh.NEL;
+    
+    memset(s_E, 0, sizeof(struct Some_variables));
+    
+    /* mm, ot */
+    cudaMalloc((void**)&s_E->mm, neq * sizeof(struct matrix_mult));
+    cudaMalloc((void**)&s_E->ot, E->n_octoterms * sizeof(struct octoterm));
+    cudaMemcpy(s_E->mm, E->mm, neq * sizeof(struct matrix_mult), cudaMemcpyHostToDevice);
+    cudaMemcpy(s_E->ot, E->ot, E->n_octoterms * sizeof(struct octoterm), cudaMemcpyHostToDevice);
+    
+    /* IEN -- cf. allocate_common_vars() */
+    cudaMalloc((void**)&s_E->IEN, (nel+2)*sizeof(struct IEN));
+    cudaMemcpy(s_E->IEN, E->IEN, (nel+2)*sizeof(struct IEN), cudaMemcpyHostToDevice);
+    
+    /* ID -- cf. allocate_common_vars()*/
+    cudaMalloc((void **)&s_E->ID, (nno+1)*sizeof(struct ID));
+    cudaMemcpy(s_E->ID, E->ID, (nno+1)*sizeof(struct ID), cudaMemcpyHostToDevice);
+    
+    /* elt_k -- cf. general_stokes_solver_setup() */
+    cudaMalloc((void **)&s_E->elt_k, (nel+1)*sizeof(struct EK));
+    cudaMemcpy(s_E->elt_k, E->elt_k, (nel+1)*sizeof(struct EK), cudaMemcpyHostToDevice);
+    
+    /* E */
+    cudaMalloc((void**)d_E, sizeof(Some_variables));
+    cudaMemcpy(*d_E, s_E, sizeof(Some_variables), cudaMemcpyHostToDevice);
+    
+    return;
+}
+
+static void destroy_E(
+    struct Some_variables *d_E,
+    struct Some_variables *s_E
+    )
+{
+    cudaFree(s_E->mm);
+    cudaFree(s_E->ot);
+    cudaFree(s_E->IEN);
+    cudaFree(s_E->ID);
+    cudaFree(s_E->elt_k);
+    cudaFree(d_E);
+}
+
+
+/*------------------------------------------------------------------------*/
 /* from General_matix_functions.c */
 
-__device__ double conj_grad(
+double conj_grad(
     struct Some_variables *E,
     double *d0,
     double *F,
@@ -456,7 +410,19 @@ __device__ double conj_grad(
 
     assert(residual != 0.0  /* initial residual for CG = 0.0 */);
     count = 0;
-
+    
+    /* pointers to device memory */
+    struct Some_variables *d_E = 0;
+    double *d_p2 = 0, *d_Ap = 0;
+    
+    /* construct 'E' on the device */
+    struct Some_variables s_E;
+    construct_E(&d_E, &s_E, E);
+    
+    /* allocate memory on the device */
+    cudaMalloc((void**)&d_p2, (1+neq)*sizeof(double));
+    cudaMalloc((void**)&d_Ap, (1+neq)*sizeof(double));
+    
     while (((residual > acc) && (count < steps)) || count == 0)  {
 
         for(i=0;i<neq;i++)
@@ -475,9 +441,26 @@ __device__ double conj_grad(
         }
 
         dotr0z0 = dotr1z1;
-
-        assemble_del2_u(E,p2,Ap,1);
-
+        
+        /********************************************/
+        /* launch e_assemble_del2_u() on the device */
+        
+        /* copy input to the device */
+        cudaMemcpy(d_p2, p2, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+        
+        /* launch */
+        dim3 dimBlock(ENODES, ENODES, 1);
+        dim3 dimGrid(neq, 1, 1);
+        e_assemble_del2_u<<< dimGrid, dimBlock >>>(d_E, d_p2, d_Ap, 1);
+        
+        /* wait for completion */
+        cudaThreadSynchronize();
+        
+        /* copy output from device */
+        cudaMemcpy(Ap, d_Ap, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+        
+        /********************************************/
+        
         dotprod=global_vdot(E,p2,Ap);
 
         if(0.0==dotprod)
@@ -500,6 +483,12 @@ __device__ double conj_grad(
         /* end of while-loop */
 
     }
+    
+    /* free device memory */
+    cudaFree(d_p2);
+    cudaFree(d_Ap);
+    
+    destroy_E(d_E, &s_E);
 
     *cycles=count;
 
@@ -509,7 +498,7 @@ __device__ double conj_grad(
 }
 
 
-__global__ void solve_del2_u(
+void do_solve_del2_u(
     struct Some_variables *E,
     double *d0,
     double *F,
@@ -550,6 +539,7 @@ __global__ void solve_del2_u(
 static void assert_assumptions(struct All_variables *E, int high_lev) {
     
     assert(!E->control.NMULTIGRID);
+    assert(!E->control.NASSEMBLE);
     
     assert(E->sphere.caps_per_proc == CAPS_PER_PROC);
     
@@ -562,7 +552,7 @@ static void assert_assumptions(struct All_variables *E, int high_lev) {
     assert(E->parallel.Skip_neq[LEVEL][M] == 0);
 }
 
-__host__ int launch_solve_del2_u(
+extern "C" int solve_del2_u(
     struct All_variables *E,
     double **d0,
     double **F,
@@ -571,8 +561,6 @@ __host__ int launch_solve_del2_u(
     )
 {
     struct Some_variables kE;
-    struct octoterm *ot;
-    int n_octoterms;
     
     assert_assumptions(E, high_lev);
     
@@ -609,16 +597,16 @@ __host__ int launch_solve_del2_u(
     kE.memory = (double *)malloc(kE.memoryDim*sizeof(double));
     
     kE.mm = (struct matrix_mult *)malloc(kE.lmesh.NEQ * sizeof(struct matrix_mult));
-    n_octoterms = e_tally(&kE);
-    ot = (struct octoterm *)malloc(n_octoterms * sizeof(struct octoterm));
-    e_map(&kE, ot);
+    kE.n_octoterms = e_tally(&kE);
+    kE.ot = (struct octoterm *)malloc(kE.n_octoterms * sizeof(struct octoterm));
+    e_map(&kE);
     
     /* zero outputs */
     kE.monitor.momentum_residual = 0.0;
     kE.valid = 0;
     
     /* solve */
-    solve_del2_u(&kE, d0[M], F[M], acc);
+    do_solve_del2_u(&kE, d0[M], F[M], acc);
     
     /* get outputs */
     E->control.total_iteration_cycles = kE.control.total_iteration_cycles;
@@ -627,7 +615,7 @@ __host__ int launch_solve_del2_u(
     
     free(kE.memory);
     free(kE.mm);
-    free(ot);
+    free(kE.ot);
     
     return kE.valid;
 }
