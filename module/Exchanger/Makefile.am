@@ -83,6 +83,8 @@ sources = \
 	Interior.h \
 	misc.cc \
 	misc.h \
+	PInterior.cc \
+	PInterior.h \
 	SInlet.cc \
 	SInlet.h \
 	SIUnit.cc \

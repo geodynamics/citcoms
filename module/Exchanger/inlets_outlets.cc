@@ -29,6 +29,7 @@
 #include "config.h"
 #include <Python.h>
 #include "mpi.h"
+#include "mpi/pympi.h"
 #include "inlets_outlets.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,6 +69,43 @@ void deleteSVTInlet(void* p)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+#include "BoundarySVTInlet.h"
+
+extern "C" void deleteBoundarySVTInlet(void*);
+
+
+char PyCitcomSExchanger_BoundarySVTInlet_create__doc__[] = "";
+char PyCitcomSExchanger_BoundarySVTInlet_create__name__[] = "BoundarySVTInlet_create";
+
+PyObject * PyCitcomSExchanger_BoundarySVTInlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3, *obj4;
+
+    if (!PyArg_ParseTuple(args, "OOOO:BoundarySVTInlet_create",
+                          &obj1, &obj2, &obj3, &obj4))
+        return NULL;
+
+    Boundary* b = static_cast<Boundary*>(PyCObject_AsVoidPtr(obj1));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+    PyMPICommObject* comm = (PyMPICommObject *)obj4;
+    MPI_Comm& cm = comm->comm;
+
+    BoundarySVTInlet* inlet = new BoundarySVTInlet(*b, *sink, E, cm);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deleteBoundarySVTInlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deleteBoundarySVTInlet(void* p)
+{
+    delete static_cast<BoundarySVTInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 #include "TInlet.h"
 
 extern "C" void deleteTInlet(void*);
@@ -98,6 +136,41 @@ PyObject * PyCitcomSExchanger_TInlet_create(PyObject *self, PyObject *args)
 void deleteTInlet(void* p)
 {
     delete static_cast<TInlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "PInlet.h"
+
+extern "C" void deletePInlet(void*);
+
+
+char PyCitcomSExchanger_PInlet_create__doc__[] = "";
+char PyCitcomSExchanger_PInlet_create__name__[] = "PInlet_create";
+
+PyObject * PyCitcomSExchanger_PInlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj1, *obj2, *obj3;
+
+    if (!PyArg_ParseTuple(args, "OOO:PInlet_create",
+                          &obj1, &obj2, &obj3))
+        return NULL;
+
+    Exchanger::BoundedMesh* b = static_cast<Exchanger::BoundedMesh*>(PyCObject_AsVoidPtr(obj1));
+    Exchanger::Sink* sink = static_cast<Exchanger::Sink*>(PyCObject_AsVoidPtr(obj2));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj3));
+
+    PInlet* inlet = new PInlet(*b, *sink, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(inlet, deletePInlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deletePInlet(void* p)
+{
+    delete static_cast<PInlet*>(p);
 }
 
 
@@ -236,6 +309,40 @@ PyObject * PyCitcomSExchanger_TOutlet_create(PyObject *self, PyObject *args)
 void deleteTOutlet(void* p)
 {
     delete static_cast<TOutlet*>(p);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "POutlet.h"
+
+extern "C" void deletePOutlet(void*);
+
+
+char PyCitcomSExchanger_POutlet_create__doc__[] = "";
+char PyCitcomSExchanger_POutlet_create__name__[] = "POutlet_create";
+
+PyObject * PyCitcomSExchanger_POutlet_create(PyObject *self, PyObject *args)
+{
+    PyObject *obj0, *obj1;
+
+    if (!PyArg_ParseTuple(args, "OO:POutlet_create",
+                          &obj0, &obj1))
+        return NULL;
+
+    CitcomSource* source = static_cast<CitcomSource*>(PyCObject_AsVoidPtr(obj0));
+    All_variables* E = static_cast<All_variables*>(PyCObject_AsVoidPtr(obj1));
+
+    POutlet* outlet = new POutlet(*source, E);
+
+    PyObject *cobj = PyCObject_FromVoidPtr(outlet, deletePOutlet);
+    return Py_BuildValue("O", cobj);
+}
+
+
+void deletePOutlet(void* p)
+{
+    delete static_cast<POutlet*>(p);
 }
 
 

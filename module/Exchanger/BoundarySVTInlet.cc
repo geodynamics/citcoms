@@ -29,17 +29,21 @@
 #include "config.h"
 #include "journal/diagnostics.h"
 #include "AreaWeightedNormal.h"
+#include "Convertor.h"
 #include "Boundary.h"
-#include "BoundaryVTInlet.h"
+#include "BoundarySVTInlet.h"
 
+using Exchanger::Array2D;
+using Exchanger::DIM;
+using Exchanger::STRESS_DIM;
 using Exchanger::Sink;
 
 
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
+BoundarySVTInlet::BoundarySVTInlet(const Boundary& boundary,
+                                   const Sink& sink,
+                                   All_variables* E,
+                                   const MPI_Comm& c) :
+    BaseSVTInlet(boundary, sink, E),
     comm(c),
     awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
 {
@@ -48,25 +52,42 @@ BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
 }
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
+BoundarySVTInlet::~BoundarySVTInlet()
 {
     delete awnormal;
 }
 
 
-void BoundaryVTInlet::recv()
+void BoundarySVTInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
-    VTInlet::recv();
+    // store bc from previous timestep
+    s.swap(s_old);
+    t.swap(t_old);
+    v.swap(v_old);
 
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
+    // receive the fields from outlet
+    sink.recv(t, v);
+    sink.recv(s);
+
+    // convert back to CitcomS' units and coordinate system
+    Exchanger::Convertor& convertor = Convertor::instance();
+    convertor.xtemperature(t);
+    convertor.xvelocity(v, sink.getX());
+    //convertor.xstress(s, sink.getX());
+
+    // correct v to be div-free
+    awnormal->imposeConstraint(v, comm, sink, E);
+
+    t.print("CitcomS-BoundarySVTInlet-T");
+    v.print("CitcomS-BoundarySVTInlet-V");
+    s.print("CitcomS-BoundarySVTInlet-S");
 }
 
 
 // version
-// $Id$
+// $Id: BoundaryVTInlet.cc 7403 2007-06-23 00:33:20Z tan2 $
 
 // End of file

@@ -48,6 +48,12 @@ extern "C"
 PyObject * PyCitcomSExchanger_createEmptyInterior(PyObject *, PyObject *);
 
 
+extern char PyCitcomSExchanger_createEmptyPInterior__name__[];
+extern char PyCitcomSExchanger_createEmptyPInterior__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_createEmptyPInterior(PyObject *, PyObject *);
+
+
 extern char PyCitcomSExchanger_createGlobalBoundedBox__name__[];
 extern char PyCitcomSExchanger_createGlobalBoundedBox__doc__[];
 extern "C"
@@ -58,6 +64,12 @@ extern char PyCitcomSExchanger_createInterior__name__[];
 extern char PyCitcomSExchanger_createInterior__doc__[];
 extern "C"
 PyObject * PyCitcomSExchanger_createInterior(PyObject *, PyObject *);
+
+
+extern char PyCitcomSExchanger_createPInterior__name__[];
+extern char PyCitcomSExchanger_createPInterior__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_createPInterior(PyObject *, PyObject *);
 
 
 extern char PyCitcomSExchanger_initConvertor__name__[];

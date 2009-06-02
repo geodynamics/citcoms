@@ -39,10 +39,22 @@ extern "C"
 PyObject * PyCitcomSExchanger_SVTInlet_create(PyObject *, PyObject *);
 
 
+extern char PyCitcomSExchanger_BoundarySVTInlet_create__name__[];
+extern char PyCitcomSExchanger_BoundarySVTInlet_create__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_BoundarySVTInlet_create(PyObject *, PyObject *);
+
+
 extern char PyCitcomSExchanger_TInlet_create__name__[];
 extern char PyCitcomSExchanger_TInlet_create__doc__[];
 extern "C"
 PyObject * PyCitcomSExchanger_TInlet_create(PyObject *, PyObject *);
+
+
+extern char PyCitcomSExchanger_PInlet_create__name__[];
+extern char PyCitcomSExchanger_PInlet_create__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_PInlet_create(PyObject *, PyObject *);
 
 
 extern char PyCitcomSExchanger_SInlet_create__name__[];
@@ -70,6 +82,12 @@ extern char PyCitcomSExchanger_TOutlet_create__name__[];
 extern char PyCitcomSExchanger_TOutlet_create__doc__[];
 extern "C"
 PyObject * PyCitcomSExchanger_TOutlet_create(PyObject *, PyObject *);
+
+
+extern char PyCitcomSExchanger_POutlet_create__name__[];
+extern char PyCitcomSExchanger_POutlet_create__doc__[];
+extern "C"
+PyObject * PyCitcomSExchanger_POutlet_create(PyObject *, PyObject *);
 
 
 extern char PyCitcomSExchanger_VOutlet_create__name__[];

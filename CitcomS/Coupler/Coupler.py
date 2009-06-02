@@ -151,10 +151,16 @@ class Coupler(Component):
 
         # updating the temperature field in the containing solver or not
         two_way_communication = prop.bool("two_way_communication", default=True)
-        # insuring consistent inititial temperature fields at the overlapping
+
+        # ensuring consistent inititial temperature fields at the overlapping
         # domain or not
         exchange_initial_temperature = prop.bool("exchange_initial_temperature",
                                                  default=True)
+
+        # pressure from the csolver can be used as a good initial guess
+        # for pressure of the esolver
+        exchange_pressure = prop.bool("exchange_pressure",
+                                      default=True)
 
         # if si_unit is True, quantities exchanged are in SI units
         si_unit = prop.bool("si_unit", default=False)

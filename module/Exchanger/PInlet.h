@@ -23,48 +23,42 @@
 //
 //</LicenseText>
 //
+// Role:
+//     impose velocity and temperature as b.c.
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include "config.h"
-#include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
+#if !defined(pyCitcomSExchanger_PInlet_h)
+#define pyCitcomSExchanger_PInlet_h
 
-using Exchanger::Sink;
+#include "Exchanger/Array2D.h"
+#include "Exchanger/DIM.h"
+#include "Exchanger/Inlet.h"
 
-
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-}
+struct All_variables;
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
+class PInlet : public Exchanger::Inlet {
+    All_variables* E;
+    Exchanger::Array2D<double,1> p;
+
+public:
+    PInlet(const Exchanger::BoundedMesh& boundedMesh,
+	   const Exchanger::Sink& sink,
+	   All_variables* E);
+
+    virtual ~PInlet();
+
+    virtual void recv();
+    virtual void impose();
+
+private:
+
+};
 
 
-void BoundaryVTInlet::recv()
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-
-    VTInlet::recv();
-
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
-}
-
+#endif
 
 // version
 // $Id$

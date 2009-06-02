@@ -23,47 +23,77 @@
 //
 //</LicenseText>
 //
+//  Purpose:
+//  Replace local temperture field by received values. Note that b.c. is not
+//  affected.
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
 #include "config.h"
 #include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
+#include "global_defs.h"
+#include "Convertor.h"
+#include "Exchanger/BoundedMesh.h"
+#include "Exchanger/Sink.h"
+#include "PInlet.h"
 
+using Exchanger::Array2D;
+using Exchanger::BoundedMesh;
 using Exchanger::Sink;
 
+extern "C" {
+    double global_p_norm2(struct All_variables*,  double **);
+}
 
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
+
+PInlet::PInlet(const BoundedMesh& boundedMesh,
+	       const Sink& sink,
+	       All_variables* e) :
+    Inlet(boundedMesh, sink),
+    E(e),
+    p(sink.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 }
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
+PInlet::~PInlet()
+{}
 
 
-void BoundaryVTInlet::recv()
+void PInlet::recv()
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
-    VTInlet::recv();
+    sink.recv(p);
 
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
+    // TODO: convert pressure to non-dimensional value
+    //Exchanger::Convertor& convertor = Convertor::instance();
+    //convertor.xpressure(t);
+
+    p.print("CitcomS-PInlet-P");
 }
+
+
+void PInlet::impose()
+{
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::at(__HERE__) << journal::endl;
+
+    const int m = 1;
+    for(int i=0; i<sink.size(); i++) {
+	int n = mesh.nodeID(sink.meshNode(i));
+	E->P[m][n] = p[0][i];
+    }
+
+    E->monitor.pdotp = global_p_norm2(E, E->P);
+}
+
+
+// private functions
 
 
 // version

@@ -52,12 +52,6 @@ class EmbeddedCoupler(Coupler):
         # otherwise, we have to stop
         assert solver.inventory.bc.inventory.side_sbcs == True, \
                'Error: esolver.bc.side_sbcs must be on!'
-
-        # allocate space for exchanger objects
-        self.remoteIntrList = range(self.remoteSize)
-        self.sourceList = range(self.remoteSize)
-        self.outletList = range(self.remoteSize)
-
         return
 
 
@@ -84,6 +78,7 @@ class EmbeddedCoupler(Coupler):
 
         # an empty interior object, which will be filled by a remote interior obj.
         if inv.two_way_communication:
+            self.remoteIntrList = range(self.remoteSize)
             for i in range(self.remoteSize):
                 self.remoteIntrList[i] = createEmptyInterior()
 
@@ -107,12 +102,21 @@ class EmbeddedCoupler(Coupler):
         self.sink = Sink_create(self.sinkComm.handle(),
                                 self.remoteSize,
                                 self.boundary)
+
+        if self.inventory.exchange_pressure:
+            from ExchangerLib import createPInterior
+            self.pinterior, _ = createPInterior(self.myBBox,
+                                                self.all_variables)
+            self.psink = Sink_create(self.sinkComm.handle(),
+                                     self.remoteSize,
+                                     self.pinterior)
         return
 
 
     def createSource(self):
         # the source obj's will send interior temperature to a remote sink
         from ExchangerLib import CitcomSource_create
+        self.sourceList = range(self.remoteSize)
         for i, comm, b in zip(range(self.remoteSize),
                               self.srcCommList,
                               self.remoteIntrList):
@@ -134,15 +138,27 @@ class EmbeddedCoupler(Coupler):
         # boundary conditions will be recv. by SVTInlet, which receives
         # stress, velocity, and temperature
         import Inlet
-        self.inlet = Inlet.SVTInlet(self.boundary,
-                                    self.sink,
-                                    self.all_variables)
+        if self.inventory.amending_outflow:
+            self.inlet = Inlet.BoundarySVTInlet(self.boundary,
+                                                self.sink,
+                                                self.all_variables,
+                                                self.communicator.handle())
+        else:
+            self.inlet = Inlet.SVTInlet(self.boundary,
+                                        self.sink,
+                                        self.all_variables)
+
+        if self.inventory.exchange_pressure:
+            self.pinlet = Inlet.PInlet(self.pinterior,
+                                       self.psink,
+                                       self.all_variables)
         return
 
 
     def createII(self):
         # interior temperature will be sent by TOutlet
         import Outlet
+        self.outletList = range(self.remoteSize)
         for i, src in zip(range(self.remoteSize),
                           self.sourceList):
             self.outletList[i] = Outlet.TOutlet(src, self.all_variables)
@@ -182,11 +198,18 @@ class EmbeddedCoupler(Coupler):
 
     def preVSolverRun(self):
         # apply bc before solving the velocity
+
+        # recv'ing vbc after sync'd steps
         if self.toApplyBC:
             self.inlet.recv()
 
             self.toApplyBC = False
 
+            if self.inventory.exchange_pressure:
+                self.pinlet.recv()
+                self.pinlet.impose()
+
+        # update vbc every time step
         self.inlet.impose()
 
         # applyBC only when previous step is sync'd
@@ -261,6 +284,8 @@ class EmbeddedCoupler(Coupler):
         # excluding nodes in bottom boundary?
         exclude_bottom = prop.bool("exclude_bottom", default=False)
 
+        # amending the received vbc to be divergence-free
+        amending_outflow = prop.bool("amending_outflow", default=False)
 
 
 

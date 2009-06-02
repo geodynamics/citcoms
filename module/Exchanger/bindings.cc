@@ -65,10 +65,20 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      PyCitcomSExchanger_SVTInlet_create__doc__},
 
+    {PyCitcomSExchanger_BoundarySVTInlet_create__name__,
+     PyCitcomSExchanger_BoundarySVTInlet_create,
+     METH_VARARGS,
+     PyCitcomSExchanger_BoundarySVTInlet_create__doc__},
+
     {PyCitcomSExchanger_TInlet_create__name__,
      PyCitcomSExchanger_TInlet_create,
      METH_VARARGS,
      PyCitcomSExchanger_TInlet_create__doc__},
+
+    {PyCitcomSExchanger_PInlet_create__name__,
+     PyCitcomSExchanger_PInlet_create,
+     METH_VARARGS,
+     PyCitcomSExchanger_PInlet_create__doc__},
 
     {PyCitcomSExchanger_SInlet_create__name__,
      PyCitcomSExchanger_SInlet_create,
@@ -89,6 +99,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      PyCitcomSExchanger_TOutlet_create,
      METH_VARARGS,
      PyCitcomSExchanger_TOutlet_create__doc__},
+
+    {PyCitcomSExchanger_POutlet_create__name__,
+     PyCitcomSExchanger_POutlet_create,
+     METH_VARARGS,
+     PyCitcomSExchanger_POutlet_create__doc__},
 
     {PyCitcomSExchanger_VOutlet_create__name__,
      PyCitcomSExchanger_VOutlet_create,
@@ -117,6 +132,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      METH_VARARGS,
      PyCitcomSExchanger_createEmptyInterior__doc__},
 
+    {PyCitcomSExchanger_createEmptyPInterior__name__,
+     PyCitcomSExchanger_createEmptyPInterior,
+     METH_VARARGS,
+     PyCitcomSExchanger_createEmptyPInterior__doc__},
+
     {PyCitcomSExchanger_createGlobalBoundedBox__name__,
      PyCitcomSExchanger_createGlobalBoundedBox,
      METH_VARARGS,
@@ -126,6 +146,11 @@ struct PyMethodDef pyExchanger_methods[] = {
      PyCitcomSExchanger_createInterior,
      METH_VARARGS,
      PyCitcomSExchanger_createInterior__doc__},
+
+    {PyCitcomSExchanger_createPInterior__name__,
+     PyCitcomSExchanger_createPInterior,
+     METH_VARARGS,
+     PyCitcomSExchanger_createPInterior__doc__},
 
     {PyCitcomSExchanger_initConvertor__name__,
      PyCitcomSExchanger_initConvertor,

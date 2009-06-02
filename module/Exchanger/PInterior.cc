@@ -27,42 +27,56 @@
 //
 
 #include "config.h"
+#include <vector>
+#include "global_defs.h"
+#include "PInterior.h"
 #include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
-
-using Exchanger::Sink;
 
 
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-}
+PInterior::PInterior() :
+    Exchanger::BoundedMesh()
+{}
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
 
-
-void BoundaryVTInlet::recv()
+PInterior::PInterior(const Exchanger::BoundedBox& bbox,
+                     const All_variables* E) :
+    Exchanger::BoundedMesh()
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
-    VTInlet::recv();
+    bbox_ = bbox;
+    bbox_.print("CitcomS-PInterior-BBox");
 
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
+    X_.reserve(E->lmesh.nel);
+    nodeID_.reserve(E->lmesh.nel);
+
+    initX(E);
+
+    X_.shrink();
+    X_.print("CitcomS-PInterior-X");
+
+    nodeID_.shrink();
+    nodeID_.print("CitcomS-PInterior-nodeID");
+}
+
+
+void PInterior::initX(const All_variables* E)
+{
+    std::vector<double> x(Exchanger::DIM);
+
+    // Storing the coordinates of the center of elements 
+    for (int m=1;m<=E->sphere.caps_per_proc;m++)
+        for(int e=1;e<=E->lmesh.nel;e++) {
+            for(int d=0; d<Exchanger::DIM; d++)
+                x[d] = E->eco[m][e].centre[d+1];
+            
+            if(isInside(x, bbox_)) {
+                X_.push_back(x);
+                nodeID_.push_back(e);
+            }
+        }
 }
 
 

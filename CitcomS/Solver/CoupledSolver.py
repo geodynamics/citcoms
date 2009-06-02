@@ -68,7 +68,6 @@ class CoupledSolver(Solver):
 
             # insure consistent temperature fields across solvers
             self.coupler.exchangeTemperature()
-
             self.solveVelocities()
         return
 
@@ -76,9 +75,8 @@ class CoupledSolver(Solver):
 
     def solveVelocities(self):
         # sync boundary conditions before/after vsolver
-        vsolver = self.inventory.vsolver
         self.coupler.preVSolverRun()
-        vsolver.run()
+        self.inventory.vsolver.run()
         self.coupler.postVSolverRun()
         return
 

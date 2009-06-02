@@ -38,6 +38,7 @@
 #include "AreaWeightedNormal.h"
 
 extern "C" {
+    // for definition of SIDE_NORTH etc.
 #include "element_definitions.h"
 }
 
@@ -51,13 +52,20 @@ AreaWeightedNormal::AreaWeightedNormal(const MPI_Comm& comm,
 				       const Boundary& boundary,
 				       const Sink& sink,
 				       const All_variables* E) :
-    size_(boundary.size()),
-    toleranceOutflow_(E->control.accuracy),
-    nwght(size_, 0)
+    nwght(boundary.size(), 0)
 {
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::at(__HERE__) << journal::endl;
+
     computeWeightedNormal(boundary, E);
-    double total_area = computeTotalArea(comm, sink);
-    normalize(total_area);
+    double inv_total_area = 1 / computeTotalArea(comm, sink);
+
+    // normalize
+    for(int n=0; n<sink.size(); n++) {
+	int i = sink.meshNode(n);
+	for(int j=0; j<DIM; j++)
+	    nwght[j][i] *= inv_total_area;
+    }
 }
 
 
@@ -67,22 +75,23 @@ AreaWeightedNormal::~AreaWeightedNormal()
 
 void AreaWeightedNormal::imposeConstraint(Velo& V,
 					  const MPI_Comm& comm,
-					  const Sink& sink) const
+					  const Sink& sink,
+					  const All_variables* E) const
 {
-    journal::info_t info("CitcomS-AreaWeightedNormal-outflow");
+    journal::debug_t debug("CitcomS-Exchanger");
+    debug << journal::at(__HERE__) << journal::endl;
 
     double outflow = computeOutflow(V, comm, sink);
-    info << journal::at(__HERE__)
-	 << "Net outflow: "
-	 << outflow << journal::endl;
 
-    if (std::abs(outflow) > toleranceOutflow_) {
-	reduceOutflow(V, outflow, sink);
+    reduceOutflow(V, outflow, sink);
 
-	outflow = computeOutflow(V, comm, sink);
-	info << journal::at(__HERE__)
-	     << "Net outflow after correction (SHOULD BE ZERO !): "
-	     << outflow << journal::endl;
+    double new_outflow = computeOutflow(V, comm, sink);
+
+    if(E->parallel.me == 0) {
+        fprintf(stderr, "Net outflow amended from %e to %e\n",
+                outflow, new_outflow);
+        fprintf(E->fp, "Net outflow amended from %e to %e\n",
+                outflow, new_outflow);
     }
 }
 
@@ -94,24 +103,32 @@ void AreaWeightedNormal::computeWeightedNormal(const Boundary& boundary,
 {
     const int nodes_per_element = 8;
     const int vpoints_per_side = 4;
+
+    // converting normal vector [-1, 0, 1] to side index,
     const int side_normal[DIM][DIM] = {{SIDE_NORTH, -1, SIDE_SOUTH},
 				       {SIDE_WEST, -1, SIDE_EAST},
 				       {SIDE_BOTTOM, -1, SIDE_TOP}};
 
+    /* For each node belong to boundary elements, check all 6 faces,
+     * if the node is on the face and the face is part of the boundary,
+     * compute the surface area by summing the 2D determinants. */
     for (int m=1; m<=E->sphere.caps_per_proc; m++)
 	for (int es=1; es<=E->boundary.nel; es++) {
 	    int el = E->boundary.element[m][es];
 	    for(int n=1; n<=nodes_per_element; n++) {
 		int node = E->ien[m][el].node[n];
 		int bnode = boundary.bnode(node);
+
+                // skipping nodes not on the boundary
 		if(bnode < 0) continue;
 
 		for(int j=0; j<DIM; j++) {
-		    int normal = boundary.normal(j,bnode);
+                    // normal is either -1, 1, or 0
+		    int normal = boundary.normal(j, bnode);
 		    if(normal) {
 			int side = side_normal[j][normal+1];
 			for(int k=1; k<=vpoints_per_side; k++)
-			    nwght[j][bnode] += normal * E->boundary.det[m][side][k][es];
+			    nwght[j][bnode] += normal * E->boundary.det[m][side][k][es] / vpoints_per_side;
 		    }
 		} // end of loop over dim
 	    } // end of loop over element nodes
@@ -131,15 +148,32 @@ double AreaWeightedNormal::computeTotalArea(const MPI_Comm& comm,
 
     Exchanger::util::gatherSum(comm, total_area);
 
+    journal::info_t info("CitcomS-AreaWeightedNormal-area");
+    info << journal::at(__HERE__)
+         << "Total surface area: "
+         << total_area << journal::endl;
+
+    /** debug **
+    for(int j=0; j<DIM; j++) {
+        double in, out;
+        in = out = 0;
+        for(int n=0; n<sink.size(); n++) {
+            int i = sink.meshNode(n);
+            if(nwght[j][i] > 0) out += nwght[j][i];
+            else in += nwght[j][i];
+        }
+
+        Exchanger::util::gatherSum(comm, in);
+        Exchanger::util::gatherSum(comm, out);
+
+        journal::info_t info("CitcomS-AreaWeightedNormal-area");
+        info << journal::at(__HERE__)
+             << "Partial surface area: " << j << " "
+             << in << " " << out << journal::endl;
+    }
+    */
+
     return total_area;
-}
-
-
-void AreaWeightedNormal::normalize(double total_area)
-{
-    for(int i=0; i<size_; i++)
-	for(int j=0; j<DIM; j++)
-	    nwght[j][i] /= total_area;
 }
 
 
@@ -147,6 +181,7 @@ double AreaWeightedNormal::computeOutflow(const Velo& V,
 					  const MPI_Comm& comm,
 					  const Sink& sink) const
 {
+    /* integrate dot(V,n) over the surface  */
     double outflow = 0;
     for(int n=0; n<sink.size(); n++) {
 	int i = sink.meshNode(n);

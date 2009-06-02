@@ -37,11 +37,13 @@
 #include "CitcomSource.h"
 #include "Convertor.h"
 #include "Interior.h"
+#include "PInterior.h"
 #include "exchangers.h"
 
 void deleteBoundary(void*);
 void deleteBoundedBox(void*);
 void deleteInterior(void*);
+void deletePInterior(void*);
 void deleteCitcomSource(void*);
 
 using Exchanger::BoundedBox;
@@ -97,6 +99,18 @@ PyObject * PyCitcomSExchanger_createEmptyInterior(PyObject *, PyObject *args)
 }
 
 
+char PyCitcomSExchanger_createEmptyPInterior__doc__[] = "";
+char PyCitcomSExchanger_createEmptyPInterior__name__[] = "createEmptyPInterior";
+
+PyObject * PyCitcomSExchanger_createEmptyPInterior(PyObject *, PyObject *args)
+{
+    PInterior* b = new PInterior();
+
+    PyObject *cobj = PyCObject_FromVoidPtr(b, deletePInterior);
+    return Py_BuildValue("N", cobj);
+}
+
+
 char PyCitcomSExchanger_createGlobalBoundedBox__doc__[] = "";
 char PyCitcomSExchanger_createGlobalBoundedBox__name__[] = "createGlobalBoundedBox";
 
@@ -145,6 +159,30 @@ PyObject * PyCitcomSExchanger_createInterior(PyObject *, PyObject *args)
     BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
 
     PyObject *cobj1 = PyCObject_FromVoidPtr(i, deleteInterior);
+    /* the memory of bbox is managed by i, no need to call its d'ctor */
+    PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, NULL);
+    return Py_BuildValue("NN", cobj1, cobj2);
+}
+
+
+char PyCitcomSExchanger_createPInterior__doc__[] = "";
+char PyCitcomSExchanger_createPInterior__name__[] = "createPInterior";
+
+PyObject * PyCitcomSExchanger_createPInterior(PyObject *, PyObject *args)
+{
+    PyObject *obj1, *obj2;
+
+    if (!PyArg_ParseTuple(args, "OO:createPInterior", &obj1, &obj2))
+	return NULL;
+
+    BoundedBox* rbbox = static_cast<BoundedBox*>(PyCObject_AsVoidPtr(obj1));
+    All_variables* E = static_cast<All_variables*>
+	                          (PyCObject_AsVoidPtr(obj2));
+
+    PInterior* i = new PInterior(*rbbox, E);
+    BoundedBox* bbox = const_cast<BoundedBox*>(&(i->bbox()));
+
+    PyObject *cobj1 = PyCObject_FromVoidPtr(i, deletePInterior);
     /* the memory of bbox is managed by i, no need to call its d'ctor */
     PyObject *cobj2 = PyCObject_FromVoidPtr(bbox, NULL);
     return Py_BuildValue("NN", cobj1, cobj2);
@@ -256,6 +294,12 @@ void deleteBoundedBox(void* p)
 void deleteInterior(void* p)
 {
     delete static_cast<Interior*>(p);
+}
+
+
+void deletePInterior(void* p)
+{
+    delete static_cast<PInterior*>(p);
 }
 
 

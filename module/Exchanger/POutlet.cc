@@ -27,43 +27,46 @@
 //
 
 #include "config.h"
+#include "global_defs.h"
 #include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
-
-using Exchanger::Sink;
+#include "CitcomSource.h"
+#include "Convertor.h"
+#include "POutlet.h"
 
 
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
+POutlet::POutlet(const CitcomSource& source,
+		 All_variables* e) :
+    Outlet(source),
+    E(e),
+    p(source.size())
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 }
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
+POutlet::~POutlet()
+{}
 
 
-void BoundaryVTInlet::recv()
+void POutlet::send()
 {
     journal::debug_t debug("CitcomS-Exchanger");
     debug << journal::at(__HERE__) << journal::endl;
 
-    VTInlet::recv();
+    source.interpolatePressure(p);
+    p.print("CitcomS-POutlet-P");
 
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
+    // TODO: convert pressure to non-dimensional value
+    //Exchanger::Convertor& convertor = Convertor::instance();
+    //convertor.pressure(p);
+
+    source.send(p);
 }
+
+
+// private functions
+
 
 
 // version

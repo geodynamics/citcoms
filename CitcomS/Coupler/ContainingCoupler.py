@@ -38,12 +38,6 @@ class ContainingCoupler(Coupler):
 
     def initialize(self, solver):
         Coupler.initialize(self, solver)
-
-        # allocate space for exchanger objects
-        self.remoteBdryList = range(self.remoteSize)
-        self.sourceList = range(self.remoteSize)
-        self.outletList = range(self.remoteSize)
-
         return
 
 
@@ -65,8 +59,10 @@ class ContainingCoupler(Coupler):
         self.interior, self.myBBox = createInterior(self.remoteBBox,
                                                     self.all_variables)
 
-        # an empty boundary object, which will be filled by a remote boundary obj.
+        self.remoteBdryList = range(self.remoteSize)
         for i in range(self.remoteSize):
+            # an empty boundary object for remote velocity nodes
+            # will be filled by a remote boundary obj.
             self.remoteBdryList[i] = createEmptyBoundary()
 
         return
@@ -84,6 +80,7 @@ class ContainingCoupler(Coupler):
     def createSource(self):
         # the source obj's will send boundary conditions to a remote sink
         from ExchangerLib import CitcomSource_create
+        self.sourceList = range(self.remoteSize)
         for i, comm, b in zip(range(self.remoteSize),
                               self.srcCommList,
                               self.remoteBdryList):
@@ -98,6 +95,24 @@ class ContainingCoupler(Coupler):
                                                      self.myBBox,
                                                      self.all_variables)
 
+        if self.inventory.exchange_pressure:
+            from ExchangerLib import createEmptyPInterior
+            self.pinterior = range(self.remoteSize)
+
+            for i in range(self.remoteSize):
+                self.pinterior[i] = createEmptyPInterior()
+
+            self.psourceList = range(self.remoteSize)
+            for i, comm, b in zip(range(self.remoteSize),
+                                  self.srcCommList,
+                                  self.pinterior):
+                # sink is always in the last rank of a communicator
+                sinkRank = comm.size - 1
+                self.psourceList[i] = CitcomSource_create(comm.handle(),
+                                                          sinkRank,
+                                                          b,
+                                                          self.myBBox,
+                                                          self.all_variables)
         return
 
 
@@ -117,9 +132,18 @@ class ContainingCoupler(Coupler):
         # boundary conditions will be sent by SVTOutlet, which sends
         # stress, velocity, and temperature
         import Outlet
+        self.outletList = range(self.remoteSize)
         for i, src in zip(range(self.remoteSize),
                           self.sourceList):
             self.outletList[i] = Outlet.SVTOutlet(src, self.all_variables)
+
+        if self.inventory.exchange_pressure:
+            self.poutletList = range(self.remoteSize)
+            for i, src in zip(range(self.remoteSize),
+                              self.psourceList):
+
+                self.poutletList[i] = Outlet.POutlet(src, self.all_variables)
+
         return
 
 
@@ -180,6 +204,10 @@ class ContainingCoupler(Coupler):
         # send computed velocity to ECPLR for its BCs
         for outlet in self.outletList:
             outlet.send()
+
+        if self.inventory.exchange_pressure:
+            for outlet in self.poutletList:
+                outlet.send()
         return
 
 

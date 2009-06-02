@@ -23,59 +23,60 @@
 //
 //</LicenseText>
 //
+// Role:
+//     impose normal velocity and shear traction as velocity b.c.,
+//     also impose temperature as temperature b.c.
+//
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#if !defined(pyCitcomSExchanger_AreaWeightedNormal_h)
-#define pyCitcomSExchanger_AreaWeightedNormal_h
+#if !defined(pyCitcomSExchanger_BaseSVTInlet_h)
+#define pyCitcomSExchanger_BaseSVTInlet_h
 
-#include <vector>
-#include "mpi.h"
 #include "Exchanger/Array2D.h"
 #include "Exchanger/DIM.h"
-#include "Exchanger/Sink.h"
+#include "Exchanger/Inlet.h"
 
 struct All_variables;
 class Boundary;
 
 
-class AreaWeightedNormal {
-    Exchanger::Array2D<double,Exchanger::DIM> nwght;
+class BaseSVTInlet : public Exchanger::Inlet{
+protected:
+    All_variables* E;
+    Exchanger::Array2D<double,Exchanger::STRESS_DIM> s;
+    Exchanger::Array2D<double,Exchanger::STRESS_DIM> s_old;
+    Exchanger::Array2D<double,Exchanger::DIM> v;
+    Exchanger::Array2D<double,Exchanger::DIM> v_old;
+    Exchanger::Array2D<double,1> t;
+    Exchanger::Array2D<double,1> t_old;
 
 public:
-    AreaWeightedNormal(const MPI_Comm& comm,
-		       const Boundary& boundary,
-		       const Exchanger::Sink& sink,
-                       const All_variables* E);
-    ~AreaWeightedNormal();
+    BaseSVTInlet(const Boundary& boundary,
+                 const Exchanger::Sink& sink,
+                 All_variables* E);
 
-    typedef Exchanger::Array2D<double,Exchanger::DIM> Velo;
+    virtual ~BaseSVTInlet();
 
-    void imposeConstraint(Velo& V,
-			  const MPI_Comm& comm,
-			  const Exchanger::Sink& sink,
-			  const All_variables* E) const;
+    virtual void impose();
 
-private:
-    void computeWeightedNormal(const Boundary& boundary,
-			       const All_variables* E);
-    double computeTotalArea(const MPI_Comm& comm,
-                            const Exchanger::Sink& sink) const;
-    void normalize(double total_area);
-    double computeOutflow(const Velo& V,
-			  const MPI_Comm& comm,
-			  const Exchanger::Sink& sink) const;
-    inline int sign(double number) const;
-    void reduceOutflow(Velo& V, double outflow,
-		       const Exchanger::Sink& sink) const;
+    //virtual void recv() should be implemented by child class
 
+protected:
+    void setVBCFlag();
+    void setTBCFlag();
+
+    void imposeSV();
+    void imposeT();
+
+    double side_tractions(const Exchanger::Array2D<double,Exchanger::STRESS_DIM>& stress,
+			  int node, int normal_dir,  int dim) const;
 };
 
 
 #endif
 
 // version
-// $Id$
+// $Id: BaseSVTInlet.h 2397 2005-10-04 22:37:25Z leif $
 
 // End of file
-

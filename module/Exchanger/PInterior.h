@@ -26,45 +26,28 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include "config.h"
-#include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
+#if !defined(pyCitcomSExchanger_PInterior_h)
+#define pyCitcomSExchanger_PInterior_h
 
-using Exchanger::Sink;
+#include "Exchanger/BoundedMesh.h"
 
-
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-}
+struct All_variables;
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
+class PInterior : public Exchanger::BoundedMesh {
+
+public:
+    PInterior();
+    PInterior(const Exchanger::BoundedBox& bbox,
+              const All_variables* E);
+
+private:
+    void initX(const All_variables* E);
+
+};
 
 
-void BoundaryVTInlet::recv()
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-
-    VTInlet::recv();
-
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
-}
-
+#endif
 
 // version
 // $Id$

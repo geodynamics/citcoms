@@ -26,45 +26,35 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //
 
-#include "config.h"
-#include "journal/diagnostics.h"
-#include "AreaWeightedNormal.h"
-#include "Boundary.h"
-#include "BoundaryVTInlet.h"
+#if !defined(pyCitcomSExchanger_POutlet_h)
+#define pyCitcomSExchanger_POutlet_h
 
-using Exchanger::Sink;
+#include "Exchanger/Outlet.h"
 
-
-BoundaryVTInlet::BoundaryVTInlet(const Boundary& boundary,
-				 const Sink& sink,
-				 All_variables* E,
-				 MPI_Comm c) :
-    VTInlet(boundary, sink, E),
-    comm(c),
-    awnormal(new AreaWeightedNormal(comm, boundary, sink, E))
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-}
+struct All_variables;
+class CitcomSource;
 
 
-BoundaryVTInlet::~BoundaryVTInlet()
-{
-    delete awnormal;
-}
+class POutlet : public Exchanger::Outlet {
+    All_variables* E;
+    Exchanger::Array2D<double,1> p;
+
+public:
+    POutlet(const CitcomSource& source,
+	    All_variables* E);
+    virtual ~POutlet();
+
+    virtual void send();
+
+private:
+    // disable copy c'tor and assignment operator
+    POutlet(const POutlet&);
+    POutlet& operator=(const POutlet&);
+
+};
 
 
-void BoundaryVTInlet::recv()
-{
-    journal::debug_t debug("CitcomS-Exchanger");
-    debug << journal::at(__HERE__) << journal::endl;
-
-    VTInlet::recv();
-
-    awnormal->imposeConstraint(v, comm, sink, comm);
-    v.print("CitcomS-BoundaryVTInlet-V_constrained");
-}
-
+#endif
 
 // version
 // $Id$

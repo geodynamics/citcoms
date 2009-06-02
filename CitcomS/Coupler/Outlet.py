@@ -66,6 +66,17 @@ class TOutlet(Outlet):
 
 
 
+class POutlet(Outlet):
+
+    def __init__(self, source, all_variables):
+        import ExchangerLib
+        self._handle = ExchangerLib.POutlet_create(source,
+                                                   all_variables)
+        return
+
+
+
+
 class VTOutlet(Outlet):
 
     def __init__(self, source, all_variables):

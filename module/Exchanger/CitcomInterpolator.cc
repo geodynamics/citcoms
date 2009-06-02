@@ -80,7 +80,7 @@ void CitcomInterpolator::interpolatePressure(Array2D<double,1>& P)
         int n1 = elem_[0][i];
         for(int k=0; k<NODES_PER_ELEMENT; k++) {
             int node = E->ien[mm][n1].node[k+1];
-            P[0][i] += shape_[k][i] * E->P[mm][node];
+            P[0][i] += shape_[k][i] * E->NP[mm][node];
         }
     }
 }

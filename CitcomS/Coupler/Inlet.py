@@ -66,12 +66,33 @@ class SVTInlet(Inlet):
 
 
 
+class BoundarySVTInlet(Inlet):
+
+    def __init__(self, mesh, sink, all_variables, comm):
+        import ExchangerLib
+        self._handle = ExchangerLib.BoundarySVTInlet_create(mesh,
+                                                            sink,
+                                                            all_variables,
+                                                            comm)
+        return
+
+
 
 class TInlet(Inlet):
 
         def __init__(self, mesh, sink, all_variables):
                 import ExchangerLib
                 self._handle = ExchangerLib.TInlet_create(mesh,
+                                                          sink,
+                                                          all_variables)
+                return
+
+
+class PInlet(Inlet):
+
+        def __init__(self, mesh, sink, all_variables):
+                import ExchangerLib
+                self._handle = ExchangerLib.PInlet_create(mesh,
                                                           sink,
                                                           all_variables)
                 return
