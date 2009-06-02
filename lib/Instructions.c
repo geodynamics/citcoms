@@ -1479,6 +1479,8 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.botm = 0;
     E->output.geoid = 0;
     E->output.horiz_avg = 0;
+    E->output.seismic = 0;
+    E->output.coord_bin = 0;
     E->output.tracer = 0;
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
