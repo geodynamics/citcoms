@@ -135,7 +135,7 @@ class TestExchanger(Application):
 
         import pyre.inventory
 
-        import CitcomS.Components.Exchanger as Exchanger
+        import CitcomS.Coupler as Coupler
         import CitcomS.Controller as Controller
         import CitcomS.Layout as Layout
 
@@ -143,8 +143,10 @@ class TestExchanger(Application):
         controller = pyre.inventory.facility("controller", default=Controller.controller())
         layout = pyre.inventory.facility("layout", default=Layout.layout())
 
-        coarse = pyre.inventory.facility("coarse", default=Exchanger.coarsegridexchanger("coarse"))
-        fine = pyre.inventory.facility("fine", default=Exchanger.finegridexchanger("fine"))
+        coarse = pyre.inventory.facility("coarse", factory=Coupler.containingcoupler,
+                                         args=("coarse", "coarse"))
+        fine = pyre.inventory.facility("fine", factory=Coupler.embeddedcoupler,
+                                         args=("fine","fine"))
 
 
 
