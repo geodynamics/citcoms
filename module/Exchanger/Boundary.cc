@@ -55,14 +55,10 @@ Boundary::Boundary(const All_variables* E,
     normal_.reserve(maxNodes);
 
     // find out which nodes belong to the boundary and fill X_ with them
-    // XXX: only implemented for regional model
     if (E->parallel.nprocxy == 1)
-        initX(E, excludeTop, excludeBottom);
-    else {
-        journal::firewall_t firewall("CitcomS-Boundary");
-        firewall << "Boundary is not implemented for full solver (yet)."
-                 << journal::endl;
-    }
+        initRegionalX(E, excludeTop, excludeBottom);
+    else 
+        initFullX(E, excludeTop, excludeBottom);
 
     // define the tight bounding box of the boundary
     initBBox(E);
@@ -93,8 +89,8 @@ void Boundary::initBBox(const All_variables *E)
 }
 
 
-void Boundary::initX(const All_variables* E,
-		     bool excludeTop, bool excludeBottom)
+void Boundary::initRegionalX(const All_variables* E,
+                             bool excludeTop, bool excludeBottom)
 {
     const int itop = E->lmesh.noz;
 
@@ -141,6 +137,40 @@ void Boundary::initX(const All_variables* E,
     for(int i=2; i<E->lmesh.noz; i++)
 	addSidewalls(E, i, 0);
 
+}
+
+
+void Boundary::initFullX(const All_variables* E,
+                         bool excludeTop, bool excludeBottom)
+{
+    const int itop = E->lmesh.noz;
+
+    if(E->parallel.me_loc[3] == E->parallel.nprocz - 1) {
+	if(!excludeTop) {
+	    for(int k=1; k<=E->lmesh.noy; k++)
+		for(int j=1; j<=E->lmesh.nox; j++) {
+		    std::vector<int> normalFlag(Exchanger::DIM,0);
+		    normalFlag[2] = 1;
+		    int node = ijk2node(E, itop, j, k);
+		    appendNode(E, node, normalFlag);
+		}
+	}
+    }
+
+
+    const int ibottom = 1;
+
+    if(E->parallel.me_loc[3] == 0) {
+	if(!excludeBottom) {
+	    for(int k=1; k<=E->lmesh.noy; k++)
+		for(int j=1; j<=E->lmesh.nox; j++) {
+		    std::vector<int> normalFlag(Exchanger::DIM,0);
+		    normalFlag[2] = -1;
+		    int node = ijk2node(E, ibottom, j, k);
+		    appendNode(E, node, normalFlag);
+		}
+	}
+    }
 }
 
 

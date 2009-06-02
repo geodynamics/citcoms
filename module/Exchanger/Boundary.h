@@ -59,9 +59,11 @@ public:
 
 private:
     void initBBox(const All_variables *E);
-    void initX(const All_variables *E,
-	       bool excludeTop, bool excludeBottom);
-
+    void initRegionalX(const All_variables *E,
+                       bool excludeTop, bool excludeBottom);
+    void initFullX(const All_variables *E,
+                   bool excludeTop, bool excludeBottom);
+    
     void addSidewalls(const All_variables* E, int znode, int r_normal);
     bool checkSidewalls(const All_variables* E,
 			int j, int k, std::vector<int>& normalFlag);
