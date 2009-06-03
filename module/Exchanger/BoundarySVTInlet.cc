@@ -33,9 +33,6 @@
 #include "Boundary.h"
 #include "BoundarySVTInlet.h"
 
-using Exchanger::Array2D;
-using Exchanger::DIM;
-using Exchanger::STRESS_DIM;
 using Exchanger::Sink;
 
 
