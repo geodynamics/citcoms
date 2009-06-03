@@ -57,10 +57,16 @@ INCLUDES = \
 	$(MPIINCLUDES)
 
 sources = \
+	AreaWeightedNormal.cc \
+	AreaWeightedNormal.h \
 	bindings.cc \
 	bindings.h \
+	BaseSVTInlet.cc \
+	BaseSVTInlet.h \
 	Boundary.cc \
 	Boundary.h \
+	BoundarySVTInlet.cc \
+	BoundarySVTInlet.h \
 	CitcomInterpolator.cc \
 	CitcomInterpolator.h \
 	CitcomSource.cc \
@@ -83,8 +89,12 @@ sources = \
 	Interior.h \
 	misc.cc \
 	misc.h \
+	PInlet.cc \
+	PInlet.h \
 	PInterior.cc \
 	PInterior.h \
+	POutlet.cc \
+	POutlet.h \
 	SInlet.cc \
 	SInlet.h \
 	SIUnit.cc \
@@ -103,9 +113,8 @@ sources = \
 	VTInlet.h \
 	VTOutlet.cc \
 	VTOutlet.h
+
 EXTRA_DIST = \
-	AreaWeightedNormal.cc \
-	AreaWeightedNormal.h \
 	BoundaryVTInlet.cc \
 	BoundaryVTInlet.h
 
