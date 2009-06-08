@@ -6,7 +6,8 @@ Version 3.1.0
 
 * Converting temperature and composition to seismic velocities. The seismic 
   velocities output can be uploaded to CIG seismic portal for SPECFEM3D 
-  simulation to generate synthetic seismograms.
+  simulation to generate synthetic seismograms. See Cookbook 10 in the
+  manual.
  
 * Allowing tracers in global model with nproc > 2 by changing the mesh 
   slightly.
@@ -16,9 +17,13 @@ Version 3.1.0
   the norms of div(u), u, and p are no longer dependent on the grid size.
 
 * Adding self-gravitational effect on geoid, contributed by Shijie Zhong.
+  See Cookbook 8 in the manual.
 
 * Adding Consistent-Boundary-Flux (CBF) method to compute dynamic topography,
-  contributed by Shijie Zhong.
+  contributed by Shijie Zhong. See Cookbook 8 in the manual.
+
+* Better convergence for the nested solver calculation. See Cookbook 9 in the
+  manual.
 
 * Adding GMT/netcdf grd input for surface velocity boundary conditions,
   initial temperature, material dependence and local Rayleigh number in
