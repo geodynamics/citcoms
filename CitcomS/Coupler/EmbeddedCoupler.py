@@ -52,6 +52,13 @@ class EmbeddedCoupler(Coupler):
         # otherwise, we have to stop
         assert solver.inventory.bc.inventory.side_sbcs == True, \
                'Error: esolver.bc.side_sbcs must be on!'
+
+        # XXX: model/Exchanger/AreaWeightedNormal.cc
+        # computeOutflow() and reduceOutflow() needs to be modified
+        # to support compressible flow
+        assert (not self.inventory.amending_outflow) or \
+               solver.inventory.gruneisen == 0, \
+               'Error, amending_outflow is not implemented for compressible flow!'
         return
 
 
