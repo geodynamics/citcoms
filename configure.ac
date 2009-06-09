@@ -25,7 +25,7 @@ dnl</LicenseText>
 # $Id$
 
 AC_PREREQ(2.59)
-AC_INIT([CitcomS], [3.1.0a], [cig-mc@geodynamics.org], [CitcomS])
+AC_INIT([CitcomS], [3.1.0], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
 AC_CONFIG_SRCDIR([bin/Citcom.c])
 AC_CONFIG_HEADER([config.h])
@@ -53,6 +53,12 @@ AC_ARG_WITH([exchanger],
         [use Exchanger @<:@default=auto@:>@])],
     [want_exchanger="$withval"],
     [want_exchanger=auto])
+AC_ARG_VAR(HC_HOME, [home path to HC program, used by --with-ggrd])
+AC_ARG_WITH([ggrd],
+    [AC_HELP_STRING([--with-ggrd],
+        [use GGRD file support @<:@default=no@:>@])],
+    [want_ggrd="$withval"],
+    [want_ggrd=no])
 AC_ARG_WITH([cuda],
     [AC_HELP_STRING([--with-cuda],
         [use CUDA @<:@default=no@:>@])],
@@ -123,8 +129,8 @@ AC_CHECK_HEADER([mpi.h], [], [AC_MSG_ERROR([header 'mpi.h' not found])])
 AC_CHECK_HEADERS([malloc.h])
 CIT_CHECK_HEADER_HDF5
 
-AC_LANG_PUSH(C++)
 if test "$want_exchanger" != no; then
+    AC_LANG_PUSH(C++)
     CIT_HEADER_MPI
     save_CPPFLAGS="$CPPFLAGS"
     CPPFLAGS="$PYTHON_EGG_CPPFLAGS $CPPFLAGS"
@@ -137,8 +143,8 @@ if test "$want_exchanger" != no; then
         fi
     ])
     CPPFLAGS="$save_CPPFLAGS"
+    AC_LANG_POP()
 fi
-AC_LANG_POP()
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -154,10 +160,44 @@ AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
 AM_CONDITIONAL([COND_EXCHANGER], [test "$want_exchanger" = yes])
 AC_SEARCH_LIBS([gzopen], [z], [
 		CPPFLAGS="-DUSE_GZDIR $CPPFLAGS"
-		LDFLAGS="-lz $LDFLAGS"
+		LIBS="-lz $LIBS"
 		], [
     AC_MSG_WARN([GZip library not found; disabling gzip support; try setting LDFLAGS to enable it])
 ])
+
+# Check for ggrd support
+if test "$want_ggrd" != no; then
+    # Checking gmt.h, which is included by hc.h
+    if test -n "$GMTHOME"; then
+        CPPFLAGS="$CPPFLAGS -I$GMTHOME/include"
+    fi
+    # Avoid including gmt_math.h when checking gmt.h
+    AC_CHECK_HEADER([gmt.h],[],[AC_MSG_ERROR([header 'gmt.h' not found, required by ggrd])],[
+        #define _GMT_MATH_H
+    ])
+
+    # Checking hc.h
+    if test -n "$HC_HOME"; then
+        CPPFLAGS="$CPPFLAGS -I$HC_HOME -DUSE_GGRD"
+    fi
+    AC_CHECK_HEADER([hc.h], [], [AC_MSG_ERROR([header 'hc.h' not found, required by ggrd])])
+
+    # Checking GMT library
+    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [
+    ],
+    [AC_MSG_ERROR([GMT library not found, required by ggrd])])
+
+    # Checking HC ggrd library
+    if test -n "$HC_HOME"; then
+        if test -n "$ARCH"; then
+            LDFLAGS="$LDFLAGS -L$HC_HOME/objects/$ARCH"
+        else
+            LDFLAGS="$LDFLAGS -L$HC_HOME/objects"
+        fi
+    fi
+    AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found])])
+fi
+
 
 AC_CONFIG_FILES([Makefile
                  bin/Makefile
@@ -176,17 +216,23 @@ AC_OUTPUT
 # report configuration summary
 echo -e "\n\n"
 echo "================ Configuration Summary ================"
-echo -e "\t PYTHON: " $PYTHON
-echo -e "\t PYTHONPATH: " $PYTHONPATH
+if test "$want_pyre" = yes; then
+    echo -e "\t PYTHON: " $PYTHON
+    echo -e "\t PYTHONPATH: " $PYTHONPATH
+fi
 echo -e "\t CC: " $CC
 echo -e "\t CFLAGS: " $CFLAGS
 echo -e "\t CPPFLAGS: " $CPPFLAGS
-echo -e "\t CXX: " $CXX
-echo -e "\t CXXFLAGS: " $CXXFLAGS
+if test "$want_exchanger" != no; then
+    echo -e "\t CXX: " $CXX
+    echo -e "\t CXXFLAGS: " $CXXFLAGS
+fi
 echo -e "\t LDFLAGS: " $LDFLAGS
+echo -e "\t LIBS: " $LIBS
 echo -e "\t with-pyre: " $want_pyre
 echo -e "\t with-exchanger: " $want_exchanger
 echo -e "\t with-hdf5: " $want_hdf5
+echo -e "\t with-ggrd: " $want_ggrd
 echo
 
 dnl end of configure.ac
