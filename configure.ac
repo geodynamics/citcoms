@@ -167,12 +167,18 @@ AC_SEARCH_LIBS([gzopen], [z], [
 
 # Check for ggrd support
 if test "$want_ggrd" != no; then
+    # Checking netcdf.h, which is included by gmt_grd.h -> gmt.h
+    if test -n "$NETCDFHOME"; then
+        CPPFLAGS="$CPPFLAGS -I$NETCDFHOME/include"
+    fi
+    AC_CHECK_HEADER([netcdf.h],[],[AC_MSG_ERROR([header 'netcdf.h' not found, required by ggrd. Try setting environment variable NETCDEHOME.])])
+
     # Checking gmt.h, which is included by hc.h
     if test -n "$GMTHOME"; then
         CPPFLAGS="$CPPFLAGS -I$GMTHOME/include"
     fi
     # Avoid including gmt_math.h when checking gmt.h
-    AC_CHECK_HEADER([gmt.h],[],[AC_MSG_ERROR([header 'gmt.h' not found, required by ggrd])],[
+    AC_CHECK_HEADER([gmt.h],[],[AC_MSG_ERROR([header 'gmt.h' not found, required by ggrd. Try setting environment variable GMTHOME.])],[
         #define _GMT_MATH_H
     ])
 
@@ -180,13 +186,19 @@ if test "$want_ggrd" != no; then
     if test -n "$HC_HOME"; then
         CPPFLAGS="$CPPFLAGS -I$HC_HOME -DUSE_GGRD"
     fi
-    AC_CHECK_HEADER([hc.h], [], [AC_MSG_ERROR([header 'hc.h' not found, required by ggrd])])
+    AC_CHECK_HEADER([hc.h], [], [AC_MSG_ERROR([header 'hc.h' not found, required by ggrd. Try setting environment variable HC_HOME.])])
+
+    # Checking NETCDF library
+    if test -n "$NETCDFHOME"; then
+        LDFLAGS="$LDFLAGS -L$NETCDFHOME/lib"
+    fi
+    AC_SEARCH_LIBS([nc_open], [netcdf], [], [AC_MSG_ERROR([NETCDF library not found, required by ggrd. Try setting environment variable NETCDEHOME.])])
 
     # Checking GMT library
     if test -n "$GMTHOME"; then
         LDFLAGS="$LDFLAGS -L$GMTHOME/lib"
     fi
-    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [], [AC_MSG_ERROR([GMT library not found, required by ggrd])])
+    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [], [AC_MSG_ERROR([GMT library not found, required by ggrd. Try setting environment variable GMTHOME.])])
 
     # Checking HC ggrd library
     if test -n "$HC_HOME"; then
@@ -196,7 +208,7 @@ if test "$want_ggrd" != no; then
             LDFLAGS="$LDFLAGS -L$HC_HOME/objects"
         fi
     fi
-    AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found])])
+    AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found. Try setting environment variable HC_HOME.])])
 fi
 
 
