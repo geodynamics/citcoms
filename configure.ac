@@ -183,9 +183,10 @@ if test "$want_ggrd" != no; then
     AC_CHECK_HEADER([hc.h], [], [AC_MSG_ERROR([header 'hc.h' not found, required by ggrd])])
 
     # Checking GMT library
-    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [
-    ],
-    [AC_MSG_ERROR([GMT library not found, required by ggrd])])
+    if test -n "$GMTHOME"; then
+        LDFLAGS="$LDFLAGS -L$GMTHOME/lib"
+    fi
+    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [], [AC_MSG_ERROR([GMT library not found, required by ggrd])])
 
     # Checking HC ggrd library
     if test -n "$HC_HOME"; then
