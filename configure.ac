@@ -70,6 +70,9 @@ AM_CONDITIONAL([COND_CUDA], [test "$want_cuda" = yes])
 AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])
 AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlc++_r xlC_r xlC icpc ecpc pgCC])
 
+# Checking a system header here so that CPP is always defined
+AC_CHECK_HEADERS([malloc.h])
+
 if test "$want_pyre" = yes; then
     # Check for Python.
     AM_PATH_PYTHON([2.3])
@@ -126,7 +129,6 @@ fi
 
 # Checks for header files.
 AC_CHECK_HEADER([mpi.h], [], [AC_MSG_ERROR([header 'mpi.h' not found])])
-AC_CHECK_HEADERS([malloc.h])
 CIT_CHECK_HEADER_HDF5
 
 if test "$want_exchanger" != no; then
