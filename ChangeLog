@@ -1,3 +1,1452 @@
+2009-06-10 20:42  tan2
+
+	* configure.ac: Added COND_GGRD flags; removed redundant LIBS
+
+2009-06-10 20:41  tan2
+
+	* configure.ac: Checking malloc.h earlier to initialize even when
+	  not using pyre
+
+2009-06-10 17:49  tan2
+
+	* configure.ac: checking netcdf header and library
+
+2009-06-10 04:11  tan2
+
+	* configure.ac: Append GMTHOME/lib to LD path
+
+2009-06-09 23:47  tan2
+
+	* configure.ac: Adding ggrd compilation support
+
+2009-06-08 21:03  tan2
+
+	* NEWS: One more feature and mention where to find the features in
+	  the cookbooks.
+
+2009-06-08 18:11  tan2
+
+	* CitcomS/Coupler/EmbeddedCoupler.py: Added a safe guard
+
+2009-06-04 21:04  tan2
+
+	* examples/Cookbook9/cookbook9.cfg: Reordering parameter
+
+2009-06-03 21:08  tan2
+
+	* module/Exchanger/BoundarySVTInlet.cc,
+	  module/Exchanger/SVTInlet.cc, module/Exchanger/SVTInlet.h: Update
+	  SVTInlet to inherit from BaseSVTInlet
+
+2009-06-03 21:07  tan2
+
+	* module/Exchanger/Makefile.am: adding files to makefile
+
+2009-06-02 22:58  tan2
+
+	* tests/coupled.cfg, tests/exchange.py: update to current coupler
+
+2009-06-02 22:58  tan2
+
+	* examples/Cookbook9/cookbook9.cfg: reducing the accuracy of
+	  solvers, otherwise, they will converge to the wrong result
+
+2009-06-02 22:56  tan2
+
+	* CitcomS/Coupler/ContainingCoupler.py, CitcomS/Coupler/Coupler.py,
+	  CitcomS/Coupler/EmbeddedCoupler.py, CitcomS/Coupler/Inlet.py,
+	  CitcomS/Coupler/Outlet.py, CitcomS/Solver/CoupledSolver.py,
+	  module/Exchanger/AreaWeightedNormal.cc,
+	  module/Exchanger/AreaWeightedNormal.h,
+	  module/Exchanger/BaseSVTInlet.cc,
+	  module/Exchanger/BaseSVTInlet.h,
+	  module/Exchanger/BoundarySVTInlet.cc,
+	  module/Exchanger/BoundarySVTInlet.h,
+	  module/Exchanger/BoundaryVTInlet.cc,
+	  module/Exchanger/CitcomInterpolator.cc,
+	  module/Exchanger/Makefile.am, module/Exchanger/PInlet.cc,
+	  module/Exchanger/PInlet.h, module/Exchanger/PInterior.cc,
+	  module/Exchanger/PInterior.h, module/Exchanger/POutlet.cc,
+	  module/Exchanger/POutlet.h, module/Exchanger/bindings.cc,
+	  module/Exchanger/exchangers.cc, module/Exchanger/exchangers.h,
+	  module/Exchanger/inlets_outlets.cc,
+	  module/Exchanger/inlets_outlets.h: Added parameters
+	  'amending_outflow' and 'exchange_pressure' to help the
+	  convergence of esolver
+	  
+	  When 'amending_outflow' is set to true, the imposed velocity BC
+	  will be amended slightly to be divergence-free. (The divergence,
+	  e.g. outflow, is caused by the combination of solver inaccuracy
+	  and interpolation inaccuracy.)
+	  
+	  When 'exchange_pressure' is set to true, the initial pressure (at
+	  element level) of the embedded solver is taken from the pressure
+	  solution of the containing solver.
+
+2009-06-02 22:09  tan2
+
+	* module/Exchanger/Boundary.cc, module/Exchanger/Boundary.h:
+	  Boundary for global mesh, not sure whether it works with
+	  interpolator or not
+
+2009-06-02 21:58  tan2
+
+	* lib/Instructions.c: init'd E->output.seismic and
+	  E->output.coord_bin
+
+2009-06-02 21:58  tan2
+
+	* examples/Cookbook10/cookbook10.cfg: refining cookbook10
+
+2009-05-28 01:50  leif
+
+	* configure.ac, lib/General_matrix_functions.c, lib/Makefile.am,
+	  lib/cgrad_kernel.cu: CUDA-ized e_assemble_del2_u(), and ran it
+	  successfully -- and slowly! -- under the device emulator. Added a
+	  new 'configure' option: "--with-cuda".
+
+2009-05-27 02:32  leif
+
+	* lib/cgrad_kernel.cu: Parallelized strip_bcs_from_residual().
+
+2009-05-27 01:28  leif
+
+	* lib/cgrad_kernel.cu: Sketched data-parallel version of
+	  e_assemble_del2_u().
+
+2009-05-26 15:21  becker
+
+	* lib/Initial_temperature.c, lib/convection_variables.h: Added
+	  blob_bc_persist parameter (default = off) to allow assigning
+	  blob-like temperature anomalies to BCs.
+
+2009-05-26 15:03  becker
+
+	* lib/Initial_temperature.c, lib/Pan_problem_misc_functions.c:
+	  Fixed typo in blob temperature assignment.
+	  
+	  Changed conversion of coordinates, now assignment works.
+
+2009-05-21 23:16  tan2
+
+	* NEWS: add changes in r14999
+
+2009-05-15 22:32  tan2
+
+	* visual/project_geoid.c: ignoring the degree-0 and degree-1
+	  components of geoid
+
+2009-05-10 23:18  tan2
+
+	* NEWS: add more chaanges in v3.1.0
+
+2009-05-10 16:37  tan2
+
+	* configure.ac, setup.py: Change version number for v3.1.0 alpha
+	  release
+
+2009-05-10 16:35  tan2
+
+	* NEWS: Summary of changes in this release
+
+2009-05-01 22:19  tan2
+
+	* examples/Cookbook10, examples/Cookbook10/cookbook10.cfg: Adding
+	  cookbook for synthetic seismogram, mostly copied from cookbook7
+
+2009-05-01 22:18  tan2
+
+	* lib/Mineral_physics_models.c: Depth is measured from r=1.0, not
+	  outer radius, because in coupled model, the outer radius can be <
+	  1.0.
+
+2009-05-01 22:17  tan2
+
+	* lib/Instructions.c: Printing a big warning when plate velocity is
+	  imposed but remove_angular_momentum or remove_rigid_rotation is
+	  on.
+
+2009-05-01 22:15  tan2
+
+	* lib/Drive_solvers.c: Removing angular momentum in pseudo free
+	  surface case
+
+2009-05-01 22:14  tan2
+
+	* visual/parser.py: ignore anything after ';'
+
+2009-05-01 22:13  tan2
+
+	* INSTALL: explicitly add Python.h to requirement
+
+2009-04-28 22:53  leif
+
+	* lib/cgrad_kernel.cu: For my own sanity, simplified code assuming
+	  the following:
+	  
+	  E->sphere.caps_per_proc == 1 E->parallel.nproc == 1
+	  E->mesh.levmax == 0 E->mesh.nsd == 3
+
+2009-04-27 20:15  leif
+
+	* lib/cgrad_kernel.cu: Moved malloc/free calls outside of kernel.
+	  (The amount of memory allocated appears to be invariant.)
+
+2009-04-27 18:39  leif
+
+	* lib/cgrad_kernel.cu: Consolidated calls to malloc/free.
+
+2009-04-24 18:37  becker
+
+	* lib/Instructions.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h: Added flag to allow using the more precise
+	  method of computing strain-rates throughout the globe, and not
+	  just close to the poles.
+	  
+	  precise_strain_rate=on
+	  
+	  will select this, default is "odd", i.e. poles only as before.
+
+2009-04-23 02:32  leif
+
+	* lib/cgrad_kernel.cu: Don't call through function pointers --
+	  otherwise, 'nvcc' crashes!
+
+2009-04-23 02:22  leif
+
+	* lib/cgrad_kernel.cu: Proposed CUDA kernel for conjugate gradient
+	  solver.
+
+2009-04-22 00:59  leif
+
+	* lib/Instructions.c: Avoid core dump in record() when E->fp hasn't
+	  been set yet.
+
+2009-04-21 22:29  leif
+
+	* configure.ac: The new Python.h header check reorders this script
+	  somewhat. CIT_CHECK_PYTHON_HEADER must follow AC_PROG_CC, and
+	  precede CIT_PYTHON_EGG_SETUP.
+
+2009-04-21 19:33  leif
+
+	* configure.ac: Issue45: Check for Python.h.
+
+2009-04-17 03:37  becker
+
+	* lib/Viscosity_structures.c: Added viscosity options 9 and 10 for
+	  TDPEPV which are identical to 3 and 8 but temperature is not
+	  limited to [0;1]. This is cumbersome, but perhaps needed for
+	  backward compatibility.
+
+2009-04-16 18:24  tan2
+
+	* CitcomS/Components/IC.py, CitcomS/Components/Param.py,
+	  examples/Cookbook6/cookbook6.cfg, lib/Initial_temperature.c,
+	  lib/Lith_age.c, lib/Output_h5.c, lib/global_defs.h,
+	  module/Exchanger/initTemperature.cc, module/setProperties.c: Move
+	  parameter "mantle_temp" from CitcomS.solver.param to
+	  CitcomS.solver.ic. Renamed E->control.lith_age_mantle_temp to
+	  E->control.mantle_temp.
+
+2009-04-16 18:23  tan2
+
+	* examples/Cookbook8/cookbook8.cfg: update cookbook8 with the
+	  manual
+
+2009-04-16 18:22  tan2
+
+	* module/Exchanger/Makefile.am: Add -DUSE_HDF5 to CPPFLAGS in
+	  module/Exchanger
+
+2009-04-16 18:21  tan2
+
+	* examples/Cookbook7/cookbook7.cfg: change the viscosity section to
+	  be the same as that in cookbook3.
+
+2009-04-16 18:20  tan2
+
+	* examples/Cookbook4/cookbook4.cfg,
+	  examples/Cookbook5/cookbook5.cfg: Removed domain extents, since
+	  they are determined by coor_file.
+
+2009-04-16 18:07  tan2
+
+	* INSTALL: Removed instructions to 'make install', 'make clean' and
+	  'make distclean'. Added dependencies.
+
+2009-04-09 20:53  tan2
+
+	* lib/Instructions.c, module/setProperties.c: Fixed a bug in cgrad
+	  solver introduced in r13270.
+
+2009-04-09 20:39  becker
+
+	* lib/Output.c: Left debugging output in, now cleaned up
+
+2009-04-09 20:37  becker
+
+	* bin/Citcom.c, lib/Instructions.c, lib/Output.c: Fixed file output
+	  issue which caused vtk log file I/O to bomb during Citcom
+	  finalize.
+
+2009-04-08 23:39  tan2
+
+	* CitcomS/BaseApplication.py, CitcomS/Controller.py,
+	  CitcomS/Solver/CoupledFullSolver.py,
+	  CitcomS/Solver/CoupledRegionalSolver.py,
+	  CitcomS/Solver/FullSolver.py, CitcomS/Solver/RegionalSolver.py,
+	  CitcomS/Solver/Solver.py, bin/Citcom.c, lib/Instructions.c,
+	  lib/Viscosity_structures.c, lib/citcom_init.h,
+	  module/initial_conditions.c: Sync'ing C and Pyre and adding
+	  comments
+
+2009-04-08 23:38  tan2
+
+	* CitcomS/Controller.py, CitcomS/Solver/CoupledSolver.py,
+	  CitcomS/Solver/Solver.py, bin/Citcom.c, lib/Citcom_init.c,
+	  lib/Parallel_util.c, lib/citcom_init.h, lib/parallel_related.h,
+	  module/bindings.c, module/initial_conditions.c, module/misc.c,
+	  module/misc.h, module/outputs.c, module/outputs.h: Added a
+	  function citcom_finalize() to close files and MPI before exit.
+	  Return 0 when the code is finished normally. Rearrang
+	  post_processing and stokes_flow_only.
+
+2009-04-08 23:34  tan2
+
+	* examples/Full/input.sample, examples/Regional/input.sample,
+	  lib/Convection.c, lib/Instructions.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h, module/advdiffu.c, module/bindings.c,
+	  module/misc.c, module/misc.h: Clean up.
+
+2009-04-08 23:31  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  lib/Construct_arrays.c, lib/Full_parallel_related.c,
+	  lib/Full_version_dependent.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Regional_parallel_related.c,
+	  lib/Regional_sphere_related.c, lib/Regional_version_dependent.c,
+	  lib/Size_does_matter.c, lib/Solver_conj_grad.c,
+	  lib/Solver_multigrid.c, lib/global_defs.h, module/bindings.c,
+	  module/stokes_solver.c, module/stokes_solver.h: Removed
+	  multigrid-el option of stokes solver, which is broken for a long
+	  time and not used by anyone.
+
+2009-04-08 23:27  tan2
+
+	* lib/Instructions.c: Moved where to call read_rayleigh_from_file()
+	  earlier. I hope this doesn't break the ray_control stuff.
+
+2009-04-08 20:24  becker
+
+	* lib/Ggrd_handling.c: Fixed bug in vtop assignment.
+
+2009-04-07 22:50  tan2
+
+	* examples/Makefile.am: Revert the unintended modification of
+	  examples/Makefile.am
+
+2009-04-07 22:45  tan2
+
+	* examples/Cookbook3/cookbook3.cfg,
+	  examples/Cookbook4/cookbook4.cfg, examples/Makefile.am: Change
+	  the viscosity option in cookbook3 and cookbook4
+
+2009-04-07 22:44  tan2
+
+	* examples/Cookbook2/cookbook2.cfg: Change the mesh size in
+	  cookbook2
+
+2009-04-04 00:59  tan2
+
+	* lib/Makefile.am, lib/Mineral_physics_models.c,
+	  lib/Seismic_model.c: Renamed Seismic_model.c to
+	  Mineral_physics_models.c
+
+2009-04-04 00:57  tan2
+
+	* lib/Output.c, lib/Seismic_model.c: Fixed a few bugs in seismic
+	  output
+	  
+	  * fixed errors in the coefficient table * fixed typos *
+	  normalized drho by reference density profile * more digits in the
+	  prem radius table * added two specfem flags in PREM calculation.
+	  * "dv" output for debugging purpose, disabled.
+
+2009-04-04 00:52  tan2
+
+	* examples/example0.cfg: Inconsisent parameters with the manual
+
+2009-03-28 02:29  becker
+
+	* lib/Full_tracer_advection.c, lib/Ggrd_handling.c,
+	  lib/Tracer_setup.c: Modified the way the compositional init with
+	  ggrd tracer can now select either a range of layers (>0) or a
+	  specific layer (<0).
+
+2009-03-20 23:36  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  lib/General_matrix_functions.c, lib/Instructions.c,
+	  lib/global_defs.h, module/setProperties.c: limiting the number of
+	  multigrid cycles in solve_del2_u().
+	  
+	  A new input parameter solver.vsolver.max_mg_cycles (default to
+	  50) controls the max. number of multigrid cycles when solving the
+	  velocity. Without this parameter, when the stiffness matrix is
+	  near singular, the the multigrid solver may become an infinite
+	  loop.
+
+2009-03-18 19:39  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py, module/setProperties.c:
+	  Remove mgunitx etc from pyre input. This restores the behavior in
+	  v3.0 and earlier version.
+	  
+	  In pyre version, the mesh size is always specified by nodex etc.
+	  In C version, the mesh size is specified by nodex if
+	  Solver=cgrad, and by mgunitx and levels if Solver=multigrid.
+
+2009-03-17 23:42  tan2
+
+	* lib/Output.c: Rollback the unintended change in velo output.
+
+2009-03-17 00:18  tan2
+
+	* lib/Full_read_input_from_files.c, lib/Full_version_dependent.c,
+	  lib/Initial_temperature.c, lib/Lith_age.c,
+	  lib/Material_properties.c, lib/Output_gzdir.c,
+	  lib/Problem_related.c, lib/Regional_read_input_from_files.c,
+	  lib/Regional_sphere_related.c, lib/Regional_version_dependent.c:
+	  Check return values of sscanf/fscanf. This fixs issue265.
+
+2009-03-17 00:17  tan2
+
+	* lib/Obsolete.c, lib/Pan_problem_misc_functions.c: Removed
+	  obsolete function read_previous_field()
+
+2009-03-17 00:16  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  examples/Cookbook8/cookbook8.cfg, lib/Drive_solvers.c,
+	  lib/Global_operations.c, lib/Instructions.c, lib/Output_gzdir.c,
+	  lib/Tracer_setup.c, lib/global_defs.h, module/setProperties.c:
+	  remove angular momentum from stokes solution by setting
+	  solver.vsolver.remove_angular_mementum=1
+
+2009-03-16 23:17  tan2
+
+	* CitcomS/Components/Param.py, lib/Instructions.c, lib/Makefile.am,
+	  lib/Output.c, lib/Output_gzdir.c, lib/Output_h5.c,
+	  lib/Seismic_model.c, lib/global_defs.h, lib/output.h,
+	  module/setProperties.c: Converting temperature/composition fields
+	  to seismic velocities, in a format that specfem3d portal and v4.1
+	  can understand.
+	  
+	  * solver.param.mineral_physics_mode: default to 3, the model of
+	  Tramper, Vacher and Vlaar's PEPI 2001. * output_optional=seismic
+	  will write coordinates and seismic velocities in binary files for
+	  specfem comsumption. * domain bounds file "datafile.domain":
+	  binary file with nproc * 10 doubles. The 10 doubles are (rmin,
+	  rmax) and four (theta, phi) pairs for the four bottom corner
+	  nodes. This file is written by rank-0 processor only.
+
+2009-03-16 22:52  tan2
+
+	* lib/Initial_temperature.c, tests/stokes,
+	  tests/stokes/bousinessq.cfg, tests/stokes/tala.cfg: add test
+	  cases for the stokes solver under bousinessq approximation and
+	  truncated anelastic liquid approximation
+
+2009-03-16 22:50  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py, CitcomS/Solver/Solver.py,
+	  lib/Full_geometry_cartesian.c, lib/Full_sphere_related.c,
+	  lib/Instructions.c, lib/Regional_geometry_cartesian.c,
+	  lib/Regional_sphere_related.c, module/bindings.c,
+	  module/mesher.c, module/mesher.h, module/setProperties.c:
+	  seperate initialization and parameter input
+
+2009-03-16 22:44  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py: change the default of mgunit
+
+2009-03-16 22:43  tan2
+
+	* CitcomS/Components/Advection_diffusion/Advection_diffusion.py,
+	  CitcomS/Components/Sphere/Sphere.py,
+	  CitcomS/Components/Stokes_solver/Incompressible.py,
+	  CitcomS/Solver/Solver.py: Make the initialization step in pyre
+	  conforms to C version. This fixs a bug in r13270.
+
+2009-03-10 00:58  tan2
+
+	* lib/Determine_net_rotation.c: Disable HC related stuff if
+	  USE_GGRD is not set
+
+2009-03-04 23:45  becker
+
+	* bin/Citcom.c, lib/Checkpoints.c, lib/Full_tracer_advection.c,
+	  lib/Regional_tracer_advection.c, lib/Tracer_setup.c: Changed ic
+	  flavors from 100 to 99 as per Eh's request
+
+2009-03-04 23:00  becker
+
+	* bin/Citcom.c, lib/Checkpoints.c, lib/Full_tracer_advection.c,
+	  lib/Regional_tracer_advection.c, lib/Tracer_setup.c: Changed ggrd
+	  flavor init for tracers with checkpoint override from 2 to 100 as
+	  per Eh's request.
+
+2009-02-28 21:23  becker
+
+	* bin/Citcom.c, lib/Checkpoints.c, lib/Composition_related.c,
+	  lib/Determine_net_rotation.c, lib/Full_tracer_advection.c,
+	  lib/Instructions.c, lib/Tracer_setup.c: Added
+	  ic_method_for_flavors=2, which works like the ggrd based tracer
+	  flavor init method ic_method_for_flavors=1 but overrides restart
+	  settings for tracers. This allows a compositional restart of a
+	  purely thermal run.
+
+2009-02-20 00:09  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Full_tracer_advection.c,
+	  lib/Process_buoyancy.c, lib/Tracer_setup.c, lib/tracer_defs.h,
+	  module/setProperties.c: Partially back out r19268,r9272,r11215,
+	  since the AVM stuff is redesigned.
+
+2009-02-19 23:46  tan2
+
+	* lib/Full_tracer_advection.c, lib/Process_buoyancy.c,
+	  lib/Tracer_setup.c: Partially back out r11218, since the AVM
+	  stuff is redesigned.
+
+2009-02-19 23:41  tan2
+
+	* CitcomS/BaseApplication.py, CitcomS/Controller.py,
+	  lib/Process_buoyancy.c, module/initial_conditions.c: Partially
+	  back out r11221, since the AVM stuff is redesigned.
+
+2009-02-19 23:35  tan2
+
+	* lib/Process_buoyancy.c: Back out r11279, since the AVM stuff is
+	  redesigned.
+
+2009-02-13 03:46  leif
+
+	* lib/Checkpoints.c: Fixed minor bug exposed by C-to-C++
+	  translation (r14045).
+
+2009-02-06 19:51  tan2
+
+	* lib/Instructions.c, lib/Stokes_flow_Incomp.c: Emit the warning
+	  message from a different place to get rid of static variables.
+	  Also, the macros TRUE and FALSE are undefined unless configured
+	  with GMT.
+
+2008-12-22 18:48  tan2
+
+	* lib/Viscosity_structures.c: Fixed a bug in viscosity rheol=7. Bug
+	  reported by Laura Alisic.
+
+2008-11-19 06:49  tan2
+
+	* lib/General_matrix_functions.c: Fixed two bugs in lg_pow(a, n),
+	  which computes a^n.
+	  
+	  One bug is when n=0, it returned a, instead of 1 Another bug is
+	  a^(n-1) was returned
+
+2008-11-18 23:56  tan2
+
+	* lib/Topo_gravity.c: One more fix to zero geoid arrays
+
+2008-11-18 22:58  tan2
+
+	* lib/Topo_gravity.c: Zero'ed geoid arrays.
+
+2008-11-18 06:55  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c,
+	  lib/Stokes_flow_Incomp.c, lib/global_defs.h: Patched up
+	  Ggrd_handling for velocity grids close to pole.
+	  
+	  Addded flag to suppress check of incompressibility and pressure
+	  convergence. Partially, this is because for kinematic BCs
+	  pressure will only be constrained up to a constant, partially
+	  because mixed density/plate flow models show very poor
+	  convergence, still to be checked.
+
+2008-11-11 02:55  becker
+
+	* lib/Initial_temperature.c: blob parameters were required even if
+	  tic_method != 2, changed such that the parameters were only read
+	  in if tic_method == 2
+
+2008-11-11 02:48  becker
+
+	* lib/Initial_temperature.c: Minor fix to allow compilation with
+	  USE_GGRD
+
+2008-11-07 23:35  tan2
+
+	* module/setProperties.c: forget to check in module/setProperties.c
+
+2008-11-07 23:32  tan2
+
+	* CitcomS/Components/IC.py, examples/Cookbook6/cookbook6.cfg,
+	  lib/Full_solver.c, lib/Full_version_dependent.c,
+	  lib/Initial_temperature.c, lib/Regional_solver.c,
+	  lib/Regional_version_dependent.c, lib/solver.h: * Reserved
+	  'tic_method=100' for user-defined initial temperature. * Read all
+	  parameters related to initial temperature regardless which
+	  tic_method is used. This will make the life easier when adding
+	  new tic_method. * Fixed a bug in 'tic_method=0' for regional
+	  model. The bug causes that the sinosoidal temperature
+	  perturbation is applied at 0th processor only. * Fixed a bug in
+	  'tic_method=1' for regional model. 'tic_method=1' should generate
+	  a top TBL according to the input parameter 'half_space_age'.
+	  However, the code effectively multiply 25x to the age. Cookbook6
+	  is using this tic_method, so its half_space_age needs to become
+	  2500 to get the original temperature. * In 'tic_method=2',
+	  compute distance in Cartesian coordinate, instead of spherical
+	  coordinate. * Refactoring codes for temperature initial
+	  conditions. * Merged regional_construct_tic_from_input() and
+	  full_construct_tic_from_input() to construct_tic_from_input().
+
+2008-11-07 23:32  tan2
+
+	* lib/Viscosity_structures.c: Reserved 'rheol=100' for user-defined
+	  viscosity law.
+
+2008-11-07 23:31  tan2
+
+	* CitcomS/Components/Output.py, module/setProperties.c: Added
+	  parameter 'use_cbf_topo' to pyre binding, default to off.
+
+2008-11-07 23:14  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py, CitcomS/Solver/Solver.py,
+	  examples/Full/input.sample, examples/Regional/input.sample,
+	  lib/Full_solver.c, lib/Full_version_dependent.c,
+	  lib/Instructions.c, lib/Regional_solver.c,
+	  lib/Regional_version_dependent.c, lib/solver.h,
+	  module/setProperties.c: * Added back parameters
+	  mgunitx/mgunity/mgunitz. This partly reverts r13256. * Under
+	  pyre, uses mgunitx/mgunity/mgunitz and levels to compute
+	  nodex/nodey/nodez in multigrid solver. * Merged
+	  regional_global_derived_values() and full_global_derived_values()
+	  to global_derived_values().
+
+2008-11-05 00:19  tan2
+
+	* lib/Full_version_dependent.c: Minor fix on node counting
+
+2008-11-04 22:50  tan2
+
+	* visual/pasteCitcomData.py: Added a missing import
+
+2008-11-04 21:02  tan2
+
+	* visual/zslice.py: zslice.py will slice opt files if present
+
+2008-11-04 21:01  tan2
+
+	* CitcomS/Solver/Solver.py, examples/Full/input.sample,
+	  examples/Regional/input.sample, lib/Instructions.c,
+	  module/bindings.c, module/misc.c, module/misc.h: Removed input
+	  parameters "mgunitx", "mgunity" and "mgunitz". Their values are
+	  inferred from other parameters. Also, the code checks that
+	  "levels" > 1 when multigrid solver is used.
+
+2008-11-04 21:00  tan2
+
+	* lib/Output.c: Fixed a bug in outputting comp_el
+
+2008-11-01 18:37  becker
+
+	* lib/Full_sphere_related.c, lib/Full_version_dependent.c,
+	  lib/Instructions.c, lib/Stokes_flow_Incomp.c: Fixed two typos,
+	  velocity norm function was called where pressure norm should have
+	  been called. This leads to core dumps, all seems to be working
+	  now.
+
+2008-10-31 20:18  tan2
+
+	* lib/Full_version_dependent.c, lib/Regional_version_dependent.c:
+	  Reporting correct nno and nel (number of nodes and elements)
+
+2008-10-29 23:22  tan2
+
+	* lib/global_defs.h: (for r13196) Fixing convergence criterion for
+	  Stokes solver.
+	  
+	  * New functions global_v_norm2(), global_p_norm2(),
+	  global_div_norm2() compute the L2 norm of velocity, pressure, and
+	  divergence. * The L2 norm of the vector f is defined as:
+	  \sum_{all elements} ( \int_{element} (f*f dA) ) / A where A is
+	  the volume of the domain. * The convergence criterion is
+	  controlled by parameter "accuracy" under
+	  "[CitcomS.solver.vsolver]". The iteration stops if
+	  (norm(div(rho*V))/norm(V) < accuracy) or ( (norm(dV)/norm(V) <
+	  accuracy) and (norm(dP)/norm(P) < accuracy) for the last two
+	  iterations ) * The default value of "accuracy" becomes 1e-4. *
+	  The input parameters "tole_compressibility" and
+	  "relative_err_accuracy" under "[CitcomS.solver.vsolver]" are
+	  gone. * The mass matrix E->MASS becomes double precision (was
+	  single precision).
+
+2008-10-29 23:17  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  examples/Cookbook6/cookbook6.cfg,
+	  examples/Cookbook7/cookbook7.cfg,
+	  examples/Cookbook8/cookbook8.cfg,
+	  examples/Cookbook9/cookbook9.cfg, examples/Full/input.sample,
+	  examples/Regional/input.sample, lib/Checkpoints.c,
+	  lib/Element_calculations.c, lib/General_matrix_functions.c,
+	  lib/Global_operations.c, lib/Instructions.c, lib/Output_h5.c,
+	  lib/Output_vtk.c, lib/Size_does_matter.c,
+	  lib/Stokes_flow_Incomp.c, lib/global_defs.h,
+	  module/Exchanger/AreaWeightedNormal.cc, module/Exchanger/misc.cc,
+	  module/setProperties.c, tests/coupled.cfg,
+	  tests/multicoupled.cfg, tests/test2.sh, tests/test5.sh: Fixed two
+	  bugs in vtk velocity output
+
+2008-10-23 23:35  becker
+
+	* lib/Ggrd_handling.c, lib/Initial_temperature.c,
+	  lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Topo_gravity.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h: Initial test implementation of netcdf grd
+	  based assignment of designated Euler vectors based on a code grd.
+
+2008-09-04 22:46  tan2
+
+	* lib/Viscosity_structures.c: multi-component chemical viscosity
+
+2008-09-04 20:18  tan2
+
+	* lib/Regional_sphere_related.c: Fixed issue 158: incorrect
+	  E->control.fi_max with coor=1
+
+2008-09-04 00:20  tan2
+
+	* lib/Instructions.c, lib/Makefile.am, lib/Output_vtk.c: Some basic
+	  VTK parallel XML output
+	  
+	  * output in vts/pvts Structured VTK XML format * only these
+	  fields are available: coordinate, temperature, velocity and
+	  viscosity * coordinate and velocity are in Cartesian coordinates
+	  
+	  Some notes for future tasks: * adding other node- or
+	  element-based fields (pressure, stress, comp_nd, comp_el) is easy
+	  * tracer output should be in vtp format * surf, botm, and
+	  horiz_avg will be in vts format * geoid will still be as an ascii
+	  table
+
+2008-09-04 00:12  tan2
+
+	* lib/global_defs.h: forgot to checkin this change in r12799
+
+2008-09-04 00:11  tan2
+
+	* CitcomS/Components/Output.py, module/setProperties.c: pyre input
+	  for "self_gravitation"
+
+2008-09-04 00:10  tan2
+
+	* lib/Sphere_harmonics.c, lib/Topo_gravity.c: self-gravitation
+	  geoid stuff
+	  
+	  * compute geoid due to internal buoyancy at the bottom * get rid
+	  of stress arrays * seperating topo effect on surface geoid into
+	  two part: surface topo and CMB topo.
+
+2008-07-24 18:42  tan2
+
+	* module/setProperties.c: E->viscosity.zbase_layer is not init'd in
+	  pyre version. This fixes issue 155.
+
+2008-07-24 18:21  becker
+
+	* lib/Instructions.c: Both Eh and I were right and now the z_layer
+	  check should be finally fixed.
+
+2008-07-24 18:13  becker
+
+	* lib/Instructions.c, lib/Viscosity_structures.c: Fixed typo that
+	  provided assignment of zbase_layer thanks to Eh.
+
+2008-07-24 01:00  becker
+
+	* bin/Citcom.c, lib/Ggrd_handling.c, lib/Instructions.c,
+	  lib/Pan_problem_misc_functions.c, lib/Viscosity_structures.c,
+	  lib/viscosity_descriptions.h: Added rheology option eight. The
+	  other merges are surprising.
+
+2008-06-30 15:49  becker
+
+	* lib/Output.c, lib/Output_gzdir.c, lib/Output_h5.c: Moved the
+	  stress computation into stress output subroutine, for consistency
+	  with the style of the Output...c files.
+
+2008-06-30 02:12  becker
+
+	* lib/Construct_arrays.c, lib/Ggrd_handling.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Output_h5.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h,
+	  lib/viscosity_descriptions.h: Made CBF topography method and call
+	  to E->solver.parallel_communication_routs_s contingent on a
+	  "use_cbf_topo" parameter which is for now, by default, off, until
+	  the potential remaining memory bug (?) is tracked down.
+	  
+	  Made sure the stress tensor is computed before stress output, as
+	  CBF topo does not require the computation of the stress tensor.
+	  
+	  Added a z_layer input flag for zbase_layer other than the four
+	  layers used for the control of phase boundary depth. (Default is
+	  backward compatible.)
+
+2008-06-27 00:53  becker
+
+	* lib/Global_operations.c: Check in of proper version for
+	  elliptical net rotation correction.
+
+2008-06-26 23:56  becker
+
+	* lib/Global_operations.c, lib/Instructions.c,
+	  lib/Pan_problem_misc_functions.c, lib/global_defs.h: Reordered
+	  loop in get_buoyancy to speed up array access.
+	  
+	  Fixed omission of one elliptical correction, added a flag.
+
+2008-06-26 23:04  becker
+
+	* lib/Determine_net_rotation.c, lib/Drive_solvers.c,
+	  lib/Full_sphere_related.c, lib/Full_version_dependent.c,
+	  lib/Global_operations.c, lib/Instructions.c, lib/Nodal_mesh.c,
+	  lib/Output_gzdir.c, lib/Pan_problem_misc_functions.c,
+	  lib/Regional_version_dependent.c, lib/Size_does_matter.c,
+	  lib/global_defs.h: Replaced several trig function evaluations in
+	  Size_does_matter.c witht he precomputed SinCos arrays for
+	  speedup.
+	  
+	  Experimental ellipticity implementation has been improved
+	  somewhat, and made accessible only when -DALLOW_ELLIPTICAL is
+	  set. This was necessary to not slow the spherical version of the
+	  code down with if statements.
+
+2008-06-25 01:13  becker
+
+	* lib/Determine_net_rotation.c, lib/Element_calculations.c,
+	  lib/Ggrd_handling.c, lib/Global_operations.c, lib/Instructions.c,
+	  lib/Output.c, lib/Output_gzdir.c,
+	  lib/Pan_problem_misc_functions.c, lib/Size_does_matter.c,
+	  lib/Topo_gravity.c, lib/Tracer_setup.c: Modified net rotation
+	  computation for ellipticity.
+	  
+	  Minor additions (prototypes) to make the code compile smoothly
+	  under PGI.
+
+2008-06-24 21:18  tan2
+
+	* lib/Construct_arrays.c, lib/Full_parallel_related.c: Modified
+	  routs_s for lines. Added some debugging output and updated
+	  comments.
+
+2008-06-24 21:11  tan2
+
+	* lib/Topo_gravity.c: Only top/bottom processors need to
+	  communicate
+
+2008-06-21 22:28  becker
+
+	* lib/Full_boundary_conditions.c, lib/Full_parallel_related.c,
+	  lib/Full_read_input_from_files.c, lib/Full_version_dependent.c,
+	  lib/Ggrd_handling.c, lib/Initial_temperature.c,
+	  lib/Instructions.c, lib/Regional_boundary_conditions.c,
+	  lib/Regional_read_input_from_files.c, lib/global_defs.h:
+	  Assignment of velocity boundary condition only called once at the
+	  top multigrid level during boundary condition assignment.
+	  
+	  Experimental implementation of mixed velocity/free slip boundary
+	  condition based on netcdf grids, in Ggrd_handling.
+
+2008-06-20 23:01  tan2
+
+	* lib/Output.c, lib/Output_gzdir.c, lib/Output_h5.c: Enable CBF
+	  topography
+
+2008-06-20 22:51  tan2
+
+	* lib/Topo_gravity.c: Added back get_CBF_topo(), from Shijie Zhong,
+	  with some minor modifications.
+	  
+	  Minor modifications: * some double arrays -> float arrays *
+	  calling exchange_snode_d() -> calling *_exchange_snode_f()
+
+2008-06-20 22:50  tan2
+
+	* lib/Full_parallel_related.c, lib/Regional_parallel_related.c:
+	  Resurrected full_parallel_communication_routs_s(), which is
+	  needed by CBF topo.
+	  
+	  Renamed exchange_snode_f() to full_exchange_snode_f() and
+	  regional_exchange_snode_f().
+
+2008-06-20 22:42  tan2
+
+	* lib/Size_does_matter.c: Added get_global_1d_shape_fn_L() from
+	  Shijie Zhong
+
+2008-06-20 22:41  tan2
+
+	* lib/Shape_functions.c: Compute E->L and E->Lx 1d shape functions
+	  (1d is a misnomer, they are 2d actually).
+
+2008-06-20 19:08  tan2
+
+	* lib/Full_version_dependent.c: The function declaration was put at
+	  a wrong place.
+
+2008-06-19 22:20  tan2
+
+	* visual/project_geoid.c: Change back the order of input arguments
+	  to match the manual.
+
+2008-06-19 21:43  tan2
+
+	* lib/Viscosity_structures.c: The comment in rheol=4 doesn't match
+	  the code and is removed.
+	  
+	  Added option rheol=7, with a complete temperature- and
+	  pressure-dependent Arrhenius law.
+	  
+	  This fixed issue152.
+
+2008-06-19 21:42  tan2
+
+	* lib/Full_version_dependent.c, lib/Sphere_harmonics.c: Added
+	  debugging (but disabled) function for spherical harmonics
+	  expansion.
+
+2008-06-19 01:05  tan2
+
+	* lib/Global_operations.c, lib/Topo_gravity.c: Send geoid arrays to
+	  vertical columns of processors. After this fix, the geoid output
+	  is the same for nprocz=1 and nprocz>1.
+
+2008-06-19 01:04  tan2
+
+	* lib/Size_does_matter.c, lib/Sphere_harmonics.c: Compute
+	  E->surf_det (top surface area, ie. surface jacobian, of an
+	  element) on a unit sphere.
+	  
+	  Use E->surf_det, instead of the surface jacobian returned by
+	  get_global_1d_shape_fn(), to expand spherical harmonics.
+	  
+	  The surface jacobian returned by get_global_1d_shape_fn() is
+	  defined at the top radius of the current mesh. When nprocz>1, the
+	  top radius is not the same as the outer radius of the sphere for
+	  processors. As a result, the spherical harmonics expansion gave
+	  incorrect result when nprocz>1 in the previous revisions.
+
+2008-06-18 22:35  becker
+
+	* lib/Global_operations.c: Speed up of computation by precomputing
+	  constants.
+
+2008-06-17 21:23  tan2
+
+	* lib/General_matrix_functions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Output_h5.c, lib/Sphere_harmonics.c, lib/Topo_gravity.c,
+	  lib/global_defs.h: Compute geoid with self gravitation. Code
+	  contributed by Shijie Zhong.
+
+2008-06-17 20:31  becker
+
+	* lib/Drive_solvers.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Output.c, lib/Size_does_matter.c,
+	  lib/Solver_conj_grad.c, lib/Solver_multigrid.c,
+	  lib/Sphere_harmonics.c, lib/Topo_gravity.c, lib/global_defs.h:
+	  Added a few more comments and made a few loops more efficient.
+
+2008-06-14 00:00  becker
+
+	* bin/Citcom.c, lib/Full_read_input_from_files.c,
+	  lib/Ggrd_handling.c, lib/Instructions.c,
+	  lib/Pan_problem_misc_functions.c, lib/Problem_related.c,
+	  lib/global_defs.h: Added a few comments on Rayleigh number netcdf
+	  control.
+
+2008-06-13 23:36  tan2
+
+	* NEWS: update NEWS item
+
+2008-06-13 23:35  tan2
+
+	* lib/Ggrd_handling.c, lib/Global_operations.c, lib/Output_gzdir.c:
+	  Replaced MPI_COMM_WORLD by E->parallel.world.
+	  
+	  MPI_COMM_WORLD is the global communicator. E->parallel.world is
+	  the communicator for the current solver. These two are different
+	  in a coupled run. Before this fix, full-regional coupling will
+	  dead lock.
+
+2008-06-13 23:34  tan2
+
+	* bin/Citcom.c: Added some comments
+
+2008-06-13 23:33  tan2
+
+	* CitcomS/Controller.py: To be consistent with C version, disable
+	  checkpoint point output at 0th step if restarting.
+
+2008-06-13 23:32  tan2
+
+	* lib/Construct_arrays.c, lib/Drive_solvers.c,
+	  lib/Full_parallel_related.c, lib/Full_version_dependent.c,
+	  lib/General_matrix_functions.c, lib/Regional_parallel_related.c,
+	  lib/Regional_version_dependent.c, lib/Stokes_flow_Incomp.c:
+	  Correctly counting the global number of equations. This will
+	  slightly affect the results of the stokes solver.
+	  
+	  This avoid double counting the overlapping nodes between
+	  processors and the global norm of velocity vector.
+
+2008-06-13 23:25  tan2
+
+	* module/Exchanger/Boundary.cc: Using firewall channel, since error
+	  channel doesn't stop the code.
+
+2008-06-13 23:24  tan2
+
+	* lib/Stokes_flow_Incomp.c: Decalred variables as double to avoid
+	  float-double conversion later in the loop.
+
+2008-06-13 19:14  tan2
+
+	* visual/project_geoid.c: update the help message
+
+2008-06-12 21:22  becker
+
+	* bin/Citcom.c, lib/Checkpoints.c, lib/Construct_arrays.c,
+	  lib/Determine_net_rotation.c, lib/Drive_solvers.c,
+	  lib/Full_boundary_conditions.c, lib/Full_read_input_from_files.c,
+	  lib/Full_sphere_related.c, lib/Full_version_dependent.c,
+	  lib/Ggrd_handling.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c, lib/Pan_problem_misc_functions.c,
+	  lib/Process_buoyancy.c, lib/Regional_boundary_conditions.c,
+	  lib/Size_does_matter.c, lib/Topo_gravity.c, lib/Tracer_setup.c,
+	  lib/global_defs.h, visual/project_geoid.c: Added tentative
+	  implementation of a rotating, elliptical Earth.
+	  
+	  Made restart for constant viscosity cases possible.
+	  
+	  Added alternative geoid computation place holder for
+	  self-gravitating mantle, to be filled out by Shijie's old code.
+
+2008-05-30 18:42  becker
+
+	* visual/project_geoid.c: Fixed typo in memory allocation procedure
+	  that led to core dump.
+
+2008-05-12 21:22  gurnis
+
+	* NEWS: fixed typo
+
+2008-05-12 21:16  gurnis
+
+	* NEWS: Just a place holder for the next release
+
+2008-05-05 19:17  gurnis
+
+	* lib/Regional_read_input_from_files.c: Bug Fix
+
+2008-05-01 22:59  tan2
+
+	* CitcomS/Components/BC.py, CitcomS/Solver/Solver.py,
+	  module/bindings.c, module/misc.c, module/misc.h: Add python
+	  binding to update top surface temperatures
+
+2008-05-01 22:56  gurnis
+
+	* bin/Citcom.c, lib/Full_boundary_conditions.c,
+	  lib/Full_read_input_from_files.c, lib/Problem_related.c,
+	  lib/Regional_boundary_conditions.c,
+	  lib/Regional_read_input_from_files.c, lib/Viscosity_structures.c:
+	  More additions to allow top surface temperatures to be read in a
+	  each time step. Should read in every time step for C only
+	  version. Additional changes for Pyre version to follow; will test
+	  more once these changes are made.
+	  
+	  Small changes to viscosity structures when reading in materials
+	  for each element. More documentation to follow.
+
+2008-05-01 00:51  tan2
+
+	* CitcomS/Components/Param.py, lib/Instructions.c, lib/Output_h5.c,
+	  module/setProperties.c: Inputing tbcs_file &
+	  temperature_boundary_file
+
+2008-04-30 23:11  gurnis
+
+	* lib/global_defs.h: Start to add new features for reading surface
+	  temperature for all top surface node points
+	  
+	  Added new variables to the CONTROL structure vbcs_file &
+	  temperature_boundary_fi le
+
+2008-04-06 21:58  becker
+
+	* bin/Citcom.c, lib/Advection_diffusion.c,
+	  lib/Full_read_input_from_files.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Pan_problem_misc_functions.c,
+	  lib/Problem_related.c, lib/Regional_read_input_from_files.c,
+	  lib/ggrd_handling.h, lib/global_defs.h,
+	  lib/viscosity_descriptions.h: GMT/Netcdf grd input can now deal
+	  with velocity boundary conditions, material dependence, and local
+	  Rayleigh number in surface layers.
+
+2008-03-05 21:15  tan2
+
+	* lib/Instructions.c: Close trace_log files when finalizing
+
+2008-03-05 21:07  tan2
+
+	* lib/Full_sphere_related.c, lib/Full_version_dependent.c,
+	  lib/General_matrix_functions.c, lib/Instructions.c,
+	  lib/Obsolete.c, lib/Regional_version_dependent.c,
+	  lib/global_defs.h: Clean up unused arrays and functions
+
+2008-03-05 21:06  tan2
+
+	* lib/Tracer_setup.c: Write exclusive tracer time every 20 steps
+
+2008-03-05 21:04  tan2
+
+	* examples/Makefile.am, lib/Full_sphere_related.c,
+	  lib/Full_version_dependent.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Obsolete.c,
+	  lib/Regional_version_dependent.c, lib/Tracer_setup.c,
+	  lib/global_defs.h, visual/Makefile.am: Revert r11328
+
+2008-03-05 20:50  tan2
+
+	* examples/Makefile.am, lib/Full_sphere_related.c,
+	  lib/Full_version_dependent.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Obsolete.c,
+	  lib/Regional_version_dependent.c, lib/Tracer_setup.c,
+	  lib/global_defs.h, visual/Makefile.am: Write exclusive tracer
+	  time every 20 steps
+
+2008-02-28 01:03  tan2
+
+	* lib/Composition_related.c: Removed artificial tolerance of empty
+	  elements. This greatly decreases the minimal number of tracers
+	  per element required for a given mesh.
+	  
+	  This fixed issue140.
+
+2008-02-28 01:00  tan2
+
+	* lib/Process_buoyancy.c: Minor tweak
+
+2008-02-27 07:42  becker
+
+	* lib/Full_read_input_from_files.c, lib/Ggrd_handling.c,
+	  lib/Initial_temperature.c, lib/Instructions.c, lib/Lith_age.c,
+	  lib/Output_gzdir.c, lib/Pan_problem_misc_functions.c,
+	  lib/Regional_read_input_from_files.c, lib/Tracer_setup.c,
+	  lib/ggrd_handling.h: Built surface velocity BC support via Netcdf
+	  grd files back in. This needs more testing, but it would be good
+	  to have the framework in place before new additions are made.
+	  Also, age control is not yet implemented, but will be soon.
+
+2008-02-21 01:25  tan2
+
+	* bin/Citcom.c: Removed unnecessary call to construct_mat_group()
+
+2008-02-21 01:03  tan2
+
+	* CitcomS/BaseApplication.py, CitcomS/Controller.py,
+	  lib/Full_tracer_advection.c, lib/Process_buoyancy.c,
+	  module/initial_conditions.c: Finished interpolating fields onto
+	  tracers
+
+2008-02-21 01:02  tan2
+
+	* lib/Full_tracer_advection.c: Renamed fix_phi() to fix_angle()
+
+2008-02-21 01:01  tan2
+
+	* lib/Full_tracer_advection.c: Fixed issue139. Bug for tracers near
+	  South pole.
+
+2008-02-21 01:00  tan2
+
+	* lib/Full_tracer_advection.c, lib/Process_buoyancy.c,
+	  lib/Tracer_setup.c: Get new tracers in post processing stage
+
+2008-02-21 00:56  tan2
+
+	* lib/Pan_problem_misc_functions.c, lib/Tracer_setup.c: Read
+	  multiple extraq
+
+2008-02-21 00:55  tan2
+
+	* lib/Composition_related.c, lib/Instructions.c, lib/Output.c,
+	  lib/Output_gzdir.c: Write averaged composition in horiz_avg
+	  output. The HDF5 part of output is not implemented...
+
+2008-02-21 00:54  tan2
+
+	* lib/Process_buoyancy.c: Removed horizontal average from
+	  output_interpolated_fields()
+
+2008-02-21 00:53  tan2
+
+	* lib/Instructions.c, lib/Process_buoyancy.c, lib/global_defs.h:
+	  Compute horizontal average for composition fields
+
+2008-02-17 00:14  becker
+
+	* bin/Citcom.c, lib/Full_read_input_from_files.c,
+	  lib/Ggrd_handling.c, lib/Initial_temperature.c,
+	  lib/Instructions.c, lib/Regional_read_input_from_files.c,
+	  lib/Viscosity_structures.c, lib/convection_variables.h,
+	  lib/global_defs.h: Modified Citcom.c such that E->mat gets
+	  assigned based on element depth (as was default before), even if
+	  mat_control is not selected.
+	  
+	  Added (back in?) ggrd netcdf type VIP prefactor material control
+	  via ggrd_mat_control flags (as documented in Instructions.c)
+	  
+	  Renamed some of the ggrd stuff to make it more modular.
+
+2008-02-09 00:14  tan2
+
+	* lib/Process_buoyancy.c: Interpolate fields in post_processing()
+	  
+	  * The parameter "itracer_interpolate_fields" is the same as
+	  "model_type" in the AVM code. * If itracer_interpolate_fields is
+	  1, 2, or 3, it interpolates temperature and compositions. The
+	  horizonal average is not removed yet.
+
+2008-02-08 23:58  tan2
+
+	* lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c:
+	  Refactored the functions.
+	  
+	  * get shape functions on tracer location * interpolate data using
+	  acquired shape functions
+
+2008-02-08 23:56  tan2
+
+	* CitcomS/Solver/Solver.py, bin/Citcom.c, module/bindings.c,
+	  module/initial_conditions.c, module/initial_conditions.h: Added
+	  binding for post_processing(). Exit program after post processing
+	  and saving results.
+
+2008-02-08 23:54  tan2
+
+	* lib/Full_tracer_advection.c, lib/global_defs.h: * Using a
+	  different reference point for uv space. This fixed a nasty bug
+	  when some cap extends over ~pi/2.
+	  
+	  * A bunch of debugging output (disabled)
+	  
+	  * Disable more debugging output
+
+2008-02-08 23:50  tan2
+
+	* CitcomS/Components/Tracer.py, lib/Full_tracer_advection.c,
+	  lib/Tracer_setup.c, lib/tracer_defs.h, module/setProperties.c:
+	  Added new parameter: itracer_interpolate_fields
+	  
+	  When it is 0 (default), nothing is done. Otherwise, the
+	  convection fields are interpolated onto the location of tracers.
+
+2008-02-04 23:23  tan2
+
+	* examples/Makefile.am, visual/Makefile.am: Reverted part of
+	  unwannted change
+
+2008-02-04 23:21  tan2
+
+	* examples/Makefile.am, module/misc.c, visual/Makefile.am: Fixed
+	  potential memory leak
+
+2008-02-04 23:13  tan2
+
+	* module/Exchanger/exchangers.cc: Fixed bugs in managing reference
+	  counts and potential double-free
+
+2008-02-04 20:40  tan2
+
+	* lib/Initial_temperature.c: Fixed a regression reported by Lydia
+	  Dicaprio.
+	  
+	  The initial temperature should be constructured in this order: 1.
+	  if tic_method=-1, read from velo files. 2. if lith_age=1,
+	  read/constructed from lith_age files. 3. otherwise, call
+	  {full,regional}_construct_tic_from_input()
+
+2008-01-22 19:52  tan2
+
+	* lib/Advection_diffusion.c, lib/Element_calculations.c,
+	  lib/Size_does_matter.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c: Renamed functions
+
+2008-01-22 19:38  tan2
+
+	* lib/Advection_diffusion.c, lib/Element_calculations.c,
+	  lib/Global_operations.c, lib/Instructions.c, lib/Obsolete.c,
+	  lib/Process_buoyancy.c, lib/Size_does_matter.c,
+	  lib/Topo_gravity.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h: Computes the derivatives of shape functions
+	  and jacobians only once and stores them for later use. This
+	  reduces the total cpu time of cookbook8 by 13%.
+	  
+	  - get_global_shape_fn_sph() computes and stores the derivatives
+	  of shape functions and jacobians.
+	  
+	  - Moved get_global_shape_fn() to Obsolete.c
+	  
+	  - Calling construct_shape_function_derivatives() in
+	  initial_mesh_solver_setup(). This function call
+	  get_global_shape_fn_sph() for each element.
+	  
+	  - get_rtf_at_vpts() and get_rtf_at_ppts() are for coord.
+	  transformation matrix at vpts and ppts respectively
+	  
+	  - Passed arguments by references in PG solvers instead of by
+	  values to avoid copying.
+
+2008-01-17 02:06  becker
+
+	* lib/Full_tracer_advection.c, lib/global_defs.h: Changed GNOMONIC
+	  to CITCOM_GNOMONIC to avoid namespace conflict with GMT gmt.h
+
+2008-01-16 20:53  tan2
+
+	* lib/Tracer_setup.c: Forgot to checkin this file
+
+2008-01-16 20:34  tan2
+
+	* lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/tracer_defs.h: Added timing information for tracer module.
+	  The timing is reported in *.tracer_log.* files.
+
+2008-01-16 20:30  tan2
+
+	* lib/Full_tracer_advection.c, lib/global_defs.h,
+	  lib/tracer_defs.h: A more memory efficient way to find shape
+	  function for tracers.
+	  
+	  - Migrated E->tracer.UV to E->gnomonic. The reference point is
+	  the 1st node of the local mesh. The 0th element of E->gnomonic
+	  stores the sine of cosine of reference theta. - Convertd
+	  shape_coefs array from size of nel to size of snel to save
+	  memory.
+
+2008-01-15 23:36  tan2
+
+	* AUTHORS: Added Luis Armendariz to the author list
+
+2008-01-15 23:11  tan2
+
+	* lib/Full_sphere_related.c: Simplified loop over levels
+
+2008-01-15 23:05  tan2
+
+	* examples/Makefile.am, lib/Full_sphere_related.c,
+	  lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c, lib/global_defs.h, lib/tracer_defs.h,
+	  visual/Makefile.am: Reverted previous checkin
+
+2008-01-15 23:01  tan2
+
+	* examples/Makefile.am, lib/Full_sphere_related.c,
+	  lib/Full_tracer_advection.c, lib/Regional_tracer_advection.c,
+	  lib/Tracer_setup.c, lib/global_defs.h, lib/tracer_defs.h,
+	  visual/Makefile.am: Simplified loop over levels
+
+2008-01-15 00:29  tan2
+
+	* lib/Full_sphere_related.c: Forgot to rename variables
+
+2008-01-14 23:03  tan2
+
+	* lib/Full_sphere_related.c: Fixed 2 bugs in full_coord_of_cap().
+	  
+	  1. x and y arrays were overridden in the loop of level. 2. Choice
+	  of reference point was not optimal and may cause round off
+	  problem.
+
+2008-01-03 19:51  tan2
+
+	* lib/Construct_arrays.c, lib/Full_geometry_cartesian.c,
+	  lib/Full_sphere_related.c, lib/Full_tracer_advection.c,
+	  lib/Full_version_dependent.c, lib/Output_h5.c,
+	  lib/Regional_version_dependent.c, lib/Sphere_harmonics.c,
+	  lib/Sphere_util.c, lib/global_defs.h: Re-applied patches that got
+	  reverted in r8973
+
+2007-12-29 07:02  becker
+
+	* lib/Construct_arrays.c, lib/Full_geometry_cartesian.c,
+	  lib/Full_sphere_related.c, lib/Full_tracer_advection.c,
+	  lib/Full_version_dependent.c, lib/Instructions.c,
+	  lib/Output_h5.c, lib/Regional_version_dependent.c,
+	  lib/Sphere_harmonics.c, lib/Sphere_util.c, lib/global_defs.h:
+	  Trying to sync back up, those should be old changes, I hope.
+
+2007-12-20 20:30  tan2
+
+	* lib/Full_sphere_related.c, lib/Full_tracer_advection.c,
+	  lib/Full_version_dependent.c, lib/Sphere_harmonics.c,
+	  lib/Sphere_util.c, lib/global_defs.h, tests/gnomonic.c: Generated
+	  global mesh by great circles. Tracer module can split the cap in
+	  the map view now.
+
+2007-12-20 20:27  tan2
+
+	* lib/Full_geometry_cartesian.c: Fine tune the mesh so that each
+	  cap has the same surface area
+
+2007-12-20 20:26  tan2
+
+	* lib/Regional_version_dependent.c: Removed obsolete code
+
+2007-12-20 20:25  tan2
+
+	* lib/Construct_arrays.c: Fixed a redundant cast
+
+2007-12-17 22:06  tan2
+
+	* lib/Output_h5.c: Fixed phase change width
+
+2007-11-12 22:42  tan2
+
+	* NEWS, configure.ac: Updated the version number and file NEWS
+
+2007-11-12 22:38  tan2
+
+	* module/Exchanger/Makefile.am: Added mishing header file to the
+	  makefile, also avoided compiling unused code.
+
+2007-11-11 20:37  becker
+
+	* lib/Construct_arrays.c, lib/Full_obsolete.c, lib/Ggrd_handling.c,
+	  lib/Material_properties.c, lib/global_defs.h: Synching with the
+	  new release, none of those changes should be relevant.
+
+2007-11-08 22:41  tan2
+
+	* ChangeLog: Updated file ChangeLog to r8244
+
 2007-11-08 22:31  tan2
 
 	* lib/Instructions.c, lib/Pan_problem_misc_functions.c: Replaced a
