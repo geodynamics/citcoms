@@ -1,6 +1,11 @@
-CitcomS NEWS -- history of user-visible changes.  2009-05-10
+CitcomS NEWS -- history of user-visible changes.  2009-06-25
 
 Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
+
+Version 3.1.1
+
+* Added missing files in Cookbook 10.
+
 
 Version 3.1.0
 
