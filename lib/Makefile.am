@@ -55,7 +55,7 @@ AM_CPPFLAGS += -DUSE_CUDA
 .cu.o:
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libCitcomS_a_CFLAGS) $(CFLAGS) -c -o $@ $<
 
-CUDA_SOURCES += cgrad_kernel.cu
+CUDA_SOURCES += cgrad_kernel.cu multigrid_kernel.cu
 endif
 
 # static library

@@ -595,6 +595,8 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 }
 
 
+#ifndef USE_CUDA
+
 /* ============================================================================
    Multigrid Gauss-Seidel relaxation scheme which requires the storage of local
    information, otherwise some other method is required. NOTE this is a bit worse
@@ -753,6 +755,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     return;
 
 }
+#endif /* !USE_CUDA */
 
 
 double cofactor(A,i,j,n)
