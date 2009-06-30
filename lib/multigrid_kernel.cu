@@ -30,7 +30,7 @@ struct Some_variables {
     
     double *BI;
     
-    double *temp, *temp1;
+    double *temp;
     unsigned int *NODE;
 };
 
@@ -46,7 +46,7 @@ __device__ void strip_bcs_from_residual(
     int i;
 
     if (E->num_zero_resid)
-        for(i=1;i<=E->num_zero_resid;i++)
+        for (i=1;i<=E->num_zero_resid;i++)
             Res[E->zero_resid[i]] = 0.0;
 
     return;
@@ -74,12 +74,13 @@ __device__ void n_assemble_del2_u(
     const int nno=E->lmesh.NNO;
 
 
-    for(e=0;e<=neq;e++)
+    for (e=0;e<=neq;e++) {
         Au[e]=0.0;
+    }
 
     u[neq] = 0.0;
 
-    for(e=1;e<=nno;e++)     {
+    for (e=1;e<=nno;e++) {
 
         eqn1=E->ID[e].doff[1];
         eqn2=E->ID[e].doff[2];
@@ -94,14 +95,15 @@ __device__ void n_assemble_del2_u(
         B2=E->Eqn_k2+(e-1)*MAX_EQN;
         B3=E->Eqn_k3+(e-1)*MAX_EQN;
 
-        for(i=3;i<MAX_EQN;i++)  {
+        for (i=3;i<MAX_EQN;i++) {
             UU = u[C[i]];
             Au[eqn1] += B1[i]*UU;
             Au[eqn2] += B2[i]*UU;
             Au[eqn3] += B3[i]*UU;
         }
-        for(i=0;i<MAX_EQN;i++)
+        for (i=0;i<MAX_EQN;i++) {
             Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+        }
 
     }     /* end for e */
 
@@ -140,25 +142,23 @@ __global__ void do_gauss_seidel(
 
     steps=*cycles;
 
-    if(guess) {
+    if (guess) {
         n_assemble_del2_u(E,d0,Ad,1);
-    }
-    else
-        for(i=0;i<neq;i++) {
+    } else {
+        for (i=0;i<neq;i++) {
             d0[i]=Ad[i]=zeroo;
         }
+    }
 
-    count = 0;
-
-
-    while (count < steps) {
-        for(j=0;j<=E->lmesh.NEQ;j++)
+    for (count = 0; count < steps; ++count) {
+        for (j=0;j<=E->lmesh.NEQ;j++) {
             E->temp[j] = zeroo;
+        }
 
         Ad[neq] = zeroo;
 
-        for(i=1;i<=E->lmesh.NNO;i++)
-            if(E->NODE[i] & OFFSIDE)   {
+        for (i=1;i<=E->lmesh.NNO;i++) {
+            if (E->NODE[i] & OFFSIDE) {
 
                 eqn1=E->ID[i].doff[1];
                 eqn2=E->ID[i].doff[2];
@@ -166,12 +166,10 @@ __global__ void do_gauss_seidel(
                 E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
                 E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
                 E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
-                E->temp1[eqn1] = Ad[eqn1];
-                E->temp1[eqn2] = Ad[eqn2];
-                E->temp1[eqn3] = Ad[eqn3];
             }
+        }
 
-        for(i=1;i<=E->lmesh.NNO;i++)     {
+        for (i=1;i<=E->lmesh.NNO;i++) {
 
             eqn1=E->ID[i].doff[1];
             eqn2=E->ID[i].doff[2];
@@ -185,7 +183,7 @@ __global__ void do_gauss_seidel(
                no communications are needed yet, because boundary Ad will
                not be used for the G-S iterations for interior nodes */
 
-            for(j=3;j<MAX_EQN;j++)  {
+            for (j=3;j<MAX_EQN;j++)  {
                 UU = E->temp[C[j]];
                 Ad[eqn1] += B1[j]*UU;
                 Ad[eqn2] += B2[j]*UU;
@@ -199,39 +197,16 @@ __global__ void do_gauss_seidel(
             }
 
             /* Ad on boundaries differs after the following operation */
-            for(j=0;j<MAX_EQN;j++)
+            for (j=0;j<MAX_EQN;j++) {
                 Ad[C[j]]  += B1[j]*E->temp[eqn1]
                              +  B2[j]*E->temp[eqn2]
                              +  B3[j]*E->temp[eqn3];
+            }
 
             d0[eqn1] += E->temp[eqn1];
             d0[eqn2] += E->temp[eqn2];
             d0[eqn3] += E->temp[eqn3];
         }
-
-        for(i=1;i<=E->lmesh.NNO;i++)
-            if(E->NODE[i] & OFFSIDE)   {
-                eqn1=E->ID[i].doff[1];
-                eqn2=E->ID[i].doff[2];
-                eqn3=E->ID[i].doff[3];
-                Ad[eqn1] -= E->temp1[eqn1];
-                Ad[eqn2] -= E->temp1[eqn2];
-                Ad[eqn3] -= E->temp1[eqn3];
-            }
-
-        for(i=1;i<=E->lmesh.NNO;i++)
-            if(E->NODE[i] & OFFSIDE)   {
-                eqn1=E->ID[i].doff[1];
-                eqn2=E->ID[i].doff[2];
-                eqn3=E->ID[i].doff[3];
-                Ad[eqn1] += E->temp1[eqn1];
-                Ad[eqn2] += E->temp1[eqn2];
-                Ad[eqn3] += E->temp1[eqn3];
-            }
-
-
-	count++;
-
     }
 
     *cycles=count;
@@ -287,7 +262,6 @@ extern "C" void gauss_seidel(
     kE.BI = E->BI[LEVEL][M];
     
     kE.temp = E->temp[M];
-    kE.temp1 = E->temp1[M];
     
     kE.NODE = E->NODE[LEVEL][M];
     
