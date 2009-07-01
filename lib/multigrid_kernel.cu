@@ -3,10 +3,11 @@
 
 #include "global_defs.h"
 #include "element_definitions.h"
+#include <assert.h>
+#include <stdio.h>
 
 
 enum {
-    LEVEL = 0,
     CAPS_PER_PROC = 1,
     M = 1, /* cap # */
     NSD = 3, /* Spatial extent: 3d */
@@ -224,8 +225,6 @@ static void assert_assumptions(struct All_variables *E, int level) {
     assert(E->sphere.caps_per_proc == CAPS_PER_PROC);
     
     assert(E->mesh.nsd == NSD);
-    assert(E->mesh.levmax == LEVEL);
-    assert(level == LEVEL);
     
     assert(E->parallel.nproc == 1);
 }
@@ -246,24 +245,41 @@ extern "C" void gauss_seidel(
     
     /* initialize 'Some_variables' with 'All_variables' */
     
-    kE.num_zero_resid = E->num_zero_resid[LEVEL][M];
-    kE.zero_resid = E->zero_resid[LEVEL][M];
+    kE.num_zero_resid = E->num_zero_resid[level][M];
+    kE.zero_resid = E->zero_resid[level][M];
     
-    kE.lmesh.NEQ = E->lmesh.NEQ[LEVEL];
-    kE.lmesh.NNO = E->lmesh.NNO[LEVEL];
+    kE.lmesh.NEQ = E->lmesh.NEQ[level];
+    kE.lmesh.NNO = E->lmesh.NNO[level];
     
-    kE.ID    = E->ID[LEVEL][M];
+    kE.ID    = E->ID[level][M];
     
-    kE.Eqn_k1 = E->Eqn_k1[LEVEL][M];
-    kE.Eqn_k2 = E->Eqn_k2[LEVEL][M];
-    kE.Eqn_k3 = E->Eqn_k3[LEVEL][M];
-    kE.Node_map = E->Node_map[LEVEL][M];
+    kE.Eqn_k1 = E->Eqn_k1[level][M];
+    kE.Eqn_k2 = E->Eqn_k2[level][M];
+    kE.Eqn_k3 = E->Eqn_k3[level][M];
+    kE.Node_map = E->Node_map[level][M];
     
-    kE.BI = E->BI[LEVEL][M];
+    kE.BI = E->BI[level][M];
     
     kE.temp = E->temp[M];
     
-    kE.NODE = E->NODE[LEVEL][M];
+    kE.NODE = E->NODE[level][M];
     
-    /* XXX */
+                                       /* XXX */
+    do {
+        int i, doff, print;
+        for (i=1;i<=kE.lmesh.NNO;i++) {
+            print = (i < 10 || i > kE.lmesh.NNO - 10);
+            if (print)
+                fprintf(stderr, "%04d:", i);
+            for (doff = 1; doff <= 3; ++doff) {
+                assert(kE.ID[i].doff[doff] == /*NSD*/ 3 * (i - 1) + doff - 1);
+                if (print)
+                    fprintf(stderr, " %d", kE.ID[i].doff[doff]);
+            }
+            if (print)
+                fprintf(stderr, "\n");
+        }
+        fprintf(stderr, "\n0 - NEQ %d\n", kE.lmesh.NEQ);
+    } while (0);
+    assert(0);
 }

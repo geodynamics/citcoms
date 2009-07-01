@@ -50,14 +50,6 @@ struct Some_variables {
     
     double *BI;
     
-    struct /*CONTROL*/ {
-        int NASSEMBLE;
-        
-        int v_steps_low;
-        int total_iteration_cycles;
-        int total_v_solver_calls;
-    } control;
-    
     /* temporary malloc'd memory */
     double *memory;
     int memoryDim;
@@ -66,13 +58,6 @@ struct Some_variables {
     int n_octoterms;
     struct octoterm *ot;
     
-    /* outputs */
-    
-    struct /*MONITOR*/ {
-        double momentum_residual;
-    } monitor;
-
-    int valid;
 };
 
 
@@ -367,7 +352,7 @@ static void destroy_E(
 /*------------------------------------------------------------------------*/
 /* from General_matix_functions.c */
 
-double conj_grad(
+double do_conj_grad(
     struct Some_variables *E,
     double *d0,
     double *F,
@@ -498,42 +483,6 @@ double conj_grad(
 }
 
 
-void do_solve_del2_u(
-    struct Some_variables *E,
-    double *d0,
-    double *F,
-    double acc
-    )
-{
-    int count,cycles;
-    int i, neq;
-
-    double residual;
-
-    neq  = E->lmesh.NEQ;
-
-    for(i=0;i<neq;i++)  {
-        d0[i] = 0.0;
-    }
-
-    residual = sqrt(global_vdot(E,F,F));
-
-    count = 0;
-
-    cycles = E->control.v_steps_low;
-    residual = conj_grad(E,d0,F,acc,&cycles);
-    E->valid = (residual < acc)? 1:0;
-
-    count++;
-
-    E->monitor.momentum_residual = residual;
-    E->control.total_iteration_cycles += count;
-    E->control.total_v_solver_calls += 1;
-
-    return;
-}
-
-
 /*------------------------------------------------------------------------*/
 
 static void assert_assumptions(struct All_variables *E, int high_lev) {
@@ -552,17 +501,20 @@ static void assert_assumptions(struct All_variables *E, int high_lev) {
     assert(E->parallel.Skip_neq[LEVEL][M] == 0);
 }
 
-extern "C" int solve_del2_u(
+
+extern "C" double conj_grad(
     struct All_variables *E,
     double **d0,
     double **F,
     double acc,
-    int high_lev
+    int *cycles,
+    int level
     )
 {
     struct Some_variables kE;
+    double residual;
     
-    assert_assumptions(E, high_lev);
+    assert_assumptions(E, level);
     
     /* initialize 'Some_variables' with 'All_variables' */
     
@@ -584,11 +536,6 @@ extern "C" int solve_del2_u(
         
     kE.BI = E->BI[LEVEL][M];
         
-    kE.control.NASSEMBLE = E->control.NASSEMBLE;
-    kE.control.v_steps_low = E->control.v_steps_low;
-    kE.control.total_iteration_cycles = E->control.total_iteration_cycles; /* in/out */
-    kE.control.total_v_solver_calls = E->control.total_v_solver_calls; /* in/out */
-    
     /* allocate temporary memory */
     kE.memoryDim = 0;
     kE.memoryDim += 5 * E->lmesh.NEQ[LEVEL]  + /* r0,r1,r2,z0,z1 */
@@ -601,21 +548,12 @@ extern "C" int solve_del2_u(
     kE.ot = (struct octoterm *)malloc(kE.n_octoterms * sizeof(struct octoterm));
     e_map(&kE);
     
-    /* zero outputs */
-    kE.monitor.momentum_residual = 0.0;
-    kE.valid = 0;
-    
     /* solve */
-    do_solve_del2_u(&kE, d0[M], F[M], acc);
-    
-    /* get outputs */
-    E->control.total_iteration_cycles = kE.control.total_iteration_cycles;
-    E->control.total_v_solver_calls = kE.control.total_v_solver_calls;
-    E->monitor.momentum_residual = kE.monitor.momentum_residual;
+    residual = do_conj_grad(&kE, d0[M], F[M], acc, cycles);
     
     free(kE.memory);
     free(kE.mm);
     free(kE.ot);
     
-    return kE.valid;
+    return residual;
 }

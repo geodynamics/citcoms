@@ -45,7 +45,6 @@ int epsilon[4][4] = {   /* Levi-Cita epsilon */
     Iterative solver also using multigrid  ........
     ===========================================================  */
 
-#ifndef USE_CUDA
 int solve_del2_u(E,d0,F,acc,high_lev)
      struct All_variables *E;
      double **d0;
@@ -146,7 +145,6 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   return(valid);
 }
-#endif /* !USE_CUDA */
 
 /* =================================
    recursive multigrid function ....
