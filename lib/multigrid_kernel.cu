@@ -26,7 +26,7 @@ struct Some_variables {
     
     struct ID *ID;
     
-    higher_precision *Eqn_k1, *Eqn_k2, *Eqn_k3;
+    higher_precision *Eqn_k[NSD+1];
     int *Node_map;
     
     double *BI;
@@ -45,7 +45,8 @@ __device__ void strip_bcs_from_residual(
     )
 {
     int i;
-
+    
+    /* XXX: see get_bcs_id_for_residual() */
     if (E->num_zero_resid)
         for (i=1;i<=E->num_zero_resid;i++)
             Res[E->zero_resid[i]] = 0.0;
@@ -57,57 +58,55 @@ __device__ void strip_bcs_from_residual(
 /*------------------------------------------------------------------------*/
 /* from Element_calculations.c */
 
-__device__ void n_assemble_del2_u(
+__global__ void n_assemble_del2_u(
     struct Some_variables *E,
     double *u, double *Au,
     int strip_bcs
     )
 {
-    int e,i;
-    int eqn1,eqn2,eqn3;
-
-    double UU,U1,U2,U3;
-
-    int *C;
-    higher_precision *B1,*B2,*B3;
-
-    const int neq=E->lmesh.NEQ;
-    const int nno=E->lmesh.NNO;
-
-
-    for (e=0;e<=neq;e++) {
-        Au[e]=0.0;
+    const int neq = E->lmesh.NEQ;
+    
+    int e, doff, eqn;
+    
+    e = blockIdx.x + 1; /* 1 <= e <= E->lmesh.NNO */
+    doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    eqn = E->ID[e].doff[doff];
+    
+    double Au_eqn;
+    
+    Au_eqn = 0.0;
+    if (e == 1 && doff == 1) {
+        Au[neq] = 0.0;
+        u[neq] = 0.0;
     }
+    
+    int *C;
+    higher_precision *B;
+    double UU;
+    int i;
+    
+    C = E->Node_map + (e-1)*MAX_EQN;
+    B = E->Eqn_k[doff]+(e-1)*MAX_EQN;
 
-    u[neq] = 0.0;
-
-    for (e=1;e<=nno;e++) {
-
-        eqn1=E->ID[e].doff[1];
-        eqn2=E->ID[e].doff[2];
-        eqn3=E->ID[e].doff[3];
-
-        U1 = u[eqn1];
-        U2 = u[eqn2];
-        U3 = u[eqn3];
-
-        C=E->Node_map + (e-1)*MAX_EQN;
-        B1=E->Eqn_k1+(e-1)*MAX_EQN;
-        B2=E->Eqn_k2+(e-1)*MAX_EQN;
-        B3=E->Eqn_k3+(e-1)*MAX_EQN;
-
-        for (i=3;i<MAX_EQN;i++) {
-            UU = u[C[i]];
-            Au[eqn1] += B1[i]*UU;
-            Au[eqn2] += B2[i]*UU;
-            Au[eqn3] += B3[i]*UU;
-        }
-        for (i=0;i<MAX_EQN;i++) {
-            Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
-        }
-
-    }     /* end for e */
-
+    for (i=3;i<MAX_EQN;i++) {
+        UU = u[C[i]];
+        Au_eqn += B[i]*UU;
+    }
+    
+    /* store to global memory */
+    Au[eqn] = Au_eqn;
+    
+#if 0
+    /* XXX: What now? */
+    double U1,U2,U3;
+    U1 = u[eqn1];
+    U2 = u[eqn2];
+    U3 = u[eqn3];
+    for (i=0;i<MAX_EQN;i++) {
+        Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+    }
+#endif
+    
     if (strip_bcs)
 	strip_bcs_from_residual(E,Au);
 
@@ -116,9 +115,88 @@ __device__ void n_assemble_del2_u(
 
 
 /*------------------------------------------------------------------------*/
-/* based on the function from General_matrix_functions.c */
+/* These are based on the function from General_matrix_functions.c. */
 
-__global__ void do_gauss_seidel(
+__global__ void gauss_seidel_0(
+    struct Some_variables *E,
+    double *d0,
+    double *Ad
+    )
+{
+    const double zeroo = 0.0;
+    int i;
+    
+    i = blockIdx.x; /* 0 <= i < E->lmesh.NEQ */
+    d0[i] = Ad[i] = zeroo;
+}
+
+__global__ void gauss_seidel_1(
+    struct Some_variables *E,
+    double *F, double *Ad
+    )
+{
+    const double zeroo = 0.0;
+    const int neq = E->lmesh.NEQ;
+    
+    int i, doff, eqn;
+    
+    i = blockIdx.x + 1; /* 1 <= i <= E->lmesh.NNO */
+    doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    eqn = E->ID[i].doff[doff];
+    
+    if (E->NODE[i] & OFFSIDE) {
+        E->temp[eqn] = (F[eqn] - Ad[eqn])*E->BI[eqn];
+    } else {
+        E->temp[eqn] = zeroo;
+    }
+    
+    if (i == 1 && doff == 1) {
+        E->temp[neq] = zeroo;
+        Ad[neq] = zeroo;
+    }
+}
+
+__global__ void gauss_seidel_2(
+    struct Some_variables *E,
+    double *F, double *Ad
+    )
+{
+    int i, doff, eqn;
+    
+    i = blockIdx.x + 1; /* 1 <= i <= E->lmesh.NNO */
+    doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    eqn = E->ID[i].doff[doff];
+    
+    int *C;
+    higher_precision *B;
+    double UU, Ad_eqn;
+    int j;
+    
+    C = E->Node_map+(i-1)*MAX_EQN;
+    B = E->Eqn_k[doff]+(i-1)*MAX_EQN;
+    
+    /* load from global memory */
+    Ad_eqn = Ad[eqn];
+    
+    /* Ad on boundaries differs after the following operation, but
+       no communications are needed yet, because boundary Ad will
+       not be used for the G-S iterations for interior nodes */
+    
+    for (j=3;j<MAX_EQN;j++)  {
+        UU = E->temp[C[j]];
+        Ad_eqn += B[j]*UU;
+    }
+    
+    /* store to global memory */
+    Ad[eqn] = Ad_eqn;
+    
+    if (!(E->NODE[i] & OFFSIDE))   {
+        E->temp[eqn] = (F[eqn] - Ad_eqn)*E->BI[eqn];
+    }
+
+}
+
+void do_gauss_seidel(
     struct Some_variables *E,
     double *d0,
     double *F, double *Ad,
@@ -132,70 +210,34 @@ __global__ void do_gauss_seidel(
     int *C;
     int eqn1,eqn2,eqn3;
 
-    double UU;
-
     higher_precision *B1,*B2,*B3;
-
-
-    const int neq=E->lmesh.NEQ;
-
-    const double zeroo = 0.0;
 
     steps=*cycles;
 
+    dim3 neqBlock(1, 1, 1);
+    dim3 neqGrid(E->lmesh.NEQ, 1, 1);
+    
+    dim3 nnoBlock(1, 1, 1);
+    dim3 nnoGrid(E->lmesh.NNO, NSD, 1);
+    
+    /* XXX: allocate & init device memory */
+    struct Some_variables *d_E = 0;
+    double *d_d0 = 0, *d_F = 0, *d_Ad = 0;
+    
     if (guess) {
-        n_assemble_del2_u(E,d0,Ad,1);
+        n_assemble_del2_u<<< nnoGrid, nnoBlock >>>(d_E, d_d0, d_Ad, 1);
     } else {
-        for (i=0;i<neq;i++) {
-            d0[i]=Ad[i]=zeroo;
-        }
+        gauss_seidel_0<<< neqGrid, neqBlock >>>(d_E, d_d0, d_Ad);
     }
-
+    
     for (count = 0; count < steps; ++count) {
-        for (j=0;j<=E->lmesh.NEQ;j++) {
-            E->temp[j] = zeroo;
-        }
-
-        Ad[neq] = zeroo;
-
+        
+        gauss_seidel_1<<< nnoGrid, nnoBlock >>>(d_E, d_F, d_Ad);
+        gauss_seidel_2<<< nnoGrid, nnoBlock >>>(d_E, d_F, d_Ad);
+        
+        
+        /* XXX: How to parallelize this? */
         for (i=1;i<=E->lmesh.NNO;i++) {
-            if (E->NODE[i] & OFFSIDE) {
-
-                eqn1=E->ID[i].doff[1];
-                eqn2=E->ID[i].doff[2];
-                eqn3=E->ID[i].doff[3];
-                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
-                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
-                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
-            }
-        }
-
-        for (i=1;i<=E->lmesh.NNO;i++) {
-
-            eqn1=E->ID[i].doff[1];
-            eqn2=E->ID[i].doff[2];
-            eqn3=E->ID[i].doff[3];
-            C=E->Node_map+(i-1)*MAX_EQN;
-            B1=E->Eqn_k1+(i-1)*MAX_EQN;
-            B2=E->Eqn_k2+(i-1)*MAX_EQN;
-            B3=E->Eqn_k3+(i-1)*MAX_EQN;
-
-            /* Ad on boundaries differs after the following operation, but
-               no communications are needed yet, because boundary Ad will
-               not be used for the G-S iterations for interior nodes */
-
-            for (j=3;j<MAX_EQN;j++)  {
-                UU = E->temp[C[j]];
-                Ad[eqn1] += B1[j]*UU;
-                Ad[eqn2] += B2[j]*UU;
-                Ad[eqn3] += B3[j]*UU;
-            }
-
-            if (!(E->NODE[i]&OFFSIDE))   {
-                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
-                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
-                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
-            }
 
             /* Ad on boundaries differs after the following operation */
             for (j=0;j<MAX_EQN;j++) {
@@ -209,10 +251,12 @@ __global__ void do_gauss_seidel(
             d0[eqn3] += E->temp[eqn3];
         }
     }
-
+    
+    /* wait for completion */
+    cudaThreadSynchronize();
+    
     *cycles=count;
     return;
-
 }
 
 
@@ -253,9 +297,10 @@ extern "C" void gauss_seidel(
     
     kE.ID    = E->ID[level][M];
     
-    kE.Eqn_k1 = E->Eqn_k1[level][M];
-    kE.Eqn_k2 = E->Eqn_k2[level][M];
-    kE.Eqn_k3 = E->Eqn_k3[level][M];
+    kE.Eqn_k[0] = 0;
+    kE.Eqn_k[1] = E->Eqn_k1[level][M];
+    kE.Eqn_k[2] = E->Eqn_k2[level][M];
+    kE.Eqn_k[3] = E->Eqn_k3[level][M];
     kE.Node_map = E->Node_map[level][M];
     
     kE.BI = E->BI[level][M];
