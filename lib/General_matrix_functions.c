@@ -304,6 +304,7 @@ double multi_grid(E,d1,F,acc,hl)
     ===========================================================  */
 
 
+#ifndef USE_CUDA
 double conj_grad(E,d0,F,acc,cycles,level)
      struct All_variables *E;
      double **d0;
@@ -422,6 +423,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
     }
 
     return(residual);   }
+#endif /* !USE_CUDA */
 
 
 /* ========================================================================================

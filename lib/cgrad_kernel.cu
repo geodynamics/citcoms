@@ -1,6 +1,12 @@
 /* -*- C -*- */
 /* vim:set ft=c: */
 
+#if __CUDA_ARCH__ < 130
+/* for double-precision floating-point */
+#error This code requires compute capability 1.3 or higher; try giving "-arch sm_13".
+#endif
+
+
 #include <math.h>
 #include "global_defs.h"
 
