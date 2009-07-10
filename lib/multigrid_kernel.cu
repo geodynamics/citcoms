@@ -279,6 +279,204 @@ static void assert_assumptions(struct All_variables *E, int level) {
     assert(E->parallel.nproc == 1);
 }
 
+static void tally_n_assemble_del2_u(
+    struct Some_variables *E //,
+    //double *u, double *Au,
+    //int strip_bcs
+    )
+{
+    int e,i;
+    int eqn1,eqn2,eqn3;
+    
+#if 0
+    double UU,U1,U2,U3;
+#endif
+
+    int *C;
+#if 0
+    higher_precision *B1,*B2,*B3;
+#endif
+
+    const int neq=E->lmesh.NEQ;
+    const int nno=E->lmesh.NNO;
+    
+    /*
+     * Au = E->Eqn_k? * u
+     *  where E->Eqn_k? is the sparse stiffness matrix
+     */
+    
+    int maxAcc, total;
+    int *tally;
+    int **threadMap, **threadTally;
+    int f;
+    
+    tally = (int *)malloc((neq+1) * sizeof(int));
+    threadMap = (int **)malloc((neq+1)* sizeof(int*));
+    threadTally = (int **)malloc((neq+1)* sizeof(int*));
+    
+    for(e=0;e<=neq;e++) {
+        //Au[e]=0.0;
+        tally[e] = 0;
+        threadMap[e] = (int *)malloc((neq+1) * sizeof(int));
+        threadTally[e] = (int *)malloc((neq+1) * sizeof(int));
+        for(f=0;f<=neq;f++) {
+            threadMap[e][f] = -1;
+            threadTally[e][f] = 0;
+        }
+    }
+
+#if 0
+    u[neq] = 0.0;
+#endif
+
+    for(e=1;e<=nno;e++)     {
+
+        eqn1=E->ID[e].doff[1];
+        eqn2=E->ID[e].doff[2];
+        eqn3=E->ID[e].doff[3];
+        
+        /* could compute, but 'Node_map' is more complicated */
+        assert(eqn1 == 3*(e-1));
+        assert(eqn2 == eqn1+1);
+        assert(eqn3 == eqn1+2);
+        
+        /* could put maps in constant memory */
+        
+        /*
+         * Key observation: after parallelizing on 'e' (either one):
+         *
+         *   ID[e].doff[1,2,3]
+         *   C
+         *
+         * are fixed for each thread.  => Not worth obsessing over?
+         */
+        
+        /*
+         * Put Au[eqnX] into shared memory; it is accessed almost MAX_EQN=42 times.
+         *
+         * "Au[e]=0.0" should be unnecessary -- single write at end of fn
+         * from 'AuX' local var.. so actually, Au[eqnX] sits in register
+         * 
+         * But what about "Au[C[i]]"???????????
+         */
+        
+        /*
+         * neq vs. nno
+         *
+         * neq == 3*nno
+         * warp=32; only 2 threads wasted
+         * better: 3 warps 32*3
+         *
+         * use y for "dimension index"? (block size 32x3; nno % 32)
+         */
+        
+#if 0
+        U1 = u[eqn1];
+        U2 = u[eqn2];
+        U3 = u[eqn3];
+#endif
+
+        C=E->Node_map + (e-1)*MAX_EQN;
+#if 0
+        B1=E->Eqn_k[1]+(e-1)*MAX_EQN;
+        B2=E->Eqn_k[2]+(e-1)*MAX_EQN;
+        B3=E->Eqn_k[3]+(e-1)*MAX_EQN;
+#endif
+
+        for(i=3;i<MAX_EQN;i++)  {
+#if 0
+            UU = u[C[i]];
+            Au[eqn1] += B1[i]*UU;
+            Au[eqn2] += B2[i]*UU;
+            Au[eqn3] += B3[i]*UU;
+#endif
+            ++tally[eqn1];
+            ++tally[eqn2];
+            ++tally[eqn3];
+            for(f=0;f<=neq;f++) {
+                if (threadMap[eqn1][f] == e) {
+                    ++threadTally[eqn1][f];
+                    break;
+                }
+                if (threadMap[eqn1][f] == -1) {
+                    threadMap[eqn1][f] = e;
+                    ++threadTally[eqn1][f];
+                    break;
+                }
+            }
+            for(f=0;f<=neq;f++) {
+                if (threadMap[eqn2][f] == e) {
+                    ++threadTally[eqn2][f];
+                    break;
+                }
+                if (threadMap[eqn2][f] == -1) {
+                    threadMap[eqn2][f] = e;
+                    ++threadTally[eqn2][f];
+                    break;
+                }
+            }
+            for(f=0;f<=neq;f++) {
+                if (threadMap[eqn3][f] == e) {
+                    ++threadTally[eqn3][f];
+                    break;
+                }
+                if (threadMap[eqn3][f] == -1) {
+                    threadMap[eqn3][f] = e;
+                    ++threadTally[eqn3][f];
+                    break;
+                }
+            }
+        }
+        for(i=0;i<MAX_EQN;i++) {
+#if 0
+            Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+#endif
+            ++tally[C[i]];
+            for(f=0;f<=neq;f++) {
+                if (threadMap[C[i]][f] == e) {
+                    ++threadTally[C[i]][f];
+                    break;
+                }
+                if (threadMap[C[i]][f] == -1) {
+                    threadMap[C[i]][f] = e;
+                    ++threadTally[C[i]][f];
+                    break;
+                }
+            }
+        }
+
+    }     /* end for e */
+    
+    maxAcc = 0;
+    total = 0;
+    for(e=0;e<=neq;e++) {
+        int myTally;
+        fprintf(stderr, "Au[%d]: %d times", e, tally[e]);
+        if (e < neq)
+            maxAcc = max(maxAcc, tally[e]);
+        total += tally[e];
+        myTally = 0;
+        for(f=0;f<=neq;f++) {
+            if (threadMap[e][f] == -1)
+                break;
+            fprintf(stderr, " %d(%d)", threadMap[e][f], threadTally[e][f]);
+            myTally += threadTally[e][f];
+        }
+        fprintf(stderr, " (%d times)\n", myTally);
+    }
+    //fprintf(stderr, "Au[%d] == %f\n", e - 1, Au[e]);
+    fprintf(stderr, "max accesses %d\n", maxAcc);
+    fprintf(stderr, "total accesses %d\n", total);
+    assert(0);
+    
+#if 0
+    if (strip_bcs)
+        strip_bcs_from_residual(E,Au);
+#endif
+
+    return;
+}
+
 extern "C" void gauss_seidel(
     struct All_variables *E,
     double **d0,
@@ -332,5 +530,6 @@ extern "C" void gauss_seidel(
         }
         fprintf(stderr, "\n0 - NEQ %d\n", kE.lmesh.NEQ);
     } while (0);
+    tally_n_assemble_del2_u(&kE);
     assert(0);
 }
