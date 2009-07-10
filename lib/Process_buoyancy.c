@@ -53,9 +53,9 @@ void post_processing(struct All_variables *E)
 void heat_flux(E)
     struct All_variables *E;
 {
-    int m,e,el,i,j,node,lnode;
+    int m,e,el,i,j,node,lnode,nz;
     float *flux[NCS],*SU[NCS],*RU[NCS];
-    float VV[4][9],u[9],T[9],dTdz[9],area,uT;
+    float VV[4][9],u[9],T[9],dTdz[9],rho[9],area,uT;
     float *sum_h;
 
     void velo_from_element();
@@ -91,7 +91,10 @@ void heat_flux(E)
         u[i] = 0.0;
         T[i] = 0.0;
         dTdz[i] = 0.0;
+        rho[i] = 0.0;
         for(j=1;j<=ends;j++)  {
+          nz = ((E->ien[m][e].node[j]-1) % E->lmesh.noz)+1;
+          rho[i] += E->refstate.rho[nz]*E->N.vpt[GNVINDEX(j,i)];
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
           T[i] += E->T[m][E->ien[m][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
           dTdz[i] += -E->T[m][E->ien[m][e].node[j]]*E->gNX[m][e].vpt[GNVXINDEX(2,j,i)];
@@ -102,7 +105,7 @@ void heat_flux(E)
       area = 0.0;
       for(i=1;i<=vpts;i++)   {
         /* XXX: missing unit conversion, heat capacity and thermal conductivity */
-        uT += u[i]*T[i]*E->gDA[m][e].vpt[i] + dTdz[i]*E->gDA[m][e].vpt[i];
+        uT += rho[i]*u[i]*T[i]*E->gDA[m][e].vpt[i] + dTdz[i]*E->gDA[m][e].vpt[i];
         }
 
       uT /= E->eco[m][e].area;
