@@ -39,26 +39,9 @@ struct Some_variables {
     
     double *temp;
     unsigned int *NODE;
-};
-
-
-/*------------------------------------------------------------------------*/
-/* from BC_util.c */
-
-__device__ void strip_bcs_from_residual(
-    struct Some_variables *E,
-    double *Res
-    )
-{
-    int i;
     
-    /* XXX: see get_bcs_id_for_residual() */
-    if (E->num_zero_resid)
-        for (i=1;i<=E->num_zero_resid;i++)
-            Res[E->zero_resid[i]] = 0.0;
-
-    return;
-}
+    int2 **term;
+};
 
 
 /*------------------------------------------------------------------------*/
@@ -70,52 +53,94 @@ __global__ void n_assemble_del2_u(
     int strip_bcs
     )
 {
-    const int neq = E->lmesh.NEQ;
+    int n = blockIdx.x + 1; /* 1 <= n <= E->lmesh.NNO */
+    int doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    unsigned int tid = threadIdx.x; /* 0 <= tid < MAX_EQN */
     
-    int e, doff, eqn;
+    /* Each block writes one element of Au in global memory: Au[eqn]. */
+    int eqn = E->ID[n].doff[doff]; /* XXX: Compute this value? */
     
-    e = blockIdx.x + 1; /* 1 <= e <= E->lmesh.NNO */
-    doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
-    eqn = E->ID[e].doff[doff];
-    
-    double Au_eqn;
-    
-    Au_eqn = 0.0;
-    if (e == 1 && doff == 1) {
-        Au[neq] = 0.0;
-        u[neq] = 0.0;
+    if (strip_bcs) {
+        /* See get_bcs_id_for_residual(). */
+        unsigned int flags = E->NODE[n];
+        unsigned int vb = 0x1 << doff; /* VBX, VBY, or VBZ */
+        if (flags & vb) {
+            /* no-op: Au[eqn] is zero */
+            if (tid == 0) {
+                Au[eqn] = 0.0;
+            }
+            /* XXX: Hundreds of blocks exit here (E->num_zero_resid).
+               Does it matter? */
+            return;
+        }
     }
     
-    int *C;
-    higher_precision *B;
-    double UU;
-    int i;
+    /* The partial sum computed by this thread. */
+    double acc;
     
-    C = E->Node_map + (e-1)*MAX_EQN;
-    B = E->Eqn_k[doff]+(e-1)*MAX_EQN;
-
-    for (i=3;i<MAX_EQN;i++) {
-        UU = u[C[i]];
-        Au_eqn += B[i]*UU;
+    /* Part I: The terms here are easily derived from the block and
+       thread indices. */
+    {
+        int e = n; /* 1 <= e <= E->lmesh.NNO */
+        int i = (int)tid; /* 0 <= i < MAX_EQN */
+        
+        if (i < 3) {
+            acc = 0.0;
+        } else {
+            int *C = E->Node_map + (e-1)*MAX_EQN;
+            higher_precision *B = E->Eqn_k[doff]+(e-1)*MAX_EQN;
+            double UU = u[C[i]];
+            acc = B[i]*UU;
+        }
     }
     
-    /* store to global memory */
-    Au[eqn] = Au_eqn;
-    
-#if 0
-    /* XXX: What now? */
-    double U1,U2,U3;
-    U1 = u[eqn1];
-    U2 = u[eqn2];
-    U3 = u[eqn3];
-    for (i=0;i<MAX_EQN;i++) {
-        Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+    /* Part II: These terms are more complicated. */
+    {
+        int2 pair = E->term[eqn][tid];
+        int e = pair.x; /* 1 <= e <= E->lmesh.NNO */
+        int i = pair.y; /* 0 <= i < MAX_EQN */
+        
+        if (i != -1) {
+            /* XXX: Compute these values? */
+            int eqn1 = E->ID[e].doff[1];
+            int eqn2 = E->ID[e].doff[2];
+            int eqn3 = E->ID[e].doff[3];
+            
+            double U1 = u[eqn1];
+            double U2 = u[eqn2];
+            double U3 = u[eqn3];
+            
+            higher_precision *B1, *B2, *B3;
+            B1 = E->Eqn_k[1]+(e-1)*MAX_EQN;
+            B2 = E->Eqn_k[2]+(e-1)*MAX_EQN;
+            B3 = E->Eqn_k[3]+(e-1)*MAX_EQN;
+            
+            acc += B1[i]*U1 +
+                   B2[i]*U2 +
+                   B3[i]*U3;
+        } else {
+            /* XXX: A considerable number of threads idle here. */
+        }
     }
-#endif
     
-    if (strip_bcs)
-	strip_bcs_from_residual(E,Au);
-
+    /* Reduce the partial sums for this block.
+       Based on reduce2() in the CUDA SDK. */
+    __shared__ double sum[MAX_EQN];
+    sum[tid] = acc;
+    __syncthreads();
+    for (unsigned int s = MAX_EQN/2; s > 0; s >>= 1) {
+        if (tid < s) {
+            sum[tid] += sum[tid + s];
+        }
+        /* XXX: not always necessary */
+        __syncthreads();
+    }
+    
+    /* Each block writes one element of Au in global memory. */
+    if (tid == 0) {
+        Au[eqn] = sum[0];
+    }
+    
     return;
 }
 
@@ -231,7 +256,13 @@ void do_gauss_seidel(
     double *d_d0 = 0, *d_F = 0, *d_Ad = 0;
     
     if (guess) {
-        n_assemble_del2_u<<< nnoGrid, nnoBlock >>>(d_E, d_d0, d_Ad, 1);
+        /* XXX */
+        d_Ad[E->lmesh.NEQ] = 0.0; /* Au -- unnecessary? */
+        d_d0[E->lmesh.NEQ] = 0.0; /* u */
+        
+        dim3 block(MAX_EQN, 1, 1);
+        dim3 grid(E->lmesh.NNO, NSD, 1);
+        n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
     } else {
         gauss_seidel_0<<< neqGrid, neqBlock >>>(d_E, d_d0, d_Ad);
     }
@@ -308,21 +339,30 @@ static void tally_n_assemble_del2_u(
     int maxAcc, total;
     int *tally;
     int **threadMap, **threadTally;
+    int2 **terms;
     int f;
     
     tally = (int *)malloc((neq+1) * sizeof(int));
     threadMap = (int **)malloc((neq+1)* sizeof(int*));
     threadTally = (int **)malloc((neq+1)* sizeof(int*));
+    terms = (int2 **)malloc((neq+1)* sizeof(int2 *));
     
     for(e=0;e<=neq;e++) {
         //Au[e]=0.0;
         tally[e] = 0;
         threadMap[e] = (int *)malloc((neq+1) * sizeof(int));
         threadTally[e] = (int *)malloc((neq+1) * sizeof(int));
+        terms[e] = (int2 *)malloc((MAX_EQN+1) * sizeof(int2));
         for(f=0;f<=neq;f++) {
             threadMap[e][f] = -1;
             threadTally[e][f] = 0;
         }
+        for (f = 0; f < MAX_EQN; ++f) {
+            terms[e][f].x = -1;
+            terms[e][f].y = -1;
+        }
+        terms[e][MAX_EQN].x = 0;
+        terms[e][MAX_EQN].y = 0;
     }
 
 #if 0
@@ -443,6 +483,15 @@ static void tally_n_assemble_del2_u(
                     break;
                 }
             }
+            ++terms[C[i]][MAX_EQN].y;
+            for (f = 0; f < MAX_EQN; ++f) {
+                if (terms[C[i]][f].y == -1) {
+                    terms[C[i]][f].x = e;
+                    terms[C[i]][f].y = i;
+                    break;
+                }
+            }
+            assert(C[i] == neq || f < MAX_EQN);
         }
 
     }     /* end for e */
@@ -467,7 +516,18 @@ static void tally_n_assemble_del2_u(
     //fprintf(stderr, "Au[%d] == %f\n", e - 1, Au[e]);
     fprintf(stderr, "max accesses %d\n", maxAcc);
     fprintf(stderr, "total accesses %d\n", total);
-    assert(0);
+    
+    fprintf(stderr, "\nterms:\n");
+    for(e=0;e<=neq;e++) {
+        fprintf(stderr, "Au[%d]: %d terms %s", e, terms[e][MAX_EQN].y,
+                terms[e][MAX_EQN].y > MAX_EQN ? "XXXTO" : "");
+        for (f = 0; f < MAX_EQN; ++f) {
+            if (terms[e][f].y == -1)
+                break;
+            fprintf(stderr, " %d(%d)", terms[e][f].y, terms[e][f].x);
+        }
+        fprintf(stderr, "\n");
+    }
     
 #if 0
     if (strip_bcs)
@@ -531,5 +591,11 @@ extern "C" void gauss_seidel(
         fprintf(stderr, "\n0 - NEQ %d\n", kE.lmesh.NEQ);
     } while (0);
     tally_n_assemble_del2_u(&kE);
+    do {
+        int i;
+        fprintf(stderr, "E->num_zero_resid == %d\n", kE.num_zero_resid);
+        for (i=1;i<=kE.num_zero_resid;i++)
+            fprintf(stderr, "    Au[%d] = 0.0\n", kE.zero_resid[i]);
+    } while (0);
     assert(0);
 }
