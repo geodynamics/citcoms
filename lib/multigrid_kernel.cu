@@ -22,8 +22,6 @@ enum {
 
 
 struct Some_variables {
-    int num_zero_resid;
-    int *zero_resid;
     
     struct /*MESH_DATA*/ {
         int NEQ;
@@ -42,6 +40,77 @@ struct Some_variables {
     
     int2 *term;
 };
+
+
+/*------------------------------------------------------------------------*/
+
+static void construct_E(
+    struct Some_variables **d_E,
+    struct Some_variables *s_E, /* host's shadow copy of d_E */
+    struct Some_variables *E
+    )
+{
+    /* construct a copy of 'E' in device memory */
+    
+    int neq = E->lmesh.NEQ;
+    int nno = E->lmesh.NNO;
+    
+    s_E->lmesh.NEQ = E->lmesh.NEQ;
+    s_E->lmesh.NNO = E->lmesh.NNO;
+    
+    /* ID -- cf. allocate_common_vars()*/
+    cudaMalloc((void **)&s_E->ID, (nno+1)*sizeof(struct ID));
+    cudaMemcpy(s_E->ID, E->ID, (nno+1)*sizeof(struct ID), cudaMemcpyHostToDevice);
+    
+    /* Eqn_k, Node_map -- cf. construct_node_maps() */
+    size_t matrix = MAX_EQN * nno;
+    s_E->Eqn_k[0] = 0;
+    cudaMalloc((void **)&s_E->Eqn_k[1], 3*matrix*sizeof(higher_precision));
+    s_E->Eqn_k[2] = s_E->Eqn_k[1] + matrix;
+    s_E->Eqn_k[3] = s_E->Eqn_k[2] + matrix;
+    cudaMemcpy(s_E->Eqn_k[1], E->Eqn_k[1], matrix*sizeof(higher_precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(s_E->Eqn_k[2], E->Eqn_k[2], matrix*sizeof(higher_precision), cudaMemcpyHostToDevice);
+    cudaMemcpy(s_E->Eqn_k[3], E->Eqn_k[3], matrix*sizeof(higher_precision), cudaMemcpyHostToDevice);
+    cudaMalloc((void **)&s_E->Node_map, matrix*sizeof(int));
+    cudaMemcpy(s_E->Node_map, E->Node_map, matrix*sizeof(int), cudaMemcpyHostToDevice);
+    
+    /* BI -- cf. allocate_velocity_vars() */
+    cudaMalloc((void **)&s_E->BI, neq*sizeof(double));
+    cudaMemcpy(s_E->BI, E->BI, neq*sizeof(double), cudaMemcpyHostToDevice);
+    
+    /* temp -- cf. allocate_velocity_vars() */
+    cudaMalloc((void **)&s_E->temp, (neq+1)*sizeof(double));
+    cudaMemcpy(s_E->temp, E->temp, (neq+1)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    /* NODE -- cf. allocate_common_vars() */
+    cudaMalloc((void **)&s_E->NODE, (nno+1)*sizeof(unsigned int));
+    cudaMemcpy(s_E->NODE, E->NODE, (nno+1)*sizeof(unsigned int), cudaMemcpyHostToDevice);
+    
+    /* term */
+    cudaMalloc((void **)&s_E->term, (neq+1) * MAX_EQN * sizeof(int2));
+    cudaMemcpy(s_E->term, E->term, (neq+1) * MAX_EQN * sizeof(int2), cudaMemcpyHostToDevice);
+    
+    /* E */
+    cudaMalloc((void**)d_E, sizeof(Some_variables));
+    cudaMemcpy(*d_E, s_E, sizeof(Some_variables), cudaMemcpyHostToDevice);
+    
+    return;
+}
+
+static void destroy_E(
+    struct Some_variables *d_E,
+    struct Some_variables *s_E
+    )
+{
+    cudaFree(s_E->ID);
+    cudaFree(s_E->Eqn_k[1]);
+    cudaFree(s_E->Node_map);
+    cudaFree(s_E->BI);
+    cudaFree(s_E->temp);
+    cudaFree(s_E->NODE);
+    cudaFree(s_E->term);
+    cudaFree(d_E);
+}
 
 
 /*------------------------------------------------------------------------*/
@@ -140,6 +209,11 @@ __global__ void n_assemble_del2_u(
     /* Each block writes one element of Au in global memory. */
     if (tid == 0) {
         Au[eqn] = sum[0];
+        
+        if (n == 1 && doff == 1) {
+            /* Well, actually, the first block writes one more. */
+            Au[E->lmesh.NEQ] = 0.0;
+        }
     }
     
     return;
@@ -301,18 +375,33 @@ void do_gauss_seidel(
 
     steps=*cycles;
 
-    /* XXX: allocate & init device memory */
+    /* pointers to device memory */
     struct Some_variables *d_E = 0;
     double *d_d0 = 0, *d_F = 0, *d_Ad = 0;
     
+    /* construct 'E' on the device */
+    struct Some_variables s_E;
+    construct_E(&d_E, &s_E, E);
+    
+    int neq = E->lmesh.NEQ;
+    
+    /* allocate memory on the device */
+    cudaMalloc((void**)&d_d0, (1+neq)*sizeof(double));
+    cudaMalloc((void**)&d_F, neq*sizeof(double));
+    cudaMalloc((void**)&d_Ad, (1+neq)*sizeof(double));
+    
+    /* copy input to the device */
+    cudaMemcpy(d_F, F, neq*sizeof(double), cudaMemcpyHostToDevice);
+    
     if (guess) {
-        /* XXX */
-        d_Ad[E->lmesh.NEQ] = 0.0; /* Au -- unnecessary? */
-        d_d0[E->lmesh.NEQ] = 0.0; /* u */
+        /* copy more input to the device */
+        d0[E->lmesh.NEQ] = 0.0; /* normally done by n_assemble_del2_u() */
+        cudaMemcpy(d_d0, d0, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
         
         dim3 block(MAX_EQN, 1, 1);
         dim3 grid(E->lmesh.NNO, NSD, 1);
         n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
+    
     } else {
         dim3 block(1, 1, 1);
         dim3 grid(E->lmesh.NEQ, 1, 1);
@@ -338,7 +427,18 @@ void do_gauss_seidel(
     /* wait for completion */
     cudaThreadSynchronize();
     
+    /* copy output from device */
+    cudaMemcpy(Ad, d_Ad, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    /* free device memory */
+    cudaFree(d_d0);
+    cudaFree(d_F);
+    cudaFree(d_Ad);
+    
+    destroy_E(d_E, &s_E);
+    
     *cycles=count;
+    
     return;
 }
 
@@ -361,6 +461,12 @@ static void collect_terms(
     )
 {
     /* Map out how to parallelize "Au[C[i]] += ..." and "Ad[C[j]] += ...". */
+    
+    static int2 *cache;
+    if (cache) {
+        E->term = cache;
+        return;
+    }
     
     const int neq = E->lmesh.NEQ;
     const int nno = E->lmesh.NNO;
@@ -391,6 +497,8 @@ static void collect_terms(
         }
     }
     
+    cache = E->term;
+    
     return;
 }
 
@@ -409,9 +517,6 @@ extern "C" void gauss_seidel(
     assert_assumptions(E, level);
     
     /* initialize 'Some_variables' with 'All_variables' */
-    
-    kE.num_zero_resid = E->num_zero_resid[level][M];
-    kE.zero_resid = E->zero_resid[level][M];
     
     kE.lmesh.NEQ = E->lmesh.NEQ[level];
     kE.lmesh.NNO = E->lmesh.NNO[level];
