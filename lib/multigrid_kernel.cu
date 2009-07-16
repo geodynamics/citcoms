@@ -355,7 +355,7 @@ __global__ void gauss_seidel_3(
     
     if (tid == 0) {
         /* Each block writes one element of Ad... */
-        Ad[eqn] = sum[0];
+        Ad[eqn] += sum[0];
         /* ..and one element of d0. */
         d0[eqn] += E->temp[eqn];
     }
@@ -425,10 +425,13 @@ void do_gauss_seidel(
     }
     
     /* wait for completion */
-    cudaThreadSynchronize();
+    if (cudaThreadSynchronize() != cudaSuccess) {
+        assert(0 && "something went wrong");
+    }
     
     /* copy output from device */
     cudaMemcpy(Ad, d_Ad, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(d0, d_d0, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
     
     /* free device memory */
     cudaFree(d_d0);
@@ -462,12 +465,6 @@ static void collect_terms(
 {
     /* Map out how to parallelize "Au[C[i]] += ..." and "Ad[C[j]] += ...". */
     
-    static int2 *cache;
-    if (cache) {
-        E->term = cache;
-        return;
-    }
-    
     const int neq = E->lmesh.NEQ;
     const int nno = E->lmesh.NNO;
     
@@ -496,8 +493,6 @@ static void collect_terms(
             assert(C[i] == neq || j < MAX_EQN);
         }
     }
-    
-    cache = E->term;
     
     return;
 }
@@ -536,8 +531,6 @@ extern "C" void gauss_seidel(
     kE.NODE = E->NODE[level][M];
     
     collect_terms(&kE);
-    
-    assert(0);
     
     do_gauss_seidel(
         &kE,
