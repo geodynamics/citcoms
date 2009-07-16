@@ -22,6 +22,8 @@ enum {
 
 
 struct Some_variables {
+    int num_zero_resid;
+    int *zero_resid;
     
     struct /*MESH_DATA*/ {
         int NEQ;
@@ -497,6 +499,16 @@ static void collect_terms(
     return;
 }
 
+
+void new_gauss_seidel(
+    struct Some_variables *E,
+    double *d0,
+    double *F, double *Ad,
+    double acc,
+    int *cycles,
+    int guess
+    );
+
 extern "C" void gauss_seidel(
     struct All_variables *E,
     double **d0,
@@ -512,6 +524,9 @@ extern "C" void gauss_seidel(
     assert_assumptions(E, level);
     
     /* initialize 'Some_variables' with 'All_variables' */
+    
+    kE.num_zero_resid = E->num_zero_resid[level][M];
+    kE.zero_resid = E->zero_resid[level][M];
     
     kE.lmesh.NEQ = E->lmesh.NEQ[level];
     kE.lmesh.NNO = E->lmesh.NNO[level];
@@ -530,14 +545,196 @@ extern "C" void gauss_seidel(
     
     kE.NODE = E->NODE[level][M];
     
-    collect_terms(&kE);
+    if (0) {
+        collect_terms(&kE);
+        
+        do_gauss_seidel(
+            &kE,
+            d0[M],
+            F[M], Ad[M],
+            acc,
+            cycles,
+            guess
+            );
+    } else {
+        new_gauss_seidel(
+            &kE,
+            d0[M],
+            F[M], Ad[M],
+            acc,
+            cycles,
+            guess
+            );
+    }
+}
+
+
+
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*/
+
+void new_strip_bcs_from_residual(
+    struct Some_variables *E,
+    double *Res
+    )
+{
+    for(int i = 1; i <= E->num_zero_resid; i++)
+        Res[E->zero_resid[i]] = 0.0;
+}
+
+
+void new_n_assemble_del2_u(
+    struct Some_variables *E,
+    double *u, double *Au,
+    int strip_bcs
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
     
-    do_gauss_seidel(
-        &kE,
-        d0[M],
-        F[M], Ad[M],
-        acc,
-        cycles,
-        guess
-        );
+    for (int e = 0; e <= neq; e++) {
+        Au[e] = 0.0;
+    }
+    
+    u[neq] = 0.0;
+    
+    for (int e = 1; e <= nno; e++) {
+        
+        int eqn1 = E->ID[e].doff[1];
+        int eqn2 = E->ID[e].doff[2];
+        int eqn3 = E->ID[e].doff[3];
+        
+        double U1 = u[eqn1];
+        double U2 = u[eqn2];
+        double U3 = u[eqn3];
+        
+        int *C = E->Node_map + (e-1)*MAX_EQN;
+        
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (e-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (e-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (e-1)*MAX_EQN;
+        
+        for (int i = 3; i < MAX_EQN; i++)  {
+            double UU = u[C[i]];
+            Au[eqn1] += B1[i]*UU;
+            Au[eqn2] += B2[i]*UU;
+            Au[eqn3] += B3[i]*UU;
+        }
+        for (int i = 0; i < MAX_EQN; i++) {
+            Au[C[i]] += B1[i]*U1 +
+                        B2[i]*U2 +
+                        B3[i]*U3;
+        }
+    }
+    
+    if (strip_bcs)
+        new_strip_bcs_from_residual(E,Au);
+    
+    return;
+}
+
+
+void new_gauss_seidel(
+    struct Some_variables *E,
+    double *d0,
+    double *F, double *Ad,
+    double acc,
+    int *cycles,
+    int guess
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    const double zeroo = 0.0;
+    
+    if (guess) {
+        // n_assemble_del2_u {
+        new_n_assemble_del2_u(E,d0,Ad,1);
+        // }
+    } else {
+        // gauss_seidel_0 {
+        for (int i = 0; i < neq; i++) {
+            d0[i] = Ad[i] = zeroo;
+        }
+        // }
+    }
+    
+    int steps = *cycles;
+    int count;
+    for (count = 0; count < steps; ++count) {
+        
+        // gauss_seidel_1 {
+        for (int j = 0; j <= neq; j++) {
+            E->temp[j] = zeroo;
+        }
+        
+        Ad[neq] = zeroo;
+        
+        for (int i = 1; i <= nno; i++) {
+            if (E->NODE[i] & OFFSIDE) {
+                int eqn1 = E->ID[i].doff[1];
+                int eqn2 = E->ID[i].doff[2];
+                int eqn3 = E->ID[i].doff[3];
+                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            }
+        }
+        // } gauss_seidel_1
+        
+        for (int i = 1; i <= nno; i++) {
+            
+            // gauss_seidel_2 {
+            
+            int eqn1 = E->ID[i].doff[1];
+            int eqn2 = E->ID[i].doff[2];
+            int eqn3 = E->ID[i].doff[3];
+            
+            int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+            higher_precision *B1,*B2,*B3;
+            B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+            B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+            B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+            /* Ad on boundaries differs after the following operation, but
+               no communications are needed yet, because boundary Ad will
+               not be used for the G-S iterations for interior nodes */
+            
+            for (int j = 3; j < MAX_EQN; j++) {
+                double UU = E->temp[C[j]];
+                Ad[eqn1] += B1[j]*UU;
+                Ad[eqn2] += B2[j]*UU;
+                Ad[eqn3] += B3[j]*UU;
+            }
+            
+            if (!(E->NODE[i] & OFFSIDE)) {
+                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            }
+            
+            // }
+            
+            // gauss_seidel_3 {
+            
+            /* Ad on boundaries differs after the following operation */
+            for (int j = 0; j < MAX_EQN; j++) {
+                Ad[C[j]] += B1[j]*E->temp[eqn1] +
+                            B2[j]*E->temp[eqn2] +
+                            B3[j]*E->temp[eqn3];
+            }
+            
+            d0[eqn1] += E->temp[eqn1];
+            d0[eqn2] += E->temp[eqn2];
+            d0[eqn3] += E->temp[eqn3];
+            
+            // }
+        }
+    }
+    
+    *cycles=count;
+    return;
 }
