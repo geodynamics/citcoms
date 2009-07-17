@@ -363,6 +363,39 @@ __global__ void gauss_seidel_3(
     }
 }
 
+
+void host_n_assemble_del2_u(
+    struct Some_variables *E,
+    double *u, double *Au,
+    int strip_bcs
+    );
+
+void host_gauss_seidel_0(
+    struct Some_variables *E,
+    double *d0,
+    double *Ad
+    );
+
+void host_gauss_seidel_1(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *F, double *Ad
+    );
+
+void host_gauss_seidel_2(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *F, double *Ad
+    );
+
+void host_gauss_seidel_3(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *d0,
+    double *Ad
+    );
+
+
 void do_gauss_seidel(
     struct Some_variables *E,
     double *d0,
@@ -402,27 +435,32 @@ void do_gauss_seidel(
         
         dim3 block(MAX_EQN, 1, 1);
         dim3 grid(E->lmesh.NNO, NSD, 1);
-        n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
+        if (0) n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
+        else host_n_assemble_del2_u(E, d_d0, d_Ad, 1);
     
     } else {
         dim3 block(1, 1, 1);
         dim3 grid(E->lmesh.NEQ, 1, 1);
-        gauss_seidel_0<<< grid, block >>>(d_E, d_d0, d_Ad);
+        if (1) gauss_seidel_0<<< grid, block >>>(d_E, d_d0, d_Ad);
+        else host_gauss_seidel_0(E, d_d0, d_Ad);
     }
     
     for (count = 0; count < steps; ++count) {
         {
             dim3 block(1, 1, 1);
             dim3 grid(E->lmesh.NNO, NSD, 1);
-            gauss_seidel_1<<< grid, block >>>(d_E, d_F, d_Ad);
-            gauss_seidel_2<<< grid, block >>>(d_E, d_F, d_Ad);
+            if (1) gauss_seidel_1<<< grid, block >>>(d_E, d_F, d_Ad);
+            else host_gauss_seidel_1(E, &s_E, d_F, d_Ad);
+            if (0) gauss_seidel_2<<< grid, block >>>(d_E, d_F, d_Ad);
+            else host_gauss_seidel_2(E, &s_E, d_F, d_Ad);
         }
         
         /* Ad on boundaries differs after the following operation */
         {
             dim3 block(MAX_EQN, 1, 1);
             dim3 grid(E->lmesh.NNO, NSD, 1);
-            gauss_seidel_3<<< grid, block >>>(d_E, d_d0, d_Ad);
+            if (0) gauss_seidel_3<<< grid, block >>>(d_E, d_d0, d_Ad);
+            else host_gauss_seidel_3(E, &s_E, d_d0, d_Ad);            
         }
     }
     
@@ -500,15 +538,6 @@ static void collect_terms(
 }
 
 
-void new_gauss_seidel(
-    struct Some_variables *E,
-    double *d0,
-    double *F, double *Ad,
-    double acc,
-    int *cycles,
-    int guess
-    );
-
 extern "C" void gauss_seidel(
     struct All_variables *E,
     double **d0,
@@ -545,27 +574,16 @@ extern "C" void gauss_seidel(
     
     kE.NODE = E->NODE[level][M];
     
-    if (0) {
-        collect_terms(&kE);
-        
-        do_gauss_seidel(
-            &kE,
-            d0[M],
-            F[M], Ad[M],
-            acc,
-            cycles,
-            guess
-            );
-    } else {
-        new_gauss_seidel(
-            &kE,
-            d0[M],
-            F[M], Ad[M],
-            acc,
-            cycles,
-            guess
-            );
-    }
+    collect_terms(&kE);
+    
+    do_gauss_seidel(
+        &kE,
+        d0[M],
+        F[M], Ad[M],
+        acc,
+        cycles,
+        guess
+        );
 }
 
 
@@ -574,7 +592,7 @@ extern "C" void gauss_seidel(
 /*------------------------------------------------------------------------*/
 /*------------------------------------------------------------------------*/
 
-void new_strip_bcs_from_residual(
+void host_strip_bcs_from_residual(
     struct Some_variables *E,
     double *Res
     )
@@ -584,14 +602,21 @@ void new_strip_bcs_from_residual(
 }
 
 
-void new_n_assemble_del2_u(
+void host_n_assemble_del2_u(
     struct Some_variables *E,
-    double *u, double *Au,
+    double *d_u, double *d_Au,
     int strip_bcs
     )
 {
+    cudaThreadSynchronize();
+    
     const int neq = E->lmesh.NEQ;
     const int nno = E->lmesh.NNO;
+    
+    double *u = (double *)malloc((1+neq)*sizeof(double));
+    cudaMemcpy(u, d_u, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    double *Au = (double *)malloc((1+neq)*sizeof(double));
     
     for (int e = 0; e <= neq; e++) {
         Au[e] = 0.0;
@@ -630,111 +655,196 @@ void new_n_assemble_del2_u(
     }
     
     if (strip_bcs)
-        new_strip_bcs_from_residual(E,Au);
+        host_strip_bcs_from_residual(E,Au);
+    
+    cudaMemcpy(d_Au, Au, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    free(u);
+    free(Au);
     
     return;
 }
 
 
-void new_gauss_seidel(
+void host_gauss_seidel_0(
     struct Some_variables *E,
-    double *d0,
-    double *F, double *Ad,
-    double acc,
-    int *cycles,
-    int guess
+    double *d_d0,
+    double *d_Ad
     )
 {
+    cudaThreadSynchronize();
+    
     const int neq = E->lmesh.NEQ;
-    const int nno = E->lmesh.NNO;
+    
+    double *d0 = (double *)malloc((1+neq)*sizeof(double));
+    double *Ad = (double *)malloc((1+neq)*sizeof(double));
+    
     const double zeroo = 0.0;
     
-    if (guess) {
-        // n_assemble_del2_u {
-        new_n_assemble_del2_u(E,d0,Ad,1);
-        // }
-    } else {
-        // gauss_seidel_0 {
-        for (int i = 0; i < neq; i++) {
-            d0[i] = Ad[i] = zeroo;
-        }
-        // }
+    for (int i = 0; i < neq; i++) {
+        d0[i] = Ad[i] = zeroo;
     }
     
-    int steps = *cycles;
-    int count;
-    for (count = 0; count < steps; ++count) {
-        
-        // gauss_seidel_1 {
-        for (int j = 0; j <= neq; j++) {
-            E->temp[j] = zeroo;
-        }
-        
-        Ad[neq] = zeroo;
-        
-        for (int i = 1; i <= nno; i++) {
-            if (E->NODE[i] & OFFSIDE) {
-                int eqn1 = E->ID[i].doff[1];
-                int eqn2 = E->ID[i].doff[2];
-                int eqn3 = E->ID[i].doff[3];
-                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
-                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
-                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
-            }
-        }
-        // } gauss_seidel_1
-        
-        for (int i = 1; i <= nno; i++) {
-            
-            // gauss_seidel_2 {
-            
+    cudaMemcpy(d_d0, d0, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_Ad, Ad, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    free(d0);
+    free(Ad);
+}
+
+
+void host_gauss_seidel_1(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *d_F, double *d_Ad
+    )
+{
+    cudaThreadSynchronize();
+    
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    double *F = (double *)malloc(neq*sizeof(double));
+    cudaMemcpy(F, d_F, neq*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    double *Ad = (double *)malloc((1+neq)*sizeof(double));
+    cudaMemcpy(Ad, d_Ad, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    const double zeroo = 0.0;
+    
+    for (int j = 0; j <= neq; j++) {
+        E->temp[j] = zeroo;
+    }
+    
+    Ad[neq] = zeroo;
+    
+    for (int i = 1; i <= nno; i++) {
+        if (E->NODE[i] & OFFSIDE) {
             int eqn1 = E->ID[i].doff[1];
             int eqn2 = E->ID[i].doff[2];
             int eqn3 = E->ID[i].doff[3];
-            
-            int *C = E->Node_map + (i-1)*MAX_EQN;
-            
-            higher_precision *B1,*B2,*B3;
-            B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
-            B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
-            B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
-            
-            /* Ad on boundaries differs after the following operation, but
-               no communications are needed yet, because boundary Ad will
-               not be used for the G-S iterations for interior nodes */
-            
-            for (int j = 3; j < MAX_EQN; j++) {
-                double UU = E->temp[C[j]];
-                Ad[eqn1] += B1[j]*UU;
-                Ad[eqn2] += B2[j]*UU;
-                Ad[eqn3] += B3[j]*UU;
-            }
-            
-            if (!(E->NODE[i] & OFFSIDE)) {
-                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
-                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
-                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
-            }
-            
-            // }
-            
-            // gauss_seidel_3 {
-            
-            /* Ad on boundaries differs after the following operation */
-            for (int j = 0; j < MAX_EQN; j++) {
-                Ad[C[j]] += B1[j]*E->temp[eqn1] +
-                            B2[j]*E->temp[eqn2] +
-                            B3[j]*E->temp[eqn3];
-            }
-            
-            d0[eqn1] += E->temp[eqn1];
-            d0[eqn2] += E->temp[eqn2];
-            d0[eqn3] += E->temp[eqn3];
-            
-            // }
+            E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+            E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+            E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
         }
     }
     
-    *cycles=count;
-    return;
+    /* Ad[neq] */
+    cudaMemcpy(d_Ad + neq, Ad + neq, sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(s_E->temp, E->temp, (neq+1)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    free(F);
+    free(Ad);
+}
+
+
+void host_gauss_seidel_2(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *d_F, double *d_Ad
+    )
+{
+    cudaThreadSynchronize();
+    
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    double *F = (double *)malloc(neq*sizeof(double));
+    cudaMemcpy(F, d_F, neq*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    double *Ad = (double *)malloc((1+neq)*sizeof(double));
+    cudaMemcpy(Ad, d_Ad, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    cudaMemcpy(E->temp, s_E->temp, (neq+1)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        /* Ad on boundaries differs after the following operation, but
+           no communications are needed yet, because boundary Ad will
+           not be used for the G-S iterations for interior nodes */
+            
+        for (int j = 3; j < MAX_EQN; j++) {
+            double UU = E->temp[C[j]];
+            Ad[eqn1] += B1[j]*UU;
+            Ad[eqn2] += B2[j]*UU;
+            Ad[eqn3] += B3[j]*UU;
+        }
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+            E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+            E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+        }
+            
+    }
+            
+    cudaMemcpy(d_Ad, Ad, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(s_E->temp, E->temp, (neq+1)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    free(F);
+    free(Ad);
+}
+
+
+void host_gauss_seidel_3(
+    struct Some_variables *E,
+    struct Some_variables *s_E,
+    double *d_d0,
+    double *d_Ad
+    )
+{
+    cudaThreadSynchronize();
+    
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    double *d0 = (double *)malloc((1+neq)*sizeof(double));
+    double *Ad = (double *)malloc((1+neq)*sizeof(double));
+    
+    cudaMemcpy(d0, d_d0, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(Ad, d_Ad, (1+neq)*sizeof(double), cudaMemcpyDeviceToHost);
+    cudaMemcpy(E->temp, s_E->temp, (neq+1)*sizeof(double), cudaMemcpyDeviceToHost);
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        /* Ad on boundaries differs after the following operation */
+        for (int j = 0; j < MAX_EQN; j++) {
+            Ad[C[j]] += B1[j]*E->temp[eqn1] +
+                        B2[j]*E->temp[eqn2] +
+                        B3[j]*E->temp[eqn3];
+        }
+            
+        d0[eqn1] += E->temp[eqn1];
+        d0[eqn2] += E->temp[eqn2];
+        d0[eqn3] += E->temp[eqn3];
+            
+    }
+    
+    cudaMemcpy(d_d0, d0, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_Ad, Ad, (1+neq)*sizeof(double), cudaMemcpyHostToDevice);
+    
+    free(d0);
+    free(Ad);
 }
