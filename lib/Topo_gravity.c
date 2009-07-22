@@ -216,10 +216,12 @@ void compute_nodal_stress(struct All_variables *E,
   void velo_from_element();
   void stress_conform_bcs();
 
-  int i,j,e,node,m;
+  int i,j,p,q,e,node,m;
 
   float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
   double dilation[9];
+  double ba[9][9][4][7];
+
   double pre[9],tww[9],rtf[4][9];
   double velo_scaling, stress_scaling, mass_fac;
 
@@ -231,6 +233,7 @@ void compute_nodal_stress(struct All_variables *E,
   const int ends=enodes[dims];
   const int lev=E->mesh.levmax;
   const int sphere_key=1;
+  const int ppts = ppoints[dims];
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
     for(e=1;e<=E->lmesh.nel;e++)  {
@@ -283,34 +286,55 @@ void compute_nodal_stress(struct All_variables *E,
           tww[i] += dOmega->vpt[j] * g_point[j].weight[E->mesh.nsd-1]
             * E->N.vpt[GNVINDEX(i,j)];
       }
+      if (E->control.precise_strain_rate){
+	/*  
+	    Ba method 
+	*/
 
-      /* integrate over element  */
-      for(j=1;j<=vpts;j++)   {	/* Gauss integration points */
-        for(i=1;i<=ends;i++)   { /* nodes in element loop */
-	  /* strain rate contributions from each node */
-          Vxyz[1][j]+=( VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
-                        + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[2][j]+=( (VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]
-                         + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
-                        + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
-          Vxyz[3][j]+= VV[3][i]*GNx->vpt[GNVXINDEX(2,i,j)];
-
-          Vxyz[4][j]+=( (VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)]
-                         - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
-                        + VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
-          Vxyz[5][j]+=VV[1][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-                                                                      *GNx->vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
-          Vxyz[6][j]+=VV[2][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
-                                                                      *GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
-          Vxyz[7][j]+=rtf[3][j] * (
-                                   VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
-                                   + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
-                                   + VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
-          Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
-            ( VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
-              + VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
-              - VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)] );
-        }
+	if ((e-1)%E->lmesh.elz==0) {
+	  construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
+	}
+	
+	get_ba_p(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,
+		 rtf, E->mesh.nsd, ba);
+	
+	for(j=1;j<=ppts;j++)
+	  for(p=1;p<=8;p++)
+	    for(i=1;i<=ends;i++)
+	      for(q=1;q<=dims;q++) {
+		Vxyz[p][j] += ba[i][j][q][p] * VV[q][i];
+	      }
+	
+	
+      }else{		/* old method */
+	/* integrate over element  */
+	for(j=1;j<=vpts;j++)   {	/* Gauss integration points */
+	  for(i=1;i<=ends;i++)   { /* nodes in element loop */
+	    /* strain rate contributions from each node */
+	    Vxyz[1][j]+=( VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
+			  + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+	    Vxyz[2][j]+=( (VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]
+			   + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+			  + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
+	    Vxyz[3][j]+= VV[3][i]*GNx->vpt[GNVXINDEX(2,i,j)];
+	    
+	    Vxyz[4][j]+=( (VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)]
+			   - VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j]))/sin(rtf[1][j])
+			  + VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)])*rtf[3][j];
+	    Vxyz[5][j]+=VV[1][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+									 *GNx->vpt[GNVXINDEX(0,i,j)]-VV[1][i]*E->N.vpt[GNVINDEX(i,j)]);
+	    Vxyz[6][j]+=VV[2][i]*GNx->vpt[GNVXINDEX(2,i,j)] + rtf[3][j]*(VV[3][i]
+									 *GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])-VV[2][i]*E->N.vpt[GNVINDEX(i,j)]);
+	    Vxyz[7][j]+=rtf[3][j] * (
+				     VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
+				     + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
+				     + VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
+	    Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
+	      ( VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
+		+ VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
+		- VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)] );
+	  }
+	}
       }
 
       if(E->control.inv_gruneisen != 0) { /* isotropic component */
