@@ -941,7 +941,8 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 
     for(e=1; e<=nel; e++) {
 
-        get_rtf_at_ppts(E, m, lev, e, rtf);
+        get_rtf_at_ppts(E, m, lev, e, rtf); /* pressure evaluation
+					       points */
         velo_from_element(E, VV, m, e, sphere_key);
         GNx = &(E->gNX[m][e]);
 
@@ -1019,7 +1020,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
                                        - VV[2][i] * E->N.ppt[GNPINDEX(i, j)]);
                 }
             }
-        } /* end of else */
+        } /* end of fast, imprecise strain-rate computation */
 
         if(E->control.inv_gruneisen != 0) {
             for(j=1; j<=ppts; j++)
@@ -1030,7 +1031,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
         edot[1][2] = edot[1][3] = edot[2][3] = 0;
 
         /* edot is 2 * (the deviatoric strain rate tensor) */
-        for(j=1; j<=ppts; j++) {
+        for(j=1; j <= ppts; j++) {
             edot[1][1] += 2.0 * (Vxyz[1][j] - dilation[j]);
             edot[2][2] += 2.0 * (Vxyz[2][j] - dilation[j]);
             edot[3][3] += 2.0 * (Vxyz[3][j] - dilation[j]);

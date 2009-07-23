@@ -215,6 +215,8 @@ void compute_nodal_stress(struct All_variables *E,
   void get_rtf_at_vpts();
   void velo_from_element();
   void stress_conform_bcs();
+  void construct_c3x3matrix_el();
+  void get_ba();
 
   int i,j,p,q,e,node,m;
 
@@ -228,15 +230,17 @@ void compute_nodal_stress(struct All_variables *E,
   struct Shape_function_dA *dOmega;
   struct Shape_function_dx *GNx;
 
-  const int dims=E->mesh.nsd;
-  const int vpts=vpoints[dims];
-  const int ends=enodes[dims];
-  const int lev=E->mesh.levmax;
+
+
   const int sphere_key=1;
-  const int ppts = ppoints[dims];
+  const int lev = E->mesh.levmax;
+  const int dims = E->mesh.nsd;
+  const int nel = E->lmesh.nel;
+  const int vpts = vpoints[dims];
+  const int ends = enodes[dims];
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    for(e=1;e<=E->lmesh.nel;e++)  {
+    for(e=1;e <= nel;e++)  {
       Szz = 0.0;
       Sxx = 0.0;
       Syy = 0.0;
@@ -265,7 +269,8 @@ void compute_nodal_stress(struct All_variables *E,
        *    Vxyz[6] = 2*e23
        * where 1 is theta, 2 is phi, and 3 is r
        */
-      for(j=1;j<=vpts;j++)  {
+      for(j=1;j <= vpts;j++)  {	/* loop through velocity Gauss points  */
+
         pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega->vpt[j];
         dilation[j] = 0.0;
         Vxyz[1][j] = 0.0;
@@ -280,7 +285,7 @@ void compute_nodal_stress(struct All_variables *E,
 
       for(i=1;i<=ends;i++) {
         tww[i] = 0.0;
-        for(j=1;j<=vpts;j++)	/* weighting, consisting of Jacobian,
+        for(j=1;j <= vpts;j++)	/* weighting, consisting of Jacobian,
 				   Gauss weight and shape function,
 				   evaluated at integration points */
           tww[i] += dOmega->vpt[j] * g_point[j].weight[E->mesh.nsd-1]
@@ -288,28 +293,29 @@ void compute_nodal_stress(struct All_variables *E,
       }
       if (E->control.precise_strain_rate){
 	/*  
-	    Ba method 
+	    B method 
 	*/
 
 	if ((e-1)%E->lmesh.elz==0) {
 	  construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
 	}
+	/* get b at velocity Gauss points */
+	get_ba(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,rtf, dims, ba);
 	
-	get_ba_p(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,
-		 rtf, E->mesh.nsd, ba);
-	
-	for(j=1;j<=ppts;j++)
-	  for(p=1;p<=8;p++)
-	    for(i=1;i<=ends;i++)
-	      for(q=1;q<=dims;q++) {
+	for(j=1;j <= vpts;j++)
+	  for(p=1;p <= 8;p++)
+	    for(i=1;i <= ends;i++)
+	      for(q=1;q <= dims;q++) {
 		Vxyz[p][j] += ba[i][j][q][p] * VV[q][i];
 	      }
 	
 	
-      }else{		/* old method */
+      }else{	
+	/* old method */
+
 	/* integrate over element  */
-	for(j=1;j<=vpts;j++)   {	/* Gauss integration points */
-	  for(i=1;i<=ends;i++)   { /* nodes in element loop */
+	for(j=1;j <= vpts;j++)   {	/* Gauss integration points */
+	  for(i=1;i <= ends;i++)   { /* nodes in element loop */
 	    /* strain rate contributions from each node */
 	    Vxyz[1][j]+=( VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
 			  + VV[3][i]*E->N.vpt[GNVINDEX(i,j)] )*rtf[3][j];
@@ -342,7 +348,8 @@ void compute_nodal_stress(struct All_variables *E,
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
 
-      for(j=1;j<=vpts;j++)   {
+      for(j=1;j <= vpts;j++)   {
+	/* deviatoric stress, pressure will be added later */
           Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]); /*  */
           Syy += 2.0 * pre[j] * (Vxyz[2][j] - dilation[j]);
           Szz += 2.0 * pre[j] * (Vxyz[3][j] - dilation[j]);
