@@ -538,6 +538,357 @@ static void collect_terms(
 }
 
 
+void oy_gauss_seidel_2(
+    struct Some_variables *E
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    int *ti = (int *)malloc(3* nno * sizeof(int));
+    int *ti_tally = (int *)malloc(3 * nno * sizeof(int));
+    for (int i = 1; i <= nno; i++) {
+        ti[i - 1] = 0;
+        ti_tally[i - 1] = 0;
+    }
+    
+    int *back = ti;
+    
+    int *temp = (int *)malloc((neq+1)*sizeof(int));
+    int *temp_pre = (int *)malloc((neq+1)*sizeof(int));
+    int *temp_post = (int *)malloc((neq+1)*sizeof(int));
+    for (int i = 0; i <= neq; ++i) {
+        temp[i] = 0;                   /* uninit */
+        temp_pre[i] = 0;
+        temp_post[i] = 0;
+    }
+    
+    FILE *dot = fopen("gs2.dot", "w");
+    
+    fprintf(dot,
+            "digraph G {\n"
+            "    node [shape=box];\n\n");
+    
+    // job1[label="Job #1"];
+    const int DOT_MIN = 270;
+    const int DOT_MAX = 300;
+    
+    for (int i = 0; i <= neq && DOT_MIN <= i && i < DOT_MAX; ++i) {
+        fprintf(dot, "    Ad_%d_0[label=\"Ad[%d]\"];\n", i, i);
+    }
+    int *Ad = (int *)malloc((neq+1)*sizeof(int));
+    for (int i = 0; i <= neq; ++i) {
+        Ad[i] = 0;
+    }
+    
+    for (int i = 0; i <= neq && DOT_MIN <= i && i < DOT_MAX; ++i) {
+        fprintf(dot, "    temp_%d_0[label=\"temp[%d]\"];\n", i, i);
+    }
+    for (int i = 1; i <= nno; i++) {
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+        if (eqn3 < DOT_MIN || DOT_MAX <= eqn3) {
+            continue;
+        }
+        if (!(E->NODE[i] & OFFSIDE)) {
+            fprintf(dot, "    temp_%d_offside[label=\"temp[%d] OFFSIDE\"];\n", eqn1, eqn1);
+            fprintf(dot, "    temp_%d_offside[label=\"temp[%d] OFFSIDE\"];\n", eqn2, eqn2);
+            fprintf(dot, "    temp_%d_offside[label=\"temp[%d] OFFSIDE\"];\n", eqn3, eqn3);
+        }
+    }
+    for (int j = 3; j < MAX_EQN; j++) {
+        fprintf(dot, "    B1_%d_UU[label=\"B1[%d]*UU\"];\n", j, j);
+        fprintf(dot, "    B2_%d_UU[label=\"B2[%d]*UU\"];\n", j, j);
+        fprintf(dot, "    B3_%d_UU[label=\"B3[%d]*UU\"];\n", j, j);
+    }
+    fprintf(dot, "\n");
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        //fprintf(stderr, "@@@ read: ");
+        for (int j = 3; j < MAX_EQN; j++) {
+            //double UU = E->temp[C[j]];
+            //fprintf(stderr, "%d ", C[j]);
+            
+            /***
+             *  This may read 'temp' elements which are not written by
+             *  the OFFSIDE code below.  BUT, if a temp element IS
+             *  written by the OFFSIDE code, the read here follows the
+             *  write.
+             */
+            
+            if (C[j] < DOT_MIN || DOT_MAX <= C[j]) {
+            } else if (temp_pre[C[j]] || temp_post[C[j]]) {
+                /* edge already written */
+            } else if (temp[C[j]]) {
+                /* offside value */
+                fprintf(dot, "    temp_%d_offside->B1_%d_UU;\n", C[j], j);
+            } else {
+                /* original value */
+                fprintf(dot, "    temp_%d_0->B1_%d_UU;\n", C[j], j);
+            }
+            if (temp[C[j]]) {
+                /* already written */
+                ++temp_post[C[j]];
+            } else {
+                ++temp_pre[C[j]];
+            }
+            for (int *x = ti; x < back; ++x) {
+                if (C[j] == *x) {
+                    int tallyho = x - ti;
+                    ++ti_tally[tallyho];
+                }
+            }
+            /*
+              double UU = E->temp[C[j]];
+              Ad[eqn1] += B1[j]*UU;
+              Ad[eqn2] += B2[j]*UU;
+              Ad[eqn3] += B3[j]*UU;
+            */
+            if (DOT_MIN <= eqn3 && eqn3 < DOT_MAX) {
+                fprintf(dot, "    Ad_%d_%d[label=\"Ad[%d]\"];\n", eqn1, Ad[eqn1] + 1, eqn1);
+                fprintf(dot, "    Ad_%d_%d[label=\"Ad[%d]\"];\n", eqn2, Ad[eqn2] + 1, eqn2);
+                fprintf(dot, "    Ad_%d_%d[label=\"Ad[%d]\"];\n", eqn3, Ad[eqn3] + 1, eqn3);
+                fprintf(dot, "    Ad_%d_%d->Ad_%d_%d;\n", eqn1, Ad[eqn1], eqn1, Ad[eqn1] + 1);
+                fprintf(dot, "    Ad_%d_%d->Ad_%d_%d;\n", eqn2, Ad[eqn2], eqn2, Ad[eqn2] + 1);
+                fprintf(dot, "    Ad_%d_%d->Ad_%d_%d;\n", eqn3, Ad[eqn3], eqn3, Ad[eqn3] + 1);
+                fprintf(dot, "    B1_%d_UU->Ad_%d_%d;\n", j, eqn1, Ad[eqn1] + 1);
+                fprintf(dot, "    B2_%d_UU->Ad_%d_%d;\n", j, eqn2, Ad[eqn2] + 1);
+                fprintf(dot, "    B3_%d_UU->Ad_%d_%d;\n", j, eqn3, Ad[eqn3] + 1);
+            }
+            ++Ad[eqn1];
+            ++Ad[eqn2];
+            ++Ad[eqn3];
+        }
+        //fprintf(stderr, "\n");
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            fprintf(stderr, "@@@@@@ %d write: %d %d %d\n", i, eqn1, eqn2, eqn3);
+            //E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+            //E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+            //E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            ++temp[eqn1];
+            ++temp[eqn2];
+            ++temp[eqn3];
+            if (i < nno) {
+                int next_i = i + 1;
+                int *next_C = E->Node_map + (next_i-1)*MAX_EQN;
+                int flag1, flag2, flag3;
+                flag1 = flag2 = flag3 = 0;
+                for (int j = 3; j < MAX_EQN; j++) {
+                    if (next_C[j] == eqn1) {
+                        flag1 = 1;
+                    } else if (next_C[j] == eqn2) {
+                        flag2 = 1;
+                    } else if (next_C[j] == eqn3) {
+                        flag3 = 1;
+                    }
+                }
+                assert(flag1 && flag2 && flag3);
+            } else {
+                assert(0);
+            }
+            *back++ = eqn1;
+            *back++ = eqn2;
+            *back++ = eqn3;
+            if (DOT_MIN <= eqn3 && eqn3 < DOT_MAX) {
+                fprintf(dot, "    Ad_%d_%d->temp_%d_offside;\n", eqn1, Ad[eqn1], eqn1);
+                fprintf(dot, "    Ad_%d_%d->temp_%d_offside;\n", eqn2, Ad[eqn2], eqn2);
+                fprintf(dot, "    Ad_%d_%d->temp_%d_offside;\n", eqn3, Ad[eqn3], eqn3);
+            }
+        }
+            
+    }
+    
+    for (int i = 0; i <= neq; ++i) {
+        assert(temp[i] <= 1);
+        if (temp[i]) {
+            fprintf(stderr, "@@@ temp[%d] was written %d times\n", i, temp[i]);
+        }
+    }
+    for (int *x = ti; x < back; ++x) {
+        int tallyho = x - ti;
+        int eqn = *x;
+        assert(temp_pre[eqn] == 0);
+        assert(temp_pre[eqn] + temp_post[eqn] == ti_tally[tallyho]);
+        fprintf(stderr, "@@@ read tally %d for %d: %d + %d = %d\n", tallyho, eqn,
+                temp_pre[eqn], temp_post[eqn], ti_tally[tallyho]);
+    }
+    
+    fprintf(dot, "}\n");
+    fclose(dot);
+    
+}
+
+
+void piano_roll_gauss_seidel_2(
+    struct Some_variables *E
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    int *roll = (int *)malloc(nno*MAX_EQN*sizeof(int));
+    for (int i = 0; i < nno*MAX_EQN; ++i) {
+        roll[i] = 0;
+    }
+    
+    int offsideTally = 0;
+    
+    int *Ad = (int *)malloc((neq+1)*sizeof(int));
+    for (int i = 0; i <= neq; ++i) {
+        Ad[i] = 0;
+    }
+    int *temp = (int *)malloc((neq+1)*sizeof(int));
+    for (int i = 0; i <= neq; ++i) {
+        temp[i] = 0;
+    }
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        for (int j = 3; j < MAX_EQN; j++) {
+            /*
+              double UU = E->temp[C[j]];
+              Ad[eqn1] += B1[j]*UU;
+              Ad[eqn2] += B2[j]*UU;
+              Ad[eqn3] += B3[j]*UU;
+            */
+            
+            int *row = roll + j*nno;
+            row[i-1] = eqn1;
+            
+            Ad[eqn1] = max(Ad[eqn1], temp[C[j]]) + 1;
+            Ad[eqn2] = max(Ad[eqn2], temp[C[j]]) + 1;
+            Ad[eqn3] = max(Ad[eqn3], temp[C[j]]) + 1;
+        }
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            ++offsideTally;
+            /*
+              E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+              E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+              E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            */
+            temp[eqn1] = Ad[eqn1] + 1;
+            temp[eqn2] = Ad[eqn2] + 1;
+            temp[eqn3] = Ad[eqn3] + 1;
+        }
+            
+    }
+    
+    fprintf(stderr, "!offside: %d of %d\n", offsideTally, nno);
+    int maxAd = 0, maxTemp = 0;
+    for (int i = 0; i <= neq; ++i) {
+        maxAd = max(maxAd, Ad[i]);
+        maxTemp = max(maxTemp, temp[i]);
+        fprintf(stderr, "depth[%d]: Ad %d temp %d\n", i, Ad[i], temp[i]);
+    }
+    fprintf(stderr, "max Ad depth %d\n", maxAd);
+    fprintf(stderr, "max temp depth %d\n", maxTemp);
+    
+    //------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    
+    
+    int *nodes = (int *)malloc(maxAd*sizeof(int));
+    for (int i = 0; i < maxAd; ++i) {
+        nodes[i] = 0;
+    }
+    for (int i = 0; i <= neq; ++i) {
+        Ad[i] = 0;
+        temp[i] = 0;
+    }
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        for (int j = 3; j < MAX_EQN; j++) {
+            /*
+              double UU = E->temp[C[j]];
+              Ad[eqn1] += B1[j]*UU;
+              Ad[eqn2] += B2[j]*UU;
+              Ad[eqn3] += B3[j]*UU;
+            */
+            
+            int *row = roll + j*nno;
+            row[i-1] = eqn1;
+            
+            Ad[eqn1] = max(Ad[eqn1], temp[C[j]]) + 1;
+            Ad[eqn2] = max(Ad[eqn2], temp[C[j]]) + 1;
+            Ad[eqn3] = max(Ad[eqn3], temp[C[j]]) + 1;
+            ++nodes[Ad[eqn1]];
+            ++nodes[Ad[eqn2]];
+            ++nodes[Ad[eqn3]];
+        }
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            ++offsideTally;
+            /*
+              E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+              E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+              E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            */
+            temp[eqn1] = Ad[eqn1] + 1;
+            temp[eqn2] = Ad[eqn2] + 1;
+            temp[eqn3] = Ad[eqn3] + 1;
+            ++nodes[temp[eqn1]];
+            ++nodes[temp[eqn2]];
+            ++nodes[temp[eqn3]];
+        }
+            
+    }
+    for (int i = 0; i <= neq; ++i) {
+        if (!Ad[i]) ++nodes[0];
+        if (!temp[i]) ++nodes[0];
+    }
+    
+    int nodeTally = 0;
+    for (int i = 0; i < maxAd; ++i) {
+        fprintf(stderr, "nodes at depth %03d %d\n", i, nodes[i]);
+        nodeTally += nodes[i];
+    }
+    fprintf(stderr, "total nodes: %d\n", nodeTally);
+        
+    if (0) for (int j = 3; j < MAX_EQN; j++) {
+        int *row = roll + j*nno;
+        fprintf(stderr, "row %d: ", j);
+        for (int i = 1; i <= nno; i++) {
+            fprintf(stderr, "%d ", row[i-1]);
+        }
+        fprintf(stderr, "\n");
+    }
+}
+
+
 extern "C" void gauss_seidel(
     struct All_variables *E,
     double **d0,
@@ -575,6 +926,9 @@ extern "C" void gauss_seidel(
     kE.NODE = E->NODE[level][M];
     
     collect_terms(&kE);
+    if (0) oy_gauss_seidel_2(&kE);
+    piano_roll_gauss_seidel_2(&kE);
+    assert(0);
     
     do_gauss_seidel(
         &kE,
