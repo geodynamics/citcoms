@@ -297,19 +297,32 @@ void compute_nodal_stress(struct All_variables *E,
 	*/
 
 	if ((e-1)%E->lmesh.elz==0) {
-	  construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
+	  construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,0);
 	}
 	/* get b at velocity Gauss points */
 	get_ba(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,rtf, dims, ba);
-	
-	for(j=1;j <= vpts;j++)
-	  for(p=1;p <= 8;p++)
+	/* regular stress tensor */
+	for(p=1;p <= 6;p++)
+	  for(j=1;j <= vpts;j++)
 	    for(i=1;i <= ends;i++)
 	      for(q=1;q <= dims;q++) {
 		Vxyz[p][j] += ba[i][j][q][p] * VV[q][i];
 	      }
 	
-	
+	/* divergence and vorticity */
+	for(j=1;j <= vpts;j++)   {	/* Gauss integration points */
+	  for(i=1;i <= ends;i++)   { /* nodes in element loop */
+	    Vxyz[7][j]+=rtf[3][j] * (
+				     VV[1][i]*GNx->vpt[GNVXINDEX(0,i,j)]
+				     + VV[1][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])/sin(rtf[1][j])
+				     + VV[2][i]*GNx->vpt[GNVXINDEX(1,i,j)]/sin(rtf[1][j])  );
+	    Vxyz[8][j]+=rtf[3][j]/sin(rtf[1][j])*
+	      ( VV[2][i]*GNx->vpt[GNVXINDEX(0,i,j)]*sin(rtf[1][j])
+		+ VV[2][i]*E->N.vpt[GNVINDEX(i,j)]*cos(rtf[1][j])
+		- VV[1][i]*GNx->vpt[GNVXINDEX(1,i,j)] );
+	  }
+	}
+
       }else{	
 	/* old method */
 
