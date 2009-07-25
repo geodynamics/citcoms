@@ -304,6 +304,136 @@ __global__ void gauss_seidel_2(
 
 }
 
+__global__ void gauss_seidel_2a(
+    struct Some_variables *E,
+    double *F, double *Ad
+    )
+{
+    const int nno = E->lmesh.NNO;
+    
+    int j = threadIdx.x + 3; /* 3 <= j < MAX_EQN */
+    int doff = threadIdx.y + 1; /* 1 <= doff < NSD */ 
+    
+    for (int i = 1; i <= nno; i++) {
+        int eqn = E->ID[i].doff[doff];
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+        higher_precision *B = E->Eqn_k[doff] + (i-1)*MAX_EQN;
+        
+        /* Ad on boundaries differs after the following operation, but
+           no communications are needed yet, because boundary Ad will
+           not be used for the G-S iterations for interior nodes */
+        
+        __shared__ double UU[MAX_EQN-3];
+        if (threadIdx.y == 0) {
+            UU[threadIdx.x] = E->temp[C[j]];
+        }
+        __syncthreads();
+        __shared__ double Ad_eqn[NSD];
+        if (threadIdx.x == 0) {
+            Ad_eqn[threadIdx.y] = Ad[eqn];
+        }
+        __shared__ double sum[MAX_EQN-3][3];
+        /*for (int j = 3; j < MAX_EQN; j++)*/ {
+            sum[threadIdx.x][threadIdx.y] = B[j]*UU[threadIdx.x];
+        }
+        __syncthreads();
+        /* Reduce. */
+        for (unsigned int s = (MAX_EQN-3)/2; s > 0; s >>= 1) {
+            if (threadIdx.x < s) {
+                sum[threadIdx.x][threadIdx.y] += sum[threadIdx.x + s][threadIdx.y];
+            }
+            /* XXX: not always necessary */
+            __syncthreads();
+        }
+        
+        if (threadIdx.x == 0) {
+            Ad_eqn[threadIdx.y] += sum[0][threadIdx.y];
+            Ad[eqn] = Ad_eqn[threadIdx.y];
+            if (!(E->NODE[i] & OFFSIDE)) {
+                E->temp[eqn] = (F[eqn] - Ad_eqn[threadIdx.y])*E->BI[eqn];
+            }
+        }
+        __syncthreads();
+    }
+}
+
+
+__global__ void gauss_seidel_2b(
+    struct Some_variables *E,
+    double *F, double *Ad
+    )
+{
+    const int nno = E->lmesh.NNO;
+    unsigned int tid = threadIdx.x;
+    
+    for (int i = 1; i <= nno; i++) {
+        
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = eqn1 + 1;
+        int eqn3 = eqn2 + 1;
+        
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+        
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+        
+        /* Ad on boundaries differs after the following operation, but
+           no communications are needed yet, because boundary Ad will
+           not be used for the G-S iterations for interior nodes */
+        
+        double Ad_eqn1, Ad_eqn2, Ad_eqn3;
+        if (tid == 0) {
+            Ad_eqn1 = Ad[eqn1];
+            Ad_eqn2 = Ad[eqn2];
+            Ad_eqn3 = Ad[eqn3];
+        }
+        
+        __shared__ double sum1[MAX_EQN-3];
+        __shared__ double sum2[MAX_EQN-3];
+        __shared__ double sum3[MAX_EQN-3];
+        
+        int j = tid + 3; /* 3 <= j < MAX_EQN */
+        /*for (int j = 3; j < MAX_EQN; j++)*/ {
+            double UU = E->temp[C[j]];
+            sum1[tid] = B1[j]*UU;
+            sum2[tid] = B2[j]*UU;
+            sum3[tid] = B3[j]*UU;
+        }
+        __syncthreads();
+        
+        /* Reduce. */
+        for (unsigned int s = (MAX_EQN-3)/2; s > 0; s >>= 1) {
+            if (tid < s) {
+                sum1[tid] += sum1[tid + s];
+                sum2[tid] += sum2[tid + s];
+                sum3[tid] += sum3[tid + s];
+            }
+            /* XXX: not always necessary */
+            __syncthreads();
+        }
+        
+        if (tid == 0) {
+            Ad_eqn1 += sum1[0];
+            Ad_eqn2 += sum2[0];
+            Ad_eqn3 += sum3[0];
+            Ad[eqn1] = Ad_eqn1;
+            Ad[eqn2] = Ad_eqn2;
+            Ad[eqn3] = Ad_eqn3;
+            if (!(E->NODE[i] & OFFSIDE)) {
+                E->temp[eqn1] = (F[eqn1] - Ad_eqn1)*E->BI[eqn1];
+                E->temp[eqn2] = (F[eqn2] - Ad_eqn2)*E->BI[eqn2];
+                E->temp[eqn3] = (F[eqn3] - Ad_eqn3)*E->BI[eqn3];
+            }
+        }
+        __syncthreads();
+        
+    }
+    
+}
+
+
 __global__ void gauss_seidel_3(
     struct Some_variables *E,
     double *d0,
@@ -451,8 +581,23 @@ void do_gauss_seidel(
             dim3 grid(E->lmesh.NNO, NSD, 1);
             if (1) gauss_seidel_1<<< grid, block >>>(d_E, d_F, d_Ad);
             else host_gauss_seidel_1(E, &s_E, d_F, d_Ad);
-            if (0) gauss_seidel_2<<< grid, block >>>(d_E, d_F, d_Ad);
-            else host_gauss_seidel_2(E, &s_E, d_F, d_Ad);
+        }
+        
+        if (0) {
+            dim3 block(MAX_EQN - 3, NSD, 1);
+            dim3 grid(1, 1, 1);
+            gauss_seidel_2a<<< grid, block >>>(d_E, d_F, d_Ad);
+        }
+        if (1) {
+            //dim3 block(MAX_EQN - 3, NSD, 1);
+            dim3 block(MAX_EQN - 3, 1, 1);
+            dim3 grid(1, 1, 1);
+            gauss_seidel_2b<<< grid, block >>>(d_E, d_F, d_Ad);
+        }
+        if (0) host_gauss_seidel_2(E, &s_E, d_F, d_Ad);
+        
+        if (cudaThreadSynchronize() != cudaSuccess) {
+            assert(0 && "something went wrong");
         }
         
         /* Ad on boundaries differs after the following operation */
@@ -889,6 +1034,208 @@ void piano_roll_gauss_seidel_2(
 }
 
 
+typedef struct OpcodeStream {
+    int alloc;
+    int count;
+    int *opcodes;
+    int *operands;
+} OS;
+
+
+static void pushBackOpcode(OS *os, int opcode, int operand, OS *sub) {
+    int subCount = sub->count ? 2 + sub->count : 1;
+    if (os->count + 1 + subCount > os->alloc) {
+        do {
+            os->alloc *= 2;
+        } while (os->count + 1 + subCount > os->alloc);
+        os->opcodes = (int *)realloc(os->opcodes, os->alloc*sizeof(int));
+        os->operands = (int *)realloc(os->operands, os->alloc*sizeof(int));
+    }
+    if (sub->count) {
+        os->opcodes[os->count] = 10;
+        os->operands[os->count] = 0;
+        ++os->count;
+        for (int op = 0; op < sub->count; ++op) {
+            os->opcodes[os->count] = sub->opcodes[op];
+            os->operands[os->count] = sub->operands[op];
+            ++os->count;
+        }
+        os->opcodes[os->count] = 11;
+        os->operands[os->count] = 0;
+        ++os->count;
+    } else {
+        os->opcodes[os->count] = 0;
+        os->operands[os->count] = 0;
+        ++os->count;
+    }
+    os->opcodes[os->count] = opcode;
+    os->operands[os->count] = operand;
+    ++os->count;
+}
+
+void opcode_gauss_seidel_2(
+    struct Some_variables *E
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    OS *Ad = (OS *)malloc((neq+1)*sizeof(OS));
+    for (int i = 0; i <= neq; ++i) {
+        Ad[i].alloc = 2;
+        Ad[i].count = 0;
+        Ad[i].opcodes = (int *)malloc(2*sizeof(int));
+        Ad[i].operands = (int *)malloc(2*sizeof(int));
+    }
+    OS *temp = (OS *)malloc((neq+1)*sizeof(OS));
+    for (int i = 0; i <= neq; ++i) {
+        temp[i].alloc = 2;
+        temp[i].count = 0;
+        temp[i].opcodes = (int *)malloc(2*sizeof(int));
+        temp[i].operands = (int *)malloc(2*sizeof(int));
+    }
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        /* Ad on boundaries differs after the following operation, but
+           no communications are needed yet, because boundary Ad will
+           not be used for the G-S iterations for interior nodes */
+            
+        for (int j = 3; j < MAX_EQN; j++) {
+            /*
+              double UU = E->temp[C[j]];
+              Ad[eqn1] += B1[j]*UU;
+              Ad[eqn2] += B2[j]*UU;
+              Ad[eqn3] += B3[j]*UU;
+            */
+            pushBackOpcode(Ad + eqn1, 1, j, temp + C[j]);
+            pushBackOpcode(Ad + eqn2, 1, j, temp + C[j]);
+            pushBackOpcode(Ad + eqn3, 1, j, temp + C[j]);
+        }
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            /*
+              E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+              E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+              E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            */
+            pushBackOpcode(temp + eqn1, 2, eqn1, Ad + eqn1);
+            pushBackOpcode(temp + eqn2, 2, eqn2, Ad + eqn2);
+            pushBackOpcode(temp + eqn3, 2, eqn3, Ad + eqn3);
+        }
+            
+    }
+    
+    for (int i = 0; i <= neq; ++i) {
+        fprintf(stderr, "Ad[%d]: ", i);
+        OS *os = Ad + i;
+        for (int op = 0; op < os->count; ++op) {
+            if (os->opcodes[op] == 10) {
+                fprintf(stderr, "(");
+            } else if (os->opcodes[op] == 11) {
+                fprintf(stderr, ")");
+            } else if (os->opcodes[op] == 0) {
+                fprintf(stderr, "@ ");
+            } else {
+                fprintf(stderr, "%d,%d ", os->opcodes[op], os->operands[op]);
+            }
+        }
+        fprintf(stderr, "\n");
+    }
+    
+}
+
+
+void launch_tally_gauss_seidel_2(
+    struct Some_variables *E
+    )
+{
+    const int neq = E->lmesh.NEQ;
+    const int nno = E->lmesh.NNO;
+    
+    int *Ad = (int *)malloc((neq+1)*sizeof(int));
+    int *temp = (int *)malloc((neq+1)*sizeof(int));
+    for (int i = 0; i <= neq; ++i) {
+        Ad[i] = 0;
+        temp[i] = 0;
+    }
+    int launchTally = 0;
+    int maxSpread = 0, minSpread = 0;
+    
+    for (int i = 1; i <= nno; i++) {
+            
+        int eqn1 = E->ID[i].doff[1];
+        int eqn2 = E->ID[i].doff[2];
+        int eqn3 = E->ID[i].doff[3];
+            
+        int *C = E->Node_map + (i-1)*MAX_EQN;
+            
+        higher_precision *B1,*B2,*B3;
+        B1 = E->Eqn_k[1] + (i-1)*MAX_EQN;
+        B2 = E->Eqn_k[2] + (i-1)*MAX_EQN;
+        B3 = E->Eqn_k[3] + (i-1)*MAX_EQN;
+            
+        for (int j = 3; j < MAX_EQN; j++) {
+            /*
+              double UU = E->temp[C[j]];
+              Ad[eqn1] += B1[j]*UU;
+              Ad[eqn2] += B2[j]*UU;
+              Ad[eqn3] += B3[j]*UU;
+            */
+            
+            maxSpread = max(maxSpread, eqn1 - C[j]);
+            minSpread = min(minSpread, eqn1 - C[j]);
+            if (temp[C[j]]) {
+                ++launchTally;
+                for (int i = 0; i <= neq; ++i) {
+                    Ad[i] = 0;
+                    temp[i] = 0;
+                }
+            }
+            Ad[eqn1] = 1;
+            Ad[eqn2] = 1;
+            Ad[eqn3] = 1;
+        }
+            
+        if (!(E->NODE[i] & OFFSIDE)) {
+            /*
+              E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[eqn1];
+              E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[eqn2];
+              E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[eqn3];
+            */
+            if (Ad[eqn1] || Ad[eqn2] || Ad[eqn3]) {
+                ++launchTally;
+                for (int i = 0; i <= neq; ++i) {
+                    Ad[i] = 0;
+                    temp[i] = 0;
+                }
+            }
+            temp[eqn1] = 1;
+            temp[eqn2] = 1;
+            temp[eqn3] = 1;
+        }
+            
+    }
+    
+    fprintf(stderr, "launch tally: %d\n", launchTally);
+    fprintf(stderr, "maxSpread: %d\n", maxSpread);
+    fprintf(stderr, "minSpread: %d\n", minSpread);
+
+    
+}
+
+
 extern "C" void gauss_seidel(
     struct All_variables *E,
     double **d0,
@@ -927,8 +1274,10 @@ extern "C" void gauss_seidel(
     
     collect_terms(&kE);
     if (0) oy_gauss_seidel_2(&kE);
-    piano_roll_gauss_seidel_2(&kE);
-    assert(0);
+    if (0) piano_roll_gauss_seidel_2(&kE);
+    if (0) opcode_gauss_seidel_2(&kE);
+    if (0) launch_tally_gauss_seidel_2(&kE);
+    if (0) assert(0);
     
     do_gauss_seidel(
         &kE,
