@@ -230,41 +230,41 @@ __global__ void n_assemble_del2_u(
 /* These are based on the function from General_matrix_functions.c. */
 
 __global__ void gauss_seidel_0(
-    struct Some_variables *E,
+    int neq,
     double *d0,
     double *Ad
     )
 {
-    const double zeroo = 0.0;
-    int i;
-    
-    i = blockIdx.x; /* 0 <= i < E->lmesh.NEQ */
-    d0[i] = Ad[i] = zeroo;
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < neq) {
+        d0[i] = Ad[i] = 0.0;
+    }
 }
 
 __global__ void gauss_seidel_1(
     struct Some_variables *E,
+    int neq, int nno,
     double *F, double *Ad
     )
 {
     const double zeroo = 0.0;
-    const int neq = E->lmesh.NEQ;
     
-    int i, doff, eqn;
-    
-    i = blockIdx.x + 1; /* 1 <= i <= E->lmesh.NNO */
-    doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
-    eqn = E->ID[i].doff[doff];
-    
-    if (E->NODE[i] & OFFSIDE) {
-        E->temp[eqn] = (F[eqn] - Ad[eqn])*E->BI[eqn];
-    } else {
-        E->temp[eqn] = zeroo;
-    }
-    
-    if (i == 1 && doff == 1) {
-        E->temp[neq] = zeroo;
-        Ad[neq] = zeroo;
+    int i = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    if (i <= nno) {
+        /* 1 <= i <= E->lmesh.NNO */
+        int doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+        int eqn = E->ID[i].doff[doff];
+        
+        if (E->NODE[i] & OFFSIDE) {
+            E->temp[eqn] = (F[eqn] - Ad[eqn])*E->BI[eqn];
+        } else {
+            E->temp[eqn] = zeroo;
+        }
+        
+        if (i == 1 && doff == 1) {
+            E->temp[neq] = zeroo;
+            Ad[neq] = zeroo;
+        }
     }
 }
 
@@ -536,6 +536,11 @@ void do_gauss_seidel(
     /* copy input to the device */
     cudaMemcpy(d_F, F, neq*sizeof(double), cudaMemcpyHostToDevice);
     
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    static float totalElapsedTime = 0.0;
+    
     if (guess) {
         /* copy more input to the device */
         d0[E->lmesh.NEQ] = 0.0; /* normally done by n_assemble_del2_u() */
@@ -547,18 +552,42 @@ void do_gauss_seidel(
         else host_n_assemble_del2_u(E, d_d0, d_Ad, 1);
     
     } else {
-        dim3 block(1, 1, 1);
-        dim3 grid(E->lmesh.NEQ, 1, 1);
-        if (1) gauss_seidel_0<<< grid, block >>>(d_E, d_d0, d_Ad);
-        else host_gauss_seidel_0(E, d_d0, d_Ad);
+        const int blockSize = 64;
+        const int dim = E->lmesh.NEQ;
+        int gridSize = dim / blockSize;
+        if (dim % blockSize)
+            ++gridSize;
+        
+        dim3 block(blockSize, 1, 1);
+        dim3 grid(gridSize, 1, 1);
+        gauss_seidel_0<<< grid, block >>>(E->lmesh.NEQ, d_d0, d_Ad);
     }
     
     for (count = 0; count < steps; ++count) {
         {
-            dim3 block(1, 1, 1);
-            dim3 grid(E->lmesh.NNO, NSD, 1);
-            if (1) gauss_seidel_1<<< grid, block >>>(d_E, d_F, d_Ad);
-            else host_gauss_seidel_1(E, &s_E, d_F, d_Ad);
+            const int blockSize = 64;
+            const int dim = E->lmesh.NNO;
+            int gridSize = dim / blockSize;
+            if (dim % blockSize)
+                ++gridSize;
+            
+            dim3 block(blockSize, 1, 1);
+            dim3 grid(gridSize, NSD, 1);
+            
+            cudaEventRecord(start, 0);
+            
+            gauss_seidel_1<<< grid, block >>>(d_E, E->lmesh.NEQ, E->lmesh.NNO, d_F, d_Ad);
+            
+            cudaEventRecord(stop, 0);
+            if (0) {
+                cudaEventSynchronize(stop);
+                float elapsedTime;
+                cudaEventElapsedTime(&elapsedTime, start, stop);
+                totalElapsedTime += elapsedTime;
+                if (count == steps - 1) {
+                    printf("gauss_seidel_0 %d\t%f\t%f\n", count, elapsedTime, totalElapsedTime);
+                }
+            }
         }
         
         if (1) {
@@ -581,6 +610,9 @@ void do_gauss_seidel(
             else host_gauss_seidel_3(E, &s_E, d_d0, d_Ad);            
         }
     }
+    
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
     
     /* wait for completion */
     if (cudaThreadSynchronize() != cudaSuccess) {
