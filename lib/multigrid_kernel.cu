@@ -125,16 +125,25 @@ __global__ void n_assemble_del2_u(
     )
 {
     int n = blockIdx.x + 1; /* 1 <= n <= E->lmesh.NNO */
-    int doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    int doff = blockIdx.y + 1; /* 1 <= doff <= NSD */ 
     unsigned int tid = threadIdx.x; /* 0 <= tid < MAX_EQN */
     
     /* Each block writes one element of Au in global memory: Au[eqn]. */
     int eqn = E->ID[n].doff[doff]; /* XXX: Compute this value? */
     
+    if (n == 1 && doff == 1 && tid == 0) {
+        Au[E->lmesh.NEQ] = 0.0;
+    }
+    
     if (strip_bcs) {
         /* See get_bcs_id_for_residual(). */
         unsigned int flags = E->NODE[n];
-        unsigned int vb = 0x1 << doff; /* VBX, VBY, or VBZ */
+        unsigned int vb;
+        switch (doff) {
+        case 1: vb = VBX; break; /* 0x2 */
+        case 2: vb = VBY; break; /* 0x8 */
+        case 3: vb = VBZ; break; /* 0x4 */
+        }
         if (flags & vb) {
             /* no-op: Au[eqn] is zero */
             if (tid == 0) {
@@ -215,11 +224,6 @@ __global__ void n_assemble_del2_u(
     /* Each block writes one element of Au in global memory. */
     if (tid == 0) {
         Au[eqn] = sum[0];
-        
-        if (n == 1 && doff == 1) {
-            /* Well, actually, the first block writes one more. */
-            Au[E->lmesh.NEQ] = 0.0;
-        }
     }
     
     return;
@@ -252,7 +256,7 @@ __global__ void gauss_seidel_1(
     int i = blockIdx.x * blockDim.x + threadIdx.x + 1;
     if (i <= nno) {
         /* 1 <= i <= E->lmesh.NNO */
-        int doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+        int doff = blockIdx.y + 1; /* 1 <= doff <= NSD */ 
         int eqn = E->ID[i].doff[doff];
         
         if (E->NODE[i] & OFFSIDE) {
@@ -276,7 +280,7 @@ __global__ void gauss_seidel_2a(
     const int nno = E->lmesh.NNO;
     
     int j = threadIdx.x + 3; /* 3 <= j < MAX_EQN */
-    int doff = threadIdx.y + 1; /* 1 <= doff < NSD */ 
+    int doff = threadIdx.y + 1; /* 1 <= doff <= NSD */ 
     
     for (int i = 1; i <= nno; i++) {
         int eqn = E->ID[i].doff[doff];
@@ -415,7 +419,7 @@ __global__ void gauss_seidel_3(
     )
 {
     int n = blockIdx.x + 1; /* 1 <= n <= E->lmesh.NNO */
-    int doff = blockIdx.y + 1; /* 1 <= doff < NSD */ 
+    int doff = blockIdx.y + 1; /* 1 <= doff <= NSD */ 
     unsigned int tid = threadIdx.x; /* 0 <= tid < MAX_EQN */
     
     /* Each block writes one element of Ad and d0 in global memory:
@@ -548,7 +552,7 @@ void do_gauss_seidel(
         
         dim3 block(MAX_EQN, 1, 1);
         dim3 grid(E->lmesh.NNO, NSD, 1);
-        if (0) n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
+        if (1) n_assemble_del2_u<<< grid, block >>>(d_E, d_d0, d_Ad, 1);
         else host_n_assemble_del2_u(E, d_d0, d_Ad, 1);
     
     } else {
