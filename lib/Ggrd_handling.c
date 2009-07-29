@@ -643,17 +643,25 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   static pole_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
+  int top_echo,nfree,nfixed;
 #ifdef USE_GZDIR
   gzFile *fp1;
 #else
   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
 #endif
+  /* top processor check */
+  top_echo = E->parallel.nprocz-1;
+
   /* read in plate code files?  */
   use_codes = (E->control.ggrd_vtop_omega[0] > 1e-7)?(1):(0);
   save_codes = 0;
   /*  */
   if(E->mesh.topvbc != 1)
     myerror(E,"ggrd_read_vtop_from_file: top velocity BCs, but topvbc is free slip");
+
+  if(E->parallel.me == 0)
+    fprintf(stderr,"ggrd_read_vtop_from_file: init, mixed %i\n",E->control.ggrd_allow_mixed_vbcs);
+	    
   /* global, top level number of nodes */
   noxg = E->lmesh.nox;nozg=E->lmesh.noz;noyg=E->lmesh.noy;
   noxgnozg = noxg*nozg;
@@ -664,7 +672,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   vscale = E->data.scalev * E->data.timedir;
   if(use_codes)
     vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
-  if (E->parallel.me_loc[3] == E->parallel.nprocz-1) { 
+  if (E->parallel.me_loc[3] == top_echo) { 
     
     /* 
        TOP PROCESSORs ONLY 
@@ -687,7 +695,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	 read in grd files (only needed for top processors, really, but
 	 leave as is for now
       */
-      if(E->parallel.me==0)
+      if(E->parallel.me == top_echo)
 	fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities for %s setup\n",
 		is_global?("global"):("regional"));
       if(is_global){		/* decide on GMT flag */
@@ -749,7 +757,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	snprintf(tfilename1,1000,"%s/codes.%d.gz", E->control.data_dir,E->parallel.me);
 	fp1 = gzdir_output_open(tfilename1,"w");
       }
-      if(E->parallel.me == 0)
+      if(E->parallel.me == top_echo)
 	if(use_codes)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
 		  E->control.ggrd_vtop_omega[1],
@@ -766,7 +774,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     */
     theta_max = (90-E->control.ggrd.svp[0].south)*M_PI/180-1e-5;
     theta_min = (90-E->control.ggrd.svp[0].north)*M_PI/180+1e-5;
-    if((E->parallel.me ==0) && (is_global)){
+    if((E->parallel.me == top_echo) && (is_global)){
       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
 	      E->control.ggrd.svp[0].south,E->control.ggrd.svp[0].north);
     }
@@ -784,25 +792,25 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	  interpolate = 0;
 	  /* present day should be last file*/
 	  i1 = E->control.ggrd.time_hist.nvtimes - 1;
-	  if(E->parallel.me == 0)
+	  if(E->parallel.me == top_echo)
 	    fprintf(stderr,"ggrd_read_vtop_from_file: using present day vtop for age = %g\n",age);
 	}else{
 	  /*  */
 	  ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
 			     E->control.ggrd.time_hist.vstage_transition);
 	  interpolate = 1;
-	  if(E->parallel.me == 0)
+	  if(E->parallel.me == top_echo)
 	    fprintf(stderr,"ggrd_read_vtop_from_file: interpolating vtop for age = %g\n",age);
 	}
 	
       }else{
 	interpolate = 0;		/* single timestep, use single file */
 	i1 = 0;
-	if(E->parallel.me == 0)
+	if(E->parallel.me == top_echo)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
       }
       
-      if(E->parallel.me==0){
+      if(E->parallel.me == top_echo){
 	fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
 		timedep,age);
 
@@ -810,7 +818,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       /* if mixed BCs are allowed, need to reassign the boundary
 	 condition */
       if(E->control.ggrd_allow_mixed_vbcs){
-
+	nfree = nfixed = 0;
 	/* 
 	   
 	mixed BC part
@@ -818,7 +826,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	*/
 	if(use_codes)
 	  myerror(E,"cannot mix Euler velocities for plate codes and mixed vbcs");
-	if(E->parallel.me == 0)
+	if(E->parallel.me == top_echo)
 	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
 	
 	
@@ -882,11 +890,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		}
 		if(fabs(v[2]) > cutoff){
 		  /* free slip */
+		  nfree++;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
 		}else{
+		  nfixed++;
 		  /* no slip */
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBX;
 		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
@@ -898,6 +908,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    /* sum up all assignments */
 	  } /* cap */
 	} /* level */
+	fprintf(stderr,"mixed_bc: %i free %i fixed for CPU %i\n",nfree,nfixed,E->parallel.me);
       }	 /* end mixed BC assign */
 
       /* 
@@ -1035,7 +1046,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     }
   } /* end top proc branch */
   E->control.ggrd.vtop_control_init = 1;
-  if(E->parallel.me == 0)fprintf(stderr,"vtop from grd done: %i\n",lc++);
+  if(E->parallel.me == 0)
+    fprintf(stderr,"vtop from grd done: %i\n",lc++);
 }
 
 
