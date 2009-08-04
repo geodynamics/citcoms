@@ -653,7 +653,7 @@ static void assert_assumptions(struct All_variables *E, int level) {
     assert(E->parallel.nproc == 1);
 }
 
-static void collect_terms(
+static int2 *collect_terms(
     struct Some_variables *E
     )
 {
@@ -662,7 +662,7 @@ static void collect_terms(
     const int neq = E->lmesh.NEQ;
     const int nno = E->lmesh.NNO;
     
-    E->term = (int2 *)malloc((neq+1) * MAX_EQN * sizeof(int2));
+    int2 *term = (int2 *)malloc((neq+1) * MAX_EQN * sizeof(int2));
     
     for (int e = 0; e <= neq; e++) {
         int2 *term = E->term + e*MAX_EQN;
@@ -688,7 +688,7 @@ static void collect_terms(
         }
     }
     
-    return;
+    return term;
 }
 
 
@@ -728,7 +728,10 @@ extern "C" void gauss_seidel(
     
     kE.NODE = E->NODE[level][M];
     
-    collect_terms(&kE);
+    static int2 *term[MAX_LEVELS];
+    if (!term[level])
+        term[level] = collect_terms(&kE);
+    kE.term = term[level];
     
     do_gauss_seidel(
         &kE,
