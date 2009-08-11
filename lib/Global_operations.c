@@ -36,6 +36,7 @@ double theta_g(double , struct All_variables *);
 #endif
 
 void calc_cbase_at_tp(float , float , float *);
+void myerror(struct All_variables *E,char *message);
 
 /* ===============================================
    strips horizontal average from nodal field X.
@@ -1022,4 +1023,25 @@ void remove_rigid_rot(struct All_variables *E)
 
     return;
 
+}
+
+
+void gather_r(struct All_variables *E, double *r)
+{
+    /* Gather the radial coordinate and concatnate
+     * them together as a 1d array. */
+
+    const int m = 1;
+    int n = E->parallel.nprocz;
+
+    /* send all r coordiante except the top node, which is the
+       same as the bottom node of the next processor. */
+    MPI_Allgather(&(E->sx[m][3][1]), E->lmesh.noz-1, MPI_DOUBLE,
+                  &(r[1]), E->lmesh.noz-1, MPI_DOUBLE,
+                  E->parallel.vertical_comm);
+
+    /* add the top most nodes of all processors */
+    r[E->mesh.noz] = E->sphere.ro;
+
+    return;
 }
