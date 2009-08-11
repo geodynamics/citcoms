@@ -38,8 +38,10 @@
 
 static void read_refstate(struct All_variables *E);
 static void adams_williamson_eos(struct All_variables *E);
+static void murnaghan_eos(struct All_variables *E);
 
 int layers_r(struct All_variables *,float);
+void myerror(struct All_variables *E,char *message);
 
 void mat_prop_allocate(struct All_variables *E)
 {
@@ -84,6 +86,10 @@ void reference_state(struct All_variables *E)
     case 1:
         /* Adams-Williamson EoS */
         adams_williamson_eos(E);
+        break;
+    case 2:
+        /* Murnaghan's integrated linear EoS + constant Gruneisen parameter */
+        murnaghan_eos(E);
         break;
     default:
         if (E->parallel.me) {
@@ -177,3 +183,100 @@ static void adams_williamson_eos(struct All_variables *E)
 }
 
 
+static void murnaghan_eos(struct All_variables *E)
+{
+    /* Reference: Murnaghan (1967), Finite Deformation of an Elastic Solid.
+
+       Let K0' = dK/dP at P=0
+           beta = dissipation number / Gruniesen parameter
+
+       dP = rho * g * dr
+       rho = rho0 * (1 + P * K0' / K0)^(1/K0')
+
+       ==> non-dimensionalization
+       rho = rho0 * (1 + beta * P * K0')^(1/K0')
+
+       The non-linear ODE is intergated repeatedly to find
+       convergence solution.
+
+
+       Assuming Gruneisen parameter and Cp are constant:
+
+       alpha = gamma * Cp * rho / Ks
+    */
+
+    const double k0p = 3.5;
+    const double beta = E->control.disptn_number * E->control.inv_gruneisen;
+    double *r, *rho, *p;
+
+    const int gnoz = E->mesh.noz;
+
+    int count = 0;
+    int i, j;
+    double old_rho_cmb, diff;
+    const acc = 1e-8;
+
+
+    r = (double *) malloc((gnoz+1)*sizeof(double));
+    rho = (double *) malloc((gnoz+1)*sizeof(double));
+    p = (double *) malloc((gnoz+1)*sizeof(double));
+
+    if(r == NULL || rho == NULL || p == NULL) {
+        myerror(E, "allocating memory in murnaghan_eos()");
+    }
+
+    /* r[1 ... gnoz] will hold the global radial coordinates */
+    gather_r(E, r);
+
+    for(i=1; i<=gnoz; i++) {
+	rho[i] = 1;
+        p[i] = 0;
+    }
+
+    old_rho_cmb = 0;
+    do {
+        /* integrate downward from surface to CMB */
+        for(i=gnoz-1; i>0; i--) {
+            p[i] = p[i+1] + 0.5 * (rho[i] + rho[i+1]) * (r[i+1] - r[i]);
+            rho[i] = rho[gnoz] * pow(1 + beta * k0p * p[i], 1.0/k0p);
+        }
+
+        diff = fabs(rho[1] - old_rho_cmb);
+        old_rho_cmb = rho[1];
+        count ++;
+
+        /* The loop should converge within 50 iterations
+           with reasonable beta and K0p */
+        if(count > 50) myerror(E, "Murnaghan EoS cannot converge");
+    } while(diff > acc);
+
+    /*
+    if(E->parallel.me == 0) {
+        fprintf(stderr, "%d iterations\n", count);
+        for(i=gnoz; i>0; i--) {
+            fprintf(stderr, "%d %e %e %e\n", i, r[i], p[i], rho[i]);
+        }
+    }
+    */
+
+    for(i=1, j=E->lmesh.nzs; i<=E->lmesh.noz; i++, j++) {
+        double ks;
+	E->refstate.rho[i] = rho[j];
+	E->refstate.gravity[i] = 1;
+	E->refstate.heat_capacity[i] = 1;
+
+        ks = pow(rho[j]/rho[gnoz], k0p);
+	E->refstate.thermal_expansivity[i] = rho[j] / ks;
+
+	/*E->refstate.thermal_conductivity[i] = 1;*/
+	/*E->refstate.Tadi[i] = (E->control.adiabaticT0 + E->control.surface_temp) * exp(E->control.disptn_number * z) - E->control.surface_temp;*/
+    }
+
+
+
+    free(r);
+    free(rho);
+    free(p);
+
+    return;
+}
