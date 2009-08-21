@@ -96,7 +96,11 @@ void viscosity_system_input(struct All_variables *E)
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;
 
-      input_boolean("pdepv_eff",&(E->viscosity.pdepv_eff),"on",m);
+      input_boolean("psrw",&(E->viscosity.psrw),"off",m); /* SRW? else regular plasiticity */
+      input_boolean("pdepv_eff",&(E->viscosity.pdepv_eff),"on",m); /* effective
+								      or
+								      min/max
+								      approach */
       input_float_vector("pdepv_a",E->viscosity.num_mat,(E->viscosity.pdepv_a),m);
       input_float_vector("pdepv_b",E->viscosity.num_mat,(E->viscosity.pdepv_b),m);
       input_float_vector("pdepv_y",E->viscosity.num_mat,(E->viscosity.pdepv_y),m);
@@ -754,8 +758,11 @@ void visc_from_S(E,EEta,propogate)
 
 void visc_from_P(E,EEta) /* "plasticity" implementation
 
-			 viscosity will be limited by a yield stress
 
+			 psrw = FALSE
+
+			 viscosity will be limited by a yield stress
+			 
 			 \sigma_y  = min(a + b * (1-r), y)
 
 			 where a,b,y are parameters input via pdepv_a,b,y
@@ -779,64 +786,79 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 			 where \eta_0 is the regular viscosity
 
 
+			 psrw = TRUE
+
+			 a strain-rate weakening rheology applies
+			 based on a steady state stress-strain
+			 relationship following, e.g., Tackley 1998
+
+			 \eta_ett = (\sigma_y^2 \eta_0)/(\sigma_y^2 + \eta_0^2 (2 \eps_II^2))
+
+			 where sigma_y is defined as above
+
+			 where the 2\eps_II arises because our \eps_II has the 1/2 factor in it
+
 			 TWB
 
 			 */
      struct All_variables *E;
      float **EEta;
 {
-    float *eedot,zz[9],zzz,tau,eta_p,eta_new;
-    int m,e,l,z,jj,kk;
+  float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
+  int m,e,l,z,jj,kk;
 
-    const int vpts = vpoints[E->mesh.nsd];
-    const int nel = E->lmesh.nel;
-    const int ends = enodes[E->mesh.nsd];
-
-    void strain_rate_2_inv();
-
-    eedot = (float *) malloc((2+nel)*sizeof(float));
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-
-      if(E->viscosity.pdepv_visited){
-
-        strain_rate_2_inv(E,m,eedot,1);	/* get second invariant for all elements */
-
-      }else{
-	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
-	  eedot[e] = 1.0;
-	if(m == E->sphere.caps_per_proc)
-	  E->viscosity.pdepv_visited = 1;
-	if((E->parallel.me == 0)&&(E->control.verbose)){
-	  for(e=0;e < E->viscosity.num_mat;e++)
-	    fprintf(stderr,"num mat: %i a: %g b: %g y: %g\n",
-		    e,E->viscosity.pdepv_a[e],E->viscosity.pdepv_b[e],E->viscosity.pdepv_y[e]);
-	}
+  const int vpts = vpoints[E->mesh.nsd];
+  const int nel = E->lmesh.nel;
+  const int ends = enodes[E->mesh.nsd];
+  
+  void strain_rate_2_inv();
+  
+  
+  eedot = (float *) malloc((2+nel)*sizeof(float));
+  
+  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
+    
+    if(E->viscosity.pdepv_visited){
+      if(E->viscosity.psrw)
+	strain_rate_2_inv(E,m,eedot,0);	/* get second invariant for all elements, don't take sqrt */
+      else
+	strain_rate_2_inv(E,m,eedot,1);	/* get second invariant for all elements */
+    }else{
+      for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
+	eedot[e] = 1.0;
+      if(m == E->sphere.caps_per_proc)
+	E->viscosity.pdepv_visited = 1;
+      if((E->parallel.me == 0)&&(E->control.verbose)){
+	fprintf(stderr,"num mat: %i a: %g b: %g y: %g %s\n",
+		e,E->viscosity.pdepv_a[e],E->viscosity.pdepv_b[e],E->viscosity.pdepv_y[e],
+		(E->viscosity.psrw)?(" -- SRW"):(""));
       }
-
+    }
+    if(!E->viscosity.psrw){
+      /* 
+	 regular plasticity
+      */
       for(e=1;e <= nel;e++)   {	/* loop through all elements */
-
+	
 	l = E->mat[m][e] -1 ;	/* material of this element */
-
+	
 	for(kk=1;kk <= ends;kk++) /* nodal depths */
 	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); /* for depth, zz = 1 - r */
-
+	
 	for(jj=1;jj <= vpts;jj++){ /* loop through integration points */
-
+	  
 	  zzz = 0.0;		/* get mean depth of integration point */
 	  for(kk=1;kk<=ends;kk++)
 	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
-
+	  
 	  /* depth dependent yield stress */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
-
+	  
 	  /* min of depth dep. and constant yield stress */
 	  tau = min(tau,  E->viscosity.pdepv_y[l]);
-
+	  
 	  /* yield viscosity */
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
-
-
 	  if(E->viscosity.pdepv_eff){
 	    /* two dashpots in series */
 	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
@@ -845,15 +867,43 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
 	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
-	  //zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
-	  //eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
+	  //	  zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
+	  //	  eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
 	  EEta[m][(e-1)*vpts + jj] = eta_new;
-        } /* end integration point loop */
+	} /* end integration point loop */
       }	/* end element loop */
-
-    } /* end caps loop */
-    free ((void *)eedot);
-    return;
+    }else{
+      /* strain-rate weakening, steady state solution */
+      for(e=1;e <= nel;e++)   {	/* loop through all elements */
+	
+	l = E->mat[m][e] -1 ;	
+	for(kk=1;kk <= ends;kk++)
+	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); 
+	for(jj=1;jj <= vpts;jj++){ 
+	  zzz = 0.0;
+	  for(kk=1;kk<=ends;kk++)
+	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+	  /* compute sigma_y as above */
+	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
+	  tau = min(tau,  E->viscosity.pdepv_y[l]);
+	  tau2 = tau * tau;
+	  if(tau < 1e10){
+	    /*  */
+	    eta_old = EEta[m][ (e-1)*vpts + jj ];
+	    eta_old2 = eta_old * eta_old;
+	    /* effectiev viscosity */
+	    eta_new = (tau2 * eta_old)/(tau2 + 2.0 * eta_old2 * eedot[e]);
+	    //fprintf(stderr,"SRW: a %11g b %11g y %11g z %11g sy: %11g e2: %11g eold: %11g enew: %11g logr: %.3f\n",
+	    //	    E->viscosity.pdepv_a[l],E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],zzz,tau,eedot[e],eta_old,eta_new,
+	    //	    log10(eta_new/eta_old));
+	    EEta[m][(e-1)*vpts + jj] = eta_new;
+	  }
+	}
+      }
+    }
+  } /* end caps loop */
+  free ((void *)eedot);
+  return;
 }
 
 /*

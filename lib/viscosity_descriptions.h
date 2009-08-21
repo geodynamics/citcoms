@@ -93,8 +93,10 @@ struct VISC_OPT {
   float cdepv_ff[10];		/*  flavor factors */
 
   int PDEPV;			/* "plasticity" law parameters */
-  float pdepv_a[CITCOM_MAX_VISC_LAYER], pdepv_b[CITCOM_MAX_VISC_LAYER], pdepv_y[CITCOM_MAX_VISC_LAYER],pdepv_offset;
+  float pdepv_a[CITCOM_MAX_VISC_LAYER], 
+    pdepv_b[CITCOM_MAX_VISC_LAYER], pdepv_y[CITCOM_MAX_VISC_LAYER],pdepv_offset;
   int pdepv_eff,pdepv_visited;
+  int psrw;
 
     int TDEPV;
     int TDEPV_AVE;
