@@ -380,21 +380,23 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                                        dvelocity, dpressure,
                                        E->monitor.incompressibility);
         }
-	if(E->control.only_check_vel_convergence){
-	  /* disregard pressure and div check */
-	  if(dvelocity < imp)
-            converging++;
-	  else
-            converging = 0;
-	  E->monitor.incompressibility = dvelocity;
+	if(!valid){
+	  converging = 0;
 	}else{
-	  /* how many consecutive converging iterations? */
-	  if(dvelocity < imp && dpressure < imp)
-            converging++;
-	  else
-            converging = 0;
-
-
+	  if(E->control.only_check_vel_convergence){
+	    /* disregard pressure and div check */
+	    if(dvelocity < imp)
+	      converging++;
+	    else
+	      converging = 0;
+	    E->monitor.incompressibility = dvelocity;
+	  }else{
+	    /* how many consecutive converging iterations? */
+	    if(dvelocity < imp && dpressure < imp)
+	      converging++;
+	    else
+	      converging = 0;
+	  }
 	}
 
         /* shift array pointers */
