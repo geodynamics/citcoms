@@ -675,26 +675,29 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                        dvelocity, dpressure,
                                        E->monitor.incompressibility);
         }
-
-	if(E->control.only_check_vel_convergence){
-	  /* 
-
-	  override pressure and compressibility check
-
-	  */
-	  if(dvelocity < imp)
-	    converging++;
-	  else
-	    converging =0;
-	  E->monitor.incompressibility = dvelocity;
+	if(!valid){
+	  converging = 0;
 	}else{
-	  /* how many consecutive converging iterations? */
-	  if(dvelocity < imp && dpressure < imp)
-            converging++;
-	  else
-            converging = 0;
+	  if(E->control.only_check_vel_convergence){
+	    /* 
+	       
+	    override pressure and compressibility check
+	    
+	    */
+	    if(dvelocity < imp)
+	      converging++;
+	    else
+	      converging =0;
+	    E->monitor.incompressibility = dvelocity;
+	  }else{
+	    /* how many consecutive converging iterations? */
+	    if(dvelocity < imp && dpressure < imp)
+	      converging++;
+	    else
+	      converging = 0;
+	  }
 	}
-        /* shift array pointers */
+	/* shift array pointers */
         for(m=1; m<=E->sphere.caps_per_proc; m++) {
             shuffle[m] = p1[m];
             p1[m] = p2[m];
