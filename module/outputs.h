@@ -32,6 +32,10 @@ extern char pyCitcom_output__name__[];
 extern char pyCitcom_output__doc__[];
 PyObject * pyCitcom_output(PyObject *, PyObject *);
 
+extern char pyCitcom_output_q_files__name__[];
+extern char pyCitcom_output_q_files__doc__[];
+PyObject * pyCitcom_output_q_files(PyObject *, PyObject *);
+
 extern char pyCitcom_output_time__name__[];
 extern char pyCitcom_output_time__doc__[];
 PyObject * pyCitcom_output_time(PyObject *, PyObject *);

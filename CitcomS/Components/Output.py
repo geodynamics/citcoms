@@ -61,6 +61,9 @@ class Output(CitcomComponent):
         # remove net rotation
         gzdir_rnr = inv.bool("gzdir_rnr", default=False)
 
+        # write additional heat flux files? if yes, how frequent?
+        write_q_files = inv.int("write_q_files", default=0)
+
         # max. degree for spherical harmonics output
         output_ll_max = inv.int("output_ll_max", default=20)
 

@@ -317,6 +317,8 @@ PyObject * pyCitcom_Output_set_properties(PyObject *self, PyObject *args)
     /* should we save the basis vectors? (memory!) */
     E->output.gzdir.vtk_base_save = 1;
 
+    getIntProperty(properties, "write_q_files", E->output.write_q_files, fp);
+
     getIntProperty(properties, "output_ll_max", E->output.llmax, fp);
     getIntProperty(properties, "self_gravitation", E->control.self_gravitation, fp);
     getIntProperty(properties, "use_cbf_topo", E->control.use_cbf_topo, fp);

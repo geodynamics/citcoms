@@ -26,7 +26,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 
-from CitcomSLib import CPU_time, output, output_time, output_checkpoint, return_dt, return_t, return_step
+from CitcomSLib import CPU_time, output, output_q_files, output_time, output_checkpoint, return_dt, return_t, return_step
 from pyre.components.Component import Component
 import journal
 
@@ -240,6 +240,11 @@ class Solver(Component):
 
     def save(self, monitoringFrequency):
         step = self.step
+
+        # write heat flux more frequently
+        write_q_files = self.inventory.output.inventory.write_q_files
+        if write_q_files and not (step % write_q_files):
+            output_q_files(self.all_variables)
 
         # output spacing is 'monitoringFrequency'
         if not (step % monitoringFrequency):

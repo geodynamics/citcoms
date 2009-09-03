@@ -233,6 +233,11 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_output__doc__},
 
+    {pyCitcom_output_q_files__name__,
+     pyCitcom_output_q_files,
+     METH_VARARGS,
+     pyCitcom_output_q_files__doc__},
+
     {pyCitcom_output_time__name__,
      pyCitcom_output_time,
      METH_VARARGS,

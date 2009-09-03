@@ -56,6 +56,28 @@ PyObject * pyCitcom_output(PyObject *self, PyObject *args)
 }
 
 
+char pyCitcom_output_q_files__doc__[] = "";
+char pyCitcom_output_q_files__name__[] = "output_q_files";
+
+PyObject * pyCitcom_output_q_files(PyObject *self, PyObject *args)
+{
+    PyObject *obj;
+    struct All_variables* E;
+    extern void heat_flux(struct All_variables*);
+
+    if (!PyArg_ParseTuple(args, "O:output_q_files", &obj))
+        return NULL;
+
+    E = (struct All_variables*)(PyCObject_AsVoidPtr(obj));
+
+    heat_flux(E);
+
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+
 char pyCitcom_output_time__doc__[] = "";
 char pyCitcom_output_time__name__[] = "output_time";
 
