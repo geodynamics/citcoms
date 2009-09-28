@@ -32,7 +32,6 @@
 
 void myerror(char *,struct All_variables *);
 void sphere_expansion(struct All_variables *, float **, float *, float *);
-void sphere_expansion();
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);
 long double lg_pow(long double, int);
