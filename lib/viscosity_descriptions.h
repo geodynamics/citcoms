@@ -25,22 +25,13 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-/* in this file define the contents of the VISC_OPT data structure
-   which is used to store information used to create predefined
-   viscosity fields, those determined from prior input, those
-   related to temperature/pressure/stress/anything else. */
 
 
 #define CITCOM_MAX_VISC_LAYER 40
 
 struct VISC_OPT {
-    void (* update_viscosity)();
 
     int update_allowed;		/* determines whether visc field can evolve */
-    int EQUIVDD;			/* Whatever the structure, average in the end */
-    int equivddopt;
-    int proflocx;			/* use depth dependence from given x,y location */
-    int proflocy;
     int SMOOTH;
     int smooth_cycles;
 
@@ -50,25 +41,18 @@ struct VISC_OPT {
     int FROM_FILE;
     int FROM_SPECS;
 
-				/* System ... */
+    /* System ... */
     int RHEOL;			/* 1,2 */
-    int rheol_layers;
     int num_mat;
 
-    int ncmb;
-    int nlm;
-    int n410;
-    int nlith;
     float zcmb;			/* old layer specs */
     float zlm;
     float z410;
     float zlith;
-  float zbase_layer[CITCOM_MAX_VISC_LAYER]; /* new */
+    float zbase_layer[CITCOM_MAX_VISC_LAYER]; /* new */
 
-    int FREEZE;
-    float freeze_thresh;
-    float freeze_value;
 
+    /* low viscosity channel and wedge stuff */
     int channel;
     int wedge;
 
@@ -77,85 +61,45 @@ struct VISC_OPT {
     float lv_channel_thickness;
     float lv_reduction;
 
+
+    /* viscosity cut-off */
     int MAX;
     float max_value;
     int MIN;
     float min_value;
 
+
+    /* non-Newtonian stress dependence */
     int SDEPV;
     float sdepv_misfit;
-    int sdepv_normalize,sdepv_visited;
+    int sdepv_normalize, sdepv_visited;
     float sdepv_expt[CITCOM_MAX_VISC_LAYER];
     float sdepv_trns[CITCOM_MAX_VISC_LAYER];
 
 
-  int CDEPV;			/* compositional viscosity */
-  float cdepv_ff[10];		/*  flavor factors */
+    /* compositional viscosity */
+    int CDEPV;
+    float cdepv_ff[10];		/*  flavor factors */
 
-  int PDEPV;			/* "plasticity" law parameters */
-  float pdepv_a[CITCOM_MAX_VISC_LAYER], 
-    pdepv_b[CITCOM_MAX_VISC_LAYER], pdepv_y[CITCOM_MAX_VISC_LAYER],pdepv_offset;
-  int pdepv_eff,pdepv_visited;
-  int psrw;
 
+    /* "plasticity" law parameters */
+    int PDEPV;
+    float pdepv_a[CITCOM_MAX_VISC_LAYER],
+        pdepv_b[CITCOM_MAX_VISC_LAYER],
+        pdepv_y[CITCOM_MAX_VISC_LAYER],
+        pdepv_offset;
+    int pdepv_eff, pdepv_visited;
+    int psrw;
+
+
+    /* temperature dependence */
     int TDEPV;
-    int TDEPV_AVE;
     float N0[CITCOM_MAX_VISC_LAYER];
-    float E[CITCOM_MAX_VISC_LAYER],T0[CITCOM_MAX_VISC_LAYER];
-    float T[CITCOM_MAX_VISC_LAYER],Z[CITCOM_MAX_VISC_LAYER];
+    float E[CITCOM_MAX_VISC_LAYER];
+    float T[CITCOM_MAX_VISC_LAYER];
+    float Z[CITCOM_MAX_VISC_LAYER];
 
-    int weak_blobs;
-    float weak_blobx[CITCOM_MAX_VISC_LAYER];
-    float weak_bloby[CITCOM_MAX_VISC_LAYER];
-    float weak_blobz[CITCOM_MAX_VISC_LAYER];
-    float weak_blobwidth[CITCOM_MAX_VISC_LAYER];
-    float weak_blobmag[CITCOM_MAX_VISC_LAYER];
+    float ET_red, T_sol0;			/* for viscosity law 8 */
 
-    int weak_zones;
-    float weak_zonex1[CITCOM_MAX_VISC_LAYER];
-    float weak_zoney1[CITCOM_MAX_VISC_LAYER];
-    float weak_zonez1[CITCOM_MAX_VISC_LAYER];
-    float weak_zonex2[CITCOM_MAX_VISC_LAYER];
-    float weak_zoney2[CITCOM_MAX_VISC_LAYER];
-    float weak_zonez2[CITCOM_MAX_VISC_LAYER];
-
-    float weak_zonewidth[CITCOM_MAX_VISC_LAYER];
-    float weak_zonemag[CITCOM_MAX_VISC_LAYER];
-
-    int guess;
-    char old_file[100];
-				/* Specification info */
-
-				/* Prespecified viscosity parameters */
-    char VISC_OPT[20];
-
-  // superceded by num_mat
-  //int layers;			/* number of layers with properties .... */
-
-
-    int SLABLVZ;			/* slab structure imposed on top of 3 layer structure */
-    int slvzd1,slvzd2,slvzd3;	        /* layer thicknesses (nodes) */
-    int slvzD1,slvzD2;		        /* slab posn & length */
-    float slvzn1,slvzn2,slvzn3,slvzN;   /* viscosities */
-
-    int COSX;
-    float cosx_epsilon;
-    float cosx_k;
-    int cosx_exp;
-
-    int EXPX;
-    float expx_epsilon;
-
-  float ET_red,T_sol0;			/* for viscosity law 8 */
-
-
-    /* MODULE BASED VISCOSITY VARIATIONS */
-
-    int RESDEPV;
-    float RESeta0[CITCOM_MAX_VISC_LAYER];
-
-    int CHEMDEPV;
-    float CH0[CITCOM_MAX_VISC_LAYER];
-    float CHEMeta0[CITCOM_MAX_VISC_LAYER];
 
 } viscosity;
