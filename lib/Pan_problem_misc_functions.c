@@ -284,6 +284,53 @@ int read_double_vector(FILE *in, int num_columns, double *fields)
 }
 
 
+/*
+ * Read fp line by line, until a line matching string param is found.
+ * Then, the next E->mesh.nel lines are read into var array.
+ */
+void read_visc_param_from_file(struct All_variables *E,
+                               const char *param, float *var,
+                               FILE *fp)
+{
+    char buffer[256], *p;
+    size_t len;
+    int i;
+
+    len = strlen(param);
+
+    /* back to beginning of file */
+    rewind(fp);
+
+    while(1) {
+        p = fgets(buffer, 255, fp);
+        if(!p) {
+            /* reaching end of file */
+            if(E->parallel.me == 0)
+                fprintf(stderr, "Cannot find param '%s' in visc_layer_file\n", param);
+            parallel_process_termination();
+        }
+
+        if(strncmp(buffer, param, len) == 0)
+            /* find matching param */
+            break;
+    }
+
+    /* fill in the array in reversed order */
+    for(i=E->mesh.elz-1; i>=0; i--) {
+        int n;
+        n = fscanf(fp, "%f", &(var[i]));
+        //fprintf(stderr, "%d %f\n", i, var[i]);
+        if(n != 1) {
+            fprintf(stderr,"Error while reading file '%s'\n", E->viscosity.layer_file);
+            exit(8);
+        }
+    }
+
+    return;
+}
+
+
+
 /* =================================================
   my version of arc tan
  =================================================*/

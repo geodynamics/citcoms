@@ -822,21 +822,33 @@ void construct_mat_group(E)
      struct All_variables *E;
 {
   int m,i,j,k,kk,el,lev,a,nodea,els,llayer;
+  void read_visc_layer_file(struct All_variables *E);
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    for(el=1;el<=E->lmesh.nel;el++) {
-      E->mat[m][el] = 1;
-      nodea = E->ien[m][el].node[2];
-      llayer = layers(E,m,nodea);
-      if (llayer)  {
-	E->mat[m][el] = llayer;
-      }
-    }
-  }
+  if(E->viscosity.layer_control) {
+      read_visc_layer_file(E);
 
+      /* assign the global nz to mat group */
+      for (m=1;m<=E->sphere.caps_per_proc;m++)
+          for(el=1;el<=E->lmesh.nel;el++) {
+              int nz;
+              nz = ((el-1) % E->lmesh.elz) + 1;
+              E->mat[m][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
+          }
+  } else {
+      for (m=1;m<=E->sphere.caps_per_proc;m++) {
+          for(el=1;el<=E->lmesh.nel;el++) {
+              E->mat[m][el] = 1;
+              nodea = E->ien[m][el].node[2];
+              llayer = layers(E,m,nodea);
+              if (llayer)  {
+                  E->mat[m][el] = llayer;
+              }
+          }
+      }
+  }
   return;
 }
 

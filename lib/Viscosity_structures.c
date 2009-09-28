@@ -39,6 +39,11 @@
 
 void myerror(struct All_variables *,char *);
 
+void allocate_visc_vars(struct All_variables *E);
+void read_visc_layer_file(struct All_variables *E);
+void read_visc_param_from_file(struct All_variables *E,
+                               const char *param, float *var,
+                               FILE *fp);
 static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
@@ -50,35 +55,32 @@ void viscosity_system_input(struct All_variables *E)
     int m=E->parallel.me;
     int i;
 
-    /* default values .... */
-    for(i=0;i < CITCOM_MAX_VISC_LAYER;i++) {
-        E->viscosity.N0[i]=1.0;
-        E->viscosity.T[i] = 0.0;
-        E->viscosity.Z[i] = 0.0;
-        E->viscosity.E[i] = 0.0;
 
-	E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = min(a + b * (1-r),y) */
-	E->viscosity.pdepv_b[i] = 0.0;
-	E->viscosity.pdepv_y[i] = 1.e20;
-
-
-    }
-    for(i=0;i<10;i++)
-      E->viscosity.cdepv_ff[i] = 1.0; /* flavor factors for CDEPV */
-
-
-    /* read in information */
     input_boolean("VISC_UPDATE",&(E->viscosity.update_allowed),"on",m);
-    input_int("rheol",&(E->viscosity.RHEOL),"3",m);
 
+    input_boolean("visc_layer_control",&(E->viscosity.layer_control),"off",m);
+    input_string("visc_layer_file", E->viscosity.layer_file,"visc.dat",m);
+
+    allocate_visc_vars(E);
+
+    for(i=0;i < E->viscosity.num_mat;i++)
+        E->viscosity.N0[i]=1.0;
     input_float_vector("visc0",E->viscosity.num_mat,(E->viscosity.N0),m);
 
     input_boolean("TDEPV",&(E->viscosity.TDEPV),"on",m);
+    input_int("rheol",&(E->viscosity.RHEOL),"3",m);
     if (E->viscosity.TDEPV) {
+        for(i=0;i < E->viscosity.num_mat;i++) {
+            E->viscosity.T[i] = 0.0;
+            E->viscosity.Z[i] = 0.0;
+            E->viscosity.E[i] = 0.0;
+        }
+
         input_float_vector("viscT",E->viscosity.num_mat,(E->viscosity.T),m);
         input_float_vector("viscE",E->viscosity.num_mat,(E->viscosity.E),m);
         input_float_vector("viscZ",E->viscosity.num_mat,(E->viscosity.Z),m);
-	/* for viscosity 8 */
+
+        /* for viscosity 8 */
         input_float("T_sol0",&(E->viscosity.T_sol0),"0.6",m);
         input_float("ET_red",&(E->viscosity.ET_red),"0.1",m);
     }
@@ -95,6 +97,11 @@ void viscosity_system_input(struct All_variables *E)
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;
+      for(i=0;i < CITCOM_MAX_VISC_LAYER;i++) {
+          E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = min(a + b * (1-r),y) */
+          E->viscosity.pdepv_b[i] = 0.0;
+          E->viscosity.pdepv_y[i] = 1.e20;
+      }
 
       input_boolean("psrw",&(E->viscosity.psrw),"off",m); /* SRW? else regular plasiticity */
       input_boolean("pdepv_eff",&(E->viscosity.pdepv_eff),"on",m); /* effective
@@ -112,6 +119,8 @@ void viscosity_system_input(struct All_variables *E)
 
 
     input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+    for(i=0;i<10;i++)
+      E->viscosity.cdepv_ff[i] = 1.0; /* flavor factors for CDEPV */
     if(E->viscosity.CDEPV){
       /* compositional viscosity */
       if(E->control.tracer < 1){
@@ -167,6 +176,40 @@ void viscosity_input(struct All_variables *E)
     return;
 }
 
+
+void allocate_visc_vars(struct All_variables *E)
+{
+    int i;
+
+    if(E->viscosity.layer_control) {
+        /* noz is already defined, but elz is undefined yet */
+        i = E->mesh.noz - 1;
+    } else {
+        i = E->viscosity.num_mat;
+    }
+
+    E->viscosity.N0 = (float*) malloc(i*sizeof(float));
+    E->viscosity.E = (float*) malloc(i*sizeof(float));
+    E->viscosity.T = (float*) malloc(i*sizeof(float));
+    E->viscosity.Z = (float*) malloc(i*sizeof(float));
+    E->viscosity.pdepv_a = (float*) malloc(i*sizeof(float));
+    E->viscosity.pdepv_b = (float*) malloc(i*sizeof(float));
+    E->viscosity.pdepv_y = (float*) malloc(i*sizeof(float));
+    E->viscosity.sdepv_expt = (float*) malloc(i*sizeof(float));
+
+    if(E->viscosity.N0 == NULL ||
+       E->viscosity.E == NULL ||
+       E->viscosity.T == NULL ||
+       E->viscosity.Z == NULL ||
+       E->viscosity.pdepv_a == NULL ||
+       E->viscosity.pdepv_b == NULL ||
+       E->viscosity.pdepv_y == NULL ||
+       E->viscosity.sdepv_expt == NULL) {
+        fprintf(stderr, "Error: Cannot allocate visc memory, rank=%d\n",
+                E->parallel.me);
+        exit(8);
+    }
+}
 
 
 /* ============================================ */
@@ -282,6 +325,53 @@ void visc_from_mat(E,EEta)
 
     return;
 }
+
+
+void read_visc_layer_file(struct All_variables *E)
+{
+    int i;
+    FILE *fp;
+    char junk[256];
+
+    fp = fopen(E->viscosity.layer_file, "r");
+    if (fp == NULL) {
+        fprintf(E->fp, "(Viscosity_structures #1) Cannot open %s\n", E->viscosity.layer_file);
+        exit(8);
+    }
+
+
+    /* default value */
+    for(i=0; i<E->mesh.elz; i++) {
+        E->viscosity.N0[i] =
+            E->viscosity.E[i] =
+            E->viscosity.T[i] =
+            E->viscosity.Z[i] =
+            E->viscosity.pdepv_a[i] =
+            E->viscosity.pdepv_b[i] =
+            E->viscosity.pdepv_y[i] =
+            E->viscosity.sdepv_expt[i] = 0;
+    }
+
+    read_visc_param_from_file(E, "visc0", E->viscosity.N0, fp);
+    if(E->viscosity.TDEPV) {
+        read_visc_param_from_file(E, "viscE", E->viscosity.E, fp);
+        read_visc_param_from_file(E, "viscT", E->viscosity.T, fp);
+        read_visc_param_from_file(E, "viscZ", E->viscosity.Z, fp);
+    }
+
+    if(E->viscosity.SDEPV) {
+        read_visc_param_from_file(E, "sdepv_expt", E->viscosity.sdepv_expt, fp);
+    }
+
+    if(E->viscosity.PDEPV) {
+        read_visc_param_from_file(E, "pdepv_a", E->viscosity.pdepv_a, fp);
+        read_visc_param_from_file(E, "pdepv_b", E->viscosity.pdepv_b, fp);
+        read_visc_param_from_file(E, "pdepv_y", E->viscosity.pdepv_y, fp);
+    }
+
+    return;
+}
+
 
 void visc_from_T(E,EEta,propogate)
      struct All_variables *E;

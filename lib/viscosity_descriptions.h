@@ -73,8 +73,7 @@ struct VISC_OPT {
     int SDEPV;
     float sdepv_misfit;
     int sdepv_normalize, sdepv_visited;
-    float sdepv_expt[CITCOM_MAX_VISC_LAYER];
-    float sdepv_trns[CITCOM_MAX_VISC_LAYER];
+    float *sdepv_expt;
 
 
     /* compositional viscosity */
@@ -84,22 +83,18 @@ struct VISC_OPT {
 
     /* "plasticity" law parameters */
     int PDEPV;
-    float pdepv_a[CITCOM_MAX_VISC_LAYER],
-        pdepv_b[CITCOM_MAX_VISC_LAYER],
-        pdepv_y[CITCOM_MAX_VISC_LAYER],
-        pdepv_offset;
+    float *pdepv_a, *pdepv_b, *pdepv_y, pdepv_offset;
     int pdepv_eff, pdepv_visited;
     int psrw;
 
 
     /* temperature dependence */
     int TDEPV;
-    float N0[CITCOM_MAX_VISC_LAYER];
-    float E[CITCOM_MAX_VISC_LAYER];
-    float T[CITCOM_MAX_VISC_LAYER];
-    float Z[CITCOM_MAX_VISC_LAYER];
+    float *N0, *E, *T, *Z;
 
     float ET_red, T_sol0;			/* for viscosity law 8 */
 
+    int layer_control;
+    char layer_file[255];
 
 } viscosity;

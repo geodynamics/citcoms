@@ -78,6 +78,9 @@ class Visc(CitcomComponent):
         num_mat = pyre.inventory.int("num_mat", default=4)
         visc0 = pyre.inventory.list("visc0", default=[1, 1, 1, 1])
 
+        visc_layer_control = pyre.inventory.bool("visc_layer_control", default=False)
+        visc_layer_file = pyre.inventory.str("visc_layer_file", default="visc.dat")
+
         TDEPV = pyre.inventory.bool("TDEPV", default=False)
         rheol = pyre.inventory.int("rheol", default=3)
         viscE = pyre.inventory.list("viscE", default=[1, 1, 1, 1])

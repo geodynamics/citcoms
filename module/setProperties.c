@@ -78,6 +78,7 @@ int _getDoubleVectorProperty(PyObject* properties, char* attribute,
 
 void myerror(struct All_variables *,char *);
 void report(struct All_variables *,char *);
+void allocate_visc_vars(struct All_variables *);
 
 /*==============================================================*/
 
@@ -775,6 +776,12 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
 	num_mat = MAX_MAT;
     }
     E->viscosity.num_mat = num_mat;
+
+    getIntProperty(properties, "visc_layer_control", E->viscosity.layer_control, fp);
+    getStringProperty(properties, "visc_layer_file", E->viscosity.layer_file, fp);
+
+    allocate_visc_vars(E);
+
 
     getFloatVectorProperty(properties, "visc0",
                            E->viscosity.N0, num_mat, fp);
