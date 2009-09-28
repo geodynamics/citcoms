@@ -142,6 +142,7 @@ void assemble_forces_pseudo_surf(E,penalty)
   void get_elt_f();
   void get_elt_tr_pseudo_surf();
   void strip_bcs_from_residual();
+  double global_vdot();
 
   const int neq=E->lmesh.neq;
   const int nel=E->lmesh.nel;
@@ -173,6 +174,17 @@ void assemble_forces_pseudo_surf(E,penalty)
 
   (E->solver.exchange_id_d)(E, E->F, lev);
   strip_bcs_from_residual(E,E->F,lev);
+
+  /* compute the norm of E->F */
+  E->monitor.fdotf = sqrt(global_vdot(E, E->F, E->F, lev));
+
+  if(E->parallel.me==0) {
+      fprintf(stderr, "Momentum equation force %.9e\n",
+              E->monitor.fdotf);
+      fprintf(E->fp, "Momentum equation force %.9e\n",
+              E->monitor.fdotf);
+  }
+
   return;
 }
 
