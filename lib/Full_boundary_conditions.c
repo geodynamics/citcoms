@@ -61,7 +61,12 @@ void full_velocity_boundary_conditions(E)
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
-	}
+#ifdef USE_GGRD
+	/* Ggrd traction control */
+	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
+	  ggrd_read_vtop_from_file(E, 1);
+#endif
+      }
       if(E->mesh.botvbc != 1) {	/* free slip bottom */
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
@@ -90,6 +95,7 @@ void full_velocity_boundary_conditions(E)
 	     read_velocity_boundary_from_file(E);
 	}
       }
+
       if(E->mesh.botvbc == 1) {	/* velocity bottom BC */
         horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
