@@ -423,19 +423,6 @@ void read_initial_settings(struct All_variables *E)
      jumps, they may or may not be identical with the phase changes */
   E->viscosity.zbase_layer[0] = E->viscosity.zbase_layer[1] = -999;
   input_float_vector("z_layer",E->viscosity.num_mat,(E->viscosity.zbase_layer),m);
-  if((fabs(E->viscosity.zbase_layer[0]+999) < 1e-5) && 
-     (fabs(E->viscosity.zbase_layer[1]+999) < 1e-5)){
-    /* 
-       no z_layer input found  
-    */
-    if(E->viscosity.num_mat != 4)
-      myerror(E,"error: either use z_layer for non dim layer depths, or set num_mat to four");
-
-    E->viscosity.zbase_layer[0] = E->viscosity.zlith;
-    E->viscosity.zbase_layer[1] = E->viscosity.z410;
-    E->viscosity.zbase_layer[2] = E->viscosity.zlm;
-    E->viscosity.zbase_layer[3] = E->viscosity.zcmb;
-  }
 
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
@@ -760,6 +747,20 @@ void check_settings_consistency(struct All_variables *E)
       if(E->parallel.me == 0)
 	 fprintf(stderr,"\nWARNING: The input parameters impose boundary velocity, but also remove angular momentum/rigid rotation!\n\n");
     }
+
+    /* no z_layer input found */
+    if((fabs(E->viscosity.zbase_layer[0]+999) < 1e-5) &&
+       (fabs(E->viscosity.zbase_layer[1]+999) < 1e-5)) {
+
+        if(E->viscosity.num_mat != 4)
+            myerror(E,"error: either use z_layer for non dim layer depths, or set num_mat to four");
+
+        E->viscosity.zbase_layer[0] = E->viscosity.zlith;
+        E->viscosity.zbase_layer[1] = E->viscosity.z410;
+        E->viscosity.zbase_layer[2] = E->viscosity.zlm;
+        E->viscosity.zbase_layer[3] = E->viscosity.zcmb;
+    }
+
     return;
 }
 
