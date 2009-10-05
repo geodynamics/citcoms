@@ -43,6 +43,7 @@ class Visc(CitcomComponent):
 
         inv = self.inventory
         inv.visc0 = map(float, inv.visc0)
+        inv.z_layer = map(float, inv.z_layer)
         inv.viscE = map(float, inv.viscE)
         inv.viscT = map(float, inv.viscT)
         inv.viscZ = map(float, inv.viscZ)
@@ -78,6 +79,7 @@ class Visc(CitcomComponent):
         num_mat = pyre.inventory.int("num_mat", default=4)
         visc0 = pyre.inventory.list("visc0", default=[1, 1, 1, 1])
 
+        z_layer = pyre.inventory.list("z_layer", default=[-999, -999])
         visc_layer_control = pyre.inventory.bool("visc_layer_control", default=False)
         visc_layer_file = pyre.inventory.str("visc_layer_file", default="visc.dat")
 

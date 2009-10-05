@@ -545,6 +545,13 @@ PyObject * pyCitcom_Sphere_set_properties(PyObject *self, PyObject *args)
     getFloatVectorProperty(properties, "coor_refine", E->control.coor_refine, 4, fp);
     getStringProperty(properties, "coor_file", E->control.coor_file, fp);
 
+    getIntProperty(properties, "r_grid_layers", E->control.rlayers, fp);
+    if(E->control.rlayers > 20)
+        myerror(E, "number of rlayers out of bounds (20) for coor = 3");
+    getFloatVectorProperty(properties, "rr", E->control.rrlayer, E->control.rlayers, fp);
+    getIntVectorProperty(properties, "nr", E->control.nrlayer, E->control.rlayers, fp);
+
+
     getIntProperty(properties, "nodex", E->mesh.nox, fp);
     getIntProperty(properties, "nodey", E->mesh.noy, fp);
     getIntProperty(properties, "nodez", E->mesh.noz, fp);
@@ -767,16 +774,17 @@ PyObject * pyCitcom_Visc_set_properties(PyObject *self, PyObject *args)
     getIntProperty(properties, "visc_smooth_method", E->viscosity.smooth_cycles, fp);
     getIntProperty(properties, "VISC_UPDATE", E->viscosity.update_allowed, fp);
 
-#define MAX_MAT 40
-
     getIntProperty(properties, "num_mat", num_mat, fp);
-    if(num_mat > MAX_MAT) {
+    if(num_mat > CITCOM_MAX_VISC_LAYER) {
 	/* max. allowed material types = 40 */
-	fprintf(stderr, "'num_mat' greater than allowed value, set to %d\n", MAX_MAT);
-	num_mat = MAX_MAT;
+	fprintf(stderr, "'num_mat' greater than allowed value, set to %d\n",
+                CITCOM_MAX_VISC_LAYER);
+	num_mat = CITCOM_MAX_VISC_LAYER;
     }
     E->viscosity.num_mat = num_mat;
 
+    getFloatVectorProperty(properties, "z_layer",
+                           E->viscosity.zbase_layer, num_mat, fp);
     getIntProperty(properties, "visc_layer_control", E->viscosity.layer_control, fp);
     getStringProperty(properties, "visc_layer_file", E->viscosity.layer_file, fp);
 
