@@ -160,7 +160,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
 
       case 3:  /* read element materials */
 #ifdef USE_GGRD
-	if(!E->control.ggrd.mat_control){
+	if(E->control.ggrd.mat_control == 0 ){
 #endif
         sprintf(output_file1,"%s%0.0f.0",E->control.mat_file,newage1);
         sprintf(output_file2,"%s%0.0f.0",E->control.mat_file,newage2);
@@ -316,7 +316,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
 
       case 3:  /* read element materials */
 #ifdef USE_GGRD
-	if(E->control.ggrd.mat_control){
+	if(E->control.ggrd.mat_control != 0){
 	  ggrd_read_mat_from_file(E, 0);
 	}else{
 #endif

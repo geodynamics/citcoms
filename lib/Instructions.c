@@ -487,6 +487,10 @@ void read_initial_settings(struct All_variables *E)
 
      read in time-constant prefactors from weak.grd netcdf file that apply to top two E->mat layers
 
+     i.e.  ggrd_mat_control > 0 --> assign to layers with ilayer <=   ggrd_mat_control
+           ggrd_mat_control < 0 --> assign to layers with ilayer ==  -ggrd_mat_control
+
+
      (b)
 
      ggrd_mat_control=2
@@ -503,6 +507,9 @@ void read_initial_settings(struct All_variables *E)
      0 15
      15 30
      30 60
+
+
+     
      
   */
   ggrd_init_master(&E->control.ggrd);
@@ -511,9 +518,10 @@ void read_initial_settings(struct All_variables *E)
   input_string("ggrd_time_hist_file",
 	       E->control.ggrd.time_hist.file,"",m); 
   /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
+  /* if < 0, will assign only to layer == -ggrd_mat_control */
   input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); 
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
-  if(E->control.ggrd.mat_control) /* this will override mat_control setting */
+  if(E->control.ggrd.mat_control != 0) /* this will override mat_control setting */
     E->control.mat_control = 1;
   /* 
      

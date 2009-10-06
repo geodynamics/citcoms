@@ -159,7 +159,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 
       case 3:  /* read element materials */
 #ifdef USE_GGRD
-	if(!E->control.ggrd.mat_control){
+	if(E->control.ggrd.mat_control == 0){
 #endif
 	sprintf(output_file1,"%s%0.0f.%d",E->control.mat_file,newage1,cap);
 	sprintf(output_file2,"%s%0.0f.%d",E->control.mat_file,newage2,cap);
@@ -311,7 +311,7 @@ void full_read_input_files_for_timesteps(E,action,output)
 
       case 3:  /* read element materials and Ray */
 #ifdef USE_GGRD
-	if(E->control.ggrd.mat_control){ /* use netcdf grids */
+	if(E->control.ggrd.mat_control != 0){ /* use netcdf grids */
 	  ggrd_read_mat_from_file(E, 1);
 	}else{
 #endif

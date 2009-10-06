@@ -328,7 +328,11 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 
 read in material, i.e. viscosity prefactor from ggrd file, this will get assigned if
 
-layer <=  E->control.ggrd.mat_control
+layer <=  E->control.ggrd.mat_control for  E->control.ggrd.mat_control > 0
+
+or 
+
+layer ==  -E->control.ggrd.mat_control for  E->control.ggrd.mat_control < 0
 
 
 */
@@ -369,8 +373,15 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     /* assign the general depth dependent material group */
     construct_mat_group(E);
     if(E->parallel.me==0)
-      fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to all above %g km\n",
-	      E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1]);
+      
+      if(E->control.ggrd.mat_control > 0)
+	fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to all above %g km\n",
+		E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1]);
+      else
+	fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to single layer at %g km\n",
+		E->data.radius_km*E->viscosity.zbase_layer[-E->control.ggrd.mat_control-1]);
+
+	
     if(is_global)		/* decide on GMT flag */
       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
     else
@@ -424,7 +435,8 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     */
     for (m=1;m <= E->sphere.caps_per_proc;m++) {
       for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
-	if(E->mat[m][j] <= E->control.ggrd.mat_control ){
+	if(((E->control.ggrd.mat_control > 0) && (E->mat[m][j] <=  E->control.ggrd.mat_control )) || 
+	   ((E->control.ggrd.mat_control < 0) && (E->mat[m][j] == -E->control.ggrd.mat_control ))){
 	  /*
 	     lithosphere or asthenosphere
 	  */
