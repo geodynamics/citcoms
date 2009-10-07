@@ -105,6 +105,8 @@ class Incompressible(CitcomComponent):
         remove_rigid_rotation = prop.bool("remove_rigid_rotation", default=True)
         remove_angular_momentum = prop.bool("remove_angular_momentum", default=True)
 
+        only_check_vel_convergence = prop.bool("only_check_vel_convergence", default=False)
+
         # Not used. Retained here for backward compatibility.
         tole_compressibility = prop.float("tole_compressibility", default=1.0e-7)
         relative_err_accuracy = prop.float("relative_err_accuracy", default=0.001)
