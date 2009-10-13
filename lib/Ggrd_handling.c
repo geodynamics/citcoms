@@ -701,13 +701,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     if(use_codes)
       vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
     if(E->parallel.me == 0)
-      fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr\n");
+      fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr\n, scaling factor: %g",vscale);
   }else{
     /* stress scale, from MPa */
-    vscale =  1e-6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6));
+    vscale =  1e6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6));
     if((!mode_warned) && (E->parallel.me == 0)){
       fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: make sure traction control is what you want, not free slip\n");
-      fprintf(stderr,"ggrd_read_vtop_from_file: expecting traction grids in MPa\n");
+      fprintf(stderr,"ggrd_read_vtop_from_file: expecting traction grids in MPa, scaling factor: %g\n",vscale);
       mode_warned = TRUE;
     }
   }
