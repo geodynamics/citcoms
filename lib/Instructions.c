@@ -414,9 +414,9 @@ void read_initial_settings(struct All_variables *E)
   /* those are specific depth layers associated with phase
      transitions, default values should be fixed */
   input_float("z_cmb",&(E->viscosity.zcmb),"0.45",m); /* 0.45063569 */
-  input_float("z_lmantle",&(E->viscosity.zlm),"0.45",m); /*0.10359441  */
-  input_float("z_410",&(E->viscosity.z410),"0.225",m); /* 0.06434, more like it */
-  input_float("z_lith",&(E->viscosity.zlith),"0.225",m); /* 0.0157, more like it */
+  input_float("z_lmantle",&(E->viscosity.zlm),"0.103594412180191",m); /*0.10359441  */
+  input_float("z_410",&(E->viscosity.z410),"0.0643541045361796",m); /* 0.06434, more like it */
+  input_float("z_lith",&(E->viscosity.zlith),"0.0156961230576048",m); /* 0.0157, more like it */
 
 
   /* those are depth layers associated with viscosity or material
