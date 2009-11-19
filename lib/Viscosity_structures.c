@@ -97,7 +97,7 @@ void viscosity_system_input(struct All_variables *E)
     input_boolean("PDEPV",&(E->viscosity.PDEPV),"off",m); /* plasticity addition by TWB */
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;
-      for(i=0;i < CITCOM_MAX_VISC_LAYER;i++) {
+      for(i=0;i < E->viscosity.num_mat;i++) {
           E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = min(a + b * (1-r),y) */
           E->viscosity.pdepv_b[i] = 0.0;
           E->viscosity.pdepv_y[i] = 1.e20;

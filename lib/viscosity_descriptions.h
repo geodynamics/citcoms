@@ -83,7 +83,8 @@ struct VISC_OPT {
 
     /* "plasticity" law parameters */
     int PDEPV;
-    float *pdepv_a, *pdepv_b, *pdepv_y, pdepv_offset;
+    float *pdepv_a, *pdepv_b, *pdepv_y;
+    float pdepv_offset;
     int pdepv_eff, pdepv_visited;
     int psrw;
 
