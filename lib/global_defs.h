@@ -285,6 +285,7 @@ struct SPHERE   {
   double *angle1[MAX_LEVELS][NCS][5];
 
   double *R[MAX_LEVELS];
+  double *gr;
   double ro,ri;
   struct CAP cap[NCS];
 

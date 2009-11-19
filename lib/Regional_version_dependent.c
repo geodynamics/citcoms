@@ -119,6 +119,10 @@ void regional_node_locations(E)
   }
 
 
+  for (i=1;i<=E->mesh.noz;i++)  {
+      E->sphere.gr[i] = rr[i];
+      /* if(E->parallel.me==0) fprintf(stderr, "%d %f\n", i, E->sphere.gr[i]); */
+  }
 
   for (i=1;i<=E->lmesh.noz;i++)  {
       k = E->lmesh.nzs+i-1;

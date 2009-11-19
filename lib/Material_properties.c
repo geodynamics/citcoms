@@ -217,22 +217,19 @@ static void murnaghan_eos(struct All_variables *E)
     const acc = 1e-8;
 
 
-    r = (double *) malloc((gnoz+1)*sizeof(double));
     rho = (double *) malloc((gnoz+1)*sizeof(double));
     p = (double *) malloc((gnoz+1)*sizeof(double));
 
-    if(r == NULL || rho == NULL || p == NULL) {
+    if(rho == NULL || p == NULL) {
         myerror(E, "allocating memory in murnaghan_eos()");
     }
-
-    /* r[1 ... gnoz] will hold the global radial coordinates */
-    gather_r(E, r);
 
     for(i=1; i<=gnoz; i++) {
 	rho[i] = 1;
         p[i] = 0;
     }
 
+    r = E->sphere.gr;
     old_rho_cmb = 0;
     do {
         /* integrate downward from surface to CMB */
