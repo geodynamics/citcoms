@@ -214,7 +214,7 @@ static void murnaghan_eos(struct All_variables *E)
     int count = 0;
     int i, j;
     double old_rho_cmb, diff;
-    const acc = 1e-8;
+    const double acc = 1e-8;
 
 
     rho = (double *) malloc((gnoz+1)*sizeof(double));
@@ -271,7 +271,6 @@ static void murnaghan_eos(struct All_variables *E)
 
 
 
-    free(r);
     free(rho);
     free(p);
 
