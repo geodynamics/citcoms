@@ -29,12 +29,7 @@
    Variables are initialized etc, default values are set */
 
 
-#include <math.h>
-#include <sys/types.h>
-#include "element_definitions.h"
 #include "global_defs.h"
-#include <stdlib.h> /* for "system" command */
-#include <strings.h>
 
 void set_convection_defaults(E)
      struct All_variables *E;

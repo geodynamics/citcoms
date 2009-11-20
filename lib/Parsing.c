@@ -29,12 +29,7 @@
    then parse the contents as parameters for citcom */
 
 #include <stdio.h>
-#include <sys/types.h>
-#ifndef __sunos__
-#include <strings.h>
-#else
 #include <string.h>
-#endif
 #include "global_defs.h"
 #include "parsing.h"
 
