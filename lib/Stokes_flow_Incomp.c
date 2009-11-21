@@ -289,8 +289,8 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     r0dotz0 = 0;
 
     while( (count < *steps_max) &&
-           (E->monitor.incompressibility > imp) &&
-           (converging < 2) ) {
+           ((E->monitor.incompressibility > imp) ||
+	    (converging < 2) )) {
         /* require two consecutive converging iterations to quit the while-loop */
 
         /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
@@ -383,13 +383,15 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 	if(!valid){
 	  converging = 0;
 	}else{
+	 
+
 	  if(E->control.only_check_vel_convergence){
 	    /* disregard pressure and div check */
 	    if(dvelocity < imp)
 	      converging++;
 	    else
 	      converging = 0;
-	    E->monitor.incompressibility = dvelocity;
+	    
 	  }else{
 	    /* how many consecutive converging iterations? */
 	    if(dvelocity < imp && dpressure < imp)
@@ -397,6 +399,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 	    else
 	      converging = 0;
 	  }
+	  
 	}
 
         /* shift array pointers */
@@ -542,8 +545,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     r0dotrt = alpha = omega = 0;
 
     while( (count < *steps_max) &&
-           (E->monitor.incompressibility > imp) &&
-           (converging < 2) ) {
+           ((E->monitor.incompressibility > imp) ||
+	    (converging < 2) )) {
         /* require two consecutive converging iterations to quit the while-loop */
 
         /* r1dotrt = <r1, rt> */
@@ -685,12 +688,11 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 	       
 	    override pressure and compressibility check
 	    
-	    */
+	      */
 	    if(dvelocity < imp)
 	      converging++;
 	    else
 	      converging =0;
-	    E->monitor.incompressibility = dvelocity;
 	  }else{
 	    /* how many consecutive converging iterations? */
 	    if(dvelocity < imp && dpressure < imp)

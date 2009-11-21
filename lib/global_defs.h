@@ -381,6 +381,7 @@ struct MONITOR {
 
     double momentum_residual;
     double incompressibility;
+
     double fdotf;
     double vdotv;
     double pdotp;

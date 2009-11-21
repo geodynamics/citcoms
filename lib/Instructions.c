@@ -604,6 +604,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("down_heavy",&(E->control.down_heavy),"1,0,nomax",m);
   input_int("up_heavy",&(E->control.up_heavy),"1,0,nomax",m);
   input_double("accuracy",&(E->control.accuracy),"1.0e-4,0.0,1.0",m);
+
+
   input_boolean("only_check_vel_convergence",&(E->control.only_check_vel_convergence),"off",m);
 
   input_int("vhighstep",&(E->control.v_steps_high),"1,0,nomax",m);
