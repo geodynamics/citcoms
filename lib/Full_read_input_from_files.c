@@ -223,7 +223,7 @@ void full_read_input_files_for_timesteps(E,action,output)
       case 1:  /* velocity boundary conditions */
 #ifdef USE_GGRD
 	if(E->control.ggrd.vtop_control){
-	  ggrd_read_vtop_from_file(E, 1);
+	  ggrd_read_vtop_from_file(E, 1,0);
 	}else{
 #endif
 	nnn=nox*noy;

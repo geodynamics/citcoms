@@ -434,6 +434,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("topvbc",&(E->mesh.topvbc),"0",m);
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
+  input_int("toplayerbc",&(E->mesh.toplayerbc),"0",m); /* apply surface BC throughout all layer nodes  */
+
   input_float("topvbxval",&(E->control.VBXtopval),"0.0",m);
   input_float("botvbxval",&(E->control.VBXbotval),"0.0",m);
   input_float("topvbyval",&(E->control.VBYtopval),"0.0",m);
@@ -521,6 +523,8 @@ void read_initial_settings(struct All_variables *E)
   /* if < 0, will assign only to layer == -ggrd_mat_control */
   input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); 
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
+  input_string("ggrd_mat_depth_file",
+	       E->control.ggrd_mat_depth_file,"_i_do_not_exist_",m); 
   if(E->control.ggrd.mat_control != 0) /* this will override mat_control setting */
     E->control.mat_control = 1;
   /* 

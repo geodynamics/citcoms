@@ -29,6 +29,7 @@
 #include "global_defs.h"
 
 
+
 void strip_bcs_from_residual(E,Res,level)
     struct All_variables *E;
     double **Res;
@@ -135,6 +136,7 @@ void velocities_conform_bcs(E,U)
 
     return;
 }
+
 
 
 /* End of file  */

@@ -30,7 +30,9 @@
 #include <math.h>
 
 #include "lith_age.h"
-
+#ifdef USE_GGRD
+#include "ggrd_handling.h"
+#endif
 /* ========================================== */
 
 static void horizontal_bc();
@@ -46,10 +48,11 @@ void full_velocity_boundary_conditions(E)
 {
   void velocity_imp_vert_bc();
   void velocity_apply_periodicapply_periodic_bcs();
+  void assign_internal_bc(struct All_variables * );
 
   void apply_side_sbc();
 
-  int j,noz,lv;
+  int j,noz,lv,k,node;
 
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
@@ -64,7 +67,7 @@ void full_velocity_boundary_conditions(E)
 #ifdef USE_GGRD
 	/* Ggrd traction control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E, 1);
+	  ggrd_read_vtop_from_file(E, 1,0);
 #endif
       }
       if(E->mesh.botvbc != 1) {	/* free slip bottom */
@@ -119,6 +122,14 @@ void full_velocity_boundary_conditions(E)
   /* If any imposed internal velocity structure it goes here */
 
 
+      /*
+	apply stress or velocity boundary conditions, read from file
+	settings are to be implemented in those routines (will only do
+	anything at present, if E->mesh.toplayerbc > 0
+      */
+      assign_internal_bc(E);
+	
+
    return; }
 
 /* ========================================== */
@@ -172,7 +183,13 @@ void full_temperature_boundary_conditions(E)
 
 /*  =========================================================  */
 
+/* 
 
+why don't we have only one horizontal_bc for both regional and full
+versions ? TWB
+
+
+ */
 static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
      struct All_variables *E;
      float *BC[];
@@ -185,41 +202,80 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 
 {
   int i,j,node,rowl;
-
+  static short int warned = FALSE;
     /* safety feature */
   if(dirn > E->mesh.nsd)
      return;
 
-  if (ROW==1)
-      rowl = 1;
-  else
-      rowl = E->lmesh.NOZ[level];
 
-  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
-       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+  /* 
+     I commented this out since the regular calls are always either
+     ROW == 1 or ROW = E->lmesh.NOZ[level], and I want to allow
+     assigning internal BCs TWB
+
+  */
+  /*   if (ROW==1) */
+  /*       rowl = 1; */
+  /*   else */
+  /*       rowl = E->lmesh.NOZ[level]; */
+  rowl = ROW;
+  /* 
+     now warn if not assigning to top or bottom, but allow 
+  */
+  if((ROW != 1) && (ROW != E->lmesh.NOZ[level])){
+    if(!warned){
+      fprintf(stderr,"horizontal_bc: CPU %i: assigning internal BC\n",
+	      E->parallel.me);
+      warned = TRUE;
+    }
 
     /* turn bc marker to zero */
     if (onoff == 0)          {
       for(j=1;j<=E->lmesh.NOY[level];j++)
-    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
-    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
-    	  }        /* end for loop i & j */
-      }
-
+	for(i=1;i<=E->lmesh.NOX[level];i++)     {
+	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+	}        /* end for loop i & j */
+    }
+    
     /* turn bc marker to one */
     else        {
       for(j=1;j<=E->lmesh.NOY[level];j++)
-        for(i=1;i<=E->lmesh.NOX[level];i++)       {
-    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
-    	  if(level==E->mesh.levmax)   /* NB */
-    	    BC[dirn][node] = value;
+	for(i=1;i<=E->lmesh.NOX[level];i++)       {
+	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+	  if(level==E->mesh.levmax)   /* NB */
+	    BC[dirn][node] = value;
+	}     /* end for loop i & j */
+    }
+  }else{
+
+    
+    if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
+	 ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+      
+      /* turn bc marker to zero */
+      if (onoff == 0)          {
+	for(j=1;j<=E->lmesh.NOY[level];j++)
+	  for(i=1;i<=E->lmesh.NOX[level];i++)     {
+	    node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	    E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  }        /* end for loop i & j */
+      }
+      
+      /* turn bc marker to one */
+      else        {
+	for(j=1;j<=E->lmesh.NOY[level];j++)
+	  for(i=1;i<=E->lmesh.NOX[level];i++)       {
+	    node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	    E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+	    if(level==E->mesh.levmax)   /* NB */
+	      BC[dirn][node] = value;
     	  }     /* end for loop i & j */
       }
-
+      
     }             /* end for if ROW */
-
+  }
   return;
 }
 
@@ -239,6 +295,57 @@ static void temperature_apply_periodic_bcs(E)
 
   return;
   }
+
+
+/* 
+
+facility to apply internal velocity or stress conditions after
+top/bottom
+
+options:
+
+toplayerbc > 0: assign surface BC down to toplayerbc nd
+
+ */
+void assign_internal_bc(struct All_variables *E)
+{
+  
+  int lv, j, noz, k,node,lay;
+  /* stress or vel BC within a layer */
+  
+
+  if(E->mesh.toplayerbc > 0){
+    for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
+      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+	noz = E->mesh.NOZ[lv];
+	for(k=noz-1;k >= 1;k--){ /* assumes regular grid */
+	  node = k;		/* global node number */
+	  if((lay = layers(E,j,node)) <= E->mesh.toplayerbc){
+	    if(E->mesh.topvbc != 1) {	/* free slip top */
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
+	    }else{		/* no slip */
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,SBX,0,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,SBY,0,lv,j);
+	    }
+	  }
+	}
+      }
+#ifdef USE_GGRD
+    if(E->control.ggrd.vtop_control)
+      ggrd_read_vtop_from_file(E, 1, 1);
+#endif
+  }
+}
+
 
 
 

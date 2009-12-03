@@ -346,6 +346,7 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int botvbc;
     int sidevbc;
 
+    int toplayerbc;		/* apply surface BC throughout layer */
 
     int periodic_x;
     int periodic_y;
@@ -525,6 +526,8 @@ struct CONTROL {
   float *surface_rayleigh;
   int ggrd_allow_mixed_vbcs;
   float ggrd_vtop_omega[4];
+  char ggrd_mat_depth_file[1000];
+  ggrd_boolean ggrd_mat_is_3d;
 #endif
     double accuracy;
   int only_check_vel_convergence;
