@@ -393,10 +393,10 @@ static void temperature_refl_vert_bc(E)
 /*  =========================================================  */
 
 
-static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
+static void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
      struct All_variables *E;
      float *BC[];
-     int ROW;
+     int row;
      int dirn;
      float value;
      unsigned int mask;
@@ -404,38 +404,27 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
      int level,m;
 
 {
-  int i,j,node,rowl;
+  int i,j,node;
   static short int warned = FALSE;
 
     /* safety feature */
   if(dirn > E->mesh.nsd)
      return;
- /* 
-     I commented this out since the regular calls are always either
-     ROW == 1 or ROW = E->lmesh.NOZ[level], and I want to allow
-     assigning internal BCs TWB
-
-  */
-  /*   if (ROW==1) */
-  /*       rowl = 1; */
-  /*   else */
-  /*       rowl = E->lmesh.NOZ[level]; */
-  rowl = ROW;
-  /* 
-     now warn if not assigning to top or bottom, but allow 
-  */
-  if((ROW != 1) && (ROW != E->lmesh.NOZ[level])){
+  if((row != 1) && (row != E->lmesh.NOZ[level])){
+    /* not in top or bottom row of this processor */
     if(!warned){
-      fprintf(stderr,"horizontal_bc: CPU %i: assigning internal BC\n",
-	      E->parallel.me);
+      fprintf(stderr,"horizontal_bc: CPU %i: assigning internal BC, %i %i %i\n",
+	      E->parallel.me,row,E->lmesh.NOZ[level],E->mesh.noz);
       warned = TRUE;
     }
-    
+    if(row >  E->lmesh.NOZ[level])
+      myerror(E,"horizontal_bc: error, out of bounds");
+
     /* turn bc marker to zero */
     if (onoff == 0)          {
       for(j=1;j<=E->lmesh.NOY[level];j++)
 	for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
 	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
 	}        /* end for loop i & j */
       }
@@ -444,7 +433,7 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
     else        {
       for(j=1;j<=E->lmesh.NOY[level];j++)
 	for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
 	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
 	  
 	  if(level==E->mesh.levmax)   /* NB */
@@ -452,14 +441,14 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
 	}     /* end for loop i & j */
     }
   }else{
-    if ( (ROW==1 && E->parallel.me_loc[3]==0) ||
-	 (ROW==E->lmesh.NOZ[level] && E->parallel.me_loc[3]==E->parallel.nprocz-1) ) {
+    if ( (row==1 && E->parallel.me_loc[3]==0) ||
+	 (row==E->lmesh.NOZ[level] && E->parallel.me_loc[3]==E->parallel.nprocz-1) ) {
       
     /* turn bc marker to zero */
       if (onoff == 0)          {
 	for(j=1;j<=E->lmesh.NOY[level];j++)
 	  for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	    node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	    node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
 	    E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
     	  }        /* end for loop i & j */
       }
@@ -468,7 +457,7 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
       else        {
 	for(j=1;j<=E->lmesh.NOY[level];j++)
 	  for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	    node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+	    node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
 	    E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
 	    
 	    if(level==E->mesh.levmax)   /* NB */
@@ -476,7 +465,7 @@ static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
     	  }     /* end for loop i & j */
       }
       
-    }             /* end for if ROW */
+    }             /* end for if row */
   }
 
   return;
@@ -526,7 +515,7 @@ void assign_internal_bc(struct All_variables *E)
   if(E->mesh.toplayerbc > 0){
     for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
       for (j=1;j<=E->sphere.caps_per_proc;j++)     {
-	noz = E->mesh.NOZ[lv];
+	noz = E->lmesh.NOZ[lv];
 	for(k=noz-1;k >= 1;k--){ /* assumes regular grid */
 	  node = k;		/* global node number */
 	  if((lay = layers(E,j,node)) <= E->mesh.toplayerbc){

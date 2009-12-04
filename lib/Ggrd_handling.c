@@ -700,6 +700,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 #else
   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
 #endif
+
+  /* top level number of nodes */
+  noxg = E->lmesh.nox;
+  nozg = E->lmesh.noz;
+  noyg = E->lmesh.noy;
+  noxgnozg = noxg*nozg;
+  
+
+
   /* top processor check */
   top_echo = E->parallel.nprocz-1;
   /* output of warning messages */
@@ -732,12 +741,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
     fprintf(stderr,"ggrd_read_vtop_from_file: init stage, assigning %s, mixed mode: %i\n",
 	    ((E->mesh.topvbc)?("velocities"):("tractions")),E->control.ggrd_allow_mixed_vbcs);
 	    
-  /* global, top level number of nodes */
-  noxg = E->lmesh.nox;
-  nozg = E->lmesh.noz;
-  noyg = E->lmesh.noy;
-  noxgnozg = noxg*nozg;
-  
+
   if(use_vel){
     /* 
        velocity scaling, assuming input is cm/yr  
@@ -918,10 +922,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	   slip */
 	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
 	for(level=E->mesh.gridmax;level >= E->mesh.gridmin;level--){/* multigrid levels */
+	  /* all levels */
 	  noxl = E->lmesh.NOX[level];
 	  noyl = E->lmesh.NOY[level];
 	  nozl = E->lmesh.NOZ[level];
 	  noxlnozl = noxl*nozl;
+
 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	    /* determine vertical nodes */
 	    if(is_internal){
@@ -951,9 +957,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	       loop through all horizontal nodes 
 	    */
 	    if(assign){
-	      for(i=1;i<=noyl;i++){
-		for(j=1;j<=noxl;j++) {
-		  nodel =  j * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
+	      for(i=1;i <= noyl;i++){
+		for(j=1;j <= noxl;j++) {
+		  nodel =  nozl + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
 		  /* node location */
 		  rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
 		  rout[2] = E->SX[level][m][2][nodel];
@@ -1078,7 +1084,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	if(assign){
 	  for(i=1;i <= noyg;i++)	{/* loop through surface nodes */
 	    for(j=1;j <= noxg;j++)    {
-	      nodel = (i-1)*noxgnozg + j * nozg; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
+	      nodel =  nozg + (j-1) * nozg + (i-1)*noxgnozg; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
 	      /*  */
 	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	      rout[2] = E->sx[m][2][nodel];
@@ -1152,7 +1158,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	      
 	      */
 	      for(k = botnode;k <= topnode;k++){
-		nodel = k + (i-1)*noxgnozg + (j-1) * nozg; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
+		nodel = k + (j-1) * nozg + (i-1)*noxgnozg ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(use_codes){
 		  /* find code from v[1], theta */
 		  code = (int)(v[1] + 0.5);
