@@ -227,9 +227,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
 
     case 1:  /* velocity boundary conditions */
 #ifdef USE_GGRD
-      if(E->control.ggrd.vtop_control){
-	ggrd_read_vtop_from_file(E, 0,0);
-      }else{
+      if(!E->control.ggrd.vtop_control){ /* grd control is called from boundary condition file */
 #endif
       nnn=nox*noy;
       for(i=1;i<=dims;i++)  {

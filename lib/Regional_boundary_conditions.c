@@ -35,8 +35,8 @@
 #endif
 
 /* ========================================== */
-
-static void horizontal_bc();
+void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+void assign_internal_bc(struct All_variables * ,int);
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
 static void velocity_refl_vert_bc();
@@ -52,7 +52,7 @@ void regional_velocity_boundary_conditions(E)
   void velocity_imp_vert_bc();
   void renew_top_velocity_boundary();
   void apply_side_sbc();
-  void assign_internal_bc(struct All_variables * );
+
   int node,d,j,noz,lv,k;
 
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
@@ -66,11 +66,6 @@ void regional_velocity_boundary_conditions(E)
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
-#ifdef USE_GGRD
-	/* Ggrd traction control */
-	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E, 0, 0);
-#endif
       }
       else if(E->mesh.topvbc == 1) {
         horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
@@ -127,7 +122,12 @@ void regional_velocity_boundary_conditions(E)
       anything at present, if E->mesh.toplayerbc > 0
 
       */
-      assign_internal_bc(E);
+      assign_internal_bc(E,0);
+#ifdef USE_GGRD	
+      if(E->control.ggrd.vtop_control)
+	ggrd_read_vtop_from_file(E,0);
+#endif
+
 
       if(E->control.verbose) {
 	for (j=1;j<=E->sphere.caps_per_proc;j++)
@@ -390,88 +390,6 @@ static void temperature_refl_vert_bc(E)
 }
 
 
-/*  =========================================================  */
-
-
-static void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
-     struct All_variables *E;
-     float *BC[];
-     int row;
-     int dirn;
-     float value;
-     unsigned int mask;
-     char onoff;
-     int level,m;
-
-{
-  int i,j,node;
-  static short int warned = FALSE;
-
-    /* safety feature */
-  if(dirn > E->mesh.nsd)
-     return;
-  if((row != 1) && (row != E->lmesh.NOZ[level])){
-    /* not in top or bottom row of this processor */
-    if(!warned){
-      fprintf(stderr,"horizontal_bc: CPU %i: assigning internal BC, %i %i %i\n",
-	      E->parallel.me,row,E->lmesh.NOZ[level],E->mesh.noz);
-      warned = TRUE;
-    }
-    if(row >  E->lmesh.NOZ[level])
-      myerror(E,"horizontal_bc: error, out of bounds");
-
-    /* turn bc marker to zero */
-    if (onoff == 0)          {
-      for(j=1;j<=E->lmesh.NOY[level];j++)
-	for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
-	}        /* end for loop i & j */
-      }
-    
-    /* turn bc marker to one */
-    else        {
-      for(j=1;j<=E->lmesh.NOY[level];j++)
-	for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
-	  
-	  if(level==E->mesh.levmax)   /* NB */
-	    BC[dirn][node] = value;
-	}     /* end for loop i & j */
-    }
-  }else{
-    if ( (row==1 && E->parallel.me_loc[3]==0) ||
-	 (row==E->lmesh.NOZ[level] && E->parallel.me_loc[3]==E->parallel.nprocz-1) ) {
-      
-    /* turn bc marker to zero */
-      if (onoff == 0)          {
-	for(j=1;j<=E->lmesh.NOY[level];j++)
-	  for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	    node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-	    E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
-    	  }        /* end for loop i & j */
-      }
-      
-      /* turn bc marker to one */
-      else        {
-	for(j=1;j<=E->lmesh.NOY[level];j++)
-	  for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	    node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-	    E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
-	    
-	    if(level==E->mesh.levmax)   /* NB */
-	      BC[dirn][node] = value;
-    	  }     /* end for loop i & j */
-      }
-      
-    }             /* end for if row */
-  }
-
-  return;
-}
-
-
 static void velocity_apply_periodic_bcs(E)
     struct All_variables *E;
 {
@@ -494,55 +412,6 @@ static void temperature_apply_periodic_bcs(E)
   return;
   }
 
-
-/* 
-
-facility to apply internal velocity or stress conditions after
-top/bottom
-
-options:
-
-toplayerbc > 0: assign surface BC down to toplayerbc nd
-
- */
-void assign_internal_bc(struct All_variables *E)
-{
-  
-  int lv, j, noz, k,node,lay;
-  /* stress or vel BC within a layer */
-  
-
-  if(E->mesh.toplayerbc > 0){
-    for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
-      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
-	noz = E->lmesh.NOZ[lv];
-	for(k=noz-1;k >= 1;k--){ /* assumes regular grid */
-	  node = k;		/* global node number */
-	  if((lay = layers(E,j,node)) <= E->mesh.toplayerbc){
-	    if(E->mesh.topvbc != 1) {	/* free slip top */
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
-	    }else{		/* no slip */
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,SBX,0,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
-	      horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,SBY,0,lv,j);
-	    }
-	  }
-	}
-      }
-#ifdef USE_GGRD
-    if(E->control.ggrd.vtop_control)
-      ggrd_read_vtop_from_file(E, 0, 1);
-#endif
-  }
-}
 
 
 

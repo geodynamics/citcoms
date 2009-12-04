@@ -674,18 +674,15 @@ read surface boundary conditions from netcdf grd files
 if topvbc=1, will apply to velocities
 if topvbc=0, will apply to tractions
 
-
-if is_inetrnal is set, will check for toplayerbc > 0, and assign
-internal boundary conditions to nodes within layer <= toplayerbc
 */
 
-void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_internal)
+void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
   int mpi_rc,interpolate,timedep,use_codes,code,assign;
   int mpi_inmsg, mpi_success_message = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
-  int noxg,nozg,noyg,noxl,noyl,nozl,lselect,idim,noxgnozg,noxlnozl,save_codes,topnode,botnode;
+  int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,noxlnozl,save_codes,topnode,botnode;
   char gmt_string[10],char_dummy;
   static int lc =0;			/* only for debugging */
   double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
@@ -694,25 +691,28 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
   static pole_warned = FALSE, mode_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
-  int top_echo,nfree,nfixed,use_vel;
+  int top_proc,nfree,nfixed,use_vel,allow_internal;
 #ifdef USE_GZDIR
   gzFile *fp1;
 #else
   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
 #endif
 
-  /* top level number of nodes */
-  noxg = E->lmesh.nox;
-  nozg = E->lmesh.noz;
-  noyg = E->lmesh.noy;
-  noxgnozg = noxg*nozg;
+  /* number of nodes for this processor at highest MG level */
+  nox = E->lmesh.nox;
+  noz = E->lmesh.noz;
+  noy = E->lmesh.noy;
+  noxnoz = nox*noz;
   
-
+  if(E->mesh.toplayerbc > 0)
+    allow_internal = TRUE;
+  else
+    allow_internal = FALSE;
 
   /* top processor check */
-  top_echo = E->parallel.nprocz-1;
+  top_proc = E->parallel.nprocz-1;
   /* output of warning messages */
-  if((is_internal && (E->parallel.me == 0))||(E->parallel.me == top_echo))
+  if((allow_internal && (E->parallel.me == 0))||(E->parallel.me == top_proc))
     verbose = TRUE;
   else
     verbose = FALSE;
@@ -729,7 +729,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
     break;
   }
 
-  /* read in plate code files?  */
+  /* 
+     
+     read in plate code files?  this will assign Euler vector
+     respective velocities
+
+  */
   use_codes = (E->control.ggrd_vtop_omega[0] > 1e-7)?(1):(0);
   save_codes = 0;
   if(use_codes && (!use_vel)){
@@ -760,7 +765,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
       mode_warned = TRUE;
     }
   }
-  if (is_internal || (E->parallel.me_loc[3] == top_echo)) { 
+  if (allow_internal || (E->parallel.me_loc[3] == top_proc)) { 
     
     /* 
        top processors for regular operations, all for internal
@@ -845,7 +850,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	snprintf(tfilename1,1000,"%s/codes.%d.gz", E->control.data_dir,E->parallel.me);
 	fp1 = gzdir_output_open(tfilename1,"w");
       }
-      if(E->parallel.me == top_echo)
+      if(verbose)
 	if(use_codes)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
 		  E->control.ggrd_vtop_omega[1],
@@ -898,11 +903,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
       }
       
-      if(verbose){
+      if(verbose)
 	fprintf(stderr,"ggrd_read_vtop_from_file: assigning %s BC, timedep: %i time: %g\n",
 		(use_vel)?("velocities"):("tractions"),	timedep,age);
-
-      }
+      
       /* if mixed BCs are allowed, need to reassign the boundary
 	 condition */
       if(E->control.ggrd_allow_mixed_vbcs){
@@ -914,15 +918,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	*/
 	if(use_codes)
 	  myerror(E,"cannot mix Euler velocities for plate codes and mixed vbcs");
-	if((is_internal && (E->parallel.me==0)) || (E->parallel.me == top_echo))
+	if(verbose)
 	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
-	
-	
 	/* velocities larger than the cutoff will be assigned as free
 	   slip */
 	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
 	for(level=E->mesh.gridmax;level >= E->mesh.gridmin;level--){/* multigrid levels */
-	  /* all levels */
+	  /* assign BCs to all levels */
 	  noxl = E->lmesh.NOX[level];
 	  noyl = E->lmesh.NOY[level];
 	  nozl = E->lmesh.NOZ[level];
@@ -930,31 +932,28 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 
 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	    /* determine vertical nodes */
-	    if(is_internal){
+	    if(allow_internal){
 	      /* internal */
-	      if(E->mesh.toplayerbc == 0){ /* don't assign */
+	      /* check for internal nodes in layers */
+	      for(k=nozl;k >= 1;k--){
+		if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
+		  break;
+	      }
+	      if(k == nozl){	/*  */
 		assign = FALSE;
-	      }else{		/* check for internal nodes in layers */
-		for(k=nozl-1;k >= 1;k--){
-		  if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
-		    break;
-		}
-		if(k == nozl-1){
-		  assign = FALSE;
-		}else{
-		  assign = TRUE;
-		  topnode = nozl-1;
-		  botnode = k+1;
-		}
+	      }else{
+		assign = TRUE;topnode = nozl;botnode = k+1;
 	      }
 	    }else{		/* just top node */
 	      assign = TRUE;
 	      topnode = botnode = nozl;
 	    }
-	    if(verbose)fprintf(stderr,"ggrd_read_vtop_from_file: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
-			       is_internal,assign,botnode,topnode,nozl);
+	    if(verbose)
+	      fprintf(stderr,"ggrd_read_vtop_from_file: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
+		      allow_internal,assign,botnode,topnode,nozl);
 	    /* 
-	       loop through all horizontal nodes 
+	       loop through all horizontal nodes and assign boundary
+	       conditions for all required levels
 	    */
 	    if(assign){
 	      for(i=1;i <= noyl;i++){
@@ -988,15 +987,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
 						   vin1,FALSE,shift_to_pos_lon)){
 		    fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
-			    rout[1],rout[2]);
-		    parallel_process_termination();
+			    rout[1],rout[2]);parallel_process_termination();
 		  }
 		  if(interpolate){	/* second time */
 		    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),vin2,
 						     FALSE,shift_to_pos_lon)){
 		      fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
-			      rout[1],rout[2]);
-		      parallel_process_termination();
+			      rout[1],rout[2]);parallel_process_termination();
 		    }
 		    v[2] = (f1*vin1[0] + f2*vin2[0]); /* vphi unscaled! */
 		  }else{
@@ -1051,40 +1048,38 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
       condition values
       
       */
+      /* scaled cutoff velocity */
+      if(!use_codes)		/* else, is not defined */
+	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+      else{
+	cutoff = 1e30;
+	if(save_codes)	/* those will be surface nodes only */
+	  gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
+      }
+      
       for (m=1;m <= E->sphere.caps_per_proc;m++) {
-	if(is_internal){
-	  if(E->mesh.toplayerbc == 0){ /* don't assign */
+	if(allow_internal){
+	  /* check for internal nodes in layers */
+	  for(k=noz;k >= 1;k--){
+	    if(layers(E,m,k) > E->mesh.toplayerbc) /* assumes regular mesh structure ! */
+	      break;
+	  }
+	  if(k == noz){
 	    assign = FALSE;
-	  }else{		/* check for internal nodes in layers */
-	    for(k=nozg-1;k >= 1;k--){
-	      if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
-		break;
-	    }
-	    if(k == nozg-1){
-	      assign = FALSE;
-	    }else{
-	      assign = TRUE;topnode = nozg-1;botnode = k+1;
-	    }
+	  }else{
+	    assign = TRUE;topnode = noz;botnode = k+1;
 	  }
 	}else{		/* just top node */
 	  assign = TRUE;
-	  topnode = botnode = nozg;
+	  topnode = botnode = noz;
 	}
-	if(verbose)fprintf(stderr,"ggrd_read_vtop_from_file: internal: %i assign: %i k: %i to %i (%i)\n",
-			   is_internal,assign,botnode,topnode,nozg);
-	
-	/* scaled cutoff velocity */
-	if(!use_codes)		/* else, is not defined */
-	  cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
-	else{
-	  cutoff = 1e30;
-	  if(save_codes)	/* those will be surface nodes only */
-	    gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
-	}
-	if(assign){
-	  for(i=1;i <= noyg;i++)	{/* loop through surface nodes */
-	    for(j=1;j <= noxg;j++)    {
-	      nodel =  nozg + (j-1) * nozg + (i-1)*noxgnozg; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
+	if(verbose)
+	  fprintf(stderr,"ggrd_read_vtop_from_file: internal: %i assign: %i k: %i to %i (%i)\n",
+		  allow_internal,assign,botnode,topnode,noz);
+	if(assign){	
+	  for(i=1;i <= noy;i++)	{/* loop through surface nodes */
+	    for(j=1;j <= nox;j++)    {
+	      nodel =  noz + (j-1) * noz + (i-1)*noxnoz; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
 	      /*  */
 	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	      rout[2] = E->sx[m][2][nodel];
@@ -1158,13 +1153,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 	      
 	      */
 	      for(k = botnode;k <= topnode;k++){
-		nodel = k + (j-1) * nozg + (i-1)*noxgnozg ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
+		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(use_codes){
 		  /* find code from v[1], theta */
 		  code = (int)(v[1] + 0.5);
 		  if(save_codes)	/* lon lat code */
-		    gzprintf(fp1, "%9.4f %9.4f %i\n",
-			     rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
+		    gzprintf(fp1, "%9.4f %9.4f %i\n",rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
 		  if((int)E->control.ggrd_vtop_omega[0] == code){
 		    /* within plate */
 		    sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
@@ -1183,7 +1177,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 		    v[1] = v[2] = 0.0;
 		  }
 		}
-		
 		/* assign velociites */
 		if(fabs(v[2]) > cutoff){
 		  /* huge velocitie - free slip */
@@ -1195,7 +1188,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
 		  E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
 		}
 		E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
-	      }
+	      }	/* end z */
 	    } /* end x */
 	  } /* end y */
 	} /* end assign */
@@ -1211,7 +1204,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global, int is_int
       gzclose(fp1);
     }
   } /* end top proc branch */
-  E->control.ggrd.vtop_control_init = 1;
+
+  /*  */
+  E->control.ggrd.vtop_control_init = TRUE;
   //if(E->parallel.me == 0)
   //fprintf(stderr,"vtop from grd done: %i\n",lc++);
 }
