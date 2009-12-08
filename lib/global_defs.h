@@ -530,7 +530,8 @@ struct CONTROL {
   ggrd_boolean ggrd_mat_is_3d;
 #endif
     double accuracy;
-  int only_check_vel_convergence;
+    int check_continuity_convergence;
+    int check_pressure_convergence;
     char velocity_boundary_file[1000];
     char temperature_boundary_file[1000];
     char mat_file[1000];

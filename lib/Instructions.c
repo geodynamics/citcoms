@@ -609,8 +609,8 @@ void read_initial_settings(struct All_variables *E)
   input_int("up_heavy",&(E->control.up_heavy),"1,0,nomax",m);
   input_double("accuracy",&(E->control.accuracy),"1.0e-4,0.0,1.0",m);
 
-
-  input_boolean("only_check_vel_convergence",&(E->control.only_check_vel_convergence),"off",m);
+  input_boolean("check_continuity_convergence",&(E->control.check_continuity_convergence),"on",m);
+  input_boolean("check_pressure_convergence",&(E->control.check_pressure_convergence),"on",m);
 
   input_int("vhighstep",&(E->control.v_steps_high),"1,0,nomax",m);
   input_int("vlowstep",&(E->control.v_steps_low),"250,0,nomax",m);
@@ -747,10 +747,6 @@ void check_settings_consistency(struct All_variables *E)
             myerror(E, "number of multigrid levels < 2\n");
         if(E->mesh.levels > MAX_LEVELS)
             myerror(E, "number of multigrid levels out of bound\n");
-    }
-
-    if((E->parallel.me == 0) && (E->control.only_check_vel_convergence)) {
-        fprintf(stderr,"solve_Ahat_p_fhat: WARNING: overriding pressure and div check\n");
     }
 
     /* remove angular momentum/rigid rotation should only be done in free

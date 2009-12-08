@@ -87,6 +87,9 @@ class Incompressible(CitcomComponent):
         precond = prop.bool("precond", default=True)
 
         accuracy = prop.float("accuracy", default=1.0e-4)
+        check_continuity_convergence = prop.bool("check_continuity_convergence", default=True)
+        check_pressure_convergence = prop.bool("check_pressure_convergence", default=True)
+
         mg_cycle = prop.int("mg_cycle", default=1)
         down_heavy = prop.int("down_heavy", default=3)
         up_heavy = prop.int("up_heavy", default=3)

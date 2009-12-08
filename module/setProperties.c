@@ -881,6 +881,9 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
 
     getDoubleProperty(properties, "accuracy", E->control.accuracy, fp);
 
+    getIntProperty(properties, "check_continuity_convergence", E->control.check_continuity_convergence, fp);
+    getIntProperty(properties, "check_pressure_convergence", E->control.check_pressure_convergence, fp);
+
     getIntProperty(properties, "mg_cycle", E->control.mg_cycle, fp);
     getIntProperty(properties, "down_heavy", E->control.down_heavy, fp);
     getIntProperty(properties, "up_heavy", E->control.up_heavy, fp);

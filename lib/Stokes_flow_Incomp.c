@@ -148,6 +148,19 @@ static void print_convergence_progress(struct All_variables *E,
 }
 
 
+static int keep_iterating(struct All_variables *E,
+                          double acc, int converging)
+{
+    const int required_converging_loops = 2;
+
+    if(E->control.check_continuity_convergence)
+        return (E->monitor.incompressibility > acc) ||
+	    (converging < required_converging_loops);
+    else
+        return (E->monitor.incompressibility > acc) &&
+	    (converging < required_converging_loops);
+}
+
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
@@ -272,9 +285,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
   
     r0dotz0 = 0;
 
-    while( (count < *steps_max) &&
-           ((E->monitor.incompressibility > imp) ||
-	    (converging < 2) )) {
+    while( (count < *steps_max) && keep_iterating(E, imp, converging) ) {
         /* require two consecutive converging iterations to quit the while-loop */
 
         /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
@@ -364,25 +375,25 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                                        dvelocity, dpressure,
                                        E->monitor.incompressibility);
         }
-	if(!valid){
-	  converging = 0;
-	}else{
-	 
 
-	  if(E->control.only_check_vel_convergence){
-	    /* disregard pressure and div check */
-	    if(dvelocity < imp)
-	      converging++;
-	    else
-	      converging = 0;
-	    
-	  }else{
-	    /* how many consecutive converging iterations? */
-	    if(dvelocity < imp && dpressure < imp)
-	      converging++;
-	    else
-	      converging = 0;
-	  }
+	if(!valid){
+            /* reset consecutive converging iterations */
+            converging = 0;
+	}else{
+            /* how many consecutive converging iterations? */
+            if(E->control.check_pressure_convergence) {
+                /* check dv and dp */
+                if(dvelocity < imp && dpressure < imp)
+                    converging++;
+                else
+                    converging = 0;
+            }else{
+                /* check dv only */
+                if(dvelocity < imp)
+                    converging++;
+                else
+                    converging = 0;
+            }
 	  
 	}
 
@@ -528,9 +539,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     valid = 1;
     r0dotrt = alpha = omega = 0;
 
-    while( (count < *steps_max) &&
-           ((E->monitor.incompressibility > imp) ||
-	    (converging < 2) )) {
+    while( (count < *steps_max) && keep_iterating(E, imp, converging) ) {
         /* require two consecutive converging iterations to quit the while-loop */
 
         /* r1dotrt = <r1, rt> */
@@ -664,27 +673,28 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                        dvelocity, dpressure,
                                        E->monitor.incompressibility);
         }
+
 	if(!valid){
-	  converging = 0;
+            /* reset consecutive converging iterations */
+            converging = 0;
 	}else{
-	  if(E->control.only_check_vel_convergence){
-	    /* 
-	       
-	    override pressure and compressibility check
-	    
-	      */
-	    if(dvelocity < imp)
-	      converging++;
-	    else
-	      converging =0;
-	  }else{
-	    /* how many consecutive converging iterations? */
-	    if(dvelocity < imp && dpressure < imp)
-	      converging++;
-	    else
-	      converging = 0;
-	  }
+            /* how many consecutive converging iterations? */
+            if(E->control.check_pressure_convergence) {
+                /* check dv and dp */
+                if(dvelocity < imp && dpressure < imp)
+                    converging++;
+                else
+                    converging = 0;
+            }else{
+                /* check dv only */
+                if(dvelocity < imp)
+                    converging++;
+                else
+                    converging = 0;
+            }
+	  
 	}
+
 	/* shift array pointers */
         for(m=1; m<=E->sphere.caps_per_proc; m++) {
             shuffle[m] = p1[m];
@@ -794,10 +804,7 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
             fprintf(stderr, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
             fprintf(E->fp, "itercg -- div(rho*v)/v=%.2e dv/v=%.2e and dp/p=%.2e loop %d\n\n", div_res, relative_err_v, relative_err_p, num_of_loop);
         }
-	if(E->control.only_check_vel_convergence){
-	  /* override pressure and compressibility check */
-	  relative_err_p = div_res = relative_err_v;
-	}
+
         num_of_loop++;
 
     } /* end of while */
