@@ -312,21 +312,6 @@ struct PyMethodDef pyCitcom_methods[] = {
 
     /* from stokes_solver.h */
 
-    {pyCitcom_assemble_forces__name__,
-     pyCitcom_assemble_forces,
-     METH_VARARGS,
-     pyCitcom_assemble_forces__doc__},
-
-    {pyCitcom_assemble_forces_pseudo_surf__name__,
-     pyCitcom_assemble_forces_pseudo_surf,
-     METH_VARARGS,
-     pyCitcom_assemble_forces_pseudo_surf__doc__},
-
-    {pyCitcom_construct_stiffness_B_matrix__name__,
-     pyCitcom_construct_stiffness_B_matrix,
-     METH_VARARGS,
-     pyCitcom_construct_stiffness_B_matrix__doc__},
-
     {pyCitcom_general_stokes_solver__name__,
      pyCitcom_general_stokes_solver,
      METH_VARARGS,
@@ -337,11 +322,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      METH_VARARGS,
      pyCitcom_general_stokes_solver_setup__doc__},
 
-    {pyCitcom_get_system_viscosity__name__,
-     pyCitcom_get_system_viscosity,
-     METH_VARARGS,
-     pyCitcom_get_system_viscosity__doc__},
-
     {pyCitcom_set_cg_defaults__name__,
      pyCitcom_set_cg_defaults,
      METH_VARARGS,
@@ -351,16 +331,6 @@ struct PyMethodDef pyCitcom_methods[] = {
      pyCitcom_set_mg_defaults,
      METH_VARARGS,
      pyCitcom_set_mg_defaults__doc__},
-
-    {pyCitcom_solve_constrained_flow_iterative__name__,
-     pyCitcom_solve_constrained_flow_iterative,
-     METH_VARARGS,
-     pyCitcom_solve_constrained_flow_iterative__doc__},
-
-    {pyCitcom_solve_constrained_flow_iterative_pseudo_surf__name__,
-     pyCitcom_solve_constrained_flow_iterative_pseudo_surf,
-     METH_VARARGS,
-     pyCitcom_solve_constrained_flow_iterative_pseudo_surf__doc__},
 
     /* Sentinel */
     {0, 0, 0, 0}

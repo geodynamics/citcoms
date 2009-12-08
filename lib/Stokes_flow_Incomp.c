@@ -62,26 +62,6 @@ void solve_constrained_flow_iterative(E)
 
 {
     void v_from_vector();
-    void p_to_nodes();
-
-    int cycles;
-
-    cycles=E->control.p_iterations;
-
-    /* Solve for velocity and pressure, correct for bc's */
-
-    solve_Ahat_p_fhat(E,E->U,E->P,E->F,E->control.accuracy,&cycles);
-
-    v_from_vector(E);
-    p_to_nodes(E,E->P,E->NP,E->mesh.levmax);
-
-    return;
-}
-
-void solve_constrained_flow_iterative_pseudo_surf(E)
-     struct All_variables *E;
-
-{
     void v_from_vector_pseudo_surf();
     void p_to_nodes();
 
@@ -93,7 +73,11 @@ void solve_constrained_flow_iterative_pseudo_surf(E)
 
     solve_Ahat_p_fhat(E,E->U,E->P,E->F,E->control.accuracy,&cycles);
 
-    v_from_vector_pseudo_surf(E);
+    if(E->control.pseudo_free_surf)
+        v_from_vector_pseudo_surf(E);
+    else
+        v_from_vector(E);
+
     p_to_nodes(E,E->P,E->NP,E->mesh.levmax);
 
     return;

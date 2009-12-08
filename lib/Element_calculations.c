@@ -43,11 +43,11 @@ void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
 			      struct CCX *,int ,int ,int );
 void assemble_div_u(struct All_variables *,
                     double **, double **, int );
-void get_elt_tr(struct All_variables *, int , int , double [24], int );
-void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
+static void get_elt_tr(struct All_variables *, int , int , double [24], int );
+static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
 
 
-void add_force(struct All_variables *E, int e, double elt_f[24], int m)
+static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
 {
   const int dims=E->mesh.nsd;
   const int ends=enodes[E->mesh.nsd];
@@ -82,7 +82,6 @@ void assemble_forces(E,penalty)
 
   void get_buoyancy();
   void get_elt_f();
-  void get_elt_tr();
   void strip_bcs_from_residual();
   double global_vdot();
 
@@ -107,67 +106,12 @@ void assemble_forces(E,penalty)
       e = E->boundary.element[m][i];
 
       for(a=0;a<24;a++) elt_f[a] = 0.0;
-      for(a=SIDE_BEGIN; a<=SIDE_END; a++)
-	get_elt_tr(E, i, a, elt_f, m);
-
-      add_force(E, e, elt_f, m);
-    }
-  }       /* end for m */
-
-  (E->solver.exchange_id_d)(E, E->F, lev);
-  strip_bcs_from_residual(E,E->F,lev);
-
-  /* compute the norm of E->F */
-  E->monitor.fdotf = sqrt(global_vdot(E, E->F, E->F, lev));
-
-  if(E->parallel.me==0) {
-      fprintf(stderr, "Momentum equation force %.9e\n",
-              E->monitor.fdotf);
-      fprintf(E->fp, "Momentum equation force %.9e\n",
-              E->monitor.fdotf);
-  }
-
-  return;
-}
-
-
-void assemble_forces_pseudo_surf(E,penalty)
-     struct All_variables *E;
-     int penalty;
-{
-  double elt_f[24];
-  int m,a,e,i;
-
-  void get_buoyancy();
-  void get_elt_f();
-  void get_elt_tr_pseudo_surf();
-  void strip_bcs_from_residual();
-  double global_vdot();
-
-  const int neq=E->lmesh.neq;
-  const int nel=E->lmesh.nel;
-  const int lev=E->mesh.levmax;
-
-  get_buoyancy(E,E->buoyancy);
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-
-    for(a=0;a<neq;a++)
-      E->F[m][a] = 0.0;
-
-    for (e=1;e<=nel;e++)  {
-      get_elt_f(E,e,elt_f,1,m);
-      add_force(E, e, elt_f, m);
-    }
-
-    /* for traction bc */
-    for(i=1; i<=E->boundary.nel; i++) {
-      e = E->boundary.element[m][i];
-
-      for(a=0;a<24;a++) elt_f[a] = 0.0;
-      for(a=SIDE_BEGIN; a<=SIDE_END; a++)
-	get_elt_tr_pseudo_surf(E, i, a, elt_f, m);
-
+      for(a=SIDE_BEGIN; a<=SIDE_END; a++) {
+          if(E->control.pseudo_free_surf)
+              get_elt_tr_pseudo_surf(E, i, a, elt_f, m);
+          else
+              get_elt_tr(E, i, a, elt_f, m);
+      }
       add_force(E, e, elt_f, m);
     }
   }       /* end for m */
@@ -1061,7 +1005,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   Function to create the element force vector due to stress b.c.
   ================================================================= */
 
-void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
 
 	const int dims=E->mesh.nsd;
@@ -1144,7 +1088,7 @@ void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], i
 	}
 }
 
-void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
 {
 
 	const int dims=E->mesh.nsd;

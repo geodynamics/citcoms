@@ -178,10 +178,10 @@ int need_visc_update(struct All_variables *E)
 
 void general_stokes_solver_pseudo_surf(struct All_variables *E)
 {
-  void solve_constrained_flow_iterative_pseudo_surf();
+  void solve_constrained_flow_iterative();
   void construct_stiffness_B_matrix();
   void velocities_conform_bcs();
-  void assemble_forces_pseudo_surf();
+  void assemble_forces();
   void get_system_viscosity();
   void std_timestep();
   void remove_rigid_rot();
@@ -207,12 +207,12 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   E->monitor.topo_loop = 0;
   if(E->monitor.solution_cycles==0) std_timestep(E);
   while(E->monitor.stop_topo_loop == 0) {
-	  assemble_forces_pseudo_surf(E,0);
+	  assemble_forces(E,0);
 	  if(need_visc_update(E)){
 	    get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 	    construct_stiffness_B_matrix(E);
 	  }
-	  solve_constrained_flow_iterative_pseudo_surf(E);
+	  solve_constrained_flow_iterative(E);
 
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
@@ -238,8 +238,10 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 			  dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
 
 			  if(E->parallel.me==0){
-				  fprintf(stderr,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
-				  fprintf(E->fp,"Stress dependent viscosity: DUdot = %.4e (%.4e) for iteration %d\n",dUdot_mag,Udot_mag,count);
+                              fprintf(stderr,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
+                                      dUdot_mag,Udot_mag,count);
+                              fprintf(E->fp,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
+                                      dUdot_mag,Udot_mag,count);
 				  fflush(E->fp);
 			  }
 
@@ -248,7 +250,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
 			  get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
 			  construct_stiffness_B_matrix(E);
-			  solve_constrained_flow_iterative_pseudo_surf(E);
+			  solve_constrained_flow_iterative(E);
 
 			  count++;
 
