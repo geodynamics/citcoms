@@ -68,19 +68,12 @@ void general_stokes_solver(struct All_variables *E)
   void get_system_viscosity();
   void remove_rigid_rot();
 
-  float vmag;
-
-  double Udot_mag, dUdot_mag,omega[3];
-  int m,count,i,j,k;
+  double Udot_mag, dUdot_mag;
+  int m,count,i;
 
   double *oldU[NCS], *delta_U[NCS];
 
-  const int nno = E->lmesh.nno;
-  const int nel = E->lmesh.nel;
   const int neq = E->lmesh.neq;
-  const int vpts = vpoints[E->mesh.nsd];
-  const int dims = E->mesh.nsd;
-  const int addi_dof = additional_dof[dims];
 
   velocities_conform_bcs(E,E->U);
 
@@ -187,19 +180,12 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   void remove_rigid_rot();
   void get_STD_freesurf(struct All_variables *, float**);
 
-  float vmag;
-
   double Udot_mag, dUdot_mag;
-  int m,count,i,j,k,topo_loop;
+  int m,count,i;
 
   double *oldU[NCS], *delta_U[NCS];
 
-  const int nno = E->lmesh.nno;
-  const int nel = E->lmesh.nel;
   const int neq = E->lmesh.neq;
-  const int vpts = vpoints[E->mesh.nsd];
-  const int dims = E->mesh.nsd;
-  const int addi_dof = additional_dof[dims];
 
   velocities_conform_bcs(E,E->U);
 
