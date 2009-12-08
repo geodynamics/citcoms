@@ -129,7 +129,7 @@ void internal_horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
       for(i=1;i<=E->lmesh.NOX[level];i++)       {
 	node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
 	E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
-	if(level==E->mesh.levmax)   /* NB */
+	if(level == E->mesh.levmax)   /* NB */
 	  BC[dirn][node] = value;
       }     /* end for loop i & j */
   }
@@ -260,7 +260,7 @@ toplayerbc == 0: no action
 void assign_internal_bc(struct All_variables *E,int is_global)
 {
   
-  int lv, j, noz, k,lay,ncount;
+  int lv, j, noz, k,lay,ncount,ontop,onbottom;
   /* stress or vel BC within a layer */
   ncount = 0;
 
@@ -271,25 +271,31 @@ void assign_internal_bc(struct All_variables *E,int is_global)
 	/* we're looping through all nodes for the possibility that
 	   there are several internal processors which need BCs */
 	for(k=noz;k >= 1;k--){ /* assumes regular grid */
+	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
+	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(TRUE):(FALSE);
 	  /* node number is k, assuming no dependence on x and y  */
 	  if((lay = layers(E,j,k)) <= E->mesh.toplayerbc){
-	    if((!((k==1) && (E->parallel.me_loc[3]==0))) && 
-	       (!((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))))
+	    
+	    if((!ontop)&&(!onbottom))
 	      ncount++;		/* not in top or bottom */
-	    if(E->mesh.topvbc != 1) {	/* free slip top */
+	    if(E->mesh.topvbc != 1) {	/* free slip */
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	      if(ontop || onbottom)
+		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	      if(ontop || onbottom)
+		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
 	    }else{		/* no slip */
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	      if(ontop || onbottom)
+		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
 	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,SBX,0,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,SBY,0,lv,j);
+	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,                 SBX,0,lv,j);
+	      if(ontop || onbottom)
+		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,                 SBY,0,lv,j);
 	    }
 	  }
 	}

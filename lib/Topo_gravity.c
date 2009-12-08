@@ -450,19 +450,27 @@ void stress_conform_bcs(struct All_variables *E)
 {
   int m, i, j, k, n, d;
   const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
-  const int stress_index[4][4] = { {0, 0, 0, 0},
-                                   {0, 1, 4, 5}, /* N-S sides */
-                                   {0, 4, 2, 6}, /* E-W sides */
-                                   {0, 5, 6, 3} }; /* U-D sides */
+  /* 
+     stress tensor is sorted like so: 1: xx 2: yy 3: zz 4: xy 5: xz 6: yz 
+                                         tt    pp    rr    tp    tr    pr 
+  */
+  const int stress_index[4][4] = { {0, 0, 0, 0}, /* traction to stress tensor conversion */
+                                   {0, 1, 4, 5}, /* N-S sides,  xx xy xz */
+                                   {0, 4, 2, 6}, /* E-W sides   yx yy yz */
+                                   {0, 5, 6, 3} }; /* U-D sides zx zy zz */
 
-  if(E->control.side_sbcs) {
+  int noxnoz;
+
+  noxnoz = E->lmesh.nox*E->lmesh.noz;
+
+  if(E->control.side_sbcs) {	/* side boundary conditions */
 
     for(m=1; m<=E->sphere.caps_per_proc; m++)
       for(i=1; i<=E->lmesh.noy; i++)
         for(j=1; j<=E->lmesh.nox; j++)
           for(k=1; k<=E->lmesh.noz; k++) {
 
-            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+            n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
 
             for(d=1; d<=E->mesh.nsd; d++)
 
@@ -483,22 +491,43 @@ void stress_conform_bcs(struct All_variables *E)
           }
 
   } else {
+    /* 
+       regular case 
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-      for(i=1; i<=E->lmesh.noy; i++)
-        for(j=1; j<=E->lmesh.nox; j++)
-          for(k=1; k<=E->lmesh.noz; k++) {
-            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-            for(d=1; d<=E->mesh.nsd; d++)
-              if(E->node[m][n] & sbc_flag[d]) {
-                if(i==1 || i==E->lmesh.noy)
-                  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
-                if(j==1 || j==E->lmesh.nox)
-                  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
-                if(k==1 || k==E->lmesh.noz)
-                  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
-              }
-          }
+    */
+    if(E->mesh.toplayerbc > 0){
+      /* internal BCs */
+      for(m=1; m<=E->sphere.caps_per_proc; m++)
+	for(i=1; i<=E->lmesh.noy; i++)
+	  for(j=1; j<=E->lmesh.nox; j++)
+	    for(k=1; k<=E->lmesh.noz; k++) {
+	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
+	      for(d=1; d<=E->mesh.nsd; d++)
+		if(E->node[m][n] & sbc_flag[d]) {
+		  /* apply internal traction vector on horizontal surface */
+		  if(layers(E,m,n) <= E->mesh.toplayerbc)
+		    E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+		}
+	    }
+
+    }else{
+      /* default */
+      for(m=1; m<=E->sphere.caps_per_proc; m++)
+	for(i=1; i<=E->lmesh.noy; i++)
+	  for(j=1; j<=E->lmesh.nox; j++)
+	    for(k=1; k<=E->lmesh.noz; k++) {
+	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
+	      for(d=1; d<=E->mesh.nsd; d++)
+		if(E->node[m][n] & sbc_flag[d]) {
+		  if(i==1 || i==E->lmesh.noy)
+		    E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
+		  if(j==1 || j==E->lmesh.nox)
+		    E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
+		  if(k==1 || k==E->lmesh.noz)
+		    E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+		}
+	    }
+    }
   }
 }
 

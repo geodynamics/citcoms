@@ -679,7 +679,7 @@ if topvbc=0, will apply to tractions
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
-  int mpi_rc,interpolate,timedep,use_codes,code,assign;
+  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop;
   int mpi_inmsg, mpi_success_message = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
   int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,noxlnozl,save_codes,topnode,botnode;
@@ -1008,6 +1008,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  */
 		  
 		  for(k = botnode;k <= topnode;k++){
+		    ontop = ((k==nozl) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		    /* depth loop */
 		    nodel =  k + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
 		    if(fabs(v[2]) > cutoff){
@@ -1153,6 +1154,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      
 	      */
 	      for(k = botnode;k <= topnode;k++){
+		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(use_codes){
 		  /* find code from v[1], theta */
@@ -1187,7 +1189,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
 		  E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
 		}
-		E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+		if(use_vel && ontop)
+		  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
 	      }	/* end z */
 	    } /* end x */
 	  } /* end y */
