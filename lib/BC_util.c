@@ -29,6 +29,8 @@
 #include "global_defs.h"
 void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+void myerror(struct All_variables *,char *);
+int layers(struct All_variables *,int,int);
 
 /* 
 
@@ -271,8 +273,8 @@ void assign_internal_bc(struct All_variables *E,int is_global)
 	/* we're looping through all nodes for the possibility that
 	   there are several internal processors which need BCs */
 	for(k=noz;k >= 1;k--){ /* assumes regular grid */
-	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
-	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(TRUE):(FALSE);
+	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(1):(0);
+	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
 	  /* node number is k, assuming no dependence on x and y  */
 	  if((lay = layers(E,j,k)) <= E->mesh.toplayerbc){
 	    
