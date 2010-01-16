@@ -58,6 +58,22 @@ void v_from_vector(E)
     return;
 }
 
+void assign_v_to_vector(E)
+     struct All_variables *E;
+{
+    int m,node;
+    const int nno = E->lmesh.nno;
+
+    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+      for(node=1;node<=nno;node++)     {
+	E->U[m][E->id[m][node].doff[1]] =  E->sphere.cap[m].V[1][node];
+	E->U[m][E->id[m][node].doff[2]] =  E->sphere.cap[m].V[2][node];
+	E->U[m][E->id[m][node].doff[3]] =  E->sphere.cap[m].V[3][node];
+      }
+    }
+    return;
+}
+
 void v_from_vector_pseudo_surf(E)
      struct All_variables *E;
 {

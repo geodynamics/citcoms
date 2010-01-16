@@ -876,7 +876,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 			 where \eta_0 is the regular viscosity
 
 
-			 psrw = TRUE
+			 psrw = 1
 
 			 a strain-rate weakening rheology applies
 			 based on a steady state stress-strain

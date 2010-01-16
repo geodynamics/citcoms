@@ -513,7 +513,7 @@ struct CONTROL {
     int up_heavy;
     int verbose;
 
-    int remove_rigid_rotation;
+    int remove_rigid_rotation,inner_remove_rigid_rotation;
     int remove_angular_momentum;
 
     int side_sbcs;
@@ -529,7 +529,7 @@ struct CONTROL {
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
 #endif
-    double accuracy;
+    double accuracy,inner_accuracy_scale;
     int check_continuity_convergence;
     int check_pressure_convergence;
     char velocity_boundary_file[1000];

@@ -196,7 +196,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     double *shuffle[NCS];
     double alpha, delta, r0dotz0, r1dotz1;
     double v_res;
-
+    double inner_imp;
     double global_pdot();
     double global_v_norm2(), global_p_norm2(), global_div_norm2();
 
@@ -211,6 +211,11 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     void strip_bcs_from_residual();
     int  solve_del2_u();
     void parallel_process_termination();
+    void v_from_vector();
+    void v_from_vector_pseudo_surf();
+    void assign_v_to_vector();
+
+    inner_imp = imp * E->control.inner_accuracy_scale; /* allow for different innner loop accuracy */
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -251,7 +256,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     /* In the compressible case, the initial guess of P might be bad.
      * Do not correct V with it. */
     if(E->control.inv_gruneisen == 0)
-        initial_vel_residual(E, V, P, F, imp*v_res);
+        initial_vel_residual(E, V, P, F, inner_imp*v_res);
 
 
     /* initial residual r1 = div(V) */
@@ -313,7 +318,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
         /* solve K*u1 = grad(s2) for u1 */
         assemble_grad_p(E, s2, F, lev);
-        valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
+        valid = solve_del2_u(E, E->u1, F, inner_imp*v_res, lev);
         if(!valid && (E->parallel.me==0)) {
             fputs("Warning: solver not converging! 1\n", stderr);
             fputs("Warning: solver not converging! 1\n", E->fp);
@@ -410,7 +415,16 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
         /* shift <r0, z0> = <r1, z1> */
         r0dotz0 = r1dotz1;
-
+	if((E->sphere.caps == 12) && (E->control.inner_remove_rigid_rotation)){
+	  /* allow for removal of net rotation at each iterative step
+	     (expensive) */
+	  if(E->control.pseudo_free_surf) /* move from U to V */
+	    v_from_vector_pseudo_surf(E);
+	  else
+	    v_from_vector(E);
+	  remove_rigid_rot(E);	/* correct V */
+	  assign_v_to_vector(E); /* assign V to U */
+	}
     } /* end loop for conjugate gradient */
 
     assemble_div_u(E, V, z1, lev);
@@ -459,7 +473,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     int m, j, count, lev;
     int valid;
 
-    double alpha, beta, omega;
+    double alpha, beta, omega,inner_imp;
     double r0dotrt, r1dotrt;
     double v_norm, p_norm;
     double dvelocity, dpressure;
@@ -472,6 +486,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double *shuffle[NCS];
 
     double time0, v_res;
+    
+    inner_imp = imp * E->control.inner_accuracy_scale; /* allow for different innner loop accuracy */
 
     npno = E->lmesh.npno;
     neq = E->lmesh.neq;
@@ -505,7 +521,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
 
     /* calculate the initial velocity residual */
-    initial_vel_residual(E, V, P, F, imp*v_res);
+    initial_vel_residual(E, V, P, F, inner_imp*v_res);
 
 
     /* initial residual r1 = div(rho_ref*V) */
@@ -575,7 +591,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* solve K*u0 = grad(pt) for u1 */
         assemble_grad_p(E, pt, F, lev);
-        valid = solve_del2_u(E, u0, F, imp*v_res, lev);
+        valid = solve_del2_u(E, u0, F, inner_imp*v_res, lev);
         if(!valid && (E->parallel.me==0)) {
             fputs("Warning: solver not converging! 1\n", stderr);
             fputs("Warning: solver not converging! 1\n", E->fp);
@@ -605,7 +621,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* solve K*u1 = grad(st) for u1 */
         assemble_grad_p(E, st, F, lev);
-        valid = solve_del2_u(E, E->u1, F, imp*v_res, lev);
+        valid = solve_del2_u(E, E->u1, F, inner_imp*v_res, lev);
         if(!valid && (E->parallel.me==0)) {
             fputs("Warning: solver not converging! 2\n", stderr);
             fputs("Warning: solver not converging! 2\n", E->fp);
@@ -755,7 +771,7 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_v_norm2(),global_p_norm2();
     double global_div_norm2();
     void assemble_div_rho_u();
-
+    
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     	old_v[m] = (double *)malloc(neq*sizeof(double));
     	diff_v[m] = (double *)malloc(neq*sizeof(double));
@@ -766,7 +782,7 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     cycles = E->control.p_iterations;
 
     initial_vel_residual(E, V, P, F,
-                         imp * E->monitor.fdotf);
+                         imp * E->control.inner_accuracy_scale * E->monitor.fdotf);
 
     div_res = 1.0;
     relative_err_v = 1.0;

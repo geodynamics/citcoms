@@ -585,6 +585,7 @@ void read_initial_settings(struct All_variables *E)
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
   input_boolean("remove_rigid_rotation",&(E->control.remove_rigid_rotation),"on",m);
+  input_boolean("inner_remove_rigid_rotation",&(E->control.inner_remove_rigid_rotation),"off",m);
   input_boolean("remove_angular_momentum",&(E->control.remove_angular_momentum),"on",m);
 
   input_boolean("self_gravitation",&(E->control.self_gravitation),"off",m);
@@ -608,6 +609,7 @@ void read_initial_settings(struct All_variables *E)
   input_int("down_heavy",&(E->control.down_heavy),"1,0,nomax",m);
   input_int("up_heavy",&(E->control.up_heavy),"1,0,nomax",m);
   input_double("accuracy",&(E->control.accuracy),"1.0e-4,0.0,1.0",m);
+  input_double("inner_accuracy_scale",&(E->control.inner_accuracy_scale),"1.0,0.000001,1.0",m);
 
   input_boolean("check_continuity_convergence",&(E->control.check_continuity_convergence),"on",m);
   input_boolean("check_pressure_convergence",&(E->control.check_pressure_convergence),"on",m);
