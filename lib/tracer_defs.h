@@ -58,6 +58,8 @@ struct TRACE{
     int max_ntracers[13];
     int *ielement[13];
 
+    int number_of_tracers;
+
     int ilatersize[13];
     int ilater[13];
     double *rlater[13][100];

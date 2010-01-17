@@ -938,6 +938,9 @@ static void read_tracer_file(struct All_variables *E)
 
     icushion=100;
 
+    /* for absolute tracer method */
+    E->trace.number_of_tracers = number_of_tracers;
+
     iestimate=number_of_tracers/E->parallel.nproc + icushion;
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
