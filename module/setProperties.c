@@ -880,6 +880,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "precond", E->control.precondition, fp);
 
     getDoubleProperty(properties, "accuracy", E->control.accuracy, fp);
+    getDoubleProperty(properties, "inner_accuracy_scale", E->control.inner_accuracy_scale, fp);
 
     getIntProperty(properties, "check_continuity_convergence", E->control.check_continuity_convergence, fp);
     getIntProperty(properties, "check_pressure_convergence", E->control.check_pressure_convergence, fp);
@@ -896,6 +897,7 @@ PyObject * pyCitcom_Incompressible_set_properties(PyObject *self, PyObject *args
     getIntProperty(properties, "aug_lagr", E->control.augmented_Lagr, fp);
     getDoubleProperty(properties, "aug_number", E->control.augmented, fp);
 
+    getIntProperty(properties, "inner_remove_rigid_rotation", E->control.inner_remove_rigid_rotation, fp);
     getIntProperty(properties, "remove_rigid_rotation", E->control.remove_rigid_rotation, fp);
     getIntProperty(properties, "remove_angular_momentum", E->control.remove_angular_momentum, fp);
 

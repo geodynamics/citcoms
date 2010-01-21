@@ -87,6 +87,8 @@ class Incompressible(CitcomComponent):
         precond = prop.bool("precond", default=True)
 
         accuracy = prop.float("accuracy", default=1.0e-4)
+        inner_accuracy_scale = prop.float("inner_accuracy_scale", default=1.0)
+
         check_continuity_convergence = prop.bool("check_continuity_convergence", default=True)
         check_pressure_convergence = prop.bool("check_pressure_convergence", default=True)
 
@@ -105,6 +107,8 @@ class Incompressible(CitcomComponent):
         uzawa = prop.str("uzawa", default="cg",
                          validator=prop.choice(["cg", "bicg"]))
         compress_iter_maxstep = prop.int("compress_iter_maxstep", default=100)
+
+        inner_remove_rigid_rotation = prop.bool("inner_remove_rigid_rotation", default=False)
         remove_rigid_rotation = prop.bool("remove_rigid_rotation", default=True)
         remove_angular_momentum = prop.bool("remove_angular_momentum", default=True)
 
