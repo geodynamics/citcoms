@@ -424,7 +424,7 @@ void CitcomInterpolator::selfTest(const BoundedMesh& boundedMesh,
 	for(int k=0; k<DIM; k++)
 	    norm += (xt[k]-xi[k]) * (xt[k]-xi[k]);
 
-	if(norm > 1.e-10) {
+	if(norm > E->control.accuracy * E->control.accuracy) {
 	    double tshape = 0.0;
 	    for(int j=0; j<NODES_PER_ELEMENT; j++)
 		tshape += shape_[j][i];
