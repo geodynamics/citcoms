@@ -51,6 +51,7 @@ struct VISC_OPT {
     float zlith;
     float zbase_layer[CITCOM_MAX_VISC_LAYER]; /* new */
 
+    int use_ne_visc_smooth;
 
     /* low viscosity channel and wedge stuff */
     int channel;
