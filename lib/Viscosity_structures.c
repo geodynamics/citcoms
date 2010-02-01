@@ -146,7 +146,7 @@ void viscosity_system_input(struct All_variables *E)
     input_float("lv_channel_thickness",&(E->viscosity.lv_channel_thickness),"0.0047",m);
     input_float("lv_reduction",&(E->viscosity.lv_reduction),"0.5",m);
 
-    input_boolean("use_ne_visc_smooth",&(E->viscosity.use_ne_visc_smooth),"off",m);
+    input_boolean("use_ne_visc_smooth",&(E->viscosity.SMOOTH),"off",m);
 
     input_boolean("VMAX",&(E->viscosity.MAX),"off",m);
     if (E->viscosity.MAX)
@@ -294,7 +294,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
     /* interpolate from gauss quadrature points to node points for output */
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
-    if(E->viscosity.use_ne_visc_smooth){ /* go the other way, for
+    if(E->viscosity.SMOOTH){ /* go the other way, for
 					    smoothing */
       visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);
     }
