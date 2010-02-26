@@ -566,9 +566,9 @@ static void geoid_from_buoyancy(struct All_variables *E,
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
-    /* sin coeff */
-    geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
     /* cos coeff */
+    geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+    /* sin coeff */
     geoid[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
 
     /* reset arrays */
