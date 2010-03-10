@@ -346,7 +346,7 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int botvbc;
     int sidevbc;
 
-    int toplayerbc;		/* apply surface BC throughout layer */
+    int toplayerbc;		/* apply surface BC throughout top layers, or for a single internal node */
 
     int periodic_x;
     int periodic_y;

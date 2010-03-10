@@ -492,11 +492,11 @@ void stress_conform_bcs(struct All_variables *E)
 
   } else {
     /* 
-       regular case 
+       no side boundary conditions
 
     */
     if(E->mesh.toplayerbc > 0){
-      /* internal BCs */
+      /* internal BCs for top toplayerbc layers */
       for(m=1; m<=E->sphere.caps_per_proc; m++)
 	for(i=1; i<=E->lmesh.noy; i++)
 	  for(j=1; j<=E->lmesh.nox; j++)
@@ -510,6 +510,19 @@ void stress_conform_bcs(struct All_variables *E)
 		}
 	    }
 
+    }else if(E->mesh.toplayerbc < 0){ 
+      /* internal BCs for a single node layer noz+toplayerbc down */
+      for(m=1; m<=E->sphere.caps_per_proc; m++)
+	for(i=1; i<=E->lmesh.noy; i++)
+	  for(j=1; j<=E->lmesh.nox; j++){
+	    k = E->lmesh.noz + E->mesh.toplayerbc;
+	    n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
+	    for(d=1; d<=E->mesh.nsd; d++)
+	      if(E->node[m][n] & sbc_flag[d]) {
+		/* apply internal traction vector on horizontal surface */
+		E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+	      }
+	  }
     }else{
       /* default */
       for(m=1; m<=E->sphere.caps_per_proc; m++)

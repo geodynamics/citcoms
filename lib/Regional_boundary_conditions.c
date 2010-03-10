@@ -119,7 +119,7 @@ void regional_velocity_boundary_conditions(E)
 	 
       apply stress or velocity boundary conditions, read from file
       settings are to be implemented in those routines (will only do
-      anything at present, if E->mesh.toplayerbc > 0
+      anything at present, if E->mesh.toplayerbc != 0
 
       */
       assign_internal_bc(E,0);

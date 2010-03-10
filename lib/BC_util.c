@@ -255,10 +255,13 @@ top/bottom
 
 options:
 
-toplayerbc  > 0: assign surface BC down to toplayerbc nd
+toplayerbc  > 0: assign surface boundary condition down to all nodes within the the toplayerbc 
+                 layer, e.g. layer one for lithosphere
 toplayerbc == 0: no action
+toplayerbc  < 0: assign surface boundary condition within medium at node -toplayerbc depth, ie.
+                 toplayerbc = -1 is one node underneath surface
 
- */
+*/
 void assign_internal_bc(struct All_variables *E,int is_global)
 {
   
@@ -307,8 +310,46 @@ void assign_internal_bc(struct All_variables *E,int is_global)
     if(E->control.ggrd.vtop_control)
       ggrd_read_vtop_from_file(E, is_global, 1);
 #endif
-  } /* end toplayerbc > 0 branch */
-  
+    /* end toplayerbc > 0 branch */
+  }else if(E->mesh.toplayerbc < 0){ 
+    /* internal node at noz-toplayerbc */
+    for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
+      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+	noz = E->lmesh.NOZ[lv];
+	/* we're looping through all nodes for the possibility that
+	   there are several internal processors which need BCs */
+	k = noz + E->mesh.toplayerbc;
+	if(k < 1)myerror(E,"out of bounds for noz and toplayerbc");
+	onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
+	if(!onbottom)
+	  ncount++;		/* not in top or bottom */
+	if(E->mesh.topvbc != 1) {	/* free slip */
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
+	  if(onbottom)
+	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
+	  if(onbottom)
+	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
+	}else{		/* no slip */
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
+	  if(onbottom)
+	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,                 SBX,0,lv,j);
+	  if(onbottom)
+	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,                 SBY,0,lv,j);
+	}
+      }
+    /* read in velocities/stresses from grd file? */
+#ifdef USE_GGRD
+    if(E->control.ggrd.vtop_control)
+      ggrd_read_vtop_from_file(E, is_global, 1);
+#endif
+    /* end toplayerbc < 0 branch */
+  }
   if(ncount)
     fprintf(stderr,"assign_internal_bc: CPU %4i (%s): WARNING: assigned internal %s BCs to %6i nodes\n",
 	    E->parallel.me,((E->parallel.me_loc[3]==0)&&(E->parallel.nprocz!=1))?("bottom"):

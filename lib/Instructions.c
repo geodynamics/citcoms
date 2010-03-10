@@ -434,7 +434,16 @@ void read_initial_settings(struct All_variables *E)
   input_int("topvbc",&(E->mesh.topvbc),"0",m);
   input_int("botvbc",&(E->mesh.botvbc),"0",m);
 
-  input_int("toplayerbc",&(E->mesh.toplayerbc),"0",m); /* apply surface BC throughout all layer nodes  */
+  input_int("toplayerbc",&(E->mesh.toplayerbc),"0",m); /* > 0: apply
+                                                            surface BC
+                                                            throughout
+                                                            all layer
+                                                            nodes of layers toplayerbc (i.e. = 1 for top layer)
+
+
+							    < 0: apply to single node layer noz+toplayerbc
+
+						       */
 
   input_float("topvbxval",&(E->control.VBXtopval),"0.0",m);
   input_float("botvbxval",&(E->control.VBXbotval),"0.0",m);
@@ -511,6 +520,9 @@ void read_initial_settings(struct All_variables *E)
      30 60
 
 
+
+     in the example above, the input grid is a layer. if it's a 3D model, provide 
+     ggrd_mat_depth_file, akin to temperature input
      
      
   */

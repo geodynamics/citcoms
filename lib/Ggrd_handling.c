@@ -326,7 +326,8 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 /*
 
 
-read in material, i.e. viscosity prefactor from ggrd file, this will get assigned if
+read in material, i.e. viscosity prefactor from ggrd file, this will
+get assigned for all nodes if their 
 
 layer <=  E->control.ggrd.mat_control for  E->control.ggrd.mat_control > 0
 
@@ -334,6 +335,9 @@ or
 
 layer ==  -E->control.ggrd.mat_control for  E->control.ggrd.mat_control < 0
 
+
+the grd model can be 2D (a layer in itself), or 3D (a model with
+several layers)
 
 */
 void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
@@ -679,7 +683,7 @@ if topvbc=0, will apply to tractions
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
-  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop;
+  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop,kinc;
   int mpi_inmsg, mpi_success_message = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
   int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,noxlnozl,save_codes,topnode,botnode;
@@ -704,7 +708,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   noy = E->lmesh.noy;
   noxnoz = nox*noz;
   
-  if(E->mesh.toplayerbc > 0)
+  if(E->mesh.toplayerbc != 0)
     allow_internal = TRUE;
   else
     allow_internal = FALSE;
@@ -934,19 +938,35 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    /* determine vertical nodes */
 	    if(allow_internal){
 	      /* internal */
-	      /* check for internal nodes in layers */
-	      for(k=nozl;k >= 1;k--){
-		if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
-		  break;
-	      }
-	      if(k == nozl){	/*  */
-		assign = FALSE;
+	      if(E->mesh.toplayerbc > 0){
+		/* check for internal nodes in layers */
+		for(k=nozl;k >= 1;k--){
+		  if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
+		    break;
+		}
+		if(k == nozl){	/*  */
+		  assign = FALSE;
+		}else{
+		  assign = TRUE;topnode = nozl;botnode = k+1;
+		}
+		kinc = 1;
 	      }else{
-		assign = TRUE;topnode = nozl;botnode = k+1;
+		/* only one internal node */
+		assign = TRUE;
+		topnode = nozl;
+		if(level == E->mesh.gridmax){
+		  botnode = nozl +  E->mesh.toplayerbc;
+		  kinc = topnode - botnode;
+		}else{
+		  if(E->parallel.me == 0)
+		    fprintf(stderr,"WARNING: assigning single layer internal boundary condition only to top level multigrid\n");
+		  botnode = nozl;kinc = 1;
+		}
 	      }
 	    }else{		/* just top node */
 	      assign = TRUE;
 	      topnode = botnode = nozl;
+	      kinc = 1;
 	    }
 	    if(verbose)
 	      fprintf(stderr,"ggrd_read_vtop_from_file: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
@@ -1007,7 +1027,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  
 		  */
 		  
-		  for(k = botnode;k <= topnode;k++){
+		  for(k = botnode;k <= topnode;k += kinc){
 		    ontop = ((k==nozl) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		    /* depth loop */
 		    nodel =  k + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
@@ -1153,7 +1173,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      XXX
 	      
 	      */
-	      for(k = botnode;k <= topnode;k++){
+	      for(k = botnode;k <= topnode;k += kinc){
 		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(use_codes){
