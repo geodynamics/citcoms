@@ -683,7 +683,7 @@ if topvbc=0, will apply to tractions
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
-  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop,kinc;
+  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop;
   int mpi_inmsg, mpi_success_message = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
   int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,noxlnozl,save_codes,topnode,botnode;
@@ -949,24 +949,23 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		}else{
 		  assign = TRUE;topnode = nozl;botnode = k+1;
 		}
-		kinc = 1;
 	      }else{
 		/* only one internal node */
-		assign = TRUE;
-		topnode = nozl;
+
 		if(level == E->mesh.gridmax){
+		  assign = TRUE;
 		  botnode = nozl +  E->mesh.toplayerbc;
-		  kinc = topnode - botnode;
+		  topnode = botnode;
 		}else{
 		  if(E->parallel.me == 0)
 		    fprintf(stderr,"WARNING: assigning single layer internal boundary condition only to top level multigrid\n");
-		  botnode = nozl;kinc = 1;
+		  assign = FALSE;
+		  botnode = topnode = nozl;
 		}
 	      }
 	    }else{		/* just top node */
 	      assign = TRUE;
 	      topnode = botnode = nozl;
-	      kinc = 1;
 	    }
 	    if(verbose)
 	      fprintf(stderr,"ggrd_read_vtop_from_file: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
@@ -1027,7 +1026,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  
 		  */
 		  
-		  for(k = botnode;k <= topnode;k += kinc){
+		  for(k = botnode;k <= topnode;k++){
 		    ontop = ((k==nozl) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		    /* depth loop */
 		    nodel =  k + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
@@ -1173,7 +1172,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      XXX
 	      
 	      */
-	      for(k = botnode;k <= topnode;k += kinc){
+	      for(k = botnode;k <= topnode;k++){
 		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(use_codes){

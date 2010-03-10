@@ -319,27 +319,17 @@ void assign_internal_bc(struct All_variables *E,int is_global)
 	/* we're looping through all nodes for the possibility that
 	   there are several internal processors which need BCs */
 	k = noz + E->mesh.toplayerbc;
-	if(k < 1)myerror(E,"out of bounds for noz and toplayerbc");
-	onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
-	if(!onbottom)
-	  ncount++;		/* not in top or bottom */
+	if(k <= 1)myerror(E,"out of bounds for noz and toplayerbc");
+	ncount++;		/* not in top or bottom */
 	if(E->mesh.topvbc != 1) {	/* free slip */
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
-	  if(onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
-	  if(onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
 	}else{		/* no slip */
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
-	  if(onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,                 SBX,0,lv,j);
-	  if(onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
 	  internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,                 SBY,0,lv,j);
 	}
       }
