@@ -346,7 +346,8 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int botvbc;
     int sidevbc;
 
-    int toplayerbc;		/* apply surface BC throughout top layers, or for a single internal node */
+    int toplayerbc;		/* apply surface BC throughout top, or for a single internal node */
+    float toplayerbc_r;		/* minimum r to apply BC to */
 
     int periodic_x;
     int periodic_y;
@@ -528,6 +529,7 @@ struct CONTROL {
   float ggrd_vtop_omega[4];
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
+  float  ggrd_lower_depth_km,ggrd_lower_scale,ggrd_lower_offset;
 #endif
     double accuracy,inner_accuracy_scale;
     int check_continuity_convergence;

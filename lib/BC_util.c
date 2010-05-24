@@ -255,8 +255,7 @@ top/bottom
 
 options:
 
-toplayerbc  > 0: assign surface boundary condition down to all nodes within the the toplayerbc 
-                 layer, e.g. layer one for lithosphere
+toplayerbc  > 0: assign surface boundary condition down to all nodes with r >= toplayerbc_r
 toplayerbc == 0: no action
 toplayerbc  < 0: assign surface boundary condition within medium at node -toplayerbc depth, ie.
                  toplayerbc = -1 is one node underneath surface
@@ -279,8 +278,8 @@ void assign_internal_bc(struct All_variables *E,int is_global)
 	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(1):(0);
 	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
 	  /* node number is k, assuming no dependence on x and y  */
-	  if((lay = layers(E,j,k)) <= E->mesh.toplayerbc){
-	    
+	  if(E->SX[lv][lv][3][k] >= E->mesh.toplayerbc_r){
+	    lay = layers(E,j,k);
 	    if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	      ncount++;		/* not in top or bottom */
 	    if(E->mesh.topvbc != 1) {	/* free slip */

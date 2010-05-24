@@ -175,7 +175,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   MPI_Status mpi_stat;
   int mpi_rc;
   int mpi_inmsg, mpi_success_message = 1;
-  double temp1,tbot,tgrad,tmean,tadd,rho_prem;
+  double temp1,tbot,tgrad,tmean,tadd,rho_prem,depth,loc_scale;
   char gmt_string[10];
   int i,j,k,m,node,noxnoz,nox,noy,noz;
   static ggrd_boolean shift_to_pos_lon = FALSE;
@@ -248,10 +248,6 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
     */
     tbot = 1.0;
   }
-  /*
-     mean temp is (top+bot)/2 + offset
-  */
-  tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd.temp.offset;
 
 
   for(m=1;m <= E->sphere.caps_per_proc;m++)
@@ -264,31 +260,46 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 	  /*
 	     get interpolated velocity anomaly
 	  */
-	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],(double)E->sx[m][1][node],
+	  depth = (1-E->sx[m][3][node])*6371;
+	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],
+					    (double)E->sx[m][1][node],
 					    (double)E->sx[m][2][node],
 					    E->control.ggrd.temp.d,&tadd,
 					    FALSE,shift_to_pos_lon)){
 	    fprintf(stderr,"%g %g %g\n",E->sx[m][2][node]*57.29577951308232087,
-		    90-E->sx[m][1][node]*57.29577951308232087,(1-E->sx[m][3][node])*6371);
+		    90-E->sx[m][1][node]*57.29577951308232087,depth);
 		    
 	    myerror(E,"ggrd__temp_init_general: interpolation error");
 
+	  }
+	  
+	  if(depth < E->control.ggrd_lower_depth_km){
+	    /*
+	      mean temp is (top+bot)/2 + offset
+	    */
+	    tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd.temp.offset;
+	    loc_scale =  E->control.ggrd.temp.scale;
+	  }else{		/* lower mantle */
+	    tmean = (tbot + E->control.TBCtopval)/2.0 +  E->control.ggrd_lower_offset;
+	    loc_scale = E->control.ggrd_lower_scale;
 	  }
 	  if(E->control.ggrd.temp.scale_with_prem){
 	    /*
 	       get the PREM density at r for additional scaling
 	    */
 	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp.prem);
-	    if(rho_prem < 3200.0)
-	      rho_prem = 3200.0; /* we don't want the density of water */
+	    if(rho_prem < GGRD_DENS_MIN){
+	      fprintf(stderr,"WARNING: restricting minimum density to %g, would have been %g\n",
+		      GGRD_DENS_MIN,rho_prem);
+	      rho_prem = GGRD_DENS_MIN; /* we don't want the density of water or crust*/
+	    }
 	    /*
 	       assign temperature
 	    */
-	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp.scale *
-	      rho_prem / E->data.density;
+	    E->T[m][node] = tmean + tadd * loc_scale * rho_prem / E->data.density;
 	  }else{
 	    /* no PREM scaling */
-	    E->T[m][node] = tmean + tadd * E->control.ggrd.temp.scale;
+	    E->T[m][node] = tmean + tadd * loc_scale;
 	  }
 
 	  if(E->control.ggrd.temp.limit_trange){
@@ -1209,7 +1220,7 @@ void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input
     if(E->mesh.toplayerbc > 0){
       /* check for internal nodes in layers */
       for(k=nozl;k >= 1;k--){
-	if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
+	if(E->SX[level][m][3][k] < E->mesh.toplayerbc_r) /* assume regular mesh structure */
 	  break;
       }
       if(k == nozl){	/*  */
@@ -1227,13 +1238,14 @@ void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input
       *assign = TRUE;
       *topnode = *botnode;
     }else{
-      fprintf(stderr,"ggrd_vtop_helper_decide_on_internal_nodes: toplayerbc %i\n", E->mesh.toplayerbc);
+      fprintf(stderr,"ggrd_vtop_helper_decide_on_internal_nodes: toplayerbc %i, r_min: %g\n", 
+	      E->mesh.toplayerbc,E->mesh.toplayerbc_r);
       myerror(E,"ggrd_vtop_helper_decide_on_internal_nodes: logic error");
     }
   }
   if(verbose)
-    fprintf(stderr,"ggrd_vtop_helper_decide_on_internal_nodes: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
-	    allow_internal,*assign,*botnode,*topnode,nozl);
+    fprintf(stderr,"ggrd_vtop_helper_decide_on_internal_nodes: mixed: internal: %i assign: %i k: %i to %i (%i), r_min: %g\n",
+	    allow_internal,*assign,*botnode,*topnode,nozl,E->mesh.toplayerbc_r);
   
 }
 
