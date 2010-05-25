@@ -278,7 +278,7 @@ void assign_internal_bc(struct All_variables *E,int is_global)
 	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(1):(0);
 	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
 	  /* node number is k, assuming no dependence on x and y  */
-	  if(E->SX[lv][lv][3][k] >= E->mesh.toplayerbc_r){
+	  if(E->SX[lv][j][3][k] >= E->mesh.toplayerbc_r){
 	    lay = layers(E,j,k);
 	    if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	      ncount++;		/* not in top or bottom */
