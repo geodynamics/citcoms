@@ -55,11 +55,6 @@ class Coupler(Component):
         assert solver.inventory.tsolver.inventory.monitor_max_T == False, \
                'Error: solver.tsolver.monitor_max_T must be off!'
 
-        # the exchanger doesn't know how to apply boundary conditions
-        # for the multigrid solver
-        assert solver.inventory.vsolver.inventory.Solver == "cgrad", \
-               'Error: solver.vsolver.Solver must be "cgrad"'
-
         self.communicator = solver.communicator
         self.srcCommList = solver.myPlus
 

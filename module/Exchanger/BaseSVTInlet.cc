@@ -39,7 +39,7 @@ extern "C" {
 #include "element_definitions.h"
 
     void check_bc_consistency(const All_variables *E);
-    void construct_id(const All_variables *E);
+    void get_bcs_id_for_residual(const All_variables *E, int level, int m);
 }
 
 using Exchanger::Array2D;
@@ -103,18 +103,24 @@ void BaseSVTInlet::setVBCFlag()
 
     for(int i=0; i<boundary.size(); i++) {
         int n = boundary.nodeID(i);
-	for(int d=0; d<DIM; ++d)
-	    if(boundary.normal(d,i)) {
-		E->node[m][n] = E->node[m][n] | vbcFlag[d];
-		E->node[m][n] = E->node[m][n] & (~sbcFlag[d]);
-	    } else {
-		E->node[m][n] = E->node[m][n] | sbcFlag[d];
-		E->node[m][n] = E->node[m][n] & (~vbcFlag[d]);
-	    }
+        for(int lev=E->mesh.gridmax; lev>=E->mesh.gridmin; lev--) {
+            int nn = nodelevel(n, lev);
+            if(nn != 0) {
+                for(int d=0; d<DIM; ++d)
+                    if(boundary.normal(d,i)) {
+                        E->NODE[lev][m][nn] = E->NODE[lev][m][nn] | vbcFlag[d];
+                        E->NODE[lev][m][nn] = E->NODE[lev][m][nn] & (~sbcFlag[d]);
+                    } else {
+                        E->NODE[lev][m][nn] = E->NODE[lev][m][nn] | sbcFlag[d];
+                        E->NODE[lev][m][nn] = E->NODE[lev][m][nn] & (~vbcFlag[d]);
+                    }
+            }
+        }
     }
 
-    // reconstruct ID array to reflect changes in VBC
-    construct_id(E);
+    // reconstruct zero_resid array to reflect changes in VBC
+    for(int lev=E->mesh.gridmax; lev>=E->mesh.gridmin; lev--)
+        get_bcs_id_for_residual(E,lev,m);
 }
 
 
@@ -212,6 +218,34 @@ double BaseSVTInlet::side_tractions(const Array2D<double,STRESS_DIM>& stress,
     return stress[ stress_index[normal_dir][dim] ][node];
 }
 
+
+int BaseSVTInlet::nodelevel(int node, int level)
+{
+    // Given the "node" number of highest level, return the node number
+    // at "level" below. Return 0 if this node is not below to lower level.
+    const int nox = E->lmesh.nox;
+    const int noy = E->lmesh.noy;
+    const int noz = E->lmesh.noz;
+    const int nx = E->lmesh.NOX[level];
+    const int ny = E->lmesh.NOY[level];
+    const int nz = E->lmesh.NOZ[level];
+    const int f = pow(2, (E->mesh.gridmax - level));
+
+    int i, j, k, ii, jj, kk;
+
+    // indices at highest level, starting from 0
+    k = (node - 1) % noz;
+    j = (node - 1) / (nox * noz);
+    i = ((node - 1) - j * nox * noz) / noz;
+
+    if((i % f) != 0 || (j % f) != 0 || (k % f) != 0) return 0;
+
+    ii = i / f;
+    jj = j / f;
+    kk = k / f;
+
+    return jj*nx*nz + ii*nz + kk + 1;
+}
 
 // version
 // $Id: BaseSVTInlet.cc 7643 2007-07-11 20:17:32Z tan2 $

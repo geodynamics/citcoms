@@ -71,6 +71,8 @@ protected:
 
     double side_tractions(const Exchanger::Array2D<double,Exchanger::STRESS_DIM>& stress,
 			  int node, int normal_dir,  int dim) const;
+
+    int nodelevel(int node, int level);
 };
 
 
