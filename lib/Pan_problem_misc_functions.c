@@ -52,9 +52,11 @@
 #include "parallel_related.h"
 
 void calc_cbase_at_tp(float , float , float *);
+void calc_cbase_at_tp_d(double , double , double *);
 void rtp2xyz(float , float , float, float *);
 void rtp2xyzd(double , double , double, double *);
 void convert_pvec_to_cvec(float ,float , float , float *,float *);
+void convert_pvec_to_cvec_d(double ,double , double , double *,double *);
 void *safe_malloc (size_t );
 void myerror(struct All_variables *,char *);
 void xyz2rtp(float ,float ,float ,float *);
@@ -423,6 +425,29 @@ void calc_cbase_at_tp(float theta, float phi, float *base)
  base[7]= cp;
  base[8]= 0.0;
 }
+void calc_cbase_at_tp_d(double theta, double phi, double *base) /* double version */
+{
+
+
+ double ct,cp,st,sp;
+
+ ct=cos(theta);
+ cp=cos(phi);
+ st=sin(theta);
+ sp=sin(phi);
+ /* r */
+ base[0]= st * cp;
+ base[1]= st * sp;
+ base[2]= ct;
+ /* theta */
+ base[3]= ct * cp;
+ base[4]= ct * sp;
+ base[5]= -st;
+ /* phi */
+ base[6]= -sp;
+ base[7]= cp;
+ base[8]= 0.0;
+}
 
 /* calculate base at nodal locations where we have precomputed cos/sin */
 
@@ -455,6 +480,17 @@ void calc_cbase_at_node(int cap, int node, float *base,struct All_variables *E)
 void convert_pvec_to_cvec(float vr,float vt,
 			  float vp, float *base,
 			  float *cvec)
+{
+  int i;
+  for(i=0;i<3;i++){
+    cvec[i]  = base[i]  * vr;
+    cvec[i] += base[3+i]* vt;
+    cvec[i] += base[6+i]* vp;
+  }
+}
+void convert_pvec_to_cvec_d(double vr,double vt,
+			    double vp, double *base,
+			    double *cvec)
 {
   int i;
   for(i=0;i<3;i++){

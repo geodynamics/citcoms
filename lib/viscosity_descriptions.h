@@ -35,6 +35,11 @@ struct VISC_OPT {
     int SMOOTH;
     int smooth_cycles;
 
+  int allow_orthotropic_viscosity,orthotropic_viscosity_init;
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    int anisotropic_init;	/* 0: isotropic, 1: random, 2: from file */
+    char anisotropic_init_dir[1000];
+#endif
 
     char STRUCTURE[20];		/* which option to determine viscosity field, one of .... */
     int FROM_SYSTEM;

@@ -117,6 +117,10 @@ void *safe_malloc (size_t );
 int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);
 
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+void gzdir_output_avisc(struct All_variables *, int);
+#endif
 
 extern void temperatures_conform_bcs(struct All_variables *);
 extern void myerror(struct All_variables *,char *);
@@ -163,6 +167,9 @@ void gzdir_output(struct All_variables *E, int out_cycles)
 					else new VTK output won't
 					work */
   gzdir_output_visc(E, out_cycles);
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+  gzdir_output_avisc(E, out_cycles);
+#endif
 
   gzdir_output_surf_botm(E, out_cycles);
 
@@ -749,6 +756,66 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
       if(E->parallel.me <  E->parallel.nproc-1){
 	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
+  }
+  return;
+}
+
+/*
+   anisotropic viscosity
+*/
+void gzdir_output_avisc(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  gzFile *gz1;
+  FILE *fp1;
+  int lev = E->mesh.levmax;
+  float ftmp;
+  /* for dealing with several processors */
+  MPI_Status mpi_stat;
+  int mpi_rc;
+  int mpi_inmsg, mpi_success_message = 1;
+  if(E->viscosity.allow_orthotropic_viscosity){
+    
+    if(E->output.gzdir.vtk_io < 2){
+      snprintf(output_file,255,
+	       "%s/%d/avisc.%d.%d.gz", E->control.data_dir,
+	       cycles,E->parallel.me, cycles);
+      gz1 = gzdir_output_open(output_file,"w");
+      for(j=1;j<=E->sphere.caps_per_proc;j++) {
+	gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+	for(i=1;i<=E->lmesh.nno;i++)
+	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
+      }
+      
+      gzclose(gz1);
+    }else{
+      if(E->output.gzdir.vtk_io == 2)
+	parallel_process_sync(E);
+      /* new legacy VTK */
+      get_vtk_filename(output_file,0,E,cycles);
+      if((E->parallel.me == 0) || (E->output.gzdir.vtk_io == 3)){
+	fp1 = output_open(output_file,"a");
+	myfprintf(fp1,"SCALARS vis2 float 1\n");
+	myfprintf(fp1,"LOOKUP_TABLE default\n");
+      }else{
+	/* if not first, wait for previous */
+	mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
+	/* open for append */
+	fp1 = output_open(output_file,"a");
+      }
+      for(j=1; j<= E->sphere.caps_per_proc;j++)
+	for(i=1;i<=E->lmesh.nno;i++){
+	  ftmp = E->VI2[lev][j][i];
+	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)
+	    BE_WERROR;
+	}
+      fclose(fp1);fflush(fp1);		/* close file and flush buffer */
+      if(E->output.gzdir.vtk_io == 2)
+	if(E->parallel.me <  E->parallel.nproc-1){
+	  mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
+	}
+    }
   }
   return;
 }

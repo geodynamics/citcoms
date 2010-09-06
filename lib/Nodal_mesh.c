@@ -34,6 +34,7 @@
 #include "global_defs.h"
 
 
+
 /* get nodal spherical velocities from the solution vector */
 void v_from_vector(E)
      struct All_variables *E;
@@ -230,127 +231,132 @@ void p_to_nodes(E,P,PN,lev)
 }
 
 
+/* 
 
+   interpolate the viscosity from element integration points to nodes
+
+ */
 void visc_from_gint_to_nodes(E,VE,VN,lev)
   struct All_variables *E;
   float **VE,**VN;
   int lev;
-  {
-  int m,e,i,j,k,n;
+{
+  int m,e,i,j,k,n,off,lim;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
-  double temp_visc;
-
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(i=1;i<=E->lmesh.NNO[lev];i++)
-     VN[m][i] = 0.0;
-
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)   {
-     temp_visc=0.0;
-     for(i=1;i<=vpts;i++)
-        temp_visc += VE[m][(e-1)*vpts + i];
-     temp_visc = temp_visc/vpts;
-
-     for(j=1;j<=ends;j++)                {
-       n = E->IEN[lev][m][e].node[j];
-       VN[m][n] += E->TWW[lev][m][e].node[j] * temp_visc;
-       }
+  double temp_visc, weight;
+  
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(i=1;i<=E->lmesh.NNO[lev];i++)
+      VN[m][i] = 0.0;
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(e=1;e<=E->lmesh.NEL[lev];e++)   {
+      temp_visc=0.0;
+      for(i=1;i<=vpts;i++)
+	temp_visc += VE[m][(e-1)*vpts + i];
+      temp_visc = temp_visc/vpts;
+      
+      for(j=1;j<=ends;j++)                {
+	n = E->IEN[lev][m][e].node[j];
+	VN[m][n] += E->TWW[lev][m][e].node[j] * temp_visc;
+      }
     }
+  (E->exchange_node_f)(E,VN,lev);
+  for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(n=1;n<=E->lmesh.NNO[lev];n++)
+      VN[m][n] *= E->MASS[lev][m][n];
 
-   (E->exchange_node_f)(E,VN,lev);
-
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(n=1;n<=E->lmesh.NNO[lev];n++)
-        VN[m][n] *= E->MASS[lev][m][n];
-
-   return;
+  return;
 }
 
+/* 
 
+interpolate viscosity from nodes to element integration points
+
+ */
 void visc_from_nodes_to_gint(E,VN,VE,lev)
   struct All_variables *E;
   float **VE,**VN;
   int lev;
-  {
+{
 
-  int m,e,i,j,k,n;
+  int m,e,i,j,k,n,off;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
   double temp_visc;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)
-     for(i=1;i<=vpts;i++)
-       VE[m][(e-1)*vpts+i] = 0.0;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)
-     for(i=1;i<=vpts;i++)      {
-       temp_visc=0.0;
-       for(j=1;j<=ends;j++)
-	 temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[m][E->IEN[lev][m][e].node[j]];
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(e=1;e<=E->lmesh.NEL[lev];e++)
+      for(i=1;i<=vpts;i++)
+	VE[m][(e-1)*vpts+i] = 0.0;
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(e=1;e<=E->lmesh.NEL[lev];e++)
+      for(i=1;i<=vpts;i++)      {
+	temp_visc=0.0;
+	for(j=1;j<=ends;j++)
+	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[m][E->IEN[lev][m][e].node[j]];
+	VE[m][(e-1)*vpts+i] = temp_visc;
+      }
 
-       VE[m][(e-1)*vpts+i] = temp_visc;
-       }
+  return;
+}
 
-   return;
-   }
+/* called from MG as  (?)
 
+   visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv) 
+
+*/
 void visc_from_gint_to_ele(E,VE,VN,lev)
   struct All_variables *E;
   float **VE,**VN;
   int lev;
   {
-  int m,e,i,j,k,n;
-  const int nsd=E->mesh.nsd;
-  const int vpts=vpoints[nsd];
-  const int ends=enodes[nsd];
-  double temp_visc;
+    int m,e,i,j,k,n,off;
+    const int nsd=E->mesh.nsd;
+    const int vpts=vpoints[nsd];
+    const int ends=enodes[nsd];
+    double temp_visc;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(i=1;i<=E->lmesh.NEL[lev];i++)
-     VN[m][i] = 0.0;
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+      for(i=1;i<=E->lmesh.NEL[lev];i++)
+	VN[m][i] = 0.0;
+    for (m=1;m<=E->sphere.caps_per_proc;m++)
+      for(e=1;e<=E->lmesh.NEL[lev];e++)   {
+	temp_visc=0.0;
+	for(i=1;i<=vpts;i++)
+	  temp_visc += VE[m][(e-1)*vpts + i];
+	temp_visc = temp_visc/vpts;
+	VN[m][e] = temp_visc;
+      }
+    
+    return;
+  }
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)   {
-     temp_visc=0.0;
-     for(i=1;i<=vpts;i++)
-        temp_visc += VE[m][(e-1)*vpts + i];
-     temp_visc = temp_visc/vpts;
+/* called from MG as 
 
-     VN[m][e] = temp_visc;
-    }
+   visc_from_ele_to_gint(E,viscD,E->EVI[sl_minus],sl_minus); 
 
-   return;
-}
-
+*/
 
 void visc_from_ele_to_gint(E,VN,VE,lev)
   struct All_variables *E;
   float **VE,**VN;
   int lev;
-  {
-
-  int m,e,i,j,k,n;
+{
+  int m,e,i,j,k,n,off;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
   double temp_visc;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)
-     for(i=1;i<=vpts;i++)
-       VE[m][(e-1)*vpts+i] = 0.0;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
-   for(e=1;e<=E->lmesh.NEL[lev];e++)
-     for(i=1;i<=vpts;i++)      {
-
-       VE[m][(e-1)*vpts+i] = VN[m][e];
-       }
-
-   return;
- }
+  for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for(e=1;e<=E->lmesh.NEL[lev];e++)
+      for(i=1;i<=vpts;i++)      {
+	VE[m][(e-1)*vpts+i] = VN[m][e];
+      }
+  return;
+}

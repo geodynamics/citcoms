@@ -58,6 +58,13 @@ extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**,
                          float**, float**, int);
 extern void get_CBF_topo(struct All_variables *, float**, float**);
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+void output_avisc(struct All_variables *, int);
+#endif
+
+
+
 
 /**********************************************************************/
 
@@ -105,6 +112,10 @@ void output(struct All_variables *E, int cycles)
 
   output_velo(E, cycles);
   output_visc(E, cycles);
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+  output_avisc(E, cycles);
+#endif
+
 
   output_surf_botm(E, cycles);
 
@@ -310,6 +321,29 @@ void output_visc(struct All_variables *E, int cycles)
 
   return;
 }
+
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+void output_avisc(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+  int lev = E->mesh.levmax;
+  if(E->viscosity.allow_orthotropic_viscosity){
+    sprintf(output_file,"%s.avisc.%d.%d", E->control.data_file,
+	    E->parallel.me, cycles);
+    fp1 = output_open(output_file, "w");
+    for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+      for(i=1;i<=E->lmesh.nno;i++)
+	fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
+    }
+    
+    fclose(fp1);
+  }
+  return;
+}
+#endif
 
 
 void output_velo(struct All_variables *E, int cycles)

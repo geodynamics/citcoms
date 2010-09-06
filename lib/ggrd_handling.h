@@ -45,5 +45,6 @@ void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 float find_age_in_MY();
 void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
+void ggrd_read_anivisc_from_file(struct All_variables *, int );
 
 #define GGRD_DENS_MIN 3200	/* minimum density for PREM scaling of input files */

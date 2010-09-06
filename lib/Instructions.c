@@ -160,7 +160,11 @@ void initial_mesh_solver_setup(struct All_variables *E)
     construct_sub_element(E);
     construct_shape_functions(E);
     construct_shape_function_derivatives(E);
+    if(chatty)fprintf(stderr,"shape functions done\n");
+
     construct_elt_gs(E);
+
+
     if(E->control.inv_gruneisen != 0)
         construct_elt_cs(E);
 
@@ -589,6 +593,11 @@ void read_initial_settings(struct All_variables *E)
   */
   input_boolean("allow_mixed_vbcs",&(E->control.ggrd_allow_mixed_vbcs),"off",m);
 
+  /* when assigning  composition from grid file, allow values between 0 and 1 ? 
+     default will ronud up/down to 0 or 1
+  */
+  input_boolean("ggrd_comp_smooth",&(E->control.ggrd_comp_smooth),"off",m);
+
 
 #endif
 
@@ -878,7 +887,7 @@ void allocate_common_vars(E)
 
 {
     void set_up_nonmg_aliases();
-    int m,n,snel,nsf,elx,ely,nox,noy,noz,nno,nel,npno;
+    int m,n,snel,nsf,elx,ely,nox,noy,noz,nno,nel,npno,lim;
     int k,i,j,d,l,nno_l,npno_l,nozl,nnov_l,nxyz;
 
     m=0;
@@ -1045,6 +1054,34 @@ void allocate_common_vars(E)
 
     }         /* end for cap and i & j  */
 
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+ if(E->viscosity.allow_orthotropic_viscosity){
+   for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
+     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
+       nel  = E->lmesh.NEL[i];
+       nno  = E->lmesh.NNO[i];
+       E->EVI2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn1[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn3[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       
+       E->VI2[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn1[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn2[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn3[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
+       if((!(E->EVI2[i][j]))||(!(E->VI2[i][j]))||
+	  (!(E->EVIn1[i][j]))||(!(E->EVIn2[i][j]))||(!(E->EVIn3[i][j]))||
+	  (!(E->VIn1[i][j]))||(!(E->VIn2[i][j]))||(!(E->VIn3[i][j]))){
+	 fprintf(stderr, "Error: Cannot allocate anisotropic visc memory, rank=%d\n",
+		 E->parallel.me);
+	 parallel_process_termination();
+       }
+     }
+   E->viscosity.orthotropic_viscosity_init = FALSE;
+   if(E->parallel.me == 0)
+     fprintf(stderr,"allocated for anisotropic viscosity levmax %i\n",E->mesh.gridmax);
+ }
+#endif
 
  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 

@@ -525,7 +525,7 @@ struct CONTROL {
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
   float *surface_rayleigh;
-  int ggrd_allow_mixed_vbcs;
+  int ggrd_allow_mixed_vbcs,ggrd_comp_smooth;
   float ggrd_vtop_omega[4];
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
@@ -782,6 +782,14 @@ struct All_variables {
 
     float *Vi[NCS],*EVi[NCS];
     float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
+
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    float *VI2[MAX_LEVELS][NCS],*EVI2[MAX_LEVELS][NCS];
+    float *VIn1[MAX_LEVELS][NCS],*EVIn1[MAX_LEVELS][NCS];
+    float *VIn2[MAX_LEVELS][NCS],*EVIn2[MAX_LEVELS][NCS];
+    float *VIn3[MAX_LEVELS][NCS],*EVIn3[MAX_LEVELS][NCS];
+#endif
+
 
     int num_zero_resid[MAX_LEVELS][NCS];
     int *zero_resid[MAX_LEVELS][NCS];

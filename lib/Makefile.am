@@ -68,7 +68,9 @@ libCitcomS_la_SOURCES = $(sources)
 
 sources = \
 	Advection_diffusion.c \
+	Anisotropic_viscosity.c \
 	advection_diffusion.h \
+	anisotropic_viscosity.h \
 	advection.h \
 	BC_util.c \
 	Checkpoints.c \

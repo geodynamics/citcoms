@@ -253,31 +253,81 @@ void project_viscosity(E)
     viscD[m]=(float *)malloc((1+vpts*E->lmesh.NEL[lv-1])*sizeof(float));
     }
 
-  for(lv=E->mesh.levmax;lv>E->mesh.levmin;lv--)     {
-
-    sl_minus = lv -1;
-
-    if (E->viscosity.smooth_cycles==1)  {
-      visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
-      project_scalar(E,lv,viscU,viscD);
-      visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC /* allow for anisotropy */
+  if(E->viscosity.allow_orthotropic_viscosity){
+    for(lv=E->mesh.levmax;lv>E->mesh.levmin;lv--)     {
+      sl_minus = lv -1;
+      if (E->viscosity.smooth_cycles==1)  {
+	visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);	/* isotropic */
+	project_scalar(E,lv,viscU,viscD);
+	visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+	/* anisotropic */
+	visc_from_gint_to_nodes(E,E->EVI2[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVI2[sl_minus],sl_minus);
+	visc_from_gint_to_nodes(E,E->EVIn1[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn1[sl_minus],sl_minus);
+	visc_from_gint_to_nodes(E,E->EVIn2[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn2[sl_minus],sl_minus);
+	visc_from_gint_to_nodes(E,E->EVIn3[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn3[sl_minus],sl_minus);
+	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
-    else if (E->viscosity.smooth_cycles==2)   {
-      visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);
-      inject_scalar_e(E,lv,viscU,E->EVI[sl_minus]);
+      else if (E->viscosity.smooth_cycles==2)   {
+	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv); /* isotropic */
+	inject_scalar_e(E,lv,viscU,E->EVI[sl_minus]);
+	/* anisotropic */
+	visc_from_gint_to_ele(E,E->EVI2[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVI2[sl_minus]);
+	visc_from_gint_to_ele(E,E->EVIn1[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn1[sl_minus]);
+	visc_from_gint_to_ele(E,E->EVIn2[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn2[sl_minus]);
+	visc_from_gint_to_ele(E,E->EVIn3[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn3[sl_minus]);
+	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
-    else if (E->viscosity.smooth_cycles==3)   {
-      visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);
-      project_scalar_e(E,lv,viscU,viscD);
-      visc_from_ele_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+      else if (E->viscosity.smooth_cycles==3)   {
+	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);/* isotropic */
+	project_scalar_e(E,lv,viscU,viscD);
+	visc_from_ele_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+	/* anisotropic */
+	visc_from_gint_to_ele(E,E->EVI2[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVI2[sl_minus],sl_minus);
+	visc_from_gint_to_ele(E,E->EVIn1[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn1[sl_minus],sl_minus);
+	visc_from_gint_to_ele(E,E->EVIn2[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn2[sl_minus],sl_minus);
+	visc_from_gint_to_ele(E,E->EVIn3[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn3[sl_minus],sl_minus);
+	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
-    else if (E->viscosity.smooth_cycles==0)  {
-/*      visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
-      inject_scalar(E,lv,viscU,viscD);
-      visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus); */
-
-      inject_scalar(E,lv,E->VI[lv],E->VI[sl_minus]);
-      visc_from_nodes_to_gint(E,E->VI[sl_minus],E->EVI[sl_minus],sl_minus);
+      else if (E->viscosity.smooth_cycles==0)  {
+	inject_scalar(E,lv,E->VI[lv],E->VI[sl_minus]);/* isotropic */
+	visc_from_nodes_to_gint(E,E->VI[sl_minus],E->EVI[sl_minus],sl_minus);
+	/* anisotropic */
+	inject_scalar(E,lv,E->VI2[lv],E->VI2[sl_minus]);visc_from_nodes_to_gint(E,E->VI2[sl_minus],E->EVI2[sl_minus],sl_minus);
+	inject_scalar(E,lv,E->VIn1[lv],E->VIn1[sl_minus]);visc_from_nodes_to_gint(E,E->VIn1[sl_minus],E->EVIn1[sl_minus],sl_minus);
+	inject_scalar(E,lv,E->VIn2[lv],E->VIn2[sl_minus]);visc_from_nodes_to_gint(E,E->VIn2[sl_minus],E->EVIn2[sl_minus],sl_minus);
+	inject_scalar(E,lv,E->VIn3[lv],E->VIn3[sl_minus]);visc_from_nodes_to_gint(E,E->VIn3[sl_minus],E->EVIn3[sl_minus],sl_minus);
+	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
+      }
+    }
+  }else{
+#endif
+    /* regular operation, isotropic viscosity */
+    for(lv=E->mesh.levmax;lv>E->mesh.levmin;lv--)     {
+      
+      sl_minus = lv -1;
+      
+      if (E->viscosity.smooth_cycles==1)  {
+	visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
+	project_scalar(E,lv,viscU,viscD);
+	visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+      }
+      else if (E->viscosity.smooth_cycles==2)   {
+	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);
+	inject_scalar_e(E,lv,viscU,E->EVI[sl_minus]);
+      }
+      else if (E->viscosity.smooth_cycles==3)   {
+	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);
+	project_scalar_e(E,lv,viscU,viscD);
+	visc_from_ele_to_gint(E,viscD,E->EVI[sl_minus],sl_minus);
+      }
+      else if (E->viscosity.smooth_cycles==0)  {
+	/*      visc_from_gint_to_nodes(E,E->EVI[lv],viscU,lv);
+		inject_scalar(E,lv,viscU,viscD);
+		visc_from_nodes_to_gint(E,viscD,E->EVI[sl_minus],sl_minus); */
+	
+	inject_scalar(E,lv,E->VI[lv],E->VI[sl_minus]);
+	visc_from_nodes_to_gint(E,E->VI[sl_minus],E->EVI[sl_minus],sl_minus);
       }
 
 
@@ -289,7 +339,9 @@ void project_viscosity(E)
             }
 */
     }
-
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+  }
+#endif
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
     free((void *)viscU[m]);
     free((void *)viscD[m]);

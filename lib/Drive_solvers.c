@@ -51,7 +51,6 @@ void general_stokes_solver_setup(struct All_variables *E)
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	E->elt_k[i][m]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
 
-
   return;
 }
 
@@ -81,7 +80,7 @@ void general_stokes_solver(struct All_variables *E)
   if(need_visc_update(E)){
     get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
     construct_stiffness_B_matrix(E);
-  }
+  } 
 
   solve_constrained_flow_iterative(E);
 

@@ -103,7 +103,7 @@ AC_PROG_LIBTOOL
 
 # Checks for libraries.
 AC_SEARCH_LIBS([MPI_Init], [mpi mpich], [], [AC_MSG_ERROR([MPI library not found])])
-AC_SEARCH_LIBS([sqrt], [m])
+
 
 CIT_CHECK_LIB_HDF5
 CIT_CHECK_LIB_HDF5_PARALLEL
@@ -213,6 +213,7 @@ if test "$want_ggrd" != no; then
     AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found. Try setting environment variable HC_HOME.])])
 fi
 
+AC_SEARCH_LIBS([sqrt], [m])
 
 AC_CONFIG_FILES([Makefile
                  bin/Makefile

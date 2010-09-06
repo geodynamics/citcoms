@@ -48,6 +48,10 @@ void compute_nodal_stress(struct All_variables *,
                           float** , float** , float** ,
                           float** , float** );
 void stress_conform_bcs(struct All_variables *);
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+#endif
+
 
 /* 
 
@@ -217,7 +221,7 @@ void compute_nodal_stress(struct All_variables *E,
   void construct_c3x3matrix_el();
   void get_ba();
 
-  int i,j,p,q,e,node,m;
+  int i,j,p,q,e,node,m,l1,l2;
 
   float VV[4][9],Vxyz[9][9],Szz,Sxx,Syy,Sxy,Sxz,Szy,div,vor;
   double dilation[9];
@@ -225,7 +229,9 @@ void compute_nodal_stress(struct All_variables *E,
 
   double pre[9],tww[9],rtf[4][9];
   double velo_scaling, stress_scaling, mass_fac;
-
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+  double D[6][6],n[3],eps[6],str[6];
+#endif
   struct Shape_function_dA *dOmega;
   struct Shape_function_dx *GNx;
 
@@ -269,7 +275,7 @@ void compute_nodal_stress(struct All_variables *E,
        * where 1 is theta, 2 is phi, and 3 is r
        */
       for(j=1;j <= vpts;j++)  {	/* loop through velocity Gauss points  */
-
+	/* E->EVi[j] = E->EVI[E->mesh.levmax][j]; */
         pre[j] =  E->EVi[m][(e-1)*vpts+j]*dOmega->vpt[j];
         dilation[j] = 0.0;
         Vxyz[1][j] = 0.0;
@@ -359,7 +365,43 @@ void compute_nodal_stress(struct All_variables *E,
           for(j=1;j<=vpts;j++)
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    if(E->viscosity.allow_orthotropic_viscosity){
+      for(j=1;j <= vpts;j++)   {
+	l1 = (e-1)*vpts+j;
+	n[0] = E->EVIn1[E->mesh.levmax][m][l1];	/* Cartesian directors */
+	n[1] = E->EVIn2[E->mesh.levmax][m][l1];
+	n[2] = E->EVIn3[E->mesh.levmax][m][l1];
+	/* 
+	   get viscosity matrix and convert to spherical system in
+	   CitcomS convection
 
+	*/
+	get_constitutive_orthotropic_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],n,TRUE,rtf[1][j],rtf[2][j]);
+	
+	/* deviatoric stress, pressure will be added later */
+	eps[0] = Vxyz[1][j] - dilation[j]; /* strain-rates */
+	eps[1] = Vxyz[2][j] - dilation[j];
+	eps[2] = Vxyz[3][j] - dilation[j];
+	eps[3] = Vxyz[4][j];eps[4] = Vxyz[5][j];eps[5] = Vxyz[5][j];
+	for(l1=0;l1 < 6;l1++){	
+	  str[l1]=0.0;
+	  for(l2=0;l2 < 6;l2++)
+	    str[l1] += D[l1][l2] * eps[l2];
+	}
+	Sxx += pre[j] * str[0];
+	Syy += pre[j] * str[1];
+	Szz += pre[j] * str[2];
+	Sxy += pre[j] * str[3];
+	Sxz += pre[j] * str[4];
+	Szy += pre[j] * str[5];
+	
+	div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
+	vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
+      }
+
+    }else{
+#endif
       for(j=1;j <= vpts;j++)   {
 	/* deviatoric stress, pressure will be added later */
           Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]); /*  */
@@ -371,6 +413,9 @@ void compute_nodal_stress(struct All_variables *E,
           div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
           vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
       }
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    }
+#endif
       /* normalize by volume */
       Sxx /= E->eco[m][e].area;
       Syy /= E->eco[m][e].area;

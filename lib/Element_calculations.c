@@ -46,6 +46,9 @@ void assemble_div_u(struct All_variables *,
 static void get_elt_tr(struct All_variables *, int , int , double [24], int );
 static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
 
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+#endif
 
 static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
 {
@@ -282,7 +285,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
      int lev, iconv;
 {
     double bdbmu[4][4];
-    int pn,qn,ad,bd;
+    int pn,qn,ad,bd,off;
 
     int a,b,i,j,i1,j1,k;
     double rtf[4][9],W[9];
@@ -299,76 +302,115 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const int ends = ENODES3D;
     const int dims=E->mesh.nsd;
 
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    double D[VPOINTS3D+1][6][6],n[3],btmp[6];
+    int l1,l2;
+#endif
+
     get_rtf_at_vpts(E, m, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,0);
-
+    
     /* Note N[a].gauss_pt[n] is the value of shape fn a at the nth gaussian
        quadrature point. Nx[d] is the derivative wrt x[d]. */
-
+    
     for(k=1;k<=vpts;k++) {
-      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][(el-1)*vpts+k];
+      off = (el-1)*vpts+k;
+      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+      if(E->viscosity.allow_orthotropic_viscosity){/* allow for a possibly anisotropic viscosity */
+	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
+	/* get the viscosity factor matrix and convert to CitcomS spherical */
+	get_constitutive_orthotropic_viscosity(D[k],E->EVI2[lev][m][off],n,TRUE,rtf[1][k],rtf[2][k]); 
+      }
+#endif
     }
-
+    
     get_ba(&(E->N), &(E->GNX[lev][m][el]), &E->element_Cc, &E->element_Ccx,
            rtf, E->mesh.nsd, ba);
 
-  for(a=1;a<=ends;a++)
-    for(b=a;b<=ends;b++)   {
-      bdbmu[1][1]=bdbmu[1][2]=bdbmu[1][3]=
-      bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
-      bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
+    for(a=1;a<=ends;a++)	/* loop over element nodes */
+      for(b=a;b<=ends;b++)   {
 
-      for(i=1;i<=dims;i++)
-        for(j=1;j<=dims;j++)
-          for(k=1;k<=VPOINTS3D;k++)
-              bdbmu[i][j] += W[k] * ( two * ( ba[a][k][i][1]*ba[b][k][j][1] +
-                                              ba[a][k][i][2]*ba[b][k][j][2] +
-                                              ba[a][k][i][3]*ba[b][k][j][3] ) +
-                                      ba[a][k][i][4]*ba[b][k][j][4] +
-                                      ba[a][k][i][5]*ba[b][k][j][5] +
-                                      ba[a][k][i][6]*ba[b][k][j][6] );
+	bdbmu[1][1]=bdbmu[1][2]=bdbmu[1][3]=
+	  bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
+	  bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-      if(E->control.inv_gruneisen != 0)
-        for(i=1;i<=dims;i++)
-          for(j=1;j<=dims;j++)
-            for(k=1;k<=VPOINTS3D;k++)
-                bdbmu[i][j] -= W[k] * two_thirds *
-                    ( ba[a][k][i][1] + ba[a][k][i][2] + ba[a][k][i][3] ) *
-                    ( ba[b][k][j][1] + ba[b][k][j][2] + ba[b][k][j][3] );
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+	if(E->viscosity.allow_orthotropic_viscosity){
+	  for(i=1;i<=dims;i++)
+	    for(j=1;j<=dims;j++)
+	      for(k=1;k<=vpts;k++){ /*  */
 
-
-                /**/
-      ad=dims*(a-1);
-      bd=dims*(b-1);
-
-      pn=ad*nn+bd;
-      qn=bd*nn+ad;
-
-      elt_k[pn       ] = bdbmu[1][1] ; /* above */
-      elt_k[pn+1     ] = bdbmu[1][2] ;
-      elt_k[pn+2     ] = bdbmu[1][3] ;
-      elt_k[pn+nn    ] = bdbmu[2][1] ;
-      elt_k[pn+nn+1  ] = bdbmu[2][2] ;
-      elt_k[pn+nn+2  ] = bdbmu[2][3] ;
-      elt_k[pn+2*nn  ] = bdbmu[3][1] ;
-      elt_k[pn+2*nn+1] = bdbmu[3][2] ;
-      elt_k[pn+2*nn+2] = bdbmu[3][3] ;
-
-      elt_k[qn       ] = bdbmu[1][1] ; /* below diag */
-      elt_k[qn+1     ] = bdbmu[2][1] ;
-      elt_k[qn+2     ] = bdbmu[3][1] ;
-      elt_k[qn+nn    ] = bdbmu[1][2] ;
-      elt_k[qn+nn+1  ] = bdbmu[2][2] ;
-      elt_k[qn+nn+2  ] = bdbmu[3][2] ;
-      elt_k[qn+2*nn  ] = bdbmu[1][3] ;
-      elt_k[qn+2*nn+1] = bdbmu[2][3] ;
-      elt_k[qn+2*nn+2] = bdbmu[3][3] ;
-                /**/
-
+		/* note that D is in 0,...,N-1 convention */
+		for(l1=0;l1 < 6;l1++) /* compute D*B */
+		  for(btmp[l1]=0.0,l2=0;l2<6;l2++)
+		    btmp[l1] += D[k][l1][l2] * ba[b][k][j][l2+1];
+		/* compute B^T (D*B) */
+		bdbmu[i][j] += W[k] * ( ba[a][k][i][1]*btmp[0]+ba[a][k][i][2]*btmp[1]+ba[a][k][i][3]*btmp[2]+
+					ba[a][k][i][4]*btmp[3]+ba[a][k][i][5]*btmp[4]+ba[a][k][i][6]*btmp[5]);
+	      }
+	  if(E->control.inv_gruneisen != 0)
+	    for(i=1;i<=dims;i++)
+	      for(j=1;j<=dims;j++)
+		for(k=1;k<=VPOINTS3D;k++)
+		  bdbmu[i][j] -= W[k] * two_thirds *
+		    ( ba[a][k][i][1] + ba[a][k][i][2] + ba[a][k][i][3] ) *
+		    ( ba[b][k][j][1] + ba[b][k][j][2] + ba[b][k][j][3] );
+	}else{
+#endif	/* isotropic branch */
+	  for(i=1;i<=dims;i++)
+	    for(j=1;j<=dims;j++)
+	      for(k=1;k<=VPOINTS3D;k++)
+		bdbmu[i][j] += W[k] * ( two * ( ba[a][k][i][1]*ba[b][k][j][1] +
+						ba[a][k][i][2]*ba[b][k][j][2] +
+						ba[a][k][i][3]*ba[b][k][j][3] ) +
+					ba[a][k][i][4]*ba[b][k][j][4] +
+					ba[a][k][i][5]*ba[b][k][j][5] +
+					ba[a][k][i][6]*ba[b][k][j][6] );
+	  
+	  if(E->control.inv_gruneisen != 0)
+	    for(i=1;i<=dims;i++)
+	      for(j=1;j<=dims;j++)
+		for(k=1;k<=VPOINTS3D;k++)
+		  bdbmu[i][j] -= W[k] * two_thirds *
+		    ( ba[a][k][i][1] + ba[a][k][i][2] + ba[a][k][i][3] ) *
+		    ( ba[b][k][j][1] + ba[b][k][j][2] + ba[b][k][j][3] );
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+	}
+#endif
+	
+	/**/
+	ad=dims*(a-1);
+	bd=dims*(b-1);
+	
+	pn=ad*nn+bd;
+	qn=bd*nn+ad;
+	
+	elt_k[pn       ] = bdbmu[1][1] ; /* above */
+	elt_k[pn+1     ] = bdbmu[1][2] ;
+	elt_k[pn+2     ] = bdbmu[1][3] ;
+	elt_k[pn+nn    ] = bdbmu[2][1] ;
+	elt_k[pn+nn+1  ] = bdbmu[2][2] ;
+	elt_k[pn+nn+2  ] = bdbmu[2][3] ;
+	elt_k[pn+2*nn  ] = bdbmu[3][1] ;
+	elt_k[pn+2*nn+1] = bdbmu[3][2] ;
+	elt_k[pn+2*nn+2] = bdbmu[3][3] ;
+	
+	elt_k[qn       ] = bdbmu[1][1] ; /* below diag */
+	elt_k[qn+1     ] = bdbmu[2][1] ;
+	elt_k[qn+2     ] = bdbmu[3][1] ;
+	elt_k[qn+nn    ] = bdbmu[1][2] ;
+	elt_k[qn+nn+1  ] = bdbmu[2][2] ;
+	elt_k[qn+nn+2  ] = bdbmu[3][2] ;
+	elt_k[qn+2*nn  ] = bdbmu[1][3] ;
+	elt_k[qn+2*nn+1] = bdbmu[2][3] ;
+	elt_k[qn+2*nn+2] = bdbmu[3][3] ;
+	/**/
+	
       } /*  Sum over all the a,b's to obtain full  elt_k matrix */
-
+    
     return;
 }
 

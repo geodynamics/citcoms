@@ -48,6 +48,9 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
 void parallel_process_termination();
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+#endif
 
 
 void viscosity_system_input(struct All_variables *E)
@@ -61,6 +64,29 @@ void viscosity_system_input(struct All_variables *E)
     input_boolean("visc_layer_control",&(E->viscosity.layer_control),"off",m);
     input_string("visc_layer_file", E->viscosity.layer_file,"visc.dat",m);
 
+
+    input_boolean("allow_orthotropic_viscosity",&(E->viscosity.allow_orthotropic_viscosity),"off",m);
+#ifndef CITCOM_ALLOW_ORTHOTROPIC_VISC 
+    if(E->viscosity.allow_orthotropic_viscosity){ /* error */
+      fprintf(stderr,"error: allow_orthotropic_viscosity is set, but code not compiled with CITCOM_ALLOW_ORTHOTROPIC_VISC\n");
+      parallel_process_termination();
+    }
+#else
+    if(E->viscosity.allow_orthotropic_viscosity){ /* read additional
+						     parameters for
+						     anisotropic
+						     viscosity */
+      input_int("anisotropic_init",&(E->viscosity.anisotropic_init),"0",m);
+      input_string("anisotropic_init_dir",(E->viscosity.anisotropic_init_dir),"",m); /* directory
+											 for
+											 ggrd
+											 type
+											 init */
+
+    }
+
+#endif
+    /* allocate memory here */
     allocate_visc_vars(E);
 
     for(i=0;i < E->viscosity.num_mat;i++)
@@ -181,41 +207,49 @@ void viscosity_input(struct All_variables *E)
 
 void allocate_visc_vars(struct All_variables *E)
 {
-    int i;
+  int i,j,k,lim,nel,nno;
 
-    if(E->viscosity.layer_control) {
-        /* noz is already defined, but elz is undefined yet */
-        i = E->mesh.noz - 1;
-    } else {
-        i = E->viscosity.num_mat;
-    }
+  if(E->viscosity.layer_control) {
+    /* noz is already defined, but elz is undefined yet */
+    i = E->mesh.noz - 1;
+  } else {
+    i = E->viscosity.num_mat;
+  }
+  
+  E->viscosity.N0 = (float*) malloc(i*sizeof(float));
+  E->viscosity.E = (float*) malloc(i*sizeof(float));
+  E->viscosity.T = (float*) malloc(i*sizeof(float));
+  E->viscosity.Z = (float*) malloc(i*sizeof(float));
+  E->viscosity.pdepv_a = (float*) malloc(i*sizeof(float));
+  E->viscosity.pdepv_b = (float*) malloc(i*sizeof(float));
+  E->viscosity.pdepv_y = (float*) malloc(i*sizeof(float));
+  E->viscosity.sdepv_expt = (float*) malloc(i*sizeof(float));
+  
+  if(E->viscosity.N0 == NULL ||
+     E->viscosity.E == NULL ||
+     E->viscosity.T == NULL ||
+     E->viscosity.Z == NULL ||
+     E->viscosity.pdepv_a == NULL ||
+     E->viscosity.pdepv_b == NULL ||
+     E->viscosity.pdepv_y == NULL ||
+     E->viscosity.sdepv_expt == NULL) {
+    fprintf(stderr, "Error: Cannot allocate visc memory, rank=%d\n",
+	    E->parallel.me);
+    parallel_process_termination();
+  }
 
-    E->viscosity.N0 = (float*) malloc(i*sizeof(float));
-    E->viscosity.E = (float*) malloc(i*sizeof(float));
-    E->viscosity.T = (float*) malloc(i*sizeof(float));
-    E->viscosity.Z = (float*) malloc(i*sizeof(float));
-    E->viscosity.pdepv_a = (float*) malloc(i*sizeof(float));
-    E->viscosity.pdepv_b = (float*) malloc(i*sizeof(float));
-    E->viscosity.pdepv_y = (float*) malloc(i*sizeof(float));
-    E->viscosity.sdepv_expt = (float*) malloc(i*sizeof(float));
-
-    if(E->viscosity.N0 == NULL ||
-       E->viscosity.E == NULL ||
-       E->viscosity.T == NULL ||
-       E->viscosity.Z == NULL ||
-       E->viscosity.pdepv_a == NULL ||
-       E->viscosity.pdepv_b == NULL ||
-       E->viscosity.pdepv_y == NULL ||
-       E->viscosity.sdepv_expt == NULL) {
-        fprintf(stderr, "Error: Cannot allocate visc memory, rank=%d\n",
-                E->parallel.me);
-        exit(8);
-    }
 }
 
 
 /* ============================================ */
+/* 
 
+   when called from Drive_solvers:
+   
+   evisc = E->EVI[E->mesh.levmax]
+   visc  = E->VI[E->mesh.levmax]
+
+ */
 void get_system_viscosity(E,propogate,evisc,visc)
      struct All_variables *E;
      int propogate;
@@ -238,6 +272,15 @@ void get_system_viscosity(E,propogate,evisc,visc)
     double *TG;
 
     const int vpts = vpoints[E->mesh.nsd];
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+    if(E->viscosity.allow_orthotropic_viscosity){
+      if(!E->viscosity.orthotropic_viscosity_init)
+	set_anisotropic_viscosity_at_element_level(E,1);
+      else
+	set_anisotropic_viscosity_at_element_level(E,0);
+    }
+#endif
+
 
     if(E->viscosity.TDEPV)
         visc_from_T(E,evisc,propogate);
@@ -291,13 +334,32 @@ void get_system_viscosity(E,propogate,evisc,visc)
       }
       fflush(E->fp_out);
     }
-
     /* interpolate from gauss quadrature points to node points for output */
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
+
     if(E->viscosity.SMOOTH){ /* go the other way, for
 					    smoothing */
       visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);
     }
+
+#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC /* allow for anisotropy */
+    if(E->viscosity.allow_orthotropic_viscosity){
+      visc_from_gint_to_nodes(E,E->EVI2[E->mesh.levmax], E->VI2[E->mesh.levmax],E->mesh.levmax);
+      visc_from_gint_to_nodes(E,E->EVIn1[E->mesh.levmax], E->VIn1[E->mesh.levmax],E->mesh.levmax);
+      visc_from_gint_to_nodes(E,E->EVIn2[E->mesh.levmax], E->VIn2[E->mesh.levmax],E->mesh.levmax);
+      visc_from_gint_to_nodes(E,E->EVIn3[E->mesh.levmax], E->VIn3[E->mesh.levmax],E->mesh.levmax);
+      normalize_director_at_nodes(E,E->VIn1[E->mesh.levmax],E->VIn2[E->mesh.levmax],E->VIn3[E->mesh.levmax],E->mesh.levmax);
+      
+      if(E->viscosity.SMOOTH){ 
+	visc_from_nodes_to_gint(E,E->VI2[E->mesh.levmax],E->EVI2[E->mesh.levmax],E->mesh.levmax);
+	visc_from_nodes_to_gint(E,E->VIn1[E->mesh.levmax],E->EVIn1[E->mesh.levmax],E->mesh.levmax);
+	visc_from_nodes_to_gint(E,E->VIn2[E->mesh.levmax],E->EVIn2[E->mesh.levmax],E->mesh.levmax);
+	visc_from_nodes_to_gint(E,E->VIn3[E->mesh.levmax],E->EVIn3[E->mesh.levmax],E->mesh.levmax);
+	normalize_director_at_gint(E,E->EVIn1[E->mesh.levmax],E->EVIn2[E->mesh.levmax],E->EVIn3[E->mesh.levmax],E->mesh.levmax);
+    
+      }
+    }
+#endif
     return;
 }
 
