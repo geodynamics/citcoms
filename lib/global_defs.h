@@ -529,6 +529,7 @@ struct CONTROL {
   float ggrd_vtop_omega[4];
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
+  int ggrd_mat_limit_prefactor;
   float  ggrd_lower_depth_km,ggrd_lower_scale,ggrd_lower_offset;
 #endif
     double accuracy,inner_accuracy_scale;

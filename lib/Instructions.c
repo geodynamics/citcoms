@@ -537,6 +537,7 @@ void read_initial_settings(struct All_variables *E)
   /* if > 0, will use top  E->control.ggrd.mat_control layers and assign a prefactor for the viscosity */
   /* if < 0, will assign only to layer == -ggrd_mat_control */
   input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); 
+  input_boolean("ggrd_mat_limit_prefactor",&(E->control.ggrd_mat_limit_prefactor),"on",m); /* limit prefactor to with 1e+/-5 */
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
   input_string("ggrd_mat_depth_file",
 	       E->control.ggrd_mat_depth_file,"_i_do_not_exist_",m); 

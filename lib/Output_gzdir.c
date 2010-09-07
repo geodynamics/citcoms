@@ -981,7 +981,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
     snprintf(output_file,255,"%s/%d/horiz_avg.%d.%d.gz", E->control.data_dir,
 	    cycles,E->parallel.me, cycles);
     fp1=gzdir_output_open(output_file,"w");
-    for(j=1;j<=E->lmesh.noz;j++)  {
+    for(j=1;j<=E->lmesh.noz;j++)  { /* format: r <T> <vh> <vr> (<C>) */
         gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {

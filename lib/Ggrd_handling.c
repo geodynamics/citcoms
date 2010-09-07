@@ -537,11 +537,14 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	      }else{
 		vip = indbl;
 	      }
-	      /* limit the input scaling? */
-	      if(vip < 1e-5)
-	      	vip = 1e-5;
-	      if(vip > 1e5)
-	      	vip = 1e5;
+	      if(E->control.ggrd_mat_limit_prefactor){
+		/* limit the input scaling? */
+		if(vip < 1e-5)
+		  vip = 1e-5;
+		if(vip > 1e5)
+		  vip = 1e5;
+	      }
+	      //fprintf(stderr,"lon %11g lat %11g depth %11g vip %11g\n",rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0,vip);
 	      E->VIP[m][el] = vip;
 	    }
 	  }

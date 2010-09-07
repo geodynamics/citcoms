@@ -387,11 +387,17 @@ void visc_from_mat(E,EEta)
 {
 
     int i,m,jj;
-
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
+    if(E->control.mat_control){	/* use pre-factor even without temperature dependent viscosity */
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nel;i++)
-            for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-                EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1];
+	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
+	    EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1]*E->VIP[m][i];
+     }else{
+      for(m=1;m<=E->sphere.caps_per_proc;m++)
+        for(i=1;i<=E->lmesh.nel;i++)
+	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
+	    EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1];
+    }
 
     return;
 }
