@@ -56,6 +56,10 @@ struct All_variables* citcom_init(MPI_Comm *world)
   E->control.total_iteration_cycles=0;
   E->control.total_v_solver_calls=0;
 
+  /* seed random number generator with same seed for
+     reproducibility */
+  srand48((long int) -1);
+
   return(E);
 }
 

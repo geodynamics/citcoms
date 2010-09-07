@@ -826,7 +826,8 @@ static void generate_random_tracers(struct All_variables *E,
     /* 
        
     what is this supposed to mean? why not initialize the random
-    number generator with a srand48 call? XXX TWB
+    number generator with a srand48 call? I added that in Citcom_init
+    to ensure reproducibility TWB
 
     */
     while (E->trace.ntracers[j]<tracers_cap) {
@@ -845,7 +846,7 @@ static void generate_random_tracers(struct All_variables *E,
         random1=drand48();
         random2=drand48();
         random3=drand48();
-#else
+#else  /* never called */
         random1=(1.0*rand())/(1.0*RAND_MAX);
         random2=(1.0*rand())/(1.0*RAND_MAX);
         random3=(1.0*rand())/(1.0*RAND_MAX);
