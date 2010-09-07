@@ -1318,7 +1318,7 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 read in anisotropic viscosity from a directory which holds
 
 
-vis2.grd for the viscosity factors 
+vis2.grd for the viscosity factors  (1 - eta_S/eta)
 
 nr.grd, nt.grd, np.grd for the directors
 
@@ -1339,7 +1339,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   const int ends = enodes[dims];
   FILE *in;
   struct ggrd_gt *vis2_grd,*ntheta_grd,*nphi_grd,*nr_grd;
-  const int init_layer = 1;	/* initialize all elements in top layer */
   const int vpts = vpoints[E->mesh.nsd];
 
   
@@ -1395,9 +1394,16 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 
 
   if(E->parallel.me==0)
-    fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all above %g km, input is %s\n",
-	    E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1],
-	    (is_global)?("global"):("regional"));
+    if(E->viscosity.anivisc_layer > 0)
+      fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements above %g km, input is %s\n",
+	      E->data.radius_km*E->viscosity.zbase_layer[E->viscosity.anivisc_layer - 1],
+	      (is_global)?("global"):("regional"));
+    else
+      fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements between  %g and %g km, input is %s\n",
+	      E->data.radius_km*((E->viscosity.anivisc_layer<-1)?(E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 2]):(0)),
+	      E->data.radius_km*E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 1],
+	      (is_global)?("global"):("regional"));
+
   /* 
      read viscosity ratio, and east/north direction of normal azimuth 
   */
@@ -1437,7 +1443,8 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   */
   for (m=1;m <= E->sphere.caps_per_proc;m++) {
     for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
-      if(E->mat[m][j] <=  init_layer){
+      if(((E->viscosity.anivisc_layer > 0)&&(E->mat[m][j] <=   E->viscosity.anivisc_layer))||
+	 ((E->viscosity.anivisc_layer < 0)&&(E->mat[m][j] ==  -E->viscosity.anivisc_layer))){
 	/* within top layers */
 	for (k=1;k <= ely;k++){
 	  for (i=1;i <= elx;i++)   {
@@ -1449,7 +1456,9 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 	    xloc[1] = xloc[2] = xloc[3] = 0.0;
 	    for(inode=1;inode <= 4;inode++){
 	      ind = E->ien[m][el].node[inode];
-	      xloc[1] += E->x[m][1][ind];xloc[2] += E->x[m][2][ind];xloc[3] += E->x[m][3][ind];
+	      xloc[1] += E->x[m][1][ind];
+	      xloc[2] += E->x[m][2][ind];
+	      xloc[3] += E->x[m][3][ind];
 	    }
 	    xloc[1]/=4.;xloc[2]/=4.;xloc[3]/=4.;
 	    xyz2rtpd(xloc[1],xloc[2],xloc[3],rout); /* convert to spherical */
@@ -1482,16 +1491,20 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 			rout[2]*180/M_PI,90-rout[1]*180/M_PI);
 		parallel_process_termination();
 	    }
-	    /* 
-	       convert from n_east,n_north to Cartesian vector,
-	       assuming the director is in the horizontal, 
-	       i.e. n_r = 0
-	    */
-	    nlen = sqrt(nphi*nphi+ntheta*ntheta+nr*nr); /* correct, because
-							   interpolation might have
-							   screwed up initialization */
+	    nlen = sqrt(nphi*nphi + ntheta*ntheta + nr*nr); /* correct,
+							       because
+							       interpolation
+							       might
+							       have
+							       screwed
+							       up
+							       initialization */
 	    nphi /= nlen; ntheta /= nlen;nr /= nlen;
-	    calc_cbase_at_tp_d(rout[1],rout[2],base);
+	    calc_cbase_at_tp_d(rout[1],rout[2],base); /* convert from
+							 spherical
+							 coordinates
+							 to
+							 Cartesian */
 	    convert_pvec_to_cvec_d(nr,ntheta,nphi,base,cvec);
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      ind = (el-1)*vpts + l;

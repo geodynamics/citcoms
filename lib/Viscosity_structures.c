@@ -82,6 +82,9 @@ void viscosity_system_input(struct All_variables *E)
 											 ggrd
 											 type
 											 init */
+      input_int("anivisc_layer",&(E->viscosity.anivisc_layer),"1",m); /* >0: assign to layers on top of anivisc_layer
+									 <0: assign to layer = anivisc_layer
+								      */
 
     }
 

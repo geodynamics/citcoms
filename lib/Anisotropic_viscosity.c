@@ -55,7 +55,8 @@ compute a cartesian anisotropic viscosity matrix
 
 
    output: D[0,...,5][0,...,5] constitutive matrix
-   input: delta_vis difference in viscosity from isotropic viscosity, which is set to unity 
+
+   input: delta_vis difference in viscosity from isotropic viscosity (set to unity here)
    
           n[0,..,2]: director orientation, in cartesian
 
@@ -343,7 +344,8 @@ void rot_4x4(double c4[3][3][3][3], double r[3][3], double c4c[3][3][3][3])
 	    for(j2=0;j2<3;j2++)
 	      for(j3=0;j3<3;j3++)
 		for(j4=0;j4<3;j4++)
-		  c4c[i1][i2][i3][i4] += r[i1][j1] * r[i2][j2]* r[i3][j3]* r[i4][j4] * c4[j1][j2][j3][j4];
+		  c4c[i1][i2][i3][i4] += r[i1][j1] * r[i2][j2] * 
+		                         r[i3][j3]* r[i4][j4]  * c4[j1][j2][j3][j4];
 
 }
 

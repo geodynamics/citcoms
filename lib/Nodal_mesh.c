@@ -245,7 +245,7 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
-  double temp_visc, weight;
+  double temp_visc;
   
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.NNO[lev];i++)
@@ -351,7 +351,6 @@ void visc_from_ele_to_gint(E,VN,VE,lev)
   const int vpts=vpoints[nsd];
   const int ends=enodes[nsd];
   double temp_visc;
-
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
