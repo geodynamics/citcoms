@@ -328,7 +328,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       }else if(E->viscosity.allow_anisotropic_viscosity == 2){
 	/* transversely isotropic */
 	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
-	get_constitutive_ti_viscosity(D[k],E->EVI2[lev][m][off],0,n,TRUE,rtf[1][k],rtf[2][k]); 
+	get_constitutive_ti_viscosity(D[k],E->EVI2[lev][m][off],0.,n,TRUE,rtf[1][k],rtf[2][k]); 
       }
 #endif
     }

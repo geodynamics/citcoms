@@ -22,7 +22,8 @@ void print_6x6_mat(FILE *, double [6][6]);
 void zero_6x6(double [6][6]);
 void zero_4x4(double [3][3][3][3]);
 void rotate_ti6x6_to_director(double [6][6],double [3]);
-
+void normalize_vec3(float *, float *, float *);
+void normalize_vec3d(double *, double *, double *);
 
 #define __CITCOM_READ_ANIVISC_HEADER__
 #endif

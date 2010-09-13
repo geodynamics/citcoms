@@ -1335,7 +1335,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   int m,el,i,j,k,l,inode,i1,i2,elxlz,elxlylz,ind,nel;
   int llayer,nox,noy,noz,level,lselect,idim,elx,ely,elz;
   char gmt_string[10],char_dummy;
-  double vis2,log_vis,ntheta,nphi,nr,rout[3],xloc[4],nlen;
+  double vis2,log_vis,ntheta,nphi,nr,rout[3],xloc[4];
   double cvec[3],base[9];
   char tfilename[1000];
   static ggrd_boolean shift_to_pos_lon = FALSE;
@@ -1492,15 +1492,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 			rout[2]*180/M_PI,90-rout[1]*180/M_PI);
 		parallel_process_termination();
 	    }
-	    nlen = sqrt(nphi*nphi + ntheta*ntheta + nr*nr); /* correct,
-							       because
-							       interpolation
-							       might
-							       have
-							       screwed
-							       up
-							       initialization */
-	    nphi /= nlen; ntheta /= nlen;nr /= nlen;
+	    normalize_vec3d(&nr,&ntheta,&nphi);
 	    calc_cbase_at_tp_d(rout[1],rout[2],base); /* convert from
 							 spherical
 							 coordinates

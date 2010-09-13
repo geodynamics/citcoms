@@ -74,7 +74,9 @@ and
 \nu_2 = 1 - \Delta ; \eta_1 = \Gamma ; (\eta_2 = 2 (\Gamma-\Delta)); for isotropy \Delta = 0, \Gamma = 0
 
 n[3] is the cartesian direction into which the weak shear points
-(ie. routine will rotate the 3 axis into the n diretion)
+(ie. routine will rotate the 3 axis into the n direction) and will 
+normalize n, if not already normalized
+
 
 */
 void get_constitutive_ti_viscosity(double D[6][6], double delta_vis, double gamma_vis,
@@ -83,15 +85,6 @@ void get_constitutive_ti_viscosity(double D[6][6], double delta_vis, double gamm
 {
   double nlen,delta_vis2;
   int ani;
-  /* 
-     make sure things are normalized (n[3] might come from interpolation)
-  */
-  nlen = sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2]);
-  if((nlen < 0.95)||(nlen > 1.05)){
-    fprintf(stderr,"get_constitutive_ti_viscosity: error: nlen: %g\n",nlen);
-    parallel_process_termination();
-  }
-
   /* isotropic part, in units of iso_visc */
   zero_6x6(D);
   D[0][0] = 2.0;		/* xx = tt*/
@@ -104,14 +97,21 @@ void get_constitutive_ti_viscosity(double D[6][6], double delta_vis, double gamm
   ani = FALSE;
   if((fabs(delta_vis) > 3e-15) || (fabs(gamma_vis) > 3e-15)){
     ani = TRUE;
-    /* get Cartesian anisotropy correction matrix */
+    /* get Cartesian anisotropy matrix by adding anisotropic
+       components */
     D[0][0] += gamma_vis;
-    D[1][0] = D[0][1] = D[1][1] = D[0][0];
+    D[1][0] = D[0][1] = gamma_vis;
+    D[1][1] = D[0][0];
     D[2][2] += 2.*gamma_vis;
     D[4][4] -= delta_vis;
     D[5][5] = D[4][4];
+    /* 
+       the rotation routine takes care of normalization and will normalize n
+    */
     //print_6x6_mat(stderr,D);
-    rotate_ti6x6_to_director(D,n); /* rotate, can use same mat for 6x6 */
+    rotate_ti6x6_to_director(D,n); /* rotate such that the generic z
+				      preferred axis is aligned with
+				      the director */
     //print_6x6_mat(stderr,D);fprintf(stderr,"\n");
   }
   if(ani && convert_to_spherical){
@@ -147,14 +147,6 @@ void get_constitutive_orthotropic_viscosity(double D[6][6], double delta_vis,
   double nlen,delta_vis2;
   double delta[3][3][3][3];
   int ani;
-  /* 
-     make sure things are normalized (n[3] might come from interpolation)
-  */
-  nlen = sqrt(n[0]*n[0]+n[1]*n[1]+n[2]*n[2]);
-  if((nlen < 0.95)||(nlen > 1.05)){
-    fprintf(stderr,"get_constitutive_orthotropic_viscosity: error: nlen: %g\n",nlen);
-    parallel_process_termination();
-  }
   ani=FALSE;
   /* isotropic part, in units of iso_visc */
   zero_6x6(D);
@@ -168,8 +160,13 @@ void get_constitutive_orthotropic_viscosity(double D[6][6], double delta_vis,
   /* get Cartesian anisotropy matrix */
   if(fabs(delta_vis) > 3e-15){
     ani = TRUE;
-    get_orth_delta(delta,n);	/* get anisotropy tensor, \Delta of
-				   Muehlhaus et al. (2002)  */
+    get_orth_delta(delta,n);	/* 
+				   get anisotropy tensor, \Delta of
+				   Muehlhaus et al. (2002)
+
+				   this routine will normalize n, just in case
+
+				*/
     delta_vis2 = 2.0*delta_vis;
     /* s_xx = s_tt */
     D[0][0] -= delta_vis2 * delta[0][0][0][0]; /* * e_xx */
@@ -312,13 +309,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int ini
 void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
 {
   int n,m;
-  double nlen;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(n=1;n<=E->lmesh.NNO[lev];n++){
-      nlen = sqrt(n1[m][n]*n1[m][n] + n2[m][n]*n2[m][n] + n3[m][n]*n3[m][n]);
-      n1[m][n] /= nlen;
-      n2[m][n] /= nlen;
-      n3[m][n] /= nlen;
+      normalize_vec3(&(n1[m][n]),&(n2[m][n]),&(n3[m][n]));
     }
 }
 void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
@@ -326,15 +319,11 @@ void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, f
   int m,e,i,off;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
-  double nlen;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	off = (e-1)*vpts+i;
-	nlen = sqrt(n1[m][off]*n1[m][off] + n2[m][off]*n2[m][off] + n3[m][off]*n3[m][off]);
-	n1[m][off] /= nlen;
-	n2[m][off] /= nlen;
-	n3[m][off] /= nlen;
+	normalize_vec3(&(n1[m][off]),&(n2[m][off]),&( n3[m][off]));
       }
 }
 /* 
@@ -376,14 +365,29 @@ void conv_cart6x6_to_spherical(double c[6][6], double theta, double phi, double 
 rotate 6x6 D matrix with preferred axis aligned with z to the
 Cartesian director orientation, in place
 
- */
+n will be normalized, just in case
+
+*/
 void rotate_ti6x6_to_director(double D[6][6],double n[3])
 {
-  double a[3][3][3][3],b[3][3][3][3],rot[3][3];
-  rot[0][0] = rot[0][1] = 
-    rot[1][0] = rot[1][1] = 
-    rot[2][0] = rot[2][1] = 0.0;
-  rot[0][0] = n[0];  rot[1][0] = n[1];  rot[2][0] = n[2];
+  double a[3][3][3][3],b[3][3][3][3],rot[3][3],
+    hlen2,x2,y2,xy,zm1;
+  /* normalize */
+  normalize_vec3d((n+0),(n+1),(n+2));
+  /* calc aux variable */
+  x2 = n[0]*n[0];y2 = n[1]*n[1];xy = n[0]*n[1];
+  hlen2 = x2 + y2;zm1 = n[2]-1;
+  /* rotation matrix to get {0,0,1} to {x,y,z} */
+  rot[0][0] = (y2 + x2*n[2])/hlen2;
+  rot[0][1] = (xy*zm1)/hlen2;
+  rot[0][2] = n[0];
+  rot[1][0] = rot[0][1];
+  rot[1][1] = (x2 + y2*n[2])/hlen2;
+  rot[1][2] = n[1];
+  rot[2][0] = -n[0];
+  rot[2][1] = -n[1];
+  rot[2][2] =  n[2];
+  /* rotate the D matrix */
   c4fromc6(a,D);
   rot_4x4(a,rot,b);
   c6fromc4(D,b);
@@ -410,6 +414,7 @@ void get_orth_delta(double d[3][3][3][3],double n[3])
 {
   int i,j,k,l;
   double tmp;
+  normalize_vec3d((n+0),(n+1),(n+2));
   for(i=0;i<3;i++)
     for(j=0;j<3;j++)
       for(k=0;k<3;k++)
@@ -593,7 +598,22 @@ void c6fromc4(double c[6][6],double c4[3][3][3][3])
 }
 
 
-
+void normalize_vec3(float *x, float *y, float *z)
+{
+  double len = 0.;
+  len += (double)(*x) * (double)(*x);
+  len += (double)(*y) * (double)(*y);
+  len += (double)(*z) * (double)(*z);
+  len = sqrt(len);
+  *x /= len;*y /= len;*z /= len;
+}
+void normalize_vec3d(double *x, double *y, double *z)
+{
+  double len = 0.;
+  len += (*x) * (*x);len += (*y) * (*y);len += (*z) * (*z);
+  len = sqrt(len);
+  *x /= len;*y /= len;*z /= len;
+}
 
 
 #endif

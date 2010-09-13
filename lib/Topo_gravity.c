@@ -380,7 +380,7 @@ void compute_nodal_stress(struct All_variables *E,
 	if(E->viscosity.allow_anisotropic_viscosity == 1)
 	  get_constitutive_orthotropic_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],n,TRUE,rtf[1][j],rtf[2][j]);
 	else if(E->viscosity.allow_anisotropic_viscosity == 2)
-	  get_constitutive_ti_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],0,n,TRUE,rtf[1][j],rtf[2][j]);
+	  get_constitutive_ti_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],0.,n,TRUE,rtf[1][j],rtf[2][j]);
 	
 	/* deviatoric stress, pressure will be added later */
 	eps[0] = Vxyz[1][j] - dilation[j]; /* strain-rates */
