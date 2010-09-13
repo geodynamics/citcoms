@@ -24,6 +24,11 @@ void zero_4x4(double [3][3][3][3]);
 void rotate_ti6x6_to_director(double [6][6],double [3]);
 void normalize_vec3(float *, float *, float *);
 void normalize_vec3d(double *, double *, double *);
+void mat_mult_vec_3x3(double [3][3],double [3],double [3]);
+void cross_product(double [3],double [3],double [3]);
+void get_constitutive_isotropic(double [6][6]);
+void get_constitutive(double [6][6], int , int , int , double , double , 
+		      struct All_variables *);
 
 #define __CITCOM_READ_ANIVISC_HEADER__
 #endif

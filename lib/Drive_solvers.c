@@ -34,7 +34,7 @@
 double global_vdot();
 double vnorm_nonnewt();
 int need_visc_update(struct All_variables *);
-
+int need_to_iterate(struct All_variables *);
 
 
 /************************************************************/
@@ -68,11 +68,13 @@ void general_stokes_solver(struct All_variables *E)
   void remove_rigid_rot();
 
   double Udot_mag, dUdot_mag;
-  int m,count,i;
+  int m,i;
 
   double *oldU[NCS], *delta_U[NCS];
 
   const int neq = E->lmesh.neq;
+
+  E->monitor.visc_iter_count = 0; /* first solution */
 
   velocities_conform_bcs(E,E->U);
 
@@ -81,10 +83,11 @@ void general_stokes_solver(struct All_variables *E)
     get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
     construct_stiffness_B_matrix(E);
   } 
-
+  
   solve_constrained_flow_iterative(E);
 
-  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
+  
+  if (need_to_iterate(E)) {
     /* outer iterations for velocity dependent viscosity */
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
@@ -95,8 +98,8 @@ void general_stokes_solver(struct All_variables *E)
     }
 
     Udot_mag=dUdot_mag=0.0;
-    count=1;
 
+    E->monitor.visc_iter_count++;
     while (1) {    
      
 
@@ -112,19 +115,20 @@ void general_stokes_solver(struct All_variables *E)
 
       if(E->parallel.me==0){
 	fprintf(stderr,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
-		dUdot_mag,Udot_mag,count);
+		dUdot_mag,Udot_mag,E->monitor.visc_iter_count);
 	fprintf(E->fp,"Stress dep. visc./plast.: DUdot = %.4e (%.4e) for iteration %d\n",
-		dUdot_mag,Udot_mag,count);
+		dUdot_mag,Udot_mag,E->monitor.visc_iter_count);
 	fflush(E->fp);
       }
-      if ((count>50) || (dUdot_mag < E->viscosity.sdepv_misfit))
+      if ((E->monitor.visc_iter_count > 50) || 
+	  (dUdot_mag < E->viscosity.sdepv_misfit))
 	break;
       
       get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
       construct_stiffness_B_matrix(E);
       solve_constrained_flow_iterative(E);
       
-      count++;
+      E->monitor.visc_iter_count++;
 
     } /*end while*/
 
@@ -133,7 +137,7 @@ void general_stokes_solver(struct All_variables *E)
       free((void *) delta_U[m]);
     }
 
-  } /*end if SDEPV or PDEPV */
+  } /*end if we need iterations */
 
   /* remove the rigid rotation component from the velocity solution */
   if((E->sphere.caps == 12) &&
@@ -167,7 +171,23 @@ int need_visc_update(struct All_variables *E)
     }
   }
 }
-
+int need_to_iterate(struct All_variables *E){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+  /* anisotropic viscosity */
+  if(E->viscosity.allow_anisotropic_viscosity){
+    if((E->monitor.solution_cycles == 0) && 
+       E->viscosity.anivisc_start_from_iso) /* first step will be
+					       solved isotropically at
+					       first  */
+      return TRUE;
+    else
+      return (E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE);
+  }
+#else
+  /* regular operation */
+  return ((E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE));
+#endif
+}
 void general_stokes_solver_pseudo_surf(struct All_variables *E)
 {
   void solve_constrained_flow_iterative();

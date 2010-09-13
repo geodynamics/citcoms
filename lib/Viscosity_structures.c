@@ -86,6 +86,11 @@ void viscosity_system_input(struct All_variables *E)
 									 <0: assign to layer = anivisc_layer
 								      */
 
+      input_boolean("anivisc_start_from_iso",
+		    &(E->viscosity.anivisc_start_from_iso),"on",m); /* start
+								       from
+								       isotropic
+								       solution? */
     }
 
 #endif

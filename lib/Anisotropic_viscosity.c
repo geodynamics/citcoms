@@ -51,6 +51,37 @@ void calc_cbase_at_tp_d(double , double , double *);
 #define CITCOM_DELTA(i,j) ((i==j)?(1.0):(0.0))
 
 
+void get_constitutive(double D[6][6], int lev, int m, 
+		      int off, double theta, double phi, 
+		      struct All_variables *E)
+{
+  double n[3];
+  const int convert_to_spherical = TRUE; 
+  if(E->viscosity.allow_anisotropic_viscosity){
+    if((E->monitor.solution_cycles == 0)&&
+       (E->viscosity.anivisc_start_from_iso)&&(E->monitor.visc_iter_count == 0))
+      /* first iteration of "stress-dependent" loop for first timestep */
+      get_constitutive_isotropic(D);
+    else{      
+      /* allow for a possibly anisotropic viscosity */
+      n[0] =  E->EVIn1[lev][m][off];
+      n[1] =  E->EVIn2[lev][m][off];
+      n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
+      if(E->viscosity.allow_anisotropic_viscosity == 1){ /* orthotropic */
+	get_constitutive_orthotropic_viscosity(D,E->EVI2[lev][m][off],
+					       n,convert_to_spherical,theta,phi); 
+      }else if(E->viscosity.allow_anisotropic_viscosity == 2){
+	/* transversely isotropic */
+	get_constitutive_ti_viscosity(D,E->EVI2[lev][m][off],0.,
+				      n,convert_to_spherical,theta,phi); 
+      }
+    }
+  }else{
+    get_constitutive_isotropic(D);
+  }
+}
+
+
 /* 
 
 transversely isotropic viscosity following Han and Wahr
@@ -86,14 +117,7 @@ void get_constitutive_ti_viscosity(double D[6][6], double delta_vis, double gamm
   double nlen,delta_vis2;
   int ani;
   /* isotropic part, in units of iso_visc */
-  zero_6x6(D);
-  D[0][0] = 2.0;		/* xx = tt*/
-  D[1][1] = 2.0;		/* yy = pp */
-  D[2][2] = 2.0;		/* zz = rr */
-  D[3][3] = 1.0;		/* xy = tp */
-  D[4][4] = 1.0;		/* xz = rt */
-  D[5][5] = 1.0;		/* yz = rp */
-
+  get_constitutive_isotropic(D);
   ani = FALSE;
   if((fabs(delta_vis) > 3e-15) || (fabs(gamma_vis) > 3e-15)){
     ani = TRUE;
@@ -148,15 +172,8 @@ void get_constitutive_orthotropic_viscosity(double D[6][6], double delta_vis,
   double delta[3][3][3][3];
   int ani;
   ani=FALSE;
-  /* isotropic part, in units of iso_visc */
-  zero_6x6(D);
-  D[0][0] = 2.0;		/* xx = tt*/
-  D[1][1] = 2.0;		/* yy = pp */
-  D[2][2] = 2.0;		/* zz = rr */
-  D[3][3] = 1.0;		/* xy = tp */
-  D[4][4] = 1.0;		/* xz = rt */
-  D[5][5] = 1.0;		/* yz = rp */
-
+  /* start with isotropic */
+  get_constitutive_isotropic(D);
   /* get Cartesian anisotropy matrix */
   if(fabs(delta_vis) > 3e-15){
     ani = TRUE;
@@ -217,7 +234,17 @@ void get_constitutive_orthotropic_viscosity(double D[6][6], double delta_vis,
     //print_6x6_mat(stderr,D);fprintf(stderr,"\n");
   }
 }
-
+void get_constitutive_isotropic(double D[6][6])
+{
+  /* isotropic part, in units of iso_visc */
+  zero_6x6(D);
+  D[0][0] = 2.0;		/* xx = tt*/
+  D[1][1] = 2.0;		/* yy = pp */
+  D[2][2] = 2.0;		/* zz = rr */
+  D[3][3] = 1.0;		/* xy = tp */
+  D[4][4] = 1.0;		/* xz = rt */
+  D[5][5] = 1.0;		/* yz = rp */
+}
 void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int init_stage)
 {
   int i,j,k,l,off,nel;
@@ -287,7 +314,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int ini
 	fprintf(stderr,"set_anisotropic_viscosity_at_element_level: anisotropic_init mode 2 requires USE_GGRD compilation\n");
 	parallel_process_termination();
 #endif
-	ggrd_read_anivisc_from_file(E,1);
+	ggrd_read_anivisc_from_file(E,(E->sphere.caps == 12)?(TRUE):(FALSE));
 	break;
       default:
 	fprintf(stderr,"set_anisotropic_viscosity_at_element_level: anisotropic_init %i undefined\n",
@@ -352,7 +379,8 @@ c and p cannot be the same matrix
    c and p can be the same amtrix
 
 */
-void conv_cart6x6_to_spherical(double c[6][6], double theta, double phi, double p[6][6])
+void conv_cart6x6_to_spherical(double c[6][6], 
+			       double theta, double phi, double p[6][6])
 {
   double c4[3][3][3][3],p4[3][3][3][3],rot[3][3];
   get_citcom_spherical_rot(theta,phi,rot);
@@ -370,27 +398,31 @@ n will be normalized, just in case
 */
 void rotate_ti6x6_to_director(double D[6][6],double n[3])
 {
-  double a[3][3][3][3],b[3][3][3][3],rot[3][3],
+  double a[3][3][3][3],b[3][3][3][3],rot[3][3],test[3],testr[3],prod[3],
     hlen2,x2,y2,xy,zm1;
   /* normalize */
   normalize_vec3d((n+0),(n+1),(n+2));
   /* calc aux variable */
   x2 = n[0]*n[0];y2 = n[1]*n[1];xy = n[0]*n[1];
   hlen2 = x2 + y2;zm1 = n[2]-1;
-  /* rotation matrix to get {0,0,1} to {x,y,z} */
-  rot[0][0] = (y2 + x2*n[2])/hlen2;
-  rot[0][1] = (xy*zm1)/hlen2;
-  rot[0][2] = n[0];
-  rot[1][0] = rot[0][1];
-  rot[1][1] = (x2 + y2*n[2])/hlen2;
-  rot[1][2] = n[1];
-  rot[2][0] = -n[0];
-  rot[2][1] = -n[1];
-  rot[2][2] =  n[2];
-  /* rotate the D matrix */
-  c4fromc6(a,D);
-  rot_4x4(a,rot,b);
-  c6fromc4(D,b);
+  if(hlen2 > 3e-15){
+    /* rotation matrix to get {0,0,1} to {x,y,z} */
+    rot[0][0] = (y2 + x2*n[2])/hlen2;
+    rot[0][1] = (xy*zm1)/hlen2;
+    rot[0][2] = n[0];
+    rot[1][0] = rot[0][1];
+    rot[1][1] = (x2 + y2*n[2])/hlen2;
+    rot[1][2] = n[1];
+    rot[2][0] = -n[0];
+    rot[2][1] = -n[1];
+    rot[2][2] =  n[2];
+
+    /* rotate the D matrix */
+    c4fromc6(a,D);
+    rot_4x4(a,rot,b);
+    c6fromc4(D,b);
+  }			/* already oriented right */
+    
 }
 
 void get_citcom_spherical_rot(double theta, double phi, double rot[3][3]){
@@ -597,7 +629,15 @@ void c6fromc4(double c[6][6],double c4[3][3][3][3])
       c[j][i] = c[i][j];
 }
 
-
+void mat_mult_vec_3x3(double a[3][3],double b[3],double c[3])
+{
+  int i,j;
+  for(i=0;i<3;i++){
+    c[i]=0;
+    for(j=0;j<3;j++)
+      c[i] += a[i][j] * b[j];
+  }
+}
 void normalize_vec3(float *x, float *y, float *z)
 {
   double len = 0.;
@@ -614,6 +654,11 @@ void normalize_vec3d(double *x, double *y, double *z)
   len = sqrt(len);
   *x /= len;*y /= len;*z /= len;
 }
-
+void cross_product(double a[3],double b[3],double c[3])
+{
+  c[0]=a[1]*b[2]-a[2]*b[1];
+  c[1]=a[2]*b[0]-a[0]*b[2];
+  c[2]=a[0]*b[1]-a[1]*b[0];
+}
 
 #endif

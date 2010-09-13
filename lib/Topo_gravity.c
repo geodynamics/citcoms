@@ -369,18 +369,12 @@ void compute_nodal_stress(struct All_variables *E,
     if(E->viscosity.allow_anisotropic_viscosity){ /* general anisotropic */
       for(j=1;j <= vpts;j++)   {
 	l1 = (e-1)*vpts+j;
-	n[0] = E->EVIn1[E->mesh.levmax][m][l1];	/* Cartesian directors */
-	n[1] = E->EVIn2[E->mesh.levmax][m][l1];
-	n[2] = E->EVIn3[E->mesh.levmax][m][l1];
 	/* 
 	   get viscosity matrix and convert to spherical system in
 	   CitcomS convection
 
 	*/
-	if(E->viscosity.allow_anisotropic_viscosity == 1)
-	  get_constitutive_orthotropic_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],n,TRUE,rtf[1][j],rtf[2][j]);
-	else if(E->viscosity.allow_anisotropic_viscosity == 2)
-	  get_constitutive_ti_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],0.,n,TRUE,rtf[1][j],rtf[2][j]);
+	get_constitutive(D,E->mesh.levmax,m,l1,rtf[1][j],rtf[2][j],E);
 	
 	/* deviatoric stress, pressure will be added later */
 	eps[0] = Vxyz[1][j] - dilation[j]; /* strain-rates */

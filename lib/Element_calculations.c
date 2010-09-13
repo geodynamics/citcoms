@@ -303,7 +303,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const int dims=E->mesh.nsd;
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-    double D[VPOINTS3D+1][6][6],n[3],btmp[6];
+    double D[VPOINTS3D+1][6][6],btmp[6];
     int l1,l2;
 #endif
 
@@ -320,16 +320,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
       /* allow for a possibly anisotropic viscosity */
-
-      if(E->viscosity.allow_anisotropic_viscosity == 1){ /* orthotropic */
-	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
-	/* get the viscosity factor matrix and convert to CitcomS spherical */
-	get_constitutive_orthotropic_viscosity(D[k],E->EVI2[lev][m][off],n,TRUE,rtf[1][k],rtf[2][k]); 
-      }else if(E->viscosity.allow_anisotropic_viscosity == 2){
-	/* transversely isotropic */
-	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
-	get_constitutive_ti_viscosity(D[k],E->EVI2[lev][m][off],0.,n,TRUE,rtf[1][k],rtf[2][k]); 
-      }
+      get_constitutive(D[k],lev,m,off,rtf[1][k],rtf[2][k],E);
 #endif
     }
     

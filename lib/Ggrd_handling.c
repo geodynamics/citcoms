@@ -1368,11 +1368,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
       }
     }
   }
-  /* 
-     
-  rest
-
-  */
   if(is_global)		/* decide on GMT flag */
     sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
   else

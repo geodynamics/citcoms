@@ -37,8 +37,9 @@ struct VISC_OPT {
 
   int allow_anisotropic_viscosity,anisotropic_viscosity_init;
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-    int anisotropic_init;	/* 0: isotropic, 1: random, 2: from file */
-    char anisotropic_init_dir[1000];
+  int anivisc_start_from_iso; /* start from isotropic solution? */
+  int anisotropic_init;	/* 0: isotropic, 1: random, 2: from file */
+  char anisotropic_init_dir[1000];
   int anivisc_layer;		/* layer to assign anisotropic viscosity to for mode 2 */
 #endif
 

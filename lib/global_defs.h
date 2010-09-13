@@ -378,6 +378,8 @@ struct MONITOR {
     int solution_cycles;
     int solution_cycles_init;
 
+    int visc_iter_count;
+
     int stop_topo_loop;
     int topo_loop;
 
