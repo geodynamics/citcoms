@@ -46,7 +46,7 @@ void assemble_div_u(struct All_variables *,
 static void get_elt_tr(struct All_variables *, int , int , double [24], int );
 static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 #endif
 
@@ -302,7 +302,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     const int ends = ENODES3D;
     const int dims=E->mesh.nsd;
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     double D[VPOINTS3D+1][6][6],n[3],btmp[6];
     int l1,l2;
 #endif
@@ -318,11 +318,17 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     for(k=1;k<=vpts;k++) {
       off = (el-1)*vpts+k;
       W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
-      if(E->viscosity.allow_orthotropic_viscosity){/* allow for a possibly anisotropic viscosity */
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+      /* allow for a possibly anisotropic viscosity */
+
+      if(E->viscosity.allow_anisotropic_viscosity == 1){ /* orthotropic */
 	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
 	/* get the viscosity factor matrix and convert to CitcomS spherical */
 	get_constitutive_orthotropic_viscosity(D[k],E->EVI2[lev][m][off],n,TRUE,rtf[1][k],rtf[2][k]); 
+      }else if(E->viscosity.allow_anisotropic_viscosity == 2){
+	/* transversely isotropic */
+	n[0] =  E->EVIn1[lev][m][off];n[1] =  E->EVIn2[lev][m][off];n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
+	get_constitutive_ti_viscosity(D[k],E->EVI2[lev][m][off],0,n,TRUE,rtf[1][k],rtf[2][k]); 
       }
 #endif
     }
@@ -337,8 +343,8 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
 	  bdbmu[2][1]=bdbmu[2][2]=bdbmu[2][3]=
 	  bdbmu[3][1]=bdbmu[3][2]=bdbmu[3][3]=0.0;
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
-	if(E->viscosity.allow_orthotropic_viscosity){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+	if(E->viscosity.allow_anisotropic_viscosity){
 	  for(i=1;i<=dims;i++)
 	    for(j=1;j<=dims;j++)
 	      for(k=1;k<=vpts;k++){ /*  */
@@ -377,7 +383,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
 		  bdbmu[i][j] -= W[k] * two_thirds *
 		    ( ba[a][k][i][1] + ba[a][k][i][2] + ba[a][k][i][3] ) *
 		    ( ba[b][k][j][1] + ba[b][k][j][2] + ba[b][k][j][3] );
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 	}
 #endif
 	

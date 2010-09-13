@@ -200,7 +200,8 @@ if test "$want_ggrd" != no; then
     if test -n "$GMTHOME"; then
         LDFLAGS="$LDFLAGS -L$GMTHOME/lib"
     fi
-    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [], [AC_MSG_ERROR([GMT library not found, required by ggrd. Try setting environment variable GMTHOME.])])
+    AC_SEARCH_LIBS([GMT_grd_init], [gmt], [], [AC_MSG_ERROR([GMT library not found, required by ggrd. Try setting environment variable GMTHOME.])], [-lm])
+
 
     # Checking HC ggrd library
     if test -n "$HC_HOME"; then
@@ -210,7 +211,7 @@ if test "$want_ggrd" != no; then
             LDFLAGS="$LDFLAGS -L$HC_HOME/objects"
         fi
     fi
-    AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found. Try setting environment variable HC_HOME.])])
+    AC_SEARCH_LIBS([ggrd_init_master], [ggrd], [], [AC_MSG_ERROR([HC ggrd library not found. Try setting environment variable HC_HOME.])],[-lm])
 fi
 
 AC_SEARCH_LIBS([sqrt], [m])

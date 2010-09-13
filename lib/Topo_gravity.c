@@ -48,7 +48,7 @@ void compute_nodal_stress(struct All_variables *,
                           float** , float** , float** ,
                           float** , float** );
 void stress_conform_bcs(struct All_variables *);
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 #endif
 
@@ -229,7 +229,7 @@ void compute_nodal_stress(struct All_variables *E,
 
   double pre[9],tww[9],rtf[4][9];
   double velo_scaling, stress_scaling, mass_fac;
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   double D[6][6],n[3],eps[6],str[6];
 #endif
   struct Shape_function_dA *dOmega;
@@ -365,8 +365,8 @@ void compute_nodal_stress(struct All_variables *E,
           for(j=1;j<=vpts;j++)
               dilation[j] = (Vxyz[1][j] + Vxyz[2][j] + Vxyz[3][j]) / 3.0;
       }
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
-    if(E->viscosity.allow_orthotropic_viscosity){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+    if(E->viscosity.allow_anisotropic_viscosity){ /* general anisotropic */
       for(j=1;j <= vpts;j++)   {
 	l1 = (e-1)*vpts+j;
 	n[0] = E->EVIn1[E->mesh.levmax][m][l1];	/* Cartesian directors */
@@ -377,7 +377,10 @@ void compute_nodal_stress(struct All_variables *E,
 	   CitcomS convection
 
 	*/
-	get_constitutive_orthotropic_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],n,TRUE,rtf[1][j],rtf[2][j]);
+	if(E->viscosity.allow_anisotropic_viscosity == 1)
+	  get_constitutive_orthotropic_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],n,TRUE,rtf[1][j],rtf[2][j]);
+	else if(E->viscosity.allow_anisotropic_viscosity == 2)
+	  get_constitutive_ti_viscosity(D,E->EVI2[E->mesh.levmax][m][l1],0,n,TRUE,rtf[1][j],rtf[2][j]);
 	
 	/* deviatoric stress, pressure will be added later */
 	eps[0] = Vxyz[1][j] - dilation[j]; /* strain-rates */
@@ -413,7 +416,7 @@ void compute_nodal_stress(struct All_variables *E,
           div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
           vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
       }
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     }
 #endif
       /* normalize by volume */

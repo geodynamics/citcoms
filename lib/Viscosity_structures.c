@@ -48,7 +48,7 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
 void parallel_process_termination();
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 #endif
 
@@ -65,18 +65,18 @@ void viscosity_system_input(struct All_variables *E)
     input_string("visc_layer_file", E->viscosity.layer_file,"visc.dat",m);
 
 
-    input_boolean("allow_orthotropic_viscosity",&(E->viscosity.allow_orthotropic_viscosity),"off",m);
-#ifndef CITCOM_ALLOW_ORTHOTROPIC_VISC 
-    if(E->viscosity.allow_orthotropic_viscosity){ /* error */
-      fprintf(stderr,"error: allow_orthotropic_viscosity is set, but code not compiled with CITCOM_ALLOW_ORTHOTROPIC_VISC\n");
+    input_int("allow_anisotropic_viscosity",&(E->viscosity.allow_anisotropic_viscosity),"0",m);
+#ifndef CITCOM_ALLOW_ANISOTROPIC_VISC 
+    if(E->viscosity.allow_anisotropic_viscosity){ /* error */
+      fprintf(stderr,"error: allow_anisotropic_viscosity is not zero, but code not compiled with CITCOM_ALLOW_ANISOTROPIC_VISC\n");
       parallel_process_termination();
     }
 #else
-    if(E->viscosity.allow_orthotropic_viscosity){ /* read additional
+    if(E->viscosity.allow_anisotropic_viscosity){ /* read additional
 						     parameters for
 						     anisotropic
 						     viscosity */
-      input_int("anisotropic_init",&(E->viscosity.anisotropic_init),"0",m);
+      input_int("anisotropic_init",&(E->viscosity.anisotropic_init),"0",m); /* 0: isotropic 1: random 2: read in director and log10(eta_s/eta) */
       input_string("anisotropic_init_dir",(E->viscosity.anisotropic_init_dir),"",m); /* directory
 											 for
 											 ggrd
@@ -275,9 +275,9 @@ void get_system_viscosity(E,propogate,evisc,visc)
     double *TG;
 
     const int vpts = vpoints[E->mesh.nsd];
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
-    if(E->viscosity.allow_orthotropic_viscosity){
-      if(!E->viscosity.orthotropic_viscosity_init)
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+    if(E->viscosity.allow_anisotropic_viscosity){
+      if(!E->viscosity.anisotropic_viscosity_init)
 	set_anisotropic_viscosity_at_element_level(E,1);
       else
 	set_anisotropic_viscosity_at_element_level(E,0);
@@ -345,8 +345,8 @@ void get_system_viscosity(E,propogate,evisc,visc)
       visc_from_nodes_to_gint(E,visc,evisc,E->mesh.levmax);
     }
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC /* allow for anisotropy */
-    if(E->viscosity.allow_orthotropic_viscosity){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC /* allow for anisotropy */
+    if(E->viscosity.allow_anisotropic_viscosity){
       visc_from_gint_to_nodes(E,E->EVI2[E->mesh.levmax], E->VI2[E->mesh.levmax],E->mesh.levmax);
       visc_from_gint_to_nodes(E,E->EVIn1[E->mesh.levmax], E->VIn1[E->mesh.levmax],E->mesh.levmax);
       visc_from_gint_to_nodes(E,E->EVIn2[E->mesh.levmax], E->VIn2[E->mesh.levmax],E->mesh.levmax);
@@ -354,6 +354,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
       normalize_director_at_nodes(E,E->VIn1[E->mesh.levmax],E->VIn2[E->mesh.levmax],E->VIn3[E->mesh.levmax],E->mesh.levmax);
       
       if(E->viscosity.SMOOTH){ 
+	if(E->parallel.me == 0)fprintf(stderr,"WARNING: smoothing anisotropic viscosity, perhaps not a good idea\n");
 	visc_from_nodes_to_gint(E,E->VI2[E->mesh.levmax],E->EVI2[E->mesh.levmax],E->mesh.levmax);
 	visc_from_nodes_to_gint(E,E->VIn1[E->mesh.levmax],E->EVIn1[E->mesh.levmax],E->mesh.levmax);
 	visc_from_nodes_to_gint(E,E->VIn2[E->mesh.levmax],E->EVIn2[E->mesh.levmax],E->mesh.levmax);

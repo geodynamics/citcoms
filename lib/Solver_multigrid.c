@@ -253,8 +253,8 @@ void project_viscosity(E)
     viscD[m]=(float *)malloc((1+vpts*E->lmesh.NEL[lv-1])*sizeof(float));
     }
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC /* allow for anisotropy */
-  if(E->viscosity.allow_orthotropic_viscosity){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC /* allow for anisotropy */
+  if(E->viscosity.allow_anisotropic_viscosity){
     for(lv=E->mesh.levmax;lv>E->mesh.levmin;lv--)     {
       sl_minus = lv -1;
       if (E->viscosity.smooth_cycles==1)  {
@@ -339,7 +339,7 @@ void project_viscosity(E)
             }
 */
     }
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   }
 #endif
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {

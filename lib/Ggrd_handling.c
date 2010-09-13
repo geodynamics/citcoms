@@ -44,9 +44,10 @@ gzFile *gzdir_output_open(char *,char *);
 #include "composition_related.h"
 #include "element_definitions.h"
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 #endif
+
 #ifdef USE_GGRD
 
 #include "hc.h"			/* ggrd and hc packages */
@@ -1314,14 +1315,14 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 }
 
 
-
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 /*
 
 
 read in anisotropic viscosity from a directory which holds
 
 
-vis2.grd for the viscosity factors  (1 - eta_S/eta)
+vis2.grd for the viscosity factors, read in log10(eta_S/eta)
 
 nr.grd, nt.grd, np.grd for the directors
 
@@ -1334,7 +1335,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   int m,el,i,j,k,l,inode,i1,i2,elxlz,elxlylz,ind,nel;
   int llayer,nox,noy,noz,level,lselect,idim,elx,ely,elz;
   char gmt_string[10],char_dummy;
-  double vis2,ntheta,nphi,nr,rout[3],xloc[4],nlen;
+  double vis2,log_vis,ntheta,nphi,nr,rout[3],xloc[4],nlen;
   double cvec[3],base[9];
   char tfilename[1000];
   static ggrd_boolean shift_to_pos_lon = FALSE;
@@ -1350,12 +1351,9 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   elxlz = elx * elz;
   elxlylz = elxlz * ely;
 
-#ifndef CITCOM_ALLOW_ORTHOTROPIC_VISC
-  fprintf(stderr,"ggrd_read_anivisc_from_file: error, need to compile with CITCOM_ALLOW_ORTHOTROPIC_VISC\n");
-  parallel_process_termination();
-#endif
-  if(!E->viscosity.allow_orthotropic_viscosity)
-    myerror(E,"ggrd_read_anivisc_from_file: called, but allow_orthotropic_viscosity is FALSE?!");
+
+  if(E->viscosity.allow_anisotropic_viscosity == 0)
+    myerror(E,"ggrd_read_anivisc_from_file: called, but allow_anisotropic_viscosity is FALSE?!");
   
   /* isotropic default */
   for(i=E->mesh.gridmin;i <= E->mesh.gridmax;i++){
@@ -1468,7 +1466,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 
 	    /* vis2 */
 	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],
-					     vis2_grd,&vis2,FALSE,shift_to_pos_lon)){
+					     vis2_grd,&log_vis,FALSE,shift_to_pos_lon)){
 		fprintf(stderr,"ggrd_read_anivisc_from_file: interpolation error at lon: %g lat: %g\n",
 			rout[2]*180/M_PI,90-rout[1]*180/M_PI);
 		parallel_process_termination();
@@ -1509,6 +1507,8 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 							 to
 							 Cartesian */
 	    convert_pvec_to_cvec_d(nr,ntheta,nphi,base,cvec);
+	    /* transform */
+	    vis2 = 1.0 - pow(10.0,log_vis);
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      ind = (el-1)*vpts + l;
 	      E->EVI2[E->mesh.gridmax][m][ind]  =   vis2;
@@ -1532,6 +1532,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 }
 
 
-#endif
+#endif	/* for ANISOTROPIC */
 
 
+#endif	/* for GGRD */

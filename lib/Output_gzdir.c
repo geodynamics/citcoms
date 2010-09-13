@@ -117,7 +117,7 @@ void *safe_malloc (size_t );
 int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 void gzdir_output_avisc(struct All_variables *, int);
 #endif
@@ -167,7 +167,7 @@ void gzdir_output(struct All_variables *E, int out_cycles)
 					else new VTK output won't
 					work */
   gzdir_output_visc(E, out_cycles);
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   gzdir_output_avisc(E, out_cycles);
 #endif
 
@@ -760,6 +760,8 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
   return;
 }
 
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+
 /*
    anisotropic viscosity
 */
@@ -775,7 +777,7 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
   MPI_Status mpi_stat;
   int mpi_rc;
   int mpi_inmsg, mpi_success_message = 1;
-  if(E->viscosity.allow_orthotropic_viscosity){
+  if(E->viscosity.allow_anisotropic_viscosity){
     
     if(E->output.gzdir.vtk_io < 2){
       snprintf(output_file,255,
@@ -820,7 +822,7 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
   return;
 }
 
-
+#endif
 
 void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 {

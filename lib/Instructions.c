@@ -1055,8 +1055,9 @@ void allocate_common_vars(E)
 
     }         /* end for cap and i & j  */
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
- if(E->viscosity.allow_orthotropic_viscosity){
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+ if(E->viscosity.allow_anisotropic_viscosity){ /* any anisotropic
+						  viscosity */
    for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
      for (j=1;j<=E->sphere.caps_per_proc;j++)  {
        nel  = E->lmesh.NEL[i];
@@ -1078,9 +1079,11 @@ void allocate_common_vars(E)
 	 parallel_process_termination();
        }
      }
-   E->viscosity.orthotropic_viscosity_init = FALSE;
+   E->viscosity.anisotropic_viscosity_init = FALSE;
    if(E->parallel.me == 0)
-     fprintf(stderr,"allocated for anisotropic viscosity levmax %i\n",E->mesh.gridmax);
+     fprintf(stderr,"allocated for anisotropic viscosity (%s) levmax %i\n",
+	     (E->viscosity.allow_anisotropic_viscosity == 1)?("orthotropic"):("transversely isotropic"),
+	     E->mesh.gridmax);
  }
 #endif
 

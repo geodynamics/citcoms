@@ -58,7 +58,7 @@ extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**,
                          float**, float**, int);
 extern void get_CBF_topo(struct All_variables *, float**, float**);
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
 void output_avisc(struct All_variables *, int);
 #endif
@@ -112,7 +112,7 @@ void output(struct All_variables *E, int cycles)
 
   output_velo(E, cycles);
   output_visc(E, cycles);
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   output_avisc(E, cycles);
 #endif
 
@@ -322,14 +322,14 @@ void output_visc(struct All_variables *E, int cycles)
   return;
 }
 
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 void output_avisc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
   FILE *fp1;
   int lev = E->mesh.levmax;
-  if(E->viscosity.allow_orthotropic_viscosity){
+  if(E->viscosity.allow_anisotropic_viscosity){
     sprintf(output_file,"%s.avisc.%d.%d", E->control.data_file,
 	    E->parallel.me, cycles);
     fp1 = output_open(output_file, "w");

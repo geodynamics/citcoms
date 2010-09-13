@@ -35,8 +35,8 @@ struct VISC_OPT {
     int SMOOTH;
     int smooth_cycles;
 
-  int allow_orthotropic_viscosity,orthotropic_viscosity_init;
-#ifdef CITCOM_ALLOW_ORTHOTROPIC_VISC
+  int allow_anisotropic_viscosity,anisotropic_viscosity_init;
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     int anisotropic_init;	/* 0: isotropic, 1: random, 2: from file */
     char anisotropic_init_dir[1000];
   int anivisc_layer;		/* layer to assign anisotropic viscosity to for mode 2 */
