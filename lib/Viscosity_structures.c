@@ -148,8 +148,10 @@ void viscosity_system_input(struct All_variables *E)
 
       input_float("pdepv_offset",&(E->viscosity.pdepv_offset),"0.0",m);
     }
-    if(E->viscosity.PDEPV || E->viscosity.SDEPV)
-      input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);
+    input_float("sdepv_misfit",&(E->viscosity.sdepv_misfit),"0.001",m);	/* there should be no harm in having 
+									   this parameter read in regardless of 
+									   rheology (activated it for anisotropic viscosity)
+									*/
 
 
     input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
