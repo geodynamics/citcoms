@@ -130,6 +130,7 @@ double multi_grid(struct All_variables *, double **, double **, double, int);
 double conj_grad(struct All_variables *, double **, double **, double, int *, int);
 void element_gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
 void gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
+double cofactor(double [4][4], int, int, int);
 
 double determinant(double [4][4], int);
 long double lg_pow(long double, int);
