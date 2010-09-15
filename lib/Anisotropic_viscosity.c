@@ -30,7 +30,7 @@
 
 /* 
 
-   anisotropic viscosity following Muehlhaus, Moresi, Hobbs and Dufour
+   orthotropic viscosity following Muehlhaus, Moresi, Hobbs and Dufour
    (PAGEOPH, 159, 2311, 2002)
 
    tranverse isotropy following Han and Wahr (PEPI, 102, 33, 1997)
@@ -53,10 +53,10 @@ void calc_cbase_at_tp_d(double , double , double *);
 
 void get_constitutive(double D[6][6], int lev, int m, 
 		      int off, double theta, double phi, 
+		      int convert_to_spherical,
 		      struct All_variables *E)
 {
   double n[3];
-  const int convert_to_spherical = TRUE; 
   if(E->viscosity.allow_anisotropic_viscosity){
     if((E->monitor.solution_cycles == 0)&&
        (E->viscosity.anivisc_start_from_iso)&&(E->monitor.visc_iter_count == 0))

@@ -320,7 +320,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
       /* allow for a possibly anisotropic viscosity */
-      get_constitutive(D[k],lev,m,off,rtf[1][k],rtf[2][k],E);
+      get_constitutive(D[k],lev,m,off,rtf[1][k],rtf[2][k],TRUE,E);
 #endif
     }
     

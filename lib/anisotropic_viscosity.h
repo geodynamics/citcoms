@@ -28,7 +28,7 @@ void mat_mult_vec_3x3(double [3][3],double [3],double [3]);
 void cross_product(double [3],double [3],double [3]);
 void get_constitutive_isotropic(double [6][6]);
 void get_constitutive(double [6][6], int , int , int , double , double , 
-		      struct All_variables *);
+		      int,struct All_variables *);
 
 #define __CITCOM_READ_ANIVISC_HEADER__
 #endif

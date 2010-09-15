@@ -818,27 +818,27 @@ struct All_variables {
     struct Shape_function1_dx Lx;
     struct Shape_function_dx NMx;
 
-    void (* build_forcing_term)(void*);
-    void (* iterative_solver)(void*);
-    void (* next_buoyancy_field)(void*);
-    void (* next_buoyancy_field_init)(void*);
-    void (* obtain_gravity)(void*);
-    void (* problem_settings)(void*);
-    void (* problem_derived_values)(void*);
-    void (* problem_allocate_vars)(void*);
-    void (* problem_boundary_conds)(void*);
-    void (* problem_update_node_positions)(void*);
-    void (* problem_initial_fields)(void*);
-    void (* problem_tracer_setup)(void*);
-    void (* problem_tracer_output)(void*, int);
-    void (* problem_update_bcs)(void*);
-    void (* special_process_new_velocity)(void*);
-    void (* special_process_new_buoyancy)(void*);
-    void (* solve_stokes_problem)(void*);
-    void (* solver_allocate_vars)(void*);
-    void (* transform)(void*);
+    void (* build_forcing_term)(struct All_variables *);
+    void (* iterative_solver)(struct All_variables *);
+    void (* next_buoyancy_field)(struct All_variables *);
+    void (* next_buoyancy_field_init)(struct All_variables *);
+    void (* obtain_gravity)(struct All_variables *);
+    void (* problem_settings)(struct All_variables *);
+    void (* problem_derived_values)(struct All_variables *);
+    void (* problem_allocate_vars)(struct All_variables *);
+    void (* problem_boundary_conds)(struct All_variables *);
+    void (* problem_update_node_positions)(struct All_variables *);
+    void (* problem_initial_fields)(struct All_variables *);
+    void (* problem_tracer_setup)(struct All_variables *);
+    void (* problem_tracer_output)(struct All_variables *, int);
+    void (* problem_update_bcs)(struct All_variables *);
+    void (* spec68ial_process_new_velocity)(struct All_variables *);
+    void (* special_process_new_buoyancy)(struct All_variables *);
+    void (* solve_stokes_problem)(struct All_variables *);
+    void (* solver_allocate_vars)(struct All_variables *);
+    void (* transform)(struct All_variables *);
 
-    float (* node_space_function[3])(void*);
+    float (* node_space_function[3])(struct All_variables *);
 
     /* function pointer for choosing between various output routines */
     void (* problem_output)(struct All_variables *, int);
@@ -846,7 +846,7 @@ struct All_variables {
   /* the following function pointers are for exchanger */
   void (* exchange_node_d)(struct All_variables *, double**, int);
   void (* exchange_node_f)(struct All_variables *, float**, int);
-  void (* temperatures_conform_bcs)(void*);
+  void (* temperatures_conform_bcs)(struct All_variables *);
 
 };
 
@@ -856,5 +856,5 @@ struct All_variables {
 
 
 
-
+#include "prototypes.h"
 #endif

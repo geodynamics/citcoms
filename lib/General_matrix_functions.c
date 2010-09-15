@@ -757,38 +757,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 }
 #endif /* !USE_CUDA */
 
-
-double cofactor(A,i,j,n)
-     double A[4][4];
-     int i,j,n;
-
-{ int k,l,p,q;
-  double determinant();
-
-  double B[4][4]; /* because of recursive behaviour of det/cofac, need to use
-			       new copy of B at each 'n' level of this routine */
-
-  if (n>3) printf("Error, no cofactors for matrix more than 3x3\n");
-
-  p=q=1;
-
-  for(k=1;k<=n;k++)    {
-     if(k==i) continue;
-     for(l=1;l<=n;l++)      {
-	   if (l==j) continue;
-           B[p][q]=A[k][l];
-	   q++ ;
-	   }
-     q=1;p++;
-     }
-
-
-  return(epsilon[i][j]*determinant(B,n-1));
-
-
-}
-
-
 /* Fast (conditional) determinant for 3x3 or 2x2 ... otherwise calls general routine */
 
 double determinant(A,n)
@@ -812,27 +780,6 @@ double determinant(A,n)
       }
 }
 
-
-/* recursive function to determine matrix determinant */
-
-double gen_determinant(A,n)
-     double **A;
-     int n;
-
-{ double det;
-  double cofactor();
-
-  int i;
-
-
-  if(n==1) return(A[1][1]); /* need a way to break the recursion */
-
-  det=0.0;
-  for(i=1;i<=n;i++)
-    det += A[1][i]*cofactor(A,1,i,n);
-
-  return(det);
-}
 
 
 long double lg_pow(long double a, int n)

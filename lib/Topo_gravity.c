@@ -30,7 +30,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void myerror(char *,struct All_variables *);
+void myerror(struct All_variables *, char *);
 void sphere_expansion(struct All_variables *, float **, float *, float *);
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);
@@ -367,48 +367,50 @@ void compute_nodal_stress(struct All_variables *E,
       }
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     if(E->viscosity.allow_anisotropic_viscosity){ /* general anisotropic */
-      for(j=1;j <= vpts;j++)   {
-	l1 = (e-1)*vpts+j;
+      for(i=1;i <= vpts;i++)   {
+	l1 = (e-1)*vpts+i;
 	/* 
 	   get viscosity matrix and convert to spherical system in
 	   CitcomS convection
 
 	*/
-	get_constitutive(D,E->mesh.levmax,m,l1,rtf[1][j],rtf[2][j],E);
+	get_constitutive(D,E->mesh.levmax,m,l1,rtf[1][i],rtf[2][i],TRUE,E);
 	
 	/* deviatoric stress, pressure will be added later */
-	eps[0] = Vxyz[1][j] - dilation[j]; /* strain-rates */
-	eps[1] = Vxyz[2][j] - dilation[j];
-	eps[2] = Vxyz[3][j] - dilation[j];
-	eps[3] = Vxyz[4][j];eps[4] = Vxyz[5][j];eps[5] = Vxyz[5][j];
+	eps[0] = Vxyz[1][i] - dilation[i]; /* strain-rates */
+	eps[1] = Vxyz[2][i] - dilation[i];
+	eps[2] = Vxyz[3][i] - dilation[i];
+	eps[3] = Vxyz[4][i];
+	eps[4] = Vxyz[5][i];
+	eps[5] = Vxyz[5][i];
 	for(l1=0;l1 < 6;l1++){	
 	  str[l1]=0.0;
 	  for(l2=0;l2 < 6;l2++)
 	    str[l1] += D[l1][l2] * eps[l2];
 	}
-	Sxx += pre[j] * str[0];
-	Syy += pre[j] * str[1];
-	Szz += pre[j] * str[2];
-	Sxy += pre[j] * str[3];
-	Sxz += pre[j] * str[4];
-	Szy += pre[j] * str[5];
+	Sxx += pre[i] * str[0];
+	Syy += pre[i] * str[1];
+	Szz += pre[i] * str[2];
+	Sxy += pre[i] * str[3];
+	Sxz += pre[i] * str[4];
+	Szy += pre[i] * str[5];
 	
-	div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
-	vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
+	div += Vxyz[7][i]*dOmega->vpt[i]; /* divergence */
+	vor += Vxyz[8][i]*dOmega->vpt[i]; /* vorticity */
       }
 
     }else{
 #endif
-      for(j=1;j <= vpts;j++)   {
+      for(i=1;i <= vpts;i++)   {
 	/* deviatoric stress, pressure will be added later */
-          Sxx += 2.0 * pre[j] * (Vxyz[1][j] - dilation[j]); /*  */
-          Syy += 2.0 * pre[j] * (Vxyz[2][j] - dilation[j]);
-          Szz += 2.0 * pre[j] * (Vxyz[3][j] - dilation[j]);
-          Sxy += pre[j] * Vxyz[4][j]; /*  */
-          Sxz += pre[j] * Vxyz[5][j];
-          Szy += pre[j] * Vxyz[6][j];
-          div += Vxyz[7][j]*dOmega->vpt[j]; /* divergence */
-          vor += Vxyz[8][j]*dOmega->vpt[j]; /* vorticity */
+          Sxx += 2.0 * pre[i] * (Vxyz[1][i] - dilation[i]); /*  */
+          Syy += 2.0 * pre[i] * (Vxyz[2][i] - dilation[i]);
+          Szz += 2.0 * pre[i] * (Vxyz[3][i] - dilation[i]);
+          Sxy += pre[i] * Vxyz[4][i]; /*  */
+          Sxz += pre[i] * Vxyz[5][i];
+          Szy += pre[i] * Vxyz[6][i];
+          div += Vxyz[7][i]*dOmega->vpt[i]; /* divergence */
+          vor += Vxyz[8][i]*dOmega->vpt[i]; /* vorticity */
       }
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     }

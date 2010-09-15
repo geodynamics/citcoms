@@ -552,7 +552,8 @@ void output_horiz_avg(struct All_variables *E, int cycles)
 void output_seismic(struct All_variables *E, int cycles)
 {
     void get_prem(double, double*, double*, double*);
-    void compute_seismic_model(const struct All_variables*, double*, double*, double*);
+    void compute_seismic_model(struct All_variables*, 
+			       double*, double*, double*);
 
     char output_file[255];
     FILE* fp;

@@ -34,9 +34,9 @@
 double theta_g(double , struct All_variables *);
 #endif
 
-void twiddle_thumbs(yawn,scratch_groin)
+void twiddle_thumbs(yawn)
      struct All_variables *yawn;
-     int scratch_groin;
+     //     int scratch_groin;
 
 { /* Do nothing, just sit back and relax.
      Take it easy for a while, maybe size

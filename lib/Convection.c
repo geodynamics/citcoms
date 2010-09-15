@@ -34,6 +34,7 @@
 void set_convection_defaults(E)
      struct All_variables *E;
 {
+  /*
     void PG_timestep();
     void PG_timestep_init();
     void read_convection_settings();
@@ -42,7 +43,7 @@ void set_convection_defaults(E)
     void convection_boundary_conditions();
     void convection_initial_fields();
     void twiddle_thumbs();
-
+  */
     E->control.CONVECTION = 1;
 
     E->advection.timestep = 0.0;

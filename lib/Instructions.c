@@ -1762,7 +1762,7 @@ void output_init(struct  All_variables *E)
             fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', 'ascii-gz' or 'vtk'\n");
             fprintf(E->fp, "wrong output_format, must be  'ascii', 'hdf5' 'ascii-gz', or 'vtk'\n");
         }
-        parallel_process_termination(E);
+        parallel_process_termination();
     }
 #else
     else {
@@ -1771,7 +1771,7 @@ void output_init(struct  All_variables *E)
             fprintf(stderr, "wrong output_format, must be 'ascii', 'hdf5', or 'vtk' (USE_GZDIR undefined)\n");
             fprintf(E->fp, "wrong output_format, must be 'ascii', 'hdf5', or 'vtk' (USE_GZDIR undefined)\n");
         }
-        parallel_process_termination(E);
+        parallel_process_termination();
     }
 #endif
 

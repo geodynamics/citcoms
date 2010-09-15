@@ -266,7 +266,6 @@ void project_viscosity(E)
 	visc_from_gint_to_nodes(E,E->EVIn1[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn1[sl_minus],sl_minus);
 	visc_from_gint_to_nodes(E,E->EVIn2[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn2[sl_minus],sl_minus);
 	visc_from_gint_to_nodes(E,E->EVIn3[lv],viscU,lv);project_scalar(E,lv,viscU,viscD);visc_from_nodes_to_gint(E,viscD,E->EVIn3[sl_minus],sl_minus);
-	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
       else if (E->viscosity.smooth_cycles==2)   {
 	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv); /* isotropic */
@@ -276,7 +275,6 @@ void project_viscosity(E)
 	visc_from_gint_to_ele(E,E->EVIn1[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn1[sl_minus]);
 	visc_from_gint_to_ele(E,E->EVIn2[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn2[sl_minus]);
 	visc_from_gint_to_ele(E,E->EVIn3[lv],viscU,lv);inject_scalar_e(E,lv,viscU,E->EVIn3[sl_minus]);
-	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
       else if (E->viscosity.smooth_cycles==3)   {
 	visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv);/* isotropic */
@@ -287,7 +285,6 @@ void project_viscosity(E)
 	visc_from_gint_to_ele(E,E->EVIn1[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn1[sl_minus],sl_minus);
 	visc_from_gint_to_ele(E,E->EVIn2[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn2[sl_minus],sl_minus);
 	visc_from_gint_to_ele(E,E->EVIn3[lv],viscU,lv);project_scalar_e(E,lv,viscU,viscD);visc_from_ele_to_gint(E,viscD,E->EVIn3[sl_minus],sl_minus);
-	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
       else if (E->viscosity.smooth_cycles==0)  {
 	inject_scalar(E,lv,E->VI[lv],E->VI[sl_minus]);/* isotropic */
@@ -297,8 +294,8 @@ void project_viscosity(E)
 	inject_scalar(E,lv,E->VIn1[lv],E->VIn1[sl_minus]);visc_from_nodes_to_gint(E,E->VIn1[sl_minus],E->EVIn1[sl_minus],sl_minus);
 	inject_scalar(E,lv,E->VIn2[lv],E->VIn2[sl_minus]);visc_from_nodes_to_gint(E,E->VIn2[sl_minus],E->EVIn2[sl_minus],sl_minus);
 	inject_scalar(E,lv,E->VIn3[lv],E->VIn3[sl_minus]);visc_from_nodes_to_gint(E,E->VIn3[sl_minus],E->EVIn3[sl_minus],sl_minus);
-	normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);
       }
+      normalize_director_at_gint(E,E->EVIn1[sl_minus],E->EVIn2[sl_minus],E->EVIn3[sl_minus],sl_minus);      
     }
   }else{
 #endif

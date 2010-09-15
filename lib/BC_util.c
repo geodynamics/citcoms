@@ -32,6 +32,8 @@ void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsig
 void myerror(struct All_variables *,char *);
 int layers(struct All_variables *,int,int);
 
+
+
 /* 
 
 assign boundary conditions to a horizontal layer of nodes on top and
