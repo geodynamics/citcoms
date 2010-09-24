@@ -52,7 +52,7 @@ void calc_cbase_at_tp_d(double , double , double *);
 
 
 void get_constitutive(double D[6][6], int lev, int m, 
-		      int off, double theta, double phi, 
+		      int enode, double theta, double phi, 
 		      int convert_to_spherical,
 		      struct All_variables *E)
 {
@@ -64,15 +64,15 @@ void get_constitutive(double D[6][6], int lev, int m,
       get_constitutive_isotropic(D);
     else{      
       /* allow for a possibly anisotropic viscosity */
-      n[0] =  E->EVIn1[lev][m][off];
-      n[1] =  E->EVIn2[lev][m][off];
-      n[2] =  E->EVIn3[lev][m][off]; /* Cartesian directors */
+      n[0] =  E->EVIn1[lev][m][enode];
+      n[1] =  E->EVIn2[lev][m][enode];
+      n[2] =  E->EVIn3[lev][m][enode]; /* Cartesian directors */
       if(E->viscosity.allow_anisotropic_viscosity == 1){ /* orthotropic */
-	get_constitutive_orthotropic_viscosity(D,E->EVI2[lev][m][off],
+	get_constitutive_orthotropic_viscosity(D,E->EVI2[lev][m][enode],
 					       n,convert_to_spherical,theta,phi); 
       }else if(E->viscosity.allow_anisotropic_viscosity == 2){
 	/* transversely isotropic */
-	get_constitutive_ti_viscosity(D,E->EVI2[lev][m][off],0.,
+	get_constitutive_ti_viscosity(D,E->EVI2[lev][m][enode],0.,
 				      n,convert_to_spherical,theta,phi); 
       }
     }
@@ -247,7 +247,7 @@ void get_constitutive_isotropic(double D[6][6])
 }
 void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int init_stage)
 {
-  int i,j,k,l,off,nel;
+  int i,j,k,l,enode,nel;
   double vis2,n[3],u,v,s,r;
   const int vpts = vpoints[E->mesh.nsd];
   
@@ -266,9 +266,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int ini
 	  for (j=1;j<=E->sphere.caps_per_proc;j++) {
 	    for(k=1;k <= nel;k++){
 	      for(l=1;l <= vpts;l++){ /* assign to all integration points */
-		off = (k-1)*vpts + l;
-		E->EVI2[i][j][off] = 0.0;
-		E->EVIn1[i][j][off] = 1.0; E->EVIn2[i][j][off] = E->EVIn3[i][j][off] = 0.0;
+		enode = (k-1)*vpts + l;
+		E->EVI2[i][j][enode] = 0.0;
+		E->EVIn1[i][j][enode] = 1.0; E->EVIn2[i][j][enode] = E->EVIn3[i][j][enode] = 0.0;
 	      }
 	    }
 	  }
@@ -299,11 +299,11 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int ini
 	      n[1] = v * r;		/* y */
 	      n[2] = 2.0*s -1 ;		/* z */
 	      for(l=1;l <= vpts;l++){ /* assign to all integration points */
-		off = (k-1)*vpts + l;
-		E->EVI2[i][j][off] = vis2;
-		E->EVIn1[i][j][off] = n[0]; 
-		E->EVIn2[i][j][off] = n[1];
-		E->EVIn3[i][j][off] = n[2];
+		enode = (k-1)*vpts + l;
+		E->EVI2[i][j][enode] = vis2;
+		E->EVIn1[i][j][enode] = n[0]; 
+		E->EVIn2[i][j][enode] = n[1];
+		E->EVIn3[i][j][enode] = n[2];
 	      }
 	    }
 	  }
@@ -343,14 +343,14 @@ void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, 
 }
 void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
 {
-  int m,e,i,off;
+  int m,e,i,enode;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
-	off = (e-1)*vpts+i;
-	normalize_vec3(&(n1[m][off]),&(n2[m][off]),&( n3[m][off]));
+	enode = (e-1)*vpts+i;
+	normalize_vec3(&(n1[m][enode]),&(n2[m][enode]),&( n3[m][enode]));
       }
 }
 /* 

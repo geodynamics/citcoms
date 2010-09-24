@@ -428,6 +428,8 @@ void read_initial_settings(struct All_variables *E)
   E->viscosity.zbase_layer[0] = E->viscosity.zbase_layer[1] = -999;
   input_float_vector("z_layer",E->viscosity.num_mat,(E->viscosity.zbase_layer),m);
 
+
+
   /*  the start age and initial subduction history   */
   input_float("start_age",&(E->control.start_age),"0.0",m);
   input_int("reset_startage",&(E->control.reset_startage),"0",m);
@@ -791,7 +793,10 @@ void check_settings_consistency(struct All_variables *E)
         E->viscosity.zbase_layer[0] = E->viscosity.zlith;
         E->viscosity.zbase_layer[1] = E->viscosity.z410;
         E->viscosity.zbase_layer[2] = E->viscosity.zlm;
-        E->viscosity.zbase_layer[3] = E->viscosity.zcmb;
+        E->viscosity.zbase_layer[3] = E->viscosity.zcmb; /* the lowest layers is never checked, really 
+							    if x3 < zlm, then the last layers gets assigned
+							    i left this in for backward compatibility
+							 */
     }
 
     return;

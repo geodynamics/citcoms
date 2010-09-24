@@ -319,11 +319,13 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
       off = (el-1)*vpts+k;
       W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-      /* allow for a possibly anisotropic viscosity */
-      get_constitutive(D[k],lev,m,off,rtf[1][k],rtf[2][k],TRUE,E);
+      if(E->viscosity.allow_anisotropic_viscosity){
+	/* allow for a possibly anisotropic viscosity */
+	get_constitutive(D[k],lev,m,off,rtf[1][k],rtf[2][k],TRUE,E);
+      }
 #endif
     }
-    
+    /*  */
     get_ba(&(E->N), &(E->GNX[lev][m][el]), &E->element_Cc, &E->element_Ccx,
            rtf, E->mesh.nsd, ba);
 
@@ -906,6 +908,7 @@ void get_elt_c(struct All_variables *E, int el,
 
 /*==============================================================
   Function to supply the element g matrix for a given element e.
+  used for the divergence
   ==============================================================  */
 
 void get_elt_g(E,el,elt_del,lev,m)
@@ -916,13 +919,20 @@ void get_elt_g(E,el,elt_del,lev,m)
 
 {
    void get_rtf_at_ppts();
-   int p,a,i;
+   int p,a,i,j,k;
    double ra,ct,si,x[4],rtf[4][9];
    double temp;
-
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+   double Dtmp[6][6],Duse[6][6],rtf2[4][9],weight;
+   const int vpts=VPOINTS3D;
+   const int modify_g = TRUE;
+   //const int modify_g = FALSE;
+   int off;
+   double ba[9][9][4][7];
+#endif
    const int dims=E->mesh.nsd;
    const int ends=enodes[dims];
-
+ 
    /* Special case, 4/8 node bilinear cartesian square/cube element -> 1 pressure point */
 
    if ((el-1)%E->lmesh.ELZ[lev]==0)
@@ -930,31 +940,69 @@ void get_elt_g(E,el,elt_del,lev,m)
 
    get_rtf_at_ppts(E, m, lev, el, rtf);
 
-   temp=p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
+   temp = p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
 
-   ra = rtf[3][1];
-   si = 1.0/sin(rtf[1][1]);
-   ct = cos(rtf[1][1])*si;
-
-   for(a=1;a<=ends;a++)      {
-     for (i=1;i<=dims;i++)
-       x[i]=E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)]
-        + 2.0*ra*E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)]
-        + ra*(E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)]
-        +E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(1,i,1,a,1)]
-        +ct*E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)]
-        +si*(E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)]*E->element_Cc.ppt[BPINDEX(2,i,a,1)]
-        +E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(2,i,2,a,1)]));
-
-     p=dims*(a-1);
-     elt_del[p  ][0] = -x[1] * temp;
-     elt_del[p+1][0] = -x[2] * temp;
-     elt_del[p+2][0] = -x[3] * temp;
-
-      /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,E->GDA[lev][m][el].ppt[1],E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)],E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
-      */
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+   if(E->viscosity.allow_anisotropic_viscosity && modify_g){
+     /* find avg constitutive matrix from all vpts (change this later) */
+     get_rtf_at_vpts(E, m, lev, el, rtf2);
+     for(i=0;i<6;i++)
+       for(j=0;j<6;j++)
+	 Duse[i][j]=0.0;
+     weight = 1./(2.*vpts);
+     for(i=1;i <= vpts;i++){	/* get vag const matrix */
+       off = (el-1)*vpts+i;
+       get_constitutive(Dtmp,lev,m,off,rtf2[1][i],rtf2[2][i],TRUE,E);
+       for(j=0;j<6;j++)
+	 for(k=0;k<6;k++)
+	   Duse[j][k] += Dtmp[j][k]*weight;
      }
+     get_ba_p(&(E->N),&(E->GNX[lev][m][el]),&E->element_Cc, &E->element_Ccx,rtf,E->mesh.nsd,ba);
 
+     /* assume single pressure point */
+     for(a = 1; a <= ends; a++){
+       for(i = 1; i <= dims; i++){
+	 x[i] = 0.0;
+	 for(k=0;k < 6;k++){
+	   x[i] += Duse[0][k] * ba[a][1][i][k+1];
+	   x[i] += Duse[1][k] * ba[a][1][i][k+1];
+	   x[i] += Duse[2][k] * ba[a][1][i][k+1];
+	 }
+       }
+       p=dims*(a-1);
+       elt_del[p  ][0] = -x[1] * temp;
+       elt_del[p+1][0] = -x[2] * temp;
+       elt_del[p+2][0] = -x[3] * temp;
+       
+     }
+   }else{
+#endif
+     ra = rtf[3][1];
+     si = 1.0/sin(rtf[1][1]);
+     ct = cos(rtf[1][1])*si;
+
+     /* old, isotropic part */
+     for(a=1;a<=ends;a++)      {
+       for (i=1;i<=dims;i++)
+	 x[i] = E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)] * E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
+	   2.0 * ra * E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
+	   ra * 
+	   (E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
+	    E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(1,i,1,a,1)] +
+	    ct * E->N.ppt[GNPINDEX(a,1)] * E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
+	    si * (E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)] * E->element_Cc.ppt[BPINDEX(2,i,a,1)] +
+		  E->N.ppt[GNPINDEX(a,1)] * E->element_Ccx.ppt[BPXINDEX(2,i,2,a,1)]));
+       p=dims*(a-1);
+       elt_del[p  ][0] = -x[1] * temp;
+       elt_del[p+1][0] = -x[2] * temp;
+       elt_del[p+2][0] = -x[3] * temp;
+       
+      /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,E->GDA[lev][m][el].ppt[1],E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)],E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
+       */
+     }
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+   }
+#endif
    return;
  }
 
