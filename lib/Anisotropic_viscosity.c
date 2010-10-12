@@ -253,6 +253,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E, int ini
   
   if(E->viscosity.allow_anisotropic_viscosity){
     if(init_stage){	
+      if(E->parallel.me == 0)
+	fprintf(stderr,"set_anisotropic_viscosity: allowing for %s viscosity\n",
+	       (E->viscosity.allow_anisotropic_viscosity == 1)?("orthotropic"):("transversely isotropic"));
       if(E->viscosity.anisotropic_viscosity_init)
 	myerror(E,"anisotropic viscosity should not be initialized twice?!");
       /* first call */

@@ -1085,10 +1085,6 @@ void allocate_common_vars(E)
        }
      }
    E->viscosity.anisotropic_viscosity_init = FALSE;
-   if(E->parallel.me == 0)
-     fprintf(stderr,"allocated for anisotropic viscosity (%s) levmax %i\n",
-	     (E->viscosity.allow_anisotropic_viscosity == 1)?("orthotropic"):("transversely isotropic"),
-	     E->mesh.gridmax);
  }
 #endif
 

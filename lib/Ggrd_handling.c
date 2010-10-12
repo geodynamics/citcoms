@@ -489,11 +489,11 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 		 EVAL FORM FUNCTION???)
 	      */
 	      xloc[1] = xloc[2] = xloc[3] = 0.0;
-	      for(inode=1;inode <= 4;inode++){
+	      for(inode=1;inode <= ends;inode++){
 		ind = E->ien[m][el].node[inode];
 		xloc[1] += E->x[m][1][ind];xloc[2] += E->x[m][2][ind];xloc[3] += E->x[m][3][ind];
 	      }
-	      xloc[1]/=4.;xloc[2]/=4.;xloc[3]/=4.;
+	      xloc[1]/=ends;xloc[2]/=ends;xloc[3]/=ends;
 	      xyz2rtpd(xloc[1],xloc[2],xloc[3],rout);
 	      /* 
 		 material 
@@ -1450,13 +1450,13 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 	      find average coordinates
 	    */
 	    xloc[1] = xloc[2] = xloc[3] = 0.0;
-	    for(inode=1;inode <= 4;inode++){
+	    for(inode=1;inode <= ends;inode++){
 	      ind = E->ien[m][el].node[inode];
 	      xloc[1] += E->x[m][1][ind];
 	      xloc[2] += E->x[m][2][ind];
 	      xloc[3] += E->x[m][3][ind];
 	    }
-	    xloc[1]/=4.;xloc[2]/=4.;xloc[3]/=4.;
+	    xloc[1]/=ends;xloc[2]/=ends;xloc[3]/=ends;
 	    xyz2rtpd(xloc[1],xloc[2],xloc[3],rout); /* convert to spherical */
 
 	    /* vis2 */

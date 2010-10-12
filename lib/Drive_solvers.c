@@ -175,17 +175,18 @@ int need_to_iterate(struct All_variables *E){
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   /* anisotropic viscosity */
   if(E->viscosity.allow_anisotropic_viscosity){
-    if((E->monitor.solution_cycles == 0) && 
-       E->viscosity.anivisc_start_from_iso) /* first step will be
+    if(E->viscosity.anivisc_start_from_iso) /* first step will be
 					       solved isotropically at
 					       first  */
       return TRUE;
     else
       return (E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE);
-  }
-#else
+  }else{
+#endif
   /* regular operation */
   return ((E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE));
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+  }
 #endif
 }
 void general_stokes_solver_pseudo_surf(struct All_variables *E)
