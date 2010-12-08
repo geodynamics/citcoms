@@ -34,58 +34,6 @@ int layers(struct All_variables *,int,int);
 
 
 
-/* 
-
-assign boundary conditions to a horizontal layer of nodes on top and
-bottom, only applying to those processors
-
-*/
-void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
-     struct All_variables *E;
-     float *BC[];
-     int row;
-     int dirn;
-     float value;
-     unsigned int mask;
-     char onoff;
-     int level,m;
-
-{
-  int i,j,node,noxnoz;
-  /* safety feature */
-  if(dirn > E->mesh.nsd)
-     return;
-
-  noxnoz = E->lmesh.NOX[level]*E->lmesh.NOZ[level];
- 
-  /* regular operation, assign only if in top
-     (row==E->lmesh.NOZ[level]) or bottom (row==1) processor  */
-  
-  if ( ( (row==1) && (E->parallel.me_loc[3]==0) ) || /* bottom or top */
-       ( (row==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
-    
-    /* turn bc marker to zero */
-    if (onoff == 0)          {
-      for(j=1;j<=E->lmesh.NOY[level];j++)
-	for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
-	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
-	}        /* end for loop i & j */
-    }
-    
-    /* turn bc marker to one */
-    else        {
-      for(j=1;j<=E->lmesh.NOY[level];j++)
-	for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
-	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
-	  if(level==E->mesh.levmax)   /* NB */
-	    BC[dirn][node] = value;
-	}     /* end for loop i & j */
-    }
-    
-  }             /* end for if row */
-  return;}
 
 
 

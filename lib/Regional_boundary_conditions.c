@@ -35,7 +35,7 @@
 #endif
 
 /* ========================================== */
-void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+static void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void assign_internal_bc(struct All_variables * ,int);
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
@@ -385,6 +385,59 @@ static void temperature_refl_vert_bc(E)
           E->node[m][node2] = E->node[m][node2] | FBY;
           E->sphere.cap[m].TB[3][node2] = 0.0;
           }    /* end loop for i and j */
+
+  return;
+}
+/*  =========================================================  */
+
+
+static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
+     struct All_variables *E;
+     float *BC[];
+     int ROW;
+     int dirn;
+     float value;
+     unsigned int mask;
+     char onoff;
+     int level,m;
+
+{
+  int i,j,node,rowl;
+
+    /* safety feature */
+  if(dirn > E->mesh.nsd)
+     return;
+
+  if (ROW==1)
+      rowl = 1;
+  else
+      rowl = E->lmesh.NOZ[level];
+
+  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
+       ( (ROW==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1)) ) {
+
+    /* turn bc marker to zero */
+    if (onoff == 0)          {
+      for(j=1;j<=E->lmesh.NOY[level];j++)
+    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
+    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  }        /* end for loop i & j */
+      }
+
+    /* turn bc marker to one */
+    else        {
+      for(j=1;j<=E->lmesh.NOY[level];j++)
+        for(i=1;i<=E->lmesh.NOX[level];i++)       {
+    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+
+    	  if(level==E->mesh.levmax)   /* NB */
+    	    BC[dirn][node] = value;
+    	  }     /* end for loop i & j */
+      }
+
+    }             /* end for if ROW */
 
   return;
 }
