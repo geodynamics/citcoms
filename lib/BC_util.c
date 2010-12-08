@@ -51,34 +51,24 @@ void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
      int level,m;
 
 {
-  int i,j,node,noxnoz,rowl;
+  int i,j,node,noxnoz;
   /* safety feature */
   if(dirn > E->mesh.nsd)
      return;
-   /* 
-     I had commented this out since the regular calls are always
-     either ROW == 1 or ROW = E->lmesh.NOZ[level], and I want to allow
-     assigning internal BCs. now back in for testing following up on Dan's email TWB
-
-  */
-  if (row==1) 
-    rowl = 1; 
-  else 
-    rowl = E->lmesh.NOZ[level]; 
 
   noxnoz = E->lmesh.NOX[level]*E->lmesh.NOZ[level];
  
   /* regular operation, assign only if in top
-     (rowl==E->lmesh.NOZ[level]) or bottom (rowl==1) processor  */
+     (row==E->lmesh.NOZ[level]) or bottom (row==1) processor  */
   
-  if ( ( (rowl==1) && (E->parallel.me_loc[3]==0) ) || /* bottom or top */
-       ( (rowl==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+  if ( ( (row==1) && (E->parallel.me_loc[3]==0) ) || /* bottom or top */
+       ( (row==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
     
     /* turn bc marker to zero */
     if (onoff == 0)          {
       for(j=1;j<=E->lmesh.NOY[level];j++)
 	for(i=1;i<=E->lmesh.NOX[level];i++)     {
-	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
 	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
 	}        /* end for loop i & j */
     }
@@ -87,14 +77,14 @@ void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
     else        {
       for(j=1;j<=E->lmesh.NOY[level];j++)
 	for(i=1;i<=E->lmesh.NOX[level];i++)       {
-	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
 	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
 	  if(level==E->mesh.levmax)   /* NB */
 	    BC[dirn][node] = value;
 	}     /* end for loop i & j */
     }
     
-  }             /* end for if rowl */
+  }             /* end for if row */
   return;}
 
 
