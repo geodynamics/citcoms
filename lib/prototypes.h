@@ -6,8 +6,6 @@ void PG_timestep(struct All_variables *);
 void std_timestep(struct All_variables *);
 void PG_timestep_solve(struct All_variables *);
 /* Anisotropic_viscosity.c */
-static void horizontal_bc(struct All_variables *, float *[], int, int, float, unsigned int, char, int, int);
-void internal_horizontal_bc(struct All_variables *, float *[], int, int, float, unsigned int, char, int, int);
 void strip_bcs_from_residual(struct All_variables *, double **, int);
 void temperatures_conform_bcs(struct All_variables *);
 void temperatures_conform_bcs2(struct All_variables *);

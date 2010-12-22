@@ -28,7 +28,9 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include <math.h>
-
+#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
+#include "anisotropic_viscosity.h"
+#endif
 
 void set_mg_defaults(E)
      struct All_variables *E;

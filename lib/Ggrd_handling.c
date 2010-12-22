@@ -299,7 +299,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp.prem);
 	    if(rho_prem < GGRD_DENS_MIN){
 	      fprintf(stderr,"WARNING: restricting minimum density to %g, would have been %g\n",
-		      GGRD_DENS_MIN,rho_prem);
+		      (float)GGRD_DENS_MIN,rho_prem);
 	      rho_prem = GGRD_DENS_MIN; /* we don't want the density of water or crust*/
 	    }
 	    /*
@@ -716,7 +716,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
     cos_theta,sin_phi,cos_phi,theta_max,theta_min;
   char tfilename1[1000],tfilename2[1000];
-  static pole_warned = FALSE, mode_warned = FALSE;
+  static int pole_warned = FALSE, mode_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   const int dims=E->mesh.nsd;
   int top_proc,nfree,nfixed,use_vel,allow_internal;

@@ -391,15 +391,8 @@ static void temperature_refl_vert_bc(E)
 /*  =========================================================  */
 
 
-static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
-     struct All_variables *E;
-     float *BC[];
-     int ROW;
-     int dirn;
-     float value;
-     unsigned int mask;
-     char onoff;
-     int level,m;
+static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn,
+			   float value,unsigned int mask,char onoff,int level,int m)
 
 {
   int i,j,node,rowl;

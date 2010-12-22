@@ -33,6 +33,9 @@ void myerror(struct All_variables *,char *);
 int layers(struct All_variables *,int,int);
 
 
+#ifdef USE_GGRD
+#include "ggrd_handling.h"
+#endif
 
 
 
@@ -43,16 +46,8 @@ assign boundary conditions to a horizontal layer of nodes within mesh,
 without consideration of being in top or bottom processor
 
 */
-void internal_horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
-     struct All_variables *E;
-     float *BC[];
-     int row;
-     int dirn;
-     float value;
-     unsigned int mask;
-     char onoff;
-     int level,m;
-
+void internal_horizontal_bc(struct All_variables *E,float *BC[],int row,int dirn,
+			    float value,unsigned int mask,char onoff,int level,int m)
 {
   int i,j,node,noxnoz;
   /* safety feature */
@@ -257,7 +252,7 @@ void assign_internal_bc(struct All_variables *E,int is_global)
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
-      ggrd_read_vtop_from_file(E, is_global, 1);
+      ggrd_read_vtop_from_file(E, is_global);
 #endif
     /* end toplayerbc > 0 branch */
   }else if(E->mesh.toplayerbc < 0){ 
@@ -302,7 +297,7 @@ void assign_internal_bc(struct All_variables *E,int is_global)
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
-      ggrd_read_vtop_from_file(E, is_global, 1);
+      ggrd_read_vtop_from_file(E, is_global);
 #endif
     /* end toplayerbc < 0 branch */
   }

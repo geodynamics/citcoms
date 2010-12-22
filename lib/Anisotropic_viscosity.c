@@ -47,6 +47,9 @@
 #include "anisotropic_viscosity.h"
 void calc_cbase_at_tp(float , float , float *);
 void calc_cbase_at_tp_d(double , double , double *);
+#ifdef USE_GGRD
+#include "ggrd_handling.h"
+#endif
 
 #define CITCOM_DELTA(i,j) ((i==j)?(1.0):(0.0))
 
