@@ -82,6 +82,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   int mpi_rc;  
   int mpi_inmsg, mpi_success_message = 1;
   static ggrd_boolean shift_to_pos_lon = FALSE;	/* this should not be needed anymore */
+  ggrd_boolean use_nearneighbor;
   report(E,"ggrd_init_tracer_flavors: ggrd mat init");
   int only_one_layer,this_layer;
   /* 
@@ -94,6 +95,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
     sprintf(gmt_bc,"");
   }
   only_one_layer = ((E->trace.ggrd_layers > 0)?(0):(1));
+  /*  */
+  use_nearneighbor  = TRUE;	/* no interpolation */
 
   /* 
      initialize the ggrd control 
@@ -105,7 +108,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   }
   if(ggrd_grdtrack_init_general(FALSE,E->trace.ggrd_file,
 				char_dummy,gmt_bc,
-				ggrd_ict,FALSE,FALSE)){
+				ggrd_ict,FALSE,FALSE,use_nearneighbor)){
     myerror(E,"ggrd tracer init error");
   }
   /* shold we decide on shifting to positive longitudes, ie. 0...360? */
@@ -233,7 +236,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   if(ggrd_grdtrack_init_general(TRUE,E->control.ggrd.temp.gfile,
 				E->control.ggrd.temp.dfile,gmt_string,
 				E->control.ggrd.temp.d,(E->parallel.me == 0),
-				FALSE))
+				FALSE,FALSE))
     myerror(E,"grd init error");
   /*  */
   if(E->parallel.me <  E->parallel.nproc-1){
@@ -376,11 +379,15 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
   const int dims=E->mesh.nsd;
   const int ends = enodes[dims];
   FILE *in;
-
+  ggrd_boolean use_nearneighbor;
+  
   nox=E->mesh.nox;noy=E->mesh.noy;noz=E->mesh.noz;
   elx=E->lmesh.elx;elz=E->lmesh.elz;ely=E->lmesh.ely;
   elxlz = elx * elz;
   elxlylz = elxlz * ely;
+
+  /* no interpolation */
+  use_nearneighbor = TRUE;
 
   /*
      if we have not initialized the time history structure, do it now
@@ -443,7 +450,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	  sprintf(tfilename,"%s/%i/weak.grd",E->control.ggrd.mat_file,i+1);
       }
       if(ggrd_grdtrack_init_general(E->control.ggrd_mat_is_3d,tfilename,E->control.ggrd_mat_depth_file,
-				    gmt_string,(E->control.ggrd.mat+i),(E->parallel.me == 0),FALSE))
+				    gmt_string,(E->control.ggrd.mat+i),(E->parallel.me == 0),FALSE,use_nearneighbor))
 	myerror(E,"ggrd init error");
     }
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
@@ -593,7 +600,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
   double indbl,indbl2,age,f1,f2,vip,rout[3],xloc[4];
   char tfilename[1000];
   static ggrd_boolean shift_to_pos_lon = FALSE;
-
+  ggrd_boolean use_nearneighbor = FALSE; /* use interpolation by default */
   const int dims=E->mesh.nsd;
   const int ends = enodes[dims];
   /* dimensional ints */
@@ -633,7 +640,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
       else
 	sprintf(tfilename,"%s/%i/rayleigh.grd",E->control.ggrd.ray_file,i+1);
       if(ggrd_grdtrack_init_general(FALSE,tfilename,&char_dummy,
-				    gmt_string,(E->control.ggrd.ray+i),(E->parallel.me == 0),FALSE))
+				    gmt_string,(E->control.ggrd.ray+i),(E->parallel.me == 0),FALSE,use_nearneighbor))
 	myerror(E,"ggrd init error");
     }
     if(E->parallel.me <  E->parallel.nproc-1){ /* tell the next proc to go ahead */
@@ -718,6 +725,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   char tfilename1[1000],tfilename2[1000];
   static int pole_warned = FALSE, mode_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
+  ggrd_boolean use_nearneighbor;
   const int dims=E->mesh.nsd;
   int top_proc,nfree,nfixed,use_vel,allow_internal;
 #ifdef USE_GZDIR
@@ -731,6 +739,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   noz = E->lmesh.noz;
   noy = E->lmesh.noy;
   noxnoz = nox*noz;
+  if(E->control.ggrd_allow_mixed_vbcs)
+    use_nearneighbor = TRUE;
+  else
+    use_nearneighbor = FALSE;
   
   if(E->mesh.toplayerbc != 0)
     allow_internal = TRUE;
@@ -861,15 +873,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	}
 	if(use_codes){
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
-					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE))
+					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,use_nearneighbor))
 	    myerror(E,"ggrd init error codes");
 
 	}else{
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
-					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE))
+					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,use_nearneighbor))
 	    myerror(E,"ggrd init error vt");
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
-					gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE))
+					gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE,use_nearneighbor))
 	    myerror(E,"ggrd init error vp"); 
 	}
       }/* all grids read */
@@ -1344,14 +1356,17 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   FILE *in;
   struct ggrd_gt *vis2_grd,*ntheta_grd,*nphi_grd,*nr_grd;
   const int vpts = vpoints[E->mesh.nsd];
-
+  ggrd_boolean use_nearneighbor;
   
   nox=E->mesh.nox;noy=E->mesh.noy;noz=E->mesh.noz;
   elx=E->lmesh.elx;elz=E->lmesh.elz;ely=E->lmesh.ely;
   elxlz = elx * elz;
   elxlylz = elxlz * ely;
 
+  /* should we actually interpolate? */
+  use_nearneighbor = TRUE;
 
+  
   if(E->viscosity.allow_anisotropic_viscosity == 0)
     myerror(E,"ggrd_read_anivisc_from_file: called, but allow_anisotropic_viscosity is FALSE?!");
   
@@ -1406,22 +1421,22 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   /* viscosity factor */
   sprintf(tfilename,"%s/vis2.grd",E->viscosity.anisotropic_init_dir);
   if(ggrd_grdtrack_init_general(FALSE,tfilename,"",gmt_string,
-				vis2_grd,(E->parallel.me == 0),FALSE))
+				vis2_grd,(E->parallel.me == 0),FALSE,use_nearneighbor))
     myerror(E,"ggrd init error");
   /* n_r */
   sprintf(tfilename,"%s/nr.grd",E->viscosity.anisotropic_init_dir);
   if(ggrd_grdtrack_init_general(FALSE,tfilename,"",gmt_string,
-				nr_grd,(E->parallel.me == 0),FALSE))
+				nr_grd,(E->parallel.me == 0),FALSE,use_nearneighbor))
     myerror(E,"ggrd init error");
   /* n_theta */
   sprintf(tfilename,"%s/nt.grd",E->viscosity.anisotropic_init_dir);
   if(ggrd_grdtrack_init_general(FALSE,tfilename,"",gmt_string,
-				ntheta_grd,(E->parallel.me == 0),FALSE))
+				ntheta_grd,(E->parallel.me == 0),FALSE,use_nearneighbor))
     myerror(E,"ggrd init error");
   /* n_phi */
   sprintf(tfilename,"%s/np.grd",E->viscosity.anisotropic_init_dir);
   if(ggrd_grdtrack_init_general(FALSE,tfilename,"",gmt_string,
-				nphi_grd,(E->parallel.me == 0),FALSE))
+				nphi_grd,(E->parallel.me == 0),FALSE,use_nearneighbor))
     myerror(E,"ggrd init error");
 
   /* done */
