@@ -555,6 +555,7 @@ static void element_residual(struct All_variables *E, int el,
     const int lev=E->mesh.levmax;
     const int ends=enodes[dims];
     const int vpts=vpoints[dims];
+    const int onedvpts = onedvpoints[dims];
     const int diffusion = (diff != 0.0);
 
     for(i=1;i<=vpts;i++)	{
@@ -649,32 +650,31 @@ static void element_residual(struct All_variables *E, int el,
     /* include BC's for fluxes at (nominally horizontal) edges (X-Y plane) */
 
     if(FLAGS!=NULL) {
-      onedfns=0;
-      for(a=1;a<=ends;a++)
-	if (FLAGS[m][E->ien[m][el].node[a]] & FBZ) {
-	  if (!onedfns++) get_global_1d_shape_fn(E,el,&GM,&dGamma,1,m);
+      aid = -1;
+      if (FLAGS[m][E->ien[m][el].node[1]] & FBZ) {   // only check for the 1st node
+          aid = 0;
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
+          }
+      else if (FLAGS[m][E->ien[m][el].node[5]] & FBZ) {   // only check for the 5th node
+          aid = 1;
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
+          }
+      if (aid>=0)  {
+        for(a=1;a<=onedvpts;a++)  {
 
-	  nodes[1] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][0];
-	  nodes[2] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][0];
-	  nodes[4] = loc[loc[a].node_nebrs[0][0]].node_nebrs[2][1];
-	  nodes[3] = loc[loc[a].node_nebrs[0][1]].node_nebrs[2][1];
+	  for(j=1;j<=onedvpts;j++)  {
+            dT[j] = 0.0;
+	    for(k=1;k<=onedvpts;k++)
+              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[m][el].node[k+aid*onedvpts]];
+            }
+	  for(j=1;j<=onedvpts;j++)  {
+	    Eres[a+aid*onedvpts] += dGamma.vpt[GMVGAMMA(aid,j)] *
+		E->M.vpt[GMVINDEX(a,j)] * g_1d[j].weight[dims-1] *
+		dT[j];
+            }
 
-	  for(aid=0,j=1;j<=onedvpoints[E->mesh.nsd];j++)
-	    if (a==nodes[j])
-	      aid = j;
-	  if(aid==0)
-	    printf("%d: mixed up in pg-flux int: looking for %d\n",el,a);
-
-	  if (loc[a].plus[1] != 0)
-	    back_front = 0;
-	  else back_front = 1;
-
-	  for(j=1;j<=onedvpoints[dims];j++)
-	    for(k=1;k<=onedvpoints[dims];k++)
-	      Eres[a] += dGamma.vpt[GMVGAMMA(back_front,j)] *
-		E->M.vpt[GMVINDEX(aid,j)] * g_1d[j].weight[dims-1] *
-		BC[2][E->ien[m][el].node[a]] * E->M.vpt[GMVINDEX(k,j)];
 	}
+      }
     }
 
     return;
