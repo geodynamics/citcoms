@@ -430,16 +430,17 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     else
       E->control.ggrd_mat_is_3d = FALSE;
 
-    if(E->parallel.me==0)
-      if(E->control.ggrd.mat_control > 0)
+    if(E->parallel.me==0){
+      if(E->control.ggrd.mat_control > 0){
 	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to all above %g km, input is %s, %s\n",
 		E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1],
 		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
-      else
+      }else{
 	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to single layer at %g km, input is %s, %s\n",
 		E->data.radius_km*E->viscosity.zbase_layer[-E->control.ggrd.mat_control-1],
 		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
-
+      }
+    }
     for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
       if(!timedep)		/* constant */
 	sprintf(tfilename,"%s",E->control.ggrd.mat_file);
@@ -890,16 +891,18 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	snprintf(tfilename1,1000,"%s/codes.%d.gz", E->control.data_dir,E->parallel.me);
 	fp1 = gzdir_output_open(tfilename1,"w");
       }
-      if(verbose)
-	if(use_codes)
+      if(verbose){
+	if(use_codes){
 	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
 		  E->control.ggrd_vtop_omega[1],
 		  E->control.ggrd_vtop_omega[2],
 		  E->control.ggrd_vtop_omega[3],
 		  (int)E->control.ggrd_vtop_omega[0]);
-	else
+	}else{
 	  fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
 		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
+	}
+      }
     } /* end init part */
     
     /* 
@@ -1404,16 +1407,18 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
   ntheta_grd = (struct  ggrd_gt *)calloc(1,sizeof(struct ggrd_gt));
 
 
-  if(E->parallel.me==0)
-    if(E->viscosity.anivisc_layer > 0)
+  if(E->parallel.me==0){
+    if(E->viscosity.anivisc_layer > 0){
       fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements above %g km, input is %s\n",
 	      E->data.radius_km*E->viscosity.zbase_layer[E->viscosity.anivisc_layer - 1],
 	      (is_global)?("global"):("regional"));
-    else
+    }else{
       fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements between  %g and %g km, input is %s\n",
 	      E->data.radius_km*((E->viscosity.anivisc_layer<-1)?(E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 2]):(0)),
 	      E->data.radius_km*E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 1],
 	      (is_global)?("global"):("regional"));
+    }
+  }
 
   /* 
      read viscosity ratio, and east/north direction of normal azimuth 

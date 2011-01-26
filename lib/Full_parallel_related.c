@@ -67,7 +67,8 @@ void full_parallel_processor_setup(struct All_variables *E)
   E->parallel.total_surf_proc = E->sphere.caps * surf_proc_per_cap;
 
   if ( total_proc != E->parallel.nproc ) {
-    if (E->parallel.me==0) fprintf(stderr,"!!!! # of requested CPU is incorrect \n");
+    if (E->parallel.me==0) fprintf(stderr,"!!!! # of requested CPU is incorrect (expected: %i got: %i)\n",
+				   total_proc, E->parallel.nproc);
     parallel_process_termination();
     }
 

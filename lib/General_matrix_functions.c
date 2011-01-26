@@ -122,9 +122,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
      We should give it a chance to recover if it briefly diverges initially, and
      don't worry about slower convergence if it is close to the answer   */
 
-  if((count > 0) &&
-     (residual > r0*2.0)  ||
-     (fabs(residual-prior_residual) < acc*0.1 && (residual > acc * 10.0))   )
+  if(((count > 0) && (residual > r0*2.0))  ||
+     ((fabs(residual-prior_residual) < acc*0.1) && (residual > acc * 10.0))   )
     convergent=0;
   else {
     convergent=1;
@@ -365,7 +364,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
 	dotr1z1 = global_vdot(E,r1,z1,level);
 
-	if (0==count)
+	if (count == 0 )
           for(m=1;m<=E->sphere.caps_per_proc;m++)
 	    for(i=0;i<high_neq;i++)
 	      p2[m][i] = z1[m][i];
