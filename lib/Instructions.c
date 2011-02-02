@@ -1068,6 +1068,7 @@ void allocate_common_vars(E)
        nel  = E->lmesh.NEL[i];
        nno  = E->lmesh.NNO[i];
        E->EVI2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->avmode[i][j] = (unsigned char *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(unsigned char));
        E->EVIn1[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
        E->EVIn2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
        E->EVIn3[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));

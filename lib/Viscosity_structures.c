@@ -76,23 +76,42 @@ void viscosity_system_input(struct All_variables *E)
 						     parameters for
 						     anisotropic
 						     viscosity */
-      input_int("anisotropic_init",&(E->viscosity.anisotropic_init),"0",m); /* 0: isotropic 1: random 2: read in director and log10(eta_s/eta) */
+      input_int("anisotropic_init",&(E->viscosity.anisotropic_init),"0",m); /* 0: isotropic
+									       1: random
+									       2: read in director orientation
+									       and log10(eta_s/eta) 
+									       3: align with velocity, use ani_vis2_factor for eta_s/eta
+									       4: align with ISA, use ani_vis2_factor for eta_s/eta
+									       5: align mixed depending on deformation state, use ani_vis2_factor for eta_s/eta
+									       6: use radially aligned director and taper eta_s/eta from base (1) to top of layer (ani_vis2_factor)
+									       
+									    */
       input_string("anisotropic_init_dir",(E->viscosity.anisotropic_init_dir),"",m); /* directory
-											 for
-											 ggrd
-											 type
-											 init */
+											for
+											ggrd
+											type
+											init */
       input_int("anivisc_layer",&(E->viscosity.anivisc_layer),"1",m); /* >0: assign to layers on top of anivisc_layer
 									 <0: assign to layer = anivisc_layer
 								      */
-
+      if((E->viscosity.anisotropic_init == 6) && (E->viscosity.anivisc_layer >= 0))
+	myerror(E,"anisotropic init mode 6 requires selection of layer where anisotropy applies");
+      
       input_boolean("anivisc_start_from_iso",
 		    &(E->viscosity.anivisc_start_from_iso),"on",m); /* start
 								       from
 								       isotropic
 								       solution? */
+      if(!E->viscosity.anivisc_start_from_iso)
+	if(E->viscosity.anisotropic_init == 3){
+	  if(E->parallel.me == 0)fprintf(stderr,"WARNING: overriding anisotropic first step for ani init mode\n");
+	  E->viscosity.anivisc_start_from_iso = TRUE;
+	}
+      /* ratio between weak and strong direction */
+      input_double("ani_vis2_factor",&(E->viscosity.ani_vis2_factor),"1.0",m);
+      
+      
     }
-
 #endif
     /* allocate memory here */
     allocate_visc_vars(E);
