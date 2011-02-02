@@ -374,7 +374,10 @@ void compute_nodal_stress(struct All_variables *E,
 	   CitcomS convection
 
 	*/
-	get_constitutive(D,E->mesh.levmax,m,l1,rtf[1][i],rtf[2][i],TRUE,E);
+	get_constitutive(D,rtf[1][i],rtf[2][i],TRUE,
+			 E->EVIn1[E->mesh.levmax][m][l1], E->EVIn2[E->mesh.levmax][m][l1], E->EVIn3[E->mesh.levmax][m][l1],
+			 E->EVI2[E->mesh.levmax][m][l1],E->avmode[E->mesh.levmax][m][l1],
+			 E);
 	
 	/* deviatoric stress, pressure will be added later */
 	eps[0] = Vxyz[1][i] - dilation[i]; /* strain-rates */

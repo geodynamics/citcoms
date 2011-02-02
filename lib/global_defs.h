@@ -791,6 +791,7 @@ struct All_variables {
     float *VIn1[MAX_LEVELS][NCS],*EVIn1[MAX_LEVELS][NCS];
     float *VIn2[MAX_LEVELS][NCS],*EVIn2[MAX_LEVELS][NCS];
     float *VIn3[MAX_LEVELS][NCS],*EVIn3[MAX_LEVELS][NCS];
+    unsigned char *avmode[MAX_LEVELS][NCS];
 #endif
 
 
