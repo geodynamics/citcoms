@@ -5,7 +5,46 @@ void PG_timestep_init(struct All_variables *);
 void PG_timestep(struct All_variables *);
 void std_timestep(struct All_variables *);
 void PG_timestep_solve(struct All_variables *);
+/* Advection_diffusion.sz.c */
+void advection_diffusion_parameters(struct All_variables *);
+void advection_diffusion_allocate_memory(struct All_variables *);
+void PG_timestep_init(struct All_variables *);
+void PG_timestep(struct All_variables *);
+void std_timestep(struct All_variables *);
+void PG_timestep_solve(struct All_variables *);
 /* Anisotropic_viscosity.c */
+void get_constitutive(double [6][6], double, double, int, float, float, float, float, int, struct All_variables *);
+void get_constitutive_ti_viscosity(double [6][6], double, double, double [3], int, double, double);
+void get_constitutive_orthotropic_viscosity(double [6][6], double, double [3], int, double, double);
+void get_constitutive_isotropic(double [6][6]);
+void set_anisotropic_viscosity_at_element_level(struct All_variables *, int);
+void normalize_director_at_nodes(struct All_variables *, float **, float **, float **, int);
+void normalize_director_at_gint(struct All_variables *, float **, float **, float **, int);
+void conv_cart4x4_to_spherical(double [3][3][3][3], double, double, double [3][3][3][3]);
+void conv_cart6x6_to_spherical(double [6][6], double, double, double [6][6]);
+void rotate_ti6x6_to_director(double [6][6], double [3]);
+void get_citcom_spherical_rot(double, double, double [3][3]);
+void get_orth_delta(double [3][3][3][3], double [3]);
+void align_director_with_ISA_for_element(struct All_variables *, int);
+void get_vgm_p(double [4][9], struct Shape_function *, struct Shape_function_dx *, struct CC *, struct CCX *, double [4][9], int, int, int, int, double [3][3], double [3]);
+unsigned char calc_isa_from_vgm(double [3][3], double [3], int, double [3], struct All_variables *, int);
+int is_pure_shear(double [3][3], double [3][3], double [3][3]);
+void rot_4x4(double [3][3][3][3], double [3][3], double [3][3][3][3]);
+void zero_6x6(double [6][6]);
+void zero_4x4(double [3][3][3][3]);
+void copy_4x4(double [3][3][3][3], double [3][3][3][3]);
+void copy_6x6(double [6][6], double [6][6]);
+void print_6x6_mat(FILE *, double [6][6]);
+void print_3x3_mat(FILE *, double [3][3]);
+void c4fromc6(double [3][3][3][3], double [6][6]);
+void c6fromc4(double [6][6], double [3][3][3][3]);
+void isacalc(double [3][3], double *, double [3], struct All_variables *, int *);
+void f_times_ft(double [3][3], double [3][3]);
+void drex_eigen(double [3][3], double [3][3], int *);
+void malmul_scaled_id(double [3][3], double [3][3], double, double);
+void myerror_s(char *, struct All_variables *);
+/* BC_util.c */
+void internal_horizontal_bc(struct All_variables *, float *[], int, int, float, unsigned int, char, int, int);
 void strip_bcs_from_residual(struct All_variables *, double **, int);
 void temperatures_conform_bcs(struct All_variables *);
 void temperatures_conform_bcs2(struct All_variables *);
@@ -15,6 +54,7 @@ void assign_internal_bc(struct All_variables *, int);
 void output_checkpoint(struct All_variables *);
 void read_checkpoint(struct All_variables *);
 /* Citcom_init.c */
+struct All_variables *citcom_init(MPI_Comm *);
 void citcom_finalize(struct All_variables *, int);
 /* Composition_related.c */
 void composition_input(struct All_variables *);
@@ -53,6 +93,8 @@ void convection_boundary_conditions(struct All_variables *);
 double determine_model_net_rotation(struct All_variables *, double *);
 double determine_netr_tp(float, float, float, float, float, int, double *, double *);
 void sub_netr(float, float, float, float *, float *, double *);
+void hc_ludcmp_3x3(double [3][3], int, int *);
+void hc_lubksb_3x3(double [3][3], int, int *, double *);
 /* Drive_solvers.c */
 void general_stokes_solver_setup(struct All_variables *);
 void general_stokes_solver(struct All_variables *);
@@ -127,11 +169,24 @@ double multi_grid(struct All_variables *, double **, double **, double, int);
 double conj_grad(struct All_variables *, double **, double **, double, int *, int);
 void element_gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
 void gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
-double cofactor(double [4][4], int, int, int);
-
 double determinant(double [4][4], int);
+double cofactor(double [4][4], int, int, int);
 long double lg_pow(long double, int);
+#ifdef USE_GGRD
 /* Ggrd_handling.c */
+void ggrd_init_tracer_flavors(struct All_variables *);
+void ggrd_full_temp_init(struct All_variables *);
+void ggrd_reg_temp_init(struct All_variables *);
+void ggrd_temp_init_general(struct All_variables *, int);
+void ggrd_read_mat_from_file(struct All_variables *, int);
+void ggrd_read_ray_from_file(struct All_variables *, int);
+void ggrd_read_vtop_from_file(struct All_variables *, int);
+void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *, int, int, int, int, int, int *, int *, int *);
+void ggrd_read_age_from_file(struct All_variables *, int);
+void ggrd_adjust_tbl_rayleigh(struct All_variables *, double **);
+void ggrd_solve_eigen3x3(double [3][3], double [3], double [3][3], struct All_variables *);
+void ggrd_read_anivisc_from_file(struct All_variables *, int);
+#endif
 /* Global_operations.c */
 void remove_horiz_ave(struct All_variables *, double **, double *, int);
 void remove_horiz_ave2(struct All_variables *, double **);
@@ -161,6 +216,7 @@ double vnorm_nonnewt(struct All_variables *, double **, double **, int);
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);
 void remove_rigid_rot(struct All_variables *);
+
 /* Initial_temperature.c */
 void tic_input(struct All_variables *);
 void convection_initial_temperature(struct All_variables *);
@@ -216,8 +272,6 @@ void visc_from_gint_to_nodes(struct All_variables *, float **, float **, int);
 void visc_from_nodes_to_gint(struct All_variables *, float **, float **, int);
 void visc_from_gint_to_ele(struct All_variables *, float **, float **, int);
 void visc_from_ele_to_gint(struct All_variables *, float **, float **, int);
-
-
 /* Output.c */
 void output_common_input(struct All_variables *);
 void output(struct All_variables *, int);
@@ -226,6 +280,7 @@ void output_coord(struct All_variables *);
 void output_domain(struct All_variables *);
 void output_coord_bin(struct All_variables *);
 void output_visc(struct All_variables *, int);
+void output_avisc(struct All_variables *, int);
 void output_velo(struct All_variables *, int);
 void output_surf_botm(struct All_variables *, int);
 void output_geoid(struct All_variables *, int);
@@ -239,7 +294,35 @@ void output_comp_nd(struct All_variables *, int);
 void output_comp_el(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
 void output_time(struct All_variables *, int);
+#ifdef USE_GZDIR
 /* Output_gzdir.c */
+void gzdir_output(struct All_variables *, int);
+gzFile *gzdir_output_open(char *, char *);
+void gzdir_output_coord(struct All_variables *);
+void gzdir_output_velo_temp(struct All_variables *, int);
+void gzdir_output_visc(struct All_variables *, int);
+void gzdir_output_avisc(struct All_variables *, int);
+void gzdir_output_surf_botm(struct All_variables *, int);
+void gzdir_output_geoid(struct All_variables *, int);
+void gzdir_output_stress(struct All_variables *, int);
+void gzdir_output_horiz_avg(struct All_variables *, int);
+void gzdir_output_mat(struct All_variables *);
+void gzdir_output_pressure(struct All_variables *, int);
+void gzdir_output_tracer(struct All_variables *, int);
+void gzdir_output_comp_nd(struct All_variables *, int);
+void gzdir_output_comp_el(struct All_variables *, int);
+void gzdir_output_heating(struct All_variables *, int);
+void restart_tic_from_gzdir_file(struct All_variables *);
+int open_file_zipped(char *, FILE **, struct All_variables *);
+void gzip_file(char *);
+void get_vtk_filename(char *, int, struct All_variables *, int);
+int be_write_float_to_file(float *, int, FILE *);
+int be_write_int_to_file(int *, int, FILE *);
+void myfprintf(FILE *, char *);
+int be_is_little_endian(void);
+void be_flip_byte_order(void *, size_t);
+void be_flipit(void *, void *, size_t);
+#endif
 /* Output_h5.c */
 void h5output_allocate_memory(struct All_variables *);
 void h5output(struct All_variables *, int);
@@ -247,9 +330,6 @@ void h5input_params(struct All_variables *);
 /* Output_vtk.c */
 void vtk_output(struct All_variables *, int);
 /* Pan_problem_misc_functions.c */
-void get_3x3_from_9vec(double [3][3], double *);
-void get_9vec_from_3x3(double *,double [3][3]);
-
 int get_process_identifier(void);
 void unique_copy_file(struct All_variables *, char *, char *);
 void apply_side_sbc(struct All_variables *);
@@ -271,13 +351,12 @@ void *safe_malloc(size_t);
 void myerror(struct All_variables *, char *);
 void get_r_spacing_fine(double *, struct All_variables *);
 void get_r_spacing_at_levels(double *, struct All_variables *);
-void remove_trace_3x3(double [3][3]);
-void matmul_3x3(double [3][3],double [3][3],double [3][3]);
 void normalize_vec3(float *, float *, float *);
 void normalize_vec3d(double *, double *, double *);
-
-
-
+void matmul_3x3(double [3][3], double [3][3], double [3][3]);
+void remove_trace_3x3(double [3][3]);
+void get_9vec_from_3x3(double *, double [3][3]);
+void get_3x3_from_9vec(double [3][3], double *);
 /* Parallel_util.c */
 void parallel_process_finalize(void);
 void parallel_process_termination(void);
@@ -306,6 +385,7 @@ void phase_change_apply_670(struct All_variables *, double **);
 void phase_change_apply_cmb(struct All_variables *, double **);
 /* Problem_related.c */
 void read_velocity_boundary_from_file(struct All_variables *);
+void read_rayleigh_from_file(struct All_variables *);
 void read_mat_from_file(struct All_variables *);
 void read_temperature_boundary_from_file(struct All_variables *);
 void get_initial_elapsed_time(struct All_variables *);
@@ -326,7 +406,6 @@ void regional_set_3dc_defaults(struct All_variables *);
 void regional_set_3dsphere_defaults(struct All_variables *);
 /* Regional_lith_age_read_files.c */
 void regional_lith_age_read_files(struct All_variables *, int);
-
 /* Regional_parallel_related.c */
 void regional_parallel_processor_setup(struct All_variables *);
 void regional_parallel_domain_decomp0(struct All_variables *);
@@ -433,11 +512,6 @@ void expand_later_array(struct All_variables *, int);
 int icheck_processor_shell(struct All_variables *, int, double);
 int icheck_that_processor_shell(struct All_variables *, int, int, double);
 /* Viscosity_structures.c */
-void calc_rot_from_vgm(double [3][3], double [3][3]);
-void calc_strain_from_vgm9(double *, double [3][3]);
-void calc_strain_from_vgm(double [3][3], double [3][3]);
-double second_invariant_from_3x3(double [3][3]);
-
 void viscosity_system_input(struct All_variables *);
 void viscosity_input(struct All_variables *);
 void allocate_visc_vars(struct All_variables *);
@@ -450,3 +524,7 @@ void visc_from_S(struct All_variables *, float **, int);
 void visc_from_P(struct All_variables *, float **);
 void visc_from_C(struct All_variables *, float **);
 void strain_rate_2_inv(struct All_variables *, int, float *, int);
+double second_invariant_from_3x3(double [3][3]);
+void calc_strain_from_vgm(double [3][3], double [3][3]);
+void calc_strain_from_vgm9(double *, double [3][3]);
+void calc_rot_from_vgm(double [3][3], double [3][3]);

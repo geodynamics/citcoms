@@ -503,7 +503,7 @@ void visc_from_T(E,EEta,propogate)
 
                 if(E->control.mat_control==0)
                     tempa = E->viscosity.N0[l];
-                else if(E->control.mat_control==1)
+                else 
                     tempa = E->viscosity.N0[l]*E->VIP[m][i];
 
                 for(kk=1;kk<=ends;kk++) {
@@ -531,7 +531,7 @@ void visc_from_T(E,EEta,propogate)
 
                 if(E->control.mat_control==0)
                     tempa = E->viscosity.N0[l];
-                else if(E->control.mat_control==1)
+                else 
                     tempa = E->viscosity.N0[l]*E->VIP[m][i];
 
                 for(kk=1;kk<=ends;kk++) {
@@ -639,12 +639,11 @@ void visc_from_T(E,EEta,propogate)
                         temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    if(E->control.mat_control==0)
+                    if(E->control.mat_control==0){
                         EEta[m][ (i-1)*vpts + jj ] = tempa*
                             exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
                                  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
-
-                    if(E->control.mat_control==1) {
+		    }else{
                        visc2 = tempa*
 	               exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
 		          - E->viscosity.E[l]/(one +E->viscosity.T[l]) );

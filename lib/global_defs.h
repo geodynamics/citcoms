@@ -36,6 +36,9 @@ to functions across the whole filespace of CITCOM.
 #ifdef USE_GGRD
 #include "hc.h"
 #endif
+#ifdef USE_GZDIR
+#include <zlib.h>
+#endif
 
 #include <assert.h>
 #include <stdio.h>

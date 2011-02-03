@@ -415,17 +415,17 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
 
   if(!found)
     {if(m==0)
-      if(VERBOSE)
-	if (Default != STRANGE_NUM)
-	  fprintf(stderr,"%25s: (boolean int) = not found (%d) \n",name,(int)(Default));
-	else
-	 { fprintf(stderr,"%25s: (boolean int) = not found (no default) \n",name);
-	   if(BEGINNER)
-	     { fprintf(stderr,"\t\t Previously set value gives ...");
-	       fprintf(stderr,"%d\n",*value);
-	     }
+	if(VERBOSE){
+	  if (Default != STRANGE_NUM)
+	    fprintf(stderr,"%25s: (boolean int) = not found (%d) \n",name,(int)(Default));
+	  else{ 
+	    fprintf(stderr,"%25s: (boolean int) = not found (no default) \n",name);
+	    if(BEGINNER){ 
+	      fprintf(stderr,"\t\t Previously set value gives ...");
+	      fprintf(stderr,"%d\n",*value);
+	    }
+	  }
 	 }
-
       return(0);
     }
 

@@ -662,6 +662,7 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
       interpolate = 1;
     }else{
       interpolate = 0;i1 = 0;
+      age=0;
     }
     if(E->parallel.me == 0)
       fprintf(stderr,"ggrd_read_ray_from_file: assigning at time %g\n",age);
@@ -1082,7 +1083,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       else{
 	cutoff = 1e30;
 	if(save_codes)	/* those will be surface nodes only */
-	  gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
+	  gzprintf(fp1,"%3d %7d\n",E->sphere.caps_per_proc,E->lmesh.nsf);
       }
 
       /* top leevl */
