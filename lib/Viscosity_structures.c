@@ -1477,3 +1477,43 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 
     return;
 }
+/* compute second invariant from a strain-rate tensor in 0,...2 format
+
+ */
+double second_invariant_from_3x3(double e[3][3])
+{
+  return(sqrt(0.5*
+	      (e[0][0] * e[0][0] + 
+	       e[0][1] * e[0][1] * 2.0 + 
+	       e[1][1] * e[1][1] + 
+	       e[1][2] * e[1][2] * 2.0 + 
+	       e[2][2] * e[2][2] + 
+	       e[0][2] * e[0][2] * 2.0)));
+}
+void calc_strain_from_vgm(double l[3][3], double d[3][3])
+{
+  int i,j;
+  for(i=0;i < 3;i++)
+    for(j=0;j < 3;j++)
+      d[i][j] = 0.5 * (l[i][j] + l[j][i]);
+}
+void calc_strain_from_vgm9(double *l9, double d[3][3])
+{
+  double l[3][3];
+  get_3x3_from_9vec(l, l9);
+  calc_strain_from_vgm(l, d);
+}
+
+/* 
+
+   given a 3x3 velocity gradient matrix l, compute a rotation matrix
+
+*/
+
+void calc_rot_from_vgm(double l[3][3], double r[3][3])
+{
+  int i,j;
+  for(i=0;i < 3;i++)
+    for(j=0;j < 3;j++)
+      r[i][j] = 0.5 * (l[i][j] - l[j][i]);
+}

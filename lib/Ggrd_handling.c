@@ -1329,6 +1329,29 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 
 }
 
+/* 
+
+solve a eigenproblem for a symmetric [3][3] matrix (which will not be
+overwritten)
+
+on output, d has the sorted eigenvalues, 
+and e the eigenvectors in each column
+
+d[0] > d[1] > d[2]
+
+
+ */
+void ggrd_solve_eigen3x3(double a[3][3],double d[3],
+			 double e[3][3],struct All_variables *E)
+{
+  GMT_LONG n=3,nrots;
+  double x[3],b[3],z[3],v[9],a9[9];
+  get_9vec_from_3x3(a9,a);
+  /* the j-th column of V is the eigenvector corresponding to the j-th eigenvalue */
+  if (GMT_jacobi (a9, &n, &n, d, v, b, z, &nrots))
+    myerror(E,"GMT Eigenvalue routine failed to converge in 50 sweeps");
+  get_3x3_from_9vec(e,v);
+}
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 /*

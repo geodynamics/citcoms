@@ -247,6 +247,9 @@ void h5input_params(struct All_variables *);
 /* Output_vtk.c */
 void vtk_output(struct All_variables *, int);
 /* Pan_problem_misc_functions.c */
+void get_3x3_from_9vec(double [3][3], double *);
+void get_9vec_from_3x3(double *,double [3][3]);
+
 int get_process_identifier(void);
 void unique_copy_file(struct All_variables *, char *, char *);
 void apply_side_sbc(struct All_variables *);
@@ -268,6 +271,13 @@ void *safe_malloc(size_t);
 void myerror(struct All_variables *, char *);
 void get_r_spacing_fine(double *, struct All_variables *);
 void get_r_spacing_at_levels(double *, struct All_variables *);
+void remove_trace_3x3(double [3][3]);
+void matmul_3x3(double [3][3],double [3][3],double [3][3]);
+void normalize_vec3(float *, float *, float *);
+void normalize_vec3d(double *, double *, double *);
+
+
+
 /* Parallel_util.c */
 void parallel_process_finalize(void);
 void parallel_process_termination(void);
@@ -423,6 +433,11 @@ void expand_later_array(struct All_variables *, int);
 int icheck_processor_shell(struct All_variables *, int, double);
 int icheck_that_processor_shell(struct All_variables *, int, int, double);
 /* Viscosity_structures.c */
+void calc_rot_from_vgm(double [3][3], double [3][3]);
+void calc_strain_from_vgm9(double *, double [3][3]);
+void calc_strain_from_vgm(double [3][3], double [3][3]);
+double second_invariant_from_3x3(double [3][3]);
+
 void viscosity_system_input(struct All_variables *);
 void viscosity_input(struct All_variables *);
 void allocate_visc_vars(struct All_variables *);
