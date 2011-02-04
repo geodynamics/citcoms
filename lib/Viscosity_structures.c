@@ -1516,3 +1516,136 @@ void calc_rot_from_vgm(double l[3][3], double r[3][3])
     for(j=0;j < 3;j++)
       r[i][j] = 0.5 * (l[i][j] - l[j][i]);
 }
+
+/* 
+
+   get velocity gradient matrix at element, and also compute the
+   average velocity in this element
+   
+
+*/
+
+void get_vgm_p(double VV[4][9],struct Shape_function *N,
+	       struct Shape_function_dx *GNx,
+	       struct CC *cc, struct CCX *ccx, double rtf[4][9],
+	       int dims,int ppts, int ends, int spherical,
+	       double l[3][3], double v[3])
+{
+
+  int i,k,j,a;
+  double ra[9], si[9], ct[9];
+  const double one = 1.0;
+  const double two = 2.0;
+  double vgm[3][3];
+  double shp, cc1, cc2, cc3,d_t,d_r,d_p,up,ur,ut;
+  /* init L matrix */
+  for(i=0;i < 3;i++){
+    v[i] = 0.0;
+    for(j=0;j < 3; j++)
+      l[i][j] = 0.0;
+  }
+  /* mean velocity at pressure integration point */
+  for(a=1;a <= ends;a++){
+    v[0] += N->ppt[GNPINDEX(a, 1)] * VV[1][a];
+    v[1] += N->ppt[GNPINDEX(a, 1)] * VV[2][a];
+    v[2] += N->ppt[GNPINDEX(a, 1)] * VV[3][a];
+  }
+  if(spherical){
+    for(k = 1; k <= ppts; k++){
+      ra[k] = rtf[3][k];	      /* 1/r */
+      si[k] = one / sin(rtf[1][k]); /* 1/sin(t) */
+      ct[k] = cos(rtf[1][k]) * si[k]; /* cot(t) */
+    }
+    for(a = 1; a <= ends; a++){
+      for(k = 1; k <= ppts; k++){
+	d_t = GNx->ppt[GNPXINDEX(0, a, k)]; /* d_t */
+	d_p = GNx->ppt[GNPXINDEX(1, a, k)]; /* d_p */
+	d_r = GNx->ppt[GNPXINDEX(2, a, k)]; /* d_r */
+	shp = N->ppt[GNPINDEX(a, k)];
+	for(i = 1; i <= dims; i++){
+	  ut = cc->ppt[BPINDEX(1, i, a, k)]; /* ut */
+	  up = cc->ppt[BPINDEX(2, i, a, k)]; /* up */
+	  ur = cc->ppt[BPINDEX(3, i, a, k)]; /* ur */
+	  
+	  /* velocity gradient matrix is transpose of grad v, using Citcom sort t, p, r
+	
+	     | d_t(vt) d_p(vt) d_r(vt) |
+	     | d_t(vp) d_p(vp) d_r(vp) |
+	     | d_t(vr) d_p(vr) d_r(vr) |
+
+	  */
+
+	  /* d_t vt = 1/r (d_t vt + vr) */
+	  vgm[0][0] =  ((d_t * ut + shp * ccx->ppt[BPXINDEX(1, i, 1, a, k)]) + 
+			shp * ur) * ra[k];
+	  /* d_p vt = 1/r (1/sin(t) d_p vt -vp/tan(t)) */
+	  vgm[0][1] =  ((d_p * ut + shp * ccx->ppt[BPXINDEX(1, i, 2, a, k)]) * si[k] - 
+			shp * up * ct[k]) * ra[k];
+	  /* d_r vt = d_r v_t */
+	  vgm[0][2] = d_r * ut;
+	  /* d_t vp = 1/r d_t v_p*/
+	  vgm[1][0] = (d_t * up + shp * ccx->ppt[BPXINDEX(2, i, 1, a, k)]) * ra[k];
+	  /* d_p vp = 1/r((d_p vp)/sin(t) + vt/tan(t) + vr) */
+	  vgm[1][1] = ((d_p * up + shp * ccx->ppt[BPXINDEX(2, i, 2, a, k)]) * si[k] + 
+		       shp * ut * ct[k] + shp * ur) * ra[k];
+	  /* d_r vp = d_r v_p */
+	  vgm[1][2] =  d_r * up;
+	  /* d_t vr = 1/r(d_t vr - vt) */
+	  vgm[2][0] = ((d_t * ur + shp * ccx->ppt[BPXINDEX(3, i, 1, a, k)]) -
+		       shp * ut) * ra[k];
+	  /* d_p vr =  1/r(1/sin(t) d_p vr - vp) */
+	  vgm[2][1] = (( d_p * ur + shp * ccx->ppt[BPXINDEX(3,i, 2,a,k)] ) * si[k] -
+		       shp * up ) * ra[k];
+	  /* d_r vr = d_r vr */
+	  vgm[2][2] = d_r * ur;
+
+
+	  l[0][0] += vgm[0][0] * VV[i][a];
+	  l[0][1] += vgm[0][1] * VV[i][a];
+	  l[0][2] += vgm[0][2] * VV[1][a];
+	  
+	  l[1][0] += vgm[1][0] * VV[i][a];
+	  l[1][1] += vgm[1][1] * VV[i][a];
+	  l[1][2] += vgm[1][2] * VV[i][a];
+	  
+	  l[2][0] += vgm[2][0] * VV[i][a];
+	  l[2][1] += vgm[2][1] * VV[i][a];
+	  l[2][2] += vgm[2][2] * VV[i][a];
+	  
+	}
+      }
+    }
+  }else{		
+    /* cartesian */
+    for(k = 1; k <= ppts; k++){
+      for(a = 1; a <= ends; a++){
+	/* velocity gradient matrix is transpose of grad v
+	
+	     | d_x(vx) d_y(vx) d_z(vx) |
+	     | d_x(vy) d_y(vy) d_z(vy) |
+	     | d_x(vz) d_y(vz) d_z(vz) |
+	*/
+	l[0][0] += GNx->ppt[GNPXINDEX(0, a, k)] * VV[1][a]; /* other contributions are zero */
+	l[0][1] += GNx->ppt[GNPXINDEX(1, a, k)] * VV[1][a];
+	l[0][2] += GNx->ppt[GNPXINDEX(2, a, k)] * VV[1][a];
+
+	l[1][0] += GNx->ppt[GNPXINDEX(0, a, k)] * VV[2][a];
+	l[1][1] += GNx->ppt[GNPXINDEX(1, a, k)] * VV[2][a];
+	l[1][2] += GNx->ppt[GNPXINDEX(2, a, k)] * VV[2][a];
+
+	l[2][0] += GNx->ppt[GNPXINDEX(0, a, k)] * VV[3][a];
+	l[2][1] += GNx->ppt[GNPXINDEX(1, a, k)] * VV[3][a];
+	l[2][2] += GNx->ppt[GNPXINDEX(2, a, k)] * VV[3][a];
+
+      }
+    }
+  }
+  if(ppts != 1){
+    for(i=0;i<3;i++)
+      for(j=0;j<3;j++)
+	l[i][j] /= (float)ppts;
+  }
+
+}
+
+
