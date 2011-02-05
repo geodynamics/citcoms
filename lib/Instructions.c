@@ -280,6 +280,7 @@ void read_initial_settings(struct All_variables *E)
   double ell_tmp;
   int m=E->parallel.me;
   double levmax;
+  int tmp_int_in;
 
   /* first the problem type (defines subsequent behaviour) */
 
@@ -636,6 +637,13 @@ void read_initial_settings(struct All_variables *E)
 
   input_boolean("check_continuity_convergence",&(E->control.check_continuity_convergence),"on",m);
   input_boolean("check_pressure_convergence",&(E->control.check_pressure_convergence),"on",m);
+
+  /* for backward compatibility, override */
+  input_boolean("only_check_vel_convergence",&tmp_int_in,"off",m);
+  if(tmp_int_in){
+    E->control.check_continuity_convergence = 0;
+    E->control.check_pressure_convergence = 0;
+  }
 
   input_int("vhighstep",&(E->control.v_steps_high),"1,0,nomax",m);
   input_int("vlowstep",&(E->control.v_steps_low),"250,0,nomax",m);
