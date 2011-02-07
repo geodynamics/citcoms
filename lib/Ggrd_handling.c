@@ -1440,6 +1440,8 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
 	  ind = (k-1)*vpts + l;
 	  E->EVI2[i][j][ind] = 0.0;
 	  E->EVIn1[i][j][ind] = 1.0; E->EVIn2[i][j][ind] = E->EVIn3[i][j][ind] = 0.0;
+	  E->avmode[i][j][ind] = (unsigned char)
+	    E->viscosity.allow_anisotropic_viscosity;
 	}
       }
     }
