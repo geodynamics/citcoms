@@ -823,13 +823,6 @@ static void generate_random_tracers(struct All_variables *E,
 
     /* Tracers are placed randomly in cap */
     /* (intentionally using rand() instead of srand() )*/
-    /* 
-       
-    what is this supposed to mean? why not initialize the random
-    number generator with a srand48 call? I added that in Citcom_init
-    to ensure reproducibility TWB
-
-    */
     while (E->trace.ntracers[j]<tracers_cap) {
 
         number_of_tries++;
