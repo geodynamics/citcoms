@@ -105,11 +105,19 @@ static void vtk_cell_data_trailer(struct All_variables *E, FILE *fp)
 static void vtk_output_temp(struct All_variables *E, FILE *fp)
 {
     int i, j;
+    int m,k,l,nox,noy,noz,noxnoz;
+    noy=E->lmesh.noy;
+    nox=E->lmesh.nox;
+    noz=E->lmesh.noz;
+    noxnoz = nox * noz;
 
     fputs("        <DataArray type=\"Float32\" Name=\"temperature\" format=\"ascii\">\n", fp);
 
     for(j=1; j<=E->sphere.caps_per_proc; j++) {
-        for(i=1; i<=E->lmesh.nno; i++) {
+      for(m=1;m <= noz;m++)  
+	for(k=1;k <= noy;k++)
+	  for(l=1;l <= nox;l++){
+	    i = m + (l-1) * noz + (k-1) * noxnoz;
             fprintf(fp, "%.6e\n", E->T[j][i]);
         }
     }
@@ -125,6 +133,11 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
     double sint, sinf, cost, cosf;
     float *V[4];
     const int lev = E->mesh.levmax;
+    int m,k,l,nox,noy,noz,noxnoz;
+    noy=E->lmesh.noy;
+    nox=E->lmesh.nox;
+    noz=E->lmesh.noz;
+    noxnoz = nox * noz;
 
     fputs("        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"ascii\">\n", fp);
 
@@ -133,17 +146,21 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
         V[2] = E->sphere.cap[j].V[2];
         V[3] = E->sphere.cap[j].V[3];
 
-        for(i=1; i<=E->lmesh.nno; i++) {
-            sint = E->SinCos[lev][j][0][i];
-            sinf = E->SinCos[lev][j][1][i];
-            cost = E->SinCos[lev][j][2][i];
-            cosf = E->SinCos[lev][j][3][i];
-
-            fprintf(fp, "%.6e %.6e %.6e\n",
-                    V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf,
-                    V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf,
-                    -V[1][i]*sint + V[3][i]*cost);
-        }
+	for(m=1;m <= noz;m++)  
+	  for(k=1;k <= noy;k++)
+	    for(l=1;l <= nox;l++){
+	      i = m + (l-1) * noz + (k-1) * noxnoz;
+	    
+	      sint = E->SinCos[lev][j][0][i];
+	      sinf = E->SinCos[lev][j][1][i];
+	      cost = E->SinCos[lev][j][2][i];
+	      cosf = E->SinCos[lev][j][3][i];
+	      
+	      fprintf(fp, "%.6e %.6e %.6e\n",
+		      V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf,
+		      V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf,
+		      -V[1][i]*sint + V[3][i]*cost);
+	    }
     }
 
     fputs("        </DataArray>\n", fp);
@@ -155,12 +172,21 @@ static void vtk_output_visc(struct All_variables *E, FILE *fp)
 {
     int i, j;
     int lev = E->mesh.levmax;
+    int m,k,l,nox,noy,noz,noxnoz;
+    noy=E->lmesh.noy;
+    nox=E->lmesh.nox;
+    noz=E->lmesh.noz;
+    noxnoz = nox * noz;
 
     fputs("        <DataArray type=\"Float32\" Name=\"viscosity\" format=\"ascii\">\n", fp);
 
     for(j=1; j<=E->sphere.caps_per_proc; j++) {
-        for(i=1; i<=E->lmesh.nno; i++)
+      for(m=1;m <= noz;m++)  
+	for(k=1;k <= noy;k++)
+	  for(l=1;l <= nox;l++){
+	    i = m + (l-1) * noz + (k-1) * noxnoz;
             fprintf(fp, "%.4e\n", E->VI[lev][j][i]);
+	  }
     }
 
     fputs("        </DataArray>\n", fp);
@@ -173,16 +199,26 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     /* Output Cartesian coordinates as most VTK visualization softwares
        assume it. */
     int i, j;
+    int m,k,l,nox,noy,noz,noxnoz;
+    noy=E->lmesh.noy;
+    nox=E->lmesh.nox;
+    noz=E->lmesh.noz;
+    noxnoz = nox * noz;
 
     fputs("      <Points>\n", fp);
     fputs("        <DataArray type=\"Float32\" Name=\"coordinate\" NumberOfComponents=\"3\" format=\"ascii\">\n", fp);
 
     for(j=1; j<=E->sphere.caps_per_proc; j++) {
-        for(i=1; i<=E->lmesh.nno; i++)
+      for(m=1;m <= noz;m++)  
+	for(k=1;k <= noy;k++)
+	  for(l=1;l <= nox;l++){
+	    i = m + (l-1) * noz + (k-1) * noxnoz;
+	    
             fprintf(fp,"%.6e %.6e %.6e\n",
                     E->x[j][1][i],
                     E->x[j][2][i],
                     E->x[j][3][i]);
+	  }
     }
 
     fputs("        </DataArray>\n", fp);
