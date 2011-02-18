@@ -286,6 +286,7 @@ void gzdir_output_coord(struct All_variables *E)
     /* write nodal coordinate to file, big endian */
     for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nno;i++) {
+	/* cartesian coordinates */
 	x[0]=E->x[j][1][i];x[1]=E->x[j][2][i];x[2]=E->x[j][3][i];
 	if(be_write_float_to_file(x,3,fp1) != 3)
 	  BE_WERROR;
