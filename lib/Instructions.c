@@ -635,6 +635,8 @@ void read_initial_settings(struct All_variables *E)
   input_double("accuracy",&(E->control.accuracy),"1.0e-4,0.0,1.0",m);
   input_double("inner_accuracy_scale",&(E->control.inner_accuracy_scale),"1.0,0.000001,1.0",m);
 
+  input_boolean("force_iteration",&(E->control.force_iteration),"off",m);
+
   input_boolean("check_continuity_convergence",&(E->control.check_continuity_convergence),"on",m);
   input_boolean("check_pressure_convergence",&(E->control.check_pressure_convergence),"on",m);
 

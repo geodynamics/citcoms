@@ -172,22 +172,26 @@ int need_visc_update(struct All_variables *E)
   }
 }
 int need_to_iterate(struct All_variables *E){
+  if(E->control.force_iteration){
+    return 1;
+  }else{
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   /* anisotropic viscosity */
   if(E->viscosity.allow_anisotropic_viscosity){
     if(E->viscosity.anivisc_start_from_iso) /* first step will be
 					       solved isotropically at
 					       first  */
-      return TRUE;
+      return 1;
     else
-      return (E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE);
+      return (E->viscosity.SDEPV || E->viscosity.PDEPV)?(1):(0);
   }else{
 #endif
   /* regular operation */
-  return ((E->viscosity.SDEPV || E->viscosity.PDEPV)?(TRUE):(FALSE));
+  return ((E->viscosity.SDEPV || E->viscosity.PDEPV)?(1):(0));
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   }
 #endif
+  }
 }
 void general_stokes_solver_pseudo_surf(struct All_variables *E)
 {
