@@ -388,7 +388,7 @@ void compute_nodal_stress(struct All_variables *E,
 	eps[2] = Vxyz[3][i] - dilation[i];
 	eps[3] = Vxyz[4][i];
 	eps[4] = Vxyz[5][i];
-	eps[5] = Vxyz[5][i];
+	eps[5] = Vxyz[6][i];
 	for(l1=0;l1 < 6;l1++){	
 	  str[l1]=0.0;
 	  for(l2=0;l2 < 6;l2++)
