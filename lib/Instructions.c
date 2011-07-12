@@ -809,6 +809,16 @@ void check_settings_consistency(struct All_variables *E)
 							 */
     }
 
+    if (strcmp(E->output.vtk_format, "binary") == 0) {
+#ifndef USE_GZDIR
+        /* zlib is required for vtk binary output */
+        if(E->parallel.me == 0) {
+            fputs("VTK binary output requires zlib, but couldn't find it at 'configure' time. Please either use VTK ascii output or re-run 'configure' with suitable flags.\n", stderr);
+        }
+        parallel_process_termination();
+#endif
+    }
+
     return;
 }
 

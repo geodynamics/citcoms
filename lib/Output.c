@@ -93,6 +93,17 @@ void output_common_input(struct All_variables *E)
       //fprintf(stderr,"gzdir: vtkio: %i save basis vectors: %i\n",
       //      E->output.gzdir.vtk_io,E->output.gzdir.vtk_base_save);
     }
+
+    if(strcmp(E->output.format, "vtk") == 0) {
+        input_string("vtk_format", E->output.vtk_format, "ascii",m);
+        if (strcmp(E->output.vtk_format, "binary") != 0 &&
+            strcmp(E->output.vtk_format, "ascii") != 0) {
+            if(E->parallel.me == 0) {
+                fprintf(stderr, "Unknown vtk_format: %s\n", E->output.vtk_format);
+            }
+            parallel_process_termination();
+        }
+    }
 }
 
 
