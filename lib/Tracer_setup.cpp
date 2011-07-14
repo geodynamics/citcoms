@@ -56,11 +56,7 @@ void gzip_file(char *);
 
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
-void expand_later_array(struct All_variables *E, int j);
-void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
-void allocate_tracer_arrays(struct All_variables *E,
-                            int j, int number_of_tracers);
 void count_tracers_of_flavors(struct All_variables *E);
 
 int full_icheck_cap(struct All_variables *E, int icap,
@@ -79,9 +75,7 @@ static void read_old_tracer_file(struct All_variables *E);
 static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
-static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
-static void eject_tracer(struct All_variables *E, int j, int it);
 int read_double_vector(FILE *, int , double *);
 void cart_to_sphere(struct All_variables *,
                     double , double , double ,
@@ -221,14 +215,14 @@ void tracer_input(struct All_variables *E)
 
 void tracer_initial_settings(struct All_variables *E)
 {
-   void full_keep_within_bounds();
+   /*void full_keep_within_bounds();
    void full_tracer_setup();
    void full_get_velocity();
    int full_iget_element();
    void regional_keep_within_bounds();
    void regional_tracer_setup();
    void regional_get_velocity();
-   int regional_iget_element();
+   int regional_iget_element();*/
 
    E->trace.advection_time = 0;
    E->trace.find_tracers_time = 0;
@@ -366,7 +360,6 @@ void tracer_post_processing(struct All_variables *E)
 static void predict_tracers(struct All_variables *E)
 {
 
-    int numtracers;
     int j;
     int kk;
     int nelem;
@@ -377,6 +370,8 @@ static void predict_tracers(struct All_variables *E)
     double theta_pred,phi_pred,rad_pred;
     double x_pred,y_pred,z_pred;
     double velocity_vector[4];
+    TracerArray::iterator ta;
+    TracerList::iterator tr;
 
     void cart_to_sphere();
 
@@ -384,20 +379,20 @@ static void predict_tracers(struct All_variables *E)
     dt=E->advection.timestep;
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
+    // For each cap
+    for (ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
 
-        numtracers=E->trace.ntracers[j];
+        // For each tracer listed for the given cap
+        for (tr=ta->begin();tr!=ta->end();++tr) {
 
-        for (kk=1;kk<=numtracers;kk++) {
+            theta0=tr->theta;
+            phi0=tr->phi;
+            rad0=tr->rad;
+            x0=tr->x;
+            y0=tr->y;
+            z0=tr->z;
 
-            theta0=E->trace.basicq[j][0][kk];
-            phi0=E->trace.basicq[j][1][kk];
-            rad0=E->trace.basicq[j][2][kk];
-            x0=E->trace.basicq[j][3][kk];
-            y0=E->trace.basicq[j][4][kk];
-            z0=E->trace.basicq[j][5][kk];
-
-            nelem=E->trace.ielement[j][kk];
+            nelem=tr->ielement;
             (E->trace.get_velocity)(E,j,nelem,theta0,phi0,rad0,velocity_vector);
 
             x_pred=x0+velocity_vector[1]*dt;
@@ -412,24 +407,24 @@ static void predict_tracers(struct All_variables *E)
 
             /* Current Coordinates are always kept in positions 0-5. */
 
-            E->trace.basicq[j][0][kk]=theta_pred;
-            E->trace.basicq[j][1][kk]=phi_pred;
-            E->trace.basicq[j][2][kk]=rad_pred;
-            E->trace.basicq[j][3][kk]=x_pred;
-            E->trace.basicq[j][4][kk]=y_pred;
-            E->trace.basicq[j][5][kk]=z_pred;
+            tr->theta=theta_pred;
+            tr->phi=phi_pred;
+            tr->rad=rad_pred;
+            tr->x=x_pred;
+            tr->y=y_pred;
+            tr->z=z_pred;
 
             /* Fill in original coords (positions 6-8) */
 
-            E->trace.basicq[j][6][kk]=x0;
-            E->trace.basicq[j][7][kk]=y0;
-            E->trace.basicq[j][8][kk]=z0;
+            tr->x0=x0;
+            tr->y0=y0;
+            tr->z0=z0;
 
             /* Fill in original velocities (positions 9-11) */
 
-            E->trace.basicq[j][9][kk]=velocity_vector[1];  /* Vx */
-            E->trace.basicq[j][10][kk]=velocity_vector[2];  /* Vy */
-            E->trace.basicq[j][11][kk]=velocity_vector[3];  /* Vz */
+            tr->Vx=velocity_vector[1];  /* Vx */
+            tr->Vy=velocity_vector[2];  /* Vy */
+            tr->Vz=velocity_vector[3];  /* Vz */
 
 
         } /* end kk, predicting tracers */
@@ -477,29 +472,34 @@ static void correct_tracers(struct All_variables *E)
 
     void cart_to_sphere();
 
+    TracerArray::iterator ta;
+    TracerList::iterator tr;
 
     dt=E->advection.timestep;
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        for (kk=1;kk<=E->trace.ntracers[j];kk++) {
+    // For each cap
+    for (ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
 
-            theta_pred=E->trace.basicq[j][0][kk];
-            phi_pred=E->trace.basicq[j][1][kk];
-            rad_pred=E->trace.basicq[j][2][kk];
-            x_pred=E->trace.basicq[j][3][kk];
-            y_pred=E->trace.basicq[j][4][kk];
-            z_pred=E->trace.basicq[j][5][kk];
+        // For each tracer listed for the given cap
+        for (tr=ta->begin();tr!=ta->end();++tr) {
 
-            x0=E->trace.basicq[j][6][kk];
-            y0=E->trace.basicq[j][7][kk];
-            z0=E->trace.basicq[j][8][kk];
+            theta_pred=tr->theta;
+            phi_pred=tr->phi;
+            rad_pred=tr->rad;
+            x_pred=tr->x;
+            y_pred=tr->y;
+            z_pred=tr->z;
 
-            Vx0=E->trace.basicq[j][9][kk];
-            Vy0=E->trace.basicq[j][10][kk];
-            Vz0=E->trace.basicq[j][11][kk];
+            x0=tr->x0;
+            y0=tr->y0;
+            z0=tr->z0;
 
-            nelem=E->trace.ielement[j][kk];
+            Vx0=tr->Vx;
+            Vy0=tr->Vy;
+            Vz0=tr->Vz;
+
+            nelem=tr->ielement;
 
             (E->trace.get_velocity)(E,j,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
 
@@ -516,12 +516,12 @@ static void correct_tracers(struct All_variables *E)
 
             /* Fill in Current Positions (other positions are no longer important) */
 
-            E->trace.basicq[j][0][kk]=theta_cor;
-            E->trace.basicq[j][1][kk]=phi_cor;
-            E->trace.basicq[j][2][kk]=rad_cor;
-            E->trace.basicq[j][3][kk]=x_cor;
-            E->trace.basicq[j][4][kk]=y_cor;
-            E->trace.basicq[j][5][kk]=z_cor;
+            tr->theta=theta_cor;
+            tr->phi=phi_cor;
+            tr->rad=rad_cor;
+            tr->x=x_cor;
+            tr->y=y_cor;
+            tr->z=z_cor;
 
         } /* end kk, correcting tracers */
     } /* end caps */
@@ -548,7 +548,6 @@ static void find_tracers(struct All_variables *E)
     int j;
     int it;
     int iprevious_element;
-    int num_tracers;
 
     double theta,phi,rad;
     double x,y,z;
@@ -556,8 +555,6 @@ static void find_tracers(struct All_variables *E)
     double time_stat2;
 
     void put_away_later();
-    void eject_tracer();
-    void reduce_tracer_arrays();
     void sphere_to_cart();
     void full_lost_souls();
     void regional_lost_souls();
@@ -565,13 +562,13 @@ static void find_tracers(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
+    TracerArray::iterator ta;
+    TracerList::iterator tr;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
+    // For each cap
+    for (ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
 
         /* initialize arrays and statistical counters */
-
-        E->trace.ilater[j]=E->trace.ilatersize[j]=0;
 
         E->trace.istat1=0;
         for (kk=0;kk<=4;kk++) {
@@ -582,20 +579,20 @@ static void find_tracers(struct All_variables *E)
         /* important to index by it, not kk */
 
         it=0;
-        num_tracers=E->trace.ntracers[j];
 
-        for (kk=1;kk<=num_tracers;kk++) {
+        // For each tracer listed for the given cap
+        for (tr=ta->begin();tr!=ta->end();++tr) {
 
             it++;
 
-            theta=E->trace.basicq[j][0][it];
-            phi=E->trace.basicq[j][1][it];
-            rad=E->trace.basicq[j][2][it];
-            x=E->trace.basicq[j][3][it];
-            y=E->trace.basicq[j][4][it];
-            z=E->trace.basicq[j][5][it];
+            theta=tr->theta;
+            phi=tr->phi;
+            rad=tr->rad;
+            x=tr->x;
+            y=tr->y;
+            z=tr->z;
 
-            iprevious_element=E->trace.ielement[j][it];
+            iprevious_element=tr->ielement;
 
             iel=(E->trace.iget_element)(E,j,iprevious_element,x,y,z,theta,phi,rad);
             /* debug *
@@ -603,13 +600,12 @@ static void find_tracers(struct All_variables *E)
             fflush(E->trace.fpt);
             /**/
 
-            E->trace.ielement[j][it]=iel;
+            tr->ielement=iel;
 
             if (iel == -99) {
                 /* tracer is inside other processors */
-                put_away_later(E,j,it);
-                eject_tracer(E,j,it);
-                it--;
+		E->trace.later_tracer[j].push_back(*tr);
+                tr = ta->erase(tr);
             } else if (iel == -1) {
                 /* tracer is inside this processor,
                  * but cannot find its element.
@@ -617,9 +613,7 @@ static void find_tracers(struct All_variables *E)
 
                 if (E->trace.itracer_warnings) exit(10);
 
-
-                eject_tracer(E,j,it);
-                it--;
+                tr = ta->erase(tr);
             }
 
         } /* end tracers */
@@ -639,21 +633,6 @@ static void find_tracers(struct All_variables *E)
     else
         regional_lost_souls(E);
 
-    /* Free later arrays */
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        if (E->trace.ilatersize[j]>0) {
-            for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-                free(E->trace.rlater[j][kk]);
-            }
-        }
-    } /* end j */
-
-
-    /* Adjust Array Sizes */
-
-    reduce_tracer_arrays(E);
-
     E->trace.find_tracers_time += CPU_time0() - begin_time;
 
     return;
@@ -667,24 +646,25 @@ static void find_tracers(struct All_variables *E)
 
 void count_tracers_of_flavors(struct All_variables *E)
 {
+    TracerArray::iterator ta;
+    TracerList::iterator tr;
 
-    int j, flavor, e, kk;
-    int numtracers;
+    int j, flavor, e;
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
+    // For each cap
+    for (j=1,ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta,++j) {
 
         /* first zero arrays */
         for (flavor=0; flavor<E->trace.nflavors; flavor++)
             for (e=1; e<=E->lmesh.nel; e++)
-                E->trace.ntracer_flavor[j][flavor][e] = 0;
-
-        numtracers=E->trace.ntracers[j];
+                E->trace.num_tracer_flavors[j][flavor][e] = 0;
 
         /* Fill arrays */
-        for (kk=1; kk<=numtracers; kk++) {
-            e = E->trace.ielement[j][kk];
-            flavor = E->trace.extraq[j][0][kk];
-            E->trace.ntracer_flavor[j][flavor][e]++;
+        // For each tracer listed for the given cap
+        for (tr=ta->begin();tr!=ta->end();++tr) {
+            e = tr->ielement;
+            flavor = tr->flavor;
+            E->trace.num_tracer_flavors[j][flavor][e]++;
         }
     }
 
@@ -801,8 +781,6 @@ static void generate_random_tracers(struct All_variables *E,
     double random1,random2,random3;
 
 
-    allocate_tracer_arrays(E,j,tracers_cap);
-
     /* Finding the min/max of the cartesian coordinates. */
     /* One must loop over E->X to find the min/max, since the 8 corner */
     /* nodes may not be the min/max. */
@@ -823,7 +801,7 @@ static void generate_random_tracers(struct All_variables *E,
 
     /* Tracers are placed randomly in cap */
     /* (intentionally using rand() instead of srand() )*/
-    while (E->trace.ntracers[j]<tracers_cap) {
+    while (E->trace.tracers[j].size()<tracers_cap) {
 
         number_of_tries++;
         max_tries=100*tracers_cap;
@@ -869,15 +847,16 @@ static void generate_random_tracers(struct All_variables *E,
 
         (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
 
-        E->trace.ntracers[j]++;
-        kk=E->trace.ntracers[j];
+        Tracer new_tracer;
 
-        E->trace.basicq[j][0][kk]=theta;
-        E->trace.basicq[j][1][kk]=phi;
-        E->trace.basicq[j][2][kk]=rad;
-        E->trace.basicq[j][3][kk]=x;
-        E->trace.basicq[j][4][kk]=y;
-        E->trace.basicq[j][5][kk]=z;
+        new_tracer.theta=theta;
+        new_tracer.phi=phi;
+        new_tracer.rad=rad;
+        new_tracer.x=x;
+        new_tracer.y=y;
+        new_tracer.z=z;
+
+        E->trace.tracers[j].push_back(new_tracer);
 
     } /* end while */
 
@@ -907,7 +886,6 @@ static void read_tracer_file(struct All_variables *E)
     int icheck_processor_shell();
     void sphere_to_cart();
     void cart_to_sphere();
-    void expand_tracer_arrays();
 
     double x,y,z;
     double theta,phi,rad;
@@ -926,7 +904,8 @@ static void read_tracer_file(struct All_variables *E)
             number_of_tracers, ncolumns);
 
     /* some error control */
-    if (E->trace.number_of_extra_quantities+3 != ncolumns) {
+    //if (E->trace.number_of_extra_quantities+3 != ncolumns) {
+    if (1+3 != ncolumns) {
         fprintf(E->trace.fpt,"ERROR(read tracer file)-wrong # of columns\n");
         fflush(E->trace.fpt);
         exit(10);
@@ -938,17 +917,14 @@ static void read_tracer_file(struct All_variables *E)
     icushion=100;
 
     /* for absolute tracer method */
-    E->trace.number_of_tracers = number_of_tracers;
-
     iestimate=number_of_tracers/E->parallel.nproc + icushion;
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
-        allocate_tracer_arrays(E,j,iestimate);
-
         for (kk=1;kk<=number_of_tracers;kk++) {
             int len, ncol;
-            ncol = 3 + E->trace.number_of_extra_quantities;
+            ncol = 3 + 1;
+            //ncol = 3 + E->trace.number_of_extra_quantities;
 
             len = read_double_vector(fptracer, ncol, buffer);
             if (len != ncol) {
@@ -984,24 +960,20 @@ static void read_tracer_file(struct All_variables *E)
             /* if still here, tracer is in processor domain */
 
 
-            E->trace.ntracers[j]++;
+            Tracer in_tracer;
+            in_tracer.theta=theta;
+            in_tracer.phi=phi;
+            in_tracer.rad=rad;
+            in_tracer.x=x;
+            in_tracer.y=y;
+            in_tracer.z=z;
 
-            if (E->trace.ntracers[j]>=(E->trace.max_ntracers[j]-5)) expand_tracer_arrays(E,j);
-
-            E->trace.basicq[j][0][E->trace.ntracers[j]]=theta;
-            E->trace.basicq[j][1][E->trace.ntracers[j]]=phi;
-            E->trace.basicq[j][2][E->trace.ntracers[j]]=rad;
-            E->trace.basicq[j][3][E->trace.ntracers[j]]=x;
-            E->trace.basicq[j][4][E->trace.ntracers[j]]=y;
-            E->trace.basicq[j][5][E->trace.ntracers[j]]=z;
-
-            for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[j][i][E->trace.ntracers[j]]=buffer[i+3];
+            E->trace.tracers[j].push_back(in_tracer);
 
         } /* end kk, number of tracers */
 
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
-                E->trace.ntracers[j]);
+                (int)E->trace.tracers[j].size());
 
         /** debug **
         for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
@@ -1059,11 +1031,11 @@ static void read_old_tracer_file(struct All_variables *E)
 
     FILE *fp1;
 
-    if (E->trace.number_of_extra_quantities>99) {
+    /*if (E->trace.number_of_extra_quantities>99) {
         fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-increase size of extra[]\n");
         fflush(E->trace.fpt);
         parallel_process_termination();
-    }
+    }*/
 
 
 
@@ -1103,20 +1075,17 @@ static void read_old_tracer_file(struct All_variables *E)
 
 
         /* some error control */
-        if (E->trace.number_of_extra_quantities+3 != ncolumns) {
+        //if (E->trace.number_of_extra_quantities+3 != ncolumns) {
+        if (1+3 != ncolumns) {
             fprintf(E->trace.fpt,"ERROR(read_old_tracer_file)-wrong # of columns\n");
             fflush(E->trace.fpt);
             exit(10);
         }
 
-        /* allocate memory for tracer arrays */
-
-        allocate_tracer_arrays(E,j,numtracers);
-        E->trace.ntracers[j]=numtracers;
-
         for (kk=1;kk<=numtracers;kk++) {
             int len, ncol;
-            ncol = 3 + E->trace.number_of_extra_quantities;
+            ncol = 3 + 1;
+            //ncol = 3 + E->trace.number_of_extra_quantities;
 
             len = read_double_vector(fp1, ncol, buffer);
             if (len != ncol) {
@@ -1135,15 +1104,17 @@ static void read_old_tracer_file(struct All_variables *E)
 
             (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
 
-            E->trace.basicq[j][0][kk]=theta;
-            E->trace.basicq[j][1][kk]=phi;
-            E->trace.basicq[j][2][kk]=rad;
-            E->trace.basicq[j][3][kk]=x;
-            E->trace.basicq[j][4][kk]=y;
-            E->trace.basicq[j][5][kk]=z;
+            Tracer in_tracer;
+            in_tracer.theta = theta;
+            in_tracer.phi = phi;
+            in_tracer.rad = rad;
+            in_tracer.x = x;
+            in_tracer.y = y;
+            in_tracer.z = z;
+            E->trace.tracers[j].push_back(in_tracer);
 
-            for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[j][i][kk]=buffer[i+3];
+            //for (i=0; i<E->trace.number_of_extra_quantities; i++)
+            //    E->trace.extraq[j][i][kk]=buffer[i+3];
 
         }
 
@@ -1220,7 +1191,7 @@ static int isum_tracers(struct All_variables *E)
 
     imycount = 0;
     for (j=1; j<=E->sphere.caps_per_proc; j++)
-        imycount = imycount + E->trace.ntracers[j];
+        imycount = imycount + E->trace.tracers[j].size();
 
     MPI_Allreduce(&imycount,&iallcount,1,MPI_INT,MPI_SUM,E->parallel.world);
 
@@ -1236,7 +1207,6 @@ void cart_to_sphere(struct All_variables *E,
 {
 
     double temp;
-    double myatan();
 
     temp=x*x+y*y;
 
@@ -1275,21 +1245,22 @@ void sphere_to_cart(struct All_variables *E,
 
 static void init_tracer_flavors(struct All_variables *E)
 {
-    int j, kk, number_of_tracers;
+    int j, kk;
     int i;
     double flavor;
     double rad;
+    TracerArray::iterator ta;
+    TracerList::iterator tr;
 
     switch(E->trace.ic_method_for_flavors){
     case 0:
       /* ic_method_for_flavors == 0 (layered structure) */
       /* any tracer above z_interface[i] is of flavor i */
       /* any tracer below z_interface is of flavor (nflavors-1) */
-      for (j=1;j<=E->sphere.caps_per_proc;j++) {
+      for (ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
 
-	number_of_tracers = E->trace.ntracers[j];
-	for (kk=1;kk<=number_of_tracers;kk++) {
-	  rad = E->trace.basicq[j][2][kk];
+	for (tr=ta->begin();tr!=ta->end();++tr) {
+	  rad = tr->rad;
 
           flavor = E->trace.nflavors - 1;
           for (i=0; i<E->trace.nflavors-1; i++) {
@@ -1298,7 +1269,7 @@ static void init_tracer_flavors(struct All_variables *E)
                   break;
               }
           }
-          E->trace.extraq[j][0][kk] = flavor;
+          tr->flavor = flavor;
 	}
       }
       break;
@@ -1443,296 +1414,6 @@ void get_neighboring_caps(struct All_variables *E)
     return;
 }
 
-
-/**************** INITIALIZE TRACER ARRAYS ************************************/
-/*                                                                            */
-/* This function allocates memories to tracer arrays.                         */
-
-void allocate_tracer_arrays(struct All_variables *E,
-                            int j, int number_of_tracers)
-{
-
-    int kk;
-
-    /* max_ntracers is physical size of tracer array */
-    /* (initially make it 25% larger than required */
-
-    E->trace.max_ntracers[j]=number_of_tracers+number_of_tracers/4;
-    E->trace.ntracers[j]=0;
-
-    /* make tracer arrays */
-
-    if ((E->trace.ielement[j]=(int *) malloc(E->trace.max_ntracers[j]*sizeof(int)))==NULL) {
-        fprintf(E->trace.fpt,"ERROR(make tracer array)-no memory 1a\n");
-        fflush(E->trace.fpt);
-        exit(10);
-    }
-    for (kk=1;kk<E->trace.max_ntracers[j];kk++)
-        E->trace.ielement[j][kk]=-99;
-
-
-    for (kk=0;kk<E->trace.number_of_basic_quantities;kk++) {
-        if ((E->trace.basicq[j][kk]=(double *)malloc(E->trace.max_ntracers[j]*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1b.%d\n",kk);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    }
-
-    for (kk=0;kk<E->trace.number_of_extra_quantities;kk++) {
-        if ((E->trace.extraq[j][kk]=(double *)malloc(E->trace.max_ntracers[j]*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    }
-
-    if (E->trace.nflavors > 0) {
-        E->trace.ntracer_flavor[j]=(int **)malloc(E->trace.nflavors*sizeof(int*));
-        for (kk=0;kk<E->trace.nflavors;kk++) {
-            if ((E->trace.ntracer_flavor[j][kk]=(int *)malloc((E->lmesh.nel+1)*sizeof(int)))==NULL) {
-                fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-        }
-    }
-
-
-    fprintf(E->trace.fpt,"Physical size of tracer arrays (max_ntracers): %d\n",
-            E->trace.max_ntracers[j]);
-    fflush(E->trace.fpt);
-
-    return;
-}
-
-
-
-/****** EXPAND TRACER ARRAYS *****************************************/
-
-void expand_tracer_arrays(struct All_variables *E, int j)
-{
-
-    int inewsize;
-    int kk;
-    int icushion;
-
-    /* expand basicq and ielement by 20% */
-
-    icushion=100;
-
-    inewsize=E->trace.max_ntracers[j]+E->trace.max_ntracers[j]/5+icushion;
-
-    if ((E->trace.ielement[j]=(int *)realloc(E->trace.ielement[j],inewsize*sizeof(int)))==NULL) {
-        fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory (ielement)\n");
-        fflush(E->trace.fpt);
-        exit(10);
-    }
-
-    for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++) {
-        if ((E->trace.basicq[j][kk]=(double *)realloc(E->trace.basicq[j][kk],inewsize*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory (%d)\n",kk);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    }
-
-    for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++) {
-        if ((E->trace.extraq[j][kk]=(double *)realloc(E->trace.extraq[j][kk],inewsize*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory 78 (%d)\n",kk);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    }
-
-
-    fprintf(E->trace.fpt,"Expanding physical memory of ielement, basicq, and extraq to %d from %d\n",
-            inewsize,E->trace.max_ntracers[j]);
-
-    E->trace.max_ntracers[j]=inewsize;
-
-    return;
-}
-
-
-
-
-/****** REDUCE  TRACER ARRAYS *****************************************/
-
-static void reduce_tracer_arrays(struct All_variables *E)
-{
-
-    int inewsize;
-    int kk;
-    int iempty_space;
-    int j;
-
-    int icushion=100;
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-
-        /* if physical size is double tracer size, reduce it */
-
-        iempty_space=(E->trace.max_ntracers[j]-E->trace.ntracers[j]);
-
-        if (iempty_space>(E->trace.ntracers[j]+icushion)) {
-
-
-            inewsize=E->trace.ntracers[j]+E->trace.ntracers[j]/4+icushion;
-
-            if (inewsize<1) {
-                fprintf(E->trace.fpt,"Error(reduce tracer arrays)-something up (hdf3)\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-
-
-            if ((E->trace.ielement[j]=(int *)realloc(E->trace.ielement[j],inewsize*sizeof(int)))==NULL) {
-                fprintf(E->trace.fpt,"ERROR(reduce tracer arrays )-no memory (ielement)\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-
-
-            for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++) {
-                if ((E->trace.basicq[j][kk]=(double *)realloc(E->trace.basicq[j][kk],inewsize*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"AKM(reduce tracer arrays )-no memory (%d)\n",kk);
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-            }
-
-            for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++) {
-                if ((E->trace.extraq[j][kk]=(double *)realloc(E->trace.extraq[j][kk],inewsize*sizeof(double)))==NULL) {
-                    fprintf(E->trace.fpt,"AKM(reduce tracer arrays )-no memory 783 (%d)\n",kk);
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-            }
-
-
-            fprintf(E->trace.fpt,"Reducing physical memory of ielement, basicq, and extraq to %d from %d\n",
-                    E->trace.max_ntracers[j],inewsize);
-
-            E->trace.max_ntracers[j]=inewsize;
-
-        } /* end if */
-
-    } /* end j */
-
-    return;
-}
-
-
-/********** PUT AWAY LATER ************************************/
-/*                                             */
-/* rlater has a similar structure to basicq     */
-/* ilatersize is the physical memory and       */
-/* ilater is the number of tracers             */
-
-static void put_away_later(struct All_variables *E, int j, int it)
-{
-    int kk;
-    void expand_later_array();
-
-
-    /* The first tracer in initiates memory allocation. */
-    /* Memory is freed after parallel communications    */
-
-    if (E->trace.ilatersize[j]==0) {
-
-        E->trace.ilatersize[j]=E->trace.max_ntracers[j]/5;
-
-        for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-            if ((E->trace.rlater[j][kk]=(double *)malloc(E->trace.ilatersize[j]*sizeof(double)))==NULL) {
-                fprintf(E->trace.fpt,"AKM(put_away_later)-no memory (%d)\n",kk);
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-        }
-    } /* end first particle initiating memory allocation */
-
-
-    /* Put tracer in later array */
-
-    E->trace.ilater[j]++;
-
-    if (E->trace.ilater[j] >= (E->trace.ilatersize[j]-5)) expand_later_array(E,j);
-
-    /* stack basic and extra quantities together (basic first) */
-
-    for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.rlater[j][kk][E->trace.ilater[j]]=E->trace.basicq[j][kk][it];
-
-    for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.rlater[j][E->trace.number_of_basic_quantities+kk][E->trace.ilater[j]]=E->trace.extraq[j][kk][it];
-
-
-    return;
-}
-
-
-/****** EXPAND LATER ARRAY *****************************************/
-
-void expand_later_array(struct All_variables *E, int j)
-{
-
-    int inewsize;
-    int kk;
-    int icushion;
-
-    /* expand rlater by 20% */
-
-    icushion=100;
-
-    inewsize=E->trace.ilatersize[j]+E->trace.ilatersize[j]/5+icushion;
-
-    for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-        if ((E->trace.rlater[j][kk]=(double *)realloc(E->trace.rlater[j][kk],inewsize*sizeof(double)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(expand later array )-no memory (%d)\n",kk);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-    }
-
-
-    fprintf(E->trace.fpt,"Expanding physical memory of rlater to %d from %d\n",
-            inewsize,E->trace.ilatersize[j]);
-
-    E->trace.ilatersize[j]=inewsize;
-
-    return;
-}
-
-
-/***** EJECT TRACER ************************************************/
-
-static void eject_tracer(struct All_variables *E, int j, int it)
-{
-
-    int ilast_tracer;
-    int kk;
-
-
-    ilast_tracer=E->trace.ntracers[j];
-
-    /* put last tracer in ejected tracer position */
-
-    E->trace.ielement[j][it]=E->trace.ielement[j][ilast_tracer];
-
-    for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.basicq[j][kk][it]=E->trace.basicq[j][kk][ilast_tracer];
-
-    for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.extraq[j][kk][it]=E->trace.extraq[j][kk][ilast_tracer];
-
-
-
-    E->trace.ntracers[j]--;
-
-    return;
-}
 
 
 
