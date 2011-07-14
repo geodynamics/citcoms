@@ -80,9 +80,7 @@ int get_process_identifier()
 }
 
 
-void unique_copy_file(E,name,comment)
-    struct All_variables *E;
-    char *name, *comment;
+void unique_copy_file(struct All_variables *E, char *name, char *comment)
 {
     char unique_name[500];
     char command[600];
@@ -337,8 +335,7 @@ void read_visc_param_from_file(struct All_variables *E,
   my version of arc tan
  =================================================*/
 
-double myatan(y,x)
- double y,x;
+double myatan(double y, double x)
  {
  double fi;
 

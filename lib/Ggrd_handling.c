@@ -33,7 +33,7 @@ the ggrd subroutines of the hc package
 */
 #ifdef USE_GZDIR
 #include <zlib.h>
-gzFile *gzdir_output_open(char *,char *);
+//gzFile *gzdir_output_open(char *,char *);
 
 #endif
 

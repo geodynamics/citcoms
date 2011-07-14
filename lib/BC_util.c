@@ -33,6 +33,8 @@ void myerror(struct All_variables *,char *);
 int layers(struct All_variables *,int,int);
 
 
+#include <math.h>
+
 #ifdef USE_GGRD
 #include "ggrd_handling.h"
 #endif
@@ -86,10 +88,7 @@ void internal_horizontal_bc(struct All_variables *E,float *BC[],int row,int dirn
 }
 
 
-void strip_bcs_from_residual(E,Res,level)
-    struct All_variables *E;
-    double **Res;
-    int level;
+void strip_bcs_from_residual(struct All_variables *E, double **Res, int level)
 {
     int m,i;
 
@@ -102,8 +101,7 @@ void strip_bcs_from_residual(E,Res,level)
 }
 
 
-void temperatures_conform_bcs(E)
-     struct All_variables *E;
+void temperatures_conform_bcs(struct All_variables *E)
 {
   void temperatures_conform_bcs2(struct All_variables *);
   void assimilate_lith_conform_bcs2(struct All_variables *);
@@ -121,8 +119,7 @@ void temperatures_conform_bcs(E)
 }
 
 
-void temperatures_conform_bcs2(E)
-     struct All_variables *E;
+void temperatures_conform_bcs2(struct All_variables *E)
 {
   int j,node;
   unsigned int type;
@@ -166,9 +163,7 @@ void temperatures_conform_bcs2(E)
 }
 
 
-void velocities_conform_bcs(E,U)
-    struct All_variables *E;
-    double **U;
+void velocities_conform_bcs(struct All_variables *E, double **U)
 {
     int node,m;
 

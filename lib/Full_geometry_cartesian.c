@@ -31,8 +31,7 @@
 #include "parsing.h"
 
 
-void full_set_2dc_defaults(E)
-     struct All_variables *E;
+void full_set_2dc_defaults(struct All_variables *E)
 {
 
   E->mesh.nsd = 2;
@@ -41,8 +40,7 @@ void full_set_2dc_defaults(E)
 }
 
 
-void full_set_2pt5dc_defaults(E)
-    struct All_variables *E;
+void full_set_2pt5dc_defaults(struct All_variables *E)
 {
 
   E->mesh.nsd = 2;
@@ -50,8 +48,7 @@ void full_set_2pt5dc_defaults(E)
 
 }
 
-void full_set_3dc_defaults(E)
-     struct All_variables *E;
+void full_set_3dc_defaults(struct All_variables *E)
 {
 
   E->mesh.nsd = 3;
@@ -59,8 +56,7 @@ void full_set_3dc_defaults(E)
 
 }
 
-void full_set_3dsphere_defaults(E)
-     struct All_variables *E;
+void full_set_3dsphere_defaults(struct All_variables *E)
 {
   E->mesh.nsd = 3;
   E->mesh.dof = 3;

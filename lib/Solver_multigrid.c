@@ -32,12 +32,8 @@
 #include "anisotropic_viscosity.h"
 #endif
 
-void set_mg_defaults(E)
-     struct All_variables *E;
-{ void assemble_forces_iterative();
-  void solve_constrained_flow_iterative();
-  void mg_allocate_vars();
-
+void set_mg_defaults(struct All_variables *E)
+{
   E->control.NMULTIGRID = 1;
   E->build_forcing_term =   assemble_forces_iterative;
   E->solve_stokes_problem = solve_constrained_flow_iterative;
@@ -47,8 +43,7 @@ void set_mg_defaults(E)
 return;
 }
 
-void mg_allocate_vars(E)
-     struct All_variables *E;
+void mg_allocate_vars(struct All_variables *E)
 {
   return;
 
@@ -60,11 +55,9 @@ void mg_allocate_vars(E)
    just dropping values at shared grid points.
    ===================================================== */
 
-void inject_scalar(E,start_lev,AU,AD)
-     struct All_variables *E;
-     int start_lev;
-     float **AU,**AD;  /* data on upper/lower mesh  */
+// float **AU,**AD;  /* data on upper/lower mesh  */
 
+void inject_scalar(struct All_variables *E, int start_lev, float **AU, float **AD)
 {
     int i,m,el,node_coarse,node_fine,sl_minus,eqn,eqn_coarse;
     void gather_to_1layer_node ();
@@ -91,11 +84,9 @@ void inject_scalar(E,start_lev,AU,AD)
     return;
 }
 
-void inject_vector(E,start_lev,AU,AD)
-     struct All_variables *E;
-     int start_lev;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+// double **AU,**AD;  /* data on upper/lower mesh  */
 
+void inject_vector(struct All_variables *E, int start_lev, double **AU, double **AD)
 {
     int i,j,m,el,node_coarse,node_fine,sl_minus,eqn_fine,eqn_coarse;
 
@@ -132,11 +123,7 @@ void inject_vector(E,start_lev,AU,AD)
    just dropping values at shared grid points.
    ===================================================== */
 
-void un_inject_vector(E,start_lev,AD,AU)
-
-     struct All_variables *E;
-     int start_lev;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+void un_inject_vector(struct All_variables *E, int start_lev, double **AD, double **AU)
 {
     int i,m;
     int el,node,node_plus;
@@ -184,11 +171,7 @@ void un_inject_vector(E,start_lev,AD,AU)
    ======================================================================================= */
 
 
-void interp_vector(E,start_lev,AD,AU)
-
-    struct All_variables *E;
-     int start_lev;
-     double **AD,**AU;  /* data on upper/lower mesh  */
+void interp_vector(struct All_variables *E, int start_lev, double **AD, double **AU)
 {
     void un_inject_vector();
     void fill_in_gaps();
@@ -229,9 +212,7 @@ void interp_vector(E,start_lev,AD,AU)
     levels in the problem. (no gaps for vbcs)
     ==============================================  */
 
-void project_viscosity(E)
-     struct All_variables *E;
-
+void project_viscosity(struct All_variables *E)
 {
     int lv,i,j,k,m,sl_minus;
     void inject_scalar();
@@ -350,11 +331,7 @@ void project_viscosity(E)
 }
 
 /* ==================================================== */
-void inject_scalar_e(E,start_lev,AU,AD)
-
-     struct All_variables *E;
-     int start_lev;
-     float **AU,**AD;  /* data on upper/lower mesh  */
+void inject_scalar_e(struct All_variables *E, int start_lev, float **AU, float **AD)
 {
     int i,j,m;
     int el,node,e;
@@ -384,11 +361,7 @@ return;
 }
 
 /* ==================================================== */
-void project_scalar_e(E,start_lev,AU,AD)
-
-     struct All_variables *E;
-     int start_lev;
-     float **AU,**AD;  /* data on upper/lower mesh  */
+void project_scalar_e(struct All_variables *E, int start_lev, float **AU, float **AD)
 {
     int i,j,m;
     int el,node,e;
@@ -423,11 +396,7 @@ return;
 }
 
 /* ==================================================== */
-void project_scalar(E,start_lev,AU,AD)
-
-     struct All_variables *E;
-     int start_lev;
-     float **AU,**AD;  /* data on upper/lower mesh  */
+void project_scalar(struct All_variables *E, int start_lev, float **AU, float **AD)
 {
     int i,j,m;
     int el,node,node1;
@@ -476,11 +445,7 @@ return;
 
 /* this is prefered scheme with averages */
 
-void project_vector(E,start_lev,AU,AD,ic)
-
-     struct All_variables *E;
-     int start_lev,ic;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+void project_vector(struct All_variables *E, int start_lev, double **AU, double **AD, int ic)
 {
     int i,j,m;
     int el,node1,node,e1;
@@ -553,10 +518,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  }
 
 /* ================================================= */
- void from_xyz_to_rtf(E,level,xyz,rtf)
- struct All_variables *E;
- int level;
- double **rtf,**xyz;
+ void from_xyz_to_rtf(struct All_variables *E, int level, double **xyz, double **rtf)
  {
 
  int i,j,m,eqn1,eqn2,eqn3;
@@ -585,10 +547,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  }
 
 /* ================================================= */
- void from_rtf_to_xyz(E,level,rtf,xyz)
- struct All_variables *E;
- int level;
- double **rtf,**xyz;
+ void from_rtf_to_xyz(struct All_variables *E, int level, double **rtf, double **xyz)
  {
 
  int i,j,m,eqn1,eqn2,eqn3;
@@ -618,10 +577,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  }
 
  /* ========================================================== */
- void fill_in_gaps(E,temp,level)
-    struct All_variables *E;
-    int level;
-    double **temp;
+ void fill_in_gaps(struct All_variables *E, double **temp, int level)
   {
 
     int i,j,k,m;

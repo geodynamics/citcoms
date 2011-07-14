@@ -28,11 +28,8 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void set_cg_defaults(E)
-     struct All_variables *E;
-{ void assemble_forces_iterative();
-  void solve_constrained_flow_iterative();
-  void cg_allocate_vars();
+void set_cg_defaults(struct All_variables *E)
+{
 
   E->control.CONJ_GRAD = 1;
   E->build_forcing_term =   assemble_forces_iterative;
@@ -43,8 +40,7 @@ void set_cg_defaults(E)
   return;
 }
 
-void cg_allocate_vars(E)
-     struct All_variables *E;
+void cg_allocate_vars(struct All_variables *E)
 { 
   /* Nothing required ONLY by conj-grad stuff  */
  /* printf("here here\n"); */
@@ -53,8 +49,7 @@ void cg_allocate_vars(E)
 
 }
 
-void assemble_forces_iterative(E)
-    struct All_variables *E;
+void assemble_forces_iterative(struct All_variables *E)
 { 
   int i;
 

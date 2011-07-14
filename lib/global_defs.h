@@ -51,21 +51,15 @@ to functions across the whole filespace of CITCOM.
 #include "hdf5.h"
 #endif
 
-#ifdef __cplusplus
-
-extern "C" {
-
-#else
-
-
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 
 /* Macros */
-#define max(A,B) (((A) > (B)) ? (A) : (B))
-#define min(A,B) (((A) < (B)) ? (A) : (B))
+//#define max(A,B) (((A) > (B)) ? (A) : (B))
+//#define min(A,B) (((A) < (B)) ? (A) : (B))
 #define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
-
-#endif
 
 
 #define LIDN 0x1
@@ -700,7 +694,16 @@ struct CITCOM_GNOMONIC {
 #ifdef USE_HDF5
 #include "hdf5_related.h"
 #endif
+
+//#ifdef __cplusplus
+//}
+//#endif
+
 #include "tracer_defs.h"
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
 
 struct All_variables {
 
@@ -855,9 +858,9 @@ struct All_variables {
 
 };
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 #ifndef TRUE
 #define TRUE 1

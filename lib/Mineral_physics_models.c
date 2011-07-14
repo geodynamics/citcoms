@@ -176,10 +176,10 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
 
 
     /* reference model (PREM) */
-    rhor = malloc((E->lmesh.noz+1) * sizeof(double));
-    vpr = malloc((E->lmesh.noz+1) * sizeof(double));
-    vsr = malloc((E->lmesh.noz+1) * sizeof(double));
-    depthkm = malloc((E->lmesh.noz+1) * sizeof(double));
+    rhor = (double *)malloc((E->lmesh.noz+1) * sizeof(double));
+    vpr = (double *)malloc((E->lmesh.noz+1) * sizeof(double));
+    vsr = (double *)malloc((E->lmesh.noz+1) * sizeof(double));
+    depthkm = (double *)malloc((E->lmesh.noz+1) * sizeof(double));
 
     for(nz=1; nz<=E->lmesh.noz; nz++) {
         get_prem(E->sx[m][3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);

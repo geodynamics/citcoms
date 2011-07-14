@@ -44,10 +44,7 @@ void myerror(struct All_variables *E,char *message);
    aren't & another method is required.
    =============================================== */
 
-void remove_horiz_ave(E,X,H,store_or_not)
-     struct All_variables *E;
-     double **X, *H;
-     int store_or_not;
+void remove_horiz_ave(struct All_variables *E, double **X, double *H, int store_or_not)
 
 {
     int m,i,j,k,n,nox,noz,noy;
@@ -83,9 +80,7 @@ void remove_horiz_ave2(struct All_variables *E, double **X)
 }
 
 
-void return_horiz_ave(E,X,H)
-     struct All_variables *E;
-     double **X, *H;
+void return_horiz_ave(struct All_variables *E, double **X, double *H)
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -163,9 +158,7 @@ void return_horiz_ave(E,X,H)
   return;
   }
 
-void return_horiz_ave_f(E,X,H)
-     struct All_variables *E;
-     float **X, *H;
+void return_horiz_ave_f(struct All_variables *E, float **X, float *H)
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -250,9 +243,7 @@ void return_horiz_ave_f(E,X,H)
 /* however here, elemental horizontal averages are given rather than */
 /* nodal averages. Also note, here is average per element            */
 
-void return_elementwise_horiz_ave(E,X,H)
-     struct All_variables *E;
-     double **X, *H;
+void return_elementwise_horiz_ave(struct All_variables *E, double **X, double *H)
 {
 
   int m,i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
@@ -312,11 +303,7 @@ void return_elementwise_horiz_ave(E,X,H)
   return;
 }
 
-float return_bulk_value(E,Z,average)
-     struct All_variables *E;
-     float **Z;
-     int average;
-
+float return_bulk_value(struct All_variables *E, float **Z, int average)
 {
     int n,i,j,k,el,m;
     float volume,integral,volume1,integral1;
@@ -356,11 +343,7 @@ float return_bulk_value(E,Z,average)
 /*         when integer average =0, integral is returned.           */
 
 
-double return_bulk_value_d(E,Z,average)
-     struct All_variables *E;
-     double **Z;
-     int average;
-
+double return_bulk_value_d(struct All_variables *E, double **Z, int average)
 {
     int n,i,j,el,m;
     double volume,integral,volume1,integral1;
@@ -394,9 +377,7 @@ double return_bulk_value_d(E,Z,average)
 }
 
 /* ================================================== */
-float find_max_horizontal(E,Tmax)
-struct All_variables *E;
-float Tmax;
+float find_max_horizontal(struct All_variables *E, float Tmax)
 {
  float ttmax;
 
@@ -406,10 +387,7 @@ float Tmax;
  }
 
 /* ================================================== */
-void sum_across_surface(E,data,total)
-struct All_variables *E;
-float *data;
-int total;
+void sum_across_surface(struct All_variables *E, float *data, int total)
 {
  int j,d;
  float *temp;
@@ -430,9 +408,7 @@ int total;
 /* ================================================== */
 
 /* ================================================== */
-void sum_across_surf_sph1(E,sphc,sphs)
-struct All_variables *E;
-float *sphc,*sphs;
+void sum_across_surf_sph1(struct All_variables *E, float *sphc, float *sphs)
 {
  int jumpp,total,j,d;
  float *sphcs,*temp;
@@ -466,11 +442,7 @@ float *sphc,*sphs;
 /* ================================================== */
 
 
-float global_fvdot(E,A,B,lev)
-   struct All_variables *E;
-   float **A,**B;
-   int lev;
-
+float global_fvdot(struct All_variables *E, float **A, float **B, int lev)
 {
   int m,i,neq;
   float prod, temp,temp1;
@@ -499,11 +471,7 @@ float global_fvdot(E,A,B,lev)
 }
 
 
-double kineticE_radial(E,A,lev)
-   struct All_variables *E;
-   double **A;
-   int lev;
-
+double kineticE_radial(struct All_variables *E, double **A, int lev)
 {
   int m,i,neq;
   double prod, temp,temp1;
@@ -531,11 +499,7 @@ double kineticE_radial(E,A,lev)
   return (prod);
 }
 
-double global_vdot(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_vdot(struct All_variables *E, double **A, double **B, int lev)
 {
   int m,i,neq;
   double prod, temp,temp1;
@@ -562,11 +526,7 @@ double global_vdot(E,A,B,lev)
 }
 
 
-double global_pdot(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_pdot(struct All_variables *E, double **A, double **B, int lev)
 {
   int i,m,npno;
   double prod, temp;
@@ -656,11 +616,7 @@ double global_div_norm2(struct All_variables *E,  double **A)
 }
 
 
-double global_tdot_d(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_tdot_d(struct All_variables *E, double **A, double **B, int lev)
 {
   int i,nno,m;
   double prod, temp;
@@ -681,11 +637,7 @@ double global_tdot_d(E,A,B,lev)
   return (prod);
   }
 
-float global_tdot(E,A,B,lev)
-   struct All_variables *E;
-   float **A,**B;
-   int lev;
-
+float global_tdot(struct All_variables *E, float **A, float **B, int lev)
 {
   int i,nno,m;
   float prod, temp;
@@ -706,18 +658,14 @@ float global_tdot(E,A,B,lev)
   }
 
 
-float global_fmin(E,a)
-   struct All_variables *E;
-   float a;
+float global_fmin(struct All_variables *E, double a)
 {
   float temp;
   MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MIN,E->parallel.world);
   return (temp);
   }
 
-double global_dmax(E,a)
-   struct All_variables *E;
-   double a;
+double global_dmax(struct All_variables *E, double a)
 {
   double temp;
   MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
@@ -725,18 +673,14 @@ double global_dmax(E,a)
   }
 
 
-float global_fmax(E,a)
-   struct All_variables *E;
-   float a;
+float global_fmax(struct All_variables *E, float a)
 {
   float temp;
   MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,E->parallel.world);
   return (temp);
   }
 
-double Tmaxd(E,T)
-  struct All_variables *E;
-  double **T;
+double Tmaxd(struct All_variables *E, double **T)
 {
   double global_dmax(),temp,temp1;
   int i,m;
@@ -744,16 +688,14 @@ double Tmaxd(E,T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = fmax(T[m][i],temp);
 
   temp1 = global_dmax(E,temp);
   return (temp1);
   }
 
 
-float Tmax(E,T)
-  struct All_variables *E;
-  float **T;
+float Tmax(struct All_variables *E, float **T)
 {
   float global_fmax(),temp,temp1;
   int i,m;
@@ -761,17 +703,14 @@ float Tmax(E,T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = fmax(T[m][i],temp);
 
   temp1 = global_fmax(E,temp);
   return (temp1);
   }
 
 
-double  vnorm_nonnewt(E,dU,U,lev)
-  struct All_variables *E;
-  double **dU,**U;
-  int lev;
+double  vnorm_nonnewt(struct All_variables *E, double **dU, double **U, int lev)
 {
  double temp1,temp2,dtemp,temp;
  int a,e,i,m,node;
@@ -803,9 +742,7 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
 }
 
 
-void sum_across_depth_sph1(E,sphc,sphs)
-     struct All_variables *E;
-     float *sphc,*sphs;
+void sum_across_depth_sph1(struct All_variables *E, float *sphc, float *sphs)
 {
     int jumpp,total,j;
 
@@ -888,7 +825,6 @@ void broadcast_vertical(struct All_variables *E,
 void remove_rigid_rot(struct All_variables *E)
 {
     void velo_from_element_d();
-    double myatan();
     double wx, wy, wz, v_theta, v_phi, cos_t,sin_t,sin_f, cos_f,frd;
     double vx[9], vy[9], vz[9];
     double r, t, f, efac,tg;

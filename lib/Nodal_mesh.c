@@ -36,8 +36,7 @@
 
 
 /* get nodal spherical velocities from the solution vector */
-void v_from_vector(E)
-     struct All_variables *E;
+void v_from_vector(struct All_variables *E)
 {
     int m,node;
     const int nno = E->lmesh.nno;
@@ -59,8 +58,7 @@ void v_from_vector(E)
     return;
 }
 
-void assign_v_to_vector(E)
-     struct All_variables *E;
+void assign_v_to_vector(struct All_variables *E)
 {
     int m,node;
     const int nno = E->lmesh.nno;
@@ -75,8 +73,7 @@ void assign_v_to_vector(E)
     return;
 }
 
-void v_from_vector_pseudo_surf(E)
-     struct All_variables *E;
+void v_from_vector_pseudo_surf(struct All_variables *E)
 {
     int m,node;
 
@@ -118,10 +115,7 @@ void v_from_vector_pseudo_surf(E)
     return;
 }
 /* cartesian velocities within element, single prec version */
-void velo_from_element(E,VV,m,el,sphere_key)
-     struct All_variables *E;
-     float VV[4][9];
-     int el,m,sphere_key;
+void velo_from_element(struct All_variables *E, float VV[4][9], int m, int el, int sphere_key)
 {
 
     int a, node;
@@ -159,10 +153,7 @@ void velo_from_element(E,VV,m,el,sphere_key)
 }
 
 /* double prec version */
-void velo_from_element_d(E,VV,m,el,sphere_key)
-     struct All_variables *E;
-     double VV[4][9];
-     int el,m,sphere_key;
+void velo_from_element_d(struct All_variables *E, double VV[4][9], int m, int el, int sphere_key)
 {
 
     int a, node;
@@ -202,11 +193,7 @@ void velo_from_element_d(E,VV,m,el,sphere_key)
 }
 
 
-void p_to_nodes(E,P,PN,lev)
-     struct All_variables *E;
-     double **P;
-     float **PN;
-     int lev;
+void p_to_nodes(struct All_variables *E, double **P, float **PN, int lev)
 
 { int e,element,node,j,m;
 
@@ -236,10 +223,7 @@ void p_to_nodes(E,P,PN,lev)
    interpolate the viscosity from element integration points to nodes
 
  */
-void visc_from_gint_to_nodes(E,VE,VN,lev)
-  struct All_variables *E;
-  float **VE,**VN;
-  int lev;
+void visc_from_gint_to_nodes(struct All_variables *E, float **VE, float **VN, int lev)
 {
   int m,e,i,j,k,n,off,lim;
   const int nsd=E->mesh.nsd;
@@ -275,10 +259,7 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
 interpolate viscosity from nodes to element integration points
 
  */
-void visc_from_nodes_to_gint(E,VN,VE,lev)
-  struct All_variables *E;
-  float **VE,**VN;
-  int lev;
+void visc_from_nodes_to_gint(struct All_variables *E, float **VN, float **VE, int lev)
 {
 
   int m,e,i,j,k,n,off;
@@ -309,10 +290,7 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
    visc_from_gint_to_ele(E,E->EVI[lv],viscU,lv) 
 
 */
-void visc_from_gint_to_ele(E,VE,VN,lev)
-  struct All_variables *E;
-  float **VE,**VN;
-  int lev;
+void visc_from_gint_to_ele(struct All_variables *E, float **VE, float **VN, int lev)
   {
     int m,e,i,j,k,n,off;
     const int nsd=E->mesh.nsd;
@@ -341,10 +319,7 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
 
 */
 
-void visc_from_ele_to_gint(E,VN,VE,lev)
-  struct All_variables *E;
-  float **VE,**VN;
-  int lev;
+void visc_from_ele_to_gint(struct All_variables *E, float **VN, float **VE, int lev)
 {
   int m,e,i,j,k,n,off;
   const int nsd=E->mesh.nsd;

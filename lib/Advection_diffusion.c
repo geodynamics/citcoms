@@ -143,7 +143,6 @@ void std_timestep(struct All_variables *E)
 {
     int i,d,n,nel,el,node,m;
 
-    float global_fmin();
     void velo_from_element();
 
     float adv_timestep;
@@ -178,12 +177,12 @@ void std_timestep(struct All_variables *E)
 	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
 
 	step = (0.5/uc);
-	adv_timestep = min(adv_timestep,step);
+	adv_timestep = fmin(adv_timestep,step);
       }
 
     adv_timestep = E->advection.dt_reduced * adv_timestep;
 
-    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
+    adv_timestep = 1.0e-32 + fmin(E->advection.fine_tune_dt*adv_timestep,
 				 E->advection.diff_timestep);
 
     E->advection.timestep = global_fmin(E,adv_timestep);
@@ -246,7 +245,7 @@ void PG_timestep_solve(struct All_variables *E)
           process_heating(E, psc_pass);
 
         /* XXX: replace inputdiff with refstate.thermal_conductivity */
-	pg_solver(E,E->T,E->Tdot,DTdot,&(E->convection.heat_sources),E->control.inputdiff,1,E->node);
+	pg_solver(E,E->T,E->Tdot,DTdot,(SOURCES*)&(E->convection.heat_sources),E->control.inputdiff,1,E->node);
 	corrector(E,E->T,E->Tdot,DTdot);
 	temperatures_conform_bcs(E);
       }
@@ -320,14 +319,12 @@ static void set_diffusion_timestep(struct All_variables *E)
   float diff_timestep, ts;
   int m, el, d;
 
-  float global_fmin();
-
   diff_timestep = 1.0e8;
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
 	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
-	diff_timestep = min(diff_timestep,ts);
+	diff_timestep = fmin(diff_timestep,ts);
       }
     }
 

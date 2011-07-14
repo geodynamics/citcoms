@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Advection_diffusion.c */
 void advection_diffusion_parameters(struct All_variables *);
 void advection_diffusion_allocate_memory(struct All_variables *);
@@ -528,3 +532,8 @@ double second_invariant_from_3x3(double [3][3]);
 void calc_strain_from_vgm(double [3][3], double [3][3]);
 void calc_strain_from_vgm9(double *, double [3][3]);
 void calc_rot_from_vgm(double [3][3], double [3][3]);
+
+#ifdef __cplusplus
+}
+#endif
+

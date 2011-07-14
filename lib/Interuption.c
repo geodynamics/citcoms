@@ -29,9 +29,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "global_defs.h"
 #include "interuption.h"
-
-void parallel_process_termination();
 
 int Emergency_stop;
 

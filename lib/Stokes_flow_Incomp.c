@@ -57,9 +57,7 @@ static void initial_vel_residual(struct All_variables *E,
 
 /* Master loop for pressure and (hence) velocity field */
 
-void solve_constrained_flow_iterative(E)
-     struct All_variables *E;
-
+void solve_constrained_flow_iterative(struct All_variables *E)
 {
     void v_from_vector();
     void v_from_vector_pseudo_surf();
@@ -103,8 +101,8 @@ static double momentum_eqn_residual(struct All_variables *E,
     const int neq = E->lmesh.neq;
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        r1[m] = malloc((neq+1)*sizeof(double));
-        r2[m] = malloc((neq+1)*sizeof(double));
+        r1[m] = (double*)malloc((neq+1)*sizeof(double));
+        r2[m] = (double*)malloc((neq+1)*sizeof(double));
     }
 
     /* r2 = F - grad(P) - K*V */

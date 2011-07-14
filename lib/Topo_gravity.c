@@ -63,11 +63,7 @@ removed, make sure to recompute in output routines
 
  */
 
-void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
-    struct All_variables *E;
-    float **tpg,**tpgb;
-    float **divg,**vort;
-    int ii;
+void get_STD_topo(struct All_variables *E, float **tpg, float **tpgb, float **divg, float **vort, int ii)
 {
     void allocate_STD_mem();
     void compute_nodal_stress();
@@ -933,8 +929,7 @@ static void geoid_from_topography_self_g(struct All_variables *E,
 
 
 
-void compute_geoid(E)
-     struct All_variables *E;
+void compute_geoid(struct All_variables *E)
 {
     int i, p;
 
@@ -987,10 +982,7 @@ this routine does not require stress tensor computation, call
 separately if stress output is needed
 
  */
-void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*/
-    struct All_variables *E;
-    float **H,**HB;
-
+void get_CBF_topo(struct All_variables *E, float **H, float **HB)
 {
     void get_elt_k();
     void get_elt_g();

@@ -48,7 +48,7 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
                              int m, int icap)
 {
     int i,lev;
-    double t[4], myatan();
+    double t[4];
 
     for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
         for (i=1;i<=E->lmesh.NNO[lev];i++) {
@@ -78,8 +78,7 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
 
    =================================================  */
 
-void full_node_locations(E)
-     struct All_variables *E;
+void full_node_locations(struct All_variables *E)
 {
   int i,j,k,ii,lev;
   double ro,dr,*rr,*RR,fo,tg;

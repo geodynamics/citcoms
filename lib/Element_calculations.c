@@ -76,9 +76,7 @@ static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
    Function to get the global H vector (mixed method driving terms)
    ================================================================ */
 
-void assemble_forces(E,penalty)
-     struct All_variables *E;
-     int penalty;
+void assemble_forces(struct All_variables *E, int penalty)
 {
   double elt_f[24];
   int m,a,e,i;
@@ -278,11 +276,7 @@ void get_ba_p(struct Shape_function *N, struct Shape_function_dx *GNx,
   Function to supply the element k matrix for a given element e.
   ==============================================================  */
 
-void get_elt_k(E,el,elt_k,lev,m,iconv)
-     struct All_variables *E;
-     int el,m;
-     double elt_k[24*24];
-     int lev, iconv;
+void get_elt_k(struct All_variables *E, int el, double elt_k[24*24], int lev, int m, int iconv)
 {
     double bdbmu[4][4];
     int pn,qn,ad,bd,off;
@@ -424,11 +418,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
    element or node by node.
    ============================================= */
 
-void assemble_del2_u(E,u,Au,level,strip_bcs)
-     struct All_variables *E;
-     double **u,**Au;
-     int level;
-     int strip_bcs;
+void assemble_del2_u(struct All_variables *E, double **u, double **Au, int level, int strip_bcs)
 {
   void e_assemble_del2_u();
   void n_assemble_del2_u();
@@ -445,11 +435,7 @@ void assemble_del2_u(E,u,Au,level,strip_bcs)
    Assemble del_squared_u vector el by el
    ======================================   */
 
-void e_assemble_del2_u(E,u,Au,level,strip_bcs)
-  struct All_variables *E;
-  double **u,**Au;
-  int level;
-  int strip_bcs;
+void e_assemble_del2_u(struct All_variables *E, double **u, double **Au, int level, int strip_bcs)
 
 {
   int  e,i,a,b,a1,a2,a3,ii,m,nodeb;
@@ -518,11 +504,7 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
    Assemble Au using stored, nodal coefficients.
    ====================================================== */
 
-void n_assemble_del2_u(E,u,Au,level,strip_bcs)
-     struct All_variables *E;
-     double **u,**Au;
-     int level;
-     int strip_bcs;
+void n_assemble_del2_u(struct All_variables *E, double **u, double **Au, int level, int strip_bcs)
 {
     int m, e,i;
     int eqn1,eqn2,eqn3;
@@ -582,11 +564,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 }
 
 
-void build_diagonal_of_K(E,el,elt_k,level,m)
-     struct All_variables *E;
-     int level,el,m;
-     double elt_k[24*24];
-
+void build_diagonal_of_K(struct All_variables *E, int el, double elt_k[24*24], int level, int m)
 {
     int a,a1,a2,p,node;
 
@@ -615,8 +593,7 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
   return;
 }
 
-void build_diagonal_of_Ahat(E)
-    struct All_variables *E;
+void build_diagonal_of_Ahat(struct All_variables *E)
 {
     double assemble_dAhatp_entry();
 
@@ -739,11 +716,7 @@ void assemble_div_u(struct All_variables *E,
    Assemble a grad_P vector element by element
    ==========================================  */
 
-void assemble_grad_p(E,P,gradP,lev)
-     struct All_variables *E;
-     double **P,**gradP;
-     int lev;
-
+void assemble_grad_p(struct All_variables *E, double **P, double **gradP, int lev)
 {
   int m,e,i,j1,j2,j3,p,a,b,nel,neq;
   void strip_bcs_from_residual();
@@ -787,10 +760,7 @@ return;
 }
 
 
-double assemble_dAhatp_entry(E,e,level,m)
-     struct All_variables *E;
-     int e,level,m;
-
+double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m)
 {
     int i,j,p,a,b,node,npno;
     void strip_bcs_from_residual();
@@ -915,12 +885,7 @@ void get_elt_c(struct All_variables *E, int el,
   used for the divergence
   ==============================================================  */
 
-void get_elt_g(E,el,elt_del,lev,m)
-     struct All_variables *E;
-     int el,m;
-     higher_precision elt_del[24][1];
-     int lev;
-
+void get_elt_g(struct All_variables *E, int el, higher_precision elt_del[24][1], int lev, int m)
 {
    void get_rtf_at_ppts();
    int p,a,i,j,k;
@@ -1017,12 +982,7 @@ void get_elt_g(E,el,elt_del,lev,m)
   Function to create the element force vector (allowing for velocity b.c.'s)
   ================================================================= */
 
-void get_elt_f(E,el,elt_f,bcs,m)
-     struct All_variables *E;
-     int el,m;
-     double elt_f[24];
-     int bcs;
-
+void get_elt_f(struct All_variables *E, int el, double elt_f[24], int bcs, int m)
 {
 
   int i,p,a,b,j,k,q,es;
@@ -1290,11 +1250,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
  subroutine to get augmented lagrange part of stiffness matrix
 ================================================================== */
 
-void get_aug_k(E,el,elt_k,level,m)
-     struct All_variables *E;
-     int el,m;
-     double elt_k[24*24];
-     int level;
+void get_aug_k(struct All_variables *E, int el, double elt_k[24*24], int level, int m)
 {
      int i,p[9],a,b,nodea,nodeb;
      double Visc;

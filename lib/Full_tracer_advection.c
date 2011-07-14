@@ -160,22 +160,6 @@ void full_tracer_setup(struct All_variables *E)
 
     /* Determine number of tracer quantities */
 
-    /* advection_quantites - those needed for advection */
-    E->trace.number_of_basic_quantities=12;
-
-    /* extra_quantities - used for flavors, composition, etc.    */
-    /* (can be increased for additional science i.e. tracing chemistry */
-
-    E->trace.number_of_extra_quantities = 0;
-    if (E->trace.nflavors > 0)
-        E->trace.number_of_extra_quantities += 1;
-
-
-    E->trace.number_of_tracer_quantities =
-        E->trace.number_of_basic_quantities +
-        E->trace.number_of_extra_quantities;
-
-
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
@@ -183,22 +167,6 @@ void full_tracer_setup(struct All_variables *E)
 
 
     /* Some error control regarding size of pointer arrays */
-
-    if (E->trace.number_of_basic_quantities>99) {
-        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of basic in tracer_defs.h\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
-    if (E->trace.number_of_extra_quantities>99) {
-        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of extraq in tracer_defs.h\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
-    if (E->trace.number_of_tracer_quantities>99) {
-        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of rlater in tracer_defs.h\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
 
     write_trace_instructions(E);
 
@@ -288,7 +256,6 @@ void full_lost_souls(struct All_variables *E)
     double *receive_z[13][3];
     double *REC[13];
 
-    void expand_tracer_arrays();
     int icheck_that_processor_shell();
 
     double CPU_time0();
@@ -312,7 +279,7 @@ void full_lost_souls(struct All_variables *E)
       fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
-    E->trace.istat_isend=E->trace.ilater[j];
+    E->trace.istat_isend=E->trace.later_tracer[j].size();
     /** debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
@@ -327,13 +294,13 @@ void full_lost_souls(struct All_variables *E)
 
     /* initialize isend and ireceive */
     /* # of neighbors in the horizontal plane */
-    isize[j]=E->trace.ilater[j]*E->trace.number_of_tracer_quantities;
+    isize[j]=E->trace.later_tracer[j].size()*(12+1);
     for (kk=0;kk<=num_ngb;kk++) isend[j][kk]=0;
     for (kk=0;kk<=num_ngb;kk++) ireceive[j][kk]=0;
 
     /* Allocate Maximum Memory to Send Arrays */
 
-    itemp_size=max(isize[j],1);
+    itemp_size=fmax(isize[j],1);
 
     for (kk=0;kk<=num_ngb;kk++) {
         if ((send[j][kk]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
@@ -407,9 +374,9 @@ void full_lost_souls(struct All_variables *E)
     /* Allocate memory in receive arrays */
 
     for (ithatcap=0;ithatcap<=num_ngb;ithatcap++) {
-        isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
+        isize[j]=ireceive[j][ithatcap]*(12+1);
 
-        itemp_size=max(1,isize[j]);
+        itemp_size=fmax(1,isize[j]);
 
         if ((receive[j][ithatcap]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
@@ -428,7 +395,7 @@ void full_lost_souls(struct All_variables *E)
     if (E->parallel.nprocz>1) {
 
         ithatcap=ithiscap;
-        isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
+        isize[j]=isend[j][ithatcap]*(12+1);
         for (mm=0;mm<isize[j];mm++) {
             receive[j][ithatcap][mm]=send[j][ithatcap][mm];
         }
@@ -440,12 +407,12 @@ void full_lost_souls(struct All_variables *E)
     for (kk=1;kk<=num_ngb;kk++) {
         idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-        isize[j]=isend[j][kk]*E->trace.number_of_tracer_quantities;
+        isize[j]=isend[j][kk]*(12+1);
 
         MPI_Isend(send[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
                   11,E->parallel.world,&request[idb++]);
 
-        isize[j]=ireceive[j][kk]*E->trace.number_of_tracer_quantities;
+        isize[j]=ireceive[j][kk]*(12+1);
 
         MPI_Irecv(receive[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
                   11,E->parallel.world,&request[idb++]);
@@ -475,8 +442,8 @@ void full_lost_souls(struct All_variables *E)
 
     /* Allocate Memory for REC array */
 
-    isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
-    isize[j]=max(isize[j],1);
+    isize[j]=isum[j]*(12+1);
+    isize[j]=fmax(isize[j],1);
     if ((REC[j]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
         fprintf(E->trace.fpt,"Error(lost souls)-no memory (g323)\n");
         fflush(E->trace.fpt);
@@ -495,9 +462,9 @@ void full_lost_souls(struct All_variables *E)
 
         for (pp=0;pp<ireceive[j][ithatcap];pp++) {
             irec[j]++;
-            ipos=pp*E->trace.number_of_tracer_quantities;
+            ipos=pp*(12+1);
 
-            for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
+            for (mm=0;mm<12+1;mm++) {
                 ipos2=ipos+mm;
                 REC[j][irec_position]=receive[j][ithatcap][ipos2];
 
@@ -520,8 +487,8 @@ void full_lost_souls(struct All_variables *E)
         /* (No dynamic reallocation of send_z necessary)    */
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-            isize[j]=itracers_subject_to_vertical_transport[j]*E->trace.number_of_tracer_quantities;
-            isize[j]=max(isize[j],1);
+            isize[j]=itracers_subject_to_vertical_transport[j]*(12+1);
+            isize[j]=fmax(isize[j],1);
 
             if ((send_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
@@ -546,7 +513,7 @@ void full_lost_souls(struct All_variables *E)
             num_tracers=irec[j];
             for (kk=1;kk<=num_tracers;kk++) {
 
-                ireceive_position=it*E->trace.number_of_tracer_quantities;
+                ireceive_position=it*(12+1);
                 it++;
 
                 irad=ireceive_position+2;
@@ -561,12 +528,12 @@ void full_lost_souls(struct All_variables *E)
                 if (ival==1) {
 
 
-                    isend_position=isend_z[j][ivertical_neighbor]*E->trace.number_of_tracer_quantities;
+                    isend_position=isend_z[j][ivertical_neighbor]*(12+1);
                     isend_z[j][ivertical_neighbor]++;
 
-                    ilast_receiver_position=(irec[j]-1)*E->trace.number_of_tracer_quantities;
+                    ilast_receiver_position=(irec[j]-1)*(12+1);
 
-                    for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
+                    for (mm=0;mm<12+1;mm++) {
                         ipos=ireceive_position+mm;
                         ipos2=isend_position+mm;
 
@@ -626,8 +593,8 @@ void full_lost_souls(struct All_variables *E)
 
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-            isize[j]=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
-            isize[j]=max(isize[j],1);
+            isize[j]=ireceive_z[j][kk]*(12+1);
+            isize[j]=fmax(isize[j],1);
 
             if ((receive_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"Error(lost souls)-no memory (t590)\n");
@@ -643,12 +610,12 @@ void full_lost_souls(struct All_variables *E)
 
             idestination_proc = E->parallel.PROCESSORz[lev].pass[kk];
 
-            isize_send=isend_z[j][kk]*E->trace.number_of_tracer_quantities;
+            isize_send=isend_z[j][kk]*(12+1);
 
             MPI_Isend(send_z[j][kk],isize_send,MPI_DOUBLE,idestination_proc,
                       15,E->parallel.world,&request[idb++]);
 
-            isize_receive=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
+            isize_receive=ireceive_z[j][kk]*(12+1);
 
             MPI_Irecv(receive_z[j][kk],isize_receive,MPI_DOUBLE,idestination_proc,
                       15,E->parallel.world,&request[idb++]);
@@ -670,7 +637,7 @@ void full_lost_souls(struct All_variables *E)
 
         isum[j]=isum[j]+irec[j];
 
-        isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
+        isize[j]=isum[j]*(12+1);
 
         if (isize[j]>0) {
             if ((REC[j]=(double *)realloc(REC[j],isize[j]*sizeof(double)))==NULL) {
@@ -686,11 +653,11 @@ void full_lost_souls(struct All_variables *E)
 
             for (kk=0;kk<ireceive_z[j][ivertical_neighbor];kk++) {
 
-                irec_position=irec[j]*E->trace.number_of_tracer_quantities;
+                irec_position=irec[j]*(12+1);
                 irec[j]++;
-                ireceive_position=kk*E->trace.number_of_tracer_quantities;
+                ireceive_position=kk*(12+1);
 
-                for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
+                for (mm=0;mm<12+1;mm++) {
                     REC[j][irec_position+mm]=receive_z[j][ivertical_neighbor][ireceive_position+mm];
                 }
             }
@@ -711,41 +678,34 @@ void full_lost_souls(struct All_variables *E)
 
 
     for (kk=0;kk<irec[j];kk++) {
-        E->trace.ntracers[j]++;
+        Tracer new_tracer;
 
-        if (E->trace.ntracers[j]>(E->trace.max_ntracers[j]-5)) expand_tracer_arrays(E,j);
+        ireceive_position=kk*(12+1);
+        new_tracer.theta = REC[j][ipos+0];
+        new_tracer.phi = REC[j][ipos+1];
+        new_tracer.rad = REC[j][ipos+2];
+        new_tracer.x = REC[j][ipos+3];
+        new_tracer.y = REC[j][ipos+4];
+        new_tracer.z = REC[j][ipos+5];
+        new_tracer.x0 = REC[j][ipos+6];
+        new_tracer.y0 = REC[j][ipos+7];
+        new_tracer.z0 = REC[j][ipos+8];
+        new_tracer.Vx = REC[j][ipos+9];
+        new_tracer.Vy = REC[j][ipos+10];
+        new_tracer.Vz = REC[j][ipos+11];
+        new_tracer.flavor = REC[j][ipos+12];
 
-        ireceive_position=kk*E->trace.number_of_tracer_quantities;
-
-        for (mm=0;mm<E->trace.number_of_basic_quantities;mm++) {
-            ipos=ireceive_position+mm;
-
-            E->trace.basicq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
-        }
-        for (mm=0;mm<E->trace.number_of_extra_quantities;mm++) {
-            ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
-
-            E->trace.extraq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
-        }
-
-        theta=E->trace.basicq[j][0][E->trace.ntracers[j]];
-        phi=E->trace.basicq[j][1][E->trace.ntracers[j]];
-        rad=E->trace.basicq[j][2][E->trace.ntracers[j]];
-        x=E->trace.basicq[j][3][E->trace.ntracers[j]];
-        y=E->trace.basicq[j][4][E->trace.ntracers[j]];
-        z=E->trace.basicq[j][5][E->trace.ntracers[j]];
-
-
-        iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
+        iel=(E->trace.iget_element)(E,j,-99,new_tracer.x,new_tracer.y,new_tracer.z,new_tracer.theta,new_tracer.phi,new_tracer.rad);
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
-            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",x,y,z,theta,phi,rad);
+            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",new_tracer.x,new_tracer.y,new_tracer.z,new_tracer.theta,new_tracer.phi,new_tracer.rad);
             fflush(E->trace.fpt);
             exit(10);
         }
 
-        E->trace.ielement[j][E->trace.ntracers[j]]=iel;
+        new_tracer.ielement = iel;
+        E->trace.tracers[j].push_back(new_tracer);
 
     }
     if(E->control.verbose){
@@ -778,21 +738,20 @@ static void full_put_lost_tracers(struct All_variables *E,
 {
     const int j = 1;
     int kk, pp;
-    int numtracers, ithatcap, icheck;
+    int ithatcap, icheck;
     int isend_position, ipos;
     int lev = E->mesh.levmax;
     double theta, phi, rad;
     double x, y, z;
+    TracerList::iterator tr;
 
     /* transfer tracers from rlater to send */
 
-    numtracers=E->trace.ilater[j];
-
-    for (kk=1;kk<=numtracers;kk++) {
-        rad=E->trace.rlater[j][2][kk];
-        x=E->trace.rlater[j][3][kk];
-        y=E->trace.rlater[j][4][kk];
-        z=E->trace.rlater[j][5][kk];
+    for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
+        rad=tr->rad;
+        x=tr->x;
+        y=tr->y;
+        z=tr->z;
 
         /* first check same cap if nprocz>1 */
 
@@ -829,12 +788,21 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         /* assign tracer to send */
 
-        isend_position=(isend[j][ithatcap]-1)*E->trace.number_of_tracer_quantities;
+        isend_position=(isend[j][ithatcap]-1)*(12+1);
 
-        for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
-            ipos=isend_position+pp;
-            send[j][ithatcap][ipos]=E->trace.rlater[j][pp][kk];
-        }
+        send[j][ithatcap][isend_position+0]=tr->theta;
+        send[j][ithatcap][isend_position+1]=tr->phi;
+        send[j][ithatcap][isend_position+2]=tr->rad;
+        send[j][ithatcap][isend_position+3]=tr->x;
+        send[j][ithatcap][isend_position+4]=tr->y;
+        send[j][ithatcap][isend_position+5]=tr->z;
+        send[j][ithatcap][isend_position+6]=tr->x0;
+        send[j][ithatcap][isend_position+7]=tr->y0;
+        send[j][ithatcap][isend_position+8]=tr->z0;
+        send[j][ithatcap][isend_position+9]=tr->Vx;
+        send[j][ithatcap][isend_position+10]=tr->Vy;
+        send[j][ithatcap][isend_position+11]=tr->Vz;
+        send[j][ithatcap][isend_position+12]=tr->flavor;
 
     } /* end kk, assigning tracers */
 
@@ -1304,8 +1272,8 @@ static void make_regular_grid(struct All_variables *E)
 
     double *tmin;
     double *tmax;
-    double *fmin;
-    double *fmax;
+    double *fmin_array;
+    double *fmax_array;
 
     void sphere_to_cart();
 
@@ -1353,18 +1321,18 @@ static void make_regular_grid(struct All_variables *E)
                     theta=E->sx[j][1][kk];
                     phi=E->sx[j][2][kk];
 
-                    thetamax=max(thetamax,theta);
-                    thetamin=min(thetamin,theta);
+                    thetamax=fmax(thetamax,theta);
+                    thetamin=fmin(thetamin,theta);
 
                 }
 
             /* expand range slightly (should take care of poles)  */
 
             thetamax=thetamax+expansion;
-            thetamax=min(thetamax,M_PI);
+            thetamax=fmin(thetamax,M_PI);
 
             thetamin=thetamin-expansion;
-            thetamin=max(thetamin,0.0);
+            thetamin=fmax(thetamin,0.0);
 
             /* Convert input data from degrees to radians  */
 
@@ -1470,13 +1438,13 @@ static void make_regular_grid(struct All_variables *E)
                     fflush(E->trace.fpt);
                     exit(10);
                 }
-            if ((fmin=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+            if ((fmin_array=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
                 {
                     fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
                     fflush(E->trace.fpt);
                     exit(10);
                 }
-            if ((fmax=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+            if ((fmax_array=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
                 {
                     fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
                     fflush(E->trace.fpt);
@@ -1498,10 +1466,10 @@ static void make_regular_grid(struct All_variables *E)
                             theta=E->sx[j][1][node];
                             phi=E->sx[j][2][node];
 
-                            theta_min=min(theta_min,theta);
-                            theta_max=max(theta_max,theta);
-                            phi_min=min(phi_min,phi);
-                            phi_max=max(phi_max,phi);
+                            theta_min=fmin(theta_min,theta);
+                            theta_max=fmax(theta_max,theta);
+                            phi_min=fmin(phi_min,phi);
+                            phi_max=fmax(phi_max,phi);
                         }
 
                     /* add half difference to phi and expansion to theta to be safe */
@@ -1509,8 +1477,8 @@ static void make_regular_grid(struct All_variables *E)
                     theta_max=theta_max+expansion;
                     theta_min=theta_min-expansion;
 
-                    theta_max=min(M_PI,theta_max);
-                    theta_min=max(0.0,theta_min);
+                    theta_max=fmin(M_PI,theta_max);
+                    theta_min=fmax(0.0,theta_min);
 
                     half_diff=0.5*(phi_max-phi_min);
                     phi_max=phi_max+half_diff;
@@ -1527,8 +1495,8 @@ static void make_regular_grid(struct All_variables *E)
 
                     tmin[kk]=theta_min;
                     tmax[kk]=theta_max;
-                    fmin[kk]=phi_min;
-                    fmax[kk]=phi_max;
+                    fmin_array[kk]=phi_min;
+                    fmax_array[kk]=phi_max;
                 }
 
             /* end looking through elements */
@@ -1565,7 +1533,7 @@ static void make_regular_grid(struct All_variables *E)
                       for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
                       {
                       pp=mm/elz;
-                      if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
+                      if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin_array[pp]) && (phi<=fmax_array[pp]) )
                       {
                       ival=icheck_element_column(E,j,mm,x,y,z,rad);
                       if (ival>0)
@@ -1605,7 +1573,7 @@ static void make_regular_grid(struct All_variables *E)
                     for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
                         {
                             pp=mm/elz;
-                            if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
+                            if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin_array[pp]) && (phi<=fmax_array[pp]) )
                                 {
                                     ival=icheck_element_column(E,j,mm,x,y,z,rad);
                                     if (ival>0)
@@ -1630,8 +1598,8 @@ static void make_regular_grid(struct All_variables *E)
 
             free(tmin);
             free(tmax);
-            free(fmin);
-            free(fmax);
+            free(fmin_array);
+            free(fmax_array);
 
         } /* end j */
 
@@ -1970,12 +1938,14 @@ static void write_trace_instructions(struct All_variables *E)
     /* more obscure stuff */
 
     fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
+    /*
     fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
             E->trace.number_of_basic_quantities);
     fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
             E->trace.number_of_extra_quantities);
     fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
             E->trace.number_of_tracer_quantities);
+    */
 
 
     /* analytical test */
@@ -2318,8 +2288,6 @@ static int icheck_bounds(struct All_variables *E,
     double theta, phi;
     double tiny, eps;
     double x,y,z;
-
-    double myatan();
 
     /* make vectors from node to node */
 
@@ -2866,7 +2834,7 @@ static void define_uv_space(struct All_variables *E)
     double u, v, cosc, theta_f, phi_f, dphi, cosd;
     double *cost, *sint, *cosf, *sinf;
 
-    if ((E->gnomonic = malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
+    if ((E->gnomonic = (CITCOM_GNOMONIC*)malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
         == NULL) {
         fprintf(stderr,"Error(define uv)-not enough memory(a)\n");
         exit(10);
@@ -3066,9 +3034,7 @@ void full_keep_within_bounds(struct All_variables *E,
 /* This function (and the 2 following) are used to test advection of tracers by assigning */
 /* a test function (in "analytical_test_function").                                       */
 
-void analytical_test(E)
-     struct All_variables *E;
-
+void analytical_test(struct All_variables *E)
 {
 #if 0
     int kk,pp;
@@ -3325,15 +3291,7 @@ void analytical_test(E)
 
 /*************** ANALYTICAL RUNGE KUTTE ******************/
 /*                                                       */
-void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
-     struct All_variables *E;
-     int nsteps;
-     double dt;
-     double *x0_c;
-     double *x0_s;
-     double *xf_c;
-     double *xf_s;
-     double *vec;
+void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, double *x0_s, double *x0_c, double *xf_s, double *xf_c, double *vec)
 
 {
 
@@ -3445,12 +3403,7 @@ void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
 /* vel_c[2] => velocity in y direction                      */
 /* vel_c[3] => velocity in z direction                      */
 
-void analytical_test_function(E,theta,phi,rad,vel_s,vel_c)
-     struct All_variables *E;
-     double theta,phi,rad;
-     double *vel_s;
-     double *vel_c;
-
+void analytical_test_function(struct All_variables *E, double theta, double phi, double rad, double *vel_s, double *vel_c)
 {
 
     double sint,sinf,cost,cosf;

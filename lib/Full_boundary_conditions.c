@@ -44,8 +44,7 @@ void read_velocity_boundary_from_file(struct All_variables *);
 
 /* ========================================== */
 
-void full_velocity_boundary_conditions(E)
-     struct All_variables *E;
+void full_velocity_boundary_conditions(struct All_variables *E)
 {
   void velocity_imp_vert_bc();
   void velocity_apply_periodicapply_periodic_bcs();
@@ -131,10 +130,8 @@ void full_velocity_boundary_conditions(E)
 
 /* ========================================== */
 
-void full_temperature_boundary_conditions(E)
-     struct All_variables *E;
+void full_temperature_boundary_conditions(struct All_variables *E)
 {
-  void temperatures_conform_bcs();
   void temperature_imposed_vert_bcs();
   int j,lev,noz;
 
@@ -223,16 +220,14 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
 }
 
 
-static void velocity_apply_periodic_bcs(E)
-    struct All_variables *E;
+static void velocity_apply_periodic_bcs(struct All_variables *E)
 {
   fprintf(E->fp,"Periodic boundary conditions\n");
 
   return;
   }
 
-static void temperature_apply_periodic_bcs(E)
-    struct All_variables *E;
+static void temperature_apply_periodic_bcs(struct All_variables *E)
 {
  fprintf(E->fp,"Periodic temperature boundary conditions\n");
 

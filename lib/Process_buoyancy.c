@@ -50,8 +50,7 @@ void post_processing(struct All_variables *E)
     Surface heat flux
    =================== */
 
-void heat_flux(E)
-    struct All_variables *E;
+void heat_flux(struct All_variables *E)
 {
     int m,e,el,i,j,node,lnode,nz;
     float *flux[NCS],*SU[NCS],*RU[NCS];

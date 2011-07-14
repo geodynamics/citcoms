@@ -1078,29 +1078,29 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   int i, j, n, ncolumns;
   char output_file[255];
   gzFile *fp1;
+  TracerArray::iterator ta;
+  TracerList::iterator tr;
 
   snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz",
 	   E->control.data_dir,cycles,
 	   E->parallel.me, cycles);
   fp1 = gzdir_output_open(output_file,"w");
 
-  ncolumns = 3 + E->trace.number_of_extra_quantities;
+  ncolumns = 3 + 1;
+  //ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+  for(ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
+      gzprintf(fp1,"%d %d %d %.5e\n", cycles, ta->size(),
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[j];n++) {
+      for(tr=ta->begin();tr!=ta->end();++tr) {
           /* write basic quantities (coordinate) */
-          gzprintf(fp1,"%9.5e %9.5e %9.5e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
+          gzprintf(fp1,"%9.5e %9.5e %9.5e %9.5e",
+                  tr->theta,
+                  tr->phi,
+                  tr->rad,
+                  tr->flavor);
 
-          /* write extra quantities */
-          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %9.5e", E->trace.extraq[j][i][n]);
-          }
           gzprintf(fp1, "\n");
       }
 
@@ -1514,8 +1514,8 @@ void be_flip_byte_order(void *x, size_t len)
 /* this should not be called with (i,i,size i) */
 void be_flipit(void *d, void *s, size_t len)
 {
-  unsigned char *dest = d;
-  unsigned char *src  = s;
+  unsigned char *dest = (unsigned char *)d;
+  unsigned char *src  = (unsigned char *)s;
   src += len - 1;
   for (; len; len--)
     *dest++ = *src--;

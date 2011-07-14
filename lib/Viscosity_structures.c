@@ -279,10 +279,7 @@ void allocate_visc_vars(struct All_variables *E)
    visc  = E->VI[E->mesh.levmax]
 
  */
-void get_system_viscosity(E,propogate,evisc,visc)
-     struct All_variables *E;
-     int propogate;
-     float **evisc,**visc;
+void get_system_viscosity(struct All_variables *E, int propogate, float **evisc, float **visc)
 {
     void visc_from_mat();
     void visc_from_T();
@@ -408,9 +405,7 @@ void initial_viscosity(struct All_variables *E)
 }
 
 
-void visc_from_mat(E,EEta)
-     struct All_variables *E;
-     float **EEta;
+void visc_from_mat(struct All_variables *E, float **EEta)
 {
 
     int i,m,jj;
@@ -476,10 +471,7 @@ void read_visc_layer_file(struct All_variables *E)
 }
 
 
-void visc_from_T(E,EEta,propogate)
-     struct All_variables *E;
-     float **EEta;
-     int propogate;
+void visc_from_T(struct All_variables *E, float **EEta, int propogate)
 {
     int m,i,k,l,z,jj,kk;
     float zero,one,eta0,temp,tempa,TT[9];
@@ -575,8 +567,8 @@ void visc_from_T(E,EEta,propogate)
 						   computation of
 						   depth, not needed
 						   TWB */
-		      TT[kk]=max(TT[kk],zero);
-		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+		      TT[kk]=fmax(TT[kk],zero);
+		      temp += fmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 		    EEta[m][ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
@@ -604,8 +596,8 @@ void visc_from_T(E,EEta,propogate)
                     temp=0.0;
                     zzz=0.0;
                     for(kk=1;kk<=ends;kk++)   {
-                        TT[kk]=max(TT[kk],zero);
-                        temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                        TT[kk]=fmax(TT[kk],zero);
+                        temp += fmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                         zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
@@ -635,8 +627,8 @@ void visc_from_T(E,EEta,propogate)
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
                     for(kk=1;kk<=ends;kk++)   {
-                        TT[kk]=max(TT[kk],zero);
-                        temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                        TT[kk]=fmax(TT[kk],zero);
+                        temp += fmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
                     if(E->control.mat_control==0){
@@ -686,8 +678,8 @@ void visc_from_T(E,EEta,propogate)
 	    for(jj=1;jj <= vpts;jj++) {
 	      temp=0.0;zzz=0.0;
 	      for(kk=1;kk <= ends;kk++)   {
-		TT[kk]=max(TT[kk],zero);
-		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+		TT[kk]=fmax(TT[kk],zero);
+		temp += fmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
 		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	      }
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
@@ -797,8 +789,8 @@ void visc_from_T(E,EEta,propogate)
                 for(jj=1;jj<=vpts;jj++) {
                     temp=zzz=0.0;
                     for(kk=1;kk<=ends;kk++)   {	
-		      TT[kk]=max(TT[kk],zero);
-		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
+		      TT[kk]=fmax(TT[kk],zero);
+		      temp += fmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];/* mean r */
                     }
 		    /* convert to z, as defined to be unity at surface
@@ -902,10 +894,7 @@ void visc_from_T(E,EEta,propogate)
 }
 
 
-void visc_from_S(E,EEta,propogate)
-     struct All_variables *E;
-     float **EEta;
-     int propogate;
+void visc_from_S(struct All_variables *E, float **EEta, int propogate)
 {
     float one,two,scale,stress_magnitude,depth,exponent1;
     float *eedot;
@@ -933,7 +922,7 @@ void visc_from_S(E,EEta,propogate)
       }
         /* eedot cannot be too small, or the viscosity will go to inf */
 	for(e=1;e<=nel;e++){
-	  eedot[e] = max(eedot[e], 1.0e-16);
+	  eedot[e] = fmax(eedot[e], 1.0e-16);
 	}
 
         for(e=1;e<=nel;e++)   {
@@ -948,7 +937,7 @@ void visc_from_S(E,EEta,propogate)
     return;
 }
 
-void visc_from_P(E,EEta) /* "plasticity" implementation
+void visc_from_P(struct All_variables *E, float **EEta) /* "plasticity" implementation
 
 
 			 psrw = FALSE
@@ -993,8 +982,6 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 			 TWB
 
 			 */
-     struct All_variables *E;
-     float **EEta;
 {
   float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
   int m,e,l,z,jj,kk;
@@ -1047,7 +1034,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
 	  
 	  /* min of depth dep. and constant yield stress */
-	  tau = min(tau,  E->viscosity.pdepv_y[l]);
+	  tau = fmin(tau,  E->viscosity.pdepv_y[l]);
 	  
 	  /* yield viscosity */
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
@@ -1056,7 +1043,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
 	  }else{
 	    /* min viscosities*/
-	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
+	    eta_new  = fmin(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
 	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
 	  //	  zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
@@ -1077,7 +1064,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	  /* compute sigma_y as above */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
-	  tau = min(tau,  E->viscosity.pdepv_y[l]);
+	  tau = fmin(tau,  E->viscosity.pdepv_y[l]);
 	  tau2 = tau * tau;
 	  if(tau < 1e10){
 	    /*  */
@@ -1105,9 +1092,7 @@ mean average from the tracer composition, assuming two flavors and
 compositions between zero and unity
 
 */
-void visc_from_C( E, EEta)
-     struct All_variables *E;
-     float **EEta;
+void visc_from_C(struct All_variables *E, float **EEta)
 {
   double vmean,cc_loc[10],CC[10][9],cbackground;
   int m,l,z,jj,kk,i,p,q;
@@ -1155,10 +1140,7 @@ void visc_from_C( E, EEta)
   } /* end cap */
 }
 
-void strain_rate_2_inv(E,m,EEDOT,SQRT)
-     struct All_variables *E;
-     float *EEDOT;
-     int m,SQRT;
+void strain_rate_2_inv(struct All_variables *E, int m, float *EEDOT, int SQRT)
 {
     void get_rtf_at_ppts();
     void velo_from_element();
@@ -1397,7 +1379,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                                 E->sx[m][3][E->ien[m][ee].node[8]]);
 
                     /* if ee has tracers in it and is within the channel */
-                    if((E->trace.ntracer_flavor[m][flavor][ee] > 0) &&
+                    if((E->trace.num_tracer_flavors[m][flavor][ee] > 0) &&
                        (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
                            F[e] = E->viscosity.lv_reduction;
                            break;
@@ -1458,7 +1440,7 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                     ee = (k-1)*E->lmesh.elz + ii;
 
                     /* if ee has tracers in it */
-                    if(E->trace.ntracer_flavor[m][flavor][ee] > 0) {
+                    if(E->trace.num_tracer_flavors[m][flavor][ee] > 0) {
                         F[e] = E->viscosity.lv_reduction;
                         break;
                     }

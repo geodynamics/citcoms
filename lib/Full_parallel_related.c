@@ -72,7 +72,7 @@ void full_parallel_processor_setup(struct All_variables *E)
     parallel_process_termination();
     }
 
-  E->sphere.caps_per_proc = max(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
+  E->sphere.caps_per_proc = fmax(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
 
   if (E->sphere.caps_per_proc > 1) {
     if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not supported.\n \n");
@@ -326,8 +326,7 @@ fprintf(stderr,"b %d %d %d %d %d %d %d\n",E->parallel.me,E->parallel.me_loc[1],E
  exchange info across the boundaries
  ============================================ */
 
-void full_parallel_domain_boundary_nodes(E)
-  struct All_variables *E;
+void full_parallel_domain_boundary_nodes(struct All_variables *E)
   {
 
   void parallel_process_termination();
@@ -502,8 +501,7 @@ if (E->control.verbose) {
 static void face_eqn_node_to_pass(struct All_variables *, int, int, int, int);
 static void line_eqn_node_to_pass(struct All_variables *, int, int, int, int, int, int);
 
-void full_parallel_communication_routs_v(E)
-  struct All_variables *E;
+void full_parallel_communication_routs_v(struct All_variables *E)
   {
 
   int m,i,ii,j,k,l,node,el,elt,lnode,jj,doff,target;
@@ -759,8 +757,7 @@ void full_parallel_communication_routs_v(E)
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-void full_parallel_communication_routs_s(E)
-  struct All_variables *E;
+void full_parallel_communication_routs_s(struct All_variables *E)
 {
 
   int i,ii,j,k,l,node,el,elt,lnode,jj,doff;
@@ -834,9 +831,7 @@ void full_parallel_communication_routs_s(E)
 /* ================================================ */
 /* ================================================ */
 
-static void face_eqn_node_to_pass(E,lev,m,npass,bd)
-  struct All_variables *E;
-  int lev,m,npass,bd;
+static void face_eqn_node_to_pass(struct All_variables *E, int lev, int m, int npass, int bd)
 {
   int jj,kk,node,doff;
   const int dims=E->mesh.nsd;
@@ -859,9 +854,7 @@ static void face_eqn_node_to_pass(E,lev,m,npass,bd)
 /* ================================================ */
 /* ================================================ */
 
-static void line_eqn_node_to_pass(E,lev,m,npass,num_node,offset,stride)
-  struct All_variables *E;
-  int lev,m,npass,num_node,offset,stride;
+static void line_eqn_node_to_pass(struct All_variables *E, int lev, int m, int npass, int num_node, int offset, int stride)
 {
   int jj,kk,node,doff;
   const int dims=E->mesh.nsd;
@@ -902,10 +895,7 @@ So, this bug won't manifest itself. But in other version of CitcomS, it will.
 by Tan2 7/21, 2003
 ================================================ */
 
-void full_exchange_id_d(E, U, lev)
- struct All_variables *E;
- double **U;
- int lev;
+void full_exchange_id_d(struct All_variables *E, double **U, int lev)
  {
 
  int ii,j,jj,m,k,kk,t_cap,idb,msginfo[8];
@@ -927,7 +917,7 @@ void full_exchange_id_d(E, U, lev)
  sizeofk = 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    kk = (1+E->parallel.NUM_NEQz[lev].pass[k])*sizeof(double);
-   sizeofk = max(sizeofk, kk);
+   sizeofk = fmax(sizeofk, kk);
  }
  RV=(double *)malloc( sizeofk );
  SV=(double *)malloc( sizeofk );
@@ -1018,10 +1008,7 @@ void full_exchange_id_d(E, U, lev)
 
 /* ================================================ */
 /* ================================================ */
-static void exchange_node_d(E, U, lev)
- struct All_variables *E;
- double **U;
- int lev;
+static void exchange_node_d(struct All_variables *E, double **U, int lev)
  {
 
  int ii,j,jj,m,k,kk,t_cap,idb,msginfo[8];
@@ -1045,7 +1032,7 @@ static void exchange_node_d(E, U, lev)
  idb= 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    sizeofk = (1+E->parallel.NUM_NODEz[lev].pass[k])*sizeof(double);
-   idb = max(idb,sizeofk);
+   idb = fmax(idb,sizeofk);
  }
 
  RV=(double *)malloc( idb );
@@ -1142,10 +1129,7 @@ static void exchange_node_d(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-static void exchange_node_f(E, U, lev)
- struct All_variables *E;
- float **U;
- int lev;
+static void exchange_node_f(struct All_variables *E, float **U, int lev)
  {
 
  int ii,j,jj,m,k,kk,t_cap,idb,msginfo[8];
@@ -1170,7 +1154,7 @@ static void exchange_node_f(E, U, lev)
  idb= 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    sizeofk = (1+E->parallel.NUM_NODEz[lev].pass[k])*sizeof(float);
-   idb = max(idb,sizeofk);
+   idb = fmax(idb,sizeofk);
  }
 
  RV=(float *)malloc( idb );

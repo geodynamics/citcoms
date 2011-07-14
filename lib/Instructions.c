@@ -623,7 +623,7 @@ void read_initial_settings(struct All_variables *E)
 								 heat flux files? */
   if(E->output.write_q_files){	/* make sure those get written at
 				   least as often as velocities */
-    E->output.write_q_files = min(E->output.write_q_files,E->control.record_every);
+    E->output.write_q_files = fmin(E->output.write_q_files,E->control.record_every);
   }
 
 
@@ -898,9 +898,7 @@ void global_derived_values(struct All_variables *E)
    common to all problems follow ...
    ===================================  */
 
-void allocate_common_vars(E)
-     struct All_variables *E;
-
+void allocate_common_vars(struct All_variables *E)
 {
     void set_up_nonmg_aliases();
     int m,n,snel,nsf,elx,ely,nox,noy,noz,nno,nel,npno,lim;
@@ -955,8 +953,8 @@ void allocate_common_vars(E)
   /* nodal mass */
   E->NMass[j] = (double *) malloc((nno+1)*sizeof(double));
 
-  nxyz = max(nox*noz,nox*noy);
-  nxyz = 2*max(nxyz,noz*noy);
+  nxyz = fmax(nox*noz,nox*noy);
+  nxyz = 2*fmax(nxyz,noz*noy);
 
   E->sien[j]         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
   E->surf_element[j] = (int *) malloc((nxyz+2)*sizeof(int));
@@ -1051,9 +1049,9 @@ void allocate_common_vars(E)
     E->VI[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
     E->NODE[i][j] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
-    nxyz = max(nox*noz,nox*noy);
-    nxyz = 2*max(nxyz,noz*noy);
-    nozl = max(noy,nox*2);
+    nxyz = fmax(nox*noz,nox*noy);
+    nxyz = 2*fmax(nxyz,noz*noy);
+    nozl = fmax(noy,nox*2);
 
 
 
@@ -1134,9 +1132,7 @@ void allocate_common_vars(E)
 
 /*  =========================================================  */
 
-void allocate_velocity_vars(E)
-     struct All_variables *E;
-
+void allocate_velocity_vars(struct All_variables *E)
 {
     int m,n,i,j,k,l;
 
@@ -1196,8 +1192,7 @@ void allocate_velocity_vars(E)
 
 /*  =========================================================  */
 
-void global_default_values(E)
-     struct All_variables *E;
+void global_default_values(struct All_variables *E)
 {
 
   /* FIRST: values which are not changed routinely by the user */
@@ -1296,8 +1291,7 @@ void global_default_values(E)
 /* =============================================================
    ============================================================= */
 
-void check_bc_consistency(E)
-     struct All_variables *E;
+void check_bc_consistency(struct All_variables *E)
 
 { int i,j,lev;
 
@@ -1336,9 +1330,7 @@ void check_bc_consistency(E)
 
 }
 
-void set_up_nonmg_aliases(E,j)
-     struct All_variables *E;
-     int j;
+void set_up_nonmg_aliases(struct All_variables *E, int j)
 
 { /* Aliases for functions only interested in the highest mg level */
 
@@ -1363,9 +1355,7 @@ void set_up_nonmg_aliases(E,j)
 
   return; }
 
-void report(E,string)
-     struct All_variables *E;
-     char * string;
+void report(struct All_variables *E, char * string)
 { if(E->control.verbose && E->parallel.me==0)
     { fprintf(stderr,"%s\n",string);
       fflush(stderr);
@@ -1373,9 +1363,7 @@ void report(E,string)
   return;
 }
 
-void record(E,string)
-     struct All_variables *E;
-     char * string;
+void record(struct All_variables *E, char * string)
 { if(E->control.verbose && E->fp)
     { fprintf(E->fp,"%s\n",string);
       fflush(E->fp);
@@ -1395,8 +1383,7 @@ void record(E,string)
 
 
 /* This function is replaced by CitcomS.Components.IC.launch()*/
-void common_initial_fields(E)
-    struct All_variables *E;
+void common_initial_fields(struct All_variables *E)
 {
     void initial_pressure();
     void initial_velocity();
@@ -1412,8 +1399,7 @@ void common_initial_fields(E)
 
 /* ========================================== */
 
-void initial_pressure(E)
-     struct All_variables *E;
+void initial_pressure(struct All_variables *E)
 {
     int i,m;
     report(E,"Initialize pressure field");
@@ -1425,8 +1411,7 @@ void initial_pressure(E)
   return;
 }
 
-void initial_velocity(E)
-     struct All_variables *E;
+void initial_velocity(struct All_variables *E)
 {
     int i,m;
     report(E,"Initialize velocity field");

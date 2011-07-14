@@ -38,9 +38,7 @@
   Open these files, read in results, and average if necessary
 =========================================================================*/
 
-void full_read_input_files_for_timesteps(E,action,output)
-    struct All_variables *E;
-    int action, output;
+void full_read_input_files_for_timesteps(struct All_variables *E, int action, int output)
 {
     float find_age_in_MY();
 

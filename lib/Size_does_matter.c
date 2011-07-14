@@ -34,8 +34,7 @@
 double theta_g(double , struct All_variables *);
 #endif
 
-void twiddle_thumbs(yawn)
-     struct All_variables *yawn;
+void twiddle_thumbs(struct All_variables *yawn)
      //     int scratch_groin;
 
 { /* Do nothing, just sit back and relax.
@@ -51,8 +50,6 @@ void twiddle_thumbs(yawn)
 static void form_rtf_bc(int k, double x[4],
                         double rtf[4][9], double bc[4][4])
 {
-    double myatan();
-
     rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]); /* 1/r */
     rtf[1][k] = acos(x[3]*rtf[3][k]); /* theta */
     rtf[2][k] = myatan(x[2],x[1]); /* phi */
@@ -76,9 +73,6 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 {
     int i,j,k,d,e;
     double jacobian;
-    double determinant();
-    double cofactor(),myatan();
-    void   form_rtf_bc();
 
     struct Shape_function_dx LGNx;
 
@@ -209,8 +203,6 @@ void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
     int i, k, d;
     double x[4];
 
-    double myatan();
-
     const int dims = E->mesh.nsd;
     const int ends = ENODES3D;
     const int vpts = VPOINTS3D;
@@ -238,8 +230,6 @@ void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
 {
     int i, k, d;
     double x[4];
-
-    double myatan();
 
     const int dims = E->mesh.nsd;
     const int ends = ENODES3D;
@@ -306,14 +296,12 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5],
 
 /*   ======================================================================
      ======================================================================  */
-void construct_surf_det (E)
-     struct All_variables *E;
+void construct_surf_det (struct All_variables *E)
 {
 
   int m,i,k,d,e,es,el;
 
   double jacobian;
-  double determinant();
   double cofactor();
 
   const int oned = onedvpoints[E->mesh.nsd];
@@ -363,7 +351,6 @@ void construct_bdry_det(struct All_variables *E)
   int m,i,k,d,e,es,el,side;
 
   double jacobian;
-  double determinant();
   double cofactor();
 
   const int oned = onedvpoints[E->mesh.nsd];
@@ -418,16 +405,11 @@ void construct_bdry_det(struct All_variables *E)
 
 /*   ======================================================================
      ======================================================================  */
-void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
-     struct All_variables *E;
-     int el,top,m;
-     struct Shape_function1 *GM;
-     struct Shape_function1_dA *dGammax;
+void get_global_1d_shape_fn(struct All_variables *E, int el, struct Shape_function1 *GM, struct Shape_function1_dA *dGammax, int top, int m)
 {
   int ii,i,k,d,e;
 
   double jacobian;
-  double determinant();
 
   const int oned = onedvpoints[E->mesh.nsd];
 
@@ -457,16 +439,11 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
 
 /*   ======================================================================
      ======================================================================  */
-void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
-     struct All_variables *E;
-     int el,top,m;
-     struct Shape_function1 *GM;
-     struct Shape_function1_dA *dGammax;
+void get_global_1d_shape_fn_L(struct All_variables *E, int el, struct Shape_function1 *GM, struct Shape_function1_dA *dGammax, int top, int m)
 {
     int ii,i,k,d,e,node;
 
     double jacobian;
-    double determinant();
 
     const int oned = onedvpoints[E->mesh.nsd];
 
@@ -527,17 +504,11 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
 /*   ======================================================================
      For calculating pressure boundary term --- Choi, 11/13/02
      ======================================================================  */
-void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
-     struct All_variables *E;
-     int el,side,m;
-     struct Shape_function1 *GM;
-     struct Shape_function1_dx *GMx;
-     struct Shape_function_side_dA *dGamma;
+void get_global_side_1d_shape_fn(struct All_variables *E, int el, struct Shape_function1 *GM, struct Shape_function1_dx *GMx, struct Shape_function_side_dA *dGamma, int side, int m)
 {
   int i,k,d,e;
 
   double jacobian;
-  double determinant();
 
   const int oned = onedvpoints[E->mesh.nsd];
   double xx[4][5],dxda[4][4];
@@ -571,7 +542,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 			      struct CCX *ccx,int lev,int m,int pressure)
 {
   int a,i,j,k,d,lnode;
-  double cofactor(),myatan();
+  double cofactor();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
@@ -713,7 +684,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 				  int lev,int m,int pressure,int side)
 {
   int a,aa,i,j,k,d,lnode;
-  double cofactor(),myatan();
+  double cofactor();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
@@ -850,11 +821,10 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 
 
 /* ======================================= */
-void construct_c3x3matrix(E)
-     struct All_variables *E;
+void construct_c3x3matrix(struct All_variables *E)
 {
   int m,a,i,j,k,d,es,el,nel_surface,lev,lnode;
-  double cofactor(),myatan();
+  double cofactor();
   double x[4],u[4][4],ux[3][4][4],ua[4][4];
   double costt,cosff,sintt,sinff,rr,tt,ff;
 
@@ -1009,7 +979,7 @@ void mass_matrix(struct All_variables *E)
 {
     int m,node,i,nint,e,lev;
     int n[9], nz;
-    double myatan(),area,centre[4],temp[9],temp2[9],dx1,dx2,dx3;
+    double area,centre[4],temp[9],temp2[9],dx1,dx2,dx3;
 
     const int vpts=vpoints[E->mesh.nsd];
 
@@ -1046,7 +1016,7 @@ void mass_matrix(struct All_variables *E)
                 E->ECO[lev][m][e].centre[3] = dx3;
 
                 /* delta(theta) of this element */
-                dx1 = max( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
+                dx1 = fmax( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
                            fabs(E->SX[lev][m][1][n[2]]-E->SX[lev][m][1][n[4]]) );
 
                 /* length of this element in the theta-direction */
@@ -1055,15 +1025,15 @@ void mass_matrix(struct All_variables *E)
                 /* delta(phi) of this element */
                 dx1 = fabs(E->SX[lev][m][2][n[3]]-E->SX[lev][m][2][n[1]]);
                 if (dx1>M_PI)
-                    dx1 = min(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
+                    dx1 = fmin(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
+                        fmax(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
 
                 dx2 = fabs(E->SX[lev][m][2][n[2]]-E->SX[lev][m][2][n[4]]);
                 if (dx2>M_PI)
-                    dx2 = min(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
+                    dx2 = fmin(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
+                        fmax(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
 
-                dx2 = max(dx1,dx2);
+                dx2 = fmax(dx1,dx2);
 
                 /* length of this element in the phi-direction */
                 E->ECO[lev][m][e].size[2] = dx2*E->ECO[lev][m][e].centre[3]

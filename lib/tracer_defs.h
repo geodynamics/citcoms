@@ -26,11 +26,31 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 
-
+#include <vector>
+#include <list>
 
 /* forward declaration */
 struct All_variables;
 
+
+class Tracer {
+public:
+	// Tracer position in spherical coordinates
+	double theta, phi, rad;
+	// Tracer position in Cartesian coordinates
+	double x, y, z;
+	// Previous Cartesian position and velocity
+	double x0, y0, z0;
+	double Vx, Vy, Vz;
+
+	// Tracer flavor (meaning should be application dependent)
+	double flavor;
+
+	int ielement;
+};
+
+typedef std::list<Tracer> TracerList;
+typedef std::vector<TracerList> TracerArray;
 
 struct TRACE{
 
@@ -47,26 +67,27 @@ struct TRACE{
     double box_cushion;
 
     /* tracer arrays */
-    int number_of_basic_quantities;
-    int number_of_extra_quantities;
-    int number_of_tracer_quantities;
+    TracerArray tracers;
+    //int number_of_basic_quantities;
+    //int number_of_extra_quantities;
+    //int number_of_tracer_quantities;
 
-    double *basicq[13][100];
-    double *extraq[13][100];
+    //double *basicq[13][100];
+    //double *extraq[13][100];
 
-    int ntracers[13];
-    int max_ntracers[13];
-    int *ielement[13];
+    //int ntracers[13];
+    //int max_ntracers[13];
+    //int *ielement[13];
 
-    int number_of_tracers;
-
-    int ilatersize[13];
-    int ilater[13];
-    double *rlater[13][100];
+    //int ilatersize[13];
+    //int ilater[13];
+    //double *rlater[13][100];
+    TracerList later_tracer[13];
 
     /* tracer flavors */
     int nflavors;
-    int **ntracer_flavor[13];
+    std::map<int, std::map<int, int> > num_tracer_flavors[13];
+    //int **ntracer_flavor[13];
 
     int ic_method_for_flavors;
     double *z_interface;

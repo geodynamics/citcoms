@@ -32,9 +32,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void regional_coord_of_cap(E,m,icap)
-   struct All_variables *E;
-   int icap,m;
+void regional_coord_of_cap(struct All_variables *E, int m, int icap)
   {
 
   int i,j,k,lev,temp,elx,ely,nox,noy,noz,node,nodes;
@@ -69,7 +67,7 @@ void regional_coord_of_cap(E,m,icap)
   nprocyl=E->parallel.nprocy;
   nproczl=E->parallel.nprocz;
   nnproc=nprocyl*nprocxl*nproczl;
-  temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
+  temp = fmax(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
   /* define the cap corners */
   E->sphere.cap[1].theta[1] = E->control.theta_min;

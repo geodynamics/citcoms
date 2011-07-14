@@ -60,6 +60,7 @@ endif
 
 # static library
 libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
+libCitcomS_a_CXXFLAGS = $(AM_CXXFLAGS) # hack for automake
 libCitcomS_a_SOURCES = $(sources)
 
 # shared library (libtool)
@@ -129,7 +130,7 @@ sources = \
 	Stokes_flow_Incomp.c \
 	Topo_gravity.c \
 	tracer_defs.h \
-	Tracer_setup.c \
+	Tracer_setup.cpp \
 	viscosity_descriptions.h \
 	Viscosity_structures.c \
 	Full_boundary_conditions.c \

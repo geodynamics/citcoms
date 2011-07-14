@@ -71,6 +71,9 @@ AM_CONDITIONAL([COND_CUDA], [test "$want_cuda" = yes])
 AC_PROG_CC([mpicc hcc mpcc mpcc_r mpxlc cmpicc gcc cc cl icc ecc pgcc xlc xlc_r])
 AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC CC cxx cc++ cl FCC KCC RCC xlc++_r xlC_r xlC icpc ecpc pgCC])
 
+CC="$CXX"
+CFLAGS="$CXXFLAGS"
+
 # Checking a system header here so that CPP is always defined
 AC_CHECK_HEADERS([malloc.h])
 

@@ -28,7 +28,15 @@
 
 struct All_variables;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void full_solver_init(struct All_variables *E);
+
+#ifdef __cplusplus
+}
+#endif
 
 void solver_init(struct All_variables *E)
 {

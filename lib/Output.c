@@ -562,9 +562,9 @@ void output_seismic(struct All_variables *E, int cycles)
     double *rho, *vp, *vs;
     const int len = E->lmesh.nno;
 
-    rho = malloc(len * sizeof(double));
-    vp = malloc(len * sizeof(double));
-    vs = malloc(len * sizeof(double));
+    rho = (double *)malloc(len * sizeof(double));
+    vp = (double *)malloc(len * sizeof(double));
+    vs = (double *)malloc(len * sizeof(double));
     if(rho==NULL || vp==NULL || vs==NULL) {
         fprintf(stderr, "Error while allocating memory\n");
         abort();
@@ -659,28 +659,29 @@ void output_tracer(struct All_variables *E, int cycles)
   int i, j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
+  TracerArray::iterator ta;
+  TracerList::iterator tr;
+
 
   sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
   fp1 = output_open(output_file, "w");
 
-  ncolumns = 3 + E->trace.number_of_extra_quantities;
+  //ncolumns = 3 + E->trace.number_of_extra_quantities;
+  ncolumns = 3 + 1;
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+  for(ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, ta->size(),
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[j];n++) {
+      for(tr=ta->begin();tr!=ta->end();++tr) {
           /* write basic quantities (coordinate) */
-          fprintf(fp1,"%.12e %.12e %.12e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
+          fprintf(fp1,"%.12e %.12e %.12e %.12e",
+                  tr->theta,
+                  tr->phi,
+                  tr->rad,
+                  tr->flavor);
 
-          /* write extra quantities */
-          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
-          }
           fprintf(fp1, "\n");
       }
 

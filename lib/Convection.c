@@ -31,8 +31,7 @@
 
 #include "global_defs.h"
 
-void set_convection_defaults(E)
-     struct All_variables *E;
+void set_convection_defaults(struct All_variables *E)
 {
   /*
     void PG_timestep();
@@ -71,9 +70,7 @@ void set_convection_defaults(E)
     return;
 }
 
-void read_convection_settings(E)
-     struct All_variables *E;
-
+void read_convection_settings(struct All_variables *E)
 {
     void advection_diffusion_parameters();
 
@@ -88,16 +85,13 @@ void read_convection_settings(E)
    Any setup which relates only to the convection stuff goes in here
    ================================================================= */
 
-void convection_derived_values(E)
-     struct All_variables *E;
-
+void convection_derived_values(struct All_variables *E)
 {
 
   return;
 }
 
-void convection_allocate_memory(E)
-     struct All_variables *E;
+void convection_allocate_memory(struct All_variables *E)
 
 { void advection_diffusion_allocate_memory();
 
@@ -108,8 +102,7 @@ void convection_allocate_memory(E)
 
 /* ============================================ */
 
-void convection_initial_fields(E)
-     struct All_variables *E;
+void convection_initial_fields(struct All_variables *E)
 
 {
     void convection_initial_temperature();
@@ -120,8 +113,7 @@ void convection_initial_fields(E)
 
 /* =========================================== */
 
-void convection_boundary_conditions(E)
-     struct All_variables *E;
+void convection_boundary_conditions(struct All_variables *E)
 
 {
     (E->solver.velocity_boundary_conditions)(E);      /* universal */
