@@ -1078,7 +1078,6 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   int i, j, n, ncolumns;
   char output_file[255];
   gzFile *fp1;
-  TracerArray::iterator ta;
   TracerList::iterator tr;
 
   snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz",
@@ -1089,17 +1088,17 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   ncolumns = 3 + 1;
   //ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  for(ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
-      gzprintf(fp1,"%d %d %d %.5e\n", cycles, ta->size(),
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.tracers[j].size(),
               ncolumns, E->monitor.elapsed_time);
 
-      for(tr=ta->begin();tr!=ta->end();++tr) {
+      for(tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
           /* write basic quantities (coordinate) */
           gzprintf(fp1,"%9.5e %9.5e %9.5e %9.5e",
-                  tr->theta,
-                  tr->phi,
-                  tr->rad,
-                  tr->flavor);
+                  tr->theta(),
+                  tr->phi(),
+                  tr->rad(),
+                  tr->flavor());
 
           gzprintf(fp1, "\n");
       }

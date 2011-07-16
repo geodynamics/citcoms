@@ -32,25 +32,99 @@
 /* forward declaration */
 struct All_variables;
 
+#ifndef _TRACER_DEFS_H_
+#define _TRACER_DEFS_H_
+
+class CartesianCoord;
+
+// Position or vector in spherical coordinates
+class SphericalCoord {
+public:
+	double	_theta, _phi, _rad;
+	SphericalCoord(void) : _theta(0), _phi(0), _rad(0) {};
+	SphericalCoord(double theta, double phi, double rad) : _theta(theta), _phi(phi), _rad(rad) {};
+
+	size_t size(void) const { return 3; };
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
+	CartesianCoord toCartesian(void) const;
+
+	void constrainThetaPhi(void);
+	double constrainAngle(const double angle) const;
+};
+
+// Position or vector in Cartesian coordinates
+class CartesianCoord {
+public:
+	double	_x, _y, _z;
+	CartesianCoord(void) : _x(0), _y(0), _z(0) {};
+	CartesianCoord(double x, double y, double z) : _x(x), _y(y), _z(z) {};
+
+	size_t size(void) const { return 3; };
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
+	SphericalCoord toSpherical(void) const;
+
+        const CartesianCoord operator+(const CartesianCoord &other) const;
+        const CartesianCoord operator*(const double &val) const;
+};
 
 class Tracer {
-public:
+private:
 	// Tracer position in spherical coordinates
-	double theta, phi, rad;
+	SphericalCoord	_sc;
 	// Tracer position in Cartesian coordinates
-	double x, y, z;
-	// Previous Cartesian position and velocity
-	double x0, y0, z0;
-	double Vx, Vy, Vz;
+	CartesianCoord	_cc;
+	// Previous Cartesian position
+	CartesianCoord	_cc0;
+	// Previous Cartesian velocity
+	CartesianCoord	_Vc;
 
 	// Tracer flavor (meaning should be application dependent)
-	double flavor;
+	double _flavor;
 
-	int ielement;
+	int _ielement;
+
+public:
+	Tracer(void) : _sc(), _cc(), _cc0(), _Vc() {};
+	Tracer(SphericalCoord new_sc, CartesianCoord new_cc) : _sc(new_sc), _cc(new_cc), _cc0(), _Vc() {};
+
+	CartesianCoord getCartesianPos(void) const { return _cc; };
+	SphericalCoord getSphericalPos(void) const { return _sc; };
+	CartesianCoord getOrigCartesianPos(void) const { return _cc0; };
+	CartesianCoord getCartesianVel(void) const { return _Vc; };
+
+	void setCoords(SphericalCoord new_sc, CartesianCoord new_cc) {
+		_sc = new_sc;
+		_cc = new_cc;
+	}
+	void setOrigVals(CartesianCoord new_cc0, CartesianCoord new_vc) {
+		_cc0 = new_cc0;
+		_Vc = new_vc;
+	}
+
+	double theta(void) { return _sc._theta; };
+	double phi(void) { return _sc._phi; };
+	double rad(void) { return _sc._rad; };
+
+	double x(void) { return _cc._x; };
+	double y(void) { return _cc._y; };
+	double z(void) { return _cc._z; };
+
+	int ielement(void) { return _ielement; };
+	void set_ielement(int ielement) { _ielement = ielement; };
+
+	double flavor(void) { return _flavor; };
+	void set_flavor(double flavor) { _flavor = flavor; };
+
+	size_t size(void);
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
 };
 
 typedef std::list<Tracer> TracerList;
-typedef std::vector<TracerList> TracerArray;
+
+#endif
 
 struct TRACE{
 
@@ -67,22 +141,9 @@ struct TRACE{
     double box_cushion;
 
     /* tracer arrays */
-    TracerArray tracers;
-    //int number_of_basic_quantities;
-    //int number_of_extra_quantities;
-    //int number_of_tracer_quantities;
+    TracerList tracers[13];
 
-    //double *basicq[13][100];
-    //double *extraq[13][100];
-
-    //int ntracers[13];
-    //int max_ntracers[13];
-    //int *ielement[13];
-
-    //int ilatersize[13];
-    //int ilater[13];
-    //double *rlater[13][100];
-    TracerList later_tracer[13];
+    TracerList escaped_tracers[13];
 
     /* tracer flavors */
     int nflavors;
@@ -169,10 +230,8 @@ struct TRACE{
     int (* iget_element)(struct All_variables*, int, int,
                          double, double, double, double, double, double);
 
-    void (* get_velocity)(struct All_variables*, int, int,
-                          double, double, double, double*);
+    CartesianCoord (* get_velocity)(struct All_variables*, int, int,
+                          double, double, double);
 
-    void (* keep_within_bounds)(struct All_variables*,
-                                double*, double*, double*,
-                                double*, double*, double*);
+    void (* keep_within_bounds)(struct All_variables*, CartesianCoord &, SphericalCoord &);
 };

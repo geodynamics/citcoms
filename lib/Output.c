@@ -659,7 +659,6 @@ void output_tracer(struct All_variables *E, int cycles)
   int i, j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
-  TracerArray::iterator ta;
   TracerList::iterator tr;
 
 
@@ -670,17 +669,17 @@ void output_tracer(struct All_variables *E, int cycles)
   //ncolumns = 3 + E->trace.number_of_extra_quantities;
   ncolumns = 3 + 1;
 
-  for(ta=E->trace.tracers.begin();ta!=E->trace.tracers.end();++ta) {
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, ta->size(),
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.tracers[j].size(),
               ncolumns, E->monitor.elapsed_time);
 
-      for(tr=ta->begin();tr!=ta->end();++tr) {
+      for(tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
           /* write basic quantities (coordinate) */
           fprintf(fp1,"%.12e %.12e %.12e %.12e",
-                  tr->theta,
-                  tr->phi,
-                  tr->rad,
-                  tr->flavor);
+                  tr->theta(),
+                  tr->phi(),
+                  tr->rad(),
+                  tr->flavor());
 
           fprintf(fp1, "\n");
       }

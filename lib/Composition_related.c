@@ -386,7 +386,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
                 flavor = i;
                 comp =
                     E->trace.num_tracer_flavors[j][flavor][e] / E->eco[j][e].area
-                    * domain_volume / E->trace.tracers.size();
+                    * domain_volume / E->trace.tracers[j].size();
 
                 /* truncate composition at 1.0 */
                 /* This violates mass conservation but prevents unphysical C */

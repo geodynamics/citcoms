@@ -158,8 +158,6 @@ void full_tracer_setup(struct All_variables *E)
     /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
-    /* Determine number of tracer quantities */
-
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
@@ -279,7 +277,7 @@ void full_lost_souls(struct All_variables *E)
       fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
-    E->trace.istat_isend=E->trace.later_tracer[j].size();
+    E->trace.istat_isend=E->trace.escaped_tracers[j].size();
     /** debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
@@ -294,7 +292,7 @@ void full_lost_souls(struct All_variables *E)
 
     /* initialize isend and ireceive */
     /* # of neighbors in the horizontal plane */
-    isize[j]=E->trace.later_tracer[j].size()*(12+1);
+    isize[j]=E->trace.escaped_tracers[j].size()*(12+1);
     for (kk=0;kk<=num_ngb;kk++) isend[j][kk]=0;
     for (kk=0;kk<=num_ngb;kk++) ireceive[j][kk]=0;
 
@@ -681,30 +679,18 @@ void full_lost_souls(struct All_variables *E)
         Tracer new_tracer;
 
         ireceive_position=kk*(12+1);
-        new_tracer.theta = REC[j][ipos+0];
-        new_tracer.phi = REC[j][ipos+1];
-        new_tracer.rad = REC[j][ipos+2];
-        new_tracer.x = REC[j][ipos+3];
-        new_tracer.y = REC[j][ipos+4];
-        new_tracer.z = REC[j][ipos+5];
-        new_tracer.x0 = REC[j][ipos+6];
-        new_tracer.y0 = REC[j][ipos+7];
-        new_tracer.z0 = REC[j][ipos+8];
-        new_tracer.Vx = REC[j][ipos+9];
-        new_tracer.Vy = REC[j][ipos+10];
-        new_tracer.Vz = REC[j][ipos+11];
-        new_tracer.flavor = REC[j][ipos+12];
+	new_tracer.readFromMem(&REC[j][ireceive_position]);
 
-        iel=(E->trace.iget_element)(E,j,-99,new_tracer.x,new_tracer.y,new_tracer.z,new_tracer.theta,new_tracer.phi,new_tracer.rad);
+        iel=(E->trace.iget_element)(E,j,-99,new_tracer.x(),new_tracer.y(),new_tracer.z(),new_tracer.theta(),new_tracer.phi(),new_tracer.rad());
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
-            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",new_tracer.x,new_tracer.y,new_tracer.z,new_tracer.theta,new_tracer.phi,new_tracer.rad);
+            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",new_tracer.x(),new_tracer.y(),new_tracer.z(),new_tracer.theta(),new_tracer.phi(),new_tracer.rad());
             fflush(E->trace.fpt);
             exit(10);
         }
 
-        new_tracer.ielement = iel;
+        new_tracer.set_ielement(iel);
         E->trace.tracers[j].push_back(new_tracer);
 
     }
@@ -748,10 +734,10 @@ static void full_put_lost_tracers(struct All_variables *E,
     /* transfer tracers from rlater to send */
 
     for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
-        rad=tr->rad;
-        x=tr->x;
-        y=tr->y;
-        z=tr->z;
+        rad=tr->rad();
+        x=tr->x();
+        y=tr->y();
+        z=tr->z();
 
         /* first check same cap if nprocz>1 */
 
@@ -790,19 +776,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         isend_position=(isend[j][ithatcap]-1)*(12+1);
 
-        send[j][ithatcap][isend_position+0]=tr->theta;
-        send[j][ithatcap][isend_position+1]=tr->phi;
-        send[j][ithatcap][isend_position+2]=tr->rad;
-        send[j][ithatcap][isend_position+3]=tr->x;
-        send[j][ithatcap][isend_position+4]=tr->y;
-        send[j][ithatcap][isend_position+5]=tr->z;
-        send[j][ithatcap][isend_position+6]=tr->x0;
-        send[j][ithatcap][isend_position+7]=tr->y0;
-        send[j][ithatcap][isend_position+8]=tr->z0;
-        send[j][ithatcap][isend_position+9]=tr->Vx;
-        send[j][ithatcap][isend_position+10]=tr->Vy;
-        send[j][ithatcap][isend_position+11]=tr->Vz;
-        send[j][ithatcap][isend_position+12]=tr->flavor;
+        tr->writeToMem(&send[j][ithatcap][isend_position]);
 
     } /* end kk, assigning tracers */
 
@@ -858,9 +832,6 @@ void full_get_shape_functions(struct All_variables *E,
     int maxlevel=E->mesh.levmax;
 
     const double eps=-1e-4;
-
-    void sphere_to_cart();
-
 
     /* find u and v using spherical coordinates */
 
@@ -996,10 +967,9 @@ double full_interpolate_data(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-void full_get_velocity(struct All_variables *E,
+CartesianCoord full_get_velocity(struct All_variables *E,
                        int j, int nelem,
-                       double theta, double phi, double rad,
-                       double *velocity_vector)
+                       double theta, double phi, double rad)
 {
     int iwedge;
     const int sphere_key = 0;
@@ -1007,8 +977,6 @@ void full_get_velocity(struct All_variables *E,
     double shape[9];
     double VV[4][9];
     double vx[7],vy[7],vz[7];
-
-    void velo_from_element_d();
 
     full_get_shape_functions(E, shape, nelem, theta, phi, rad);
     iwedge=shape[0];
@@ -1061,16 +1029,11 @@ void full_get_velocity(struct All_variables *E,
             vz[6]=VV[3][8];
         }
 
-    velocity_vector[1]=vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
-        vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6];
-    velocity_vector[2]=vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
-        vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6];
-    velocity_vector[3]=vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
-        vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
 
 
-
-    return;
+    return CartesianCoord(vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6],
+    			vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6],
+    			vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6]);
 }
 
 /***************************************************************/
@@ -1274,8 +1237,6 @@ static void make_regular_grid(struct All_variables *E)
     double *tmax;
     double *fmin_array;
     double *fmax_array;
-
-    void sphere_to_cart();
 
     const double two_pi=2.0*M_PI;
 
@@ -2491,30 +2452,6 @@ static void fix_angle(double *angle)
     return;
 }
 
-/******************************************************************/
-/* FIX THETA PHI                                                  */
-/*                                                                */
-/* This function constrains the value of theta to be              */
-/* between 0 and  PI, and                                         */
-/* this function constrains the value of phi to be                */
-/* between 0 and 2 PI                                             */
-/*                                                                */
-static void fix_theta_phi(double *theta, double *phi)
-{
-    const double two_pi=2.0*M_PI;
-
-    fix_angle(theta);
-
-    if (*theta > M_PI) {
-        *theta = two_pi - *theta;
-        *phi += M_PI;
-    }
-
-    fix_angle(phi);
-
-    return;
-}
-
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
@@ -2528,7 +2465,6 @@ int full_iget_element(struct All_variables *E,
                       double x, double y, double z,
                       double theta, double phi, double rad)
 {
-    int icheck_processor_shell();
     int iregel;
     int iel;
     int ntheta,nphi;
@@ -3016,14 +2952,10 @@ static void determine_shape_coefficients(struct All_variables *E)
 /* This function makes sure the particle is within the sphere, and      */
 /* phi and theta are within the proper degree range.                    */
 
-void full_keep_within_bounds(struct All_variables *E,
-                             double *x, double *y, double *z,
-                             double *theta, double *phi, double *rad)
+void full_keep_within_bounds(struct All_variables *E, CartesianCoord &cc, SphericalCoord &sc)
 {
-    fix_theta_phi(theta, phi);
-    fix_radius(E,rad,theta,phi,x,y,z);
-
-    return;
+	sc.constrainThetaPhi();
+    //fix_radius(E,rad,theta,phi,x,y,z);
 }
 
 
@@ -3067,7 +2999,6 @@ void analytical_test(struct All_variables *E)
     void predict_tracers();
     void correct_tracers();
     void analytical_runge_kutte();
-    void sphere_to_cart();
 
 
     fprintf(E->trace.fpt,"Starting Analytical Test\n");
@@ -3310,8 +3241,6 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
     double time;
     double path,dtpath;
 
-    void sphere_to_cart();
-    void cart_to_sphere();
     void analytical_test_function();
 
     theta_0=x0_s[1];
