@@ -35,7 +35,6 @@
 
 static void allocate_composition_memory(struct All_variables *E);
 static void compute_elemental_composition_ratio_method(struct All_variables *E);
-static void compute_elemental_composition_absolute_method(struct All_variables *E);
 static void init_bulk_composition(struct All_variables *E);
 static void check_initial_composition(struct All_variables *E);
 static void fill_composition_from_neighbors(struct All_variables *E);
@@ -56,11 +55,11 @@ void composition_input(struct All_variables *E)
         /* ibuoy_type=1 (ratio method) */
 
         input_int("buoy_type",&(E->composition.ibuoy_type),"1,0,nomax",m);
-        /* if (E->composition.ibuoy_type!=1) {
+        if (E->composition.ibuoy_type!=1) {
             fprintf(stderr,"Terror-Sorry, only ratio method allowed now\n");
             fflush(stderr);
             parallel_process_termination();
-        } */
+        }
 
         if (E->composition.ibuoy_type==0)
             E->composition.ncomp = E->trace.nflavors;
@@ -162,6 +161,9 @@ void write_composition_instructions(struct All_variables *E)
 void fill_composition(struct All_variables *E)
 {
 
+    /* XXX: Currently, only the ratio method works here.           */
+    /* Will have to come back here to include the absolute method. */
+
     /* ratio method */
 
     if (E->composition.ibuoy_type==1) {
@@ -169,15 +171,12 @@ void fill_composition(struct All_variables *E)
     }
 
     /* absolute method */
-    if (E->composition.ibuoy_type==0) {
-        compute_elemental_composition_absolute_method(E);
-    }
 
-    /* if (E->composition.ibuoy_type!=1) {
+    if (E->composition.ibuoy_type!=1) {
         fprintf(E->trace.fpt,"Error(compute...)-only ratio method now\n");
         fflush(E->trace.fpt);
         exit(10);
-    } */
+    }
 
     /* Map elemental composition to nodal points */
 
@@ -242,21 +241,20 @@ static void allocate_composition_memory(struct All_variables *E)
 
 void init_composition(struct All_variables *E)
 {
+    /* XXX: Currently, only the ratio method works here.           */
+    /* Will have to come back here to include the absolute method. */
+
     /* ratio method */
     if (E->composition.ibuoy_type==1) {
         compute_elemental_composition_ratio_method(E);
     }
 
     /* absolute method */
-    if (E->composition.ibuoy_type==0) {
-        compute_elemental_composition_absolute_method(E);
-    }
-
-    /* if (E->composition.ibuoy_type!=1) {
+    if (E->composition.ibuoy_type!=1) {
         fprintf(E->trace.fpt,"Error(compute...)-only ratio method now\n");
         fflush(E->trace.fpt);
         exit(10);
-    } */
+    }
 
     /* for empty elements */
     check_initial_composition(E);
@@ -303,7 +301,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.num_tracer_flavors[j][flavor][e];
+                numtracers += E->trace.ntracer_flavor[j][flavor][e];
 
             /* Check for empty entries and compute ratio.  */
             /* If no tracers are in an element, skip this element, */
@@ -317,7 +315,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             for(i=0;i<E->composition.ncomp;i++) {
                 flavor = i + 1;
                 E->composition.comp_el[j][i][e] =
-                    E->trace.num_tracer_flavors[j][flavor][e] / (double)numtracers;
+                    E->trace.ntracer_flavor[j][flavor][e] / (double)numtracers;
             }
         }
 
@@ -337,70 +335,6 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
 
     return;
 }
-
-
-
-/*********** COMPUTE ELEMENTAL ABSOLUTE METHOD *************************/
-/*                                                                     */
-/* This function computes the composition per element.                 */
-/* The concentration of material i in an element is                    */
-/* defined as:                                                         */
-/*   tracer i mass * (# of tracers of flavor i) / ( volume of element) */
-/*                                                                     */ 
-/* where tracer i mass = tot tracer volume / tot num of tracers        */
-/*                                                                     */
-/* Added by DJB 01/14/10.  Known caveats: (will address at some point) */
-/*     1) XXX: needs better error handling                             */
-/*     2) XXX: only tested with one flavor of tracer (flavor 0)        */
-/*     3) XXX: only tested by reading in a file of tracer locations    */
-/*     4) XXX: the initial volume of the tracer domain is HARD-CODED!  */
-
-static void compute_elemental_composition_absolute_method(struct All_variables *E)
-{
-    int i, j, e, flavor, numtracers;
-    double domain_volume;
-    float comp;
-    float one = 1.0;
-
-    /* This needs to be `manually' changed for the total volume */
-    /*  occupied by your tracers */
-    domain_volume = 1e-2;
-
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
-        for (e=1; e<=E->lmesh.nel; e++) {
-            numtracers = 0;
-            for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.num_tracer_flavors[j][flavor][e];
-
-            /* Check for empty entries */
-            /* If no tracers are in an element, comp = 0.0 (i.e. is ambient) */
-            if (numtracers == 0) {
-                for(i=0;i<E->composition.ncomp;i++) {
-                    E->composition.comp_el[j][i][e] = 0.0;
-                }
-                continue;
-            }
-
-            /* Composition is proportional to (local) tracer density */
-            for(i=0;i<E->composition.ncomp;i++) {
-                flavor = i;
-                comp =
-                    E->trace.num_tracer_flavors[j][flavor][e] / E->eco[j][e].area
-                    * domain_volume / E->trace.tracers[j].size();
-
-                /* truncate composition at 1.0 */
-                /* This violates mass conservation but prevents unphysical C */
-                /* XXX: make truncation a switch for the user to specify */
-                E->composition.comp_el[j][i][e] = fmin(comp,one);
-
-            }
-        }
-    }
-
-    return;
-}
-
-
 
 /********** MAP COMPOSITION TO NODES ****************/
 /*                                                  */
@@ -503,7 +437,7 @@ static void fill_composition_from_neighbors(struct All_variables *E)
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.num_tracer_flavors[j][flavor][e];
+                numtracers += E->trace.ntracer_flavor[j][flavor][e];
 
             if (numtracers == 0)
                 is_empty[e] = 1;

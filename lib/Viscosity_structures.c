@@ -937,7 +937,8 @@ void visc_from_S(struct All_variables *E, float **EEta, int propogate)
     return;
 }
 
-void visc_from_P(struct All_variables *E, float **EEta) /* "plasticity" implementation
+void visc_from_P(struct All_variables *E, float **EEta)
+			/* "plasticity" implementation
 
 
 			 psrw = FALSE
@@ -1379,7 +1380,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                                 E->sx[m][3][E->ien[m][ee].node[8]]);
 
                     /* if ee has tracers in it and is within the channel */
-                    if((E->trace.num_tracer_flavors[m][flavor][ee] > 0) &&
+                    if((E->trace.ntracer_flavor[m][flavor][ee] > 0) &&
                        (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
                            F[e] = E->viscosity.lv_reduction;
                            break;
@@ -1440,7 +1441,7 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                     ee = (k-1)*E->lmesh.elz + ii;
 
                     /* if ee has tracers in it */
-                    if(E->trace.num_tracer_flavors[m][flavor][ee] > 0) {
+                    if(E->trace.ntracer_flavor[m][flavor][ee] > 0) {
                         F[e] = E->viscosity.lv_reduction;
                         break;
                     }

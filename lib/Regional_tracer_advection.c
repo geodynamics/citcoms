@@ -49,7 +49,7 @@ static void write_trace_instructions(struct All_variables *E);
 static void make_mesh_ijk(struct All_variables *E);
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             Tracer send_tracer, int j);
+                             int kk, int j);
 static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv,
                               int j);
@@ -92,11 +92,47 @@ void regional_tracer_setup(struct All_variables *E)
     /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
+    /* Determine number of tracer quantities */
+
+    /* advection_quantites - those needed for advection */
+    E->trace.number_of_basic_quantities=12;
+
+    /* extra_quantities - used for flavors, composition, etc.    */
+    /* (can be increased for additional science i.e. tracing chemistry */
+
+    E->trace.number_of_extra_quantities = 0;
+    if (E->trace.nflavors > 0)
+        E->trace.number_of_extra_quantities += 1;
+
+
+    E->trace.number_of_tracer_quantities =
+        E->trace.number_of_basic_quantities +
+        E->trace.number_of_extra_quantities;
+
+
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
     /* Other positions may be used depending on science being done */
 
+
+    /* Some error control regarding size of pointer arrays */
+
+    if (E->trace.number_of_basic_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of basic in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_extra_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of extraq in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_tracer_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of rlater in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
 
     write_trace_instructions(E);
 
@@ -173,14 +209,12 @@ static void write_trace_instructions(struct All_variables *E)
     /* more obscure stuff */
 
     fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
-    /*
     fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
             E->trace.number_of_basic_quantities);
     fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
             E->trace.number_of_extra_quantities);
     fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
             E->trace.number_of_tracer_quantities);
-    */
 
 
 
@@ -486,14 +520,16 @@ double regional_interpolate_data(struct All_variables *E,
 
 /******** GET VELOCITY ***************************************/
 
-CartesianCoord regional_get_velocity(struct All_variables *E,
+void regional_get_velocity(struct All_variables *E,
                            int m, int nelem,
-                           double theta, double phi, double rad)
+                           double theta, double phi, double rad,
+                           double *velocity_vector)
 {
+    void velo_from_element_d();
+
     double shp[9], VV[4][9], tmp;
     int n, d, node;
     const int sphere_key = 0;
-    CartesianCoord res_vector;
 
     /* get shape functions at (theta, phi, rad) */
     regional_get_shape_functions(E, shp, nelem, theta, phi, rad);
@@ -507,10 +543,13 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
          Interpolate the velocity on the tracer position
     ***/
 
-    for(n=1; n<=8; n++) {
-        res_vector._x += VV[1][n] * shp[n];
-        res_vector._y += VV[2][n] * shp[n];
-        res_vector._z += VV[3][n] * shp[n];
+    for(d=1; d<=3; d++)
+        velocity_vector[d] = 0;
+
+
+    for(d=1; d<=3; d++) {
+        for(n=1; n<=8; n++)
+            velocity_vector[d] += VV[d][n] * shp[n];
     }
 
 
@@ -531,46 +570,52 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
     fflush(E->trace.fpt);
     /**/
 
-    return res_vector;
+    return;
 }
 
 
-void regional_keep_within_bounds(struct All_variables *E, CartesianCoord &cc, SphericalCoord &sc)
+void regional_keep_within_bounds(struct All_variables *E,
+                                 double *x, double *y, double *z,
+                                 double *theta, double *phi, double *rad)
 {
+    void sphere_to_cart();
     int changed = 0;
 
-    if (sc._theta > E->control.theta_max - E->trace.box_cushion) {
-        sc._theta = E->control.theta_max - E->trace.box_cushion;
+    if (*theta > E->control.theta_max - E->trace.box_cushion) {
+        *theta = E->control.theta_max - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (sc._theta < E->control.theta_min + E->trace.box_cushion) {
-        sc._theta = E->control.theta_min + E->trace.box_cushion;
+    if (*theta < E->control.theta_min + E->trace.box_cushion) {
+        *theta = E->control.theta_min + E->trace.box_cushion;
         changed = 1;
     }
 
-    if (sc._phi > E->control.fi_max - E->trace.box_cushion) {
-        sc._phi = E->control.fi_max - E->trace.box_cushion;
+    if (*phi > E->control.fi_max - E->trace.box_cushion) {
+        *phi = E->control.fi_max - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (sc._phi < E->control.fi_min + E->trace.box_cushion) {
-        sc._phi = E->control.fi_min + E->trace.box_cushion;
+    if (*phi < E->control.fi_min + E->trace.box_cushion) {
+        *phi = E->control.fi_min + E->trace.box_cushion;
         changed = 1;
     }
 
-    if (sc._rad > E->sphere.ro - E->trace.box_cushion) {
-        sc._rad = E->sphere.ro - E->trace.box_cushion;
+    if (*rad > E->sphere.ro - E->trace.box_cushion) {
+        *rad = E->sphere.ro - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (sc._rad < E->sphere.ri + E->trace.box_cushion) {
-        sc._rad = E->sphere.ri + E->trace.box_cushion;
+    if (*rad < E->sphere.ri + E->trace.box_cushion) {
+        *rad = E->sphere.ri + E->trace.box_cushion;
         changed = 1;
     }
 
-    if (changed) cc = sc.toCartesian();
+    if (changed)
+        sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
 
+
+    return;
 }
 
 
@@ -589,6 +634,7 @@ void regional_lost_souls(struct All_variables *E)
     double *send[2];
     double *recv[2];
 
+    void expand_tracer_arrays();
     int icheck_that_processor_shell();
 
     int ipass;
@@ -599,7 +645,7 @@ void regional_lost_souls(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
-    E->trace.istat_isend = E->trace.escaped_tracers[j].size();
+    E->trace.istat_isend = E->trace.ilater[j];
 
     /* the bounding box */
     for (d=0; d<E->mesh.nsd; d++) {
@@ -643,8 +689,8 @@ void regional_lost_souls(struct All_variables *E)
 
 
     /* Allocate Maximum Memory to Send Arrays */
-    max_send_size = fmax(2*E->trace.escaped_tracers[j].size(), E->trace.tracers[j].size()/100);
-    itemp_size = max_send_size * (12+1);
+    max_send_size = fmax(2*E->trace.ilater[j], E->trace.ntracers[j]/100);
+    itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
 
     if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
         == NULL) {
@@ -660,74 +706,70 @@ void regional_lost_souls(struct All_variables *E)
     }
 
 
-    TracerList::iterator  tr;
-
     for (d=0; d<E->mesh.nsd; d++) {
-        int original_size = E->trace.escaped_tracers[j].size();
+        int original_size = E->trace.ilater[j];
         int idb;
+        int kk = 1;
         int isend[2], irecv[2];
         isend[0] = isend[1] = 0;
 
+
         /* move out-of-bound tracers to send array */
-        for (tr=E->trace.escaped_tracers[j].begin();tr!=E->trace.escaped_tracers[j].end();++tr) {
+        while (kk<=E->trace.ilater[j]) {
             double coord;
 
             /* Is the tracer within the bounds in the d-th dimension */
-            switch(d) {
-                case 0:
-                    coord=tr->theta();
-                    break;
-                case 1:
-                    coord=tr->phi();
-                    break;
-                case 2:
-                    coord=tr->rad();
-                    break;
-            }
+            coord = E->trace.rlater[j][d][kk];
 
             if (coord < bounds[d][0]) {
-                put_lost_tracers(E, &(isend[0]), send[0], *tr, j);
-                tr = E->trace.escaped_tracers[j].erase(tr);
+                put_lost_tracers(E, &(isend[0]), send[0], kk, j);
             }
             else if (coord >= bounds[d][1]) {
-                put_lost_tracers(E, &(isend[1]), send[1], *tr, j);
-                tr = E->trace.escaped_tracers[j].erase(tr);
+                put_lost_tracers(E, &(isend[1]), send[1], kk, j);
             }
             else {
                 /* check next tracer */
+                kk++;
             }
 
             /* reallocate send if size too small */
-            if ((isend[0] > max_send_size - 5) || (isend[1] > max_send_size - 5)) {
+            if ((isend[0] > max_send_size - 5) ||
+                (isend[1] > max_send_size - 5)) {
 
                 isize = max_send_size + max_send_size/4 + 10;
-                itemp_size = isize * (12+1);
+                itemp_size = isize * E->trace.number_of_tracer_quantities;
 
-                if ((send[0] = (double *)realloc(send[0], itemp_size*sizeof(double))) == NULL) {
+                if ((send[0] = (double *)realloc(send[0],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
                     fprintf(E->trace.fpt,"Error(lost souls)-no memory (s4)\n");
                     fflush(E->trace.fpt);
                     exit(10);
                 }
-                if ((send[1] = (double *)realloc(send[1], itemp_size*sizeof(double))) == NULL) {
+                if ((send[1] = (double *)realloc(send[1],
+                                                 itemp_size*sizeof(double)))
+                    == NULL) {
                     fprintf(E->trace.fpt,"Error(lost souls)-no memory (s5)\n");
                     fflush(E->trace.fpt);
                     exit(10);
                 }
 
-                fprintf(E->trace.fpt,"Expanding physical memory of send to %d from %d\n",
+                fprintf(E->trace.fpt,"Expanding physical memory of send to "
+                        "%d from %d\n",
                         isize, max_send_size);
 
                 max_send_size = isize;
             }
 
-        }
+
+        } /* end of while kk */
 
 
         /* check the total # of tracers is conserved */
-        if ((isend[0] + isend[1] + E->trace.escaped_tracers[j].size()) != original_size) {
+        if ((isend[0] + isend[1] + E->trace.ilater[j]) != original_size) {
             fprintf(E->trace.fpt, "original_size: %d, rlater_size: %d, "
                     "send_size: %d\n",
-                    original_size, (int)E->trace.escaped_tracers[j].size(), kk);
+                    original_size, E->trace.ilater[j], kk);
         }
 
 
@@ -785,7 +827,7 @@ void regional_lost_souls(struct All_variables *E)
 
         /* Allocate memory in receive arrays */
         for (i=0; i<2; i++) {
-            isize = irecv[i] * (12+1);
+            isize = irecv[i] * E->trace.number_of_tracer_quantities;
             itemp_size = fmax(1, isize);
 
             if ((recv[i] = (double *)malloc(itemp_size*sizeof(double)))
@@ -804,11 +846,11 @@ void regional_lost_souls(struct All_variables *E)
             kk = d*2 + i + 1;
             target_rank = ngbr_rank[kk];
             if (target_rank >= 0) {
-                isize = isend[i] * (12+1);
+                isize = isend[i] * E->trace.number_of_tracer_quantities;
                 MPI_Isend(send[i], isize, MPI_DOUBLE, target_rank,
                           12, E->parallel.world, &request[idb++]);
 
-                isize = irecv[i] * (12+1);
+                isize = irecv[i] * E->trace.number_of_tracer_quantities;
                 MPI_Irecv(recv[i], isize, MPI_DOUBLE, target_rank,
                           12, E->parallel.world, &request[idb++]);
 
@@ -847,16 +889,14 @@ void regional_lost_souls(struct All_variables *E)
 
 
     /* rlater should be empty by now */
-    if (E->trace.escaped_tracers[j].size() > 0) {
+    if (E->trace.ilater[j] > 0) {
         fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
-        /*
         for (kk=1; kk<=E->trace.ilater[j]; kk++) {
             fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
                     E->trace.rlater[j][0][kk],
                     E->trace.rlater[j][1][kk],
                     E->trace.rlater[j][2][kk]);
         }
-        */
         fflush(E->trace.fpt);
         exit(10);
     }
@@ -874,17 +914,26 @@ void regional_lost_souls(struct All_variables *E)
 
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             Tracer send_tracer, int j)
+                             int kk, int j)
 {
     int ilast_tracer, isend_position, ipos;
     int pp;
 
     /* move the tracer from rlater to send */
-    isend_position = (*send_size) * (12+1);
+    isend_position = (*send_size) * E->trace.number_of_tracer_quantities;
 
-    send_tracer.writeToMem(&send[isend_position]);
-
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        ipos = isend_position + pp;
+        send[ipos] = E->trace.rlater[j][pp][kk];
+    }
     (*send_size)++;
+
+    /* eject the tracer from rlater */
+    ilast_tracer = E->trace.ilater[j];
+    for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
+        E->trace.rlater[j][pp][kk] = E->trace.rlater[j][pp][ilast_tracer];
+    }
+    E->trace.ilater[j]--;
 
     return;
 }
@@ -898,24 +947,25 @@ static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv,
                               int j)
 {
+    void expand_tracer_arrays();
+    void expand_later_array();
     int icheck_processor_shell();
 
     int kk, pp;
-    int ipos, inside, iel;
+    int ipos, ilast, inside, iel;
+    double theta, phi, rad;
 
     for (kk=0; kk<recv_size; kk++) {
-        Tracer new_tracer;
-
-        ipos = kk * new_tracer.size();
-
-        /* found the element */
-	new_tracer.readFromMem(&recv[ipos]);
+        ipos = kk * E->trace.number_of_tracer_quantities;
+        theta = recv[ipos];
+        phi = recv[ipos + 1];
+        rad = recv[ipos + 2];
 
         /* check whether this tracer is inside this proc */
         /* check radius first, since it is cheaper       */
-        inside = icheck_processor_shell(E, j, new_tracer.rad());
+        inside = icheck_processor_shell(E, j, rad);
         if (inside == 1)
-            inside = regional_icheck_cap(E, 0, new_tracer.theta(), new_tracer.phi(), new_tracer.rad(), new_tracer.rad());
+            inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
         else
             inside = 0;
 
@@ -927,21 +977,58 @@ static void put_found_tracers(struct All_variables *E,
         /**/
 
         if (inside) {
-            iel = regional_iget_element(E, j, -99, 0, 0, 0, new_tracer.theta(), new_tracer.phi(), new_tracer.rad());
+
+            E->trace.ntracers[j]++;
+            ilast = E->trace.ntracers[j];
+
+            if (E->trace.ntracers[j] > (E->trace.max_ntracers[j]-5))
+                expand_tracer_arrays(E, j);
+
+            for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
+                E->trace.basicq[j][pp][ilast] = recv[ipos+pp];
+
+            ipos += E->trace.number_of_basic_quantities;
+            for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
+                E->trace.extraq[j][pp][ilast] = recv[ipos+pp];
+
+
+            /* found the element */
+            iel = regional_iget_element(E, j, -99, 0, 0, 0, theta, phi, rad);
 
             if (iel<1) {
-                fprintf(E->trace.fpt, "Error(regional lost souls) - element not here?\n");
-                fprintf(E->trace.fpt, "theta, phi, rad: %f %f %f\n", new_tracer.theta(), new_tracer.phi(), new_tracer.rad());
+                fprintf(E->trace.fpt, "Error(regional lost souls) - "
+                        "element not here?\n");
+                fprintf(E->trace.fpt, "theta, phi, rad: %f %f %f\n",
+                        theta, phi, rad);
                 fflush(E->trace.fpt);
                 exit(10);
             }
 
-            new_tracer.set_ielement(iel);
-            E->trace.tracers[j].push_back(new_tracer);
+            E->trace.ielement[j][ilast] = iel;
 
         }
         else {
-            E->trace.escaped_tracers[j].push_back(new_tracer);
+            if (E->trace.ilatersize[j]==0) {
+
+                E->trace.ilatersize[j]=E->trace.max_ntracers[j]/5;
+
+                for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
+                    if ((E->trace.rlater[j][kk]=(double *)malloc(E->trace.ilatersize[j]*sizeof(double)))==NULL) {
+                        fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
+                        fflush(E->trace.fpt);
+                        exit(10);
+                    }
+                }
+            } /* end first particle initiating memory allocation */
+
+            E->trace.ilater[j]++;
+            ilast = E->trace.ilater[j];
+
+            if (E->trace.ilater[j] > (E->trace.ilatersize[j]-5))
+                expand_later_array(E, j);
+
+            for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
+                E->trace.rlater[j][pp][ilast] = recv[ipos+pp];
         } /* end of if-else */
 
         /** debug **

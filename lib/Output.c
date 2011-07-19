@@ -58,13 +58,6 @@ extern void heat_flux(struct All_variables *);
 extern void get_STD_topo(struct All_variables *, float**, float**,
                          float**, float**, int);
 extern void get_CBF_topo(struct All_variables *, float**, float**);
-#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-#include "anisotropic_viscosity.h"
-void output_avisc(struct All_variables *, int);
-#endif
-
-
-
 
 /**********************************************************************/
 
@@ -112,10 +105,6 @@ void output(struct All_variables *E, int cycles)
 
   output_velo(E, cycles);
   output_visc(E, cycles);
-#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-  output_avisc(E, cycles);
-#endif
-
 
   output_surf_botm(E, cycles);
 
@@ -321,29 +310,6 @@ void output_visc(struct All_variables *E, int cycles)
 
   return;
 }
-
-#ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-void output_avisc(struct All_variables *E, int cycles)
-{
-  int i, j;
-  char output_file[255];
-  FILE *fp1;
-  int lev = E->mesh.levmax;
-  if(E->viscosity.allow_anisotropic_viscosity){
-    sprintf(output_file,"%s.avisc.%d.%d", E->control.data_file,
-	    E->parallel.me, cycles);
-    fp1 = output_open(output_file, "w");
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
-      for(i=1;i<=E->lmesh.nno;i++)
-	fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
-    }
-    
-    fclose(fp1);
-  }
-  return;
-}
-#endif
 
 
 void output_velo(struct All_variables *E, int cycles)
@@ -552,8 +518,7 @@ void output_horiz_avg(struct All_variables *E, int cycles)
 void output_seismic(struct All_variables *E, int cycles)
 {
     void get_prem(double, double*, double*, double*);
-    void compute_seismic_model(struct All_variables*, 
-			       double*, double*, double*);
+    void compute_seismic_model(const struct All_variables*, double*, double*, double*);
 
     char output_file[255];
     FILE* fp;
@@ -562,9 +527,9 @@ void output_seismic(struct All_variables *E, int cycles)
     double *rho, *vp, *vs;
     const int len = E->lmesh.nno;
 
-    rho = (double *)malloc(len * sizeof(double));
-    vp = (double *)malloc(len * sizeof(double));
-    vs = (double *)malloc(len * sizeof(double));
+    rho = (double*)malloc(len * sizeof(double));
+    vp = (double*)malloc(len * sizeof(double));
+    vs = (double*)malloc(len * sizeof(double));
     if(rho==NULL || vp==NULL || vs==NULL) {
         fprintf(stderr, "Error while allocating memory\n");
         abort();
@@ -659,28 +624,28 @@ void output_tracer(struct All_variables *E, int cycles)
   int i, j, n, ncolumns;
   char output_file[255];
   FILE *fp1;
-  TracerList::iterator tr;
-
 
   sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
           E->parallel.me, cycles);
   fp1 = output_open(output_file, "w");
 
-  //ncolumns = 3 + E->trace.number_of_extra_quantities;
-  ncolumns = 3 + 1;
+  ncolumns = 3 + E->trace.number_of_extra_quantities;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.tracers[j].size(),
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
               ncolumns, E->monitor.elapsed_time);
 
-      for(tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
+      for(n=1;n<=E->trace.ntracers[j];n++) {
           /* write basic quantities (coordinate) */
-          fprintf(fp1,"%.12e %.12e %.12e %.12e",
-                  tr->theta(),
-                  tr->phi(),
-                  tr->rad(),
-                  tr->flavor());
+          fprintf(fp1,"%.12e %.12e %.12e",
+                  E->trace.basicq[j][0][n],
+                  E->trace.basicq[j][1][n],
+                  E->trace.basicq[j][2][n]);
 
+          /* write extra quantities */
+          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
+              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
+          }
           fprintf(fp1, "\n");
       }
 

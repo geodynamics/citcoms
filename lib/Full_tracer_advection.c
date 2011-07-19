@@ -158,6 +158,24 @@ void full_tracer_setup(struct All_variables *E)
     /* This parameter specifies how close a tracer can get to the boundary */
     E->trace.box_cushion=0.00001;
 
+    /* Determine number of tracer quantities */
+
+    /* advection_quantites - those needed for advection */
+    E->trace.number_of_basic_quantities=12;
+
+    /* extra_quantities - used for flavors, composition, etc.    */
+    /* (can be increased for additional science i.e. tracing chemistry */
+
+    E->trace.number_of_extra_quantities = 0;
+    if (E->trace.nflavors > 0)
+        E->trace.number_of_extra_quantities += 1;
+
+
+    E->trace.number_of_tracer_quantities =
+        E->trace.number_of_basic_quantities +
+        E->trace.number_of_extra_quantities;
+
+
     /* Fixed positions in tracer array */
     /* Flavor is always in extraq position 0  */
     /* Current coordinates are always kept in basicq positions 0-5 */
@@ -165,6 +183,22 @@ void full_tracer_setup(struct All_variables *E)
 
 
     /* Some error control regarding size of pointer arrays */
+
+    if (E->trace.number_of_basic_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of basic in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_extra_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of extraq in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
+    if (E->trace.number_of_tracer_quantities>99) {
+        fprintf(E->trace.fpt,"ERROR(initialize_trace)-increase 2nd position size of rlater in tracer_defs.h\n");
+        fflush(E->trace.fpt);
+        parallel_process_termination();
+    }
 
     write_trace_instructions(E);
 
@@ -254,6 +288,7 @@ void full_lost_souls(struct All_variables *E)
     double *receive_z[13][3];
     double *REC[13];
 
+    void expand_tracer_arrays();
     int icheck_that_processor_shell();
 
     double CPU_time0();
@@ -277,7 +312,7 @@ void full_lost_souls(struct All_variables *E)
       fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
-    E->trace.istat_isend=E->trace.escaped_tracers[j].size();
+    E->trace.istat_isend=E->trace.ilater[j];
     /** debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
@@ -292,7 +327,7 @@ void full_lost_souls(struct All_variables *E)
 
     /* initialize isend and ireceive */
     /* # of neighbors in the horizontal plane */
-    isize[j]=E->trace.escaped_tracers[j].size()*(12+1);
+    isize[j]=E->trace.ilater[j]*E->trace.number_of_tracer_quantities;
     for (kk=0;kk<=num_ngb;kk++) isend[j][kk]=0;
     for (kk=0;kk<=num_ngb;kk++) ireceive[j][kk]=0;
 
@@ -372,7 +407,7 @@ void full_lost_souls(struct All_variables *E)
     /* Allocate memory in receive arrays */
 
     for (ithatcap=0;ithatcap<=num_ngb;ithatcap++) {
-        isize[j]=ireceive[j][ithatcap]*(12+1);
+        isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
         itemp_size=fmax(1,isize[j]);
 
@@ -393,7 +428,7 @@ void full_lost_souls(struct All_variables *E)
     if (E->parallel.nprocz>1) {
 
         ithatcap=ithiscap;
-        isize[j]=isend[j][ithatcap]*(12+1);
+        isize[j]=isend[j][ithatcap]*E->trace.number_of_tracer_quantities;
         for (mm=0;mm<isize[j];mm++) {
             receive[j][ithatcap][mm]=send[j][ithatcap][mm];
         }
@@ -405,12 +440,12 @@ void full_lost_souls(struct All_variables *E)
     for (kk=1;kk<=num_ngb;kk++) {
         idestination_proc=E->parallel.PROCESSOR[lev][j].pass[kk];
 
-        isize[j]=isend[j][kk]*(12+1);
+        isize[j]=isend[j][kk]*E->trace.number_of_tracer_quantities;
 
         MPI_Isend(send[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
                   11,E->parallel.world,&request[idb++]);
 
-        isize[j]=ireceive[j][kk]*(12+1);
+        isize[j]=ireceive[j][kk]*E->trace.number_of_tracer_quantities;
 
         MPI_Irecv(receive[j][kk],isize[j],MPI_DOUBLE,idestination_proc,
                   11,E->parallel.world,&request[idb++]);
@@ -440,7 +475,7 @@ void full_lost_souls(struct All_variables *E)
 
     /* Allocate Memory for REC array */
 
-    isize[j]=isum[j]*(12+1);
+    isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
     isize[j]=fmax(isize[j],1);
     if ((REC[j]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
         fprintf(E->trace.fpt,"Error(lost souls)-no memory (g323)\n");
@@ -460,9 +495,9 @@ void full_lost_souls(struct All_variables *E)
 
         for (pp=0;pp<ireceive[j][ithatcap];pp++) {
             irec[j]++;
-            ipos=pp*(12+1);
+            ipos=pp*E->trace.number_of_tracer_quantities;
 
-            for (mm=0;mm<12+1;mm++) {
+            for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
                 ipos2=ipos+mm;
                 REC[j][irec_position]=receive[j][ithatcap][ipos2];
 
@@ -485,7 +520,7 @@ void full_lost_souls(struct All_variables *E)
         /* (No dynamic reallocation of send_z necessary)    */
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-            isize[j]=itracers_subject_to_vertical_transport[j]*(12+1);
+            isize[j]=itracers_subject_to_vertical_transport[j]*E->trace.number_of_tracer_quantities;
             isize[j]=fmax(isize[j],1);
 
             if ((send_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
@@ -511,7 +546,7 @@ void full_lost_souls(struct All_variables *E)
             num_tracers=irec[j];
             for (kk=1;kk<=num_tracers;kk++) {
 
-                ireceive_position=it*(12+1);
+                ireceive_position=it*E->trace.number_of_tracer_quantities;
                 it++;
 
                 irad=ireceive_position+2;
@@ -526,12 +561,12 @@ void full_lost_souls(struct All_variables *E)
                 if (ival==1) {
 
 
-                    isend_position=isend_z[j][ivertical_neighbor]*(12+1);
+                    isend_position=isend_z[j][ivertical_neighbor]*E->trace.number_of_tracer_quantities;
                     isend_z[j][ivertical_neighbor]++;
 
-                    ilast_receiver_position=(irec[j]-1)*(12+1);
+                    ilast_receiver_position=(irec[j]-1)*E->trace.number_of_tracer_quantities;
 
-                    for (mm=0;mm<12+1;mm++) {
+                    for (mm=0;mm<=(E->trace.number_of_tracer_quantities-1);mm++) {
                         ipos=ireceive_position+mm;
                         ipos2=isend_position+mm;
 
@@ -591,7 +626,7 @@ void full_lost_souls(struct All_variables *E)
 
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
-            isize[j]=ireceive_z[j][kk]*(12+1);
+            isize[j]=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
             isize[j]=fmax(isize[j],1);
 
             if ((receive_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
@@ -608,12 +643,12 @@ void full_lost_souls(struct All_variables *E)
 
             idestination_proc = E->parallel.PROCESSORz[lev].pass[kk];
 
-            isize_send=isend_z[j][kk]*(12+1);
+            isize_send=isend_z[j][kk]*E->trace.number_of_tracer_quantities;
 
             MPI_Isend(send_z[j][kk],isize_send,MPI_DOUBLE,idestination_proc,
                       15,E->parallel.world,&request[idb++]);
 
-            isize_receive=ireceive_z[j][kk]*(12+1);
+            isize_receive=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
 
             MPI_Irecv(receive_z[j][kk],isize_receive,MPI_DOUBLE,idestination_proc,
                       15,E->parallel.world,&request[idb++]);
@@ -635,7 +670,7 @@ void full_lost_souls(struct All_variables *E)
 
         isum[j]=isum[j]+irec[j];
 
-        isize[j]=isum[j]*(12+1);
+        isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
 
         if (isize[j]>0) {
             if ((REC[j]=(double *)realloc(REC[j],isize[j]*sizeof(double)))==NULL) {
@@ -651,11 +686,11 @@ void full_lost_souls(struct All_variables *E)
 
             for (kk=0;kk<ireceive_z[j][ivertical_neighbor];kk++) {
 
-                irec_position=irec[j]*(12+1);
+                irec_position=irec[j]*E->trace.number_of_tracer_quantities;
                 irec[j]++;
-                ireceive_position=kk*(12+1);
+                ireceive_position=kk*E->trace.number_of_tracer_quantities;
 
-                for (mm=0;mm<12+1;mm++) {
+                for (mm=0;mm<E->trace.number_of_tracer_quantities;mm++) {
                     REC[j][irec_position+mm]=receive_z[j][ivertical_neighbor][ireceive_position+mm];
                 }
             }
@@ -676,22 +711,41 @@ void full_lost_souls(struct All_variables *E)
 
 
     for (kk=0;kk<irec[j];kk++) {
-        Tracer new_tracer;
+        E->trace.ntracers[j]++;
 
-        ireceive_position=kk*(12+1);
-	new_tracer.readFromMem(&REC[j][ireceive_position]);
+        if (E->trace.ntracers[j]>(E->trace.max_ntracers[j]-5)) expand_tracer_arrays(E,j);
 
-        iel=(E->trace.iget_element)(E,j,-99,new_tracer.x(),new_tracer.y(),new_tracer.z(),new_tracer.theta(),new_tracer.phi(),new_tracer.rad());
+        ireceive_position=kk*E->trace.number_of_tracer_quantities;
+
+        for (mm=0;mm<E->trace.number_of_basic_quantities;mm++) {
+            ipos=ireceive_position+mm;
+
+            E->trace.basicq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
+        }
+        for (mm=0;mm<E->trace.number_of_extra_quantities;mm++) {
+            ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
+
+            E->trace.extraq[j][mm][E->trace.ntracers[j]]=REC[j][ipos];
+        }
+
+        theta=E->trace.basicq[j][0][E->trace.ntracers[j]];
+        phi=E->trace.basicq[j][1][E->trace.ntracers[j]];
+        rad=E->trace.basicq[j][2][E->trace.ntracers[j]];
+        x=E->trace.basicq[j][3][E->trace.ntracers[j]];
+        y=E->trace.basicq[j][4][E->trace.ntracers[j]];
+        z=E->trace.basicq[j][5][E->trace.ntracers[j]];
+
+
+        iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
-            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",new_tracer.x(),new_tracer.y(),new_tracer.z(),new_tracer.theta(),new_tracer.phi(),new_tracer.rad());
+            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",x,y,z,theta,phi,rad);
             fflush(E->trace.fpt);
             exit(10);
         }
 
-        new_tracer.set_ielement(iel);
-        E->trace.tracers[j].push_back(new_tracer);
+        E->trace.ielement[j][E->trace.ntracers[j]]=iel;
 
     }
     if(E->control.verbose){
@@ -724,20 +778,21 @@ static void full_put_lost_tracers(struct All_variables *E,
 {
     const int j = 1;
     int kk, pp;
-    int ithatcap, icheck;
+    int numtracers, ithatcap, icheck;
     int isend_position, ipos;
     int lev = E->mesh.levmax;
     double theta, phi, rad;
     double x, y, z;
-    TracerList::iterator tr;
 
     /* transfer tracers from rlater to send */
 
-    for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
-        rad=tr->rad();
-        x=tr->x();
-        y=tr->y();
-        z=tr->z();
+    numtracers=E->trace.ilater[j];
+
+    for (kk=1;kk<=numtracers;kk++) {
+        rad=E->trace.rlater[j][2][kk];
+        x=E->trace.rlater[j][3][kk];
+        y=E->trace.rlater[j][4][kk];
+        z=E->trace.rlater[j][5][kk];
 
         /* first check same cap if nprocz>1 */
 
@@ -774,9 +829,12 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         /* assign tracer to send */
 
-        isend_position=(isend[j][ithatcap]-1)*(12+1);
+        isend_position=(isend[j][ithatcap]-1)*E->trace.number_of_tracer_quantities;
 
-        tr->writeToMem(&send[j][ithatcap][isend_position]);
+        for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
+            ipos=isend_position+pp;
+            send[j][ithatcap][ipos]=E->trace.rlater[j][pp][kk];
+        }
 
     } /* end kk, assigning tracers */
 
@@ -832,6 +890,9 @@ void full_get_shape_functions(struct All_variables *E,
     int maxlevel=E->mesh.levmax;
 
     const double eps=-1e-4;
+
+    void sphere_to_cart();
+
 
     /* find u and v using spherical coordinates */
 
@@ -967,9 +1028,10 @@ double full_interpolate_data(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-CartesianCoord full_get_velocity(struct All_variables *E,
+void full_get_velocity(struct All_variables *E,
                        int j, int nelem,
-                       double theta, double phi, double rad)
+                       double theta, double phi, double rad,
+                       double *velocity_vector)
 {
     int iwedge;
     const int sphere_key = 0;
@@ -977,6 +1039,8 @@ CartesianCoord full_get_velocity(struct All_variables *E,
     double shape[9];
     double VV[4][9];
     double vx[7],vy[7],vz[7];
+
+    void velo_from_element_d();
 
     full_get_shape_functions(E, shape, nelem, theta, phi, rad);
     iwedge=shape[0];
@@ -1029,11 +1093,16 @@ CartesianCoord full_get_velocity(struct All_variables *E,
             vz[6]=VV[3][8];
         }
 
+    velocity_vector[1]=vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
+        vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6];
+    velocity_vector[2]=vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
+        vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6];
+    velocity_vector[3]=vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
+        vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
 
 
-    return CartesianCoord(vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6],
-    			vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6],
-    			vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6]);
+
+    return;
 }
 
 /***************************************************************/
@@ -1237,6 +1306,8 @@ static void make_regular_grid(struct All_variables *E)
     double *tmax;
     double *fmin_array;
     double *fmax_array;
+
+    void sphere_to_cart();
 
     const double two_pi=2.0*M_PI;
 
@@ -1899,14 +1970,12 @@ static void write_trace_instructions(struct All_variables *E)
     /* more obscure stuff */
 
     fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
-    /*
     fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
             E->trace.number_of_basic_quantities);
     fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
             E->trace.number_of_extra_quantities);
     fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
             E->trace.number_of_tracer_quantities);
-    */
 
 
     /* analytical test */
@@ -2452,11 +2521,34 @@ static void fix_angle(double *angle)
     return;
 }
 
+/******************************************************************/
+/* FIX THETA PHI                                                  */
+/*                                                                */
+/* This function constrains the value of theta to be              */
+/* between 0 and  PI, and                                         */
+/* this function constrains the value of phi to be                */
+/* between 0 and 2 PI                                             */
+/*                                                                */
+static void fix_theta_phi(double *theta, double *phi)
+{
+    const double two_pi=2.0*M_PI;
+
+    fix_angle(theta);
+
+    if (*theta > M_PI) {
+        *theta = two_pi - *theta;
+        *phi += M_PI;
+    }
+
+    fix_angle(phi);
+
+    return;
+}
+
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
 /* Returns -99 if not in this cap.                               */
-/* Returns -1 if in this cap but cannot find the element.        */
 /* iprevious_element, if known, is the last known element. If    */
 /* it is not known, input a negative number.                     */
 
@@ -2465,6 +2557,7 @@ int full_iget_element(struct All_variables *E,
                       double x, double y, double z,
                       double theta, double phi, double rad)
 {
+    int icheck_processor_shell();
     int iregel;
     int iel;
     int ntheta,nphi;
@@ -2645,7 +2738,7 @@ int full_iget_element(struct All_variables *E,
     fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %.15e %.15e %.15e %.15e %.15e %d\n",
             x,y,z,theta,phi,iregel);
     fflush(E->trace.fpt);
-    return -1;
+    exit(10);
 
  foundit:
 
@@ -2952,10 +3045,14 @@ static void determine_shape_coefficients(struct All_variables *E)
 /* This function makes sure the particle is within the sphere, and      */
 /* phi and theta are within the proper degree range.                    */
 
-void full_keep_within_bounds(struct All_variables *E, CartesianCoord &cc, SphericalCoord &sc)
+void full_keep_within_bounds(struct All_variables *E,
+                             double *x, double *y, double *z,
+                             double *theta, double *phi, double *rad)
 {
-	sc.constrainThetaPhi();
-    //fix_radius(E,rad,theta,phi,x,y,z);
+    fix_theta_phi(theta, phi);
+    fix_radius(E,rad,theta,phi,x,y,z);
+
+    return;
 }
 
 
@@ -2967,6 +3064,7 @@ void full_keep_within_bounds(struct All_variables *E, CartesianCoord &cc, Spheri
 /* a test function (in "analytical_test_function").                                       */
 
 void analytical_test(struct All_variables *E)
+
 {
 #if 0
     int kk,pp;
@@ -2999,6 +3097,7 @@ void analytical_test(struct All_variables *E)
     void predict_tracers();
     void correct_tracers();
     void analytical_runge_kutte();
+    void sphere_to_cart();
 
 
     fprintf(E->trace.fpt,"Starting Analytical Test\n");
@@ -3223,7 +3322,6 @@ void analytical_test(struct All_variables *E)
 /*************** ANALYTICAL RUNGE KUTTE ******************/
 /*                                                       */
 void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, double *x0_s, double *x0_c, double *xf_s, double *xf_c, double *vec)
-
 {
 
     int kk;
@@ -3241,6 +3339,8 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
     double time;
     double path,dtpath;
 
+    void sphere_to_cart();
+    void cart_to_sphere();
     void analytical_test_function();
 
     theta_0=x0_s[1];
