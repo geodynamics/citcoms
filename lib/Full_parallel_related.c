@@ -72,7 +72,7 @@ void full_parallel_processor_setup(struct All_variables *E)
     parallel_process_termination();
     }
 
-  E->sphere.caps_per_proc = max(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
+  E->sphere.caps_per_proc = citmax(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
 
   if (E->sphere.caps_per_proc > 1) {
     if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not supported.\n \n");
@@ -917,7 +917,7 @@ void full_exchange_id_d(struct All_variables *E, double **U, int lev)
  sizeofk = 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    kk = (1+E->parallel.NUM_NEQz[lev].pass[k])*sizeof(double);
-   sizeofk = max(sizeofk, kk);
+   sizeofk = citmax(sizeofk, kk);
  }
  RV=(double *)malloc( sizeofk );
  SV=(double *)malloc( sizeofk );
@@ -1032,7 +1032,7 @@ static void exchange_node_d(struct All_variables *E, double **U, int lev)
  idb= 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    sizeofk = (1+E->parallel.NUM_NODEz[lev].pass[k])*sizeof(double);
-   idb = max(idb,sizeofk);
+   idb = citmax(idb,sizeofk);
  }
 
  RV=(double *)malloc( idb );
@@ -1154,7 +1154,7 @@ static void exchange_node_f(struct All_variables *E, float **U, int lev)
  idb= 0;
  for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)  {
    sizeofk = (1+E->parallel.NUM_NODEz[lev].pass[k])*sizeof(float);
-   idb = max(idb,sizeofk);
+   idb = citmax(idb,sizeofk);
  }
 
  RV=(float *)malloc( idb );

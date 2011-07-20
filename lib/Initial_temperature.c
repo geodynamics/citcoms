@@ -288,7 +288,7 @@ static void read_tic_from_file(struct All_variables *E)
       }
       /* Truncate the temperature to be within (0,1). */
       /* This might not be desirable in some situations. */
-      E->T[m][i] = max(0.0,min(g,1.0));
+      E->T[m][i] = citmax(0.0,citmin(g,1.0));
     }
   }
   fclose (fp);

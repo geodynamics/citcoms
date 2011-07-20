@@ -27,10 +27,111 @@
  */
 
 
+#include <vector>
+#include <list>
+#include <math.h>
 
 /* forward declaration */
 struct All_variables;
 
+#ifndef _TRACER_DEFS_H_
+#define _TRACER_DEFS_H_
+
+class CartesianCoord;
+
+// Position or vector in spherical coordinates
+class SphericalCoord {
+public:
+	double	_theta, _phi, _rad;
+	SphericalCoord(void) : _theta(0), _phi(0), _rad(0) {};
+	SphericalCoord(double theta, double phi, double rad) : _theta(theta), _phi(phi), _rad(rad) {};
+	
+	size_t size(void) const { return 3; };
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
+	CartesianCoord toCartesian(void) const;
+	
+	void constrainThetaPhi(void);
+	double constrainAngle(const double angle) const;
+};
+
+// Position or vector in Cartesian coordinates
+class CartesianCoord {
+public:
+	double	_x, _y, _z;
+	CartesianCoord(void) : _x(0), _y(0), _z(0) {};
+	CartesianCoord(double x, double y, double z) : _x(x), _y(y), _z(z) {};
+	
+	size_t size(void) const { return 3; };
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
+	SphericalCoord toSpherical(void) const;
+	double dist(const CartesianCoord &o) const {
+		double xd=_x-o._x, yd=_y-o._y, zd=_z-o._z;
+		return sqrt(xd*xd+yd*yd+zd*zd);
+	};
+	
+	const CartesianCoord operator+(const CartesianCoord &other) const;
+	const CartesianCoord operator*(const double &val) const;
+	void operator=(const CartesianCoord &other) { _x = other._x; _y = other._y; _z = other._z; };
+};
+
+class Tracer {
+private:
+	// Tracer position in spherical coordinates
+	SphericalCoord	_sc;
+	// Tracer position in Cartesian coordinates
+	CartesianCoord	_cc;
+	// Previous Cartesian position
+	CartesianCoord	_cc0;
+	// Previous Cartesian velocity
+	CartesianCoord	_Vc;
+	
+	// Tracer flavor (meaning should be application dependent)
+	double _flavor;
+	
+	int _ielement;
+	
+public:
+	Tracer(void) : _sc(), _cc(), _cc0(), _Vc() {};
+	Tracer(SphericalCoord new_sc, CartesianCoord new_cc) : _sc(new_sc), _cc(new_cc), _cc0(), _Vc() {};
+	
+	CartesianCoord getCartesianPos(void) const { return _cc; };
+	SphericalCoord getSphericalPos(void) const { return _sc; };
+	CartesianCoord getOrigCartesianPos(void) const { return _cc0; };
+	CartesianCoord getCartesianVel(void) const { return _Vc; };
+	
+	void setCoords(SphericalCoord new_sc, CartesianCoord new_cc) {
+		_sc = new_sc;
+		_cc = new_cc;
+	}
+	void setOrigVals(CartesianCoord new_cc0, CartesianCoord new_vc) {
+		_cc0 = new_cc0;
+		_Vc = new_vc;
+	}
+	
+	double theta(void) { return _sc._theta; };
+	double phi(void) { return _sc._phi; };
+	double rad(void) { return _sc._rad; };
+	
+	double x(void) { return _cc._x; };
+	double y(void) { return _cc._y; };
+	double z(void) { return _cc._z; };
+	
+	int ielement(void) { return _ielement; };
+	void set_ielement(int ielement) { _ielement = ielement; };
+	
+	double flavor(void) { return _flavor; };
+	void set_flavor(double flavor) { _flavor = flavor; };
+	
+	size_t size(void);
+	void writeToMem(double *mem) const;
+	void readFromMem(const double *mem);
+};
+
+typedef std::list<Tracer> TracerList;
+
+#endif
 
 struct TRACE{
 

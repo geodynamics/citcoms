@@ -54,8 +54,8 @@ to functions across the whole filespace of CITCOM.
 
 
 /* Macros */
-#define max(A,B) (((A) > (B)) ? (A) : (B))
-#define min(A,B) (((A) < (B)) ? (A) : (B))
+#define citmax(A,B) (((A) > (B)) ? (A) : (B))
+#define citmin(A,B) (((A) < (B)) ? (A) : (B))
 #define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
 
 

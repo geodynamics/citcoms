@@ -391,7 +391,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
                 /* truncate composition at 1.0 */
                 /* This violates mass conservation but prevents unphysical C */
                 /* XXX: make truncation a switch for the user to specify */
-                E->composition.comp_el[j][i][e] = min(comp,one);
+                E->composition.comp_el[j][i][e] = citmin(comp,one);
 
             }
         }

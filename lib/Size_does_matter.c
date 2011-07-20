@@ -1011,7 +1011,7 @@ void mass_matrix(struct All_variables *E)
                 E->ECO[lev][m][e].centre[3] = dx3;
 
                 /* delta(theta) of this element */
-                dx1 = max( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
+                dx1 = citmax( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
                            fabs(E->SX[lev][m][1][n[2]]-E->SX[lev][m][1][n[4]]) );
 
                 /* length of this element in the theta-direction */
@@ -1020,15 +1020,15 @@ void mass_matrix(struct All_variables *E)
                 /* delta(phi) of this element */
                 dx1 = fabs(E->SX[lev][m][2][n[3]]-E->SX[lev][m][2][n[1]]);
                 if (dx1>M_PI)
-                    dx1 = min(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
+                    dx1 = citmin(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
+                        citmax(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
 
                 dx2 = fabs(E->SX[lev][m][2][n[2]]-E->SX[lev][m][2][n[4]]);
                 if (dx2>M_PI)
-                    dx2 = min(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
+                    dx2 = citmin(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
+                        citmax(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
 
-                dx2 = max(dx1,dx2);
+                dx2 = citmax(dx1,dx2);
 
                 /* length of this element in the phi-direction */
                 E->ECO[lev][m][e].size[2] = dx2*E->ECO[lev][m][e].centre[3]

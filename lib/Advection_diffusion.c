@@ -177,12 +177,12 @@ void std_timestep(struct All_variables *E)
 	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
 
 	step = (0.5/uc);
-	adv_timestep = min(adv_timestep,step);
+	adv_timestep = citmin(adv_timestep,step);
       }
 
     adv_timestep = E->advection.dt_reduced * adv_timestep;
 
-    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
+    adv_timestep = 1.0e-32 + citmin(E->advection.fine_tune_dt*adv_timestep,
 				 E->advection.diff_timestep);
 
     E->advection.timestep = global_fmin(E,adv_timestep);
@@ -324,7 +324,7 @@ static void set_diffusion_timestep(struct All_variables *E)
     for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
 	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
-	diff_timestep = min(diff_timestep,ts);
+	diff_timestep = citmin(diff_timestep,ts);
       }
     }
 

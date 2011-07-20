@@ -169,7 +169,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   double a, b;
   double offset;
 
-  temp = max(E->mesh.noy, E->mesh.nox);
+  temp = citmax(E->mesh.noy, E->mesh.nox);
 
   theta0 = (double *)malloc((temp+1)*sizeof(double));
   fi0    = (double *)malloc((temp+1)*sizeof(double));

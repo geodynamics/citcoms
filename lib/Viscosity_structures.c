@@ -151,7 +151,7 @@ void viscosity_system_input(struct All_variables *E)
     if (E->viscosity.PDEPV) {
       E->viscosity.pdepv_visited = 0;
       for(i=0;i < E->viscosity.num_mat;i++) {
-          E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = min(a + b * (1-r),y) */
+          E->viscosity.pdepv_a[i] = 1.e20; /* \sigma_y = citmin(a + b * (1-r),y) */
           E->viscosity.pdepv_b[i] = 0.0;
           E->viscosity.pdepv_y[i] = 1.e20;
       }
@@ -567,8 +567,8 @@ void visc_from_T(struct All_variables *E, float **EEta, int propogate)
 						   computation of
 						   depth, not needed
 						   TWB */
-		      TT[kk]=max(TT[kk],zero);
-		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+		      TT[kk]=citmax(TT[kk],zero);
+		      temp += citmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 		    EEta[m][ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
@@ -596,8 +596,8 @@ void visc_from_T(struct All_variables *E, float **EEta, int propogate)
                     temp=0.0;
                     zzz=0.0;
                     for(kk=1;kk<=ends;kk++)   {
-                        TT[kk]=max(TT[kk],zero);
-                        temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                        TT[kk]=citmax(TT[kk],zero);
+                        temp += citmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                         zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
@@ -627,8 +627,8 @@ void visc_from_T(struct All_variables *E, float **EEta, int propogate)
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
                     for(kk=1;kk<=ends;kk++)   {
-                        TT[kk]=max(TT[kk],zero);
-                        temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                        TT[kk]=citmax(TT[kk],zero);
+                        temp += citmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
                     if(E->control.mat_control==0){
@@ -678,8 +678,8 @@ void visc_from_T(struct All_variables *E, float **EEta, int propogate)
 	    for(jj=1;jj <= vpts;jj++) {
 	      temp=0.0;zzz=0.0;
 	      for(kk=1;kk <= ends;kk++)   {
-		TT[kk]=max(TT[kk],zero);
-		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+		TT[kk]=citmax(TT[kk],zero);
+		temp += citmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
 		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	      }
 	      EEta[m][ (i-1)*vpts + jj ] = tempa*
@@ -789,8 +789,8 @@ void visc_from_T(struct All_variables *E, float **EEta, int propogate)
                 for(jj=1;jj<=vpts;jj++) {
                     temp=zzz=0.0;
                     for(kk=1;kk<=ends;kk++)   {	
-		      TT[kk]=max(TT[kk],zero);
-		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
+		      TT[kk]=citmax(TT[kk],zero);
+		      temp += citmin(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)]; /* mean temp */
 		      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];/* mean r */
                     }
 		    /* convert to z, as defined to be unity at surface
@@ -922,7 +922,7 @@ void visc_from_S(struct All_variables *E, float **EEta, int propogate)
       }
         /* eedot cannot be too small, or the viscosity will go to inf */
 	for(e=1;e<=nel;e++){
-	  eedot[e] = max(eedot[e], 1.0e-16);
+	  eedot[e] = citmax(eedot[e], 1.0e-16);
 	}
 
         for(e=1;e<=nel;e++)   {
@@ -1034,7 +1034,7 @@ void visc_from_P(struct All_variables *E, float **EEta)
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
 	  
 	  /* min of depth dep. and constant yield stress */
-	  tau = min(tau,  E->viscosity.pdepv_y[l]);
+	  tau = citmin(tau,  E->viscosity.pdepv_y[l]);
 	  
 	  /* yield viscosity */
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
@@ -1043,7 +1043,7 @@ void visc_from_P(struct All_variables *E, float **EEta)
 	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
 	  }else{
 	    /* min viscosities*/
-	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
+	    eta_new  = citmin(EEta[m][ (e-1)*vpts + jj ], eta_p);
 	  }
 	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
 	  //	  zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
@@ -1064,7 +1064,7 @@ void visc_from_P(struct All_variables *E, float **EEta)
 	    zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	  /* compute sigma_y as above */
 	  tau = E->viscosity.pdepv_a[l] + zzz * E->viscosity.pdepv_b[l];
-	  tau = min(tau,  E->viscosity.pdepv_y[l]);
+	  tau = citmin(tau,  E->viscosity.pdepv_y[l]);
 	  tau2 = tau * tau;
 	  if(tau < 1e10){
 	    /*  */

@@ -67,7 +67,7 @@ void regional_coord_of_cap(struct All_variables *E, int m, int icap)
   nprocyl=E->parallel.nprocy;
   nproczl=E->parallel.nprocz;
   nnproc=nprocyl*nprocxl*nproczl;
-  temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
+  temp = citmax(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
   /* define the cap corners */
   E->sphere.cap[1].theta[1] = E->control.theta_min;

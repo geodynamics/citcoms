@@ -696,7 +696,7 @@ double Tmaxd(struct All_variables *E, double **T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = citmax(T[m][i],temp);
 
   temp1 = global_dmax(E,temp);
   return (temp1);
@@ -711,7 +711,7 @@ float Tmax(struct All_variables *E, float **T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = citmax(T[m][i],temp);
 
   temp1 = global_fmax(E,temp);
   return (temp1);

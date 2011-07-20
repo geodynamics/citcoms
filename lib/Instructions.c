@@ -623,7 +623,7 @@ void read_initial_settings(struct All_variables *E)
 								 heat flux files? */
   if(E->output.write_q_files){	/* make sure those get written at
 				   least as often as velocities */
-    E->output.write_q_files = min(E->output.write_q_files,E->control.record_every);
+    E->output.write_q_files = citmin(E->output.write_q_files,E->control.record_every);
   }
 
 
@@ -964,8 +964,8 @@ void allocate_common_vars(struct All_variables *E)
   /* nodal mass */
   E->NMass[j] = (double *) malloc((nno+1)*sizeof(double));
 
-  nxyz = max(nox*noz,nox*noy);
-  nxyz = 2*max(nxyz,noz*noy);
+  nxyz = citmax(nox*noz,nox*noy);
+  nxyz = 2*citmax(nxyz,noz*noy);
 
   E->sien[j]         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
   E->surf_element[j] = (int *) malloc((nxyz+2)*sizeof(int));
@@ -1060,9 +1060,9 @@ void allocate_common_vars(struct All_variables *E)
     E->VI[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
     E->NODE[i][j] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
-    nxyz = max(nox*noz,nox*noy);
-    nxyz = 2*max(nxyz,noz*noy);
-    nozl = max(noy,nox*2);
+    nxyz = citmax(nox*noz,nox*noy);
+    nxyz = 2*citmax(nxyz,noz*noy);
+    nozl = citmax(noy,nox*2);
 
 
 

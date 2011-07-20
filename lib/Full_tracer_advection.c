@@ -333,7 +333,7 @@ void full_lost_souls(struct All_variables *E)
 
     /* Allocate Maximum Memory to Send Arrays */
 
-    itemp_size=max(isize[j],1);
+    itemp_size=citmax(isize[j],1);
 
     for (kk=0;kk<=num_ngb;kk++) {
         if ((send[j][kk]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
@@ -409,7 +409,7 @@ void full_lost_souls(struct All_variables *E)
     for (ithatcap=0;ithatcap<=num_ngb;ithatcap++) {
         isize[j]=ireceive[j][ithatcap]*E->trace.number_of_tracer_quantities;
 
-        itemp_size=max(1,isize[j]);
+        itemp_size=citmax(1,isize[j]);
 
         if ((receive[j][ithatcap]=(double *)malloc(itemp_size*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
@@ -476,7 +476,7 @@ void full_lost_souls(struct All_variables *E)
     /* Allocate Memory for REC array */
 
     isize[j]=isum[j]*E->trace.number_of_tracer_quantities;
-    isize[j]=max(isize[j],1);
+    isize[j]=citmax(isize[j],1);
     if ((REC[j]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
         fprintf(E->trace.fpt,"Error(lost souls)-no memory (g323)\n");
         fflush(E->trace.fpt);
@@ -521,7 +521,7 @@ void full_lost_souls(struct All_variables *E)
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
             isize[j]=itracers_subject_to_vertical_transport[j]*E->trace.number_of_tracer_quantities;
-            isize[j]=max(isize[j],1);
+            isize[j]=citmax(isize[j],1);
 
             if ((send_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"Error(lost souls)-no memory (c721)\n");
@@ -627,7 +627,7 @@ void full_lost_souls(struct All_variables *E)
 
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
             isize[j]=ireceive_z[j][kk]*E->trace.number_of_tracer_quantities;
-            isize[j]=max(isize[j],1);
+            isize[j]=citmax(isize[j],1);
 
             if ((receive_z[j][kk]=(double *)malloc(isize[j]*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"Error(lost souls)-no memory (t590)\n");
@@ -1353,18 +1353,18 @@ static void make_regular_grid(struct All_variables *E)
                     theta=E->sx[j][1][kk];
                     phi=E->sx[j][2][kk];
 
-                    thetamax=max(thetamax,theta);
-                    thetamin=min(thetamin,theta);
+                    thetamax=citmax(thetamax,theta);
+                    thetamin=citmin(thetamin,theta);
 
                 }
 
             /* expand range slightly (should take care of poles)  */
 
             thetamax=thetamax+expansion;
-            thetamax=min(thetamax,M_PI);
+            thetamax=citmin(thetamax,M_PI);
 
             thetamin=thetamin-expansion;
-            thetamin=max(thetamin,0.0);
+            thetamin=citmax(thetamin,0.0);
 
             /* Convert input data from degrees to radians  */
 
@@ -1498,10 +1498,10 @@ static void make_regular_grid(struct All_variables *E)
                             theta=E->sx[j][1][node];
                             phi=E->sx[j][2][node];
 
-                            theta_min=min(theta_min,theta);
-                            theta_max=max(theta_max,theta);
-                            phi_min=min(phi_min,phi);
-                            phi_max=max(phi_max,phi);
+                            theta_min=citmin(theta_min,theta);
+                            theta_max=citmax(theta_max,theta);
+                            phi_min=citmin(phi_min,phi);
+                            phi_max=citmax(phi_max,phi);
                         }
 
                     /* add half difference to phi and expansion to theta to be safe */
@@ -1509,8 +1509,8 @@ static void make_regular_grid(struct All_variables *E)
                     theta_max=theta_max+expansion;
                     theta_min=theta_min-expansion;
 
-                    theta_max=min(M_PI,theta_max);
-                    theta_min=max(0.0,theta_min);
+                    theta_max=citmin(M_PI,theta_max);
+                    theta_min=citmax(0.0,theta_min);
 
                     half_diff=0.5*(phi_max-phi_min);
                     phi_max=phi_max+half_diff;
