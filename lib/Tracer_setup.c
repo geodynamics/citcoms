@@ -221,15 +221,6 @@ void tracer_input(struct All_variables *E)
 
 void tracer_initial_settings(struct All_variables *E)
 {
-   void full_keep_within_bounds();
-   void full_tracer_setup();
-   void full_get_velocity();
-   int full_iget_element();
-   void regional_keep_within_bounds();
-   void regional_tracer_setup();
-   void regional_get_velocity();
-   int regional_iget_element();
-
    E->trace.advection_time = 0;
    E->trace.find_tracers_time = 0;
    E->trace.lost_souls_time = 0;
@@ -1236,7 +1227,6 @@ void cart_to_sphere(struct All_variables *E,
 {
 
     double temp;
-    double myatan();
 
     temp=x*x+y*y;
 

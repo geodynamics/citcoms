@@ -42,9 +42,7 @@ extern int Emergency_stop;
 
 void solver_init(struct All_variables *E);
 
-int main(argc,argv)
-     int argc;
-     char **argv;
+int main(int argc, char **argv)
 
 {	/* Functions called by main*/
   void general_stokes_solver();

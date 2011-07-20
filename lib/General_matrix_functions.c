@@ -45,12 +45,7 @@ int epsilon[4][4] = {   /* Levi-Cita epsilon */
     Iterative solver also using multigrid  ........
     ===========================================================  */
 
-int solve_del2_u(E,d0,F,acc,high_lev)
-     struct All_variables *E;
-     double **d0;
-     double **F;
-     double acc;
-     int high_lev;
+int solve_del2_u(struct All_variables *E, double **d0, double **F, double acc, int high_lev)
 {
   void assemble_del2_u();
   void e_assemble_del2_u();
@@ -149,12 +144,7 @@ int solve_del2_u(E,d0,F,acc,high_lev)
    recursive multigrid function ....
    ================================= */
 
-double multi_grid(E,d1,F,acc,hl)
-     struct All_variables *E;
-     double **d1;
-     double **F;
-     double acc;
-     int hl;  /* higher level of two */
+double multi_grid(struct All_variables *E, double **d1, double **F, double acc, int hl)
 {
     double residual,AudotAu;
     void interp_vector();
@@ -304,13 +294,7 @@ double multi_grid(E,d1,F,acc,hl)
 
 
 #ifndef USE_CUDA
-double conj_grad(E,d0,F,acc,cycles,level)
-     struct All_variables *E;
-     double **d0;
-     double **F;
-     double acc;
-     int *cycles;
-     int level;
+double conj_grad(struct All_variables *E, double **d0, double **F, double acc, int *cycles, int level)
 {
     double *r0[NCS],*r1[NCS],*r2[NCS];
     double *z0[NCS],*z1[NCS],*z2[NCS];
@@ -431,14 +415,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
    versions
    =========================================================================================*/
 
-void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
-    struct All_variables *E;
-    double **d0;
-    double **F,**Ad;
-    double acc;
-    int *cycles;
-    int level;
-    int guess;
+void element_gauss_seidel(struct All_variables *E, double **d0, double **F, double **Ad, double acc, int *cycles, int level, int guess)
 {
     int count,i,j,k,l,m,ns,nc,d,steps,loc;
     int p1,p2,p3,q1,q2,q3;
@@ -603,14 +580,7 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
    time (Jacobi at a node). It does the job though.
    ============================================================================ */
 
-void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
-     struct All_variables *E;
-     double **d0;
-     double **F,**Ad;
-     double acc;
-     int *cycles;
-     int level;
-     int guess;
+void gauss_seidel(struct All_variables *E, double **d0, double **F, double **Ad, double acc, int *cycles, int level, int guess)
 {
 
     int count,i,j,k,l,m,ns,steps;
@@ -758,9 +728,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
 /* Fast (conditional) determinant for 3x3 or 2x2 ... otherwise calls general routine */
 
-double determinant(A,n)
-     double A[4][4];
-     int n;
+double determinant(double A[4][4], int n)
 
 { double gen_determinant();
 
@@ -781,12 +749,9 @@ double determinant(A,n)
 
 
 
-double cofactor(A,i,j,n)
-     double A[4][4];
-     int i,j,n;
+double cofactor(double A[4][4], int i, int j, int n)
 
 { int k,l,p,q;
-  double determinant();
 
   double B[4][4]; /* because of recursive behaviour of det/cofac, need to use
 			       new copy of B at each 'n' level of this routine */

@@ -12,8 +12,7 @@ static void compute_sphereh_table(struct All_variables *);
 /*   ======================================================================
      ======================================================================  */
 
-void set_sphere_harmonics(E)
-     struct All_variables *E;
+void set_sphere_harmonics(struct All_variables *E)
 
 {
     int m,node,ll,mm,i,j;
@@ -100,9 +99,7 @@ double modified_plgndr_a(int l, int m, double t)
 /* =========================================================
    expand the field TG into spherical harmonics
    ========================================================= */
-void sphere_expansion(E,TG,sphc,sphs)
-     struct All_variables *E;
-     float **TG,*sphc,*sphs;
+void sphere_expansion(struct All_variables *E, float **TG, float *sphc, float *sphs)
 {
     int el,nint,d,p,i,m,j,es,mm,ll,rand();
     void sum_across_surf_sph1();
@@ -193,11 +190,8 @@ void debug_sphere_expansion(struct All_variables *E)
 
 /* ==================================================*/
 /* ==================================================*/
-static void  compute_sphereh_table(E)
-     struct All_variables *E;
+static void  compute_sphereh_table(struct All_variables *E)
 {
-    double modified_plgndr_a();
-
     int m,node,ll,mm,i,j,p;
     double t,f,mmf;
     

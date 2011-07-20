@@ -114,7 +114,7 @@ static void vtk_output_temp(struct All_variables *E, FILE *fp)
 {
     int i;
     int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
-    float* floattemp = malloc(nodes*sizeof(float));
+    float* floattemp = (float *)malloc(nodes*sizeof(float));
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"temperature\" format=\"%s\">\n", E->output.vtk_format);
 
@@ -139,7 +139,7 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
     double sint, sinf, cost, cosf;
     float *V[4];
     const int lev = E->mesh.levmax;
-    float* floatvel = malloc(nodes*3*sizeof(float));
+    float* floatvel = (float *)malloc(nodes*3*sizeof(float));
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
@@ -194,7 +194,7 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
        assume it. */
     int i, j;
     int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
-    float* floatpos = malloc(nodes*3*sizeof(float));
+    float* floatpos = (float *)malloc(nodes*3*sizeof(float));
 
     fputs("      <Points>\n", fp);
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"coordinate\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
@@ -249,7 +249,7 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
     int i, j, k;
     char name[255];
     int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
-    float* floatcompo = malloc (nodes*sizeof(float));
+    float* floatcompo = (float *)malloc (nodes*sizeof(float));
 
     for(k=0;k<E->composition.ncomp;k++) {
         fprintf(fp, "        <DataArray type=\"Float32\" Name=\"composition%d\" format=\"%s\">\n", k+1, E->output.vtk_format);
@@ -276,7 +276,7 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
     int i, j, k;
     int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
     char output_file[255];
-    float* floattopo = malloc (nodes*sizeof(float));
+    float* floattopo = (float *)malloc (nodes*sizeof(float));
 
     if((E->output.write_q_files == 0) || (cycles == 0) ||
       (cycles % E->output.write_q_files)!=0)
@@ -516,7 +516,7 @@ static void zlibcompress(unsigned char* in, int nn, unsigned char** out, int *nn
     z_stream strm;
 
     /* hope compressed data will be <= uncompressed */
-    *out = malloc(sizeof(unsigned char)*nn);
+    *out = (unsigned char *)malloc(sizeof(unsigned char)*nn);
 
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
@@ -563,7 +563,7 @@ static void zlibcompress(unsigned char* in, int nn, unsigned char** out, int *nn
 
     // now we know how short "out" should be!
     *nn2=ntemp;
-    *out = realloc(*out,sizeof(unsigned char)*ntemp);
+    *out = (unsigned char *)realloc(*out,sizeof(unsigned char)*ntemp);
 
     (void)deflateEnd(&strm);
 #endif
@@ -614,12 +614,12 @@ static void base64plushead(unsigned char * in, int nn, int orinn, unsigned char*
     int b64bodylength;
     unsigned char * b64body;
     /* header of data */
-    unsigned char * charhead = malloc(sizeof(unsigned char)*16);
+    unsigned char * charhead = (unsigned char*)malloc(sizeof(unsigned char)*16);
     /* - consists of "1" (number of pieces) */
     /* - original datalength in byte */
     /* - original datalength in byte */
     /* - new datalength after z-lib compression */
-    int * headInts= malloc(sizeof(int)*4);
+    int * headInts= (int *)malloc(sizeof(int)*4);
     headInts[0]=1;
     headInts[1]=orinn;
     headInts[2]=orinn;
@@ -628,13 +628,13 @@ static void base64plushead(unsigned char * in, int nn, int orinn, unsigned char*
     IntToUnsignedChar(headInts,4,charhead);
 
     // base64: 16byte -> 24byte
-    b64head =  malloc(sizeof(unsigned char)*24);
+    b64head =  (unsigned char *)malloc(sizeof(unsigned char)*24);
     // fills b64head
     base64(charhead, 16, b64head);
 
     // base64 data
     b64bodylength = 4*ceil((float) nn/3.0);
-    b64body = malloc(sizeof(unsigned char)*b64bodylength);
+    b64body = (unsigned char *)malloc(sizeof(unsigned char)*b64bodylength);
     // writes base64 data to b64body
     base64(in,nn,b64body);
 
@@ -657,7 +657,7 @@ static void write_binary_array(int nn, float* array, FILE * f)
 {
     /* writes vtk-data array of floats and performs zip and base64 encoding */
     int chararraylength=4*nn;	/* nn floats -> 4*nn unsigned chars */
-    unsigned char * chararray = malloc (chararraylength * sizeof(unsigned char));
+    unsigned char * chararray = (unsigned char *)malloc (chararraylength * sizeof(unsigned char));
     int compressedarraylength = 0;
     unsigned char * compressedarray;
     unsigned char ** pointertocompressedarray= &compressedarray;
@@ -672,7 +672,7 @@ static void write_binary_array(int nn, float* array, FILE * f)
     /* special header for zip compressed and bas64 encoded data
     header needs 4 int32 = 16 byte -> 24 byte due to base64 (4*16/3) */
     base64plusheadlength = 24 + 4*ceil((float) compressedarraylength/3.0);
-    base64plusheadarray = malloc(sizeof(unsigned char)* base64plusheadlength);
+    base64plusheadarray = (unsigned char *)malloc(sizeof(unsigned char)* base64plusheadlength);
 
     /* fills base64plusheadarray with everything ready for simple writing */
     base64plushead(compressedarray,compressedarraylength, chararraylength, base64plusheadarray);

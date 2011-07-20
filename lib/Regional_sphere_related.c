@@ -32,9 +32,7 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void regional_coord_of_cap(E,m,icap)
-   struct All_variables *E;
-   int icap,m;
+void regional_coord_of_cap(struct All_variables *E, int m, int icap)
   {
 
   int i,j,k,lev,temp,elx,ely,nox,noy,noz,node,nodes;

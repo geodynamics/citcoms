@@ -2319,8 +2319,6 @@ static int icheck_bounds(struct All_variables *E,
     double tiny, eps;
     double x,y,z;
 
-    double myatan();
-
     /* make vectors from node to node */
 
     makevector(v12,rnode2[1],rnode2[2],rnode2[3],rnode1[1],rnode1[2],rnode1[3]);
@@ -2866,7 +2864,7 @@ static void define_uv_space(struct All_variables *E)
     double u, v, cosc, theta_f, phi_f, dphi, cosd;
     double *cost, *sint, *cosf, *sinf;
 
-    if ((E->gnomonic = malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
+    if ((E->gnomonic = (CITCOM_GNOMONIC*)malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
         == NULL) {
         fprintf(stderr,"Error(define uv)-not enough memory(a)\n");
         exit(10);
@@ -3066,8 +3064,7 @@ void full_keep_within_bounds(struct All_variables *E,
 /* This function (and the 2 following) are used to test advection of tracers by assigning */
 /* a test function (in "analytical_test_function").                                       */
 
-void analytical_test(E)
-     struct All_variables *E;
+void analytical_test(struct All_variables *E)
 
 {
 #if 0
@@ -3325,15 +3322,7 @@ void analytical_test(E)
 
 /*************** ANALYTICAL RUNGE KUTTE ******************/
 /*                                                       */
-void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
-     struct All_variables *E;
-     int nsteps;
-     double dt;
-     double *x0_c;
-     double *x0_s;
-     double *xf_c;
-     double *xf_s;
-     double *vec;
+void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, double *x0_s, double *x0_c, double *xf_s, double *xf_c, double *vec)
 
 {
 
@@ -3445,11 +3434,7 @@ void analytical_runge_kutte(E,nsteps,dt,x0_s,x0_c,xf_s,xf_c,vec)
 /* vel_c[2] => velocity in y direction                      */
 /* vel_c[3] => velocity in z direction                      */
 
-void analytical_test_function(E,theta,phi,rad,vel_s,vel_c)
-     struct All_variables *E;
-     double theta,phi,rad;
-     double *vel_s;
-     double *vel_c;
+void analytical_test_function(struct All_variables *E, double theta, double phi, double rad, double *vel_s, double *vel_c)
 
 {
 

@@ -168,10 +168,7 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   double theta, fi, cost, sint, cosf, sinf, efac2,rfac;
   double a, b;
   double offset;
-  double myatan();
 
-  void even_divide_arc12();
-  
   temp = max(E->mesh.noy, E->mesh.nox);
 
   theta0 = (double *)malloc((temp+1)*sizeof(double));
@@ -198,10 +195,10 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   v4     = (double *)malloc((temp+1)*sizeof(double));
 
   temp = E->mesh.noy * E->mesh.nox;
-  px = malloc((temp+1)*sizeof(double));
-  py = malloc((temp+1)*sizeof(double));
-  qx = malloc((temp+1)*sizeof(double));
-  qy = malloc((temp+1)*sizeof(double));
+  px = (double *)malloc((temp+1)*sizeof(double));
+  py = (double *)malloc((temp+1)*sizeof(double));
+  qx = (double *)malloc((temp+1)*sizeof(double));
+  qy = (double *)malloc((temp+1)*sizeof(double));
 
   /* define the cap corners */
 

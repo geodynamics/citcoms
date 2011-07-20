@@ -39,15 +39,14 @@ static void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigne
 void assign_internal_bc(struct All_variables * ,int);
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
-static void velocity_refl_vert_bc();
-static void temperature_refl_vert_bc();
+static void velocity_refl_vert_bc(struct All_variables *);
+static void temperature_refl_vert_bc(struct All_variables *);
 void read_temperature_boundary_from_file(struct All_variables *);
 void read_velocity_boundary_from_file(struct All_variables *);
 
 /* ========================================== */
 
-void regional_velocity_boundary_conditions(E)
-     struct All_variables *E;
+void regional_velocity_boundary_conditions(struct All_variables *E)
 {
   void velocity_imp_vert_bc();
   void renew_top_velocity_boundary();
@@ -144,16 +143,11 @@ void regional_velocity_boundary_conditions(E)
 
 /* ========================================== */
 
-void regional_temperature_boundary_conditions(E)
-     struct All_variables *E;
+void regional_temperature_boundary_conditions(struct All_variables *E)
 {
-  void temperature_imposed_vert_bcs();
-  void temperature_lith_adj();
-  void temperatures_conform_bcs();
   int j,lev,noz;
 
   lev = E->mesh.levmax;
-
 
      temperature_refl_vert_bc(E);
 
@@ -196,8 +190,7 @@ void regional_temperature_boundary_conditions(E)
 
 /* ========================================== */
 
-static void velocity_refl_vert_bc(E)
-     struct All_variables *E;
+static void velocity_refl_vert_bc(struct All_variables *E)
 {
   int m,i,j,ii,jj;
   int node1,node2;
@@ -339,8 +332,7 @@ static void velocity_refl_vert_bc(E)
   return;
 }
 
-static void temperature_refl_vert_bc(E)
-     struct All_variables *E;
+static void temperature_refl_vert_bc(struct All_variables *E)
 {
   int i,j,m;
   int node1,node2;
@@ -436,8 +428,7 @@ static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn
 }
 
 
-static void velocity_apply_periodic_bcs(E)
-    struct All_variables *E;
+static void velocity_apply_periodic_bcs(struct All_variables *E)
 {
   int n1,n2,level;
   int i,j,ii,jj;
@@ -448,8 +439,7 @@ static void velocity_apply_periodic_bcs(E)
   return;
   }
 
-static void temperature_apply_periodic_bcs(E)
-    struct All_variables *E;
+static void temperature_apply_periodic_bcs(struct All_variables *E)
 {
  const int dims=E->mesh.nsd;
 

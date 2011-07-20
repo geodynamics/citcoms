@@ -38,8 +38,7 @@ void gzip_file(char *);
   read velocity vectors at the top surface from files
 =========================================================================*/
 
-void read_velocity_boundary_from_file(E)
-     struct All_variables *E;
+void read_velocity_boundary_from_file(struct All_variables *E)
 {
     (E->solver.read_input_files_for_timesteps)(E,1,1); /* read velocity(1) and output(1) */
     return;
@@ -51,8 +50,7 @@ wrapper for ggrd functionality to read in netcdf grid files for
 laterally varying rayleigh number in the top layers 
 
  */
-void read_rayleigh_from_file(E)
-     struct All_variables *E;
+void read_rayleigh_from_file(struct All_variables *E)
 {
   (E->solver.read_input_files_for_timesteps)(E,4,1); /* read Rayleigh number for top layers */
   return;
@@ -62,8 +60,7 @@ void read_rayleigh_from_file(E)
   construct material array
 =========================================================================*/
 
-void read_mat_from_file(E)
-     struct All_variables *E;
+void read_mat_from_file(struct All_variables *E)
 {
     (E->solver.read_input_files_for_timesteps)(E,3,1); /* read element material(3) and output(1) */
   return;
@@ -73,8 +70,7 @@ void read_mat_from_file(E)
   read temperature at the top surface from files
 =========================================================================*/
 
-void read_temperature_boundary_from_file(E)
-     struct All_variables *E;
+void read_temperature_boundary_from_file(struct All_variables *E)
 {
     (E->solver.read_input_files_for_timesteps)(E,5,1); /* read temperature(5) and output(1) */
     return;
@@ -85,8 +81,7 @@ void read_temperature_boundary_from_file(E)
   Open restart file to get initial elapsed time, or calculate the right value
 =========================================================================*/
 
-void get_initial_elapsed_time(E)
-  struct All_variables *E;
+void get_initial_elapsed_time(struct All_variables *E)
 {
     FILE *fp;
     int ll, mm,rezip;
@@ -136,8 +131,7 @@ void get_initial_elapsed_time(E)
   Sets the elapsed time to zero, if desired.
 =========================================================================*/
 
-void set_elapsed_time(E)
-  struct All_variables *E;
+void set_elapsed_time(struct All_variables *E)
 {
 
     if (E->control.zero_elapsed_time) /* set elapsed_time to zero */
@@ -151,8 +145,7 @@ void set_elapsed_time(E)
   run, if desired.
 =========================================================================*/
 
-void set_starting_age(E)
-  struct All_variables *E;
+void set_starting_age(struct All_variables *E)
 {
 /* remember start_age is in MY */
     if (E->control.reset_startage)
@@ -168,9 +161,7 @@ void set_starting_age(E)
   making ages SMALLER!
 =========================================================================*/
 
-  float find_age_in_MY(E)
-
-  struct All_variables *E;
+float find_age_in_MY(struct All_variables *E)
 {
    float age_in_MY, e_4;
 

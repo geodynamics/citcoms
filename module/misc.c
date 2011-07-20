@@ -123,7 +123,7 @@ PyObject * pyCitcom_citcom_init(PyObject *self, PyObject *args)
                             "%s: 'libCitcomSCommon.citcom_init' failed",
                             pyCitcom_citcom_init__name__);
 
-    cobj = PyCObject_FromVoidPtr(E, deleteE);
+    cobj = PyCObject_FromVoidPtr(E, (void (*)(void*))deleteE);
 
     return Py_BuildValue("N", cobj);
 }

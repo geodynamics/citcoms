@@ -207,7 +207,7 @@ double global_p_norm2(struct All_variables *, double **);
 double global_div_norm2(struct All_variables *, double **);
 double global_tdot_d(struct All_variables *, double **, double **, int);
 float global_tdot(struct All_variables *, float **, float **, int);
-float global_fmin(struct All_variables *, double);
+float global_fmin(struct All_variables *, float);
 double global_dmax(struct All_variables *, double);
 float global_fmax(struct All_variables *, double);
 double Tmaxd(struct All_variables *, double **);

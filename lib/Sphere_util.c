@@ -37,11 +37,9 @@
   anglewise evenly.
  =================================================*/
 
-void even_divide_arc12(elx,x1,y1,z1,x2,y2,z2,theta,fi)
- double x1,y1,z1,x2,y2,z2,*theta,*fi;
- int elx;
+void even_divide_arc12(int elx, double x1, double y1, double z1, double x2, double y2, double z2, double *theta, double *fi)
 {
-  double dx,dy,dz,xx,yy,zz,myatan();
+  double dx,dy,dz,xx,yy,zz;
   int j, nox;
 
   nox = elx+1;
@@ -64,13 +62,11 @@ void even_divide_arc12(elx,x1,y1,z1,x2,y2,z2,theta,fi)
    compute angle and area
    ================================================*/
 
-void compute_angle_surf_area (E)
-     struct All_variables *E;
+void compute_angle_surf_area (struct All_variables *E)
 {
 
     int es,el,m,i,j,ii,ia[5],lev;
-    double aa,y1[4],y2[4],angle[6],xx[4][5],area_sphere_cap();
-    void get_angle_sphere_cap();
+    double aa,y1[4],y2[4],angle[6],xx[4][5];
     void parallel_process_termination();
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
@@ -123,12 +119,10 @@ void compute_angle_surf_area (E)
 /* ================================================
    area of spherical rectangle
    ================================================ */
-double area_sphere_cap(angle)
-     double angle[6];
+double area_sphere_cap(double angle[6])
 {
 
     double area,a,b,c;
-    double area_of_sphere_triag();
 
     a = angle[1];
     b = angle[2];
@@ -146,8 +140,7 @@ double area_sphere_cap(angle)
 /* ================================================
    area of spherical triangle
    ================================================ */
-double area_of_sphere_triag(a,b,c)
-     double a,b,c;
+double area_of_sphere_triag(double a, double b, double c)
 {
 
     double ss,ak,aa,bb,cc,area;
@@ -176,13 +169,10 @@ double area_of_sphere_triag(a,b,c)
     angle [i]: angle bet test node and node i of the rectangle
     angle1[i]: angle bet nodes i and i+1 of the rectangle
     ====================================================================== */
-double area_of_5points(E,lev,m,el,x,ne)
-     struct All_variables *E;
-     int lev,m,el,ne;
-     double x[4];
+double area_of_5points(struct All_variables *E, int lev, int m, int el, double x[4], int ne)
 {
     int i,es,ia[5];
-    double area1,get_angle(),area_of_sphere_triag();
+    double area1;
     double xx[4],angle[5],angle1[5];
 
     for (i=1;i<=4;i++)
@@ -210,12 +200,11 @@ double area_of_5points(E,lev,m,el,x,ne)
     get the angle for given four points spherical rectangle
     ================================= */
 
-void  get_angle_sphere_cap(xx,angle)
-     double xx[4][5],angle[6];
+void  get_angle_sphere_cap(double xx[4][5], double angle[6])
 {
 
     int i,j,ii;
-    double y1[4],y2[4],get_angle();;
+    double y1[4],y2[4];
 
     for (i=1;i<=4;i++)     {     /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
         for (j=1;j<=3;j++)     {
@@ -238,8 +227,7 @@ void  get_angle_sphere_cap(xx,angle)
 /*  ================================
     get the angle for given two points
     ================================= */
-double get_angle(x,xx)
-     double x[4],xx[4];
+double get_angle(double x[4], double xx[4])
 {
     double dist,angle;
     const double pt5 = 0.5;

@@ -294,8 +294,7 @@ fprintf(stderr,"b %d %d %d %d %d %d %d\n",E->parallel.me,E->parallel.me_loc[1],E
  exchange info across the boundaries
  ============================================ */
 
-void regional_parallel_domain_boundary_nodes(E)
-  struct All_variables *E;
+void regional_parallel_domain_boundary_nodes(struct All_variables *E)
   {
 
   void parallel_process_termination();
@@ -443,8 +442,7 @@ if (E->control.verbose) {
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-void regional_parallel_communication_routs_v(E)
-  struct All_variables *E;
+void regional_parallel_communication_routs_v(struct All_variables *E)
   {
 
   int m,i,ii,j,k,l,node,el,elt,lnode,jj,doff,target_cap;
@@ -619,8 +617,7 @@ void regional_parallel_communication_routs_v(E)
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-void regional_parallel_communication_routs_s(E)
-  struct All_variables *E;
+void regional_parallel_communication_routs_s(struct All_variables *E)
   {
 
   int i,ii,j,k,l,node,el,elt,lnode,jj,doff;
@@ -741,10 +738,7 @@ So, this bug won't manifest itself. But in other version of CitcomS, it will.
 by Tan2 7/21, 2003
 ================================================ */
 
-void regional_exchange_id_d(E, U, lev)
- struct All_variables *E;
- double **U;
- int lev;
+void regional_exchange_id_d(struct All_variables *E, double **U, int lev)
  {
 
  int ii,j,jj,m,k;
@@ -791,10 +785,7 @@ void regional_exchange_id_d(E, U, lev)
 
 /* ================================================ */
 /* ================================================ */
-static void exchange_node_d(E, U, lev)
- struct All_variables *E;
- double **U;
- int lev;
+static void exchange_node_d(struct All_variables *E, double **U, int lev)
  {
 
  int ii,j,jj,m,k;
@@ -840,10 +831,7 @@ static void exchange_node_d(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-static void exchange_node_f(E, U, lev)
- struct All_variables *E;
- float **U;
- int lev;
+static void exchange_node_f(struct All_variables *E, float **U, int lev)
 {
 
  int ii,j,jj,m,k;

@@ -43,8 +43,7 @@ void ggrd_reg_temp_init(struct All_variables *);
 
    =================================================  */
 
-void regional_node_locations(E)
-  struct All_variables *E;
+void regional_node_locations(struct All_variables *E)
 {
   int i,j,k,lev;
   double ro,dr,*rr,*RR,fo;

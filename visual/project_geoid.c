@@ -66,10 +66,10 @@ void print_help()
 
 void allocate_sph_harm(sph_harm *coeff, int len)
 {
-    coeff->ll = malloc(len * sizeof(int));
-    coeff->mm = malloc(len * sizeof(int));
-    coeff->clm = malloc(len * sizeof(float));
-    coeff->slm = malloc(len * sizeof(float));
+    coeff->ll = (int *)malloc(len * sizeof(int));
+    coeff->mm = (int *)malloc(len * sizeof(int));
+    coeff->clm = (float *)malloc(len * sizeof(float));
+    coeff->slm = (float *)malloc(len * sizeof(float));
 }
 
 
@@ -145,8 +145,8 @@ void get_mesh(mesh *grid, int ntheta, int nphi)
     grid->nphi = nphi;
 
     /* allocate memory */
-    grid->theta = malloc(ntheta * sizeof(double));
-    grid->phi = malloc(nphi * sizeof(double));
+    grid->theta = (double *)malloc(ntheta * sizeof(double));
+    grid->phi = (double *)malloc(nphi * sizeof(double));
 
 
     /* create a regular mesh */

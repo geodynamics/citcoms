@@ -42,8 +42,7 @@ int layers(struct All_variables *,int ,int );
   it should be done through a pre-calculated lookup table.
   ======================================================== */
 
-void construct_ien(E)
-     struct All_variables *E;
+void construct_ien(struct All_variables *E)
 
 {
   int lev,p,q,r,rr,j;
@@ -136,8 +135,7 @@ void construct_surface( struct All_variables *E)
   Function to make the ID array for above case
   ============================================ */
 
-void construct_id(E)
-     struct All_variables *E;
+void construct_id(struct All_variables *E)
 {
     int i,j,k;
     int eqn_count,node,nno;
@@ -199,9 +197,7 @@ void construct_id(E)
 
 
 
-void get_bcs_id_for_residual(E,level,m)
-    struct All_variables *E;
-    int level,m;
+void get_bcs_id_for_residual(struct All_variables *E, int level, int m)
   {
 
     int i,j;
@@ -233,8 +229,7 @@ void get_bcs_id_for_residual(E,level,m)
   Function to construct  the LM array from the ID and IEN arrays
   ========================================================== */
 
-void construct_lm(E)
-     struct All_variables *E;
+void construct_lm(struct All_variables *E)
 {
   int i,j,a,e;
   int lev,eqn_no;
@@ -251,8 +246,7 @@ void construct_lm(E)
    Function to build the local node matrix indexing maps
    ===================================================== */
 
-void construct_node_maps(E)
-    struct All_variables *E;
+void construct_node_maps(struct All_variables *E)
 {
     double time1,CPU_time0();
 
@@ -328,8 +322,7 @@ void construct_node_maps(E)
 }
 
 
-void construct_node_ks(E)
-     struct All_variables *E;
+void construct_node_ks(struct All_variables *E)
 {
     int m,level,i,j,k,e;
     int node,node1,eqn1,eqn2,eqn3,loc0,loc1,loc2,loc3,found,element,index,pp,qq;
@@ -476,8 +469,7 @@ void construct_node_ks(E)
     return;
 }
 
-void rebuild_BI_on_boundary(E)
-     struct All_variables *E;
+void rebuild_BI_on_boundary(struct All_variables *E)
 {
     int m,level,i,j;
     int eqn1,eqn2,eqn3;
@@ -544,9 +536,8 @@ void rebuild_BI_on_boundary(E)
    Function to set up the boundary condition
    masks and other indicators.
    ============================================  */
-
-void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
-     struct All_variables *E;
+/* Add lid/edge masks/nodal weightings */
+void construct_masks(struct All_variables *E)
 {
   int i,j,k,l,node,el,elt;
   int lev,elx,elz,ely,nno,nox,noz,noy;
@@ -595,9 +586,7 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
      build the sub-element reference matrices
      ==========================================   */
 
-void construct_sub_element(E)
-     struct All_variables *E;
-
+void construct_sub_element(struct All_variables *E)
 {    int i,j,k,l,m;
      int lev,nox,noy,noz,nnn,elx,elz,ely,elzu,elxu,elt,eltu;
 
@@ -641,8 +630,7 @@ void construct_sub_element(E)
    }
 
 
-void construct_elt_ks(E)
-     struct All_variables *E;
+void construct_elt_ks(struct All_variables *E)
 {
     int e,el,lev,j,k,ii,m;
     void get_elt_k();
@@ -688,8 +676,7 @@ void construct_elt_ks(E)
 
 
 
-void construct_elt_gs(E)
-     struct All_variables *E;
+void construct_elt_gs(struct All_variables *E)
 { int m,el,lev,a;
   void get_elt_g();
 
@@ -737,8 +724,7 @@ void construct_elt_cs(struct All_variables *E)
  routine for constructing stiffness and node_maps
  ============================================================== */
 
-void construct_stiffness_B_matrix(E)
-  struct All_variables *E;
+void construct_stiffness_B_matrix(struct All_variables *E)
 {
   void build_diagonal_of_K();
   void build_diagonal_of_Ahat();
@@ -818,8 +804,7 @@ int layers(struct All_variables *E,int m,int node)
 
 
  ============================================================== */
-void construct_mat_group(E)
-     struct All_variables *E;
+void construct_mat_group(struct All_variables *E)
 {
   int m,i,j,k,kk,el,lev,a,nodea,els,llayer;
   void read_visc_layer_file(struct All_variables *E);

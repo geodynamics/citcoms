@@ -279,10 +279,7 @@ void allocate_visc_vars(struct All_variables *E)
    visc  = E->VI[E->mesh.levmax]
 
  */
-void get_system_viscosity(E,propogate,evisc,visc)
-     struct All_variables *E;
-     int propogate;
-     float **evisc,**visc;
+void get_system_viscosity(struct All_variables *E, int propogate, float **evisc, float **visc)
 {
     void visc_from_mat();
     void visc_from_T();
@@ -408,9 +405,7 @@ void initial_viscosity(struct All_variables *E)
 }
 
 
-void visc_from_mat(E,EEta)
-     struct All_variables *E;
-     float **EEta;
+void visc_from_mat(struct All_variables *E, float **EEta)
 {
 
     int i,m,jj;
@@ -476,10 +471,7 @@ void read_visc_layer_file(struct All_variables *E)
 }
 
 
-void visc_from_T(E,EEta,propogate)
-     struct All_variables *E;
-     float **EEta;
-     int propogate;
+void visc_from_T(struct All_variables *E, float **EEta, int propogate)
 {
     int m,i,k,l,z,jj,kk;
     float zero,one,eta0,temp,tempa,TT[9];
@@ -902,10 +894,7 @@ void visc_from_T(E,EEta,propogate)
 }
 
 
-void visc_from_S(E,EEta,propogate)
-     struct All_variables *E;
-     float **EEta;
-     int propogate;
+void visc_from_S(struct All_variables *E, float **EEta, int propogate)
 {
     float one,two,scale,stress_magnitude,depth,exponent1;
     float *eedot;
@@ -948,8 +937,8 @@ void visc_from_S(E,EEta,propogate)
     return;
 }
 
-void visc_from_P(E,EEta) /* "plasticity" implementation
-
+void visc_from_P(struct All_variables *E, float **EEta)
+			 /* "plasticity" implementation
 
 			 psrw = FALSE
 
@@ -993,8 +982,6 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 			 TWB
 
 			 */
-     struct All_variables *E;
-     float **EEta;
 {
   float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
   int m,e,l,z,jj,kk;
@@ -1105,9 +1092,7 @@ mean average from the tracer composition, assuming two flavors and
 compositions between zero and unity
 
 */
-void visc_from_C( E, EEta)
-     struct All_variables *E;
-     float **EEta;
+void visc_from_C(struct All_variables *E, float **EEta)
 {
   double vmean,cc_loc[10],CC[10][9],cbackground;
   int m,l,z,jj,kk,i,p,q;
@@ -1155,10 +1140,7 @@ void visc_from_C( E, EEta)
   } /* end cap */
 }
 
-void strain_rate_2_inv(E,m,EEDOT,SQRT)
-     struct All_variables *E;
-     float *EEDOT;
-     int m,SQRT;
+void strain_rate_2_inv(struct All_variables *E, int m, float *EEDOT, int SQRT)
 {
     void get_rtf_at_ppts();
     void velo_from_element();

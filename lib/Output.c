@@ -573,9 +573,9 @@ void output_seismic(struct All_variables *E, int cycles)
     double *rho, *vp, *vs;
     const int len = E->lmesh.nno;
 
-    rho = malloc(len * sizeof(double));
-    vp = malloc(len * sizeof(double));
-    vs = malloc(len * sizeof(double));
+    rho = (double *)malloc(len * sizeof(double));
+    vp = (double *)malloc(len * sizeof(double));
+    vs = (double *)malloc(len * sizeof(double));
     if(rho==NULL || vp==NULL || vs==NULL) {
         fprintf(stderr, "Error while allocating memory\n");
         abort();

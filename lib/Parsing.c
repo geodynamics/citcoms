@@ -84,12 +84,9 @@ int BEGINNER = 0;
 int interpret_control_string();
 
 
-void setup_parser(E,filename)
-     struct All_variables *E;
-     char *filename;
+void setup_parser(struct All_variables *E, char *filename)
 {
     void unique_copy_file();
-    void add_to_parameter_list();
 
     FILE * fp;
     char *pl,*pn,*pv;
@@ -175,8 +172,7 @@ void setup_parser(E,filename)
 
 }
 
-void shutdown_parser(E)
-     struct All_variables *E;
+void shutdown_parser(struct All_variables *E)
 
 {
 	if(ARGLIST != NULL) free(ARGLIST);
@@ -188,13 +184,11 @@ void shutdown_parser(E)
 
 
 /* add an entry to arglist, expanding memory */
-void add_to_parameter_list(name,value)
-     char *name, *value;	/* if necessary */
+void add_to_parameter_list(char *name, char *value)
 {
   struct arglist *alptr;
   int len;
   char *ptr;
-  int compute_parameter_hash_table();
 
   /* check arglist memory */
   if(NLIST >= LISTMAX)
@@ -233,8 +227,7 @@ void add_to_parameter_list(name,value)
   NLIST++;
 }
 
-int compute_parameter_hash_table(s)
-     char *s;
+int compute_parameter_hash_table(char *s)
 { int h;
 
   h= s[0];
@@ -251,11 +244,7 @@ int compute_parameter_hash_table(s)
   return(h);
 }
 
-int input_int(name,value,interpret,m)
-     char *name;
-     int *value;
-     char *interpret;
-     int m;
+int input_int(char *name, int *value, char *interpret, int m)
 
 {
     struct arglist *alptr;
@@ -320,11 +309,8 @@ int input_int(name,value,interpret,m)
   return(found);
 }
 
-int input_string(name,value,Default,m)  /* in the case of a string default=NULL forces input */
-     char *name;
-     char *value;
-     char *Default;
-     int m;
+/* in the case of a string default=NULL forces input */
+int input_string(char *name, char *value, char *Default, int m)
 {
   char *sptr;
   struct arglist *alptr;
@@ -374,11 +360,8 @@ int input_string(name,value,Default,m)  /* in the case of a string default=NULL 
   return(found);
 }
 
-int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
-     char *name;
-     int *value;
-     char *interpret;
-     int m;
+/* supports name=on/off too */
+int input_boolean(char *name, int *value, char *interpret, int m)
 {
   char *sptr;
   struct arglist *alptr;
@@ -443,11 +426,7 @@ int input_boolean(name,value,interpret,m)  /* supports name=on/off too */
   return(found);
 }
 
-int input_float(name,value,interpret,m)
-     char *name;
-     float *value;
-     char *interpret;
-     int m;
+int input_float(char *name, float *value, char *interpret, int m)
 
 { char *sptr;
   struct arglist *alptr;
@@ -511,11 +490,7 @@ int input_float(name,value,interpret,m)
   return(found);
 }
 
-int input_double(name,value,interpret,m)
-     char *name;
-     double *value;
-     char *interpret;
-     int m;
+int input_double(char *name, double *value, char *interpret, int m)
 
 { char *sptr;
   struct arglist *alptr;
@@ -630,11 +605,7 @@ int input_int_vector(char *name, int number,int *value,int m)
 
 
 
-int input_char_vector(name,number,value,m)
-     char *name;
-     int number;
-     char *value; /* comma-separated list of ints */
-     int m;
+int input_char_vector(char *name, int number, char *value, int m)
 
 { char *sptr;
   struct arglist *alptr;
@@ -679,11 +650,7 @@ int input_char_vector(name,number,value,m)
   return(found);
 }
 
-int input_float_vector(name,number,value,m)
-     char *name;
-     int number;
-     float *value; /* comma-separated list of floats */
-     int m;
+int input_float_vector(char *name, int number, float *value, int m)
 
 { char *sptr;
   struct arglist *alptr;
@@ -731,11 +698,7 @@ int input_float_vector(name,number,value,m)
   return(found);
 }
 
-int input_double_vector(name,number,value,m)
-     char *name;
-     int number;
-     double *value; /* comma-separated list of floats */
-     int m;
+int input_double_vector(char *name, int number, double *value, int m)
 
 { char *sptr;
   struct arglist *alptr;
@@ -786,10 +749,7 @@ int input_double_vector(name,number,value,m)
    The function strtok does not work on linux machine
 */
 
-int interpret_control_string(interpret,essential,Default,minvalue,maxvalue)
-     char *interpret;
-     int *essential;
-     double *Default,*minvalue,*maxvalue;
+int interpret_control_string(char *interpret, int *essential, double *Default, double *minvalue, double *maxvalue)
 
 { char *substring;
 

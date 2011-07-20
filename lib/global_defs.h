@@ -51,21 +51,12 @@ to functions across the whole filespace of CITCOM.
 #include "hdf5.h"
 #endif
 
-#ifdef __cplusplus
-
-extern "C" {
-
-#else
-
-
 
 
 /* Macros */
 #define max(A,B) (((A) > (B)) ? (A) : (B))
 #define min(A,B) (((A) < (B)) ? (A) : (B))
 #define SWAP(a,b) {temp=(a);(a)=(b);(b)=temp;}
-
-#endif
 
 
 #define LIDN 0x1
@@ -856,9 +847,6 @@ struct All_variables {
 
 };
 
-#ifdef __cplusplus
-}
-#endif
 
 #ifndef TRUE
 #define TRUE 1
