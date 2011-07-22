@@ -1075,39 +1075,35 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
 
 void gzdir_output_tracer(struct All_variables *E, int cycles)
 {
-  int i, j, n, ncolumns;
-  char output_file[255];
-  gzFile *fp1;
-
-  snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz",
-	   E->control.data_dir,cycles,
-	   E->parallel.me, cycles);
-  fp1 = gzdir_output_open(output_file,"w");
-
-  ncolumns = 3 + E->trace.number_of_extra_quantities;
-
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
-              ncolumns, E->monitor.elapsed_time);
-
-      for(n=1;n<=E->trace.ntracers[j];n++) {
-          /* write basic quantities (coordinate) */
-          gzprintf(fp1,"%9.5e %9.5e %9.5e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
-
-          /* write extra quantities */
-          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %9.5e", E->trace.extraq[j][i][n]);
-          }
-          gzprintf(fp1, "\n");
-      }
-
-  }
-
-  gzclose(fp1);
-  return;
+	int						i, j, n, ncolumns;
+	char					output_file[255];
+	gzFile					*fp1;
+	TracerList::iterator	tr;
+	
+	snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz",
+			 E->control.data_dir,cycles,
+			 E->parallel.me, cycles);
+	fp1 = gzdir_output_open(output_file,"w");
+	
+	ncolumns = 3 + 1;
+	
+	for(j=1;j<=E->sphere.caps_per_proc;j++) {
+		gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.tracers[j].size(),
+				 ncolumns, E->monitor.elapsed_time);
+		
+		for(tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
+			/* write basic quantities (coordinate) */
+			gzprintf(fp1,"%9.5e %9.5e %9.5e", tr->x(), tr->y(), tr->z());
+			
+			/* write extra quantities */
+			gzprintf(fp1," %9.5e", tr->flavor());
+			gzprintf(fp1, "\n");
+		}
+		
+	}
+	
+	gzclose(fp1);
+	return;
 }
 
 

@@ -667,38 +667,34 @@ void output_pressure(struct All_variables *E, int cycles)
 
 void output_tracer(struct All_variables *E, int cycles)
 {
-  int i, j, n, ncolumns;
-  char output_file[255];
-  FILE *fp1;
-
-  sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
-          E->parallel.me, cycles);
-  fp1 = output_open(output_file, "w");
-
-  ncolumns = 3 + E->trace.number_of_extra_quantities;
-
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
-              ncolumns, E->monitor.elapsed_time);
-
-      for(n=1;n<=E->trace.ntracers[j];n++) {
-          /* write basic quantities (coordinate) */
-          fprintf(fp1,"%.12e %.12e %.12e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
-
-          /* write extra quantities */
-          for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
-          }
-          fprintf(fp1, "\n");
-      }
-
-  }
-
-  fclose(fp1);
-  return;
+	int						i, j, n, ncolumns;
+	char					output_file[255];
+	FILE					*fp1;
+	TracerList::iterator	tr;
+	
+	sprintf(output_file,"%s.tracer.%d.%d", E->control.data_file,
+			E->parallel.me, cycles);
+	fp1 = output_open(output_file, "w");
+	
+	ncolumns = 3 + 1; // ERIC:  E->trace.number_of_extra_quantities;
+	
+	for(j=1;j<=E->sphere.caps_per_proc;j++) {
+		fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.tracers[j].size(),
+				ncolumns, E->monitor.elapsed_time);
+		
+		for(tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
+			/* write basic quantities (coordinate) */
+			fprintf(fp1,"%.12e %.12e %.12e", tr->theta(), tr->phi(), tr->rad());
+			
+			/* write extra quantities */
+			fprintf(fp1," %.12e", tr->flavor());
+			fprintf(fp1, "\n");
+		}
+		
+	}
+	
+	fclose(fp1);
+	return;
 }
 
 

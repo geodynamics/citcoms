@@ -318,6 +318,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
                 flavor = i + 1;
                 E->composition.comp_el[j][i][e] =
                     E->trace.ntracer_flavor[j][flavor][e] / (double)numtracers;
+				fprintf(E->trace.fpt, "%d %d %d %f\n", j, i, e, E->composition.comp_el[j][i][e]);
             }
         }
 

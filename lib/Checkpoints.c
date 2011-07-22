@@ -247,32 +247,32 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
 
 static void tracer_checkpoint(struct All_variables *E, FILE *fp)
 {
-    int m, i;
+    int						m, i, ntracers, tracer_size;
+	double					*tracer_data;
+	TracerList::iterator	tr;
+	Tracer					temp;
 
     write_sentinel(fp);
 
-    fwrite(&(E->trace.number_of_basic_quantities), sizeof(int), 1, fp);
-    fwrite(&(E->trace.number_of_extra_quantities), sizeof(int), 1, fp);
+	tracer_size = temp.size();
+	tracer_data = (double *)malloc(tracer_size*sizeof(double));
+	
+    fwrite(&tracer_size, sizeof(int), 1, fp);
     fwrite(&(E->trace.nflavors), sizeof(int), 1, fp);
     fwrite(&(E->trace.ilast_tracer_count), sizeof(int), 1, fp);
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        fwrite(&(E->trace.ntracers[m]), sizeof(int), 1, fp);
-
-    /* the 0-th element of basicq/extraq/ielement is not init'd
-     * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<6; i++) {
-            fwrite(E->trace.basicq[m][i], sizeof(double),
-                   E->trace.ntracers[m]+1, fp);
-        }
-        for(i=0; i<E->trace.number_of_extra_quantities; i++) {
-            fwrite(E->trace.extraq[m][i], sizeof(double),
-                   E->trace.ntracers[m]+1, fp);
-        }
-        fwrite(E->trace.ielement[m], sizeof(int),
-               E->trace.ntracers[m]+1, fp);
+		ntracers = E->trace.tracers[m].size();
+        fwrite(&ntracers, sizeof(int), 1, fp);
+		
+		// Write each tracer to the memory data structure, then copy that to the file
+		for (tr=E->trace.tracers[m].begin();tr!=E->trace.tracers[m].end();++tr) {
+			tr->writeToMem(tracer_data);
+			fwrite(tracer_data, tracer_size*sizeof(double), 1, fp);
+		}
     }
+	
+	free(tracer_data);
 
     return;
 }
@@ -280,30 +280,23 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
 
 static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 {
-    void count_tracers_of_flavors(struct All_variables *E);
-    void allocate_tracer_arrays();
-
-    int m, i, itmp;
+    int		m, i, itmp, ntracers, tracer_size;
+	double	*tracer_data;
+	Tracer	new_tracer;
 
     read_sentinel(fp, E->parallel.me);
 
-    fread(&itmp, sizeof(int), 1, fp);
-    if (itmp != E->trace.number_of_basic_quantities) {
-        fprintf(stderr, "Error in reading checkpoint file: tracer basicq, me=%d\n",
+    fread(&tracer_size, sizeof(int), 1, fp);
+    if (tracer_size != new_tracer.size()) {
+        fprintf(stderr, "Error in reading checkpoint file: tracer size, me=%d\n",
                 E->parallel.me);
-        fprintf(stderr, "%d\n", itmp);
+        fprintf(stderr, "%d\n", tracer_size);
         exit(-1);
 
     }
-
-    fread(&itmp, sizeof(int), 1, fp);
-    if (itmp != E->trace.number_of_extra_quantities) {
-        fprintf(stderr, "Error in reading checkpoint file: tracer extraq, me=%d\n",
-                E->parallel.me);
-        fprintf(stderr, "%d\n", itmp);
-        exit(-1);
-
-    }
+	
+	// Allocate memory for reading tracer data in
+	tracer_data = (double *)malloc(tracer_size*sizeof(double));
 
     fread(&itmp, sizeof(int), 1, fp);
     if (itmp != E->trace.nflavors) {
@@ -311,7 +304,6 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
                 E->parallel.me);
         fprintf(stderr, "%d\n", itmp);
         exit(-1);
-
     }
 
     fread(&itmp, sizeof(int), 1, fp);
@@ -319,25 +311,19 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
     /* # of tracers, allocate memory */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fread(&itmp, sizeof(int), 1, fp);
-        allocate_tracer_arrays(E, m, itmp);
-        E->trace.ntracers[m] = itmp;
+        fread(&ntracers, sizeof(int), 1, fp);
+        allocate_tracer_arrays(E, m, ntracers);
+
+		/* read tracer data */
+		for (i=0;i<ntracers;++i) {
+			fread(tracer_data, tracer_size*sizeof(double), 1, fp);
+			new_tracer.readFromMem(tracer_data);
+			E->trace.tracers[m].push_back(new_tracer);
+		}
     }
 
-    /* read tracer data */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<6; i++) {
-            fread(E->trace.basicq[m][i], sizeof(double),
-                  E->trace.ntracers[m]+1, fp);
-        }
-        for(i=0; i<E->trace.number_of_extra_quantities; i++) {
-            fread(E->trace.extraq[m][i], sizeof(double),
-                  E->trace.ntracers[m]+1, fp);
-        }
-        fread(E->trace.ielement[m], sizeof(int),
-              E->trace.ntracers[m]+1, fp);
-    }
-
+	free(tracer_data);
+	
     /* init E->trace.ntracer_flavor */
     count_tracers_of_flavors(E);
 

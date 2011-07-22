@@ -93,8 +93,9 @@ private:
 	int _ielement;
 	
 public:
-	Tracer(void) : _sc(), _cc(), _cc0(), _Vc() {};
-	Tracer(SphericalCoord new_sc, CartesianCoord new_cc) : _sc(new_sc), _cc(new_cc), _cc0(), _Vc() {};
+	Tracer(void) : _sc(), _cc(), _cc0(), _Vc(), _flavor(0), _ielement(-99) {};
+	Tracer(SphericalCoord new_sc, CartesianCoord new_cc) :
+		_sc(new_sc), _cc(new_cc), _cc0(), _Vc(), _flavor(0), _ielement(-99) {};
 	
 	CartesianCoord getCartesianPos(void) const { return _cc; };
 	SphericalCoord getSphericalPos(void) const { return _sc; };
@@ -148,22 +149,27 @@ struct TRACE{
     double box_cushion;
 
     /* tracer arrays */
-    int number_of_basic_quantities;
-    int number_of_extra_quantities;
-    int number_of_tracer_quantities;
+	
+    TracerList *tracers;
+	
+    TracerList *escaped_tracers;
+	
+    //int number_of_basic_quantities;
+    //int number_of_extra_quantities;
+    //int number_of_tracer_quantities;
 
-    double *basicq[13][100];
-    double *extraq[13][100];
+    //double *basicq[13][100];
+    //double *extraq[13][100];
 
-    int ntracers[13];
-    int max_ntracers[13];
-    int *ielement[13];
+    //int ntracers[13];
+    //int max_ntracers[13];
+    //int *ielement[13];
 
     int number_of_tracers;
 
-    int ilatersize[13];
-    int ilater[13];
-    double *rlater[13][100];
+    //int ilatersize[13];
+    //int ilater[13];
+    //double *rlater[13][100];
 
     /* tracer flavors */
     int nflavors;
