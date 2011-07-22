@@ -253,12 +253,11 @@ struct TRACE{
     /*********************/
 
     int (* iget_element)(struct All_variables*, int, int,
-                         double, double, double, double, double, double);
+                         CartesianCoord, SphericalCoord);
 
-    void (* get_velocity)(struct All_variables*, int, int,
-                          double, double, double, double*);
+    CartesianCoord (* get_velocity)(struct All_variables*, int, int,
+                          SphericalCoord);
 
     void (* keep_within_bounds)(struct All_variables*,
-                                double*, double*, double*,
-                                double*, double*, double*);
+                                CartesianCoord &, SphericalCoord &);
 };

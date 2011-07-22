@@ -74,10 +74,9 @@ static void makevector(double *vec, double xf, double yf, double zf,
                        double x0, double y0, double z0);
 static void crossit(double *cross, double *A, double *B);
 static void fix_radius(struct All_variables *E,
-                       double *radius, double *theta, double *phi,
-                       double *x, double *y, double *z);
+                       SphericalCoord &sc,
+                       CartesianCoord &cc);
 static void fix_angle(double *angle);
-static void fix_theta_phi(double *theta, double *phi);
 static int iget_radial_element(struct All_variables *E,
                                int j, int iel,
                                double rad);
@@ -90,7 +89,7 @@ static void full_put_lost_tracers(struct All_variables *E,
                                   int isend[13][13], double *send[13][13]);
 void pdebug(struct All_variables *E, int i);
 int full_icheck_cap(struct All_variables *E, int icap,
-                    double x, double y, double z, double rad);
+                    CartesianCoord cc, double rad);
 
 
 
@@ -693,23 +692,22 @@ void full_lost_souls(struct All_variables *E)
 
     for (kk=0;kk<irec[j];kk++) {
 		Tracer new_tracer;
+		CartesianCoord	cc;
+		SphericalCoord	sc;
 
         ireceive_position=kk*new_tracer.size();
 		
 		new_tracer.readFromMem(&REC[j][ireceive_position]);
 
-        theta=new_tracer.theta();
-        phi=new_tracer.phi();
-        rad=new_tracer.rad();
-        x=new_tracer.x();
-        y=new_tracer.y();
-        z=new_tracer.z();
-
-        iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
+		sc = new_tracer.getSphericalPos();
+		cc = new_tracer.getCartesianPos();
+		
+        iel=(E->trace.iget_element)(E,j,-99,cc,sc);
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
-            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",x,y,z,theta,phi,rad);
+            fprintf(E->trace.fpt,"x,y,z-theta,phi,rad: %f %f %f - %f %f %f\n",
+					cc._x,cc._y,cc._z,sc._theta,sc._phi,sc._rad);
             fflush(E->trace.fpt);
             exit(10);
         }
@@ -750,23 +748,19 @@ static void full_put_lost_tracers(struct All_variables *E,
     int ithatcap, icheck;
     int isend_position, ipos;
     int lev = E->mesh.levmax;
-    double theta, phi, rad;
-    double x, y, z;
 	TracerList::iterator tr;
+	CartesianCoord	cc;
 
     /* transfer tracers from rlater to send */
 
     for (tr=E->trace.escaped_tracers[j].begin();tr!=E->trace.escaped_tracers[j].end();++tr) {
-        rad=tr->rad();
-        x=tr->x();
-        y=tr->y();
-        z=tr->z();
+		cc = tr->getCartesianPos();
 
         /* first check same cap if nprocz>1 */
 
         if (E->parallel.nprocz>1) {
             ithatcap=0;
-            icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
+            icheck=full_icheck_cap(E,ithatcap,cc,tr->rad());
             if (icheck==1) goto foundit;
 
         }
@@ -775,7 +769,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         for (pp=1;pp<=E->parallel.TNUM_PASS[lev][j];pp++) {
             ithatcap=pp;
-            icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
+            icheck=full_icheck_cap(E,ithatcap,cc,tr->rad());
             if (icheck==1) goto foundit;
         }
 
@@ -783,8 +777,8 @@ static void full_put_lost_tracers(struct All_variables *E,
         /* should not be here */
         if (icheck!=1) {
             fprintf(E->trace.fpt,"Error(lost souls)-should not be here\n");
-            fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",x,y,z,rad);
-            icheck=full_icheck_cap(E,0,x,y,z,rad);
+            fprintf(E->trace.fpt,"x: %f y: %f z: %f rad: %f\n",cc._x,cc._y,cc._z,tr->rad());
+            icheck=full_icheck_cap(E,0,cc,tr->rad());
             if (icheck==1) fprintf(E->trace.fpt," icheck here!\n");
             else fprintf(E->trace.fpt,"icheck not here!\n");
             fflush(E->trace.fpt);
@@ -857,9 +851,6 @@ void full_get_shape_functions(struct All_variables *E,
 
     const double eps=-1e-4;
 
-    void sphere_to_cart();
-
-
     /* find u and v using spherical coordinates */
 
     spherical_to_uv(E,j,theta,phi,&u,&v);
@@ -909,7 +900,7 @@ void full_get_shape_functions(struct All_variables *E,
                     sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
                     ival=icheck_element(E,j,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
-                    ival=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
+                    ival=(E->trace.iget_element)(E,j,-99,CartesianCoord(x,y,z),SphericalCoord(theta,phi,rad));
                     fprintf(E->trace.fpt,"New Element?: %d\n",ival);
                     ival=icheck_column_neighbors(E,j,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"New Element (neighs)?: %d\n",ival);
@@ -994,10 +985,9 @@ double full_interpolate_data(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-void full_get_velocity(struct All_variables *E,
+CartesianCoord full_get_velocity(struct All_variables *E,
                        int j, int nelem,
-                       double theta, double phi, double rad,
-                       double *velocity_vector)
+                       SphericalCoord sc)
 {
     int iwedge;
     const int sphere_key = 0;
@@ -1006,9 +996,7 @@ void full_get_velocity(struct All_variables *E,
     double VV[4][9];
     double vx[7],vy[7],vz[7];
 
-    void velo_from_element_d();
-
-    full_get_shape_functions(E, shape, nelem, theta, phi, rad);
+    full_get_shape_functions(E, shape, nelem, sc._theta, sc._phi, sc._rad);
     iwedge=shape[0];
 
     /* get cartesian velocity */
@@ -1059,16 +1047,12 @@ void full_get_velocity(struct All_variables *E,
             vz[6]=VV[3][8];
         }
 
-    velocity_vector[1]=vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
-        vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6];
-    velocity_vector[2]=vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
-        vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6];
-    velocity_vector[3]=vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
-        vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
-
-
-
-    return;
+	return CartesianCoord(vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
+						  vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6],
+						  vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
+						  vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6],
+						  vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
+						  vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6]);
 }
 
 /***************************************************************/
@@ -2199,7 +2183,7 @@ static int icheck_element_column(struct All_variables *E,
 /* a given cap                                              */
 /*                                                          */
 int full_icheck_cap(struct All_variables *E, int icap,
-                    double x, double y, double z, double rad)
+                    CartesianCoord cc, double rad)
 {
 
     double test_point[4];
@@ -2228,9 +2212,9 @@ int full_icheck_cap(struct All_variables *E, int icap,
 
     /* test_point - project to outer radius */
 
-    test_point[1]=x/rad;
-    test_point[2]=y/rad;
-    test_point[3]=z/rad;
+    test_point[1]=cc._x/rad;
+    test_point[2]=cc._y/rad;
+    test_point[3]=cc._z/rad;
 
     ival=icheck_bounds(E,test_point,rnode[1],rnode[2],rnode[3],rnode[4]);
 
@@ -2432,39 +2416,36 @@ static void crossit(double *cross, double *A, double *B)
 /* This function moves particles back in bounds if they left     */
 /* during advection                                              */
 
-static void fix_radius(struct All_variables *E,
-                       double *radius, double *theta, double *phi,
-                       double *x, double *y, double *z)
+static void fix_radius(struct All_variables *E, SphericalCoord &sc, CartesianCoord &cc)
 {
     double sint,cost,sinf,cosf,rad;
     double max_radius, min_radius;
-
+	int changed = 0;
+	
     max_radius = E->sphere.ro - E->trace.box_cushion;
     min_radius = E->sphere.ri + E->trace.box_cushion;
-
-    if (*radius > max_radius) {
-        *radius=max_radius;
+	
+    if (sc._rad > max_radius) {
+		changed = 1;
+        sc._rad=max_radius;
         rad=max_radius;
-        cost=cos(*theta);
-        sint=sqrt(1.0-cost*cost);
-        cosf=cos(*phi);
-        sinf=sin(*phi);
-        *x=rad*sint*cosf;
-        *y=rad*sint*sinf;
-        *z=rad*cost;
     }
-    if (*radius < min_radius) {
-        *radius=min_radius;
+    if (sc._rad < min_radius) {
+		changed = 1;
+        sc._rad=min_radius;
         rad=min_radius;
-        cost=cos(*theta);
-        sint=sqrt(1.0-cost*cost);
-        cosf=cos(*phi);
-        sinf=sin(*phi);
-        *x=rad*sint*cosf;
-        *y=rad*sint*sinf;
-        *z=rad*cost;
     }
-
+	
+	if (changed) {
+        cost=cos(sc._theta);
+        sint=sqrt(1.0-cost*cost);
+        cosf=cos(sc._phi);
+        sinf=sin(sc._phi);
+        cc._x=rad*sint*cosf;
+        cc._y=rad*sint*sinf;
+        cc._z=rad*cost;
+	}
+	
     return;
 }
 
@@ -2487,30 +2468,6 @@ static void fix_angle(double *angle)
     return;
 }
 
-/******************************************************************/
-/* FIX THETA PHI                                                  */
-/*                                                                */
-/* This function constrains the value of theta to be              */
-/* between 0 and  PI, and                                         */
-/* this function constrains the value of phi to be                */
-/* between 0 and 2 PI                                             */
-/*                                                                */
-static void fix_theta_phi(double *theta, double *phi)
-{
-    const double two_pi=2.0*M_PI;
-
-    fix_angle(theta);
-
-    if (*theta > M_PI) {
-        *theta = two_pi - *theta;
-        *phi += M_PI;
-    }
-
-    fix_angle(phi);
-
-    return;
-}
-
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
@@ -2521,8 +2478,8 @@ static void fix_theta_phi(double *theta, double *phi)
 
 int full_iget_element(struct All_variables *E,
                       int j, int iprevious_element,
-                      double x, double y, double z,
-                      double theta, double phi, double rad)
+                      CartesianCoord cc,
+                      SphericalCoord sc)
 {
     int icheck_processor_shell();
     int iregel;
@@ -2541,14 +2498,13 @@ int full_iget_element(struct All_variables *E,
     ely=E->lmesh.ely;
     elz=E->lmesh.elz;
 
-
     ntheta=0;
     nphi=0;
 
     /* check the radial range */
     if (E->parallel.nprocz>1)
         {
-            ival=icheck_processor_shell(E,j,rad);
+            ival=icheck_processor_shell(E,j,sc._rad);
             if (ival!=1) return -99;
         }
 
@@ -2560,7 +2516,7 @@ int full_iget_element(struct All_variables *E,
 
     /* get regular element number */
 
-    iregel=iget_regel(E,j,theta,phi,&ntheta,&nphi);
+    iregel=iget_regel(E,j,sc._theta,sc._phi,&ntheta,&nphi);
     if (iregel<=0)
         {
             return -99;
@@ -2579,7 +2535,7 @@ int full_iget_element(struct All_variables *E,
 
     if (iprevious_element>0)
         {
-            ival=icheck_element_column(E,j,iprevious_element,x,y,z,rad);
+            ival=icheck_element_column(E,j,iprevious_element,cc._x,cc._y,cc._z,sc._rad);
             if (ival==1)
                 {
                     iel=iprevious_element;
@@ -2600,7 +2556,7 @@ int full_iget_element(struct All_variables *E,
 
                     if (nelem!=iprevious_element)
                         {
-                            ival=icheck_element_column(E,j,nelem,x,y,z,rad);
+                            ival=icheck_element_column(E,j,nelem,cc._x,cc._y,cc._z,sc._rad);
                             if (ival==1)
                                 {
                                     iel=nelem;
@@ -2617,7 +2573,7 @@ int full_iget_element(struct All_variables *E,
 
     if (iprevious_element>0)
         {
-            iel=icheck_column_neighbors(E,j,iprevious_element,x,y,z,rad);
+            iel=icheck_column_neighbors(E,j,iprevious_element,cc._x,cc._y,cc._z,sc._rad);
             if (iel>0)
                 {
                     goto foundit;
@@ -2626,7 +2582,7 @@ int full_iget_element(struct All_variables *E,
 
     /* check if still in cap */
 
-    ival=full_icheck_cap(E,0,x,y,z,rad);
+    ival=full_icheck_cap(E,0,cc,sc._rad);
     if (ival==0)
         {
             return -99;
@@ -2643,7 +2599,7 @@ int full_iget_element(struct All_variables *E,
     icorner[4]=elxz*ely;
     for (kk=1;kk<=4;kk++)
         {
-            ival=icheck_element_column(E,j,icorner[kk],x,y,z,rad);
+            ival=icheck_element_column(E,j,icorner[kk],cc._x,cc._y,cc._z,sc._rad);
             if (ival>0)
                 {
                     iel=icorner[kk];
@@ -2661,7 +2617,7 @@ int full_iget_element(struct All_variables *E,
                     for (kk=1;kk<=ichoice;kk++)
                         {
                             ineighbor=E->trace.regtoel[j][kk][iregel];
-                            iel=icheck_column_neighbors(E,j,ineighbor,x,y,z,rad);
+                            iel=icheck_column_neighbors(E,j,ineighbor,cc._x,cc._y,cc._z,sc._rad);
                             if (iel>0)
                                 {
                                     goto foundit;
@@ -2675,7 +2631,7 @@ int full_iget_element(struct All_variables *E,
 
     E->trace.istat1++;
 
-    iel=icheck_all_columns(E,j,x,y,z,rad);
+    iel=icheck_all_columns(E,j,cc._x,cc._y,cc._z,sc._rad);
 
     /*
       fprintf(E->trace.fpt,"WARNING(full_iget_element)-doing a full search!\n");
@@ -2703,7 +2659,7 @@ int full_iget_element(struct All_variables *E,
 
     fprintf(E->trace.fpt,"Error(full_iget_element) - element not found\n");
     fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %.15e %.15e %.15e %.15e %.15e %d\n",
-            x,y,z,theta,phi,iregel);
+            cc._x,cc._y,cc._z,sc._theta,sc._phi,iregel);
     fflush(E->trace.fpt);
     return -1;
 
@@ -2711,7 +2667,7 @@ int full_iget_element(struct All_variables *E,
 
     /* find radial element */
 
-    ifinal_iel=iget_radial_element(E,j,iel,rad);
+    ifinal_iel=iget_radial_element(E,j,iel,sc._rad);
 
     return ifinal_iel;
 }
@@ -3013,11 +2969,11 @@ static void determine_shape_coefficients(struct All_variables *E)
 /* phi and theta are within the proper degree range.                    */
 
 void full_keep_within_bounds(struct All_variables *E,
-                             double *x, double *y, double *z,
-                             double *theta, double *phi, double *rad)
+                             CartesianCoord &cc,
+                             SphericalCoord &sc)
 {
-    fix_theta_phi(theta, phi);
-    fix_radius(E,rad,theta,phi,x,y,z);
+    sc.constrainThetaPhi();
+    fix_radius(E,sc,cc);
 
     return;
 }
@@ -3306,10 +3262,6 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
     double velp_s[4],velp_c[4];
     double time;
     double path,dtpath;
-
-    void sphere_to_cart();
-    void cart_to_sphere();
-    void analytical_test_function();
 
     theta_0=x0_s[1];
     phi_0=x0_s[2];

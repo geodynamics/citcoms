@@ -270,8 +270,8 @@ static void make_mesh_ijk(struct All_variables *E)
 
 int regional_iget_element(struct All_variables *E,
 			  int m, int iprevious_element,
-			  double dummy1, double dummy2, double dummy3,
-			  double theta, double phi, double rad)
+			  CartesianCoord dummy,
+			  SphericalCoord sc)
 {
     int e, i, j, k;
     int ii, jj, kk;
@@ -291,9 +291,9 @@ int regional_iget_element(struct All_variables *E,
 	i = (e / elz) % elx;
 	j = e / (elz*elx);
 
-	ii = isearch_neighbors(E->trace.x_space, elx+1, theta, i);
-	jj = isearch_neighbors(E->trace.y_space, ely+1, phi, j);
-	kk = isearch_neighbors(E->trace.z_space, elz+1, rad, k);
+	ii = isearch_neighbors(E->trace.x_space, elx+1, sc._theta, i);
+	jj = isearch_neighbors(E->trace.y_space, ely+1, sc._phi, j);
+	kk = isearch_neighbors(E->trace.z_space, elz+1, sc._rad, k);
 
         if (ii>=0 && jj>=0 && kk>=0)
             return jj*elx*elz + ii*elz + kk + 1;
@@ -301,9 +301,9 @@ int regional_iget_element(struct All_variables *E,
 
     /* Search all elements if either the previous element is unknown */
     /* or failed to find in the neighboring elements                 */
-    ii = isearch_all(E->trace.x_space, elx+1, theta);
-    jj = isearch_all(E->trace.y_space, ely+1, phi);
-    kk = isearch_all(E->trace.z_space, elz+1, rad);
+    ii = isearch_all(E->trace.x_space, elx+1, sc._theta);
+    jj = isearch_all(E->trace.y_space, ely+1, sc._phi);
+    kk = isearch_all(E->trace.z_space, elz+1, sc._rad);
 
     if (ii<0 || jj<0 || kk<0)
         return -99;
@@ -368,7 +368,7 @@ int isearch_neighbors(double *array, int nsize,
 /* a given cap                                              */
 /*                                                          */
 int regional_icheck_cap(struct All_variables *E, int icap,
-                        double theta, double phi, double rad, double junk)
+                        SphericalCoord sc, double junk)
 {
     double theta_min, theta_max;
     double phi_min, phi_max;
@@ -382,8 +382,8 @@ int regional_icheck_cap(struct All_variables *E, int icap,
     phi_min = E->trace.phi_cap[icap][2];
     phi_max = E->trace.phi_cap[icap][4];
 
-    if ((theta >= theta_min) && (theta < theta_max) &&
-        (phi >= phi_min) && (phi < phi_max))
+    if ((sc._theta >= theta_min) && (sc._theta < theta_max) &&
+        (sc._phi >= phi_min) && (sc._phi < phi_max))
         return 1;
 
     //TODO: deal with south west bounds
@@ -480,19 +480,19 @@ double regional_interpolate_data(struct All_variables *E,
 
 /******** GET VELOCITY ***************************************/
 
-void regional_get_velocity(struct All_variables *E,
+CartesianCoord regional_get_velocity(struct All_variables *E,
                            int m, int nelem,
-                           double theta, double phi, double rad,
-                           double *velocity_vector)
+                           SphericalCoord sc)
 {
     void velo_from_element_d();
 
     double shp[9], VV[4][9], tmp;
     int n, d, node;
     const int sphere_key = 0;
+	double velocity_vector[4];
 
     /* get shape functions at (theta, phi, rad) */
-    regional_get_shape_functions(E, shp, nelem, theta, phi, rad);
+    regional_get_shape_functions(E, shp, nelem, sc._theta, sc._phi, sc._rad);
 
 
     /* get cartesian velocity */
@@ -530,49 +530,48 @@ void regional_get_velocity(struct All_variables *E,
     fflush(E->trace.fpt);
     /**/
 
-    return;
+    return CartesianCoord(velocity_vector[1], velocity_vector[2], velocity_vector[3]);
 }
 
 
 void regional_keep_within_bounds(struct All_variables *E,
-                                 double *x, double *y, double *z,
-                                 double *theta, double *phi, double *rad)
+                                 CartesianCoord &cc,
+                                 SphericalCoord &sc)
 {
-    void sphere_to_cart();
     int changed = 0;
 
-    if (*theta > E->control.theta_max - E->trace.box_cushion) {
-        *theta = E->control.theta_max - E->trace.box_cushion;
+    if (sc._theta > E->control.theta_max - E->trace.box_cushion) {
+        sc._theta = E->control.theta_max - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (*theta < E->control.theta_min + E->trace.box_cushion) {
-        *theta = E->control.theta_min + E->trace.box_cushion;
+    if (sc._theta < E->control.theta_min + E->trace.box_cushion) {
+        sc._theta = E->control.theta_min + E->trace.box_cushion;
         changed = 1;
     }
 
-    if (*phi > E->control.fi_max - E->trace.box_cushion) {
-        *phi = E->control.fi_max - E->trace.box_cushion;
+    if (sc._phi > E->control.fi_max - E->trace.box_cushion) {
+        sc._phi = E->control.fi_max - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (*phi < E->control.fi_min + E->trace.box_cushion) {
-        *phi = E->control.fi_min + E->trace.box_cushion;
+    if (sc._phi < E->control.fi_min + E->trace.box_cushion) {
+        sc._phi = E->control.fi_min + E->trace.box_cushion;
         changed = 1;
     }
 
-    if (*rad > E->sphere.ro - E->trace.box_cushion) {
-        *rad = E->sphere.ro - E->trace.box_cushion;
+    if (sc._rad > E->sphere.ro - E->trace.box_cushion) {
+        sc._rad = E->sphere.ro - E->trace.box_cushion;
         changed = 1;
     }
 
-    if (*rad < E->sphere.ri + E->trace.box_cushion) {
-        *rad = E->sphere.ri + E->trace.box_cushion;
+    if (sc._rad < E->sphere.ri + E->trace.box_cushion) {
+        sc._rad = E->sphere.ri + E->trace.box_cushion;
         changed = 1;
     }
 
     if (changed)
-        sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
+        cc = sc.toCartesian();
 
 
     return;
@@ -909,7 +908,7 @@ static void put_found_tracers(struct All_variables *E,
         /* check radius first, since it is cheaper       */
         inside = icheck_processor_shell(E, j, rad);
         if (inside == 1)
-            inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
+            inside = regional_icheck_cap(E, 0, SphericalCoord(theta, phi, rad), rad);
         else
             inside = 0;
 
@@ -925,7 +924,7 @@ static void put_found_tracers(struct All_variables *E,
 			new_tracer.readFromMem(&recv[ipos]);
 
             /* found the element */
-            iel = regional_iget_element(E, j, -99, 0, 0, 0, theta, phi, rad);
+            iel = regional_iget_element(E, j, -99, CartesianCoord(0, 0, 0), SphericalCoord(theta, phi, rad));
 
             if (iel<1) {
                 fprintf(E->trace.fpt, "Error(regional lost souls) - "

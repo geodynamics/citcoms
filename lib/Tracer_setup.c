@@ -62,9 +62,9 @@ void allocate_tracer_arrays(struct All_variables *E,
 void count_tracers_of_flavors(struct All_variables *E);
 
 int full_icheck_cap(struct All_variables *E, int icap,
-                    double x, double y, double z, double rad);
+                    CartesianCoord cc, double rad);
 int regional_icheck_cap(struct All_variables *E, int icap,
-                        double x, double y, double z, double rad);
+                        SphericalCoord sc, double rad);
 
 static void find_tracers(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
@@ -139,6 +139,72 @@ void Tracer::readFromMem(const double *mem) {
 	_Vc.readFromMem(&mem[9]);
 	_flavor = mem[12];
 	_ielement = mem[13];
+}
+
+
+
+SphericalCoord CartesianCoord::toSpherical(void) const
+{
+	double temp;
+	double theta, phi, rad;
+	
+	temp=_x*_x+_y*_y;
+	
+	theta=atan2(sqrt(temp),_z);
+	phi=myatan(_y,_x);
+	rad=sqrt(temp+_z*_z);
+	
+	return SphericalCoord(theta, phi, rad);
+}
+
+CartesianCoord SphericalCoord::toCartesian(void) const
+{
+	double sint,cost,sinf,cosf;
+	double x, y, z;
+	
+	sint=sin(_theta);
+	cost=cos(_theta);
+	sinf=sin(_phi);
+	cosf=cos(_phi);
+	
+	x=_rad*sint*cosf;
+	y=_rad*sint*sinf;
+	z=_rad*cost;
+	
+	return CartesianCoord(x,y,z);
+}
+
+
+
+const CartesianCoord CartesianCoord::operator+(const CartesianCoord &other) const {
+	return CartesianCoord(	this->_x+other._x,
+						  this->_y+other._y,
+						  this->_z+other._z);
+}
+
+// Multiply each element by a constant factor
+const CartesianCoord CartesianCoord::operator*(const double &val) const {
+	return CartesianCoord(	this->_x*val,
+						  this->_y*val,
+						  this->_z*val);
+}
+
+
+// Returns a constrained angle between 0 and 2 PI
+double SphericalCoord::constrainAngle(const double angle) const {
+    const double two_pi = 2.0*M_PI;
+	
+	return angle - two_pi * floor(angle/two_pi);
+}
+
+// Constrains theta to be between 0 and PI while simultaneously constraining phi between 0 and 2 PI
+void SphericalCoord::constrainThetaPhi(void) {
+	_theta = constrainAngle(_theta);
+	if (_theta > M_PI) {
+		_theta = 2*M_PI - _theta;
+		_phi += M_PI;
+	}
+	_phi = constrainAngle(_phi);
 }
 
 
@@ -322,8 +388,6 @@ void tracer_advection(struct All_variables *E)
     E->trace.advection_time += CPU_time0() - begin_time;
 
     tracer_post_processing(E);
-
-    return;
 }
 
 
@@ -394,160 +458,91 @@ void tracer_post_processing(struct All_variables *E)
 /*                                                                        */
 /* This function predicts tracers performing an euler step                */
 /*                                                                        */
-/*                                                                        */
-/* Note positions used in tracer array                                    */
-/* [positions 0-5 are always fixed with current coordinates               */
-/*  Positions 6-8 contain original Cartesian coordinates.                 */
-/*  Positions 9-11 contain original Cartesian velocities.                 */
-/*                                                                        */
 
 static void predict_tracers(struct All_variables *E)
 {
-
-    int numtracers;
-    int j;
-    int nelem;
-
-    double dt;
-    double theta0,phi0,rad0;
-    double x0,y0,z0;
-    double theta_pred,phi_pred,rad_pred;
-    double x_pred,y_pred,z_pred;
-    double velocity_vector[4];
-	
+    int						j, nelem;
+    double					dt;
+	SphericalCoord			sc0, sc_pred;
+	CartesianCoord			cc0, cc_pred, velocity_vector;
 	TracerList::iterator	tr;
-
-
+	
     dt=E->advection.timestep;
-
-
+	
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
+		
         for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
-
-            theta0=tr->theta();
-            phi0=tr->phi();
-            rad0=tr->rad();
-            x0=tr->x();
-            y0=tr->y();
-            z0=tr->z();
-
-            nelem=tr->ielement();
-            (E->trace.get_velocity)(E,j,nelem,theta0,phi0,rad0,velocity_vector);
-
-            x_pred=x0+velocity_vector[1]*dt;
-            y_pred=y0+velocity_vector[2]*dt;
-            z_pred=z0+velocity_vector[3]*dt;
-
-
-            /* keep in box */
-
-            cart_to_sphere(E,x_pred,y_pred,z_pred,&theta_pred,&phi_pred,&rad_pred);
-            (E->trace.keep_within_bounds)(E,&x_pred,&y_pred,&z_pred,&theta_pred,&phi_pred,&rad_pred);
-
-            /* Current Coordinates are always kept in positions 0-5. */
-
-            tr->setCoords(SphericalCoord(theta_pred, phi_pred, rad_pred), CartesianCoord(x_pred, y_pred, z_pred));
-
-            /* Fill in original coords (positions 6-8) */
-            /* Fill in original velocities (positions 9-11) */
-
-			tr->setOrigVals(CartesianCoord(x0, y0, z0),
-							CartesianCoord(velocity_vector[1], velocity_vector[2], velocity_vector[3]));
-
-        } /* end kk, predicting tracers */
+			// Get initial tracer position
+			sc0 = tr->getSphericalPos();
+			cc0 = tr->getCartesianPos();
+			
+			// Interpolate the velocity of the tracer from element it is in
+            nelem = tr->ielement();
+            velocity_vector = (E->trace.get_velocity)(E,j,nelem,sc0);
+			
+			// Advance the tracer location in an Euler step
+			cc_pred = cc0 + velocity_vector * dt;
+			
+            // Ensure tracer remains in the boundaries
+			sc_pred = cc_pred.toSpherical();
+            (E->trace.keep_within_bounds)(E, cc_pred, sc_pred);
+			
+			// Set new tracer coordinates
+            tr->setCoords(sc_pred, cc_pred);
+			
+            // Save original coords and velocities for later correction
+			
+			tr->setOrigVals(cc0, velocity_vector);
+			
+        } /* end predicting tracers */
     } /* end caps */
-
+	
     /* find new tracer elements and caps */
-
     find_tracers(E);
-
-    return;
-
 }
-
 
 /*********** CORRECT TRACERS **********************************************/
 /*                                                                        */
 /* This function corrects tracers using both initial and                  */
 /* predicted velocities                                                   */
 /*                                                                        */
-/*                                                                        */
-/* Note positions used in tracer array                                    */
-/* [positions 0-5 are always fixed with current coordinates               */
-/*  Positions 6-8 contain original Cartesian coordinates.                 */
-/*  Positions 9-11 contain original Cartesian velocities.                 */
-/*                                                                        */
-
 
 static void correct_tracers(struct All_variables *E)
 {
-
-    int j;
-    int nelem;
-
-
-    double dt;
-    double x0,y0,z0;
-    double theta_pred,phi_pred,rad_pred;
-    double x_pred,y_pred,z_pred;
-    double theta_cor,phi_cor,rad_cor;
-    double x_cor,y_cor,z_cor;
-    double velocity_vector[4];
-    double Vx0,Vy0,Vz0;
-    double Vx_pred,Vy_pred,Vz_pred;
-	
+    int						j, nelem;
+    double					dt;
 	TracerList::iterator	tr;
-
-
+	CartesianCoord			orig_pos, orig_vel, pred_vel, new_coord;
+	SphericalCoord			new_coord_sph;
+	
     dt=E->advection.timestep;
-
-
+	
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
         for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
-
-            theta_pred=tr->theta();
-            phi_pred=tr->phi();
-            rad_pred=tr->rad();
-            x_pred=tr->x();
-            y_pred=tr->y();
-            z_pred=tr->z();
-
-            x0=tr->getOrigCartesianPos()._x;
-            y0=tr->getOrigCartesianPos()._y;
-            z0=tr->getOrigCartesianPos()._z;
-
-            Vx0=tr->getCartesianVel()._x;
-            Vy0=tr->getCartesianVel()._y;
-            Vz0=tr->getCartesianVel()._z;
-
-            nelem=tr->ielement();
-
-            (E->trace.get_velocity)(E,j,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
-
-            Vx_pred=velocity_vector[1];
-            Vy_pred=velocity_vector[2];
-            Vz_pred=velocity_vector[3];
-
-            x_cor=x0 + dt * 0.5*(Vx0+Vx_pred);
-            y_cor=y0 + dt * 0.5*(Vy0+Vy_pred);
-            z_cor=z0 + dt * 0.5*(Vz0+Vz_pred);
-
-            cart_to_sphere(E,x_cor,y_cor,z_cor,&theta_cor,&phi_cor,&rad_cor);
-            (E->trace.keep_within_bounds)(E,&x_cor,&y_cor,&z_cor,&theta_cor,&phi_cor,&rad_cor);
-
-            /* Fill in Current Positions (other positions are no longer important) */
-
-			tr->setCoords(SphericalCoord(theta_cor, phi_cor, rad_cor), CartesianCoord(x_cor, y_cor, z_cor));
-
-        } /* end kk, correcting tracers */
+			
+			// Get the original tracer position and velocity
+            orig_pos = tr->getOrigCartesianPos();
+            orig_vel = tr->getCartesianVel();
+			
+			// Get the predicted velocity by interpolating in the current element
+            nelem = tr->ielement();
+            pred_vel = (E->trace.get_velocity)(E, j, nelem, tr->getSphericalPos());
+			
+			// Correct the tracer position based on the original and new velocities
+			new_coord = orig_pos + (orig_vel+pred_vel) * (dt*0.5);
+			new_coord_sph = new_coord.toSpherical();
+			
+			// Ensure tracer remains in boundaries
+            (E->trace.keep_within_bounds)(E, new_coord, new_coord_sph);
+			
+            // Fill in current positions (original values are no longer important)
+			tr->setCoords(new_coord_sph, new_coord);
+			
+        } /* end correcting tracers */
     } /* end caps */
-
+	
     /* find new tracer elements and caps */
-
     find_tracers(E);
-
-    return;
 }
 
 
@@ -560,46 +555,33 @@ static void correct_tracers(struct All_variables *E)
 static void find_tracers(struct All_variables *E)
 {
 
-    int iel;
-    int kk;
-    int j;
-    int iprevious_element;
-
-    double theta,phi,rad;
-    double x,y,z;
-    double time_stat1;
-    double time_stat2;
-	
+    int						iel, j, iprevious_element;
 	TracerList::iterator	tr;
-
-    double CPU_time0();
-    double begin_time = CPU_time0();
-
+    double					begin_time = CPU_time0();
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
 
         /* initialize arrays and statistical counters */
 
         E->trace.istat1=0;
-        for (kk=0;kk<=4;kk++) {
+        for (int kk=0;kk<=4;kk++) {
             E->trace.istat_ichoice[j][kk]=0;
         }
 
         for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();) {
 
-            theta=tr->theta();
-            phi=tr->phi();
-            rad=tr->rad();
-            x=tr->x();
-            y=tr->y();
-            z=tr->z();
+			CartesianCoord		cc;
+			SphericalCoord		sc;
+			
+			sc = tr->getSphericalPos();
+			cc = tr->getCartesianPos();
 
             iprevious_element=tr->ielement();
 
-            iel=(E->trace.iget_element)(E,j,iprevious_element,x,y,z,theta,phi,rad);
+            iel=(E->trace.iget_element)(E,j,iprevious_element,cc,sc);
             /* debug *
-            fprintf(E->trace.fpt,"BB. kk %d %d %d %d %f %f %f %f %f %f\n",kk,j,iprevious_element,iel,x,y,z,theta,phi,rad);
+            fprintf(E->trace.fpt,"BB. kk %d %d %d %f %f %f %f %f %f\n",
+					j,iprevious_element,iel,cc._x,cc._y,cc._z,sc._theta,sc._phi,sc._rad);
             fflush(E->trace.fpt);
             /**/
 
@@ -628,11 +610,6 @@ static void find_tracers(struct All_variables *E)
 
 
     /* Now take care of tracers that exited cap */
-
-    /* REMOVE */
-    /*
-      parallel_process_termination();
-    */
 
     if (E->parallel.nprocxy == 12)
         full_lost_souls(E);
@@ -721,7 +698,6 @@ void initialize_tracers(struct All_variables *E)
 
     find_tracers(E);
 
-
     /* count # of tracers of each flavor */
 
     if (E->trace.nflavors > 0)
@@ -756,15 +732,11 @@ static void make_tracer_array(struct All_variables *E)
 
         generate_random_tracers(E, tracers_cap, j);
 
-
-
     }/* end j */
 
 
     /* Initialize tracer flavors */
     if (E->trace.nflavors) init_tracer_flavors(E);
-
-    return;
 }
 
 
@@ -777,8 +749,6 @@ static void generate_random_tracers(struct All_variables *E,
     int number_of_tries=0;
     int max_tries;
 
-    double x,y,z;
-    double theta,phi,rad;
     double xmin,xmax,ymin,ymax,zmin,zmax;
     double random1,random2,random3;
 
@@ -790,6 +760,7 @@ static void generate_random_tracers(struct All_variables *E,
     xmin = ymin = zmin = E->sphere.ro;
     xmax = ymax = zmax = -E->sphere.ro;
     for (kk=1; kk<=E->lmesh.nno; kk++) {
+		double x,y,z;
         x = E->x[j][1][kk];
         y = E->x[j][2][kk];
         z = E->x[j][3][kk];
@@ -826,32 +797,35 @@ static void generate_random_tracers(struct All_variables *E,
         random3=(1.0*rand())/(1.0*RAND_MAX);
 #endif
 
-        x=xmin+random1*(xmax-xmin);
-        y=ymin+random2*(ymax-ymin);
-        z=zmin+random3*(zmax-zmin);
+		CartesianCoord	new_cc;
+		SphericalCoord	new_sc;
+		
+        new_cc = CartesianCoord(xmin+random1*(xmax-xmin),
+								ymin+random2*(ymax-ymin),
+								zmin+random3*(zmax-zmin));
 
         /* first check if within shell */
 
-        cart_to_sphere(E,x,y,z,&theta,&phi,&rad);
+		new_sc = new_cc.toSpherical();
 
-        if (rad>=E->sx[j][3][E->lmesh.noz]) continue;
-        if (rad<E->sx[j][3][1]) continue;
+        if (new_sc._rad>=E->sx[j][3][E->lmesh.noz]) continue;
+        if (new_sc._rad<E->sx[j][3][1]) continue;
 
         /* check if in current cap */
         if (E->parallel.nprocxy==1)
-            ival=regional_icheck_cap(E,0,theta,phi,rad,rad);
+            ival=regional_icheck_cap(E,0,new_sc,new_sc._rad);
         else
-            ival=full_icheck_cap(E,0,x,y,z,rad);
+            ival=full_icheck_cap(E,0,new_cc,new_sc._rad);
 
         if (ival!=1) continue;
 
         /* Made it, so record tracer information */
 
-        (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
+        (E->trace.keep_within_bounds)(E, new_cc, new_sc);
 
 		Tracer	new_tracer;
 		
-		new_tracer.setCoords(SphericalCoord(theta, phi, rad), CartesianCoord(x, y, z));
+		new_tracer.setCoords(new_sc, new_cc);
 		E->trace.tracers[j].push_back(new_tracer);
     } /* end while */
 
@@ -877,8 +851,6 @@ static void read_tracer_file(struct All_variables *E)
     int icushion;
     int i, j;
 
-    double x,y,z;
-    double theta,phi,rad;
     double buffer[100];
 
     FILE *fptracer;
@@ -900,7 +872,6 @@ static void read_tracer_file(struct All_variables *E)
         exit(10);
     }
 
-
     /* initially size tracer arrays to number of tracers divided by processors */
 
     icushion=100;
@@ -915,7 +886,10 @@ static void read_tracer_file(struct All_variables *E)
         allocate_tracer_arrays(E,j,iestimate);
 
         for (kk=1;kk<=number_of_tracers;kk++) {
-            int len, ncol;
+			SphericalCoord		in_coord_sph;
+			CartesianCoord		in_coord_cc;
+            int					len, ncol;
+			
             ncol = 3 + 1;	// ERIC: E->trace.number_of_extra_quantities;
 
             len = read_double_vector(fptracer, ncol, buffer);
@@ -925,27 +899,23 @@ static void read_tracer_file(struct All_variables *E)
                 exit(10);
             }
 
-            theta = buffer[0];
-            phi = buffer[1];
-            rad = buffer[2];
-
-            sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
-
+			in_coord_sph.readFromMem(buffer);
+			in_coord_cc = in_coord_sph.toCartesian();
 
             /* make sure theta, phi is in range, and radius is within bounds */
 
-            (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
+            (E->trace.keep_within_bounds)(E,in_coord_cc,in_coord_sph);
 
             /* check whether tracer is within processor domain */
 
             icheck=1;
-            if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,j,rad);
+            if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,j,in_coord_sph._rad);
             if (icheck!=1) continue;
 
             if (E->parallel.nprocxy==1)
-                icheck=regional_icheck_cap(E,0,theta,phi,rad,rad);
+                icheck=regional_icheck_cap(E,0,in_coord_sph,in_coord_sph._rad);
             else
-                icheck=full_icheck_cap(E,0,x,y,z,rad);
+                icheck=full_icheck_cap(E,0,in_coord_cc,in_coord_sph._rad);
 
             if (icheck==0) continue;
 
@@ -953,7 +923,7 @@ static void read_tracer_file(struct All_variables *E)
 
 			Tracer new_tracer;
 			
-			new_tracer.setCoords(SphericalCoord(theta, phi, rad), CartesianCoord(x,y,z));
+			new_tracer.setCoords(in_coord_sph, in_coord_cc);
 			new_tracer.set_flavor(buffer[3]);
 			E->trace.tracers[j].push_back(new_tracer);
 
@@ -1018,8 +988,6 @@ static void read_old_tracer_file(struct All_variables *E)
 
     FILE *fp1;
 
-
-
     /* deal with different output formats */
 #ifdef USE_GZDIR
     if(strcmp(E->output.format, "ascii-gz") == 0){
@@ -1069,6 +1037,9 @@ static void read_old_tracer_file(struct All_variables *E)
 
         for (kk=1;kk<=numtracers;kk++) {
             int len, ncol;
+			SphericalCoord	sc;
+			CartesianCoord	cc;
+			
             ncol = 3 + 1;
 
             len = read_double_vector(fp1, ncol, buffer);
@@ -1078,19 +1049,16 @@ static void read_old_tracer_file(struct All_variables *E)
                 exit(10);
             }
 
-            theta = buffer[0];
-            phi = buffer[1];
-            rad = buffer[2];
-
-            sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
+			sc.readFromMem(buffer);
+			cc = sc.toCartesian();
 
             /* it is possible that if on phi=0 boundary, significant digits can push phi over 2pi */
 
-            (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
+            (E->trace.keep_within_bounds)(E,cc,sc);
 
 			Tracer	new_tracer;
 			
-            new_tracer.setCoords(SphericalCoord(theta, phi, rad), CartesianCoord(x, y, z));
+            new_tracer.setCoords(sc, cc);
 			new_tracer.set_flavor(buffer[3]);
 			E->trace.tracers[j].push_back(new_tracer);
 
@@ -1123,9 +1091,6 @@ static void read_old_tracer_file(struct All_variables *E)
 
     return;
 }
-
-
-
 
 
 /*********** CHECK SUM **************************************************/
@@ -1192,7 +1157,6 @@ void cart_to_sphere(struct All_variables *E,
     *theta=atan2(sqrt(temp),z);
     *phi=myatan(y,x);
 
-
     return;
 }
 
@@ -1218,8 +1182,6 @@ void sphere_to_cart(struct All_variables *E,
 
     return;
 }
-
-
 
 static void init_tracer_flavors(struct All_variables *E)
 {
@@ -1400,7 +1362,6 @@ void allocate_tracer_arrays(struct All_variables *E,
 
     int kk;
 
-
     if (E->trace.nflavors > 0) {
         E->trace.ntracer_flavor[j]=(int **)malloc(E->trace.nflavors*sizeof(int*));
         for (kk=0;kk<E->trace.nflavors;kk++) {
@@ -1412,16 +1373,10 @@ void allocate_tracer_arrays(struct All_variables *E,
         }
     }
 
-
     fflush(E->trace.fpt);
 
     return;
 }
-
-
-
-
-
 
 
 /********** ICHECK PROCESSOR SHELL *************/
@@ -1451,7 +1406,6 @@ int icheck_processor_shell(struct All_variables *E,
     /* First check bottom */
 
     if (rad<bottom_r) return -99;
-
 
     /* Check top */
 
