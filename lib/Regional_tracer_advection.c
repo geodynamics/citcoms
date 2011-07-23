@@ -373,14 +373,14 @@ int regional_icheck_cap(struct All_variables *E, int icap,
     double theta_min, theta_max;
     double phi_min, phi_max;
 
-    /* corner 2 is the north-west corner */
-    /* corner 4 is the south-east corner */
+    /* corner 1 is the north-west corner */
+    /* corner 3 is the south-east corner */
 
-    theta_min = E->trace.theta_cap[icap][2];
-    theta_max = E->trace.theta_cap[icap][4];
+    theta_min = E->trace.boundaries[icap].spherical_boundary[1]._theta;
+    theta_max = E->trace.boundaries[icap].spherical_boundary[3]._theta;
 
-    phi_min = E->trace.phi_cap[icap][2];
-    phi_max = E->trace.phi_cap[icap][4];
+    phi_min = E->trace.boundaries[icap].spherical_boundary[1]._phi;
+    phi_max = E->trace.boundaries[icap].spherical_boundary[3]._phi;
 
     if ((sc._theta >= theta_min) && (sc._theta < theta_max) &&
         (sc._phi >= phi_min) && (sc._phi < phi_max))
@@ -895,20 +895,18 @@ static void put_found_tracers(struct All_variables *E,
 {
     int kk, pp;
     int ipos, ilast, inside, iel;
-    double theta, phi, rad;
-	Tracer new_tracer;
+	SphericalCoord	sc;
+	Tracer			new_tracer;
 
     for (kk=0; kk<recv_size; kk++) {
         ipos = kk * new_tracer.size();
-        theta = recv[ipos];
-        phi = recv[ipos + 1];
-        rad = recv[ipos + 2];
+		sc.readFromMem(&recv[ipos]);
 
         /* check whether this tracer is inside this proc */
         /* check radius first, since it is cheaper       */
-        inside = icheck_processor_shell(E, j, rad);
+        inside = icheck_processor_shell(E, j, sc._rad);
         if (inside == 1)
-            inside = regional_icheck_cap(E, 0, SphericalCoord(theta, phi, rad), rad);
+            inside = regional_icheck_cap(E, 0, sc, sc._rad);
         else
             inside = 0;
 
@@ -924,13 +922,13 @@ static void put_found_tracers(struct All_variables *E,
 			new_tracer.readFromMem(&recv[ipos]);
 
             /* found the element */
-            iel = regional_iget_element(E, j, -99, CartesianCoord(0, 0, 0), SphericalCoord(theta, phi, rad));
+            iel = regional_iget_element(E, j, -99, CartesianCoord(0, 0, 0), sc);
 
             if (iel<1) {
                 fprintf(E->trace.fpt, "Error(regional lost souls) - "
                         "element not here?\n");
                 fprintf(E->trace.fpt, "theta, phi, rad: %f %f %f\n",
-                        theta, phi, rad);
+                        sc._theta, sc._phi, sc._rad);
                 fflush(E->trace.fpt);
                 exit(10);
             }

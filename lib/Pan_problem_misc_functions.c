@@ -357,6 +357,7 @@ double return1_test()
    there's a double version of this in Tracer_setup called
    sphere_to_cart
 
+   ERIC TODO: see if these can be replaced by SphericalCoord
 */
 void rtp2xyzd(double r, double theta, double phi, double *xout)
 {

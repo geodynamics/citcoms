@@ -73,7 +73,20 @@ public:
 	
 	const CartesianCoord operator+(const CartesianCoord &other) const;
 	const CartesianCoord operator*(const double &val) const;
+	const CartesianCoord operator/(const double &val) const;
 	void operator=(const CartesianCoord &other) { _x = other._x; _y = other._y; _z = other._z; };
+};
+
+class CapBoundary {
+public:
+	CartesianCoord	cartesian_boundary[4];
+	SphericalCoord	spherical_boundary[4];
+	double			cos_theta[4];
+	double			sin_theta[4];
+	double			cos_phi[4];
+	double			sin_phi[4];
+	
+	void setBoundary(int bnum, CartesianCoord cc, SphericalCoord sc);
 };
 
 class Tracer {
@@ -199,19 +212,7 @@ struct TRACE{
 
 
     /* Mesh information */
-    double xcap[13][5];
-    double ycap[13][5];
-    double zcap[13][5];
-    double theta_cap[13][5];
-    double phi_cap[13][5];
-    double rad_cap[13][5];
-
-    double cos_theta[13][5];
-    double sin_theta[13][5];
-    double cos_phi[13][5];
-    double sin_phi[13][5];
-
-
+	CapBoundary	boundaries[13];
 
     /*********************/
     /* for globall model */

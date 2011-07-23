@@ -150,7 +150,7 @@ void full_coord_of_cap(struct All_variables *, int, int);
 void full_tracer_input(struct All_variables *);
 void full_tracer_setup(struct All_variables *);
 void full_lost_souls(struct All_variables *);
-void full_get_shape_functions(struct All_variables *, double [9], int, double, double, double);
+void full_get_shape_functions(struct All_variables *, double [9], int, SphericalCoord);
 double full_interpolate_data(struct All_variables *, double [9], double [9]);
 CartesianCoord full_get_velocity(struct All_variables *, int, int, SphericalCoord);
 int full_icheck_cap(struct All_variables *, int, CartesianCoord, double);
@@ -158,7 +158,7 @@ int full_iget_element(struct All_variables *, int, int, CartesianCoord, Spherica
 void full_keep_within_bounds(struct All_variables *, CartesianCoord &, SphericalCoord &);
 void analytical_test(struct All_variables *);
 void analytical_runge_kutte(struct All_variables *, int, double, double *, double *, double *, double *, double *);
-void analytical_test_function(struct All_variables *, double, double, double, double *, double *);
+void analytical_test_function(struct All_variables *, SphericalCoord, SphericalCoord &, CartesianCoord &);
 void pdebug(struct All_variables *, int);
 /* Full_version_dependent.c */
 void full_node_locations(struct All_variables *);
@@ -503,8 +503,6 @@ void tracer_advection(struct All_variables *);
 void tracer_post_processing(struct All_variables *);
 void count_tracers_of_flavors(struct All_variables *);
 void initialize_tracers(struct All_variables *);
-void cart_to_sphere(struct All_variables *, double, double, double, double *, double *, double *);
-void sphere_to_cart(struct All_variables *, double, double, double, double *, double *, double *);
 void get_neighboring_caps(struct All_variables *);
 void allocate_tracer_arrays(struct All_variables *, int, int);
 void expand_tracer_arrays(struct All_variables *, int);

@@ -78,12 +78,6 @@ static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
 int read_double_vector(FILE *, int , double *);
-void cart_to_sphere(struct All_variables *,
-                    double , double , double ,
-                    double *, double *, double *);
-void sphere_to_cart(struct All_variables *,
-                    double , double , double ,
-                    double *, double *, double *);
 int icheck_processor_shell(struct All_variables *,
                            int , double );
 
@@ -189,6 +183,13 @@ const CartesianCoord CartesianCoord::operator*(const double &val) const {
 						  this->_z*val);
 }
 
+// Divide each element by a constant factor
+const CartesianCoord CartesianCoord::operator/(const double &val) const {
+	return CartesianCoord(	this->_x/val,
+						  this->_y/val,
+						  this->_z/val);
+}
+
 
 // Returns a constrained angle between 0 and 2 PI
 double SphericalCoord::constrainAngle(const double angle) const {
@@ -207,6 +208,16 @@ void SphericalCoord::constrainThetaPhi(void) {
 	_phi = constrainAngle(_phi);
 }
 
+
+void CapBoundary::setBoundary(int bnum, CartesianCoord cc, SphericalCoord sc) {
+	assert(bnum>=0 && bnum < 4);
+	cartesian_boundary[bnum] = cc;
+	spherical_boundary[bnum] = sc;
+	cos_theta[bnum] = cos(sc._theta);
+	sin_theta[bnum] = sin(sc._theta);
+	cos_phi[bnum] = cos(sc._phi);
+	sin_phi[bnum] = sin(sc._phi);
+}
 
 
 void tracer_input(struct All_variables *E)
@@ -579,7 +590,7 @@ static void find_tracers(struct All_variables *E)
             iprevious_element=tr->ielement();
 
             iel=(E->trace.iget_element)(E,j,iprevious_element,cc,sc);
-            /* debug *
+            ///* debug *
             fprintf(E->trace.fpt,"BB. kk %d %d %d %f %f %f %f %f %f\n",
 					j,iprevious_element,iel,cc._x,cc._y,cc._z,sc._theta,sc._phi,sc._rad);
             fflush(E->trace.fpt);
@@ -984,8 +995,6 @@ static void read_old_tracer_file(struct All_variables *E)
     double x,y,z;
     double buffer[100];
 
-    void sphere_to_cart();
-
     FILE *fp1;
 
     /* deal with different output formats */
@@ -1143,46 +1152,6 @@ static int isum_tracers(struct All_variables *E)
 
 
 
-/********** CART TO SPHERE ***********************/
-void cart_to_sphere(struct All_variables *E,
-                    double x, double y, double z,
-                    double *theta, double *phi, double *rad)
-{
-
-    double temp;
-
-    temp=x*x+y*y;
-
-    *rad=sqrt(temp+z*z);
-    *theta=atan2(sqrt(temp),z);
-    *phi=myatan(y,x);
-
-    return;
-}
-
-/********** SPHERE TO CART ***********************/
-void sphere_to_cart(struct All_variables *E,
-                    double theta, double phi, double rad,
-                    double *x, double *y, double *z)
-{
-
-    double sint,cost,sinf,cosf;
-    double temp;
-
-    sint=sin(theta);
-    cost=cos(theta);
-    sinf=sin(phi);
-    cosf=cos(phi);
-
-    temp=rad*sint;
-
-    *x=temp*cosf;
-    *y=temp*sinf;
-    *z=rad*cost;
-
-    return;
-}
-
 static void init_tracer_flavors(struct All_variables *E)
 {
     int						j, kk, i;
@@ -1242,8 +1211,6 @@ static void init_tracer_flavors(struct All_variables *E)
 
 void get_neighboring_caps(struct All_variables *E)
 {
-    void sphere_to_cart();
-
     const int ncorners = 4; /* # of top corner nodes */
     int i, j, n, d, kk, lev, idb;
     int num_ngb, neighbor_proc, tag;
@@ -1308,23 +1275,18 @@ void get_neighboring_caps(struct All_variables *E)
          */
         for (kk=0; kk<=num_ngb; kk++) {
             n = 0;
-            for (i=1; i<=ncorners; i++) {
+            for (i=0; i<ncorners; i++) {
+				SphericalCoord	sc;
+				CartesianCoord	cc;
+				
                 theta = rr[kk][n++];
                 phi = rr[kk][n++];
                 rad = E->sphere.ro;
-
-                sphere_to_cart(E, theta, phi, rad, &x, &y, &z);
-
-                E->trace.xcap[kk][i] = x;
-                E->trace.ycap[kk][i] = y;
-                E->trace.zcap[kk][i] = z;
-                E->trace.theta_cap[kk][i] = theta;
-                E->trace.phi_cap[kk][i] = phi;
-                E->trace.rad_cap[kk][i] = rad;
-                E->trace.cos_theta[kk][i] = cos(theta);
-                E->trace.sin_theta[kk][i] = sin(theta);
-                E->trace.cos_phi[kk][i] = cos(phi);
-                E->trace.sin_phi[kk][i] = sin(phi);
+				
+				sc = SphericalCoord(theta, phi, rad);
+				cc = sc.toCartesian();
+				
+				E->trace.boundaries[kk].setBoundary(i, cc, sc);
             }
         } /* end kk, number of neighbors */
 
