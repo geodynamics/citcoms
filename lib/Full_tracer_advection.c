@@ -34,11 +34,11 @@
 #include "composition_related.h"
 
 static void get_2dshape(struct All_variables *E,
-                        int j, int nelem,
+                        int j, ElementID nelem,
                         double u, double v,
                         int iwedge, double * shape2d);
 static void get_radial_shape(struct All_variables *E,
-                             int j, int nelem,
+                             int j, ElementID nelem,
                              double rad, double *shaperad);
 static void spherical_to_uv(struct All_variables *E, int j,
                             double theta, double phi,
@@ -46,7 +46,7 @@ static void spherical_to_uv(struct All_variables *E, int j,
 static void make_regular_grid(struct All_variables *E);
 static void write_trace_instructions(struct All_variables *E);
 static int icheck_column_neighbors(struct All_variables *E,
-                                   int j, int nel,
+                                   int j, ElementID nel,
                                    CartesianCoord cc,
                                    double rad);
 static int icheck_all_columns(struct All_variables *E,
@@ -54,25 +54,21 @@ static int icheck_all_columns(struct All_variables *E,
                               CartesianCoord cc,
                               double rad);
 static int icheck_element(struct All_variables *E,
-                          int j, int nel,
+                          int j, ElementID nel,
                           CartesianCoord cc,
                           double rad);
 static int icheck_shell(struct All_variables *E,
-                        int nel, double rad);
+                        ElementID nel, double rad);
 static int icheck_element_column(struct All_variables *E,
-                                 int j, int nel,
+                                 int j, ElementID nel,
                                  CartesianCoord cc,
                                  double rad);
 static int icheck_bounds(struct All_variables *E,
                          CartesianCoord test_point,
-                         double *rnode1, double *rnode2,
-                         double *rnode3, double *rnode4);
-static double findradial(struct All_variables *E, CartesianCoord vec,
+                         const CapBoundary bounds);
+static double findradial(CartesianCoord vec,
                          double cost, double sint,
                          double cosf, double sinf);
-CartesianCoord makevector(double xf, double yf, double zf,
-                       double x0, double y0, double z0);
-CartesianCoord crossit(CartesianCoord A, CartesianCoord B);
 static void fix_radius(struct All_variables *E,
                        SphericalCoord &sc,
                        CartesianCoord &cc);
@@ -99,7 +95,6 @@ void full_tracer_input(struct All_variables *E)
 {
     int m = E->parallel.me;
 
-
     /* Regular grid parameters */
     /* (first fill uniform del[0] value) */
     /* (later, in make_regular_grid, will adjust and distribute to caps */
@@ -109,15 +104,11 @@ void full_tracer_input(struct All_variables *E)
     input_double("regular_grid_deltheta",&(E->trace.deltheta[0]),"1.0",m);
     input_double("regular_grid_delphi",&(E->trace.delphi[0]),"1.0",m);
 
-
     /* Analytical Test Function */
 
     E->trace.ianalytical_tracer_test=0;
     /* input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
               "0,0,nomax",m); */
-
-
-    return;
 }
 
 /***** FULL TRACER SETUP ************************/
@@ -126,9 +117,6 @@ void full_tracer_setup(struct All_variables *E)
 {
 
     char output_file[200];
-    void get_neighboring_caps();
-    void analytical_test();
-    double CPU_time0();
     double begin_time = CPU_time0();
 
     /* Some error control */
@@ -235,9 +223,6 @@ void full_lost_souls(struct All_variables *E)
     double *receive_z[13][3];
     double *REC[13];
 
-    int icheck_that_processor_shell();
-
-    double CPU_time0();
     double begin_time = CPU_time0();
 
     int number_of_caps=12;
@@ -478,7 +463,6 @@ void full_lost_souls(struct All_variables *E)
             }
         }
 
-
         for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
 
             ithat_processor=E->parallel.PROCESSORz[lev].pass[ivertical_neighbor];
@@ -514,7 +498,7 @@ void full_lost_souls(struct All_variables *E)
 
                     ilast_receiver_position=(irec[j]-1)*temp_tracer.size();
 
-                    for (mm=0;mm<=(temp_tracer.size()-1);mm++) {
+                    for (mm=0;mm<temp_tracer.size();mm++) {
                         ipos=ireceive_position+mm;
                         ipos2=isend_position+mm;
 
@@ -703,7 +687,6 @@ void full_lost_souls(struct All_variables *E)
     }
 
     E->trace.lost_souls_time += CPU_time0() - begin_time;
-    return;
 }
 
 
@@ -764,8 +747,6 @@ static void full_put_lost_tracers(struct All_variables *E,
     } /* end kk, assigning tracers */
 
 	E->trace.escaped_tracers[j].clear();
-	
-    return;
 }
 
 /************************ GET SHAPE FUNCTION *********************************/
@@ -798,7 +779,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 /*         6        7               6            8                           */
 
 void full_get_shape_functions(struct All_variables *E,
-                              double shp[9], int nelem,
+                              double shp[9], ElementID nelem,
                               SphericalCoord sc)
 {
     const int j = 1;
@@ -958,7 +939,7 @@ double full_interpolate_data(struct All_variables *E,
 /*         6        7               6            8                           */
 
 CartesianCoord full_get_velocity(struct All_variables *E,
-                       int j, int nelem,
+                       int j, ElementID nelem,
                        SphericalCoord sc)
 {
     int iwedge;
@@ -1036,7 +1017,7 @@ CartesianCoord full_get_velocity(struct All_variables *E,
 /* van Steenhoven, 1986).                                      */
 
 static void get_2dshape(struct All_variables *E,
-                        int j, int nelem,
+                        int j, ElementID nelem,
                         double u, double v,
                         int iwedge, double * shape2d)
 {
@@ -1083,7 +1064,7 @@ static void get_2dshape(struct All_variables *E,
 /* This function determines radial shape functions at rad      */
 
 static void get_radial_shape(struct All_variables *E,
-                             int j, int nelem,
+                             int j, ElementID nelem,
                              double rad, double *shaperad)
 {
 
@@ -1187,7 +1168,6 @@ static void spherical_to_uv(struct All_variables *E, int j,
 
 static void make_regular_grid(struct All_variables *E)
 {
-
     int j;
     int kk;
     int mm;
@@ -1211,7 +1191,7 @@ static void make_regular_grid(struct All_variables *E)
     int iregel;
     int istat_ichoice[13][5];
     int isum;
-
+	
     double x,y,z;
     double theta,phi,rad;
     double deltheta;
@@ -1223,18 +1203,18 @@ static void make_regular_grid(struct All_variables *E)
     double theta_max,phi_max;
     double half_diff;
     double expansion;
-
+	
     double *tmin;
     double *tmax;
     double *fmin;
     double *fmax;
-
+	
     const double two_pi=2.0*M_PI;
-
+	
     elz=E->lmesh.elz;
-
+	
     nelsurf=E->lmesh.elx*E->lmesh.ely;
-
+	
     //TODO: find the bounding box of the mesh, if the box is too close to
     // to core, set a flag (rotated_reggrid) to true and rotate the
     // bounding box to the equator. Generate the regular grid with the new
@@ -1242,579 +1222,576 @@ static void make_regular_grid(struct All_variables *E)
     // (theta, phi) -> (??)
     // Whenever the regular grid is used, check the flat (rotated_reggrid),
     // if true, rotate the checkpoint as well.
-
+	
     /* note, mesh is rotated along theta 22.5 degrees divided by elx. */
     /* We at least want that much expansion here! Otherwise, theta min */
     /* will not be valid near poles. We do a little more (x2) to be safe */
     /* Typically 1-2 degrees. Look in nodal_mesh.c for this.             */
-
+	
     expansion=2.0*0.5*(M_PI/4.0)/(1.0*E->lmesh.elx);
-
+	
     start_time=CPU_time0();
-
+	
     if (E->parallel.me==0) fprintf(stderr,"Generating Regular Grid\n");
-
-
+	
+	
     /* for each cap, determine theta and phi bounds, watch out near poles  */
-
+	
     numregnodes=0;
     for(j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-
-            thetamax=0.0;
-            thetamin=M_PI;
-
-            phimax=two_pi;
-            phimin=0.0;
-
-            for (kk=1;kk<=E->lmesh.nno;kk=kk+E->lmesh.noz)
-                {
-
-                    theta=E->sx[j][1][kk];
-                    phi=E->sx[j][2][kk];
-
-                    thetamax=citmax(thetamax,theta);
-                    thetamin=citmin(thetamin,theta);
-
-                }
-
-            /* expand range slightly (should take care of poles)  */
-
-            thetamax=thetamax+expansion;
-            thetamax=citmin(thetamax,M_PI);
-
-            thetamin=thetamin-expansion;
-            thetamin=citmax(thetamin,0.0);
-
-            /* Convert input data from degrees to radians  */
-
-            deltheta=E->trace.deltheta[0]*M_PI/180.0;
-            delphi=E->trace.delphi[0]*M_PI/180.0;
-
-
-            /* Adjust deltheta and delphi to fit a uniform number of regular elements */
-
-            numtheta=fabs(thetamax-thetamin)/deltheta;
-            numphi=fabs(phimax-phimin)/delphi;
-            nodestheta=numtheta+1;
-            nodesphi=numphi+1;
-            numregel=numtheta*numphi;
-            numregnodes=nodestheta*nodesphi;
-
-            if ((numtheta==0)||(numphi==0))
-                {
-                    fprintf(E->trace.fpt,"Error(make_regular_grid): numtheta: %d numphi: %d\n",numtheta,numphi);
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-
-            deltheta=fabs(thetamax-thetamin)/(1.0*numtheta);
-            delphi=fabs(phimax-phimin)/(1.0*numphi);
-
-            /* fill global variables */
-
-            E->trace.deltheta[j]=deltheta;
-            E->trace.delphi[j]=delphi;
-            E->trace.numtheta[j]=numtheta;
-            E->trace.numphi[j]=numphi;
-            E->trace.thetamax[j]=thetamax;
-            E->trace.thetamin[j]=thetamin;
-            E->trace.phimax[j]=phimax;
-            E->trace.phimin[j]=phimin;
-            E->trace.numregel[j]=numregel;
-            E->trace.numregnodes[j]=numregnodes;
-
-            if ( ((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)) < 0.5 )
-                {
-                    fprintf(E->trace.fpt,"\n ! WARNING: regular/real ratio low: %f ! \n",
-                            ((1.0*numregel)/(1.0*E->lmesh.nel)) );
-                    fprintf(E->trace.fpt," Should reduce size of regular mesh\n");
-                    fprintf(stderr,"! WARNING: regular/real ratio low: %f ! \n",
-                            ((1.0*numregel)/(1.0*E->lmesh.nel)) );
-                    fprintf(stderr," Should reduce size of regular mesh\n");
-                    fflush(E->trace.fpt);
-                    if (E->trace.itracer_warnings) exit(10);
-                }
-
-            /* print some output */
-
-            fprintf(E->trace.fpt,"\nRegular grid:\n");
-            fprintf(E->trace.fpt,"Theta min: %f max: %f \n",thetamin,thetamax);
-            fprintf(E->trace.fpt,"Phi min: %f max: %f \n",phimin,phimax);
-            fprintf(E->trace.fpt,"Adjusted deltheta: %f delphi: %f\n",deltheta,delphi);
-            fprintf(E->trace.fpt,"(numtheta: %d  numphi: %d)\n",numtheta,numphi);
-            fprintf(E->trace.fpt,"Number of regular elements: %d  (nodes: %d)\n",numregel,numregnodes);
-
-            fprintf(E->trace.fpt,"regular/real ratio: %f\n",((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)));
-            fflush(E->trace.fpt);
-
-            /* Allocate memory for regnodetoel */
-            /* Regtoel is an integer array which represents nodes on    */
-            /* the regular mesh. Each node on the regular mesh contains */
-            /* the real element value if one exists (-99 otherwise)     */
-
-
-
-            if ((E->trace.regnodetoel[j]=(int *)malloc((numregnodes+1)*sizeof(int)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(make regular) -no memory - uh3ud\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-
-
-            /* Initialize regnodetoel - reg elements not used =-99 */
-
-            for (kk=1;kk<=numregnodes;kk++)
-                {
-                    E->trace.regnodetoel[j][kk]=-99;
-                }
-
-            /* Begin Mapping (only need to use surface elements) */
-
-            parallel_process_sync(E);
-            if (E->parallel.me==0) fprintf(stderr,"Beginning Mapping\n");
-
-            /* Generate temporary arrays of max and min values for each surface element */
-
-
-            if ((tmin=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-            if ((tmax=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-            if ((fmin=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-            if ((fmax=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
-                {
-                    fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
-                    fflush(E->trace.fpt);
-                    exit(10);
-                }
-
-            for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
-                {
-
-                    kk=mm/elz;
-
-                    theta_min=M_PI;
-                    theta_max=0.0;
-                    phi_min=two_pi;
-                    phi_max=0.0;
-                    for (pp=1;pp<=4;pp++)
-                        {
-                            node=E->ien[j][mm].node[pp];
-                            theta=E->sx[j][1][node];
-                            phi=E->sx[j][2][node];
-
-                            theta_min=citmin(theta_min,theta);
-                            theta_max=citmax(theta_max,theta);
-                            phi_min=citmin(phi_min,phi);
-                            phi_max=citmax(phi_max,phi);
-                        }
-
-                    /* add half difference to phi and expansion to theta to be safe */
-
-                    theta_max=theta_max+expansion;
-                    theta_min=theta_min-expansion;
-
-                    theta_max=citmin(M_PI,theta_max);
-                    theta_min=citmax(0.0,theta_min);
-
-                    half_diff=0.5*(phi_max-phi_min);
-                    phi_max=phi_max+half_diff;
-                    phi_min=phi_min-half_diff;
-
-                    fix_angle(&phi_max);
-                    fix_angle(&phi_min);
-
-                    if (phi_min>phi_max)
-                        {
-                            phi_min=0.0;
-                            phi_max=two_pi;
-                        }
-
-                    tmin[kk]=theta_min;
-                    tmax[kk]=theta_max;
-                    fmin[kk]=phi_min;
-                    fmax[kk]=phi_max;
-                }
-
-            /* end looking through elements */
-
-            ifound_one=0;
-
-            rad=E->sphere.ro;
-
-            imap=0;
-
-            for (kk=1;kk<=numregnodes;kk++)
-                {
-                    E->trace.regnodetoel[j][kk]=-99;
-
-                    /* find theta and phi for a given regular node */
-
-                    idum1=(kk-1)/(numtheta+1);
-                    idum2=kk-1-idum1*(numtheta+1);
-
-                    theta=thetamin+(1.0*idum2*deltheta);
-                    phi=phimin+(1.0*idum1*delphi);
-
-					SphericalCoord		sc(theta,phi,rad);
-					CartesianCoord		cc;
-					
-					cc = sc.toCartesian();
-
-                    ilast_el=1;
-
-                    /* if previous element not found yet, check all surface elements */
-
-                    /*
-                      if (ifound_one==0)
-                      {
-                      for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
-                      {
-                      pp=mm/elz;
-                      if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
-                      {
-                      ival=icheck_element_column(E,j,mm,x,y,z,rad);
-                      if (ival>0)
-                      {
-                      ilast_el=mm;
-                      ifound_one++;
-                      E->trace.regnodetoel[j][kk]=mm;
-                      goto foundit;
-                      }
-                      }
-                      }
-                      goto foundit;
-                      }
-                    */
-
-                    /* first check previous element */
-
-                    ival=icheck_element_column(E,j,ilast_el,cc,rad);
-                    if (ival>0)
-                        {
-                            E->trace.regnodetoel[j][kk]=ilast_el;
-                            goto foundit;
-                        }
-
-                    /* check neighbors */
-
-                    ival=icheck_column_neighbors(E,j,ilast_el,cc,rad);
-                    if (ival>0)
-                        {
-                            E->trace.regnodetoel[j][kk]=ival;
-                            ilast_el=ival;
-                            goto foundit;
-                        }
-
-                    /* check all */
-
-                    for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
-                        {
-                            pp=mm/elz;
-                            if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
-                                {
-                                    ival=icheck_element_column(E,j,mm,cc,rad);
-                                    if (ival>0)
-                                        {
-                                            ilast_el=mm;
-                                            E->trace.regnodetoel[j][kk]=mm;
-                                            goto foundit;
-                                        }
-                                }
-                        }
-
-                foundit:
-
-                    if (E->trace.regnodetoel[j][kk]>0) imap++;
-
-                } /* end all regular nodes (kk) */
-
-            fprintf(E->trace.fpt,"percentage mapped: %f\n", (1.0*imap)/(1.0*numregnodes)*100.0);
-            fflush(E->trace.fpt);
-
-            /* free temporary arrays */
-
-            free(tmin);
-            free(tmax);
-            free(fmin);
-            free(fmax);
-
-        } /* end j */
-
-
+	{
+		
+		thetamax=0.0;
+		thetamin=M_PI;
+		
+		phimax=two_pi;
+		phimin=0.0;
+		
+		for (kk=1;kk<=E->lmesh.nno;kk=kk+E->lmesh.noz)
+		{
+			
+			theta=E->sx[j][1][kk];
+			phi=E->sx[j][2][kk];
+			
+			thetamax=citmax(thetamax,theta);
+			thetamin=citmin(thetamin,theta);
+			
+		}
+		
+		/* expand range slightly (should take care of poles)  */
+		
+		thetamax=thetamax+expansion;
+		thetamax=citmin(thetamax,M_PI);
+		
+		thetamin=thetamin-expansion;
+		thetamin=citmax(thetamin,0.0);
+		
+		/* Convert input data from degrees to radians  */
+		
+		deltheta=E->trace.deltheta[0]*M_PI/180.0;
+		delphi=E->trace.delphi[0]*M_PI/180.0;
+		
+		
+		/* Adjust deltheta and delphi to fit a uniform number of regular elements */
+		
+		numtheta=fabs(thetamax-thetamin)/deltheta;
+		numphi=fabs(phimax-phimin)/delphi;
+		nodestheta=numtheta+1;
+		nodesphi=numphi+1;
+		numregel=numtheta*numphi;
+		numregnodes=nodestheta*nodesphi;
+		
+		if ((numtheta==0)||(numphi==0))
+		{
+			fprintf(E->trace.fpt,"Error(make_regular_grid): numtheta: %d numphi: %d\n",numtheta,numphi);
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		
+		deltheta=fabs(thetamax-thetamin)/(1.0*numtheta);
+		delphi=fabs(phimax-phimin)/(1.0*numphi);
+		
+		/* fill global variables */
+		
+		E->trace.deltheta[j]=deltheta;
+		E->trace.delphi[j]=delphi;
+		E->trace.numtheta[j]=numtheta;
+		E->trace.numphi[j]=numphi;
+		E->trace.thetamax[j]=thetamax;
+		E->trace.thetamin[j]=thetamin;
+		E->trace.phimax[j]=phimax;
+		E->trace.phimin[j]=phimin;
+		E->trace.numregel[j]=numregel;
+		E->trace.numregnodes[j]=numregnodes;
+		
+		if ( ((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)) < 0.5 )
+		{
+			fprintf(E->trace.fpt,"\n ! WARNING: regular/real ratio low: %f ! \n",
+					((1.0*numregel)/(1.0*E->lmesh.nel)) );
+			fprintf(E->trace.fpt," Should reduce size of regular mesh\n");
+			fprintf(stderr,"! WARNING: regular/real ratio low: %f ! \n",
+					((1.0*numregel)/(1.0*E->lmesh.nel)) );
+			fprintf(stderr," Should reduce size of regular mesh\n");
+			fflush(E->trace.fpt);
+			if (E->trace.itracer_warnings) exit(10);
+		}
+		
+		/* print some output */
+		
+		fprintf(E->trace.fpt,"\nRegular grid:\n");
+		fprintf(E->trace.fpt,"Theta min: %f max: %f \n",thetamin,thetamax);
+		fprintf(E->trace.fpt,"Phi min: %f max: %f \n",phimin,phimax);
+		fprintf(E->trace.fpt,"Adjusted deltheta: %f delphi: %f\n",deltheta,delphi);
+		fprintf(E->trace.fpt,"(numtheta: %d  numphi: %d)\n",numtheta,numphi);
+		fprintf(E->trace.fpt,"Number of regular elements: %d  (nodes: %d)\n",numregel,numregnodes);
+		
+		fprintf(E->trace.fpt,"regular/real ratio: %f\n",((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)));
+		fflush(E->trace.fpt);
+		
+		/* Allocate memory for regnodetoel */
+		/* Regtoel is an integer array which represents nodes on    */
+		/* the regular mesh. Each node on the regular mesh contains */
+		/* the real element value if one exists (-99 otherwise)     */
+		
+		
+		
+		if ((E->trace.regnodetoel[j]=(int *)malloc((numregnodes+1)*sizeof(int)))==NULL)
+		{
+			fprintf(E->trace.fpt,"ERROR(make regular) -no memory - uh3ud\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		
+		
+		/* Initialize regnodetoel - reg elements not used =-99 */
+		
+		for (kk=1;kk<=numregnodes;kk++)
+		{
+			E->trace.regnodetoel[j][kk]=-99;
+		}
+		
+		/* Begin Mapping (only need to use surface elements) */
+		
+		parallel_process_sync(E);
+		if (E->parallel.me==0) fprintf(stderr,"Beginning Mapping\n");
+		
+		/* Generate temporary arrays of max and min values for each surface element */
+		
+		
+		if ((tmin=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+		{
+			fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		if ((tmax=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+		{
+			fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		if ((fmin=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+		{
+			fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		if ((fmax=(double *)malloc((nelsurf+1)*sizeof(double)))==NULL)
+		{
+			fprintf(E->trace.fpt,"ERROR(make regular) -no memory - 7t1a\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
+		
+		for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
+		{
+			
+			kk=mm/elz;
+			
+			theta_min=M_PI;
+			theta_max=0.0;
+			phi_min=two_pi;
+			phi_max=0.0;
+			for (pp=1;pp<=4;pp++)
+			{
+				node=E->ien[j][mm].node[pp];
+				theta=E->sx[j][1][node];
+				phi=E->sx[j][2][node];
+				
+				theta_min=citmin(theta_min,theta);
+				theta_max=citmax(theta_max,theta);
+				phi_min=citmin(phi_min,phi);
+				phi_max=citmax(phi_max,phi);
+			}
+			
+			/* add half difference to phi and expansion to theta to be safe */
+			
+			theta_max=theta_max+expansion;
+			theta_min=theta_min-expansion;
+			
+			theta_max=citmin(M_PI,theta_max);
+			theta_min=citmax(0.0,theta_min);
+			
+			half_diff=0.5*(phi_max-phi_min);
+			phi_max=phi_max+half_diff;
+			phi_min=phi_min-half_diff;
+			
+			fix_angle(&phi_max);
+			fix_angle(&phi_min);
+			
+			if (phi_min>phi_max)
+			{
+				phi_min=0.0;
+				phi_max=two_pi;
+			}
+			
+			tmin[kk]=theta_min;
+			tmax[kk]=theta_max;
+			fmin[kk]=phi_min;
+			fmax[kk]=phi_max;
+		}
+		
+		/* end looking through elements */
+		
+		ifound_one=0;
+		
+		rad=E->sphere.ro;
+		
+		imap=0;
+		
+		for (kk=1;kk<=numregnodes;kk++)
+		{
+			E->trace.regnodetoel[j][kk]=-99;
+			
+			/* find theta and phi for a given regular node */
+			
+			idum1=(kk-1)/(numtheta+1);
+			idum2=kk-1-idum1*(numtheta+1);
+			
+			theta=thetamin+(1.0*idum2*deltheta);
+			phi=phimin+(1.0*idum1*delphi);
+			
+			SphericalCoord		sc(theta,phi,rad);
+			CartesianCoord		cc;
+			
+			cc = sc.toCartesian();
+			
+			ilast_el=1;
+			
+			/* if previous element not found yet, check all surface elements */
+			
+			/*
+			 if (ifound_one==0)
+			 {
+			 for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
+			 {
+			 pp=mm/elz;
+			 if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
+			 {
+			 ival=icheck_element_column(E,j,mm,x,y,z,rad);
+			 if (ival>0)
+			 {
+			 ilast_el=mm;
+			 ifound_one++;
+			 E->trace.regnodetoel[j][kk]=mm;
+			 goto foundit;
+			 }
+			 }
+			 }
+			 goto foundit;
+			 }
+			 */
+			
+			/* first check previous element */
+			
+			ival=icheck_element_column(E,j,ilast_el,cc,rad);
+			if (ival>0)
+			{
+				E->trace.regnodetoel[j][kk]=ilast_el;
+				goto foundit;
+			}
+			
+			/* check neighbors */
+			
+			ival=icheck_column_neighbors(E,j,ilast_el,cc,rad);
+			if (ival>0)
+			{
+				E->trace.regnodetoel[j][kk]=ival;
+				ilast_el=ival;
+				goto foundit;
+			}
+			
+			/* check all */
+			
+			for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
+			{
+				pp=mm/elz;
+				if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
+				{
+					ival=icheck_element_column(E,j,mm,cc,rad);
+					if (ival>0)
+					{
+						ilast_el=mm;
+						E->trace.regnodetoel[j][kk]=mm;
+						goto foundit;
+					}
+				}
+			}
+			
+		foundit:
+			
+			if (E->trace.regnodetoel[j][kk]>0) imap++;
+			
+		} /* end all regular nodes (kk) */
+		
+		fprintf(E->trace.fpt,"percentage mapped: %f\n", (1.0*imap)/(1.0*numregnodes)*100.0);
+		fflush(E->trace.fpt);
+		
+		/* free temporary arrays */
+		
+		free(tmin);
+		free(tmax);
+		free(fmin);
+		free(fmax);
+		
+	} /* end j */
+	
+	
     /* some error control */
-
+	
     for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-            for (kk=1;kk<=numregnodes;kk++)
-                {
-
-                    if (E->trace.regnodetoel[j][kk]!=-99)
-                        {
-                            if ( (E->trace.regnodetoel[j][kk]<1)||(E->trace.regnodetoel[j][kk]>E->lmesh.nel) )
-                                {
-                                    fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[j][kk]);
-                                    fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[j][kk]);
-                                    fflush(E->trace.fpt);
-                                    fflush(stderr);
-                                    exit(10);
-                                }
-                        }
-                }
-        }
-
-
+	{
+		for (kk=1;kk<=numregnodes;kk++)
+		{
+			
+			if (E->trace.regnodetoel[j][kk]!=-99)
+			{
+				if ( (E->trace.regnodetoel[j][kk]<1)||(E->trace.regnodetoel[j][kk]>E->lmesh.nel) )
+				{
+					fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[j][kk]);
+					fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[j][kk]);
+					fflush(E->trace.fpt);
+					fflush(stderr);
+					exit(10);
+				}
+			}
+		}
+	}
+	
+	
     /* Now put regnodetoel information into regtoel */
-
-
+	
+	
     if (E->parallel.me==0) fprintf(stderr,"Beginning Regtoel submapping \n");
-
+	
     /* AKMA decided it would be more efficient to have reg element choice array */
     /* rather than reg node array as used before          */
-
-
+	
+	
     for(j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-
-            /* initialize statistical counter */
-
-            for (pp=0;pp<=4;pp++) istat_ichoice[j][pp]=0;
-
-            /* Allocate memory for regtoel */
-            /* Regtoel consists of 4 positions for each regular element */
-            /* Position[0] lists the number of element choices (later   */
-            /* referred to as ichoice), followed                        */
-            /* by the possible element choices.                          */
-            /* ex.) A regular element has 4 nodes. Each node resides in  */
-            /* a real element. The number of real elements a regular     */
-            /* element touches (one of its nodes are in) is ichoice.     */
-            /* Special ichoice notes:                                    */
-            /*    ichoice=-1   all regular element nodes = -99 (no elements) */
-            /*    ichoice=0    all 4 corners within one element              */
-            /*    ichoice=1     one element choice (diff from ichoice 0 in    */
-            /*                  that perhaps one reg node is in an element    */
-            /*                  and the rest are not (-99).                   */
-            /*    ichoice>1     Multiple elements to check                    */
-
-            numregel= E->trace.numregel[j];
-
-            for (pp=0;pp<=4;pp++)
-                {
-                    if ((E->trace.regtoel[j][pp]=(int *)malloc((numregel+1)*sizeof(int)))==NULL)
-                        {
-                            fprintf(E->trace.fpt,"ERROR(make regular)-no memory 98d (%d %d %d)\n",pp,numregel,j);
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-                }
-
-            numtheta=E->trace.numtheta[j];
-            numphi=E->trace.numphi[j];
-
-            for (nphi=1;nphi<=numphi;nphi++)
-                {
-                    for (ntheta=1;ntheta<=numtheta;ntheta++)
-                        {
-
-                            iregel=ntheta+(nphi-1)*numtheta;
-
-                            /* initialize regtoel (not necessary really) */
-
-                            for (pp=0;pp<=4;pp++) E->trace.regtoel[j][pp][iregel]=-33;
-
-                            if ( (iregel>numregel)||(iregel<1) )
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(make_regular_grid)-weird iregel: %d (max: %d)\n",iregel,numregel);
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-
-                            iregnode[1]=iregel+(nphi-1);
-                            iregnode[2]=iregel+nphi;
-                            iregnode[3]=iregel+nphi+E->trace.numtheta[j]+1;
-                            iregnode[4]=iregel+nphi+E->trace.numtheta[j];
-
-                            for (kk=1;kk<=4;kk++)
-                                {
-                                    if ((iregnode[kk]<1)||(iregnode[kk]>numregnodes))
-                                        {
-                                            fprintf(E->trace.fpt,"ERROR(make regular)-bad regnode %d\n",iregnode[kk]);
-                                            fflush(E->trace.fpt);
-                                            exit(10);
-                                        }
-                                    if (E->trace.regnodetoel[j][iregnode[kk]]>E->lmesh.nel)
-                                        {
-                                            fprintf(E->trace.fpt,"AABB HERE %d %d %d %d\n",iregel,iregnode[kk],kk,E->trace.regnodetoel[j][iregnode[kk]]);
-                                            fflush(E->trace.fpt);
-                                        }
-                                }
-
-
-                            /* find number of choices */
-
-                            ichoice=0;
-                            icount=0;
-
-                            for (kk=1;kk<=4;kk++)
-                                {
-
-                                    if (E->trace.regnodetoel[j][iregnode[kk]]<=0) goto next_corner;
-
-                                    icount++;
-                                    for (pp=1;pp<=(kk-1);pp++)
-                                        {
-                                            if (E->trace.regnodetoel[j][iregnode[kk]]==E->trace.regnodetoel[j][iregnode[pp]]) goto next_corner;
-                                        }
-                                    ichoice++;
-                                    itemp[ichoice]=E->trace.regnodetoel[j][iregnode[kk]];
-
-                                    if ((ichoice<0) || (ichoice>4) )
-                                        {
-                                            fprintf(E->trace.fpt,"ERROR(make regular) - weird ichoice %d \n",ichoice);
-                                            fflush(E->trace.fpt);
-                                            exit(10);
-                                        }
-                                    if ((itemp[ichoice]<0) || (itemp[ichoice]>E->lmesh.nel) )
-                                        {
-                                            fprintf(E->trace.fpt,"ERROR(make regular) - weird element choice %d %d\n",itemp[ichoice],ichoice);
-                                            fflush(E->trace.fpt);
-                                            exit(10);
-                                        }
-
-                                next_corner:
-                                    ;
-                                } /* end kk */
-
-                            istat_ichoice[j][ichoice]++;
-
-                            if ((ichoice<0) || (ichoice>4))
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(make_regular)-wierd ichoice %d\n",ichoice);
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-
-                            if (ichoice==0)
-                                {
-                                    E->trace.regtoel[j][0][iregel]=-1;
-                                    /*
-                                      fprintf(E->trace.fpt,"HH1: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[j][1][iregel],iregel,ichoice,E->trace.regtoel[j][0][iregel],E->trace.regtoel[j][1][iregel]);
-                                    */
-                                }
-                            else if ( (ichoice==1) && (icount==4) )
-                                {
-                                    E->trace.regtoel[j][0][iregel]=0;
-                                    E->trace.regtoel[j][1][iregel]=itemp[1];
-
-                                    /*
-                                      fprintf(E->trace.fpt,"HH2: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[j][1][iregel],iregel,ichoice,E->trace.regtoel[j][0][iregel],E->trace.regtoel[j][1][iregel]);
-                                    */
-
-                                    if (itemp[1]<1 || itemp[1]>E->lmesh.nel)
-                                        {
-                                            fprintf(E->trace.fpt,"ERROR(make_regular)-huh? wierd itemp\n");
-                                            fflush(E->trace.fpt);
-                                            exit(10);
-                                        }
-                                }
-                            else if ( (ichoice>0) && (ichoice<5) )
-                                {
-                                    E->trace.regtoel[j][0][iregel]=ichoice;
-                                    for (pp=1;pp<=ichoice;pp++)
-                                        {
-                                            E->trace.regtoel[j][pp][iregel]=itemp[pp];
-
-                                            /*
-                                              fprintf(E->trace.fpt,"HH:(%p)  iregel: %d ichoice: %d pp: %d value: %d %d\n",&E->trace.regtoel[j][pp][iregel],iregel,ichoice,pp,itemp[pp],E->trace.regtoel[j][pp][iregel]);
-                                            */
-                                            if (itemp[pp]<1 || itemp[pp]>E->lmesh.nel)
-                                                {
-                                                    fprintf(E->trace.fpt,"ERROR(make_regular)-huh? wierd itemp 2 \n");
-                                                    fflush(E->trace.fpt);
-                                                    exit(10);
-                                                }
-                                        }
-                                }
-                            else
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(make_regular)- should not be here! %d\n",ichoice);
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-                        }
-                }
-
-            /* can now free regnodetoel */
-
-            free (E->trace.regnodetoel[j]);
-
-
-            /* testing */
-            for (kk=1;kk<=E->trace.numregel[j];kk++)
-                {
-                    if ((E->trace.regtoel[j][0][kk]<-1)||(E->trace.regtoel[j][0][kk]>4))
-                        {
-                            fprintf(E->trace.fpt,"ERROR(make regular) regtoel ichoice0? %d %d \n",kk,E->trace.regtoel[j][pp][kk]);
-                            fflush(E->trace.fpt);
-                            exit(10);
-                        }
-                    for (pp=1;pp<=4;pp++)
-                        {
-                            if (((E->trace.regtoel[j][pp][kk]<1)&&(E->trace.regtoel[j][pp][kk]!=-33))||(E->trace.regtoel[j][pp][kk]>E->lmesh.nel))
-                                {
-                                    fprintf(E->trace.fpt,"ERROR(make regular) (%p) regtoel? %d %d(%d) %d\n",&E->trace.regtoel[j][pp][kk],kk,pp,E->trace.regtoel[j][0][kk],E->trace.regtoel[j][pp][kk]);
-                                    fflush(E->trace.fpt);
-                                    exit(10);
-                                }
-                        }
-                }
-
-        } /* end j */
-
-
+	{
+		
+		/* initialize statistical counter */
+		
+		for (pp=0;pp<=4;pp++) istat_ichoice[j][pp]=0;
+		
+		/* Allocate memory for regtoel */
+		/* Regtoel consists of 4 positions for each regular element */
+		/* Position[0] lists the number of element choices (later   */
+		/* referred to as ichoice), followed                        */
+		/* by the possible element choices.                          */
+		/* ex.) A regular element has 4 nodes. Each node resides in  */
+		/* a real element. The number of real elements a regular     */
+		/* element touches (one of its nodes are in) is ichoice.     */
+		/* Special ichoice notes:                                    */
+		/*    ichoice=-1   all regular element nodes = -99 (no elements) */
+		/*    ichoice=0    all 4 corners within one element              */
+		/*    ichoice=1     one element choice (diff from ichoice 0 in    */
+		/*                  that perhaps one reg node is in an element    */
+		/*                  and the rest are not (-99).                   */
+		/*    ichoice>1     Multiple elements to check                    */
+		
+		numregel= E->trace.numregel[j];
+		
+		for (pp=0;pp<=4;pp++)
+		{
+			if ((E->trace.regtoel[j][pp]=(int *)malloc((numregel+1)*sizeof(int)))==NULL)
+			{
+				fprintf(E->trace.fpt,"ERROR(make regular)-no memory 98d (%d %d %d)\n",pp,numregel,j);
+				fflush(E->trace.fpt);
+				exit(10);
+			}
+		}
+		
+		numtheta=E->trace.numtheta[j];
+		numphi=E->trace.numphi[j];
+		
+		for (nphi=1;nphi<=numphi;nphi++)
+		{
+			for (ntheta=1;ntheta<=numtheta;ntheta++)
+			{
+				
+				iregel=ntheta+(nphi-1)*numtheta;
+				
+				/* initialize regtoel (not necessary really) */
+				
+				for (pp=0;pp<=4;pp++) E->trace.regtoel[j][pp][iregel]=-33;
+				
+				if ( (iregel>numregel)||(iregel<1) )
+				{
+					fprintf(E->trace.fpt,"ERROR(make_regular_grid)-weird iregel: %d (max: %d)\n",iregel,numregel);
+					fflush(E->trace.fpt);
+					exit(10);
+				}
+				
+				iregnode[1]=iregel+(nphi-1);
+				iregnode[2]=iregel+nphi;
+				iregnode[3]=iregel+nphi+E->trace.numtheta[j]+1;
+				iregnode[4]=iregel+nphi+E->trace.numtheta[j];
+				
+				for (kk=1;kk<=4;kk++)
+				{
+					if ((iregnode[kk]<1)||(iregnode[kk]>numregnodes))
+					{
+						fprintf(E->trace.fpt,"ERROR(make regular)-bad regnode %d\n",iregnode[kk]);
+						fflush(E->trace.fpt);
+						exit(10);
+					}
+					if (E->trace.regnodetoel[j][iregnode[kk]]>E->lmesh.nel)
+					{
+						fprintf(E->trace.fpt,"AABB HERE %d %d %d %d\n",iregel,iregnode[kk],kk,E->trace.regnodetoel[j][iregnode[kk]]);
+						fflush(E->trace.fpt);
+					}
+				}
+				
+				
+				/* find number of choices */
+				
+				ichoice=0;
+				icount=0;
+				
+				for (kk=1;kk<=4;kk++)
+				{
+					
+					if (E->trace.regnodetoel[j][iregnode[kk]]<=0) goto next_corner;
+					
+					icount++;
+					for (pp=1;pp<=(kk-1);pp++)
+					{
+						if (E->trace.regnodetoel[j][iregnode[kk]]==E->trace.regnodetoel[j][iregnode[pp]]) goto next_corner;
+					}
+					ichoice++;
+					itemp[ichoice]=E->trace.regnodetoel[j][iregnode[kk]];
+					
+					if ((ichoice<0) || (ichoice>4) )
+					{
+						fprintf(E->trace.fpt,"ERROR(make regular) - weird ichoice %d \n",ichoice);
+						fflush(E->trace.fpt);
+						exit(10);
+					}
+					if ((itemp[ichoice]<0) || (itemp[ichoice]>E->lmesh.nel) )
+					{
+						fprintf(E->trace.fpt,"ERROR(make regular) - weird element choice %d %d\n",itemp[ichoice],ichoice);
+						fflush(E->trace.fpt);
+						exit(10);
+					}
+					
+				next_corner:
+					;
+				} /* end kk */
+				
+				istat_ichoice[j][ichoice]++;
+				
+				if ((ichoice<0) || (ichoice>4))
+				{
+					fprintf(E->trace.fpt,"ERROR(make_regular)-wierd ichoice %d\n",ichoice);
+					fflush(E->trace.fpt);
+					exit(10);
+				}
+				
+				if (ichoice==0)
+				{
+					E->trace.regtoel[j][0][iregel]=-1;
+					/*
+					 fprintf(E->trace.fpt,"HH1: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[j][1][iregel],iregel,ichoice,E->trace.regtoel[j][0][iregel],E->trace.regtoel[j][1][iregel]);
+					 */
+				}
+				else if ( (ichoice==1) && (icount==4) )
+				{
+					E->trace.regtoel[j][0][iregel]=0;
+					E->trace.regtoel[j][1][iregel]=itemp[1];
+					
+					/*
+					 fprintf(E->trace.fpt,"HH2: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[j][1][iregel],iregel,ichoice,E->trace.regtoel[j][0][iregel],E->trace.regtoel[j][1][iregel]);
+					 */
+					
+					if (itemp[1]<1 || itemp[1]>E->lmesh.nel)
+					{
+						fprintf(E->trace.fpt,"ERROR(make_regular)-huh? wierd itemp\n");
+						fflush(E->trace.fpt);
+						exit(10);
+					}
+				}
+				else if ( (ichoice>0) && (ichoice<5) )
+				{
+					E->trace.regtoel[j][0][iregel]=ichoice;
+					for (pp=1;pp<=ichoice;pp++)
+					{
+						E->trace.regtoel[j][pp][iregel]=itemp[pp];
+						
+						/*
+						 fprintf(E->trace.fpt,"HH:(%p)  iregel: %d ichoice: %d pp: %d value: %d %d\n",&E->trace.regtoel[j][pp][iregel],iregel,ichoice,pp,itemp[pp],E->trace.regtoel[j][pp][iregel]);
+						 */
+						if (itemp[pp]<1 || itemp[pp]>E->lmesh.nel)
+						{
+							fprintf(E->trace.fpt,"ERROR(make_regular)-huh? wierd itemp 2 \n");
+							fflush(E->trace.fpt);
+							exit(10);
+						}
+					}
+				}
+				else
+				{
+					fprintf(E->trace.fpt,"ERROR(make_regular)- should not be here! %d\n",ichoice);
+					fflush(E->trace.fpt);
+					exit(10);
+				}
+			}
+		}
+		
+		/* can now free regnodetoel */
+		
+		free (E->trace.regnodetoel[j]);
+		
+		
+		/* testing */
+		for (kk=1;kk<=E->trace.numregel[j];kk++)
+		{
+			if ((E->trace.regtoel[j][0][kk]<-1)||(E->trace.regtoel[j][0][kk]>4))
+			{
+				fprintf(E->trace.fpt,"ERROR(make regular) regtoel ichoice0? %d %d \n",kk,E->trace.regtoel[j][pp][kk]);
+				fflush(E->trace.fpt);
+				exit(10);
+			}
+			for (pp=1;pp<=4;pp++)
+			{
+				if (((E->trace.regtoel[j][pp][kk]<1)&&(E->trace.regtoel[j][pp][kk]!=-33))||(E->trace.regtoel[j][pp][kk]>E->lmesh.nel))
+				{
+					fprintf(E->trace.fpt,"ERROR(make regular) (%p) regtoel? %d %d(%d) %d\n",&E->trace.regtoel[j][pp][kk],kk,pp,E->trace.regtoel[j][0][kk],E->trace.regtoel[j][pp][kk]);
+					fflush(E->trace.fpt);
+					exit(10);
+				}
+			}
+		}
+		
+	} /* end j */
+	
+	
     fprintf(E->trace.fpt,"Mapping completed (%f seconds)\n",CPU_time0()-start_time);
     fflush(E->trace.fpt);
-
+	
     parallel_process_sync(E);
-
+	
     if (E->parallel.me==0) fprintf(stderr,"Mapping completed (%f seconds)\n",CPU_time0()-start_time);
-
+	
     /* Print out information regarding regular/real element coverage */
-
+	
     for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
-
-            isum=0;
-            for (kk=0;kk<=4;kk++) isum=isum+istat_ichoice[j][kk];
-            fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
-            fprintf(E->trace.fpt," (stats done on regular elements that were used)\n");
-            fprintf(E->trace.fpt,"Ichoice is number of real elements touched by a regular element\n");
-            fprintf(E->trace.fpt,"  (ichoice=0 is optimal)\n");
-            fprintf(E->trace.fpt,"Ichoice=0: %f percent\n",(100.0*istat_ichoice[j][0])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=1: %f percent\n",(100.0*istat_ichoice[j][1])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=2: %f percent\n",(100.0*istat_ichoice[j][2])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=3: %f percent\n",(100.0*istat_ichoice[j][3])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=4: %f percent\n",(100.0*istat_ichoice[j][4])/(1.0*isum));
-
-        } /* end j */
-
-
-    return;
+	{
+		
+		isum=0;
+		for (kk=0;kk<=4;kk++) isum=isum+istat_ichoice[j][kk];
+		fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
+		fprintf(E->trace.fpt," (stats done on regular elements that were used)\n");
+		fprintf(E->trace.fpt,"Ichoice is number of real elements touched by a regular element\n");
+		fprintf(E->trace.fpt,"  (ichoice=0 is optimal)\n");
+		fprintf(E->trace.fpt,"Ichoice=0: %f percent\n",(100.0*istat_ichoice[j][0])/(1.0*isum));
+		fprintf(E->trace.fpt,"Ichoice=1: %f percent\n",(100.0*istat_ichoice[j][1])/(1.0*isum));
+		fprintf(E->trace.fpt,"Ichoice=2: %f percent\n",(100.0*istat_ichoice[j][2])/(1.0*isum));
+		fprintf(E->trace.fpt,"Ichoice=3: %f percent\n",(100.0*istat_ichoice[j][3])/(1.0*isum));
+		fprintf(E->trace.fpt,"Ichoice=4: %f percent\n",(100.0*istat_ichoice[j][4])/(1.0*isum));
+		
+	} /* end j */
 }
 
 
@@ -1822,46 +1799,45 @@ static void make_regular_grid(struct All_variables *E)
 static void write_trace_instructions(struct All_variables *E)
 {
     int i;
-
+	
     fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
     fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
-
-    if (E->trace.ic_method==0)
-        {
-            fprintf(E->trace.fpt,"Generating New Tracer Array\n");
-            fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
-        }
-    if (E->trace.ic_method==1)
-        {
-            fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
-        }
-    if (E->trace.ic_method==2)
-        {
-            fprintf(E->trace.fpt,"Reading individual tracer files\n");
-        }
-
+	
+	switch (E->trace.ic_method) {
+		case 0:
+			fprintf(E->trace.fpt,"Generating New Tracer Array\n");
+			fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
+			break;
+		case 1:
+			fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
+			break;
+		case 2:
+			fprintf(E->trace.fpt,"Reading individual tracer files\n");
+			break;
+	}
+	
     fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
-
+	
     if (E->trace.nflavors && E->trace.ic_method==0) {
         fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
         if (E->trace.ic_method_for_flavors == 0) {
-	  /* default mode 0 */
+			/* default mode 0 */
             fprintf(E->trace.fpt,"Layered tracer flavors\n");
             for (i=0; i<E->trace.nflavors-1; i++)
                 fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
         }
 #ifdef USE_GGRD
-	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
-	  /* ggrd modes 1 and 99 (99  is override for restart) */
+		else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
+			/* ggrd modes 1 and 99 (99  is override for restart) */
             fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
-	    if( E->trace.ggrd_layers > 0)
-	      fprintf(E->trace.fpt,"file: %s top %i layers\n",E->trace.ggrd_file,
-		      E->trace.ggrd_layers);
-	    else
-	      fprintf(E->trace.fpt,"file: %s only layer %i\n",E->trace.ggrd_file,
-		      -E->trace.ggrd_layers);
- 
-	}
+			if( E->trace.ggrd_layers > 0)
+				fprintf(E->trace.fpt,"file: %s top %i layers\n",E->trace.ggrd_file,
+						E->trace.ggrd_layers);
+			else
+				fprintf(E->trace.fpt,"file: %s only layer %i\n",E->trace.ggrd_file,
+						-E->trace.ggrd_layers);
+			
+		}
 #endif
         else {
             fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
@@ -1869,7 +1845,7 @@ static void write_trace_instructions(struct All_variables *E)
             parallel_process_termination();
         }
     }
-
+	
     for (i=0; i<E->trace.nflavors-2; i++) {
         if (E->trace.z_interface[i] < E->trace.z_interface[i+1]) {
             fprintf(E->trace.fpt,"Sorry - The %d-th z_interface is smaller than the next one.\n", i);
@@ -1877,44 +1853,37 @@ static void write_trace_instructions(struct All_variables *E)
             parallel_process_termination();
         }
     }
-
-
-
+	
     /* regular grid stuff */
-
+	
     fprintf(E->trace.fpt,"Regular Grid-> deltheta: %f delphi: %f\n",
             E->trace.deltheta[0],E->trace.delphi[0]);
-
+	
     /* more obscure stuff */
-
+	
     fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
-    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
-            12); // ERIC: E->trace.number_of_basic_quantities);
-    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
-            1);  // ERIC: E->trace.number_of_extra_quantities);
-    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
-            13); // ERIC: E->trace.number_of_tracer_quantities);
-
-
+    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n", 12);
+    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n", 1);
+    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n", 13);
+	
     /* analytical test */
-
+	
     if (E->trace.ianalytical_tracer_test==1)
-        {
-            fprintf(E->trace.fpt,"\n\n ! Analytical Test Being Performed ! \n");
-            fprintf(E->trace.fpt,"(some of the above parameters may not be used or applied\n");
-            fprintf(E->trace.fpt,"Velocity functions given in main code\n");
-            fflush(E->trace.fpt);
-        }
-
+	{
+		fprintf(E->trace.fpt,"\n\n ! Analytical Test Being Performed ! \n");
+		fprintf(E->trace.fpt,"(some of the above parameters may not be used or applied\n");
+		fprintf(E->trace.fpt,"Velocity functions given in main code\n");
+		fflush(E->trace.fpt);
+	}
+	
     if (E->trace.itracer_warnings==0)
-        {
-            fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-            fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-            fflush(E->trace.fpt);
-        }
-
+	{
+		fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+		fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+		fflush(E->trace.fpt);
+	}
+	
     write_composition_instructions(E);
-    return;
 }
 
 
@@ -1924,33 +1893,32 @@ static void write_trace_instructions(struct All_variables *E)
 /* column. Neighbor surface element number is returned        */
 
 static int icheck_column_neighbors(struct All_variables *E,
-                                   int j, int nel,
+                                   int j, ElementID nel,
                                    CartesianCoord cc,
                                    double rad)
 {
-
     int ival;
     int neighbor[25];
     int elx,ely,elz;
     int elxz;
     int kk;
-
+	
     /*
-      const int number_of_neighbors=24;
-    */
-
+	 const int number_of_neighbors=24;
+	 */
+	
     /* maybe faster to only check inner ring */
-
+	
     const int number_of_neighbors=8;
-
+	
     elx=E->lmesh.elx;
     ely=E->lmesh.ely;
     elz=E->lmesh.elz;
-
+	
     elxz=elx*elz;
-
+	
     /* inner ring */
-
+	
     neighbor[1]=nel-elxz-elz;
     neighbor[2]=nel-elxz;
     neighbor[3]=nel-elxz+elz;
@@ -1959,9 +1927,9 @@ static int icheck_column_neighbors(struct All_variables *E,
     neighbor[6]=nel+elxz-elz;
     neighbor[7]=nel+elxz;
     neighbor[8]=nel+elxz+elz;
-
+	
     /* outer ring */
-
+	
     neighbor[9]=nel+2*elxz-elz;
     neighbor[10]=nel+2*elxz;
     neighbor[11]=nel+2*elxz+elz;
@@ -1978,21 +1946,19 @@ static int icheck_column_neighbors(struct All_variables *E,
     neighbor[22]=nel-2*elz;
     neighbor[23]=nel+elxz-2*elz;
     neighbor[24]=nel+2*elxz-2*elz;
-
-
+	
     for (kk=1;kk<=number_of_neighbors;kk++)
-        {
-
-            if ((neighbor[kk]>=1)&&(neighbor[kk]<=E->lmesh.nel))
-                {
-                    ival=icheck_element_column(E,j,neighbor[kk],cc,rad);
-                    if (ival>0)
-                        {
-                            return neighbor[kk];
-                        }
-                }
-        }
-
+	{
+		if ((neighbor[kk]>=1)&&(neighbor[kk]<=E->lmesh.nel))
+		{
+			ival=icheck_element_column(E,j,neighbor[kk],cc,rad);
+			if (ival>0)
+			{
+				return neighbor[kk];
+			}
+		}
+	}
+	
     return -99;
 }
 
@@ -2013,7 +1979,7 @@ static int icheck_all_columns(struct All_variables *E,
     int elz=E->lmesh.elz;
     int numel=E->lmesh.nel;
 	
-    for (nel=elz;nel<=numel;nel=nel+elz)
+    for (nel=elz;nel<=numel;nel+=elz)
 	{
 		icheck=icheck_element_column(E,j,nel,cc,rad);
 		if (icheck==1) return nel;
@@ -2029,16 +1995,16 @@ static int icheck_all_columns(struct All_variables *E,
 /* a given element                                          */
 
 static int icheck_element(struct All_variables *E,
-                          int j, int nel,
+                          int j, ElementID nel,
                           CartesianCoord cc,
                           double rad)
 {
     int icheck;
 	
-    icheck = icheck_shell(E,nel,rad);
+    icheck = icheck_shell(E, nel, rad);
     if (icheck == 0) return 0;
 	
-    icheck = icheck_element_column(E,j,nel,cc,rad);
+    icheck = icheck_element_column(E, j, nel, cc, rad);
     if (icheck == 0) return 0;
 	
     return 1;
@@ -2052,15 +2018,10 @@ static int icheck_element(struct All_variables *E,
 /* note: j set to 1; shouldn't depend on cap               */
 
 static int icheck_shell(struct All_variables *E,
-                        int nel, double rad)
+                        ElementID nel, double rad)
 {
-
-    int ival;
-    int ibottom_node;
-    int itop_node;
-
-    double bottom_rad;
-    double top_rad;
+    int ibottom_node, itop_node;
+    double bottom_rad, top_rad;
 
     ibottom_node=E->ien[1][nel].node[1];
     itop_node=E->ien[1][nel].node[5];
@@ -2068,10 +2029,8 @@ static int icheck_shell(struct All_variables *E,
     bottom_rad=E->sx[1][3][ibottom_node];
     top_rad=E->sx[1][3][itop_node];
 
-    ival=0;
-    if ((rad>=bottom_rad)&&(rad<top_rad)) ival=1;
-
-    return ival;
+    if ((rad>=bottom_rad)&&(rad<top_rad)) return 1;
+	else return 0;
 }
 
 /********  ICHECK ELEMENT COLUMN ****************************/
@@ -2080,17 +2039,15 @@ static int icheck_shell(struct All_variables *E,
 /* a given element's column                                 */
 
 static int icheck_element_column(struct All_variables *E,
-                                 int j, int nel,
+                                 int j, ElementID nel,
                                  CartesianCoord cc,
                                  double rad)
 {
     CartesianCoord	test_point;
-    double rnode[4][8];
+	CapBoundary		bounds;
+    int				lev, kk, node;
 	
-    int lev = E->mesh.levmax;
-    int kk;
-    int node;
-	
+	lev = E->mesh.levmax;
     E->trace.istat_elements_checked++;
 	
     /* surface coords of element nodes */
@@ -2099,21 +2056,19 @@ static int icheck_element_column(struct All_variables *E,
 	{
 		node=E->ien[j][nel].node[kk+4+1];
 		
-		rnode[kk][1]=E->x[j][1][node];
-		rnode[kk][2]=E->x[j][2][node];
-		rnode[kk][3]=E->x[j][3][node];
-		
-		rnode[kk][4]=E->SinCos[lev][j][2][node]; /* cos(theta) */
-		rnode[kk][5]=E->SinCos[lev][j][0][node]; /* sin(theta) */
-		rnode[kk][6]=E->SinCos[lev][j][3][node]; /* cos(phi) */
-		rnode[kk][7]=E->SinCos[lev][j][1][node]; /* sin(phi) */
+		bounds.setCartTrigBounds(kk,
+								 CartesianCoord(E->x[j][1][node], E->x[j][2][node], E->x[j][3][node]),
+								 E->SinCos[lev][j][2][node], /* cos(theta) */
+								 E->SinCos[lev][j][0][node], /* sin(theta) */
+								 E->SinCos[lev][j][3][node], /* cos(phi) */
+								 E->SinCos[lev][j][1][node]); /* sin(phi) */
 	}
 	
     /* test_point - project to outer radius */
 	
     test_point = cc/rad;
 	
-    return icheck_bounds(E,test_point,rnode[0],rnode[1],rnode[2],rnode[3]);
+    return icheck_bounds(E,test_point,bounds);
 }
 
 
@@ -2127,28 +2082,12 @@ int full_icheck_cap(struct All_variables *E, int icap,
 {
 	
     CartesianCoord	test_point;
-    double			rnode[4][8];
-    int				kk;
-	
-    /* surface coords of cap nodes */
-	
-    for (kk=0;kk<4;kk++)
-	{
-		rnode[kk][1]=E->trace.boundaries[icap].cartesian_boundary[kk]._x;
-		rnode[kk][2]=E->trace.boundaries[icap].cartesian_boundary[kk]._y;
-		rnode[kk][3]=E->trace.boundaries[icap].cartesian_boundary[kk]._z;
-		
-		rnode[kk][4]=E->trace.boundaries[icap].cos_theta[kk];
-		rnode[kk][5]=E->trace.boundaries[icap].sin_theta[kk];
-		rnode[kk][6]=E->trace.boundaries[icap].cos_phi[kk];
-		rnode[kk][7]=E->trace.boundaries[icap].sin_phi[kk];
-	}
 	
     /* test_point - project to outer radius */
 	
     test_point = cc/rad;
 	
-    return icheck_bounds(E,test_point,rnode[0],rnode[1],rnode[2],rnode[3]);
+    return icheck_bounds(E,test_point,E->trace.boundaries[icap]);
 }
 
 /***** ICHECK BOUNDS ******************************/
@@ -2174,112 +2113,97 @@ int full_icheck_cap(struct All_variables *E, int icap,
 
 static int icheck_bounds(struct All_variables *E,
                          CartesianCoord test_point,
-                         double *rnode1, double *rnode2,
-                         double *rnode3, double *rnode4)
+                         const CapBoundary bounds)
 {
-
-    int number_of_tries=0;
-    int icheck;
-
+    int					number_of_tries=0;
 	CartesianCoord		v12, v23, v34, v41;
 	CartesianCoord		v1p, v2p, v3p, v4p;
 	CartesianCoord		cross1, cross2, cross3, cross4;
+	SphericalCoord		sc;
 	
     double rad1,rad2,rad3,rad4;
-    double theta, phi;
     double tiny, eps;
-    double x,y,z;
-
+	
     /* make vectors from node to node */
-
-    v12 = makevector(rnode2[1],rnode2[2],rnode2[3],rnode1[1],rnode1[2],rnode1[3]);
-    v23 = makevector(rnode3[1],rnode3[2],rnode3[3],rnode2[1],rnode2[2],rnode2[3]);
-    v34 = makevector(rnode4[1],rnode4[2],rnode4[3],rnode3[1],rnode3[2],rnode3[3]);
-    v41 = makevector(rnode1[1],rnode1[2],rnode1[3],rnode4[1],rnode4[2],rnode4[3]);
-
- try_again:
-
+	
+    v12 = bounds.cartesian_boundary[1] - bounds.cartesian_boundary[0];
+    v23 = bounds.cartesian_boundary[2] - bounds.cartesian_boundary[1];
+    v34 = bounds.cartesian_boundary[3] - bounds.cartesian_boundary[2];
+    v41 = bounds.cartesian_boundary[0] - bounds.cartesian_boundary[3];
+	
+try_again:
+	
     number_of_tries++;
-
+	
     /* make vectors from test point to node */
-
-    v1p = makevector(test_point._x,test_point._y,test_point._z,rnode1[1],rnode1[2],rnode1[3]);
-    v2p = makevector(test_point._x,test_point._y,test_point._z,rnode2[1],rnode2[2],rnode2[3]);
-    v3p = makevector(test_point._x,test_point._y,test_point._z,rnode3[1],rnode3[2],rnode3[3]);
-    v4p = makevector(test_point._x,test_point._y,test_point._z,rnode4[1],rnode4[2],rnode4[3]);
-
+	
+	v1p = test_point - bounds.cartesian_boundary[0];
+	v2p = test_point - bounds.cartesian_boundary[1];
+	v3p = test_point - bounds.cartesian_boundary[2];
+	v4p = test_point - bounds.cartesian_boundary[3];
+	
     /* Calculate cross products */
-
-    cross2 = crossit(v12,v2p);
-    cross3 = crossit(v23,v3p);
-    cross4 = crossit(v34,v4p);
-    cross1 = crossit(v41,v1p);
-
+	
+    cross2 = v12.crossProduct(v2p);
+    cross3 = v23.crossProduct(v3p);
+    cross4 = v34.crossProduct(v4p);
+    cross1 = v41.crossProduct(v1p);
+	
     /* Calculate radial component of cross products */
-
-    rad1=findradial(E,cross1,rnode1[4],rnode1[5],rnode1[6],rnode1[7]);
-    rad2=findradial(E,cross2,rnode2[4],rnode2[5],rnode2[6],rnode2[7]);
-    rad3=findradial(E,cross3,rnode3[4],rnode3[5],rnode3[6],rnode3[7]);
-    rad4=findradial(E,cross4,rnode4[4],rnode4[5],rnode4[6],rnode4[7]);
-
+	
+    rad1=findradial(cross1,bounds.cos_theta[0],bounds.sin_theta[0],bounds.cos_phi[0],bounds.sin_phi[0]);
+    rad2=findradial(cross2,bounds.cos_theta[1],bounds.sin_theta[1],bounds.cos_phi[1],bounds.sin_phi[1]);
+    rad3=findradial(cross3,bounds.cos_theta[2],bounds.sin_theta[2],bounds.cos_phi[2],bounds.sin_phi[2]);
+    rad4=findradial(cross4,bounds.cos_theta[3],bounds.sin_theta[3],bounds.cos_phi[3],bounds.sin_phi[3]);
+	
     /*  Check if any radial components is zero (along a boundary), adjust if so */
     /*  Hopefully, this doesn't happen often, may be expensive                  */
-
+	
     tiny=1e-15;
     eps=1e-6;
-
+	
     if (number_of_tries>3)
-        {
-            fprintf(E->trace.fpt,"Error(icheck_bounds)-too many tries\n");
-            fprintf(E->trace.fpt,"Rads: %f %f %f %f\n",rad1,rad2,rad3,rad4);
-            fprintf(E->trace.fpt,"Test Point: %f %f %f  \n",test_point._x,test_point._y,test_point._z);
-            fprintf(E->trace.fpt,"Nodal points: 1: %f %f %f\n",rnode1[1],rnode1[2],rnode1[3]);
-            fprintf(E->trace.fpt,"Nodal points: 2: %f %f %f\n",rnode2[1],rnode2[2],rnode2[3]);
-            fprintf(E->trace.fpt,"Nodal points: 3: %f %f %f\n",rnode3[1],rnode3[2],rnode3[3]);
-            fprintf(E->trace.fpt,"Nodal points: 4: %f %f %f\n",rnode4[1],rnode4[2],rnode4[3]);
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-
+	{
+		fprintf(E->trace.fpt,"Error(icheck_bounds)-too many tries\n");
+		fprintf(E->trace.fpt,"Rads: %f %f %f %f\n",rad1,rad2,rad3,rad4);
+		fprintf(E->trace.fpt,"Test Point: %f %f %f  \n",test_point._x,test_point._y,test_point._z);
+		//fprintf(E->trace.fpt,"Nodal points: 1: %f %f %f\n",rnode1._x,rnode1._y,rnode1._z);
+		//fprintf(E->trace.fpt,"Nodal points: 2: %f %f %f\n",rnode2._x,rnode2._y,rnode2._z);
+		//fprintf(E->trace.fpt,"Nodal points: 3: %f %f %f\n",rnode3._x,rnode3._y,rnode3._z);
+		//fprintf(E->trace.fpt,"Nodal points: 4: %f %f %f\n",rnode4._x,rnode4._y,rnode4._z);
+		fflush(E->trace.fpt);
+		exit(10);
+	}
+	
+	// If any radial component is small, we are on a boundary
     if (fabs(rad1)<=tiny||fabs(rad2)<=tiny||fabs(rad3)<=tiny||fabs(rad4)<=tiny)
-        {
-            x=test_point._x;
-            y=test_point._y;
-            z=test_point._z;
-            theta=myatan(sqrt(x*x+y*y),z);
-            phi=myatan(y,x);
-
-            if (theta<=M_PI/2.0)
-                {
-                    theta=theta+eps;
-                }
-            else
-                {
-                    theta=theta-eps;
-                }
-            phi=phi+eps;
-            x=sin(theta)*cos(phi);
-            y=sin(theta)*sin(phi);
-            z=cos(theta);
-            test_point._x=x;
-            test_point._y=y;
-            test_point._z=z;
-
-            number_of_tries++;
-            goto try_again;
-
-        }
-
-    icheck=0;
-    if (rad1>0.0&&rad2>0.0&&rad3>0.0&&rad4>0.0) icheck=1;
-
+	{
+		// Convert our test point to spherical coordinates
+		sc = test_point.toSpherical();
+		
+		// Ensure it is within bounds
+		if (sc._theta < 0) sc._theta += 2*M_PI;
+		sc._rad = 1;
+		
+		// Nudge the point by eps
+		if (sc._theta <= M_PI/2.0) sc._theta += eps;
+		else sc._theta -= eps;
+		sc._phi += eps;
+		
+		// Convert the nudged test point back to Cartesian coordinates
+		test_point = sc.toCartesian();
+		
+		number_of_tries++;
+		goto try_again;
+	}
+	
+    if (rad1>0.0 && rad2>0.0 && rad3>0.0 && rad4>0.0) return 1;
+	else return 0;
+	
     /*
-      fprintf(stderr,"%d: icheck: %d\n",E->parallel.me,icheck);
-      fprintf(stderr,"%d: rads: %f %f %f %f\n",E->parallel.me,rad1,rad2,rad3,rad4);
-    */
-
-    return icheck;
-
+	 fprintf(stderr,"%d: icheck: %d\n",E->parallel.me,icheck);
+	 fprintf(stderr,"%d: rads: %f %f %f %f\n",E->parallel.me,rad1,rad2,rad3,rad4);
+	 */
 }
 
 /****************************************************************************/
@@ -2287,7 +2211,7 @@ static int icheck_bounds(struct All_variables *E,
 /*                                                                          */
 /* This function finds the radial component of a Cartesian vector           */
 
-static double findradial(struct All_variables *E, CartesianCoord vec,
+static double findradial(CartesianCoord vec,
                          double cost, double sint,
                          double cosf, double sinf)
 {
@@ -2298,24 +2222,6 @@ static double findradial(struct All_variables *E, CartesianCoord vec,
     radialpartk=vec._z*cost;
 
 	return radialparti+radialpartj+radialpartk;
-}
-
-
-/******************MAKEVECTOR*********************************************************/
-
-CartesianCoord makevector(double xf, double yf, double zf,
-                       double x0, double y0, double z0)
-{
-    return CartesianCoord(xf-x0, yf-y0, zf-z0);
-}
-
-/********************CROSSIT********************************************************/
-
-CartesianCoord crossit(CartesianCoord A, CartesianCoord B)
-{
-	return CartesianCoord(A._y*B._z-A._z*B._y,
-						  A._z*B._x-A._x*B._z,
-						  A._x*B._y-A._y*B._x);
 }
 
 
@@ -2400,182 +2306,178 @@ int full_iget_element(struct All_variables *E,
     int elx,ely,elz,elxz;
     int ifinal_iel;
     int nelem;
-
+	
     elx=E->lmesh.elx;
     ely=E->lmesh.ely;
     elz=E->lmesh.elz;
-
+	
     ntheta=0;
     nphi=0;
-
+	
     /* check the radial range */
     if (E->parallel.nprocz>1)
-        {
-            ival=icheck_processor_shell(E,j,sc._rad);
-            if (ival!=1) return -99;
-        }
-
+	{
+		ival=icheck_processor_shell(E,j,sc._rad);
+		if (ival!=1) return -99;
+	}
+	
     /* do quick search to see if element can be easily found. */
     /* note that element may still be out of this cap, but    */
     /* it is probably fast to do a quick search before        */
     /* checking cap                                           */
-
-
+	
     /* get regular element number */
-
+	
     iregel=iget_regel(E,j,sc._theta,sc._phi,&ntheta,&nphi);
     if (iregel<=0)
-        {
-            return -99;
-        }
-
-
+	{
+		return -99;
+	}
+	
+	
     /* AKMA put safety here or in make grid */
-
+	
     if (E->trace.regtoel[j][0][iregel]==0)
-        {
-            iel=E->trace.regtoel[j][1][iregel];
-            goto foundit;
-        }
-
+	{
+		iel=E->trace.regtoel[j][1][iregel];
+		goto foundit;
+	}
+	
     /* first check previous element */
-
+	
     if (iprevious_element>0)
-        {
-            ival=icheck_element_column(E,j,iprevious_element,cc,sc._rad);
-            if (ival==1)
-                {
-                    iel=iprevious_element;
-                    goto foundit;
-                }
-        }
-
+	{
+		ival=icheck_element_column(E,j,iprevious_element,cc,sc._rad);
+		if (ival==1)
+		{
+			iel=iprevious_element;
+			goto foundit;
+		}
+	}
+	
     /* Check all regular mapping choices */
-
+	
     ichoice=0;
     if (E->trace.regtoel[j][0][iregel]>0)
-        {
-
-            ichoice=E->trace.regtoel[j][0][iregel];
-            for (kk=1;kk<=ichoice;kk++)
-                {
-                    nelem=E->trace.regtoel[j][kk][iregel];
-
-                    if (nelem!=iprevious_element)
-                        {
-                            ival=icheck_element_column(E,j,nelem,cc,sc._rad);
-                            if (ival==1)
-                                {
-                                    iel=nelem;
-                                    goto foundit;
-                                }
-
-                        }
-                }
-        }
-
+	{
+		
+		ichoice=E->trace.regtoel[j][0][iregel];
+		for (kk=1;kk<=ichoice;kk++)
+		{
+			nelem=E->trace.regtoel[j][kk][iregel];
+			
+			if (nelem!=iprevious_element)
+			{
+				ival=icheck_element_column(E,j,nelem,cc,sc._rad);
+				if (ival==1)
+				{
+					iel=nelem;
+					goto foundit;
+				}
+				
+			}
+		}
+	}
+	
     /* If here, it means that tracer could not be found quickly with regular element map */
-
+	
     /* First check previous element neighbors */
-
+	
     if (iprevious_element>0)
-        {
-            iel=icheck_column_neighbors(E,j,iprevious_element,cc,sc._rad);
-            if (iel>0)
-                {
-                    goto foundit;
-                }
-        }
-
+	{
+		iel=icheck_column_neighbors(E,j,iprevious_element,cc,sc._rad);
+		if (iel>0)
+		{
+			goto foundit;
+		}
+	}
+	
     /* check if still in cap */
-
+	
     ival=full_icheck_cap(E,0,cc,sc._rad);
-    if (ival==0)
-        {
-            return -99;
-        }
-
+    if (ival==0) return -99;
+	
     /* if here, still in cap (hopefully, without a doubt) */
-
+	
     /* check cap corners (they are sometimes tricky) */
-
+	
     elxz=elx*elz;
     icorner[1]=elz;
     icorner[2]=elxz;
     icorner[3]=elxz*(ely-1)+elz;
     icorner[4]=elxz*ely;
     for (kk=1;kk<=4;kk++)
-        {
-            ival=icheck_element_column(E,j,icorner[kk],cc,sc._rad);
-            if (ival>0)
-                {
-                    iel=icorner[kk];
-                    goto foundit;
-                }
-        }
-
-
+	{
+		ival=icheck_element_column(E,j,icorner[kk],cc,sc._rad);
+		if (ival>0)
+		{
+			iel=icorner[kk];
+			goto foundit;
+		}
+	}
+	
+	
     /* if previous element is not known, check neighbors of those tried in iquick... */
-
+	
     if (iprevious_element<0)
-        {
-            if (ichoice>0)
-                {
-                    for (kk=1;kk<=ichoice;kk++)
-                        {
-                            ineighbor=E->trace.regtoel[j][kk][iregel];
-                            iel=icheck_column_neighbors(E,j,ineighbor,cc,sc._rad);
-                            if (iel>0)
-                                {
-                                    goto foundit;
-                                }
-                        }
-                }
-
-        }
-
+	{
+		if (ichoice>0)
+		{
+			for (kk=1;kk<=ichoice;kk++)
+			{
+				ineighbor=E->trace.regtoel[j][kk][iregel];
+				iel=icheck_column_neighbors(E,j,ineighbor,cc,sc._rad);
+				if (iel>0)
+				{
+					goto foundit;
+				}
+			}
+		}
+		
+	}
+	
     /* As a last resort, check all element columns */
-
+	
     E->trace.istat1++;
-
+	
     iel=icheck_all_columns(E,j,cc,sc._rad);
-
+	
     /*
-      fprintf(E->trace.fpt,"WARNING(full_iget_element)-doing a full search!\n");
-      fprintf(E->trace.fpt,"  Most often means tracers have moved more than 1 element away\n");
-      fprintf(E->trace.fpt,"  or regular element resolution is way too low.\n");
-      fprintf(E->trace.fpt,"  COLUMN: %d \n",iel);
-      fprintf(E->trace.fpt,"  PREVIOUS ELEMENT: %d \n",iprevious_element);
-      fprintf(E->trace.fpt,"  x,y,z,theta,phi,rad: %f %f %f   %f %f %f\n",x,y,z,theta,phi,rad);
-      fflush(E->trace.fpt);
-      if (E->trace.itracer_warnings) exit(10);
-    */
-
+	 fprintf(E->trace.fpt,"WARNING(full_iget_element)-doing a full search!\n");
+	 fprintf(E->trace.fpt,"  Most often means tracers have moved more than 1 element away\n");
+	 fprintf(E->trace.fpt,"  or regular element resolution is way too low.\n");
+	 fprintf(E->trace.fpt,"  COLUMN: %d \n",iel);
+	 fprintf(E->trace.fpt,"  PREVIOUS ELEMENT: %d \n",iprevious_element);
+	 fprintf(E->trace.fpt,"  x,y,z,theta,phi,rad: %f %f %f   %f %f %f\n",x,y,z,theta,phi,rad);
+	 fflush(E->trace.fpt);
+	 if (E->trace.itracer_warnings) exit(10);
+	 */
+	
     if (E->trace.istat1%100==0)
-        {
-            fprintf(E->trace.fpt,"Checked all elements %d times already this turn\n",E->trace.istat1);
-            fflush(E->trace.fpt);
-        }
+	{
+		fprintf(E->trace.fpt,"Checked all elements %d times already this turn\n",E->trace.istat1);
+		fflush(E->trace.fpt);
+	}
     if (iel>0)
-        {
-            goto foundit;
-        }
-
-
+	{
+		goto foundit;
+	}
+	
+	
     /* if still here, there is a problem */
-
+	
     fprintf(E->trace.fpt,"Error(full_iget_element) - element not found\n");
     fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %.15e %.15e %.15e %.15e %.15e %d\n",
             cc._x,cc._y,cc._z,sc._theta,sc._phi,iregel);
     fflush(E->trace.fpt);
     return -1;
-
- foundit:
-
+	
+foundit:
+	
     /* find radial element */
-
+	
     ifinal_iel=iget_radial_element(E,j,iel,sc._rad);
-
+	
     return ifinal_iel;
 }
 
@@ -2589,7 +2491,6 @@ static int iget_radial_element(struct All_variables *E,
                                int j, int iel,
                                double rad)
 {
-
     int elz=E->lmesh.elz;
     int ibottom_element;
     int iradial_element;
@@ -2894,7 +2795,6 @@ void full_keep_within_bounds(struct All_variables *E,
 /* a test function (in "analytical_test_function").                                       */
 
 void analytical_test(struct All_variables *E)
-
 {
 #if 0
     int kk;

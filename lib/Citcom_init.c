@@ -32,41 +32,33 @@
 
 struct All_variables* citcom_init(MPI_Comm *world)
 {
-  int get_process_identifier();
-
-  struct All_variables *E;
-  int rank, nproc;
-
-  E = (struct All_variables*) malloc(sizeof(struct All_variables));
-
-  MPI_Comm_rank(*world, &rank);
-  MPI_Comm_size(*world, &nproc);
-
-  E->control.PID = get_process_identifier();
-  E->parallel.world = *world;
-  E->parallel.nproc = nproc;
-  E->parallel.me = rank;
-
-  /* fprintf(stderr,"%d in %d processpors, E at %p pid=%d\n",
-          rank, nproc, E, E->control.PID); */
-
-  E->monitor.solution_cycles=0;
-  E->control.keep_going=1;
-
-  E->control.total_iteration_cycles=0;
-  E->control.total_v_solver_calls=0;
-
-
-
-  return(E);
+	struct All_variables *E;
+	int rank, nproc;
+	
+	E = (struct All_variables*) malloc(sizeof(struct All_variables));
+	
+	MPI_Comm_rank(*world, &rank);
+	MPI_Comm_size(*world, &nproc);
+	
+	E->control.PID = get_process_identifier();
+	E->parallel.world = *world;
+	E->parallel.nproc = nproc;
+	E->parallel.me = rank;
+	
+	/* fprintf(stderr,"%d in %d processpors, E at %p pid=%d\n",
+	 rank, nproc, E, E->control.PID); */
+	
+	E->monitor.solution_cycles=0;
+	E->control.keep_going=1;
+	
+	E->control.total_iteration_cycles=0;
+	E->control.total_v_solver_calls=0;
+	
+	return(E);
 }
-
 
 void citcom_finalize(struct All_variables *E, int status)
 {
-    void output_finalize(struct All_variables*);
-    void parallel_process_finalize();
-
     output_finalize(E);
     parallel_process_finalize();
     exit(status);

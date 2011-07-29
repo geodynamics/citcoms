@@ -37,6 +37,9 @@ struct All_variables;
 #ifndef _TRACER_DEFS_H_
 #define _TRACER_DEFS_H_
 
+typedef int ElementID;
+#define UNDEFINED_ELEMENT		((ElementID)-99)
+
 class CartesianCoord;
 
 // Position or vector in spherical coordinates
@@ -47,8 +50,8 @@ public:
 	SphericalCoord(double theta, double phi, double rad) : _theta(theta), _phi(phi), _rad(rad) {};
 	
 	size_t size(void) const { return 3; };
-	void writeToMem(double *mem) const;
-	void readFromMem(const double *mem);
+	double *writeToMem(double *mem) const;
+	double *readFromMem(double *mem);
 	CartesianCoord toCartesian(void) const;
 	
 	void constrainThetaPhi(void);
@@ -63,15 +66,17 @@ public:
 	CartesianCoord(double x, double y, double z) : _x(x), _y(y), _z(z) {};
 	
 	size_t size(void) const { return 3; };
-	void writeToMem(double *mem) const;
-	void readFromMem(const double *mem);
+	double *writeToMem(double *mem) const;
+	double *readFromMem(double *mem);
 	SphericalCoord toSpherical(void) const;
+	CartesianCoord crossProduct(const CartesianCoord &b) const;
 	double dist(const CartesianCoord &o) const {
 		double xd=_x-o._x, yd=_y-o._y, zd=_z-o._z;
 		return sqrt(xd*xd+yd*yd+zd*zd);
 	};
 	
 	const CartesianCoord operator+(const CartesianCoord &other) const;
+	const CartesianCoord operator-(const CartesianCoord &other) const;
 	const CartesianCoord operator*(const double &val) const;
 	const CartesianCoord operator/(const double &val) const;
 	void operator=(const CartesianCoord &other) { _x = other._x; _y = other._y; _z = other._z; };
@@ -86,7 +91,8 @@ public:
 	double			cos_phi[4];
 	double			sin_phi[4];
 	
-	void setBoundary(int bnum, CartesianCoord cc, SphericalCoord sc);
+	void setBoundary(int bnum, SphericalCoord sc);
+	void setCartTrigBounds(int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf);
 };
 
 class Tracer {
@@ -103,23 +109,24 @@ private:
 	// Tracer flavor (meaning should be application dependent)
 	double _flavor;
 	
-	int _ielement;
+	// ID of element containing this tracer
+	ElementID _ielement;
 	
 public:
-	Tracer(void) : _sc(), _cc(), _cc0(), _Vc(), _flavor(0), _ielement(-99) {};
+	Tracer(void) : _sc(), _cc(), _cc0(), _Vc(), _flavor(0), _ielement(UNDEFINED_ELEMENT) {};
 	Tracer(SphericalCoord new_sc, CartesianCoord new_cc) :
-		_sc(new_sc), _cc(new_cc), _cc0(), _Vc(), _flavor(0), _ielement(-99) {};
+		_sc(new_sc), _cc(new_cc), _cc0(), _Vc(), _flavor(0), _ielement(UNDEFINED_ELEMENT) {};
 	
 	CartesianCoord getCartesianPos(void) const { return _cc; };
 	SphericalCoord getSphericalPos(void) const { return _sc; };
 	CartesianCoord getOrigCartesianPos(void) const { return _cc0; };
 	CartesianCoord getCartesianVel(void) const { return _Vc; };
 	
-	void setCoords(SphericalCoord new_sc, CartesianCoord new_cc) {
+	void setCoords(const SphericalCoord new_sc, const CartesianCoord new_cc) {
 		_sc = new_sc;
 		_cc = new_cc;
 	}
-	void setOrigVals(CartesianCoord new_cc0, CartesianCoord new_vc) {
+	void setOrigVals(const CartesianCoord new_cc0, const CartesianCoord new_vc) {
 		_cc0 = new_cc0;
 		_Vc = new_vc;
 	}
@@ -132,15 +139,15 @@ public:
 	double y(void) { return _cc._y; };
 	double z(void) { return _cc._z; };
 	
-	int ielement(void) { return _ielement; };
-	void set_ielement(int ielement) { _ielement = ielement; };
+	ElementID ielement(void) const { return _ielement; };
+	void set_ielement(const ElementID ielement) { _ielement = ielement; };
 	
-	double flavor(void) { return _flavor; };
-	void set_flavor(double flavor) { _flavor = flavor; };
+	double flavor(void) const { return _flavor; };
+	void set_flavor(const double flavor) { _flavor = flavor; };
 	
 	size_t size(void);
-	void writeToMem(double *mem) const;
-	void readFromMem(const double *mem);
+	double *writeToMem(double *mem) const;
+	double *readFromMem(double *mem);
 };
 
 typedef std::list<Tracer> TracerList;
@@ -163,38 +170,23 @@ struct TRACE{
 
     /* tracer arrays */
 	
+	// Sets of tracers organized by cap
     TracerList *tracers;
 	
+	// Sets of tracers that have escaped a cap, organized by cap
     TracerList *escaped_tracers;
-	
-    //int number_of_basic_quantities;
-    //int number_of_extra_quantities;
-    //int number_of_tracer_quantities;
-
-    //double *basicq[13][100];
-    //double *extraq[13][100];
-
-    //int ntracers[13];
-    //int max_ntracers[13];
-    //int *ielement[13];
-
-    int number_of_tracers;
-
-    //int ilatersize[13];
-    //int ilater[13];
-    //double *rlater[13][100];
 
     /* tracer flavors */
     int nflavors;
     int **ntracer_flavor[13];
 
+	int number_of_tracers;
+	
     int ic_method_for_flavors;
     double *z_interface;
 
     char ggrd_file[255];		/* for grd input */
     int ggrd_layers;
-
-
 
     /* statistical parameters */
     int istat_ichoice[13][5];
@@ -204,18 +196,16 @@ struct TRACE{
     int istat_elements_checked;
     int ilast_tracer_count;
 
-
     /* timing information */
     double advection_time;
     double find_tracers_time;
     double lost_souls_time;
 
-
     /* Mesh information */
 	CapBoundary	boundaries[13];
 
     /*********************/
-    /* for globall model */
+    /* for global model  */
     /*********************/
 
     /* regular mesh parameters */
@@ -235,9 +225,6 @@ struct TRACE{
     /* gnomonic shape functions */
     double *shape_coefs[13][3][10];
 
-
-
-
     /**********************/
     /* for regional model */
     /**********************/
@@ -246,14 +233,11 @@ struct TRACE{
     double *y_space;
     double *z_space;
 
-
-
-
     /*********************/
     /* function pointers */
     /*********************/
 
-    int (* iget_element)(struct All_variables*, int, int,
+    ElementID (* iget_element)(struct All_variables*, int, int,
                          CartesianCoord, SphericalCoord);
 
     CartesianCoord (* get_velocity)(struct All_variables*, int, int,

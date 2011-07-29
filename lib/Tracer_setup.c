@@ -26,7 +26,6 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 /*
-
   Tracer_setup.c
 
       A program which initiates the distribution of tracers
@@ -81,35 +80,42 @@ int read_double_vector(FILE *, int , double *);
 int icheck_processor_shell(struct All_variables *,
                            int , double );
 
-
-
-void SphericalCoord::writeToMem(double *mem) const {
+// Write coordinate values to memory
+double *SphericalCoord::writeToMem(double *mem) const {
 	mem[0] = _theta;
 	mem[1] = _phi;
 	mem[2] = _rad;
+	return &mem[3];
 }
 
-void SphericalCoord::readFromMem(const double *mem) {
+// Read coordinate values from memory
+double *SphericalCoord::readFromMem(double *mem) {
+	double	*tmp = mem;
 	_theta = mem[0];
 	_phi = mem[1];
 	_rad = mem[2];
+	return &tmp[3];
 }
 
-void CartesianCoord::writeToMem(double *mem) const {
+// Write coordiante values to memory
+double *CartesianCoord::writeToMem(double *mem) const {
 	mem[0] = _x;
 	mem[1] = _y;
 	mem[2] = _z;
+	return &mem[3];
 }
 
-void CartesianCoord::readFromMem(const double *mem) {
+// Read coordinate values from memory
+double *CartesianCoord::readFromMem(double *mem) {
 	_x = mem[0];
 	_y = mem[1];
 	_z = mem[2];
+	return &mem[3];
 }
 
-
+// Return the size of storage required for this tracer in doubles
 size_t Tracer::size(void) {
-	return 	_sc.size()	// spherical coords
+	return _sc.size()	// spherical coords
 	+ _cc.size()		// Cartesian coords
 	+ _cc0.size()		// Original coords
 	+ _Vc.size()		// Velocity
@@ -117,30 +123,36 @@ size_t Tracer::size(void) {
 	+ 1;				// ielement
 }
 
-void Tracer::writeToMem(double *mem) const {
-	_sc.writeToMem(&mem[0]);
-	_cc.writeToMem(&mem[3]);
-	_cc0.writeToMem(&mem[6]);
-	_Vc.writeToMem(&mem[9]);
-	mem[12] = _flavor;
-	mem[13] = _ielement;
+// Write all relevant tracer data to memory and return
+// an updated pointer to the end of the written data
+double *Tracer::writeToMem(double *mem) const {
+	double	*tmp = mem;
+	tmp = _sc.writeToMem(tmp);
+	tmp = _cc.writeToMem(tmp);
+	tmp = _cc0.writeToMem(tmp);
+	tmp = _Vc.writeToMem(tmp);
+	tmp[0] = _flavor;
+	tmp[1] = _ielement;
+	return &tmp[2];
 }
 
-void Tracer::readFromMem(const double *mem) {
-	_sc.readFromMem(&mem[0]);
-	_cc.readFromMem(&mem[3]);
-	_cc0.readFromMem(&mem[6]);
-	_Vc.readFromMem(&mem[9]);
-	_flavor = mem[12];
-	_ielement = mem[13];
+// Read tracer data from memory and return an updated pointer
+// to the end of the read data
+double *Tracer::readFromMem(double *mem) {
+	double	*tmp = mem;
+	tmp = _sc.readFromMem(tmp);
+	tmp = _cc.readFromMem(tmp);
+	tmp = _cc0.readFromMem(tmp);
+	tmp = _Vc.readFromMem(tmp);
+	_flavor = tmp[0];
+	_ielement = tmp[1];
+	return &tmp[2];
 }
 
-
-
+// Convert Cartesian system coordinates to spherical
 SphericalCoord CartesianCoord::toSpherical(void) const
 {
-	double temp;
-	double theta, phi, rad;
+	double temp, theta, phi, rad;
 	
 	temp=_x*_x+_y*_y;
 	
@@ -151,6 +163,7 @@ SphericalCoord CartesianCoord::toSpherical(void) const
 	return SphericalCoord(theta, phi, rad);
 }
 
+// Convert spherical system coordinates to Cartesian
 CartesianCoord SphericalCoord::toCartesian(void) const
 {
 	double sint,cost,sinf,cosf;
@@ -168,15 +181,21 @@ CartesianCoord SphericalCoord::toCartesian(void) const
 	return CartesianCoord(x,y,z);
 }
 
-
-
+// Add two coordinates together as vectors by summing each of their components
 const CartesianCoord CartesianCoord::operator+(const CartesianCoord &other) const {
 	return CartesianCoord(	this->_x+other._x,
 						  this->_y+other._y,
 						  this->_z+other._z);
 }
 
-// Multiply each element by a constant factor
+// Get the difference of two coordinates as vectors by subtracting each of their components
+const CartesianCoord CartesianCoord::operator-(const CartesianCoord &other) const {
+	return CartesianCoord(	this->_x-other._x,
+						  this->_y-other._y,
+						  this->_z-other._z);
+}
+
+// Multiply each component by a constant factor
 const CartesianCoord CartesianCoord::operator*(const double &val) const {
 	return CartesianCoord(	this->_x*val,
 						  this->_y*val,
@@ -190,6 +209,12 @@ const CartesianCoord CartesianCoord::operator/(const double &val) const {
 						  this->_z/val);
 }
 
+// Return the cross product of this vector with another vector (b)
+CartesianCoord CartesianCoord::crossProduct(const CartesianCoord &b) const {
+	return CartesianCoord(this->_y*b._z - this->_z*b._y,
+						  this->_z*b._x - this->_x*b._z,
+						  this->_x*b._y - this->_y*b._x);
+}
 
 // Returns a constrained angle between 0 and 2 PI
 double SphericalCoord::constrainAngle(const double angle) const {
@@ -208,58 +233,65 @@ void SphericalCoord::constrainThetaPhi(void) {
 	_phi = constrainAngle(_phi);
 }
 
-
-void CapBoundary::setBoundary(int bnum, CartesianCoord cc, SphericalCoord sc) {
+// Set the boundaries of a cap specified by spherical coordinates
+void CapBoundary::setBoundary(int bnum, SphericalCoord sc) {
 	assert(bnum>=0 && bnum < 4);
-	cartesian_boundary[bnum] = cc;
 	spherical_boundary[bnum] = sc;
+	cartesian_boundary[bnum] = sc.toCartesian();
 	cos_theta[bnum] = cos(sc._theta);
 	sin_theta[bnum] = sin(sc._theta);
 	cos_phi[bnum] = cos(sc._phi);
 	sin_phi[bnum] = sin(sc._phi);
 }
 
+void CapBoundary::setCartTrigBounds(int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf) {
+	assert(bnum>=0 && bnum < 4);
+	cartesian_boundary[bnum] = cc;
+	spherical_boundary[bnum] = SphericalCoord();	// empty spherical bounds
+	cos_theta[bnum] = cost;
+	sin_theta[bnum] = sint;
+	cos_phi[bnum] = cosf;
+	sin_phi[bnum] = sinf;
+}
+
 
 void tracer_input(struct All_variables *E)
 {
-    void full_tracer_input();
-    void myerror();
-    void report();
     char message[100];
     int m=E->parallel.me;
     int i;
-
+	
     input_boolean("tracer",&(E->control.tracer),"off",m);
     input_boolean("tracer_enriched",
-		  &(E->control.tracer_enriched),"off",m);
+				  &(E->control.tracer_enriched),"off",m);
     if(E->control.tracer_enriched){
-      if(!E->control.tracer)	/* check here so that we can get away
-				   with only one if statement in
-				   Advection_diffusion */
-	myerror(E,"need to switch on tracers for tracer_enriched");
-
-      input_float("Q0_enriched",&(E->control.Q0ER),"0.0",m);
-      snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g (only one composition!)",
-	       E->control.Q0,E->control.Q0ER);
-      report(E,message);
-      //
-      // this check doesn't work at this point in the code, and we didn't want to put it into every call to
-      // Advection diffusion
-      //
-      //if(E->composition.ncomp != 1)
-      //myerror(E,"enriched tracers cannot deal with more than one composition yet");
-
+		if(!E->control.tracer)	/* check here so that we can get away
+								 with only one if statement in
+								 Advection_diffusion */
+			myerror(E,"need to switch on tracers for tracer_enriched");
+		
+		input_float("Q0_enriched",&(E->control.Q0ER),"0.0",m);
+		snprintf(message,100,"using compositionally enriched heating: C = 0: %g C = 1: %g (only one composition!)",
+				 E->control.Q0,E->control.Q0ER);
+		report(E,message);
+		//
+		// this check doesn't work at this point in the code, and we didn't want to put it into every call to
+		// Advection diffusion
+		//
+		//if(E->composition.ncomp != 1)
+		//myerror(E,"enriched tracers cannot deal with more than one composition yet");
+		
     }
     if(E->control.tracer) {
-
+		
         /* tracer_ic_method=0 (random generated array) */
         /* tracer_ic_method=1 (all proc read the same file) */
         /* tracer_ic_method=2 (each proc reads its restart file) */
         input_int("tracer_ic_method",&(E->trace.ic_method),"0,0,nomax",m);
-
+		
         if (E->trace.ic_method==0){
             input_int("tracers_per_element",&(E->trace.itperel),"10,0,nomax",m);
-	}
+		}
         else if (E->trace.ic_method==1)
             input_string("tracer_file",E->trace.tracer_file,"tracer.dat",m);
         else if (E->trace.ic_method==2) {
@@ -270,101 +302,96 @@ void tracer_input(struct All_variables *E)
             fprintf(stderr,"Sorry, tracer_ic_method only 0, 1 and 2 available\n");
             parallel_process_termination();
         }
-
-
+		
+		
         /* How many flavors of tracers */
         /* If tracer_flavors > 0, each element will report the number of
          * tracers of each flavor inside it. This information can be used
          * later for many purposes. One of it is to compute composition,
          * either using absolute method or ratio method. */
         input_int("tracer_flavors",&(E->trace.nflavors),"0,0,nomax",m);
-
-	/* 0: default from layers 
-	   1: from netcdf grds
-	   
-	   
-	   99: from grds, overriding checkpoints during restart
-	   (1 and 99 require ggrd)
-	*/
-
+		
+		/* 0: default from layers 
+		 1: from netcdf grds
+		 
+		 
+		 99: from grds, overriding checkpoints during restart
+		 (1 and 99 require ggrd)
+		 */
+		
         input_int("ic_method_for_flavors",
-		  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
-
-
+				  &(E->trace.ic_method_for_flavors),"0,0,nomax",m);
+		
+		
         if (E->trace.nflavors > 1) {
             switch(E->trace.ic_method_for_flavors){
-	      /* default method */
-            case 0:			
-	      /* flavors initialized from layers */
-                E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
-                                                        *sizeof(double));
-                for(i=0; i<E->trace.nflavors-1; i++)
-                    E->trace.z_interface[i] = 0.7;
-
-                input_double_vector("z_interface", E->trace.nflavors-1,
-                                    E->trace.z_interface, m);
-                break;
-		/* 
-		   two grd init method, second will override restart
-		*/
+					/* default method */
+				case 0:			
+					/* flavors initialized from layers */
+					E->trace.z_interface = (double*) malloc((E->trace.nflavors-1)
+															*sizeof(double));
+					for(i=0; i<E->trace.nflavors-1; i++)
+						E->trace.z_interface[i] = 0.7;
+					
+					input_double_vector("z_interface", E->trace.nflavors-1,
+										E->trace.z_interface, m);
+					break;
+					/* 
+					 two grd init method, second will override restart
+					 */
 #ifdef USE_GGRD
-            case 1:
-	    case 99:		/* will override restart */
-	      /* from grid in top n materials, this will override
-		 the checkpoint input */
-	      input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
-	      input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* 
-
-									      >0 : which top layers to use, layer <= ictracer_grd_layers
-									      <0 : only use one layer layer == -ictracer_grd_layers
-
-									      */
-	      break;
-	      
+				case 1:
+				case 99:		/* will override restart */
+					/* from grid in top n materials, this will override
+					 the checkpoint input */
+					input_string("ictracer_grd_file",E->trace.ggrd_file,"",m); /* file from which to read */
+					input_int("ictracer_grd_layers",&(E->trace.ggrd_layers),"2",m); /* 
+																					 
+																					 >0 : which top layers to use, layer <= ictracer_grd_layers
+																					 <0 : only use one layer layer == -ictracer_grd_layers
+																					 
+																					 */
+					break;
+					
 #endif
-            default:
-                fprintf(stderr,"ic_method_for_flavors %i undefined (1 and 99 only for ggrd mode)\n",E->trace.ic_method_for_flavors);
-                parallel_process_termination();
-                break;
+				default:
+					fprintf(stderr,"ic_method_for_flavors %i undefined (1 and 99 only for ggrd mode)\n",E->trace.ic_method_for_flavors);
+					parallel_process_termination();
+					break;
             }
         }
-
+		
         /* Warning level */
         input_boolean("itracer_warnings",&(E->trace.itracer_warnings),"on",m);
-
-
+		
         if(E->parallel.nprocxy == 12)
             full_tracer_input(E);
-
-
+		
         composition_input(E);
-
     }
-
-    return;
 }
 
-
+// Set up the tracer computation based on whether this is
+// a regional or full mantle simulation
 void tracer_initial_settings(struct All_variables *E)
 {
-   E->trace.advection_time = 0;
-   E->trace.find_tracers_time = 0;
-   E->trace.lost_souls_time = 0;
-
-   if(E->parallel.nprocxy == 1) {
-       E->problem_tracer_setup = regional_tracer_setup;
-
-       E->trace.keep_within_bounds = regional_keep_within_bounds;
-       E->trace.get_velocity = regional_get_velocity;
-       E->trace.iget_element = regional_iget_element;
-   }
-   else {
-       E->problem_tracer_setup = full_tracer_setup;
-
-       E->trace.keep_within_bounds = full_keep_within_bounds;
-       E->trace.get_velocity = full_get_velocity;
-       E->trace.iget_element = full_iget_element;
-   }
+	E->trace.advection_time = 0;
+	E->trace.find_tracers_time = 0;
+	E->trace.lost_souls_time = 0;
+	
+	if(E->parallel.nprocxy == 1) {
+		E->problem_tracer_setup = regional_tracer_setup;
+		
+		E->trace.keep_within_bounds = regional_keep_within_bounds;
+		E->trace.get_velocity = regional_get_velocity;
+		E->trace.iget_element = regional_iget_element;
+	} else {
+		E->problem_tracer_setup = full_tracer_setup;
+		
+		E->trace.keep_within_bounds = full_keep_within_bounds;
+		E->trace.get_velocity = full_get_velocity;
+		E->trace.iget_element = full_iget_element;
+	}
 }
 
 
@@ -374,27 +401,24 @@ void tracer_initial_settings(struct All_variables *E)
 /* In this code, unlike the original 3D cartesian code, force is filled      */
 /* during Stokes solution. No need to call thermal_buoyancy() after tracing. */
 
-
 void tracer_advection(struct All_variables *E)
 {
-    double CPU_time0();
     double begin_time = CPU_time0();
 
-    /* advect tracers */
+    // Advect tracers
     predict_tracers(E);
     correct_tracers(E);
 
-    /* check that the number of tracers is conserved */
+    // Check that the number of tracers is conserved
     check_sum(E);
 
-    /* count # of tracers of each flavor */
+    // Count # of tracers of each flavor
     if (E->trace.nflavors > 0)
         count_tracers_of_flavors(E);
 
-    /* update the composition field */
-    if (E->composition.on) {
+    // Update the composition field
+    if (E->composition.on)
         fill_composition(E);
-    }
 
     E->trace.advection_time += CPU_time0() - begin_time;
 
@@ -402,22 +426,21 @@ void tracer_advection(struct All_variables *E)
 }
 
 
-
 /********* TRACER POST PROCESSING ****************************************/
 
 void tracer_post_processing(struct All_variables *E)
 {
     int i;
-
+	
     /* reset statistical counters */
     E->trace.istat_isend=0;
     E->trace.istat_elements_checked=0;
     E->trace.istat1=0;
-
+	
     /* write timing information every 20 steps */
     if ((E->monitor.solution_cycles % 20) == 0) {
         fprintf(E->trace.fpt, "STEP %d\n", E->monitor.solution_cycles);
-
+		
         fprintf(E->trace.fpt, "Advecting tracers takes %f seconds.\n",
                 E->trace.advection_time - E->trace.find_tracers_time);
         fprintf(E->trace.fpt, "Finding element takes %f seconds.\n",
@@ -425,43 +448,40 @@ void tracer_post_processing(struct All_variables *E)
         fprintf(E->trace.fpt, "Exchanging lost tracers takes %f seconds.\n",
                 E->trace.lost_souls_time);
     }
-
+	
     if(E->control.verbose){
-      fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
-
-      fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
-
-      fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
-
-      /* compositional and error fraction data files */
-      //TODO: move
-      if (E->composition.on) {
-        fprintf(E->trace.fpt,"Empty elements filled with old compositional "
-                "values: %d (%f percent)\n", E->trace.istat_iempty,
-                (100.0*E->trace.istat_iempty)/E->lmesh.nel);
-        E->trace.istat_iempty=0;
-
-
-        get_bulk_composition(E);
-
-        if (E->parallel.me==0) {
-
-            fprintf(E->fp,"composition: %e",E->monitor.elapsed_time);
-            for (i=0; i<E->composition.ncomp; i++)
-                fprintf(E->fp," %e", E->composition.bulk_composition[i]);
-            fprintf(E->fp,"\n");
-
-            fprintf(E->fp,"composition_error_fraction: %e",E->monitor.elapsed_time);
-            for (i=0; i<E->composition.ncomp; i++)
-                fprintf(E->fp," %e", E->composition.error_fraction[i]);
-            fprintf(E->fp,"\n");
-
-        }
-      }
-      fflush(E->trace.fpt);
+		fprintf(E->trace.fpt,"Number of times for all element search  %d\n",E->trace.istat1);
+		
+		fprintf(E->trace.fpt,"Number of tracers sent to other processors: %d\n",E->trace.istat_isend);
+		
+		fprintf(E->trace.fpt,"Number of times element columns are checked: %d \n",E->trace.istat_elements_checked);
+		
+		/* compositional and error fraction data files */
+		if (E->composition.on) {
+			fprintf(E->trace.fpt,"Empty elements filled with old compositional "
+					"values: %d (%f percent)\n", E->trace.istat_iempty,
+					(100.0*E->trace.istat_iempty)/E->lmesh.nel);
+			E->trace.istat_iempty=0;
+			
+			
+			get_bulk_composition(E);
+			
+			if (E->parallel.me==0) {
+				
+				fprintf(E->fp,"composition: %e",E->monitor.elapsed_time);
+				for (i=0; i<E->composition.ncomp; i++)
+					fprintf(E->fp," %e", E->composition.bulk_composition[i]);
+				fprintf(E->fp,"\n");
+				
+				fprintf(E->fp,"composition_error_fraction: %e",E->monitor.elapsed_time);
+				for (i=0; i<E->composition.ncomp; i++)
+					fprintf(E->fp," %e", E->composition.error_fraction[i]);
+				fprintf(E->fp,"\n");
+				
+			}
+		}
+		fflush(E->trace.fpt);
     }
-
-    return;
 }
 
 
@@ -472,7 +492,8 @@ void tracer_post_processing(struct All_variables *E)
 
 static void predict_tracers(struct All_variables *E)
 {
-    int						j, nelem;
+    int						j;
+	ElementID				nelem;
     double					dt;
 	SphericalCoord			sc0, sc_pred;
 	CartesianCoord			cc0, cc_pred, velocity_vector;
@@ -480,6 +501,7 @@ static void predict_tracers(struct All_variables *E)
 	
     dt=E->advection.timestep;
 	
+	// Go through each simulation cap
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 		
         for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();++tr) {
@@ -505,10 +527,10 @@ static void predict_tracers(struct All_variables *E)
 			
 			tr->setOrigVals(cc0, velocity_vector);
 			
-        } /* end predicting tracers */
-    } /* end caps */
+        }
+    }
 	
-    /* find new tracer elements and caps */
+    // Find new tracer elements and caps
     find_tracers(E);
 }
 
@@ -520,7 +542,8 @@ static void predict_tracers(struct All_variables *E)
 
 static void correct_tracers(struct All_variables *E)
 {
-    int						j, nelem;
+    int						j;
+	ElementID				nelem;
     double					dt;
 	TracerList::iterator	tr;
 	CartesianCoord			orig_pos, orig_vel, pred_vel, new_coord;
@@ -565,11 +588,15 @@ static void correct_tracers(struct All_variables *E)
 
 static void find_tracers(struct All_variables *E)
 {
-
-    int						iel, j, iprevious_element;
+    int						j;
+	ElementID				iel, iprevious_element;
 	TracerList::iterator	tr;
-    double					begin_time = CPU_time0();
-
+    double					begin_time;
+	CartesianCoord			cc;
+	SphericalCoord			sc;
+	
+	begin_time = CPU_time0();
+	
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
         /* initialize arrays and statistical counters */
@@ -580,14 +607,11 @@ static void find_tracers(struct All_variables *E)
         }
 
         for (tr=E->trace.tracers[j].begin();tr!=E->trace.tracers[j].end();) {
-
-			CartesianCoord		cc;
-			SphericalCoord		sc;
 			
 			sc = tr->getSphericalPos();
 			cc = tr->getCartesianPos();
 
-            iprevious_element=tr->ielement();
+            iprevious_element = tr->ielement();
 
             iel=(E->trace.iget_element)(E,j,iprevious_element,cc,sc);
             ///* debug *
@@ -602,7 +626,6 @@ static void find_tracers(struct All_variables *E)
                 /* tracer is inside other processors */
 				E->trace.escaped_tracers[j].push_back(*tr);
 				tr=E->trace.tracers[j].erase(tr);
-				//fprintf(stderr, "ejected!\n" );
             } else if (iel == -1) {
                 /* tracer is inside this processor,
                  * but cannot find its element.
@@ -610,7 +633,7 @@ static void find_tracers(struct All_variables *E)
 
                 if (E->trace.itracer_warnings) exit(10);
 
-				tr=E->trace.tracers[j].erase(tr);
+				tr = E->trace.tracers[j].erase(tr);
             } else {
 				tr++;
 			}
@@ -619,7 +642,6 @@ static void find_tracers(struct All_variables *E)
 
     } /* end j */
 
-
     /* Now take care of tracers that exited cap */
 
     if (E->parallel.nprocxy == 12)
@@ -627,10 +649,7 @@ static void find_tracers(struct All_variables *E)
     else
         regional_lost_souls(E);
 
-
     E->trace.find_tracers_time += CPU_time0() - begin_time;
-
-    return;
 }
 
 
@@ -641,8 +660,8 @@ static void find_tracers(struct All_variables *E)
 
 void count_tracers_of_flavors(struct All_variables *E)
 {
-
-    int j, flavor, e, kk;
+    int						j, flavor, kk;
+	ElementID				e;
 	TracerList::iterator	tr;
 
     for (j=1; j<=E->sphere.caps_per_proc; j++) {
@@ -674,15 +693,11 @@ void count_tracers_of_flavors(struct All_variables *E)
     }
     fflush(E->trace.fpt);
     /**/
-
-    return;
 }
-
 
 
 void initialize_tracers(struct All_variables *E)
 {
-
 	E->trace.tracers = new TracerList[13];
 	E->trace.escaped_tracers = new TracerList[13];
 	
@@ -705,16 +720,13 @@ void initialize_tracers(struct All_variables *E)
     if(E->parallel.me==0)
         fprintf(stderr, "Sum of Tracers: %d\n", E->trace.ilast_tracer_count);
 
-    /* find elements */
-
+    // Find elements
     find_tracers(E);
 
     /* count # of tracers of each flavor */
 
     if (E->trace.nflavors > 0)
         count_tracers_of_flavors(E);
-	
-    return;
 }
 
 
@@ -724,9 +736,7 @@ void initialize_tracers(struct All_variables *E)
 
 static void make_tracer_array(struct All_variables *E)
 {
-
-    int tracers_cap;
-    int j;
+    int tracers_cap, j;
     double processor_fraction;
 
     if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
@@ -745,12 +755,9 @@ static void make_tracer_array(struct All_variables *E)
 
     }/* end j */
 
-
     /* Initialize tracer flavors */
     if (E->trace.nflavors) init_tracer_flavors(E);
 }
-
-
 
 static void generate_random_tracers(struct All_variables *E,
                                     int tracers_cap, int j)
@@ -852,7 +859,6 @@ static void generate_random_tracers(struct All_variables *E,
 
 static void read_tracer_file(struct All_variables *E)
 {
-
     char input_s[1000];
 
     int number_of_tracers, ncolumns;
@@ -896,7 +902,7 @@ static void read_tracer_file(struct All_variables *E)
 
         allocate_tracer_arrays(E,j,iestimate);
 
-        for (kk=1;kk<=number_of_tracers;kk++) {
+        for (kk=0;kk<number_of_tracers;kk++) {
 			SphericalCoord		in_coord_sph;
 			CartesianCoord		in_coord_cc;
             int					len, ncol;
@@ -938,7 +944,7 @@ static void read_tracer_file(struct All_variables *E)
 			new_tracer.set_flavor(buffer[3]);
 			E->trace.tracers[j].push_back(new_tracer);
 
-        } /* end kk, number of tracers */
+        } /* end number of tracers */
 
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
                 E->trace.tracers[j].size());
@@ -1108,7 +1114,6 @@ static void read_old_tracer_file(struct All_variables *E)
 
 static void check_sum(struct All_variables *E)
 {
-
     int number, iold_number;
 
     number = isum_tracers(E);
@@ -1124,8 +1129,6 @@ static void check_sum(struct All_variables *E)
     }
 
     E->trace.ilast_tracer_count = number;
-
-    return;
 }
 
 
@@ -1135,15 +1138,12 @@ static void check_sum(struct All_variables *E)
 
 static int isum_tracers(struct All_variables *E)
 {
-    int imycount;
-    int iallcount;
-    int j;
+    int j, imycount, iallcount;
 
-    iallcount = 0;
-
-    imycount = 0;
+    iallcount = imycount = 0;
+	
     for (j=1; j<=E->sphere.caps_per_proc; j++)
-        imycount = imycount + E->trace.tracers[j].size();
+        imycount += E->trace.tracers[j].size();
 
     MPI_Allreduce(&imycount,&iallcount,1,MPI_INT,MPI_SUM,E->parallel.world);
 
@@ -1277,16 +1277,14 @@ void get_neighboring_caps(struct All_variables *E)
             n = 0;
             for (i=0; i<ncorners; i++) {
 				SphericalCoord	sc;
-				CartesianCoord	cc;
 				
                 theta = rr[kk][n++];
                 phi = rr[kk][n++];
                 rad = E->sphere.ro;
 				
 				sc = SphericalCoord(theta, phi, rad);
-				cc = sc.toCartesian();
 				
-				E->trace.boundaries[kk].setBoundary(i, cc, sc);
+				E->trace.boundaries[kk].setBoundary(i, sc);
             }
         } /* end kk, number of neighbors */
 
@@ -1321,7 +1319,6 @@ void get_neighboring_caps(struct All_variables *E)
 void allocate_tracer_arrays(struct All_variables *E,
                             int j, int number_of_tracers)
 {
-
     int kk;
 
     if (E->trace.nflavors > 0) {
@@ -1336,8 +1333,6 @@ void allocate_tracer_arrays(struct All_variables *E,
     }
 
     fflush(E->trace.fpt);
-
-    return;
 }
 
 
@@ -1365,22 +1360,18 @@ int icheck_processor_shell(struct All_variables *E,
     top_r = E->sx[j][3][noz];
     bottom_r = E->sx[j][3][1];
 
-    /* First check bottom */
-
+    // First check bottom
     if (rad<bottom_r) return -99;
 
-    /* Check top */
-
+    // Check top
     if (rad<top_r) return 1;
 
-    /* top processor */
-
+    // top processor
     if ( (rad<=top_r) && (E->parallel.me_loc[3]==nprocz-1) ) return 1;
 
-    /* If here, means point is above processor */
+    // If here, means point is above processor
     return 0;
 }
-
 
 /********* ICHECK THAT PROCESSOR SHELL ********/
 /*                                            */
@@ -1396,7 +1387,6 @@ int icheck_processor_shell(struct All_variables *E,
 int icheck_that_processor_shell(struct All_variables *E,
                                 int j, int nprocessor, double rad)
 {
-    int icheck_processor_shell();
     int me = E->parallel.me;
 
     /* nprocessor is right on top of me */
@@ -1420,5 +1410,3 @@ int icheck_that_processor_shell(struct All_variables *E,
 
     return 0;
 }
-
-
