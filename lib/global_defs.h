@@ -530,7 +530,7 @@ struct CONTROL {
 #ifdef USE_GGRD
   struct ggrd_master ggrd;
   float *surface_rayleigh;
-  int ggrd_allow_mixed_vbcs,ggrd_comp_smooth;
+  int ggrd_allow_mixed_vbcs,ggrd_comp_smooth,ggrd_tinit_nl_scale;
   float ggrd_vtop_omega[4];
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;

@@ -285,6 +285,7 @@ void read_initial_settings(struct All_variables *E)
   /* first the problem type (defines subsequent behaviour) */
 
   input_string("Problem",E->control.PROBLEM_TYPE,"convection",m);
+
   if ( strcmp(E->control.PROBLEM_TYPE,"convection") == 0)
     set_convection_defaults(E);
   else if ( strcmp(E->control.PROBLEM_TYPE,"convection-chemical") == 0)

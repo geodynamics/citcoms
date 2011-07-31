@@ -143,7 +143,7 @@ static void print_convergence_progress(struct All_variables *E,
             "div/v=%.2e dv/v=%.2e dp/p=%.2e step %d\n",
             count, t, v_norm, p_norm, div, dv, dp,
             E->monitor.solution_cycles);
-
+    fflush(stderr);
     return;
 }
 

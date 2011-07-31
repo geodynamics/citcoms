@@ -95,8 +95,9 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   int mpi_inmsg, mpi_success_message = 1;
   static ggrd_boolean shift_to_pos_lon = FALSE;	/* this should not be needed anymore */
   ggrd_boolean use_nearneighbor;
-  report(E,"ggrd_init_tracer_flavors: ggrd mat init");
+
   int only_one_layer,this_layer;
+  report(E,"ggrd_init_tracer_flavors: ggrd mat init");
   /* 
      are we global?
   */
@@ -177,7 +178,10 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   ggrd_grdtrack_free_gstruc(ggrd_ict);
   report(E,"ggrd tracer init done");
   if(E->parallel.me == 0)
-    fprintf(stderr,"ggrd tracer init OK\n");
+    if(only_one_layer)
+      fprintf(stderr,"ggrd tracer init OK for layer %i\n",-E->trace.ggrd_layers);
+    else
+      fprintf(stderr,"ggrd tracer init OK for all layers <= %i\n",E->trace.ggrd_layers);
 }
 
 void ggrd_full_temp_init(struct All_variables *E)
@@ -297,10 +301,19 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
 	    fprintf(stderr,"%g %g %g\n",E->sx[m][2][node]*57.29577951308232087,
 		    90-E->sx[m][1][node]*57.29577951308232087,depth);
 		    
-	    myerror(E,"ggrd__temp_init_general: interpolation error");
-
+	    myerror(E,"ggrd_temp_init_general: interpolation error");
 	  }
-	  
+	  if(E->control.ggrd_tinit_nl_scale){ /* nonlinear scaling,
+						 downeighing negative
+						 anomalies. this is
+						 meant for seismic
+						 tomography with
+						 velocity anomalies in
+						 the +/- 10% range,
+						 given as percent
+					      */
+	    tadd = (0.625*tadd+0.03125*tadd*tadd);
+	  }
 	  if(depth < E->control.ggrd_lower_depth_km){
 	    /*
 	      mean temp is (top+bot)/2 + offset

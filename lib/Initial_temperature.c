@@ -195,6 +195,10 @@ void tic_input(struct All_variables *E)
       input_string("ggrd_tinit_prem_file",
 		   E->control.ggrd.temp.prem.model_filename,"hc/prem/prem.dat", 
 		   E->parallel.me); /* PREM model filename */
+
+      /* non-linear scaling, downweighing negative anomalies? */
+      input_boolean("ggrd_tinit_nl_scale",&(E->control.ggrd_tinit_nl_scale),"off",E->parallel.me);
+    
 #else
       fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
       parallel_process_termination();
