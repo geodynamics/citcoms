@@ -35,16 +35,13 @@
 
 static void get_2dshape(struct All_variables *E,
                         int j, ElementID nelem,
-                        double u, double v,
+                        CoordUV uv,
                         int iwedge, double * shape2d);
 static void get_radial_shape(struct All_variables *E,
                              int j, ElementID nelem,
                              double rad, double *shaperad);
-static void spherical_to_uv(struct All_variables *E, int j,
-                            double theta, double phi,
-                            double *u, double *v);
-static void make_regular_grid(struct All_variables *E);
-static void write_trace_instructions(struct All_variables *E);
+static CoordUV spherical_to_uv(struct All_variables *E,
+                            SphericalCoord sc);
 static int icheck_column_neighbors(struct All_variables *E,
                                    int j, ElementID nel,
                                    CartesianCoord cc,
@@ -67,8 +64,7 @@ static int icheck_bounds(struct All_variables *E,
                          CartesianCoord test_point,
                          const CapBoundary bounds);
 static double findradial(CartesianCoord vec,
-                         double cost, double sint,
-                         double cosf, double sinf);
+                         BoundaryPoint bp);
 static void fix_radius(struct All_variables *E,
                        SphericalCoord &sc,
                        CartesianCoord &cc);
@@ -79,14 +75,11 @@ static int iget_radial_element(struct All_variables *E,
 static int iget_regel(struct All_variables *E, int j,
                       double theta, double phi,
                       int *ntheta, int *nphi);
-static void define_uv_space(struct All_variables *E);
-static void determine_shape_coefficients(struct All_variables *E);
 static void full_put_lost_tracers(struct All_variables *E,
                                   int isend[13][13], double *send[13][13]);
 void pdebug(struct All_variables *E, int i);
 int full_icheck_cap(struct All_variables *E, int icap,
                     CartesianCoord cc, double rad);
-
 
 
 /******* FULL TRACER INPUT *********************/
@@ -109,61 +102,6 @@ void full_tracer_input(struct All_variables *E)
     E->trace.ianalytical_tracer_test=0;
     /* input_int("analytical_tracer_test",&(E->trace.ianalytical_tracer_test),
               "0,0,nomax",m); */
-}
-
-/***** FULL TRACER SETUP ************************/
-
-void full_tracer_setup(struct All_variables *E)
-{
-
-    char output_file[200];
-    double begin_time = CPU_time0();
-
-    /* Some error control */
-    if (E->sphere.caps_per_proc>1) {
-            fprintf(stderr,"This code does not work for multiple caps per processor!\n");
-            parallel_process_termination();
-    }
-
-    /* open tracing output file */
-    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
-    E->trace.fpt=fopen(output_file,"w");
-
-
-    /* reset statistical counters */
-    E->trace.istat_isend=0;
-    E->trace.istat_iempty=0;
-    E->trace.istat_elements_checked=0;
-    E->trace.istat1=0;
-
-    /* some obscure initial parameters */
-    /* This parameter specifies how close a tracer can get to the boundary */
-    E->trace.box_cushion=0.00001;
-
-    write_trace_instructions(E);
-
-
-    /* Gnometric projection for velocity interpolation */
-    define_uv_space(E);
-    determine_shape_coefficients(E);
-
-    /* The bounding box of neiboring processors */
-    get_neighboring_caps(E);
-
-    /* Fine-grained regular grid to search tracers */
-    make_regular_grid(E);
-
-    if (E->trace.ianalytical_tracer_test==1) {
-        //TODO: walk into this code...
-        analytical_test(E);
-        parallel_process_termination();
-    }
-
-    if (E->composition.on)
-        composition_setup(E);
-
-    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
-            CPU_time0() - begin_time);
 }
 
 
@@ -597,11 +535,10 @@ void full_lost_souls(struct All_variables *E)
 
         isum[j]=0;
         for (ivertical_neighbor=1;ivertical_neighbor<=E->parallel.TNUM_PASSz[lev];ivertical_neighbor++) {
-            isum[j]=isum[j]+ireceive_z[j][ivertical_neighbor];
+            isum[j] += ireceive_z[j][ivertical_neighbor];
         }
 
-        isum[j]=isum[j]+irec[j];
-
+        isum[j] += irec[j];
         isize[j]=isum[j]*temp_tracer.size();
 
         if (isize[j]>0) {
@@ -789,7 +726,7 @@ void full_get_shape_functions(struct All_variables *E,
     int ival;
     int itry;
 
-    double u,v;
+	CoordUV		uv;
     double shape2d[4];
     double shaperad[3];
     double shape[7];
@@ -800,7 +737,7 @@ void full_get_shape_functions(struct All_variables *E,
 
     /* find u and v using spherical coordinates */
 
-    spherical_to_uv(E,j,sc._theta,sc._phi,&u,&v);
+    uv = spherical_to_uv(E,sc);
 
     inum=0;
     itry=1;
@@ -816,7 +753,7 @@ void full_get_shape_functions(struct All_variables *E,
     /* determine shape functions of wedge */
     /* There are 3 shape functions for the triangular wedge */
 
-    get_2dshape(E,j,nelem,u,v,iwedge,shape2d);
+    get_2dshape(E,j,nelem,uv,iwedge,shape2d);
 
     /* if any shape functions are negative, goto next wedge */
 
@@ -835,7 +772,7 @@ void full_get_shape_functions(struct All_variables *E,
 					CartesianCoord	cc;
                     fprintf(E->trace.fpt,"ERROR(gnomonic_interpolation)-inum>1\n");
                     fprintf(E->trace.fpt,"shape %f %f %f\n",shape2d[1],shape2d[2],shape2d[3]);
-                    fprintf(E->trace.fpt,"u %f v %f element: %d \n",u,v, nelem);
+                    fprintf(E->trace.fpt,"u %f v %f element: %d \n",uv.u,uv.v, nelem);
                     fprintf(E->trace.fpt,"Element uv boundaries: \n");
                     for(kk=1;kk<=4;kk++) {
                         i = (E->ien[j][nelem].node[kk] - 1) / E->lmesh.noz + 1;
@@ -894,26 +831,6 @@ void full_get_shape_functions(struct All_variables *E,
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
             shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
     /**/
-
-    return;
-}
-
-
-double full_interpolate_data(struct All_variables *E,
-                             double shp[9], double data[9])
-{
-    int iwedge = shp[0];
-
-    if (iwedge==1)
-        return data[1]*shp[1] + data[2]*shp[2] + data[3]*shp[3]
-            + data[5]*shp[4] + data[6]*shp[5] + data[7]*shp[6];
-
-    if (iwedge==2)
-        return data[1]*shp[1] + data[3]*shp[2] + data[4]*shp[3]
-            + data[5]*shp[4] + data[7]*shp[5] + data[8]*shp[6];
-
-    fprintf(stderr, "full_interpolate_data: shouldn't be here\n");
-    exit(2);
 }
 
 
@@ -947,7 +864,7 @@ CartesianCoord full_get_velocity(struct All_variables *E,
 
     double shape[9];
     double VV[4][9];
-    double vx[7],vy[7],vz[7];
+    double vx[6],vy[6],vz[6];
 
     full_get_shape_functions(E, shape, nelem, sc);
     iwedge=shape[0];
@@ -959,53 +876,53 @@ CartesianCoord full_get_velocity(struct All_variables *E,
 
     if (iwedge==1)
         {
-            vx[1]=VV[1][1];
-            vx[2]=VV[1][2];
-            vx[3]=VV[1][3];
-            vx[4]=VV[1][5];
-            vx[5]=VV[1][6];
-            vx[6]=VV[1][7];
-            vy[1]=VV[2][1];
-            vy[2]=VV[2][2];
-            vy[3]=VV[2][3];
-            vy[4]=VV[2][5];
-            vy[5]=VV[2][6];
-            vy[6]=VV[2][7];
-            vz[1]=VV[3][1];
-            vz[2]=VV[3][2];
-            vz[3]=VV[3][3];
-            vz[4]=VV[3][5];
-            vz[5]=VV[3][6];
-            vz[6]=VV[3][7];
+            vx[0]=VV[1][1];
+            vx[1]=VV[1][2];
+            vx[2]=VV[1][3];
+            vx[3]=VV[1][5];
+            vx[4]=VV[1][6];
+            vx[5]=VV[1][7];
+            vy[0]=VV[2][1];
+            vy[1]=VV[2][2];
+            vy[2]=VV[2][3];
+            vy[3]=VV[2][5];
+            vy[4]=VV[2][6];
+            vy[5]=VV[2][7];
+            vz[0]=VV[3][1];
+            vz[1]=VV[3][2];
+            vz[2]=VV[3][3];
+            vz[3]=VV[3][5];
+            vz[4]=VV[3][6];
+            vz[5]=VV[3][7];
         }
     if (iwedge==2)
         {
-            vx[1]=VV[1][1];
-            vx[2]=VV[1][3];
-            vx[3]=VV[1][4];
-            vx[4]=VV[1][5];
-            vx[5]=VV[1][7];
-            vx[6]=VV[1][8];
-            vy[1]=VV[2][1];
-            vy[2]=VV[2][3];
-            vy[3]=VV[2][4];
-            vy[4]=VV[2][5];
-            vy[5]=VV[2][7];
-            vy[6]=VV[2][8];
-            vz[1]=VV[3][1];
-            vz[2]=VV[3][3];
-            vz[3]=VV[3][4];
-            vz[4]=VV[3][5];
-            vz[5]=VV[3][7];
-            vz[6]=VV[3][8];
+            vx[0]=VV[1][1];
+            vx[1]=VV[1][3];
+            vx[2]=VV[1][4];
+            vx[3]=VV[1][5];
+            vx[4]=VV[1][7];
+            vx[5]=VV[1][8];
+            vy[0]=VV[2][1];
+            vy[1]=VV[2][3];
+            vy[2]=VV[2][4];
+            vy[3]=VV[2][5];
+            vy[4]=VV[2][7];
+            vy[5]=VV[2][8];
+            vz[0]=VV[3][1];
+            vz[1]=VV[3][3];
+            vz[2]=VV[3][4];
+            vz[3]=VV[3][5];
+            vz[4]=VV[3][7];
+            vz[5]=VV[3][8];
         }
 
-	return CartesianCoord(vx[1]*shape[1]+vx[2]*shape[2]+shape[3]*vx[3]+
-						  vx[4]*shape[4]+vx[5]*shape[5]+shape[6]*vx[6],
-						  vy[1]*shape[1]+vy[2]*shape[2]+shape[3]*vy[3]+
-						  vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6],
-						  vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
-						  vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6]);
+	return CartesianCoord(vx[0]*shape[1]+vx[1]*shape[2]+shape[3]*vx[2]+
+						  vx[3]*shape[4]+vx[4]*shape[5]+shape[6]*vx[5],
+						  vy[0]*shape[1]+vy[1]*shape[2]+shape[3]*vy[2]+
+						  vy[3]*shape[4]+vy[4]*shape[5]+shape[6]*vy[5],
+						  vz[0]*shape[1]+vz[1]*shape[2]+shape[3]*vz[2]+
+						  vz[3]*shape[4]+vz[4]*shape[5]+shape[6]*vz[5]);
 }
 
 /***************************************************************/
@@ -1018,7 +935,7 @@ CartesianCoord full_get_velocity(struct All_variables *E,
 
 static void get_2dshape(struct All_variables *E,
                         int j, ElementID nelem,
-                        double u, double v,
+                        CoordUV uv,
                         int iwedge, double * shape2d)
 {
 
@@ -1032,7 +949,7 @@ static void get_2dshape(struct All_variables *E,
     a1=E->trace.shape_coefs[j][iwedge][2][n];
     a2=E->trace.shape_coefs[j][iwedge][3][n];
 
-    shape2d[1]=a0+a1*u+a2*v;
+    shape2d[1]=a0+a1*uv.u+a2*uv.v;
 
     /* shape function 2 */
 
@@ -1040,7 +957,7 @@ static void get_2dshape(struct All_variables *E,
     a1=E->trace.shape_coefs[j][iwedge][5][n];
     a2=E->trace.shape_coefs[j][iwedge][6][n];
 
-    shape2d[2]=a0+a1*u+a2*v;
+    shape2d[2]=a0+a1*uv.u+a2*uv.v;
 
     /* shape function 3 */
 
@@ -1048,14 +965,12 @@ static void get_2dshape(struct All_variables *E,
     a1=E->trace.shape_coefs[j][iwedge][8][n];
     a2=E->trace.shape_coefs[j][iwedge][9][n];
 
-    shape2d[3]=a0+a1*u+a2*v;
+    shape2d[3]=a0+a1*uv.u+a2*uv.v;
 
     /** debug **
     fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
             nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
     /**/
-
-    return;
 }
 
 /***************************************************************/
@@ -1107,8 +1022,6 @@ static void get_radial_shape(struct All_variables *E,
             fflush(E->trace.fpt);
             exit(10);
         }
-
-    return;
 }
 
 
@@ -1121,9 +1034,8 @@ static void get_radial_shape(struct All_variables *E,
 /* This function transforms theta and phi to new coords       */
 /* u and v using gnomonic projection.                          */
 
-static void spherical_to_uv(struct All_variables *E, int j,
-                            double theta, double phi,
-                            double *u, double *v)
+static CoordUV spherical_to_uv(struct All_variables *E,
+                            SphericalCoord sc)
 {
     double phi_f;
     double cosc;
@@ -1137,27 +1049,24 @@ static void spherical_to_uv(struct All_variables *E, int j,
     cos_theta_f = E->gnomonic[0].u;
     sin_theta_f = E->gnomonic[0].v;
 
-    cost=cos(theta);
+    cost=cos(sc._theta);
     /*
       sint=sin(theta);
     */
     sint=sqrt(1.0-cost*cost);
 
-    cosp2=cos(phi-phi_f);
-    sinp2=sin(phi-phi_f);
+    cosp2=cos(sc._phi-phi_f);
+    sinp2=sin(sc._phi-phi_f);
 
     cosc=cos_theta_f*cost+sin_theta_f*sint*cosp2;
     cosc=1.0/cosc;
-
-    *u=sint*sinp2*cosc;
-    *v=(sin_theta_f*cost-cos_theta_f*sint*cosp2)*cosc;
+	
+	return CoordUV(sint*sinp2*cosc, (sin_theta_f*cost-cos_theta_f*sint*cosp2)*cosc);
 
     /** debug **
     fprintf(E->trace.fpt, "(%e %e) -> (%e %e)\n",
             theta, phi, *u, *v);
     /**/
-
-    return;
 }
 
 
@@ -1166,7 +1075,7 @@ static void spherical_to_uv(struct All_variables *E, int j,
 /* This function generates the finer regular grid which is    */
 /* mapped to real elements                                    */
 
-static void make_regular_grid(struct All_variables *E)
+void make_regular_grid(struct All_variables *E)
 {
     int j;
     int kk;
@@ -1543,7 +1452,6 @@ static void make_regular_grid(struct All_variables *E)
 	{
 		for (kk=1;kk<=numregnodes;kk++)
 		{
-			
 			if (E->trace.regnodetoel[j][kk]!=-99)
 			{
 				if ( (E->trace.regnodetoel[j][kk]<1)||(E->trace.regnodetoel[j][kk]>E->lmesh.nel) )
@@ -1795,98 +1703,6 @@ static void make_regular_grid(struct All_variables *E)
 }
 
 
-/**** WRITE TRACE INSTRUCTIONS ***************/
-static void write_trace_instructions(struct All_variables *E)
-{
-    int i;
-	
-    fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
-    fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
-	
-	switch (E->trace.ic_method) {
-		case 0:
-			fprintf(E->trace.fpt,"Generating New Tracer Array\n");
-			fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
-			break;
-		case 1:
-			fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
-			break;
-		case 2:
-			fprintf(E->trace.fpt,"Reading individual tracer files\n");
-			break;
-	}
-	
-    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
-	
-    if (E->trace.nflavors && E->trace.ic_method==0) {
-        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
-        if (E->trace.ic_method_for_flavors == 0) {
-			/* default mode 0 */
-            fprintf(E->trace.fpt,"Layered tracer flavors\n");
-            for (i=0; i<E->trace.nflavors-1; i++)
-                fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
-        }
-#ifdef USE_GGRD
-		else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
-			/* ggrd modes 1 and 99 (99  is override for restart) */
-            fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
-			if( E->trace.ggrd_layers > 0)
-				fprintf(E->trace.fpt,"file: %s top %i layers\n",E->trace.ggrd_file,
-						E->trace.ggrd_layers);
-			else
-				fprintf(E->trace.fpt,"file: %s only layer %i\n",E->trace.ggrd_file,
-						-E->trace.ggrd_layers);
-			
-		}
-#endif
-        else {
-            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
-    }
-	
-    for (i=0; i<E->trace.nflavors-2; i++) {
-        if (E->trace.z_interface[i] < E->trace.z_interface[i+1]) {
-            fprintf(E->trace.fpt,"Sorry - The %d-th z_interface is smaller than the next one.\n", i);
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
-    }
-	
-    /* regular grid stuff */
-	
-    fprintf(E->trace.fpt,"Regular Grid-> deltheta: %f delphi: %f\n",
-            E->trace.deltheta[0],E->trace.delphi[0]);
-	
-    /* more obscure stuff */
-	
-    fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
-    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n", 12);
-    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n", 1);
-    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n", 13);
-	
-    /* analytical test */
-	
-    if (E->trace.ianalytical_tracer_test==1)
-	{
-		fprintf(E->trace.fpt,"\n\n ! Analytical Test Being Performed ! \n");
-		fprintf(E->trace.fpt,"(some of the above parameters may not be used or applied\n");
-		fprintf(E->trace.fpt,"Velocity functions given in main code\n");
-		fflush(E->trace.fpt);
-	}
-	
-    if (E->trace.itracer_warnings==0)
-	{
-		fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-		fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-		fflush(E->trace.fpt);
-	}
-	
-    write_composition_instructions(E);
-}
-
-
 /*********  ICHECK COLUMN NEIGHBORS ***************************/
 /*                                                            */
 /* This function check whether a point is in a neighboring    */
@@ -2126,10 +1942,10 @@ static int icheck_bounds(struct All_variables *E,
 	
     /* make vectors from node to node */
 	
-    v12 = bounds.cartesian_boundary[1] - bounds.cartesian_boundary[0];
-    v23 = bounds.cartesian_boundary[2] - bounds.cartesian_boundary[1];
-    v34 = bounds.cartesian_boundary[3] - bounds.cartesian_boundary[2];
-    v41 = bounds.cartesian_boundary[0] - bounds.cartesian_boundary[3];
+    v12 = bounds[1].cartesian() - bounds[0].cartesian();
+    v23 = bounds[2].cartesian() - bounds[1].cartesian();
+    v34 = bounds[3].cartesian() - bounds[2].cartesian();
+    v41 = bounds[0].cartesian() - bounds[3].cartesian();
 	
 try_again:
 	
@@ -2137,10 +1953,10 @@ try_again:
 	
     /* make vectors from test point to node */
 	
-	v1p = test_point - bounds.cartesian_boundary[0];
-	v2p = test_point - bounds.cartesian_boundary[1];
-	v3p = test_point - bounds.cartesian_boundary[2];
-	v4p = test_point - bounds.cartesian_boundary[3];
+	v1p = test_point - bounds[0].cartesian();
+	v2p = test_point - bounds[1].cartesian();
+	v3p = test_point - bounds[2].cartesian();
+	v4p = test_point - bounds[3].cartesian();
 	
     /* Calculate cross products */
 	
@@ -2151,10 +1967,10 @@ try_again:
 	
     /* Calculate radial component of cross products */
 	
-    rad1=findradial(cross1,bounds.cos_theta[0],bounds.sin_theta[0],bounds.cos_phi[0],bounds.sin_phi[0]);
-    rad2=findradial(cross2,bounds.cos_theta[1],bounds.sin_theta[1],bounds.cos_phi[1],bounds.sin_phi[1]);
-    rad3=findradial(cross3,bounds.cos_theta[2],bounds.sin_theta[2],bounds.cos_phi[2],bounds.sin_phi[2]);
-    rad4=findradial(cross4,bounds.cos_theta[3],bounds.sin_theta[3],bounds.cos_phi[3],bounds.sin_phi[3]);
+    rad1=findradial(cross1,bounds[0]);
+    rad2=findradial(cross2,bounds[1]);
+    rad3=findradial(cross3,bounds[2]);
+    rad4=findradial(cross4,bounds[3]);
 	
     /*  Check if any radial components is zero (along a boundary), adjust if so */
     /*  Hopefully, this doesn't happen often, may be expensive                  */
@@ -2212,14 +2028,13 @@ try_again:
 /* This function finds the radial component of a Cartesian vector           */
 
 static double findradial(CartesianCoord vec,
-                         double cost, double sint,
-                         double cosf, double sinf)
+                         BoundaryPoint bp)
 {
     double radialparti,radialpartj,radialpartk;
 
-    radialparti=vec._x*sint*cosf;
-    radialpartj=vec._y*sint*sinf;
-    radialpartk=vec._z*cost;
+    radialparti=vec._x*bp.sin_theta*bp.cos_phi;
+    radialpartj=vec._y*bp.sin_theta*bp.sin_phi;
+    radialpartk=vec._z*bp.cos_theta;
 
 	return radialparti+radialpartj+radialpartk;
 }
@@ -2277,8 +2092,6 @@ static void fix_angle(double *angle)
     double d2 = floor(*angle / two_pi);
 
     *angle -= two_pi * d2;
-
-    return;
 }
 
 /********** IGET ELEMENT *****************************************/
@@ -2294,7 +2107,6 @@ int full_iget_element(struct All_variables *E,
                       CartesianCoord cc,
                       SphericalCoord sc)
 {
-    int icheck_processor_shell();
     int iregel;
     int iel;
     int ntheta,nphi;
@@ -2542,10 +2354,8 @@ static int iget_regel(struct All_variables *E, int j,
                       double theta, double phi,
                       int *ntheta, int *nphi)
 {
-
     int iregel;
     int idum;
-
     double rdum;
 
     /* first check whether theta is in range */
@@ -2584,7 +2394,7 @@ static int iget_regel(struct All_variables *E, int j,
 /* E->gnomonic[node].u = u                                      */
 /* E->gnomonic[node].v = v                                      */
 
-static void define_uv_space(struct All_variables *E)
+void define_uv_space(struct All_variables *E)
 {
     const int j = 1;
     const int lev = E->mesh.levmax;
@@ -2660,7 +2470,7 @@ static void define_uv_space(struct All_variables *E)
 /*                                                             */
 /* shape_coefs[cap][wedge][3 shape functions*3 coefs][nelems]  */
 
-static void determine_shape_coefficients(struct All_variables *E)
+void determine_shape_coefficients(struct All_variables *E)
 {
     const int j = 1;
     int nelem, iwedge, kk, i;
@@ -2766,8 +2576,6 @@ static void determine_shape_coefficients(struct All_variables *E)
 
         } /* end wedge */
     } /* end elem */
-
-    return;
 }
 
 
@@ -2782,8 +2590,6 @@ void full_keep_within_bounds(struct All_variables *E,
 {
     sc.constrainThetaPhi();
     fix_radius(E,sc,cc);
-
-    return;
 }
 
 
@@ -2808,14 +2614,12 @@ void analytical_test(struct All_variables *E)
     double runge_dt;
     double theta,phi,rad;
     double time;
-    double vel_s[4];
-    double vel_c[4];
     double my_theta0,my_phi0,my_rad0;
     double my_thetaf,my_phif,my_radf;
     double theta0,phi0,rad0;
     double thetaf,phif,radf;
-    double x0_s[4],xf_s[4];
-    double x0_c[4],xf_c[4];
+	SphericalCoord	vel_s, x0_s, xf_s;
+	CartesianCoord	vel_c, x0_c, xf_c;
     double vec[4];
     double runge_path_length,runge_time;
     double x0,y0,z0;
@@ -2853,9 +2657,9 @@ void analytical_test(struct All_variables *E)
 
                     analytical_test_function(E,SphericalCoord(theta,phi,rad),vel_s,vel_c);
 
-                    E->sphere.cap[j].V[1][kk]=vel_s[1];
-                    E->sphere.cap[j].V[2][kk]=vel_s[2];
-                    E->sphere.cap[j].V[3][kk]=vel_s[3];
+                    E->sphere.cap[j].V[1][kk]=vel_s._theta;
+                    E->sphere.cap[j].V[2][kk]=vel_s._phi;
+                    E->sphere.cap[j].V[3][kk]=vel_s._rad;
                 }
         }
 
@@ -2976,15 +2780,12 @@ void analytical_test(struct All_variables *E)
     MPI_Allreduce(&my_phif,&phif,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
     MPI_Allreduce(&my_radf,&radf,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
-    x0_s[1]=theta0;
-    x0_s[2]=phi0;
-    x0_s[3]=rad0;
+	x0_s = SphericalCoord(theta0, phi0, rad0);
 
     nrunge_refinement=1000;
 
     nrunge_steps=nsteps*nrunge_refinement;
     runge_dt=dt/(1.0*nrunge_refinement);
-
 
     analytical_runge_kutte(E,nrunge_steps,runge_dt,x0_s,x0_c,xf_s,xf_c,vec);
 
@@ -2996,15 +2797,15 @@ void analytical_test(struct All_variables *E)
 	CartesianCoord	ccf;
 	SphericalCoord	scf(thetaf, phif, radf);
 	
-    x0=x0_c[1];
-    y0=x0_c[2];
-    z0=x0_c[3];
+    x0=x0_c._x;
+    y0=x0_c._y;
+    z0=x0_c._z;
 
     /* convert final citcom coords into cartesian */
 
 	ccf = scf.toCartesian();
 
-    difference=sqrt((ccf._x-xf_c[1])*(ccf._x-xf_c[1])+(ccf._y-xf_c[2])*(ccf._y-xf_c[2])+(ccf._z-xf_c[3])*(ccf._z-xf_c[3]));
+    difference=ccf.dist(xf_c);
 
     difperpath=difference/runge_path_length;
 
@@ -3018,7 +2819,7 @@ void analytical_test(struct All_variables *E)
 
     fprintf(E->trace.fpt,"\n\nRunge-Kutte calculation: steps: %d  dt: %g\n",nrunge_steps,runge_dt);
     fprintf(E->trace.fpt,"                    starting position: theta: %f phi: %f rad: %f\n", theta0,phi0,rad0);
-    fprintf(E->trace.fpt,"                    final position: theta: %f phi: %f rad: %f\n",xf_s[1],xf_s[2],xf_s[3]);
+    fprintf(E->trace.fpt,"                    final position: theta: %f phi: %f rad: %f\n",xf_s._theta,xf_s._phi,xf_s._rad);
     fprintf(E->trace.fpt,"                    path length: %f \n",runge_path_length );
     fprintf(E->trace.fpt,"                    (final time: %f) \n",runge_time );
 
@@ -3034,7 +2835,7 @@ void analytical_test(struct All_variables *E)
 
             fprintf(stderr,"\n\nRunge-Kutte calculation: steps: %d  dt: %f\n",nrunge_steps,runge_dt);
             fprintf(stderr,"                    starting position: theta: %f phi: %f rad: %f\n", theta0,phi0,rad0);
-            fprintf(stderr,"                    final position: theta: %f phi: %f rad: %f\n",xf_s[1],xf_s[2],xf_s[3]);
+            fprintf(stderr,"                    final position: theta: %f phi: %f rad: %f\n",xf_s._theta,xf_s._phi,xf_s._rad);
             fprintf(stderr,"                    path length: %f \n",runge_path_length );
             fprintf(stderr,"                    (final time: %f) \n",runge_time );
 
@@ -3044,33 +2845,29 @@ void analytical_test(struct All_variables *E)
 
     fflush(E->trace.fpt);
 #endif
-    return;
 }
 
 /*************** ANALYTICAL RUNGE KUTTE ******************/
 /*                                                       */
-void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, double *x0_s, double *x0_c, double *xf_s, double *xf_c, double *vec)
+void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt,
+							SphericalCoord &x0_s, CartesianCoord &x0_c,
+							SphericalCoord &xf_s, CartesianCoord &xf_c, double *vec)
 {
-    int kk;
-	
+    int					kk;
 	CartesianCoord		cc0, ccp, ccc, vel0_c, velp_c;
 	SphericalCoord		sc0, scp, scc, vel0_s, velp_s;
+    double				time, path;
 	
-    double time, path;
-	
-	sc0 = SphericalCoord(x0_s[1], x0_s[2], x0_s[3]);
+	sc0 = x0_s;
 	cc0 = sc0.toCartesian();
 	
     /* fill initial cartesian vector to send back */
-	
-    x0_c[1]=cc0._x;
-    x0_c[2]=cc0._y;
-    x0_c[3]=cc0._z;
+	x0_c = cc0;
 	
     time=0.0;
     path=0.0;
 	
-    for (kk=1;kk<=nsteps;kk++)
+    for (kk=0;kk<nsteps;kk++)
 	{
 		// Get velocity at initial position
 		analytical_test_function(E,sc0,vel0_s,vel0_c);
@@ -3093,7 +2890,7 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
 		// Compute path length
 		path += ccc.dist(cc0);
 		
-		time=time+dt;
+		time += dt;
 		
 		cc0 = ccc;
 		
@@ -3102,13 +2899,8 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
 	
     /* fill final spherical and cartesian vectors to send back */
 	
-    xf_s[1]=scc._theta;
-    xf_s[2]=scc._phi;
-    xf_s[3]=scc._rad;
-	
-    xf_c[1]=ccc._x;
-    xf_c[2]=ccc._y;
-    xf_c[3]=ccc._z;
+	xf_s = scc;
+	xf_c = ccc;
 	
     vec[1]=time;
     vec[2]=path;
@@ -3124,34 +2916,13 @@ void analytical_runge_kutte(struct All_variables *E, int nsteps, double dt, doub
 
 void analytical_test_function(struct All_variables *E, SphericalCoord sc, SphericalCoord &vel_s, CartesianCoord &vel_c)
 {
-    double sint,sinf,cost,cosf;
-    double v_theta,v_phi,v_rad;
-    double vx,vy,vz;
-
     /* This is where the function is given in spherical */
-
-    v_theta=50.0*sc._rad*cos(sc._phi);
-    v_phi=100.0*sc._rad*sin(sc._theta);
-    v_rad=25.0*sc._rad;
-
-    vel_s._theta=v_theta;
-    vel_s._phi=v_phi;
-    vel_s._rad=v_rad;
+    vel_s._theta=50.0*sc._rad*cos(sc._phi);
+    vel_s._phi=100.0*sc._rad*sin(sc._theta);
+    vel_s._rad=25.0*sc._rad;
 
     /* Convert the function into cartesian */
-
-    sint=sin(sc._theta);
-    sinf=sin(sc._phi);
-    cost=cos(sc._theta);
-    cosf=cos(sc._phi);
-
-    vx=v_theta*cost*cosf-v_phi*sinf+v_rad*sint*cosf;
-    vy=v_theta*cost*sinf+v_phi*cosf+v_rad*sint*sinf;
-    vz=-v_theta*sint+v_rad*cost;
-
-    vel_c._x=vx;
-    vel_c._y=vy;
-    vel_c._z=vz;
+	vel_c = vel_s.toCartesian();
 }
 
 

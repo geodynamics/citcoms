@@ -832,7 +832,6 @@ void broadcast_vertical(struct All_variables *E,
 
 void remove_rigid_rot(struct All_variables *E)
 {
-    void velo_from_element_d();
     double wx, wy, wz, v_theta, v_phi, cos_t,sin_t,sin_f, cos_f,frd;
     double vx[9], vy[9], vz[9];
     double r, t, f, efac,tg;

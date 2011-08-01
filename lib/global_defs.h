@@ -826,7 +826,6 @@ struct All_variables {
     void (* problem_boundary_conds)(struct All_variables *);
     void (* problem_update_node_positions)(struct All_variables *);
     void (* problem_initial_fields)(struct All_variables *);
-    void (* problem_tracer_setup)(struct All_variables *);
     void (* problem_tracer_output)(struct All_variables *, int);
     void (* problem_update_bcs)(struct All_variables *);
     void (* spec68ial_process_new_velocity)(struct All_variables *);

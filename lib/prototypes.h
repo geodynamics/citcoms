@@ -147,17 +147,18 @@ void spherical_to_uv2(double [2], int, double *, double *, double *, double *);
 void uv_to_spherical(double [2], int, double *, double *, double *, double *);
 void full_coord_of_cap(struct All_variables *, int, int);
 /* Full_tracer_advection.c */
+void define_uv_space(struct All_variables *E);
+void determine_shape_coefficients(struct All_variables *E);
+void make_regular_grid(struct All_variables *E);
 void full_tracer_input(struct All_variables *);
-void full_tracer_setup(struct All_variables *);
 void full_lost_souls(struct All_variables *);
 void full_get_shape_functions(struct All_variables *, double [9], int, SphericalCoord);
-double full_interpolate_data(struct All_variables *, double [9], double [9]);
 CartesianCoord full_get_velocity(struct All_variables *, int, int, SphericalCoord);
 int full_icheck_cap(struct All_variables *, int, CartesianCoord, double);
 int full_iget_element(struct All_variables *, int, int, CartesianCoord, SphericalCoord);
 void full_keep_within_bounds(struct All_variables *, CartesianCoord &, SphericalCoord &);
 void analytical_test(struct All_variables *);
-void analytical_runge_kutte(struct All_variables *, int, double, double *, double *, double *, double *, double *);
+void analytical_runge_kutte(struct All_variables *, int, double, SphericalCoord &, CartesianCoord &, SphericalCoord &, CartesianCoord &, double *);
 void analytical_test_function(struct All_variables *, SphericalCoord, SphericalCoord &, CartesianCoord &);
 void pdebug(struct All_variables *, int);
 /* Full_version_dependent.c */
@@ -421,12 +422,12 @@ void regional_solver_init(struct All_variables *);
 /* Regional_sphere_related.c */
 void regional_coord_of_cap(struct All_variables *, int, int);
 /* Regional_tracer_advection.c */
-void regional_tracer_setup(struct All_variables *);
+void make_mesh_ijk(struct All_variables *E);
 int regional_iget_element(struct All_variables *, int, int, CartesianCoord, SphericalCoord);
 int isearch_all(double *, int, double);
 int isearch_neighbors(double *, int, double, int);
 int regional_icheck_cap(struct All_variables *, int, SphericalCoord, double);
-void regional_get_shape_functions(struct All_variables *, double [9], int, double, double, double);
+void regional_get_shape_functions(struct All_variables *, double [8], int, SphericalCoord);
 double regional_interpolate_data(struct All_variables *, double [9], double [9]);
 CartesianCoord regional_get_velocity(struct All_variables *, int, int, SphericalCoord);
 void regional_keep_within_bounds(struct All_variables *, CartesianCoord &, SphericalCoord &);

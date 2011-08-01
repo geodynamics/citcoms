@@ -45,8 +45,6 @@
 #include "parallel_related.h"
 
 
-static void write_trace_instructions(struct All_variables *E);
-static void make_mesh_ijk(struct All_variables *E);
 static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv,
                               int j);
@@ -55,143 +53,9 @@ int isearch_neighbors(double *array, int nsize,
 int isearch_all(double *array, int nsize, double a);
 
 
-void regional_tracer_setup(struct All_variables *E)
-{
-
-    char output_file[255];
-    void get_neighboring_caps();
-    double CPU_time0();
-    double begin_time = CPU_time0();
-
-    /* Some error control */
-
-    if (E->sphere.caps_per_proc>1) {
-            fprintf(stderr,"This code does not work for multiple caps per processor!\n");
-            parallel_process_termination();
-    }
 
 
-    /* open tracing output file */
-
-    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
-    E->trace.fpt=fopen(output_file,"w");
-
-
-    /* reset statistical counters */
-
-    E->trace.istat_isend=0;
-    E->trace.istat_iempty=0;
-    E->trace.istat_elements_checked=0;
-    E->trace.istat1=0;
-
-
-    /* some obscure initial parameters */
-    /* This parameter specifies how close a tracer can get to the boundary */
-    E->trace.box_cushion=0.00001;
-
-    /* Fixed positions in tracer array */
-    /* Flavor is always in extraq position 0  */
-    /* Current coordinates are always kept in basicq positions 0-5 */
-    /* Other positions may be used depending on science being done */
-
-    write_trace_instructions(E);
-
-    /* The bounding box of neiboring processors */
-    get_neighboring_caps(E);
-
-    make_mesh_ijk(E);
-
-    if (E->composition.on)
-        composition_setup(E);
-
-    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
-            CPU_time0() - begin_time);
-
-    return;
-}
-
-
-/**** WRITE TRACE INSTRUCTIONS ***************/
-static void write_trace_instructions(struct All_variables *E)
-{
-    int i;
-
-    fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
-    fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
-
-    if (E->trace.ic_method==0) {
-        fprintf(E->trace.fpt,"Generating New Tracer Array\n");
-        fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
-    }
-    if (E->trace.ic_method==1) {
-        fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
-    }
-    if (E->trace.ic_method==2) {
-        fprintf(E->trace.fpt,"Read individual tracer files\n");
-    }
-
-    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
-
-    if (E->trace.nflavors && E->trace.ic_method==0) {
-        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
-        if (E->trace.ic_method_for_flavors == 0) {
-            fprintf(E->trace.fpt,"Layered tracer flavors\n");
-            for (i=0; i<E->trace.nflavors-1; i++)
-                fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
-        }
-#ifdef USE_GGRD
-	else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
-	  /* ggrd modes 1 and 99 (99 is override for restart) */
-	  fprintf(stderr,"ggrd regional flavors not implemented\n");
-          fprintf(E->trace.fpt,"ggrd not implemented et for regional, flavor method= %d\n",
-		  E->trace.ic_method_for_flavors);
-	  fflush(E->trace.fpt);
-	  parallel_process_termination();
-	}
-#endif
-        else {
-            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
-    }
-
-    for (i=0; i<E->trace.nflavors-2; i++) {
-        if (E->trace.z_interface[i] < E->trace.z_interface[i+1]) {
-            fprintf(E->trace.fpt,"Sorry - The %d-th z_interface is smaller than the next one.\n", i);
-            fflush(E->trace.fpt);
-            parallel_process_termination();
-        }
-    }
-
-
-
-    /* more obscure stuff */
-
-    fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
-    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n",
-            12);
-    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n",
-            1);
-    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n",
-            13);
-
-
-
-    if (E->trace.itracer_warnings==0) {
-        fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-        fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
-        fflush(E->trace.fpt);
-    }
-
-    write_composition_instructions(E);
-
-
-    return;
-}
-
-
-static void make_mesh_ijk(struct All_variables *E)
+void make_mesh_ijk(struct All_variables *E)
 {
     int m,i,j,k,node;
     int nox,noy,noz;
@@ -256,8 +120,6 @@ static void make_mesh_ijk(struct All_variables *E)
     fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
     parallel_process_termination();
     /**/
-
-    return;
 }
 
 
@@ -282,7 +144,6 @@ int regional_iget_element(struct All_variables *E,
     elz = E->lmesh.elz;
 
     //TODO: take care of south west bound
-
 
     /* Search neighboring elements if the previous element is known */
     if (iprevious_element > 0) {
@@ -376,11 +237,11 @@ int regional_icheck_cap(struct All_variables *E, int icap,
     /* corner 1 is the north-west corner */
     /* corner 3 is the south-east corner */
 
-    theta_min = E->trace.boundaries[icap].spherical_boundary[1]._theta;
-    theta_max = E->trace.boundaries[icap].spherical_boundary[3]._theta;
+    theta_min = E->trace.boundaries[icap][1].spherical_pt._theta;
+    theta_max = E->trace.boundaries[icap][3].spherical_pt._theta;
 
-    phi_min = E->trace.boundaries[icap].spherical_boundary[1]._phi;
-    phi_max = E->trace.boundaries[icap].spherical_boundary[3]._phi;
+    phi_min = E->trace.boundaries[icap][1].spherical_pt._phi;
+    phi_max = E->trace.boundaries[icap][3].spherical_pt._phi;
 
     if ((sc._theta >= theta_min) && (sc._theta < theta_max) &&
         (sc._phi >= phi_min) && (sc._phi < phi_max))
@@ -392,8 +253,8 @@ int regional_icheck_cap(struct All_variables *E, int icap,
 
 
 void regional_get_shape_functions(struct All_variables *E,
-                                  double shp[9], int nelem,
-                                  double theta, double phi, double rad)
+                                  double shp[8], int nelem,
+                                  SphericalCoord sc)
 {
     int e, i, j, k;
     int elx, ely, elz;
@@ -423,13 +284,13 @@ void regional_get_shape_functions(struct All_variables *E,
          dx
     ***/
 
-    tr_dx = theta - E->trace.x_space[i];
+    tr_dx = sc._theta - E->trace.x_space[i];
     dx = E->trace.x_space[i+1] - E->trace.x_space[i];
 
-    tr_dy = phi - E->trace.y_space[j];
+    tr_dy = sc._phi - E->trace.y_space[j];
     dy = E->trace.y_space[j+1] - E->trace.y_space[j];
 
-    tr_dz = rad - E->trace.z_space[k];
+    tr_dz = sc._rad - E->trace.z_space[k];
     dz = E->trace.z_space[k+1] - E->trace.z_space[k];
 
 
@@ -443,38 +304,24 @@ void regional_get_shape_functions(struct All_variables *E,
     /* compute volumetic weighting functions */
     volume = dx*dz*dy;
 
-    shp[1] = (dx-tr_dx) * (dy-tr_dy) * (dz-tr_dz) / volume;
-    shp[2] = tr_dx      * (dy-tr_dy) * (dz-tr_dz) / volume;
-    shp[3] = tr_dx      * tr_dy      * (dz-tr_dz) / volume;
-    shp[4] = (dx-tr_dx) * tr_dy      * (dz-tr_dz) / volume;
-    shp[5] = (dx-tr_dx) * (dy-tr_dy) * tr_dz      / volume;
-    shp[6] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
-    shp[7] = tr_dx      * tr_dy      * tr_dz      / volume;
-    shp[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
+    shp[0] = (dx-tr_dx) * (dy-tr_dy) * (dz-tr_dz) / volume;
+    shp[1] = tr_dx      * (dy-tr_dy) * (dz-tr_dz) / volume;
+    shp[2] = tr_dx      * tr_dy      * (dz-tr_dz) / volume;
+    shp[3] = (dx-tr_dx) * tr_dy      * (dz-tr_dz) / volume;
+    shp[4] = (dx-tr_dx) * (dy-tr_dy) * tr_dz      / volume;
+    shp[5] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
+    shp[6] = tr_dx      * tr_dy      * tr_dz      / volume;
+    shp[7] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
 
     /** debug **
     fprintf(E->trace.fpt, "dr=(%e,%e,%e)  tr_dr=(%e,%e,%e)\n",
             dx, dy, dz, tr_dx, tr_dy, tr_dz);
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e %e %e\n",
-            shp[1], shp[2], shp[3], shp[4], shp[5], shp[6], shp[7], shp[8]);
+            shp[0], shp[1], shp[2], shp[3], shp[4], shp[5], shp[6], shp[7]);
     fprintf(E->trace.fpt, "sum(shp): %e\n",
-            shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]+ shp[8]);
+            shp[0]+ shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]);
     fflush(E->trace.fpt);
     /**/
-    return;
-}
-
-
-double regional_interpolate_data(struct All_variables *E,
-                                 double shp[9], double data[9])
-{
-    int n;
-    double result = 0;
-
-    for(n=1; n<=8; n++)
-        result += data[n] * shp[n];
-
-    return result;
 }
 
 
@@ -484,15 +331,13 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
                            int m, int nelem,
                            SphericalCoord sc)
 {
-    void velo_from_element_d();
-
-    double shp[9], VV[4][9], tmp;
+    double shp[8], VV[4][9], tmp;
     int n, d, node;
     const int sphere_key = 0;
-	double velocity_vector[4];
+	double velocity_vector[3];
 
     /* get shape functions at (theta, phi, rad) */
-    regional_get_shape_functions(E, shp, nelem, sc._theta, sc._phi, sc._rad);
+    regional_get_shape_functions(E, shp, nelem, sc);
 
 
     /* get cartesian velocity */
@@ -503,13 +348,12 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
          Interpolate the velocity on the tracer position
     ***/
 
-    for(d=1; d<=3; d++)
+    for(d=0; d<3; d++)
         velocity_vector[d] = 0;
 
-
-    for(d=1; d<=3; d++) {
-        for(n=1; n<=8; n++)
-            velocity_vector[d] += VV[d][n] * shp[n];
+    for(d=0; d<3; d++) {
+        for(n=0; n<8; n++)
+            velocity_vector[d] += VV[d+1][n+1] * shp[n];
     }
 
 
@@ -530,7 +374,7 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
     fflush(E->trace.fpt);
     /**/
 
-    return CartesianCoord(velocity_vector[1], velocity_vector[2], velocity_vector[3]);
+    return CartesianCoord(velocity_vector[0], velocity_vector[1], velocity_vector[2]);
 }
 
 
@@ -572,9 +416,6 @@ void regional_keep_within_bounds(struct All_variables *E,
 
     if (changed)
         cc = sc.toCartesian();
-
-
-    return;
 }
 
 
@@ -595,15 +436,15 @@ void regional_lost_souls(struct All_variables *E)
 
     int ipass;
 
-    MPI_Status status[4];
-    MPI_Request request[4];
+    MPI_Status				status[4];
+    MPI_Request				request[4];
 
-	Tracer temp_tracer;
+	Tracer					temp_tracer;
 	TracerList::iterator	tr;
 	
-    double CPU_time0();
-    double begin_time = CPU_time0();
+    double begin_time;
 
+	begin_time = CPU_time0();
     E->trace.istat_isend = E->trace.escaped_tracers[j].size();
 
     /* the bounding box */
@@ -881,7 +722,6 @@ void regional_lost_souls(struct All_variables *E)
     free(send[1]);
 
     E->trace.lost_souls_time += CPU_time0() - begin_time;
-    return;
 }
 
 
@@ -950,6 +790,4 @@ static void put_found_tracers(struct All_variables *E,
         /**/
 
     } /* end of for kk */
-
-    return;
 }

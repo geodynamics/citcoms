@@ -74,6 +74,7 @@ void set_elapsed_time(struct All_variables*);
 void set_sphere_harmonics (struct All_variables*);
 void set_starting_age(struct All_variables*);
 void tracer_initial_settings(struct All_variables*);
+void tracer_setup(struct All_variables*);
 void tracer_input(struct All_variables*);
 void viscosity_input(struct All_variables*);
 void vtk_output(struct All_variables*, int);
@@ -183,7 +184,7 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
     if(E->control.tracer) {
 	tracer_initial_settings(E);
-	(E->problem_tracer_setup)(E);
+	tracer_setup(E);
 	if(chatty)fprintf(stderr,"tracer setup done\n");
     }
 

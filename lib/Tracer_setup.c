@@ -53,6 +53,8 @@ int open_file_zipped(char *, FILE **,struct All_variables *);
 void gzip_file(char *);
 #endif
 
+static void write_trace_instructions(struct All_variables *E);
+
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
 void tracer_post_processing(struct All_variables *E);
@@ -234,24 +236,25 @@ void SphericalCoord::constrainThetaPhi(void) {
 }
 
 // Set the boundaries of a cap specified by spherical coordinates
-void CapBoundary::setBoundary(int bnum, SphericalCoord sc) {
-	assert(bnum>=0 && bnum < 4);
-	spherical_boundary[bnum] = sc;
-	cartesian_boundary[bnum] = sc.toCartesian();
-	cos_theta[bnum] = cos(sc._theta);
-	sin_theta[bnum] = sin(sc._theta);
-	cos_phi[bnum] = cos(sc._phi);
-	sin_phi[bnum] = sin(sc._phi);
+void CapBoundary::setBoundary(unsigned int bnum, SphericalCoord sc) {
+	assert(bnum < 4);
+	bounds[bnum] = BoundaryPoint(sc.toCartesian(),
+								 sc,
+								 cos(sc._theta),
+								 sin(sc._theta),
+								 cos(sc._phi),
+								 sin(sc._phi));
 }
 
-void CapBoundary::setCartTrigBounds(int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf) {
-	assert(bnum>=0 && bnum < 4);
-	cartesian_boundary[bnum] = cc;
-	spherical_boundary[bnum] = SphericalCoord();	// empty spherical bounds
-	cos_theta[bnum] = cost;
-	sin_theta[bnum] = sint;
-	cos_phi[bnum] = cosf;
-	sin_phi[bnum] = sinf;
+// TODO: compute spherical coordinate?
+void CapBoundary::setCartTrigBounds(unsigned int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf) {
+	assert(bnum < 4);
+	bounds[bnum] = BoundaryPoint(cc,
+								 SphericalCoord(),	// empty spherical bounds
+								 cost,
+								 sint,
+								 cosf,
+								 sinf);
 }
 
 
@@ -380,18 +383,183 @@ void tracer_initial_settings(struct All_variables *E)
 	E->trace.lost_souls_time = 0;
 	
 	if(E->parallel.nprocxy == 1) {
-		E->problem_tracer_setup = regional_tracer_setup;
+		E->trace.full_tracers = false;
 		
 		E->trace.keep_within_bounds = regional_keep_within_bounds;
 		E->trace.get_velocity = regional_get_velocity;
 		E->trace.iget_element = regional_iget_element;
 	} else {
-		E->problem_tracer_setup = full_tracer_setup;
+		E->trace.full_tracers = true;
 		
 		E->trace.keep_within_bounds = full_keep_within_bounds;
 		E->trace.get_velocity = full_get_velocity;
 		E->trace.iget_element = full_iget_element;
 	}
+}
+
+
+
+void tracer_setup(struct All_variables *E)
+{
+    char output_file[255];
+    double begin_time;
+	
+	begin_time = CPU_time0();
+	
+    /* Some error control */
+    if (E->sphere.caps_per_proc>1) {
+		fprintf(stderr,"This code does not work for multiple caps per processor!\n");
+		parallel_process_termination();
+    }
+	
+    /* open tracing output file */
+    sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
+    E->trace.fpt=fopen(output_file,"w");
+	
+	
+    /* reset statistical counters */
+    E->trace.istat_isend=0;
+    E->trace.istat_iempty=0;
+    E->trace.istat_elements_checked=0;
+    E->trace.istat1=0;
+	
+	
+    /* some obscure initial parameters */
+    /* This parameter specifies how close a tracer can get to the boundary */
+    E->trace.box_cushion=0.00001;
+	
+    write_trace_instructions(E);
+	
+	if (E->trace.full_tracers) {
+		/* Gnometric projection for velocity interpolation */
+		define_uv_space(E);
+		determine_shape_coefficients(E);
+		
+		/* The bounding box of neiboring processors */
+		get_neighboring_caps(E);
+		
+		/* Fine-grained regular grid to search tracers */
+		make_regular_grid(E);
+		
+		if (E->trace.ianalytical_tracer_test==1) {
+			//TODO: walk into this code...
+			analytical_test(E);
+			parallel_process_termination();
+		}
+	} else {
+		/* The bounding box of neighboring processors */
+		get_neighboring_caps(E);
+		
+		make_mesh_ijk(E);
+	}
+	
+    if (E->composition.on)
+        composition_setup(E);
+	
+    fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
+            CPU_time0() - begin_time);
+}
+
+
+/**** WRITE TRACE INSTRUCTIONS ***************/
+static void write_trace_instructions(struct All_variables *E)
+{
+    int i;
+	
+    fprintf(E->trace.fpt,"\nTracing Activated! (proc: %d)\n",E->parallel.me);
+    fprintf(E->trace.fpt,"   Allen K. McNamara 12-2003\n\n");
+	
+	switch (E->trace.ic_method) {
+		case 0:
+			fprintf(E->trace.fpt,"Generating New Tracer Array\n");
+			fprintf(E->trace.fpt,"Tracers per element: %d\n",E->trace.itperel);
+			break;
+		case 1:
+			fprintf(E->trace.fpt,"Reading tracer file %s\n",E->trace.tracer_file);
+			break;
+		case 2:
+			fprintf(E->trace.fpt,"Reading individual tracer files\n");
+			break;
+	}
+	
+    fprintf(E->trace.fpt,"Number of tracer flavors: %d\n", E->trace.nflavors);
+	
+    if (E->trace.nflavors && E->trace.ic_method==0) {
+        fprintf(E->trace.fpt,"Initialized tracer flavors by: %d\n", E->trace.ic_method_for_flavors);
+        if (E->trace.ic_method_for_flavors == 0) {
+            fprintf(E->trace.fpt,"Layered tracer flavors\n");
+            for (i=0; i<E->trace.nflavors-1; i++)
+                fprintf(E->trace.fpt,"Interface Height: %d %f\n",i,E->trace.z_interface[i]);
+        }
+#ifdef USE_GGRD
+		else if((E->trace.ic_method_for_flavors == 1)||(E->trace.ic_method_for_flavors == 99)) {
+			if (E->trace.full_tracers) {
+				/* ggrd modes 1 and 99 (99  is override for restart) */
+				fprintf(E->trace.fpt,"netcdf grd assigned tracer flavors\n");
+				if( E->trace.ggrd_layers > 0)
+					fprintf(E->trace.fpt,"file: %s top %i layers\n",E->trace.ggrd_file,
+							E->trace.ggrd_layers);
+				else
+					fprintf(E->trace.fpt,"file: %s only layer %i\n",E->trace.ggrd_file,
+							-E->trace.ggrd_layers);
+			} else {
+				/* ggrd modes 1 and 99 (99 is override for restart) */
+				fprintf(stderr,"ggrd regional flavors not implemented\n");
+				fprintf(E->trace.fpt,"ggrd not implemented et for regional, flavor method= %d\n",
+						E->trace.ic_method_for_flavors);
+				fflush(E->trace.fpt);
+				parallel_process_termination();
+			}
+		}
+#endif
+        else {
+            fprintf(E->trace.fpt,"Sorry-This IC methods for Flavors are Unavailable %d\n",E->trace.ic_method_for_flavors);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+	
+    for (i=0; i<E->trace.nflavors-2; i++) {
+        if (E->trace.z_interface[i] < E->trace.z_interface[i+1]) {
+            fprintf(E->trace.fpt,"Sorry - The %d-th z_interface is smaller than the next one.\n", i);
+            fflush(E->trace.fpt);
+            parallel_process_termination();
+        }
+    }
+	
+	if (E->trace.full_tracers) {
+		/* regular grid stuff */
+		
+		fprintf(E->trace.fpt,"Regular Grid-> deltheta: %f delphi: %f\n",
+				E->trace.deltheta[0],E->trace.delphi[0]);
+	}
+	
+    /* more obscure stuff */
+	
+    fprintf(E->trace.fpt,"Box Cushion: %f\n",E->trace.box_cushion);
+    fprintf(E->trace.fpt,"Number of Basic Quantities: %d\n", 12);
+    fprintf(E->trace.fpt,"Number of Extra Quantities: %d\n", 1);
+    fprintf(E->trace.fpt,"Total Number of Tracer Quantities: %d\n", 13);
+	
+	if (E->trace.full_tracers) {
+		/* analytical test */
+		
+		if (E->trace.ianalytical_tracer_test==1)
+		{
+			fprintf(E->trace.fpt,"\n\n ! Analytical Test Being Performed ! \n");
+			fprintf(E->trace.fpt,"(some of the above parameters may not be used or applied\n");
+			fprintf(E->trace.fpt,"Velocity functions given in main code\n");
+			fflush(E->trace.fpt);
+		}
+	}
+	
+    if (E->trace.itracer_warnings==0) {
+        fprintf(E->trace.fpt,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fprintf(stderr,"\n WARNING EXITS ARE TURNED OFF! TURN THEM ON!\n");
+        fflush(E->trace.fpt);
+    }
+	
+    write_composition_instructions(E);
 }
 
 

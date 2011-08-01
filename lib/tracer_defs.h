@@ -82,17 +82,37 @@ public:
 	void operator=(const CartesianCoord &other) { _x = other._x; _y = other._y; _z = other._z; };
 };
 
-class CapBoundary {
+class CoordUV {
 public:
-	CartesianCoord	cartesian_boundary[4];
-	SphericalCoord	spherical_boundary[4];
-	double			cos_theta[4];
-	double			sin_theta[4];
-	double			cos_phi[4];
-	double			sin_phi[4];
+	double u, v;
+	CoordUV(void) : u(NAN), v(NAN) {};
+	CoordUV(double new_u, double new_v) : u(new_u), v(new_v) {};
+};
+
+class BoundaryPoint {
+public:
+	CartesianCoord	cartesian_pt;
+	SphericalCoord	spherical_pt;
+	double			cos_theta;
+	double			sin_theta;
+	double			cos_phi;
+	double			sin_phi;
 	
-	void setBoundary(int bnum, SphericalCoord sc);
-	void setCartTrigBounds(int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf);
+	BoundaryPoint(void) : cartesian_pt(), spherical_pt(), cos_theta(NAN), sin_theta(NAN), cos_phi(NAN), sin_phi(NAN) {};
+	BoundaryPoint(CartesianCoord cc, SphericalCoord sc, double cost, double sint, double cosf, double sinf) :
+		cartesian_pt(cc), spherical_pt(sc), cos_theta(cost), sin_theta(sint), cos_phi(cosf), sin_phi(sinf) {};
+	
+	CartesianCoord cartesian(void) const { return cartesian_pt; };
+};
+
+class CapBoundary {
+private:
+	BoundaryPoint	bounds[4];
+	
+public:
+	BoundaryPoint operator[] (unsigned int i) const { assert(i<4); return bounds[i]; };
+	void setBoundary(unsigned int bnum, SphericalCoord sc);
+	void setCartTrigBounds(unsigned int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf);
 };
 
 class Tracer {
@@ -196,6 +216,9 @@ struct TRACE{
     int istat_elements_checked;
     int ilast_tracer_count;
 
+	// Whether we are doing tracers in a full sphere shell or just a region
+	bool full_tracers;
+	
     /* timing information */
     double advection_time;
     double find_tracers_time;
