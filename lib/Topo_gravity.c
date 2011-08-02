@@ -212,7 +212,6 @@ void compute_nodal_stress(struct All_variables *E,
                           float** divv, float** vorv)
 {
   void get_rtf_at_vpts();
-  void velo_from_element();
   void stress_conform_bcs();
   void construct_c3x3matrix_el();
   void get_ba();
@@ -991,7 +990,6 @@ void get_CBF_topo(struct All_variables *E, float **H, float **HB)
     void get_global_1d_shape_fn_L();
     void full_exchange_snode_f();
     void regional_exchange_snode_f();
-    void velo_from_element();
 
     int a,address,el,elb,els,node,nodeb,nodes,i,j,k,l,m,n,count;
     int nodel,nodem,nodesl,nodesm,nnsf,nel2;

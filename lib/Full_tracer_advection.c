@@ -65,9 +65,6 @@ static int icheck_bounds(struct All_variables *E,
                          const CapBoundary bounds);
 static double findradial(CartesianCoord vec,
                          BoundaryPoint bp);
-static void fix_radius(struct All_variables *E,
-                       SphericalCoord &sc,
-                       CartesianCoord &cc);
 static void fix_angle(double *angle);
 static int iget_radial_element(struct All_variables *E,
                                int j, int iel,
@@ -590,7 +587,7 @@ void full_lost_souls(struct All_variables *E)
 		sc = new_tracer.getSphericalPos();
 		cc = new_tracer.getCartesianPos();
 		
-        iel=(E->trace.iget_element)(E,j,-99,cc,sc);
+        iel=(E->trace.iget_element)(E,j,UNDEFINED_ELEMENT,cc,sc);
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
@@ -715,8 +712,8 @@ static void full_put_lost_tracers(struct All_variables *E,
 /*         5        6               5            7                           */
 /*         6        7               6            8                           */
 
-void full_get_shape_functions(struct All_variables *E,
-                              double shp[9], ElementID nelem,
+void full_get_shape_functions(struct All_variables *E, int &shape_iwedge,
+                              double shp[6], ElementID nelem,
                               SphericalCoord sc)
 {
     const int j = 1;
@@ -727,8 +724,8 @@ void full_get_shape_functions(struct All_variables *E,
     int itry;
 
 	CoordUV		uv;
-    double shape2d[4];
-    double shaperad[3];
+    double shape2d[3];
+    double shaperad[2];
     double shape[7];
 
     int maxlevel=E->mesh.levmax;
@@ -746,7 +743,7 @@ void full_get_shape_functions(struct All_variables *E,
 
     /* Check first wedge (1 of 2) */
 
-    iwedge=1;
+    iwedge=0;
 
  next_wedge:
 
@@ -757,9 +754,9 @@ void full_get_shape_functions(struct All_variables *E,
 
     /* if any shape functions are negative, goto next wedge */
 
-    if (shape2d[1]<eps||shape2d[2]<eps||shape2d[3]<eps)
+    if (shape2d[0]<eps||shape2d[1]<eps||shape2d[2]<eps)
         {
-            inum=inum+1;
+            inum++;
             /* AKMA clean this up */
             if (inum>3)
                 {
@@ -771,12 +768,12 @@ void full_get_shape_functions(struct All_variables *E,
                 {
 					CartesianCoord	cc;
                     fprintf(E->trace.fpt,"ERROR(gnomonic_interpolation)-inum>1\n");
-                    fprintf(E->trace.fpt,"shape %f %f %f\n",shape2d[1],shape2d[2],shape2d[3]);
+                    fprintf(E->trace.fpt,"shape %f %f %f\n",shape2d[0],shape2d[1],shape2d[2]);
                     fprintf(E->trace.fpt,"u %f v %f element: %d \n",uv.u,uv.v, nelem);
                     fprintf(E->trace.fpt,"Element uv boundaries: \n");
                     for(kk=1;kk<=4;kk++) {
                         i = (E->ien[j][nelem].node[kk] - 1) / E->lmesh.noz + 1;
-                        fprintf(E->trace.fpt,"%d: U: %f V:%f\n",kk,E->gnomonic[i].u,E->gnomonic[i].v);
+                        fprintf(E->trace.fpt,"%d: U: %f V:%f\n",kk,(*E->trace.gnomonic)[i].u,(*E->trace.gnomonic)[i].v);
                     }
                     fprintf(E->trace.fpt,"theta: %f phi: %f rad: %f\n",sc._theta,sc._phi,sc._rad);
                     fprintf(E->trace.fpt,"Element theta-phi boundaries: \n");
@@ -787,7 +784,7 @@ void full_get_shape_functions(struct All_variables *E,
                     ival=icheck_element(E,j,nelem,cc,sc._rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
 					
-                    ival=(E->trace.iget_element)(E, j, -99, cc, sc);
+                    ival=(E->trace.iget_element)(E, j, UNDEFINED_ELEMENT, cc, sc);
                     fprintf(E->trace.fpt,"New Element?: %d\n",ival);
 					
                     ival=icheck_column_neighbors(E,j,nelem,cc,sc._rad);
@@ -804,7 +801,7 @@ void full_get_shape_functions(struct All_variables *E,
                     exit(10);
                 }
 
-            iwedge=2;
+            iwedge=1;
             goto next_wedge;
         }
 
@@ -819,17 +816,17 @@ void full_get_shape_functions(struct All_variables *E,
 
     /* Sum of shape functions is 1                       */
 
-    shp[0]=iwedge;
-    shp[1]=shaperad[1]*shape2d[1];
-    shp[2]=shaperad[1]*shape2d[2];
-    shp[3]=shaperad[1]*shape2d[3];
-    shp[4]=shaperad[2]*shape2d[1];
-    shp[5]=shaperad[2]*shape2d[2];
-    shp[6]=shaperad[2]*shape2d[3];
+    shape_iwedge = iwedge;
+    shp[0]=shaperad[0]*shape2d[0];
+    shp[1]=shaperad[0]*shape2d[1];
+    shp[2]=shaperad[0]*shape2d[2];
+    shp[3]=shaperad[1]*shape2d[0];
+    shp[4]=shaperad[1]*shape2d[1];
+    shp[5]=shaperad[1]*shape2d[2];
 
     /** debug **
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
-            shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
+            shp[0], shp[1], shp[2], shp[3], shp[4], shp[5]);
     /**/
 }
 
@@ -856,73 +853,40 @@ void full_get_shape_functions(struct All_variables *E,
 /*         6        7               6            8                           */
 
 CartesianCoord full_get_velocity(struct All_variables *E,
-                       int j, ElementID nelem,
-                       SphericalCoord sc)
+								 int j, ElementID nelem,
+								 SphericalCoord sc)
 {
-    int iwedge;
+    int iwedge, i;
     const int sphere_key = 0;
-
-    double shape[9];
-    double VV[4][9];
-    double vx[6],vy[6],vz[6];
-
-    full_get_shape_functions(E, shape, nelem, sc);
-    iwedge=shape[0];
-
+	
+    double			shape[6];
+    CartesianCoord	VV[9], vel[6], result;
+	
+    full_get_shape_functions(E, iwedge, shape, nelem, sc);
+	
     /* get cartesian velocity */
     velo_from_element_d(E, VV, j, nelem, sphere_key);
-
+	
     /* depending on wedge, set up velocity points */
-
-    if (iwedge==1)
-        {
-            vx[0]=VV[1][1];
-            vx[1]=VV[1][2];
-            vx[2]=VV[1][3];
-            vx[3]=VV[1][5];
-            vx[4]=VV[1][6];
-            vx[5]=VV[1][7];
-            vy[0]=VV[2][1];
-            vy[1]=VV[2][2];
-            vy[2]=VV[2][3];
-            vy[3]=VV[2][5];
-            vy[4]=VV[2][6];
-            vy[5]=VV[2][7];
-            vz[0]=VV[3][1];
-            vz[1]=VV[3][2];
-            vz[2]=VV[3][3];
-            vz[3]=VV[3][5];
-            vz[4]=VV[3][6];
-            vz[5]=VV[3][7];
-        }
-    if (iwedge==2)
-        {
-            vx[0]=VV[1][1];
-            vx[1]=VV[1][3];
-            vx[2]=VV[1][4];
-            vx[3]=VV[1][5];
-            vx[4]=VV[1][7];
-            vx[5]=VV[1][8];
-            vy[0]=VV[2][1];
-            vy[1]=VV[2][3];
-            vy[2]=VV[2][4];
-            vy[3]=VV[2][5];
-            vy[4]=VV[2][7];
-            vy[5]=VV[2][8];
-            vz[0]=VV[3][1];
-            vz[1]=VV[3][3];
-            vz[2]=VV[3][4];
-            vz[3]=VV[3][5];
-            vz[4]=VV[3][7];
-            vz[5]=VV[3][8];
-        }
-
-	return CartesianCoord(vx[0]*shape[1]+vx[1]*shape[2]+shape[3]*vx[2]+
-						  vx[3]*shape[4]+vx[4]*shape[5]+shape[6]*vx[5],
-						  vy[0]*shape[1]+vy[1]*shape[2]+shape[3]*vy[2]+
-						  vy[3]*shape[4]+vy[4]*shape[5]+shape[6]*vy[5],
-						  vz[0]*shape[1]+vz[1]*shape[2]+shape[3]*vz[2]+
-						  vz[3]*shape[4]+vz[4]*shape[5]+shape[6]*vz[5]);
+	
+    if (iwedge==0) {
+		vel[0]=VV[1];
+		vel[1]=VV[2];
+		vel[2]=VV[3];
+		vel[3]=VV[5];
+		vel[4]=VV[6];
+		vel[5]=VV[7];
+	} else if (iwedge==1) {
+		vel[0]=VV[1];
+		vel[1]=VV[3];
+		vel[2]=VV[4];
+		vel[3]=VV[5];
+		vel[4]=VV[7];
+		vel[5]=VV[8];
+	}
+	
+	for (i=0;i<6;++i) result += vel[i] * shape[i];
+	return result;
 }
 
 /***************************************************************/
@@ -938,38 +902,17 @@ static void get_2dshape(struct All_variables *E,
                         CoordUV uv,
                         int iwedge, double * shape2d)
 {
-
-    double a0,a1,a2;
     /* convert nelem to surface element number */
     int n = (nelem - 1) / E->lmesh.elz + 1;
 
-    /* shape function 1 */
-
-    a0=E->trace.shape_coefs[j][iwedge][1][n];
-    a1=E->trace.shape_coefs[j][iwedge][2][n];
-    a2=E->trace.shape_coefs[j][iwedge][3][n];
-
-    shape2d[1]=a0+a1*uv.u+a2*uv.v;
-
-    /* shape function 2 */
-
-    a0=E->trace.shape_coefs[j][iwedge][4][n];
-    a1=E->trace.shape_coefs[j][iwedge][5][n];
-    a2=E->trace.shape_coefs[j][iwedge][6][n];
-
-    shape2d[2]=a0+a1*uv.u+a2*uv.v;
-
-    /* shape function 3 */
-
-    a0=E->trace.shape_coefs[j][iwedge][7][n];
-    a1=E->trace.shape_coefs[j][iwedge][8][n];
-    a2=E->trace.shape_coefs[j][iwedge][9][n];
-
-    shape2d[3]=a0+a1*uv.u+a2*uv.v;
+    /* shape functions */
+	shape2d[0] = E->trace.shape_coefs[j][iwedge][n]->applyShapeFunc(0, uv);
+	shape2d[1] = E->trace.shape_coefs[j][iwedge][n]->applyShapeFunc(1, uv);
+	shape2d[2] = E->trace.shape_coefs[j][iwedge][n]->applyShapeFunc(2, uv);
 
     /** debug **
     fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
-            nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
+            nelem, n, iwedge, shape2d[0], shape2d[1], shape2d[2]);
     /**/
 }
 
@@ -985,7 +928,6 @@ static void get_radial_shape(struct All_variables *E,
 
     int node1,node5;
     double rad1,rad5,f1,f2,delrad;
-
     const double eps=1e-6;
     double top_bound=1.0+eps;
     double bottom_bound=0.0-eps;
@@ -1004,28 +946,25 @@ static void get_radial_shape(struct All_variables *E,
     /* Save a small amount of computation here   */
     /* because f1+f2=1, shapes can be switched   */
     /*
-      shaperad[1]=1.0-f1=1.0-(1.0-f2)=f2;
-      shaperad[2]=1.0-f2=1.0-(10-f1)=f1;
+      shaperad[0]=1.0-f1=1.0-(1.0-f2)=f2;
+      shaperad[1]=1.0-f2=1.0-(10-f1)=f1;
     */
 
-    shaperad[1]=f2;
-    shaperad[2]=f1;
+    shaperad[0]=f2;
+    shaperad[1]=f1;
 
     /* Some error control */
 
-    if (shaperad[1]>(top_bound)||shaperad[1]<(bottom_bound)||
-        shaperad[2]>(top_bound)||shaperad[2]<(bottom_bound))
+    if (shaperad[0]>top_bound || shaperad[0]<bottom_bound ||
+        shaperad[1]>top_bound || shaperad[1]<bottom_bound)
         {
             fprintf(E->trace.fpt,"ERROR(get_radial_shape)\n");
+            fprintf(E->trace.fpt,"shaperad[0]: %f \n",shaperad[0]);
             fprintf(E->trace.fpt,"shaperad[1]: %f \n",shaperad[1]);
-            fprintf(E->trace.fpt,"shaperad[2]: %f \n",shaperad[2]);
             fflush(E->trace.fpt);
             exit(10);
         }
 }
-
-
-
 
 
 /**************************************************************/
@@ -1044,10 +983,10 @@ static CoordUV spherical_to_uv(struct All_variables *E,
 
     /* theta_f and phi_f are the reference points of the cap */
 
-    phi_f = E->gnomonic_reference_phi;
+    phi_f = E->trace.gnomonic_reference_phi;
 
-    cos_theta_f = E->gnomonic[0].u;
-    sin_theta_f = E->gnomonic[0].v;
+    cos_theta_f = (*E->trace.gnomonic)[0].u;
+    sin_theta_f = (*E->trace.gnomonic)[0].v;
 
     cost=cos(sc._theta);
     /*
@@ -1240,7 +1179,7 @@ void make_regular_grid(struct All_variables *E)
 		/* Allocate memory for regnodetoel */
 		/* Regtoel is an integer array which represents nodes on    */
 		/* the regular mesh. Each node on the regular mesh contains */
-		/* the real element value if one exists (-99 otherwise)     */
+		/* the real element value if one exists (UNDEFINED_ELEMENT otherwise)     */
 		
 		
 		
@@ -1252,11 +1191,11 @@ void make_regular_grid(struct All_variables *E)
 		}
 		
 		
-		/* Initialize regnodetoel - reg elements not used =-99 */
+		/* Initialize regnodetoel - reg elements not used = UNDEFINED_ELEMENT */
 		
 		for (kk=1;kk<=numregnodes;kk++)
 		{
-			E->trace.regnodetoel[j][kk]=-99;
+			E->trace.regnodetoel[j][kk]=UNDEFINED_ELEMENT;
 		}
 		
 		/* Begin Mapping (only need to use surface elements) */
@@ -1350,7 +1289,7 @@ void make_regular_grid(struct All_variables *E)
 		
 		for (kk=1;kk<=numregnodes;kk++)
 		{
-			E->trace.regnodetoel[j][kk]=-99;
+			E->trace.regnodetoel[j][kk]=UNDEFINED_ELEMENT;
 			
 			/* find theta and phi for a given regular node */
 			
@@ -1452,7 +1391,7 @@ void make_regular_grid(struct All_variables *E)
 	{
 		for (kk=1;kk<=numregnodes;kk++)
 		{
-			if (E->trace.regnodetoel[j][kk]!=-99)
+			if (E->trace.regnodetoel[j][kk]!=UNDEFINED_ELEMENT)
 			{
 				if ( (E->trace.regnodetoel[j][kk]<1)||(E->trace.regnodetoel[j][kk]>E->lmesh.nel) )
 				{
@@ -1492,11 +1431,11 @@ void make_regular_grid(struct All_variables *E)
 		/* a real element. The number of real elements a regular     */
 		/* element touches (one of its nodes are in) is ichoice.     */
 		/* Special ichoice notes:                                    */
-		/*    ichoice=-1   all regular element nodes = -99 (no elements) */
+		/*    ichoice=-1   all regular element nodes = UNDEFINED_ELEMENT (no elements) */
 		/*    ichoice=0    all 4 corners within one element              */
 		/*    ichoice=1     one element choice (diff from ichoice 0 in    */
 		/*                  that perhaps one reg node is in an element    */
-		/*                  and the rest are not (-99).                   */
+		/*                  and the rest are not (UNDEFINED_ELEMENT).     */
 		/*    ichoice>1     Multiple elements to check                    */
 		
 		numregel= E->trace.numregel[j];
@@ -1686,7 +1625,6 @@ void make_regular_grid(struct All_variables *E)
 	
     for (j=1;j<=E->sphere.caps_per_proc;j++)
 	{
-		
 		isum=0;
 		for (kk=0;kk<=4;kk++) isum=isum+istat_ichoice[j][kk];
 		fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
@@ -1775,7 +1713,7 @@ static int icheck_column_neighbors(struct All_variables *E,
 		}
 	}
 	
-    return -99;
+    return UNDEFINED_ELEMENT;
 }
 
 
@@ -1783,7 +1721,7 @@ static int icheck_column_neighbors(struct All_variables *E,
 /*                                                            */
 /* This function check all columns until the proper one for   */
 /* a point (x,y,z) is found. The surface element is returned  */
-/* else -99 if can't be found.                                */
+/* else UNDEFINED_ELEMENT if can't be found.                  */
 
 static int icheck_all_columns(struct All_variables *E,
                               int j,
@@ -1801,7 +1739,7 @@ static int icheck_all_columns(struct All_variables *E,
 		if (icheck==1) return nel;
 	}
 	
-    return -99;
+    return UNDEFINED_ELEMENT;
 }
 
 
@@ -2040,44 +1978,6 @@ static double findradial(CartesianCoord vec,
 }
 
 
-/************ FIX RADIUS ********************************************/
-/* This function moves particles back in bounds if they left     */
-/* during advection                                              */
-
-static void fix_radius(struct All_variables *E, SphericalCoord &sc, CartesianCoord &cc)
-{
-    double sint,cost,sinf,cosf,rad;
-    double max_radius, min_radius;
-	int changed = 0;
-	
-    max_radius = E->sphere.ro - E->trace.box_cushion;
-    min_radius = E->sphere.ri + E->trace.box_cushion;
-	
-    if (sc._rad > max_radius) {
-		changed = 1;
-        sc._rad=max_radius;
-        rad=max_radius;
-    }
-    if (sc._rad < min_radius) {
-		changed = 1;
-        sc._rad=min_radius;
-        rad=min_radius;
-    }
-	
-	if (changed) {
-        cost=cos(sc._theta);
-        sint=sqrt(1.0-cost*cost);
-        cosf=cos(sc._phi);
-        sinf=sin(sc._phi);
-        cc._x=rad*sint*cosf;
-        cc._y=rad*sint*sinf;
-        cc._z=rad*cost;
-	}
-	
-    return;
-}
-
-
 /******************************************************************/
 /* FIX ANGLE                                                      */
 /*                                                                */
@@ -2097,7 +1997,7 @@ static void fix_angle(double *angle)
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
-/* Returns -99 if not in this cap.                               */
+/* Returns UNDEFINED_ELEMENT if not in this cap.                 */
 /* Returns -1 if in this cap but cannot find the element.        */
 /* iprevious_element, if known, is the last known element. If    */
 /* it is not known, input a negative number.                     */
@@ -2130,7 +2030,7 @@ int full_iget_element(struct All_variables *E,
     if (E->parallel.nprocz>1)
 	{
 		ival=icheck_processor_shell(E,j,sc._rad);
-		if (ival!=1) return -99;
+		if (ival!=1) return UNDEFINED_ELEMENT;
 	}
 	
     /* do quick search to see if element can be easily found. */
@@ -2143,7 +2043,7 @@ int full_iget_element(struct All_variables *E,
     iregel=iget_regel(E,j,sc._theta,sc._phi,&ntheta,&nphi);
     if (iregel<=0)
 	{
-		return -99;
+		return UNDEFINED_ELEMENT;
 	}
 	
 	
@@ -2207,7 +2107,7 @@ int full_iget_element(struct All_variables *E,
     /* check if still in cap */
 	
     ival=full_icheck_cap(E,0,cc,sc._rad);
-    if (ival==0) return -99;
+    if (ival==0) return UNDEFINED_ELEMENT;
 	
     /* if here, still in cap (hopefully, without a doubt) */
 	
@@ -2347,7 +2247,7 @@ static int iget_radial_element(struct All_variables *E,
 /*********** IGET REGEL ******************************************/
 /*                                                               */
 /* This function returns the regular element in which a point    */
-/* exists. If not found, returns -99.                            */
+/* exists. If not found, returns UNDEFINED_ELEMENT.              */
 /* npi and ntheta are modified for later use                     */
 
 static int iget_regel(struct All_variables *E, int j,
@@ -2360,8 +2260,8 @@ static int iget_regel(struct All_variables *E, int j,
 
     /* first check whether theta is in range */
 
-    if (theta<E->trace.thetamin[j]) return -99;
-    if (theta>E->trace.thetamax[j]) return -99;
+    if (theta<E->trace.thetamin[j]) return UNDEFINED_ELEMENT;
+    if (theta>E->trace.thetamax[j]) return UNDEFINED_ELEMENT;
 
     /* get ntheta, nphi on regular mesh */
 
@@ -2377,8 +2277,8 @@ static int iget_regel(struct All_variables *E, int j,
 
     /* check range to be sure */
 
-    if (iregel>E->trace.numregel[j]) return -99;
-    if (iregel<1) return -99;
+    if (iregel>E->trace.numregel[j]) return UNDEFINED_ELEMENT;
+    if (iregel<1) return UNDEFINED_ELEMENT;
 
     return iregel;
 }
@@ -2404,12 +2304,6 @@ void define_uv_space(struct All_variables *E)
     double u, v, cosc, theta_f, phi_f, dphi, cosd;
     double *cost, *sint, *cosf, *sinf;
 
-    if ((E->gnomonic = (CITCOM_GNOMONIC*)malloc((E->lmesh.nsf+1)*sizeof(struct CITCOM_GNOMONIC)))
-        == NULL) {
-        fprintf(stderr,"Error(define uv)-not enough memory(a)\n");
-        exit(10);
-    }
-
     sint = E->SinCos[lev][j][0];
     sinf = E->SinCos[lev][j][1];
     cost = E->SinCos[lev][j][2];
@@ -2419,7 +2313,7 @@ void define_uv_space(struct All_variables *E)
     /* use the point at middle of the cap */
     refnode = 1 + E->lmesh.noz * ((E->lmesh.noy / 2) * E->lmesh.nox
                                   + E->lmesh.nox / 2);
-    phi_f = E->gnomonic_reference_phi = E->sx[j][2][refnode];
+    phi_f = E->trace.gnomonic_reference_phi = E->sx[j][2][refnode];
 
     /** debug **
     theta_f = E->sx[j][1][refnode];
@@ -2432,9 +2326,7 @@ void define_uv_space(struct All_variables *E)
     /**/
 
     /* store cos(theta_f) and sin(theta_f) */
-    E->gnomonic[0].u = cost[refnode];
-    E->gnomonic[0].v = sint[refnode];
-
+	E->trace.gnomonic->insert(std::make_pair(0, CoordUV(cost[refnode], sint[refnode])));
 
     /* convert each nodal point to u and v */
 
@@ -2446,18 +2338,14 @@ void define_uv_space(struct All_variables *E)
         v = (sint[refnode] * cost[n] - cost[refnode] * sint[n] * cosd)
             / cosc;
 
-        E->gnomonic[i].u = u;
-        E->gnomonic[i].v = v;
+		E->trace.gnomonic->insert(std::make_pair(i, CoordUV(u, v)));
 
         /** debug **
         fprintf(E->trace.fpt, "n=%d ns=%d cosc=%e (%e %e) -> (%e %e)\n",
                 n, i, cosc, E->sx[j][1][n], E->sx[j][2][n], u, v);
         /**/
     }
-
-    return;
 }
-
 
 /***************************************************************/
 /* DETERMINE SHAPE COEFFICIENTS                                */
@@ -2476,26 +2364,17 @@ void determine_shape_coefficients(struct All_variables *E)
     int nelem, iwedge, kk, i;
     int snode;
 
-    double u[5], v[5];
-    double x1 = 0.0;
-    double x2 = 0.0;
-    double x3 = 0.0;
-    double y1 = 0.0;
-    double y2 = 0.0;
-    double y3 = 0.0;
-    double delta, a0, a1, a2;
+	CoordUV	uv[5], xy1, xy2, xy3;
 
     /* first, allocate memory */
 
-    for(iwedge=1; iwedge<=2; iwedge++) {
-        for (kk=1; kk<=9; kk++) {
-            if ((E->trace.shape_coefs[j][iwedge][kk] =
-                 (double *)malloc((E->lmesh.snel+1)*sizeof(double))) == NULL) {
-                fprintf(E->trace.fpt,"ERROR(find shape coefs)-not enough memory(a)\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-        }
+    for(iwedge=0; iwedge<2; iwedge++) {
+		if ((E->trace.shape_coefs[j][iwedge] = 
+			 (TriElemLinearShapeFunc **)malloc((E->lmesh.snel+1)*sizeof(TriElemLinearShapeFunc*))) == NULL) {
+			fprintf(E->trace.fpt,"ERROR(find shape coefs)-not enough memory(a)\n");
+			fflush(E->trace.fpt);
+			exit(10);
+		}
     }
 
     for (i=1, nelem=1; i<=E->lmesh.snel; i++, nelem+=E->lmesh.elz) {
@@ -2504,65 +2383,27 @@ void determine_shape_coefficients(struct All_variables *E)
 
         for(kk=1; kk<=4; kk++) {
             snode = (E->ien[j][nelem].node[kk]-1) / E->lmesh.noz + 1;
-            u[kk] = E->gnomonic[snode].u;
-            v[kk] = E->gnomonic[snode].v;
+            uv[kk] = (*E->trace.gnomonic)[snode];
         }
 
-        for(iwedge=1; iwedge<=2; iwedge++) {
+        for(iwedge=0; iwedge<2; iwedge++) {
 
-            if (iwedge == 1) {
-                x1 = u[1];
-                x2 = u[2];
-                x3 = u[3];
-                y1 = v[1];
-                y2 = v[2];
-                y3 = v[3];
+            if (iwedge == 0) {
+                xy1 = uv[1];
+                xy2 = uv[2];
+                xy3 = uv[3];
+            } else if (iwedge == 1) {
+                xy1 = uv[1];
+                xy2 = uv[3];
+                xy3 = uv[4];
             }
-            if (iwedge == 2) {
-                x1 = u[1];
-                x2 = u[3];
-                x3 = u[4];
-                y1 = v[1];
-                y2 = v[3];
-                y3 = v[4];
-            }
-
-            /* shape function 1 */
-
-            delta = (x3-x2)*(y1-y2)-(y2-y3)*(x2-x1);
-            a0 = (x2*y3-x3*y2)/delta;
-            a1 = (y2-y3)/delta;
-            a2 = (x3-x2)/delta;
-
-            E->trace.shape_coefs[j][iwedge][1][i] = a0;
-            E->trace.shape_coefs[j][iwedge][2][i] = a1;
-            E->trace.shape_coefs[j][iwedge][3][i] = a2;
-
-            /* shape function 2 */
-
-            delta = (x3-x1)*(y2-y1)-(y1-y3)*(x1-x2);
-            a0 = (x1*y3-x3*y1)/delta;
-            a1 = (y1-y3)/delta;
-            a2 = (x3-x1)/delta;
-
-            E->trace.shape_coefs[j][iwedge][4][i] = a0;
-            E->trace.shape_coefs[j][iwedge][5][i] = a1;
-            E->trace.shape_coefs[j][iwedge][6][i] = a2;
-
-            /* shape function 3 */
-
-            delta = (x1-x2)*(y3-y2)-(y2-y1)*(x2-x3);
-            a0 = (x2*y1-x1*y2)/delta;
-            a1 = (y2-y1)/delta;
-            a2 = (x1-x2)/delta;
-
-            E->trace.shape_coefs[j][iwedge][7][i] = a0;
-            E->trace.shape_coefs[j][iwedge][8][i] = a1;
-            E->trace.shape_coefs[j][iwedge][9][i] = a2;
+			
+			E->trace.shape_coefs[j][iwedge][i] = new TriElemLinearShapeFunc(xy1, xy2, xy3);
 
             /** debug **
             fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e, %e %e %e, %e %e %e)\n",
                     nelem, i, iwedge,
+                    E->trace.shape_coefs[j][iwedge][0][i],
                     E->trace.shape_coefs[j][iwedge][1][i],
                     E->trace.shape_coefs[j][iwedge][2][i],
                     E->trace.shape_coefs[j][iwedge][3][i],
@@ -2570,26 +2411,11 @@ void determine_shape_coefficients(struct All_variables *E)
                     E->trace.shape_coefs[j][iwedge][5][i],
                     E->trace.shape_coefs[j][iwedge][6][i],
                     E->trace.shape_coefs[j][iwedge][7][i],
-                    E->trace.shape_coefs[j][iwedge][8][i],
-                    E->trace.shape_coefs[j][iwedge][9][i]);
+                    E->trace.shape_coefs[j][iwedge][8][i]);
             /**/
 
         } /* end wedge */
     } /* end elem */
-}
-
-
-/*********** KEEP WITHIN BOUNDS *****************************************/
-/*                                                                      */
-/* This function makes sure the particle is within the sphere, and      */
-/* phi and theta are within the proper degree range.                    */
-
-void full_keep_within_bounds(struct All_variables *E,
-                             CartesianCoord &cc,
-                             SphericalCoord &sc)
-{
-    sc.constrainThetaPhi();
-    fix_radius(E,sc,cc);
 }
 
 

@@ -1143,7 +1143,6 @@ void visc_from_C(struct All_variables *E, float **EEta)
 void strain_rate_2_inv(struct All_variables *E, int m, float *EEDOT, int SQRT)
 {
     void get_rtf_at_ppts();
-    void velo_from_element();
     void construct_c3x3matrix_el();
     void get_ba_p();
 

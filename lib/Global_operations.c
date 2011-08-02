@@ -845,7 +845,7 @@ void remove_rigid_rot(struct All_variables *E)
     const int ppts = PPOINTS3D;
     const int vpts = VPOINTS3D;
     const int sphere_key = 1;
-    double VV[4][9];
+    CartesianCoord VV[9];
     double rot, fr, tr;
     double tmp, moment_of_inertia, rho;
 
@@ -891,8 +891,8 @@ void remove_rigid_rot(struct All_variables *E)
 	}
 	for (j=1;j<=ppts;j++)   {
 	  for (i=1;i<=ends;i++)   {
-	    vx[j] += VV[1][i]*E->N.ppt[GNPINDEX(i,j)]; 
-	    vy[j] += VV[2][i]*E->N.ppt[GNPINDEX(i,j)]; 
+	    vx[j] += VV[i]._x*E->N.ppt[GNPINDEX(i,j)]; 
+	    vy[j] += VV[i]._y*E->N.ppt[GNPINDEX(i,j)]; 
 	  }
 	}
 

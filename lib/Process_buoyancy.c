@@ -57,7 +57,6 @@ void heat_flux(struct All_variables *E)
     float VV[4][9],u[9],T[9],dTdz[9],rho[9],area,uT;
     float *sum_h;
 
-    void velo_from_element();
     void sum_across_surface();
     void return_horiz_ave();
     void return_horiz_ave_f();

@@ -75,10 +75,17 @@ public:
 		return sqrt(xd*xd+yd*yd+zd*zd);
 	};
 	
+	// Operations that return a new object
 	const CartesianCoord operator+(const CartesianCoord &other) const;
 	const CartesianCoord operator-(const CartesianCoord &other) const;
 	const CartesianCoord operator*(const double &val) const;
 	const CartesianCoord operator/(const double &val) const;
+	
+	// Operations that modify this object
+	CartesianCoord & operator+=(const CartesianCoord &other);
+	CartesianCoord & operator-=(const CartesianCoord &other);
+	CartesianCoord & operator*=(const double &val);
+	CartesianCoord & operator/=(const double &val);
 	void operator=(const CartesianCoord &other) { _x = other._x; _y = other._y; _z = other._z; };
 };
 
@@ -113,6 +120,14 @@ public:
 	BoundaryPoint operator[] (unsigned int i) const { assert(i<4); return bounds[i]; };
 	void setBoundary(unsigned int bnum, SphericalCoord sc);
 	void setCartTrigBounds(unsigned int bnum, CartesianCoord cc, double cost, double sint, double cosf, double sinf);
+};
+
+class TriElemLinearShapeFunc {
+private:
+	double		sf[3][3];
+public:
+	TriElemLinearShapeFunc(CoordUV xy1, CoordUV xy2, CoordUV xy3);
+	double applyShapeFunc(const unsigned int i, const CoordUV uv) const;
 };
 
 class Tracer {
@@ -227,6 +242,10 @@ struct TRACE{
     /* Mesh information */
 	CapBoundary	boundaries[13];
 
+	// Map of node numbers to gnomonic coordinates
+	std::map<int, CoordUV> *gnomonic;
+    double gnomonic_reference_phi;
+	
     /*********************/
     /* for global model  */
     /*********************/
@@ -246,7 +265,7 @@ struct TRACE{
     int *regtoel[13][5];
 
     /* gnomonic shape functions */
-    double *shape_coefs[13][3][10];
+    TriElemLinearShapeFunc **shape_coefs[13][2];
 
     /**********************/
     /* for regional model */
@@ -265,7 +284,4 @@ struct TRACE{
 
     CartesianCoord (* get_velocity)(struct All_variables*, int, int,
                           SphericalCoord);
-
-    void (* keep_within_bounds)(struct All_variables*,
-                                CartesianCoord &, SphericalCoord &);
 };

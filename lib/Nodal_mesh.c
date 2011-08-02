@@ -153,7 +153,7 @@ void velo_from_element(struct All_variables *E, float VV[4][9], int m, int el, i
 }
 
 /* double prec version */
-void velo_from_element_d(struct All_variables *E, double VV[4][9], int m, int el, int sphere_key)
+void velo_from_element_d(struct All_variables *E, CartesianCoord VV[9], int m, int el, int sphere_key)
 {
 
     int a, node;
@@ -166,9 +166,9 @@ void velo_from_element_d(struct All_variables *E, double VV[4][9], int m, int el
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
             node = E->ien[m][el].node[a];
-            VV[1][a] = E->sphere.cap[m].V[1][node];
-            VV[2][a] = E->sphere.cap[m].V[2][node];
-            VV[3][a] = E->sphere.cap[m].V[3][node];
+			VV[a] = CartesianCoord(E->sphere.cap[m].V[1][node],
+								   E->sphere.cap[m].V[2][node],
+								   E->sphere.cap[m].V[3][node]);
         }
     else {
         for(a=1;a<=ends;a++)   {
@@ -179,17 +179,16 @@ void velo_from_element_d(struct All_variables *E, double VV[4][9], int m, int el
             cost = E->SinCos[lev][m][2][node];
             cosf = E->SinCos[lev][m][3][node];
 
-            VV[1][a] = E->sphere.cap[m].V[1][node]*cost*cosf
-                - E->sphere.cap[m].V[2][node]*sinf
-                + E->sphere.cap[m].V[3][node]*sint*cosf;
-            VV[2][a] = E->sphere.cap[m].V[1][node]*cost*sinf
-                + E->sphere.cap[m].V[2][node]*cosf
-                + E->sphere.cap[m].V[3][node]*sint*sinf;
-            VV[3][a] = -E->sphere.cap[m].V[1][node]*sint
-                + E->sphere.cap[m].V[3][node]*cost;
+			VV[a] = CartesianCoord(E->sphere.cap[m].V[1][node]*cost*cosf
+								   - E->sphere.cap[m].V[2][node]*sinf
+								   + E->sphere.cap[m].V[3][node]*sint*cosf,
+								   E->sphere.cap[m].V[1][node]*cost*sinf
+								   + E->sphere.cap[m].V[2][node]*cosf
+								   + E->sphere.cap[m].V[3][node]*sint*sinf,
+								   -E->sphere.cap[m].V[1][node]*sint
+								   + E->sphere.cap[m].V[3][node]*cost);
         }
     }
-    return;
 }
 
 

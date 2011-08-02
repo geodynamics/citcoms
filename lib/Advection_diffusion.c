@@ -143,8 +143,6 @@ void std_timestep(struct All_variables *E)
 {
     int i,d,n,nel,el,node,m;
 
-    void velo_from_element();
-
     float adv_timestep;
     float ts,uc1,uc2,uc3,uc,size,step,VV[4][9];
 
@@ -390,7 +388,6 @@ static void pg_solver(struct All_variables *E,
                       double diff, int bc, unsigned int **FLAGS)
 {
     void get_rtf_at_vpts();
-    void velo_from_element();
 
     int el,e,a,i,a1,m;
     double Eres[9],rtf[4][9];  /* correction to the (scalar) Tdot field */

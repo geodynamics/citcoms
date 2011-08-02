@@ -126,7 +126,7 @@ void make_mesh_ijk(struct All_variables *E)
 /********** IGET ELEMENT *****************************************/
 /*                                                               */
 /* This function returns the the real element for a given point. */
-/* Returns -99 in not in this cap.                               */
+/* Returns UNDEFINED_ELEMENT in not in this cap.                 */
 /* iprevious_element, if known, is the last known element. If    */
 /* it is not known, input a negative number.                     */
 
@@ -167,7 +167,7 @@ int regional_iget_element(struct All_variables *E,
     kk = isearch_all(E->trace.z_space, elz+1, sc._rad);
 
     if (ii<0 || jj<0 || kk<0)
-        return -99;
+        return UNDEFINED_ELEMENT;
 
     return jj*elx*elz + ii*elz + kk + 1;
 }
@@ -331,10 +331,11 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
                            int m, int nelem,
                            SphericalCoord sc)
 {
-    double shp[8], VV[4][9], tmp;
-    int n, d, node;
+    double shp[8], tmp;
+	CartesianCoord	VV[9];
+    int n;
     const int sphere_key = 0;
-	double velocity_vector[3];
+	CartesianCoord velocity_vector;
 
     /* get shape functions at (theta, phi, rad) */
     regional_get_shape_functions(E, shp, nelem, sc);
@@ -348,17 +349,13 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
          Interpolate the velocity on the tracer position
     ***/
 
-    for(d=0; d<3; d++)
-        velocity_vector[d] = 0;
-
-    for(d=0; d<3; d++) {
-        for(n=0; n<8; n++)
-            velocity_vector[d] += VV[d+1][n+1] * shp[n];
-    }
+	for(n=1; n<9; n++) {
+		velocity_vector += VV[n] * shp[n];
+	}
 
 
     /** debug **
-    for(d=1; d<=3; d++) {
+    for(d=0; d<3; d++) {
         fprintf(E->trace.fpt, "VV: %e %e %e %e %e %e %e %e: %e\n",
                 VV[d][1], VV[d][2], VV[d][3], VV[d][4],
                 VV[d][5], VV[d][6], VV[d][7], VV[d][8],
@@ -374,48 +371,7 @@ CartesianCoord regional_get_velocity(struct All_variables *E,
     fflush(E->trace.fpt);
     /**/
 
-    return CartesianCoord(velocity_vector[0], velocity_vector[1], velocity_vector[2]);
-}
-
-
-void regional_keep_within_bounds(struct All_variables *E,
-                                 CartesianCoord &cc,
-                                 SphericalCoord &sc)
-{
-    int changed = 0;
-
-    if (sc._theta > E->control.theta_max - E->trace.box_cushion) {
-        sc._theta = E->control.theta_max - E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (sc._theta < E->control.theta_min + E->trace.box_cushion) {
-        sc._theta = E->control.theta_min + E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (sc._phi > E->control.fi_max - E->trace.box_cushion) {
-        sc._phi = E->control.fi_max - E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (sc._phi < E->control.fi_min + E->trace.box_cushion) {
-        sc._phi = E->control.fi_min + E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (sc._rad > E->sphere.ro - E->trace.box_cushion) {
-        sc._rad = E->sphere.ro - E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (sc._rad < E->sphere.ri + E->trace.box_cushion) {
-        sc._rad = E->sphere.ri + E->trace.box_cushion;
-        changed = 1;
-    }
-
-    if (changed)
-        cc = sc.toCartesian();
+    return velocity_vector;
 }
 
 
@@ -762,7 +718,7 @@ static void put_found_tracers(struct All_variables *E,
 			new_tracer.readFromMem(&recv[ipos]);
 
             /* found the element */
-            iel = regional_iget_element(E, j, -99, CartesianCoord(0, 0, 0), sc);
+            iel = regional_iget_element(E, j, UNDEFINED_ELEMENT, CartesianCoord(0, 0, 0), sc);
 
             if (iel<1) {
                 fprintf(E->trace.fpt, "Error(regional lost souls) - "

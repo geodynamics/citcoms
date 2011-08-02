@@ -183,32 +183,64 @@ CartesianCoord SphericalCoord::toCartesian(void) const
 	return CartesianCoord(x,y,z);
 }
 
+// Add a coordinate to this one by summing the components
+CartesianCoord & CartesianCoord::operator+=(const CartesianCoord &other) {
+	this->_x += other._x;
+	this->_y += other._y;
+	this->_z += other._z;
+	return *this;
+}
+
+// Get the difference of a coordinate from this one as vectors by subtracting components
+CartesianCoord & CartesianCoord::operator-=(const CartesianCoord &other) {
+	this->_x -= other._x;
+	this->_y -= other._y;
+	this->_z -= other._z;
+	return *this;
+}
+
+// Multiply each component by a constant factor
+CartesianCoord & CartesianCoord::operator*=(const double &val) {
+	this->_x *= val;
+	this->_y *= val;
+	this->_z *= val;
+	return *this;
+}
+
+// Divide each element by a constant factor
+CartesianCoord & CartesianCoord::operator/=(const double &val) {
+	this->_x /= val;
+	this->_y /= val;
+	this->_z /= val;
+	return *this;
+}
+
 // Add two coordinates together as vectors by summing each of their components
 const CartesianCoord CartesianCoord::operator+(const CartesianCoord &other) const {
-	return CartesianCoord(	this->_x+other._x,
-						  this->_y+other._y,
-						  this->_z+other._z);
+	CartesianCoord	new_coord = *this;
+	new_coord += other;
+	return new_coord;
 }
 
 // Get the difference of two coordinates as vectors by subtracting each of their components
 const CartesianCoord CartesianCoord::operator-(const CartesianCoord &other) const {
-	return CartesianCoord(	this->_x-other._x,
-						  this->_y-other._y,
-						  this->_z-other._z);
+	CartesianCoord	new_coord = *this;
+	new_coord -= other;
+	return new_coord;
 }
 
 // Multiply each component by a constant factor
 const CartesianCoord CartesianCoord::operator*(const double &val) const {
-	return CartesianCoord(	this->_x*val,
-						  this->_y*val,
-						  this->_z*val);
+	CartesianCoord	new_coord = *this;
+	new_coord *= val;
+	return new_coord;
 }
 
 // Divide each element by a constant factor
 const CartesianCoord CartesianCoord::operator/(const double &val) const {
-	return CartesianCoord(	this->_x/val,
-						  this->_y/val,
-						  this->_z/val);
+	CartesianCoord	new_coord = *this;
+	new_coord /= val;
+	return new_coord;
 }
 
 // Return the cross product of this vector with another vector (b)
@@ -257,6 +289,46 @@ void CapBoundary::setCartTrigBounds(unsigned int bnum, CartesianCoord cc, double
 								 sinf);
 }
 
+
+TriElemLinearShapeFunc::TriElemLinearShapeFunc(CoordUV xy1, CoordUV xy2, CoordUV xy3) {
+    double delta, a0, a1, a2;
+	
+	/* shape function 1 */
+	delta = (xy3.u-xy2.u)*(xy1.v-xy2.v)-(xy2.v-xy3.v)*(xy2.u-xy1.u);
+	a0 = (xy2.u*xy3.v-xy3.u*xy2.v)/delta;
+	a1 = (xy2.v-xy3.v)/delta;
+	a2 = (xy3.u-xy2.u)/delta;
+	
+	sf[0][0] = a0;
+	sf[0][1] = a1;
+	sf[0][2] = a2;
+	
+	/* shape function 2 */
+	delta = (xy3.u-xy1.u)*(xy2.v-xy1.v)-(xy1.v-xy3.v)*(xy1.u-xy2.u);
+	a0 = (xy1.u*xy3.v-xy3.u*xy1.v)/delta;
+	a1 = (xy1.v-xy3.v)/delta;
+	a2 = (xy3.u-xy1.u)/delta;
+	
+	sf[1][0] = a0;
+	sf[1][1] = a1;
+	sf[1][2] = a2;
+	
+	/* shape function 3 */
+	
+	delta = (xy1.u-xy2.u)*(xy3.v-xy2.v)-(xy2.v-xy1.v)*(xy2.u-xy3.u);
+	a0 = (xy2.u*xy1.v-xy1.u*xy2.v)/delta;
+	a1 = (xy2.v-xy1.v)/delta;
+	a2 = (xy1.u-xy2.u)/delta;
+	
+	sf[2][0] = a0;
+	sf[2][1] = a1;
+	sf[2][2] = a2;
+}
+
+double TriElemLinearShapeFunc::applyShapeFunc(const unsigned int i, const CoordUV uv) const {
+	assert(i < 3);
+	return sf[i][0]+sf[i][1]*uv.u+sf[i][2]*uv.v;
+}
 
 void tracer_input(struct All_variables *E)
 {
@@ -378,22 +450,21 @@ void tracer_input(struct All_variables *E)
 // a regional or full mantle simulation
 void tracer_initial_settings(struct All_variables *E)
 {
+	// Initialize CPU time counters
 	E->trace.advection_time = 0;
 	E->trace.find_tracers_time = 0;
 	E->trace.lost_souls_time = 0;
 	
-	if(E->parallel.nprocxy == 1) {
-		E->trace.full_tracers = false;
-		
-		E->trace.keep_within_bounds = regional_keep_within_bounds;
-		E->trace.get_velocity = regional_get_velocity;
-		E->trace.iget_element = regional_iget_element;
-	} else {
-		E->trace.full_tracers = true;
-		
-		E->trace.keep_within_bounds = full_keep_within_bounds;
+	// If we have more than 1 processor, we are in full mantle tracer mode
+	E->trace.full_tracers = (E->parallel.nprocxy != 1);
+	
+	// Set up function pointers depending on which mode we are in
+	if(E->trace.full_tracers) {
 		E->trace.get_velocity = full_get_velocity;
 		E->trace.iget_element = full_iget_element;
+	} else {
+		E->trace.get_velocity = regional_get_velocity;
+		E->trace.iget_element = regional_iget_element;
 	}
 }
 
@@ -431,6 +502,9 @@ void tracer_setup(struct All_variables *E)
     write_trace_instructions(E);
 	
 	if (E->trace.full_tracers) {
+		// Initialize gnomonic node->coordinate mapping
+		E->trace.gnomonic = new std::map<int, CoordUV>;
+		
 		/* Gnometric projection for velocity interpolation */
 		define_uv_space(E);
 		determine_shape_coefficients(E);
@@ -653,6 +727,83 @@ void tracer_post_processing(struct All_variables *E)
 }
 
 
+/*********** KEEP WITHIN BOUNDS *****************************************/
+/*                                                                      */
+/* This function makes sure the particle is within the sphere, and      */
+/* phi and theta are within the proper degree range.                    */
+
+void keep_within_bounds(struct All_variables *E,
+                             CartesianCoord &cc,
+                             SphericalCoord &sc)
+{
+    double max_theta, min_theta;
+    double max_fi, min_fi;
+    double max_radius, min_radius;
+    double sint,cost,sinf,cosf;
+	int changed = 0;
+	
+	// TODO: simplify and unify (if possible) the logic here
+	// If we're in full tracer mode, constrain phi and theta
+	if (E->trace.full_tracers) {
+		sc.constrainThetaPhi();
+	} else {	// otherwise use the min/max values
+		max_theta = E->control.theta_max - E->trace.box_cushion;
+		min_theta = E->control.theta_min + E->trace.box_cushion;
+		
+		max_fi = E->control.fi_max - E->trace.box_cushion;
+		min_fi = E->control.fi_min + E->trace.box_cushion;
+		
+		if (sc._theta > max_theta) {
+			sc._theta = max_theta;
+			changed = 1;
+		}
+		
+		if (sc._theta < min_theta) {
+			sc._theta = min_theta;
+			changed = 1;
+		}
+		
+		if (sc._phi > max_fi) {
+			sc._phi = max_fi;
+			changed = 1;
+		}
+		
+		if (sc._phi < min_fi) {
+			sc._phi = min_fi;
+			changed = 1;
+		}
+	}
+	
+	// In all modes we are constrained by radius
+    max_radius = E->sphere.ro - E->trace.box_cushion;
+    min_radius = E->sphere.ri + E->trace.box_cushion;
+	
+    if (sc._rad > max_radius) {
+		changed = 1;
+        sc._rad=max_radius;
+    }
+    if (sc._rad < min_radius) {
+		changed = 1;
+        sc._rad=min_radius;
+    }
+	
+	// If the particle was moved, recalculate the Cartesian position
+	if (changed) {
+		if (E->trace.full_tracers) {
+			cost=cos(sc._theta);
+			sint=sqrt(1.0-cost*cost);
+			cosf=cos(sc._phi);
+			sinf=sin(sc._phi);
+			cc._x=sc._rad*sint*cosf;
+			cc._y=sc._rad*sint*sinf;
+			cc._z=sc._rad*cost;
+		} else {
+			cc = sc.toCartesian();
+		}
+	}
+}
+
+
 /*********** PREDICT TRACERS **********************************************/
 /*                                                                        */
 /* This function predicts tracers performing an euler step                */
@@ -686,7 +837,7 @@ static void predict_tracers(struct All_variables *E)
 			
             // Ensure tracer remains in the boundaries
 			sc_pred = cc_pred.toSpherical();
-            (E->trace.keep_within_bounds)(E, cc_pred, sc_pred);
+            keep_within_bounds(E, cc_pred, sc_pred);
 			
 			// Set new tracer coordinates
             tr->setCoords(sc_pred, cc_pred);
@@ -735,7 +886,7 @@ static void correct_tracers(struct All_variables *E)
 			new_coord_sph = new_coord.toSpherical();
 			
 			// Ensure tracer remains in boundaries
-            (E->trace.keep_within_bounds)(E, new_coord, new_coord_sph);
+            keep_within_bounds(E, new_coord, new_coord_sph);
 			
             // Fill in current positions (original values are no longer important)
 			tr->setCoords(new_coord_sph, new_coord);
@@ -752,7 +903,7 @@ static void correct_tracers(struct All_variables *E)
 /*                                                             */
 /* This function finds tracer elements and moves tracers to    */
 /* other processor domains if necessary.                       */
-/* Array ielement is filled with elemental values.                */
+/* Array ielement is filled with elemental values.             */
 
 static void find_tracers(struct All_variables *E)
 {
@@ -790,7 +941,7 @@ static void find_tracers(struct All_variables *E)
 
             tr->set_ielement(iel);
 
-            if (iel == -99) {
+            if (iel == UNDEFINED_ELEMENT) {
                 /* tracer is inside other processors */
 				E->trace.escaped_tracers[j].push_back(*tr);
 				tr=E->trace.tracers[j].erase(tr);
@@ -866,20 +1017,27 @@ void count_tracers_of_flavors(struct All_variables *E)
 
 void initialize_tracers(struct All_variables *E)
 {
+	// Initialize per-cap arrays for tracers and escaped tracers
 	E->trace.tracers = new TracerList[13];
 	E->trace.escaped_tracers = new TracerList[13];
 	
-    if (E->trace.ic_method==0)
-        make_tracer_array(E);
-    else if (E->trace.ic_method==1)
-        read_tracer_file(E);
-    else if (E->trace.ic_method==2)
-        read_old_tracer_file(E);
-    else {
-        fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
-        fflush(E->trace.fpt);
-        parallel_process_termination();
-    }
+	// Call the appropriate function depending on the tracer input method
+	switch (E->trace.ic_method) {
+		case 0:
+			make_tracer_array(E);
+			break;
+		case 1:
+			read_tracer_file(E);
+			break;
+		case 2:
+			read_old_tracer_file(E);
+			break;
+		default:
+			fprintf(E->trace.fpt,"Not ready for other inputs yet\n");
+			fflush(E->trace.fpt);
+			parallel_process_termination();
+			break;
+	}
 
     /* total number of tracers  */
 
@@ -998,16 +1156,16 @@ static void generate_random_tracers(struct All_variables *E,
         if (new_sc._rad<E->sx[j][3][1]) continue;
 
         /* check if in current cap */
-        if (E->parallel.nprocxy==1)
-            ival=regional_icheck_cap(E,0,new_sc,new_sc._rad);
-        else
+        if (E->trace.full_tracers)
             ival=full_icheck_cap(E,0,new_cc,new_sc._rad);
+        else
+            ival=regional_icheck_cap(E,0,new_sc,new_sc._rad);
 
         if (ival!=1) continue;
 
         /* Made it, so record tracer information */
 
-        (E->trace.keep_within_bounds)(E, new_cc, new_sc);
+        keep_within_bounds(E, new_cc, new_sc);
 
 		Tracer	new_tracer;
 		
@@ -1089,7 +1247,7 @@ static void read_tracer_file(struct All_variables *E)
 
             /* make sure theta, phi is in range, and radius is within bounds */
 
-            (E->trace.keep_within_bounds)(E,in_coord_cc,in_coord_sph);
+            keep_within_bounds(E,in_coord_cc,in_coord_sph);
 
             /* check whether tracer is within processor domain */
 
@@ -1097,10 +1255,10 @@ static void read_tracer_file(struct All_variables *E)
             if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,j,in_coord_sph._rad);
             if (icheck!=1) continue;
 
-            if (E->parallel.nprocxy==1)
-                icheck=regional_icheck_cap(E,0,in_coord_sph,in_coord_sph._rad);
-            else
+            if (E->trace.full_tracers)
                 icheck=full_icheck_cap(E,0,in_coord_cc,in_coord_sph._rad);
+            else
+                icheck=regional_icheck_cap(E,0,in_coord_sph,in_coord_sph._rad);
 
             if (icheck==0) continue;
 
@@ -1237,7 +1395,7 @@ static void read_old_tracer_file(struct All_variables *E)
 
             /* it is possible that if on phi=0 boundary, significant digits can push phi over 2pi */
 
-            (E->trace.keep_within_bounds)(E,cc,sc);
+            keep_within_bounds(E,cc,sc);
 
 			Tracer	new_tracer;
 			
@@ -1505,7 +1663,7 @@ void allocate_tracer_arrays(struct All_variables *E,
 
 
 /********** ICHECK PROCESSOR SHELL *************/
-/* returns -99 if rad is below current shell  */
+/* returns UNDEFINED_ELEMENT if rad is below current shell  */
 /* returns 0 if rad is above current shell    */
 /* returns 1 if rad is within current shell   */
 /*                                            */
@@ -1529,7 +1687,7 @@ int icheck_processor_shell(struct All_variables *E,
     bottom_r = E->sx[j][3][1];
 
     // First check bottom
-    if (rad<bottom_r) return -99;
+    if (rad<bottom_r) return UNDEFINED_ELEMENT;
 
     // Check top
     if (rad<top_r) return 1;
@@ -1565,7 +1723,7 @@ int icheck_that_processor_shell(struct All_variables *E,
 
     /* nprocessor is right on bottom of me */
     if (nprocessor == me-1) {
-        if (icheck_processor_shell(E, j, rad) == -99) return 1;
+        if (icheck_processor_shell(E, j, rad) == UNDEFINED_ELEMENT) return 1;
         else return 0;
     }
 
