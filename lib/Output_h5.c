@@ -2099,6 +2099,8 @@ static herr_t h5close_field(field_t **field)
             /*free((*field)->data);*/
             free(*field);
         }
+
+    return 0;
 }
 
 
