@@ -383,7 +383,7 @@ static void temperature_refl_vert_bc(E)
           node2 = i +(j-1)*E->lmesh.noz + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
           E->node[m][node2] = E->node[m][node2] & (~TBY);
           E->node[m][node2] = E->node[m][node2] | FBY;
-          E->sphere.cap[m].TB[3][node2] = 0.0;
+          E->sphere.cap[m].TB[2][node2] = 0.0;
           }    /* end loop for i and j */
 
   return;
