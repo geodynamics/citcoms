@@ -278,7 +278,7 @@ void read_initial_settings(struct All_variables *E)
   void set_mg_defaults();
   float tmp;
   double ell_tmp;
-  int m=E->parallel.me;
+  int m=E->parallel.me,i;
   double levmax;
   int tmp_int_in;
 
@@ -542,6 +542,21 @@ void read_initial_settings(struct All_variables *E)
   /* if < 0, will assign only to layer == -ggrd_mat_control */
   input_int("ggrd_mat_control",&(E->control.ggrd.mat_control),"0",m); 
   input_boolean("ggrd_mat_limit_prefactor",&(E->control.ggrd_mat_limit_prefactor),"on",m); /* limit prefactor to with 1e+/-5 */
+  input_int("ggrd_mat_is_code",&(E->control.ggrd_mat_is_code),"0",m); /* the viscosity grids are
+									   actually codes for
+									   different types of
+									   rheologies, from 1 .... cmax
+									   
+									   
+									*/
+  if(E->control.ggrd_mat_is_code){
+    /* we need code assignments */
+    E->control.ggrd_mat_code_viscosities = (float *)malloc(sizeof(float)*E->control.ggrd_mat_is_code);
+    for(i=0;i < E->control.ggrd_mat_is_code;i++)
+      E->control.ggrd_mat_code_viscosities[i] = 1;
+    input_float_vector("ggrd_mat_code_viscosities",
+		       E->control.ggrd_mat_is_code,(E->control.ggrd_mat_code_viscosities),m);
+  }
   input_string("ggrd_mat_file",E->control.ggrd.mat_file,"",m); /* file to read prefactors from */
   input_string("ggrd_mat_depth_file",
 	       E->control.ggrd_mat_depth_file,"_i_do_not_exist_",m); 

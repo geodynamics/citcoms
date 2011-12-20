@@ -304,7 +304,7 @@ void compute_nodal_stress(struct All_variables *E,
 	if ((e-1)%E->lmesh.elz==0) {
 	  construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,0);
 	}
-	/* get b at velocity Gauss points */
+	/* get B at velocity Gauss points */
 	get_ba(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,rtf, dims, ba);
 	/* regular stress tensor */
 	for(p=1;p <= 6;p++)

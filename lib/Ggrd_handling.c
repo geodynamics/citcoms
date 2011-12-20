@@ -420,6 +420,9 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
   /* no interpolation */
   use_nearneighbor = TRUE;
 #endif
+  if(E->control.ggrd_mat_is_code)
+    use_nearneighbor = TRUE;
+    
   /*
      if we have not initialized the time history structure, do it now
   */
@@ -510,7 +513,9 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
       i1 = 0;
     }
     /*
+      
        loop through all elements and assign
+       
     */
     for (m=1;m <= E->sphere.caps_per_proc;m++) {
       for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
@@ -591,17 +596,56 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
 	    }
 	  }
 	}else{
-	  /* outside the lithosphere */
-	  for (k=1;k <= ely;k++){
-	    for (i=1;i <= elx;i++)   {
-	      el = j + (i-1) * elz + (k-1)*elxlz;
-	      /* no scaling else */
-	      E->VIP[m][el] = 1.0;
+	  /* outside the lithosphere/layers under consideration */
+	  if(E->control.ggrd_mat_is_code){
+	    for (k=1;k <= ely;k++){
+	      for (i=1;i <= elx;i++)   {
+		el = j + (i-1) * elz + (k-1)*elxlz;
+		E->VIP[m][el] = 0; /* zero code --> unity scale */
+	      }
+	    }
+	  }else{
+	    for (k=1;k <= ely;k++){
+	      for (i=1;i <= elx;i++)   {
+		el = j + (i-1) * elz + (k-1)*elxlz;
+		E->VIP[m][el] = 1.0;
+	      }
 	    }
 	  }
 	}
       }	/* end elz loop */
     } /* end m loop */
+    if(E->control.ggrd_mat_is_code){
+      /* 
+	 code assignment 
+      */
+    
+      if(E->parallel.me==0){
+	for(i=0;i < E->control.ggrd_mat_is_code;i++)
+	  fprintf(stderr,"ggrd_read_mat_from_file: code %03i: viscosity: %12.3e\n",
+		  i+1,E->control.ggrd_mat_code_viscosities[i]);
+      }
+      
+      /* the grids were actually code flags from 1...cmax */
+      for (m=1;m <= E->sphere.caps_per_proc;m++) {
+	for (j=1;j <= elz;j++) {
+	  for (k=1;k <= ely;k++){
+	    for (i=1;i <= elx;i++)   {
+	      el = j + (i-1) * elz + (k-1)*elxlz;
+	      if((int)E->VIP[m][el] < 1){ /* background */
+		E->VIP[m][el] = 1.0;
+	      }else{
+		if((((int)E->VIP[m][el]) > E->control.ggrd_mat_is_code)||(((int)E->VIP[m][el]) < 1)){
+		  fprintf(stderr,"%i\n",(int)E->VIP[m][el]);
+		  myerror(E,"ggrd_mat_code_viscosities: input code out of bounds");
+		}
+		E->VIP[m][el] = E->control.ggrd_mat_code_viscosities[(int)(E->VIP[m][el]-1)];
+	      }
+	    }
+	  }
+	}
+      }
+    }
   } /* end assignment loop */
   if((!timedep) && (!E->control.ggrd.mat_control_init)){
     /* forget the grid */
