@@ -172,8 +172,8 @@ void viscosity_system_input(struct All_variables *E)
 									   rheology (activated it for anisotropic viscosity)
 									*/
 
-
-    input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+    // moved to Composition related, for init purposes
+    //input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
     for(i=0;i<10;i++)
       E->viscosity.cdepv_ff[i] = 1.0; /* flavor factors for CDEPV */
     if(E->viscosity.CDEPV){

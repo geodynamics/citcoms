@@ -605,7 +605,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
 
     /* scale for buoyancy */
     scaling2 = -E->data.therm_exp*E->data.ref_temperature*E->data.density
-        / E->control.Atemp;
+      / fabs(E->control.Atemp);
     /* scale for geoid */
     scaling = 4.0 * M_PI * 1.0e3 * E->data.radius_km * E->data.grav_const
         / E->data.grav_acc;

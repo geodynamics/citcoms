@@ -45,12 +45,16 @@ void composition_input(struct All_variables *E)
 {
     int i;
     int m = E->parallel.me;
+    input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+    E->composition.icompositional_rheology = E->viscosity.CDEPV;
 
     input_boolean("chemical_buoyancy",
 		  &(E->composition.ichemical_buoyancy),
 		  "1,0,nomax",m);
 
-    if (E->control.tracer && E->composition.ichemical_buoyancy) {
+    if (E->control.tracer && 
+	(E->composition.ichemical_buoyancy || 
+	 E->composition.icompositional_rheology)) {
 
         /* ibuoy_type=0 (absolute method) */
         /* ibuoy_type=1 (ratio method) */
@@ -66,7 +70,7 @@ void composition_input(struct All_variables *E)
             E->composition.ncomp = E->trace.nflavors;
         else if (E->composition.ibuoy_type==1)
             E->composition.ncomp = E->trace.nflavors - 1;
-
+	
         E->composition.buoyancy_ratio = (double*) malloc(E->composition.ncomp
                                                          *sizeof(double));
 
@@ -81,11 +85,17 @@ void composition_input(struct All_variables *E)
 
 
     /* compositional rheology */
-    /* what was this about? there is a CDEPV for compositional rheology TWB  */
+    /* what was this about? there is a CDEPV for compositional rheology 
+       
+    i moved this to the top so that cdepv = on would activate tracers
+
+    TWB  */
 
     /* icompositional_rheology=0 (off) */
     /* icompositional_rheology=1 (on) */
-    E->composition.icompositional_rheology = 0;
+    //E->composition.icompositional_rheology = 0;
+
+
     /*
     input_int("compositional_rheology",
               &(E->composition.icompositional_rheology),"1,0,nomax",m);

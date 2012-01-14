@@ -157,7 +157,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     //char filename[100];FILE *out;
 
     nxny = E->lmesh.nox*E->lmesh.noy;
-    /* Rayleigh number */
+    /* Rayleigh number (can be negative for time reversal) */
     temp = E->control.Atemp;
 
     /* thermal buoyancy */

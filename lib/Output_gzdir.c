@@ -1135,7 +1135,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 	       E->composition.initial_bulk_composition,
 	       E->composition.bulk_composition);
       for(i=1;i<=E->lmesh.nno;i++) {
-	for(k=0;k<E->composition.ncomp;k++)
+	for(k=0;k < E->composition.ncomp;k++)
 	  gzprintf(gz1,"%.6e ",E->composition.comp_node[j][k][i]);
 	gzprintf(gz1,"\n");
       }

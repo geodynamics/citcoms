@@ -777,6 +777,8 @@ static void process_visc_heating(struct All_variables *E, int m,
     const int vpts = VPOINTS3D;
 
     strain_sqr = (float*) malloc((E->lmesh.nel+1)*sizeof(float));
+    /* note that this will be negative for Atemp < 0 for time
+       reversal */
     temp = E->control.disptn_number / E->control.Atemp / vpts;
 
     strain_rate_2_inv(E, m, strain_sqr, 0);
@@ -833,7 +835,9 @@ static void latent_heating(struct All_variables *E, int m,
     double temp, temp0, temp1, temp2, temp3, matprop;
     int e, ez, i, j;
     const int ends = ENODES3D;
-
+    /* 
+       note that this will be negative for time-reversal
+    */
     temp0 = 2.0 * inv_width * clapeyron * E->control.disptn_number * Ra / E->control.Atemp / ends;
     temp1 = temp0 * clapeyron;
 

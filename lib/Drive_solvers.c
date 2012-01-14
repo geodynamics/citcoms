@@ -172,7 +172,7 @@ int need_visc_update(struct All_variables *E)
   }
 }
 int need_to_iterate(struct All_variables *E){
-  if(E->control.force_iteration){
+  if((E->control.force_iteration) && (E->monitor.solution_cycles == 0)){
     return 1;
   }else{
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC

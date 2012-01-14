@@ -124,7 +124,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   }
   if(ggrd_grdtrack_init_general(FALSE,E->trace.ggrd_file,
 				char_dummy,gmt_bc,
-				ggrd_ict,FALSE,FALSE,
+				ggrd_ict,(E->parallel.me==0)?TRUE:FALSE,FALSE,
 				use_nearneighbor)){
     myerror(E,"ggrd tracer init error");
   }
@@ -134,7 +134,7 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
     mpi_rc = MPI_Send(&mpi_success_message, 1,
 		      MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
   }else{
-    report(E,"ggrd_init_tracer_flavors: last processor done with ggrd mat init");
+    fprintf(stderr,"ggrd_init_tracer_flavors: last processor done with ggrd mat init");
   }
   /* init done */
 
