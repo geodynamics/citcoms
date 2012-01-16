@@ -2551,6 +2551,7 @@ static void fix_theta_phi(double *theta, double *phi)
 /*                                                               */
 /* This function returns the the real element for a given point. */
 /* Returns -99 if not in this cap.                               */
+/* Returns -1 if in this cap but cannot find the element.        */
 /* iprevious_element, if known, is the last known element. If    */
 /* it is not known, input a negative number.                     */
 
@@ -2740,7 +2741,7 @@ int full_iget_element(struct All_variables *E,
     fprintf(E->trace.fpt,"x,y,z,theta,phi,iregel %.15e %.15e %.15e %.15e %.15e %d\n",
             x,y,z,theta,phi,iregel);
     fflush(E->trace.fpt);
-    exit(10);
+    return -1;
 
  foundit:
 

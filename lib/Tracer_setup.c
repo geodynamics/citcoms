@@ -605,8 +605,19 @@ static void find_tracers(struct All_variables *E)
 
             E->trace.ielement[j][it]=iel;
 
-            if (iel<0) {
+            if (iel == -99) {
+                /* tracer is inside other processors */
                 put_away_later(E,j,it);
+                eject_tracer(E,j,it);
+                it--;
+            } else if (iel == -1) {
+                /* tracer is inside this processor,
+                 * but cannot find its element.
+                 * Throw away the tracer. */
+
+                if (E->trace.itracer_warnings) exit(10);
+
+
                 eject_tracer(E,j,it);
                 it--;
             }

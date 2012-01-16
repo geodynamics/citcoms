@@ -81,7 +81,7 @@ def batchpaste(datadir, datafile, fields, timestep, nodes):
     cwd = os.getcwd()
 
     for rank, node in enumerate(nodes):
-        if node == 'localhost' or node == hostname:
+        if node == 'localhost' or node == '-' or node == hostname:
             # local paste
             import pasteCitcomData
             pasteCitcomData.run(datadir, datafile, fields, rank, timestep, cwd)
