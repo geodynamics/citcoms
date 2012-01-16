@@ -757,7 +757,8 @@ void check_settings_consistency(struct All_variables *E)
     if(E->sphere.caps == 12 &&
        (E->control.remove_angular_momentum || E->control.remove_rigid_rotation) &&
        (E->mesh.topvbc || E->mesh.botvbc || E->control.side_sbcs)) {
-        fprintf(stderr,"\nWARNING: The input parameters impose boundary velocity, but also remove angular momentum/rigid rotation!\n\n");
+      if(E->parallel.me == 0)
+	 fprintf(stderr,"\nWARNING: The input parameters impose boundary velocity, but also remove angular momentum/rigid rotation!\n\n");
     }
     return;
 }
