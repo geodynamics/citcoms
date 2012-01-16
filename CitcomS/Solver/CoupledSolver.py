@@ -85,6 +85,9 @@ class CoupledSolver(Solver):
     def advectTracers(self):
         # override Solver.advectTracers, since tracer module
         # doesn't work in coupled run
+        if self.communicator.rank == 0:
+            import sys
+            sys.stderr.write('WARNING: CoupledSolver is incompatible with tracer advection. Tracer advection is disabled!!!\n')
         return
 
 

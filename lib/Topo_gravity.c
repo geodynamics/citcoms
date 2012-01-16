@@ -947,10 +947,19 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
          eu [m*dims+2] = VV[3][m+1];
          }
 
+      /* The statement order is important:
+         elb must be executed before el when calling get_elt_f().
+         Otherwise, construct_c3x3matrix_el() would be skipped incorrectly. */
       get_elt_f(E,elb,eltfb,1,j);
       get_elt_f(E,el,eltf,1,j);
+
       get_elt_k(E,elb,eltkb,lev,j,1);
       get_elt_k(E,el,eltk,lev,j,1);
+
+      if (E->control.augmented_Lagr) {
+          get_aug_k(E,elb,eltkb,lev,1);
+          get_aug_k(E,el,eltk,lev,1);
+      }
 //      get_elt_g(E,elb,eltgb,lev,j);
 //      get_elt_g(E,el,eltg,lev,j);
 
