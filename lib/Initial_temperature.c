@@ -420,10 +420,10 @@ static void add_perturbations_at_layers(struct All_variables *E)
         kk = E->convection.load_depth[p];
         con = E->convection.perturb_mag[p];
 
-        if ( (kk < 1) || (kk >= gnoz) ) continue; /* layer kk is outside domain */
+        if ( (kk < 1) || (kk > gnoz) ) continue; /* layer kk is outside domain */
 
         k = kk - E->lmesh.nzs + 1; /* convert global nz to local nz */
-        if ( (k < 1) || (k >= noz) ) continue; /* layer k is not inside this proc. */
+        if ( (k < 1) || (k > noz) ) continue; /* layer k is not inside this proc. */
         if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0
             && E->sphere.capid[1] == 1 )
             fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
