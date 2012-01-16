@@ -1,5 +1,5 @@
 //
-// time: Wed Oct  4 15:59:54 2006
+// time: Thu Jan 21 10:56:00 2010
 //
 // version: 3.2.0 (format), 4.3.2 (DX)
 //
@@ -16,6 +16,9 @@
 // macro reference (indirect): CitcomSViscosity @dxmacrodir@/CitcomSViscosity.net
 //
 // macro reference (indirect): CitcomSImport @dxmacrodir@/CitcomSImport.net
+//
+// macro reference (direct): CitcomSImportOpt @dxmacrodir@/CitcomSImportOpt.net
+include "CitcomSImportOpt.net"
 //
 // macro reference (direct): CitcomSFullImport @dxmacrodir@/CitcomSFullImport.net
 include "CitcomSFullImport.net"
@@ -121,6 +124,24 @@ main_AutoGlyph_9_out_1 =
     main_AutoGlyph_9_in_7
     ) [instance: 9, cache: 1];
     // 
+    // node FileSelector[2]: x = 349, y = 39, inputs = 0, label = FileSelector
+    // output[1]: visible = 1, type = 32, value = "samples/fulltest.opt%02d.100.general"
+    // output[2]: visible = 1, type = 32, value = "fulltest.opt%02d.100.general"
+    // page group: import
+    //
+    // 
+    // node CitcomSImportOpt[1]: x = 354, y = 271, inputs = 4, label = CitcomSImportOpt
+    // page group: import
+    //
+main_CitcomSImportOpt_1_out_1 = 
+    CitcomSImportOpt(
+    main_FileSelector_2_out_1,
+    main_CitcomSFullImport_1_out_2,
+    main_CitcomSImportOpt_1_in_3,
+    main_CitcomSImportOpt_1_in_4
+    ) [instance: 1, cache: 1];
+    // 
+    //
     // node Transmitter[16]: x = 133, y = 371, inputs = 1, label = temperature
     // page group: import
     //
@@ -627,6 +648,11 @@ main_Receiver_94_out_1[cache: 0] = connections;
     // page group: import
     //
 viscosity = main_CitcomSFullImport_1_out_3;
+    // 
+    // node Transmitter[26]: x = 392, y = 372, inputs = 1, label = opt_field
+    // page group: import
+    //
+opt_field = main_CitcomSImportOpt_1_out_1;
 // network: end of macro body
 CacheScene(main_Image_3_in_1, main_Image_3_out_1, main_Image_3_out_2);
 }
@@ -667,6 +693,10 @@ main_AutoGlyph_9_in_5 = NULL;
 main_AutoGlyph_9_in_6 = NULL;
 main_AutoGlyph_9_in_7 = NULL;
 main_AutoGlyph_9_out_1 = NULL;
+main_FileSelector_2_out_1 = "samples/fulltest.opt%02d.100.general";
+main_CitcomSImportOpt_1_in_3 = NULL;
+main_CitcomSImportOpt_1_in_4 = NULL;
+main_CitcomSImportOpt_1_out_1 = NULL;
 main_Transmitter_16_out_1 = NULL;
 main_Receiver_96_out_1 = NULL;
 main_Scalar_6_in_1 = "Scalar_6";
