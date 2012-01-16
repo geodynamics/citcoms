@@ -338,22 +338,29 @@ void regional_read_input_files_for_timesteps(E,action,output)
                   fprintf(stderr,"Error while reading file '%s'\n",output_file1);
                   exit(8);
               }
-              if(fscanf(fp2,"%d %d %f", &nn,&(LL2[i]),&(VIP2[i])) != 3) {
-                  fprintf(stderr,"Error while reading file '%s'\n",output_file2);
-                  exit(8);
+              if (pos_age) {
+                  if(fscanf(fp2,"%d %d %f", &nn,&(LL2[i]),&(VIP2[i])) != 3) {
+                      fprintf(stderr,"Error while reading file '%s'\n",output_file2);
+                      exit(8);
+                  }
               }
           }
 
           fclose(fp1);
-          fclose(fp2);
+          if (pos_age) fclose(fp2);
 
           for (k=1;k<=ely;k++)   {
             for (i=1;i<=elx;i++)   {
               for (j=1;j<=elz;j++)  {
                 el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
                 elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
+                if (pos_age) { /* positive ages - we must interpolate */
+                    E->VIP[1][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
+                }
+                else { /* negative ages - don't do the interpolation */
+                    E->VIP[1][el] = VIP1[elg];
+                }
 
-                E->VIP[1][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
                 /* E->mat[1][el] = LL1[elg]; */ /*use the mat numbers base on radius*/
 
               }     /* end for j  */
