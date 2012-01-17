@@ -83,6 +83,30 @@ if test "$want_pyre" = yes; then
 
     # Check for Python modules and packages.
     export want_exchanger
+
+    # merlin's install_deps command is incompatible with python 2.7
+    if test "$PYTHON_VERSION" = 2.7; then
+        # Check for presence of pythia .egg or .tar.gz files
+	if ls $cit_builddir/deps/pythia-0.8.1.* 2>&1 > /dev/null; then
+	    echo -e "Found Pythia package."
+	else
+            echo -e "Please download pythia from:"
+	    echo -e "  http://www.geodynamics.org/cig/software/pythia"
+	    echo -e "and put it under deps/ directory."
+            AC_MSG_ERROR([Pythia package not found])
+	fi
+    else
+        AC_MSG_NOTICE([downloading missing Python dependencies])
+	AS_IF([AC_TRY_COMMAND([$PYTHON setup.py install_deps -f $cit_builddir/deps -zmxd $cit_builddir/deps >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+          [],
+          [AC_MSG_FAILURE([cannot download missing Python dependencies])])
+    fi
+
+    AC_MSG_NOTICE([building Python dependencies])
+    AS_IF([AC_TRY_COMMAND([$PYTHON setup.py develop -H None -f $cit_builddir/deps -x -d $cit_builddir/python >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD])],
+          [],
+          [AC_MSG_FAILURE([building Python dependencies])])
+
     CIT_PYTHON_EGG_SETUP
 
     CIT_PROG_PYCONFIG
