@@ -601,8 +601,7 @@ void read_initial_settings(struct All_variables *E)
 
   */
   input_boolean("ggrd_vtop_euler",&(E->control.ggrd_vtop_euler),"off",m);
-  if(E->control.ggrd_vtop_euler)
-    E->control.ggrd.vtop_control = 1;
+
 
   if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
     E->control.vbcs_file = 1;

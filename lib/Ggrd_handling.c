@@ -1225,7 +1225,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       */
       /* scaled cutoff velocity */
       if(!E->control.ggrd_vtop_euler)		/* else, is not defined */
-	cutoff = E->control.ggrd.svt->fmaxlim[0] * vscale + 1e-5;
+	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
       else{
 	cutoff = 1e30;
       }
