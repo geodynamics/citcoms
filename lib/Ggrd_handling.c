@@ -791,13 +791,20 @@ read surface boundary conditions from netcdf grd files
 if topvbc=1, will apply to velocities
 if topvbc=0, will apply to tractions
 
+if ggrd_allow_mixed_vbcs is true, will allow for a mix of prescribed
+and free mechanical BCs
+
+
+if ggrd_vtop_euler is true, will look for plate codes and rotation
+vector file and prescribe Euler vectors instead
+
 */
 
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
   int mpi_rc,interpolate,timedep,*max_code,code,assign,ontop;
-  int mpi_inmsg, mpi_success_message = 1,we_have_velocities;
+  int mpi_inmsg, mpi_success_message = 1,we_have_velocity_grids = 1;
   int m,el,i,k,i1,i2,ind,nodel,j,level, verbose,euler_i;
   int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,
     noxlnozl,save_codes,topnode,botnode;
@@ -842,8 +849,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 
   /* top processor check */
   top_proc = E->parallel.nprocz-1;
-  /* output of warning messages */
-  if((allow_internal && (E->parallel.me == 0))||(E->parallel.me == top_proc))
+  /* 
+     output of warning messages 
+  */
+  if((allow_internal && (E->parallel.me == 0)) || (E->parallel.me == top_proc))
     verbose = TRUE;
   else
     verbose = FALSE;
@@ -878,7 +887,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 
   if(use_vel){
     /* 
-       velocity scaling, assuming input is cm/yr  
+       velocity scaling, assuming input is cm/yr
     */
     vscale = E->data.scalev * E->data.timedir;
     if(E->control.ggrd_vtop_euler)
@@ -886,7 +895,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     if(E->parallel.me == 0)
       fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr, scaling factor: %g\n",vscale);
   }else{
-    /* stress scale, from MPa */
+    /* 
+       stress scale, assuming input is in MPa
+    */
     vscale =  1e6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6));
     if((!mode_warned) && (verbose)){
       fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: make sure traction control is what you want, not free slip\n");
@@ -897,6 +908,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   if (allow_internal || (E->parallel.me_loc[3] == top_proc)) { 
     
     /* 
+       
        top processors for regular operations, all for internal
 
     */
@@ -937,10 +949,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
       E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
       if(E->control.ggrd_vtop_euler){
+	/* make room for euler vectors */
 	euler = (struct elvc **)malloc(E->control.ggrd.time_hist.nvtimes * sizeof(struct elvc *));
 	max_code = (int *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(int));
       }
-      /* for detecting the actual max */
+
+      /* for detecting the actual max of the velocities */
       E->control.ggrd.svt->bandlim = E->control.ggrd.svp->bandlim = 1e6;
       for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
 	/* 
@@ -957,7 +971,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	    sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
 	    sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
 	  }
-	} else {			/* f(t) */
+	} else {			/* f(t), different stages */
 	  if(E->control.ggrd_vtop_euler){
 	    sprintf(tfilename1,"%s/%i/code.grd",E->control.ggrd.vtop_dir,i+1);
 	    sprintf(tfilename2,"%s/%i/rotvec.dat",E->control.ggrd.vtop_dir,i+1);
@@ -972,70 +986,78 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	     avoid interpolation
 	  */ 
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
-					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,
-					TRUE))
+					gmt_string,(E->control.ggrd.svt+i),
+					verbose,FALSE,TRUE))
 	    myerror(E,"ggrd init error codes");
 	  /* 
-	     read in euler vectors 
+
+	  read in euler vectors 
+	  
 	  */
 	  if((in = fopen(tfilename2,"r"))==NULL){
 	    fprintf(stderr,"ggrd_read_vtop_from_file: cannot open %s for Euler vectors\n",tfilename2);
 	    myerror(E,"");
 	  }
+	  max_code[i] = 0;	/*  */
 	  euler[i] = (struct elvc *)malloc(sizeof(struct elvc));
-	  while(fscanf(in,"%f %f %f",&(euler[i][max_code[i]].w[0]),&(euler[i][max_code[i]].w[1]),
+	  while(fscanf(in,"%f %f %f", /* reading in the euler vectors for each plate code */
+		       &(euler[i][max_code[i]].w[0]),
+		       &(euler[i][max_code[i]].w[1]),
 		       &(euler[i][max_code[i]].w[2]))==3){
 	    max_code[i]++;
 	    euler[i] = (struct elvc *)realloc(euler[i],(max_code[i]+1)*sizeof(struct elvc));
 	  }
 	  fclose(in);
 	  euler[i] = (struct elvc *)realloc(euler[i],max_code[i] * sizeof(struct elvc));
-	  we_have_velocities = 0;
-	  if(E->parallel.me == 0)
+	  we_have_velocity_grids = 0; /* code grid */
+	  if(verbose)
 	    fprintf(stderr,"ggrd_read_vtop_from_file: step %i read %i Euler vectors from %s\n",i+1,max_code[i],tfilename2);
 	}else{
-	  /* velocities */
-	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
-					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,
+	  /* 
+	     actual velocities  in grd form
+	  */
+	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy, /* theta */
+					gmt_string,(E->control.ggrd.svt+i),verbose,FALSE,
 					use_nearneighbor))
 	    myerror(E,"ggrd init error vt");
-	  if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy,
-					gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE,
+	  if(ggrd_grdtrack_init_general(FALSE,tfilename2,&char_dummy, /* phi */
+					gmt_string,(E->control.ggrd.svp+i),verbose,FALSE,
 					use_nearneighbor))
 	    myerror(E,"ggrd init error vp"); 
-	  we_have_velocities = 1;
+	  we_have_velocity_grids = 1;
 	}
 	/* end timestep loop */
-      }/* all grids read */
+      }
       if(E->control.ggrd_vtop_euler){
 	if(E->control.ggrd.time_hist.nvtimes == 1){
-	  save_codes = 1;
-
+	  save_codes = 1;	/*  */
 	  snprintf(tfilename1,1000,"%s/codes.%d.gz", /* some debugging output for the codes read in */
 		   E->control.data_dir,E->parallel.me);
 	  fp1 = gzdir_output_open(tfilename1,"w");
-	  if(E->parallel.me == 0)fprintf(stderr,"saving codes for debugging to %s\n",tfilename1);
+	  if(verbose)fprintf(stderr,"saving codes for debugging to %s\n",tfilename1);
 	}
       }
       if(verbose){
 	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
 		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svt->fmaxlim[0]);
       }
-    } /* end init part */
+      /* end init part, only executed once */
+    } 
     
     /* 
-       geographic bounds 
+       geographic bounds, use the theta file, as that's always read in
     */
     theta_max = (90.-E->control.ggrd.svt[0].south)*M_PI/180-1e-5;
     theta_min = (90.-E->control.ggrd.svt[0].north)*M_PI/180+1e-5;
-    if(E->parallel.me == 0){
+    if(verbose)
       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
 	      E->control.ggrd.svt[0].south,E->control.ggrd.svt[0].north);
-    }
 
     if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
       /* 
+	 
 	 either first time around, or time-dependent assignment
+
       */
       age = find_age_in_MY(E);
       if(timedep){
@@ -1059,7 +1081,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	
       }else{
 	interpolate = 0;		/* single timestep, use single file */
-	i1 = 0;
+	i1 = i2 = 0;
 	if(verbose)
 	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
       }
@@ -1092,7 +1114,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	  noxlnozl = noxl*nozl;
 
 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
-	    /* determine vertical nodes */
+	    /* 
+	       determine vertical nodes and set the assign flag, if needed
+	    */
 	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,m,verbose,
 						      &assign,&botnode,&topnode);
 	    /* 
@@ -1191,7 +1215,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	   end mixed BC assign 
 
 	*/
-      }	 
+      }
 
       /* 
 	 
@@ -1206,8 +1230,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	cutoff = 1e30;
       }
 
-      /* top level */
-
       for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	/* top level only */
 	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,m,verbose,
@@ -1219,7 +1241,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      /*  */
 	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	      rout[2] = E->sx[m][2][nodel];
-	      if(we_have_velocities){
+	      if(we_have_velocity_grids){
 		/* 
 		   
 		for global grid, shift theta if too close to poles
@@ -1308,6 +1330,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
 		if(E->control.ggrd_vtop_euler){
+		  /* 
+
+		  assign velocities from Euler vectors
+
+		  */
+
 		  /* find code from v[1], theta */
 		  code = (int)v[1];
 		  if((code > max_code[euler_i])||(code<1)){
@@ -1355,23 +1383,23 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
       }
+
     } /* end assignment branch */
     if(E->control.ggrd_vtop_euler){
       if(save_codes){
 	save_codes = 0;
 	gzclose(fp1);
       }
-      for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++)
+      for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++) /* unload */
 	free(euler[i]);
       free(euler);
       free(max_code);
     }
-  } /* end top proc branch */
 
-  /*  */
+
+  } /* end top processor or allow internal branch branch */
+
   E->control.ggrd.vtop_control_init = TRUE;
-  //if(E->parallel.me == 0)
-  //fprintf(stderr,"vtop from grd done: %i\n",lc++);
 }
 
 

@@ -600,7 +600,7 @@ void read_initial_settings(struct All_variables *E)
   codes go between 1....N where N is the number of entries in rotvec.dat
 
   */
-  input_boolean("ggrd_vtop_euler",&(E->control.ggrd_vtop_euler),"0",m);
+  input_boolean("ggrd_vtop_euler",&(E->control.ggrd_vtop_euler),"off",m);
   if(E->control.ggrd_vtop_euler)
     E->control.ggrd.vtop_control = 1;
 
