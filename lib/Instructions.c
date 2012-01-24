@@ -586,22 +586,22 @@ void read_initial_settings(struct All_variables *E)
   input_string("ggrd_vtop_dir",E->control.ggrd.vtop_dir,"",m); /* file to read prefactors from */
 
   /* 
-     read in omega[4] vector 
+     
+  if ggrd_vtop_euler is set, will read 
 
-     if omega[0] is > 0, will read in a code.grd file instead of
-     vp.grd/vt.grd and assign the Euler vector omega[1-3] to all
-     locations with that omega[0] code. The Euler pole is assumed to
-     be in deg/Myr
+  wx wy wz 
 
-     ggrd_vtop_omega=4,-0.0865166,0.277312,-0.571239
+  from E->control.ggrd.vtop_dir/rotvec.dat
 
-     will assign the NUVEL-1A NNR Pacific plate rotation vector to all
-     points with code 4
+  and location codes from E->control.ggrd.vtop_dir/code.grd
+
+  assigning euler vector velocities in cm/yr assuming wx/wy/wz are in deg/Myr
+
+  codes go between 1....N where N is the number of entries in rotvec.dat
 
   */
-  E->control.ggrd_vtop_omega[0] = 0;
-  input_float_vector("ggrd_vtop_omega",4,E->control.ggrd_vtop_omega,m);
-  if(E->control.ggrd_vtop_omega[0] > 0)
+  input_boolean("ggrd_vtop_euler",&(E->control.ggrd_vtop_euler),"0",m);
+  if(E->control.ggrd_vtop_euler)
     E->control.ggrd.vtop_control = 1;
 
   if(E->control.ggrd.vtop_control) /* this will override mat_control setting */

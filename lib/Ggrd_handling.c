@@ -796,9 +796,9 @@ if topvbc=0, will apply to tractions
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 {
   MPI_Status mpi_stat;
-  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop;
-  int mpi_inmsg, mpi_success_message = 1;
-  int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
+  int mpi_rc,interpolate,timedep,*max_code,code,assign,ontop;
+  int mpi_inmsg, mpi_success_message = 1,we_have_velocities;
+  int m,el,i,k,i1,i2,ind,nodel,j,level, verbose,euler_i;
   int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,
     noxlnozl,save_codes,topnode,botnode;
   char gmt_string[10],char_dummy;
@@ -811,6 +811,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   ggrd_boolean use_nearneighbor;
   const int dims=E->mesh.nsd;
   int top_proc,nfree,nfixed,use_vel,allow_internal;
+  struct elvc{
+    float w[3];
+  } **euler;
+  FILE *in;
 #ifdef USE_GZDIR
   gzFile *fp1;
 #else
@@ -831,7 +835,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
   else
     use_nearneighbor = FALSE;
 #endif
-
   if(E->mesh.toplayerbc != 0)
     allow_internal = TRUE;
   else
@@ -856,19 +859,17 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
     myerror(E,"ggrd_read_vtop_from_file: cannot handle topvbc other than 1 (vel) or 0 (stress)");
     break;
   }
-
   /* 
 
      read in plate code files?  this will assign Euler vector
      respective velocities
 
   */
-  use_codes = (E->control.ggrd_vtop_omega[0] > 1e-7)?(1):(0);
+
   save_codes = 0;
-  if(use_codes && (!use_vel)){
+  if(E->control.ggrd_vtop_euler && (!use_vel)){
     myerror(E,"ggrd_read_vtop_from_file: looking for Euler codes but in traction mode, likely no good");
   }
-
 
   if(verbose)
     fprintf(stderr,"ggrd_read_vtop_from_file: init stage, assigning %s, mixed mode: %i\n",
@@ -880,7 +881,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
        velocity scaling, assuming input is cm/yr  
     */
     vscale = E->data.scalev * E->data.timedir;
-    if(use_codes)
+    if(E->control.ggrd_vtop_euler)
       vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
     if(E->parallel.me == 0)
       fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr, scaling factor: %g\n",vscale);
@@ -935,6 +936,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       */
       E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
       E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+      if(E->control.ggrd_vtop_euler){
+	euler = (struct elvc **)malloc(E->control.ggrd.time_hist.nvtimes * sizeof(struct elvc *));
+	max_code = (int *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(int));
+      }
       /* for detecting the actual max */
       E->control.ggrd.svt->bandlim = E->control.ggrd.svp->bandlim = 1e6;
       for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
@@ -945,27 +950,51 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	
 	*/
 	if(!timedep){ /* constant */
-	  if(use_codes)
+	  if(E->control.ggrd_vtop_euler){
 	    sprintf(tfilename1,"%s/code.grd",E->control.ggrd.vtop_dir);
-	  else{
+	    sprintf(tfilename2,"%s/rotvec.dat",E->control.ggrd.vtop_dir);
+	  }else{
 	    sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
 	    sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
 	  }
 	} else {			/* f(t) */
-	  if(use_codes)
+	  if(E->control.ggrd_vtop_euler){
 	    sprintf(tfilename1,"%s/%i/code.grd",E->control.ggrd.vtop_dir,i+1);
-	  else{
+	    sprintf(tfilename2,"%s/%i/rotvec.dat",E->control.ggrd.vtop_dir,i+1);
+	  }else{
 	    sprintf(tfilename1,"%s/%i/vt.grd",E->control.ggrd.vtop_dir,i+1);
 	    sprintf(tfilename2,"%s/%i/vp.grd",E->control.ggrd.vtop_dir,i+1);
 	  }
 	}
-	if(use_codes){
+	if(E->control.ggrd_vtop_euler){
+	  /* 
+	     reading in the codes, use nearneighbor assignment to
+	     avoid interpolation
+	  */ 
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
 					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,
-					use_nearneighbor))
+					TRUE))
 	    myerror(E,"ggrd init error codes");
-
+	  /* 
+	     read in euler vectors 
+	  */
+	  if((in = fopen(tfilename2,"r"))==NULL){
+	    fprintf(stderr,"ggrd_read_vtop_from_file: cannot open %s for Euler vectors\n",tfilename2);
+	    myerror(E,"");
+	  }
+	  euler[i] = (struct elvc *)malloc(sizeof(struct elvc));
+	  while(fscanf(in,"%f %f %f",&(euler[i][max_code[i]].w[0]),&(euler[i][max_code[i]].w[1]),
+		       &(euler[i][max_code[i]].w[2]))==3){
+	    max_code[i]++;
+	    euler[i] = (struct elvc *)realloc(euler[i],(max_code[i]+1)*sizeof(struct elvc));
+	  }
+	  fclose(in);
+	  euler[i] = (struct elvc *)realloc(euler[i],max_code[i] * sizeof(struct elvc));
+	  we_have_velocities = 0;
+	  if(E->parallel.me == 0)
+	    fprintf(stderr,"ggrd_read_vtop_from_file: step %i read %i Euler vectors from %s\n",i+1,max_code[i],tfilename2);
 	}else{
+	  /* velocities */
 	  if(ggrd_grdtrack_init_general(FALSE,tfilename1,&char_dummy,
 					gmt_string,(E->control.ggrd.svt+i),(E->parallel.me == 0),FALSE,
 					use_nearneighbor))
@@ -974,36 +1003,34 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 					gmt_string,(E->control.ggrd.svp+i),(E->parallel.me == 0),FALSE,
 					use_nearneighbor))
 	    myerror(E,"ggrd init error vp"); 
+	  we_have_velocities = 1;
 	}
+	/* end timestep loop */
       }/* all grids read */
-      if(use_codes){
-	save_codes = 1;
-	snprintf(tfilename1,1000,"%s/codes.%d.gz", 
-		 E->control.data_dir,E->parallel.me);
-	fp1 = gzdir_output_open(tfilename1,"w");
+      if(E->control.ggrd_vtop_euler){
+	if(E->control.ggrd.time_hist.nvtimes == 1){
+	  save_codes = 1;
+
+	  snprintf(tfilename1,1000,"%s/codes.%d.gz", /* some debugging output for the codes read in */
+		   E->control.data_dir,E->parallel.me);
+	  fp1 = gzdir_output_open(tfilename1,"w");
+	  if(E->parallel.me == 0)fprintf(stderr,"saving codes for debugging to %s\n",tfilename1);
+	}
       }
       if(verbose){
-	if(use_codes){
-	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
-		  E->control.ggrd_vtop_omega[1],
-		  E->control.ggrd_vtop_omega[2],
-		  E->control.ggrd_vtop_omega[3],
-		  (int)E->control.ggrd_vtop_omega[0]);
-	}else{
-	  fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
-		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
-	}
+	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
+		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svt->fmaxlim[0]);
       }
     } /* end init part */
     
     /* 
        geographic bounds 
     */
-    theta_max = (90-E->control.ggrd.svp[0].south)*M_PI/180-1e-5;
-    theta_min = (90-E->control.ggrd.svp[0].north)*M_PI/180+1e-5;
-    if(verbose && is_global){
+    theta_max = (90.-E->control.ggrd.svt[0].south)*M_PI/180-1e-5;
+    theta_min = (90.-E->control.ggrd.svt[0].north)*M_PI/180+1e-5;
+    if(E->parallel.me == 0){
       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
-	      E->control.ggrd.svp[0].south,E->control.ggrd.svp[0].north);
+	      E->control.ggrd.svt[0].south,E->control.ggrd.svt[0].north);
     }
 
     if((E->control.ggrd.time_hist.nvtimes > 1)|| (!E->control.ggrd.vtop_control_init)){
@@ -1050,13 +1077,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	mixed BC part
 
 	*/
-	if(use_codes)
+	if(E->control.ggrd_vtop_euler)
 	  myerror(E,"cannot mix Euler velocities for plate codes and mixed vbcs");
 	if(verbose)
 	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
 	/* velocities larger than the cutoff will be assigned as free
 	   slip */
-	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
+	cutoff = E->control.ggrd.svt->fmaxlim[0] + 1e-5;	  
 	for(level=E->mesh.gridmax;level >= E->mesh.gridmin;level--){/* multigrid levels */
 	  /* assign BCs to all levels */
 	  noxl = E->lmesh.NOX[level];
@@ -1087,7 +1114,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  if((is_global)&&(rout[1] > theta_max)){
 		    if(!pole_warned){
 		      fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
-			      rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+				rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
 		      pole_warned = TRUE;
 		    }
 		    rout[1] = theta_max;
@@ -1159,7 +1186,12 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	  } /* cap */
 	} /* MG level */
 	fprintf(stderr,"ggrd_read_vtop_from_file: mixed_bc: %i free %i fixed for CPU %i\n",nfree,nfixed,E->parallel.me);
-      }	 /* end mixed BC assign */
+
+	/* 
+	   end mixed BC assign 
+
+	*/
+      }	 
 
       /* 
 	 
@@ -1168,15 +1200,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       
       */
       /* scaled cutoff velocity */
-      if(!use_codes)		/* else, is not defined */
-	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+      if(!E->control.ggrd_vtop_euler)		/* else, is not defined */
+	cutoff = E->control.ggrd.svt->fmaxlim[0] * vscale + 1e-5;
       else{
 	cutoff = 1e30;
-	if(save_codes)	/* those will be surface nodes only */
-	  gzprintf(fp1,"%3d %7d\n",E->sphere.caps_per_proc,E->lmesh.nsf);
       }
 
-      /* top leevl */
+      /* top level */
 
       for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	/* top level only */
@@ -1189,48 +1219,55 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      /*  */
 	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	      rout[2] = E->sx[m][2][nodel];
-	      /* 
-		 
-	      for global grid, shift theta if too close to poles
-	      
-	      */
-	      if((is_global)&&(rout[1] > theta_max)){
-		if(!pole_warned){
-		  fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
-			  rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
-		  pole_warned = TRUE;
+	      if(we_have_velocities){
+		/* 
+		   
+		for global grid, shift theta if too close to poles
+		
+		*/
+		if((is_global)&&(rout[1] > theta_max)){
+		  if(!pole_warned){
+		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
+			    rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+		    pole_warned = TRUE;
+		  }
+		  rout[1] = theta_max;
 		}
-		rout[1] = theta_max;
-	      }
-	      if((is_global)&&(rout[1] < theta_min)){
-		if(!pole_warned){
-		  fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
-			  rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
-		  pole_warned = TRUE;
+		if((is_global)&&(rout[1] < theta_min)){
+		  if(!pole_warned){
+		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
+			    rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
+		    pole_warned = TRUE;
+		  }
+		  rout[1] = theta_min;
 		}
-		rout[1] = theta_min;
 	      }
+	      /* theta or codes */
 	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
 					       vin1,FALSE,shift_to_pos_lon)){
 		fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
 			rout[1],rout[2]);
 		parallel_process_termination();
 	      }
-	      if(!use_codes)
+	      if(!E->control.ggrd_vtop_euler){
+		/* phi */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
 						 (vin1+1),FALSE,shift_to_pos_lon)){
 		  fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
 			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
+	      }
 	      if(interpolate){	/* second time */
+		/* theta or code */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,
 						 FALSE,shift_to_pos_lon)){
 		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
 			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
-		if(!use_codes){
+		if(!E->control.ggrd_vtop_euler){
+		  /* phi */
 		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),
 						   FALSE,shift_to_pos_lon)){
 		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
@@ -1240,14 +1277,23 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  v[1] = (f1*vin1[0] + f2*vin2[0])*vscale; /* theta */
 		  v[2] = (f1*vin1[1] + f2*vin2[1])*vscale; /* phi */
 		}else{
-		  v[1] = (f1*vin1[0] + f2*vin2[0]); /* theta */
+		  /* for code, take closest stage */
+		  if(f1 > f2){
+		    v[1] = vin1[0];
+		    euler_i = i1;
+		  }else{
+		    v[1] = vin2[0];
+		    euler_i = i2;
+		  }
 		}
 	      }else{
-		if(!use_codes){
+		/* single timestep */
+		if(!E->control.ggrd_vtop_euler){
 		  v[1] = vin1[0]*vscale; /* theta */
 		  v[2] = vin1[1]*vscale; /* phi */
 		}else{
 		  v[1] = vin1[0];	/* theta */
+		  euler_i = i1;
 		}
 	      }
 	      
@@ -1261,28 +1307,31 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      for(k = botnode;k <= topnode;k++){
 		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
 		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
-		if(use_codes){
+		if(E->control.ggrd_vtop_euler){
 		  /* find code from v[1], theta */
-		  code = (int)(v[1] + 0.5);
+		  code = (int)v[1];
+		  if((code > max_code[euler_i])||(code<1)){
+		    fprintf(stderr,"code %i out of bounds, use 1 ... %i for stage %i\n",code,max_code[euler_i],euler_i);
+		    fprintf(stderr, "%9.4f %9.4f %i\n",rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
+		    myerror(E,"");
+		  }
 		  if(save_codes)	/* lon lat code */
 		    gzprintf(fp1, "%9.4f %9.4f %i\n",rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
-		  if((int)E->control.ggrd_vtop_omega[0] == code){
-		    /* within plate */
-		    sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
-		    sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
-		    /* compute spherical velocities in cm/yr at this
-		       location, assuming rotation pole is in deg/Myr */
-		    vx[1]=E->control.ggrd_vtop_omega[2]*E->x[m][3][nodel] - E->control.ggrd_vtop_omega[3]*E->x[m][2][nodel]; 
-		    vx[2]=E->control.ggrd_vtop_omega[3]*E->x[m][1][nodel] - E->control.ggrd_vtop_omega[1]*E->x[m][3][nodel]; 
-		    vx[3]=E->control.ggrd_vtop_omega[1]*E->x[m][2][nodel] - E->control.ggrd_vtop_omega[2]*E->x[m][1][nodel]; 
-		    /*  */
-		    v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
-		    v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phie */
-		    /* scale */
-		    v[1] *= vscale;v[2] *= vscale;
-		  }else{
-		    v[1] = v[2] = 0.0;
-		  }
+		  /* Euler vector assignment */
+		  code--;
+		  /* within plate */
+		  sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
+		  sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
+		  /* compute spherical velocities in cm/yr at this
+		     location, assuming rotation pole is in deg/Myr */
+		  vx[1]=euler[euler_i][code].w[1] * E->x[m][3][nodel] - euler[euler_i][code].w[2] * E->x[m][2][nodel]; /* vx =  */
+		  vx[2]=euler[euler_i][code].w[2] * E->x[m][1][nodel] - euler[euler_i][code].w[0] * E->x[m][3][nodel]; /* vy =  */
+		  vx[3]=euler[euler_i][code].w[0] * E->x[m][2][nodel] - euler[euler_i][code].w[1] * E->x[m][1][nodel]; /* vz =  */
+		  /*  */
+		  v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
+		  v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phi */
+		  /* scale */
+		  v[1] *= vscale;v[2] *= vscale;
 		}
 		/* assign velociites */
 		if(fabs(v[2]) > cutoff){
@@ -1307,9 +1356,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
       }
     } /* end assignment branch */
-    if(use_codes && save_codes){
-      save_codes = 0;
-      gzclose(fp1);
+    if(E->control.ggrd_vtop_euler){
+      if(save_codes){
+	save_codes = 0;
+	gzclose(fp1);
+      }
+      for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++)
+	free(euler[i]);
+      free(euler);
+      free(max_code);
     }
   } /* end top proc branch */
 

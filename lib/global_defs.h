@@ -531,7 +531,7 @@ struct CONTROL {
   struct ggrd_master ggrd;
   float *surface_rayleigh;
   int ggrd_allow_mixed_vbcs,ggrd_comp_smooth,ggrd_tinit_nl_scale;
-  float ggrd_vtop_omega[4];
+  int ggrd_vtop_euler;;
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
   int ggrd_mat_limit_prefactor,ggrd_mat_is_code;
