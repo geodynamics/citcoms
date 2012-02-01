@@ -1,3 +1,893 @@
+2012-01-24 21:54  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c, lib/global_defs.h: Fixed
+	  minor ggrd assignment bug.
+
+2012-01-24 18:44  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c: Debugging GGrd
+
+2012-01-24 18:03  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c, lib/global_defs.h:
+	  Updating to latest version for sync.
+
+2012-01-19 19:24  tan2
+
+	* configure.ac: Stop configure if pyre is enabled and python 2.7 is
+	  used. See Issue622.
+
+2012-01-17 04:57  tan2
+
+	* INSTALL: updated installation instruction
+
+2012-01-17 02:41  tan2
+
+	* configure.ac: When python 2.7 is used, ask users to download
+	  pythia manually. See issue622 and issue606.
+
+2012-01-14 08:00  becker
+
+	* lib/Advection_diffusion.c, lib/Composition_related.c,
+	  lib/Drive_solvers.c, lib/Ggrd_handling.c, lib/Output_gzdir.c,
+	  lib/Pan_problem_misc_functions.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c: Made sure that compositional
+	  viscosity without compositional buoyancy can be assigned without
+	  setting ibuoy=1 and the buoyancy number to zero.
+
+2011-12-20 18:04  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c, lib/Topo_gravity.c,
+	  lib/global_defs.h: Merged with recent check in, minor changes.
+
+2011-11-14 05:06  tan2
+
+	* lib/Regional_boundary_conditions.c: Fixed a bug in reflective TBC
+	  where y-index should be used, not z-index. The bug is harmless
+	  though.
+	  
+	  I checked the code history. This bug exists since CitcomS 1.0,
+	  but not in CitcomCU nor CitcomT.
+
+2011-10-14 18:27  tan2
+
+	* lib/Output_h5.c: fixed a bug that h5close_field() didn't have a
+	  return statement, reported by Nicolas Flament in issue611.
+
+2011-09-18 03:54  tan2
+
+	* lib/Initial_temperature.c: fixed a bug that when the perturblayer
+	  is on the internal boundary, the temperature perturbation wasn't
+	  added to the lower processor.
+
+2011-07-31 20:38  becker
+
+	* lib/Ggrd_handling.c, lib/Initial_temperature.c,
+	  lib/Instructions.c, lib/Stokes_flow_Incomp.c, lib/global_defs.h:
+	  Updating to newest version, don't think that there should be any
+	  significant changes on my side.
+
+2011-07-12 16:27  tan2
+
+	* CitcomS/Components/Output.py, lib/Instructions.c, lib/Output.c,
+	  lib/Output_vtk.c, lib/global_defs.h, module/setProperties.c:
+	  enhancing VTK output, mostly contributed by Rene Gassmoeller at
+	  GFZ.
+	  
+	  - A new input parameter 'vtk_format', which can be either 'ascii'
+	  (default) or 'binary'. When 'binary', gzip and base64 encoding
+	  are used. - The node ordering is changed to CitcomS native
+	  ordering. The consequence is the axis are rotated as z in CitcomS
+	  is mapped to X in vtk, and x to Y, y to Z. - More data can be
+	  outputted in vtk format - Using .pvts file for regional model;
+	  .vtm and .visit file for global model (.vtm format provided by
+	  Tobias Hoeink at Rice, .visit format provided by Kat at
+	  visitusers.org/forum)
+
+2011-03-21 00:13  becker
+
+	* lib/Topo_gravity.c: Fixed typo for anisotropic stress
+	  computation.
+
+2011-02-22 04:13  becker
+
+	* lib/Drive_solvers.c, lib/Instructions.c, lib/global_defs.h: Added
+	  a flag force_iteration which if on (off by default), will enforce
+	  an iterative solution to the velocity fields even if linear
+	  rheologies were chosen. This is useful for debugging/robustness
+	  tests.
+
+2011-02-18 19:45  becker
+
+	* lib, lib/Anisotropic_viscosity.c, lib/Output_gzdir.c,
+	  lib/anisotropic_viscosity.h: Modified storage of anisotropic
+	  viscosity files. Those are now
+
+2011-02-14 05:45  becker
+
+	* lib/Output_vtk.c: Improved vtk output, still for Dan to test.
+
+2011-02-12 05:30  becker
+
+	* lib/Anisotropic_viscosity.c, lib/anisotropic_viscosity.h: Aedded
+	  the actual files because I didn't know how to link from CitcomCU.
+	  
+	  Those are didentical
+
+2011-02-12 05:20  becker
+
+	* lib/Anisotropic_viscosity.c, lib/anisotropic_viscosity.h:
+
+2011-02-08 04:06  becker
+
+	* lib/Citcom_init.c, lib/Tracer_setup.c: Removed the srand() call
+	  that seemed like a good idea (rev. 17175) but screwed up
+	  tracer-based runs with large number of processors (12x3x3x2).
+	  Weird, but oh well. Someone advise why this didn't work?
+
+2011-02-07 19:00  becker
+
+	* lib/Ggrd_handling.c: Added one missing line for anisotropic
+	  viscosity init.
+
+2011-02-07 00:32  becker
+
+	* lib/Ggrd_handling.c: Reversed, temporarily, the use of
+	  nearneighbor because it makes it easier to compare model
+	  computations with previous versions.
+
+2011-02-06 23:57  becker
+
+	* lib/Full_boundary_conditions.c: Fixed typo that was introduced in
+	  17555 and made temperature field assignment apparently screwed
+	  up.
+
+2011-02-05 23:45  becker
+
+	* lib/Instructions.c: Backward compatibility of neglect of both
+	  divergence and pressure for convergence checks.
+
+2011-02-04 05:03  becker
+
+	* lib/Viscosity_structures.c: Temporarily moved velocity gradient
+	  computation to ensure compilation.
+
+2011-02-03 21:06  becker
+
+	* lib/Ggrd_handling.c, lib/Parsing.c, lib/Viscosity_structures.c,
+	  lib/global_defs.h, lib/prototypes.h: Uptdated prototypes file.
+	  
+	  Fixed a few compiler complaints.
+	  
+	  Made sure that atemp is always set in Viscosity_structures,
+	  making mat_control > 0 feasible, not just 0 or 1
+
+2011-02-03 17:11  becker
+
+	* lib/Ggrd_handling.c, lib/Pan_problem_misc_functions.c,
+	  lib/Viscosity_structures.c, lib/ggrd_handling.h,
+	  lib/prototypes.h: Forgot some functions, not sure why the linker
+	  didn't complain previously.
+
+2011-02-02 01:09  becker
+
+	* lib/Instructions.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c: Futher synchronization with CitcomCU
+	  anisotropic viscosity.
+
+2011-02-02 00:30  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Element_calculations.c,
+	  lib/Topo_gravity.c, lib/anisotropic_viscosity.h,
+	  lib/global_defs.h, lib/viscosity_descriptions.h: Trial
+	  synchronization between CitcomCU and CitcomS anisotropic
+	  viscosity.
+
+2011-01-26 00:14  becker
+
+	* lib/Full_parallel_related.c, lib/General_matrix_functions.c,
+	  lib/Ggrd_handling.c: Added parentheses for logic statements as
+	  per compiler suggestion
+
+2011-01-19 21:00  becker
+
+	* lib/Advection_diffusion.c: Checking in Shijie Zhong's revised
+	  Advection_diffusion routine.
+
+2010-12-29 20:47  becker
+
+	* lib/Ggrd_handling.c: Added support for non-interpolated grd
+	  input.
+
+2010-12-22 21:53  becker
+
+	* lib/Anisotropic_viscosity.c, lib/BC_util.c,
+	  lib/Full_boundary_conditions.c, lib/Ggrd_handling.c,
+	  lib/Regional_boundary_conditions.c, lib/Solver_multigrid.c,
+	  lib/prototypes.h: Minor fixes for compile, still hunting for
+	  convergence problem.
+
+2010-12-08 21:06  becker
+
+	* lib/BC_util.c, lib/Full_boundary_conditions.c,
+	  lib/Regional_boundary_conditions.c, lib/prototypes.h: Reverted to
+	  separate horizontal_bc routines for regional and full. the former
+	  has a check for
+	  
+	  ROW==E->lmesh.NOZ[level] &&
+	  E->parallel.me_loc[3]==E->parallel.nprocz-1
+	  
+	  while the full version has
+	  
+	  ROW==E->mesh.NOZ[level]) &&
+	  (E->parallel.me_loc[3]==E->parallel.nprocz-1) )
+
+2010-12-08 20:14  becker
+
+	* lib/BC_util.c: Reverted the rowl adjustment since it didn't fix
+	  the problem reported by Dan.
+
+2010-12-08 18:43  becker
+
+	* lib/global_defs.h: Added definition of TRUE (1) and FALSE (0) in
+	  case undefined (was defined for GMT/ggrd compile before).
+
+2010-12-08 00:54  becker
+
+	* lib/BC_util.c: Addded a test for top or bottom nodal row back
+	  into horizontal_bc (earlier moved from
+	  Regional_boundary_conditions and Full_boundary_conditions to
+	  BC_util.c) to see if this helps fix a bug reported by Dan that I
+	  could not reproduce in the non-pyre version.
+
+2010-10-12 06:36  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Drive_solvers.c,
+	  lib/Ggrd_handling.c, lib/Instructions.c: More accurate
+	  computation of element coordinates in anisotropic part.
+
+2010-09-24 03:35  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Element_calculations.c,
+	  lib/Instructions.c: Augmented G matrix with anisotropic
+	  computation, may or may not be a good idea.
+
+2010-09-15 10:40  becker
+
+	* lib/General_matrix_functions.c, lib/prototypes.h: Missed one
+	  routine.
+
+2010-09-15 10:36  becker
+
+	* lib/Anisotropic_viscosity.c, lib/BC_util.c, lib/Convection.c,
+	  lib/Element_calculations.c, lib/General_matrix_functions.c,
+	  lib/Instructions.c, lib/Obsolete.c, lib/Output.c,
+	  lib/Size_does_matter.c, lib/Solver_multigrid.c,
+	  lib/Topo_gravity.c, lib/anisotropic_viscosity.h,
+	  lib/global_defs.h, lib/prototypes.h: Suggested use of general
+	  prototypes
+	  
+	  Retired N>3 matrix determinant functions (because they caused
+	  compile problems)
+
+2010-09-14 01:08  becker
+
+	* lib/Viscosity_structures.c: Read in sdepv_misfit regardless of
+	  rheology.
+
+2010-09-13 14:07  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Drive_solvers.c,
+	  lib/Element_calculations.c, lib/Ggrd_handling.c,
+	  lib/Topo_gravity.c, lib/Viscosity_structures.c,
+	  lib/anisotropic_viscosity.h, lib/global_defs.h,
+	  lib/viscosity_descriptions.h: Added option to start with
+	  isotropic viscosity during first anisotropic iteration.
+
+2010-09-13 12:01  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Element_calculations.c,
+	  lib/Ggrd_handling.c, lib/Topo_gravity.c,
+	  lib/anisotropic_viscosity.h: Forgot part of the rotation matrix,
+	  minor fixes else, still experimental.
+
+2010-09-13 07:13  becker
+
+	* configure.ac, lib/Anisotropic_viscosity.c,
+	  lib/Element_calculations.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Output.c, lib/Output_gzdir.c,
+	  lib/Solver_multigrid.c, lib/Topo_gravity.c,
+	  lib/Viscosity_structures.c, lib/anisotropic_viscosity.h,
+	  lib/global_defs.h, lib/viscosity_descriptions.h: Made sure
+	  current version compiled nicely without additional flags.
+	  
+	  Anisotropic viscosity is set up more flexibly.
+
+2010-09-07 07:05  becker
+
+	* lib/Ggrd_handling.c, lib/Instructions.c, lib/Output_gzdir.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h: Made sure that
+	  viscosity prefactors get assigned for material dependent
+	  viscosity only (TDEPV = off)
+
+2010-09-07 02:22  becker
+
+	* lib/Citcom_init.c, lib/Tracer_setup.c: Added random number
+	  generator initialization to ensure exact reproducibility of all
+	  runs, including those with tracers.
+	  
+	  Earlier reported solver issues might be related to our cluster,
+	  at least all revisions seems to give the same answer now.
+
+2010-09-07 01:40  becker
+
+	* lib/Anisotropic_viscosity.c, lib/Ggrd_handling.c,
+	  lib/Nodal_mesh.c, lib/Viscosity_structures.c,
+	  lib/viscosity_descriptions.h: Checking in current version because
+	  of need for debugging.
+	  
+	  Revision 17172, compared to (presumably) 17153 give strange
+	  multigrid convergence behavior. Checking why that is now.
+
+2010-09-06 05:20  becker
+
+	* configure.ac, lib/Anisotropic_viscosity.c, lib/Drive_solvers.c,
+	  lib/Element_calculations.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Makefile.am, lib/Nodal_mesh.c,
+	  lib/Output.c, lib/Output_gzdir.c,
+	  lib/Pan_problem_misc_functions.c, lib/Solver_multigrid.c,
+	  lib/Topo_gravity.c, lib/Tracer_setup.c,
+	  lib/Viscosity_structures.c, lib/anisotropic_viscosity.h,
+	  lib/ggrd_handling.h, lib/global_defs.h,
+	  lib/viscosity_descriptions.h: Trial implementation of anisotropic
+	  viscosity.
+
+2010-08-30 20:41  tan2
+
+	* CitcomS/Coupler/Coupler.py, module/Exchanger/BaseSVTInlet.cc,
+	  module/Exchanger/BaseSVTInlet.h: Added support of multigrid
+	  solver in Exchanger. Lifted the solver assertion in Coupler.
+	  
+	  Cookbook9 can be converted to multigrid solver once appropriate
+	  parameters (*solver.mesher.levels=2 and
+	  *solver.vsolver.Solver=multigrid) are added. However, the
+	  embedded solver will converge incorrectly. Setting
+	  esolver.vsolver.accuracy=6e-3 seems to fix the problem.
+
+2010-05-25 02:47  becker
+
+	* lib/BC_util.c: And a typo fix.
+
+2010-05-24 18:00  becker
+
+	* lib/BC_util.c, lib/Ggrd_handling.c, lib/Initial_temperature.c,
+	  lib/Instructions.c, lib/ggrd_handling.h, lib/global_defs.h:
+	  toplayerbc > 0 will now assign BCs for all noes with r >=
+	  toplayerbc_r, which defaults to 0.984303876942 i.e. 100 km depth.
+	  (Still experimental.)
+
+2010-03-12 00:41  becker
+
+	* lib/BC_util.c, lib/Ggrd_handling.c: Improvements for internal
+	  BCs.
+
+2010-03-10 19:55  becker
+
+	* lib/BC_util.c, lib/Ggrd_handling.c, lib/Topo_gravity.c: This
+	  logic should make more sense for internal BCs, but still testing.
+
+2010-03-10 19:38  becker
+
+	* lib/BC_util.c, lib/Full_boundary_conditions.c,
+	  lib/Ggrd_handling.c, lib/Instructions.c,
+	  lib/Regional_boundary_conditions.c, lib/Topo_gravity.c,
+	  lib/global_defs.h: Experimental implementation of a single node
+	  layer for internal boundary condition assignment, assigned if
+	  toplayerbc < 0, to nodes at layer noz+toplayerbc, but only for
+	  the top level multigrid, for now.
+
+2010-02-26 21:04  walter
+
+	* lib/Topo_gravity.c: Fix a misleading comment
+
+2010-02-02 23:41  walter
+
+	* Makefile.am: Fix an error when running autoreconf -i
+
+2010-02-01 19:43  becker
+
+	* lib/Viscosity_structures.c, lib/viscosity_descriptions.h: Changed
+	  internal variable name for use_se_smoothing, as per Eh's
+	  suggestion.
+
+2010-01-29 14:48  becker
+
+	* lib/Viscosity_structures.c, lib/viscosity_descriptions.h: Added
+	  old CitcomS element -> nodes -> element viscosity smoothing with
+	  new use_ne_visc_smooth parameter, default is off.
+
+2010-01-21 21:23  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  module/setProperties.c: Added pyre input for the new parameters
+	  added in r16138.
+
+2010-01-21 21:22  tan2
+
+	* module/Exchanger/CitcomInterpolator.cc: Replaced fixed accuracy
+	  setting. Bug reported by Rob Moucha.
+
+2010-01-21 20:11  tan2
+
+	* visual/OpenDXMacro/CitcomSImportOpt.net, visual/visFull.cfg,
+	  visual/visFull.net.in: Added opendx macro to visualize opt (e.g.
+	  composition) fields. This fixed Issue99.
+
+2010-01-17 01:19  danb
+
+	* lib/Composition_related.c, lib/Tracer_setup.c, lib/tracer_defs.h:
+	  Preliminary support for the absolute tracer method. Only tested
+	  with one flavor, reading in from a file, and the initial volume
+	  of the tracers is HARD-CODED! In addition, the code automaticaly
+	  truncates the composition to one, although this should be a
+	  switch for the user to specify.
+
+2010-01-16 02:47  becker
+
+	* lib/Instructions.c, lib/Nodal_mesh.c, lib/Stokes_flow_Incomp.c,
+	  lib/Viscosity_structures.c, lib/global_defs.h: Implementation of
+	  two, perhaps entirely unnecessary features, in search of why
+	  certain prescribed velocity models do not converge like they
+	  should.
+	  
+	  - allow for each inner loop solution to have a higher accuracy
+	  than the outer, Uzawa loop. This is set by new parameter
+	  "inner_accuracy_scale", which pre-multiplies the inner accuracy
+	  (imp) setting (defaults to unity)
+	  
+	  - remove any rigid body rotation at each Uzawa iteration step.
+	  Parmaeter "inner_remove_rigid_rotation", by default off. For
+	  this, I also added an experimental routine assign_v_to_vector()
+	  in order to reasign the V velocities to the U solution vector
+	  after removing the net rotations from V (how is supposed to work
+	  for the regular operational mode?)
+
+2009-12-09 02:25  tan2
+
+	* lib/BC_util.c: Replaced TRUE and FALSE. Added function
+	  prototypes.
+
+2009-12-08 21:44  tan2
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py,
+	  lib/Instructions.c, lib/Stokes_flow_Incomp.c, lib/global_defs.h,
+	  module/setProperties.c: Added two boolean parameters for
+	  controlling convergence criterion:
+	  
+	  check_continuity_convergence (default=on): include div/v in the
+	  criterion. check_pressure_convergence (default=on): include dp/p
+	  in the criterion.
+	  
+	  Retired the parameter: only_check_vel_convergence.
+
+2009-12-08 21:43  tan2
+
+	* lib/Drive_solvers.c: removed unused variables in Drive_solvers.c
+
+2009-12-08 21:43  tan2
+
+	* lib/Drive_solvers.c, lib/Element_calculations.c,
+	  lib/Stokes_flow_Incomp.c, module/bindings.c,
+	  module/stokes_solver.c, module/stokes_solver.h: Merged
+	  solve_constrained_flow_iterative_pseudo_surf() with void
+	  solve_constrained_flow_iterative(); assemble_forces_pseudo_surf()
+	  wi
+	  
+	  Removed used python bindings in module/stokes_solver.c
+
+2009-12-08 17:19  becker
+
+	* lib/BC_util.c, lib/Ggrd_handling.c, lib/Topo_gravity.c: Truly
+	  apply internal boundary conditions on horizontal surfaces for
+	  E->mesh.toplayerbc > 0 (default, of course, 0)
+
+2009-12-04 23:16  becker
+
+	* lib/BC_util.c: Modified handling of internal BCs, as per Eh's
+	  suggestion, now handled in a separate function.
+
+2009-12-04 21:57  tan2
+
+	* README: Removed metioning the version number in README. Added the
+	  url of the manual.
+
+2009-12-04 17:44  becker
+
+	* lib/BC_util.c, lib/Full_boundary_conditions.c,
+	  lib/Full_read_input_from_files.c, lib/Ggrd_handling.c,
+	  lib/Regional_boundary_conditions.c,
+	  lib/Regional_read_input_from_files.c, lib/ggrd_handling.h:
+	  Suggested unified treatment of horizontal_bc (moved to BC_util)
+	  for review by Eh
+	  
+	  Improved handling of grd-read velocity and traction boundary
+	  conditions.
+
+2009-12-04 02:33  becker
+
+	* lib/Full_boundary_conditions.c, lib/Ggrd_handling.c,
+	  lib/Regional_boundary_conditions.c: Temporary fix for regular
+	  operations, for Eh's review.
+	  
+	  Ggrd assignment still needs tending to.
+
+2009-12-03 23:51  becker
+
+	* lib/BC_util.c, lib/Full_boundary_conditions.c,
+	  lib/Full_read_input_from_files.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Regional_boundary_conditions.c,
+	  lib/Regional_read_input_from_files.c, lib/ggrd_handling.h,
+	  lib/global_defs.h: Experimental implementation of internal stress
+	  or velocity boundary conditions. As of right now, toplayerbc > 0
+	  (default = 0) will assign the surface boundary condition to all
+	  nodes within the first toplayerbc layers. If BCs are assigned
+	  from file, this will only work for the grd method, not the
+	  regular file I/O.
+
+2009-11-21 00:15  becker
+
+	* lib/Instructions.c, lib/Stokes_flow_Incomp.c, lib/global_defs.h:
+	  Exit criterion for incompressibility iteration allowed for
+	  velocity and pressure convergence at finite compressibility >
+	  accuracy. Changed criterion to loop while (convergence < 2) OR
+	  (compressibility < imp)
+	  
+	  Please review
+	  
+	  Also modified the sloppy iteration branch, where pressure isn't
+	  checked.
+
+2009-11-20 21:58  tan2
+
+	* lib/Convection.c, lib/Parsing.c: Clean up #include
+
+2009-11-20 21:58  tan2
+
+	* lib/Material_properties.c: Fixed two minor errors
+
+2009-11-19 23:11  tan2
+
+	* lib/Full_version_dependent.c, lib/Global_operations.c,
+	  lib/Instructions.c, lib/Material_properties.c,
+	  lib/Regional_version_dependent.c, lib/global_defs.h: Created a
+	  new array E->sphere.gr for the radii of all layers. This makes
+	  gather_r() obsolete.
+
+2009-11-19 23:09  tan2
+
+	* lib/Viscosity_structures.c, lib/viscosity_descriptions.h:
+	  refactor viscosity definition
+
+2009-11-19 23:08  tan2
+
+	* visual/batchcombine.py: 'localhost' can abbr. as '-'
+
+2009-10-14 18:26  becker
+
+	* lib/Instructions.c: Changed defaults for z_410, z_lmantle, z_lith
+	  to more Earth like parameters.
+	  
+	  Does this break any tests?
+
+2009-10-13 16:37  becker
+
+	* lib/Ggrd_handling.c: Fixed typo.
+
+2009-10-08 18:01  tan2
+
+	* CitcomS/Components/Visc.py: z_layer needs 4 elements
+
+2009-10-07 04:39  danb
+
+	* CitcomS/Components/Stokes_solver/Incompressible.py: added
+	  only_check_vel_convergence to pyre version.
+
+2009-10-06 18:48  becker
+
+	* lib/Full_read_input_from_files.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Regional_read_input_from_files.c:
+	  Modified handling of ggrd_mat_control, > 0 will select all layers
+	  above, < 0 will select individual layer == - ggrd_mat_control
+
+2009-10-05 19:06  tan2
+
+	* CitcomS/Components/Sphere/Sphere.py, CitcomS/Components/Visc.py,
+	  module/setProperties.c: Add pyre binding of z_layer,
+	  r_grid_layers, rr, and nr.
+	  
+	  replace MAX_MAT with CITCOM_MAX_VISC_LAYER.
+
+2009-10-05 19:05  tan2
+
+	* lib/Instructions.c: Refactoring z_layer input validation.
+
+2009-10-05 19:05  tan2
+
+	* lib/Full_tracer_advection.c, lib/Tracer_setup.c: Dealing with
+	  tracers that belong to the current processor but cannot find its
+	  element.
+	  
+	  When itracer_warning is off, the code will ignore the lost
+	  tracers. When itracer_warning is on (default), the code will
+	  abort.
+
+2009-10-02 23:16  becker
+
+	* lib/Full_boundary_conditions.c, lib/Ggrd_handling.c,
+	  lib/Instructions.c, lib/Regional_boundary_conditions.c:
+	  Experimental traction surface BC from grds.
+
+2009-09-28 20:08  tan2
+
+	* CitcomS/Components/Visc.py, lib/Construct_arrays.c,
+	  lib/Pan_problem_misc_functions.c, lib/Viscosity_structures.c,
+	  lib/viscosity_descriptions.h, module/setProperties.c:
+	  visc_layer_control: allowing each radial layer has its own
+	  viscosity parameters
+	  
+	  When "visc_layer_control" is true, the file "visc_layer_file" is
+	  read in. The format of visc_layer_file:
+	  
+	  param_nameA Aval_1 Aval_2 ... Aval_nel
+	  
+	  param_nameB Bval_1 Bval_2 ... Bval_nel
+	  
+	  . . .
+	  
+	  The first line is assigned to the basal layer (CMB), and the last
+	  line to the surface layer. Note that each parameter has nodez-1
+	  values.
+
+2009-09-28 20:05  tan2
+
+	* lib/viscosity_descriptions.h: clean up unused viscosity variables
+
+2009-09-28 20:05  tan2
+
+	* lib/Element_calculations.c: Fixed a bug in pseudo free surface,
+	  reported by Robert Moucha.
+
+2009-09-28 20:04  tan2
+
+	* lib/Topo_gravity.c: remove duplicating prototype declaration
+
+2009-09-03 17:24  tan2
+
+	* CitcomS/Components/Output.py, CitcomS/Solver/Solver.py,
+	  module/bindings.c, module/outputs.c, module/outputs.h,
+	  module/setProperties.c: Added pyre binding for write_q_files
+
+2009-09-03 17:24  tan2
+
+	* CitcomS/Solver/CoupledSolver.py: Added a warning message about
+	  tracer + coupling
+
+2009-08-25 19:54  becker
+
+	* lib/Stokes_flow_Incomp.c: Forgot one valid check for Uzawa
+	  iterations.
+
+2009-08-25 17:31  becker
+
+	* lib/Stokes_flow_Incomp.c: Ensure that Uzawa solver does not
+	  converge if low level, MG solver does not yield a valid solution.
+
+2009-08-21 20:32  becker
+
+	* lib/Viscosity_structures.c, lib/viscosity_descriptions.h: test
+	  implementation of steady state strain-rate weakending via PDEPV
+	  psrw=on parameter.
+
+2009-08-11 17:48  tan2
+
+	* lib/Material_properties.c: Add Murnaghan's integrated linear EoS
+	  as reference_state=2
+
+2009-08-11 17:47  tan2
+
+	* lib/Global_operations.c: Add gather_r() to gather all radial
+	  coordinates
+
+2009-08-11 17:35  tan2
+
+	* lib/Topo_gravity.c: Adding augmented Lagrangian component of
+	  stiffness matrix in cbf topo
+
+2009-08-04 01:45  leif
+
+	* lib/multigrid_kernel.cu: The function collect_terms() turns out
+	  to be quite expensive (over 70% according to gprof). Perform it
+	  once per level, caching the result.
+
+2009-07-29 20:16  leif
+
+	* lib/multigrid_kernel.cu: Fixed the remaining bug in
+	  n_assemble_del2_u(). Glancing at "global_defs.h", I had assumed
+	  that VBX, VBY, and VBZ were defined in the natrual way:
+	  
+	  #define VBX 0x2 #define VBY 0x4 #define VBZ 0x8
+	  
+	  I.e., "0x1 << doff"... but today I looked at it more closely; Y &
+	  Z are reversed!!!
+	  
+	  #define VBX 0x2 #define VBZ 0x4 #define VBY 0x8
+	  
+	  With this fix, the CUDA multigrid solver seems to work correctly.
+
+2009-07-29 04:05  becker
+
+	* lib/Ggrd_handling.c: Ensure debugging output for ggrd_vtop mixed
+	  BC if more than one CPU with depth is used.
+	  
+	  Previous check in of precise_strain_rate=on mode seems to be OK,
+	  stress, geoid, and dynamic topo output (for cbf topo off) have
+	  been tested.
+
+2009-07-28 01:00  leif
+
+	* lib/multigrid_kernel.cu: Experiments show that using a block size
+	  of 1 leads to poor performance. Using the recommended minimum of
+	  64, gauss_seidel_0 and gauss_seidel_1 are about 3x to 4x faster.
+
+2009-07-27 23:44  leif
+
+	* lib/multigrid_kernel.cu: Fixed stupid reduce bug that affected
+	  several routines. (This is what I get for coping & pasting
+	  example code without thinking.) Now the only remaining broken
+	  routine is n_assemble_del2_u().
+
+2009-07-25 02:48  leif
+
+	* lib/multigrid_kernel.cu: Wrote two new versions of
+	  gauss_seidel_2() -- neither of which is very parallel. Both
+	  produce similar wrong answers.
+
+2009-07-24 01:03  becker
+
+	* lib/Topo_gravity.c: This version of precise strain-rates may now
+	  be worth testing out.
+
+2009-07-23 18:40  becker
+
+	* lib/Topo_gravity.c, lib/Viscosity_structures.c: Corrected call to
+	  get_ba in Topo_gravity for precise_strain_rate, still testing.
+	  Rest should be cosmetic.
+
+2009-07-23 03:50  leif
+
+	* lib/multigrid_kernel.cu: This junk is my effort to understand
+	  gauss_seidel_2(). Because of the way E->temp[] is used, it is
+	  quite difficult (impossible?) to parallelize. I even wrote code
+	  to generate a "dot" graph of the expression tree. Of course, this
+	  tree is too big to plot in its entirety. With neq == 2187, the
+	  tree has 87479 nodes and is 355 levels deep; each level can have
+	  anywhere from a handful to several hundred nodes, with over a
+	  thousand nodes in each of the bottommost layers.
+
+2009-07-22 20:17  becker
+
+	* lib/Topo_gravity.c: Tentative check in of stress computation
+	  modification such that Eh can take a look of what we're working
+	  on.
+
+2009-07-17 21:22  leif
+
+	* lib/multigrid_kernel.cu: Created drop-in, host-side replacements
+	  for each of the multigrid kernel functions. After swapping them
+	  in/out, it seems n_assemble_del2_u(), gauss_seidel_2(), and
+	  gauss_seidel_3() are all buggy :-( Both gauss_seidel_0() and
+	  gauss_seidel_1() appear to be OK... but that isn't worth writing
+	  home about, because they are both trivial.
+
+2009-07-16 03:13  leif
+
+	* lib/multigrid_kernel.cu: New scaffolding with annotations.
+
+2009-07-16 00:49  leif
+
+	* lib/multigrid_kernel.cu: Bug fixes... still doesn't work right.
+
+2009-07-15 21:54  leif
+
+	* lib/multigrid_kernel.cu: Wrote code to allocate & initialize
+	  device memory, and copy the result from the device.
+
+2009-07-15 01:58  leif
+
+	* lib/multigrid_kernel.cu: Parallelized the last fragment of the
+	  gauss_seidel() main loop as gauss_seidel_3(). It turns out to be
+	  very similar to the second half of n_assemble_del2_u(). Tore down
+	  scaffolding.
+
+2009-07-15 00:14  leif
+
+	* lib/multigrid_kernel.cu: Parallel n_assemble_del2_u() takes
+	  shape.
+
+2009-07-10 22:15  leif
+
+	* lib/multigrid_kernel.cu: Pardon my dust...
+	  tally_n_assemble_del2_u() is instrumention and printfs I wrote in
+	  order to understand n_assemble_del2_u(). As with
+	  e_assemble_del2_u(), it appears I need one block for each Au[i]
+	  element, with a reduction in shared memory.
+
+2009-07-10 21:08  danb
+
+	* lib/Process_buoyancy.c: include density (rho) scaling in
+	  convective heat flux (necessary for compressible flow)
+
+2009-07-09 20:40  danb
+
+	* lib/Regional_read_input_from_files.c: Second material element
+	  file only read in and processed when (pos_age) criteria met (i.e.
+	  consistent with vel b.c. approach).
+
+2009-07-09 17:27  becker
+
+	* lib/Instructions.c: Only one processor complains about removing
+	  rigid rotations while prescribing plate motions.
+
+2009-07-06 22:13  leif
+
+	* lib/General_matrix_functions.c, lib/cgrad_kernel.cu,
+	  lib/multigrid_kernel.cu: Make sure "-arch sm_13" is given -- for
+	  double-precision floating-point. Added missing #ifndef USE_CUDA.
+
+2009-07-02 18:41  leif
+
+	* lib/multigrid_kernel.cu: Sketched data-parallel version of
+	  gauss_seidel(). I haven't figured out how to parallelize the
+	  following:
+	  
+	  Au[C[i]] += ... Ad[C[j]] += ...
+
+2009-07-01 19:09  leif
+
+	* lib/General_matrix_functions.c, lib/cgrad_kernel.cu,
+	  lib/multigrid_kernel.cu: Fixed a pair of mistakes I made: under
+	  cgrad, don't replace solve_del2_u(); under multigrid, 'level' is
+	  not a constant.
+
+2009-06-30 22:33  leif
+
+	* lib/multigrid_kernel.cu: The 'temp1' array is unnecessary since
+	  nproc == 1.
+
+2009-06-29 22:10  leif
+
+	* lib/multigrid_kernel.cu: For my own sanity, simplified code
+	  assuming the following:
+	  
+	  E->sphere.caps_per_proc == 1 E->parallel.nproc == 1
+	  E->mesh.levmax == 0 E->mesh.nsd == 3
+
+2009-06-29 20:18  leif
+
+	* lib/General_matrix_functions.c, lib/Makefile.am,
+	  lib/multigrid_kernel.cu: Proposed CUDA kernel for multigrid
+	  solver.
+
+2009-06-25 16:51  tan2
+
+	* examples/Cookbook10/cmt-solution.cookbook10,
+	  examples/Cookbook10/stations.cookbook10: forgot to add these
+	  files
+
+2009-06-15 18:21  tan2
+
+	* ChangeLog: Update ChangeLog to r15180
+
 2009-06-10 20:42  tan2
 
 	* configure.ac: Added COND_GGRD flags; removed redundant LIBS
@@ -2037,8 +2927,7 @@
 
 2007-08-29 23:18  tan2
 
-	* doc/CitcomS, doc: Restructing the repository layout for CitcomS
-	  documentation
+	* doc: Restructing the repository layout for CitcomS documentation
 
 2007-08-29 20:55  tan2
 
@@ -6806,21 +7695,7 @@
 
 2005-10-29 02:16  leif
 
-	* mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
-	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook1/cookbook1.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook2/cookbook2.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook3/cookbook3.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook4/cookbook4.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook5/cookbook5.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/Cookbook7/cookbook7.sh,
-	  mc/3D/CitcomS/tags/v2.0.1/examples/example1.sh,
-	  examples/Cookbook1/cookbook1.sh, examples/Cookbook2/cookbook2.sh:
+	* examples/Cookbook1/cookbook1.sh, examples/Cookbook2/cookbook2.sh:
 	  Set svn:executable on all examples and cookbooks.
 
 2005-10-29 02:07  leif
@@ -6849,39 +7724,7 @@
 
 2005-10-21 19:35  leif
 
-	* mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
-	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
-	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSFullImport.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSFullImport.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSImport.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSImport.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceHeatflux.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceHeatflux.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceImport.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceImport.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceTopo.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceTopo.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceVelocity.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSSurfaceVelocity.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSTemperature.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSTemperature.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSVelocity.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSVelocity.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSViscosity.net,
-	  mc/3D/CitcomS/branches/v2/visual/OpenDXMacro/CitcomSViscosity.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/visFull.net,
-	  mc/3D/CitcomS/branches/v2/visual/visFull.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/visRegional.net,
-	  mc/3D/CitcomS/branches/v2/visual/visRegional.net.in,
-	  mc/3D/CitcomS/branches/v2/visual/visRegionalSurface.net,
-	  mc/3D/CitcomS/branches/v2/visual/visRegionalSurface.net.in,
-	  examples/Cookbook1/cookbook1.sh, examples/Cookbook2/cookbook2.sh,
+	* examples/Cookbook1/cookbook1.sh, examples/Cookbook2/cookbook2.sh,
 	  examples/Cookbook3/cookbook3.sh, examples/Cookbook4/cookbook4.sh,
 	  examples/Cookbook5/cookbook5.sh, examples/Cookbook7/cookbook7.sh,
 	  examples/example1.sh, visual/Makefile.am,
@@ -6910,9 +7753,7 @@
 
 2005-10-07 12:37  leif
 
-	* mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
-	  pyre/Solver/FullSolver.py, pyre/Solver/RegionalSolver.py: Don't
+	* pyre/Solver/FullSolver.py, pyre/Solver/RegionalSolver.py: Don't
 	  suppress errors loading Full/Regional module.
 
 2005-10-04 23:58  tan2
@@ -6928,216 +7769,12 @@
 
 2005-10-04 22:37  leif
 
-	* mc/3D/CitcomS/branches/v2/Make.mm,
-	  mc/3D/CitcomS/branches/v2/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/configure.ac,
-	  mc/3D/CitcomS/branches/v2/drivers/Citcom.c,
-	  mc/3D/CitcomS/branches/v2/drivers/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/drivers/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/drivers/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/drivers/local.def,
-	  mc/3D/CitcomS/branches/v2/etc/Make.mm,
-	  mc/3D/CitcomS/branches/v2/etc/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/etc/__vault__.odb,
-	  mc/3D/CitcomS/branches/v2/etc/full-sphere.odb,
-	  mc/3D/CitcomS/branches/v2/etc/full.odb,
-	  mc/3D/CitcomS/branches/v2/etc/globus.odb,
-	  mc/3D/CitcomS/branches/v2/etc/incomp-newtonian.odb,
-	  mc/3D/CitcomS/branches/v2/etc/incomp-non-newtonian.odb,
-	  mc/3D/CitcomS/branches/v2/etc/lam-mpi.odb,
-	  mc/3D/CitcomS/branches/v2/etc/lsf.odb,
-	  mc/3D/CitcomS/branches/v2/etc/mpich.odb,
-	  mc/3D/CitcomS/branches/v2/etc/pbs.odb,
-	  mc/3D/CitcomS/branches/v2/etc/regional-sphere.odb,
-	  mc/3D/CitcomS/branches/v2/etc/regional.odb,
-	  mc/3D/CitcomS/branches/v2/etc/temp.odb,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook1/cookbook1.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook7/cookbook7.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Advection_diffusion.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Citcom_init.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Construct_arrays.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Convection.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Drive_solvers.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Element_calculations.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/General_matrix_functions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Global_operations.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Initial_temperature.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Instructions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Interuption.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Nodal_mesh.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Obsolete.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Output.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Pan_problem_misc_functions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Parsing.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Phase_change.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Problem_related.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Process_buoyancy.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Shape_functions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Size_does_matter.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Solver_conj_grad.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Solver_multigrid.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Sphere_harmonics.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Stokes_flow_Incomp.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Topo_gravity.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Tracer_advection.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Viscosity_structures.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/advection.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/advection_diffusion.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/citcom_init.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/convection_variables.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/drive_solvers.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/element_definitions.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/global_defs.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/initial_temperature.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/interuption.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/lith_age.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/Common/output.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/parallel_related.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/parsing.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/phase_change.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/sphere_communication.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/temperature_descriptions.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/tracer_defs.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/viscosity_descriptions.h,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Boundary_conditions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Geometry_cartesian.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Lith_age.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Obsolete.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Parallel_related.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Read_input_from_files.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Sphere_related.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Version_dependent.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Boundary_conditions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Geometry_cartesian.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Lith_age.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Obsolete.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Parallel_related.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Read_input_from_files.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Sphere_related.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Version_dependent.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/local.def,
-	  mc/3D/CitcomS/branches/v2/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Full/Fullmodule.cc,
-	  mc/3D/CitcomS/branches/v2/module/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Full/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Regionalmodule.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/misc.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/misc.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.h,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Advection_diffusion.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/BC.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/CitcomComponent.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Const.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/CoarseGridExchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Exchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/FineGridExchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Inlet.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Outlet.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/IC.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Launchers.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Param.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Phase.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/FullSphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/RegionalSphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Sphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Incompressible.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Tracer.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Visc.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Controller.py,
-	  mc/3D/CitcomS/branches/v2/pyre/CoupledApp.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Coupler.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Layout.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/pyre/SimpleApp.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/Solver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/__init__.py.in,
-	  mc/3D/CitcomS/branches/v2/pyre/local.def,
-	  mc/3D/CitcomS/branches/v2/tests/Make.mm,
-	  mc/3D/CitcomS/branches/v2/tests/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/tests/asap.py,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh.in,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh.in,
-	  mc/3D/CitcomS/branches/v2/tests/hrothgar.py,
-	  mc/3D/CitcomS/branches/v2/tests/local.def,
-	  mc/3D/CitcomS/branches/v2/tests/signon.py,
-	  mc/3D/CitcomS/branches/v2/visual/Make.mm,
-	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/visual/autocombine.py,
-	  mc/3D/CitcomS/branches/v2/visual/batchcombine.py,
-	  mc/3D/CitcomS/branches/v2/visual/batchpaste.sh,
-	  mc/3D/CitcomS/branches/v2/visual/batchsurf.py,
-	  mc/3D/CitcomS/branches/v2/visual/combine.py,
-	  mc/3D/CitcomS/branches/v2/visual/combinesurf.py,
-	  mc/3D/CitcomS/branches/v2/visual/dxgeneral.sh,
-	  mc/3D/CitcomS/branches/v2/visual/dxgeneralsurf.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getcoord.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getlog.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getsurf.sh,
-	  mc/3D/CitcomS/branches/v2/visual/parser.py,
-	  mc/3D/CitcomS/branches/v2/visual/pasteCitcomData.sh,
-	  mc/3D/CitcomS/branches/v2/visual/zslice.py, Make.mm, Makefile.am,
-	  configure.ac, drivers/Citcom.c, drivers/Full/Make.mm,
-	  drivers/Full/local.def, drivers/Make.mm, drivers/Makefile.am,
-	  drivers/Regional/Make.mm, drivers/Regional/local.def,
-	  drivers/local.def, etc/Make.mm, etc/Makefile.am,
-	  etc/__vault__.odb, etc/full-sphere.odb, etc/full.odb,
-	  etc/globus.odb, etc/incomp-newtonian.odb,
+	* Make.mm, Makefile.am, configure.ac, drivers/Citcom.c,
+	  drivers/Full/Make.mm, drivers/Full/local.def, drivers/Make.mm,
+	  drivers/Makefile.am, drivers/Regional/Make.mm,
+	  drivers/Regional/local.def, drivers/local.def, etc/Make.mm,
+	  etc/Makefile.am, etc/__vault__.odb, etc/full-sphere.odb,
+	  etc/full.odb, etc/globus.odb, etc/incomp-newtonian.odb,
 	  etc/incomp-non-newtonian.odb, etc/lam-mpi.odb, etc/lsf.odb,
 	  etc/mpich.odb, etc/pbs.odb, etc/regional-sphere.odb,
 	  etc/regional.odb, etc/temp.odb, examples/Cookbook1/cookbook1.sh,
@@ -7273,168 +7910,8 @@
 
 2005-10-04 02:53  leif
 
-	* mc/3D/CitcomS/branches/v2/AUTHORS,
-	  mc/3D/CitcomS/branches/v2/COPYING,
-	  mc/3D/CitcomS/branches/v2/ChangeLog,
-	  mc/3D/CitcomS/branches/v2/CitcomS.py-LICENSE.txt,
-	  mc/3D/CitcomS/branches/v2/INSTALL,
-	  mc/3D/CitcomS/branches/v2/Make.mm,
-	  mc/3D/CitcomS/branches/v2/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/NEWS, mc/3D/CitcomS/branches/v2/README,
-	  mc/3D/CitcomS/branches/v2/citcoms_profile,
-	  mc/3D/CitcomS/branches/v2/configure.ac,
-	  mc/3D/CitcomS/branches/v2/drivers/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/drivers/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/drivers/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/drivers/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/drivers/local.def,
-	  mc/3D/CitcomS/branches/v2/etc/CitcomS.pml.in,
-	  mc/3D/CitcomS/branches/v2/etc/Make.mm,
-	  mc/3D/CitcomS/branches/v2/etc/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/etc/__vault__.odb,
-	  mc/3D/CitcomS/branches/v2/etc/full-sphere.odb,
-	  mc/3D/CitcomS/branches/v2/etc/full.odb,
-	  mc/3D/CitcomS/branches/v2/etc/globus.odb,
-	  mc/3D/CitcomS/branches/v2/etc/incomp-newtonian.odb,
-	  mc/3D/CitcomS/branches/v2/etc/incomp-non-newtonian.odb,
-	  mc/3D/CitcomS/branches/v2/etc/lam-mpi.odb,
-	  mc/3D/CitcomS/branches/v2/etc/lsf.odb,
-	  mc/3D/CitcomS/branches/v2/etc/mpich.odb,
-	  mc/3D/CitcomS/branches/v2/etc/pbs.odb,
-	  mc/3D/CitcomS/branches/v2/etc/regional-sphere.odb,
-	  mc/3D/CitcomS/branches/v2/etc/regional.odb,
-	  mc/3D/CitcomS/branches/v2/etc/temp.odb,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook2/cookbook2.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook3/cookbook3.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook4/cookbook4.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Cookbook5/cookbook5.sh,
-	  mc/3D/CitcomS/branches/v2/examples/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/examples/example1.sh,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Element_calculations.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Obsolete.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Pan_problem_misc_functions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Size_does_matter.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Topo_gravity.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/Tracer_advection.c,
-	  mc/3D/CitcomS/branches/v2/lib/Common/advection_diffusion.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/citcom_init.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/drive_solvers.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/global_defs.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/Common/output.h,
-	  mc/3D/CitcomS/branches/v2/lib/Common/parallel_related.h,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Boundary_conditions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Full/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Boundary_conditions.c,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/lib/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/lib/local.def,
-	  mc/3D/CitcomS/branches/v2/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Full/Fullmodule.cc,
-	  mc/3D/CitcomS/branches/v2/module/Full/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Full/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Full/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Make.mm,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/module/Regional/Regionalmodule.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/advdiffu.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/bindings.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/exceptions.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/initial_conditions.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/local.def,
-	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/mesher.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/misc.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/misc.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/outputs.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/setProperties.h,
-	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.cc,
-	  mc/3D/CitcomS/branches/v2/module/Regional/stokes_solver.h,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Advection_diffusion.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Advection_diffusion/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/BC.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/CitcomComponent.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Const.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/CoarseGridExchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Exchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/FineGridExchanger.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Inlet.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/Outlet.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Exchanger/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/IC.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Launchers.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Param.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Phase.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/FullSphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/RegionalSphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/Sphere.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Sphere/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Incompressible.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Stokes_solver/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Tracer.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/Visc.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Components/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/CoupledApp.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Coupler.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Layout.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/pyre/SimpleApp.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/FullSolver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/Make.mm,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/RegionalSolver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/Solver.py,
-	  mc/3D/CitcomS/branches/v2/pyre/Solver/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/__init__.py,
-	  mc/3D/CitcomS/branches/v2/pyre/__init__.py.in,
-	  mc/3D/CitcomS/branches/v2/pyre/local.def,
-	  mc/3D/CitcomS/branches/v2/tests/Make.mm,
-	  mc/3D/CitcomS/branches/v2/tests/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/tests/asap.py,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsfull.sh.in,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh,
-	  mc/3D/CitcomS/branches/v2/tests/citcomsregional.sh.in,
-	  mc/3D/CitcomS/branches/v2/tests/hrothgar.py,
-	  mc/3D/CitcomS/branches/v2/tests/local.def,
-	  mc/3D/CitcomS/branches/v2/tests/signon.py,
-	  mc/3D/CitcomS/branches/v2/visual/Make.mm,
-	  mc/3D/CitcomS/branches/v2/visual/Makefile.am,
-	  mc/3D/CitcomS/branches/v2/visual/batchcombine.py,
-	  mc/3D/CitcomS/branches/v2/visual/batchpaste.sh,
-	  mc/3D/CitcomS/branches/v2/visual/batchsurf.py,
-	  mc/3D/CitcomS/branches/v2/visual/combine.py,
-	  mc/3D/CitcomS/branches/v2/visual/combinesurf.py,
-	  mc/3D/CitcomS/branches/v2/visual/dxgeneral.sh,
-	  mc/3D/CitcomS/branches/v2/visual/dxgeneralsurf.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getcoord.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getlog.sh,
-	  mc/3D/CitcomS/branches/v2/visual/getsurf.sh,
-	  mc/3D/CitcomS/branches/v2/visual/pasteCitcomData.sh, Makefile.am,
-	  tests/Make.mm: Ported GNU Build System from CitcomS trunk to v2
-	  branch.
+	* Makefile.am, tests/Make.mm: Ported GNU Build System from CitcomS
+	  trunk to v2 branch.
 
 2005-10-04 00:34  leif
 
@@ -13612,5 +14089,5 @@
 
 2005-08-23 02:42  VCP
 
-	* mc/3D/CitcomS/branches, .: VCP: initializing layout
+	* .: VCP: initializing layout
 

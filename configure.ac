@@ -25,7 +25,7 @@ dnl</LicenseText>
 # $Id$
 
 AC_PREREQ(2.59)
-AC_INIT([CitcomS], [3.1.0], [cig-mc@geodynamics.org], [CitcomS])
+AC_INIT([CitcomS], [3.1.2], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
 AC_CONFIG_SRCDIR([bin/Citcom.c])
 AC_CONFIG_HEADER([config.h])
@@ -37,9 +37,9 @@ AC_ARG_VAR(PYTHON, [Python interpreter])
 AC_ARG_VAR(PYTHONPATH, [Python module search path])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
-        [build Pyre modules @<:@default=yes@:>@])],
+        [build Pyre modules @<:@default=no@:>@])],
     [want_pyre="$withval"],
-    [want_pyre=yes])
+    [want_pyre=no])
 AM_CONDITIONAL([COND_PYRE], [test "$want_pyre" = yes])
 AC_ARG_ENABLE([embedding],
     [AC_HELP_STRING([--enable-embedding],

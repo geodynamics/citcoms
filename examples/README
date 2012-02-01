@@ -1,0 +1,8 @@
+Note regarding examples:
+
+The Cookbook examples in this directory are designed for the Pyre enabled
+version of CitcomS ("./configure --with-pyre").  In the current version of
+CitcomS, Pyre is disabled by default.  If you want to use the Cookbook
+examples you must configure CitcomS with Pyre enabled.  Otherwise, you can
+use the Regional and Full examples in this directory with Pyre disabled.
+
