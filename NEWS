@@ -1,6 +1,92 @@
-CitcomS NEWS -- history of user-visible changes.  2009-05-10
+CitcomS NEWS -- history of user-visible changes.  2012-02-01
 
 Please send CitcomS.py bug reports to cig-mc@geodynamics.org.
+
+Version 3.1.2
+
+* Pyre configuration is now disabled by default.
+
+* If Python 2.7 is detected, Pyre is disabled due to conflicts.
+
+* Enhanced VTK output, mostly contributed by Rene Gassmoeller at GFZ.
+
+* Revised Advection_diffusion routine. Contributed by Thorsten Becker
+  and Shijie Zhong.
+
+* Trial implementation of anisotropic viscosity.
+  Contributed by Thorsten Becker.
+
+* Added support of multigrid solver in Exchanger.
+  Contributed by Eh Tan.
+
+* Added control for inner loop solution accuracy (inner_accuracy_scale).
+  Added option to remove rigid body rotation at each Uzawa iteration
+  step (inner_remove_rigid_rotation). Contributed by Thorsten Becker.
+
+* Added two boolean parameters for controlling convergence
+  criterion: check_continuity_convergence and check_pressure_convergence.
+  Contributed by Eh Tan.
+
+* Added experimental implementation of internal stress or velocity
+  boundary conditions. Contributed by Thorsten Becker.
+
+* Improved handling of grd-read velocity and traction boundary
+  conditions. Contributed by Thorsten Becker.
+
+* Changed default parameters for z_410, z_lmantle, z_lith to more 
+  Earth-like parameters. Contributed by Thorsten Becker.
+
+* Added experimental traction surface BC from grds.
+  Contributed by Thorsten Becker.
+
+* Added ability for each radial layer to have distinct viscosity
+  parameters. Contributed by Eh Tan.
+
+* Added test implementation of steady state strain-rate weakening
+  via PDEPV psrw=on parameter. Contributed by Thorsten Becker.
+
+* Added Murnaghan's integrated linear EoS. Contributed by Eh Tan.
+
+* Added augmented Lagrangian component of stiffness matrix in cbf
+  topo. Contributed by Eh Tan.
+
+* Performance optimizations for CUDA code. Contributed by Leif Strand.
+
+* Fixed several bugs in the code and manual, including:
+  - Fixed a bug in pseudo free surface, reported by Robert Moucha.
+  - Correctly handle orphan tracers.
+  - Added Pyre binding for write_q_files, z_layer, r_grid_layers,
+    rr, nr, others.
+  - Replaced fixed accuracy setting. Bug reported by Rob Moucha.
+  - Fixed temperature perturbation bug for multiple processors.
+
+
+Version 3.1.1
+
+* Added precise_strain_rate function. Contributed by Thorsten Becker.
+
+* Added density (rho) scaling in convective heat flux (necessary
+  for compressible flow). Contributed by Dan Bower.
+
+* Added parameters 'amending_outflow' and 'exchange_pressure' to
+  help the convergence of esolver. Contributed by Eh Tan.
+
+* Added boundary for global mesh in exchanger module.
+  Contributed by Eh Tan.
+
+* Refined Cookbooks 9, 10.
+
+* Added CUDA-ized e_assemble_del2_u() function, multigrid solver,
+  other functions also parallelized. Enabled using configure option
+  "--with-cuda".  Contributed by Leif Strand.
+
+* Added blob_bc_persist parameter to allow assigning blob-like temperature
+  anomalies to BCs. Contributed by Thorsten Becker.
+
+* Fixed several bugs in the code and manual, including:
+
+  - Ensure output variables are correctly initialized.
+  - Avoid multiple error messages when using multiple processors.
 
 Version 3.1.0
 
