@@ -601,7 +601,8 @@ void read_initial_settings(struct All_variables *E)
 
   */
   input_boolean("ggrd_vtop_euler",&(E->control.ggrd_vtop_euler),"off",m);
-
+  if(E->control.ggrd_vtop_euler)
+    E->control.ggrd.vtop_control = 1;
 
   if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
     E->control.vbcs_file = 1;
@@ -909,9 +910,9 @@ void global_derived_values(struct All_variables *E)
 
 
     if(E->control.print_convergence && E->parallel.me==0) {
-	fprintf(stderr,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+	fprintf(stderr,"Problem has %i x %i x %i nodes per cap, %i nodes and %i elements in total\n",
                 E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
-	fprintf(E->fp,"Problem has %d x %d x %d nodes per cap, %d nodes and %d elements in total\n",
+	fprintf(E->fp,"Problem has %i x %i x %i nodes per cap, %i nodes and %i elements in total\n",
                 E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
     }
    return;
@@ -1115,7 +1116,7 @@ void allocate_common_vars(E)
        if((!(E->EVI2[i][j]))||(!(E->VI2[i][j]))||
 	  (!(E->EVIn1[i][j]))||(!(E->EVIn2[i][j]))||(!(E->EVIn3[i][j]))||
 	  (!(E->VIn1[i][j]))||(!(E->VIn2[i][j]))||(!(E->VIn3[i][j]))){
-	 fprintf(stderr, "Error: Cannot allocate anisotropic visc memory, rank=%d\n",
+	 fprintf(stderr, "Error: Cannot allocate anisotropic visc memory, rank=%i\n",
 		 E->parallel.me);
 	 parallel_process_termination();
        }
