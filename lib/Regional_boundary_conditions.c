@@ -36,7 +36,7 @@
 
 /* ========================================== */
 static void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
-void assign_internal_bc(struct All_variables * ,int);
+void assign_internal_bc(struct All_variables *);
 static void velocity_apply_periodic_bcs();
 static void temperature_apply_periodic_bcs();
 static void velocity_refl_vert_bc();
@@ -122,10 +122,10 @@ void regional_velocity_boundary_conditions(E)
       anything at present, if E->mesh.toplayerbc != 0
 
       */
-      assign_internal_bc(E,0);
+      assign_internal_bc(E);
 #ifdef USE_GGRD	
       if(E->control.ggrd.vtop_control)
-	ggrd_read_vtop_from_file(E,0);
+	ggrd_read_vtop_from_file(E,1);
 #endif
 
 

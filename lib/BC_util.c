@@ -206,7 +206,7 @@ toplayerbc  < 0: assign surface boundary condition within medium at node -toplay
                  toplayerbc = -1 is one node underneath surface
 
 */
-void assign_internal_bc(struct All_variables *E,int is_global)
+void assign_internal_bc(struct All_variables *E)
 {
   
   int lv, j, noz, k,lay,ncount,ontop,onbottom;
@@ -252,7 +252,7 @@ void assign_internal_bc(struct All_variables *E,int is_global)
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
-      ggrd_read_vtop_from_file(E, is_global);
+      ggrd_read_vtop_from_file(E, TRUE);
 #endif
     /* end toplayerbc > 0 branch */
   }else if(E->mesh.toplayerbc < 0){ 
@@ -297,7 +297,7 @@ void assign_internal_bc(struct All_variables *E,int is_global)
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
-      ggrd_read_vtop_from_file(E, is_global);
+      ggrd_read_vtop_from_file(E, TRUE);
 #endif
     /* end toplayerbc < 0 branch */
   }

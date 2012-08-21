@@ -284,7 +284,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
       case 2:  /* ages for lithosphere temperature assimilation */
 #ifdef USE_GGRD
 	if(E->control.ggrd.age_control){
-	  ggrd_read_age_from_file(E, 0);
+	  ggrd_read_age_from_file(E, 1);
 	}else{
 #endif
         for(i=1;i<=noy;i++)
@@ -315,7 +315,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
       case 3:  /* read element materials */
 #ifdef USE_GGRD
 	if(E->control.ggrd.mat_control != 0){
-	  ggrd_read_mat_from_file(E, 0);
+	  ggrd_read_mat_from_file(E, 1);
 	}else{
 #endif
 
@@ -376,7 +376,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
     case 4:			/* material control */
 #ifdef USE_GGRD
       if(E->control.ggrd.ray_control)
-	ggrd_read_ray_from_file(E, 0);
+	ggrd_read_ray_from_file(E, 1);
 #else
       myerror(E,"input_from_files: mode 4 only for GGRD");
 #endif

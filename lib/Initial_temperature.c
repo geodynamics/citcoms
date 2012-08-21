@@ -650,10 +650,7 @@ static void construct_tic_from_input(struct All_variables *E)
     case 4:
         /* read initial temperature from grd files */
 #ifdef USE_GGRD
-        if (E->sphere.caps == 1)
-            ggrd_reg_temp_init(E);
-        else
-            ggrd_full_temp_init(E);
+        ggrd_temp_init_general(E,1);
 #else
         fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
         parallel_process_termination();

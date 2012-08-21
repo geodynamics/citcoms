@@ -184,14 +184,6 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
       fprintf(stderr,"ggrd tracer init OK for all layers <= %i\n",E->trace.ggrd_layers);
 }
 
-void ggrd_full_temp_init(struct All_variables *E)
-{
-  ggrd_temp_init_general(E,1);
-}
-void ggrd_reg_temp_init(struct All_variables *E)
-{
-  ggrd_temp_init_general(E,0);
-}
 
 
 
@@ -201,7 +193,7 @@ initialize temperatures from grd files for spherical geometry
 
 */
 
-void ggrd_temp_init_general(struct All_variables *E,int is_global)
+void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 {
 
   MPI_Status mpi_stat;
@@ -212,8 +204,8 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   int i,j,k,m,node,noxnoz,nox,noy,noz;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   
-  if(is_global)		/* decide on GMT flag */
-    sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+  if(is_geographic)		/* decide on GMT flag */
+    sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic grid */
   else
     sprintf(gmt_string,"");
 
@@ -223,7 +215,8 @@ void ggrd_temp_init_general(struct All_variables *E,int is_global)
   noxnoz = nox * noz;
 
   if(E->parallel.me == 0)
-    fprintf(stderr,"ggrd_temp_init_general: using GMT grd files for temperatures, gmtflag: %s\n",gmt_string);
+    fprintf(stderr,"ggrd_temp_init_general: using GMT grd files for temperatures, gmtflag: %s\n",
+	    gmt_string);
   /*
 
 
@@ -394,7 +387,7 @@ the grd model can be 2D (a layer in itself), or 3D (a model with
 several layers)
 
 */
-void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
+void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 {
   MPI_Status mpi_stat;
   int mpi_rc,timedep,interpolate;
@@ -440,8 +433,8 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
     /* assign the general depth dependent material group */
     construct_mat_group(E);
  	
-    if(is_global)		/* decide on GMT flag */
-      sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+    if(is_geographic)		/* decide on GMT flag */
+      sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic */
     else
       sprintf(gmt_string,"");
     /*
@@ -468,11 +461,11 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_global)
       if(E->control.ggrd.mat_control > 0){
 	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to all above %g km, input is %s, %s\n",
 		E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1],
-		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
+		(is_geographic)?("geographic"):("Cartesian"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
       }else{
 	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to single layer at %g km, input is %s, %s\n",
 		E->data.radius_km*E->viscosity.zbase_layer[-E->control.ggrd.mat_control-1],
-		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
+		(is_geographic)?("geographic"):("Cartesian"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
       }
     }
     for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
@@ -668,7 +661,7 @@ to the rayleigh number in the surface layers, e.g. to have a simple
 way to represent stationary, chemical heterogeneity
 
 */
-void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
+void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
 {
   MPI_Status mpi_stat;
   int mpi_rc,timedep,interpolate;
@@ -706,8 +699,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_global)
     /* init step */
     if(E->parallel.me==0)
       fprintf(stderr,"ggrd_read_ray_from_file: initializing from %s\n",E->control.ggrd.ray_file);
-    if(is_global)		/* decide on GMT flag */
-      sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+    if(is_geographic)		/* decide on GMT flag */
+      sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic */
     else
       sprintf(gmt_string,"");
     if(E->parallel.me > 0)	/* wait for previous processor */
@@ -800,7 +793,7 @@ vector file and prescribe Euler vectors instead
 
 */
 
-void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
+void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 {
   MPI_Status mpi_stat;
   int mpi_rc,interpolate,timedep,*max_code,code,assign,ontop;
@@ -931,10 +924,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
       */
       if(verbose)
 	fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities/tractions for %s setup\n",
-		is_global?("global"):("regional"));
-      if(is_global){		/* decide on GMT flag */
+		is_geographic?("geographic"):("Cartesian"));
+      if(is_geographic){		/* decide on GMT flag */
 	//sprintf(gmt_string,""); /* periodic */
-	sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+	sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic */
       }else
 	sprintf(gmt_string,"");
 
@@ -1132,10 +1125,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  rout[2] = E->SX[level][m][2][nodel];
 		  /* 
 		     
-		  for global grid, shift theta if too close to poles
+		  for geographic grid, shift theta if too close to poles
 		  
 		  */
-		  if((is_global)&&(rout[1] > theta_max)){
+		  if((is_geographic)&&(rout[1] > theta_max)){
 		    if(!pole_warned){
 		      fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
 				rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
@@ -1143,7 +1136,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		    }
 		    rout[1] = theta_max;
 		  }
-		  if((is_global)&&(rout[1] < theta_min)){
+		  if((is_geographic)&&(rout[1] < theta_min)){
 		    if(!pole_warned){
 		      fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
 			      rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
@@ -1244,10 +1237,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 	      if(we_have_velocity_grids){
 		/* 
 		   
-		for global grid, shift theta if too close to poles
+		for geographic grid, shift theta if too close to poles
 		
 		*/
-		if((is_global)&&(rout[1] > theta_max)){
+		if((is_geographic)&&(rout[1] > theta_max)){
 		  if(!pole_warned){
 		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
 			    rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
@@ -1255,7 +1248,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
 		  }
 		  rout[1] = theta_max;
 		}
-		if((is_global)&&(rout[1] < theta_min)){
+		if((is_geographic)&&(rout[1] < theta_min)){
 		  if(!pole_warned){
 		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
 			    rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
@@ -1448,7 +1441,7 @@ void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input
   
 }
 
-void ggrd_read_age_from_file(struct All_variables *E, int is_global)
+void ggrd_read_age_from_file(struct All_variables *E, int is_geographic)
 {
   myerror(E,"not implemented yet");
 } /* end age control */
@@ -1539,7 +1532,7 @@ vis2.grd for the viscosity factors, read in log10(eta_S/eta)
 nr.grd, nt.grd, np.grd for the directors
 
 */
-void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
+void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 {
   MPI_Status mpi_stat;
   int mpi_rc;
@@ -1586,8 +1579,8 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
       }
     }
   }
-  if(is_global)		/* decide on GMT flag */
-    sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+  if(is_geographic)		/* decide on GMT flag */
+    sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic */
   else
     sprintf(gmt_string,"");
   /*
@@ -1611,12 +1604,12 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_global)
     if(E->viscosity.anivisc_layer > 0){
       fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements above %g km, input is %s\n",
 	      E->data.radius_km*E->viscosity.zbase_layer[E->viscosity.anivisc_layer - 1],
-	      (is_global)?("global"):("regional"));
+	      (is_geographic)?("geographic"):("Cartesian"));
     }else{
       fprintf(stderr,"ggrd_read_anivisc_from_file: initializing, assigning to all elements between  %g and %g km, input is %s\n",
 	      E->data.radius_km*((E->viscosity.anivisc_layer<-1)?(E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 2]):(0)),
 	      E->data.radius_km*E->viscosity.zbase_layer[-E->viscosity.anivisc_layer - 1],
-	      (is_global)?("global"):("regional"));
+	      (is_geographic)?("geographic"):("Cartesian"));
     }
   }
 

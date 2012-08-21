@@ -633,7 +633,7 @@ static void base64plushead(unsigned char * in, int nn, int orinn, unsigned char*
     base64(charhead, 16, b64head);
 
     // base64 data
-    b64bodylength = 4*ceil((float) nn/3.0);
+    b64bodylength = 4*ceil((double) nn/3.0);
     b64body = malloc(sizeof(unsigned char)*b64bodylength);
     // writes base64 data to b64body
     base64(in,nn,b64body);
@@ -671,7 +671,7 @@ static void write_binary_array(int nn, float* array, FILE * f)
 
     /* special header for zip compressed and bas64 encoded data
     header needs 4 int32 = 16 byte -> 24 byte due to base64 (4*16/3) */
-    base64plusheadlength = 24 + 4*ceil((float) compressedarraylength/3.0);
+    base64plusheadlength = 24 + 4*ceil((double) compressedarraylength/3.0);
     base64plusheadarray = malloc(sizeof(unsigned char)* base64plusheadlength);
 
     /* fills base64plusheadarray with everything ready for simple writing */
@@ -681,6 +681,7 @@ static void write_binary_array(int nn, float* array, FILE * f)
     fprintf(f,"\n");
     free(chararray);
     free(base64plusheadarray);
+    free(compressedarray);
 }
 
 /**********************************************************************/

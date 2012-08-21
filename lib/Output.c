@@ -82,7 +82,7 @@ void output_common_input(struct All_variables *E)
       /*
 	 vtk_io = 1: write files for post-processing into VTK
 	 vtk_io = 2: write serial legacy VTK file
-	 vtk_io = 3: write paralle legacy VTK file
+	 vtk_io = 3: write parallel legacy VTK file
 
       */
       input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"0",m);
