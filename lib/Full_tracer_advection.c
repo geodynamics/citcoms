@@ -2315,11 +2315,9 @@ static int icheck_bounds(struct All_variables *E,
     double cross3[4];
     double cross4[4];
     double rad1,rad2,rad3,rad4;
-    double theta, phi;
+    double theta, phi,rad;
     double tiny, eps;
     double x,y,z;
-
-    double myatan();
 
     /* make vectors from node to node */
 
@@ -2357,7 +2355,7 @@ static int icheck_bounds(struct All_variables *E,
     /*  Hopefully, this doesn't happen often, may be expensive                  */
 
     tiny=1e-15;
-    eps=1e-6;
+    eps=1e-3;
 
     if (number_of_tries>3)
         {
@@ -2373,33 +2371,36 @@ static int icheck_bounds(struct All_variables *E,
         }
 
     if (fabs(rad1)<=tiny||fabs(rad2)<=tiny||fabs(rad3)<=tiny||fabs(rad4)<=tiny)
-        {
-            x=test_point[1];
-            y=test_point[2];
-            z=test_point[3];
-            theta=myatan(sqrt(x*x+y*y),z);
-            phi=myatan(y,x);
-
-            if (theta<=M_PI/2.0)
-                {
-                    theta=theta+eps;
-                }
-            else
-                {
-                    theta=theta-eps;
-                }
-            phi=phi+eps;
-            x=sin(theta)*cos(phi);
-            y=sin(theta)*sin(phi);
-            z=cos(theta);
-            test_point[1]=x;
-            test_point[2]=y;
-            test_point[3]=z;
-
-            number_of_tries++;
-            goto try_again;
-
-        }
+      {
+	if (fabs(rad1) <= tiny){
+	  test_point[1] += v12[1] * eps; 
+	  test_point[2] += v12[2] * eps; 
+	  test_point[3] += v12[3] * eps; 
+	}
+	if (fabs(rad2) <= tiny){
+	  test_point[1] += v23[1] * eps; 
+	  test_point[2] += v23[2] * eps; 
+	  test_point[3] += v23[3] * eps; 
+	}
+	if (fabs(rad3) <= tiny){
+	  test_point[1] += v34[1] * eps; 
+	  test_point[2] += v34[2] * eps; 
+	  test_point[3] += v34[3] * eps; 
+	}
+	if (fabs(rad4) <= tiny){
+	  test_point[1] += v41[1] * eps; 
+	  test_point[2] += v41[2] * eps; 
+	  test_point[3] += v41[3] * eps; 
+	}
+	rad = sqrt(test_point[1]*test_point[1]+test_point[2]*test_point[2]+test_point[3]*test_point[3]);
+	test_point[1] /= rad;
+	test_point[2] /= rad;
+	test_point[3] /= rad;
+	
+	number_of_tries++;
+	goto try_again;
+	
+      }
 
     icheck=0;
     if (rad1>0.0&&rad2>0.0&&rad3>0.0&&rad4>0.0) icheck=1;
