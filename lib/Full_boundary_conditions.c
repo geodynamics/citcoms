@@ -67,7 +67,7 @@ void full_velocity_boundary_conditions(E)
 #ifdef USE_GGRD
 	/* Ggrd traction control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E, 1);
+	  ggrd_read_vtop_from_file(E, TRUE);
 #endif
 
       }
@@ -91,7 +91,7 @@ void full_velocity_boundary_conditions(E)
 #ifdef USE_GGRD
 	/* Ggrd velocity control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E,1);
+	  ggrd_read_vtop_from_file(E,TRUE);
 #endif
 
 

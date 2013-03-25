@@ -85,7 +85,7 @@ void output_common_input(struct All_variables *E)
 	 vtk_io = 3: write parallel legacy VTK file
 
       */
-      input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"0",m);
+      input_int("gzdir_vtkio",&(E->output.gzdir.vtk_io),"1",m);
       /* remove net rotation on output step? */
       input_boolean("gzdir_rnr",&(E->output.gzdir.rnr),"off",m);
       E->output.gzdir.vtk_base_init = 0;

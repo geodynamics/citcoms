@@ -70,7 +70,7 @@ void regional_velocity_boundary_conditions(E)
 #ifdef USE_GGRD
 	/* Ggrd traction control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E, 1);
+	  ggrd_read_vtop_from_file(E, TRUE);
 #endif
 
       }
@@ -84,7 +84,7 @@ void regional_velocity_boundary_conditions(E)
 #ifdef USE_GGRD
 	/* Ggrd velocity control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
-	  ggrd_read_vtop_from_file(E, 1);
+	  ggrd_read_vtop_from_file(E, TRUE);
 #endif
 	if(E->control.vbcs_file)   {
 	  if((lv == E->mesh.gridmin) && (j == E->sphere.caps_per_proc))
@@ -119,7 +119,9 @@ void regional_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
         horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,SBY,0,lv,j);
         }
-      }    /* end for j and lv */
+
+
+    }    /* end for j and lv */
 
       velocity_refl_vert_bc(E);
 
