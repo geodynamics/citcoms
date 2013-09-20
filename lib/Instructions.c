@@ -768,14 +768,10 @@ void read_initial_settings(struct All_variables *E)
 
   E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
 
-  input_float("reftemperature",&(E->data.ref_temperature),"2700.0",m);
- 
-  if (E->control.stokes!=1) {
-     E->data.ref_viscosity = E->data.ref_temperature *
-         E->data.density * E->data.grav_acc * E->data.therm_exp *
-      E->data.radius_km * E->data.radius_km * E->data.radius_km * 1e9
-     /(E->control.Atemp * E->data.therm_diff);
-    }
+  E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
+    * E->data.ref_viscosity
+    / (E->data.density * E->data.grav_acc * E->data.therm_exp)
+    / (E->data.radius_km * E->data.radius_km * E->data.radius_km * 1e9);
 
   output_common_input(E);
   h5input_params(E);
