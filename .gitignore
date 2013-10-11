@@ -1,7 +1,5 @@
 # ignore svn externals
 .svn
-archimedes
-m4
 
 # ignore object files and static libraries
 *.o
