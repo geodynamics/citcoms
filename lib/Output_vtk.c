@@ -109,17 +109,16 @@ static void vtk_cell_data_trailer(struct All_variables *E, FILE *fp)
     return;
 }
 
-
 static void vtk_output_temp(struct All_variables *E, FILE *fp)
 {
     int i;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floattemp = malloc(nodes*sizeof(float));
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"temperature\" format=\"%s\">\n", E->output.vtk_format);
 
     for(i=0;i <= nodes;i++)
-        floattemp[i] =  (float) *(E->T[1]+i+1);
+        floattemp[i] =  (float) *(E->T+i+1);
 
     if (strcmp(E->output.vtk_format,"binary") == 0) {
         write_binary_array(nodes,floattemp,fp);
@@ -128,14 +127,12 @@ static void vtk_output_temp(struct All_variables *E, FILE *fp)
     }
     fputs("        </DataArray>\n", fp);
     free(floattemp);
-    return;
 }
-
 
 static void vtk_output_velo(struct All_variables *E, FILE *fp)
 {
     int i, j;
-    int nodes=E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes=E->lmesh.nno;
     double sint, sinf, cost, cosf;
     float *V[4];
     const int lev = E->mesh.levmax;
@@ -143,21 +140,22 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1; j<=E->sphere.caps_per_proc; j++) {
-        V[1] = E->sphere.cap[j].V[1];
-        V[2] = E->sphere.cap[j].V[2];
-        V[3] = E->sphere.cap[j].V[3];
+    V[1] = E->sphere.cap.V[1];
+    V[2] = E->sphere.cap.V[2];
+    V[3] = E->sphere.cap.V[3];
 
-        for(i=1; i<=E->lmesh.nno; i++) {
-            sint = E->SinCos[lev][j][0][i];
-            sinf = E->SinCos[lev][j][1][i];
-            cost = E->SinCos[lev][j][2][i];
-            cosf = E->SinCos[lev][j][3][i];
+    for(i=1; i<=E->lmesh.nno; i++) {
+        sint = E->SinCos[lev][0][i];
+        sinf = E->SinCos[lev][1][i];
+        cost = E->SinCos[lev][2][i];
+        cosf = E->SinCos[lev][3][i];
 
-            floatvel[(((j-1)*E->sphere.caps_per_proc)+i-1)*3+0] = (float)(V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf);
-            floatvel[(((j-1)*E->sphere.caps_per_proc)+i-1)*3+1] = (float)(V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf);
-            floatvel[(((j-1)*E->sphere.caps_per_proc)+i-1)*3+2] = (float)(-V[1][i]*sint + V[3][i]*cost);
-        }
+        floatvel[(i-1)*3+0] = 
+          (float)(V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf);
+        floatvel[(i-1)*3+1] = 
+          (float)(V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf);
+        floatvel[(i-1)*3+2] = 
+          (float)(-V[1][i]*sint + V[3][i]*cost);
     }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)
@@ -167,24 +165,21 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
     fputs("        </DataArray>\n", fp);
 
     free(floatvel);
-    return;
 }
-
 
 static void vtk_output_visc(struct All_variables *E, FILE *fp)
 {
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     int lev = E->mesh.levmax;
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"viscosity\" format=\"%s\">\n", E->output.vtk_format);
         if (strcmp(E->output.vtk_format, "binary") == 0) {
-            write_binary_array(nodes,&E->VI[lev][1][1],fp);
+            write_binary_array(nodes,&E->VI[lev][1],fp);
         } else {
-            write_ascii_array(nodes,1,&E->VI[lev][1][1],fp);
+            write_ascii_array(nodes,1,&E->VI[lev][1],fp);
         }
 
     fputs("        </DataArray>\n", fp);
-    return;
 }
 
 
@@ -193,18 +188,16 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     /* Output Cartesian coordinates as most VTK visualization softwares
        assume it. */
     int i, j;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floatpos = malloc(nodes*3*sizeof(float));
 
     fputs("      <Points>\n", fp);
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"coordinate\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1; j<=E->sphere.caps_per_proc; j++) {
-        for(i=1; i<=E->lmesh.nno; i++){
-                floatpos[((j-1)*E->lmesh.nno+i-1)*3] = (float)(E->x[j][1][i]);
-	        floatpos[((j-1)*E->lmesh.nno+i-1)*3+1]=(float)(E->x[j][2][i]);
-	        floatpos[((j-1)*E->lmesh.nno+i-1)*3+2]=(float)(E->x[j][3][i]);
-        }
+    for(i=1; i<=E->lmesh.nno; i++){
+      floatpos[(i-1)*3+0]=(float)(E->x[1][i]);
+      floatpos[(i-1)*3+1]=(float)(E->x[2][i]);
+      floatpos[(i-1)*3+2]=(float)(E->x[3][i]);
     }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)
@@ -214,12 +207,11 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     fputs("        </DataArray>\n", fp);
     fputs("      </Points>\n", fp);
     free(floatpos);
-    return;
 }
 
 static void vtk_output_stress(struct All_variables *E, FILE *fp)
 {
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
    /* for stress computation */
     void allocate_STD_mem();
     void compute_nodal_stress();
@@ -235,9 +227,9 @@ static void vtk_output_stress(struct All_variables *E, FILE *fp)
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"stress\" NumberOfComponents=\"6\" format=\"%s\">\n", E->output.vtk_format);
 
     if (strcmp(E->output.vtk_format, "binary") == 0) {
-        write_binary_array(nodes*6,&E->gstress[1][1],fp);
+        write_binary_array(nodes*6,&E->gstress[1],fp);
     } else {
-        write_ascii_array(nodes*6,6,&E->gstress[1][1],fp);
+        write_ascii_array(nodes*6,6,&E->gstress[1],fp);
     }
 
     fputs("        </DataArray>\n", fp);
@@ -248,16 +240,14 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
 {
     int i, j, k;
     char name[255];
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floatcompo = malloc (nodes*sizeof(float));
 
     for(k=0;k<E->composition.ncomp;k++) {
         fprintf(fp, "        <DataArray type=\"Float32\" Name=\"composition%d\" format=\"%s\">\n", k+1, E->output.vtk_format);
 
-        for(j=1; j<=E->sphere.caps_per_proc; j++) {
-            for(i=1; i<=E->lmesh.nno; i++) {
-                floatcompo[(j-1)*E->lmesh.nno+i-1] = (float) (E->composition.comp_node[j][k][i]);
-	    }
+        for(i=1; i<=E->lmesh.nno; i++) {
+          floatcompo[i-1] = (float) (E->composition.comp_node[k][i]);
         }
 
         if (strcmp(E->output.vtk_format, "binary") == 0)
@@ -267,14 +257,13 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
         fputs("        </DataArray>\n", fp);
     }
     free(floatcompo);
-    return;
 }
 
 
 static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 {
     int i, j, k;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     char output_file[255];
     float* floattopo = malloc (nodes*sizeof(float));
 
@@ -292,21 +281,19 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 
     fprintf(fp,"        <DataArray type=\"Float32\" Name=\"surface\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++){
-        for(i=1;i<=E->lmesh.nsf;i++){
-            for(k=1;k<=E->lmesh.noz;k++){
-                floattopo[(j-1)*E->lmesh.nno + (i-1)*E->lmesh.noz + k-1] = 0.0;
-            }
+    for(i=1;i<=E->lmesh.nsf;i++){
+        for(k=1;k<=E->lmesh.noz;k++){
+            floattopo[(i-1)*E->lmesh.noz + k-1] = 0.0;
+        }
 
-            if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
+        if (E->parallel.me_loc[3]==E->parallel.nprocz-1) {
 
-                /* choose either STD topo or pseudo-free-surf topo */
-                if(E->control.pseudo_free_surf)
-                floattopo[(j-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.freesurf[j][i];
-                else
-                floattopo[(j-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.tpg[j][i];
+            /* choose either STD topo or pseudo-free-surf topo */
+            if(E->control.pseudo_free_surf)
+            floattopo[i*E->lmesh.noz-1] = E->slice.freesurf[i];
+            else
+            floattopo[i*E->lmesh.noz-1] = E->slice.tpg[i];
 
-            }
         }
     }
 
@@ -316,7 +303,6 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
         write_ascii_array(nodes,1,floattopo,fp);
 
     fputs("        </DataArray>\n", fp);
-  return;
 }
 
 

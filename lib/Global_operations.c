@@ -43,14 +43,10 @@ void myerror(struct All_variables *E,char *message);
    Assumes orthogonal mesh, otherwise, horizontals
    aren't & another method is required.
    =============================================== */
-
-void remove_horiz_ave(E,X,H,store_or_not)
-     struct All_variables *E;
-     double **X, *H;
-     int store_or_not;
-
+void remove_horiz_ave( struct All_variables *E, double *X, double *H,
+    int store_or_not )
 {
-    int m,i,j,k,n,nox,noz,noy;
+    int i,j,k,n,nox,noz,noy;
     void return_horiz_ave();
 
     const int dims = E->mesh.nsd;
@@ -61,19 +57,15 @@ void remove_horiz_ave(E,X,H,store_or_not)
 
     return_horiz_ave(E,X,H);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(k=1;k<=noy;k++)
       for(j=1;j<=nox;j++)
-	for(i=1;i<=noz;i++) {
+        for(i=1;i<=noz;i++) {
             n = i+(j-1)*noz+(k-1)*noz*nox;
-            X[m][n] -= H[i];
-	}
-
-   return;
+            X[n] -= H[i];
+        }
 }
 
-
-void remove_horiz_ave2(struct All_variables *E, double **X)
+void remove_horiz_ave2(struct All_variables *E, double *X)
 {
     double *H;
 
@@ -83,9 +75,7 @@ void remove_horiz_ave2(struct All_variables *E, double **X)
 }
 
 
-void return_horiz_ave(E,X,H)
-     struct All_variables *E;
-     double **X, *H;
+void return_horiz_ave( struct All_variables *E, double *X, double *H )
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -112,33 +102,32 @@ void return_horiz_ave(E,X,H)
     temp[i+1] = temp[i+1+noz] = 0.0;
     top = 0;
     if (i==elz) top = 1;
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+          lnode[1] = E->ien[el].node[1];
+          lnode[2] = E->ien[el].node[2];
+          lnode[3] = E->ien[el].node[3];
+          lnode[4] = E->ien[el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+            lnode[1] = E->ien[el].node[5];
+            lnode[2] = E->ien[el].node[6];
+            lnode[3] = E->ien[el].node[7];
+            lnode[4] = E->ien[el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
@@ -160,12 +149,9 @@ void return_horiz_ave(E,X,H)
   free ((void *) Have);
   free ((void *) temp);
 
-  return;
-  }
+}
 
-void return_horiz_ave_f(E,X,H)
-     struct All_variables *E;
-     float **X, *H;
+void return_horiz_ave_f( struct All_variables *E, float *X, float *H )
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -192,33 +178,32 @@ void return_horiz_ave_f(E,X,H)
     temp[i+1] = temp[i+1+noz] = 0.0;
     top = 0;
     if (i==elz) top = 1;
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+          lnode[1] = E->ien[el].node[1];
+          lnode[2] = E->ien[el].node[2];
+          lnode[3] = E->ien[el].node[3];
+          lnode[4] = E->ien[el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+            lnode[1] = E->ien[el].node[5];
+            lnode[2] = E->ien[el].node[6];
+            lnode[3] = E->ien[el].node[7];
+            lnode[4] = E->ien[el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
@@ -233,15 +218,10 @@ void return_horiz_ave_f(E,X,H)
     if(Have[i+noz] != 0.0)
        H[i] = Have[i]/Have[i+noz];
     }
- /* if (E->parallel.me==0)
-    for(i=1;i<=noz;i++)
-      fprintf(stderr,"area %d %d %g\n",E->parallel.me,i,Have[i+noz]);
-*/
   free ((void *) Have);
   free ((void *) temp);
 
-  return;
-  }
+}
 
 
 /******* RETURN ELEMENTWISE HORIZ AVE ********************************/
@@ -250,9 +230,8 @@ void return_horiz_ave_f(E,X,H)
 /* however here, elemental horizontal averages are given rather than */
 /* nodal averages. Also note, here is average per element            */
 
-void return_elementwise_horiz_ave(E,X,H)
-     struct All_variables *E;
-     double **X, *H;
+void return_elementwise_horiz_ave( struct All_variables *E, 
+                                   double *X, double *H )
 {
 
   int m,i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
@@ -279,21 +258,16 @@ void return_elementwise_horiz_ave(E,X,H)
 
   for (i=1;i<=elz;i++)
   {
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
+    for (k=1;k<=ely;k++)
     {
-      for (k=1;k<=ely;k++)
+      for (j=1;j<=elx;j++)
       {
-        for (j=1;j<=elx;j++)
-        {
-          el = i + (j-1)*elz + (k-1)*elx*elz;
-          temp[i] += X[m][el]*E->ECO[E->mesh.levmax][m][el].area;
-          temp[i+elz] += E->ECO[E->mesh.levmax][m][el].area;
-        }
+        el = i + (j-1)*elz + (k-1)*elx*elz;
+        temp[i] += X[el]*E->ECO[E->mesh.levmax][el].area;
+        temp[i+elz] += E->ECO[E->mesh.levmax][el].area;
       }
     }
   }
-
-
 
 /* determine which processors should get the message from me for
                computing the layer averages */
@@ -305,17 +279,11 @@ void return_elementwise_horiz_ave(E,X,H)
        H[i] = Have[i]/Have[i+elz];
     }
 
-
   free ((void *) Have);
   free ((void *) temp);
-
-  return;
 }
 
-float return_bulk_value(E,Z,average)
-     struct All_variables *E;
-     float **Z;
-     int average;
+float return_bulk_value( struct All_variables *E, float *Z, int average )
 
 {
     int n,i,j,k,el,m;
@@ -327,18 +295,14 @@ float return_bulk_value(E,Z,average)
     volume1=0.0;
     integral1=0.0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-       for (el=1;el<=E->lmesh.nel;el++)  {
-
-	  for(j=1;j<=vpts;j++)
-	    for(i=1;i<=ends;i++) {
-		n = E->ien[m][el].node[i];
-		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-		integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-                }
-
-          }
-
+    for (el=1;el<=E->lmesh.nel;el++)  {
+      for(j=1;j<=vpts;j++)
+        for(i=1;i<=ends;i++) {
+          n = E->ien[el].node[i];
+          volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+          integral1 += Z[n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+        }
+      }
 
     MPI_Allreduce(&volume1  ,&volume  ,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
     MPI_Allreduce(&integral1,&integral,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
@@ -354,62 +318,46 @@ float return_bulk_value(E,Z,average)
 /* Same as return_bulk_value but allowing double instead of float.        */
 /* I think when integer average =1, volume average is returned.           */
 /*         when integer average =0, integral is returned.           */
-
-
-double return_bulk_value_d(E,Z,average)
-     struct All_variables *E;
-     double **Z;
-     int average;
-
+double return_bulk_value_d( struct All_variables *E, double *Z, int average )
 {
-    int n,i,j,el,m;
-    double volume,integral,volume1,integral1;
+  int n,i,j,el,m;
+  double volume,integral,volume1,integral1;
 
-    const int vpts = vpoints[E->mesh.nsd];
-    const int ends = enodes[E->mesh.nsd];
+  const int vpts = vpoints[E->mesh.nsd];
+  const int ends = enodes[E->mesh.nsd];
 
-    volume1=0.0;
-    integral1=0.0;
+  volume1=0.0;
+  integral1=0.0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-       for (el=1;el<=E->lmesh.nel;el++)  {
-
-          for(j=1;j<=vpts;j++)
-            for(i=1;i<=ends;i++) {
-                n = E->ien[m][el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-            }
-
-       }
+  for (el=1;el<=E->lmesh.nel;el++)  {
+    for(j=1;j<=vpts;j++)
+      for(i=1;i<=ends;i++) {
+          n = E->ien[el].node[i];
+          volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+          integral1 += Z[n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+      }
+  }
 
 
-    MPI_Allreduce(&volume1  ,&volume  ,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-    MPI_Allreduce(&integral1,&integral,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&volume1  ,&volume  ,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+  MPI_Allreduce(&integral1,&integral,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
-    if(average && volume != 0.0)
-           integral /= volume;
+  if(average && volume != 0.0)
+    integral /= volume;
 
-    return((double)integral);
+  return((double)integral);
 }
 
 /* ================================================== */
-float find_max_horizontal(E,Tmax)
-struct All_variables *E;
-float Tmax;
+float find_max_horizontal( struct All_variables *E, float Tmax )
 {
  float ttmax;
-
  MPI_Allreduce(&Tmax,&ttmax,1,MPI_FLOAT,MPI_MAX,E->parallel.horizontal_comm);
-
  return(ttmax);
- }
+}
 
 /* ================================================== */
-void sum_across_surface(E,data,total)
-struct All_variables *E;
-float *data;
-int total;
+void sum_across_surface( struct All_variables *E, float *data, int total )
 {
  int j,d;
  float *temp;
@@ -422,17 +370,10 @@ int total;
  }
 
  free((void *)temp);
-
- return;
 }
 
 /* ================================================== */
-/* ================================================== */
-
-/* ================================================== */
-void sum_across_surf_sph1(E,sphc,sphs)
-struct All_variables *E;
-float *sphc,*sphs;
+void sum_across_surf_sph1( struct All_variables *E, float *sphc, float *sphs )
 {
  int jumpp,total,j,d;
  float *sphcs,*temp;
@@ -459,18 +400,10 @@ float *sphc,*sphs;
 
  free((void *)temp);
  free((void *)sphcs);
-
- return;
 }
 
 /* ================================================== */
-
-
-float global_fvdot(E,A,B,lev)
-   struct All_variables *E;
-   float **A,**B;
-   int lev;
-
+float global_fvdot( struct All_variables *E, float *A, float *B, int lev )
 {
   int m,i,neq;
   float prod, temp,temp1;
@@ -480,93 +413,70 @@ float global_fvdot(E,A,B,lev)
   temp = 0.0;
   temp1 = 0.0;
   prod = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    neq=E->lmesh.NEQ[lev];
-    temp1 = 0.0;
-    for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i];
+  neq=E->lmesh.NEQ[lev];
+  temp1 = 0.0;
+  for (i=0;i<neq;i++)
+    temp += A[i]*B[i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-       temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
+  for (i=1;i<=E->parallel.Skip_neq[lev];i++)
+     temp1 += A[E->parallel.Skip_id[lev][i]]*B[E->parallel.Skip_id[lev][i]];
 
-    temp -= temp1;
-
-    }
+  temp -= temp1;
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
 
-
-double kineticE_radial(E,A,lev)
-   struct All_variables *E;
-   double **A;
-   int lev;
-
+double kineticE_radial( struct All_variables *E, double *A, int lev )
 {
   int m,i,neq;
   double prod, temp,temp1;
 
-    temp = 0.0;
-    prod = 0.0;
+  temp = 0.0;
+  prod = 0.0;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    neq=E->lmesh.NEQ[lev];
-    temp1 = 0.0;
-    for (i=0;i<neq;i++)
-      if ((i+1)%3==0)
-        temp += A[m][i]*A[m][i];
+  neq=E->lmesh.NEQ[lev];
+  temp1 = 0.0;
+  for (i=0;i<neq;i++)
+    if ((i+1)%3==0)
+      temp += A[i]*A[i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-      if ((E->parallel.Skip_id[lev][m][i]+1)%3==0)
-        temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*A[m][E->parallel.Skip_id[lev][m][i]];
+  for (i=1;i<=E->parallel.Skip_neq[lev];i++)
+    if ((E->parallel.Skip_id[lev][i]+1)%3==0)
+      temp1 += A[E->parallel.Skip_id[lev][i]]*A[E->parallel.Skip_id[lev][i]];
 
-    temp -= temp1;
-
-    }
+  temp -= temp1;
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
 
-double global_vdot(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_vdot( struct All_variables *E, double *A, double *B, int lev )
 {
   int m,i,neq;
   double prod, temp,temp1;
 
-    temp = 0.0;
-    prod = 0.0;
+  temp = 0.0;
+  prod = 0.0;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    neq=E->lmesh.NEQ[lev];
-    temp1 = 0.0;
-    for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i];
+  neq=E->lmesh.NEQ[lev];
+  temp1 = 0.0;
+  for (i=0;i<neq;i++)
+    temp += A[i]*B[i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-       temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
+  for (i=1;i<=E->parallel.Skip_neq[lev];i++)
+     temp1 += A[E->parallel.Skip_id[lev][i]]*B[E->parallel.Skip_id[lev][i]];
 
-    temp -= temp1;
-
-    }
+  temp -= temp1;
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
 }
 
-
-double global_pdot(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_pdot( struct All_variables *E, double *A, double *B, int lev )
 {
   int i,m,npno;
   double prod, temp;
@@ -575,11 +485,9 @@ double global_pdot(E,A,B,lev)
 
   temp = 0.0;
   prod = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    npno=E->lmesh.NPNO[lev];
-    for (i=1;i<=npno;i++)
-      temp += A[m][i]*B[m][i];
-    }
+  npno=E->lmesh.NPNO[lev];
+  for (i=1;i<=npno;i++)
+    temp += A[i]*B[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
@@ -588,7 +496,7 @@ double global_pdot(E,A,B,lev)
 
 
 /* return ||V||^2 */
-double global_v_norm2(struct All_variables *E,  double **V)
+double global_v_norm2(struct All_variables *E,  double *V)
 {
     int i, m, d;
     int eqn1, eqn2, eqn3;
@@ -596,16 +504,15 @@ double global_v_norm2(struct All_variables *E,  double **V)
 
     temp = 0.0;
     prod = 0.0;
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.nno; i++) {
-            eqn1 = E->id[m][i].doff[1];
-            eqn2 = E->id[m][i].doff[2];
-            eqn3 = E->id[m][i].doff[3];
-            /* L2 norm  */
-            temp += (V[m][eqn1] * V[m][eqn1] +
-                     V[m][eqn2] * V[m][eqn2] +
-                     V[m][eqn3] * V[m][eqn3]) * E->NMass[m][i];
-        }
+    for (i=1; i<=E->lmesh.nno; i++) {
+        eqn1 = E->id[i].doff[1];
+        eqn2 = E->id[i].doff[2];
+        eqn3 = E->id[i].doff[3];
+        /* L2 norm  */
+        temp += (V[eqn1] * V[eqn1] +
+                 V[eqn2] * V[eqn2] +
+                 V[eqn3] * V[eqn3]) * E->NMass[i];
+    }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
 
@@ -614,18 +521,17 @@ double global_v_norm2(struct All_variables *E,  double **V)
 
 
 /* return ||P||^2 */
-double global_p_norm2(struct All_variables *E,  double **P)
+double global_p_norm2(struct All_variables *E,  double *P)
 {
     int i, m;
     double prod, temp;
 
     temp = 0.0;
     prod = 0.0;
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
-            /* L2 norm */
-            temp += P[m][i] * P[m][i] * E->eco[m][i].area;
-        }
+    for (i=1; i<=E->lmesh.npno; i++) {
+        /* L2 norm */
+        temp += P[i] * P[i] * E->eco[i].area;
+    }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
 
@@ -634,33 +540,27 @@ double global_p_norm2(struct All_variables *E,  double **P)
 
 
 /* return ||A||^2, where A_i is \int{div(u) d\Omega_i} */
-double global_div_norm2(struct All_variables *E,  double **A)
+double global_div_norm2(struct All_variables *E,  double *A)
 {
     int i, m;
     double prod, temp;
 
     temp = 0.0;
     prod = 0.0;
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
-            /* L2 norm of div(u) */
-            temp += A[m][i] * A[m][i] / E->eco[m][i].area;
+    for (i=1; i<=E->lmesh.npno; i++) {
+        /* L2 norm of div(u) */
+        temp += A[i] * A[i] / E->eco[i].area;
 
-            /* L1 norm */
-            /*temp += fabs(A[m][i]);*/
-        }
+        /* L1 norm */
+        /*temp += fabs(A[m][i]);*/
+    }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
 
     return (prod/E->mesh.volume);
 }
 
-
-double global_tdot_d(E,A,B,lev)
-   struct All_variables *E;
-   double **A,**B;
-   int lev;
-
+double global_tdot_d( struct All_variables *E, double *A, double *B, int lev )
 {
   int i,nno,m;
   double prod, temp;
@@ -669,23 +569,17 @@ double global_tdot_d(E,A,B,lev)
 
   temp = 0.0;
   prod = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    nno=E->lmesh.NNO[lev];
-    for (i=1;i<=nno;i++)
-    if (!(E->NODE[lev][m][i] & SKIP))
-      temp += A[m][i];
-    }
+  nno=E->lmesh.NNO[lev];
+  for (i=1;i<=nno;i++)
+  if (!(E->NODE[lev][i] & SKIP))
+    temp += A[i]*B[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
   return (prod);
-  }
+}
 
-float global_tdot(E,A,B,lev)
-   struct All_variables *E;
-   float **A,**B;
-   int lev;
-
+float global_tdot( struct All_variables *E, float *A, float *B, int lev )
 {
   int i,nno,m;
   float prod, temp;
@@ -693,17 +587,15 @@ float global_tdot(E,A,B,lev)
 
   temp = 0.0;
   prod = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-    nno=E->lmesh.NNO[lev];
-    for (i=1;i<=nno;i++)
-      if (!(E->NODE[lev][m][i] & SKIP))
-        temp += A[m][i]*B[m][i];
-    }
+  nno=E->lmesh.NNO[lev];
+  for (i=1;i<=nno;i++)
+    if (!(E->NODE[lev][i] & SKIP))
+      temp += A[i]*B[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 
   return (prod);
-  }
+}
 
 
 float global_fmin(E,a)
@@ -715,63 +607,47 @@ float global_fmin(E,a)
   return (temp);
   }
 
-double global_dmax(E,a)
-   struct All_variables *E;
-   double a;
+double global_dmax( struct All_variables *E, double a )
 {
   double temp;
   MPI_Allreduce(&a, &temp,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
   return (temp);
-  }
+}
 
-
-float global_fmax(E,a)
-   struct All_variables *E;
-   float a;
+float global_fmax( struct All_variables *E, float a )
 {
   float temp;
   MPI_Allreduce(&a, &temp,1,MPI_FLOAT,MPI_MAX,E->parallel.world);
   return (temp);
-  }
+}
 
-double Tmaxd(E,T)
-  struct All_variables *E;
-  double **T;
+double Tmaxd( struct All_variables *E, double *T )
 {
-  double global_dmax(),temp,temp1;
+  double temp,temp1;
   int i,m;
 
   temp = -10.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+  for(i=1;i<=E->lmesh.nno;i++)
+    temp = max(T[i],temp);
 
   temp1 = global_dmax(E,temp);
   return (temp1);
-  }
+}
 
-
-float Tmax(E,T)
-  struct All_variables *E;
-  float **T;
+float Tmax( struct All_variables *E, float *T )
 {
-  float global_fmax(),temp,temp1;
+  float temp,temp1;
   int i,m;
 
   temp = -10.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+  for(i=1;i<=E->lmesh.nno;i++)
+    temp = max(T[i],temp);
 
   temp1 = global_fmax(E,temp);
   return (temp1);
-  }
+}
 
-
-double  vnorm_nonnewt(E,dU,U,lev)
-  struct All_variables *E;
-  double **dU,**U;
-  int lev;
+double  vnorm_nonnewt(struct All_variables *E, double *dU, double *U, int lev)
 {
  double temp1,temp2,dtemp,temp;
  int a,e,i,m,node;
@@ -781,17 +657,15 @@ double  vnorm_nonnewt(E,dU,U,lev)
 
  dtemp=0.0;
  temp=0.0;
-for (m=1;m<=E->sphere.caps_per_proc;m++)
   for (e=1;e<=nel;e++)
-   /*if (E->mat[m][e]==1)*/
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
-	 node = E->IEN[lev][m][e].node[a];
-         dtemp += dU[m][ E->ID[lev][m][node].doff[i] ]*
-                  dU[m][ E->ID[lev][m][node].doff[i] ];
-         temp += U[m][ E->ID[lev][m][node].doff[i] ]*
-                 U[m][ E->ID[lev][m][node].doff[i] ];
-         }
+         node = E->IEN[lev][e].node[a];
+         dtemp += dU[ E->ID[lev][node].doff[i] ]*
+                  dU[ E->ID[lev][node].doff[i] ];
+         temp += U[ E->ID[lev][node].doff[i] ]*
+                 U[ E->ID[lev][node].doff[i] ];
+       }
 
 
   MPI_Allreduce(&dtemp, &temp2,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -802,10 +676,7 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
   return (temp1);
 }
 
-
-void sum_across_depth_sph1(E,sphc,sphs)
-     struct All_variables *E;
-     float *sphc,*sphs;
+void sum_across_depth_sph1( struct All_variables *E, float *sphc, float *sphs )
 {
     int jumpp,total,j;
 
@@ -836,14 +707,8 @@ void sum_across_depth_sph1(E,sphc,sphs)
 	free(temp);
 	free(sphcs);
     }
-
-
-    return;
 }
 
-
-/* ================================================== */
-/* ================================================== */
 void broadcast_vertical(struct All_variables *E,
                         float *sphc, float *sphs,
                         int root)
@@ -912,7 +777,7 @@ void remove_rigid_rot(struct All_variables *E)
         for (i=1;i<=E->lmesh.elz;i++)
             tmp += (8.0*M_PI/15.0)*
                 0.5*(E->refstate.rho[i] + E->refstate.rho[i+1])*
-                (pow(E->sx[1][3][i+1],5.0) - pow(E->sx[1][3][i],5.0));
+                (pow(E->sx[3][i+1],5.0) - pow(E->sx[3][i],5.0));
 
         MPI_Allreduce(&tmp, &moment_of_inertia, 1, MPI_DOUBLE,
                       MPI_SUM, E->parallel.vertical_comm);
@@ -928,21 +793,20 @@ void remove_rigid_rot(struct All_variables *E)
     fxyz[1] = fxyz[2] = fxyz[3] = 0.0;
     
     
-    for (m=1;m<=E->sphere.caps_per_proc;m++) {
       for (e=1;e<=E->lmesh.nel;e++) {
 #ifdef ALLOW_ELLIPTICAL
-	t = theta_g(E->eco[m][e].centre[1],E);
+	t = theta_g(E->eco[e].centre[1],E);
 #else
-	t = E->eco[m][e].centre[1];
+	t = E->eco[e].centre[1];
 #endif
-	f = E->eco[m][e].centre[2];
-	r = E->eco[m][e].centre[3];
+	f = E->eco[e].centre[2];
+	r = E->eco[e].centre[3];
 	
 	cos_t = cos(t);sin_t = sin(t);
 	sin_f = sin(f);cos_f = cos(f);
 	
 	/* get Cartesian, element local velocities */
-	velo_from_element_d(E,VV,m,e,sphere_key);
+	velo_from_element_d(E,VV,e,sphere_key);
 	for (j=1;j<=ppts;j++)   {
 	  vx[j] = 0.0;vy[j] = 0.0;
 	}
@@ -962,11 +826,10 @@ void remove_rigid_rot(struct All_variables *E)
         } else {
             rho = 1;
         }
-	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[m][e].area * rho;
-	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[m][e].area * rho;
-	exyz[3] -= (wx*sin_t                 ) * E->eco[m][e].area * rho;
+	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[e].area * rho;
+	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[e].area * rho;
+	exyz[3] -= (wx*sin_t                 ) * E->eco[e].area * rho;
       }
-    } /* end cap */
     
     MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);
     
@@ -991,38 +854,31 @@ void remove_rigid_rot(struct All_variables *E)
       remove rigid rotation 
     */
 #ifdef ALLOW_ELLIPTICAL
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       for (node=1;node<=nno;node++)   {
 	/* cartesian velocity = omega \cross r  */
-	vx[0] = fxyz[2]* E->x[m][3][node] - fxyz[3]*E->x[m][2][node];
-	vx[1] = fxyz[3]* E->x[m][1][node] - fxyz[1]*E->x[m][3][node];
-	vx[2] = fxyz[1]* E->x[m][2][node] - fxyz[2]*E->x[m][1][node];
+	vx[0] = fxyz[2]* E->x[3][node] - fxyz[3]*E->x[2][node];
+	vx[1] = fxyz[3]* E->x[1][node] - fxyz[1]*E->x[3][node];
+	vx[2] = fxyz[1]* E->x[2][node] - fxyz[2]*E->x[1][node];
 	/* project into theta, phi */
-	calc_cbase_at_node(m,node,cart_base,E);
+	calc_cbase_at_node(node,cart_base,E);
 	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
 	v_phi   = vx[0]*cart_base[6] + vx[1]*cart_base[7];
-	E->sphere.cap[m].V[1][node] -= v_theta;
-	E->sphere.cap[m].V[2][node] -= v_phi;
+	E->sphere.cap.V[1][node] -= v_theta;
+	E->sphere.cap.V[2][node] -= v_phi;
       }
-    }
 #else
     sin_t = sin(tr) * rot;
     cos_t = cos(tr) * rot;
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       for (node=1;node<=nno;node++)   {
-	frd = fr - E->sx[m][2][node];
-	v_theta = E->sx[m][3][node] * sin_t * sin(frd);
-	v_phi =   E->sx[m][3][node] * 
-	  (  E->SinCos[lev][m][0][node] * cos_t - E->SinCos[lev][m][2][node]  * sin_t * cos(frd) );
+	frd = fr - E->sx[2][node];
+	v_theta = E->sx[3][node] * sin_t * sin(frd);
+	v_phi =   E->sx[3][node] * 
+	  (  E->SinCos[lev][0][node] * cos_t - E->SinCos[lev][2][node]  * sin_t * cos(frd) );
 	
-	E->sphere.cap[m].V[1][node] -= v_theta;
-	E->sphere.cap[m].V[2][node] -= v_phi;
+	E->sphere.cap.V[1][node] -= v_theta;
+	E->sphere.cap.V[2][node] -= v_phi;
       }
-    }
 #endif
-
-    return;
-
 }
 
 

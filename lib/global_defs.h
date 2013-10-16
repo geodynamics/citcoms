@@ -122,16 +122,16 @@ extern "C" {
 
 struct Bdry {
   int nel;
-  int *element[NCS];
-  int *normal[NCS][4];
-  double *det[NCS][7][5];
+  int *element;
+  int *normal[4];
+  double *det[7][5];
 };
 
 
 struct SBC {
   /* stress (traction) boundary conditions */
-  int *node[NCS];
-  double *SB[NCS][7][4];
+  int *node;
+  double *SB[7][4];
 };
 
 
@@ -228,18 +228,18 @@ struct Parallel {
     int idb;
     int me_loc[4];
     int num_b;
-    int Skip_neq[MAX_LEVELS][NCS];
-    int *Skip_id[MAX_LEVELS][NCS];
+    int Skip_neq[MAX_LEVELS];
+    int *Skip_id[MAX_LEVELS];
 
-    int TNUM_PASS[MAX_LEVELS][NCS];
-    struct BOUND *NODE[MAX_LEVELS][NCS];
-    struct BOUND NUM_NNO[MAX_LEVELS][NCS];
-    struct BOUND NUM_PASS[MAX_LEVELS][NCS];
-    struct PASS NUM_NEQ[MAX_LEVELS][NCS];
-    struct PASS NUM_NODE[MAX_LEVELS][NCS];
-    struct PASS PROCESSOR[MAX_LEVELS][NCS];
-    struct PASS *EXCHANGE_ID[MAX_LEVELS][NCS];
-    struct PASS *EXCHANGE_NODE[MAX_LEVELS][NCS];
+    int TNUM_PASS[MAX_LEVELS];
+    struct BOUND *NODE[MAX_LEVELS];
+    struct BOUND NUM_NNO[MAX_LEVELS];
+    struct BOUND NUM_PASS[MAX_LEVELS];
+    struct PASS NUM_NEQ[MAX_LEVELS];
+    struct PASS NUM_NODE[MAX_LEVELS];
+    struct PASS PROCESSOR[MAX_LEVELS];
+    struct PASS *EXCHANGE_ID[MAX_LEVELS];
+    struct PASS *EXCHANGE_NODE[MAX_LEVELS];
 
     int TNUM_PASSz[MAX_LEVELS];
     struct BOUND NUM_PASSz[MAX_LEVELS];
@@ -247,10 +247,10 @@ struct Parallel {
     struct PASS NUM_NEQz[MAX_LEVELS];
     struct PASS NUM_NODEz[MAX_LEVELS];
 
-    int sTNUM_PASS[MAX_LEVELS][NCS];
-    struct PASS NUM_sNODE[MAX_LEVELS][NCS];
-    struct PASS sPROCESSOR[MAX_LEVELS][NCS];
-    struct PASS *EXCHANGE_sNODE[MAX_LEVELS][NCS];
+    int sTNUM_PASS[MAX_LEVELS];
+    struct PASS NUM_sNODE[MAX_LEVELS];
+    struct PASS sPROCESSOR[MAX_LEVELS];
+    struct PASS *EXCHANGE_sNODE[MAX_LEVELS];
     };
 
 struct CAP    {
@@ -265,7 +265,7 @@ struct CAP    {
 struct SPHERE   {
   int caps;
   int caps_per_proc;
-  int capid[NCS];
+  int capid;
   int max_connections;
   int *hindex[100];
   int hindice;
@@ -278,19 +278,19 @@ struct SPHERE   {
   float *harm_tpgt[2];
   float *harm_tpgb[2];
 
-  double **tablesplm[NCS];
-  double **tablescosf[NCS];
-  double **tablessinf[NCS];
+  double **tablesplm;
+  double **tablescosf;
+  double **tablessinf;
 
-  double area[NCS];
-  double angle[NCS][5];
-  double *area1[MAX_LEVELS][NCS];
-  double *angle1[MAX_LEVELS][NCS][5];
+  double area;
+  double angle[5];
+  double *area1[MAX_LEVELS];
+  double *angle1[MAX_LEVELS][5];
 
   double *R[MAX_LEVELS];
   double *gr;
   double ro,ri;
-  struct CAP cap[NCS];
+  struct CAP cap;
 
 };
 
@@ -367,13 +367,13 @@ struct HAVE {    /* horizontal averages */
 };
 
 struct SLICE {    /* horizontally sliced data, including topography */
-    float *tpg[NCS];
-    float *tpgb[NCS];
-    float *shflux[NCS];
-    float *bhflux[NCS];
-    float *divg[NCS];
-    float *vort[NCS];
-    float *freesurf[NCS];
+    float *tpg;
+    float *tpgb;
+    float *shflux;
+    float *bhflux;
+    float *divg;
+    float *vort;
+    float *freesurf;
   };
 
 
@@ -681,8 +681,8 @@ struct COMPOSITION {
     int ncomp;
     double *buoyancy_ratio;
 
-    double **comp_el[13];
-    double **comp_node[13];
+    double **comp_el;
+    double **comp_node;
 
     double *initial_bulk_composition;
     double *bulk_composition;
@@ -739,22 +739,22 @@ struct All_variables {
     struct CITCOM_GNOMONIC *gnomonic;
     double gnomonic_reference_phi;
 
-    struct COORD *eco[NCS];
-    struct IEN *ien[NCS];  /* global */
-    struct SIEN *sien[NCS];
-    struct ID *id[NCS];
-    struct COORD *ECO[MAX_LEVELS][NCS];
-    struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
-    struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
-    struct ID *ID[MAX_LEVELS][NCS];
-    struct SUBEL *EL[MAX_LEVELS][NCS];
-    struct EG *elt_del[MAX_LEVELS][NCS];
-    struct EC *elt_c[MAX_LEVELS][NCS];
-    struct EK *elt_k[MAX_LEVELS][NCS];
-    struct CC *cc[NCS];
-    struct CCX *ccx[NCS];
-    struct CC *CC[MAX_LEVELS][NCS];
-    struct CCX *CCX[MAX_LEVELS][NCS];
+    struct COORD *eco;
+    struct IEN *ien;  /* global */
+    struct SIEN *sien;
+    struct ID *id;
+    struct COORD *ECO[MAX_LEVELS];
+    struct IEN *IEN[MAX_LEVELS]; /* global at each level */
+    struct FNODE *TWW[MAX_LEVELS];	/* for nodal averages */
+    struct ID *ID[MAX_LEVELS];
+    struct SUBEL *EL[MAX_LEVELS];
+    struct EG *elt_del[MAX_LEVELS];
+    struct EC *elt_c[MAX_LEVELS];
+    struct EK *elt_k[MAX_LEVELS];
+    struct CC *cc;
+    struct CCX *ccx;
+    struct CC *CC[MAX_LEVELS];
+    struct CCX *CCX[MAX_LEVELS];
 
     struct CC element_Cc;
     struct CCX element_Ccx;
@@ -762,59 +762,62 @@ struct All_variables {
     struct REF_STATE refstate;
 
 
-    higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
-    int *Node_map [MAX_LEVELS][NCS];
+    higher_precision *Eqn_k1[MAX_LEVELS];
+    higher_precision *Eqn_k2[MAX_LEVELS];
+    higher_precision *Eqn_k3[MAX_LEVELS];
+    int *Node_map [MAX_LEVELS];
 
-    double *BI[MAX_LEVELS][NCS],*BPI[MAX_LEVELS][NCS];
+    double *BI[MAX_LEVELS],*BPI[MAX_LEVELS];
 
     double *rho;
-    double *heating_adi[NCS];
-    double *heating_visc[NCS];
-    double *heating_latent[NCS];
+    double *heating_adi;
+    double *heating_visc;
+    double *heating_latent;
 
-    double *P[NCS],*F[NCS],*U[NCS];
-    double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
-    double *u1[NCS];
-    double *temp[NCS],*temp1[NCS];
-    double *Mass[NCS], *MASS[MAX_LEVELS][NCS];
-    double *TMass[NCS], *NMass[NCS];
-    double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
-    double *sx[NCS][4],*x[NCS][4];
-    double *surf_det[NCS][5];
-    double *SinCos[MAX_LEVELS][NCS][4];
+    double *P,*F,*U;
+    double *T,*Tdot,*buoyancy;
+    double *u1;
+    double *temp,*temp1;
+    double *Mass, *MASS[MAX_LEVELS];
+    double *TMass, *NMass;
+    double *SX[MAX_LEVELS][4];
+    double *X[MAX_LEVELS][4];
+    double *sx[4],*x[4];
+    double *surf_det[5];
+    double *SinCos[MAX_LEVELS][4];
 
-    float *NP[NCS];
+    float *NP;
   //float *stress[NCS];
-    float *gstress[NCS];
-    float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
-    float *Fascmb[NCS],*Fascmb_b[NCS];
+    float *gstress;
+    float *Fas670,*Fas410,*Fas670_b,*Fas410_b;
+    float *Fascmb,*Fascmb_b;
 
-    float *Vi[NCS],*EVi[NCS];
-    float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
+    float *Vi,*EVi;
+    float *VI[MAX_LEVELS],*EVI[MAX_LEVELS];
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-    float *VI2[MAX_LEVELS][NCS],*EVI2[MAX_LEVELS][NCS];
-    float *VIn1[MAX_LEVELS][NCS],*EVIn1[MAX_LEVELS][NCS];
-    float *VIn2[MAX_LEVELS][NCS],*EVIn2[MAX_LEVELS][NCS];
-    float *VIn3[MAX_LEVELS][NCS],*EVIn3[MAX_LEVELS][NCS];
-    unsigned char *avmode[MAX_LEVELS][NCS];
+    float *VI2[MAX_LEVELS],*EVI2[MAX_LEVELS];
+    float *VIn1[MAX_LEVELS],*EVIn1[MAX_LEVELS];
+    float *VIn2[MAX_LEVELS],*EVIn2[MAX_LEVELS];
+    float *VIn3[MAX_LEVELS],*EVIn3[MAX_LEVELS];
+    unsigned char *avmode[MAX_LEVELS];
 #endif
 
 
-    int num_zero_resid[MAX_LEVELS][NCS];
-    int *zero_resid[MAX_LEVELS][NCS];
-    int *surf_element[NCS],*surf_node[NCS];
-    int *mat[NCS];
-    float *VIP[NCS];
-    unsigned int *NODE[MAX_LEVELS][NCS];
-    unsigned int *node[NCS];
+    int num_zero_resid[MAX_LEVELS];
+    int *zero_resid[MAX_LEVELS];
+    int *surf_element,*surf_node;
+    int *mat;
+    float *VIP;
+    unsigned int *NODE[MAX_LEVELS];
+    unsigned int *node;
 
     float *age_t;
 
-    struct Shape_function_dx *GNX[MAX_LEVELS][NCS];
-    struct Shape_function_dA *GDA[MAX_LEVELS][NCS];
-    struct Shape_function_dx *gNX[NCS];
-    struct Shape_function_dA *gDA[NCS];
+    struct Shape_function_dx *GNX[MAX_LEVELS];
+    struct Shape_function_dA *GDA[MAX_LEVELS];
+    struct Shape_function_dx *gNX;
+    struct Shape_function_dA *gDA;
 
     struct Shape_function1 M; /* master-element shape funtions */
     struct Shape_function1_dx Mx;
@@ -851,8 +854,8 @@ struct All_variables {
     void (* problem_output)(struct All_variables *, int);
 
   /* the following function pointers are for exchanger */
-  void (* exchange_node_d)(struct All_variables *, double**, int);
-  void (* exchange_node_f)(struct All_variables *, float**, int);
+  void (* exchange_node_d)(struct All_variables *, double*, int);
+  void (* exchange_node_f)(struct All_variables *, float*, int);
   void (* temperatures_conform_bcs)(struct All_variables *);
 
 };

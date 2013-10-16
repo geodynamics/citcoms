@@ -135,8 +135,8 @@ void h5output_time(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
+extern void get_STD_topo(struct All_variables *, float*, float*, float*, float*, int);
+extern void get_CBF_topo(struct All_variables *, float*, float*);
 extern void compute_geoid(struct All_variables *);
 
 
@@ -451,9 +451,9 @@ void h5output_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[3*m+0] = E->sx[1][1][n+1];
-                field->data[3*m+1] = E->sx[1][2][n+1];
-                field->data[3*m+2] = E->sx[1][3][n+1];
+                field->data[3*m+0] = E->sx[1][n+1];
+                field->data[3*m+1] = E->sx[2][n+1];
+                field->data[3*m+2] = E->sx[3][n+1];
             }
         }
     }
@@ -497,9 +497,9 @@ void h5output_velocity(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[3*m+0] = E->sphere.cap[1].V[1][n+1];
-                field->data[3*m+1] = E->sphere.cap[1].V[2][n+1];
-                field->data[3*m+2] = E->sphere.cap[1].V[3][n+1];
+                field->data[3*m+0] = E->sphere.cap.V[1][n+1];
+                field->data[3*m+1] = E->sphere.cap.V[2][n+1];
+                field->data[3*m+2] = E->sphere.cap.V[3][n+1];
             }
         }
     }
@@ -543,7 +543,7 @@ void h5output_temperature(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->T[1][n+1];
+                field->data[m] = E->T[n+1];
             }
         }
     }
@@ -589,7 +589,7 @@ void h5output_viscosity(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->VI[lev][1][n+1];
+                field->data[m] = E->VI[lev][n+1];
             }
         }
     }
@@ -632,7 +632,7 @@ void h5output_pressure(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->NP[1][n+1];
+                field->data[m] = E->NP[n+1];
             }
         }
     }
@@ -690,12 +690,12 @@ void h5output_stress(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[6*m+0] = E->gstress[1][6*n+1];
-                field->data[6*m+1] = E->gstress[1][6*n+2];
-                field->data[6*m+2] = E->gstress[1][6*n+3];
-                field->data[6*m+3] = E->gstress[1][6*n+4];
-                field->data[6*m+4] = E->gstress[1][6*n+5];
-                field->data[6*m+5] = E->gstress[1][6*n+6];
+                field->data[6*m+0] = E->gstress[6*n+1];
+                field->data[6*m+1] = E->gstress[6*n+2];
+                field->data[6*m+2] = E->gstress[6*n+3];
+                field->data[6*m+3] = E->gstress[6*n+4];
+                field->data[6*m+4] = E->gstress[6*n+5];
+                field->data[6*m+5] = E->gstress[6*n+6];
             }
         }
     }
@@ -754,8 +754,8 @@ void h5output_surf_botm_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                field->data[2*m+0] = E->sx[1][1][n+1];
-                field->data[2*m+1] = E->sx[1][2][n+1];
+                field->data[2*m+0] = E->sx[1][n+1];
+                field->data[2*m+1] = E->sx[2][n+1];
             }
         }
         dataset = H5Dopen(E->hdf5.file_id, "/surf/coord");
@@ -772,8 +772,8 @@ void h5output_surf_botm_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                field->data[2*m+0] = E->sx[1][1][n+1];
-                field->data[2*m+1] = E->sx[1][2][n+1];
+                field->data[2*m+0] = E->sx[1][n+1];
+                field->data[2*m+1] = E->sx[2][n+1];
             }
         }
         dataset = H5Dopen(E->hdf5.file_id, "/botm/coord");
@@ -851,8 +851,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap.V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap.V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/surf/velocity");
@@ -866,7 +866,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                scalar->data[m] = E->slice.shflux[1][n+1];
+                scalar->data[m] = E->slice.shflux[n+1];
             }
         }
 
@@ -876,9 +876,9 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
 
         /* choose either STD topo or pseudo-free-surf topo */
         if (E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[1];
+            topo = E->slice.freesurf;
         else
-            topo = E->slice.tpg[1];
+            topo = E->slice.tpg;
 
         /* topography data */
         for(i = 0; i < mx; i++)
@@ -921,8 +921,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap.V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap.V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/botm/velocity");
@@ -936,7 +936,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                scalar->data[m] = E->slice.bhflux[1][n+1];
+                scalar->data[m] = E->slice.bhflux[n+1];
             }
         }
         dataset = H5Dopen(file_id, "/botm/heatflux");
@@ -944,7 +944,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
         status = H5Dclose(dataset);
 
         /* topography data */
-        topo = E->slice.tpg[1];
+        topo = E->slice.tpg;
         for(i = 0; i < mx; i++)
         {
             for(j = 0; j < my; j++)
@@ -986,7 +986,7 @@ void h5output_have_coord(struct All_variables *E)
     if (E->output.horiz_avg == 1)
     {
         for(k = 0; k < mz; k++)
-            field->data[k] = E->sx[1][3][k+1];
+            field->data[k] = E->sx[3][k+1];
         dataset = H5Dopen(E->hdf5.file_id, "/horiz_avg/coord");
         status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
         status = H5Dclose(dataset);
@@ -1274,7 +1274,7 @@ void h5output_connectivity(struct All_variables *E)
 
         for(e = 0; e < nel; e++)
         {
-            ien = E->ien[1][e+1].node;
+            ien = E->ien[e+1].node;
             data[8*e+0] = ien[1]-1; /* TODO: subtract one? */
             data[8*e+1] = ien[2]-1;
             data[8*e+2] = ien[3]-1;
@@ -1537,21 +1537,25 @@ void h5output_meta(struct All_variables *E)
     dims[1] = 4;
     data = (double *)malloc((dims[0]*dims[1]) * sizeof(double));
 
+    /*
+    RKK:  !!!need to verify the following!!!
+    What is E->sphere.caps ? 1 for regional and 12 for full? 
+    */
     for(n = 1; n <= E->sphere.caps; n++)
     {
-        data[4*(n-1) + 0] = E->sphere.cap[n].theta[1];
-        data[4*(n-1) + 1] = E->sphere.cap[n].theta[2];
-        data[4*(n-1) + 2] = E->sphere.cap[n].theta[3];
-        data[4*(n-1) + 3] = E->sphere.cap[n].theta[4];
+        data[4*(n-1) + 0] = E->sphere.cap.theta[1];
+        data[4*(n-1) + 1] = E->sphere.cap.theta[2];
+        data[4*(n-1) + 2] = E->sphere.cap.theta[3];
+        data[4*(n-1) + 3] = E->sphere.cap.theta[4];
     }
     status = set_attribute_array(input, "theta", rank, dims, H5T_NATIVE_DOUBLE, data);
 
     for(n = 1; n <= E->sphere.caps; n++)
     {
-        data[4*(n-1) + 0] = E->sphere.cap[n].fi[1];
-        data[4*(n-1) + 1] = E->sphere.cap[n].fi[2];
-        data[4*(n-1) + 2] = E->sphere.cap[n].fi[3];
-        data[4*(n-1) + 3] = E->sphere.cap[n].fi[4];
+        data[4*(n-1) + 0] = E->sphere.cap.fi[1];
+        data[4*(n-1) + 1] = E->sphere.cap.fi[2];
+        data[4*(n-1) + 2] = E->sphere.cap.fi[3];
+        data[4*(n-1) + 3] = E->sphere.cap.fi[4];
     }
     status = set_attribute_array(input, "fi", rank, dims, H5T_NATIVE_DOUBLE, data);
 

@@ -152,7 +152,7 @@ static int find_intersection(double *x, double *y,
 }
 
 
-void full_coord_of_cap(struct All_variables *E, int m, int icap)
+void full_coord_of_cap(struct All_variables *E)
 {
   int i, j, k, lev, temp, elx, ely;
   int node, snode, ns, step;
@@ -209,39 +209,131 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
      each cap is about the same. */
   offset = 9.736/180.0*M_PI;
 
-  for (i=1;i<=4;i++)  {
-    E->sphere.cap[(i-1)*3+1].theta[1] = 0.0;
-    E->sphere.cap[(i-1)*3+1].theta[2] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+1].theta[3] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+1].theta[4] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+1].fi[1] = 0.0;
-    E->sphere.cap[(i-1)*3+1].fi[2] = (i-1)*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+1].fi[3] = (i-1)*M_PI/2.0 + M_PI/4.0;
-    E->sphere.cap[(i-1)*3+1].fi[4] = i*M_PI/2.0;
+  int capnum = E->parallel.me % 12;
 
-    E->sphere.cap[(i-1)*3+2].theta[1] = M_PI/4.0+offset;
-    E->sphere.cap[(i-1)*3+2].theta[2] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].theta[3] = 3*M_PI/4.0-offset;
-    E->sphere.cap[(i-1)*3+2].theta[4] = M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[1] = i*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[2] = i*M_PI/2.0 - M_PI/4.0;
-    E->sphere.cap[(i-1)*3+2].fi[3] = i*M_PI/2.0;
-    E->sphere.cap[(i-1)*3+2].fi[4] = i*M_PI/2.0 + M_PI/4.0;
-    }
-
-  for (i=1;i<=4;i++)  {
-    j = (i-1)*3;
-    if (i==1) j=12;
-    E->sphere.cap[j].theta[1] = M_PI/2.0;
-    E->sphere.cap[j].theta[2] = 3*M_PI/4.0-offset;
-    E->sphere.cap[j].theta[3] = M_PI;
-    E->sphere.cap[j].theta[4] = 3*M_PI/4.0-offset;
-    E->sphere.cap[j].fi[1] = (i-1)*M_PI/2.0 + M_PI/4.0;
-    E->sphere.cap[j].fi[2] = (i-1)*M_PI/2.0;
-    E->sphere.cap[j].fi[3] = 0.0;
-    E->sphere.cap[j].fi[4] = i*M_PI/2.0;
-    }
-
+  switch( capnum )
+  {
+    case 0:
+      E->sphere.cap.theta[1] = M_PI/2.0;
+      E->sphere.cap.theta[2] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[3] = M_PI;
+      E->sphere.cap.theta[4] = 3*M_PI/4.0-offset;
+      E->sphere.cap.fi[1] = M_PI/4.0;
+      E->sphere.cap.fi[2] = 0.0;
+      E->sphere.cap.fi[3] = 0.0;
+      E->sphere.cap.fi[4] = M_PI/2.0;
+      break;
+    case 1:
+      E->sphere.cap.theta[1] = 0.0;
+      E->sphere.cap.theta[2] = M_PI/4.0+offset;
+      E->sphere.cap.theta[3] = M_PI/2.0;
+      E->sphere.cap.theta[4] = M_PI/4.0+offset;
+      E->sphere.cap.fi[1] = 0.0;
+      E->sphere.cap.fi[2] = 0.0;
+      E->sphere.cap.fi[3] = M_PI/4.0;
+      E->sphere.cap.fi[4] = M_PI/2.0;
+      break;
+    case 2:
+      E->sphere.cap.theta[1] = M_PI/4.0+offset;
+      E->sphere.cap.theta[2] = M_PI/2.0;
+      E->sphere.cap.theta[3] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[4] = M_PI/2.0;
+      E->sphere.cap.fi[1] = M_PI/2.0;
+      E->sphere.cap.fi[2] = M_PI/2.0 - M_PI/4.0;
+      E->sphere.cap.fi[3] = M_PI/2.0;
+      E->sphere.cap.fi[4] = M_PI/2.0 + M_PI/4.0;
+      break;
+    case 3:
+      E->sphere.cap.theta[1] = M_PI/2.0;
+      E->sphere.cap.theta[2] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[3] = M_PI;
+      E->sphere.cap.theta[4] = 3*M_PI/4.0-offset;
+      E->sphere.cap.fi[1] = M_PI/2.0 + M_PI/4.0;
+      E->sphere.cap.fi[2] = M_PI/2.0;
+      E->sphere.cap.fi[3] = 0.0;
+      E->sphere.cap.fi[4] = M_PI;
+      break;
+    case 4:
+      E->sphere.cap.theta[1] = 0.0;
+      E->sphere.cap.theta[2] = M_PI/4.0+offset;
+      E->sphere.cap.theta[3] = M_PI/2.0;
+      E->sphere.cap.theta[4] = M_PI/4.0+offset;
+      E->sphere.cap.fi[1] = 0.0;
+      E->sphere.cap.fi[2] = M_PI/2.0;
+      E->sphere.cap.fi[3] = M_PI/2.0 + M_PI/4.0;
+      E->sphere.cap.fi[4] = M_PI;
+      break;
+    case 5:
+      E->sphere.cap.theta[1] = M_PI/4.0+offset;
+      E->sphere.cap.theta[2] = M_PI/2.0;
+      E->sphere.cap.theta[3] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[4] = M_PI/2.0;
+      E->sphere.cap.fi[1] = M_PI;
+      E->sphere.cap.fi[2] = M_PI - M_PI/4.0;
+      E->sphere.cap.fi[3] = M_PI;
+      E->sphere.cap.fi[4] = M_PI + M_PI/4.0;
+      break;
+    case 6:
+      E->sphere.cap.theta[1] = M_PI/2.0;
+      E->sphere.cap.theta[2] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[3] = M_PI;
+      E->sphere.cap.theta[4] = 3*M_PI/4.0-offset;
+      E->sphere.cap.fi[1] = 2.0*M_PI/2.0 + M_PI/4.0;
+      E->sphere.cap.fi[2] = 2.0*M_PI/2.0;
+      E->sphere.cap.fi[3] = 0.0;
+      E->sphere.cap.fi[4] = 1.5*M_PI;
+      break;
+    case 7:
+      E->sphere.cap.theta[1] = 0.0;
+      E->sphere.cap.theta[2] = M_PI/4.0+offset;
+      E->sphere.cap.theta[3] = M_PI/2.0;
+      E->sphere.cap.theta[4] = M_PI/4.0+offset;
+      E->sphere.cap.fi[1] = 0.0;
+      E->sphere.cap.fi[2] = M_PI;
+      E->sphere.cap.fi[3] = M_PI + M_PI/4.0;
+      E->sphere.cap.fi[4] = 3.0*M_PI/2.0;
+      break;
+    case 8:
+      E->sphere.cap.theta[1] = M_PI/4.0+offset;
+      E->sphere.cap.theta[2] = M_PI/2.0;
+      E->sphere.cap.theta[3] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[4] = M_PI/2.0;
+      E->sphere.cap.fi[1] = 3.0*M_PI/2.0;
+      E->sphere.cap.fi[2] = 3.0*M_PI/2.0 - M_PI/4.0;
+      E->sphere.cap.fi[3] = 3.0*M_PI/2.0;
+      E->sphere.cap.fi[4] = 3.0*M_PI/2.0 + M_PI/4.0;
+      break;
+    case 9:
+      E->sphere.cap.theta[1] = M_PI/2.0;
+      E->sphere.cap.theta[2] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[3] = M_PI;
+      E->sphere.cap.theta[4] = 3*M_PI/4.0-offset;
+      E->sphere.cap.fi[1] = 3.0*M_PI/2.0 + M_PI/4.0;
+      E->sphere.cap.fi[2] = 3.0*M_PI/2.0;
+      E->sphere.cap.fi[3] = 0.0;
+      E->sphere.cap.fi[4] = 2.0*M_PI;
+      break;
+    case 10:
+      E->sphere.cap.theta[1] = 0.0;
+      E->sphere.cap.theta[2] = M_PI/4.0+offset;
+      E->sphere.cap.theta[3] = M_PI/2.0;
+      E->sphere.cap.theta[4] = M_PI/4.0+offset;
+      E->sphere.cap.fi[1] = 0.0;
+      E->sphere.cap.fi[2] = 3.0*M_PI/2.0;
+      E->sphere.cap.fi[3] = 3.0*M_PI/2.0 + M_PI/4.0;
+      E->sphere.cap.fi[4] = 3.0*M_PI/2.0;
+      break;
+    case 11:
+      E->sphere.cap.theta[1] = M_PI/4.0+offset;
+      E->sphere.cap.theta[2] = M_PI/2.0;
+      E->sphere.cap.theta[3] = 3*M_PI/4.0-offset;
+      E->sphere.cap.theta[4] = M_PI/2.0;
+      E->sphere.cap.fi[1] = 2.0*M_PI;
+      E->sphere.cap.fi[2] = 2.0*M_PI - M_PI/4.0;
+      E->sphere.cap.fi[3] = 2.0*M_PI;
+      E->sphere.cap.fi[4] = 2.0*M_PI + M_PI/4.0;
+      break;
+  }
 
   /* 4 corners of the cap in Cartesian coordinates */
   /* the order of corners is: */
@@ -252,9 +344,9 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 #ifdef ALLOW_ELLIPTICAL
   for (i=1;i<=4;i++)    {	/* works for both elliptical and spherical */
     
-    x[i] = E->data.ra * sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
-    y[i] = E->data.ra * sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
-    z[i] = E->data.rc * cos(E->sphere.cap[icap].theta[i]);
+    x[i] = E->data.ra * sin(E->sphere.cap.theta[i])*cos(E->sphere.cap.fi[i]);
+    y[i] = E->data.ra * sin(E->sphere.cap.theta[i])*sin(E->sphere.cap.fi[i]);
+    z[i] = E->data.rc * cos(E->sphere.cap.theta[i]);
     
     center[0] += x[i];
     center[1] += y[i];
@@ -263,9 +355,9 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 #else
   /* only spherical */
   for (i=1;i<=4;i++)    {
-    x[i] = sin(E->sphere.cap[icap].theta[i])*cos(E->sphere.cap[icap].fi[i]);
-    y[i] = sin(E->sphere.cap[icap].theta[i])*sin(E->sphere.cap[icap].fi[i]);
-    z[i] = cos(E->sphere.cap[icap].theta[i]);
+    x[i] = sin(E->sphere.cap.theta[i])*cos(E->sphere.cap.fi[i]);
+    y[i] = sin(E->sphere.cap.theta[i])*sin(E->sphere.cap.fi[i]);
+    z[i] = cos(E->sphere.cap.theta[i]);
     center[0] += x[i];
     center[1] += y[i];
     center[2] += z[i];
@@ -436,14 +528,14 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 	   
 	   for (i=1; i<=lvnoz; i++) {
 	     /*   theta,fi,and r coordinates   */
-	     E->SX[lev][m][1][node] = theta;
-	     E->SX[lev][m][2][node] = fi;
-	     E->SX[lev][m][3][node] = rfac * E->sphere.R[lev][i];
+	     E->SX[lev][1][node] = theta;
+	     E->SX[lev][2][node] = fi;
+	     E->SX[lev][3][node] = rfac * E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
-	     E->X[lev][m][1][node] = E->data.ra * E->sphere.R[lev][i]*sint*cosf;
-	     E->X[lev][m][2][node] = E->data.ra * E->sphere.R[lev][i]*sint*sinf;
-	     E->X[lev][m][3][node] = E->data.rc * E->sphere.R[lev][i]*cost;
+	     E->X[lev][1][node] = E->data.ra * E->sphere.R[lev][i]*sint*cosf;
+	     E->X[lev][2][node] = E->data.ra * E->sphere.R[lev][i]*sint*sinf;
+	     E->X[lev][3][node] = E->data.rc * E->sphere.R[lev][i]*cost;
 	     
 	     node++;
 	   }
@@ -472,14 +564,14 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 	   
 	   for (i=1; i<=lvnoz; i++) {
 	     /*   theta,fi,and r coordinates   */
-	     E->SX[lev][m][1][node] = theta;
-	     E->SX[lev][m][2][node] = fi;
-	     E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+	     E->SX[lev][1][node] = theta;
+	     E->SX[lev][2][node] = fi;
+	     E->SX[lev][3][node] = E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
-	     E->X[lev][m][1][node]  = E->sphere.R[lev][i]*sint*cosf;
-	     E->X[lev][m][2][node]  = E->sphere.R[lev][i]*sint*sinf;
-	     E->X[lev][m][3][node]  = E->sphere.R[lev][i]*cost;
+	     E->X[lev][1][node]  = E->sphere.R[lev][i]*sint*cosf;
+	     E->X[lev][2][node]  = E->sphere.R[lev][i]*sint*sinf;
+	     E->X[lev][3][node]  = E->sphere.R[lev][i]*cost;
 	     
 	     node++;
 	   }
@@ -515,8 +607,5 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
   free ((void *)py    );
   free ((void *)qx    );
   free ((void *)qy    );
-
-
-  return;
 }
 

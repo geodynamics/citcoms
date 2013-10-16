@@ -768,10 +768,14 @@ void read_initial_settings(struct All_variables *E)
 
   E->data.therm_cond = E->data.therm_diff * E->data.density * E->data.Cp;
 
-  E->data.ref_temperature = E->control.Atemp * E->data.therm_diff
-    * E->data.ref_viscosity
-    / (E->data.density * E->data.grav_acc * E->data.therm_exp)
-    / (E->data.radius_km * E->data.radius_km * E->data.radius_km * 1e9);
+  input_float("reftemperature",&(E->data.ref_temperature),"2700.0",m);
+ 
+  if (E->control.stokes!=1) {
+     E->data.ref_viscosity = E->data.ref_temperature *
+         E->data.density * E->data.grav_acc * E->data.therm_exp *
+      E->data.radius_km * E->data.radius_km * E->data.radius_km * 1e9
+     /(E->control.Atemp * E->data.therm_diff);
+    }
 
   output_common_input(E);
   h5input_params(E);
@@ -922,17 +926,13 @@ void global_derived_values(struct All_variables *E)
 	fprintf(E->fp,"Problem has %i x %i x %i nodes per cap, %i nodes and %i elements in total\n",
                 E->mesh.nox, E->mesh.noz, E->mesh.noy, E->mesh.nno, E->mesh.nel);
     }
-   return;
 }
-
 
 /* ===================================
    Functions which set up details
    common to all problems follow ...
    ===================================  */
-
-void allocate_common_vars(E)
-     struct All_variables *E;
+void allocate_common_vars( struct All_variables *E )
 
 {
     void set_up_nonmg_aliases();
@@ -941,8 +941,6 @@ void allocate_common_vars(E)
 
     m=0;
     n=1;
-
- for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
   npno = E->lmesh.npno;
   nel  = E->lmesh.nel;
@@ -954,48 +952,47 @@ void allocate_common_vars(E)
   elx  = E->lmesh.elx;
   ely  = E->lmesh.ely;
 
-  E->P[j]        = (double *) malloc((npno+1)*sizeof(double));
-  E->T[j]        = (double *) malloc((nno+1)*sizeof(double));
-  E->NP[j]       = (float *) malloc((nno+1)*sizeof(float));
-  E->buoyancy[j] = (double *) malloc((nno+1)*sizeof(double));
+  E->P        = (double *) malloc((npno+1)*sizeof(double));
+  E->T        = (double *) malloc((nno+1)*sizeof(double));
+  E->NP       = (float *) malloc((nno+1)*sizeof(float));
+  E->buoyancy = (double *) malloc((nno+1)*sizeof(double));
 
-  E->gstress[j] = (float *) malloc((6*nno+1)*sizeof(float));
+  E->gstress = (float *) malloc((6*nno+1)*sizeof(float));
   // TWB do we need this anymore XXX
   //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
   for(i=1;i<=E->mesh.nsd;i++)
-      E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
+      E->sphere.cap.TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
-  E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.divg[j]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.vort[j]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.shflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.bhflux[j]    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.divg     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.vort     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.shflux    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.bhflux    = (float *)malloc((nsf+2)*sizeof(float));
   /*  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf) */
-  E->slice.freesurf[j]    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.freesurf    = (float *)malloc((nsf+2)*sizeof(float));
 
-  E->mat[j] = (int *) malloc((nel+2)*sizeof(int));
-  E->VIP[j] = (float *) malloc((nel+2)*sizeof(float));
+  E->mat = (int *) malloc((nel+2)*sizeof(int));
+  E->VIP = (float *) malloc((nel+2)*sizeof(float));
 
-  E->heating_adi[j]    = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_visc[j]   = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_latent[j] = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_adi    = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_visc   = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_latent = (double *) malloc((nel+1)*sizeof(double));
 
   /* lump mass matrix for the energy eqn */
-  E->TMass[j] = (double *) malloc((nno+1)*sizeof(double));
+  E->TMass = (double *) malloc((nno+1)*sizeof(double));
 
   /* nodal mass */
-  E->NMass[j] = (double *) malloc((nno+1)*sizeof(double));
+  E->NMass = (double *) malloc((nno+1)*sizeof(double));
 
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);
 
-  E->sien[j]         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
-  E->surf_element[j] = (int *) malloc((nxyz+2)*sizeof(int));
-  E->surf_node[j]    = (int *) malloc((nsf+2)*sizeof(int));
+  E->sien         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
+  E->surf_element = (int *) malloc((nxyz+2)*sizeof(int));
+  E->surf_node    = (int *) malloc((nsf+2)*sizeof(int));
 
-  }         /* end for cap j  */
 
   /* density field */
   E->rho      = (double *) malloc((nno+1)*sizeof(double));
@@ -1009,7 +1006,6 @@ void allocate_common_vars(E)
 
  for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
   E->sphere.R[i] = (double *)  malloc((E->lmesh.NOZ[i]+1)*sizeof(double));
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     nno  = E->lmesh.NNO[i];
     npno = E->lmesh.NPNO[i];
     nel  = E->lmesh.NEL[i];
@@ -1021,34 +1017,33 @@ void allocate_common_vars(E)
     snel=E->lmesh.SNEL[i];
 
     for(d=1;d<=E->mesh.nsd;d++)   {
-      E->X[i][j][d]  = (double *)  malloc((nno+1)*sizeof(double));
-      E->SX[i][j][d]  = (double *)  malloc((nno+1)*sizeof(double));
+      E->X[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
+      E->SX[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
       }
 
     for(d=0;d<=3;d++)
-      E->SinCos[i][j][d]  = (double *)  malloc((nno+1)*sizeof(double));
+      E->SinCos[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
 
-    E->IEN[i][j] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
-    E->EL[i][j]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
-    E->sphere.area1[i][j] = (double *) malloc((snel+1)*sizeof(double));
+    E->IEN[i] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
+    E->EL[i]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
+    E->sphere.area1[i] = (double *) malloc((snel+1)*sizeof(double));
     for (k=1;k<=4;k++)
-      E->sphere.angle1[i][j][k] = (double *) malloc((snel+1)*sizeof(double));
+      E->sphere.angle1[i][k] = (double *) malloc((snel+1)*sizeof(double));
 
-    E->GNX[i][j] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
-    E->GDA[i][j] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
+    E->GNX[i]=(struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
+    E->GDA[i] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
-    E->MASS[i][j]     = (double *) malloc((nno+1)*sizeof(double));
-    E->ECO[i][j] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
+    E->MASS[i]     = (double *) malloc((nno+1)*sizeof(double));
+    E->ECO[i] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
-    E->TWW[i][j] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
+    E->TWW[i] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
 
     for(d=1;d<=E->mesh.nsd;d++)
       for(l=1;l<=E->lmesh.NNO[i];l++)  {
-        E->SX[i][j][d][l] = 0.0;
-        E->X[i][j][d][l] = 0.0;
+        E->SX[i][d][l] = 0.0;
+        E->X[i][d][l] = 0.0;
         }
 
-    }
   }
 
  for(i=0;i<=E->output.llmax;i++)
@@ -1057,7 +1052,6 @@ void allocate_common_vars(E)
 
 
  for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
     nno  = E->lmesh.NNO[i];
     npno = E->lmesh.NPNO[i];
@@ -1069,107 +1063,91 @@ void allocate_common_vars(E)
     ely = E->lmesh.ELY[i];
 
     nxyz = elx*ely;
-    E->CC[i][j] =(struct CC *)  malloc((1)*sizeof(struct CC));
-    E->CCX[i][j]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
+    E->CC[i] =(struct CC *)  malloc((1)*sizeof(struct CC));
+    E->CCX[i]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
 
-    E->elt_del[i][j] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
+    E->elt_del[i] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
 
     if(E->control.inv_gruneisen != 0)
-        E->elt_c[i][j] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
+        E->elt_c[i] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
 
-    E->EVI[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-    E->BPI[i][j] = (double *) malloc((npno+1)*sizeof(double));
+    E->EVI[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+    E->BPI[i] = (double *) malloc((npno+1)*sizeof(double));
 
-    E->ID[i][j]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
-    E->VI[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
-    E->NODE[i][j] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
+    E->ID[i]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
+    E->VI[i]  = (float *)        malloc((nno+1)*sizeof(float));
+    E->NODE[i] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
     nxyz = max(nox*noz,nox*noy);
     nxyz = 2*max(nxyz,noz*noy);
     nozl = max(noy,nox*2);
 
-
-
-    E->parallel.EXCHANGE_sNODE[i][j] = (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
-    E->parallel.NODE[i][j]   = (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
-    E->parallel.EXCHANGE_NODE[i][j]= (struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
-    E->parallel.EXCHANGE_ID[i][j] = (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
+    E->parallel.EXCHANGE_sNODE[i] = (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
+    E->parallel.NODE[i]   = (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
+    E->parallel.EXCHANGE_NODE[i]=(struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
+    E->parallel.EXCHANGE_ID[i] = (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
 
     for(l=1;l<=E->lmesh.NNO[i];l++)  {
-      E->NODE[i][j][l] = (INTX | INTY | INTZ);  /* and any others ... */
-      E->VI[i][j][l] = 1.0;
+      E->NODE[i][l] = (INTX | INTY | INTZ);  /* and any others ... */
+      E->VI[i][l] = 1.0;
       }
-
-
-    }         /* end for cap and i & j  */
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
  if(E->viscosity.allow_anisotropic_viscosity){ /* any anisotropic
 						  viscosity */
    for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
        nel  = E->lmesh.NEL[i];
        nno  = E->lmesh.NNO[i];
-       E->EVI2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->avmode[i][j] = (unsigned char *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(unsigned char));
-       E->EVIn1[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->EVIn2[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->EVIn3[i][j] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVI2[i]=(float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->avmode[i]=(unsigned char *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(unsigned char));
+       E->EVIn1[i]=(float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn2[i]=(float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn3[i]=(float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
        
-       E->VI2[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn1[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn2[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn3[i][j]  = (float *)        malloc((nno+1)*sizeof(float));
-       if((!(E->EVI2[i][j]))||(!(E->VI2[i][j]))||
-	  (!(E->EVIn1[i][j]))||(!(E->EVIn2[i][j]))||(!(E->EVIn3[i][j]))||
-	  (!(E->VIn1[i][j]))||(!(E->VIn2[i][j]))||(!(E->VIn3[i][j]))){
+       E->VI2[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn1[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn2[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn3[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       if((!(E->EVI2[i]))||(!(E->VI2[i]))||
+	  (!(E->EVIn1[i]))||(!(E->EVIn2[i]))||(!(E->EVIn3[i]))||
+	  (!(E->VIn1[i]))||(!(E->VIn2[i]))||(!(E->VIn3[i]))){
 	 fprintf(stderr, "Error: Cannot allocate anisotropic visc memory, rank=%i\n",
 		 E->parallel.me);
 	 parallel_process_termination();
        }
-     }
    E->viscosity.anisotropic_viscosity_init = FALSE;
  }
 #endif
 
- for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-
   for(k=1;k<=E->mesh.nsd;k++)
     for(i=1;i<=E->lmesh.nno;i++)
-      E->sphere.cap[j].TB[k][i] = 0.0;
+      E->sphere.cap.TB[k][i] = 0.0;
 
   for(i=1;i<=E->lmesh.nno;i++)
-     E->T[j][i] = 0.0;
+     E->T[i] = 0.0;
 
   for(i=1;i<=E->lmesh.nel;i++)   {
-      E->mat[j][i]=1;
-      E->VIP[j][i]=1.0;
+      E->mat[i]=1;
+      E->VIP[i]=1.0;
 
-      E->heating_adi[j][i] = 0;
-      E->heating_visc[j][i] = 0;
-      E->heating_latent[j][i] = 1.0;
+      E->heating_adi[i] = 0;
+      E->heating_visc[i] = 0;
+      E->heating_latent[i] = 1.0;
   }
 
   for(i=1;i<=E->lmesh.npno;i++)
-      E->P[j][i] = 0.0;
+      E->P[i] = 0.0;
 
   mat_prop_allocate(E);
   phase_change_allocate(E);
   set_up_nonmg_aliases(E,j);
 
-  }         /* end for cap j  */
-
   if (strcmp(E->output.format, "hdf5") == 0)
       h5output_allocate_memory(E);
-
-  return;
-  }
+}
 
 /*  =========================================================  */
-
-void allocate_velocity_vars(E)
-     struct All_variables *E;
-
+void allocate_velocity_vars( struct All_variables *E )
 {
     int m,n,i,j,k,l;
 
@@ -1180,51 +1158,43 @@ void allocate_velocity_vars(E)
 
  m=0;
  n=1;
-  for (j=1;j<=E->sphere.caps_per_proc;j++)   {
     E->lmesh.nnov = E->lmesh.nno;
     E->lmesh.neq = E->lmesh.nnov * E->mesh.nsd;
 
-    E->temp[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->temp1[j] = (double *) malloc(E->lmesh.neq*sizeof(double));
-    E->F[j] = (double *) malloc(E->lmesh.neq*sizeof(double));
-    E->U[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->u1[j] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
+    E->temp = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
+    E->temp1 = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->F = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->U = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
+    E->u1 = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
 
 
     for(i=1;i<=E->mesh.nsd;i++) {
-      E->sphere.cap[j].V[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap[j].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap[j].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap.V[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap.VB[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap.Vprev[i]=(float *) malloc((E->lmesh.nnov+1)*sizeof(float));
     }
 
     for(i=0;i<E->lmesh.neq;i++)
-      E->U[j][i] = E->temp[j][i] = E->temp1[j][i] = 0.0;
-
+      E->U[i] = E->temp[i] = E->temp1[i] = 0.0;
 
     for(k=1;k<=E->mesh.nsd;k++)
       for(i=1;i<=E->lmesh.nnov;i++)
-        E->sphere.cap[j].VB[k][i] = 0.0;
+        E->sphere.cap.VB[k][i] = 0.0;
 
-  }       /* end for cap j */
-
-  for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)   {
+  for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++) {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
 
-      E->BI[l][j] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
+      E->BI[l] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
           E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
-      E->zero_resid[l][j] = (int *) malloc((k+2)*sizeof(int));
-      E->parallel.Skip_id[l][j] = (int *) malloc((k+2)*sizeof(int));
+      E->zero_resid[l] = (int *) malloc((k+2)*sizeof(int));
+      E->parallel.Skip_id[l] = (int *) malloc((k+2)*sizeof(int));
 
       for(i=0;i<E->lmesh.NEQ[l];i++) {
-         E->BI[l][j][i]=0.0;
+         E->BI[l][i]=0.0;
          }
-
-      }   /* end for j & l */
-
-  return;
- }
+  }   /* end for j & l */
+}
 
 
 /*  =========================================================  */
@@ -1325,48 +1295,35 @@ void global_default_values(E)
   return;
 }
 
+void check_bc_consistency( struct All_variables *E )
+{ 
+   int i,j,lev;
 
-/* =============================================================
-   ============================================================= */
-
-void check_bc_consistency(E)
-     struct All_variables *E;
-
-{ int i,j,lev;
-
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     for(i=1;i<=E->lmesh.nno;i++)    {
-      if ((E->node[j][i] & VBX) && (E->node[j][i] & SBX))
+      if ((E->node[i] & VBX) && (E->node[i] & SBX))
         printf("Inconsistent x velocity bc at %d\n",i);
-      if ((E->node[j][i] & VBZ) && (E->node[j][i] & SBZ))
+      if ((E->node[i] & VBZ) && (E->node[i] & SBZ))
         printf("Inconsistent z velocity bc at %d\n",i);
-      if ((E->node[j][i] & VBY) && (E->node[j][i] & SBY))
+      if ((E->node[i] & VBY) && (E->node[i] & SBY))
         printf("Inconsistent y velocity bc at %d\n",i);
-      if ((E->node[j][i] & TBX) && (E->node[j][i] & FBX))
+      if ((E->node[i] & TBX) && (E->node[i] & FBX))
         printf("Inconsistent x temperature bc at %d\n",i);
-      if ((E->node[j][i] & TBZ) && (E->node[j][i] & FBZ))
+      if ((E->node[i] & TBZ) && (E->node[i] & FBZ))
         printf("Inconsistent z temperature bc at %d\n",i);
-      if ((E->node[j][i] & TBY) && (E->node[j][i] & FBY))
+      if ((E->node[i] & TBY) && (E->node[i] & FBY))
         printf("Inconsistent y temperature bc at %d\n",i);
       }
-    }          /* end for j */
 
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-      for(i=1;i<=E->lmesh.NNO[lev];i++)        {
-        if ((E->NODE[lev][j][i] & VBX) && (E->NODE[lev][j][i]  & SBX))
-          printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
-        if ((E->NODE[lev][j][i] & VBZ) && (E->NODE[lev][j][i]  & SBZ))
-          printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
-        if ((E->NODE[lev][j][i] & VBY) && (E->NODE[lev][j][i]  & SBY))
-          printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
-        /* Tbc's not applicable below top level */
-        }
-
-    }   /* end for  j and lev */
-
-  return;
-
+    for(i=1;i<=E->lmesh.NNO[lev];i++) {
+      if ((E->NODE[lev][i] & VBX) && (E->NODE[lev][i]  & SBX))
+        printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
+      if ((E->NODE[lev][i] & VBZ) && (E->NODE[lev][i]  & SBZ))
+        printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
+      if ((E->NODE[lev][i] & VBY) && (E->NODE[lev][i]  & SBY))
+        printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
+      /* Tbc's not applicable below top level */
+      }
 }
 
 void set_up_nonmg_aliases(E,j)
@@ -1428,8 +1385,7 @@ void record(E,string)
 
 
 /* This function is replaced by CitcomS.Components.IC.launch()*/
-void common_initial_fields(E)
-    struct All_variables *E;
+void common_initial_fields( struct All_variables *E )
 {
     void initial_pressure();
     void initial_velocity();
@@ -1438,40 +1394,28 @@ void common_initial_fields(E)
     initial_pressure(E);
     initial_velocity(E);
     initial_viscosity(E);
-
-    return;
-
 }
 
 /* ========================================== */
-
-void initial_pressure(E)
-     struct All_variables *E;
+void initial_pressure( struct All_variables *E )
 {
-    int i,m;
-    report(E,"Initialize pressure field");
+  int i,m;
+  report(E,"Initialize pressure field");
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=E->lmesh.npno;i++)
-      E->P[m][i]=0.0;
-
-  return;
+  for(i=1;i<=E->lmesh.npno;i++)
+    E->P[i]=0.0;
 }
 
-void initial_velocity(E)
-     struct All_variables *E;
+void initial_velocity( struct All_variables *E )
 {
-    int i,m;
-    report(E,"Initialize velocity field");
+  int i,m;
+  report(E,"Initialize velocity field");
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(i=1;i<=E->lmesh.nnov;i++)   {
-        E->sphere.cap[m].V[1][i]=0.0;
-        E->sphere.cap[m].V[2][i]=0.0;
-        E->sphere.cap[m].V[3][i]=0.0;
-        }
-
-    return;
+  for(i=1;i<=E->lmesh.nnov;i++)   {
+    E->sphere.cap.V[1][i]=0.0;
+    E->sphere.cap.V[2][i]=0.0;
+    E->sphere.cap.V[3][i]=0.0;
+  }
 }
 
 

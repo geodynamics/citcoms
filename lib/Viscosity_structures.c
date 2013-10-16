@@ -44,7 +44,8 @@ void read_visc_layer_file(struct All_variables *E);
 void read_visc_param_from_file(struct All_variables *E,
                                const char *param, float *var,
                                FILE *fp);
-static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
+static void apply_low_visc_wedge_channel( struct All_variables *E, 
+                                          float *evisc );
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
 void parallel_process_termination();
@@ -282,7 +283,7 @@ void allocate_visc_vars(struct All_variables *E)
 void get_system_viscosity(E,propogate,evisc,visc)
      struct All_variables *E;
      int propogate;
-     float **evisc,**visc;
+     float *evisc,*visc;
 {
     void visc_from_mat();
     void visc_from_T();
@@ -339,30 +340,26 @@ void get_system_viscosity(E,propogate,evisc,visc)
     /* min/max cut-off */
 
     if(E->viscosity.MAX) {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(i=1;i<=E->lmesh.nel;i++)
-                for(j=1;j<=vpts;j++)
-                    if(evisc[m][(i-1)*vpts + j] > E->viscosity.max_value)
-                        evisc[m][(i-1)*vpts + j] = E->viscosity.max_value;
+        for(i=1;i<=E->lmesh.nel;i++)
+            for(j=1;j<=vpts;j++)
+                if(evisc[(i-1)*vpts + j] > E->viscosity.max_value)
+                    evisc[(i-1)*vpts + j] = E->viscosity.max_value;
     }
 
     if(E->viscosity.MIN) {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(i=1;i<=E->lmesh.nel;i++)
-                for(j=1;j<=vpts;j++)
-                    if(evisc[m][(i-1)*vpts + j] < E->viscosity.min_value)
-                        evisc[m][(i-1)*vpts + j] = E->viscosity.min_value;
+        for(i=1;i<=E->lmesh.nel;i++)
+            for(j=1;j<=vpts;j++)
+                if(evisc[(i-1)*vpts + j] < E->viscosity.min_value)
+                    evisc[(i-1)*vpts + j] = E->viscosity.min_value;
     }
 
     if (E->control.verbose)  {
       fprintf(E->fp_out,"output_evisc \n");
-      for(m=1;m<=E->sphere.caps_per_proc;m++) {
-        fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[m]);
+        fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid);
       for(i=1;i<=E->lmesh.nel;i++)
-          fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[m][i],evisc[m][(i-1)*vpts+1],evisc[m][(i-1)*vpts+7]);
+          fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[i],evisc[(i-1)*vpts+1],evisc[(i-1)*vpts+7]);
       }
       fflush(E->fp_out);
-    }
     /* interpolate from gauss quadrature points to node points for output */
     visc_from_gint_to_nodes(E,evisc,visc,E->mesh.levmax);
 
@@ -403,30 +400,23 @@ void initial_viscosity(struct All_variables *E)
 
     if (E->viscosity.FROM_SYSTEM)
         get_system_viscosity(E,1,E->EVI[E->mesh.levmax],E->VI[E->mesh.levmax]);
-
-    return;
 }
-
 
 void visc_from_mat(E,EEta)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
 {
 
     int i,m,jj;
     if(E->control.mat_control){	/* use pre-factor even without temperature dependent viscosity */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nel;i++)
 	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-	    EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1]*E->VIP[m][i];
+	    EEta[ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[i]-1]*E->VIP[i];
      }else{
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nel;i++)
 	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-	    EEta[m][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[m][i]-1];
+	    EEta[ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[i]-1];
     }
-
-    return;
 }
 
 
@@ -471,14 +461,11 @@ void read_visc_layer_file(struct All_variables *E)
         read_visc_param_from_file(E, "pdepv_b", E->viscosity.pdepv_b, fp);
         read_visc_param_from_file(E, "pdepv_y", E->viscosity.pdepv_y, fp);
     }
-
-    return;
 }
-
 
 void visc_from_T(E,EEta,propogate)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
      int propogate;
 {
     int m,i,k,l,z,jj,kk;
@@ -497,17 +484,16 @@ void visc_from_T(E,EEta,propogate)
     switch (E->viscosity.RHEOL)   {
     case 1:
         /* eta = N_0 exp( E * (T_0 - T))  */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 
                 if(E->control.mat_control==0)
                     tempa = E->viscosity.N0[l];
                 else 
-                    tempa = E->viscosity.N0[l]*E->VIP[m][i];
+                    tempa = E->viscosity.N0[l]*E->VIP[i];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -516,7 +502,7 @@ void visc_from_T(E,EEta,propogate)
                         temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( E->viscosity.E[l] * (E->viscosity.T[l] - temp));
 
                 }
@@ -525,17 +511,16 @@ void visc_from_T(E,EEta,propogate)
 
     case 2:
         /* eta = N_0 exp(-T/T_0) */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 
                 if(E->control.mat_control==0)
                     tempa = E->viscosity.N0[l];
                 else 
-                    tempa = E->viscosity.N0[l]*E->VIP[m][i];
+                    tempa = E->viscosity.N0[l]*E->VIP[i];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -544,7 +529,7 @@ void visc_from_T(E,EEta,propogate)
                         temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( -temp / E->viscosity.T[l]);
 
                 }
@@ -557,16 +542,15 @@ void visc_from_T(E,EEta,propogate)
 	   where T is normalized to be within 0...1
 
 	 */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 		if(E->control.mat_control) /* switch moved up here TWB */
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -578,7 +562,7 @@ void visc_from_T(E,EEta,propogate)
 		      TT[kk]=max(TT[kk],zero);
 		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
-		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
 			   - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
                 }
@@ -587,17 +571,16 @@ void visc_from_T(E,EEta,propogate)
 
     case 4:
         /* eta = N_0 exp( (E + (1-z)Z_0) / (T+T_0) ) */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 		if(E->control.mat_control) /* moved this up here TWB */
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                    TT[kk] = E->T[E->ien[i].node[kk]];
+                    zz[kk] = (1.-E->sx[3][E->ien[i].node[kk]]);
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -610,7 +593,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
 
-		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
 			   / (E->viscosity.T[l]+temp) );
 
@@ -623,13 +606,12 @@ void visc_from_T(E,EEta,propogate)
 
         /* when mat_control=0, same as rheol 3,
            when mat_control=1, applying viscosity cut-off before mat_control */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
                 tempa = E->viscosity.N0[l];
                 /* fprintf(stderr,"\nINSIDE visc_from_T, l=%d, tempa=%g",l+1,tempa);*/
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -640,7 +622,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
                     if(E->control.mat_control==0){
-                        EEta[m][ (i-1)*vpts + jj ] = tempa*
+                        EEta[ (i-1)*vpts + jj ] = tempa*
                             exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
                                  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    }else{
@@ -655,7 +637,7 @@ void visc_from_T(E,EEta,propogate)
                            if(visc2 < E->viscosity.min_value)
                                visc2 = E->viscosity.min_value;
                          }
-                       EEta[m][ (i-1)*vpts + jj ] = E->VIP[m][i]*visc2;
+                       EEta[ (i-1)*vpts + jj ] = E->VIP[i]*visc2;
                       }
 
                 }
@@ -668,19 +650,18 @@ void visc_from_T(E,EEta,propogate)
            eta = N_0 exp(E(T_0-T) + (1-z) Z_0 )
         */
 
-        for(m=1;m <= E->sphere.caps_per_proc;m++)
 	  for(i=1;i <= nel;i++)   {
 
-	    l = E->mat[m][i] - 1;
+	    l = E->mat[i] - 1;
 
 	    if(E->control.mat_control)
-	      tempa = E->viscosity.N0[l] * E->VIP[m][i];
+	      tempa = E->viscosity.N0[l] * E->VIP[i];
 	    else
 	      tempa = E->viscosity.N0[l];
 
 	    for(kk=1;kk<=ends;kk++) {
-	      TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-	      zz[kk] = (1.0 - E->sx[m][3][E->ien[m][i].node[kk]]);
+	      TT[kk] = E->T[E->ien[i].node[kk]];
+	      zz[kk] = (1.0 - E->sx[3][E->ien[i].node[kk]]);
 	    }
 
 	    for(jj=1;jj <= vpts;jj++) {
@@ -690,7 +671,7 @@ void visc_from_T(E,EEta,propogate)
 		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
 		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	      }
-	      EEta[m][ (i-1)*vpts + jj ] = tempa*
+	      EEta[ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
 	      /*
@@ -731,18 +712,17 @@ void visc_from_T(E,EEta,propogate)
                 - [viscE + (1-r_CMB)*viscZ] / (viscT+1) }
         */
 
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-	      l = E->mat[m][i] - 1;
+	      l = E->mat[i] - 1;
 
 		if(E->control.mat_control)
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                    TT[kk] = E->T[E->ien[i].node[kk]];
+                    zz[kk] = (1.-E->sx[3][E->ien[i].node[kk]]);
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -754,7 +734,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
 
-                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
                              / (E->viscosity.T[l] + temp)
                              - (E->viscosity.E[l] +
@@ -781,17 +761,16 @@ void visc_from_T(E,EEta,propogate)
         */
 
         dr = E->sphere.ro - E->sphere.ri;
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 		if(E->control.mat_control) 
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-		  zz[kk] = E->sx[m][3][E->ien[m][i].node[kk]]; /* radius */
+		  TT[kk] = E->T[E->ien[i].node[kk]];
+		  zz[kk] = E->sx[3][E->ien[i].node[kk]]; /* radius */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -807,9 +786,9 @@ void visc_from_T(E,EEta,propogate)
 		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
 				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
-		      EEta[m][ (i-1)*vpts + jj ] = visc1;
+		      EEta[ (i-1)*vpts + jj ] = visc1;
 		    else
-		      EEta[m][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
+		      EEta[ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
                 }
             }
         break;
@@ -819,21 +798,20 @@ void visc_from_T(E,EEta,propogate)
 	   like option 3, but T is allow to vary beyond 1 
 
 	 */
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 		if(E->control.mat_control) /* switch moved up here TWB */
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
                 for(kk=1;kk<=ends;kk++) 
-		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
 		
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
                     for(kk=1;kk<=ends;kk++)
 		      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
-		    EEta[m][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
 			   - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
                 }
@@ -851,17 +829,16 @@ void visc_from_T(E,EEta,propogate)
         */
 
         dr = E->sphere.ro - E->sphere.ri;
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=nel;i++)   {
-                l = E->mat[m][i] - 1;
+                l = E->mat[i] - 1;
 		if(E->control.mat_control) 
-		  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+		  tempa = E->viscosity.N0[l] * E->VIP[i];
 		else
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
-		  zz[kk] = E->sx[m][3][E->ien[m][i].node[kk]]; /* radius */
+		  TT[kk] = E->T[E->ien[i].node[kk]];
+		  zz[kk] = E->sx[3][E->ien[i].node[kk]]; /* radius */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -874,9 +851,9 @@ void visc_from_T(E,EEta,propogate)
 		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
 				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
-		      EEta[m][ (i-1)*vpts + jj ] = visc1;
+		      EEta[ (i-1)*vpts + jj ] = visc1;
 		    else
-		      EEta[m][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
+		      EEta[ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
                 }
             }
         break;
@@ -896,16 +873,9 @@ void visc_from_T(E,EEta,propogate)
         parallel_process_termination();
         break;
     }
-
-
-    return;
 }
 
-
-void visc_from_S(E,EEta,propogate)
-     struct All_variables *E;
-     float **EEta;
-     int propogate;
+void visc_from_S( struct All_variables *E, float *EEta, int propogate )
 {
     float one,two,scale,stress_magnitude,depth,exponent1;
     float *eedot;
@@ -920,11 +890,10 @@ void visc_from_S(E,EEta,propogate)
     one = 1.0;
     two = 2.0;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
       if(E->viscosity.sdepv_visited){
 	
         /* get second invariant for all elements */
-        strain_rate_2_inv(E,m,eedot,1);
+        strain_rate_2_inv(E,eedot,1);
       }else{
 	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
 	  eedot[e] = 1.0;
@@ -937,15 +906,14 @@ void visc_from_S(E,EEta,propogate)
 	}
 
         for(e=1;e<=nel;e++)   {
-            exponent1= one/E->viscosity.sdepv_expt[E->mat[m][e]-1];
+            exponent1= one/E->viscosity.sdepv_expt[E->mat[e]-1];
             scale=pow(eedot[e],exponent1-one);
             for(jj=1;jj<=vpts;jj++)
-                EEta[m][(e-1)*vpts + jj] = scale*pow(EEta[m][(e-1)*vpts+jj],exponent1);
+                EEta[(e-1)*vpts + jj] = 
+                  scale*pow(EEta[(e-1)*vpts+jj],exponent1);
         }
-    }
 
     free ((void *)eedot);
-    return;
 }
 
 void visc_from_P(E,EEta) /* "plasticity" implementation
@@ -994,7 +962,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 
 			 */
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
 {
   float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
   int m,e,l,z,jj,kk;
@@ -1008,17 +976,14 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
   
   eedot = (float *) malloc((2+nel)*sizeof(float));
   
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    
     if(E->viscosity.pdepv_visited){
       if(E->viscosity.psrw)
-	strain_rate_2_inv(E,m,eedot,0);	/* get second invariant for all elements, don't take sqrt */
+	strain_rate_2_inv(E,eedot,0);	/* get second invariant for all elements, don't take sqrt */
       else
-	strain_rate_2_inv(E,m,eedot,1);	/* get second invariant for all elements */
+	strain_rate_2_inv(E,eedot,1);	/* get second invariant for all elements */
     }else{
       for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
 	eedot[e] = 1.0;
-      if(m == E->sphere.caps_per_proc)
 	E->viscosity.pdepv_visited = 1;
       if((E->parallel.me == 0)&&(E->control.verbose)){
 	fprintf(stderr,"num mat: %i a: %g b: %g y: %g %s\n",
@@ -1032,10 +997,10 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
       */
       for(e=1;e <= nel;e++)   {	/* loop through all elements */
 	
-	l = E->mat[m][e] -1 ;	/* material of this element */
+	l = E->mat[e] -1 ;	/* material of this element */
 	
 	for(kk=1;kk <= ends;kk++) /* nodal depths */
-	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); /* for depth, zz = 1 - r */
+	  zz[kk] = (1.0 - E->sx[3][E->ien[e].node[kk]]); /* for depth, zz = 1 - r */
 	
 	for(jj=1;jj <= vpts;jj++){ /* loop through integration points */
 	  
@@ -1053,24 +1018,24 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
 	  if(E->viscosity.pdepv_eff){
 	    /* two dashpots in series */
-	    eta_new  = 1.0/(1.0/EEta[m][ (e-1)*vpts + jj ] + 1.0/eta_p);
+	    eta_new  = 1.0/(1.0/EEta[ (e-1)*vpts + jj ] + 1.0/eta_p);
 	  }else{
 	    /* min viscosities*/
-	    eta_new  = min(EEta[m][ (e-1)*vpts + jj ], eta_p);
+	    eta_new  = min(EEta[ (e-1)*vpts + jj ], eta_p);
 	  }
 	  //fprintf(stderr,"z: %11g mat: %i a: %11g b: %11g y: %11g ee: %11g tau: %11g eta_p: %11g eta_new: %11g eta_old: %11g\n",
 	  //	  zzz,l,E->viscosity.pdepv_a[l], E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],
 	  //	  eedot[e],tau,eta_p,eta_new,EEta[m][(e-1)*vpts + jj]);
-	  EEta[m][(e-1)*vpts + jj] = eta_new;
+	  EEta[(e-1)*vpts + jj] = eta_new;
 	} /* end integration point loop */
       }	/* end element loop */
     }else{
       /* strain-rate weakening, steady state solution */
       for(e=1;e <= nel;e++)   {	/* loop through all elements */
 	
-	l = E->mat[m][e] -1 ;	
+	l = E->mat[e] -1 ;	
 	for(kk=1;kk <= ends;kk++)
-	  zz[kk] = (1.0 - E->sx[m][3][E->ien[m][e].node[kk]]); 
+	  zz[kk] = (1.0 - E->sx[3][E->ien[e].node[kk]]); 
 	for(jj=1;jj <= vpts;jj++){ 
 	  zzz = 0.0;
 	  for(kk=1;kk<=ends;kk++)
@@ -1081,21 +1046,19 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  tau2 = tau * tau;
 	  if(tau < 1e10){
 	    /*  */
-	    eta_old = EEta[m][ (e-1)*vpts + jj ];
+	    eta_old = EEta[ (e-1)*vpts + jj ];
 	    eta_old2 = eta_old * eta_old;
 	    /* effectiev viscosity */
 	    eta_new = (tau2 * eta_old)/(tau2 + 2.0 * eta_old2 * eedot[e]);
 	    //fprintf(stderr,"SRW: a %11g b %11g y %11g z %11g sy: %11g e2: %11g eold: %11g enew: %11g logr: %.3f\n",
 	    //	    E->viscosity.pdepv_a[l],E->viscosity.pdepv_b[l],E->viscosity.pdepv_y[l],zzz,tau,eedot[e],eta_old,eta_new,
 	    //	    log10(eta_new/eta_old));
-	    EEta[m][(e-1)*vpts + jj] = eta_new;
+	    EEta[(e-1)*vpts + jj] = eta_new;
 	  }
 	}
       }
     }
-  } /* end caps loop */
   free ((void *)eedot);
-  return;
 }
 
 /*
@@ -1105,9 +1068,7 @@ mean average from the tracer composition, assuming two flavors and
 compositions between zero and unity
 
 */
-void visc_from_C( E, EEta)
-     struct All_variables *E;
-     float **EEta;
+void visc_from_C( struct All_variables *E, float *EEta )
 {
   double vmean,cc_loc[10],CC[10][9],cbackground;
   int m,l,z,jj,kk,i,p,q;
@@ -1117,13 +1078,11 @@ void visc_from_C( E, EEta)
   const int nel = E->lmesh.nel;
   const int ends = enodes[E->mesh.nsd];
 
-  for(m=1;m <= E->sphere.caps_per_proc;m++)  {
     for(i = 1; i <= nel; i++){
-      /* determine composition of each of the nodes of the
-	 element */
+    /* determine composition of each of the nodes of the element */
         for(p=0; p<E->composition.ncomp; p++) {
             for(kk = 1; kk <= ends; kk++){
-                CC[p][kk] = E->composition.comp_node[m][p][E->ien[m][i].node[kk]];
+                CC[p][kk] = E->composition.comp_node[p][E->ien[i].node[kk]];
                 if(CC[p][kk] < 0)CC[p][kk]=0.0;
                 if(CC[p][kk] > 1)CC[p][kk]=1.0;
             }
@@ -1148,17 +1107,16 @@ void visc_from_C( E, EEta)
             vmean = exp(vmean);
 
             /* multiply the viscosity with this prefactor */
-            EEta[m][ (i-1)*vpts + jj ] *= vmean;
+            EEta[ (i-1)*vpts + jj ] *= vmean;
 
         } /* end jj loop */
     } /* end el loop */
-  } /* end cap */
 }
 
-void strain_rate_2_inv(E,m,EEDOT,SQRT)
+void strain_rate_2_inv(E,EEDOT,SQRT)
      struct All_variables *E;
      float *EEDOT;
-     int m,SQRT;
+     int SQRT;
 {
     void get_rtf_at_ppts();
     void velo_from_element();
@@ -1183,10 +1141,10 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 
     for(e=1; e<=nel; e++) {
 
-        get_rtf_at_ppts(E, m, lev, e, rtf); /* pressure evaluation
+        get_rtf_at_ppts(E, lev, e, rtf); /* pressure evaluation
 					       points */
-        velo_from_element(E, VV, m, e, sphere_key);
-        GNx = &(E->gNX[m][e]);
+        velo_from_element(E, VV, e, sphere_key);
+        GNx = &(E->gNX[e]);
 
         theta = rtf[1][1];
 
@@ -1211,16 +1169,17 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
             dilation[j] = 0.0;
         }
 
-        if ((E->control.precise_strain_rate) || (theta < 0.09) || (theta > 3.05)) {
+        if ((E->control.precise_strain_rate) || 
+            (theta < 0.09) || 
+            (theta > 3.05)) {
             /* When the element is close to the poles, use a more
-             * precise method to compute the strain rate. 
-	     
-	     if precise_strain_rate=on, will always choose this option
-
-	    */
+             * precise method to compute the strain rate. if 
+             * precise_strain_rate=on, will always choose this option
+             */
 
             if ((e-1)%E->lmesh.elz==0) {
-                construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
+                construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,
+                    lev,1);
             }
 
             get_ba_p(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,
@@ -1296,12 +1255,9 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
     else
 	for(e=1;e<=nel;e++)
 	    EEDOT[e] *=  0.5;
-
-    return;
 }
 
-
-static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
+static void apply_low_visc_wedge_channel(struct All_variables *E, float *evisc)
 {
     void parallel_process_termination();
 
@@ -1321,7 +1277,6 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
         parallel_process_termination();
     }
 
-
     F = (float *)malloc((E->lmesh.nel+1)*sizeof(float));
     for(i=1 ; i<=E->lmesh.nel ; i++)
         F[i] = 0.0;
@@ -1330,151 +1285,110 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
     if(E->viscosity.channel)
         low_viscosity_channel_factor(E, F);
 
-
     /* if low viscosity wedge ... */
     if(E->viscosity.wedge)
         low_viscosity_wedge_factor(E, F);
 
 
     for(i=1 ; i<=E->lmesh.nel ; i++) {
-        if (F[i] != 0.0)
-            for(m = 1 ; m <= E->sphere.caps_per_proc ; m++) {
-                for(j=1;j<=vpts;j++) {
-                    evisc[m][(i-1)*vpts + j] = F[i];
-            }
-        }
+      if (F[i] != 0.0)
+        for(j=1;j<=vpts;j++)
+            evisc[(i-1)*vpts + j] = F[i];
     }
 
-
     free(F);
-
-    return;
 }
-
-
-
 
 static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 {
     int i, ii, k, m, e, ee;
-    int nz_min[NCS], nz_max[NCS];
+    int nz_min, nz_max;
     const int flavor = 0;
     double rad_mean, rr;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* find index of radius corresponding to lv_min_radius */
-        for(e=1; e<=E->lmesh.elz; e++) {
-            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                              E->sx[m][3][E->ien[m][e].node[8]]);
-            if(rad_mean >= E->viscosity.lv_min_radius) break;
-        }
-        nz_min[m] = e;
-
-        /* find index of radius corresponding to lv_max_radius */
-        for(e=E->lmesh.elz; e>=1; e--) {
-            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                              E->sx[m][3][E->ien[m][e].node[8]]);
-            if(rad_mean <= E->viscosity.lv_max_radius) break;
-        }
-        nz_max[m] = e;
+    /* find index of radius corresponding to lv_min_radius */
+    for(e=1; e<=E->lmesh.elz; e++) {
+        rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                          E->sx[3][E->ien[e].node[8]]);
+        if(rad_mean >= E->viscosity.lv_min_radius) break;
     }
+    nz_min = e;
 
+    /* find index of radius corresponding to lv_max_radius */
+    for(e=E->lmesh.elz; e>=1; e--) {
+        rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                          E->sx[3][E->ien[e].node[8]]);
+        if(rad_mean <= E->viscosity.lv_max_radius) break;
+    }
+    nz_max = e;
 
+    for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
+        for(i=nz_min; i<=nz_max; i++) {
+            e = (k-1)*E->lmesh.elz + i;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
-            for(i=nz_min[m]; i<=nz_max[m]; i++) {
-                e = (k-1)*E->lmesh.elz + i;
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
 
-                rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                                  E->sx[m][3][E->ien[m][e].node[8]]);
+            /* loop over elements below e */
+            for(ii=i; ii>=nz_min; ii--) {
+                ee = (k-1)*E->lmesh.elz + ii;
 
-                /* loop over elements below e */
-                for(ii=i; ii>=nz_min[m]; ii--) {
-                    ee = (k-1)*E->lmesh.elz + ii;
+                rr = 0.5 * (E->sx[3][E->ien[ee].node[1]] +
+                            E->sx[3][E->ien[ee].node[8]]);
 
-                    rr = 0.5 * (E->sx[m][3][E->ien[m][ee].node[1]] +
-                                E->sx[m][3][E->ien[m][ee].node[8]]);
-
-                    /* if ee has tracers in it and is within the channel */
-                    if((E->trace.ntracer_flavor[m][flavor][ee] > 0) &&
-                       (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
-                           F[e] = E->viscosity.lv_reduction;
-                           break;
-                       }
-                }
+                /* if ee has tracers in it and is within the channel */
+                if((E->trace.ntracer_flavor[flavor][ee] > 0) &&
+                   (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
+                       F[e] = E->viscosity.lv_reduction;
+                       break;
+                   }
             }
         }
     }
-
-
-    /** debug **
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(e=1; e<=E->lmesh.nel; e++)
-            fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
-    /**/
-
-    return;
 }
-
 
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 {
     int i, ii, k, m, e, ee;
-    int nz_min[NCS], nz_max[NCS];
+    int nz_min, nz_max;
     const int flavor = 0;
     double rad_mean, rr;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* find index of radius corresponding to lv_min_radius */
-        for(e=1; e<=E->lmesh.elz; e++) {
-            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                              E->sx[m][3][E->ien[m][e].node[8]]);
-            if(rad_mean >= E->viscosity.lv_min_radius) break;
-        }
-        nz_min[m] = e;
-
-        /* find index of radius corresponding to lv_max_radius */
-        for(e=E->lmesh.elz; e>=1; e--) {
-            rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                              E->sx[m][3][E->ien[m][e].node[8]]);
-            if(rad_mean <= E->viscosity.lv_max_radius) break;
-        }
-        nz_max[m] = e;
+    /* find index of radius corresponding to lv_min_radius */
+    for(e=1; e<=E->lmesh.elz; e++) {
+        rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                          E->sx[3][E->ien[e].node[8]]);
+        if(rad_mean >= E->viscosity.lv_min_radius) break;
     }
+    nz_min = e;
 
+    /* find index of radius corresponding to lv_max_radius */
+    for(e=E->lmesh.elz; e>=1; e--) {
+        rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                          E->sx[3][E->ien[e].node[8]]);
+        if(rad_mean <= E->viscosity.lv_max_radius) break;
+    }
+    nz_max = e;
 
+    for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
+        for(i=nz_min; i<=nz_max; i++) {
+            e = (k-1)*E->lmesh.elz + i;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
-            for(i=nz_min[m]; i<=nz_max[m]; i++) {
-                e = (k-1)*E->lmesh.elz + i;
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
 
-                rad_mean = 0.5 * (E->sx[m][3][E->ien[m][e].node[1]] +
-                                  E->sx[m][3][E->ien[m][e].node[8]]);
+            /* loop over elements below e */
+            for(ii=i; ii>=nz_min; ii--) {
+                ee = (k-1)*E->lmesh.elz + ii;
 
-                /* loop over elements below e */
-                for(ii=i; ii>=nz_min[m]; ii--) {
-                    ee = (k-1)*E->lmesh.elz + ii;
-
-                    /* if ee has tracers in it */
-                    if(E->trace.ntracer_flavor[m][flavor][ee] > 0) {
-                        F[e] = E->viscosity.lv_reduction;
-                        break;
-                    }
+                /* if ee has tracers in it */
+                if(E->trace.ntracer_flavor[flavor][ee] > 0) {
+                    F[e] = E->viscosity.lv_reduction;
+                    break;
                 }
             }
         }
     }
-
-
-    /** debug **
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(e=1; e<=E->lmesh.nel; e++)
-            fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
-    /**/
-
-    return;
 }
 /* compute second invariant from a strain-rate tensor in 0,...2 format
 

@@ -182,8 +182,8 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
     depthkm = malloc((E->lmesh.noz+1) * sizeof(double));
 
     for(nz=1; nz<=E->lmesh.noz; nz++) {
-        get_prem(E->sx[m][3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
-        depthkm[nz] = (1.0 - E->sx[m][3][nz]) * E->data.radius_km;
+        get_prem(E->sx[3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
+        depthkm[nz] = (1.0 - E->sx[3][nz]) * E->data.radius_km;
     }
 
     /* deviation from the reference */
@@ -193,7 +193,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
 
         d = depthkm[nz];
         d2 = d * d;
-        dT = (E->T[m][i+1] - E->Have.T[nz]) * E->data.ref_temperature;
+        dT = (E->T[i+1] - E->Have.T[nz]) * E->data.ref_temperature;
 
         drho = -dT * E->refstate.thermal_expansivity[nz] * E->data.therm_exp;
 
@@ -202,7 +202,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
 
         if(E->control.tracer && E->composition.on && E->composition.ichemical_buoyancy)
             for(j=0; j<E->composition.ncomp; j++) {
-                dC = E->composition.comp_node[m][j][i+1] - E->Have.C[j][nz];
+                dC = E->composition.comp_node[j][i+1] - E->Have.C[j][nz];
 
                 drho += dC * E->composition.buoyancy_ratio[j]
                     * E->data.ref_temperature * E->data.therm_exp / E->refstate.rho[nz];

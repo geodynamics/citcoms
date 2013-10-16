@@ -461,25 +461,25 @@ void renew_top_velocity_boundary(E)
 	nodel = (k-1)*nox*noz + (i-1)*noz+noz;
 	fyy=E->SX[lev][1][1][nodel];
 	if (fyy < fyy1 || fyy >fyy2 )   {
-	  E->sphere.cap[1].VB[1][nodel]=0.0;
-	  E->sphere.cap[1].VB[2][nodel]=-vvc;
-	  E->sphere.cap[1].VB[3][nodel]=0.0;
+	  E->sphere.cap.VB[1][nodel]=0.0;
+	  E->sphere.cap.VB[2][nodel]=-vvc;
+	  E->sphere.cap.VB[3][nodel]=0.0;
 	}    /* the region outside of the domain bounded by the trench length  */
 	else if (fyy>=fyy1 && fyy <=fyy2)  {
 	  if (E->SX[lev][1][2][nodel]>=0.00 && E->SX[lev][1][2][nodel]<= fxx1) {
-	    E->sphere.cap[1].VB[1][nodel]=0.0;
-	    E->sphere.cap[1].VB[2][nodel]=vvo;
-	    E->sphere.cap[1].VB[3][nodel]=0.0;
+	    E->sphere.cap.VB[1][nodel]=0.0;
+	    E->sphere.cap.VB[2][nodel]=vvo;
+	    E->sphere.cap.VB[3][nodel]=0.0;
 	  }
 	  else if ( E->SX[lev][1][2][nodel]>fxx1 && E->SX[lev][1][2][nodel]<fxx2) {
-	    E->sphere.cap[1].VB[1][nodel]=0.0;
-	    E->sphere.cap[1].VB[2][nodel]=vxx1;
-	    E->sphere.cap[1].VB[3][nodel]=0.0;
+	    E->sphere.cap.VB[1][nodel]=0.0;
+	    E->sphere.cap.VB[2][nodel]=vxx1;
+	    E->sphere.cap.VB[3][nodel]=0.0;
 	  }
 	  else if ( E->SX[lev][1][2][nodel]>=fxx2) {
-	    E->sphere.cap[1].VB[1][nodel]=0.0;
-	    E->sphere.cap[1].VB[2][nodel]=vvc;
-	    E->sphere.cap[1].VB[3][nodel]=0.0;
+	    E->sphere.cap.VB[1][nodel]=0.0;
+	    E->sphere.cap.VB[2][nodel]=vvc;
+	    E->sphere.cap.VB[3][nodel]=0.0;
 	  }
 	}   /* end of else if (fyy>=fyy1 && fyy <=fyy2)  */
 

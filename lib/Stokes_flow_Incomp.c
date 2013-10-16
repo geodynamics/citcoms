@@ -39,19 +39,19 @@
 void myerror(struct All_variables *,char *);
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
-                              double **V, double **P, double **F,
+                              double *V, double *P, double *F,
                               double imp, int *steps_max);
 static void solve_Ahat_p_fhat_CG(struct All_variables *E,
-                                 double **V, double **P, double **F,
+                                 double *V, double *P, double *F,
                                  double imp, int *steps_max);
 static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
-                                    double **V, double **P, double **F,
+                                    double *V, double *P, double *F,
                                     double imp, int *steps_max);
 static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
-                                      double **V, double **P, double **F,
+                                      double *V, double *P, double *F,
                                       double imp, int *steps_max);
 static void initial_vel_residual(struct All_variables *E,
-                                 double **V, double **P, double **F,
+                                 double *V, double *P, double *F,
                                  double imp);
 
 
@@ -79,15 +79,11 @@ void solve_constrained_flow_iterative(E)
         v_from_vector(E);
 
     p_to_nodes(E,E->P,E->NP,E->mesh.levmax);
-
-    return;
 }
 
-
 /* ========================================================================= */
-
 static double momentum_eqn_residual(struct All_variables *E,
-                                    double **V, double **P, double **F)
+                                    double *V, double *P, double *F)
 {
     /* Compute the norm of (F - grad(P) - K*V)
      * This norm is ~= E->monitor.momentum_residual */
@@ -97,31 +93,26 @@ static double momentum_eqn_residual(struct All_variables *E,
     double global_v_norm2();
 
     int i, m;
-    double *r1[NCS], *r2[NCS];
+    double *r1, *r2;
     double res;
     const int lev = E->mesh.levmax;
     const int neq = E->lmesh.neq;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        r1[m] = malloc((neq+1)*sizeof(double));
-        r2[m] = malloc((neq+1)*sizeof(double));
-    }
+    r1 = malloc((neq+1)*sizeof(double));
+    r2 = malloc((neq+1)*sizeof(double));
 
     /* r2 = F - grad(P) - K*V */
     assemble_grad_p(E, P, E->u1, lev);
     assemble_del2_u(E, V, r1, lev, 1);
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=0; i<neq; i++)
-            r2[m][i] = F[m][i] - E->u1[m][i] - r1[m][i];
+    for(i=0; i<neq; i++)
+      r2[i] = F[i] - E->u1[i] - r1[i];
 
     strip_bcs_from_residual(E, r2, lev);
 
     res = sqrt(global_v_norm2(E, r2));
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        free(r1[m]);
-        free(r2[m]);
-    }
+    free(r1);
+    free(r2);
     return(res);
 }
 
@@ -144,7 +135,6 @@ static void print_convergence_progress(struct All_variables *E,
             count, t, v_norm, p_norm, div, dv, dp,
             E->monitor.solution_cycles);
     fflush(stderr);
-    return;
 }
 
 
@@ -163,7 +153,7 @@ static int keep_iterating(struct All_variables *E,
 
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
-                               double **V, double **P, double **F,
+                               double *V, double *P, double *F,
                                double imp, int *steps_max)
 {
     if(E->control.inv_gruneisen == 0)
@@ -176,8 +166,6 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
         else
             myerror(E, "Error: unknown Uzawa iteration\n");
     }
-
-    return;
 }
 
 
@@ -186,14 +174,14 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
  */
 
 static void solve_Ahat_p_fhat_CG(struct All_variables *E,
-                                 double **V, double **P, double **FF,
+                                 double *V, double *P, double *FF,
                                  double imp, int *steps_max)
 {
     int m, j, count, valid, lev, npno, neq;
 
-    double *r1[NCS], *r2[NCS], *z1[NCS], *s1[NCS], *s2[NCS], *cu[NCS];
-    double *F[NCS];
-    double *shuffle[NCS];
+    double *r1, *r2, *z1, *s1, *s2, *cu;
+    double *F;
+    double *shuffle;
     double alpha, delta, r0dotz0, r1dotz1;
     double v_res;
     double inner_imp;
@@ -221,15 +209,13 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
 
-    for (m=1; m<=E->sphere.caps_per_proc; m++)   {
-        F[m] = (double *)malloc(neq*sizeof(double));
-        r1[m] = (double *)malloc((npno+1)*sizeof(double));
-        r2[m] = (double *)malloc((npno+1)*sizeof(double));
-        z1[m] = (double *)malloc((npno+1)*sizeof(double));
-        s1[m] = (double *)malloc((npno+1)*sizeof(double));
-        s2[m] = (double *)malloc((npno+1)*sizeof(double));
-        cu[m] = (double *)malloc((npno+1)*sizeof(double));
-    }
+    F = (double *)malloc(neq*sizeof(double));
+    r1 = (double *)malloc((npno+1)*sizeof(double));
+    r2 = (double *)malloc((npno+1)*sizeof(double));
+    z1 = (double *)malloc((npno+1)*sizeof(double));
+    s1 = (double *)malloc((npno+1)*sizeof(double));
+    s2 = (double *)malloc((npno+1)*sizeof(double));
+    cu = (double *)malloc((npno+1)*sizeof(double));
 
     time0 = CPU_time0();
     count = 0;
@@ -237,18 +223,16 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
     /* copy the original force vector since we need to keep it intact
        between iterations */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(j=0;j<neq;j++)
-            F[m][j] = FF[m][j];
+    for(j=0;j<neq;j++)
+      F[j] = FF[j];
 
 
     /* calculate the contribution of compressibility in the continuity eqn */
     if(E->control.inv_gruneisen != 0) {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(j=1;j<=npno;j++)
-                cu[m][j] = 0.0;
+      for(j=1;j<=npno;j++)
+        cu[j] = 0.0;
 
-        assemble_c_u(E, V, cu, lev);
+      assemble_c_u(E, V, cu, lev);
     }
 
 
@@ -262,13 +246,10 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     /* initial residual r1 = div(V) */
     assemble_div_u(E, V, r1, lev);
 
-
     /* add the contribution of compressibility to the initial residual */
     if(E->control.inv_gruneisen != 0)
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(j=1;j<=npno;j++) {
-                r1[m][j] += cu[m][j];
-            }
+      for(j=1;j<=npno;j++)
+          r1[j] += cu[j];
 
     E->monitor.vdotv = global_v_norm2(E, V);
     E->monitor.incompressibility = sqrt(global_div_norm2(E, r1)
@@ -294,9 +275,8 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
         /* require two consecutive converging iterations to quit the while-loop */
 
         /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                z1[m][j] = E->BPI[lev][m][j] * r1[m][j];
+        for(j=1; j<=npno; j++)
+          z1[j] = E->BPI[lev][j] * r1[j];
 
 
         /* r1dotz1 = <r1, z1> */
@@ -305,15 +285,13 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
         /* update search direction */
         if(count == 0)
-            for (m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
-                    s2[m][j] = z1[m][j];
+            for(j=1; j<=npno; j++)
+                s2[j] = z1[j];
         else {
             /* s2 = z1 + s1 * <r1,z1>/<r0,z0> */
             delta = r1dotz1 / r0dotz0;
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
-                    s2[m][j] = z1[m][j] + delta * s1[m][j];
+            for(j=1; j<=npno; j++)
+              s2[j] = z1[j] + delta * s1[j];
         }
 
         /* solve K*u1 = grad(s2) for u1 */
@@ -335,21 +313,16 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
 
         /* r2 = r1 - alpha * div(u1) */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                r2[m][j] = r1[m][j] - alpha * F[m][j];
-
+        for(j=1; j<=npno; j++)
+          r2[j] = r1[j] - alpha * F[j];
 
         /* P = P + alpha * s2 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                P[m][j] += alpha * s2[m][j];
-
+        for(j=1; j<=npno; j++)
+          P[j] += alpha * s2[j];
 
         /* V = V - alpha * u1 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=0; j<neq; j++)
-                V[m][j] -= alpha * E->u1[m][j];
+        for(j=0; j<neq; j++)
+          V[j] -= alpha * E->u1[j];
 
 
         /* compute velocity and incompressibility residual */
@@ -357,17 +330,17 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
         E->monitor.pdotp = global_p_norm2(E, P);
         v_norm = sqrt(E->monitor.vdotv);
         p_norm = sqrt(E->monitor.pdotp);
-        dvelocity = alpha * sqrt(global_v_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
-        dpressure = alpha * sqrt(global_p_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
+        dvelocity = 
+          alpha * sqrt(global_v_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
+        dpressure = 
+          alpha * sqrt(global_p_norm2(E, s2) / (1e-32 + E->monitor.pdotp));
 
        
 
         assemble_div_u(E, V, z1, lev);
         if(E->control.inv_gruneisen != 0)
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
-                for(j=1;j<=npno;j++) {
-                    z1[m][j] += cu[m][j];
-            }
+          for(j=1;j<=npno;j++)
+            z1[j] += cu[j];
         E->monitor.incompressibility = sqrt(global_div_norm2(E, z1)
                                             / (1e-32 + E->monitor.vdotv));
 
@@ -381,37 +354,35 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
                                        E->monitor.incompressibility);
         }
 
-	if(!valid){
-            /* reset consecutive converging iterations */
-            converging = 0;
-	}else{
-            /* how many consecutive converging iterations? */
-            if(E->control.check_pressure_convergence) {
-                /* check dv and dp */
-                if(dvelocity < imp && dpressure < imp)
-                    converging++;
-                else
-                    converging = 0;
-            }else{
-                /* check dv only */
-                if(dvelocity < imp)
-                    converging++;
-                else
-                    converging = 0;
-            }
-	  
-	}
+        if(!valid){
+          /* reset consecutive converging iterations */
+          converging = 0;
+        }else{
+          /* how many consecutive converging iterations? */
+          if(E->control.check_pressure_convergence) {
+              /* check dv and dp */
+              if(dvelocity < imp && dpressure < imp)
+                  converging++;
+              else
+                  converging = 0;
+          }else{
+              /* check dv only */
+              if(dvelocity < imp)
+                  converging++;
+              else
+                  converging = 0;
+          }
+          
+        }
 
         /* shift array pointers */
-        for(m=1; m<=E->sphere.caps_per_proc; m++) {
-            shuffle[m] = s1[m];
-            s1[m] = s2[m];
-            s2[m] = shuffle[m];
+        shuffle = s1;
+        s1 = s2;
+        s2 = shuffle;
 
-            shuffle[m] = r1[m];
-            r1[m] = r2[m];
-            r2[m] = shuffle[m];
-        }
+        shuffle = r1;
+        r1 = r2;
+        r2 = shuffle;
 
         /* shift <r0, z0> = <r1, z1> */
         r0dotz0 = r1dotz1;
@@ -429,33 +400,26 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
     assemble_div_u(E, V, z1, lev);
     if(E->control.inv_gruneisen != 0)
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(j=1;j<=npno;j++) {
-                z1[m][j] += cu[m][j];
-            }
+      for(j=1;j<=npno;j++)
+        z1[j] += cu[j];
 
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        free((void *) F[m]);
-        free((void *) r1[m]);
-        free((void *) r2[m]);
-        free((void *) z1[m]);
-        free((void *) s1[m]);
-        free((void *) s2[m]);
-        free((void *) cu[m]);
-    }
+    free((void *) F);
+    free((void *) r1);
+    free((void *) r2);
+    free((void *) z1);
+    free((void *) s1);
+    free((void *) s2);
+    free((void *) cu);
 
     *steps_max=count;
-
-    return;
 }
 
 /* Solve compressible Stokes flow using
  * bi-conjugate gradient stablized (BiCG-stab) iterations
  */
-
 static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
-                                   double **V, double **P, double **FF,
+                                   double *V, double *P, double *FF,
                                    double imp, int *steps_max)
 {
     void assemble_div_rho_u();
@@ -479,11 +443,11 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     double dvelocity, dpressure;
     int converging;
 
-    double *F[NCS];
-    double *r1[NCS], *r2[NCS], *pt[NCS], *p1[NCS], *p2[NCS];
-    double *rt[NCS], *v0[NCS], *s0[NCS], *st[NCS], *t0[NCS];
-    double *u0[NCS];
-    double *shuffle[NCS];
+    double *F;
+    double *r1, *r2, *pt, *p1, *p2;
+    double *rt, *v0, *s0, *st, *t0;
+    double *u0;
+    double *shuffle;
 
     double time0, v_res;
     
@@ -493,21 +457,18 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     neq = E->lmesh.neq;
     lev = E->mesh.levmax;
 
-    for (m=1; m<=E->sphere.caps_per_proc; m++)   {
-        F[m] = (double *)malloc(neq*sizeof(double));
-        r1[m] = (double *)malloc((npno+1)*sizeof(double));
-        r2[m] = (double *)malloc((npno+1)*sizeof(double));
-        pt[m] = (double *)malloc((npno+1)*sizeof(double));
-        p1[m] = (double *)malloc((npno+1)*sizeof(double));
-        p2[m] = (double *)malloc((npno+1)*sizeof(double));
-        rt[m] = (double *)malloc((npno+1)*sizeof(double));
-        v0[m] = (double *)malloc((npno+1)*sizeof(double));
-        s0[m] = (double *)malloc((npno+1)*sizeof(double));
-        st[m] = (double *)malloc((npno+1)*sizeof(double));
-        t0[m] = (double *)malloc((npno+1)*sizeof(double));
-
-        u0[m] = (double *)malloc(neq*sizeof(double));
-    }
+    F = (double *)malloc(neq*sizeof(double));
+    r1 = (double *)malloc((npno+1)*sizeof(double));
+    r2 = (double *)malloc((npno+1)*sizeof(double));
+    pt = (double *)malloc((npno+1)*sizeof(double));
+    p1 = (double *)malloc((npno+1)*sizeof(double));
+    p2 = (double *)malloc((npno+1)*sizeof(double));
+    rt = (double *)malloc((npno+1)*sizeof(double));
+    v0 = (double *)malloc((npno+1)*sizeof(double));
+    s0 = (double *)malloc((npno+1)*sizeof(double));
+    st = (double *)malloc((npno+1)*sizeof(double));
+    t0 = (double *)malloc((npno+1)*sizeof(double));
+    u0 = (double *)malloc(neq*sizeof(double));
 
     time0 = CPU_time0();
     count = 0;
@@ -515,10 +476,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     /* copy the original force vector since we need to keep it intact
        between iterations */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(j=0;j<neq;j++)
-            F[m][j] = FF[m][j];
-
+    for(j=0;j<neq;j++)
+        F[j] = FF[j];
 
     /* calculate the initial velocity residual */
     initial_vel_residual(E, V, P, F, inner_imp*v_res);
@@ -545,11 +504,9 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                    E->monitor.incompressibility);
     }
 
-
     /* initial conjugate residual rt = r1 */
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(j=1; j<=npno; j++)
-            rt[m][j] = r1[m][j];
+    for(j=1; j<=npno; j++)
+        rt[j] = r1[j];
 
 
     valid = 1;
@@ -567,26 +524,21 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
             parallel_process_termination();
         }
 
-
         /* update search direction */
         if(count == 0)
-            for (m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
-                    p2[m][j] = r1[m][j];
+            for(j=1; j<=npno; j++)
+                p2[j] = r1[j];
         else {
             /* p2 = r1 + <r1,rt>/<r0,rt> * alpha/omega * (p1 - omega*v0) */
             beta = (r1dotrt / r0dotrt) * (alpha / omega);
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
-                    p2[m][j] = r1[m][j] + beta
-                        * (p1[m][j] - omega * v0[m][j]);
+            for(j=1; j<=npno; j++)
+              p2[j] = r1[j] + beta*(p1[j] - omega*v0[j]);
         }
 
 
         /* preconditioner BPI ~= inv(K), pt = BPI*p2 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                pt[m][j] = E->BPI[lev][m][j] * p2[m][j];
+        for(j=1; j<=npno; j++)
+            pt[j] = E->BPI[lev][j] * p2[j];
 
 
         /* solve K*u0 = grad(pt) for u1 */
@@ -598,26 +550,19 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         }
         strip_bcs_from_residual(E, u0, lev);
 
-
         /* v0 = div(rho_ref*u0) */
         assemble_div_rho_u(E, u0, v0, lev);
-
 
         /* alpha = r1dotrt / <rt, v0> */
         alpha = r1dotrt / global_pdot(E, rt, v0, lev);
 
-
         /* s0 = r1 - alpha * v0 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                s0[m][j] = r1[m][j] - alpha * v0[m][j];
-
+        for(j=1; j<=npno; j++)
+            s0[j] = r1[j] - alpha * v0[j];
 
         /* preconditioner BPI ~= inv(K), st = BPI*s0 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                st[m][j] = E->BPI[lev][m][j] * s0[m][j];
-
+        for(j=1; j<=npno; j++)
+            st[j] = E->BPI[lev][j] * s0[j];
 
         /* solve K*u1 = grad(st) for u1 */
         assemble_grad_p(E, st, F, lev);
@@ -632,35 +577,26 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         /* t0 = div(rho_ref * u1) */
         assemble_div_rho_u(E, E->u1, t0, lev);
 
-
         /* omega = <t0, s0> / <t0, t0> */
         omega = global_pdot(E, t0, s0, lev) / global_pdot(E, t0, t0, lev);
 
-
         /* r2 = s0 - omega * t0 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                r2[m][j] = s0[m][j] - omega * t0[m][j];
-
+        for(j=1; j<=npno; j++)
+            r2[j] = s0[j] - omega * t0[j];
 
         /* P = P + alpha * pt + omega * st */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                s0[m][j] = alpha * pt[m][j] + omega * st[m][j];
+        for(j=1; j<=npno; j++)
+            s0[j] = alpha * pt[j] + omega * st[j];
 
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                P[m][j] += s0[m][j];
-
+        for(j=1; j<=npno; j++)
+            P[j] += s0[j];
 
         /* V = V - alpha * u0 - omega * u1 */
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=0; j<neq; j++)
-                F[m][j] = alpha * u0[m][j] + omega * E->u1[m][j];
+        for(j=0; j<neq; j++)
+            F[j] = alpha * u0[j] + omega * E->u1[j];
 
-        for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=0; j<neq; j++)
-                V[m][j] -= F[m][j];
+        for(j=0; j<neq; j++)
+            V[j] -= F[j];
 
 
         /* compute velocity and incompressibility residual */
@@ -690,79 +626,69 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
                                        E->monitor.incompressibility);
         }
 
-	if(!valid){
-            /* reset consecutive converging iterations */
-            converging = 0;
-	}else{
-            /* how many consecutive converging iterations? */
-            if(E->control.check_pressure_convergence) {
-                /* check dv and dp */
-                if(dvelocity < imp && dpressure < imp)
-                    converging++;
-                else
-                    converging = 0;
-            }else{
-                /* check dv only */
-                if(dvelocity < imp)
-                    converging++;
-                else
-                    converging = 0;
-            }
-	  
-	}
-
-	/* shift array pointers */
-        for(m=1; m<=E->sphere.caps_per_proc; m++) {
-            shuffle[m] = p1[m];
-            p1[m] = p2[m];
-            p2[m] = shuffle[m];
-
-            shuffle[m] = r1[m];
-            r1[m] = r2[m];
-            r2[m] = shuffle[m];
+      if(!valid){
+        /* reset consecutive converging iterations */
+        converging = 0;
+      }else{
+        /* how many consecutive converging iterations? */
+        if(E->control.check_pressure_convergence) {
+            /* check dv and dp */
+            if(dvelocity < imp && dpressure < imp)
+                converging++;
+            else
+                converging = 0;
+        }else{
+            /* check dv only */
+            if(dvelocity < imp)
+                converging++;
+            else
+                converging = 0;
         }
+        
+      }
 
-        /* shift <r0, rt> = <r1, rt> */
-        r0dotrt = r1dotrt;
+      /* shift array pointers */
+      shuffle = p1;
+      p1 = p2;
+      p2 = shuffle;
+
+      shuffle = r1;
+      r1 = r2;
+      r2 = shuffle;
+
+      /* shift <r0, rt> = <r1, rt> */
+      r0dotrt = r1dotrt;
 
     } /* end loop for conjugate gradient */
 
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-    	free((void *) F[m]);
-        free((void *) r1[m]);
-        free((void *) r2[m]);
-        free((void *) pt[m]);
-        free((void *) p1[m]);
-        free((void *) p2[m]);
-        free((void *) rt[m]);
-        free((void *) v0[m]);
-        free((void *) s0[m]);
-        free((void *) st[m]);
-        free((void *) t0[m]);
-
-        free((void *) u0[m]);
-    }
+    free((void *) F);
+    free((void *) r1);
+    free((void *) r2);
+    free((void *) pt);
+    free((void *) p1);
+    free((void *) p2);
+    free((void *) rt);
+    free((void *) v0);
+    free((void *) s0);
+    free((void *) st);
+    free((void *) t0);
+    free((void *) u0);
 
     *steps_max=count;
-
-    return;
-
 }
-
 
 /* Solve compressible Stokes flow using
  * conjugate gradient (CG) iterations with an outer iteration
  */
-
 static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
-                                     double **V, double **P, double **F,
+                                     double *V, double *P, double *F,
                                      double imp, int *steps_max)
 {
     int m, i;
     int cycles, num_of_loop;
     double relative_err_v, relative_err_p;
-    double *old_v[NCS], *old_p[NCS],*diff_v[NCS],*diff_p[NCS];
+    double *old_v, *old_p,*diff_v,*diff_p;
     double div_res;
     const int npno = E->lmesh.npno;
     const int neq = E->lmesh.neq;
@@ -772,12 +698,10 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
     double global_div_norm2();
     void assemble_div_rho_u();
     
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    	old_v[m] = (double *)malloc(neq*sizeof(double));
-    	diff_v[m] = (double *)malloc(neq*sizeof(double));
-    	old_p[m] = (double *)malloc((npno+1)*sizeof(double));
-    	diff_p[m] = (double *)malloc((npno+1)*sizeof(double));
-    }
+    old_v = (double *)malloc(neq*sizeof(double));
+    diff_v = (double *)malloc(neq*sizeof(double));
+    old_p = (double *)malloc((npno+1)*sizeof(double));
+    diff_p = (double *)malloc((npno+1)*sizeof(double));
 
     cycles = E->control.p_iterations;
 
@@ -793,10 +717,10 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
           (div_res > imp) &&
           (num_of_loop <= E->control.compress_iter_maxstep)) {
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++) {
-            for(i=0;i<neq;i++) old_v[m][i] = V[m][i];
-            for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
-        }
+          for(i=0;i<neq;i++) 
+            old_v[i] = V[i];
+          for(i=1;i<=npno;i++) 
+            old_p[i] = P[i];
 
         solve_Ahat_p_fhat_CG(E, V, P, F, imp, &cycles);
 
@@ -804,14 +728,14 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
         assemble_div_rho_u(E, V, E->u1, lev);
         div_res = sqrt(global_div_norm2(E, E->u1) / (1e-32 + E->monitor.vdotv));
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)
-            for(i=0;i<neq;i++) diff_v[m][i] = V[m][i] - old_v[m][i];
+        for(i=0;i<neq;i++) 
+          diff_v[i] = V[i] - old_v[i];
 
         relative_err_v = sqrt( global_v_norm2(E,diff_v) /
                                (1.0e-32 + E->monitor.vdotv) );
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)
-            for(i=1;i<=npno;i++) diff_p[m][i] = P[m][i] - old_p[m][i];
+        for(i=1;i<=npno;i++) 
+          diff_p[i] = P[i] - old_p[i];
 
         relative_err_p = sqrt( global_p_norm2(E,diff_p) /
                                (1.0e-32 + E->monitor.pdotp) );
@@ -825,19 +749,14 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
 
     } /* end of while */
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-    	free((void *) old_v[m]);
-    	free((void *) old_p[m]);
-	free((void *) diff_v[m]);
-	free((void *) diff_p[m]);
-    }
-
-    return;
+    free((void *) old_v);
+    free((void *) old_p);
+    free((void *) diff_v);
+    free((void *) diff_p);
 }
 
-
 static void initial_vel_residual(struct All_variables *E,
-                                 double **V, double **P, double **F,
+                                 double *V, double *P, double *F,
                                  double acc)
 {
     void assemble_del2_u();
@@ -851,14 +770,12 @@ static void initial_vel_residual(struct All_variables *E,
 
     /* F = F - grad(P) - K*V */
     assemble_grad_p(E, P, E->u1, lev);
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=0; i<neq; i++)
-            F[m][i] = F[m][i] - E->u1[m][i];
+    for(i=0; i<neq; i++)
+      F[i] = F[i] - E->u1[i];
 
     assemble_del2_u(E, V, E->u1, lev, 1);
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=0; i<neq; i++)
-            F[m][i] = F[m][i] - E->u1[m][i];
+    for(i=0; i<neq; i++)
+      F[i] = F[i] - E->u1[i];
 
     strip_bcs_from_residual(E, F, lev);
 
@@ -873,9 +790,6 @@ static void initial_vel_residual(struct All_variables *E,
 
 
     /* V = V + u1 */
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=0; i<neq; i++)
-            V[m][i] += E->u1[m][i];
-
-    return;
+    for(i=0; i<neq; i++)
+        V[i] += E->u1[i];
 }

@@ -44,13 +44,8 @@ int epsilon[4][4] = {   /* Levi-Cita epsilon */
 /*  ===========================================================
     Iterative solver also using multigrid  ........
     ===========================================================  */
-
-int solve_del2_u(E,d0,F,acc,high_lev)
-     struct All_variables *E;
-     double **d0;
-     double **F;
-     double acc;
-     int high_lev;
+int solve_del2_u( struct All_variables *E, double *d0, double *F, double acc,
+                  int high_lev )
 {
   void assemble_del2_u();
   void e_assemble_del2_u();
@@ -75,10 +70,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   neq  = E->lmesh.NEQ[high_lev];
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=0;i<neq;i++)  {
-	d0[m][i] = 0.0;
-      }
+  for(i=0;i<neq;i++)
+    d0[i] = 0.0;
 
   r0=residual=sqrt(global_vdot(E,F,F,high_lev));
 
@@ -148,13 +141,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 /* =================================
    recursive multigrid function ....
    ================================= */
-
-double multi_grid(E,d1,F,acc,hl)
-     struct All_variables *E;
-     double **d1;
-     double **F;
-     double acc;
-     int hl;  /* higher level of two */
+double multi_grid( struct All_variables *E, double *d1, double *F, double acc,
+                   int hl /* higher level of two */ )
 {
     double residual,AudotAu;
     void interp_vector();
@@ -177,36 +165,34 @@ double multi_grid(E,d1,F,acc,hl)
     const int levmax = E->mesh.levmax;
 
     double time1,time,CPU_time0();
-    double *res[MAX_LEVELS][NCS],*AU[MAX_LEVELS][NCS];
-    double *vel[MAX_LEVELS][NCS],*del_vel[MAX_LEVELS][NCS];
-    double *rhs[MAX_LEVELS][NCS],*fl[MAX_LEVELS][NCS];
-				/* because it's recursive, need a copy at
-				    each level */
+    double *res[MAX_LEVELS],*AU[MAX_LEVELS];
+    double *vel[MAX_LEVELS],*del_vel[MAX_LEVELS];
+    double *rhs[MAX_LEVELS],*fl[MAX_LEVELS];
 
-    for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
-      for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-	del_vel[i][m]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	AU[i][m] = (double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	vel[i][m]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	res[i][m]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
-	if (i<E->mesh.levmax)
-	  fl[i][m]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
-      }
+    /* because it's recursive, need a copy at each level */
+    for(i=E->mesh.levmin;i<=E->mesh.levmax;i++){
+      del_vel[i]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+      AU[i] = (double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+      vel[i]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+      res[i]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
+      if (i<E->mesh.levmax)
+        fl[i]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
+    }
 
     Vnmax = E->control.mg_cycle;
 
-        /* Project residual onto all the lower levels */
+    /* Project residual onto all the lower levels */
 
     project_vector(E,levmax,F,fl[levmax-1],1);
     strip_bcs_from_residual(E,fl[levmax-1],levmax-1);
     for(lev=levmax-1;lev>levmin;lev--) {
-        project_vector(E,lev,fl[lev],fl[lev-1],1);
-        strip_bcs_from_residual(E,fl[lev-1],lev-1);
-       }
+      project_vector(E,lev,fl[lev],fl[lev-1],1);
+      strip_bcs_from_residual(E,fl[lev-1],lev-1);
+    }
 
-        /* Solve for the lowest level */
+    /* Solve for the lowest level */
 
-/*    time=CPU_time0(); */
+    /*    time=CPU_time0(); */
     cycles = E->control.v_steps_low;
 
     gauss_seidel(E,vel[levmin],fl[levmin],AU[levmin],acc*0.01,&cycles,levmin,0);
@@ -214,109 +200,97 @@ double multi_grid(E,d1,F,acc,hl)
     for(lev=levmin+1;lev<=levmax;lev++) {
       time=CPU_time0();
 
-                         /* Utilize coarse solution and smooth at this level */
+      /* Utilize coarse solution and smooth at this level */
       interp_vector(E,lev-1,vel[lev-1],vel[lev]);
       strip_bcs_from_residual(E,vel[lev],lev);
 
       if (lev==levmax)
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-          for(j=0;j<E->lmesh.NEQ[lev];j++)
-             res[lev][m][j]=F[m][j];
+        for(j=0;j<E->lmesh.NEQ[lev];j++)
+           res[lev][j]=F[j];
       else
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-          for(j=0;j<E->lmesh.NEQ[lev];j++)
-             res[lev][m][j]=fl[lev][m][j];
+        for(j=0;j<E->lmesh.NEQ[lev];j++)
+           res[lev][j]=fl[lev][j];
 
-      for(Vn=1;Vn<=Vnmax;Vn++)   {
-                                        /*    Downward stoke of the V    */
-        for (dlev=lev;dlev>=levmin+1;dlev--)   {
+         for(Vn=1;Vn<=Vnmax;Vn++) {
+          /*    Downward stoke of the V    */
+           for (dlev=lev;dlev>=levmin+1;dlev--)   {
 
-                                      /* Pre-smoothing  */
-          cycles=((dlev==levmax)?E->control.v_steps_high:E->control.down_heavy);
-          ic = ((dlev==lev)?1:0);
-          gauss_seidel(E,vel[dlev],res[dlev],AU[dlev],0.01,&cycles,dlev,ic);
+            /* Pre-smoothing  */
+            cycles=((dlev==levmax)?
+                E->control.v_steps_high:E->control.down_heavy);
+            ic = ((dlev==lev)?1:0);
+            gauss_seidel(E,vel[dlev],res[dlev],AU[dlev],0.01,&cycles,dlev,ic);
 
-          for(m=1;m<=E->sphere.caps_per_proc;m++)
-             for(i=0;i<E->lmesh.NEQ[dlev];i++)  {
-               res[dlev][m][i]  = res[dlev][m][i] - AU[dlev][m][i];
-	       }
+            for(i=0;i<E->lmesh.NEQ[dlev];i++)
+              res[dlev][i]  = res[dlev][i] - AU[dlev][i];
 
-          project_vector(E,dlev,res[dlev],res[dlev-1],1);
-          strip_bcs_from_residual(E,res[dlev-1],dlev-1);
-          }
+            project_vector(E,dlev,res[dlev],res[dlev-1],1);
+            strip_bcs_from_residual(E,res[dlev-1],dlev-1);
+           }
 
-                                        /*    Bottom of the V    */
-       cycles = E->control.v_steps_low;
-       gauss_seidel(E,vel[levmin],res[levmin],AU[levmin],acc*0.01,&cycles,levmin,0);
-                                        /*    Upward stoke of the V    */
-        for (ulev=levmin+1;ulev<=lev;ulev++)   {
-            cycles=((ulev==levmax)?E->control.v_steps_high:E->control.up_heavy);
+           /*    Bottom of the V    */
+           cycles = E->control.v_steps_low;
+           gauss_seidel(E,vel[levmin],res[levmin],AU[levmin],acc*0.01,&cycles,
+               levmin,0);
+           /*    Upward stoke of the V    */
+           for (ulev=levmin+1;ulev<=lev;ulev++)   {
+              cycles=((ulev==levmax)?
+                  E->control.v_steps_high:E->control.up_heavy);
 
-            interp_vector(E,ulev-1,vel[ulev-1],del_vel[ulev]);
-            strip_bcs_from_residual(E,del_vel[ulev],ulev);
-            gauss_seidel(E,del_vel[ulev],res[ulev],AU[ulev],0.01,&cycles,ulev,1);
+              interp_vector(E,ulev-1,vel[ulev-1],del_vel[ulev]);
+              strip_bcs_from_residual(E,del_vel[ulev],ulev);
+              gauss_seidel(E,del_vel[ulev],res[ulev],AU[ulev],0.01,&cycles,
+                  ulev,1);
 
-            AudotAu = global_vdot(E,AU[ulev],AU[ulev],ulev);
-            alpha = global_vdot(E,AU[ulev],res[ulev],ulev)/AudotAu;
+              AudotAu = global_vdot(E,AU[ulev],AU[ulev],ulev);
+              alpha = global_vdot(E,AU[ulev],res[ulev],ulev)/AudotAu;
 
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
               for(i=0;i<E->lmesh.NEQ[ulev];i++)   {
-               vel[ulev][m][i] += alpha*del_vel[ulev][m][i];
-               }
+                vel[ulev][i] += alpha*del_vel[ulev][i];
+              }
 
-            if (ulev ==levmax)
-              for(m=1;m<=E->sphere.caps_per_proc;m++)
-                for(i=0;i<E->lmesh.NEQ[ulev];i++)   {
-                  res[ulev][m][i] -= alpha*AU[ulev][m][i];
-                  }
+              if (ulev ==levmax)
+                for(i=0;i<E->lmesh.NEQ[ulev];i++) {
+                  res[ulev][i] -= alpha*AU[ulev][i];
+                }
 
             }
-        }
+          }
       }
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(j=0;j<E->lmesh.NEQ[levmax];j++)   {
-        F[m][j]=res[levmax][m][j];
-        d1[m][j]+=vel[levmax][m][j];
-        }
+    for(j=0;j<E->lmesh.NEQ[levmax];j++)   {
+      F[j]=res[levmax][j];
+      d1[j]+=vel[levmax][j];
+    }
 
-     residual = sqrt(global_vdot(E,F,F,hl));
+    residual = sqrt(global_vdot(E,F,F,hl));
 
-      for(i=E->mesh.levmin;i<=E->mesh.levmax;i++)
-        for(m=1;m<=E->sphere.caps_per_proc;m++) {
-	  free((double*) del_vel[i][m]);
-	  free((double*) AU[i][m]);
-	  free((double*) vel[i][m]);
-	  free((double*) res[i][m]);
-	  if (i<E->mesh.levmax)
-	    free((double*) fl[i][m]);
+    for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
+      free((double*) del_vel[i]);
+      free((double*) AU[i]);
+      free((double*) vel[i]);
+      free((double*) res[i]);
+      if (i<E->mesh.levmax)
+        free((double*) fl[i]);
 	  }
-
 
     return(residual);
 }
-
 
 /*  ===========================================================
     Conjugate gradient relaxation for the matrix equation Kd = f
     Returns the residual reduction after itn iterations ...
     ===========================================================  */
-
-
 #ifndef USE_CUDA
-double conj_grad(E,d0,F,acc,cycles,level)
-     struct All_variables *E;
-     double **d0;
-     double **F;
-     double acc;
-     int *cycles;
-     int level;
+double conj_grad( struct All_variables *E,
+                  double *d0, double *F, double acc,
+                  int *cycles, int level )
 {
-    double *r0[NCS],*r1[NCS],*r2[NCS];
-    double *z0[NCS],*z1[NCS],*z2[NCS];
-    double *p1[NCS],*p2[NCS];
-    double *Ap[NCS];
-    double *shuffle[NCS];
+    double *r0,*r1,*r2;
+    double *z0,*z1,*z2;
+    double *p1,*p2;
+    double *Ap;
+    double *shuffle;
 
     int m,count,i,steps;
     double residual;
@@ -334,22 +308,19 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
     steps = *cycles;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-      r0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      r1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      r2[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      z0[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      z1[m] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      p1[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      p2[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      Ap[m] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-    }
+    r0 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+    r1 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+    r2 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+    z0 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+    z1 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+    p1 = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+    p2 = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+    Ap = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=0;i<high_neq;i++) {
-	r1[m][i] = F[m][i];
-        d0[m][i] = 0.0;
-	}
+    for(i=0;i<high_neq;i++) {
+      r1[i] = F[i];
+      d0[i] = 0.0;
+    }
 
     residual = sqrt(global_vdot(E,r1,r1,level));
 
@@ -358,87 +329,72 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
     while (((residual > acc) && (count < steps)) || count == 0)  {
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=0;i<high_neq;i++)
-         z1[m][i] = E->BI[level][m][i] * r1[m][i];
+        z1[i] = E->BI[level][i] * r1[i];
 
-	dotr1z1 = global_vdot(E,r1,z1,level);
+      dotr1z1 = global_vdot(E,r1,z1,level);
 
-	if (count == 0 )
-          for(m=1;m<=E->sphere.caps_per_proc;m++)
-	    for(i=0;i<high_neq;i++)
-	      p2[m][i] = z1[m][i];
-	else {
-	    assert(dotr0z0 != 0.0 /* in head of conj_grad */);
-	    beta = dotr1z1/dotr0z0;
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
-	      for(i=0;i<high_neq;i++)
-		p2[m][i] = z1[m][i] + beta * p1[m][i];
-	}
+      if (count == 0 )
+        for(i=0;i<high_neq;i++)
+          p2[i] = z1[i];
+      else {
+        assert(dotr0z0 != 0.0 /* in head of conj_grad */);
+        beta = dotr1z1/dotr0z0;
+          for(i=0;i<high_neq;i++)
+            p2[i] = z1[i] + beta * p1[i];
+      }
 
-    dotr0z0 = dotr1z1;
+      dotr0z0 = dotr1z1;
 
-	assemble_del2_u(E,p2,Ap,level,1);
+      assemble_del2_u(E,p2,Ap,level,1);
 
-	dotprod=global_vdot(E,p2,Ap,level);
+      dotprod=global_vdot(E,p2,Ap,level);
 
-	if(0.0==dotprod)
-	    alpha=1.0e-3;
-	else
-	    alpha = dotr1z1/dotprod;
+      if(0.0==dotprod)
+        alpha=1.0e-3;
+      else
+        alpha = dotr1z1/dotprod;
 
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-          for(i=0;i<high_neq;i++) {
-	    d0[m][i] += alpha * p2[m][i];
-	    r2[m][i] = r1[m][i] - alpha * Ap[m][i];
+      for(i=0;i<high_neq;i++) {
+        d0[i] += alpha * p2[i];
+        r2[i] = r1[i] - alpha * Ap[i];
 	    }
 
-	residual = sqrt(global_vdot(E,r2,r2,level));
+      residual = sqrt(global_vdot(E,r2,r2,level));
 
-        for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-	  shuffle[m] = r0[m]; r0[m] = r1[m]; r1[m] = r2[m]; r2[m] = shuffle[m];
-	  shuffle[m] = z0[m]; z0[m] = z1[m]; z1[m] = shuffle[m];
-	  shuffle[m] = p1[m]; p1[m] = p2[m]; p2[m] = shuffle[m];
-          }
+      shuffle = r0; r0 = r1; r1 = r2; r2 = shuffle;
+      shuffle = z0; z0 = z1; z1 = shuffle;
+      shuffle = p1; p1 = p2; p2 = shuffle;
 
-	count++;
-	/* end of while-loop */
+      count++;
 
-    }
+    } /* end of while-loop */
 
     *cycles=count;
 
     strip_bcs_from_residual(E,d0,level);
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-      free((double*) r0[m]);
-      free((double*) r1[m]);
-      free((double*) r2[m]);
-      free((double*) z0[m]);
-      free((double*) z1[m]);
-      free((double*) p1[m]);
-      free((double*) p2[m]);
-      free((double*) Ap[m]);
-    }
+    free((double*) r0);
+    free((double*) r1);
+    free((double*) r2);
+    free((double*) z0);
+    free((double*) z1);
+    free((double*) p1);
+    free((double*) p2);
+    free((double*) Ap);
 
     return(residual);   }
 #endif /* !USE_CUDA */
 
 
-/* ========================================================================================
-   An element by element version of the gauss-seidel routine. Initially this is a test
-   platform, we want to know if it handles discontinuities any better than the node/equation
-   versions
-   =========================================================================================*/
-
-void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
-    struct All_variables *E;
-    double **d0;
-    double **F,**Ad;
-    double acc;
-    int *cycles;
-    int level;
-    int guess;
+/* =============================================================================
+An element by element version of the gauss-seidel routine. Initially this is a 
+test platform, we want to know if it handles discontinuities any better than 
+the node/equation versions
+==============================================================================*/
+void element_gauss_seidel( struct All_variables *E,
+                           double *d0, double *F, double *Ad,
+                           double acc, int *cycles, int level, int guess )
 {
     int count,i,j,k,l,m,ns,nc,d,steps,loc;
     int p1,p2,p3,q1,q2,q3;
@@ -454,8 +410,9 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     double w11,w12,w13;
     double w[24];
 
-    double *dd[NCS],*elt_k;
-    int *vis[NCS];
+    double *dd;
+    double *elt_k;
+    int *vis;
 
     const int dims=E->mesh.nsd;
     const int ends=enodes[dims];
@@ -467,113 +424,112 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
     steps=*cycles;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++) {
-      dd[m] = (double *)malloc(neq*sizeof(double));
-      vis[m] = (int *)malloc((nno+1)*sizeof(int));
-    }
+    dd = (double *)malloc(neq*sizeof(double));
+    vis = (int *)malloc((nno+1)*sizeof(int));
     elt_k=(double *)malloc((24*24)*sizeof(double));
 
     if(guess){
-	e_assemble_del2_u(E,d0,Ad,level,1);
+      e_assemble_del2_u(E,d0,Ad,level,1);
     }
     else {
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++)
-	     Ad[m][i]=d0[m][i]=0.0;
+      for(i=0;i<neq;i++)
+	     Ad[i]=d0[i]=0.0;
     }
 
    count=0;
-   while (count <= steps)      {
-     for (m=1;m<=E->sphere.caps_per_proc;m++) {
-	for(i=1;i<=nno;i++)
-	    vis[m][i]=0;
+   while (count <= steps) {
+    for(i=1;i<=nno;i++)
+      vis[i]=0;
 
-	for(e=1;e<=nel;e++) {
+    for(e=1;e<=nel;e++) {
+      elt_k = E->elt_k[level][e].k;
 
-	    elt_k = E->elt_k[level][m][e].k;
+      for(i=1;i<=ends;i++)  {
+        node=E->IEN[level][e].node[i];
+        p1=(i-1)*dims;
+        w[p1] = w[p1+1] = w[p1+2] = 1.0;
+        if(E->NODE[level][node] & VBX)
+          w[p1] = 0.0;
+        if(E->NODE[level][node] & VBY)
+          w[p1+1] = 0.0;
+        if(E->NODE[level][node] & VBZ)
+          w[p1+2] = 0.0;
+      }
 
-	    for(i=1;i<=ends;i++)  {
-		node=E->IEN[level][m][e].node[i];
-		p1=(i-1)*dims;
-		w[p1] = w[p1+1] = w[p1+2] = 1.0;
-		if(E->NODE[level][m][node] & VBX)
-		    w[p1] = 0.0;
-		if(E->NODE[level][m][node] & VBY)
-		    w[p1+1] = 0.0;
-		if(E->NODE[level][m][node] & VBZ)
-		    w[p1+2] = 0.0;
+      for(i=1;i<=ends;i++) {
+        node=E->IEN[level][e].node[i];
+        if(!vis[node])
+          continue;
 
-	        }
+        eqn1=E->ID[level][node].doff[1];
+        eqn2=E->ID[level][node].doff[2];
+        eqn3=E->ID[level][node].doff[3];
+        p1=(i-1)*dims*n;
+        p2=p1+n;
+        p3=p2+n;
 
+        /* update Au */
+        for(j=1;j<=ends;j++) {
+          node1=E->IEN[level][e].node[j];
 
-	    for(i=1;i<=ends;i++)   {
-		node=E->IEN[level][m][e].node[i];
-		if(!vis[m][node])
-		    continue;
+          eqn11=E->ID[level][node1].doff[1];
+          eqn12=E->ID[level][node1].doff[2];
+          eqn13=E->ID[level][node1].doff[3];
+          q1=(j-1)*3;
 
-		eqn1=E->ID[level][m][node].doff[1];
-		eqn2=E->ID[level][m][node].doff[2];
-                eqn3=E->ID[level][m][node].doff[3];
-		p1=(i-1)*dims*n;
-		p2=p1+n;
-		p3=p2+n;
-
-
-		/* update Au */
-		for(j=1;j<=ends;j++) {
-		    node1=E->IEN[level][m][e].node[j];
-
-	            eqn11=E->ID[level][m][node1].doff[1];
-		    eqn12=E->ID[level][m][node1].doff[2];
-		    eqn13=E->ID[level][m][node1].doff[3];
-		    q1=(j-1)*3;
-
-                    Ad[m][eqn11] += w[q1]*(elt_k[p1+q1] * dd[m][eqn1] + elt_k[p2+q1] * dd[m][eqn2] + elt_k[p3+q1] * dd[m][eqn3]);
-                    Ad[m][eqn12] += w[q1+1]*(elt_k[p1+q1+1] * dd[m][eqn1] + elt_k[p2+q1+1] * dd[m][eqn2] + elt_k[p3+q1+1] * dd[m][eqn3]);
-	            Ad[m][eqn13] += w[q1+2]*(elt_k[p1+q1+2] * dd[m][eqn1] + elt_k[p2+q1+2] * dd[m][eqn2] + elt_k[p3+q1+2] * dd[m][eqn3]);
-
-		   }
-	        }
+          Ad[eqn11] += w[q1]*(elt_k[p1+q1]*dd[eqn1] + elt_k[p2+q1]*dd[eqn2] 
+              + elt_k[p3+q1]*dd[eqn3]);
+          Ad[eqn12] += w[q1+1]*(elt_k[p1+q1+1]*dd[eqn1] + 
+              elt_k[p2+q1+1]*dd[eqn2] + elt_k[p3+q1+1]*dd[eqn3]);
+          Ad[eqn13] += w[q1+2]*(elt_k[p1+q1+2]*dd[eqn1] + 
+              elt_k[p2+q1+2]*dd[eqn2] + elt_k[p3+q1+2] * dd[eqn3]);
+        }
+      }
 
 
-	    for(i=1;i<=ends;i++)   {
-		node=E->IEN[level][m][e].node[i];
-		if(vis[m][node])
-		    continue;
+      for(i=1;i<=ends;i++) {
+        node=E->IEN[level][e].node[i];
+        if(vis[node])
+          continue;
 
-		eqn1=E->ID[level][m][node].doff[1];
-		eqn2=E->ID[level][m][node].doff[2];
-		eqn3=E->ID[level][m][node].doff[3];
-		p1=(i-1)*dims*n;
-		p2=p1+n;
-		p3=p2+n;
+        eqn1=E->ID[level][node].doff[1];
+        eqn2=E->ID[level][node].doff[2];
+        eqn3=E->ID[level][node].doff[3];
+        p1=(i-1)*dims*n;
+        p2=p1+n;
+        p3=p2+n;
 
-		/* update dd, d0 */
-		d0[m][eqn1] += (dd[m][eqn1] = w[(i-1)*dims]*(F[m][eqn1]-Ad[m][eqn1])*E->BI[level][m][eqn1]);
-		d0[m][eqn2] += (dd[m][eqn2] = w[(i-1)*dims+1]*(F[m][eqn2]-Ad[m][eqn2])*E->BI[level][m][eqn2]);
-		d0[m][eqn3] += (dd[m][eqn3] = w[(i-1)*dims+2]*(F[m][eqn3]-Ad[m][eqn3])*E->BI[level][m][eqn3]);
+        /* update dd, d0 */
+        d0[eqn1] += (dd[eqn1] = 
+            w[(i-1)*dims+0]*(F[eqn1]-Ad[eqn1])*E->BI[level][eqn1]);
+        d0[eqn2] += (dd[eqn2] = 
+            w[(i-1)*dims+1]*(F[eqn2]-Ad[eqn2])*E->BI[level][eqn2]);
+        d0[eqn3] += (dd[eqn3] = 
+            w[(i-1)*dims+2]*(F[eqn3]-Ad[eqn3])*E->BI[level][eqn3]);
 
-		vis[m][node]=1;
+        vis[node]=1;
 
-		/* update Au */
-		for(j=1;j<=ends;j++) {
-		   node1=E->IEN[level][m][e].node[j];
+        /* update Au */
+        for(j=1;j<=ends;j++) {
+          node1=E->IEN[level][e].node[j];
 
-		   eqn11=E->ID[level][m][node1].doff[1];
-		   eqn12=E->ID[level][m][node1].doff[2];
-		   eqn13=E->ID[level][m][node1].doff[3];
-		   q1=(j-1)*3;
-		   q2=q1+1;
-		   q3=q1+2;
+        eqn11=E->ID[level][node1].doff[1];
+        eqn12=E->ID[level][node1].doff[2];
+        eqn13=E->ID[level][node1].doff[3];
+        q1=(j-1)*3;
+        q2=q1+1;
+        q3=q1+2;
 
-		   Ad[m][eqn11] += w[q1]*(elt_k[p1+q1] * dd[m][eqn1] + elt_k[p2+q1] * dd[m][eqn2] + elt_k[p3+q1] * dd[m][eqn3]);
-		   Ad[m][eqn12] += w[q2]*(elt_k[p1+q2] * dd[m][eqn1] + elt_k[p2+q2] * dd[m][eqn2] + elt_k[p3+q2] * dd[m][eqn3]);
-		   Ad[m][eqn13] += w[q3]*(elt_k[p1+q3] * dd[m][eqn1] + elt_k[p2+q3] * dd[m][eqn2] + elt_k[p3+q3] * dd[m][eqn3]);
-		   }
-	       }
+        Ad[eqn11] += w[q1]*(elt_k[p1+q1] * dd[eqn1] + 
+            elt_k[p2+q1] * dd[eqn2] + elt_k[p3+q1] * dd[eqn3]);
+        Ad[eqn12] += w[q2]*(elt_k[p1+q2] * dd[eqn1] + 
+            elt_k[p2+q2] * dd[eqn2] + elt_k[p3+q2] * dd[eqn3]);
+        Ad[eqn13] += w[q3]*(elt_k[p1+q3] * dd[eqn1] + 
+            elt_k[p2+q3] * dd[eqn2] + elt_k[p3+q3] * dd[eqn3]);
+        }
+      }
 
-	    }          /* end for el  */
-	 }               /* end for m */
+    }          /* end for el  */
 
         (E->solver.exchange_id_d)(E, Ad, level);
         (E->solver.exchange_id_d)(E, d0, level);
@@ -584,35 +540,24 @@ void element_gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
     }
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++) {
-      free((double*) dd[m]);
-      free((int*) vis[m]);
-    }
+    free((double*) dd);
+    free((int*) vis);
     free((double*) elt_k);
-
-    return;
 }
 
 
 #ifndef USE_CUDA
 
 /* ============================================================================
-   Multigrid Gauss-Seidel relaxation scheme which requires the storage of local
-   information, otherwise some other method is required. NOTE this is a bit worse
-   than real gauss-seidel because it relaxes all the equations for a node at one
-   time (Jacobi at a node). It does the job though.
-   ============================================================================ */
-
-void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
-     struct All_variables *E;
-     double **d0;
-     double **F,**Ad;
-     double acc;
-     int *cycles;
-     int level;
-     int guess;
+ Multigrid Gauss-Seidel relaxation scheme which requires the storage of local
+ information, otherwise some other method is required. NOTE this is a bit worse
+ than real gauss-seidel because it relaxes all the equations for a node at one
+ time (Jacobi at a node). It does the job though.
+ ============================================================================ */
+void gauss_seidel( struct All_variables *E,
+                   double *d0, double *F, double *Ad, double acc,
+                   int *cycles, int level, int guess )
 {
-
     int count,i,j,k,l,m,ns,steps;
     int *C;
     int eqn1,eqn2,eqn3;
@@ -641,142 +586,118 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     steps=*cycles;
     sor = 1.3;
 
-    if(guess) {
+    if(guess)
       n_assemble_del2_u(E,d0,Ad,level,1);
-    }
     else
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++) {
-	    d0[m][i]=Ad[m][i]=zeroo;
-	}
+      for(i=0;i<neq;i++)
+        d0[i]=Ad[i]=zeroo;
 
     count = 0;
 
 
     while (count < steps) {
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(j=0;j<=E->lmesh.NEQ[level];j++)
-          E->temp[m][j] = zeroo;
+      for(j=0;j<=E->lmesh.NEQ[level];j++)
+        E->temp[j] = zeroo;
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-          Ad[m][neq] = zeroo;
+      Ad[neq] = zeroo;
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][m][i] & OFFSIDE)   {
+      for(i=1;i<=E->lmesh.NNO[level];i++)
+        if(E->NODE[level][i] & OFFSIDE)   {
+          eqn1=E->ID[level][i].doff[1];
+          eqn2=E->ID[level][i].doff[2];
+          eqn3=E->ID[level][i].doff[3];
+          E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
+          E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
+          E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];
+          E->temp1[eqn1] = Ad[eqn1];
+          E->temp1[eqn2] = Ad[eqn2];
+          E->temp1[eqn3] = Ad[eqn3];
+        }
 
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-	    E->temp[m][eqn1] = (F[m][eqn1] - Ad[m][eqn1])*E->BI[level][m][eqn1];
-	    E->temp[m][eqn2] = (F[m][eqn2] - Ad[m][eqn2])*E->BI[level][m][eqn2];
-	    E->temp[m][eqn3] = (F[m][eqn3] - Ad[m][eqn3])*E->BI[level][m][eqn3];
-	    E->temp1[m][eqn1] = Ad[m][eqn1];
-	    E->temp1[m][eqn2] = Ad[m][eqn2];
-	    E->temp1[m][eqn3] = Ad[m][eqn3];
-            }
+      for(i=1;i<=E->lmesh.NNO[level];i++) {
+        eqn1=E->ID[level][i].doff[1];
+        eqn2=E->ID[level][i].doff[2];
+        eqn3=E->ID[level][i].doff[3];
+        C=E->Node_map[level]+(i-1)*max_eqn;
+        B1=E->Eqn_k1[level]+(i-1)*max_eqn;
+        B2=E->Eqn_k2[level]+(i-1)*max_eqn;
+        B3=E->Eqn_k3[level]+(i-1)*max_eqn;
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)     {
+       /* Ad on boundaries differs after the following operation, but
+        no communications are needed yet, because boundary Ad will
+        not be used for the G-S iterations for interior nodes */
 
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-            C=E->Node_map[level][m]+(i-1)*max_eqn;
-	    B1=E->Eqn_k1[level][m]+(i-1)*max_eqn;
-	    B2=E->Eqn_k2[level][m]+(i-1)*max_eqn;
- 	    B3=E->Eqn_k3[level][m]+(i-1)*max_eqn;
+        for(j=3;j<max_eqn;j++) {
+           UU = E->temp[C[j]];
+           Ad[eqn1] += B1[j]*UU;
+           Ad[eqn2] += B2[j]*UU;
+           Ad[eqn3] += B3[j]*UU;
+        }
 
-                 /* Ad on boundaries differs after the following operation, but
-                  no communications are needed yet, because boundary Ad will
-                  not be used for the G-S iterations for interior nodes */
+        if(!(E->NODE[level][i]&OFFSIDE)) {
+           E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
+           E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
+           E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];
+	      }
 
-            for(j=3;j<max_eqn;j++)  {
-                 UU = E->temp[m][C[j]];
-                 Ad[m][eqn1] += B1[j]*UU;
-                 Ad[m][eqn2] += B2[j]*UU;
-                 Ad[m][eqn3] += B3[j]*UU;
-                 }
+        /* Ad on boundaries differs after the following operation */
+        for(j=0;j<max_eqn;j++)
+		      Ad[C[j]] += B1[j]*E->temp[eqn1]
+                   +  B2[j]*E->temp[eqn2]
+                   +  B3[j]*E->temp[eqn3];
 
-            if (!(E->NODE[level][m][i]&OFFSIDE))   {
-               E->temp[m][eqn1] = (F[m][eqn1] - Ad[m][eqn1])*E->BI[level][m][eqn1];
-               E->temp[m][eqn2] = (F[m][eqn2] - Ad[m][eqn2])*E->BI[level][m][eqn2];
-               E->temp[m][eqn3] = (F[m][eqn3] - Ad[m][eqn3])*E->BI[level][m][eqn3];
-	       }
+        d0[eqn1] += E->temp[eqn1];
+        d0[eqn2] += E->temp[eqn2];
+        d0[eqn3] += E->temp[eqn3];
+      }
 
-                 /* Ad on boundaries differs after the following operation */
-	    for(j=0;j<max_eqn;j++)
-		    Ad[m][C[j]]  += B1[j]*E->temp[m][eqn1]
-                                 +  B2[j]*E->temp[m][eqn2]
-                                 +  B3[j]*E->temp[m][eqn3];
-
-	    d0[m][eqn1] += E->temp[m][eqn1];
-	    d0[m][eqn2] += E->temp[m][eqn2];
-	    d0[m][eqn3] += E->temp[m][eqn3];
-  	    }
-
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][m][i] & OFFSIDE)   {
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-	    Ad[m][eqn1] -= E->temp1[m][eqn1];
-	    Ad[m][eqn2] -= E->temp1[m][eqn2];
-	    Ad[m][eqn3] -= E->temp1[m][eqn3];
-	    }
+      for(i=1;i<=E->lmesh.NNO[level];i++)
+        if(E->NODE[level][i] & OFFSIDE)   {
+          eqn1=E->ID[level][i].doff[1];
+          eqn2=E->ID[level][i].doff[2];
+          eqn3=E->ID[level][i].doff[3];
+          Ad[eqn1] -= E->temp1[eqn1];
+          Ad[eqn2] -= E->temp1[eqn2];
+          Ad[eqn3] -= E->temp1[eqn3];
+        }
 
       (E->solver.exchange_id_d)(E, Ad, level);
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
- 	for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][m][i] & OFFSIDE)   {
-	    eqn1=E->ID[level][m][i].doff[1];
-	    eqn2=E->ID[level][m][i].doff[2];
-	    eqn3=E->ID[level][m][i].doff[3];
-	    Ad[m][eqn1] += E->temp1[m][eqn1];
-	    Ad[m][eqn2] += E->temp1[m][eqn2];
-	    Ad[m][eqn3] += E->temp1[m][eqn3];
-	    }
+      for(i=1;i<=E->lmesh.NNO[level];i++)
+        if(E->NODE[level][i] & OFFSIDE)   {
+          eqn1=E->ID[level][i].doff[1];
+          eqn2=E->ID[level][i].doff[2];
+          eqn3=E->ID[level][i].doff[3];
+          Ad[eqn1] += E->temp1[eqn1];
+          Ad[eqn2] += E->temp1[eqn2];
+          Ad[eqn3] += E->temp1[eqn3];
+        }
 
 
-	count++;
-
-/*     for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for(i=0;i<neq;i++)          {
-	   F[m][i] -= Ad[m][i];
-	   Ad[m][i] = 0.0;
-	  }
-*/
-      }
-
+      count++;
+    }
     *cycles=count;
-    return;
-
 }
 #endif /* !USE_CUDA */
 
 /* Fast (conditional) determinant for 3x3 or 2x2 ... otherwise calls general routine */
 
-double determinant(A,n)
-     double A[4][4];
-     int n;
+double determinant( double A[4][4], int n )
+{ 
+  double gen_determinant();
 
-{ double gen_determinant();
-
-  switch (n)
-    { case 1:
-	return(A[1][1]);
-      case 2:
-	return(A[1][1]*A[2][2]-A[1][2]*A[2][1]);
-      case 3:
-	return(A[1][1]*(A[2][2]*A[3][3]-A[2][3]*A[3][2])-
-	       A[1][2]*(A[2][1]*A[3][3]-A[2][3]*A[3][1])+
-	       A[1][3]*(A[2][1]*A[3][2]-A[2][2]*A[3][1]));
-      default:
-	return(1);
-/*	return(gen_determinant(A,n)); */
-      }
+  switch(n) { 
+    case 1:
+      return(A[1][1]);
+    case 2:
+      return(A[1][1]*A[2][2]-A[1][2]*A[2][1]);
+    case 3:
+      return(A[1][1]*(A[2][2]*A[3][3]-A[2][3]*A[3][2])-
+             A[1][2]*(A[2][1]*A[3][3]-A[2][3]*A[3][1])+
+             A[1][3]*(A[2][1]*A[3][2]-A[2][2]*A[3][1]));
+    default:
+      return(1);
+  }
 }
 
 

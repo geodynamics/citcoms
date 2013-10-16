@@ -80,7 +80,7 @@ int be_is_little_endian(void);
 int be_write_float_to_file(float *, int , FILE *);
 int be_write_int_to_file(int *, int , FILE *);
 void myfprintf(FILE *,char *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
+void calc_cbase_at_node(int , float *,struct All_variables *);
 
 /*  */
 void get_vtk_filename(char *,int,struct All_variables *,int);
@@ -126,9 +126,9 @@ extern void temperatures_conform_bcs(struct All_variables *);
 extern void myerror(struct All_variables *,char *);
 extern void mkdatadir(const char *);
 extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**,
-                         float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
+extern void get_STD_topo(struct All_variables *, float*, float*,
+                         float*, float*, int);
+extern void get_CBF_topo(struct All_variables *, float*, float*);
 
 /**********************************************************************/
 
@@ -270,11 +270,9 @@ void gzdir_output_coord(struct All_variables *E)
       myfprintf(fp1,"DATASET UNSTRUCTURED_GRID\n");
       if(E->output.gzdir.vtk_io == 2) /* serial */
 	sprintf(message,"POINTS %i float\n", /* total number of nodes */
-		E->lmesh.nno * E->parallel.nproc *
-		E->sphere.caps_per_proc);
+		E->lmesh.nno * E->parallel.nproc);
       else			/* parallel */
-	sprintf(message,"POINTS %i float\n",
-		E->lmesh.nno * E->sphere.caps_per_proc);
+	sprintf(message,"POINTS %i float\n", E->lmesh.nno);
       myfprintf(fp1,message);
     }else{			/* serial output */
       /* if not first CPU, wait for previous before appending */
@@ -284,15 +282,13 @@ void gzdir_output_coord(struct All_variables *E)
     }
     out = 0;
     /* write nodal coordinate to file, big endian */
-    for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nno;i++) {
-	/* cartesian coordinates */
-	x[0]=E->x[j][1][i];x[1]=E->x[j][2][i];x[2]=E->x[j][3][i];
-	if(be_write_float_to_file(x,3,fp1) != 3)
-	  BE_WERROR;
-	out++;
+        /* cartesian coordinates */
+        x[0]=E->x[1][i];x[1]=E->x[2][i];x[2]=E->x[3][i];
+        if(be_write_float_to_file(x,3,fp1) != 3)
+          BE_WERROR;
+        out++;
       }
-    }
     if(E->output.gzdir.vtk_io == 2){ /* serial output, close and have
 					next one write */
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
@@ -307,10 +303,9 @@ void gzdir_output_coord(struct All_variables *E)
     if((E->output.gzdir.vtk_io == 3) || (E->parallel.me == 0)){ /* in first CPU, or parallel output */
       if(E->output.gzdir.vtk_io == 2){ /* need to reopen, serial */
 	fp1 = output_open(output_file,"a");
-	j = E->parallel.nproc * E->lmesh.nel *
-	  E->sphere.caps_per_proc; /* total number of elements */
+	j = E->parallel.nproc * E->lmesh.nel; /* total number of elements */
       }else{			/* parallel */
-	j = E->lmesh.nel * E->sphere.caps_per_proc;
+	j = E->lmesh.nel;
       }
       sprintf(message,"CELLS %i %i\n", /* number of elements
 				      total number of int entries
@@ -334,20 +329,18 @@ void gzdir_output_coord(struct All_variables *E)
       offset = -1;
     }
     ix[0] = enodes[E->mesh.nsd];
-    for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nel;i++) {
 	/*
 	   need to add offset according to the processor for global
 	   node numbers
 	*/
-	ix[1]= E->ien[j][i].node[1]+offset;ix[2] = E->ien[j][i].node[2]+offset;
-	ix[3]= E->ien[j][i].node[3]+offset;ix[4] = E->ien[j][i].node[4]+offset;
-	ix[5]= E->ien[j][i].node[5]+offset;ix[6] = E->ien[j][i].node[6]+offset;
-	ix[7]= E->ien[j][i].node[7]+offset;ix[8] = E->ien[j][i].node[8]+offset;
+	ix[1]= E->ien[i].node[1]+offset;ix[2] = E->ien[i].node[2]+offset;
+	ix[3]= E->ien[i].node[3]+offset;ix[4] = E->ien[i].node[4]+offset;
+	ix[5]= E->ien[i].node[5]+offset;ix[6] = E->ien[i].node[6]+offset;
+	ix[7]= E->ien[i].node[7]+offset;ix[8] = E->ien[i].node[8]+offset;
 	if(be_write_int_to_file(ix,9,fp1)!=9)
 	  BE_WERROR;
       }
-    }
     if(E->output.gzdir.vtk_io == 2){ /* serial IO */
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
       if(E->parallel.me <  E->parallel.nproc-1)
@@ -357,9 +350,9 @@ void gzdir_output_coord(struct All_variables *E)
     if((E->output.gzdir.vtk_io==3) || (E->parallel.me == 0) ){
       if(E->output.gzdir.vtk_io == 2){ /* serial */
 	fp1 = output_open(output_file,"a");
-	j=E->parallel.nproc*E->lmesh.nel*E->sphere.caps_per_proc;
+	j=E->parallel.nproc*E->lmesh.nel;
       }else{			/* parallel */
-	j = E->lmesh.nel*E->sphere.caps_per_proc;
+	j = E->lmesh.nel;
       }
       sprintf(message,"CELL_TYPES %i\n",j); /* number of elements*/
       myfprintf(fp1,message);
@@ -385,12 +378,10 @@ void gzdir_output_coord(struct All_variables *E)
     gz1 = gzdir_output_open(output_file,"w");
 
     /* nodal coordinates */
-    for(j=1;j<=E->sphere.caps_per_proc;j++)     {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gz1,"%7d\n",E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.6e %.6e %.6e\n",
-		 E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
-    }
+        gzprintf(gz1,"%.6e %.6e %.6e\n",
+                 E->sx[1][i],E->sx[2][i],E->sx[3][i]);
 
     gzclose(gz1);
     if(E->output.gzdir.vtk_io == 1){
@@ -401,26 +392,23 @@ void gzdir_output_coord(struct All_variables *E)
 
       */
       /*
-	 nodal coordinates in Cartesian
+       nodal coordinates in Cartesian
       */
       snprintf(output_file,255,"%s/vtk_ecor.%d.gz",
 	       E->control.data_dir,E->parallel.me);
       gz1 = gzdir_output_open(output_file,"w");
-      for(j=1;j <= E->sphere.caps_per_proc;j++)     {
-	for(i=1;i <= E->lmesh.nno;i++) {
-	  gzprintf(gz1,"%9.6f %9.6f %9.6f\n", /* cartesian nodal coordinates */
-		   E->x[j][1][i],E->x[j][2][i],E->x[j][3][i]);
-	}
+      for(i=1;i <= E->lmesh.nno;i++) {
+        gzprintf(gz1,"%9.6f %9.6f %9.6f\n", /* cartesian nodal coordinates */
+           E->x[1][i],E->x[2][i],E->x[3][i]);
       }
       gzclose(gz1);
       /*
-	 connectivity for all elements
+       connectivity for all elements
       */
       offset = E->lmesh.nno * E->parallel.me - 1;
       snprintf(output_file,255,"%s/vtk_econ.%d.gz",
 	       E->control.data_dir,E->parallel.me);
       gz1 = gzdir_output_open(output_file,"w");
-      for(j=1;j <= E->sphere.caps_per_proc;j++)     {
 	for(i=1;i <= E->lmesh.nel;i++) {
 	  gzprintf(gz1,"%2i\t",enodes[E->mesh.nsd]);
 	  if(enodes[E->mesh.nsd] != 8){
@@ -432,17 +420,14 @@ void gzdir_output_coord(struct All_variables *E)
 	     node numbers
 	  */
 	  gzprintf(gz1,"%6i %6i %6i %6i %6i %6i %6i %6i\n",
-		   E->ien[j][i].node[1]+offset,E->ien[j][i].node[2]+offset,
-		   E->ien[j][i].node[3]+offset,E->ien[j][i].node[4]+offset,
-		   E->ien[j][i].node[5]+offset,E->ien[j][i].node[6]+offset,
-		   E->ien[j][i].node[7]+offset,E->ien[j][i].node[8]+offset);
+		   E->ien[i].node[1]+offset,E->ien[i].node[2]+offset,
+		   E->ien[i].node[3]+offset,E->ien[i].node[4]+offset,
+		   E->ien[i].node[5]+offset,E->ien[i].node[6]+offset,
+		   E->ien[i].node[7]+offset,E->ien[i].node[8]+offset);
 	}
-      }
       gzclose(gz1);
     } /* end vtkio = 1 (pre VTK) */
   }
-
-  return;
 }
 
 /*
@@ -472,14 +457,13 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     if((!E->output.gzdir.vtk_base_init) ||(!E->output.gzdir.vtk_base_save)){
       /* either not computed, or need to compute anew */
       if(!E->output.gzdir.vtk_base_init) /* init space */
-	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os*E->sphere.caps_per_proc);
+	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os);
       /* compute */
-      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-	for(i=1;i <= E->lmesh.nno;i++,k += 9){
-	  /* cartesian basis vectors at theta, phi */
-	  calc_cbase_at_node(j,i,(E->output.gzdir.vtk_base+k),E);
+      k=0;
+      for(i=1;i <= E->lmesh.nno;i++,k += 9){
+        /* cartesian basis vectors at theta, phi */
+        calc_cbase_at_node(i,(E->output.gzdir.vtk_base+k),E);
 	}
-      }
       E->output.gzdir.vtk_base_init = 1;
     }
   }
@@ -522,9 +506,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       }
       fp1 = output_open(output_file,"a");
       if(E->output.gzdir.vtk_io == 2) /* serial */
-	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->parallel.nproc*E->sphere.caps_per_proc);
+	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->parallel.nproc);
       else			/* parallel */
-	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->sphere.caps_per_proc);
+	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno);
       myfprintf(fp1,message);
       myfprintf(fp1,"SCALARS temperature float 1\n");
       myfprintf(fp1,"LOOKUP_TABLE default\n");
@@ -534,11 +518,10 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       /* open for append */
       fp1 = output_open(output_file,"a");
     }
-    for(j=1; j<= E->sphere.caps_per_proc;j++) /* print the temperatures */
       for(i=1;i<=E->lmesh.nno;i++){
-	cvec[0] = E->T[j][i];
-	if(be_write_float_to_file(cvec,1,fp1)!=1)
-	  BE_WERROR;
+        cvec[0] = E->T[i];
+        if(be_write_float_to_file(cvec,1,fp1)!=1)
+          BE_WERROR;
       }
     if(E->output.gzdir.vtk_io == 2){
       fclose(fp1);fflush(fp1);		/* close file and flush buffer */
@@ -561,30 +544,31 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 5, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
-    for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
+    k = 0;
       if(E->output.gzdir.rnr){
 	/* remove NR */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  vcorr[0] = E->sphere.cap[j].V[1][i]; /* vtheta */
-	  vcorr[1] = E->sphere.cap[j].V[2][i]; /* vphi */
+	  vcorr[0] = E->sphere.cap.V[1][i]; /* vtheta */
+	  vcorr[1] = E->sphere.cap.V[2][i]; /* vphi */
 	  /* remove the velocity that corresponds to a net rotation of omega[0..2] at location
 	     r,t,p from the t,p velocities in vcorr[0..1]
 	  */
-	  sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
+	  sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 
-	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],vcorr[0],vcorr[1],
+	  convert_pvec_to_cvec(E->sphere.cap.V[3][i],vcorr[0],vcorr[1],
 			       (E->output.gzdir.vtk_base+k),cvec);
-	  if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
+	  if(be_write_float_to_file(cvec,3,fp1)!=3)
+      BE_WERROR;
 	}
       }else{
 	/* regular output */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],
+	  convert_pvec_to_cvec(E->sphere.cap.V[3][i],E->sphere.cap.V[1][i],E->sphere.cap.V[2][i],
 			       (E->output.gzdir.vtk_base+k),cvec);
-	  if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
+	  if(be_write_float_to_file(cvec,3,fp1)!=3)
+      BE_WERROR;
 	}
       }
-    }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2){
       if(E->parallel.me <  E->parallel.nproc-1){
@@ -629,34 +613,32 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     gzout = gzdir_output_open(output_file,"w");
     gzprintf(gzout,"%d %d %.5e\n",
 	     cycles,E->lmesh.nno,E->monitor.elapsed_time);
-    for(j=1; j<= E->sphere.caps_per_proc;j++)     {
-      gzprintf(gzout,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gzout,"%7d\n",E->lmesh.nno);
       if(E->output.gzdir.vtk_io){
 	/* VTK */
 	for(i=1;i<=E->lmesh.nno;i++)
-	  gzprintf(gzout,"%.6e\n",E->T[j][i]);
+	  gzprintf(gzout,"%.6e\n",E->T[i]);
       } else {
 	/* old velo + T output */
 	if(E->output.gzdir.rnr){
 	  /* remove NR */
 	  for(i=1;i<=E->lmesh.nno;i++){
-	    vcorr[0] = E->sphere.cap[j].V[1][i]; /* vt */
-	    vcorr[1] = E->sphere.cap[j].V[2][i]; /* vphi */
-	    sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
+	    vcorr[0] = E->sphere.cap.V[1][i]; /* vt */
+	    vcorr[1] = E->sphere.cap.V[2][i]; /* vphi */
+	    sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     vcorr[0],vcorr[1],
-		     E->sphere.cap[j].V[3][i],E->T[j][i]);
+		     E->sphere.cap.V[3][i],E->T[i]);
 
 	  }
 	}else{
 	  for(i=1;i<=E->lmesh.nno;i++)
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
-		     E->sphere.cap[j].V[1][i],
-		     E->sphere.cap[j].V[2][i],
-		     E->sphere.cap[j].V[3][i],E->T[j][i]);
+		     E->sphere.cap.V[1][i],
+		     E->sphere.cap.V[2][i],
+		     E->sphere.cap.V[3][i],E->T[i]);
 	}
       }
-    }
     gzclose(gzout);
     if(E->output.gzdir.vtk_io){
       /*
@@ -665,30 +647,30 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       snprintf(output_file,255,"%s/%d/vtk_v.%d.%d.gz",
 	       E->control.data_dir,cycles,E->parallel.me,cycles);
       gzout = gzdir_output_open(output_file,"w");
-      for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
-	if(E->output.gzdir.rnr){
-	  /* remove NR */
-	  for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	    vcorr[0] = E->sphere.cap[j].V[1][i];
-	    vcorr[1] = E->sphere.cap[j].V[2][i];
-	    sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
-	    convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],vcorr[0],vcorr[1],
-				 (E->output.gzdir.vtk_base+k),cvec);
-	    gzprintf(gzout,"%10.4e %10.4e %10.4e\n",cvec[0],cvec[1],cvec[2]);
-	  }
-	}else{
-	  /* regular output */
-	  for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	    /* convert r,theta,phi vector to x,y,z at base location */
-	    convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],
-				 E->sphere.cap[j].V[1][i],
-				 E->sphere.cap[j].V[2][i],
-				 (E->output.gzdir.vtk_base+k),cvec);
-	    /* output of cartesian vector */
-	    gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
-		     cvec[0],cvec[1],cvec[2]);
-	  }
-	}
+      k = 0;
+      if(E->output.gzdir.rnr){
+        /* remove NR */
+          for(i=1;i<=E->lmesh.nno;i++,k += 9) {
+            vcorr[0] = E->sphere.cap.V[1][i];
+            vcorr[1] = E->sphere.cap.V[2][i];
+            sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],
+                     (vcorr+0),(vcorr+1),omega);
+            convert_pvec_to_cvec(E->sphere.cap.V[3][i],vcorr[0],vcorr[1],
+                                 (E->output.gzdir.vtk_base+k),cvec);
+            gzprintf(gzout,"%10.4e %10.4e %10.4e\n",cvec[0],cvec[1],cvec[2]);
+          }
+      }else{
+        /* regular output */
+        for(i=1;i<=E->lmesh.nno;i++,k += 9) {
+          /* convert r,theta,phi vector to x,y,z at base location */
+          convert_pvec_to_cvec(E->sphere.cap.V[3][i],
+             E->sphere.cap.V[1][i],
+             E->sphere.cap.V[2][i],
+             (E->output.gzdir.vtk_base+k),cvec);
+          /* output of cartesian vector */
+          gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
+             cvec[0],cvec[1],cvec[2]);
+        }
       }
       gzclose(gzout);
 
@@ -724,11 +706,9 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 	     "%s/%d/visc.%d.%d.gz", E->control.data_dir,
 	     cycles,E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gz1,"%7d\n",E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.4e\n",E->VI[lev][j][i]);
-    }
+        gzprintf(gz1,"%.4e\n",E->VI[lev][i]);
 
     gzclose(gz1);
   }else{
@@ -746,11 +726,11 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
       /* open for append */
       fp1 = output_open(output_file,"a");
     }
-    for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = log10(E->VI[lev][j][i]);
-	if(fabs(ftmp) < 5e-7)ftmp = 0.0;
-	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+        ftmp = log10(E->VI[lev][i]);
+        if(fabs(ftmp) < 5e-7)ftmp = 0.0;
+        if(be_write_float_to_file(&ftmp,1,fp1)!=1)
+          BE_WERROR;
       }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2)
@@ -758,7 +738,6 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
-  return;
 }
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
@@ -785,11 +764,9 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 	       "%s/%d/avisc.%d.%d.gz", E->control.data_dir,
 	       cycles,E->parallel.me, cycles);
       gz1 = gzdir_output_open(output_file,"w");
-      for(j=1;j<=E->sphere.caps_per_proc;j++) {
-	gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+	gzprintf(gz1,"%7d\n",E->lmesh.nno);
 	for(i=1;i<=E->lmesh.nno;i++)
-	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
-      }
+	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][i],E->VIn1[lev][i],E->VIn2[lev][i],E->VIn3[lev][i]);
       
       gzclose(gz1);
     }else{
@@ -807,9 +784,8 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 	/* open for append */
 	fp1 = output_open(output_file,"a");
       }
-      for(j=1; j<= E->sphere.caps_per_proc;j++)
 	for(i=1;i<=E->lmesh.nno;i++){
-	  ftmp = E->VI2[lev][j][i];
+	  ftmp = E->VI2[lev][i];
 	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)
 	    BE_WERROR;
 	}
@@ -820,7 +796,6 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 	}
     }
   }
-  return;
 }
 
 #endif
@@ -849,19 +824,17 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp2 = gzdir_output_open(output_file,"w");
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-        /* choose either STD topo or pseudo-free-surf topo */
-        if(E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[j];
-        else
-            topo = E->slice.tpg[j];
+    /* choose either STD topo or pseudo-free-surf topo */
+    if(E->control.pseudo_free_surf)
+        topo = E->slice.freesurf;
+    else
+        topo = E->slice.tpg;
 
-        gzprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
-        for(i=1;i<=E->lmesh.nsf;i++)   {
-            s = i*E->lmesh.noz;
-            gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		     topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
-        }
+    gzprintf(fp2,"%7d\n",E->lmesh.nsf);
+    for(i=1;i<=E->lmesh.nsf;i++)   {
+      s = i*E->lmesh.noz;
+      gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
+      topo[i],E->slice.shflux[i],E->sphere.cap.V[1][s],E->sphere.cap.V[2][s]);
     }
     gzclose(fp2);
   }
@@ -872,20 +845,18 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp2 = gzdir_output_open(output_file,"w");
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-      gzprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      gzprintf(fp2,"%7d\n",E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		 E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+		                  E->slice.tpgb[i],
+                      E->slice.bhflux[i],
+                      E->sphere.cap.V[1][s],
+                      E->sphere.cap.V[2][s]);
       }
-    }
     gzclose(fp2);
   }
-
-  return;
 }
-
 
 void gzdir_output_geoid(struct All_variables *E, int cycles)
 {
@@ -936,8 +907,8 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   void allocate_STD_mem();
   void compute_nodal_stress();
   void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
+  float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+  float *divv,*vorv;
   /*  */
   if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
     allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
@@ -951,17 +922,15 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 
   gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
-    for (node=1;node<=E->lmesh.nno;node++)
-      gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[m][(node-1)*6+1], /*  stt */
-              E->gstress[m][(node-1)*6+2], /*  spp */
-              E->gstress[m][(node-1)*6+3], /*  srr */
-              E->gstress[m][(node-1)*6+4], /*  stp */
-              E->gstress[m][(node-1)*6+5], /*  str */
-              E->gstress[m][(node-1)*6+6]); /* srp */
-  }
+  gzprintf(fp1,"%7d\n",E->lmesh.nno);
+  for (node=1;node<=E->lmesh.nno;node++)
+    gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
+            E->gstress[(node-1)*6+1], /*  stt */
+            E->gstress[(node-1)*6+2], /*  spp */
+            E->gstress[(node-1)*6+3], /*  srr */
+            E->gstress[(node-1)*6+4], /*  stp */
+            E->gstress[(node-1)*6+5], /*  str */
+            E->gstress[(node-1)*6+6]); /* srp */
   gzclose(fp1);
 }
 
@@ -985,7 +954,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1=gzdir_output_open(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  { /* format: r <T> <vh> <vr> (<C>) */
-        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {
             int n;
@@ -996,8 +965,6 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
     }
     gzclose(fp1);
   }
-
-  return;
 }
 
 
@@ -1011,16 +978,11 @@ void gzdir_output_mat(struct All_variables *E)
   snprintf(output_file,255,"%s/mat.%d.gz", E->control.data_dir,E->parallel.me);
   fp = gzdir_output_open(output_file,"w");
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(el=1;el<=E->lmesh.nel;el++)
-      gzprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
+  for(el=1;el<=E->lmesh.nel;el++)
+    gzprintf(fp,"%d %d %f\n", el,E->mat[el],E->VIP[el]);
 
   gzclose(fp);
-
-  return;
 }
-
-
 
 void gzdir_output_pressure(struct All_variables *E, int cycles)
 {
@@ -1039,11 +1001,9 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
 	     E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
     gzprintf(gz1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
-      for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.6e\n",E->NP[j][i]);
-    }
+    gzprintf(gz1,"%7d\n",E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++)
+      gzprintf(gz1,"%.6e\n",E->NP[i]);
     gzclose(gz1);
   }else{/* new legacy VTK */
     if(E->output.gzdir.vtk_io == 2)
@@ -1057,10 +1017,10 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
       mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
-    for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = E->NP[j][i];
-	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
+        ftmp = E->NP[i];
+        if(be_write_float_to_file(&ftmp,1,fp1)!=1)
+          BE_WERROR;
       }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2)
@@ -1068,10 +1028,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
 	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
-  return;
 }
-
-
 
 void gzdir_output_tracer(struct All_variables *E, int cycles)
 {
@@ -1086,30 +1043,25 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers,
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[j];n++) {
+      for(n=1;n<=E->trace.ntracers;n++) {
           /* write basic quantities (coordinate) */
           gzprintf(fp1,"%9.5e %9.5e %9.5e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
+                  E->trace.basicq[0][n],
+                  E->trace.basicq[1][n],
+                  E->trace.basicq[2][n]);
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %9.5e", E->trace.extraq[j][i][n]);
+              gzprintf(fp1," %9.5e", E->trace.extraq[i][n]);
           }
           gzprintf(fp1, "\n");
       }
 
-  }
-
   gzclose(fp1);
-  return;
 }
-
 
 void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 {
@@ -1128,18 +1080,16 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 	     E->control.data_dir,cycles,
 	     E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(gz1,"%3d %7d %.5e %.5e %.5e\n",
-	       j, E->lmesh.nel,
+    gzprintf(gz1,"%7d %.5e %.5e %.5e\n",
+	       E->lmesh.nel,
 	       E->monitor.elapsed_time,
 	       E->composition.initial_bulk_composition,
 	       E->composition.bulk_composition);
       for(i=1;i<=E->lmesh.nno;i++) {
 	for(k=0;k < E->composition.ncomp;k++)
-	  gzprintf(gz1,"%.6e ",E->composition.comp_node[j][k][i]);
+	  gzprintf(gz1,"%.6e ",E->composition.comp_node[k][i]);
 	gzprintf(gz1,"\n");
       }
-    }
     gzclose(gz1);
   }else{/* new legacy VTK */
     if(E->output.gzdir.vtk_io == 2)
@@ -1156,12 +1106,12 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
       mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1), 0, E->parallel.world, &mpi_stat);
       fp1 = output_open(output_file,"a");
     }
-    for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
-	for(k=0;k<E->composition.ncomp;k++){
-	  ftmp = E->composition.comp_node[j][k][i];
-	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
-	}
+        for(k=0;k<E->composition.ncomp;k++){
+          ftmp = E->composition.comp_node[k][i];
+          if(be_write_float_to_file(&ftmp,1,fp1)!=1)
+            BE_WERROR;
+        }
       }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
     if(E->output.gzdir.vtk_io == 2) /* serial */
@@ -1169,9 +1119,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 	mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
       }
   }
-  return;
 }
-
 
 void gzdir_output_comp_el(struct All_variables *E, int cycles)
 {
@@ -1183,24 +1131,20 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1 = gzdir_output_open(output_file,"w");
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        gzprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
-                j, E->lmesh.nel,
+        gzprintf(fp1,"%7d %.5e %.5e %.5e\n",
+                E->lmesh.nel,
                 E->monitor.elapsed_time,
                 E->composition.initial_bulk_composition,
                 E->composition.bulk_composition);
 
         for(i=1;i<=E->lmesh.nel;i++) {
-	  for(k=0;k<E->composition.ncomp;k++)
-            gzprintf(fp1,"%.6e ",E->composition.comp_el[j][k][i]);
-	  gzprintf(fp1,"\n");
+          for(k=0;k<E->composition.ncomp;k++)
+            gzprintf(fp1,"%.6e ",E->composition.comp_el[k][i]);
+            gzprintf(fp1,"\n");
         }
-    }
 
     gzclose(fp1);
-    return;
 }
-
 
 void gzdir_output_heating(struct All_variables *E, int cycles)
 {
@@ -1214,15 +1158,11 @@ void gzdir_output_heating(struct All_variables *E, int cycles)
 
     gzprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        gzprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        gzprintf(fp1,"%7d\n", E->lmesh.nel);
         for(e=1; e<=E->lmesh.nel; e++)
-            gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
-                      E->heating_visc[j][e], E->heating_latent[j][e]);
-    }
+            gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[e],
+                      E->heating_visc[e], E->heating_latent[e]);
     gzclose(fp1);
-
-    return;
 }
 
 
@@ -1276,7 +1216,6 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
   
   switch(E->output.gzdir.vtk_io) {
   case 1: /* VTK */
-    for(m=1;m <= E->sphere.caps_per_proc;m++) {
       if(fscanf(fp,"%i %i",&ll,&mm) != 2)
 	myerror(E,"restart vtkl read error 1");
       for(i=1;i<=E->lmesh.nno;i++){
@@ -1286,24 +1225,21 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	  fprintf(stderr,"WARNING: found a NaN in input temperatures\n");
 	  g=0.0;
 	}
-	E->T[m][i] = g;
+	E->T[i] = g;
       }
-    }
     break;
   default:			/* old style velo */
-    for(m=1;m <= E->sphere.caps_per_proc;m++) {
       fscanf(fp,"%i %i",&ll,&mm);
       for(i=1;i<=E->lmesh.nno;i++)  {
         if(fscanf(fp,"%f %f %f %f",&v1,&v2,&v3,&g) != 4)
 	  myerror(E,"restart velo read error 1");
-	/*  E->sphere.cap[m].V[1][i] = v1;
-	    E->sphere.cap[m].V[1][i] = v2;
-	    E->sphere.cap[m].V[1][i] = v3;  */
+	/*  E->sphere.cap.V[1][i] = v1;
+	    E->sphere.cap.V[1][i] = v2;
+	    E->sphere.cap.V[1][i] = v3;  */
 	/* I don't like that  */
-	//E->T[m][i] = max(0.0,min(g,1.0));
-	E->T[m][i] = g;
+	//E->T[i] = max(0.0,min(g,1.0));
+	E->T[i] = g;
       }
-    }
     break;
   }
   fclose (fp);

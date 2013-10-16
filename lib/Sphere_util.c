@@ -73,51 +73,46 @@ void compute_angle_surf_area (E)
     void get_angle_sphere_cap();
     void parallel_process_termination();
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         ia[1] = 1;
         ia[2] = E->lmesh.noz*E->lmesh.nox-E->lmesh.noz+1;
         ia[3] = E->lmesh.nno-E->lmesh.noz+1;
         ia[4] = ia[3]-E->lmesh.noz*(E->lmesh.nox-1);
 
         for (i=1;i<=4;i++)  {
-            xx[1][i] = E->x[m][1][ia[i]]/E->sx[m][3][ia[1]];
-            xx[2][i] = E->x[m][2][ia[i]]/E->sx[m][3][ia[1]];
-            xx[3][i] = E->x[m][3][ia[i]]/E->sx[m][3][ia[1]];
+            xx[1][i] = E->x[1][ia[i]]/E->sx[3][ia[1]];
+            xx[2][i] = E->x[2][ia[i]]/E->sx[3][ia[1]];
+            xx[3][i] = E->x[3][ia[i]]/E->sx[3][ia[1]];
         }
 
         get_angle_sphere_cap(xx,angle);
 
         for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
-            E->sphere.angle[m][i] = angle[i];
+            E->sphere.angle[i] = angle[i];
 
-        E->sphere.area[m] = area_sphere_cap(angle);
+        E->sphere.area = area_sphere_cap(angle);
 
         for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)
             for (es=1;es<=E->lmesh.SNEL[lev];es++)              {
                 el = (es-1)*E->lmesh.ELZ[lev]+1;
                 for (i=1;i<=4;i++)
-                    ia[i] = E->IEN[lev][m][el].node[i];
+                    ia[i] = E->IEN[lev][el].node[i];
 
                 for (i=1;i<=4;i++)  {
-                    xx[1][i] = E->X[lev][m][1][ia[i]]/E->SX[lev][m][3][ia[1]];
-                    xx[2][i] = E->X[lev][m][2][ia[i]]/E->SX[lev][m][3][ia[1]];
-                    xx[3][i] = E->X[lev][m][3][ia[i]]/E->SX[lev][m][3][ia[1]];
+                    xx[1][i] = E->X[lev][1][ia[i]]/E->SX[lev][3][ia[1]];
+                    xx[2][i] = E->X[lev][2][ia[i]]/E->SX[lev][3][ia[1]];
+                    xx[3][i] = E->X[lev][3][ia[i]]/E->SX[lev][3][ia[1]];
                 }
 
                 get_angle_sphere_cap(xx,angle);
 
                 for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
-                    E->sphere.angle1[lev][m][i][es] = angle[i];
+                    E->sphere.angle1[lev][i][es] = angle[i];
 
-                E->sphere.area1[lev][m][es] = area_sphere_cap(angle);
+                E->sphere.area1[lev][es] = area_sphere_cap(angle);
 
 /*              fprintf(E->fp_out,"lev%d %d %.6e %.6e %.6e %.6e %.6e\n",lev,es,angle[1],angle[2],angle[3],angle[4],E->sphere.area1[lev][m][es]); */
 
             }  /* end for lev and es */
-
-    }  /* end for m */
-
-    return;
 }
 
 /* ================================================
@@ -176,26 +171,24 @@ double area_of_sphere_triag(a,b,c)
     angle [i]: angle bet test node and node i of the rectangle
     angle1[i]: angle bet nodes i and i+1 of the rectangle
     ====================================================================== */
-double area_of_5points(E,lev,m,el,x,ne)
-     struct All_variables *E;
-     int lev,m,el,ne;
-     double x[4];
+double area_of_5points( struct All_variables *E, int lev, int el, 
+                        double x[4], int ne )
 {
     int i,es,ia[5];
     double area1,get_angle(),area_of_sphere_triag();
     double xx[4],angle[5],angle1[5];
 
     for (i=1;i<=4;i++)
-        ia[i] = E->IEN[lev][m][el].node[i];
+        ia[i] = E->IEN[lev][el].node[i];
 
     es = (el-1)/E->lmesh.ELZ[lev]+1;
 
     for (i=1;i<=4;i++)                 {
-        xx[1] = E->X[lev][m][1][ia[i]]/E->SX[lev][m][3][ia[1]];
-        xx[2] = E->X[lev][m][2][ia[i]]/E->SX[lev][m][3][ia[1]];
-        xx[3] = E->X[lev][m][3][ia[i]]/E->SX[lev][m][3][ia[1]];
+        xx[1] = E->X[lev][1][ia[i]]/E->SX[lev][3][ia[1]];
+        xx[2] = E->X[lev][2][ia[i]]/E->SX[lev][3][ia[1]];
+        xx[3] = E->X[lev][3][ia[i]]/E->SX[lev][3][ia[1]];
         angle[i] = get_angle(x,xx);  /* get angle bet (i,j) and other four*/
-        angle1[i]= E->sphere.angle1[lev][m][i][es];
+        angle1[i]= E->sphere.angle1[lev][i][es];
     }
 
     area1 = area_of_sphere_triag(angle[1],angle[2],angle1[1])
@@ -232,7 +225,6 @@ void  get_angle_sphere_cap(xx,angle)
     }
 
     angle[5] = get_angle(y1,y2);     /* angle5 for betw 1 and 3: diagonal */
-    return;
 }
 
 /*  ================================

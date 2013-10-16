@@ -33,15 +33,15 @@
 #include "parsing.h"
 #include "phase_change.h"
 
-static void phase_change_apply(struct All_variables *E, double **buoy,
-			       float **B, float **B_b,
+static void phase_change_apply(struct All_variables *E, double *buoy,
+			       float *B, float *B_b,
 			       float Ra, float clapeyron,
 			       float depth, float transT, float inv_width);
 static void calc_phase_change(struct All_variables *E,
-			      float **B, float **B_b,
+			      float *B, float *B_b,
 			      float Ra, float clapeyron,
 			      float depth, float transT, float inv_width);
-static void debug_phase_change(struct All_variables *E, float **B);
+static void debug_phase_change(struct All_variables *E, float *B);
 
 
 void phase_change_allocate(struct All_variables *E)
@@ -50,16 +50,12 @@ void phase_change_allocate(struct All_variables *E)
   int nno  = E->lmesh.nno;
   int nsf  = E->lmesh.nsf;
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-    E->Fas410[j]   = (float *) malloc((nno+1)*sizeof(float));
-    E->Fas410_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-    E->Fas670[j]   = (float *) malloc((nno+1)*sizeof(float));
-    E->Fas670_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-    E->Fascmb[j]   = (float *) malloc((nno+1)*sizeof(float));
-    E->Fascmb_b[j] = (float *) malloc((nsf+1)*sizeof(float));
-  }
-
-  return;
+  E->Fas410   = (float *) malloc((nno+1)*sizeof(float));
+  E->Fas410_b = (float *) malloc((nsf+1)*sizeof(float));
+  E->Fas670   = (float *) malloc((nno+1)*sizeof(float));
+  E->Fas670_b = (float *) malloc((nsf+1)*sizeof(float));
+  E->Fascmb   = (float *) malloc((nno+1)*sizeof(float));
+  E->Fascmb_b = (float *) malloc((nsf+1)*sizeof(float));
 }
 
 
@@ -94,53 +90,45 @@ void phase_change_input(struct All_variables *E)
 
   if (width!=0.0)
     E->control.inv_widthcmb = 1.0/width;
-
-
-  return;
 }
 
-
-void phase_change_apply_410(struct All_variables *E, double **buoy)
+void phase_change_apply_410(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_410 != 0.0)
     phase_change_apply(E, buoy, E->Fas410, E->Fas410_b, E->control.Ra_410,
 		       E->control.clapeyron410, E->viscosity.z410,
 		       E->control.transT410, E->control.inv_width410);
-  return;
 }
 
 
-void phase_change_apply_670(struct All_variables *E, double **buoy)
+void phase_change_apply_670(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_670 != 0.0)
     phase_change_apply(E, buoy, E->Fas670, E->Fas670_b, E->control.Ra_670,
 		       E->control.clapeyron670, E->viscosity.zlm,
 		       E->control.transT670, E->control.inv_width670);
-  return;
 }
 
 
-void phase_change_apply_cmb(struct All_variables *E, double **buoy)
+void phase_change_apply_cmb(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_cmb != 0.0)
     phase_change_apply(E, buoy, E->Fascmb, E->Fascmb_b, E->control.Ra_cmb,
 		       E->control.clapeyroncmb, E->viscosity.zcmb,
 		       E->control.transTcmb, E->control.inv_widthcmb);
-  return;
 }
 
 
-static void phase_change_apply(struct All_variables *E, double **buoy,
-			       float **B, float **B_b,
+static void phase_change_apply(struct All_variables *E, double *buoy,
+			       float *B, float *B_b,
 			       float Ra, float clapeyron,
 			       float depth, float transT, float inv_width)
 {
   int m, i;
 
   calc_phase_change(E, B, B_b, Ra, clapeyron, depth, transT, inv_width);
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      buoy[m][i] -= Ra * B[m][i];
+      buoy[i] -= Ra * B[i];
 
   if (E->control.verbose) {
     fprintf(E->fp_out, "Ra=%f, clapeyron=%f, depth=%f, transT=%f, inv_width=%f\n",
@@ -148,13 +136,11 @@ static void phase_change_apply(struct All_variables *E, double **buoy,
     debug_phase_change(E,B);
     fflush(E->fp_out);
   }
-
-  return;
 }
 
 
 static void calc_phase_change(struct All_variables *E,
-			      float **B, float **B_b,
+			      float *B, float *B_b,
 			      float Ra, float clapeyron,
 			      float depth, float transT, float inv_width)
 {
@@ -164,19 +150,18 @@ static void calc_phase_change(struct All_variables *E,
   pt5 = 0.5;
   one = 1.0;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     /* compute phase function B, the concentration of the high pressure
      * phase. B is between 0 and 1. */
     for(i=1;i<=E->lmesh.nno;i++)  {
         nz = ((i-1) % E->lmesh.noz) + 1;
-        dz = (E->sphere.ro-E->sx[m][3][i]) - depth;
+        dz = (E->sphere.ro-E->sx[3][i]) - depth;
         /*XXX: dz*rho[nz]*g[nz] is only a approximation for the reduced
          * pressure, a more accurate formula is:
          *   integral(rho(z)*g(z)*dz) from depth_ph to current depth   */
         e_pressure = dz * E->refstate.rho[nz] * E->refstate.gravity[nz]
-            - clapeyron * (E->T[m][i] - transT);
+            - clapeyron * (E->T[i] - transT);
 
-        B[m][i] = pt5 * (one + tanh(inv_width * e_pressure));
+        B[i] = pt5 * (one + tanh(inv_width * e_pressure));
     }
 
     /* compute the phase boundary, defined as the depth where B==0.5 */
@@ -184,30 +169,23 @@ static void calc_phase_change(struct All_variables *E,
     for (k=1;k<=E->lmesh.noy;k++)
       for (j=1;j<=E->lmesh.nox;j++)  {
         ns++;
-        B_b[m][ns]=0.0;
+        B_b[ns]=0.0;
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
-          if (B[m][n]>=pt5 && B[m][n+1]<=pt5)
-            B_b[m][ns]=(E->sx[m][3][n+1]-E->sx[m][3][n])*(pt5-B[m][n])/(B[m][n+1]-B[m][n])+E->sx[m][3][n];
+          if (B[n]>=pt5 && B[n+1]<=pt5)
+            B_b[ns]=(E->sx[3][n+1]-E->sx[3][n])*(pt5-B[n])/(B[n+1]-B[n])+E->sx[3][n];
 	}
       }
-  }
-
-  return;
 }
 
-
-static void debug_phase_change(struct All_variables *E, float **B)
+static void debug_phase_change(struct All_variables *E, float *B)
 {
   int m, j;
 
   fprintf(E->fp_out,"output_phase_change_buoyancy\n");
-  for(m=1;m<=E->sphere.caps_per_proc;m++)        {
-    fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[m]);
-    for (j=1;j<=E->lmesh.nno;j++)
-      fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",E->sx[m][3][j],E->T[m][j],j,B[m][j]);
-  }
+  fprintf(E->fp_out,"for cap %d\n",E->sphere.capid);
+  for (j=1;j<=E->lmesh.nno;j++)
+    fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",
+        E->sx[3][j],E->T[j],j,B[j]);
   fflush(E->fp_out);
-
-  return;
 }

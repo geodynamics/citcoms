@@ -49,10 +49,9 @@ static void write_trace_instructions(struct All_variables *E);
 static void make_mesh_ijk(struct All_variables *E);
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             int kk, int j);
+                             int kk);
 static void put_found_tracers(struct All_variables *E,
-                              int recv_size, double *recv,
-                              int j);
+                              int recv_size, double *recv);
 int isearch_neighbors(double *array, int nsize,
                       double a, int hint);
 int isearch_all(double *array, int nsize, double a);
@@ -65,13 +64,6 @@ void regional_tracer_setup(struct All_variables *E)
     void get_neighboring_caps();
     double CPU_time0();
     double begin_time = CPU_time0();
-
-    /* Some error control */
-
-    if (E->sphere.caps_per_proc>1) {
-            fprintf(stderr,"This code does not work for multiple caps per processor!\n");
-            parallel_process_termination();
-    }
 
 
     /* open tracing output file */
@@ -146,8 +138,6 @@ void regional_tracer_setup(struct All_variables *E)
 
     fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
             CPU_time0() - begin_time);
-
-    return;
 }
 
 
@@ -225,9 +215,6 @@ static void write_trace_instructions(struct All_variables *E)
     }
 
     write_composition_instructions(E);
-
-
-    return;
 }
 
 
@@ -248,56 +235,14 @@ static void make_mesh_ijk(struct All_variables *E)
         reading the local mesh coordinate
     ***/
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for(i=0;i<nox;i++)
-	    E->trace.x_space[i]=E->sx[m][1][i*noz+1];
-
-        for(j=0;j<noy;j++)
-	    E->trace.y_space[j]=E->sx[m][2][j*nox*noz+1];
-
-        for(k=0;k<noz;k++)
-	    E->trace.z_space[k]=E->sx[m][3][k+1];
-
-    }   /* end of m  */
-
-
-    /* debug *
     for(i=0;i<nox;i++)
-	fprintf(E->trace.fpt, "i=%d x=%e\n", i, E->trace.x_space[i]);
+	    E->trace.x_space[i]=E->sx[1][i*noz+1];
+
     for(j=0;j<noy;j++)
-	fprintf(E->trace.fpt, "j=%d y=%e\n", j, E->trace.y_space[j]);
+	    E->trace.y_space[j]=E->sx[2][j*nox*noz+1];
+
     for(k=0;k<noz;k++)
-	fprintf(E->trace.fpt, "k=%d z=%e\n", k, E->trace.z_space[k]);
-
-    /**
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 0));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 1));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 2));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 3));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 4));
-
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 0));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 1));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 2));
-
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 2));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 3));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 4));
-
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.5));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.1));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.55));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.0));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.551));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.99));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.75));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.775));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
-    parallel_process_termination();
-    /**/
-
-    return;
+	    E->trace.z_space[k]=E->sx[3][k+1];
 }
 
 
@@ -309,7 +254,7 @@ static void make_mesh_ijk(struct All_variables *E)
 /* it is not known, input a negative number.                     */
 
 int regional_iget_element(struct All_variables *E,
-			  int m, int iprevious_element,
+			  int iprevious_element,
 			  double dummy1, double dummy2, double dummy3,
 			  double theta, double phi, double rad)
 {
@@ -521,7 +466,7 @@ double regional_interpolate_data(struct All_variables *E,
 /******** GET VELOCITY ***************************************/
 
 void regional_get_velocity(struct All_variables *E,
-                           int m, int nelem,
+                           int nelem,
                            double theta, double phi, double rad,
                            double *velocity_vector)
 {
@@ -536,7 +481,7 @@ void regional_get_velocity(struct All_variables *E,
 
 
     /* get cartesian velocity */
-    velo_from_element_d(E, VV, m, nelem, sphere_key);
+    velo_from_element_d(E, VV, nelem, sphere_key);
 
 
     /*** comment by Tan2 1/25/2005
@@ -569,10 +514,7 @@ void regional_get_velocity(struct All_variables *E,
 
     fflush(E->trace.fpt);
     /**/
-
-    return;
 }
-
 
 void regional_keep_within_bounds(struct All_variables *E,
                                  double *x, double *y, double *z,
@@ -613,16 +555,10 @@ void regional_keep_within_bounds(struct All_variables *E,
 
     if (changed)
         sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
-
-
-    return;
 }
-
 
 void regional_lost_souls(struct All_variables *E)
 {
-    /* This part only works if E->sphere.caps_per_proc==1 */
-    const int j = 1;
     int lev = E->mesh.levmax;
 
     int i, d, kk;
@@ -645,20 +581,20 @@ void regional_lost_souls(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
-    E->trace.istat_isend = E->trace.ilater[j];
+    E->trace.istat_isend = E->trace.ilater;
 
     /* the bounding box */
     for (d=0; d<E->mesh.nsd; d++) {
-        bounds[d][0] = E->sx[j][d+1][1];
-        bounds[d][1] = E->sx[j][d+1][E->lmesh.nno];
+        bounds[d][0] = E->sx[d+1][1];
+        bounds[d][1] = E->sx[d+1][E->lmesh.nno];
     }
 
     /* set up ranks for neighboring procs */
     /* if ngbr_rank is -1, there is no neighbor on this side */
     ipass = 1;
     for (kk=1; kk<=6; kk++) {
-        if (E->parallel.NUM_PASS[lev][j].bound[kk] == 1) {
-            ngbr_rank[kk] = E->parallel.PROCESSOR[lev][j].pass[ipass];
+        if (E->parallel.NUM_PASS[lev].bound[kk] == 1) {
+            ngbr_rank[kk] = E->parallel.PROCESSOR[lev].pass[ipass];
             ipass++;
         }
         else {
@@ -689,7 +625,7 @@ void regional_lost_souls(struct All_variables *E)
 
 
     /* Allocate Maximum Memory to Send Arrays */
-    max_send_size = max(2*E->trace.ilater[j], E->trace.ntracers[j]/100);
+    max_send_size = max(2*E->trace.ilater, E->trace.ntracers/100);
     itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
 
     if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
@@ -707,7 +643,7 @@ void regional_lost_souls(struct All_variables *E)
 
 
     for (d=0; d<E->mesh.nsd; d++) {
-        int original_size = E->trace.ilater[j];
+        int original_size = E->trace.ilater;
         int idb;
         int kk = 1;
         int isend[2], irecv[2];
@@ -715,17 +651,17 @@ void regional_lost_souls(struct All_variables *E)
 
 
         /* move out-of-bound tracers to send array */
-        while (kk<=E->trace.ilater[j]) {
+        while (kk<=E->trace.ilater) {
             double coord;
 
             /* Is the tracer within the bounds in the d-th dimension */
-            coord = E->trace.rlater[j][d][kk];
+            coord = E->trace.rlater[d][kk];
 
             if (coord < bounds[d][0]) {
-                put_lost_tracers(E, &(isend[0]), send[0], kk, j);
+                put_lost_tracers(E, &(isend[0]), send[0], kk);
             }
             else if (coord >= bounds[d][1]) {
-                put_lost_tracers(E, &(isend[1]), send[1], kk, j);
+                put_lost_tracers(E, &(isend[1]), send[1], kk);
             }
             else {
                 /* check next tracer */
@@ -766,10 +702,10 @@ void regional_lost_souls(struct All_variables *E)
 
 
         /* check the total # of tracers is conserved */
-        if ((isend[0] + isend[1] + E->trace.ilater[j]) != original_size) {
+        if ((isend[0] + isend[1] + E->trace.ilater) != original_size) {
             fprintf(E->trace.fpt, "original_size: %d, rlater_size: %d, "
                     "send_size: %d\n",
-                    original_size, E->trace.ilater[j], kk);
+                    original_size, E->trace.ilater, kk);
         }
 
 
@@ -878,7 +814,7 @@ void regional_lost_souls(struct All_variables *E)
 
         /* put the received tracers */
         for (i=0; i<2; i++) {
-            put_found_tracers(E, irecv[i], recv[i], j);
+            put_found_tracers(E, irecv[i], recv[i]);
         }
 
 
@@ -889,13 +825,13 @@ void regional_lost_souls(struct All_variables *E)
 
 
     /* rlater should be empty by now */
-    if (E->trace.ilater[j] > 0) {
+    if (E->trace.ilater > 0) {
         fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
-        for (kk=1; kk<=E->trace.ilater[j]; kk++) {
+        for (kk=1; kk<=E->trace.ilater; kk++) {
             fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
-                    E->trace.rlater[j][0][kk],
-                    E->trace.rlater[j][1][kk],
-                    E->trace.rlater[j][2][kk]);
+                    E->trace.rlater[0][kk],
+                    E->trace.rlater[1][kk],
+                    E->trace.rlater[2][kk]);
         }
         fflush(E->trace.fpt);
         exit(10);
@@ -908,13 +844,12 @@ void regional_lost_souls(struct All_variables *E)
     free(send[1]);
 
     E->trace.lost_souls_time += CPU_time0() - begin_time;
-    return;
 }
 
 
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             int kk, int j)
+                             int kk)
 {
     int ilast_tracer, isend_position, ipos;
     int pp;
@@ -924,18 +859,16 @@ static void put_lost_tracers(struct All_variables *E,
 
     for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
         ipos = isend_position + pp;
-        send[ipos] = E->trace.rlater[j][pp][kk];
+        send[ipos] = E->trace.rlater[pp][kk];
     }
     (*send_size)++;
 
     /* eject the tracer from rlater */
-    ilast_tracer = E->trace.ilater[j];
+    ilast_tracer = E->trace.ilater;
     for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
-        E->trace.rlater[j][pp][kk] = E->trace.rlater[j][pp][ilast_tracer];
+        E->trace.rlater[pp][kk] = E->trace.rlater[pp][ilast_tracer];
     }
-    E->trace.ilater[j]--;
-
-    return;
+    E->trace.ilater--;
 }
 
 
@@ -944,8 +877,7 @@ static void put_lost_tracers(struct All_variables *E,
 /* Otherwise, append to rlater for sending to another proc      */
 
 static void put_found_tracers(struct All_variables *E,
-                              int recv_size, double *recv,
-                              int j)
+                              int recv_size, double *recv)
 {
     void expand_tracer_arrays();
     void expand_later_array();
@@ -963,7 +895,7 @@ static void put_found_tracers(struct All_variables *E,
 
         /* check whether this tracer is inside this proc */
         /* check radius first, since it is cheaper       */
-        inside = icheck_processor_shell(E, j, rad);
+        inside = icheck_processor_shell(E, rad);
         if (inside == 1)
             inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
         else
@@ -978,22 +910,22 @@ static void put_found_tracers(struct All_variables *E,
 
         if (inside) {
 
-            E->trace.ntracers[j]++;
-            ilast = E->trace.ntracers[j];
+            E->trace.ntracers++;
+            ilast = E->trace.ntracers;
 
-            if (E->trace.ntracers[j] > (E->trace.max_ntracers[j]-5))
-                expand_tracer_arrays(E, j);
+            if (E->trace.ntracers > (E->trace.max_ntracers-5))
+                expand_tracer_arrays(E);
 
             for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
-                E->trace.basicq[j][pp][ilast] = recv[ipos+pp];
+                E->trace.basicq[pp][ilast] = recv[ipos+pp];
 
             ipos += E->trace.number_of_basic_quantities;
             for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
-                E->trace.extraq[j][pp][ilast] = recv[ipos+pp];
+                E->trace.extraq[pp][ilast] = recv[ipos+pp];
 
 
             /* found the element */
-            iel = regional_iget_element(E, j, -99, 0, 0, 0, theta, phi, rad);
+            iel = regional_iget_element(E, -99, 0, 0, 0, theta, phi, rad);
 
             if (iel<1) {
                 fprintf(E->trace.fpt, "Error(regional lost souls) - "
@@ -1004,16 +936,16 @@ static void put_found_tracers(struct All_variables *E,
                 exit(10);
             }
 
-            E->trace.ielement[j][ilast] = iel;
+            E->trace.ielement[ilast] = iel;
 
         }
         else {
-            if (E->trace.ilatersize[j]==0) {
+            if (E->trace.ilatersize==0) {
 
-                E->trace.ilatersize[j]=E->trace.max_ntracers[j]/5;
+                E->trace.ilatersize=E->trace.max_ntracers/5;
 
                 for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
-                    if ((E->trace.rlater[j][kk]=(double *)malloc(E->trace.ilatersize[j]*sizeof(double)))==NULL) {
+                    if ((E->trace.rlater[kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
                         fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
                         fflush(E->trace.fpt);
                         exit(10);
@@ -1021,14 +953,14 @@ static void put_found_tracers(struct All_variables *E,
                 }
             } /* end first particle initiating memory allocation */
 
-            E->trace.ilater[j]++;
-            ilast = E->trace.ilater[j];
+            E->trace.ilater++;
+            ilast = E->trace.ilater;
 
-            if (E->trace.ilater[j] > (E->trace.ilatersize[j]-5))
-                expand_later_array(E, j);
+            if (E->trace.ilater > (E->trace.ilatersize-5))
+                expand_later_array(E);
 
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
-                E->trace.rlater[j][pp][ilast] = recv[ipos+pp];
+                E->trace.rlater[pp][ilast] = recv[ipos+pp];
         } /* end of if-else */
 
         /** debug **
@@ -1038,6 +970,4 @@ static void put_found_tracers(struct All_variables *E,
         /**/
 
     } /* end of for kk */
-
-    return;
 }

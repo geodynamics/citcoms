@@ -63,12 +63,12 @@ void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
+void calc_cbase_at_node(int , float *,struct All_variables *);
 #ifdef ALLOW_ELLIPTICAL
 double theta_g(double , struct All_variables *);
 #endif
 #ifdef USE_GGRD
-void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
+void ggrd_adjust_tbl_rayleigh(struct All_variables *,double *);
 #endif
 
 int get_process_identifier()
@@ -98,7 +98,6 @@ void unique_copy_file(E,name,comment)
 
 }
 
-
 void apply_side_sbc(struct All_variables *E)
 {
   /* This function is called only when E->control.side_sbcs is true.
@@ -115,71 +114,66 @@ void apply_side_sbc(struct All_variables *E)
     parallel_process_termination();
   }
 
-  for(m=1; m<=E->sphere.caps_per_proc; m++) {
-    E->sbc.node[m] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
+  E->sbc.node = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
 
-    n = 1;
-    for(i=1; i<=E->lmesh.nno; i++) {
-      if(E->node[m][i] & sbc_flags) {
-	E->sbc.node[m][i] = n;
-	n++;
-      }
-      else
-	E->sbc.node[m][i] = 0;
+  n = 1;
+  for(i=1; i<=E->lmesh.nno; i++) {
+    if(E->node[i] & sbc_flags) {
+      E->sbc.node[i] = n;
+      n++;
+    }
+    else
+      E->sbc.node[i] = 0;
+  }
 
+  for(side=SIDE_BEGIN; side<=SIDE_END; side++)
+    for(d=1; d<=E->mesh.nsd; d++) {
+      E->sbc.SB[side][d] = (double *) malloc(n*sizeof(double));
+
+      for(i=0; i<n; i++)
+        E->sbc.SB[side][d][i] = 0;
     }
 
-    for(side=SIDE_BEGIN; side<=SIDE_END; side++)
-      for(d=1; d<=E->mesh.nsd; d++) {
-	E->sbc.SB[m][side][d] = (double *) malloc(n*sizeof(double));
-
-	for(i=0; i<n; i++)
-	  E->sbc.SB[m][side][d][i] = 0;
+  for(d=1; d<=E->mesh.nsd; d++)
+    for(i=1; i<=E->lmesh.nno; i++)
+      if(E->node[i] & sbc_flag[d] && E->sphere.cap.VB[d][i] != 0) {
+        j = E->sbc.node[i];
+        for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
+          E->sbc.SB[side][d][j] = E->sphere.cap.VB[d][i];
       }
-
-    for(d=1; d<=E->mesh.nsd; d++)
-      for(i=1; i<=E->lmesh.nno; i++)
-	if(E->node[m][i] & sbc_flag[d] && E->sphere.cap[m].VB[d][i] != 0) {
-	  j = E->sbc.node[m][i];
-	  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
-	    E->sbc.SB[m][side][d][j] = E->sphere.cap[m].VB[d][i];
-	}
-  }
 }
 
 
-void get_buoyancy(struct All_variables *E, double **buoy)
+void get_buoyancy(struct All_variables *E, double *buoy)
 {
     int i,j,m,n,nz,nxny;
     int lev = E->mesh.levmax;
     double temp,temp2,rfac,cost2;
-    void remove_horiz_ave2(struct All_variables*, double**);
+    void remove_horiz_ave2(struct All_variables*, double*);
     //char filename[100];FILE *out;
 
     nxny = E->lmesh.nox*E->lmesh.noy;
     /* Rayleigh number (can be negative for time reversal) */
     temp = E->control.Atemp;
 
-    /* thermal buoyancy */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      /* thermal buoyancy */
       for(i=1;i<=E->lmesh.nno;i++) {
-	nz = ((i-1) % E->lmesh.noz) + 1;
+        nz = ((i-1) % E->lmesh.noz) + 1;
         /* We don't need to substract adiabatic T profile from T here,
          * since the horizontal average of buoy will be removed.
          */
-        buoy[m][i] =  temp * E->refstate.rho[nz]
-	  * E->refstate.thermal_expansivity[nz] * E->T[m][i];
+        buoy[i] =  temp * E->refstate.rho[nz]
+          * E->refstate.thermal_expansivity[nz] * E->T[i];
       }
     
     /* chemical buoyancy */
     if(E->control.tracer &&
        (E->composition.ichemical_buoyancy)) {
       for(j=0;j<E->composition.ncomp;j++) {
-	/* TODO: how to scale chemical buoyancy wrt reference density? */
-	temp2 = E->composition.buoyancy_ratio[j] * temp;
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
+        /* TODO: how to scale chemical buoyancy wrt reference density? */
+        temp2 = E->composition.buoyancy_ratio[j] * temp;
 	      for(i=1;i<=E->lmesh.nno;i++)
-		buoy[m][i] -= temp2 * E->composition.comp_node[m][j][i];
+          buoy[i] -= temp2 * E->composition.comp_node[j][i];
       }
     }
 #ifdef USE_GGRD
@@ -206,35 +200,30 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       /* g= g_e (1+(5/2m-f) cos^2(theta)) , not theta_g */
       rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
       /*  */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for(j=0;j < nxny;j++) {
-	  for(i=1;i<=E->lmesh.noz;i++)
-	    n = j*E->lmesh.noz + i; /* this could be improved by only
-				       computing the cos as a function
-				       of lat, but leave for now  */
-	    cost2 = cos(E->sx[m][1][n]);cost2 = cost2*cost2;	    /* cos^2(theta) */
-	    /* correct gravity for rotation */
-	    buoy[m][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
-	  }
+      for(j=0;j < nxny;j++) {
+        for(i=1;i<=E->lmesh.noz;i++)
+          n = j*E->lmesh.noz + i; /* this could be improved by only
+                   computing the cos as a function
+                   of lat, but leave for now  */
+          cost2 = cos(E->sx[1][n]);cost2 = cost2*cost2;	    /* cos^2(theta) */
+          /* correct gravity for rotation */
+          buoy[n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
+      }
     }else{
 #endif
       /* default */
       /* no latitude dependency of gravity */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
-	for(j=0;j < nxny;j++) {
-	  for(i=1;i<=E->lmesh.noz;i++){
-	    n = j*E->lmesh.noz + i;
-	    buoy[m][n] *= E->refstate.gravity[i];
-	  }
-	}
+      for(j=0;j < nxny;j++) {
+        for(i=1;i<=E->lmesh.noz;i++){
+          n = j*E->lmesh.noz + i;
+          buoy[n] *= E->refstate.gravity[i];
+        }
+      }
 #ifdef ALLOW_ELLIPTICAL
     }
 #endif    
     
-
     remove_horiz_ave2(E,buoy);
-    
-    return;
 }
 
 
@@ -451,15 +440,15 @@ void calc_cbase_at_tp_d(double theta, double phi, double *base) /* double versio
 
 /* calculate base at nodal locations where we have precomputed cos/sin */
 
-void calc_cbase_at_node(int cap, int node, float *base,struct All_variables *E)
+void calc_cbase_at_node(int node, float *base,struct All_variables *E)
 {
   int lev ;
   double ct,cp,st,sp;
   lev = E->mesh.levmax;
-  st = E->SinCos[lev][cap][0][node]; /* for elliptical, sincos would be  corrected */
-  sp = E->SinCos[lev][cap][1][node];
-  ct = E->SinCos[lev][cap][2][node];
-  cp = E->SinCos[lev][cap][3][node];
+  st = E->SinCos[lev][0][node]; /* for elliptical, sincos would be  corrected */
+  sp = E->SinCos[lev][1][node];
+  ct = E->SinCos[lev][2][node];
+  cp = E->SinCos[lev][3][node];
            
   /* r */
   base[0]= st * cp;

@@ -36,9 +36,7 @@ double vnorm_nonnewt();
 int need_visc_update(struct All_variables *);
 int need_to_iterate(struct All_variables *);
 
-
 /************************************************************/
-
 void general_stokes_solver_setup(struct All_variables *E)
 {
   int i, m;
@@ -48,14 +46,8 @@ void general_stokes_solver_setup(struct All_variables *E)
     construct_node_maps(E);
   else
     for (i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	E->elt_k[i][m]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
-
-  return;
+      E->elt_k[i]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
 }
-
-
-
 
 void general_stokes_solver(struct All_variables *E)
 {
@@ -70,7 +62,7 @@ void general_stokes_solver(struct All_variables *E)
   double Udot_mag, dUdot_mag;
   int m,i;
 
-  double *oldU[NCS], *delta_U[NCS];
+  double *oldU, *delta_U;
 
   const int neq = E->lmesh.neq;
 
@@ -90,27 +82,23 @@ void general_stokes_solver(struct All_variables *E)
   if (need_to_iterate(E)) {
     /* outer iterations for velocity dependent viscosity */
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      delta_U[m] = (double *)malloc(neq*sizeof(double));
-      oldU[m] = (double *)malloc(neq*sizeof(double));
-      for(i=0;i<neq;i++)
-	oldU[m][i]=0.0;
-    }
+    delta_U = (double *)malloc(neq*sizeof(double));
+    oldU = (double *)malloc(neq*sizeof(double));
+    for(i=0;i<neq;i++)
+      oldU[i]=0.0;
 
     Udot_mag=dUdot_mag=0.0;
 
     E->monitor.visc_iter_count++;
     while (1) {    
      
+    for (i=0;i<neq;i++) {
+      delta_U[i] = E->U[i] - oldU[i];
+      oldU[i] = E->U[i];
+    }
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	for (i=0;i<neq;i++) {
-	  delta_U[m][i] = E->U[m][i] - oldU[m][i];
-	  oldU[m][i] = E->U[m][i];
-	}
-
-      Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
-      dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
+    Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
+    dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
 
 
       if(E->parallel.me==0){
@@ -132,10 +120,8 @@ void general_stokes_solver(struct All_variables *E)
 
     } /*end while*/
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      free((void *) oldU[m]);
-      free((void *) delta_U[m]);
-    }
+    free((void *) oldU);
+    free((void *) delta_U);
 
   } /*end if we need iterations */
 
@@ -144,8 +130,6 @@ void general_stokes_solver(struct All_variables *E)
      (E->control.remove_rigid_rotation || E->control.remove_angular_momentum)) {
       remove_rigid_rot(E);
   }
-
-  return;
 }
 
 int need_visc_update(struct All_variables *E)
@@ -202,12 +186,12 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   void get_system_viscosity();
   void std_timestep();
   void remove_rigid_rot();
-  void get_STD_freesurf(struct All_variables *, float**);
+  void get_STD_freesurf(struct All_variables *, float*);
 
   double Udot_mag, dUdot_mag;
   int m,count,i;
 
-  double *oldU[NCS], *delta_U[NCS];
+  double *oldU, *delta_U;
 
   const int neq = E->lmesh.neq;
 
@@ -226,23 +210,20 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
-		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-			  delta_U[m] = (double *)malloc(neq*sizeof(double));
-			  oldU[m] = (double *)malloc(neq*sizeof(double));
-			  for(i=0;i<neq;i++)
-				  oldU[m][i]=0.0;
-		  }
+      delta_U = (double *)malloc(neq*sizeof(double));
+      oldU = (double *)malloc(neq*sizeof(double));
+      for(i=0;i<neq;i++)
+        oldU[i]=0.0;
 
 		  Udot_mag=dUdot_mag=0.0;
 		  count=1;
 
 		  while (1) {
 
-			  for (m=1;m<=E->sphere.caps_per_proc;m++)
-				  for (i=0;i<neq;i++) {
-					  delta_U[m][i] = E->U[m][i] - oldU[m][i];
-					  oldU[m][i] = E->U[m][i];
-				  }
+        for (i=0;i<neq;i++) {
+          delta_U[i] = E->U[i] - oldU[i];
+          oldU[i] = E->U[i];
+        }
 
 			  Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
 			  dUdot_mag = vnorm_nonnewt(E,delta_U,oldU,E->mesh.levmax);
@@ -265,10 +246,8 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 			  count++;
 
 		  } /*end while */
-		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-			  free((void *) oldU[m]);
-			  free((void *) delta_U[m]);
-		  }
+      free((void *) oldU);
+      free((void *) delta_U);
 
 	  } /*end if SDEPV or PDEPV */
 	  E->monitor.topo_loop++;

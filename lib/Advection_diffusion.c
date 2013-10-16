@@ -38,29 +38,29 @@
 #include "parsing.h"
 
 static void set_diffusion_timestep(struct All_variables *E);
-static void predictor(struct All_variables *E, double **field,
-                      double **fielddot);
-static void corrector(struct All_variables *E, double **field,
-                      double **fielddot, double **Dfielddot);
+static void predictor(struct All_variables *E, double *field,
+                      double *fielddot);
+static void corrector(struct All_variables *E, double *field,
+                      double *fielddot, double *Dfielddot);
 static void pg_solver(struct All_variables *E,
-                      double **T, double **Tdot, double **DTdot,
+                      double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
-                      double diff, int bc, unsigned int **FLAGS);
+                      double diff, int bc, unsigned int *FLAGS);
 static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
                         struct Shape_function_dx *GNx,
                         float VV[4][9], double rtf[4][9],
-                        double diffusion, int m);
+                        double diffusion);
 static void element_residual(struct All_variables *E, int el,
                              struct Shape_function *PG,
                              struct Shape_function_dx *GNx,
                              struct Shape_function_dA *dOmega,
                              float VV[4][9],
-                             double **field, double **fielddot,
+                             double *field, double *fielddot,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS, int m);
+                             unsigned int *FLAGS);
 static void filter(struct All_variables *E);
 static void process_heating(struct All_variables *E, int psc_pass);
 
@@ -100,12 +100,10 @@ void advection_diffusion_allocate_memory(struct All_variables *E)
 {
   int i,m;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+  E->Tdot = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
-    for(i=1;i<=E->lmesh.nno;i++)
-      E->Tdot[m][i]=0.0;
-    }
+  for(i=1;i<=E->lmesh.nno;i++)
+    E->Tdot[i]=0.0;
 
   return;
 }
@@ -164,34 +162,32 @@ void std_timestep(struct All_variables *E)
     }
 
     adv_timestep = 1.0e8;
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nel;el++) {
 
-	velo_from_element(E,VV,m,el,sphere_key);
+	velo_from_element(E,VV,el,sphere_key);
 
 	uc=uc1=uc2=uc3=0.0;
 	for(i=1;i<=ENODES3D;i++) {
 	  uc1 += E->N.ppt[GNPINDEX(i,1)]*VV[1][i];
 	  uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
 	  uc3 += E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
-        }
-	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
+  }
+	uc = fabs(uc1)/E->eco[el].size[1] + 
+       fabs(uc2)/E->eco[el].size[2] + 
+       fabs(uc3)/E->eco[el].size[3];
 
 	step = (0.5/uc);
 	adv_timestep = min(adv_timestep,step);
-      }
+  }
 
-    adv_timestep = E->advection.dt_reduced * adv_timestep;
+  adv_timestep = E->advection.dt_reduced * adv_timestep;
 
-    adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
-				 E->advection.diff_timestep);
+  adv_timestep = 1.0e-32 + min(E->advection.fine_tune_dt*adv_timestep,
+       E->advection.diff_timestep);
 
-    E->advection.timestep = global_fmin(E,adv_timestep);
+  E->advection.timestep = global_fmin(E,adv_timestep);
 
-/*     if (E->parallel.me==0) */
-/*       fprintf(stderr, "adv_timestep=%g diff_timestep=%g\n",adv_timestep,E->advection.diff_timestep); */
-
-    return;
+  return;
 }
 
 
@@ -204,25 +200,21 @@ void PG_timestep_solve(struct All_variables *E)
   void assimilate_lith_conform_bcs();
   int i,m,psc_pass,iredo;
   double time0,time1,T_interior1;
-  double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
+  double *DTdot, *T1, *Tdot1;
 
   E->advection.timesteps++;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+  DTdot = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
 
   if(E->advection.monitor_max_T) {
-     for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-         T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-         Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-     }
+     T1 = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+     Tdot1 = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
-     for(m=1;m<=E->sphere.caps_per_proc;m++)
-         for (i=1;i<=E->lmesh.nno;i++)   {
-             T1[m][i] = E->T[m][i];
-             Tdot1[m][i] = E->Tdot[m][i];
-         }
+     for (i=1;i<=E->lmesh.nno;i++){
+         T1[i] = E->T[i];
+         Tdot1[i] = E->Tdot[i];
+     }
 
      /* get the max temperature for old T */
      T_interior1 = Tmaxd(E,E->T);
@@ -265,11 +257,10 @@ void PG_timestep_solve(struct All_variables *E)
                   fprintf(E->fp, "max T varied from %e to %e\n",
                           T_interior1, E->monitor.T_interior);
               }
-              for(m=1;m<=E->sphere.caps_per_proc;m++)
-                  for (i=1;i<=E->lmesh.nno;i++)   {
-                      E->T[m][i] = T1[m][i];
-                      E->Tdot[m][i] = Tdot1[m][i];
-                  }
+              for (i=1;i<=E->lmesh.nno;i++)   {
+                  E->T[i] = T1[i];
+                  E->Tdot[i] = Tdot1[i];
+              }
               iredo = 1;
               E->advection.dt_reduced *= 0.5;
               E->advection.last_sub_iterations ++;
@@ -291,25 +282,18 @@ void PG_timestep_solve(struct All_variables *E)
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *) DTdot[m] );
-  }
+  free((void *) DTdot );
 
   if(E->advection.monitor_max_T) {
-      for(m=1;m<=E->sphere.caps_per_proc;m++) {
-          free((void *) T1[m] );
-          free((void *) Tdot1[m] );
-      }
+    free((void *) T1 );
+    free((void *) Tdot1 );
   }
 
   if(E->control.lith_age) {
-      if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
-      lith_age_conform_tbc(E);
-      assimilate_lith_conform_bcs(E);
+    if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
+    lith_age_conform_tbc(E);
+    assimilate_lith_conform_bcs(E);
   }
-
-
-  return;
 }
 
 
@@ -323,18 +307,15 @@ static void set_diffusion_timestep(struct All_variables *E)
   float global_fmin();
 
   diff_timestep = 1.0e8;
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(el=1;el<=E->lmesh.nel;el++)  {
-      for(d=1;d<=E->mesh.nsd;d++)    {
-	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
-	diff_timestep = min(diff_timestep,ts);
-      }
+  for(el=1;el<=E->lmesh.nel;el++) {
+    for(d=1;d<=E->mesh.nsd;d++) {
+      ts = E->eco[el].size[d] * E->eco[el].size[d];
+      diff_timestep = min(diff_timestep,ts);
     }
+  }
 
   diff_timestep = global_fmin(E,diff_timestep);
   E->advection.diff_timestep = 0.5 * diff_timestep;
-
-  return;
 }
 
 
@@ -342,39 +323,33 @@ static void set_diffusion_timestep(struct All_variables *E)
    predictor and corrector steps.
    ============================== */
 
-static void predictor(struct All_variables *E, double **field,
-                      double **fielddot)
+static void predictor(struct All_variables *E, double *field,
+                      double *fielddot)
 {
   int node,m;
   double multiplier;
 
   multiplier = (1.0-E->advection.gamma) * E->advection.timestep;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(node=1;node<=E->lmesh.nno;node++)  {
-      field[m][node] += multiplier * fielddot[m][node] ;
-      fielddot[m][node] = 0.0;
-    }
-
-  return;
+  for(node=1;node<=E->lmesh.nno;node++)  {
+    field[node] += multiplier * fielddot[node] ;
+    fielddot[node] = 0.0;
+  }
 }
 
 
-static void corrector(struct All_variables *E, double **field,
-                      double **fielddot, double **Dfielddot)
+static void corrector(struct All_variables *E, double *field,
+                      double *fielddot, double *Dfielddot)
 {
   int node,m;
   double multiplier;
 
   multiplier = E->advection.gamma * E->advection.timestep;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(node=1;node<=E->lmesh.nno;node++) {
-      field[m][node] += multiplier * Dfielddot[m][node];
-      fielddot[m][node] +=  Dfielddot[m][node];
-    }
-
-  return;
+  for(node=1;node<=E->lmesh.nno;node++) {
+    field[node] += multiplier * Dfielddot[node];
+    fielddot[node] +=  Dfielddot[node];
+  }
 }
 
 
@@ -385,12 +360,10 @@ static void corrector(struct All_variables *E, double **field,
    vector optimizations etc and one optimized for
    workstations.
    =================================================== */
-
-
 static void pg_solver(struct All_variables *E,
-                      double **T, double **Tdot, double **DTdot,
+                      double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
-                      double diff, int bc, unsigned int **FLAGS)
+                      double diff, int bc, unsigned int *FLAGS)
 {
     void get_rtf_at_vpts();
     void velo_from_element();
@@ -407,56 +380,45 @@ static void pg_solver(struct All_variables *E,
     const int sphere_key = 1;
     const int lev=E->mesh.levmax;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nno;i++)
- 	 DTdot[m][i] = 0.0;
+    for(i=1;i<=E->lmesh.nno;i++)
+     DTdot[i] = 0.0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-       for(el=1;el<=E->lmesh.nel;el++)    {
+    for(el=1;el<=E->lmesh.nel;el++)    {
+      velo_from_element(E,VV,el,sphere_key);
+      get_rtf_at_vpts(E, lev, el, rtf);
 
-          velo_from_element(E,VV,m,el,sphere_key);
+      /* XXX: replace diff with refstate.thermal_conductivity */
+      pg_shape_fn(E, el, &PG, &(E->gNX[el]), VV, rtf, diff);
+      element_residual(E, el, &PG, &(E->gNX[el]), &(E->gDA[el]),
+                       VV, T, Tdot,
+                       Q0, Eres, rtf, diff, E->sphere.cap.TB, // check cap
+                       FLAGS);
 
-          get_rtf_at_vpts(E, m, lev, el, rtf);
+      for(a=1;a<=ends;a++) {
+        a1 = E->ien[el].node[a];
+        DTdot[a1] += Eres[a];
+      }
 
-          /* XXX: replace diff with refstate.thermal_conductivity */
-          pg_shape_fn(E, el, &PG, &(E->gNX[m][el]), VV,
-                      rtf, diff, m);
-          element_residual(E, el, &PG, &(E->gNX[m][el]), &(E->gDA[m][el]),
-                           VV, T, Tdot,
-                           Q0, Eres, rtf, diff, E->sphere.cap[m].TB,
-                           FLAGS, m);
-
-        for(a=1;a<=ends;a++) {
-	    a1 = E->ien[m][el].node[a];
-	    DTdot[m][a1] += Eres[a];
-           }
-
-        } /* next element */
+    } /* next element */
 
     (E->exchange_node_d)(E,DTdot,lev);
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<=E->lmesh.nno;i++) {
-        if(!(E->node[m][i] & (TBX | TBY | TBZ))){
-	  DTdot[m][i] *= E->TMass[m][i];         /* lumped mass matrix */
-	}	else
-	  DTdot[m][i] = 0.0;         /* lumped mass matrix */
-      }
-
-    return;
+    for(i=1;i<=E->lmesh.nno;i++) {
+      if(!(E->node[i] & (TBX | TBY | TBZ)))
+        DTdot[i] *= E->TMass[i];   /* lumped mass matrix */
+      else
+        DTdot[i] = 0.0;               /* lumped mass matrix */
+    }
 }
-
-
 
 /* ===================================================
    Petrov-Galerkin shape functions for a given element
    =================================================== */
-
 static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
                         struct Shape_function_dx *GNx,
                         float VV[4][9], double rtf[4][9],
-                        double diffusion, int m)
+                        double diffusion)
 {
     int i,j;
     int *ienm;
@@ -467,7 +429,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
 
     double prod1,unorm,twodiff;
 
-    ienm=E->ien[m][el].node;
+    ienm=E->ien[el].node;
 
     twodiff = 2.0*diffusion;
 
@@ -477,11 +439,11 @@ static void pg_shape_fn(struct All_variables *E, int el,
       uc1 +=  E->N.ppt[GNPINDEX(i,1)]*VV[1][i];
       uc2 +=  E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
       uc3 +=  E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
-      }
+    }
 
-    uxse = fabs(uc1*E->eco[m][el].size[1]);
-    ueta = fabs(uc2*E->eco[m][el].size[2]);
-    ufai = fabs(uc3*E->eco[m][el].size[3]);
+    uxse = fabs(uc1*E->eco[el].size[1]);
+    ueta = fabs(uc2*E->eco[el].size[2]);
+    ufai = fabs(uc3*E->eco[el].size[3]);
 
     xse = (uxse>twodiff)? (1.0-twodiff/uxse):0.0;
     eta = (ueta>twodiff)? (1.0-twodiff/ueta):0.0;
@@ -496,42 +458,37 @@ static void pg_shape_fn(struct All_variables *E, int el,
        sint[i] = rtf[3][i]/sin(rtf[1][i]);
 
     for(i=1;i<=VPOINTS3D;i++) {
-       u1 = u2 = u3 = 0.0;
-       for(j=1;j<=ENODES3D;j++)  /* this line heavily used */ {
-		u1 += VV[1][j] * E->N.vpt[GNVINDEX(j,i)];
-		u2 += VV[2][j] * E->N.vpt[GNVINDEX(j,i)];
-	   	u3 += VV[3][j] * E->N.vpt[GNVINDEX(j,i)];
+      u1 = u2 = u3 = 0.0;
+      for(j=1;j<=ENODES3D;j++)  /* this line heavily used */ {
+        u1 += VV[1][j] * E->N.vpt[GNVINDEX(j,i)];
+        u2 += VV[2][j] * E->N.vpt[GNVINDEX(j,i)];
+        u3 += VV[3][j] * E->N.vpt[GNVINDEX(j,i)];
 	    }
 
-       for(j=1;j<=ENODES3D;j++) {
-            prod1 = (u1 * GNx->vpt[GNVXINDEX(0,j,i)]*rtf[3][i] +
-                     u2 * GNx->vpt[GNVXINDEX(1,j,i)]*sint[i] +
-                     u3 * GNx->vpt[GNVXINDEX(2,j,i)] ) ;
+      for(j=1;j<=ENODES3D;j++) {
+        prod1 = (u1 * GNx->vpt[GNVXINDEX(0,j,i)]*rtf[3][i] +
+                 u2 * GNx->vpt[GNVXINDEX(1,j,i)]*sint[i] +
+                 u3 * GNx->vpt[GNVXINDEX(2,j,i)]) ;
 
-	    PG->vpt[GNVINDEX(j,i)] = E->N.vpt[GNVINDEX(j,i)] + adiff * prod1;
+        PG->vpt[GNVINDEX(j,i)] = E->N.vpt[GNVINDEX(j,i)] + adiff * prod1;
 	    }
-       }
-
-   return;
+    }
 }
-
-
 
 /* ==========================================
    Residual force vector from heat-transport.
    Used to correct the Tdot term.
    =========================================  */
-
 static void element_residual(struct All_variables *E, int el,
                              struct Shape_function *PG,
                              struct Shape_function_dx *GNx,
                              struct Shape_function_dA *dOmega,
                              float VV[4][9],
-                             double **field, double **fielddot,
+                             double *field, double *fielddot,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS, int m)
+                             unsigned int *FLAGS)
 {
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
@@ -563,18 +520,18 @@ static void element_residual(struct All_variables *E, int el,
       v1[i] = tx1[i]=  0.0;
       v2[i] = tx2[i]=  0.0;
       v3[i] = tx3[i]=  0.0;
-      }
+    }
 
     for(i=1;i<=vpts;i++)
         sint[i] = rtf[3][i]/sin(rtf[1][i]);
 
     for(j=1;j<=ends;j++)       {
-      node = E->ien[m][el].node[j];
-      T = field[m][node];
-      if(E->node[m][node] & (TBX | TBY | TBZ))
-	    DT=0.0;
+      node = E->ien[el].node[j];
+      T = field[node];
+      if(E->node[node] & (TBX | TBY | TBZ))
+        DT=0.0;
       else
-	    DT = fielddot[m][node];
+        DT = fielddot[node];
 
       for(i=1;i<=vpts;i++)  {
           dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
@@ -588,11 +545,6 @@ static void element_residual(struct All_variables *E, int el,
       }
     }
 
-/*    Q=0.0;
-    for(i=0;i<Q0.number;i++)
-	  Q += Q0->Q[i] * exp(-Q0->lambda[i] * (E->monitor.elapsed_time+Q0->t_offset));
-*/
-
     /* heat production */
     Q = E->control.Q0;
 
@@ -600,46 +552,46 @@ static void element_residual(struct All_variables *E, int el,
     if(E->control.tracer_enriched){
       /* XXX: change Q and Q0 to be a vector of ncomp elements */
 
-      /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
-	 between  */
-      Q *= (1.0 - E->composition.comp_el[m][0][el]);
-      Q += E->composition.comp_el[m][0][el] * E->control.Q0ER;
+      /* 
+         Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
+         between  
+       */
+      Q *= (1.0 - E->composition.comp_el[0][el]);
+      Q += E->composition.comp_el[0][el] * E->control.Q0ER;
     }
 
     nz = ((el-1) % E->lmesh.elz) + 1;
-    rho = 0.5 * (E->refstate.rho[nz] + E->refstate.rho[nz+1]);
-    cp = 0.5 * (E->refstate.heat_capacity[nz] + E->refstate.heat_capacity[nz+1]);
+    rho = 0.5*(E->refstate.rho[nz] + E->refstate.rho[nz+1]);
+    cp = 0.5*(E->refstate.heat_capacity[nz] + E->refstate.heat_capacity[nz+1]);
 
     if(E->control.disptn_number == 0)
         heating = rho * Q;
     else
         /* E->heating_latent is actually the inverse of latent heating */
-        heating = (rho * Q - E->heating_adi[m][el] + E->heating_visc[m][el])
-            * E->heating_latent[m][el];
+        heating = (rho * Q - E->heating_adi[el] + E->heating_visc[el]) 
+                  * E->heating_latent[el];
 
     /* construct residual from this information */
 
-
     if(diffusion){
       for(j=1;j<=ends;j++) {
-	Eres[j]=0.0;
-	for(i=1;i<=vpts;i++)
-	  Eres[j] -=
-	    PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
-              * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
+        Eres[j]=0.0;
+        for(i=1;i<=vpts;i++)
+          Eres[j] -=
+          PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
+                * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
                  - heating )
-              + diff * dOmega->vpt[i] * E->heating_latent[m][el]
+              + diff * dOmega->vpt[i] * E->heating_latent[el]
               * (GNx->vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
                  GNx->vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
                  GNx->vpt[GNVXINDEX(2,j,i)]*tx3[i] );
       }
     }
-
     else { /* no diffusion term */
       for(j=1;j<=ends;j++) {
-	Eres[j]=0.0;
-	for(i=1;i<=vpts;i++)
-	  Eres[j] -= PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
+        Eres[j]=0.0;
+        for(i=1;i<=vpts;i++)
+          Eres[j] -= PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
               * (dT[i] - heating + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i]);
       }
     }
@@ -651,33 +603,31 @@ static void element_residual(struct All_variables *E, int el,
 
     if(FLAGS!=NULL) {
       aid = -1;
-      if (FLAGS[m][E->ien[m][el].node[1]] & FBZ) {   // only check for the 1st node
-          aid = 0;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
-          }
-      else if (FLAGS[m][E->ien[m][el].node[5]] & FBZ) {   // only check for the 5th node
+      if (FLAGS[E->ien[el].node[1]] & FBZ) {// only check for the 1st node
+        aid = 0;
+        get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
+      }
+      else {
+        if (FLAGS[E->ien[el].node[5]] & FBZ) {// only check for the 5th node
           aid = 1;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
-          }
+          get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
+        }
+      }
       if (aid>=0)  {
-        for(a=1;a<=onedvpts;a++)  {
-
-	  for(j=1;j<=onedvpts;j++)  {
+        for(a=1;a<=onedvpts;a++){
+          for(j=1;j<=onedvpts;j++){
             dT[j] = 0.0;
-	    for(k=1;k<=onedvpts;k++)
-              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[m][el].node[k+aid*onedvpts]];
+            for(k=1;k<=onedvpts;k++)
+              dT[j] += 
+                E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[el].node[k+aid*onedvpts]];
             }
-	  for(j=1;j<=onedvpts;j++)  {
-	    Eres[a+aid*onedvpts] += dGamma.vpt[GMVGAMMA(aid,j)] *
-		E->M.vpt[GMVINDEX(a,j)] * g_1d[j].weight[dims-1] *
-		dT[j];
-            }
-
-	}
+          for(j=1;j<=onedvpts;j++){
+            Eres[a+aid*onedvpts] += dGamma.vpt[GMVGAMMA(aid,j)] *
+              E->M.vpt[GMVINDEX(a,j)] * g_1d[j].weight[dims-1] * dT[j];
+          }
+        }
       }
     }
-
-    return;
 }
 
 
@@ -708,67 +658,63 @@ static void filter(struct All_variables *E)
     for(i=1;i<=E->lmesh.noz;i++)
         rhocp[i] = E->refstate.rho[i] * E->refstate.heat_capacity[i];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)  {
-            nz = ((i-1) % E->lmesh.noz) + 1;
+    for(i=1;i<=E->lmesh.nno;i++)  {
+      nz = ((i-1) % E->lmesh.noz) + 1;
 
-            /* compute sum(rho*cp*T) before filtering, skipping nodes
-               that's shared by another processor */
-            if(!(E->NODE[lev][m][i] & SKIP))
-                Tsum0 += E->T[m][i]*rhocp[nz];
+      /* compute sum(rho*cp*T) before filtering, skipping nodes
+         that's shared by another processor */
+      if(!(E->NODE[lev][i] & SKIP))
+          Tsum0 += E->T[i]*rhocp[nz];
 
-            /* remove overshoot */
-            if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
-            if(E->T[m][i]<Tmin0) E->T[m][i]=Tmin0;
-            if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
-            if(E->T[m][i]>Tmax0) E->T[m][i]=Tmax0;
+      /* remove overshoot */
+      if(E->T[i]<Tmin)  Tmin=E->T[i];
+      if(E->T[i]<Tmin0) E->T[i]=Tmin0;
+      if(E->T[i]>Tmax) Tmax=E->T[i];
+      if(E->T[i]>Tmax0) E->T[i]=Tmax0;
 
-        }
+    }
 
     /* find global max/min of temperature */
     MPI_Allreduce(&Tmin,&Tmin1,1,MPI_DOUBLE,MPI_MIN,E->parallel.world);
     MPI_Allreduce(&Tmax,&Tmax1,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)  {
-            nz = ((i-1) % E->lmesh.noz) + 1;
+    for(i=1;i<=E->lmesh.nno;i++)  {
+        nz = ((i-1) % E->lmesh.noz) + 1;
 
-            /* remvoe undershoot */
-            if(E->T[m][i]<=fabs(2*Tmin0-Tmin1))   E->T[m][i]=Tmin0;
-            if(E->T[m][i]>=(2*Tmax0-Tmax1))   E->T[m][i]=Tmax0;
+        /* remvoe undershoot */
+        if(E->T[i]<=fabs(2*Tmin0-Tmin1))   
+          E->T[i]=Tmin0;
+        /* remove overshoot */
+        if(E->T[i]>=(2*Tmax0-Tmax1))   
+          E->T[i]=Tmax0;
 
-            /* sum(rho*cp*T) after filtering */
-            if (!(E->NODE[lev][m][i] & SKIP))  {
-                Tsum1 += E->T[m][i]*rhocp[nz];
-                if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0) {
-                    sum_rhocp += rhocp[nz];
-                }
-
-            }
-
+        /* sum(rho*cp*T) after filtering */
+        if (!(E->NODE[lev][i] & SKIP))  {
+          Tsum1 += E->T[i]*rhocp[nz];
+          if(E->T[i]!=Tmin0 && E->T[i]!=Tmax0) {
+            sum_rhocp += rhocp[nz];
+          }
         }
+    }
 
     /* find the difference of sum(rho*cp*T) before/after the filtering */
     TDIST=Tsum0-Tsum1;
     MPI_Allreduce(&TDIST,&TDIST1,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
-    MPI_Allreduce(&sum_rhocp,&total_sum_rhocp,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
+    MPI_Allreduce(&sum_rhocp,&total_sum_rhocp,1,MPI_DOUBLE,MPI_SUM,
+        E->parallel.world);
     TDIST=TDIST1/total_sum_rhocp;
 
     /* keep sum(rho*cp*T) the same before/after the filtering by distributing
        the difference back to nodes */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(i=1;i<=E->lmesh.nno;i++)   {
-            if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0)
-                E->T[m][i] +=TDIST;
-        }
+    for(i=1;i<=E->lmesh.nno;i++) {
+      if(E->T[i]!=Tmin0 && E->T[i]!=Tmax0)
+        E->T[i] +=TDIST;
+    }
 
     free(rhocp);
-    return;
 }
 
-
-static void process_visc_heating(struct All_variables *E, int m,
-                                 double *heating)
+static void process_visc_heating(struct All_variables *E, double *heating)
 {
     void strain_rate_2_inv();
     int e, i;
@@ -781,24 +727,20 @@ static void process_visc_heating(struct All_variables *E, int m,
        reversal */
     temp = E->control.disptn_number / E->control.Atemp / vpts;
 
-    strain_rate_2_inv(E, m, strain_sqr, 0);
+    strain_rate_2_inv(E, strain_sqr, 0);
 
     for(e=1; e<=E->lmesh.nel; e++) {
-        visc = 0.0;
-        for(i = 1; i <= vpts; i++)
-            visc += E->EVi[m][(e-1)*vpts + i];
+      visc = 0.0;
+      for(i = 1; i <= vpts; i++)
+        visc += E->EVi[(e-1)*vpts + i];
 
-        heating[e] = temp * visc * strain_sqr[e];
+      heating[e] = temp * visc * strain_sqr[e];
     }
 
     free(strain_sqr);
-
-    return;
 }
 
-
-static void process_adi_heating(struct All_variables *E, int m,
-                                double *heating)
+static void process_adi_heating(struct All_variables *E, double *heating)
 {
     int e, ez, i, j;
     double matprop, temp1, temp2;
@@ -815,152 +757,134 @@ static void process_adi_heating(struct All_variables *E, int m,
 
         temp1 = 0.0;
         for(i=1; i<=ends; i++) {
-            j = E->ien[m][e].node[i];
-            temp1 += E->sphere.cap[m].V[3][j]
-                * (E->T[m][j] + E->control.surface_temp);
+            j = E->ien[e].node[i];
+            temp1 += E->sphere.cap.V[3][j] // rkk check the cap
+                * (E->T[j] + E->control.surface_temp);
         }
 
         heating[e] = matprop * temp1 * temp2;
     }
-
-    return;
 }
 
-
-static void latent_heating(struct All_variables *E, int m,
+static void latent_heating(struct All_variables *E,
                            double *heating_latent, double *heating_adi,
-                           float **B, float Ra, float clapeyron,
+                           float *B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
 {
-    double temp, temp0, temp1, temp2, temp3, matprop;
-    int e, ez, i, j;
-    const int ends = ENODES3D;
-    /* 
-       note that this will be negative for time-reversal
-    */
-    temp0 = 2.0 * inv_width * clapeyron * E->control.disptn_number * Ra / E->control.Atemp / ends;
-    temp1 = temp0 * clapeyron;
+  double temp, temp0, temp1, temp2, temp3, matprop;
+  int e, ez, i, j;
+  const int ends = ENODES3D;
+  /* 
+     note that this will be negative for time-reversal
+  */
+  temp0 = 2.0 * inv_width * clapeyron * E->control.disptn_number * Ra / 
+    E->control.Atemp / ends;
+  temp1 = temp0 * clapeyron;
 
-    for(e=1; e<=E->lmesh.nel; e++) {
-        ez = (e - 1) % E->lmesh.elz + 1;
-        matprop = 0.125
-            * (E->refstate.thermal_expansivity[ez] +
-               E->refstate.thermal_expansivity[ez + 1])
-            * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
-            * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
+  for(e=1; e<=E->lmesh.nel; e++) {
+    ez = (e - 1) % E->lmesh.elz + 1;
+    matprop = 0.125
+        * (E->refstate.thermal_expansivity[ez] +
+           E->refstate.thermal_expansivity[ez + 1])
+        * (E->refstate.rho[ez] + E->refstate.rho[ez + 1])
+        * (E->refstate.gravity[ez] + E->refstate.gravity[ez + 1]);
 
-        temp2 = 0;
-        temp3 = 0;
-        for(i=1; i<=ends; i++) {
-            j = E->ien[m][e].node[i];
-            temp = (1.0 - B[m][j]) * B[m][j]
-                * (E->T[m][j] + E->control.surface_temp);
-            temp2 += temp * E->sphere.cap[m].V[3][j];
-            temp3 += temp;
-        }
-
-        /* correction on the adiabatic cooling term */
-        heating_adi[e] += matprop * temp2 * temp0;
-
-        /* correction on the DT/Dt term */
-        heating_latent[e] += temp3 * temp1;
+    temp2 = 0;
+    temp3 = 0;
+    for(i=1; i<=ends; i++) {
+      j = E->ien[e].node[i];
+      temp = (1.0 - B[j]) * B[j] * (E->T[j] + E->control.surface_temp);
+      temp2 += temp * E->sphere.cap.V[3][j]; // rkk: check the cap
+      temp3 += temp;
     }
-    return;
+
+    /* correction on the adiabatic cooling term */
+    heating_adi[e] += matprop * temp2 * temp0;
+
+    /* correction on the DT/Dt term */
+    heating_latent[e] += temp3 * temp1;
+  }
 }
 
-
-static void process_latent_heating(struct All_variables *E, int m,
+static void process_latent_heating(struct All_variables *E,
                                    double *heating_latent, double *heating_adi)
 {
     int e;
 
     /* reset */
     for(e=1; e<=E->lmesh.nel; e++)
-        heating_latent[e] = 1.0;
+      heating_latent[e] = 1.0;
 
     if(E->control.Ra_410 != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
-                       E->Fas410, E->control.Ra_410,
-                       E->control.clapeyron410, E->viscosity.z410,
-                       E->control.transT410, E->control.inv_width410);
-
+      latent_heating(E, heating_latent, heating_adi,
+                     E->Fas410, E->control.Ra_410,
+                     E->control.clapeyron410, E->viscosity.z410,
+                     E->control.transT410, E->control.inv_width410);
     }
 
     if(E->control.Ra_670 != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
+        latent_heating(E, heating_latent, heating_adi,
                        E->Fas670, E->control.Ra_670,
                        E->control.clapeyron670, E->viscosity.zlm,
                        E->control.transT670, E->control.inv_width670);
     }
 
     if(E->control.Ra_cmb != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
+        latent_heating(E, heating_latent, heating_adi,
                        E->Fascmb, E->control.Ra_cmb,
                        E->control.clapeyroncmb, E->viscosity.zcmb,
                        E->control.transTcmb, E->control.inv_widthcmb);
     }
 
-
     if(E->control.Ra_410 != 0 || E->control.Ra_670 != 0.0 ||
        E->control.Ra_cmb != 0) {
         for(e=1; e<=E->lmesh.nel; e++)
-            heating_latent[e] = 1.0 / heating_latent[e];
+          heating_latent[e] = 1.0 / heating_latent[e];
     }
-
-    return;
 }
 
-
-static double total_heating(struct All_variables *E, double **heating)
+static double total_heating(struct All_variables *E, double *heating)
 {
-    int m, e;
+    int e;
     double sum, total;
 
     /* sum up within each processor */
     sum = 0;
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(e=1; e<=E->lmesh.nel; e++)
-            sum += heating[m][e] * E->eco[m][e].area;
-    }
+    for(e=1; e<=E->lmesh.nel; e++)
+      sum += heating[e] * E->eco[e].area;
 
     /* sum up for all processors */
-    MPI_Allreduce(&sum, &total, 1,
-                  MPI_DOUBLE, MPI_SUM, E->parallel.world);
+    MPI_Allreduce(&sum, &total, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
 
     return total;
 }
-
 
 static void process_heating(struct All_variables *E, int psc_pass)
 {
     int m;
     double total_visc_heating, total_adi_heating;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        if(psc_pass == 0) {
-            /* visc heating does not change between psc_pass, compute only
-             * at first psc_pass */
-            process_visc_heating(E, m, E->heating_visc[m]);
-        }
-        process_adi_heating(E, m, E->heating_adi[m]);
-        process_latent_heating(E, m, E->heating_latent[m], E->heating_adi[m]);
+    if(psc_pass == 0) {
+      /* visc heating does not change between psc_pass, compute only
+       * at first psc_pass */
+      process_visc_heating(E, E->heating_visc);
     }
+    process_adi_heating(E, E->heating_adi);
+    process_latent_heating(E, E->heating_latent, E->heating_adi);
 
     /* compute total amount of visc/adi heating over all processors
      * only at last psc_pass */
     if(psc_pass == (E->advection.temp_iterations-1)) {
-        total_visc_heating = total_heating(E, E->heating_visc);
-        total_adi_heating = total_heating(E, E->heating_adi);
+      total_visc_heating = total_heating(E, E->heating_visc);
+      total_adi_heating = total_heating(E, E->heating_adi);
 
-        if(E->parallel.me == 0) {
-            fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
-                    E->monitor.solution_cycles,
-                    total_visc_heating, total_adi_heating);
-            fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
-                    E->monitor.solution_cycles,
-                    total_visc_heating, total_adi_heating);
-        }
+      if(E->parallel.me == 0) {
+        fprintf(E->fp, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                E->monitor.solution_cycles,
+                total_visc_heating, total_adi_heating);
+        fprintf(stderr, "Step: %d, Total_heating(visc, adi): %g %g\n",
+                E->monitor.solution_cycles,
+                total_visc_heating, total_adi_heating);
+      }
     }
-
-    return;
 }

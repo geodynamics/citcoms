@@ -93,58 +93,59 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
       top = 1;
     else
       top = 0;
-    for (m=1;m <= E->sphere.caps_per_proc;m++)
       for (k=1;k <= ely;k++)
         for (j=1;j <= elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
 	  /* find mean element location and horizontal velocity */
 
 	  x[0] = x[1] = x[2] = v[0] = v[1] = vw = 0.0;
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+    lnode[1] = E->ien[el].node[1];
+    lnode[2] = E->ien[el].node[2];
+    lnode[3] = E->ien[el].node[3];
+    lnode[4] = E->ien[el].node[4];
 
-          for(nint=1;nint <= onedvpoints[E->mesh.nsd];nint++)   {
-            for(d=1;d <= onedvpoints[E->mesh.nsd];d++){
+    for(nint=1;nint <= onedvpoints[E->mesh.nsd];nint++) {
+      for(d=1;d <= onedvpoints[E->mesh.nsd];d++) {
 	      vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(0,nint)];
-	      x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
-	      x[1] += E->x[m][2][lnode[d]] * vtmp;
-	      x[2] += E->x[m][3][lnode[d]] * vtmp;
+	      x[0] += E->x[1][lnode[d]] * vtmp; /* coords */
+	      x[1] += E->x[2][lnode[d]] * vtmp;
+	      x[2] += E->x[3][lnode[d]] * vtmp;
 	      
-              v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp; /* theta */
-              v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp; /* phi */
+        v[0] += E->sphere.cap.V[1][lnode[d]] * vtmp; /* theta */
+        v[1] += E->sphere.cap.V[2][lnode[d]] * vtmp; /* phi */
 	      vw += dGamma.vpt[GMVGAMMA(0,nint)];
 	    }
 	  }
-          if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+    if (i==elz) {
+      lnode[1] = E->ien[el].node[5];
+      lnode[2] = E->ien[el].node[6];
+      lnode[3] = E->ien[el].node[7];
+      lnode[4] = E->ien[el].node[8];
 
-            for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
-              for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
-		vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(1,nint)];
-		x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
-		x[1] += E->x[m][2][lnode[d]] * vtmp;
-		x[2] += E->x[m][3][lnode[d]] * vtmp;
-		/*  */
-		v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp;
-		v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp;
-		vw += dGamma.vpt[GMVGAMMA(1,nint)];
+      for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
+        for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
+          vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(1,nint)];
+          x[0] += E->x[1][lnode[d]] * vtmp; /* coords */
+          x[1] += E->x[2][lnode[d]] * vtmp;
+          x[2] += E->x[3][lnode[d]] * vtmp;
+          
+          v[0] += E->sphere.cap.V[1][lnode[d]] * vtmp;
+          v[1] += E->sphere.cap.V[2][lnode[d]] * vtmp;
+          vw += dGamma.vpt[GMVGAMMA(1,nint)];
 	      }
 	    }
 	  }   /* end of if i==elz    */
-	  x[0] /= vw;x[1] /= vw;x[2] /= vw; /* convert */
+	  x[0] /= vw;
+    x[1] /= vw;
+    x[2] /= vw; /* convert */
 	  xyz2rtp(x[0],x[1],x[2],xp);
 	  v[0] /= vw;v[1] /= vw;
 	  /* add */
 	  determine_netr_tp(xp[0],xp[1],xp[2],v[0],v[1],1,(coef+(i-1)*9),&ddummy);
-	}  /* end of j  and k, and m  */
+	}  /* end of j and k  */
 
   }        /* Done for i */
   /*
@@ -155,25 +156,19 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   omega[0]=omega[1]=omega[2]=0.0;
 
   /* depth range */
-  rr = E->sx[1][3][E->ien[1][elz].node[5]] - E->sx[1][3][E->ien[1][1].node[1]];
+  rr = E->sx[3][E->ien[elz].node[5]] - E->sx[3][E->ien[1].node[1]];
   if(rr < 1e-7)
     myerror(E,"rr error in net r determine");
   vw = 0.0;
   for (i=0;i < elz;i++) {	/* regular 0..n-1 loop */
     /* solve layer NR */
     lamp = determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,2,(acoef+i*9),(lomega+i*3));
-    r1 = E->sx[1][3][E->ien[1][i+1].node[1]]; /* nodal radii for the
-						 i-th element, this
-						 assumes that there
-						 are no lateral
-						 variations in radii!
-					      */
-    r2 = E->sx[1][3][E->ien[1][i+1].node[5]];
+    /* nodal radii for the i-th element, this assumes that there 
+       are no lateral variations in radii!  */
+    r1 = E->sx[3][E->ien[i+1].node[1]]; 
+    r2 = E->sx[3][E->ien[i+1].node[5]];
     vtmp = (r2-r1)/rr;		/* weight for this layer */
-    //if(E->parallel.me == 0)
-    //  fprintf(stderr,"NR layer %5i (%11g - %11g, %11g): |%11g %11g %11g| = %11g\n",
-    //	      i+1,r1,r2,vtmp,lomega[i*3+0],lomega[i*3+1],lomega[i*3+2],lamp);
-    /*  */
+
     for(i1=0;i1<3;i1++)
       omega[i1] += lomega[i*3+i1] * vtmp;
     vw += vtmp;
@@ -188,7 +183,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   free ((void *) coef);
   free ((void *) lomega);
 
-
   oamp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
   if(E->parallel.me == 0)
     fprintf(stderr,"determined net rotation of | %.4e %.4e %.4e | = %.4e\n",
@@ -197,9 +191,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 }
 
 /*
-
-
-
 compute net rotation from velocities given at r, theta, phi as vel_theta and vel_phi
 
 the routines below are based on code originally from Peter Bird, see

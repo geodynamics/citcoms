@@ -304,17 +304,17 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 #ifdef CitcomS_global_defs_h	/* CitcomS */
       for(i=mgmin;i <= mgmax;i++){
 	nel  = E->lmesh.NEL[i];
-	for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	  for(k=1;k <= nel;k++){
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
-	      E->EVI2[i][m][off] = 0.0;
-	      E->EVIn1[i][m][off] = 1.0; E->EVIn2[i][m][off] = E->EVIn3[i][m][off] = 0.0;
-	      E->avmode[i][m][off] = (unsigned char)
-		E->viscosity.allow_anisotropic_viscosity;
+	      E->EVI2[i][off] = 0.0;
+	      E->EVIn1[i][off] = 1.0; 
+        E->EVIn2[i][off] = 0.0;
+        E->EVIn3[i][off] = 0.0;
+	      E->avmode[i][off] = 
+          (unsigned char) E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
-	}
       }
 #else  /* CitcomCU */
       for(i=mgmin;i <= mgmax;i++){
@@ -341,9 +341,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
       if(E->parallel.me == 0)fprintf(stderr,"set_anisotropic_viscosity_at_element_level: initializing random viscosity\n");
       for(i=mgmin;i <= mgmax;i++){
 	nel  = E->lmesh.NEL[i];
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	for (m=1;m <= E->sphere.caps_per_proc;m++) {
-#endif
 	  for(k=1;k <= nel;k++){
 	    vis2 = 0.01+drand48()*0.99; /* random fluctuation */
 	    /* get random vector */
@@ -358,17 +355,18 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-	      E->EVI2[i][m][off] = vis2;E->EVIn1[i][m][off] = n[0]; E->EVIn2[i][m][off] = n[1];E->EVIn3[i][m][off] = n[2];
-	      E->avmode[i][m][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
+	      E->EVI2[i][off] = vis2;
+        E->EVIn1[i][off] = n[0]; 
+        E->EVIn2[i][off] = n[1];
+        E->EVIn3[i][off] = n[2];
+	      E->avmode[i][off] = 
+          (unsigned char)E->viscosity.allow_anisotropic_viscosity;
 #else
 	      E->EVI2[i][off] = vis2;   E->EVIn1[i][off] = n[0];    E->EVIn2[i][off] = n[1];   E->EVIn3[i][off] = n[2];
 	      E->avmode[i][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
 #endif
 	    }
 	  }
-#ifdef CitcomS_global_defs_h	/* CitcomS m loop*/
-	}
-#endif
       }	/* mg loop */
       /* end random init */
       break;
@@ -447,21 +445,16 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	z_top = E->viscosity.zbase_layer[ani_layer-2];
 #endif
       for(i=mgmin;i <= mgmax;i++){
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	for(m=1;m <= E->sphere.caps_per_proc;m++){
-#endif
-	  elx = E->lmesh.ELX[i];elz = E->lmesh.ELZ[i];ely = E->lmesh.ELY[i];
+	  elx = E->lmesh.ELX[i];
+    elz = E->lmesh.ELZ[i];
+    ely = E->lmesh.ELY[i];
 	  elxlz = elx * elz;
 	  for (j=1;j <= elz;j++){
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	    if(E->mat[m][j] ==  ani_layer){
-#else
 	    if(E->mat[j] ==  ani_layer){
-#endif
 	      for(u=0.,inode=1;inode <= ends;inode++){ /* mean vertical coordinate */
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-		off = E->ien[m][j].node[inode];
-		u += E->sx[m][3][off];
+		off = E->ien[j].node[inode];
+		u += E->sx[3][off];
 #else
 		off = E->ien[j].node[inode];
 		if(E->control.Rsphere)
@@ -490,8 +483,8 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  /* CitcomS */
 		  xloc[0] = xloc[1] = xloc[2] = 0.0;
 		  for(inode=1;inode <= ends;inode++){
-		    off = E->ien[m][el].node[inode];
-		    rtp2xyz((float)E->sx[m][3][off],(float)E->sx[m][1][off],(float)E->sx[m][2][off],rout);
+		    off = E->ien[el].node[inode];
+		    rtp2xyz((float)E->sx[3][off],(float)E->sx[1][off],(float)E->sx[2][off],rout);
 		    xloc[0] += rout[0];xloc[1] += rout[1];xloc[2] += rout[2];
 		  }
 		  xloc[0]/=ends;xloc[1]/=ends;xloc[2]/=ends;
@@ -516,9 +509,11 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  n[0]=rout[0];n[1]=rout[1];n[2]=rout[2];
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
-		    E->EVI2[i][m][off] = vis2;
-		    E->EVIn1[i][m][off] = n[0]; E->EVIn2[i][m][off] = n[1];E->EVIn3[i][m][off] = n[2];
-		    E->avmode[i][m][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][off] = vis2;
+		    E->EVIn1[i][off] = n[0]; 
+        E->EVIn2[i][off] = n[1];
+        E->EVIn3[i][off] = n[2];
+		    E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 		  }
 #else 
 		  /* 
@@ -579,7 +574,11 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-		    E->EVI2[i][m][off] = 0;E->EVIn1[i][m][off] = 1; E->EVIn2[i][m][off] = 0;E->EVIn3[i][m][off] = 0;E->avmode[i][m][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][off] = 0;
+        E->EVIn1[i][off] = 1; 
+        E->EVIn2[i][off] = 0;
+        E->EVIn3[i][off] = 0;
+        E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 #else
 		    E->EVI2[i][off] = 0;E->EVIn1[i][off] = 1; E->EVIn2[i][off] = 0;E->EVIn3[i][off] = 0;E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 #endif
@@ -588,10 +587,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	      }
 	    }
 	  }
-#ifdef CitcomS_global_defs_h	/* CitcomS */
 	} /* end m loop */
-#endif
-      }	/* end multigrid */
 	if(read_grd)
 	ggrd_grdtrack_free_gstruc(vis2_grd);
 	
@@ -632,25 +628,24 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 }
 
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
+void normalize_director_at_nodes(struct All_variables *E,
+                                 float *n1, float *n2, float *n3, int lev)
 {
-  int n,m;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(n=1;n<=E->lmesh.NNO[lev];n++){
-      normalize_vec3(&(n1[m][n]),&(n2[m][n]),&(n3[m][n]));
-    }
+  int n;
+  for(n=1;n<=E->lmesh.NNO[lev];n++)
+    normalize_vec3(&(n1[n]),&(n2[n]),&(n3[n]));
 }
-void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
+void normalize_director_at_gint(struct All_variables *E,
+                                float *n1, float *n2, float *n3, int lev)
 {
-  int m,e,i,enode;
+  int e,i,enode;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
-    for(e=1;e<=E->lmesh.NEL[lev];e++)
-      for(i=1;i<=vpts;i++)      {
-	enode = (e-1)*vpts+i;
-	normalize_vec3(&(n1[m][enode]),&(n2[m][enode]),&( n3[m][enode]));
-      }
+  for(e=1;e<=E->lmesh.NEL[lev];e++)
+    for(i=1;i<=vpts;i++) {
+      enode = (e-1)*vpts+i;
+      normalize_vec3(&(n1[enode]),&(n2[enode]),&(n3[enode]));
+    }
 }
 #else  /* CU */
 void normalize_director_at_nodes(struct All_variables *E,float *n1,float *n2, float *n3, int lev)
@@ -831,43 +826,40 @@ void align_director_with_ISA_for_element(struct All_variables *E,
   }
   for(e=1; e <= nel; e++) {
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-    for(m=1;m <= E->sphere.caps_per_proc;m++) {
-      if(((E->viscosity.anivisc_layer > 0)&&
-	  (E->mat[m][e] <=   E->viscosity.anivisc_layer))||
-	 ((E->viscosity.anivisc_layer < 0)&&
-	  (E->mat[m][e] ==  -E->viscosity.anivisc_layer))){
-	get_rtf_at_ppts(E, m, lev, e, rtf); /* pressure points */
-	//if((e-1)%E->lmesh.elz==0)
-	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
-	for(i = 1; i <= ends; i++){	/* velocity at element nodes */
-	  off = E->ien[m][e].node[i];
-	  VV[1][i] = E->sphere.cap[m].V[1][off];
-	  VV[2][i] = E->sphere.cap[m].V[2][off];
-	  VV[3][i] = E->sphere.cap[m].V[3][off];
-	}
-	/* calculate velocity gradient matrix */
-	get_vgm_p(VV,&(E->N),&(E->GNX[lev][m][e]),&E->element_Cc, 
-		  &E->element_Ccx,rtf,E->mesh.nsd,ppts,ends,TRUE,lgrad,
-		  evel);
-	/* calculate the ISA axis and determine the type of
-	   anisotropy */
-	avmode = calc_isa_from_vgm(lgrad,evel,e,isa,E,mode);
-	/* 
-	   convert for spherical (Citcom system) to Cartesian 
-	*/
-	calc_cbase_at_tp(rtf[1][1],rtf[2][1],base);
-	convert_pvec_to_cvec(isa[2],isa[0],isa[1],base,n);
-	/* assign to director for all vpoints */
-	for(i=1;i <= vpts;i++){
-	  off = (e-1)*vpts + i;
-	  E->avmode[lev][m][off] = avmode;
-	  E->EVI2[lev][m][off] = vis2;
-	  E->EVIn1[lev][m][off] = n[0]; 
-	  E->EVIn2[lev][m][off] = n[1];
-	  E->EVIn3[lev][m][off] = n[2];
-	}
-      }	/* in layer */
-    } /* caps */
+    if(((E->viscosity.anivisc_layer > 0)&&
+        (E->mat[e] <=   E->viscosity.anivisc_layer))||
+       ((E->viscosity.anivisc_layer < 0)&&
+        (E->mat[e] ==  -E->viscosity.anivisc_layer))){
+      get_rtf_at_ppts(E, lev, e, rtf); /* pressure points */
+      //if((e-1)%E->lmesh.elz==0)
+      construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
+      for(i = 1; i <= ends; i++){	/* velocity at element nodes */
+        off = E->ien[e].node[i];
+        VV[1][i] = E->sphere.cap.V[1][off];
+        VV[2][i] = E->sphere.cap.V[2][off];
+        VV[3][i] = E->sphere.cap.V[3][off];
+      }
+      /* calculate velocity gradient matrix */
+      get_vgm_p(VV,&(E->N),&(E->GNX[lev][e]),&E->element_Cc, 
+                &E->element_Ccx,rtf,E->mesh.nsd,ppts,ends,TRUE,lgrad,
+                evel);
+      /* calculate the ISA axis and determine the type of anisotropy */
+      avmode = calc_isa_from_vgm(lgrad,evel,e,isa,E,mode);
+      /* 
+       convert for spherical (Citcom system) to Cartesian 
+      */
+      calc_cbase_at_tp(rtf[1][1],rtf[2][1],base);
+      convert_pvec_to_cvec(isa[2],isa[0],isa[1],base,n);
+      /* assign to director for all vpoints */
+      for(i=1;i <= vpts;i++){
+        off = (e-1)*vpts + i;
+        E->avmode[lev][off] = avmode;
+        E->EVI2[lev][off] = vis2;
+        E->EVIn1[lev][off] = n[0]; 
+        E->EVIn2[lev][off] = n[1];
+        E->EVIn3[lev][off] = n[2];
+      }
+    }	/* in layer */
 #else
     if(((E->viscosity.anivisc_layer > 0)&&
 	(E->mat[e] <=   E->viscosity.anivisc_layer))||
@@ -912,7 +904,6 @@ void align_director_with_ISA_for_element(struct All_variables *E,
     } /* end in layer branch */
 #endif
   }
-
 }
 
 

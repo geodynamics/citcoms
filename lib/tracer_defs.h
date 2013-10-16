@@ -51,22 +51,22 @@ struct TRACE{
     int number_of_extra_quantities;
     int number_of_tracer_quantities;
 
-    double *basicq[13][100];
-    double *extraq[13][100];
+    double *basicq[100];
+    double *extraq[100];
 
-    int ntracers[13];
-    int max_ntracers[13];
-    int *ielement[13];
+    int ntracers;
+    int max_ntracers;
+    int *ielement;
 
     int number_of_tracers;
 
-    int ilatersize[13];
-    int ilater[13];
-    double *rlater[13][100];
+    int ilatersize;
+    int ilater;
+    double *rlater[100];
 
     /* tracer flavors */
     int nflavors;
-    int **ntracer_flavor[13];
+    int **ntracer_flavor;
 
     int ic_method_for_flavors;
     double *z_interface;
@@ -77,7 +77,7 @@ struct TRACE{
 
 
     /* statistical parameters */
-    int istat_ichoice[13][5];
+    int istat_ichoice[5];
     int istat_isend;
     int istat_iempty;
     int istat1;
@@ -111,18 +111,18 @@ struct TRACE{
     /*********************/
 
     /* regular mesh parameters */
-    int numtheta[13];
-    int numphi[13];
-    unsigned int numregel[13];
-    unsigned int numregnodes[13];
-    double deltheta[13];
-    double delphi[13];
-    double thetamax[13];
-    double thetamin[13];
-    double phimax[13];
-    double phimin[13];
-    int *regnodetoel[13];
-    int *regtoel[13][5];
+    int numtheta;
+    int numphi;
+    unsigned int numregel;
+    unsigned int numregnodes;
+    double deltheta;
+    double delphi;
+    double thetamax;
+    double thetamin;
+    double phimax;
+    double phimin;
+    int *regnodetoel;
+    int *regtoel[5];
 
     /* gnomonic shape functions */
     double *shape_coefs[13][3][10];
@@ -145,10 +145,10 @@ struct TRACE{
     /* function pointers */
     /*********************/
 
-    int (* iget_element)(struct All_variables*, int, int,
+    int (* iget_element)(struct All_variables*, int,
                          double, double, double, double, double, double);
 
-    void (* get_velocity)(struct All_variables*, int, int,
+    void (* get_velocity)(struct All_variables*, int,
                           double, double, double, double*);
 
     void (* keep_within_bounds)(struct All_variables*,

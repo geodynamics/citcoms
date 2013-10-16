@@ -43,9 +43,9 @@
 	Function to give the global shape function from the local: Assumes ORTHOGONAL MESH
 	==================================================================================      */
 
-void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
+void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev)
      struct All_variables *E;
-     int el,m;
+     int el;
      struct Shape_function *GN;
      struct Shape_function_dx *GNx;
      struct Shape_function_dA *dOmega;
@@ -79,13 +79,13 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
 
       for(d=1;d<=dims;d++)
         for(i=1;i<=ends;i++)
-          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]*
+          x[d] += E->X[lev][d][E->IEN[lev][el].node[i]]*
                 E->N.vpt[GNVINDEX(i,k)];
 
       for(d=1;d<=dims;d++)
 	for(e=1;e<=dims;e++)
 	  for(i=1;i<=ends;i++)
-            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+            dxda[d][e] += E->X[lev][e][E->IEN[lev][el].node[i]]
                * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
 
       jacobian = determinant(dxda,E->mesh.nsd);
@@ -140,13 +140,13 @@ void get_global_shape_fn(E,el,GN,GNx,dOmega,pressure,sphere,rtf,lev,m)
 
       for(d=1;d<=dims;d++)
         for(i=1;i<=ends;i++)
-          x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+          x[d] += E->X[lev][d][E->IEN[lev][el].node[i]]
                  *E->N.ppt[GNPINDEX(i,k)];
 
       for(d=1;d<=dims;d++)
 	for(e=1;e<=dims;e++)
 	  for(i=1;i<=ends;i++)
-            dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+            dxda[d][e] += E->X[lev][e][E->IEN[lev][el].node[i]]
                      * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
 
       jacobian = determinant(dxda,E->mesh.nsd);
@@ -220,7 +220,7 @@ void get_global_1d_shape_fn_1(E,el,GM,dGammax,nodal,m)
           dxda[d][e] = 0.0;
           for(i=1;i<=ends;i++)
             dxda[d][e] += E->NMx.vpt[GNVXINDEX(d-1,i,k)]
-                * E->x[m][e][E->ien[m][el].node[i]];
+                * E->x[e][E->ien[el].node[i]];
           }
 
       for(d=1;d<=dims;d++)
@@ -284,9 +284,9 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
   elist[2][5]=5; elist[2][6]=6; elist[2][7]=7; elist[2][8]=8;
   /******************************************/
 
-  to = E->eco[m][el].centre[1];
-  fo = E->eco[m][el].centre[2];
-  ro = E->eco[m][el].centre[3];
+  to = E->eco[el].centre[1];
+  fo = E->eco[el].centre[2];
+  ro = E->eco[el].centre[3];
 
   dxdy[1][1] = cos(to)*cos(fo);
   dxdy[1][2] = cos(to)*sin(fo);
@@ -301,16 +301,16 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
   /*for side elements*/
   for(i=1;i<=ends;i++) {
     a = elist[NS][i+far*ends];
-    node=E->ien[m][el].node[a];
-    xx[1][i] = E->x[m][1][node]*dxdy[1][1]
-      + E->x[m][2][node]*dxdy[1][2]
-      + E->x[m][3][node]*dxdy[1][3];
-    xx[2][i] = E->x[m][1][node]*dxdy[2][1]
-      + E->x[m][2][node]*dxdy[2][2]
-      + E->x[m][3][node]*dxdy[2][3];
-    xx[3][i] = E->x[m][1][node]*dxdy[3][1]
-      + E->x[m][2][node]*dxdy[3][2]
-      + E->x[m][3][node]*dxdy[3][3];
+    node=E->ien[el].node[a];
+    xx[1][i] = E->x[1][node]*dxdy[1][1]
+      + E->x[2][node]*dxdy[1][2]
+      + E->x[3][node]*dxdy[1][3];
+    xx[2][i] = E->x[1][node]*dxdy[2][1]
+      + E->x[2][node]*dxdy[2][2]
+      + E->x[3][node]*dxdy[2][3];
+    xx[3][i] = E->x[1][node]*dxdy[3][1]
+      + E->x[2][node]*dxdy[3][2]
+      + E->x[3][node]*dxdy[3][3];
   }
 
   for(k=1;k<=oned;k++)    {
@@ -369,7 +369,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
 	for(d=1;d<=E->mesh.nsd-1;d++)
 	  for(e=1;e<=E->mesh.nsd-1;e++) {
 	    a = elist[NS][k+far*ends];
-	    node=E->ien[m][el].node[a];
+	    node=E->ien[el].node[a];
 	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
 	  }
       }
@@ -380,7 +380,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,NS,far,m)
 	for(d=1;d<=E->mesh.nsd-1;d++)
 	  for(e=1;e<=E->mesh.nsd-1;e++) {
 	    a = elist[NS][k+far*ends];
-	    node=E->ien[m][el].node[a];
+	    node=E->ien[el].node[a];
 	    dxda[d][e] += xx[dims[NS][e]][k]*E->Mx.ppt[GMPXINDEX(d-1,k,i)];
 	  }
       }
@@ -424,7 +424,7 @@ void get_elt_h(E,el,elt_h,m)
   type=VBX;
   for(i=1;i<=E->mesh.nsd;i++)
     { for(a=1;a<=enodes[E->mesh.nsd];a++)
-	{ if (E->node[m][E->ien[m][el].node[a]] & type)
+	{ if (E->node[E->ien[el].node[a]] & type)
 	    { if(!got_g)
 		{  get_elt_g(E,el,elt_g,E->mesh.levmax,m);
 		   got_g++;
@@ -433,7 +433,7 @@ void get_elt_h(E,el,elt_h,m)
 	      p=E->mesh.nsd*(a-1) + i - 1;
 	      for(b=1;b<=pnodes[E->mesh.nsd];b++)
 		{ q = b-1;
-		  elt_h[q] -= elt_g[p][q] * E->sphere.cap[m].VB[i][E->ien[m][el].node[a]];
+		  elt_h[q] -= elt_g[p][q] * E->sphere.cap.VB[i][E->ien[el].node[a]];
 		}
 	    }
 	}
@@ -463,7 +463,7 @@ void get_ele_visc(E, EV,m)
     for (el=1;el<=nel;el++)   {
       EV[el] = 0.0;
       for (j=1;j<=vpts;j++)   {
-        EV[el] +=  E->EVI[lev][m][(el-1)*vpts+j];
+        EV[el] +=  E->EVI[lev][(el-1)*vpts+j];
       }
 
       EV[el] /= vpts;
@@ -633,11 +633,11 @@ int locate_cap(E,x)
 	ia[4] = ia[3]-E->lmesh.noz*(E->lmesh.nox-1);
 
 	for (i=1;i<=4;i++)  {
-	    xx[1] = E->x[m][1][ia[i]]/E->sx[m][3][ia[1]];
-	    xx[2] = E->x[m][2][ia[i]]/E->sx[m][3][ia[1]];
-	    xx[3] = E->x[m][3][ia[i]]/E->sx[m][3][ia[1]];
+	    xx[1] = E->x[1][ia[i]]/E->sx[m][3][ia[1]];
+	    xx[2] = E->x[2][ia[i]]/E->sx[m][3][ia[1]];
+	    xx[3] = E->x[3][ia[i]]/E->sx[m][3][ia[1]];
 	    angle[i] = get_angle(x,xx);    /* get angle between (i,j) and other four*/
-	    angle1[i]=E->sphere.angle[m][i];
+	    angle1[i]=E->sphere.angle[i];
 	}
 
 	area1 = area_of_sphere_triag(angle[1],angle[2],angle1[1])
@@ -645,7 +645,7 @@ int locate_cap(E,x)
 	    + area_of_sphere_triag(angle[3],angle[4],angle1[3])
 	    + area_of_sphere_triag(angle[4],angle[1],angle1[4]);
 
-	if ( fabs ((area1-E->sphere.area[m])/E->sphere.area[m]) <e_7 ) {
+	if ( fabs ((area1-E->sphere.area)/E->sphere.area) <e_7 ) {
 	    mm = m;
 	    return (mm);
         }
@@ -680,7 +680,7 @@ int m,ne;
 
 	el = (es-1)*E->lmesh.ELZ[level]+1;
 	area1 = area_of_5points (E,level,m,el,x,ne);
-	area = E->sphere.area1[level][m][es];
+	area = E->sphere.area1[level][es];
 
 	if(fabs ((area1-area)/area) <e_7 ) {
 	    for (lev=E->mesh.levmin;lev<E->mesh.levmax;lev++)  {
@@ -688,12 +688,12 @@ int m,ne;
 		j=1;
 		areamin = e_6;
 		do {
-		    el_plus = E->EL[lev][m][el].sub[j];
+		    el_plus = E->EL[lev][el].sub[j];
 
 		    es_plus = (el_plus-1)/E->lmesh.ELZ[lev_plus]+1;
 
 		    area1 = area_of_5points(E,lev_plus,m,el_plus,x,ne);
-		    area = E->sphere.area1[lev_plus][m][es_plus];
+		    area = E->sphere.area1[lev_plus][es_plus];
 
 		    if(fabs(area1-area)<areamin) {
 			areamin=fabs(area1-area);
@@ -743,8 +743,8 @@ int m,el,ne;
 
     es = (el-1)/E->lmesh.elz+1;
 
-    to = E->eco[m][el].centre[1];
-    fo = E->eco[m][el].centre[2];
+    to = E->eco[el].centre[1];
+    fo = E->eco[el].centre[2];
 
     dxdy[1][1] = cos(to)*cos(fo);
     dxdy[1][2] = cos(to)*sin(fo);
@@ -757,13 +757,13 @@ int m,el,ne;
     dxdy[3][3] = cos(to);
 
     for(i=1;i<=oned;i++) {         /* nodes */
-	node = E->ien[m][el].node[i];
-	snode = E->sien[m][es].node[i];
-	t[i] = T[m][snode];
+	node = E->ien[el].node[i];
+	snode = E->sien[es].node[i];
+	t[i] = T[snode];
 	for (j=1;j<=E->mesh.nsd;j++)
-	    yy[j][i] = E->x[m][1][node]*dxdy[j][1]
-                + E->x[m][2][node]*dxdy[j][2]
-                + E->x[m][3][node]*dxdy[j][3];
+	    yy[j][i] = E->x[1][node]*dxdy[j][1]
+                + E->x[2][node]*dxdy[j][2]
+                + E->x[3][node]*dxdy[j][3];
     }
 
     for (j=1;j<=E->mesh.nsd;j++)
@@ -875,21 +875,21 @@ void phase_change_410(E,B,B_b)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     for(i=1;i<=E->lmesh.nno;i++)  {
-      e_pressure = (E->sphere.ro-E->sx[m][3][i])-E->viscosity.z410-
-            E->control.clapeyron410*(E->T[m][i]-E->control.transT410);
+      e_pressure = (E->sphere.ro-E->sx[3][i])-E->viscosity.z410-
+            E->control.clapeyron410*(E->T[i]-E->control.transT410);
 
-      B[m][i] = pt5*(one+tanh(E->control.width410*e_pressure));
+      B[i] = pt5*(one+tanh(E->control.width410*e_pressure));
       }
 
     ns = 0;
     for (k=1;k<=E->lmesh.noy;k++)
       for (j=1;j<=E->lmesh.nox;j++)  {
         ns = ns + 1;
-        B_b[m][ns]=0.0;
+        B_b[ns]=0.0;
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
-          if (B[m][n]>=pt5&&B[m][n+1]<=pt5)
-            B_b[m][ns]=(E->sx[m][3][n+1]-E->sx[m][3][n])*(pt5-B[m][n])/(B[m][n+1]-B[m][n])+E->sx[m][3][n];
+          if (B[n]>=pt5&&B[n+1]<=pt5)
+            B_b[ns]=(E->sx[3][n+1]-E->sx[3][n])*(pt5-B[n])/(B[n+1]-B[n])+E->sx[3][n];
           }
         }
     }
@@ -910,21 +910,21 @@ void phase_change_670(E,B,B_b)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     for(i=1;i<=E->lmesh.nno;i++)  {
-      e_pressure = (E->sphere.ro-E->sx[m][3][i])-E->viscosity.zlm-
-            E->control.clapeyron670*(E->T[m][i]-E->control.transT670);
+      e_pressure = (E->sphere.ro-E->sx[3][i])-E->viscosity.zlm-
+            E->control.clapeyron670*(E->T[i]-E->control.transT670);
 
-      B[m][i] = pt5*(one+tanh(E->control.width670*e_pressure));
+      B[i] = pt5*(one+tanh(E->control.width670*e_pressure));
       }
 
     ns = 0;
     for (k=1;k<=E->lmesh.noy;k++)
       for (j=1;j<=E->lmesh.nox;j++)  {
         ns = ns + 1;
-        B_b[m][ns]=0.0;
+        B_b[ns]=0.0;
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
-          if (B[m][n]>=pt5&&B[m][n+1]<=pt5)
-            B_b[m][ns]=(E->sx[m][3][n+1]-E->sx[m][3][n])*(pt5-B[m][n])/(B[m][n+1]-B[m][n])+E->sx[m][3][n];
+          if (B[n]>=pt5&&B[n+1]<=pt5)
+            B_b[ns]=(E->sx[3][n+1]-E->sx[3][n])*(pt5-B[n])/(B[n+1]-B[n])+E->sx[3][n];
           }
         }
     }
@@ -945,21 +945,21 @@ void phase_change_cmb(E,B,B_b)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     for(i=1;i<=E->lmesh.nno;i++)  {
-      e_pressure = (E->sphere.ro-E->sx[m][3][i])-E->viscosity.zcmb-
-            E->control.clapeyroncmb*(E->T[m][i]-E->control.transTcmb);
+      e_pressure = (E->sphere.ro-E->sx[3][i])-E->viscosity.zcmb-
+            E->control.clapeyroncmb*(E->T[i]-E->control.transTcmb);
 
-      B[m][i] = pt5*(one+tanh(E->control.widthcmb*e_pressure));
+      B[i] = pt5*(one+tanh(E->control.widthcmb*e_pressure));
       }
 
     ns = 0;
     for (k=1;k<=E->lmesh.noy;k++)
       for (j=1;j<=E->lmesh.nox;j++)  {
         ns = ns + 1;
-        B_b[m][ns]=0.0;
+        B_b[ns]=0.0;
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
-          if (B[m][n]>=pt5&&B[m][n+1]<=pt5)
-            B_b[m][ns]=(E->sx[m][3][n+1]-E->sx[m][3][n])*(pt5-B[m][n])/(B[m][n+1]-B[m][n])+E->sx[m][3][n];
+          if (B[n]>=pt5&&B[n+1]<=pt5)
+            B_b[ns]=(E->sx[3][n+1]-E->sx[3][n])*(pt5-B[n])/(B[n+1]-B[n])+E->sx[3][n];
           }
         }
     }
@@ -985,8 +985,8 @@ void flogical_mesh_to_real(E,data,level)
 
 void p_to_centres(E,PN,P,lev)
      struct All_variables *E;
-     float **PN;
-     double **P;
+     float *PN;
+     double *P;
      int lev;
 
 {  int p,element,node,j,m;
@@ -994,14 +994,14 @@ void p_to_centres(E,PN,P,lev)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(p=1;p<=E->lmesh.NEL[lev];p++)
-      P[m][p] = 0.0;
+      P[p] = 0.0;
 
    weight=1.0/((double)enodes[E->mesh.nsd]) ;
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(p=1;p<=E->lmesh.NEL[lev];p++)
       for(j=1;j<=enodes[E->mesh.nsd];j++)
-        P[m][p] += PN[m][E->IEN[lev][m][p].node[j]] * weight;
+        P[p] += PN[E->IEN[lev][p].node[j]] * weight;
 
    return;
    }
@@ -1009,7 +1009,7 @@ void p_to_centres(E,PN,P,lev)
 
 void v_to_intpts(E,VN,VE,lev)
   struct All_variables *E;
-  float **VN,**VE;
+  float *VN,*VE;
   int lev;
   {
 
@@ -1021,9 +1021,9 @@ void v_to_intpts(E,VN,VE,lev)
  for (m=1;m<=E->sphere.caps_per_proc;m++)
    for(e=1;e<=E->lmesh.NEL[lev];e++)
      for(i=1;i<=vpts;i++)                 {
-        VE[m][(e-1)*vpts + i] = 0.0;
+        VE[(e-1)*vpts + i] = 0.0;
         for(j=1;j<=ends;j++)
-          VE[m][(e-1)*vpts + i] += VN[m][E->IEN[lev][m][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
+          VE[(e-1)*vpts + i] += VN[E->IEN[lev][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
         }
 
    return;
@@ -1044,10 +1044,10 @@ void visc_to_intpts(E,VN,VE,lev)
  for (m=1;m<=E->sphere.caps_per_proc;m++)
    for(e=1;e<=E->lmesh.NEL[lev];e++)
      for(i=1;i<=vpts;i++) {
-        VE[m][(e-1)*vpts + i] = 0.0;
+        VE[(e-1)*vpts + i] = 0.0;
 	for(j=1;j<=ends;j++)
-          VE[m][(e-1)*vpts + i] += log(VN[m][E->IEN[lev][m][e].node[j]]) *  E->N.vpt[GNVINDEX(j,i)];
-        VE[m][(e-1)*vpts + i] = exp(VE[m][(e-1)*vpts + i]);
+          VE[(e-1)*vpts + i] += log(VN[E->IEN[lev][e].node[j]]) *  E->N.vpt[GNVINDEX(j,i)];
+        VE[(e-1)*vpts + i] = exp(VE[(e-1)*vpts + i]);
         }
 
   }
@@ -1721,6 +1721,6 @@ double cofactor(A,i,j,n)
 
 
 /* version */
-/* $Id$ */
+/* $Id: Obsolete.c 17193 2010-09-15 10:36:58Z becker $ */
 
 /* End of file  */

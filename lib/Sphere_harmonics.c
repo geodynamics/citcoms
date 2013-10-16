@@ -100,9 +100,8 @@ double modified_plgndr_a(int l, int m, double t)
 /* =========================================================
    expand the field TG into spherical harmonics
    ========================================================= */
-void sphere_expansion(E,TG,sphc,sphs)
-     struct All_variables *E;
-     float **TG,*sphc,*sphs;
+void sphere_expansion( struct All_variables *E, 
+                       float *TG, float *sphc, float * sphs )
 {
     int el,nint,d,p,i,m,j,es,mm,ll,rand();
     void sum_across_surf_sph1();
@@ -112,37 +111,34 @@ void sphere_expansion(E,TG,sphc,sphs)
         sphs[i] = 0.0;
     }
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-        for (es=1;es<=E->lmesh.snel;es++)   {
+    for (es=1;es<=E->lmesh.snel;es++)   {
 
-            for (ll=0;ll<=E->output.llmax;ll++)
-                for (mm=0; mm<=ll; mm++)   {
+        for (ll=0;ll<=E->output.llmax;ll++)
+            for (mm=0; mm<=ll; mm++)   {
 
-                    p = E->sphere.hindex[ll][mm];
+                p = E->sphere.hindex[ll][mm];
 
-                    for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
-                        for(d=1;d<=onedvpoints[E->mesh.nsd];d++)   {
-                            j = E->sien[m][es].node[d];
-                            sphc[p] += TG[m][E->sien[m][es].node[d]]
-                                * E->sphere.tablesplm[m][j][p]
-                                * E->sphere.tablescosf[m][j][mm]
-                                * E->M.vpt[GMVINDEX(d,nint)]
-                                * E->surf_det[m][nint][es];
-                            sphs[p] += TG[m][E->sien[m][es].node[d]]
-                                * E->sphere.tablesplm[m][j][p]
-                                * E->sphere.tablessinf[m][j][mm]
-                                * E->M.vpt[GMVINDEX(d,nint)]
-                                * E->surf_det[m][nint][es];
-                        }
+                for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
+                    for(d=1;d<=onedvpoints[E->mesh.nsd];d++)   {
+                        j = E->sien[es].node[d];
+                        sphc[p] += TG[E->sien[es].node[d]]
+                            * E->sphere.tablesplm[j][p]
+                            * E->sphere.tablescosf[j][mm]
+                            * E->M.vpt[GMVINDEX(d,nint)]
+                            * E->surf_det[nint][es];
+                        sphs[p] += TG[E->sien[es].node[d]]
+                            * E->sphere.tablesplm[j][p]
+                            * E->sphere.tablessinf[j][mm]
+                            * E->M.vpt[GMVINDEX(d,nint)]
+                            * E->surf_det[nint][es];
                     }
+                }
 
-                }       /* end for ll and mm  */
+            }       /* end for ll and mm  */
 
-        }
+    }
 
     sum_across_surf_sph1(E,sphc,sphs);
-
-    return;
 }
 
 
@@ -153,10 +149,9 @@ void debug_sphere_expansion(struct All_variables *E)
      */
     int m, i, j, k, p, node;
     int ll, mm;
-    float *TT[NCS], *sph_harm[2];
+    float *TT, *sph_harm[2];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+    TT = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* sin coeff */
     sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
@@ -164,13 +159,12 @@ void debug_sphere_expansion(struct All_variables *E)
     sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
 
     for(k=1;k<=E->lmesh.noz;k++)  {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
-            for(i=1;i<=E->lmesh.noy;i++)
-                for(j=1;j<=E->lmesh.nox;j++)  {
-                    node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
-                    p = j + (i-1)*E->lmesh.nox;
-                    TT[m][p] = E->T[m][node];
-                }
+      for(i=1;i<=E->lmesh.noy;i++)
+          for(j=1;j<=E->lmesh.nox;j++)  {
+              node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
+              p = j + (i-1)*E->lmesh.nox;
+              TT[p] = E->T[node];
+          }
 
         /* expand TT into spherical harmonics */
         sphere_expansion(E, TT, sph_harm[0], sph_harm[1]);
@@ -186,10 +180,7 @@ void debug_sphere_expansion(struct All_variables *E)
                 }
         }
     }
-
-    return;
 }
-
 
 /* ==================================================*/
 /* ==================================================*/
@@ -201,38 +192,37 @@ static void  compute_sphereh_table(E)
     int m,node,ll,mm,i,j,p;
     double t,f,mmf;
     
+    E->sphere.tablesplm = 
+      (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
+    E->sphere.tablescosf = 
+      (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
+    E->sphere.tablessinf = 
+      (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        E->sphere.tablesplm[m]   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
-        E->sphere.tablescosf[m] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
-        E->sphere.tablessinf[m] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
-
-        for (i=1;i<=E->lmesh.nsf;i++)   {
-            E->sphere.tablesplm[m][i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
-            E->sphere.tablescosf[m][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
-            E->sphere.tablessinf[m][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
-        }
+    for (i=1;i<=E->lmesh.nsf;i++)   {
+        E->sphere.tablesplm[i]= 
+          (double *)malloc((E->sphere.hindice)*sizeof(double));
+        E->sphere.tablescosf[i]= 
+          (double *)malloc((E->output.llmax+1)*sizeof(double));
+        E->sphere.tablessinf[i]= 
+          (double *)malloc((E->output.llmax+1)*sizeof(double));
     }
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-        for (j=1;j<=E->lmesh.nsf;j++)  {
-            node = j*E->lmesh.noz;
-            f=E->sx[m][2][node];
-            t=E->sx[m][1][node];
-            for (mm=0;mm<=E->output.llmax;mm++)   {
-	      mmf = (double)(mm)*f;
-                E->sphere.tablescosf[m][j][mm] = cos( mmf );
-                E->sphere.tablessinf[m][j][mm] = sin( mmf );
-            }
-
-            for (ll=0;ll<=E->output.llmax;ll++)
-                for (mm=0;mm<=ll;mm++)  {
-                    p = E->sphere.hindex[ll][mm];
-                    E->sphere.tablesplm[m][j][p] = modified_plgndr_a(ll,mm,t) ;
-                }
+    for (j=1;j<=E->lmesh.nsf;j++)  {
+        node = j*E->lmesh.noz;
+        f=E->sx[2][node];
+        t=E->sx[1][node];
+        for (mm=0;mm<=E->output.llmax;mm++)   {
+          mmf = (double)(mm)*f;
+          E->sphere.tablescosf[j][mm] = cos( mmf );
+          E->sphere.tablessinf[j][mm] = sin( mmf );
         }
-    }
 
-    return;
+        for (ll=0;ll<=E->output.llmax;ll++)
+          for (mm=0;mm<=ll;mm++)  {
+            p = E->sphere.hindex[ll][mm];
+            E->sphere.tablesplm[j][p] = modified_plgndr_a(ll,mm,t) ;
+          }
+    }
 }
 
