@@ -942,56 +942,56 @@ void allocate_common_vars( struct All_variables *E )
     m=0;
     n=1;
 
-  npno = E->lmesh.npno;
-  nel  = E->lmesh.nel;
-  nno  = E->lmesh.nno;
-  nsf  = E->lmesh.nsf;
-  noz  = E->lmesh.noz;
-  nox  = E->lmesh.nox;
-  noy  = E->lmesh.noy;
-  elx  = E->lmesh.elx;
-  ely  = E->lmesh.ely;
+    npno = E->lmesh.npno;
+    nel  = E->lmesh.nel;
+    nno  = E->lmesh.nno;
+    nsf  = E->lmesh.nsf;
+    noz  = E->lmesh.noz;
+    nox  = E->lmesh.nox;
+    noy  = E->lmesh.noy;
+    elx  = E->lmesh.elx;
+    ely  = E->lmesh.ely;
 
-  E->P        = (double *) malloc((npno+1)*sizeof(double));
-  E->T        = (double *) malloc((nno+1)*sizeof(double));
-  E->NP       = (float *) malloc((nno+1)*sizeof(float));
-  E->buoyancy = (double *) malloc((nno+1)*sizeof(double));
+    E->P        = (double *) malloc((npno+1)*sizeof(double));
+    E->T        = (double *) malloc((nno+1)*sizeof(double));
+    E->NP       = (float *) malloc((nno+1)*sizeof(float));
+    E->buoyancy = (double *) malloc((nno+1)*sizeof(double));
 
-  E->gstress = (float *) malloc((6*nno+1)*sizeof(float));
-  // TWB do we need this anymore XXX
-  //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
+    E->gstress = (float *) malloc((6*nno+1)*sizeof(float));
+    // TWB do we need this anymore XXX
+    //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
-  for(i=1;i<=E->mesh.nsd;i++)
-      E->sphere.cap.TB[i] = (float *)  malloc((nno+1)*sizeof(float));
+    for(i=1;i<=E->mesh.nsd;i++)
+        E->sphere.cap.TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
-  E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.divg     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.vort     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.shflux    = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.bhflux    = (float *)malloc((nsf+2)*sizeof(float));
-  /*  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf) */
-  E->slice.freesurf    = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.divg     = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.vort     = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.shflux    = (float *)malloc((nsf+2)*sizeof(float));
+    E->slice.bhflux    = (float *)malloc((nsf+2)*sizeof(float));
+    /*  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf) */
+    E->slice.freesurf    = (float *)malloc((nsf+2)*sizeof(float));
 
-  E->mat = (int *) malloc((nel+2)*sizeof(int));
-  E->VIP = (float *) malloc((nel+2)*sizeof(float));
+    E->mat = (int *) malloc((nel+2)*sizeof(int));
+    E->VIP = (float *) malloc((nel+2)*sizeof(float));
 
-  E->heating_adi    = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_visc   = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_latent = (double *) malloc((nel+1)*sizeof(double));
+    E->heating_adi    = (double *) malloc((nel+1)*sizeof(double));
+    E->heating_visc   = (double *) malloc((nel+1)*sizeof(double));
+    E->heating_latent = (double *) malloc((nel+1)*sizeof(double));
 
-  /* lump mass matrix for the energy eqn */
-  E->TMass = (double *) malloc((nno+1)*sizeof(double));
+    /* lump mass matrix for the energy eqn */
+    E->TMass = (double *) malloc((nno+1)*sizeof(double));
 
-  /* nodal mass */
-  E->NMass = (double *) malloc((nno+1)*sizeof(double));
+    /* nodal mass */
+    E->NMass = (double *) malloc((nno+1)*sizeof(double));
 
-  nxyz = max(nox*noz,nox*noy);
-  nxyz = 2*max(nxyz,noz*noy);
+    nxyz = max(nox*noz,nox*noy);
+    nxyz = 2*max(nxyz,noz*noy);
 
-  E->sien         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
-  E->surf_element = (int *) malloc((nxyz+2)*sizeof(int));
-  E->surf_node    = (int *) malloc((nsf+2)*sizeof(int));
+    E->sien         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
+    E->surf_element = (int *) malloc((nxyz+2)*sizeof(int));
+    E->surf_node    = (int *) malloc((nsf+2)*sizeof(int));
 
 
   /* density field */
@@ -1084,8 +1084,10 @@ void allocate_common_vars( struct All_variables *E )
 
     E->parallel.EXCHANGE_sNODE[i] = 
       (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
+
     E->parallel.NODE[i] = 
       (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
+
     E->parallel.EXCHANGE_NODE[i] = 
       (struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
     E->parallel.EXCHANGE_ID[i] = 
