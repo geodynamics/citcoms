@@ -1082,10 +1082,14 @@ void allocate_common_vars( struct All_variables *E )
     nxyz = 2*max(nxyz,noz*noy);
     nozl = max(noy,nox*2);
 
-    E->parallel.EXCHANGE_sNODE[i] = (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
-    E->parallel.NODE[i]   = (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
-    E->parallel.EXCHANGE_NODE[i]=(struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
-    E->parallel.EXCHANGE_ID[i] = (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
+    E->parallel.EXCHANGE_sNODE[i] = 
+      (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
+    E->parallel.NODE[i] = 
+      (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
+    E->parallel.EXCHANGE_NODE[i] = 
+      (struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
+    E->parallel.EXCHANGE_ID[i] = 
+      (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
 
     for(l=1;l<=E->lmesh.NNO[i];l++)  {
       E->NODE[i][l] = (INTX | INTY | INTZ);  /* and any others ... */
@@ -1140,7 +1144,7 @@ void allocate_common_vars( struct All_variables *E )
 
   mat_prop_allocate(E);
   phase_change_allocate(E);
-  set_up_nonmg_aliases(E,j);
+  set_up_nonmg_aliases(E);
 
   if (strcmp(E->output.format, "hdf5") == 0)
       h5output_allocate_memory(E);
@@ -1326,41 +1330,35 @@ void check_bc_consistency( struct All_variables *E )
       }
 }
 
-void set_up_nonmg_aliases(E,j)
-     struct All_variables *E;
-     int j;
-
-{ /* Aliases for functions only interested in the highest mg level */
-
+/* Aliases for functions only interested in the highest mg level */
+void set_up_nonmg_aliases( struct All_variables *E )
+{ 
   int i;
 
-  E->eco[j] = E->ECO[E->mesh.levmax][j];
-  E->ien[j] = E->IEN[E->mesh.levmax][j];
-  E->id[j] = E->ID[E->mesh.levmax][j];
-  E->Vi[j] = E->VI[E->mesh.levmax][j];
-  E->EVi[j] = E->EVI[E->mesh.levmax][j];
-  E->node[j] = E->NODE[E->mesh.levmax][j];
-  E->cc[j] = E->CC[E->mesh.levmax][j];
-  E->ccx[j] = E->CCX[E->mesh.levmax][j];
-  E->Mass[j] = E->MASS[E->mesh.levmax][j];
-  E->gDA[j] = E->GDA[E->mesh.levmax][j];
-  E->gNX[j] = E->GNX[E->mesh.levmax][j];
+  E->eco = E->ECO[E->mesh.levmax];
+  E->ien = E->IEN[E->mesh.levmax];
+  E->id = E->ID[E->mesh.levmax];
+  E->Vi = E->VI[E->mesh.levmax];
+  E->EVi = E->EVI[E->mesh.levmax];
+  E->node = E->NODE[E->mesh.levmax];
+  E->cc = E->CC[E->mesh.levmax];
+  E->ccx = E->CCX[E->mesh.levmax];
+  E->Mass = E->MASS[E->mesh.levmax];
+  E->gDA = E->GDA[E->mesh.levmax];
+  E->gNX = E->GNX[E->mesh.levmax];
 
-  for (i=1;i<=E->mesh.nsd;i++)    {
-    E->x[j][i] = E->X[E->mesh.levmax][j][i];
-    E->sx[j][i] = E->SX[E->mesh.levmax][j][i];
-    }
+  for (i=1;i<=E->mesh.nsd;i++) {
+    E->x[i] = E->X[E->mesh.levmax][i];
+    E->sx[i] = E->SX[E->mesh.levmax][i];
+  }
+}
 
-  return; }
-
-void report(E,string)
-     struct All_variables *E;
-     char * string;
-{ if(E->control.verbose && E->parallel.me==0)
-    { fprintf(stderr,"%s\n",string);
-      fflush(stderr);
-    }
-  return;
+void report( struct All_variables *E, char * string )
+{ 
+  if(E->control.verbose && E->parallel.me==0) { 
+    fprintf(stderr,"%s\n",string);
+    fflush(stderr);
+  }
 }
 
 void record(E,string)
