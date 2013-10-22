@@ -136,10 +136,10 @@ void apply_side_sbc(struct All_variables *E)
 
   for(d=1; d<=E->mesh.nsd; d++)
     for(i=1; i<=E->lmesh.nno; i++)
-      if(E->node[i] & sbc_flag[d] && E->sphere.cap.VB[d][i] != 0) {
+      if(E->node[i] & sbc_flag[d] && E->sphere.cap[1].VB[d][i] != 0) {
         j = E->sbc.node[i];
         for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
-          E->sbc.SB[side][d][j] = E->sphere.cap.VB[d][i];
+          E->sbc.SB[side][d][j] = E->sphere.cap[1].VB[d][i];
       }
 }
 

@@ -66,7 +66,7 @@ int solve_del2_u( struct All_variables *E, double *d0, double *F, double acc,
 
   double CPU_time0(),initial_time,time;
   double residual,prior_residual,r0;
-  double *D1[NCS], *r[NCS], *Au[NCS];
+  //double *D1[NCS], *r[NCS], *Au[NCS];
 
   neq  = E->lmesh.NEQ[high_lev];
 

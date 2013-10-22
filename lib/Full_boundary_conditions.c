@@ -57,12 +57,12 @@ void full_velocity_boundary_conditions(E)
   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
     noz = E->mesh.NOZ[lv];
     if(E->mesh.topvbc != 1) {	/* free slip top */
-    horizontal_bc(E,E->sphere.cap.VB,noz,1,0.0,VBX,0,lv);
-    horizontal_bc(E,E->sphere.cap.VB,noz,3,0.0,VBZ,1,lv);
-    horizontal_bc(E,E->sphere.cap.VB,noz,2,0.0,VBY,0,lv);
-    horizontal_bc(E,E->sphere.cap.VB,noz,1,E->control.VBXtopval,SBX,1,lv);
-    horizontal_bc(E,E->sphere.cap.VB,noz,3,0.0,SBZ,0,lv);
-    horizontal_bc(E,E->sphere.cap.VB,noz,2,E->control.VBYtopval,SBY,1,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,1,0.0,VBX,0,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,3,0.0,VBZ,1,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,2,0.0,VBY,0,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,1,E->control.VBXtopval,SBX,1,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,3,0.0,SBZ,0,lv);
+    horizontal_bc(E,E->sphere.cap[1].VB,noz,2,E->control.VBYtopval,SBY,1,lv);
 #ifdef USE_GGRD
     /* Ggrd traction control */
     if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
@@ -71,21 +71,21 @@ void full_velocity_boundary_conditions(E)
 
     }
     if(E->mesh.botvbc != 1) {	/* free slip bottom */
-      horizontal_bc(E,E->sphere.cap.VB,1,1,0.0,VBX,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,3,0.0,VBZ,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,2,0.0,VBY,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,1,E->control.VBXbotval,SBX,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,3,0.0,SBZ,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,2,E->control.VBYbotval,SBY,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,1,0.0,VBX,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,3,0.0,VBZ,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,2,0.0,VBY,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,1,E->control.VBXbotval,SBX,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,3,0.0,SBZ,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,2,E->control.VBYbotval,SBY,1,lv);
     }
 
     if(E->mesh.topvbc == 1) {	/* velocity/no slip BC */
-      horizontal_bc(E,E->sphere.cap.VB,noz,1,E->control.VBXtopval,VBX,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,noz,3,0.0,VBZ,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,noz,2,E->control.VBYtopval,VBY,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,noz,1,0.0,SBX,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,noz,3,0.0,SBZ,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,noz,2,0.0,SBY,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,1,E->control.VBXtopval,VBX,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,3,0.0,VBZ,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,2,E->control.VBYtopval,VBY,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,1,0.0,SBX,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,3,0.0,SBZ,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,noz,2,0.0,SBY,0,lv);
 #ifdef USE_GGRD
       /* Ggrd velocity control */
       if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
@@ -101,12 +101,12 @@ void full_velocity_boundary_conditions(E)
     }
 
     if(E->mesh.botvbc == 1) {	/* velocity bottom BC */
-      horizontal_bc(E,E->sphere.cap.VB,1,1,E->control.VBXbotval,VBX,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,3,0.0,VBZ,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,2,E->control.VBYbotval,VBY,1,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,1,0.0,SBX,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,3,0.0,SBZ,0,lv);
-      horizontal_bc(E,E->sphere.cap.VB,1,2,0.0,SBY,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,1,E->control.VBXbotval,VBX,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,3,0.0,VBZ,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,2,E->control.VBYbotval,VBY,1,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,1,0.0,SBX,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,3,0.0,SBZ,0,lv);
+      horizontal_bc(E,E->sphere.cap[1].VB,1,2,0.0,SBY,0,lv);
     }
 
     if(E->control.side_sbcs)
@@ -126,21 +126,21 @@ void full_temperature_boundary_conditions(E)
   lev = E->mesh.levmax;
   noz = E->mesh.noz;
   if(E->mesh.toptbc == 1) {
-    horizontal_bc(E,E->sphere.cap.TB,noz,3,E->control.TBCtopval,TBZ,1,lev);
-    horizontal_bc(E,E->sphere.cap.TB,noz,3,E->control.TBCtopval,FBZ,0,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,noz,3,E->control.TBCtopval,TBZ,1,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,noz,3,E->control.TBCtopval,FBZ,0,lev);
     if(E->control.tbcs_file)
         read_temperature_boundary_from_file(E);
   } else {
-    horizontal_bc(E,E->sphere.cap.TB,noz,3,E->control.TBCtopval,TBZ,0,lev);
-    horizontal_bc(E,E->sphere.cap.TB,noz,3,E->control.TBCtopval,FBZ,1,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,noz,3,E->control.TBCtopval,TBZ,0,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,noz,3,E->control.TBCtopval,FBZ,1,lev);
   }
 
   if(E->mesh.bottbc == 1) {
-    horizontal_bc(E,E->sphere.cap.TB,1,3,E->control.TBCbotval,TBZ,1,lev);
-    horizontal_bc(E,E->sphere.cap.TB,1,3,E->control.TBCbotval,FBZ,0,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,1,3,E->control.TBCbotval,TBZ,1,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,1,3,E->control.TBCbotval,FBZ,0,lev);
   } else {
-    horizontal_bc(E,E->sphere.cap.TB,1,3,E->control.TBCbotval,TBZ,0,lev);
-    horizontal_bc(E,E->sphere.cap.TB,1,3,E->control.TBCbotval,FBZ,1,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,1,3,E->control.TBCbotval,TBZ,0,lev);
+    horizontal_bc(E,E->sphere.cap[1].TB,1,3,E->control.TBCbotval,FBZ,1,lev);
   }
 
   if(E->control.lith_age_time==1)  {

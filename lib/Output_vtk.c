@@ -140,9 +140,9 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-    V[1] = E->sphere.cap.V[1];
-    V[2] = E->sphere.cap.V[2];
-    V[3] = E->sphere.cap.V[3];
+    V[1] = E->sphere.cap[1].V[1];
+    V[2] = E->sphere.cap[1].V[2];
+    V[3] = E->sphere.cap[1].V[3];
 
     for(i=1; i<=E->lmesh.nno; i++) {
         sint = E->SinCos[lev][0][i];
@@ -216,13 +216,13 @@ static void vtk_output_stress(struct All_variables *E, FILE *fp)
     void allocate_STD_mem();
     void compute_nodal_stress();
     void free_STD_mem();
-    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-    float *divv[NCS],*vorv[NCS];
+    float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+    float *divv,*vorv;
 
     /* those are sorted like stt spp srr stp str srp  */
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    free_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"stress\" NumberOfComponents=\"6\" format=\"%s\">\n", E->output.vtk_format);
 

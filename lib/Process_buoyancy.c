@@ -198,9 +198,9 @@ void compute_horiz_avg(struct All_variables *E)
 
     for(i=1;i<=E->lmesh.nno;i++) {
         S1[i] = E->T[i];
-        S2[i] = E->sphere.cap.V[1][i]*E->sphere.cap.V[1][i]
-              + E->sphere.cap.V[2][i]*E->sphere.cap.V[2][i];
-        S3[i] = E->sphere.cap.V[3][i]*E->sphere.cap.V[3][i];
+        S2[i] = E->sphere.cap[1].V[1][i]*E->sphere.cap[1].V[1][i]
+              + E->sphere.cap[1].V[2][i]*E->sphere.cap[1].V[2][i];
+        S3[i] = E->sphere.cap[1].V[3][i]*E->sphere.cap[1].V[3][i];
     }
 
     return_horiz_ave_f(E,S1,E->Have.T);

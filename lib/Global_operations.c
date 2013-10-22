@@ -875,8 +875,8 @@ void remove_rigid_rot(struct All_variables *E)
 	v_phi =   E->sx[3][node] * 
 	  (  E->SinCos[lev][0][node] * cos_t - E->SinCos[lev][2][node]  * sin_t * cos(frd) );
 	
-	E->sphere.cap.V[1][node] -= v_theta;
-	E->sphere.cap.V[2][node] -= v_phi;
+	E->sphere.cap[1].V[1][node] -= v_theta;
+	E->sphere.cap[1].V[2][node] -= v_phi;
       }
 #endif
 }

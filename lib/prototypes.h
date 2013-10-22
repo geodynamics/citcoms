@@ -145,7 +145,7 @@ void full_solver_init(struct All_variables *);
 /* Full_sphere_related.c */
 void spherical_to_uv2(double [2], int, double *, double *, double *, double *);
 void uv_to_spherical(double [2], int, double *, double *, double *, double *);
-void full_coord_of_cap(struct All_variables *);
+void full_coord_of_cap(struct All_variables *E, int icap );
 /* Full_tracer_advection.c */
 void full_tracer_input(struct All_variables *);
 void full_tracer_setup(struct All_variables *);
@@ -492,8 +492,8 @@ void solve_constrained_flow_iterative(struct All_variables *);
 /* Topo_gravity.c */
 void get_STD_topo(struct All_variables *, float *, float *, float *, float *, int);
 void get_STD_freesurf(struct All_variables *, float *);
-void allocate_STD_mem(struct All_variables *, float *, float *, float *, float *, float *, float *, float *, float *);
-void free_STD_mem(struct All_variables *, float *, float *, float *, float *, float *, float *, float *, float *);
+void allocate_STD_mem(struct All_variables *, float **, float **, float **, float **, float **, float **, float **, float **);
+void free_STD_mem(struct All_variables *, float **, float **, float **, float **, float **, float **, float **, float **);
 void compute_nodal_stress(struct All_variables *, float *, float *, float *, float *, float *, float *, float *, float *);
 void stress_conform_bcs(struct All_variables *);
 void compute_geoid(struct All_variables *);

@@ -497,9 +497,9 @@ void h5output_velocity(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[3*m+0] = E->sphere.cap.V[1][n+1];
-                field->data[3*m+1] = E->sphere.cap.V[2][n+1];
-                field->data[3*m+2] = E->sphere.cap.V[3][n+1];
+                field->data[3*m+0] = E->sphere.cap[1].V[1][n+1];
+                field->data[3*m+1] = E->sphere.cap[1].V[2][n+1];
+                field->data[3*m+2] = E->sphere.cap[1].V[3][n+1];
             }
         }
     }
@@ -661,14 +661,14 @@ void h5output_stress(struct All_variables *E, int cycles)
     void allocate_STD_mem();
     void compute_nodal_stress();
     void free_STD_mem();
-    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-    float *divv[NCS],*vorv[NCS];
+    float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+    float *divv,*vorv;
     /*  */
     
     if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
       compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-      free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      free_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     }
      
     field = E->hdf5.tensor3d;
@@ -851,8 +851,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap.V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap.V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/surf/velocity");
@@ -921,8 +921,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap.V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap.V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/botm/velocity");
@@ -1537,25 +1537,21 @@ void h5output_meta(struct All_variables *E)
     dims[1] = 4;
     data = (double *)malloc((dims[0]*dims[1]) * sizeof(double));
 
-    /*
-    RKK:  !!!need to verify the following!!!
-    What is E->sphere.caps ? 1 for regional and 12 for full? 
-    */
     for(n = 1; n <= E->sphere.caps; n++)
     {
-        data[4*(n-1) + 0] = E->sphere.cap.theta[1];
-        data[4*(n-1) + 1] = E->sphere.cap.theta[2];
-        data[4*(n-1) + 2] = E->sphere.cap.theta[3];
-        data[4*(n-1) + 3] = E->sphere.cap.theta[4];
+        data[4*(n-1) + 0] = E->sphere.cap[n].theta[1];
+        data[4*(n-1) + 1] = E->sphere.cap[n].theta[2];
+        data[4*(n-1) + 2] = E->sphere.cap[n].theta[3];
+        data[4*(n-1) + 3] = E->sphere.cap[n].theta[4];
     }
     status = set_attribute_array(input, "theta", rank, dims, H5T_NATIVE_DOUBLE, data);
 
     for(n = 1; n <= E->sphere.caps; n++)
     {
-        data[4*(n-1) + 0] = E->sphere.cap.fi[1];
-        data[4*(n-1) + 1] = E->sphere.cap.fi[2];
-        data[4*(n-1) + 2] = E->sphere.cap.fi[3];
-        data[4*(n-1) + 3] = E->sphere.cap.fi[4];
+        data[4*(n-1) + 0] = E->sphere.cap[n].fi[1];
+        data[4*(n-1) + 1] = E->sphere.cap[n].fi[2];
+        data[4*(n-1) + 2] = E->sphere.cap[n].fi[3];
+        data[4*(n-1) + 3] = E->sphere.cap[n].fi[4];
     }
     status = set_attribute_array(input, "fi", rank, dims, H5T_NATIVE_DOUBLE, data);
 

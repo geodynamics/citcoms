@@ -169,13 +169,11 @@ void lith_age_update_tbc(struct All_variables *E)
         r1=E->sx[3][node];
 
         if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
-          E->sphere.cap.TB[1][node]=E->T[node];
-          E->sphere.cap.TB[2][node]=E->T[node];
-          E->sphere.cap.TB[3][node]=E->T[node];
+          E->sphere.cap[1].TB[1][node]=E->T[node];
+          E->sphere.cap[1].TB[2][node]=E->T[node];
+          E->sphere.cap[1].TB[3][node]=E->T[node];
         }
 	}
-
-  return;
 }
 
 
@@ -308,9 +306,9 @@ void lith_age_conform_tbc(struct All_variables *E)
             t0 = E->control.mantle_temp * erf(temp);
 
             /* keep the age the same! */
-            E->sphere.cap.TB[1][node]=t0;
-            E->sphere.cap.TB[2][node]=t0;
-            E->sphere.cap.TB[3][node]=t0;
+            E->sphere.cap[1].TB[1][node]=t0;
+            E->sphere.cap[1].TB[2][node]=t0;
+            E->sphere.cap[1].TB[3][node]=t0;
           }
 
           if( ((E->sx[2][node]<=fff2) || (E->sx[2][node]>=fff3)) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
@@ -321,9 +319,9 @@ void lith_age_conform_tbc(struct All_variables *E)
             temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
             t0 = E->control.mantle_temp * erf(temp);
 
-            E->sphere.cap.TB[1][node]=t0;
-            E->sphere.cap.TB[2][node]=t0;
-            E->sphere.cap.TB[3][node]=t0;
+            E->sphere.cap[1].TB[1][node]=t0;
+            E->sphere.cap[1].TB[2][node]=t0;
+            E->sphere.cap[1].TB[3][node]=t0;
 
           }
 
@@ -355,9 +353,9 @@ void lith_age_conform_tbc(struct All_variables *E)
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
 
-		E->sphere.cap.TB[1][node]=t0;
-		E->sphere.cap.TB[2][node]=t0;
-		E->sphere.cap.TB[3][node]=t0;
+		E->sphere.cap[1].TB[1][node]=t0;
+		E->sphere.cap[1].TB[2][node]=t0;
+		E->sphere.cap[1].TB[3][node]=t0;
 	      }
 	    }
 	  }     /* end k   */
@@ -387,25 +385,25 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
         case 0:  /* no match, next node */
             break;
         case TBX:
-            assimilate_new_temp = E->sphere.cap.TB[1][node];
+            assimilate_new_temp = E->sphere.cap[1].TB[1][node];
             break;
         case TBZ:
-            assimilate_new_temp = E->sphere.cap.TB[3][node];
+            assimilate_new_temp = E->sphere.cap[1].TB[3][node];
             break;
         case TBY:
-            assimilate_new_temp = E->sphere.cap.TB[2][node];
+            assimilate_new_temp = E->sphere.cap[1].TB[2][node];
             break;
         case (TBX | TBZ):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap.TB[1][node] + E->sphere.cap.TB[3][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[3][node]);
             break;
         case (TBX | TBY):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap.TB[1][node] + E->sphere.cap.TB[2][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[2][node]);
             break;
         case (TBZ | TBY):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap.TB[3][node] + E->sphere.cap.TB[2][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[1].TB[3][node] + E->sphere.cap[1].TB[2][node]);
             break;
         case (TBZ | TBY | TBX):     /* clashes ! */
-            assimilate_new_temp = 0.3333333 * (E->sphere.cap.TB[1][node] + E->sphere.cap.TB[2][node] + E->sphere.cap.TB[3][node]);
+            assimilate_new_temp = 0.3333333 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[2][node] + E->sphere.cap[1].TB[3][node]);
             break;
         } /* end switch */
 

@@ -548,14 +548,14 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       if(E->output.gzdir.rnr){
 	/* remove NR */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  vcorr[0] = E->sphere.cap.V[1][i]; /* vtheta */
-	  vcorr[1] = E->sphere.cap.V[2][i]; /* vphi */
+	  vcorr[0] = E->sphere.cap[1].V[1][i]; /* vtheta */
+	  vcorr[1] = E->sphere.cap[1].V[2][i]; /* vphi */
 	  /* remove the velocity that corresponds to a net rotation of omega[0..2] at location
 	     r,t,p from the t,p velocities in vcorr[0..1]
 	  */
 	  sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 
-	  convert_pvec_to_cvec(E->sphere.cap.V[3][i],vcorr[0],vcorr[1],
+	  convert_pvec_to_cvec(E->sphere.cap[1].V[3][i],vcorr[0],vcorr[1],
 			       (E->output.gzdir.vtk_base+k),cvec);
 	  if(be_write_float_to_file(cvec,3,fp1)!=3)
       BE_WERROR;
@@ -563,7 +563,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       }else{
 	/* regular output */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  convert_pvec_to_cvec(E->sphere.cap.V[3][i],E->sphere.cap.V[1][i],E->sphere.cap.V[2][i],
+	  convert_pvec_to_cvec(E->sphere.cap[1].V[3][i],E->sphere.cap[1].V[1][i],E->sphere.cap[1].V[2][i],
 			       (E->output.gzdir.vtk_base+k),cvec);
 	  if(be_write_float_to_file(cvec,3,fp1)!=3)
       BE_WERROR;
@@ -623,20 +623,20 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	if(E->output.gzdir.rnr){
 	  /* remove NR */
 	  for(i=1;i<=E->lmesh.nno;i++){
-	    vcorr[0] = E->sphere.cap.V[1][i]; /* vt */
-	    vcorr[1] = E->sphere.cap.V[2][i]; /* vphi */
+	    vcorr[0] = E->sphere.cap[1].V[1][i]; /* vt */
+	    vcorr[1] = E->sphere.cap[1].V[2][i]; /* vphi */
 	    sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     vcorr[0],vcorr[1],
-		     E->sphere.cap.V[3][i],E->T[i]);
+		     E->sphere.cap[1].V[3][i],E->T[i]);
 
 	  }
 	}else{
 	  for(i=1;i<=E->lmesh.nno;i++)
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
-		     E->sphere.cap.V[1][i],
-		     E->sphere.cap.V[2][i],
-		     E->sphere.cap.V[3][i],E->T[i]);
+		     E->sphere.cap[1].V[1][i],
+		     E->sphere.cap[1].V[2][i],
+		     E->sphere.cap[1].V[3][i],E->T[i]);
 	}
       }
     gzclose(gzout);
@@ -651,11 +651,11 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       if(E->output.gzdir.rnr){
         /* remove NR */
           for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-            vcorr[0] = E->sphere.cap.V[1][i];
-            vcorr[1] = E->sphere.cap.V[2][i];
+            vcorr[0] = E->sphere.cap[1].V[1][i];
+            vcorr[1] = E->sphere.cap[1].V[2][i];
             sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],
                      (vcorr+0),(vcorr+1),omega);
-            convert_pvec_to_cvec(E->sphere.cap.V[3][i],vcorr[0],vcorr[1],
+            convert_pvec_to_cvec(E->sphere.cap[1].V[3][i],vcorr[0],vcorr[1],
                                  (E->output.gzdir.vtk_base+k),cvec);
             gzprintf(gzout,"%10.4e %10.4e %10.4e\n",cvec[0],cvec[1],cvec[2]);
           }
@@ -663,9 +663,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
         /* regular output */
         for(i=1;i<=E->lmesh.nno;i++,k += 9) {
           /* convert r,theta,phi vector to x,y,z at base location */
-          convert_pvec_to_cvec(E->sphere.cap.V[3][i],
-             E->sphere.cap.V[1][i],
-             E->sphere.cap.V[2][i],
+          convert_pvec_to_cvec(E->sphere.cap[1].V[3][i],
+             E->sphere.cap[1].V[1][i],
+             E->sphere.cap[1].V[2][i],
              (E->output.gzdir.vtk_base+k),cvec);
           /* output of cartesian vector */
           gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
@@ -834,7 +834,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
     for(i=1;i<=E->lmesh.nsf;i++)   {
       s = i*E->lmesh.noz;
       gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-      topo[i],E->slice.shflux[i],E->sphere.cap.V[1][s],E->sphere.cap.V[2][s]);
+      topo[i],E->slice.shflux[i],E->sphere.cap[1].V[1][s],E->sphere.cap[1].V[2][s]);
     }
     gzclose(fp2);
   }
@@ -851,8 +851,8 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
         gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
 		                  E->slice.tpgb[i],
                       E->slice.bhflux[i],
-                      E->sphere.cap.V[1][s],
-                      E->sphere.cap.V[2][s]);
+                      E->sphere.cap[1].V[1][s],
+                      E->sphere.cap[1].V[2][s]);
       }
     gzclose(fp2);
   }
@@ -911,9 +911,9 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   float *divv,*vorv;
   /*  */
   if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    free_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
   }
 
   snprintf(output_file,255,"%s/%d/stress.%d.%d.gz", E->control.data_dir,
@@ -1233,9 +1233,9 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
       for(i=1;i<=E->lmesh.nno;i++)  {
         if(fscanf(fp,"%f %f %f %f",&v1,&v2,&v3,&g) != 4)
 	  myerror(E,"restart velo read error 1");
-	/*  E->sphere.cap.V[1][i] = v1;
-	    E->sphere.cap.V[1][i] = v2;
-	    E->sphere.cap.V[1][i] = v3;  */
+	/*  E->sphere.cap[1].V[1][i] = v1;
+	    E->sphere.cap[1].V[1][i] = v2;
+	    E->sphere.cap[1].V[1][i] = v3;  */
 	/* I don't like that  */
 	//E->T[i] = max(0.0,min(g,1.0));
 	E->T[i] = g;

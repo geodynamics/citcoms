@@ -101,7 +101,7 @@ void full_parallel_processor_setup(struct All_variables *E)
   i = cases[1]; /* 1 for more than 12 processors */
 
   temp = pid_surf; /* cap number (out of 12) */
-  E->sphere.capid = incases1[1].links[temp]; /* id (1~12) of the current cap */
+  E->sphere.capid[1] = incases1[i].links[temp]; /* id (1~12) of the current cap */
 
   /* determine which caps are linked with each of 12 caps  */
   /* if the 12 caps are broken, set these up instead */
@@ -136,7 +136,7 @@ void full_parallel_processor_setup(struct All_variables *E)
   if (E->control.verbose) {
     fprintf(E->fp_out,"me=%d loc1=%d loc2=%d loc3=%d\n",me,
         E->parallel.me_loc[1],E->parallel.me_loc[2],E->parallel.me_loc[3]);
-    fprintf(E->fp_out,"capid[%d]=%d \n",j,E->sphere.capid);
+    fprintf(E->fp_out,"capid[1]=%d \n",E->sphere.capid[1]);
     for (m=0;m<E->sphere.caps;m++)
       for (j=0;j<E->parallel.nprocy;j++)
         for (i=0;i<E->parallel.nprocx;i++)

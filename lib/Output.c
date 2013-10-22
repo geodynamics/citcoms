@@ -353,7 +353,7 @@ void output_velo(struct All_variables *E, int cycles)
 
     fprintf(fp1,"%7d\n",E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++) {
-        fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap.V[1][i],E->sphere.cap.V[2][i],E->sphere.cap.V[3][i],E->T[i]);
+        fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[1].V[1][i],E->sphere.cap[1].V[2][i],E->sphere.cap[1].V[3][i],E->T[i]);
     }
 
   fclose(fp1);
@@ -394,7 +394,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		    topo[i],E->slice.shflux[i],E->sphere.cap.V[1][s],E->sphere.cap.V[2][s]);
+		    topo[i],E->slice.shflux[i],E->sphere.cap[1].V[1][s],E->sphere.cap[1].V[2][s]);
         }
     fclose(fp2);
   }
@@ -409,14 +409,12 @@ void output_surf_botm(struct All_variables *E, int cycles)
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		E->slice.tpgb[i],E->slice.bhflux[i],E->sphere.cap.V[1][s],E->sphere.cap.V[2][s]);
+		E->slice.tpgb[i],E->slice.bhflux[i],E->sphere.cap[1].V[1][s],E->sphere.cap[1].V[2][s]);
       }
     fclose(fp2);
   }
 
-  return;
 }
-
 
 void output_geoid(struct All_variables *E, int cycles)
 {
@@ -467,13 +465,13 @@ void output_stress(struct All_variables *E, int cycles)
   void allocate_STD_mem();
   void compute_nodal_stress();
   void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
+  float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+  float *divv,*vorv;
   /*  */
   if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    free_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, vorv);
   }
   sprintf(output_file,"%s.stress.%d.%d", E->control.data_file,
           E->parallel.me, cycles);

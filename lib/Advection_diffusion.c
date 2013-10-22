@@ -391,7 +391,7 @@ static void pg_solver(struct All_variables *E,
       pg_shape_fn(E, el, &PG, &(E->gNX[el]), VV, rtf, diff);
       element_residual(E, el, &PG, &(E->gNX[el]), &(E->gDA[el]),
                        VV, T, Tdot,
-                       Q0, Eres, rtf, diff, E->sphere.cap.TB, // check cap
+                       Q0, Eres, rtf, diff, E->sphere.cap[1].TB, // rkk check cap
                        FLAGS);
 
       for(a=1;a<=ends;a++) {
@@ -758,7 +758,7 @@ static void process_adi_heating(struct All_variables *E, double *heating)
         temp1 = 0.0;
         for(i=1; i<=ends; i++) {
             j = E->ien[e].node[i];
-            temp1 += E->sphere.cap.V[3][j] // rkk check the cap
+            temp1 += E->sphere.cap[1].V[3][j] // rkk check the cap
                 * (E->T[j] + E->control.surface_temp);
         }
 
@@ -794,7 +794,7 @@ static void latent_heating(struct All_variables *E,
     for(i=1; i<=ends; i++) {
       j = E->ien[e].node[i];
       temp = (1.0 - B[j]) * B[j] * (E->T[j] + E->control.surface_temp);
-      temp2 += temp * E->sphere.cap.V[3][j]; // rkk: check the cap
+      temp2 += temp * E->sphere.cap[1].V[3][j]; // rkk: check the cap
       temp3 += temp;
     }
 

@@ -60,8 +60,8 @@ zero_elapsed_time=1
 
 # timestepping information
 minstep=1
-maxstep=71
-maxtotstep=71
+maxstep=1
+maxtotstep=1
 storage_spacing=10
 cpu_limits_in_seconds=360000000
 

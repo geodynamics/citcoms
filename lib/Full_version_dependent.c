@@ -159,8 +159,8 @@ void full_node_locations( struct All_variables *E )
   free ((void *) rr);
   free ((void *) RR);
 
-  ii = E->sphere.capid;
-  full_coord_of_cap(E);
+  ii = E->sphere.capid[1];
+  full_coord_of_cap(E,ii);
 
   if (E->control.verbose) {
       for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {

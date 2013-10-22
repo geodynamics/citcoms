@@ -962,7 +962,7 @@ void allocate_common_vars( struct All_variables *E )
     //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
     for(i=1;i<=E->mesh.nsd;i++)
-        E->sphere.cap.TB[i] = (float *)  malloc((nno+1)*sizeof(float));
+        E->sphere.cap[1].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
     E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
     E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
@@ -1051,7 +1051,7 @@ void allocate_common_vars( struct All_variables *E )
 				       *sizeof(int));
 
 
- for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
+ for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++) {
 
     nno  = E->lmesh.NNO[i];
     npno = E->lmesh.NPNO[i];
@@ -1098,6 +1098,8 @@ void allocate_common_vars( struct All_variables *E )
       E->VI[i][l] = 1.0;
       }
 
+  }
+
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
  if(E->viscosity.allow_anisotropic_viscosity){ /* any anisotropic
 						  viscosity */
@@ -1127,7 +1129,7 @@ void allocate_common_vars( struct All_variables *E )
 
   for(k=1;k<=E->mesh.nsd;k++)
     for(i=1;i<=E->lmesh.nno;i++)
-      E->sphere.cap.TB[k][i] = 0.0;
+      E->sphere.cap[1].TB[k][i] = 0.0;
 
   for(i=1;i<=E->lmesh.nno;i++)
      E->T[i] = 0.0;
@@ -1175,9 +1177,9 @@ void allocate_velocity_vars( struct All_variables *E )
 
 
     for(i=1;i<=E->mesh.nsd;i++) {
-      E->sphere.cap.V[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap.VB[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap.Vprev[i]=(float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].V[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].VB[i]=(float *)malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].Vprev[i]=(float *) malloc((E->lmesh.nnov+1)*sizeof(float));
     }
 
     for(i=0;i<E->lmesh.neq;i++)
@@ -1185,7 +1187,7 @@ void allocate_velocity_vars( struct All_variables *E )
 
     for(k=1;k<=E->mesh.nsd;k++)
       for(i=1;i<=E->lmesh.nnov;i++)
-        E->sphere.cap.VB[k][i] = 0.0;
+        E->sphere.cap[1].VB[k][i] = 0.0;
 
   for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++) {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
@@ -1412,9 +1414,9 @@ void initial_velocity( struct All_variables *E )
   report(E,"Initialize velocity field");
 
   for(i=1;i<=E->lmesh.nnov;i++)   {
-    E->sphere.cap.V[1][i]=0.0;
-    E->sphere.cap.V[2][i]=0.0;
-    E->sphere.cap.V[3][i]=0.0;
+    E->sphere.cap[1].V[1][i]=0.0;
+    E->sphere.cap[1].V[2][i]=0.0;
+    E->sphere.cap[1].V[3][i]=0.0;
   }
 }
 

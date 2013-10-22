@@ -265,7 +265,7 @@ struct CAP    {
 struct SPHERE   {
   int caps;
   int caps_per_proc;
-  int capid;
+  int capid[NCS];
   int max_connections;
   int *hindex[100];
   int hindice;
@@ -290,7 +290,7 @@ struct SPHERE   {
   double *R[MAX_LEVELS];
   double *gr;
   double ro,ri;
-  struct CAP cap;
+  struct CAP cap[NCS];
 
 };
 

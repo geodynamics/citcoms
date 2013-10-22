@@ -239,7 +239,7 @@ static void debug_tic(struct All_variables *E)
   int m, j;
 
   fprintf(E->fp_out,"output_temperature\n");
-  fprintf(E->fp_out,"for cap %d\n",E->sphere.capid);
+  fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[1]);
   for (j=1;j<=E->lmesh.nno;j++)
     fprintf(E->fp_out,"X = %.6e Z = %.6e Y = %.6e T[%06d] = %.6e \n",
         E->sx[1][j],E->sx[2][j],E->sx[3][j],j,E->T[j]);
@@ -419,7 +419,7 @@ static void add_perturbations_at_layers(struct All_variables *E)
         k = kk - E->lmesh.nzs + 1; /* convert global nz to local nz */
         if ( (k < 1) || (k > noz) ) continue; /* layer k is not inside this proc. */
         if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0
-            && E->sphere.capid == 1 )
+            && E->sphere.capid[1] == 1 )
             fprintf(stderr,"Initial temperature perturbation:  layer=%d  mag=%g  l=%d  m=%d\n", kk, con, ll, mm);
 
         if(E->sphere.caps == 1) {
@@ -478,7 +478,7 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
         con = E->convection.perturb_mag[p];
 
         if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0
-            && E->sphere.capid == 1 )
+            && E->sphere.capid[1] == 1 )
             fprintf(stderr,"Initial temperature perturbation:  mag=%g  l=%d  m=%d\n", con, ll, mm);
 
         if(E->sphere.caps == 1) {
@@ -565,9 +565,9 @@ static void add_spherical_anomaly(struct All_variables *E)
                     r1 = E->sx[3][node];
                     if((fabs(r1 - rout) < e_4) || (fabs(r1 - rin) < e_4)){
                       /* at bottom or top of box, assign as TBC */
-                      E->sphere.cap.TB[1][node]=E->T[node];
-                      E->sphere.cap.TB[2][node]=E->T[node];
-                      E->sphere.cap.TB[3][node]=E->T[node];
+                      E->sphere.cap[1].TB[1][node]=E->T[node];
+                      E->sphere.cap[1].TB[2][node]=E->T[node];
+                      E->sphere.cap[1].TB[3][node]=E->T[node];
                     }
                   }
                 }
