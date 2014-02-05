@@ -1,0 +1,39 @@
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=60
+
+# CitcomS.controller
+storage_spacing=30
+
+# CitcomS.solver
+datafile=cookbook2
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=0.7854
+fi_min=0.0
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+radius_inner=0.55
+radius_outer=1.0
+theta_max=1.5708
+theta_min=0.7854
+
+# CitcomS.solver.bc
+topvbc=1
+topvbxval=100
+topvbyval=0
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.0
+
+# CitcomS.solver.visc
+num_mat=4
+

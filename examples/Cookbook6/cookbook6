@@ -1,0 +1,70 @@
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=100
+
+# CitcomS.controller
+storage_spacing=10
+
+# CitcomS.solver
+datafile=cookbook6
+rayleigh=4.312616e+08
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=./coord.dat
+fi_max=1
+fi_min=0
+nodex=61
+nodey=61
+nodez=25
+nprocx=2
+nprocy=2
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+fixed_timestep=7.77e-10
+
+# CitcomS.solver.vsolver
+accuracy=1e-5
+piterations=100000
+precond=on
+vlowstep=100000
+
+# CitcomS.solver.bc
+bottbcval=0.82
+pseudo_free_surf=on
+topvbc=2
+
+# CitcomS.solver.const
+density=3270.0
+gravacc=10.0
+radius=6.371e+06
+refvisc=1.0e+21
+thermdiff=1.0e-06
+thermexp=3.0e-05
+
+# CitcomS.solver.ic
+blob_center=1.570800e+00,1.570800e+00,9.246600e-01
+blob_dT=0.18
+blob_radius=6.278334e-02
+half_space_age=2500.0
+mantle_temp=0.82
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+tic_method=2
+
+# CitcomS.solver.param
+start_age=60
+
+# CitcomS.solver.visc
+TDEPV=on
+num_mat=4
+visc0=1,1,1,1
+viscE=9.50614,9.50614,9.50614,9.50614
+viscT=1.02126,1.02126,1.02126,1.02126
+
