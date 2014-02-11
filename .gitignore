@@ -37,3 +37,9 @@ bin/mpipycitcoms
 bin/pycitcoms
 visual/project_geoid
 
+# ignore LaTex aux files, log files, etc
+*.aux
+*.lof
+*.log
+*.out
+*.toc
