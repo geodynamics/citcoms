@@ -43,3 +43,4 @@ visual/project_geoid
 *.log
 *.out
 *.toc
+doc/citcoms-manual.synctex.gz
