@@ -34,6 +34,7 @@ usage: autocombine.py machinefile inputfile step1 [step2 [...] ]
 # default values for CitcomS input
 defaults = {'output_format': 'ascii',
             'output_optional': 'surf,botm',
+	    'output_optional_EL': 'heating',
             'buoy_type': 1,
             'tracer_flavors': 2,
             'nprocx': 1,
@@ -53,8 +54,22 @@ def normalize_optional(output_optional):
         opt = opt.strip()
 
         ## retain fields that are node-based
-        if opt in ('pressure', 'stress', 'comp_nd'):
+        if opt in ('pressure', 'stress', 'comp_nd','phase'):
             fields.append(opt)
+
+
+    return ','.join(fields)
+	
+def normalize_optional_EL(output_optional_EL):
+    fields = []
+
+    for opt_EL in output_optional_EL.split(','):
+        ## remove the leading/trailing whitespaces
+        opt_EL = opt_EL.strip()
+
+        ## retain fields that are node-based
+        if opt_EL in ('heating'):
+            fields.append(opt_EL)
 
 
     return ','.join(fields)
@@ -90,6 +105,9 @@ if __name__ == '__main__':
 
     output_optional = parser.getstr('output_optional')
     optional_fields = normalize_optional(output_optional)
+	
+    output_optional_EL = parser.getstr('output_optional_EL')
+    optional_fields_EL = normalize_optional_EL(output_optional_EL)
 
     buoy_type = parser.getint('buoy_type')
     nflavors = parser.getint('tracer_flavors')
@@ -128,6 +146,13 @@ if __name__ == '__main__':
                             nodex, nodey, nodez,
                             ncap, nprocx, nprocy, nprocz,
                             optional_fields, ncompositions)
+							
+		# combining optional fields (based on element number), if necessary
+        if optional_fields_EL:
+            bc.batchcombine(nodelist, datadir, datafile, timestep,
+                            (nodex - 1), (nodey-1), (nodez-1),
+                            ncap, (nprocx - 0), (nprocy-0), (nprocz - 0),
+                            optional_fields_EL, ncompositions)
 
 
 
