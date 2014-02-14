@@ -96,6 +96,45 @@ class Combine(object):
                     m = k + j * nodez + i * nodex * nodez
                     self.saved[m] = data[n]
                     n += 1
+	
+        return
+
+
+
+    def join_EL(self, data, me):
+        # processor geometry
+        nprocx = self.nprocx
+        nprocy = self.nprocy
+        nprocz = self.nprocz
+
+        mylocz = me % nprocz
+        mylocx = ((me - mylocz) / nprocz) % nprocx
+        mylocy = (((me - mylocz) / nprocz - mylocx) / nprocx) % nprocy
+
+        # mesh geometry
+        nodex = self.nodex
+        nodey = self.nodey
+        nodez = self.nodez
+
+        mynodex = 1 + (nodex-nprocx)/nprocx
+        mynodey = 1 + (nodey-nprocy)/nprocy
+        mynodez = 1 + (nodez-nprocz)/nprocz
+
+        if not len(data) == mynodex * mynodey * mynodez:
+            raise ValueError, "incorrect data size"
+
+
+        mynxs = (mynodex - 0) * mylocx
+        mynys = (mynodey - 0) * mylocy
+        mynzs = (mynodez - 0) * mylocz
+
+        n = 0
+        for i in range(mynys, mynys+mynodey):
+            for j in range(mynxs, mynxs + mynodex):
+                for k in range(mynzs, mynzs + mynodez):
+                    m = k + j * nodez + i * nodex * nodez
+                    self.saved[m] = data[n]
+                    n += 1
 
         return
 
@@ -124,10 +163,15 @@ def combine(prefix, opts, step, nodex, nodey, nodez,
             filename = '%s.%s.%d.%d.pasted' % (prefix, opts, n, step)
             print 'reading', filename
             data = cb.readData(filename, 0)
-            cb.join(data, n)
+	    if opts == 'heating':
+		cb.join_EL(data, n)
+	    else:
+            	cb.join(data, n)
 
         if opts == 'coord,velo,visc':
             filename = '%s.cap%02d.%d' % (prefix, i, step)
+	elif opts == 'heating':
+	    filename = '%s.ele%02d.%d' % (prefix, i, step)
         else:
             filename = '%s.opt%02d.%d' % (prefix, i, step)
 
