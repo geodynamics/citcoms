@@ -43,12 +43,13 @@ public:
   Py2CConverter(const char* pycfgfile, const char* ccfgfile);
   ~Py2CConverter();
   
-  void convert();
+  void convert(bool save_all=false);
 private:
   void initialize_parameters();
   bool parse(const std::string& name, const std::string& value);
   void check_and_fix_errors();
   void save();
+  void save_all();
   void load();
   
   std::map<std::string, Parameter> parameters;

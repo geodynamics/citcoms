@@ -33,11 +33,14 @@ Py2CConverter::~Py2CConverter()
   fout.close();
 }
   
-void Py2CConverter::convert()
+void Py2CConverter::convert(bool saveall)
 {
   load();
   check_and_fix_errors();
-  save();
+  if(saveall)
+    save_all();
+  else
+    save();
 }
 
 void Py2CConverter::initialize_parameters()
@@ -66,9 +69,9 @@ void Py2CConverter::initialize_parameters()
   parameters["gruneisen"] = {"0.0", "CitcomS.solver"};
   parameters["surfaceT"] = {"0.1", "CitcomS.solver"};
   parameters["Q0"] = {"0", "CitcomS.solver"};
-  parameters["stokes_flow_only"] = {"off", "CitcomS.solver"};
-  parameters["verbose"] = {"off", "CitcomS.solver"};
-  parameters["see_convergence"] = {"on", "CitcomS.solver"};
+  parameters["stokes_flow_only"] = {"0", "CitcomS.solver"};
+  parameters["verbose"] = {"0", "CitcomS.solver"};
+  parameters["see_convergence"] = {"1", "CitcomS.solver"};
 
   // CitcomS.solver.mesher
   parameters["nproc_surf"] = {"1", "CitcomS.solver.mesher"};
@@ -91,21 +94,25 @@ void Py2CConverter::initialize_parameters()
   parameters["theta_max"] = {"2.0708","CitcomS.solver.mesher",true};
   parameters["fi_min"] = {"0","CitcomS.solver.mesher",true};
   parameters["fi_max"] = {"1","CitcomS.solver.mesher",true};
+  parameters["r_grid_layers"] = {"1","CitcomS.solver.mesher"};
+  parameters["rr"] = {"1","CitcomS.solver.mesher"};
+  parameters["nr"] = {"1","CitcomS.solver.mesher"};
 
   // CitcomS.solver.tsolver
-  parameters["ADV"] = {"on","CitcomS.solver.tsolver"};
-  parameters["filter_temp"] = {"off","CitcomS.solver.tsolver"};
-  parameters["monitor_max_T"] = {"on","CitcomS.solver.tsolver"};
+  parameters["ADV"] = {"1","CitcomS.solver.tsolver"};
+  parameters["filter_temp"] = {"0","CitcomS.solver.tsolver"};
+  parameters["monitor_max_T"] = {"1","CitcomS.solver.tsolver"};
   parameters["finetunedt"] = {"0.9","CitcomS.solver.tsolver"};
   parameters["fixed_timestep"] = {"0.0","CitcomS.solver.tsolver"};
   parameters["input_diffusivity"] = {"1","CitcomS.solver.tsolver"};
   parameters["adv_gamma"] = {"0.5","CitcomS.solver.tsolver"};
   parameters["adv_sub_iterations"] = {"2","CitcomS.solver.tsolver"};
+  parameters["inputdiffusivity"] = {"1","CitcomS.solver.tsolver"};
   
   // CitcomS.solver.vsolver
   parameters["Solver"] = {"cgrad","CitcomS.solver.vsolver"};
-  parameters["node_assemble"] = {"on","CitcomS.solver.vsolver"};
-  parameters["precond"] = {"on","CitcomS.solver.vsolver"};
+  parameters["node_assemble"] = {"1","CitcomS.solver.vsolver"};
+  parameters["precond"] = {"1","CitcomS.solver.vsolver"};
   parameters["accuracy"] = {"1.0e-4","CitcomS.solver.vsolver"};
   parameters["uzawa"] = {"cg","CitcomS.solver.vsolver"};
   parameters["compress_iter_maxstep"] = {"100","CitcomS.solver.vsolver"};
@@ -116,14 +123,19 @@ void Py2CConverter::initialize_parameters()
   parameters["vhighstep"] = {"3","CitcomS.solver.vsolver"};
   parameters["max_mg_cycles"] = {"50","CitcomS.solver.vsolver"};
   parameters["piterations"] = {"1000","CitcomS.solver.vsolver"};
-  parameters["aug_lagr"] = {"on","CitcomS.solver.vsolver"};
+  parameters["aug_lagr"] = {"1","CitcomS.solver.vsolver"};
   parameters["aug_number"] = {"2000","CitcomS.solver.vsolver"};
-  parameters["remove_rigid_rotation"] = {"on","CitcomS.solver.vsolver"};
-  parameters["remove_angular_momentum"] = {"on","CitcomS.solver.vsolver"};
+  parameters["remove_rigid_rotation"] = {"1","CitcomS.solver.vsolver"};
+  parameters["remove_angular_momentum"] = {"1","CitcomS.solver.vsolver"};
+  parameters["inner_accuracy_scale"] = {"1.0","CitcomS.solver.vsolver"};
+  parameters["check_continuity_convergence"] = {"1","CitcomS.solver.vsolver"};
+  parameters["check_pressure_convergence"] = {"1","CitcomS.solver.vsolver"};
+  parameters["only_check_vel_convergence"] = {"0","CitcomS.solver.vsolver"};
+  parameters["inner_remove_rigid_rotation"] = {"0","CitcomS.solver.vsolver"};
 
   // CitcomS.solver.bc
-  parameters["side_sbcs"] = {"off","CitcomS.solver.bc"};
-  parameters["pseudo_free_surf"] = {"off","CitcomS.solver.bc"};
+  parameters["side_sbcs"] = {"0","CitcomS.solver.bc"};
+  parameters["pseudo_free_surf"] = {"0","CitcomS.solver.bc"};
   parameters["topvbc"] = {"0","CitcomS.solver.bc"};
   parameters["topvbxval"] = {"0","CitcomS.solver.bc"};
   parameters["topvbyval"] = {"0","CitcomS.solver.bc"};
@@ -134,7 +146,7 @@ void Py2CConverter::initialize_parameters()
   parameters["toptbcval"] = {"0","CitcomS.solver.bc"};
   parameters["bottbc"] = {"1","CitcomS.solver.bc"};
   parameters["bottbcval"] = {"1","CitcomS.solver.bc"};
-  parameters["temperature_bound_adj"] = {"off","CitcomS.solver.bc"};
+  parameters["temperature_bound_adj"] = {"0","CitcomS.solver.bc"};
   parameters["depth_bound_adj"] = {"0.157","CitcomS.solver.bc"};
   parameters["width_bound_adj"] = {"0.08727","CitcomS.solver.bc"};
 
@@ -154,10 +166,10 @@ void Py2CConverter::initialize_parameters()
   parameters["z_cmb"] = {"0.439", "CitcomS.solver.const"};
 
   // CitcomS.solver.ic
-  parameters["restart"] = {"off", "CitcomS.solver.ic"};
-  parameters["post_p"] = {"off", "CitcomS.solver.ic"};
+  parameters["restart"] = {"0", "CitcomS.solver.ic"};
+  parameters["post_p"] = {"0", "CitcomS.solver.ic"};
   parameters["solution_cycles_init"] = {"0", "CitcomS.solver.ic"};
-  parameters["zero_elapsed_time"] = {"on", "CitcomS.solver.ic"};
+  parameters["zero_elapsed_time"] = {"1", "CitcomS.solver.ic"};
   parameters["tic_method"] = {"0", "CitcomS.solver.ic"};
   parameters["num_perturbations"] = {"1", "CitcomS.solver.ic",true};
   parameters["perturbl"] = {"1", "CitcomS.solver.ic",true};
@@ -174,8 +186,8 @@ void Py2CConverter::initialize_parameters()
   parameters["output_format"] = {"\"ascii\"", "CitcomS.solver.output"};
   parameters["output_optional"] = {"\"surf,botm,tracer\"", "CitcomS.solver.output"};
   parameters["output_ll_max"] = {"20", "CitcomS.solver.output"};
-  parameters["self_gravitation"] = {"off", "CitcomS.solver.output"};
-  parameters["use_cbf_topo"] = {"off", "CitcomS.solver.output"};
+  parameters["self_gravitation"] = {"0", "CitcomS.solver.output"};
+  parameters["use_cbf_topo"] = {"0", "CitcomS.solver.output"};
   parameters["cb_block_size"] = {"1048576", "CitcomS.solver.output"};
   parameters["cb_buffer_size"] = {"4194304", "CitcomS.solver.output"};
   parameters["sieve_buf_size"] = {"1048576", "CitcomS.solver.output"};
@@ -184,21 +196,27 @@ void Py2CConverter::initialize_parameters()
   parameters["cache_mdc_nelmts"] = {"10330", "CitcomS.solver.output"};
   parameters["cache_rdcc_nelmts"] = {"521", "CitcomS.solver.output"};
   parameters["cache_rdcc_nbytes"] = {"1048576", "CitcomS.solver.output"};
+  parameters["write_q_files"] = {"0", "CitcomS.solver.output"};
+  parameters["vtk_format"] = {"binary", "CitcomS.solver.output"};
+  parameters["gzdir_vtkio"] = {"1", "CitcomS.solver.output"};
+  parameters["gzdir_rnr"] = {"0", "CitcomS.solver.output"};
 
   // CitcomS.solver.param
   parameters["reference_state"] = {"1", "CitcomS.solver.param"};
   parameters["refstate_file"] = {"\"refstate.dat\"", "CitcomS.solver.param"};
   parameters["mineral_physics_model"] = {"3", "CitcomS.solver.param"};
-  parameters["file_vbcs"] = {"off", "CitcomS.solver.param"};
+  parameters["file_vbcs"] = {"0", "CitcomS.solver.param"};
   parameters["vel_bound_file"] = {"\"bevel.dat\"", "CitcomS.solver.param"};
-  parameters["mat_control"] = {"off", "CitcomS.solver.param"};
+  parameters["mat_control"] = {"0", "CitcomS.solver.param"};
   parameters["mat_file"] = {"\"mat.dat\"", "CitcomS.solver.param"};
-  parameters["lith_age"] = {"off", "CitcomS.solver.param"};
+  parameters["lith_age"] = {"0", "CitcomS.solver.param"};
   parameters["lith_age_file"] = {"\"age.dat\"", "CitcomS.solver.param"};
-  parameters["lith_age_time"] = {"off", "CitcomS.solver.param"};
+  parameters["lith_age_time"] = {"0", "CitcomS.solver.param"};
   parameters["lith_age_depth"] = {"0.0314", "CitcomS.solver.param"};
   parameters["start_age"] = {"40", "CitcomS.solver.param"};
-  parameters["reset_startage"] = {"off", "CitcomS.solver.param"};
+  parameters["reset_startage"] = {"0", "CitcomS.solver.param"};
+  parameters["file_tbcs"] = {"0", "CitcomS.solver.param"};
+  parameters["temp_bound_file"] = {"btemp.dat", "CitcomS.solver.param"};
 
   // CitcomS.solver.phase
   parameters["Ra_410"] = {"0", "CitcomS.solver.phase"};
@@ -215,43 +233,43 @@ void Py2CConverter::initialize_parameters()
   parameters["widthcmb"] = {"0.0058", "CitcomS.solver.phase"};
 
   // CitcomS.solver.tracer
-  parameters["tracer"] = {"off", "Citcoms.Solver.tracer"};
+  parameters["tracer"] = {"0", "Citcoms.Solver.tracer"};
   parameters["tracer_ic_method"] = {"0", "Citcoms.Solver.tracer"};
   parameters["tracers_per_element"] = {"10", "Citcoms.Solver.tracer"};
   parameters["tracer_file"] = {"\"tracer.dat\"", "Citcoms.Solver.tracer"};
   parameters["tracer_flavors"] = {"0", "Citcoms.Solver.tracer"};
   parameters["ic_method_for_flavors"] = {"0", "Citcoms.Solver.tracer"};
   parameters["z_interface"] = {"0.7", "Citcoms.Solver.tracer"};
-  parameters["itracer_warnings"] = {"on", "Citcoms.Solver.tracer"};
+  parameters["itracer_warnings"] = {"1", "Citcoms.Solver.tracer"};
   parameters["regular_grid_deltheta"] = {"1.0", "Citcoms.Solver.tracer"};
   parameters["regular_grid_delphi"] = {"1.0", "Citcoms.Solver.tracer"};
-  parameters["chemical_buoyancy"] = {"on", "Citcoms.Solver.tracer"};
+  parameters["chemical_buoyancy"] = {"1", "Citcoms.Solver.tracer"};
   parameters["buoy_type"] = {"1", "Citcoms.Solver.tracer"};
   parameters["buoyancy_ratio"] = {"1.0", "Citcoms.Solver.tracer"};
-  parameters["tracer_enriched"] = {"off", "Citcoms.Solver.tracer"};
+  parameters["tracer_enriched"] = {"0", "Citcoms.Solver.tracer"};
   parameters["Q0_enriched"] = {"0.0", "Citcoms.Solver.tracer"};
 
   // CitcomS.solver.visc
   parameters["Viscosity"] = {"\"system\"", "CitcomS.solver.visc"};
   parameters["visc_smooth_method"] = {"3", "CitcomS.solver.visc"};
-  parameters["VISC_UPDATE"] = {"on", "CitcomS.solver.visc"};
+  parameters["VISC_UPDATE"] = {"1", "CitcomS.solver.visc"};
   parameters["num_mat"] = {"4", "CitcomS.solver.visc",true};
   parameters["visc0"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["TDEPV"] = {"off", "CitcomS.solver.visc"};
+  parameters["TDEPV"] = {"0", "CitcomS.solver.visc"};
   parameters["rheol"] = {"3", "CitcomS.solver.visc"};
   parameters["viscE"] = {"1,1,1,1", "CitcomS.solver.visc"};
   parameters["viscT"] = {"1,1,1,1", "CitcomS.solver.visc"};
   parameters["viscZ"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["SDEPV"] = {"off", "CitcomS.solver.visc"};
+  parameters["SDEPV"] = {"0", "CitcomS.solver.visc"};
   parameters["sdepv_misfit"] = {"0.001", "CitcomS.solver.visc"};
   parameters["sdepv_expt"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["PDEPV"] = {"off", "CitcomS.solver.visc"};
+  parameters["PDEPV"] = {"0", "CitcomS.solver.visc"};
   parameters["pdepv_a"] = {"1e20,1e20,1e20,1e20", "CitcomS.solver.visc"};
   parameters["pdepv_b"] = {"0,0,0,0", "CitcomS.solver.visc"};
   parameters["pdepv_y"] = {"1e20,1e20,1e20,1e20", "CitcomS.solver.visc"};
-  parameters["pdepv_eff"] = {"on", "CitcomS.solver.visc"};
+  parameters["pdepv_eff"] = {"1", "CitcomS.solver.visc"};
   parameters["pdepv_offset"] = {"0", "CitcomS.solver.visc"};
-  parameters["CDEPV"] = {"off", "CitcomS.solver.visc"};
+  parameters["CDEPV"] = {"0", "CitcomS.solver.visc"};
   parameters["cdepv_ff"] = {"1,1", "CitcomS.solver.visc"};
   parameters["low_visc_channel"] = {"0", "CitcomS.solver.visc"};
   parameters["low_visc_wedge"] = {"0", "CitcomS.solver.visc"};
@@ -259,10 +277,13 @@ void Py2CConverter::initialize_parameters()
   parameters["lv_max_radius"] = {"0.9921", "CitcomS.solver.visc"};
   parameters["lv_channel_thickness"] = {"0.0047", "CitcomS.solver.visc"};
   parameters["lv_reduction"] = {"0.5", "CitcomS.solver.visc"};
-  parameters["VMIN"] = {"off", "CitcomS.solver.visc"};
+  parameters["VMIN"] = {"0", "CitcomS.solver.visc"};
   parameters["visc_min"] = {"0.001", "CitcomS.solver.visc"};
-  parameters["VMAX"] = {"off", "CitcomS.solver.visc"};
+  parameters["VMAX"] = {"0", "CitcomS.solver.visc"};
   parameters["visc_max"] = {"1000", "CitcomS.solver.visc"};
+  parameters["z_layer"] = {"-999,-999,-999,-999", "CitcomS.solver.visc"};
+  parameters["visc_layer_control"] = {"0", "CitcomS.solver.visc"};
+  parameters["visc_layer_file"] = {"visc.dat", "CitcomS.solver.visc"};
 }
 
 void Py2CConverter::load()
@@ -471,6 +492,34 @@ void Py2CConverter::save()
     }
   }
 
+  // write out all the log messages at the end of the config file
+  for(const auto& msg : log_messages)
+    fout << msg << std::endl;
+}
+
+void Py2CConverter::save_all()
+{
+
+  for(const auto& secname : {std::string("CitcomS"), 
+	std::string("CitcomS.controller"), std::string("CitcomS.solver"),
+	std::string("CitcomS.solver.mesher"), std::string("CitcomS.solver.tsolver"),
+	std::string("CitcomS.solver.vsolver"), std::string("CitcomS.solver.bc"),
+	std::string("CitcomS.solver.const"), std::string("CitcomS.solver.ic"),
+	std::string("CitcomS.solver.output"), std::string("CitcomS.solver.param"),
+	std::string("CitcomS.solver.phase"), std::string("CitcomS.solver.tracer"),
+	std::string("CitcomS.solver.visc")})
+  {
+
+    fout << "# " << secname << std::endl;
+    for(auto p = parameters.begin(); p != parameters.end(); ++p)
+    {
+      if((p->second.section == secname))
+      {
+	fout << p->first << "=" << p->second.value << std::endl;
+      }
+    }
+    fout << std::endl;
+  }
   // write out all the log messages at the end of the config file
   for(const auto& msg : log_messages)
     fout << msg << std::endl;
