@@ -221,6 +221,7 @@ void remove_rigid_rot(struct All_variables *);
 void tic_input(struct All_variables *);
 void convection_initial_temperature(struct All_variables *);
 /* Instructions.c */
+void print_all_config_params(struct All_variables *);
 void initial_mesh_solver_setup(struct All_variables *);
 void read_instructions(struct All_variables *, char *);
 void initial_setup(struct All_variables *);

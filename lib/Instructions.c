@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- /*
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -1882,4 +1882,23 @@ char* strip(char *input)
     return str;
 }
 
+void print_all_config_parame(struct All_variables *E)
+{
+  char filename[16];
+  FILE *fp;
 
+  if(E->parallel.me == 0) {
+    sprintf(filename, "pid%09d", E->control.PID);
+    fp = fopen(filename, "w");
+    
+    /* CitcomS*/
+    fprintf(fp, "# CitcomS\n");
+    fprintf(fp, "minstep=%d\n", E->advection.min_timesteps);
+    fprintf(fp, "maxstep=%d\n", E->advection.max_timesteps);
+    fprintf(fp, "maxtotstep=%d\n", E->advection.max_total_timesteps);
+    fprintf(fp, "cpu_limits_in_seconds=%d\n", E->control.record_all_until);
+    fprintf(fp, "solver=%d\n", E->advection.min_timesteps);
+  
+    /* close the file after we are done writing all parameters */
+  }
+}
