@@ -1,0 +1,67 @@
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=11000
+solver=full
+
+# CitcomS.controller
+checkpointFrequency=5000
+storage_spacing=100
+
+# CitcomS.solver
+datadir=A3-benchmark
+datafile=A3-benchmark
+#rayleigh=7.681755e4
+rayleigh=7e3
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=33
+nodey=33
+nodez=33
+nproc_surf=12
+nprocx=2
+nprocy=2
+nprocz=2
+theta_max=2.0708
+theta_min=1.0708
+levels=4
+mgunitx=2
+mgunity=2
+mgunitz=2
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=16
+perturbm=2
+perturbmag=0.01
+tic_method=0
+
+# CitcomS.solver.vsolver
+Solver=multigrid
+precond=on
+accuracy=1.0e-4
+uzawa=cg
+mg_cycle=1
+down_heavy=3
+up_heavy=3
+vlowstep=400
+vhighstep=3
+max_mg_cycles=200
+piterations=1500
+
+# CitcomS.solver.output
+output_ll_max=40
+output_optional=geoid,surf,botm,horiz_avg,volume_avg
+use_cbf_topo=on
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+num_mat=4
+rheol=1
+visc0=1,1,1,1
+viscE=3.0,3.0,3.0,3.0
+viscT=0.5,0.5,0.5,0.5
+
