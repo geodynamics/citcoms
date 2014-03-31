@@ -622,42 +622,44 @@ struct gzd_struc{
 
 };
 
-struct Output {
-    char format[20];  /* ascii or hdf5 */
-    char optional[1000]; /* comma-delimited list of objects to output */
-    char vtk_format[10]; /*ascii or binary */
+struct Output 
+{
+  char format[20];  /* ascii or hdf5 */
+  char optional[1000]; /* comma-delimited list of objects to output */
+  char vtk_format[10]; /*ascii or binary */
 
-    int llmax;  /* max degree of spherical harmonics output */
+  int llmax;  /* max degree of spherical harmonics output */
 
-    /* size of collective buffer used by MPI-IO */
-    int cb_block_size;
-    int cb_buffer_size;
+  /* size of collective buffer used by MPI-IO */
+  int cb_block_size;
+  int cb_buffer_size;
 
-    /* size of data sieve buffer used by HDF5 */
-    int sieve_buf_size;
+  /* size of data sieve buffer used by HDF5 */
+  int sieve_buf_size;
 
-    /* memory alignment used by HDF5 */
-    int alignment;
-    int alignment_threshold;
+  /* memory alignment used by HDF5 */
+  int alignment;
+  int alignment_threshold;
 
-    /* cache for chunked dataset used by HDF5 */
-    int cache_mdc_nelmts;
-    int cache_rdcc_nelmts;
-    int cache_rdcc_nbytes;
+  /* cache for chunked dataset used by HDF5 */
+  int cache_mdc_nelmts;
+  int cache_rdcc_nelmts;
+  int cache_rdcc_nbytes;
 
-    int connectivity; /* whether to output connectivity */
-    int stress;       /* whether to output stress */
-    int pressure;     /* whether to output pressure */
-    int surf;         /* whether to output surface data */
-    int botm;         /* whether to output bottom data */
-    int geoid;        /* whether to output geoid/topo spherial harmonics */
-    int horiz_avg;    /* whether to output horizontal averaged profile */
-    int seismic;      /* whether to output seismic velocity model */
-    int coord_bin;    /* whether to output coordinates in binary format */
-    int tracer;       /* whether to output tracer coordinate */
-    int comp_el;      /* whether to output composition at elements */
-    int comp_nd;      /* whether to output composition at nodes */
-    int heating;      /* whether to output heating terms at elements */
+  int connectivity; /* whether to output connectivity */
+  int stress;       /* whether to output stress */
+  int pressure;     /* whether to output pressure */
+  int surf;         /* whether to output surface data */
+  int botm;         /* whether to output bottom data */
+  int geoid;        /* whether to output geoid/topo spherial harmonics */
+  int horiz_avg;    /* whether to output horizontal averaged profile */
+  int volume_avg;   /* whether to output volume averaged profile */
+  int seismic;      /* whether to output seismic velocity model */
+  int coord_bin;    /* whether to output coordinates in binary format */
+  int tracer;       /* whether to output tracer coordinate */
+  int comp_el;      /* whether to output composition at elements */
+  int comp_nd;      /* whether to output composition at nodes */
+  int heating;      /* whether to output heating terms at elements */
 
 
   /* flags used by GZDIR */
