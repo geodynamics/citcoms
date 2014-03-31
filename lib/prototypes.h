@@ -396,6 +396,7 @@ float find_age_in_MY(struct All_variables *);
 void post_processing(struct All_variables *);
 void heat_flux(struct All_variables *);
 void compute_horiz_avg(struct All_variables *);
+void compute_volume_avg(struct All_variables *, float *, float *);
 /* Regional_boundary_conditions.c */
 void regional_velocity_boundary_conditions(struct All_variables *);
 void regional_temperature_boundary_conditions(struct All_variables *);
