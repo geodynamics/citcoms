@@ -286,6 +286,7 @@ void output_surf_botm(struct All_variables *, int);
 void output_geoid(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
+void output_volume_avg(struct All_variables *, int);
 void output_seismic(struct All_variables *, int);
 void output_mat(struct All_variables *);
 void output_pressure(struct All_variables *, int);

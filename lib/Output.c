@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <math.h>
 #include <mpi.h>
 #include "element_definitions.h"
@@ -49,6 +50,7 @@ void output_surf_botm(struct All_variables *, int);
 void output_geoid(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
+void output_volume_avg(struct All_variables *, int);
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
@@ -144,8 +146,11 @@ void output(struct All_variables *E, int cycles)
   if (E->output.pressure)
     output_pressure(E, cycles);
 
-  if (E->output.horiz_avg)
-      output_horiz_avg(E, cycles);
+  if(E->output.horiz_avg)
+    output_horiz_avg(E, cycles);
+
+  if(E->output.volume_avg)
+    output_volume_avg(E, cycles);
 
   if (E->output.seismic)
       output_seismic(E, cycles);
@@ -558,7 +563,30 @@ void output_horiz_avg(struct All_variables *E, int cycles)
   return;
 }
 
+void output_volume_avg(struct All_variables *E, int cycles)
+{
+  /* volume average output of temperature and rms velocity */
+  void compute_volume_avg();
 
+  int j;
+  char output_file[255];
+  FILE *fp1;
+  float T_avg=0.0, V_rms_avg=0.0;
+
+  /* compute horizontal average here.... */
+  compute_volume_avg(E, &T_avg, &V_rms_avg);
+
+  /* only the first nprocz processors need to output */
+
+  if (E->parallel.me == 0)  
+  {
+    sprintf(output_file,"%s.volume_avg.%d.%d", E->control.data_file,
+            E->parallel.me, cycles);
+    fp1=fopen(output_file,"w");
+    fprintf(fp1,"%.4e %.4e\n", T_avg, V_rms_avg);
+    fclose(fp1);
+  }
+}
 
 void output_seismic(struct All_variables *E, int cycles)
 {
