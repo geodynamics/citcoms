@@ -576,14 +576,12 @@ void output_volume_avg(struct All_variables *E, int cycles)
   /* compute horizontal average here.... */
   compute_volume_avg(E, &T_avg, &V_rms_avg);
 
-  /* only the first nprocz processors need to output */
-
   if (E->parallel.me == 0)  
   {
-    sprintf(output_file,"%s.volume_avg.%d.%d", E->control.data_file,
-            E->parallel.me, cycles);
-    fp1=fopen(output_file,"w");
-    fprintf(fp1,"%.4e %.4e\n", T_avg, V_rms_avg);
+    sprintf(output_file,"%s.volume_avg", E->control.data_file);
+    fp1=fopen(output_file,"a");
+    fprintf(fp1,"%d %.4e %.4e %.4e\n", 
+	    cycles, E->monitor.elapsed_time, T_avg, V_rms_avg);
     fclose(fp1);
   }
 }
