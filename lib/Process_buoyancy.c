@@ -200,16 +200,16 @@ void heat_flux(E)
 /*
  * compute the volume average of temperature and RMS velocity 
  */
-void compute_volume_avg(struct All_variables *E, float *T_avg, float *Vrms_avg)
+void compute_volume_avg(struct All_variables *E, double *T_avg, double *Vrms_avg)
 {
   /* float return_bulk_value(struct All_variables *, float **, int); */
   int m, n, i;
-  float *S1[NCS], *S2[NCS];
+  double *S1[NCS], *S2[NCS];
 
   for(m=1; m<=E->sphere.caps_per_proc; m++)
   {
-    S1[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    S2[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    S1[1] = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    S2[1] = (double *)malloc((E->lmesh.nno+1)*sizeof(double));
   }
 
   for(m=1; m<=E->sphere.caps_per_proc; m++)
@@ -223,8 +223,14 @@ void compute_volume_avg(struct All_variables *E, float *T_avg, float *Vrms_avg)
 	E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i];
     }
   }
-  *T_avg = return_bulk_value(E, S1, 1); /* 1 => need volume average */
-  *Vrms_avg = sqrt(return_bulk_value(E, S2, 1)); /* 1 => need volume average */
+  
+  *T_avg = return_bulk_value_d(E, S1, 1); /* 1 => need volume average */
+  *Vrms_avg = sqrt(return_bulk_value_d(E, S2, 1)); /* 1 => need volume average */
+
+  for(m=1;m<=E->sphere.caps_per_proc;m++) {
+    free((void *)S1[m]);
+    free((void *)S2[m]);
+  }
 }
 
 /*

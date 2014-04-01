@@ -571,7 +571,7 @@ void output_volume_avg(struct All_variables *E, int cycles)
   int j;
   char output_file[255];
   FILE *fp1;
-  float T_avg=0.0, V_rms_avg=0.0;
+  double T_avg=0.0, V_rms_avg=0.0;
 
   /* compute horizontal average here.... */
   compute_volume_avg(E, &T_avg, &V_rms_avg);
@@ -579,7 +579,7 @@ void output_volume_avg(struct All_variables *E, int cycles)
   if (E->parallel.me == 0)  
   {
     sprintf(output_file,"%s.volume_avg", E->control.data_file);
-    fp1=fopen(output_file,"a");
+    fp1=fopen(output_file,"a+");
     fprintf(fp1,"%d %.4e %.4e %.4e\n", 
 	    cycles, E->monitor.elapsed_time, T_avg, V_rms_avg);
     fclose(fp1);
