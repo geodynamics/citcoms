@@ -224,6 +224,7 @@ void convection_initial_temperature(struct All_variables *);
 void print_all_config_params(struct All_variables *);
 void initial_mesh_solver_setup(struct All_variables *);
 void read_instructions(struct All_variables *, char *);
+void print_all_config_parameters(struct All_variables *E);
 void initial_setup(struct All_variables *);
 void initialize_material(struct All_variables *);
 void initial_conditions(struct All_variables *);

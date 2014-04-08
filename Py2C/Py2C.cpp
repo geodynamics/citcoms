@@ -104,7 +104,6 @@ void Py2CConverter::initialize_parameters()
   parameters["monitor_max_T"] = {"1","CitcomS.solver.tsolver"};
   parameters["finetunedt"] = {"0.9","CitcomS.solver.tsolver"};
   parameters["fixed_timestep"] = {"0.0","CitcomS.solver.tsolver"};
-  parameters["input_diffusivity"] = {"1","CitcomS.solver.tsolver"};
   parameters["adv_gamma"] = {"0.5","CitcomS.solver.tsolver"};
   parameters["adv_sub_iterations"] = {"2","CitcomS.solver.tsolver"};
   parameters["inputdiffusivity"] = {"1","CitcomS.solver.tsolver"};
