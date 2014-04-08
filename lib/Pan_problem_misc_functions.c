@@ -263,7 +263,7 @@ static int scan_double_vector(const char *str, int len, double *values)
     /** debug **
     for (i = 0; i < len; ++i) fprintf(stderr, "%e, ", values[i]);
     fprintf(stderr, "\n");
-    /**/
+    */
     return len;
 }
 

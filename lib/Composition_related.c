@@ -466,7 +466,7 @@ void map_composition_to_nodes(struct All_variables *E)
                 E->composition.comp_node[j][i][kk] *= E->MASS[E->mesh.levmax][j][kk];
 
         /* testing */
-        /**
+        /*
         for(i=0;i<E->composition.ncomp;i++)
             for (kk=1;kk<=E->lmesh.nel;kk++) {
                 fprintf(E->trace.fpt,"%d %f\n",kk,E->composition.comp_el[j][i][kk]);
@@ -477,7 +477,7 @@ void map_composition_to_nodes(struct All_variables *E)
                 fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][i][kk]);
             }
         fflush(E->trace.fpt);
-        /**/
+        */
 
     } /* end j */
 
