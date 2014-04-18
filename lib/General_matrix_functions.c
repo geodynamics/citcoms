@@ -383,7 +383,8 @@ double conj_grad( struct All_variables *E,
     free((double*) p2);
     free((double*) Ap);
 
-    return(residual);   }
+    return(residual);   
+}
 #endif /* !USE_CUDA */
 
 

@@ -68,7 +68,7 @@ struct ext_par		/* global variables for getpar */
   int listmax;
   int bufmax;
   FILE *listout;
-}	ext_par;
+} ext_par;
 
 struct arglist		/* structure of list set up by setpar */
 {

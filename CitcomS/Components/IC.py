@@ -42,6 +42,11 @@ class IC(CitcomComponent):
         from CitcomSLib import IC_set_properties
 
         inv = self.inventory
+        
+        # rkk: the following is casting/corecing the inv.perturbmag to be a sequence
+        # of type float. what kind of sequence is inv.perturbmag? An array? It is a
+        # pyre.inventory.list, as declared on line 131
+
         inv.perturbmag = map(float, inv.perturbmag)
         inv.perturbl = map(int, inv.perturbl)
         inv.perturbm = map(int, inv.perturbm)

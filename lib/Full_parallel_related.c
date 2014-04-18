@@ -195,7 +195,7 @@ static void set_vertical_communicator(struct All_variables *E)
 
   processors = (int *)malloc((E->parallel.nprocz+2)*sizeof(int));
 
-  m = E->sphere.capid - 1;
+  m = E->sphere.capid[1] - 1;
   i = E->parallel.me_loc[1];
   j = E->parallel.me_loc[2];
 
@@ -395,7 +395,7 @@ void full_parallel_domain_boundary_nodes( struct All_variables *E )
     add them back here */
 
     /* north pole is at the front left proc. of 1st cap */
-    if (E->sphere.capid == 1 &&
+    if (E->sphere.capid[1] == 1 &&
     E->parallel.me_loc[1] == 0 &&
     E->parallel.me_loc[2] == 0)
       for(j=1;j<=noz;j++) {
@@ -404,7 +404,7 @@ void full_parallel_domain_boundary_nodes( struct All_variables *E )
       }
 
     /* south pole is at the back right proc. of final cap */
-    if (E->sphere.capid == E->sphere.caps &&
+    if (E->sphere.capid[1] == E->sphere.caps &&
     E->parallel.me_loc[1] == E->parallel.nprocx-1 &&
     E->parallel.me_loc[2] == E->parallel.nprocy-1)
       for(j=1;j<=noz;j++) {
@@ -426,7 +426,7 @@ void full_parallel_domain_boundary_nodes( struct All_variables *E )
     fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);
     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
       fprintf(E->fp_out,"lev=%d  me=%d capid=%d\n",
-          lev, E->parallel.me,E->sphere.capid);
+          lev, E->parallel.me,E->sphere.capid[1]);
     for (ii=1;ii<=6;ii++)
       for (i=1;i<=E->parallel.NUM_NNO[lev].bound[ii];i++)
         fprintf(E->fp_out,"ii=%d   %d %d \n",ii,i,
@@ -476,7 +476,7 @@ void full_parallel_communication_routs_v( struct All_variables *E )
     noz = E->lmesh.NOZ[lev];
     noy = E->lmesh.NOY[lev];
 
-    cap = E->sphere.capid - 1;  /* which cap I am in (0~11) */
+    cap = E->sphere.capid[1] - 1;  /* which cap I am in (0~11) */
 
     /* -X face */
     npass = ii = 1;
@@ -617,7 +617,7 @@ void full_parallel_communication_routs_v( struct All_variables *E )
         E->parallel.NUM_NODEz[lev].pass[kkk] = 0;
         E->parallel.NUM_NEQz[lev].pass[kkk] = 0;
 
-        cap = E->sphere.capid - 1;  /* which cap I am in (0~11) */
+        cap = E->sphere.capid[1] - 1;  /* which cap I am in (0~11) */
         E->parallel.PROCESSORz[lev].pass[kkk] =
         E->parallel.loc2proc_map[cap][lx][ly][lz+((ii==5)?-1:1)];
 
@@ -644,7 +644,7 @@ void full_parallel_communication_routs_v( struct All_variables *E )
     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
       fprintf(E->fp_out,"output_communication route surface for lev=%d\n",lev);
       fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",
-        E->parallel.me,E->sphere.capid,E->parallel.TNUM_PASS[lev]);
+        E->parallel.me,E->sphere.capid[1],E->parallel.TNUM_PASS[lev]);
       for (k=1;k<=E->parallel.TNUM_PASS[lev];k++) {
         fprintf(E->fp_out,
             "proc %d and pass  %d to proc %d with %d eqn and %d node\n",
@@ -670,7 +670,7 @@ void full_parallel_communication_routs_v( struct All_variables *E )
       fprintf(E->fp_out,"proc %d and pass  %d to proc %d\n",
           E->parallel.me,k,E->parallel.PROCESSORz[lev].pass[k]);
 
-      fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n", E->sphere.capid,
+      fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n", E->sphere.capid[1],
       E->parallel.NUM_NEQ[lev].pass[kkkp],
       E->parallel.NUM_NODE[lev].pass[kkkp]);
       for(ii=1;ii<=E->parallel.NUM_NEQ[lev].pass[kkkp];ii++) 
@@ -708,7 +708,7 @@ void full_parallel_communication_routs_s( struct All_variables *E )
     noz = E->lmesh.NOZ[lev];
     noy = E->lmesh.NOY[lev];
 
-    j = E->sphere.capid;
+    j = E->sphere.capid[1];
     for (kkk=1;kkk<=E->parallel.TNUM_PASS[lev];kkk++) {
       if (kkk<=4) {  /* first 4 communications are for XZ and YZ planes */
         ii = kkk;
@@ -739,7 +739,7 @@ void full_parallel_communication_routs_s( struct All_variables *E )
       fprintf(E->fp_out,"output_communication route surface for lev=%d\n",lev);
       fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",
           E->parallel.me,
-          E->sphere.capid,
+          E->sphere.capid[1],
           E->parallel.TNUM_PASS[lev]);
       for (k=1;k<=E->parallel.TNUM_PASS[lev];k++) {
         fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d node\n",
