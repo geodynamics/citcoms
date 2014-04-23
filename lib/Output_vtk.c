@@ -714,6 +714,9 @@ void vtk_output(struct All_variables *E, int cycles)
     if (E->output.surf)
         vtk_output_surf(E, fp, cycles);
 
+    if(E->output.volume_avg)
+      output_volume_avg(E, cycles);
+
     vtk_point_data_trailer(E, fp);
 
     /* write element-based field */
