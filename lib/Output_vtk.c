@@ -716,6 +716,9 @@ void vtk_output(struct All_variables *E, int cycles)
 
     output_surf_botm(E, cycles);
 
+    if (E->output.geoid)
+      output_geoid(E, cycles);
+
     if(E->output.horiz_avg)
       output_horiz_avg(E, cycles);
 
