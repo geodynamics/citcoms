@@ -1,6 +1,6 @@
 # CitcomS
 cpu_limits_in_seconds=360000000
-minstep=11000
+minstep=50001
 solver=full
 
 # CitcomS.controller
@@ -10,8 +10,7 @@ storage_spacing=100
 # CitcomS.solver
 datadir=A3-benchmark
 datafile=A3-benchmark
-#rayleigh=7.681755e4
-rayleigh=7e3
+rayleigh=7.681755e4
 
 # CitcomS.solver.mesher
 fi_max=1
@@ -54,6 +53,7 @@ piterations=1500
 # CitcomS.solver.output
 output_ll_max=40
 output_optional=geoid,surf,botm,horiz_avg,volume_avg
+output_format=vtk
 use_cbf_topo=on
 
 # CitcomS.solver.visc

@@ -54,6 +54,7 @@ piterations=1500
 # CitcomS.solver.output
 output_ll_max=40
 output_optional=geoid,surf,botm,horiz_avg,volume_avg
+output_format=vtk
 use_cbf_topo=on
 
 # CitcomS.solver.visc

@@ -1,6 +1,6 @@
 # CitcomS
 cpu_limits_in_seconds=360000000
-minstep=40001
+minstep=75001
 solver=full
 
 # CitcomS.controller
@@ -8,8 +8,8 @@ checkpointFrequency=5000
 storage_spacing=100
 
 # CitcomS.solver
-datadir=A1-benchmark
-datafile=A1-benchmark
+datadir=A4-benchmark
+datafile=A4-benchmark
 rayleigh=7.681755e4
 
 # CitcomS.solver.mesher
@@ -62,6 +62,6 @@ VISC_UPDATE=on
 num_mat=4
 rheol=1
 visc0=1,1,1,1
-viscE=0.0,0.0,0.0,0.0
+viscE=4.6052,4.6052,4.6052,4.6052
 viscT=0.5,0.5,0.5,0.5
 
