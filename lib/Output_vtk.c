@@ -714,6 +714,8 @@ void vtk_output(struct All_variables *E, int cycles)
     if (E->output.surf)
         vtk_output_surf(E, fp, cycles);
 
+    output_surf_botm(E, cycles);
+
     if(E->output.horiz_avg)
       output_horiz_avg(E, cycles);
 
