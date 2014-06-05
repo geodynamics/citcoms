@@ -388,11 +388,8 @@ This release of CitcomS 3.2 adds numerous changes since 3.1.1 which
 was released in 2009. These include improved implementations of internal
 stress, radial layer dependent viscosity, and velocity boundary conditions.
 Improvements have also been made in solver convergence controls, VTK
-output and several bug fixes. Finally, the Pyre configuration option
-has been turned off by default, though it can be enabled during configuration.
-Other enhancements include:
+output and several bug fixes. Other enhancements include:
 \begin{itemize}
-\item If Python 2.7 is detected, Pyre is disabled due to conflicts.
 \item Trial implementation of anisotropic viscosity.
 \item Added support of multigrid solver in Exchanger.
 \item Improved handling of grd-read velocity and traction boundary conditions.
@@ -408,8 +405,6 @@ PDEPV psrw=on parameter.
 \begin{itemize}
 \item Fixed a bug in pseudo free surface, reported by Robert Moucha.
 \item Correctly handle orphan tracers.
-\item Added Pyre binding for write\_q\_files, z\_layer, r\_grid\_layers,
-rr, nr, others.
 \item Replaced fixed accuracy setting. Bug reported by Rob Moucha.
 \item Fixed temperature perturbation bug for multiple processors. 
 \end{itemize}
@@ -857,8 +852,6 @@ Installation of CitcomS requires the following:
 \begin{itemize}
 \item A C compiler
 \item An MPI library
-\item If using Pyre: between Python 2.4 to 2.6, including header files (Python.h),
-and the pythia package (see below).
 \end{itemize}
 You can install all the dependencies in one command on most Linux
 machines. On Debian, Ubuntu or similar distributions, use this command
@@ -880,20 +873,6 @@ MPI installations are typically configured for a particular compiler,
 and provide a special wrapper command to invoke the right compiler.
 Therefore, the choice of MPI implementation often determines which
 C compiler to use.
-\begin{quote}
-\textbf{Note:} Users familiar with older versions of CitcomS may prefer
-to install only the legacy CitcomS tools, \texttt{CitcomSFull} and
-\texttt{CitcomSRegional}, and forgo use of Python and the Pyre framework.
-By default in CitcomS 3.2.0 this is how CitcomS is configured. This
-process requires only a C compiler and an MPI library. For more information,
-see Section \ref{sec:Installing-without-Pyre} later in this chapter.
-\end{quote}
-If you are going to use solver coupling, you will also need a decent
-C++ compiler (e.g., g++ 3.2 or newer) and the Exchanger package; see
-Section \ref{sec:Exchanger-Configuration-(Optional)}. Optionally,
-CitcomS can be configured to use a parallel HDF5 library; see Section
-\vref{sec:HDF5-Configuration}.
-
 
 \subsection{C Compiler}
 
@@ -953,81 +932,6 @@ searches for the following MPI C command names:
 \begin{lyxcode}
 mpicc~hcc~mpcc~mpcc\_r~mpxlc~cmpicc
 \end{lyxcode}
-
-\subsection{Python (Optional)}
-
-Your system may already have a suitable Python interpreter installed.
-To check, type the \texttt{python} command:
-\begin{lyxcode}
-\$~python~-V
-
-Python~2.5.2
-\end{lyxcode}
-Mac OS X 10.3 and later ships with a suitable version of Python preinstalled.
-If you're using an older version of Mac OS X, or for more information
-in general, see Python on the Mac \url{www.python.org/download/mac}
-at the Python web site.
-
-On Linux, simply install the binary system package available for your
-distribution. Be sure to select the Python development package (typically
-called \texttt{python-dev}) in addition to the core Python package
--- even if you don't plan on doing any Python software development.
-The development package contains the Python header files (Python.h),
-which are necessary for building CitcomS.
-
-If you are working on a cluster and \texttt{python} is too old, try
-poking around a little. Sometimes multiple versions of Python are
-installed on the same system:
-\begin{lyxcode}
-\$~python~-V
-
-Python~2.2.3
-
-\$~which~python
-
-/usr/bin/python
-
-\$~ls~/usr/bin/python{*}
-
-/usr/bin/python~/usr/bin/python2~/usr/bin/python2.2
-
-/usr/bin/python24~/usr/bin/python2.4
-
-\$
-\end{lyxcode}
-In the above scenario, it is useful to create an alias to the newer
-Python:
-\begin{lyxcode}
-\$~cd~\textasciitilde{}/bin
-
-\$~ln~-s~/usr/bin/python2.4~python
-
-\$~export~PATH=\$HOME/bin:\$PATH
-
-\$~cd
-
-\$~hash~-r
-
-\$~which~python
-
-\textasciitilde{}/bin/python
-
-\$~python~-V
-
-Python~2.4.1
-
-\$
-\end{lyxcode}
-If absolutely necessary, one can easily build Python from source using
-a C compiler. You can download Python from the Python website \url{www.python.org}.
-Please note that Pyre in CitcomS does not work with Python 2.7 or
-higher.
-
-
-\subsection{Pythia (Optional)}
-
-The current version of pythia package can be downloaded from the \href{http://www.geodynamics.org/cig/software/pythia}{CIG Pythia page}.
-
 
 \section{Downloading and Unpacking Source}
 
@@ -1118,14 +1022,6 @@ please send \texttt{config.log} as an attachment.
 Upon successful completion, \texttt{configure} will print a brief
 configuration summary.
 
-If Pyre is enabled, the \texttt{configure} script will automatically
-check for needed Python dependencies, including the Pythia package
-(which includes the Pyre framework). If necessary, \texttt{configure}
-will download missing Python packages from the Internet and store
-them under \texttt{\textit{\emph{deps/}}}. These are Python packages
-which are required (either directly or indirectly) by CitcomS.
-
-
 \subsection{Configure Usage}
 
 For a detailed list of \texttt{configure} variables and options, give
@@ -1151,16 +1047,6 @@ e.g.,
 \hline 
 \textbf{Variable} & \textbf{Description}\tabularnewline
 \hline 
-\hline 
-PYTHON & Python interpreter. This is useful if you have Python installed in
-a non-standard location, e.g.,
-
-\texttt{~~./configure \textbackslash{}}
-
-\texttt{~~~~~~PYTHON=/opt/python2.5/bin/python} 
-
-By default, \texttt{configure} will search for a suitable Python interpreter
-using your \texttt{PATH} environment variable.\tabularnewline
 \hline 
 CC & C compiler command. This is usually set to the name of an MPI wrapper
 command, e.g.,
@@ -1235,38 +1121,6 @@ itself in \texttt{LDFLAGS} using the \texttt{-l} compiler option.
 If a library name is not given -- or if the given option doesn't work
 -- \texttt{configure} will automatically try linking using \texttt{-lmpi}
 and, if that fails, \texttt{-lmpich}.
-
-
-\section{\label{sec:Exchanger-Configuration-(Optional)}Exchanger Configuration
-(Optional)}
-
-This version of CitcomS is capable of solver coupling. Two or more
-instances of CitcomS solvers can be coupled together to solve a problem
-with different length and time scales \cite{Tan et al GeoFramework Part I}.
-An external Exchanger package is needed for solver coupling. You can
-download Exchanger at CIG's Exchanger web page \url{geodynamics.org/cig/software/packages/cs/exchanger}.
-After you download and untar the package, you can configure and install
-Exchanger using these commands:
-\begin{lyxcode}
-\$~cd~Exchanger-1.0.1/
-
-\$~./configure~-{}-prefix=\$HOME/cig
-
-\$~make
-
-\$~make~install
-\end{lyxcode}
-By default, CitcomS will attempt to auto-detect your Exchanger installation
-and will disable Exchanger support if it is not found. You may specify
-the location of your Exchanger installation by setting the PYTHONPATH
-environment variable to the appropriate installation prefix.
-\begin{lyxcode}
-\$~cd~CitcomS-3.2.0/
-
-\$~export~PYTHONPATH=\$HOME/cig/lib/python2.5/site-packages:\$PYTHONPATH
-
-\$~./configure~-{}-with-exchanger
-\end{lyxcode}
 
 \section{\label{sec:HDF5-Configuration}HDF5 Configuration (Optional)}
 
@@ -1378,52 +1232,6 @@ commands:
 \end{lyxcode}
 You may need to set \texttt{GMTHOME} and \texttt{NETCDFHOME} environment
 variables if these packages is not installed in the system directory.
-
-
-\section{\label{sec:Batch-System-Configuration}Batch System Configuration}
-
-If you are installing CitcomS on a cluster with a batch system, you
-can configure Pyre such that the \texttt{citcoms} command automatically
-submits jobs to the batch queue. Pyre contains support for the LSF,
-PBS, and Globus batch systems.
-
-The command to submit a batch job depends upon the particular batch
-system used. Further, the command used in a batch script to launch
-an MPI program varies from one cluster to the next. This command can
-vary between two clusters, even if the clusters use the same batch
-system! On some systems, \texttt{mpirun} is invoked directly from
-the batch script. On others, a special wrapper is used instead. If
-you need help to configure Pyre for your cluster, you can contact
-CIG Mantle Convection Mailing List \url{cig-mc@geodynamics.org} for
-assistance.
-
-Properly configured, Pyre can handle job submissions automatically,
-insulating users from the details of the batch system and the site
-configuration. This feature has the most value when the system administrator
-installs a global Pyre configuration file on the cluster (under \texttt{/etc/pythia-0.8}),
-for the benefit of all users and all Pyre-based applications.
-
-For more information on configuring Pyre for your batch system, see
-CIG's Pythia page \url{geodynamics.org/cig/software/packages/cs/pythia/docs/batch}.
-For more information on batch system configuration as it pertains
-to running CitcomS, see Section \vref{sub:Launchers-and-Schedulers}.
-
-
-\section{\label{sec:Installing-without-Pyre}Installing with Pyre}
-
-By default, CitcomS 3.2.0 does not install using Pyre. To build CitcomS
-binaries with the Pyre wrappers (necessary for the example Cookbooks),
-call \texttt{configure} using the \texttt{-{}-with-pyre} option:
-\begin{lyxcode}
-\$~./configure~-{}-with-pyre=yes
-\end{lyxcode}
-The only system requirements for this configuration are an MPI library
-and a C compiler. With Pyre the make command will build \texttt{pycitcoms}
-and \texttt{mpipycitcoms} as well as the script \texttt{citcoms} used
-for running CitcomS. Without Pyre the \texttt{make} command will build
-two command-line tools, \texttt{CitcomSFull} and \texttt{CitcomSRegional},
-for running the full solver and the regional solver, respectively.
-
 
 \section{\label{sec:Software-Repository}Installing from the Software Repository}
 
