@@ -2711,67 +2711,67 @@ while a lower resolution is sufficient for the wider cold downwelling.
 \subsection{Solution}
 
 The parameter that controls whether a mesh is to be uniform or refined
-is \texttt{solver.mesher.coor}. Set it to \texttt{1} \texttt{(solver.mesher.coor=1)}
+is \texttt{coor}. Set it to \texttt{1} \texttt{(coor=1)}
 in order to read the uneven mesh point coordinates from an input file
 (specified by \texttt{coor\_file}). The format of the coordinate input
 file is described in Appendix \vref{sec:Coordinate-files}.
 \begin{lyxcode}
-coor~=~1~\\
-coor\_file~=~coor.dat
+coor=1\\
+coor\_file=coor.dat
 \end{lyxcode}
 The computational domain is bounded in colatitude between radian 1
 and 2, in latitude between radian 0 and 1, and in radius between 0.55
 and 1, as determined by the content of \texttt{coor\_file}.
 
 
-\subsubsection{Example: Regionally Refined Meshes, \texttt{cookbook4.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~250~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~10~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-rayleigh~=~1e6~~~~~~~~~~~~~~;~Rayleigh~number~\\
-datafile~=~cookbook4~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbmag~=~0.05~\\
-perturblayer~=~10~\\
-~\\
-\#~Perturb~the~initial~temperature~gradient~in~the~longitudinal~\\
-\#~direction.~\\
-perturbl~=~1~\\
-perturbm~=~0~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-\#~Read~uneven~mesh~point~coordinates~from~'coor.dat'.~\\
-coor~=~1~\\
-coor\_file~=~coor.dat~\\
-~\\
-nprocx~=~2~\\
-nprocy~=~1~\\
-nprocz~=~1~\\
-nodex~=~33~\\
-nodey~=~17~\\
-nodez~=~17~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+\subsubsection{Example: Regionally Refined Meshes, \texttt{cookbook4}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=250
+
+# CitcomS.controller
+storage_spacing=50
+
+# CitcomS.solver
+datafile=cookbook4
+rayleigh=1e6
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=coor.dat
+fi_max=1
+fi_min=0
+nodex=33
+nodey=17
+nodez=17
+nprocx=1
+nprocy=1
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=10
+perturbm=0
+perturbmag=0.05
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook4.pdf}
@@ -2885,7 +2885,7 @@ so the Euler pole moved closer.}
 
 
 
-\subsubsection{Example: Subduction Models with Trench Rollback, \texttt{cookbook5.cfg}}
+\subsubsection{Example: Subduction Models with Trench Rollback, \texttt{cookbook5}}
 \begin{verbatim}
 # CitcomS
 cpu_limits_in_seconds=360000000
