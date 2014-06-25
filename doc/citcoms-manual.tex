@@ -3053,7 +3053,7 @@ as due to the thermal heterogeneity, drive the convection flow.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook7.cfg}. Most of the parameters you have
+You will use \texttt{cookbook7}. Most of the parameters you have
 encountered in previous cookbooks. The initial condition is the same
 as in Cookbook 1, and the viscosity law is the same as in Cookbook
 3. 
@@ -3062,17 +3062,17 @@ A large number of ASCII files will be output. In order to keep the
 current directory tidy, the output files can be put in a subdirectory
 \texttt{output/} by specifying
 \begin{lyxcode}
-datadir~=~output
+datadir=output
 \end{lyxcode}
 Since you are interested in the composition field, the compostion
 output should be enabled and some output files disabled:
 \begin{lyxcode}
-output\_optional~=~tracer,comp\_nd
+output\_optional=tracer,comp\_nd
 \end{lyxcode}
 The most important parameters are in the \texttt{CitcomS.solver.tracer}
 section. Turn on the tracer module:
 \begin{lyxcode}
-tracer~=~1
+tracer=1
 \end{lyxcode}
 The number of tracers and their initial location must be set. Here,
 you specify \texttt{tracer\_ic\_method=0}. The tracers will be generated
@@ -3088,9 +3088,9 @@ of the tracers from the file specified by \texttt{datafile\_old} (in
 the \texttt{CitcomS.solver} section) and \texttt{solution\_cycles\_init}
 (in the \texttt{CitcomS.solver.ic} section). 
 \begin{lyxcode}
-tracer\_ic\_method~=~0~\\
-tracers\_per\_element~=~20~\\
-tracer\_file~=~tracer.dat
+tracer\_ic\_method=0\\
+tracers\_per\_element=20\\
+tracer\_file=tracer.dat
 \end{lyxcode}
 Each tracer can have a ``flavor'' attached to it. The meaning of the
 flavor depends on the application. Here, the flavor indicates the
@@ -3102,21 +3102,21 @@ how to assign the flavor to each tracer. If \texttt{ic\_method\_for\_flavors=0},
 tracers above \texttt{z\_interface} are assigned to flavor 0, and
 tracers below \texttt{z\_interface} to flavor 1.
 \begin{lyxcode}
-tracer\_flavors~=~2~\\
-ic\_method\_for\_flavors~=~0~\\
-z\_interface~=~0.7
+tracer\_flavors=2\\
+ic\_method\_for\_flavors=0\\
+z\_interface=0.7
 \end{lyxcode}
 The thermo-chemical convection module is turned on by
 \begin{lyxcode}
-chemical\_buoyancy~=~1
+chemical\_buoyancy=1
 \end{lyxcode}
 The composition field is determined by the ratio method (\texttt{buoy\_type=1})
 \cite{Tackely King tracer ratio method}. The density anomaly of the
 anomalous chemical composition is defined by $B=\Delta\rho_{ch}/\left(\rho_{0}\alpha_{0}\Delta T\right)$,
 the buoyancy ratio. 
 \begin{lyxcode}
-buoy\_type~=~1~\\
-buoyancy\_ratio~=~0.5
+buoy\_type=1\\
+buoyancy\_ratio=0.5
 \end{lyxcode}
 The code keeps track of the sum of the bulk composition. In a perfect
 world, the sum of the bulk composition would not change with time.
@@ -3132,8 +3132,8 @@ rule of thumb is that the grid spacing of the regular grid should
 be less than $18/(nodex\times nprocx)$. These parameters are used
 only in the full spherical version.
 \begin{lyxcode}
-regular\_grid\_deltheta~=~1.0~\\
-regular\_grid\_delphi~=~1.0
+regular\_grid\_deltheta=1.0\\
+regular\_grid\_delphi=1.0
 \end{lyxcode}
 If you encounter any error, look at the end of the tracer log files
 (\texttt{cookbook7.tracer\_log.{*}}) for error messages.
@@ -3148,74 +3148,69 @@ are set by \texttt{piterations}. \texttt{Both vlowstep }and \texttt{piterations}
 should be large integers, but you can experiment with a larger value
 for \texttt{accuracy} to speed up the computation. 
 \begin{lyxcode}
-Solver~=~cgrad~\\
-accuracy~=~1e-03~\\
-vlowstep~=~1000~\\
-piterations~=~1000
+Solver=cgrad\\
+accuracy=1e-03\\
+vlowstep=1000\\
+piterations=1000
 \end{lyxcode}
 
-\subsubsection{Example: Thermo-Chemical Convection, \texttt{cookbook7.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~15~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~5~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datadir~=~output~~~~~~~~~~~;~path~to~output~directory~\\
-datafile~=~cookbook7~~~~~~~;~prefix~of~output~filenames~\\
-rayleigh~=~1e7~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05~\\
-~\\
-{[}CitcomS.solver.output{]}~\\
-output\_optional~=~tracer,comp\_nd~\\
-~\\
-{[}CitcomS.solver.tracer{]}~\\
-tracer~=~on~\\
-tracer\_ic\_method~=~0~\\
-tracers\_per\_element~=~20~\\
-tracer\_file~=~tracer.dat~\\
-~\\
-tracer\_flavors~=~2~\\
-ic\_method\_for\_flavors~=~0~\\
-z\_interface~=~0.7~\\
-~\\
-chemical\_buoyancy~=~1~\\
-buoy\_type~=~1~\\
-buoyancy\_ratio~=~0.5~\\
-~\\
-regular\_grid\_deltheta~=~1.0~\\
-regular\_grid\_delphi~=~1.0~\\
-~\\
-{[}CitcomS.solver.vsolver{]}~\\
-Solver~=~cgrad~\\
-accuracy~=~1e-04~\\
-vlowstep~=~1000~\\
-piterations~=~1000~\\
-~\\
-\#~Assign~the~viscosities.~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+\subsubsection{Example: Thermo-Chemical Convection, \texttt{cookbook7}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=15
+solver=full
+
+# CitcomS.controller
+storage_spacing=5
+
+# CitcomS.solver
+datadir=output
+datafile=cookbook7
+rayleigh=1e7
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=9
+nodey=9
+nodez=9
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.vsolver
+Solver=cgrad
+accuracy=1e-04
+piterations=1000
+vlowstep=1000
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=5
+perturbm=2
+perturbmag=0.05
+
+# CitcomS.solver.output
+output_optional=tracer,comp_nd
+
+# CitcomS.solver.tracer
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \noindent \begin{center}
 \begin{figure}[H]
 \noindent \begin{centering}

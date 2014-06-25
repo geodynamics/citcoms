@@ -53,4 +53,3 @@ viscZ=0,0,0,0
 visc_max=100.0
 visc_min=1.0
 
-# WARNING: incorrect value for nproc_surf found; setting it to 12
