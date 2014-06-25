@@ -3327,20 +3327,16 @@ state. It will use 12 processors and take 1 to 2 days to finish on
 a modern computer. At every 1,000th time-step interval, a checkpoint
 for the internal state of the solver is saved.
 \begin{lyxcode}
-checkpointFrequency~=~1000
+checkpointFrequency=1000
 \end{lyxcode}
 If the solver is interrupted before finishing the computation, one
 can resume the computation from the checkpointed state. To shorten
-the computation time, a checkpoint at the 9,000th time step (\texttt{CitcomS-cookbook8-
-restart.tar.gz}) is provided at CIG's CitcomS web page \url{geodynamics.org/cig/software/packages/mc/citcoms}.
-(Note that the checkpoint files are produced by an x86 machine and
-may not be usable by other types of machines, e.g., PowerPC.) To resume
-the computation from the 9,000th time-step checkpoint, untar the package
-in the \texttt{examples/Cookbook8/} directory and set these parameters:
+the computation time, a checkpoint at the 9,000th time step 
+is provided in the \texttt{examples/Cookbook8/} directory. To restart the
+computation from this checkpoint, set these parameters:
 \begin{lyxcode}
-{[}CitcomS.solver.ic{]}~\\
-restart~=~on~\\
-solution\_cycles\_init~=~9000
+restart=on\\
+solution\_cycles\_init=9000
 \end{lyxcode}
 If you restart from the checkpoint, the computation will resume from
 the 9,000th time-step. Note that the \texttt{coord} files are only
@@ -3358,26 +3354,26 @@ the effective dissipation number is 0.275 ($=0.5\times(r_{outer}-r_{inner})$).
 Under these non-dimensional numbers, the convection is of low vigor
 and low compressibility.
 \begin{lyxcode}
-rayleigh~=~7.68175583e4~\\
-dissipation\_number~=~0.5~\\
-gruneisen~=~1.25~\\
-surfaceT~=~0.1
+rayleigh=7.68175583e4\\
+dissipation\_number=0.5\\
+gruneisen=1.25\\
+surfaceT=0.1
 \end{lyxcode}
 Since we are going to use the multigrid solver, the grid size is specified
 by:
 \begin{lyxcode}
-nodex~=~33~\\
-nodey~=~33~\\
-nodez~=~33~\\
-levels~=~5
+nodex=33\\
+nodey=33\\
+nodez=33\\
+levels=5
 \end{lyxcode}
 The additional parameter \texttt{levels} specifies the nested levels
 of multigrid units and is subjected to the following constraint: 
 \begin{equation}
 \mathrm{nodex}=1+\mathrm{nprocx}\times\mathrm{mgunitx}\times2^{levels-1}\label{eq:mgunit}
 \end{equation}
-where \texttt{mgunitx} must be an integer. In the pure C version,
-\texttt{mgunitx} is an input parameter.
+where \texttt{mgunitx}, which \textbf{must be an integer}, is an input 
+parameter.
 
 If \texttt{reference\_state=}1, then constant gravity, heat capacity,
 thermal expansivity, and $\rho_{r}=exp\left(\frac{D_{i}}{\gamma}(1-r)\right)$
@@ -3385,16 +3381,16 @@ are used as the reference state. If \texttt{reference\_state=}0, the
 reference state is read from a file \texttt{refstate\_file}. See Appendix
 \ref{cha:Appendix-A:-Input} for the file format.
 \begin{lyxcode}
-reference\_state~=~1~\\
-refstate\_file~=~ref.dat
+reference\_state=1\\
+refstate\_file=ref.dat
 \end{lyxcode}
 We are interested in the geoid, dynamic topography, and heat flux.
 The dynamic topography and heat flux are computed on the surface grids.
 The geoid is computed in the spherical harmonics, with a maximal degree
 of \texttt{20}. 
 \begin{lyxcode}
-output\_optional~=~geoid,surf,botm~\\
-output\_ll\_max~=~20
+output\_optional=geoid,surf,botm\\
+output\_ll\_max=20
 \end{lyxcode}
 The initial temperature is a conductive profile with a single spherical
 harmonic perturbation. The perturbation is located at mid-depth and
@@ -3404,29 +3400,29 @@ mag\times\sin\left(\frac{(r-r_{in})\pi}{r_{out}-r_{in}}\right)\left(\sin(m\phi)+
 \]
 
 \begin{lyxcode}
-tic\_method~=~3~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~17~\\
-perturbmag~=~0.01
+tic\_method=3\\
+num\_perturbations=1\\
+perturbl=3\\
+perturbm=2\\
+perturblayer=17\\
+perturbmag=0.01
 \end{lyxcode}
 You will need the output of dynamic topography and the geoid. The
 dynamics topography will be computed by the Consistent Boundary Flux
 (CBF) method, and the effect of self-gravitation is included in the
 geoid. The maximum spherical harmonics degree for the geoid is 20.
 \begin{lyxcode}
-output\_optional~=~geoid,surf,botm~\\
-use\_cbf\_topo~=~on~\\
-self\_gravitation~=~on~\\
-output\_ll\_max~=~20
+output\_optional=geoid,surf,botm\\
+use\_cbf\_topo=on\\
+self\_gravitation=on\\
+output\_ll\_max=20
 \end{lyxcode}
 Various parameters tune the performance of the solver. The maximum
 size of each time step is determined dynamically by the Courant criterion.
 To enhance the stability of the energy equation solver, you will only
 use three quarters of the maximum Courant time-step size.
 \begin{lyxcode}
-finetunedt~=~0.75
+finetunedt=0.75
 \end{lyxcode}
 You will use the multigrid solver to solve the matrix equation $\mathbf{A}x=b$
 for $x$. The multigrid solver is more efficient than the conjugate
@@ -3440,26 +3436,26 @@ of smoothing passes at lowest/highest levels; and \texttt{max\_mg\_cycles}
 is the maximum number of multigrid cycles per solve. All these parameters
 should be small integers.
 \begin{lyxcode}
-Solver~=~multigrid~\\
-mg\_cycle~=~1~\\
-down\_heavy~=~2~\\
-up\_heavy~=~2~\\
-vlowstep~=~20~\\
-vhighstep~=~2~\\
-max\_mg\_cycles~=~50
+Solver=multigrid\\
+mg\_cycle=1\\
+down\_heavy=2\\
+up\_heavy=2\\
+vlowstep=20\\
+vhighstep=2\\
+max\_mg\_cycles=50
 \end{lyxcode}
 The following parameter turn on the pre-conditioner for the matrix
 equation solver (either multigrid or conjugate gradient).
 \begin{lyxcode}
-precond~=~on
+precond=on
 \end{lyxcode}
 The stiffness matrix uses augmented Lagrangian formulation to improve
 the convergence for large viscosity variations \cite{Moresi/Zhong/Gurnis The accuracy}.
 These parameters specify whether to enable the formulation and how
 much weight to use for the formulation.
 \begin{lyxcode}
-aug\_lagr~=~on~\\
-aug\_number~=~2.0e3
+aug\_lagr=on\\
+aug\_number=2.0e3
 \end{lyxcode}
 The discrete Stokes equations \ref{eq:discrete continuite eqn} and
 \ref{eq:discrete momentum eqn} are solved using the Uzawa algorithm,
@@ -3472,15 +3468,15 @@ level for the continuity equation \ref{eq:discrete continuite eqn}.
 Sometimes, larger value of \texttt{piterations} is required for convergence
 if complicated velocity boundary conditions are used.
 \begin{lyxcode}
-piterations~=~375
+piterations=375
 \end{lyxcode}
 For the compressible case, two choices of the Uzawa algorithm are
 available. If \texttt{uzawa=cg}, the algorithm described in Equation
 \ref{eq:iter-cg} is used. In this case, an additional parameter controls
 the maximum number of outer iterations. 
 \begin{lyxcode}
-uzawa~=~cg~\\
-compress\_iter\_maxstep~=~100
+uzawa=cg\\
+compress\_iter\_maxstep=100
 \end{lyxcode}
 If \texttt{uzawa=bicg}, the algorithm described in Equation \ref{eq:bicg}
 is used, and no additional parameter is needed.
@@ -3491,7 +3487,7 @@ and \ref{eq:discrete momentum eqn} both are smaller than \texttt{accuracy},
 or if the changes in the velocity and pressure both are smaller than
 \texttt{accuracy} for the last two iterations.
 \begin{lyxcode}
-accuracy~=~0.001
+accuracy=0.001
 \end{lyxcode}
 Finally, the net angular momentum of the velocity solution is removed.
 The net angular momentum and rigid body rotation are unconstrained
@@ -3504,106 +3500,105 @@ boundary conditions, the angular momentum must be constant in time.
 Enforcing the angular momentum to be zero by removing it from the
 velocity solution is often desirable. 
 \begin{lyxcode}
-remove\_rigid\_rotation~=~off~\\
-remove\_angular\_momentum~=~on
+remove\_rigid\_rotation=off\\
+remove\_angular\_momentum=on
 \end{lyxcode}
 However, for models with imposed plate velocity, it is advisable to
 turn off both \texttt{remove\_rigid\_rotation} and \texttt{remove\_angular\_momentum}.
 
 
-\subsubsection{Example: Compressible Steady-State Convection, cookbook8.cfg}
-\begin{lyxcode}
-\#~Cookbook~8:~Compressible~Model~and~Checkpointing~\\
-~\\
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~10000~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~1000~\\
-checkpointFrequency~=~1000~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datadir~=~output~\\
-datafile~=~cookbook8~\\
-datadir\_old~=~restart~\\
-datafile\_old~=~cookbook8~\\
-~\\
-rayleigh~=~7.68175583e4~\\
-dissipation\_number~=~0.5~\\
-gruneisen~=~1.25~\\
-surfaceT~=~0.1~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-nodex~=~33~\\
-nodey~=~33~\\
-nodez~=~33~\\
-levels~=~5~\\
-~\\
-coor~=~1~\\
-coor\_file~=~coord.dat~\\
-~\\
-{[}CitcomS.solver.param{]}~\\
-reference\_state~=~1~\\
-refstate\_file~=~ref.dat~\\
-~\\
-{[}CitcomS.solver.output{]}~\\
-output\_optional~=~geoid,surf,botm~\\
-use\_cbf\_topo~=~on~\\
-self\_gravitation~=~on~\\
-output\_ll\_max~=~20~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~3~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~17~\\
-perturbmag~=~0.01~\\
-~\\
-restart~=~off~\\
-solution\_cycles\_init~=~9000~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-visc\_smooth\_method~=~1~\\
-~\\
-TDEPV~=~on~\\
-rheol~=~1~\\
-num\_mat~=~4~\\
-viscE~=~2.99573,2.99573,2.99573,2.99573~\\
-viscT~=~0.5,0.5,0.5,0.5~\\
-visc0~=~1,1,1,1~\\
-~\\
-VMIN~=~on~\\
-visc\_min~=~0.001~\\
-VMAX~=~on~\\
-visc\_max~=~1e+06~\\
-~\\
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-~\\
-{[}CitcomS.solver.vsolver{]}~\\
-uzawa~=~cg~\\
-Solver~=~multigrid~\\
-mg\_cycle~=~1~\\
-down\_heavy~=~2~\\
-up\_heavy~=~2~\\
-vlowstep~=~20~\\
-vhighstep~=~2~\\
-max\_mg\_cycles~=~50~\\
-~\\
-aug\_lagr~=~on~\\
-aug\_number~=~2.0e3~\\
-precond~=~on~\\
-~\\
-piterations~=~375~\\
-accuracy~=~0.001~\\
-compress\_iter\_maxstep~=~100~\\
-~\\
-remove\_rigid\_rotation~=~off~\\
-remove\_angular\_momentum~=~on
-\end{lyxcode}
+\subsubsection{Example: Compressible Steady-State Convection, cookbook8}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=10000
+solver=full
+
+# CitcomS.controller
+checkpointFrequency=1000
+storage_spacing=1000
+
+# CitcomS.solver
+datadir=output
+datadir_old=restart
+datafile=cookbook8
+datafile_old=cookbook8
+dissipation_number=0.5
+gruneisen=1.25
+rayleigh=7.68175583e4
+surfaceT=0.1
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=coord.dat
+fi_max=1
+fi_min=0
+levels=5
+mgunitx=2
+mgunity=2
+mgunitz=2
+nodex=33
+nodey=33
+nodez=33
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+finetunedt=0.75
+
+# CitcomS.solver.vsolver
+Solver=multigrid
+accuracy=0.001
+aug_lagr=on
+aug_number=2.0e3
+compress_iter_maxstep=100
+down_heavy=2
+max_mg_cycles=50
+mg_cycle=1
+piterations=375
+precond=on
+remove_angular_momentum=on
+remove_rigid_rotation=off
+up_heavy=2
+uzawa=cg
+vhighstep=2
+vlowstep=20
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=17
+perturbm=2
+perturbmag=0.01
+restart=off
+solution_cycles_init=9000
+tic_method=3
+
+# CitcomS.solver.output
+output_ll_max=20
+output_optional=geoid,surf,botm
+self_gravitation=on
+use_cbf_topo=on
+
+# CitcomS.solver.param
+reference_state=1
+refstate_file=ref.dat
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=1
+visc0=1,1,1,1
+viscE=2.99573,2.99573,2.99573,2.99573
+viscT=0.5,0.5,0.5,0.5
+visc_max=1e+06
+visc_min=0.001
+visc_smooth_method=1
+\end{verbatim}
 
 \subsection{Discussion}
 
@@ -3631,16 +3626,15 @@ SI units) for the Earth. Note that the temperature drop from the core-mantle
 boundary to the surface ($\Delta T$ in Equation \ref{eq:T dim})
 is derived from these constants and the Rayleigh number.
 \begin{lyxcode}
-{[}CitcomS.solver.const{]}~\\
-radius=6.371e+06~\\
-density=3340~\\
-thermdiff=1e-06~\\
-gravacc=9.81~\\
-thermexp=3e-05~\\
-refvisc=1e+21~\\
-cp=1200~\\
-density\_above=1030~\\
-density\_below=6600~
+radius=6.371e+06\\
+density=3340\\
+thermdiff=1e-06\\
+gravacc=9.81\\
+thermexp=3e-05\\
+refvisc=1e+21\\
+cp=1200\\
+density\_above=1030\\
+density\_below=6600
 \end{lyxcode}
 \begin{figure}[H]
 \begin{centering}

@@ -87,8 +87,3 @@ viscT=0.5,0.5,0.5,0.5
 visc_max=1e+06
 visc_min=0.001
 visc_smooth_method=1
-
-# WARNING: incorrect value for nproc_surf found; setting it to 12
-# WARNING: changing mgunitx value to satisfy eqn 6.7
-# WARNING: changing mgunity value to satisfy eqn 6.7
-# WARNING: changing mgunitz value to satisfy eqn 6.7
