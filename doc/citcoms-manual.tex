@@ -2568,19 +2568,18 @@ or stress-dependent viscosity.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook3.cfg}. The parameters specify the number
+You will use \texttt{cookbook3}. The parameters specify the number
 of time steps (200), how often outputs will be created (25), the prefix
 of the output filenames (\texttt{cookbook3}), and the Rayleigh number
 ($10^{6}$).
 \begin{lyxcode}
-steps~=~200~\\
-monitoringFrequency~=~25~\\
-datafile~=~cookbook3~\\
-rayleigh~=~1e6
+steps=200\\
+monitoringFrequency=25\\
+datafile=cookbook3\\
+rayleigh=1e6
 \end{lyxcode}
-The \texttt{solver.visc} facility assigns the viscosities. The parameters
-specify whether the viscosity should be updated at every time step
-(\texttt{on}), the number of viscous layers (4), the viscosity of
+The parameters specify whether the viscosity should be updated at every time
+step (\texttt{on}), the number of viscous layers (4), the viscosity of
 each layer (1,1,1,1), whether the viscosity is temperature dependent
 (\texttt{on}), the type of viscosity law to use (4), the activation
 energy of each layer (0.2,0.2,0.2,0.2), the temperature offset of
@@ -2589,18 +2588,18 @@ whether to apply the minimum cutoff (\texttt{on}), the value of the
 minimum cutoff (1.0), whether to apply the maximum cutoff (\texttt{on}),
 and the value of the maximum cutoff (100.0). 
 \begin{lyxcode}
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
+VISC\_UPDATE=on\\
+num\_mat=4\\
+visc0=1,1,1,1\\
+TDEPV=on\\
+rheol=4\\
+viscE=0.2,0.2,0.2,0.2\\
+viscT=0,0,0,0\\
+viscZ=0,0,0,0\\
+VMIN=on\\
+visc\_min=1.0\\
+VMAX=on\\
+visc\_max=100.0
 \end{lyxcode}
 The range of the layers are determined by the following parameters:
 layer 1 extends from the top surface to a depth of \texttt{solver.const.z\_lith}
@@ -2644,43 +2643,51 @@ viscZ=\frac{\rho gV_{a}}{R\Delta T}\label{eq:viscZ}
 viscT=T_{0}\label{eq:viscT}
 \end{equation}
 
+\subsubsection{Example: Temperature-Dependent Viscosity, \texttt{cookbook3}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=200
 
+# CitcomS.controller
+storage_spacing=25
 
-\subsubsection{Example: Temperature-Dependent Viscosity, \texttt{cookbook3.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~200~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~25~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook3~~~~~~~~;~prefix~of~output~filenames~\\
-rayleigh~=~1e6~~~~~~~~~~~~~~;~Rayleigh~number~\\
-~\\
-\#~Modify~the~layout~of~the~mesh.~\\
-{[}CitcomS.solver.mesher{]}~\\
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
-~\\
-\#~Assign~the~viscosities.~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+# CitcomS.solver
+datafile=cookbook3
+rayleigh=1e6
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook3.pdf}
