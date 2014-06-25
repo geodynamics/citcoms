@@ -2976,8 +2976,7 @@ compensated by the deformed surface. This type of boundary condition
 works well for long-wavelength topography, but a free-surface formulation
 becomes necessary in cases where intermediate to short wavelength
 topography is of interest or the lithosphere has a very high effective
-viscosity. Another situation where free-surface formulation is desired
-is when two Pyre solvers, Snac and Citcom, are coupled.
+viscosity.
 
 The basic algorithm \cite{Zhong et al Free-surface formulation,Zhong et al Three-dimensional}
 consists of four steps. 
@@ -3008,15 +3007,15 @@ of the radial dimension placed at the center of the domain
 \end{itemize}
 The pseudo-free-surface boundary condition is enabled by:
 \begin{lyxcode}
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~2~\\
-pseudo\_free\_surf~=~on
+\# CitcomS.solver.bc\\
+topvbc=2\\
+pseudo\_free\_surf=on
 \end{lyxcode}
 The time step size is fixed to $7.77\times10^{-10}$ (about 1000 yrs),
 instead of determined dynamically by the velocity solution.
 \begin{lyxcode}
-{[}CitcomS.solver.tsolver{]}~\\
-fixed\_timestep~=~7.77e-10
+\# CitcomS.solver.tsolver\\
+fixed\_timestep=7.77e-10
 \end{lyxcode}
 
 \subsection{Discussion}
