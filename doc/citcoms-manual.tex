@@ -2825,17 +2825,17 @@ jump occurred for the right slab only, so the Euler pole moved closer.
 Since we impose a top velocity boundary in our model, the following
 parameters should be turned on: 
 \begin{lyxcode}
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~1~\\
+\# CitcomS.solver.bc\\
+topvbc=1\\
 ~\\
-{[}CitcomS.solver.param{]}~\\
-file\_vbcs~=~on
+\# CitcomS.solver.param\\
+file\_vbcs=on
 \end{lyxcode}
 The following two lines specify the location of the velocity files
 and the starting age for the model: 
 \begin{lyxcode}
-start\_age~=~55~\\
-vel\_bound\_file~=~./velocity/bvel.dat~
+start\_age=55\\
+vel\_bound\_file=./velocity/bvel.dat~
 \end{lyxcode}
 Since the starting age is set to 55 Ma, there will be 57 velocity
 files, one for each Ma (\texttt{vel.dat0, vel.dat1,} \texttt{...vel.dat55,
@@ -2851,13 +2851,13 @@ and \texttt{datafile\_old}, and the time step of the velo file in
 \texttt{solition\_cycles\_init}. In this example, a processor of MPI
 rank \texttt{n} will read file \texttt{./ic/cookbook5.velo.n.0}
 \begin{lyxcode}
-{[}CitcomS.solver{]}~\\
-datadir\_old~=~./ic~\\
-datafile\_old~=~cookbook5~\\
+\# CitcomS.solver\\
+datadir\_old=./ic\\
+datafile\_old=cookbook5\\
 ~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~-1~~\\
-solution\_cycles\_init~=~0
+\# CitcomS.solver.ic\\
+tic\_method=-1\\
+solution\_cycles\_init=0
 \end{lyxcode}
 The descending slab will cause some numerical instability in the temperature
 solver. To reduce the numerical instability, you will use a smaller
@@ -2866,9 +2866,9 @@ The change in maximum temperature will also be monitored. If the maximum
 temperature increases too much (> 5\%) between time steps, the temperature
 solver will rerun with half time-step size.
 \begin{lyxcode}
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-monitor\_max\_T~=~on
+\# CitcomS.solver.tsolver\\
+finetunedt=0.75\\
+monitor\_max\_T=on
 \end{lyxcode}
 \begin{figure}[H]
 \begin{centering}
@@ -2886,59 +2886,66 @@ so the Euler pole moved closer.}
 
 
 \subsubsection{Example: Subduction Models with Trench Rollback, \texttt{cookbook5.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~1100~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~100~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook5~\\
-datadir\_old~=~./ic~\\
-datafile\_old~=~cookbook5~\\
-rayleigh~=~4.07e+08~\\
-~\\
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~1~\\
-~\\
-{[}CitcomS.solver.param{]}~\\
-file\_vbcs~=~on~\\
-start\_age~=~55~\\
-~\\
-\#~Since~the~starting~age~is~set~to~55~Ma,~there~will~be~57~velocity~\\
-\#~files,~one~for~each~Ma~(bvel.dat0,~bvel.dat1,~...~bvel.dat56).~\\
-vel\_bound\_file~=~./velocity/bvel.dat~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~-1~\\
-solution\_cycles\_init~=~0~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-coor~=~1~\\
-coor\_file~=~./coor.dat~\\
-nprocx~=~1~\\
-nprocy~=~2~\\
-nprocz~=~1~\\
-nodex~=~17~\\
-nodey~=~65~\\
-nodez~=~33~\\
-~\\
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-monitor\_max\_T~=~on~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-num\_mat~=~4~\\
-visc0~=~100,0.003,1,2~\\
-TDEPV~=~on~\\
-viscE~=~24,24,24,24~\\
-viscT~=~0.182,0.182,0.182,0.182~\\
-VMIN~=~on~\\
-visc\_min~=~0.01~\\
-VMAX~=~on~\\
-visc\_max~=~100.0~
-\end{lyxcode}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=1100
+
+# CitcomS.controller
+storage_spacing=100
+
+# CitcomS.solver
+datadir_old=./ic
+datafile=cookbook5
+datafile_old=cookbook5
+rayleigh=4.07e+08
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=./coor.dat
+fi_max=1
+fi_min=0
+nodex=17
+nodey=65
+nodez=33
+nprocx=1
+nprocy=2
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+finetunedt=0.75
+monitor_max_T=on
+
+# CitcomS.solver.bc
+topvbc=1
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+solution_cycles_init=0
+tic_method=-1
+
+# CitcomS.solver.param
+file_vbcs=on
+start_age=55
+vel_bound_file=./velocity/bvel.dat
+
+# CitcomS.solver.visc
+TDEPV=on
+VMAX=on
+VMIN=on
+num_mat=4
+visc0=100,0.003,1,2
+viscE=24,24,24,24
+viscT=0.182,0.182,0.182,0.182
+visc_max=100.0
+visc_min=0.01
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook5dot2.pdf}
