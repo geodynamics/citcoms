@@ -29,5 +29,3 @@ perturbmag=0.05
 
 # CitcomS.solver.visc
 num_mat=4
-
-# WARNING: incorrect value for nproc_surf found; setting it to 12

@@ -2339,22 +2339,22 @@ Right (B): The temperature field at 1081 km depth from a Cookbook
 
 \subsection{Solution}
 
-You will use \texttt{cookbook1.cfg}. The first set of parameters specifies
+You will use \texttt{cookbook1}. The first set of parameters specifies
 that you are going to use the full spherical version of the solver.
 The default is to use the regional spherical version, so this must
 be set.
 \begin{lyxcode}
-solver~=~full
+solver=full
 \end{lyxcode}
 The second set of parameters specifies the number of time steps (100),
 how often full outputs of the computation are created (25), and the
 prefix of output filenames (cookbook1).
 \begin{lyxcode}
-steps~=~100~\\
-monitoringFrequency~=~25~\\
-datafile~=~cookbook1
+steps=100~\\
+storage\_spacing=25\\
+datafile=cookbook1
 \end{lyxcode}
-The \texttt{solver.ic} facility controls the temperature field for
+The following parameters control the temperature field for
 the initial conditions. The last set of parameters includes the number
 of perturbations to the initial temperature (1), the number of nodal
 lines of the perturbation in the longitudinal direction, e.g., the
@@ -2364,36 +2364,51 @@ perturbation is on (5), and the amplitude of the perturbation (0.05).
 Note that although the number of perturbations is assigned here as
 \texttt{num\_perturbations=1}, that is actually the default value.
 \begin{lyxcode}
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05
+num\_perturbations=1\\
+perturbl=3\\
+perturbm=2\\
+perturblayer=5\\
+perturbmag=0.05
 \end{lyxcode}
 This example is executed by typing 
 \begin{lyxcode}
-\$~citcoms~cookbook1.cfg
+\$mpirun -np 12 CitcomSFull cookbook1
 \end{lyxcode}
 
-\subsubsection{Example: Global Model, \texttt{cookbook1.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~100~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~25~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook1~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05~
-\end{lyxcode}
+\subsubsection{Example: Global Model, \texttt{cookbook1}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=100
+solver=full
+
+# CitcomS.controller
+storage_spacing=25
+
+# CitcomS.solver
+datafile=cookbook1
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=9
+nodey=9
+nodez=9
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=5
+perturbm=2
+perturbmag=0.05
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
 Once you have run the model, you can visualize the results using OpenDX,
 described in the previous chapter. When you invoke ``Edit Visual Program,''
 select \texttt{visFull.net}. 
@@ -2408,8 +2423,6 @@ slice through a spherical model of convection, with warmer colors
 indicating upwelling and the cooler colors showing downwelling.}
 \end{figure}
 
-
-
 \subsection{Discussion}
 
 You have generated a simple example of the full CitcomS model, with
@@ -2418,23 +2431,9 @@ and perturbation on the initial temperature field which has a degree-3
 and an order-2 pattern, after 100 time steps, the convection pattern
 remains relatively steady.
 
-As a side note, it is not required that 12 processors, with one spherical
-cap per processor, be used. As an end-member possibility, for example,
-12 different jobs could be run on a single computer (\texttt{n001}
-in this example) by invoking:
-\begin{lyxcode}
-\$~citcoms~cookbook1.cfg~-{}-launcher.nodegen=\textquotedbl{}n\%03d\textquotedbl{}~\textbackslash{}~\\
--{}-launcher.nodelist={[}1,1,1,1,1,1,1,1,1,1,1,1{]}
-\end{lyxcode}
-This is not particularly efficient, but it does illustrate the flexibility
-of both MPI and Pyre.
-
 \newpage{}
 
-
 \section{Cookbook 2: Domain Size and Velocity Boundary Conditions}
-
-
 \subsection{Problem}
 
 This example solves for thermal convection with velocity boundary
