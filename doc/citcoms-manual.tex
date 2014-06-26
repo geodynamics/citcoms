@@ -2444,13 +2444,13 @@ This requires using the regional version of CitcomS.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook2.cfg}. The parameters specify the number
+You will use \texttt{cookbook2}. The parameters specify the number
 of time steps (60), the prefix of the output filenames (\texttt{cookbook2}),
 and how often outputs will be created (30).
 \begin{lyxcode}
-steps~=~60~\\
-monitoringFrequency~=~30~\\
-datafile~=~cookbook2
+steps=60\\
+storage\_spacing=30\\
+datafile=cookbook2
 \end{lyxcode}
 The \texttt{solver.mesher} facility has several properties involved
 in the generation of the computational mesh. Continue to use the default
@@ -2463,73 +2463,81 @@ and the minimum/maximum extents in the colatitudal, longitudal, and
 radial (\texttt{theta}, \texttt{fi}, \texttt{radius}) directions.
 The unit for \texttt{theta} and \texttt{fi} is radian.
 \begin{lyxcode}
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
+nprocx=2\\
+nprocy=2\\
+nodex=17\\
+nodey=17\\
+nodez=9\\
 ~\\
-theta\_min~=~0.7854~\\
-theta\_max~=~1.5708~\\
-fi\_min~=~0.0~\\
-fi\_max~=~0.7854~\\
-radius\_inner~=~0.55~\\
-radius\_outer~=~1.0
+theta\_min=0.7854\\
+theta\_max=1.5708\\
+fi\_min=0.0\\
+fi\_max=0.7854\\
+radius\_inner=0.55\\
+radius\_outer=1.0
 \end{lyxcode}
-The \texttt{solver.bc} facility allows you to impose a uniform velocity
+The following parameters allow you to impose a uniform velocity
 across the top surface. You have a velocity which is purely in the
 colatitude direction with a non-dimensional velocity of 100 (see Equation
 \vref{eq:u dim} for how to dimensionalize it).
 \begin{lyxcode}
-topvbc~~~~=~~~1~\\
-topvbxval~=~100~\\
-topvbyval~=~~~0
+topvbc=1\\
+topvbxval=100\\
+topvbyval=0
 \end{lyxcode}
 In addition, the initial temperature field has a linear conductive
 profile. The amplitude of initial temperature perturbation is set
-to zero using the \texttt{solver.ic} facility. 
+to zero using the following parameters. 
 \begin{lyxcode}
-num\_perturbations~=~1~\\
-perturbmag~~~~~~~~=~0.0~
+num\_perturbations=1\\
+perturbmag=0.0
 \end{lyxcode}
 
-\subsubsection{Example: Velocity Boundary Conditions, \texttt{cookbook2.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~60~~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~30~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook2~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-\#~Modify~the~layout~of~the~mesh.~\\
-{[}CitcomS.solver.mesher{]}~\\
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
-~\\
-theta\_min~=~0.7854~\\
-theta\_max~=~1.5708~\\
-fi\_min~=~0.0~\\
-fi\_max~=~0.7854~\\
-radius\_inner~=~0.55~\\
-radius\_outer~=~1.0~\\
-~\\
-\#~Impose~a~uniform~velocity~across~the~top~surface.~\\
-{[}CitcomS.solver.bc{]}~\\
-topvbc~~~~=~~~1~\\
-topvbxval~=~100~\\
-topvbyval~=~~~0~\\
-~\\
-\#~In~addition,~set~the~initial~temperature~perturbation~to~zero.~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbmag~~~~~~~~=~0.0~
-\end{lyxcode}
+\subsubsection{Example: Velocity Boundary Conditions, \texttt{cookbook2}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=60
+
+# CitcomS.controller
+storage_spacing=30      ; how often outputs are created
+
+# CitcomS.solver
+datafile=cookbook2      ; prefix of output filenames
+rayleigh=100000
+
+# Modify the layout of the mesh
+# CitcomS.solver.mesher
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+
+theta_max=1.5708
+theta_min=0.7854
+fi_max=0.7854
+fi_min=0.0
+radius_inner=0.55
+radius_outer=1.0
+
+# Import a uniform velocity across the top surface.
+# CitcomS.solver.bc
+topvbc=1
+topvbxval=100
+topvbyval=0
+
+# In addition, set the initial temperature perturbation to zero.
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.0
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
 
 \subsection{Discussion}
 
