@@ -263,11 +263,16 @@ void get_prem(double, double *, double *, double *);
 void compute_seismic_model(struct All_variables *, double *, double *, double *);
 /* Nodal_mesh.c */
 void v_from_vector(struct All_variables *);
+PetscErrorCode v_from_vector_petsc(struct All_variables *);
 void assign_v_to_vector(struct All_variables *);
 void v_from_vector_pseudo_surf(struct All_variables *);
+PetscErrorCode v_from_vector_pseudo_surf_petsc(struct All_variables *);
 void velo_from_element(struct All_variables *, float [4][9], int, int, int);
 void velo_from_element_d(struct All_variables *, double [4][9], int, int, int);
+
 void p_to_nodes(struct All_variables *, double **, float **, int);
+PetscErrorCode p_to_nodes_petsc(struct All_variables *, Vec, Vec, int);
+
 void visc_from_gint_to_nodes(struct All_variables *, float **, float **, int);
 void visc_from_nodes_to_gint(struct All_variables *, float **, float **, int);
 void visc_from_gint_to_ele(struct All_variables *, float **, float **, int);

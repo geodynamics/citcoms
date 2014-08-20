@@ -96,14 +96,12 @@ PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *E)
       E->control.accuracy, &cycles);
   CHKERRQ(ierr);
 
-  /*
   if(E->control.pseudo_free_surf)
     v_from_vector_pseudo_surf_petsc(E);
   else
     v_from_vector_petsc(E);
 
   p_to_nodes_petsc(E, E->PVec, E->NPVec, E->mesh.levmax);
-  */
   
   PetscFunctionReturn(0);
 }
