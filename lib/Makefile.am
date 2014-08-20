@@ -27,21 +27,6 @@
 noinst_LIBRARIES =
 lib_LTLIBRARIES =
 
-if COND_PYRE
-
-if COND_EMBEDDING
-    # static library
-    noinst_LIBRARIES += libCitcomS.a
-else
-    # shared library (libtool)
-    lib_LTLIBRARIES += libCitcomS.la
-endif
-
-else
-    # static library
-    noinst_LIBRARIES += libCitcomS.a
-endif
-
 AM_CPPFLAGS =
 if COND_HDF5
     AM_CPPFLAGS += -DUSE_HDF5

@@ -26,23 +26,6 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-if COND_PYRE
-    MAYBE_PYRE = CitcomS etc examples module tests visual
-endif
-
-SUBDIRS = lib $(MAYBE_PYRE) bin
-
-EXTRA_DIST = \
-	setup.py \
-	archimedes/__init__.py
-
-if COND_PYRE
-install-data-hook:
-	top_builddir=`$(am__cd) $(top_builddir) && pwd` && \
-		cd $(top_srcdir) && \
-		$(PYTHON) setup.py install_deps -H None -f $$top_builddir/deps --prefix=$(prefix) && \
-		$(PYTHON) setup.py egg_info -e $(pythondir)
-endif
-
+SUBDIRS = lib bin
 
 ## end of Makefile.am

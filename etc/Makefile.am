@@ -23,14 +23,5 @@
 
 # $Id$
 
-dist_pkgsysconf_DATA = \
-	full.odb \
-	full-sphere.odb \
-	incomp-newtonian.odb \
-	incomp-non-newtonian.odb \
-	regional.odb \
-	regional-sphere.odb \
-	temp.odb \
-	__vault__.odb
 
 ## end of Makefile.am
