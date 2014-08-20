@@ -486,6 +486,246 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 }
 
 /*
+ * Implementation of the Conjugate Gradient Uzawa algorithm using PETSc
+ * Vec, Mat and KSPSolve
+ */
+static void solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
+				     double **V, double **P, double **F,
+				     double imp, int *steps_max )
+{
+  PetscErrorCode ierr;
+  Vec V_k, P_k, s_1, s_2, r_1, r_2, z_1, BPI, FF, Gsk, u_k, Duk, cu;
+  PetscReal alpha, delta, r_1_norm, r1dotz1, r0dotz0, s_2_dot_F;
+  int i,j,count,m;
+  double time0, CPU_time0();
+  double v_norm, p_norm, dvelocity, dpressure;
+  double inner_imp, v_res;
+
+  int lev = E->mesh.levmax;
+  int npno = E->lmesh.npno;
+  int neq = E->lmesh.neq;
+  int nel = E->lmesh.nel;
+
+  inner_imp = imp * E->control.inner_accuracy_scale; 
+  v_res = E->monitor.fdotf;
+
+  time0 = CPU_time0();
+  count = 0;
+
+  // Create the force Vec
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  CHKERRQ(ierr);
+  double *F_tmp;
+  ierr = VecGetArray( FF, &F_tmp ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
+    for( i = 0; i < neq; i++ )
+      F_tmp[i] = F[m][i];
+  }
+  ierr = VecRestoreArray( FF, &F_tmp ); CHKERRQ( ierr );
+
+  // create the pressure vector and initialize it to zero
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, nel, PETSC_DECIDE, &P_k ); 
+  CHKERRQ(ierr);
+  ierr = VecSet( P_k, 0.0 ); CHKERRQ( ierr );
+
+  // create the velocity vector
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &V_k ); 
+  CHKERRQ(ierr);
+
+  // Copy the contents of V into V_k
+  PetscScalar *V_k_tmp;
+  ierr = VecGetArray( V_k, &V_k_tmp ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
+    for( i = 0; i <= neq; i++ )
+      V_k_tmp[i] = V[m][i];
+  }
+  ierr = VecRestoreArray( V_k, &V_k_tmp ); CHKERRQ( ierr );
+
+  // PETSc bookkeeping --- create various temporary Vec objects with
+  // the appropriate sizes, including the PETSc vec version of E->BPI
+  // preconditioner
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, npno, PETSC_DECIDE, &r_1 ); 
+  CHKERRQ(ierr);
+  ierr = VecDuplicate( V_k, &Gsk ); CHKERRQ( ierr );
+  ierr = VecDuplicate( V_k, &u_k ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &s_1 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &s_2 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &r_2 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &z_1 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &cu ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &Duk ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r_1, &BPI ); CHKERRQ( ierr );
+  PetscReal *bpi;
+  ierr = VecGetArray( BPI, &bpi ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; m++ )
+    for( j = 0; j < npno; j++ )
+      bpi[j] = E->BPI[lev][m][j+1];
+  ierr = VecRestoreArray( BPI, &bpi ); CHKERRQ( ierr );
+
+  /* calculate the contribution of compressibility in the continuity eqn */
+  if( E->control.inv_gruneisen != 0 ) {
+    ierr = VecSet( cu, 0.0 ); CHKERRQ( ierr );
+    assemble_c_u_PETSc( E, V_k, cu, lev );
+  }
+
+  /* calculate the initial velocity residual */
+  /* In the compressible case, the initial guess of P might be bad.
+   * Do not correct V with it. */
+  if( E->control.inv_gruneisen == 0 ) {
+    initial_vel_residual_PETSc(E, V_k, P_k, FF, inner_imp*v_res);
+  }
+
+  /* initial residual r1 = div(V) */
+  ierr = MatMult( E->D, V_k, r_1 ); CHKERRQ( ierr );
+
+  /* add the contribution of compressibility to the initial residual */
+  if( E->control.inv_gruneisen != 0 ) {
+    // r_1 += cu
+    ierr = VecAXPY( r_1, 1.0, cu ); CHKERRQ( ierr );
+  }
+
+  E->monitor.vdotv = global_v_norm2_PETSc( E, V_k );
+  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r_1 )
+                                       / (1e-32 + E->monitor.vdotv) );
+
+  v_norm = sqrt( E->monitor.vdotv );
+  p_norm = sqrt( E->monitor.pdotp );
+  dvelocity = 1.0;
+  dpressure = 1.0;
+
+  if( E->control.print_convergence && E->parallel.me == 0 ) {
+    print_convergence_progress( E, count, time0, 
+                                v_norm, p_norm,
+                                dvelocity, dpressure,
+                                E->monitor.incompressibility );
+  }
+
+  
+  r0dotz0 = 0;
+  ierr = VecNorm( r_1, NORM_2, &r_1_norm ); CHKERRQ( ierr );
+
+  while( (r_1_norm > E->control.petsc_uzawa_tol) && (count < *steps_max) )
+    {
+      
+      /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
+      ierr = VecPointwiseMult( z_1, BPI, r_1 ); CHKERRQ( ierr );
+
+      /* r1dotz1 = <r1, z1> */
+      ierr = VecDot( r_1, z_1, &r1dotz1 ); CHKERRQ( ierr );
+      assert( r1dotz1 != 0.0  /* Division by zero in head of incompressibility
+                                 iteration */);
+
+      /* update search direction */
+      if( count == 0 )
+	    {
+	      // s_2 = z_1
+	      ierr = VecCopy( z_1, s_2 ); CHKERRQ( ierr ); // s2 = z1
+	    }
+      else
+	    {
+	      // s2 = z1 + s1 * <r1,z1>/<r0,z0>
+	      delta = r1dotz1 / r0dotz0;
+	      ierr = VecWAXPY( s_2, delta, s_1, z_1 ); CHKERRQ( ierr );
+	    }
+
+      // Solve K*u_k = grad(s_2) for u_k
+      ierr = MatMult( E->G, s_2, Gsk ); CHKERRQ( ierr );
+      ierr = KSPSolve( E->ksp, Gsk, u_k ); CHKERRQ( ierr );
+      strip_bcs_from_residual_PETSc( E, u_k, lev );
+
+      // Duk = D*u_k ( D*u_k is the same as div(u_k) )
+      ierr = MatMult( E->D, u_k, Duk ); CHKERRQ( ierr );
+
+      // alpha = <r1,z1> / <s2,F>
+      ierr = VecDot( s_2, Duk, &s_2_dot_F ); CHKERRQ( ierr );
+      alpha = r1dotz1 / s_2_dot_F;
+
+      // r2 = r1 - alpha * div(u_k)
+      ierr = VecWAXPY( r_2, -1.0*alpha, Duk, r_1 ); CHKERRQ( ierr );
+
+      // P = P + alpha * s_2
+      ierr = VecAXPY( P_k, 1.0*alpha, s_2 ); CHKERRQ( ierr );
+      
+      // V = V - alpha * u_1
+      ierr = VecAXPY( V_k, -1.0*alpha, u_k ); CHKERRQ( ierr );
+      //strip_bcs_from_residual_PETSc( E, V_k, E->mesh.levmax );
+
+      /* compute velocity and incompressibility residual */
+      E->monitor.vdotv = global_v_norm2_PETSc( E, V_k );
+      E->monitor.pdotp = global_p_norm2_PETSc( E, P_k );
+      v_norm = sqrt( E->monitor.vdotv );
+      p_norm = sqrt( E->monitor.pdotp );
+      dvelocity = alpha * sqrt( global_v_norm2_PETSc( E, u_k ) /
+                                (1e-32 + E->monitor.vdotv) );
+      dpressure = alpha * sqrt( global_p_norm2_PETSc( E, s_2 ) /
+                                (1e-32 + E->monitor.pdotp) );
+
+      // compute the updated value of z_1, z1 = div(V) 
+      ierr = MatMult( E->D, V_k, z_1 ); CHKERRQ( ierr );
+      if( E->control.inv_gruneisen != 0 )
+	    {
+        // z_1 += cu
+        ierr = VecAXPY( z_1, 1.0, cu ); CHKERRQ( ierr );
+      }
+
+      E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, z_1 )
+                                           / (1e-32 + E->monitor.vdotv) );
+
+      count++;
+
+      if( E->control.print_convergence && E->parallel.me == 0 ) {
+        print_convergence_progress( E, count, time0,
+                                    v_norm, p_norm,
+                                    dvelocity, dpressure,
+                                    E->monitor.incompressibility );
+      }
+
+      /* shift array pointers */
+      ierr = VecSwap( s_2, s_1 ); CHKERRQ( ierr );
+      ierr = VecSwap( r_2, r_1 ); CHKERRQ( ierr );
+
+      /* shift <r0, z0> = <r1, z1> */
+      r0dotz0 = r1dotz1;
+
+      // recompute the norm
+      ierr = VecNorm( r_1, NORM_2, &r_1_norm ); CHKERRQ( ierr );
+
+    } /* end loop for conjugate gradient */
+
+  // converged. now copy the converged values of V_k and P_k into V and P
+  PetscReal *P_tmp, *V_tmp;
+  ierr = VecGetArray( V_k, &V_tmp ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; ++m ) {
+    for( i = 0; i <= neq; i++ )
+      V[m][i] = V_tmp[i];
+  }
+  ierr = VecRestoreArray( V_k, &V_tmp ); CHKERRQ( ierr );
+  
+  ierr = VecGetArray( P_k, &P_tmp ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; ++m ) {
+    for( i = 0; i < nel; i++ )
+      P[m][i+1] = P_tmp[i]; 
+  }
+  ierr = VecRestoreArray( P_k, &P_tmp ); CHKERRQ( ierr );
+
+  // PETSc cleanup of all temporary Vec objects
+  ierr = VecDestroy( &V_k ); CHKERRQ( ierr );
+  ierr = VecDestroy( &P_k ); CHKERRQ( ierr );
+  ierr = VecDestroy( &s_1 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &s_2 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &r_1 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &r_2 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &z_1 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &BPI ); CHKERRQ( ierr );
+  ierr = VecDestroy( &FF );  CHKERRQ( ierr );
+  ierr = VecDestroy( &Gsk ); CHKERRQ( ierr );
+  ierr = VecDestroy( &u_k ); CHKERRQ( ierr );
+  ierr = VecDestroy( &Duk ); CHKERRQ( ierr );
+
+  *steps_max = count;
+}
+
+/*
  * BiCGstab for compressible Stokes flow using PETSc Vec, Mat and KSPSolve
  */
 static void solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
