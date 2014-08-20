@@ -229,12 +229,13 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   // K is (neq+1) x (neq+1)
   // U is (neq+1)
   // KU is (neq+1)
-  int i, j, neq, nel;
+  int i, j, neq;
   PetscErrorCode ierr;
+  PetscScalar *KData, *KUData;
   struct MatMultShell *ctx;
   MatShellGetContext( K, (void **)&ctx );
-  neq = ctx->iSize;
-  nel = ctx->oSize;
+  neq = ctx->iSize; // ctx->iSize SHOULD be the same as ctx->oSize
+#if 0
   int low, high;
 
   VecAssemblyBegin(U);
@@ -247,10 +248,18 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
       CHKERRQ( ierr );
     }
   }
-
+#endif
+  ierr = VecGetArray(K, &KData); CHKERRQ(ierr);
+  for(j = 0; j <=neq; j++)
+    ctx->iData[1][j] = KData[j];
+  ierr = VecRestoreArray(K, &KData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_del2_u( ctx->E, ctx->iData, ctx->oData, ctx->level, 1 );
-  
+  ierr = VecGetArray(KU, &KUData); CHKERRQ(ierr);
+  for(j = 0; j <= neq; j++)
+    KUData[j] = ctx->oData[1][j];
+  ierr = VecRestoreArray(KU, &KUData); CHKERRQ(ierr);
+#if 0 
   VecGetOwnershipRange( KU, &low, &high );
   for( i=1; i <= ctx->E->sphere.caps_per_proc; ++i ) {
     for( j = 0; j <= neq; j++ ) {
@@ -260,7 +269,7 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   }
   VecAssemblyBegin( KU );
   VecAssemblyEnd( KU );
-
+#endif
   PetscFunctionReturn(0);
 }
 
@@ -271,12 +280,14 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   // GP is (neq+1) x 1 of which first neq entries (0:neq-1) are actual values
   int i, j, neq, nel;
   PetscErrorCode ierr;
+  PetscScalar *PData, *GPData;
   struct MatMultShell *ctx;
   MatShellGetContext( G, (void **)&ctx );
-  neq = ctx->iSize;
   nel = ctx->iSize;
-
+  neq = ctx->oSize;
+#if 0  
   int low, high;
+
   VecGetOwnershipRange( P, &low, &high );
 
   VecAssemblyBegin( P );
@@ -288,10 +299,21 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
       CHKERRQ( ierr );
     }
   }
+#endif
+  ierr = VecGetArray(P, &PData); CHKERRQ(ierr);
+  for(j = 0; j < nel; j++)
+    ctx->iData[1][j+1] = PData[j];
+  ierr = VecRestoreArray(P, &PData); CHKERRQ(ierr);
+
 
   // actual CitcomS operation
   assemble_grad_p( ctx->E, ctx->iData, ctx->oData, ctx->level );
 
+  ierr = VecGetArray(GP, &GPData); CHKERRQ(ierr);
+  for(j = 0; j < neq; j++)
+    GPData[j] = ctx->oData[1][j];
+  ierr = VecRestoreArray(GP, &GPData); CHKERRQ(ierr);
+#if 0
   VecGetOwnershipRange( GP, &low, &high );
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < neq; j++ ) {
@@ -301,7 +323,7 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   }
   VecAssemblyBegin( GP );
   VecAssemblyEnd( GP );
-
+#endif
   PetscFunctionReturn(0);
 }
 

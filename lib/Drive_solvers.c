@@ -67,8 +67,8 @@ void general_stokes_solver_setup(struct All_variables *E)
 
   E->mtx_grad_p.E = E;
   E->mtx_grad_p.level = E->mesh.levmax;
-  E->mtx_grad_p.iSize = E->lmesh.neq;
-  E->mtx_grad_p.oSize = E->lmesh.nel;
+  E->mtx_grad_p.iSize = E->lmesh.nel;
+  E->mtx_grad_p.oSize = E->lmesh.neq;
   
   E->mtx_div_u.E = E;
   E->mtx_div_u.level = E->mesh.levmax;
@@ -86,16 +86,16 @@ void general_stokes_solver_setup(struct All_variables *E)
   E->pcshell_ctx.acc = 1e-6;
   E->pcshell_ctx.level = lev;
 
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.iData[i] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.oData[i] );
-  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_grad_p.iData[i] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_grad_p.oData[i] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_u.iData[i] );
-  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_div_u.oData[i] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_rho_u.iData[i] );
-  PetscMalloc( (npno+1)*sizeof(double), &E->mtx_div_rho_u.oData[i] );
-  PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.V[i] );
-  PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.RR[i] );
+  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.iData[1] );
+  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.oData[1] );
+  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_grad_p.iData[1] );
+  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_grad_p.oData[1] );
+  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_u.iData[1] );
+  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_div_u.oData[1] );
+  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_rho_u.iData[1] );
+  PetscMalloc( (npno+1)*sizeof(double), &E->mtx_div_rho_u.oData[1] );
+  PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.V[1] );
+  PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.RR[1] );
 
   // Create a Matrix shell for the K matrix
   MatCreateShell( PETSC_COMM_WORLD, 
