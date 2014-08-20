@@ -38,6 +38,9 @@
 
 void myerror(struct All_variables *,char *);
 
+static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
+    Vec V, Vec P, Vec F, double imp, int *steps_max);
+
 static void solve_Ahat_p_fhat(struct All_variables *E,
                               double **V, double **P, double **F,
                               double imp, int *steps_max);
@@ -83,6 +86,27 @@ void solve_constrained_flow_iterative(E)
     return;
 }
 
+PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *E)
+{
+  PetscErrorCode ierr;
+  int cycles;
+
+  cycles = E->control.p_iterations;
+  ierr = solve_Ahat_p_fhat_petsc(E, E->UVec, E->PVec, E->FVec, 
+      E->control.accuracy, &cycles);
+  CHKERRQ(ierr);
+
+  /*
+  if(E->control.pseudo_free_surf)
+    v_from_vector_pseudo_surf_petsc(E);
+  else
+    v_from_vector_petsc(E);
+
+  p_to_nodes_petsc(E, E->PVec, E->NPVec, E->mesh.levmax);
+  */
+  
+  PetscFunctionReturn(0);
+}
 
 /* ========================================================================= */
 
@@ -161,6 +185,11 @@ static int keep_iterating(struct All_variables *E,
 	    (converging < required_converging_loops);
 }
 
+static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
+    Vec V, Vec P, Vec F, double imp, int *steps_max )
+{
+  PetscFunctionReturn(0);
+}
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,

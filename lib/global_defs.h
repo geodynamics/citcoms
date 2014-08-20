@@ -722,6 +722,7 @@ struct All_variables {
     KSP   ksp;
     PC    pc;
     SNES  snes;
+    Vec   PVec, NPVec, UVec, FVec;
 
     FILE *fp;
     FILE *fptime;

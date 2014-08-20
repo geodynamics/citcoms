@@ -487,6 +487,7 @@ void get_angle_sphere_cap(double [4][5], double [6]);
 double get_angle(double [4], double [4]);
 /* Stokes_flow_Incomp.c */
 void solve_constrained_flow_iterative(struct All_variables *);
+PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *);
 /* Topo_gravity.c */
 void get_STD_topo(struct All_variables *, float **, float **, float **, float **, int);
 void get_STD_freesurf(struct All_variables *, float **);
