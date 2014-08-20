@@ -1,5 +1,5 @@
-use_petsc=off
-petsc_schur=off
+use_petsc=on
+petsc_schur=on
 
 # specify output files
 datadir="/home/rkk/scratch"

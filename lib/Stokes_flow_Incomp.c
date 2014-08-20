@@ -222,11 +222,57 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
 static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   double **V, double **P, double **F, double imp, int *steps_max)
 {
+  int i, npno, neq, lev, nel;
   PetscErrorCode ierr;
 
   Mat S;
+  Vec FF, PVec, VVec;
+  PetscReal *P_data, *V_data;
+
+  nel = E->lmesh.nel;
+  npno = E->lmesh.npno;
+  neq = E->lmesh.neq;
+  lev = E->mesh.levmax;
+
+  // Create the force Vec
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  CHKERRQ(ierr);
+  double *FF_data;
+  ierr = VecGetArray( FF, &FF_data ); CHKERRQ( ierr );
+  for( i = 0; i < neq; i++ )
+    FF_data[i] = F[1][i];
+  ierr = VecRestoreArray( FF, &FF_data ); CHKERRQ( ierr );
+
+
+  // create the pressure vector and initialize it to zero
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, nel, PETSC_DECIDE, &PVec ); 
+  CHKERRQ(ierr);
+  ierr = VecSet( PVec, 0.0 ); CHKERRQ( ierr );
+
+  // create the velocity vector and copy contents of V into it
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &VVec ); 
+  CHKERRQ(ierr);
+  ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
+  for( i = 0; i <= neq; i++ )
+    V_data[i] = V[1][i];
+  ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
+
+  /* Create the Schur complement */
   ierr = MatCreateSchurComplement(E->K,E->K,E->G,E->D,PETSC_NULL, &S); 
   CHKERRQ(ierr);
+
+  /* carry out the actual solution */
+
+  // copy the values of VVec and PVec into V and P
+  ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
+  for( i = 0; i <= neq; i++ )
+    V[1][i] = V_data[i];
+  ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
+  
+  ierr = VecGetArray( PVec, &P_data ); CHKERRQ( ierr );
+  for( i = 0; i < nel; i++ )
+    P[1][i+1] = P_data[i]; 
+  ierr = VecRestoreArray( PVec, &P_data ); CHKERRQ( ierr );
 
   PetscFunctionReturn(0);
 }
