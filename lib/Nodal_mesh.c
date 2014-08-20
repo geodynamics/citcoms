@@ -58,17 +58,7 @@ void v_from_vector(E)
 
     return;
 }
-/*
-PetscErrorCode v_from_vector_petsc(struct All_variables *E)
-{
-  PetscFunctionReturn(0);
-}
 
-PetscErrorCode v_from_vector_pseudo_surf_petsc(struct All_variables *E)
-{
-  PetscFunctionReturn(0);
-}
-*/
 void assign_v_to_vector(E)
      struct All_variables *E;
 {
@@ -210,39 +200,7 @@ void velo_from_element_d(E,VV,m,el,sphere_key)
     }
     return;
 }
-/*
-PetscErrorCode p_to_nodes_petsc(struct All_variables *E, 
-    Vec PVec, Vec PNVec, int lev )
-{
-  PetscErrorCode ierr;
-  PetscScalar *P[2], *PN[2]; // 2 instead of NCS(=14) to save space
-  int e, element,node, j;
 
-  ierr = VecGetArray(PVec, &P[1]); CHKERRQ(ierr); --P[1];
-  ierr = VecGetArray(PNVec, &PN[1]); CHKERRQ(ierr); --PN[1];
-
-  for(node = 1; node <= E->lmesh.NNO[lev]; ++node )
-    PN[1][node] = 0.0;
-
-  for(element = 1; element <= E->lmesh.NEL[lev]; element++)
-    for(j = 1; j <= enodes[E->mesh.nsd]; j++)
-    {
-      node = E->IEN[lev][1][element].node[j];
-      PN[1][node] += P[1][element] * E->TWW[lev][1][element].node[j];
-    }
-
-  (E->exchange_node_f)(E, PN, lev); 
-
-  for(node = 1; node <= E->lmesh.NNO[lev]; node++)
-    PN[1][node] *= E->MASS[lev][1][node];
-
-  ++P[1]; ierr = VecRestoreArray(PVec, &P[1]); CHKERRQ(ierr);
-  ++PN[1]; ierr = VecRestoreArray(PNVec, &PN[1]); CHKERRQ(ierr);
-
-  PetscFunctionReturn(0);
-
-}
-*/
 void p_to_nodes(E,P,PN,lev)
      struct All_variables *E;
      double **P;
