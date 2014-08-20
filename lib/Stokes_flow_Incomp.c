@@ -39,9 +39,6 @@
 
 void myerror(struct All_variables *,char *);
 
-static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
-    Vec V, Vec P, Vec F, double imp, int *steps_max);
-
 static void solve_Ahat_p_fhat(struct All_variables *E,
                               double **V, double **P, double **F,
                               double imp, int *steps_max);
@@ -55,12 +52,17 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
 
-static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E,
-                                 double **V, double **P, double **F,
-                                 double imp, int *steps_max);
+static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
+    Vec V, Vec P, Vec F, double imp, int *steps_max);
+
+static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
+    double **V, double **P, double **F, double imp, int *steps_max);
+
+static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E, 
+    double **V, double **P, double **F, double imp, int *steps_max);
+
 static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc(struct All_variables *E,
-                                    double **V, double **P, double **F,
-                                    double imp, int *steps_max);
+    double **V, double **P, double **F, double imp, int *steps_max);
 
 static void initial_vel_residual(struct All_variables *E,
                                  double **V, double **P, double **F,
@@ -185,7 +187,7 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
   {
     if(E->control.petsc_schur) // use Schur complement reduction
     {
-      myerror(E, "Error: Schur complement reduction not implemented\n");
+      solve_Ahat_p_fhat_PETSc_Schur(E, V, P, F, imp, steps_max);
     }
     else                       // use the Uzawa algorithm
     {
@@ -217,6 +219,17 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
   }
 }
 
+static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
+  double **V, double **P, double **F, double imp, int *steps_max)
+{
+  PetscErrorCode ierr;
+
+  Mat S;
+  ierr = MatCreateSchurComplement(E->K,E->K,E->G,E->D,PETSC_NULL, &S); 
+  CHKERRQ(ierr);
+
+  PetscFunctionReturn(0);
+}
 
 /* Solve incompressible Stokes flow using
  * conjugate gradient (CG) iterations
