@@ -135,19 +135,6 @@ void strip_bcs_from_residual_PETSc(
       }
     }
   ierr = VecRestoreArray(Res, &ResData);
-#if 0
-  VecGetOwnershipRange( Res, &low, &high );
- 
-  for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
-    if( E->num_zero_resid[level][m] ) {
-      for( i = 1; i <= E->num_zero_resid[level][m]; i++ ) {
-	      VecSetValue( Res, E->zero_resid[level][m][i]+low, 0.0, INSERT_VALUES );
-      }
-    }
-  }
-  VecAssemblyBegin( Res );
-  VecAssemblyEnd( Res );
-#endif
 }
 
 PetscErrorCode initial_vel_residual_PETSc( struct All_variables *E,
