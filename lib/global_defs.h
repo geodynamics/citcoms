@@ -564,6 +564,7 @@ struct CONTROL {
     int petsc_linear;
     int petsc_nonlinear;
     int petsc_schur;
+    float petsc_uzawa_tol;
 };
 
 

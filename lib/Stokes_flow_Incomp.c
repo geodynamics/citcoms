@@ -54,10 +54,10 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
 
-static void solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E,
+static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E,
                                  double **V, double **P, double **F,
                                  double imp, int *steps_max);
-static void solve_Ahat_p_fhat_BiCG_PETSc(struct All_variables *E,
+static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc(struct All_variables *E,
                                     double **V, double **P, double **F,
                                     double imp, int *steps_max);
 
@@ -489,7 +489,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
  * Implementation of the Conjugate Gradient Uzawa algorithm using PETSc
  * Vec, Mat and KSPSolve
  */
-static void solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
+static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
 				     double **V, double **P, double **F,
 				     double imp, int *steps_max )
 {
@@ -723,12 +723,14 @@ static void solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   ierr = VecDestroy( &Duk ); CHKERRQ( ierr );
 
   *steps_max = count;
+
+  PetscFunctionReturn(0);
 }
 
 /*
  * BiCGstab for compressible Stokes flow using PETSc Vec, Mat and KSPSolve
  */
-static void solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
+static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
 					  double **V, double **P, double **F,
 					  double imp, int *steps_max )
 {
@@ -976,6 +978,8 @@ static void solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   ierr = VecDestroy( &P0 ); CHKERRQ( ierr );
 
   *steps_max = count;
+
+  PetscFunctionReturn(0);
 }
 
 /* Solve compressible Stokes flow using
