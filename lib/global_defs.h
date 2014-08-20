@@ -558,6 +558,10 @@ struct CONTROL {
     int print_convergence;
     int sdepv_print_convergence;
 
+    /* PETSc flags */
+    int use_petsc;
+    int petsc_linear;
+    int petsc_nonlinear;
 };
 
 
