@@ -222,17 +222,22 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
 static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   double **V, double **P, double **F, double imp, int *steps_max)
 {
-  int i, npno, neq, lev, nel;
+  int i, npno, neq, lev, nel, N, count;
   PetscErrorCode ierr;
 
   Mat S;
-  Vec FF, PVec, VVec;
+  Vec FF, PVec, VVec, fhat, fstar, t1;
   PetscReal *P_data, *V_data;
+  KSP inner_ksp, S_ksp;
+  PC inner_pc, S_pc;
 
   nel = E->lmesh.nel;
   npno = E->lmesh.npno;
   neq = E->lmesh.neq;
   lev = E->mesh.levmax;
+
+  count = *steps_max;
+  double time0 = CPU_time0();
 
   // Create the force Vec
   ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
@@ -243,13 +248,14 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
     FF_data[i] = F[1][i];
   ierr = VecRestoreArray( FF, &FF_data ); CHKERRQ( ierr );
 
+  ierr = VecDuplicate(FF, &t1); CHKERRQ(ierr);
 
-  // create the pressure vector and initialize it to zero
+  /* create the pressure vector and initialize it to zero */
   ierr = VecCreateMPI( PETSC_COMM_WORLD, nel, PETSC_DECIDE, &PVec ); 
   CHKERRQ(ierr);
   ierr = VecSet( PVec, 0.0 ); CHKERRQ( ierr );
 
-  // create the velocity vector and copy contents of V into it
+  /* create the velocity vector and copy contents of V into it */
   ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &VVec ); 
   CHKERRQ(ierr);
   ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
@@ -257,13 +263,53 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
     V_data[i] = V[1][i];
   ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
 
-  /* Create the Schur complement */
+  /*----------------------------------*/
+  /* Define a Schur complement matrix */
+  /*----------------------------------*/
   ierr = MatCreateSchurComplement(E->K,E->K,E->G,E->D,PETSC_NULL, &S); 
   CHKERRQ(ierr);
+  ierr = MatSchurComplementGetKSP(S, &inner_ksp); CHKERRQ(ierr);
+  // the following commented out line doesn't work with shell matrices
+  //ierr = KSPSetType(inner_ksp, "preonly"); CHKERRQ(ierr);
+  ierr = KSPGetPC(inner_ksp, &inner_pc); CHKERRQ(ierr);
+  // the following commented out line doesn't work with shell matrices
+  //ierr = PCSetType(inner_pc, "lu"); CHKERRQ(ierr);
 
-  /* carry out the actual solution */
+  /*-------------------------------------------------*/
+  /* Build the RHS of the Schur Complement Reduction */
+  /*-------------------------------------------------*/
+  ierr = MatGetVecs(S, PETSC_NULL, &fhat); CHKERRQ(ierr);
+  ierr = KSPSolve(inner_ksp, FF, t1); CHKERRQ(ierr);
+  ierr = MatMult(E->D, t1, fhat); CHKERRQ(ierr);
 
-  // copy the values of VVec and PVec into V and P
+  /*-------------------------------------------*/
+  /* Build the solver for the Schur complement */
+  /*-------------------------------------------*/
+  ierr = KSPCreate(PETSC_COMM_WORLD, &S_ksp); CHKERRQ(ierr);
+  ierr = KSPSetOperators(S_ksp, S, S); CHKERRQ(ierr);
+  ierr = KSPGetPC(S_ksp, &S_pc); CHKERRQ(ierr);
+  ierr = KSPSetType(S_ksp, "cg"); CHKERRQ(ierr);
+  ierr = PCSetType(S_pc, "none"); CHKERRQ(ierr);
+  ierr = KSPSetInitialGuessNonzero(S_ksp, PETSC_TRUE); CHKERRQ(ierr);
+
+  /*--------------------*/
+  /* Solve for pressure */
+  /*--------------------*/
+  ierr = KSPSolve(S_ksp, fhat, PVec); CHKERRQ(ierr);
+
+  /*--------------------*/
+  /* Solve for velocity */
+  /*--------------------*/
+  ierr = MatGetVecs(E->K, PETSC_NULL, &fstar); CHKERRQ(ierr);
+  ierr = MatMult(E->G, PVec, fstar); CHKERRQ(ierr);
+  ierr = VecAYPX(fstar, -1.0, FF); CHKERRQ(ierr);
+  ierr = MatSchurComplementGetKSP(S, &inner_ksp); CHKERRQ(ierr);
+  ierr = KSPSetInitialGuessNonzero(inner_ksp, PETSC_TRUE); CHKERRQ(ierr);
+  ierr = KSPSolve(inner_ksp, fstar, VVec); CHKERRQ(ierr);
+
+  /*-----------------------------------------------*/
+  /* copy the values of VVec and PVec into V and P */
+  /*-----------------------------------------------*/
   ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
   for( i = 0; i <= neq; i++ )
     V[1][i] = V_data[i];
@@ -273,6 +319,20 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   for( i = 0; i < nel; i++ )
     P[1][i+1] = P_data[i]; 
   ierr = VecRestoreArray( PVec, &P_data ); CHKERRQ( ierr );
+
+  /*---------------------------------------------------------------------*/
+  /* output v_norm values; all other values are currently not meaningful */
+  /*---------------------------------------------------------------------*/
+  E->monitor.vdotv = global_v_norm2(E, V);
+  double v_norm = sqrt(E->monitor.vdotv);
+  double p_norm = sqrt(E->monitor.pdotp);
+  double dvelocity = 1.0;
+  double dpressure = 1.0;
+  int converging = 0;
+  if (E->control.print_convergence && E->parallel.me==0)  {
+    print_convergence_progress(E, count, time0, v_norm, p_norm,
+                                 dvelocity, dpressure, 1.0);
+  }
 
   PetscFunctionReturn(0);
 }
