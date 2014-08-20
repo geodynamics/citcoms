@@ -126,6 +126,16 @@ void strip_bcs_from_residual_PETSc(
     struct All_variables *E, Vec Res, int level )
 {
   int i, m, low, high;
+  PetscErrorCode ierr;
+  PetscScalar *ResData;
+  ierr = VecGetArray(Res, &ResData);
+    if( E->num_zero_resid[level][1] ) {
+      for( i = 1; i <= E->num_zero_resid[level][1]; i++ ) {
+        ResData[E->zero_resid[level][1][i]] = 0.0;
+      }
+    }
+  ierr = VecRestoreArray(Res, &ResData);
+#if 0
   VecGetOwnershipRange( Res, &low, &high );
  
   for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
@@ -137,6 +147,7 @@ void strip_bcs_from_residual_PETSc(
   }
   VecAssemblyBegin( Res );
   VecAssemblyEnd( Res );
+#endif
 }
 
 PetscErrorCode initial_vel_residual_PETSc( struct All_variables *E,
@@ -181,25 +192,16 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
 
   PetscErrorCode ierr;
   struct MultiGrid_PC *ctx;
+  PetscScalar *xData, *yData;
   ierr = PCShellGetContext( pc, (void **)&ctx ); CHKERRQ( ierr );
   int count, valid;
   double residual;
   int m, i;
 
-
-  int low, high;
-  VecGetOwnershipRange( x, &low, &high );
-
-  VecAssemblyBegin(x);
-  VecAssemblyEnd(x);
-  for( m=1; m<=ctx->E->sphere.caps_per_proc; ++m ) {
-    for( i=0; i<ctx->nno; ++i ) {
-      PetscInt ix[] = {i+low};
-      ierr = VecGetValues( x, 1, ix, &ctx->RR[m][i] );
-      CHKERRQ( ierr );
-    }
-  }
-
+  ierr = VecGetArray(x, &xData); CHKERRQ(ierr);
+  for(i = 0; i < ctx->nno; ++i)
+    ctx->RR[1][i] = xData[i];
+  ierr = VecRestoreArray(x, &xData); CHKERRQ(ierr);
   /* initialize the space for the solution */
   for( i = 0; i < ctx->nno; i++ )
       ctx->V[1][i] = 0.0;
@@ -212,14 +214,11 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
     count++;
   } while ( (!valid) && (count < ctx->max_vel_iterations) );
   ctx->status = residual;
-
-  VecGetOwnershipRange( y, &low, &high );
-  for( i = 0; i < ctx->nno; i++ ) {
-    ierr = VecSetValue( y, i+low, ctx->V[1][i], INSERT_VALUES ); 
-    CHKERRQ( ierr );
-  }
-  VecAssemblyBegin(y);
-  VecAssemblyEnd(y);
+  
+  ierr = VecGetArray(y, &yData); CHKERRQ(ierr);
+  for(i = 0; i < ctx->nno; i++)
+    yData[i] = ctx->V[1][i];
+  ierr = VecRestoreArray(y, &yData); CHKERRQ(ierr);
 
   PetscFunctionReturn(0);
 }
@@ -231,45 +230,20 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   // KU is (neq+1)
   int i, j, neq;
   PetscErrorCode ierr;
-  PetscScalar *KData, *KUData;
+  PetscScalar *UData, *KUData;
   struct MatMultShell *ctx;
   MatShellGetContext( K, (void **)&ctx );
   neq = ctx->iSize; // ctx->iSize SHOULD be the same as ctx->oSize
-#if 0
-  int low, high;
-
-  VecAssemblyBegin(U);
-  VecAssemblyEnd(U);
-  VecGetOwnershipRange( U, &low, &high );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j <= neq; j++ ) {
-      PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
-      CHKERRQ( ierr );
-    }
-  }
-#endif
-  ierr = VecGetArray(K, &KData); CHKERRQ(ierr);
+  ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
   for(j = 0; j <=neq; j++)
-    ctx->iData[1][j] = KData[j];
-  ierr = VecRestoreArray(K, &KData); CHKERRQ(ierr);
+    ctx->iData[1][j] = UData[j];
+  ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_del2_u( ctx->E, ctx->iData, ctx->oData, ctx->level, 1 );
   ierr = VecGetArray(KU, &KUData); CHKERRQ(ierr);
   for(j = 0; j <= neq; j++)
     KUData[j] = ctx->oData[1][j];
   ierr = VecRestoreArray(KU, &KUData); CHKERRQ(ierr);
-#if 0 
-  VecGetOwnershipRange( KU, &low, &high );
-  for( i=1; i <= ctx->E->sphere.caps_per_proc; ++i ) {
-    for( j = 0; j <= neq; j++ ) {
-      ierr = VecSetValue( KU, j+low, ctx->oData[i][j], INSERT_VALUES );
-      CHKERRQ( ierr );
-    }
-  }
-  VecAssemblyBegin( KU );
-  VecAssemblyEnd( KU );
-#endif
   PetscFunctionReturn(0);
 }
 
@@ -285,45 +259,16 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   MatShellGetContext( G, (void **)&ctx );
   nel = ctx->iSize;
   neq = ctx->oSize;
-#if 0  
-  int low, high;
-
-  VecGetOwnershipRange( P, &low, &high );
-
-  VecAssemblyBegin( P );
-  VecAssemblyEnd( P );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < nel; j++ ) {
-      PetscInt ix[] = {j+low};
-      ierr = VecGetValues( P, 1, ix, &ctx->iData[i][j+1] );
-      CHKERRQ( ierr );
-    }
-  }
-#endif
   ierr = VecGetArray(P, &PData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
     ctx->iData[1][j+1] = PData[j];
   ierr = VecRestoreArray(P, &PData); CHKERRQ(ierr);
-
-
   // actual CitcomS operation
   assemble_grad_p( ctx->E, ctx->iData, ctx->oData, ctx->level );
-
   ierr = VecGetArray(GP, &GPData); CHKERRQ(ierr);
   for(j = 0; j < neq; j++)
     GPData[j] = ctx->oData[1][j];
   ierr = VecRestoreArray(GP, &GPData); CHKERRQ(ierr);
-#if 0
-  VecGetOwnershipRange( GP, &low, &high );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < neq; j++ ) {
-      ierr = VecSetValue( GP, j+low, ctx->oData[i][j], INSERT_VALUES );
-      CHKERRQ( ierr );
-    }
-  }
-  VecAssemblyBegin( GP );
-  VecAssemblyEnd( GP );
-#endif
   PetscFunctionReturn(0);
 }
 
@@ -334,37 +279,21 @@ PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
+  PetscScalar *UData, *DUData;
   struct MatMultShell *ctx;
   MatShellGetContext( D, (void **)&ctx );
   neq = ctx->iSize;
   nel = ctx->oSize;
-
-  int low, high;
-  VecGetOwnershipRange( U, &low, &high );
-
-  VecAssemblyBegin( U );
-  VecAssemblyEnd( U );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < neq; j++ ) {
-      PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
-      CHKERRQ( ierr );
-    }
-  }
-
+  ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
+  for(j = 0; j < neq; j++)
+    ctx->iData[1][j] = UData[j];
+  ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_div_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
-
-  VecGetOwnershipRange( DU, &low, &high );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < nel; j++ ) {
-      ierr = VecSetValue( DU, j+low, ctx->oData[i][j+1], INSERT_VALUES );
-      CHKERRQ( ierr );
-    }
-  }
-  VecAssemblyBegin( DU );
-  VecAssemblyEnd( DU );
-
+  ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
+  for(j = 0; j < nel; j++)
+    DUData[j] = ctx->oData[1][j+1];
+  ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
@@ -375,36 +304,20 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
+  PetscScalar *UData, *DUData;
   struct MatMultShell *ctx;
   MatShellGetContext( DC, (void **)&ctx );
   neq = ctx->iSize;
   nel = ctx->oSize;
-
-  int low, high;
-  VecGetOwnershipRange( U, &low, &high );
-
-  VecAssemblyBegin( U );
-  VecAssemblyEnd( U );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < neq; j++ ) {
-      PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
-      CHKERRQ( ierr );
-    }
-  }
-
+  ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
+  for(j = 0; j < neq; j++)
+    ctx->iData[1][j] = UData[j];
+  ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_div_rho_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
-
-  VecGetOwnershipRange( DU, &low, &high );
-  for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
-    for( j = 0; j < nel; j++ ) {
-      ierr = VecSetValue( DU, j+low, ctx->oData[i][j+1], INSERT_VALUES );
-      CHKERRQ( ierr );
-    }
-  }
-  VecAssemblyBegin( DU );
-  VecAssemblyEnd( DU );
-
+  ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
+  for(j = 0; j < nel; j++)
+    DUData[j] = ctx->oData[1][j+1];
+  ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
