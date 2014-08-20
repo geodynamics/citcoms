@@ -787,9 +787,9 @@ void read_initial_settings(struct All_variables *E)
   (E->problem_settings)(E);
 
   /* PETSc related flags */
-  input_boolean("use_petsc",&E->data.use_petsc,"on",m);
-  input_boolean("petsc_linear",&E->data.petsc_linear,"on",m);
-  input_boolean("petsc_nonlinear",&E->data.petsc_nonlinear,"off",m);
+  input_boolean("use_petsc",&E->control.use_petsc,"on",m);
+  input_boolean("petsc_linear",&E->control.petsc_linear,"on",m);
+  input_boolean("petsc_nonlinear",&E->control.petsc_nonlinear,"off",m);
 
   check_settings_consistency(E);
   return;

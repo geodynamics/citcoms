@@ -45,6 +45,7 @@ to functions across the whole filespace of CITCOM.
 #include <stdlib.h>
 #include <mpi.h>
 #include <petscksp.h>
+#include <petscsnes.h>
 
 
 
@@ -715,6 +716,12 @@ struct All_variables {
 #include "convection_variables.h"
 #include "viscosity_descriptions.h"
 #include "advection.h"
+
+    /* PETSc related data structures */
+    Mat   K, G, D, DC;
+    KSP   ksp;
+    PC    pc;
+    SNES  snes;
 
     FILE *fp;
     FILE *fptime;

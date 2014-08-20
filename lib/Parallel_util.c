@@ -36,7 +36,7 @@
 
 PetscErrorCode parallel_process_finalize()
 {
-  return Petsc_Finalize();
+  return PetscFinalize();
 }
 
 /* ============================================ */
@@ -45,7 +45,7 @@ PetscErrorCode parallel_process_finalize()
 void parallel_process_termination()
 {
 
-  Petsc_Finalize();
+  PetscFinalize();
   exit(8);
 }
 

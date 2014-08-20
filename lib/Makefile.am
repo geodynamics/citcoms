@@ -114,6 +114,8 @@ sources = \
 	Parallel_util.c \
 	Parsing.c \
 	parsing.h \
+	Petsc_citcoms.c \
+	petsc_citcoms.h \
 	Phase_change.c \
 	phase_change.h \
 	Problem_related.c \
