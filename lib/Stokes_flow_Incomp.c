@@ -53,6 +53,14 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
+
+static void solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E,
+                                 double **V, double **P, double **F,
+                                 double imp, int *steps_max);
+static void solve_Ahat_p_fhat_BiCG_PETSc(struct All_variables *E,
+                                    double **V, double **P, double **F,
+                                    double imp, int *steps_max);
+
 static void initial_vel_residual(struct All_variables *E,
                                  double **V, double **P, double **F,
                                  double imp);
@@ -475,6 +483,259 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     *steps_max=count;
 
     return;
+}
+
+/*
+ * BiCGstab for compressible Stokes flow using PETSc Vec, Mat and KSPSolve
+ */
+static void solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
+					  double **V, double **P, double **F,
+					  double imp, int *steps_max )
+{
+  PetscErrorCode ierr;
+  Vec FF, P0, p1, p2, pt, r1, r2, rt, s0, st, t0, u0, u1, V0, BPI, v0;
+
+  PetscReal alpha, omega, beta;
+  PetscReal r1_norm, r1dotrt, r0dotrt, rtdotV0, t0dots0, t0dott0;
+
+  int i,j,k,m, count;
+
+  double time0, CPU_time0();
+  double v_norm, p_norm, inner_imp, v_res, dvelocity, dpressure;
+
+  int lev = E->mesh.levmax;
+  int npno = E->lmesh.npno;
+  int neq = E->lmesh.neq;
+  int nel = E->lmesh.nel;
+  
+  // Create the force Vec
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  CHKERRQ(ierr);
+  double *F_tmp;
+  ierr = VecGetArray( FF, &F_tmp ); CHKERRQ( ierr );
+  for( m=1; m<=E->sphere.caps_per_proc; ++m ) {
+    for( i = 0; i < neq; i++ )
+      F_tmp[i] = F[m][i];
+  }
+  ierr = VecRestoreArray( FF, &F_tmp ); CHKERRQ( ierr );
+
+  inner_imp = imp * E->control.inner_accuracy_scale;
+  time0 = CPU_time0();
+  count = 0;
+  v_res = E->monitor.fdotf;
+
+
+  // create the pressure vector and initialize it to zero
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, nel, PETSC_DECIDE, &P0 ); 
+  CHKERRQ(ierr);
+  ierr = VecSet( P0, 0.0 ); CHKERRQ( ierr );
+
+  // create the velocity vector
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &V0 ); 
+  CHKERRQ(ierr);
+
+  // Copy the contents of V into V0
+  PetscScalar *V0_tmp;
+  ierr = VecGetArray( V0, &V0_tmp ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
+    for( i = 0; i <= neq; i++ )
+      V0_tmp[i] = V[m][i];
+  }
+  ierr = VecRestoreArray( V0, &V0_tmp ); CHKERRQ( ierr );
+
+
+  ierr = VecDuplicate( V0, &u0 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( V0, &u1 ); CHKERRQ( ierr );
+
+  /* calculate the initial velocity residual */
+  initial_vel_residual_PETSc( E, V0, P0, FF, inner_imp*v_res );
+
+  /* initial residual r1 = div(rho_ref*V) */
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, npno, PETSC_DECIDE, &r1 ); 
+
+  CHKERRQ(ierr);
+  ierr = MatMult( E->DC, V0, r1 ); CHKERRQ( ierr );
+
+  E->monitor.vdotv = global_v_norm2_PETSc( E, V0 );
+  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r1 )
+                                       / (1e-32 + E->monitor.vdotv) );
+  v_norm = sqrt( E->monitor.vdotv );
+  p_norm = sqrt( E->monitor.pdotp );
+  dvelocity = 1.0;
+  dpressure = 1.0;
+
+  if( E->control.print_convergence && E->parallel.me == 0 ) {
+    print_convergence_progress( E, count, time0,
+                                v_norm, p_norm,
+                                dvelocity, dpressure,
+                                E->monitor.incompressibility );
+  }
+
+  // create all the vectors for later use
+  ierr = VecDuplicate( r1, &rt ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &p1 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &p2 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &BPI ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &pt ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &s0 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &st ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &t0 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &r2 ); CHKERRQ( ierr );
+  ierr = VecDuplicate( r1, &v0 ); CHKERRQ( ierr );
+
+  /* initial conjugate residual rt = r1 */
+  ierr = VecCopy( r1, rt ); CHKERRQ( ierr );
+
+  /* BPI ~= K inverse */
+  PetscReal *bpi;
+  ierr = VecGetArray( BPI, &bpi ); CHKERRQ( ierr );
+  for( m = 1; m <= E->sphere.caps_per_proc; m++ )
+    for( j = 0; j < npno; j++ )
+      bpi[j] = E->BPI[lev][m][j+1];
+  ierr = VecRestoreArray( BPI, &bpi ); CHKERRQ( ierr );
+
+  r0dotrt = alpha = omega = 0.0;
+
+  ierr = VecNorm( r1, NORM_2, &r1_norm ); CHKERRQ( ierr );
+
+  while( (r1_norm > E->control.petsc_uzawa_tol) && (count < *steps_max) )
+  {
+
+    /* r1dotrt = <r1, rt> */
+    // r1dotrt = global_pdot( E, r1, rt, lev )
+    ierr = VecDot( r1, rt, &r1dotrt ); CHKERRQ( ierr );
+
+    if( r1dotrt == 0.0 ) {
+      fprintf( E->fp, "BiCGstab method failed!!\n" );
+      fprintf( stderr, "BiCGstab method failed!!\n" );
+      parallel_process_termination();
+    }
+
+    /* update search direction */
+    if( count == 0 ) {
+      ierr = VecCopy( r1, p2 ); CHKERRQ( ierr );
+    }
+    else {
+      /* p2 = r1 + <r1,rt>/<r0,rt> * alpha/omega * (p1 - omega*v0) */
+      beta = (r1dotrt/r0dotrt)*(alpha/omega);
+      ierr = VecAXPY( p1, -1.0*omega, v0); CHKERRQ( ierr );
+      ierr = VecWAXPY( p2, beta, p1, r1 ); CHKERRQ( ierr );
+    }
+
+    /* preconditioner BPI ~= inv(K), pt = BPI*p2 */
+    ierr = VecPointwiseMult( pt, BPI, p2 ); CHKERRQ( ierr );
+
+    /* solve K*u0 = grad(pt) for u1 */
+    ierr = MatMult( E->G, pt, FF ); CHKERRQ( ierr );
+    ierr = KSPSolve( E->ksp, FF, u0 ); CHKERRQ( ierr );
+    strip_bcs_from_residual_PETSc( E, u0, lev );
+
+    /* v0 = div(rho_ref*u0) */
+    ierr = MatMult( E->DC, u0, v0 ); CHKERRQ( ierr );
+    
+    /* alpha = r1dotrt / <rt, v0> */
+    ierr = VecDot( rt, v0, &rtdotV0 ); CHKERRQ( ierr );
+    alpha = r1dotrt / rtdotV0;
+
+    /* s0 = r1 - alpha * v0 */
+    ierr = VecWAXPY( s0, -1.0*alpha, v0, r1 ); CHKERRQ( ierr );
+
+    /* preconditioner BPI ~= inv(K), st = BPI*s0 */
+    ierr = VecPointwiseMult( st, BPI, s0 ); CHKERRQ( ierr );
+
+    /* solve K*u1 = grad(st) for u1*/
+    ierr = MatMult( E->G, st, FF ); CHKERRQ( ierr );
+    ierr = KSPSolve( E->ksp, FF, u1 ); CHKERRQ( ierr );
+    strip_bcs_from_residual_PETSc( E, u1, lev );
+
+    /* t0 = div(rho_ref*u1) */
+    ierr = MatMult( E->DC, u1, t0 ); CHKERRQ( ierr );
+
+    /* omega = <t0, s0> / <t0, t0> */
+    ierr = VecDot( t0, s0, &t0dots0 ); CHKERRQ( ierr );
+    ierr = VecDot( t0, t0, &t0dott0 ); CHKERRQ( ierr );
+    omega = t0dots0 / t0dott0;
+
+    /* r2 = s0 - omega * t0 */
+    ierr = VecWAXPY( r2, -1.0*omega, t0, s0 ); CHKERRQ( ierr );
+
+    /* P = P + alpha * pt + omega * st */
+    ierr = VecAXPBY( st, alpha, omega, pt ); CHKERRQ( ierr );
+    ierr = VecAXPY( P0, 1.0, st ); CHKERRQ( ierr );
+
+    /* V = V - alpha * u0 - omega * u1 */
+    ierr = VecAXPBY( u1, alpha, omega, u0 ); CHKERRQ( ierr );
+    ierr = VecAXPY( V0, -1.0, u1 ); CHKERRQ( ierr );
+
+    /* compute velocity and incompressibility residual */
+    E->monitor.vdotv = global_v_norm2_PETSc(E, V0);
+    E->monitor.pdotp = global_p_norm2_PETSc(E, P0);
+    v_norm = sqrt( E->monitor.vdotv );
+    p_norm = sqrt( E->monitor.pdotp );
+    dvelocity = sqrt( global_v_norm2_PETSc( E, u1 ) / 
+                      (1e-32 + E->monitor.vdotv) );
+    dpressure = sqrt( global_p_norm2_PETSc( E, st ) / 
+                      (1e-32 + E->monitor.pdotp) );
+
+
+    ierr = MatMult( E->DC, V0, t0 ); CHKERRQ( ierr );
+    E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, t0 )
+                                        / (1e-32 + E->monitor.vdotv) );
+
+    count++;
+
+    if( E->control.print_convergence && E->parallel.me == 0 ) {
+      print_convergence_progress( E, count, time0,
+                                  v_norm, p_norm,
+                                  dvelocity, dpressure,
+                                  E->monitor.incompressibility );
+    }
+
+    /* shift array pointers */
+    ierr = VecSwap( p1, p2 ); CHKERRQ( ierr );
+    ierr = VecSwap( r1, r2 ); CHKERRQ( ierr );
+
+    /* shift <r0, rt> = <r1, rt> */
+    r0dotrt = r1dotrt;
+
+    // recompute the norm of the residual
+    ierr = VecNorm( r1, NORM_2, &r1_norm ); CHKERRQ( ierr );
+
+  }
+
+  // converged. now copy the converged values of V0 and P0 into V and P
+  PetscReal *P_tmp, *V_tmp;
+  ierr = VecGetArray( V0, &V_tmp ); CHKERRQ( ierr );
+  for( m=1; m<=E->sphere.caps_per_proc; ++m ) {
+    for( i = 0; i < neq; i++ )
+      V[m][i+1] = V_tmp[i]; 
+  }
+  ierr = VecRestoreArray( V0, &V_tmp ); CHKERRQ( ierr );
+  
+  ierr = VecGetArray( P0, &P_tmp ); CHKERRQ( ierr );
+  for( m = 1; m < E->sphere.caps_per_proc; ++m ) {
+    for( i = 0; i < nel; i++ )
+      P[1][i+1] = P_tmp[i]; 
+  }
+  ierr = VecRestoreArray( P0, &P_tmp ); CHKERRQ( ierr );
+
+
+  ierr = VecDestroy( &rt ); CHKERRQ( ierr );
+  ierr = VecDestroy( &p1 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &p2 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &BPI ); CHKERRQ( ierr );
+  ierr = VecDestroy( &pt ); CHKERRQ( ierr );
+  ierr = VecDestroy( &u0 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &s0 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &st ); CHKERRQ( ierr );
+  ierr = VecDestroy( &u1 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &t0 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &r2 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &v0 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &V0 ); CHKERRQ( ierr );
+  ierr = VecDestroy( &P0 ); CHKERRQ( ierr );
+
+  *steps_max = count;
 }
 
 /* Solve compressible Stokes flow using
