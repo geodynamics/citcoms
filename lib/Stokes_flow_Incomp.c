@@ -52,9 +52,6 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
 
-static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
-    Vec V, Vec P, Vec F, double imp, int *steps_max);
-
 static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
     double **V, double **P, double **F, double imp, int *steps_max);
 
@@ -171,12 +168,6 @@ static int keep_iterating(struct All_variables *E,
     else
         return (E->monitor.incompressibility > acc) &&
 	    (converging < required_converging_loops);
-}
-
-static PetscErrorCode solve_Ahat_p_fhat_petsc(struct All_variables *E,
-    Vec V, Vec P, Vec F, double imp, int *steps_max )
-{
-  PetscFunctionReturn(0);
 }
 
 static void solve_Ahat_p_fhat(struct All_variables *E,
