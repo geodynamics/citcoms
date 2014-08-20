@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
+#include "petsc_citcoms.h"
 #include <stdlib.h>
 
 void myerror(struct All_variables *,char *);
@@ -93,27 +94,6 @@ void solve_constrained_flow_iterative(E)
 
     return;
 }
-/*
-PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *E)
-{
-  PetscErrorCode ierr;
-  int cycles;
-
-  cycles = E->control.p_iterations;
-  ierr = solve_Ahat_p_fhat_petsc(E, E->UVec, E->PVec, E->FVec, 
-      E->control.accuracy, &cycles);
-  CHKERRQ(ierr);
-
-  if(E->control.pseudo_free_surf)
-    v_from_vector_pseudo_surf_petsc(E);
-  else
-    v_from_vector_petsc(E);
-
-  p_to_nodes_petsc(E, E->PVec, E->NPVec, E->mesh.levmax);
-  
-  PetscFunctionReturn(0);
-}
-*/
 /* ========================================================================= */
 
 static double momentum_eqn_residual(struct All_variables *E,
@@ -201,6 +181,29 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max)
 {
+  if(E->control.use_petsc)
+  {
+    if(E->control.petsc_schur) // use Schur complement reduction
+    {
+      myerror(E, "Error: Schur complement reduction not implemented\n");
+    }
+    else                       // use the Uzawa algorithm
+    {
+      if(E->control.inv_gruneisen == 0)
+        solve_Ahat_p_fhat_CG_PETSc(E, V, P, F, imp, steps_max);
+      else
+      {
+        if(strcmp(E->control.uzawa, "cg") == 0)
+          solve_Ahat_p_fhat_iterCG(E, V, P, F, imp, steps_max);
+        else if(strcmp(E->control.uzawa, "bicg") == 0)
+          solve_Ahat_p_fhat_BiCG_PETSc(E, V, P, F, imp, steps_max);
+        else
+          myerror(E, "Error: unknown Uzawa iteration\n");
+      }
+    }
+  }
+  else                         // the original non-PETSc CitcomS code
+  {
     if(E->control.inv_gruneisen == 0)
         solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
     else {
@@ -211,8 +214,7 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
         else
             myerror(E, "Error: unknown Uzawa iteration\n");
     }
-
-    return;
+  }
 }
 
 
@@ -1202,16 +1204,11 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         p_norm = sqrt(E->monitor.pdotp);
         dvelocity = sqrt(global_v_norm2(E, F) / (1e-32 + E->monitor.vdotv));
         dpressure = sqrt(global_p_norm2(E, s0) / (1e-32 + E->monitor.pdotp));
-
-
 	
 
         assemble_div_rho_u(E, V, t0, lev);
         E->monitor.incompressibility = sqrt(global_div_norm2(E, t0)
                                             / (1e-32 + E->monitor.vdotv));
-
-
-
 
         count++;
 
@@ -1330,7 +1327,11 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
             for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
         }
 
-        solve_Ahat_p_fhat_CG(E, V, P, F, imp, &cycles);
+        if(E->control.use_petsc)
+          solve_Ahat_p_fhat_CG_PETSc(E, V, P, F, imp, &cycles);
+        else
+          solve_Ahat_p_fhat_CG(E, V, P, F, imp, &cycles);
+
 
         /* compute norm of div(rho*V) */
         assemble_div_rho_u(E, V, E->u1, lev);
