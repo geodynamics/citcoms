@@ -563,6 +563,7 @@ struct CONTROL {
     int use_petsc;
     int petsc_linear;
     int petsc_nonlinear;
+    int petsc_schur;
 };
 
 
@@ -710,6 +711,39 @@ struct CITCOM_GNOMONIC {
 #endif
 #include "tracer_defs.h"
 
+/* PETSc MultiGrid Shell preconditioner */  
+struct MultiGrid_PC
+{
+  PC self;
+  struct All_variables *E;
+  // multigrid stuff
+  double acc;
+  int smooth_up;
+  int smooth_down;
+  int smooth_coarse;
+  int smooth_fine;
+  int max_vel_iterations;
+  int cycle_type;
+  double status;
+  int level;
+  int levmax;
+  PetscBool mg_monitor;
+  int nno;
+  double *V[NCS];
+  double *RR[NCS];
+};
+
+/* PETSc Matrix shell contexts */
+struct MatMultShell
+{
+  struct All_variables *E;
+  int level;
+  int iSize;
+  int oSize;
+  double *iData[NCS];
+  double *oData[NCS];
+};
+
 struct All_variables {
 
 #include "solver.h"
@@ -723,6 +757,8 @@ struct All_variables {
     PC    pc;
     SNES  snes;
     Vec   PVec, NPVec, UVec, FVec;
+    struct MatMultShell mtx_del2_u, mtx_grad_p, mtx_div_u, mtx_div_rho_u;
+    struct MultiGrid_PC pcshell_ctx;
 
     FILE *fp;
     FILE *fptime;

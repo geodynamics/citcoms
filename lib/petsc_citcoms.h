@@ -7,68 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
-struct MultiGrid_PC
-{
-  PC self;
-  struct All_variables *E;
-  // multigrid stuff
-  double acc;
-  int smooth_up;
-  int smooth_down;
-  int smooth_coarse;
-  int smooth_fine;
-  int max_vel_iterations;
-  int cycle_type;
-  double status;
-  int level;
-  int levmax;
-  PetscBool mg_monitor;
-  int nno;
-  int caps_per_proc;
-  double *V[NCS];
-  double *RR[NCS];
-};
-
-struct MatMultShell_del2_u
-{
-  struct All_variables *E;
-  int level;
-  int neq;
-  int nel;
-  double *u[NCS];
-  double *Ku[NCS];
-};
-
-struct MatMultShell_grad_p
-{
-  struct All_variables *E;
-  int level;
-  int neq;
-  int nel;
-  double *p[NCS];
-  double *Gp[NCS];
-};
-
-struct MatMultShell_div_u
-{
-  struct All_variables *E;
-  int level;
-  int neq;
-  int nel;
-  double *u[NCS];
-  double *Du[NCS];
-};
-
-struct MatMultShell_div_rho_u
-{
-  struct All_variables *E;
-  int level;
-  int neq;
-  int npno;
-  double *u[NCS];
-  double *Du[NCS];
-};
 
 void strip_bcs_from_residual_PETSc( 
     struct All_variables *E, Vec Res, int level );

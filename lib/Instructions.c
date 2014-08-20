@@ -223,18 +223,10 @@ void read_instructions(struct All_variables *E, char *filename)
 /* This function is replaced by CitcomS.Solver.initial_setup() in Pyre. */
 void initial_setup(struct All_variables *E)
 {
-    void general_stokes_solver_setup();
-    void initial_mesh_solver_setup();
-
     initial_mesh_solver_setup(E);
-
     general_stokes_solver_setup(E);
-
     (E->next_buoyancy_field_init)(E);
-
-    return;
 }
-
 
 void initialize_material(struct All_variables *E)
 {
@@ -790,6 +782,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("use_petsc",&E->control.use_petsc,"on",m);
   input_boolean("petsc_linear",&E->control.petsc_linear,"on",m);
   input_boolean("petsc_nonlinear",&E->control.petsc_nonlinear,"off",m);
+  input_boolean("petsc_schur",&E->control.petsc_schur,"off",m);
 
   check_settings_consistency(E);
   return;

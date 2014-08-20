@@ -103,7 +103,9 @@ int main(argc,argv)
   read_instructions(E, argv[1]);
 
   /* create mesh, setup solvers etc. */
-  /* also initialize E->UVec, E->PVec, E->FVec, E->K, E->G, E->D */
+  /* initial_setup calls general_stokes_solver_setup which also does all
+   * the PETSc related initialization
+   */
   initial_setup(E);
 
   cpu_time_on_vp_it = CPU_time0();

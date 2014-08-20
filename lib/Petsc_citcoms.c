@@ -201,11 +201,8 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
   }
 
   /* initialize the space for the solution */
-  for( m = 1; m <= ctx->caps_per_proc; m++ ) {
-    for( i = 0; i < ctx->nno; i++ ) {
-      ctx->V[m][i] = 0.0;
-    }
-  }
+  for( i = 0; i < ctx->nno; i++ )
+      ctx->V[1][i] = 0.0;
 
   count = 0;
 
@@ -217,11 +214,9 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
   ctx->status = residual;
 
   VecGetOwnershipRange( y, &low, &high );
-  for( m = 1; m <= ctx->caps_per_proc; m++ ) {
-    for( i = 0; i < ctx->nno; i++ ) {
-      ierr = VecSetValue( y, i+low, ctx->V[m][i], INSERT_VALUES ); 
-      CHKERRQ( ierr );
-    }
+  for( i = 0; i < ctx->nno; i++ ) {
+    ierr = VecSetValue( y, i+low, ctx->V[1][i], INSERT_VALUES ); 
+    CHKERRQ( ierr );
   }
   VecAssemblyBegin(y);
   VecAssemblyEnd(y);
@@ -236,10 +231,10 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   // KU is (neq+1)
   int i, j, neq, nel;
   PetscErrorCode ierr;
-  struct MatMultShell_del2_u *ctx;
+  struct MatMultShell *ctx;
   MatShellGetContext( K, (void **)&ctx );
-  neq = ctx->neq;
-  nel = ctx->nel;
+  neq = ctx->iSize;
+  nel = ctx->oSize;
   int low, high;
 
   VecAssemblyBegin(U);
@@ -248,18 +243,18 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j <= neq; j++ ) {
       PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->u[i][j] );
+      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
       CHKERRQ( ierr );
     }
   }
 
   // actual CitcomS operation
-  assemble_del2_u( ctx->E, ctx->u, ctx->Ku, ctx->level, 1 );
+  assemble_del2_u( ctx->E, ctx->iData, ctx->oData, ctx->level, 1 );
   
   VecGetOwnershipRange( KU, &low, &high );
   for( i=1; i <= ctx->E->sphere.caps_per_proc; ++i ) {
     for( j = 0; j <= neq; j++ ) {
-      ierr = VecSetValue( KU, j+low, ctx->Ku[i][j], INSERT_VALUES );
+      ierr = VecSetValue( KU, j+low, ctx->oData[i][j], INSERT_VALUES );
       CHKERRQ( ierr );
     }
   }
@@ -276,10 +271,10 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   // GP is (neq+1) x 1 of which first neq entries (0:neq-1) are actual values
   int i, j, neq, nel;
   PetscErrorCode ierr;
-  struct MatMultShell_grad_p *ctx;
+  struct MatMultShell *ctx;
   MatShellGetContext( G, (void **)&ctx );
-  neq = ctx->neq;
-  nel = ctx->nel;
+  neq = ctx->iSize;
+  nel = ctx->iSize;
 
   int low, high;
   VecGetOwnershipRange( P, &low, &high );
@@ -289,18 +284,18 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < nel; j++ ) {
       PetscInt ix[] = {j+low};
-      ierr = VecGetValues( P, 1, ix, &ctx->p[i][j+1] );
+      ierr = VecGetValues( P, 1, ix, &ctx->iData[i][j+1] );
       CHKERRQ( ierr );
     }
   }
 
   // actual CitcomS operation
-  assemble_grad_p( ctx->E, ctx->p, ctx->Gp, ctx->level );
+  assemble_grad_p( ctx->E, ctx->iData, ctx->oData, ctx->level );
 
   VecGetOwnershipRange( GP, &low, &high );
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < neq; j++ ) {
-      ierr = VecSetValue( GP, j+low, ctx->Gp[i][j], INSERT_VALUES );
+      ierr = VecSetValue( GP, j+low, ctx->oData[i][j], INSERT_VALUES );
       CHKERRQ( ierr );
     }
   }
@@ -317,10 +312,10 @@ PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
-  struct MatMultShell_div_u *ctx;
+  struct MatMultShell *ctx;
   MatShellGetContext( D, (void **)&ctx );
-  neq = ctx->neq;
-  nel = ctx->nel;
+  neq = ctx->iSize;
+  nel = ctx->oSize;
 
   int low, high;
   VecGetOwnershipRange( U, &low, &high );
@@ -330,18 +325,18 @@ PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < neq; j++ ) {
       PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->u[i][j] );
+      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
       CHKERRQ( ierr );
     }
   }
 
   // actual CitcomS operation
-  assemble_div_u( ctx->E, ctx->u, ctx->Du, ctx->level );
+  assemble_div_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
 
   VecGetOwnershipRange( DU, &low, &high );
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < nel; j++ ) {
-      ierr = VecSetValue( DU, j+low, ctx->Du[i][j+1], INSERT_VALUES );
+      ierr = VecSetValue( DU, j+low, ctx->oData[i][j+1], INSERT_VALUES );
       CHKERRQ( ierr );
     }
   }
@@ -358,10 +353,10 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
-  struct MatMultShell_div_u *ctx;
+  struct MatMultShell *ctx;
   MatShellGetContext( DC, (void **)&ctx );
-  neq = ctx->neq;
-  nel = ctx->nel;
+  neq = ctx->iSize;
+  nel = ctx->oSize;
 
   int low, high;
   VecGetOwnershipRange( U, &low, &high );
@@ -371,18 +366,18 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < neq; j++ ) {
       PetscInt ix[] = {j+low};
-      ierr = VecGetValues( U, 1, ix, &ctx->u[i][j] );
+      ierr = VecGetValues( U, 1, ix, &ctx->iData[i][j] );
       CHKERRQ( ierr );
     }
   }
 
   // actual CitcomS operation
-  assemble_div_rho_u( ctx->E, ctx->u, ctx->Du, ctx->level );
+  assemble_div_rho_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
 
   VecGetOwnershipRange( DU, &low, &high );
   for( i = 1; i <= ctx->E->sphere.caps_per_proc; i++ ) {
     for( j = 0; j < nel; j++ ) {
-      ierr = VecSetValue( DU, j+low, ctx->Du[i][j+1], INSERT_VALUES );
+      ierr = VecSetValue( DU, j+low, ctx->oData[i][j+1], INSERT_VALUES );
       CHKERRQ( ierr );
     }
   }
@@ -391,4 +386,3 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
 
   PetscFunctionReturn(0);
 }
-
