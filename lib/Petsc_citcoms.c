@@ -118,6 +118,8 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E,
   }
   ierr = VecRestoreArray( U, &U_temp ); CHKERRQ( ierr );
   ierr = VecRestoreArray( result, &result_temp ); CHKERRQ( ierr );
+
+  PetscFunctionReturn(0);
 }
 
 void strip_bcs_from_residual_PETSc( 
@@ -171,6 +173,7 @@ PetscErrorCode initial_vel_residual_PETSc( struct All_variables *E,
 
     /* V = V + u1 */
     ierr = VecAXPY( V, 1.0, u1 ); CHKERRQ( ierr );
+  PetscFunctionReturn(0);
 }
 
 PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )

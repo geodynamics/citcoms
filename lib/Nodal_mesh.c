@@ -58,7 +58,7 @@ void v_from_vector(E)
 
     return;
 }
-
+/*
 PetscErrorCode v_from_vector_petsc(struct All_variables *E)
 {
   PetscFunctionReturn(0);
@@ -68,7 +68,7 @@ PetscErrorCode v_from_vector_pseudo_surf_petsc(struct All_variables *E)
 {
   PetscFunctionReturn(0);
 }
-
+*/
 void assign_v_to_vector(E)
      struct All_variables *E;
 {
@@ -210,7 +210,7 @@ void velo_from_element_d(E,VV,m,el,sphere_key)
     }
     return;
 }
-
+/*
 PetscErrorCode p_to_nodes_petsc(struct All_variables *E, 
     Vec PVec, Vec PNVec, int lev )
 {
@@ -242,7 +242,7 @@ PetscErrorCode p_to_nodes_petsc(struct All_variables *E,
   PetscFunctionReturn(0);
 
 }
-
+*/
 void p_to_nodes(E,P,PN,lev)
      struct All_variables *E;
      double **P;

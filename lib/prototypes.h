@@ -263,15 +263,15 @@ void get_prem(double, double *, double *, double *);
 void compute_seismic_model(struct All_variables *, double *, double *, double *);
 /* Nodal_mesh.c */
 void v_from_vector(struct All_variables *);
-PetscErrorCode v_from_vector_petsc(struct All_variables *);
+//PetscErrorCode v_from_vector_petsc(struct All_variables *);
 void assign_v_to_vector(struct All_variables *);
 void v_from_vector_pseudo_surf(struct All_variables *);
-PetscErrorCode v_from_vector_pseudo_surf_petsc(struct All_variables *);
+//PetscErrorCode v_from_vector_pseudo_surf_petsc(struct All_variables *);
 void velo_from_element(struct All_variables *, float [4][9], int, int, int);
 void velo_from_element_d(struct All_variables *, double [4][9], int, int, int);
 
 void p_to_nodes(struct All_variables *, double **, float **, int);
-PetscErrorCode p_to_nodes_petsc(struct All_variables *, Vec, Vec, int);
+//PetscErrorCode p_to_nodes_petsc(struct All_variables *, Vec, Vec, int);
 
 void visc_from_gint_to_nodes(struct All_variables *, float **, float **, int);
 void visc_from_nodes_to_gint(struct All_variables *, float **, float **, int);
@@ -492,7 +492,7 @@ void get_angle_sphere_cap(double [4][5], double [6]);
 double get_angle(double [4], double [4]);
 /* Stokes_flow_Incomp.c */
 void solve_constrained_flow_iterative(struct All_variables *);
-PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *);
+//PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *);
 /* Topo_gravity.c */
 void get_STD_topo(struct All_variables *, float **, float **, float **, float **, int);
 void get_STD_freesurf(struct All_variables *, float **);

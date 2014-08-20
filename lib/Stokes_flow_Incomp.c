@@ -85,7 +85,7 @@ void solve_constrained_flow_iterative(E)
 
     return;
 }
-
+/*
 PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *E)
 {
   PetscErrorCode ierr;
@@ -105,7 +105,7 @@ PetscErrorCode solve_constrained_flow_iterative_petsc(struct All_variables *E)
   
   PetscFunctionReturn(0);
 }
-
+*/
 /* ========================================================================= */
 
 static double momentum_eqn_residual(struct All_variables *E,
