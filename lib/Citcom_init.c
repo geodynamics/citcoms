@@ -32,8 +32,6 @@
 
 struct All_variables* citcom_init(MPI_Comm *world)
 {
-  int get_process_identifier();
-
   struct All_variables *E;
   int rank, nproc;
 
@@ -64,9 +62,6 @@ struct All_variables* citcom_init(MPI_Comm *world)
 
 void citcom_finalize(struct All_variables *E, int status)
 {
-    void output_finalize(struct All_variables*);
-    void parallel_process_finalize();
-
     output_finalize(E);
     parallel_process_finalize();
     exit(status);

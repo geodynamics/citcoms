@@ -34,10 +34,9 @@
 /* ============================================ */
 /* ============================================ */
 
-void parallel_process_finalize()
+PetscErrorCode parallel_process_finalize()
 {
-  MPI_Finalize();
-  return;
+  return Petsc_Finalize();
 }
 
 /* ============================================ */
@@ -46,10 +45,9 @@ void parallel_process_finalize()
 void parallel_process_termination()
 {
 
-  MPI_Finalize();
+  Petsc_Finalize();
   exit(8);
-  return;
-  }
+}
 
 /* ============================================ */
 /* ============================================ */
@@ -58,18 +56,16 @@ void parallel_process_sync(struct All_variables *E)
 {
 
   MPI_Barrier(E->parallel.world);
-  return;
-  }
+}
 
 
 /* ==========================   */
 
- double CPU_time0()
+double CPU_time0()
 {
- double time, MPI_Wtime();
- time = MPI_Wtime();
- return (time);
+  double time, MPI_Wtime();
+  time = MPI_Wtime();
+  return (time);
 }
-
 
 /* End of file */
