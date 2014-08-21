@@ -33,15 +33,14 @@ endif
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
 
-######## legacy drivers ########
+bin_SCRIPTS =
 
-
+######## C drivers ########
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
 CitcomSFull_LDADD = $(libCitcomS)
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
 CitcomSRegional_LDADD = $(libCitcomS)
 
-abs_top_builddir = @abs_top_builddir@
-abs_builddir = @abs_builddir@
+libCitcomS = $(top_builddir)/lib/libCitcomS.a
 
 ## end of Makefile.am
