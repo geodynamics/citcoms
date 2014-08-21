@@ -70,10 +70,13 @@ int main(argc,argv)
 
   struct All_variables *E;
   MPI_Comm world;
+#ifdef USE_PETSC
   PetscErrorCode ierr;
-
   ierr = PetscInitialize(&argc, &argv, NULL, NULL);
   CHKERRQ(ierr);
+#else
+  MPI_Init(&argc, &argv); /* added here to allow command-line input */
+#endif
 
   if (argc < 2)   {
     fprintf(stderr,"Usage: %s PARAMETERFILE\n", argv[0]);
@@ -85,7 +88,11 @@ int main(argc,argv)
   /* this section reads input, allocates memory, and set some initial values;
    * replaced by CitcomS.Controller.initialize() and
    * CitcomS.Solver.initialize() in Pyre. */
+#ifdef USE_PETSC
   world = PETSC_COMM_WORLD;
+#else
+  world = MPI_COMM_WORLD;
+#endif
   E = citcom_init(&world); /* allocate global E and do initializaion here */
 
   /* define common aliases for full/regional functions */

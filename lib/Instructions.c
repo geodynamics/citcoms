@@ -777,14 +777,14 @@ void read_initial_settings(struct All_variables *E)
 				   the tracer input */
 
   (E->problem_settings)(E);
-
+#ifdef USE_PETSC
   /* PETSc related flags */
   input_boolean("use_petsc",&E->control.use_petsc,"on",m);
   input_boolean("petsc_linear",&E->control.petsc_linear,"on",m);
   input_boolean("petsc_nonlinear",&E->control.petsc_nonlinear,"off",m);
   input_boolean("petsc_schur",&E->control.petsc_schur,"off",m);
   input_float("petsc_uzawa_tol", &E->control.petsc_uzawa_tol, "1e-6", m);
-
+#endif
   check_settings_consistency(E);
   return;
 }

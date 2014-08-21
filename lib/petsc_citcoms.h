@@ -2,6 +2,8 @@
 #ifndef __CitcomS__PETSc__h__
 #define __CitcomS__PETSc__h__
 
+#ifdef USE_PETSC
+
 #include <petscksp.h>
 
 #ifdef __cplusplus
@@ -28,5 +30,7 @@ PetscErrorCode MatShellMult_div_rho_u( Mat D, Vec U, Vec DU );
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* USE_PETSC */
 
 #endif // __CitcomS__PETSc__h__

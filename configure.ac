@@ -35,6 +35,12 @@ AM_INIT_AUTOMAKE([foreign])
 # 'configure' options
 AC_ARG_VAR(PYTHON, [Python interpreter])
 AC_ARG_VAR(PYTHONPATH, [Python module search path])
+AC_ARG_WITH([petsc],
+    [AC_HELP_STRING([--with-petsc],
+        [use PETSc library @<:@default=no@:>@])],
+    [want_petsc="$withval"],
+    [want_petsc=no])
+AM_CONDITIONAL([COND_PETSC], [test "$want_petsc" = yes])
 AC_ARG_WITH([pyre],
     [AC_HELP_STRING([--with-pyre],
         [build Pyre modules @<:@default=no@:>@])],
@@ -73,6 +79,10 @@ AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC 
 
 # Checking a system header here so that CPP is always defined
 AC_CHECK_HEADERS([malloc.h])
+
+if test "$want_petsc" = yes; then
+  CIT_PATH_PETSC(3.5.1,[CPPFLAGS="-DUSE_PETSC $CPPFLAGS"],[AC_MSG_ERROR([PETSc Library not found])])
+fi
 
 if test "$want_pyre" = yes; then
     # Check for Python.
@@ -270,6 +280,7 @@ echo -e "\t with-pyre: " $want_pyre
 echo -e "\t with-exchanger: " $want_exchanger
 echo -e "\t with-hdf5: " $want_hdf5
 echo -e "\t with-ggrd: " $want_ggrd
+echo -e "\t with-petsc: " $want_petsc
 echo
 
 dnl end of configure.ac

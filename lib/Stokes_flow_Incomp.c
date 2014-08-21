@@ -34,8 +34,11 @@
 #include <sys/types.h>
 #include "element_definitions.h"
 #include "global_defs.h"
-#include "petsc_citcoms.h"
 #include <stdlib.h>
+
+#ifdef USE_PETSC
+#include "petsc_citcoms.h"
+#endif
 
 void myerror(struct All_variables *,char *);
 
@@ -52,6 +55,7 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
                                       double **V, double **P, double **F,
                                       double imp, int *steps_max);
 
+#ifdef USE_PETSC
 static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
     double **V, double **P, double **F, double imp, int *steps_max);
 
@@ -60,6 +64,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc(struct All_variables *E,
 
 static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc(struct All_variables *E,
     double **V, double **P, double **F, double imp, int *steps_max);
+#endif
 
 static void initial_vel_residual(struct All_variables *E,
                                  double **V, double **P, double **F,
@@ -174,6 +179,7 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
                                double **V, double **P, double **F,
                                double imp, int *steps_max)
 {
+#ifdef USE_PETSC
   if(E->control.use_petsc)
   {
     if(E->control.petsc_schur) // use Schur complement reduction
@@ -197,6 +203,7 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
   }
   else                         // the original non-PETSc CitcomS code
   {
+#endif 
     if(E->control.inv_gruneisen == 0)
         solve_Ahat_p_fhat_CG(E, V, P, F, imp, steps_max);
     else {
@@ -207,9 +214,12 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
         else
             myerror(E, "Error: unknown Uzawa iteration\n");
     }
+#ifdef USE_PETSC
   }
+#endif
 }
 
+#ifdef USE_PETSC
 static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   double **V, double **P, double **F, double imp, int *steps_max)
 {
@@ -327,6 +337,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
 
   PetscFunctionReturn(0);
 }
+#endif
 
 /* Solve incompressible Stokes flow using
  * conjugate gradient (CG) iterations
@@ -597,6 +608,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
     return;
 }
 
+#ifdef USE_PETSC
 /*
  * Implementation of the Conjugate Gradient Uzawa algorithm using PETSc
  * Vec, Mat and KSPSolve
@@ -1093,6 +1105,7 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
 
   PetscFunctionReturn(0);
 }
+#endif /* USE_PETSC */
 
 /* Solve compressible Stokes flow using
  * bi-conjugate gradient stablized (BiCG-stab) iterations
@@ -1436,10 +1449,11 @@ static void solve_Ahat_p_fhat_iterCG(struct All_variables *E,
             for(i=0;i<neq;i++) old_v[m][i] = V[m][i];
             for(i=1;i<=npno;i++) old_p[m][i] = P[m][i];
         }
-
+#ifdef USE_PETSC
         if(E->control.use_petsc)
           solve_Ahat_p_fhat_CG_PETSc(E, V, P, F, imp, &cycles);
         else
+#endif
           solve_Ahat_p_fhat_CG(E, V, P, F, imp, &cycles);
 
 

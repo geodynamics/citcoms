@@ -1,3 +1,5 @@
+#ifdef USE_PETSC
+
 #include "global_defs.h"
 #include "element_definitions.h"
 #include "petsc_citcoms.h"
@@ -308,3 +310,5 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
+
+#endif /* USE_PETSC */

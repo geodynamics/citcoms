@@ -44,9 +44,11 @@ to functions across the whole filespace of CITCOM.
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+
+#ifdef USE_PETSC
 #include <petscksp.h>
 #include <petscsnes.h>
-
+#endif
 
 
 #ifdef USE_HDF5
@@ -558,13 +560,14 @@ struct CONTROL {
 
     int print_convergence;
     int sdepv_print_convergence;
-
+#ifdef USE_PETSC
     /* PETSc flags */
     int use_petsc;
     int petsc_linear;
     int petsc_nonlinear;
     int petsc_schur;
     float petsc_uzawa_tol;
+#endif
 };
 
 
@@ -752,6 +755,7 @@ struct All_variables {
 #include "viscosity_descriptions.h"
 #include "advection.h"
 
+#ifdef USE_PETSC
     /* PETSc related data structures */
     Mat   K, G, D, DC;
     KSP   ksp;
@@ -760,6 +764,7 @@ struct All_variables {
     Vec   PVec, NPVec, UVec, FVec;
     struct MatMultShell mtx_del2_u, mtx_grad_p, mtx_div_u, mtx_div_rho_u;
     struct MultiGrid_PC pcshell_ctx;
+#endif
 
     FILE *fp;
     FILE *fptime;

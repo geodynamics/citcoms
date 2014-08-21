@@ -30,7 +30,10 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 #include "drive_solvers.h"
+
+#ifdef USE_PETSC
 #include "petsc_citcoms.h"
+#endif
 
 double global_vdot();
 double vnorm_nonnewt();
@@ -52,6 +55,7 @@ void general_stokes_solver_setup(struct All_variables *E)
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	E->elt_k[i][m]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
 
+#ifdef USE_PETSC
   /*
    * PETSc related initialization
    */
@@ -149,6 +153,7 @@ void general_stokes_solver_setup(struct All_variables *E)
   /************************************************************
    * End PETSc Initialization
    ************************************************************/
+#endif
 }
 
 void general_stokes_solver(struct All_variables *E)
