@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-PetscErrorCode parallel_process_finalize();
+void parallel_process_finalize();
 void parallel_process_termination();
 void parallel_process_sync(struct All_variables *E);
 double CPU_time0();
