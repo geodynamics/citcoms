@@ -360,7 +360,7 @@ void remove_trace_3x3(double [3][3]);
 void get_9vec_from_3x3(double *, double [3][3]);
 void get_3x3_from_9vec(double [3][3], double *);
 /* Parallel_util.c */
-PetscErrorCode parallel_process_finalize(void);
+void parallel_process_finalize(void);
 void parallel_process_termination(void);
 void parallel_process_sync(struct All_variables *);
 double CPU_time0(void);

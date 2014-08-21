@@ -715,6 +715,7 @@ struct CITCOM_GNOMONIC {
 #endif
 #include "tracer_defs.h"
 
+#ifdef USE_PETSC
 /* PETSc MultiGrid Shell preconditioner */  
 struct MultiGrid_PC
 {
@@ -747,6 +748,7 @@ struct MatMultShell
   double *iData[NCS];
   double *oData[NCS];
 };
+#endif /* USE_PETSC */
 
 struct All_variables {
 

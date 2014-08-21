@@ -34,9 +34,13 @@
 /* ============================================ */
 /* ============================================ */
 
-PetscErrorCode parallel_process_finalize()
+void parallel_process_finalize()
 {
-  return PetscFinalize();
+#ifdef USE_PETSC
+  PetscFinalize();
+#else
+  MPI_Finalize();
+#endif
 }
 
 /* ============================================ */
@@ -44,8 +48,11 @@ PetscErrorCode parallel_process_finalize()
 
 void parallel_process_termination()
 {
-
+#ifdef USE_PETSC
   PetscFinalize();
+#else
+  MPI_Finalize();
+#endif
   exit(8);
 }
 
