@@ -81,7 +81,9 @@ AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC 
 AC_CHECK_HEADERS([malloc.h])
 
 if test "$want_petsc" = yes; then
-  CIT_PATH_PETSC(3.5.1,[CPPFLAGS="-DUSE_PETSC $CPPFLAGS"],[AC_MSG_ERROR([PETSc Library not found])])
+  CIT_PATH_PETSC(3.5.1,[CPPFLAGS="-DUSE_PETSC -I$PETSC_DIR/include -I$PETSC_DIR/$PETSC_ARCH/include $CPPFLAGS"],[AC_MSG_ERROR([PETSc Library not found])])
+  LDFLAGS="-L$PETSC_DIR/$PETSC_ARCH/lib $LDFLAGS"
+  LIBS="-lpetsc $LIBS"
 fi
 
 if test "$want_pyre" = yes; then
