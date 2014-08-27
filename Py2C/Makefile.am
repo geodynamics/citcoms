@@ -24,8 +24,13 @@
 # $Id$
 
 
-ACLOCAL_AMFLAGS = -I m4
+AM_CPPFLAGS = -std=c++11
 
-SUBDIRS = lib bin Py2C
+bin_PROGRAMS = ../bin/Py2C
+
+bin_SCRIPTS =
+
+######## C drivers ########
+Py2C_SOURCES = Py2CMain.cpp Py2C.cpp
 
 ## end of Makefile.am
