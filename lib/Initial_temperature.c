@@ -554,6 +554,57 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
     return;
 }
 
+static void add_perturbations_at_all_layers_B(struct All_variables *E)
+{
+  /*
+   * This method generates the initial temperature profile according to 
+   * equation (47) of the Zhong et. al. 2008 paper. (4,0)+(4,4) I.C. is
+   * hard coded
+   */
+
+    int m, i, j, k, node;
+    int p;
+    int nox, noy, noz, gnoz;
+    double r1, t1, f1, tlen, flen, rlen, con;
+
+    nox = E->lmesh.nox;
+    noy = E->lmesh.noy;
+    noz = E->lmesh.noz;
+    gnoz = E->mesh.noz;
+
+    rlen = M_PI / (E->sphere.ro - E->sphere.ri);
+
+    for (p=0; p<E->convection.number_of_perturbations; p++) {
+        con = E->convection.perturb_mag[p];
+
+        if (E->parallel.me_loc[1] == 0 && E->parallel.me_loc[2] == 0
+            && E->sphere.capid[1] == 1 )
+            fprintf(stderr,"Initial temperature perturbation:  mag=%g\n", con);
+
+        if(E->sphere.caps == 1) {
+          myerror(E, "add_pertubrbations_at_all_layers_B is not implemented for the Regional model");
+        }
+        else {
+            /* global mode, add spherical harmonics perturbation */
+
+            for(m=1; m<=E->sphere.caps_per_proc; m++)
+                for(i=1; i<=noy; i++)
+                    for(j=1; j<=nox;j ++)
+                        for(k=1; k<=noz; k++) {
+                            node = k + (j-1)*noz + (i-1)*nox*noz;
+                            t1 = E->sx[m][1][node];
+                            f1 = E->sx[m][2][node];
+                            r1 = E->sx[m][3][node];
+
+                            E->T[m][node] += con * (modified_plgndr_a(4,0,t1) + 
+                                (5.0/7.0)*cos(4*f1)*modified_plgndr_a(4,4,t1))
+                                * sin((r1-E->sphere.ri) * rlen);
+                        }
+        } /* end if */
+    } /* end for p */
+
+    return;
+}
 
 static void add_spherical_anomaly(struct All_variables *E)
 {
@@ -657,6 +708,12 @@ static void construct_tic_from_input(struct All_variables *E)
 #endif
         break;
     
+    case 6:
+        /* a conductive temperature profile + perturbations at all layers */
+        conductive_temperature_profile(E);
+        add_perturbations_at_all_layers_B(E);
+        break;
+
     case 10:
         /* T='mantle_temp' for whole mantle + cold lithosphere TBL
            + perturbations at some layers */
