@@ -26,7 +26,7 @@
 
 AM_CPPFLAGS = -std=c++11
 
-bin_PROGRAMS = ../bin/Py2C
+bin_PROGRAMS = Py2C
 
 bin_SCRIPTS =
 

@@ -139,6 +139,7 @@ AC_CONFIG_FILES([Makefile
                  examples/Makefile
                  lib/Makefile
                  tests/Makefile
+                 Py2C/Makefile
                  visual/Makefile
                  visual/OpenDXMacro/Makefile])
 
