@@ -24,7 +24,7 @@
 # $Id$
 
 
-AM_CPPFLAGS = -std=c++11
+AM_CPPFLAGS =
 
 bin_PROGRAMS = Py2C
 
