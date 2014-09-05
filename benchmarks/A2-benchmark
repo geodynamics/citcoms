@@ -1,15 +1,15 @@
 # CitcomS
 cpu_limits_in_seconds=360000000
-minstep=50001
+minstep=15001
 solver=full
 
 # CitcomS.controller
 checkpointFrequency=5000
-storage_spacing=100
+storage_spacing=50
 
 # CitcomS.solver
-datadir=A2-benchmark
-datafile=A2-benchmark
+datadir=/scratch/02204/rakuko/A2_02
+datafile=A2_02
 rayleigh=7.681755e4
 
 # CitcomS.solver.mesher
@@ -48,7 +48,7 @@ perturbl=3
 perturblayer=16
 perturbm=2
 perturbmag=0.01
-tic_method=0
+tic_method=3
 
 # CitcomS.solver.output
 output_ll_max=40
@@ -64,4 +64,3 @@ rheol=1
 visc0=1,1,1,1
 viscE=2.3026,2.3026,2.3026,2.3026
 viscT=0.5,0.5,0.5,0.5
-

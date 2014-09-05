@@ -1,15 +1,15 @@
 # CitcomS
 cpu_limits_in_seconds=360000000
-minstep=50001
+minstep=11001
 solver=full
 
 # CitcomS.controller
 checkpointFrequency=5000
-storage_spacing=100
+storage_spacing=50
 
 # CitcomS.solver
-datadir=A3-benchmark
-datafile=A3-benchmark
+datadir=/scratch/02204/rakuko/A3_07
+datafile=A3_07
 rayleigh=7.681755e4
 
 # CitcomS.solver.mesher
@@ -29,14 +29,6 @@ mgunitx=2
 mgunity=2
 mgunitz=2
 
-# CitcomS.solver.ic
-num_perturbations=1
-perturbl=3
-perturblayer=16
-perturbm=2
-perturbmag=0.01
-tic_method=0
-
 # CitcomS.solver.vsolver
 Solver=multigrid
 precond=on
@@ -49,6 +41,14 @@ vlowstep=400
 vhighstep=3
 max_mg_cycles=200
 piterations=1500
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=16
+perturbm=2
+perturbmag=0.01
+tic_method=3
 
 # CitcomS.solver.output
 output_ll_max=40
@@ -64,4 +64,3 @@ rheol=1
 visc0=1,1,1,1
 viscE=3.0,3.0,3.0,3.0
 viscT=0.5,0.5,0.5,0.5
-

@@ -1,6 +1,6 @@
 # CitcomS
 cpu_limits_in_seconds=360000000
-minstep=30001
+minstep=65001
 solver=full
 
 # CitcomS.controller
@@ -8,8 +8,8 @@ checkpointFrequency=5000
 storage_spacing=100
 
 # CitcomS.solver
-datadir=/scratch/02204/rakuko/A4_02
-datafile=A4_02
+datadir=/scratch/02204/rakuko/A9_01
+datafile=A9_01
 rayleigh=7.681755e4
 
 # CitcomS.solver.mesher
@@ -62,5 +62,6 @@ VISC_UPDATE=on
 num_mat=4
 rheol=1
 visc0=1,1,1,1
-viscE=4.6052,4.6052,4.6052,4.6052
+viscE=16.1181,16.1181,16.1181,16.1181
 viscT=0.5,0.5,0.5,0.5
+CDEPV=off
