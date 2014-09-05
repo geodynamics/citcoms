@@ -9,6 +9,12 @@ namespace
     else
       return 2*pow2(n-1);
   }
+  std::string to_string(int value)
+  {
+    std::ostringstream ostr;
+    ostr << value;
+    return ostr.str();
+  }
 }
 
 Parameter::Parameter() 
@@ -47,242 +53,242 @@ void Py2CConverter::initialize_parameters()
 {
   // CitcomS
   // minstep is called steps in the Python version
-  parameters["minstep"] =  {"1", "CitcomS"};
-  parameters["maxstep"] = {"1000", "CitcomS"};
-  parameters["maxtotstep"] = {"1000000", "CitcomS"};
-  parameters["cpu_limits_in_seconds"] = {"360000000", "CitcomS", true};
+  parameters["minstep"] =  Parameter("1", "CitcomS");
+  parameters["maxstep"] = Parameter("1000", "CitcomS");
+  parameters["maxtotstep"] = Parameter("1000000", "CitcomS");
+  parameters["cpu_limits_in_seconds"] = Parameter("360000000", "CitcomS", true);
 
-  parameters["solver"] = {"regional", "CitcomS"};
+  parameters["solver"] = Parameter("regional", "CitcomS");
   
   // CitcomS.controller
   // storage_spacing is called monitoringFrequency in the Python versions
-  parameters["storage_spacing"] = {"100", "CitcomS.controller"};
-  parameters["checkpointFrequency"] = {"100", "CitcomS.controller"};
+  parameters["storage_spacing"] = Parameter("100", "CitcomS.controller");
+  parameters["checkpointFrequency"] = Parameter("100", "CitcomS.controller");
   
   // CitcomS.solver
-  parameters["datadir"] = {"\".\"", "CitcomS.solver"};
-  parameters["datafile"] = {"\"regtest\"", "CitcomS.solver"};
-  parameters["datadir_old"] = {"\".\"", "CitcomS.solver"};
-  parameters["datafile_old"] = {"\"regtest\"", "CitcomS.solver"};
-  parameters["rayleigh"] = {"100000", "CitcomS.solver",true};
-  parameters["dissipation_number"] = {"0.0", "CitcomS.solver"};
-  parameters["gruneisen"] = {"0.0", "CitcomS.solver"};
-  parameters["surfaceT"] = {"0.1", "CitcomS.solver"};
-  parameters["Q0"] = {"0", "CitcomS.solver"};
-  parameters["stokes_flow_only"] = {"0", "CitcomS.solver"};
-  parameters["verbose"] = {"0", "CitcomS.solver"};
-  parameters["see_convergence"] = {"1", "CitcomS.solver"};
+  parameters["datadir"] = Parameter("\".\"", "CitcomS.solver");
+  parameters["datafile"] = Parameter("\"regtest\"", "CitcomS.solver");
+  parameters["datadir_old"] = Parameter("\".\"", "CitcomS.solver");
+  parameters["datafile_old"] = Parameter("\"regtest\"", "CitcomS.solver");
+  parameters["rayleigh"] = Parameter("100000", "CitcomS.solver",true);
+  parameters["dissipation_number"] = Parameter("0.0", "CitcomS.solver");
+  parameters["gruneisen"] = Parameter("0.0", "CitcomS.solver");
+  parameters["surfaceT"] = Parameter("0.1", "CitcomS.solver");
+  parameters["Q0"] = Parameter("0", "CitcomS.solver");
+  parameters["stokes_flow_only"] = Parameter("0", "CitcomS.solver");
+  parameters["verbose"] = Parameter("0", "CitcomS.solver");
+  parameters["see_convergence"] = Parameter("1", "CitcomS.solver");
 
   // CitcomS.solver.mesher
-  parameters["nproc_surf"] = {"1", "CitcomS.solver.mesher"};
-  parameters["nprocx"] = {"1","CitcomS.solver.mesher"};
-  parameters["nprocy"] = {"1","CitcomS.solver.mesher"};
-  parameters["nprocz"] = {"1","CitcomS.solver.mesher"};
-  parameters["coor"] = {"0","CitcomS.solver.mesher"};
-  parameters["coor_file"] = {"\"coor.dat\"","CitcomS.solver.mesher"};
-  parameters["coor_refine"] = {"0.1,0.15,0.1,0.2","CitcomS.solver.mesher"};
-  parameters["nodex"] = {"9","CitcomS.solver.mesher",true};
-  parameters["nodey"] = {"9","CitcomS.solver.mesher",true};
-  parameters["nodez"] = {"9","CitcomS.solver.mesher",true};
-  parameters["levels"] = {"1","CitcomS.solver.mesher"};
-  parameters["mgunitx"] = {"8", "CitcomS.solver.mesher"};
-  parameters["mgunity"] = {"8", "CitcomS.solver.mesher"};
-  parameters["mgunitz"] = {"8", "CitcomS.solver.mesher"};
-  parameters["radius_outer"] = {"1","CitcomS.solver.mesher"};
-  parameters["radius_inner"] = {"0.55","CitcomS.solver.mesher"};
-  parameters["theta_min"] = {"1.0708","CitcomS.solver.mesher",true};
-  parameters["theta_max"] = {"2.0708","CitcomS.solver.mesher",true};
-  parameters["fi_min"] = {"0","CitcomS.solver.mesher",true};
-  parameters["fi_max"] = {"1","CitcomS.solver.mesher",true};
-  parameters["r_grid_layers"] = {"1","CitcomS.solver.mesher"};
-  parameters["rr"] = {"1","CitcomS.solver.mesher"};
-  parameters["nr"] = {"1","CitcomS.solver.mesher"};
+  parameters["nproc_surf"] = Parameter("1", "CitcomS.solver.mesher");
+  parameters["nprocx"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["nprocy"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["nprocz"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["coor"] = Parameter("0","CitcomS.solver.mesher");
+  parameters["coor_file"] = Parameter("\"coor.dat\"","CitcomS.solver.mesher");
+  parameters["coor_refine"] = Parameter("0.1,0.15,0.1,0.2","CitcomS.solver.mesher");
+  parameters["nodex"] = Parameter("9","CitcomS.solver.mesher",true);
+  parameters["nodey"] = Parameter("9","CitcomS.solver.mesher",true);
+  parameters["nodez"] = Parameter("9","CitcomS.solver.mesher",true);
+  parameters["levels"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["mgunitx"] = Parameter("8", "CitcomS.solver.mesher");
+  parameters["mgunity"] = Parameter("8", "CitcomS.solver.mesher");
+  parameters["mgunitz"] = Parameter("8", "CitcomS.solver.mesher");
+  parameters["radius_outer"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["radius_inner"] = Parameter("0.55","CitcomS.solver.mesher");
+  parameters["theta_min"] = Parameter("1.0708","CitcomS.solver.mesher",true);
+  parameters["theta_max"] = Parameter("2.0708","CitcomS.solver.mesher",true);
+  parameters["fi_min"] = Parameter("0","CitcomS.solver.mesher",true);
+  parameters["fi_max"] = Parameter("1","CitcomS.solver.mesher",true);
+  parameters["r_grid_layers"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["rr"] = Parameter("1","CitcomS.solver.mesher");
+  parameters["nr"] = Parameter("1","CitcomS.solver.mesher");
 
   // CitcomS.solver.tsolver
-  parameters["ADV"] = {"1","CitcomS.solver.tsolver"};
-  parameters["filter_temp"] = {"0","CitcomS.solver.tsolver"};
-  parameters["monitor_max_T"] = {"1","CitcomS.solver.tsolver"};
-  parameters["finetunedt"] = {"0.9","CitcomS.solver.tsolver"};
-  parameters["fixed_timestep"] = {"0.0","CitcomS.solver.tsolver"};
-  parameters["adv_gamma"] = {"0.5","CitcomS.solver.tsolver"};
-  parameters["adv_sub_iterations"] = {"2","CitcomS.solver.tsolver"};
-  parameters["inputdiffusivity"] = {"1","CitcomS.solver.tsolver"};
+  parameters["ADV"] = Parameter("1","CitcomS.solver.tsolver");
+  parameters["filter_temp"] = Parameter("0","CitcomS.solver.tsolver");
+  parameters["monitor_max_T"] = Parameter("1","CitcomS.solver.tsolver");
+  parameters["finetunedt"] = Parameter("0.9","CitcomS.solver.tsolver");
+  parameters["fixed_timestep"] = Parameter("0.0","CitcomS.solver.tsolver");
+  parameters["adv_gamma"] = Parameter("0.5","CitcomS.solver.tsolver");
+  parameters["adv_sub_iterations"] = Parameter("2","CitcomS.solver.tsolver");
+  parameters["inputdiffusivity"] = Parameter("1","CitcomS.solver.tsolver");
   
   // CitcomS.solver.vsolver
-  parameters["Solver"] = {"cgrad","CitcomS.solver.vsolver"};
-  parameters["node_assemble"] = {"1","CitcomS.solver.vsolver"};
-  parameters["precond"] = {"1","CitcomS.solver.vsolver"};
-  parameters["accuracy"] = {"1.0e-4","CitcomS.solver.vsolver"};
-  parameters["uzawa"] = {"cg","CitcomS.solver.vsolver"};
-  parameters["compress_iter_maxstep"] = {"100","CitcomS.solver.vsolver"};
-  parameters["mg_cycle"] = {"1","CitcomS.solver.vsolver"};
-  parameters["down_heavy"] = {"3","CitcomS.solver.vsolver"};
-  parameters["up_heavy"] = {"3","CitcomS.solver.vsolver"};
-  parameters["vlowstep"] = {"1000","CitcomS.solver.vsolver"};
-  parameters["vhighstep"] = {"3","CitcomS.solver.vsolver"};
-  parameters["max_mg_cycles"] = {"50","CitcomS.solver.vsolver"};
-  parameters["piterations"] = {"1000","CitcomS.solver.vsolver"};
-  parameters["aug_lagr"] = {"1","CitcomS.solver.vsolver"};
-  parameters["aug_number"] = {"2000","CitcomS.solver.vsolver"};
-  parameters["remove_rigid_rotation"] = {"1","CitcomS.solver.vsolver"};
-  parameters["remove_angular_momentum"] = {"1","CitcomS.solver.vsolver"};
-  parameters["inner_accuracy_scale"] = {"1.0","CitcomS.solver.vsolver"};
-  parameters["check_continuity_convergence"] = {"1","CitcomS.solver.vsolver"};
-  parameters["check_pressure_convergence"] = {"1","CitcomS.solver.vsolver"};
-  parameters["only_check_vel_convergence"] = {"0","CitcomS.solver.vsolver"};
-  parameters["inner_remove_rigid_rotation"] = {"0","CitcomS.solver.vsolver"};
+  parameters["Solver"] = Parameter("cgrad","CitcomS.solver.vsolver");
+  parameters["node_assemble"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["precond"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["accuracy"] = Parameter("1.0e-4","CitcomS.solver.vsolver");
+  parameters["uzawa"] = Parameter("cg","CitcomS.solver.vsolver");
+  parameters["compress_iter_maxstep"] = Parameter("100","CitcomS.solver.vsolver");
+  parameters["mg_cycle"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["down_heavy"] = Parameter("3","CitcomS.solver.vsolver");
+  parameters["up_heavy"] = Parameter("3","CitcomS.solver.vsolver");
+  parameters["vlowstep"] = Parameter("1000","CitcomS.solver.vsolver");
+  parameters["vhighstep"] = Parameter("3","CitcomS.solver.vsolver");
+  parameters["max_mg_cycles"] = Parameter("50","CitcomS.solver.vsolver");
+  parameters["piterations"] = Parameter("1000","CitcomS.solver.vsolver");
+  parameters["aug_lagr"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["aug_number"] = Parameter("2000","CitcomS.solver.vsolver");
+  parameters["remove_rigid_rotation"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["remove_angular_momentum"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["inner_accuracy_scale"] = Parameter("1.0","CitcomS.solver.vsolver");
+  parameters["check_continuity_convergence"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["check_pressure_convergence"] = Parameter("1","CitcomS.solver.vsolver");
+  parameters["only_check_vel_convergence"] = Parameter("0","CitcomS.solver.vsolver");
+  parameters["inner_remove_rigid_rotation"] = Parameter("0","CitcomS.solver.vsolver");
 
   // CitcomS.solver.bc
-  parameters["side_sbcs"] = {"0","CitcomS.solver.bc"};
-  parameters["pseudo_free_surf"] = {"0","CitcomS.solver.bc"};
-  parameters["topvbc"] = {"0","CitcomS.solver.bc"};
-  parameters["topvbxval"] = {"0","CitcomS.solver.bc"};
-  parameters["topvbyval"] = {"0","CitcomS.solver.bc"};
-  parameters["botvbc"] = {"0","CitcomS.solver.bc"};
-  parameters["botvbxval"] = {"0","CitcomS.solver.bc"};
-  parameters["botvbyval"] = {"0","CitcomS.solver.bc"};
-  parameters["toptbc"] = {"1","CitcomS.solver.bc"};
-  parameters["toptbcval"] = {"0","CitcomS.solver.bc"};
-  parameters["bottbc"] = {"1","CitcomS.solver.bc"};
-  parameters["bottbcval"] = {"1","CitcomS.solver.bc"};
-  parameters["temperature_bound_adj"] = {"0","CitcomS.solver.bc"};
-  parameters["depth_bound_adj"] = {"0.157","CitcomS.solver.bc"};
-  parameters["width_bound_adj"] = {"0.08727","CitcomS.solver.bc"};
+  parameters["side_sbcs"] = Parameter("0","CitcomS.solver.bc");
+  parameters["pseudo_free_surf"] = Parameter("0","CitcomS.solver.bc");
+  parameters["topvbc"] = Parameter("0","CitcomS.solver.bc");
+  parameters["topvbxval"] = Parameter("0","CitcomS.solver.bc");
+  parameters["topvbyval"] = Parameter("0","CitcomS.solver.bc");
+  parameters["botvbc"] = Parameter("0","CitcomS.solver.bc");
+  parameters["botvbxval"] = Parameter("0","CitcomS.solver.bc");
+  parameters["botvbyval"] = Parameter("0","CitcomS.solver.bc");
+  parameters["toptbc"] = Parameter("1","CitcomS.solver.bc");
+  parameters["toptbcval"] = Parameter("0","CitcomS.solver.bc");
+  parameters["bottbc"] = Parameter("1","CitcomS.solver.bc");
+  parameters["bottbcval"] = Parameter("1","CitcomS.solver.bc");
+  parameters["temperature_bound_adj"] = Parameter("0","CitcomS.solver.bc");
+  parameters["depth_bound_adj"] = Parameter("0.157","CitcomS.solver.bc");
+  parameters["width_bound_adj"] = Parameter("0.08727","CitcomS.solver.bc");
 
   // CitcomS.solver.const
-  parameters["radius"] = {"6.371e+06", "CitcomS.solver.const"};
-  parameters["density"] = {"3340.0", "CitcomS.solver.const"};
-  parameters["thermdiff"] = {"1e-06", "CitcomS.solver.const"};
-  parameters["gravacc"] = {"9.81", "CitcomS.solver.const"};
-  parameters["thermexp"] = {"3e-05", "CitcomS.solver.const"};
-  parameters["refvisc"] = {"1e+21", "CitcomS.solver.const"};
-  parameters["cp"] = {"1200", "CitcomS.solver.const"};
-  parameters["density_above"] = {"1030.0", "CitcomS.solver.const"};
-  parameters["density_below"] = {"6600.0", "CitcomS.solver.const"};
-  parameters["z_lith"] = {"0.014", "CitcomS.solver.const"};
-  parameters["z_410"] = {"0.06435", "CitcomS.solver.const"};
-  parameters["z_lmantle"] = {"0.105", "CitcomS.solver.const"};
-  parameters["z_cmb"] = {"0.439", "CitcomS.solver.const"};
+  parameters["radius"] = Parameter("6.371e+06", "CitcomS.solver.const");
+  parameters["density"] = Parameter("3340.0", "CitcomS.solver.const");
+  parameters["thermdiff"] = Parameter("1e-06", "CitcomS.solver.const");
+  parameters["gravacc"] = Parameter("9.81", "CitcomS.solver.const");
+  parameters["thermexp"] = Parameter("3e-05", "CitcomS.solver.const");
+  parameters["refvisc"] = Parameter("1e+21", "CitcomS.solver.const");
+  parameters["cp"] = Parameter("1200", "CitcomS.solver.const");
+  parameters["density_above"] = Parameter("1030.0", "CitcomS.solver.const");
+  parameters["density_below"] = Parameter("6600.0", "CitcomS.solver.const");
+  parameters["z_lith"] = Parameter("0.014", "CitcomS.solver.const");
+  parameters["z_410"] = Parameter("0.06435", "CitcomS.solver.const");
+  parameters["z_lmantle"] = Parameter("0.105", "CitcomS.solver.const");
+  parameters["z_cmb"] = Parameter("0.439", "CitcomS.solver.const");
 
   // CitcomS.solver.ic
-  parameters["restart"] = {"0", "CitcomS.solver.ic"};
-  parameters["post_p"] = {"0", "CitcomS.solver.ic"};
-  parameters["solution_cycles_init"] = {"0", "CitcomS.solver.ic"};
-  parameters["zero_elapsed_time"] = {"1", "CitcomS.solver.ic"};
-  parameters["tic_method"] = {"0", "CitcomS.solver.ic"};
-  parameters["num_perturbations"] = {"1", "CitcomS.solver.ic",true};
-  parameters["perturbl"] = {"1", "CitcomS.solver.ic",true};
-  parameters["perturbm"] = {"1", "CitcomS.solver.ic",true};
-  parameters["perturblayer"] = {"5", "CitcomS.solver.ic",true};
-  parameters["perturbmag"] = {"0.05", "CitcomS.solver.ic",true};
-  parameters["half_space_age"] = {"40", "CitcomS.solver.ic"};
-  parameters["mantle_temp"] = {"1.0", "CitcomS.solver.ic"};
-  parameters["blob_center"] = {"[-999,-999,-999]", "CitcomS.solver.ic"};
-  parameters["blob_radius"] = {"0.063", "CitcomS.solver.ic"};
-  parameters["blob_dT"] = {"0.18", "CitcomS.solver.ic"};
+  parameters["restart"] = Parameter("0", "CitcomS.solver.ic");
+  parameters["post_p"] = Parameter("0", "CitcomS.solver.ic");
+  parameters["solution_cycles_init"] = Parameter("0", "CitcomS.solver.ic");
+  parameters["zero_elapsed_time"] = Parameter("1", "CitcomS.solver.ic");
+  parameters["tic_method"] = Parameter("0", "CitcomS.solver.ic");
+  parameters["num_perturbations"] = Parameter("1", "CitcomS.solver.ic",true);
+  parameters["perturbl"] = Parameter("1", "CitcomS.solver.ic",true);
+  parameters["perturbm"] = Parameter("1", "CitcomS.solver.ic",true);
+  parameters["perturblayer"] = Parameter("5", "CitcomS.solver.ic",true);
+  parameters["perturbmag"] = Parameter("0.05", "CitcomS.solver.ic",true);
+  parameters["half_space_age"] = Parameter("40", "CitcomS.solver.ic");
+  parameters["mantle_temp"] = Parameter("1.0", "CitcomS.solver.ic");
+  parameters["blob_center"] = Parameter("[-999,-999,-999]", "CitcomS.solver.ic");
+  parameters["blob_radius"] = Parameter("0.063", "CitcomS.solver.ic");
+  parameters["blob_dT"] = Parameter("0.18", "CitcomS.solver.ic");
 
   // CitcomS.solver.output
-  parameters["output_format"] = {"\"ascii\"", "CitcomS.solver.output"};
-  parameters["output_optional"] = {"\"surf,botm,tracer\"", "CitcomS.solver.output"};
-  parameters["output_ll_max"] = {"20", "CitcomS.solver.output"};
-  parameters["self_gravitation"] = {"0", "CitcomS.solver.output"};
-  parameters["use_cbf_topo"] = {"0", "CitcomS.solver.output"};
-  parameters["cb_block_size"] = {"1048576", "CitcomS.solver.output"};
-  parameters["cb_buffer_size"] = {"4194304", "CitcomS.solver.output"};
-  parameters["sieve_buf_size"] = {"1048576", "CitcomS.solver.output"};
-  parameters["output_alignment"] = {"262144", "CitcomS.solver.output"};
-  parameters["output_alignment_threshold"] = {"524288", "CitcomS.solver.output"};
-  parameters["cache_mdc_nelmts"] = {"10330", "CitcomS.solver.output"};
-  parameters["cache_rdcc_nelmts"] = {"521", "CitcomS.solver.output"};
-  parameters["cache_rdcc_nbytes"] = {"1048576", "CitcomS.solver.output"};
-  parameters["write_q_files"] = {"0", "CitcomS.solver.output"};
-  parameters["vtk_format"] = {"binary", "CitcomS.solver.output"};
-  parameters["gzdir_vtkio"] = {"1", "CitcomS.solver.output"};
-  parameters["gzdir_rnr"] = {"0", "CitcomS.solver.output"};
+  parameters["output_format"] = Parameter("\"ascii\"", "CitcomS.solver.output");
+  parameters["output_optional"] = Parameter("\"surf,botm,tracer\"", "CitcomS.solver.output");
+  parameters["output_ll_max"] = Parameter("20", "CitcomS.solver.output");
+  parameters["self_gravitation"] = Parameter("0", "CitcomS.solver.output");
+  parameters["use_cbf_topo"] = Parameter("0", "CitcomS.solver.output");
+  parameters["cb_block_size"] = Parameter("1048576", "CitcomS.solver.output");
+  parameters["cb_buffer_size"] = Parameter("4194304", "CitcomS.solver.output");
+  parameters["sieve_buf_size"] = Parameter("1048576", "CitcomS.solver.output");
+  parameters["output_alignment"] = Parameter("262144", "CitcomS.solver.output");
+  parameters["output_alignment_threshold"] = Parameter("524288", "CitcomS.solver.output");
+  parameters["cache_mdc_nelmts"] = Parameter("10330", "CitcomS.solver.output");
+  parameters["cache_rdcc_nelmts"] = Parameter("521", "CitcomS.solver.output");
+  parameters["cache_rdcc_nbytes"] = Parameter("1048576", "CitcomS.solver.output");
+  parameters["write_q_files"] = Parameter("0", "CitcomS.solver.output");
+  parameters["vtk_format"] = Parameter("binary", "CitcomS.solver.output");
+  parameters["gzdir_vtkio"] = Parameter("1", "CitcomS.solver.output");
+  parameters["gzdir_rnr"] = Parameter("0", "CitcomS.solver.output");
 
   // CitcomS.solver.param
-  parameters["reference_state"] = {"1", "CitcomS.solver.param"};
-  parameters["refstate_file"] = {"\"refstate.dat\"", "CitcomS.solver.param"};
-  parameters["mineral_physics_model"] = {"3", "CitcomS.solver.param"};
-  parameters["file_vbcs"] = {"0", "CitcomS.solver.param"};
-  parameters["vel_bound_file"] = {"\"bevel.dat\"", "CitcomS.solver.param"};
-  parameters["mat_control"] = {"0", "CitcomS.solver.param"};
-  parameters["mat_file"] = {"\"mat.dat\"", "CitcomS.solver.param"};
-  parameters["lith_age"] = {"0", "CitcomS.solver.param"};
-  parameters["lith_age_file"] = {"\"age.dat\"", "CitcomS.solver.param"};
-  parameters["lith_age_time"] = {"0", "CitcomS.solver.param"};
-  parameters["lith_age_depth"] = {"0.0314", "CitcomS.solver.param"};
-  parameters["start_age"] = {"40", "CitcomS.solver.param"};
-  parameters["reset_startage"] = {"0", "CitcomS.solver.param"};
-  parameters["file_tbcs"] = {"0", "CitcomS.solver.param"};
-  parameters["temp_bound_file"] = {"btemp.dat", "CitcomS.solver.param"};
+  parameters["reference_state"] = Parameter("1", "CitcomS.solver.param");
+  parameters["refstate_file"] = Parameter("\"refstate.dat\"", "CitcomS.solver.param");
+  parameters["mineral_physics_model"] = Parameter("3", "CitcomS.solver.param");
+  parameters["file_vbcs"] = Parameter("0", "CitcomS.solver.param");
+  parameters["vel_bound_file"] = Parameter("\"bevel.dat\"", "CitcomS.solver.param");
+  parameters["mat_control"] = Parameter("0", "CitcomS.solver.param");
+  parameters["mat_file"] = Parameter("\"mat.dat\"", "CitcomS.solver.param");
+  parameters["lith_age"] = Parameter("0", "CitcomS.solver.param");
+  parameters["lith_age_file"] = Parameter("\"age.dat\"", "CitcomS.solver.param");
+  parameters["lith_age_time"] = Parameter("0", "CitcomS.solver.param");
+  parameters["lith_age_depth"] = Parameter("0.0314", "CitcomS.solver.param");
+  parameters["start_age"] = Parameter("40", "CitcomS.solver.param");
+  parameters["reset_startage"] = Parameter("0", "CitcomS.solver.param");
+  parameters["file_tbcs"] = Parameter("0", "CitcomS.solver.param");
+  parameters["temp_bound_file"] = Parameter("btemp.dat", "CitcomS.solver.param");
 
   // CitcomS.solver.phase
-  parameters["Ra_410"] = {"0", "CitcomS.solver.phase"};
-  parameters["clapeyron410"] = {"0.0235", "CitcomS.solver.phase"};
-  parameters["transT410"] = {"0.78", "CitcomS.solver.phase"};
-  parameters["width410"] = {"0.0058", "CitcomS.solver.phase"};
-  parameters["Ra_670"] = {"0", "CitcomS.solver.phase"};
-  parameters["clapeyron670"] = {"-0.0235", "CitcomS.solver.phase"};
-  parameters["transT670"] = {"0.78", "CitcomS.solver.phase"};
-  parameters["width670"] = {"0.0058", "CitcomS.solver.phase"};
-  parameters["Ra_cmb"] = {"0", "CitcomS.solver.phase"};
-  parameters["clapeyroncmb"] = {"-0.0235", "CitcomS.solver.phase"};
-  parameters["transTcmb"] = {"0.875", "CitcomS.solver.phase"};
-  parameters["widthcmb"] = {"0.0058", "CitcomS.solver.phase"};
+  parameters["Ra_410"] = Parameter("0", "CitcomS.solver.phase");
+  parameters["clapeyron410"] = Parameter("0.0235", "CitcomS.solver.phase");
+  parameters["transT410"] = Parameter("0.78", "CitcomS.solver.phase");
+  parameters["width410"] = Parameter("0.0058", "CitcomS.solver.phase");
+  parameters["Ra_670"] = Parameter("0", "CitcomS.solver.phase");
+  parameters["clapeyron670"] = Parameter("-0.0235", "CitcomS.solver.phase");
+  parameters["transT670"] = Parameter("0.78", "CitcomS.solver.phase");
+  parameters["width670"] = Parameter("0.0058", "CitcomS.solver.phase");
+  parameters["Ra_cmb"] = Parameter("0", "CitcomS.solver.phase");
+  parameters["clapeyroncmb"] = Parameter("-0.0235", "CitcomS.solver.phase");
+  parameters["transTcmb"] = Parameter("0.875", "CitcomS.solver.phase");
+  parameters["widthcmb"] = Parameter("0.0058", "CitcomS.solver.phase");
 
   // CitcomS.solver.tracer
-  parameters["tracer"] = {"0", "Citcoms.Solver.tracer"};
-  parameters["tracer_ic_method"] = {"0", "Citcoms.Solver.tracer"};
-  parameters["tracers_per_element"] = {"10", "Citcoms.Solver.tracer"};
-  parameters["tracer_file"] = {"\"tracer.dat\"", "Citcoms.Solver.tracer"};
-  parameters["tracer_flavors"] = {"0", "Citcoms.Solver.tracer"};
-  parameters["ic_method_for_flavors"] = {"0", "Citcoms.Solver.tracer"};
-  parameters["z_interface"] = {"0.7", "Citcoms.Solver.tracer"};
-  parameters["itracer_warnings"] = {"1", "Citcoms.Solver.tracer"};
-  parameters["regular_grid_deltheta"] = {"1.0", "Citcoms.Solver.tracer"};
-  parameters["regular_grid_delphi"] = {"1.0", "Citcoms.Solver.tracer"};
-  parameters["chemical_buoyancy"] = {"1", "Citcoms.Solver.tracer"};
-  parameters["buoy_type"] = {"1", "Citcoms.Solver.tracer"};
-  parameters["buoyancy_ratio"] = {"1.0", "Citcoms.Solver.tracer"};
-  parameters["tracer_enriched"] = {"0", "Citcoms.Solver.tracer"};
-  parameters["Q0_enriched"] = {"0.0", "Citcoms.Solver.tracer"};
+  parameters["tracer"] = Parameter("0", "Citcoms.Solver.tracer");
+  parameters["tracer_ic_method"] = Parameter("0", "Citcoms.Solver.tracer");
+  parameters["tracers_per_element"] = Parameter("10", "Citcoms.Solver.tracer");
+  parameters["tracer_file"] = Parameter("\"tracer.dat\"", "Citcoms.Solver.tracer");
+  parameters["tracer_flavors"] = Parameter("0", "Citcoms.Solver.tracer");
+  parameters["ic_method_for_flavors"] = Parameter("0", "Citcoms.Solver.tracer");
+  parameters["z_interface"] = Parameter("0.7", "Citcoms.Solver.tracer");
+  parameters["itracer_warnings"] = Parameter("1", "Citcoms.Solver.tracer");
+  parameters["regular_grid_deltheta"] = Parameter("1.0", "Citcoms.Solver.tracer");
+  parameters["regular_grid_delphi"] = Parameter("1.0", "Citcoms.Solver.tracer");
+  parameters["chemical_buoyancy"] = Parameter("1", "Citcoms.Solver.tracer");
+  parameters["buoy_type"] = Parameter("1", "Citcoms.Solver.tracer");
+  parameters["buoyancy_ratio"] = Parameter("1.0", "Citcoms.Solver.tracer");
+  parameters["tracer_enriched"] = Parameter("0", "Citcoms.Solver.tracer");
+  parameters["Q0_enriched"] = Parameter("0.0", "Citcoms.Solver.tracer");
 
   // CitcomS.solver.visc
-  parameters["Viscosity"] = {"\"system\"", "CitcomS.solver.visc"};
-  parameters["visc_smooth_method"] = {"3", "CitcomS.solver.visc"};
-  parameters["VISC_UPDATE"] = {"1", "CitcomS.solver.visc"};
-  parameters["num_mat"] = {"4", "CitcomS.solver.visc",true};
-  parameters["visc0"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["TDEPV"] = {"0", "CitcomS.solver.visc"};
-  parameters["rheol"] = {"3", "CitcomS.solver.visc"};
-  parameters["viscE"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["viscT"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["viscZ"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["SDEPV"] = {"0", "CitcomS.solver.visc"};
-  parameters["sdepv_misfit"] = {"0.001", "CitcomS.solver.visc"};
-  parameters["sdepv_expt"] = {"1,1,1,1", "CitcomS.solver.visc"};
-  parameters["PDEPV"] = {"0", "CitcomS.solver.visc"};
-  parameters["pdepv_a"] = {"1e20,1e20,1e20,1e20", "CitcomS.solver.visc"};
-  parameters["pdepv_b"] = {"0,0,0,0", "CitcomS.solver.visc"};
-  parameters["pdepv_y"] = {"1e20,1e20,1e20,1e20", "CitcomS.solver.visc"};
-  parameters["pdepv_eff"] = {"1", "CitcomS.solver.visc"};
-  parameters["pdepv_offset"] = {"0", "CitcomS.solver.visc"};
-  parameters["CDEPV"] = {"0", "CitcomS.solver.visc"};
-  parameters["cdepv_ff"] = {"1,1", "CitcomS.solver.visc"};
-  parameters["low_visc_channel"] = {"0", "CitcomS.solver.visc"};
-  parameters["low_visc_wedge"] = {"0", "CitcomS.solver.visc"};
-  parameters["lv_min_radius"] = {"0.9764", "CitcomS.solver.visc"};
-  parameters["lv_max_radius"] = {"0.9921", "CitcomS.solver.visc"};
-  parameters["lv_channel_thickness"] = {"0.0047", "CitcomS.solver.visc"};
-  parameters["lv_reduction"] = {"0.5", "CitcomS.solver.visc"};
-  parameters["VMIN"] = {"0", "CitcomS.solver.visc"};
-  parameters["visc_min"] = {"0.001", "CitcomS.solver.visc"};
-  parameters["VMAX"] = {"0", "CitcomS.solver.visc"};
-  parameters["visc_max"] = {"1000", "CitcomS.solver.visc"};
-  parameters["z_layer"] = {"-999,-999,-999,-999", "CitcomS.solver.visc"};
-  parameters["visc_layer_control"] = {"0", "CitcomS.solver.visc"};
-  parameters["visc_layer_file"] = {"visc.dat", "CitcomS.solver.visc"};
+  parameters["Viscosity"] = Parameter("\"system\"", "CitcomS.solver.visc");
+  parameters["visc_smooth_method"] = Parameter("3", "CitcomS.solver.visc");
+  parameters["VISC_UPDATE"] = Parameter("1", "CitcomS.solver.visc");
+  parameters["num_mat"] = Parameter("4", "CitcomS.solver.visc",true);
+  parameters["visc0"] = Parameter("1,1,1,1", "CitcomS.solver.visc");
+  parameters["TDEPV"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["rheol"] = Parameter("3", "CitcomS.solver.visc");
+  parameters["viscE"] = Parameter("1,1,1,1", "CitcomS.solver.visc");
+  parameters["viscT"] = Parameter("1,1,1,1", "CitcomS.solver.visc");
+  parameters["viscZ"] = Parameter("1,1,1,1", "CitcomS.solver.visc");
+  parameters["SDEPV"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["sdepv_misfit"] = Parameter("0.001", "CitcomS.solver.visc");
+  parameters["sdepv_expt"] = Parameter("1,1,1,1", "CitcomS.solver.visc");
+  parameters["PDEPV"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["pdepv_a"] = Parameter("1e20,1e20,1e20,1e20", "CitcomS.solver.visc");
+  parameters["pdepv_b"] = Parameter("0,0,0,0", "CitcomS.solver.visc");
+  parameters["pdepv_y"] = Parameter("1e20,1e20,1e20,1e20", "CitcomS.solver.visc");
+  parameters["pdepv_eff"] = Parameter("1", "CitcomS.solver.visc");
+  parameters["pdepv_offset"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["CDEPV"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["cdepv_ff"] = Parameter("1,1", "CitcomS.solver.visc");
+  parameters["low_visc_channel"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["low_visc_wedge"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["lv_min_radius"] = Parameter("0.9764", "CitcomS.solver.visc");
+  parameters["lv_max_radius"] = Parameter("0.9921", "CitcomS.solver.visc");
+  parameters["lv_channel_thickness"] = Parameter("0.0047", "CitcomS.solver.visc");
+  parameters["lv_reduction"] = Parameter("0.5", "CitcomS.solver.visc");
+  parameters["VMIN"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["visc_min"] = Parameter("0.001", "CitcomS.solver.visc");
+  parameters["VMAX"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["visc_max"] = Parameter("1000", "CitcomS.solver.visc");
+  parameters["z_layer"] = Parameter("-999,-999,-999,-999", "CitcomS.solver.visc");
+  parameters["visc_layer_control"] = Parameter("0", "CitcomS.solver.visc");
+  parameters["visc_layer_file"] = Parameter("visc.dat", "CitcomS.solver.visc");
 }
 
 void Py2CConverter::load()
@@ -308,7 +314,7 @@ void Py2CConverter::load()
     {
       size_t pos = cfgline.find_first_of(';');
       if(pos != std::string::npos)
-	cfgline = cfgline.substr(0,pos);
+	      cfgline = cfgline.substr(0,pos);
       std::string name, value;
       pos = cfgline.find_first_of('=');
       assert(pos != std::string::npos); // parameter line without = is malformed
@@ -316,17 +322,15 @@ void Py2CConverter::load()
       value = cfgline.substr(pos+1);
 
       // trim any leading and trailing whitespaces from name and value
-      name.erase(std::remove_if(name.begin(), name.end(), ::isspace), 
-		 name.end());
-      value.erase(std::remove_if(value.begin(), value.end(), ::isspace), 
-		  value.end());
+      name.erase(std::remove_if(name.begin(), name.end(), ::isspace), name.end());
+      value.erase(std::remove_if(value.begin(), value.end(), ::isspace), value.end());
 
       // parse the name value pair, and record any unknown parameters
       if(!parse(name, value))
       {
-	std::ostringstream ostr;
-	ostr << "# unknown parameter " << name << " with value " << value;
-	log_messages.push_back(ostr.str());
+        std::ostringstream ostr;
+        ostr << "# unknown parameter " << name << " with value " << value;
+        log_messages.push_back(ostr.str());
       }
     }
   }
@@ -361,7 +365,7 @@ void Py2CConverter::check_and_fix_errors()
   // for the full spherical model, nprocx=nprocy, mgunitx=mgunity
   if(parameters["solver"].value == "full")
   {
-    if(std::stoi(parameters["nproc_surf"].value) != 12)
+    if(std::atoi(parameters["nproc_surf"].value.c_str()) != 12)
     {
       log_messages.push_back("# WARNING: incorrect value for nproc_surf found; "
 			     "setting it to 12");
@@ -387,7 +391,7 @@ void Py2CConverter::check_and_fix_errors()
   }
   else if(parameters["solver"].value == "regional")
   {
-    if(std::stoi(parameters["nproc_surf"].value) != 1)
+    if(std::atoi(parameters["nproc_surf"].value.c_str()) != 1)
     {
       log_messages.push_back("# WARNING: incorrect value for nproc_surf found; "
 			     "setting it to 1");
@@ -402,36 +406,33 @@ void Py2CConverter::check_and_fix_errors()
   {
     int nprocx, nprocy, nprocz, nodex, nodey, nodez;
     int mgunitx, mgunity, mgunitz, levels;
-    nprocx = std::stoi(parameters["nprocx"].value); 
-    nprocy = std::stoi(parameters["nprocy"].value);
-    nprocz = std::stoi(parameters["nprocz"].value);
-    nodex = std::stoi(parameters["nodex"].value); 
-    nodey = std::stoi(parameters["nodey"].value);
-    nodez = std::stoi(parameters["nodez"].value);
-    mgunitx = std::stoi(parameters["mgunitx"].value); 
-    mgunity = std::stoi(parameters["mgunity"].value);
-    mgunitz = std::stoi(parameters["mgunitz"].value);
-    levels = std::stoi(parameters["levels"].value);
+    nprocx = std::atoi(parameters["nprocx"].value.c_str()); 
+    nprocy = std::atoi(parameters["nprocy"].value.c_str());
+    nprocz = std::atoi(parameters["nprocz"].value.c_str());
+    nodex = std::atoi(parameters["nodex"].value.c_str()); 
+    nodey = std::atoi(parameters["nodey"].value.c_str());
+    nodez = std::atoi(parameters["nodez"].value.c_str());
+    mgunitx = std::atoi(parameters["mgunitx"].value.c_str()); 
+    mgunity = std::atoi(parameters["mgunity"].value.c_str());
+    mgunitz = std::atoi(parameters["mgunitz"].value.c_str());
+    levels = std::atoi(parameters["levels"].value.c_str());
 
     if(nodex != (1+nprocx*mgunitx*pow2(levels-1)))
     {
       log_messages.push_back("# WARNING: changing mgunitx value to satisfy eqn 6.7");
-      parameters["mgunitx"].value = 
-	std::to_string((nodex - 1)/(nprocx*pow2(levels-1)));
+      parameters["mgunitx"].value = to_string((nodex - 1)/(nprocx*pow2(levels-1)));
       parameters["mgunitx"].isDefault = false;
     }
     if(nodey != (1+nprocy*mgunity*pow2(levels-1)))
     {
       log_messages.push_back("# WARNING: changing mgunity value to satisfy eqn 6.7");
-      parameters["mgunity"].value = 
-	std::to_string((nodey - 1)/(nprocy*pow2(levels-1)));
+      parameters["mgunity"].value = to_string((nodey - 1)/(nprocy*pow2(levels-1)));
       parameters["mgunity"].isDefault = false;
     }
     if(nodez != (1+nprocz*mgunitz*pow2(levels-1)))
     {
       log_messages.push_back("# WARNING: changing mgunitz value to satisfy eqn 6.7");
-      parameters["mgunitz"].value = 
-	std::to_string((nodez - 1)/(nprocz*pow2(levels-1)));
+      parameters["mgunitz"].value = to_string((nodez - 1)/(nprocz*pow2(levels-1)));
       parameters["mgunitz"].isDefault = false;
     }
   }
@@ -439,29 +440,38 @@ void Py2CConverter::check_and_fix_errors()
 
 void Py2CConverter::save()
 {
+  std::list<std::string> all_sections;
+  all_sections.push_back(std::string("CitcomS")); 
+	all_sections.push_back(std::string("CitcomS.controller")); 
+  all_sections.push_back(std::string("CitcomS.solver"));
+	all_sections.push_back(std::string("CitcomS.solver.mesher")); 
+  all_sections.push_back(std::string("CitcomS.solver.tsolver"));
+	all_sections.push_back(std::string("CitcomS.solver.vsolver")); 
+  all_sections.push_back(std::string("CitcomS.solver.bc"));
+	all_sections.push_back(std::string("CitcomS.solver.const")); 
+  all_sections.push_back(std::string("CitcomS.solver.ic"));
+	all_sections.push_back(std::string("CitcomS.solver.output")); 
+  all_sections.push_back(std::string("CitcomS.solver.param"));
+	all_sections.push_back(std::string("CitcomS.solver.phase")); 
+  all_sections.push_back(std::string("CitcomS.solver.tracer"));
+	all_sections.push_back(std::string("CitcomS.solver.visc"));
 
-  for(const auto& secname : {std::string("CitcomS"), 
-	std::string("CitcomS.controller"), std::string("CitcomS.solver"),
-	std::string("CitcomS.solver.mesher"), std::string("CitcomS.solver.tsolver"),
-	std::string("CitcomS.solver.vsolver"), std::string("CitcomS.solver.bc"),
-	std::string("CitcomS.solver.const"), std::string("CitcomS.solver.ic"),
-	std::string("CitcomS.solver.output"), std::string("CitcomS.solver.param"),
-	std::string("CitcomS.solver.phase"), std::string("CitcomS.solver.tracer"),
-	std::string("CitcomS.solver.visc")})
+  std::list<std::string>::const_iterator citer;
+  for(citer = all_sections.begin(); citer != all_sections.end(); ++citer)
   {
 
     // check if atleast one parameter in this section has been changed from its
     // default value
-    if(section_names.count(secname) > 0)
+    if(section_names.count(*citer) > 0)
     {
-      fout << "# " << secname << std::endl;
-      for(auto p = parameters.begin(); p != parameters.end(); ++p)
+      fout << "# " << *citer << std::endl;
+      std::map<std::string, Parameter>::const_iterator p;
+      for(p = parameters.begin(); p != parameters.end(); ++p)
       {
-	if((p->second.section == secname) && 
-	   ((!p->second.isDefault)||(p->second.cRequired)))
-	{
-	  fout << p->first << "=" << p->second.value << std::endl;
-	}
+        if((p->second.section == *citer) && ((!p->second.isDefault)||(p->second.cRequired)))
+        {
+          fout << p->first << "=" << p->second.value << std::endl;
+        }
       }
       fout << std::endl;
     }
@@ -470,56 +480,66 @@ void Py2CConverter::save()
       // check if there are any cRequired parameters in this section or any 
       // parameters that have been changed from their default values
       std::vector<std::string> namevals;
-      namevals.push_back(secname);
-      for(auto p = parameters.begin(); p != parameters.end(); ++p)
+      namevals.push_back(*citer);
+      std::map<std::string, Parameter>::const_iterator p;
+      for(p = parameters.begin(); p != parameters.end(); ++p)
       {
-	if((p->second.section == secname) && 
-	   ((p->second.cRequired)||(!p->second.isDefault)))
-	{
-	  namevals.push_back(p->first + "=" + p->second.value);
-	}
+        if((p->second.section == *citer) && ((p->second.cRequired)||(!p->second.isDefault)))
+        {
+          namevals.push_back(p->first + "=" + p->second.value);
+        }
       }
       if(namevals.size() > 1)
       {
-	fout << "# " << namevals[0] << std::endl;
-	for(size_t ndx=1; ndx < namevals.size(); ++ndx)
-	{
-	  fout << namevals[ndx] << std::endl;
-	}
-	fout << std::endl;
+        fout << "# " << namevals[0] << std::endl;
+        for(size_t ndx=1; ndx < namevals.size(); ++ndx)
+        {
+          fout << namevals[ndx] << std::endl;
+        }
+        fout << std::endl;
       }
     }
   }
 
   // write out all the log messages at the end of the config file
-  for(const auto& msg : log_messages)
-    fout << msg << std::endl;
+  for(citer = log_messages.begin(); citer != log_messages.end(); ++citer)
+    fout << (*citer) << std::endl;
 }
 
 void Py2CConverter::save_all()
 {
+  std::list<std::string> all_sections;
+  all_sections.push_back(std::string("CitcomS")); 
+	all_sections.push_back(std::string("CitcomS.controller")); 
+  all_sections.push_back(std::string("CitcomS.solver"));
+	all_sections.push_back(std::string("CitcomS.solver.mesher")); 
+  all_sections.push_back(std::string("CitcomS.solver.tsolver"));
+	all_sections.push_back(std::string("CitcomS.solver.vsolver")); 
+  all_sections.push_back(std::string("CitcomS.solver.bc"));
+	all_sections.push_back(std::string("CitcomS.solver.const")); 
+  all_sections.push_back(std::string("CitcomS.solver.ic"));
+	all_sections.push_back(std::string("CitcomS.solver.output")); 
+  all_sections.push_back(std::string("CitcomS.solver.param"));
+	all_sections.push_back(std::string("CitcomS.solver.phase")); 
+  all_sections.push_back(std::string("CitcomS.solver.tracer"));
+	all_sections.push_back(std::string("CitcomS.solver.visc"));
 
-  for(const auto& secname : {std::string("CitcomS"), 
-	std::string("CitcomS.controller"), std::string("CitcomS.solver"),
-	std::string("CitcomS.solver.mesher"), std::string("CitcomS.solver.tsolver"),
-	std::string("CitcomS.solver.vsolver"), std::string("CitcomS.solver.bc"),
-	std::string("CitcomS.solver.const"), std::string("CitcomS.solver.ic"),
-	std::string("CitcomS.solver.output"), std::string("CitcomS.solver.param"),
-	std::string("CitcomS.solver.phase"), std::string("CitcomS.solver.tracer"),
-	std::string("CitcomS.solver.visc")})
+  std::list<std::string>::const_iterator citer;
+  for(citer = all_sections.begin(); citer != all_sections.end(); ++citer)
   {
 
-    fout << "# " << secname << std::endl;
-    for(auto p = parameters.begin(); p != parameters.end(); ++p)
+    fout << "# " << *citer << std::endl;
+    std::map<std::string, Parameter>::const_iterator p;
+    for(p = parameters.begin(); p != parameters.end(); ++p)
     {
-      if((p->second.section == secname))
+      if((p->second.section == *citer))
       {
-	fout << p->first << "=" << p->second.value << std::endl;
+        fout << p->first << "=" << p->second.value << std::endl;
       }
     }
     fout << std::endl;
   }
   // write out all the log messages at the end of the config file
-  for(const auto& msg : log_messages)
-    fout << msg << std::endl;
+  for(citer = log_messages.begin(); citer != log_messages.end(); ++citer)
+    fout << (*citer) << std::endl;
 }
