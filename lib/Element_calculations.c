@@ -430,6 +430,7 @@ void assemble_del2_u(E,u,Au,level,strip_bcs)
      int level;
      int strip_bcs;
 {
+
   void e_assemble_del2_u();
   void n_assemble_del2_u();
 
@@ -472,10 +473,9 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 	a2 = E->ID[level][m][ii].doff[2];
 	a3 = E->ID[level][m][ii].doff[3];
 	for(b=1;b<=ends;b++) {
-	        nodeb = E->IEN[level][m][e].node[b];
-	        ii = (a*n+b)*dims-(dims*n+dims);
-			/* i=1, j=1,2 */
-	          /* i=1, j=1,2,3 */
+	  nodeb = E->IEN[level][m][e].node[b];
+	  ii = (a*n+b)*dims-(dims*n+dims);
+	  /* i=1, j=1,2,3 */
 		Au[m][a1] +=
 		        E->elt_k[level][m][e].k[ii] *
 			u[m][E->ID[level][m][nodeb].doff[1]]
@@ -541,10 +541,8 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 
-     for(e=0;e<=neq;e++)
-	Au[m][e]=0.0;
-
-     u[m][neq] = 0.0;
+     for(e=0;e<neq;e++)
+      Au[m][e]=0.0;
 
      for(e=1;e<=nno;e++)     {
 
