@@ -665,11 +665,12 @@ void assemble_c_u(struct All_variables *E,
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(a=1;a<=ends;a++) {
             p = (a-1)*dims;
-            for(e=1;e<=nel;e++) {
+            for(e=0;e<nel;e++) {
                 b = E->IEN[level][m][e].node[a];
                 j1= E->ID[level][m][b].doff[1];
                 j2= E->ID[level][m][b].doff[2];
                 j3= E->ID[level][m][b].doff[3];
+
                 result[m][e] += E->elt_c[level][m][e].c[p  ][0] * U[m][j1]
                               + E->elt_c[level][m][e].c[p+1][0] * U[m][j2]
                               + E->elt_c[level][m][e].c[p+2][0] * U[m][j3];
