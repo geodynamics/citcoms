@@ -184,7 +184,8 @@ static void solve_Ahat_p_fhat(struct All_variables *E,
   {
     if(E->control.petsc_schur) // use Schur complement reduction
     {
-      solve_Ahat_p_fhat_PETSc_Schur(E, V, P, F, imp, steps_max);
+      myerror(E, "Schur complement reduction approach is not implemented yet");
+      //solve_Ahat_p_fhat_PETSc_Schur(E, V, P, F, imp, steps_max);
     }
     else                       // use the Uzawa algorithm
     {
