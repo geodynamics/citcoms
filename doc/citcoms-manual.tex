@@ -1440,6 +1440,17 @@ commands:
 You may need to set \texttt{GMTHOME} and \texttt{NETCDFHOME} environment
 variables if these packages is not installed in the system directory.
 
+\section{PETSc Configuration (Optional)}
+
+To use the PETSc functionality in CitcomS, CitcomS first needs to be built with the PETSc library. This
+is done by passing \texttt{--with-petsc=yes} option to the \texttt{configure} script. If this option is 
+passed to \texttt{configure}, \texttt{configure} expects PETSc to be installed correctly on the system,
+with the environment variables \texttt{PETSC\_DIR} and \texttt{PETSC\_ARCH} being set appropriately.
+\texttt{configure} will check for the \texttt{PETSC\_DIR} and \texttt{PETSC\_ARCH} only if the 
+\texttt{--with-petsc=yes} option has been passed to the script.
+
+The PETSc homepage is \url{http://www.mcs.anl.gov/petsc/} and information about installing PETSc can be found at
+\url{http://www.mcs.anl.gov/petsc/documentation/installation.html}
 
 \section{\label{sec:Batch-System-Configuration}Batch System Configuration}
 
@@ -5750,6 +5761,18 @@ r\texttt{\small{adius=6371e3}}~\\
 \texttt{\small{Geometry=sphere}} & For this version of CitcomS, all of these parameters must be set as
 indicated.\tabularnewline
 \hline 
+\end{tabular}
+
+\subsection{PETSc Related Flags}
+
+
+\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
+\hline 
+\texttt{\small{use\_petsc=off}} & Set to \texttt{on} to use PETSc functionality. Turning on this flag only will\\
+                                  cause the PETSc version of the Uzawa algorithm to be used in the Stokes solver
+                                  \tabularnewline\hline
+\texttt{\small{petsc\_schur=off}} & Set to \texttt{on} to use the ``Schur complement reduction'' approach in\\
+                                  the Stokes solver\tabularnewline\hline 
 \end{tabular}
 
 
