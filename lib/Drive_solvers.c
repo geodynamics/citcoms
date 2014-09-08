@@ -156,6 +156,29 @@ void general_stokes_solver_setup(struct All_variables *E)
 #endif
 }
 
+#ifdef USE_PETSC
+void general_stokes_solver_teardown(struct All_variables *E)
+{
+  KSPDestroy(&E->ksp);
+
+  MatDestroy(&E->K);
+  MatDestroy(&E->G);
+  MatDestroy(&E->D);
+  MatDestroy(&E->DC);
+
+  PetscFree( E->mtx_del2_u.iData[1] );
+  PetscFree( E->mtx_del2_u.oData[1] );
+  PetscFree( E->mtx_grad_p.iData[1] );
+  PetscFree( E->mtx_grad_p.oData[1] );
+  PetscFree( E->mtx_div_u.iData[1] );
+  PetscFree( E->mtx_div_u.oData[1] );
+  PetscFree( E->mtx_div_rho_u.iData[1] );
+  PetscFree( E->mtx_div_rho_u.oData[1] );
+  PetscFree( E->pcshell_ctx.V[1] );
+  PetscFree( E->pcshell_ctx.RR[1] );
+}
+#endif
+
 void general_stokes_solver(struct All_variables *E)
 {
   void solve_constrained_flow_iterative();

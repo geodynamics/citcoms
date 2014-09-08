@@ -137,6 +137,14 @@ int main(argc,argv)
       post_processing(E);
       (E->problem_output)(E, E->monitor.solution_cycles);
 
+#ifdef USE_PETSC
+      /* 
+       * cleanup all the PETSc related initializations done in 
+       * general_stokes_solver_setup()
+       */
+      general_stokes_solver_teardown(E);
+#endif
+
       citcom_finalize(E, 0);
   }
 
@@ -180,6 +188,13 @@ int main(argc,argv)
     if(E->control.tracer==1)
       tracer_advection(E);
     (E->problem_output)(E, E->monitor.solution_cycles);
+#ifdef USE_PETSC
+      /* 
+       * cleanup all the PETSc related initializations done in 
+       * general_stokes_solver_setup()
+       */
+      general_stokes_solver_teardown(E);
+#endif
     citcom_finalize(E, 0);
   }
 
@@ -295,6 +310,13 @@ int main(argc,argv)
     fprintf(E->fp,"Average cpu time taken for velocity step = %f\n",
 	    cpu_time_on_vp_it/((float)(E->monitor.solution_cycles-E->control.restart)));
   }
+#ifdef USE_PETSC
+  /* 
+   * cleanup all the PETSc related initializations done in 
+   * general_stokes_solver_setup()
+   */
+  general_stokes_solver_teardown(E);
+#endif
   citcom_finalize(E, 0);
   return(0);
 

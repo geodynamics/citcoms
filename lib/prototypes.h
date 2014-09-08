@@ -97,6 +97,9 @@ void hc_ludcmp_3x3(double [3][3], int, int *);
 void hc_lubksb_3x3(double [3][3], int, int *, double *);
 /* Drive_solvers.c */
 void general_stokes_solver_setup(struct All_variables *);
+#ifdef USE_PETSC
+void general_stokes_solver_teardown(struct All_variables *);
+#endif
 void general_stokes_solver(struct All_variables *);
 int need_visc_update(struct All_variables *);
 int need_to_iterate(struct All_variables *);
