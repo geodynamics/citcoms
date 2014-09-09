@@ -713,8 +713,8 @@ void assemble_div_u(struct All_variables *E,
     const int npno=E->lmesh.NPNO[level];
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(e=1;e<=npno;e++)
-	divU[m][e] = 0.0;
+    for(e=0;e<npno;e++)
+      divU[m][e] = 0.0;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
        for(a=1;a<=ends;a++)   {
@@ -730,7 +730,6 @@ void assemble_div_u(struct All_variables *E,
 	    }
 	 }
 
-    return;
 }
 
 
