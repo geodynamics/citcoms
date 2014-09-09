@@ -170,7 +170,6 @@ void full_construct_boundary(struct All_variables *);
 int solve_del2_u(struct All_variables *, double **, double **, double, int);
 double multi_grid(struct All_variables *, double **, double **, double, int);
 double conj_grad(struct All_variables *, double **, double **, double, int *, int);
-void element_gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
 void gauss_seidel(struct All_variables *, double **, double **, double **, double, int *, int, int);
 double determinant(double [4][4], int);
 double cofactor(double [4][4], int, int, int);
