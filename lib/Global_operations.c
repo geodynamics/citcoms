@@ -622,9 +622,10 @@ double global_p_norm2(struct All_variables *E,  double **P)
     temp = 0.0;
     prod = 0.0;
     for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
-            /* L2 norm */
-            temp += P[m][i] * P[m][i] * E->eco[m][i].area;
+        for (i=0; i<E->lmesh.npno; i++) {
+            /* L2 norm */ 
+            /* should be E->eco[m][i].area after E->eco hase been made 0-based */
+            temp += P[m][i] * P[m][i] * E->eco[m][i+1].area;
         }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
