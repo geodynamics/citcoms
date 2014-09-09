@@ -577,7 +577,7 @@ double global_pdot(E,A,B,lev)
   prod = 0.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     npno=E->lmesh.NPNO[lev];
-    for (i=1;i<=npno;i++)
+    for (i=0;i<npno;i++)
       temp += A[m][i]*B[m][i];
     }
 
