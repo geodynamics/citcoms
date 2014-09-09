@@ -1153,16 +1153,16 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)   {
         F[m] = (double *)malloc(neq*sizeof(double));
-        r1[m] = (double *)malloc((npno+1)*sizeof(double));
-        r2[m] = (double *)malloc((npno+1)*sizeof(double));
-        pt[m] = (double *)malloc((npno+1)*sizeof(double));
-        p1[m] = (double *)malloc((npno+1)*sizeof(double));
-        p2[m] = (double *)malloc((npno+1)*sizeof(double));
-        rt[m] = (double *)malloc((npno+1)*sizeof(double));
-        v0[m] = (double *)malloc((npno+1)*sizeof(double));
-        s0[m] = (double *)malloc((npno+1)*sizeof(double));
-        st[m] = (double *)malloc((npno+1)*sizeof(double));
-        t0[m] = (double *)malloc((npno+1)*sizeof(double));
+        r1[m] = (double *)malloc((npno)*sizeof(double));
+        r2[m] = (double *)malloc((npno)*sizeof(double));
+        pt[m] = (double *)malloc((npno)*sizeof(double));
+        p1[m] = (double *)malloc((npno)*sizeof(double));
+        p2[m] = (double *)malloc((npno)*sizeof(double));
+        rt[m] = (double *)malloc((npno)*sizeof(double));
+        v0[m] = (double *)malloc((npno)*sizeof(double));
+        s0[m] = (double *)malloc((npno)*sizeof(double));
+        st[m] = (double *)malloc((npno)*sizeof(double));
+        t0[m] = (double *)malloc((npno)*sizeof(double));
 
         u0[m] = (double *)malloc(neq*sizeof(double));
     }
@@ -1206,7 +1206,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     /* initial conjugate residual rt = r1 */
     for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(j=1; j<=npno; j++)
+        for(j=0; j<npno; j++)
             rt[m][j] = r1[m][j];
 
 
@@ -1229,13 +1229,13 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
         /* update search direction */
         if(count == 0)
             for (m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
+                for(j=0; j<npno; j++)
                     p2[m][j] = r1[m][j];
         else {
             /* p2 = r1 + <r1,rt>/<r0,rt> * alpha/omega * (p1 - omega*v0) */
             beta = (r1dotrt / r0dotrt) * (alpha / omega);
             for(m=1; m<=E->sphere.caps_per_proc; m++)
-                for(j=1; j<=npno; j++)
+                for(j=0; j<npno; j++)
                     p2[m][j] = r1[m][j] + beta
                         * (p1[m][j] - omega * v0[m][j]);
         }
@@ -1243,8 +1243,9 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* preconditioner BPI ~= inv(K), pt = BPI*p2 */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                pt[m][j] = E->BPI[lev][m][j] * p2[m][j];
+            for(j=0; j<npno; j++)
+                /* change to E->BPI[lev][m][j] after it has been made 0-based */
+                pt[m][j] = E->BPI[lev][m][j+1] * p2[m][j];
 
 
         /* solve K*u0 = grad(pt) for u1 */
@@ -1267,14 +1268,15 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* s0 = r1 - alpha * v0 */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
+            for(j=0; j<npno; j++)
                 s0[m][j] = r1[m][j] - alpha * v0[m][j];
 
 
         /* preconditioner BPI ~= inv(K), st = BPI*s0 */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
-                st[m][j] = E->BPI[lev][m][j] * s0[m][j];
+            for(j=0; j<npno; j++)
+                /* change to E->BPI[lev][m][j] after it has been made 0-based */
+                st[m][j] = E->BPI[lev][m][j+1] * s0[m][j];
 
 
         /* solve K*u1 = grad(st) for u1 */
@@ -1297,17 +1299,17 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* r2 = s0 - omega * t0 */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
+            for(j=0; j<npno; j++)
                 r2[m][j] = s0[m][j] - omega * t0[m][j];
 
 
         /* P = P + alpha * pt + omega * st */
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
+            for(j=0; j<npno; j++)
                 s0[m][j] = alpha * pt[m][j] + omega * st[m][j];
 
         for(m=1; m<=E->sphere.caps_per_proc; m++)
-            for(j=1; j<=npno; j++)
+            for(j=0; j<npno; j++)
                 P[m][j] += s0[m][j];
 
 
@@ -1398,9 +1400,6 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
     }
 
     *steps_max=count;
-
-    return;
-
 }
 
 
