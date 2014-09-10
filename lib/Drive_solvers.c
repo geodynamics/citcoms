@@ -90,20 +90,20 @@ void general_stokes_solver_setup(struct All_variables *E)
   E->pcshell_ctx.acc = 1e-6;
   E->pcshell_ctx.level = lev;
 
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.iData[1] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_del2_u.oData[1] );
-  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_grad_p.iData[1] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_grad_p.oData[1] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_u.iData[1] );
-  PetscMalloc( (nel+1)*sizeof(double), &E->mtx_div_u.oData[1] );
-  PetscMalloc( (neq+1)*sizeof(double), &E->mtx_div_rho_u.iData[1] );
-  PetscMalloc( (npno+1)*sizeof(double), &E->mtx_div_rho_u.oData[1] );
+  PetscMalloc( neq*sizeof(double), &E->mtx_del2_u.iData[1] );
+  PetscMalloc( neq*sizeof(double), &E->mtx_del2_u.oData[1] );
+  PetscMalloc( nel*sizeof(double), &E->mtx_grad_p.iData[1] );
+  PetscMalloc( neq*sizeof(double), &E->mtx_grad_p.oData[1] );
+  PetscMalloc( neq*sizeof(double), &E->mtx_div_u.iData[1] );
+  PetscMalloc( nel*sizeof(double), &E->mtx_div_u.oData[1] );
+  PetscMalloc( neq*sizeof(double), &E->mtx_div_rho_u.iData[1] );
+  PetscMalloc( npno*sizeof(double), &E->mtx_div_rho_u.oData[1] );
   PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.V[1] );
   PetscMalloc( (E->lmesh.NEQ[lev])*sizeof(double), &E->pcshell_ctx.RR[1] );
 
   // Create a Matrix shell for the K matrix
   MatCreateShell( PETSC_COMM_WORLD, 
-			            neq+1, neq+1,
+			            neq, neq,
 			            PETSC_DETERMINE, PETSC_DETERMINE,
 			            (void *)&E->mtx_del2_u, 
 			            &E->K );
@@ -112,7 +112,7 @@ void general_stokes_solver_setup(struct All_variables *E)
 
   // Create a Matrix shell for the G matrix
   MatCreateShell( PETSC_COMM_WORLD, 
-			            neq+1, nel,
+			            neq, nel,
 			            PETSC_DETERMINE, PETSC_DETERMINE,
 			            (void *)&E->mtx_grad_p, 
 			            &E->G );
@@ -121,7 +121,7 @@ void general_stokes_solver_setup(struct All_variables *E)
 
   // Create a Matrix shell for the D matrix
   MatCreateShell( PETSC_COMM_WORLD, 
-			            nel, neq+1,
+			            nel, neq,
 			            PETSC_DETERMINE, PETSC_DETERMINE,
 			            (void *)&E->mtx_div_u, 
 			            &E->D );
@@ -130,7 +130,7 @@ void general_stokes_solver_setup(struct All_variables *E)
 
   // Create a Matrix shell for the DC matrix
   MatCreateShell( PETSC_COMM_WORLD, 
-			            npno, neq+1,
+			            npno, neq,
 			            PETSC_DETERMINE, PETSC_DETERMINE,
 			            (void *)&E->mtx_div_rho_u, 
 			            &E->DC );
@@ -216,7 +216,7 @@ void general_stokes_solver(struct All_variables *E)
       delta_U[m] = (double *)malloc(neq*sizeof(double));
       oldU[m] = (double *)malloc(neq*sizeof(double));
       for(i=0;i<neq;i++)
-	oldU[m][i]=0.0;
+        oldU[m][i]=0.0;
     }
 
     Udot_mag=dUdot_mag=0.0;
