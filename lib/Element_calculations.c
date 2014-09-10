@@ -659,7 +659,7 @@ void assemble_c_u(struct All_variables *E,
     const int dims = E->mesh.nsd;
     const int npno = E->lmesh.NPNO[level];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
+    for(m=1;m<=E->sphere.caps_per_proc;m++) {
         for(a=1;a<=ends;a++) {
             p = (a-1)*dims;
             for(e=0;e<nel;e++) {
@@ -668,13 +668,12 @@ void assemble_c_u(struct All_variables *E,
                 j2= E->ID[level][m][b].doff[2];
                 j3= E->ID[level][m][b].doff[3];
 
-                result[m][e] += E->elt_c[level][m][e].c[p  ][0] * U[m][j1]
-                              + E->elt_c[level][m][e].c[p+1][0] * U[m][j2]
-                              + E->elt_c[level][m][e].c[p+2][0] * U[m][j3];
+                result[m][e] += E->elt_c[level][m][e+1].c[p  ][0] * U[m][j1]
+                              + E->elt_c[level][m][e+1].c[p+1][0] * U[m][j2]
+                              + E->elt_c[level][m][e+1].c[p+2][0] * U[m][j3];
             }
         }
-
-    return;
+    }
 }
 
 

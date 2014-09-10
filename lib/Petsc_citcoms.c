@@ -44,9 +44,9 @@ double global_p_norm2_PETSc( struct All_variables *E,  Vec p )
     ierr = VecGetArray( p, &P ); CHKERRQ( ierr );
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
+        for (i=0; i<E->lmesh.npno; i++) {
             /* L2 norm */
-            temp += P[i] * P[i] * E->eco[m][i].area;
+            temp += P[i] * P[i] * E->eco[m][i+1].area;
         }
     ierr = VecRestoreArray( p, &P ); CHKERRQ( ierr );
 
@@ -67,9 +67,9 @@ double global_div_norm2_PETSc( struct All_variables *E,  Vec a )
 
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
+        for (i=0; i<E->lmesh.npno; i++) {
             /* L2 norm of div(u) */
-            temp += A[i] * A[i] / E->eco[m][i].area;
+            temp += A[i] * A[i] / E->eco[m][i+1].area;
 
             /* L1 norm */
             /*temp += fabs(A[i]);*/
@@ -86,8 +86,7 @@ double global_div_norm2_PETSc( struct All_variables *E,  Vec a )
    Note that the storage is not zero'd before assembling.
    =====================================================  */
 
-PetscErrorCode assemble_c_u_PETSc( struct All_variables *E,
-                         Vec U, Vec result, int level )
+PetscErrorCode assemble_c_u_PETSc( struct All_variables *E, Vec U, Vec result, int level )
 //                  double **U, double **result, int level)
 {
     int e,j1,j2,j3,p,a,b,m;
@@ -106,15 +105,15 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E,
   for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
-      for(e=1;e<=nel;e++) {
-        b = E->IEN[level][m][e].node[a];
+      for(e=0;e<nel;e++) {
+        b = E->IEN[level][m][e+1].node[a];
         j1= E->ID[level][m][b].doff[1];
         j2= E->ID[level][m][b].doff[2];
         j3= E->ID[level][m][b].doff[3];
 
-        result_temp[e]  += E->elt_c[level][m][e].c[p  ][0] * U_temp[j1]
-                         + E->elt_c[level][m][e].c[p+1][0] * U_temp[j2]
-                         + E->elt_c[level][m][e].c[p+2][0] * U_temp[j3];
+        result_temp[e]  += E->elt_c[level][m][e+1].c[p  ][0] * U_temp[j1]
+                         + E->elt_c[level][m][e+1].c[p+1][0] * U_temp[j2]
+                         + E->elt_c[level][m][e+1].c[p+2][0] * U_temp[j3];
       }
     }
   }
@@ -214,9 +213,9 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
 
 PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
 {
-  // K is (neq+1) x (neq+1)
-  // U is (neq+1)
-  // KU is (neq+1)
+  // K is neq x neq
+  // U is neq x 1
+  // KU is neq x 1
   int i, j, neq;
   PetscErrorCode ierr;
   PetscScalar *UData, *KUData;
@@ -224,13 +223,13 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   MatShellGetContext( K, (void **)&ctx );
   neq = ctx->iSize; // ctx->iSize SHOULD be the same as ctx->oSize
   ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
-  for(j = 0; j <=neq; j++)
+  for(j = 0; j <neq; j++)
     ctx->iData[1][j] = UData[j];
   ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_del2_u( ctx->E, ctx->iData, ctx->oData, ctx->level, 1 );
   ierr = VecGetArray(KU, &KUData); CHKERRQ(ierr);
-  for(j = 0; j <= neq; j++)
+  for(j = 0; j < neq; j++)
     KUData[j] = ctx->oData[1][j];
   ierr = VecRestoreArray(KU, &KUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
@@ -238,9 +237,9 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
 
 PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
 {
-  // G is (neq+1) x (nel)
-  // P is (nel) x 1
-  // GP is (neq+1) x 1 of which first neq entries (0:neq-1) are actual values
+  // G is neq x nel
+  // P is nel x 1
+  // GP is neq x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
   PetscScalar *PData, *GPData;
@@ -250,7 +249,7 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   neq = ctx->oSize;
   ierr = VecGetArray(P, &PData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    ctx->iData[1][j+1] = PData[j];
+    ctx->iData[1][j] = PData[j];
   ierr = VecRestoreArray(P, &PData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_grad_p( ctx->E, ctx->iData, ctx->oData, ctx->level );
@@ -263,8 +262,8 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
 
 PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
 {
-  // D is nel x (neq+1)
-  // U is (neq+1) x 1, of which first neq values (0:neq-1) are actual values
+  // D is nel x neq
+  // U is neq x 1
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
@@ -281,15 +280,15 @@ PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
   assemble_div_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
   ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    DUData[j] = ctx->oData[1][j+1];
+    DUData[j] = ctx->oData[1][j];
   ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
 
 PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
 {
-  // DC is nel x (neq+1)
-  // U is (neq+1) x 1, of which first neq values (0:neq-1) are actual values
+  // DC is nel x neq
+  // U is neq x 1
   // DU is nel x 1
   int i, j, neq, nel;
   PetscErrorCode ierr;
@@ -306,7 +305,7 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   assemble_div_rho_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
   ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    DUData[j] = ctx->oData[1][j+1];
+    DUData[j] = ctx->oData[1][j];
   ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }

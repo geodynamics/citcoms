@@ -10,11 +10,8 @@
 extern "C" {
 #endif
 
-void strip_bcs_from_residual_PETSc( 
-    struct All_variables *E, Vec Res, int level );
-PetscErrorCode initial_vel_residual_PETSc( struct All_variables *E,
-                                 Vec V, Vec P, Vec F,
-                                 double acc );
+void strip_bcs_from_residual_PETSc(struct All_variables *E, Vec Res, int level);
+PetscErrorCode initial_vel_residual_PETSc(struct All_variables *E, Vec V, Vec P, Vec F, double acc);
 double global_v_norm2_PETSc( struct All_variables *E, Vec v );
 double global_p_norm2_PETSc( struct All_variables *E, Vec p );
 double global_div_norm2_PETSc( struct All_variables *E,  Vec a );
