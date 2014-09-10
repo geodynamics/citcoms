@@ -757,31 +757,27 @@ void assemble_grad_p(E,P,gradP,lev)
     for(i=0;i<neq;i++)
       gradP[m][i] = 0.0;
 
-    for(e=1;e<=nel;e++) {
+    for(e=0;e<nel;e++) {
+      if(0.0==P[m][e])
+        continue;
 
-	if(0.0==P[m][e])
-	    continue;
-
-	for(a=1;a<=ends;a++)       {
-	     p = (a-1)*dims;
-	     b = E->IEN[lev][m][e].node[a];
-	     j1= E->ID[lev][m][b].doff[1];
-	     j2= E->ID[lev][m][b].doff[2];
-	     j3= E->ID[lev][m][b].doff[3];
-		        /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
-             gradP[m][j1] += E->elt_del[lev][m][e].g[p  ][0] * P[m][e];
-             gradP[m][j2] += E->elt_del[lev][m][e].g[p+1][0] * P[m][e];
-             gradP[m][j3] += E->elt_del[lev][m][e].g[p+2][0] * P[m][e];
-	     }
-        }       /* end for el */
-     }       /* end for m */
+      for(a=1;a<=ends;a++) {
+         p = (a-1)*dims;
+         b = E->IEN[lev][m][e+1].node[a];
+         j1= E->ID[lev][m][b].doff[1];
+         j2= E->ID[lev][m][b].doff[2];
+         j3= E->ID[lev][m][b].doff[3];
+              /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
+         gradP[m][j1] += E->elt_del[lev][m][e+1].g[p  ][0] * P[m][e];
+         gradP[m][j2] += E->elt_del[lev][m][e+1].g[p+1][0] * P[m][e];
+         gradP[m][j3] += E->elt_del[lev][m][e+1].g[p+2][0] * P[m][e];
+      }
+    }       /* end for el */
+  }       /* end for m */
 
   (E->solver.exchange_id_d)(E, gradP,  lev); /*  correct gradP   */
 
-
   strip_bcs_from_residual(E,gradP,lev);
-
-return;
 }
 
 
