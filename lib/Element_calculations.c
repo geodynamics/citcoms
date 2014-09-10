@@ -712,24 +712,24 @@ void assemble_div_u(struct All_variables *E,
     const int dims=E->mesh.nsd;
     const int npno=E->lmesh.NPNO[level];
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-    for(e=0;e<npno;e++)
-      divU[m][e] = 0.0;
+    for(m=1;m<=E->sphere.caps_per_proc;m++)
+      for(e=0;e<npno;e++)
+        divU[m][e] = 0.0;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
-       for(a=1;a<=ends;a++)   {
-	  p = (a-1)*dims;
-          for(e=1;e<=nel;e++) {
-	    b = E->IEN[level][m][e].node[a];
-	    j1= E->ID[level][m][b].doff[1];
-            j2= E->ID[level][m][b].doff[2];
-	    j3= E->ID[level][m][b].doff[3];
-	    divU[m][e] += E->elt_del[level][m][e].g[p  ][0] * U[m][j1]
-	                + E->elt_del[level][m][e].g[p+1][0] * U[m][j2]
-	                + E->elt_del[level][m][e].g[p+2][0] * U[m][j3];
-	    }
-	 }
-
+    for(m=1;m<=E->sphere.caps_per_proc;m++) {
+      for(a=1;a<=ends;a++) {
+        p = (a-1)*dims;
+        for(e=0;e<nel;e++) {
+          b = E->IEN[level][m][e+1].node[a];
+          j1= E->ID[level][m][b].doff[1];
+          j2= E->ID[level][m][b].doff[2];
+          j3= E->ID[level][m][b].doff[3];
+          divU[m][e] += E->elt_del[level][m][e+1].g[p  ][0] * U[m][j1]
+                      + E->elt_del[level][m][e+1].g[p+1][0] * U[m][j2]
+                      + E->elt_del[level][m][e+1].g[p+2][0] * U[m][j3];
+        }
+      }
+    }
 }
 
 
