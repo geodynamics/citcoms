@@ -242,7 +242,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   double time0 = CPU_time0();
 
   // Create the force Vec
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &FF ); 
   CHKERRQ(ierr);
   double *FF_data;
   ierr = VecGetArray( FF, &FF_data ); CHKERRQ( ierr );
@@ -258,10 +258,10 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   ierr = VecSet( PVec, 0.0 ); CHKERRQ( ierr );
 
   /* create the velocity vector and copy contents of V into it */
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &VVec ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &VVec ); 
   CHKERRQ(ierr);
   ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
-  for( i = 0; i <= neq; i++ )
+  for( i = 0; i < neq; i++ )
     V_data[i] = V[1][i];
   ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
 
@@ -313,13 +313,13 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   /* copy the values of VVec and PVec into V and P */
   /*-----------------------------------------------*/
   ierr = VecGetArray( VVec, &V_data ); CHKERRQ( ierr );
-  for( i = 0; i <= neq; i++ )
+  for( i = 0; i < neq; i++ )
     V[1][i] = V_data[i];
   ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
   
   ierr = VecGetArray( PVec, &P_data ); CHKERRQ( ierr );
   for( i = 0; i < nel; i++ )
-    P[1][i+1] = P_data[i]; 
+    P[1][i] = P_data[i]; 
   ierr = VecRestoreArray( PVec, &P_data ); CHKERRQ( ierr );
 
   /*---------------------------------------------------------------------*/
@@ -637,7 +637,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   count = 0;
 
   // Create the force Vec
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &FF ); 
   CHKERRQ(ierr);
   double *F_tmp;
   ierr = VecGetArray( FF, &F_tmp ); CHKERRQ( ierr );
@@ -653,14 +653,14 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   ierr = VecSet( P_k, 0.0 ); CHKERRQ( ierr );
 
   // create the velocity vector
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &V_k ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &V_k ); 
   CHKERRQ(ierr);
 
   // Copy the contents of V into V_k
   PetscScalar *V_k_tmp;
   ierr = VecGetArray( V_k, &V_k_tmp ); CHKERRQ( ierr );
   for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
-    for( i = 0; i <= neq; i++ )
+    for( i = 0; i < neq; i++ )
       V_k_tmp[i] = V[m][i];
   }
   ierr = VecRestoreArray( V_k, &V_k_tmp ); CHKERRQ( ierr );
@@ -709,8 +709,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   }
 
   E->monitor.vdotv = global_v_norm2_PETSc( E, V_k );
-  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r_1 )
-                                       / (1e-32 + E->monitor.vdotv) );
+  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r_1 ) / (1e-32 + E->monitor.vdotv) );
 
   v_norm = sqrt( E->monitor.vdotv );
   p_norm = sqrt( E->monitor.pdotp );
@@ -779,10 +778,8 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
       E->monitor.pdotp = global_p_norm2_PETSc( E, P_k );
       v_norm = sqrt( E->monitor.vdotv );
       p_norm = sqrt( E->monitor.pdotp );
-      dvelocity = alpha * sqrt( global_v_norm2_PETSc( E, u_k ) /
-                                (1e-32 + E->monitor.vdotv) );
-      dpressure = alpha * sqrt( global_p_norm2_PETSc( E, s_2 ) /
-                                (1e-32 + E->monitor.pdotp) );
+      dvelocity = alpha * sqrt( global_v_norm2_PETSc( E, u_k ) / (1e-32 + E->monitor.vdotv) );
+      dpressure = alpha * sqrt( global_p_norm2_PETSc( E, s_2 ) / (1e-32 + E->monitor.pdotp) );
 
       // compute the updated value of z_1, z1 = div(V) 
       ierr = MatMult( E->D, V_k, z_1 ); CHKERRQ( ierr );
@@ -792,8 +789,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
         ierr = VecAXPY( z_1, 1.0, cu ); CHKERRQ( ierr );
       }
 
-      E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, z_1 )
-                                           / (1e-32 + E->monitor.vdotv) );
+      E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, z_1 ) / (1e-32 + E->monitor.vdotv) );
 
       count++;
 
@@ -820,7 +816,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   PetscReal *P_tmp, *V_tmp;
   ierr = VecGetArray( V_k, &V_tmp ); CHKERRQ( ierr );
   for( m = 1; m <= E->sphere.caps_per_proc; ++m ) {
-    for( i = 0; i <= neq; i++ )
+    for( i = 0; i < neq; i++ )
       V[m][i] = V_tmp[i];
   }
   ierr = VecRestoreArray( V_k, &V_tmp ); CHKERRQ( ierr );
@@ -875,7 +871,7 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   int nel = E->lmesh.nel;
   
   // Create the force Vec
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &FF ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &FF ); 
   CHKERRQ(ierr);
   double *F_tmp;
   ierr = VecGetArray( FF, &F_tmp ); CHKERRQ( ierr );
@@ -897,14 +893,14 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   ierr = VecSet( P0, 0.0 ); CHKERRQ( ierr );
 
   // create the velocity vector
-  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &V0 ); 
+  ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &V0 ); 
   CHKERRQ(ierr);
 
   // Copy the contents of V into V0
   PetscScalar *V0_tmp;
   ierr = VecGetArray( V0, &V0_tmp ); CHKERRQ( ierr );
   for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
-    for( i = 0; i <= neq; i++ )
+    for( i = 0; i < neq; i++ )
       V0_tmp[i] = V[m][i];
   }
   ierr = VecRestoreArray( V0, &V0_tmp ); CHKERRQ( ierr );
@@ -923,8 +919,7 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   ierr = MatMult( E->DC, V0, r1 ); CHKERRQ( ierr );
 
   E->monitor.vdotv = global_v_norm2_PETSc( E, V0 );
-  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r1 )
-                                       / (1e-32 + E->monitor.vdotv) );
+  E->monitor.incompressibility = sqrt( global_div_norm2_PETSc( E, r1 ) / (1e-32 + E->monitor.vdotv) );
   v_norm = sqrt( E->monitor.vdotv );
   p_norm = sqrt( E->monitor.pdotp );
   dvelocity = 1.0;
@@ -1038,10 +1033,8 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
     E->monitor.pdotp = global_p_norm2_PETSc(E, P0);
     v_norm = sqrt( E->monitor.vdotv );
     p_norm = sqrt( E->monitor.pdotp );
-    dvelocity = sqrt( global_v_norm2_PETSc( E, u1 ) / 
-                      (1e-32 + E->monitor.vdotv) );
-    dpressure = sqrt( global_p_norm2_PETSc( E, st ) / 
-                      (1e-32 + E->monitor.pdotp) );
+    dvelocity = sqrt( global_v_norm2_PETSc( E, u1 ) / (1e-32 + E->monitor.vdotv) );
+    dpressure = sqrt( global_p_norm2_PETSc( E, st ) / (1e-32 + E->monitor.pdotp) );
 
 
     ierr = MatMult( E->DC, V0, t0 ); CHKERRQ( ierr );
@@ -1074,7 +1067,7 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   ierr = VecGetArray( V0, &V_tmp ); CHKERRQ( ierr );
   for( m=1; m<=E->sphere.caps_per_proc; ++m ) {
     for( i = 0; i < neq; i++ )
-      V[m][i+1] = V_tmp[i]; 
+      V[m][i] = V_tmp[i]; 
   }
   ierr = VecRestoreArray( V0, &V_tmp ); CHKERRQ( ierr );
   

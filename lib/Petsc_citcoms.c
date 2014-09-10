@@ -149,7 +149,7 @@ PetscErrorCode initial_vel_residual_PETSc( struct All_variables *E,
     PetscErrorCode ierr;
 
     Vec u1;
-    ierr = VecCreateMPI( PETSC_COMM_WORLD, neq+1, PETSC_DECIDE, &u1 ); 
+    ierr = VecCreateMPI( PETSC_COMM_WORLD, neq, PETSC_DECIDE, &u1 ); 
     CHKERRQ( ierr );
 
     /* F = F - grad(P) - K*V */
