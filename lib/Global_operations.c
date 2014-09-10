@@ -643,9 +643,9 @@ double global_div_norm2(struct All_variables *E,  double **A)
     temp = 0.0;
     prod = 0.0;
     for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.npno; i++) {
+        for (i=0; i<E->lmesh.npno; i++) {
             /* L2 norm of div(u) */
-            temp += A[m][i] * A[m][i] / E->eco[m][i].area;
+            temp += A[m][i] * A[m][i] / E->eco[m][i+1].area;
 
             /* L1 norm */
             /*temp += fabs(A[m][i]);*/

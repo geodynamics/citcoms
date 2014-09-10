@@ -1152,16 +1152,16 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
     for (m=1; m<=E->sphere.caps_per_proc; m++)   {
         F[m] = (double *)malloc(neq*sizeof(double));
-        r1[m] = (double *)malloc((npno)*sizeof(double));
-        r2[m] = (double *)malloc((npno)*sizeof(double));
-        pt[m] = (double *)malloc((npno)*sizeof(double));
-        p1[m] = (double *)malloc((npno)*sizeof(double));
-        p2[m] = (double *)malloc((npno)*sizeof(double));
-        rt[m] = (double *)malloc((npno)*sizeof(double));
-        v0[m] = (double *)malloc((npno)*sizeof(double));
-        s0[m] = (double *)malloc((npno)*sizeof(double));
-        st[m] = (double *)malloc((npno)*sizeof(double));
-        t0[m] = (double *)malloc((npno)*sizeof(double));
+        r1[m] = (double *)malloc(npno*sizeof(double));
+        r2[m] = (double *)malloc(npno*sizeof(double));
+        pt[m] = (double *)malloc(npno*sizeof(double));
+        p1[m] = (double *)malloc(npno*sizeof(double));
+        p2[m] = (double *)malloc(npno*sizeof(double));
+        rt[m] = (double *)malloc(npno*sizeof(double));
+        v0[m] = (double *)malloc(npno*sizeof(double));
+        s0[m] = (double *)malloc(npno*sizeof(double));
+        st[m] = (double *)malloc(npno*sizeof(double));
+        t0[m] = (double *)malloc(npno*sizeof(double));
 
         u0[m] = (double *)malloc(neq*sizeof(double));
     }
@@ -1235,8 +1235,7 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
             beta = (r1dotrt / r0dotrt) * (alpha / omega);
             for(m=1; m<=E->sphere.caps_per_proc; m++)
                 for(j=0; j<npno; j++)
-                    p2[m][j] = r1[m][j] + beta
-                        * (p1[m][j] - omega * v0[m][j]);
+                    p2[m][j] = r1[m][j] + beta*(p1[m][j] - omega*v0[m][j]);
         }
 
 
