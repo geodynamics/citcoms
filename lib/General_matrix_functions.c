@@ -465,8 +465,6 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     const int noy=E->lmesh.NOZ[level];
     const int max_eqn=14*dims;
 
-    const double zeroo = 0.0;
-
     steps=*cycles;
     sor = 1.3;
 
@@ -476,7 +474,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     else
       for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for(i=0;i<neq;i++) {
-	    d0[m][i]=Ad[m][i]=zeroo;
+	    d0[m][i]=Ad[m][i]=0.0;
 	}
 
     count = 0;
@@ -485,10 +483,10 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     while (count < steps) {
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(j=0;j<=E->lmesh.NEQ[level];j++)
-          E->temp[m][j] = zeroo;
+          E->temp[m][j] = 0.0;
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
-          Ad[m][neq] = zeroo;
+          Ad[m][neq] = 0.0;
 
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(i=1;i<=E->lmesh.NNO[level];i++)
@@ -497,6 +495,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][m][i].doff[1];
 	    eqn2=E->ID[level][m][i].doff[2];
 	    eqn3=E->ID[level][m][i].doff[3];
+    
 	    E->temp[m][eqn1] = (F[m][eqn1] - Ad[m][eqn1])*E->BI[level][m][eqn1];
 	    E->temp[m][eqn2] = (F[m][eqn2] - Ad[m][eqn2])*E->BI[level][m][eqn2];
 	    E->temp[m][eqn3] = (F[m][eqn3] - Ad[m][eqn3])*E->BI[level][m][eqn3];
@@ -504,7 +503,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    E->temp1[m][eqn2] = Ad[m][eqn2];
 	    E->temp1[m][eqn3] = Ad[m][eqn3];
             }
-
+      
       for (m=1;m<=E->sphere.caps_per_proc;m++)
  	for(i=1;i<=E->lmesh.NNO[level];i++)     {
 
