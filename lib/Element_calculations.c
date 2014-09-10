@@ -778,10 +778,7 @@ void assemble_grad_p(E,P,gradP,lev)
 }
 
 
-double assemble_dAhatp_entry(E,e,level,m)
-     struct All_variables *E;
-     int e,level,m;
-
+double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m)
 {
     int i,j,p,a,b,node,npno;
     void strip_bcs_from_residual();
@@ -794,22 +791,22 @@ double assemble_dAhatp_entry(E,e,level,m)
     npno=E->lmesh.NPNO[level];
 
     for(i=0;i<81;i++)
-	gradP[i] = 0.0;
+    	gradP[i] = 0.0;
 
     divU=0.0;
 
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
-      node = E->IEN[level][m][e].node[a];
+      node = E->IEN[level][m][e+1].node[a];
       j=E->ID[level][m][node].doff[1];
-      gradP[p] += E->BI[level][m][j]*E->elt_del[level][m][e].g[p][0];
+      gradP[p] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p][0];
 
       j=E->ID[level][m][node].doff[2];
-      gradP[p+1] += E->BI[level][m][j]*E->elt_del[level][m][e].g[p+1][0];
+      gradP[p+1] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p+1][0];
 
       j=E->ID[level][m][node].doff[3];
-      gradP[p+2] += E->BI[level][m][j]*E->elt_del[level][m][e].g[p+2][0];
-      }
+      gradP[p+2] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p+2][0];
+    }
 
 
     /* calculate div U from the same thing .... */
@@ -821,12 +818,13 @@ double assemble_dAhatp_entry(E,e,level,m)
 
     for(b=1;b<=ends;b++) {
       p = (b-1)*dims;
-      divU +=E->elt_del[level][m][e].g[p][0] * gradP[p];
-      divU +=E->elt_del[level][m][e].g[p+1][0] * gradP[p+1];
-      divU +=E->elt_del[level][m][e].g[p+2][0] * gradP[p+2];
-      }
+      divU +=E->elt_del[level][m][e+1].g[p][0] * gradP[p];
+      divU +=E->elt_del[level][m][e+1].g[p+1][0] * gradP[p+1];
+      divU +=E->elt_del[level][m][e+1].g[p+2][0] * gradP[p+2];
+    }
 
-return(divU);  }
+    return(divU);  
+}
 
 
 /*==============================================================
