@@ -613,37 +613,34 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
   return;
 }
 
-void build_diagonal_of_Ahat(E)
-    struct All_variables *E;
+void build_diagonal_of_Ahat(struct All_variables *E)
 {
-    double assemble_dAhatp_entry();
+  double assemble_dAhatp_entry();
 
-    double BU;
-    int m,e,npno,neq,level;
+  double BU;
+  int m,e,npno,neq,level;
 
- for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++)
+  for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++)
 
-   for (m=1;m<=E->sphere.caps_per_proc;m++)    {
+    for (m=1;m<=E->sphere.caps_per_proc;m++) {
 
-     npno = E->lmesh.NPNO[level];
-     neq=E->lmesh.NEQ[level];
+      npno = E->lmesh.NPNO[level];
+      neq=E->lmesh.NEQ[level];
 
-     for(e=1;e<=npno;e++)
-	E->BPI[level][m][e]=1.0;
+      for(e=0;e<npno;e++)
+        E->BPI[level][m][e+1]=1.0;
 
-     if(!E->control.precondition)
-	return;
+      if(!E->control.precondition)
+        return;
 
-     for(e=1;e<=npno;e++)  {
-	BU=assemble_dAhatp_entry(E,e,level,m);
-	if(BU != 0.0)
-	    E->BPI[level][m][e] = 1.0/BU;
-	else
-	    E->BPI[level][m][e] = 1.0;
-        }
-     }
-
-    return;
+      for(e=0;e<npno;e++) {
+        BU=assemble_dAhatp_entry(E,e,level,m);
+        if(BU != 0.0)
+	        E->BPI[level][m][e+1] = 1.0/BU;
+        else
+          E->BPI[level][m][e+1] = 1.0;
+      }
+    }
 }
 
 
