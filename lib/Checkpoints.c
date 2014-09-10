@@ -460,7 +460,7 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
      * and won't be used when read it. */
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points */
-        fwrite(E->P[m], sizeof(double), E->lmesh.npno+1, fp);
+        fwrite(E->P[m], sizeof(double), E->lmesh.npno, fp);
 
         /* velocity at equation points */
         fwrite(E->U[m], sizeof(double), E->lmesh.neq, fp);
@@ -488,7 +488,7 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         /* Pressure at equation points */
-      if(fread(E->P[m], sizeof(double), E->lmesh.npno+1, fp) !=  E->lmesh.npno+1)
+      if(fread(E->P[m], sizeof(double), E->lmesh.npno, fp) !=  E->lmesh.npno+1)
 	myerror(E,"read_momentum_checkpoint: error at P");
         /* velocity at equation points */
       if(fread(E->U[m], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)

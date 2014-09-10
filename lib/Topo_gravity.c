@@ -432,9 +432,9 @@ void compute_nodal_stress(struct All_variables *E,
       vor /= E->eco[m][e].area;
 
       /* add the pressure term */
-      Szz -= E->P[m][e];
-      Sxx -= E->P[m][e];
-      Syy -= E->P[m][e];
+      Szz -= E->P[m][e-1]; /* E->P is now 0-based. Change e-1 to e */
+      Sxx -= E->P[m][e-1]; /* when the loop variable e goes from */
+      Syy -= E->P[m][e-1]; /* 0 to nel-1, instead of the current 1 to nel */
 
       for(i=1;i<=ends;i++) {
         node = E->ien[m][e].node[i]; /* assign to global nodes */
@@ -1084,8 +1084,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 //      get_elt_g(E,el,eltg,lev,j);
 
       for(m=0;m<dims*ends;m++) {
-           res[m]  = eltf[m]  - E->elt_del[lev][j][el].g[m][0]  * E->P[j][el];
-           resb[m] = eltfb[m] - E->elt_del[lev][j][elb].g[m][0]* E->P[j][elb];
+           res[m]  = eltf[m]  - E->elt_del[lev][j][el].g[m][0]  * E->P[j][el-1];
+           resb[m] = eltfb[m] - E->elt_del[lev][j][elb].g[m][0]* E->P[j][elb-1];
 //           res[m]  = eltf[m] - eltg[m][0]  * E->P[j][el];
 //           resb[m] = eltfb[m] - eltgb[m][0]* E->P[j][elb];
             }
