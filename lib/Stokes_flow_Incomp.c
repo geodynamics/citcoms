@@ -308,6 +308,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   ierr = MatSchurComplementGetKSP(S, &inner_ksp); CHKERRQ(ierr);
   ierr = KSPSetInitialGuessNonzero(inner_ksp, PETSC_TRUE); CHKERRQ(ierr);
   ierr = KSPSolve(inner_ksp, fstar, VVec); CHKERRQ(ierr);
+  //strip_bcs_from_residual_PETSc( E, VVec, lev );
 
   /*-----------------------------------------------*/
   /* copy the values of VVec and PVec into V and P */
@@ -316,24 +317,27 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   for( i = 0; i < neq; i++ )
     V[1][i] = V_data[i];
   ierr = VecRestoreArray( VVec, &V_data ); CHKERRQ( ierr );
+  //velocities_conform_bcs( E, VVec, lev );
   
   ierr = VecGetArray( PVec, &P_data ); CHKERRQ( ierr );
   for( i = 0; i < nel; i++ )
     P[1][i] = P_data[i]; 
   ierr = VecRestoreArray( PVec, &P_data ); CHKERRQ( ierr );
 
-  /*---------------------------------------------------------------------*/
-  /* output v_norm values; all other values are currently not meaningful */
-  /*---------------------------------------------------------------------*/
+
+
+  /*---------------------------------------------------------------------------------------*/
+  /* output v_norm and p_norm values; dvelocity and dpressure are currently not meaningful */
+  /*---------------------------------------------------------------------------------------*/
   E->monitor.vdotv = global_v_norm2(E, V);
+  E->monitor.pdotp = global_p_norm2(E, P);
   double v_norm = sqrt(E->monitor.vdotv);
   double p_norm = sqrt(E->monitor.pdotp);
   double dvelocity = 1.0;
   double dpressure = 1.0;
   int converging = 0;
   if (E->control.print_convergence && E->parallel.me==0)  {
-    print_convergence_progress(E, count, time0, v_norm, p_norm,
-                                 dvelocity, dpressure, 1.0);
+    print_convergence_progress(E, count, time0, v_norm, p_norm, dvelocity, dpressure, 1.0);
   }
 
   PetscFunctionReturn(0);
