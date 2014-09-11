@@ -324,6 +324,16 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
     P[1][i] = P_data[i]; 
   ierr = VecRestoreArray( PVec, &P_data ); CHKERRQ( ierr );
 
+	if((E->sphere.caps == 12) && (E->control.inner_remove_rigid_rotation)){
+	  /* allow for removal of net rotation at each iterative step (expensive) */
+	  if(E->control.pseudo_free_surf) /* move from U to V */
+	    v_from_vector_pseudo_surf(E);
+	  else
+	    v_from_vector(E);
+	  remove_rigid_rot(E);	/* correct V */
+	  assign_v_to_vector(E); /* assign V to U */
+	}
+
 
 
   /*---------------------------------------------------------------------------------------*/
@@ -486,7 +496,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
             fputs("Warning: solver not converging! 1\n", stderr);
             fputs("Warning: solver not converging! 1\n", E->fp);
         }
-        strip_bcs_from_residual(E, E->u1, lev);
+        //strip_bcs_from_residual(E, E->u1, lev);
 
 
         /* F = div(u1) */
