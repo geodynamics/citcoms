@@ -308,9 +308,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	  for(k=1;k <= nel;k++){
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
-	      E->EVI2[i][m][off] = 0.0;
-	      E->EVIn1[i][m][off] = 1.0; E->EVIn2[i][m][off] = E->EVIn3[i][m][off] = 0.0;
-	      E->avmode[i][m][off] = (unsigned char)
+	      E->EVI2[i][CPPR][off] = 0.0;
+	      E->EVIn1[i][CPPR][off] = 1.0; E->EVIn2[i][CPPR][off] = E->EVIn3[i][CPPR][off] = 0.0;
+	      E->avmode[i][CPPR][off] = (unsigned char)
 		E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
@@ -358,8 +358,8 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-	      E->EVI2[i][m][off] = vis2;E->EVIn1[i][m][off] = n[0]; E->EVIn2[i][m][off] = n[1];E->EVIn3[i][m][off] = n[2];
-	      E->avmode[i][m][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
+	      E->EVI2[i][CPPR][off] = vis2;E->EVIn1[i][CPPR][off] = n[0]; E->EVIn2[i][CPPR][off] = n[1];E->EVIn3[i][CPPR][off] = n[2];
+	      E->avmode[i][CPPR][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
 #else
 	      E->EVI2[i][off] = vis2;   E->EVIn1[i][off] = n[0];    E->EVIn2[i][off] = n[1];   E->EVIn3[i][off] = n[2];
 	      E->avmode[i][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
@@ -454,14 +454,14 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	  elxlz = elx * elz;
 	  for (j=1;j <= elz;j++){
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-	    if(E->mat[m][j] ==  ani_layer){
+	    if(E->mat[CPPR][j] ==  ani_layer){
 #else
 	    if(E->mat[j] ==  ani_layer){
 #endif
 	      for(u=0.,inode=1;inode <= ends;inode++){ /* mean vertical coordinate */
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-		off = E->ien[m][j].node[inode];
-		u += E->sx[m][3][off];
+		off = E->ien[CPPR][j].node[inode];
+		u += E->sx[CPPR][3][off];
 #else
 		off = E->ien[j].node[inode];
 		if(E->control.Rsphere)
@@ -490,8 +490,8 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  /* CitcomS */
 		  xloc[0] = xloc[1] = xloc[2] = 0.0;
 		  for(inode=1;inode <= ends;inode++){
-		    off = E->ien[m][el].node[inode];
-		    rtp2xyz((float)E->sx[m][3][off],(float)E->sx[m][1][off],(float)E->sx[m][2][off],rout);
+		    off = E->ien[CPPR][el].node[inode];
+		    rtp2xyz((float)E->sx[CPPR][3][off],(float)E->sx[CPPR][1][off],(float)E->sx[CPPR][2][off],rout);
 		    xloc[0] += rout[0];xloc[1] += rout[1];xloc[2] += rout[2];
 		  }
 		  xloc[0]/=ends;xloc[1]/=ends;xloc[2]/=ends;
@@ -516,9 +516,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  n[0]=rout[0];n[1]=rout[1];n[2]=rout[2];
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
-		    E->EVI2[i][m][off] = vis2;
-		    E->EVIn1[i][m][off] = n[0]; E->EVIn2[i][m][off] = n[1];E->EVIn3[i][m][off] = n[2];
-		    E->avmode[i][m][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][CPPR][off] = vis2;
+		    E->EVIn1[i][CPPR][off] = n[0]; E->EVIn2[i][CPPR][off] = n[1];E->EVIn3[i][CPPR][off] = n[2];
+		    E->avmode[i][CPPR][off] = CITCOM_ANIVISC_ORTHO_MODE;
 		  }
 #else 
 		  /* 
@@ -579,7 +579,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-		    E->EVI2[i][m][off] = 0;E->EVIn1[i][m][off] = 1; E->EVIn2[i][m][off] = 0;E->EVIn3[i][m][off] = 0;E->avmode[i][m][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][CPPR][off] = 0;E->EVIn1[i][CPPR][off] = 1; E->EVIn2[i][CPPR][off] = 0;E->EVIn3[i][CPPR][off] = 0;E->avmode[i][CPPR][off] = CITCOM_ANIVISC_ORTHO_MODE;
 #else
 		    E->EVI2[i][off] = 0;E->EVIn1[i][off] = 1; E->EVIn2[i][off] = 0;E->EVIn3[i][off] = 0;E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 #endif
@@ -637,7 +637,7 @@ void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, 
   int n,m;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(n=1;n<=E->lmesh.NNO[lev];n++){
-      normalize_vec3(&(n1[m][n]),&(n2[m][n]),&(n3[m][n]));
+      normalize_vec3(&(n1[CPPR][n]),&(n2[CPPR][n]),&(n3[CPPR][n]));
     }
 }
 void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
@@ -649,7 +649,7 @@ void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, f
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	enode = (e-1)*vpts+i;
-	normalize_vec3(&(n1[m][enode]),&(n2[m][enode]),&( n3[m][enode]));
+	normalize_vec3(&(n1[CPPR][enode]),&(n2[CPPR][enode]),&( n3[CPPR][enode]));
       }
 }
 #else  /* CU */
@@ -833,20 +833,20 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 #ifdef CitcomS_global_defs_h	/* CitcomS */
     for(m=1;m <= E->sphere.caps_per_proc;m++) {
       if(((E->viscosity.anivisc_layer > 0)&&
-	  (E->mat[m][e] <=   E->viscosity.anivisc_layer))||
+	  (E->mat[CPPR][e] <=   E->viscosity.anivisc_layer))||
 	 ((E->viscosity.anivisc_layer < 0)&&
-	  (E->mat[m][e] ==  -E->viscosity.anivisc_layer))){
+	  (E->mat[CPPR][e] ==  -E->viscosity.anivisc_layer))){
 	get_rtf_at_ppts(E, m, lev, e, rtf); /* pressure points */
 	//if((e-1)%E->lmesh.elz==0)
-	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,m,1);
+	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,CPPR,1);
 	for(i = 1; i <= ends; i++){	/* velocity at element nodes */
-	  off = E->ien[m][e].node[i];
-	  VV[1][i] = E->sphere.cap[m].V[1][off];
-	  VV[2][i] = E->sphere.cap[m].V[2][off];
-	  VV[3][i] = E->sphere.cap[m].V[3][off];
+	  off = E->ien[CPPR][e].node[i];
+	  VV[1][i] = E->sphere.cap[CPPR].V[1][off];
+	  VV[2][i] = E->sphere.cap[CPPR].V[2][off];
+	  VV[3][i] = E->sphere.cap[CPPR].V[3][off];
 	}
 	/* calculate velocity gradient matrix */
-	get_vgm_p(VV,&(E->N),&(E->GNX[lev][m][e]),&E->element_Cc, 
+	get_vgm_p(VV,&(E->N),&(E->GNX[lev][CPPR][e]),&E->element_Cc, 
 		  &E->element_Ccx,rtf,E->mesh.nsd,ppts,ends,TRUE,lgrad,
 		  evel);
 	/* calculate the ISA axis and determine the type of
@@ -860,11 +860,11 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	/* assign to director for all vpoints */
 	for(i=1;i <= vpts;i++){
 	  off = (e-1)*vpts + i;
-	  E->avmode[lev][m][off] = avmode;
-	  E->EVI2[lev][m][off] = vis2;
-	  E->EVIn1[lev][m][off] = n[0]; 
-	  E->EVIn2[lev][m][off] = n[1];
-	  E->EVIn3[lev][m][off] = n[2];
+	  E->avmode[lev][CPPR][off] = avmode;
+	  E->EVI2[lev][CPPR][off] = vis2;
+	  E->EVIn1[lev][CPPR][off] = n[0]; 
+	  E->EVIn2[lev][CPPR][off] = n[1];
+	  E->EVIn3[lev][CPPR][off] = n[2];
 	}
       }	/* in layer */
     } /* caps */
