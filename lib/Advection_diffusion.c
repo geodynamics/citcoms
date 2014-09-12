@@ -101,10 +101,10 @@ void advection_diffusion_allocate_memory(struct All_variables *E)
   int i,m;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    E->Tdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    E->Tdot[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
     for(i=1;i<=E->lmesh.nno;i++)
-      E->Tdot[m][i]=0.0;
+      E->Tdot[CPPR][i]=0.0;
     }
 
   return;
@@ -167,7 +167,7 @@ void std_timestep(struct All_variables *E)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nel;el++) {
 
-	velo_from_element(E,VV,m,el,sphere_key);
+	velo_from_element(E,VV,CPPR,el,sphere_key);
 
 	uc=uc1=uc2=uc3=0.0;
 	for(i=1;i<=ENODES3D;i++) {
@@ -175,7 +175,7 @@ void std_timestep(struct All_variables *E)
 	  uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
 	  uc3 += E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
         }
-	uc = fabs(uc1)/E->eco[m][el].size[1] + fabs(uc2)/E->eco[m][el].size[2] + fabs(uc3)/E->eco[m][el].size[3];
+	uc = fabs(uc1)/E->eco[CPPR][el].size[1] + fabs(uc2)/E->eco[CPPR][el].size[2] + fabs(uc3)/E->eco[CPPR][el].size[3];
 
 	step = (0.5/uc);
 	adv_timestep = min(adv_timestep,step);
@@ -209,19 +209,19 @@ void PG_timestep_solve(struct All_variables *E)
   E->advection.timesteps++;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    DTdot[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    DTdot[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
 
   if(E->advection.monitor_max_T) {
      for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-         T1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-         Tdot1[m]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+         T1[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+         Tdot1[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
      }
 
      for(m=1;m<=E->sphere.caps_per_proc;m++)
          for (i=1;i<=E->lmesh.nno;i++)   {
-             T1[m][i] = E->T[m][i];
-             Tdot1[m][i] = E->Tdot[m][i];
+             T1[CPPR][i] = E->T[CPPR][i];
+             Tdot1[CPPR][i] = E->Tdot[CPPR][i];
          }
 
      /* get the max temperature for old T */
@@ -267,8 +267,8 @@ void PG_timestep_solve(struct All_variables *E)
               }
               for(m=1;m<=E->sphere.caps_per_proc;m++)
                   for (i=1;i<=E->lmesh.nno;i++)   {
-                      E->T[m][i] = T1[m][i];
-                      E->Tdot[m][i] = Tdot1[m][i];
+                      E->T[CPPR][i] = T1[CPPR][i];
+                      E->Tdot[CPPR][i] = Tdot1[CPPR][i];
                   }
               iredo = 1;
               E->advection.dt_reduced *= 0.5;
@@ -292,13 +292,13 @@ void PG_timestep_solve(struct All_variables *E)
     E->control.keep_going = 0;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    free((void *) DTdot[m] );
+    free((void *) DTdot[CPPR] );
   }
 
   if(E->advection.monitor_max_T) {
       for(m=1;m<=E->sphere.caps_per_proc;m++) {
-          free((void *) T1[m] );
-          free((void *) Tdot1[m] );
+          free((void *) T1[CPPR] );
+          free((void *) Tdot1[CPPR] );
       }
   }
 
@@ -326,7 +326,7 @@ static void set_diffusion_timestep(struct All_variables *E)
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
-	ts = E->eco[m][el].size[d] * E->eco[m][el].size[d];
+	ts = E->eco[CPPR][el].size[d] * E->eco[CPPR][el].size[d];
 	diff_timestep = min(diff_timestep,ts);
       }
     }
@@ -352,8 +352,8 @@ static void predictor(struct All_variables *E, double **field,
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++)  {
-      field[m][node] += multiplier * fielddot[m][node] ;
-      fielddot[m][node] = 0.0;
+      field[CPPR][node] += multiplier * fielddot[CPPR][node] ;
+      fielddot[CPPR][node] = 0.0;
     }
 
   return;
@@ -370,8 +370,8 @@ static void corrector(struct All_variables *E, double **field,
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++) {
-      field[m][node] += multiplier * Dfielddot[m][node];
-      fielddot[m][node] +=  Dfielddot[m][node];
+      field[CPPR][node] += multiplier * Dfielddot[CPPR][node];
+      fielddot[CPPR][node] +=  Dfielddot[CPPR][node];
     }
 
   return;
@@ -409,26 +409,26 @@ static void pg_solver(struct All_variables *E,
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++)
- 	 DTdot[m][i] = 0.0;
+ 	 DTdot[CPPR][i] = 0.0;
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
        for(el=1;el<=E->lmesh.nel;el++)    {
 
-          velo_from_element(E,VV,m,el,sphere_key);
+          velo_from_element(E,VV,CPPR,el,sphere_key);
 
-          get_rtf_at_vpts(E, m, lev, el, rtf);
+          get_rtf_at_vpts(E, CPPR, lev, el, rtf);
 
           /* XXX: replace diff with refstate.thermal_conductivity */
-          pg_shape_fn(E, el, &PG, &(E->gNX[m][el]), VV,
-                      rtf, diff, m);
-          element_residual(E, el, &PG, &(E->gNX[m][el]), &(E->gDA[m][el]),
+          pg_shape_fn(E, el, &PG, &(E->gNX[CPPR][el]), VV,
+                      rtf, diff, CPPR);
+          element_residual(E, el, &PG, &(E->gNX[CPPR][el]), &(E->gDA[CPPR][el]),
                            VV, T, Tdot,
-                           Q0, Eres, rtf, diff, E->sphere.cap[m].TB,
-                           FLAGS, m);
+                           Q0, Eres, rtf, diff, E->sphere.cap[CPPR].TB,
+                           FLAGS, CPPR);
 
         for(a=1;a<=ends;a++) {
-	    a1 = E->ien[m][el].node[a];
-	    DTdot[m][a1] += Eres[a];
+	    a1 = E->ien[CPPR][el].node[a];
+	    DTdot[CPPR][a1] += Eres[a];
            }
 
         } /* next element */
@@ -437,10 +437,10 @@ static void pg_solver(struct All_variables *E,
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
-        if(!(E->node[m][i] & (TBX | TBY | TBZ))){
-	  DTdot[m][i] *= E->TMass[m][i];         /* lumped mass matrix */
+        if(!(E->node[CPPR][i] & (TBX | TBY | TBZ))){
+	  DTdot[CPPR][i] *= E->TMass[CPPR][i];         /* lumped mass matrix */
 	}	else
-	  DTdot[m][i] = 0.0;         /* lumped mass matrix */
+	  DTdot[CPPR][i] = 0.0;         /* lumped mass matrix */
       }
 
     return;
@@ -458,6 +458,9 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         float VV[4][9], double rtf[4][9],
                         double diffusion, int m)
 {
+  /* the [m]'s inside this function have not been replaced by CPPR since m is an arg that
+   * will eventually go away
+   */
     int i,j;
     int *ienm;
 
@@ -533,6 +536,9 @@ static void element_residual(struct All_variables *E, int el,
                              double diff, float **BC,
                              unsigned int **FLAGS, int m)
 {
+  /* the [m]'s inside this function have not been replaced by CPPR since m is an arg that
+   * will eventually go away
+   */
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
     double dT[9];
@@ -714,14 +720,14 @@ static void filter(struct All_variables *E)
 
             /* compute sum(rho*cp*T) before filtering, skipping nodes
                that's shared by another processor */
-            if(!(E->NODE[lev][m][i] & SKIP))
-                Tsum0 += E->T[m][i]*rhocp[nz];
+            if(!(E->NODE[lev][CPPR][i] & SKIP))
+                Tsum0 += E->T[CPPR][i]*rhocp[nz];
 
             /* remove overshoot */
-            if(E->T[m][i]<Tmin)  Tmin=E->T[m][i];
-            if(E->T[m][i]<Tmin0) E->T[m][i]=Tmin0;
-            if(E->T[m][i]>Tmax) Tmax=E->T[m][i];
-            if(E->T[m][i]>Tmax0) E->T[m][i]=Tmax0;
+            if(E->T[CPPR][i]<Tmin)  Tmin=E->T[CPPR][i];
+            if(E->T[CPPR][i]<Tmin0) E->T[CPPR][i]=Tmin0;
+            if(E->T[CPPR][i]>Tmax) Tmax=E->T[CPPR][i];
+            if(E->T[CPPR][i]>Tmax0) E->T[CPPR][i]=Tmax0;
 
         }
 
@@ -734,13 +740,13 @@ static void filter(struct All_variables *E)
             nz = ((i-1) % E->lmesh.noz) + 1;
 
             /* remvoe undershoot */
-            if(E->T[m][i]<=fabs(2*Tmin0-Tmin1))   E->T[m][i]=Tmin0;
-            if(E->T[m][i]>=(2*Tmax0-Tmax1))   E->T[m][i]=Tmax0;
+            if(E->T[CPPR][i]<=fabs(2*Tmin0-Tmin1))   E->T[CPPR][i]=Tmin0;
+            if(E->T[CPPR][i]>=(2*Tmax0-Tmax1))   E->T[CPPR][i]=Tmax0;
 
             /* sum(rho*cp*T) after filtering */
-            if (!(E->NODE[lev][m][i] & SKIP))  {
-                Tsum1 += E->T[m][i]*rhocp[nz];
-                if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0) {
+            if (!(E->NODE[lev][CPPR][i] & SKIP))  {
+                Tsum1 += E->T[CPPR][i]*rhocp[nz];
+                if(E->T[CPPR][i]!=Tmin0 && E->T[CPPR][i]!=Tmax0) {
                     sum_rhocp += rhocp[nz];
                 }
 
@@ -758,8 +764,8 @@ static void filter(struct All_variables *E)
        the difference back to nodes */
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(i=1;i<=E->lmesh.nno;i++)   {
-            if(E->T[m][i]!=Tmin0 && E->T[m][i]!=Tmax0)
-                E->T[m][i] +=TDIST;
+            if(E->T[CPPR][i]!=Tmin0 && E->T[CPPR][i]!=Tmax0)
+                E->T[CPPR][i] +=TDIST;
         }
 
     free(rhocp);
@@ -770,6 +776,7 @@ static void filter(struct All_variables *E)
 static void process_visc_heating(struct All_variables *E, int m,
                                  double *heating)
 {
+  /* m is an arg that will go away, hence not replaced by CPPR */
     void strain_rate_2_inv();
     int e, i;
     double visc, temp;
@@ -800,6 +807,7 @@ static void process_visc_heating(struct All_variables *E, int m,
 static void process_adi_heating(struct All_variables *E, int m,
                                 double *heating)
 {
+  /* m is an arg that will go away, hence not replaced by CPPR */
     int e, ez, i, j;
     double matprop, temp1, temp2;
     const int ends = ENODES3D;
@@ -832,6 +840,7 @@ static void latent_heating(struct All_variables *E, int m,
                            float **B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
 {
+  /* m is an arg that will go away, hence not replaced by CPPR */
     double temp, temp0, temp1, temp2, temp3, matprop;
     int e, ez, i, j;
     const int ends = ENODES3D;
@@ -872,6 +881,7 @@ static void latent_heating(struct All_variables *E, int m,
 static void process_latent_heating(struct All_variables *E, int m,
                                    double *heating_latent, double *heating_adi)
 {
+  /* m is an arg that will go away, hence not replaced by CPPR */
     int e;
 
     /* reset */
@@ -920,7 +930,7 @@ static double total_heating(struct All_variables *E, double **heating)
     sum = 0;
     for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(e=1; e<=E->lmesh.nel; e++)
-            sum += heating[m][e] * E->eco[m][e].area;
+            sum += heating[CPPR][e] * E->eco[CPPR][e].area;
     }
 
     /* sum up for all processors */
@@ -940,10 +950,10 @@ static void process_heating(struct All_variables *E, int psc_pass)
         if(psc_pass == 0) {
             /* visc heating does not change between psc_pass, compute only
              * at first psc_pass */
-            process_visc_heating(E, m, E->heating_visc[m]);
+            process_visc_heating(E, CPPR, E->heating_visc[CPPR]);
         }
-        process_adi_heating(E, m, E->heating_adi[m]);
-        process_latent_heating(E, m, E->heating_latent[m], E->heating_adi[m]);
+        process_adi_heating(E, CPPR, E->heating_adi[CPPR]);
+        process_latent_heating(E, CPPR, E->heating_latent[CPPR], E->heating_adi[CPPR]);
     }
 
     /* compute total amount of visc/adi heating over all processors
