@@ -169,10 +169,10 @@ static void print_convergence_progress_schur(struct All_variables *E,
 {
   double t = CPU_time0() - time0;
 
-  fprintf(E->fp, "#inner iters=%03d #outer iters=%03d time=%5.1f s v=%e p=%e\n", 
-      inner, outer, time0, vnorm, pnorm);
-  fprintf(stderr, "#inner iters=%03d #outer iters=%03d time=%5.1f s v=%e p=%e\n", 
-      inner, outer, time0, vnorm, pnorm);
+  fprintf(E->fp, "#inner=%03d #outer=%03d time=%5.1f s v=%e p=%e step %d\n", 
+      inner, outer, t, vnorm, pnorm,E->monitor.solution_cycles);
+  fprintf(stderr, "#inner=%03d #outer=%03d time=%5.1f s v=%e p=%e step %d\n", 
+      inner, outer, t, vnorm, pnorm,E->monitor.solution_cycles);
   fflush(stderr);
 }
 
