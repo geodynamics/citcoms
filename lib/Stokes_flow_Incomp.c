@@ -161,6 +161,20 @@ static void print_convergence_progress(struct All_variables *E,
     return;
 }
 
+static void print_convergence_progress_schur(struct All_variables *E, 
+                                             int inner, 
+                                             int outer, 
+                                             double time0,
+                                             double vnorm, double pnorm)
+{
+  double t = CPU_time0() - time0;
+
+  fprintf(E->fp, "#inner iters=%03d #outer iters=%03d time=%5.1f s v=%e p=%e\n", 
+      inner, outer, time0, vnorm, pnorm);
+  fprintf(stderr, "#inner iters=%03d #outer iters=%03d time=%5.1f s v=%e p=%e\n", 
+      inner, outer, time0, vnorm, pnorm);
+  fflush(stderr);
+}
 
 static int keep_iterating(struct All_variables *E,
                           double acc, int converging)
@@ -232,6 +246,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   PetscReal *P_data, *V_data;
   KSP inner_ksp, S_ksp;
   PC inner_pc, S_pc;
+  PetscInt inner1, inner2, outer;
 
   nel = E->lmesh.nel;
   npno = E->lmesh.npno;
@@ -282,6 +297,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   /*-------------------------------------------------*/
   ierr = MatGetVecs(S, PETSC_NULL, &fhat); CHKERRQ(ierr);
   ierr = KSPSolve(inner_ksp, FF, t1); CHKERRQ(ierr);
+  ierr = KSPGetIterationNumber(inner_ksp, &inner1); CHKERRQ(ierr);
   ierr = MatMult(E->D, t1, fhat); CHKERRQ(ierr);
 
   /*-------------------------------------------*/
@@ -298,6 +314,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   /* Solve for pressure */
   /*--------------------*/
   ierr = KSPSolve(S_ksp, fhat, PVec); CHKERRQ(ierr);
+  ierr = KSPGetIterationNumber(inner_ksp, &outer); CHKERRQ(ierr);
 
   /*--------------------*/
   /* Solve for velocity */
@@ -305,9 +322,9 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   ierr = MatGetVecs(E->K, PETSC_NULL, &fstar); CHKERRQ(ierr);
   ierr = MatMult(E->G, PVec, fstar); CHKERRQ(ierr);
   ierr = VecAYPX(fstar, 1.0, FF); CHKERRQ(ierr);
-  ierr = MatSchurComplementGetKSP(S, &inner_ksp); CHKERRQ(ierr);
   ierr = KSPSetInitialGuessNonzero(inner_ksp, PETSC_TRUE); CHKERRQ(ierr);
   ierr = KSPSolve(inner_ksp, fstar, VVec); CHKERRQ(ierr);
+  ierr = KSPGetIterationNumber(inner_ksp, &inner2); CHKERRQ(ierr);
 
   /*-----------------------------------------------*/
   /* copy the values of VVec and PVec into V and P */
@@ -334,7 +351,6 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
 	}
 
 
-
   /*---------------------------------------------------------------------------------------*/
   /* output v_norm and p_norm values; dvelocity and dpressure are currently not meaningful */
   /*---------------------------------------------------------------------------------------*/
@@ -346,7 +362,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   double dpressure = 1.0;
   int converging = 0;
   if (E->control.print_convergence && E->parallel.me==0)  {
-    print_convergence_progress(E, count, time0, v_norm, p_norm, dvelocity, dpressure, 1.0);
+    print_convergence_progress_schur(E, (inner1+inner2), outer, time0, v_norm, p_norm);
   }
 
   PetscFunctionReturn(0);
