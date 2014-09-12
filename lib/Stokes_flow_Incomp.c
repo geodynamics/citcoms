@@ -292,7 +292,7 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   //ierr = KSPGetPC(S_ksp, &S_pc); CHKERRQ(ierr);
   ierr = KSPSetType(S_ksp, "cg"); CHKERRQ(ierr);
   //ierr = PCSetType(S_pc, "none"); CHKERRQ(ierr);
-  //ierr = KSPSetInitialGuessNonzero(S_ksp, PETSC_FALSE); CHKERRQ(ierr);
+  ierr = KSPSetInitialGuessNonzero(S_ksp, PETSC_TRUE); CHKERRQ(ierr);
 
   /*--------------------*/
   /* Solve for pressure */
@@ -304,11 +304,10 @@ static PetscErrorCode solve_Ahat_p_fhat_PETSc_Schur(struct All_variables *E,
   /*--------------------*/
   ierr = MatGetVecs(E->K, PETSC_NULL, &fstar); CHKERRQ(ierr);
   ierr = MatMult(E->G, PVec, fstar); CHKERRQ(ierr);
-  ierr = VecAYPX(fstar, -1.0, FF); CHKERRQ(ierr);
+  ierr = VecAYPX(fstar, 1.0, FF); CHKERRQ(ierr);
   ierr = MatSchurComplementGetKSP(S, &inner_ksp); CHKERRQ(ierr);
-  //ierr = KSPSetInitialGuessNonzero(inner_ksp, PETSC_FALSE); CHKERRQ(ierr);
+  ierr = KSPSetInitialGuessNonzero(inner_ksp, PETSC_TRUE); CHKERRQ(ierr);
   ierr = KSPSolve(inner_ksp, fstar, VVec); CHKERRQ(ierr);
-  //strip_bcs_from_residual_PETSc( E, VVec, lev );
 
   /*-----------------------------------------------*/
   /* copy the values of VVec and PVec into V and P */
