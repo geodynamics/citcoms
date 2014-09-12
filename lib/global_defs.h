@@ -61,7 +61,7 @@ extern "C" {
 
 #else
 
-
+extern const int CPPR;
 
 
 /* Macros */

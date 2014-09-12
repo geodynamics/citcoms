@@ -40,6 +40,8 @@
 
 extern int Emergency_stop;
 
+const int CPPR = 1;
+
 void solver_init(struct All_variables *E);
 
 int main(argc,argv)
