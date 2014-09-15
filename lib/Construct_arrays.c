@@ -71,7 +71,7 @@ void construct_ien(E)
              element = (r-1)*elx*elz + (q-1)*elz  + p;
              start = (r-1)*noz*nox + (q-1)*noz + p;
              for(rr=1;rr<=ends;rr++)
-               E->IEN[lev][j][element].node[rr]= start
+               E->IEN[lev][CPPR][element].node[rr]= start
                   + offset[rr].vector[0]
                   + offset[rr].vector[1]*noz
                   + offset[rr].vector[2]*noz*nox;
@@ -108,16 +108,16 @@ void construct_surface( struct All_variables *E)
     for(element=1;element<=E->lmesh.nel;element++)
       if ( element%E->lmesh.elz==0) { /* top */
         e ++;
-        E->sien[j][e].node[1] = E->ien[j][element].node[5]/E->lmesh.noz;
-        E->sien[j][e].node[2] = E->ien[j][element].node[6]/E->lmesh.noz;
-        E->sien[j][e].node[3] = E->ien[j][element].node[7]/E->lmesh.noz;
-        E->sien[j][e].node[4] = E->ien[j][element].node[8]/E->lmesh.noz;
-        E->surf_element[j][e] = element;
+        E->sien[CPPR][e].node[1] = E->ien[CPPR][element].node[5]/E->lmesh.noz;
+        E->sien[CPPR][e].node[2] = E->ien[CPPR][element].node[6]/E->lmesh.noz;
+        E->sien[CPPR][e].node[3] = E->ien[CPPR][element].node[7]/E->lmesh.noz;
+        E->sien[CPPR][e].node[4] = E->ien[CPPR][element].node[8]/E->lmesh.noz;
+        E->surf_element[CPPR][e] = element;
         }
 
     E->lmesh.snel = e;
     for (i=1;i<=E->lmesh.nsf;i++)
-      E->surf_node[j][i] = i*E->lmesh.noz;
+      E->surf_node[CPPR][i] = i*E->lmesh.noz;
 
   }     /* end for cap j */
 
@@ -125,7 +125,7 @@ void construct_surface( struct All_variables *E)
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
       for(e=1;e<=E->lmesh.snel;e++) {
         fprintf(E->fp_out, "sien sel=%d node=%d %d %d %d\n",
-		e, E->sien[j][e].node[1], E->sien[j][e].node[2], E->sien[j][e].node[3], E->sien[j][e].node[4]);
+		e, E->sien[CPPR][e].node[1], E->sien[CPPR][e].node[2], E->sien[CPPR][e].node[3], E->sien[CPPR][e].node[4]);
       }
     }
   }
@@ -155,7 +155,7 @@ void construct_id(E)
 
       for(node=1;node<=E->lmesh.NNO[lev];node++)
         for(doff=1;doff<=dims;doff++)  {
-          E->ID[lev][j][node].doff[doff] = eqn_count;
+          E->ID[lev][CPPR][node].doff[doff] = eqn_count;
           eqn_count ++;
           }
 
@@ -163,21 +163,21 @@ void construct_id(E)
 
       i = 0;
       for(node=1;node<=E->lmesh.NNO[lev];node++) {
-        if (E->NODE[lev][j][node] & SKIP)
+        if (E->NODE[lev][CPPR][node] & SKIP)
         for(doff=1;doff<=dims;doff++)  {
 	  i++;
-          E->parallel.Skip_id[lev][j][i] = E->ID[lev][j][node].doff[doff];
+          E->parallel.Skip_id[lev][CPPR][i] = E->ID[lev][CPPR][node].doff[doff];
           }
         }
 
-      E->parallel.Skip_neq[lev][j] = i;
+      E->parallel.Skip_neq[lev][CPPR] = i;
 
       /* global # of unskipped eqn */
-      neq = E->lmesh.NEQ[lev] - E->parallel.Skip_neq[lev][j];
+      neq = E->lmesh.NEQ[lev] - E->parallel.Skip_neq[lev][CPPR];
       MPI_Allreduce(&neq, &gneq, 1, MPI_INT, MPI_SUM, E->parallel.world);
       E->mesh.NEQ[lev] = gneq;
 
-      get_bcs_id_for_residual(E,lev,j);
+      get_bcs_id_for_residual(E,lev,CPPR);
 
       }       /* end for j */
     }      /* end for lev */
@@ -210,21 +210,21 @@ void get_bcs_id_for_residual(E,level,m)
 
    j = 0;
    for(i=1;i<=nno;i++) {
-      if ( (E->NODE[level][m][i] & VBX) != 0 )  {
+      if ( (E->NODE[level][CPPR][i] & VBX) != 0 )  {
 	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[1];
+        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[1];
 	}
-      if ( (E->NODE[level][m][i] & VBY) != 0 )  {
+      if ( (E->NODE[level][CPPR][i] & VBY) != 0 )  {
 	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[2];
+        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[2];
 	}
-      if ( (E->NODE[level][m][i] & VBZ) != 0 )  {
+      if ( (E->NODE[level][CPPR][i] & VBZ) != 0 )  {
 	j++;
-        E->zero_resid[level][m][j] = E->ID[level][m][i].doff[3];
+        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[3];
 	}
       }
 
-    E->num_zero_resid[level][m] = j;
+    E->num_zero_resid[level][CPPR] = j;
 
     return;
 }
@@ -272,20 +272,20 @@ void construct_node_maps(E)
        noz = E->lmesh.NOZ[lev];
        noy = E->lmesh.NOY[lev];
        nox = E->lmesh.NOX[lev];
-       max_eqn = 14*dims;
+       max_eqn = 14*dims; // Is this 14 supposed to be NCS?
        matrix = max_eqn*nno;
 
-       E->Node_map[lev][m]=(int *) malloc (matrix*sizeof(int));
+       E->Node_map[lev][CPPR]=(int *) malloc (matrix*sizeof(int));
 
        for(i=0;i<matrix;i++)
-	   E->Node_map[lev][m][i] = neq;  /* neq indicates an invalid eqn # */
+	   E->Node_map[lev][CPPR][i] = neq;  /* neq indicates an invalid eqn # */
 
        for (ii=1;ii<=noy;ii++)
        for (jj=1;jj<=nox;jj++)
        for (kk=1;kk<=noz;kk++)  {
 	 nn = kk + (jj-1)*noz+ (ii-1)*noxz;
 	 for(doff=1;doff<=dims;doff++)
-	   E->Node_map[lev][m][(nn-1)*max_eqn+doff-1] = E->ID[lev][m][nn].doff[doff];
+	   E->Node_map[lev][CPPR][(nn-1)*max_eqn+doff-1] = E->ID[lev][CPPR][nn].doff[doff];
 
          ia = 0;
 	 is=1; ie=dims2;
@@ -304,22 +304,22 @@ void construct_node_maps(E)
                if (ja<nn)   {
 		 ia++;
                  for (doff=1;doff<=dims;doff++)
-                   E->Node_map[lev][m][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][m][ja].doff[doff];
+                   E->Node_map[lev][CPPR][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][CPPR][ja].doff[doff];
                  }
                }
          }
 
-       E->Eqn_k1[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-       E->Eqn_k2[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-       E->Eqn_k3[lev][m] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k1[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k2[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k3[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
 
        E->mesh.matrix_size[lev] = matrix;
 
        if(E->control.verbose) {
-           fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, m);
+           fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, CPPR);
            fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
            for(i=0;i<matrix;i++)
-               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][m][i]);
+               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][CPPR][i]);
        }
 
     }         /* end for level and m */
@@ -360,55 +360,55 @@ void construct_node_ks(E)
         nel=E->lmesh.NEL[level];
         nno=E->lmesh.NNO[level];
 	for(i=0;i<neq;i++)
-	    E->BI[level][m][i] = zero;
+	    E->BI[level][CPPR][i] = zero;
         for(i=0;i<E->mesh.matrix_size[level];i++) {
-            E->Eqn_k1[level][m][i] = zero;
-            E->Eqn_k2[level][m][i] = zero;
-            E->Eqn_k3[level][m][i] = zero;
+            E->Eqn_k1[level][CPPR][i] = zero;
+            E->Eqn_k2[level][CPPR][i] = zero;
+            E->Eqn_k3[level][CPPR][i] = zero;
             }
 
         for(element=1;element<=nel;element++) {
 
-	    get_elt_k(E,element,elt_K,level,m,0);
+	    get_elt_k(E,element,elt_K,level,CPPR,0);
 
 	    if (E->control.augmented_Lagr)
-	         get_aug_k(E,element,elt_K,level,m);
+	         get_aug_k(E,element,elt_K,level,CPPR);
 
-            build_diagonal_of_K(E,element,elt_K,level,m);
+            build_diagonal_of_K(E,element,elt_K,level,CPPR);
 
 	    for(i=1;i<=ends;i++) {  /* i, is the node we are storing to */
-	       node=E->IEN[level][m][element].node[i];
+	       node=E->IEN[level][CPPR][element].node[i];
 
 	       pp=(i-1)*dims;
 	       w1=w2=w3=1.0;
 
 	       loc0=(node-1)*max_eqn;
 
-	       if(E->NODE[level][m][node] & VBX) w1=0.0;
-	       if(E->NODE[level][m][node] & VBZ) w3=0.0;
-	       if(E->NODE[level][m][node] & VBY) w2=0.0;
+	       if(E->NODE[level][CPPR][node] & VBX) w1=0.0;
+	       if(E->NODE[level][CPPR][node] & VBZ) w3=0.0;
+	       if(E->NODE[level][CPPR][node] & VBY) w2=0.0;
 
 	       for(j=1;j<=ends;j++) { /* j is the node we are receiving from */
-	         node1=E->IEN[level][m][element].node[j];
+	         node1=E->IEN[level][CPPR][element].node[j];
 
                         /* only for half of the matrix ,because of the symmetry */
                  if (node1<=node)  {
 
 		    ww1=ww2=ww3=1.0;
 		    qq=(j-1)*dims;
-		    eqn1=E->ID[level][m][node1].doff[1];
-		    eqn2=E->ID[level][m][node1].doff[2];
-		    eqn3=E->ID[level][m][node1].doff[3];
+		    eqn1=E->ID[level][CPPR][node1].doff[1];
+		    eqn2=E->ID[level][CPPR][node1].doff[2];
+		    eqn3=E->ID[level][CPPR][node1].doff[3];
 
-		    if(E->NODE[level][m][node1] & VBX) ww1=0.0;
-		    if(E->NODE[level][m][node1] & VBZ) ww3=0.0;
-		    if(E->NODE[level][m][node1] & VBY) ww2=0.0;
+		    if(E->NODE[level][CPPR][node1] & VBX) ww1=0.0;
+		    if(E->NODE[level][CPPR][node1] & VBZ) ww3=0.0;
+		    if(E->NODE[level][CPPR][node1] & VBY) ww2=0.0;
 
 		    /* search for direction 1*/
 
 		    found=0;
 		    for(k=0;k<max_eqn;k++)
-		      if(E->Node_map[level][m][loc0+k] == eqn1) { /* found, index next equation */
+		      if(E->Node_map[level][CPPR][loc0+k] == eqn1) { /* found, index next equation */
 			    index=k;
 			    found++;
 			    break;
@@ -416,15 +416,15 @@ void construct_node_ks(E)
 
 		    assert(found /* direction 1 */);
 
-		    E->Eqn_k1[level][m][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
-		    E->Eqn_k2[level][m][loc0+index] +=  w2*ww1*elt_K[(pp+1)*lms+qq]; /* direction 1 */
-		    E->Eqn_k3[level][m][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
+		    E->Eqn_k1[level][CPPR][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
+		    E->Eqn_k2[level][CPPR][loc0+index] +=  w2*ww1*elt_K[(pp+1)*lms+qq]; /* direction 1 */
+		    E->Eqn_k3[level][CPPR][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
 
 		     /* search for direction 2*/
 
 		    found=0;
 		    for(k=0;k<max_eqn;k++)
-			if(E->Node_map[level][m][loc0+k] == eqn2) { /* found, index next equation */
+			if(E->Node_map[level][CPPR][loc0+k] == eqn2) { /* found, index next equation */
 			    index=k;
 			    found++;
 			    break;
@@ -432,15 +432,15 @@ void construct_node_ks(E)
 
 		    assert(found /* direction 2 */);
 
-		    E->Eqn_k1[level][m][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
-		    E->Eqn_k2[level][m][loc0+index] += w2*ww2*elt_K[(pp+1)*lms+qq+1]; /* direction 2 */
-		    E->Eqn_k3[level][m][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
+		    E->Eqn_k1[level][CPPR][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
+		    E->Eqn_k2[level][CPPR][loc0+index] += w2*ww2*elt_K[(pp+1)*lms+qq+1]; /* direction 2 */
+		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
 
 		    /* search for direction 3*/
 
                     found=0;
 		    for(k=0;k<max_eqn;k++)
-		    if(E->Node_map[level][m][loc0+k] == eqn3) { /* found, index next equation */
+		    if(E->Node_map[level][CPPR][loc0+k] == eqn3) { /* found, index next equation */
 			index=k;
 			found++;
 			break;
@@ -448,9 +448,9 @@ void construct_node_ks(E)
 
                     assert(found /* direction 3 */);
 
-		    E->Eqn_k1[level][m][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
-                    E->Eqn_k2[level][m][loc0+index] += w2*ww3*elt_K[(pp+1)*lms+qq+2]; /* direction 2 */
-		    E->Eqn_k3[level][m][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
+		    E->Eqn_k1[level][CPPR][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
+        E->Eqn_k2[level][CPPR][loc0+index] += w2*ww3*elt_K[(pp+1)*lms+qq+2]; /* direction 2 */
+		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
 
 		    }   /* end for j */
 		  }   /* end for node1<= node */
@@ -464,9 +464,9 @@ void construct_node_ks(E)
         neq=E->lmesh.NEQ[level];
 
         for(j=0;j<neq;j++)                 {
-            if(E->BI[level][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,level,j,neq);
-	    assert( E->BI[level][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-            E->BI[level][m][j]  = (double) 1.0/E->BI[level][m][j];
+            if(E->BI[level][CPPR][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,level,j,neq);
+	    assert( E->BI[level][CPPR][j] != 0 /* diagonal of matrix = 0, not acceptable */);
+            E->BI[level][CPPR][j]  = (double) 1.0/E->BI[level][CPPR][j];
 	    }
 	}           /* end for m */
 
@@ -492,26 +492,26 @@ void rebuild_BI_on_boundary(E)
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(j=0;j<=E->lmesh.NEQ[level];j++)
-            E->temp[m][j]=0.0;
+            E->temp[CPPR][j]=0.0;
 
         for(i=1;i<=E->lmesh.NNO[level];i++)  {
-            eqn1=E->ID[level][m][i].doff[1];
-            eqn2=E->ID[level][m][i].doff[2];
-            eqn3=E->ID[level][m][i].doff[3];
+            eqn1=E->ID[level][CPPR][i].doff[1];
+            eqn2=E->ID[level][CPPR][i].doff[2];
+            eqn3=E->ID[level][CPPR][i].doff[3];
 
-            C=E->Node_map[level][m] + (i-1)*max_eqn;
-            B1=E->Eqn_k1[level][m]+(i-1)*max_eqn;
-            B2=E->Eqn_k2[level][m]+(i-1)*max_eqn;
-            B3=E->Eqn_k3[level][m]+(i-1)*max_eqn;
+            C=E->Node_map[level][CPPR] + (i-1)*max_eqn;
+            B1=E->Eqn_k1[level][CPPR]+(i-1)*max_eqn;
+            B2=E->Eqn_k2[level][CPPR]+(i-1)*max_eqn;
+            B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;
 
             for(j=3;j<max_eqn;j++) {
-                E->temp[m][eqn1] += fabs(B1[j]);
-                E->temp[m][eqn2] += fabs(B2[j]);
-                E->temp[m][eqn3] += fabs(B3[j]);
+                E->temp[CPPR][eqn1] += fabs(B1[j]);
+                E->temp[CPPR][eqn2] += fabs(B2[j]);
+                E->temp[CPPR][eqn3] += fabs(B3[j]);
                 }
 
             for(j=0;j<max_eqn;j++)
-                E->temp[m][C[j]] += fabs(B1[j]) + fabs(B2[j]) + fabs(B3[j]);
+                E->temp[CPPR][C[j]] += fabs(B1[j]) + fabs(B2[j]) + fabs(B3[j]);
 
             }
         }
@@ -520,16 +520,16 @@ void rebuild_BI_on_boundary(E)
 
      for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=0;i<E->lmesh.NEQ[level];i++)  {
-            E->temp[m][i] = E->temp[m][i] - 1.0/E->BI[level][m][i];
+            E->temp[CPPR][i] = E->temp[CPPR][i] - 1.0/E->BI[level][CPPR][i];
             }
         for(i=1;i<=E->lmesh.NNO[level];i++)
-          if (E->NODE[level][m][i] & OFFSIDE)   {
-            eqn1=E->ID[level][m][i].doff[1];
-            eqn2=E->ID[level][m][i].doff[2];
-            eqn3=E->ID[level][m][i].doff[3];
-            E->BI[level][m][eqn1] = (double) 1.0/E->temp[m][eqn1];
-            E->BI[level][m][eqn2] = (double) 1.0/E->temp[m][eqn2];
-            E->BI[level][m][eqn3] = (double) 1.0/E->temp[m][eqn3];
+          if (E->NODE[level][CPPR][i] & OFFSIDE)   {
+            eqn1=E->ID[level][CPPR][i].doff[1];
+            eqn2=E->ID[level][CPPR][i].doff[2];
+            eqn3=E->ID[level][CPPR][i].doff[3];
+            E->BI[level][CPPR][eqn1] = (double) 1.0/E->temp[CPPR][eqn1];
+            E->BI[level][CPPR][eqn2] = (double) 1.0/E->temp[CPPR][eqn2];
+            E->BI[level][CPPR][eqn3] = (double) 1.0/E->temp[CPPR][eqn3];
             }
         }
 
@@ -560,14 +560,14 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
       nno = E->lmesh.NNO[lev];
 
         if (E->parallel.me_loc[3]==0 )
-          for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[5];i++)   {
-            node = E->parallel.NODE[lev][j][i].bound[5];
- 	    E->NODE[lev][j][node] = E->NODE[lev][j][node] | TZEDGE;
+          for (i=1;i<=E->parallel.NUM_NNO[lev][CPPR].bound[5];i++)   {
+            node = E->parallel.NODE[lev][CPPR][i].bound[5];
+ 	    E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | TZEDGE;
 	    }
         if ( E->parallel.me_loc[3]==E->parallel.nprocz-1 )
-          for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[6];i++)   {
-  	    node = E->parallel.NODE[lev][j][i].bound[6];
-	    E->NODE[lev][j][node] = E->NODE[lev][j][node] | TZEDGE;
+          for (i=1;i<=E->parallel.NUM_NNO[lev][CPPR].bound[6];i++)   {
+  	    node = E->parallel.NODE[lev][CPPR][i].bound[6];
+	    E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | TZEDGE;
 	    }
 
       }    /* end for j & lev */
@@ -627,7 +627,7 @@ void construct_sub_element(E)
 		  eltu = (j*2-1) + elzu *2*(i-1) + elxu*elzu*2*(k-1);
 
 		  for(l=1;l<=enodes[E->mesh.nsd];l++)   {
-		      E->EL[lev][m][elt].sub[l] = eltu
+		      E->EL[lev][CPPR][elt].sub[l] = eltu
                                  + offset[l].vector[0]
                                  + offset[l].vector[1] * elzu
                                  + offset[l].vector[2] * elzu * elxu;
@@ -661,12 +661,12 @@ void construct_elt_ks(E)
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
-	    get_elt_k(E,el,E->elt_k[lev][m][el].k,lev,m,0);
+	    get_elt_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR,0);
 
 	    if (E->control.augmented_Lagr)
-	        get_aug_k(E,el,E->elt_k[lev][m][el].k,lev,m);
+	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
 
-            build_diagonal_of_K(E,el,E->elt_k[lev][m][el].k,lev,m);
+            build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
 
 	    }
 	}        /* end for m */
@@ -676,9 +676,9 @@ void construct_elt_ks(E)
       for(m=1;m<=E->sphere.caps_per_proc;m++)
 
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
-	       if(E->BI[lev][m][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
-               assert( E->BI[lev][m][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-               E->BI[lev][m][j]  = (double) 1.0/E->BI[lev][m][j];
+	       if(E->BI[lev][CPPR][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
+               assert( E->BI[lev][CPPR][j] != 0 /* diagonal of matrix = 0, not acceptable */);
+               E->BI[lev][CPPR][j]  = (double) 1.0/E->BI[lev][CPPR][j];
 	       }
 
     }       /* end for level */
@@ -702,7 +702,7 @@ void construct_elt_gs(E)
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[lev];el++)
-        get_elt_g(E,el,E->elt_del[lev][m][el].g,lev,m);
+        get_elt_g(E,el,E->elt_del[lev][CPPR][el].g,lev,CPPR);
 
 
   return;
@@ -725,7 +725,7 @@ void construct_elt_cs(struct All_variables *E)
     for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
         for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(el=1;el<=E->lmesh.NEL[lev];el++) {
-                get_elt_c(E,el,E->elt_c[lev][m][el].c,lev,m);
+                get_elt_c(E,el,E->elt_c[lev][CPPR][el].c,lev,CPPR);
             }
 
 
@@ -807,7 +807,7 @@ int layers_r(struct All_variables *E,float r)
 /* determine layer number of node "node" of cap "m" */
 int layers(struct All_variables *E,int m,int node)
 {
-  return(layers_r(E,E->sx[m][3][node]));
+  return(layers_r(E,E->sx[CPPR][3][node]));
 }
 
 
@@ -835,16 +835,16 @@ void construct_mat_group(E)
           for(el=1;el<=E->lmesh.nel;el++) {
               int nz;
               nz = ((el-1) % E->lmesh.elz) + 1;
-              E->mat[m][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
+              E->mat[CPPR][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
           }
   } else {
       for (m=1;m<=E->sphere.caps_per_proc;m++) {
           for(el=1;el<=E->lmesh.nel;el++) {
-              E->mat[m][el] = 1;
-              nodea = E->ien[m][el].node[2];
-              llayer = layers(E,m,nodea);
+              E->mat[CPPR][el] = 1;
+              nodea = E->ien[CPPR][el].node[2];
+              llayer = layers(E,CPPR,nodea);
               if (llayer)  {
-                  E->mat[m][el] = llayer;
+                  E->mat[CPPR][el] = llayer;
               }
           }
       }
