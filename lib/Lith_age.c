@@ -134,12 +134,12 @@ void lith_age_construct_tic(struct All_variables *E)
 	for(k=1;k<=noz;k++)  {
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
-	  r1=E->sx[m][3][node];
-	  E->T[m][node] = E->control.mantle_temp;
+	  r1=E->sx[CPPR][3][node];
+	  E->T[CPPR][node] = E->control.mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-	      E->T[m][node] = E->control.mantle_temp * erf(temp);
+	      E->T[CPPR][node] = E->control.mantle_temp * erf(temp);
 	    }
 	}
 
@@ -170,12 +170,12 @@ void lith_age_update_tbc(struct All_variables *E)
       for(j=1;j<=nox;j++)
 	for(k=1;k<=noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
-	  r1=E->sx[m][3][node];
+	  r1=E->sx[CPPR][3][node];
 
 	  if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
-	    E->sphere.cap[m].TB[1][node]=E->T[m][node];
-	    E->sphere.cap[m].TB[2][node]=E->T[m][node];
-	    E->sphere.cap[m].TB[3][node]=E->T[m][node];
+	    E->sphere.cap[CPPR].TB[1][node]=E->T[CPPR][node];
+	    E->sphere.cap[CPPR].TB[2][node]=E->T[CPPR][node];
+	    E->sphere.cap[CPPR].TB[3][node]=E->T[CPPR][node];
 	  }
 	}
 
@@ -204,37 +204,37 @@ all three get set to true. CPC 6/20/00 */
     if(lv==E->mesh.gridmax)
       for(j=1;j<=E->sphere.caps_per_proc;j++)
 	for(node=1;node<=E->lmesh.nno;node++)  {
-	  if( ((E->sx[j][1][node]<=ttt2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[j][1][node]>=ttt3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[CPPR][1][node]<=ttt2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[CPPR][1][node]>=ttt3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if < (width) from x bounds AND (depth) from top */
 	    {
-	      E->node[j][node]=E->node[j][node] | TBX;
-	      E->node[j][node]=E->node[j][node] & (~FBX);
-	      E->node[j][node]=E->node[j][node] | TBY;
-	      E->node[j][node]=E->node[j][node] & (~FBY);
-	      E->node[j][node]=E->node[j][node] | TBZ;
-	      E->node[j][node]=E->node[j][node] & (~FBZ);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
-	  if( ((E->sx[j][2][node]<=fff2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[CPPR][2][node]<=fff2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
-	      E->node[j][node]=E->node[j][node] | TBX;
-	      E->node[j][node]=E->node[j][node] & (~FBX);
-	      E->node[j][node]=E->node[j][node] | TBY;
-	      E->node[j][node]=E->node[j][node] & (~FBY);
-	      E->node[j][node]=E->node[j][node] | TBZ;
-	      E->node[j][node]=E->node[j][node] & (~FBZ);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
-	  if( ((E->sx[j][2][node]>=fff3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[CPPR][2][node]>=fff3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
-	      E->node[j][node]=E->node[j][node] | TBX;
-	      E->node[j][node]=E->node[j][node] & (~FBX);
-	      E->node[j][node]=E->node[j][node] | TBY;
-	      E->node[j][node]=E->node[j][node] & (~FBY);
-	      E->node[j][node]=E->node[j][node] | TBZ;
-	      E->node[j][node]=E->node[j][node] & (~FBZ);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
 	}
@@ -244,14 +244,14 @@ all three get set to true. CPC 6/20/00 */
     if(lv==E->mesh.gridmax)
       for(j=1;j<=E->sphere.caps_per_proc;j++)
 	for(node=1;node<=E->lmesh.nno;node++)  {
-	  if(E->sx[j][3][node]>=E->sphere.ro-E->control.lith_age_depth)
+	  if(E->sx[CPPR][3][node]>=E->sphere.ro-E->control.lith_age_depth)
 	    { /* if closer than (lith_age_depth) from top */
-	      E->node[j][node]=E->node[j][node] | TBX;
-	      E->node[j][node]=E->node[j][node] & (~FBX);
-	      E->node[j][node]=E->node[j][node] | TBY;
-	      E->node[j][node]=E->node[j][node] & (~FBY);
-	      E->node[j][node]=E->node[j][node] | TBZ;
-	      E->node[j][node]=E->node[j][node] & (~FBZ);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
+	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
+	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
 	}
@@ -307,23 +307,23 @@ void lith_age_conform_tbc(struct All_variables *E)
 	  for(k=1;k<=noz;k++)  {
 	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
-	    t1=E->sx[m][1][node];
-	    f1=E->sx[m][2][node];
-	    r1=E->sx[m][3][node];
+	    t1=E->sx[CPPR][1][node];
+	    f1=E->sx[CPPR][2][node];
+	    r1=E->sx[CPPR][3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-	      if( ((E->sx[m][1][node]<=ttt2) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[m][1][node]>=ttt3) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
+	      if( ((E->sx[CPPR][1][node]<=ttt2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[CPPR][1][node]>=ttt3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
 		/* if < (width) from x bounds AND (depth) from top */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
 
 		/* keep the age the same! */
-		E->sphere.cap[m].TB[1][node]=t0;
-		E->sphere.cap[m].TB[2][node]=t0;
-		E->sphere.cap[m].TB[3][node]=t0;
+		E->sphere.cap[CPPR].TB[1][node]=t0;
+		E->sphere.cap[CPPR].TB[2][node]=t0;
+		E->sphere.cap[CPPR].TB[3][node]=t0;
 	      }
 
-	      if( ((E->sx[m][2][node]<=fff2) || (E->sx[m][2][node]>=fff3)) && (E->sx[m][3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
+	      if( ((E->sx[CPPR][2][node]<=fff2) || (E->sx[CPPR][2][node]>=fff3)) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
 		/* if < (width) from y bounds AND (depth) from top */
 
 
@@ -331,9 +331,9 @@ void lith_age_conform_tbc(struct All_variables *E)
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
 
-		E->sphere.cap[m].TB[1][node]=t0;
-		E->sphere.cap[m].TB[2][node]=t0;
-		E->sphere.cap[m].TB[3][node]=t0;
+		E->sphere.cap[CPPR].TB[1][node]=t0;
+		E->sphere.cap[CPPR].TB[2][node]=t0;
+		E->sphere.cap[CPPR].TB[3][node]=t0;
 
 	      }
 
@@ -352,23 +352,23 @@ void lith_age_conform_tbc(struct All_variables *E)
 	  for(k=1;k<=noz;k++)  {
 	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
-	    t1=E->sx[m][1][node];
-	    f1=E->sx[m][2][node];
-	    r1=E->sx[m][3][node];
+	    t1=E->sx[CPPR][1][node];
+	    f1=E->sx[CPPR][2][node];
+	    r1=E->sx[CPPR][3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-	      if(  E->sx[m][3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
+	      if(  E->sx[CPPR][3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
 		/* if closer than (lith_age_depth) from top */
 
-                depth=E->sphere.ro - E->sx[m][3][node];
+                depth=E->sphere.ro - E->sx[CPPR][3][node];
 
 		/* set a new age from the file */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
 
-		E->sphere.cap[m].TB[1][node]=t0;
-		E->sphere.cap[m].TB[2][node]=t0;
-		E->sphere.cap[m].TB[3][node]=t0;
+		E->sphere.cap[CPPR].TB[1][node]=t0;
+		E->sphere.cap[CPPR].TB[2][node]=t0;
+		E->sphere.cap[CPPR].TB[3][node]=t0;
 	      }
 	    }
 	  }     /* end k   */
@@ -395,35 +395,35 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
   for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
 
-        type = (E->node[j][node] & (TBX | TBZ | TBY));
+        type = (E->node[CPPR][node] & (TBX | TBZ | TBY));
 
         switch (type) {
         case 0:  /* no match, next node */
             break;
         case TBX:
-            assimilate_new_temp = E->sphere.cap[j].TB[1][node];
+            assimilate_new_temp = E->sphere.cap[CPPR].TB[1][node];
             break;
         case TBZ:
-            assimilate_new_temp = E->sphere.cap[j].TB[3][node];
+            assimilate_new_temp = E->sphere.cap[CPPR].TB[3][node];
             break;
         case TBY:
-            assimilate_new_temp = E->sphere.cap[j].TB[2][node];
+            assimilate_new_temp = E->sphere.cap[CPPR].TB[2][node];
             break;
         case (TBX | TBZ):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[3][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[3][node]);
             break;
         case (TBX | TBY):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node]);
             break;
         case (TBZ | TBY):     /* clashes ! */
-            assimilate_new_temp = 0.5 * (E->sphere.cap[j].TB[3][node] + E->sphere.cap[j].TB[2][node]);
+            assimilate_new_temp = 0.5 * (E->sphere.cap[CPPR].TB[3][node] + E->sphere.cap[CPPR].TB[2][node]);
             break;
         case (TBZ | TBY | TBX):     /* clashes ! */
-            assimilate_new_temp = 0.3333333 * (E->sphere.cap[j].TB[1][node] + E->sphere.cap[j].TB[2][node] + E->sphere.cap[j].TB[3][node]);
+            assimilate_new_temp = 0.3333333 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node] + E->sphere.cap[CPPR].TB[3][node]);
             break;
         } /* end switch */
 
-        depth = E->sphere.ro - E->sx[j][3][node];
+        depth = E->sphere.ro - E->sx[CPPR][3][node];
 
         switch (type) {
         case 0:  /* no match, next node */
@@ -432,10 +432,10 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
             if(depth <= E->control.lith_age_depth) {
                 /* daf == depth_assimilation_factor */
                 daf = 0.5*depth/E->control.lith_age_depth;
-                E->T[j][node] = daf*E->T[j][node] + (1.0-daf)*assimilate_new_temp;
+                E->T[CPPR][node] = daf*E->T[CPPR][node] + (1.0-daf)*assimilate_new_temp;
                }
             else
-                E->T[j][node] = assimilate_new_temp;
+                E->T[CPPR][node] = assimilate_new_temp;
         } /* end switch */
 
     } /* next node */
