@@ -66,7 +66,7 @@ void remove_horiz_ave(E,X,H,store_or_not)
       for(j=1;j<=nox;j++)
 	for(i=1;i<=noz;i++) {
             n = i+(j-1)*noz+(k-1)*noz*nox;
-            X[m][n] -= H[i];
+            X[CPPR][n] -= H[i];
 	}
 
    return;
@@ -116,29 +116,29 @@ void return_horiz_ave(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+          lnode[1] = E->ien[CPPR][el].node[1];
+          lnode[2] = E->ien[CPPR][el].node[2];
+          lnode[3] = E->ien[CPPR][el].node[3];
+          lnode[4] = E->ien[CPPR][el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+            lnode[1] = E->ien[CPPR][el].node[5];
+            lnode[2] = E->ien[CPPR][el].node[6];
+            lnode[3] = E->ien[CPPR][el].node[7];
+            lnode[4] = E->ien[CPPR][el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
@@ -196,29 +196,29 @@ void return_horiz_ave_f(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+          lnode[1] = E->ien[CPPR][el].node[1];
+          lnode[2] = E->ien[CPPR][el].node[2];
+          lnode[3] = E->ien[CPPR][el].node[3];
+          lnode[4] = E->ien[CPPR][el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+            lnode[1] = E->ien[CPPR][el].node[5];
+            lnode[2] = E->ien[CPPR][el].node[6];
+            lnode[3] = E->ien[CPPR][el].node[7];
+            lnode[4] = E->ien[CPPR][el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[m][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
@@ -286,8 +286,8 @@ void return_elementwise_horiz_ave(E,X,H)
         for (j=1;j<=elx;j++)
         {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          temp[i] += X[m][el]*E->ECO[E->mesh.levmax][m][el].area;
-          temp[i+elz] += E->ECO[E->mesh.levmax][m][el].area;
+          temp[i] += X[CPPR][el]*E->ECO[E->mesh.levmax][CPPR][el].area;
+          temp[i+elz] += E->ECO[E->mesh.levmax][CPPR][el].area;
         }
       }
     }
@@ -332,9 +332,9 @@ float return_bulk_value(E,Z,average)
 
 	  for(j=1;j<=vpts;j++)
 	    for(i=1;i<=ends;i++) {
-		n = E->ien[m][el].node[i];
-		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-		integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
+		n = E->ien[CPPR][el].node[i];
+		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
+		integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
                 }
 
           }
@@ -376,9 +376,9 @@ double return_bulk_value_d(E,Z,average)
 
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
-                n = E->ien[m][el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
-                integral1 += Z[m][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[m][el].vpt[j];
+                n = E->ien[CPPR][el].node[i];
+                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
+                integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
             }
 
        }
@@ -484,10 +484,10 @@ float global_fvdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i];
+      temp += A[CPPR][i]*B[CPPR][i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-       temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
+    for (i=1;i<=E->parallel.Skip_neq[lev][CPPR];i++)
+       temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*B[CPPR][E->parallel.Skip_id[lev][CPPR][i]];
 
     temp -= temp1;
 
@@ -516,11 +516,11 @@ double kineticE_radial(E,A,lev)
     temp1 = 0.0;
     for (i=0;i<neq;i++)
       if ((i+1)%3==0)
-        temp += A[m][i]*A[m][i];
+        temp += A[CPPR][i]*A[CPPR][i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-      if ((E->parallel.Skip_id[lev][m][i]+1)%3==0)
-        temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*A[m][E->parallel.Skip_id[lev][m][i]];
+    for (i=1;i<=E->parallel.Skip_neq[lev][CPPR];i++)
+      if ((E->parallel.Skip_id[lev][CPPR][i]+1)%3==0)
+        temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*A[m][E->parallel.Skip_id[lev][CPPR][i]];
 
     temp -= temp1;
 
@@ -547,10 +547,10 @@ double global_vdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[m][i]*B[m][i];
+      temp += A[CPPR][i]*B[CPPR][i];
 
-    for (i=1;i<=E->parallel.Skip_neq[lev][m];i++)
-       temp1 += A[m][E->parallel.Skip_id[lev][m][i]]*B[m][E->parallel.Skip_id[lev][m][i]];
+    for (i=1;i<=E->parallel.Skip_neq[lev][CPPR];i++)
+       temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*B[m][E->parallel.Skip_id[lev][CPPR][i]];
 
     temp -= temp1;
 
@@ -578,7 +578,7 @@ double global_pdot(E,A,B,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     npno=E->lmesh.NPNO[lev];
     for (i=0;i<npno;i++)
-      temp += A[m][i]*B[m][i];
+      temp += A[CPPR][i]*B[CPPR][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -598,13 +598,13 @@ double global_v_norm2(struct All_variables *E,  double **V)
     prod = 0.0;
     for (m=1; m<=E->sphere.caps_per_proc; m++)
         for (i=1; i<=E->lmesh.nno; i++) {
-            eqn1 = E->id[m][i].doff[1];
-            eqn2 = E->id[m][i].doff[2];
-            eqn3 = E->id[m][i].doff[3];
+            eqn1 = E->id[CPPR][i].doff[1];
+            eqn2 = E->id[CPPR][i].doff[2];
+            eqn3 = E->id[CPPR][i].doff[3];
             /* L2 norm  */
-            temp += (V[m][eqn1] * V[m][eqn1] +
-                     V[m][eqn2] * V[m][eqn2] +
-                     V[m][eqn3] * V[m][eqn3]) * E->NMass[m][i];
+            temp += (V[CPPR][eqn1] * V[CPPR][eqn1] +
+                     V[CPPR][eqn2] * V[CPPR][eqn2] +
+                     V[CPPR][eqn3] * V[CPPR][eqn3]) * E->NMass[CPPR][i];
         }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -625,7 +625,7 @@ double global_p_norm2(struct All_variables *E,  double **P)
         for (i=0; i<E->lmesh.npno; i++) {
             /* L2 norm */ 
             /* should be E->eco[m][i].area after E->eco hase been made 0-based */
-            temp += P[m][i] * P[m][i] * E->eco[m][i+1].area;
+            temp += P[CPPR][i] * P[CPPR][i] * E->eco[CPPR][i+1].area;
         }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -645,7 +645,7 @@ double global_div_norm2(struct All_variables *E,  double **A)
     for (m=1; m<=E->sphere.caps_per_proc; m++)
         for (i=0; i<E->lmesh.npno; i++) {
             /* L2 norm of div(u) */
-            temp += A[m][i] * A[m][i] / E->eco[m][i+1].area;
+            temp += A[CPPR][i] * A[CPPR][i] / E->eco[CPPR][i+1].area;
 
             /* L1 norm */
             /*temp += fabs(A[m][i]);*/
@@ -673,8 +673,8 @@ double global_tdot_d(E,A,B,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     nno=E->lmesh.NNO[lev];
     for (i=1;i<=nno;i++)
-    if (!(E->NODE[lev][m][i] & SKIP))
-      temp += A[m][i];
+    if (!(E->NODE[lev][CPPR][i] & SKIP))
+      temp += A[CPPR][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -697,8 +697,8 @@ float global_tdot(E,A,B,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
     nno=E->lmesh.NNO[lev];
     for (i=1;i<=nno;i++)
-      if (!(E->NODE[lev][m][i] & SKIP))
-        temp += A[m][i]*B[m][i];
+      if (!(E->NODE[lev][CPPR][i] & SKIP))
+        temp += A[CPPR][i]*B[CPPR][i];
     }
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
@@ -745,7 +745,7 @@ double Tmaxd(E,T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = max(T[CPPR][i],temp);
 
   temp1 = global_dmax(E,temp);
   return (temp1);
@@ -762,7 +762,7 @@ float Tmax(E,T)
   temp = -10.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
-      temp = max(T[m][i],temp);
+      temp = max(T[CPPR][i],temp);
 
   temp1 = global_fmax(E,temp);
   return (temp1);
@@ -787,11 +787,11 @@ for (m=1;m<=E->sphere.caps_per_proc;m++)
    /*if (E->mat[m][e]==1)*/
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
-	 node = E->IEN[lev][m][e].node[a];
-         dtemp += dU[m][ E->ID[lev][m][node].doff[i] ]*
-                  dU[m][ E->ID[lev][m][node].doff[i] ];
-         temp += U[m][ E->ID[lev][m][node].doff[i] ]*
-                 U[m][ E->ID[lev][m][node].doff[i] ];
+	 node = E->IEN[lev][CPPR][e].node[a];
+         dtemp += dU[CPPR][ E->ID[lev][CPPR][node].doff[i] ]*
+                  dU[CPPR][ E->ID[lev][CPPR][node].doff[i] ];
+         temp += U[CPPR][ E->ID[lev][CPPR][node].doff[i] ]*
+                 U[CPPR][ E->ID[lev][CPPR][node].doff[i] ];
          }
 
 
@@ -932,18 +932,18 @@ void remove_rigid_rot(struct All_variables *E)
     for (m=1;m<=E->sphere.caps_per_proc;m++) {
       for (e=1;e<=E->lmesh.nel;e++) {
 #ifdef ALLOW_ELLIPTICAL
-	t = theta_g(E->eco[m][e].centre[1],E);
+	t = theta_g(E->eco[CPPR][e].centre[1],E);
 #else
-	t = E->eco[m][e].centre[1];
+	t = E->eco[CPPR][e].centre[1];
 #endif
-	f = E->eco[m][e].centre[2];
-	r = E->eco[m][e].centre[3];
+	f = E->eco[CPPR][e].centre[2];
+	r = E->eco[CPPR][e].centre[3];
 	
 	cos_t = cos(t);sin_t = sin(t);
 	sin_f = sin(f);cos_f = cos(f);
 	
 	/* get Cartesian, element local velocities */
-	velo_from_element_d(E,VV,m,e,sphere_key);
+	velo_from_element_d(E,VV,CPPR,e,sphere_key);
 	for (j=1;j<=ppts;j++)   {
 	  vx[j] = 0.0;vy[j] = 0.0;
 	}
@@ -963,9 +963,9 @@ void remove_rigid_rot(struct All_variables *E)
         } else {
             rho = 1;
         }
-	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[m][e].area * rho;
-	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[m][e].area * rho;
-	exyz[3] -= (wx*sin_t                 ) * E->eco[m][e].area * rho;
+	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[CPPR][e].area * rho;
+	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[CPPR][e].area * rho;
+	exyz[3] -= (wx*sin_t                 ) * E->eco[CPPR][e].area * rho;
       }
     } /* end cap */
     
@@ -995,9 +995,9 @@ void remove_rigid_rot(struct All_variables *E)
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       for (node=1;node<=nno;node++)   {
 	/* cartesian velocity = omega \cross r  */
-	vx[0] = fxyz[2]* E->x[m][3][node] - fxyz[3]*E->x[m][2][node];
-	vx[1] = fxyz[3]* E->x[m][1][node] - fxyz[1]*E->x[m][3][node];
-	vx[2] = fxyz[1]* E->x[m][2][node] - fxyz[2]*E->x[m][1][node];
+	vx[0] = fxyz[2]* E->x[CPPR][3][node] - fxyz[3]*E->x[CPPR][2][node];
+	vx[1] = fxyz[3]* E->x[CPPR][1][node] - fxyz[1]*E->x[CPPR][3][node];
+	vx[2] = fxyz[1]* E->x[CPPR][2][node] - fxyz[2]*E->x[m][1][node];
 	/* project into theta, phi */
 	calc_cbase_at_node(m,node,cart_base,E);
 	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
@@ -1011,13 +1011,13 @@ void remove_rigid_rot(struct All_variables *E)
     cos_t = cos(tr) * rot;
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       for (node=1;node<=nno;node++)   {
-	frd = fr - E->sx[m][2][node];
-	v_theta = E->sx[m][3][node] * sin_t * sin(frd);
-	v_phi =   E->sx[m][3][node] * 
-	  (  E->SinCos[lev][m][0][node] * cos_t - E->SinCos[lev][m][2][node]  * sin_t * cos(frd) );
+	frd = fr - E->sx[CPPR][2][node];
+	v_theta = E->sx[CPPR][3][node] * sin_t * sin(frd);
+	v_phi =   E->sx[CPPR][3][node] * 
+	  (  E->SinCos[lev][CPPR][0][node] * cos_t - E->SinCos[lev][CPPR][2][node]  * sin_t * cos(frd) );
 	
-	E->sphere.cap[m].V[1][node] -= v_theta;
-	E->sphere.cap[m].V[2][node] -= v_phi;
+	E->sphere.cap[CPPR].V[1][node] -= v_theta;
+	E->sphere.cap[CPPR].V[2][node] -= v_phi;
       }
     }
 #endif
