@@ -458,9 +458,6 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         float VV[4][9], double rtf[4][9],
                         double diffusion, int m)
 {
-  /* the [m]'s inside this function have not been replaced by CPPR since m is an arg that
-   * will eventually go away
-   */
     int i,j;
     int *ienm;
 
@@ -470,7 +467,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
 
     double prod1,unorm,twodiff;
 
-    ienm=E->ien[m][el].node;
+    ienm=E->ien[CPPR][el].node;
 
     twodiff = 2.0*diffusion;
 
@@ -482,9 +479,9 @@ static void pg_shape_fn(struct All_variables *E, int el,
       uc3 +=  E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
       }
 
-    uxse = fabs(uc1*E->eco[m][el].size[1]);
-    ueta = fabs(uc2*E->eco[m][el].size[2]);
-    ufai = fabs(uc3*E->eco[m][el].size[3]);
+    uxse = fabs(uc1*E->eco[CPPR][el].size[1]);
+    ueta = fabs(uc2*E->eco[CPPR][el].size[2]);
+    ufai = fabs(uc3*E->eco[CPPR][el].size[3]);
 
     xse = (uxse>twodiff)? (1.0-twodiff/uxse):0.0;
     eta = (ueta>twodiff)? (1.0-twodiff/ueta):0.0;
@@ -536,9 +533,6 @@ static void element_residual(struct All_variables *E, int el,
                              double diff, float **BC,
                              unsigned int **FLAGS, int m)
 {
-  /* the [m]'s inside this function have not been replaced by CPPR since m is an arg that
-   * will eventually go away
-   */
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
     double dT[9];
@@ -575,12 +569,12 @@ static void element_residual(struct All_variables *E, int el,
         sint[i] = rtf[3][i]/sin(rtf[1][i]);
 
     for(j=1;j<=ends;j++)       {
-      node = E->ien[m][el].node[j];
-      T = field[m][node];
-      if(E->node[m][node] & (TBX | TBY | TBZ))
+      node = E->ien[CPPR][el].node[j];
+      T = field[CPPR][node];
+      if(E->node[CPPR][node] & (TBX | TBY | TBZ))
 	    DT=0.0;
       else
-	    DT = fielddot[m][node];
+	    DT = fielddot[CPPR][node];
 
       for(i=1;i<=vpts;i++)  {
           dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
@@ -608,8 +602,8 @@ static void element_residual(struct All_variables *E, int el,
 
       /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
 	 between  */
-      Q *= (1.0 - E->composition.comp_el[m][0][el]);
-      Q += E->composition.comp_el[m][0][el] * E->control.Q0ER;
+      Q *= (1.0 - E->composition.comp_el[CPPR][0][el]);
+      Q += E->composition.comp_el[CPPR][0][el] * E->control.Q0ER;
     }
 
     nz = ((el-1) % E->lmesh.elz) + 1;
@@ -620,8 +614,8 @@ static void element_residual(struct All_variables *E, int el,
         heating = rho * Q;
     else
         /* E->heating_latent is actually the inverse of latent heating */
-        heating = (rho * Q - E->heating_adi[m][el] + E->heating_visc[m][el])
-            * E->heating_latent[m][el];
+        heating = (rho * Q - E->heating_adi[CPPR][el] + E->heating_visc[CPPR][el])
+            * E->heating_latent[CPPR][el];
 
     /* construct residual from this information */
 
@@ -657,13 +651,13 @@ static void element_residual(struct All_variables *E, int el,
 
     if(FLAGS!=NULL) {
       aid = -1;
-      if (FLAGS[m][E->ien[m][el].node[1]] & FBZ) {   // only check for the 1st node
+      if (FLAGS[CPPR][E->ien[CPPR][el].node[1]] & FBZ) {   // only check for the 1st node
           aid = 0;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,CPPR);
           }
-      else if (FLAGS[m][E->ien[m][el].node[5]] & FBZ) {   // only check for the 5th node
+      else if (FLAGS[CPPR][E->ien[CPPR][el].node[5]] & FBZ) {   // only check for the 5th node
           aid = 1;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,m);
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,CPPR);
           }
       if (aid>=0)  {
         for(a=1;a<=onedvpts;a++)  {
@@ -671,7 +665,7 @@ static void element_residual(struct All_variables *E, int el,
 	  for(j=1;j<=onedvpts;j++)  {
             dT[j] = 0.0;
 	    for(k=1;k<=onedvpts;k++)
-              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[m][el].node[k+aid*onedvpts]];
+              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[CPPR][el].node[k+aid*onedvpts]];
             }
 	  for(j=1;j<=onedvpts;j++)  {
 	    Eres[a+aid*onedvpts] += dGamma.vpt[GMVGAMMA(aid,j)] *
@@ -776,7 +770,6 @@ static void filter(struct All_variables *E)
 static void process_visc_heating(struct All_variables *E, int m,
                                  double *heating)
 {
-  /* m is an arg that will go away, hence not replaced by CPPR */
     void strain_rate_2_inv();
     int e, i;
     double visc, temp;
@@ -788,12 +781,12 @@ static void process_visc_heating(struct All_variables *E, int m,
        reversal */
     temp = E->control.disptn_number / E->control.Atemp / vpts;
 
-    strain_rate_2_inv(E, m, strain_sqr, 0);
+    strain_rate_2_inv(E, CPPR, strain_sqr, 0);
 
     for(e=1; e<=E->lmesh.nel; e++) {
         visc = 0.0;
         for(i = 1; i <= vpts; i++)
-            visc += E->EVi[m][(e-1)*vpts + i];
+            visc += E->EVi[CPPR][(e-1)*vpts + i];
 
         heating[e] = temp * visc * strain_sqr[e];
     }
@@ -807,7 +800,6 @@ static void process_visc_heating(struct All_variables *E, int m,
 static void process_adi_heating(struct All_variables *E, int m,
                                 double *heating)
 {
-  /* m is an arg that will go away, hence not replaced by CPPR */
     int e, ez, i, j;
     double matprop, temp1, temp2;
     const int ends = ENODES3D;
@@ -823,9 +815,9 @@ static void process_adi_heating(struct All_variables *E, int m,
 
         temp1 = 0.0;
         for(i=1; i<=ends; i++) {
-            j = E->ien[m][e].node[i];
-            temp1 += E->sphere.cap[m].V[3][j]
-                * (E->T[m][j] + E->control.surface_temp);
+            j = E->ien[CPPR][e].node[i];
+            temp1 += E->sphere.cap[CPPR].V[3][j]
+                * (E->T[CPPR][j] + E->control.surface_temp);
         }
 
         heating[e] = matprop * temp1 * temp2;
@@ -840,7 +832,6 @@ static void latent_heating(struct All_variables *E, int m,
                            float **B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
 {
-  /* m is an arg that will go away, hence not replaced by CPPR */
     double temp, temp0, temp1, temp2, temp3, matprop;
     int e, ez, i, j;
     const int ends = ENODES3D;
@@ -861,10 +852,10 @@ static void latent_heating(struct All_variables *E, int m,
         temp2 = 0;
         temp3 = 0;
         for(i=1; i<=ends; i++) {
-            j = E->ien[m][e].node[i];
-            temp = (1.0 - B[m][j]) * B[m][j]
-                * (E->T[m][j] + E->control.surface_temp);
-            temp2 += temp * E->sphere.cap[m].V[3][j];
+            j = E->ien[CPPR][e].node[i];
+            temp = (1.0 - B[CPPR][j]) * B[CPPR][j]
+                * (E->T[CPPR][j] + E->control.surface_temp);
+            temp2 += temp * E->sphere.cap[CPPR].V[3][j];
             temp3 += temp;
         }
 
@@ -881,7 +872,6 @@ static void latent_heating(struct All_variables *E, int m,
 static void process_latent_heating(struct All_variables *E, int m,
                                    double *heating_latent, double *heating_adi)
 {
-  /* m is an arg that will go away, hence not replaced by CPPR */
     int e;
 
     /* reset */
@@ -889,7 +879,7 @@ static void process_latent_heating(struct All_variables *E, int m,
         heating_latent[e] = 1.0;
 
     if(E->control.Ra_410 != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
+        latent_heating(E, CPPR, heating_latent, heating_adi,
                        E->Fas410, E->control.Ra_410,
                        E->control.clapeyron410, E->viscosity.z410,
                        E->control.transT410, E->control.inv_width410);
@@ -897,14 +887,14 @@ static void process_latent_heating(struct All_variables *E, int m,
     }
 
     if(E->control.Ra_670 != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
+        latent_heating(E, CPPR, heating_latent, heating_adi,
                        E->Fas670, E->control.Ra_670,
                        E->control.clapeyron670, E->viscosity.zlm,
                        E->control.transT670, E->control.inv_width670);
     }
 
     if(E->control.Ra_cmb != 0.0) {
-        latent_heating(E, m, heating_latent, heating_adi,
+        latent_heating(E, CPPR, heating_latent, heating_adi,
                        E->Fascmb, E->control.Ra_cmb,
                        E->control.clapeyroncmb, E->viscosity.zcmb,
                        E->control.transTcmb, E->control.inv_widthcmb);
