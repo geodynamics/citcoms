@@ -57,14 +57,14 @@ static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
   int a, a1, a2, a3, p, node;
 
   for(a=1;a<=ends;a++)          {
-    node = E->ien[m][e].node[a];
+    node = E->ien[CPPR][e].node[a];
     p=(a-1)*dims;
-    a1=E->id[m][node].doff[1];
-    E->F[m][a1] += elt_f[p];
-    a2=E->id[m][node].doff[2];
-    E->F[m][a2] += elt_f[p+1];
-    a3=E->id[m][node].doff[3];
-    E->F[m][a3] += elt_f[p+2];
+    a1=E->id[CPPR][node].doff[1];
+    E->F[CPPR][a1] += elt_f[p];
+    a2=E->id[CPPR][node].doff[2];
+    E->F[CPPR][a2] += elt_f[p+1];
+    a3=E->id[CPPR][node].doff[3];
+    E->F[CPPR][a3] += elt_f[p+2];
   }
 }
 
@@ -97,25 +97,25 @@ void assemble_forces(E,penalty)
   for(m=1;m<=E->sphere.caps_per_proc;m++)    {
 
     for(a=0;a<neq;a++)
-      E->F[m][a] = 0.0;
+      E->F[CPPR][a] = 0.0;
 
     for (e=1;e<=nel;e++)  {
-      get_elt_f(E,e,elt_f,1,m);
-      add_force(E, e, elt_f, m);
+      get_elt_f(E,e,elt_f,1,CPPR);
+      add_force(E, e, elt_f, CPPR);
     }
 
     /* for traction bc */
     for(i=1; i<=E->boundary.nel; i++) {
-      e = E->boundary.element[m][i];
+      e = E->boundary.element[CPPR][i];
 
       for(a=0;a<24;a++) elt_f[a] = 0.0;
       for(a=SIDE_BEGIN; a<=SIDE_END; a++) {
           if(E->control.pseudo_free_surf)
-              get_elt_tr_pseudo_surf(E, i, a, elt_f, m);
+              get_elt_tr_pseudo_surf(E, i, a, elt_f, CPPR);
           else
-              get_elt_tr(E, i, a, elt_f, m);
+              get_elt_tr(E, i, a, elt_f, CPPR);
       }
-      add_force(E, e, elt_f, m);
+      add_force(E, e, elt_f, CPPR);
     }
   }       /* end for m */
 
@@ -307,30 +307,30 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     int l1,l2;
 #endif
 
-    get_rtf_at_vpts(E, m, lev, el, rtf);
+    get_rtf_at_vpts(E, CPPR, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
-      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,0);
+      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,CPPR,0);
     
     /* Note N[a].gauss_pt[n] is the value of shape fn a at the nth gaussian
        quadrature point. Nx[d] is the derivative wrt x[d]. */
     
     for(k=1;k<=vpts;k++) {
       off = (el-1)*vpts+k;
-      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][m][el].vpt[k]*E->EVI[lev][m][off];
+      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][CPPR][el].vpt[k]*E->EVI[lev][CPPR][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
       if(E->viscosity.allow_anisotropic_viscosity){
 	/* allow for a possibly anisotropic viscosity */
 	get_constitutive(D[k],rtf[1][k],rtf[2][k],TRUE,
-			 E->EVIn1[lev][m][off], E->EVIn2[lev][m][off], 
-			 E->EVIn3[lev][m][off],
-			 E->EVI2[lev][m][off],E->avmode[lev][m][off],
+			 E->EVIn1[lev][CPPR][off], E->EVIn2[lev][CPPR][off], 
+			 E->EVIn3[lev][CPPR][off],
+			 E->EVI2[lev][CPPR][off],E->avmode[lev][CPPR][off],
 			 E);
       }
 #endif
     }
     /*  */
-    get_ba(&(E->N), &(E->GNX[lev][m][el]), &E->element_Cc, &E->element_Ccx,
+    get_ba(&(E->N), &(E->GNX[lev][CPPR][el]), &E->element_Cc, &E->element_Ccx,
            rtf, E->mesh.nsd, ba);
 
     for(a=1;a<=ends;a++)	/* loop over element nodes */
