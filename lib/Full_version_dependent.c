@@ -52,21 +52,21 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
 
     for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
         for (i=1;i<=E->lmesh.NNO[lev];i++) {
-            t[0] = E->X[lev][m][1][i]*dircos[1][1]+
-                E->X[lev][m][2][i]*dircos[1][2]+
-                E->X[lev][m][3][i]*dircos[1][3];
-            t[1] = E->X[lev][m][1][i]*dircos[2][1]+
-                E->X[lev][m][2][i]*dircos[2][2]+
-                E->X[lev][m][3][i]*dircos[2][3];
-            t[2] = E->X[lev][m][1][i]*dircos[3][1]+
-                E->X[lev][m][2][i]*dircos[3][2]+
-                E->X[lev][m][3][i]*dircos[3][3];
+            t[0] = E->X[lev][CPPR][1][i]*dircos[1][1]+
+                E->X[lev][CPPR][2][i]*dircos[1][2]+
+                E->X[lev][CPPR][3][i]*dircos[1][3];
+            t[1] = E->X[lev][CPPR][1][i]*dircos[2][1]+
+                E->X[lev][CPPR][2][i]*dircos[2][2]+
+                E->X[lev][CPPR][3][i]*dircos[2][3];
+            t[2] = E->X[lev][CPPR][1][i]*dircos[3][1]+
+                E->X[lev][CPPR][2][i]*dircos[3][2]+
+                E->X[lev][CPPR][3][i]*dircos[3][3];
 
-            E->X[lev][m][1][i] = t[0];
-            E->X[lev][m][2][i] = t[1];
-            E->X[lev][m][3][i] = t[2];
-            E->SX[lev][m][1][i] = acos(t[2]/E->SX[lev][m][3][i]);
-            E->SX[lev][m][2][i] = myatan(t[1],t[0]);
+            E->X[lev][CPPR][1][i] = t[0];
+            E->X[lev][CPPR][2][i] = t[1];
+            E->X[lev][CPPR][3][i] = t[2];
+            E->SX[lev][CPPR][1][i] = acos(t[2]/E->SX[lev][CPPR][3][i]);
+            E->SX[lev][CPPR][2][i] = myatan(t[1],t[0]);
         }
     }    /* lev */
 
@@ -164,8 +164,8 @@ void full_node_locations(E)
   free ((void *) RR);
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     ii = E->sphere.capid[j];
-     full_coord_of_cap(E,j,ii);
+     ii = E->sphere.capid[CPPR];
+     full_coord_of_cap(E,CPPR,ii);
      }
 
   if (E->control.verbose) {
@@ -174,7 +174,7 @@ void full_node_locations(E)
           for (j=1;j<=E->sphere.caps_per_proc;j++)
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
+                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
       }
       fflush(E->fp_out);
   }
@@ -195,8 +195,8 @@ void full_node_locations(E)
   dircos[3][3] = cos(ro);
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     ii = E->sphere.capid[j];
-     full_rotate_mesh(E,dircos,j,ii);
+     ii = E->sphere.capid[CPPR];
+     full_rotate_mesh(E,dircos,CPPR,ii);
      }
 
   if (E->control.verbose) {
@@ -205,7 +205,7 @@ void full_node_locations(E)
           for (j=1;j<=E->sphere.caps_per_proc;j++)
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
+                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
       }
       fflush(E->fp_out);
   }
@@ -216,21 +216,21 @@ void full_node_locations(E)
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-	tg = theta_g(E->SX[lev][j][1][i],E);
-	E->SinCos[lev][j][0][i] = sin(tg); /*  */
-	E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]);
-	E->SinCos[lev][j][2][i] = cos(tg);
-	E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]);
+	tg = theta_g(E->SX[lev][CPPR][1][i],E);
+	E->SinCos[lev][CPPR][0][i] = sin(tg); /*  */
+	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]);
+	E->SinCos[lev][CPPR][2][i] = cos(tg);
+	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]);
       }
 #else
   /* spherical */
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-	E->SinCos[lev][j][0][i] = sin(E->SX[lev][j][1][i]); /* sin(theta) */
-	E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]); /* sin(phi) */
-	E->SinCos[lev][j][2][i] = cos(E->SX[lev][j][1][i]); /* cos(theta) */
-	E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]); /* cos(phi) */
+	E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][CPPR][1][i]); /* sin(theta) */
+	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]); /* sin(phi) */
+	E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][CPPR][1][i]); /* cos(theta) */
+	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]); /* cos(phi) */
       }
 
 #endif
@@ -252,10 +252,10 @@ void full_construct_boundary( struct All_variables *E)
   /* boundary = top + bottom */
   int max_size = 2*E->lmesh.elx*E->lmesh.ely + 1;
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    E->boundary.element[m] = (int *)malloc(max_size*sizeof(int));
+    E->boundary.element[CPPR] = (int *)malloc(max_size*sizeof(int));
 
     for(d=1; d<=dims; d++)
-      E->boundary.normal[m][d] = (int *)malloc(max_size*sizeof(int));
+      E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
   }
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
@@ -265,20 +265,20 @@ void full_construct_boundary( struct All_variables *E)
 	if(E->parallel.me_loc[3] == 0) {
 	  i = 1;
 	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
-	  E->boundary.element[m][count] = el;
-	  E->boundary.normal[m][dims][count] = -1;
+	  E->boundary.element[CPPR][count] = el;
+	  E->boundary.normal[CPPR][dims][count] = -1;
 	  for(d=1; d<dims; d++)
-	      E->boundary.normal[m][d][count] = 0;
+	      E->boundary.normal[CPPR][d][count] = 0;
 	  ++count;
 	}
 
 	if(E->parallel.me_loc[3] == E->parallel.nprocz - 1) {
 	  i = E->lmesh.elz;
 	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
-	  E->boundary.element[m][count] = el;
-	  E->boundary.normal[m][dims][count] = 1;
+	  E->boundary.element[CPPR][count] = el;
+	  E->boundary.normal[CPPR][dims][count] = 1;
 	  for(d=1; d<dims; d++)
-	    E->boundary.normal[m][d][count] = 0;
+	    E->boundary.normal[CPPR][d][count] = 0;
 	  ++count;
 	}
 
