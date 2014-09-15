@@ -196,9 +196,9 @@ void output_coord(struct All_variables *E)
   fp1 = output_open(output_file, "w");
 
   for(j=1;j<=E->sphere.caps_per_proc;j++)     {
-    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+      fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[CPPR][1][i],E->sx[CPPR][2][i],E->sx[CPPR][3][i]);
   }
 
   fclose(fp1);
@@ -215,7 +215,7 @@ void output_domain(struct All_variables *E)
 
     /* Note: rank-0 writes the domain bounds of all processors */
 
-    const int j = 1;
+    const int j = CPPR;
     const int tag = 0;
     const int receiver = 0;
     const int nox = E->lmesh.nox;
@@ -232,16 +232,16 @@ void output_domain(struct All_variables *E)
 
     double buffer[ncolumns];
 
-    buffer[0] = E->sx[j][3][1];
-    buffer[1] = E->sx[j][3][noz];
-    buffer[2] = E->sx[j][1][corner_nodes[0]];
-    buffer[3] = E->sx[j][2][corner_nodes[0]];
-    buffer[4] = E->sx[j][1][corner_nodes[1]];
-    buffer[5] = E->sx[j][2][corner_nodes[1]];
-    buffer[6] = E->sx[j][1][corner_nodes[2]];
-    buffer[7] = E->sx[j][2][corner_nodes[2]];
-    buffer[8] = E->sx[j][1][corner_nodes[3]];
-    buffer[9] = E->sx[j][2][corner_nodes[3]];
+    buffer[0] = E->sx[CPPR][3][1];
+    buffer[1] = E->sx[CPPR][3][noz];
+    buffer[2] = E->sx[CPPR][1][corner_nodes[0]];
+    buffer[3] = E->sx[CPPR][2][corner_nodes[0]];
+    buffer[4] = E->sx[CPPR][1][corner_nodes[1]];
+    buffer[5] = E->sx[CPPR][2][corner_nodes[1]];
+    buffer[6] = E->sx[CPPR][1][corner_nodes[2]];
+    buffer[7] = E->sx[CPPR][2][corner_nodes[2]];
+    buffer[8] = E->sx[CPPR][1][corner_nodes[3]];
+    buffer[9] = E->sx[CPPR][2][corner_nodes[3]];
 
     if(E->parallel.me == 0) {
         int i, rank;
@@ -323,9 +323,9 @@ void output_visc(struct All_variables *E, int cycles)
 
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.4e\n",E->VI[lev][j][i]);
+      fprintf(fp1,"%.4e\n",E->VI[lev][CPPR][i]);
   }
 
   fclose(fp1);
@@ -345,9 +345,9 @@ void output_avisc(struct All_variables *E, int cycles)
 	    E->parallel.me, cycles);
     fp1 = output_open(output_file, "w");
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+      fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
+	fprintf(fp1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][CPPR][i],E->VIn1[lev][CPPR][i],E->VIn2[lev][CPPR][i],E->VIn3[lev][CPPR][i]);
     }
     
     fclose(fp1);
@@ -370,9 +370,9 @@ void output_velo(struct All_variables *E, int cycles)
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++) {
-        fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],E->sphere.cap[j].V[3][i],E->T[j][i]);
+        fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[CPPR].V[1][i],E->sphere.cap[CPPR].V[2][i],E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
     }
   }
 
@@ -409,15 +409,15 @@ void output_surf_botm(struct All_variables *E, int cycles)
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
         /* choose either STD topo or pseudo-free-surf topo */
         if(E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[j];
+            topo = E->slice.freesurf[CPPR];
         else
-            topo = E->slice.tpg[j];
+            topo = E->slice.tpg[CPPR];
 
-        fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+        fprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		    topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+		    topo[i],E->slice.shflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
         }
     }
     fclose(fp2);
@@ -430,11 +430,11 @@ void output_surf_botm(struct All_variables *E, int cycles)
     fp2 = output_open(output_file, "w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-      fprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      fprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+		E->slice.tpgb[CPPR][i],E->slice.bhflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
       }
     }
     fclose(fp2);
@@ -508,16 +508,16 @@ void output_stress(struct All_variables *E, int cycles)
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    fprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
+    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     /* those are sorted like stt spp srr stp str srp  */
     for (node=1;node<=E->lmesh.nno;node++)
       fprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[m][(node-1)*6+1],
-              E->gstress[m][(node-1)*6+2],
-              E->gstress[m][(node-1)*6+3],
-              E->gstress[m][(node-1)*6+4],
-              E->gstress[m][(node-1)*6+5],
-              E->gstress[m][(node-1)*6+6]);
+              E->gstress[CPPR][(node-1)*6+1],
+              E->gstress[CPPR][(node-1)*6+2],
+              E->gstress[CPPR][(node-1)*6+3],
+              E->gstress[CPPR][(node-1)*6+4],
+              E->gstress[CPPR][(node-1)*6+5],
+              E->gstress[CPPR][(node-1)*6+6]);
   }
   fclose(fp1);
 }
@@ -542,7 +542,7 @@ void output_horiz_avg(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
-        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],
+        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[CPPR][3][j],
 		E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {
@@ -631,7 +631,7 @@ void output_mat(struct All_variables *E)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)
-      fprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
+      fprintf(fp,"%d %d %f\n", el,E->mat[CPPR][el],E->VIP[CPPR][el]);
 
   fclose(fp);
 
@@ -653,9 +653,9 @@ void output_pressure(struct All_variables *E, int cycles)
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
-      fprintf(fp1,"%.6e\n",E->NP[j][i]);
+      fprintf(fp1,"%.6e\n",E->NP[CPPR][i]);
   }
 
   fclose(fp1);
@@ -678,19 +678,19 @@ void output_tracer(struct All_variables *E, int cycles)
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[CPPR],
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[j];n++) {
+      for(n=1;n<=E->trace.ntracers[CPPR];n++) {
           /* write basic quantities (coordinate) */
           fprintf(fp1,"%.12e %.12e %.12e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
+                  E->trace.basicq[CPPR][0][n],
+                  E->trace.basicq[CPPR][1][n],
+                  E->trace.basicq[CPPR][2][n]);
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              fprintf(fp1," %.12e", E->trace.extraq[j][i][n]);
+              fprintf(fp1," %.12e", E->trace.extraq[CPPR][i][n]);
           }
           fprintf(fp1, "\n");
       }
@@ -714,7 +714,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fprintf(fp1,"%3d %7d %.5e %d\n",
-                j, E->lmesh.nel,
+                CPPR, E->lmesh.nel,
                 E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
             fprintf(fp1,"%.5e %.5e ",
@@ -725,7 +725,7 @@ void output_comp_nd(struct All_variables *E, int cycles)
 
         for(i=1;i<=E->lmesh.nno;i++) {
             for(k=0;k<E->composition.ncomp;k++) {
-                fprintf(fp1,"%.6e ",E->composition.comp_node[j][k][i]);
+                fprintf(fp1,"%.6e ",E->composition.comp_node[CPPR][k][i]);
             }
             fprintf(fp1,"\n");
         }
@@ -749,7 +749,7 @@ void output_comp_el(struct All_variables *E, int cycles)
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fprintf(fp1,"%3d %7d %.5e %d\n",
-                j, E->lmesh.nel,
+                CPPR, E->lmesh.nel,
                 E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
             fprintf(fp1,"%.5e %.5e ",
@@ -761,7 +761,7 @@ void output_comp_el(struct All_variables *E, int cycles)
         for(i=1;i<=E->lmesh.nel;i++) {
             for(k=0;k<E->composition.ncomp;k++) {
                 fprintf(fp1,"%.6e ",
-			E->composition.comp_el[j][k][i]);
+			E->composition.comp_el[CPPR][k][i]);
             }
             fprintf(fp1,"\n");
         }
@@ -785,10 +785,10 @@ void output_heating(struct All_variables *E, int cycles)
     fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        fprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        fprintf(fp1,"%3d %7d\n", CPPR, E->lmesh.nel);
         for(e=1; e<=E->lmesh.nel; e++)
-            fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
-                    E->heating_visc[j][e], E->heating_latent[j][e]);
+            fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[CPPR][e],
+                    E->heating_visc[CPPR][e], E->heating_latent[CPPR][e]);
     }
     fclose(fp1);
 
