@@ -97,44 +97,44 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
       for (k=1;k <= ely;k++)
         for (j=1;j <= elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,m);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
 
 	  /* find mean element location and horizontal velocity */
 
 	  x[0] = x[1] = x[2] = v[0] = v[1] = vw = 0.0;
 
-          lnode[1] = E->ien[m][el].node[1];
-          lnode[2] = E->ien[m][el].node[2];
-          lnode[3] = E->ien[m][el].node[3];
-          lnode[4] = E->ien[m][el].node[4];
+          lnode[1] = E->ien[CPPR][el].node[1];
+          lnode[2] = E->ien[CPPR][el].node[2];
+          lnode[3] = E->ien[CPPR][el].node[3];
+          lnode[4] = E->ien[CPPR][el].node[4];
 
           for(nint=1;nint <= onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d <= onedvpoints[E->mesh.nsd];d++){
 	      vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(0,nint)];
-	      x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
-	      x[1] += E->x[m][2][lnode[d]] * vtmp;
-	      x[2] += E->x[m][3][lnode[d]] * vtmp;
+	      x[0] += E->x[CPPR][1][lnode[d]] * vtmp; /* coords */
+	      x[1] += E->x[CPPR][2][lnode[d]] * vtmp;
+	      x[2] += E->x[CPPR][3][lnode[d]] * vtmp;
 	      
-              v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp; /* theta */
-              v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp; /* phi */
+              v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp; /* theta */
+              v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp; /* phi */
 	      vw += dGamma.vpt[GMVGAMMA(0,nint)];
 	    }
 	  }
           if (i==elz)  {
-            lnode[1] = E->ien[m][el].node[5];
-            lnode[2] = E->ien[m][el].node[6];
-            lnode[3] = E->ien[m][el].node[7];
-            lnode[4] = E->ien[m][el].node[8];
+            lnode[1] = E->ien[CPPR][el].node[5];
+            lnode[2] = E->ien[CPPR][el].node[6];
+            lnode[3] = E->ien[CPPR][el].node[7];
+            lnode[4] = E->ien[CPPR][el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
 		vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(1,nint)];
-		x[0] += E->x[m][1][lnode[d]] * vtmp; /* coords */
-		x[1] += E->x[m][2][lnode[d]] * vtmp;
-		x[2] += E->x[m][3][lnode[d]] * vtmp;
+		x[0] += E->x[CPPR][1][lnode[d]] * vtmp; /* coords */
+		x[1] += E->x[CPPR][2][lnode[d]] * vtmp;
+		x[2] += E->x[CPPR][3][lnode[d]] * vtmp;
 		/*  */
-		v[0] += E->sphere.cap[m].V[1][lnode[d]] * vtmp;
-		v[1] += E->sphere.cap[m].V[2][lnode[d]] * vtmp;
+		v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp;
+		v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp;
 		vw += dGamma.vpt[GMVGAMMA(1,nint)];
 	      }
 	    }
