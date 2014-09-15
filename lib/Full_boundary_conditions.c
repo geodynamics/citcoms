@@ -58,12 +58,12 @@ void full_velocity_boundary_conditions(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
       noz = E->mesh.NOZ[lv];
       if(E->mesh.topvbc != 1) {	/* free slip top */
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,VBX,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,VBZ,1,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,0.0,VBY,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,E->control.VBXtopval,SBX,1,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,SBZ,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,E->control.VBYtopval,SBY,1,lv,CPPR);
 #ifdef USE_GGRD
 	/* Ggrd traction control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
@@ -72,21 +72,21 @@ void full_velocity_boundary_conditions(E)
 
       }
       if(E->mesh.botvbc != 1) {	/* free slip bottom */
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,0.0,VBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,0.0,VBY,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,E->control.VBXbotval,SBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,E->control.VBYbotval,SBY,1,lv,CPPR);
         }
 
       if(E->mesh.topvbc == 1) {	/* velocity/no slip BC */
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,SBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,E->control.VBXtopval,VBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,E->control.VBYtopval,VBY,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,SBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,0.0,SBY,0,lv,CPPR);
 
 #ifdef USE_GGRD
 	/* Ggrd velocity control */
@@ -102,18 +102,18 @@ void full_velocity_boundary_conditions(E)
 				     be easiest to call only once and
 				     have routines deal with multigrid
 				  */
-	  if((lv == E->mesh.gridmin) && (j == E->sphere.caps_per_proc))
+	  if((lv == E->mesh.gridmin) && (CPPR == E->sphere.caps_per_proc))
 	     read_velocity_boundary_from_file(E);
 	}
       }
 
       if(E->mesh.botvbc == 1) {	/* velocity bottom BC */
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,VBY,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,SBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,SBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,E->control.VBXbotval,VBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,E->control.VBYbotval,VBY,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,0.0,SBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,0.0,SBY,0,lv,CPPR);
         }
       }    /* end for j and lv */
 
@@ -152,23 +152,23 @@ void full_temperature_boundary_conditions(E)
   for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->mesh.noz;
     if(E->mesh.toptbc == 1)    {
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,CPPR);
       if(E->control.tbcs_file)
           read_temperature_boundary_from_file(E);
       }
     else   {
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,CPPR);
       }
 
     if(E->mesh.bottbc == 1)    {
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,1,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,0,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,TBZ,1,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,FBZ,0,lev,CPPR);
       }
     else        {
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,TBZ,0,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,FBZ,1,lev,CPPR);
       }
 
     if(E->control.lith_age_time==1)  {
@@ -212,7 +212,7 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
       for(j=1;j<=E->lmesh.NOY[level];j++)
     	for(i=1;i<=E->lmesh.NOX[level];i++)     {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] & (~ mask);
     	  }        /* end for loop i & j */
       }
 
@@ -221,7 +221,7 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
       for(j=1;j<=E->lmesh.NOY[level];j++)
         for(i=1;i<=E->lmesh.NOX[level];i++)       {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] | (mask);
     	  if(level==E->mesh.levmax)   /* NB */
     	    BC[dirn][node] = value;
     	  }     /* end for loop i & j */
