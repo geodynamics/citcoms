@@ -140,9 +140,9 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 
   /* assign values to each tracer based on grd file */
   for (j=1;j<=E->sphere.caps_per_proc;j++) {
-    number_of_tracers = E->trace.ntracers[j];
+    number_of_tracers = E->trace.ntracers[CPPR];
     for (kk=1;kk <= number_of_tracers;kk++) {
-      rad = E->trace.basicq[j][2][kk]; /* tracer radius */
+      rad = E->trace.basicq[CPPR][2][kk]; /* tracer radius */
 
       this_layer = layers_r(E,rad);
       if((only_one_layer && (this_layer == -E->trace.ggrd_layers)) ||
@@ -150,8 +150,8 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	/*
 	   in top layers
 	*/
-	phi =   E->trace.basicq[j][1][kk];
-	theta = E->trace.basicq[j][0][kk];
+	phi =   E->trace.basicq[CPPR][1][kk];
+	theta = E->trace.basicq[CPPR][0][kk];
 	/* interpolate from grid */
 	if(!ggrd_grdtrack_interpolate_tp((double)theta,(double)phi,
 					 ggrd_ict,&indbl,FALSE,shift_to_pos_lon)){
@@ -166,10 +166,10 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	  else
 	    indbl = 1.0;
 	}
-	E->trace.extraq[j][0][kk]= indbl;
+	E->trace.extraq[CPPR][0][kk]= indbl;
       }else{
 	/* below */
-	E->trace.extraq[j][0][kk] = 0.0;
+	E->trace.extraq[CPPR][0][kk] = 0.0;
       }
     }
   }
@@ -285,14 +285,14 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	  /*
 	     get interpolated velocity anomaly
 	  */
-	  depth = (1-E->sx[m][3][node])*6371;
-	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[m][3][node],
-					    (double)E->sx[m][1][node],
-					    (double)E->sx[m][2][node],
+	  depth = (1-E->sx[CPPR][3][node])*6371;
+	  if(!ggrd_grdtrack_interpolate_rtp((double)E->sx[CPPR][3][node],
+					    (double)E->sx[CPPR][1][node],
+					    (double)E->sx[CPPR][2][node],
 					    E->control.ggrd.temp.d,&tadd,
 					    FALSE,shift_to_pos_lon)){
-	    fprintf(stderr,"%g %g %g\n",E->sx[m][2][node]*57.29577951308232087,
-		    90-E->sx[m][1][node]*57.29577951308232087,depth);
+	    fprintf(stderr,"%g %g %g\n",E->sx[CPPR][2][node]*57.29577951308232087,
+		    90-E->sx[CPPR][1][node]*57.29577951308232087,depth);
 		    
 	    myerror(E,"ggrd_temp_init_general: interpolation error");
 	  }
@@ -321,7 +321,7 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	    /*
 	       get the PREM density at r for additional scaling
 	    */
-	    prem_get_rho(&rho_prem,(double)E->sx[m][3][node],&E->control.ggrd.temp.prem);
+	    prem_get_rho(&rho_prem,(double)E->sx[CPPR][3][node],&E->control.ggrd.temp.prem);
 	    if(rho_prem < GGRD_DENS_MIN){
 	      fprintf(stderr,"WARNING: restricting minimum density to %g, would have been %g\n",
 		      (float)GGRD_DENS_MIN,rho_prem);
@@ -330,28 +330,28 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	    /*
 	       assign temperature
 	    */
-	    E->T[m][node] = tmean + tadd * loc_scale * rho_prem / E->data.density;
+	    E->T[CPPR][node] = tmean + tadd * loc_scale * rho_prem / E->data.density;
 	  }else{
 	    /* no PREM scaling */
-	    E->T[m][node] = tmean + tadd * loc_scale;
+	    E->T[CPPR][node] = tmean + tadd * loc_scale;
 	  }
 
 	  if(E->control.ggrd.temp.limit_trange){
 	    /* limit to 0 < T < 1 ?*/
-	    E->T[m][node] = min(max(E->T[m][node], 0.0),1.0);
+	    E->T[CPPR][node] = min(max(E->T[CPPR][node], 0.0),1.0);
 	  }
 	  //fprintf(stderr,"z: %11g T: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	  if(E->control.ggrd.temp.override_tbc){
 	    if((k == 1) && (E->mesh.bottbc == 1)){ /* bottom TBC */
-	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
-	      E->sphere.cap[m].TB[2][node] =  E->T[m][node];
-	      E->sphere.cap[m].TB[3][node] =  E->T[m][node];
+	      E->sphere.cap[CPPR].TB[1][node] =  E->T[CPPR][node];
+	      E->sphere.cap[CPPR].TB[2][node] =  E->T[CPPR][node];
+	      E->sphere.cap[CPPR].TB[3][node] =  E->T[CPPR][node];
 	      //fprintf(stderr,"z: %11g TBB: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	    }
 	    if((k == noz) && (E->mesh.toptbc == 1)){ /* top TBC */
-	      E->sphere.cap[m].TB[1][node] =  E->T[m][node];
-	      E->sphere.cap[m].TB[2][node] =  E->T[m][node];
-	      E->sphere.cap[m].TB[3][node] =  E->T[m][node];
+	      E->sphere.cap[CPPR].TB[1][node] =  E->T[CPPR][node];
+	      E->sphere.cap[CPPR].TB[2][node] =  E->T[CPPR][node];
+	      E->sphere.cap[CPPR].TB[3][node] =  E->T[CPPR][node];
 	      //fprintf(stderr,"z: %11g TBT: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	    }
 	  }
@@ -512,8 +512,8 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
     */
     for (m=1;m <= E->sphere.caps_per_proc;m++) {
       for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
-	if(((E->control.ggrd.mat_control > 0) && (E->mat[m][j] <=  E->control.ggrd.mat_control )) || 
-	   ((E->control.ggrd.mat_control < 0) && (E->mat[m][j] == -E->control.ggrd.mat_control ))){
+	if(((E->control.ggrd.mat_control > 0) && (E->mat[CPPR][j] <=  E->control.ggrd.mat_control )) || 
+	   ((E->control.ggrd.mat_control < 0) && (E->mat[CPPR][j] == -E->control.ggrd.mat_control ))){
 	  /*
 	     lithosphere or asthenosphere
 	  */
@@ -529,8 +529,8 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	      */
 	      xloc[1] = xloc[2] = xloc[3] = 0.0;
 	      for(inode=1;inode <= ends;inode++){
-		ind = E->ien[m][el].node[inode];
-		xloc[1] += E->x[m][1][ind];xloc[2] += E->x[m][2][ind];xloc[3] += E->x[m][3][ind];
+		ind = E->ien[CPPR][el].node[inode];
+		xloc[1] += E->x[CPPR][1][ind];xloc[2] += E->x[CPPR][2][ind];xloc[3] += E->x[CPPR][3][ind];
 	      }
 	      xloc[1]/=ends;xloc[2]/=ends;xloc[3]/=ends;
 	      xyz2rtpd(xloc[1],xloc[2],xloc[3],rout);
@@ -585,7 +585,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 		  vip = 1e5;
 	      }
 	      //fprintf(stderr,"lon %11g lat %11g depth %11g vip %11g\n",rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0,vip);
-	      E->VIP[m][el] = vip;
+	      E->VIP[CPPR][el] = vip;
 	    }
 	  }
 	}else{
@@ -594,14 +594,14 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	    for (k=1;k <= ely;k++){
 	      for (i=1;i <= elx;i++)   {
 		el = j + (i-1) * elz + (k-1)*elxlz;
-		E->VIP[m][el] = 0; /* zero code --> unity scale */
+		E->VIP[CPPR][el] = 0; /* zero code --> unity scale */
 	      }
 	    }
 	  }else{
 	    for (k=1;k <= ely;k++){
 	      for (i=1;i <= elx;i++)   {
 		el = j + (i-1) * elz + (k-1)*elxlz;
-		E->VIP[m][el] = 1.0;
+		E->VIP[CPPR][el] = 1.0;
 	      }
 	    }
 	  }
@@ -626,13 +626,13 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	    for (i=1;i <= elx;i++)   {
 	      el = j + (i-1) * elz + (k-1)*elxlz;
 	      if((int)E->VIP[m][el] < 1){ /* background */
-		E->VIP[m][el] = 1.0;
+		E->VIP[CPPR][el] = 1.0;
 	      }else{
-		if((((int)E->VIP[m][el]) > E->control.ggrd_mat_is_code)||(((int)E->VIP[m][el]) < 1)){
-		  fprintf(stderr,"%i\n",(int)E->VIP[m][el]);
+		if((((int)E->VIP[CPPR][el]) > E->control.ggrd_mat_is_code)||(((int)E->VIP[CPPR][el]) < 1)){
+		  fprintf(stderr,"%i\n",(int)E->VIP[CPPR][el]);
 		  myerror(E,"ggrd_mat_code_viscosities: input code out of bounds");
 		}
-		E->VIP[m][el] = E->control.ggrd_mat_code_viscosities[(int)(E->VIP[m][el]-1)];
+		E->VIP[CPPR][el] = E->control.ggrd_mat_code_viscosities[(int)(E->VIP[CPPR][el]-1)];
 	      }
 	    }
 	  }
@@ -744,8 +744,8 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
       /* loop through all surface nodes */
       for (j=1;j <= E->lmesh.nsf;j++)  {
 	node = j * E->lmesh.noz ;
-	rout[1] = (double)E->sx[m][1][node];
-	rout[2] = (double)E->sx[m][2][node];
+	rout[1] = (double)E->sx[CPPR][1][node];
+	rout[2] = (double)E->sx[CPPR][2][node];
 	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,
 					 FALSE,shift_to_pos_lon)){
 	  fprintf(stderr,"ggrd_read_ray_from_file: interpolation error at %g, %g\n",
@@ -1110,7 +1110,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	    /* 
 	       determine vertical nodes and set the assign flag, if needed
 	    */
-	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,m,verbose,
+	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,CPPR,verbose,
 						      &assign,&botnode,&topnode);
 	    /* 
 	       loop through all horizontal nodes and assign boundary
@@ -1121,8 +1121,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		for(j=1;j <= noxl;j++) {
 		  nodel =  nozl + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
 		  /* node location */
-		  rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
-		  rout[2] = E->SX[level][m][2][nodel];
+		  rout[1] = E->SX[level][CPPR][1][nodel]; /* theta,phi */
+		  rout[2] = E->SX[level][CPPR][2][nodel];
 		  /* 
 		     
 		  for geographic grid, shift theta if too close to poles
@@ -1175,25 +1175,25 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		    if(fabs(v[2]) > cutoff){
 		      /* free slip */
 		      nfree++;
-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
+		      E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~VBX);
+		      E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | SBX;
+		      E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~VBY);
+		      E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | SBY;
 		    }else{
 		      nfixed++;
 		      if(use_vel){
 			/* no slip */
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBX;
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBY;
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | VBX;
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~SBX);
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | VBY;
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~SBY);
 		      }else{			fprintf(stderr,"t %i %i\n",level,nodel);
 
 			/* prescribed tractions */
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~VBX);
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | SBX;
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] & (~VBY);
+			E->NODE[level][CPPR][nodel] = E->NODE[level][CPPR][nodel] | SBY;
 		      }
 		    }
 		  } /* depth loop */
@@ -1232,8 +1232,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	    for(j=1;j <= nox;j++)    {
 	      nodel =  noz + (j-1) * noz + (i-1)*noxnoz; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
 	      /*  */
-	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
-	      rout[2] = E->sx[m][2][nodel];
+	      rout[1] = E->sx[CPPR][1][nodel]; /* theta,phi coordinates */
+	      rout[2] = E->sx[CPPR][2][nodel];
 	      if(we_have_velocity_grids){
 		/* 
 		   
@@ -1345,9 +1345,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		  sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
 		  /* compute spherical velocities in cm/yr at this
 		     location, assuming rotation pole is in deg/Myr */
-		  vx[1]=euler[euler_i][code].w[1] * E->x[m][3][nodel] - euler[euler_i][code].w[2] * E->x[m][2][nodel]; /* vx =  */
-		  vx[2]=euler[euler_i][code].w[2] * E->x[m][1][nodel] - euler[euler_i][code].w[0] * E->x[m][3][nodel]; /* vy =  */
-		  vx[3]=euler[euler_i][code].w[0] * E->x[m][2][nodel] - euler[euler_i][code].w[1] * E->x[m][1][nodel]; /* vz =  */
+		  vx[1]=euler[euler_i][code].w[1] * E->x[CPPR][3][nodel] - euler[euler_i][code].w[2] * E->x[CPPR][2][nodel]; /* vx =  */
+		  vx[2]=euler[euler_i][code].w[2] * E->x[CPPR][1][nodel] - euler[euler_i][code].w[0] * E->x[CPPR][3][nodel]; /* vy =  */
+		  vx[3]=euler[euler_i][code].w[0] * E->x[CPPR][2][nodel] - euler[euler_i][code].w[1] * E->x[CPPR][1][nodel]; /* vz =  */
 		  /*  */
 		  v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
 		  v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phi */
@@ -1357,15 +1357,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		/* assign velociites */
 		if(fabs(v[2]) > cutoff){
 		  /* huge velocitie - free slip */
-		  E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
-		  E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
+		  E->sphere.cap[CPPR].VB[1][nodel] = 0;	/* theta */
+		  E->sphere.cap[CPPR].VB[2][nodel] = 0;	/* phi */
 		}else{
 		  /* regular no slip , assign velocities/tractions as BCs */
-		  E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
-		  E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
+		  E->sphere.cap[CPPR].VB[1][nodel] = v[1];	/* theta */
+		  E->sphere.cap[CPPR].VB[2][nodel] = v[2];	/* phi */
 		}
 		if(use_vel && ontop)
-		  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+		  E->sphere.cap[CPPR].VB[3][nodel] = 0.0; /* r */
 	      }	/* end z */
 	    } /* end x */
 	  } /* end y */
@@ -1412,7 +1412,7 @@ void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input
     if(E->mesh.toplayerbc > 0){
       /* check for internal nodes in layers */
       for(k=nozl;k >= 1;k--){
-	if(E->SX[level][m][3][k] < E->mesh.toplayerbc_r) /* assume regular mesh structure */
+	if(E->SX[level][CPPR][3][k] < E->mesh.toplayerbc_r) /* assume regular mesh structure */
 	  break;
       }
       if(k == nozl){	/*  */
@@ -1466,12 +1466,12 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
       if(fabs(E->control.surface_rayleigh[snode]-1.0)>1e-6){
 	for(i=1;i <= E->lmesh.noz;i++){ /* go through depth layers */
 	  node = (snode-1)*E->lmesh.noz + i; /* global node number */
-	  if(layers(E,m,node) <= E->control.ggrd.ray_control){ 
+	  if(layers(E,CPPR,node) <= E->control.ggrd.ray_control){ 
 	    /* 
 	       node is in top layers 
 	    */
 	    /* depth factor, cos^2 tapered */
-	    xloc=1.0 + ((1 - E->sx[m][3][node]) - 
+	    xloc=1.0 + ((1 - E->sx[CPPR][3][node]) - 
 			E->viscosity.zbase_layer[E->control.ggrd.ray_control-1])/
 	      E->viscosity.zbase_layer[E->control.ggrd.ray_control-1];
 	    fac = cos(xloc*1.5707963267);fac *= fac; /* cos^2
@@ -1481,13 +1481,13 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 							1 at surface
 							to zero at
 							boundary */
-	    bnew = buoy[m][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
+	    bnew = buoy[CPPR][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
 	    /* debugging */
 	    /*   fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n", */
 	    /* 	    	    (1 - E->sx[m][3][node])*E->data.radius_km,E->control.ggrd.ray_control, */
 	    /* 	    	    E->viscosity.zbase_layer[E->control.ggrd.ray_control-1]*E->data.radius_km, */
 	    /* 	    	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]); */
-	    buoy[m][node] = fac * bnew + (1-fac)*buoy[m][node];
+	    buoy[CPPR][node] = fac * bnew + (1-fac)*buoy[CPPR][node];
 	  }
 	}
       }
@@ -1571,9 +1571,9 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
       for(k=1;k <= nel;k++){
 	for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	  ind = (k-1)*vpts + l;
-	  E->EVI2[i][j][ind] = 0.0;
-	  E->EVIn1[i][j][ind] = 1.0; E->EVIn2[i][j][ind] = E->EVIn3[i][j][ind] = 0.0;
-	  E->avmode[i][j][ind] = (unsigned char)
+	  E->EVI2[i][CPPR][ind] = 0.0;
+	  E->EVIn1[i][CPPR][ind] = 1.0; E->EVIn2[i][CPPR][ind] = E->EVIn3[i][CPPR][ind] = 0.0;
+	  E->avmode[i][CPPR][ind] = (unsigned char)
 	    E->viscosity.allow_anisotropic_viscosity;
 	}
       }
@@ -1657,9 +1657,9 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
   for (m=1;m <= E->sphere.caps_per_proc;m++) {
     for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
       if(((E->viscosity.anivisc_layer > 0)&&
-	  (E->mat[m][j] <=   E->viscosity.anivisc_layer))||
+	  (E->mat[CPPR][j] <=   E->viscosity.anivisc_layer))||
 	 ((E->viscosity.anivisc_layer < 0)&&
-	  (E->mat[m][j] ==  -E->viscosity.anivisc_layer))){
+	  (E->mat[CPPR][j] ==  -E->viscosity.anivisc_layer))){
 	/* within top layers */
 	for (k=1;k <= ely;k++){
 	  for (i=1;i <= elx;i++)   {
@@ -1670,10 +1670,10 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	    */
 	    xloc[1] = xloc[2] = xloc[3] = 0.0;
 	    for(inode=1;inode <= ends;inode++){
-	      ind = E->ien[m][el].node[inode];
-	      xloc[1] += E->x[m][1][ind];
-	      xloc[2] += E->x[m][2][ind];
-	      xloc[3] += E->x[m][3][ind];
+	      ind = E->ien[CPPR][el].node[inode];
+	      xloc[1] += E->x[CPPR][1][ind];
+	      xloc[2] += E->x[CPPR][2][ind];
+	      xloc[3] += E->x[CPPR][3][ind];
 	    }
 	    xloc[1]/=ends;xloc[2]/=ends;xloc[3]/=ends;
 	    xyz2rtpd(xloc[1],xloc[2],xloc[3],rout); /* convert to spherical */
@@ -1717,10 +1717,10 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	    vis2 = 1.0 - pow(10.0,log_vis);
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      ind = (el-1)*vpts + l;
-	      E->EVI2[E->mesh.gridmax][m][ind]  =   vis2;
-	      E->EVIn1[E->mesh.gridmax][m][ind]  = cvec[0];
-	      E->EVIn2[E->mesh.gridmax][m][ind]  = cvec[1];
-	      E->EVIn3[E->mesh.gridmax][m][ind]  = cvec[2];
+	      E->EVI2[E->mesh.gridmax][CPPR][ind]  =   vis2;
+	      E->EVIn1[E->mesh.gridmax][CPPR][ind]  = cvec[0];
+	      E->EVIn2[E->mesh.gridmax][CPPR][ind]  = cvec[1];
+	      E->EVIn3[E->mesh.gridmax][CPPR][ind]  = cvec[2];
 	    }
 	  }
 	}
