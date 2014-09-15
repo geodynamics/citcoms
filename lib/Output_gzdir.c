@@ -287,7 +287,7 @@ void gzdir_output_coord(struct All_variables *E)
     for(j=1;j <= E->sphere.caps_per_proc;j++)     {
       for(i=1;i <= E->lmesh.nno;i++) {
 	/* cartesian coordinates */
-	x[0]=E->x[j][1][i];x[1]=E->x[j][2][i];x[2]=E->x[j][3][i];
+	x[0]=E->x[CPPR][1][i];x[1]=E->x[CPPR][2][i];x[2]=E->x[CPPR][3][i];
 	if(be_write_float_to_file(x,3,fp1) != 3)
 	  BE_WERROR;
 	out++;
@@ -340,10 +340,10 @@ void gzdir_output_coord(struct All_variables *E)
 	   need to add offset according to the processor for global
 	   node numbers
 	*/
-	ix[1]= E->ien[j][i].node[1]+offset;ix[2] = E->ien[j][i].node[2]+offset;
-	ix[3]= E->ien[j][i].node[3]+offset;ix[4] = E->ien[j][i].node[4]+offset;
-	ix[5]= E->ien[j][i].node[5]+offset;ix[6] = E->ien[j][i].node[6]+offset;
-	ix[7]= E->ien[j][i].node[7]+offset;ix[8] = E->ien[j][i].node[8]+offset;
+	ix[1]= E->ien[CPPR][i].node[1]+offset;ix[2] = E->ien[CPPR][i].node[2]+offset;
+	ix[3]= E->ien[CPPR][i].node[3]+offset;ix[4] = E->ien[CPPR][i].node[4]+offset;
+	ix[5]= E->ien[CPPR][i].node[5]+offset;ix[6] = E->ien[CPPR][i].node[6]+offset;
+	ix[7]= E->ien[CPPR][i].node[7]+offset;ix[8] = E->ien[CPPR][i].node[8]+offset;
 	if(be_write_int_to_file(ix,9,fp1)!=9)
 	  BE_WERROR;
       }
@@ -386,10 +386,10 @@ void gzdir_output_coord(struct All_variables *E)
 
     /* nodal coordinates */
     for(j=1;j<=E->sphere.caps_per_proc;j++)     {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
 	gzprintf(gz1,"%.6e %.6e %.6e\n",
-		 E->sx[j][1][i],E->sx[j][2][i],E->sx[j][3][i]);
+		 E->sx[CPPR][1][i],E->sx[CPPR][2][i],E->sx[CPPR][3][i]);
     }
 
     gzclose(gz1);
@@ -409,7 +409,7 @@ void gzdir_output_coord(struct All_variables *E)
       for(j=1;j <= E->sphere.caps_per_proc;j++)     {
 	for(i=1;i <= E->lmesh.nno;i++) {
 	  gzprintf(gz1,"%9.6f %9.6f %9.6f\n", /* cartesian nodal coordinates */
-		   E->x[j][1][i],E->x[j][2][i],E->x[j][3][i]);
+		   E->x[CPPR][1][i],E->x[CPPR][2][i],E->x[CPPR][3][i]);
 	}
       }
       gzclose(gz1);
@@ -432,10 +432,10 @@ void gzdir_output_coord(struct All_variables *E)
 	     node numbers
 	  */
 	  gzprintf(gz1,"%6i %6i %6i %6i %6i %6i %6i %6i\n",
-		   E->ien[j][i].node[1]+offset,E->ien[j][i].node[2]+offset,
-		   E->ien[j][i].node[3]+offset,E->ien[j][i].node[4]+offset,
-		   E->ien[j][i].node[5]+offset,E->ien[j][i].node[6]+offset,
-		   E->ien[j][i].node[7]+offset,E->ien[j][i].node[8]+offset);
+		   E->ien[CPPR][i].node[1]+offset,E->ien[CPPR][i].node[2]+offset,
+		   E->ien[CPPR][i].node[3]+offset,E->ien[CPPR][i].node[4]+offset,
+		   E->ien[CPPR][i].node[5]+offset,E->ien[CPPR][i].node[6]+offset,
+		   E->ien[CPPR][i].node[7]+offset,E->ien[CPPR][i].node[8]+offset);
 	}
       }
       gzclose(gz1);
@@ -477,7 +477,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       for(k=0,j=1;j <= E->sphere.caps_per_proc;j++,k += os)     {
 	for(i=1;i <= E->lmesh.nno;i++,k += 9){
 	  /* cartesian basis vectors at theta, phi */
-	  calc_cbase_at_node(j,i,(E->output.gzdir.vtk_base+k),E);
+	  calc_cbase_at_node(CPPR,i,(E->output.gzdir.vtk_base+k),E);
 	}
       }
       E->output.gzdir.vtk_base_init = 1;
@@ -536,7 +536,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     }
     for(j=1; j<= E->sphere.caps_per_proc;j++) /* print the temperatures */
       for(i=1;i<=E->lmesh.nno;i++){
-	cvec[0] = E->T[j][i];
+	cvec[0] = E->T[CPPR][i];
 	if(be_write_float_to_file(cvec,1,fp1)!=1)
 	  BE_WERROR;
       }
@@ -565,21 +565,21 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       if(E->output.gzdir.rnr){
 	/* remove NR */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  vcorr[0] = E->sphere.cap[j].V[1][i]; /* vtheta */
-	  vcorr[1] = E->sphere.cap[j].V[2][i]; /* vphi */
+	  vcorr[0] = E->sphere.cap[CPPR].V[1][i]; /* vtheta */
+	  vcorr[1] = E->sphere.cap[CPPR].V[2][i]; /* vphi */
 	  /* remove the velocity that corresponds to a net rotation of omega[0..2] at location
 	     r,t,p from the t,p velocities in vcorr[0..1]
 	  */
-	  sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
+	  sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
 
-	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],vcorr[0],vcorr[1],
+	  convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],vcorr[0],vcorr[1],
 			       (E->output.gzdir.vtk_base+k),cvec);
 	  if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
 	}
       }else{
 	/* regular output */
 	for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	  convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],E->sphere.cap[j].V[1][i],E->sphere.cap[j].V[2][i],
+	  convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],E->sphere.cap[CPPR].V[1][i],E->sphere.cap[CPPR].V[2][i],
 			       (E->output.gzdir.vtk_base+k),cvec);
 	  if(be_write_float_to_file(cvec,3,fp1)!=3)BE_WERROR;
 	}
@@ -630,30 +630,30 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     gzprintf(gzout,"%d %d %.5e\n",
 	     cycles,E->lmesh.nno,E->monitor.elapsed_time);
     for(j=1; j<= E->sphere.caps_per_proc;j++)     {
-      gzprintf(gzout,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gzout,"%3d %7d\n",CPPR,E->lmesh.nno);
       if(E->output.gzdir.vtk_io){
 	/* VTK */
 	for(i=1;i<=E->lmesh.nno;i++)
-	  gzprintf(gzout,"%.6e\n",E->T[j][i]);
+	  gzprintf(gzout,"%.6e\n",E->T[CPPR][i]);
       } else {
 	/* old velo + T output */
 	if(E->output.gzdir.rnr){
 	  /* remove NR */
 	  for(i=1;i<=E->lmesh.nno;i++){
-	    vcorr[0] = E->sphere.cap[j].V[1][i]; /* vt */
-	    vcorr[1] = E->sphere.cap[j].V[2][i]; /* vphi */
-	    sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
+	    vcorr[0] = E->sphere.cap[CPPR].V[1][i]; /* vt */
+	    vcorr[1] = E->sphere.cap[CPPR].V[2][i]; /* vphi */
+	    sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     vcorr[0],vcorr[1],
-		     E->sphere.cap[j].V[3][i],E->T[j][i]);
+		     E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
 
 	  }
 	}else{
 	  for(i=1;i<=E->lmesh.nno;i++)
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
-		     E->sphere.cap[j].V[1][i],
-		     E->sphere.cap[j].V[2][i],
-		     E->sphere.cap[j].V[3][i],E->T[j][i]);
+		     E->sphere.cap[CPPR].V[1][i],
+		     E->sphere.cap[CPPR].V[2][i],
+		     E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
 	}
       }
     }
@@ -669,10 +669,10 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	if(E->output.gzdir.rnr){
 	  /* remove NR */
 	  for(i=1;i<=E->lmesh.nno;i++,k += 9) {
-	    vcorr[0] = E->sphere.cap[j].V[1][i];
-	    vcorr[1] = E->sphere.cap[j].V[2][i];
-	    sub_netr(E->sx[j][3][i],E->sx[j][1][i],E->sx[j][2][i],(vcorr+0),(vcorr+1),omega);
-	    convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],vcorr[0],vcorr[1],
+	    vcorr[0] = E->sphere.cap[CPPR].V[1][i];
+	    vcorr[1] = E->sphere.cap[CPPR].V[2][i];
+	    sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
+	    convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],vcorr[0],vcorr[1],
 				 (E->output.gzdir.vtk_base+k),cvec);
 	    gzprintf(gzout,"%10.4e %10.4e %10.4e\n",cvec[0],cvec[1],cvec[2]);
 	  }
@@ -680,9 +680,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	  /* regular output */
 	  for(i=1;i<=E->lmesh.nno;i++,k += 9) {
 	    /* convert r,theta,phi vector to x,y,z at base location */
-	    convert_pvec_to_cvec(E->sphere.cap[j].V[3][i],
-				 E->sphere.cap[j].V[1][i],
-				 E->sphere.cap[j].V[2][i],
+	    convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],
+				 E->sphere.cap[CPPR].V[1][i],
+				 E->sphere.cap[CPPR].V[2][i],
 				 (E->output.gzdir.vtk_base+k),cvec);
 	    /* output of cartesian vector */
 	    gzprintf(gzout,"%10.4e %10.4e %10.4e\n",
@@ -725,9 +725,9 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 	     cycles,E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.4e\n",E->VI[lev][j][i]);
+	gzprintf(gz1,"%.4e\n",E->VI[lev][CPPR][i]);
     }
 
     gzclose(gz1);
@@ -748,7 +748,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
     }
     for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = log10(E->VI[lev][j][i]);
+	ftmp = log10(E->VI[lev][CPPR][i]);
 	if(fabs(ftmp) < 5e-7)ftmp = 0.0;
 	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
       }
@@ -786,9 +786,9 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 	       cycles,E->parallel.me, cycles);
       gz1 = gzdir_output_open(output_file,"w");
       for(j=1;j<=E->sphere.caps_per_proc;j++) {
-	gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+	gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
 	for(i=1;i<=E->lmesh.nno;i++)
-	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][j][i],E->VIn1[lev][j][i],E->VIn2[lev][j][i],E->VIn3[lev][j][i]);
+	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][CPPR][i],E->VIn1[lev][CPPR][i],E->VIn2[lev][CPPR][i],E->VIn3[lev][CPPR][i]);
       }
       
       gzclose(gz1);
@@ -809,7 +809,7 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
       }
       for(j=1; j<= E->sphere.caps_per_proc;j++)
 	for(i=1;i<=E->lmesh.nno;i++){
-	  ftmp = E->VI2[lev][j][i];
+	  ftmp = E->VI2[lev][CPPR][i];
 	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)
 	    BE_WERROR;
 	}
@@ -852,15 +852,15 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
         /* choose either STD topo or pseudo-free-surf topo */
         if(E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[j];
+            topo = E->slice.freesurf[CPPR];
         else
-            topo = E->slice.tpg[j];
+            topo = E->slice.tpg[CPPR];
 
-        gzprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+        gzprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		     topo[i],E->slice.shflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+		     topo[i],E->slice.shflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
         }
     }
     gzclose(fp2);
@@ -873,11 +873,11 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
     fp2 = gzdir_output_open(output_file,"w");
 
     for(j=1;j<=E->sphere.caps_per_proc;j++)  {
-      gzprintf(fp2,"%3d %7d\n",j,E->lmesh.nsf);
+      gzprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		 E->slice.tpgb[j][i],E->slice.bhflux[j][i],E->sphere.cap[j].V[1][s],E->sphere.cap[j].V[2][s]);
+		 E->slice.tpgb[CPPR][i],E->slice.bhflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
       }
     }
     gzclose(fp2);
@@ -952,15 +952,15 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nno);
+    gzprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for (node=1;node<=E->lmesh.nno;node++)
       gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[m][(node-1)*6+1], /*  stt */
-              E->gstress[m][(node-1)*6+2], /*  spp */
-              E->gstress[m][(node-1)*6+3], /*  srr */
-              E->gstress[m][(node-1)*6+4], /*  stp */
-              E->gstress[m][(node-1)*6+5], /*  str */
-              E->gstress[m][(node-1)*6+6]); /* srp */
+              E->gstress[CPPR][(node-1)*6+1], /*  stt */
+              E->gstress[CPPR][(node-1)*6+2], /*  spp */
+              E->gstress[CPPR][(node-1)*6+3], /*  srr */
+              E->gstress[CPPR][(node-1)*6+4], /*  stp */
+              E->gstress[CPPR][(node-1)*6+5], /*  str */
+              E->gstress[CPPR][(node-1)*6+6]); /* srp */
   }
   gzclose(fp1);
 }
@@ -1013,7 +1013,7 @@ void gzdir_output_mat(struct All_variables *E)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)
-      gzprintf(fp,"%d %d %f\n", el,E->mat[m][el],E->VIP[m][el]);
+      gzprintf(fp,"%d %d %f\n", el,E->mat[CPPR][el],E->VIP[CPPR][el]);
 
   gzclose(fp);
 
@@ -1040,9 +1040,9 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
     gz1 = gzdir_output_open(output_file,"w");
     gzprintf(gz1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(gz1,"%3d %7d\n",j,E->lmesh.nno);
+      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.6e\n",E->NP[j][i]);
+	gzprintf(gz1,"%.6e\n",E->NP[CPPR][i]);
     }
     gzclose(gz1);
   }else{/* new legacy VTK */
@@ -1059,7 +1059,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
     }
     for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = E->NP[j][i];
+	ftmp = E->NP[CPPR][i];
 	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
       }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */
@@ -1087,19 +1087,19 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
   for(j=1;j<=E->sphere.caps_per_proc;j++) {
-      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[j],
+      gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[CPPR],
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[j];n++) {
+      for(n=1;n<=E->trace.ntracers[CPPR];n++) {
           /* write basic quantities (coordinate) */
           gzprintf(fp1,"%9.5e %9.5e %9.5e",
-                  E->trace.basicq[j][0][n],
-                  E->trace.basicq[j][1][n],
-                  E->trace.basicq[j][2][n]);
+                  E->trace.basicq[CPPR][0][n],
+                  E->trace.basicq[CPPR][1][n],
+                  E->trace.basicq[CPPR][2][n]);
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %9.5e", E->trace.extraq[j][i][n]);
+              gzprintf(fp1," %9.5e", E->trace.extraq[CPPR][i][n]);
           }
           gzprintf(fp1, "\n");
       }
@@ -1130,13 +1130,13 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
     gz1 = gzdir_output_open(output_file,"w");
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
       gzprintf(gz1,"%3d %7d %.5e %.5e %.5e\n",
-	       j, E->lmesh.nel,
+	       CPPR, E->lmesh.nel,
 	       E->monitor.elapsed_time,
 	       E->composition.initial_bulk_composition,
 	       E->composition.bulk_composition);
       for(i=1;i<=E->lmesh.nno;i++) {
 	for(k=0;k < E->composition.ncomp;k++)
-	  gzprintf(gz1,"%.6e ",E->composition.comp_node[j][k][i]);
+	  gzprintf(gz1,"%.6e ",E->composition.comp_node[CPPR][k][i]);
 	gzprintf(gz1,"\n");
       }
     }
@@ -1159,7 +1159,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
     for(j=1; j<= E->sphere.caps_per_proc;j++)
       for(i=1;i<=E->lmesh.nno;i++){
 	for(k=0;k<E->composition.ncomp;k++){
-	  ftmp = E->composition.comp_node[j][k][i];
+	  ftmp = E->composition.comp_node[CPPR][k][i];
 	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
 	}
       }
@@ -1185,14 +1185,14 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
         gzprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
-                j, E->lmesh.nel,
+                CPPR, E->lmesh.nel,
                 E->monitor.elapsed_time,
                 E->composition.initial_bulk_composition,
                 E->composition.bulk_composition);
 
         for(i=1;i<=E->lmesh.nel;i++) {
 	  for(k=0;k<E->composition.ncomp;k++)
-            gzprintf(fp1,"%.6e ",E->composition.comp_el[j][k][i]);
+            gzprintf(fp1,"%.6e ",E->composition.comp_el[CPPR][k][i]);
 	  gzprintf(fp1,"\n");
         }
     }
@@ -1215,10 +1215,10 @@ void gzdir_output_heating(struct All_variables *E, int cycles)
     gzprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
     for(j=1;j<=E->sphere.caps_per_proc;j++) {
-        gzprintf(fp1,"%3d %7d\n", j, E->lmesh.nel);
+        gzprintf(fp1,"%3d %7d\n", CPPR, E->lmesh.nel);
         for(e=1; e<=E->lmesh.nel; e++)
-            gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[j][e],
-                      E->heating_visc[j][e], E->heating_latent[j][e]);
+            gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[CPPR][e],
+                      E->heating_visc[CPPR][e], E->heating_latent[CPPR][e]);
     }
     gzclose(fp1);
 
@@ -1286,7 +1286,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	  fprintf(stderr,"WARNING: found a NaN in input temperatures\n");
 	  g=0.0;
 	}
-	E->T[m][i] = g;
+	E->T[CPPR][i] = g;
       }
     }
     break;
@@ -1301,7 +1301,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	    E->sphere.cap[m].V[1][i] = v3;  */
 	/* I don't like that  */
 	//E->T[m][i] = max(0.0,min(g,1.0));
-	E->T[m][i] = g;
+	E->T[CPPR][i] = g;
       }
     }
     break;
