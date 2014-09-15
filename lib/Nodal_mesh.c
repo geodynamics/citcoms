@@ -44,15 +44,15 @@ void v_from_vector(E)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for(node=1;node<=nno;node++)     {
-            E->sphere.cap[m].V[1][node] = E->U[m][E->id[m][node].doff[1]];
-            E->sphere.cap[m].V[2][node] = E->U[m][E->id[m][node].doff[2]];
-            E->sphere.cap[m].V[3][node] = E->U[m][E->id[m][node].doff[3]];
-            if (E->node[m][node] & VBX)
-                E->sphere.cap[m].V[1][node] = E->sphere.cap[m].VB[1][node];
-            if (E->node[m][node] & VBY)
-                E->sphere.cap[m].V[2][node] = E->sphere.cap[m].VB[2][node];
-            if (E->node[m][node] & VBZ)
-                E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
+            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[CPPR][node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[CPPR][node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[CPPR][node].doff[3]];
+            if (E->node[CPPR][node] & VBX)
+                E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
+            if (E->node[CPPR][node] & VBY)
+                E->sphere.cap[CPPR].V[2][node] = E->sphere.cap[CPPR].VB[2][node];
+            if (E->node[CPPR][node] & VBZ)
+                E->sphere.cap[CPPR].V[3][node] = E->sphere.cap[CPPR].VB[3][node];
         }
     }
 
@@ -67,9 +67,9 @@ void assign_v_to_vector(E)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(node=1;node<=nno;node++)     {
-	E->U[m][E->id[m][node].doff[1]] =  E->sphere.cap[m].V[1][node];
-	E->U[m][E->id[m][node].doff[2]] =  E->sphere.cap[m].V[2][node];
-	E->U[m][E->id[m][node].doff[3]] =  E->sphere.cap[m].V[3][node];
+	E->U[CPPR][E->id[CPPR][node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
+	E->U[CPPR][E->id[CPPR][node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
+	E->U[CPPR][E->id[CPPR][node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
       }
     }
     return;
@@ -86,26 +86,26 @@ void v_from_vector_pseudo_surf(E)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for(node=1;node<=nno;node++)     {
-            E->sphere.cap[m].Vprev[1][node] = E->sphere.cap[m].V[1][node];
-            E->sphere.cap[m].Vprev[2][node] = E->sphere.cap[m].V[2][node];
-            E->sphere.cap[m].Vprev[3][node] = E->sphere.cap[m].V[3][node];
+            E->sphere.cap[CPPR].Vprev[1][node] = E->sphere.cap[CPPR].V[1][node];
+            E->sphere.cap[CPPR].Vprev[2][node] = E->sphere.cap[CPPR].V[2][node];
+            E->sphere.cap[CPPR].Vprev[3][node] = E->sphere.cap[CPPR].V[3][node];
 
-            E->sphere.cap[m].V[1][node] = E->U[m][E->id[m][node].doff[1]];
-            E->sphere.cap[m].V[2][node] = E->U[m][E->id[m][node].doff[2]];
-            E->sphere.cap[m].V[3][node] = E->U[m][E->id[m][node].doff[3]];
-            if (E->node[m][node] & VBX)
-                E->sphere.cap[m].V[1][node] = E->sphere.cap[m].VB[1][node];
-            if (E->node[m][node] & VBY)
-                E->sphere.cap[m].V[2][node] = E->sphere.cap[m].VB[2][node];
-            if (E->node[m][node] & VBZ)
-                E->sphere.cap[m].V[3][node] = E->sphere.cap[m].VB[3][node];
+            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[CPPR][node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[CPPR][node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[CPPR][node].doff[3]];
+            if (E->node[CPPR][node] & VBX)
+                E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
+            if (E->node[CPPR][node] & VBY)
+                E->sphere.cap[CPPR].V[2][node] = E->sphere.cap[CPPR].VB[2][node];
+            if (E->node[CPPR][node] & VBZ)
+                E->sphere.cap[CPPR].V[3][node] = E->sphere.cap[CPPR].VB[3][node];
 
-            sum_dV += (E->sphere.cap[m].V[1][node] - E->sphere.cap[m].Vprev[1][node])*(E->sphere.cap[m].V[1][node] - E->sphere.cap[m].Vprev[1][node])
-                + (E->sphere.cap[m].V[2][node] - E->sphere.cap[m].Vprev[2][node])*(E->sphere.cap[m].V[2][node] - E->sphere.cap[m].Vprev[2][node])
-                + (E->sphere.cap[m].V[3][node] - E->sphere.cap[m].Vprev[3][node])*(E->sphere.cap[m].V[3][node] - E->sphere.cap[m].Vprev[3][node]);
-            sum_V += E->sphere.cap[m].V[1][node]*E->sphere.cap[m].V[1][node]
-                + E->sphere.cap[m].V[2][node]*E->sphere.cap[m].V[2][node]
-                + E->sphere.cap[m].V[3][node]*E->sphere.cap[m].V[3][node];
+            sum_dV += (E->sphere.cap[CPPR].V[1][node] - E->sphere.cap[CPPR].Vprev[1][node])*(E->sphere.cap[CPPR].V[1][node] - E->sphere.cap[CPPR].Vprev[1][node])
+                + (E->sphere.cap[CPPR].V[2][node] - E->sphere.cap[CPPR].Vprev[2][node])*(E->sphere.cap[CPPR].V[2][node] - E->sphere.cap[CPPR].Vprev[2][node])
+                + (E->sphere.cap[CPPR].V[3][node] - E->sphere.cap[CPPR].Vprev[3][node])*(E->sphere.cap[CPPR].V[3][node] - E->sphere.cap[CPPR].Vprev[3][node]);
+            sum_V += E->sphere.cap[CPPR].V[1][node]*E->sphere.cap[CPPR].V[1][node]
+                + E->sphere.cap[CPPR].V[2][node]*E->sphere.cap[CPPR].V[2][node]
+                + E->sphere.cap[CPPR].V[3][node]*E->sphere.cap[CPPR].V[3][node];
         }
         rel_error = sqrt(sum_dV)/sqrt(sum_V);
         MPI_Allreduce(&rel_error,&global_max_error,1,MPI_DOUBLE,MPI_MAX,E->parallel.world);
@@ -132,27 +132,27 @@ void velo_from_element(E,VV,m,el,sphere_key)
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
             node = E->ien[m][el].node[a];
-            VV[1][a] = E->sphere.cap[m].V[1][node];
-            VV[2][a] = E->sphere.cap[m].V[2][node];
-            VV[3][a] = E->sphere.cap[m].V[3][node];
+            VV[1][a] = E->sphere.cap[CPPR].V[1][node];
+            VV[2][a] = E->sphere.cap[CPPR].V[2][node];
+            VV[3][a] = E->sphere.cap[CPPR].V[3][node];
         }
     else {
         for(a=1;a<=ends;a++)   {
-            node = E->ien[m][el].node[a];
+            node = E->ien[CPPR][el].node[a];
 
-            sint = E->SinCos[lev][m][0][node]; 
-            sinf = E->SinCos[lev][m][1][node];
-            cost = E->SinCos[lev][m][2][node];
-            cosf = E->SinCos[lev][m][3][node];
+            sint = E->SinCos[lev][CPPR][0][node]; 
+            sinf = E->SinCos[lev][CPPR][1][node];
+            cost = E->SinCos[lev][CPPR][2][node];
+            cosf = E->SinCos[lev][CPPR][3][node];
 
-            VV[1][a] = E->sphere.cap[m].V[1][node]*cost*cosf
-                - E->sphere.cap[m].V[2][node]*sinf
-                + E->sphere.cap[m].V[3][node]*sint*cosf;
-            VV[2][a] = E->sphere.cap[m].V[1][node]*cost*sinf
-                + E->sphere.cap[m].V[2][node]*cosf
-                + E->sphere.cap[m].V[3][node]*sint*sinf;
-            VV[3][a] = -E->sphere.cap[m].V[1][node]*sint
-                + E->sphere.cap[m].V[3][node]*cost;
+            VV[1][a] = E->sphere.cap[CPPR].V[1][node]*cost*cosf
+                - E->sphere.cap[CPPR].V[2][node]*sinf
+                + E->sphere.cap[CPPR].V[3][node]*sint*cosf;
+            VV[2][a] = E->sphere.cap[CPPR].V[1][node]*cost*sinf
+                + E->sphere.cap[CPPR].V[2][node]*cosf
+                + E->sphere.cap[CPPR].V[3][node]*sint*sinf;
+            VV[3][a] = -E->sphere.cap[CPPR].V[1][node]*sint
+                + E->sphere.cap[CPPR].V[3][node]*cost;
         }
     }
     return;
@@ -174,28 +174,28 @@ void velo_from_element_d(E,VV,m,el,sphere_key)
 
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
-            node = E->ien[m][el].node[a];
-            VV[1][a] = E->sphere.cap[m].V[1][node];
-            VV[2][a] = E->sphere.cap[m].V[2][node];
-            VV[3][a] = E->sphere.cap[m].V[3][node];
+            node = E->ien[CPPR][el].node[a];
+            VV[1][a] = E->sphere.cap[CPPR].V[1][node];
+            VV[2][a] = E->sphere.cap[CPPR].V[2][node];
+            VV[3][a] = E->sphere.cap[CPPR].V[3][node];
         }
     else {
         for(a=1;a<=ends;a++)   {
-            node = E->ien[m][el].node[a];
+            node = E->ien[CPPR][el].node[a];
 
-            sint = E->SinCos[lev][m][0][node];
-            sinf = E->SinCos[lev][m][1][node];
-            cost = E->SinCos[lev][m][2][node];
-            cosf = E->SinCos[lev][m][3][node];
+            sint = E->SinCos[lev][CPPR][0][node];
+            sinf = E->SinCos[lev][CPPR][1][node];
+            cost = E->SinCos[lev][CPPR][2][node];
+            cosf = E->SinCos[lev][CPPR][3][node];
 
-            VV[1][a] = E->sphere.cap[m].V[1][node]*cost*cosf
-                - E->sphere.cap[m].V[2][node]*sinf
-                + E->sphere.cap[m].V[3][node]*sint*cosf;
-            VV[2][a] = E->sphere.cap[m].V[1][node]*cost*sinf
-                + E->sphere.cap[m].V[2][node]*cosf
-                + E->sphere.cap[m].V[3][node]*sint*sinf;
-            VV[3][a] = -E->sphere.cap[m].V[1][node]*sint
-                + E->sphere.cap[m].V[3][node]*cost;
+            VV[1][a] = E->sphere.cap[CPPR].V[1][node]*cost*cosf
+                - E->sphere.cap[CPPR].V[2][node]*sinf
+                + E->sphere.cap[CPPR].V[3][node]*sint*cosf;
+            VV[2][a] = E->sphere.cap[CPPR].V[1][node]*cost*sinf
+                + E->sphere.cap[CPPR].V[2][node]*cosf
+                + E->sphere.cap[CPPR].V[3][node]*sint*sinf;
+            VV[3][a] = -E->sphere.cap[CPPR].V[1][node]*sint
+                + E->sphere.cap[CPPR].V[3][node]*cost;
         }
     }
     return;
@@ -211,20 +211,20 @@ void p_to_nodes(E,P,PN,lev)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.NNO[lev];node++)
-      PN[m][node] =  0.0;
+      PN[CPPR][node] =  0.0;
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(element=1;element<=E->lmesh.NEL[lev];element++)
        for(j=1;j<=enodes[E->mesh.nsd];j++)  {
-     	  node = E->IEN[lev][m][element].node[j];
-    	  PN[m][node] += P[m][element] * E->TWW[lev][m][element].node[j] ;
+     	  node = E->IEN[lev][CPPR][element].node[j];
+    	  PN[CPPR][node] += P[CPPR][element] * E->TWW[lev][CPPR][element].node[j] ;
     	  }
 
    (E->exchange_node_f)(E,PN,lev);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(node=1;node<=E->lmesh.NNO[lev];node++)
-        PN[m][node] *= E->MASS[lev][m][node];
+        PN[CPPR][node] *= E->MASS[lev][CPPR][node];
 
      return;
 }
@@ -248,23 +248,23 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
   
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.NNO[lev];i++)
-      VN[m][i] = 0.0;
+      VN[CPPR][i] = 0.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)   {
       temp_visc=0.0;
       for(i=1;i<=vpts;i++)
-	temp_visc += VE[m][(e-1)*vpts + i];
+	temp_visc += VE[CPPR][(e-1)*vpts + i];
       temp_visc = temp_visc/vpts;
       
       for(j=1;j<=ends;j++)                {
-	n = E->IEN[lev][m][e].node[j];
-	VN[m][n] += E->TWW[lev][m][e].node[j] * temp_visc;
+	n = E->IEN[lev][CPPR][e].node[j];
+	VN[CPPR][n] += E->TWW[lev][CPPR][e].node[j] * temp_visc;
       }
     }
   (E->exchange_node_f)(E,VN,lev);
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(n=1;n<=E->lmesh.NNO[lev];n++)
-      VN[m][n] *= E->MASS[lev][m][n];
+      VN[CPPR][n] *= E->MASS[lev][CPPR][n];
 
   return;
 }
@@ -290,14 +290,14 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)
-	VE[m][(e-1)*vpts+i] = 0.0;
+	VE[CPPR][(e-1)*vpts+i] = 0.0;
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	temp_visc=0.0;
 	for(j=1;j<=ends;j++)
-	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[m][E->IEN[lev][m][e].node[j]];
-	VE[m][(e-1)*vpts+i] = temp_visc;
+	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[CPPR][E->IEN[lev][CPPR][e].node[j]];
+	VE[CPPR][(e-1)*vpts+i] = temp_visc;
       }
 
   return;
@@ -321,14 +321,14 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.NEL[lev];i++)
-	VN[m][i] = 0.0;
+	VN[CPPR][i] = 0.0;
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(e=1;e<=E->lmesh.NEL[lev];e++)   {
 	temp_visc=0.0;
 	for(i=1;i<=vpts;i++)
-	  temp_visc += VE[m][(e-1)*vpts + i];
+	  temp_visc += VE[CPPR][(e-1)*vpts + i];
 	temp_visc = temp_visc/vpts;
-	VN[m][e] = temp_visc;
+	VN[CPPR][e] = temp_visc;
       }
     
     return;
@@ -354,7 +354,7 @@ void visc_from_ele_to_gint(E,VN,VE,lev)
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
-	VE[m][(e-1)*vpts+i] = VN[m][e];
+	VE[CPPR][(e-1)*vpts+i] = VN[CPPR][e];
       }
   return;
 }
