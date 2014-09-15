@@ -91,7 +91,7 @@ void full_read_input_files_for_timesteps(E,action,output)
     }
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      cap = E->sphere.capid[m] - 1;  /* capid: 1-12 */
+      cap = E->sphere.capid[CPPR] - 1;  /* capid: 1-12 */
 
       switch (action) { /* set up files to open */
 
@@ -256,14 +256,14 @@ void full_read_input_files_for_timesteps(E,action,output)
 	      nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
 	      nodel = (k-1)*nox1*noz1 + (i-1)*noz1+noz1;
 	      if (pos_age) { /* positive ages - we must interpolate */
-		E->sphere.cap[m].VB[1][nodel] = (VB1[1][nodeg] + (VB2[1][nodeg]-VB1[1][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
-		E->sphere.cap[m].VB[2][nodel] = (VB1[2][nodeg] + (VB2[2][nodeg]-VB1[2][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
-		E->sphere.cap[m].VB[3][nodel] = 0.0;
+		E->sphere.cap[CPPR].VB[1][nodel] = (VB1[1][nodeg] + (VB2[1][nodeg]-VB1[1][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
+		E->sphere.cap[CPPR].VB[2][nodel] = (VB1[2][nodeg] + (VB2[2][nodeg]-VB1[2][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
+		E->sphere.cap[CPPR].VB[3][nodel] = 0.0;
 	      }
 	      else { /* negative ages - don't do the interpolation */
-		E->sphere.cap[m].VB[1][nodel] = VB1[1][nodeg] * E->data.scalev;
-		E->sphere.cap[m].VB[2][nodel] = VB1[2][nodeg] * E->data.scalev;
-		E->sphere.cap[m].VB[3][nodel] = 0.0;
+		E->sphere.cap[CPPR].VB[1][nodel] = VB1[1][nodeg] * E->data.scalev;
+		E->sphere.cap[CPPR].VB[2][nodel] = VB1[2][nodeg] * E->data.scalev;
+		E->sphere.cap[CPPR].VB[3][nodel] = 0.0;
 	      }
 	    }
 	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
@@ -321,10 +321,10 @@ void full_read_input_files_for_timesteps(E,action,output)
 
         for(m=1;m<=E->sphere.caps_per_proc;m++)
           for (el=1; el<=elx*ely*elz; el++)  {
-            nodea = E->ien[m][el].node[2];
+            nodea = E->ien[CPPR][el].node[2];
             llayer = layers(E,m,nodea);
             if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
-              E->mat[m][el] = llayer;
+              E->mat[CPPR][el] = llayer;
               fprintf(stderr,"\nINSIDE llayer=%d",llayer);
             }
           }
@@ -349,7 +349,7 @@ void full_read_input_files_for_timesteps(E,action,output)
                   el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
                   elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
 
-                  E->VIP[m][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
+                  E->VIP[CPPR][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
                   /* E->mat[m][el] = LL1[elg]; */ /*get material numbers from radius internally */
 
                 }     /* end for j  */
@@ -402,14 +402,14 @@ void full_read_input_files_for_timesteps(E,action,output)
 	      nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
 	      nodel = (k-1)*nox1*noz1 + (i-1)*noz1+noz1;
 	      if (pos_age) { /* positive ages - we must interpolate */
-		E->sphere.cap[m].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
-		E->sphere.cap[m].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
-		E->sphere.cap[m].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[CPPR].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[CPPR].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[CPPR].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
 	      }
 	      else { /* negative ages - don't do the interpolation */
-		E->sphere.cap[m].TB[1][nodel] = TB1[nodeg];
-		E->sphere.cap[m].TB[2][nodel] = TB1[nodeg];
-		E->sphere.cap[m].TB[3][nodel] = TB1[nodeg];
+		E->sphere.cap[CPPR].TB[1][nodel] = TB1[nodeg];
+		E->sphere.cap[CPPR].TB[2][nodel] = TB1[nodeg];
+		E->sphere.cap[CPPR].TB[3][nodel] = TB1[nodeg];
 	      }
 	    }
 	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
