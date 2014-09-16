@@ -83,9 +83,9 @@ void inject_scalar(E,start_lev,AU,AD)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
-          node_coarse = E->IEN[sl_minus][m][el].node[i];
-          node_fine=E->IEN[start_lev][m][E->EL[sl_minus][m][el].sub[i]].node[i];
-          AD[m][node_coarse] = AU[m][node_fine];
+          node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
+          node_fine=E->IEN[start_lev][CPPR][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
+          AD[CPPR][node_coarse] = AU[CPPR][node_fine];
           }
 
     return;
@@ -114,12 +114,12 @@ void inject_vector(E,start_lev,AU,AD)
     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
-          node_coarse = E->IEN[sl_minus][m][el].node[i];
-          node_fine=E->IEN[start_lev][m][E->EL[sl_minus][m][el].sub[i]].node[i];
+          node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
+          node_fine=E->IEN[start_lev][CPPR][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
           for (j=1;j<=dims;j++)    {
-            eqn_fine   = E->ID[start_lev][m][node_fine].doff[j];
-            eqn_coarse = E->ID[sl_minus][m][node_coarse].doff[j];
-            AD[m][eqn_coarse] = AU[m][eqn_fine];
+            eqn_fine   = E->ID[start_lev][CPPR][node_fine].doff[j];
+            eqn_coarse = E->ID[sl_minus][CPPR][node_coarse].doff[j];
+            AD[CPPR][eqn_coarse] = AU[CPPR][eqn_fine];
             }
           }
 
@@ -154,23 +154,23 @@ void un_inject_vector(E,start_lev,AD,AU)
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<neq;i++)
-	AU[m][i]=0.0;
+	AU[CPPR][i]=0.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nels;el++)
         for(i=1;i<=ENODES3D;i++)  {
-          node = E->IEN[start_lev][m][el].node[i];
-	  node_plus=E->IEN[sl_plus][m][E->EL[start_lev][m][el].sub[i]].node[i];
+          node = E->IEN[start_lev][CPPR][el].node[i];
+	  node_plus=E->IEN[sl_plus][CPPR][E->EL[start_lev][CPPR][el].sub[i]].node[i];
 
-	  eqn1 = E->ID[start_lev][m][node].doff[1];
-	  eqn2 = E->ID[start_lev][m][node].doff[2];
-	  eqn3 = E->ID[start_lev][m][node].doff[3];
-	  eqn_plus1 = E->ID[sl_plus][m][node_plus].doff[1];
-	  eqn_plus2 = E->ID[sl_plus][m][node_plus].doff[2];
-	  eqn_plus3 = E->ID[sl_plus][m][node_plus].doff[3];
-	  AU[m][eqn_plus1] = AD[m][eqn1];
-	  AU[m][eqn_plus2] = AD[m][eqn2];
-	  AU[m][eqn_plus3] = AD[m][eqn3];
+	  eqn1 = E->ID[start_lev][CPPR][node].doff[1];
+	  eqn2 = E->ID[start_lev][CPPR][node].doff[2];
+	  eqn3 = E->ID[start_lev][CPPR][node].doff[3];
+	  eqn_plus1 = E->ID[sl_plus][CPPR][node_plus].doff[1];
+	  eqn_plus2 = E->ID[sl_plus][CPPR][node_plus].doff[2];
+	  eqn_plus3 = E->ID[sl_plus][CPPR][node_plus].doff[3];
+	  AU[CPPR][eqn_plus1] = AD[CPPR][eqn1];
+	  AU[CPPR][eqn_plus2] = AD[CPPR][eqn2];
+	  AU[CPPR][eqn_plus3] = AD[CPPR][eqn3];
 	  }
 
     return;
@@ -251,8 +251,8 @@ void project_viscosity(E)
   lv = E->mesh.levmax;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    viscU[m]=(float *)malloc((1+E->lmesh.NNO[lv])*sizeof(float));
-    viscD[m]=(float *)malloc((1+vpts*E->lmesh.NEL[lv-1])*sizeof(float));
+    viscU[CPPR]=(float *)malloc((1+E->lmesh.NNO[lv])*sizeof(float));
+    viscD[CPPR]=(float *)malloc((1+vpts*E->lmesh.NEL[lv-1])*sizeof(float));
     }
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC /* allow for anisotropy */
@@ -342,8 +342,8 @@ void project_viscosity(E)
   }
 #endif
   for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-    free((void *)viscU[m]);
-    free((void *)viscD[m]);
+    free((void *)viscU[CPPR]);
+    free((void *)viscD[CPPR]);
     }
 
     return;
@@ -371,13 +371,13 @@ void inject_scalar_e(E,start_lev,AU,AD)
 
  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=n_minus;i++)
-       AD[m][i] = 0.0;
+       AD[CPPR][i] = 0.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
             for(i=1;i<=ENODES3D;i++)                {
-                e = E->EL[sl_minus][m][el].sub[i];
-                AD[m][(el-1)*vpts+i] = AU[m][e];
+                e = E->EL[sl_minus][CPPR][el].sub[i];
+                AD[CPPR][(el-1)*vpts+i] = AU[CPPR][e];
                 }
 
 return;
@@ -406,18 +406,18 @@ void project_scalar_e(E,start_lev,AU,AD)
 
  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=n_minus;i++)
-       AD[m][i] = 0.0;
+       AD[CPPR][i] = 0.0;
 
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)    {
             average=0.0;
             for(i=1;i<=ENODES3D;i++) {
-                e = E->EL[sl_minus][m][el].sub[i];
-                average += AU[m][e];
+                e = E->EL[sl_minus][CPPR][el].sub[i];
+                average += AU[CPPR][e];
                 }
 
-            AD[m][el] = average*weight;
+            AD[CPPR][el] = average*weight;
             }
 return;
 }
@@ -444,30 +444,30 @@ void project_scalar(E,start_lev,AU,AD)
 
  for(m=1;m<=E->sphere.caps_per_proc;m++)
    for(i=1;i<=nno_minus;i++)
-     AD[m][i] = 0.0;
+     AD[CPPR][i] = 0.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
             for(i=1;i<=ENODES3D;i++) {
                 average=0.0;
-                node1 = E->EL[sl_minus][m][el].sub[i];
+                node1 = E->EL[sl_minus][CPPR][el].sub[i];
                 for(j=1;j<=ENODES3D;j++)                     {
-                    node=E->IEN[start_lev][m][node1].node[j];
-                    average += AU[m][node];
+                    node=E->IEN[start_lev][CPPR][node1].node[j];
+                    average += AU[CPPR][node];
                     }
 
                 w=weight*average;
 
-                node= E->IEN[sl_minus][m][el].node[i];
+                node= E->IEN[sl_minus][CPPR][el].node[i];
 
-                AD[m][node] += w * E->TWW[sl_minus][m][el].node[i];
+                AD[CPPR][node] += w * E->TWW[sl_minus][CPPR][el].node[i];
          }
 
    (E->exchange_node_f)(E,AD,sl_minus);
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
-       AD[m][i] *= E->MASS[sl_minus][m][i];
+       AD[CPPR][i] *= E->MASS[sl_minus][CPPR][i];
        }
 
 
@@ -514,26 +514,26 @@ void project_vector(E,start_lev,AU,AD,ic)
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=0;i<neq_minus;i++)
-        E->temp1[m][i] = 0.0;
+        E->temp1[CPPR][i] = 0.0;
 
                 /* smooth in xyz coordinates */
       for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
           for(i=1;i<=ENODES3D;i++) {
-                node= E->IEN[sl_minus][m][el].node[i];
+                node= E->IEN[sl_minus][CPPR][el].node[i];
 		average1=average2=average3=0.0;
-		e1 = E->EL[sl_minus][m][el].sub[i];
+		e1 = E->EL[sl_minus][CPPR][el].sub[i];
 		for(j=1;j<=ENODES3D;j++) {
-		    node1=E->IEN[start_lev][m][e1].node[j];
-		    average1 += E->temp[m][E->ID[start_lev][m][node1].doff[1]];
-		    average2 += E->temp[m][E->ID[start_lev][m][node1].doff[2]];
-		    average3 += E->temp[m][E->ID[start_lev][m][node1].doff[3]];
+		    node1=E->IEN[start_lev][CPPR][e1].node[j];
+		    average1 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[1]];
+		    average2 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[2]];
+		    average3 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[3]];
 		    }
-		w = weight*E->TWW[sl_minus][m][el].node[i];
+		w = weight*E->TWW[sl_minus][CPPR][el].node[i];
 
-		E->temp1[m][E->ID[sl_minus][m][node].doff[1]] += w * average1;
-		E->temp1[m][E->ID[sl_minus][m][node].doff[2]] += w * average2;
-	 	E->temp1[m][E->ID[sl_minus][m][node].doff[3]] += w * average3;
+		E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[1]] += w * average1;
+		E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[2]] += w * average2;
+	 	E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[3]] += w * average3;
                 }
 
 
@@ -541,9 +541,9 @@ void project_vector(E,start_lev,AU,AD,ic)
 
    for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
-       E->temp1[m][E->ID[sl_minus][m][i].doff[1]] *= E->MASS[sl_minus][m][i];
-       E->temp1[m][E->ID[sl_minus][m][i].doff[2]] *= E->MASS[sl_minus][m][i];
-       E->temp1[m][E->ID[sl_minus][m][i].doff[3]] *= E->MASS[sl_minus][m][i];
+       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][CPPR][i];
        }
 
                /* back into rtf coordinates */
@@ -564,21 +564,21 @@ void project_vector(E,start_lev,AU,AD,ic)
 
  for (m=1;m<=E->sphere.caps_per_proc;m++)
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
-     eqn1 = E->ID[level][m][i].doff[1];
-     eqn2 = E->ID[level][m][i].doff[2];
-     eqn3 = E->ID[level][m][i].doff[3];
-     sint = E->SinCos[level][m][0][i];
-     sinf = E->SinCos[level][m][1][i];
-     cost = E->SinCos[level][m][2][i];
-     cosf = E->SinCos[level][m][3][i];
-     rtf[m][eqn1] = xyz[m][eqn1]*cost*cosf
-                  + xyz[m][eqn2]*cost*sinf
-                  - xyz[m][eqn3]*sint;
-     rtf[m][eqn2] = -xyz[m][eqn1]*sinf
-                  + xyz[m][eqn2]*cosf;
-     rtf[m][eqn3] = xyz[m][eqn1]*sint*cosf
-                  + xyz[m][eqn2]*sint*sinf
-                  + xyz[m][eqn3]*cost;
+     eqn1 = E->ID[level][CPPR][i].doff[1];
+     eqn2 = E->ID[level][CPPR][i].doff[2];
+     eqn3 = E->ID[level][CPPR][i].doff[3];
+     sint = E->SinCos[level][CPPR][0][i];
+     sinf = E->SinCos[level][CPPR][1][i];
+     cost = E->SinCos[level][CPPR][2][i];
+     cosf = E->SinCos[level][CPPR][3][i];
+     rtf[CPPR][eqn1] = xyz[CPPR][eqn1]*cost*cosf
+                  + xyz[CPPR][eqn2]*cost*sinf
+                  - xyz[CPPR][eqn3]*sint;
+     rtf[CPPR][eqn2] = -xyz[CPPR][eqn1]*sinf
+                  + xyz[CPPR][eqn2]*cosf;
+     rtf[CPPR][eqn3] = xyz[CPPR][eqn1]*sint*cosf
+                  + xyz[CPPR][eqn2]*sint*sinf
+                  + xyz[CPPR][eqn3]*cost;
      }
 
  return;
@@ -596,21 +596,21 @@ void project_vector(E,start_lev,AU,AD,ic)
 
  for (m=1;m<=E->sphere.caps_per_proc;m++)
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
-     eqn1 = E->ID[level][m][i].doff[1];
-     eqn2 = E->ID[level][m][i].doff[2];
-     eqn3 = E->ID[level][m][i].doff[3];
-     sint = E->SinCos[level][m][0][i];
-     sinf = E->SinCos[level][m][1][i];
-     cost = E->SinCos[level][m][2][i];
-     cosf = E->SinCos[level][m][3][i];
-     xyz[m][eqn1] = rtf[m][eqn1]*cost*cosf
-                  - rtf[m][eqn2]*sinf
-                  + rtf[m][eqn3]*sint*cosf;
-     xyz[m][eqn2] = rtf[m][eqn1]*cost*sinf
-                  + rtf[m][eqn2]*cosf
-                  + rtf[m][eqn3]*sint*sinf;
-     xyz[m][eqn3] = -rtf[m][eqn1]*sint
-                  + rtf[m][eqn3]*cost;
+     eqn1 = E->ID[level][CPPR][i].doff[1];
+     eqn2 = E->ID[level][CPPR][i].doff[2];
+     eqn3 = E->ID[level][CPPR][i].doff[3];
+     sint = E->SinCos[level][CPPR][0][i];
+     sinf = E->SinCos[level][CPPR][1][i];
+     cost = E->SinCos[level][CPPR][2][i];
+     cosf = E->SinCos[level][CPPR][3][i];
+     xyz[CPPR][eqn1] = rtf[CPPR][eqn1]*cost*cosf
+                  - rtf[CPPR][eqn2]*sinf
+                  + rtf[CPPR][eqn3]*sint*cosf;
+     xyz[CPPR][eqn2] = rtf[CPPR][eqn1]*cost*sinf
+                  + rtf[CPPR][eqn2]*cosf
+                  + rtf[CPPR][eqn3]*sint*sinf;
+     xyz[CPPR][eqn3] = -rtf[CPPR][eqn1]*sint
+                  + rtf[CPPR][eqn3]*cost;
 
      }
 
@@ -650,20 +650,20 @@ void project_vector(E,start_lev,AU,AD,ic)
 
 	      /* now for each direction */
 
-	      eqn0=E->ID[level][m][node0].doff[1];
-	      eqn1=E->ID[level][m][node1].doff[1];
-	      eqn2=E->ID[level][m][node2].doff[1];
-	      temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	      eqn0=E->ID[level][CPPR][node0].doff[1];
+	      eqn1=E->ID[level][CPPR][node1].doff[1];
+	      eqn2=E->ID[level][CPPR][node2].doff[1];
+	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	      eqn0=E->ID[level][m][node0].doff[2];
-	      eqn1=E->ID[level][m][node1].doff[2];
-	      eqn2=E->ID[level][m][node2].doff[2];
-	      temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	      eqn0=E->ID[level][CPPR][node0].doff[2];
+	      eqn1=E->ID[level][CPPR][node1].doff[2];
+	      eqn2=E->ID[level][CPPR][node2].doff[2];
+	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	      eqn0=E->ID[level][m][node0].doff[3];
-	      eqn1=E->ID[level][m][node1].doff[3];
-	      eqn2=E->ID[level][m][node2].doff[3];
-	      temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	      eqn0=E->ID[level][CPPR][node0].doff[3];
+	      eqn1=E->ID[level][CPPR][node1].doff[3];
+	      eqn2=E->ID[level][CPPR][node2].doff[3];
+	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 	      }
 
     n1 = n2 =0.5;
@@ -674,20 +674,20 @@ void project_vector(E,start_lev,AU,AD,ic)
 	        node1 = node0 - noxz;
 	        node2 = node0 + noxz;
 
-	        eqn0=E->ID[level][m][node0].doff[1];
-	        eqn1=E->ID[level][m][node1].doff[1];
-	        eqn2=E->ID[level][m][node2].doff[1];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[1];
+	        eqn1=E->ID[level][CPPR][node1].doff[1];
+	        eqn2=E->ID[level][CPPR][node2].doff[1];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	        eqn0=E->ID[level][m][node0].doff[2];
-	        eqn1=E->ID[level][m][node1].doff[2];
-	        eqn2=E->ID[level][m][node2].doff[2];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[2];
+	        eqn1=E->ID[level][CPPR][node1].doff[2];
+	        eqn2=E->ID[level][CPPR][node2].doff[2];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	        eqn0=E->ID[level][m][node0].doff[3];
-	        eqn1=E->ID[level][m][node1].doff[3];
-	        eqn2=E->ID[level][m][node2].doff[3];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[3];
+	        eqn1=E->ID[level][CPPR][node1].doff[3];
+	        eqn2=E->ID[level][CPPR][node2].doff[3];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 	       }
 
 
@@ -702,20 +702,20 @@ void project_vector(E,start_lev,AU,AD,ic)
 		node1 = node0 - 1;
 		node2 = node0 + 1;
 
-	        eqn0=E->ID[level][m][node0].doff[1];
-	        eqn1=E->ID[level][m][node1].doff[1];
-	        eqn2=E->ID[level][m][node2].doff[1];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[1];
+	        eqn1=E->ID[level][CPPR][node1].doff[1];
+	        eqn2=E->ID[level][CPPR][node2].doff[1];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	        eqn0=E->ID[level][m][node0].doff[2];
-	        eqn1=E->ID[level][m][node1].doff[2];
-	        eqn2=E->ID[level][m][node2].doff[2];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[2];
+	        eqn1=E->ID[level][CPPR][node1].doff[2];
+	        eqn2=E->ID[level][CPPR][node2].doff[2];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 
-	        eqn0=E->ID[level][m][node0].doff[3];
-	        eqn1=E->ID[level][m][node1].doff[3];
-	        eqn2=E->ID[level][m][node2].doff[3];
-	        temp[m][eqn0] = n1*temp[m][eqn1]+n2*temp[m][eqn2];
+	        eqn0=E->ID[level][CPPR][node0].doff[3];
+	        eqn1=E->ID[level][CPPR][node1].doff[3];
+	        eqn2=E->ID[level][CPPR][node2].doff[3];
+	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 	        }
        }
     }         /* end for m */
