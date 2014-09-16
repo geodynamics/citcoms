@@ -304,7 +304,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 #ifdef CitcomS_global_defs_h	/* CitcomS */
       for(i=mgmin;i <= mgmax;i++){
 	nel  = E->lmesh.NEL[i];
-	for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	  for(k=1;k <= nel;k++){
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
@@ -314,7 +313,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
-	}
       }
 #else  /* CitcomCU */
       for(i=mgmin;i <= mgmax;i++){
@@ -341,9 +339,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
       if(E->parallel.me == 0)fprintf(stderr,"set_anisotropic_viscosity_at_element_level: initializing random viscosity\n");
       for(i=mgmin;i <= mgmax;i++){
 	nel  = E->lmesh.NEL[i];
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	for (m=1;m <= E->sphere.caps_per_proc;m++) {
-#endif
 	  for(k=1;k <= nel;k++){
 	    vis2 = 0.01+drand48()*0.99; /* random fluctuation */
 	    /* get random vector */
@@ -447,9 +442,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	z_top = E->viscosity.zbase_layer[ani_layer-2];
 #endif
       for(i=mgmin;i <= mgmax;i++){
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	for(m=1;m <= E->sphere.caps_per_proc;m++){
-#endif
+
 	  elx = E->lmesh.ELX[i];elz = E->lmesh.ELZ[i];ely = E->lmesh.ELY[i];
 	  elxlz = elx * elz;
 	  for (j=1;j <= elz;j++){
@@ -588,9 +581,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	      }
 	    }
 	  }
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-	} /* end m loop */
-#endif
       }	/* end multigrid */
 	if(read_grd)
 	ggrd_grdtrack_free_gstruc(vis2_grd);
@@ -635,7 +625,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
 {
   int n,m;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(n=1;n<=E->lmesh.NNO[lev];n++){
       normalize_vec3(&(n1[CPPR][n]),&(n2[CPPR][n]),&(n3[CPPR][n]));
     }
@@ -645,7 +634,6 @@ void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, f
   int m,e,i,enode;
   const int nsd=E->mesh.nsd;
   const int vpts=vpoints[nsd];
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	enode = (e-1)*vpts+i;
@@ -744,7 +732,8 @@ void rotate_ti6x6_to_director(double D[6][6],double n[3])
     
 }
 
-void get_citcom_spherical_rot(double theta, double phi, double rot[3][3]){
+void get_citcom_spherical_rot(double theta, double phi, double rot[3][3])
+{
   float base[9];
   calc_cbase_at_tp((float)theta,(float)phi, base); /* compute cartesian basis at
 						      theta, phi location */
@@ -831,7 +820,6 @@ void align_director_with_ISA_for_element(struct All_variables *E,
   }
   for(e=1; e <= nel; e++) {
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-    for(m=1;m <= E->sphere.caps_per_proc;m++) {
       if(((E->viscosity.anivisc_layer > 0)&&
 	  (E->mat[CPPR][e] <=   E->viscosity.anivisc_layer))||
 	 ((E->viscosity.anivisc_layer < 0)&&
@@ -867,7 +855,6 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	  E->EVIn3[lev][CPPR][off] = n[2];
 	}
       }	/* in layer */
-    } /* caps */
 #else
     if(((E->viscosity.anivisc_layer > 0)&&
 	(E->mat[e] <=   E->viscosity.anivisc_layer))||
