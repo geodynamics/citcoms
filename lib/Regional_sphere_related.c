@@ -72,14 +72,14 @@ void regional_coord_of_cap(E,m,icap)
   temp = max(E->mesh.NOY[E->mesh.levmax],E->mesh.NOX[E->mesh.levmax]);
 
   /* define the cap corners */
-  E->sphere.cap[1].theta[1] = E->control.theta_min;
-  E->sphere.cap[1].theta[2] = E->control.theta_max;
-  E->sphere.cap[1].theta[3] = E->control.theta_max;
-  E->sphere.cap[1].theta[4] = E->control.theta_min;
-  E->sphere.cap[1].fi[1] = E->control.fi_min;
-  E->sphere.cap[1].fi[2] = E->control.fi_min;
-  E->sphere.cap[1].fi[3] = E->control.fi_max;
-  E->sphere.cap[1].fi[4] = E->control.fi_max;
+  E->sphere.cap[CPPR].theta[1] = E->control.theta_min;
+  E->sphere.cap[CPPR].theta[2] = E->control.theta_max;
+  E->sphere.cap[CPPR].theta[3] = E->control.theta_max;
+  E->sphere.cap[CPPR].theta[4] = E->control.theta_min;
+  E->sphere.cap[CPPR].fi[1] = E->control.fi_min;
+  E->sphere.cap[CPPR].fi[2] = E->control.fi_min;
+  E->sphere.cap[CPPR].fi[3] = E->control.fi_max;
+  E->sphere.cap[CPPR].fi[4] = E->control.fi_max;
 
   if(E->control.coor==1) {
 
@@ -122,14 +122,14 @@ void regional_coord_of_cap(E,m,icap)
     fclose(fp);
     
     /* redefine the cap corners */
-    E->sphere.cap[1].theta[1] = E->control.theta_min;
-    E->sphere.cap[1].theta[2] = E->control.theta_max;
-    E->sphere.cap[1].theta[3] = E->control.theta_max;
-    E->sphere.cap[1].theta[4] = E->control.theta_min;
-    E->sphere.cap[1].fi[1] = E->control.fi_min;
-    E->sphere.cap[1].fi[2] = E->control.fi_min;
-    E->sphere.cap[1].fi[3] = E->control.fi_max;
-    E->sphere.cap[1].fi[4] = E->control.fi_max;
+    E->sphere.cap[CPPR].theta[1] = E->control.theta_min;
+    E->sphere.cap[CPPR].theta[2] = E->control.theta_max;
+    E->sphere.cap[CPPR].theta[3] = E->control.theta_max;
+    E->sphere.cap[CPPR].theta[4] = E->control.theta_min;
+    E->sphere.cap[CPPR].fi[1] = E->control.fi_min;
+    E->sphere.cap[CPPR].fi[2] = E->control.fi_min;
+    E->sphere.cap[CPPR].fi[3] = E->control.fi_max;
+    E->sphere.cap[CPPR].fi[4] = E->control.fi_max;
     
     for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
       
@@ -166,16 +166,16 @@ void regional_coord_of_cap(E,m,icap)
                 node = i + (j-1)*noz + (k-1)*nox*noz;
 
                      /*   theta,fi,and r coordinates   */
-                E->SX[lev][m][1][node] = theta1[lev][nodesx];
-                E->SX[lev][m][2][node] = fi1[lev][nodesy];
-                E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+                E->SX[lev][CPPR][1][node] = theta1[lev][nodesx];
+                E->SX[lev][CPPR][2][node] = fi1[lev][nodesy];
+                E->SX[lev][CPPR][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][m][1][node] =
+                E->X[lev][CPPR][1][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*cos(fi1[lev][nodesy]);
-                E->X[lev][m][2][node] =
+                E->X[lev][CPPR][2][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*sin(fi1[lev][nodesy]);
-                E->X[lev][m][3][node] =
+                E->X[lev][CPPR][3][node] =
                             E->sphere.R[lev][i]*cos(theta1[lev][nodesx]);
                 }
              }
@@ -209,13 +209,13 @@ void regional_coord_of_cap(E,m,icap)
   SX[1]  = (double *)malloc((temp+1)*sizeof(double));
 
 
-     tt[1] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_loc[1]);
-     tt[2] = E->sphere.cap[m].theta[1]+(E->sphere.cap[m].theta[2] -E->sphere.cap[m].theta[1])/nprocxl*(E->parallel.me_loc[1]+1);
+     tt[1] = E->sphere.cap[CPPR].theta[1]+(E->sphere.cap[CPPR].theta[2] -E->sphere.cap[CPPR].theta[1])/nprocxl*(E->parallel.me_loc[1]);
+     tt[2] = E->sphere.cap[CPPR].theta[1]+(E->sphere.cap[CPPR].theta[2] -E->sphere.cap[CPPR].theta[1])/nprocxl*(E->parallel.me_loc[1]+1);
      tt[3] = tt[2];
      tt[4] = tt[1];
-     ff[1] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_loc[2]);
+     ff[1] = E->sphere.cap[CPPR].fi[1]+(E->sphere.cap[CPPR].fi[4] -E->sphere.cap[CPPR].fi[1])/nprocyl*(E->parallel.me_loc[2]);
      ff[2] = ff[1];
-     ff[3] = E->sphere.cap[m].fi[1]+(E->sphere.cap[m].fi[4] -E->sphere.cap[1].fi[1])/nprocyl*(E->parallel.me_loc[2]+1);
+     ff[3] = E->sphere.cap[CPPR].fi[1]+(E->sphere.cap[CPPR].fi[4] -E->sphere.cap[CPPR].fi[1])/nprocyl*(E->parallel.me_loc[2]+1);
      ff[4] = ff[3];
 
 
@@ -249,16 +249,16 @@ void regional_coord_of_cap(E,m,icap)
                 node = i + (j-1)*noz + (k-1)*nox*noz;
 
                      /*   theta,fi,and r coordinates   */
-                E->SX[lev][m][1][node] = SX[0][nodes];
-                E->SX[lev][m][2][node] = SX[1][nodes];
-                E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+                E->SX[lev][CPPR][1][node] = SX[0][nodes];
+                E->SX[lev][CPPR][2][node] = SX[1][nodes];
+                E->SX[lev][CPPR][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][m][1][node] =
+                E->X[lev][CPPR][1][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*cos(SX[1][nodes]);
-                E->X[lev][m][2][node] =
+                E->X[lev][CPPR][2][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*sin(SX[1][nodes]);
-                E->X[lev][m][3][node] =
+                E->X[lev][CPPR][3][node] =
                             E->sphere.R[lev][i]*cos(SX[0][nodes]);
                 }
              }
