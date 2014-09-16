@@ -90,7 +90,6 @@ void full_read_input_files_for_timesteps(E,action,output)
       pos_age = 1;
     }
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       cap = E->sphere.capid[CPPR] - 1;  /* capid: 1-12 */
 
       switch (action) { /* set up files to open */
@@ -319,10 +318,9 @@ void full_read_input_files_for_timesteps(E,action,output)
         LL2 = (int*) malloc ((emax+1)*sizeof(int));
 
 
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
           for (el=1; el<=elx*ely*elz; el++)  {
             nodea = E->ien[CPPR][el].node[2];
-            llayer = layers(E,m,nodea);
+            llayer = layers(E,CPPR,nodea);
             if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
               E->mat[CPPR][el] = llayer;
               fprintf(stderr,"\nINSIDE llayer=%d",llayer);
@@ -342,7 +340,6 @@ void full_read_input_files_for_timesteps(E,action,output)
           fclose(fp1);
           fclose(fp2);
 
-          for (m=1;m<=E->sphere.caps_per_proc;m++) {
             for (k=1;k<=ely;k++)   {
               for (i=1;i<=elx;i++)   {
                 for (j=1;j<=elz;j++)  {
@@ -355,7 +352,6 @@ void full_read_input_files_for_timesteps(E,action,output)
                 }     /* end for j  */
               }     /*  end for i */
             }     /*  end for k  */
-          }     /*  end for m  */
 
          free ((void *) VIP1);
          free ((void *) VIP2);
@@ -418,9 +414,6 @@ void full_read_input_files_for_timesteps(E,action,output)
 	break;
 
       } /* end switch */
-    } /* end for m */
 
     fflush(E->fp);
-
-    return;
 }
