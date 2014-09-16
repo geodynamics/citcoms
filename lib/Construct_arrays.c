@@ -54,7 +54,6 @@ void construct_ien(E)
   const int ends=enodes[dims];
 
   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  {
-    for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
       elx = E->lmesh.ELX[lev];
       elz = E->lmesh.ELZ[lev];
@@ -77,7 +76,6 @@ void construct_ien(E)
                   + offset[rr].vector[2]*noz*nox;
 	     }
 
-      }     /* end for cap j */
     }     /* end loop for lev */
 
 
@@ -92,8 +90,6 @@ void construct_ien(E)
 /*     } */
 /*   fflush (E->fp_out); */
 /*   } */
-
-  return;
 }
 
 
@@ -103,7 +99,6 @@ void construct_surface( struct All_variables *E)
 {
   int i, j, e, element;
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     e = 0;
     for(element=1;element<=E->lmesh.nel;element++)
       if ( element%E->lmesh.elz==0) { /* top */
@@ -119,15 +114,12 @@ void construct_surface( struct All_variables *E)
     for (i=1;i<=E->lmesh.nsf;i++)
       E->surf_node[CPPR][i] = i*E->lmesh.noz;
 
-  }     /* end for cap j */
 
   if(E->control.verbose) {
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
       for(e=1;e<=E->lmesh.snel;e++) {
         fprintf(E->fp_out, "sien sel=%d node=%d %d %d %d\n",
 		e, E->sien[CPPR][e].node[1], E->sien[CPPR][e].node[2], E->sien[CPPR][e].node[3], E->sien[CPPR][e].node[4]);
       }
-    }
   }
 }
 
@@ -150,7 +142,6 @@ void construct_id(E)
     const int ends=enodes[dims];
 
   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)  {
-    for(j=1;j<=E->sphere.caps_per_proc;j++)  {
       eqn_count = 0;
 
       for(node=1;node<=E->lmesh.NNO[lev];node++)
@@ -179,7 +170,6 @@ void construct_id(E)
 
       get_bcs_id_for_residual(E,lev,CPPR);
 
-      }       /* end for j */
     }      /* end for lev */
 
     E->lmesh.neq = E->lmesh.NEQ[E->mesh.levmax];
@@ -192,11 +182,7 @@ void construct_id(E)
 /*           fprintf(E->fp_out,"%d %d %d %d %d\n",eqn_count,i,E->ID[lev][j][i].doff[1],E->ID[lev][j][i].doff[2],E->ID[lev][j][i].doff[3]); */
 /*       fflush(E->fp_out); */
 /*       } */
-
-
-    return;
-    }
-
+}
 
 
 void get_bcs_id_for_residual(E,level,m)
@@ -225,8 +211,6 @@ void get_bcs_id_for_residual(E,level,m)
       }
 
     E->num_zero_resid[level][CPPR] = j;
-
-    return;
 }
 
 /*==========================================================
@@ -242,8 +226,6 @@ void construct_lm(E)
 
   const int dims=E->mesh.nsd,dofs=E->mesh.dof;
   const int ends=enodes[dims];
-
-  return;
 }
 
 
@@ -265,7 +247,6 @@ void construct_node_maps(E)
 
   dims2 = dims-1;
   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
-    for (m=1;m<=E->sphere.caps_per_proc;m++)             {
        neq=E->lmesh.NEQ[lev];
        nno=E->lmesh.NNO[lev];
        noxz = E->lmesh.NOX[lev]*E->lmesh.NOZ[lev];
@@ -321,10 +302,6 @@ void construct_node_maps(E)
            for(i=0;i<matrix;i++)
                fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][CPPR][i]);
        }
-
-    }         /* end for level and m */
-
-    return;
 }
 
 
@@ -354,7 +331,6 @@ void construct_node_ks(E)
 
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
 
-      for(m=1;m<=E->sphere.caps_per_proc;m++)     {
 
         neq=E->lmesh.NEQ[level];
         nel=E->lmesh.NEL[level];
@@ -456,11 +432,9 @@ void construct_node_ks(E)
 		  }   /* end for node1<= node */
 		}      /* end for i */
 	    }            /* end for element */
-	}           /* end for m */
 
      (E->solver.exchange_id_d)(E, E->BI[level], level);
 
-     for(m=1;m<=E->sphere.caps_per_proc;m++)     {
         neq=E->lmesh.NEQ[level];
 
         for(j=0;j<neq;j++)                 {
@@ -468,12 +442,9 @@ void construct_node_ks(E)
 	    assert( E->BI[level][CPPR][j] != 0 /* diagonal of matrix = 0, not acceptable */);
             E->BI[level][CPPR][j]  = (double) 1.0/E->BI[level][CPPR][j];
 	    }
-	}           /* end for m */
 
 
     }     /* end for level */
-
-    return;
 }
 
 void rebuild_BI_on_boundary(E)
@@ -490,7 +461,6 @@ void rebuild_BI_on_boundary(E)
     const int max_eqn = dims*14;
 
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
-     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(j=0;j<=E->lmesh.NEQ[level];j++)
             E->temp[CPPR][j]=0.0;
 
@@ -514,14 +484,12 @@ void rebuild_BI_on_boundary(E)
                 E->temp[CPPR][C[j]] += fabs(B1[j]) + fabs(B2[j]) + fabs(B3[j]);
 
             }
-        }
 
      (E->solver.exchange_id_d)(E, E->temp, level);
 
-     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=0;i<E->lmesh.NEQ[level];i++)  {
             E->temp[CPPR][i] = E->temp[CPPR][i] - 1.0/E->BI[level][CPPR][i];
-            }
+        }
         for(i=1;i<=E->lmesh.NNO[level];i++)
           if (E->NODE[level][CPPR][i] & OFFSIDE)   {
             eqn1=E->ID[level][CPPR][i].doff[1];
@@ -530,13 +498,10 @@ void rebuild_BI_on_boundary(E)
             E->BI[level][CPPR][eqn1] = (double) 1.0/E->temp[CPPR][eqn1];
             E->BI[level][CPPR][eqn2] = (double) 1.0/E->temp[CPPR][eqn2];
             E->BI[level][CPPR][eqn3] = (double) 1.0/E->temp[CPPR][eqn3];
-            }
-        }
+          }
 
 
     }     /* end for level */
-
- return;
 }
 
 
@@ -552,7 +517,6 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
   int lev,elx,elz,ely,nno,nox,noz,noy;
 
   for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)           {
       elz = E->lmesh.ELZ[lev];
       ely = E->lmesh.ELY[lev];
       noy = E->lmesh.NOY[lev];
@@ -570,7 +534,6 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
 	    E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | TZEDGE;
 	    }
 
-      }    /* end for j & lev */
 
 /*   if (E->control.verbose) { */
 /*     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)  */
@@ -586,9 +549,7 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
 /*       } */
 /*     fflush(E->fp_out); */
 /*   } */
-
-  return;
-  }
+}
 
 
 /*   ==========================================
@@ -603,7 +564,6 @@ void construct_sub_element(E)
 
 
   for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--)
-     for (m=1;m<=E->sphere.caps_per_proc;m++)       {
           elx = E->lmesh.ELX[lev];
 	  elz = E->lmesh.ELZ[lev];
 	  ely = E->lmesh.ELY[lev];
@@ -633,12 +593,7 @@ void construct_sub_element(E)
                                  + offset[l].vector[2] * elzu * elxu;
 		      }
 		  }
-
-	  }
-
-
-   return;
-   }
+}
 
 
 void construct_elt_ks(E)
@@ -657,7 +612,6 @@ void construct_elt_ks(E)
 
     for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)  {
 
-      for(m=1;m<=E->sphere.caps_per_proc;m++)     {
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
@@ -669,11 +623,8 @@ void construct_elt_ks(E)
             build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
 
 	    }
-	}        /* end for m */
 
       (E->solver.exchange_id_d)(E, E->BI[lev], lev);    /*correct BI   */
-
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
 
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
 	       if(E->BI[lev][CPPR][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
@@ -682,8 +633,6 @@ void construct_elt_ks(E)
 	       }
 
     }       /* end for level */
-
-  return;
 }
 
 
@@ -700,12 +649,8 @@ void construct_elt_gs(E)
 /*       fprintf(stderr,"storing elt g matrices\n"); */
 
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(el=1;el<=E->lmesh.NEL[lev];el++)
-        get_elt_g(E,el,E->elt_del[lev][CPPR][el].g,lev,CPPR);
-
-
-  return;
+    for(el=1;el<=E->lmesh.NEL[lev];el++)
+      get_elt_g(E,el,E->elt_del[lev][CPPR][el].g,lev,CPPR);
 }
 
 
@@ -723,13 +668,9 @@ void construct_elt_cs(struct All_variables *E)
 /*         fprintf(stderr,"storing elt c matrices\n"); */
 
     for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(el=1;el<=E->lmesh.NEL[lev];el++) {
                 get_elt_c(E,el,E->elt_c[lev][CPPR][el].c,lev,CPPR);
             }
-
-
-    return;
 }
 
 
@@ -762,9 +703,6 @@ void construct_stiffness_B_matrix(E)
 
   if (E->control.NMULTIGRID || (E->control.NASSEMBLE && !E->control.CONJ_GRAD))
     rebuild_BI_on_boundary(E);
-
-
-  return;
 }
 
 /* took this apart to allow call from other subroutines */
@@ -831,14 +769,12 @@ void construct_mat_group(E)
       read_visc_layer_file(E);
 
       /* assign the global nz to mat group */
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
           for(el=1;el<=E->lmesh.nel;el++) {
               int nz;
               nz = ((el-1) % E->lmesh.elz) + 1;
               E->mat[CPPR][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
           }
   } else {
-      for (m=1;m<=E->sphere.caps_per_proc;m++) {
           for(el=1;el<=E->lmesh.nel;el++) {
               E->mat[CPPR][el] = 1;
               nodea = E->ien[CPPR][el].node[2];
@@ -847,9 +783,5 @@ void construct_mat_group(E)
                   E->mat[CPPR][el] = llayer;
               }
           }
-      }
   }
-  return;
 }
-
-
