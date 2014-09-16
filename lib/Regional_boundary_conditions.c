@@ -60,12 +60,12 @@ void regional_velocity_boundary_conditions(E)
       noz = E->lmesh.NOZ[lv];
 
       if(E->mesh.topvbc == 0) {
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
-	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,VBX,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,VBZ,1,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,0.0,VBY,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,E->control.VBXtopval,SBX,1,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,SBZ,0,lv,CPPR);
+	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,E->control.VBYtopval,SBY,1,lv,CPPR);
 
 #ifdef USE_GGRD
 	/* Ggrd traction control */
@@ -75,12 +75,12 @@ void regional_velocity_boundary_conditions(E)
 
       }
       else if(E->mesh.topvbc == 1) {
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,VBY,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,SBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,E->control.VBXtopval,VBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,E->control.VBYtopval,VBY,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,SBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,0.0,SBY,0,lv,CPPR);
 #ifdef USE_GGRD
 	/* Ggrd velocity control */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
@@ -93,31 +93,31 @@ void regional_velocity_boundary_conditions(E)
       }
       else if(E->mesh.topvbc == 2) {
 	/* This extra BC is for a open top */
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,VBY,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,VBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,VBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,0.0,VBY,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,E->control.VBXtopval,SBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,3,0.0,SBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,2,E->control.VBYtopval,SBY,1,lv,CPPR);
         }
 
 
 
       if(E->mesh.botvbc == 0) {
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,VBY,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,SBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,SBY,1,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,0.0,VBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,0.0,VBY,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,E->control.VBXbotval,SBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,E->control.VBYbotval,SBY,1,lv,CPPR);
         }
       else if(E->mesh.botvbc == 1) {
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,E->control.VBXbotval,VBX,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,VBZ,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,E->control.VBYbotval,VBY,1,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,SBX,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,3,0.0,SBZ,0,lv,j);
-        horizontal_bc(E,E->sphere.cap[j].VB,1,2,0.0,SBY,0,lv,j);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,E->control.VBXbotval,VBX,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,VBZ,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,E->control.VBYbotval,VBY,1,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,1,0.0,SBX,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,3,0.0,SBZ,0,lv,CPPR);
+        horizontal_bc(E,E->sphere.cap[CPPR].VB,1,2,0.0,SBY,0,lv,CPPR);
         }
 
 
@@ -142,7 +142,7 @@ void regional_velocity_boundary_conditions(E)
       if(E->control.verbose) {
 	for (j=1;j<=E->sphere.caps_per_proc;j++)
 	  for (node=1;node<=E->lmesh.nno;node++)
-	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ);
+	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",CPPR,node,E->sphere.cap[CPPR].VB[1][node],E->sphere.cap[CPPR].VB[2][node],E->sphere.cap[CPPR].VB[3][node],E->node[CPPR][node]&VBX,E->node[CPPR][node]&VBY,E->node[CPPR][node]&VBZ);
 	fflush(E->fp_out);
       }
       /* If any imposed internal velocity structure it goes here */
@@ -170,24 +170,24 @@ void regional_temperature_boundary_conditions(E)
   for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->lmesh.noz;
     if(E->mesh.toptbc == 1)    {
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,CPPR);
       if(E->control.tbcs_file)   {
 	  read_temperature_boundary_from_file(E);   /* read in the temperature boundary condition from file */
 	}
       }
     else   {
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,CPPR);
       }
 
     if(E->mesh.bottbc == 1)    {
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,1,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,0,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,TBZ,1,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,FBZ,0,lev,CPPR);
       }
     else        {
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
-      horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,TBZ,0,lev,CPPR);
+      horizontal_bc(E,E->sphere.cap[CPPR].TB,1,3,E->control.TBCbotval,FBZ,1,lev,CPPR);
       }
 
     if((E->control.temperature_bound_adj==1) || (E->control.lith_age_time==1))  {
@@ -226,14 +226,14 @@ static void velocity_refl_vert_bc(E)
 
         ii = i + E->lmesh.nzs - 1;
         if (E->parallel.me_loc[1]==0 )  {
-           E->sphere.cap[m].VB[1][node1] = 0.0;
+           E->sphere.cap[CPPR].VB[1][node1] = 0.0;
            if((ii != 1) && (ii != E->mesh.noz))
-              E->sphere.cap[m].VB[3][node1] = 0.0;
+              E->sphere.cap[CPPR].VB[3][node1] = 0.0;
                }
         if (E->parallel.me_loc[1]==E->parallel.nprocx-1)  {
-           E->sphere.cap[m].VB[1][node2] = 0.0;
+           E->sphere.cap[CPPR].VB[1][node2] = 0.0;
            if((ii != 1) && (ii != E->mesh.noz))
-              E->sphere.cap[m].VB[3][node2] = 0.0;
+              E->sphere.cap[CPPR].VB[3][node2] = 0.0;
            }
         }      /* end loop for i and j */
 
@@ -247,9 +247,9 @@ static void velocity_refl_vert_bc(E)
           node1 = i + (j-1)*E->lmesh.noz;
           ii = i + E->lmesh.nzs - 1;
 
-          E->sphere.cap[m].VB[2][node1] = 0.0;
+          E->sphere.cap[CPPR].VB[2][node1] = 0.0;
           if((ii != 1) && (ii != E->mesh.noz))
-            E->sphere.cap[m].VB[3][node1] = 0.0;
+            E->sphere.cap[CPPR].VB[3][node1] = 0.0;
           }    /* end of loop i & j */
 
     if (E->parallel.me_loc[2]==E->parallel.nprocy-1)
@@ -259,9 +259,9 @@ static void velocity_refl_vert_bc(E)
           node2 = (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox + i + (j-1)*E->lmesh.noz;
           ii = i + E->lmesh.nzs - 1;
 
-          E->sphere.cap[m].VB[2][node2] = 0.0;
+          E->sphere.cap[CPPR].VB[2][node2] = 0.0;
           if((ii != 1) && (ii != E->mesh.noz))
-            E->sphere.cap[m].VB[3][node2] = 0.0;
+            E->sphere.cap[CPPR].VB[3][node2] = 0.0;
           }    /* end of loop i & j */
 
 
@@ -281,23 +281,23 @@ static void velocity_refl_vert_bc(E)
           node2 = node1 + (nox-1)*noz;
           ii = i + E->lmesh.NZS[level] - 1;
           if (E->parallel.me_loc[1]==0 )  {
-            E->NODE[level][m][node1] = E->NODE[level][m][node1] | VBX;
-            E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~SBX);
+            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | VBX;
+            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~SBX);
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
-               E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBY);
-               E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBY;
-               E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBZ);
-               E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBZ;
+               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBY);
+               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBY;
+               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBZ);
+               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBZ;
                }
             }
           if (E->parallel.me_loc[1]==E->parallel.nprocx-1)  {
-            E->NODE[level][m][node2] = E->NODE[level][m][node2] | VBX;
-            E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~SBX);
+            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | VBX;
+            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~SBX);
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
-              E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBY);
-              E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBY;
-              E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBZ);
-              E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBZ;
+              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBY);
+              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBY;
+              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBZ);
+              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBZ;
                   }
             }
           }   /* end for loop i & j */
@@ -312,15 +312,15 @@ static void velocity_refl_vert_bc(E)
             ii = i + E->lmesh.NZS[level] - 1;
             jj = j + E->lmesh.NXS[level] - 1;
 
-            E->NODE[level][m][node1] = E->NODE[level][m][node1] | VBY;
-            E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~SBY);
+            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | VBY;
+            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~SBY);
             if((ii!= 1) && (ii != E->mesh.NOZ[level]))  {
-                E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBZ);
-                E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBZ;
+                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBZ);
+                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBZ;
                 }
             if((jj!=1) && (jj!=E->mesh.NOX[level]) && (ii!=1) && (ii!=E->mesh.NOZ[level])){
-                E->NODE[level][m][node1] = E->NODE[level][m][node1] & (~VBX);
-                E->NODE[level][m][node1] = E->NODE[level][m][node1] | SBX;
+                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBX);
+                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBX;
                 }
                 }    /* end for loop i & j  */
 
@@ -330,15 +330,15 @@ static void velocity_refl_vert_bc(E)
             node2 = (noy-1)*noz*nox + i + (j-1)*noz;
             ii = i + E->lmesh.NZS[level] - 1;
             jj = j + E->lmesh.NXS[level] - 1;
-            E->NODE[level][m][node2] = E->NODE[level][m][node2] | VBY;
-            E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~SBY);
+            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | VBY;
+            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~SBY);
             if((ii!= 1) && (ii != E->mesh.NOZ[level]))  {
-                E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBZ);
-                E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBZ;
+                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBZ);
+                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBZ;
                 }
             if((jj!=1) && (jj!=E->mesh.NOX[level]) && (ii!=1) && (ii!=E->mesh.NOZ[level])){
-                E->NODE[level][m][node2] = E->NODE[level][m][node2] & (~VBX);
-                E->NODE[level][m][node2] = E->NODE[level][m][node2] | SBX;
+                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBX);
+                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBX;
                 }
             }
 
@@ -365,14 +365,14 @@ static void temperature_refl_vert_bc(E)
         node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
         node2 = node1 + (E->lmesh.nox-1)*E->lmesh.noz;
         if (E->parallel.me_loc[1]==0 )                   {
-          E->node[m][node1] = E->node[m][node1] & (~TBX);
-          E->node[m][node1] = E->node[m][node1] | FBX;
-          E->sphere.cap[m].TB[1][node1] = 0.0;
+          E->node[CPPR][node1] = E->node[CPPR][node1] & (~TBX);
+          E->node[CPPR][node1] = E->node[CPPR][node1] | FBX;
+          E->sphere.cap[CPPR].TB[1][node1] = 0.0;
               }
         if (E->parallel.me_loc[1]==E->parallel.nprocx-1)   {
-          E->node[m][node2] = E->node[m][node2] & (~TBX);
-          E->node[m][node2] = E->node[m][node2] | FBX;
-          E->sphere.cap[m].TB[1][node2] = 0.0;
+          E->node[CPPR][node2] = E->node[CPPR][node2] & (~TBX);
+          E->node[CPPR][node2] = E->node[CPPR][node2] | FBX;
+          E->sphere.cap[CPPR].TB[1][node2] = 0.0;
               }
         }       /* end for loop i & j */
 
@@ -381,9 +381,9 @@ static void temperature_refl_vert_bc(E)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node1 = i + (j-1)*E->lmesh.noz;
-          E->node[m][node1] = E->node[m][node1] & (~TBY);
-              E->node[m][node1] = E->node[m][node1] | FBY;
-              E->sphere.cap[m].TB[2][node1] = 0.0;
+          E->node[CPPR][node1] = E->node[CPPR][node1] & (~TBY);
+              E->node[CPPR][node1] = E->node[CPPR][node1] | FBY;
+              E->sphere.cap[CPPR].TB[2][node1] = 0.0;
               }
 
     if (E->parallel.me_loc[2]==E->parallel.nprocy-1)
@@ -391,9 +391,9 @@ static void temperature_refl_vert_bc(E)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node2 = i +(j-1)*E->lmesh.noz + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
-          E->node[m][node2] = E->node[m][node2] & (~TBY);
-          E->node[m][node2] = E->node[m][node2] | FBY;
-          E->sphere.cap[m].TB[2][node2] = 0.0;
+          E->node[CPPR][node2] = E->node[CPPR][node2] & (~TBY);
+          E->node[CPPR][node2] = E->node[CPPR][node2] | FBY;
+          E->sphere.cap[CPPR].TB[2][node2] = 0.0;
           }    /* end loop for i and j */
 
   return;
@@ -424,7 +424,7 @@ static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn
       for(j=1;j<=E->lmesh.NOY[level];j++)
     	for(i=1;i<=E->lmesh.NOX[level];i++)     {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] & (~ mask);
     	  }        /* end for loop i & j */
       }
 
@@ -433,7 +433,7 @@ static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn
       for(j=1;j<=E->lmesh.NOY[level];j++)
         for(i=1;i<=E->lmesh.NOX[level];i++)       {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] | (mask);
 
     	  if(level==E->mesh.levmax)   /* NB */
     	    BC[dirn][node] = value;
