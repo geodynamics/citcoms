@@ -93,7 +93,6 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
       top = 1;
     else
       top = 0;
-    for (m=1;m <= E->sphere.caps_per_proc;m++)
       for (k=1;k <= ely;k++)
         for (j=1;j <= elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
