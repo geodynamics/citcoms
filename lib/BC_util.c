@@ -93,12 +93,10 @@ void strip_bcs_from_residual(E,Res,level)
 {
     int m,i;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     if (E->num_zero_resid[level][CPPR])
       for(i=1;i<=E->num_zero_resid[level][CPPR];i++)
          Res[CPPR][E->zero_resid[level][CPPR][i]] = 0.0;
 
-    return;
 }
 
 
@@ -127,7 +125,6 @@ void temperatures_conform_bcs2(E)
   int j,node;
   unsigned int type;
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
 
         type = (E->node[CPPR][node] & (TBX | TBZ | TBY));
@@ -160,9 +157,6 @@ void temperatures_conform_bcs2(E)
 
         /* next node */
     }
-
-  return;
-
 }
 
 
@@ -178,7 +172,6 @@ void velocities_conform_bcs(E,U)
 
     const int nno = E->lmesh.nno;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(node=1;node<=nno;node++) {
 
         if (E->node[CPPR][node] & typex)
@@ -188,9 +181,7 @@ void velocities_conform_bcs(E,U)
 	if (E->node[CPPR][node] & typez)
 	      U[CPPR][E->id[CPPR][node].doff[3]] = E->sphere.cap[CPPR].VB[3][node];
         }
-      }
 
-    return;
 }
 
 /* 
@@ -215,7 +206,6 @@ void assign_internal_bc(struct All_variables *E)
 
   if(E->mesh.toplayerbc > 0){
     for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
-      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
 	noz = E->lmesh.NOZ[lv];
 	/* we're looping through all nodes for the possibility that
 	   there are several internal processors which need BCs */
@@ -248,7 +238,6 @@ void assign_internal_bc(struct All_variables *E)
 	    }
 	  }
 	}
-      }
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
@@ -258,7 +247,6 @@ void assign_internal_bc(struct All_variables *E)
   }else if(E->mesh.toplayerbc < 0){ 
     /* internal node at noz-toplayerbc */
     for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
-      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
 	noz = E->lmesh.NOZ[lv];
 	/* we're looping through all nodes for the possibility that
 	   there are several internal processors which need BCs */
@@ -293,7 +281,6 @@ void assign_internal_bc(struct All_variables *E)
 	    internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,SBZ,0,lv,CPPR);
 	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,0.0,                 SBY,0,lv,CPPR);
 	}
-      }
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
     if(E->control.ggrd.vtop_control)
@@ -307,8 +294,3 @@ void assign_internal_bc(struct All_variables *E)
 	    ((E->parallel.me_loc[3]==E->parallel.nprocz-1)?("top"):("interior")),
 	    (E->mesh.topvbc!=1)?("stress"):("velocity"),ncount);
 }
-
-
-
-/* End of file  */
-
