@@ -143,7 +143,7 @@ void regional_node_locations(E)
 
 
   for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-     regional_coord_of_cap(E,j,0);
+     regional_coord_of_cap(E,CPPR,0);
      }
 
 
@@ -151,10 +151,10 @@ void regional_node_locations(E)
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
     fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-      fprintf(E->fp_out,"output_coordinates for cap %d %d\n",j,E->lmesh.NNO[lev]);
+      fprintf(E->fp_out,"output_coordinates for cap %d %d\n",CPPR,E->lmesh.NNO[lev]);
       for (i=1;i<=E->lmesh.NNO[lev];i++)
         if(i%E->lmesh.NOZ[lev]==1)
-             fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
+             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
       }
     }
     fflush(E->fp_out);
@@ -168,10 +168,10 @@ void regional_node_locations(E)
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-        E->SinCos[lev][j][0][i] = sin(E->SX[lev][j][1][i]);
-        E->SinCos[lev][j][1][i] = sin(E->SX[lev][j][2][i]);
-        E->SinCos[lev][j][2][i] = cos(E->SX[lev][j][1][i]);
-        E->SinCos[lev][j][3][i] = cos(E->SX[lev][j][2][i]);
+        E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][CPPR][1][i]);
+        E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]);
+        E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][CPPR][1][i]);
+        E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]);
         }
 
 /*
@@ -213,7 +213,7 @@ void regional_node_locations(E)
     for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)
         if(i%E->lmesh.NOZ[lev]==1)
-             fprintf(E->fp_out,"%d %d %g %g %g\n",j,i,E->SX[lev][j][1][i],E->SX[lev][j][2][i],E->SX[lev][j][3][i]);
+             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
       }
     fflush(E->fp_out);
   }
@@ -240,10 +240,10 @@ void regional_construct_boundary( struct All_variables *E)
     - (E->lmesh.elx-2)*(E->lmesh.ely-2)*(E->lmesh.elz-2) + 1;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    E->boundary.element[m] = (int *)malloc(max_size*sizeof(int));
+    E->boundary.element[CPPR] = (int *)malloc(max_size*sizeof(int));
 
     for(d=1; d<=dims; d++)
-      E->boundary.normal[m][d] = (int *)malloc(max_size*sizeof(int));
+      E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
 
   }
 
@@ -292,9 +292,9 @@ void regional_construct_boundary( struct All_variables *E)
 
 	  if(isBoundary) {
 	    el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
-	    E->boundary.element[m][count] = el;
+	    E->boundary.element[CPPR][count] = el;
 	    for(d=1; d<=dims; d++)
-	      E->boundary.normal[m][d][count] = normalFlag[d];
+	      E->boundary.normal[CPPR][d][count] = normalFlag[d];
 
 	    ++count;
 	  }
