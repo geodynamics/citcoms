@@ -218,35 +218,30 @@ static void allocate_composition_memory(struct All_variables *E)
 
     /* allocat memory for composition fields at the nodes and elements */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        if ((E->composition.comp_el[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8987y\n");
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-        if ((E->composition.comp_node[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
-            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8988y\n");
-            fflush(E->trace.fpt);
-            exit(10);
-        }
-
-        for (i=0; i<E->composition.ncomp; i++) {
-            if ((E->composition.comp_el[CPPR][i]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
-                fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-
-            if ((E->composition.comp_node[CPPR][i]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
-                fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
-                fflush(E->trace.fpt);
-                exit(10);
-            }
-        }
-
+    if ((E->composition.comp_el[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+        fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8987y\n");
+        fflush(E->trace.fpt);
+        exit(10);
+    }
+    if ((E->composition.comp_node[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+        fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8988y\n");
+        fflush(E->trace.fpt);
+        exit(10);
     }
 
-    return;
+    for (i=0; i<E->composition.ncomp; i++) {
+        if ((E->composition.comp_el[CPPR][i]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
+            fflush(E->trace.fpt);
+            exit(10);
+        }
+
+        if ((E->composition.comp_node[CPPR][i]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
+            fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
+            fflush(E->trace.fpt);
+            exit(10);
+        }
+    }
 }
 
 
@@ -309,7 +304,6 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
     int iempty = 0;
 
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
@@ -341,11 +335,8 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             }
         }
 
-    } /* end j */
 
     E->trace.istat_iempty += iempty;
-
-    return;
 }
 
 
@@ -376,7 +367,6 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
     /*  occupied by your tracers */
     domain_volume = 1e-2;
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
@@ -405,9 +395,6 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
 
             }
         }
-    }
-
-    return;
 }
 
 
@@ -423,8 +410,6 @@ void map_composition_to_nodes(struct All_variables *E)
     int nelem, nodenum;
     int j;
 
-
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
         /* first, initialize node array */
         for(i=0;i<E->composition.ncomp;i++) {
@@ -450,17 +435,13 @@ void map_composition_to_nodes(struct All_variables *E)
             }
 
         } /* end nelem */
-    } /* end j */
 
     for(i=0;i<E->composition.ncomp;i++) {
-        for (j=1;j<=E->sphere.caps_per_proc;j++)
-            tmp[CPPR] = E->composition.comp_node[CPPR][i];
-
+        tmp[CPPR] = E->composition.comp_node[CPPR][i];
         (E->exchange_node_d)(E,tmp,E->mesh.levmax);
     }
 
     /* Divide by nodal volume */
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
         for(i=0;i<E->composition.ncomp;i++)
             for (kk=1;kk<=E->lmesh.nno;kk++)
                 E->composition.comp_node[CPPR][i][kk] *= E->MASS[E->mesh.levmax][CPPR][kk];
@@ -477,11 +458,7 @@ void map_composition_to_nodes(struct All_variables *E)
                 fprintf(E->trace.fpt,"%d %f %f\n",kk,E->sx[j][3][kk],E->composition.comp_node[j][i][kk]);
             }
         fflush(E->trace.fpt);
-        /**/
-
-    } /* end j */
-
-    return;
+        **/
 }
 
 
@@ -508,7 +485,6 @@ static void fill_composition_from_neighbors(struct All_variables *E)
     is_empty = (int *)calloc(E->lmesh.nel+1, sizeof(int));
     sum = (double *)malloc(E->composition.ncomp * sizeof(double));
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
         /* which element is empty? */
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
@@ -546,14 +522,12 @@ static void fill_composition_from_neighbors(struct All_variables *E)
                     E->composition.comp_el[CPPR][i][e] = sum[i] / count;
             }
         }
-    }
 
     free(is_empty);
     free(sum);
 
     fprintf(E->trace.fpt,"Done.\n");
     fflush(E->trace.fpt);
-    return;
 }
 
 
@@ -571,8 +545,7 @@ static void init_bulk_composition(struct All_variables *E)
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)
-            tmp[CPPR] = E->composition.comp_node[CPPR][i];
+        tmp[CPPR] = E->composition.comp_node[CPPR][i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);
@@ -580,8 +553,6 @@ static void init_bulk_composition(struct All_variables *E)
         E->composition.bulk_composition[i] = volume;
         E->composition.initial_bulk_composition[i] = volume;
     }
-
-    return;
 }
 
 
@@ -596,16 +567,14 @@ void get_bulk_composition(struct All_variables *E)
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)
-            tmp[CPPR] = E->composition.comp_node[CPPR][i];
+        tmp[CPPR] = E->composition.comp_node[CPPR][i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);
 
         E->composition.bulk_composition[i] = volume;
 
-        E->composition.error_fraction[i] = (volume - E->composition.initial_bulk_composition[i]) / E->composition.initial_bulk_composition[i];
+        E->composition.error_fraction[i] = 
+          (volume - E->composition.initial_bulk_composition[i]) / E->composition.initial_bulk_composition[i];
     }
-
-    return;
 }
