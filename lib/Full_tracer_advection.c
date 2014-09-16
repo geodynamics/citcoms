@@ -1338,8 +1338,6 @@ static void make_regular_grid(struct All_variables *E)
     /* for each cap, determine theta and phi bounds, watch out near poles  */
 
     numregnodes=0;
-    for(j=1;j<=E->sphere.caps_per_proc;j++)
-        {
 
             thetamax=0.0;
             thetamin=M_PI;
@@ -1633,26 +1631,22 @@ static void make_regular_grid(struct All_variables *E)
             free(fmin);
             free(fmax);
 
-        } /* end j */
 
 
     /* some error control */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
+    for (kk=1;kk<=numregnodes;kk++)
         {
-            for (kk=1;kk<=numregnodes;kk++)
-                {
 
-                    if (E->trace.regnodetoel[CPPR][kk]!=-99)
+            if (E->trace.regnodetoel[CPPR][kk]!=-99)
+                {
+                    if ( (E->trace.regnodetoel[CPPR][kk]<1)||(E->trace.regnodetoel[CPPR][kk]>E->lmesh.nel) )
                         {
-                            if ( (E->trace.regnodetoel[CPPR][kk]<1)||(E->trace.regnodetoel[CPPR][kk]>E->lmesh.nel) )
-                                {
-                                    fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
-                                    fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
-                                    fflush(E->trace.fpt);
-                                    fflush(stderr);
-                                    exit(10);
-                                }
+                            fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
+                            fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
+                            fflush(E->trace.fpt);
+                            fflush(stderr);
+                            exit(10);
                         }
                 }
         }
@@ -1666,9 +1660,6 @@ static void make_regular_grid(struct All_variables *E)
     /* AKMA decided it would be more efficient to have reg element choice array */
     /* rather than reg node array as used before          */
 
-
-    for(j=1;j<=E->sphere.caps_per_proc;j++)
-        {
 
             /* initialize statistical counter */
 
@@ -1863,7 +1854,6 @@ static void make_regular_grid(struct All_variables *E)
                         }
                 }
 
-        } /* end j */
 
 
     fprintf(E->trace.fpt,"Mapping completed (%f seconds)\n",CPU_time0()-start_time);
@@ -1875,25 +1865,18 @@ static void make_regular_grid(struct All_variables *E)
 
     /* Print out information regarding regular/real element coverage */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
-        {
 
-            isum=0;
-            for (kk=0;kk<=4;kk++) isum=isum+istat_ichoice[CPPR][kk];
-            fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
-            fprintf(E->trace.fpt," (stats done on regular elements that were used)\n");
-            fprintf(E->trace.fpt,"Ichoice is number of real elements touched by a regular element\n");
-            fprintf(E->trace.fpt,"  (ichoice=0 is optimal)\n");
-            fprintf(E->trace.fpt,"Ichoice=0: %f percent\n",(100.0*istat_ichoice[CPPR][0])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=1: %f percent\n",(100.0*istat_ichoice[CPPR][1])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=2: %f percent\n",(100.0*istat_ichoice[CPPR][2])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=3: %f percent\n",(100.0*istat_ichoice[CPPR][3])/(1.0*isum));
-            fprintf(E->trace.fpt,"Ichoice=4: %f percent\n",(100.0*istat_ichoice[CPPR][4])/(1.0*isum));
-
-        } /* end j */
-
-
-    return;
+    isum=0;
+    for (kk=0;kk<=4;kk++) isum=isum+istat_ichoice[CPPR][kk];
+    fprintf(E->trace.fpt,"\n\nInformation regarding number of real elements per regular elements\n");
+    fprintf(E->trace.fpt," (stats done on regular elements that were used)\n");
+    fprintf(E->trace.fpt,"Ichoice is number of real elements touched by a regular element\n");
+    fprintf(E->trace.fpt,"  (ichoice=0 is optimal)\n");
+    fprintf(E->trace.fpt,"Ichoice=0: %f percent\n",(100.0*istat_ichoice[CPPR][0])/(1.0*isum));
+    fprintf(E->trace.fpt,"Ichoice=1: %f percent\n",(100.0*istat_ichoice[CPPR][1])/(1.0*isum));
+    fprintf(E->trace.fpt,"Ichoice=2: %f percent\n",(100.0*istat_ichoice[CPPR][2])/(1.0*isum));
+    fprintf(E->trace.fpt,"Ichoice=3: %f percent\n",(100.0*istat_ichoice[CPPR][3])/(1.0*isum));
+    fprintf(E->trace.fpt,"Ichoice=4: %f percent\n",(100.0*istat_ichoice[CPPR][4])/(1.0*isum));
 }
 
 
