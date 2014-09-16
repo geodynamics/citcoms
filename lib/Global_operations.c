@@ -999,7 +999,7 @@ void remove_rigid_rot(struct All_variables *E)
 	vx[1] = fxyz[3]* E->x[CPPR][1][node] - fxyz[1]*E->x[CPPR][3][node];
 	vx[2] = fxyz[1]* E->x[CPPR][2][node] - fxyz[2]*E->x[m][1][node];
 	/* project into theta, phi */
-	calc_cbase_at_node(m,node,cart_base,E);
+	calc_cbase_at_node(CPPR,node,cart_base,E);
 	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
 	v_phi   = vx[0]*cart_base[6] + vx[1]*cart_base[7];
 	E->sphere.cap[m].V[1][node] -= v_theta;
