@@ -77,15 +77,15 @@ void heat_flux(E)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++) {
 
-    flux[m] = (float *) malloc((1+nno)*sizeof(float));
+    flux[CPPR] = (float *) malloc((1+nno)*sizeof(float));
 
     for(i=1;i<=nno;i++)   {
-      flux[m][i] = 0.0;
+      flux[CPPR][i] = 0.0;
       }
 
     for(e=1;e<=E->lmesh.nel;e++) {
 
-      velo_from_element(E,VV,m,e,sphere_key);
+      velo_from_element(E,VV,CPPR,e,sphere_key);
 
       for(i=1;i<=vpts;i++)   {
         u[i] = 0.0;
@@ -93,11 +93,11 @@ void heat_flux(E)
         dTdz[i] = 0.0;
         rho[i] = 0.0;
         for(j=1;j<=ends;j++)  {
-          nz = ((E->ien[m][e].node[j]-1) % E->lmesh.noz)+1;
+          nz = ((E->ien[CPPR][e].node[j]-1) % E->lmesh.noz)+1;
           rho[i] += E->refstate.rho[nz]*E->N.vpt[GNVINDEX(j,i)];
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
-          T[i] += E->T[m][E->ien[m][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
-          dTdz[i] += -E->T[m][E->ien[m][e].node[j]]*E->gNX[m][e].vpt[GNVXINDEX(2,j,i)];
+          T[i] += E->T[CPPR][E->ien[CPPR][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
+          dTdz[i] += -E->T[CPPR][E->ien[CPPR][e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
           }
         }
 
@@ -105,13 +105,13 @@ void heat_flux(E)
       area = 0.0;
       for(i=1;i<=vpts;i++)   {
         /* XXX: missing unit conversion, heat capacity and thermal conductivity */
-        uT += rho[i]*u[i]*T[i]*E->gDA[m][e].vpt[i] + dTdz[i]*E->gDA[m][e].vpt[i];
+        uT += rho[i]*u[i]*T[i]*E->gDA[CPPR][e].vpt[i] + dTdz[i]*E->gDA[CPPR][e].vpt[i];
         }
 
-      uT /= E->eco[m][e].area;
+      uT /= E->eco[CPPR][e].area;
 
       for(j=1;j<=ends;j++)
-        flux[m][E->ien[m][e].node[j]] += uT*E->TWW[lev][m][e].node[j];
+        flux[CPPR][E->ien[CPPR][e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
 
       }             /* end of e */
     }             /* end of m */
@@ -121,36 +121,36 @@ void heat_flux(E)
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno;i++)
-       flux[m][i] *= E->MASS[lev][m][i];
+       flux[CPPR][i] *= E->MASS[lev][CPPR][i];
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nsf;i++)
-        E->slice.shflux[m][i]=2*flux[m][E->surf_node[m][i]]-flux[m][E->surf_node[m][i]-1];
+        E->slice.shflux[CPPR][i]=2*flux[CPPR][E->surf_node[CPPR][i]]-flux[CPPR][E->surf_node[CPPR][i]-1];
 
   if (E->parallel.me_loc[3]==0)
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nsf;i++)
-        E->slice.bhflux[m][i] = 2*flux[m][E->surf_node[m][i]-E->lmesh.noz+1]
-                                - flux[m][E->surf_node[m][i]-E->lmesh.noz+2];
+        E->slice.bhflux[CPPR][i] = 2*flux[CPPR][E->surf_node[CPPR][i]-E->lmesh.noz+1]
+                                - flux[CPPR][E->surf_node[CPPR][i]-E->lmesh.noz+2];
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.snel;e++) {
-         uT =(E->slice.shflux[m][E->sien[m][e].node[1]] +
-              E->slice.shflux[m][E->sien[m][e].node[2]] +
-              E->slice.shflux[m][E->sien[m][e].node[3]] +
-              E->slice.shflux[m][E->sien[m][e].node[4]])*0.25;
+         uT =(E->slice.shflux[CPPR][E->sien[CPPR][e].node[1]] +
+              E->slice.shflux[CPPR][E->sien[CPPR][e].node[2]] +
+              E->slice.shflux[CPPR][E->sien[CPPR][e].node[3]] +
+              E->slice.shflux[CPPR][E->sien[CPPR][e].node[4]])*0.25;
          el = e*E->lmesh.elz;
-         sum_h[0] += uT*E->eco[m][el].area;
-         sum_h[1] += E->eco[m][el].area;
+         sum_h[0] += uT*E->eco[CPPR][el].area;
+         sum_h[1] += E->eco[CPPR][el].area;
 
-         uT =(E->slice.bhflux[m][E->sien[m][e].node[1]] +
-              E->slice.bhflux[m][E->sien[m][e].node[2]] +
-              E->slice.bhflux[m][E->sien[m][e].node[3]] +
-              E->slice.bhflux[m][E->sien[m][e].node[4]])*0.25;
+         uT =(E->slice.bhflux[CPPR][E->sien[CPPR][e].node[1]] +
+              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[2]] +
+              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[3]] +
+              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[4]])*0.25;
          el = (e-1)*E->lmesh.elz+1;
-         sum_h[2] += uT*E->eco[m][el].area;
-         sum_h[3] += E->eco[m][el].area;
+         sum_h[2] += uT*E->eco[CPPR][el].area;
+         sum_h[3] += E->eco[CPPR][el].area;
          }
 
   sum_across_surface(E,sum_h,4);
@@ -190,7 +190,7 @@ void heat_flux(E)
 
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
-    free((void *)flux[m]);
+    free((void *)flux[CPPR]);
 
   free((void *)sum_h);
 
@@ -210,17 +210,17 @@ void compute_horiz_avg(struct All_variables *E)
     float *S1[NCS],*S2[NCS],*S3[NCS];
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)      {
-	S1[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-	S2[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-	S3[m] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S1[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S2[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S3[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     }
 
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
 	for(i=1;i<=E->lmesh.nno;i++) {
-	    S1[m][i] = E->T[m][i];
-	    S2[m][i] = E->sphere.cap[m].V[1][i]*E->sphere.cap[m].V[1][i]
-          	+ E->sphere.cap[m].V[2][i]*E->sphere.cap[m].V[2][i];
-	    S3[m][i] = E->sphere.cap[m].V[3][i]*E->sphere.cap[m].V[3][i];
+	    S1[CPPR][i] = E->T[CPPR][i];
+	    S2[CPPR][i] = E->sphere.cap[CPPR].V[1][i]*E->sphere.cap[CPPR].V[1][i]
+          	+ E->sphere.cap[CPPR].V[2][i]*E->sphere.cap[CPPR].V[2][i];
+	    S3[CPPR][i] = E->sphere.cap[CPPR].V[3][i]*E->sphere.cap[CPPR].V[3][i];
 	}
     }
 
@@ -232,16 +232,16 @@ void compute_horiz_avg(struct All_variables *E)
         for(n=0; n<E->composition.ncomp; n++) {
             for(m=1;m<=E->sphere.caps_per_proc;m++) {
                 for(i=1;i<=E->lmesh.nno;i++)
-                    S1[m][i] = E->composition.comp_node[m][n][i];
+                    S1[CPPR][i] = E->composition.comp_node[CPPR][n][i];
             }
             return_horiz_ave_f(E,S1,E->Have.C[n]);
         }
     }
 
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
-	free((void *)S1[m]);
-	free((void *)S2[m]);
-	free((void *)S3[m]);
+	free((void *)S1[CPPR]);
+	free((void *)S2[CPPR]);
+	free((void *)S3[CPPR]);
     }
 
     for (i=1;i<=E->lmesh.noz;i++) {
