@@ -54,8 +54,7 @@ void full_velocity_boundary_conditions(E)
 
   int j,noz,lv,k,node;
 
-  for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+  for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--) {
       noz = E->mesh.NOZ[lv];
       if(E->mesh.topvbc != 1) {	/* free slip top */
 	horizontal_bc(E,E->sphere.cap[CPPR].VB,noz,1,0.0,VBX,0,lv,CPPR);
@@ -149,7 +148,6 @@ void full_temperature_boundary_conditions(E)
   int j,lev,noz;
 
   lev = E->mesh.levmax;
-  for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->mesh.noz;
     if(E->mesh.toptbc == 1)    {
       horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,CPPR);
@@ -180,7 +178,6 @@ void full_temperature_boundary_conditions(E)
     }
 
 
-    }     /* end for j */
 
   temperatures_conform_bcs(E);
   E->temperatures_conform_bcs = temperatures_conform_bcs;
