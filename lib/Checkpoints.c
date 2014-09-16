@@ -256,12 +256,10 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->trace.nflavors), sizeof(int), 1, fp);
     fwrite(&(E->trace.ilast_tracer_count), sizeof(int), 1, fp);
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        fwrite(&(E->trace.ntracers[CPPR]), sizeof(int), 1, fp);
+    fwrite(&(E->trace.ntracers[CPPR]), sizeof(int), 1, fp);
 
     /* the 0-th element of basicq/extraq/ielement is not init'd
      * and won't be used when read it. */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(i=0; i<6; i++) {
             fwrite(E->trace.basicq[CPPR][i], sizeof(double),
                    E->trace.ntracers[CPPR]+1, fp);
@@ -272,9 +270,7 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
         }
         fwrite(E->trace.ielement[CPPR], sizeof(int),
                E->trace.ntracers[CPPR]+1, fp);
-    }
 
-    return;
 }
 
 
@@ -318,14 +314,11 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
     E->trace.ilast_tracer_count = itmp;
 
     /* # of tracers, allocate memory */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
         fread(&itmp, sizeof(int), 1, fp);
         allocate_tracer_arrays(E, CPPR, itmp);
         E->trace.ntracers[CPPR] = itmp;
-    }
 
     /* read tracer data */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
         for(i=0; i<6; i++) {
             fread(E->trace.basicq[CPPR][i], sizeof(double),
                   E->trace.ntracers[CPPR]+1, fp);
@@ -336,12 +329,9 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
         }
         fread(E->trace.ielement[CPPR], sizeof(int),
               E->trace.ntracers[CPPR]+1, fp);
-    }
 
     /* init E->trace.ntracer_flavor */
     count_tracers_of_flavors(E);
-
-    return;
 }
 
 
@@ -359,13 +349,9 @@ static void composition_checkpoint(struct All_variables *E, FILE *fp)
 
     /* the 0-th element of comp_el is not init'd
      * and won't be used when read it. */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->composition.ncomp; i++)
-            fwrite(E->composition.comp_el[CPPR][i], sizeof(double),
-                   E->lmesh.nel+1, fp);
-    }
-
-    return;
+    for(i=0; i<E->composition.ncomp; i++)
+        fwrite(E->composition.comp_el[CPPR][i], sizeof(double),
+               E->lmesh.nel+1, fp);
 }
 
 
@@ -390,11 +376,9 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp)
     fread(E->composition.initial_bulk_composition, sizeof(double),
           E->composition.ncomp, fp);
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        for(i=0; i<E->composition.ncomp; i++)
-            fread(E->composition.comp_el[CPPR][i], sizeof(double),
-                  E->lmesh.nel+1, fp);
-    }
+    for(i=0; i<E->composition.ncomp; i++)
+        fread(E->composition.comp_el[CPPR][i], sizeof(double),
+              E->lmesh.nel+1, fp);
 
     /* init E->composition.comp_node */
     map_composition_to_nodes(E);
@@ -406,8 +390,6 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp)
         E->composition.error_fraction[i] = E->composition.bulk_composition[i]
         / E->composition.initial_bulk_composition[i] - 1.0;
     }
-
-    return;
 }
 
 
@@ -417,12 +399,8 @@ static void energy_checkpoint(struct All_variables *E, FILE *fp)
 
     write_sentinel(fp);
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        fwrite(E->T[CPPR], sizeof(double), E->lmesh.nno+1, fp);
-        fwrite(E->Tdot[CPPR], sizeof(double), E->lmesh.nno+1, fp);
-    }
-
-    return;
+    fwrite(E->T[CPPR], sizeof(double), E->lmesh.nno+1, fp);
+    fwrite(E->Tdot[CPPR], sizeof(double), E->lmesh.nno+1, fp);
 }
 
 
@@ -434,14 +412,10 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
 
     /* the 0-th element of T/Tdot is not init'd
      * and won't be used when read it. */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
       if(fread(E->T[CPPR], sizeof(double), E->lmesh.nno+1, fp)!= E->lmesh.nno+1)
 	myerror(E,"read_energy_checkpoint: error at T");
       if(fread(E->Tdot[CPPR], sizeof(double), E->lmesh.nno+1, fp)!=E->lmesh.nno+1)
 	myerror(E,"read_energy_checkpoint: error at Tdot");
-    }
-
-    return;
 }
 
 
@@ -458,15 +432,11 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
 
     /* the 0-th element of P/NP/EVI/VI is not init'd
      * and won't be used when read it. */
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* Pressure at equation points */
-        fwrite(E->P[CPPR], sizeof(double), E->lmesh.npno, fp);
+    /* Pressure at equation points */
+    fwrite(E->P[CPPR], sizeof(double), E->lmesh.npno, fp);
 
-        /* velocity at equation points */
-        fwrite(E->U[CPPR], sizeof(double), E->lmesh.neq, fp);
-    }
-
-    return;
+    /* velocity at equation points */
+    fwrite(E->U[CPPR], sizeof(double), E->lmesh.neq, fp);
 }
 
 
@@ -486,14 +456,12 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
     if(fread(junk, sizeof(float), 2, fp)!=2)
       myerror(E,"read_momentum_checkpoint: error at vdotv");
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++) {
-        /* Pressure at equation points */
+      /* Pressure at equation points */
       if(fread(E->P[CPPR], sizeof(double), E->lmesh.npno, fp) !=  E->lmesh.npno+1)
-	myerror(E,"read_momentum_checkpoint: error at P");
-        /* velocity at equation points */
+        myerror(E,"read_momentum_checkpoint: error at P");
+      /* velocity at equation points */
       if(fread(E->U[CPPR], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
-	myerror(E,"read_momentum_checkpoint: error at U");
-    }
+        myerror(E,"read_momentum_checkpoint: error at U");
 
     E->monitor.vdotv = global_v_norm2(E, E->U);
     E->monitor.pdotp = global_p_norm2(E, E->P);
@@ -503,8 +471,4 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
 
     /* init E->NP */
     p_to_nodes(E, E->P, E->NP, lev);
-
-    return;
 }
-
-
