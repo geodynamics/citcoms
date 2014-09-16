@@ -52,8 +52,7 @@ void general_stokes_solver_setup(struct All_variables *E)
     construct_node_maps(E);
   else
     for (i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
-	E->elt_k[i][CPPR]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
+      E->elt_k[i][CPPR]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
 
 #ifdef USE_PETSC
   /*
@@ -212,12 +211,10 @@ void general_stokes_solver(struct All_variables *E)
   if (need_to_iterate(E)) {
     /* outer iterations for velocity dependent viscosity */
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
       delta_U[CPPR] = (double *)malloc(neq*sizeof(double));
       oldU[CPPR] = (double *)malloc(neq*sizeof(double));
       for(i=0;i<neq;i++)
         oldU[CPPR][i]=0.0;
-    }
 
     Udot_mag=dUdot_mag=0.0;
 
@@ -225,7 +222,6 @@ void general_stokes_solver(struct All_variables *E)
     while (1) {    
      
 
-      for (m=1;m<=E->sphere.caps_per_proc;m++)
 	for (i=0;i<neq;i++) {
 	  delta_U[CPPR][i] = E->U[CPPR][i] - oldU[CPPR][i];
 	  oldU[CPPR][i] = E->U[CPPR][i];
@@ -254,10 +250,8 @@ void general_stokes_solver(struct All_variables *E)
 
     } /*end while*/
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-      free((void *) oldU[CPPR]);
-      free((void *) delta_U[CPPR]);
-    }
+    free((void *) oldU[CPPR]);
+    free((void *) delta_U[CPPR]);
 
   } /*end if we need iterations */
 
@@ -266,8 +260,6 @@ void general_stokes_solver(struct All_variables *E)
      (E->control.remove_rigid_rotation || E->control.remove_angular_momentum)) {
       remove_rigid_rot(E);
   }
-
-  return;
 }
 
 int need_visc_update(struct All_variables *E)
@@ -348,19 +340,16 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
-		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 			  delta_U[CPPR] = (double *)malloc(neq*sizeof(double));
 			  oldU[CPPR] = (double *)malloc(neq*sizeof(double));
 			  for(i=0;i<neq;i++)
 				  oldU[CPPR][i]=0.0;
-		  }
 
 		  Udot_mag=dUdot_mag=0.0;
 		  count=1;
 
 		  while (1) {
 
-			  for (m=1;m<=E->sphere.caps_per_proc;m++)
 				  for (i=0;i<neq;i++) {
 					  delta_U[CPPR][i] = E->U[CPPR][i] - oldU[CPPR][i];
 					  oldU[CPPR][i] = E->U[CPPR][i];
@@ -387,10 +376,8 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 			  count++;
 
 		  } /*end while */
-		  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
-			  free((void *) oldU[CPPR]);
-			  free((void *) delta_U[CPPR]);
-		  }
+      free((void *) oldU[CPPR]);
+      free((void *) delta_U[CPPR]);
 
 	  } /*end if SDEPV or PDEPV */
 	  E->monitor.topo_loop++;
@@ -403,6 +390,4 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   }
 
   get_STD_freesurf(E,E->slice.freesurf);
-
-  return;
 }
