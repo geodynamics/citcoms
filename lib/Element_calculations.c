@@ -94,8 +94,6 @@ void assemble_forces(E,penalty)
 
   get_buoyancy(E,E->buoyancy);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)    {
-
     for(a=0;a<neq;a++)
       E->F[CPPR][a] = 0.0;
 
@@ -117,7 +115,6 @@ void assemble_forces(E,penalty)
       }
       add_force(E, e, elt_f, CPPR);
     }
-  }       /* end for m */
 
   (E->solver.exchange_id_d)(E, E->F, lev);
   strip_bcs_from_residual(E,E->F,lev);
@@ -126,13 +123,9 @@ void assemble_forces(E,penalty)
   E->monitor.fdotf = sqrt(global_vdot(E, E->F, E->F, lev));
 
   if(E->parallel.me==0) {
-      fprintf(stderr, "Momentum equation force %.9e\n",
-              E->monitor.fdotf);
-      fprintf(E->fp, "Momentum equation force %.9e\n",
-              E->monitor.fdotf);
+      fprintf(stderr, "Momentum equation force %.9e\n", E->monitor.fdotf);
+      fprintf(E->fp, "Momentum equation force %.9e\n", E->monitor.fdotf);
   }
-
-  return;
 }
 
 
@@ -464,41 +457,41 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     for(i=0;i<neq;i++)
-      Au[m][i] = 0.0;
+      Au[CPPR][i] = 0.0;
 
     for(e=1;e<=nel;e++)   {
       for(a=1;a<=ends;a++) {
-	ii = E->IEN[level][m][e].node[a];
-	a1 = E->ID[level][m][ii].doff[1];
-	a2 = E->ID[level][m][ii].doff[2];
-	a3 = E->ID[level][m][ii].doff[3];
+	ii = E->IEN[level][CPPR][e].node[a];
+	a1 = E->ID[level][CPPR][ii].doff[1];
+	a2 = E->ID[level][CPPR][ii].doff[2];
+	a3 = E->ID[level][CPPR][ii].doff[3];
 	for(b=1;b<=ends;b++) {
-	  nodeb = E->IEN[level][m][e].node[b];
+	  nodeb = E->IEN[level][CPPR][e].node[b];
 	  ii = (a*n+b)*dims-(dims*n+dims);
 	  /* i=1, j=1,2,3 */
-		Au[m][a1] +=
-		        E->elt_k[level][m][e].k[ii] *
-			u[m][E->ID[level][m][nodeb].doff[1]]
-		      + E->elt_k[level][m][e].k[ii+1] *
-			u[m][E->ID[level][m][nodeb].doff[2]]
-		      + E->elt_k[level][m][e].k[ii+2] *
-			u[m][E->ID[level][m][nodeb].doff[3]];
+		Au[CPPR][a1] +=
+		        E->elt_k[level][CPPR][e].k[ii] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+		      + E->elt_k[level][CPPR][e].k[ii+1] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+		      + E->elt_k[level][CPPR][e].k[ii+2] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
 		/* i=2, j=1,2,3 */
-		Au[m][a2] +=
-		        E->elt_k[level][m][e].k[ii+n] *
-			u[m][E->ID[level][m][nodeb].doff[1]]
-		      + E->elt_k[level][m][e].k[ii+n+1] *
-			u[m][E->ID[level][m][nodeb].doff[2]]
-		      + E->elt_k[level][m][e].k[ii+n+2] *
-			u[m][E->ID[level][m][nodeb].doff[3]];
+		Au[CPPR][a2] +=
+		        E->elt_k[level][CPPR][e].k[ii+n] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+		      + E->elt_k[level][CPPR][e].k[ii+n+1] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+		      + E->elt_k[level][CPPR][e].k[ii+n+2] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
 		/* i=3, j=1,2,3 */
-		Au[m][a3] +=
-		        E->elt_k[level][m][e].k[ii+n+n] *
-			u[m][E->ID[level][m][nodeb].doff[1]]
-		      + E->elt_k[level][m][e].k[ii+n+n+1] *
-			u[m][E->ID[level][m][nodeb].doff[2]]
-		      + E->elt_k[level][m][e].k[ii+n+n+2] *
-			u[m][E->ID[level][m][nodeb].doff[3]];
+		Au[CPPR][a3] +=
+		        E->elt_k[level][CPPR][e].k[ii+n+n] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+		      + E->elt_k[level][CPPR][e].k[ii+n+n+1] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+		      + E->elt_k[level][CPPR][e].k[ii+n+n+2] *
+			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
 
  	    }         /* end for loop b */
         }             /* end for loop a */
@@ -542,31 +535,31 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
   for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 
      for(e=0;e<neq;e++)
-      Au[m][e]=0.0;
+      Au[CPPR][e]=0.0;
 
      for(e=1;e<=nno;e++)     {
 
-       eqn1=E->ID[level][m][e].doff[1];
-       eqn2=E->ID[level][m][e].doff[2];
-       eqn3=E->ID[level][m][e].doff[3];
+       eqn1=E->ID[level][CPPR][e].doff[1];
+       eqn2=E->ID[level][CPPR][e].doff[2];
+       eqn3=E->ID[level][CPPR][e].doff[3];
 
-       U1 = u[m][eqn1];
-       U2 = u[m][eqn2];
-       U3 = u[m][eqn3];
+       U1 = u[CPPR][eqn1];
+       U2 = u[CPPR][eqn2];
+       U3 = u[CPPR][eqn3];
 
-       C=E->Node_map[level][m] + (e-1)*max_eqn;
-       B1=E->Eqn_k1[level][m]+(e-1)*max_eqn;
-       B2=E->Eqn_k2[level][m]+(e-1)*max_eqn;
-       B3=E->Eqn_k3[level][m]+(e-1)*max_eqn;
+       C=E->Node_map[level][CPPR] + (e-1)*max_eqn;
+       B1=E->Eqn_k1[level][CPPR]+(e-1)*max_eqn;
+       B2=E->Eqn_k2[level][CPPR]+(e-1)*max_eqn;
+       B3=E->Eqn_k3[level][CPPR]+(e-1)*max_eqn;
 
        for(i=3;i<max_eqn;i++)  {
-	  UU = u[m][C[i]];
-  	  Au[m][eqn1] += B1[i]*UU;
-  	  Au[m][eqn2] += B2[i]*UU;
-  	  Au[m][eqn3] += B3[i]*UU;
+	  UU = u[CPPR][C[i]];
+  	  Au[CPPR][eqn1] += B1[i]*UU;
+  	  Au[CPPR][eqn2] += B2[i]*UU;
+  	  Au[CPPR][eqn3] += B3[i]*UU;
        }
        for(i=0;i<max_eqn;i++)
-          Au[m][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+          Au[CPPR][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
        }     /* end for e */
      }     /* end for m */
@@ -593,21 +586,21 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
     const int ends=enodes[E->mesh.nsd];
 
     for(a=1;a<=ends;a++) {
-	    node=E->IEN[level][m][el].node[a];
+	    node=E->IEN[level][CPPR][el].node[a];
 	    /* dirn 1 */
-	    a1 = E->ID[level][m][node].doff[1];
+	    a1 = E->ID[level][CPPR][node].doff[1];
 	    p=(a-1)*dims;
-	    E->BI[level][m][a1] += elt_k[p*n+p];
+	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
 
 	    /* dirn 2 */
-	    a2 = E->ID[level][m][node].doff[2];
+	    a2 = E->ID[level][CPPR][node].doff[2];
 	    p=(a-1)*dims+1;
-	    E->BI[level][m][a2] += elt_k[p*n+p];
+	    E->BI[level][CPPR][a2] += elt_k[p*n+p];
 
 	    /* dirn 3 */
-	    a1 = E->ID[level][m][node].doff[3];
+	    a1 = E->ID[level][CPPR][node].doff[3];
 	    p=(a-1)*dims+2;
-	    E->BI[level][m][a1] += elt_k[p*n+p];
+	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
             }
 
   return;
@@ -628,7 +621,7 @@ void build_diagonal_of_Ahat(struct All_variables *E)
       neq=E->lmesh.NEQ[level];
 
       for(e=0;e<npno;e++)
-        E->BPI[level][m][e+1]=1.0;
+        E->BPI[level][CPPR][e+1]=1.0;
 
       if(!E->control.precondition)
         return;
@@ -636,9 +629,9 @@ void build_diagonal_of_Ahat(struct All_variables *E)
       for(e=0;e<npno;e++) {
         BU=assemble_dAhatp_entry(E,e,level,m);
         if(BU != 0.0)
-	        E->BPI[level][m][e+1] = 1.0/BU;
+	        E->BPI[level][CPPR][e+1] = 1.0/BU;
         else
-          E->BPI[level][m][e+1] = 1.0;
+          E->BPI[level][CPPR][e+1] = 1.0;
       }
     }
 }
@@ -663,14 +656,14 @@ void assemble_c_u(struct All_variables *E,
         for(a=1;a<=ends;a++) {
             p = (a-1)*dims;
             for(e=0;e<nel;e++) {
-                b = E->IEN[level][m][e].node[a];
-                j1= E->ID[level][m][b].doff[1];
-                j2= E->ID[level][m][b].doff[2];
-                j3= E->ID[level][m][b].doff[3];
+                b = E->IEN[level][CPPR][e].node[a];
+                j1= E->ID[level][CPPR][b].doff[1];
+                j2= E->ID[level][CPPR][b].doff[2];
+                j3= E->ID[level][CPPR][b].doff[3];
 
-                result[m][e] += E->elt_c[level][m][e+1].c[p  ][0] * U[m][j1]
-                              + E->elt_c[level][m][e+1].c[p+1][0] * U[m][j2]
-                              + E->elt_c[level][m][e+1].c[p+2][0] * U[m][j3];
+                result[CPPR][e] += E->elt_c[level][CPPR][e+1].c[p  ][0] * U[CPPR][j1]
+                              + E->elt_c[level][CPPR][e+1].c[p+1][0] * U[CPPR][j2]
+                              + E->elt_c[level][CPPR][e+1].c[p+2][0] * U[CPPR][j3];
             }
         }
     }
@@ -710,19 +703,19 @@ void assemble_div_u(struct All_variables *E,
 
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(e=0;e<npno;e++)
-        divU[m][e] = 0.0;
+        divU[CPPR][e] = 0.0;
 
     for(m=1;m<=E->sphere.caps_per_proc;m++) {
       for(a=1;a<=ends;a++) {
         p = (a-1)*dims;
         for(e=0;e<nel;e++) {
-          b = E->IEN[level][m][e+1].node[a];
-          j1= E->ID[level][m][b].doff[1];
-          j2= E->ID[level][m][b].doff[2];
-          j3= E->ID[level][m][b].doff[3];
-          divU[m][e] += E->elt_del[level][m][e+1].g[p  ][0] * U[m][j1]
-                      + E->elt_del[level][m][e+1].g[p+1][0] * U[m][j2]
-                      + E->elt_del[level][m][e+1].g[p+2][0] * U[m][j3];
+          b = E->IEN[level][CPPR][e+1].node[a];
+          j1= E->ID[level][CPPR][b].doff[1];
+          j2= E->ID[level][CPPR][b].doff[2];
+          j3= E->ID[level][CPPR][b].doff[3];
+          divU[CPPR][e] += E->elt_del[level][CPPR][e+1].g[p  ][0] * U[CPPR][j1]
+                      + E->elt_del[level][CPPR][e+1].g[p+1][0] * U[CPPR][j2]
+                      + E->elt_del[level][CPPR][e+1].g[p+2][0] * U[CPPR][j3];
         }
       }
     }
@@ -751,22 +744,22 @@ void assemble_grad_p(E,P,gradP,lev)
     neq=E->lmesh.NEQ[lev];
 
     for(i=0;i<neq;i++)
-      gradP[m][i] = 0.0;
+      gradP[CPPR][i] = 0.0;
 
     for(e=0;e<nel;e++) {
-      if(0.0==P[m][e])
+      if(0.0==P[CPPR][e])
         continue;
 
       for(a=1;a<=ends;a++) {
          p = (a-1)*dims;
-         b = E->IEN[lev][m][e+1].node[a];
-         j1= E->ID[lev][m][b].doff[1];
-         j2= E->ID[lev][m][b].doff[2];
-         j3= E->ID[lev][m][b].doff[3];
+         b = E->IEN[lev][CPPR][e+1].node[a];
+         j1= E->ID[lev][CPPR][b].doff[1];
+         j2= E->ID[lev][CPPR][b].doff[2];
+         j3= E->ID[lev][CPPR][b].doff[3];
               /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
-         gradP[m][j1] += E->elt_del[lev][m][e+1].g[p  ][0] * P[m][e];
-         gradP[m][j2] += E->elt_del[lev][m][e+1].g[p+1][0] * P[m][e];
-         gradP[m][j3] += E->elt_del[lev][m][e+1].g[p+2][0] * P[m][e];
+         gradP[CPPR][j1] += E->elt_del[lev][CPPR][e+1].g[p  ][0] * P[CPPR][e];
+         gradP[CPPR][j2] += E->elt_del[lev][CPPR][e+1].g[p+1][0] * P[CPPR][e];
+         gradP[CPPR][j3] += E->elt_del[lev][CPPR][e+1].g[p+2][0] * P[CPPR][e];
       }
     }       /* end for el */
   }       /* end for m */
@@ -796,15 +789,15 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m)
 
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
-      node = E->IEN[level][m][e+1].node[a];
-      j=E->ID[level][m][node].doff[1];
-      gradP[p] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p][0];
+      node = E->IEN[level][CPPR][e+1].node[a];
+      j=E->ID[level][CPPR][node].doff[1];
+      gradP[p] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p][0];
 
-      j=E->ID[level][m][node].doff[2];
-      gradP[p+1] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p+1][0];
+      j=E->ID[level][CPPR][node].doff[2];
+      gradP[p+1] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p+1][0];
 
-      j=E->ID[level][m][node].doff[3];
-      gradP[p+2] += E->BI[level][m][j]*E->elt_del[level][m][e+1].g[p+2][0];
+      j=E->ID[level][CPPR][node].doff[3];
+      gradP[p+2] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p+2][0];
     }
 
 
@@ -817,9 +810,9 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m)
 
     for(b=1;b<=ends;b++) {
       p = (b-1)*dims;
-      divU +=E->elt_del[level][m][e+1].g[p][0] * gradP[p];
-      divU +=E->elt_del[level][m][e+1].g[p+1][0] * gradP[p+1];
-      divU +=E->elt_del[level][m][e+1].g[p+2][0] * gradP[p+2];
+      divU +=E->elt_del[level][CPPR][e+1].g[p][0] * gradP[p];
+      divU +=E->elt_del[level][CPPR][e+1].g[p+1][0] * gradP[p+1];
+      divU +=E->elt_del[level][CPPR][e+1].g[p+2][0] * gradP[p+2];
     }
 
     return(divU);  
@@ -845,7 +838,7 @@ void get_elt_c(struct All_variables *E, int el,
     if ((el-1)%E->lmesh.ELZ[lev]==0)
         construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
 
-    temp = p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
+    temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
 
     switch (E->refstate.choice) {
     case 1:
@@ -869,7 +862,7 @@ void get_elt_c(struct All_variables *E, int el,
         /* compute d(rho)/dr/rho from rho(r) */
 
         for(a=1;a<=ends;a++) {
-            j = E->IEN[lev][m][el].node[a];
+            j = E->IEN[lev][CPPR][el].node[a];
             nz = (j - 1) % E->lmesh.noz + 1;
             rho[a] = E->refstate.rho[nz];
         }
@@ -882,7 +875,7 @@ void get_elt_c(struct All_variables *E, int el,
 
         for(a=1;a<=ends;a++) {
             for (i=1;i<=dims;i++) {
-                x[i] = rho[a] * E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)]
+                x[i] = rho[a] * E->GNX[lev][CPPR][el].ppt[GNPXINDEX(2,a,1)]
                     * E->N.ppt[GNPINDEX(a,1)]
                     * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
             }
@@ -932,7 +925,7 @@ void get_elt_g(E,el,elt_del,lev,m)
 
    get_rtf_at_ppts(E, m, lev, el, rtf);
 
-   temp = p_point[1].weight[dims-1] * E->GDA[lev][m][el].ppt[1];
+   temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
    if(E->viscosity.allow_anisotropic_viscosity && modify_g){
@@ -945,14 +938,14 @@ void get_elt_g(E,el,elt_del,lev,m)
      for(i=1;i <= vpts;i++){	/* get vag const matrix */
        off = (el-1)*vpts+i;
        get_constitutive(Dtmp,rtf2[1][i],rtf2[2][i],TRUE,
-			E->EVIn1[lev][m][off], E->EVIn2[lev][m][off], E->EVIn3[lev][m][off],
-			E->EVI2[lev][m][off],E->avmode[lev][m][off],
+			E->EVIn1[lev][CPPR][off], E->EVIn2[lev][CPPR][off], E->EVIn3[lev][CPPR][off],
+			E->EVI2[lev][CPPR][off],E->avmode[lev][CPPR][off],
 			E);
        for(j=0;j<6;j++)
 	 for(k=0;k<6;k++)
 	   Duse[j][k] += Dtmp[j][k]*weight;
      }
-     get_ba_p(&(E->N),&(E->GNX[lev][m][el]),&E->element_Cc, &E->element_Ccx,rtf,E->mesh.nsd,ba);
+     get_ba_p(&(E->N),&(E->GNX[lev][CPPR][el]),&E->element_Cc, &E->element_Ccx,rtf,E->mesh.nsd,ba);
 
      /* assume single pressure point */
      for(a = 1; a <= ends; a++){
@@ -979,13 +972,13 @@ void get_elt_g(E,el,elt_del,lev,m)
      /* old, isotropic part */
      for(a=1;a<=ends;a++)      {
        for (i=1;i<=dims;i++)
-	 x[i] = E->GNX[lev][m][el].ppt[GNPXINDEX(2,a,1)] * E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
+	 x[i] = E->GNX[lev][CPPR][el].ppt[GNPXINDEX(2,a,1)] * E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
 	   2.0 * ra * E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
 	   ra * 
-	   (E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
+	   (E->GNX[lev][CPPR][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
 	    E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(1,i,1,a,1)] +
 	    ct * E->N.ppt[GNPINDEX(a,1)] * E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
-	    si * (E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)] * E->element_Cc.ppt[BPINDEX(2,i,a,1)] +
+	    si * (E->GNX[lev][CPPR][el].ppt[GNPXINDEX(1,a,1)] * E->element_Cc.ppt[BPINDEX(2,i,a,1)] +
 		  E->N.ppt[GNPINDEX(a,1)] * E->element_Ccx.ppt[BPXINDEX(2,i,2,a,1)]));
        p=dims*(a-1);
        elt_del[p  ][0] = -x[1] * temp;
@@ -1034,7 +1027,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   for(p=0;p<n;p++) elt_f[p] = 0.0;
 
   for(p=1;p<=ends;p++)
-    force[p] = E->buoyancy[m][E->ien[m][el].node[p]];
+    force[p] = E->buoyancy[CPPR][E->ien[CPPR][el].node[p]];
 
   for(j=1;j<=vpts;j++)       {   /*compute force at each int point */
     force_at_gs[j] = 0.0;
@@ -1044,12 +1037,12 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
   for(i=1;i<=dims;i++)  {
     for(a=1;a<=ends;a++)  {
-      nodea=E->ien[m][el].node[a];
+      nodea=E->ien[CPPR][el].node[a];
       p= dims*(a-1)+i-1;
 
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
         elt_f[p] += force_at_gs[j] * E->N.vpt[GNVINDEX(a,j)]
-           *E->gDA[m][el].vpt[j]*g_point[j].weight[dims-1]
+           *E->gDA[CPPR][el].vpt[j]*g_point[j].weight[dims-1]
            *E->element_Cc.vpt[BVINDEX(3,i,a,j)];
 
 	  /* imposed velocity terms */
@@ -1059,15 +1052,15 @@ void get_elt_f(E,el,elt_f,bcs,m)
         for(j=1;j<=dims;j++) {
 	  type=vbc_flag[j];
           for(b=1;b<=ends;b++) {
-            nodeb=E->ien[m][el].node[b];
-            if ((E->node[m][nodeb]&type)&&(E->sphere.cap[m].VB[j][nodeb]!=0.0)){
+            nodeb=E->ien[CPPR][el].node[b];
+            if ((E->node[CPPR][nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
                 get_elt_k(E,el,elt_k,E->mesh.levmax,m,1);
                 got_elt_k = 1;
                 }
               q = dims*(b-1)+j-1;
               if(p!=q) {
-                elt_f[p] -= elt_k[p*n+q] * E->sphere.cap[m].VB[j][nodeb];
+                elt_f[p] -= elt_k[p*n+q] * E->sphere.cap[CPPR].VB[j][nodeb];
                 }
               }
             }  /* end for b */
@@ -1101,7 +1094,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 
 	double traction[4][5],traction_at_gs[4][5], value, tmp;
 	int j, b, p, k, a, nodea, d;
-	int el = E->boundary.element[m][bel];
+	int el = E->boundary.element[CPPR][bel];
 	int flagged;
 	int found = 0;
 
@@ -1115,10 +1108,10 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 
 	if(E->control.side_sbcs)
 		for(a=1;a<=ends1;a++)  {
-			nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+			nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
-				value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
-				flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
+				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );
 			}
@@ -1127,10 +1120,10 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 		/* if side_sbcs is false, only apply sbc on top and bottom surfaces */
 		if(side == SIDE_BOTTOM || side == SIDE_TOP) {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
-					value = E->sphere.cap[m].VB[d][nodea];
-					flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+					value = E->sphere.cap[CPPR].VB[d][nodea];
+					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );
 				}
@@ -1163,7 +1156,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
 				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-					* E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
+					* E->boundary.det[CPPR][side][k][bel] * g_1d[k].weight[dims-1];
 
 			}
 		}
@@ -1184,7 +1177,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 
 	double traction[4][5],traction_at_gs[4][5], value, tmp;
 	int j, b, p, k, a, nodea, d;
-	int el = E->boundary.element[m][bel];
+	int el = E->boundary.element[CPPR][bel];
 	int flagged;
 	int found = 0;
 
@@ -1198,10 +1191,10 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 
 	if(E->control.side_sbcs)
 		for(a=1;a<=ends1;a++)  {
-			nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+			nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
-				value = E->sbc.SB[m][side][d][ E->sbc.node[m][nodea] ];
-				flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
+				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );
 			}
@@ -1209,14 +1202,14 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 	else {
 		if( side == SIDE_TOP && E->parallel.me_loc[3]==E->parallel.nprocz-1 && (el%E->lmesh.elz==0)) {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
-				nodeas = E->ien[m][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
+				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
+				nodeas = E->ien[CPPR][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
 				traction[1][a] = 0.0;
 				traction[2][a] = 0.0;
 				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
-					*(E->slice.freesurf[m][nodeas]+E->sphere.cap[m].V[3][nodea]*E->advection.timestep);
+					*(E->slice.freesurf[CPPR][nodeas]+E->sphere.cap[CPPR].V[3][nodea]*E->advection.timestep);
 				if(E->parallel.me==11 && nodea==3328)
-					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[m].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
+					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[CPPR].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
 				found = 1;
 #if 0
 				if(found && E->parallel.me==1)
@@ -1230,10 +1223,10 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 		}
 		else {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[m][el].node[ sidenodes[side][a] ];
+				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
-					value = E->sphere.cap[m].VB[d][nodea];
-					flagged = (E->node[m][nodea] & sbc_flag[d]) && (value);
+					value = E->sphere.cap[CPPR].VB[d][nodea];
+					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );
 				}
@@ -1266,7 +1259,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
 				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-					* E->boundary.det[m][side][k][bel] * g_1d[k].weight[dims-1];
+					* E->boundary.det[CPPR][side][k][bel] * g_1d[k].weight[dims-1];
 
 			}
 		}
@@ -1295,44 +1288,44 @@ void get_aug_k(E,el,elt_k,level,m)
      Visc = 0.0;
      for(a=1;a<=vpts;a++) {
 	  p[a] = (a-1)*dims;
-	  Visc += E->EVI[level][m][(el-1)*vpts+a];
+	  Visc += E->EVI[level][CPPR][(el-1)*vpts+a];
        }
      Visc = Visc/vpts;
 
      for(a=1;a<=ends;a++) {
-        nodea=E->IEN[level][m][el].node[a];
+        nodea=E->IEN[level][CPPR][el].node[a];
         for(b=1;b<=ends;b++) {
-           nodeb=E->IEN[level][m][el].node[b];      /* for Kab dims*dims  */
+           nodeb=E->IEN[level][CPPR][el].node[b];      /* for Kab dims*dims  */
 	   i = (a-1)*n*dims+(b-1)*dims;
 	   elt_k[i  ] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]][0]*
-		      E->elt_del[level][m][el].g[p[b]][0];   /*for 11 */
+	              E->elt_del[level][CPPR][el].g[p[a]][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]][0];   /*for 11 */
 	   elt_k[i+1] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]][0]*
-		      E->elt_del[level][m][el].g[p[b]+1][0];  /* for 12 */
+	              E->elt_del[level][CPPR][el].g[p[a]][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 12 */
 	   elt_k[i+n] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+1][0]*
-		      E->elt_del[level][m][el].g[p[b]][0];    /* for 21 */
+	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]][0];    /* for 21 */
 	   elt_k[i+n+1] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+1][0]*
-		      E->elt_del[level][m][el].g[p[b]+1][0];  /* for 22 */
+	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 22 */
 
            if(3==dims) {
 	       elt_k[i+2] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]][0]*
-		      E->elt_del[level][m][el].g[p[b]+2][0];  /* for 13 */
+	              E->elt_del[level][CPPR][el].g[p[a]][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 13 */
 	       elt_k[i+n+2] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+1][0]*
-		      E->elt_del[level][m][el].g[p[b]+2][0];  /* for 23 */
+	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 23 */
 	       elt_k[i+n+n] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+2][0]*
-		      E->elt_del[level][m][el].g[p[b]][0];    /* for 31 */
+	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]][0];    /* for 31 */
 	       elt_k[i+n+n+1] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+2][0]*
-		      E->elt_del[level][m][el].g[p[b]+1][0];  /* for 32 */
+	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 32 */
 	       elt_k[i+n+n+2] += Visc*E->control.augmented*
-	              E->elt_del[level][m][el].g[p[a]+2][0]*
-		      E->elt_del[level][m][el].g[p[b]+2][0];  /* for 33 */
+	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
+		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 33 */
                }
            }
        }
