@@ -193,8 +193,6 @@ void get_ba(struct Shape_function *N, struct Shape_function_dx *GNx,
                                * isi[k] * ra[k];
         }
         }
-
-    return;
 }
 
 
@@ -262,7 +260,6 @@ void get_ba_p(struct Shape_function *N, struct Shape_function_dx *GNx,
                        * isi[k] * ra[k];
             }
         }
-    return;
 }
 
 
@@ -406,8 +403,6 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
 	/**/
 	
       } /*  Sum over all the a,b's to obtain full  elt_k matrix */
-    
-    return;
 }
 
 
@@ -431,8 +426,6 @@ void assemble_del2_u(E,u,Au,level,strip_bcs)
     n_assemble_del2_u(E,u,Au,level,strip_bcs);
   else
     e_assemble_del2_u(E,u,Au,level,strip_bcs);
-
-  return;
 }
 
 /* ======================================
@@ -455,7 +448,6 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
   const int nel=E->lmesh.NEL[level];
   const int neq=E->lmesh.NEQ[level];
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
     for(i=0;i<neq;i++)
       Au[CPPR][i] = 0.0;
 
@@ -497,14 +489,12 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
         }             /* end for loop a */
 
        }          /* end for e */
-     }         /* end for m  */
 
     (E->solver.exchange_id_d)(E, Au, level);
 
   if(strip_bcs)
      strip_bcs_from_residual(E,Au,level);
-
-  return; }
+}
 
 
 /* ======================================================
@@ -531,8 +521,6 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
     const int dims=E->mesh.nsd;
     const int max_eqn = dims*14;
 
-
-  for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 
      for(e=0;e<neq;e++)
       Au[CPPR][e]=0.0;
@@ -562,14 +550,11 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
           Au[CPPR][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
        }     /* end for e */
-     }     /* end for m */
 
      (E->solver.exchange_id_d)(E, Au, level);
 
     if (strip_bcs)
 	strip_bcs_from_residual(E,Au,level);
-
-    return;
 }
 
 
@@ -602,8 +587,6 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
 	    p=(a-1)*dims+2;
 	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
             }
-
-  return;
 }
 
 void build_diagonal_of_Ahat(struct All_variables *E)
@@ -613,9 +596,8 @@ void build_diagonal_of_Ahat(struct All_variables *E)
   double BU;
   int m,e,npno,neq,level;
 
-  for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++)
+  for (level=E->mesh.gridmin;level<=E->mesh.gridmax;level++) {
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++) {
 
       npno = E->lmesh.NPNO[level];
       neq=E->lmesh.NEQ[level];
@@ -627,13 +609,13 @@ void build_diagonal_of_Ahat(struct All_variables *E)
         return;
 
       for(e=0;e<npno;e++) {
-        BU=assemble_dAhatp_entry(E,e,level,m);
+        BU=assemble_dAhatp_entry(E,e,level,CPPR);
         if(BU != 0.0)
 	        E->BPI[level][CPPR][e+1] = 1.0/BU;
         else
           E->BPI[level][CPPR][e+1] = 1.0;
       }
-    }
+  }
 }
 
 
@@ -652,7 +634,6 @@ void assemble_c_u(struct All_variables *E,
     const int dims = E->mesh.nsd;
     const int npno = E->lmesh.NPNO[level];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++) {
         for(a=1;a<=ends;a++) {
             p = (a-1)*dims;
             for(e=0;e<nel;e++) {
@@ -666,7 +647,6 @@ void assemble_c_u(struct All_variables *E,
                               + E->elt_c[level][CPPR][e+1].c[p+2][0] * U[CPPR][j3];
             }
         }
-    }
 }
 
 
@@ -682,8 +662,6 @@ void assemble_div_rho_u(struct All_variables *E,
     void assemble_div_u();
     assemble_div_u(E, U, result, level);
     assemble_c_u(E, U, result, level);
-
-    return;
 }
 
 
@@ -701,11 +679,9 @@ void assemble_div_u(struct All_variables *E,
     const int dims=E->mesh.nsd;
     const int npno=E->lmesh.NPNO[level];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(e=0;e<npno;e++)
         divU[CPPR][e] = 0.0;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++) {
       for(a=1;a<=ends;a++) {
         p = (a-1)*dims;
         for(e=0;e<nel;e++) {
@@ -718,7 +694,6 @@ void assemble_div_u(struct All_variables *E,
                       + E->elt_del[level][CPPR][e+1].g[p+2][0] * U[CPPR][j3];
         }
       }
-    }
 }
 
 
@@ -737,8 +712,6 @@ void assemble_grad_p(E,P,gradP,lev)
 
   const int ends=enodes[E->mesh.nsd];
   const int dims=E->mesh.nsd;
-
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
 
     nel=E->lmesh.NEL[lev];
     neq=E->lmesh.NEQ[lev];
@@ -762,7 +735,6 @@ void assemble_grad_p(E,P,gradP,lev)
          gradP[CPPR][j3] += E->elt_del[lev][CPPR][e+1].g[p+2][0] * P[CPPR][e];
       }
     }       /* end for el */
-  }       /* end for m */
 
   (E->solver.exchange_id_d)(E, gradP,  lev); /*  correct gradP   */
 
@@ -886,8 +858,6 @@ void get_elt_c(struct All_variables *E, int el,
         }
 
     }
-
-    return;
 }
 
 
@@ -991,8 +961,7 @@ void get_elt_g(E,el,elt_del,lev,m)
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
    }
 #endif
-   return;
- }
+}
 
 /*=================================================================
   Function to create the element force vector (allowing for velocity b.c.'s)
@@ -1069,10 +1038,6 @@ void get_elt_f(E,el,elt_f,bcs,m)
 
       }
     } /*  Complete the loops for a,i  	*/
-
-
-
-  return;
 }
 
 
@@ -1329,9 +1294,7 @@ void get_aug_k(E,el,elt_k,level,m)
                }
            }
        }
-
-   return;
-   }
+}
 
 
 /* version */
