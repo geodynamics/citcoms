@@ -1168,7 +1168,7 @@ void strain_rate_2_inv(E,m,EEDOT,SQRT)
 	    */
 
             if ((e-1)%E->lmesh.elz==0) {
-                construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,CPPR,1);
+                construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
             }
 
             get_ba_p(&(E->N), GNx, &E->element_Cc, &E->element_Ccx,

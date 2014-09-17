@@ -40,7 +40,7 @@ void construct_side_c3x3matrix_el(struct All_variables *,int ,
 				  int ,int ,int ,int );
 void construct_c3x3matrix(struct All_variables *);
 void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
-			      struct CCX *,int ,int ,int );
+			      struct CCX *,int ,int );
 void assemble_div_u(struct All_variables *,
                     double **, double **, int );
 static void get_elt_tr(struct All_variables *, int , int , double [24], int );
@@ -300,7 +300,7 @@ void get_elt_k(E,el,elt_k,lev,m,iconv)
     get_rtf_at_vpts(E, CPPR, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
-      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,CPPR,0);
+      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,0);
     
     /* Note N[a].gauss_pt[n] is the value of shape fn a at the nth gaussian
        quadrature point. Nx[d] is the derivative wrt x[d]. */
@@ -808,7 +808,7 @@ void get_elt_c(struct All_variables *E, int el,
     const int ends = enodes[dims];
 
     if ((el-1)%E->lmesh.ELZ[lev]==0)
-        construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
+        construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,1);
 
     temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
 
@@ -891,7 +891,7 @@ void get_elt_g(E,el,elt_del,lev,m)
    /* Special case, 4/8 node bilinear cartesian square/cube element -> 1 pressure point */
 
    if ((el-1)%E->lmesh.ELZ[lev]==0)
-      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,m,1);
+      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,1);
 
    get_rtf_at_ppts(E, m, lev, el, rtf);
 
@@ -988,7 +988,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
   es = (el-1)/E->lmesh.elz + 1;
 
   if ((el-1)%E->lmesh.elz==0)
-      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,E->mesh.levmax,m,0);
+      construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,E->mesh.levmax,0);
 
   for(p=0;p<n;p++) elt_f[p] = 0.0;
 

@@ -826,7 +826,7 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	  (E->mat[CPPR][e] ==  -E->viscosity.anivisc_layer))){
 	get_rtf_at_ppts(E, m, lev, e, rtf); /* pressure points */
 	//if((e-1)%E->lmesh.elz==0)
-	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,CPPR,1);
+	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
 	for(i = 1; i <= ends; i++){	/* velocity at element nodes */
 	  off = E->ien[CPPR][e].node[i];
 	  VV[1][i] = E->sphere.cap[CPPR].V[1][off];
