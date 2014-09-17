@@ -60,7 +60,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS, int m);
+                             unsigned int **FLAGS);
 static void filter(struct All_variables *E);
 static void process_heating(struct All_variables *E, int psc_pass);
 
@@ -385,7 +385,7 @@ static void pg_solver(struct All_variables *E,
       element_residual(E, el, &PG, &(E->gNX[CPPR][el]), &(E->gDA[CPPR][el]),
                        VV, T, Tdot,
                        Q0, Eres, rtf, diff, E->sphere.cap[CPPR].TB,
-                       FLAGS, CPPR);
+                       FLAGS);
 
       for(a=1;a<=ends;a++) {
         a1 = E->ien[CPPR][el].node[a];
@@ -488,7 +488,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS, int m)
+                             unsigned int **FLAGS)
 {
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
@@ -585,7 +585,7 @@ static void element_residual(struct All_variables *E, int el,
 	    PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
               * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
                  - heating )
-              + diff * dOmega->vpt[i] * E->heating_latent[m][el]
+              + diff * dOmega->vpt[i] * E->heating_latent[CPPR][el]
               * (GNx->vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
                  GNx->vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
                  GNx->vpt[GNVXINDEX(2,j,i)]*tx3[i] );
