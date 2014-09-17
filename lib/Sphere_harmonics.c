@@ -41,8 +41,6 @@ void set_sphere_harmonics(E)
     }
 
     compute_sphereh_table(E);
-
-    return;
 }
 
 /* =====================================
@@ -112,7 +110,6 @@ void sphere_expansion(E,TG,sphc,sphs)
         sphs[i] = 0.0;
     }
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
         for (es=1;es<=E->lmesh.snel;es++)   {
 
             for (ll=0;ll<=E->output.llmax;ll++)
@@ -141,8 +138,6 @@ void sphere_expansion(E,TG,sphc,sphs)
         }
 
     sum_across_surf_sph1(E,sphc,sphs);
-
-    return;
 }
 
 
@@ -155,8 +150,7 @@ void debug_sphere_expansion(struct All_variables *E)
     int ll, mm;
     float *TT[NCS], *sph_harm[2];
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+    TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* sin coeff */
     sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
@@ -164,7 +158,6 @@ void debug_sphere_expansion(struct All_variables *E)
     sph_harm[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
 
     for(k=1;k<=E->lmesh.noz;k++)  {
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=E->lmesh.noy;i++)
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
@@ -186,8 +179,6 @@ void debug_sphere_expansion(struct All_variables *E)
                 }
         }
     }
-
-    return;
 }
 
 
@@ -202,7 +193,6 @@ static void  compute_sphereh_table(E)
     double t,f,mmf;
     
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         E->sphere.tablesplm[CPPR]   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablescosf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablessinf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
@@ -212,9 +202,7 @@ static void  compute_sphereh_table(E)
             E->sphere.tablescosf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
             E->sphere.tablessinf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
         }
-    }
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         for (j=1;j<=E->lmesh.nsf;j++)  {
             node = j*E->lmesh.noz;
             f=E->sx[CPPR][2][node];
@@ -231,8 +219,4 @@ static void  compute_sphereh_table(E)
                     E->sphere.tablesplm[CPPR][j][p] = modified_plgndr_a(ll,mm,t) ;
                 }
         }
-    }
-
-    return;
 }
-
