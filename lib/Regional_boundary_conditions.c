@@ -55,8 +55,7 @@ void regional_velocity_boundary_conditions(E)
 
   int node,d,j,noz,lv,k;
 
-  for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+  for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--) {
       noz = E->lmesh.NOZ[lv];
 
       if(E->mesh.topvbc == 0) {
@@ -87,7 +86,7 @@ void regional_velocity_boundary_conditions(E)
 	  ggrd_read_vtop_from_file(E, TRUE);
 #endif
 	if(E->control.vbcs_file)   {
-	  if((lv == E->mesh.gridmin) && (j == E->sphere.caps_per_proc))
+	  if(lv == E->mesh.gridmin)
 	    read_velocity_boundary_from_file(E);   /* read in the velocity boundary condition from file */
 	}
       }
@@ -140,15 +139,11 @@ void regional_velocity_boundary_conditions(E)
 
 
       if(E->control.verbose) {
-	for (j=1;j<=E->sphere.caps_per_proc;j++)
 	  for (node=1;node<=E->lmesh.nno;node++)
 	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",CPPR,node,E->sphere.cap[CPPR].VB[1][node],E->sphere.cap[CPPR].VB[2][node],E->sphere.cap[CPPR].VB[3][node],E->node[CPPR][node]&VBX,E->node[CPPR][node]&VBY,E->node[CPPR][node]&VBZ);
 	fflush(E->fp_out);
       }
       /* If any imposed internal velocity structure it goes here */
-
-
-   return;
 }
 
 
@@ -167,7 +162,6 @@ void regional_temperature_boundary_conditions(E)
 
      temperature_refl_vert_bc(E);
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->lmesh.noz;
     if(E->mesh.toptbc == 1)    {
       horizontal_bc(E,E->sphere.cap[CPPR].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,CPPR);
@@ -197,7 +191,6 @@ void regional_temperature_boundary_conditions(E)
       lith_age_temperature_bound_adj(E,lev);
     }
 
-    }     /* end for j */
 
    temperatures_conform_bcs(E);
    E->temperatures_conform_bcs = temperatures_conform_bcs;
@@ -218,7 +211,6 @@ static void velocity_refl_vert_bc(E)
 
 
   if (E->parallel.me_loc[1]==0 || E->parallel.me_loc[1]==E->parallel.nprocx-1)
-   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(j=1;j<=E->lmesh.noy;j++)
       for(i=1;i<=E->lmesh.noz;i++)  {
         node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
@@ -241,7 +233,6 @@ static void velocity_refl_vert_bc(E)
 
 
     if (E->parallel.me_loc[2]==0)
-     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++)       {
           node1 = i + (j-1)*E->lmesh.noz;
@@ -253,7 +244,6 @@ static void velocity_refl_vert_bc(E)
           }    /* end of loop i & j */
 
     if (E->parallel.me_loc[2]==E->parallel.nprocy-1)
-     for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++)       {
           node2 = (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox + i + (j-1)*E->lmesh.noz;
@@ -273,7 +263,6 @@ static void velocity_refl_vert_bc(E)
     noy = E->lmesh.NOY[level] ;
     nox = E->lmesh.NOX[level] ;
 
-     for (m=1;m<=E->sphere.caps_per_proc;m++)  {
        if (E->parallel.me_loc[1]==0 || E->parallel.me_loc[1]==E->parallel.nprocx-1) {
          for(j=1;j<=noy;j++)
           for(i=1;i<=noz;i++) {
@@ -342,11 +331,8 @@ static void velocity_refl_vert_bc(E)
                 }
             }
 
-       }       /* end for m  */
        }
        }       /*  end for loop level  */
-
-  return;
 }
 
 static void temperature_refl_vert_bc(E)
@@ -359,7 +345,6 @@ static void temperature_refl_vert_bc(E)
  /* Temps and bc-values  at top level only */
 
    if (E->parallel.me_loc[1]==0 || E->parallel.me_loc[1]==E->parallel.nprocx-1)
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(j=1;j<=E->lmesh.noy;j++)
       for(i=1;i<=E->lmesh.noz;i++) {
         node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
@@ -377,7 +362,6 @@ static void temperature_refl_vert_bc(E)
         }       /* end for loop i & j */
 
     if (E->parallel.me_loc[2]==0)
-     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node1 = i + (j-1)*E->lmesh.noz;
@@ -387,7 +371,6 @@ static void temperature_refl_vert_bc(E)
               }
 
     if (E->parallel.me_loc[2]==E->parallel.nprocy-1)
-     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node2 = i +(j-1)*E->lmesh.noz + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
