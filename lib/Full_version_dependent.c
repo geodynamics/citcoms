@@ -164,7 +164,7 @@ void full_node_locations(E)
   free ((void *) RR);
 
    ii = E->sphere.capid[CPPR];
-   full_coord_of_cap(E,CPPR,ii);
+   full_coord_of_cap(E,ii);
 
   if (E->control.verbose) {
       for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {

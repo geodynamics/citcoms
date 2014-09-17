@@ -152,7 +152,7 @@ static int find_intersection(double *x, double *y,
 }
 
 
-void full_coord_of_cap(struct All_variables *E, int m, int icap)
+void full_coord_of_cap(struct All_variables *E, int icap)
 {
   int i, j, k, lev, temp, elx, ely;
   int node, snode, ns, step;
@@ -472,14 +472,14 @@ void full_coord_of_cap(struct All_variables *E, int m, int icap)
 	   
 	   for (i=1; i<=lvnoz; i++) {
 	     /*   theta,fi,and r coordinates   */
-	     E->SX[lev][m][1][node] = theta;
-	     E->SX[lev][m][2][node] = fi;
-	     E->SX[lev][m][3][node] = E->sphere.R[lev][i];
+	     E->SX[lev][CPPR][1][node] = theta;
+	     E->SX[lev][CPPR][2][node] = fi;
+	     E->SX[lev][CPPR][3][node] = E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
-	     E->X[lev][m][1][node]  = E->sphere.R[lev][i]*sint*cosf;
-	     E->X[lev][m][2][node]  = E->sphere.R[lev][i]*sint*sinf;
-	     E->X[lev][m][3][node]  = E->sphere.R[lev][i]*cost;
+	     E->X[lev][CPPR][1][node]  = E->sphere.R[lev][i]*sint*cosf;
+	     E->X[lev][CPPR][2][node]  = E->sphere.R[lev][i]*sint*sinf;
+	     E->X[lev][CPPR][3][node]  = E->sphere.R[lev][i]*cost;
 	     
 	     node++;
 	   }

@@ -148,7 +148,7 @@ void full_solver_init(struct All_variables *);
 /* Full_sphere_related.c */
 void spherical_to_uv2(double [2], int, double *, double *, double *, double *);
 void uv_to_spherical(double [2], int, double *, double *, double *, double *);
-void full_coord_of_cap(struct All_variables *, int, int);
+void full_coord_of_cap(struct All_variables *, int);
 /* Full_tracer_advection.c */
 void full_tracer_input(struct All_variables *);
 void full_tracer_setup(struct All_variables *);
