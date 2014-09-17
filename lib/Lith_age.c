@@ -66,7 +66,6 @@ void lith_age_input(struct All_variables *E)
       input_float("width_bound_adj",&(E->control.width_bound_adj),"0.08727",m);
     }
   }
-  return;
 }
 
 
@@ -128,7 +127,6 @@ void lith_age_construct_tic(struct All_variables *E)
   gnoy=E->mesh.noy;
   gnoz=E->mesh.noz;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=noy;i++)
       for(j=1;j<=nox;j++)
 	for(k=1;k<=noz;k++)  {
@@ -147,8 +145,6 @@ void lith_age_construct_tic(struct All_variables *E)
   lith_age_update_tbc(E);
 
   temperatures_conform_bcs(E);
-
-  return;
 }
 
 
@@ -165,7 +161,6 @@ void lith_age_update_tbc(struct All_variables *E)
   rout = E->sphere.ro;
   rin = E->sphere.ri;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=noy;i++)
       for(j=1;j<=nox;j++)
 	for(k=1;k<=noz;k++)  {
@@ -178,8 +173,6 @@ void lith_age_update_tbc(struct All_variables *E)
 	    E->sphere.cap[CPPR].TB[3][node]=E->T[CPPR][node];
 	  }
 	}
-
-  return;
 }
 
 
@@ -202,7 +195,6 @@ all three get set to true. CPC 6/20/00 */
     fff3=E->control.fi_max - E->control.width_bound_adj;
 
     if(lv==E->mesh.gridmax)
-      for(j=1;j<=E->sphere.caps_per_proc;j++)
 	for(node=1;node<=E->lmesh.nno;node++)  {
 	  if( ((E->sx[CPPR][1][node]<=ttt2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[CPPR][1][node]>=ttt3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if < (width) from x bounds AND (depth) from top */
@@ -242,7 +234,6 @@ all three get set to true. CPC 6/20/00 */
 
   if (E->control.lith_age_time) {
     if(lv==E->mesh.gridmax)
-      for(j=1;j<=E->sphere.caps_per_proc;j++)
 	for(node=1;node<=E->lmesh.nno;node++)  {
 	  if(E->sx[CPPR][3][node]>=E->sphere.ro-E->control.lith_age_depth)
 	    { /* if closer than (lith_age_depth) from top */
@@ -256,8 +247,6 @@ all three get set to true. CPC 6/20/00 */
 
 	}
   } /* end E->control.lith_age_time */
-
-  return;
 }
 
 
@@ -301,7 +290,6 @@ void lith_age_conform_tbc(struct All_variables *E)
     fff2=E->control.fi_min + E->control.width_bound_adj;
     fff3=E->control.fi_max - E->control.width_bound_adj;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++)
 	  for(k=1;k<=noz;k++)  {
@@ -346,7 +334,6 @@ void lith_age_conform_tbc(struct All_variables *E)
 
   /* NOW SET THE TEMPERATURES IN THE LITHOSPHERE IF CHANGING EVERY TIME STEP */
   if(E->monitor.solution_cycles>0 && E->control.lith_age_time)   {
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++)
 	  for(k=1;k<=noz;k++)  {
@@ -374,7 +361,6 @@ void lith_age_conform_tbc(struct All_variables *E)
 	  }     /* end k   */
   }   /*  end of solution cycles  && lith_age_time */
 
-  return;
 }
 
 
@@ -392,7 +378,6 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
   noy=E->lmesh.noy;
   noz=E->lmesh.noz;
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++)
     for(node=1;node<=E->lmesh.nno;node++)  {
 
         type = (E->node[CPPR][node] & (TBX | TBZ | TBY));
@@ -439,6 +424,4 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
         } /* end switch */
 
     } /* next node */
-
-return;
 }
