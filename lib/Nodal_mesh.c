@@ -42,7 +42,6 @@ void v_from_vector(E)
     int m,node;
     const int nno = E->lmesh.nno;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for(node=1;node<=nno;node++)     {
             E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[CPPR][node].doff[1]];
             E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[CPPR][node].doff[2]];
@@ -54,9 +53,6 @@ void v_from_vector(E)
             if (E->node[CPPR][node] & VBZ)
                 E->sphere.cap[CPPR].V[3][node] = E->sphere.cap[CPPR].VB[3][node];
         }
-    }
-
-    return;
 }
 
 void assign_v_to_vector(E)
@@ -65,14 +61,11 @@ void assign_v_to_vector(E)
     int m,node;
     const int nno = E->lmesh.nno;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
       for(node=1;node<=nno;node++)     {
 	E->U[CPPR][E->id[CPPR][node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
 	E->U[CPPR][E->id[CPPR][node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
 	E->U[CPPR][E->id[CPPR][node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
       }
-    }
-    return;
 }
 
 void v_from_vector_pseudo_surf(E)
@@ -84,7 +77,6 @@ void v_from_vector_pseudo_surf(E)
     double sum_V = 0.0, sum_dV = 0.0, rel_error = 0.0, global_max_error = 0.0;
     double tol_error = 1.0e-03;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         for(node=1;node<=nno;node++)     {
             E->sphere.cap[CPPR].Vprev[1][node] = E->sphere.cap[CPPR].V[1][node];
             E->sphere.cap[CPPR].Vprev[2][node] = E->sphere.cap[CPPR].V[2][node];
@@ -113,10 +105,8 @@ void v_from_vector_pseudo_surf(E)
         if(E->parallel.me==0)
             fprintf(stderr,"global_max_error=%e stop_topo_loop=%d\n",global_max_error,E->monitor.stop_topo_loop);
 
-    }
-
-    return;
 }
+
 /* cartesian velocities within element, single prec version */
 void velo_from_element(E,VV,m,el,sphere_key)
      struct All_variables *E;
@@ -131,7 +121,7 @@ void velo_from_element(E,VV,m,el,sphere_key)
 
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
-            node = E->ien[m][el].node[a];
+            node = E->ien[CPPR][el].node[a];
             VV[1][a] = E->sphere.cap[CPPR].V[1][node];
             VV[2][a] = E->sphere.cap[CPPR].V[2][node];
             VV[3][a] = E->sphere.cap[CPPR].V[3][node];
@@ -155,7 +145,6 @@ void velo_from_element(E,VV,m,el,sphere_key)
                 + E->sphere.cap[CPPR].V[3][node]*cost;
         }
     }
-    return;
 }
 
 /* double prec version */
@@ -198,7 +187,6 @@ void velo_from_element_d(E,VV,m,el,sphere_key)
                 + E->sphere.cap[CPPR].V[3][node]*cost;
         }
     }
-    return;
 }
 
 void p_to_nodes(E,P,PN,lev)
@@ -209,11 +197,9 @@ void p_to_nodes(E,P,PN,lev)
 
 { int e,element,node,j,m;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.NNO[lev];node++)
       PN[CPPR][node] =  0.0;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(element=1;element<=E->lmesh.NEL[lev];element++)
        for(j=1;j<=enodes[E->mesh.nsd];j++)  {
      	  node = E->IEN[lev][CPPR][element].node[j];
@@ -222,11 +208,8 @@ void p_to_nodes(E,P,PN,lev)
 
    (E->exchange_node_f)(E,PN,lev);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
-     for(node=1;node<=E->lmesh.NNO[lev];node++)
-        PN[CPPR][node] *= E->MASS[lev][CPPR][node];
-
-     return;
+   for(node=1;node<=E->lmesh.NNO[lev];node++)
+      PN[CPPR][node] *= E->MASS[lev][CPPR][node];
 }
 
 
@@ -246,10 +229,8 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
   const int ends=enodes[nsd];
   double temp_visc;
   
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.NNO[lev];i++)
       VN[CPPR][i] = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)   {
       temp_visc=0.0;
       for(i=1;i<=vpts;i++)
@@ -262,11 +243,8 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
       }
     }
   (E->exchange_node_f)(E,VN,lev);
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(n=1;n<=E->lmesh.NNO[lev];n++)
       VN[CPPR][n] *= E->MASS[lev][CPPR][n];
-
-  return;
 }
 
 /* 
@@ -287,11 +265,9 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
   double temp_visc;
 
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)
 	VE[CPPR][(e-1)*vpts+i] = 0.0;
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	temp_visc=0.0;
@@ -299,8 +275,6 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
 	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[CPPR][E->IEN[lev][CPPR][e].node[j]];
 	VE[CPPR][(e-1)*vpts+i] = temp_visc;
       }
-
-  return;
 }
 
 /* called from MG as  (?)
@@ -319,10 +293,8 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
     const int ends=enodes[nsd];
     double temp_visc;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.NEL[lev];i++)
 	VN[CPPR][i] = 0.0;
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(e=1;e<=E->lmesh.NEL[lev];e++)   {
 	temp_visc=0.0;
 	for(i=1;i<=vpts;i++)
@@ -330,9 +302,7 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
 	temp_visc = temp_visc/vpts;
 	VN[CPPR][e] = temp_visc;
       }
-    
-    return;
-  }
+}
 
 /* called from MG as 
 
@@ -351,10 +321,8 @@ void visc_from_ele_to_gint(E,VN,VE,lev)
   const int ends=enodes[nsd];
   double temp_visc;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	VE[CPPR][(e-1)*vpts+i] = VN[CPPR][e];
       }
-  return;
 }
