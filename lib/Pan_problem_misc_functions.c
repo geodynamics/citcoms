@@ -115,7 +115,6 @@ void apply_side_sbc(struct All_variables *E)
     parallel_process_termination();
   }
 
-  for(m=1; m<=E->sphere.caps_per_proc; m++) {
     E->sbc.node[CPPR] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
 
     n = 1;
@@ -144,7 +143,6 @@ void apply_side_sbc(struct All_variables *E)
 	  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
 	    E->sbc.SB[CPPR][side][d][j] = E->sphere.cap[CPPR].VB[d][i];
 	}
-  }
 }
 
 
@@ -161,7 +159,6 @@ void get_buoyancy(struct All_variables *E, double **buoy)
     temp = E->control.Atemp;
 
     /* thermal buoyancy */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=E->lmesh.nno;i++) {
 	nz = ((i-1) % E->lmesh.noz) + 1;
         /* We don't need to substract adiabatic T profile from T here,
@@ -177,7 +174,6 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       for(j=0;j<E->composition.ncomp;j++) {
 	/* TODO: how to scale chemical buoyancy wrt reference density? */
 	temp2 = E->composition.buoyancy_ratio[j] * temp;
-            for(m=1;m<=E->sphere.caps_per_proc;m++)
 	      for(i=1;i<=E->lmesh.nno;i++)
 		buoy[CPPR][i] -= temp2 * E->composition.comp_node[CPPR][j][i];
       }
@@ -206,7 +202,6 @@ void get_buoyancy(struct All_variables *E, double **buoy)
       /* g= g_e (1+(5/2m-f) cos^2(theta)) , not theta_g */
       rfac = E->data.ge*(5./2.*E->data.rotm-E->data.ellipticity);
       /*  */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
 	for(j=0;j < nxny;j++) {
 	  for(i=1;i<=E->lmesh.noz;i++)
 	    n = j*E->lmesh.noz + i; /* this could be improved by only
@@ -220,7 +215,6 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 #endif
       /* default */
       /* no latitude dependency of gravity */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
 	for(j=0;j < nxny;j++) {
 	  for(i=1;i<=E->lmesh.noz;i++){
 	    n = j*E->lmesh.noz + i;
@@ -234,7 +228,6 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 
     remove_horiz_ave2(E,buoy);
     
-    return;
 }
 
 
@@ -328,7 +321,6 @@ void read_visc_param_from_file(struct All_variables *E,
         }
     }
 
-    return;
 }
 
 
