@@ -57,7 +57,7 @@ void gzip_file(char *);
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
 void expand_later_array(struct All_variables *E);
-void expand_tracer_arrays(struct All_variables *E, int j);
+void expand_tracer_arrays(struct All_variables *E);
 void tracer_post_processing(struct All_variables *E);
 void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers);
 void count_tracers_of_flavors(struct All_variables *E);
@@ -947,7 +947,8 @@ static void read_tracer_file(struct All_variables *E)
 
             E->trace.ntracers[CPPR]++;
 
-            if (E->trace.ntracers[CPPR]>=(E->trace.max_ntracers[CPPR]-5)) expand_tracer_arrays(E,j);
+            if (E->trace.ntracers[CPPR]>=(E->trace.max_ntracers[CPPR]-5)) 
+              expand_tracer_arrays(E);
 
             E->trace.basicq[CPPR][0][E->trace.ntracers[CPPR]]=theta;
             E->trace.basicq[CPPR][1][E->trace.ntracers[CPPR]]=phi;
@@ -1400,15 +1401,13 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     fprintf(E->trace.fpt,"Physical size of tracer arrays (max_ntracers): %d\n",
             E->trace.max_ntracers[CPPR]);
     fflush(E->trace.fpt);
-
-    return;
 }
 
 
 
 /****** EXPAND TRACER ARRAYS *****************************************/
 
-void expand_tracer_arrays(struct All_variables *E, int j)
+void expand_tracer_arrays(struct All_variables *E)
 {
 
     int inewsize;
@@ -1448,8 +1447,6 @@ void expand_tracer_arrays(struct All_variables *E, int j)
             inewsize,E->trace.max_ntracers[CPPR]);
 
     E->trace.max_ntracers[CPPR]=inewsize;
-
-    return;
 }
 
 
@@ -1558,9 +1555,6 @@ static void put_away_later(struct All_variables *E, int j, int it)
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
         E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater[CPPR]]=E->trace.extraq[CPPR][kk][it];
-
-
-    return;
 }
 
 
@@ -1699,5 +1693,3 @@ int icheck_that_processor_shell(struct All_variables *E,
 
     return 0;
 }
-
-

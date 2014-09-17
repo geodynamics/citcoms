@@ -713,7 +713,8 @@ void full_lost_souls(struct All_variables *E)
     for (kk=0;kk<irec[CPPR];kk++) {
         E->trace.ntracers[CPPR]++;
 
-        if (E->trace.ntracers[CPPR]>(E->trace.max_ntracers[CPPR]-5)) expand_tracer_arrays(E,j);
+        if (E->trace.ntracers[CPPR]>(E->trace.max_ntracers[CPPR]-5)) 
+          expand_tracer_arrays(E);
 
         ireceive_position=kk*E->trace.number_of_tracer_quantities;
 

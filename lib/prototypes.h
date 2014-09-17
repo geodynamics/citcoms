@@ -511,7 +511,7 @@ void cart_to_sphere(struct All_variables *, double, double, double, double *, do
 void sphere_to_cart(struct All_variables *, double, double, double, double *, double *, double *);
 void get_neighboring_caps(struct All_variables *);
 void allocate_tracer_arrays(struct All_variables *, int);
-void expand_tracer_arrays(struct All_variables *, int);
+void expand_tracer_arrays(struct All_variables *);
 void expand_later_array(struct All_variables *);
 int icheck_processor_shell(struct All_variables *, int, double);
 int icheck_that_processor_shell(struct All_variables *, int, int, double);
