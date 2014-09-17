@@ -315,7 +315,7 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
     /* # of tracers, allocate memory */
         fread(&itmp, sizeof(int), 1, fp);
-        allocate_tracer_arrays(E, CPPR, itmp);
+        allocate_tracer_arrays(E, itmp);
         E->trace.ntracers[CPPR] = itmp;
 
     /* read tracer data */

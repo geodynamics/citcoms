@@ -59,8 +59,7 @@ int icheck_that_processor_shell(struct All_variables *E,
 void expand_later_array(struct All_variables *E, int j);
 void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
-void allocate_tracer_arrays(struct All_variables *E,
-                            int j, int number_of_tracers);
+void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers);
 void count_tracers_of_flavors(struct All_variables *E);
 
 int full_icheck_cap(struct All_variables *E, int icap,
@@ -769,7 +768,7 @@ static void generate_random_tracers(struct All_variables *E,
     double random1,random2,random3;
 
 
-    allocate_tracer_arrays(E,CPPR,tracers_cap);
+    allocate_tracer_arrays(E,tracers_cap);
 
     /* Finding the min/max of the cartesian coordinates. */
     /* One must loop over E->X to find the min/max, since the 8 corner */
@@ -910,7 +909,7 @@ static void read_tracer_file(struct All_variables *E)
 
     iestimate=number_of_tracers/E->parallel.nproc + icushion;
 
-        allocate_tracer_arrays(E,CPPR,iestimate);
+        allocate_tracer_arrays(E,iestimate);
 
         for (kk=1;kk<=number_of_tracers;kk++) {
             int len, ncol;
@@ -1060,7 +1059,7 @@ static void read_old_tracer_file(struct All_variables *E)
 
         /* allocate memory for tracer arrays */
 
-        allocate_tracer_arrays(E,CPPR,numtracers);
+        allocate_tracer_arrays(E,numtracers);
         E->trace.ntracers[CPPR]=numtracers;
 
         for (kk=1;kk<=numtracers;kk++) {
@@ -1352,8 +1351,7 @@ void get_neighboring_caps(struct All_variables *E)
 /*                                                                            */
 /* This function allocates memories to tracer arrays.                         */
 
-void allocate_tracer_arrays(struct All_variables *E,
-                            int j, int number_of_tracers)
+void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
 {
 
     int kk;
