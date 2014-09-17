@@ -150,7 +150,6 @@ void get_prem(double r, double *vp, double *vs, double *rho)
 #undef SUPPRESS_CRUSTAL_MESH
 #undef ONE_CRUST
 
-    return;
 }
 
 
@@ -227,7 +226,6 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
     free(vsr);
     free(depthkm);
 
-    return;
 }
 
 
@@ -292,5 +290,4 @@ void compute_seismic_model(struct All_variables *E,
         break;
     }
 
-    return;
 }
