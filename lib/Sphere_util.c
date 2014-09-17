@@ -57,8 +57,7 @@ void even_divide_arc12(elx,x1,y1,z1,x2,y2,z2,theta,fi)
       fi[j]    = myatan(yy,xx);
       }
 
-   return;
-  }
+}
 
 /* ================================================
    compute angle and area
@@ -73,7 +72,6 @@ void compute_angle_surf_area (E)
     void get_angle_sphere_cap();
     void parallel_process_termination();
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)   {
         ia[1] = 1;
         ia[2] = E->lmesh.noz*E->lmesh.nox-E->lmesh.noz+1;
         ia[3] = E->lmesh.nno-E->lmesh.noz+1;
@@ -111,13 +109,7 @@ void compute_angle_surf_area (E)
 
                 E->sphere.area1[lev][CPPR][es] = area_sphere_cap(angle);
 
-/*              fprintf(E->fp_out,"lev%d %d %.6e %.6e %.6e %.6e %.6e\n",lev,es,angle[1],angle[2],angle[3],angle[4],E->sphere.area1[lev][m][es]); */
-
             }  /* end for lev and es */
-
-    }  /* end for m */
-
-    return;
 }
 
 /* ================================================
@@ -232,7 +224,6 @@ void  get_angle_sphere_cap(xx,angle)
     }
 
     angle[5] = get_angle(y1,y2);     /* angle5 for betw 1 and 3: diagonal */
-    return;
 }
 
 /*  ================================
