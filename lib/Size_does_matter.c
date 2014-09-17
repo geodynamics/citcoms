@@ -34,16 +34,9 @@
 double theta_g(double , struct All_variables *);
 #endif
 
-void twiddle_thumbs(yawn)
-     struct All_variables *yawn;
-     //     int scratch_groin;
-
-{ /* Do nothing, just sit back and relax.
-     Take it easy for a while, maybe size
-     doesn't matter after all. There, there
-     that's better. Now ... */
-
-  return; }
+void twiddle_thumbs(struct All_variables *E)
+{
+}
 
 /*   ======================================================================
      ======================================================================  */
@@ -66,8 +59,6 @@ static void form_rtf_bc(int k, double x[4],
     bc[3][1] = x[1]*rtf[3][k];	/*  */
     bc[3][2] = x[2]*rtf[3][k];
     bc[3][3] = x[3]*rtf[3][k];
-
-    return;
 }
 
 
@@ -178,9 +169,6 @@ static void get_global_shape_fn_sph(struct All_variables *E,
             }
 
     }              /* end for k int */
-
-
-    return;
 }
 
 
@@ -312,12 +300,10 @@ void construct_surf_det (E)
 
   double xx[4][5], dxda[4][4], r2;
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       E->surf_det[CPPR][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
     }
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++) {
   r2 = 1.0 / (E->sx[CPPR][3][E->lmesh.elz+1] * E->sx[CPPR][3][E->lmesh.elz+1]);
 
   for (es=1;es<=E->lmesh.snel;es++)   {
@@ -340,8 +326,6 @@ void construct_surf_det (E)
       E->surf_det[CPPR][k][es] = jacobian * r2;
       }
     }
-  }
-  return;
 }
 
 
@@ -362,12 +346,10 @@ void construct_bdry_det(struct All_variables *E)
 
   double xx[4][5],dxda[4][4];
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for (side=SIDE_BEGIN; side<=SIDE_END; side++)
       for(d=1; d<=oned; d++)
 	E->boundary.det[CPPR][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for (es=1;es<=E->boundary.nel;es++) {
       el = E->boundary.element[CPPR][es];
 
@@ -430,8 +412,6 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
       dGammax->vpt[GMVGAMMA(ii,k)] = jacobian;
     }
   }
-
-  return;
 }
 
 /*   ======================================================================
@@ -499,8 +479,6 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
             dGammax->vpt[GMVGAMMA(ii,k)] = jacobian;
         }
     }
-
-    return;
 }
 
 /*   ======================================================================
@@ -539,8 +517,6 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
     jacobian = determinant(dxda,E->mesh.nsd-1);
     dGamma->vpt[k] = jacobian;
   }
-
-  return;
 }
 
 
@@ -682,9 +658,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
 
       }         /* end if pressure  */
-
-   return;
-  }
+}
 
 
 void construct_side_c3x3matrix_el(struct All_variables *E,int el,
@@ -823,8 +797,6 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       }      /* end for local node */
     }      /* end for int points */
   }      /* end if pressure  */
-
-  return;
 }
 
 
@@ -842,8 +814,7 @@ void construct_c3x3matrix(E)
   const int vpts=vpoints[dims];
   const int ppts=ppoints[dims];
 
- for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
-  for (m=1;m<=E->sphere.caps_per_proc;m++)   {
+ for (lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++) {
     nel_surface = E->lmesh.NEL[lev]/E->lmesh.ELZ[lev];
     for (es=1;es<=nel_surface;es++)        {
 
@@ -969,10 +940,8 @@ void construct_c3x3matrix(E)
 
 
       }         /* end for es */
-    }           /* end for m */
-
-   return;
-   }
+    }           /* end for lev */
+}
 
 
 
@@ -995,7 +964,6 @@ void mass_matrix(struct All_variables *E)
     /* ECO .size can also be defined here */
 
     for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
-        for (m=1;m<=E->sphere.caps_per_proc;m++)   {
 
             for(node=1;node<=E->lmesh.NNO[lev];node++)
                 E->MASS[lev][CPPR][node] = 0.0;
@@ -1079,24 +1047,19 @@ void mass_matrix(struct All_variables *E)
 
             } /* end of ele*/
 
-        } /* end of for m */
 
         if(lev == E->mesh.levmax)
-            for (m=1;m<=E->sphere.caps_per_proc;m++)
-                for(node=1;node<=E->lmesh.NNO[lev];node++)
-                    E->NMass[CPPR][node] = E->MASS[lev][CPPR][node];
+            for(node=1;node<=E->lmesh.NNO[lev];node++)
+                E->NMass[CPPR][node] = E->MASS[lev][CPPR][node];
 
         if (E->control.NMULTIGRID||E->mesh.levmax==lev)
             (E->exchange_node_d)(E,E->MASS[lev],lev);
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)
-            for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->MASS[lev][CPPR][node] = 1.0/E->MASS[lev][CPPR][node];
+        for(node=1;node<=E->lmesh.NNO[lev];node++)
+            E->MASS[lev][CPPR][node] = 1.0/E->MASS[lev][CPPR][node];
 
     } /* end of for lev */
 
-
-    for (m=1;m<=E->sphere.caps_per_proc;m++) {
 
         for(node=1;node<=E->lmesh.nno;node++)
             E->TMass[CPPR][node] = 0.0;
@@ -1118,21 +1081,18 @@ void mass_matrix(struct All_variables *E)
                 E->TMass[CPPR][E->ien[CPPR][e].node[node]] += temp[node];
 
         } /* end of for e */
-    } /* end of for m */
 
     (E->exchange_node_d)(E,E->TMass,E->mesh.levmax);
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-        for(node=1;node<=E->lmesh.nno;node++)
-            E->TMass[CPPR][node] = 1.0 / E->TMass[CPPR][node];
+      for(node=1;node<=E->lmesh.nno;node++)
+          E->TMass[CPPR][node] = 1.0 / E->TMass[CPPR][node];
 
 
     /* compute volume of this processor mesh and the whole mesh */
     E->lmesh.volume = 0;
     E->mesh.volume = 0;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
-        for(e=1;e<=E->lmesh.nel;e++)
-            E->lmesh.volume += E->eco[CPPR][e].area;
+    for(e=1;e<=E->lmesh.nel;e++)
+        E->lmesh.volume += E->eco[CPPR][e].area;
 
     MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE,
                   MPI_SUM, E->parallel.world);
@@ -1144,20 +1104,16 @@ void mass_matrix(struct All_variables *E)
 
         for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
             fprintf(E->fp_out,"output_mass lev=%d\n",lev);
-            for (m=1;m<=E->sphere.caps_per_proc;m++)   {
                 fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
                 for(e=1;e<=E->lmesh.NEL[lev];e++)
                     fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][CPPR][e].area);
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
                     fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][CPPR][node]);
-            }
         }
 
-        for (m=1;m<=E->sphere.caps_per_proc;m++)   {
             fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
             for (node=1;node<=E->lmesh.nno;node++)
                 fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[CPPR][node]);
-        }
         fflush(E->fp_out);
     }
 }
