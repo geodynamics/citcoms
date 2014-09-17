@@ -235,8 +235,6 @@ void convection_initial_temperature(struct All_variables *E)
 
   if (E->control.verbose)
     debug_tic(E);
-
-  return;
 }
 
 
@@ -245,14 +243,10 @@ static void debug_tic(struct All_variables *E)
   int m, j;
 
   fprintf(E->fp_out,"output_temperature\n");
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
     for (j=1;j<=E->lmesh.nno;j++)
       fprintf(E->fp_out,"X = %.6e Z = %.6e Y = %.6e T[%06d] = %.6e \n",E->sx[CPPR][1][j],E->sx[CPPR][2][j],E->sx[CPPR][3][j],j,E->T[CPPR][j]);
-  }
   fflush(E->fp_out);
-
-  return;
 }
 
 
@@ -281,7 +275,6 @@ static void read_tic_from_file(struct All_variables *E)
   fgets(input_s,1000,fp);
   sscanf(input_s,"%d %d %f",&ll,&mm,&tt);
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     fgets(input_s,1000,fp);
     sscanf(input_s,"%d %d",&ll,&mm);
     for(i=1;i<=E->lmesh.nno;i++)  {
@@ -294,12 +287,9 @@ static void read_tic_from_file(struct All_variables *E)
       /* This might not be desirable in some situations. */
       E->T[CPPR][i] = max(0.0,min(g,1.0));
     }
-  }
   fclose (fp);
 
   temperatures_conform_bcs(E);
-
-  return;
 }
 
 
@@ -313,7 +303,6 @@ static void linear_temperature_profile(struct All_variables *E)
     noy = E->lmesh.noy;
     noz = E->lmesh.noz;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(i=1; i<=noy; i++)
             for(j=1; j<=nox;j ++)
                 for(k=1; k<=noz; k++) {
@@ -321,8 +310,6 @@ static void linear_temperature_profile(struct All_variables *E)
                     r1 = E->sx[CPPR][3][node];
                     E->T[CPPR][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
                 }
-
-    return;
 }
 
 
@@ -336,21 +323,18 @@ static void conductive_temperature_profile(struct All_variables *E)
     noy = E->lmesh.noy;
     noz = E->lmesh.noz;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=1; i<=noy; i++)
-            for(j=1; j<=nox;j ++)
-                for(k=1; k<=noz; k++) {
-                    node = k + (j-1)*noz + (i-1)*nox*noz;
-                    r1 = E->sx[CPPR][3][node];
-                    E->T[CPPR][node] = (E->control.TBCtopval*E->sphere.ro
-                                     - E->control.TBCbotval*E->sphere.ri)
-                        / (E->sphere.ro - E->sphere.ri)
-                        + (E->control.TBCbotval - E->control.TBCtopval)
-                        * E->sphere.ro * E->sphere.ri / r1
-                        / (E->sphere.ro - E->sphere.ri);
-                }
-
-    return;
+    for(i=1; i<=noy; i++)
+        for(j=1; j<=nox;j ++)
+            for(k=1; k<=noz; k++) {
+                node = k + (j-1)*noz + (i-1)*nox*noz;
+                r1 = E->sx[CPPR][3][node];
+                E->T[CPPR][node] = (E->control.TBCtopval*E->sphere.ro
+                                 - E->control.TBCbotval*E->sphere.ri)
+                    / (E->sphere.ro - E->sphere.ri)
+                    + (E->control.TBCbotval - E->control.TBCtopval)
+                    * E->sphere.ro * E->sphere.ri / r1
+                    / (E->sphere.ro - E->sphere.ri);
+            }
 }
 
 
@@ -358,11 +342,8 @@ static void constant_temperature_profile(struct All_variables *E, double mantle_
 {
     int m, i;
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=1; i<=E->lmesh.nno; i++)
-            E->T[CPPR][i] = mantle_temp;
-
-    return;
+    for(i=1; i<=E->lmesh.nno; i++)
+        E->T[CPPR][i] = mantle_temp;
 }
 
 
@@ -380,16 +361,13 @@ static void add_top_tbl(struct All_variables *E, double age_in_myrs, double mant
     tmp = 0.5 / sqrt(age_in_myrs / E->data.scalet);
 
     fprintf(stderr, "%e %e\n", dT, tmp);
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=1; i<=noy; i++)
-            for(j=1; j<=nox;j ++)
-                for(k=1; k<=noz; k++) {
-                    node = k + (j-1)*noz + (i-1)*nox*noz;
-                    r1 = E->sx[CPPR][3][node];
-                    E->T[CPPR][node] -= dT * erfc(tmp * (E->sphere.ro - r1));
-                }
-
-    return;
+    for(i=1; i<=noy; i++)
+        for(j=1; j<=nox;j ++)
+            for(k=1; k<=noz; k++) {
+                node = k + (j-1)*noz + (i-1)*nox*noz;
+                r1 = E->sx[CPPR][3][node];
+                E->T[CPPR][node] -= dT * erfc(tmp * (E->sphere.ro - r1));
+            }
 }
 
 
@@ -406,16 +384,13 @@ static void add_bottom_tbl(struct All_variables *E, double age_in_myrs, double m
     dT = (E->control.TBCbotval - mantle_temp);
     tmp = 0.5 / sqrt(age_in_myrs / E->data.scalet);
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(i=1; i<=noy; i++)
-            for(j=1; j<=nox;j ++)
-                for(k=1; k<=noz; k++) {
-                    node = k + (j-1)*noz + (i-1)*nox*noz;
-                    r1 = E->sx[CPPR][3][node];
-                    E->T[CPPR][node] += dT * erfc(tmp * (r1 - E->sphere.ri));
-                }
-
-    return;
+    for(i=1; i<=noy; i++)
+        for(j=1; j<=nox;j ++)
+            for(k=1; k<=noz; k++) {
+                node = k + (j-1)*noz + (i-1)*nox*noz;
+                r1 = E->sx[CPPR][3][node];
+                E->T[CPPR][node] += dT * erfc(tmp * (r1 - E->sphere.ri));
+            }
 }
 
 
@@ -456,7 +431,6 @@ static void add_perturbations_at_layers(struct All_variables *E)
             tlen = M_PI / (E->control.theta_max - E->control.theta_min);
             flen = M_PI / (E->control.fi_max - E->control.fi_min);
 
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
                 for(i=1; i<=noy; i++)
                     for(j=1; j<=nox;j ++) {
                         node = k + (j-1)*noz + (i-1)*nox*noz;
@@ -469,7 +443,6 @@ static void add_perturbations_at_layers(struct All_variables *E)
         else {
             /* global mode, add spherical harmonics perturbation */
 
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
                 for(i=1; i<=noy; i++)
                     for(j=1; j<=nox;j ++) {
                         node = k + (j-1)*noz + (i-1)*nox*noz;
@@ -480,8 +453,6 @@ static void add_perturbations_at_layers(struct All_variables *E)
                     }
         } /* end if */
     } /* end for p */
-
-    return;
 }
 
 
@@ -519,7 +490,6 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
             tlen = M_PI / (E->control.theta_max - E->control.theta_min);
             flen = M_PI / (E->control.fi_max - E->control.fi_min);
 
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
                 for(i=1; i<=noy; i++)
                     for(j=1; j<=nox;j ++)
                         for(k=1; k<=noz; k++) {
@@ -535,7 +505,6 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
         else {
             /* global mode, add spherical harmonics perturbation */
 
-            for(m=1; m<=E->sphere.caps_per_proc; m++)
                 for(i=1; i<=noy; i++)
                     for(j=1; j<=nox;j ++)
                         for(k=1; k<=noz; k++) {
@@ -544,14 +513,12 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
                             f1 = E->sx[CPPR][2][node];
                             r1 = E->sx[CPPR][3][node];
 
-                            E->T[m][node] += con * modified_plgndr_a(ll,mm,t1)
+                            E->T[CPPR][node] += con * modified_plgndr_a(ll,mm,t1)
                                 * (cos(mm*f1) + sin(mm*f1))
                                 * sin((r1-E->sphere.ri) * rlen);
                         }
         } /* end if */
     } /* end for p */
-
-    return;
 }
 
 
@@ -586,7 +553,6 @@ static void add_spherical_anomaly(struct All_variables *E)
     rtp2xyzd(r_center, theta_center, fi_center, (x_center+1));
 
     /* compute temperature field according to nodal coordinate */
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(i=1; i<=noy; i++)
             for(j=1; j<=nox;j ++)
                 for(k=1; k<=noz; k++) {
@@ -610,7 +576,6 @@ static void add_spherical_anomaly(struct All_variables *E)
 		      }
 		    }
                 }
-    return;
 }
 
 
