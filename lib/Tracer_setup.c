@@ -80,7 +80,7 @@ static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
 static void reduce_tracer_arrays(struct All_variables *E);
 static void put_away_later(struct All_variables *E, int j, int it);
-static void eject_tracer(struct All_variables *E, int j, int it);
+static void eject_tracer(struct All_variables *E, int it);
 int read_double_vector(FILE *, int , double *);
 void cart_to_sphere(struct All_variables *,
                     double , double , double ,
@@ -592,17 +592,13 @@ static void find_tracers(struct All_variables *E)
             iprevious_element=E->trace.ielement[CPPR][it];
 
             iel=(E->trace.iget_element)(E,CPPR,iprevious_element,x,y,z,theta,phi,rad);
-            /* debug *
-            fprintf(E->trace.fpt,"BB. kk %d %d %d %d %f %f %f %f %f %f\n",kk,j,iprevious_element,iel,x,y,z,theta,phi,rad);
-            fflush(E->trace.fpt);
-            /**/
 
             E->trace.ielement[CPPR][it]=iel;
 
             if (iel == -99) {
                 /* tracer is inside other processors */
                 put_away_later(E,CPPR,it);
-                eject_tracer(E,CPPR,it);
+                eject_tracer(E,it);
                 it--;
             } else if (iel == -1) {
                 /* tracer is inside this processor,
@@ -612,7 +608,7 @@ static void find_tracers(struct All_variables *E)
                 if (E->trace.itracer_warnings) exit(10);
 
 
-                eject_tracer(E,CPPR,it);
+                eject_tracer(E,it);
                 it--;
             }
 
@@ -1591,24 +1587,20 @@ void expand_later_array(struct All_variables *E, int j)
         }
     }
 
-
     fprintf(E->trace.fpt,"Expanding physical memory of rlater to %d from %d\n",
             inewsize,E->trace.ilatersize[CPPR]);
 
     E->trace.ilatersize[CPPR]=inewsize;
-
-    return;
 }
 
 
 /***** EJECT TRACER ************************************************/
 
-static void eject_tracer(struct All_variables *E, int j, int it)
+static void eject_tracer(struct All_variables *E, int it)
 {
 
     int ilast_tracer;
     int kk;
-
 
     ilast_tracer=E->trace.ntracers[CPPR];
 
@@ -1622,11 +1614,7 @@ static void eject_tracer(struct All_variables *E, int j, int it)
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
         E->trace.extraq[CPPR][kk][it]=E->trace.extraq[CPPR][kk][ilast_tracer];
 
-
-
     E->trace.ntracers[CPPR]--;
-
-    return;
 }
 
 
