@@ -168,9 +168,9 @@ double area_of_sphere_triag(a,b,c)
     angle [i]: angle bet test node and node i of the rectangle
     angle1[i]: angle bet nodes i and i+1 of the rectangle
     ====================================================================== */
-double area_of_5points(E,lev,m,el,x,ne)
+double area_of_5points(E,lev,el,x,ne)
      struct All_variables *E;
-     int lev,m,el,ne;
+     int lev,el,ne;
      double x[4];
 {
     int i,es,ia[5];

@@ -486,7 +486,7 @@ void even_divide_arc12(int, double, double, double, double, double, double, doub
 void compute_angle_surf_area(struct All_variables *);
 double area_sphere_cap(double [6]);
 double area_of_sphere_triag(double, double, double);
-double area_of_5points(struct All_variables *, int, int, int, double [4], int);
+double area_of_5points(struct All_variables *, int, int, double [4], int);
 void get_angle_sphere_cap(double [4][5], double [6]);
 double get_angle(double [4], double [4]);
 /* Stokes_flow_Incomp.c */
