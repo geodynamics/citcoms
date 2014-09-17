@@ -139,7 +139,6 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
   /* init done */
 
   /* assign values to each tracer based on grd file */
-  for (j=1;j<=E->sphere.caps_per_proc;j++) {
     number_of_tracers = E->trace.ntracers[CPPR];
     for (kk=1;kk <= number_of_tracers;kk++) {
       rad = E->trace.basicq[CPPR][2][kk]; /* tracer radius */
@@ -172,7 +171,6 @@ void ggrd_init_tracer_flavors(struct All_variables *E)
 	E->trace.extraq[CPPR][0][kk] = 0.0;
       }
     }
-  }
 
   /* free grd structure */
   ggrd_grdtrack_free_gstruc(ggrd_ict);
@@ -275,7 +273,6 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
   }
 
 
-  for(m=1;m <= E->sphere.caps_per_proc;m++)
     for(i=1;i <= noy;i++)
       for(j=1;j <= nox;j++)
 	for(k=1;k <= noz;k++)  {
@@ -510,7 +507,6 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
        loop through all elements and assign
        
     */
-    for (m=1;m <= E->sphere.caps_per_proc;m++) {
       for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
 	if(((E->control.ggrd.mat_control > 0) && (E->mat[CPPR][j] <=  E->control.ggrd.mat_control )) || 
 	   ((E->control.ggrd.mat_control < 0) && (E->mat[CPPR][j] == -E->control.ggrd.mat_control ))){
@@ -607,7 +603,6 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	  }
 	}
       }	/* end elz loop */
-    } /* end m loop */
     if(E->control.ggrd_mat_is_code){
       /* 
 	 code assignment 
@@ -620,12 +615,11 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
       }
       
       /* the grids were actually code flags from 1...cmax */
-      for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	for (j=1;j <= elz;j++) {
 	  for (k=1;k <= ely;k++){
 	    for (i=1;i <= elx;i++)   {
 	      el = j + (i-1) * elz + (k-1)*elxlz;
-	      if((int)E->VIP[m][el] < 1){ /* background */
+	      if((int)E->VIP[CPPR][el] < 1){ /* background */
 		E->VIP[CPPR][el] = 1.0;
 	      }else{
 		if((((int)E->VIP[CPPR][el]) > E->control.ggrd_mat_is_code)||(((int)E->VIP[CPPR][el]) < 1)){
@@ -637,7 +631,6 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	    }
 	  }
 	}
-      }
     }
   } /* end assignment loop */
   if((!timedep) && (!E->control.ggrd.mat_control_init)){
@@ -740,7 +733,6 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
     }
     if(E->parallel.me == 0)
       fprintf(stderr,"ggrd_read_ray_from_file: assigning at time %g\n",age);
-    for (m=1;m <= E->sphere.caps_per_proc;m++) {
       /* loop through all surface nodes */
       for (j=1;j <= E->lmesh.nsf;j++)  {
 	node = j * E->lmesh.noz ;
@@ -768,7 +760,6 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
 	}
 	E->control.surface_rayleigh[j] = vip;
       }	/* end node loop */
-    } /* end cap loop */
   } /* end assign loop */
   if((!timedep) && (!E->control.ggrd.ray_control_init)){			/* forget the grid */
     ggrd_grdtrack_free_gstruc(E->control.ggrd.ray);
@@ -1106,7 +1097,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	  nozl = E->lmesh.NOZ[level];
 	  noxlnozl = noxl*nozl;
 
-	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	    /* 
 	       determine vertical nodes and set the assign flag, if needed
 	    */
@@ -1200,7 +1190,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		}	/* end x loop */
 	      } /* end y loop */
 	    } /* actually assign */
-	  } /* cap */
 	} /* MG level */
 	fprintf(stderr,"ggrd_read_vtop_from_file: mixed_bc: %i free %i fixed for CPU %i\n",nfree,nfixed,E->parallel.me);
 
@@ -1223,9 +1212,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	cutoff = 1e30;
       }
 
-      for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	/* top level only */
-	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,m,verbose,
+	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,CPPR,verbose,
 						  &assign,&botnode,&topnode);
 	if(assign){	
 	  for(i=1;i <= noy;i++)	{/* loop through surface nodes */
@@ -1370,7 +1358,6 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	    } /* end x */
 	  } /* end y */
 	} /* end assign */
-      } /* end cap loop */
       
       if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
@@ -1461,7 +1448,6 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
   /* 
      need to scale buoy with the material determined rayleigh numbers
   */
-  for(m=1;m <= E->sphere.caps_per_proc;m++){
     for(snode=1;snode <= E->lmesh.nsf;snode++){ /* loop through surface nodes */
       if(fabs(E->control.surface_rayleigh[snode]-1.0)>1e-6){
 	for(i=1;i <= E->lmesh.noz;i++){ /* go through depth layers */
@@ -1492,7 +1478,6 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 	}
       }
     }
-  }
 
 }
 
@@ -1567,7 +1552,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
   /* isotropic default */
   for(i=E->mesh.gridmin;i <= E->mesh.gridmax;i++){
     nel  = E->lmesh.NEL[i];
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
       for(k=1;k <= nel;k++){
 	for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	  ind = (k-1)*vpts + l;
@@ -1577,7 +1561,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	    E->viscosity.allow_anisotropic_viscosity;
 	}
       }
-    }
   }
   if(is_geographic)		/* decide on GMT flag */
     sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic */
@@ -1654,7 +1637,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
   loop through all elements and assign
 
   */
-  for (m=1;m <= E->sphere.caps_per_proc;m++) {
     for (j=1;j <= elz;j++)  {	/* this assumes a regular grid sorted as in (1)!!! */
       if(((E->viscosity.anivisc_layer > 0)&&
 	  (E->mat[CPPR][j] <=   E->viscosity.anivisc_layer))||
@@ -1726,7 +1708,6 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	}
       }	/* end insize lith */
     }	/* end elz loop */
-  } /* end m loop */
 
 
   ggrd_grdtrack_free_gstruc(vis2_grd);
