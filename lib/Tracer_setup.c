@@ -384,7 +384,6 @@ static void predict_tracers(struct All_variables *E)
     dt=E->advection.timestep;
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
         numtracers=E->trace.ntracers[CPPR];
 
@@ -433,7 +432,6 @@ static void predict_tracers(struct All_variables *E)
 
 
         } /* end kk, predicting tracers */
-    } /* end caps */
 
     /* find new tracer elements and caps */
 
@@ -481,7 +479,6 @@ static void correct_tracers(struct All_variables *E)
     dt=E->advection.timestep;
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
         for (kk=1;kk<=E->trace.ntracers[CPPR];kk++) {
 
             theta_pred=E->trace.basicq[CPPR][0][kk];
@@ -524,7 +521,6 @@ static void correct_tracers(struct All_variables *E)
             E->trace.basicq[CPPR][5][kk]=z_cor;
 
         } /* end kk, correcting tracers */
-    } /* end caps */
 
     /* find new tracer elements and caps */
 
@@ -566,7 +562,6 @@ static void find_tracers(struct All_variables *E)
     double begin_time = CPU_time0();
 
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
 
         /* initialize arrays and statistical counters */
@@ -624,7 +619,6 @@ static void find_tracers(struct All_variables *E)
 
         } /* end tracers */
 
-    } /* end j */
 
 
     /* Now take care of tracers that exited cap */
@@ -641,13 +635,11 @@ static void find_tracers(struct All_variables *E)
 
     /* Free later arrays */
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-        if (E->trace.ilatersize[CPPR]>0) {
-            for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-                free(E->trace.rlater[CPPR][kk]);
-            }
+    if (E->trace.ilatersize[CPPR]>0) {
+        for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
+            free(E->trace.rlater[CPPR][kk]);
         }
-    } /* end j */
+    }
 
 
     /* Adjust Array Sizes */
@@ -671,7 +663,6 @@ void count_tracers_of_flavors(struct All_variables *E)
     int j, flavor, e, kk;
     int numtracers;
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
 
         /* first zero arrays */
         for (flavor=0; flavor<E->trace.nflavors; flavor++)
@@ -686,24 +677,6 @@ void count_tracers_of_flavors(struct All_variables *E)
             flavor = E->trace.extraq[CPPR][0][kk];
             E->trace.ntracer_flavor[CPPR][flavor][e]++;
         }
-    }
-
-    /* debug */
-    /**
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
-        for (e=1; e<=E->lmesh.nel; e++) {
-            fprintf(E->trace.fpt, "element=%d ntracer_flaver =", e);
-            for (flavor=0; flavor<E->trace.nflavors; flavor++) {
-                fprintf(E->trace.fpt, " %d",
-                        E->trace.ntracer_flavor[j][flavor][e]);
-            }
-            fprintf(E->trace.fpt, "\n");
-        }
-    }
-    fflush(E->trace.fpt);
-    /**/
-
-    return;
 }
 
 
@@ -761,8 +734,6 @@ static void make_tracer_array(struct All_variables *E)
 
     if (E->parallel.me==0) fprintf(stderr,"Making Tracer Array\n");
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
         processor_fraction=E->lmesh.volume/E->mesh.volume;
         tracers_cap=E->mesh.nel*E->trace.itperel*processor_fraction;
         /*
@@ -775,13 +746,10 @@ static void make_tracer_array(struct All_variables *E)
 
 
 
-    }/* end j */
 
 
     /* Initialize tracer flavors */
     if (E->trace.nflavors) init_tracer_flavors(E);
-
-    return;
 }
 
 
@@ -942,8 +910,6 @@ static void read_tracer_file(struct All_variables *E)
 
     iestimate=number_of_tracers/E->parallel.nproc + icushion;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
         allocate_tracer_arrays(E,CPPR,iestimate);
 
         for (kk=1;kk<=number_of_tracers;kk++) {
@@ -1002,22 +968,6 @@ static void read_tracer_file(struct All_variables *E)
 
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
                 E->trace.ntracers[CPPR]);
-
-        /** debug **
-        for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
-            fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
-                    E->trace.basicq[j][0][kk],
-                    E->trace.basicq[j][1][kk],
-                    E->trace.basicq[j][2][kk]);
-            fprintf(E->trace.fpt, "   extraq=");
-            for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                fprintf(E->trace.fpt, " %g", E->trace.extraq[j][i][kk]);
-            fprintf(E->trace.fpt, "\n");
-        }
-        fflush(E->trace.fpt);
-        /**/
-
-    } /* end j */
 
     fclose(fptracer);
 
@@ -1093,7 +1043,6 @@ static void read_old_tracer_file(struct All_variables *E)
     fprintf(stderr,"Read old tracers from %s\n",output_file);
 
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++) {
         fgets(input_s,200,fp1);
         if(sscanf(input_s,"%d %d %d %lf",
                   &idum1, &numtracers, &ncolumns, &rdum1) != 4) {
@@ -1147,24 +1096,9 @@ static void read_old_tracer_file(struct All_variables *E)
 
         }
 
-        /** debug **
-        for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
-            fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
-                    E->trace.basicq[j][0][kk],
-                    E->trace.basicq[j][1][kk],
-                    E->trace.basicq[j][2][kk]);
-            fprintf(E->trace.fpt, "   extraq=");
-            for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                fprintf(E->trace.fpt, " %g", E->trace.extraq[j][i][kk]);
-            fprintf(E->trace.fpt, "\n");
-        }
-        fflush(E->trace.fpt);
-        /**/
-
         fprintf(E->trace.fpt,"Read %d tracers from file %s\n",numtracers,output_file);
         fflush(E->trace.fpt);
 
-    }
     fclose(fp1);
 #ifdef USE_GZDIR
     if(strcmp(E->output.format, "ascii-gz") == 0)
@@ -1219,8 +1153,7 @@ static int isum_tracers(struct All_variables *E)
     iallcount = 0;
 
     imycount = 0;
-    for (j=1; j<=E->sphere.caps_per_proc; j++)
-        imycount = imycount + E->trace.ntracers[CPPR];
+    imycount = imycount + E->trace.ntracers[CPPR];
 
     MPI_Allreduce(&imycount,&iallcount,1,MPI_INT,MPI_SUM,E->parallel.world);
 
@@ -1243,9 +1176,6 @@ void cart_to_sphere(struct All_variables *E,
     *rad=sqrt(temp+z*z);
     *theta=atan2(sqrt(temp),z);
     *phi=myatan(y,x);
-
-
-    return;
 }
 
 /********** SPHERE TO CART ***********************/
@@ -1285,7 +1215,6 @@ static void init_tracer_flavors(struct All_variables *E)
       /* ic_method_for_flavors == 0 (layered structure) */
       /* any tracer above z_interface[i] is of flavor i */
       /* any tracer below z_interface is of flavor (nflavors-1) */
-      for (j=1;j<=E->sphere.caps_per_proc;j++) {
 
 	number_of_tracers = E->trace.ntracers[CPPR];
 	for (kk=1;kk<=number_of_tracers;kk++) {
@@ -1300,7 +1229,6 @@ static void init_tracer_flavors(struct All_variables *E)
           }
           E->trace.extraq[CPPR][0][kk] = flavor;
 	}
-      }
       break;
 
     case 1:			/* from grd in top n layers */
@@ -1360,8 +1288,6 @@ void get_neighboring_caps(struct All_variables *E)
     lev = E->mesh.levmax;
     tag = 45;
 
-    for (j=1; j<=E->sphere.caps_per_proc; j++) {
-
         /* loop over top corners to get their coordinates */
         n = 0;
         for (i=0; i<ncorners; i++) {
@@ -1419,28 +1345,6 @@ void get_neighboring_caps(struct All_variables *E)
                 E->trace.sin_phi[kk][i] = sin(phi);
             }
         } /* end kk, number of neighbors */
-
-        /* debugging output *
-        for (kk=0; kk<=num_ngb; kk++) {
-            if (kk==0)
-                neighbor_proc = E->parallel.me;
-            else
-                neighbor_proc = E->parallel.PROCESSOR[lev][1].pass[kk];
-
-            for (i=1; i<=ncorners; i++) {
-                fprintf(E->trace.fpt, "pass=%d rank=%d corner=%d "
-                        "sx=(%g, %g, %g)\n",
-                        kk, neighbor_proc, i,
-                        E->trace.theta_cap[kk][i],
-                        E->trace.phi_cap[kk][i],
-                        E->trace.rad_cap[kk][i]);
-            }
-        }
-        fflush(E->trace.fpt);
-        /**/
-    }
-
-    return;
 }
 
 
@@ -1569,9 +1473,6 @@ static void reduce_tracer_arrays(struct All_variables *E)
 
     int icushion=100;
 
-    for (j=1;j<=E->sphere.caps_per_proc;j++) {
-
-
         /* if physical size is double tracer size, reduce it */
 
         iempty_space=(E->trace.max_ntracers[CPPR]-E->trace.ntracers[CPPR]);
@@ -1618,10 +1519,6 @@ static void reduce_tracer_arrays(struct All_variables *E)
             E->trace.max_ntracers[CPPR]=inewsize;
 
         } /* end if */
-
-    } /* end j */
-
-    return;
 }
 
 
