@@ -50,7 +50,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [2
 #include "anisotropic_viscosity.h"
 #endif
 
-static void add_force(struct All_variables *E, int e, double elt_f[24], int m)
+static void add_force(struct All_variables *E, int e, double elt_f[24])
 {
   const int dims=E->mesh.nsd;
   const int ends=enodes[E->mesh.nsd];
@@ -99,7 +99,7 @@ void assemble_forces(E,penalty)
 
     for (e=1;e<=nel;e++)  {
       get_elt_f(E,e,elt_f,1,CPPR);
-      add_force(E, e, elt_f, CPPR);
+      add_force(E, e, elt_f);
     }
 
     /* for traction bc */
@@ -113,7 +113,7 @@ void assemble_forces(E,penalty)
           else
               get_elt_tr(E, i, a, elt_f, CPPR);
       }
-      add_force(E, e, elt_f, CPPR);
+      add_force(E, e, elt_f);
     }
 
   (E->solver.exchange_id_d)(E, E->F, lev);
@@ -954,9 +954,6 @@ void get_elt_g(E,el,elt_del,lev,m)
        elt_del[p  ][0] = -x[1] * temp;
        elt_del[p+1][0] = -x[2] * temp;
        elt_del[p+2][0] = -x[3] * temp;
-       
-      /* fprintf (E->fp,"B= %d %d %g %g %g %g %g\n",el,a,E->GDA[lev][m][el].ppt[1],E->GNX[lev][m][el].ppt[GNPXINDEX(0,a,1)],E->GNX[lev][m][el].ppt[GNPXINDEX(1,a,1)],elt_del[p][0],elt_del[p+1][0]);
-       */
      }
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
    }
