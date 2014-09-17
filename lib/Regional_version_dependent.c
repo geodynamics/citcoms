@@ -142,20 +142,16 @@ void regional_node_locations(E)
     }          /* lev   */
 
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)   {
      regional_coord_of_cap(E,CPPR,0);
-     }
 
 
   if (E->control.verbose) {
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
     fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
-    for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-      fprintf(E->fp_out,"output_coordinates for cap %d %d\n",CPPR,E->lmesh.NNO[lev]);
-      for (i=1;i<=E->lmesh.NNO[lev];i++)
-        if(i%E->lmesh.NOZ[lev]==1)
-             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
-      }
+    fprintf(E->fp_out,"output_coordinates for cap %d %d\n",CPPR,E->lmesh.NNO[lev]);
+    for (i=1;i<=E->lmesh.NNO[lev];i++)
+      if(i%E->lmesh.NOZ[lev]==1)
+        fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
     }
     fflush(E->fp_out);
   }
@@ -166,51 +162,16 @@ void regional_node_locations(E)
     myerror("ellipticity not implemented for regional code",E);
 #endif
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
         E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][CPPR][1][i]);
         E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]);
         E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][CPPR][1][i]);
         E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]);
-        }
-
-/*
-  if (E->parallel.me_loc[3]==E->parallel.nprocz-1)  {
-    sprintf(output_file,"coord.%d",E->parallel.me);
-    fp=fopen(output_file,"w");
-	if (fp == NULL) {
-          fprintf(E->fp,"(Nodal_mesh.c #2) Cannot open %s\n",output_file);
-          exit(8);
-	}
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
-      for(i=1;i<=E->lmesh.noy;i++) {
-        for(j=1;j<=E->lmesh.nox;j++)  {
-           node=1+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-           t1 = 90.0-E->sx[m][1][node]/M_PI*180.0;
-           f1 = E->sx[m][2][node]/M_PI*180.0;
-           fprintf(fp,"%f %f\n",t1,f1);
-           }
-        fprintf(fp,">\n");
-        }
-      for(j=1;j<=E->lmesh.nox;j++)  {
-        for(i=1;i<=E->lmesh.noy;i++) {
-           node=1+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
-           t1 = 90.0-E->sx[m][1][node]/M_PI*180.0;
-           f1 = E->sx[m][2][node]/M_PI*180.0;
-           fprintf(fp,"%f %f\n",t1,f1);
-           }
-        fprintf(fp,">\n");
-        }
       }
-     fclose(fp);
-     }
-*/
-
 
   if (E->control.verbose) {
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
     fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
-    for (j=1;j<=E->sphere.caps_per_proc;j++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)
         if(i%E->lmesh.NOZ[lev]==1)
              fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
@@ -239,15 +200,12 @@ void regional_construct_boundary( struct All_variables *E)
   int max_size = E->lmesh.elx*E->lmesh.ely*E->lmesh.elz
     - (E->lmesh.elx-2)*(E->lmesh.ely-2)*(E->lmesh.elz-2) + 1;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
-    E->boundary.element[CPPR] = (int *)malloc(max_size*sizeof(int));
+  E->boundary.element[CPPR] = (int *)malloc(max_size*sizeof(int));
 
-    for(d=1; d<=dims; d++)
-      E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
+  for(d=1; d<=dims; d++)
+    E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
 
-  }
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     count = 1;
     for(k=1; k<=E->lmesh.ely; k++)
       for(j=1; j<=E->lmesh.elx; j++)
@@ -302,5 +260,4 @@ void regional_construct_boundary( struct All_variables *E)
 	} /* end for i, j, k */
 
     E->boundary.nel = count - 1;
-  } /* end for m */
 }
