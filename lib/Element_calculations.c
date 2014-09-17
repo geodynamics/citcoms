@@ -558,9 +558,9 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 }
 
 
-void build_diagonal_of_K(E,el,elt_k,level,m)
+void build_diagonal_of_K(E,el,elt_k,level)
      struct All_variables *E;
-     int level,el,m;
+     int level,el;
      double elt_k[24*24];
 
 {
@@ -586,7 +586,7 @@ void build_diagonal_of_K(E,el,elt_k,level,m)
 	    a1 = E->ID[level][CPPR][node].doff[3];
 	    p=(a-1)*dims+2;
 	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
-            }
+    }
 }
 
 void build_diagonal_of_Ahat(struct All_variables *E)

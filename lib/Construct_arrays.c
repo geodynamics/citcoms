@@ -350,7 +350,7 @@ void construct_node_ks(E)
 	    if (E->control.augmented_Lagr)
 	         get_aug_k(E,element,elt_K,level,CPPR);
 
-            build_diagonal_of_K(E,element,elt_K,level,CPPR);
+            build_diagonal_of_K(E,element,elt_K,level);
 
 	    for(i=1;i<=ends;i++) {  /* i, is the node we are storing to */
 	       node=E->IEN[level][CPPR][element].node[i];
@@ -620,7 +620,7 @@ void construct_elt_ks(E)
 	    if (E->control.augmented_Lagr)
 	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
 
-            build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
+            build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev);
 
 	    }
 

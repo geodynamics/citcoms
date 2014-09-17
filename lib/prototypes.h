@@ -112,7 +112,7 @@ void get_elt_k(struct All_variables *, int, double [24*24], int, int, int);
 void assemble_del2_u(struct All_variables *, double **, double **, int, int);
 void e_assemble_del2_u(struct All_variables *, double **, double **, int, int);
 void n_assemble_del2_u(struct All_variables *, double **, double **, int, int);
-void build_diagonal_of_K(struct All_variables *, int, double [24*24], int, int);
+void build_diagonal_of_K(struct All_variables *, int, double [24*24], int);
 void build_diagonal_of_Ahat(struct All_variables *);
 void assemble_c_u(struct All_variables *, double **, double **, int);
 void assemble_div_rho_u(struct All_variables *, double **, double **, int);
