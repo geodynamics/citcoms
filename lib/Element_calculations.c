@@ -37,7 +37,7 @@
 /* else, PGI would complain */
 void construct_side_c3x3matrix_el(struct All_variables *,int ,
 				  struct CC *,struct CCX *,
-				  int ,int ,int ,int );
+				  int ,int ,int );
 void construct_c3x3matrix(struct All_variables *);
 void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
 			      struct CCX *,int ,int );
@@ -1098,8 +1098,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 	if(!found) return;
 
 	/* compute traction at each int point */
-	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
-				     E->mesh.levmax,m,0,side);
+	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx, E->mesh.levmax,0,side);
 
 	for(k=1;k<=oned;k++)
 		for(d=1;d<=dims;d++) {
@@ -1201,8 +1200,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 	if(!found) return;
 
 	/* compute traction at each int point */
-	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx,
-				     E->mesh.levmax,m,0,side);
+	construct_side_c3x3matrix_el(E,el,&Cc,&Ccx, E->mesh.levmax,0,side);
 
 	for(k=1;k<=oned;k++)
 		for(d=1;d<=dims;d++) {

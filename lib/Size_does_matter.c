@@ -663,7 +663,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
 void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 				  struct CC *cc,struct CCX *ccx,
-				  int lev,int m,int pressure,int side)
+				  int lev,int pressure,int side)
 {
   int a,aa,i,j,k,d,lnode;
   double cofactor(),myatan();
