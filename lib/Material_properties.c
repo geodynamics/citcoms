@@ -110,7 +110,6 @@ void reference_state(struct All_variables *E)
                     E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
         }
 
-    return;
 }
 
 
@@ -157,7 +156,6 @@ static void read_refstate(struct All_variables *E)
     }
 
     fclose(fp);
-    return;
 }
 
 
@@ -179,7 +177,6 @@ static void adams_williamson_eos(struct All_variables *E)
 	/*E->refstate.Tadi[i] = (E->control.adiabaticT0 + E->control.surface_temp) * exp(E->control.disptn_number * z) - E->control.surface_temp;*/
     }
 
-    return;
 }
 
 
@@ -274,5 +271,4 @@ static void murnaghan_eos(struct All_variables *E)
     free(rho);
     free(p);
 
-    return;
 }
