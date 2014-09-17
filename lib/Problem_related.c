@@ -42,7 +42,6 @@ void read_velocity_boundary_from_file(E)
      struct All_variables *E;
 {
     (E->solver.read_input_files_for_timesteps)(E,1,1); /* read velocity(1) and output(1) */
-    return;
 }
 #ifdef USE_GGRD
 /* 
@@ -55,7 +54,6 @@ void read_rayleigh_from_file(E)
      struct All_variables *E;
 {
   (E->solver.read_input_files_for_timesteps)(E,4,1); /* read Rayleigh number for top layers */
-  return;
 }
 #endif
 /*=======================================================================
@@ -66,8 +64,6 @@ void read_mat_from_file(E)
      struct All_variables *E;
 {
     (E->solver.read_input_files_for_timesteps)(E,3,1); /* read element material(3) and output(1) */
-  return;
-
 }
 /*=======================================================================
   read temperature at the top surface from files
@@ -77,7 +73,6 @@ void read_temperature_boundary_from_file(E)
      struct All_variables *E;
 {
     (E->solver.read_input_files_for_timesteps)(E,5,1); /* read temperature(5) and output(1) */
-    return;
 }
 
 
@@ -129,7 +124,6 @@ void get_initial_elapsed_time(E)
 #endif
     } /* end if tic_method */
 
-    return;
 }
 
 /*=======================================================================
@@ -142,8 +136,6 @@ void set_elapsed_time(E)
 
     if (E->control.zero_elapsed_time) /* set elapsed_time to zero */
 	E->monitor.elapsed_time = 0.0;
-
-   return;
 }
 
 /*=======================================================================
@@ -157,8 +149,6 @@ void set_starting_age(E)
 /* remember start_age is in MY */
     if (E->control.reset_startage)
 	E->control.start_age = E->monitor.elapsed_time*E->data.scalet;
-
-   return;
 }
 
 
