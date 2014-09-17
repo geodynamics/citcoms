@@ -1,6 +1,6 @@
 /*
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- /*
+ *
  *<LicenseText>
  *
  * CitcomS by Louis Moresi, Shijie Zhong, Lijie Han, Eh Tan,
@@ -941,8 +941,6 @@ void allocate_common_vars(E)
     m=0;
     n=1;
 
- for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-
   npno = E->lmesh.npno;
   nel  = E->lmesh.nel;
   nno  = E->lmesh.nno;
@@ -994,7 +992,6 @@ void allocate_common_vars(E)
   E->surf_element[CPPR] = (int *) malloc((nxyz+2)*sizeof(int));
   E->surf_node[CPPR]    = (int *) malloc((nsf+2)*sizeof(int));
 
-  }         /* end for cap j  */
 
   /* density field */
   E->rho      = (double *) malloc((nno+1)*sizeof(double));
@@ -1008,7 +1005,6 @@ void allocate_common_vars(E)
 
  for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
   E->sphere.R[i] = (double *)  malloc((E->lmesh.NOZ[i]+1)*sizeof(double));
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     nno  = E->lmesh.NNO[i];
     npno = E->lmesh.NPNO[i];
     nel  = E->lmesh.NEL[i];
@@ -1047,7 +1043,6 @@ void allocate_common_vars(E)
         E->X[i][CPPR][d][l] = 0.0;
         }
 
-    }
   }
 
  for(i=0;i<=E->output.llmax;i++)
@@ -1055,8 +1050,7 @@ void allocate_common_vars(E)
 				       *sizeof(int));
 
 
- for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
+ for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++) {
 
     nno  = E->lmesh.NNO[i];
     npno = E->lmesh.NPNO[i];
@@ -1105,8 +1099,7 @@ void allocate_common_vars(E)
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
  if(E->viscosity.allow_anisotropic_viscosity){ /* any anisotropic
 						  viscosity */
-   for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-     for (j=1;j<=E->sphere.caps_per_proc;j++)  {
+   for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++) {
        nel  = E->lmesh.NEL[i];
        nno  = E->lmesh.NNO[i];
        E->EVI2[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
@@ -1131,7 +1124,6 @@ void allocate_common_vars(E)
  }
 #endif
 
- for (j=1;j<=E->sphere.caps_per_proc;j++)  {
 
   for(k=1;k<=E->mesh.nsd;k++)
     for(i=1;i<=E->lmesh.nno;i++)
@@ -1156,7 +1148,6 @@ void allocate_common_vars(E)
   phase_change_allocate(E);
   set_up_nonmg_aliases(E,CPPR);
 
-  }         /* end for cap j  */
 
   if (strcmp(E->output.format, "hdf5") == 0)
       h5output_allocate_memory(E);
@@ -1179,7 +1170,6 @@ void allocate_velocity_vars(E)
 
  m=0;
  n=1;
-  for (j=1;j<=E->sphere.caps_per_proc;j++)   {
     E->lmesh.nnov = E->lmesh.nno;
     E->lmesh.neq = E->lmesh.nnov * E->mesh.nsd;
 
@@ -1204,10 +1194,8 @@ void allocate_velocity_vars(E)
       for(i=1;i<=E->lmesh.nnov;i++)
         E->sphere.cap[CPPR].VB[k][i] = 0.0;
 
-  }       /* end for cap j */
 
-  for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)   {
+  for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++) {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
 
       E->BI[l][CPPR] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
@@ -1221,9 +1209,7 @@ void allocate_velocity_vars(E)
          }
 
       }   /* end for j & l */
-
-  return;
- }
+}
 
 
 /*  =========================================================  */
@@ -1331,10 +1317,10 @@ void global_default_values(E)
 void check_bc_consistency(E)
      struct All_variables *E;
 
-{ int i,j,lev;
+{ 
+  int i,j,lev;
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-    for(i=1;i<=E->lmesh.nno;i++)    {
+    for(i=1;i<=E->lmesh.nno;i++) {
       if ((E->node[CPPR][i] & VBX) && (E->node[CPPR][i] & SBX))
         printf("Inconsistent x velocity bc at %d\n",i);
       if ((E->node[CPPR][i] & VBZ) && (E->node[CPPR][i] & SBZ))
@@ -1348,11 +1334,9 @@ void check_bc_consistency(E)
       if ((E->node[CPPR][i] & TBY) && (E->node[CPPR][i] & FBY))
         printf("Inconsistent y temperature bc at %d\n",i);
       }
-    }          /* end for j */
 
-  for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
-    for (j=1;j<=E->sphere.caps_per_proc;j++)  {
-      for(i=1;i<=E->lmesh.NNO[lev];i++)        {
+  for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++) {
+      for(i=1;i<=E->lmesh.NNO[lev];i++) {
         if ((E->NODE[lev][CPPR][i] & VBX) && (E->NODE[lev][CPPR][i]  & SBX))
           printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
         if ((E->NODE[lev][CPPR][i] & VBZ) && (E->NODE[lev][CPPR][i]  & SBZ))
@@ -1361,11 +1345,7 @@ void check_bc_consistency(E)
           printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
         /* Tbc's not applicable below top level */
         }
-
     }   /* end for  j and lev */
-
-  return;
-
 }
 
 void set_up_nonmg_aliases(E,j)
@@ -1392,8 +1372,7 @@ void set_up_nonmg_aliases(E,j)
     E->x[CPPR][i] = E->X[E->mesh.levmax][CPPR][i];
     E->sx[CPPR][i] = E->SX[E->mesh.levmax][CPPR][i];
     }
-
-  return; }
+}
 
 void report(E,string)
      struct All_variables *E;
@@ -1402,7 +1381,6 @@ void report(E,string)
     { fprintf(stderr,"%s\n",string);
       fflush(stderr);
     }
-  return;
 }
 
 void record(E,string)
@@ -1450,11 +1428,8 @@ void initial_pressure(E)
     int i,m;
     report(E,"Initialize pressure field");
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=0;i<E->lmesh.npno;i++)
       E->P[CPPR][i]=0.0;
-
-  return;
 }
 
 void initial_velocity(E)
@@ -1463,14 +1438,11 @@ void initial_velocity(E)
     int i,m;
     report(E,"Initialize velocity field");
 
-  for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nnov;i++)   {
         E->sphere.cap[CPPR].V[1][i]=0.0;
         E->sphere.cap[CPPR].V[2][i]=0.0;
         E->sphere.cap[CPPR].V[3][i]=0.0;
-        }
-
-    return;
+    }
 }
 
 
