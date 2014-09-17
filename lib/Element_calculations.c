@@ -609,7 +609,7 @@ void build_diagonal_of_Ahat(struct All_variables *E)
         return;
 
       for(e=0;e<npno;e++) {
-        BU=assemble_dAhatp_entry(E,e,level,CPPR);
+        BU=assemble_dAhatp_entry(E,e,level);
         if(BU != 0.0)
 	        E->BPI[level][CPPR][e+1] = 1.0/BU;
         else
@@ -742,7 +742,7 @@ void assemble_grad_p(E,P,gradP,lev)
 }
 
 
-double assemble_dAhatp_entry(struct All_variables *E, int e, int level, int m)
+double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
 {
     int i,j,p,a,b,node,npno;
     void strip_bcs_from_residual();
