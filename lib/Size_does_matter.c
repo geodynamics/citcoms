@@ -99,17 +99,17 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.vpt[GNVINDEX(i,k)];
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
                 for(i=1;i<=ends;i++)
-                    dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+                    dxda[d][e] += E->X[lev][CPPR][e][E->IEN[lev][CPPR][el].node[i]]
                         * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda, E->mesh.nsd);
-        E->GDA[lev][m][el].vpt[k] = jacobian;
+        E->GDA[lev][CPPR][el].vpt[k] = jacobian;
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
@@ -128,7 +128,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(j=1;j<=ends;j++)
             for(d=1;d<=dims;d++)         {
-                E->GNX[lev][m][el].vpt[GNVXINDEX(d-1,j,k)]
+                E->GNX[lev][CPPR][el].vpt[GNVXINDEX(d-1,j,k)]
                     = bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
                     + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
                     + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
@@ -144,17 +144,17 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.ppt[GNPINDEX(i,k)];
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
                 for(i=1;i<=ends;i++)
-                    dxda[d][e] += E->X[lev][m][e][E->IEN[lev][m][el].node[i]]
+                    dxda[d][e] += E->X[lev][CPPR][e][E->IEN[lev][CPPR][el].node[i]]
                         * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda,E->mesh.nsd);
-        E->GDA[lev][m][el].ppt[k] = jacobian;
+        E->GDA[lev][CPPR][el].ppt[k] = jacobian;
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
@@ -171,7 +171,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
             }
         for(j=1;j<=ends;j++)
             for(d=1;d<=dims;d++)         {
-                E->GNX[lev][m][el].ppt[GNPXINDEX(d-1,j,k)]
+                E->GNX[lev][CPPR][el].ppt[GNPXINDEX(d-1,j,k)]
                     = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
                     + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
                     + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
@@ -188,13 +188,9 @@ void construct_shape_function_derivatives(struct All_variables *E)
 {
     int m, lev, el;
 
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for(lev=E->mesh.levmax; lev>=E->mesh.levmin; lev--)
-            for(el=1; el<=E->lmesh.NEL[lev]; el++) {
-                get_global_shape_fn_sph(E, m, lev, el);
-            }
-
-    return;
+    for(lev=E->mesh.levmax; lev>=E->mesh.levmin; lev--)
+        for(el=1; el<=E->lmesh.NEL[lev]; el++)
+            get_global_shape_fn_sph(E, CPPR, lev, el);
 }
 
 
@@ -221,15 +217,13 @@ void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.vpt[GNVINDEX(i,k)];
 
         rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]); /* 1/r */
         rtf[1][k] = acos(x[3]*rtf[3][k]); /* theta */
         rtf[2][k] = myatan(x[2],x[1]); /* phi */
     }
-
-    return;
 }
 
 
@@ -251,15 +245,13 @@ void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[i]]
+                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.ppt[GNPINDEX(i,k)];
 
         rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
         rtf[1][k] = acos(x[3]*rtf[3][k]);
         rtf[2][k] = myatan(x[2],x[1]);
     }
-
-    return;
 }
 
 
@@ -271,12 +263,12 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5],
   const int oned = onedvpoints[E->mesh.nsd];
 
 #ifdef ALLOW_ELLIPTICAL
-  to = theta_g(E->eco[m][el].centre[1],E);
+  to = theta_g(E->eco[CPPR][el].centre[1],E);
 #else
-  to = E->eco[m][el].centre[1];	
+  to = E->eco[CPPR][el].centre[1];	
 #endif
 
-  fo = E->eco[m][el].centre[2];
+  fo = E->eco[CPPR][el].centre[2];
 
   dxdy[1][1] = cos(to)*cos(fo);
   dxdy[1][2] = cos(to)*sin(fo);
@@ -290,16 +282,16 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5],
 
   for(i=1;i<=oned;i++) {     /* nodes */
     s = sidenodes[side][i];
-    node = E->ien[m][el].node[s];
-    xx[1][i] = E->x[m][1][node]*dxdy[1][1]
-             + E->x[m][2][node]*dxdy[1][2]
-             + E->x[m][3][node]*dxdy[1][3];
-    xx[2][i] = E->x[m][1][node]*dxdy[2][1]
-             + E->x[m][2][node]*dxdy[2][2]
-             + E->x[m][3][node]*dxdy[2][3];
-    xx[3][i] = E->x[m][1][node]*dxdy[3][1]
-             + E->x[m][2][node]*dxdy[3][2]
-             + E->x[m][3][node]*dxdy[3][3];
+    node = E->ien[CPPR][el].node[s];
+    xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
+             + E->x[CPPR][2][node]*dxdy[1][2]
+             + E->x[CPPR][3][node]*dxdy[1][3];
+    xx[2][i] = E->x[CPPR][1][node]*dxdy[2][1]
+             + E->x[CPPR][2][node]*dxdy[2][2]
+             + E->x[CPPR][3][node]*dxdy[2][3];
+    xx[3][i] = E->x[CPPR][1][node]*dxdy[3][1]
+             + E->x[CPPR][2][node]*dxdy[3][2]
+             + E->x[CPPR][3][node]*dxdy[3][3];
   }
 }
 
@@ -322,15 +314,15 @@ void construct_surf_det (E)
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
-      E->surf_det[m][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
+      E->surf_det[CPPR][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
     }
 
   for (m=1;m<=E->sphere.caps_per_proc;m++) {
-  r2 = 1.0 / (E->sx[m][3][E->lmesh.elz+1] * E->sx[m][3][E->lmesh.elz+1]);
+  r2 = 1.0 / (E->sx[CPPR][3][E->lmesh.elz+1] * E->sx[CPPR][3][E->lmesh.elz+1]);
 
   for (es=1;es<=E->lmesh.snel;es++)   {
     el = es * E->lmesh.elz;
-    get_side_x_cart(E, xx, el, SIDE_TOP, m);
+    get_side_x_cart(E, xx, el, SIDE_TOP, CPPR);
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       for(d=1;d<=E->mesh.nsd-1;d++)
@@ -345,7 +337,7 @@ void construct_surf_det (E)
       jacobian = determinant(dxda,E->mesh.nsd-1);
 
       /* scale the jacobian so that it is defined on a unit sphere */
-      E->surf_det[m][k][es] = jacobian * r2;
+      E->surf_det[CPPR][k][es] = jacobian * r2;
       }
     }
   }
@@ -373,14 +365,14 @@ void construct_bdry_det(struct All_variables *E)
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for (side=SIDE_BEGIN; side<=SIDE_END; side++)
       for(d=1; d<=oned; d++)
-	E->boundary.det[m][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
+	E->boundary.det[CPPR][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
 
   for (m=1;m<=E->sphere.caps_per_proc;m++)
     for (es=1;es<=E->boundary.nel;es++) {
-      el = E->boundary.element[m][es];
+      el = E->boundary.element[CPPR][es];
 
       for (side=SIDE_BEGIN; side<=SIDE_END; side++) {
-	get_side_x_cart(E, xx, el, side, m);
+	get_side_x_cart(E, xx, el, side, CPPR);
 
 	for(k=1;k<=oned;k++) { /* all of the vpoints*/
 
@@ -394,23 +386,10 @@ void construct_bdry_det(struct All_variables *E)
 		dxda[d][e] += xx[sidedim[side][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
 	  jacobian = determinant(dxda,E->mesh.nsd-1);
-	  E->boundary.det[m][side][k][es] = jacobian;
+	  E->boundary.det[CPPR][side][k][es] = jacobian;
 	}
 
-	/*
-	fprintf(stderr, "Boundary det: %d %d- %e %e %e %e; sum = %e\n", el, side,
-	      E->boundary.det[m][side][1][es],
-	      E->boundary.det[m][side][2][es],
-	      E->boundary.det[m][side][3][es],
-	      E->boundary.det[m][side][4][es],
-	      E->boundary.det[m][side][1][es]+
-	      E->boundary.det[m][side][2][es]+
-	      E->boundary.det[m][side][3][es]+
-	      E->boundary.det[m][side][4][es]);
-	*/
       }
-
-
     }
 }
 
@@ -435,7 +414,7 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
 
   for (ii=0;ii<=top;ii++)   {   /* ii=0 for bottom and ii=1 for top */
 
-    get_side_x_cart(E, xx, el, ii+1, m);
+    get_side_x_cart(E, xx, el, ii+1, CPPR);
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       for(d=1;d<=E->mesh.nsd-1;d++)
@@ -473,11 +452,11 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
     double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
 
 #ifdef ALLOW_ELLIPTICAL
-    to = theta_g(E->eco[m][el].centre[1],E);
+    to = theta_g(E->eco[CPPR][el].centre[1],E);
 #else
-    to = E->eco[m][el].centre[1]; 
+    to = E->eco[CPPR][el].centre[1]; 
 #endif
-    fo = E->eco[m][el].centre[2];
+    fo = E->eco[CPPR][el].centre[2];
 
     dxdy[1][1] = cos(to)*cos(fo);
     dxdy[1][2] = cos(to)*sin(fo);
@@ -493,16 +472,16 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
 
         for(i=1;i<=oned;i++) {     /* nodes */
             e = i+ii*oned;
-            node = E->ien[m][el].node[e];
-            xx[1][i] = E->x[m][1][node]*dxdy[1][1]
-                + E->x[m][2][node]*dxdy[1][2]
-                + E->x[m][3][node]*dxdy[1][3];
-            xx[2][i] = E->x[m][1][node]*dxdy[2][1]
-                + E->x[m][2][node]*dxdy[2][2]
-                + E->x[m][3][node]*dxdy[2][3];
-            xx[3][i] = E->x[m][1][node]*dxdy[3][1]
-                + E->x[m][2][node]*dxdy[3][2]
-                + E->x[m][3][node]*dxdy[3][3];
+            node = E->ien[CPPR][el].node[e];
+            xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
+                + E->x[CPPR][2][node]*dxdy[1][2]
+                + E->x[CPPR][3][node]*dxdy[1][3];
+            xx[2][i] = E->x[CPPR][1][node]*dxdy[2][1]
+                + E->x[CPPR][2][node]*dxdy[2][2]
+                + E->x[CPPR][3][node]*dxdy[2][3];
+            xx[3][i] = E->x[CPPR][1][node]*dxdy[3][1]
+                + E->x[CPPR][2][node]*dxdy[3][2]
+                + E->x[CPPR][3][node]*dxdy[3][3];
         }
 
         for(k=1;k<=oned;k++)    { /* all of the vpoints*/
@@ -542,7 +521,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
   const int oned = onedvpoints[E->mesh.nsd];
   double xx[4][5],dxda[4][4];
 
-  get_side_x_cart(E, xx, el, side, m);
+  get_side_x_cart(E, xx, el, side, CPPR);
 
   for(k=1;k<=oned;k++)    {
 
@@ -587,7 +566,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
       for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.vpt[GNVINDEX(a,k)];
 
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -615,8 +594,8 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
       ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
       for(a=1;a<=ends;a++)   {
-          tt = E->SX[lev][m][1][E->IEN[lev][m][el].node[a]];
-          ff = E->SX[lev][m][2][E->IEN[lev][m][el].node[a]];
+          tt = E->SX[lev][CPPR][1][E->IEN[lev][CPPR][el].node[a]];
+          ff = E->SX[lev][CPPR][2][E->IEN[lev][CPPR][el].node[a]];
           costt = cos(tt);
           cosff = cos(ff);
           sintt = sin(tt);
@@ -648,7 +627,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -677,11 +656,11 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
         for(a=1;a<=ends;a++)   {
 
-	  lnode = E->IEN[lev][m][el].node[a];
-	  sintt = E->SinCos[lev][m][0][lnode];
-	  sinff = E->SinCos[lev][m][1][lnode];
-	  costt = E->SinCos[lev][m][2][lnode];
-	  cosff = E->SinCos[lev][m][3][lnode];
+	  lnode = E->IEN[lev][CPPR][el].node[a];
+	  sintt = E->SinCos[lev][CPPR][0][lnode];
+	  sinff = E->SinCos[lev][CPPR][1][lnode];
+	  costt = E->SinCos[lev][CPPR][2][lnode];
+	  cosff = E->SinCos[lev][CPPR][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -729,7 +708,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       for(d=1;d<=dims;d++)
 	for(aa=1;aa<=ends;aa++) {
 	  a=sidenodes[side][aa];
-	  x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+	  x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
 	    *E->M.vpt[GMVINDEX(aa,k)];
 
 	}
@@ -762,11 +741,11 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       for(aa=1;aa<=ends;aa++) {
 	a=sidenodes[side][aa];
 
-	lnode = E->IEN[lev][m][el].node[a];
-	sintt = E->SinCos[lev][m][0][lnode];
-	sinff = E->SinCos[lev][m][1][lnode];
-	costt = E->SinCos[lev][m][2][lnode];
-	cosff = E->SinCos[lev][m][3][lnode];
+	lnode = E->IEN[lev][CPPR][el].node[a];
+	sintt = E->SinCos[lev][CPPR][0][lnode];
+	sinff = E->SinCos[lev][CPPR][1][lnode];
+	costt = E->SinCos[lev][CPPR][2][lnode];
+	cosff = E->SinCos[lev][CPPR][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -791,7 +770,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
        	x[d]=0.0;
       for(a=1;a<=ends;a++) {
        	aa=sidenodes[side][a];
-       	x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[aa]]
+       	x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[aa]]
        	  *E->M.ppt[GMPINDEX(a,k)];
       }
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -821,11 +800,11 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       for(a=1;a<=ends;a++)   {
 	aa=sidenodes[side][a];
 
-	lnode = E->IEN[lev][m][el].node[aa];
-	sintt = E->SinCos[lev][m][0][lnode];
-	sinff = E->SinCos[lev][m][1][lnode];
-	costt = E->SinCos[lev][m][2][lnode];
-	cosff = E->SinCos[lev][m][3][lnode];
+	lnode = E->IEN[lev][CPPR][el].node[aa];
+	sintt = E->SinCos[lev][CPPR][0][lnode];
+	sinff = E->SinCos[lev][CPPR][1][lnode];
+	costt = E->SinCos[lev][CPPR][2][lnode];
+	cosff = E->SinCos[lev][CPPR][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -876,7 +855,7 @@ void construct_c3x3matrix(E)
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.vpt[GNVINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -905,11 +884,11 @@ void construct_c3x3matrix(E)
 
         for(a=1;a<=ends;a++)   {
 
-	  lnode = E->IEN[lev][m][el].node[a];
-	  sintt = E->SinCos[lev][m][0][lnode];
-	  sinff = E->SinCos[lev][m][1][lnode];
-	  costt = E->SinCos[lev][m][2][lnode];
-	  cosff = E->SinCos[lev][m][3][lnode];
+	  lnode = E->IEN[lev][CPPR][el].node[a];
+	  sintt = E->SinCos[lev][CPPR][0][lnode];
+	  sinff = E->SinCos[lev][CPPR][1][lnode];
+	  costt = E->SinCos[lev][CPPR][2][lnode];
+	  cosff = E->SinCos[lev][CPPR][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -917,11 +896,11 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][m][es].vpt[BVINDEX(i,j,a,k)] =
+              E->CC[lev][CPPR][es].vpt[BVINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
-              E->CCX[lev][m][es].vpt[BVXINDEX(i,j,1,a,k)] =
+              E->CCX[lev][CPPR][es].vpt[BVXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
-              E->CCX[lev][m][es].vpt[BVXINDEX(i,j,2,a,k)] =
+              E->CCX[lev][CPPR][es].vpt[BVXINDEX(i,j,2,a,k)] =
                     ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
               }
           }      /* end for local node */
@@ -934,7 +913,7 @@ void construct_c3x3matrix(E)
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][m][d][E->IEN[lev][m][el].node[a]]
+            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -963,11 +942,11 @@ void construct_c3x3matrix(E)
 
         for(a=1;a<=ends;a++)   {
 
-	  lnode = E->IEN[lev][m][el].node[a];
-	  sintt = E->SinCos[lev][m][0][lnode];
-	  sinff = E->SinCos[lev][m][1][lnode];
-	  costt = E->SinCos[lev][m][2][lnode];
-	  cosff = E->SinCos[lev][m][3][lnode];
+	  lnode = E->IEN[lev][CPPR][el].node[a];
+	  sintt = E->SinCos[lev][CPPR][0][lnode];
+	  sinff = E->SinCos[lev][CPPR][1][lnode];
+	  costt = E->SinCos[lev][CPPR][2][lnode];
+	  cosff = E->SinCos[lev][CPPR][3][lnode];
 
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
@@ -976,11 +955,11 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][m][es].ppt[BPINDEX(i,j,a,k)] =
+              E->CC[lev][CPPR][es].ppt[BPINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
-              E->CCX[lev][m][es].ppt[BPXINDEX(i,j,1,a,k)] =
+              E->CCX[lev][CPPR][es].ppt[BPXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
-              E->CCX[lev][m][es].ppt[BPXINDEX(i,j,2,a,k)] =
+              E->CCX[lev][CPPR][es].ppt[BPXINDEX(i,j,2,a,k)] =
                     ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
               }
 
@@ -1019,18 +998,18 @@ void mass_matrix(struct All_variables *E)
         for (m=1;m<=E->sphere.caps_per_proc;m++)   {
 
             for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->MASS[lev][m][node] = 0.0;
+                E->MASS[lev][CPPR][node] = 0.0;
 
             for(e=1;e<=E->lmesh.NEL[lev];e++)  {
 
                 area = centre[1] = centre[2] = centre[3] = 0.0;
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
-                    n[node] = E->IEN[lev][m][e].node[node];
+                    n[node] = E->IEN[lev][CPPR][e].node[node];
 
                 for(i=1;i<=E->mesh.nsd;i++)  {
                     for(node=1;node<=enodes[E->mesh.nsd];node++)
-                        centre[i] += E->X[lev][m][i][n[node]];
+                        centre[i] += E->X[lev][CPPR][i][n[node]];
 
                     centre[i] = centre[i]/enodes[E->mesh.nsd];
                 }     /* end for i */
@@ -1041,61 +1020,61 @@ void mass_matrix(struct All_variables *E)
                 dx2 = myatan(centre[2],centre[1]);
 
                 /* center of this element in the spherical coordinate */
-                E->ECO[lev][m][e].centre[1] = dx1;
-                E->ECO[lev][m][e].centre[2] = dx2;
-                E->ECO[lev][m][e].centre[3] = dx3;
+                E->ECO[lev][CPPR][e].centre[1] = dx1;
+                E->ECO[lev][CPPR][e].centre[2] = dx2;
+                E->ECO[lev][CPPR][e].centre[3] = dx3;
 
                 /* delta(theta) of this element */
-                dx1 = max( fabs(E->SX[lev][m][1][n[3]]-E->SX[lev][m][1][n[1]]),
-                           fabs(E->SX[lev][m][1][n[2]]-E->SX[lev][m][1][n[4]]) );
+                dx1 = max( fabs(E->SX[lev][CPPR][1][n[3]]-E->SX[lev][CPPR][1][n[1]]),
+                           fabs(E->SX[lev][CPPR][1][n[2]]-E->SX[lev][CPPR][1][n[4]]) );
 
                 /* length of this element in the theta-direction */
-                E->ECO[lev][m][e].size[1] = dx1*E->ECO[lev][m][e].centre[3];
+                E->ECO[lev][CPPR][e].size[1] = dx1*E->ECO[lev][CPPR][e].centre[3];
 
                 /* delta(phi) of this element */
-                dx1 = fabs(E->SX[lev][m][2][n[3]]-E->SX[lev][m][2][n[1]]);
+                dx1 = fabs(E->SX[lev][CPPR][2][n[3]]-E->SX[lev][CPPR][2][n[1]]);
                 if (dx1>M_PI)
-                    dx1 = min(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[3]],E->SX[lev][m][2][n[1]]) ;
+                    dx1 = min(E->SX[lev][CPPR][2][n[3]],E->SX[lev][CPPR][2][n[1]]) + 2.0*M_PI -
+                        max(E->SX[lev][CPPR][2][n[3]],E->SX[lev][CPPR][2][n[1]]) ;
 
-                dx2 = fabs(E->SX[lev][m][2][n[2]]-E->SX[lev][m][2][n[4]]);
+                dx2 = fabs(E->SX[lev][CPPR][2][n[2]]-E->SX[lev][CPPR][2][n[4]]);
                 if (dx2>M_PI)
-                    dx2 = min(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) + 2.0*M_PI -
-                        max(E->SX[lev][m][2][n[2]],E->SX[lev][m][2][n[4]]) ;
+                    dx2 = min(E->SX[lev][CPPR][2][n[2]],E->SX[lev][CPPR][2][n[4]]) + 2.0*M_PI -
+                        max(E->SX[lev][CPPR][2][n[2]],E->SX[lev][CPPR][2][n[4]]) ;
 
                 dx2 = max(dx1,dx2);
 
                 /* length of this element in the phi-direction */
-                E->ECO[lev][m][e].size[2] = dx2*E->ECO[lev][m][e].centre[3]
-                    *sin(E->ECO[lev][m][e].centre[1]);
+                E->ECO[lev][CPPR][e].size[2] = dx2*E->ECO[lev][CPPR][e].centre[3]
+                    *sin(E->ECO[lev][CPPR][e].centre[1]);
 
                 /* delta(radius) of this element */
-                dx3 = 0.25*(fabs(E->SX[lev][m][3][n[5]]+E->SX[lev][m][3][n[6]]
-                                 +E->SX[lev][m][3][n[7]]+E->SX[lev][m][3][n[8]]
-                                 -E->SX[lev][m][3][n[1]]-E->SX[lev][m][3][n[2]]
-                                 -E->SX[lev][m][3][n[3]]-E->SX[lev][m][3][n[4]]));
+                dx3 = 0.25*(fabs(E->SX[lev][CPPR][3][n[5]]+E->SX[lev][CPPR][3][n[6]]
+                                 +E->SX[lev][CPPR][3][n[7]]+E->SX[lev][CPPR][3][n[8]]
+                                 -E->SX[lev][CPPR][3][n[1]]-E->SX[lev][CPPR][3][n[2]]
+                                 -E->SX[lev][CPPR][3][n[3]]-E->SX[lev][CPPR][3][n[4]]));
 
                 /* length of this element in the radius-direction */
-                E->ECO[lev][m][e].size[3] = dx3;
+                E->ECO[lev][CPPR][e].size[3] = dx3;
 
                 /* volume (area in 2D) of this element */
                 for(nint=1;nint<=vpts;nint++)
-                    area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][m][e].vpt[nint];
-                E->ECO[lev][m][e].area = area;
+                    area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][CPPR][e].vpt[nint];
+                E->ECO[lev][CPPR][e].area = area;
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)  {
                     temp[node] = 0.0;
                     for(nint=1;nint<=vpts;nint++)
-                        temp[node] += E->GDA[lev][m][e].vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
+                        temp[node] += E->GDA[lev][CPPR][e].vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
                             *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
                 }
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
-                    E->MASS[lev][m][E->IEN[lev][m][e].node[node]] += temp[node];
+                    E->MASS[lev][CPPR][E->IEN[lev][CPPR][e].node[node]] += temp[node];
 
                 /* weight of each node, equivalent to pmass in ConMan */
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
-                    E->TWW[lev][m][e].node[node] = temp[node];
+                    E->TWW[lev][CPPR][e].node[node] = temp[node];
 
 
             } /* end of ele*/
@@ -1105,14 +1084,14 @@ void mass_matrix(struct All_variables *E)
         if(lev == E->mesh.levmax)
             for (m=1;m<=E->sphere.caps_per_proc;m++)
                 for(node=1;node<=E->lmesh.NNO[lev];node++)
-                    E->NMass[m][node] = E->MASS[lev][m][node];
+                    E->NMass[CPPR][node] = E->MASS[lev][CPPR][node];
 
         if (E->control.NMULTIGRID||E->mesh.levmax==lev)
             (E->exchange_node_d)(E,E->MASS[lev],lev);
 
         for (m=1;m<=E->sphere.caps_per_proc;m++)
             for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->MASS[lev][m][node] = 1.0/E->MASS[lev][m][node];
+                E->MASS[lev][CPPR][node] = 1.0/E->MASS[lev][CPPR][node];
 
     } /* end of for lev */
 
@@ -1120,23 +1099,23 @@ void mass_matrix(struct All_variables *E)
     for (m=1;m<=E->sphere.caps_per_proc;m++) {
 
         for(node=1;node<=E->lmesh.nno;node++)
-            E->TMass[m][node] = 0.0;
+            E->TMass[CPPR][node] = 0.0;
 
         for(e=1;e<=E->lmesh.nel;e++)  {
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
                 temp[node] = 0.0;
-                nz = ((E->ien[m][e].node[node]-1) % E->lmesh.noz) + 1;
+                nz = ((E->ien[CPPR][e].node[node]-1) % E->lmesh.noz) + 1;
                 for(nint=1;nint<=vpts;nint++)
                     temp[node] += E->refstate.rho[nz]
                         * E->refstate.heat_capacity[nz]
-                        * E->gDA[m][e].vpt[nint]
+                        * E->gDA[CPPR][e].vpt[nint]
                         * g_point[nint].weight[E->mesh.nsd-1]
                         * E->N.vpt[GNVINDEX(node,nint)];
             }
 
             /* lumped mass matrix, equivalent to tmass in ConMan */
             for(node=1;node<=enodes[E->mesh.nsd];node++)
-                E->TMass[m][E->ien[m][e].node[node]] += temp[node];
+                E->TMass[CPPR][E->ien[CPPR][e].node[node]] += temp[node];
 
         } /* end of for e */
     } /* end of for m */
@@ -1144,7 +1123,7 @@ void mass_matrix(struct All_variables *E)
     (E->exchange_node_d)(E,E->TMass,E->mesh.levmax);
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for(node=1;node<=E->lmesh.nno;node++)
-            E->TMass[m][node] = 1.0 / E->TMass[m][node];
+            E->TMass[CPPR][node] = 1.0 / E->TMass[CPPR][node];
 
 
     /* compute volume of this processor mesh and the whole mesh */
@@ -1153,7 +1132,7 @@ void mass_matrix(struct All_variables *E)
 
     for (m=1;m<=E->sphere.caps_per_proc;m++)
         for(e=1;e<=E->lmesh.nel;e++)
-            E->lmesh.volume += E->eco[m][e].area;
+            E->lmesh.volume += E->eco[CPPR][e].area;
 
     MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE,
                   MPI_SUM, E->parallel.world);
@@ -1166,27 +1145,19 @@ void mass_matrix(struct All_variables *E)
         for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
             fprintf(E->fp_out,"output_mass lev=%d\n",lev);
             for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-                fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
+                fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
                 for(e=1;e<=E->lmesh.NEL[lev];e++)
-                    fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][m][e].area);
+                    fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][CPPR][e].area);
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
-                    fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][m][node]);
+                    fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][CPPR][node]);
             }
         }
 
         for (m=1;m<=E->sphere.caps_per_proc;m++)   {
-            fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[m],m);
+            fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
             for (node=1;node<=E->lmesh.nno;node++)
-                fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[m][node]);
+                fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[CPPR][node]);
         }
         fflush(E->fp_out);
     }
-
-    return;
 }
-
-
-/* version */
-/* $Id$ */
-
-/* End of file  */
