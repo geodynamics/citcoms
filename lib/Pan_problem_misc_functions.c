@@ -63,7 +63,7 @@ void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 void get_r_spacing_fine(double *,struct All_variables *);
 void get_r_spacing_at_levels(double *,struct All_variables *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
+void calc_cbase_at_node(int , float *,struct All_variables *);
 #ifdef ALLOW_ELLIPTICAL
 double theta_g(double , struct All_variables *);
 #endif
@@ -443,7 +443,7 @@ void calc_cbase_at_tp_d(double theta, double phi, double *base) /* double versio
 
 /* calculate base at nodal locations where we have precomputed cos/sin */
 
-void calc_cbase_at_node(int cap, int node, float *base,struct All_variables *E)
+void calc_cbase_at_node(int node, float *base,struct All_variables *E)
 {
   int lev ;
   double ct,cp,st,sp;

@@ -348,7 +348,7 @@ void xyz2rtp(float, float, float, float *);
 void xyz2rtpd(float, float, float, double *);
 void calc_cbase_at_tp(float, float, float *);
 void calc_cbase_at_tp_d(double, double, double *);
-void calc_cbase_at_node(int, int, float *, struct All_variables *);
+void calc_cbase_at_node(int, float *, struct All_variables *);
 void convert_pvec_to_cvec(float, float, float, float *, float *);
 void convert_pvec_to_cvec_d(double, double, double, double *, double *);
 void *safe_malloc(size_t);

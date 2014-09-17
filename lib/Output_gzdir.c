@@ -80,7 +80,7 @@ int be_is_little_endian(void);
 int be_write_float_to_file(float *, int , FILE *);
 int be_write_int_to_file(int *, int , FILE *);
 void myfprintf(FILE *,char *);
-void calc_cbase_at_node(int , int , float *,struct All_variables *);
+void calc_cbase_at_node(int , float *,struct All_variables *);
 
 /*  */
 void get_vtk_filename(char *,int,struct All_variables *,int);
@@ -464,7 +464,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       /* compute */
 	for(i=1,k=0;i <= E->lmesh.nno;i++,k += 9){
 	  /* cartesian basis vectors at theta, phi */
-	  calc_cbase_at_node(CPPR,i,(E->output.gzdir.vtk_base+k),E);
+	  calc_cbase_at_node(i,(E->output.gzdir.vtk_base+k),E);
 	}
       E->output.gzdir.vtk_base_init = 1;
     }
