@@ -34,7 +34,8 @@
 
 void set_mg_defaults(E)
      struct All_variables *E;
-{ void assemble_forces_iterative();
+{
+  void assemble_forces_iterative();
   void solve_constrained_flow_iterative();
   void mg_allocate_vars();
 
@@ -42,16 +43,11 @@ void set_mg_defaults(E)
   E->build_forcing_term =   assemble_forces_iterative;
   E->solve_stokes_problem = solve_constrained_flow_iterative;
   E->solver_allocate_vars = mg_allocate_vars;
-
-
-return;
 }
 
 void mg_allocate_vars(E)
      struct All_variables *E;
 {
-  return;
-
 }
 
 
@@ -80,15 +76,12 @@ void inject_scalar(E,start_lev,AU,AD)
     sl_minus = start_lev-1;
 
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
           node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
           node_fine=E->IEN[start_lev][CPPR][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
           AD[CPPR][node_coarse] = AU[CPPR][node_fine];
-          }
-
-    return;
+        }
 }
 
 void inject_vector(E,start_lev,AU,AD)
@@ -111,7 +104,6 @@ void inject_vector(E,start_lev,AU,AD)
 
     sl_minus = start_lev-1;
 
-    for (m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
           node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
@@ -122,8 +114,6 @@ void inject_vector(E,start_lev,AU,AD)
             AD[CPPR][eqn_coarse] = AU[CPPR][eqn_fine];
             }
           }
-
-    return;
 }
 
 
@@ -152,11 +142,9 @@ void un_inject_vector(E,start_lev,AD,AU)
 
     assert(start_lev != E->mesh.levmax  /* un_injection */);
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-      for(i=1;i<neq;i++)
-	AU[CPPR][i]=0.0;
+    for(i=1;i<neq;i++)
+      AU[CPPR][i]=0.0;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(el=1;el<=nels;el++)
         for(i=1;i<=ENODES3D;i++)  {
           node = E->IEN[start_lev][CPPR][el].node[i];
@@ -172,9 +160,7 @@ void un_inject_vector(E,start_lev,AD,AU)
 	  AU[CPPR][eqn_plus2] = AD[CPPR][eqn2];
 	  AU[CPPR][eqn_plus3] = AD[CPPR][eqn3];
 	  }
-
-    return;
-  }
+}
 
 
 /* =======================================================================================
@@ -217,10 +203,6 @@ void interp_vector(E,start_lev,AD,AU)
     un_inject_vector(E,start_lev,AU,E->temp); /*  information from lower level */
     fill_in_gaps(E,E->temp,level);
     from_xyz_to_rtf(E,level,E->temp,AU);      /* get back to rtf coordinates */
-
-
-  return;
-
 }
 
 
@@ -250,10 +232,8 @@ void project_viscosity(E)
 
   lv = E->mesh.levmax;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
     viscU[CPPR]=(float *)malloc((1+E->lmesh.NNO[lv])*sizeof(float));
     viscD[CPPR]=(float *)malloc((1+vpts*E->lmesh.NEL[lv-1])*sizeof(float));
-    }
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC /* allow for anisotropy */
   if(E->viscosity.allow_anisotropic_viscosity){
@@ -330,23 +310,12 @@ void project_viscosity(E)
       }
 
 
-/*        for(m=1;m<=E->sphere.caps_per_proc;m++) {
-            for (i=1;i<=E->lmesh.NEL[lv-1];i++)
-               fprintf (E->fp_out,"%d %g\n",i,viscD[m][i]);
-            for (i=1;i<=E->lmesh.NEL[lv];i++)
-               fprintf (E->fp_out,"%d %g\n",i,viscU[m][i]);
-            }
-*/
     }
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
   }
 #endif
-  for(m=1;m<=E->sphere.caps_per_proc;m++)  {
     free((void *)viscU[CPPR]);
     free((void *)viscD[CPPR]);
-    }
-
-    return;
 }
 
 /* ==================================================== */
@@ -369,18 +338,14 @@ void inject_scalar_e(E,start_lev,AU,AD)
     const int n_minus=nels_minus*vpts;
 
 
- for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=n_minus;i++)
        AD[CPPR][i] = 0.0;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
             for(i=1;i<=ENODES3D;i++)                {
                 e = E->EL[sl_minus][CPPR][el].sub[i];
                 AD[CPPR][(el-1)*vpts+i] = AU[CPPR][e];
                 }
-
-return;
 }
 
 /* ==================================================== */
@@ -404,22 +369,19 @@ void project_scalar_e(E,start_lev,AU,AD)
     const int n_minus=nels_minus*vpts;
 
 
- for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=n_minus;i++)
        AD[CPPR][i] = 0.0;
 
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        for(el=1;el<=nels_minus;el++)    {
-            average=0.0;
-            for(i=1;i<=ENODES3D;i++) {
-                e = E->EL[sl_minus][CPPR][el].sub[i];
-                average += AU[CPPR][e];
-                }
-
-            AD[CPPR][el] = average*weight;
+    for(el=1;el<=nels_minus;el++)    {
+        average=0.0;
+        for(i=1;i<=ENODES3D;i++) {
+            e = E->EL[sl_minus][CPPR][el].sub[i];
+            average += AU[CPPR][e];
             }
-return;
+
+        AD[CPPR][el] = average*weight;
+        }
 }
 
 /* ==================================================== */
@@ -442,11 +404,9 @@ void project_scalar(E,start_lev,AU,AD)
     const double weight=(double) 1.0/ends;
 
 
- for(m=1;m<=E->sphere.caps_per_proc;m++)
    for(i=1;i<=nno_minus;i++)
      AD[CPPR][i] = 0.0;
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
             for(i=1;i<=ENODES3D;i++) {
                 average=0.0;
@@ -465,13 +425,9 @@ void project_scalar(E,start_lev,AU,AD)
 
    (E->exchange_node_f)(E,AD,sl_minus);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
        AD[CPPR][i] *= E->MASS[sl_minus][CPPR][i];
-       }
-
-
-return;
+     }
 }
 
 /* this is prefered scheme with averages */
@@ -512,12 +468,10 @@ void project_vector(E,start_lev,AU,AD,ic)
                 /* convert into xyz coordinates */
       from_rtf_to_xyz(E,start_lev,AU,E->temp);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=0;i<neq_minus;i++)
         E->temp1[CPPR][i] = 0.0;
 
                 /* smooth in xyz coordinates */
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
         for(el=1;el<=nels_minus;el++)
           for(i=1;i<=ENODES3D;i++) {
                 node= E->IEN[sl_minus][CPPR][el].node[i];
@@ -539,7 +493,6 @@ void project_vector(E,start_lev,AU,AD,ic)
 
    (E->solver.exchange_id_d)(E, E->temp1, sl_minus);
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(i=1;i<=nno_minus;i++)  {
        E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][CPPR][i];
        E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][CPPR][i];
@@ -548,9 +501,7 @@ void project_vector(E,start_lev,AU,AD,ic)
 
                /* back into rtf coordinates */
    from_xyz_to_rtf(E,sl_minus,E->temp1,AD);
-
- return;
- }
+}
 
 /* ================================================= */
  void from_xyz_to_rtf(E,level,xyz,rtf)
@@ -562,7 +513,6 @@ void project_vector(E,start_lev,AU,AD,ic)
  int i,j,m,eqn1,eqn2,eqn3;
  double cost,cosf,sint,sinf;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
      eqn1 = E->ID[level][CPPR][i].doff[1];
      eqn2 = E->ID[level][CPPR][i].doff[2];
@@ -580,8 +530,6 @@ void project_vector(E,start_lev,AU,AD,ic)
                   + xyz[CPPR][eqn2]*sint*sinf
                   + xyz[CPPR][eqn3]*cost;
      }
-
- return;
  }
 
 /* ================================================= */
@@ -594,7 +542,6 @@ void project_vector(E,start_lev,AU,AD,ic)
  int i,j,m,eqn1,eqn2,eqn3;
  double cost,cosf,sint,sinf;
 
- for (m=1;m<=E->sphere.caps_per_proc;m++)
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
      eqn1 = E->ID[level][CPPR][i].doff[1];
      eqn2 = E->ID[level][CPPR][i].doff[2];
@@ -613,8 +560,6 @@ void project_vector(E,start_lev,AU,AD,ic)
                   + rtf[CPPR][eqn3]*cost;
 
      }
-
- return;
  }
 
  /* ========================================================== */
@@ -638,7 +583,6 @@ void project_vector(E,start_lev,AU,AD,ic)
     const int noy = E->lmesh.NOY[level];
     const int sl_minus = level-1;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)       {
     n1 = n2 =0.5;
     noxz = nox*noz;
     for(k=1;k<=noy;k+=2)          /* Fill in gaps in x direction */
@@ -718,7 +662,4 @@ void project_vector(E,start_lev,AU,AD,ic)
 	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
 	        }
        }
-    }         /* end for m */
-
- return;
-  }
+}
