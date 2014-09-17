@@ -56,7 +56,7 @@ void gzip_file(char *);
 
 int icheck_that_processor_shell(struct All_variables *E,
                                        int j, int nprocessor, double rad);
-void expand_later_array(struct All_variables *E, int j);
+void expand_later_array(struct All_variables *E);
 void expand_tracer_arrays(struct All_variables *E, int j);
 void tracer_post_processing(struct All_variables *E);
 void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers);
@@ -1549,7 +1549,7 @@ static void put_away_later(struct All_variables *E, int j, int it)
 
     E->trace.ilater[CPPR]++;
 
-    if (E->trace.ilater[CPPR] >= (E->trace.ilatersize[CPPR]-5)) expand_later_array(E,j);
+    if (E->trace.ilater[CPPR] >= (E->trace.ilatersize[CPPR]-5)) expand_later_array(E);
 
     /* stack basic and extra quantities together (basic first) */
 
@@ -1566,7 +1566,7 @@ static void put_away_later(struct All_variables *E, int j, int it)
 
 /****** EXPAND LATER ARRAY *****************************************/
 
-void expand_later_array(struct All_variables *E, int j)
+void expand_later_array(struct All_variables *E)
 {
 
     int inewsize;

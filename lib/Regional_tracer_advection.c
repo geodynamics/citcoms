@@ -855,7 +855,7 @@ static void put_found_tracers(struct All_variables *E,
             ilast = E->trace.ilater[CPPR];
 
             if (E->trace.ilater[CPPR] > (E->trace.ilatersize[CPPR]-5))
-                expand_later_array(E, CPPR);
+                expand_later_array(E);
 
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
                 E->trace.rlater[CPPR][pp][ilast] = recv[ipos+pp];
