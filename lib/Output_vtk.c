@@ -64,8 +64,6 @@ static void vts_file_header(struct All_variables *E, FILE *fp)
     snprintf(header, 1024, format, extent, extent);
 
     fputs(header, fp);
-
-    return;
 }
 
 
@@ -78,35 +76,30 @@ static void vts_file_trailer(struct All_variables *E, FILE *fp)
 
     fputs(trailer, fp);
 
-    return;
 }
 
 
 static void vtk_point_data_header(struct All_variables *E, FILE *fp)
 {
     fputs("      <PointData Scalars=\"temperature\" Vectors=\"velocity\">\n", fp);
-    return;
 }
 
 
 static void vtk_point_data_trailer(struct All_variables *E, FILE *fp)
 {
     fputs("      </PointData>\n", fp);
-    return;
 }
 
 
 static void vtk_cell_data_header(struct All_variables *E, FILE *fp)
 {
     fputs("      <CellData>\n", fp);
-    return;
 }
 
 
 static void vtk_cell_data_trailer(struct All_variables *E, FILE *fp)
 {
     fputs("      </CellData>\n", fp);
-    return;
 }
 
 
@@ -128,7 +121,6 @@ static void vtk_output_temp(struct All_variables *E, FILE *fp)
     }
     fputs("        </DataArray>\n", fp);
     free(floattemp);
-    return;
 }
 
 
@@ -143,7 +135,6 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1; j<=E->sphere.caps_per_proc; j++) {
         V[1] = E->sphere.cap[CPPR].V[1];
         V[2] = E->sphere.cap[CPPR].V[2];
         V[3] = E->sphere.cap[CPPR].V[3];
@@ -158,7 +149,6 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
             floatvel[(((CPPR-1)*E->sphere.caps_per_proc)+i-1)*3+1] = (float)(V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf);
             floatvel[(((CPPR-1)*E->sphere.caps_per_proc)+i-1)*3+2] = (float)(-V[1][i]*sint + V[3][i]*cost);
         }
-    }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)
         write_binary_array(nodes*3,floatvel,fp);
@@ -167,7 +157,6 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
     fputs("        </DataArray>\n", fp);
 
     free(floatvel);
-    return;
 }
 
 
@@ -184,7 +173,6 @@ static void vtk_output_visc(struct All_variables *E, FILE *fp)
         }
 
     fputs("        </DataArray>\n", fp);
-    return;
 }
 
 
@@ -199,13 +187,11 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     fputs("      <Points>\n", fp);
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"coordinate\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1; j<=E->sphere.caps_per_proc; j++) {
         for(i=1; i<=E->lmesh.nno; i++){
           floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3] = (float)(E->x[CPPR][1][i]);
 	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+1]=(float)(E->x[CPPR][2][i]);
 	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+2]=(float)(E->x[CPPR][3][i]);
         }
-    }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)
         write_binary_array(nodes*3,floatpos,fp);
@@ -214,7 +200,6 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     fputs("        </DataArray>\n", fp);
     fputs("      </Points>\n", fp);
     free(floatpos);
-    return;
 }
 
 static void vtk_output_stress(struct All_variables *E, FILE *fp)
@@ -241,7 +226,6 @@ static void vtk_output_stress(struct All_variables *E, FILE *fp)
     }
 
     fputs("        </DataArray>\n", fp);
-    return;
 }
 
 static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
@@ -254,11 +238,9 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
     for(k=0;k<E->composition.ncomp;k++) {
         fprintf(fp, "        <DataArray type=\"Float32\" Name=\"composition%d\" format=\"%s\">\n", k+1, E->output.vtk_format);
 
-        for(j=1; j<=E->sphere.caps_per_proc; j++) {
             for(i=1; i<=E->lmesh.nno; i++) {
                 floatcompo[(CPPR-1)*E->lmesh.nno+i-1] = (float) (E->composition.comp_node[CPPR][k][i]);
 	    }
-        }
 
         if (strcmp(E->output.vtk_format, "binary") == 0)
             write_binary_array(nodes,floatcompo,fp);
@@ -267,7 +249,6 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
         fputs("        </DataArray>\n", fp);
     }
     free(floatcompo);
-    return;
 }
 
 
@@ -292,7 +273,6 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 
     fprintf(fp,"        <DataArray type=\"Float32\" Name=\"surface\" format=\"%s\">\n", E->output.vtk_format);
 
-    for(j=1;j<=E->sphere.caps_per_proc;j++){
         for(i=1;i<=E->lmesh.nsf;i++){
             for(k=1;k<=E->lmesh.noz;k++){
                 floattopo[(CPPR-1)*E->lmesh.nno + (i-1)*E->lmesh.noz + k-1] = 0.0;
@@ -308,7 +288,6 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 
             }
         }
-    }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)
         write_binary_array(nodes,floattopo,fp);
@@ -316,7 +295,6 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
         write_ascii_array(nodes,1,floattopo,fp);
 
     fputs("        </DataArray>\n", fp);
-  return;
 }
 
 
@@ -452,7 +430,6 @@ static void write_ascii_array(int nn, int perLine, float *array, FILE *fp)
                     array[6*i+3],array[6*i+4],array[6*i+5]);
         break;
     }
-    return;
 }
 
 static void FloatToUnsignedChar(float * floatarray, int nn, unsigned char * chararray)
@@ -473,7 +450,6 @@ static void FloatToUnsignedChar(float * floatarray, int nn, unsigned char * char
         chararray[4*i+2]=floattransform.output[2];
         chararray[4*i+3]=floattransform.output[3];
     }
-    return;
 }
 
 static void IntToUnsignedChar(int * intarray, int nn, unsigned char * chararray)
@@ -568,7 +544,6 @@ static void zlibcompress(unsigned char* in, int nn, unsigned char** out, int *nn
     (void)deflateEnd(&strm);
 #endif
 
-    return;
 }
 
 static void base64(unsigned char * in, int nn, unsigned char* out)
@@ -739,5 +714,4 @@ void vtk_output(struct All_variables *E, int cycles)
         else
             write_pvts(E, cycles);
     }
-    return;
 }
