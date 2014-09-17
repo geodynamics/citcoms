@@ -50,16 +50,12 @@ void phase_change_allocate(struct All_variables *E)
   int nno  = E->lmesh.nno;
   int nsf  = E->lmesh.nsf;
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)  {
     E->Fas410[CPPR]   = (float *) malloc((nno+1)*sizeof(float));
     E->Fas410_b[CPPR] = (float *) malloc((nsf+1)*sizeof(float));
     E->Fas670[CPPR]   = (float *) malloc((nno+1)*sizeof(float));
     E->Fas670_b[CPPR] = (float *) malloc((nsf+1)*sizeof(float));
     E->Fascmb[CPPR]   = (float *) malloc((nno+1)*sizeof(float));
     E->Fascmb_b[CPPR] = (float *) malloc((nsf+1)*sizeof(float));
-  }
-
-  return;
 }
 
 
@@ -138,7 +134,6 @@ static void phase_change_apply(struct All_variables *E, double **buoy,
   int m, i;
 
   calc_phase_change(E, B, B_b, Ra, clapeyron, depth, transT, inv_width);
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=E->lmesh.nno;i++)
       buoy[CPPR][i] -= Ra * B[CPPR][i];
 
@@ -148,8 +143,6 @@ static void phase_change_apply(struct All_variables *E, double **buoy,
     debug_phase_change(E,B);
     fflush(E->fp_out);
   }
-
-  return;
 }
 
 
@@ -164,7 +157,6 @@ static void calc_phase_change(struct All_variables *E,
   pt5 = 0.5;
   one = 1.0;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)     {
     /* compute phase function B, the concentration of the high pressure
      * phase. B is between 0 and 1. */
     for(i=1;i<=E->lmesh.nno;i++)  {
@@ -187,13 +179,10 @@ static void calc_phase_change(struct All_variables *E,
         B_b[CPPR][ns]=0.0;
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
-          if (B[CPPR][n]>=pt5 && B[m][n+1]<=pt5)
+          if (B[CPPR][n]>=pt5 && B[CPPR][n+1]<=pt5)
             B_b[CPPR][ns]=(E->sx[CPPR][3][n+1]-E->sx[CPPR][3][n])*(pt5-B[CPPR][n])/(B[CPPR][n+1]-B[CPPR][n])+E->sx[CPPR][3][n];
 	}
       }
-  }
-
-  return;
 }
 
 
@@ -202,12 +191,8 @@ static void debug_phase_change(struct All_variables *E, float **B)
   int m, j;
 
   fprintf(E->fp_out,"output_phase_change_buoyancy\n");
-  for(m=1;m<=E->sphere.caps_per_proc;m++)        {
     fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
     for (j=1;j<=E->lmesh.nno;j++)
       fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",E->sx[CPPR][3][j],E->T[CPPR][j],j,B[CPPR][j]);
-  }
   fflush(E->fp_out);
-
-  return;
 }
