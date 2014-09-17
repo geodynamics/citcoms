@@ -487,7 +487,7 @@ if (E->control.verbose) {
  assuming fault nodes are in the top row of processors
  ============================================ */
 
-static void face_eqn_node_to_pass(struct All_variables *, int, int, int, int);
+static void face_eqn_node_to_pass(struct All_variables *, int, int, int);
 static void line_eqn_node_to_pass(struct All_variables *, int, int, int, int, int, int);
 
 void full_parallel_communication_routs_v(E)
@@ -534,7 +534,7 @@ void full_parallel_communication_routs_v(E)
 	}
 
       E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-      face_eqn_node_to_pass(E,lev,CPPR,npass,ii);
+      face_eqn_node_to_pass(E,lev,npass,ii);
 
       /* +X face */
       npass = ii = 2;
@@ -550,7 +550,7 @@ void full_parallel_communication_routs_v(E)
 	  target = E->parallel.loc2proc_map[temp][ly][nprocy-1][lz];
 	}
       E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-      face_eqn_node_to_pass(E,lev,CPPR,npass,ii);
+      face_eqn_node_to_pass(E,lev,npass,ii);
 
       /* -Y face */
       npass = ii = 3;
@@ -567,7 +567,7 @@ void full_parallel_communication_routs_v(E)
 	}
 
       E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-      face_eqn_node_to_pass(E,lev,CPPR,npass,ii);
+      face_eqn_node_to_pass(E,lev,npass,ii);
 
       /* +Y face */
       npass = ii = 4;
@@ -584,7 +584,7 @@ void full_parallel_communication_routs_v(E)
 	}
 
       E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-      face_eqn_node_to_pass(E,lev,CPPR,npass,ii);
+      face_eqn_node_to_pass(E,lev,npass,ii);
 
       /* do lines parallel to Z */
 
@@ -810,9 +810,9 @@ void full_parallel_communication_routs_s(E)
 /* ================================================ */
 /* ================================================ */
 
-static void face_eqn_node_to_pass(E,lev,m,npass,bd)
+static void face_eqn_node_to_pass(E,lev,npass,bd)
   struct All_variables *E;
-  int lev,m,npass,bd;
+  int lev,npass,bd;
 {
   int jj,kk,node,doff;
   const int dims=E->mesh.nsd;
@@ -828,8 +828,6 @@ static void face_eqn_node_to_pass(E,lev,m,npass,bd)
   }
 
   E->parallel.NUM_NEQ[lev][CPPR].pass[npass] = jj;
-
-  return;
 }
 
 /* ================================================ */
