@@ -66,14 +66,6 @@ void regional_tracer_setup(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
-    /* Some error control */
-
-    if (E->sphere.caps_per_proc > 1) {
-            fprintf(stderr,"This code does not work for multiple caps per processor!\n");
-            parallel_process_termination();
-    }
-
-
     /* open tracing output file */
 
     sprintf(output_file,"%s.tracer_log.%d",E->control.data_file,E->parallel.me);
@@ -146,8 +138,6 @@ void regional_tracer_setup(struct All_variables *E)
 
     fprintf(E->trace.fpt, "Tracer intiailization takes %f seconds.\n",
             CPU_time0() - begin_time);
-
-    return;
 }
 
 
@@ -225,9 +215,6 @@ static void write_trace_instructions(struct All_variables *E)
     }
 
     write_composition_instructions(E);
-
-
-    return;
 }
 
 
@@ -248,7 +235,6 @@ static void make_mesh_ijk(struct All_variables *E)
         reading the local mesh coordinate
     ***/
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)  {
         for(i=0;i<nox;i++)
 	    E->trace.x_space[i]=E->sx[CPPR][1][i*noz+1];
 
@@ -257,47 +243,6 @@ static void make_mesh_ijk(struct All_variables *E)
 
         for(k=0;k<noz;k++)
 	    E->trace.z_space[k]=E->sx[CPPR][3][k+1];
-
-    }   /* end of m  */
-
-
-    /* debug *
-    for(i=0;i<nox;i++)
-	fprintf(E->trace.fpt, "i=%d x=%e\n", i, E->trace.x_space[i]);
-    for(j=0;j<noy;j++)
-	fprintf(E->trace.fpt, "j=%d y=%e\n", j, E->trace.y_space[j]);
-    for(k=0;k<noz;k++)
-	fprintf(E->trace.fpt, "k=%d z=%e\n", k, E->trace.z_space[k]);
-
-    /**
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 0));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 1));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 2));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 3));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 4));
-
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 0));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 1));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.56, 2));
-
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 2));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 3));
-    fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.99, 4));
-
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.5));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.1));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.55));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 1.0));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.551));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.99));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.75));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.775));
-    fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
-    parallel_process_termination();
-    /**/
-
-    return;
 }
 
 
@@ -491,17 +436,6 @@ void regional_get_shape_functions(struct All_variables *E,
     shp[6] = tr_dx      * (dy-tr_dy) * tr_dz      / volume;
     shp[7] = tr_dx      * tr_dy      * tr_dz      / volume;
     shp[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
-
-    /** debug **
-    fprintf(E->trace.fpt, "dr=(%e,%e,%e)  tr_dr=(%e,%e,%e)\n",
-            dx, dy, dz, tr_dx, tr_dy, tr_dz);
-    fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e %e %e\n",
-            shp[1], shp[2], shp[3], shp[4], shp[5], shp[6], shp[7], shp[8]);
-    fprintf(E->trace.fpt, "sum(shp): %e\n",
-            shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]+ shp[8]);
-    fflush(E->trace.fpt);
-    /**/
-    return;
 }
 
 
@@ -539,38 +473,13 @@ void regional_get_velocity(struct All_variables *E,
     velo_from_element_d(E, VV, m, nelem, sphere_key);
 
 
-    /*** comment by Tan2 1/25/2005
-         Interpolate the velocity on the tracer position
-    ***/
-
+    /* Interpolate the velocity on the tracer position */
     for(d=1; d<=3; d++)
         velocity_vector[d] = 0;
-
-
     for(d=1; d<=3; d++) {
         for(n=1; n<=8; n++)
             velocity_vector[d] += VV[d][n] * shp[n];
     }
-
-
-    /** debug **
-    for(d=1; d<=3; d++) {
-        fprintf(E->trace.fpt, "VV: %e %e %e %e %e %e %e %e: %e\n",
-                VV[d][1], VV[d][2], VV[d][3], VV[d][4],
-                VV[d][5], VV[d][6], VV[d][7], VV[d][8],
-                velocity_vector[d]);
-    }
-
-    tmp = 0;
-    for(n=1; n<=8; n++)
-        tmp += E->sx[m][1][E->ien[m][nelem].node[n]] * shp[n];
-
-    fprintf(E->trace.fpt, "THETA: %e -> %e\n", theta, tmp);
-
-    fflush(E->trace.fpt);
-    /**/
-
-    return;
 }
 
 
@@ -613,9 +522,6 @@ void regional_keep_within_bounds(struct All_variables *E,
 
     if (changed)
         sphere_to_cart(E, *theta, *phi, *rad, x, y, z);
-
-
-    return;
 }
 
 
@@ -665,28 +571,6 @@ void regional_lost_souls(struct All_variables *E)
             ngbr_rank[kk] = -1;
         }
     }
-
-    /* debug *
-    for (kk=1; kk<=E->trace.istat_isend; kk++) {
-        fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
-                E->trace.rlater[j][0][kk],
-                E->trace.rlater[j][1][kk],
-                E->trace.rlater[j][2][kk]);
-    }
-
-    for (d=0; d<E->mesh.nsd; d++) {
-        fprintf(E->trace.fpt, "bounds(dim=%d) = (%e, %e)\n",
-                d, bounds[d][0], bounds[d][1]);
-    }
-
-    for (kk=1; kk<=6; kk++) {
-        fprintf(E->trace.fpt, "pass=%d  neighbor_rank=%d\n",
-                kk, ngbr_rank[kk]);
-    }
-    fflush(E->trace.fpt);
-    parallel_process_sync(E);
-    /**/
-
 
     /* Allocate Maximum Memory to Send Arrays */
     max_send_size = max(2*E->trace.ilater[CPPR], E->trace.ntracers[CPPR]/100);
@@ -772,19 +656,6 @@ void regional_lost_souls(struct All_variables *E)
                     original_size, E->trace.ilater[CPPR], kk);
         }
 
-
-        /** debug **
-        for (i=0; i<2; i++) {
-            for (kk=0; kk<isend[i]; kk++) {
-                fprintf(E->trace.fpt, "dim:%d side:%d kk=%d coord[kk]=%e\n",
-                        d, i, kk,
-                        send[i][kk*E->trace.number_of_tracer_quantities+d]);
-            }
-        }
-        fflush(E->trace.fpt);
-        /**/
-
-
         /* Send info to other processors regarding number of send tracers */
 
         /* check whether there is a neighbor in this pass*/
@@ -808,22 +679,6 @@ void regional_lost_souls(struct All_variables *E)
 
         /* Wait for non-blocking calls to complete */
         MPI_Waitall(idb, request, status);
-
-
-        /** debug **
-        for (i=0; i<2; i++) {
-            int target_rank;
-            kk = d*2 + i + 1;
-            target_rank = ngbr_rank[kk];
-            if (target_rank >= 0) {
-                fprintf(E->trace.fpt, "%d: %d send %d to proc %d\n",
-                        d, i, isend[i], target_rank);
-                fprintf(E->trace.fpt, "%d: %d recv %d from proc %d\n",
-                        d, i, irecv[i], target_rank);
-            }
-        }
-        parallel_process_sync(E);
-        /**/
 
         /* Allocate memory in receive arrays */
         for (i=0; i<2; i++) {
@@ -861,21 +716,6 @@ void regional_lost_souls(struct All_variables *E)
         /* Wait for non-blocking calls to complete */
         MPI_Waitall(idb, request, status);
 
-
-        /** debug **
-        for (i=0; i<2; i++) {
-            for (kk=1; kk<=irecv[i]; kk++) {
-                fprintf(E->trace.fpt, "recv: %d %e %e %e\n",
-                        kk,
-                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities],
-                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+1],
-                        recv[i][(kk-1)*E->trace.number_of_tracer_quantities+2]);
-            }
-        }
-        fflush(E->trace.fpt);
-        parallel_process_sync(E);
-        /**/
-
         /* put the received tracers */
         for (i=0; i<2; i++) {
             put_found_tracers(E, irecv[i], recv[i], CPPR);
@@ -908,7 +748,6 @@ void regional_lost_souls(struct All_variables *E)
     free(send[1]);
 
     E->trace.lost_souls_time += CPU_time0() - begin_time;
-    return;
 }
 
 
@@ -934,8 +773,6 @@ static void put_lost_tracers(struct All_variables *E,
         E->trace.rlater[CPPR][pp][kk] = E->trace.rlater[CPPR][pp][ilast_tracer];
     }
     E->trace.ilater[CPPR]--;
-
-    return;
 }
 
 
@@ -968,13 +805,6 @@ static void put_found_tracers(struct All_variables *E,
             inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
         else
             inside = 0;
-
-        /** debug **
-        fprintf(E->trace.fpt, "kk=%d, inside=%d, xx=(%e, %e, %e)\n",
-                kk, inside, theta, phi, rad);
-        fprintf(E->trace.fpt, "before: %d %d\n",
-                E->trace.ilater[j], E->trace.ntracers[j]);
-        /**/
 
         if (inside) {
 
@@ -1030,14 +860,5 @@ static void put_found_tracers(struct All_variables *E,
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
                 E->trace.rlater[CPPR][pp][ilast] = recv[ipos+pp];
         } /* end of if-else */
-
-        /** debug **
-        fprintf(E->trace.fpt, "after: %d %d\n",
-                E->trace.ilater[j], E->trace.ntracers[j]);
-        fflush(E->trace.fpt);
-        /**/
-
     } /* end of for kk */
-
-    return;
 }
