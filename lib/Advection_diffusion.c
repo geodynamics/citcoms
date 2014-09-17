@@ -296,7 +296,6 @@ static void set_diffusion_timestep(struct All_variables *E)
   float global_fmin();
 
   diff_timestep = 1.0e8;
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
 	ts = E->eco[CPPR][el].size[d] * E->eco[CPPR][el].size[d];
@@ -306,8 +305,6 @@ static void set_diffusion_timestep(struct All_variables *E)
 
   diff_timestep = global_fmin(E,diff_timestep);
   E->advection.diff_timestep = 0.5 * diff_timestep;
-
-  return;
 }
 
 
