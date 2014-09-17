@@ -15,16 +15,13 @@ double global_v_norm2_PETSc( struct All_variables *E,  Vec v )
 
     PetscScalar *V;
     ierr = VecGetArray( v, &V ); CHKERRQ( ierr );
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=1; i<=E->lmesh.nno; i++) {
-            eqn1 = E->id[CPPR][i].doff[1];
-            eqn2 = E->id[CPPR][i].doff[2];
-            eqn3 = E->id[CPPR][i].doff[3];
-            /* L2 norm  */
-            temp += (V[eqn1] * V[eqn1] +
-                     V[eqn2] * V[eqn2] +
-                     V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
-        }
+    for (i=1; i<=E->lmesh.nno; i++) {
+        eqn1 = E->id[CPPR][i].doff[1];
+        eqn2 = E->id[CPPR][i].doff[2];
+        eqn3 = E->id[CPPR][i].doff[3];
+        /* L2 norm  */
+        temp += (V[eqn1] * V[eqn1] + V[eqn2] * V[eqn2] + V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
+    }
     ierr = VecRestoreArray( v, &V ); CHKERRQ( ierr );
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -43,11 +40,10 @@ double global_p_norm2_PETSc( struct All_variables *E,  Vec p )
     PetscScalar *P;
     ierr = VecGetArray( p, &P ); CHKERRQ( ierr );
 
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=0; i<E->lmesh.npno; i++) {
-            /* L2 norm */
-            temp += P[i] * P[i] * E->eco[CPPR][i+1].area;
-        }
+    for (i=0; i<E->lmesh.npno; i++) {
+        /* L2 norm */
+        temp += P[i] * P[i] * E->eco[CPPR][i+1].area;
+    }
     ierr = VecRestoreArray( p, &P ); CHKERRQ( ierr );
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -66,14 +62,13 @@ double global_div_norm2_PETSc( struct All_variables *E,  Vec a )
     ierr = VecGetArray( a, &A ); CHKERRQ( ierr );
 
 
-    for (m=1; m<=E->sphere.caps_per_proc; m++)
-        for (i=0; i<E->lmesh.npno; i++) {
-            /* L2 norm of div(u) */
-            temp += A[i] * A[i] / E->eco[CPPR][i+1].area;
+    for (i=0; i<E->lmesh.npno; i++) {
+        /* L2 norm of div(u) */
+        temp += A[i] * A[i] / E->eco[CPPR][i+1].area;
 
-            /* L1 norm */
-            /*temp += fabs(A[i]);*/
-        }
+        /* L1 norm */
+        /*temp += fabs(A[i]);*/
+    }
     ierr = VecRestoreArray( a, &A ); CHKERRQ( ierr );
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -102,7 +97,6 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E, Vec U, Vec result, i
     ierr = VecGetArray( U, &U_temp ); CHKERRQ( ierr );
     ierr = VecGetArray( result, &result_temp ); CHKERRQ( ierr );
 
-  for( m = 1; m <= E->sphere.caps_per_proc; m++ ) {
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
       for(e=0;e<nel;e++) {
@@ -116,7 +110,6 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E, Vec U, Vec result, i
                          + E->elt_c[level][CPPR][e+1].c[p+2][0] * U_temp[j3];
       }
     }
-  }
   ierr = VecRestoreArray( U, &U_temp ); CHKERRQ( ierr );
   ierr = VecRestoreArray( result, &result_temp ); CHKERRQ( ierr );
 
