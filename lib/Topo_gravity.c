@@ -91,7 +91,6 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
 
    topo_scaling1 = topo_scaling2 = 1.0;
 
-   for(m=1;m<=E->sphere.caps_per_proc;m++)
      for(snode=1;snode<=E->lmesh.nsf;snode++)   {
         node = E->surf_node[CPPR][snode];
         tpg[CPPR][snode]  = -2*SZZ[CPPR][node]               + SZZ[CPPR][node-1];
@@ -105,8 +104,6 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
      }
 
    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
-
-   return;
 }
 
 void get_STD_freesurf(struct All_variables *E,float **freesurf)
@@ -114,13 +111,10 @@ void get_STD_freesurf(struct All_variables *E,float **freesurf)
         int node,snode,m;
 
         if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
-                for(m=1;m<=E->sphere.caps_per_proc;m++)
-                        for(snode=1;snode<=E->lmesh.nsf;snode++) {
-                                node = E->surf_node[CPPR][snode];
-                                /*freesurf[m][snode] += 0.5*(E->sphere.cap[m].V[3][node]+E->sphere.cap[m].Vprev[3][node])*E->advection.timestep;*/
-                                freesurf[CPPR][snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
-                        }
-        return;
+          for(snode=1;snode<=E->lmesh.nsf;snode++) {
+            node = E->surf_node[CPPR][snode];
+            freesurf[CPPR][snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
+          }
 }
 
 
@@ -131,7 +125,6 @@ void allocate_STD_mem(struct All_variables *E,
 {
   int m, i;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     SXX[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     SYY[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     SXY[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
@@ -140,9 +133,7 @@ void allocate_STD_mem(struct All_variables *E,
     SZZ[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     divv[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
     vorv[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-  }
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     for(i=1;i<=E->lmesh.nno;i++) {
       SZZ[CPPR][i] = 0.0;
       SXX[CPPR][i] = 0.0;
@@ -153,8 +144,6 @@ void allocate_STD_mem(struct All_variables *E,
       divv[CPPR][i] = 0.0;
       vorv[CPPR][i] = 0.0;
     }
-  }
-  return;
 }
 
 
@@ -163,8 +152,6 @@ void free_STD_mem(struct All_variables *E,
                   float** SXY, float** SXZ, float** SZY,
                   float** divv, float** vorv)
 {
-  int m;
-  for(m=1;m<=E->sphere.caps_per_proc;m++)        {
     free((void *)SXX[CPPR]);
     free((void *)SYY[CPPR]);
     free((void *)SXY[CPPR]);
@@ -173,42 +160,7 @@ void free_STD_mem(struct All_variables *E,
     free((void *)SZZ[CPPR]);
     free((void *)divv[CPPR]);
     free((void *)vorv[CPPR]);
-    }
 }
-
-
-/* void get_surf_stress(E,SXX,SYY,SZZ,SXY,SXZ,SZY) */
-/*   struct All_variables *E; */
-/*   float **SXX,**SYY,**SZZ,**SXY,**SXZ,**SZY; */
-/* { */
-/*   int m,i,node,stride; */
-
-/*   stride = E->lmesh.nsf*6; */
-
-/*   for(m=1;m<=E->sphere.caps_per_proc;m++) */
-/*     for (node=1;node<=E->lmesh.nno;node++) */
-/*       if ( (node%E->lmesh.noz)==0 )  { */
-/*         i = node/E->lmesh.noz; */
-/*         E->stress[m][(i-1)*6+1] = SXX[m][node]; */
-/*         E->stress[m][(i-1)*6+2] = SYY[m][node]; */
-/*         E->stress[m][(i-1)*6+3] = SZZ[m][node]; */
-/*         E->stress[m][(i-1)*6+4] = SXY[m][node]; */
-/*         E->stress[m][(i-1)*6+5] = SXZ[m][node]; */
-/*         E->stress[m][(i-1)*6+6] = SZY[m][node]; */
-/*         } */
-/*      else if ( ((node+1)%E->lmesh.noz)==0 )  { */
-/*         i = (node+1)/E->lmesh.noz; */
-/*         E->stress[m][stride+(i-1)*6+1] = SXX[m][node]; */
-/*         E->stress[m][stride+(i-1)*6+2] = SYY[m][node]; */
-/*         E->stress[m][stride+(i-1)*6+3] = SZZ[m][node]; */
-/*         E->stress[m][stride+(i-1)*6+4] = SXY[m][node]; */
-/*         E->stress[m][stride+(i-1)*6+5] = SXZ[m][node]; */
-/*         E->stress[m][stride+(i-1)*6+6] = SZY[m][node]; */
-/*         } */
-
-/*   return; */
-/* } */
-
 
 void compute_nodal_stress(struct All_variables *E,
                           float** SXX, float** SYY, float** SZZ,
@@ -244,7 +196,6 @@ void compute_nodal_stress(struct All_variables *E,
   const int vpts = vpoints[dims];
   const int ends = enodes[dims];
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++) {
     for(e=1;e <= nel;e++)  {
       Szz = 0.0;
       Sxx = 0.0;
@@ -264,16 +215,6 @@ void compute_nodal_stress(struct All_variables *E,
       GNx = &(E->gNX[CPPR][e]);	/* derivatives of shape functions at
 				   integration points */
 
-      /* Vxyz is the strain rate vector, whose relationship with
-       * the strain rate tensor (e) is that:
-       *    Vxyz[1] = e11
-       *    Vxyz[2] = e22
-       *    Vxyz[3] = e33
-       *    Vxyz[4] = 2*e12
-       *    Vxyz[5] = 2*e13
-       *    Vxyz[6] = 2*e23
-       * where 1 is theta, 2 is phi, and 3 is r
-       */
       for(j=1;j <= vpts;j++)  {	/* loop through velocity Gauss points  */
 	/* E->EVi[j] = E->EVI[E->mesh.levmax][j]; */
         pre[j] =  E->EVi[CPPR][(e-1)*vpts+j]*dOmega->vpt[j];
@@ -449,7 +390,6 @@ void compute_nodal_stress(struct All_variables *E,
       }
 
     }    /* end for el */
-  }     /* end for m */
 
   (E->exchange_node_f)(E,SXX,lev);
   (E->exchange_node_f)(E,SYY,lev);
@@ -462,7 +402,6 @@ void compute_nodal_stress(struct All_variables *E,
 
   stress_scaling = velo_scaling = 1.0;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(node=1;node<=E->lmesh.nno;node++)   {
       mass_fac = E->Mass[CPPR][node]*stress_scaling;
       SZZ[CPPR][node] *= mass_fac;
@@ -478,7 +417,6 @@ void compute_nodal_stress(struct All_variables *E,
     }
 
   /* assign stress to all the nodes */
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
     for (node=1;node<=E->lmesh.nno;node++) {
       E->gstress[CPPR][(node-1)*6+1] = SXX[CPPR][node];
       E->gstress[CPPR][(node-1)*6+2] = SYY[CPPR][node];
@@ -490,7 +428,6 @@ void compute_nodal_stress(struct All_variables *E,
 
   /* replace boundary stresses with boundary conditions (if specified) */
   stress_conform_bcs(E);
-
 }
 
 
@@ -515,7 +452,6 @@ void stress_conform_bcs(struct All_variables *E)
 
   if(E->control.side_sbcs) {	/* side boundary conditions */
 
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
       for(i=1; i<=E->lmesh.noy; i++)
         for(j=1; j<=E->lmesh.nox; j++)
           for(k=1; k<=E->lmesh.noz; k++) {
@@ -547,7 +483,6 @@ void stress_conform_bcs(struct All_variables *E)
     */
     if(E->mesh.toplayerbc != 0){
       /* internal BCs are allowed */
-      for(m=1; m<=E->sphere.caps_per_proc; m++)
 	for(i=1; i<=E->lmesh.noy; i++)
 	  for(j=1; j<=E->lmesh.nox; j++)
 	    for(k=1; k<=E->lmesh.noz; k++) {
@@ -560,7 +495,6 @@ void stress_conform_bcs(struct All_variables *E)
 	    }
     }else{
       /* default */
-      for(m=1; m<=E->sphere.caps_per_proc; m++)
 	for(i=1; i<=E->lmesh.noy; i++)
 	  for(j=1; j<=E->lmesh.nox; j++)
 	    for(k=1; k<=E->lmesh.noz; k++) {
@@ -611,8 +545,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
         / E->data.grav_acc;
 
     /* density of one layer */
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+    TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* cos coeff */
     geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
@@ -632,7 +565,6 @@ static void geoid_from_buoyancy(struct All_variables *E,
         /* correction for variable gravity */
         grav = 0.5 * (E->refstate.gravity[k] + E->refstate.gravity[k+1]);
         buoy2rho = scaling2 / grav;
-        for(m=1;m<=E->sphere.caps_per_proc;m++)
             for(i=1;i<=E->lmesh.noy;i++)
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node= k + (j-1)*E->lmesh.noz + (i-1)*nxnz;
@@ -676,12 +608,10 @@ static void geoid_from_buoyancy(struct All_variables *E,
     /* accumulate geoid from all layers to the CMB (bottom processors) */
     sum_across_depth_sph1(E, harm_geoidb[0], harm_geoidb[1]);
 
-    for(m=1;m<=E->sphere.caps_per_proc;m++)
-        free ((void *)TT[CPPR]);
+    free ((void *)TT[CPPR]);
 
     free ((void *)geoid[0]);
     free ((void *)geoid[1]);
-    return;
 }
 
 static void expand_topo_sph_harm(struct All_variables *E,
@@ -745,8 +675,6 @@ static void expand_topo_sph_harm(struct All_variables *E,
     /* send arrays to all processors in the same vertical column */
     broadcast_vertical(E, tpgb[0], tpgb[1], 0);
     broadcast_vertical(E, tpgt[0], tpgt[1], E->parallel.nprocz-1);
-
-    return;
 }
 
 
@@ -818,8 +746,6 @@ static void geoid_from_topography(struct All_variables *E,
     /* send arrays to all processors in the same vertical column */
     broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
     broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
-
-    return;
 }
 
 
@@ -927,8 +853,6 @@ static void geoid_from_topography_self_g(struct All_variables *E,
     /* send arrays to all processors in the same vertical column */
     broadcast_vertical(E, geoid_tpgb[0], geoid_tpgb[1], 0);
     broadcast_vertical(E, geoid_tpgt[0], geoid_tpgt[1], E->parallel.nprocz-1);
-
-    return;
 }
 
 
@@ -965,8 +889,6 @@ void compute_geoid(E)
                     + E->sphere.harm_geoid_from_tpgb[i][p];
             }
     }
-
-    return;
 }
 
 
@@ -1033,14 +955,10 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     eltTU = (float *)malloc((1+Tsize)*sizeof(float));
     eltTL = (float *)malloc((1+Tsize)*sizeof(float));
 
-  for(j=1;j<=E->sphere.caps_per_proc;j++)          {
     SU[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
     SL[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
     RU[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
     RL[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
-    }
-
-  for(j=1;j<=E->sphere.caps_per_proc;j++)          {
 
     for(i=0;i<=lnsf;i++)
       RU[CPPR][i] = RL[CPPR][i] = SU[CPPR][i] = SL[CPPR][i] = 0.0;
@@ -1080,14 +998,10 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
           get_aug_k(E,elb,eltkb,lev,CPPR);
           get_aug_k(E,el,eltk,lev,CPPR);
       }
-//      get_elt_g(E,elb,eltgb,lev,j);
-//      get_elt_g(E,el,eltg,lev,j);
 
       for(m=0;m<dims*ends;m++) {
            res[m]  = eltf[m]  - E->elt_del[lev][CPPR][el].g[m][0]  * E->P[CPPR][el-1];
            resb[m] = eltfb[m] - E->elt_del[lev][CPPR][elb].g[m][0]* E->P[CPPR][elb-1];
-//           res[m]  = eltf[m] - eltg[m][0]  * E->P[j][el];
-//           resb[m] = eltfb[m] - eltgb[m][0]* E->P[j][elb];
             }
 
       for(m=0;m<dims*ends;m++)
@@ -1167,7 +1081,6 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
 
         }
 
-  }      /* end for j */
 
   /* for bottom topography */
   if(E->parallel.me_loc[3] == 0) {
@@ -1176,9 +1089,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
   else
       regional_exchange_snode_f(E,RL,SL,E->mesh.levmax);
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)
-      for(i=1;i<=E->lmesh.nsf;i++)
-          HB[CPPR][i] = RL[CPPR][i]/SL[CPPR][i];
+    for(i=1;i<=E->lmesh.nsf;i++)
+        HB[CPPR][i] = RL[CPPR][i]/SL[CPPR][i];
   }
   /* for top topo */
   if(E->parallel.me_loc[3] == E->parallel.nprocz-1) {
@@ -1187,23 +1099,13 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
   else
       regional_exchange_snode_f(E,RU,SU,E->mesh.levmax);
 
-  for (j=1;j<=E->sphere.caps_per_proc;j++)
-      for(i=1;i<=E->lmesh.nsf;i++)
-          H[CPPR][i] = RU[CPPR][i]/SU[CPPR][i];
+  for(i=1;i<=E->lmesh.nsf;i++)
+      H[CPPR][i] = RU[CPPR][i]/SU[CPPR][i];
   }
     free((void *)eltTU);
     free((void *)eltTL);
-    for (j=1;j<=E->sphere.caps_per_proc;j++)   {
-      free((void *)SU[CPPR]);
-      free((void *)SL[CPPR]);
-      free((void *)RU[CPPR]);
-      free((void *)RL[CPPR]);
-      }
-    return;
+    free((void *)SU[CPPR]);
+    free((void *)SL[CPPR]);
+    free((void *)RU[CPPR]);
+    free((void *)RL[CPPR]);
 }
-
-
-/* version */
-/* $Id$ */
-
-/* End of file  */
