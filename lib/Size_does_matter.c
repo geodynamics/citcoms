@@ -215,8 +215,7 @@ void get_rtf_at_vpts(struct All_variables *E, int m, int lev, int el,
 }
 
 
-void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
-                  double rtf[4][9])
+void get_rtf_at_ppts(struct All_variables *E, int lev, int el, double rtf[4][9])
 {
     int i, k, d;
     double x[4];

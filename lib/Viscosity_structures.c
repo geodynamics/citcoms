@@ -1131,7 +1131,7 @@ void strain_rate_2_inv(E,EEDOT,SQRT)
 
     for(e=1; e<=nel; e++) {
 
-        get_rtf_at_ppts(E, CPPR, lev, e, rtf); /* pressure evaluation
+        get_rtf_at_ppts(E, lev, e, rtf); /* pressure evaluation
 					       points */
         velo_from_element(E, VV, e, sphere_key);
         GNx = &(E->gNX[CPPR][e]);

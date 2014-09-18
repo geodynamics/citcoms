@@ -892,7 +892,7 @@ void get_elt_g(E,el,elt_del,lev)
    if ((el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,1);
 
-   get_rtf_at_ppts(E, CPPR, lev, el, rtf);
+   get_rtf_at_ppts(E, lev, el, rtf);
 
    temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
 
