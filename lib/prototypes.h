@@ -432,7 +432,7 @@ int isearch_neighbors(double *, int, double, int);
 int regional_icheck_cap(struct All_variables *, int, double, double, double, double);
 void regional_get_shape_functions(struct All_variables *, double [9], int, double, double, double);
 double regional_interpolate_data(struct All_variables *, double [9], double [9]);
-void regional_get_velocity(struct All_variables *, int, int, double, double, double, double *);
+void regional_get_velocity(struct All_variables *, int, double, double, double, double *);
 void regional_keep_within_bounds(struct All_variables *, double *, double *, double *, double *, double *, double *);
 void regional_lost_souls(struct All_variables *);
 /* Regional_version_dependent.c */

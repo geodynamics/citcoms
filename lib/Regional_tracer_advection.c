@@ -455,7 +455,7 @@ double regional_interpolate_data(struct All_variables *E,
 /******** GET VELOCITY ***************************************/
 
 void regional_get_velocity(struct All_variables *E,
-                           int m, int nelem,
+                           int nelem,
                            double theta, double phi, double rad,
                            double *velocity_vector)
 {
@@ -470,7 +470,7 @@ void regional_get_velocity(struct All_variables *E,
 
 
     /* get cartesian velocity */
-    velo_from_element_d(E, VV, m, nelem, sphere_key);
+    velo_from_element_d(E, VV, CPPR, nelem, sphere_key);
 
 
     /* Interpolate the velocity on the tracer position */

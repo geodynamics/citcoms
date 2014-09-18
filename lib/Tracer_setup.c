@@ -396,7 +396,7 @@ static void predict_tracers(struct All_variables *E)
             z0=E->trace.basicq[CPPR][5][kk];
 
             nelem=E->trace.ielement[CPPR][kk];
-            (E->trace.get_velocity)(E,CPPR,nelem,theta0,phi0,rad0,velocity_vector);
+            (E->trace.get_velocity)(E,nelem,theta0,phi0,rad0,velocity_vector);
 
             x_pred=x0+velocity_vector[1]*dt;
             y_pred=y0+velocity_vector[2]*dt;
@@ -497,7 +497,7 @@ static void correct_tracers(struct All_variables *E)
 
             nelem=E->trace.ielement[CPPR][kk];
 
-            (E->trace.get_velocity)(E,CPPR,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
+            (E->trace.get_velocity)(E,nelem,theta_pred,phi_pred,rad_pred,velocity_vector);
 
             Vx_pred=velocity_vector[1];
             Vy_pred=velocity_vector[2];
