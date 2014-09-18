@@ -71,8 +71,7 @@ static void find_tracers(struct All_variables *E);
 static void predict_tracers(struct All_variables *E);
 static void correct_tracers(struct All_variables *E);
 static void make_tracer_array(struct All_variables *E);
-static void generate_random_tracers(struct All_variables *E,
-                                    int tracers_cap, int j);
+static void generate_random_tracers(struct All_variables *E, int tracers_cap);
 static void read_tracer_file(struct All_variables *E);
 static void read_old_tracer_file(struct All_variables *E);
 static void check_sum(struct All_variables *E);
@@ -737,7 +736,7 @@ static void make_tracer_array(struct All_variables *E)
 
         fprintf(E->trace.fpt,"\nGenerating %d Tracers\n",tracers_cap);
 
-        generate_random_tracers(E, tracers_cap, CPPR);
+        generate_random_tracers(E, tracers_cap);
 
 
 
@@ -749,8 +748,7 @@ static void make_tracer_array(struct All_variables *E)
 
 
 
-static void generate_random_tracers(struct All_variables *E,
-                                    int tracers_cap, int j)
+static void generate_random_tracers(struct All_variables *E, int tracers_cap)
 {
     void cart_to_sphere();
     int kk;
@@ -843,8 +841,6 @@ static void generate_random_tracers(struct All_variables *E,
         E->trace.basicq[CPPR][5][kk]=z;
 
     } /* end while */
-
-    return;
 }
 
 
