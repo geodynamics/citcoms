@@ -175,11 +175,11 @@ void velocities_conform_bcs(E,U)
       for(node=1;node<=nno;node++) {
 
         if (E->node[CPPR][node] & typex)
-	      U[CPPR][E->id[CPPR][node].doff[1]] = E->sphere.cap[CPPR].VB[1][node];
+	      U[CPPR][E->id[node].doff[1]] = E->sphere.cap[CPPR].VB[1][node];
  	if (E->node[CPPR][node] & typey)
-	      U[CPPR][E->id[CPPR][node].doff[2]] = E->sphere.cap[CPPR].VB[2][node];
+	      U[CPPR][E->id[node].doff[2]] = E->sphere.cap[CPPR].VB[2][node];
 	if (E->node[CPPR][node] & typez)
-	      U[CPPR][E->id[CPPR][node].doff[3]] = E->sphere.cap[CPPR].VB[3][node];
+	      U[CPPR][E->id[node].doff[3]] = E->sphere.cap[CPPR].VB[3][node];
         }
 
 }

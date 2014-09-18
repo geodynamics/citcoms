@@ -16,9 +16,9 @@ double global_v_norm2_PETSc( struct All_variables *E,  Vec v )
     PetscScalar *V;
     ierr = VecGetArray( v, &V ); CHKERRQ( ierr );
     for (i=1; i<=E->lmesh.nno; i++) {
-        eqn1 = E->id[CPPR][i].doff[1];
-        eqn2 = E->id[CPPR][i].doff[2];
-        eqn3 = E->id[CPPR][i].doff[3];
+        eqn1 = E->id[i].doff[1];
+        eqn2 = E->id[i].doff[2];
+        eqn3 = E->id[i].doff[3];
         /* L2 norm  */
         temp += (V[eqn1] * V[eqn1] + V[eqn2] * V[eqn2] + V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
     }

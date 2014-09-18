@@ -574,9 +574,9 @@ double global_v_norm2(struct All_variables *E,  double **V)
     temp = 0.0;
     prod = 0.0;
     for (i=1; i<=E->lmesh.nno; i++) {
-        eqn1 = E->id[CPPR][i].doff[1];
-        eqn2 = E->id[CPPR][i].doff[2];
-        eqn3 = E->id[CPPR][i].doff[3];
+        eqn1 = E->id[i].doff[1];
+        eqn2 = E->id[i].doff[2];
+        eqn3 = E->id[i].doff[3];
         /* L2 norm  */
         temp += (V[CPPR][eqn1] * V[CPPR][eqn1] +
                  V[CPPR][eqn2] * V[CPPR][eqn2] +

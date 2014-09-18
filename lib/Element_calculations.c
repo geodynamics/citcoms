@@ -59,11 +59,11 @@ static void add_force(struct All_variables *E, int e, double elt_f[24])
   for(a=1;a<=ends;a++)          {
     node = E->ien[e].node[a];
     p=(a-1)*dims;
-    a1=E->id[CPPR][node].doff[1];
+    a1=E->id[node].doff[1];
     E->F[CPPR][a1] += elt_f[p];
-    a2=E->id[CPPR][node].doff[2];
+    a2=E->id[node].doff[2];
     E->F[CPPR][a2] += elt_f[p+1];
-    a3=E->id[CPPR][node].doff[3];
+    a3=E->id[node].doff[3];
     E->F[CPPR][a3] += elt_f[p+2];
   }
 }

@@ -43,9 +43,9 @@ void v_from_vector(E)
     const int nno = E->lmesh.nno;
 
         for(node=1;node<=nno;node++)     {
-            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[CPPR][node].doff[1]];
-            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[CPPR][node].doff[2]];
-            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[CPPR][node].doff[3]];
+            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[node].doff[3]];
             if (E->node[CPPR][node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
             if (E->node[CPPR][node] & VBY)
@@ -62,9 +62,9 @@ void assign_v_to_vector(E)
     const int nno = E->lmesh.nno;
 
       for(node=1;node<=nno;node++)     {
-	E->U[CPPR][E->id[CPPR][node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
-	E->U[CPPR][E->id[CPPR][node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
-	E->U[CPPR][E->id[CPPR][node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
+	E->U[CPPR][E->id[node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
+	E->U[CPPR][E->id[node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
+	E->U[CPPR][E->id[node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
       }
 }
 
@@ -82,9 +82,9 @@ void v_from_vector_pseudo_surf(E)
             E->sphere.cap[CPPR].Vprev[2][node] = E->sphere.cap[CPPR].V[2][node];
             E->sphere.cap[CPPR].Vprev[3][node] = E->sphere.cap[CPPR].V[3][node];
 
-            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[CPPR][node].doff[1]];
-            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[CPPR][node].doff[2]];
-            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[CPPR][node].doff[3]];
+            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[node].doff[3]];
             if (E->node[CPPR][node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
             if (E->node[CPPR][node] & VBY)
