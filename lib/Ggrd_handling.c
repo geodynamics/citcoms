@@ -525,7 +525,7 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
 	      */
 	      xloc[1] = xloc[2] = xloc[3] = 0.0;
 	      for(inode=1;inode <= ends;inode++){
-		ind = E->ien[CPPR][el].node[inode];
+		ind = E->ien[el].node[inode];
 		xloc[1] += E->x[CPPR][1][ind];xloc[2] += E->x[CPPR][2][ind];xloc[3] += E->x[CPPR][3][ind];
 	      }
 	      xloc[1]/=ends;xloc[2]/=ends;xloc[3]/=ends;
@@ -1652,7 +1652,7 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	    */
 	    xloc[1] = xloc[2] = xloc[3] = 0.0;
 	    for(inode=1;inode <= ends;inode++){
-	      ind = E->ien[CPPR][el].node[inode];
+	      ind = E->ien[el].node[inode];
 	      xloc[1] += E->x[CPPR][1][ind];
 	      xloc[2] += E->x[CPPR][2][ind];
 	      xloc[3] += E->x[CPPR][3][ind];

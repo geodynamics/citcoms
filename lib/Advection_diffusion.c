@@ -387,7 +387,7 @@ static void pg_solver(struct All_variables *E,
                        FLAGS);
 
       for(a=1;a<=ends;a++) {
-        a1 = E->ien[CPPR][el].node[a];
+        a1 = E->ien[el].node[a];
         DTdot[CPPR][a1] += Eres[a];
       }
 
@@ -425,7 +425,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
 
     double prod1,unorm,twodiff;
 
-    ienm=E->ien[CPPR][el].node;
+    ienm=E->ien[el].node;
 
     twodiff = 2.0*diffusion;
 
@@ -525,7 +525,7 @@ static void element_residual(struct All_variables *E, int el,
         sint[i] = rtf[3][i]/sin(rtf[1][i]);
 
     for(j=1;j<=ends;j++)       {
-      node = E->ien[CPPR][el].node[j];
+      node = E->ien[el].node[j];
       T = field[CPPR][node];
       if(E->node[CPPR][node] & (TBX | TBY | TBZ))
 	    DT=0.0;
@@ -607,11 +607,11 @@ static void element_residual(struct All_variables *E, int el,
 
     if(FLAGS!=NULL) {
       aid = -1;
-      if (FLAGS[CPPR][E->ien[CPPR][el].node[1]] & FBZ) {   // only check for the 1st node
+      if (FLAGS[CPPR][E->ien[el].node[1]] & FBZ) {   // only check for the 1st node
           aid = 0;
 	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }
-      else if (FLAGS[CPPR][E->ien[CPPR][el].node[5]] & FBZ) {   // only check for the 5th node
+      else if (FLAGS[CPPR][E->ien[el].node[5]] & FBZ) {   // only check for the 5th node
           aid = 1;
 	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }
@@ -621,7 +621,7 @@ static void element_residual(struct All_variables *E, int el,
 	  for(j=1;j<=onedvpts;j++)  {
             dT[j] = 0.0;
 	    for(k=1;k<=onedvpts;k++)
-              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[CPPR][el].node[k+aid*onedvpts]];
+              dT[j] += E->M.vpt[GMVINDEX(k,j)]*BC[3][E->ien[el].node[k+aid*onedvpts]];
             }
 	  for(j=1;j<=onedvpts;j++)  {
 	    Eres[a+aid*onedvpts] += dGamma.vpt[GMVGAMMA(aid,j)] *
@@ -763,7 +763,7 @@ static void process_adi_heating(struct All_variables *E, double *heating)
 
         temp1 = 0.0;
         for(i=1; i<=ends; i++) {
-            j = E->ien[CPPR][e].node[i];
+            j = E->ien[e].node[i];
             temp1 += E->sphere.cap[CPPR].V[3][j]
                 * (E->T[CPPR][j] + E->control.surface_temp);
         }
@@ -798,7 +798,7 @@ static void latent_heating(struct All_variables *E,
         temp2 = 0;
         temp3 = 0;
         for(i=1; i<=ends; i++) {
-            j = E->ien[CPPR][e].node[i];
+            j = E->ien[e].node[i];
             temp = (1.0 - B[CPPR][j]) * B[CPPR][j]
                 * (E->T[CPPR][j] + E->control.surface_temp);
             temp2 += temp * E->sphere.cap[CPPR].V[3][j];

@@ -102,10 +102,10 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 
 	  x[0] = x[1] = x[2] = v[0] = v[1] = vw = 0.0;
 
-          lnode[1] = E->ien[CPPR][el].node[1];
-          lnode[2] = E->ien[CPPR][el].node[2];
-          lnode[3] = E->ien[CPPR][el].node[3];
-          lnode[4] = E->ien[CPPR][el].node[4];
+          lnode[1] = E->ien[el].node[1];
+          lnode[2] = E->ien[el].node[2];
+          lnode[3] = E->ien[el].node[3];
+          lnode[4] = E->ien[el].node[4];
 
           for(nint=1;nint <= onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d <= onedvpoints[E->mesh.nsd];d++){
@@ -120,10 +120,10 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 	    }
 	  }
           if (i==elz)  {
-            lnode[1] = E->ien[CPPR][el].node[5];
-            lnode[2] = E->ien[CPPR][el].node[6];
-            lnode[3] = E->ien[CPPR][el].node[7];
-            lnode[4] = E->ien[CPPR][el].node[8];
+            lnode[1] = E->ien[el].node[5];
+            lnode[2] = E->ien[el].node[6];
+            lnode[3] = E->ien[el].node[7];
+            lnode[4] = E->ien[el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
@@ -154,20 +154,20 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
   omega[0]=omega[1]=omega[2]=0.0;
 
   /* depth range */
-  rr = E->sx[1][3][E->ien[1][elz].node[5]] - E->sx[1][3][E->ien[1][1].node[1]];
+  rr = E->sx[CPPR][3][E->ien[elz].node[5]] - E->sx[CPPR][3][E->ien[1].node[1]];
   if(rr < 1e-7)
     myerror(E,"rr error in net r determine");
   vw = 0.0;
   for (i=0;i < elz;i++) {	/* regular 0..n-1 loop */
     /* solve layer NR */
     lamp = determine_netr_tp(ddummy,ddummy,ddummy,ddummy,ddummy,2,(acoef+i*9),(lomega+i*3));
-    r1 = E->sx[1][3][E->ien[1][i+1].node[1]]; /* nodal radii for the
+    r1 = E->sx[CPPR][3][E->ien[i+1].node[1]]; /* nodal radii for the
 						 i-th element, this
 						 assumes that there
 						 are no lateral
 						 variations in radii!
 					      */
-    r2 = E->sx[1][3][E->ien[1][i+1].node[5]];
+    r2 = E->sx[CPPR][3][E->ien[i+1].node[5]];
     vtmp = (r2-r1)/rr;		/* weight for this layer */
     //if(E->parallel.me == 0)
     //  fprintf(stderr,"NR layer %5i (%11g - %11g, %11g): |%11g %11g %11g| = %11g\n",

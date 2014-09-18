@@ -57,7 +57,7 @@ static void add_force(struct All_variables *E, int e, double elt_f[24])
   int a, a1, a2, a3, p, node;
 
   for(a=1;a<=ends;a++)          {
-    node = E->ien[CPPR][e].node[a];
+    node = E->ien[e].node[a];
     p=(a-1)*dims;
     a1=E->id[CPPR][node].doff[1];
     E->F[CPPR][a1] += elt_f[p];
@@ -992,7 +992,7 @@ void get_elt_f(E,el,elt_f,bcs)
   for(p=0;p<n;p++) elt_f[p] = 0.0;
 
   for(p=1;p<=ends;p++)
-    force[p] = E->buoyancy[CPPR][E->ien[CPPR][el].node[p]];
+    force[p] = E->buoyancy[CPPR][E->ien[el].node[p]];
 
   for(j=1;j<=vpts;j++)       {   /*compute force at each int point */
     force_at_gs[j] = 0.0;
@@ -1002,7 +1002,7 @@ void get_elt_f(E,el,elt_f,bcs)
 
   for(i=1;i<=dims;i++)  {
     for(a=1;a<=ends;a++)  {
-      nodea=E->ien[CPPR][el].node[a];
+      nodea=E->ien[el].node[a];
       p= dims*(a-1)+i-1;
 
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
@@ -1017,7 +1017,7 @@ void get_elt_f(E,el,elt_f,bcs)
         for(j=1;j<=dims;j++) {
 	  type=vbc_flag[j];
           for(b=1;b<=ends;b++) {
-            nodeb=E->ien[CPPR][el].node[b];
+            nodeb=E->ien[el].node[b];
             if ((E->node[CPPR][nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
                 get_elt_k(E,el,elt_k,E->mesh.levmax,1);
@@ -1069,7 +1069,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 
 	if(E->control.side_sbcs)
 		for(a=1;a<=ends1;a++)  {
-			nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
+			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
 				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
 				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
@@ -1081,7 +1081,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 		/* if side_sbcs is false, only apply sbc on top and bottom surfaces */
 		if(side == SIDE_BOTTOM || side == SIDE_TOP) {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
+				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
 					value = E->sphere.cap[CPPR].VB[d][nodea];
 					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
@@ -1151,7 +1151,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 
 	if(E->control.side_sbcs)
 		for(a=1;a<=ends1;a++)  {
-			nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
+			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
 				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
 				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
@@ -1162,8 +1162,8 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 	else {
 		if( side == SIDE_TOP && E->parallel.me_loc[3]==E->parallel.nprocz-1 && (el%E->lmesh.elz==0)) {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
-				nodeas = E->ien[CPPR][el].node[ sidenodes[side][a] ]/E->lmesh.noz;
+				nodea = E->ien[el].node[ sidenodes[side][a] ];
+				nodeas = E->ien[el].node[ sidenodes[side][a] ]/E->lmesh.noz;
 				traction[1][a] = 0.0;
 				traction[2][a] = 0.0;
 				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
@@ -1183,7 +1183,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 		}
 		else {
 			for(a=1;a<=ends1;a++)  {
-				nodea = E->ien[CPPR][el].node[ sidenodes[side][a] ];
+				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
 					value = E->sphere.cap[CPPR].VB[d][nodea];
 					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);

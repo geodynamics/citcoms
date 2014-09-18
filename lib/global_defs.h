@@ -797,7 +797,7 @@ struct All_variables {
     double gnomonic_reference_phi;
 
     struct COORD *eco[NCS];
-    struct IEN *ien[NCS];  /* global */
+    struct IEN *ien;  /* global */
     struct SIEN *sien[NCS];
     struct ID *id[NCS];
     struct COORD *ECO[MAX_LEVELS][NCS];

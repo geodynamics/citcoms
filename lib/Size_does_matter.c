@@ -267,7 +267,7 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5], int el, int side)
 
   for(i=1;i<=oned;i++) {     /* nodes */
     s = sidenodes[side][i];
-    node = E->ien[CPPR][el].node[s];
+    node = E->ien[el].node[s];
     xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
              + E->x[CPPR][2][node]*dxdy[1][2]
              + E->x[CPPR][3][node]*dxdy[1][3];
@@ -449,7 +449,7 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top)
 
         for(i=1;i<=oned;i++) {     /* nodes */
             e = i+ii*oned;
-            node = E->ien[CPPR][el].node[e];
+            node = E->ien[el].node[e];
             xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
                 + E->x[CPPR][2][node]*dxdy[1][2]
                 + E->x[CPPR][3][node]*dxdy[1][3];
@@ -1064,7 +1064,7 @@ void mass_matrix(struct All_variables *E)
         for(e=1;e<=E->lmesh.nel;e++)  {
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
                 temp[node] = 0.0;
-                nz = ((E->ien[CPPR][e].node[node]-1) % E->lmesh.noz) + 1;
+                nz = ((E->ien[e].node[node]-1) % E->lmesh.noz) + 1;
                 for(nint=1;nint<=vpts;nint++)
                     temp[node] += E->refstate.rho[nz]
                         * E->refstate.heat_capacity[nz]
@@ -1075,7 +1075,7 @@ void mass_matrix(struct All_variables *E)
 
             /* lumped mass matrix, equivalent to tmass in ConMan */
             for(node=1;node<=enodes[E->mesh.nsd];node++)
-                E->TMass[CPPR][E->ien[CPPR][e].node[node]] += temp[node];
+                E->TMass[CPPR][E->ien[e].node[node]] += temp[node];
 
         } /* end of for e */
 

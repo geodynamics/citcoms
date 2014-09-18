@@ -378,7 +378,7 @@ void compute_nodal_stress(struct All_variables *E,
       Syy -= E->P[CPPR][e-1]; /* 0 to nel-1, instead of the current 1 to nel */
 
       for(i=1;i<=ends;i++) {
-        node = E->ien[CPPR][e].node[i]; /* assign to global nodes */
+        node = E->ien[e].node[i]; /* assign to global nodes */
         SZZ[CPPR][node] += tww[i] * Szz;
         SXX[CPPR][node] += tww[i] * Sxx;
         SYY[CPPR][node] += tww[i] * Syy;

@@ -453,7 +453,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 #endif
 	      for(u=0.,inode=1;inode <= ends;inode++){ /* mean vertical coordinate */
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-		off = E->ien[CPPR][j].node[inode];
+		off = E->ien[j].node[inode];
 		u += E->sx[CPPR][3][off];
 #else
 		off = E->ien[j].node[inode];
@@ -483,7 +483,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  /* CitcomS */
 		  xloc[0] = xloc[1] = xloc[2] = 0.0;
 		  for(inode=1;inode <= ends;inode++){
-		    off = E->ien[CPPR][el].node[inode];
+		    off = E->ien[el].node[inode];
 		    rtp2xyz((float)E->sx[CPPR][3][off],(float)E->sx[CPPR][1][off],(float)E->sx[CPPR][2][off],rout);
 		    xloc[0] += rout[0];xloc[1] += rout[1];xloc[2] += rout[2];
 		  }
@@ -828,7 +828,7 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	//if((e-1)%E->lmesh.elz==0)
 	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
 	for(i = 1; i <= ends; i++){	/* velocity at element nodes */
-	  off = E->ien[CPPR][e].node[i];
+	  off = E->ien[e].node[i];
 	  VV[1][i] = E->sphere.cap[CPPR].V[1][off];
 	  VV[2][i] = E->sphere.cap[CPPR].V[2][off];
 	  VV[3][i] = E->sphere.cap[CPPR].V[3][off];

@@ -90,11 +90,11 @@ void heat_flux(E)
         dTdz[i] = 0.0;
         rho[i] = 0.0;
         for(j=1;j<=ends;j++)  {
-          nz = ((E->ien[CPPR][e].node[j]-1) % E->lmesh.noz)+1;
+          nz = ((E->ien[e].node[j]-1) % E->lmesh.noz)+1;
           rho[i] += E->refstate.rho[nz]*E->N.vpt[GNVINDEX(j,i)];
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
-          T[i] += E->T[CPPR][E->ien[CPPR][e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
-          dTdz[i] += -E->T[CPPR][E->ien[CPPR][e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
+          T[i] += E->T[CPPR][E->ien[e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
+          dTdz[i] += -E->T[CPPR][E->ien[e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
           }
         }
 
@@ -108,7 +108,7 @@ void heat_flux(E)
       uT /= E->eco[CPPR][e].area;
 
       for(j=1;j<=ends;j++)
-        flux[CPPR][E->ien[CPPR][e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
+        flux[CPPR][E->ien[e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
 
       }             /* end of e */
 

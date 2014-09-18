@@ -103,10 +103,10 @@ void construct_surface( struct All_variables *E)
     for(element=1;element<=E->lmesh.nel;element++)
       if ( element%E->lmesh.elz==0) { /* top */
         e ++;
-        E->sien[CPPR][e].node[1] = E->ien[CPPR][element].node[5]/E->lmesh.noz;
-        E->sien[CPPR][e].node[2] = E->ien[CPPR][element].node[6]/E->lmesh.noz;
-        E->sien[CPPR][e].node[3] = E->ien[CPPR][element].node[7]/E->lmesh.noz;
-        E->sien[CPPR][e].node[4] = E->ien[CPPR][element].node[8]/E->lmesh.noz;
+        E->sien[CPPR][e].node[1] = E->ien[element].node[5]/E->lmesh.noz;
+        E->sien[CPPR][e].node[2] = E->ien[element].node[6]/E->lmesh.noz;
+        E->sien[CPPR][e].node[3] = E->ien[element].node[7]/E->lmesh.noz;
+        E->sien[CPPR][e].node[4] = E->ien[element].node[8]/E->lmesh.noz;
         E->surf_element[CPPR][e] = element;
         }
 
@@ -777,7 +777,7 @@ void construct_mat_group(E)
   } else {
           for(el=1;el<=E->lmesh.nel;el++) {
               E->mat[CPPR][el] = 1;
-              nodea = E->ien[CPPR][el].node[2];
+              nodea = E->ien[el].node[2];
               llayer = layers(E,nodea);
               if (llayer)  {
                   E->mat[CPPR][el] = llayer;

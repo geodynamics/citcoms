@@ -336,10 +336,10 @@ void gzdir_output_coord(struct All_variables *E)
 	   need to add offset according to the processor for global
 	   node numbers
 	*/
-	ix[1]= E->ien[CPPR][i].node[1]+offset;ix[2] = E->ien[CPPR][i].node[2]+offset;
-	ix[3]= E->ien[CPPR][i].node[3]+offset;ix[4] = E->ien[CPPR][i].node[4]+offset;
-	ix[5]= E->ien[CPPR][i].node[5]+offset;ix[6] = E->ien[CPPR][i].node[6]+offset;
-	ix[7]= E->ien[CPPR][i].node[7]+offset;ix[8] = E->ien[CPPR][i].node[8]+offset;
+	ix[1]= E->ien[i].node[1]+offset;ix[2] = E->ien[i].node[2]+offset;
+	ix[3]= E->ien[i].node[3]+offset;ix[4] = E->ien[i].node[4]+offset;
+	ix[5]= E->ien[i].node[5]+offset;ix[6] = E->ien[i].node[6]+offset;
+	ix[7]= E->ien[i].node[7]+offset;ix[8] = E->ien[i].node[8]+offset;
 	if(be_write_int_to_file(ix,9,fp1)!=9)
 	  BE_WERROR;
       }
@@ -422,10 +422,10 @@ void gzdir_output_coord(struct All_variables *E)
 	     node numbers
 	  */
 	  gzprintf(gz1,"%6i %6i %6i %6i %6i %6i %6i %6i\n",
-		   E->ien[CPPR][i].node[1]+offset,E->ien[CPPR][i].node[2]+offset,
-		   E->ien[CPPR][i].node[3]+offset,E->ien[CPPR][i].node[4]+offset,
-		   E->ien[CPPR][i].node[5]+offset,E->ien[CPPR][i].node[6]+offset,
-		   E->ien[CPPR][i].node[7]+offset,E->ien[CPPR][i].node[8]+offset);
+		   E->ien[i].node[1]+offset,E->ien[i].node[2]+offset,
+		   E->ien[i].node[3]+offset,E->ien[i].node[4]+offset,
+		   E->ien[i].node[5]+offset,E->ien[i].node[6]+offset,
+		   E->ien[i].node[7]+offset,E->ien[i].node[8]+offset);
 	}
       gzclose(gz1);
     } /* end vtkio = 1 (pre VTK) */

@@ -121,14 +121,14 @@ void velo_from_element(E,VV,el,sphere_key)
 
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
-            node = E->ien[CPPR][el].node[a];
+            node = E->ien[el].node[a];
             VV[1][a] = E->sphere.cap[CPPR].V[1][node];
             VV[2][a] = E->sphere.cap[CPPR].V[2][node];
             VV[3][a] = E->sphere.cap[CPPR].V[3][node];
         }
     else {
         for(a=1;a<=ends;a++)   {
-            node = E->ien[CPPR][el].node[a];
+            node = E->ien[el].node[a];
 
             sint = E->SinCos[lev][CPPR][0][node]; 
             sinf = E->SinCos[lev][CPPR][1][node];
@@ -163,14 +163,14 @@ void velo_from_element_d(E,VV,el,sphere_key)
 
     if (sphere_key)
         for(a=1;a<=ends;a++)   {
-            node = E->ien[CPPR][el].node[a];
+            node = E->ien[el].node[a];
             VV[1][a] = E->sphere.cap[CPPR].V[1][node];
             VV[2][a] = E->sphere.cap[CPPR].V[2][node];
             VV[3][a] = E->sphere.cap[CPPR].V[3][node];
         }
     else {
         for(a=1;a<=ends;a++)   {
-            node = E->ien[CPPR][el].node[a];
+            node = E->ien[el].node[a];
 
             sint = E->SinCos[lev][CPPR][0][node];
             sinf = E->SinCos[lev][CPPR][1][node];

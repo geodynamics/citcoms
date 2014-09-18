@@ -114,10 +114,10 @@ void return_horiz_ave(E,X,H)
           el = i + (j-1)*elz + (k-1)*elx*elz;
           get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
-          lnode[1] = E->ien[CPPR][el].node[1];
-          lnode[2] = E->ien[CPPR][el].node[2];
-          lnode[3] = E->ien[CPPR][el].node[3];
-          lnode[4] = E->ien[CPPR][el].node[4];
+          lnode[1] = E->ien[el].node[1];
+          lnode[2] = E->ien[el].node[2];
+          lnode[3] = E->ien[el].node[3];
+          lnode[4] = E->ien[el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
@@ -127,10 +127,10 @@ void return_horiz_ave(E,X,H)
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[CPPR][el].node[5];
-            lnode[2] = E->ien[CPPR][el].node[6];
-            lnode[3] = E->ien[CPPR][el].node[7];
-            lnode[4] = E->ien[CPPR][el].node[8];
+            lnode[1] = E->ien[el].node[5];
+            lnode[2] = E->ien[el].node[6];
+            lnode[3] = E->ien[el].node[7];
+            lnode[4] = E->ien[el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
@@ -191,10 +191,10 @@ void return_horiz_ave_f(E,X,H)
           el = i + (j-1)*elz + (k-1)*elx*elz;
           get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
-          lnode[1] = E->ien[CPPR][el].node[1];
-          lnode[2] = E->ien[CPPR][el].node[2];
-          lnode[3] = E->ien[CPPR][el].node[3];
-          lnode[4] = E->ien[CPPR][el].node[4];
+          lnode[1] = E->ien[el].node[1];
+          lnode[2] = E->ien[el].node[2];
+          lnode[3] = E->ien[el].node[3];
+          lnode[4] = E->ien[el].node[4];
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
@@ -204,10 +204,10 @@ void return_horiz_ave_f(E,X,H)
             }
 
           if (i==elz)  {
-            lnode[1] = E->ien[CPPR][el].node[5];
-            lnode[2] = E->ien[CPPR][el].node[6];
-            lnode[3] = E->ien[CPPR][el].node[7];
-            lnode[4] = E->ien[CPPR][el].node[8];
+            lnode[1] = E->ien[el].node[5];
+            lnode[2] = E->ien[el].node[6];
+            lnode[3] = E->ien[el].node[7];
+            lnode[4] = E->ien[el].node[8];
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
@@ -318,7 +318,7 @@ float return_bulk_value(E,Z,average)
 
 	  for(j=1;j<=vpts;j++)
 	    for(i=1;i<=ends;i++) {
-		n = E->ien[CPPR][el].node[i];
+		n = E->ien[el].node[i];
 		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
 		integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
                 }
@@ -361,7 +361,7 @@ double return_bulk_value_d(E,Z,average)
 
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
-                n = E->ien[CPPR][el].node[i];
+                n = E->ien[el].node[i];
                 volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
                 integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
             }

@@ -933,13 +933,13 @@ void full_get_shape_functions(struct All_variables *E,
                     fprintf(E->trace.fpt,"u %f v %f element: %d \n",u,v, nelem);
                     fprintf(E->trace.fpt,"Element uv boundaries: \n");
                     for(kk=1;kk<=4;kk++) {
-                        i = (E->ien[CPPR][nelem].node[kk] - 1) / E->lmesh.noz + 1;
+                        i = (E->ien[nelem].node[kk] - 1) / E->lmesh.noz + 1;
                         fprintf(E->trace.fpt,"%d: U: %f V:%f\n",kk,E->gnomonic[i].u,E->gnomonic[i].v);
                     }
                     fprintf(E->trace.fpt,"theta: %f phi: %f rad: %f\n",theta,phi,rad);
                     fprintf(E->trace.fpt,"Element theta-phi boundaries: \n");
                     for(kk=1;kk<=4;kk++)
-                        fprintf(E->trace.fpt,"%d: Theta: %f Phi:%f\n",kk,E->sx[CPPR][1][E->ien[CPPR][nelem].node[kk]],E->sx[CPPR][2][E->ien[CPPR][nelem].node[kk]]);
+                        fprintf(E->trace.fpt,"%d: Theta: %f Phi:%f\n",kk,E->sx[CPPR][1][E->ien[nelem].node[kk]],E->sx[CPPR][2][E->ien[nelem].node[kk]]);
                     sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
                     ival=icheck_element(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
@@ -1161,8 +1161,8 @@ static void get_radial_shape(struct All_variables *E,
     double top_bound=1.0+eps;
     double bottom_bound=0.0-eps;
 
-    node1=E->ien[CPPR][nelem].node[1];
-    node5=E->ien[CPPR][nelem].node[5];
+    node1=E->ien[nelem].node[1];
+    node5=E->ien[nelem].node[5];
 
     rad1=E->sx[CPPR][3][node1];
     rad5=E->sx[CPPR][3][node5];
@@ -1469,7 +1469,7 @@ static void make_regular_grid(struct All_variables *E)
                     phi_max=0.0;
                     for (pp=1;pp<=4;pp++)
                         {
-                            node=E->ien[CPPR][mm].node[pp];
+                            node=E->ien[mm].node[pp];
                             theta=E->sx[CPPR][1][node];
                             phi=E->sx[CPPR][2][node];
 
@@ -2096,11 +2096,11 @@ static int icheck_shell(struct All_variables *E,
     double top_rad;
 
 
-    ibottom_node=E->ien[1][nel].node[1];
-    itop_node=E->ien[1][nel].node[5];
+    ibottom_node=E->ien[nel].node[1];
+    itop_node=E->ien[nel].node[5];
 
-    bottom_rad=E->sx[1][3][ibottom_node];
-    top_rad=E->sx[1][3][itop_node];
+    bottom_rad=E->sx[CPPR][3][ibottom_node];
+    top_rad=E->sx[CPPR][3][itop_node];
 
     ival=0;
     if ((rad>=bottom_rad)&&(rad<top_rad)) ival=1;
@@ -2135,7 +2135,7 @@ static int icheck_element_column(struct All_variables *E,
     for (kk=1;kk<=4;kk++)
         {
 
-            node=E->ien[CPPR][nel].node[kk+4];
+            node=E->ien[nel].node[kk+4];
 
             rnode[kk][1]=E->x[CPPR][1][node];
             rnode[kk][2]=E->x[CPPR][2][node];
@@ -2709,7 +2709,7 @@ static int iget_radial_element(struct All_variables *E,
     for (kk=1;kk<=elz;kk++)
         {
 
-            node=E->ien[CPPR][iradial_element].node[8];
+            node=E->ien[iradial_element].node[8];
             top_rad=E->sx[CPPR][3][node];
 
             if (rad<top_rad) goto found_it;
@@ -2892,7 +2892,7 @@ static void determine_shape_coefficients(struct All_variables *E)
         /* find u,v of local nodes at one radius  */
 
         for(kk=1; kk<=4; kk++) {
-            snode = (E->ien[CPPR][nelem].node[kk]-1) / E->lmesh.noz + 1;
+            snode = (E->ien[nelem].node[kk]-1) / E->lmesh.noz + 1;
             u[kk] = E->gnomonic[snode].u;
             v[kk] = E->gnomonic[snode].v;
         }

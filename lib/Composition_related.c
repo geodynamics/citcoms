@@ -425,7 +425,7 @@ void map_composition_to_nodes(struct All_variables *E)
             /* weight composition */
 
             for (nodenum=1;nodenum<=8;nodenum++) {
-                n = E->ien[CPPR][nelem].node[nodenum];
+                n = E->ien[nelem].node[nodenum];
                 for(i=0;i<E->composition.ncomp;i++) {
 
                     E->composition.comp_node[CPPR][i][n] +=

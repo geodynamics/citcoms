@@ -1274,7 +1274,7 @@ void h5output_connectivity(struct All_variables *E)
 
         for(e = 0; e < nel; e++)
         {
-            ien = E->ien[CPPR][e+1].node;
+            ien = E->ien[e+1].node;
             data[8*e+0] = ien[1]-1; /* TODO: subtract one? */
             data[8*e+1] = ien[2]-1;
             data[8*e+2] = ien[3]-1;
