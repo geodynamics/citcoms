@@ -78,9 +78,9 @@ static void fix_radius(struct All_variables *E,
 static void fix_angle(double *angle);
 static void fix_theta_phi(double *theta, double *phi);
 static int iget_radial_element(struct All_variables *E,
-                               int j, int iel,
+                               int iel,
                                double rad);
-static int iget_regel(struct All_variables *E, int j,
+static int iget_regel(struct All_variables *E,
                       double theta, double phi,
                       int *ntheta, int *nphi);
 static void define_uv_space(struct All_variables *E);
@@ -2534,7 +2534,7 @@ int full_iget_element(struct All_variables *E,
 
     /* get regular element number */
 
-    iregel=iget_regel(E,CPPR,theta,phi,&ntheta,&nphi);
+    iregel=iget_regel(E,theta,phi,&ntheta,&nphi);
     if (iregel<=0)
         {
             return -99;
@@ -2674,7 +2674,7 @@ int full_iget_element(struct All_variables *E,
 
     /* find radial element */
 
-    ifinal_iel=iget_radial_element(E,CPPR,iel,rad);
+    ifinal_iel=iget_radial_element(E,iel,rad);
 
     return ifinal_iel;
 }
@@ -2686,7 +2686,7 @@ int full_iget_element(struct All_variables *E,
 /* an element (iel) from the column.                         */
 
 static int iget_radial_element(struct All_variables *E,
-                               int j, int iel,
+                               int iel,
                                double rad)
 {
 
@@ -2737,7 +2737,7 @@ static int iget_radial_element(struct All_variables *E,
 /* exists. If not found, returns -99.                            */
 /* npi and ntheta are modified for later use                     */
 
-static int iget_regel(struct All_variables *E, int j,
+static int iget_regel(struct All_variables *E,
                       double theta, double phi,
                       int *ntheta, int *nphi)
 {
