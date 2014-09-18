@@ -38,7 +38,7 @@ static void get_2dshape(struct All_variables *E,
                         double u, double v,
                         int iwedge, double * shape2d);
 static void get_radial_shape(struct All_variables *E,
-                             int j, int nelem,
+                             int nelem,
                              double rad, double *shaperad);
 static void spherical_to_uv(struct All_variables *E,
                             double theta, double phi,
@@ -964,7 +964,7 @@ void full_get_shape_functions(struct All_variables *E,
     /* Determine radial shape functions */
     /* There are 2 shape functions radially */
 
-    get_radial_shape(E,CPPR,nelem,rad,shaperad);
+    get_radial_shape(E,nelem,rad,shaperad);
 
     /* There are 6 nodes to the solid wedge.             */
     /* The 6 shape functions assocated with the 6 nodes  */
@@ -1150,7 +1150,7 @@ static void get_2dshape(struct All_variables *E,
 /* This function determines radial shape functions at rad      */
 
 static void get_radial_shape(struct All_variables *E,
-                             int j, int nelem,
+                             int nelem,
                              double rad, double *shaperad)
 {
 
