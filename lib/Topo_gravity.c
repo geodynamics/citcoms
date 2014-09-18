@@ -206,7 +206,7 @@ void compute_nodal_stress(struct All_variables *E,
       div = 0.0;
       vor = 0.0;
 
-      get_rtf_at_vpts(E, CPPR, lev, e, rtf);// gets r,theta,phi coordinates at the integration points
+      get_rtf_at_vpts(E, lev, e, rtf);// gets r,theta,phi coordinates at the integration points
       velo_from_element(E,VV,e,sphere_key); /* assign node-global
 						 velocities to nodes
 						 local to the

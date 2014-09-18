@@ -297,7 +297,7 @@ void get_elt_k(E,el,elt_k,lev,iconv)
     int l1,l2;
 #endif
 
-    get_rtf_at_vpts(E, CPPR, lev, el, rtf);
+    get_rtf_at_vpts(E, lev, el, rtf);
 
     if (iconv || (el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,0);
@@ -899,7 +899,7 @@ void get_elt_g(E,el,elt_del,lev)
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
    if(E->viscosity.allow_anisotropic_viscosity && modify_g){
      /* find avg constitutive matrix from all vpts (change this later) */
-     get_rtf_at_vpts(E, m, lev, el, rtf2);
+     get_rtf_at_vpts(E, lev, el, rtf2);
      for(i=0;i<6;i++)
        for(j=0;j<6;j++)
 	 Duse[i][j]=0.0;
