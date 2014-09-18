@@ -119,7 +119,7 @@ void assemble_div_rho_u(struct All_variables *, double **, double **, int);
 void assemble_div_u(struct All_variables *, double **, double **, int);
 void assemble_grad_p(struct All_variables *, double **, double **, int);
 double assemble_dAhatp_entry(struct All_variables *, int, int);
-void get_elt_c(struct All_variables *, int, higher_precision [24][1], int, int);
+void get_elt_c(struct All_variables *, int, higher_precision [24][1], int);
 void get_elt_g(struct All_variables *, int, higher_precision [24][1], int, int);
 void get_elt_f(struct All_variables *, int, double [24], int, int);
 void get_aug_k(struct All_variables *, int, double [24*24], int);

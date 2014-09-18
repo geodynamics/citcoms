@@ -669,7 +669,7 @@ void construct_elt_cs(struct All_variables *E)
 
     for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
             for(el=1;el<=E->lmesh.NEL[lev];el++) {
-                get_elt_c(E,el,E->elt_c[lev][CPPR][el].c,lev,CPPR);
+                get_elt_c(E,el,E->elt_c[lev][CPPR][el].c,lev);
             }
 }
 

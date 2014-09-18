@@ -795,8 +795,7 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
   Function to supply the element c matrix for a given element e.
   ==============================================================  */
 
-void get_elt_c(struct All_variables *E, int el,
-               higher_precision elt_c[24][1], int lev, int m)
+void get_elt_c(struct All_variables *E, int el, higher_precision elt_c[24][1], int lev)
 {
 
     int p, a, i, j, nz;
