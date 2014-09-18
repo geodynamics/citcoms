@@ -720,7 +720,7 @@ static void filter(struct All_variables *E)
 }
 
 
-static void process_visc_heating(struct All_variables *E, int m, double *heating)
+static void process_visc_heating(struct All_variables *E, double *heating)
 {
     void strain_rate_2_inv();
     int e, i;
@@ -747,7 +747,7 @@ static void process_visc_heating(struct All_variables *E, int m, double *heating
 }
 
 
-static void process_adi_heating(struct All_variables *E, int m, double *heating)
+static void process_adi_heating(struct All_variables *E, double *heating)
 {
     int e, ez, i, j;
     double matprop, temp1, temp2;
@@ -774,7 +774,7 @@ static void process_adi_heating(struct All_variables *E, int m, double *heating)
 }
 
 
-static void latent_heating(struct All_variables *E, int m,
+static void latent_heating(struct All_variables *E,
                            double *heating_latent, double *heating_adi,
                            float **B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
@@ -815,7 +815,7 @@ static void latent_heating(struct All_variables *E, int m,
 }
 
 
-static void process_latent_heating(struct All_variables *E, int m,
+static void process_latent_heating(struct All_variables *E,
                                    double *heating_latent, double *heating_adi)
 {
     int e;
@@ -825,7 +825,7 @@ static void process_latent_heating(struct All_variables *E, int m,
         heating_latent[e] = 1.0;
 
     if(E->control.Ra_410 != 0.0) {
-        latent_heating(E, CPPR, heating_latent, heating_adi,
+        latent_heating(E, heating_latent, heating_adi,
                        E->Fas410, E->control.Ra_410,
                        E->control.clapeyron410, E->viscosity.z410,
                        E->control.transT410, E->control.inv_width410);
@@ -833,14 +833,14 @@ static void process_latent_heating(struct All_variables *E, int m,
     }
 
     if(E->control.Ra_670 != 0.0) {
-        latent_heating(E, CPPR, heating_latent, heating_adi,
+        latent_heating(E, heating_latent, heating_adi,
                        E->Fas670, E->control.Ra_670,
                        E->control.clapeyron670, E->viscosity.zlm,
                        E->control.transT670, E->control.inv_width670);
     }
 
     if(E->control.Ra_cmb != 0.0) {
-        latent_heating(E, CPPR, heating_latent, heating_adi,
+        latent_heating(E, heating_latent, heating_adi,
                        E->Fascmb, E->control.Ra_cmb,
                        E->control.clapeyroncmb, E->viscosity.zcmb,
                        E->control.transTcmb, E->control.inv_widthcmb);
@@ -880,10 +880,10 @@ static void process_heating(struct All_variables *E, int psc_pass)
     if(psc_pass == 0) {
         /* visc heating does not change between psc_pass, compute only
          * at first psc_pass */
-        process_visc_heating(E, CPPR, E->heating_visc[CPPR]);
+        process_visc_heating(E, E->heating_visc[CPPR]);
     }
-    process_adi_heating(E, CPPR, E->heating_adi[CPPR]);
-    process_latent_heating(E, CPPR, E->heating_latent[CPPR], E->heating_adi[CPPR]);
+    process_adi_heating(E, E->heating_adi[CPPR]);
+    process_latent_heating(E, E->heating_latent[CPPR], E->heating_adi[CPPR]);
 
     /* compute total amount of visc/adi heating over all processors
      * only at last psc_pass */
