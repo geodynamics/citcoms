@@ -34,7 +34,7 @@
 #include "composition_related.h"
 
 static void get_2dshape(struct All_variables *E,
-                        int j, int nelem,
+                        int nelem,
                         double u, double v,
                         int iwedge, double * shape2d);
 static void get_radial_shape(struct All_variables *E,
@@ -913,7 +913,7 @@ void full_get_shape_functions(struct All_variables *E,
     /* determine shape functions of wedge */
     /* There are 3 shape functions for the triangular wedge */
 
-    get_2dshape(E,CPPR,nelem,u,v,iwedge,shape2d);
+    get_2dshape(E,nelem,u,v,iwedge,shape2d);
 
     /* if any shape functions are negative, goto next wedge */
 
@@ -1111,7 +1111,7 @@ void full_get_velocity(struct All_variables *E,
 /* van Steenhoven, 1986).                                      */
 
 static void get_2dshape(struct All_variables *E,
-                        int j, int nelem,
+                        int nelem,
                         double u, double v,
                         int iwedge, double * shape2d)
 {
