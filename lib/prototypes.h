@@ -157,7 +157,7 @@ void full_get_shape_functions(struct All_variables *, double [9], int, double, d
 double full_interpolate_data(struct All_variables *, double [9], double [9]);
 void full_get_velocity(struct All_variables *, int, double, double, double, double *);
 int full_icheck_cap(struct All_variables *, int, double, double, double, double);
-int full_iget_element(struct All_variables *, int, int, double, double, double, double, double, double);
+int full_iget_element(struct All_variables *, int, double, double, double, double, double, double);
 void full_keep_within_bounds(struct All_variables *, double *, double *, double *, double *, double *, double *);
 void analytical_test(struct All_variables *);
 void analytical_runge_kutte(struct All_variables *, int, double, double *, double *, double *, double *, double *);

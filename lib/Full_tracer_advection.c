@@ -2518,7 +2518,7 @@ static void fix_theta_phi(double *theta, double *phi)
 /* it is not known, input a negative number.                     */
 
 int full_iget_element(struct All_variables *E,
-                      int j, int iprevious_element,
+                      int iprevious_element,
                       double x, double y, double z,
                       double theta, double phi, double rad)
 {
@@ -2674,17 +2674,6 @@ int full_iget_element(struct All_variables *E,
     E->trace.istat1++;
 
     iel=icheck_all_columns(E,CPPR,x,y,z,rad);
-
-    /*
-      fprintf(E->trace.fpt,"WARNING(full_iget_element)-doing a full search!\n");
-      fprintf(E->trace.fpt,"  Most often means tracers have moved more than 1 element away\n");
-      fprintf(E->trace.fpt,"  or regular element resolution is way too low.\n");
-      fprintf(E->trace.fpt,"  COLUMN: %d \n",iel);
-      fprintf(E->trace.fpt,"  PREVIOUS ELEMENT: %d \n",iprevious_element);
-      fprintf(E->trace.fpt,"  x,y,z,theta,phi,rad: %f %f %f   %f %f %f\n",x,y,z,theta,phi,rad);
-      fflush(E->trace.fpt);
-      if (E->trace.itracer_warnings) exit(10);
-    */
 
     if (E->trace.istat1%100==0)
         {
