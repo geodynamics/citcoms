@@ -96,7 +96,7 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
       for (k=1;k <= ely;k++)
         for (j=1;j <= elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
 	  /* find mean element location and horizontal velocity */
 

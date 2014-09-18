@@ -112,7 +112,7 @@ void return_horiz_ave(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
           lnode[1] = E->ien[CPPR][el].node[1];
           lnode[2] = E->ien[CPPR][el].node[2];
@@ -189,7 +189,7 @@ void return_horiz_ave_f(E,X,H)
       for (k=1;k<=ely;k++)
         for (j=1;j<=elx;j++)     {
           el = i + (j-1)*elz + (k-1)*elx*elz;
-          get_global_1d_shape_fn(E,el,&M,&dGamma,top,CPPR);
+          get_global_1d_shape_fn(E,el,&M,&dGamma,top);
 
           lnode[1] = E->ien[CPPR][el].node[1];
           lnode[2] = E->ien[CPPR][el].node[2];

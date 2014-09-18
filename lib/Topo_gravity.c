@@ -1057,8 +1057,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
        el = E->surf_element[j][els];
        elb = el - elz+1;
 
-       get_global_1d_shape_fn_L(E,el,&GM,&dGammax,1,CPPR);
-       get_global_1d_shape_fn_L(E,elb,&GMb,&dGammabx,0,CPPR);
+       get_global_1d_shape_fn_L(E,el,&GM,&dGammax,1);
+       get_global_1d_shape_fn_L(E,elb,&GMb,&dGammabx,0);
 
        for(m=1;m<=onedv;m++)        {
           eltTU[m-1] = 0.0;

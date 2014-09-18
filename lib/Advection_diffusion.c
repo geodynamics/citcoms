@@ -609,11 +609,11 @@ static void element_residual(struct All_variables *E, int el,
       aid = -1;
       if (FLAGS[CPPR][E->ien[CPPR][el].node[1]] & FBZ) {   // only check for the 1st node
           aid = 0;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,CPPR);
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }
       else if (FLAGS[CPPR][E->ien[CPPR][el].node[5]] & FBZ) {   // only check for the 5th node
           aid = 1;
-	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid,CPPR);
+	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }
       if (aid>=0)  {
         for(a=1;a<=onedvpts;a++)  {

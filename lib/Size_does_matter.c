@@ -379,9 +379,9 @@ void construct_bdry_det(struct All_variables *E)
 
 /*   ======================================================================
      ======================================================================  */
-void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
+void get_global_1d_shape_fn(E,el,GM,dGammax,top)
      struct All_variables *E;
-     int el,top,m;
+     int el,top;
      struct Shape_function1 *GM;
      struct Shape_function1_dA *dGammax;
 {
@@ -416,9 +416,9 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top,m)
 
 /*   ======================================================================
      ======================================================================  */
-void get_global_1d_shape_fn_L(E,el,GM,dGammax,top,m)
+void get_global_1d_shape_fn_L(E,el,GM,dGammax,top)
      struct All_variables *E;
-     int el,top,m;
+     int el,top;
      struct Shape_function1 *GM;
      struct Shape_function1_dA *dGammax;
 {
