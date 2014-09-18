@@ -1231,9 +1231,9 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
  subroutine to get augmented lagrange part of stiffness matrix
 ================================================================== */
 
-void get_aug_k(E,el,elt_k,level,m)
+void get_aug_k(E,el,elt_k,level)
      struct All_variables *E;
-     int el,m;
+     int el;
      double elt_k[24*24];
      int level;
 {
@@ -1290,9 +1290,3 @@ void get_aug_k(E,el,elt_k,level,m)
            }
        }
 }
-
-
-/* version */
-/* $Id$ */
-
-/* End of file  */

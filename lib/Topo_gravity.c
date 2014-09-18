@@ -995,8 +995,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       get_elt_k(E,el,eltk,lev,CPPR,1);
 
       if (E->control.augmented_Lagr) {
-          get_aug_k(E,elb,eltkb,lev,CPPR);
-          get_aug_k(E,el,eltk,lev,CPPR);
+          get_aug_k(E,elb,eltkb,lev);
+          get_aug_k(E,el,eltk,lev);
       }
 
       for(m=0;m<dims*ends;m++) {

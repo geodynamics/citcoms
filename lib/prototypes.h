@@ -122,7 +122,7 @@ double assemble_dAhatp_entry(struct All_variables *, int, int);
 void get_elt_c(struct All_variables *, int, higher_precision [24][1], int, int);
 void get_elt_g(struct All_variables *, int, higher_precision [24][1], int, int);
 void get_elt_f(struct All_variables *, int, double [24], int, int);
-void get_aug_k(struct All_variables *, int, double [24*24], int, int);
+void get_aug_k(struct All_variables *, int, double [24*24], int);
 /* Full_boundary_conditions.c */
 void full_velocity_boundary_conditions(struct All_variables *);
 void full_temperature_boundary_conditions(struct All_variables *);

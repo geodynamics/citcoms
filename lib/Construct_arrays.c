@@ -348,7 +348,7 @@ void construct_node_ks(E)
 	    get_elt_k(E,element,elt_K,level,CPPR,0);
 
 	    if (E->control.augmented_Lagr)
-	         get_aug_k(E,element,elt_K,level,CPPR);
+	         get_aug_k(E,element,elt_K,level);
 
             build_diagonal_of_K(E,element,elt_K,level);
 
@@ -618,7 +618,7 @@ void construct_elt_ks(E)
 	    get_elt_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR,0);
 
 	    if (E->control.augmented_Lagr)
-	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR);
+	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev);
 
             build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev);
 
