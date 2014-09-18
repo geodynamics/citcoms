@@ -63,7 +63,7 @@ static void form_rtf_bc(int k, double x[4],
 
 
 static void get_global_shape_fn_sph(struct All_variables *E,
-                                    int m, int lev, int el)
+                                    int lev, int el)
 {
     int i,j,k,d,e;
     double jacobian;
@@ -178,7 +178,7 @@ void construct_shape_function_derivatives(struct All_variables *E)
 
     for(lev=E->mesh.levmax; lev>=E->mesh.levmin; lev--)
         for(el=1; el<=E->lmesh.NEL[lev]; el++)
-            get_global_shape_fn_sph(E, CPPR, lev, el);
+            get_global_shape_fn_sph(E, lev, el);
 }
 
 
