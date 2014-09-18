@@ -488,7 +488,7 @@ if (E->control.verbose) {
  ============================================ */
 
 static void face_eqn_node_to_pass(struct All_variables *, int, int, int);
-static void line_eqn_node_to_pass(struct All_variables *, int, int, int, int, int, int);
+static void line_eqn_node_to_pass(struct All_variables *, int, int, int, int, int);
 
 void full_parallel_communication_routs_v(E)
   struct All_variables *E;
@@ -603,7 +603,7 @@ void full_parallel_communication_routs_v(E)
 	    target = E->parallel.PROCESSOR[lev][CPPR].pass[1] - nprocxz;
 
 	  E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-	  line_eqn_node_to_pass(E,lev,CPPR,npass,noz,1,1);
+	  line_eqn_node_to_pass(E,lev,npass,noz,1,1);
 	}
 
 	/* +X+Y line */
@@ -621,7 +621,7 @@ void full_parallel_communication_routs_v(E)
 	    target = E->parallel.PROCESSOR[lev][CPPR].pass[2] + nprocxz;
 
 	  E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-	  line_eqn_node_to_pass(E,lev,CPPR,npass,noz,(noy*nox-1)*noz+1,1);
+	  line_eqn_node_to_pass(E,lev,npass,noz,(noy*nox-1)*noz+1,1);
 	}
 
 	/* -X+Y line */
@@ -635,7 +635,7 @@ void full_parallel_communication_routs_v(E)
 	    target = E->parallel.PROCESSOR[lev][CPPR].pass[1] + nprocxz;
 
 	  E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-	  line_eqn_node_to_pass(E,lev,CPPR,npass,noz,(noy-1)*nox*noz+1,1);
+	  line_eqn_node_to_pass(E,lev,npass,noz,(noy-1)*nox*noz+1,1);
 	}
 
 	/* +X-Y line */
@@ -649,7 +649,7 @@ void full_parallel_communication_routs_v(E)
 	    target = E->parallel.PROCESSOR[lev][CPPR].pass[2] - nprocxz;
 
 	  E->parallel.PROCESSOR[lev][CPPR].pass[npass] = target;
-	  line_eqn_node_to_pass(E,lev,CPPR,npass,noz,(nox-1)*noz+1,1);
+	  line_eqn_node_to_pass(E,lev,npass,noz,(nox-1)*noz+1,1);
 	}
 
 
@@ -831,9 +831,9 @@ static void face_eqn_node_to_pass(E,lev,npass,bd)
 /* ================================================ */
 /* ================================================ */
 
-static void line_eqn_node_to_pass(E,lev,m,npass,num_node,offset,stride)
+static void line_eqn_node_to_pass(E,lev,npass,num_node,offset,stride)
   struct All_variables *E;
-  int lev,m,npass,num_node,offset,stride;
+  int lev,npass,num_node,offset,stride;
 {
   int jj,kk,node,doff;
   const int dims=E->mesh.nsd;
@@ -849,8 +849,6 @@ static void line_eqn_node_to_pass(E,lev,m,npass,num_node,offset,stride)
   }
 
   E->parallel.NUM_NEQ[lev][CPPR].pass[npass] = jj;
-
-  return;
 }
 
 void full_exchange_id_d(E, U, lev)
