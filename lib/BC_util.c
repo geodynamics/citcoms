@@ -27,7 +27,7 @@
  */
 
 #include "global_defs.h"
-void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int);
 void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void myerror(struct All_variables *,char *);
 int layers(struct All_variables *,int);
