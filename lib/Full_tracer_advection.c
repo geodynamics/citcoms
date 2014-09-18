@@ -53,13 +53,13 @@ static int icheck_all_columns(struct All_variables *E,
                               double x, double y, double z,
                               double rad);
 static int icheck_element(struct All_variables *E,
-                          int j, int nel,
+                          int nel,
                           double x, double y, double z,
                           double rad);
 static int icheck_shell(struct All_variables *E,
                         int nel, double rad);
 static int icheck_element_column(struct All_variables *E,
-                                 int j, int nel,
+                                 int nel,
                                  double x, double y, double z,
                                  double rad);
 static int icheck_bounds(struct All_variables *E,
@@ -941,14 +941,14 @@ void full_get_shape_functions(struct All_variables *E,
                     for(kk=1;kk<=4;kk++)
                         fprintf(E->trace.fpt,"%d: Theta: %f Phi:%f\n",kk,E->sx[CPPR][1][E->ien[CPPR][nelem].node[kk]],E->sx[CPPR][2][E->ien[CPPR][nelem].node[kk]]);
                     sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
-                    ival=icheck_element(E,CPPR,nelem,x,y,z,rad);
+                    ival=icheck_element(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
                     ival=(E->trace.iget_element)(E,-99,x,y,z,theta,phi,rad);
                     fprintf(E->trace.fpt,"New Element?: %d\n",ival);
                     ival=icheck_column_neighbors(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"New Element (neighs)?: %d\n",ival);
                     nelem=ival;
-                    ival=icheck_element(E,CPPR,nelem,x,y,z,rad);
+                    ival=icheck_element(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
                     itry++;
                     if (ival>0) goto try_again;
@@ -1534,31 +1534,9 @@ static void make_regular_grid(struct All_variables *E)
 
                     /* if previous element not found yet, check all surface elements */
 
-                    /*
-                      if (ifound_one==0)
-                      {
-                      for (mm=elz;mm<=E->lmesh.nel;mm=mm+elz)
-                      {
-                      pp=mm/elz;
-                      if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
-                      {
-                      ival=icheck_element_column(E,j,mm,x,y,z,rad);
-                      if (ival>0)
-                      {
-                      ilast_el=mm;
-                      ifound_one++;
-                      E->trace.regnodetoel[j][kk]=mm;
-                      goto foundit;
-                      }
-                      }
-                      }
-                      goto foundit;
-                      }
-                    */
-
                     /* first check previous element */
 
-                    ival=icheck_element_column(E,CPPR,ilast_el,x,y,z,rad);
+                    ival=icheck_element_column(E,ilast_el,x,y,z,rad);
                     if (ival>0)
                         {
                             E->trace.regnodetoel[CPPR][kk]=ilast_el;
@@ -1582,7 +1560,7 @@ static void make_regular_grid(struct All_variables *E)
                             pp=mm/elz;
                             if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
                                 {
-                                    ival=icheck_element_column(E,CPPR,mm,x,y,z,rad);
+                                    ival=icheck_element_column(E,mm,x,y,z,rad);
                                     if (ival>0)
                                         {
                                             ilast_el=mm;
@@ -2027,7 +2005,7 @@ static int icheck_column_neighbors(struct All_variables *E,
 
             if ((neighbor[kk]>=1)&&(neighbor[kk]<=E->lmesh.nel))
                 {
-                    ival=icheck_element_column(E,CPPR,neighbor[kk],x,y,z,rad);
+                    ival=icheck_element_column(E,neighbor[kk],x,y,z,rad);
                     if (ival>0)
                         {
                             return neighbor[kk];
@@ -2058,7 +2036,7 @@ static int icheck_all_columns(struct All_variables *E,
 
     for (nel=elz;nel<=numel;nel=nel+elz)
         {
-            icheck=icheck_element_column(E,CPPR,nel,x,y,z,rad);
+            icheck=icheck_element_column(E,nel,x,y,z,rad);
             if (icheck==1)
                 {
                     return nel;
@@ -2076,7 +2054,7 @@ static int icheck_all_columns(struct All_variables *E,
 /* a given element                                          */
 
 static int icheck_element(struct All_variables *E,
-                          int j, int nel,
+                          int nel,
                           double x, double y, double z,
                           double rad)
 {
@@ -2089,7 +2067,7 @@ static int icheck_element(struct All_variables *E,
             return 0;
         }
 
-    icheck=icheck_element_column(E,CPPR,nel,x,y,z,rad);
+    icheck=icheck_element_column(E,nel,x,y,z,rad);
     if (icheck==0)
         {
             return 0;
@@ -2136,7 +2114,7 @@ static int icheck_shell(struct All_variables *E,
 /* a given element's column                                 */
 
 static int icheck_element_column(struct All_variables *E,
-                                 int j, int nel,
+                                 int nel,
                                  double x, double y, double z,
                                  double rad)
 {
@@ -2575,7 +2553,7 @@ int full_iget_element(struct All_variables *E,
 
     if (iprevious_element>0)
         {
-            ival=icheck_element_column(E,CPPR,iprevious_element,x,y,z,rad);
+            ival=icheck_element_column(E,iprevious_element,x,y,z,rad);
             if (ival==1)
                 {
                     iel=iprevious_element;
@@ -2596,7 +2574,7 @@ int full_iget_element(struct All_variables *E,
 
                     if (nelem!=iprevious_element)
                         {
-                            ival=icheck_element_column(E,CPPR,nelem,x,y,z,rad);
+                            ival=icheck_element_column(E,nelem,x,y,z,rad);
                             if (ival==1)
                                 {
                                     iel=nelem;
@@ -2639,7 +2617,7 @@ int full_iget_element(struct All_variables *E,
     icorner[4]=elxz*ely;
     for (kk=1;kk<=4;kk++)
         {
-            ival=icheck_element_column(E,CPPR,icorner[kk],x,y,z,rad);
+            ival=icheck_element_column(E,icorner[kk],x,y,z,rad);
             if (ival>0)
                 {
                     iel=icorner[kk];
