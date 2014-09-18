@@ -68,7 +68,7 @@ void get_bulk_composition(struct All_variables *);
 void construct_ien(struct All_variables *);
 void construct_surface(struct All_variables *);
 void construct_id(struct All_variables *);
-void get_bcs_id_for_residual(struct All_variables *, int, int);
+void get_bcs_id_for_residual(struct All_variables *, int);
 void construct_lm(struct All_variables *);
 void construct_node_maps(struct All_variables *);
 void construct_node_ks(struct All_variables *);

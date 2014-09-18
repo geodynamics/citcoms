@@ -168,7 +168,7 @@ void construct_id(E)
       MPI_Allreduce(&neq, &gneq, 1, MPI_INT, MPI_SUM, E->parallel.world);
       E->mesh.NEQ[lev] = gneq;
 
-      get_bcs_id_for_residual(E,lev,CPPR);
+      get_bcs_id_for_residual(E,lev);
 
     }      /* end for lev */
 
@@ -185,9 +185,9 @@ void construct_id(E)
 }
 
 
-void get_bcs_id_for_residual(E,level,m)
+void get_bcs_id_for_residual(E,level)
     struct All_variables *E;
-    int level,m;
+    int level;
   {
 
     int i,j;
