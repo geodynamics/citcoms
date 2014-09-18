@@ -1030,7 +1030,7 @@ double full_interpolate_data(struct All_variables *E,
 /*         6        7               6            8                           */
 
 void full_get_velocity(struct All_variables *E,
-                       int j, int nelem,
+                       int nelem,
                        double theta, double phi, double rad,
                        double *velocity_vector)
 {
@@ -1100,10 +1100,6 @@ void full_get_velocity(struct All_variables *E,
         vy[4]*shape[4]+vy[5]*shape[5]+shape[6]*vy[6];
     velocity_vector[3]=vz[1]*shape[1]+vz[2]*shape[2]+shape[3]*vz[3]+
         vz[4]*shape[4]+vz[5]*shape[5]+shape[6]*vz[6];
-
-
-
-    return;
 }
 
 /***************************************************************/
@@ -1147,13 +1143,6 @@ static void get_2dshape(struct All_variables *E,
     a2=E->trace.shape_coefs[CPPR][iwedge][9][n];
 
     shape2d[3]=a0+a1*u+a2*v;
-
-    /** debug **
-    fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
-            nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
-    /**/
-
-    return;
 }
 
 /***************************************************************/
@@ -1205,12 +1194,7 @@ static void get_radial_shape(struct All_variables *E,
             fflush(E->trace.fpt);
             exit(10);
         }
-
-    return;
 }
-
-
-
 
 
 /**************************************************************/
@@ -1249,13 +1233,6 @@ static void spherical_to_uv(struct All_variables *E, int j,
 
     *u=sint*sinp2*cosc;
     *v=(sin_theta_f*cost-cos_theta_f*sint*cosp2)*cosc;
-
-    /** debug **
-    fprintf(E->trace.fpt, "(%e %e) -> (%e %e)\n",
-            theta, phi, *u, *v);
-    /**/
-
-    return;
 }
 
 
