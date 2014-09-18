@@ -447,7 +447,7 @@ void twiddle_thumbs(struct All_variables *);
 void construct_shape_function_derivatives(struct All_variables *);
 void get_rtf_at_vpts(struct All_variables *, int, int, int, double [4][9]);
 void get_rtf_at_ppts(struct All_variables *, int, int, int, double [4][9]);
-void get_side_x_cart(struct All_variables *, double [4][5], int, int, int);
+void get_side_x_cart(struct All_variables *, double [4][5], int, int);
 void construct_surf_det(struct All_variables *);
 void construct_bdry_det(struct All_variables *);
 void get_global_1d_shape_fn(struct All_variables *, int, struct Shape_function1 *, struct Shape_function1_dA *, int);

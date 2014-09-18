@@ -243,8 +243,7 @@ void get_rtf_at_ppts(struct All_variables *E, int m, int lev, int el,
 }
 
 
-void get_side_x_cart(struct All_variables *E, double xx[4][5],
-		     int el, int side, int m)
+void get_side_x_cart(struct All_variables *E, double xx[4][5], int el, int side)
 {
   double to,fo,dxdy[4][4];
   int i, node, s;
@@ -308,7 +307,7 @@ void construct_surf_det (E)
 
   for (es=1;es<=E->lmesh.snel;es++)   {
     el = es * E->lmesh.elz;
-    get_side_x_cart(E, xx, el, SIDE_TOP, CPPR);
+    get_side_x_cart(E, xx, el, SIDE_TOP);
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       for(d=1;d<=E->mesh.nsd-1;d++)
@@ -354,7 +353,7 @@ void construct_bdry_det(struct All_variables *E)
       el = E->boundary.element[CPPR][es];
 
       for (side=SIDE_BEGIN; side<=SIDE_END; side++) {
-	get_side_x_cart(E, xx, el, side, CPPR);
+	get_side_x_cart(E, xx, el, side);
 
 	for(k=1;k<=oned;k++) { /* all of the vpoints*/
 
@@ -396,7 +395,7 @@ void get_global_1d_shape_fn(E,el,GM,dGammax,top)
 
   for (ii=0;ii<=top;ii++)   {   /* ii=0 for bottom and ii=1 for top */
 
-    get_side_x_cart(E, xx, el, ii+1, CPPR);
+    get_side_x_cart(E, xx, el, ii+1);
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
       for(d=1;d<=E->mesh.nsd-1;d++)
@@ -499,7 +498,7 @@ void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side)
   const int oned = onedvpoints[E->mesh.nsd];
   double xx[4][5],dxda[4][4];
 
-  get_side_x_cart(E, xx, el, side, CPPR);
+  get_side_x_cart(E, xx, el, side);
 
   for(k=1;k<=oned;k++)    {
 
