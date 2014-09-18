@@ -1357,7 +1357,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->Vi[CPPR] = E->VI[E->mesh.levmax][CPPR];
   E->EVi[CPPR] = E->EVI[E->mesh.levmax][CPPR];
   E->node[CPPR] = E->NODE[E->mesh.levmax][CPPR];
-  E->cc[CPPR] = E->CC[E->mesh.levmax][CPPR];
+  E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx[CPPR] = E->CCX[E->mesh.levmax][CPPR];
   E->Mass[CPPR] = E->MASS[E->mesh.levmax][CPPR];
   E->gDA[CPPR] = E->GDA[E->mesh.levmax][CPPR];

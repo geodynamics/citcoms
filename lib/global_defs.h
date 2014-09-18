@@ -808,7 +808,7 @@ struct All_variables {
     struct EG *elt_del[MAX_LEVELS][NCS];
     struct EC *elt_c[MAX_LEVELS][NCS];
     struct EK *elt_k[MAX_LEVELS][NCS];
-    struct CC *cc[NCS];
+    struct CC *cc;
     struct CCX *ccx[NCS];
     struct CC *CC[MAX_LEVELS][NCS];
     struct CCX *CCX[MAX_LEVELS][NCS];
