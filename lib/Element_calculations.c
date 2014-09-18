@@ -865,9 +865,9 @@ void get_elt_c(struct All_variables *E, int el, higher_precision elt_c[24][1], i
   used for the divergence
   ==============================================================  */
 
-void get_elt_g(E,el,elt_del,lev,m)
+void get_elt_g(E,el,elt_del,lev)
      struct All_variables *E;
-     int el,m;
+     int el;
      higher_precision elt_del[24][1];
      int lev;
 
@@ -892,7 +892,7 @@ void get_elt_g(E,el,elt_del,lev,m)
    if ((el-1)%E->lmesh.ELZ[lev]==0)
       construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,1);
 
-   get_rtf_at_ppts(E, m, lev, el, rtf);
+   get_rtf_at_ppts(E, CPPR, lev, el, rtf);
 
    temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
 
