@@ -40,7 +40,7 @@ static void get_2dshape(struct All_variables *E,
 static void get_radial_shape(struct All_variables *E,
                              int j, int nelem,
                              double rad, double *shaperad);
-static void spherical_to_uv(struct All_variables *E, int j,
+static void spherical_to_uv(struct All_variables *E,
                             double theta, double phi,
                             double *u, double *v);
 static void make_regular_grid(struct All_variables *E);
@@ -897,7 +897,7 @@ void full_get_shape_functions(struct All_variables *E,
 
     /* find u and v using spherical coordinates */
 
-    spherical_to_uv(E,CPPR,theta,phi,&u,&v);
+    spherical_to_uv(E,theta,phi,&u,&v);
 
     inum=0;
     itry=1;
@@ -1203,7 +1203,7 @@ static void get_radial_shape(struct All_variables *E,
 /* This function transforms theta and phi to new coords       */
 /* u and v using gnomonic projection.                          */
 
-static void spherical_to_uv(struct All_variables *E, int j,
+static void spherical_to_uv(struct All_variables *E,
                             double theta, double phi,
                             double *u, double *v)
 {
