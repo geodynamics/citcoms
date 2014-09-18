@@ -51,8 +51,7 @@ static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
                              int kk, int j);
 static void put_found_tracers(struct All_variables *E,
-                              int recv_size, double *recv,
-                              int j);
+                              int recv_size, double *recv);
 int isearch_neighbors(double *array, int nsize,
                       double a, int hint);
 int isearch_all(double *array, int nsize, double a);
@@ -718,7 +717,7 @@ void regional_lost_souls(struct All_variables *E)
 
         /* put the received tracers */
         for (i=0; i<2; i++) {
-            put_found_tracers(E, irecv[i], recv[i], CPPR);
+            put_found_tracers(E, irecv[i], recv[i]);
         }
 
 
@@ -780,9 +779,7 @@ static void put_lost_tracers(struct All_variables *E,
 /* Put the received tracers in basiq & extraq, if within bounds */
 /* Otherwise, append to rlater for sending to another proc      */
 
-static void put_found_tracers(struct All_variables *E,
-                              int recv_size, double *recv,
-                              int j)
+static void put_found_tracers(struct All_variables *E, int recv_size, double *recv)
 {
     void expand_tracer_arrays();
     void expand_later_array();
