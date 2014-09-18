@@ -44,8 +44,7 @@ double theta_g(double , struct All_variables *);
 /* =================================================
   rotate the mesh by a rotation matrix
  =================================================*/
-static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
-                             int m, int icap)
+static void full_rotate_mesh(struct All_variables *E, double dircos[4][4], int icap)
 {
     int i,lev;
     double t[4], myatan();
@@ -69,8 +68,6 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4],
             E->SX[lev][CPPR][2][i] = myatan(t[1],t[0]);
         }
     }    /* lev */
-
-    return;
 }
 
 /* =================================================
@@ -192,7 +189,7 @@ void full_node_locations(E)
   dircos[3][3] = cos(ro);
 
      ii = E->sphere.capid[CPPR];
-     full_rotate_mesh(E,dircos,CPPR,ii);
+     full_rotate_mesh(E,dircos,ii);
 
   if (E->control.verbose) {
       for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)   {
