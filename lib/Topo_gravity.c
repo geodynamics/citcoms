@@ -1016,16 +1016,16 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
         if (m<=4)  {
           switch (m) {
              case 1:
-                nodes = E->sien[CPPR][els].node[1];
+                nodes = E->sien[els].node[1];
 		break;
              case 2:
-                nodes = E->sien[CPPR][els].node[2];
+                nodes = E->sien[els].node[2];
 		break;
              case 3:
-                nodes = E->sien[CPPR][els].node[3];
+                nodes = E->sien[els].node[3];
 		break;
              case 4:
-                nodes = E->sien[CPPR][els].node[4];
+                nodes = E->sien[els].node[4];
 		break;
 	     }
 	     RL[CPPR][nodes] += resb[(m-1)*dims+2];
@@ -1033,16 +1033,16 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
         else   {
            switch (m) {
              case 5:
-                nodes = E->sien[CPPR][els].node[1];
+                nodes = E->sien[els].node[1];
                 break;
              case 6:
-                nodes = E->sien[CPPR][els].node[2];
+                nodes = E->sien[els].node[2];
                 break;
              case 7:
-                nodes = E->sien[CPPR][els].node[3];
+                nodes = E->sien[els].node[3];
                 break;
              case 8:
-                nodes = E->sien[CPPR][els].node[4];
+                nodes = E->sien[els].node[4];
                 break;
              }
              RU[CPPR][nodes] += res[(m-1)*dims+2];
@@ -1074,10 +1074,10 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
           }
 
         for (m=1;m<=onedv;m++)     /* for bottom */
-            SL[CPPR][E->sien[CPPR][els].node[m]] += eltTL[m-1];
+            SL[CPPR][E->sien[els].node[m]] += eltTL[m-1];
 
         for (m=1;m<=onedv;m++)
-            SU[CPPR][E->sien[CPPR][els].node[m]] += eltTU[m-1];
+            SU[CPPR][E->sien[els].node[m]] += eltTU[m-1];
 
         }
 

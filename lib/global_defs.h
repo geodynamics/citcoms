@@ -798,7 +798,7 @@ struct All_variables {
 
     struct COORD *eco[NCS];
     struct IEN *ien;  /* global */
-    struct SIEN *sien[NCS];
+    struct SIEN *sien;
     struct ID *id[NCS];
     struct COORD *ECO[MAX_LEVELS][NCS];
     struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */

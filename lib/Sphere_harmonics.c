@@ -119,13 +119,13 @@ void sphere_expansion(E,TG,sphc,sphs)
 
                     for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
                         for(d=1;d<=onedvpoints[E->mesh.nsd];d++)   {
-                            j = E->sien[CPPR][es].node[d];
-                            sphc[p] += TG[CPPR][E->sien[CPPR][es].node[d]]
+                            j = E->sien[es].node[d];
+                            sphc[p] += TG[CPPR][E->sien[es].node[d]]
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablescosf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[CPPR][nint][es];
-                            sphs[p] += TG[CPPR][E->sien[CPPR][es].node[d]]
+                            sphs[p] += TG[CPPR][E->sien[es].node[d]]
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablessinf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]

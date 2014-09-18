@@ -128,18 +128,18 @@ void heat_flux(E)
                               - flux[CPPR][E->surf_node[CPPR][i]-E->lmesh.noz+2];
 
     for(e=1;e<=E->lmesh.snel;e++) {
-         uT =(E->slice.shflux[CPPR][E->sien[CPPR][e].node[1]] +
-              E->slice.shflux[CPPR][E->sien[CPPR][e].node[2]] +
-              E->slice.shflux[CPPR][E->sien[CPPR][e].node[3]] +
-              E->slice.shflux[CPPR][E->sien[CPPR][e].node[4]])*0.25;
+         uT =(E->slice.shflux[CPPR][E->sien[e].node[1]] +
+              E->slice.shflux[CPPR][E->sien[e].node[2]] +
+              E->slice.shflux[CPPR][E->sien[e].node[3]] +
+              E->slice.shflux[CPPR][E->sien[e].node[4]])*0.25;
          el = e*E->lmesh.elz;
          sum_h[0] += uT*E->eco[CPPR][el].area;
          sum_h[1] += E->eco[CPPR][el].area;
 
-         uT =(E->slice.bhflux[CPPR][E->sien[CPPR][e].node[1]] +
-              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[2]] +
-              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[3]] +
-              E->slice.bhflux[CPPR][E->sien[CPPR][e].node[4]])*0.25;
+         uT =(E->slice.bhflux[CPPR][E->sien[e].node[1]] +
+              E->slice.bhflux[CPPR][E->sien[e].node[2]] +
+              E->slice.bhflux[CPPR][E->sien[e].node[3]] +
+              E->slice.bhflux[CPPR][E->sien[e].node[4]])*0.25;
          el = (e-1)*E->lmesh.elz+1;
          sum_h[2] += uT*E->eco[CPPR][el].area;
          sum_h[3] += E->eco[CPPR][el].area;
