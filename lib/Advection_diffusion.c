@@ -50,7 +50,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
                         struct Shape_function_dx *GNx,
                         float VV[4][9], double rtf[4][9],
-                        double diffusion, int m);
+                        double diffusion);
 static void element_residual(struct All_variables *E, int el,
                              struct Shape_function *PG,
                              struct Shape_function_dx *GNx,
@@ -380,8 +380,7 @@ static void pg_solver(struct All_variables *E,
       get_rtf_at_vpts(E, CPPR, lev, el, rtf);
 
       /* XXX: replace diff with refstate.thermal_conductivity */
-      pg_shape_fn(E, el, &PG, &(E->gNX[CPPR][el]), VV,
-                  rtf, diff, CPPR);
+      pg_shape_fn(E, el, &PG, &(E->gNX[CPPR][el]), VV, rtf, diff);
       element_residual(E, el, &PG, &(E->gNX[CPPR][el]), &(E->gDA[CPPR][el]),
                        VV, T, Tdot,
                        Q0, Eres, rtf, diff, E->sphere.cap[CPPR].TB,
@@ -415,7 +414,7 @@ static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
                         struct Shape_function_dx *GNx,
                         float VV[4][9], double rtf[4][9],
-                        double diffusion, int m)
+                        double diffusion)
 {
     int i,j;
     int *ienm;
