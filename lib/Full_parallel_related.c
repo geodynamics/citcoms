@@ -719,13 +719,11 @@ void full_parallel_communication_routs_v(E)
       for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)   {
 	kkkp = k + E->sphere.max_connections;
 	fprintf(E->fp_out,"proc %d and pass  %d to proc %d\n",E->parallel.me,k,E->parallel.PROCESSORz[lev].pass[k]);
-	for (m=1;m<=E->sphere.caps_per_proc;m++)  {
 	  fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n",E->sphere.capid[CPPR],E->parallel.NUM_NEQ[lev][CPPR].pass[kkkp],E->parallel.NUM_NODE[lev][CPPR].pass[kkkp]);
 	  for (ii=1;ii<=E->parallel.NUM_NEQ[lev][CPPR].pass[kkkp];ii++) 
 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][CPPR][ii].pass[kkkp]); 
 	  for (ii=1;ii<=E->parallel.NUM_NODE[lev][CPPR].pass[kkkp];ii++) 
 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_NODE[lev][CPPR][ii].pass[kkkp]); 
-	}
       }
     }
     fflush(E->fp_out);
