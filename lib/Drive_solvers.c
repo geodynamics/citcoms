@@ -165,16 +165,16 @@ void general_stokes_solver_teardown(struct All_variables *E)
   MatDestroy(&E->D);
   MatDestroy(&E->DC);
 
-  PetscFree( E->mtx_del2_u.iData[1] );
-  PetscFree( E->mtx_del2_u.oData[1] );
-  PetscFree( E->mtx_grad_p.iData[1] );
-  PetscFree( E->mtx_grad_p.oData[1] );
-  PetscFree( E->mtx_div_u.iData[1] );
-  PetscFree( E->mtx_div_u.oData[1] );
-  PetscFree( E->mtx_div_rho_u.iData[1] );
-  PetscFree( E->mtx_div_rho_u.oData[1] );
-  PetscFree( E->pcshell_ctx.V[1] );
-  PetscFree( E->pcshell_ctx.RR[1] );
+  PetscFree( E->mtx_del2_u.iData );
+  PetscFree( E->mtx_del2_u.oData );
+  PetscFree( E->mtx_grad_p.iData );
+  PetscFree( E->mtx_grad_p.oData );
+  PetscFree( E->mtx_div_u.iData );
+  PetscFree( E->mtx_div_u.oData );
+  PetscFree( E->mtx_div_rho_u.iData );
+  PetscFree( E->mtx_div_rho_u.oData );
+  PetscFree( E->pcshell_ctx.V );
+  PetscFree( E->pcshell_ctx.RR );
 }
 #endif
 
@@ -191,7 +191,7 @@ void general_stokes_solver(struct All_variables *E)
   double Udot_mag, dUdot_mag;
   int m,i;
 
-  double *oldU[NCS], *delta_U[NCS];
+  double *oldU, *delta_U;
 
   const int neq = E->lmesh.neq;
 
@@ -211,10 +211,10 @@ void general_stokes_solver(struct All_variables *E)
   if (need_to_iterate(E)) {
     /* outer iterations for velocity dependent viscosity */
 
-      delta_U[CPPR] = (double *)malloc(neq*sizeof(double));
-      oldU[CPPR] = (double *)malloc(neq*sizeof(double));
+      delta_U = (double *)malloc(neq*sizeof(double));
+      oldU = (double *)malloc(neq*sizeof(double));
       for(i=0;i<neq;i++)
-        oldU[CPPR][i]=0.0;
+        oldU[i]=0.0;
 
     Udot_mag=dUdot_mag=0.0;
 
@@ -223,8 +223,8 @@ void general_stokes_solver(struct All_variables *E)
      
 
 	for (i=0;i<neq;i++) {
-	  delta_U[CPPR][i] = E->U[CPPR][i] - oldU[CPPR][i];
-	  oldU[CPPR][i] = E->U[CPPR][i];
+	  delta_U[i] = E->U[i] - oldU[i];
+	  oldU[i] = E->U[i];
 	}
 
       Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
@@ -250,8 +250,8 @@ void general_stokes_solver(struct All_variables *E)
 
     } /*end while*/
 
-    free((void *) oldU[CPPR]);
-    free((void *) delta_U[CPPR]);
+    free((void *) oldU);
+    free((void *) delta_U);
 
   } /*end if we need iterations */
 
@@ -321,7 +321,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   double Udot_mag, dUdot_mag;
   int m,count,i;
 
-  double *oldU[NCS], *delta_U[NCS];
+  double *oldU, *delta_U;
 
   const int neq = E->lmesh.neq;
 
@@ -340,10 +340,10 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 
 	  if (E->viscosity.SDEPV || E->viscosity.PDEPV) {
 
-			  delta_U[CPPR] = (double *)malloc(neq*sizeof(double));
-			  oldU[CPPR] = (double *)malloc(neq*sizeof(double));
+			  delta_U = (double *)malloc(neq*sizeof(double));
+			  oldU = (double *)malloc(neq*sizeof(double));
 			  for(i=0;i<neq;i++)
-				  oldU[CPPR][i]=0.0;
+				  oldU[i]=0.0;
 
 		  Udot_mag=dUdot_mag=0.0;
 		  count=1;
@@ -351,8 +351,8 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 		  while (1) {
 
 				  for (i=0;i<neq;i++) {
-					  delta_U[CPPR][i] = E->U[CPPR][i] - oldU[CPPR][i];
-					  oldU[CPPR][i] = E->U[CPPR][i];
+					  delta_U[i] = E->U[i] - oldU[i];
+					  oldU[i] = E->U[i];
 				  }
 
 			  Udot_mag  = sqrt(global_vdot(E,oldU,oldU,E->mesh.levmax));
@@ -376,8 +376,8 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
 			  count++;
 
 		  } /*end while */
-      free((void *) oldU[CPPR]);
-      free((void *) delta_U[CPPR]);
+      free((void *) oldU);
+      free((void *) delta_U);
 
 	  } /*end if SDEPV or PDEPV */
 	  E->monitor.topo_loop++;

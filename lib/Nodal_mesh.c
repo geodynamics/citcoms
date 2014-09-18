@@ -43,9 +43,9 @@ void v_from_vector(E)
     const int nno = E->lmesh.nno;
 
         for(node=1;node<=nno;node++)     {
-            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[node].doff[1]];
-            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[node].doff[2]];
-            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[node].doff[3]];
+            E->sphere.cap[CPPR].V[1][node] = E->U[E->id[node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[E->id[node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[E->id[node].doff[3]];
             if (E->node[CPPR][node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
             if (E->node[CPPR][node] & VBY)
@@ -62,9 +62,9 @@ void assign_v_to_vector(E)
     const int nno = E->lmesh.nno;
 
       for(node=1;node<=nno;node++)     {
-	E->U[CPPR][E->id[node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
-	E->U[CPPR][E->id[node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
-	E->U[CPPR][E->id[node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
+	E->U[E->id[node].doff[1]] =  E->sphere.cap[CPPR].V[1][node];
+	E->U[E->id[node].doff[2]] =  E->sphere.cap[CPPR].V[2][node];
+	E->U[E->id[node].doff[3]] =  E->sphere.cap[CPPR].V[3][node];
       }
 }
 
@@ -82,9 +82,9 @@ void v_from_vector_pseudo_surf(E)
             E->sphere.cap[CPPR].Vprev[2][node] = E->sphere.cap[CPPR].V[2][node];
             E->sphere.cap[CPPR].Vprev[3][node] = E->sphere.cap[CPPR].V[3][node];
 
-            E->sphere.cap[CPPR].V[1][node] = E->U[CPPR][E->id[node].doff[1]];
-            E->sphere.cap[CPPR].V[2][node] = E->U[CPPR][E->id[node].doff[2]];
-            E->sphere.cap[CPPR].V[3][node] = E->U[CPPR][E->id[node].doff[3]];
+            E->sphere.cap[CPPR].V[1][node] = E->U[E->id[node].doff[1]];
+            E->sphere.cap[CPPR].V[2][node] = E->U[E->id[node].doff[2]];
+            E->sphere.cap[CPPR].V[3][node] = E->U[E->id[node].doff[3]];
             if (E->node[CPPR][node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
             if (E->node[CPPR][node] & VBY)
@@ -191,7 +191,7 @@ void velo_from_element_d(E,VV,el,sphere_key)
 
 void p_to_nodes(E,P,PN,lev)
      struct All_variables *E;
-     double **P;
+     double *P;
      float **PN;
      int lev;
 
@@ -200,10 +200,10 @@ void p_to_nodes(E,P,PN,lev)
     for(node=1;node<=E->lmesh.NNO[lev];node++)
       PN[CPPR][node] =  0.0;
 
-    for(element=1;element<=E->lmesh.NEL[lev];element++)
+    for(element=0;element<E->lmesh.NEL[lev];element++)
        for(j=1;j<=enodes[E->mesh.nsd];j++)  {
-     	  node = E->IEN[lev][CPPR][element].node[j];
-    	  PN[CPPR][node] += P[CPPR][element] * E->TWW[lev][CPPR][element].node[j] ;
+     	  node = E->IEN[lev][CPPR][element+1].node[j];
+    	  PN[CPPR][node] += P[element] * E->TWW[lev][CPPR][element+1].node[j] ;
     	  }
 
    (E->exchange_node_f)(E,PN,lev);

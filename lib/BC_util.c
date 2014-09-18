@@ -88,14 +88,14 @@ void internal_horizontal_bc(struct All_variables *E,float *BC[],int row,int dirn
 
 void strip_bcs_from_residual(E,Res,level)
     struct All_variables *E;
-    double **Res;
+    double *Res;
     int level;
 {
     int m,i;
 
     if (E->num_zero_resid[level][CPPR])
       for(i=1;i<=E->num_zero_resid[level][CPPR];i++)
-         Res[CPPR][E->zero_resid[level][CPPR][i]] = 0.0;
+         Res[E->zero_resid[level][CPPR][i]] = 0.0;
 
 }
 

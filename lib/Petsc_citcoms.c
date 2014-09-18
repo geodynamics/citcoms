@@ -181,11 +181,11 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
 
   ierr = VecGetArray(x, &xData); CHKERRQ(ierr);
   for(i = 0; i < ctx->nno; ++i)
-    ctx->RR[CPPR][i] = xData[i];
+    ctx->RR[i] = xData[i];
   ierr = VecRestoreArray(x, &xData); CHKERRQ(ierr);
   /* initialize the space for the solution */
   for( i = 0; i < ctx->nno; i++ )
-      ctx->V[CPPR][i] = 0.0;
+      ctx->V[i] = 0.0;
 
   count = 0;
 
@@ -198,7 +198,7 @@ PetscErrorCode PC_Apply_MultiGrid( PC pc, Vec x, Vec y )
   
   ierr = VecGetArray(y, &yData); CHKERRQ(ierr);
   for(i = 0; i < ctx->nno; i++)
-    yData[i] = ctx->V[CPPR][i];
+    yData[i] = ctx->V[i];
   ierr = VecRestoreArray(y, &yData); CHKERRQ(ierr);
 
   PetscFunctionReturn(0);
@@ -217,13 +217,13 @@ PetscErrorCode MatShellMult_del2_u( Mat K, Vec U, Vec KU )
   neq = ctx->iSize; // ctx->iSize SHOULD be the same as ctx->oSize
   ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
   for(j = 0; j <neq; j++)
-    ctx->iData[CPPR][j] = UData[j];
+    ctx->iData[j] = UData[j];
   ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_del2_u( ctx->E, ctx->iData, ctx->oData, ctx->level, 1 );
   ierr = VecGetArray(KU, &KUData); CHKERRQ(ierr);
   for(j = 0; j < neq; j++)
-    KUData[j] = ctx->oData[CPPR][j];
+    KUData[j] = ctx->oData[j];
   ierr = VecRestoreArray(KU, &KUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -242,13 +242,13 @@ PetscErrorCode MatShellMult_grad_p( Mat G, Vec P, Vec GP )
   neq = ctx->oSize;
   ierr = VecGetArray(P, &PData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    ctx->iData[CPPR][j] = PData[j];
+    ctx->iData[j] = PData[j];
   ierr = VecRestoreArray(P, &PData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_grad_p( ctx->E, ctx->iData, ctx->oData, ctx->level );
   ierr = VecGetArray(GP, &GPData); CHKERRQ(ierr);
   for(j = 0; j < neq; j++)
-    GPData[j] = ctx->oData[CPPR][j];
+    GPData[j] = ctx->oData[j];
   ierr = VecRestoreArray(GP, &GPData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -267,13 +267,13 @@ PetscErrorCode MatShellMult_div_u( Mat D, Vec U, Vec DU )
   nel = ctx->oSize;
   ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
   for(j = 0; j < neq; j++)
-    ctx->iData[CPPR][j] = UData[j];
+    ctx->iData[j] = UData[j];
   ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_div_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
   ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    DUData[j] = ctx->oData[CPPR][j];
+    DUData[j] = ctx->oData[j];
   ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }
@@ -292,13 +292,13 @@ PetscErrorCode MatShellMult_div_rho_u( Mat DC, Vec U, Vec DU )
   nel = ctx->oSize;
   ierr = VecGetArray(U, &UData); CHKERRQ(ierr);
   for(j = 0; j < neq; j++)
-    ctx->iData[CPPR][j] = UData[j];
+    ctx->iData[j] = UData[j];
   ierr = VecRestoreArray(U, &UData); CHKERRQ(ierr);
   // actual CitcomS operation
   assemble_div_rho_u( ctx->E, ctx->iData, ctx->oData, ctx->level );
   ierr = VecGetArray(DU, &DUData); CHKERRQ(ierr);
   for(j = 0; j < nel; j++)
-    DUData[j] = ctx->oData[CPPR][j];
+    DUData[j] = ctx->oData[j];
   ierr = VecRestoreArray(DU, &DUData); CHKERRQ(ierr);
   PetscFunctionReturn(0);
 }

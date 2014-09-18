@@ -47,8 +47,8 @@ int epsilon[4][4] = {   /* Levi-Cita epsilon */
 
 int solve_del2_u(E,d0,F,acc,high_lev)
      struct All_variables *E;
-     double **d0;
-     double **F;
+     double *d0;
+     double *F;
      double acc;
      int high_lev;
 {
@@ -71,12 +71,12 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
   double CPU_time0(),initial_time,time;
   double residual,prior_residual,r0;
-  double *D1[NCS], *r[NCS], *Au[NCS];
+  double *D1, *r, *Au;
 
   neq  = E->lmesh.NEQ[high_lev];
 
   for(i=0;i<neq;i++)  {
-    d0[CPPR][i] = 0.0;
+    d0[i] = 0.0;
   }
 
   r0=residual=sqrt(global_vdot(E,F,F,high_lev));
@@ -150,8 +150,8 @@ int solve_del2_u(E,d0,F,acc,high_lev)
 
 double multi_grid(E,d1,F,acc,hl)
      struct All_variables *E;
-     double **d1;
-     double **F;
+     double *d1;
+     double *F;
      double acc;
      int hl;  /* higher level of two */
 {
@@ -175,19 +175,19 @@ double multi_grid(E,d1,F,acc,hl)
     const int levmax = E->mesh.levmax;
 
     double time1,time,CPU_time0();
-    double *res[MAX_LEVELS][NCS],*AU[MAX_LEVELS][NCS];
-    double *vel[MAX_LEVELS][NCS],*del_vel[MAX_LEVELS][NCS];
-    double *rhs[MAX_LEVELS][NCS],*fl[MAX_LEVELS][NCS];
+    double *res[MAX_LEVELS],*AU[MAX_LEVELS];
+    double *vel[MAX_LEVELS],*del_vel[MAX_LEVELS];
+    double *rhs[MAX_LEVELS],*fl[MAX_LEVELS];
 				/* because it's recursive, need a copy at
 				    each level */
 
     for(i=E->mesh.levmin;i<=E->mesh.levmax;i++) {
-	del_vel[i][CPPR]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	AU[i][CPPR] = (double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	vel[i][CPPR]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
-	res[i][CPPR]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
+	del_vel[i]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	AU[i] = (double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	vel[i]=(double *)malloc((E->lmesh.NEQ[i]+1)*sizeof(double));
+	res[i]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
 	if (i<E->mesh.levmax)
-	  fl[i][CPPR]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
+	  fl[i]=(double *)malloc((E->lmesh.NEQ[i])*sizeof(double));
       }
 
     Vnmax = E->control.mg_cycle;
@@ -217,10 +217,10 @@ double multi_grid(E,d1,F,acc,hl)
 
       if (lev==levmax)
           for(j=0;j<E->lmesh.NEQ[lev];j++)
-             res[lev][CPPR][j]=F[CPPR][j];
+             res[lev][j]=F[j];
       else
           for(j=0;j<E->lmesh.NEQ[lev];j++)
-             res[lev][CPPR][j]=fl[lev][CPPR][j];
+             res[lev][j]=fl[lev][j];
 
       for(Vn=1;Vn<=Vnmax;Vn++)   {
                                         /*    Downward stoke of the V    */
@@ -232,7 +232,7 @@ double multi_grid(E,d1,F,acc,hl)
          gauss_seidel(E,vel[dlev],res[dlev],AU[dlev],0.01,&cycles,dlev,ic);
 
          for(i=0;i<E->lmesh.NEQ[dlev];i++)  {
-           res[dlev][CPPR][i]  = res[dlev][CPPR][i] - AU[dlev][CPPR][i];
+           res[dlev][i]  = res[dlev][i] - AU[dlev][i];
 	       }
 
           project_vector(E,dlev,res[dlev],res[dlev-1],1);
@@ -254,12 +254,12 @@ double multi_grid(E,d1,F,acc,hl)
             alpha = global_vdot(E,AU[ulev],res[ulev],ulev)/AudotAu;
 
               for(i=0;i<E->lmesh.NEQ[ulev];i++)   {
-               vel[ulev][CPPR][i] += alpha*del_vel[ulev][CPPR][i];
+               vel[ulev][i] += alpha*del_vel[ulev][i];
                }
 
             if (ulev ==levmax)
                 for(i=0;i<E->lmesh.NEQ[ulev];i++)   {
-                  res[ulev][CPPR][i] -= alpha*AU[ulev][CPPR][i];
+                  res[ulev][i] -= alpha*AU[ulev][i];
                   }
 
             }
@@ -267,19 +267,19 @@ double multi_grid(E,d1,F,acc,hl)
       }
 
      for(j=0;j<E->lmesh.NEQ[levmax];j++)   {
-        F[CPPR][j]=res[levmax][CPPR][j];
-        d1[CPPR][j]+=vel[levmax][CPPR][j];
+        F[j]=res[levmax][j];
+        d1[j]+=vel[levmax][j];
         }
 
      residual = sqrt(global_vdot(E,F,F,hl));
 
       for(i=E->mesh.levmin;i<=E->mesh.levmax;i++){
-	  free((double*) del_vel[i][CPPR]);
-	  free((double*) AU[i][CPPR]);
-	  free((double*) vel[i][CPPR]);
-	  free((double*) res[i][CPPR]);
+	  free((double*) del_vel[i]);
+	  free((double*) AU[i]);
+	  free((double*) vel[i]);
+	  free((double*) res[i]);
 	  if (i<E->mesh.levmax)
-	    free((double*) fl[i][CPPR]);
+	    free((double*) fl[i]);
 	  }
 
     return(residual);
@@ -287,7 +287,7 @@ double multi_grid(E,d1,F,acc,hl)
 
 
 /*  ===========================================================
-    Conjugate gradient relaxation for the matrix equation Kd = f
+    Conjugate gradient relxation for the matrix equation Kd = f
     Returns the residual reduction after itn iterations ...
     ===========================================================  */
 
@@ -295,17 +295,17 @@ double multi_grid(E,d1,F,acc,hl)
 #ifndef USE_CUDA
 double conj_grad(E,d0,F,acc,cycles,level)
      struct All_variables *E;
-     double **d0;
-     double **F;
+     double *d0;
+     double *F;
      double acc;
      int *cycles;
      int level;
 {
-    double *r0[NCS],*r1[NCS],*r2[NCS];
-    double *z0[NCS],*z1[NCS],*z2[NCS];
-    double *p1[NCS],*p2[NCS];
-    double *Ap[NCS];
-    double *shuffle[NCS];
+    double *r0,*r1,*r2;
+    double *z0,*z1,*z2;
+    double *p1,*p2;
+    double *Ap;
+    double *shuffle;
 
     int m,count,i,steps;
     double residual;
@@ -323,18 +323,18 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
     steps = *cycles;
 
-      r0[CPPR] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      r1[CPPR] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      r2[CPPR] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      z0[CPPR] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      z1[CPPR] = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
-      p1[CPPR] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      p2[CPPR] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
-      Ap[CPPR] = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+      r0 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      r1 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      r2 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      z0 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      z1 = (double *)malloc(E->lmesh.NEQ[mem_lev]*sizeof(double));
+      p1 = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+      p2 = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
+      Ap = (double *)malloc((1+E->lmesh.NEQ[mem_lev])*sizeof(double));
 
       for(i=0;i<high_neq;i++) {
-        r1[CPPR][i] = F[CPPR][i];
-        d0[CPPR][i] = 0.0;
+        r1[i] = F[i];
+        d0[i] = 0.0;
       }
 
     residual = sqrt(global_vdot(E,r1,r1,level));
@@ -345,18 +345,18 @@ double conj_grad(E,d0,F,acc,cycles,level)
     while (((residual > acc) && (count < steps)) || count == 0)  {
 
     for(i=0;i<high_neq;i++)
-       z1[CPPR][i] = E->BI[level][CPPR][i] * r1[CPPR][i];
+       z1[i] = E->BI[level][CPPR][i] * r1[i];
 
     dotr1z1 = global_vdot(E,r1,z1,level);
 
 	if (count == 0 )
 	    for(i=0;i<high_neq;i++)
-	      p2[CPPR][i] = z1[CPPR][i];
+	      p2[i] = z1[i];
 	else {
 	    assert(dotr0z0 != 0.0 /* in head of conj_grad */);
 	    beta = dotr1z1/dotr0z0;
 	      for(i=0;i<high_neq;i++)
-		p2[CPPR][i] = z1[CPPR][i] + beta * p1[CPPR][i];
+		p2[i] = z1[i] + beta * p1[i];
 	}
 
     dotr0z0 = dotr1z1;
@@ -371,15 +371,15 @@ double conj_grad(E,d0,F,acc,cycles,level)
 	    alpha = dotr1z1/dotprod;
 
       for(i=0;i<high_neq;i++) {
-        d0[CPPR][i] += alpha * p2[CPPR][i];
-        r2[CPPR][i] = r1[CPPR][i] - alpha * Ap[CPPR][i];
+        d0[i] += alpha * p2[i];
+        r2[i] = r1[i] - alpha * Ap[i];
 	    }
 
 	residual = sqrt(global_vdot(E,r2,r2,level));
 
-	  shuffle[CPPR] = r0[CPPR]; r0[CPPR] = r1[CPPR]; r1[CPPR] = r2[CPPR]; r2[CPPR] = shuffle[CPPR];
-	  shuffle[CPPR] = z0[CPPR]; z0[CPPR] = z1[CPPR]; z1[CPPR] = shuffle[CPPR];
-	  shuffle[CPPR] = p1[CPPR]; p1[CPPR] = p2[CPPR]; p2[CPPR] = shuffle[CPPR];
+	  shuffle = r0; r0 = r1; r1 = r2; r2 = shuffle;
+	  shuffle = z0; z0 = z1; z1 = shuffle;
+	  shuffle = p1; p1 = p2; p2 = shuffle;
 
 	count++;
     } /* end of while-loop */
@@ -388,14 +388,14 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
     strip_bcs_from_residual(E,d0,level);
 
-    free((double*) r0[CPPR]);
-    free((double*) r1[CPPR]);
-    free((double*) r2[CPPR]);
-    free((double*) z0[CPPR]);
-    free((double*) z1[CPPR]);
-    free((double*) p1[CPPR]);
-    free((double*) p2[CPPR]);
-    free((double*) Ap[CPPR]);
+    free((double*) r0);
+    free((double*) r1);
+    free((double*) r2);
+    free((double*) z0);
+    free((double*) z1);
+    free((double*) p1);
+    free((double*) p2);
+    free((double*) Ap);
 
     return(residual);   
 }
@@ -412,8 +412,8 @@ double conj_grad(E,d0,F,acc,cycles,level)
 
 void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
      struct All_variables *E;
-     double **d0;
-     double **F,**Ad;
+     double *d0;
+     double *F,*Ad;
      double acc;
      int *cycles;
      int level;
@@ -451,7 +451,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
     }
     else
       for(i=0;i<neq;i++) {
-          d0[CPPR][i]=Ad[CPPR][i]=0.0;
+          d0[i]=Ad[i]=0.0;
       }
 
     count = 0;
@@ -461,7 +461,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
       for(j=0;j<=E->lmesh.NEQ[level];j++)
           E->temp[CPPR][j] = 0.0;
 
-      Ad[CPPR][neq] = 0.0;
+      Ad[neq] = 0.0;
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
           if(E->NODE[level][CPPR][i] & OFFSIDE)   {
@@ -470,12 +470,12 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
     
-	    E->temp[CPPR][eqn1] = (F[CPPR][eqn1] - Ad[CPPR][eqn1])*E->BI[level][CPPR][eqn1];
-	    E->temp[CPPR][eqn2] = (F[CPPR][eqn2] - Ad[CPPR][eqn2])*E->BI[level][CPPR][eqn2];
-	    E->temp[CPPR][eqn3] = (F[CPPR][eqn3] - Ad[CPPR][eqn3])*E->BI[level][CPPR][eqn3];
-	    E->temp1[CPPR][eqn1] = Ad[CPPR][eqn1];
-	    E->temp1[CPPR][eqn2] = Ad[CPPR][eqn2];
-	    E->temp1[CPPR][eqn3] = Ad[CPPR][eqn3];
+	    E->temp[CPPR][eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
+	    E->temp[CPPR][eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
+	    E->temp[CPPR][eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
+	    E->temp1[CPPR][eqn1] = Ad[eqn1];
+	    E->temp1[CPPR][eqn2] = Ad[eqn2];
+	    E->temp1[CPPR][eqn3] = Ad[eqn3];
             }
       
     for(i=1;i<=E->lmesh.NNO[level];i++)     {
@@ -494,26 +494,26 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
             for(j=3;j<max_eqn;j++)  {
                  UU = E->temp[CPPR][C[j]];
-                 Ad[CPPR][eqn1] += B1[j]*UU;
-                 Ad[CPPR][eqn2] += B2[j]*UU;
-                 Ad[CPPR][eqn3] += B3[j]*UU;
+                 Ad[eqn1] += B1[j]*UU;
+                 Ad[eqn2] += B2[j]*UU;
+                 Ad[eqn3] += B3[j]*UU;
                  }
 
             if (!(E->NODE[level][m][i]&OFFSIDE))   {
-               E->temp[CPPR][eqn1] = (F[CPPR][eqn1] - Ad[CPPR][eqn1])*E->BI[level][CPPR][eqn1];
-               E->temp[CPPR][eqn2] = (F[CPPR][eqn2] - Ad[CPPR][eqn2])*E->BI[level][CPPR][eqn2];
-               E->temp[CPPR][eqn3] = (F[CPPR][eqn3] - Ad[CPPR][eqn3])*E->BI[level][CPPR][eqn3];
+               E->temp[CPPR][eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
+               E->temp[CPPR][eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
+               E->temp[CPPR][eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
 	       }
 
                  /* Ad on boundaries differs after the following operation */
 	    for(j=0;j<max_eqn;j++)
-		    Ad[CPPR][C[j]]  += B1[j]*E->temp[CPPR][eqn1]
+		    Ad[C[j]]  += B1[j]*E->temp[CPPR][eqn1]
                                  +  B2[j]*E->temp[CPPR][eqn2]
                                  +  B3[j]*E->temp[CPPR][eqn3];
 
-	    d0[CPPR][eqn1] += E->temp[CPPR][eqn1];
-	    d0[CPPR][eqn2] += E->temp[CPPR][eqn2];
-	    d0[CPPR][eqn3] += E->temp[CPPR][eqn3];
+	    d0[eqn1] += E->temp[CPPR][eqn1];
+	    d0[eqn2] += E->temp[CPPR][eqn2];
+	    d0[eqn3] += E->temp[CPPR][eqn3];
   	    }
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
@@ -521,9 +521,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
-	    Ad[CPPR][eqn1] -= E->temp1[CPPR][eqn1];
-	    Ad[CPPR][eqn2] -= E->temp1[CPPR][eqn2];
-	    Ad[CPPR][eqn3] -= E->temp1[CPPR][eqn3];
+	    Ad[eqn1] -= E->temp1[CPPR][eqn1];
+	    Ad[eqn2] -= E->temp1[CPPR][eqn2];
+	    Ad[eqn3] -= E->temp1[CPPR][eqn3];
 	    }
 
       (E->solver.exchange_id_d)(E, Ad, level);
@@ -533,9 +533,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
-	    Ad[CPPR][eqn1] += E->temp1[CPPR][eqn1];
-	    Ad[CPPR][eqn2] += E->temp1[CPPR][eqn2];
-	    Ad[CPPR][eqn3] += E->temp1[CPPR][eqn3];
+	    Ad[eqn1] += E->temp1[CPPR][eqn1];
+	    Ad[eqn2] += E->temp1[CPPR][eqn2];
+	    Ad[eqn3] += E->temp1[CPPR][eqn3];
 	    }
 
 

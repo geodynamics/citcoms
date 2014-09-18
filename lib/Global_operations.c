@@ -514,7 +514,7 @@ double kineticE_radial(E,A,lev)
 
 double global_vdot(E,A,B,lev)
    struct All_variables *E;
-   double **A,**B;
+   double *A,*B;
    int lev;
 
 {
@@ -527,10 +527,10 @@ double global_vdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[CPPR][i]*B[CPPR][i];
+      temp += A[i]*B[i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev][CPPR];i++)
-       temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*B[CPPR][E->parallel.Skip_id[lev][CPPR][i]];
+       temp1 += A[E->parallel.Skip_id[lev][CPPR][i]]*B[E->parallel.Skip_id[lev][CPPR][i]];
 
     temp -= temp1;
 
@@ -543,7 +543,7 @@ double global_vdot(E,A,B,lev)
 
 double global_pdot(E,A,B,lev)
    struct All_variables *E;
-   double **A,**B;
+   double *A,*B;
    int lev;
 
 {
@@ -554,9 +554,9 @@ double global_pdot(E,A,B,lev)
 
   temp = 0.0;
   prod = 0.0;
-    npno=E->lmesh.NPNO[lev];
-    for (i=0;i<npno;i++)
-      temp += A[CPPR][i]*B[CPPR][i];
+  npno=E->lmesh.NPNO[lev];
+  for (i=0;i<npno;i++)
+    temp += A[i]*B[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
@@ -565,7 +565,7 @@ double global_pdot(E,A,B,lev)
 
 
 /* return ||V||^2 */
-double global_v_norm2(struct All_variables *E,  double **V)
+double global_v_norm2(struct All_variables *E,  double *V)
 {
     int i, m, d;
     int eqn1, eqn2, eqn3;
@@ -578,9 +578,9 @@ double global_v_norm2(struct All_variables *E,  double **V)
         eqn2 = E->id[i].doff[2];
         eqn3 = E->id[i].doff[3];
         /* L2 norm  */
-        temp += (V[CPPR][eqn1] * V[CPPR][eqn1] +
-                 V[CPPR][eqn2] * V[CPPR][eqn2] +
-                 V[CPPR][eqn3] * V[CPPR][eqn3]) * E->NMass[CPPR][i];
+        temp += (V[eqn1] * V[eqn1] +
+                 V[eqn2] * V[eqn2] +
+                 V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
     }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -590,7 +590,7 @@ double global_v_norm2(struct All_variables *E,  double **V)
 
 
 /* return ||P||^2 */
-double global_p_norm2(struct All_variables *E,  double **P)
+double global_p_norm2(struct All_variables *E,  double *P)
 {
     int i, m;
     double prod, temp;
@@ -600,7 +600,7 @@ double global_p_norm2(struct All_variables *E,  double **P)
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm */ 
         /* should be E->eco[i].area after E->eco hase been made 0-based */
-        temp += P[CPPR][i] * P[CPPR][i] * E->eco[i+1].area;
+        temp += P[i] * P[i] * E->eco[i+1].area;
     }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);

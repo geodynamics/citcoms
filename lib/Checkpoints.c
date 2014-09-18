@@ -433,10 +433,10 @@ static void momentum_checkpoint(struct All_variables *E, FILE *fp)
     /* the 0-th element of P/NP/EVI/VI is not init'd
      * and won't be used when read it. */
     /* Pressure at equation points */
-    fwrite(E->P[CPPR], sizeof(double), E->lmesh.npno, fp);
+    fwrite(E->P, sizeof(double), E->lmesh.npno, fp);
 
     /* velocity at equation points */
-    fwrite(E->U[CPPR], sizeof(double), E->lmesh.neq, fp);
+    fwrite(E->U, sizeof(double), E->lmesh.neq, fp);
 }
 
 
@@ -457,10 +457,10 @@ static void read_momentum_checkpoint(struct All_variables *E, FILE *fp)
       myerror(E,"read_momentum_checkpoint: error at vdotv");
 
       /* Pressure at equation points */
-      if(fread(E->P[CPPR], sizeof(double), E->lmesh.npno, fp) !=  E->lmesh.npno+1)
+      if(fread(E->P, sizeof(double), E->lmesh.npno, fp) !=  E->lmesh.npno+1)
         myerror(E,"read_momentum_checkpoint: error at P");
       /* velocity at equation points */
-      if(fread(E->U[CPPR], sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
+      if(fread(E->U, sizeof(double), E->lmesh.neq, fp) != E->lmesh.neq)
         myerror(E,"read_momentum_checkpoint: error at U");
 
     E->monitor.vdotv = global_v_norm2(E, E->U);

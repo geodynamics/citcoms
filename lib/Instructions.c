@@ -951,7 +951,7 @@ void allocate_common_vars(E)
   elx  = E->lmesh.elx;
   ely  = E->lmesh.ely;
 
-  E->P[CPPR]        = (double *) malloc(npno*sizeof(double));
+  E->P        = (double *) malloc(npno*sizeof(double));
   E->T[CPPR]        = (double *) malloc((nno+1)*sizeof(double));
   E->NP[CPPR]       = (float *) malloc((nno+1)*sizeof(float));
   E->buoyancy[CPPR] = (double *) malloc((nno+1)*sizeof(double));
@@ -1142,7 +1142,7 @@ void allocate_common_vars(E)
   }
 
   for(i=0;i<E->lmesh.npno;i++)
-      E->P[CPPR][i] = 0.0;
+      E->P[i] = 0.0;
 
   mat_prop_allocate(E);
   phase_change_allocate(E);
@@ -1173,9 +1173,9 @@ void allocate_velocity_vars(E)
 
     E->temp[CPPR] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
     E->temp1[CPPR] = (double *) malloc(E->lmesh.neq*sizeof(double));
-    E->F[CPPR] = (double *) malloc(E->lmesh.neq*sizeof(double));
-    E->U[CPPR] = (double *) malloc(E->lmesh.neq*sizeof(double));
-    E->u1[CPPR] = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->F = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->U = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->u1 = (double *) malloc(E->lmesh.neq*sizeof(double));
 
 
     for(i=1;i<=E->mesh.nsd;i++) {
@@ -1185,7 +1185,7 @@ void allocate_velocity_vars(E)
     }
 
     for(i=0;i<E->lmesh.neq;i++)
-      E->U[CPPR][i] = E->temp[CPPR][i] = E->temp1[CPPR][i] = 0.0;
+      E->U[i] = E->temp[CPPR][i] = E->temp1[CPPR][i] = 0.0;
 
 
     for(k=1;k<=E->mesh.nsd;k++)
@@ -1424,7 +1424,7 @@ void initial_pressure(E)
     report(E,"Initialize pressure field");
 
     for(i=0;i<E->lmesh.npno;i++)
-      E->P[CPPR][i]=0.0;
+      E->P[i]=0.0;
 }
 
 void initial_velocity(E)

@@ -734,8 +734,8 @@ struct MultiGrid_PC
   int levmax;
   PetscBool mg_monitor;
   int nno;
-  double *V[NCS];
-  double *RR[NCS];
+  double *V;
+  double *RR;
 };
 
 /* PETSc Matrix shell contexts */
@@ -745,8 +745,8 @@ struct MatMultShell
   int level;
   int iSize;
   int oSize;
-  double *iData[NCS];
-  double *oData[NCS];
+  double *iData;
+  double *oData;
 };
 #endif /* USE_PETSC */
 
@@ -829,9 +829,9 @@ struct All_variables {
     double *heating_visc[NCS];
     double *heating_latent[NCS];
 
-    double *P[NCS],*F[NCS],*U[NCS];
+    double *P,*F,*U;
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
-    double *u1[NCS];
+    double *u1;
     double *temp[NCS],*temp1[NCS];
     double *Mass[NCS], *MASS[MAX_LEVELS][NCS];
     double *TMass[NCS], *NMass[NCS];

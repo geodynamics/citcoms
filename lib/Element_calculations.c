@@ -42,7 +42,7 @@ void construct_c3x3matrix(struct All_variables *);
 void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
 			      struct CCX *,int ,int );
 void assemble_div_u(struct All_variables *,
-                    double **, double **, int );
+                    double *, double *, int );
 static void get_elt_tr(struct All_variables *, int , int , double [24]);
 static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24]);
 
@@ -60,11 +60,11 @@ static void add_force(struct All_variables *E, int e, double elt_f[24])
     node = E->ien[e].node[a];
     p=(a-1)*dims;
     a1=E->id[node].doff[1];
-    E->F[CPPR][a1] += elt_f[p];
+    E->F[a1] += elt_f[p];
     a2=E->id[node].doff[2];
-    E->F[CPPR][a2] += elt_f[p+1];
+    E->F[a2] += elt_f[p+1];
     a3=E->id[node].doff[3];
-    E->F[CPPR][a3] += elt_f[p+2];
+    E->F[a3] += elt_f[p+2];
   }
 }
 
@@ -95,7 +95,7 @@ void assemble_forces(E,penalty)
   get_buoyancy(E,E->buoyancy);
 
     for(a=0;a<neq;a++)
-      E->F[CPPR][a] = 0.0;
+      E->F[a] = 0.0;
 
     for (e=1;e<=nel;e++)  {
       get_elt_f(E,e,elt_f,1);
@@ -414,7 +414,7 @@ void get_elt_k(E,el,elt_k,lev,iconv)
 
 void assemble_del2_u(E,u,Au,level,strip_bcs)
      struct All_variables *E;
-     double **u,**Au;
+     double *u,*Au;
      int level;
      int strip_bcs;
 {
@@ -434,7 +434,7 @@ void assemble_del2_u(E,u,Au,level,strip_bcs)
 
 void e_assemble_del2_u(E,u,Au,level,strip_bcs)
   struct All_variables *E;
-  double **u,**Au;
+  double *u,*Au;
   int level;
   int strip_bcs;
 
@@ -449,7 +449,7 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
   const int neq=E->lmesh.NEQ[level];
 
     for(i=0;i<neq;i++)
-      Au[CPPR][i] = 0.0;
+      Au[i] = 0.0;
 
     for(e=1;e<=nel;e++)   {
       for(a=1;a<=ends;a++) {
@@ -461,29 +461,29 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 	  nodeb = E->IEN[level][CPPR][e].node[b];
 	  ii = (a*n+b)*dims-(dims*n+dims);
 	  /* i=1, j=1,2,3 */
-		Au[CPPR][a1] +=
+		Au[a1] +=
 		        E->elt_k[level][CPPR][e].k[ii] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+			u[E->ID[level][CPPR][nodeb].doff[1]]
 		      + E->elt_k[level][CPPR][e].k[ii+1] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+			u[E->ID[level][CPPR][nodeb].doff[2]]
 		      + E->elt_k[level][CPPR][e].k[ii+2] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
+			u[E->ID[level][CPPR][nodeb].doff[3]];
 		/* i=2, j=1,2,3 */
-		Au[CPPR][a2] +=
+		Au[a2] +=
 		        E->elt_k[level][CPPR][e].k[ii+n] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+			u[E->ID[level][CPPR][nodeb].doff[1]]
 		      + E->elt_k[level][CPPR][e].k[ii+n+1] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+			u[E->ID[level][CPPR][nodeb].doff[2]]
 		      + E->elt_k[level][CPPR][e].k[ii+n+2] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
+			u[E->ID[level][CPPR][nodeb].doff[3]];
 		/* i=3, j=1,2,3 */
-		Au[CPPR][a3] +=
+		Au[a3] +=
 		        E->elt_k[level][CPPR][e].k[ii+n+n] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[1]]
+			u[E->ID[level][CPPR][nodeb].doff[1]]
 		      + E->elt_k[level][CPPR][e].k[ii+n+n+1] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[2]]
+			u[E->ID[level][CPPR][nodeb].doff[2]]
 		      + E->elt_k[level][CPPR][e].k[ii+n+n+2] *
-			u[CPPR][E->ID[level][CPPR][nodeb].doff[3]];
+			u[E->ID[level][CPPR][nodeb].doff[3]];
 
  	    }         /* end for loop b */
         }             /* end for loop a */
@@ -503,7 +503,7 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 
 void n_assemble_del2_u(E,u,Au,level,strip_bcs)
      struct All_variables *E;
-     double **u,**Au;
+     double *u,*Au;
      int level;
      int strip_bcs;
 {
@@ -523,7 +523,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
 
 
      for(e=0;e<neq;e++)
-      Au[CPPR][e]=0.0;
+      Au[e]=0.0;
 
      for(e=1;e<=nno;e++)     {
 
@@ -531,9 +531,9 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        eqn2=E->ID[level][CPPR][e].doff[2];
        eqn3=E->ID[level][CPPR][e].doff[3];
 
-       U1 = u[CPPR][eqn1];
-       U2 = u[CPPR][eqn2];
-       U3 = u[CPPR][eqn3];
+       U1 = u[eqn1];
+       U2 = u[eqn2];
+       U3 = u[eqn3];
 
        C=E->Node_map[level][CPPR] + (e-1)*max_eqn;
        B1=E->Eqn_k1[level][CPPR]+(e-1)*max_eqn;
@@ -541,13 +541,13 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        B3=E->Eqn_k3[level][CPPR]+(e-1)*max_eqn;
 
        for(i=3;i<max_eqn;i++)  {
-	  UU = u[CPPR][C[i]];
-  	  Au[CPPR][eqn1] += B1[i]*UU;
-  	  Au[CPPR][eqn2] += B2[i]*UU;
-  	  Au[CPPR][eqn3] += B3[i]*UU;
+	  UU = u[C[i]];
+  	  Au[eqn1] += B1[i]*UU;
+  	  Au[eqn2] += B2[i]*UU;
+  	  Au[eqn3] += B3[i]*UU;
        }
        for(i=0;i<max_eqn;i++)
-          Au[CPPR][C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
+          Au[C[i]] += B1[i]*U1+B2[i]*U2+B3[i]*U3;
 
        }     /* end for e */
 
@@ -625,7 +625,7 @@ void build_diagonal_of_Ahat(struct All_variables *E)
    =====================================================  */
 
 void assemble_c_u(struct All_variables *E,
-                  double **U, double **result, int level)
+                  double *U, double *result, int level)
 {
     int e,j1,j2,j3,p,a,b,m;
 
@@ -642,9 +642,9 @@ void assemble_c_u(struct All_variables *E,
                 j2= E->ID[level][CPPR][b].doff[2];
                 j3= E->ID[level][CPPR][b].doff[3];
 
-                result[CPPR][e] += E->elt_c[level][CPPR][e+1].c[p  ][0] * U[CPPR][j1]
-                              + E->elt_c[level][CPPR][e+1].c[p+1][0] * U[CPPR][j2]
-                              + E->elt_c[level][CPPR][e+1].c[p+2][0] * U[CPPR][j3];
+                result[e] += E->elt_c[level][CPPR][e+1].c[p  ][0] * U[j1]
+                              + E->elt_c[level][CPPR][e+1].c[p+1][0] * U[j2]
+                              + E->elt_c[level][CPPR][e+1].c[p+2][0] * U[j3];
             }
         }
 }
@@ -657,7 +657,7 @@ void assemble_c_u(struct All_variables *E,
    =====================================================  */
 
 void assemble_div_rho_u(struct All_variables *E,
-                        double **U, double **result, int level)
+                        double *U, double *result, int level)
 {
     void assemble_div_u();
     assemble_div_u(E, U, result, level);
@@ -670,7 +670,7 @@ void assemble_div_rho_u(struct All_variables *E,
    ==========================================  */
 
 void assemble_div_u(struct All_variables *E,
-                    double **U, double **divU, int level)
+                    double *U, double *divU, int level)
 {
     int e,j1,j2,j3,p,a,b,m;
 
@@ -680,7 +680,7 @@ void assemble_div_u(struct All_variables *E,
     const int npno=E->lmesh.NPNO[level];
 
       for(e=0;e<npno;e++)
-        divU[CPPR][e] = 0.0;
+        divU[e] = 0.0;
 
       for(a=1;a<=ends;a++) {
         p = (a-1)*dims;
@@ -689,9 +689,9 @@ void assemble_div_u(struct All_variables *E,
           j1= E->ID[level][CPPR][b].doff[1];
           j2= E->ID[level][CPPR][b].doff[2];
           j3= E->ID[level][CPPR][b].doff[3];
-          divU[CPPR][e] += E->elt_del[level][CPPR][e+1].g[p  ][0] * U[CPPR][j1]
-                      + E->elt_del[level][CPPR][e+1].g[p+1][0] * U[CPPR][j2]
-                      + E->elt_del[level][CPPR][e+1].g[p+2][0] * U[CPPR][j3];
+          divU[e] += E->elt_del[level][CPPR][e+1].g[p  ][0] * U[j1]
+                      + E->elt_del[level][CPPR][e+1].g[p+1][0] * U[j2]
+                      + E->elt_del[level][CPPR][e+1].g[p+2][0] * U[j3];
         }
       }
 }
@@ -703,7 +703,7 @@ void assemble_div_u(struct All_variables *E,
 
 void assemble_grad_p(E,P,gradP,lev)
      struct All_variables *E;
-     double **P,**gradP;
+     double *P,*gradP;
      int lev;
 
 {
@@ -717,10 +717,10 @@ void assemble_grad_p(E,P,gradP,lev)
     neq=E->lmesh.NEQ[lev];
 
     for(i=0;i<neq;i++)
-      gradP[CPPR][i] = 0.0;
+      gradP[i] = 0.0;
 
     for(e=0;e<nel;e++) {
-      if(0.0==P[CPPR][e])
+      if(0.0==P[e])
         continue;
 
       for(a=1;a<=ends;a++) {
@@ -730,9 +730,9 @@ void assemble_grad_p(E,P,gradP,lev)
          j2= E->ID[lev][CPPR][b].doff[2];
          j3= E->ID[lev][CPPR][b].doff[3];
               /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
-         gradP[CPPR][j1] += E->elt_del[lev][CPPR][e+1].g[p  ][0] * P[CPPR][e];
-         gradP[CPPR][j2] += E->elt_del[lev][CPPR][e+1].g[p+1][0] * P[CPPR][e];
-         gradP[CPPR][j3] += E->elt_del[lev][CPPR][e+1].g[p+2][0] * P[CPPR][e];
+         gradP[j1] += E->elt_del[lev][CPPR][e+1].g[p  ][0] * P[e];
+         gradP[j2] += E->elt_del[lev][CPPR][e+1].g[p+1][0] * P[e];
+         gradP[j3] += E->elt_del[lev][CPPR][e+1].g[p+2][0] * P[e];
       }
     }       /* end for el */
 
