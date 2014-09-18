@@ -142,7 +142,7 @@ void regional_node_locations(E)
     }          /* lev   */
 
 
-     regional_coord_of_cap(E,CPPR,0);
+     regional_coord_of_cap(E,0);
 
 
   if (E->control.verbose) {

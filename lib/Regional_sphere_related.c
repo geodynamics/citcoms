@@ -32,9 +32,9 @@
 #include "element_definitions.h"
 #include "global_defs.h"
 
-void regional_coord_of_cap(E,m,icap)
+void regional_coord_of_cap(E,icap)
    struct All_variables *E;
-   int icap,m;
+   int icap;
   {
 
   int i,j,k,lev,temp,elx,ely,nox,noy,noz,node,nodes;
@@ -55,8 +55,6 @@ void regional_coord_of_cap(E,m,icap)
   void myerror();
 
   void even_divide_arc12();
-
-  m=1;
 
   gnox=E->mesh.nox;
   gnoy=E->mesh.noy;

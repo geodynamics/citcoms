@@ -423,7 +423,7 @@ void regional_read_input_files_for_timesteps(struct All_variables *, int, int);
 /* Regional_solver.c */
 void regional_solver_init(struct All_variables *);
 /* Regional_sphere_related.c */
-void regional_coord_of_cap(struct All_variables *, int, int);
+void regional_coord_of_cap(struct All_variables *, int);
 /* Regional_tracer_advection.c */
 void regional_tracer_setup(struct All_variables *);
 int regional_iget_element(struct All_variables *, int, double, double, double, double, double, double);
