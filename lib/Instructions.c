@@ -1146,14 +1146,12 @@ void allocate_common_vars(E)
 
   mat_prop_allocate(E);
   phase_change_allocate(E);
-  set_up_nonmg_aliases(E,CPPR);
+  set_up_nonmg_aliases(E);
 
 
   if (strcmp(E->output.format, "hdf5") == 0)
       h5output_allocate_memory(E);
-
-  return;
-  }
+}
 
 /*  =========================================================  */
 
@@ -1348,10 +1346,7 @@ void check_bc_consistency(E)
     }   /* end for  j and lev */
 }
 
-void set_up_nonmg_aliases(E,j)
-     struct All_variables *E;
-     int j;
-
+void set_up_nonmg_aliases(struct All_variables *E)
 { /* Aliases for functions only interested in the highest mg level */
 
   int i;

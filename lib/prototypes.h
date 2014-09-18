@@ -235,7 +235,7 @@ void allocate_common_vars(struct All_variables *);
 void allocate_velocity_vars(struct All_variables *);
 void global_default_values(struct All_variables *);
 void check_bc_consistency(struct All_variables *);
-void set_up_nonmg_aliases(struct All_variables *, int);
+void set_up_nonmg_aliases(struct All_variables *);
 void report(struct All_variables *, char *);
 void record(struct All_variables *, char *);
 void common_initial_fields(struct All_variables *);
