@@ -988,8 +988,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       /* The statement order is important:
          elb must be executed before el when calling get_elt_f().
          Otherwise, construct_c3x3matrix_el() would be skipped incorrectly. */
-      get_elt_f(E,elb,eltfb,1,CPPR);
-      get_elt_f(E,el,eltf,1,CPPR);
+      get_elt_f(E,elb,eltfb,1);
+      get_elt_f(E,el,eltf,1);
 
       get_elt_k(E,elb,eltkb,lev,CPPR,1);
       get_elt_k(E,el,eltk,lev,CPPR,1);

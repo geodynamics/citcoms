@@ -98,7 +98,7 @@ void assemble_forces(E,penalty)
       E->F[CPPR][a] = 0.0;
 
     for (e=1;e<=nel;e++)  {
-      get_elt_f(E,e,elt_f,1,CPPR);
+      get_elt_f(E,e,elt_f,1);
       add_force(E, e, elt_f);
     }
 
@@ -963,9 +963,9 @@ void get_elt_g(E,el,elt_del,lev,m)
   Function to create the element force vector (allowing for velocity b.c.'s)
   ================================================================= */
 
-void get_elt_f(E,el,elt_f,bcs,m)
+void get_elt_f(E,el,elt_f,bcs)
      struct All_variables *E;
-     int el,m;
+     int el;
      double elt_f[24];
      int bcs;
 
@@ -1020,7 +1020,7 @@ void get_elt_f(E,el,elt_f,bcs,m)
             nodeb=E->ien[CPPR][el].node[b];
             if ((E->node[CPPR][nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
-                get_elt_k(E,el,elt_k,E->mesh.levmax,m,1);
+                get_elt_k(E,el,elt_k,E->mesh.levmax,1);
                 got_elt_k = 1;
                 }
               q = dims*(b-1)+j-1;
