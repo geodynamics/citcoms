@@ -484,9 +484,9 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top)
 /*   ======================================================================
      For calculating pressure boundary term --- Choi, 11/13/02
      ======================================================================  */
-void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side,m)
+void get_global_side_1d_shape_fn(E,el,GM,GMx,dGamma,side)
      struct All_variables *E;
-     int el,side,m;
+     int el,side;
      struct Shape_function1 *GM;
      struct Shape_function1_dx *GMx;
      struct Shape_function_side_dA *dGamma;

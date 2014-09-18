@@ -452,7 +452,7 @@ void construct_surf_det(struct All_variables *);
 void construct_bdry_det(struct All_variables *);
 void get_global_1d_shape_fn(struct All_variables *, int, struct Shape_function1 *, struct Shape_function1_dA *, int);
 void get_global_1d_shape_fn_L(struct All_variables *, int, struct Shape_function1 *, struct Shape_function1_dA *, int);
-void get_global_side_1d_shape_fn(struct All_variables *, int, struct Shape_function1 *, struct Shape_function1_dx *, struct Shape_function_side_dA *, int, int);
+void get_global_side_1d_shape_fn(struct All_variables *, int, struct Shape_function1 *, struct Shape_function1_dx *, struct Shape_function_side_dA *, int);
 void construct_c3x3matrix_el(struct All_variables *, int, struct CC *, struct CCX *, int, int);
 void construct_side_c3x3matrix_el(struct All_variables *, int, struct CC *, struct CCX *, int, int, int);
 void construct_c3x3matrix(struct All_variables *);
