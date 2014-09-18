@@ -513,8 +513,8 @@ void get_neighboring_caps(struct All_variables *);
 void allocate_tracer_arrays(struct All_variables *, int);
 void expand_tracer_arrays(struct All_variables *);
 void expand_later_array(struct All_variables *);
-int icheck_processor_shell(struct All_variables *, int, double);
-int icheck_that_processor_shell(struct All_variables *, int, int, double);
+int icheck_processor_shell(struct All_variables *, double);
+int icheck_that_processor_shell(struct All_variables *, int, double);
 /* Viscosity_structures.c */
 void viscosity_system_input(struct All_variables *);
 void viscosity_input(struct All_variables *);

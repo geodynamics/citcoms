@@ -552,7 +552,7 @@ void full_lost_souls(struct All_variables *E)
 
                 rad=REC[CPPR][irad];
 
-                ival=icheck_that_processor_shell(E,j,ithat_processor,rad);
+                ival=icheck_that_processor_shell(E,ithat_processor,rad);
 
 
                 /* if tracer is in other shell, take out of receive array and give to send_z*/
@@ -2522,7 +2522,7 @@ int full_iget_element(struct All_variables *E,
     /* check the radial range */
     if (E->parallel.nprocz>1)
         {
-            ival=icheck_processor_shell(E,CPPR,rad);
+            ival=icheck_processor_shell(E,rad);
             if (ival!=1) return -99;
         }
 

@@ -800,7 +800,7 @@ static void put_found_tracers(struct All_variables *E,
 
         /* check whether this tracer is inside this proc */
         /* check radius first, since it is cheaper       */
-        inside = icheck_processor_shell(E, CPPR, rad);
+        inside = icheck_processor_shell(E, rad);
         if (inside == 1)
             inside = regional_icheck_cap(E, 0, theta, phi, rad, rad);
         else

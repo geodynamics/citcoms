@@ -55,7 +55,7 @@ void gzip_file(char *);
 #endif
 
 int icheck_that_processor_shell(struct All_variables *E,
-                                       int j, int nprocessor, double rad);
+                                       int nprocessor, double rad);
 void expand_later_array(struct All_variables *E);
 void expand_tracer_arrays(struct All_variables *E);
 void tracer_post_processing(struct All_variables *E);
@@ -87,8 +87,7 @@ void cart_to_sphere(struct All_variables *,
 void sphere_to_cart(struct All_variables *,
                     double , double , double ,
                     double *, double *, double *);
-int icheck_processor_shell(struct All_variables *,
-                           int , double );
+int icheck_processor_shell(struct All_variables *, double );
 
 
 
@@ -928,7 +927,7 @@ static void read_tracer_file(struct All_variables *E)
             /* check whether tracer is within processor domain */
 
             icheck=1;
-            if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,CPPR,rad);
+            if (E->parallel.nprocz>1) icheck=icheck_processor_shell(E,rad);
             if (icheck!=1) continue;
 
             if (E->parallel.nprocxy==1)
@@ -1620,8 +1619,7 @@ static void eject_tracer(struct All_variables *E, int it)
 /* and not including the top boundary unless  */
 /* the shell in question is the top shell     */
 
-int icheck_processor_shell(struct All_variables *E,
-                           int j, double rad)
+int icheck_processor_shell(struct All_variables *E, double rad)
 {
 
     const int noz = E->lmesh.noz;
@@ -1663,20 +1661,20 @@ int icheck_processor_shell(struct All_variables *E,
 /* included).                                    */
 
 int icheck_that_processor_shell(struct All_variables *E,
-                                int j, int nprocessor, double rad)
+                                int nprocessor, double rad)
 {
     int icheck_processor_shell();
     int me = E->parallel.me;
 
     /* nprocessor is right on top of me */
     if (nprocessor == me+1) {
-        if (icheck_processor_shell(E, CPPR, rad) == 0) return 1;
+        if (icheck_processor_shell(E, rad) == 0) return 1;
         else return 0;
     }
 
     /* nprocessor is right on bottom of me */
     if (nprocessor == me-1) {
-        if (icheck_processor_shell(E, CPPR, rad) == -99) return 1;
+        if (icheck_processor_shell(E, rad) == -99) return 1;
         else return 0;
     }
 
