@@ -599,8 +599,8 @@ double global_p_norm2(struct All_variables *E,  double **P)
     prod = 0.0;
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm */ 
-        /* should be E->eco[CPPR][i].area after E->eco hase been made 0-based */
-        temp += P[CPPR][i] * P[CPPR][i] * E->eco[CPPR][i+1].area;
+        /* should be E->eco[i].area after E->eco hase been made 0-based */
+        temp += P[CPPR][i] * P[CPPR][i] * E->eco[i+1].area;
     }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -619,8 +619,8 @@ double global_div_norm2(struct All_variables *E,  double **A)
     prod = 0.0;
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm of div(u) */
-        /* should be E->eco[CPPR][i].area after E->eco hase been made 0-based */
-        temp += A[CPPR][i] * A[CPPR][i] / E->eco[CPPR][i+1].area;
+        /* should be E->eco[i].area after E->eco hase been made 0-based */
+        temp += A[CPPR][i] * A[CPPR][i] / E->eco[i+1].area;
 
         /* L1 norm */
         /*temp += fabs(A[m][i]);*/
@@ -894,12 +894,12 @@ void remove_rigid_rot(struct All_variables *E)
     
       for (e=1;e<=E->lmesh.nel;e++) {
 #ifdef ALLOW_ELLIPTICAL
-	t = theta_g(E->eco[CPPR][e].centre[1],E);
+	t = theta_g(E->eco[e].centre[1],E);
 #else
-	t = E->eco[CPPR][e].centre[1];
+	t = E->eco[e].centre[1];
 #endif
-	f = E->eco[CPPR][e].centre[2];
-	r = E->eco[CPPR][e].centre[3];
+	f = E->eco[e].centre[2];
+	r = E->eco[e].centre[3];
 	
 	cos_t = cos(t);sin_t = sin(t);
 	sin_f = sin(f);cos_f = cos(f);
@@ -925,9 +925,9 @@ void remove_rigid_rot(struct All_variables *E)
         } else {
             rho = 1;
         }
-	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[CPPR][e].area * rho;
-	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[CPPR][e].area * rho;
-	exyz[3] -= (wx*sin_t                 ) * E->eco[CPPR][e].area * rho;
+	exyz[1] += (wx*cos_t*cos_f - wy*sin_f) * E->eco[e].area * rho;
+	exyz[2] += (wx*cos_t*sin_f + wy*cos_f) * E->eco[e].area * rho;
+	exyz[3] -= (wx*sin_t                 ) * E->eco[e].area * rho;
       }
     
     MPI_Allreduce(exyz,fxyz,4,MPI_DOUBLE,MPI_SUM,E->parallel.world);

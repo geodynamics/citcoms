@@ -165,7 +165,7 @@ void std_timestep(struct All_variables *E)
         uc2 += E->N.ppt[GNPINDEX(i,1)]*VV[2][i];
         uc3 += E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
       }
-      uc = fabs(uc1)/E->eco[CPPR][el].size[1] + fabs(uc2)/E->eco[CPPR][el].size[2] + fabs(uc3)/E->eco[CPPR][el].size[3];
+      uc = fabs(uc1)/E->eco[el].size[1] + fabs(uc2)/E->eco[el].size[2] + fabs(uc3)/E->eco[el].size[3];
 
       step = (0.5/uc);
       adv_timestep = min(adv_timestep,step);
@@ -298,7 +298,7 @@ static void set_diffusion_timestep(struct All_variables *E)
   diff_timestep = 1.0e8;
     for(el=1;el<=E->lmesh.nel;el++)  {
       for(d=1;d<=E->mesh.nsd;d++)    {
-	ts = E->eco[CPPR][el].size[d] * E->eco[CPPR][el].size[d];
+	ts = E->eco[el].size[d] * E->eco[el].size[d];
 	diff_timestep = min(diff_timestep,ts);
       }
     }
@@ -437,9 +437,9 @@ static void pg_shape_fn(struct All_variables *E, int el,
       uc3 +=  E->N.ppt[GNPINDEX(i,1)]*VV[3][i];
       }
 
-    uxse = fabs(uc1*E->eco[CPPR][el].size[1]);
-    ueta = fabs(uc2*E->eco[CPPR][el].size[2]);
-    ufai = fabs(uc3*E->eco[CPPR][el].size[3]);
+    uxse = fabs(uc1*E->eco[el].size[1]);
+    ueta = fabs(uc2*E->eco[el].size[2]);
+    ufai = fabs(uc3*E->eco[el].size[3]);
 
     xse = (uxse>twodiff)? (1.0-twodiff/uxse):0.0;
     eta = (ueta>twodiff)? (1.0-twodiff/ueta):0.0;
@@ -862,7 +862,7 @@ static double total_heating(struct All_variables *E, double **heating)
     /* sum up within each processor */
     sum = 0;
     for(e=1; e<=E->lmesh.nel; e++)
-        sum += heating[CPPR][e] * E->eco[CPPR][e].area;
+        sum += heating[CPPR][e] * E->eco[e].area;
 
     /* sum up for all processors */
     MPI_Allreduce(&sum, &total, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);

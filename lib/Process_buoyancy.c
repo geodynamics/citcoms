@@ -105,7 +105,7 @@ void heat_flux(E)
         uT += rho[i]*u[i]*T[i]*E->gDA[CPPR][e].vpt[i] + dTdz[i]*E->gDA[CPPR][e].vpt[i];
         }
 
-      uT /= E->eco[CPPR][e].area;
+      uT /= E->eco[e].area;
 
       for(j=1;j<=ends;j++)
         flux[CPPR][E->ien[e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
@@ -133,16 +133,16 @@ void heat_flux(E)
               E->slice.shflux[CPPR][E->sien[e].node[3]] +
               E->slice.shflux[CPPR][E->sien[e].node[4]])*0.25;
          el = e*E->lmesh.elz;
-         sum_h[0] += uT*E->eco[CPPR][el].area;
-         sum_h[1] += E->eco[CPPR][el].area;
+         sum_h[0] += uT*E->eco[el].area;
+         sum_h[1] += E->eco[el].area;
 
          uT =(E->slice.bhflux[CPPR][E->sien[e].node[1]] +
               E->slice.bhflux[CPPR][E->sien[e].node[2]] +
               E->slice.bhflux[CPPR][E->sien[e].node[3]] +
               E->slice.bhflux[CPPR][E->sien[e].node[4]])*0.25;
          el = (e-1)*E->lmesh.elz+1;
-         sum_h[2] += uT*E->eco[CPPR][el].area;
-         sum_h[3] += E->eco[CPPR][el].area;
+         sum_h[2] += uT*E->eco[el].area;
+         sum_h[3] += E->eco[el].area;
          }
 
   sum_across_surface(E,sum_h,4);

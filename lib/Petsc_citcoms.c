@@ -42,7 +42,7 @@ double global_p_norm2_PETSc( struct All_variables *E,  Vec p )
 
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm */
-        temp += P[i] * P[i] * E->eco[CPPR][i+1].area;
+        temp += P[i] * P[i] * E->eco[i+1].area;
     }
     ierr = VecRestoreArray( p, &P ); CHKERRQ( ierr );
 
@@ -64,7 +64,7 @@ double global_div_norm2_PETSc( struct All_variables *E,  Vec a )
 
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm of div(u) */
-        temp += A[i] * A[i] / E->eco[CPPR][i+1].area;
+        temp += A[i] * A[i] / E->eco[i+1].area;
 
         /* L1 norm */
         /*temp += fabs(A[i]);*/

@@ -363,14 +363,14 @@ void compute_nodal_stress(struct All_variables *E,
     }
 #endif
       /* normalize by volume */
-      Sxx /= E->eco[CPPR][e].area;
-      Syy /= E->eco[CPPR][e].area;
-      Szz /= E->eco[CPPR][e].area;
-      Sxy /= E->eco[CPPR][e].area;
-      Sxz /= E->eco[CPPR][e].area;
-      Szy /= E->eco[CPPR][e].area;
-      div /= E->eco[CPPR][e].area;
-      vor /= E->eco[CPPR][e].area;
+      Sxx /= E->eco[e].area;
+      Syy /= E->eco[e].area;
+      Szz /= E->eco[e].area;
+      Sxy /= E->eco[e].area;
+      Sxz /= E->eco[e].area;
+      Szy /= E->eco[e].area;
+      div /= E->eco[e].area;
+      vor /= E->eco[e].area;
 
       /* add the pressure term */
       Szz -= E->P[CPPR][e-1]; /* E->P is now 0-based. Change e-1 to e */

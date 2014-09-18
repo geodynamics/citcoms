@@ -248,12 +248,12 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5], int el, int side)
   const int oned = onedvpoints[E->mesh.nsd];
 
 #ifdef ALLOW_ELLIPTICAL
-  to = theta_g(E->eco[CPPR][el].centre[1],E);
+  to = theta_g(E->eco[el].centre[1],E);
 #else
-  to = E->eco[CPPR][el].centre[1];	
+  to = E->eco[el].centre[1];	
 #endif
 
-  fo = E->eco[CPPR][el].centre[2];
+  fo = E->eco[el].centre[2];
 
   dxdy[1][1] = cos(to)*cos(fo);
   dxdy[1][2] = cos(to)*sin(fo);
@@ -429,11 +429,11 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top)
     double to,fo,xx[4][5],dxdy[4][4],dxda[4][4],cof[4][4];
 
 #ifdef ALLOW_ELLIPTICAL
-    to = theta_g(E->eco[CPPR][el].centre[1],E);
+    to = theta_g(E->eco[el].centre[1],E);
 #else
-    to = E->eco[CPPR][el].centre[1]; 
+    to = E->eco[el].centre[1]; 
 #endif
-    fo = E->eco[CPPR][el].centre[2];
+    fo = E->eco[el].centre[2];
 
     dxdy[1][1] = cos(to)*cos(fo);
     dxdy[1][2] = cos(to)*sin(fo);
@@ -1089,7 +1089,7 @@ void mass_matrix(struct All_variables *E)
     E->mesh.volume = 0;
 
     for(e=1;e<=E->lmesh.nel;e++)
-        E->lmesh.volume += E->eco[CPPR][e].area;
+        E->lmesh.volume += E->eco[e].area;
 
     MPI_Allreduce(&E->lmesh.volume, &E->mesh.volume, 1, MPI_DOUBLE,
                   MPI_SUM, E->parallel.world);

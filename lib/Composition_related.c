@@ -385,7 +385,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
             for(i=0;i<E->composition.ncomp;i++) {
                 flavor = i;
                 comp =
-                    E->trace.ntracer_flavor[CPPR][flavor][e] / E->eco[j][e].area
+                    E->trace.ntracer_flavor[CPPR][flavor][e] / E->eco[e].area
                     * domain_volume / E->trace.number_of_tracers;
 
                 /* truncate composition at 1.0 */

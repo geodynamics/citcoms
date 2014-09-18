@@ -796,7 +796,7 @@ struct All_variables {
     struct CITCOM_GNOMONIC *gnomonic;
     double gnomonic_reference_phi;
 
-    struct COORD *eco[NCS];
+    struct COORD *eco;
     struct IEN *ien;  /* global */
     struct SIEN *sien;
     struct ID *id[NCS];
