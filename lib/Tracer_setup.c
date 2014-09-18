@@ -78,7 +78,7 @@ static void check_sum(struct All_variables *E);
 static int isum_tracers(struct All_variables *E);
 static void init_tracer_flavors(struct All_variables *E);
 static void reduce_tracer_arrays(struct All_variables *E);
-static void put_away_later(struct All_variables *E, int j, int it);
+static void put_away_later(struct All_variables *E, int it);
 static void eject_tracer(struct All_variables *E, int it);
 int read_double_vector(FILE *, int , double *);
 void cart_to_sphere(struct All_variables *,
@@ -595,7 +595,7 @@ static void find_tracers(struct All_variables *E)
 
             if (iel == -99) {
                 /* tracer is inside other processors */
-                put_away_later(E,CPPR,it);
+                put_away_later(E,it);
                 eject_tracer(E,it);
                 it--;
             } else if (iel == -1) {
@@ -1514,7 +1514,7 @@ static void reduce_tracer_arrays(struct All_variables *E)
 /* ilatersize is the physical memory and       */
 /* ilater is the number of tracers             */
 
-static void put_away_later(struct All_variables *E, int j, int it)
+static void put_away_later(struct All_variables *E, int it)
 {
     int kk;
     void expand_later_array();
