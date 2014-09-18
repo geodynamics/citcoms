@@ -80,7 +80,7 @@ void construct_elt_gs(struct All_variables *);
 void construct_elt_cs(struct All_variables *);
 void construct_stiffness_B_matrix(struct All_variables *);
 int layers_r(struct All_variables *, float);
-int layers(struct All_variables *, int, int);
+int layers(struct All_variables *, int);
 void construct_mat_group(struct All_variables *);
 /* Convection.c */
 void set_convection_defaults(struct All_variables *);

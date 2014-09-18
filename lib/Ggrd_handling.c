@@ -69,7 +69,7 @@ void report(struct All_variables *,char *);
 int layers_r(struct All_variables *,float );
 void construct_mat_group(struct All_variables *);
 void temperatures_conform_bcs(struct All_variables *);
-int layers(struct All_variables *,int ,int );
+int layers(struct All_variables *,int);
 void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *,	/* input */
 					       int ,int ,int, int,int ,int *, int *,int *);
 void convert_pvec_to_cvec_d(double ,double , double , double *,double *);
@@ -1452,7 +1452,7 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
       if(fabs(E->control.surface_rayleigh[snode]-1.0)>1e-6){
 	for(i=1;i <= E->lmesh.noz;i++){ /* go through depth layers */
 	  node = (snode-1)*E->lmesh.noz + i; /* global node number */
-	  if(layers(E,CPPR,node) <= E->control.ggrd.ray_control){ 
+	  if(layers(E,node) <= E->control.ggrd.ray_control){ 
 	    /* 
 	       node is in top layers 
 	    */

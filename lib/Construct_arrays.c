@@ -31,7 +31,7 @@
 #include "global_defs.h"
 
 int layers_r(struct All_variables *,float );
-int layers(struct All_variables *,int ,int );
+int layers(struct All_variables *,int);
 
 
 /*========================================================
@@ -743,7 +743,7 @@ int layers_r(struct All_variables *E,float r)
 }
 
 /* determine layer number of node "node" of cap "m" */
-int layers(struct All_variables *E,int m,int node)
+int layers(struct All_variables *E,int node)
 {
   return(layers_r(E,E->sx[CPPR][3][node]));
 }
@@ -778,7 +778,7 @@ void construct_mat_group(E)
           for(el=1;el<=E->lmesh.nel;el++) {
               E->mat[CPPR][el] = 1;
               nodea = E->ien[CPPR][el].node[2];
-              llayer = layers(E,CPPR,nodea);
+              llayer = layers(E,nodea);
               if (llayer)  {
                   E->mat[CPPR][el] = llayer;
               }

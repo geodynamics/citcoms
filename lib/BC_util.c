@@ -30,7 +30,7 @@
 void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void myerror(struct All_variables *,char *);
-int layers(struct All_variables *,int,int);
+int layers(struct All_variables *,int);
 
 
 #ifdef USE_GGRD
@@ -214,7 +214,7 @@ void assign_internal_bc(struct All_variables *E)
 	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
 	  /* node number is k, assuming no dependence on x and y  */
 	  if(E->SX[lv][CPPR][3][k] >= E->mesh.toplayerbc_r){
-	    lay = layers(E,CPPR,k);
+	    lay = layers(E,k);
 	    if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	      ncount++;		/* not in top or bottom */
 	    if(E->mesh.topvbc != 1) {	/* free slip */
