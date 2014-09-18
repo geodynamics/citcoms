@@ -527,7 +527,7 @@ void visc_from_T(struct All_variables *, float **, int);
 void visc_from_S(struct All_variables *, float **, int);
 void visc_from_P(struct All_variables *, float **);
 void visc_from_C(struct All_variables *, float **);
-void strain_rate_2_inv(struct All_variables *, int, float *, int);
+void strain_rate_2_inv(struct All_variables *, float *, int);
 double second_invariant_from_3x3(double [3][3]);
 void calc_strain_from_vgm(double [3][3], double [3][3]);
 void calc_strain_from_vgm9(double *, double [3][3]);

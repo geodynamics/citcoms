@@ -733,7 +733,7 @@ static void process_visc_heating(struct All_variables *E, int m, double *heating
        reversal */
     temp = E->control.disptn_number / E->control.Atemp / vpts;
 
-    strain_rate_2_inv(E, CPPR, strain_sqr, 0);
+    strain_rate_2_inv(E, strain_sqr, 0);
 
     for(e=1; e<=E->lmesh.nel; e++) {
         visc = 0.0;

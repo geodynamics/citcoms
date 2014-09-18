@@ -887,7 +887,7 @@ void visc_from_S(E,EEta,propogate)
       if(E->viscosity.sdepv_visited){
 	
         /* get second invariant for all elements */
-        strain_rate_2_inv(E,CPPR,eedot,1);
+        strain_rate_2_inv(E,eedot,1);
       }else{
 	for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
 	  eedot[e] = 1.0;
@@ -971,9 +971,9 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
   
     if(E->viscosity.pdepv_visited){
       if(E->viscosity.psrw)
-	strain_rate_2_inv(E,CPPR,eedot,0);	/* get second invariant for all elements, don't take sqrt */
+	strain_rate_2_inv(E,eedot,0);	/* get second invariant for all elements, don't take sqrt */
       else
-	strain_rate_2_inv(E,CPPR,eedot,1);	/* get second invariant for all elements */
+	strain_rate_2_inv(E,eedot,1);	/* get second invariant for all elements */
     }else{
       for(e=1;e<=nel;e++)	/* initialize with unity if no velocities around */
 	eedot[e] = 1.0;
@@ -1103,10 +1103,10 @@ void visc_from_C( E, EEta)
     } /* end el loop */
 }
 
-void strain_rate_2_inv(E,m,EEDOT,SQRT)
+void strain_rate_2_inv(E,EEDOT,SQRT)
      struct All_variables *E;
      float *EEDOT;
-     int m,SQRT;
+     int SQRT;
 {
     void get_rtf_at_ppts();
     void velo_from_element();
