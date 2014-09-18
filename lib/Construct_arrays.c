@@ -345,7 +345,7 @@ void construct_node_ks(E)
 
         for(element=1;element<=nel;element++) {
 
-	    get_elt_k(E,element,elt_K,level,CPPR,0);
+	    get_elt_k(E,element,elt_K,level,0);
 
 	    if (E->control.augmented_Lagr)
 	         get_aug_k(E,element,elt_K,level);
@@ -615,7 +615,7 @@ void construct_elt_ks(E)
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
-	    get_elt_k(E,el,E->elt_k[lev][CPPR][el].k,lev,CPPR,0);
+	    get_elt_k(E,el,E->elt_k[lev][CPPR][el].k,lev,0);
 
 	    if (E->control.augmented_Lagr)
 	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev);

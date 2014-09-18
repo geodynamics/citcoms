@@ -268,9 +268,9 @@ void get_ba_p(struct Shape_function *N, struct Shape_function_dx *GNx,
   Function to supply the element k matrix for a given element e.
   ==============================================================  */
 
-void get_elt_k(E,el,elt_k,lev,m,iconv)
+void get_elt_k(E,el,elt_k,lev,iconv)
      struct All_variables *E;
-     int el,m;
+     int el;
      double elt_k[24*24];
      int lev, iconv;
 {

@@ -108,7 +108,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *);
 void assemble_forces(struct All_variables *, int);
 void get_ba(struct Shape_function *, struct Shape_function_dx *, struct CC *, struct CCX *, double [4][9], int, double [9][9][4][7]);
 void get_ba_p(struct Shape_function *, struct Shape_function_dx *, struct CC *, struct CCX *, double [4][9], int, double [9][9][4][7]);
-void get_elt_k(struct All_variables *, int, double [24*24], int, int, int);
+void get_elt_k(struct All_variables *, int, double [24*24], int, int);
 void assemble_del2_u(struct All_variables *, double **, double **, int, int);
 void e_assemble_del2_u(struct All_variables *, double **, double **, int, int);
 void n_assemble_del2_u(struct All_variables *, double **, double **, int, int);
