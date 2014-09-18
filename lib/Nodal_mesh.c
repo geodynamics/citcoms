@@ -108,10 +108,10 @@ void v_from_vector_pseudo_surf(E)
 }
 
 /* cartesian velocities within element, single prec version */
-void velo_from_element(E,VV,m,el,sphere_key)
+void velo_from_element(E,VV,el,sphere_key)
      struct All_variables *E;
      float VV[4][9];
-     int el,m,sphere_key;
+     int el,sphere_key;
 {
 
     int a, node;
@@ -148,10 +148,10 @@ void velo_from_element(E,VV,m,el,sphere_key)
 }
 
 /* double prec version */
-void velo_from_element_d(E,VV,m,el,sphere_key)
+void velo_from_element_d(E,VV,el,sphere_key)
      struct All_variables *E;
      double VV[4][9];
-     int el,m,sphere_key;
+     int el,sphere_key;
 {
 
     int a, node;

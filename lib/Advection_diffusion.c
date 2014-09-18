@@ -157,7 +157,7 @@ void std_timestep(struct All_variables *E)
     adv_timestep = 1.0e8;
     for(el=1;el<=nel;el++) {
 
-      velo_from_element(E,VV,CPPR,el,sphere_key);
+      velo_from_element(E,VV,el,sphere_key);
 
       uc=uc1=uc2=uc3=0.0;
       for(i=1;i<=ENODES3D;i++) {
@@ -375,7 +375,7 @@ static void pg_solver(struct All_variables *E,
 
    for(el=1;el<=E->lmesh.nel;el++)    {
 
-      velo_from_element(E,VV,CPPR,el,sphere_key);
+      velo_from_element(E,VV,el,sphere_key);
 
       get_rtf_at_vpts(E, CPPR, lev, el, rtf);
 

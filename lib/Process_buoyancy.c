@@ -82,7 +82,7 @@ void heat_flux(E)
 
     for(e=1;e<=E->lmesh.nel;e++) {
 
-      velo_from_element(E,VV,CPPR,e,sphere_key);
+      velo_from_element(E,VV,e,sphere_key);
 
       for(i=1;i<=vpts;i++)   {
         u[i] = 0.0;

@@ -470,7 +470,7 @@ void regional_get_velocity(struct All_variables *E,
 
 
     /* get cartesian velocity */
-    velo_from_element_d(E, VV, CPPR, nelem, sphere_key);
+    velo_from_element_d(E, VV, nelem, sphere_key);
 
 
     /* Interpolate the velocity on the tracer position */

@@ -905,7 +905,7 @@ void remove_rigid_rot(struct All_variables *E)
 	sin_f = sin(f);cos_f = cos(f);
 	
 	/* get Cartesian, element local velocities */
-	velo_from_element_d(E,VV,CPPR,e,sphere_key);
+	velo_from_element_d(E,VV,e,sphere_key);
 	for (j=1;j<=ppts;j++)   {
 	  vx[j] = 0.0;vy[j] = 0.0;
 	}

@@ -1047,7 +1047,7 @@ void full_get_velocity(struct All_variables *E,
     iwedge=shape[0];
 
     /* get cartesian velocity */
-    velo_from_element_d(E, VV, CPPR, nelem, sphere_key);
+    velo_from_element_d(E, VV, nelem, sphere_key);
 
     /* depending on wedge, set up velocity points */
 

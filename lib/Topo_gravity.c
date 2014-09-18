@@ -207,7 +207,7 @@ void compute_nodal_stress(struct All_variables *E,
       vor = 0.0;
 
       get_rtf_at_vpts(E, CPPR, lev, e, rtf);// gets r,theta,phi coordinates at the integration points
-      velo_from_element(E,VV,CPPR,e,sphere_key); /* assign node-global
+      velo_from_element(E,VV,e,sphere_key); /* assign node-global
 						 velocities to nodes
 						 local to the
 						 element */
@@ -969,7 +969,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       el = E->surf_element[CPPR][els];
       elb = el - elz+1;
 
-      velo_from_element(E,VV,CPPR,elb,sphere_key);
+      velo_from_element(E,VV,elb,sphere_key);
 
       for(m=0;m<ends;m++) {
          eub [m*dims  ] = VV[1][m+1];
@@ -977,7 +977,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
          eub [m*dims+2] = VV[3][m+1];
          }
 
-      velo_from_element(E,VV,CPPR,el,sphere_key);
+      velo_from_element(E,VV,el,sphere_key);
 
       for(m=0;m<ends;m++) {
          eu [m*dims  ] = VV[1][m+1];
