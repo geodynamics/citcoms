@@ -426,7 +426,7 @@ void regional_solver_init(struct All_variables *);
 void regional_coord_of_cap(struct All_variables *, int, int);
 /* Regional_tracer_advection.c */
 void regional_tracer_setup(struct All_variables *);
-int regional_iget_element(struct All_variables *, int, int, double, double, double, double, double, double);
+int regional_iget_element(struct All_variables *, int, double, double, double, double, double, double);
 int isearch_all(double *, int, double);
 int isearch_neighbors(double *, int, double, int);
 int regional_icheck_cap(struct All_variables *, int, double, double, double, double);

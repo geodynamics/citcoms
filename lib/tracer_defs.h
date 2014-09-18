@@ -145,7 +145,7 @@ struct TRACE{
     /* function pointers */
     /*********************/
 
-    int (* iget_element)(struct All_variables*, int, int,
+    int (* iget_element)(struct All_variables*, int,
                          double, double, double, double, double, double);
 
     void (* get_velocity)(struct All_variables*, int,

@@ -737,7 +737,7 @@ void full_lost_souls(struct All_variables *E)
         z=E->trace.basicq[CPPR][5][E->trace.ntracers[CPPR]];
 
 
-        iel=(E->trace.iget_element)(E,j,-99,x,y,z,theta,phi,rad);
+        iel=(E->trace.iget_element)(E,-99,x,y,z,theta,phi,rad);
 
         if (iel<1) {
             fprintf(E->trace.fpt,"Error(lost souls) - element not here?\n");
@@ -944,7 +944,7 @@ void full_get_shape_functions(struct All_variables *E,
                     sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
                     ival=icheck_element(E,CPPR,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
-                    ival=(E->trace.iget_element)(E,CPPR,-99,x,y,z,theta,phi,rad);
+                    ival=(E->trace.iget_element)(E,-99,x,y,z,theta,phi,rad);
                     fprintf(E->trace.fpt,"New Element?: %d\n",ival);
                     ival=icheck_column_neighbors(E,CPPR,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"New Element (neighs)?: %d\n",ival);

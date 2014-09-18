@@ -591,7 +591,7 @@ static void find_tracers(struct All_variables *E)
 
             iprevious_element=E->trace.ielement[CPPR][it];
 
-            iel=(E->trace.iget_element)(E,CPPR,iprevious_element,x,y,z,theta,phi,rad);
+            iel=(E->trace.iget_element)(E,iprevious_element,x,y,z,theta,phi,rad);
 
             E->trace.ielement[CPPR][it]=iel;
 

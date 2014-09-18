@@ -254,7 +254,7 @@ static void make_mesh_ijk(struct All_variables *E)
 /* it is not known, input a negative number.                     */
 
 int regional_iget_element(struct All_variables *E,
-			  int m, int iprevious_element,
+			  int iprevious_element,
 			  double dummy1, double dummy2, double dummy3,
 			  double theta, double phi, double rad)
 {
@@ -823,7 +823,7 @@ static void put_found_tracers(struct All_variables *E,
 
 
             /* found the element */
-            iel = regional_iget_element(E, CPPR, -99, 0, 0, 0, theta, phi, rad);
+            iel = regional_iget_element(E, -99, 0, 0, 0, theta, phi, rad);
 
             if (iel<1) {
                 fprintf(E->trace.fpt, "Error(regional lost souls) - "
