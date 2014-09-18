@@ -49,7 +49,7 @@ static void write_trace_instructions(struct All_variables *E);
 static void make_mesh_ijk(struct All_variables *E);
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             int kk, int j);
+                             int kk);
 static void put_found_tracers(struct All_variables *E,
                               int recv_size, double *recv);
 int isearch_neighbors(double *array, int nsize,
@@ -605,10 +605,10 @@ void regional_lost_souls(struct All_variables *E)
             coord = E->trace.rlater[CPPR][d][kk];
 
             if (coord < bounds[d][0]) {
-                put_lost_tracers(E, &(isend[0]), send[0], kk, CPPR);
+                put_lost_tracers(E, &(isend[0]), send[0], kk);
             }
             else if (coord >= bounds[d][1]) {
-                put_lost_tracers(E, &(isend[1]), send[1], kk, CPPR);
+                put_lost_tracers(E, &(isend[1]), send[1], kk);
             }
             else {
                 /* check next tracer */
@@ -752,7 +752,7 @@ void regional_lost_souls(struct All_variables *E)
 
 static void put_lost_tracers(struct All_variables *E,
                              int *send_size, double *send,
-                             int kk, int j)
+                             int kk)
 {
     int ilast_tracer, isend_position, ipos;
     int pp;
