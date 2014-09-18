@@ -46,7 +46,7 @@ static void spherical_to_uv(struct All_variables *E,
 static void make_regular_grid(struct All_variables *E);
 static void write_trace_instructions(struct All_variables *E);
 static int icheck_column_neighbors(struct All_variables *E,
-                                   int j, int nel,
+                                   int nel,
                                    double x, double y, double z,
                                    double rad);
 static int icheck_all_columns(struct All_variables *E,
@@ -945,7 +945,7 @@ void full_get_shape_functions(struct All_variables *E,
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
                     ival=(E->trace.iget_element)(E,-99,x,y,z,theta,phi,rad);
                     fprintf(E->trace.fpt,"New Element?: %d\n",ival);
-                    ival=icheck_column_neighbors(E,CPPR,nelem,x,y,z,rad);
+                    ival=icheck_column_neighbors(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"New Element (neighs)?: %d\n",ival);
                     nelem=ival;
                     ival=icheck_element(E,CPPR,nelem,x,y,z,rad);
@@ -1558,7 +1558,7 @@ static void make_regular_grid(struct All_variables *E)
 
                     /* first check previous element */
 
-                    ival=icheck_element_column(E,j,ilast_el,x,y,z,rad);
+                    ival=icheck_element_column(E,CPPR,ilast_el,x,y,z,rad);
                     if (ival>0)
                         {
                             E->trace.regnodetoel[CPPR][kk]=ilast_el;
@@ -1567,7 +1567,7 @@ static void make_regular_grid(struct All_variables *E)
 
                     /* check neighbors */
 
-                    ival=icheck_column_neighbors(E,j,ilast_el,x,y,z,rad);
+                    ival=icheck_column_neighbors(E,ilast_el,x,y,z,rad);
                     if (ival>0)
                         {
                             E->trace.regnodetoel[CPPR][kk]=ival;
@@ -1582,7 +1582,7 @@ static void make_regular_grid(struct All_variables *E)
                             pp=mm/elz;
                             if ( (theta>=tmin[pp]) && (theta<=tmax[pp]) && (phi>=fmin[pp]) && (phi<=fmax[pp]) )
                                 {
-                                    ival=icheck_element_column(E,j,mm,x,y,z,rad);
+                                    ival=icheck_element_column(E,CPPR,mm,x,y,z,rad);
                                     if (ival>0)
                                         {
                                             ilast_el=mm;
@@ -1664,7 +1664,7 @@ static void make_regular_grid(struct All_variables *E)
                 {
                     if ((E->trace.regtoel[CPPR][pp]=(int *)malloc((numregel+1)*sizeof(int)))==NULL)
                         {
-                            fprintf(E->trace.fpt,"ERROR(make regular)-no memory 98d (%d %d %d)\n",pp,numregel,j);
+                            fprintf(E->trace.fpt,"ERROR(make regular)-no memory 98d (%d %d %d)\n",pp,numregel,CPPR);
                             fflush(E->trace.fpt);
                             exit(10);
                         }
@@ -1966,7 +1966,7 @@ static void write_trace_instructions(struct All_variables *E)
 /* column. Neighbor surface element number is returned        */
 
 static int icheck_column_neighbors(struct All_variables *E,
-                                   int j, int nel,
+                                   int nel,
                                    double x, double y, double z,
                                    double rad)
 {
@@ -2613,7 +2613,7 @@ int full_iget_element(struct All_variables *E,
 
     if (iprevious_element>0)
         {
-            iel=icheck_column_neighbors(E,CPPR,iprevious_element,x,y,z,rad);
+            iel=icheck_column_neighbors(E,iprevious_element,x,y,z,rad);
             if (iel>0)
                 {
                     goto foundit;
@@ -2657,7 +2657,7 @@ int full_iget_element(struct All_variables *E,
                     for (kk=1;kk<=ichoice;kk++)
                         {
                             ineighbor=E->trace.regtoel[CPPR][kk][iregel];
-                            iel=icheck_column_neighbors(E,CPPR,ineighbor,x,y,z,rad);
+                            iel=icheck_column_neighbors(E,ineighbor,x,y,z,rad);
                             if (iel>0)
                                 {
                                     goto foundit;
