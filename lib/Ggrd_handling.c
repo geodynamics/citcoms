@@ -71,7 +71,7 @@ void construct_mat_group(struct All_variables *);
 void temperatures_conform_bcs(struct All_variables *);
 int layers(struct All_variables *,int);
 void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *,	/* input */
-					       int ,int ,int, int,int ,int *, int *,int *);
+					       int ,int ,int, int ,int *, int *,int *);
 void convert_pvec_to_cvec_d(double ,double , double , double *,double *);
 void calc_cbase_at_tp_d(double , double , double *);
 void xyz2rtpd(float ,float ,float ,double *);
@@ -1100,7 +1100,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	    /* 
 	       determine vertical nodes and set the assign flag, if needed
 	    */
-	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,CPPR,verbose,
+	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,verbose,
 						      &assign,&botnode,&topnode);
 	    /* 
 	       loop through all horizontal nodes and assign boundary
@@ -1213,7 +1213,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
       }
 
 	/* top level only */
-	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,CPPR,verbose,
+	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,verbose,
 						  &assign,&botnode,&topnode);
 	if(assign){	
 	  for(i=1;i <= noy;i++)	{/* loop through surface nodes */
@@ -1385,7 +1385,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 
 void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input */
 					       int allow_internal,
-					       int nozl,int level,int m,int verbose,
+					       int nozl,int level,int verbose,
 					       int *assign, /* output */
 					       int *botnode,int *topnode)
 {

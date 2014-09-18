@@ -183,7 +183,7 @@ void ggrd_temp_init_general(struct All_variables *, int);
 void ggrd_read_mat_from_file(struct All_variables *, int);
 void ggrd_read_ray_from_file(struct All_variables *, int);
 void ggrd_read_vtop_from_file(struct All_variables *, int);
-void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *, int, int, int, int, int, int *, int *, int *);
+void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *, int, int, int, int, int *, int *, int *);
 void ggrd_read_age_from_file(struct All_variables *, int);
 void ggrd_adjust_tbl_rayleigh(struct All_variables *, double **);
 void ggrd_solve_eigen3x3(double [3][3], double [3], double [3][3], struct All_variables *);
