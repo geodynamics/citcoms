@@ -50,7 +50,6 @@ static int icheck_column_neighbors(struct All_variables *E,
                                    double x, double y, double z,
                                    double rad);
 static int icheck_all_columns(struct All_variables *E,
-                              int j,
                               double x, double y, double z,
                               double rad);
 static int icheck_element(struct All_variables *E,
@@ -2047,7 +2046,6 @@ static int icheck_column_neighbors(struct All_variables *E,
 /* else -99 if can't be found.                                */
 
 static int icheck_all_columns(struct All_variables *E,
-                              int j,
                               double x, double y, double z,
                               double rad)
 {
@@ -2673,7 +2671,7 @@ int full_iget_element(struct All_variables *E,
 
     E->trace.istat1++;
 
-    iel=icheck_all_columns(E,CPPR,x,y,z,rad);
+    iel=icheck_all_columns(E,x,y,z,rad);
 
     if (E->trace.istat1%100==0)
         {
