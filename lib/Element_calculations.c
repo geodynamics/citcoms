@@ -43,8 +43,8 @@ void construct_c3x3matrix_el (struct All_variables *,int ,struct CC *,
 			      struct CCX *,int ,int );
 void assemble_div_u(struct All_variables *,
                     double **, double **, int );
-static void get_elt_tr(struct All_variables *, int , int , double [24], int );
-static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24], int );
+static void get_elt_tr(struct All_variables *, int , int , double [24]);
+static void get_elt_tr_pseudo_surf(struct All_variables *, int , int , double [24]);
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
@@ -109,9 +109,9 @@ void assemble_forces(E,penalty)
       for(a=0;a<24;a++) elt_f[a] = 0.0;
       for(a=SIDE_BEGIN; a<=SIDE_END; a++) {
           if(E->control.pseudo_free_surf)
-              get_elt_tr_pseudo_surf(E, i, a, elt_f, CPPR);
+              get_elt_tr_pseudo_surf(E, i, a, elt_f);
           else
-              get_elt_tr(E, i, a, elt_f, CPPR);
+              get_elt_tr(E, i, a, elt_f);
       }
       add_force(E, e, elt_f);
     }
@@ -1041,7 +1041,7 @@ void get_elt_f(E,el,elt_f,bcs)
   Function to create the element force vector due to stress b.c.
   ================================================================= */
 
-static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr[24])
 {
 
 	const int dims=E->mesh.nsd;
@@ -1123,7 +1123,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 	}
 }
 
-static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24], int m)
+static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, double elt_tr[24])
 {
 
 	const int dims=E->mesh.nsd;
