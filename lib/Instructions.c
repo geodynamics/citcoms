@@ -1071,7 +1071,7 @@ void allocate_common_vars(E)
         E->elt_c[i][CPPR] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
 
     E->EVI[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-    E->BPI[i][CPPR] = (double *) malloc((npno+1)*sizeof(double));
+    E->BPI[i] = (double *) malloc((npno+1)*sizeof(double));
 
     E->ID[i][CPPR]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
     E->VI[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
@@ -1196,14 +1196,14 @@ void allocate_velocity_vars(E)
   for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++) {
       E->lmesh.NEQ[l] = E->lmesh.NNOV[l] * E->mesh.nsd;
 
-      E->BI[l][CPPR] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
+      E->BI[l] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
           E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
       E->zero_resid[l][CPPR] = (int *) malloc((k+2)*sizeof(int));
       E->parallel.Skip_id[l][CPPR] = (int *) malloc((k+2)*sizeof(int));
 
       for(i=0;i<E->lmesh.NEQ[l];i++) {
-         E->BI[l][CPPR][i]=0.0;
+         E->BI[l][i]=0.0;
          }
 
       }   /* end for j & l */

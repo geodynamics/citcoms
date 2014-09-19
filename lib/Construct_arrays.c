@@ -336,7 +336,7 @@ void construct_node_ks(E)
         nel=E->lmesh.NEL[level];
         nno=E->lmesh.NNO[level];
 	for(i=0;i<neq;i++)
-	    E->BI[level][CPPR][i] = zero;
+	    E->BI[level][i] = zero;
         for(i=0;i<E->mesh.matrix_size[level];i++) {
             E->Eqn_k1[level][CPPR][i] = zero;
             E->Eqn_k2[level][CPPR][i] = zero;
@@ -438,9 +438,9 @@ void construct_node_ks(E)
         neq=E->lmesh.NEQ[level];
 
         for(j=0;j<neq;j++)                 {
-            if(E->BI[level][CPPR][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,level,j,neq);
-	    assert( E->BI[level][CPPR][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-            E->BI[level][CPPR][j]  = (double) 1.0/E->BI[level][CPPR][j];
+            if(E->BI[level][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,level,j,neq);
+	    assert( E->BI[level][j] != 0 /* diagonal of matrix = 0, not acceptable */);
+            E->BI[level][j]  = (double) 1.0/E->BI[level][j];
 	    }
 
 
@@ -488,16 +488,16 @@ void rebuild_BI_on_boundary(E)
      (E->solver.exchange_id_d)(E, E->temp, level);
 
         for(i=0;i<E->lmesh.NEQ[level];i++)  {
-            E->temp[i] = E->temp[i] - 1.0/E->BI[level][CPPR][i];
+            E->temp[i] = E->temp[i] - 1.0/E->BI[level][i];
         }
         for(i=1;i<=E->lmesh.NNO[level];i++)
           if (E->NODE[level][CPPR][i] & OFFSIDE)   {
             eqn1=E->ID[level][CPPR][i].doff[1];
             eqn2=E->ID[level][CPPR][i].doff[2];
             eqn3=E->ID[level][CPPR][i].doff[3];
-            E->BI[level][CPPR][eqn1] = (double) 1.0/E->temp[eqn1];
-            E->BI[level][CPPR][eqn2] = (double) 1.0/E->temp[eqn2];
-            E->BI[level][CPPR][eqn3] = (double) 1.0/E->temp[eqn3];
+            E->BI[level][eqn1] = (double) 1.0/E->temp[eqn1];
+            E->BI[level][eqn2] = (double) 1.0/E->temp[eqn2];
+            E->BI[level][eqn3] = (double) 1.0/E->temp[eqn3];
           }
 
 
@@ -627,9 +627,9 @@ void construct_elt_ks(E)
       (E->solver.exchange_id_d)(E, E->BI[lev], lev);    /*correct BI   */
 
             for(j=0;j<E->lmesh.NEQ[lev];j++) {
-	       if(E->BI[lev][CPPR][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
-               assert( E->BI[lev][CPPR][j] != 0 /* diagonal of matrix = 0, not acceptable */);
-               E->BI[lev][CPPR][j]  = (double) 1.0/E->BI[lev][CPPR][j];
+	       if(E->BI[lev][j] ==0.0)  fprintf(stderr,"me= %d level %d, equation %d/%d has zero diagonal term\n",E->parallel.me,lev,j,E->lmesh.NEQ[lev]);
+               assert( E->BI[lev][j] != 0 /* diagonal of matrix = 0, not acceptable */);
+               E->BI[lev][j]  = (double) 1.0/E->BI[lev][j];
 	       }
 
     }       /* end for level */

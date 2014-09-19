@@ -466,7 +466,7 @@ static void solve_Ahat_p_fhat_CG(struct All_variables *E,
 
         /* preconditioner BPI ~= inv(K), z1 = BPI*r1 */
         for(j=0; j<npno; j++)
-            z1[j] = E->BPI[lev][CPPR][j+1] * r1[j]; /* E->BPI[lev][CPPR][j] when it is made 0-based */
+            z1[j] = E->BPI[lev][j+1] * r1[j]; /* E->BPI[lev][j] when it is made 0-based */
 
 
         /* r1dotz1 = <r1, z1> */
@@ -676,7 +676,7 @@ static PetscErrorCode solve_Ahat_p_fhat_CG_PETSc( struct All_variables *E,
   PetscReal *bpi;
   ierr = VecGetArray( BPI, &bpi ); CHKERRQ( ierr );
   for( j = 0; j < npno; j++ )
-    bpi[j] = E->BPI[lev][CPPR][j+1];
+    bpi[j] = E->BPI[lev][j+1];
   ierr = VecRestoreArray( BPI, &bpi ); CHKERRQ( ierr );
 
   /* calculate the contribution of compressibility in the continuity eqn */
@@ -936,7 +936,7 @@ static PetscErrorCode solve_Ahat_p_fhat_BiCG_PETSc( struct All_variables *E,
   PetscReal *bpi;
   ierr = VecGetArray( BPI, &bpi ); CHKERRQ( ierr );
   for( j = 0; j < npno; j++ )
-    bpi[j] = E->BPI[lev][CPPR][j+1];
+    bpi[j] = E->BPI[lev][j+1];
   ierr = VecRestoreArray( BPI, &bpi ); CHKERRQ( ierr );
 
   r0dotrt = alpha = omega = 0.0;
@@ -1208,8 +1208,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* preconditioner BPI ~= inv(K), pt = BPI*p2 */
         for(j=0; j<npno; j++)
-            /* change to E->BPI[lev][CPPR][j] after it has been made 0-based */
-            pt[j] = E->BPI[lev][CPPR][j+1] * p2[j];
+            /* change to E->BPI[lev][j] after it has been made 0-based */
+            pt[j] = E->BPI[lev][j+1] * p2[j];
 
 
         /* solve K*u0 = grad(pt) for u1 */
@@ -1237,8 +1237,8 @@ static void solve_Ahat_p_fhat_BiCG(struct All_variables *E,
 
         /* preconditioner BPI ~= inv(K), st = BPI*s0 */
         for(j=0; j<npno; j++)
-            /* change to E->BPI[lev][CPPR][j] after it has been made 0-based */
-            st[j] = E->BPI[lev][CPPR][j+1] * s0[j];
+            /* change to E->BPI[lev][j] after it has been made 0-based */
+            st[j] = E->BPI[lev][j+1] * s0[j];
 
 
         /* solve K*u1 = grad(st) for u1 */

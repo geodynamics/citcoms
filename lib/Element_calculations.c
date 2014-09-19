@@ -575,17 +575,17 @@ void build_diagonal_of_K(E,el,elt_k,level)
 	    /* dirn 1 */
 	    a1 = E->ID[level][CPPR][node].doff[1];
 	    p=(a-1)*dims;
-	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
+	    E->BI[level][a1] += elt_k[p*n+p];
 
 	    /* dirn 2 */
 	    a2 = E->ID[level][CPPR][node].doff[2];
 	    p=(a-1)*dims+1;
-	    E->BI[level][CPPR][a2] += elt_k[p*n+p];
+	    E->BI[level][a2] += elt_k[p*n+p];
 
 	    /* dirn 3 */
 	    a1 = E->ID[level][CPPR][node].doff[3];
 	    p=(a-1)*dims+2;
-	    E->BI[level][CPPR][a1] += elt_k[p*n+p];
+	    E->BI[level][a1] += elt_k[p*n+p];
     }
 }
 
@@ -603,7 +603,7 @@ void build_diagonal_of_Ahat(struct All_variables *E)
       neq=E->lmesh.NEQ[level];
 
       for(e=0;e<npno;e++)
-        E->BPI[level][CPPR][e+1]=1.0;
+        E->BPI[level][e+1]=1.0;
 
       if(!E->control.precondition)
         return;
@@ -611,9 +611,9 @@ void build_diagonal_of_Ahat(struct All_variables *E)
       for(e=0;e<npno;e++) {
         BU=assemble_dAhatp_entry(E,e,level);
         if(BU != 0.0)
-	        E->BPI[level][CPPR][e+1] = 1.0/BU;
+	        E->BPI[level][e+1] = 1.0/BU;
         else
-          E->BPI[level][CPPR][e+1] = 1.0;
+          E->BPI[level][e+1] = 1.0;
       }
   }
 }
@@ -763,13 +763,13 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
       p = (a-1)*dims;
       node = E->IEN[level][CPPR][e+1].node[a];
       j=E->ID[level][CPPR][node].doff[1];
-      gradP[p] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p][0];
+      gradP[p] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p][0];
 
       j=E->ID[level][CPPR][node].doff[2];
-      gradP[p+1] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p+1][0];
+      gradP[p+1] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p+1][0];
 
       j=E->ID[level][CPPR][node].doff[3];
-      gradP[p+2] += E->BI[level][CPPR][j]*E->elt_del[level][CPPR][e+1].g[p+2][0];
+      gradP[p+2] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p+2][0];
     }
 
 

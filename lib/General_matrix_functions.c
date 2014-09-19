@@ -345,7 +345,7 @@ double conj_grad(E,d0,F,acc,cycles,level)
     while (((residual > acc) && (count < steps)) || count == 0)  {
 
     for(i=0;i<high_neq;i++)
-       z1[i] = E->BI[level][CPPR][i] * r1[i];
+       z1[i] = E->BI[level][i] * r1[i];
 
     dotr1z1 = global_vdot(E,r1,z1,level);
 
@@ -470,9 +470,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
     
-	    E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
-	    E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
-	    E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
+	    E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
+	    E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
+	    E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];
 	    E->temp1[eqn1] = Ad[eqn1];
 	    E->temp1[eqn2] = Ad[eqn2];
 	    E->temp1[eqn3] = Ad[eqn3];
@@ -500,9 +500,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
                  }
 
             if (!(E->NODE[level][m][i]&OFFSIDE))   {
-               E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
-               E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
-               E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
+               E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
+               E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
+               E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];
 	       }
 
                  /* Ad on boundaries differs after the following operation */
