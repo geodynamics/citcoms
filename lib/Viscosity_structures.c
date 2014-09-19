@@ -489,7 +489,7 @@ void visc_from_T(E,EEta,propogate)
                     tempa = E->viscosity.N0[l]*E->VIP[CPPR][i];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -516,7 +516,7 @@ void visc_from_T(E,EEta,propogate)
                     tempa = E->viscosity.N0[l]*E->VIP[CPPR][i];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -546,7 +546,7 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -575,7 +575,7 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                     zz[kk] = (1.-E->sx[CPPR][3][E->ien[i].node[kk]]);
                 }
 
@@ -607,7 +607,7 @@ void visc_from_T(E,EEta,propogate)
                 tempa = E->viscosity.N0[l];
                 /* fprintf(stderr,"\nINSIDE visc_from_T, l=%d, tempa=%g",l+1,tempa);*/
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -656,7 +656,7 @@ void visc_from_T(E,EEta,propogate)
 	      tempa = E->viscosity.N0[l];
 
 	    for(kk=1;kk<=ends;kk++) {
-	      TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+	      TT[kk] = E->T[E->ien[i].node[kk]];
 	      zz[kk] = (1.0 - E->sx[CPPR][3][E->ien[i].node[kk]]);
 	    }
 
@@ -711,7 +711,7 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-                    TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+                    TT[kk] = E->T[E->ien[i].node[kk]];
                     zz[kk] = (1.-E->sx[CPPR][3][E->ien[i].node[kk]]);
                 }
 
@@ -759,7 +759,7 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
 		  zz[kk] = E->sx[CPPR][3][E->ien[i].node[kk]]; /* radius */
                 }
 
@@ -795,7 +795,7 @@ void visc_from_T(E,EEta,propogate)
 		else
 		  tempa = E->viscosity.N0[l];
                 for(kk=1;kk<=ends;kk++) 
-		  TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
 		
                 for(jj=1;jj<=vpts;jj++) {
                     temp=0.0;
@@ -827,7 +827,7 @@ void visc_from_T(E,EEta,propogate)
 		  tempa = E->viscosity.N0[l];
 
                 for(kk=1;kk<=ends;kk++) {
-		  TT[kk] = E->T[CPPR][E->ien[i].node[kk]];
+		  TT[kk] = E->T[E->ien[i].node[kk]];
 		  zz[kk] = E->sx[CPPR][3][E->ien[i].node[kk]]; /* radius */
                 }
 

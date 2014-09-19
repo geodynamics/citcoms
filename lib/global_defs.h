@@ -830,7 +830,7 @@ struct All_variables {
     double *heating_latent;
 
     double *P,*F,*U;
-    double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
+    double *T,*Tdot,*buoyancy[NCS];
     double *u1;
     double *temp,*temp1;
     double *Mass[NCS], *MASS[MAX_LEVELS][NCS];
@@ -908,8 +908,8 @@ struct All_variables {
     void (* problem_output)(struct All_variables *, int);
 
   /* the following function pointers are for exchanger */
-  void (* exchange_node_d)(struct All_variables *, double**, int);
-  void (* exchange_node_f)(struct All_variables *, float**, int);
+  void (* exchange_node_d)(struct All_variables *, double*, int);
+  void (* exchange_node_f)(struct All_variables *, float*, int);
   void (* temperatures_conform_bcs)(struct All_variables *);
 
 };

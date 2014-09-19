@@ -351,7 +351,7 @@ void output_velo(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++) {
-      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[CPPR].V[1][i],E->sphere.cap[CPPR].V[2][i],E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
+      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[CPPR].V[1][i],E->sphere.cap[CPPR].V[2][i],E->sphere.cap[CPPR].V[3][i],E->T[i]);
   }
 
   fclose(fp1);

@@ -133,25 +133,25 @@ void temperatures_conform_bcs2(E)
         case 0:  /* no match, next node */
             break;
         case TBX:
-            E->T[CPPR][node] = E->sphere.cap[CPPR].TB[1][node];
+            E->T[node] = E->sphere.cap[CPPR].TB[1][node];
             break;
         case TBZ:
-            E->T[CPPR][node] = E->sphere.cap[CPPR].TB[3][node];
+            E->T[node] = E->sphere.cap[CPPR].TB[3][node];
             break;
         case TBY:
-            E->T[CPPR][node] = E->sphere.cap[CPPR].TB[2][node];
+            E->T[node] = E->sphere.cap[CPPR].TB[2][node];
             break;
         case (TBX | TBZ):     /* clashes ! */
-            E->T[CPPR][node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[3][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[3][node]);
             break;
         case (TBX | TBY):     /* clashes ! */
-            E->T[CPPR][node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node]);
             break;
         case (TBZ | TBY):     /* clashes ! */
-            E->T[CPPR][node] = 0.5 * (E->sphere.cap[CPPR].TB[3][node] + E->sphere.cap[CPPR].TB[2][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[3][node] + E->sphere.cap[CPPR].TB[2][node]);
             break;
         case (TBZ | TBY | TBX):     /* clashes ! */
-            E->T[CPPR][node] = 0.3333333 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node] + E->sphere.cap[CPPR].TB[3][node]);
+            E->T[node] = 0.3333333 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node] + E->sphere.cap[CPPR].TB[3][node]);
             break;
         }
 

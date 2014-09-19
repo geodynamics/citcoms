@@ -952,7 +952,7 @@ void allocate_common_vars(E)
   ely  = E->lmesh.ely;
 
   E->P        = (double *) malloc(npno*sizeof(double));
-  E->T[CPPR]        = (double *) malloc((nno+1)*sizeof(double));
+  E->T        = (double *) malloc((nno+1)*sizeof(double));
   E->NP[CPPR]       = (float *) malloc((nno+1)*sizeof(float));
   E->buoyancy[CPPR] = (double *) malloc((nno+1)*sizeof(double));
 
@@ -1130,7 +1130,7 @@ void allocate_common_vars(E)
       E->sphere.cap[CPPR].TB[k][i] = 0.0;
 
   for(i=1;i<=E->lmesh.nno;i++)
-     E->T[CPPR][i] = 0.0;
+     E->T[i] = 0.0;
 
   for(i=1;i<=E->lmesh.nel;i++)   {
       E->mat[CPPR][i]=1;

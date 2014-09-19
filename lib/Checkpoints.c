@@ -399,8 +399,8 @@ static void energy_checkpoint(struct All_variables *E, FILE *fp)
 
     write_sentinel(fp);
 
-    fwrite(E->T[CPPR], sizeof(double), E->lmesh.nno+1, fp);
-    fwrite(E->Tdot[CPPR], sizeof(double), E->lmesh.nno+1, fp);
+    fwrite(E->T, sizeof(double), E->lmesh.nno+1, fp);
+    fwrite(E->Tdot, sizeof(double), E->lmesh.nno+1, fp);
 }
 
 
@@ -412,9 +412,9 @@ static void read_energy_checkpoint(struct All_variables *E, FILE *fp)
 
     /* the 0-th element of T/Tdot is not init'd
      * and won't be used when read it. */
-      if(fread(E->T[CPPR], sizeof(double), E->lmesh.nno+1, fp)!= E->lmesh.nno+1)
+      if(fread(E->T, sizeof(double), E->lmesh.nno+1, fp)!= E->lmesh.nno+1)
 	myerror(E,"read_energy_checkpoint: error at T");
-      if(fread(E->Tdot[CPPR], sizeof(double), E->lmesh.nno+1, fp)!=E->lmesh.nno+1)
+      if(fread(E->Tdot, sizeof(double), E->lmesh.nno+1, fp)!=E->lmesh.nno+1)
 	myerror(E,"read_energy_checkpoint: error at Tdot");
 }
 

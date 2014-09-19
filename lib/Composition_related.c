@@ -405,7 +405,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
 
 void map_composition_to_nodes(struct All_variables *E)
 {
-    double *tmp[NCS];
+    double *tmp;
     int i, n, kk;
     int nelem, nodenum;
     int j;
@@ -437,7 +437,7 @@ void map_composition_to_nodes(struct All_variables *E)
         } /* end nelem */
 
     for(i=0;i<E->composition.ncomp;i++) {
-        tmp[CPPR] = E->composition.comp_node[CPPR][i];
+        tmp = E->composition.comp_node[CPPR][i];
         (E->exchange_node_d)(E,tmp,E->mesh.levmax);
     }
 

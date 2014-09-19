@@ -165,7 +165,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
          * since the horizontal average of buoy will be removed.
          */
         buoy[CPPR][i] =  temp * E->refstate.rho[nz]
-	  * E->refstate.thermal_expansivity[nz] * E->T[CPPR][i];
+	  * E->refstate.thermal_expansivity[nz] * E->T[i];
       }
     
     /* chemical buoyancy */

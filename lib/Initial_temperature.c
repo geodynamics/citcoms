@@ -245,7 +245,7 @@ static void debug_tic(struct All_variables *E)
   fprintf(E->fp_out,"output_temperature\n");
     fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
     for (j=1;j<=E->lmesh.nno;j++)
-      fprintf(E->fp_out,"X = %.6e Z = %.6e Y = %.6e T[%06d] = %.6e \n",E->sx[CPPR][1][j],E->sx[CPPR][2][j],E->sx[CPPR][3][j],j,E->T[CPPR][j]);
+      fprintf(E->fp_out,"X = %.6e Z = %.6e Y = %.6e T[%06d] = %.6e \n",E->sx[CPPR][1][j],E->sx[CPPR][2][j],E->sx[CPPR][3][j],j,E->T[j]);
   fflush(E->fp_out);
 }
 
@@ -285,7 +285,7 @@ static void read_tic_from_file(struct All_variables *E)
       }
       /* Truncate the temperature to be within (0,1). */
       /* This might not be desirable in some situations. */
-      E->T[CPPR][i] = max(0.0,min(g,1.0));
+      E->T[i] = max(0.0,min(g,1.0));
     }
   fclose (fp);
 
@@ -308,7 +308,7 @@ static void linear_temperature_profile(struct All_variables *E)
                 for(k=1; k<=noz; k++) {
                     node = k + (j-1)*noz + (i-1)*nox*noz;
                     r1 = E->sx[CPPR][3][node];
-                    E->T[CPPR][node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
+                    E->T[node] = E->control.TBCbotval - (E->control.TBCtopval + E->control.TBCbotval)*(r1 - E->sphere.ri)/(E->sphere.ro - E->sphere.ri);
                 }
 }
 
@@ -328,7 +328,7 @@ static void conductive_temperature_profile(struct All_variables *E)
             for(k=1; k<=noz; k++) {
                 node = k + (j-1)*noz + (i-1)*nox*noz;
                 r1 = E->sx[CPPR][3][node];
-                E->T[CPPR][node] = (E->control.TBCtopval*E->sphere.ro
+                E->T[node] = (E->control.TBCtopval*E->sphere.ro
                                  - E->control.TBCbotval*E->sphere.ri)
                     / (E->sphere.ro - E->sphere.ri)
                     + (E->control.TBCbotval - E->control.TBCtopval)
@@ -343,7 +343,7 @@ static void constant_temperature_profile(struct All_variables *E, double mantle_
     int m, i;
 
     for(i=1; i<=E->lmesh.nno; i++)
-        E->T[CPPR][i] = mantle_temp;
+        E->T[i] = mantle_temp;
 }
 
 
@@ -366,7 +366,7 @@ static void add_top_tbl(struct All_variables *E, double age_in_myrs, double mant
             for(k=1; k<=noz; k++) {
                 node = k + (j-1)*noz + (i-1)*nox*noz;
                 r1 = E->sx[CPPR][3][node];
-                E->T[CPPR][node] -= dT * erfc(tmp * (E->sphere.ro - r1));
+                E->T[node] -= dT * erfc(tmp * (E->sphere.ro - r1));
             }
 }
 
@@ -389,7 +389,7 @@ static void add_bottom_tbl(struct All_variables *E, double age_in_myrs, double m
             for(k=1; k<=noz; k++) {
                 node = k + (j-1)*noz + (i-1)*nox*noz;
                 r1 = E->sx[CPPR][3][node];
-                E->T[CPPR][node] += dT * erfc(tmp * (r1 - E->sphere.ri));
+                E->T[node] += dT * erfc(tmp * (r1 - E->sphere.ri));
             }
 }
 
@@ -437,7 +437,7 @@ static void add_perturbations_at_layers(struct All_variables *E)
                         t1 = (E->sx[CPPR][1][node] - E->control.theta_min) * tlen;
                         f1 = (E->sx[CPPR][2][node] - E->control.fi_min) * flen;
 
-                        E->T[CPPR][node] += con * cos(ll*t1) * cos(mm*f1);
+                        E->T[node] += con * cos(ll*t1) * cos(mm*f1);
                     }
         }
         else {
@@ -449,7 +449,7 @@ static void add_perturbations_at_layers(struct All_variables *E)
                         t1 = E->sx[CPPR][1][node];
                         f1 = E->sx[CPPR][2][node];
 
-                        E->T[CPPR][node] += con * modified_plgndr_a(ll,mm,t1) * cos(mm*f1);
+                        E->T[node] += con * modified_plgndr_a(ll,mm,t1) * cos(mm*f1);
                     }
         } /* end if */
     } /* end for p */
@@ -498,7 +498,7 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
                             f1 = (E->sx[CPPR][2][node] - E->control.fi_min) * flen;
                             r1 = E->sx[CPPR][3][node];
 
-                            E->T[CPPR][node] += con * cos(ll*t1) * cos(mm*f1)
+                            E->T[node] += con * cos(ll*t1) * cos(mm*f1)
                                 * sin((r1-E->sphere.ri) * rlen);
                         }
         }
@@ -513,7 +513,7 @@ static void add_perturbations_at_all_layers(struct All_variables *E)
                             f1 = E->sx[CPPR][2][node];
                             r1 = E->sx[CPPR][3][node];
 
-                            E->T[CPPR][node] += con * modified_plgndr_a(ll,mm,t1)
+                            E->T[node] += con * modified_plgndr_a(ll,mm,t1)
                                 * (cos(mm*f1) + sin(mm*f1))
                                 * sin((r1-E->sphere.ri) * rlen);
                         }
@@ -563,15 +563,15 @@ static void add_spherical_anomaly(struct All_variables *E)
                     distance = sqrt(dx[1]*dx[1] + dx[2]*dx[2] + dx[3]*dx[3]);
 
                     if (distance < radius){
-		      E->T[CPPR][node] += amp * exp(-1.0*distance/radius);
+		      E->T[node] += amp * exp(-1.0*distance/radius);
 
 		      if(E->convection.blob_bc_persist){
 			r1 = E->sx[CPPR][3][node];
 			if((fabs(r1 - rout) < e_4) || (fabs(r1 - rin) < e_4)){
 			  /* at bottom or top of box, assign as TBC */
-			  E->sphere.cap[CPPR].TB[1][node]=E->T[CPPR][node];
-			  E->sphere.cap[CPPR].TB[2][node]=E->T[CPPR][node];
-			  E->sphere.cap[CPPR].TB[3][node]=E->T[CPPR][node];
+			  E->sphere.cap[CPPR].TB[1][node]=E->T[node];
+			  E->sphere.cap[CPPR].TB[2][node]=E->T[node];
+			  E->sphere.cap[CPPR].TB[3][node]=E->T[node];
 			}
 		      }
 		    }

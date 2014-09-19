@@ -162,7 +162,7 @@ void debug_sphere_expansion(struct All_variables *E)
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
                     p = j + (i-1)*E->lmesh.nox;
-                    TT[CPPR][p] = E->T[CPPR][node];
+                    TT[CPPR][p] = E->T[node];
                 }
 
         /* expand TT into spherical harmonics */

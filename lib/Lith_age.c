@@ -133,11 +133,11 @@ void lith_age_construct_tic(struct All_variables *E)
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[CPPR][3][node];
-	  E->T[CPPR][node] = E->control.mantle_temp;
+	  E->T[node] = E->control.mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
 	      temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
-	      E->T[CPPR][node] = E->control.mantle_temp * erf(temp);
+	      E->T[node] = E->control.mantle_temp * erf(temp);
 	    }
 	}
 
@@ -168,9 +168,9 @@ void lith_age_update_tbc(struct All_variables *E)
 	  r1=E->sx[CPPR][3][node];
 
 	  if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
-	    E->sphere.cap[CPPR].TB[1][node]=E->T[CPPR][node];
-	    E->sphere.cap[CPPR].TB[2][node]=E->T[CPPR][node];
-	    E->sphere.cap[CPPR].TB[3][node]=E->T[CPPR][node];
+	    E->sphere.cap[CPPR].TB[1][node]=E->T[node];
+	    E->sphere.cap[CPPR].TB[2][node]=E->T[node];
+	    E->sphere.cap[CPPR].TB[3][node]=E->T[node];
 	  }
 	}
 }
@@ -417,10 +417,10 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
             if(depth <= E->control.lith_age_depth) {
                 /* daf == depth_assimilation_factor */
                 daf = 0.5*depth/E->control.lith_age_depth;
-                E->T[CPPR][node] = daf*E->T[CPPR][node] + (1.0-daf)*assimilate_new_temp;
+                E->T[node] = daf*E->T[node] + (1.0-daf)*assimilate_new_temp;
                }
             else
-                E->T[CPPR][node] = assimilate_new_temp;
+                E->T[node] = assimilate_new_temp;
         } /* end switch */
 
     } /* next node */

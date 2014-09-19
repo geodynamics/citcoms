@@ -53,7 +53,7 @@ void heat_flux(E)
     struct All_variables *E;
 {
     int m,e,el,i,j,node,lnode,nz;
-    float *flux[NCS],*SU[NCS],*RU[NCS];
+    float *flux,*SU[NCS],*RU[NCS];
     float VV[4][9],u[9],T[9],dTdz[9],rho[9],area,uT;
     float *sum_h;
 
@@ -74,10 +74,10 @@ void heat_flux(E)
   for(i=0;i<=4;i++)
     sum_h[i] = 0.0;
 
-    flux[CPPR] = (float *) malloc((1+nno)*sizeof(float));
+    flux = (float *) malloc((1+nno)*sizeof(float));
 
     for(i=1;i<=nno;i++)   {
-      flux[CPPR][i] = 0.0;
+      flux[i] = 0.0;
       }
 
     for(e=1;e<=E->lmesh.nel;e++) {
@@ -93,8 +93,8 @@ void heat_flux(E)
           nz = ((E->ien[e].node[j]-1) % E->lmesh.noz)+1;
           rho[i] += E->refstate.rho[nz]*E->N.vpt[GNVINDEX(j,i)];
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
-          T[i] += E->T[CPPR][E->ien[e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
-          dTdz[i] += -E->T[CPPR][E->ien[e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
+          T[i] += E->T[E->ien[e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
+          dTdz[i] += -E->T[E->ien[e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
           }
         }
 
@@ -108,7 +108,7 @@ void heat_flux(E)
       uT /= E->eco[e].area;
 
       for(j=1;j<=ends;j++)
-        flux[CPPR][E->ien[e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
+        flux[E->ien[e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
 
       }             /* end of e */
 
@@ -116,7 +116,7 @@ void heat_flux(E)
   (E->exchange_node_f)(E,flux,lev);
 
    for(i=1;i<=nno;i++)
-     flux[CPPR][i] *= E->MASS[lev][CPPR][i];
+     flux[i] *= E->MASS[lev][CPPR][i];
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
     for(i=1;i<=E->lmesh.nsf;i++)
@@ -181,7 +181,7 @@ void heat_flux(E)
   }
 
 
-  free((void *)flux[CPPR]);
+  free((void *)flux);
   free((void *)sum_h);
 
 }
@@ -203,7 +203,7 @@ void compute_horiz_avg(struct All_variables *E)
 	S3[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
 
 	for(i=1;i<=E->lmesh.nno;i++) {
-	    S1[CPPR][i] = E->T[CPPR][i];
+	    S1[CPPR][i] = E->T[i];
 	    S2[CPPR][i] = E->sphere.cap[CPPR].V[1][i]*E->sphere.cap[CPPR].V[1][i]
           	+ E->sphere.cap[CPPR].V[2][i]*E->sphere.cap[CPPR].V[2][i];
 	    S3[CPPR][i] = E->sphere.cap[CPPR].V[3][i]*E->sphere.cap[CPPR].V[3][i];

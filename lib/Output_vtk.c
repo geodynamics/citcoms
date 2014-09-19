@@ -112,7 +112,7 @@ static void vtk_output_temp(struct All_variables *E, FILE *fp)
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"temperature\" format=\"%s\">\n", E->output.vtk_format);
 
     for(i=0;i <= nodes;i++)
-        floattemp[i] =  (float) *(E->T[CPPR]+i+1);
+        floattemp[i] =  (float) *(E->T+i+1);
 
     if (strcmp(E->output.vtk_format,"binary") == 0) {
         write_binary_array(nodes,floattemp,fp);

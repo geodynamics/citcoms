@@ -543,7 +543,7 @@ void h5output_temperature(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->T[CPPR][n+1];
+                field->data[m] = E->T[n+1];
             }
         }
     }

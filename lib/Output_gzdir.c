@@ -521,7 +521,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       fp1 = output_open(output_file,"a");
     }
       for(i=1;i<=E->lmesh.nno;i++){
-	cvec[0] = E->T[CPPR][i];
+	cvec[0] = E->T[i];
 	if(be_write_float_to_file(cvec,1,fp1)!=1)
 	  BE_WERROR;
       }
@@ -616,7 +616,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       if(E->output.gzdir.vtk_io){
 	/* VTK */
 	for(i=1;i<=E->lmesh.nno;i++)
-	  gzprintf(gzout,"%.6e\n",E->T[CPPR][i]);
+	  gzprintf(gzout,"%.6e\n",E->T[i]);
       } else {
 	/* old velo + T output */
 	if(E->output.gzdir.rnr){
@@ -627,7 +627,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	    sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     vcorr[0],vcorr[1],
-		     E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
+		     E->sphere.cap[CPPR].V[3][i],E->T[i]);
 
 	  }
 	}else{
@@ -635,7 +635,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     E->sphere.cap[CPPR].V[1][i],
 		     E->sphere.cap[CPPR].V[2][i],
-		     E->sphere.cap[CPPR].V[3][i],E->T[CPPR][i]);
+		     E->sphere.cap[CPPR].V[3][i],E->T[i]);
 	}
       }
     gzclose(gzout);
@@ -1225,7 +1225,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	  fprintf(stderr,"WARNING: found a NaN in input temperatures\n");
 	  g=0.0;
 	}
-	E->T[CPPR][i] = g;
+	E->T[i] = g;
       }
     break;
   default:			/* old style velo */
@@ -1238,7 +1238,7 @@ void restart_tic_from_gzdir_file(struct All_variables *E)
 	    E->sphere.cap[m].V[1][i] = v3;  */
 	/* I don't like that  */
 	//E->T[m][i] = max(0.0,min(g,1.0));
-	E->T[CPPR][i] = g;
+	E->T[i] = g;
       }
     break;
   }

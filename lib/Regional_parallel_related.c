@@ -38,8 +38,8 @@
 static void set_horizontal_communicator(struct All_variables*);
 static void set_vertical_communicator(struct All_variables*);
 
-static void exchange_node_d(struct All_variables *, double**, int);
-static void exchange_node_f(struct All_variables *, float**, int);
+static void exchange_node_d(struct All_variables *, double*, int);
+static void exchange_node_f(struct All_variables *, float*, int);
 
 
 /* ============================================ */
@@ -742,7 +742,7 @@ void regional_exchange_id_d(E, U, lev)
 /* ================================================ */
 static void exchange_node_d(E, U, lev)
  struct All_variables *E;
- double **U;
+ double *U;
  int lev;
  {
 
@@ -761,7 +761,7 @@ static void exchange_node_d(E, U, lev)
    for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)   {
 
      for (j=1;j<=E->parallel.NUM_NODE[lev][CPPR].pass[k];j++)
-       S[k][j-1] = U[CPPR][ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ];
+       S[k][j-1] = U[ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ];
 
      MPI_Sendrecv(S[k],E->parallel.NUM_NODE[lev][CPPR].pass[k],MPI_DOUBLE,
 		  E->parallel.PROCESSOR[lev][CPPR].pass[k],1,
@@ -770,7 +770,7 @@ static void exchange_node_d(E, U, lev)
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_NODE[lev][CPPR].pass[k];j++)
-       U[CPPR][ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
+       U[ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
    }
 
  for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)  {
@@ -784,7 +784,7 @@ static void exchange_node_d(E, U, lev)
 
 static void exchange_node_f(E, U, lev)
  struct All_variables *E;
- float **U;
+ float *U;
  int lev;
 {
 
@@ -804,7 +804,7 @@ static void exchange_node_f(E, U, lev)
  for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)   {
 
    for (j=1;j<=E->parallel.NUM_NODE[lev][CPPR].pass[k];j++)
-     S[k][j-1] = U[CPPR][ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ];
+     S[k][j-1] = U[ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ];
 
    MPI_Sendrecv(S[k],E->parallel.NUM_NODE[lev][CPPR].pass[k],MPI_FLOAT,
     E->parallel.PROCESSOR[lev][CPPR].pass[k],1,
@@ -813,7 +813,7 @@ static void exchange_node_f(E, U, lev)
     E->parallel.world,&status);
 
    for (j=1;j<=E->parallel.NUM_NODE[lev][CPPR].pass[k];j++)
-     U[CPPR][ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
+     U[ E->parallel.EXCHANGE_NODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
  }
 
  for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)  {

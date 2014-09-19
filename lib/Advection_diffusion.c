@@ -38,12 +38,12 @@
 #include "parsing.h"
 
 static void set_diffusion_timestep(struct All_variables *E);
-static void predictor(struct All_variables *E, double **field,
-                      double **fielddot);
-static void corrector(struct All_variables *E, double **field,
-                      double **fielddot, double **Dfielddot);
+static void predictor(struct All_variables *E, double *field,
+                      double *fielddot);
+static void corrector(struct All_variables *E, double *field,
+                      double *fielddot, double *Dfielddot);
 static void pg_solver(struct All_variables *E,
-                      double **T, double **Tdot, double **DTdot,
+                      double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
                       double diff, int bc, unsigned int **FLAGS);
 static void pg_shape_fn(struct All_variables *E, int el,
@@ -56,7 +56,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct Shape_function_dx *GNx,
                              struct Shape_function_dA *dOmega,
                              float VV[4][9],
-                             double **field, double **fielddot,
+                             double *field, double *fielddot,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
@@ -100,10 +100,10 @@ void advection_diffusion_allocate_memory(struct All_variables *E)
 {
   int i,m;
 
-    E->Tdot[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+    E->Tdot= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
     for(i=1;i<=E->lmesh.nno;i++)
-      E->Tdot[CPPR][i]=0.0;
+      E->Tdot[i]=0.0;
 }
 
 
@@ -189,20 +189,20 @@ void PG_timestep_solve(struct All_variables *E)
   void assimilate_lith_conform_bcs();
   int i,m,psc_pass,iredo;
   double time0,time1,T_interior1;
-  double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
+  double *DTdot, *T1, *Tdot1;
 
   E->advection.timesteps++;
 
-  DTdot[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+  DTdot= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
 
   if(E->advection.monitor_max_T) {
-     T1[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
-     Tdot1[CPPR]= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+     T1= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
+     Tdot1= (double *)malloc((E->lmesh.nno+1)*sizeof(double));
 
      for (i=1;i<=E->lmesh.nno;i++)   {
-         T1[CPPR][i] = E->T[CPPR][i];
-         Tdot1[CPPR][i] = E->Tdot[CPPR][i];
+         T1[i] = E->T[i];
+         Tdot1[i] = E->Tdot[i];
      }
 
      /* get the max temperature for old T */
@@ -247,8 +247,8 @@ void PG_timestep_solve(struct All_variables *E)
                           T_interior1, E->monitor.T_interior);
               }
               for (i=1;i<=E->lmesh.nno;i++)   {
-                  E->T[CPPR][i] = T1[CPPR][i];
-                  E->Tdot[CPPR][i] = Tdot1[CPPR][i];
+                  E->T[i] = T1[i];
+                  E->Tdot[i] = Tdot1[i];
               }
               iredo = 1;
               E->advection.dt_reduced *= 0.5;
@@ -271,11 +271,11 @@ void PG_timestep_solve(struct All_variables *E)
   if (E->advection.last_sub_iterations==5)
     E->control.keep_going = 0;
 
-  free((void *) DTdot[CPPR] );
+  free((void *) DTdot );
 
   if(E->advection.monitor_max_T) {
-    free((void *) T1[CPPR] );
-    free((void *) Tdot1[CPPR] );
+    free((void *) T1 );
+    free((void *) Tdot1 );
   }
 
   if(E->control.lith_age) {
@@ -312,7 +312,7 @@ static void set_diffusion_timestep(struct All_variables *E)
    predictor and corrector steps.
    ============================== */
 
-static void predictor(struct All_variables *E, double **field, double **fielddot)
+static void predictor(struct All_variables *E, double *field, double *fielddot)
 {
   int node,m;
   double multiplier;
@@ -320,14 +320,14 @@ static void predictor(struct All_variables *E, double **field, double **fielddot
   multiplier = (1.0-E->advection.gamma) * E->advection.timestep;
 
   for(node=1;node<=E->lmesh.nno;node++)  {
-    field[CPPR][node] += multiplier * fielddot[CPPR][node] ;
-    fielddot[CPPR][node] = 0.0;
+    field[node] += multiplier * fielddot[node] ;
+    fielddot[node] = 0.0;
   }
 }
 
 
-static void corrector(struct All_variables *E, double **field,
-                      double **fielddot, double **Dfielddot)
+static void corrector(struct All_variables *E, double *field,
+                      double *fielddot, double *Dfielddot)
 {
   int node,m;
   double multiplier;
@@ -335,8 +335,8 @@ static void corrector(struct All_variables *E, double **field,
   multiplier = E->advection.gamma * E->advection.timestep;
 
   for(node=1;node<=E->lmesh.nno;node++) {
-    field[CPPR][node] += multiplier * Dfielddot[CPPR][node];
-    fielddot[CPPR][node] +=  Dfielddot[CPPR][node];
+    field[node] += multiplier * Dfielddot[node];
+    fielddot[node] +=  Dfielddot[node];
   }
 }
 
@@ -351,7 +351,7 @@ static void corrector(struct All_variables *E, double **field,
 
 
 static void pg_solver(struct All_variables *E,
-                      double **T, double **Tdot, double **DTdot,
+                      double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
                       double diff, int bc, unsigned int **FLAGS)
 {
@@ -371,7 +371,7 @@ static void pg_solver(struct All_variables *E,
     const int lev=E->mesh.levmax;
 
     for(i=1;i<=E->lmesh.nno;i++)
-     DTdot[CPPR][i] = 0.0;
+     DTdot[i] = 0.0;
 
    for(el=1;el<=E->lmesh.nel;el++)    {
 
@@ -388,7 +388,7 @@ static void pg_solver(struct All_variables *E,
 
       for(a=1;a<=ends;a++) {
         a1 = E->ien[el].node[a];
-        DTdot[CPPR][a1] += Eres[a];
+        DTdot[a1] += Eres[a];
       }
 
     } /* next element */
@@ -397,9 +397,9 @@ static void pg_solver(struct All_variables *E,
 
     for(i=1;i<=E->lmesh.nno;i++) {
       if(!(E->node[CPPR][i] & (TBX | TBY | TBZ))){
-        DTdot[CPPR][i] *= E->TMass[CPPR][i];         /* lumped mass matrix */
+        DTdot[i] *= E->TMass[CPPR][i];         /* lumped mass matrix */
       }	else {
-        DTdot[CPPR][i] = 0.0;         /* lumped mass matrix */
+        DTdot[i] = 0.0;         /* lumped mass matrix */
       }
     }
 }
@@ -483,7 +483,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct Shape_function_dx *GNx,
                              struct Shape_function_dA *dOmega,
                              float VV[4][9],
-                             double **field, double **fielddot,
+                             double *field, double *fielddot,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
@@ -526,11 +526,11 @@ static void element_residual(struct All_variables *E, int el,
 
     for(j=1;j<=ends;j++)       {
       node = E->ien[el].node[j];
-      T = field[CPPR][node];
+      T = field[node];
       if(E->node[CPPR][node] & (TBX | TBY | TBZ))
 	    DT=0.0;
       else
-	    DT = fielddot[CPPR][node];
+	    DT = fielddot[node];
 
       for(i=1;i<=vpts;i++)  {
           dT[i] += DT * E->N.vpt[GNVINDEX(j,i)];
@@ -632,8 +632,6 @@ static void element_residual(struct All_variables *E, int el,
 	}
       }
     }
-
-    return;
 }
 
 
@@ -670,13 +668,13 @@ static void filter(struct All_variables *E)
         /* compute sum(rho*cp*T) before filtering, skipping nodes
            that's shared by another processor */
         if(!(E->NODE[lev][CPPR][i] & SKIP))
-            Tsum0 += E->T[CPPR][i]*rhocp[nz];
+            Tsum0 += E->T[i]*rhocp[nz];
 
         /* remove overshoot */
-        if(E->T[CPPR][i]<Tmin)  Tmin=E->T[CPPR][i];
-        if(E->T[CPPR][i]<Tmin0) E->T[CPPR][i]=Tmin0;
-        if(E->T[CPPR][i]>Tmax) Tmax=E->T[CPPR][i];
-        if(E->T[CPPR][i]>Tmax0) E->T[CPPR][i]=Tmax0;
+        if(E->T[i]<Tmin)  Tmin=E->T[i];
+        if(E->T[i]<Tmin0) E->T[i]=Tmin0;
+        if(E->T[i]>Tmax) Tmax=E->T[i];
+        if(E->T[i]>Tmax0) E->T[i]=Tmax0;
 
     }
 
@@ -688,15 +686,15 @@ static void filter(struct All_variables *E)
         nz = ((i-1) % E->lmesh.noz) + 1;
 
         /* remvoe undershoot */
-        if(E->T[CPPR][i]<=fabs(2*Tmin0-Tmin1))   
-          E->T[CPPR][i]=Tmin0;
-        if(E->T[CPPR][i]>=(2*Tmax0-Tmax1))   
-          E->T[CPPR][i]=Tmax0;
+        if(E->T[i]<=fabs(2*Tmin0-Tmin1))   
+          E->T[i]=Tmin0;
+        if(E->T[i]>=(2*Tmax0-Tmax1))   
+          E->T[i]=Tmax0;
 
         /* sum(rho*cp*T) after filtering */
         if (!(E->NODE[lev][CPPR][i] & SKIP))  {
-            Tsum1 += E->T[CPPR][i]*rhocp[nz];
-            if(E->T[CPPR][i]!=Tmin0 && E->T[CPPR][i]!=Tmax0) {
+            Tsum1 += E->T[i]*rhocp[nz];
+            if(E->T[i]!=Tmin0 && E->T[i]!=Tmax0) {
                 sum_rhocp += rhocp[nz];
             }
         }
@@ -711,8 +709,8 @@ static void filter(struct All_variables *E)
     /* keep sum(rho*cp*T) the same before/after the filtering by distributing
        the difference back to nodes */
     for(i=1;i<=E->lmesh.nno;i++)   {
-        if(E->T[CPPR][i]!=Tmin0 && E->T[CPPR][i]!=Tmax0)
-            E->T[CPPR][i] +=TDIST;
+        if(E->T[i]!=Tmin0 && E->T[i]!=Tmax0)
+            E->T[i] +=TDIST;
     }
 
     free(rhocp);
@@ -765,7 +763,7 @@ static void process_adi_heating(struct All_variables *E, double *heating)
         for(i=1; i<=ends; i++) {
             j = E->ien[e].node[i];
             temp1 += E->sphere.cap[CPPR].V[3][j]
-                * (E->T[CPPR][j] + E->control.surface_temp);
+                * (E->T[j] + E->control.surface_temp);
         }
 
         heating[e] = matprop * temp1 * temp2;
@@ -800,7 +798,7 @@ static void latent_heating(struct All_variables *E,
         for(i=1; i<=ends; i++) {
             j = E->ien[e].node[i];
             temp = (1.0 - B[CPPR][j]) * B[CPPR][j]
-                * (E->T[CPPR][j] + E->control.surface_temp);
+                * (E->T[j] + E->control.surface_temp);
             temp2 += temp * E->sphere.cap[CPPR].V[3][j];
             temp3 += temp;
         }
