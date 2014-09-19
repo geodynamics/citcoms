@@ -246,7 +246,7 @@ void construct_node_maps(E)
     int max_eqn;
 
   dims2 = dims-1;
-  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
+  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
        neq=E->lmesh.NEQ[lev];
        nno=E->lmesh.NNO[lev];
        noxz = E->lmesh.NOX[lev]*E->lmesh.NOZ[lev];
@@ -255,7 +255,6 @@ void construct_node_maps(E)
        nox = E->lmesh.NOX[lev];
        max_eqn = 14*dims; // Is this 14 supposed to be NCS?
        matrix = max_eqn*nno;
-
        E->Node_map[lev][CPPR]=(int *) malloc (matrix*sizeof(int));
 
        for(i=0;i<matrix;i++)
@@ -302,6 +301,7 @@ void construct_node_maps(E)
            for(i=0;i<matrix;i++)
                fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][CPPR][i]);
        }
+  }
 }
 
 
