@@ -464,14 +464,14 @@ void assemble_forces_iterative(struct All_variables *);
 /* Solver_multigrid.c */
 void set_mg_defaults(struct All_variables *);
 void mg_allocate_vars(struct All_variables *);
-void inject_scalar(struct All_variables *, int, float **, float **);
+void inject_scalar(struct All_variables *, int, float *, float *);
+void inject_scalar_e(struct All_variables *, int, float *, float *);
 void inject_vector(struct All_variables *, int, double *, double *);
 void un_inject_vector(struct All_variables *, int, double *, double *);
 void interp_vector(struct All_variables *, int, double *, double *);
 void project_viscosity(struct All_variables *);
-void inject_scalar_e(struct All_variables *, int, float **, float **);
-void project_scalar_e(struct All_variables *, int, float **, float **);
-void project_scalar(struct All_variables *, int, float **, float **);
+void project_scalar_e(struct All_variables *, int, float *, float *);
+void project_scalar(struct All_variables *, int, float *, float *);
 void project_vector(struct All_variables *, int, double *, double *, int);
 void from_xyz_to_rtf(struct All_variables *, int, double *, double *);
 void from_rtf_to_xyz(struct All_variables *, int, double *, double *);
