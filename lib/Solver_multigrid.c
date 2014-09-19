@@ -566,7 +566,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  void fill_in_gaps(E,temp,level)
     struct All_variables *E;
     int level;
-    double **temp;
+    double *temp;
   {
 
     int i,j,k,m;
@@ -597,17 +597,17 @@ void project_vector(E,start_lev,AU,AD,ic)
 	      eqn0=E->ID[level][CPPR][node0].doff[1];
 	      eqn1=E->ID[level][CPPR][node1].doff[1];
 	      eqn2=E->ID[level][CPPR][node2].doff[1];
-	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	      eqn0=E->ID[level][CPPR][node0].doff[2];
 	      eqn1=E->ID[level][CPPR][node1].doff[2];
 	      eqn2=E->ID[level][CPPR][node2].doff[2];
-	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	      eqn0=E->ID[level][CPPR][node0].doff[3];
 	      eqn1=E->ID[level][CPPR][node1].doff[3];
 	      eqn2=E->ID[level][CPPR][node2].doff[3];
-	      temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	      }
 
     n1 = n2 =0.5;
@@ -621,17 +621,17 @@ void project_vector(E,start_lev,AU,AD,ic)
 	        eqn0=E->ID[level][CPPR][node0].doff[1];
 	        eqn1=E->ID[level][CPPR][node1].doff[1];
 	        eqn2=E->ID[level][CPPR][node2].doff[1];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	        eqn0=E->ID[level][CPPR][node0].doff[2];
 	        eqn1=E->ID[level][CPPR][node1].doff[2];
 	        eqn2=E->ID[level][CPPR][node2].doff[2];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	        eqn0=E->ID[level][CPPR][node0].doff[3];
 	        eqn1=E->ID[level][CPPR][node1].doff[3];
 	        eqn2=E->ID[level][CPPR][node2].doff[3];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	       }
 
 
@@ -649,17 +649,17 @@ void project_vector(E,start_lev,AU,AD,ic)
 	        eqn0=E->ID[level][CPPR][node0].doff[1];
 	        eqn1=E->ID[level][CPPR][node1].doff[1];
 	        eqn2=E->ID[level][CPPR][node2].doff[1];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	        eqn0=E->ID[level][CPPR][node0].doff[2];
 	        eqn1=E->ID[level][CPPR][node1].doff[2];
 	        eqn2=E->ID[level][CPPR][node2].doff[2];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
 	        eqn0=E->ID[level][CPPR][node0].doff[3];
 	        eqn1=E->ID[level][CPPR][node1].doff[3];
 	        eqn2=E->ID[level][CPPR][node2].doff[3];
-	        temp[CPPR][eqn0] = n1*temp[CPPR][eqn1]+n2*temp[CPPR][eqn2];
+	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	        }
        }
 }
