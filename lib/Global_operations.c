@@ -740,7 +740,7 @@ float Tmax(E,T)
 
 double  vnorm_nonnewt(E,dU,U,lev)
   struct All_variables *E;
-  double **dU,**U;
+  double *dU,*U;
   int lev;
 {
  double temp1,temp2,dtemp,temp;
@@ -756,10 +756,10 @@ double  vnorm_nonnewt(E,dU,U,lev)
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
 	 node = E->IEN[lev][CPPR][e].node[a];
-         dtemp += dU[CPPR][ E->ID[lev][CPPR][node].doff[i] ]*
-                  dU[CPPR][ E->ID[lev][CPPR][node].doff[i] ];
-         temp += U[CPPR][ E->ID[lev][CPPR][node].doff[i] ]*
-                 U[CPPR][ E->ID[lev][CPPR][node].doff[i] ];
+         dtemp += dU[ E->ID[lev][CPPR][node].doff[i] ]*
+                  dU[ E->ID[lev][CPPR][node].doff[i] ];
+         temp += U[ E->ID[lev][CPPR][node].doff[i] ]*
+                 U[ E->ID[lev][CPPR][node].doff[i] ];
          }
 
 
