@@ -48,7 +48,7 @@ void internal_horizontal_bc(struct All_variables *, float *[], int, int, float, 
 void strip_bcs_from_residual(struct All_variables *, double *, int);
 void temperatures_conform_bcs(struct All_variables *);
 void temperatures_conform_bcs2(struct All_variables *);
-void velocities_conform_bcs(struct All_variables *, double **);
+void velocities_conform_bcs(struct All_variables *, double *);
 void assign_internal_bc(struct All_variables *);
 /* Checkpoints.c */
 void output_checkpoint(struct All_variables *);
