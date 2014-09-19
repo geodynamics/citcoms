@@ -436,7 +436,7 @@ void project_vector(E,start_lev,AU,AD,ic)
 
      struct All_variables *E;
      int start_lev,ic;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+     double *AU,*AD;  /* data on upper/lower mesh  */
 {
     int i,j,m;
     int el,node1,node,e1;
