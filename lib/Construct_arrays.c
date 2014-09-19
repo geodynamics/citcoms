@@ -462,7 +462,7 @@ void rebuild_BI_on_boundary(E)
 
    for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--)   {
         for(j=0;j<=E->lmesh.NEQ[level];j++)
-            E->temp[CPPR][j]=0.0;
+            E->temp[j]=0.0;
 
         for(i=1;i<=E->lmesh.NNO[level];i++)  {
             eqn1=E->ID[level][CPPR][i].doff[1];
@@ -475,29 +475,29 @@ void rebuild_BI_on_boundary(E)
             B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;
 
             for(j=3;j<max_eqn;j++) {
-                E->temp[CPPR][eqn1] += fabs(B1[j]);
-                E->temp[CPPR][eqn2] += fabs(B2[j]);
-                E->temp[CPPR][eqn3] += fabs(B3[j]);
+                E->temp[eqn1] += fabs(B1[j]);
+                E->temp[eqn2] += fabs(B2[j]);
+                E->temp[eqn3] += fabs(B3[j]);
                 }
 
             for(j=0;j<max_eqn;j++)
-                E->temp[CPPR][C[j]] += fabs(B1[j]) + fabs(B2[j]) + fabs(B3[j]);
+                E->temp[C[j]] += fabs(B1[j]) + fabs(B2[j]) + fabs(B3[j]);
 
             }
 
      (E->solver.exchange_id_d)(E, E->temp, level);
 
         for(i=0;i<E->lmesh.NEQ[level];i++)  {
-            E->temp[CPPR][i] = E->temp[CPPR][i] - 1.0/E->BI[level][CPPR][i];
+            E->temp[i] = E->temp[i] - 1.0/E->BI[level][CPPR][i];
         }
         for(i=1;i<=E->lmesh.NNO[level];i++)
           if (E->NODE[level][CPPR][i] & OFFSIDE)   {
             eqn1=E->ID[level][CPPR][i].doff[1];
             eqn2=E->ID[level][CPPR][i].doff[2];
             eqn3=E->ID[level][CPPR][i].doff[3];
-            E->BI[level][CPPR][eqn1] = (double) 1.0/E->temp[CPPR][eqn1];
-            E->BI[level][CPPR][eqn2] = (double) 1.0/E->temp[CPPR][eqn2];
-            E->BI[level][CPPR][eqn3] = (double) 1.0/E->temp[CPPR][eqn3];
+            E->BI[level][CPPR][eqn1] = (double) 1.0/E->temp[eqn1];
+            E->BI[level][CPPR][eqn2] = (double) 1.0/E->temp[eqn2];
+            E->BI[level][CPPR][eqn3] = (double) 1.0/E->temp[eqn3];
           }
 
 

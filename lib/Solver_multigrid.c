@@ -469,7 +469,7 @@ void project_vector(E,start_lev,AU,AD,ic)
       from_rtf_to_xyz(E,start_lev,AU,E->temp);
 
       for(i=0;i<neq_minus;i++)
-        E->temp1[CPPR][i] = 0.0;
+        E->temp1[i] = 0.0;
 
                 /* smooth in xyz coordinates */
         for(el=1;el<=nels_minus;el++)
@@ -479,24 +479,24 @@ void project_vector(E,start_lev,AU,AD,ic)
 		e1 = E->EL[sl_minus][CPPR][el].sub[i];
 		for(j=1;j<=ENODES3D;j++) {
 		    node1=E->IEN[start_lev][CPPR][e1].node[j];
-		    average1 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[1]];
-		    average2 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[2]];
-		    average3 += E->temp[CPPR][E->ID[start_lev][CPPR][node1].doff[3]];
+		    average1 += E->temp[E->ID[start_lev][CPPR][node1].doff[1]];
+		    average2 += E->temp[E->ID[start_lev][CPPR][node1].doff[2]];
+		    average3 += E->temp[E->ID[start_lev][CPPR][node1].doff[3]];
 		    }
 		w = weight*E->TWW[sl_minus][CPPR][el].node[i];
 
-		E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[1]] += w * average1;
-		E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[2]] += w * average2;
-	 	E->temp1[CPPR][E->ID[sl_minus][CPPR][node].doff[3]] += w * average3;
+		E->temp1[E->ID[sl_minus][CPPR][node].doff[1]] += w * average1;
+		E->temp1[E->ID[sl_minus][CPPR][node].doff[2]] += w * average2;
+	 	E->temp1[E->ID[sl_minus][CPPR][node].doff[3]] += w * average3;
                 }
 
 
    (E->solver.exchange_id_d)(E, E->temp1, sl_minus);
 
      for(i=1;i<=nno_minus;i++)  {
-       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][CPPR][i];
-       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][CPPR][i];
-       E->temp1[CPPR][E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][CPPR][i];
        }
 
                /* back into rtf coordinates */

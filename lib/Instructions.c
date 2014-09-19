@@ -1171,8 +1171,8 @@ void allocate_velocity_vars(E)
     E->lmesh.nnov = E->lmesh.nno;
     E->lmesh.neq = E->lmesh.nnov * E->mesh.nsd;
 
-    E->temp[CPPR] = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
-    E->temp1[CPPR] = (double *) malloc(E->lmesh.neq*sizeof(double));
+    E->temp = (double *) malloc((E->lmesh.neq+1)*sizeof(double));
+    E->temp1 = (double *) malloc(E->lmesh.neq*sizeof(double));
     E->F = (double *) malloc(E->lmesh.neq*sizeof(double));
     E->U = (double *) malloc(E->lmesh.neq*sizeof(double));
     E->u1 = (double *) malloc(E->lmesh.neq*sizeof(double));
@@ -1185,7 +1185,7 @@ void allocate_velocity_vars(E)
     }
 
     for(i=0;i<E->lmesh.neq;i++)
-      E->U[i] = E->temp[CPPR][i] = E->temp1[CPPR][i] = 0.0;
+      E->U[i] = E->temp[i] = E->temp1[i] = 0.0;
 
 
     for(k=1;k<=E->mesh.nsd;k++)

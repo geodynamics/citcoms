@@ -459,7 +459,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 
     while (count < steps) {
       for(j=0;j<=E->lmesh.NEQ[level];j++)
-          E->temp[CPPR][j] = 0.0;
+          E->temp[j] = 0.0;
 
       Ad[neq] = 0.0;
 
@@ -470,12 +470,12 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
     
-	    E->temp[CPPR][eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
-	    E->temp[CPPR][eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
-	    E->temp[CPPR][eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
-	    E->temp1[CPPR][eqn1] = Ad[eqn1];
-	    E->temp1[CPPR][eqn2] = Ad[eqn2];
-	    E->temp1[CPPR][eqn3] = Ad[eqn3];
+	    E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
+	    E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
+	    E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
+	    E->temp1[eqn1] = Ad[eqn1];
+	    E->temp1[eqn2] = Ad[eqn2];
+	    E->temp1[eqn3] = Ad[eqn3];
             }
       
     for(i=1;i<=E->lmesh.NNO[level];i++)     {
@@ -493,27 +493,27 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
                   not be used for the G-S iterations for interior nodes */
 
             for(j=3;j<max_eqn;j++)  {
-                 UU = E->temp[CPPR][C[j]];
+                 UU = E->temp[C[j]];
                  Ad[eqn1] += B1[j]*UU;
                  Ad[eqn2] += B2[j]*UU;
                  Ad[eqn3] += B3[j]*UU;
                  }
 
             if (!(E->NODE[level][m][i]&OFFSIDE))   {
-               E->temp[CPPR][eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
-               E->temp[CPPR][eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
-               E->temp[CPPR][eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
+               E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][CPPR][eqn1];
+               E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][CPPR][eqn2];
+               E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][CPPR][eqn3];
 	       }
 
                  /* Ad on boundaries differs after the following operation */
 	    for(j=0;j<max_eqn;j++)
-		    Ad[C[j]]  += B1[j]*E->temp[CPPR][eqn1]
-                                 +  B2[j]*E->temp[CPPR][eqn2]
-                                 +  B3[j]*E->temp[CPPR][eqn3];
+		    Ad[C[j]]  += B1[j]*E->temp[eqn1]
+                                 +  B2[j]*E->temp[eqn2]
+                                 +  B3[j]*E->temp[eqn3];
 
-	    d0[eqn1] += E->temp[CPPR][eqn1];
-	    d0[eqn2] += E->temp[CPPR][eqn2];
-	    d0[eqn3] += E->temp[CPPR][eqn3];
+	    d0[eqn1] += E->temp[eqn1];
+	    d0[eqn2] += E->temp[eqn2];
+	    d0[eqn3] += E->temp[eqn3];
   	    }
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
@@ -521,9 +521,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
-	    Ad[eqn1] -= E->temp1[CPPR][eqn1];
-	    Ad[eqn2] -= E->temp1[CPPR][eqn2];
-	    Ad[eqn3] -= E->temp1[CPPR][eqn3];
+	    Ad[eqn1] -= E->temp1[eqn1];
+	    Ad[eqn2] -= E->temp1[eqn2];
+	    Ad[eqn3] -= E->temp1[eqn3];
 	    }
 
       (E->solver.exchange_id_d)(E, Ad, level);
@@ -533,9 +533,9 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
-	    Ad[eqn1] += E->temp1[CPPR][eqn1];
-	    Ad[eqn2] += E->temp1[CPPR][eqn2];
-	    Ad[eqn3] += E->temp1[CPPR][eqn3];
+	    Ad[eqn1] += E->temp1[eqn1];
+	    Ad[eqn2] += E->temp1[eqn2];
+	    Ad[eqn3] += E->temp1[eqn3];
 	    }
 
 

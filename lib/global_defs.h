@@ -832,7 +832,7 @@ struct All_variables {
     double *P,*F,*U;
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];
     double *u1;
-    double *temp[NCS],*temp1[NCS];
+    double *temp,*temp1;
     double *Mass[NCS], *MASS[MAX_LEVELS][NCS];
     double *TMass[NCS], *NMass[NCS];
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
