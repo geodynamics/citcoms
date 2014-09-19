@@ -507,7 +507,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  void from_xyz_to_rtf(E,level,xyz,rtf)
  struct All_variables *E;
  int level;
- double **rtf,**xyz;
+ double *rtf,*xyz;
  {
 
  int i,j,m,eqn1,eqn2,eqn3;
@@ -521,14 +521,14 @@ void project_vector(E,start_lev,AU,AD,ic)
      sinf = E->SinCos[level][CPPR][1][i];
      cost = E->SinCos[level][CPPR][2][i];
      cosf = E->SinCos[level][CPPR][3][i];
-     rtf[CPPR][eqn1] = xyz[CPPR][eqn1]*cost*cosf
-                  + xyz[CPPR][eqn2]*cost*sinf
-                  - xyz[CPPR][eqn3]*sint;
-     rtf[CPPR][eqn2] = -xyz[CPPR][eqn1]*sinf
-                  + xyz[CPPR][eqn2]*cosf;
-     rtf[CPPR][eqn3] = xyz[CPPR][eqn1]*sint*cosf
-                  + xyz[CPPR][eqn2]*sint*sinf
-                  + xyz[CPPR][eqn3]*cost;
+     rtf[eqn1] = xyz[eqn1]*cost*cosf
+                  + xyz[eqn2]*cost*sinf
+                  - xyz[eqn3]*sint;
+     rtf[eqn2] = -xyz[eqn1]*sinf
+                  + xyz[eqn2]*cosf;
+     rtf[eqn3] = xyz[eqn1]*sint*cosf
+                  + xyz[eqn2]*sint*sinf
+                  + xyz[eqn3]*cost;
      }
  }
 
@@ -536,7 +536,7 @@ void project_vector(E,start_lev,AU,AD,ic)
  void from_rtf_to_xyz(E,level,rtf,xyz)
  struct All_variables *E;
  int level;
- double **rtf,**xyz;
+ double *rtf,*xyz;
  {
 
  int i,j,m,eqn1,eqn2,eqn3;
@@ -550,14 +550,14 @@ void project_vector(E,start_lev,AU,AD,ic)
      sinf = E->SinCos[level][CPPR][1][i];
      cost = E->SinCos[level][CPPR][2][i];
      cosf = E->SinCos[level][CPPR][3][i];
-     xyz[CPPR][eqn1] = rtf[CPPR][eqn1]*cost*cosf
-                  - rtf[CPPR][eqn2]*sinf
-                  + rtf[CPPR][eqn3]*sint*cosf;
-     xyz[CPPR][eqn2] = rtf[CPPR][eqn1]*cost*sinf
-                  + rtf[CPPR][eqn2]*cosf
-                  + rtf[CPPR][eqn3]*sint*sinf;
-     xyz[CPPR][eqn3] = -rtf[CPPR][eqn1]*sint
-                  + rtf[CPPR][eqn3]*cost;
+     xyz[eqn1] = rtf[eqn1]*cost*cosf
+                  - rtf[eqn2]*sinf
+                  + rtf[eqn3]*sint*cosf;
+     xyz[eqn2] = rtf[eqn1]*cost*sinf
+                  + rtf[eqn2]*cosf
+                  + rtf[eqn3]*sint*sinf;
+     xyz[eqn3] = -rtf[eqn1]*sint
+                  + rtf[eqn3]*cost;
 
      }
  }

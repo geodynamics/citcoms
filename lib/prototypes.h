@@ -473,8 +473,8 @@ void inject_scalar_e(struct All_variables *, int, float **, float **);
 void project_scalar_e(struct All_variables *, int, float **, float **);
 void project_scalar(struct All_variables *, int, float **, float **);
 void project_vector(struct All_variables *, int, double *, double *, int);
-void from_xyz_to_rtf(struct All_variables *, int, double **, double **);
-void from_rtf_to_xyz(struct All_variables *, int, double **, double **);
+void from_xyz_to_rtf(struct All_variables *, int, double *, double *);
+void from_rtf_to_xyz(struct All_variables *, int, double *, double *);
 void fill_in_gaps(struct All_variables *, double **, int);
 /* Sphere_harmonics.c */
 void set_sphere_harmonics(struct All_variables *);
