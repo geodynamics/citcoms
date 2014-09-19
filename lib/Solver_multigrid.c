@@ -174,7 +174,7 @@ void interp_vector(E,start_lev,AD,AU)
 
     struct All_variables *E;
      int start_lev;
-     double **AD,**AU;  /* data on upper/lower mesh  */
+     double *AD,*AU;  /* data on upper/lower mesh  */
 {
     void un_inject_vector();
     void fill_in_gaps();
