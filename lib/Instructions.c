@@ -975,9 +975,9 @@ void allocate_common_vars(E)
   E->mat[CPPR] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[CPPR] = (float *) malloc((nel+2)*sizeof(float));
 
-  E->heating_adi[CPPR]    = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_visc[CPPR]   = (double *) malloc((nel+1)*sizeof(double));
-  E->heating_latent[CPPR] = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_adi    = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_visc   = (double *) malloc((nel+1)*sizeof(double));
+  E->heating_latent = (double *) malloc((nel+1)*sizeof(double));
 
   /* lump mass matrix for the energy eqn */
   E->TMass[CPPR] = (double *) malloc((nno+1)*sizeof(double));
@@ -1136,9 +1136,9 @@ void allocate_common_vars(E)
       E->mat[CPPR][i]=1;
       E->VIP[CPPR][i]=1.0;
 
-      E->heating_adi[CPPR][i] = 0;
-      E->heating_visc[CPPR][i] = 0;
-      E->heating_latent[CPPR][i] = 1.0;
+      E->heating_adi[i] = 0;
+      E->heating_visc[i] = 0;
+      E->heating_latent[i] = 1.0;
   }
 
   for(i=0;i<E->lmesh.npno;i++)

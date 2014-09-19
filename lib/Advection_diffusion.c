@@ -570,8 +570,8 @@ static void element_residual(struct All_variables *E, int el,
         heating = rho * Q;
     else
         /* E->heating_latent is actually the inverse of latent heating */
-        heating = (rho * Q - E->heating_adi[CPPR][el] + E->heating_visc[CPPR][el])
-            * E->heating_latent[CPPR][el];
+        heating = (rho * Q - E->heating_adi[el] + E->heating_visc[el])
+            * E->heating_latent[el];
 
     /* construct residual from this information */
 
@@ -584,7 +584,7 @@ static void element_residual(struct All_variables *E, int el,
 	    PG->vpt[GNVINDEX(j,i)] * dOmega->vpt[i]
               * ((dT[i] + v1[i]*tx1[i] + v2[i]*tx2[i] + v3[i]*tx3[i])*rho*cp
                  - heating )
-              + diff * dOmega->vpt[i] * E->heating_latent[CPPR][el]
+              + diff * dOmega->vpt[i] * E->heating_latent[el]
               * (GNx->vpt[GNVXINDEX(0,j,i)]*tx1[i]*rtf[3][i] +
                  GNx->vpt[GNVXINDEX(1,j,i)]*tx2[i]*sint[i] +
                  GNx->vpt[GNVXINDEX(2,j,i)]*tx3[i] );
@@ -854,7 +854,7 @@ static void process_latent_heating(struct All_variables *E,
 }
 
 
-static double total_heating(struct All_variables *E, double **heating)
+static double total_heating(struct All_variables *E, double *heating)
 {
     int m, e;
     double sum, total;
@@ -862,7 +862,7 @@ static double total_heating(struct All_variables *E, double **heating)
     /* sum up within each processor */
     sum = 0;
     for(e=1; e<=E->lmesh.nel; e++)
-        sum += heating[CPPR][e] * E->eco[e].area;
+        sum += heating[e] * E->eco[e].area;
 
     /* sum up for all processors */
     MPI_Allreduce(&sum, &total, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);
@@ -879,10 +879,10 @@ static void process_heating(struct All_variables *E, int psc_pass)
     if(psc_pass == 0) {
         /* visc heating does not change between psc_pass, compute only
          * at first psc_pass */
-        process_visc_heating(E, E->heating_visc[CPPR]);
+        process_visc_heating(E, E->heating_visc);
     }
-    process_adi_heating(E, E->heating_adi[CPPR]);
-    process_latent_heating(E, E->heating_latent[CPPR], E->heating_adi[CPPR]);
+    process_adi_heating(E, E->heating_adi);
+    process_latent_heating(E, E->heating_latent, E->heating_adi);
 
     /* compute total amount of visc/adi heating over all processors
      * only at last psc_pass */

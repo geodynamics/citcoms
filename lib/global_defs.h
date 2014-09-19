@@ -825,9 +825,9 @@ struct All_variables {
     double *BI[MAX_LEVELS],*BPI[MAX_LEVELS];
 
     double *rho;
-    double *heating_adi[NCS];
-    double *heating_visc[NCS];
-    double *heating_latent[NCS];
+    double *heating_adi;
+    double *heating_visc;
+    double *heating_latent;
 
     double *P,*F,*U;
     double *T[NCS],*Tdot[NCS],*buoyancy[NCS];

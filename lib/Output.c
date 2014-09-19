@@ -734,8 +734,8 @@ void output_heating(struct All_variables *E, int cycles)
 
     fprintf(fp1,"%3d %7d\n", CPPR, E->lmesh.nel);
     for(e=1; e<=E->lmesh.nel; e++)
-        fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[CPPR][e],
-                E->heating_visc[CPPR][e], E->heating_latent[CPPR][e]);
+        fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[e],
+                E->heating_visc[e], E->heating_latent[e]);
     fclose(fp1);
 }
 
