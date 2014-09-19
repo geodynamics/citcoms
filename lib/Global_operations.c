@@ -610,7 +610,7 @@ double global_p_norm2(struct All_variables *E,  double *P)
 
 
 /* return ||A||^2, where A_i is \int{div(u) d\Omega_i} */
-double global_div_norm2(struct All_variables *E,  double **A)
+double global_div_norm2(struct All_variables *E,  double *A)
 {
     int i, m;
     double prod, temp;
@@ -620,7 +620,7 @@ double global_div_norm2(struct All_variables *E,  double **A)
     for (i=0; i<E->lmesh.npno; i++) {
         /* L2 norm of div(u) */
         /* should be E->eco[i].area after E->eco hase been made 0-based */
-        temp += A[CPPR][i] * A[CPPR][i] / E->eco[i+1].area;
+        temp += A[i] * A[i] / E->eco[i+1].area;
 
         /* L1 norm */
         /*temp += fabs(A[m][i]);*/

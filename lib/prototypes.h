@@ -206,7 +206,7 @@ double global_vdot(struct All_variables *, double *, double *, int);
 double global_pdot(struct All_variables *, double *, double *, int);
 double global_v_norm2(struct All_variables *, double *);
 double global_p_norm2(struct All_variables *, double *);
-double global_div_norm2(struct All_variables *, double **);
+double global_div_norm2(struct All_variables *, double *);
 double global_tdot_d(struct All_variables *, double **, double **, int);
 float global_tdot(struct All_variables *, float **, float **, int);
 float global_fmin(struct All_variables *, double);
