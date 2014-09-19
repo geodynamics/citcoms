@@ -87,7 +87,7 @@ void inject_scalar(E,start_lev,AU,AD)
 void inject_vector(E,start_lev,AU,AD)
      struct All_variables *E;
      int start_lev;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+     double *AU,*AD;  /* data on upper/lower mesh  */
 
 {
     int i,j,m,el,node_coarse,node_fine,sl_minus,eqn_fine,eqn_coarse;
@@ -111,7 +111,7 @@ void inject_vector(E,start_lev,AU,AD)
           for (j=1;j<=dims;j++)    {
             eqn_fine   = E->ID[start_lev][CPPR][node_fine].doff[j];
             eqn_coarse = E->ID[sl_minus][CPPR][node_coarse].doff[j];
-            AD[CPPR][eqn_coarse] = AU[CPPR][eqn_fine];
+            AD[eqn_coarse] = AU[eqn_fine];
             }
           }
 }
@@ -126,7 +126,7 @@ void un_inject_vector(E,start_lev,AD,AU)
 
      struct All_variables *E;
      int start_lev;
-     double **AU,**AD;  /* data on upper/lower mesh  */
+     double *AU,*AD;  /* data on upper/lower mesh  */
 {
     int i,m;
     int el,node,node_plus;
@@ -143,7 +143,7 @@ void un_inject_vector(E,start_lev,AD,AU)
     assert(start_lev != E->mesh.levmax  /* un_injection */);
 
     for(i=1;i<neq;i++)
-      AU[CPPR][i]=0.0;
+      AU[i]=0.0;
 
       for(el=1;el<=nels;el++)
         for(i=1;i<=ENODES3D;i++)  {
@@ -156,9 +156,9 @@ void un_inject_vector(E,start_lev,AD,AU)
 	  eqn_plus1 = E->ID[sl_plus][CPPR][node_plus].doff[1];
 	  eqn_plus2 = E->ID[sl_plus][CPPR][node_plus].doff[2];
 	  eqn_plus3 = E->ID[sl_plus][CPPR][node_plus].doff[3];
-	  AU[CPPR][eqn_plus1] = AD[CPPR][eqn1];
-	  AU[CPPR][eqn_plus2] = AD[CPPR][eqn2];
-	  AU[CPPR][eqn_plus3] = AD[CPPR][eqn3];
+	  AU[eqn_plus1] = AD[eqn1];
+	  AU[eqn_plus2] = AD[eqn2];
+	  AU[eqn_plus3] = AD[eqn3];
 	  }
 }
 
