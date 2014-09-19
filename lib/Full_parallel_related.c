@@ -853,7 +853,7 @@ static void line_eqn_node_to_pass(E,lev,npass,num_node,offset,stride)
 
 void full_exchange_id_d(E, U, lev)
  struct All_variables *E;
- double **U;
+ double *U;
  int lev;
  {
 
@@ -883,7 +883,7 @@ void full_exchange_id_d(E, U, lev)
     for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)     {
 
       for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[k];j++) {
-        S[k][j-1] = U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
+        S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
 	}
 
       if (E->parallel.PROCESSOR[lev][CPPR].pass[k] != E->parallel.me &&
@@ -906,7 +906,7 @@ void full_exchange_id_d(E, U, lev)
       }
       else {
 	for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[k];j++)
-           U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += S[k][j-1];
+           U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += S[k][j-1];
       }
     }      /* for k */
 
@@ -917,7 +917,7 @@ void full_exchange_id_d(E, U, lev)
       if (E->parallel.PROCESSOR[lev][CPPR].pass[k] != E->parallel.me &&
 	  E->parallel.PROCESSOR[lev][CPPR].pass[k] != -1) {
 	for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[k];j++)
-	  U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
+	  U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
       }
     }
 
@@ -928,7 +928,7 @@ void full_exchange_id_d(E, U, lev)
     kk = k + E->sphere.max_connections;
 
       for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[kk];j++)
-        SV[jj++] = U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ];
+        SV[jj++] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ];
 
     MPI_Sendrecv(SV, E->parallel.NUM_NEQz[lev].pass[k], MPI_DOUBLE,
 		 E->parallel.PROCESSORz[lev].pass[k], 1,
@@ -938,7 +938,7 @@ void full_exchange_id_d(E, U, lev)
 
     jj = 0;
       for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[kk];j++)
-        U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ] += RV[jj++];
+        U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ] += RV[jj++];
   }
 
    for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)  {

@@ -139,7 +139,7 @@ void full_parallel_domain_decomp0(struct All_variables *);
 void full_parallel_domain_boundary_nodes(struct All_variables *);
 void full_parallel_communication_routs_v(struct All_variables *);
 void full_parallel_communication_routs_s(struct All_variables *);
-void full_exchange_id_d(struct All_variables *, double **, int);
+void full_exchange_id_d(struct All_variables *, double *, int);
 void full_exchange_snode_f(struct All_variables *, float **, float **, int);
 /* Full_read_input_from_files.c */
 void full_read_input_files_for_timesteps(struct All_variables *, int, int);
@@ -416,7 +416,7 @@ void regional_parallel_domain_decomp0(struct All_variables *);
 void regional_parallel_domain_boundary_nodes(struct All_variables *);
 void regional_parallel_communication_routs_v(struct All_variables *);
 void regional_parallel_communication_routs_s(struct All_variables *);
-void regional_exchange_id_d(struct All_variables *, double **, int);
+void regional_exchange_id_d(struct All_variables *, double *, int);
 void regional_exchange_snode_f(struct All_variables *, float **, float **, int);
 /* Regional_read_input_from_files.c */
 void regional_read_input_files_for_timesteps(struct All_variables *, int, int);

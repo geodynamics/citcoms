@@ -699,7 +699,7 @@ void regional_parallel_communication_routs_s(E)
 
 void regional_exchange_id_d(E, U, lev)
  struct All_variables *E;
- double **U;
+ double *U;
  int lev;
  {
 
@@ -718,7 +718,7 @@ void regional_exchange_id_d(E, U, lev)
    for (k=1;k<=E->parallel.TNUM_PASS[lev][CPPR];k++)  {
 
      for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[k];j++)
-       S[k][j-1] = U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
+       S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
 
      MPI_Sendrecv(S[k],E->parallel.NUM_NEQ[lev][CPPR].pass[k],MPI_DOUBLE,
 		  E->parallel.PROCESSOR[lev][CPPR].pass[k],1,
@@ -727,7 +727,7 @@ void regional_exchange_id_d(E, U, lev)
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_NEQ[lev][CPPR].pass[k];j++)
-       U[CPPR][ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
+       U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
 
    }           /* for k */
 

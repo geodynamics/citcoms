@@ -53,7 +53,7 @@ struct Solver {
     void (*parallel_domain_boundary_nodes)(struct All_variables *);
     void (*parallel_communication_routs_v)(struct All_variables *);
     void (*parallel_communication_routs_s)(struct All_variables *);
-    void (*exchange_id_d)(struct All_variables *, double **, int);
+    void (*exchange_id_d)(struct All_variables *, double *, int);
 
     /* Read_input_from_files.c */
     void (*read_input_files_for_timesteps)(struct All_variables *, int, int);
