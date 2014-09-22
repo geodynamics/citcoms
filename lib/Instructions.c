@@ -980,7 +980,7 @@ void allocate_common_vars(E)
   E->heating_latent = (double *) malloc((nel+1)*sizeof(double));
 
   /* lump mass matrix for the energy eqn */
-  E->TMass[CPPR] = (double *) malloc((nno+1)*sizeof(double));
+  E->TMass = (double *) malloc((nno+1)*sizeof(double));
 
   /* nodal mass */
   E->NMass[CPPR] = (double *) malloc((nno+1)*sizeof(double));
@@ -1032,7 +1032,7 @@ void allocate_common_vars(E)
     E->GNX[i][CPPR] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
     E->GDA[i][CPPR] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
-    E->MASS[i][CPPR]     = (double *) malloc((nno+1)*sizeof(double));
+    E->MASS[i]     = (double *) malloc((nno+1)*sizeof(double));
     E->ECO[i][CPPR] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
     E->TWW[i][CPPR] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
@@ -1359,7 +1359,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->node[CPPR] = E->NODE[E->mesh.levmax][CPPR];
   E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
-  E->Mass[CPPR] = E->MASS[E->mesh.levmax][CPPR];
+  E->Mass[CPPR] = E->MASS[E->mesh.levmax];
   E->gDA[CPPR] = E->GDA[E->mesh.levmax][CPPR];
   E->gNX[CPPR] = E->GNX[E->mesh.levmax][CPPR];
 

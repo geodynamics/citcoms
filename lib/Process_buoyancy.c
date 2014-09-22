@@ -116,7 +116,7 @@ void heat_flux(E)
   (E->exchange_node_f)(E,flux,lev);
 
    for(i=1;i<=nno;i++)
-     flux[i] *= E->MASS[lev][CPPR][i];
+     flux[i] *= E->MASS[lev][i];
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
     for(i=1;i<=E->lmesh.nsf;i++)

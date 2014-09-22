@@ -465,7 +465,7 @@ void project_scalar(E,start_lev,AU,AD)
    (E->exchange_node_f)(E,AD,sl_minus);
 
      for(i=1;i<=nno_minus;i++)  {
-       AD[i] *= E->MASS[sl_minus][CPPR][i];
+       AD[i] *= E->MASS[sl_minus][i];
      }
 }
 
@@ -533,9 +533,9 @@ void project_vector(E,start_lev,AU,AD,ic)
    (E->solver.exchange_id_d)(E, E->temp1, sl_minus);
 
      for(i=1;i<=nno_minus;i++)  {
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][CPPR][i];
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][CPPR][i];
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][CPPR][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][i];
+       E->temp1[E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][i];
        }
 
                /* back into rtf coordinates */

@@ -209,7 +209,7 @@ void p_to_nodes(E,P,PN,lev)
    (E->exchange_node_f)(E,PN,lev);
 
    for(node=1;node<=E->lmesh.NNO[lev];node++)
-      PN[CPPR][node] *= E->MASS[lev][CPPR][node];
+      PN[CPPR][node] *= E->MASS[lev][node];
 }
 
 
@@ -244,7 +244,7 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
     }
   (E->exchange_node_f)(E,VN,lev);
     for(n=1;n<=E->lmesh.NNO[lev];n++)
-      VN[CPPR][n] *= E->MASS[lev][CPPR][n];
+      VN[CPPR][n] *= E->MASS[lev][n];
 }
 
 /* 

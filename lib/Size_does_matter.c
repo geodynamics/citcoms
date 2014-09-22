@@ -963,7 +963,7 @@ void mass_matrix(struct All_variables *E)
     for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
 
             for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->MASS[lev][CPPR][node] = 0.0;
+                E->MASS[lev][node] = 0.0;
 
             for(e=1;e<=E->lmesh.NEL[lev];e++)  {
 
@@ -1035,7 +1035,7 @@ void mass_matrix(struct All_variables *E)
                 }
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
-                    E->MASS[lev][CPPR][E->IEN[lev][CPPR][e].node[node]] += temp[node];
+                    E->MASS[lev][E->IEN[lev][CPPR][e].node[node]] += temp[node];
 
                 /* weight of each node, equivalent to pmass in ConMan */
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
@@ -1047,19 +1047,19 @@ void mass_matrix(struct All_variables *E)
 
         if(lev == E->mesh.levmax)
             for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->NMass[CPPR][node] = E->MASS[lev][CPPR][node];
+                E->NMass[CPPR][node] = E->MASS[lev][node];
 
         if (E->control.NMULTIGRID||E->mesh.levmax==lev)
             (E->exchange_node_d)(E,E->MASS[lev],lev);
 
         for(node=1;node<=E->lmesh.NNO[lev];node++)
-            E->MASS[lev][CPPR][node] = 1.0/E->MASS[lev][CPPR][node];
+            E->MASS[lev][node] = 1.0/E->MASS[lev][node];
 
     } /* end of for lev */
 
 
         for(node=1;node<=E->lmesh.nno;node++)
-            E->TMass[CPPR][node] = 0.0;
+            E->TMass[node] = 0.0;
 
         for(e=1;e<=E->lmesh.nel;e++)  {
             for(node=1;node<=enodes[E->mesh.nsd];node++) {
@@ -1075,13 +1075,13 @@ void mass_matrix(struct All_variables *E)
 
             /* lumped mass matrix, equivalent to tmass in ConMan */
             for(node=1;node<=enodes[E->mesh.nsd];node++)
-                E->TMass[CPPR][E->ien[e].node[node]] += temp[node];
+                E->TMass[E->ien[e].node[node]] += temp[node];
 
         } /* end of for e */
 
     (E->exchange_node_d)(E,E->TMass,E->mesh.levmax);
       for(node=1;node<=E->lmesh.nno;node++)
-          E->TMass[CPPR][node] = 1.0 / E->TMass[CPPR][node];
+          E->TMass[node] = 1.0 / E->TMass[node];
 
 
     /* compute volume of this processor mesh and the whole mesh */
@@ -1105,12 +1105,12 @@ void mass_matrix(struct All_variables *E)
                 for(e=1;e<=E->lmesh.NEL[lev];e++)
                     fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][CPPR][e].area);
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
-                    fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][CPPR][node]);
+                    fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][node]);
         }
 
             fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
             for (node=1;node<=E->lmesh.nno;node++)
-                fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[CPPR][node]);
+                fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[node]);
         fflush(E->fp_out);
     }
 }

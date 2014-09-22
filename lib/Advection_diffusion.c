@@ -397,7 +397,7 @@ static void pg_solver(struct All_variables *E,
 
     for(i=1;i<=E->lmesh.nno;i++) {
       if(!(E->node[CPPR][i] & (TBX | TBY | TBZ))){
-        DTdot[i] *= E->TMass[CPPR][i];         /* lumped mass matrix */
+        DTdot[i] *= E->TMass[i];         /* lumped mass matrix */
       }	else {
         DTdot[i] = 0.0;         /* lumped mass matrix */
       }

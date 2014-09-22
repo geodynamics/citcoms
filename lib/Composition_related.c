@@ -444,7 +444,7 @@ void map_composition_to_nodes(struct All_variables *E)
     /* Divide by nodal volume */
         for(i=0;i<E->composition.ncomp;i++)
             for (kk=1;kk<=E->lmesh.nno;kk++)
-                E->composition.comp_node[CPPR][i][kk] *= E->MASS[E->mesh.levmax][CPPR][kk];
+                E->composition.comp_node[CPPR][i][kk] *= E->MASS[E->mesh.levmax][kk];
 
         /* testing */
         /**
