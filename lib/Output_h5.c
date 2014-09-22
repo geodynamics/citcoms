@@ -589,7 +589,7 @@ void h5output_viscosity(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->VI[lev][CPPR][n+1];
+                field->data[m] = E->VI[lev][n+1];
             }
         }
     }

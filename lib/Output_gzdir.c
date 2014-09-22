@@ -704,7 +704,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
     gz1 = gzdir_output_open(output_file,"w");
       gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.4e\n",E->VI[lev][CPPR][i]);
+	gzprintf(gz1,"%.4e\n",E->VI[lev][i]);
 
     gzclose(gz1);
   }else{
@@ -723,7 +723,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
       fp1 = output_open(output_file,"a");
     }
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = log10(E->VI[lev][CPPR][i]);
+	ftmp = log10(E->VI[lev][i]);
 	if(fabs(ftmp) < 5e-7)ftmp = 0.0;
 	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
       }

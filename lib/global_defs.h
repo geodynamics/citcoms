@@ -847,7 +847,7 @@ struct All_variables {
     float *Fascmb[NCS],*Fascmb_b[NCS];
 
     float *Vi[NCS],*EVi[NCS];
-    float *VI[MAX_LEVELS][NCS],*EVI[MAX_LEVELS][NCS];
+    float *VI[MAX_LEVELS],*EVI[MAX_LEVELS];
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
     float *VI2[MAX_LEVELS][NCS],*EVI2[MAX_LEVELS][NCS];

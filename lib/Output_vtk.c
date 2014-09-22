@@ -167,9 +167,9 @@ static void vtk_output_visc(struct All_variables *E, FILE *fp)
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"viscosity\" format=\"%s\">\n", E->output.vtk_format);
         if (strcmp(E->output.vtk_format, "binary") == 0) {
-            write_binary_array(nodes,&E->VI[lev][CPPR][1],fp);
+            write_binary_array(nodes,&E->VI[lev][1],fp);
         } else {
-            write_ascii_array(nodes,1,&E->VI[lev][CPPR][1],fp);
+            write_ascii_array(nodes,1,&E->VI[lev][1],fp);
         }
 
     fputs("        </DataArray>\n", fp);

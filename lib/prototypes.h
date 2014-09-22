@@ -272,10 +272,10 @@ void velo_from_element_d(struct All_variables *, double [4][9], int, int);
 
 void p_to_nodes(struct All_variables *, double *, float **, int);
 
-void visc_from_gint_to_nodes(struct All_variables *, float **, float **, int);
-void visc_from_nodes_to_gint(struct All_variables *, float **, float **, int);
-void visc_from_gint_to_ele(struct All_variables *, float **, float **, int);
-void visc_from_ele_to_gint(struct All_variables *, float **, float **, int);
+void visc_from_gint_to_nodes(struct All_variables *, float *, float *, int);
+void visc_from_nodes_to_gint(struct All_variables *, float *, float *, int);
+void visc_from_gint_to_ele(struct All_variables *, float *, float *, int);
+void visc_from_ele_to_gint(struct All_variables *, float *, float *, int);
 /* Output.c */
 void output_common_input(struct All_variables *);
 void output(struct All_variables *, int);
@@ -519,14 +519,14 @@ int icheck_that_processor_shell(struct All_variables *, int, double);
 void viscosity_system_input(struct All_variables *);
 void viscosity_input(struct All_variables *);
 void allocate_visc_vars(struct All_variables *);
-void get_system_viscosity(struct All_variables *, int, float **, float **);
+void get_system_viscosity(struct All_variables *, int, float *, float *);
 void initial_viscosity(struct All_variables *);
-void visc_from_mat(struct All_variables *, float **);
+void visc_from_mat(struct All_variables *, float *);
 void read_visc_layer_file(struct All_variables *);
-void visc_from_T(struct All_variables *, float **, int);
-void visc_from_S(struct All_variables *, float **, int);
-void visc_from_P(struct All_variables *, float **);
-void visc_from_C(struct All_variables *, float **);
+void visc_from_T(struct All_variables *, float *, int);
+void visc_from_S(struct All_variables *, float *, int);
+void visc_from_P(struct All_variables *, float *);
+void visc_from_C(struct All_variables *, float *);
 void strain_rate_2_inv(struct All_variables *, float *, int);
 double second_invariant_from_3x3(double [3][3]);
 void calc_strain_from_vgm(double [3][3], double [3][3]);

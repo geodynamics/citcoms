@@ -307,7 +307,7 @@ void get_elt_k(E,el,elt_k,lev,iconv)
     
     for(k=1;k<=vpts;k++) {
       off = (el-1)*vpts+k;
-      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][CPPR][el].vpt[k]*E->EVI[lev][CPPR][off];
+      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][CPPR][el].vpt[k]*E->EVI[lev][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
       if(E->viscosity.allow_anisotropic_viscosity){
 	/* allow for a possibly anisotropic viscosity */
@@ -1247,7 +1247,7 @@ void get_aug_k(E,el,elt_k,level)
      Visc = 0.0;
      for(a=1;a<=vpts;a++) {
 	  p[a] = (a-1)*dims;
-	  Visc += E->EVI[level][CPPR][(el-1)*vpts+a];
+	  Visc += E->EVI[level][(el-1)*vpts+a];
        }
      Visc = Visc/vpts;
 

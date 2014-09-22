@@ -312,7 +312,7 @@ void output_visc(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++)
-    fprintf(fp1,"%.4e\n",E->VI[lev][CPPR][i]);
+    fprintf(fp1,"%.4e\n",E->VI[lev][i]);
   fclose(fp1);
 }
 

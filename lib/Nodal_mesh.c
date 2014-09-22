@@ -220,7 +220,7 @@ void p_to_nodes(E,P,PN,lev)
  */
 void visc_from_gint_to_nodes(E,VE,VN,lev)
   struct All_variables *E;
-  float **VE,**VN;
+  float *VE,*VN;
   int lev;
 {
   int m,e,i,j,k,n,off,lim;
@@ -230,21 +230,21 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
   double temp_visc;
   
     for(i=1;i<=E->lmesh.NNO[lev];i++)
-      VN[CPPR][i] = 0.0;
+      VN[i] = 0.0;
     for(e=1;e<=E->lmesh.NEL[lev];e++)   {
       temp_visc=0.0;
       for(i=1;i<=vpts;i++)
-	temp_visc += VE[CPPR][(e-1)*vpts + i];
+	temp_visc += VE[(e-1)*vpts + i];
       temp_visc = temp_visc/vpts;
       
       for(j=1;j<=ends;j++)                {
 	n = E->IEN[lev][CPPR][e].node[j];
-	VN[CPPR][n] += E->TWW[lev][CPPR][e].node[j] * temp_visc;
+	VN[n] += E->TWW[lev][CPPR][e].node[j] * temp_visc;
       }
     }
   (E->exchange_node_f)(E,VN,lev);
     for(n=1;n<=E->lmesh.NNO[lev];n++)
-      VN[CPPR][n] *= E->MASS[lev][n];
+      VN[n] *= E->MASS[lev][n];
 }
 
 /* 
@@ -254,7 +254,7 @@ interpolate viscosity from nodes to element integration points
  */
 void visc_from_nodes_to_gint(E,VN,VE,lev)
   struct All_variables *E;
-  float **VE,**VN;
+  float *VE,*VN;
   int lev;
 {
 
@@ -267,13 +267,13 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
 
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)
-	VE[CPPR][(e-1)*vpts+i] = 0.0;
+	VE[(e-1)*vpts+i] = 0.0;
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	temp_visc=0.0;
 	for(j=1;j<=ends;j++)
-	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[CPPR][E->IEN[lev][CPPR][e].node[j]];
-	VE[CPPR][(e-1)*vpts+i] = temp_visc;
+	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[E->IEN[lev][CPPR][e].node[j]];
+	VE[(e-1)*vpts+i] = temp_visc;
       }
 }
 
@@ -284,7 +284,7 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
 */
 void visc_from_gint_to_ele(E,VE,VN,lev)
   struct All_variables *E;
-  float **VE,**VN;
+  float *VE,*VN;
   int lev;
   {
     int m,e,i,j,k,n,off;
@@ -294,13 +294,13 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
     double temp_visc;
 
       for(i=1;i<=E->lmesh.NEL[lev];i++)
-	VN[CPPR][i] = 0.0;
+	VN[i] = 0.0;
       for(e=1;e<=E->lmesh.NEL[lev];e++)   {
 	temp_visc=0.0;
 	for(i=1;i<=vpts;i++)
-	  temp_visc += VE[CPPR][(e-1)*vpts + i];
+	  temp_visc += VE[(e-1)*vpts + i];
 	temp_visc = temp_visc/vpts;
-	VN[CPPR][e] = temp_visc;
+	VN[e] = temp_visc;
       }
 }
 
@@ -312,7 +312,7 @@ void visc_from_gint_to_ele(E,VE,VN,lev)
 
 void visc_from_ele_to_gint(E,VN,VE,lev)
   struct All_variables *E;
-  float **VE,**VN;
+  float *VE,*VN;
   int lev;
 {
   int m,e,i,j,k,n,off;
@@ -323,6 +323,6 @@ void visc_from_ele_to_gint(E,VN,VE,lev)
 
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
-	VE[CPPR][(e-1)*vpts+i] = VN[CPPR][e];
+	VE[(e-1)*vpts+i] = VN[e];
       }
 }

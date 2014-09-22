@@ -44,7 +44,7 @@ void read_visc_layer_file(struct All_variables *E);
 void read_visc_param_from_file(struct All_variables *E,
                                const char *param, float *var,
                                FILE *fp);
-static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc);
+static void apply_low_visc_wedge_channel(struct All_variables *E, float *evisc);
 static void low_viscosity_channel_factor(struct All_variables *E, float *F);
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F);
 void parallel_process_termination();
@@ -278,7 +278,7 @@ void allocate_visc_vars(struct All_variables *E)
 void get_system_viscosity(E,propogate,evisc,visc)
      struct All_variables *E;
      int propogate;
-     float **evisc,**visc;
+     float *evisc,*visc;
 {
     void visc_from_mat();
     void visc_from_T();
@@ -337,22 +337,22 @@ void get_system_viscosity(E,propogate,evisc,visc)
     if(E->viscosity.MAX) {
             for(i=1;i<=E->lmesh.nel;i++)
                 for(j=1;j<=vpts;j++)
-                    if(evisc[CPPR][(i-1)*vpts + j] > E->viscosity.max_value)
-                        evisc[CPPR][(i-1)*vpts + j] = E->viscosity.max_value;
+                    if(evisc[(i-1)*vpts + j] > E->viscosity.max_value)
+                        evisc[(i-1)*vpts + j] = E->viscosity.max_value;
     }
 
     if(E->viscosity.MIN) {
             for(i=1;i<=E->lmesh.nel;i++)
                 for(j=1;j<=vpts;j++)
-                    if(evisc[CPPR][(i-1)*vpts + j] < E->viscosity.min_value)
-                        evisc[CPPR][(i-1)*vpts + j] = E->viscosity.min_value;
+                    if(evisc[(i-1)*vpts + j] < E->viscosity.min_value)
+                        evisc[(i-1)*vpts + j] = E->viscosity.min_value;
     }
 
     if (E->control.verbose)  {
       fprintf(E->fp_out,"output_evisc \n");
         fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[CPPR]);
       for(i=1;i<=E->lmesh.nel;i++)
-          fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[CPPR][i],evisc[CPPR][(i-1)*vpts+1],evisc[CPPR][(i-1)*vpts+7]);
+          fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[CPPR][i],evisc[(i-1)*vpts+1],evisc[(i-1)*vpts+7]);
       fflush(E->fp_out);
     }
     /* interpolate from gauss quadrature points to node points for output */
@@ -399,18 +399,18 @@ void initial_viscosity(struct All_variables *E)
 
 void visc_from_mat(E,EEta)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
 {
 
     int i,m,jj;
     if(E->control.mat_control){	/* use pre-factor even without temperature dependent viscosity */
         for(i=1;i<=E->lmesh.nel;i++)
 	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-	    EEta[CPPR][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[CPPR][i]-1]*E->VIP[CPPR][i];
+	    EEta[ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[CPPR][i]-1]*E->VIP[CPPR][i];
      }else{
         for(i=1;i<=E->lmesh.nel;i++)
 	  for(jj=1;jj<=vpoints[E->mesh.nsd];jj++)
-	    EEta[CPPR][ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[CPPR][i]-1];
+	    EEta[ (i-1)*vpoints[E->mesh.nsd]+jj ] = E->viscosity.N0[E->mat[CPPR][i]-1];
     }
 }
 
@@ -461,7 +461,7 @@ void read_visc_layer_file(struct All_variables *E)
 
 void visc_from_T(E,EEta,propogate)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
      int propogate;
 {
     int m,i,k,l,z,jj,kk;
@@ -498,7 +498,7 @@ void visc_from_T(E,EEta,propogate)
                         temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( E->viscosity.E[l] * (E->viscosity.T[l] - temp));
 
                 }
@@ -525,7 +525,7 @@ void visc_from_T(E,EEta,propogate)
                         temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
                     }
 
-                    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( -temp / E->viscosity.T[l]);
 
                 }
@@ -558,7 +558,7 @@ void visc_from_T(E,EEta,propogate)
 		      TT[kk]=max(TT[kk],zero);
 		      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
                     }
-		    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
 			   - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
                 }
@@ -589,7 +589,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
 
-		    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
 			   / (E->viscosity.T[l]+temp) );
 
@@ -618,7 +618,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
                     if(E->control.mat_control==0){
-                        EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+                        EEta[ (i-1)*vpts + jj ] = tempa*
                             exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
                                  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    }else{
@@ -633,7 +633,7 @@ void visc_from_T(E,EEta,propogate)
                            if(visc2 < E->viscosity.min_value)
                                visc2 = E->viscosity.min_value;
                          }
-                       EEta[CPPR][ (i-1)*vpts + jj ] = E->VIP[CPPR][i]*visc2;
+                       EEta[ (i-1)*vpts + jj ] = E->VIP[CPPR][i]*visc2;
                       }
 
                 }
@@ -667,7 +667,7 @@ void visc_from_T(E,EEta,propogate)
 		temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
 		zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
 	      }
-	      EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+	      EEta[ (i-1)*vpts + jj ] = tempa*
 		exp( E->viscosity.E[l]*(E->viscosity.T[l] - temp) +
 		     zzz *  E->viscosity.Z[l]);
 	    }
@@ -724,7 +724,7 @@ void visc_from_T(E,EEta,propogate)
                     }
 
 
-                    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+                    EEta[ (i-1)*vpts + jj ] = tempa*
                         exp( (E->viscosity.E[l] +  E->viscosity.Z[l]*zzz )
                              / (E->viscosity.T[l] + temp)
                              - (E->viscosity.E[l] +
@@ -776,9 +776,9 @@ void visc_from_T(E,EEta,propogate)
 		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
 				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
-		      EEta[CPPR][ (i-1)*vpts + jj ] = visc1;
+		      EEta[ (i-1)*vpts + jj ] = visc1;
 		    else
-		      EEta[CPPR][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
+		      EEta[ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
                 }
             }
         break;
@@ -801,7 +801,7 @@ void visc_from_T(E,EEta,propogate)
                     temp=0.0;
                     for(kk=1;kk<=ends;kk++)
 		      temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
-		    EEta[CPPR][ (i-1)*vpts + jj ] = tempa*
+		    EEta[ (i-1)*vpts + jj ] = tempa*
 		      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
 			   - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
                 }
@@ -841,9 +841,9 @@ void visc_from_T(E,EEta,propogate)
 		    visc1 = tempa* exp( E->viscosity.E[l]/(temp+E->viscosity.T[l]) 
 				  - E->viscosity.E[l]/(one +E->viscosity.T[l]) );
 		    if(temp < E->viscosity.T_sol0 + 2.*(1.-zzz))
-		      EEta[CPPR][ (i-1)*vpts + jj ] = visc1;
+		      EEta[ (i-1)*vpts + jj ] = visc1;
 		    else
-		      EEta[CPPR][ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
+		      EEta[ (i-1)*vpts + jj ] = visc1 * E->viscosity.ET_red;
                 }
             }
         break;
@@ -868,7 +868,7 @@ void visc_from_T(E,EEta,propogate)
 
 void visc_from_S(E,EEta,propogate)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
      int propogate;
 {
     float one,two,scale,stress_magnitude,depth,exponent1;
@@ -903,7 +903,7 @@ void visc_from_S(E,EEta,propogate)
             exponent1= one/E->viscosity.sdepv_expt[E->mat[CPPR][e]-1];
             scale=pow(eedot[e],exponent1-one);
             for(jj=1;jj<=vpts;jj++)
-                EEta[CPPR][(e-1)*vpts + jj] = scale*pow(EEta[CPPR][(e-1)*vpts+jj],exponent1);
+                EEta[(e-1)*vpts + jj] = scale*pow(EEta[(e-1)*vpts+jj],exponent1);
         }
 
     free ((void *)eedot);
@@ -955,7 +955,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 
 			 */
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
 {
   float *eedot,zz[9],zzz,tau,eta_p,eta_new,tau2,eta_old,eta_old2;
   int m,e,l,z,jj,kk;
@@ -1011,12 +1011,12 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  eta_p = tau/(2.0 * eedot[e] + 1e-7) + E->viscosity.pdepv_offset;
 	  if(E->viscosity.pdepv_eff){
 	    /* two dashpots in series */
-	    eta_new  = 1.0/(1.0/EEta[CPPR][ (e-1)*vpts + jj ] + 1.0/eta_p);
+	    eta_new  = 1.0/(1.0/EEta[ (e-1)*vpts + jj ] + 1.0/eta_p);
 	  }else{
 	    /* min viscosities*/
-	    eta_new  = min(EEta[CPPR][ (e-1)*vpts + jj ], eta_p);
+	    eta_new  = min(EEta[ (e-1)*vpts + jj ], eta_p);
 	  }
-	  EEta[CPPR][(e-1)*vpts + jj] = eta_new;
+	  EEta[(e-1)*vpts + jj] = eta_new;
 	} /* end integration point loop */
       }	/* end element loop */
     }else{
@@ -1036,11 +1036,11 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	  tau2 = tau * tau;
 	  if(tau < 1e10){
 	    /*  */
-	    eta_old = EEta[CPPR][ (e-1)*vpts + jj ];
+	    eta_old = EEta[ (e-1)*vpts + jj ];
 	    eta_old2 = eta_old * eta_old;
 	    /* effectiev viscosity */
 	    eta_new = (tau2 * eta_old)/(tau2 + 2.0 * eta_old2 * eedot[e]);
-	    EEta[CPPR][(e-1)*vpts + jj] = eta_new;
+	    EEta[(e-1)*vpts + jj] = eta_new;
 	  }
 	}
       }
@@ -1057,7 +1057,7 @@ compositions between zero and unity
 */
 void visc_from_C( E, EEta)
      struct All_variables *E;
-     float **EEta;
+     float *EEta;
 {
   double vmean,cc_loc[10],CC[10][9],cbackground;
   int m,l,z,jj,kk,i,p,q;
@@ -1097,7 +1097,7 @@ void visc_from_C( E, EEta)
             vmean = exp(vmean);
 
             /* multiply the viscosity with this prefactor */
-            EEta[CPPR][ (i-1)*vpts + jj ] *= vmean;
+            EEta[ (i-1)*vpts + jj ] *= vmean;
 
         } /* end jj loop */
     } /* end el loop */
@@ -1247,7 +1247,7 @@ void strain_rate_2_inv(E,EEDOT,SQRT)
 }
 
 
-static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
+static void apply_low_visc_wedge_channel(struct All_variables *E, float *evisc)
 {
     void parallel_process_termination();
 
@@ -1285,7 +1285,7 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float **evisc)
     for(i=1 ; i<=E->lmesh.nel ; i++) {
         if (F[i] != 0.0)
                 for(j=1;j<=vpts;j++) {
-                    evisc[CPPR][(i-1)*vpts + j] = F[i];
+                    evisc[(i-1)*vpts + j] = F[i];
             }
     }
 

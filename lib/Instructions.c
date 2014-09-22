@@ -1070,11 +1070,11 @@ void allocate_common_vars(E)
     if(E->control.inv_gruneisen != 0)
         E->elt_c[i][CPPR] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
 
-    E->EVI[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+    E->EVI[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
     E->BPI[i] = (double *) malloc((npno+1)*sizeof(double));
 
     E->ID[i][CPPR]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
-    E->VI[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
+    E->VI[i]  = (float *)        malloc((nno+1)*sizeof(float));
     E->NODE[i][CPPR] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
     nxyz = max(nox*noz,nox*noy);
@@ -1090,7 +1090,7 @@ void allocate_common_vars(E)
 
     for(l=1;l<=E->lmesh.NNO[i];l++)  {
       E->NODE[i][CPPR][l] = (INTX | INTY | INTZ);  /* and any others ... */
-      E->VI[i][CPPR][l] = 1.0;
+      E->VI[i][l] = 1.0;
       }
 
 
@@ -1354,8 +1354,8 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->eco = E->ECO[E->mesh.levmax][CPPR];
   E->ien = E->IEN[E->mesh.levmax][CPPR];
   E->id = E->ID[E->mesh.levmax][CPPR];
-  E->Vi[CPPR] = E->VI[E->mesh.levmax][CPPR];
-  E->EVi[CPPR] = E->EVI[E->mesh.levmax][CPPR];
+  E->Vi[CPPR] = E->VI[E->mesh.levmax];
+  E->EVi[CPPR] = E->EVI[E->mesh.levmax];
   E->node[CPPR] = E->NODE[E->mesh.levmax][CPPR];
   E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
