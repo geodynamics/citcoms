@@ -135,8 +135,8 @@ void h5output_time(struct All_variables *, int);
 
 extern void parallel_process_termination();
 extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**, float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
+extern void get_STD_topo(struct All_variables *, float*, float*, float*, float*, int);
+extern void get_CBF_topo(struct All_variables *, float*, float*);
 extern void compute_geoid(struct All_variables *);
 
 
@@ -632,7 +632,7 @@ void h5output_pressure(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[m] = E->NP[CPPR][n+1];
+                field->data[m] = E->NP[n+1];
             }
         }
     }
@@ -661,12 +661,12 @@ void h5output_stress(struct All_variables *E, int cycles)
     void allocate_STD_mem();
     void compute_nodal_stress();
     void free_STD_mem();
-    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-    float *divv[NCS],*vorv[NCS];
+    float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+    float *divv,*vorv;
     /*  */
     
     if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-      allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+      allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
       compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
       free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
     }
@@ -866,7 +866,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                scalar->data[m] = E->slice.shflux[CPPR][n+1];
+                scalar->data[m] = E->slice.shflux[n+1];
             }
         }
 
@@ -876,9 +876,9 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
 
         /* choose either STD topo or pseudo-free-surf topo */
         if (E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[CPPR];
+            topo = E->slice.freesurf;
         else
-            topo = E->slice.tpg[CPPR];
+            topo = E->slice.tpg;
 
         /* topography data */
         for(i = 0; i < mx; i++)
@@ -936,7 +936,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                scalar->data[m] = E->slice.bhflux[CPPR][n+1];
+                scalar->data[m] = E->slice.bhflux[n+1];
             }
         }
         dataset = H5Dopen(file_id, "/botm/heatflux");
@@ -944,7 +944,7 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
         status = H5Dclose(dataset);
 
         /* topography data */
-        topo = E->slice.tpg[CPPR];
+        topo = E->slice.tpg;
         for(i = 0; i < mx; i++)
         {
             for(j = 0; j < my; j++)

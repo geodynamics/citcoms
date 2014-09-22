@@ -1171,7 +1171,7 @@ static void exchange_node_f(E, U, lev)
  free((void*) RV);
 }
 
-void full_exchange_snode_f(struct All_variables *E, float **U1, float **U2, int lev)
+void full_exchange_snode_f(struct All_variables *E, float *U1, float *U2, int lev)
  {
 
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];
@@ -1197,9 +1197,9 @@ void full_exchange_snode_f(struct All_variables *E, float **U1, float **U2, int 
 
       /* pack */
       for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)  {
-        S[kk][j-1] = U1[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+        S[kk][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
         S[kk][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]]
-                   = U2[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+                   = U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
         }
 
       if (E->parallel.PROCESSOR[lev][CPPR].pass[k]!=E->parallel.me) {
@@ -1227,8 +1227,8 @@ void full_exchange_snode_f(struct All_variables *E, float **U1, float **U2, int 
       else   {
 	kk=k;
          for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)     {
-           U1[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += S[kk][j-1];
-           U2[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
+           U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += S[kk][j-1];
+           U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
                                S[kk][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]];
            }
          }
@@ -1243,8 +1243,8 @@ void full_exchange_snode_f(struct All_variables *E, float **U1, float **U2, int 
       if (E->parallel.PROCESSOR[lev][CPPR].pass[k]!=E->parallel.me)
 	if (E->parallel.PROCESSOR[lev][CPPR].pass[k]!=-1) {
         for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)    {
-           U1[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[kk][j-1];
-           U2[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
+           U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[kk][j-1];
+           U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
                               R[kk][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]];
            }
 	}

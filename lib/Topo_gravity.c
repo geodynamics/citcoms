@@ -31,7 +31,7 @@
 #include "global_defs.h"
 
 void myerror(struct All_variables *, char *);
-void sphere_expansion(struct All_variables *, float **, float *, float *);
+void sphere_expansion(struct All_variables *, float *, float *, float *);
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);
 long double lg_pow(long double, int);
@@ -40,13 +40,13 @@ void allocate_STD_mem(struct All_variables *E,
                       float** , float** , float** ,
                       float** , float** );
 void free_STD_mem(struct All_variables *E,
-                  float** , float** , float** ,
-                  float** , float** , float** ,
-                  float** , float** );
+                  float* , float* , float* ,
+                  float* , float* , float* ,
+                  float* , float* );
 void compute_nodal_stress(struct All_variables *,
-                          float** , float** , float** ,
-                          float** , float** , float** ,
-                          float** , float** );
+                          float* , float* , float* ,
+                          float* , float* , float* ,
+                          float* , float* );
 void stress_conform_bcs(struct All_variables *);
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
@@ -65,8 +65,8 @@ removed, make sure to recompute in output routines
 
 void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     struct All_variables *E;
-    float **tpg,**tpgb;
-    float **divg,**vort;
+    float *tpg,*tpgb;
+    float *divg,*vort;
     int ii;
 {
     void allocate_STD_mem();
@@ -75,11 +75,11 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
     //void get_surf_stress();
 
     int node,snode,m;
-    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-    float *divv[NCS],*vorv[NCS];
+    float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+    float *divv,*vorv;
     float topo_scaling1, topo_scaling2;
 
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
 
     /* this one is for szz */
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
@@ -93,27 +93,27 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
 
      for(snode=1;snode<=E->lmesh.nsf;snode++)   {
         node = E->surf_node[CPPR][snode];
-        tpg[CPPR][snode]  = -2*SZZ[CPPR][node]               + SZZ[CPPR][node-1];
-        tpgb[CPPR][snode] =  2*SZZ[CPPR][node-E->lmesh.noz+1]- SZZ[CPPR][node-E->lmesh.noz+2];
+        tpg[snode]  = -2*SZZ[node]               + SZZ[node-1];
+        tpgb[snode] =  2*SZZ[node-E->lmesh.noz+1]- SZZ[node-E->lmesh.noz+2];
 
-        tpg[CPPR][snode]  =  tpg[CPPR][snode] *topo_scaling1;
-        tpgb[CPPR][snode]  = tpgb[CPPR][snode]*topo_scaling2;
+        tpg[snode]  =  tpg[snode] *topo_scaling1;
+        tpgb[snode]  = tpgb[snode]*topo_scaling2;
 
-        divg[CPPR][snode] = 2*divv[CPPR][node]-divv[CPPR][node-1];
-        vort[CPPR][snode] = 2*vorv[CPPR][node]-vorv[CPPR][node-1];
+        divg[snode] = 2*divv[node]-divv[node-1];
+        vort[snode] = 2*vorv[node]-vorv[node-1];
      }
 
    free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 }
 
-void get_STD_freesurf(struct All_variables *E,float **freesurf)
+void get_STD_freesurf(struct All_variables *E,float *freesurf)
 {
         int node,snode,m;
 
         if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
           for(snode=1;snode<=E->lmesh.nsf;snode++) {
             node = E->surf_node[CPPR][snode];
-            freesurf[CPPR][snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
+            freesurf[snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
           }
 }
 
@@ -125,47 +125,47 @@ void allocate_STD_mem(struct All_variables *E,
 {
   int m, i;
 
-    SXX[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    SYY[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    SXY[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    SXZ[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    SZY[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    SZZ[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    divv[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-    vorv[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SXX = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SYY = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SXY = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SXZ = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SZY = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *SZZ = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *divv = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+    *vorv = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
 
     for(i=1;i<=E->lmesh.nno;i++) {
-      SZZ[CPPR][i] = 0.0;
-      SXX[CPPR][i] = 0.0;
-      SYY[CPPR][i] = 0.0;
-      SXY[CPPR][i] = 0.0;
-      SXZ[CPPR][i] = 0.0;
-      SZY[CPPR][i] = 0.0;
-      divv[CPPR][i] = 0.0;
-      vorv[CPPR][i] = 0.0;
+      (*SZZ)[i] = 0.0;
+      (*SXX)[i] = 0.0;
+      (*SYY)[i] = 0.0;
+      (*SXY)[i] = 0.0;
+      (*SXZ)[i] = 0.0;
+      (*SZY)[i] = 0.0;
+      (*divv)[i] = 0.0;
+      (*vorv)[i] = 0.0;
     }
 }
 
 
 void free_STD_mem(struct All_variables *E,
-                  float** SXX, float** SYY, float** SZZ,
-                  float** SXY, float** SXZ, float** SZY,
-                  float** divv, float** vorv)
+                  float* SXX, float* SYY, float* SZZ,
+                  float* SXY, float* SXZ, float* SZY,
+                  float* divv, float* vorv)
 {
-    free((void *)SXX[CPPR]);
-    free((void *)SYY[CPPR]);
-    free((void *)SXY[CPPR]);
-    free((void *)SXZ[CPPR]);
-    free((void *)SZY[CPPR]);
-    free((void *)SZZ[CPPR]);
-    free((void *)divv[CPPR]);
-    free((void *)vorv[CPPR]);
+    free((void *)SXX);
+    free((void *)SYY);
+    free((void *)SXY);
+    free((void *)SXZ);
+    free((void *)SZY);
+    free((void *)SZZ);
+    free((void *)divv);
+    free((void *)vorv);
 }
 
 void compute_nodal_stress(struct All_variables *E,
-                          float** SXX, float** SYY, float** SZZ,
-                          float** SXY, float** SXZ, float** SZY,
-                          float** divv, float** vorv)
+                          float* SXX, float* SYY, float* SZZ,
+                          float* SXY, float* SXZ, float* SZY,
+                          float* divv, float* vorv)
 {
   void get_rtf_at_vpts();
   void velo_from_element();
@@ -379,14 +379,14 @@ void compute_nodal_stress(struct All_variables *E,
 
       for(i=1;i<=ends;i++) {
         node = E->ien[e].node[i]; /* assign to global nodes */
-        SZZ[CPPR][node] += tww[i] * Szz;
-        SXX[CPPR][node] += tww[i] * Sxx;
-        SYY[CPPR][node] += tww[i] * Syy;
-        SXY[CPPR][node] += tww[i] * Sxy;
-        SXZ[CPPR][node] += tww[i] * Sxz;
-        SZY[CPPR][node] += tww[i] * Szy;
-        divv[CPPR][node]+= tww[i] * div;
-        vorv[CPPR][node]+= tww[i] * vor;
+        SZZ[node] += tww[i] * Szz;
+        SXX[node] += tww[i] * Sxx;
+        SYY[node] += tww[i] * Syy;
+        SXY[node] += tww[i] * Sxy;
+        SXZ[node] += tww[i] * Sxz;
+        SZY[node] += tww[i] * Szy;
+        divv[node]+= tww[i] * div;
+        vorv[node]+= tww[i] * vor;
       }
 
     }    /* end for el */
@@ -404,26 +404,26 @@ void compute_nodal_stress(struct All_variables *E,
 
     for(node=1;node<=E->lmesh.nno;node++)   {
       mass_fac = E->Mass[CPPR][node]*stress_scaling;
-      SZZ[CPPR][node] *= mass_fac;
-      SXX[CPPR][node] *= mass_fac;
-      SYY[CPPR][node] *= mass_fac;
-      SXY[CPPR][node] *= mass_fac;
-      SXZ[CPPR][node] *= mass_fac;
-      SZY[CPPR][node] *= mass_fac;
+      SZZ[node] *= mass_fac;
+      SXX[node] *= mass_fac;
+      SYY[node] *= mass_fac;
+      SXY[node] *= mass_fac;
+      SXZ[node] *= mass_fac;
+      SZY[node] *= mass_fac;
       
       mass_fac = E->Mass[CPPR][node]*velo_scaling;
-      vorv[CPPR][node] *= mass_fac;
-      divv[CPPR][node] *= mass_fac;
+      vorv[node] *= mass_fac;
+      divv[node] *= mass_fac;
     }
 
   /* assign stress to all the nodes */
     for (node=1;node<=E->lmesh.nno;node++) {
-      E->gstress[CPPR][(node-1)*6+1] = SXX[CPPR][node];
-      E->gstress[CPPR][(node-1)*6+2] = SYY[CPPR][node];
-      E->gstress[CPPR][(node-1)*6+3] = SZZ[CPPR][node];
-      E->gstress[CPPR][(node-1)*6+4] = SXY[CPPR][node];
-      E->gstress[CPPR][(node-1)*6+5] = SXZ[CPPR][node];
-      E->gstress[CPPR][(node-1)*6+6] = SZY[CPPR][node];
+      E->gstress[CPPR][(node-1)*6+1] = SXX[node];
+      E->gstress[CPPR][(node-1)*6+2] = SYY[node];
+      E->gstress[CPPR][(node-1)*6+3] = SZZ[node];
+      E->gstress[CPPR][(node-1)*6+4] = SXY[node];
+      E->gstress[CPPR][(node-1)*6+5] = SXZ[node];
+      E->gstress[CPPR][(node-1)*6+6] = SZY[node];
     }
 
   /* replace boundary stresses with boundary conditions (if specified) */
@@ -529,7 +529,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
      */
 
     int m,k,ll,mm,node,i,j,p,noz,snode,nxnz;
-    float *TT[NCS],radius,*geoid[2],dlayer,con1,grav,scaling2,scaling,radius_m;
+    float *TT,radius,*geoid[2],dlayer,con1,grav,scaling2,scaling,radius_m;
     float cont, conb;
     double buoy2rho;
 
@@ -545,7 +545,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
         / E->data.grav_acc;
 
     /* density of one layer */
-    TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+    TT = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* cos coeff */
     geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
@@ -571,7 +571,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
                     p = j + (i-1)*E->lmesh.nox;
                     /* convert non-dimensional buoyancy to */
                     /* dimensional density */
-                    TT[CPPR][p] = (E->buoyancy[CPPR][node]+E->buoyancy[CPPR][node+1])
+                    TT[p] = (E->buoyancy[CPPR][node]+E->buoyancy[CPPR][node+1])
                         * 0.5 * buoy2rho;
                 }
 
@@ -608,7 +608,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
     /* accumulate geoid from all layers to the CMB (bottom processors) */
     sum_across_depth_sph1(E, harm_geoidb[0], harm_geoidb[1]);
 
-    free ((void *)TT[CPPR]);
+    free ((void *)TT);
 
     free ((void *)geoid[0]);
     free ((void *)geoid[1]);
@@ -911,7 +911,7 @@ separately if stress output is needed
  */
 void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*/
     struct All_variables *E;
-    float **H,**HB;
+    float *H,*HB;
 
 {
     void get_elt_k();
@@ -928,7 +928,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     struct Shape_function1 GM,GMb;
     struct Shape_function1_dA dGammax,dGammabx;
 
-    float *eltTU,*eltTL,*SU[NCS],*SL[NCS],*RU[NCS],*RL[NCS];
+    float *eltTU,*eltTL,*SU,*SL,*RU,*RL;
     float VV[4][9];
 
     double eltk[24*24],eltf[24];
@@ -955,13 +955,13 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     eltTU = (float *)malloc((1+Tsize)*sizeof(float));
     eltTL = (float *)malloc((1+Tsize)*sizeof(float));
 
-    SU[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
-    SL[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
-    RU[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
-    RL[CPPR] = (float *)malloc((1+lnsf)*sizeof(float));
+    SU = (float *)malloc((1+lnsf)*sizeof(float));
+    SL = (float *)malloc((1+lnsf)*sizeof(float));
+    RU = (float *)malloc((1+lnsf)*sizeof(float));
+    RL = (float *)malloc((1+lnsf)*sizeof(float));
 
     for(i=0;i<=lnsf;i++)
-      RU[CPPR][i] = RL[CPPR][i] = SU[CPPR][i] = SL[CPPR][i] = 0.0;
+      RU[i] = RL[i] = SU[i] = SL[i] = 0.0;
 
     /* calculate the element residuals */
 
@@ -1028,7 +1028,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
                 nodes = E->sien[els].node[4];
 		break;
 	     }
-	     RL[CPPR][nodes] += resb[(m-1)*dims+2];
+	     RL[nodes] += resb[(m-1)*dims+2];
 	  }
         else   {
            switch (m) {
@@ -1045,7 +1045,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
                 nodes = E->sien[els].node[4];
                 break;
              }
-             RU[CPPR][nodes] += res[(m-1)*dims+2];
+             RU[nodes] += res[(m-1)*dims+2];
           }
         }      /* end for m */
       }
@@ -1074,10 +1074,10 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
           }
 
         for (m=1;m<=onedv;m++)     /* for bottom */
-            SL[CPPR][E->sien[els].node[m]] += eltTL[m-1];
+            SL[E->sien[els].node[m]] += eltTL[m-1];
 
         for (m=1;m<=onedv;m++)
-            SU[CPPR][E->sien[els].node[m]] += eltTU[m-1];
+            SU[E->sien[els].node[m]] += eltTU[m-1];
 
         }
 
@@ -1090,7 +1090,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       regional_exchange_snode_f(E,RL,SL,E->mesh.levmax);
 
     for(i=1;i<=E->lmesh.nsf;i++)
-        HB[CPPR][i] = RL[CPPR][i]/SL[CPPR][i];
+        HB[i] = RL[i]/SL[i];
   }
   /* for top topo */
   if(E->parallel.me_loc[3] == E->parallel.nprocz-1) {
@@ -1100,12 +1100,12 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       regional_exchange_snode_f(E,RU,SU,E->mesh.levmax);
 
   for(i=1;i<=E->lmesh.nsf;i++)
-      H[CPPR][i] = RU[CPPR][i]/SU[CPPR][i];
+      H[i] = RU[i]/SU[i];
   }
     free((void *)eltTU);
     free((void *)eltTL);
-    free((void *)SU[CPPR]);
-    free((void *)SL[CPPR]);
-    free((void *)RU[CPPR]);
-    free((void *)RL[CPPR]);
+    free((void *)SU);
+    free((void *)SL);
+    free((void *)RU);
+    free((void *)RL);
 }

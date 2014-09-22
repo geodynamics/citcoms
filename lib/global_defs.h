@@ -371,13 +371,13 @@ struct HAVE {    /* horizontal averages */
 };
 
 struct SLICE {    /* horizontally sliced data, including topography */
-    float *tpg[NCS];
-    float *tpgb[NCS];
-    float *shflux[NCS];
-    float *bhflux[NCS];
-    float *divg[NCS];
-    float *vort[NCS];
-    float *freesurf[NCS];
+    float *tpg;
+    float *tpgb;
+    float *shflux;
+    float *bhflux;
+    float *divg;
+    float *vort;
+    float *freesurf;
   };
 
 
@@ -840,7 +840,7 @@ struct All_variables {
     double *surf_det[NCS][5];
     double *SinCos[MAX_LEVELS][NCS][4];
 
-    float *NP[NCS];
+    float *NP;
   //float *stress[NCS];
     float *gstress[NCS];
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];

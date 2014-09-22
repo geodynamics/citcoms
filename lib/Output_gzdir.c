@@ -126,9 +126,9 @@ extern void temperatures_conform_bcs(struct All_variables *);
 extern void myerror(struct All_variables *,char *);
 extern void mkdatadir(const char *);
 extern void heat_flux(struct All_variables *);
-extern void get_STD_topo(struct All_variables *, float**, float**,
-                         float**, float**, int);
-extern void get_CBF_topo(struct All_variables *, float**, float**);
+extern void get_STD_topo(struct All_variables *, float*, float*,
+                         float*, float*, int);
+extern void get_CBF_topo(struct All_variables *, float*, float*);
 
 /**********************************************************************/
 
@@ -821,15 +821,15 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 
         /* choose either STD topo or pseudo-free-surf topo */
         if(E->control.pseudo_free_surf)
-            topo = E->slice.freesurf[CPPR];
+            topo = E->slice.freesurf;
         else
-            topo = E->slice.tpg[CPPR];
+            topo = E->slice.tpg;
 
         gzprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		     topo[i],E->slice.shflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
+		     topo[i],E->slice.shflux[i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
         }
     gzclose(fp2);
   }
@@ -844,7 +844,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		 E->slice.tpgb[CPPR][i],E->slice.bhflux[CPPR][i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
+		 E->slice.tpgb[i],E->slice.bhflux[i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
       }
     gzclose(fp2);
   }
@@ -901,11 +901,11 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
   void allocate_STD_mem();
   void compute_nodal_stress();
   void free_STD_mem();
-  float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-  float *divv[NCS],*vorv[NCS];
+  float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+  float *divv,*vorv;
   /*  */
   if(E->control.use_cbf_topo)	{/* for CBF topo, stress will not have been computed */
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
     free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
   }
@@ -1001,7 +1001,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
     gzprintf(gz1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
       gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
-	gzprintf(gz1,"%.6e\n",E->NP[CPPR][i]);
+	gzprintf(gz1,"%.6e\n",E->NP[i]);
     gzclose(gz1);
   }else{/* new legacy VTK */
     if(E->output.gzdir.vtk_io == 2)
@@ -1016,7 +1016,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
       fp1 = output_open(output_file,"a");
     }
       for(i=1;i<=E->lmesh.nno;i++){
-	ftmp = E->NP[CPPR][i];
+	ftmp = E->NP[i];
 	if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
       }
     fclose(fp1);fflush(fp1);		/* close file and flush buffer */

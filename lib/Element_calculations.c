@@ -1167,7 +1167,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 				traction[1][a] = 0.0;
 				traction[2][a] = 0.0;
 				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
-					*(E->slice.freesurf[CPPR][nodeas]+E->sphere.cap[CPPR].V[3][nodea]*E->advection.timestep);
+					*(E->slice.freesurf[nodeas]+E->sphere.cap[CPPR].V[3][nodea]*E->advection.timestep);
 				if(E->parallel.me==11 && nodea==3328)
 					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[CPPR].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
 				found = 1;

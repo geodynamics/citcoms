@@ -209,11 +209,11 @@ static void vtk_output_stress(struct All_variables *E, FILE *fp)
     void allocate_STD_mem();
     void compute_nodal_stress();
     void free_STD_mem();
-    float *SXX[NCS],*SYY[NCS],*SXY[NCS],*SXZ[NCS],*SZY[NCS],*SZZ[NCS];
-    float *divv[NCS],*vorv[NCS];
+    float *SXX,*SYY,*SXY,*SXZ,*SZY,*SZZ;
+    float *divv,*vorv;
 
     /* those are sorted like stt spp srr stp str srp  */
-    allocate_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
+    allocate_STD_mem(E, &SXX, &SYY, &SZZ, &SXY, &SXZ, &SZY, &divv, &vorv);
     compute_nodal_stress(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
     free_STD_mem(E, SXX, SYY, SZZ, SXY, SXZ, SZY, divv, vorv);
 
@@ -282,9 +282,9 @@ static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 
                 /* choose either STD topo or pseudo-free-surf topo */
                 if(E->control.pseudo_free_surf)
-                floattopo[(CPPR-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.freesurf[CPPR][i];
+                floattopo[(CPPR-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.freesurf[i];
                 else
-                floattopo[(CPPR-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.tpg[CPPR][i];
+                floattopo[(CPPR-1)*E->lmesh.nno + i*E->lmesh.noz-1] = E->slice.tpg[i];
 
             }
         }

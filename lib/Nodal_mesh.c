@@ -192,24 +192,24 @@ void velo_from_element_d(E,VV,el,sphere_key)
 void p_to_nodes(E,P,PN,lev)
      struct All_variables *E;
      double *P;
-     float **PN;
+     float *PN;
      int lev;
 
 { int e,element,node,j,m;
 
     for(node=1;node<=E->lmesh.NNO[lev];node++)
-      PN[CPPR][node] =  0.0;
+      PN[node] =  0.0;
 
     for(element=0;element<E->lmesh.NEL[lev];element++)
        for(j=1;j<=enodes[E->mesh.nsd];j++)  {
      	  node = E->IEN[lev][CPPR][element+1].node[j];
-    	  PN[CPPR][node] += P[element] * E->TWW[lev][CPPR][element+1].node[j] ;
+    	  PN[node] += P[element] * E->TWW[lev][CPPR][element+1].node[j] ;
     	  }
 
    (E->exchange_node_f)(E,PN,lev);
 
    for(node=1;node<=E->lmesh.NNO[lev];node++)
-      PN[CPPR][node] *= E->MASS[lev][node];
+      PN[node] *= E->MASS[lev][node];
 }
 
 

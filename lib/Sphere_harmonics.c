@@ -100,7 +100,7 @@ double modified_plgndr_a(int l, int m, double t)
    ========================================================= */
 void sphere_expansion(E,TG,sphc,sphs)
      struct All_variables *E;
-     float **TG,*sphc,*sphs;
+     float *TG,*sphc,*sphs;
 {
     int el,nint,d,p,i,m,j,es,mm,ll,rand();
     void sum_across_surf_sph1();
@@ -120,12 +120,12 @@ void sphere_expansion(E,TG,sphc,sphs)
                     for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
                         for(d=1;d<=onedvpoints[E->mesh.nsd];d++)   {
                             j = E->sien[es].node[d];
-                            sphc[p] += TG[CPPR][E->sien[es].node[d]]
+                            sphc[p] += TG[E->sien[es].node[d]]
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablescosf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[CPPR][nint][es];
-                            sphs[p] += TG[CPPR][E->sien[es].node[d]]
+                            sphs[p] += TG[E->sien[es].node[d]]
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablessinf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
@@ -148,9 +148,9 @@ void debug_sphere_expansion(struct All_variables *E)
      */
     int m, i, j, k, p, node;
     int ll, mm;
-    float *TT[NCS], *sph_harm[2];
+    float *TT, *sph_harm[2];
 
-    TT[CPPR] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+    TT = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
 
     /* sin coeff */
     sph_harm[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
@@ -162,7 +162,7 @@ void debug_sphere_expansion(struct All_variables *E)
                 for(j=1;j<=E->lmesh.nox;j++)  {
                     node= k + (j-1)*E->lmesh.noz + (i-1)*E->lmesh.nox*E->lmesh.noz;
                     p = j + (i-1)*E->lmesh.nox;
-                    TT[CPPR][p] = E->T[node];
+                    TT[p] = E->T[node];
                 }
 
         /* expand TT into spherical harmonics */

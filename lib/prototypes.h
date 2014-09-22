@@ -140,7 +140,7 @@ void full_parallel_domain_boundary_nodes(struct All_variables *);
 void full_parallel_communication_routs_v(struct All_variables *);
 void full_parallel_communication_routs_s(struct All_variables *);
 void full_exchange_id_d(struct All_variables *, double *, int);
-void full_exchange_snode_f(struct All_variables *, float **, float **, int);
+void full_exchange_snode_f(struct All_variables *, float *, float *, int);
 /* Full_read_input_from_files.c */
 void full_read_input_files_for_timesteps(struct All_variables *, int, int);
 /* Full_solver.c */
@@ -270,7 +270,7 @@ void v_from_vector_pseudo_surf(struct All_variables *);
 void velo_from_element(struct All_variables *, float [4][9], int, int);
 void velo_from_element_d(struct All_variables *, double [4][9], int, int);
 
-void p_to_nodes(struct All_variables *, double *, float **, int);
+void p_to_nodes(struct All_variables *, double *, float *, int);
 
 void visc_from_gint_to_nodes(struct All_variables *, float *, float *, int);
 void visc_from_nodes_to_gint(struct All_variables *, float *, float *, int);
@@ -417,7 +417,7 @@ void regional_parallel_domain_boundary_nodes(struct All_variables *);
 void regional_parallel_communication_routs_v(struct All_variables *);
 void regional_parallel_communication_routs_s(struct All_variables *);
 void regional_exchange_id_d(struct All_variables *, double *, int);
-void regional_exchange_snode_f(struct All_variables *, float **, float **, int);
+void regional_exchange_snode_f(struct All_variables *, float *, float *, int);
 /* Regional_read_input_from_files.c */
 void regional_read_input_files_for_timesteps(struct All_variables *, int, int);
 /* Regional_solver.c */
@@ -479,7 +479,7 @@ void fill_in_gaps(struct All_variables *, double *, int);
 /* Sphere_harmonics.c */
 void set_sphere_harmonics(struct All_variables *);
 double modified_plgndr_a(int, int, double);
-void sphere_expansion(struct All_variables *, float **, float *, float *);
+void sphere_expansion(struct All_variables *, float *, float *, float *);
 void debug_sphere_expansion(struct All_variables *);
 /* Sphere_util.c */
 void even_divide_arc12(int, double, double, double, double, double, double, double *, double *);
@@ -492,14 +492,14 @@ double get_angle(double [4], double [4]);
 /* Stokes_flow_Incomp.c */
 void solve_constrained_flow_iterative(struct All_variables *);
 /* Topo_gravity.c */
-void get_STD_topo(struct All_variables *, float **, float **, float **, float **, int);
-void get_STD_freesurf(struct All_variables *, float **);
+void get_STD_topo(struct All_variables *, float *, float *, float *, float *, int);
+void get_STD_freesurf(struct All_variables *, float *);
 void allocate_STD_mem(struct All_variables *, float **, float **, float **, float **, float **, float **, float **, float **);
-void free_STD_mem(struct All_variables *, float **, float **, float **, float **, float **, float **, float **, float **);
-void compute_nodal_stress(struct All_variables *, float **, float **, float **, float **, float **, float **, float **, float **);
+void free_STD_mem(struct All_variables *, float *, float *, float *, float *, float *, float *, float *, float *);
+void compute_nodal_stress(struct All_variables *, float *, float *, float *, float *, float *, float *, float *, float *);
 void stress_conform_bcs(struct All_variables *);
 void compute_geoid(struct All_variables *);
-void get_CBF_topo(struct All_variables *, float **, float **);
+void get_CBF_topo(struct All_variables *, float *, float *);
 /* Tracer_setup.c */
 void tracer_input(struct All_variables *);
 void tracer_initial_settings(struct All_variables *);

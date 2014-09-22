@@ -316,7 +316,7 @@ void general_stokes_solver_pseudo_surf(struct All_variables *E)
   void get_system_viscosity();
   void std_timestep();
   void remove_rigid_rot();
-  void get_STD_freesurf(struct All_variables *, float**);
+  void get_STD_freesurf(struct All_variables *, float*);
 
   double Udot_mag, dUdot_mag;
   int m,count,i;

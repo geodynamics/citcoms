@@ -953,7 +953,7 @@ void allocate_common_vars(E)
 
   E->P        = (double *) malloc(npno*sizeof(double));
   E->T        = (double *) malloc((nno+1)*sizeof(double));
-  E->NP[CPPR]       = (float *) malloc((nno+1)*sizeof(float));
+  E->NP       = (float *) malloc((nno+1)*sizeof(float));
   E->buoyancy[CPPR] = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress[CPPR] = (float *) malloc((6*nno+1)*sizeof(float));
@@ -963,14 +963,14 @@ void allocate_common_vars(E)
   for(i=1;i<=E->mesh.nsd;i++)
       E->sphere.cap[CPPR].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
-  E->slice.tpg[CPPR]      = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.tpgb[CPPR]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.divg[CPPR]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.vort[CPPR]     = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.shflux[CPPR]    = (float *)malloc((nsf+2)*sizeof(float));
-  E->slice.bhflux[CPPR]    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.divg     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.vort     = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.shflux    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.bhflux    = (float *)malloc((nsf+2)*sizeof(float));
   /*  if(E->mesh.topvbc==2 && E->control.pseudo_free_surf) */
-  E->slice.freesurf[CPPR]    = (float *)malloc((nsf+2)*sizeof(float));
+  E->slice.freesurf    = (float *)malloc((nsf+2)*sizeof(float));
 
   E->mat[CPPR] = (int *) malloc((nel+2)*sizeof(int));
   E->VIP[CPPR] = (float *) malloc((nel+2)*sizeof(float));

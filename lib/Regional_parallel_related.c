@@ -825,8 +825,8 @@ static void exchange_node_f(E, U, lev)
 /* ================================================ */
 /* ================================================ */
 
-void regional_exchange_snode_f(struct All_variables *E, float **U1,
-                               float **U2, int lev)
+void regional_exchange_snode_f(struct All_variables *E, float *U1,
+                               float *U2, int lev)
  {
 
  int ii,j,k,m,kk,t_cap,idb,msginfo[8];
@@ -844,9 +844,9 @@ void regional_exchange_snode_f(struct All_variables *E, float **U1,
    for (k=1;k<=E->parallel.sTNUM_PASS[lev][CPPR];k++)  {
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)  {
-       S[k][j-1] = U1[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+       S[k][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
        S[k][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]]
-	 = U2[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+	 = U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
      }
 
      MPI_Sendrecv(S[k],2*E->parallel.NUM_sNODE[lev][CPPR].pass[k],MPI_FLOAT,
@@ -856,8 +856,8 @@ void regional_exchange_snode_f(struct All_variables *E, float **U1,
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)   {
-       U1[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
-       U2[CPPR][ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
+       U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
+       U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
 	 R[k][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]];
      }
 
