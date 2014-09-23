@@ -51,19 +51,19 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4], int i
 
     for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
         for (i=1;i<=E->lmesh.NNO[lev];i++) {
-            t[0] = E->X[lev][CPPR][1][i]*dircos[1][1]+
-                E->X[lev][CPPR][2][i]*dircos[1][2]+
-                E->X[lev][CPPR][3][i]*dircos[1][3];
-            t[1] = E->X[lev][CPPR][1][i]*dircos[2][1]+
-                E->X[lev][CPPR][2][i]*dircos[2][2]+
-                E->X[lev][CPPR][3][i]*dircos[2][3];
-            t[2] = E->X[lev][CPPR][1][i]*dircos[3][1]+
-                E->X[lev][CPPR][2][i]*dircos[3][2]+
-                E->X[lev][CPPR][3][i]*dircos[3][3];
+            t[0] = E->X[lev][1][i]*dircos[1][1]+
+                E->X[lev][2][i]*dircos[1][2]+
+                E->X[lev][3][i]*dircos[1][3];
+            t[1] = E->X[lev][1][i]*dircos[2][1]+
+                E->X[lev][2][i]*dircos[2][2]+
+                E->X[lev][3][i]*dircos[2][3];
+            t[2] = E->X[lev][1][i]*dircos[3][1]+
+                E->X[lev][2][i]*dircos[3][2]+
+                E->X[lev][3][i]*dircos[3][3];
 
-            E->X[lev][CPPR][1][i] = t[0];
-            E->X[lev][CPPR][2][i] = t[1];
-            E->X[lev][CPPR][3][i] = t[2];
+            E->X[lev][1][i] = t[0];
+            E->X[lev][2][i] = t[1];
+            E->X[lev][3][i] = t[2];
             E->SX[lev][1][i] = acos(t[2]/E->SX[lev][3][i]);
             E->SX[lev][2][i] = myatan(t[1],t[0]);
         }

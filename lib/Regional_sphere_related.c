@@ -169,11 +169,11 @@ void regional_coord_of_cap(E,icap)
                 E->SX[lev][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][CPPR][1][node] =
+                E->X[lev][1][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*cos(fi1[lev][nodesy]);
-                E->X[lev][CPPR][2][node] =
+                E->X[lev][2][node] =
                             E->sphere.R[lev][i]*sin(theta1[lev][nodesx])*sin(fi1[lev][nodesy]);
-                E->X[lev][CPPR][3][node] =
+                E->X[lev][3][node] =
                             E->sphere.R[lev][i]*cos(theta1[lev][nodesx]);
                 }
              }
@@ -252,11 +252,11 @@ void regional_coord_of_cap(E,icap)
                 E->SX[lev][3][node] = E->sphere.R[lev][i];
 
                      /*   x,y,and z oordinates   */
-                E->X[lev][CPPR][1][node] =
+                E->X[lev][1][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*cos(SX[1][nodes]);
-                E->X[lev][CPPR][2][node] =
+                E->X[lev][2][node] =
                             E->sphere.R[lev][i]*sin(SX[0][nodes])*sin(SX[1][nodes]);
-                E->X[lev][CPPR][3][node] =
+                E->X[lev][3][node] =
                             E->sphere.R[lev][i]*cos(SX[0][nodes]);
                 }
              }

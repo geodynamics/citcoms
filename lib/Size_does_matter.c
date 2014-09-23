@@ -90,13 +90,13 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
+                x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.vpt[GNVINDEX(i,k)];
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
                 for(i=1;i<=ends;i++)
-                    dxda[d][e] += E->X[lev][CPPR][e][E->IEN[lev][CPPR][el].node[i]]
+                    dxda[d][e] += E->X[lev][e][E->IEN[lev][CPPR][el].node[i]]
                         * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda, E->mesh.nsd);
@@ -135,13 +135,13 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
+                x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.ppt[GNPINDEX(i,k)];
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
                 for(i=1;i<=ends;i++)
-                    dxda[d][e] += E->X[lev][CPPR][e][E->IEN[lev][CPPR][el].node[i]]
+                    dxda[d][e] += E->X[lev][e][E->IEN[lev][CPPR][el].node[i]]
                         * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda,E->mesh.nsd);
@@ -204,7 +204,7 @@ void get_rtf_at_vpts(struct All_variables *E, int lev, int el, double rtf[4][9])
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
+                x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.vpt[GNVINDEX(i,k)];
 
         rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]); /* 1/r */
@@ -231,7 +231,7 @@ void get_rtf_at_ppts(struct All_variables *E, int lev, int el, double rtf[4][9])
 
         for(d=1;d<=dims;d++)
             for(i=1;i<=ends;i++)
-                x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[i]]
+                x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[i]]
                     * E->N.ppt[GNPINDEX(i,k)];
 
         rtf[3][k] = 1.0/sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -539,7 +539,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
       for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
+            x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.vpt[GNVINDEX(a,k)];
 
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -600,7 +600,7 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
+            x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -679,7 +679,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
       for(d=1;d<=dims;d++)
 	for(aa=1;aa<=ends;aa++) {
 	  a=sidenodes[side][aa];
-	  x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
+	  x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[a]]
 	    *E->M.vpt[GMVINDEX(aa,k)];
 
 	}
@@ -741,7 +741,7 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
        	x[d]=0.0;
       for(a=1;a<=ends;a++) {
        	aa=sidenodes[side][a];
-       	x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[aa]]
+       	x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[aa]]
        	  *E->M.ppt[GMPINDEX(a,k)];
       }
       rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -823,7 +823,7 @@ void construct_c3x3matrix(E)
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
+            x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.vpt[GNVINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -881,7 +881,7 @@ void construct_c3x3matrix(E)
 
         for(d=1;d<=dims;d++)
           for(a=1;a<=ends;a++)
-            x[d] += E->X[lev][CPPR][d][E->IEN[lev][CPPR][el].node[a]]
+            x[d] += E->X[lev][d][E->IEN[lev][CPPR][el].node[a]]
                    *E->N.ppt[GNPINDEX(a,k)];
 
         rr = sqrt(x[1]*x[1]+x[2]*x[2]+x[3]*x[3]);
@@ -974,7 +974,7 @@ void mass_matrix(struct All_variables *E)
 
                 for(i=1;i<=E->mesh.nsd;i++)  {
                     for(node=1;node<=enodes[E->mesh.nsd];node++)
-                        centre[i] += E->X[lev][CPPR][i][n[node]];
+                        centre[i] += E->X[lev][i][n[node]];
 
                     centre[i] = centre[i]/enodes[E->mesh.nsd];
                 }     /* end for i */

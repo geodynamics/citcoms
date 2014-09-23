@@ -1016,7 +1016,7 @@ void allocate_common_vars(E)
     snel=E->lmesh.SNEL[i];
 
     for(d=1;d<=E->mesh.nsd;d++)   {
-      E->X[i][CPPR][d]  = (double *)  malloc((nno+1)*sizeof(double));
+      E->X[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
       E->SX[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
       }
 
@@ -1040,7 +1040,7 @@ void allocate_common_vars(E)
     for(d=1;d<=E->mesh.nsd;d++)
       for(l=1;l<=E->lmesh.NNO[i];l++)  {
         E->SX[i][d][l] = 0.0;
-        E->X[i][CPPR][d][l] = 0.0;
+        E->X[i][d][l] = 0.0;
         }
 
   }
@@ -1364,7 +1364,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->gNX[CPPR] = E->GNX[E->mesh.levmax][CPPR];
 
   for (i=1;i<=E->mesh.nsd;i++)    {
-    E->x[i] = E->X[E->mesh.levmax][CPPR][i];
+    E->x[i] = E->X[E->mesh.levmax][i];
     E->sx[i] = E->SX[E->mesh.levmax][i];
     }
 }

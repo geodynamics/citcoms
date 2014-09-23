@@ -477,9 +477,9 @@ void full_coord_of_cap(struct All_variables *E, int icap)
 	     E->SX[lev][3][node] = E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
-	     E->X[lev][CPPR][1][node]  = E->sphere.R[lev][i]*sint*cosf;
-	     E->X[lev][CPPR][2][node]  = E->sphere.R[lev][i]*sint*sinf;
-	     E->X[lev][CPPR][3][node]  = E->sphere.R[lev][i]*cost;
+	     E->X[lev][1][node]  = E->sphere.R[lev][i]*sint*cosf;
+	     E->X[lev][2][node]  = E->sphere.R[lev][i]*sint*sinf;
+	     E->X[lev][3][node]  = E->sphere.R[lev][i]*cost;
 	     
 	     node++;
 	   }
