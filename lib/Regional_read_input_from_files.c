@@ -328,7 +328,7 @@ void regional_read_input_files_for_timesteps(E,action,output)
             nodea = E->ien[el].node[2];
             llayer = layers(E,nodea);
             if (llayer)  { /* for layers:1-lithosphere,2-upper, 3-trans, and 4-lower mantle */
-              E->mat[CPPR][el] = llayer;
+              E->mat[el] = llayer;
             }
           }
           for(i=1;i<=emax;i++)  {

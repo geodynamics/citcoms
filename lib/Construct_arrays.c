@@ -773,15 +773,15 @@ void construct_mat_group(E)
           for(el=1;el<=E->lmesh.nel;el++) {
               int nz;
               nz = ((el-1) % E->lmesh.elz) + 1;
-              E->mat[CPPR][el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
+              E->mat[el] = E->mesh.elz - (nz + E->lmesh.ezs) + 1;
           }
   } else {
           for(el=1;el<=E->lmesh.nel;el++) {
-              E->mat[CPPR][el] = 1;
+              E->mat[el] = 1;
               nodea = E->ien[el].node[2];
               llayer = layers(E,nodea);
               if (llayer)  {
-                  E->mat[CPPR][el] = llayer;
+                  E->mat[el] = llayer;
               }
           }
   }
