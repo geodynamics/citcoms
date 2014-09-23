@@ -120,12 +120,12 @@ void heat_flux(E)
 
   if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
     for(i=1;i<=E->lmesh.nsf;i++)
-      E->slice.shflux[i]=2*flux[E->surf_node[CPPR][i]]-flux[E->surf_node[CPPR][i]-1];
+      E->slice.shflux[i]=2*flux[E->surf_node[i]]-flux[E->surf_node[i]-1];
 
   if (E->parallel.me_loc[3]==0)
     for(i=1;i<=E->lmesh.nsf;i++)
-      E->slice.bhflux[i] = 2*flux[E->surf_node[CPPR][i]-E->lmesh.noz+1]
-                              - flux[E->surf_node[CPPR][i]-E->lmesh.noz+2];
+      E->slice.bhflux[i] = 2*flux[E->surf_node[i]-E->lmesh.noz+1]
+                              - flux[E->surf_node[i]-E->lmesh.noz+2];
 
     for(e=1;e<=E->lmesh.snel;e++) {
          uT =(E->slice.shflux[E->sien[e].node[1]] +

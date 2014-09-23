@@ -990,7 +990,7 @@ void allocate_common_vars(E)
 
   E->sien         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
   E->surf_element = (int *) malloc((nxyz+2)*sizeof(int));
-  E->surf_node[CPPR]    = (int *) malloc((nsf+2)*sizeof(int));
+  E->surf_node    = (int *) malloc((nsf+2)*sizeof(int));
 
 
   /* density field */

@@ -92,7 +92,7 @@ void get_STD_topo(E,tpg,tpgb,divg,vort,ii)
    topo_scaling1 = topo_scaling2 = 1.0;
 
      for(snode=1;snode<=E->lmesh.nsf;snode++)   {
-        node = E->surf_node[CPPR][snode];
+        node = E->surf_node[snode];
         tpg[snode]  = -2*SZZ[node]               + SZZ[node-1];
         tpgb[snode] =  2*SZZ[node-E->lmesh.noz+1]- SZZ[node-E->lmesh.noz+2];
 
@@ -112,7 +112,7 @@ void get_STD_freesurf(struct All_variables *E,float *freesurf)
 
         if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
           for(snode=1;snode<=E->lmesh.nsf;snode++) {
-            node = E->surf_node[CPPR][snode];
+            node = E->surf_node[snode];
             freesurf[snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
           }
 }

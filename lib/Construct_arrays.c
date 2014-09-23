@@ -112,7 +112,7 @@ void construct_surface( struct All_variables *E)
 
     E->lmesh.snel = e;
     for (i=1;i<=E->lmesh.nsf;i++)
-      E->surf_node[CPPR][i] = i*E->lmesh.noz;
+      E->surf_node[i] = i*E->lmesh.noz;
 
 
   if(E->control.verbose) {
