@@ -1018,7 +1018,7 @@ void get_elt_f(E,el,elt_f,bcs)
 	  type=vbc_flag[j];
           for(b=1;b<=ends;b++) {
             nodeb=E->ien[el].node[b];
-            if ((E->node[CPPR][nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
+            if ((E->node[nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
                 get_elt_k(E,el,elt_k,E->mesh.levmax,1);
                 got_elt_k = 1;
@@ -1072,7 +1072,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
 				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
-				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
+				flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );
 			}
@@ -1084,7 +1084,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
 					value = E->sphere.cap[CPPR].VB[d][nodea];
-					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
+					flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );
 				}
@@ -1154,7 +1154,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
 				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
-				flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
+				flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );
 			}
@@ -1186,7 +1186,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
 					value = E->sphere.cap[CPPR].VB[d][nodea];
-					flagged = (E->node[CPPR][nodea] & sbc_flag[d]) && (value);
+					flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );
 				}

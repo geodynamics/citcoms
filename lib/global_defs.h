@@ -864,7 +864,7 @@ struct All_variables {
     int *mat[NCS];
     float *VIP[NCS];
     unsigned int *NODE[MAX_LEVELS][NCS];
-    unsigned int *node[NCS];
+    unsigned int *node;
 
     float *age_t;
 

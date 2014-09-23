@@ -119,7 +119,7 @@ void apply_side_sbc(struct All_variables *E)
 
     n = 1;
     for(i=1; i<=E->lmesh.nno; i++) {
-      if(E->node[CPPR][i] & sbc_flags) {
+      if(E->node[i] & sbc_flags) {
 	E->sbc.node[CPPR][i] = n;
 	n++;
       }
@@ -138,7 +138,7 @@ void apply_side_sbc(struct All_variables *E)
 
     for(d=1; d<=E->mesh.nsd; d++)
       for(i=1; i<=E->lmesh.nno; i++)
-	if(E->node[CPPR][i] & sbc_flag[d] && E->sphere.cap[CPPR].VB[d][i] != 0) {
+	if(E->node[i] & sbc_flag[d] && E->sphere.cap[CPPR].VB[d][i] != 0) {
 	  j = E->sbc.node[CPPR][i];
 	  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
 	    E->sbc.SB[CPPR][side][d][j] = E->sphere.cap[CPPR].VB[d][i];
@@ -256,7 +256,7 @@ static int scan_double_vector(const char *str, int len, double *values)
     /** debug **
     for (i = 0; i < len; ++i) fprintf(stderr, "%e, ", values[i]);
     fprintf(stderr, "\n");
-    /**/
+    */
     return len;
 }
 

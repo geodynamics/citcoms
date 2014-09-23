@@ -199,34 +199,34 @@ all three get set to true. CPC 6/20/00 */
 	  if( ((E->sx[1][node]<=ttt2) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[1][node]>=ttt3) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if < (width) from x bounds AND (depth) from top */
 	    {
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
+	      E->node[node]=E->node[node] | TBX;
+	      E->node[node]=E->node[node] & (~FBX);
+	      E->node[node]=E->node[node] | TBY;
+	      E->node[node]=E->node[node] & (~FBY);
+	      E->node[node]=E->node[node] | TBZ;
+	      E->node[node]=E->node[node] & (~FBZ);
 	    }
 
 	  if( ((E->sx[2][node]<=fff2) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
+	      E->node[node]=E->node[node] | TBX;
+	      E->node[node]=E->node[node] & (~FBX);
+	      E->node[node]=E->node[node] | TBY;
+	      E->node[node]=E->node[node] & (~FBY);
+	      E->node[node]=E->node[node] | TBZ;
+	      E->node[node]=E->node[node] & (~FBZ);
 	    }
 
 	  if( ((E->sx[2][node]>=fff3) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
+	      E->node[node]=E->node[node] | TBX;
+	      E->node[node]=E->node[node] & (~FBX);
+	      E->node[node]=E->node[node] | TBY;
+	      E->node[node]=E->node[node] & (~FBY);
+	      E->node[node]=E->node[node] | TBZ;
+	      E->node[node]=E->node[node] & (~FBZ);
 	    }
 
 	}
@@ -237,12 +237,12 @@ all three get set to true. CPC 6/20/00 */
 	for(node=1;node<=E->lmesh.nno;node++)  {
 	  if(E->sx[3][node]>=E->sphere.ro-E->control.lith_age_depth)
 	    { /* if closer than (lith_age_depth) from top */
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBY;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBY);
-	      E->node[CPPR][node]=E->node[CPPR][node] | TBZ;
-	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
+	      E->node[node]=E->node[node] | TBX;
+	      E->node[node]=E->node[node] & (~FBX);
+	      E->node[node]=E->node[node] | TBY;
+	      E->node[node]=E->node[node] & (~FBY);
+	      E->node[node]=E->node[node] | TBZ;
+	      E->node[node]=E->node[node] & (~FBZ);
 	    }
 
 	}
@@ -380,7 +380,7 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
 
     for(node=1;node<=E->lmesh.nno;node++)  {
 
-        type = (E->node[CPPR][node] & (TBX | TBZ | TBY));
+        type = (E->node[node] & (TBX | TBZ | TBY));
 
         switch (type) {
         case 0:  /* no match, next node */

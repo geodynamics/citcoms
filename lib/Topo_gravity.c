@@ -460,7 +460,7 @@ void stress_conform_bcs(struct All_variables *E)
 
             for(d=1; d<=E->mesh.nsd; d++)
 
-              if(E->node[CPPR][n] & sbc_flag[d]) {
+              if(E->node[n] & sbc_flag[d]) {
                 if(i==1)
                   E->gstress[CPPR][(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_WEST][d][ E->sbc.node[CPPR][n] ];
                 if(i==E->lmesh.noy)
@@ -488,7 +488,7 @@ void stress_conform_bcs(struct All_variables *E)
 	    for(k=1; k<=E->lmesh.noz; k++) {
 	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
 	      for(d=1; d<=E->mesh.nsd; d++)
-		if(E->node[CPPR][n] & sbc_flag[d]) {
+		if(E->node[n] & sbc_flag[d]) {
 		  /* apply internal traction vector on horizontal surface */
 		  E->gstress[CPPR][(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
 		}
@@ -500,7 +500,7 @@ void stress_conform_bcs(struct All_variables *E)
 	    for(k=1; k<=E->lmesh.noz; k++) {
 	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
 	      for(d=1; d<=E->mesh.nsd; d++)
-		if(E->node[CPPR][n] & sbc_flag[d]) {
+		if(E->node[n] & sbc_flag[d]) {
 		  if(i==1 || i==E->lmesh.noy)
 		    E->gstress[CPPR][(n-1)*6+stress_index[d][2]] = E->sphere.cap[CPPR].VB[d][n];
 		  if(j==1 || j==E->lmesh.nox)

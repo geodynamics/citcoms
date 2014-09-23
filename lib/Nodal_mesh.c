@@ -46,11 +46,11 @@ void v_from_vector(E)
             E->sphere.cap[CPPR].V[1][node] = E->U[E->id[node].doff[1]];
             E->sphere.cap[CPPR].V[2][node] = E->U[E->id[node].doff[2]];
             E->sphere.cap[CPPR].V[3][node] = E->U[E->id[node].doff[3]];
-            if (E->node[CPPR][node] & VBX)
+            if (E->node[node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
-            if (E->node[CPPR][node] & VBY)
+            if (E->node[node] & VBY)
                 E->sphere.cap[CPPR].V[2][node] = E->sphere.cap[CPPR].VB[2][node];
-            if (E->node[CPPR][node] & VBZ)
+            if (E->node[node] & VBZ)
                 E->sphere.cap[CPPR].V[3][node] = E->sphere.cap[CPPR].VB[3][node];
         }
 }
@@ -85,11 +85,11 @@ void v_from_vector_pseudo_surf(E)
             E->sphere.cap[CPPR].V[1][node] = E->U[E->id[node].doff[1]];
             E->sphere.cap[CPPR].V[2][node] = E->U[E->id[node].doff[2]];
             E->sphere.cap[CPPR].V[3][node] = E->U[E->id[node].doff[3]];
-            if (E->node[CPPR][node] & VBX)
+            if (E->node[node] & VBX)
                 E->sphere.cap[CPPR].V[1][node] = E->sphere.cap[CPPR].VB[1][node];
-            if (E->node[CPPR][node] & VBY)
+            if (E->node[node] & VBY)
                 E->sphere.cap[CPPR].V[2][node] = E->sphere.cap[CPPR].VB[2][node];
-            if (E->node[CPPR][node] & VBZ)
+            if (E->node[node] & VBZ)
                 E->sphere.cap[CPPR].V[3][node] = E->sphere.cap[CPPR].VB[3][node];
 
             sum_dV += (E->sphere.cap[CPPR].V[1][node] - E->sphere.cap[CPPR].Vprev[1][node])*(E->sphere.cap[CPPR].V[1][node] - E->sphere.cap[CPPR].Vprev[1][node])

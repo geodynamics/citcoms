@@ -1319,17 +1319,17 @@ void check_bc_consistency(E)
   int i,j,lev;
 
     for(i=1;i<=E->lmesh.nno;i++) {
-      if ((E->node[CPPR][i] & VBX) && (E->node[CPPR][i] & SBX))
+      if ((E->node[i] & VBX) && (E->node[i] & SBX))
         printf("Inconsistent x velocity bc at %d\n",i);
-      if ((E->node[CPPR][i] & VBZ) && (E->node[CPPR][i] & SBZ))
+      if ((E->node[i] & VBZ) && (E->node[i] & SBZ))
         printf("Inconsistent z velocity bc at %d\n",i);
-      if ((E->node[CPPR][i] & VBY) && (E->node[CPPR][i] & SBY))
+      if ((E->node[i] & VBY) && (E->node[i] & SBY))
         printf("Inconsistent y velocity bc at %d\n",i);
-      if ((E->node[CPPR][i] & TBX) && (E->node[CPPR][i] & FBX))
+      if ((E->node[i] & TBX) && (E->node[i] & FBX))
         printf("Inconsistent x temperature bc at %d\n",i);
-      if ((E->node[CPPR][i] & TBZ) && (E->node[CPPR][i] & FBZ))
+      if ((E->node[i] & TBZ) && (E->node[i] & FBZ))
         printf("Inconsistent z temperature bc at %d\n",i);
-      if ((E->node[CPPR][i] & TBY) && (E->node[CPPR][i] & FBY))
+      if ((E->node[i] & TBY) && (E->node[i] & FBY))
         printf("Inconsistent y temperature bc at %d\n",i);
       }
 
@@ -1356,7 +1356,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->id = E->ID[E->mesh.levmax][CPPR];
   E->Vi = E->VI[E->mesh.levmax];
   E->EVi = E->EVI[E->mesh.levmax];
-  E->node[CPPR] = E->NODE[E->mesh.levmax][CPPR];
+  E->node = E->NODE[E->mesh.levmax][CPPR];
   E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
   E->Mass = E->MASS[E->mesh.levmax];

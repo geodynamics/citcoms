@@ -127,7 +127,7 @@ void temperatures_conform_bcs2(E)
 
     for(node=1;node<=E->lmesh.nno;node++)  {
 
-        type = (E->node[CPPR][node] & (TBX | TBZ | TBY));
+        type = (E->node[node] & (TBX | TBZ | TBY));
 
         switch (type) {
         case 0:  /* no match, next node */
@@ -174,11 +174,11 @@ void velocities_conform_bcs(E,U)
 
       for(node=1;node<=nno;node++) {
 
-        if (E->node[CPPR][node] & typex)
+        if (E->node[node] & typex)
 	      U[E->id[node].doff[1]] = E->sphere.cap[CPPR].VB[1][node];
- 	if (E->node[CPPR][node] & typey)
+ 	if (E->node[node] & typey)
 	      U[E->id[node].doff[2]] = E->sphere.cap[CPPR].VB[2][node];
-	if (E->node[CPPR][node] & typez)
+	if (E->node[node] & typez)
 	      U[E->id[node].doff[3]] = E->sphere.cap[CPPR].VB[3][node];
         }
 }

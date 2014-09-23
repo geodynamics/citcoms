@@ -45,7 +45,7 @@ static void corrector(struct All_variables *E, double *field,
 static void pg_solver(struct All_variables *E,
                       double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
-                      double diff, int bc, unsigned int **FLAGS);
+                      double diff, int bc, unsigned int *FLAGS);
 static void pg_shape_fn(struct All_variables *E, int el,
                         struct Shape_function *PG,
                         struct Shape_function_dx *GNx,
@@ -60,7 +60,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS);
+                             unsigned int *FLAGS);
 static void filter(struct All_variables *E);
 static void process_heating(struct All_variables *E, int psc_pass);
 
@@ -353,7 +353,7 @@ static void corrector(struct All_variables *E, double *field,
 static void pg_solver(struct All_variables *E,
                       double *T, double *Tdot, double *DTdot,
                       struct SOURCES *Q0,
-                      double diff, int bc, unsigned int **FLAGS)
+                      double diff, int bc, unsigned int *FLAGS)
 {
     void get_rtf_at_vpts();
     void velo_from_element();
@@ -396,7 +396,7 @@ static void pg_solver(struct All_variables *E,
     (E->exchange_node_d)(E,DTdot,lev);
 
     for(i=1;i<=E->lmesh.nno;i++) {
-      if(!(E->node[CPPR][i] & (TBX | TBY | TBZ))){
+      if(!(E->node[i] & (TBX | TBY | TBZ))){
         DTdot[i] *= E->TMass[i];         /* lumped mass matrix */
       }	else {
         DTdot[i] = 0.0;         /* lumped mass matrix */
@@ -487,7 +487,7 @@ static void element_residual(struct All_variables *E, int el,
                              struct SOURCES *Q0,
                              double Eres[9], double rtf[4][9],
                              double diff, float **BC,
-                             unsigned int **FLAGS)
+                             unsigned int *FLAGS)
 {
     int i,j,a,k,node,nodes[5],d,aid,back_front,onedfns;
     double Q;
@@ -527,7 +527,7 @@ static void element_residual(struct All_variables *E, int el,
     for(j=1;j<=ends;j++)       {
       node = E->ien[el].node[j];
       T = field[node];
-      if(E->node[CPPR][node] & (TBX | TBY | TBZ))
+      if(E->node[node] & (TBX | TBY | TBZ))
 	    DT=0.0;
       else
 	    DT = fielddot[node];
@@ -607,11 +607,11 @@ static void element_residual(struct All_variables *E, int el,
 
     if(FLAGS!=NULL) {
       aid = -1;
-      if (FLAGS[CPPR][E->ien[el].node[1]] & FBZ) {   // only check for the 1st node
+      if (FLAGS[E->ien[el].node[1]] & FBZ) {   // only check for the 1st node
           aid = 0;
 	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }
-      else if (FLAGS[CPPR][E->ien[el].node[5]] & FBZ) {   // only check for the 5th node
+      else if (FLAGS[E->ien[el].node[5]] & FBZ) {   // only check for the 5th node
           aid = 1;
 	  get_global_1d_shape_fn(E,el,&GM,&dGamma,aid);
           }

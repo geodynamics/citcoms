@@ -140,7 +140,7 @@ void regional_velocity_boundary_conditions(E)
 
       if(E->control.verbose) {
 	  for (node=1;node<=E->lmesh.nno;node++)
-	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",CPPR,node,E->sphere.cap[CPPR].VB[1][node],E->sphere.cap[CPPR].VB[2][node],E->sphere.cap[CPPR].VB[3][node],E->node[CPPR][node]&VBX,E->node[CPPR][node]&VBY,E->node[CPPR][node]&VBZ);
+	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",CPPR,node,E->sphere.cap[CPPR].VB[1][node],E->sphere.cap[CPPR].VB[2][node],E->sphere.cap[CPPR].VB[3][node],E->node[node]&VBX,E->node[node]&VBY,E->node[node]&VBZ);
 	fflush(E->fp_out);
       }
       /* If any imposed internal velocity structure it goes here */
@@ -350,13 +350,13 @@ static void temperature_refl_vert_bc(E)
         node1 = i + (j-1)*E->lmesh.noz*E->lmesh.nox;
         node2 = node1 + (E->lmesh.nox-1)*E->lmesh.noz;
         if (E->parallel.me_loc[1]==0 )                   {
-          E->node[CPPR][node1] = E->node[CPPR][node1] & (~TBX);
-          E->node[CPPR][node1] = E->node[CPPR][node1] | FBX;
+          E->node[node1] = E->node[node1] & (~TBX);
+          E->node[node1] = E->node[node1] | FBX;
           E->sphere.cap[CPPR].TB[1][node1] = 0.0;
               }
         if (E->parallel.me_loc[1]==E->parallel.nprocx-1)   {
-          E->node[CPPR][node2] = E->node[CPPR][node2] & (~TBX);
-          E->node[CPPR][node2] = E->node[CPPR][node2] | FBX;
+          E->node[node2] = E->node[node2] & (~TBX);
+          E->node[node2] = E->node[node2] | FBX;
           E->sphere.cap[CPPR].TB[1][node2] = 0.0;
               }
         }       /* end for loop i & j */
@@ -365,8 +365,8 @@ static void temperature_refl_vert_bc(E)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node1 = i + (j-1)*E->lmesh.noz;
-          E->node[CPPR][node1] = E->node[CPPR][node1] & (~TBY);
-              E->node[CPPR][node1] = E->node[CPPR][node1] | FBY;
+          E->node[node1] = E->node[node1] & (~TBY);
+              E->node[node1] = E->node[node1] | FBY;
               E->sphere.cap[CPPR].TB[2][node1] = 0.0;
               }
 
@@ -374,8 +374,8 @@ static void temperature_refl_vert_bc(E)
       for(j=1;j<=E->lmesh.nox;j++)
         for(i=1;i<=E->lmesh.noz;i++) {
           node2 = i +(j-1)*E->lmesh.noz + (E->lmesh.noy-1)*E->lmesh.noz*E->lmesh.nox;
-          E->node[CPPR][node2] = E->node[CPPR][node2] & (~TBY);
-          E->node[CPPR][node2] = E->node[CPPR][node2] | FBY;
+          E->node[node2] = E->node[node2] & (~TBY);
+          E->node[node2] = E->node[node2] | FBY;
           E->sphere.cap[CPPR].TB[2][node2] = 0.0;
           }    /* end loop for i and j */
 
