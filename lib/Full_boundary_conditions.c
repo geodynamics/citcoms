@@ -209,7 +209,7 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
       for(j=1;j<=E->lmesh.NOY[level];j++)
     	for(i=1;i<=E->lmesh.NOX[level];i++)     {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] & (~ mask);
+    	  E->NODE[level][node] = E->NODE[level][node] & (~ mask);
     	  }        /* end for loop i & j */
       }
 
@@ -218,7 +218,7 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
       for(j=1;j<=E->lmesh.NOY[level];j++)
         for(i=1;i<=E->lmesh.NOX[level];i++)       {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] | (mask);
+    	  E->NODE[level][node] = E->NODE[level][node] | (mask);
     	  if(level==E->mesh.levmax)   /* NB */
     	    BC[dirn][node] = value;
     	  }     /* end for loop i & j */

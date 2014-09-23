@@ -464,7 +464,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
       Ad[neq] = 0.0;
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][CPPR][i] & OFFSIDE)   {
+          if(E->NODE[level][i] & OFFSIDE)   {
 
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
@@ -499,7 +499,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
                  Ad[eqn3] += B3[j]*UU;
                  }
 
-            if (!(E->NODE[level][CPPR][i]&OFFSIDE))   {
+            if (!(E->NODE[level][i]&OFFSIDE))   {
                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];
@@ -517,7 +517,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
   	    }
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][CPPR][i] & OFFSIDE)   {
+          if(E->NODE[level][i] & OFFSIDE)   {
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];
@@ -529,7 +529,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
       (E->solver.exchange_id_d)(E, Ad, level);
 
       for(i=1;i<=E->lmesh.NNO[level];i++)
-          if(E->NODE[level][CPPR][i] & OFFSIDE)   {
+          if(E->NODE[level][i] & OFFSIDE)   {
 	    eqn1=E->ID[level][CPPR][i].doff[1];
 	    eqn2=E->ID[level][CPPR][i].doff[2];
 	    eqn3=E->ID[level][CPPR][i].doff[3];

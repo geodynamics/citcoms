@@ -270,23 +270,23 @@ static void velocity_refl_vert_bc(E)
           node2 = node1 + (nox-1)*noz;
           ii = i + E->lmesh.NZS[level] - 1;
           if (E->parallel.me_loc[1]==0 )  {
-            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | VBX;
-            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~SBX);
+            E->NODE[level][node1] = E->NODE[level][node1] | VBX;
+            E->NODE[level][node1] = E->NODE[level][node1] & (~SBX);
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
-               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBY);
-               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBY;
-               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBZ);
-               E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBZ;
+               E->NODE[level][node1] = E->NODE[level][node1] & (~VBY);
+               E->NODE[level][node1] = E->NODE[level][node1] | SBY;
+               E->NODE[level][node1] = E->NODE[level][node1] & (~VBZ);
+               E->NODE[level][node1] = E->NODE[level][node1] | SBZ;
                }
             }
           if (E->parallel.me_loc[1]==E->parallel.nprocx-1)  {
-            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | VBX;
-            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~SBX);
+            E->NODE[level][node2] = E->NODE[level][node2] | VBX;
+            E->NODE[level][node2] = E->NODE[level][node2] & (~SBX);
             if((ii!=1) && (ii!=E->mesh.NOZ[level])) {
-              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBY);
-              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBY;
-              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBZ);
-              E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBZ;
+              E->NODE[level][node2] = E->NODE[level][node2] & (~VBY);
+              E->NODE[level][node2] = E->NODE[level][node2] | SBY;
+              E->NODE[level][node2] = E->NODE[level][node2] & (~VBZ);
+              E->NODE[level][node2] = E->NODE[level][node2] | SBZ;
                   }
             }
           }   /* end for loop i & j */
@@ -301,15 +301,15 @@ static void velocity_refl_vert_bc(E)
             ii = i + E->lmesh.NZS[level] - 1;
             jj = j + E->lmesh.NXS[level] - 1;
 
-            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | VBY;
-            E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~SBY);
+            E->NODE[level][node1] = E->NODE[level][node1] | VBY;
+            E->NODE[level][node1] = E->NODE[level][node1] & (~SBY);
             if((ii!= 1) && (ii != E->mesh.NOZ[level]))  {
-                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBZ);
-                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBZ;
+                E->NODE[level][node1] = E->NODE[level][node1] & (~VBZ);
+                E->NODE[level][node1] = E->NODE[level][node1] | SBZ;
                 }
             if((jj!=1) && (jj!=E->mesh.NOX[level]) && (ii!=1) && (ii!=E->mesh.NOZ[level])){
-                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] & (~VBX);
-                E->NODE[level][CPPR][node1] = E->NODE[level][CPPR][node1] | SBX;
+                E->NODE[level][node1] = E->NODE[level][node1] & (~VBX);
+                E->NODE[level][node1] = E->NODE[level][node1] | SBX;
                 }
                 }    /* end for loop i & j  */
 
@@ -319,15 +319,15 @@ static void velocity_refl_vert_bc(E)
             node2 = (noy-1)*noz*nox + i + (j-1)*noz;
             ii = i + E->lmesh.NZS[level] - 1;
             jj = j + E->lmesh.NXS[level] - 1;
-            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | VBY;
-            E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~SBY);
+            E->NODE[level][node2] = E->NODE[level][node2] | VBY;
+            E->NODE[level][node2] = E->NODE[level][node2] & (~SBY);
             if((ii!= 1) && (ii != E->mesh.NOZ[level]))  {
-                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBZ);
-                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBZ;
+                E->NODE[level][node2] = E->NODE[level][node2] & (~VBZ);
+                E->NODE[level][node2] = E->NODE[level][node2] | SBZ;
                 }
             if((jj!=1) && (jj!=E->mesh.NOX[level]) && (ii!=1) && (ii!=E->mesh.NOZ[level])){
-                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] & (~VBX);
-                E->NODE[level][CPPR][node2] = E->NODE[level][CPPR][node2] | SBX;
+                E->NODE[level][node2] = E->NODE[level][node2] & (~VBX);
+                E->NODE[level][node2] = E->NODE[level][node2] | SBX;
                 }
             }
 
@@ -407,7 +407,7 @@ static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn
       for(j=1;j<=E->lmesh.NOY[level];j++)
     	for(i=1;i<=E->lmesh.NOX[level];i++)     {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] & (~ mask);
+    	  E->NODE[level][node] = E->NODE[level][node] & (~ mask);
     	  }        /* end for loop i & j */
       }
 
@@ -416,7 +416,7 @@ static void horizontal_bc( struct All_variables *E,float *BC[], int ROW,int dirn
       for(j=1;j<=E->lmesh.NOY[level];j++)
         for(i=1;i<=E->lmesh.NOX[level];i++)       {
     	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
-    	  E->NODE[level][CPPR][node] = E->NODE[level][CPPR][node] | (mask);
+    	  E->NODE[level][node] = E->NODE[level][node] | (mask);
 
     	  if(level==E->mesh.levmax)   /* NB */
     	    BC[dirn][node] = value;

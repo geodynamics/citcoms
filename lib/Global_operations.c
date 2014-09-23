@@ -647,7 +647,7 @@ double global_tdot_d(E,A,B,lev)
   prod = 0.0;
   nno=E->lmesh.NNO[lev];
   for (i=1;i<=nno;i++)
-    if (!(E->NODE[lev][CPPR][i] & SKIP))
+    if (!(E->NODE[lev][i] & SKIP))
       temp += A[CPPR][i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
@@ -669,7 +669,7 @@ float global_tdot(E,A,B,lev)
   prod = 0.0;
   nno=E->lmesh.NNO[lev];
   for (i=1;i<=nno;i++)
-    if (!(E->NODE[lev][CPPR][i] & SKIP))
+    if (!(E->NODE[lev][i] & SKIP))
       temp += A[CPPR][i]*B[CPPR][i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);

@@ -667,7 +667,7 @@ static void filter(struct All_variables *E)
 
         /* compute sum(rho*cp*T) before filtering, skipping nodes
            that's shared by another processor */
-        if(!(E->NODE[lev][CPPR][i] & SKIP))
+        if(!(E->NODE[lev][i] & SKIP))
             Tsum0 += E->T[i]*rhocp[nz];
 
         /* remove overshoot */
@@ -692,7 +692,7 @@ static void filter(struct All_variables *E)
           E->T[i]=Tmax0;
 
         /* sum(rho*cp*T) after filtering */
-        if (!(E->NODE[lev][CPPR][i] & SKIP))  {
+        if (!(E->NODE[lev][i] & SKIP))  {
             Tsum1 += E->T[i]*rhocp[nz];
             if(E->T[i]!=Tmin0 && E->T[i]!=Tmax0) {
                 sum_rhocp += rhocp[nz];

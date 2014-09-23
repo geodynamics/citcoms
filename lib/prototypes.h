@@ -44,7 +44,7 @@ void drex_eigen(double [3][3], double [3][3], int *);
 void malmul_scaled_id(double [3][3], double [3][3], double, double);
 void myerror_s(char *, struct All_variables *);
 /* BC_util.c */
-void internal_horizontal_bc(struct All_variables *, float *[], int, int, float, unsigned int, char, int, int);
+void internal_horizontal_bc(struct All_variables *, float *[], int, int, float, unsigned int, char, int);
 void strip_bcs_from_residual(struct All_variables *, double *, int);
 void temperatures_conform_bcs(struct All_variables *);
 void temperatures_conform_bcs2(struct All_variables *);

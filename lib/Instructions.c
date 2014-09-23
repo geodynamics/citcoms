@@ -1075,7 +1075,7 @@ void allocate_common_vars(E)
 
     E->ID[i][CPPR]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
     E->VI[i]  = (float *)        malloc((nno+1)*sizeof(float));
-    E->NODE[i][CPPR] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
+    E->NODE[i] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
     nxyz = max(nox*noz,nox*noy);
     nxyz = 2*max(nxyz,noz*noy);
@@ -1089,7 +1089,7 @@ void allocate_common_vars(E)
     E->parallel.EXCHANGE_ID[i][CPPR] = (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
 
     for(l=1;l<=E->lmesh.NNO[i];l++)  {
-      E->NODE[i][CPPR][l] = (INTX | INTY | INTZ);  /* and any others ... */
+      E->NODE[i][l] = (INTX | INTY | INTZ);  /* and any others ... */
       E->VI[i][l] = 1.0;
       }
 
@@ -1335,11 +1335,11 @@ void check_bc_consistency(E)
 
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++) {
       for(i=1;i<=E->lmesh.NNO[lev];i++) {
-        if ((E->NODE[lev][CPPR][i] & VBX) && (E->NODE[lev][CPPR][i]  & SBX))
+        if ((E->NODE[lev][i] & VBX) && (E->NODE[lev][i]  & SBX))
           printf("Inconsistent x velocity bc at %d,%d\n",lev,i);
-        if ((E->NODE[lev][CPPR][i] & VBZ) && (E->NODE[lev][CPPR][i]  & SBZ))
+        if ((E->NODE[lev][i] & VBZ) && (E->NODE[lev][i]  & SBZ))
           printf("Inconsistent z velocity bc at %d,%d\n",lev,i);
-        if ((E->NODE[lev][CPPR][i] & VBY) && (E->NODE[lev][CPPR][i]  & SBY))
+        if ((E->NODE[lev][i] & VBY) && (E->NODE[lev][i]  & SBY))
           printf("Inconsistent y velocity bc at %d,%d\n",lev,i);
         /* Tbc's not applicable below top level */
         }
@@ -1356,7 +1356,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->id = E->ID[E->mesh.levmax][CPPR];
   E->Vi = E->VI[E->mesh.levmax];
   E->EVi = E->EVI[E->mesh.levmax];
-  E->node = E->NODE[E->mesh.levmax][CPPR];
+  E->node = E->NODE[E->mesh.levmax];
   E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
   E->Mass = E->MASS[E->mesh.levmax];

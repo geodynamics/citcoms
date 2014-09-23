@@ -315,7 +315,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(k=1;k<=noy;k++)  {
         node = j + (k-1)*noz*nox;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] =  node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -327,7 +327,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(k=1;k<=noy;k++)      {
         node = (nox-1)*noz + j + (k-1)*noz*nox;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] =  node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -340,7 +340,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(i=1;i<=nox;i++)   {
         node = (k-1)*nox*noz + (i-1)*noz + 1;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] = node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -351,7 +351,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(i=1;i<=nox;i++)  {
         node = (k-1)*nox*noz + i*noz;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] = node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -364,7 +364,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(i=1;i<=nox;i++)   {
         node = (i-1)*noz +j;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] = node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -375,7 +375,7 @@ void regional_parallel_domain_boundary_nodes(E)
       for(i=1;i<=nox;i++)   {
         node = noz*nox*(noy-1) + (i-1)*noz +j;
         E->parallel.NODE[lev][CPPR][++lnode].bound[ii] = node;
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | OFFSIDE;
+        E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
       E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
@@ -385,19 +385,19 @@ void regional_parallel_domain_boundary_nodes(E)
     if (E->parallel.me_loc[1]!=E->parallel.nprocx-1)
       for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[2];lnode++) {
         node = E->parallel.NODE[lev][CPPR][lnode].bound[2];
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | SKIP;
+        E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
         }
 
     if (E->parallel.me_loc[2]!=E->parallel.nprocy-1)
       for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[4];lnode++) {
         node = E->parallel.NODE[lev][CPPR][lnode].bound[4];
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | SKIP;
+        E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
         }
 
     if (E->parallel.me_loc[3]!=E->parallel.nprocz-1)
       for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[6];lnode++) {
         node = E->parallel.NODE[lev][CPPR][lnode].bound[6];
-        E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | SKIP;
+        E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
         }
 
     }   /* end for level */
@@ -413,7 +413,7 @@ if (E->control.verbose) {
 
     lnode=0;
     for (node=1;node<=E->lmesh.NNO[lev];node++)
-      if((E->NODE[lev][CPPR][node] & SKIP)) {
+      if((E->NODE[lev][node] & SKIP)) {
         lnode++;
         fprintf(E->fp_out,"skip %d %d \n",lnode,node);
         }

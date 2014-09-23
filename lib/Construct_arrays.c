@@ -154,7 +154,7 @@ void construct_id(E)
 
       i = 0;
       for(node=1;node<=E->lmesh.NNO[lev];node++) {
-        if (E->NODE[lev][CPPR][node] & SKIP)
+        if (E->NODE[lev][node] & SKIP)
         for(doff=1;doff<=dims;doff++)  {
 	  i++;
           E->parallel.Skip_id[lev][CPPR][i] = E->ID[lev][CPPR][node].doff[doff];
@@ -196,15 +196,15 @@ void get_bcs_id_for_residual(E,level)
 
    j = 0;
    for(i=1;i<=nno;i++) {
-      if ( (E->NODE[level][CPPR][i] & VBX) != 0 )  {
+      if ( (E->NODE[level][i] & VBX) != 0 )  {
 	j++;
         E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[1];
 	}
-      if ( (E->NODE[level][CPPR][i] & VBY) != 0 )  {
+      if ( (E->NODE[level][i] & VBY) != 0 )  {
 	j++;
         E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[2];
 	}
-      if ( (E->NODE[level][CPPR][i] & VBZ) != 0 )  {
+      if ( (E->NODE[level][i] & VBZ) != 0 )  {
 	j++;
         E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[3];
 	}
@@ -360,9 +360,9 @@ void construct_node_ks(E)
 
 	       loc0=(node-1)*max_eqn;
 
-	       if(E->NODE[level][CPPR][node] & VBX) w1=0.0;
-	       if(E->NODE[level][CPPR][node] & VBZ) w3=0.0;
-	       if(E->NODE[level][CPPR][node] & VBY) w2=0.0;
+	       if(E->NODE[level][node] & VBX) w1=0.0;
+	       if(E->NODE[level][node] & VBZ) w3=0.0;
+	       if(E->NODE[level][node] & VBY) w2=0.0;
 
 	       for(j=1;j<=ends;j++) { /* j is the node we are receiving from */
 	         node1=E->IEN[level][CPPR][element].node[j];
@@ -376,9 +376,9 @@ void construct_node_ks(E)
 		    eqn2=E->ID[level][CPPR][node1].doff[2];
 		    eqn3=E->ID[level][CPPR][node1].doff[3];
 
-		    if(E->NODE[level][CPPR][node1] & VBX) ww1=0.0;
-		    if(E->NODE[level][CPPR][node1] & VBZ) ww3=0.0;
-		    if(E->NODE[level][CPPR][node1] & VBY) ww2=0.0;
+		    if(E->NODE[level][node1] & VBX) ww1=0.0;
+		    if(E->NODE[level][node1] & VBZ) ww3=0.0;
+		    if(E->NODE[level][node1] & VBY) ww2=0.0;
 
 		    /* search for direction 1*/
 
@@ -491,7 +491,7 @@ void rebuild_BI_on_boundary(E)
             E->temp[i] = E->temp[i] - 1.0/E->BI[level][i];
         }
         for(i=1;i<=E->lmesh.NNO[level];i++)
-          if (E->NODE[level][CPPR][i] & OFFSIDE)   {
+          if (E->NODE[level][i] & OFFSIDE)   {
             eqn1=E->ID[level][CPPR][i].doff[1];
             eqn2=E->ID[level][CPPR][i].doff[2];
             eqn3=E->ID[level][CPPR][i].doff[3];
@@ -526,12 +526,12 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
         if (E->parallel.me_loc[3]==0 )
           for (i=1;i<=E->parallel.NUM_NNO[lev][CPPR].bound[5];i++)   {
             node = E->parallel.NODE[lev][CPPR][i].bound[5];
- 	    E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | TZEDGE;
+ 	    E->NODE[lev][node] = E->NODE[lev][node] | TZEDGE;
 	    }
         if ( E->parallel.me_loc[3]==E->parallel.nprocz-1 )
           for (i=1;i<=E->parallel.NUM_NNO[lev][CPPR].bound[6];i++)   {
   	    node = E->parallel.NODE[lev][CPPR][i].bound[6];
-	    E->NODE[lev][CPPR][node] = E->NODE[lev][CPPR][node] | TZEDGE;
+	    E->NODE[lev][node] = E->NODE[lev][node] | TZEDGE;
 	    }
 
 
