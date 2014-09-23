@@ -102,7 +102,7 @@ void heat_flux(E)
       area = 0.0;
       for(i=1;i<=vpts;i++)   {
         /* XXX: missing unit conversion, heat capacity and thermal conductivity */
-        uT += rho[i]*u[i]*T[i]*E->gDA[CPPR][e].vpt[i] + dTdz[i]*E->gDA[CPPR][e].vpt[i];
+        uT += rho[i]*u[i]*T[i]*E->gDA[e].vpt[i] + dTdz[i]*E->gDA[e].vpt[i];
         }
 
       uT /= E->eco[e].area;

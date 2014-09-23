@@ -319,8 +319,8 @@ float return_bulk_value(E,Z,average)
 	  for(j=1;j<=vpts;j++)
 	    for(i=1;i<=ends;i++) {
 		n = E->ien[el].node[i];
-		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
-		integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
+		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+		integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
                 }
 
           }
@@ -362,8 +362,8 @@ double return_bulk_value_d(E,Z,average)
           for(j=1;j<=vpts;j++)
             for(i=1;i<=ends;i++) {
                 n = E->ien[el].node[i];
-                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
-                integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[CPPR][el].vpt[j];
+                volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+                integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
             }
 
        }

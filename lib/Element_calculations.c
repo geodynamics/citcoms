@@ -1007,7 +1007,7 @@ void get_elt_f(E,el,elt_f,bcs)
 
       for(j=1;j<=vpts;j++)     /*compute sum(Na(j)*F(j)*det(j)) */
         elt_f[p] += force_at_gs[j] * E->N.vpt[GNVINDEX(a,j)]
-           *E->gDA[CPPR][el].vpt[j]*g_point[j].weight[dims-1]
+           *E->gDA[el].vpt[j]*g_point[j].weight[dims-1]
            *E->element_Cc.vpt[BVINDEX(3,i,a,j)];
 
 	  /* imposed velocity terms */

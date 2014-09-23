@@ -381,7 +381,7 @@ static void pg_solver(struct All_variables *E,
 
       /* XXX: replace diff with refstate.thermal_conductivity */
       pg_shape_fn(E, el, &PG, &(E->gNX[el]), VV, rtf, diff);
-      element_residual(E, el, &PG, &(E->gNX[el]), &(E->gDA[CPPR][el]),
+      element_residual(E, el, &PG, &(E->gNX[el]), &(E->gDA[el]),
                        VV, T, Tdot,
                        Q0, Eres, rtf, diff, E->sphere.cap[CPPR].TB,
                        FLAGS);

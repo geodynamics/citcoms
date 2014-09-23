@@ -1068,7 +1068,7 @@ void mass_matrix(struct All_variables *E)
                 for(nint=1;nint<=vpts;nint++)
                     temp[node] += E->refstate.rho[nz]
                         * E->refstate.heat_capacity[nz]
-                        * E->gDA[CPPR][e].vpt[nint]
+                        * E->gDA[e].vpt[nint]
                         * g_point[nint].weight[E->mesh.nsd-1]
                         * E->N.vpt[GNVINDEX(node,nint)];
             }

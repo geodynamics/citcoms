@@ -211,7 +211,7 @@ void compute_nodal_stress(struct All_variables *E,
 						 velocities to nodes
 						 local to the
 						 element */
-      dOmega = &(E->gDA[CPPR][e]);	/* Jacobian at integration points */
+      dOmega = &(E->gDA[e]);	/* Jacobian at integration points */
       GNx = &(E->gNX[e]);	/* derivatives of shape functions at
 				   integration points */
 
