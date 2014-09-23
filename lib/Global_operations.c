@@ -276,8 +276,8 @@ void return_elementwise_horiz_ave(E,X,H)
       for (j=1;j<=elx;j++)
       {
         el = i + (j-1)*elz + (k-1)*elx*elz;
-        temp[i] += X[CPPR][el]*E->ECO[E->mesh.levmax][CPPR][el].area;
-        temp[i+elz] += E->ECO[E->mesh.levmax][CPPR][el].area;
+        temp[i] += X[CPPR][el]*E->ECO[E->mesh.levmax][el].area;
+        temp[i+elz] += E->ECO[E->mesh.levmax][el].area;
       }
     }
   }

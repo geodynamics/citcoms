@@ -1033,7 +1033,7 @@ void allocate_common_vars(E)
     E->GDA[i] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
     E->MASS[i]     = (double *) malloc((nno+1)*sizeof(double));
-    E->ECO[i][CPPR] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
+    E->ECO[i] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
     E->TWW[i][CPPR] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
 
@@ -1351,7 +1351,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
 
   int i;
 
-  E->eco = E->ECO[E->mesh.levmax][CPPR];
+  E->eco = E->ECO[E->mesh.levmax];
   E->ien = E->IEN[E->mesh.levmax][CPPR];
   E->id = E->ID[E->mesh.levmax][CPPR];
   E->Vi = E->VI[E->mesh.levmax];

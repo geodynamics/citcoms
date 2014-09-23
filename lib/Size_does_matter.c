@@ -985,16 +985,16 @@ void mass_matrix(struct All_variables *E)
                 dx2 = myatan(centre[2],centre[1]);
 
                 /* center of this element in the spherical coordinate */
-                E->ECO[lev][CPPR][e].centre[1] = dx1;
-                E->ECO[lev][CPPR][e].centre[2] = dx2;
-                E->ECO[lev][CPPR][e].centre[3] = dx3;
+                E->ECO[lev][e].centre[1] = dx1;
+                E->ECO[lev][e].centre[2] = dx2;
+                E->ECO[lev][e].centre[3] = dx3;
 
                 /* delta(theta) of this element */
                 dx1 = max( fabs(E->SX[lev][1][n[3]]-E->SX[lev][1][n[1]]),
                            fabs(E->SX[lev][1][n[2]]-E->SX[lev][1][n[4]]) );
 
                 /* length of this element in the theta-direction */
-                E->ECO[lev][CPPR][e].size[1] = dx1*E->ECO[lev][CPPR][e].centre[3];
+                E->ECO[lev][e].size[1] = dx1*E->ECO[lev][e].centre[3];
 
                 /* delta(phi) of this element */
                 dx1 = fabs(E->SX[lev][2][n[3]]-E->SX[lev][2][n[1]]);
@@ -1010,8 +1010,8 @@ void mass_matrix(struct All_variables *E)
                 dx2 = max(dx1,dx2);
 
                 /* length of this element in the phi-direction */
-                E->ECO[lev][CPPR][e].size[2] = dx2*E->ECO[lev][CPPR][e].centre[3]
-                    *sin(E->ECO[lev][CPPR][e].centre[1]);
+                E->ECO[lev][e].size[2] = dx2*E->ECO[lev][e].centre[3]
+                    *sin(E->ECO[lev][e].centre[1]);
 
                 /* delta(radius) of this element */
                 dx3 = 0.25*(fabs(E->SX[lev][3][n[5]]+E->SX[lev][3][n[6]]
@@ -1020,12 +1020,12 @@ void mass_matrix(struct All_variables *E)
                                  -E->SX[lev][3][n[3]]-E->SX[lev][3][n[4]]));
 
                 /* length of this element in the radius-direction */
-                E->ECO[lev][CPPR][e].size[3] = dx3;
+                E->ECO[lev][e].size[3] = dx3;
 
                 /* volume (area in 2D) of this element */
                 for(nint=1;nint<=vpts;nint++)
                     area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][e].vpt[nint];
-                E->ECO[lev][CPPR][e].area = area;
+                E->ECO[lev][e].area = area;
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)  {
                     temp[node] = 0.0;
@@ -1103,7 +1103,7 @@ void mass_matrix(struct All_variables *E)
             fprintf(E->fp_out,"output_mass lev=%d\n",lev);
                 fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
                 for(e=1;e<=E->lmesh.NEL[lev];e++)
-                    fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][CPPR][e].area);
+                    fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][e].area);
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
                     fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][node]);
         }
