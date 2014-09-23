@@ -1365,7 +1365,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
 
   for (i=1;i<=E->mesh.nsd;i++)    {
     E->x[CPPR][i] = E->X[E->mesh.levmax][CPPR][i];
-    E->sx[CPPR][i] = E->SX[E->mesh.levmax][CPPR][i];
+    E->sx[i] = E->SX[E->mesh.levmax][CPPR][i];
     }
 }
 

@@ -576,7 +576,7 @@ void visc_from_T(E,EEta,propogate)
 
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[E->ien[i].node[kk]];
-                    zz[kk] = (1.-E->sx[CPPR][3][E->ien[i].node[kk]]);
+                    zz[kk] = (1.-E->sx[3][E->ien[i].node[kk]]);
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -657,7 +657,7 @@ void visc_from_T(E,EEta,propogate)
 
 	    for(kk=1;kk<=ends;kk++) {
 	      TT[kk] = E->T[E->ien[i].node[kk]];
-	      zz[kk] = (1.0 - E->sx[CPPR][3][E->ien[i].node[kk]]);
+	      zz[kk] = (1.0 - E->sx[3][E->ien[i].node[kk]]);
 	    }
 
 	    for(jj=1;jj <= vpts;jj++) {
@@ -712,7 +712,7 @@ void visc_from_T(E,EEta,propogate)
 
                 for(kk=1;kk<=ends;kk++) {
                     TT[kk] = E->T[E->ien[i].node[kk]];
-                    zz[kk] = (1.-E->sx[CPPR][3][E->ien[i].node[kk]]);
+                    zz[kk] = (1.-E->sx[3][E->ien[i].node[kk]]);
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -760,7 +760,7 @@ void visc_from_T(E,EEta,propogate)
 
                 for(kk=1;kk<=ends;kk++) {
 		  TT[kk] = E->T[E->ien[i].node[kk]];
-		  zz[kk] = E->sx[CPPR][3][E->ien[i].node[kk]]; /* radius */
+		  zz[kk] = E->sx[3][E->ien[i].node[kk]]; /* radius */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -828,7 +828,7 @@ void visc_from_T(E,EEta,propogate)
 
                 for(kk=1;kk<=ends;kk++) {
 		  TT[kk] = E->T[E->ien[i].node[kk]];
-		  zz[kk] = E->sx[CPPR][3][E->ien[i].node[kk]]; /* radius */
+		  zz[kk] = E->sx[3][E->ien[i].node[kk]]; /* radius */
                 }
 
                 for(jj=1;jj<=vpts;jj++) {
@@ -993,7 +993,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	l = E->mat[CPPR][e] -1 ;	/* material of this element */
 	
 	for(kk=1;kk <= ends;kk++) /* nodal depths */
-	  zz[kk] = (1.0 - E->sx[CPPR][3][E->ien[e].node[kk]]); /* for depth, zz = 1 - r */
+	  zz[kk] = (1.0 - E->sx[3][E->ien[e].node[kk]]); /* for depth, zz = 1 - r */
 	
 	for(jj=1;jj <= vpts;jj++){ /* loop through integration points */
 	  
@@ -1025,7 +1025,7 @@ void visc_from_P(E,EEta) /* "plasticity" implementation
 	
 	l = E->mat[CPPR][e] -1 ;	
 	for(kk=1;kk <= ends;kk++)
-	  zz[kk] = (1.0 - E->sx[CPPR][3][E->ien[e].node[kk]]); 
+	  zz[kk] = (1.0 - E->sx[3][E->ien[e].node[kk]]); 
 	for(jj=1;jj <= vpts;jj++){ 
 	  zzz = 0.0;
 	  for(kk=1;kk<=ends;kk++)
@@ -1305,16 +1305,16 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 
         /* find index of radius corresponding to lv_min_radius */
         for(e=1; e<=E->lmesh.elz; e++) {
-            rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                              E->sx[CPPR][3][E->ien[e].node[8]]);
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
             if(rad_mean >= E->viscosity.lv_min_radius) break;
         }
         nz_min[CPPR] = e;
 
         /* find index of radius corresponding to lv_max_radius */
         for(e=E->lmesh.elz; e>=1; e--) {
-            rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                              E->sx[CPPR][3][E->ien[e].node[8]]);
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
             if(rad_mean <= E->viscosity.lv_max_radius) break;
         }
         nz_max[CPPR] = e;
@@ -1325,15 +1325,15 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
             for(i=nz_min[CPPR]; i<=nz_max[CPPR]; i++) {
                 e = (k-1)*E->lmesh.elz + i;
 
-                rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                                  E->sx[CPPR][3][E->ien[e].node[8]]);
+                rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                                  E->sx[3][E->ien[e].node[8]]);
 
                 /* loop over elements below e */
                 for(ii=i; ii>=nz_min[CPPR]; ii--) {
                     ee = (k-1)*E->lmesh.elz + ii;
 
-                    rr = 0.5 * (E->sx[CPPR][3][E->ien[ee].node[1]] +
-                                E->sx[CPPR][3][E->ien[ee].node[8]]);
+                    rr = 0.5 * (E->sx[3][E->ien[ee].node[1]] +
+                                E->sx[3][E->ien[ee].node[8]]);
 
                     /* if ee has tracers in it and is within the channel */
                     if((E->trace.ntracer_flavor[CPPR][flavor][ee] > 0) &&
@@ -1356,16 +1356,16 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 
         /* find index of radius corresponding to lv_min_radius */
         for(e=1; e<=E->lmesh.elz; e++) {
-            rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                              E->sx[CPPR][3][E->ien[e].node[8]]);
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
             if(rad_mean >= E->viscosity.lv_min_radius) break;
         }
         nz_min[CPPR] = e;
 
         /* find index of radius corresponding to lv_max_radius */
         for(e=E->lmesh.elz; e>=1; e--) {
-            rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                              E->sx[CPPR][3][E->ien[e].node[8]]);
+            rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                              E->sx[3][E->ien[e].node[8]]);
             if(rad_mean <= E->viscosity.lv_max_radius) break;
         }
         nz_max[CPPR] = e;
@@ -1376,8 +1376,8 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
             for(i=nz_min[CPPR]; i<=nz_max[CPPR]; i++) {
                 e = (k-1)*E->lmesh.elz + i;
 
-                rad_mean = 0.5 * (E->sx[CPPR][3][E->ien[e].node[1]] +
-                                  E->sx[CPPR][3][E->ien[e].node[8]]);
+                rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
+                                  E->sx[3][E->ien[e].node[8]]);
 
                 /* loop over elements below e */
                 for(ii=i; ii>=nz_min[CPPR]; ii--) {

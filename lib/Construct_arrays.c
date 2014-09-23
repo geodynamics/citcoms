@@ -746,7 +746,7 @@ int layers_r(struct All_variables *E,float r)
 /* determine layer number of node "node" of cap "m" */
 int layers(struct All_variables *E,int node)
 {
-  return(layers_r(E,E->sx[CPPR][3][node]));
+  return(layers_r(E,E->sx[3][node]));
 }
 
 

@@ -78,9 +78,9 @@ void compute_angle_surf_area (E)
         ia[4] = ia[3]-E->lmesh.noz*(E->lmesh.nox-1);
 
         for (i=1;i<=4;i++)  {
-            xx[1][i] = E->x[CPPR][1][ia[i]]/E->sx[CPPR][3][ia[1]];
-            xx[2][i] = E->x[CPPR][2][ia[i]]/E->sx[CPPR][3][ia[1]];
-            xx[3][i] = E->x[CPPR][3][ia[i]]/E->sx[CPPR][3][ia[1]];
+            xx[1][i] = E->x[CPPR][1][ia[i]]/E->sx[3][ia[1]];
+            xx[2][i] = E->x[CPPR][2][ia[i]]/E->sx[3][ia[1]];
+            xx[3][i] = E->x[CPPR][3][ia[i]]/E->sx[3][ia[1]];
         }
 
         get_angle_sphere_cap(xx,angle);

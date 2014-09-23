@@ -196,7 +196,7 @@ void output_coord(struct All_variables *E)
 
   fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++)
-    fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[CPPR][1][i],E->sx[CPPR][2][i],E->sx[CPPR][3][i]);
+    fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[1][i],E->sx[2][i],E->sx[3][i]);
   fclose(fp1);
 }
 
@@ -226,16 +226,16 @@ void output_domain(struct All_variables *E)
 
     double buffer[ncolumns];
 
-    buffer[0] = E->sx[CPPR][3][1];
-    buffer[1] = E->sx[CPPR][3][noz];
-    buffer[2] = E->sx[CPPR][1][corner_nodes[0]];
-    buffer[3] = E->sx[CPPR][2][corner_nodes[0]];
-    buffer[4] = E->sx[CPPR][1][corner_nodes[1]];
-    buffer[5] = E->sx[CPPR][2][corner_nodes[1]];
-    buffer[6] = E->sx[CPPR][1][corner_nodes[2]];
-    buffer[7] = E->sx[CPPR][2][corner_nodes[2]];
-    buffer[8] = E->sx[CPPR][1][corner_nodes[3]];
-    buffer[9] = E->sx[CPPR][2][corner_nodes[3]];
+    buffer[0] = E->sx[3][1];
+    buffer[1] = E->sx[3][noz];
+    buffer[2] = E->sx[1][corner_nodes[0]];
+    buffer[3] = E->sx[2][corner_nodes[0]];
+    buffer[4] = E->sx[1][corner_nodes[1]];
+    buffer[5] = E->sx[2][corner_nodes[1]];
+    buffer[6] = E->sx[1][corner_nodes[2]];
+    buffer[7] = E->sx[2][corner_nodes[2]];
+    buffer[8] = E->sx[1][corner_nodes[3]];
+    buffer[9] = E->sx[2][corner_nodes[3]];
 
     if(E->parallel.me == 0) {
         int i, rank;
@@ -510,7 +510,7 @@ void output_horiz_avg(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1=fopen(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  {
-        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[CPPR][3][j],
+        fprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[3][j],
 		E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {

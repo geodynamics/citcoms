@@ -106,8 +106,8 @@ void reference_state(struct All_variables *E)
     if(E->parallel.me < E->parallel.nprocz)
         for(i=1; i<=E->lmesh.noz; i++) {
             fprintf(stderr, "%6d %11f %11f %11e %5i\n",
-                    i+E->lmesh.nzs-1, E->sx[1][3][i], 1-E->sx[1][3][i],
-                    E->refstate.rho[i],layers_r(E,E->sx[1][3][i]));
+                    i+E->lmesh.nzs-1, E->sx[3][i], 1-E->sx[3][i],
+                    E->refstate.rho[i],layers_r(E,E->sx[3][i]));
         }
 
 }
@@ -152,7 +152,7 @@ static void read_refstate(struct All_variables *E)
                 E->refstate.gravity[i],
                 E->refstate.thermal_expansivity[i],
                 E->refstate.heat_capacity[i]);
-        /* end of debug */
+        end of debug */
     }
 
     fclose(fp);
@@ -167,7 +167,7 @@ static void adams_williamson_eos(struct All_variables *E)
     beta = E->control.disptn_number * E->control.inv_gruneisen;
 
     for(i=1; i<=E->lmesh.noz; i++) {
-	r = E->sx[1][3][i];
+	r = E->sx[3][i];
 	z = 1 - r;
 	E->refstate.rho[i] = exp(beta*z);
 	E->refstate.gravity[i] = 1;

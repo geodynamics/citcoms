@@ -813,8 +813,8 @@ static void generate_random_tracers(struct All_variables *E, int tracers_cap)
 
         cart_to_sphere(E,x,y,z,&theta,&phi,&rad);
 
-        if (rad>=E->sx[CPPR][3][E->lmesh.noz]) continue;
-        if (rad<E->sx[CPPR][3][1]) continue;
+        if (rad>=E->sx[3][E->lmesh.noz]) continue;
+        if (rad<E->sx[3][1]) continue;
 
 
         /* check if in current cap */
@@ -1283,7 +1283,7 @@ void get_neighboring_caps(struct All_variables *E)
         n = 0;
         for (i=0; i<ncorners; i++) {
             for (d=0; d<2; d++) {
-                xx[n] = E->sx[CPPR][d+1][node[i]];
+                xx[n] = E->sx[d+1][node[i]];
                 n++;
             }
         }
@@ -1628,8 +1628,8 @@ int icheck_processor_shell(struct All_variables *E, double rad)
 
     if (nprocz==1) return 1;
 
-    top_r = E->sx[CPPR][3][noz];
-    bottom_r = E->sx[CPPR][3][1];
+    top_r = E->sx[3][noz];
+    bottom_r = E->sx[3][1];
 
     /* First check bottom */
 

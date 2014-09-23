@@ -579,10 +579,10 @@ static void geoid_from_buoyancy(struct All_variables *E,
         sphere_expansion(E,TT,geoid[0],geoid[1]);
 
         /* thickness of the layer */
-        dlayer = (E->sx[CPPR][3][k+1]-E->sx[CPPR][3][k])*radius_m;
+        dlayer = (E->sx[3][k+1]-E->sx[3][k])*radius_m;
 
         /* mean radius of the layer */
-        radius = (E->sx[CPPR][3][k+1]+E->sx[CPPR][3][k])*0.5;
+        radius = (E->sx[3][k+1]+E->sx[3][k])*0.5;
 
         /* geoid contribution of density at this layer, ignore degree-0 term */
         for (ll=1;ll<=E->output.llmax;ll++) {

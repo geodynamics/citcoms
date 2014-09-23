@@ -301,7 +301,7 @@ void construct_surf_det (E)
       E->surf_det[CPPR][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
     }
 
-  r2 = 1.0 / (E->sx[CPPR][3][E->lmesh.elz+1] * E->sx[CPPR][3][E->lmesh.elz+1]);
+  r2 = 1.0 / (E->sx[3][E->lmesh.elz+1] * E->sx[3][E->lmesh.elz+1]);
 
   for (es=1;es<=E->lmesh.snel;es++)   {
     el = es * E->lmesh.elz;

@@ -876,7 +876,7 @@ void remove_rigid_rot(struct All_variables *E)
         for (i=1;i<=E->lmesh.elz;i++)
             tmp += (8.0*M_PI/15.0)*
                 0.5*(E->refstate.rho[i] + E->refstate.rho[i+1])*
-                (pow(E->sx[1][3][i+1],5.0) - pow(E->sx[1][3][i],5.0));
+                (pow(E->sx[3][i+1],5.0) - pow(E->sx[3][i],5.0));
 
         MPI_Allreduce(&tmp, &moment_of_inertia, 1, MPI_DOUBLE,
                       MPI_SUM, E->parallel.vertical_comm);
@@ -969,9 +969,9 @@ void remove_rigid_rot(struct All_variables *E)
     sin_t = sin(tr) * rot;
     cos_t = cos(tr) * rot;
       for (node=1;node<=nno;node++)   {
-	frd = fr - E->sx[CPPR][2][node];
-	v_theta = E->sx[CPPR][3][node] * sin_t * sin(frd);
-	v_phi =   E->sx[CPPR][3][node] * 
+	frd = fr - E->sx[2][node];
+	v_theta = E->sx[3][node] * sin_t * sin(frd);
+	v_phi =   E->sx[3][node] * 
 	  (  E->SinCos[lev][CPPR][0][node] * cos_t - E->SinCos[lev][CPPR][2][node]  * sin_t * cos(frd) );
 	
 	E->sphere.cap[CPPR].V[1][node] -= v_theta;

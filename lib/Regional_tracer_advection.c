@@ -235,13 +235,13 @@ static void make_mesh_ijk(struct All_variables *E)
     ***/
 
         for(i=0;i<nox;i++)
-	    E->trace.x_space[i]=E->sx[CPPR][1][i*noz+1];
+	    E->trace.x_space[i]=E->sx[1][i*noz+1];
 
         for(j=0;j<noy;j++)
-	    E->trace.y_space[j]=E->sx[CPPR][2][j*nox*noz+1];
+	    E->trace.y_space[j]=E->sx[2][j*nox*noz+1];
 
         for(k=0;k<noz;k++)
-	    E->trace.z_space[k]=E->sx[CPPR][3][k+1];
+	    E->trace.z_space[k]=E->sx[3][k+1];
 }
 
 
@@ -554,8 +554,8 @@ void regional_lost_souls(struct All_variables *E)
 
     /* the bounding box */
     for (d=0; d<E->mesh.nsd; d++) {
-        bounds[d][0] = E->sx[CPPR][d+1][1];
-        bounds[d][1] = E->sx[CPPR][d+1][E->lmesh.nno];
+        bounds[d][0] = E->sx[d+1][1];
+        bounds[d][1] = E->sx[d+1][E->lmesh.nno];
     }
 
     /* set up ranks for neighboring procs */

@@ -205,8 +205,8 @@ static void  compute_sphereh_table(E)
 
         for (j=1;j<=E->lmesh.nsf;j++)  {
             node = j*E->lmesh.noz;
-            f=E->sx[CPPR][2][node];
-            t=E->sx[CPPR][1][node];
+            f=E->sx[2][node];
+            t=E->sx[1][node];
             for (mm=0;mm<=E->output.llmax;mm++)   {
 	      mmf = (double)(mm)*f;
                 E->sphere.tablescosf[CPPR][j][mm] = cos( mmf );

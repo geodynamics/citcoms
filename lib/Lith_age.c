@@ -132,7 +132,7 @@ void lith_age_construct_tic(struct All_variables *E)
 	for(k=1;k<=noz;k++)  {
 	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
-	  r1=E->sx[CPPR][3][node];
+	  r1=E->sx[3][node];
 	  E->T[node] = E->control.mantle_temp;
 	  if( r1 >= E->sphere.ro-E->control.lith_age_depth )
 	    { /* if closer than (lith_age_depth) from top */
@@ -165,7 +165,7 @@ void lith_age_update_tbc(struct All_variables *E)
       for(j=1;j<=nox;j++)
 	for(k=1;k<=noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
-	  r1=E->sx[CPPR][3][node];
+	  r1=E->sx[3][node];
 
 	  if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
 	    E->sphere.cap[CPPR].TB[1][node]=E->T[node];
@@ -196,7 +196,7 @@ all three get set to true. CPC 6/20/00 */
 
     if(lv==E->mesh.gridmax)
 	for(node=1;node<=E->lmesh.nno;node++)  {
-	  if( ((E->sx[CPPR][1][node]<=ttt2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[CPPR][1][node]>=ttt3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[1][node]<=ttt2) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[1][node]>=ttt3) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if < (width) from x bounds AND (depth) from top */
 	    {
 	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
@@ -207,7 +207,7 @@ all three get set to true. CPC 6/20/00 */
 	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
-	  if( ((E->sx[CPPR][2][node]<=fff2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[2][node]<=fff2) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
 	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
@@ -218,7 +218,7 @@ all three get set to true. CPC 6/20/00 */
 	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBZ);
 	    }
 
-	  if( ((E->sx[CPPR][2][node]>=fff3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[2][node]>=fff3) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if fi is < (width) from side AND z is < (depth) from top */
 	    {
 	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
@@ -235,7 +235,7 @@ all three get set to true. CPC 6/20/00 */
   if (E->control.lith_age_time) {
     if(lv==E->mesh.gridmax)
 	for(node=1;node<=E->lmesh.nno;node++)  {
-	  if(E->sx[CPPR][3][node]>=E->sphere.ro-E->control.lith_age_depth)
+	  if(E->sx[3][node]>=E->sphere.ro-E->control.lith_age_depth)
 	    { /* if closer than (lith_age_depth) from top */
 	      E->node[CPPR][node]=E->node[CPPR][node] | TBX;
 	      E->node[CPPR][node]=E->node[CPPR][node] & (~FBX);
@@ -295,12 +295,12 @@ void lith_age_conform_tbc(struct All_variables *E)
 	  for(k=1;k<=noz;k++)  {
 	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
-	    t1=E->sx[CPPR][1][node];
-	    f1=E->sx[CPPR][2][node];
-	    r1=E->sx[CPPR][3][node];
+	    t1=E->sx[1][node];
+	    f1=E->sx[2][node];
+	    r1=E->sx[3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-	      if( ((E->sx[CPPR][1][node]<=ttt2) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[CPPR][1][node]>=ttt3) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
+	      if( ((E->sx[1][node]<=ttt2) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[1][node]>=ttt3) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj)) ) {
 		/* if < (width) from x bounds AND (depth) from top */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
 		t0 = E->control.mantle_temp * erf(temp);
@@ -311,7 +311,7 @@ void lith_age_conform_tbc(struct All_variables *E)
 		E->sphere.cap[CPPR].TB[3][node]=t0;
 	      }
 
-	      if( ((E->sx[CPPR][2][node]<=fff2) || (E->sx[CPPR][2][node]>=fff3)) && (E->sx[CPPR][3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
+	      if( ((E->sx[2][node]<=fff2) || (E->sx[2][node]>=fff3)) && (E->sx[3][node]>=E->sphere.ro-E->control.depth_bound_adj) ) {
 		/* if < (width) from y bounds AND (depth) from top */
 
 
@@ -339,15 +339,15 @@ void lith_age_conform_tbc(struct All_variables *E)
 	  for(k=1;k<=noz;k++)  {
 	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
 	    node=k+(j-1)*noz+(i-1)*nox*noz;
-	    t1=E->sx[CPPR][1][node];
-	    f1=E->sx[CPPR][2][node];
-	    r1=E->sx[CPPR][3][node];
+	    t1=E->sx[1][node];
+	    f1=E->sx[2][node];
+	    r1=E->sx[3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-	      if(  E->sx[CPPR][3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
+	      if(  E->sx[3][node]>=E->sphere.ro-E->control.lith_age_depth ) {
 		/* if closer than (lith_age_depth) from top */
 
-                depth=E->sphere.ro - E->sx[CPPR][3][node];
+                depth=E->sphere.ro - E->sx[3][node];
 
 		/* set a new age from the file */
 		temp = (E->sphere.ro-r1) *0.5 /sqrt(E->age_t[nodeg]);
@@ -408,7 +408,7 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
             break;
         } /* end switch */
 
-        depth = E->sphere.ro - E->sx[CPPR][3][node];
+        depth = E->sphere.ro - E->sx[3][node];
 
         switch (type) {
         case 0:  /* no match, next node */

@@ -320,7 +320,7 @@ void full_lost_souls(struct All_variables *E)
                 E->trace.rlater[CPPR][2][kk]);
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
 
@@ -352,7 +352,7 @@ void full_lost_souls(struct All_variables *E)
 
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
     /* Pre communication */
@@ -401,7 +401,7 @@ void full_lost_souls(struct All_variables *E)
 	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
 		E->parallel.me,ireceive[CPPR][kk],isource_proc);
     }
-    /**/
+    */
 
     /* Allocate memory in receive arrays */
 
@@ -618,7 +618,7 @@ void full_lost_souls(struct All_variables *E)
                     isend_z[CPPR][kk],ireceive_z[CPPR][kk]);
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
 
         /* Allocate memory to receive_z arrays */
@@ -939,7 +939,7 @@ void full_get_shape_functions(struct All_variables *E,
                     fprintf(E->trace.fpt,"theta: %f phi: %f rad: %f\n",theta,phi,rad);
                     fprintf(E->trace.fpt,"Element theta-phi boundaries: \n");
                     for(kk=1;kk<=4;kk++)
-                        fprintf(E->trace.fpt,"%d: Theta: %f Phi:%f\n",kk,E->sx[CPPR][1][E->ien[nelem].node[kk]],E->sx[CPPR][2][E->ien[nelem].node[kk]]);
+                        fprintf(E->trace.fpt,"%d: Theta: %f Phi:%f\n",kk,E->sx[1][E->ien[nelem].node[kk]],E->sx[2][E->ien[nelem].node[kk]]);
                     sphere_to_cart(E,theta,phi,rad,&x,&y,&z);
                     ival=icheck_element(E,nelem,x,y,z,rad);
                     fprintf(E->trace.fpt,"ICHECK?: %d\n",ival);
@@ -983,9 +983,7 @@ void full_get_shape_functions(struct All_variables *E,
     /** debug **
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
             shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
-    /**/
-
-    return;
+    */
 }
 
 
@@ -1164,8 +1162,8 @@ static void get_radial_shape(struct All_variables *E,
     node1=E->ien[nelem].node[1];
     node5=E->ien[nelem].node[5];
 
-    rad1=E->sx[CPPR][3][node1];
-    rad5=E->sx[CPPR][3][node5];
+    rad1=E->sx[3][node1];
+    rad5=E->sx[3][node5];
 
     delrad=rad5-rad1;
 
@@ -1325,8 +1323,8 @@ static void make_regular_grid(struct All_variables *E)
             for (kk=1;kk<=E->lmesh.nno;kk=kk+E->lmesh.noz)
                 {
 
-                    theta=E->sx[CPPR][1][kk];
-                    phi=E->sx[CPPR][2][kk];
+                    theta=E->sx[1][kk];
+                    phi=E->sx[2][kk];
 
                     thetamax=max(thetamax,theta);
                     thetamin=min(thetamin,theta);
@@ -1470,8 +1468,8 @@ static void make_regular_grid(struct All_variables *E)
                     for (pp=1;pp<=4;pp++)
                         {
                             node=E->ien[mm].node[pp];
-                            theta=E->sx[CPPR][1][node];
-                            phi=E->sx[CPPR][2][node];
+                            theta=E->sx[1][node];
+                            phi=E->sx[2][node];
 
                             theta_min=min(theta_min,theta);
                             theta_max=max(theta_max,theta);
@@ -2099,8 +2097,8 @@ static int icheck_shell(struct All_variables *E,
     ibottom_node=E->ien[nel].node[1];
     itop_node=E->ien[nel].node[5];
 
-    bottom_rad=E->sx[CPPR][3][ibottom_node];
-    top_rad=E->sx[CPPR][3][itop_node];
+    bottom_rad=E->sx[3][ibottom_node];
+    top_rad=E->sx[3][itop_node];
 
     ival=0;
     if ((rad>=bottom_rad)&&(rad<top_rad)) ival=1;
@@ -2141,8 +2139,8 @@ static int icheck_element_column(struct All_variables *E,
             rnode[kk][2]=E->x[CPPR][2][node];
             rnode[kk][3]=E->x[CPPR][3][node];
 
-            rnode[kk][4]=E->sx[CPPR][1][node];
-            rnode[kk][5]=E->sx[CPPR][2][node];
+            rnode[kk][4]=E->sx[1][node];
+            rnode[kk][5]=E->sx[2][node];
 
             rnode[kk][6]=E->SinCos[lev][CPPR][2][node]; /* cos(theta) */
             rnode[kk][7]=E->SinCos[lev][CPPR][0][node]; /* sin(theta) */
@@ -2710,7 +2708,7 @@ static int iget_radial_element(struct All_variables *E,
         {
 
             node=E->ien[iradial_element].node[8];
-            top_rad=E->sx[CPPR][3][node];
+            top_rad=E->sx[3][node];
 
             if (rad<top_rad) goto found_it;
 
@@ -2808,7 +2806,7 @@ static void define_uv_space(struct All_variables *E)
     /* use the point at middle of the cap */
     refnode = 1 + E->lmesh.noz * ((E->lmesh.noy / 2) * E->lmesh.nox
                                   + E->lmesh.nox / 2);
-    phi_f = E->gnomonic_reference_phi = E->sx[CPPR][2][refnode];
+    phi_f = E->gnomonic_reference_phi = E->sx[2][refnode];
 
     /** debug **
     theta_f = E->sx[j][1][refnode];
@@ -2818,7 +2816,7 @@ static void define_uv_space(struct All_variables *E)
     }
     fprintf(E->trace.fpt, "%d %d %d ref=(%e %e)\n",
             E->lmesh.noz, E->lmesh.nsf, refnode, theta_f, phi_f);
-    /**/
+    */
 
     /* store cos(theta_f) and sin(theta_f) */
     E->gnomonic[0].u = cost[refnode];
@@ -2828,7 +2826,7 @@ static void define_uv_space(struct All_variables *E)
     /* convert each nodal point to u and v */
 
     for (i=1, n=1; i<=E->lmesh.nsf; i++, n+=E->lmesh.noz) {
-        dphi = E->sx[CPPR][2][n] - phi_f;
+        dphi = E->sx[2][n] - phi_f;
         cosd = cos(dphi);
         cosc = cost[refnode] * cost[n] + sint[refnode] * sint[n] * cosd;
         u = sint[n] * sin(dphi) / cosc;
@@ -2841,7 +2839,7 @@ static void define_uv_space(struct All_variables *E)
         /** debug **
         fprintf(E->trace.fpt, "n=%d ns=%d cosc=%e (%e %e) -> (%e %e)\n",
                 n, i, cosc, E->sx[j][1][n], E->sx[j][2][n], u, v);
-        /**/
+        */
     }
 
     return;
@@ -2961,7 +2959,7 @@ static void determine_shape_coefficients(struct All_variables *E)
                     E->trace.shape_coefs[j][iwedge][7][i],
                     E->trace.shape_coefs[j][iwedge][8][i],
                     E->trace.shape_coefs[j][iwedge][9][i]);
-            /**/
+            */
 
         } /* end wedge */
     } /* end elem */

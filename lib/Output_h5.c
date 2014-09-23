@@ -451,9 +451,9 @@ void h5output_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[3*m+0] = E->sx[CPPR][1][n+1];
-                field->data[3*m+1] = E->sx[CPPR][2][n+1];
-                field->data[3*m+2] = E->sx[CPPR][3][n+1];
+                field->data[3*m+0] = E->sx[1][n+1];
+                field->data[3*m+1] = E->sx[2][n+1];
+                field->data[3*m+2] = E->sx[3][n+1];
             }
         }
     }
@@ -754,8 +754,8 @@ void h5output_surf_botm_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                field->data[2*m+0] = E->sx[CPPR][1][n+1];
-                field->data[2*m+1] = E->sx[CPPR][2][n+1];
+                field->data[2*m+0] = E->sx[1][n+1];
+                field->data[2*m+1] = E->sx[2][n+1];
             }
         }
         dataset = H5Dopen(E->hdf5.file_id, "/surf/coord");
@@ -772,8 +772,8 @@ void h5output_surf_botm_coord(struct All_variables *E)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                field->data[2*m+0] = E->sx[CPPR][1][n+1];
-                field->data[2*m+1] = E->sx[CPPR][2][n+1];
+                field->data[2*m+0] = E->sx[1][n+1];
+                field->data[2*m+1] = E->sx[2][n+1];
             }
         }
         dataset = H5Dopen(E->hdf5.file_id, "/botm/coord");
@@ -986,7 +986,7 @@ void h5output_have_coord(struct All_variables *E)
     if (E->output.horiz_avg == 1)
     {
         for(k = 0; k < mz; k++)
-            field->data[k] = E->sx[CPPR][3][k+1];
+            field->data[k] = E->sx[3][k+1];
         dataset = H5Dopen(E->hdf5.file_id, "/horiz_avg/coord");
         status = h5write_field(dataset, field, 0, (px == 0 && py == 0));
         status = H5Dclose(dataset);

@@ -383,7 +383,7 @@ void gzdir_output_coord(struct All_variables *E)
       gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
 	gzprintf(gz1,"%.6e %.6e %.6e\n",
-		 E->sx[CPPR][1][i],E->sx[CPPR][2][i],E->sx[CPPR][3][i]);
+		 E->sx[1][i],E->sx[2][i],E->sx[3][i]);
 
     gzclose(gz1);
     if(E->output.gzdir.vtk_io == 1){
@@ -554,7 +554,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	  /* remove the velocity that corresponds to a net rotation of omega[0..2] at location
 	     r,t,p from the t,p velocities in vcorr[0..1]
 	  */
-	  sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
+	  sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 
 	  convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],vcorr[0],vcorr[1],
 			       (E->output.gzdir.vtk_base+k),cvec);
@@ -624,7 +624,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	  for(i=1;i<=E->lmesh.nno;i++){
 	    vcorr[0] = E->sphere.cap[CPPR].V[1][i]; /* vt */
 	    vcorr[1] = E->sphere.cap[CPPR].V[2][i]; /* vphi */
-	    sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
+	    sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 	    gzprintf(gzout,"%.6e %.6e %.6e %.6e\n",
 		     vcorr[0],vcorr[1],
 		     E->sphere.cap[CPPR].V[3][i],E->T[i]);
@@ -651,7 +651,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
 	  for(i=1,k=0;i<=E->lmesh.nno;i++,k += 9) {
 	    vcorr[0] = E->sphere.cap[CPPR].V[1][i];
 	    vcorr[1] = E->sphere.cap[CPPR].V[2][i];
-	    sub_netr(E->sx[CPPR][3][i],E->sx[CPPR][1][i],E->sx[CPPR][2][i],(vcorr+0),(vcorr+1),omega);
+	    sub_netr(E->sx[3][i],E->sx[1][i],E->sx[2][i],(vcorr+0),(vcorr+1),omega);
 	    convert_pvec_to_cvec(E->sphere.cap[CPPR].V[3][i],vcorr[0],vcorr[1],
 				 (E->output.gzdir.vtk_base+k),cvec);
 	    gzprintf(gzout,"%10.4e %10.4e %10.4e\n",cvec[0],cvec[1],cvec[2]);
@@ -948,7 +948,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1=gzdir_output_open(output_file,"w");
     for(j=1;j<=E->lmesh.noz;j++)  { /* format: r <T> <vh> <vr> (<C>) */
-        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[1][3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
+        gzprintf(fp1,"%.4e %.4e %.4e %.4e",E->sx[3][j],E->Have.T[j],E->Have.V[1][j],E->Have.V[2][j]);
 
         if (E->composition.on) {
             int n;

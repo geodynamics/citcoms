@@ -161,7 +161,7 @@ static void calc_phase_change(struct All_variables *E,
      * phase. B is between 0 and 1. */
     for(i=1;i<=E->lmesh.nno;i++)  {
         nz = ((i-1) % E->lmesh.noz) + 1;
-        dz = (E->sphere.ro-E->sx[CPPR][3][i]) - depth;
+        dz = (E->sphere.ro-E->sx[3][i]) - depth;
         /*XXX: dz*rho[nz]*g[nz] is only a approximation for the reduced
          * pressure, a more accurate formula is:
          *   integral(rho(z)*g(z)*dz) from depth_ph to current depth   */
@@ -180,7 +180,7 @@ static void calc_phase_change(struct All_variables *E,
         for (i=1;i<E->lmesh.noz;i++)   {
           n = (k-1)*E->lmesh.noz*E->lmesh.nox + (j-1)*E->lmesh.noz + i;
           if (B[CPPR][n]>=pt5 && B[CPPR][n+1]<=pt5)
-            B_b[CPPR][ns]=(E->sx[CPPR][3][n+1]-E->sx[CPPR][3][n])*(pt5-B[CPPR][n])/(B[CPPR][n+1]-B[CPPR][n])+E->sx[CPPR][3][n];
+            B_b[CPPR][ns]=(E->sx[3][n+1]-E->sx[3][n])*(pt5-B[CPPR][n])/(B[CPPR][n+1]-B[CPPR][n])+E->sx[3][n];
 	}
       }
 }
@@ -193,6 +193,6 @@ static void debug_phase_change(struct All_variables *E, float **B)
   fprintf(E->fp_out,"output_phase_change_buoyancy\n");
     fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
     for (j=1;j<=E->lmesh.nno;j++)
-      fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",E->sx[CPPR][3][j],E->T[j],j,B[CPPR][j]);
+      fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",E->sx[3][j],E->T[j],j,B[CPPR][j]);
   fflush(E->fp_out);
 }

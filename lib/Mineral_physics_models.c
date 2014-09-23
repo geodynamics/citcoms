@@ -144,7 +144,7 @@ void get_prem(double r, double *vp, double *vs, double *rho)
 
     /** debug **
     fprintf(stderr, "%e %d %f %f %f\n", r, j, *rho, *vp, *vs);
-    /**/
+    */
 
 #undef NUM_PREM_LAYERS
 #undef SUPPRESS_CRUSTAL_MESH
@@ -181,8 +181,8 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
     depthkm = malloc((E->lmesh.noz+1) * sizeof(double));
 
     for(nz=1; nz<=E->lmesh.noz; nz++) {
-        get_prem(E->sx[CPPR][3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
-        depthkm[nz] = (1.0 - E->sx[CPPR][3][nz]) * E->data.radius_km;
+        get_prem(E->sx[3][nz], &vpr[nz], &vsr[nz], &rhor[nz]);
+        depthkm[nz] = (1.0 - E->sx[3][nz]) * E->data.radius_km;
     }
 
     /* deviation from the reference */
@@ -217,7 +217,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
         /** debug **
         fprintf(stderr, "node=%d dT=%f K, dC=%f, %e %e %e\n",
                 i, dT, dC, drho, dvp, dvs);
-        /**/
+        */
     }
 
 
