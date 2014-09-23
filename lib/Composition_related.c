@@ -218,7 +218,7 @@ static void allocate_composition_memory(struct All_variables *E)
 
     /* allocat memory for composition fields at the nodes and elements */
 
-    if ((E->composition.comp_el[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+    if ((E->composition.comp_el=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
         fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8987y\n");
         fflush(E->trace.fpt);
         exit(10);
@@ -230,7 +230,7 @@ static void allocate_composition_memory(struct All_variables *E)
     }
 
     for (i=0; i<E->composition.ncomp; i++) {
-        if ((E->composition.comp_el[CPPR][i]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
+        if ((E->composition.comp_el[i]=(double *)malloc((E->lmesh.nel+1)*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8989y\n");
             fflush(E->trace.fpt);
             exit(10);
@@ -320,7 +320,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
 
             for(i=0;i<E->composition.ncomp;i++) {
                 flavor = i + 1;
-                E->composition.comp_el[CPPR][i][e] =
+                E->composition.comp_el[i][e] =
                     E->trace.ntracer_flavor[CPPR][flavor][e] / (double)numtracers;
             }
         }
@@ -376,7 +376,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
             /* If no tracers are in an element, comp = 0.0 (i.e. is ambient) */
             if (numtracers == 0) {
                 for(i=0;i<E->composition.ncomp;i++) {
-                    E->composition.comp_el[CPPR][i][e] = 0.0;
+                    E->composition.comp_el[i][e] = 0.0;
                 }
                 continue;
             }
@@ -391,7 +391,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
                 /* truncate composition at 1.0 */
                 /* This violates mass conservation but prevents unphysical C */
                 /* XXX: make truncation a switch for the user to specify */
-                E->composition.comp_el[CPPR][i][e] = min(comp,one);
+                E->composition.comp_el[i][e] = min(comp,one);
 
             }
         }
@@ -429,7 +429,7 @@ void map_composition_to_nodes(struct All_variables *E)
                 for(i=0;i<E->composition.ncomp;i++) {
 
                     E->composition.comp_node[CPPR][i][n] +=
-                        E->composition.comp_el[CPPR][i][nelem]*
+                        E->composition.comp_el[i][nelem]*
                         E->TWW[E->mesh.levmax][CPPR][nelem].node[nodenum];
                 }
             }
@@ -508,7 +508,7 @@ static void fill_composition_from_neighbors(struct All_variables *E)
                     if((ee>0) && (ee<=E->lmesh.nel) && (!is_empty[ee])) {
                         count++;
                         for (i=0; i<E->composition.ncomp; i++)
-                            sum[i] += E->composition.comp_el[CPPR][i][ee];
+                            sum[i] += E->composition.comp_el[i][ee];
                     }
                 }
 
@@ -519,7 +519,7 @@ static void fill_composition_from_neighbors(struct All_variables *E)
                 }
 
                 for (i=0; i<E->composition.ncomp; i++)
-                    E->composition.comp_el[CPPR][i][e] = sum[i] / count;
+                    E->composition.comp_el[i][e] = sum[i] / count;
             }
         }
 

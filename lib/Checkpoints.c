@@ -350,7 +350,7 @@ static void composition_checkpoint(struct All_variables *E, FILE *fp)
     /* the 0-th element of comp_el is not init'd
      * and won't be used when read it. */
     for(i=0; i<E->composition.ncomp; i++)
-        fwrite(E->composition.comp_el[CPPR][i], sizeof(double),
+        fwrite(E->composition.comp_el[i], sizeof(double),
                E->lmesh.nel+1, fp);
 }
 
@@ -377,7 +377,7 @@ static void read_composition_checkpoint(struct All_variables *E, FILE *fp)
           E->composition.ncomp, fp);
 
     for(i=0; i<E->composition.ncomp; i++)
-        fread(E->composition.comp_el[CPPR][i], sizeof(double),
+        fread(E->composition.comp_el[i], sizeof(double),
               E->lmesh.nel+1, fp);
 
     /* init E->composition.comp_node */

@@ -1138,7 +1138,7 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 
         for(i=1;i<=E->lmesh.nel;i++) {
 	  for(k=0;k<E->composition.ncomp;k++)
-            gzprintf(fp1,"%.6e ",E->composition.comp_el[CPPR][k][i]);
+            gzprintf(fp1,"%.6e ",E->composition.comp_el[k][i]);
 	  gzprintf(fp1,"\n");
         }
 

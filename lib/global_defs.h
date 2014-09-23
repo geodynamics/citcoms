@@ -692,7 +692,7 @@ struct COMPOSITION {
     int ncomp;
     double *buoyancy_ratio;
 
-    double **comp_el[13];
+    double **comp_el;
     double **comp_node[13];
 
     double *initial_bulk_composition;

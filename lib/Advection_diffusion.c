@@ -558,8 +558,8 @@ static void element_residual(struct All_variables *E, int el,
 
       /* Q = Q0 for C = 0, Q = Q0ER for C = 1, and linearly in
 	 between  */
-      Q *= (1.0 - E->composition.comp_el[CPPR][0][el]);
-      Q += E->composition.comp_el[CPPR][0][el] * E->control.Q0ER;
+      Q *= (1.0 - E->composition.comp_el[0][el]);
+      Q += E->composition.comp_el[0][el] * E->control.Q0ER;
     }
 
     nz = ((el-1) % E->lmesh.elz) + 1;
