@@ -210,7 +210,7 @@ void get_bcs_id_for_residual(E,level)
 	}
       }
 
-    E->num_zero_resid[level][CPPR] = j;
+    E->num_zero_resid[level] = j;
 }
 
 /*==========================================================

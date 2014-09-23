@@ -93,8 +93,8 @@ void strip_bcs_from_residual(E,Res,level)
 {
     int m,i;
 
-    if (E->num_zero_resid[level][CPPR])
-      for(i=1;i<=E->num_zero_resid[level][CPPR];i++)
+    if (E->num_zero_resid[level])
+      for(i=1;i<=E->num_zero_resid[level];i++)
          Res[E->zero_resid[level][CPPR][i]] = 0.0;
 
 }
