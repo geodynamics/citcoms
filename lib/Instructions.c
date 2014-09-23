@@ -973,7 +973,7 @@ void allocate_common_vars(E)
   E->slice.freesurf    = (float *)malloc((nsf+2)*sizeof(float));
 
   E->mat = (int *) malloc((nel+2)*sizeof(int));
-  E->VIP[CPPR] = (float *) malloc((nel+2)*sizeof(float));
+  E->VIP = (float *) malloc((nel+2)*sizeof(float));
 
   E->heating_adi    = (double *) malloc((nel+1)*sizeof(double));
   E->heating_visc   = (double *) malloc((nel+1)*sizeof(double));
@@ -1134,7 +1134,7 @@ void allocate_common_vars(E)
 
   for(i=1;i<=E->lmesh.nel;i++)   {
       E->mat[i]=1;
-      E->VIP[CPPR][i]=1.0;
+      E->VIP[i]=1.0;
 
       E->heating_adi[i] = 0;
       E->heating_visc[i] = 0;

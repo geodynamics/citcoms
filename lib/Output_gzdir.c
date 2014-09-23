@@ -974,7 +974,7 @@ void gzdir_output_mat(struct All_variables *E)
   fp = gzdir_output_open(output_file,"w");
 
   for(el=1;el<=E->lmesh.nel;el++)
-    gzprintf(fp,"%d %d %f\n", el,E->mat[el],E->VIP[CPPR][el]);
+    gzprintf(fp,"%d %d %f\n", el,E->mat[el],E->VIP[el]);
 
   gzclose(fp);
 

@@ -595,7 +595,7 @@ void output_mat(struct All_variables *E)
   fp = output_open(output_file, "w");
 
     for(el=1;el<=E->lmesh.nel;el++)
-      fprintf(fp,"%d %d %f\n", el,E->mat[el],E->VIP[CPPR][el]);
+      fprintf(fp,"%d %d %f\n", el,E->mat[el],E->VIP[el]);
 
   fclose(fp);
 }

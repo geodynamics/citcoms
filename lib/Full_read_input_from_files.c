@@ -346,7 +346,7 @@ void full_read_input_files_for_timesteps(E,action,output)
                   el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
                   elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
 
-                  E->VIP[CPPR][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
+                  E->VIP[el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
                   /* E->mat[m][el] = LL1[elg]; */ /*get material numbers from radius internally */
 
                 }     /* end for j  */

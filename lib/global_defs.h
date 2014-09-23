@@ -862,7 +862,7 @@ struct All_variables {
     int *zero_resid[MAX_LEVELS][NCS];
     int *surf_element,*surf_node;
     int *mat;
-    float *VIP[NCS];
+    float *VIP;
     unsigned int *NODE[MAX_LEVELS][NCS];
     unsigned int *node;
 

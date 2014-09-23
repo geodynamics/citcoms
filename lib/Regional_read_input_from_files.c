@@ -353,10 +353,10 @@ void regional_read_input_files_for_timesteps(E,action,output)
                 el = j + (i-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
                 elg = E->lmesh.ezs+j + (E->lmesh.exs+i-1)*E->mesh.elz + (E->lmesh.eys+k-1)*E->mesh.elz*E->mesh.elx;
                 if (pos_age) { /* positive ages - we must interpolate */
-                    E->VIP[CPPR][el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
+                    E->VIP[el] = VIP1[elg]+(VIP2[elg]-VIP1[elg])/(newage2-newage1)*(age-newage1);
                 }
                 else { /* negative ages - don't do the interpolation */
-                    E->VIP[CPPR][el] = VIP1[elg];
+                    E->VIP[el] = VIP1[elg];
                 }
 
                 /* E->mat[1][el] = LL1[elg]; */ /*use the mat numbers base on radius*/
