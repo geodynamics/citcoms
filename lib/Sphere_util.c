@@ -97,9 +97,9 @@ void compute_angle_surf_area (E)
                     ia[i] = E->IEN[lev][CPPR][el].node[i];
 
                 for (i=1;i<=4;i++)  {
-                    xx[1][i] = E->X[lev][CPPR][1][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
-                    xx[2][i] = E->X[lev][CPPR][2][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
-                    xx[3][i] = E->X[lev][CPPR][3][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
+                    xx[1][i] = E->X[lev][CPPR][1][ia[i]]/E->SX[lev][3][ia[1]];
+                    xx[2][i] = E->X[lev][CPPR][2][ia[i]]/E->SX[lev][3][ia[1]];
+                    xx[3][i] = E->X[lev][CPPR][3][ia[i]]/E->SX[lev][3][ia[1]];
                 }
 
                 get_angle_sphere_cap(xx,angle);
@@ -183,9 +183,9 @@ double area_of_5points(E,lev,el,x,ne)
     es = (el-1)/E->lmesh.ELZ[lev]+1;
 
     for (i=1;i<=4;i++)                 {
-        xx[1] = E->X[lev][CPPR][1][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
-        xx[2] = E->X[lev][CPPR][2][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
-        xx[3] = E->X[lev][CPPR][3][ia[i]]/E->SX[lev][CPPR][3][ia[1]];
+        xx[1] = E->X[lev][CPPR][1][ia[i]]/E->SX[lev][3][ia[1]];
+        xx[2] = E->X[lev][CPPR][2][ia[i]]/E->SX[lev][3][ia[1]];
+        xx[3] = E->X[lev][CPPR][3][ia[i]]/E->SX[lev][3][ia[1]];
         angle[i] = get_angle(x,xx);  /* get angle bet (i,j) and other four*/
         angle1[i]= E->sphere.angle1[lev][CPPR][i][es];
     }

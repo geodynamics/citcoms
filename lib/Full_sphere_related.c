@@ -472,9 +472,9 @@ void full_coord_of_cap(struct All_variables *E, int icap)
 	   
 	   for (i=1; i<=lvnoz; i++) {
 	     /*   theta,fi,and r coordinates   */
-	     E->SX[lev][CPPR][1][node] = theta;
-	     E->SX[lev][CPPR][2][node] = fi;
-	     E->SX[lev][CPPR][3][node] = E->sphere.R[lev][i];
+	     E->SX[lev][1][node] = theta;
+	     E->SX[lev][2][node] = fi;
+	     E->SX[lev][3][node] = E->sphere.R[lev][i];
 	     
 	     /*   x,y,and z oordinates   */
 	     E->X[lev][CPPR][1][node]  = E->sphere.R[lev][i]*sint*cosf;

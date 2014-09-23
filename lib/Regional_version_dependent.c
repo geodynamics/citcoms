@@ -151,7 +151,7 @@ void regional_node_locations(E)
     fprintf(E->fp_out,"output_coordinates for cap %d %d\n",CPPR,E->lmesh.NNO[lev]);
     for (i=1;i<=E->lmesh.NNO[lev];i++)
       if(i%E->lmesh.NOZ[lev]==1)
-        fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
+        fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
     }
     fflush(E->fp_out);
   }
@@ -163,10 +163,10 @@ void regional_node_locations(E)
 #endif
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-        E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][CPPR][1][i]);
-        E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]);
-        E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][CPPR][1][i]);
-        E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]);
+        E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][1][i]);
+        E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][2][i]);
+        E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][1][i]);
+        E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][2][i]);
       }
 
   if (E->control.verbose) {
@@ -174,7 +174,7 @@ void regional_node_locations(E)
     fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
       for (i=1;i<=E->lmesh.NNO[lev];i++)
         if(i%E->lmesh.NOZ[lev]==1)
-             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
+             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
     fflush(E->fp_out);
   }

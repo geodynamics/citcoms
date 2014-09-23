@@ -567,8 +567,8 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
       ux[2][3][1] =-sintt*sinff;  ux[2][3][2] = sintt*cosff;  ux[2][3][3] =0.0;
 
       for(a=1;a<=ends;a++)   {
-          tt = E->SX[lev][CPPR][1][E->IEN[lev][CPPR][el].node[a]];
-          ff = E->SX[lev][CPPR][2][E->IEN[lev][CPPR][el].node[a]];
+          tt = E->SX[lev][1][E->IEN[lev][CPPR][el].node[a]];
+          ff = E->SX[lev][2][E->IEN[lev][CPPR][el].node[a]];
           costt = cos(tt);
           cosff = cos(ff);
           sintt = sin(tt);
@@ -990,22 +990,22 @@ void mass_matrix(struct All_variables *E)
                 E->ECO[lev][CPPR][e].centre[3] = dx3;
 
                 /* delta(theta) of this element */
-                dx1 = max( fabs(E->SX[lev][CPPR][1][n[3]]-E->SX[lev][CPPR][1][n[1]]),
-                           fabs(E->SX[lev][CPPR][1][n[2]]-E->SX[lev][CPPR][1][n[4]]) );
+                dx1 = max( fabs(E->SX[lev][1][n[3]]-E->SX[lev][1][n[1]]),
+                           fabs(E->SX[lev][1][n[2]]-E->SX[lev][1][n[4]]) );
 
                 /* length of this element in the theta-direction */
                 E->ECO[lev][CPPR][e].size[1] = dx1*E->ECO[lev][CPPR][e].centre[3];
 
                 /* delta(phi) of this element */
-                dx1 = fabs(E->SX[lev][CPPR][2][n[3]]-E->SX[lev][CPPR][2][n[1]]);
+                dx1 = fabs(E->SX[lev][2][n[3]]-E->SX[lev][2][n[1]]);
                 if (dx1>M_PI)
-                    dx1 = min(E->SX[lev][CPPR][2][n[3]],E->SX[lev][CPPR][2][n[1]]) + 2.0*M_PI -
-                        max(E->SX[lev][CPPR][2][n[3]],E->SX[lev][CPPR][2][n[1]]) ;
+                    dx1 = min(E->SX[lev][2][n[3]],E->SX[lev][2][n[1]]) + 2.0*M_PI -
+                        max(E->SX[lev][2][n[3]],E->SX[lev][2][n[1]]) ;
 
-                dx2 = fabs(E->SX[lev][CPPR][2][n[2]]-E->SX[lev][CPPR][2][n[4]]);
+                dx2 = fabs(E->SX[lev][2][n[2]]-E->SX[lev][2][n[4]]);
                 if (dx2>M_PI)
-                    dx2 = min(E->SX[lev][CPPR][2][n[2]],E->SX[lev][CPPR][2][n[4]]) + 2.0*M_PI -
-                        max(E->SX[lev][CPPR][2][n[2]],E->SX[lev][CPPR][2][n[4]]) ;
+                    dx2 = min(E->SX[lev][2][n[2]],E->SX[lev][2][n[4]]) + 2.0*M_PI -
+                        max(E->SX[lev][2][n[2]],E->SX[lev][2][n[4]]) ;
 
                 dx2 = max(dx1,dx2);
 
@@ -1014,10 +1014,10 @@ void mass_matrix(struct All_variables *E)
                     *sin(E->ECO[lev][CPPR][e].centre[1]);
 
                 /* delta(radius) of this element */
-                dx3 = 0.25*(fabs(E->SX[lev][CPPR][3][n[5]]+E->SX[lev][CPPR][3][n[6]]
-                                 +E->SX[lev][CPPR][3][n[7]]+E->SX[lev][CPPR][3][n[8]]
-                                 -E->SX[lev][CPPR][3][n[1]]-E->SX[lev][CPPR][3][n[2]]
-                                 -E->SX[lev][CPPR][3][n[3]]-E->SX[lev][CPPR][3][n[4]]));
+                dx3 = 0.25*(fabs(E->SX[lev][3][n[5]]+E->SX[lev][3][n[6]]
+                                 +E->SX[lev][3][n[7]]+E->SX[lev][3][n[8]]
+                                 -E->SX[lev][3][n[1]]-E->SX[lev][3][n[2]]
+                                 -E->SX[lev][3][n[3]]-E->SX[lev][3][n[4]]));
 
                 /* length of this element in the radius-direction */
                 E->ECO[lev][CPPR][e].size[3] = dx3;

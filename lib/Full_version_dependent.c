@@ -64,8 +64,8 @@ static void full_rotate_mesh(struct All_variables *E, double dircos[4][4], int i
             E->X[lev][CPPR][1][i] = t[0];
             E->X[lev][CPPR][2][i] = t[1];
             E->X[lev][CPPR][3][i] = t[2];
-            E->SX[lev][CPPR][1][i] = acos(t[2]/E->SX[lev][CPPR][3][i]);
-            E->SX[lev][CPPR][2][i] = myatan(t[1],t[0]);
+            E->SX[lev][1][i] = acos(t[2]/E->SX[lev][3][i]);
+            E->SX[lev][2][i] = myatan(t[1],t[0]);
         }
     }    /* lev */
 }
@@ -168,7 +168,7 @@ void full_node_locations(E)
           fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
+                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
       fflush(E->fp_out);
   }
@@ -196,7 +196,7 @@ void full_node_locations(E)
           fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][CPPR][1][i],E->SX[lev][CPPR][2][i],E->SX[lev][CPPR][3][i]);
+                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
       fflush(E->fp_out);
   }
@@ -206,20 +206,20 @@ void full_node_locations(E)
   /* spherical or elliptical, correct theta to theta_g for local surface-normal theta  */
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-	tg = theta_g(E->SX[lev][CPPR][1][i],E);
+	tg = theta_g(E->SX[lev][1][i],E);
 	E->SinCos[lev][CPPR][0][i] = sin(tg); /*  */
-	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]);
+	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][2][i]);
 	E->SinCos[lev][CPPR][2][i] = cos(tg);
-	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]);
+	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][2][i]);
       }
 #else
   /* spherical */
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-	E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][CPPR][1][i]); /* sin(theta) */
-	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][CPPR][2][i]); /* sin(phi) */
-	E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][CPPR][1][i]); /* cos(theta) */
-	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][CPPR][2][i]); /* cos(phi) */
+	E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][1][i]); /* sin(theta) */
+	E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][2][i]); /* sin(phi) */
+	E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][1][i]); /* cos(theta) */
+	E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][2][i]); /* cos(phi) */
       }
 #endif
 }
