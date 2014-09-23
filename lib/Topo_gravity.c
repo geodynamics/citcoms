@@ -217,7 +217,7 @@ void compute_nodal_stress(struct All_variables *E,
 
       for(j=1;j <= vpts;j++)  {	/* loop through velocity Gauss points  */
 	/* E->EVi[j] = E->EVI[E->mesh.levmax][j]; */
-        pre[j] =  E->EVi[CPPR][(e-1)*vpts+j]*dOmega->vpt[j];
+        pre[j] =  E->EVi[(e-1)*vpts+j]*dOmega->vpt[j];
         dilation[j] = 0.0;
         Vxyz[1][j] = 0.0;
         Vxyz[2][j] = 0.0;

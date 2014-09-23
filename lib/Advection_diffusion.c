@@ -735,7 +735,7 @@ static void process_visc_heating(struct All_variables *E, double *heating)
     for(e=1; e<=E->lmesh.nel; e++) {
         visc = 0.0;
         for(i = 1; i <= vpts; i++)
-            visc += E->EVi[CPPR][(e-1)*vpts + i];
+            visc += E->EVi[(e-1)*vpts + i];
 
         heating[e] = temp * visc * strain_sqr[e];
     }
