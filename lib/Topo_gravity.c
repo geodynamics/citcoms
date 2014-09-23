@@ -212,7 +212,7 @@ void compute_nodal_stress(struct All_variables *E,
 						 local to the
 						 element */
       dOmega = &(E->gDA[CPPR][e]);	/* Jacobian at integration points */
-      GNx = &(E->gNX[CPPR][e]);	/* derivatives of shape functions at
+      GNx = &(E->gNX[e]);	/* derivatives of shape functions at
 				   integration points */
 
       for(j=1;j <= vpts;j++)  {	/* loop through velocity Gauss points  */

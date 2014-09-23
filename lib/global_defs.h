@@ -870,7 +870,7 @@ struct All_variables {
 
     struct Shape_function_dx *GNX[MAX_LEVELS];
     struct Shape_function_dA *GDA[MAX_LEVELS];
-    struct Shape_function_dx *gNX[NCS];
+    struct Shape_function_dx *gNX;
     struct Shape_function_dA *gDA[NCS];
 
     struct Shape_function1 M; /* master-element shape funtions */

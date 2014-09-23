@@ -380,8 +380,8 @@ static void pg_solver(struct All_variables *E,
       get_rtf_at_vpts(E, lev, el, rtf);
 
       /* XXX: replace diff with refstate.thermal_conductivity */
-      pg_shape_fn(E, el, &PG, &(E->gNX[CPPR][el]), VV, rtf, diff);
-      element_residual(E, el, &PG, &(E->gNX[CPPR][el]), &(E->gDA[CPPR][el]),
+      pg_shape_fn(E, el, &PG, &(E->gNX[el]), VV, rtf, diff);
+      element_residual(E, el, &PG, &(E->gNX[el]), &(E->gDA[CPPR][el]),
                        VV, T, Tdot,
                        Q0, Eres, rtf, diff, E->sphere.cap[CPPR].TB,
                        FLAGS);

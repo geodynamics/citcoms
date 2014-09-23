@@ -94,7 +94,7 @@ void heat_flux(E)
           rho[i] += E->refstate.rho[nz]*E->N.vpt[GNVINDEX(j,i)];
           u[i] += VV[3][j]*E->N.vpt[GNVINDEX(j,i)];
           T[i] += E->T[E->ien[e].node[j]]*E->N.vpt[GNVINDEX(j,i)];
-          dTdz[i] += -E->T[E->ien[e].node[j]]*E->gNX[CPPR][e].vpt[GNVXINDEX(2,j,i)];
+          dTdz[i] += -E->T[E->ien[e].node[j]]*E->gNX[e].vpt[GNVXINDEX(2,j,i)];
           }
         }
 

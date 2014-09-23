@@ -1134,7 +1134,7 @@ void strain_rate_2_inv(E,EEDOT,SQRT)
         get_rtf_at_ppts(E, lev, e, rtf); /* pressure evaluation
 					       points */
         velo_from_element(E, VV, e, sphere_key);
-        GNx = &(E->gNX[CPPR][e]);
+        GNx = &(E->gNX[e]);
 
         theta = rtf[1][1];
 
