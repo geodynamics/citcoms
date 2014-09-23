@@ -403,7 +403,7 @@ void compute_nodal_stress(struct All_variables *E,
   stress_scaling = velo_scaling = 1.0;
 
     for(node=1;node<=E->lmesh.nno;node++)   {
-      mass_fac = E->Mass[CPPR][node]*stress_scaling;
+      mass_fac = E->Mass[node]*stress_scaling;
       SZZ[node] *= mass_fac;
       SXX[node] *= mass_fac;
       SYY[node] *= mass_fac;
@@ -411,7 +411,7 @@ void compute_nodal_stress(struct All_variables *E,
       SXZ[node] *= mass_fac;
       SZY[node] *= mass_fac;
       
-      mass_fac = E->Mass[CPPR][node]*velo_scaling;
+      mass_fac = E->Mass[node]*velo_scaling;
       vorv[node] *= mass_fac;
       divv[node] *= mass_fac;
     }
