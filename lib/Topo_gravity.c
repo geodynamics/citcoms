@@ -418,12 +418,12 @@ void compute_nodal_stress(struct All_variables *E,
 
   /* assign stress to all the nodes */
     for (node=1;node<=E->lmesh.nno;node++) {
-      E->gstress[CPPR][(node-1)*6+1] = SXX[node];
-      E->gstress[CPPR][(node-1)*6+2] = SYY[node];
-      E->gstress[CPPR][(node-1)*6+3] = SZZ[node];
-      E->gstress[CPPR][(node-1)*6+4] = SXY[node];
-      E->gstress[CPPR][(node-1)*6+5] = SXZ[node];
-      E->gstress[CPPR][(node-1)*6+6] = SZY[node];
+      E->gstress[(node-1)*6+1] = SXX[node];
+      E->gstress[(node-1)*6+2] = SYY[node];
+      E->gstress[(node-1)*6+3] = SZZ[node];
+      E->gstress[(node-1)*6+4] = SXY[node];
+      E->gstress[(node-1)*6+5] = SXZ[node];
+      E->gstress[(node-1)*6+6] = SZY[node];
     }
 
   /* replace boundary stresses with boundary conditions (if specified) */
@@ -462,17 +462,17 @@ void stress_conform_bcs(struct All_variables *E)
 
               if(E->node[n] & sbc_flag[d]) {
                 if(i==1)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_WEST][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_WEST][d][ E->sbc.node[CPPR][n] ];
                 if(i==E->lmesh.noy)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_EAST][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_EAST][d][ E->sbc.node[CPPR][n] ];
                 if(j==1)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_NORTH][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_NORTH][d][ E->sbc.node[CPPR][n] ];
                 if(j==E->lmesh.nox)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_SOUTH][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_SOUTH][d][ E->sbc.node[CPPR][n] ];
                 if(k==1)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_BOTTOM][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_BOTTOM][d][ E->sbc.node[CPPR][n] ];
                 if(k==E->lmesh.noz)
-                  E->gstress[CPPR][(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_TOP][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_TOP][d][ E->sbc.node[CPPR][n] ];
               }
           }
 
@@ -490,7 +490,7 @@ void stress_conform_bcs(struct All_variables *E)
 	      for(d=1; d<=E->mesh.nsd; d++)
 		if(E->node[n] & sbc_flag[d]) {
 		  /* apply internal traction vector on horizontal surface */
-		  E->gstress[CPPR][(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
+		  E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
 		}
 	    }
     }else{
@@ -502,11 +502,11 @@ void stress_conform_bcs(struct All_variables *E)
 	      for(d=1; d<=E->mesh.nsd; d++)
 		if(E->node[n] & sbc_flag[d]) {
 		  if(i==1 || i==E->lmesh.noy)
-		    E->gstress[CPPR][(n-1)*6+stress_index[d][2]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][2]] = E->sphere.cap[CPPR].VB[d][n];
 		  if(j==1 || j==E->lmesh.nox)
-		    E->gstress[CPPR][(n-1)*6+stress_index[d][1]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][1]] = E->sphere.cap[CPPR].VB[d][n];
 		  if(k==1 || k==E->lmesh.noz)
-		    E->gstress[CPPR][(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
 		}
 	    }
     }

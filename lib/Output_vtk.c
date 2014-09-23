@@ -220,9 +220,9 @@ static void vtk_output_stress(struct All_variables *E, FILE *fp)
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"stress\" NumberOfComponents=\"6\" format=\"%s\">\n", E->output.vtk_format);
 
     if (strcmp(E->output.vtk_format, "binary") == 0) {
-        write_binary_array(nodes*6,&E->gstress[CPPR][1],fp);
+        write_binary_array(nodes*6,&E->gstress[1],fp);
     } else {
-        write_ascii_array(nodes*6,6,&E->gstress[CPPR][1],fp);
+        write_ascii_array(nodes*6,6,&E->gstress[1],fp);
     }
 
     fputs("        </DataArray>\n", fp);

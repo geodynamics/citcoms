@@ -842,7 +842,7 @@ struct All_variables {
 
     float *NP;
   //float *stress[NCS];
-    float *gstress[NCS];
+    float *gstress;
     float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
     float *Fascmb[NCS],*Fascmb_b[NCS];
 

@@ -481,12 +481,12 @@ void output_stress(struct All_variables *E, int cycles)
     /* those are sorted like stt spp srr stp str srp  */
     for (node=1;node<=E->lmesh.nno;node++)
       fprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
-              E->gstress[CPPR][(node-1)*6+1],
-              E->gstress[CPPR][(node-1)*6+2],
-              E->gstress[CPPR][(node-1)*6+3],
-              E->gstress[CPPR][(node-1)*6+4],
-              E->gstress[CPPR][(node-1)*6+5],
-              E->gstress[CPPR][(node-1)*6+6]);
+              E->gstress[(node-1)*6+1],
+              E->gstress[(node-1)*6+2],
+              E->gstress[(node-1)*6+3],
+              E->gstress[(node-1)*6+4],
+              E->gstress[(node-1)*6+5],
+              E->gstress[(node-1)*6+6]);
   fclose(fp1);
 }
 

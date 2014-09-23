@@ -690,12 +690,12 @@ void h5output_stress(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[6*m+0] = E->gstress[CPPR][6*n+1];
-                field->data[6*m+1] = E->gstress[CPPR][6*n+2];
-                field->data[6*m+2] = E->gstress[CPPR][6*n+3];
-                field->data[6*m+3] = E->gstress[CPPR][6*n+4];
-                field->data[6*m+4] = E->gstress[CPPR][6*n+5];
-                field->data[6*m+5] = E->gstress[CPPR][6*n+6];
+                field->data[6*m+0] = E->gstress[6*n+1];
+                field->data[6*m+1] = E->gstress[6*n+2];
+                field->data[6*m+2] = E->gstress[6*n+3];
+                field->data[6*m+3] = E->gstress[6*n+4];
+                field->data[6*m+4] = E->gstress[6*n+5];
+                field->data[6*m+5] = E->gstress[6*n+6];
             }
         }
     }
