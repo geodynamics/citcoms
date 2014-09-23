@@ -107,7 +107,7 @@ void construct_surface( struct All_variables *E)
         E->sien[e].node[2] = E->ien[element].node[6]/E->lmesh.noz;
         E->sien[e].node[3] = E->ien[element].node[7]/E->lmesh.noz;
         E->sien[e].node[4] = E->ien[element].node[8]/E->lmesh.noz;
-        E->surf_element[CPPR][e] = element;
+        E->surf_element[e] = element;
         }
 
     E->lmesh.snel = e;

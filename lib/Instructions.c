@@ -989,7 +989,7 @@ void allocate_common_vars(E)
   nxyz = 2*max(nxyz,noz*noy);
 
   E->sien         = (struct SIEN *) malloc((nxyz+2)*sizeof(struct SIEN));
-  E->surf_element[CPPR] = (int *) malloc((nxyz+2)*sizeof(int));
+  E->surf_element = (int *) malloc((nxyz+2)*sizeof(int));
   E->surf_node[CPPR]    = (int *) malloc((nsf+2)*sizeof(int));
 
 

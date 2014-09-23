@@ -966,7 +966,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     /* calculate the element residuals */
 
     for(els=1;els<=E->lmesh.snel;els++) {
-      el = E->surf_element[CPPR][els];
+      el = E->surf_element[els];
       elb = el - elz+1;
 
       velo_from_element(E,VV,elb,sphere_key);
@@ -1054,7 +1054,7 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
     /* calculate the LHS */
 
     for(els=1;els<=E->lmesh.snel;els++) {
-       el = E->surf_element[j][els];
+       el = E->surf_element[els];
        elb = el - elz+1;
 
        get_global_1d_shape_fn_L(E,el,&GM,&dGammax,1);
