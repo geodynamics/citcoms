@@ -100,7 +100,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
                         * E->Nx.vpt[GNVXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda, E->mesh.nsd);
-        E->GDA[lev][CPPR][el].vpt[k] = jacobian;
+        E->GDA[lev][el].vpt[k] = jacobian;
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
@@ -145,7 +145,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
                         * E->Nx.ppt[GNPXINDEX(d-1,i,k)];
 
         jacobian = determinant(dxda,E->mesh.nsd);
-        E->GDA[lev][CPPR][el].ppt[k] = jacobian;
+        E->GDA[lev][el].ppt[k] = jacobian;
 
         for(d=1;d<=dims;d++)
             for(e=1;e<=dims;e++)
@@ -1024,13 +1024,13 @@ void mass_matrix(struct All_variables *E)
 
                 /* volume (area in 2D) of this element */
                 for(nint=1;nint<=vpts;nint++)
-                    area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][CPPR][e].vpt[nint];
+                    area += g_point[nint].weight[E->mesh.nsd-1] * E->GDA[lev][e].vpt[nint];
                 E->ECO[lev][CPPR][e].area = area;
 
                 for(node=1;node<=enodes[E->mesh.nsd];node++)  {
                     temp[node] = 0.0;
                     for(nint=1;nint<=vpts;nint++)
-                        temp[node] += E->GDA[lev][CPPR][e].vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
+                        temp[node] += E->GDA[lev][e].vpt[nint]*g_point[nint].weight[E->mesh.nsd-1]
                             *E->N.vpt[GNVINDEX(node,nint)];       /* int Na dV */
                 }
 

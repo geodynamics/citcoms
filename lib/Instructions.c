@@ -1030,7 +1030,7 @@ void allocate_common_vars(E)
       E->sphere.angle1[i][CPPR][k] = (double *) malloc((snel+1)*sizeof(double));
 
     E->GNX[i] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
-    E->GDA[i][CPPR] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
+    E->GDA[i] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
     E->MASS[i]     = (double *) malloc((nno+1)*sizeof(double));
     E->ECO[i][CPPR] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
@@ -1360,7 +1360,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->cc = E->CC[E->mesh.levmax][CPPR];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
   E->Mass = E->MASS[E->mesh.levmax];
-  E->gDA[CPPR] = E->GDA[E->mesh.levmax][CPPR];
+  E->gDA[CPPR] = E->GDA[E->mesh.levmax];
   E->gNX[CPPR] = E->GNX[E->mesh.levmax];
 
   for (i=1;i<=E->mesh.nsd;i++)    {

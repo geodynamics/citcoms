@@ -307,7 +307,7 @@ void get_elt_k(E,el,elt_k,lev,iconv)
     
     for(k=1;k<=vpts;k++) {
       off = (el-1)*vpts+k;
-      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][CPPR][el].vpt[k]*E->EVI[lev][off];
+      W[k]=g_point[k].weight[dims-1]*E->GDA[lev][el].vpt[k]*E->EVI[lev][off];
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
       if(E->viscosity.allow_anisotropic_viscosity){
 	/* allow for a possibly anisotropic viscosity */
@@ -809,7 +809,7 @@ void get_elt_c(struct All_variables *E, int el, higher_precision elt_c[24][1], i
     if ((el-1)%E->lmesh.ELZ[lev]==0)
         construct_c3x3matrix_el(E,el,&E->element_Cc,&E->element_Ccx,lev,1);
 
-    temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
+    temp = p_point[1].weight[dims-1] * E->GDA[lev][el].ppt[1];
 
     switch (E->refstate.choice) {
     case 1:
@@ -894,7 +894,7 @@ void get_elt_g(E,el,elt_del,lev)
 
    get_rtf_at_ppts(E, lev, el, rtf);
 
-   temp = p_point[1].weight[dims-1] * E->GDA[lev][CPPR][el].ppt[1];
+   temp = p_point[1].weight[dims-1] * E->GDA[lev][el].ppt[1];
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
    if(E->viscosity.allow_anisotropic_viscosity && modify_g){
