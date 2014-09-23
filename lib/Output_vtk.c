@@ -188,9 +188,9 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"coordinate\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
         for(i=1; i<=E->lmesh.nno; i++){
-          floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3] = (float)(E->x[CPPR][1][i]);
-	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+1]=(float)(E->x[CPPR][2][i]);
-	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+2]=(float)(E->x[CPPR][3][i]);
+          floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3] = (float)(E->x[1][i]);
+	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+1]=(float)(E->x[2][i]);
+	        floatpos[((CPPR-1)*E->lmesh.nno+i-1)*3+2]=(float)(E->x[3][i]);
         }
 
     if (strcmp(E->output.vtk_format, "binary") == 0)

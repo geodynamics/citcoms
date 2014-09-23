@@ -557,9 +557,9 @@ static void add_spherical_anomaly(struct All_variables *E)
             for(j=1; j<=nox;j ++)
                 for(k=1; k<=noz; k++) {
                     node = k + (j-1)*noz + (i-1)*nox*noz;
-		    dx[1] = E->x[CPPR][1][node] - x_center[1];
-		    dx[2] = E->x[CPPR][2][node] - x_center[2];
-		    dx[3] = E->x[CPPR][3][node] - x_center[3];
+		    dx[1] = E->x[1][node] - x_center[1];
+		    dx[2] = E->x[2][node] - x_center[2];
+		    dx[3] = E->x[3][node] - x_center[3];
                     distance = sqrt(dx[1]*dx[1] + dx[2]*dx[2] + dx[3]*dx[3]);
 
                     if (distance < radius){

@@ -290,9 +290,9 @@ void output_coord_bin(struct All_variables *E)
   header[3] = 0x12345678; /* guard */
   fwrite(header, sizeof(int32_t), 4, fp1);
 
-  fwrite(&(E->x[CPPR][1][1]), sizeof(double), E->lmesh.nno, fp1);
-  fwrite(&(E->x[CPPR][2][1]), sizeof(double), E->lmesh.nno, fp1);
-  fwrite(&(E->x[CPPR][3][1]), sizeof(double), E->lmesh.nno, fp1);
+  fwrite(&(E->x[1][1]), sizeof(double), E->lmesh.nno, fp1);
+  fwrite(&(E->x[2][1]), sizeof(double), E->lmesh.nno, fp1);
+  fwrite(&(E->x[3][1]), sizeof(double), E->lmesh.nno, fp1);
 
   fclose(fp1);
 }

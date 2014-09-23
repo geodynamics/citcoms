@@ -268,15 +268,15 @@ void get_side_x_cart(struct All_variables *E, double xx[4][5], int el, int side)
   for(i=1;i<=oned;i++) {     /* nodes */
     s = sidenodes[side][i];
     node = E->ien[el].node[s];
-    xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
-             + E->x[CPPR][2][node]*dxdy[1][2]
-             + E->x[CPPR][3][node]*dxdy[1][3];
-    xx[2][i] = E->x[CPPR][1][node]*dxdy[2][1]
-             + E->x[CPPR][2][node]*dxdy[2][2]
-             + E->x[CPPR][3][node]*dxdy[2][3];
-    xx[3][i] = E->x[CPPR][1][node]*dxdy[3][1]
-             + E->x[CPPR][2][node]*dxdy[3][2]
-             + E->x[CPPR][3][node]*dxdy[3][3];
+    xx[1][i] = E->x[1][node]*dxdy[1][1]
+             + E->x[2][node]*dxdy[1][2]
+             + E->x[3][node]*dxdy[1][3];
+    xx[2][i] = E->x[1][node]*dxdy[2][1]
+             + E->x[2][node]*dxdy[2][2]
+             + E->x[3][node]*dxdy[2][3];
+    xx[3][i] = E->x[1][node]*dxdy[3][1]
+             + E->x[2][node]*dxdy[3][2]
+             + E->x[3][node]*dxdy[3][3];
   }
 }
 
@@ -450,15 +450,15 @@ void get_global_1d_shape_fn_L(E,el,GM,dGammax,top)
         for(i=1;i<=oned;i++) {     /* nodes */
             e = i+ii*oned;
             node = E->ien[el].node[e];
-            xx[1][i] = E->x[CPPR][1][node]*dxdy[1][1]
-                + E->x[CPPR][2][node]*dxdy[1][2]
-                + E->x[CPPR][3][node]*dxdy[1][3];
-            xx[2][i] = E->x[CPPR][1][node]*dxdy[2][1]
-                + E->x[CPPR][2][node]*dxdy[2][2]
-                + E->x[CPPR][3][node]*dxdy[2][3];
-            xx[3][i] = E->x[CPPR][1][node]*dxdy[3][1]
-                + E->x[CPPR][2][node]*dxdy[3][2]
-                + E->x[CPPR][3][node]*dxdy[3][3];
+            xx[1][i] = E->x[1][node]*dxdy[1][1]
+                + E->x[2][node]*dxdy[1][2]
+                + E->x[3][node]*dxdy[1][3];
+            xx[2][i] = E->x[1][node]*dxdy[2][1]
+                + E->x[2][node]*dxdy[2][2]
+                + E->x[3][node]*dxdy[2][3];
+            xx[3][i] = E->x[1][node]*dxdy[3][1]
+                + E->x[2][node]*dxdy[3][2]
+                + E->x[3][node]*dxdy[3][3];
         }
 
         for(k=1;k<=oned;k++)    { /* all of the vpoints*/

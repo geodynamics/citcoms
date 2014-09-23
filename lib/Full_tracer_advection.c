@@ -2135,9 +2135,9 @@ static int icheck_element_column(struct All_variables *E,
 
             node=E->ien[nel].node[kk+4];
 
-            rnode[kk][1]=E->x[CPPR][1][node];
-            rnode[kk][2]=E->x[CPPR][2][node];
-            rnode[kk][3]=E->x[CPPR][3][node];
+            rnode[kk][1]=E->x[1][node];
+            rnode[kk][2]=E->x[2][node];
+            rnode[kk][3]=E->x[3][node];
 
             rnode[kk][4]=E->sx[1][node];
             rnode[kk][5]=E->sx[2][node];

@@ -769,9 +769,9 @@ static void generate_random_tracers(struct All_variables *E, int tracers_cap)
     xmin = ymin = zmin = E->sphere.ro;
     xmax = ymax = zmax = -E->sphere.ro;
     for (kk=1; kk<=E->lmesh.nno; kk++) {
-        x = E->x[CPPR][1][kk];
-        y = E->x[CPPR][2][kk];
-        z = E->x[CPPR][3][kk];
+        x = E->x[1][kk];
+        y = E->x[2][kk];
+        z = E->x[3][kk];
 
         xmin = ((xmin < x) ? xmin : x);
         xmax = ((xmax > x) ? xmax : x);

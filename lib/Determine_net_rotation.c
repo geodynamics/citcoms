@@ -110,9 +110,9 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
           for(nint=1;nint <= onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d <= onedvpoints[E->mesh.nsd];d++){
 	      vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(0,nint)];
-	      x[0] += E->x[CPPR][1][lnode[d]] * vtmp; /* coords */
-	      x[1] += E->x[CPPR][2][lnode[d]] * vtmp;
-	      x[2] += E->x[CPPR][3][lnode[d]] * vtmp;
+	      x[0] += E->x[1][lnode[d]] * vtmp; /* coords */
+	      x[1] += E->x[2][lnode[d]] * vtmp;
+	      x[2] += E->x[3][lnode[d]] * vtmp;
 	      
               v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp; /* theta */
               v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp; /* phi */
@@ -128,9 +128,9 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++){
 		vtmp = E->M.vpt[GMVINDEX(d,nint)] * dGamma.vpt[GMVGAMMA(1,nint)];
-		x[0] += E->x[CPPR][1][lnode[d]] * vtmp; /* coords */
-		x[1] += E->x[CPPR][2][lnode[d]] * vtmp;
-		x[2] += E->x[CPPR][3][lnode[d]] * vtmp;
+		x[0] += E->x[1][lnode[d]] * vtmp; /* coords */
+		x[1] += E->x[2][lnode[d]] * vtmp;
+		x[2] += E->x[3][lnode[d]] * vtmp;
 		/*  */
 		v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp;
 		v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp;

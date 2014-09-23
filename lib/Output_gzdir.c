@@ -285,7 +285,7 @@ void gzdir_output_coord(struct All_variables *E)
     /* write nodal coordinate to file, big endian */
       for(i=1;i <= E->lmesh.nno;i++) {
 	/* cartesian coordinates */
-	x[0]=E->x[CPPR][1][i];x[1]=E->x[CPPR][2][i];x[2]=E->x[CPPR][3][i];
+	x[0]=E->x[1][i];x[1]=E->x[2][i];x[2]=E->x[3][i];
 	if(be_write_float_to_file(x,3,fp1) != 3)
 	  BE_WERROR;
 	out++;
@@ -401,7 +401,7 @@ void gzdir_output_coord(struct All_variables *E)
       gz1 = gzdir_output_open(output_file,"w");
 	for(i=1;i <= E->lmesh.nno;i++) {
 	  gzprintf(gz1,"%9.6f %9.6f %9.6f\n", /* cartesian nodal coordinates */
-		   E->x[CPPR][1][i],E->x[CPPR][2][i],E->x[CPPR][3][i]);
+		   E->x[1][i],E->x[2][i],E->x[3][i]);
 	}
       gzclose(gz1);
       /*
