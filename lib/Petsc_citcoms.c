@@ -125,7 +125,7 @@ void strip_bcs_from_residual_PETSc(
   ierr = VecGetArray(Res, &ResData);
     if( E->num_zero_resid[level] ) {
       for( i = 1; i <= E->num_zero_resid[level]; i++ ) {
-        ResData[E->zero_resid[level][CPPR][i]] = 0.0;
+        ResData[E->zero_resid[level][i]] = 0.0;
       }
     }
   ierr = VecRestoreArray(Res, &ResData);

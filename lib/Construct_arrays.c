@@ -198,15 +198,15 @@ void get_bcs_id_for_residual(E,level)
    for(i=1;i<=nno;i++) {
       if ( (E->NODE[level][CPPR][i] & VBX) != 0 )  {
 	j++;
-        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[1];
+        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[1];
 	}
       if ( (E->NODE[level][CPPR][i] & VBY) != 0 )  {
 	j++;
-        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[2];
+        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[2];
 	}
       if ( (E->NODE[level][CPPR][i] & VBZ) != 0 )  {
 	j++;
-        E->zero_resid[level][CPPR][j] = E->ID[level][CPPR][i].doff[3];
+        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[3];
 	}
       }
 

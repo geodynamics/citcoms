@@ -1199,7 +1199,7 @@ void allocate_velocity_vars(E)
       E->BI[l] = (double *) malloc((E->lmesh.NEQ[l])*sizeof(double));
       k = (E->lmesh.NOX[l]*E->lmesh.NOZ[l]+E->lmesh.NOX[l]*E->lmesh.NOY[l]+
           E->lmesh.NOY[l]*E->lmesh.NOZ[l])*6;
-      E->zero_resid[l][CPPR] = (int *) malloc((k+2)*sizeof(int));
+      E->zero_resid[l] = (int *) malloc((k+2)*sizeof(int));
       E->parallel.Skip_id[l][CPPR] = (int *) malloc((k+2)*sizeof(int));
 
       for(i=0;i<E->lmesh.NEQ[l];i++) {
