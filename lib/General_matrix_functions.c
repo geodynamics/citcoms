@@ -499,7 +499,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
                  Ad[eqn3] += B3[j]*UU;
                  }
 
-            if (!(E->NODE[level][m][i]&OFFSIDE))   {
+            if (!(E->NODE[level][CPPR][i]&OFFSIDE))   {
                E->temp[eqn1] = (F[eqn1] - Ad[eqn1])*E->BI[level][eqn1];
                E->temp[eqn2] = (F[eqn2] - Ad[eqn2])*E->BI[level][eqn2];
                E->temp[eqn3] = (F[eqn3] - Ad[eqn3])*E->BI[level][eqn3];

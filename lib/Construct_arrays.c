@@ -563,7 +563,7 @@ void construct_sub_element(E)
      int lev,nox,noy,noz,nnn,elx,elz,ely,elzu,elxu,elt,eltu;
 
 
-  for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--)
+  for(lev=E->mesh.levmax-1;lev>=E->mesh.levmin;lev--) {
           elx = E->lmesh.ELX[lev];
 	  elz = E->lmesh.ELZ[lev];
 	  ely = E->lmesh.ELY[lev];
@@ -593,6 +593,7 @@ void construct_sub_element(E)
                                  + offset[l].vector[2] * elzu * elxu;
 		      }
 		  }
+  }
 }
 
 
