@@ -838,7 +838,7 @@ struct All_variables {
     double *SX[MAX_LEVELS][4],*X[MAX_LEVELS][4];
     double *sx[4],*x[4];
     double *surf_det[5];
-    double *SinCos[MAX_LEVELS][NCS][4];
+    double *SinCos[MAX_LEVELS][4];
 
     float *NP;
   //float *stress[NCS];

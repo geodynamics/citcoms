@@ -448,10 +448,10 @@ void calc_cbase_at_node(int node, float *base,struct All_variables *E)
   int lev ;
   double ct,cp,st,sp;
   lev = E->mesh.levmax;
-  st = E->SinCos[lev][CPPR][0][node]; /* for elliptical, sincos would be  corrected */
-  sp = E->SinCos[lev][CPPR][1][node];
-  ct = E->SinCos[lev][CPPR][2][node];
-  cp = E->SinCos[lev][CPPR][3][node];
+  st = E->SinCos[lev][0][node]; /* for elliptical, sincos would be  corrected */
+  sp = E->SinCos[lev][1][node];
+  ct = E->SinCos[lev][2][node];
+  cp = E->SinCos[lev][3][node];
            
   /* r */
   base[0]= st * cp;

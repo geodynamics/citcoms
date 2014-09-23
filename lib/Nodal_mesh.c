@@ -130,10 +130,10 @@ void velo_from_element(E,VV,el,sphere_key)
         for(a=1;a<=ends;a++)   {
             node = E->ien[el].node[a];
 
-            sint = E->SinCos[lev][CPPR][0][node]; 
-            sinf = E->SinCos[lev][CPPR][1][node];
-            cost = E->SinCos[lev][CPPR][2][node];
-            cosf = E->SinCos[lev][CPPR][3][node];
+            sint = E->SinCos[lev][0][node]; 
+            sinf = E->SinCos[lev][1][node];
+            cost = E->SinCos[lev][2][node];
+            cosf = E->SinCos[lev][3][node];
 
             VV[1][a] = E->sphere.cap[CPPR].V[1][node]*cost*cosf
                 - E->sphere.cap[CPPR].V[2][node]*sinf
@@ -172,10 +172,10 @@ void velo_from_element_d(E,VV,el,sphere_key)
         for(a=1;a<=ends;a++)   {
             node = E->ien[el].node[a];
 
-            sint = E->SinCos[lev][CPPR][0][node];
-            sinf = E->SinCos[lev][CPPR][1][node];
-            cost = E->SinCos[lev][CPPR][2][node];
-            cosf = E->SinCos[lev][CPPR][3][node];
+            sint = E->SinCos[lev][0][node];
+            sinf = E->SinCos[lev][1][node];
+            cost = E->SinCos[lev][2][node];
+            cosf = E->SinCos[lev][3][node];
 
             VV[1][a] = E->sphere.cap[CPPR].V[1][node]*cost*cosf
                 - E->sphere.cap[CPPR].V[2][node]*sinf

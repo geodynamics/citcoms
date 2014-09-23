@@ -2142,10 +2142,10 @@ static int icheck_element_column(struct All_variables *E,
             rnode[kk][4]=E->sx[1][node];
             rnode[kk][5]=E->sx[2][node];
 
-            rnode[kk][6]=E->SinCos[lev][CPPR][2][node]; /* cos(theta) */
-            rnode[kk][7]=E->SinCos[lev][CPPR][0][node]; /* sin(theta) */
-            rnode[kk][8]=E->SinCos[lev][CPPR][3][node]; /* cos(phi) */
-            rnode[kk][9]=E->SinCos[lev][CPPR][1][node]; /* sin(phi) */
+            rnode[kk][6]=E->SinCos[lev][2][node]; /* cos(theta) */
+            rnode[kk][7]=E->SinCos[lev][0][node]; /* sin(theta) */
+            rnode[kk][8]=E->SinCos[lev][3][node]; /* cos(phi) */
+            rnode[kk][9]=E->SinCos[lev][1][node]; /* sin(phi) */
 
         }
 
@@ -2797,10 +2797,10 @@ static void define_uv_space(struct All_variables *E)
         exit(10);
     }
 
-    sint = E->SinCos[lev][CPPR][0];
-    sinf = E->SinCos[lev][CPPR][1];
-    cost = E->SinCos[lev][CPPR][2];
-    cosf = E->SinCos[lev][CPPR][3];
+    sint = E->SinCos[lev][0];
+    sinf = E->SinCos[lev][1];
+    cost = E->SinCos[lev][2];
+    cosf = E->SinCos[lev][3];
 
     /* uv space requires a reference point */
     /* use the point at middle of the cap */

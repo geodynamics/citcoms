@@ -140,10 +140,10 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
         V[3] = E->sphere.cap[CPPR].V[3];
 
         for(i=1; i<=E->lmesh.nno; i++) {
-            sint = E->SinCos[lev][CPPR][0][i];
-            sinf = E->SinCos[lev][CPPR][1][i];
-            cost = E->SinCos[lev][CPPR][2][i];
-            cosf = E->SinCos[lev][CPPR][3][i];
+            sint = E->SinCos[lev][0][i];
+            sinf = E->SinCos[lev][1][i];
+            cost = E->SinCos[lev][2][i];
+            cosf = E->SinCos[lev][3][i];
 
             floatvel[(((CPPR-1)*E->sphere.caps_per_proc)+i-1)*3+0] = (float)(V[1][i]*cost*cosf - V[2][i]*sinf + V[3][i]*sint*cosf);
             floatvel[(((CPPR-1)*E->sphere.caps_per_proc)+i-1)*3+1] = (float)(V[1][i]*cost*sinf + V[2][i]*cosf + V[3][i]*sint*sinf);

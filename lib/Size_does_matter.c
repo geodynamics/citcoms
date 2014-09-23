@@ -630,10 +630,10 @@ void construct_c3x3matrix_el (struct All_variables *E,int el,struct CC *cc,
         for(a=1;a<=ends;a++)   {
 
 	  lnode = E->IEN[lev][CPPR][el].node[a];
-	  sintt = E->SinCos[lev][CPPR][0][lnode];
-	  sinff = E->SinCos[lev][CPPR][1][lnode];
-	  costt = E->SinCos[lev][CPPR][2][lnode];
-	  cosff = E->SinCos[lev][CPPR][3][lnode];
+	  sintt = E->SinCos[lev][0][lnode];
+	  sinff = E->SinCos[lev][1][lnode];
+	  costt = E->SinCos[lev][2][lnode];
+	  cosff = E->SinCos[lev][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -713,10 +713,10 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 	a=sidenodes[side][aa];
 
 	lnode = E->IEN[lev][CPPR][el].node[a];
-	sintt = E->SinCos[lev][CPPR][0][lnode];
-	sinff = E->SinCos[lev][CPPR][1][lnode];
-	costt = E->SinCos[lev][CPPR][2][lnode];
-	cosff = E->SinCos[lev][CPPR][3][lnode];
+	sintt = E->SinCos[lev][0][lnode];
+	sinff = E->SinCos[lev][1][lnode];
+	costt = E->SinCos[lev][2][lnode];
+	cosff = E->SinCos[lev][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -772,10 +772,10 @@ void construct_side_c3x3matrix_el(struct All_variables *E,int el,
 	aa=sidenodes[side][a];
 
 	lnode = E->IEN[lev][CPPR][el].node[aa];
-	sintt = E->SinCos[lev][CPPR][0][lnode];
-	sinff = E->SinCos[lev][CPPR][1][lnode];
-	costt = E->SinCos[lev][CPPR][2][lnode];
-	cosff = E->SinCos[lev][CPPR][3][lnode];
+	sintt = E->SinCos[lev][0][lnode];
+	sinff = E->SinCos[lev][1][lnode];
+	costt = E->SinCos[lev][2][lnode];
+	cosff = E->SinCos[lev][3][lnode];
 
 	ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
 	ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -853,10 +853,10 @@ void construct_c3x3matrix(E)
         for(a=1;a<=ends;a++)   {
 
 	  lnode = E->IEN[lev][CPPR][el].node[a];
-	  sintt = E->SinCos[lev][CPPR][0][lnode];
-	  sinff = E->SinCos[lev][CPPR][1][lnode];
-	  costt = E->SinCos[lev][CPPR][2][lnode];
-	  cosff = E->SinCos[lev][CPPR][3][lnode];
+	  sintt = E->SinCos[lev][0][lnode];
+	  sinff = E->SinCos[lev][1][lnode];
+	  costt = E->SinCos[lev][2][lnode];
+	  cosff = E->SinCos[lev][3][lnode];
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;
           ua[2][1] =-sinff;       ua[2][2] = cosff;        ua[2][3] = 0.0;
@@ -911,10 +911,10 @@ void construct_c3x3matrix(E)
         for(a=1;a<=ends;a++)   {
 
 	  lnode = E->IEN[lev][CPPR][el].node[a];
-	  sintt = E->SinCos[lev][CPPR][0][lnode];
-	  sinff = E->SinCos[lev][CPPR][1][lnode];
-	  costt = E->SinCos[lev][CPPR][2][lnode];
-	  cosff = E->SinCos[lev][CPPR][3][lnode];
+	  sintt = E->SinCos[lev][0][lnode];
+	  sinff = E->SinCos[lev][1][lnode];
+	  costt = E->SinCos[lev][2][lnode];
+	  cosff = E->SinCos[lev][3][lnode];
 
 
           ua[1][1] = costt*cosff; ua[1][2] = costt*sinff;  ua[1][3] =-sintt;

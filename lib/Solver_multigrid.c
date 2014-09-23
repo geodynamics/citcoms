@@ -556,10 +556,10 @@ void project_vector(E,start_lev,AU,AD,ic)
      eqn1 = E->ID[level][CPPR][i].doff[1];
      eqn2 = E->ID[level][CPPR][i].doff[2];
      eqn3 = E->ID[level][CPPR][i].doff[3];
-     sint = E->SinCos[level][CPPR][0][i];
-     sinf = E->SinCos[level][CPPR][1][i];
-     cost = E->SinCos[level][CPPR][2][i];
-     cosf = E->SinCos[level][CPPR][3][i];
+     sint = E->SinCos[level][0][i];
+     sinf = E->SinCos[level][1][i];
+     cost = E->SinCos[level][2][i];
+     cosf = E->SinCos[level][3][i];
      rtf[eqn1] = xyz[eqn1]*cost*cosf
                   + xyz[eqn2]*cost*sinf
                   - xyz[eqn3]*sint;
@@ -585,10 +585,10 @@ void project_vector(E,start_lev,AU,AD,ic)
      eqn1 = E->ID[level][CPPR][i].doff[1];
      eqn2 = E->ID[level][CPPR][i].doff[2];
      eqn3 = E->ID[level][CPPR][i].doff[3];
-     sint = E->SinCos[level][CPPR][0][i];
-     sinf = E->SinCos[level][CPPR][1][i];
-     cost = E->SinCos[level][CPPR][2][i];
-     cosf = E->SinCos[level][CPPR][3][i];
+     sint = E->SinCos[level][0][i];
+     sinf = E->SinCos[level][1][i];
+     cost = E->SinCos[level][2][i];
+     cosf = E->SinCos[level][3][i];
      xyz[eqn1] = rtf[eqn1]*cost*cosf
                   - rtf[eqn2]*sinf
                   + rtf[eqn3]*sint*cosf;

@@ -972,7 +972,7 @@ void remove_rigid_rot(struct All_variables *E)
 	frd = fr - E->sx[2][node];
 	v_theta = E->sx[3][node] * sin_t * sin(frd);
 	v_phi =   E->sx[3][node] * 
-	  (  E->SinCos[lev][CPPR][0][node] * cos_t - E->SinCos[lev][CPPR][2][node]  * sin_t * cos(frd) );
+	  (  E->SinCos[lev][0][node] * cos_t - E->SinCos[lev][2][node]  * sin_t * cos(frd) );
 	
 	E->sphere.cap[CPPR].V[1][node] -= v_theta;
 	E->sphere.cap[CPPR].V[2][node] -= v_phi;

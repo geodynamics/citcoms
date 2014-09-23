@@ -163,10 +163,10 @@ void regional_node_locations(E)
 #endif
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)
       for (i=1;i<=E->lmesh.NNO[lev];i++)  {
-        E->SinCos[lev][CPPR][0][i] = sin(E->SX[lev][1][i]);
-        E->SinCos[lev][CPPR][1][i] = sin(E->SX[lev][2][i]);
-        E->SinCos[lev][CPPR][2][i] = cos(E->SX[lev][1][i]);
-        E->SinCos[lev][CPPR][3][i] = cos(E->SX[lev][2][i]);
+        E->SinCos[lev][0][i] = sin(E->SX[lev][1][i]);
+        E->SinCos[lev][1][i] = sin(E->SX[lev][2][i]);
+        E->SinCos[lev][2][i] = cos(E->SX[lev][1][i]);
+        E->SinCos[lev][3][i] = cos(E->SX[lev][2][i]);
       }
 
   if (E->control.verbose) {

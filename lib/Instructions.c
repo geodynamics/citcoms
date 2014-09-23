@@ -1021,7 +1021,7 @@ void allocate_common_vars(E)
       }
 
     for(d=0;d<=3;d++)
-      E->SinCos[i][CPPR][d]  = (double *)  malloc((nno+1)*sizeof(double));
+      E->SinCos[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
 
     E->IEN[i][CPPR] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
     E->EL[i][CPPR]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
