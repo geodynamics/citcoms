@@ -983,7 +983,7 @@ void allocate_common_vars(E)
   E->TMass = (double *) malloc((nno+1)*sizeof(double));
 
   /* nodal mass */
-  E->NMass[CPPR] = (double *) malloc((nno+1)*sizeof(double));
+  E->NMass = (double *) malloc((nno+1)*sizeof(double));
 
   nxyz = max(nox*noz,nox*noy);
   nxyz = 2*max(nxyz,noz*noy);

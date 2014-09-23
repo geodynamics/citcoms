@@ -580,7 +580,7 @@ double global_v_norm2(struct All_variables *E,  double *V)
         /* L2 norm  */
         temp += (V[eqn1] * V[eqn1] +
                  V[eqn2] * V[eqn2] +
-                 V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
+                 V[eqn3] * V[eqn3]) * E->NMass[i];
     }
 
     MPI_Allreduce(&temp, &prod, 1, MPI_DOUBLE, MPI_SUM, E->parallel.world);

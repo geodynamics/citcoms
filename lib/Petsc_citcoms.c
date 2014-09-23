@@ -20,7 +20,7 @@ double global_v_norm2_PETSc( struct All_variables *E,  Vec v )
         eqn2 = E->id[i].doff[2];
         eqn3 = E->id[i].doff[3];
         /* L2 norm  */
-        temp += (V[eqn1] * V[eqn1] + V[eqn2] * V[eqn2] + V[eqn3] * V[eqn3]) * E->NMass[CPPR][i];
+        temp += (V[eqn1] * V[eqn1] + V[eqn2] * V[eqn2] + V[eqn3] * V[eqn3]) * E->NMass[i];
     }
     ierr = VecRestoreArray( v, &V ); CHKERRQ( ierr );
 

@@ -1047,7 +1047,7 @@ void mass_matrix(struct All_variables *E)
 
         if(lev == E->mesh.levmax)
             for(node=1;node<=E->lmesh.NNO[lev];node++)
-                E->NMass[CPPR][node] = E->MASS[lev][node];
+                E->NMass[node] = E->MASS[lev][node];
 
         if (E->control.NMULTIGRID||E->mesh.levmax==lev)
             (E->exchange_node_d)(E,E->MASS[lev],lev);

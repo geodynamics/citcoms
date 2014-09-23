@@ -834,7 +834,7 @@ struct All_variables {
     double *u1;
     double *temp,*temp1;
     double *Mass, *MASS[MAX_LEVELS];
-    double *TMass, *NMass[NCS];
+    double *TMass, *NMass;
     double *SX[MAX_LEVELS][NCS][4],*X[MAX_LEVELS][NCS][4];
     double *sx[NCS][4],*x[NCS][4];
     double *surf_det[NCS][5];
