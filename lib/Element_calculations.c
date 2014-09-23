@@ -320,7 +320,7 @@ void get_elt_k(E,el,elt_k,lev,iconv)
 #endif
     }
     /*  */
-    get_ba(&(E->N), &(E->GNX[lev][CPPR][el]), &E->element_Cc, &E->element_Ccx,
+    get_ba(&(E->N), &(E->GNX[lev][el]), &E->element_Cc, &E->element_Ccx,
            rtf, E->mesh.nsd, ba);
 
     for(a=1;a<=ends;a++)	/* loop over element nodes */
@@ -846,7 +846,7 @@ void get_elt_c(struct All_variables *E, int el, higher_precision elt_c[24][1], i
 
         for(a=1;a<=ends;a++) {
             for (i=1;i<=dims;i++) {
-                x[i] = rho[a] * E->GNX[lev][CPPR][el].ppt[GNPXINDEX(2,a,1)]
+                x[i] = rho[a] * E->GNX[lev][el].ppt[GNPXINDEX(2,a,1)]
                     * E->N.ppt[GNPINDEX(a,1)]
                     * E->element_Cc.ppt[BPINDEX(3,i,a,1)];
             }
@@ -914,7 +914,7 @@ void get_elt_g(E,el,elt_del,lev)
 	 for(k=0;k<6;k++)
 	   Duse[j][k] += Dtmp[j][k]*weight;
      }
-     get_ba_p(&(E->N),&(E->GNX[lev][CPPR][el]),&E->element_Cc, &E->element_Ccx,rtf,E->mesh.nsd,ba);
+     get_ba_p(&(E->N),&(E->GNX[lev][el]),&E->element_Cc, &E->element_Ccx,rtf,E->mesh.nsd,ba);
 
      /* assume single pressure point */
      for(a = 1; a <= ends; a++){
@@ -941,13 +941,13 @@ void get_elt_g(E,el,elt_del,lev)
      /* old, isotropic part */
      for(a=1;a<=ends;a++)      {
        for (i=1;i<=dims;i++)
-	 x[i] = E->GNX[lev][CPPR][el].ppt[GNPXINDEX(2,a,1)] * E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
+	 x[i] = E->GNX[lev][el].ppt[GNPXINDEX(2,a,1)] * E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
 	   2.0 * ra * E->N.ppt[GNPINDEX(a,1)]*E->element_Cc.ppt[BPINDEX(3,i,a,1)] + 
 	   ra * 
-	   (E->GNX[lev][CPPR][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
+	   (E->GNX[lev][el].ppt[GNPXINDEX(0,a,1)]*E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
 	    E->N.ppt[GNPINDEX(a,1)]*E->element_Ccx.ppt[BPXINDEX(1,i,1,a,1)] +
 	    ct * E->N.ppt[GNPINDEX(a,1)] * E->element_Cc.ppt[BPINDEX(1,i,a,1)] +
-	    si * (E->GNX[lev][CPPR][el].ppt[GNPXINDEX(1,a,1)] * E->element_Cc.ppt[BPINDEX(2,i,a,1)] +
+	    si * (E->GNX[lev][el].ppt[GNPXINDEX(1,a,1)] * E->element_Cc.ppt[BPINDEX(2,i,a,1)] +
 		  E->N.ppt[GNPINDEX(a,1)] * E->element_Ccx.ppt[BPXINDEX(2,i,2,a,1)]));
        p=dims*(a-1);
        elt_del[p  ][0] = -x[1] * temp;

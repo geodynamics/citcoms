@@ -119,7 +119,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
 
         for(j=1;j<=ends;j++)
             for(d=1;d<=dims;d++)         {
-                E->GNX[lev][CPPR][el].vpt[GNVXINDEX(d-1,j,k)]
+                E->GNX[lev][el].vpt[GNVXINDEX(d-1,j,k)]
                     = bc[d][1]*LGNx.vpt[GNVXINDEX(0,j,k)]
                     + bc[d][2]*LGNx.vpt[GNVXINDEX(1,j,k)]
                     + bc[d][3]*LGNx.vpt[GNVXINDEX(2,j,k)];
@@ -162,7 +162,7 @@ static void get_global_shape_fn_sph(struct All_variables *E,
             }
         for(j=1;j<=ends;j++)
             for(d=1;d<=dims;d++)         {
-                E->GNX[lev][CPPR][el].ppt[GNPXINDEX(d-1,j,k)]
+                E->GNX[lev][el].ppt[GNPXINDEX(d-1,j,k)]
                     = bc[d][1]*LGNx.ppt[GNPXINDEX(0,j,k)]
                     + bc[d][2]*LGNx.ppt[GNPXINDEX(1,j,k)]
                     + bc[d][3]*LGNx.ppt[GNPXINDEX(2,j,k)];
