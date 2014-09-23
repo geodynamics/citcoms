@@ -298,7 +298,7 @@ void construct_surf_det (E)
   double xx[4][5], dxda[4][4], r2;
 
     for(k=1;k<=oned;k++)    { /* all of the vpoints*/
-      E->surf_det[CPPR][k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
+      E->surf_det[k] = (double *)malloc((1+E->lmesh.snel)*sizeof(double));
     }
 
   r2 = 1.0 / (E->sx[3][E->lmesh.elz+1] * E->sx[3][E->lmesh.elz+1]);
@@ -320,7 +320,7 @@ void construct_surf_det (E)
       jacobian = determinant(dxda,E->mesh.nsd-1);
 
       /* scale the jacobian so that it is defined on a unit sphere */
-      E->surf_det[CPPR][k][es] = jacobian * r2;
+      E->surf_det[k][es] = jacobian * r2;
       }
     }
 }

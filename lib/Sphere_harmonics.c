@@ -124,12 +124,12 @@ void sphere_expansion(E,TG,sphc,sphs)
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablescosf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * E->surf_det[CPPR][nint][es];
+                                * E->surf_det[nint][es];
                             sphs[p] += TG[E->sien[es].node[d]]
                                 * E->sphere.tablesplm[CPPR][j][p]
                                 * E->sphere.tablessinf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
-                                * E->surf_det[CPPR][nint][es];
+                                * E->surf_det[nint][es];
                         }
                     }
 
