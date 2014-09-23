@@ -1086,7 +1086,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 	       E->composition.bulk_composition);
       for(i=1;i<=E->lmesh.nno;i++) {
 	for(k=0;k < E->composition.ncomp;k++)
-	  gzprintf(gz1,"%.6e ",E->composition.comp_node[CPPR][k][i]);
+	  gzprintf(gz1,"%.6e ",E->composition.comp_node[k][i]);
 	gzprintf(gz1,"\n");
       }
     gzclose(gz1);
@@ -1107,7 +1107,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
     }
       for(i=1;i<=E->lmesh.nno;i++){
 	for(k=0;k<E->composition.ncomp;k++){
-	  ftmp = E->composition.comp_node[CPPR][k][i];
+	  ftmp = E->composition.comp_node[k][i];
 	  if(be_write_float_to_file(&ftmp,1,fp1)!=1)BE_WERROR;
 	}
       }

@@ -1072,7 +1072,7 @@ void visc_from_C( E, EEta)
 	 element */
         for(p=0; p<E->composition.ncomp; p++) {
             for(kk = 1; kk <= ends; kk++){
-                CC[p][kk] = E->composition.comp_node[CPPR][p][E->ien[i].node[kk]];
+                CC[p][kk] = E->composition.comp_node[p][E->ien[i].node[kk]];
                 if(CC[p][kk] < 0)CC[p][kk]=0.0;
                 if(CC[p][kk] > 1)CC[p][kk]=1.0;
             }

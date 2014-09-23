@@ -201,7 +201,7 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
 
         if(E->control.tracer && E->composition.on && E->composition.ichemical_buoyancy)
             for(j=0; j<E->composition.ncomp; j++) {
-                dC = E->composition.comp_node[CPPR][j][i+1] - E->Have.C[j][nz];
+                dC = E->composition.comp_node[j][i+1] - E->Have.C[j][nz];
 
                 drho += dC * E->composition.buoyancy_ratio[j]
                     * E->data.ref_temperature * E->data.therm_exp / E->refstate.rho[nz];

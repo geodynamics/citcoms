@@ -223,7 +223,7 @@ static void allocate_composition_memory(struct All_variables *E)
         fflush(E->trace.fpt);
         exit(10);
     }
-    if ((E->composition.comp_node[CPPR]=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
+    if ((E->composition.comp_node=(double **)malloc((E->composition.ncomp)*sizeof(double*)))==NULL) {
         fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 8988y\n");
         fflush(E->trace.fpt);
         exit(10);
@@ -236,7 +236,7 @@ static void allocate_composition_memory(struct All_variables *E)
             exit(10);
         }
 
-        if ((E->composition.comp_node[CPPR][i]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
+        if ((E->composition.comp_node[i]=(double *)malloc((E->lmesh.nno+1)*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"AKM(allocate_composition_memory)-no memory 983rk\n");
             fflush(E->trace.fpt);
             exit(10);
@@ -414,7 +414,7 @@ void map_composition_to_nodes(struct All_variables *E)
         /* first, initialize node array */
         for(i=0;i<E->composition.ncomp;i++) {
             for (kk=1;kk<=E->lmesh.nno;kk++)
-                E->composition.comp_node[CPPR][i][kk]=0.0;
+                E->composition.comp_node[i][kk]=0.0;
         }
 
         /* Loop through all elements */
@@ -428,7 +428,7 @@ void map_composition_to_nodes(struct All_variables *E)
                 n = E->ien[nelem].node[nodenum];
                 for(i=0;i<E->composition.ncomp;i++) {
 
-                    E->composition.comp_node[CPPR][i][n] +=
+                    E->composition.comp_node[i][n] +=
                         E->composition.comp_el[i][nelem]*
                         E->TWW[E->mesh.levmax][CPPR][nelem].node[nodenum];
                 }
@@ -437,14 +437,14 @@ void map_composition_to_nodes(struct All_variables *E)
         } /* end nelem */
 
     for(i=0;i<E->composition.ncomp;i++) {
-        tmp = E->composition.comp_node[CPPR][i];
+        tmp = E->composition.comp_node[i];
         (E->exchange_node_d)(E,tmp,E->mesh.levmax);
     }
 
     /* Divide by nodal volume */
         for(i=0;i<E->composition.ncomp;i++)
             for (kk=1;kk<=E->lmesh.nno;kk++)
-                E->composition.comp_node[CPPR][i][kk] *= E->MASS[E->mesh.levmax][kk];
+                E->composition.comp_node[i][kk] *= E->MASS[E->mesh.levmax][kk];
 
         /* testing */
         /**
@@ -545,7 +545,7 @@ static void init_bulk_composition(struct All_variables *E)
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        tmp[CPPR] = E->composition.comp_node[CPPR][i];
+        tmp[CPPR] = E->composition.comp_node[i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);
@@ -567,7 +567,7 @@ void get_bulk_composition(struct All_variables *E)
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        tmp[CPPR] = E->composition.comp_node[CPPR][i];
+        tmp[CPPR] = E->composition.comp_node[i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);

@@ -175,7 +175,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	/* TODO: how to scale chemical buoyancy wrt reference density? */
 	temp2 = E->composition.buoyancy_ratio[j] * temp;
 	      for(i=1;i<=E->lmesh.nno;i++)
-		buoy[CPPR][i] -= temp2 * E->composition.comp_node[CPPR][j][i];
+		buoy[CPPR][i] -= temp2 * E->composition.comp_node[j][i];
       }
     }
 #ifdef USE_GGRD

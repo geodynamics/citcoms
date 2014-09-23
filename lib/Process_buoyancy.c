@@ -216,7 +216,7 @@ void compute_horiz_avg(struct All_variables *E)
     if (E->composition.on) {
         for(n=0; n<E->composition.ncomp; n++) {
             for(i=1;i<=E->lmesh.nno;i++)
-                S1[CPPR][i] = E->composition.comp_node[CPPR][n][i];
+                S1[CPPR][i] = E->composition.comp_node[n][i];
             return_horiz_ave_f(E,S1,E->Have.C[n]);
         }
     }

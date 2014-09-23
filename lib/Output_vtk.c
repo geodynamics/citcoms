@@ -239,7 +239,7 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
         fprintf(fp, "        <DataArray type=\"Float32\" Name=\"composition%d\" format=\"%s\">\n", k+1, E->output.vtk_format);
 
             for(i=1; i<=E->lmesh.nno; i++) {
-                floatcompo[(CPPR-1)*E->lmesh.nno+i-1] = (float) (E->composition.comp_node[CPPR][k][i]);
+                floatcompo[(CPPR-1)*E->lmesh.nno+i-1] = (float) (E->composition.comp_node[k][i]);
 	    }
 
         if (strcmp(E->output.vtk_format, "binary") == 0)
