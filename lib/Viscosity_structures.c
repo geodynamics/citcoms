@@ -1336,7 +1336,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                                 E->sx[3][E->ien[ee].node[8]]);
 
                     /* if ee has tracers in it and is within the channel */
-                    if((E->trace.ntracer_flavor[CPPR][flavor][ee] > 0) &&
+                    if((E->trace.ntracer_flavor[flavor][ee] > 0) &&
                        (rad_mean <= rr + E->viscosity.lv_channel_thickness)) {
                            F[e] = E->viscosity.lv_reduction;
                            break;
@@ -1384,7 +1384,7 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                     ee = (k-1)*E->lmesh.elz + ii;
 
                     /* if ee has tracers in it */
-                    if(E->trace.ntracer_flavor[CPPR][flavor][ee] > 0) {
+                    if(E->trace.ntracer_flavor[flavor][ee] > 0) {
                         F[e] = E->viscosity.lv_reduction;
                         break;
                     }

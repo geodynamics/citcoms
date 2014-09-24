@@ -66,7 +66,7 @@ struct TRACE{
 
     /* tracer flavors */
     int nflavors;
-    int **ntracer_flavor[13];
+    int **ntracer_flavor;
 
     int ic_method_for_flavors;
     double *z_interface;

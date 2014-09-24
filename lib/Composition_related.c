@@ -307,7 +307,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.ntracer_flavor[CPPR][flavor][e];
+                numtracers += E->trace.ntracer_flavor[flavor][e];
 
             /* Check for empty entries and compute ratio.  */
             /* If no tracers are in an element, skip this element, */
@@ -321,7 +321,7 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             for(i=0;i<E->composition.ncomp;i++) {
                 flavor = i + 1;
                 E->composition.comp_el[i][e] =
-                    E->trace.ntracer_flavor[CPPR][flavor][e] / (double)numtracers;
+                    E->trace.ntracer_flavor[flavor][e] / (double)numtracers;
             }
         }
 
@@ -370,7 +370,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.ntracer_flavor[CPPR][flavor][e];
+                numtracers += E->trace.ntracer_flavor[flavor][e];
 
             /* Check for empty entries */
             /* If no tracers are in an element, comp = 0.0 (i.e. is ambient) */
@@ -385,7 +385,7 @@ static void compute_elemental_composition_absolute_method(struct All_variables *
             for(i=0;i<E->composition.ncomp;i++) {
                 flavor = i;
                 comp =
-                    E->trace.ntracer_flavor[CPPR][flavor][e] / E->eco[e].area
+                    E->trace.ntracer_flavor[flavor][e] / E->eco[e].area
                     * domain_volume / E->trace.number_of_tracers;
 
                 /* truncate composition at 1.0 */
@@ -489,7 +489,7 @@ static void fill_composition_from_neighbors(struct All_variables *E)
         for (e=1; e<=E->lmesh.nel; e++) {
             numtracers = 0;
             for (flavor=0; flavor<E->trace.nflavors; flavor++)
-                numtracers += E->trace.ntracer_flavor[CPPR][flavor][e];
+                numtracers += E->trace.ntracer_flavor[flavor][e];
 
             if (numtracers == 0)
                 is_empty[e] = 1;

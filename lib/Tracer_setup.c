@@ -660,7 +660,7 @@ void count_tracers_of_flavors(struct All_variables *E)
         /* first zero arrays */
         for (flavor=0; flavor<E->trace.nflavors; flavor++)
             for (e=1; e<=E->lmesh.nel; e++)
-                E->trace.ntracer_flavor[CPPR][flavor][e] = 0;
+                E->trace.ntracer_flavor[flavor][e] = 0;
 
         numtracers=E->trace.ntracers;
 
@@ -668,7 +668,7 @@ void count_tracers_of_flavors(struct All_variables *E)
         for (kk=1; kk<=numtracers; kk++) {
             e = E->trace.ielement[kk];
             flavor = E->trace.extraq[0][kk];
-            E->trace.ntracer_flavor[CPPR][flavor][e]++;
+            E->trace.ntracer_flavor[flavor][e]++;
         }
 }
 
@@ -1382,9 +1382,9 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     }
 
     if (E->trace.nflavors > 0) {
-        E->trace.ntracer_flavor[CPPR]=(int **)malloc(E->trace.nflavors*sizeof(int*));
+        E->trace.ntracer_flavor=(int **)malloc(E->trace.nflavors*sizeof(int*));
         for (kk=0;kk<E->trace.nflavors;kk++) {
-            if ((E->trace.ntracer_flavor[CPPR][kk]=(int *)malloc((E->lmesh.nel+1)*sizeof(int)))==NULL) {
+            if ((E->trace.ntracer_flavor[kk]=(int *)malloc((E->lmesh.nel+1)*sizeof(int)))==NULL) {
                 fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
                 fflush(E->trace.fpt);
                 exit(10);
