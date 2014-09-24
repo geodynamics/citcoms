@@ -122,7 +122,7 @@ struct TRACE{
     double phimax;
     double phimin;
     int *regnodetoel;
-    int *regtoel[13][5];
+    int *regtoel[5];
 
     /* gnomonic shape functions */
     double *shape_coefs[13][3][10];

@@ -1638,7 +1638,7 @@ static void make_regular_grid(struct All_variables *E)
 
             for (pp=0;pp<=4;pp++)
                 {
-                    if ((E->trace.regtoel[CPPR][pp]=(int *)malloc((numregel+1)*sizeof(int)))==NULL)
+                    if ((E->trace.regtoel[pp]=(int *)malloc((numregel+1)*sizeof(int)))==NULL)
                         {
                             fprintf(E->trace.fpt,"ERROR(make regular)-no memory 98d (%d %d %d)\n",pp,numregel,CPPR);
                             fflush(E->trace.fpt);
@@ -1658,7 +1658,7 @@ static void make_regular_grid(struct All_variables *E)
 
                             /* initialize regtoel (not necessary really) */
 
-                            for (pp=0;pp<=4;pp++) E->trace.regtoel[CPPR][pp][iregel]=-33;
+                            for (pp=0;pp<=4;pp++) E->trace.regtoel[pp][iregel]=-33;
 
                             if ( (iregel>numregel)||(iregel<1) )
                                 {
@@ -1734,18 +1734,18 @@ static void make_regular_grid(struct All_variables *E)
 
                             if (ichoice==0)
                                 {
-                                    E->trace.regtoel[CPPR][0][iregel]=-1;
+                                    E->trace.regtoel[0][iregel]=-1;
                                     /*
-                                      fprintf(E->trace.fpt,"HH1: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[CPPR][1][iregel],iregel,ichoice,E->trace.regtoel[CPPR][0][iregel],E->trace.regtoel[CPPR][1][iregel]);
+                                      fprintf(E->trace.fpt,"HH1: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[1][iregel],iregel,ichoice,E->trace.regtoel[0][iregel],E->trace.regtoel[1][iregel]);
                                     */
                                 }
                             else if ( (ichoice==1) && (icount==4) )
                                 {
-                                    E->trace.regtoel[CPPR][0][iregel]=0;
-                                    E->trace.regtoel[CPPR][1][iregel]=itemp[1];
+                                    E->trace.regtoel[0][iregel]=0;
+                                    E->trace.regtoel[1][iregel]=itemp[1];
 
                                     /*
-                                      fprintf(E->trace.fpt,"HH2: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[CPPR][1][iregel],iregel,ichoice,E->trace.regtoel[CPPR][0][iregel],E->trace.regtoel[CPPR][1][iregel]);
+                                      fprintf(E->trace.fpt,"HH2: (%p) iregel: %d ichoice: %d value: %d %d\n",&E->trace.regtoel[1][iregel],iregel,ichoice,E->trace.regtoel[0][iregel],E->trace.regtoel[1][iregel]);
                                     */
 
                                     if (itemp[1]<1 || itemp[1]>E->lmesh.nel)
@@ -1757,10 +1757,10 @@ static void make_regular_grid(struct All_variables *E)
                                 }
                             else if ( (ichoice>0) && (ichoice<5) )
                                 {
-                                    E->trace.regtoel[CPPR][0][iregel]=ichoice;
+                                    E->trace.regtoel[0][iregel]=ichoice;
                                     for (pp=1;pp<=ichoice;pp++)
                                         {
-                                            E->trace.regtoel[CPPR][pp][iregel]=itemp[pp];
+                                            E->trace.regtoel[pp][iregel]=itemp[pp];
 
                                             /*
                                               fprintf(E->trace.fpt,"HH:(%p)  iregel: %d ichoice: %d pp: %d value: %d %d\n",&E->trace.regtoel[j][pp][iregel],iregel,ichoice,pp,itemp[pp],E->trace.regtoel[j][pp][iregel]);
@@ -1790,17 +1790,17 @@ static void make_regular_grid(struct All_variables *E)
             /* testing */
             for (kk=1;kk<=E->trace.numregel;kk++)
                 {
-                    if ((E->trace.regtoel[CPPR][0][kk]<-1)||(E->trace.regtoel[CPPR][0][kk]>4))
+                    if ((E->trace.regtoel[0][kk]<-1)||(E->trace.regtoel[0][kk]>4))
                         {
-                            fprintf(E->trace.fpt,"ERROR(make regular) regtoel ichoice0? %d %d \n",kk,E->trace.regtoel[CPPR][pp][kk]);
+                            fprintf(E->trace.fpt,"ERROR(make regular) regtoel ichoice0? %d %d \n",kk,E->trace.regtoel[pp][kk]);
                             fflush(E->trace.fpt);
                             exit(10);
                         }
                     for (pp=1;pp<=4;pp++)
                         {
-                            if (((E->trace.regtoel[CPPR][pp][kk]<1)&&(E->trace.regtoel[CPPR][pp][kk]!=-33))||(E->trace.regtoel[CPPR][pp][kk]>E->lmesh.nel))
+                            if (((E->trace.regtoel[pp][kk]<1)&&(E->trace.regtoel[pp][kk]!=-33))||(E->trace.regtoel[pp][kk]>E->lmesh.nel))
                                 {
-                                    fprintf(E->trace.fpt,"ERROR(make regular) (%p) regtoel? %d %d(%d) %d\n",&E->trace.regtoel[CPPR][pp][kk],kk,pp,E->trace.regtoel[CPPR][0][kk],E->trace.regtoel[CPPR][pp][kk]);
+                                    fprintf(E->trace.fpt,"ERROR(make regular) (%p) regtoel? %d %d(%d) %d\n",&E->trace.regtoel[pp][kk],kk,pp,E->trace.regtoel[0][kk],E->trace.regtoel[pp][kk]);
                                     fflush(E->trace.fpt);
                                     exit(10);
                                 }
@@ -2541,9 +2541,9 @@ int full_iget_element(struct All_variables *E,
 
     /* AKMA put safety here or in make grid */
 
-    if (E->trace.regtoel[CPPR][0][iregel]==0)
+    if (E->trace.regtoel[0][iregel]==0)
         {
-            iel=E->trace.regtoel[CPPR][1][iregel];
+            iel=E->trace.regtoel[1][iregel];
             goto foundit;
         }
 
@@ -2562,13 +2562,13 @@ int full_iget_element(struct All_variables *E,
     /* Check all regular mapping choices */
 
     ichoice=0;
-    if (E->trace.regtoel[CPPR][0][iregel]>0)
+    if (E->trace.regtoel[0][iregel]>0)
         {
 
-            ichoice=E->trace.regtoel[CPPR][0][iregel];
+            ichoice=E->trace.regtoel[0][iregel];
             for (kk=1;kk<=ichoice;kk++)
                 {
-                    nelem=E->trace.regtoel[CPPR][kk][iregel];
+                    nelem=E->trace.regtoel[kk][iregel];
 
                     if (nelem!=iprevious_element)
                         {
@@ -2632,7 +2632,7 @@ int full_iget_element(struct All_variables *E,
                 {
                     for (kk=1;kk<=ichoice;kk++)
                         {
-                            ineighbor=E->trace.regtoel[CPPR][kk][iregel];
+                            ineighbor=E->trace.regtoel[kk][iregel];
                             iel=icheck_column_neighbors(E,ineighbor,x,y,z,rad);
                             if (iel>0)
                                 {
