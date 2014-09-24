@@ -86,7 +86,7 @@ void compute_angle_surf_area (E)
         get_angle_sphere_cap(xx,angle);
 
         for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
-            E->sphere.angle[CPPR][i] = angle[i];
+            E->sphere.angle[i] = angle[i];
 
         E->sphere.area = area_sphere_cap(angle);
 
@@ -105,7 +105,7 @@ void compute_angle_surf_area (E)
                 get_angle_sphere_cap(xx,angle);
 
                 for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
-                    E->sphere.angle1[lev][CPPR][i][es] = angle[i];
+                    E->sphere.angle1[lev][i][es] = angle[i];
 
                 E->sphere.area1[lev][es] = area_sphere_cap(angle);
 
@@ -187,7 +187,7 @@ double area_of_5points(E,lev,el,x,ne)
         xx[2] = E->X[lev][2][ia[i]]/E->SX[lev][3][ia[1]];
         xx[3] = E->X[lev][3][ia[i]]/E->SX[lev][3][ia[1]];
         angle[i] = get_angle(x,xx);  /* get angle bet (i,j) and other four*/
-        angle1[i]= E->sphere.angle1[lev][CPPR][i][es];
+        angle1[i]= E->sphere.angle1[lev][i][es];
     }
 
     area1 = area_of_sphere_triag(angle[1],angle[2],angle1[1])

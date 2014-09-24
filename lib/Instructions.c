@@ -1027,7 +1027,7 @@ void allocate_common_vars(E)
     E->EL[i]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
     E->sphere.area1[i] = (double *) malloc((snel+1)*sizeof(double));
     for (k=1;k<=4;k++)
-      E->sphere.angle1[i][CPPR][k] = (double *) malloc((snel+1)*sizeof(double));
+      E->sphere.angle1[i][k] = (double *) malloc((snel+1)*sizeof(double));
 
     E->GNX[i] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
     E->GDA[i] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
