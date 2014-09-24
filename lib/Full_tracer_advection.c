@@ -1375,7 +1375,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.phimax[CPPR]=phimax;
             E->trace.phimin[CPPR]=phimin;
             E->trace.numregel=numregel;
-            E->trace.numregnodes[CPPR]=numregnodes;
+            E->trace.numregnodes=numregnodes;
 
             if ( ((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)) < 0.5 )
                 {

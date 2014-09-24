@@ -114,7 +114,7 @@ struct TRACE{
     int numtheta;
     int numphi;
     unsigned int numregel;
-    unsigned int numregnodes[13];
+    unsigned int numregnodes;
     double deltheta[13];
     double delphi[13];
     double thetamax[13];
