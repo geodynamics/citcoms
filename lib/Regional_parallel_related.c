@@ -644,9 +644,9 @@ void regional_parallel_communication_routs_s(E)
 
           E->parallel.sPROCESSOR[lev][CPPR].pass[kkk]=me-((i==1)?1:-1)*nproczl;
 
-              E->parallel.NUM_sNODE[lev][CPPR].pass[kkk] =
+              E->parallel.NUM_sNODE[lev].pass[kkk] =
                           E->parallel.NUM_NNO[lev].bound[ii]/noz;
-          for (k=1;k<=E->parallel.NUM_sNODE[lev][CPPR].pass[kkk];k++)   {
+          for (k=1;k<=E->parallel.NUM_sNODE[lev].pass[kkk];k++)   {
             lnode = k;             /* due to lnode increases in horizontal di first */
             node = (E->parallel.NODE[lev][CPPR][lnode].bound[ii]-1)/noz+1;
             E->parallel.EXCHANGE_sNODE[lev][CPPR][k].pass[kkk] = node;
@@ -672,10 +672,10 @@ void regional_parallel_communication_routs_s(E)
 
           E->parallel.sPROCESSOR[lev][CPPR].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl;
 
-              E->parallel.NUM_sNODE[lev][CPPR].pass[kkk] =
+              E->parallel.NUM_sNODE[lev].pass[kkk] =
                           E->parallel.NUM_NNO[lev].bound[ii]/noz;
 
-          for (kk=1;kk<=E->parallel.NUM_sNODE[lev][CPPR].pass[kkk];kk++)   {
+          for (kk=1;kk<=E->parallel.NUM_sNODE[lev].pass[kkk];kk++)   {
             lnode = kk;             /* due to lnode increases in horizontal di first */
             node = (E->parallel.NODE[lev][CPPR][lnode].bound[ii]-1)/noz+1;
             E->parallel.EXCHANGE_sNODE[lev][CPPR][kk].pass[kkk] = node;
@@ -836,29 +836,29 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
  MPI_Status status;
 
  for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
-   sizeofk = (1+2*E->parallel.NUM_sNODE[lev][CPPR].pass[k])*sizeof(float);
+   sizeofk = (1+2*E->parallel.NUM_sNODE[lev].pass[k])*sizeof(float);
    S[k]=(float *)malloc( sizeofk );
    R[k]=(float *)malloc( sizeofk );
  }
 
    for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
 
-     for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)  {
+     for (j=1;j<=E->parallel.NUM_sNODE[lev].pass[k];j++)  {
        S[k][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
-       S[k][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]]
+       S[k][j-1+E->parallel.NUM_sNODE[lev].pass[k]]
 	 = U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
      }
 
-     MPI_Sendrecv(S[k],2*E->parallel.NUM_sNODE[lev][CPPR].pass[k],MPI_FLOAT,
+     MPI_Sendrecv(S[k],2*E->parallel.NUM_sNODE[lev].pass[k],MPI_FLOAT,
 		  E->parallel.sPROCESSOR[lev][CPPR].pass[k],1,
-		  R[k],2*E->parallel.NUM_sNODE[lev][CPPR].pass[k],MPI_FLOAT,
+		  R[k],2*E->parallel.NUM_sNODE[lev].pass[k],MPI_FLOAT,
 		  E->parallel.sPROCESSOR[lev][CPPR].pass[k],1,
 		  E->parallel.world,&status);
 
-     for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)   {
+     for (j=1;j<=E->parallel.NUM_sNODE[lev].pass[k];j++)   {
        U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
        U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
-	 R[k][j-1+E->parallel.NUM_sNODE[lev][CPPR].pass[k]];
+	 R[k][j-1+E->parallel.NUM_sNODE[lev].pass[k]];
      }
 
    }
