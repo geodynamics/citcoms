@@ -516,7 +516,7 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
   int i,j,k,l,node,el,elt;
   int lev,elx,elz,ely,nno,nox,noz,noy;
 
-  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
+  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
       elz = E->lmesh.ELZ[lev];
       ely = E->lmesh.ELY[lev];
       noy = E->lmesh.NOY[lev];
@@ -533,22 +533,7 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
   	    node = E->parallel.NODE[lev][CPPR][i].bound[6];
 	    E->NODE[lev][node] = E->NODE[lev][node] | TZEDGE;
 	    }
-
-
-/*   if (E->control.verbose) { */
-/*     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)  */
-/*       for (j=1;j<=E->sphere.caps_per_proc;j++)           { */
-/*         for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[5];i++)   {  */
-/* 	  node = E->parallel.NODE[lev][j][i].bound[5]; */
-/* 	  fprintf(E->fp_out,"bound=5  NODE[lev=%1d][node=%3d]=%d\n",lev,node,E->NODE[lev][j][node]); */
-/* 	} */
-/*         for (i=1;i<=E->parallel.NUM_NNO[lev][j].bound[6];i++)   {  */
-/* 	  node = E->parallel.NODE[lev][j][i].bound[6]; */
-/* 	  fprintf(E->fp_out,"bound=6  NODE[lev=%1d][node=%3d]=%d\n",lev,node,E->NODE[lev][j][node]); */
-/* 	} */
-/*       } */
-/*     fflush(E->fp_out); */
-/*   } */
+  }
 }
 
 
