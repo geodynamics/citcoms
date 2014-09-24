@@ -56,7 +56,7 @@ struct TRACE{
 
     int ntracers;
     int max_ntracers;
-    int *ielement[13];
+    int *ielement;
 
     int number_of_tracers;
 

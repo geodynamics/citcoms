@@ -745,7 +745,7 @@ void full_lost_souls(struct All_variables *E)
             exit(10);
         }
 
-        E->trace.ielement[CPPR][E->trace.ntracers]=iel;
+        E->trace.ielement[E->trace.ntracers]=iel;
 
     }
     if(E->control.verbose){

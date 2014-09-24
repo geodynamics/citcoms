@@ -831,7 +831,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
                 exit(10);
             }
 
-            E->trace.ielement[CPPR][ilast] = iel;
+            E->trace.ielement[ilast] = iel;
 
         }
         else {
