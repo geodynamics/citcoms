@@ -835,12 +835,12 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
 
         }
         else {
-            if (E->trace.ilatersize[CPPR]==0) {
+            if (E->trace.ilatersize==0) {
 
-                E->trace.ilatersize[CPPR]=E->trace.max_ntracers/5;
+                E->trace.ilatersize=E->trace.max_ntracers/5;
 
                 for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
-                    if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize[CPPR]*sizeof(double)))==NULL) {
+                    if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
                         fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
                         fflush(E->trace.fpt);
                         exit(10);
@@ -851,7 +851,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
             E->trace.ilater[CPPR]++;
             ilast = E->trace.ilater[CPPR];
 
-            if (E->trace.ilater[CPPR] > (E->trace.ilatersize[CPPR]-5))
+            if (E->trace.ilater[CPPR] > (E->trace.ilatersize-5))
                 expand_later_array(E);
 
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)

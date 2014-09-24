@@ -563,7 +563,7 @@ static void find_tracers(struct All_variables *E)
 
         /* initialize arrays and statistical counters */
 
-        E->trace.ilater[CPPR]=E->trace.ilatersize[CPPR]=0;
+        E->trace.ilater[CPPR]=E->trace.ilatersize=0;
 
         E->trace.istat1=0;
         for (kk=0;kk<=4;kk++) {
@@ -628,7 +628,7 @@ static void find_tracers(struct All_variables *E)
 
     /* Free later arrays */
 
-    if (E->trace.ilatersize[CPPR]>0) {
+    if (E->trace.ilatersize>0) {
         for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
             free(E->trace.rlater[CPPR][kk]);
         }
@@ -1523,12 +1523,12 @@ static void put_away_later(struct All_variables *E, int it)
     /* The first tracer in initiates memory allocation. */
     /* Memory is freed after parallel communications    */
 
-    if (E->trace.ilatersize[CPPR]==0) {
+    if (E->trace.ilatersize==0) {
 
-        E->trace.ilatersize[CPPR]=E->trace.max_ntracers/5;
+        E->trace.ilatersize=E->trace.max_ntracers/5;
 
         for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-            if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize[CPPR]*sizeof(double)))==NULL) {
+            if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"AKM(put_away_later)-no memory (%d)\n",kk);
                 fflush(E->trace.fpt);
                 exit(10);
@@ -1541,7 +1541,7 @@ static void put_away_later(struct All_variables *E, int it)
 
     E->trace.ilater[CPPR]++;
 
-    if (E->trace.ilater[CPPR] >= (E->trace.ilatersize[CPPR]-5)) expand_later_array(E);
+    if (E->trace.ilater[CPPR] >= (E->trace.ilatersize-5)) expand_later_array(E);
 
     /* stack basic and extra quantities together (basic first) */
 
@@ -1566,7 +1566,7 @@ void expand_later_array(struct All_variables *E)
 
     icushion=100;
 
-    inewsize=E->trace.ilatersize[CPPR]+E->trace.ilatersize[CPPR]/5+icushion;
+    inewsize=E->trace.ilatersize+E->trace.ilatersize/5+icushion;
 
     for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
         if ((E->trace.rlater[CPPR][kk]=(double *)realloc(E->trace.rlater[CPPR][kk],inewsize*sizeof(double)))==NULL) {
@@ -1577,9 +1577,9 @@ void expand_later_array(struct All_variables *E)
     }
 
     fprintf(E->trace.fpt,"Expanding physical memory of rlater to %d from %d\n",
-            inewsize,E->trace.ilatersize[CPPR]);
+            inewsize,E->trace.ilatersize);
 
-    E->trace.ilatersize[CPPR]=inewsize;
+    E->trace.ilatersize=inewsize;
 }
 
 

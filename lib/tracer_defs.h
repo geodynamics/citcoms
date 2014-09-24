@@ -60,7 +60,7 @@ struct TRACE{
 
     int number_of_tracers;
 
-    int ilatersize[13];
+    int ilatersize;
     int ilater[13];
     double *rlater[13][100];
 
