@@ -571,7 +571,7 @@ static void geoid_from_buoyancy(struct All_variables *E,
                     p = j + (i-1)*E->lmesh.nox;
                     /* convert non-dimensional buoyancy to */
                     /* dimensional density */
-                    TT[p] = (E->buoyancy[CPPR][node]+E->buoyancy[CPPR][node+1])
+                    TT[p] = (E->buoyancy[node]+E->buoyancy[node+1])
                         * 0.5 * buoy2rho;
                 }
 

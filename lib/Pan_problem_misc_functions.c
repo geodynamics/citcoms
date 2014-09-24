@@ -146,12 +146,12 @@ void apply_side_sbc(struct All_variables *E)
 }
 
 
-void get_buoyancy(struct All_variables *E, double **buoy)
+void get_buoyancy(struct All_variables *E, double *buoy)
 {
     int i,j,m,n,nz,nxny;
     int lev = E->mesh.levmax;
     double temp,temp2,rfac,cost2;
-    void remove_horiz_ave2(struct All_variables*, double**);
+    void remove_horiz_ave2(struct All_variables*, double*);
     //char filename[100];FILE *out;
 
     nxny = E->lmesh.nox*E->lmesh.noy;
@@ -164,7 +164,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
         /* We don't need to substract adiabatic T profile from T here,
          * since the horizontal average of buoy will be removed.
          */
-        buoy[CPPR][i] =  temp * E->refstate.rho[nz]
+        buoy[i] =  temp * E->refstate.rho[nz]
 	  * E->refstate.thermal_expansivity[nz] * E->T[i];
       }
     
@@ -175,7 +175,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	/* TODO: how to scale chemical buoyancy wrt reference density? */
 	temp2 = E->composition.buoyancy_ratio[j] * temp;
 	      for(i=1;i<=E->lmesh.nno;i++)
-		buoy[CPPR][i] -= temp2 * E->composition.comp_node[j][i];
+		buoy[i] -= temp2 * E->composition.comp_node[j][i];
       }
     }
 #ifdef USE_GGRD
@@ -207,9 +207,9 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	    n = j*E->lmesh.noz + i; /* this could be improved by only
 				       computing the cos as a function
 				       of lat, but leave for now  */
-	    cost2 = cos(E->sx[CPPR][1][n]);cost2 = cost2*cost2;	    /* cos^2(theta) */
+	    cost2 = cos(E->sx[1][n]);cost2 = cost2*cost2;	    /* cos^2(theta) */
 	    /* correct gravity for rotation */
-	    buoy[CPPR][n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
+	    buoy[n] *= E->refstate.gravity[i] * (E->data.ge+rfac*cost2);
 	  }
     }else{
 #endif
@@ -218,7 +218,7 @@ void get_buoyancy(struct All_variables *E, double **buoy)
 	for(j=0;j < nxny;j++) {
 	  for(i=1;i<=E->lmesh.noz;i++){
 	    n = j*E->lmesh.noz + i;
-	    buoy[CPPR][n] *= E->refstate.gravity[i];
+	    buoy[n] *= E->refstate.gravity[i];
 	  }
 	}
 #ifdef ALLOW_ELLIPTICAL

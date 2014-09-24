@@ -954,7 +954,7 @@ void allocate_common_vars(E)
   E->P        = (double *) malloc(npno*sizeof(double));
   E->T        = (double *) malloc((nno+1)*sizeof(double));
   E->NP       = (float *) malloc((nno+1)*sizeof(float));
-  E->buoyancy[CPPR] = (double *) malloc((nno+1)*sizeof(double));
+  E->buoyancy = (double *) malloc((nno+1)*sizeof(double));
 
   E->gstress = (float *) malloc((6*nno+1)*sizeof(float));
   // TWB do we need this anymore XXX

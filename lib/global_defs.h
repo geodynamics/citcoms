@@ -830,7 +830,7 @@ struct All_variables {
     double *heating_latent;
 
     double *P,*F,*U;
-    double *T,*Tdot,*buoyancy[NCS];
+    double *T,*Tdot,*buoyancy;
     double *u1;
     double *temp,*temp1;
     double *Mass, *MASS[MAX_LEVELS];

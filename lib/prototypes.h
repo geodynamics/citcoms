@@ -185,14 +185,14 @@ void ggrd_read_ray_from_file(struct All_variables *, int);
 void ggrd_read_vtop_from_file(struct All_variables *, int);
 void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *, int, int, int, int, int *, int *, int *);
 void ggrd_read_age_from_file(struct All_variables *, int);
-void ggrd_adjust_tbl_rayleigh(struct All_variables *, double **);
+void ggrd_adjust_tbl_rayleigh(struct All_variables *, double *);
 void ggrd_solve_eigen3x3(double [3][3], double [3], double [3][3], struct All_variables *);
 void ggrd_read_anivisc_from_file(struct All_variables *, int);
 #endif
 /* Global_operations.c */
-void remove_horiz_ave(struct All_variables *, double **, double *, int);
-void remove_horiz_ave2(struct All_variables *, double **);
-void return_horiz_ave(struct All_variables *, double **, double *);
+void remove_horiz_ave(struct All_variables *, double *, double *, int);
+void remove_horiz_ave2(struct All_variables *, double *);
+void return_horiz_ave(struct All_variables *, double *, double *);
 void return_horiz_ave_f(struct All_variables *, float **, float *);
 void return_elementwise_horiz_ave(struct All_variables *, double **, double *);
 float return_bulk_value(struct All_variables *, float **, int);
@@ -337,7 +337,7 @@ void vtk_output(struct All_variables *, int);
 int get_process_identifier(void);
 void unique_copy_file(struct All_variables *, char *, char *);
 void apply_side_sbc(struct All_variables *);
-void get_buoyancy(struct All_variables *, double **);
+void get_buoyancy(struct All_variables *, double *);
 int read_double_vector(FILE *, int, double *);
 void read_visc_param_from_file(struct All_variables *, const char *, float *, FILE *);
 double myatan(double, double);
@@ -384,9 +384,9 @@ int interpret_control_string(char *, int *, double *, double *, double *);
 /* Phase_change.c */
 void phase_change_allocate(struct All_variables *);
 void phase_change_input(struct All_variables *);
-void phase_change_apply_410(struct All_variables *, double **);
-void phase_change_apply_670(struct All_variables *, double **);
-void phase_change_apply_cmb(struct All_variables *, double **);
+void phase_change_apply_410(struct All_variables *, double *);
+void phase_change_apply_670(struct All_variables *, double *);
+void phase_change_apply_cmb(struct All_variables *, double *);
 /* Problem_related.c */
 void read_velocity_boundary_from_file(struct All_variables *);
 void read_rayleigh_from_file(struct All_variables *);

@@ -1434,8 +1434,7 @@ void ggrd_read_age_from_file(struct All_variables *E, int is_geographic)
 } /* end age control */
 
 /* adjust Ra in top boundary layer  */
-void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
-			      double **buoy)
+void ggrd_adjust_tbl_rayleigh(struct All_variables *E, double *buoy)
 {
   int m,snode,node,i;
   double xloc,fac,bnew;
@@ -1467,13 +1466,13 @@ void ggrd_adjust_tbl_rayleigh(struct All_variables *E,
 							1 at surface
 							to zero at
 							boundary */
-	    bnew = buoy[CPPR][node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
+	    bnew = buoy[node] * E->control.surface_rayleigh[snode]; /* modified rayleigh */
 	    /* debugging */
 	    /*   fprintf(stderr,"z: %11g tl: %i zm: %11g fac: %11g sra: %11g bnew: %11g bold: %11g\n", */
 	    /* 	    	    (1 - E->sx[m][3][node])*E->data.radius_km,E->control.ggrd.ray_control, */
 	    /* 	    	    E->viscosity.zbase_layer[E->control.ggrd.ray_control-1]*E->data.radius_km, */
 	    /* 	    	    fac,E->control.surface_rayleigh[snode],(fac * bnew + (1-fac)*buoy[m][node]),buoy[m][node]); */
-	    buoy[CPPR][node] = fac * bnew + (1-fac)*buoy[CPPR][node];
+	    buoy[node] = fac * bnew + (1-fac)*buoy[node];
 	  }
 	}
       }

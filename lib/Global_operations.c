@@ -46,7 +46,7 @@ void myerror(struct All_variables *E,char *message);
 
 void remove_horiz_ave(E,X,H,store_or_not)
      struct All_variables *E;
-     double **X, *H;
+     double *X, *H;
      int store_or_not;
 
 {
@@ -64,13 +64,13 @@ void remove_horiz_ave(E,X,H,store_or_not)
     for(k=1;k<=noy;k++)
       for(j=1;j<=nox;j++)
 	for(i=1;i<=noz;i++) {
-            n = i+(j-1)*noz+(k-1)*noz*nox;
-            X[CPPR][n] -= H[i];
+      n = i+(j-1)*noz+(k-1)*noz*nox;
+      X[n] -= H[i];
 	}
 }
 
 
-void remove_horiz_ave2(struct All_variables *E, double **X)
+void remove_horiz_ave2(struct All_variables *E, double *X)
 {
     double *H;
 
@@ -82,7 +82,7 @@ void remove_horiz_ave2(struct All_variables *E, double **X)
 
 void return_horiz_ave(E,X,H)
      struct All_variables *E;
-     double **X, *H;
+     double *X, *H;
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -121,7 +121,7 @@ void return_horiz_ave(E,X,H)
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
@@ -134,7 +134,7 @@ void return_horiz_ave(E,X,H)
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }

@@ -33,7 +33,7 @@
 #include "parsing.h"
 #include "phase_change.h"
 
-static void phase_change_apply(struct All_variables *E, double **buoy,
+static void phase_change_apply(struct All_variables *E, double *buoy,
 			       float *B, float *B_b,
 			       float Ra, float clapeyron,
 			       float depth, float transT, float inv_width);
@@ -96,7 +96,7 @@ void phase_change_input(struct All_variables *E)
 }
 
 
-void phase_change_apply_410(struct All_variables *E, double **buoy)
+void phase_change_apply_410(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_410 != 0.0)
     phase_change_apply(E, buoy, E->Fas410, E->Fas410_b, E->control.Ra_410,
@@ -106,7 +106,7 @@ void phase_change_apply_410(struct All_variables *E, double **buoy)
 }
 
 
-void phase_change_apply_670(struct All_variables *E, double **buoy)
+void phase_change_apply_670(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_670 != 0.0)
     phase_change_apply(E, buoy, E->Fas670, E->Fas670_b, E->control.Ra_670,
@@ -116,7 +116,7 @@ void phase_change_apply_670(struct All_variables *E, double **buoy)
 }
 
 
-void phase_change_apply_cmb(struct All_variables *E, double **buoy)
+void phase_change_apply_cmb(struct All_variables *E, double *buoy)
 {
   if (E->control.Ra_cmb != 0.0)
     phase_change_apply(E, buoy, E->Fascmb, E->Fascmb_b, E->control.Ra_cmb,
@@ -126,7 +126,7 @@ void phase_change_apply_cmb(struct All_variables *E, double **buoy)
 }
 
 
-static void phase_change_apply(struct All_variables *E, double **buoy,
+static void phase_change_apply(struct All_variables *E, double *buoy,
 			       float *B, float *B_b,
 			       float Ra, float clapeyron,
 			       float depth, float transT, float inv_width)
@@ -135,7 +135,7 @@ static void phase_change_apply(struct All_variables *E, double **buoy,
 
   calc_phase_change(E, B, B_b, Ra, clapeyron, depth, transT, inv_width);
     for(i=1;i<=E->lmesh.nno;i++)
-      buoy[CPPR][i] -= Ra * B[i];
+      buoy[i] -= Ra * B[i];
 
   if (E->control.verbose) {
     fprintf(E->fp_out, "Ra=%f, clapeyron=%f, depth=%f, transT=%f, inv_width=%f\n",

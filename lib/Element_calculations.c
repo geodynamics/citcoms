@@ -992,7 +992,7 @@ void get_elt_f(E,el,elt_f,bcs)
   for(p=0;p<n;p++) elt_f[p] = 0.0;
 
   for(p=1;p<=ends;p++)
-    force[p] = E->buoyancy[CPPR][E->ien[el].node[p]];
+    force[p] = E->buoyancy[E->ien[el].node[p]];
 
   for(j=1;j<=vpts;j++)       {   /*compute force at each int point */
     force_at_gs[j] = 0.0;
