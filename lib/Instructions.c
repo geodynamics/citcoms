@@ -1024,7 +1024,7 @@ void allocate_common_vars(E)
       E->SinCos[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
 
     E->IEN[i] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
-    E->EL[i][CPPR]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
+    E->EL[i]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
     E->sphere.area1[i][CPPR] = (double *) malloc((snel+1)*sizeof(double));
     for (k=1;k<=4;k++)
       E->sphere.angle1[i][CPPR][k] = (double *) malloc((snel+1)*sizeof(double));

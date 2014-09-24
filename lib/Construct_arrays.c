@@ -587,7 +587,7 @@ void construct_sub_element(E)
 		  eltu = (j*2-1) + elzu *2*(i-1) + elxu*elzu*2*(k-1);
 
 		  for(l=1;l<=enodes[E->mesh.nsd];l++)   {
-		      E->EL[lev][CPPR][elt].sub[l] = eltu
+		      E->EL[lev][elt].sub[l] = eltu
                                  + offset[l].vector[0]
                                  + offset[l].vector[1] * elzu
                                  + offset[l].vector[2] * elzu * elxu;
