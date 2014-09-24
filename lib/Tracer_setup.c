@@ -942,7 +942,7 @@ static void read_tracer_file(struct All_variables *E)
 
             E->trace.ntracers++;
 
-            if (E->trace.ntracers>=(E->trace.max_ntracers[CPPR]-5)) 
+            if (E->trace.ntracers>=(E->trace.max_ntracers-5)) 
               expand_tracer_arrays(E);
 
             E->trace.basicq[0][E->trace.ntracers]=theta;
@@ -1351,22 +1351,22 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     /* max_ntracers is physical size of tracer array */
     /* (initially make it 25% larger than required */
 
-    E->trace.max_ntracers[CPPR]=number_of_tracers+number_of_tracers/4;
+    E->trace.max_ntracers=number_of_tracers+number_of_tracers/4;
     E->trace.ntracers=0;
 
     /* make tracer arrays */
 
-    if ((E->trace.ielement[CPPR]=(int *) malloc(E->trace.max_ntracers[CPPR]*sizeof(int)))==NULL) {
+    if ((E->trace.ielement[CPPR]=(int *) malloc(E->trace.max_ntracers*sizeof(int)))==NULL) {
         fprintf(E->trace.fpt,"ERROR(make tracer array)-no memory 1a\n");
         fflush(E->trace.fpt);
         exit(10);
     }
-    for (kk=1;kk<E->trace.max_ntracers[CPPR];kk++)
+    for (kk=1;kk<E->trace.max_ntracers;kk++)
         E->trace.ielement[CPPR][kk]=-99;
 
 
     for (kk=0;kk<E->trace.number_of_basic_quantities;kk++) {
-        if ((E->trace.basicq[kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
+        if ((E->trace.basicq[kk]=(double *)malloc(E->trace.max_ntracers*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1b.%d\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1374,7 +1374,7 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     }
 
     for (kk=0;kk<E->trace.number_of_extra_quantities;kk++) {
-        if ((E->trace.extraq[kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
+        if ((E->trace.extraq[kk]=(double *)malloc(E->trace.max_ntracers*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1394,7 +1394,7 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
 
 
     fprintf(E->trace.fpt,"Physical size of tracer arrays (max_ntracers): %d\n",
-            E->trace.max_ntracers[CPPR]);
+            E->trace.max_ntracers);
     fflush(E->trace.fpt);
 }
 
@@ -1413,7 +1413,7 @@ void expand_tracer_arrays(struct All_variables *E)
 
     icushion=100;
 
-    inewsize=E->trace.max_ntracers[CPPR]+E->trace.max_ntracers[CPPR]/5+icushion;
+    inewsize=E->trace.max_ntracers+E->trace.max_ntracers/5+icushion;
 
     if ((E->trace.ielement[CPPR]=(int *)realloc(E->trace.ielement[CPPR],inewsize*sizeof(int)))==NULL) {
         fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory (ielement)\n");
@@ -1439,9 +1439,9 @@ void expand_tracer_arrays(struct All_variables *E)
 
 
     fprintf(E->trace.fpt,"Expanding physical memory of ielement, basicq, and extraq to %d from %d\n",
-            inewsize,E->trace.max_ntracers[CPPR]);
+            inewsize,E->trace.max_ntracers);
 
-    E->trace.max_ntracers[CPPR]=inewsize;
+    E->trace.max_ntracers=inewsize;
 }
 
 
@@ -1461,7 +1461,7 @@ static void reduce_tracer_arrays(struct All_variables *E)
 
         /* if physical size is double tracer size, reduce it */
 
-        iempty_space=(E->trace.max_ntracers[CPPR]-E->trace.ntracers);
+        iempty_space=(E->trace.max_ntracers-E->trace.ntracers);
 
         if (iempty_space>(E->trace.ntracers+icushion)) {
 
@@ -1500,9 +1500,9 @@ static void reduce_tracer_arrays(struct All_variables *E)
 
 
             fprintf(E->trace.fpt,"Reducing physical memory of ielement, basicq, and extraq to %d from %d\n",
-                    E->trace.max_ntracers[CPPR],inewsize);
+                    E->trace.max_ntracers,inewsize);
 
-            E->trace.max_ntracers[CPPR]=inewsize;
+            E->trace.max_ntracers=inewsize;
 
         } /* end if */
 }
@@ -1525,7 +1525,7 @@ static void put_away_later(struct All_variables *E, int it)
 
     if (E->trace.ilatersize[CPPR]==0) {
 
-        E->trace.ilatersize[CPPR]=E->trace.max_ntracers[CPPR]/5;
+        E->trace.ilatersize[CPPR]=E->trace.max_ntracers/5;
 
         for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
             if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize[CPPR]*sizeof(double)))==NULL) {

@@ -808,7 +808,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
             E->trace.ntracers++;
             ilast = E->trace.ntracers;
 
-            if (E->trace.ntracers > (E->trace.max_ntracers[CPPR]-5))
+            if (E->trace.ntracers > (E->trace.max_ntracers-5))
                 expand_tracer_arrays(E);
 
             for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
@@ -837,7 +837,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
         else {
             if (E->trace.ilatersize[CPPR]==0) {
 
-                E->trace.ilatersize[CPPR]=E->trace.max_ntracers[CPPR]/5;
+                E->trace.ilatersize[CPPR]=E->trace.max_ntracers/5;
 
                 for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
                     if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize[CPPR]*sizeof(double)))==NULL) {
