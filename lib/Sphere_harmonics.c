@@ -121,12 +121,12 @@ void sphere_expansion(E,TG,sphc,sphs)
                         for(d=1;d<=onedvpoints[E->mesh.nsd];d++)   {
                             j = E->sien[es].node[d];
                             sphc[p] += TG[E->sien[es].node[d]]
-                                * E->sphere.tablesplm[CPPR][j][p]
+                                * E->sphere.tablesplm[j][p]
                                 * E->sphere.tablescosf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[nint][es];
                             sphs[p] += TG[E->sien[es].node[d]]
-                                * E->sphere.tablesplm[CPPR][j][p]
+                                * E->sphere.tablesplm[j][p]
                                 * E->sphere.tablessinf[CPPR][j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[nint][es];
@@ -193,12 +193,12 @@ static void  compute_sphereh_table(E)
     double t,f,mmf;
     
 
-        E->sphere.tablesplm[CPPR]   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
+        E->sphere.tablesplm   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablescosf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablessinf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
 
         for (i=1;i<=E->lmesh.nsf;i++)   {
-            E->sphere.tablesplm[CPPR][i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
+            E->sphere.tablesplm[i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
             E->sphere.tablescosf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
             E->sphere.tablessinf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
         }
@@ -216,7 +216,7 @@ static void  compute_sphereh_table(E)
             for (ll=0;ll<=E->output.llmax;ll++)
                 for (mm=0;mm<=ll;mm++)  {
                     p = E->sphere.hindex[ll][mm];
-                    E->sphere.tablesplm[CPPR][j][p] = modified_plgndr_a(ll,mm,t) ;
+                    E->sphere.tablesplm[j][p] = modified_plgndr_a(ll,mm,t) ;
                 }
         }
 }
