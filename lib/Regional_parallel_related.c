@@ -686,7 +686,7 @@ void regional_parallel_communication_routs_s(E)
             }  /* end for k */
 
 
-    E->parallel.sTNUM_PASS[lev][CPPR] = kkk;
+    E->parallel.sTNUM_PASS[lev] = kkk;
 
 
 
@@ -835,13 +835,13 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
 
  MPI_Status status;
 
- for (k=1;k<=E->parallel.sTNUM_PASS[lev][CPPR];k++)  {
+ for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
    sizeofk = (1+2*E->parallel.NUM_sNODE[lev][CPPR].pass[k])*sizeof(float);
    S[k]=(float *)malloc( sizeofk );
    R[k]=(float *)malloc( sizeofk );
  }
 
-   for (k=1;k<=E->parallel.sTNUM_PASS[lev][CPPR];k++)  {
+   for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev][CPPR].pass[k];j++)  {
        S[k][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
@@ -863,7 +863,7 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
 
    }
 
- for (k=1;k<=E->parallel.sTNUM_PASS[lev][CPPR];k++)  {
+ for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
    free((void*) S[k]);
    free((void*) R[k]);
  }

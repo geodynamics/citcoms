@@ -251,7 +251,7 @@ struct Parallel {
     struct PASS NUM_NEQz[MAX_LEVELS];
     struct PASS NUM_NODEz[MAX_LEVELS];
 
-    int sTNUM_PASS[MAX_LEVELS][NCS];
+    int sTNUM_PASS[MAX_LEVELS];
     struct PASS NUM_sNODE[MAX_LEVELS][NCS];
     struct PASS sPROCESSOR[MAX_LEVELS][NCS];
     struct PASS *EXCHANGE_sNODE[MAX_LEVELS][NCS];
