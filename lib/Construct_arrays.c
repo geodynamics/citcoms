@@ -161,10 +161,10 @@ void construct_id(E)
           }
         }
 
-      E->parallel.Skip_neq[lev][CPPR] = i;
+      E->parallel.Skip_neq[lev] = i;
 
       /* global # of unskipped eqn */
-      neq = E->lmesh.NEQ[lev] - E->parallel.Skip_neq[lev][CPPR];
+      neq = E->lmesh.NEQ[lev] - E->parallel.Skip_neq[lev];
       MPI_Allreduce(&neq, &gneq, 1, MPI_INT, MPI_SUM, E->parallel.world);
       E->mesh.NEQ[lev] = gneq;
 

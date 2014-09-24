@@ -232,7 +232,7 @@ struct Parallel {
     int idb;
     int me_loc[4];
     int num_b;
-    int Skip_neq[MAX_LEVELS][NCS];
+    int Skip_neq[MAX_LEVELS];
     int *Skip_id[MAX_LEVELS][NCS];
 
     int TNUM_PASS[MAX_LEVELS][NCS];
