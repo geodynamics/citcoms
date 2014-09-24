@@ -487,7 +487,7 @@ void regional_parallel_communication_routs_v(E)
             temp_dims = dims;
 
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node k */
 
               E->parallel.NUM_NEQ[lev].pass[kkk] = jj;
@@ -522,7 +522,7 @@ void regional_parallel_communication_routs_v(E)
             E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[kkk] = node;
             temp_dims = dims;
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node kk */
 
               E->parallel.NUM_NEQ[lev].pass[kkk] = jj;
@@ -557,7 +557,7 @@ void regional_parallel_communication_routs_v(E)
             E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[kkk] = node;
             temp_dims = dims;
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node k */
 
               E->parallel.NUM_NEQ[lev].pass[kkk] = jj;
@@ -718,7 +718,7 @@ void regional_exchange_id_d(E, U, lev)
    for (k=1;k<=E->parallel.TNUM_PASS[lev];k++)  {
 
      for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[k];j++)
-       S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
+       S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][j].pass[k] ];
 
      MPI_Sendrecv(S[k],E->parallel.NUM_NEQ[lev].pass[k],MPI_DOUBLE,
 		  E->parallel.PROCESSOR[lev].pass[k],1,
@@ -727,7 +727,7 @@ void regional_exchange_id_d(E, U, lev)
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[k];j++)
-       U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
+       U[ E->parallel.EXCHANGE_ID[lev][j].pass[k] ] += R[k][j-1];
 
    }           /* for k */
 

@@ -684,7 +684,7 @@ void full_parallel_communication_routs_v(E)
 	    node = E->parallel.NODE[lev][CPPR][k].bound[ii];
 	    E->parallel.EXCHANGE_NODE[lev][CPPR][++kk].pass[kkkp] = node;
 	    for(doff=1;doff<=dims;doff++)
-	      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkkp] =
+	      E->parallel.EXCHANGE_ID[lev][++jj].pass[kkkp] =
 		E->ID[lev][node].doff[doff];
 	  }
 	  E->parallel.NUM_NODE[lev].pass[kkkp] = kk;
@@ -708,7 +708,7 @@ void full_parallel_communication_routs_v(E)
 	  fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d eqn and %d node\n",E->parallel.me,k,E->parallel.PROCESSOR[lev].pass[k],E->parallel.NUM_NEQ[lev].pass[k],E->parallel.NUM_NODE[lev].pass[k]);
 	  fprintf(E->fp_out,"Eqn:\n");  
 	  for (ii=1;ii<=E->parallel.NUM_NEQ[lev].pass[k];ii++)  
-	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][CPPR][ii].pass[k]);  
+	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][ii].pass[k]);  
 	  fprintf(E->fp_out,"Node:\n");  
 	  for (ii=1;ii<=E->parallel.NUM_NODE[lev].pass[k];ii++)  
 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_NODE[lev][CPPR][ii].pass[k]);  
@@ -721,7 +721,7 @@ void full_parallel_communication_routs_v(E)
 	fprintf(E->fp_out,"proc %d and pass  %d to proc %d\n",E->parallel.me,k,E->parallel.PROCESSORz[lev].pass[k]);
 	  fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n",E->sphere.capid[CPPR],E->parallel.NUM_NEQ[lev].pass[kkkp],E->parallel.NUM_NODE[lev].pass[kkkp]);
 	  for (ii=1;ii<=E->parallel.NUM_NEQ[lev].pass[kkkp];ii++) 
-	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][CPPR][ii].pass[kkkp]); 
+	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][ii].pass[kkkp]); 
 	  for (ii=1;ii<=E->parallel.NUM_NODE[lev].pass[kkkp];ii++) 
 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_NODE[lev][CPPR][ii].pass[kkkp]); 
       }
@@ -822,7 +822,7 @@ static void face_eqn_node_to_pass(E,lev,npass,bd)
     node = E->parallel.NODE[lev][CPPR][kk].bound[bd];
     E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[npass] = node;
     for(doff=1;doff<=dims;doff++)
-      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][node].doff[doff];
+      E->parallel.EXCHANGE_ID[lev][++jj].pass[npass] = E->ID[lev][node].doff[doff];
   }
 
   E->parallel.NUM_NEQ[lev].pass[npass] = jj;
@@ -845,7 +845,7 @@ static void line_eqn_node_to_pass(E,lev,npass,num_node,offset,stride)
     node = (kk-1)*stride + offset;
     E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[npass] = node;
     for(doff=1;doff<=dims;doff++)
-      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][node].doff[doff];
+      E->parallel.EXCHANGE_ID[lev][++jj].pass[npass] = E->ID[lev][node].doff[doff];
   }
 
   E->parallel.NUM_NEQ[lev].pass[npass] = jj;
@@ -883,7 +883,7 @@ void full_exchange_id_d(E, U, lev)
     for (k=1;k<=E->parallel.TNUM_PASS[lev];k++)     {
 
       for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[k];j++) {
-        S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ];
+        S[k][j-1] = U[ E->parallel.EXCHANGE_ID[lev][j].pass[k] ];
 	}
 
       if (E->parallel.PROCESSOR[lev].pass[k] != E->parallel.me &&
@@ -906,7 +906,7 @@ void full_exchange_id_d(E, U, lev)
       }
       else {
 	for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[k];j++)
-           U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += S[k][j-1];
+           U[ E->parallel.EXCHANGE_ID[lev][j].pass[k] ] += S[k][j-1];
       }
     }      /* for k */
 
@@ -917,7 +917,7 @@ void full_exchange_id_d(E, U, lev)
       if (E->parallel.PROCESSOR[lev].pass[k] != E->parallel.me &&
 	  E->parallel.PROCESSOR[lev].pass[k] != -1) {
 	for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[k];j++)
-	  U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[k] ] += R[k][j-1];
+	  U[ E->parallel.EXCHANGE_ID[lev][j].pass[k] ] += R[k][j-1];
       }
     }
 
@@ -928,7 +928,7 @@ void full_exchange_id_d(E, U, lev)
     kk = k + E->sphere.max_connections;
 
       for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[kk];j++)
-        SV[jj++] = U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ];
+        SV[jj++] = U[ E->parallel.EXCHANGE_ID[lev][j].pass[kk] ];
 
     MPI_Sendrecv(SV, E->parallel.NUM_NEQz[lev].pass[k], MPI_DOUBLE,
 		 E->parallel.PROCESSORz[lev].pass[k], 1,
@@ -938,7 +938,7 @@ void full_exchange_id_d(E, U, lev)
 
     jj = 0;
       for (j=1;j<=E->parallel.NUM_NEQ[lev].pass[kk];j++)
-        U[ E->parallel.EXCHANGE_ID[lev][CPPR][j].pass[kk] ] += RV[jj++];
+        U[ E->parallel.EXCHANGE_ID[lev][j].pass[kk] ] += RV[jj++];
   }
 
    for (k=1;k<=E->parallel.TNUM_PASS[lev];k++)  {
