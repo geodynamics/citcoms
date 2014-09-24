@@ -291,7 +291,7 @@ void construct_node_maps(E)
 
        E->Eqn_k1[lev] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
        E->Eqn_k2[lev] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
-       E->Eqn_k3[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k3[lev] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
 
        E->mesh.matrix_size[lev] = matrix;
 
@@ -340,7 +340,7 @@ void construct_node_ks(E)
         for(i=0;i<E->mesh.matrix_size[level];i++) {
             E->Eqn_k1[level][i] = zero;
             E->Eqn_k2[level][i] = zero;
-            E->Eqn_k3[level][CPPR][i] = zero;
+            E->Eqn_k3[level][i] = zero;
             }
 
         for(element=1;element<=nel;element++) {
@@ -394,7 +394,7 @@ void construct_node_ks(E)
 
 		    E->Eqn_k1[level][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
 		    E->Eqn_k2[level][loc0+index] +=  w2*ww1*elt_K[(pp+1)*lms+qq]; /* direction 1 */
-		    E->Eqn_k3[level][CPPR][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
+		    E->Eqn_k3[level][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
 
 		     /* search for direction 2*/
 
@@ -410,7 +410,7 @@ void construct_node_ks(E)
 
 		    E->Eqn_k1[level][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
 		    E->Eqn_k2[level][loc0+index] += w2*ww2*elt_K[(pp+1)*lms+qq+1]; /* direction 2 */
-		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
+		    E->Eqn_k3[level][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
 
 		    /* search for direction 3*/
 
@@ -426,7 +426,7 @@ void construct_node_ks(E)
 
 		    E->Eqn_k1[level][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
         E->Eqn_k2[level][loc0+index] += w2*ww3*elt_K[(pp+1)*lms+qq+2]; /* direction 2 */
-		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
+		    E->Eqn_k3[level][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
 
 		    }   /* end for j */
 		  }   /* end for node1<= node */
@@ -472,7 +472,7 @@ void rebuild_BI_on_boundary(E)
             C=E->Node_map[level] + (i-1)*max_eqn;
             B1=E->Eqn_k1[level]+(i-1)*max_eqn;
             B2=E->Eqn_k2[level]+(i-1)*max_eqn;
-            B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;
+            B3=E->Eqn_k3[level]+(i-1)*max_eqn;
 
             for(j=3;j<max_eqn;j++) {
                 E->temp[eqn1] += fabs(B1[j]);
