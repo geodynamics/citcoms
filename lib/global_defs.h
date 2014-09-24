@@ -283,7 +283,7 @@ struct SPHERE   {
   float *harm_tpgb[2];
 
   double **tablesplm;
-  double **tablescosf[NCS];
+  double **tablescosf;
   double **tablessinf[NCS];
 
   double area[NCS];

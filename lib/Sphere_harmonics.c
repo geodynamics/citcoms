@@ -122,7 +122,7 @@ void sphere_expansion(E,TG,sphc,sphs)
                             j = E->sien[es].node[d];
                             sphc[p] += TG[E->sien[es].node[d]]
                                 * E->sphere.tablesplm[j][p]
-                                * E->sphere.tablescosf[CPPR][j][mm]
+                                * E->sphere.tablescosf[j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[nint][es];
                             sphs[p] += TG[E->sien[es].node[d]]
@@ -194,12 +194,12 @@ static void  compute_sphereh_table(E)
     
 
         E->sphere.tablesplm   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
-        E->sphere.tablescosf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
+        E->sphere.tablescosf = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablessinf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
 
         for (i=1;i<=E->lmesh.nsf;i++)   {
             E->sphere.tablesplm[i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
-            E->sphere.tablescosf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
+            E->sphere.tablescosf[i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
             E->sphere.tablessinf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
         }
 
@@ -209,7 +209,7 @@ static void  compute_sphereh_table(E)
             t=E->sx[1][node];
             for (mm=0;mm<=E->output.llmax;mm++)   {
 	      mmf = (double)(mm)*f;
-                E->sphere.tablescosf[CPPR][j][mm] = cos( mmf );
+                E->sphere.tablescosf[j][mm] = cos( mmf );
                 E->sphere.tablessinf[CPPR][j][mm] = sin( mmf );
             }
 
