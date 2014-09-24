@@ -295,7 +295,7 @@ void full_lost_souls(struct All_variables *E)
 
     int number_of_caps=12;
     int lev=E->mesh.levmax;
-    int num_ngb = E->parallel.TNUM_PASS[lev][CPPR];
+    int num_ngb = E->parallel.TNUM_PASS[lev];
 
     /* Note, if for some reason, the number of neighbors exceeds */
     /* 50, which is unlikely, the MPI arrays must be increased.  */
@@ -805,7 +805,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         /* check neighboring caps */
 
-        for (pp=1;pp<=E->parallel.TNUM_PASS[lev][CPPR];pp++) {
+        for (pp=1;pp<=E->parallel.TNUM_PASS[lev];pp++) {
             ithatcap=pp;
             icheck=full_icheck_cap(E,ithatcap,x,y,z,rad);
             if (icheck==1) goto foundit;

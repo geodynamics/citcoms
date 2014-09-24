@@ -235,7 +235,7 @@ struct Parallel {
     int Skip_neq[MAX_LEVELS];
     int *Skip_id[MAX_LEVELS];
 
-    int TNUM_PASS[MAX_LEVELS][NCS];
+    int TNUM_PASS[MAX_LEVELS];
     struct BOUND *NODE[MAX_LEVELS][NCS];
     struct BOUND NUM_NNO[MAX_LEVELS][NCS];
     struct BOUND NUM_PASS[MAX_LEVELS][NCS];
