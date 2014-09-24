@@ -567,7 +567,7 @@ static void find_tracers(struct All_variables *E)
 
         E->trace.istat1=0;
         for (kk=0;kk<=4;kk++) {
-            E->trace.istat_ichoice[CPPR][kk]=0;
+            E->trace.istat_ichoice[kk]=0;
         }
 
         //TODO: use while-loop instead of for-loop

@@ -77,7 +77,7 @@ struct TRACE{
 
 
     /* statistical parameters */
-    int istat_ichoice[13][5];
+    int istat_ichoice[5];
     int istat_isend;
     int istat_iempty;
     int istat1;
