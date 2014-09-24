@@ -104,9 +104,9 @@ void full_tracer_input(struct All_variables *E)
     /* (first fill uniform del[0] value) */
     /* (later, in make_regular_grid, will adjust and distribute to caps */
 
-    E->trace.deltheta[0]=1.0;
+    E->trace.deltheta=1.0;
     E->trace.delphi[0]=1.0;
-    input_double("regular_grid_deltheta",&(E->trace.deltheta[0]),"1.0",m);
+    input_double("regular_grid_deltheta",&(E->trace.deltheta),"1.0",m);
     input_double("regular_grid_delphi",&(E->trace.delphi[0]),"1.0",m);
 
 
@@ -1341,7 +1341,7 @@ static void make_regular_grid(struct All_variables *E)
 
             /* Convert input data from degrees to radians  */
 
-            deltheta=E->trace.deltheta[0]*M_PI/180.0;
+            deltheta=E->trace.deltheta*M_PI/180.0;
             delphi=E->trace.delphi[0]*M_PI/180.0;
 
 
@@ -1366,7 +1366,7 @@ static void make_regular_grid(struct All_variables *E)
 
             /* fill global variables */
 
-            E->trace.deltheta[CPPR]=deltheta;
+            E->trace.deltheta=deltheta;
             E->trace.delphi[CPPR]=delphi;
             E->trace.numtheta=numtheta;
             E->trace.numphi=numphi;
@@ -1898,7 +1898,7 @@ static void write_trace_instructions(struct All_variables *E)
     /* regular grid stuff */
 
     fprintf(E->trace.fpt,"Regular Grid-> deltheta: %f delphi: %f\n",
-            E->trace.deltheta[0],E->trace.delphi[0]);
+            E->trace.deltheta,E->trace.delphi[0]);
 
 
 
@@ -2753,7 +2753,7 @@ static int iget_regel(struct All_variables *E,
     /* get ntheta, nphi on regular mesh */
 
     rdum=theta-E->trace.thetamin[CPPR];
-    idum=rdum/E->trace.deltheta[CPPR];
+    idum=rdum/E->trace.deltheta;
     *ntheta=idum+1;
 
     rdum=phi-E->trace.phimin[CPPR];
