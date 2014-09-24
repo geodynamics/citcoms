@@ -353,7 +353,7 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
 
       lnode = 0;
@@ -365,7 +365,7 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
 
 /* do XOY boundary elements */
@@ -378,7 +378,7 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
       ii=6;                           /* top  */
       lnode=0;
@@ -389,7 +389,7 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
 
 /* do XOZ boundary elements for 3D */
@@ -402,7 +402,7 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
       ii=4;                           /* rear */
       lnode=0;
@@ -413,19 +413,19 @@ void full_parallel_domain_boundary_nodes(E)
         E->NODE[lev][node] = E->NODE[lev][node] | OFFSIDE;
         }
 
-      E->parallel.NUM_NNO[lev][CPPR].bound[ii] = lnode;
+      E->parallel.NUM_NNO[lev].bound[ii] = lnode;
 
       /* determine the overlapped nodes between caps or between proc */
 
       /* horizontal direction:
          all nodes at right (ix==nox) and front (iy==1) faces
          are skipped */
-      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[2];lnode++) {
+      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev].bound[2];lnode++) {
           node = E->parallel.NODE[lev][CPPR][lnode].bound[2];
           E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
       }
 
-      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[3];lnode++) {
+      for (lnode=1;lnode<=E->parallel.NUM_NNO[lev].bound[3];lnode++) {
           node = E->parallel.NODE[lev][CPPR][lnode].bound[3];
           E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
       }
@@ -454,7 +454,7 @@ void full_parallel_domain_boundary_nodes(E)
       /* radial direction is easy:
          all top nodes except those at top processors are skipped */
       if (E->parallel.me_loc[3]!=E->parallel.nprocz-1 )
-          for (lnode=1;lnode<=E->parallel.NUM_NNO[lev][CPPR].bound[6];lnode++) {
+          for (lnode=1;lnode<=E->parallel.NUM_NNO[lev].bound[6];lnode++) {
               node = E->parallel.NODE[lev][CPPR][lnode].bound[6];
               E->NODE[lev][node] = E->NODE[lev][node] | SKIP;
           }
@@ -467,7 +467,7 @@ if (E->control.verbose) {
  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
     fprintf(E->fp_out,"lev=%d  me=%d capid=%d m=%d \n",lev,E->parallel.me,E->sphere.capid[CPPR],CPPR);
     for (ii=1;ii<=6;ii++)
-      for (i=1;i<=E->parallel.NUM_NNO[lev][CPPR].bound[ii];i++)
+      for (i=1;i<=E->parallel.NUM_NNO[lev].bound[ii];i++)
         fprintf(E->fp_out,"ii=%d   %d %d \n",ii,i,E->parallel.NODE[lev][CPPR][i].bound[ii]);
 
     lnode=0;
@@ -680,7 +680,7 @@ void full_parallel_communication_routs_v(E)
 	    E->parallel.loc2proc_map[cap][lx][ly][lz+((ii==5)?-1:1)];
 
 	  jj=0;  kk=0;
-	  for (k=1;k<=E->parallel.NUM_NNO[lev][CPPR].bound[ii];k++)   {
+	  for (k=1;k<=E->parallel.NUM_NNO[lev].bound[ii];k++)   {
 	    node = E->parallel.NODE[lev][CPPR][k].bound[ii];
 	    E->parallel.EXCHANGE_NODE[lev][CPPR][++kk].pass[kkkp] = node;
 	    for(doff=1;doff<=dims;doff++)
@@ -763,7 +763,7 @@ void full_parallel_communication_routs_s(E)
         if (kkk<=4) {  /* first 4 communications are for XZ and YZ planes */
           ii = kkk;
           E->parallel.NUM_sNODE[lev][CPPR].pass[kkk] =
-                           E->parallel.NUM_NNO[lev][CPPR].bound[ii]/noz;
+                           E->parallel.NUM_NNO[lev].bound[ii]/noz;
 
           for (k=1;k<=E->parallel.NUM_sNODE[lev][CPPR].pass[kkk];k++)   {
             lnode = k;
@@ -815,7 +815,7 @@ static void face_eqn_node_to_pass(E,lev,npass,bd)
   int jj,kk,node,doff;
   const int dims=E->mesh.nsd;
 
-  E->parallel.NUM_NODE[lev][CPPR].pass[npass] = E->parallel.NUM_NNO[lev][CPPR].bound[bd];
+  E->parallel.NUM_NODE[lev][CPPR].pass[npass] = E->parallel.NUM_NNO[lev].bound[bd];
 
   jj = 0;
   for (kk=1;kk<=E->parallel.NUM_NODE[lev][CPPR].pass[npass];kk++)   {
