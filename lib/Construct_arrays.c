@@ -255,17 +255,17 @@ void construct_node_maps(E)
        nox = E->lmesh.NOX[lev];
        max_eqn = 14*dims; // Is this 14 supposed to be NCS?
        matrix = max_eqn*nno;
-       E->Node_map[lev][CPPR]=(int *) malloc (matrix*sizeof(int));
+       E->Node_map[lev]=(int *) malloc (matrix*sizeof(int));
 
        for(i=0;i<matrix;i++)
-	   E->Node_map[lev][CPPR][i] = neq;  /* neq indicates an invalid eqn # */
+	   E->Node_map[lev][i] = neq;  /* neq indicates an invalid eqn # */
 
        for (ii=1;ii<=noy;ii++)
        for (jj=1;jj<=nox;jj++)
        for (kk=1;kk<=noz;kk++)  {
 	 nn = kk + (jj-1)*noz+ (ii-1)*noxz;
 	 for(doff=1;doff<=dims;doff++)
-	   E->Node_map[lev][CPPR][(nn-1)*max_eqn+doff-1] = E->ID[lev][nn].doff[doff];
+	   E->Node_map[lev][(nn-1)*max_eqn+doff-1] = E->ID[lev][nn].doff[doff];
 
          ia = 0;
 	 is=1; ie=dims2;
@@ -284,7 +284,7 @@ void construct_node_maps(E)
                if (ja<nn)   {
 		 ia++;
                  for (doff=1;doff<=dims;doff++)
-                   E->Node_map[lev][CPPR][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][ja].doff[doff];
+                   E->Node_map[lev][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][ja].doff[doff];
                  }
                }
          }
@@ -299,7 +299,7 @@ void construct_node_maps(E)
            fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, CPPR);
            fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
            for(i=0;i<matrix;i++)
-               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][CPPR][i]);
+               fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][i]);
        }
   }
 }
@@ -384,7 +384,7 @@ void construct_node_ks(E)
 
 		    found=0;
 		    for(k=0;k<max_eqn;k++)
-		      if(E->Node_map[level][CPPR][loc0+k] == eqn1) { /* found, index next equation */
+		      if(E->Node_map[level][loc0+k] == eqn1) { /* found, index next equation */
 			    index=k;
 			    found++;
 			    break;
@@ -400,7 +400,7 @@ void construct_node_ks(E)
 
 		    found=0;
 		    for(k=0;k<max_eqn;k++)
-			if(E->Node_map[level][CPPR][loc0+k] == eqn2) { /* found, index next equation */
+			if(E->Node_map[level][loc0+k] == eqn2) { /* found, index next equation */
 			    index=k;
 			    found++;
 			    break;
@@ -416,7 +416,7 @@ void construct_node_ks(E)
 
                     found=0;
 		    for(k=0;k<max_eqn;k++)
-		    if(E->Node_map[level][CPPR][loc0+k] == eqn3) { /* found, index next equation */
+		    if(E->Node_map[level][loc0+k] == eqn3) { /* found, index next equation */
 			index=k;
 			found++;
 			break;
@@ -469,7 +469,7 @@ void rebuild_BI_on_boundary(E)
             eqn2=E->ID[level][i].doff[2];
             eqn3=E->ID[level][i].doff[3];
 
-            C=E->Node_map[level][CPPR] + (i-1)*max_eqn;
+            C=E->Node_map[level] + (i-1)*max_eqn;
             B1=E->Eqn_k1[level][CPPR]+(i-1)*max_eqn;
             B2=E->Eqn_k2[level][CPPR]+(i-1)*max_eqn;
             B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;

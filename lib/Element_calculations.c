@@ -535,7 +535,7 @@ void n_assemble_del2_u(E,u,Au,level,strip_bcs)
        U2 = u[eqn2];
        U3 = u[eqn3];
 
-       C=E->Node_map[level][CPPR] + (e-1)*max_eqn;
+       C=E->Node_map[level] + (e-1)*max_eqn;
        B1=E->Eqn_k1[level][CPPR]+(e-1)*max_eqn;
        B2=E->Eqn_k2[level][CPPR]+(e-1)*max_eqn;
        B3=E->Eqn_k3[level][CPPR]+(e-1)*max_eqn;

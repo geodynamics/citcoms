@@ -820,7 +820,7 @@ struct All_variables {
 
 
     higher_precision *Eqn_k1[MAX_LEVELS][NCS],*Eqn_k2[MAX_LEVELS][NCS],*Eqn_k3[MAX_LEVELS][NCS];
-    int *Node_map [MAX_LEVELS][NCS];
+    int *Node_map [MAX_LEVELS];
 
     double *BI[MAX_LEVELS],*BPI[MAX_LEVELS];
 

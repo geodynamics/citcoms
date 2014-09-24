@@ -483,7 +483,7 @@ void gauss_seidel(E,d0,F,Ad,acc,cycles,level,guess)
 	    eqn1=E->ID[level][i].doff[1];
 	    eqn2=E->ID[level][i].doff[2];
 	    eqn3=E->ID[level][i].doff[3];
-            C=E->Node_map[level][CPPR]+(i-1)*max_eqn;
+            C=E->Node_map[level]+(i-1)*max_eqn;
 	    B1=E->Eqn_k1[level][CPPR]+(i-1)*max_eqn;
 	    B2=E->Eqn_k2[level][CPPR]+(i-1)*max_eqn;
  	    B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;
