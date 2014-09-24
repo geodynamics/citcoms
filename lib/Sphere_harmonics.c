@@ -127,7 +127,7 @@ void sphere_expansion(E,TG,sphc,sphs)
                                 * E->surf_det[nint][es];
                             sphs[p] += TG[E->sien[es].node[d]]
                                 * E->sphere.tablesplm[j][p]
-                                * E->sphere.tablessinf[CPPR][j][mm]
+                                * E->sphere.tablessinf[j][mm]
                                 * E->M.vpt[GMVINDEX(d,nint)]
                                 * E->surf_det[nint][es];
                         }
@@ -195,12 +195,12 @@ static void  compute_sphereh_table(E)
 
         E->sphere.tablesplm   = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
         E->sphere.tablescosf = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
-        E->sphere.tablessinf[CPPR] = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
+        E->sphere.tablessinf = (double **) malloc((E->lmesh.nsf+1)*sizeof(double*));
 
         for (i=1;i<=E->lmesh.nsf;i++)   {
             E->sphere.tablesplm[i]= (double *)malloc((E->sphere.hindice)*sizeof(double));
             E->sphere.tablescosf[i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
-            E->sphere.tablessinf[CPPR][i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
+            E->sphere.tablessinf[i]= (double *)malloc((E->output.llmax+1)*sizeof(double));
         }
 
         for (j=1;j<=E->lmesh.nsf;j++)  {
@@ -210,7 +210,7 @@ static void  compute_sphereh_table(E)
             for (mm=0;mm<=E->output.llmax;mm++)   {
 	      mmf = (double)(mm)*f;
                 E->sphere.tablescosf[j][mm] = cos( mmf );
-                E->sphere.tablessinf[CPPR][j][mm] = sin( mmf );
+                E->sphere.tablessinf[j][mm] = sin( mmf );
             }
 
             for (ll=0;ll<=E->output.llmax;ll++)
