@@ -1084,7 +1084,7 @@ void allocate_common_vars(E)
 
 
     E->parallel.EXCHANGE_sNODE[i] = (struct PASS *) malloc((nozl+2)*sizeof(struct PASS));
-    E->parallel.NODE[i][CPPR]   = (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
+    E->parallel.NODE[i]   = (struct BOUND *) malloc((nxyz+2)*sizeof(struct BOUND));
     E->parallel.EXCHANGE_NODE[i]= (struct PASS *) malloc((nxyz+2)*sizeof(struct PASS));
     E->parallel.EXCHANGE_ID[i] = (struct PASS *) malloc((nxyz*E->mesh.nsd+3)*sizeof(struct PASS));
 

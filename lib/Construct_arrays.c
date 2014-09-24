@@ -525,12 +525,12 @@ void construct_masks(E)		/* Add lid/edge masks/nodal weightings */
 
         if (E->parallel.me_loc[3]==0 )
           for (i=1;i<=E->parallel.NUM_NNO[lev].bound[5];i++)   {
-            node = E->parallel.NODE[lev][CPPR][i].bound[5];
+            node = E->parallel.NODE[lev][i].bound[5];
  	    E->NODE[lev][node] = E->NODE[lev][node] | TZEDGE;
 	    }
         if ( E->parallel.me_loc[3]==E->parallel.nprocz-1 )
           for (i=1;i<=E->parallel.NUM_NNO[lev].bound[6];i++)   {
-  	    node = E->parallel.NODE[lev][CPPR][i].bound[6];
+  	    node = E->parallel.NODE[lev][i].bound[6];
 	    E->NODE[lev][node] = E->NODE[lev][node] | TZEDGE;
 	    }
   }
