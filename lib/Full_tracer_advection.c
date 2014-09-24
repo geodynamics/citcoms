@@ -1373,7 +1373,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.thetamax=thetamax;
             E->trace.thetamin=thetamin;
             E->trace.phimax=phimax;
-            E->trace.phimin[CPPR]=phimin;
+            E->trace.phimin=phimin;
             E->trace.numregel=numregel;
             E->trace.numregnodes=numregnodes;
 
@@ -2756,7 +2756,7 @@ static int iget_regel(struct All_variables *E,
     idum=rdum/E->trace.deltheta;
     *ntheta=idum+1;
 
-    rdum=phi-E->trace.phimin[CPPR];
+    rdum=phi-E->trace.phimin;
     idum=rdum/E->trace.delphi;
     *nphi=idum+1;
 

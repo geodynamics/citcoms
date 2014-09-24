@@ -120,7 +120,7 @@ struct TRACE{
     double thetamax;
     double thetamin;
     double phimax;
-    double phimin[13];
+    double phimin;
     int *regnodetoel[13];
     int *regtoel[13][5];
 
