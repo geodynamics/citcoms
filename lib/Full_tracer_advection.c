@@ -1369,7 +1369,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.deltheta[CPPR]=deltheta;
             E->trace.delphi[CPPR]=delphi;
             E->trace.numtheta=numtheta;
-            E->trace.numphi[CPPR]=numphi;
+            E->trace.numphi=numphi;
             E->trace.thetamax[CPPR]=thetamax;
             E->trace.thetamin[CPPR]=thetamin;
             E->trace.phimax[CPPR]=phimax;
@@ -1647,7 +1647,7 @@ static void make_regular_grid(struct All_variables *E)
                 }
 
             numtheta=E->trace.numtheta;
-            numphi=E->trace.numphi[CPPR];
+            numphi=E->trace.numphi;
 
             for (nphi=1;nphi<=numphi;nphi++)
                 {
