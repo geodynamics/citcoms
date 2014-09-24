@@ -253,7 +253,7 @@ struct Parallel {
 
     int sTNUM_PASS[MAX_LEVELS];
     struct PASS NUM_sNODE[MAX_LEVELS];
-    struct PASS sPROCESSOR[MAX_LEVELS][NCS];
+    struct PASS sPROCESSOR[MAX_LEVELS];
     struct PASS *EXCHANGE_sNODE[MAX_LEVELS][NCS];
     };
 

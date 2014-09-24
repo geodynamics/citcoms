@@ -642,7 +642,7 @@ void regional_parallel_communication_routs_s(E)
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
-          E->parallel.sPROCESSOR[lev][CPPR].pass[kkk]=me-((i==1)?1:-1)*nproczl;
+          E->parallel.sPROCESSOR[lev].pass[kkk]=me-((i==1)?1:-1)*nproczl;
 
               E->parallel.NUM_sNODE[lev].pass[kkk] =
                           E->parallel.NUM_NNO[lev].bound[ii]/noz;
@@ -670,7 +670,7 @@ void regional_parallel_communication_routs_s(E)
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
-          E->parallel.sPROCESSOR[lev][CPPR].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl;
+          E->parallel.sPROCESSOR[lev].pass[kkk]=me-((k==1)?1:-1)*nprocxl*nproczl;
 
               E->parallel.NUM_sNODE[lev].pass[kkk] =
                           E->parallel.NUM_NNO[lev].bound[ii]/noz;
@@ -850,9 +850,9 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
      }
 
      MPI_Sendrecv(S[k],2*E->parallel.NUM_sNODE[lev].pass[k],MPI_FLOAT,
-		  E->parallel.sPROCESSOR[lev][CPPR].pass[k],1,
+		  E->parallel.sPROCESSOR[lev].pass[k],1,
 		  R[k],2*E->parallel.NUM_sNODE[lev].pass[k],MPI_FLOAT,
-		  E->parallel.sPROCESSOR[lev][CPPR].pass[k],1,
+		  E->parallel.sPROCESSOR[lev].pass[k],1,
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev].pass[k];j++)   {
