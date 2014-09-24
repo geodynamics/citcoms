@@ -243,7 +243,7 @@ struct Parallel {
     struct PASS NUM_NODE[MAX_LEVELS];
     struct PASS PROCESSOR[MAX_LEVELS];
     struct PASS *EXCHANGE_ID[MAX_LEVELS];
-    struct PASS *EXCHANGE_NODE[MAX_LEVELS][NCS];
+    struct PASS *EXCHANGE_NODE[MAX_LEVELS];
 
     int TNUM_PASSz[MAX_LEVELS];
     struct BOUND NUM_PASSz[MAX_LEVELS];
