@@ -651,7 +651,7 @@ void construct_elt_gs(E)
 
   for(lev=E->mesh.gridmin;lev<=E->mesh.gridmax;lev++)
     for(el=1;el<=E->lmesh.NEL[lev];el++)
-      get_elt_g(E,el,E->elt_del[lev][CPPR][el].g,lev);
+      get_elt_g(E,el,E->elt_del[lev][el].g,lev);
 }
 
 

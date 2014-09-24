@@ -1000,8 +1000,8 @@ void get_CBF_topo(E,H,HB)       /* call this only for top and bottom processors*
       }
 
       for(m=0;m<dims*ends;m++) {
-           res[m]  = eltf[m]  - E->elt_del[lev][CPPR][el].g[m][0]  * E->P[el-1];
-           resb[m] = eltfb[m] - E->elt_del[lev][CPPR][elb].g[m][0]* E->P[elb-1];
+           res[m]  = eltf[m]  - E->elt_del[lev][el].g[m][0]  * E->P[el-1];
+           resb[m] = eltfb[m] - E->elt_del[lev][elb].g[m][0]* E->P[elb-1];
             }
 
       for(m=0;m<dims*ends;m++)

@@ -805,7 +805,7 @@ struct All_variables {
     struct FNODE *TWW[MAX_LEVELS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS];
     struct SUBEL *EL[MAX_LEVELS];
-    struct EG *elt_del[MAX_LEVELS][NCS];
+    struct EG *elt_del[MAX_LEVELS];
     struct EC *elt_c[MAX_LEVELS][NCS];
     struct EK *elt_k[MAX_LEVELS][NCS];
     struct CC *cc;

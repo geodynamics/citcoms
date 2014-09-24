@@ -1065,7 +1065,7 @@ void allocate_common_vars(E)
     E->CC[i][CPPR] =(struct CC *)  malloc((1)*sizeof(struct CC));
     E->CCX[i][CPPR]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
 
-    E->elt_del[i][CPPR] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
+    E->elt_del[i] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
 
     if(E->control.inv_gruneisen != 0)
         E->elt_c[i][CPPR] = (struct EC *) malloc((nel+1)*sizeof(struct EC));

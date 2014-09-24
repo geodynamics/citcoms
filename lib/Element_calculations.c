@@ -689,9 +689,9 @@ void assemble_div_u(struct All_variables *E,
           j1= E->ID[level][b].doff[1];
           j2= E->ID[level][b].doff[2];
           j3= E->ID[level][b].doff[3];
-          divU[e] += E->elt_del[level][CPPR][e+1].g[p  ][0] * U[j1]
-                      + E->elt_del[level][CPPR][e+1].g[p+1][0] * U[j2]
-                      + E->elt_del[level][CPPR][e+1].g[p+2][0] * U[j3];
+          divU[e] += E->elt_del[level][e+1].g[p  ][0] * U[j1]
+                      + E->elt_del[level][e+1].g[p+1][0] * U[j2]
+                      + E->elt_del[level][e+1].g[p+2][0] * U[j3];
         }
       }
 }
@@ -730,9 +730,9 @@ void assemble_grad_p(E,P,gradP,lev)
          j2= E->ID[lev][b].doff[2];
          j3= E->ID[lev][b].doff[3];
               /*for(b=0;b<ploc_mat_size[E->mesh.nsd];b++)  */
-         gradP[j1] += E->elt_del[lev][CPPR][e+1].g[p  ][0] * P[e];
-         gradP[j2] += E->elt_del[lev][CPPR][e+1].g[p+1][0] * P[e];
-         gradP[j3] += E->elt_del[lev][CPPR][e+1].g[p+2][0] * P[e];
+         gradP[j1] += E->elt_del[lev][e+1].g[p  ][0] * P[e];
+         gradP[j2] += E->elt_del[lev][e+1].g[p+1][0] * P[e];
+         gradP[j3] += E->elt_del[lev][e+1].g[p+2][0] * P[e];
       }
     }       /* end for el */
 
@@ -763,13 +763,13 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
       p = (a-1)*dims;
       node = E->IEN[level][e+1].node[a];
       j=E->ID[level][node].doff[1];
-      gradP[p] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p][0];
+      gradP[p] += E->BI[level][j]*E->elt_del[level][e+1].g[p][0];
 
       j=E->ID[level][node].doff[2];
-      gradP[p+1] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p+1][0];
+      gradP[p+1] += E->BI[level][j]*E->elt_del[level][e+1].g[p+1][0];
 
       j=E->ID[level][node].doff[3];
-      gradP[p+2] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p+2][0];
+      gradP[p+2] += E->BI[level][j]*E->elt_del[level][e+1].g[p+2][0];
     }
 
 
@@ -782,9 +782,9 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
 
     for(b=1;b<=ends;b++) {
       p = (b-1)*dims;
-      divU +=E->elt_del[level][CPPR][e+1].g[p][0] * gradP[p];
-      divU +=E->elt_del[level][CPPR][e+1].g[p+1][0] * gradP[p+1];
-      divU +=E->elt_del[level][CPPR][e+1].g[p+2][0] * gradP[p+2];
+      divU +=E->elt_del[level][e+1].g[p][0] * gradP[p];
+      divU +=E->elt_del[level][e+1].g[p+1][0] * gradP[p+1];
+      divU +=E->elt_del[level][e+1].g[p+2][0] * gradP[p+2];
     }
 
     return(divU);  
@@ -1257,34 +1257,34 @@ void get_aug_k(E,el,elt_k,level)
            nodeb=E->IEN[level][el].node[b];      /* for Kab dims*dims  */
 	   i = (a-1)*n*dims+(b-1)*dims;
 	   elt_k[i  ] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]][0];   /*for 11 */
+	              E->elt_del[level][el].g[p[a]][0]*
+		      E->elt_del[level][el].g[p[b]][0];   /*for 11 */
 	   elt_k[i+1] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 12 */
+	              E->elt_del[level][el].g[p[a]][0]*
+		      E->elt_del[level][el].g[p[b]+1][0];  /* for 12 */
 	   elt_k[i+n] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]][0];    /* for 21 */
+	              E->elt_del[level][el].g[p[a]+1][0]*
+		      E->elt_del[level][el].g[p[b]][0];    /* for 21 */
 	   elt_k[i+n+1] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 22 */
+	              E->elt_del[level][el].g[p[a]+1][0]*
+		      E->elt_del[level][el].g[p[b]+1][0];  /* for 22 */
 
            if(3==dims) {
 	       elt_k[i+2] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 13 */
+	              E->elt_del[level][el].g[p[a]][0]*
+		      E->elt_del[level][el].g[p[b]+2][0];  /* for 13 */
 	       elt_k[i+n+2] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+1][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 23 */
+	              E->elt_del[level][el].g[p[a]+1][0]*
+		      E->elt_del[level][el].g[p[b]+2][0];  /* for 23 */
 	       elt_k[i+n+n] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]][0];    /* for 31 */
+	              E->elt_del[level][el].g[p[a]+2][0]*
+		      E->elt_del[level][el].g[p[b]][0];    /* for 31 */
 	       elt_k[i+n+n+1] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+1][0];  /* for 32 */
+	              E->elt_del[level][el].g[p[a]+2][0]*
+		      E->elt_del[level][el].g[p[b]+1][0];  /* for 32 */
 	       elt_k[i+n+n+2] += Visc*E->control.augmented*
-	              E->elt_del[level][CPPR][el].g[p[a]+2][0]*
-		      E->elt_del[level][CPPR][el].g[p[b]+2][0];  /* for 33 */
+	              E->elt_del[level][el].g[p[a]+2][0]*
+		      E->elt_del[level][el].g[p[b]+2][0];  /* for 33 */
                }
            }
        }
