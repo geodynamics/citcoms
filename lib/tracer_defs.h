@@ -54,7 +54,7 @@ struct TRACE{
     double *basicq[100];
     double *extraq[100];
 
-    int ntracers[13];
+    int ntracers;
     int max_ntracers[13];
     int *ielement[13];
 

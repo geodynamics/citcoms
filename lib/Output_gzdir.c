@@ -1042,9 +1042,9 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-  gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[CPPR], ncolumns, E->monitor.elapsed_time);
+  gzprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers, ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[CPPR];n++) {
+      for(n=1;n<=E->trace.ntracers;n++) {
           /* write basic quantities (coordinate) */
           gzprintf(fp1,"%9.5e %9.5e %9.5e",
                   E->trace.basicq[0][n],

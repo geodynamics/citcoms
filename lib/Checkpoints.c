@@ -256,20 +256,20 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->trace.nflavors), sizeof(int), 1, fp);
     fwrite(&(E->trace.ilast_tracer_count), sizeof(int), 1, fp);
 
-    fwrite(&(E->trace.ntracers[CPPR]), sizeof(int), 1, fp);
+    fwrite(&(E->trace.ntracers), sizeof(int), 1, fp);
 
     /* the 0-th element of basicq/extraq/ielement is not init'd
      * and won't be used when read it. */
         for(i=0; i<6; i++) {
             fwrite(E->trace.basicq[i], sizeof(double),
-                   E->trace.ntracers[CPPR]+1, fp);
+                   E->trace.ntracers+1, fp);
         }
         for(i=0; i<E->trace.number_of_extra_quantities; i++) {
             fwrite(E->trace.extraq[i], sizeof(double),
-                   E->trace.ntracers[CPPR]+1, fp);
+                   E->trace.ntracers+1, fp);
         }
         fwrite(E->trace.ielement[CPPR], sizeof(int),
-               E->trace.ntracers[CPPR]+1, fp);
+               E->trace.ntracers+1, fp);
 
 }
 
@@ -316,19 +316,19 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
     /* # of tracers, allocate memory */
         fread(&itmp, sizeof(int), 1, fp);
         allocate_tracer_arrays(E, itmp);
-        E->trace.ntracers[CPPR] = itmp;
+        E->trace.ntracers = itmp;
 
     /* read tracer data */
         for(i=0; i<6; i++) {
             fread(E->trace.basicq[i], sizeof(double),
-                  E->trace.ntracers[CPPR]+1, fp);
+                  E->trace.ntracers+1, fp);
         }
         for(i=0; i<E->trace.number_of_extra_quantities; i++) {
             fread(E->trace.extraq[i], sizeof(double),
-                  E->trace.ntracers[CPPR]+1, fp);
+                  E->trace.ntracers+1, fp);
         }
         fread(E->trace.ielement[CPPR], sizeof(int),
-              E->trace.ntracers[CPPR]+1, fp);
+              E->trace.ntracers+1, fp);
 
     /* init E->trace.ntracer_flavor */
     count_tracers_of_flavors(E);

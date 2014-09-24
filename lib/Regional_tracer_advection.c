@@ -572,7 +572,7 @@ void regional_lost_souls(struct All_variables *E)
     }
 
     /* Allocate Maximum Memory to Send Arrays */
-    max_send_size = max(2*E->trace.ilater[CPPR], E->trace.ntracers[CPPR]/100);
+    max_send_size = max(2*E->trace.ilater[CPPR], E->trace.ntracers/100);
     itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
 
     if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
@@ -805,10 +805,10 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
 
         if (inside) {
 
-            E->trace.ntracers[CPPR]++;
-            ilast = E->trace.ntracers[CPPR];
+            E->trace.ntracers++;
+            ilast = E->trace.ntracers;
 
-            if (E->trace.ntracers[CPPR] > (E->trace.max_ntracers[CPPR]-5))
+            if (E->trace.ntracers > (E->trace.max_ntracers[CPPR]-5))
                 expand_tracer_arrays(E);
 
             for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)

@@ -635,10 +635,10 @@ void output_tracer(struct All_variables *E, int cycles)
 
   ncolumns = 3 + E->trace.number_of_extra_quantities;
 
-      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers[CPPR],
+      fprintf(fp1,"%d %d %d %.5e\n", cycles, E->trace.ntracers,
               ncolumns, E->monitor.elapsed_time);
 
-      for(n=1;n<=E->trace.ntracers[CPPR];n++) {
+      for(n=1;n<=E->trace.ntracers;n++) {
           /* write basic quantities (coordinate) */
           fprintf(fp1,"%.12e %.12e %.12e",
                   E->trace.basicq[0][n],

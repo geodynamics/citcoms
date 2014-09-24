@@ -382,7 +382,7 @@ static void predict_tracers(struct All_variables *E)
 
 
 
-        numtracers=E->trace.ntracers[CPPR];
+        numtracers=E->trace.ntracers;
 
         for (kk=1;kk<=numtracers;kk++) {
 
@@ -476,7 +476,7 @@ static void correct_tracers(struct All_variables *E)
     dt=E->advection.timestep;
 
 
-        for (kk=1;kk<=E->trace.ntracers[CPPR];kk++) {
+        for (kk=1;kk<=E->trace.ntracers;kk++) {
 
             theta_pred=E->trace.basicq[0][kk];
             phi_pred=E->trace.basicq[1][kk];
@@ -574,7 +574,7 @@ static void find_tracers(struct All_variables *E)
         /* important to index by it, not kk */
 
         it=0;
-        num_tracers=E->trace.ntracers[CPPR];
+        num_tracers=E->trace.ntracers;
 
         for (kk=1;kk<=num_tracers;kk++) {
 
@@ -662,7 +662,7 @@ void count_tracers_of_flavors(struct All_variables *E)
             for (e=1; e<=E->lmesh.nel; e++)
                 E->trace.ntracer_flavor[CPPR][flavor][e] = 0;
 
-        numtracers=E->trace.ntracers[CPPR];
+        numtracers=E->trace.ntracers;
 
         /* Fill arrays */
         for (kk=1; kk<=numtracers; kk++) {
@@ -783,7 +783,7 @@ static void generate_random_tracers(struct All_variables *E, int tracers_cap)
 
     /* Tracers are placed randomly in cap */
     /* (intentionally using rand() instead of srand() )*/
-    while (E->trace.ntracers[CPPR]<tracers_cap) {
+    while (E->trace.ntracers<tracers_cap) {
 
         number_of_tries++;
         max_tries=100*tracers_cap;
@@ -829,8 +829,8 @@ static void generate_random_tracers(struct All_variables *E, int tracers_cap)
 
         (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
 
-        E->trace.ntracers[CPPR]++;
-        kk=E->trace.ntracers[CPPR];
+        E->trace.ntracers++;
+        kk=E->trace.ntracers;
 
         E->trace.basicq[0][kk]=theta;
         E->trace.basicq[1][kk]=phi;
@@ -940,25 +940,25 @@ static void read_tracer_file(struct All_variables *E)
             /* if still here, tracer is in processor domain */
 
 
-            E->trace.ntracers[CPPR]++;
+            E->trace.ntracers++;
 
-            if (E->trace.ntracers[CPPR]>=(E->trace.max_ntracers[CPPR]-5)) 
+            if (E->trace.ntracers>=(E->trace.max_ntracers[CPPR]-5)) 
               expand_tracer_arrays(E);
 
-            E->trace.basicq[0][E->trace.ntracers[CPPR]]=theta;
-            E->trace.basicq[1][E->trace.ntracers[CPPR]]=phi;
-            E->trace.basicq[2][E->trace.ntracers[CPPR]]=rad;
-            E->trace.basicq[3][E->trace.ntracers[CPPR]]=x;
-            E->trace.basicq[4][E->trace.ntracers[CPPR]]=y;
-            E->trace.basicq[5][E->trace.ntracers[CPPR]]=z;
+            E->trace.basicq[0][E->trace.ntracers]=theta;
+            E->trace.basicq[1][E->trace.ntracers]=phi;
+            E->trace.basicq[2][E->trace.ntracers]=rad;
+            E->trace.basicq[3][E->trace.ntracers]=x;
+            E->trace.basicq[4][E->trace.ntracers]=y;
+            E->trace.basicq[5][E->trace.ntracers]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[i][E->trace.ntracers[CPPR]]=buffer[i+3];
+                E->trace.extraq[i][E->trace.ntracers]=buffer[i+3];
 
         } /* end kk, number of tracers */
 
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
-                E->trace.ntracers[CPPR]);
+                E->trace.ntracers);
 
     fclose(fptracer);
 
@@ -1052,7 +1052,7 @@ static void read_old_tracer_file(struct All_variables *E)
         /* allocate memory for tracer arrays */
 
         allocate_tracer_arrays(E,numtracers);
-        E->trace.ntracers[CPPR]=numtracers;
+        E->trace.ntracers=numtracers;
 
         for (kk=1;kk<=numtracers;kk++) {
             int len, ncol;
@@ -1144,7 +1144,7 @@ static int isum_tracers(struct All_variables *E)
     iallcount = 0;
 
     imycount = 0;
-    imycount = imycount + E->trace.ntracers[CPPR];
+    imycount = imycount + E->trace.ntracers;
 
     MPI_Allreduce(&imycount,&iallcount,1,MPI_INT,MPI_SUM,E->parallel.world);
 
@@ -1207,7 +1207,7 @@ static void init_tracer_flavors(struct All_variables *E)
       /* any tracer above z_interface[i] is of flavor i */
       /* any tracer below z_interface is of flavor (nflavors-1) */
 
-	number_of_tracers = E->trace.ntracers[CPPR];
+	number_of_tracers = E->trace.ntracers;
 	for (kk=1;kk<=number_of_tracers;kk++) {
 	  rad = E->trace.basicq[2][kk];
 
@@ -1352,7 +1352,7 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     /* (initially make it 25% larger than required */
 
     E->trace.max_ntracers[CPPR]=number_of_tracers+number_of_tracers/4;
-    E->trace.ntracers[CPPR]=0;
+    E->trace.ntracers=0;
 
     /* make tracer arrays */
 
@@ -1461,12 +1461,12 @@ static void reduce_tracer_arrays(struct All_variables *E)
 
         /* if physical size is double tracer size, reduce it */
 
-        iempty_space=(E->trace.max_ntracers[CPPR]-E->trace.ntracers[CPPR]);
+        iempty_space=(E->trace.max_ntracers[CPPR]-E->trace.ntracers);
 
-        if (iempty_space>(E->trace.ntracers[CPPR]+icushion)) {
+        if (iempty_space>(E->trace.ntracers+icushion)) {
 
 
-            inewsize=E->trace.ntracers[CPPR]+E->trace.ntracers[CPPR]/4+icushion;
+            inewsize=E->trace.ntracers+E->trace.ntracers/4+icushion;
 
             if (inewsize<1) {
                 fprintf(E->trace.fpt,"Error(reduce tracer arrays)-something up (hdf3)\n");
@@ -1591,7 +1591,7 @@ static void eject_tracer(struct All_variables *E, int it)
     int ilast_tracer;
     int kk;
 
-    ilast_tracer=E->trace.ntracers[CPPR];
+    ilast_tracer=E->trace.ntracers;
 
     /* put last tracer in ejected tracer position */
 
@@ -1603,7 +1603,7 @@ static void eject_tracer(struct All_variables *E, int it)
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
         E->trace.extraq[kk][it]=E->trace.extraq[kk][ilast_tracer];
 
-    E->trace.ntracers[CPPR]--;
+    E->trace.ntracers--;
 }
 
 
