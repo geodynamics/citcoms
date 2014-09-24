@@ -157,7 +157,7 @@ void construct_id(E)
         if (E->NODE[lev][node] & SKIP)
         for(doff=1;doff<=dims;doff++)  {
 	  i++;
-          E->parallel.Skip_id[lev][CPPR][i] = E->ID[lev][node].doff[doff];
+          E->parallel.Skip_id[lev][i] = E->ID[lev][node].doff[doff];
           }
         }
 

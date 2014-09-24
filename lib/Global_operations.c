@@ -471,7 +471,7 @@ float global_fvdot(E,A,B,lev)
       temp += A[CPPR][i]*B[CPPR][i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev];i++)
-       temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*B[CPPR][E->parallel.Skip_id[lev][CPPR][i]];
+       temp1 += A[CPPR][E->parallel.Skip_id[lev][i]]*B[CPPR][E->parallel.Skip_id[lev][i]];
 
     temp -= temp1;
 
@@ -501,8 +501,8 @@ double kineticE_radial(E,A,lev)
         temp += A[CPPR][i]*A[CPPR][i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev];i++)
-      if ((E->parallel.Skip_id[lev][CPPR][i]+1)%3==0)
-        temp1 += A[CPPR][E->parallel.Skip_id[lev][CPPR][i]]*A[CPPR][E->parallel.Skip_id[lev][CPPR][i]];
+      if ((E->parallel.Skip_id[lev][i]+1)%3==0)
+        temp1 += A[CPPR][E->parallel.Skip_id[lev][i]]*A[CPPR][E->parallel.Skip_id[lev][i]];
 
     temp -= temp1;
 
@@ -530,7 +530,7 @@ double global_vdot(E,A,B,lev)
       temp += A[i]*B[i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev];i++)
-       temp1 += A[E->parallel.Skip_id[lev][CPPR][i]]*B[E->parallel.Skip_id[lev][CPPR][i]];
+       temp1 += A[E->parallel.Skip_id[lev][i]]*B[E->parallel.Skip_id[lev][i]];
 
     temp -= temp1;
 
