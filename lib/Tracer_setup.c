@@ -667,7 +667,7 @@ void count_tracers_of_flavors(struct All_variables *E)
         /* Fill arrays */
         for (kk=1; kk<=numtracers; kk++) {
             e = E->trace.ielement[CPPR][kk];
-            flavor = E->trace.extraq[CPPR][0][kk];
+            flavor = E->trace.extraq[0][kk];
             E->trace.ntracer_flavor[CPPR][flavor][e]++;
         }
 }
@@ -953,7 +953,7 @@ static void read_tracer_file(struct All_variables *E)
             E->trace.basicq[5][E->trace.ntracers[CPPR]]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[CPPR][i][E->trace.ntracers[CPPR]]=buffer[i+3];
+                E->trace.extraq[i][E->trace.ntracers[CPPR]]=buffer[i+3];
 
         } /* end kk, number of tracers */
 
@@ -1083,7 +1083,7 @@ static void read_old_tracer_file(struct All_variables *E)
             E->trace.basicq[5][kk]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
-                E->trace.extraq[CPPR][i][kk]=buffer[i+3];
+                E->trace.extraq[i][kk]=buffer[i+3];
 
         }
 
@@ -1218,7 +1218,7 @@ static void init_tracer_flavors(struct All_variables *E)
                   break;
               }
           }
-          E->trace.extraq[CPPR][0][kk] = flavor;
+          E->trace.extraq[0][kk] = flavor;
 	}
       break;
 
@@ -1374,7 +1374,7 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
     }
 
     for (kk=0;kk<E->trace.number_of_extra_quantities;kk++) {
-        if ((E->trace.extraq[CPPR][kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
+        if ((E->trace.extraq[kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1c.%d\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1430,7 +1430,7 @@ void expand_tracer_arrays(struct All_variables *E)
     }
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++) {
-        if ((E->trace.extraq[CPPR][kk]=(double *)realloc(E->trace.extraq[CPPR][kk],inewsize*sizeof(double)))==NULL) {
+        if ((E->trace.extraq[kk]=(double *)realloc(E->trace.extraq[kk],inewsize*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory 78 (%d)\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1491,7 +1491,7 @@ static void reduce_tracer_arrays(struct All_variables *E)
             }
 
             for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++) {
-                if ((E->trace.extraq[CPPR][kk]=(double *)realloc(E->trace.extraq[CPPR][kk],inewsize*sizeof(double)))==NULL) {
+                if ((E->trace.extraq[kk]=(double *)realloc(E->trace.extraq[kk],inewsize*sizeof(double)))==NULL) {
                     fprintf(E->trace.fpt,"AKM(reduce tracer arrays )-no memory 783 (%d)\n",kk);
                     fflush(E->trace.fpt);
                     exit(10);
@@ -1549,7 +1549,7 @@ static void put_away_later(struct All_variables *E, int it)
         E->trace.rlater[CPPR][kk][E->trace.ilater[CPPR]]=E->trace.basicq[kk][it];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater[CPPR]]=E->trace.extraq[CPPR][kk][it];
+        E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater[CPPR]]=E->trace.extraq[kk][it];
 }
 
 
@@ -1601,7 +1601,7 @@ static void eject_tracer(struct All_variables *E, int it)
         E->trace.basicq[kk][it]=E->trace.basicq[kk][ilast_tracer];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.extraq[CPPR][kk][it]=E->trace.extraq[CPPR][kk][ilast_tracer];
+        E->trace.extraq[kk][it]=E->trace.extraq[kk][ilast_tracer];
 
     E->trace.ntracers[CPPR]--;
 }

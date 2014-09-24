@@ -52,7 +52,7 @@ struct TRACE{
     int number_of_tracer_quantities;
 
     double *basicq[100];
-    double *extraq[13][100];
+    double *extraq[100];
 
     int ntracers[13];
     int max_ntracers[13];

@@ -1053,7 +1053,7 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {
-              gzprintf(fp1," %9.5e", E->trace.extraq[CPPR][i][n]);
+              gzprintf(fp1," %9.5e", E->trace.extraq[i][n]);
           }
           gzprintf(fp1, "\n");
       }

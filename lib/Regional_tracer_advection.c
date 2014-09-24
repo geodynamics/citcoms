@@ -816,7 +816,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
 
             ipos += E->trace.number_of_basic_quantities;
             for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
-                E->trace.extraq[CPPR][pp][ilast] = recv[ipos+pp];
+                E->trace.extraq[pp][ilast] = recv[ipos+pp];
 
 
             /* found the element */

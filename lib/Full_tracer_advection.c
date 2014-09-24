@@ -725,7 +725,7 @@ void full_lost_souls(struct All_variables *E)
         for (mm=0;mm<E->trace.number_of_extra_quantities;mm++) {
             ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
 
-            E->trace.extraq[CPPR][mm][E->trace.ntracers[CPPR]]=REC[CPPR][ipos];
+            E->trace.extraq[mm][E->trace.ntracers[CPPR]]=REC[CPPR][ipos];
         }
 
         theta=E->trace.basicq[0][E->trace.ntracers[CPPR]];
