@@ -563,7 +563,7 @@ static void find_tracers(struct All_variables *E)
 
         /* initialize arrays and statistical counters */
 
-        E->trace.ilater[CPPR]=E->trace.ilatersize=0;
+        E->trace.ilater=E->trace.ilatersize=0;
 
         E->trace.istat1=0;
         for (kk=0;kk<=4;kk++) {
@@ -1539,17 +1539,17 @@ static void put_away_later(struct All_variables *E, int it)
 
     /* Put tracer in later array */
 
-    E->trace.ilater[CPPR]++;
+    E->trace.ilater++;
 
-    if (E->trace.ilater[CPPR] >= (E->trace.ilatersize-5)) expand_later_array(E);
+    if (E->trace.ilater >= (E->trace.ilatersize-5)) expand_later_array(E);
 
     /* stack basic and extra quantities together (basic first) */
 
     for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.rlater[CPPR][kk][E->trace.ilater[CPPR]]=E->trace.basicq[kk][it];
+        E->trace.rlater[CPPR][kk][E->trace.ilater]=E->trace.basicq[kk][it];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater[CPPR]]=E->trace.extraq[kk][it];
+        E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater]=E->trace.extraq[kk][it];
 }
 
 

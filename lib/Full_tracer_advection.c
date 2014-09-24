@@ -311,7 +311,7 @@ void full_lost_souls(struct All_variables *E)
       fprintf(E->trace.fpt, "Entering lost_souls()\n");
 
 
-    E->trace.istat_isend=E->trace.ilater[CPPR];
+    E->trace.istat_isend=E->trace.ilater;
     /** debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
@@ -326,7 +326,7 @@ void full_lost_souls(struct All_variables *E)
 
     /* initialize isend and ireceive */
     /* # of neighbors in the horizontal plane */
-    isize[CPPR]=E->trace.ilater[CPPR]*E->trace.number_of_tracer_quantities;
+    isize[CPPR]=E->trace.ilater*E->trace.number_of_tracer_quantities;
     for (kk=0;kk<=num_ngb;kk++) isend[CPPR][kk]=0;
     for (kk=0;kk<=num_ngb;kk++) ireceive[CPPR][kk]=0;
 
@@ -786,7 +786,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 
     /* transfer tracers from rlater to send */
 
-    numtracers=E->trace.ilater[CPPR];
+    numtracers=E->trace.ilater;
 
     for (kk=1;kk<=numtracers;kk++) {
         rad=E->trace.rlater[CPPR][2][kk];

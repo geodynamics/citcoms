@@ -61,7 +61,7 @@ struct TRACE{
     int number_of_tracers;
 
     int ilatersize;
-    int ilater[13];
+    int ilater;
     double *rlater[13][100];
 
     /* tracer flavors */

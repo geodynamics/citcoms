@@ -550,7 +550,7 @@ void regional_lost_souls(struct All_variables *E)
     double CPU_time0();
     double begin_time = CPU_time0();
 
-    E->trace.istat_isend = E->trace.ilater[CPPR];
+    E->trace.istat_isend = E->trace.ilater;
 
     /* the bounding box */
     for (d=0; d<E->mesh.nsd; d++) {
@@ -572,7 +572,7 @@ void regional_lost_souls(struct All_variables *E)
     }
 
     /* Allocate Maximum Memory to Send Arrays */
-    max_send_size = max(2*E->trace.ilater[CPPR], E->trace.ntracers/100);
+    max_send_size = max(2*E->trace.ilater, E->trace.ntracers/100);
     itemp_size = max_send_size * E->trace.number_of_tracer_quantities;
 
     if ((send[0] = (double *)malloc(itemp_size*sizeof(double)))
@@ -590,7 +590,7 @@ void regional_lost_souls(struct All_variables *E)
 
 
     for (d=0; d<E->mesh.nsd; d++) {
-        int original_size = E->trace.ilater[CPPR];
+        int original_size = E->trace.ilater;
         int idb;
         int kk = 1;
         int isend[2], irecv[2];
@@ -598,7 +598,7 @@ void regional_lost_souls(struct All_variables *E)
 
 
         /* move out-of-bound tracers to send array */
-        while (kk<=E->trace.ilater[CPPR]) {
+        while (kk<=E->trace.ilater) {
             double coord;
 
             /* Is the tracer within the bounds in the d-th dimension */
@@ -649,10 +649,10 @@ void regional_lost_souls(struct All_variables *E)
 
 
         /* check the total # of tracers is conserved */
-        if ((isend[0] + isend[1] + E->trace.ilater[CPPR]) != original_size) {
+        if ((isend[0] + isend[1] + E->trace.ilater) != original_size) {
             fprintf(E->trace.fpt, "original_size: %d, rlater_size: %d, "
                     "send_size: %d\n",
-                    original_size, E->trace.ilater[CPPR], kk);
+                    original_size, E->trace.ilater, kk);
         }
 
         /* Send info to other processors regarding number of send tracers */
@@ -728,9 +728,9 @@ void regional_lost_souls(struct All_variables *E)
 
 
     /* rlater should be empty by now */
-    if (E->trace.ilater[CPPR] > 0) {
+    if (E->trace.ilater > 0) {
         fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
-        for (kk=1; kk<=E->trace.ilater[CPPR]; kk++) {
+        for (kk=1; kk<=E->trace.ilater; kk++) {
             fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
                     E->trace.rlater[CPPR][0][kk],
                     E->trace.rlater[CPPR][1][kk],
@@ -767,11 +767,11 @@ static void put_lost_tracers(struct All_variables *E,
     (*send_size)++;
 
     /* eject the tracer from rlater */
-    ilast_tracer = E->trace.ilater[CPPR];
+    ilast_tracer = E->trace.ilater;
     for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
         E->trace.rlater[CPPR][pp][kk] = E->trace.rlater[CPPR][pp][ilast_tracer];
     }
-    E->trace.ilater[CPPR]--;
+    E->trace.ilater--;
 }
 
 
@@ -848,10 +848,10 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
                 }
             } /* end first particle initiating memory allocation */
 
-            E->trace.ilater[CPPR]++;
-            ilast = E->trace.ilater[CPPR];
+            E->trace.ilater++;
+            ilast = E->trace.ilater;
 
-            if (E->trace.ilater[CPPR] > (E->trace.ilatersize-5))
+            if (E->trace.ilater > (E->trace.ilatersize-5))
                 expand_later_array(E);
 
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
