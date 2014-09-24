@@ -1374,7 +1374,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.thetamin[CPPR]=thetamin;
             E->trace.phimax[CPPR]=phimax;
             E->trace.phimin[CPPR]=phimin;
-            E->trace.numregel[CPPR]=numregel;
+            E->trace.numregel=numregel;
             E->trace.numregnodes[CPPR]=numregnodes;
 
             if ( ((1.0*numregel)/(1.0*E->lmesh.elx*E->lmesh.ely)) < 0.5 )
@@ -1634,7 +1634,7 @@ static void make_regular_grid(struct All_variables *E)
             /*                  and the rest are not (-99).                   */
             /*    ichoice>1     Multiple elements to check                    */
 
-            numregel= E->trace.numregel[CPPR];
+            numregel= E->trace.numregel;
 
             for (pp=0;pp<=4;pp++)
                 {
@@ -1788,7 +1788,7 @@ static void make_regular_grid(struct All_variables *E)
 
 
             /* testing */
-            for (kk=1;kk<=E->trace.numregel[CPPR];kk++)
+            for (kk=1;kk<=E->trace.numregel;kk++)
                 {
                     if ((E->trace.regtoel[CPPR][0][kk]<-1)||(E->trace.regtoel[CPPR][0][kk]>4))
                         {
@@ -2764,7 +2764,7 @@ static int iget_regel(struct All_variables *E,
 
     /* check range to be sure */
 
-    if (iregel>E->trace.numregel[CPPR]) return -99;
+    if (iregel>E->trace.numregel) return -99;
     if (iregel<1) return -99;
 
     return iregel;
