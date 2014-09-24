@@ -111,7 +111,7 @@ struct TRACE{
     /*********************/
 
     /* regular mesh parameters */
-    int numtheta[13];
+    int numtheta;
     int numphi[13];
     unsigned int numregel[13];
     unsigned int numregnodes[13];

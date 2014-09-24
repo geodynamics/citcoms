@@ -1368,7 +1368,7 @@ static void make_regular_grid(struct All_variables *E)
 
             E->trace.deltheta[CPPR]=deltheta;
             E->trace.delphi[CPPR]=delphi;
-            E->trace.numtheta[CPPR]=numtheta;
+            E->trace.numtheta=numtheta;
             E->trace.numphi[CPPR]=numphi;
             E->trace.thetamax[CPPR]=thetamax;
             E->trace.thetamin[CPPR]=thetamin;
@@ -1646,7 +1646,7 @@ static void make_regular_grid(struct All_variables *E)
                         }
                 }
 
-            numtheta=E->trace.numtheta[CPPR];
+            numtheta=E->trace.numtheta;
             numphi=E->trace.numphi[CPPR];
 
             for (nphi=1;nphi<=numphi;nphi++)
@@ -1669,8 +1669,8 @@ static void make_regular_grid(struct All_variables *E)
 
                             iregnode[1]=iregel+(nphi-1);
                             iregnode[2]=iregel+nphi;
-                            iregnode[3]=iregel+nphi+E->trace.numtheta[CPPR]+1;
-                            iregnode[4]=iregel+nphi+E->trace.numtheta[CPPR];
+                            iregnode[3]=iregel+nphi+E->trace.numtheta+1;
+                            iregnode[4]=iregel+nphi+E->trace.numtheta;
 
                             for (kk=1;kk<=4;kk++)
                                 {
@@ -2760,7 +2760,7 @@ static int iget_regel(struct All_variables *E,
     idum=rdum/E->trace.delphi[CPPR];
     *nphi=idum+1;
 
-    iregel=*ntheta+(*nphi-1)*E->trace.numtheta[CPPR];
+    iregel=*ntheta+(*nphi-1)*E->trace.numtheta;
 
     /* check range to be sure */
 
