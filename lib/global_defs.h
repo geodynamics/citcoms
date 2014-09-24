@@ -801,7 +801,7 @@ struct All_variables {
     struct SIEN *sien;
     struct ID *id;
     struct COORD *ECO[MAX_LEVELS];
-    struct IEN *IEN[MAX_LEVELS][NCS]; /* global at each level */
+    struct IEN *IEN[MAX_LEVELS]; /* global at each level */
     struct FNODE *TWW[MAX_LEVELS][NCS];	/* for nodal averages */
     struct ID *ID[MAX_LEVELS][NCS];
     struct SUBEL *EL[MAX_LEVELS][NCS];

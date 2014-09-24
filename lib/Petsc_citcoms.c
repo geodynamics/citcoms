@@ -100,7 +100,7 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E, Vec U, Vec result, i
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
       for(e=0;e<nel;e++) {
-        b = E->IEN[level][CPPR][e+1].node[a];
+        b = E->IEN[level][e+1].node[a];
         j1= E->ID[level][CPPR][b].doff[1];
         j2= E->ID[level][CPPR][b].doff[2];
         j3= E->ID[level][CPPR][b].doff[3];

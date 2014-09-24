@@ -94,7 +94,7 @@ void compute_angle_surf_area (E)
             for (es=1;es<=E->lmesh.SNEL[lev];es++)              {
                 el = (es-1)*E->lmesh.ELZ[lev]+1;
                 for (i=1;i<=4;i++)
-                    ia[i] = E->IEN[lev][CPPR][el].node[i];
+                    ia[i] = E->IEN[lev][el].node[i];
 
                 for (i=1;i<=4;i++)  {
                     xx[1][i] = E->X[lev][1][ia[i]]/E->SX[lev][3][ia[1]];
@@ -178,7 +178,7 @@ double area_of_5points(E,lev,el,x,ne)
     double xx[4],angle[5],angle1[5];
 
     for (i=1;i<=4;i++)
-        ia[i] = E->IEN[lev][CPPR][el].node[i];
+        ia[i] = E->IEN[lev][el].node[i];
 
     es = (el-1)/E->lmesh.ELZ[lev]+1;
 

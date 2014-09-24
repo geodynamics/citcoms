@@ -755,7 +755,7 @@ double  vnorm_nonnewt(E,dU,U,lev)
    /*if (E->mat[m][e]==1)*/
      for (i=1;i<=dims;i++)
        for (a=1;a<=ends;a++) {
-	 node = E->IEN[lev][CPPR][e].node[a];
+	 node = E->IEN[lev][e].node[a];
          dtemp += dU[ E->ID[lev][CPPR][node].doff[i] ]*
                   dU[ E->ID[lev][CPPR][node].doff[i] ];
          temp += U[ E->ID[lev][CPPR][node].doff[i] ]*

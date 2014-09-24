@@ -453,12 +453,12 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 
     for(e=1;e<=nel;e++)   {
       for(a=1;a<=ends;a++) {
-	ii = E->IEN[level][CPPR][e].node[a];
+	ii = E->IEN[level][e].node[a];
 	a1 = E->ID[level][CPPR][ii].doff[1];
 	a2 = E->ID[level][CPPR][ii].doff[2];
 	a3 = E->ID[level][CPPR][ii].doff[3];
 	for(b=1;b<=ends;b++) {
-	  nodeb = E->IEN[level][CPPR][e].node[b];
+	  nodeb = E->IEN[level][e].node[b];
 	  ii = (a*n+b)*dims-(dims*n+dims);
 	  /* i=1, j=1,2,3 */
 		Au[a1] +=
@@ -571,7 +571,7 @@ void build_diagonal_of_K(E,el,elt_k,level)
     const int ends=enodes[E->mesh.nsd];
 
     for(a=1;a<=ends;a++) {
-	    node=E->IEN[level][CPPR][el].node[a];
+	    node=E->IEN[level][el].node[a];
 	    /* dirn 1 */
 	    a1 = E->ID[level][CPPR][node].doff[1];
 	    p=(a-1)*dims;
@@ -637,7 +637,7 @@ void assemble_c_u(struct All_variables *E,
         for(a=1;a<=ends;a++) {
             p = (a-1)*dims;
             for(e=0;e<nel;e++) {
-                b = E->IEN[level][CPPR][e].node[a];
+                b = E->IEN[level][e].node[a];
                 j1= E->ID[level][CPPR][b].doff[1];
                 j2= E->ID[level][CPPR][b].doff[2];
                 j3= E->ID[level][CPPR][b].doff[3];
@@ -685,7 +685,7 @@ void assemble_div_u(struct All_variables *E,
       for(a=1;a<=ends;a++) {
         p = (a-1)*dims;
         for(e=0;e<nel;e++) {
-          b = E->IEN[level][CPPR][e+1].node[a];
+          b = E->IEN[level][e+1].node[a];
           j1= E->ID[level][CPPR][b].doff[1];
           j2= E->ID[level][CPPR][b].doff[2];
           j3= E->ID[level][CPPR][b].doff[3];
@@ -725,7 +725,7 @@ void assemble_grad_p(E,P,gradP,lev)
 
       for(a=1;a<=ends;a++) {
          p = (a-1)*dims;
-         b = E->IEN[lev][CPPR][e+1].node[a];
+         b = E->IEN[lev][e+1].node[a];
          j1= E->ID[lev][CPPR][b].doff[1];
          j2= E->ID[lev][CPPR][b].doff[2];
          j3= E->ID[lev][CPPR][b].doff[3];
@@ -761,7 +761,7 @@ double assemble_dAhatp_entry(struct All_variables *E, int e, int level)
 
     for(a=1;a<=ends;a++) {
       p = (a-1)*dims;
-      node = E->IEN[level][CPPR][e+1].node[a];
+      node = E->IEN[level][e+1].node[a];
       j=E->ID[level][CPPR][node].doff[1];
       gradP[p] += E->BI[level][j]*E->elt_del[level][CPPR][e+1].g[p][0];
 
@@ -833,7 +833,7 @@ void get_elt_c(struct All_variables *E, int el, higher_precision elt_c[24][1], i
         /* compute d(rho)/dr/rho from rho(r) */
 
         for(a=1;a<=ends;a++) {
-            j = E->IEN[lev][CPPR][el].node[a];
+            j = E->IEN[lev][el].node[a];
             nz = (j - 1) % E->lmesh.noz + 1;
             rho[a] = E->refstate.rho[nz];
         }
@@ -1252,9 +1252,9 @@ void get_aug_k(E,el,elt_k,level)
      Visc = Visc/vpts;
 
      for(a=1;a<=ends;a++) {
-        nodea=E->IEN[level][CPPR][el].node[a];
+        nodea=E->IEN[level][el].node[a];
         for(b=1;b<=ends;b++) {
-           nodeb=E->IEN[level][CPPR][el].node[b];      /* for Kab dims*dims  */
+           nodeb=E->IEN[level][el].node[b];      /* for Kab dims*dims  */
 	   i = (a-1)*n*dims+(b-1)*dims;
 	   elt_k[i  ] += Visc*E->control.augmented*
 	              E->elt_del[level][CPPR][el].g[p[a]][0]*

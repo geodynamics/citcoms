@@ -78,8 +78,8 @@ void inject_scalar(E,start_lev,AU,AD)
 
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
-          node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
-          node_fine=E->IEN[start_lev][CPPR][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
+          node_coarse = E->IEN[sl_minus][el].node[i];
+          node_fine=E->IEN[start_lev][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
           AD[node_coarse] = AU[node_fine];
         }
 }
@@ -106,8 +106,8 @@ void inject_vector(E,start_lev,AU,AD)
 
       for(el=1;el<=E->lmesh.NEL[sl_minus];el++)
         for(i=1;i<=ends;i++)       {
-          node_coarse = E->IEN[sl_minus][CPPR][el].node[i];
-          node_fine=E->IEN[start_lev][CPPR][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
+          node_coarse = E->IEN[sl_minus][el].node[i];
+          node_fine=E->IEN[start_lev][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
           for (j=1;j<=dims;j++)    {
             eqn_fine   = E->ID[start_lev][CPPR][node_fine].doff[j];
             eqn_coarse = E->ID[sl_minus][CPPR][node_coarse].doff[j];
@@ -147,8 +147,8 @@ void un_inject_vector(E,start_lev,AD,AU)
 
       for(el=1;el<=nels;el++)
         for(i=1;i<=ENODES3D;i++)  {
-          node = E->IEN[start_lev][CPPR][el].node[i];
-	  node_plus=E->IEN[sl_plus][CPPR][E->EL[start_lev][CPPR][el].sub[i]].node[i];
+          node = E->IEN[start_lev][el].node[i];
+	  node_plus=E->IEN[sl_plus][E->EL[start_lev][CPPR][el].sub[i]].node[i];
 
 	  eqn1 = E->ID[start_lev][CPPR][node].doff[1];
 	  eqn2 = E->ID[start_lev][CPPR][node].doff[2];
@@ -451,13 +451,13 @@ void project_scalar(E,start_lev,AU,AD)
                 average=0.0;
                 node1 = E->EL[sl_minus][CPPR][el].sub[i];
                 for(j=1;j<=ENODES3D;j++)                     {
-                    node=E->IEN[start_lev][CPPR][node1].node[j];
+                    node=E->IEN[start_lev][node1].node[j];
                     average += AU[node];
                     }
 
                 w=weight*average;
 
-                node= E->IEN[sl_minus][CPPR][el].node[i];
+                node= E->IEN[sl_minus][el].node[i];
 
                 AD[node] += w * E->TWW[sl_minus][CPPR][el].node[i];
          }
@@ -513,11 +513,11 @@ void project_vector(E,start_lev,AU,AD,ic)
                 /* smooth in xyz coordinates */
         for(el=1;el<=nels_minus;el++)
           for(i=1;i<=ENODES3D;i++) {
-                node= E->IEN[sl_minus][CPPR][el].node[i];
+                node= E->IEN[sl_minus][el].node[i];
 		average1=average2=average3=0.0;
 		e1 = E->EL[sl_minus][CPPR][el].sub[i];
 		for(j=1;j<=ENODES3D;j++) {
-		    node1=E->IEN[start_lev][CPPR][e1].node[j];
+		    node1=E->IEN[start_lev][e1].node[j];
 		    average1 += E->temp[E->ID[start_lev][CPPR][node1].doff[1]];
 		    average2 += E->temp[E->ID[start_lev][CPPR][node1].doff[2]];
 		    average3 += E->temp[E->ID[start_lev][CPPR][node1].doff[3]];

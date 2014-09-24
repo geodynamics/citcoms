@@ -70,7 +70,7 @@ void construct_ien(E)
              element = (r-1)*elx*elz + (q-1)*elz  + p;
              start = (r-1)*noz*nox + (q-1)*noz + p;
              for(rr=1;rr<=ends;rr++)
-               E->IEN[lev][CPPR][element].node[rr]= start
+               E->IEN[lev][element].node[rr]= start
                   + offset[rr].vector[0]
                   + offset[rr].vector[1]*noz
                   + offset[rr].vector[2]*noz*nox;
@@ -353,7 +353,7 @@ void construct_node_ks(E)
             build_diagonal_of_K(E,element,elt_K,level);
 
 	    for(i=1;i<=ends;i++) {  /* i, is the node we are storing to */
-	       node=E->IEN[level][CPPR][element].node[i];
+	       node=E->IEN[level][element].node[i];
 
 	       pp=(i-1)*dims;
 	       w1=w2=w3=1.0;
@@ -365,7 +365,7 @@ void construct_node_ks(E)
 	       if(E->NODE[level][node] & VBY) w2=0.0;
 
 	       for(j=1;j<=ends;j++) { /* j is the node we are receiving from */
-	         node1=E->IEN[level][CPPR][element].node[j];
+	         node1=E->IEN[level][element].node[j];
 
                         /* only for half of the matrix ,because of the symmetry */
                  if (node1<=node)  {

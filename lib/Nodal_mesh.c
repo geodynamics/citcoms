@@ -202,7 +202,7 @@ void p_to_nodes(E,P,PN,lev)
 
     for(element=0;element<E->lmesh.NEL[lev];element++)
        for(j=1;j<=enodes[E->mesh.nsd];j++)  {
-     	  node = E->IEN[lev][CPPR][element+1].node[j];
+     	  node = E->IEN[lev][element+1].node[j];
     	  PN[node] += P[element] * E->TWW[lev][CPPR][element+1].node[j] ;
     	  }
 
@@ -238,7 +238,7 @@ void visc_from_gint_to_nodes(E,VE,VN,lev)
       temp_visc = temp_visc/vpts;
       
       for(j=1;j<=ends;j++)                {
-	n = E->IEN[lev][CPPR][e].node[j];
+	n = E->IEN[lev][e].node[j];
 	VN[n] += E->TWW[lev][CPPR][e].node[j] * temp_visc;
       }
     }
@@ -272,7 +272,7 @@ void visc_from_nodes_to_gint(E,VN,VE,lev)
       for(i=1;i<=vpts;i++)      {
 	temp_visc=0.0;
 	for(j=1;j<=ends;j++)
-	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[E->IEN[lev][CPPR][e].node[j]];
+	  temp_visc += E->N.vpt[GNVINDEX(j,i)]*VN[E->IEN[lev][e].node[j]];
 	VE[(e-1)*vpts+i] = temp_visc;
       }
 }

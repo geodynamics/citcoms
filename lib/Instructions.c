@@ -1023,7 +1023,7 @@ void allocate_common_vars(E)
     for(d=0;d<=3;d++)
       E->SinCos[i][d]  = (double *)  malloc((nno+1)*sizeof(double));
 
-    E->IEN[i][CPPR] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
+    E->IEN[i] = (struct IEN *)   malloc((nel+2)*sizeof(struct IEN));
     E->EL[i][CPPR]  = (struct SUBEL *) malloc((nel+2)*sizeof(struct SUBEL));
     E->sphere.area1[i][CPPR] = (double *) malloc((snel+1)*sizeof(double));
     for (k=1;k<=4;k++)
@@ -1352,7 +1352,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   int i;
 
   E->eco = E->ECO[E->mesh.levmax];
-  E->ien = E->IEN[E->mesh.levmax][CPPR];
+  E->ien = E->IEN[E->mesh.levmax];
   E->id = E->ID[E->mesh.levmax][CPPR];
   E->Vi = E->VI[E->mesh.levmax];
   E->EVi = E->EVI[E->mesh.levmax];
