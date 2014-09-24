@@ -1039,7 +1039,7 @@ void mass_matrix(struct All_variables *E)
 
                 /* weight of each node, equivalent to pmass in ConMan */
                 for(node=1;node<=enodes[E->mesh.nsd];node++)
-                    E->TWW[lev][CPPR][e].node[node] = temp[node];
+                    E->TWW[lev][e].node[node] = temp[node];
 
 
             } /* end of ele*/

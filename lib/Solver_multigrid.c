@@ -459,7 +459,7 @@ void project_scalar(E,start_lev,AU,AD)
 
                 node= E->IEN[sl_minus][el].node[i];
 
-                AD[node] += w * E->TWW[sl_minus][CPPR][el].node[i];
+                AD[node] += w * E->TWW[sl_minus][el].node[i];
          }
 
    (E->exchange_node_f)(E,AD,sl_minus);
@@ -522,7 +522,7 @@ void project_vector(E,start_lev,AU,AD,ic)
 		    average2 += E->temp[E->ID[start_lev][CPPR][node1].doff[2]];
 		    average3 += E->temp[E->ID[start_lev][CPPR][node1].doff[3]];
 		    }
-		w = weight*E->TWW[sl_minus][CPPR][el].node[i];
+		w = weight*E->TWW[sl_minus][el].node[i];
 
 		E->temp1[E->ID[sl_minus][CPPR][node].doff[1]] += w * average1;
 		E->temp1[E->ID[sl_minus][CPPR][node].doff[2]] += w * average2;

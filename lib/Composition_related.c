@@ -430,7 +430,7 @@ void map_composition_to_nodes(struct All_variables *E)
 
                     E->composition.comp_node[i][n] +=
                         E->composition.comp_el[i][nelem]*
-                        E->TWW[E->mesh.levmax][CPPR][nelem].node[nodenum];
+                        E->TWW[E->mesh.levmax][nelem].node[nodenum];
                 }
             }
 

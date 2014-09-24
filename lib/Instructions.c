@@ -1032,10 +1032,10 @@ void allocate_common_vars(E)
     E->GNX[i] = (struct Shape_function_dx *)malloc((nel+1)*sizeof(struct Shape_function_dx));
     E->GDA[i] = (struct Shape_function_dA *)malloc((nel+1)*sizeof(struct Shape_function_dA));
 
-    E->MASS[i]     = (double *) malloc((nno+1)*sizeof(double));
+    E->MASS[i]= (double *) malloc((nno+1)*sizeof(double));
     E->ECO[i] = (struct COORD *) malloc((nno+2)*sizeof(struct COORD));
 
-    E->TWW[i][CPPR] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
+    E->TWW[i] = (struct FNODE *)   malloc((nel+2)*sizeof(struct FNODE));
 
     for(d=1;d<=E->mesh.nsd;d++)
       for(l=1;l<=E->lmesh.NNO[i];l++)  {

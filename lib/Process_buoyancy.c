@@ -108,7 +108,7 @@ void heat_flux(E)
       uT /= E->eco[e].area;
 
       for(j=1;j<=ends;j++)
-        flux[E->ien[e].node[j]] += uT*E->TWW[lev][CPPR][e].node[j];
+        flux[E->ien[e].node[j]] += uT*E->TWW[lev][e].node[j];
 
       }             /* end of e */
 
