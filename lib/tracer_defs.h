@@ -125,7 +125,7 @@ struct TRACE{
     int *regtoel[5];
 
     /* gnomonic shape functions */
-    double *shape_coefs[13][3][10];
+    double *shape_coefs[3][10];
 
 
 

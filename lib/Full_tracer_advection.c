@@ -1119,25 +1119,25 @@ static void get_2dshape(struct All_variables *E,
 
     /* shape function 1 */
 
-    a0=E->trace.shape_coefs[CPPR][iwedge][1][n];
-    a1=E->trace.shape_coefs[CPPR][iwedge][2][n];
-    a2=E->trace.shape_coefs[CPPR][iwedge][3][n];
+    a0=E->trace.shape_coefs[iwedge][1][n];
+    a1=E->trace.shape_coefs[iwedge][2][n];
+    a2=E->trace.shape_coefs[iwedge][3][n];
 
     shape2d[1]=a0+a1*u+a2*v;
 
     /* shape function 2 */
 
-    a0=E->trace.shape_coefs[CPPR][iwedge][4][n];
-    a1=E->trace.shape_coefs[CPPR][iwedge][5][n];
-    a2=E->trace.shape_coefs[CPPR][iwedge][6][n];
+    a0=E->trace.shape_coefs[iwedge][4][n];
+    a1=E->trace.shape_coefs[iwedge][5][n];
+    a2=E->trace.shape_coefs[iwedge][6][n];
 
     shape2d[2]=a0+a1*u+a2*v;
 
     /* shape function 3 */
 
-    a0=E->trace.shape_coefs[CPPR][iwedge][7][n];
-    a1=E->trace.shape_coefs[CPPR][iwedge][8][n];
-    a2=E->trace.shape_coefs[CPPR][iwedge][9][n];
+    a0=E->trace.shape_coefs[iwedge][7][n];
+    a1=E->trace.shape_coefs[iwedge][8][n];
+    a2=E->trace.shape_coefs[iwedge][9][n];
 
     shape2d[3]=a0+a1*u+a2*v;
 }
@@ -2876,7 +2876,7 @@ static void determine_shape_coefficients(struct All_variables *E)
 
     for(iwedge=1; iwedge<=2; iwedge++) {
         for (kk=1; kk<=9; kk++) {
-            if ((E->trace.shape_coefs[CPPR][iwedge][kk] =
+            if ((E->trace.shape_coefs[iwedge][kk] =
                  (double *)malloc((E->lmesh.snel+1)*sizeof(double))) == NULL) {
                 fprintf(E->trace.fpt,"ERROR(find shape coefs)-not enough memory(a)\n");
                 fflush(E->trace.fpt);
@@ -2921,9 +2921,9 @@ static void determine_shape_coefficients(struct All_variables *E)
             a1 = (y2-y3)/delta;
             a2 = (x3-x2)/delta;
 
-            E->trace.shape_coefs[CPPR][iwedge][1][i] = a0;
-            E->trace.shape_coefs[CPPR][iwedge][2][i] = a1;
-            E->trace.shape_coefs[CPPR][iwedge][3][i] = a2;
+            E->trace.shape_coefs[iwedge][1][i] = a0;
+            E->trace.shape_coefs[iwedge][2][i] = a1;
+            E->trace.shape_coefs[iwedge][3][i] = a2;
 
             /* shape function 2 */
 
@@ -2932,9 +2932,9 @@ static void determine_shape_coefficients(struct All_variables *E)
             a1 = (y1-y3)/delta;
             a2 = (x3-x1)/delta;
 
-            E->trace.shape_coefs[CPPR][iwedge][4][i] = a0;
-            E->trace.shape_coefs[CPPR][iwedge][5][i] = a1;
-            E->trace.shape_coefs[CPPR][iwedge][6][i] = a2;
+            E->trace.shape_coefs[iwedge][4][i] = a0;
+            E->trace.shape_coefs[iwedge][5][i] = a1;
+            E->trace.shape_coefs[iwedge][6][i] = a2;
 
             /* shape function 3 */
 
@@ -2943,9 +2943,9 @@ static void determine_shape_coefficients(struct All_variables *E)
             a1 = (y2-y1)/delta;
             a2 = (x1-x2)/delta;
 
-            E->trace.shape_coefs[CPPR][iwedge][7][i] = a0;
-            E->trace.shape_coefs[CPPR][iwedge][8][i] = a1;
-            E->trace.shape_coefs[CPPR][iwedge][9][i] = a2;
+            E->trace.shape_coefs[iwedge][7][i] = a0;
+            E->trace.shape_coefs[iwedge][8][i] = a1;
+            E->trace.shape_coefs[iwedge][9][i] = a2;
 
             /** debug **
             fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e, %e %e %e, %e %e %e)\n",
