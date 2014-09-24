@@ -1370,7 +1370,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.delphi=delphi;
             E->trace.numtheta=numtheta;
             E->trace.numphi=numphi;
-            E->trace.thetamax[CPPR]=thetamax;
+            E->trace.thetamax=thetamax;
             E->trace.thetamin[CPPR]=thetamin;
             E->trace.phimax[CPPR]=phimax;
             E->trace.phimin[CPPR]=phimin;
@@ -2748,7 +2748,7 @@ static int iget_regel(struct All_variables *E,
     /* first check whether theta is in range */
 
     if (theta<E->trace.thetamin[CPPR]) return -99;
-    if (theta>E->trace.thetamax[CPPR]) return -99;
+    if (theta>E->trace.thetamax) return -99;
 
     /* get ntheta, nphi on regular mesh */
 
