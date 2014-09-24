@@ -497,9 +497,9 @@ void h5output_velocity(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = k + j*mz + i*mz*my;
-                field->data[3*m+0] = E->sphere.cap[CPPR].V[1][n+1];
-                field->data[3*m+1] = E->sphere.cap[CPPR].V[2][n+1];
-                field->data[3*m+2] = E->sphere.cap[CPPR].V[3][n+1];
+                field->data[3*m+0] = E->sphere.cap[1].V[1][n+1];
+                field->data[3*m+1] = E->sphere.cap[1].V[2][n+1];
+                field->data[3*m+2] = E->sphere.cap[1].V[3][n+1];
             }
         }
     }
@@ -851,8 +851,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap[CPPR].V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap[CPPR].V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/surf/velocity");
@@ -921,8 +921,8 @@ void h5output_surf_botm(struct All_variables *E, int cycles)
             {
                 n = k + i*nz + j*nz*nx;
                 m = j + i*my;
-                vector->data[2*m+0] = E->sphere.cap[CPPR].V[1][n+1];
-                vector->data[2*m+1] = E->sphere.cap[CPPR].V[2][n+1];
+                vector->data[2*m+0] = E->sphere.cap[1].V[1][n+1];
+                vector->data[2*m+1] = E->sphere.cap[1].V[2][n+1];
             }
         }
         dataset = H5Dopen(file_id, "/botm/velocity");

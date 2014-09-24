@@ -1018,14 +1018,14 @@ void get_elt_f(E,el,elt_f,bcs)
 	  type=vbc_flag[j];
           for(b=1;b<=ends;b++) {
             nodeb=E->ien[el].node[b];
-            if ((E->node[nodeb]&type)&&(E->sphere.cap[CPPR].VB[j][nodeb]!=0.0)){
+            if ((E->node[nodeb]&type)&&(E->sphere.cap[1].VB[j][nodeb]!=0.0)){
               if(!got_elt_k) {
                 get_elt_k(E,el,elt_k,E->mesh.levmax,1);
                 got_elt_k = 1;
                 }
               q = dims*(b-1)+j-1;
               if(p!=q) {
-                elt_f[p] -= elt_k[p*n+q] * E->sphere.cap[CPPR].VB[j][nodeb];
+                elt_f[p] -= elt_k[p*n+q] * E->sphere.cap[1].VB[j][nodeb];
                 }
               }
             }  /* end for b */
@@ -1083,7 +1083,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 			for(a=1;a<=ends1;a++)  {
 				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
-					value = E->sphere.cap[CPPR].VB[d][nodea];
+					value = E->sphere.cap[1].VB[d][nodea];
 					flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );
@@ -1167,9 +1167,9 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 				traction[1][a] = 0.0;
 				traction[2][a] = 0.0;
 				traction[3][a] = -1.0*factor*rho*g*(R*R*R)/(eta*kappa)
-					*(E->slice.freesurf[nodeas]+E->sphere.cap[CPPR].V[3][nodea]*E->advection.timestep);
+					*(E->slice.freesurf[nodeas]+E->sphere.cap[1].V[3][nodea]*E->advection.timestep);
 				if(E->parallel.me==11 && nodea==3328)
-					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[CPPR].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
+					fprintf(stderr,"traction=%e vnew=%e timestep=%e coeff=%e\n",traction[3][a],E->sphere.cap[1].V[3][nodea],E->advection.timestep,-1.0*factor*rho*g*(R*R*R)/(eta*kappa));
 				found = 1;
 #if 0
 				if(found && E->parallel.me==1)
@@ -1185,7 +1185,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 			for(a=1;a<=ends1;a++)  {
 				nodea = E->ien[el].node[ sidenodes[side][a] ];
 				for(d=1;d<=dims;d++) {
-					value = E->sphere.cap[CPPR].VB[d][nodea];
+					value = E->sphere.cap[1].VB[d][nodea];
 					flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 					found |= flagged;
 					traction[d][a] = ( flagged ? value : 0.0 );

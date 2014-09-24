@@ -196,17 +196,17 @@ void compute_horiz_avg(struct All_variables *E)
     void return_horiz_ave_f();
 
     int m, n, i;
-    float *S1[NCS],*S2[NCS],*S3[NCS];
+    float *S1,*S2,*S3;
 
-	S1[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-	S2[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
-	S3[CPPR] = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S1 = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S2 = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
+	S3 = (float *)malloc((E->lmesh.nno+1)*sizeof(float));
 
 	for(i=1;i<=E->lmesh.nno;i++) {
-	    S1[CPPR][i] = E->T[i];
-	    S2[CPPR][i] = E->sphere.cap[CPPR].V[1][i]*E->sphere.cap[CPPR].V[1][i]
-          	+ E->sphere.cap[CPPR].V[2][i]*E->sphere.cap[CPPR].V[2][i];
-	    S3[CPPR][i] = E->sphere.cap[CPPR].V[3][i]*E->sphere.cap[CPPR].V[3][i];
+	    S1[i] = E->T[i];
+	    S2[i] = E->sphere.cap[1].V[1][i]*E->sphere.cap[1].V[1][i]
+          	+ E->sphere.cap[1].V[2][i]*E->sphere.cap[1].V[2][i];
+	    S3[i] = E->sphere.cap[1].V[3][i]*E->sphere.cap[1].V[3][i];
 	}
 
     return_horiz_ave_f(E,S1,E->Have.T);
@@ -216,14 +216,14 @@ void compute_horiz_avg(struct All_variables *E)
     if (E->composition.on) {
         for(n=0; n<E->composition.ncomp; n++) {
             for(i=1;i<=E->lmesh.nno;i++)
-                S1[CPPR][i] = E->composition.comp_node[n][i];
+                S1[i] = E->composition.comp_node[n][i];
             return_horiz_ave_f(E,S1,E->Have.C[n]);
         }
     }
 
-	free((void *)S1[CPPR]);
-	free((void *)S2[CPPR]);
-	free((void *)S3[CPPR]);
+	free((void *)S1);
+	free((void *)S2);
+	free((void *)S3);
 
     for (i=1;i<=E->lmesh.noz;i++) {
 	E->Have.V[1][i] = sqrt(E->Have.V[1][i]);

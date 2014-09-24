@@ -113,7 +113,7 @@ void get_STD_freesurf(struct All_variables *E,float *freesurf)
         if (E->parallel.me_loc[3]==E->parallel.nprocz-1)
           for(snode=1;snode<=E->lmesh.nsf;snode++) {
             node = E->surf_node[snode];
-            freesurf[snode] += E->sphere.cap[CPPR].V[3][node]*E->advection.timestep;
+            freesurf[snode] += E->sphere.cap[1].V[3][node]*E->advection.timestep;
           }
 }
 
@@ -490,7 +490,7 @@ void stress_conform_bcs(struct All_variables *E)
 	      for(d=1; d<=E->mesh.nsd; d++)
 		if(E->node[n] & sbc_flag[d]) {
 		  /* apply internal traction vector on horizontal surface */
-		  E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
+		  E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[1].VB[d][n];
 		}
 	    }
     }else{
@@ -502,11 +502,11 @@ void stress_conform_bcs(struct All_variables *E)
 	      for(d=1; d<=E->mesh.nsd; d++)
 		if(E->node[n] & sbc_flag[d]) {
 		  if(i==1 || i==E->lmesh.noy)
-		    E->gstress[(n-1)*6+stress_index[d][2]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][2]] = E->sphere.cap[1].VB[d][n];
 		  if(j==1 || j==E->lmesh.nox)
-		    E->gstress[(n-1)*6+stress_index[d][1]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][1]] = E->sphere.cap[1].VB[d][n];
 		  if(k==1 || k==E->lmesh.noz)
-		    E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[CPPR].VB[d][n];
+		    E->gstress[(n-1)*6+stress_index[d][3]] = E->sphere.cap[1].VB[d][n];
 		}
 	    }
     }

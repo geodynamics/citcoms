@@ -351,7 +351,7 @@ void output_velo(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++) {
-      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[CPPR].V[1][i],E->sphere.cap[CPPR].V[2][i],E->sphere.cap[CPPR].V[3][i],E->T[i]);
+      fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[1].V[1][i],E->sphere.cap[1].V[2][i],E->sphere.cap[1].V[3][i],E->T[i]);
   }
 
   fclose(fp1);
@@ -392,7 +392,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		    topo[i],E->slice.shflux[i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
+		    topo[i],E->slice.shflux[i],E->sphere.cap[1].V[1][s],E->sphere.cap[1].V[2][s]);
         }
     fclose(fp2);
   }
@@ -407,7 +407,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
-		E->slice.tpgb[i],E->slice.bhflux[i],E->sphere.cap[CPPR].V[1][s],E->sphere.cap[CPPR].V[2][s]);
+		E->slice.tpgb[i],E->slice.bhflux[i],E->sphere.cap[1].V[1][s],E->sphere.cap[1].V[2][s]);
       }
     fclose(fp2);
   }

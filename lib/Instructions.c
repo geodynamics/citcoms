@@ -961,7 +961,7 @@ void allocate_common_vars(E)
   //E->stress[j]   = (float *) malloc((12*nsf+1)*sizeof(float));
 
   for(i=1;i<=E->mesh.nsd;i++)
-      E->sphere.cap[CPPR].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
+      E->sphere.cap[1].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
   E->slice.tpg      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb     = (float *)malloc((nsf+2)*sizeof(float));
@@ -1127,7 +1127,7 @@ void allocate_common_vars(E)
 
   for(k=1;k<=E->mesh.nsd;k++)
     for(i=1;i<=E->lmesh.nno;i++)
-      E->sphere.cap[CPPR].TB[k][i] = 0.0;
+      E->sphere.cap[1].TB[k][i] = 0.0;
 
   for(i=1;i<=E->lmesh.nno;i++)
      E->T[i] = 0.0;
@@ -1179,9 +1179,9 @@ void allocate_velocity_vars(E)
 
 
     for(i=1;i<=E->mesh.nsd;i++) {
-      E->sphere.cap[CPPR].V[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap[CPPR].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
-      E->sphere.cap[CPPR].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].V[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].VB[i] = (float *)malloc((E->lmesh.nnov+1)*sizeof(float));
+      E->sphere.cap[1].Vprev[i] = (float *) malloc((E->lmesh.nnov+1)*sizeof(float));
     }
 
     for(i=0;i<E->lmesh.neq;i++)
@@ -1190,7 +1190,7 @@ void allocate_velocity_vars(E)
 
     for(k=1;k<=E->mesh.nsd;k++)
       for(i=1;i<=E->lmesh.nnov;i++)
-        E->sphere.cap[CPPR].VB[k][i] = 0.0;
+        E->sphere.cap[1].VB[k][i] = 0.0;
 
 
   for(l=E->mesh.gridmin;l<=E->mesh.gridmax;l++) {
@@ -1434,9 +1434,9 @@ void initial_velocity(E)
     report(E,"Initialize velocity field");
 
     for(i=1;i<=E->lmesh.nnov;i++)   {
-        E->sphere.cap[CPPR].V[1][i]=0.0;
-        E->sphere.cap[CPPR].V[2][i]=0.0;
-        E->sphere.cap[CPPR].V[3][i]=0.0;
+        E->sphere.cap[1].V[1][i]=0.0;
+        E->sphere.cap[1].V[2][i]=0.0;
+        E->sphere.cap[1].V[3][i]=0.0;
     }
 }
 

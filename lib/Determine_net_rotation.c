@@ -114,8 +114,8 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 	      x[1] += E->x[2][lnode[d]] * vtmp;
 	      x[2] += E->x[3][lnode[d]] * vtmp;
 	      
-              v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp; /* theta */
-              v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp; /* phi */
+              v[0] += E->sphere.cap[1].V[1][lnode[d]] * vtmp; /* theta */
+              v[1] += E->sphere.cap[1].V[2][lnode[d]] * vtmp; /* phi */
 	      vw += dGamma.vpt[GMVGAMMA(0,nint)];
 	    }
 	  }
@@ -132,8 +132,8 @@ double determine_model_net_rotation(struct All_variables *E,double *omega)
 		x[1] += E->x[2][lnode[d]] * vtmp;
 		x[2] += E->x[3][lnode[d]] * vtmp;
 		/*  */
-		v[0] += E->sphere.cap[CPPR].V[1][lnode[d]] * vtmp;
-		v[1] += E->sphere.cap[CPPR].V[2][lnode[d]] * vtmp;
+		v[0] += E->sphere.cap[1].V[1][lnode[d]] * vtmp;
+		v[1] += E->sphere.cap[1].V[2][lnode[d]] * vtmp;
 		vw += dGamma.vpt[GMVGAMMA(1,nint)];
 	      }
 	    }

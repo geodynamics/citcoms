@@ -569,9 +569,9 @@ static void add_spherical_anomaly(struct All_variables *E)
 			r1 = E->sx[3][node];
 			if((fabs(r1 - rout) < e_4) || (fabs(r1 - rin) < e_4)){
 			  /* at bottom or top of box, assign as TBC */
-			  E->sphere.cap[CPPR].TB[1][node]=E->T[node];
-			  E->sphere.cap[CPPR].TB[2][node]=E->T[node];
-			  E->sphere.cap[CPPR].TB[3][node]=E->T[node];
+			  E->sphere.cap[1].TB[1][node]=E->T[node];
+			  E->sphere.cap[1].TB[2][node]=E->T[node];
+			  E->sphere.cap[1].TB[3][node]=E->T[node];
 			}
 		      }
 		    }

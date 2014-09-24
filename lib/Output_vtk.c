@@ -135,9 +135,9 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"velocity\" NumberOfComponents=\"3\" format=\"%s\">\n", E->output.vtk_format);
 
-        V[1] = E->sphere.cap[CPPR].V[1];
-        V[2] = E->sphere.cap[CPPR].V[2];
-        V[3] = E->sphere.cap[CPPR].V[3];
+        V[1] = E->sphere.cap[1].V[1];
+        V[2] = E->sphere.cap[1].V[2];
+        V[3] = E->sphere.cap[1].V[3];
 
         for(i=1; i<=E->lmesh.nno; i++) {
             sint = E->SinCos[lev][0][i];

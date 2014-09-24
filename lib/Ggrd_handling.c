@@ -340,15 +340,15 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	  //fprintf(stderr,"z: %11g T: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	  if(E->control.ggrd.temp.override_tbc){
 	    if((k == 1) && (E->mesh.bottbc == 1)){ /* bottom TBC */
-	      E->sphere.cap[CPPR].TB[1][node] =  E->T[node];
-	      E->sphere.cap[CPPR].TB[2][node] =  E->T[node];
-	      E->sphere.cap[CPPR].TB[3][node] =  E->T[node];
+	      E->sphere.cap[1].TB[1][node] =  E->T[node];
+	      E->sphere.cap[1].TB[2][node] =  E->T[node];
+	      E->sphere.cap[1].TB[3][node] =  E->T[node];
 	      //fprintf(stderr,"z: %11g TBB: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	    }
 	    if((k == noz) && (E->mesh.toptbc == 1)){ /* top TBC */
-	      E->sphere.cap[CPPR].TB[1][node] =  E->T[node];
-	      E->sphere.cap[CPPR].TB[2][node] =  E->T[node];
-	      E->sphere.cap[CPPR].TB[3][node] =  E->T[node];
+	      E->sphere.cap[1].TB[1][node] =  E->T[node];
+	      E->sphere.cap[1].TB[2][node] =  E->T[node];
+	      E->sphere.cap[1].TB[3][node] =  E->T[node];
 	      //fprintf(stderr,"z: %11g TBT: %11g\n",E->sx[m][3][node],E->T[m][node]);
 	    }
 	  }
@@ -1345,15 +1345,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		/* assign velociites */
 		if(fabs(v[2]) > cutoff){
 		  /* huge velocitie - free slip */
-		  E->sphere.cap[CPPR].VB[1][nodel] = 0;	/* theta */
-		  E->sphere.cap[CPPR].VB[2][nodel] = 0;	/* phi */
+		  E->sphere.cap[1].VB[1][nodel] = 0;	/* theta */
+		  E->sphere.cap[1].VB[2][nodel] = 0;	/* phi */
 		}else{
 		  /* regular no slip , assign velocities/tractions as BCs */
-		  E->sphere.cap[CPPR].VB[1][nodel] = v[1];	/* theta */
-		  E->sphere.cap[CPPR].VB[2][nodel] = v[2];	/* phi */
+		  E->sphere.cap[1].VB[1][nodel] = v[1];	/* theta */
+		  E->sphere.cap[1].VB[2][nodel] = v[2];	/* phi */
 		}
 		if(use_vel && ontop)
-		  E->sphere.cap[CPPR].VB[3][nodel] = 0.0; /* r */
+		  E->sphere.cap[1].VB[3][nodel] = 0.0; /* r */
 	      }	/* end z */
 	    } /* end x */
 	  } /* end y */

@@ -829,9 +829,9 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
 	for(i = 1; i <= ends; i++){	/* velocity at element nodes */
 	  off = E->ien[e].node[i];
-	  VV[1][i] = E->sphere.cap[CPPR].V[1][off];
-	  VV[2][i] = E->sphere.cap[CPPR].V[2][off];
-	  VV[3][i] = E->sphere.cap[CPPR].V[3][off];
+	  VV[1][i] = E->sphere.cap[1].V[1][off];
+	  VV[2][i] = E->sphere.cap[1].V[2][off];
+	  VV[3][i] = E->sphere.cap[1].V[3][off];
 	}
 	/* calculate velocity gradient matrix */
 	get_vgm_p(VV,&(E->N),&(E->GNX[lev][e]),&E->element_Cc, 

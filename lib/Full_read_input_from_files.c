@@ -255,14 +255,14 @@ void full_read_input_files_for_timesteps(E,action,output)
 	      nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
 	      nodel = (k-1)*nox1*noz1 + (i-1)*noz1+noz1;
 	      if (pos_age) { /* positive ages - we must interpolate */
-		E->sphere.cap[CPPR].VB[1][nodel] = (VB1[1][nodeg] + (VB2[1][nodeg]-VB1[1][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
-		E->sphere.cap[CPPR].VB[2][nodel] = (VB1[2][nodeg] + (VB2[2][nodeg]-VB1[2][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
-		E->sphere.cap[CPPR].VB[3][nodel] = 0.0;
+		E->sphere.cap[1].VB[1][nodel] = (VB1[1][nodeg] + (VB2[1][nodeg]-VB1[1][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
+		E->sphere.cap[1].VB[2][nodel] = (VB1[2][nodeg] + (VB2[2][nodeg]-VB1[2][nodeg])/(newage2-newage1)*(age-newage1))*E->data.scalev;
+		E->sphere.cap[1].VB[3][nodel] = 0.0;
 	      }
 	      else { /* negative ages - don't do the interpolation */
-		E->sphere.cap[CPPR].VB[1][nodel] = VB1[1][nodeg] * E->data.scalev;
-		E->sphere.cap[CPPR].VB[2][nodel] = VB1[2][nodeg] * E->data.scalev;
-		E->sphere.cap[CPPR].VB[3][nodel] = 0.0;
+		E->sphere.cap[1].VB[1][nodel] = VB1[1][nodeg] * E->data.scalev;
+		E->sphere.cap[1].VB[2][nodel] = VB1[2][nodeg] * E->data.scalev;
+		E->sphere.cap[1].VB[3][nodel] = 0.0;
 	      }
 	    }
 	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */
@@ -398,14 +398,14 @@ void full_read_input_files_for_timesteps(E,action,output)
 	      nodeg = E->lmesh.nxs+i-1 + (E->lmesh.nys+k-2)*nox;
 	      nodel = (k-1)*nox1*noz1 + (i-1)*noz1+noz1;
 	      if (pos_age) { /* positive ages - we must interpolate */
-		E->sphere.cap[CPPR].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
-		E->sphere.cap[CPPR].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
-		E->sphere.cap[CPPR].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[1].TB[1][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[1].TB[2][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
+		E->sphere.cap[1].TB[3][nodel] = (TB1[nodeg] + (TB2[nodeg]-TB1[nodeg])/(newage2-newage1)*(age-newage1));
 	      }
 	      else { /* negative ages - don't do the interpolation */
-		E->sphere.cap[CPPR].TB[1][nodel] = TB1[nodeg];
-		E->sphere.cap[CPPR].TB[2][nodel] = TB1[nodeg];
-		E->sphere.cap[CPPR].TB[3][nodel] = TB1[nodeg];
+		E->sphere.cap[1].TB[1][nodel] = TB1[nodeg];
+		E->sphere.cap[1].TB[2][nodel] = TB1[nodeg];
+		E->sphere.cap[1].TB[3][nodel] = TB1[nodeg];
 	      }
 	    }
 	}   /* end of E->parallel.me_loc[3]==E->parallel.nproczl-1   */

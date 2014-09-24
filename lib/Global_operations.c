@@ -159,7 +159,7 @@ void return_horiz_ave(E,X,H)
 
 void return_horiz_ave_f(E,X,H)
      struct All_variables *E;
-     float **X, *H;
+     float *X, *H;
 {
   const int dims = E->mesh.nsd;
   int m,i,j,k,d,nint,noz,nox,noy,el,elz,elx,ely,j1,j2,i1,i2,k1,k2,nproc;
@@ -198,7 +198,7 @@ void return_horiz_ave_f(E,X,H)
 
           for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
             for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-              temp[i] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+              temp[i] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(0,nint)];
             temp[i+noz] += dGamma.vpt[GMVGAMMA(0,nint)];
             }
@@ -211,7 +211,7 @@ void return_horiz_ave_f(E,X,H)
 
             for(nint=1;nint<=onedvpoints[E->mesh.nsd];nint++)   {
               for(d=1;d<=onedvpoints[E->mesh.nsd];d++)
-                temp[i+1] += X[CPPR][lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
+                temp[i+1] += X[lnode[d]] * E->M.vpt[GMVINDEX(d,nint)]
                           * dGamma.vpt[GMVGAMMA(1,nint)];
               temp[i+1+noz] += dGamma.vpt[GMVGAMMA(1,nint)];
               }
@@ -453,7 +453,7 @@ float *sphc,*sphs;
 
 float global_fvdot(E,A,B,lev)
    struct All_variables *E;
-   float **A,**B;
+   float *A,*B;
    int lev;
 
 {
@@ -468,10 +468,10 @@ float global_fvdot(E,A,B,lev)
     neq=E->lmesh.NEQ[lev];
     temp1 = 0.0;
     for (i=0;i<neq;i++)
-      temp += A[CPPR][i]*B[CPPR][i];
+      temp += A[i]*B[i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev];i++)
-       temp1 += A[CPPR][E->parallel.Skip_id[lev][i]]*B[CPPR][E->parallel.Skip_id[lev][i]];
+       temp1 += A[E->parallel.Skip_id[lev][i]]*B[E->parallel.Skip_id[lev][i]];
 
     temp -= temp1;
 
@@ -484,7 +484,7 @@ float global_fvdot(E,A,B,lev)
 
 double kineticE_radial(E,A,lev)
    struct All_variables *E;
-   double **A;
+   double *A;
    int lev;
 
 {
@@ -498,11 +498,11 @@ double kineticE_radial(E,A,lev)
     temp1 = 0.0;
     for (i=0;i<neq;i++)
       if ((i+1)%3==0)
-        temp += A[CPPR][i]*A[CPPR][i];
+        temp += A[i]*A[i];
 
     for (i=1;i<=E->parallel.Skip_neq[lev];i++)
       if ((E->parallel.Skip_id[lev][i]+1)%3==0)
-        temp1 += A[CPPR][E->parallel.Skip_id[lev][i]]*A[CPPR][E->parallel.Skip_id[lev][i]];
+        temp1 += A[E->parallel.Skip_id[lev][i]]*A[E->parallel.Skip_id[lev][i]];
 
     temp -= temp1;
 
@@ -962,8 +962,8 @@ void remove_rigid_rot(struct All_variables *E)
 	calc_cbase_at_node(node,cart_base,E);
 	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
 	v_phi   = vx[0]*cart_base[6] + vx[1]*cart_base[7];
-	E->sphere.cap[CPPR].V[1][node] -= v_theta;
-	E->sphere.cap[CPPR].V[2][node] -= v_phi;
+	E->sphere.cap[1].V[1][node] -= v_theta;
+	E->sphere.cap[1].V[2][node] -= v_phi;
       }
 #else
     sin_t = sin(tr) * rot;
@@ -974,8 +974,8 @@ void remove_rigid_rot(struct All_variables *E)
 	v_phi =   E->sx[3][node] * 
 	  (  E->SinCos[lev][0][node] * cos_t - E->SinCos[lev][2][node]  * sin_t * cos(frd) );
 	
-	E->sphere.cap[CPPR].V[1][node] -= v_theta;
-	E->sphere.cap[CPPR].V[2][node] -= v_phi;
+	E->sphere.cap[1].V[1][node] -= v_theta;
+	E->sphere.cap[1].V[2][node] -= v_phi;
       }
 #endif
 }

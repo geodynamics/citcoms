@@ -130,25 +130,25 @@ void temperatures_conform_bcs2(E)
         case 0:  /* no match, next node */
             break;
         case TBX:
-            E->T[node] = E->sphere.cap[CPPR].TB[1][node];
+            E->T[node] = E->sphere.cap[1].TB[1][node];
             break;
         case TBZ:
-            E->T[node] = E->sphere.cap[CPPR].TB[3][node];
+            E->T[node] = E->sphere.cap[1].TB[3][node];
             break;
         case TBY:
-            E->T[node] = E->sphere.cap[CPPR].TB[2][node];
+            E->T[node] = E->sphere.cap[1].TB[2][node];
             break;
         case (TBX | TBZ):     /* clashes ! */
-            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[3][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[3][node]);
             break;
         case (TBX | TBY):     /* clashes ! */
-            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[2][node]);
             break;
         case (TBZ | TBY):     /* clashes ! */
-            E->T[node] = 0.5 * (E->sphere.cap[CPPR].TB[3][node] + E->sphere.cap[CPPR].TB[2][node]);
+            E->T[node] = 0.5 * (E->sphere.cap[1].TB[3][node] + E->sphere.cap[1].TB[2][node]);
             break;
         case (TBZ | TBY | TBX):     /* clashes ! */
-            E->T[node] = 0.3333333 * (E->sphere.cap[CPPR].TB[1][node] + E->sphere.cap[CPPR].TB[2][node] + E->sphere.cap[CPPR].TB[3][node]);
+            E->T[node] = 0.3333333 * (E->sphere.cap[1].TB[1][node] + E->sphere.cap[1].TB[2][node] + E->sphere.cap[1].TB[3][node]);
             break;
         }
 
@@ -172,11 +172,11 @@ void velocities_conform_bcs(E,U)
       for(node=1;node<=nno;node++) {
 
         if (E->node[node] & typex)
-	      U[E->id[node].doff[1]] = E->sphere.cap[CPPR].VB[1][node];
+	      U[E->id[node].doff[1]] = E->sphere.cap[1].VB[1][node];
  	if (E->node[node] & typey)
-	      U[E->id[node].doff[2]] = E->sphere.cap[CPPR].VB[2][node];
+	      U[E->id[node].doff[2]] = E->sphere.cap[1].VB[2][node];
 	if (E->node[node] & typez)
-	      U[E->id[node].doff[3]] = E->sphere.cap[CPPR].VB[3][node];
+	      U[E->id[node].doff[3]] = E->sphere.cap[1].VB[3][node];
         }
 }
 
@@ -214,23 +214,23 @@ void assign_internal_bc(struct All_variables *E)
 	    if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	      ncount++;		/* not in top or bottom */
 	    if(E->mesh.topvbc != 1) {	/* free slip */
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,0.0,VBX,0,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,0.0,VBX,0,lv);
 	      if(ontop || onbottom)
-		internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,VBZ,1,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,0.0,VBY,0,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,E->control.VBXtopval,SBX,1,lv);
+		internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,VBZ,1,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,0.0,VBY,0,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,E->control.VBXtopval,SBX,1,lv);
 	      if(ontop || onbottom)
-		internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,SBZ,0,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,E->control.VBYtopval,SBY,1,lv);
+		internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,SBZ,0,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,E->control.VBYtopval,SBY,1,lv);
 	    }else{		/* no slip */
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,E->control.VBXtopval,VBX,1,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,E->control.VBXtopval,VBX,1,lv);
 	      if(ontop || onbottom)
-		internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,VBZ,1,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,E->control.VBYtopval,VBY,1,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,0.0,                 SBX,0,lv);
+		internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,VBZ,1,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,E->control.VBYtopval,VBY,1,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,0.0,                 SBX,0,lv);
 	      if(ontop || onbottom)
-		internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,SBZ,0,lv);
-	      internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,0.0,                 SBY,0,lv);
+		internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,SBZ,0,lv);
+	      internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,0.0,                 SBY,0,lv);
 	    }
 	  }
 	}
@@ -259,23 +259,23 @@ void assign_internal_bc(struct All_variables *E)
 	if((!ontop)&&(!onbottom)&&(lv==E->mesh.gridmax))
 	  ncount++;		/* not in top or bottom */
 	if(E->mesh.topvbc != 1) {	/* free slip */
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,0.0,VBX,0,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,0.0,VBX,0,lv);
 	  if(ontop || onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,VBZ,1,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,0.0,VBY,0,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,E->control.VBXtopval,SBX,1,lv);
+	    internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,VBZ,1,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,0.0,VBY,0,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,E->control.VBXtopval,SBX,1,lv);
 	  if(ontop || onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,SBZ,0,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,E->control.VBYtopval,SBY,1,lv);
+	    internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,SBZ,0,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,E->control.VBYtopval,SBY,1,lv);
 	}else{		/* no slip */
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,E->control.VBXtopval,VBX,1,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,E->control.VBXtopval,VBX,1,lv);
 	  if(ontop || onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,VBZ,1,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,E->control.VBYtopval,VBY,1,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,1,0.0,                 SBX,0,lv);
+	    internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,VBZ,1,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,E->control.VBYtopval,VBY,1,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,1,0.0,                 SBX,0,lv);
 	  if(ontop || onbottom)
-	    internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,3,0.0,SBZ,0,lv);
-	  internal_horizontal_bc(E,E->sphere.cap[CPPR].VB,k,2,0.0,                 SBY,0,lv);
+	    internal_horizontal_bc(E,E->sphere.cap[1].VB,k,3,0.0,SBZ,0,lv);
+	  internal_horizontal_bc(E,E->sphere.cap[1].VB,k,2,0.0,                 SBY,0,lv);
 	}
     /* read in velocities/stresses from grd file? */
 #ifdef USE_GGRD
