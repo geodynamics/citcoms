@@ -1372,7 +1372,7 @@ static void make_regular_grid(struct All_variables *E)
             E->trace.numphi=numphi;
             E->trace.thetamax=thetamax;
             E->trace.thetamin=thetamin;
-            E->trace.phimax[CPPR]=phimax;
+            E->trace.phimax=phimax;
             E->trace.phimin[CPPR]=phimin;
             E->trace.numregel=numregel;
             E->trace.numregnodes=numregnodes;
