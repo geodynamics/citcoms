@@ -685,7 +685,7 @@ void full_parallel_communication_routs_v(E)
 	    E->parallel.EXCHANGE_NODE[lev][CPPR][++kk].pass[kkkp] = node;
 	    for(doff=1;doff<=dims;doff++)
 	      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkkp] =
-		E->ID[lev][CPPR][node].doff[doff];
+		E->ID[lev][node].doff[doff];
 	  }
 	  E->parallel.NUM_NODE[lev][CPPR].pass[kkkp] = kk;
 	  E->parallel.NUM_NEQ[lev][CPPR].pass[kkkp] = jj;
@@ -822,7 +822,7 @@ static void face_eqn_node_to_pass(E,lev,npass,bd)
     node = E->parallel.NODE[lev][CPPR][kk].bound[bd];
     E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[npass] = node;
     for(doff=1;doff<=dims;doff++)
-      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][CPPR][node].doff[doff];
+      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][node].doff[doff];
   }
 
   E->parallel.NUM_NEQ[lev][CPPR].pass[npass] = jj;
@@ -845,7 +845,7 @@ static void line_eqn_node_to_pass(E,lev,npass,num_node,offset,stride)
     node = (kk-1)*stride + offset;
     E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[npass] = node;
     for(doff=1;doff<=dims;doff++)
-      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][CPPR][node].doff[doff];
+      E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[npass] = E->ID[lev][node].doff[doff];
   }
 
   E->parallel.NUM_NEQ[lev][CPPR].pass[npass] = jj;

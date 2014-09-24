@@ -109,8 +109,8 @@ void inject_vector(E,start_lev,AU,AD)
           node_coarse = E->IEN[sl_minus][el].node[i];
           node_fine=E->IEN[start_lev][E->EL[sl_minus][CPPR][el].sub[i]].node[i];
           for (j=1;j<=dims;j++)    {
-            eqn_fine   = E->ID[start_lev][CPPR][node_fine].doff[j];
-            eqn_coarse = E->ID[sl_minus][CPPR][node_coarse].doff[j];
+            eqn_fine   = E->ID[start_lev][node_fine].doff[j];
+            eqn_coarse = E->ID[sl_minus][node_coarse].doff[j];
             AD[eqn_coarse] = AU[eqn_fine];
             }
           }
@@ -150,12 +150,12 @@ void un_inject_vector(E,start_lev,AD,AU)
           node = E->IEN[start_lev][el].node[i];
 	  node_plus=E->IEN[sl_plus][E->EL[start_lev][CPPR][el].sub[i]].node[i];
 
-	  eqn1 = E->ID[start_lev][CPPR][node].doff[1];
-	  eqn2 = E->ID[start_lev][CPPR][node].doff[2];
-	  eqn3 = E->ID[start_lev][CPPR][node].doff[3];
-	  eqn_plus1 = E->ID[sl_plus][CPPR][node_plus].doff[1];
-	  eqn_plus2 = E->ID[sl_plus][CPPR][node_plus].doff[2];
-	  eqn_plus3 = E->ID[sl_plus][CPPR][node_plus].doff[3];
+	  eqn1 = E->ID[start_lev][node].doff[1];
+	  eqn2 = E->ID[start_lev][node].doff[2];
+	  eqn3 = E->ID[start_lev][node].doff[3];
+	  eqn_plus1 = E->ID[sl_plus][node_plus].doff[1];
+	  eqn_plus2 = E->ID[sl_plus][node_plus].doff[2];
+	  eqn_plus3 = E->ID[sl_plus][node_plus].doff[3];
 	  AU[eqn_plus1] = AD[eqn1];
 	  AU[eqn_plus2] = AD[eqn2];
 	  AU[eqn_plus3] = AD[eqn3];
@@ -518,24 +518,24 @@ void project_vector(E,start_lev,AU,AD,ic)
 		e1 = E->EL[sl_minus][CPPR][el].sub[i];
 		for(j=1;j<=ENODES3D;j++) {
 		    node1=E->IEN[start_lev][e1].node[j];
-		    average1 += E->temp[E->ID[start_lev][CPPR][node1].doff[1]];
-		    average2 += E->temp[E->ID[start_lev][CPPR][node1].doff[2]];
-		    average3 += E->temp[E->ID[start_lev][CPPR][node1].doff[3]];
+		    average1 += E->temp[E->ID[start_lev][node1].doff[1]];
+		    average2 += E->temp[E->ID[start_lev][node1].doff[2]];
+		    average3 += E->temp[E->ID[start_lev][node1].doff[3]];
 		    }
 		w = weight*E->TWW[sl_minus][el].node[i];
 
-		E->temp1[E->ID[sl_minus][CPPR][node].doff[1]] += w * average1;
-		E->temp1[E->ID[sl_minus][CPPR][node].doff[2]] += w * average2;
-	 	E->temp1[E->ID[sl_minus][CPPR][node].doff[3]] += w * average3;
+		E->temp1[E->ID[sl_minus][node].doff[1]] += w * average1;
+		E->temp1[E->ID[sl_minus][node].doff[2]] += w * average2;
+	 	E->temp1[E->ID[sl_minus][node].doff[3]] += w * average3;
                 }
 
 
    (E->solver.exchange_id_d)(E, E->temp1, sl_minus);
 
      for(i=1;i<=nno_minus;i++)  {
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[1]] *= E->MASS[sl_minus][i];
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[2]] *= E->MASS[sl_minus][i];
-       E->temp1[E->ID[sl_minus][CPPR][i].doff[3]] *= E->MASS[sl_minus][i];
+       E->temp1[E->ID[sl_minus][i].doff[1]] *= E->MASS[sl_minus][i];
+       E->temp1[E->ID[sl_minus][i].doff[2]] *= E->MASS[sl_minus][i];
+       E->temp1[E->ID[sl_minus][i].doff[3]] *= E->MASS[sl_minus][i];
        }
 
                /* back into rtf coordinates */
@@ -553,9 +553,9 @@ void project_vector(E,start_lev,AU,AD,ic)
  double cost,cosf,sint,sinf;
 
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
-     eqn1 = E->ID[level][CPPR][i].doff[1];
-     eqn2 = E->ID[level][CPPR][i].doff[2];
-     eqn3 = E->ID[level][CPPR][i].doff[3];
+     eqn1 = E->ID[level][i].doff[1];
+     eqn2 = E->ID[level][i].doff[2];
+     eqn3 = E->ID[level][i].doff[3];
      sint = E->SinCos[level][0][i];
      sinf = E->SinCos[level][1][i];
      cost = E->SinCos[level][2][i];
@@ -582,9 +582,9 @@ void project_vector(E,start_lev,AU,AD,ic)
  double cost,cosf,sint,sinf;
 
    for (i=1;i<=E->lmesh.NNO[level];i++)  {
-     eqn1 = E->ID[level][CPPR][i].doff[1];
-     eqn2 = E->ID[level][CPPR][i].doff[2];
-     eqn3 = E->ID[level][CPPR][i].doff[3];
+     eqn1 = E->ID[level][i].doff[1];
+     eqn2 = E->ID[level][i].doff[2];
+     eqn3 = E->ID[level][i].doff[3];
      sint = E->SinCos[level][0][i];
      sinf = E->SinCos[level][1][i];
      cost = E->SinCos[level][2][i];
@@ -633,19 +633,19 @@ void project_vector(E,start_lev,AU,AD,ic)
 
 	      /* now for each direction */
 
-	      eqn0=E->ID[level][CPPR][node0].doff[1];
-	      eqn1=E->ID[level][CPPR][node1].doff[1];
-	      eqn2=E->ID[level][CPPR][node2].doff[1];
+	      eqn0=E->ID[level][node0].doff[1];
+	      eqn1=E->ID[level][node1].doff[1];
+	      eqn2=E->ID[level][node2].doff[1];
 	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	      eqn0=E->ID[level][CPPR][node0].doff[2];
-	      eqn1=E->ID[level][CPPR][node1].doff[2];
-	      eqn2=E->ID[level][CPPR][node2].doff[2];
+	      eqn0=E->ID[level][node0].doff[2];
+	      eqn1=E->ID[level][node1].doff[2];
+	      eqn2=E->ID[level][node2].doff[2];
 	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	      eqn0=E->ID[level][CPPR][node0].doff[3];
-	      eqn1=E->ID[level][CPPR][node1].doff[3];
-	      eqn2=E->ID[level][CPPR][node2].doff[3];
+	      eqn0=E->ID[level][node0].doff[3];
+	      eqn1=E->ID[level][node1].doff[3];
+	      eqn2=E->ID[level][node2].doff[3];
 	      temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	      }
 
@@ -657,19 +657,19 @@ void project_vector(E,start_lev,AU,AD,ic)
 	        node1 = node0 - noxz;
 	        node2 = node0 + noxz;
 
-	        eqn0=E->ID[level][CPPR][node0].doff[1];
-	        eqn1=E->ID[level][CPPR][node1].doff[1];
-	        eqn2=E->ID[level][CPPR][node2].doff[1];
+	        eqn0=E->ID[level][node0].doff[1];
+	        eqn1=E->ID[level][node1].doff[1];
+	        eqn2=E->ID[level][node2].doff[1];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	        eqn0=E->ID[level][CPPR][node0].doff[2];
-	        eqn1=E->ID[level][CPPR][node1].doff[2];
-	        eqn2=E->ID[level][CPPR][node2].doff[2];
+	        eqn0=E->ID[level][node0].doff[2];
+	        eqn1=E->ID[level][node1].doff[2];
+	        eqn2=E->ID[level][node2].doff[2];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	        eqn0=E->ID[level][CPPR][node0].doff[3];
-	        eqn1=E->ID[level][CPPR][node1].doff[3];
-	        eqn2=E->ID[level][CPPR][node2].doff[3];
+	        eqn0=E->ID[level][node0].doff[3];
+	        eqn1=E->ID[level][node1].doff[3];
+	        eqn2=E->ID[level][node2].doff[3];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	       }
 
@@ -685,19 +685,19 @@ void project_vector(E,start_lev,AU,AD,ic)
 		node1 = node0 - 1;
 		node2 = node0 + 1;
 
-	        eqn0=E->ID[level][CPPR][node0].doff[1];
-	        eqn1=E->ID[level][CPPR][node1].doff[1];
-	        eqn2=E->ID[level][CPPR][node2].doff[1];
+	        eqn0=E->ID[level][node0].doff[1];
+	        eqn1=E->ID[level][node1].doff[1];
+	        eqn2=E->ID[level][node2].doff[1];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	        eqn0=E->ID[level][CPPR][node0].doff[2];
-	        eqn1=E->ID[level][CPPR][node1].doff[2];
-	        eqn2=E->ID[level][CPPR][node2].doff[2];
+	        eqn0=E->ID[level][node0].doff[2];
+	        eqn1=E->ID[level][node1].doff[2];
+	        eqn2=E->ID[level][node2].doff[2];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 
-	        eqn0=E->ID[level][CPPR][node0].doff[3];
-	        eqn1=E->ID[level][CPPR][node1].doff[3];
-	        eqn2=E->ID[level][CPPR][node2].doff[3];
+	        eqn0=E->ID[level][node0].doff[3];
+	        eqn1=E->ID[level][node1].doff[3];
+	        eqn2=E->ID[level][node2].doff[3];
 	        temp[eqn0] = n1*temp[eqn1]+n2*temp[eqn2];
 	        }
        }

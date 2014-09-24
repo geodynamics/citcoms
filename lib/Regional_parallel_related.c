@@ -487,7 +487,7 @@ void regional_parallel_communication_routs_v(E)
             temp_dims = dims;
 
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][CPPR][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node k */
 
               E->parallel.NUM_NEQ[lev][CPPR].pass[kkk] = jj;
@@ -522,7 +522,7 @@ void regional_parallel_communication_routs_v(E)
             E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[kkk] = node;
             temp_dims = dims;
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][CPPR][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node kk */
 
               E->parallel.NUM_NEQ[lev][CPPR].pass[kkk] = jj;
@@ -557,7 +557,7 @@ void regional_parallel_communication_routs_v(E)
             E->parallel.EXCHANGE_NODE[lev][CPPR][kk].pass[kkk] = node;
             temp_dims = dims;
                     for(doff=1;doff<=temp_dims;doff++)
-                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][CPPR][node].doff[doff];
+                         E->parallel.EXCHANGE_ID[lev][CPPR][++jj].pass[kkk] = E->ID[lev][node].doff[doff];
             }  /* end for node k */
 
               E->parallel.NUM_NEQ[lev][CPPR].pass[kkk] = jj;

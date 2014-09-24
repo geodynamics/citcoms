@@ -1073,7 +1073,7 @@ void allocate_common_vars(E)
     E->EVI[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
     E->BPI[i] = (double *) malloc((npno+1)*sizeof(double));
 
-    E->ID[i][CPPR]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
+    E->ID[i]  = (struct ID *)    malloc((nno+1)*sizeof(struct ID));
     E->VI[i]  = (float *)        malloc((nno+1)*sizeof(float));
     E->NODE[i] = (unsigned int *)malloc((nno+1)*sizeof(unsigned int));
 
@@ -1353,7 +1353,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
 
   E->eco = E->ECO[E->mesh.levmax];
   E->ien = E->IEN[E->mesh.levmax];
-  E->id = E->ID[E->mesh.levmax][CPPR];
+  E->id = E->ID[E->mesh.levmax];
   E->Vi = E->VI[E->mesh.levmax];
   E->EVi = E->EVI[E->mesh.levmax];
   E->node = E->NODE[E->mesh.levmax];

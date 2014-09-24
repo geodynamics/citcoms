@@ -146,7 +146,7 @@ void construct_id(E)
 
       for(node=1;node<=E->lmesh.NNO[lev];node++)
         for(doff=1;doff<=dims;doff++)  {
-          E->ID[lev][CPPR][node].doff[doff] = eqn_count;
+          E->ID[lev][node].doff[doff] = eqn_count;
           eqn_count ++;
           }
 
@@ -157,7 +157,7 @@ void construct_id(E)
         if (E->NODE[lev][node] & SKIP)
         for(doff=1;doff<=dims;doff++)  {
 	  i++;
-          E->parallel.Skip_id[lev][CPPR][i] = E->ID[lev][CPPR][node].doff[doff];
+          E->parallel.Skip_id[lev][CPPR][i] = E->ID[lev][node].doff[doff];
           }
         }
 
@@ -198,15 +198,15 @@ void get_bcs_id_for_residual(E,level)
    for(i=1;i<=nno;i++) {
       if ( (E->NODE[level][i] & VBX) != 0 )  {
 	j++;
-        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[1];
+        E->zero_resid[level][j] = E->ID[level][i].doff[1];
 	}
       if ( (E->NODE[level][i] & VBY) != 0 )  {
 	j++;
-        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[2];
+        E->zero_resid[level][j] = E->ID[level][i].doff[2];
 	}
       if ( (E->NODE[level][i] & VBZ) != 0 )  {
 	j++;
-        E->zero_resid[level][j] = E->ID[level][CPPR][i].doff[3];
+        E->zero_resid[level][j] = E->ID[level][i].doff[3];
 	}
       }
 
@@ -265,7 +265,7 @@ void construct_node_maps(E)
        for (kk=1;kk<=noz;kk++)  {
 	 nn = kk + (jj-1)*noz+ (ii-1)*noxz;
 	 for(doff=1;doff<=dims;doff++)
-	   E->Node_map[lev][CPPR][(nn-1)*max_eqn+doff-1] = E->ID[lev][CPPR][nn].doff[doff];
+	   E->Node_map[lev][CPPR][(nn-1)*max_eqn+doff-1] = E->ID[lev][nn].doff[doff];
 
          ia = 0;
 	 is=1; ie=dims2;
@@ -284,7 +284,7 @@ void construct_node_maps(E)
                if (ja<nn)   {
 		 ia++;
                  for (doff=1;doff<=dims;doff++)
-                   E->Node_map[lev][CPPR][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][CPPR][ja].doff[doff];
+                   E->Node_map[lev][CPPR][(nn-1)*max_eqn+ia*dims+doff-1]=E->ID[lev][ja].doff[doff];
                  }
                }
          }
@@ -372,9 +372,9 @@ void construct_node_ks(E)
 
 		    ww1=ww2=ww3=1.0;
 		    qq=(j-1)*dims;
-		    eqn1=E->ID[level][CPPR][node1].doff[1];
-		    eqn2=E->ID[level][CPPR][node1].doff[2];
-		    eqn3=E->ID[level][CPPR][node1].doff[3];
+		    eqn1=E->ID[level][node1].doff[1];
+		    eqn2=E->ID[level][node1].doff[2];
+		    eqn3=E->ID[level][node1].doff[3];
 
 		    if(E->NODE[level][node1] & VBX) ww1=0.0;
 		    if(E->NODE[level][node1] & VBZ) ww3=0.0;
@@ -465,9 +465,9 @@ void rebuild_BI_on_boundary(E)
             E->temp[j]=0.0;
 
         for(i=1;i<=E->lmesh.NNO[level];i++)  {
-            eqn1=E->ID[level][CPPR][i].doff[1];
-            eqn2=E->ID[level][CPPR][i].doff[2];
-            eqn3=E->ID[level][CPPR][i].doff[3];
+            eqn1=E->ID[level][i].doff[1];
+            eqn2=E->ID[level][i].doff[2];
+            eqn3=E->ID[level][i].doff[3];
 
             C=E->Node_map[level][CPPR] + (i-1)*max_eqn;
             B1=E->Eqn_k1[level][CPPR]+(i-1)*max_eqn;
@@ -492,9 +492,9 @@ void rebuild_BI_on_boundary(E)
         }
         for(i=1;i<=E->lmesh.NNO[level];i++)
           if (E->NODE[level][i] & OFFSIDE)   {
-            eqn1=E->ID[level][CPPR][i].doff[1];
-            eqn2=E->ID[level][CPPR][i].doff[2];
-            eqn3=E->ID[level][CPPR][i].doff[3];
+            eqn1=E->ID[level][i].doff[1];
+            eqn2=E->ID[level][i].doff[2];
+            eqn3=E->ID[level][i].doff[3];
             E->BI[level][eqn1] = (double) 1.0/E->temp[eqn1];
             E->BI[level][eqn2] = (double) 1.0/E->temp[eqn2];
             E->BI[level][eqn3] = (double) 1.0/E->temp[eqn3];
