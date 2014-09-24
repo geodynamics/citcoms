@@ -447,14 +447,14 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	  elxlz = elx * elz;
 	  for (j=1;j <= elz;j++){
 #ifdef CitcomS_global_defs_h	/* CitcomS */
-	    if(E->mat[CPPR][j] ==  ani_layer){
+	    if(E->mat[j] ==  ani_layer){
 #else
 	    if(E->mat[j] ==  ani_layer){
 #endif
 	      for(u=0.,inode=1;inode <= ends;inode++){ /* mean vertical coordinate */
 #ifdef CitcomS_global_defs_h	/* CitcomS */
 		off = E->ien[j].node[inode];
-		u += E->sx[CPPR][3][off];
+		u += E->sx[3][off];
 #else
 		off = E->ien[j].node[inode];
 		if(E->control.Rsphere)
@@ -484,7 +484,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  xloc[0] = xloc[1] = xloc[2] = 0.0;
 		  for(inode=1;inode <= ends;inode++){
 		    off = E->ien[el].node[inode];
-		    rtp2xyz((float)E->sx[CPPR][3][off],(float)E->sx[CPPR][1][off],(float)E->sx[CPPR][2][off],rout);
+		    rtp2xyz((float)E->sx[3][off],(float)E->sx[1][off],(float)E->sx[2][off],rout);
 		    xloc[0] += rout[0];xloc[1] += rout[1];xloc[2] += rout[2];
 		  }
 		  xloc[0]/=ends;xloc[1]/=ends;xloc[2]/=ends;
@@ -821,9 +821,9 @@ void align_director_with_ISA_for_element(struct All_variables *E,
   for(e=1; e <= nel; e++) {
 #ifdef CitcomS_global_defs_h	/* CitcomS */
       if(((E->viscosity.anivisc_layer > 0)&&
-	  (E->mat[CPPR][e] <=   E->viscosity.anivisc_layer))||
+	  (E->mat[e] <=   E->viscosity.anivisc_layer))||
 	 ((E->viscosity.anivisc_layer < 0)&&
-	  (E->mat[CPPR][e] ==  -E->viscosity.anivisc_layer))){
+	  (E->mat[e] ==  -E->viscosity.anivisc_layer))){
 	get_rtf_at_ppts(E, lev, e, rtf); /* pressure points */
 	//if((e-1)%E->lmesh.elz==0)
 	construct_c3x3matrix_el(E,e,&E->element_Cc,&E->element_Ccx,lev,1);
@@ -834,7 +834,7 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	  VV[3][i] = E->sphere.cap[CPPR].V[3][off];
 	}
 	/* calculate velocity gradient matrix */
-	get_vgm_p(VV,&(E->N),&(E->GNX[lev][CPPR][e]),&E->element_Cc, 
+	get_vgm_p(VV,&(E->N),&(E->GNX[lev][e]),&E->element_Cc, 
 		  &E->element_Ccx,rtf,E->mesh.nsd,ppts,ends,TRUE,lgrad,
 		  evel);
 	/* calculate the ISA axis and determine the type of

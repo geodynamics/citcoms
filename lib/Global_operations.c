@@ -955,9 +955,9 @@ void remove_rigid_rot(struct All_variables *E)
 #ifdef ALLOW_ELLIPTICAL
       for (node=1;node<=nno;node++)   {
 	/* cartesian velocity = omega \cross r  */
-	vx[0] = fxyz[2]* E->x[CPPR][3][node] - fxyz[3]*E->x[CPPR][2][node];
-	vx[1] = fxyz[3]* E->x[CPPR][1][node] - fxyz[1]*E->x[CPPR][3][node];
-	vx[2] = fxyz[1]* E->x[CPPR][2][node] - fxyz[2]*E->x[CPPR][1][node];
+	vx[0] = fxyz[2]* E->x[3][node] - fxyz[3]*E->x[2][node];
+	vx[1] = fxyz[3]* E->x[1][node] - fxyz[1]*E->x[3][node];
+	vx[2] = fxyz[1]* E->x[2][node] - fxyz[2]*E->x[1][node];
 	/* project into theta, phi */
 	calc_cbase_at_node(node,cart_base,E);
 	v_theta = vx[0]*cart_base[3] + vx[1]*cart_base[4] + vx[2]*cart_base[5] ;
