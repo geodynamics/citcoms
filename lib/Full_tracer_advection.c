@@ -315,9 +315,9 @@ void full_lost_souls(struct All_variables *E)
     /** debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
-                E->trace.rlater[CPPR][0][kk],
-                E->trace.rlater[CPPR][1][kk],
-                E->trace.rlater[CPPR][2][kk]);
+                E->trace.rlater[0][kk],
+                E->trace.rlater[1][kk],
+                E->trace.rlater[2][kk]);
     }
     fflush(E->trace.fpt);
     */
@@ -789,10 +789,10 @@ static void full_put_lost_tracers(struct All_variables *E,
     numtracers=E->trace.ilater;
 
     for (kk=1;kk<=numtracers;kk++) {
-        rad=E->trace.rlater[CPPR][2][kk];
-        x=E->trace.rlater[CPPR][3][kk];
-        y=E->trace.rlater[CPPR][4][kk];
-        z=E->trace.rlater[CPPR][5][kk];
+        rad=E->trace.rlater[2][kk];
+        x=E->trace.rlater[3][kk];
+        y=E->trace.rlater[4][kk];
+        z=E->trace.rlater[5][kk];
 
         /* first check same cap if nprocz>1 */
 
@@ -833,7 +833,7 @@ static void full_put_lost_tracers(struct All_variables *E,
 
         for (pp=0;pp<=(E->trace.number_of_tracer_quantities-1);pp++) {
             ipos=isend_position+pp;
-            send[CPPR][ithatcap][ipos]=E->trace.rlater[CPPR][pp][kk];
+            send[CPPR][ithatcap][ipos]=E->trace.rlater[pp][kk];
         }
 
     } /* end kk, assigning tracers */

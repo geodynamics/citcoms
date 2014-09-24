@@ -602,7 +602,7 @@ void regional_lost_souls(struct All_variables *E)
             double coord;
 
             /* Is the tracer within the bounds in the d-th dimension */
-            coord = E->trace.rlater[CPPR][d][kk];
+            coord = E->trace.rlater[d][kk];
 
             if (coord < bounds[d][0]) {
                 put_lost_tracers(E, &(isend[0]), send[0], kk);
@@ -732,9 +732,9 @@ void regional_lost_souls(struct All_variables *E)
         fprintf(E->trace.fpt, "Error(regional_lost_souls) lost tracers\n");
         for (kk=1; kk<=E->trace.ilater; kk++) {
             fprintf(E->trace.fpt, "lost #%d xx=(%e, %e, %e)\n", kk,
-                    E->trace.rlater[CPPR][0][kk],
-                    E->trace.rlater[CPPR][1][kk],
-                    E->trace.rlater[CPPR][2][kk]);
+                    E->trace.rlater[0][kk],
+                    E->trace.rlater[1][kk],
+                    E->trace.rlater[2][kk]);
         }
         fflush(E->trace.fpt);
         exit(10);
@@ -762,14 +762,14 @@ static void put_lost_tracers(struct All_variables *E,
 
     for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
         ipos = isend_position + pp;
-        send[ipos] = E->trace.rlater[CPPR][pp][kk];
+        send[ipos] = E->trace.rlater[pp][kk];
     }
     (*send_size)++;
 
     /* eject the tracer from rlater */
     ilast_tracer = E->trace.ilater;
     for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++) {
-        E->trace.rlater[CPPR][pp][kk] = E->trace.rlater[CPPR][pp][ilast_tracer];
+        E->trace.rlater[pp][kk] = E->trace.rlater[pp][ilast_tracer];
     }
     E->trace.ilater--;
 }
@@ -840,7 +840,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
                 E->trace.ilatersize=E->trace.max_ntracers/5;
 
                 for (kk=0;kk<E->trace.number_of_tracer_quantities;kk++) {
-                    if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
+                    if ((E->trace.rlater[kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
                         fprintf(E->trace.fpt,"AKM(put_found_tracers)-no memory (%d)\n",kk);
                         fflush(E->trace.fpt);
                         exit(10);
@@ -855,7 +855,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
                 expand_later_array(E);
 
             for (pp=0; pp<E->trace.number_of_tracer_quantities; pp++)
-                E->trace.rlater[CPPR][pp][ilast] = recv[ipos+pp];
+                E->trace.rlater[pp][ilast] = recv[ipos+pp];
         } /* end of if-else */
     } /* end of for kk */
 }

@@ -630,7 +630,7 @@ static void find_tracers(struct All_variables *E)
 
     if (E->trace.ilatersize>0) {
         for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-            free(E->trace.rlater[CPPR][kk]);
+            free(E->trace.rlater[kk]);
         }
     }
 
@@ -1528,7 +1528,7 @@ static void put_away_later(struct All_variables *E, int it)
         E->trace.ilatersize=E->trace.max_ntracers/5;
 
         for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-            if ((E->trace.rlater[CPPR][kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
+            if ((E->trace.rlater[kk]=(double *)malloc(E->trace.ilatersize*sizeof(double)))==NULL) {
                 fprintf(E->trace.fpt,"AKM(put_away_later)-no memory (%d)\n",kk);
                 fflush(E->trace.fpt);
                 exit(10);
@@ -1546,10 +1546,10 @@ static void put_away_later(struct All_variables *E, int it)
     /* stack basic and extra quantities together (basic first) */
 
     for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.rlater[CPPR][kk][E->trace.ilater]=E->trace.basicq[kk][it];
+        E->trace.rlater[kk][E->trace.ilater]=E->trace.basicq[kk][it];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
-        E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater]=E->trace.extraq[kk][it];
+        E->trace.rlater[E->trace.number_of_basic_quantities+kk][E->trace.ilater]=E->trace.extraq[kk][it];
 }
 
 
@@ -1569,7 +1569,7 @@ void expand_later_array(struct All_variables *E)
     inewsize=E->trace.ilatersize+E->trace.ilatersize/5+icushion;
 
     for (kk=0;kk<=((E->trace.number_of_tracer_quantities)-1);kk++) {
-        if ((E->trace.rlater[CPPR][kk]=(double *)realloc(E->trace.rlater[CPPR][kk],inewsize*sizeof(double)))==NULL) {
+        if ((E->trace.rlater[kk]=(double *)realloc(E->trace.rlater[kk],inewsize*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"AKM(expand later array )-no memory (%d)\n",kk);
             fflush(E->trace.fpt);
             exit(10);
