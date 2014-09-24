@@ -121,7 +121,7 @@ struct TRACE{
     double thetamin;
     double phimax;
     double phimin;
-    int *regnodetoel[13];
+    int *regnodetoel;
     int *regtoel[13][5];
 
     /* gnomonic shape functions */

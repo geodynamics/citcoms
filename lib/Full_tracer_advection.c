@@ -1408,7 +1408,7 @@ static void make_regular_grid(struct All_variables *E)
 
 
 
-            if ((E->trace.regnodetoel[CPPR]=(int *)malloc((numregnodes+1)*sizeof(int)))==NULL)
+            if ((E->trace.regnodetoel=(int *)malloc((numregnodes+1)*sizeof(int)))==NULL)
                 {
                     fprintf(E->trace.fpt,"ERROR(make regular) -no memory - uh3ud\n");
                     fflush(E->trace.fpt);
@@ -1420,7 +1420,7 @@ static void make_regular_grid(struct All_variables *E)
 
             for (kk=1;kk<=numregnodes;kk++)
                 {
-                    E->trace.regnodetoel[CPPR][kk]=-99;
+                    E->trace.regnodetoel[kk]=-99;
                 }
 
             /* Begin Mapping (only need to use surface elements) */
@@ -1515,7 +1515,7 @@ static void make_regular_grid(struct All_variables *E)
             for (kk=1;kk<=numregnodes;kk++)
                 {
 
-                    E->trace.regnodetoel[CPPR][kk]=-99;
+                    E->trace.regnodetoel[kk]=-99;
 
                     /* find theta and phi for a given regular node */
 
@@ -1537,7 +1537,7 @@ static void make_regular_grid(struct All_variables *E)
                     ival=icheck_element_column(E,ilast_el,x,y,z,rad);
                     if (ival>0)
                         {
-                            E->trace.regnodetoel[CPPR][kk]=ilast_el;
+                            E->trace.regnodetoel[kk]=ilast_el;
                             goto foundit;
                         }
 
@@ -1546,7 +1546,7 @@ static void make_regular_grid(struct All_variables *E)
                     ival=icheck_column_neighbors(E,ilast_el,x,y,z,rad);
                     if (ival>0)
                         {
-                            E->trace.regnodetoel[CPPR][kk]=ival;
+                            E->trace.regnodetoel[kk]=ival;
                             ilast_el=ival;
                             goto foundit;
                         }
@@ -1562,7 +1562,7 @@ static void make_regular_grid(struct All_variables *E)
                                     if (ival>0)
                                         {
                                             ilast_el=mm;
-                                            E->trace.regnodetoel[CPPR][kk]=mm;
+                                            E->trace.regnodetoel[kk]=mm;
                                             goto foundit;
                                         }
                                 }
@@ -1570,7 +1570,7 @@ static void make_regular_grid(struct All_variables *E)
 
                 foundit:
 
-                    if (E->trace.regnodetoel[CPPR][kk]>0) imap++;
+                    if (E->trace.regnodetoel[kk]>0) imap++;
 
                 } /* end all regular nodes (kk) */
 
@@ -1591,12 +1591,12 @@ static void make_regular_grid(struct All_variables *E)
     for (kk=1;kk<=numregnodes;kk++)
         {
 
-            if (E->trace.regnodetoel[CPPR][kk]!=-99)
+            if (E->trace.regnodetoel[kk]!=-99)
                 {
-                    if ( (E->trace.regnodetoel[CPPR][kk]<1)||(E->trace.regnodetoel[CPPR][kk]>E->lmesh.nel) )
+                    if ( (E->trace.regnodetoel[kk]<1)||(E->trace.regnodetoel[kk]>E->lmesh.nel) )
                         {
-                            fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
-                            fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[CPPR][kk]);
+                            fprintf(stderr,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[kk]);
+                            fprintf(E->trace.fpt,"Error(make_regular_grid)-invalid element: %d\n",E->trace.regnodetoel[kk]);
                             fflush(E->trace.fpt);
                             fflush(stderr);
                             exit(10);
@@ -1680,9 +1680,9 @@ static void make_regular_grid(struct All_variables *E)
                                             fflush(E->trace.fpt);
                                             exit(10);
                                         }
-                                    if (E->trace.regnodetoel[CPPR][iregnode[kk]]>E->lmesh.nel)
+                                    if (E->trace.regnodetoel[iregnode[kk]]>E->lmesh.nel)
                                         {
-                                            fprintf(E->trace.fpt,"AABB HERE %d %d %d %d\n",iregel,iregnode[kk],kk,E->trace.regnodetoel[CPPR][iregnode[kk]]);
+                                            fprintf(E->trace.fpt,"AABB HERE %d %d %d %d\n",iregel,iregnode[kk],kk,E->trace.regnodetoel[iregnode[kk]]);
                                             fflush(E->trace.fpt);
                                         }
                                 }
@@ -1696,15 +1696,15 @@ static void make_regular_grid(struct All_variables *E)
                             for (kk=1;kk<=4;kk++)
                                 {
 
-                                    if (E->trace.regnodetoel[CPPR][iregnode[kk]]<=0) goto next_corner;
+                                    if (E->trace.regnodetoel[iregnode[kk]]<=0) goto next_corner;
 
                                     icount++;
                                     for (pp=1;pp<=(kk-1);pp++)
                                         {
-                                            if (E->trace.regnodetoel[CPPR][iregnode[kk]]==E->trace.regnodetoel[CPPR][iregnode[pp]]) goto next_corner;
+                                            if (E->trace.regnodetoel[iregnode[kk]]==E->trace.regnodetoel[iregnode[pp]]) goto next_corner;
                                         }
                                     ichoice++;
-                                    itemp[ichoice]=E->trace.regnodetoel[CPPR][iregnode[kk]];
+                                    itemp[ichoice]=E->trace.regnodetoel[iregnode[kk]];
 
                                     if ((ichoice<0) || (ichoice>4) )
                                         {
@@ -1784,7 +1784,7 @@ static void make_regular_grid(struct All_variables *E)
 
             /* can now free regnodetoel */
 
-            free (E->trace.regnodetoel[CPPR]);
+            free (E->trace.regnodetoel);
 
 
             /* testing */
