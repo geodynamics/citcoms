@@ -286,9 +286,9 @@ struct SPHERE   {
   double **tablescosf;
   double **tablessinf;
 
-  double area[NCS];
+  double area;
   double angle[NCS][5];
-  double *area1[MAX_LEVELS][NCS];
+  double *area1[MAX_LEVELS];
   double *angle1[MAX_LEVELS][NCS][5];
 
   double *R[MAX_LEVELS];

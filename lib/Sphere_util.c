@@ -88,7 +88,7 @@ void compute_angle_surf_area (E)
         for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
             E->sphere.angle[CPPR][i] = angle[i];
 
-        E->sphere.area[CPPR] = area_sphere_cap(angle);
+        E->sphere.area = area_sphere_cap(angle);
 
         for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)
             for (es=1;es<=E->lmesh.SNEL[lev];es++)              {
@@ -107,7 +107,7 @@ void compute_angle_surf_area (E)
                 for (i=1;i<=4;i++)         /* angle1: bet 1 & 2; angle2: bet 2 & 3 ..*/
                     E->sphere.angle1[lev][CPPR][i][es] = angle[i];
 
-                E->sphere.area1[lev][CPPR][es] = area_sphere_cap(angle);
+                E->sphere.area1[lev][es] = area_sphere_cap(angle);
 
             }  /* end for lev and es */
 }
