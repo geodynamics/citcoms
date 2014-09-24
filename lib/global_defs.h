@@ -811,7 +811,7 @@ struct All_variables {
     struct CC *cc;
     struct CCX *ccx;
     struct CC *CC[MAX_LEVELS];
-    struct CCX *CCX[MAX_LEVELS][NCS];
+    struct CCX *CCX[MAX_LEVELS];
 
     struct CC element_Cc;
     struct CCX element_Ccx;

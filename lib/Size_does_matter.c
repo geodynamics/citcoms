@@ -866,9 +866,9 @@ void construct_c3x3matrix(E)
             for (j=1;j<=dims;j++)   {
               E->CC[lev][es].vpt[BVINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
-              E->CCX[lev][CPPR][es].vpt[BVXINDEX(i,j,1,a,k)] =
+              E->CCX[lev][es].vpt[BVXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
-              E->CCX[lev][CPPR][es].vpt[BVXINDEX(i,j,2,a,k)] =
+              E->CCX[lev][es].vpt[BVXINDEX(i,j,2,a,k)] =
                     ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
               }
           }      /* end for local node */
@@ -925,9 +925,9 @@ void construct_c3x3matrix(E)
             for (j=1;j<=dims;j++)   {
               E->CC[lev][es].ppt[BPINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
-              E->CCX[lev][CPPR][es].ppt[BPXINDEX(i,j,1,a,k)] =
+              E->CCX[lev][es].ppt[BPXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
-              E->CCX[lev][CPPR][es].ppt[BPXINDEX(i,j,2,a,k)] =
+              E->CCX[lev][es].ppt[BPXINDEX(i,j,2,a,k)] =
                     ua[j][1]*ux[2][i][1]+ua[j][2]*ux[2][i][2]+ua[j][3]*ux[2][i][3];
               }
 
