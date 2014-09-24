@@ -464,13 +464,13 @@ void regional_parallel_communication_routs_v(E)
           for(i=1;i<=2;i++)       {       /* do YOZ boundaries & OY lines */
 
         ii ++;
-        E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 1;
+        E->parallel.NUM_PASS[lev].bound[ii] = 1;
         if(E->parallel.me_loc[1]==0 && i==1)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
         else if(E->parallel.me_loc[1]==nprocxl-1 && i==2)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
 
-        if (E->parallel.NUM_PASS[lev][CPPR].bound[ii] == 1)  {
+        if (E->parallel.NUM_PASS[lev].bound[ii] == 1)  {
           kkk ++;
               /* determine the pass ID for ii-th boundary and kkk-th pass */
 
@@ -498,13 +498,13 @@ void regional_parallel_communication_routs_v(E)
 
         for(k=1;k<=2;k++)        {      /* do XOZ boundaries & OZ lines */
         ii ++;
-        E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 1;
+        E->parallel.NUM_PASS[lev].bound[ii] = 1;
         if(E->parallel.me_loc[2]==0 && k==1)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
         else if(E->parallel.me_loc[2]==nprocyl-1 && k==2)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
 
-        if(E->parallel.NUM_PASS[lev][CPPR].bound[ii] == 1)  {
+        if(E->parallel.NUM_PASS[lev].bound[ii] == 1)  {
 
           kkk ++;
               /* determine the pass ID for ii-th boundary and kkk-th pass */
@@ -534,13 +534,13 @@ void regional_parallel_communication_routs_v(E)
 
         for(j=1;j<=2;j++)       {       /* do XOY boundaries & OX lines */
         ii ++;
-        E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 1;
+        E->parallel.NUM_PASS[lev].bound[ii] = 1;
         if(E->parallel.me_loc[3]==0 && j==1)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
         else if(E->parallel.me_loc[3]==nproczl-1 && j==2)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
 
-        if(E->parallel.NUM_PASS[lev][CPPR].bound[ii] == 1)  {
+        if(E->parallel.NUM_PASS[lev].bound[ii] == 1)  {
           kkk ++;
               /* determine the pass ID for ii-th boundary and kkk-th pass */
 
@@ -632,13 +632,13 @@ void regional_parallel_communication_routs_s(E)
         for(i=1;i<=2;i++)       {       /* do YOZ boundaries & OY lines */
 
         ii ++;
-        E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 1;
+        E->parallel.NUM_PASS[lev].bound[ii] = 1;
         if(E->parallel.me_loc[1]==0 && i==1)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
         else if(E->parallel.me_loc[1]==nprocxl-1 && i==2)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
 
-        for (p=1;p<=E->parallel.NUM_PASS[lev][CPPR].bound[ii];p++)  {
+        for (p=1;p<=E->parallel.NUM_PASS[lev].bound[ii];p++)  {
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */
 
@@ -659,13 +659,13 @@ void regional_parallel_communication_routs_s(E)
           for(k=1;k<=2;k++)        {      /* do XOZ boundaries & OX lines */
 
         ii ++;
-        E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 1;
+        E->parallel.NUM_PASS[lev].bound[ii] = 1;
         if(E->parallel.me_loc[2]==0 && k==1)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
         else if(E->parallel.me_loc[2]==nprocyl-1 && k==2)
-          E->parallel.NUM_PASS[lev][CPPR].bound[ii] = 0;
+          E->parallel.NUM_PASS[lev].bound[ii] = 0;
 
-        for (p=1;p<=E->parallel.NUM_PASS[lev][CPPR].bound[ii];p++)  {
+        for (p=1;p<=E->parallel.NUM_PASS[lev].bound[ii];p++)  {
 
           kkk ++;
               /* determine the pass ID for ii-th boundary and p-th pass */

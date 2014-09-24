@@ -238,7 +238,7 @@ struct Parallel {
     int TNUM_PASS[MAX_LEVELS];
     struct BOUND *NODE[MAX_LEVELS][NCS];
     struct BOUND NUM_NNO[MAX_LEVELS];
-    struct BOUND NUM_PASS[MAX_LEVELS][NCS];
+    struct BOUND NUM_PASS[MAX_LEVELS];
     struct PASS NUM_NEQ[MAX_LEVELS][NCS];
     struct PASS NUM_NODE[MAX_LEVELS][NCS];
     struct PASS PROCESSOR[MAX_LEVELS][NCS];
