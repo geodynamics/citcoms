@@ -649,7 +649,7 @@ void regional_parallel_communication_routs_s(E)
           for (k=1;k<=E->parallel.NUM_sNODE[lev].pass[kkk];k++)   {
             lnode = k;             /* due to lnode increases in horizontal di first */
             node = (E->parallel.NODE[lev][CPPR][lnode].bound[ii]-1)/noz+1;
-            E->parallel.EXCHANGE_sNODE[lev][CPPR][k].pass[kkk] = node;
+            E->parallel.EXCHANGE_sNODE[lev][k].pass[kkk] = node;
             }  /* end for node k */
 
           }   /* end for loop p */
@@ -678,7 +678,7 @@ void regional_parallel_communication_routs_s(E)
           for (kk=1;kk<=E->parallel.NUM_sNODE[lev].pass[kkk];kk++)   {
             lnode = kk;             /* due to lnode increases in horizontal di first */
             node = (E->parallel.NODE[lev][CPPR][lnode].bound[ii]-1)/noz+1;
-            E->parallel.EXCHANGE_sNODE[lev][CPPR][kk].pass[kkk] = node;
+            E->parallel.EXCHANGE_sNODE[lev][kk].pass[kkk] = node;
             }  /* end for node kk */
 
           }   /* end for loop p */
@@ -844,9 +844,9 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
    for (k=1;k<=E->parallel.sTNUM_PASS[lev];k++)  {
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev].pass[k];j++)  {
-       S[k][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+       S[k][j-1] = U1[ E->parallel.EXCHANGE_sNODE[lev][j].pass[k] ];
        S[k][j-1+E->parallel.NUM_sNODE[lev].pass[k]]
-	 = U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ];
+	 = U2[ E->parallel.EXCHANGE_sNODE[lev][j].pass[k] ];
      }
 
      MPI_Sendrecv(S[k],2*E->parallel.NUM_sNODE[lev].pass[k],MPI_FLOAT,
@@ -856,8 +856,8 @@ void regional_exchange_snode_f(struct All_variables *E, float *U1,
 		  E->parallel.world,&status);
 
      for (j=1;j<=E->parallel.NUM_sNODE[lev].pass[k];j++)   {
-       U1[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] += R[k][j-1];
-       U2[ E->parallel.EXCHANGE_sNODE[lev][CPPR][j].pass[k] ] +=
+       U1[ E->parallel.EXCHANGE_sNODE[lev][j].pass[k] ] += R[k][j-1];
+       U2[ E->parallel.EXCHANGE_sNODE[lev][j].pass[k] ] +=
 	 R[k][j-1+E->parallel.NUM_sNODE[lev].pass[k]];
      }
 
