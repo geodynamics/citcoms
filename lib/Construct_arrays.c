@@ -289,7 +289,7 @@ void construct_node_maps(E)
                }
          }
 
-       E->Eqn_k1[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
+       E->Eqn_k1[lev] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
        E->Eqn_k2[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
        E->Eqn_k3[lev][CPPR] = (higher_precision *)malloc(matrix*sizeof(higher_precision));
 
@@ -338,7 +338,7 @@ void construct_node_ks(E)
 	for(i=0;i<neq;i++)
 	    E->BI[level][i] = zero;
         for(i=0;i<E->mesh.matrix_size[level];i++) {
-            E->Eqn_k1[level][CPPR][i] = zero;
+            E->Eqn_k1[level][i] = zero;
             E->Eqn_k2[level][CPPR][i] = zero;
             E->Eqn_k3[level][CPPR][i] = zero;
             }
@@ -392,7 +392,7 @@ void construct_node_ks(E)
 
 		    assert(found /* direction 1 */);
 
-		    E->Eqn_k1[level][CPPR][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
+		    E->Eqn_k1[level][loc0+index] +=  w1*ww1*elt_K[pp*lms+qq]; /* direction 1 */
 		    E->Eqn_k2[level][CPPR][loc0+index] +=  w2*ww1*elt_K[(pp+1)*lms+qq]; /* direction 1 */
 		    E->Eqn_k3[level][CPPR][loc0+index] +=  w3*ww1*elt_K[(pp+2)*lms+qq]; /* direction 1 */
 
@@ -408,7 +408,7 @@ void construct_node_ks(E)
 
 		    assert(found /* direction 2 */);
 
-		    E->Eqn_k1[level][CPPR][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
+		    E->Eqn_k1[level][loc0+index] += w1*ww2*elt_K[pp*lms+qq+1]; /* direction 1 */
 		    E->Eqn_k2[level][CPPR][loc0+index] += w2*ww2*elt_K[(pp+1)*lms+qq+1]; /* direction 2 */
 		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww2*elt_K[(pp+2)*lms+qq+1]; /* direction 3 */
 
@@ -424,7 +424,7 @@ void construct_node_ks(E)
 
                     assert(found /* direction 3 */);
 
-		    E->Eqn_k1[level][CPPR][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
+		    E->Eqn_k1[level][loc0+index] += w1*ww3*elt_K[pp*lms+qq+2]; /* direction 1 */
         E->Eqn_k2[level][CPPR][loc0+index] += w2*ww3*elt_K[(pp+1)*lms+qq+2]; /* direction 2 */
 		    E->Eqn_k3[level][CPPR][loc0+index] += w3*ww3*elt_K[(pp+2)*lms+qq+2]; /* direction 3 */
 
@@ -470,7 +470,7 @@ void rebuild_BI_on_boundary(E)
             eqn3=E->ID[level][i].doff[3];
 
             C=E->Node_map[level] + (i-1)*max_eqn;
-            B1=E->Eqn_k1[level][CPPR]+(i-1)*max_eqn;
+            B1=E->Eqn_k1[level]+(i-1)*max_eqn;
             B2=E->Eqn_k2[level][CPPR]+(i-1)*max_eqn;
             B3=E->Eqn_k3[level][CPPR]+(i-1)*max_eqn;
 
