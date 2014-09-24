@@ -52,7 +52,7 @@ void general_stokes_solver_setup(struct All_variables *E)
     construct_node_maps(E);
   else
     for (i=E->mesh.gridmin;i<=E->mesh.gridmax;i++)
-      E->elt_k[i][CPPR]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
+      E->elt_k[i]=(struct EK *)malloc((E->lmesh.NEL[i]+1)*sizeof(struct EK));
 
 #ifdef USE_PETSC
   /*

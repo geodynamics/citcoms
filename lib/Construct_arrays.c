@@ -616,12 +616,12 @@ void construct_elt_ks(E)
 
 	for(el=1;el<=E->lmesh.NEL[lev];el++)    {
 
-	    get_elt_k(E,el,E->elt_k[lev][CPPR][el].k,lev,0);
+	    get_elt_k(E,el,E->elt_k[lev][el].k,lev,0);
 
 	    if (E->control.augmented_Lagr)
-	        get_aug_k(E,el,E->elt_k[lev][CPPR][el].k,lev);
+	        get_aug_k(E,el,E->elt_k[lev][el].k,lev);
 
-            build_diagonal_of_K(E,el,E->elt_k[lev][CPPR][el].k,lev);
+            build_diagonal_of_K(E,el,E->elt_k[lev][el].k,lev);
 
 	    }
 

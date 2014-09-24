@@ -462,27 +462,27 @@ void e_assemble_del2_u(E,u,Au,level,strip_bcs)
 	  ii = (a*n+b)*dims-(dims*n+dims);
 	  /* i=1, j=1,2,3 */
 		Au[a1] +=
-		        E->elt_k[level][CPPR][e].k[ii] *
+		        E->elt_k[level][e].k[ii] *
 			u[E->ID[level][nodeb].doff[1]]
-		      + E->elt_k[level][CPPR][e].k[ii+1] *
+		      + E->elt_k[level][e].k[ii+1] *
 			u[E->ID[level][nodeb].doff[2]]
-		      + E->elt_k[level][CPPR][e].k[ii+2] *
+		      + E->elt_k[level][e].k[ii+2] *
 			u[E->ID[level][nodeb].doff[3]];
 		/* i=2, j=1,2,3 */
 		Au[a2] +=
-		        E->elt_k[level][CPPR][e].k[ii+n] *
+		        E->elt_k[level][e].k[ii+n] *
 			u[E->ID[level][nodeb].doff[1]]
-		      + E->elt_k[level][CPPR][e].k[ii+n+1] *
+		      + E->elt_k[level][e].k[ii+n+1] *
 			u[E->ID[level][nodeb].doff[2]]
-		      + E->elt_k[level][CPPR][e].k[ii+n+2] *
+		      + E->elt_k[level][e].k[ii+n+2] *
 			u[E->ID[level][nodeb].doff[3]];
 		/* i=3, j=1,2,3 */
 		Au[a3] +=
-		        E->elt_k[level][CPPR][e].k[ii+n+n] *
+		        E->elt_k[level][e].k[ii+n+n] *
 			u[E->ID[level][nodeb].doff[1]]
-		      + E->elt_k[level][CPPR][e].k[ii+n+n+1] *
+		      + E->elt_k[level][e].k[ii+n+n+1] *
 			u[E->ID[level][nodeb].doff[2]]
-		      + E->elt_k[level][CPPR][e].k[ii+n+n+2] *
+		      + E->elt_k[level][e].k[ii+n+n+2] *
 			u[E->ID[level][nodeb].doff[3]];
 
  	    }         /* end for loop b */
