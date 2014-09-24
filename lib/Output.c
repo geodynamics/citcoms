@@ -641,9 +641,9 @@ void output_tracer(struct All_variables *E, int cycles)
       for(n=1;n<=E->trace.ntracers[CPPR];n++) {
           /* write basic quantities (coordinate) */
           fprintf(fp1,"%.12e %.12e %.12e",
-                  E->trace.basicq[CPPR][0][n],
-                  E->trace.basicq[CPPR][1][n],
-                  E->trace.basicq[CPPR][2][n]);
+                  E->trace.basicq[0][n],
+                  E->trace.basicq[1][n],
+                  E->trace.basicq[2][n]);
 
           /* write extra quantities */
           for (i=0; i<E->trace.number_of_extra_quantities; i++) {

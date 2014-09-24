@@ -51,7 +51,7 @@ struct TRACE{
     int number_of_extra_quantities;
     int number_of_tracer_quantities;
 
-    double *basicq[13][100];
+    double *basicq[100];
     double *extraq[13][100];
 
     int ntracers[13];

@@ -261,7 +261,7 @@ static void tracer_checkpoint(struct All_variables *E, FILE *fp)
     /* the 0-th element of basicq/extraq/ielement is not init'd
      * and won't be used when read it. */
         for(i=0; i<6; i++) {
-            fwrite(E->trace.basicq[CPPR][i], sizeof(double),
+            fwrite(E->trace.basicq[i], sizeof(double),
                    E->trace.ntracers[CPPR]+1, fp);
         }
         for(i=0; i<E->trace.number_of_extra_quantities; i++) {
@@ -320,7 +320,7 @@ static void read_tracer_checkpoint(struct All_variables *E, FILE *fp)
 
     /* read tracer data */
         for(i=0; i<6; i++) {
-            fread(E->trace.basicq[CPPR][i], sizeof(double),
+            fread(E->trace.basicq[i], sizeof(double),
                   E->trace.ntracers[CPPR]+1, fp);
         }
         for(i=0; i<E->trace.number_of_extra_quantities; i++) {

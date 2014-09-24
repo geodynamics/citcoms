@@ -720,7 +720,7 @@ void full_lost_souls(struct All_variables *E)
         for (mm=0;mm<E->trace.number_of_basic_quantities;mm++) {
             ipos=ireceive_position+mm;
 
-            E->trace.basicq[CPPR][mm][E->trace.ntracers[CPPR]]=REC[CPPR][ipos];
+            E->trace.basicq[mm][E->trace.ntracers[CPPR]]=REC[CPPR][ipos];
         }
         for (mm=0;mm<E->trace.number_of_extra_quantities;mm++) {
             ipos=ireceive_position+E->trace.number_of_basic_quantities+mm;
@@ -728,12 +728,12 @@ void full_lost_souls(struct All_variables *E)
             E->trace.extraq[CPPR][mm][E->trace.ntracers[CPPR]]=REC[CPPR][ipos];
         }
 
-        theta=E->trace.basicq[CPPR][0][E->trace.ntracers[CPPR]];
-        phi=E->trace.basicq[CPPR][1][E->trace.ntracers[CPPR]];
-        rad=E->trace.basicq[CPPR][2][E->trace.ntracers[CPPR]];
-        x=E->trace.basicq[CPPR][3][E->trace.ntracers[CPPR]];
-        y=E->trace.basicq[CPPR][4][E->trace.ntracers[CPPR]];
-        z=E->trace.basicq[CPPR][5][E->trace.ntracers[CPPR]];
+        theta=E->trace.basicq[0][E->trace.ntracers[CPPR]];
+        phi=E->trace.basicq[1][E->trace.ntracers[CPPR]];
+        rad=E->trace.basicq[2][E->trace.ntracers[CPPR]];
+        x=E->trace.basicq[3][E->trace.ntracers[CPPR]];
+        y=E->trace.basicq[4][E->trace.ntracers[CPPR]];
+        z=E->trace.basicq[5][E->trace.ntracers[CPPR]];
 
 
         iel=(E->trace.iget_element)(E,-99,x,y,z,theta,phi,rad);

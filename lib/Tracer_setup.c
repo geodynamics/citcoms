@@ -386,12 +386,12 @@ static void predict_tracers(struct All_variables *E)
 
         for (kk=1;kk<=numtracers;kk++) {
 
-            theta0=E->trace.basicq[CPPR][0][kk];
-            phi0=E->trace.basicq[CPPR][1][kk];
-            rad0=E->trace.basicq[CPPR][2][kk];
-            x0=E->trace.basicq[CPPR][3][kk];
-            y0=E->trace.basicq[CPPR][4][kk];
-            z0=E->trace.basicq[CPPR][5][kk];
+            theta0=E->trace.basicq[0][kk];
+            phi0=E->trace.basicq[1][kk];
+            rad0=E->trace.basicq[2][kk];
+            x0=E->trace.basicq[3][kk];
+            y0=E->trace.basicq[4][kk];
+            z0=E->trace.basicq[5][kk];
 
             nelem=E->trace.ielement[CPPR][kk];
             (E->trace.get_velocity)(E,nelem,theta0,phi0,rad0,velocity_vector);
@@ -408,24 +408,24 @@ static void predict_tracers(struct All_variables *E)
 
             /* Current Coordinates are always kept in positions 0-5. */
 
-            E->trace.basicq[CPPR][0][kk]=theta_pred;
-            E->trace.basicq[CPPR][1][kk]=phi_pred;
-            E->trace.basicq[CPPR][2][kk]=rad_pred;
-            E->trace.basicq[CPPR][3][kk]=x_pred;
-            E->trace.basicq[CPPR][4][kk]=y_pred;
-            E->trace.basicq[CPPR][5][kk]=z_pred;
+            E->trace.basicq[0][kk]=theta_pred;
+            E->trace.basicq[1][kk]=phi_pred;
+            E->trace.basicq[2][kk]=rad_pred;
+            E->trace.basicq[3][kk]=x_pred;
+            E->trace.basicq[4][kk]=y_pred;
+            E->trace.basicq[5][kk]=z_pred;
 
             /* Fill in original coords (positions 6-8) */
 
-            E->trace.basicq[CPPR][6][kk]=x0;
-            E->trace.basicq[CPPR][7][kk]=y0;
-            E->trace.basicq[CPPR][8][kk]=z0;
+            E->trace.basicq[6][kk]=x0;
+            E->trace.basicq[7][kk]=y0;
+            E->trace.basicq[8][kk]=z0;
 
             /* Fill in original velocities (positions 9-11) */
 
-            E->trace.basicq[CPPR][9][kk]=velocity_vector[1];  /* Vx */
-            E->trace.basicq[CPPR][10][kk]=velocity_vector[2];  /* Vy */
-            E->trace.basicq[CPPR][11][kk]=velocity_vector[3];  /* Vz */
+            E->trace.basicq[9][kk]=velocity_vector[1];  /* Vx */
+            E->trace.basicq[10][kk]=velocity_vector[2];  /* Vy */
+            E->trace.basicq[11][kk]=velocity_vector[3];  /* Vz */
 
 
         } /* end kk, predicting tracers */
@@ -478,20 +478,20 @@ static void correct_tracers(struct All_variables *E)
 
         for (kk=1;kk<=E->trace.ntracers[CPPR];kk++) {
 
-            theta_pred=E->trace.basicq[CPPR][0][kk];
-            phi_pred=E->trace.basicq[CPPR][1][kk];
-            rad_pred=E->trace.basicq[CPPR][2][kk];
-            x_pred=E->trace.basicq[CPPR][3][kk];
-            y_pred=E->trace.basicq[CPPR][4][kk];
-            z_pred=E->trace.basicq[CPPR][5][kk];
+            theta_pred=E->trace.basicq[0][kk];
+            phi_pred=E->trace.basicq[1][kk];
+            rad_pred=E->trace.basicq[2][kk];
+            x_pred=E->trace.basicq[3][kk];
+            y_pred=E->trace.basicq[4][kk];
+            z_pred=E->trace.basicq[5][kk];
 
-            x0=E->trace.basicq[CPPR][6][kk];
-            y0=E->trace.basicq[CPPR][7][kk];
-            z0=E->trace.basicq[CPPR][8][kk];
+            x0=E->trace.basicq[6][kk];
+            y0=E->trace.basicq[7][kk];
+            z0=E->trace.basicq[8][kk];
 
-            Vx0=E->trace.basicq[CPPR][9][kk];
-            Vy0=E->trace.basicq[CPPR][10][kk];
-            Vz0=E->trace.basicq[CPPR][11][kk];
+            Vx0=E->trace.basicq[9][kk];
+            Vy0=E->trace.basicq[10][kk];
+            Vz0=E->trace.basicq[11][kk];
 
             nelem=E->trace.ielement[CPPR][kk];
 
@@ -510,12 +510,12 @@ static void correct_tracers(struct All_variables *E)
 
             /* Fill in Current Positions (other positions are no longer important) */
 
-            E->trace.basicq[CPPR][0][kk]=theta_cor;
-            E->trace.basicq[CPPR][1][kk]=phi_cor;
-            E->trace.basicq[CPPR][2][kk]=rad_cor;
-            E->trace.basicq[CPPR][3][kk]=x_cor;
-            E->trace.basicq[CPPR][4][kk]=y_cor;
-            E->trace.basicq[CPPR][5][kk]=z_cor;
+            E->trace.basicq[0][kk]=theta_cor;
+            E->trace.basicq[1][kk]=phi_cor;
+            E->trace.basicq[2][kk]=rad_cor;
+            E->trace.basicq[3][kk]=x_cor;
+            E->trace.basicq[4][kk]=y_cor;
+            E->trace.basicq[5][kk]=z_cor;
 
         } /* end kk, correcting tracers */
 
@@ -580,12 +580,12 @@ static void find_tracers(struct All_variables *E)
 
             it++;
 
-            theta=E->trace.basicq[CPPR][0][it];
-            phi=E->trace.basicq[CPPR][1][it];
-            rad=E->trace.basicq[CPPR][2][it];
-            x=E->trace.basicq[CPPR][3][it];
-            y=E->trace.basicq[CPPR][4][it];
-            z=E->trace.basicq[CPPR][5][it];
+            theta=E->trace.basicq[0][it];
+            phi=E->trace.basicq[1][it];
+            rad=E->trace.basicq[2][it];
+            x=E->trace.basicq[3][it];
+            y=E->trace.basicq[4][it];
+            z=E->trace.basicq[5][it];
 
             iprevious_element=E->trace.ielement[CPPR][it];
 
@@ -832,12 +832,12 @@ static void generate_random_tracers(struct All_variables *E, int tracers_cap)
         E->trace.ntracers[CPPR]++;
         kk=E->trace.ntracers[CPPR];
 
-        E->trace.basicq[CPPR][0][kk]=theta;
-        E->trace.basicq[CPPR][1][kk]=phi;
-        E->trace.basicq[CPPR][2][kk]=rad;
-        E->trace.basicq[CPPR][3][kk]=x;
-        E->trace.basicq[CPPR][4][kk]=y;
-        E->trace.basicq[CPPR][5][kk]=z;
+        E->trace.basicq[0][kk]=theta;
+        E->trace.basicq[1][kk]=phi;
+        E->trace.basicq[2][kk]=rad;
+        E->trace.basicq[3][kk]=x;
+        E->trace.basicq[4][kk]=y;
+        E->trace.basicq[5][kk]=z;
 
     } /* end while */
 }
@@ -945,12 +945,12 @@ static void read_tracer_file(struct All_variables *E)
             if (E->trace.ntracers[CPPR]>=(E->trace.max_ntracers[CPPR]-5)) 
               expand_tracer_arrays(E);
 
-            E->trace.basicq[CPPR][0][E->trace.ntracers[CPPR]]=theta;
-            E->trace.basicq[CPPR][1][E->trace.ntracers[CPPR]]=phi;
-            E->trace.basicq[CPPR][2][E->trace.ntracers[CPPR]]=rad;
-            E->trace.basicq[CPPR][3][E->trace.ntracers[CPPR]]=x;
-            E->trace.basicq[CPPR][4][E->trace.ntracers[CPPR]]=y;
-            E->trace.basicq[CPPR][5][E->trace.ntracers[CPPR]]=z;
+            E->trace.basicq[0][E->trace.ntracers[CPPR]]=theta;
+            E->trace.basicq[1][E->trace.ntracers[CPPR]]=phi;
+            E->trace.basicq[2][E->trace.ntracers[CPPR]]=rad;
+            E->trace.basicq[3][E->trace.ntracers[CPPR]]=x;
+            E->trace.basicq[4][E->trace.ntracers[CPPR]]=y;
+            E->trace.basicq[5][E->trace.ntracers[CPPR]]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
                 E->trace.extraq[CPPR][i][E->trace.ntracers[CPPR]]=buffer[i+3];
@@ -1075,12 +1075,12 @@ static void read_old_tracer_file(struct All_variables *E)
 
             (E->trace.keep_within_bounds)(E,&x,&y,&z,&theta,&phi,&rad);
 
-            E->trace.basicq[CPPR][0][kk]=theta;
-            E->trace.basicq[CPPR][1][kk]=phi;
-            E->trace.basicq[CPPR][2][kk]=rad;
-            E->trace.basicq[CPPR][3][kk]=x;
-            E->trace.basicq[CPPR][4][kk]=y;
-            E->trace.basicq[CPPR][5][kk]=z;
+            E->trace.basicq[0][kk]=theta;
+            E->trace.basicq[1][kk]=phi;
+            E->trace.basicq[2][kk]=rad;
+            E->trace.basicq[3][kk]=x;
+            E->trace.basicq[4][kk]=y;
+            E->trace.basicq[5][kk]=z;
 
             for (i=0; i<E->trace.number_of_extra_quantities; i++)
                 E->trace.extraq[CPPR][i][kk]=buffer[i+3];
@@ -1209,7 +1209,7 @@ static void init_tracer_flavors(struct All_variables *E)
 
 	number_of_tracers = E->trace.ntracers[CPPR];
 	for (kk=1;kk<=number_of_tracers;kk++) {
-	  rad = E->trace.basicq[CPPR][2][kk];
+	  rad = E->trace.basicq[2][kk];
 
           flavor = E->trace.nflavors - 1;
           for (i=0; i<E->trace.nflavors-1; i++) {
@@ -1366,7 +1366,7 @@ void allocate_tracer_arrays(struct All_variables *E, int number_of_tracers)
 
 
     for (kk=0;kk<E->trace.number_of_basic_quantities;kk++) {
-        if ((E->trace.basicq[CPPR][kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
+        if ((E->trace.basicq[kk]=(double *)malloc(E->trace.max_ntracers[CPPR]*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(initialize tracer arrays)-no memory 1b.%d\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1422,7 +1422,7 @@ void expand_tracer_arrays(struct All_variables *E)
     }
 
     for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++) {
-        if ((E->trace.basicq[CPPR][kk]=(double *)realloc(E->trace.basicq[CPPR][kk],inewsize*sizeof(double)))==NULL) {
+        if ((E->trace.basicq[kk]=(double *)realloc(E->trace.basicq[kk],inewsize*sizeof(double)))==NULL) {
             fprintf(E->trace.fpt,"ERROR(expand tracer arrays )-no memory (%d)\n",kk);
             fflush(E->trace.fpt);
             exit(10);
@@ -1483,7 +1483,7 @@ static void reduce_tracer_arrays(struct All_variables *E)
 
 
             for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++) {
-                if ((E->trace.basicq[CPPR][kk]=(double *)realloc(E->trace.basicq[CPPR][kk],inewsize*sizeof(double)))==NULL) {
+                if ((E->trace.basicq[kk]=(double *)realloc(E->trace.basicq[kk],inewsize*sizeof(double)))==NULL) {
                     fprintf(E->trace.fpt,"AKM(reduce tracer arrays )-no memory (%d)\n",kk);
                     fflush(E->trace.fpt);
                     exit(10);
@@ -1546,7 +1546,7 @@ static void put_away_later(struct All_variables *E, int it)
     /* stack basic and extra quantities together (basic first) */
 
     for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.rlater[CPPR][kk][E->trace.ilater[CPPR]]=E->trace.basicq[CPPR][kk][it];
+        E->trace.rlater[CPPR][kk][E->trace.ilater[CPPR]]=E->trace.basicq[kk][it];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
         E->trace.rlater[CPPR][E->trace.number_of_basic_quantities+kk][E->trace.ilater[CPPR]]=E->trace.extraq[CPPR][kk][it];
@@ -1598,7 +1598,7 @@ static void eject_tracer(struct All_variables *E, int it)
     E->trace.ielement[CPPR][it]=E->trace.ielement[CPPR][ilast_tracer];
 
     for (kk=0;kk<=((E->trace.number_of_basic_quantities)-1);kk++)
-        E->trace.basicq[CPPR][kk][it]=E->trace.basicq[CPPR][kk][ilast_tracer];
+        E->trace.basicq[kk][it]=E->trace.basicq[kk][ilast_tracer];
 
     for (kk=0;kk<=((E->trace.number_of_extra_quantities)-1);kk++)
         E->trace.extraq[CPPR][kk][it]=E->trace.extraq[CPPR][kk][ilast_tracer];

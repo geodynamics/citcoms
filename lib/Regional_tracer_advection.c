@@ -812,7 +812,7 @@ static void put_found_tracers(struct All_variables *E, int recv_size, double *re
                 expand_tracer_arrays(E);
 
             for (pp=0; pp<E->trace.number_of_basic_quantities; pp++)
-                E->trace.basicq[CPPR][pp][ilast] = recv[ipos+pp];
+                E->trace.basicq[pp][ilast] = recv[ipos+pp];
 
             ipos += E->trace.number_of_basic_quantities;
             for (pp=0; pp<E->trace.number_of_extra_quantities; pp++)
