@@ -105,9 +105,9 @@ PetscErrorCode assemble_c_u_PETSc( struct All_variables *E, Vec U, Vec result, i
         j2= E->ID[level][b].doff[2];
         j3= E->ID[level][b].doff[3];
 
-        result_temp[e]  += E->elt_c[level][CPPR][e+1].c[p  ][0] * U_temp[j1]
-                         + E->elt_c[level][CPPR][e+1].c[p+1][0] * U_temp[j2]
-                         + E->elt_c[level][CPPR][e+1].c[p+2][0] * U_temp[j3];
+        result_temp[e]  += E->elt_c[level][e+1].c[p  ][0] * U_temp[j1]
+                         + E->elt_c[level][e+1].c[p+1][0] * U_temp[j2]
+                         + E->elt_c[level][e+1].c[p+2][0] * U_temp[j3];
       }
     }
   ierr = VecRestoreArray( U, &U_temp ); CHKERRQ( ierr );

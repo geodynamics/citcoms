@@ -1068,7 +1068,7 @@ void allocate_common_vars(E)
     E->elt_del[i] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
 
     if(E->control.inv_gruneisen != 0)
-        E->elt_c[i][CPPR] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
+        E->elt_c[i] = (struct EC *) malloc((nel+1)*sizeof(struct EC));
 
     E->EVI[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
     E->BPI[i] = (double *) malloc((npno+1)*sizeof(double));
