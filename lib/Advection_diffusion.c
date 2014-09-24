@@ -773,7 +773,7 @@ static void process_adi_heating(struct All_variables *E, double *heating)
 
 static void latent_heating(struct All_variables *E,
                            double *heating_latent, double *heating_adi,
-                           float **B, float Ra, float clapeyron,
+                           float *B, float Ra, float clapeyron,
                            float depth, float transT, float inv_width)
 {
     double temp, temp0, temp1, temp2, temp3, matprop;
@@ -797,7 +797,7 @@ static void latent_heating(struct All_variables *E,
         temp3 = 0;
         for(i=1; i<=ends; i++) {
             j = E->ien[e].node[i];
-            temp = (1.0 - B[CPPR][j]) * B[CPPR][j]
+            temp = (1.0 - B[j]) * B[j]
                 * (E->T[j] + E->control.surface_temp);
             temp2 += temp * E->sphere.cap[CPPR].V[3][j];
             temp3 += temp;

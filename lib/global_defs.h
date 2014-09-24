@@ -843,8 +843,8 @@ struct All_variables {
     float *NP;
   //float *stress[NCS];
     float *gstress;
-    float *Fas670[NCS],*Fas410[NCS],*Fas670_b[NCS],*Fas410_b[NCS];
-    float *Fascmb[NCS],*Fascmb_b[NCS];
+    float *Fas670,*Fas410,*Fas670_b,*Fas410_b;
+    float *Fascmb,*Fascmb_b;
 
     float *Vi,*EVi;
     float *VI[MAX_LEVELS],*EVI[MAX_LEVELS];
