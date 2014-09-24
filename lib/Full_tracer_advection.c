@@ -346,7 +346,7 @@ void full_lost_souls(struct All_variables *E)
     /** debug **
     ithiscap=E->sphere.capid[CPPR];
     for (kk=1;kk<=num_ngb;kk++) {
-        ithatcap=E->parallel.PROCESSOR[lev][CPPR].pass[kk];
+        ithatcap=E->parallel.PROCESSOR[lev].pass[kk];
         fprintf(E->trace.fpt,"cap: %d me %d TNUM: %d rank: %d\n",
                 ithiscap,E->parallel.me,kk,ithatcap);
 
@@ -374,7 +374,7 @@ void full_lost_souls(struct All_variables *E)
     }
 
     for (kk=1;kk<=num_ngb;kk++) {
-        idestination_proc=E->parallel.PROCESSOR[lev][CPPR].pass[kk];
+        idestination_proc=E->parallel.PROCESSOR[lev].pass[kk];
 
         MPI_Isend(&isend[CPPR][kk],1,MPI_INT,idestination_proc,
                   11,E->parallel.world,&request[idb++]);
@@ -394,7 +394,7 @@ void full_lost_souls(struct All_variables *E)
         if(kk==0)
 	  isource_proc=E->parallel.me;
         else
-	  isource_proc=E->parallel.PROCESSOR[lev][CPPR].pass[kk];
+	  isource_proc=E->parallel.PROCESSOR[lev].pass[kk];
 
 	fprintf(E->trace.fpt,"%d send %d to proc %d\n",
 		E->parallel.me,isend[CPPR][kk],isource_proc);
@@ -437,7 +437,7 @@ void full_lost_souls(struct All_variables *E)
     /* neighbor caps */
 
     for (kk=1;kk<=num_ngb;kk++) {
-        idestination_proc=E->parallel.PROCESSOR[lev][CPPR].pass[kk];
+        idestination_proc=E->parallel.PROCESSOR[lev].pass[kk];
 
         isize[CPPR]=isend[CPPR][kk]*E->trace.number_of_tracer_quantities;
 

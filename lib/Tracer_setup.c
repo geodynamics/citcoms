@@ -1291,7 +1291,7 @@ void get_neighboring_caps(struct All_variables *E)
         idb = 0;
         num_ngb = E->parallel.TNUM_PASS[lev];
         for (kk=1; kk<=num_ngb; kk++) {
-            neighbor_proc = E->parallel.PROCESSOR[lev][CPPR].pass[kk];
+            neighbor_proc = E->parallel.PROCESSOR[lev].pass[kk];
 
             MPI_Isend(xx, n, MPI_DOUBLE, neighbor_proc,
                       tag, E->parallel.world, &request[idb]);

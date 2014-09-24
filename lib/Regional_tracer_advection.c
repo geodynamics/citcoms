@@ -563,7 +563,7 @@ void regional_lost_souls(struct All_variables *E)
     ipass = 1;
     for (kk=1; kk<=6; kk++) {
         if (E->parallel.NUM_PASS[lev].bound[kk] == 1) {
-            ngbr_rank[kk] = E->parallel.PROCESSOR[lev][CPPR].pass[ipass];
+            ngbr_rank[kk] = E->parallel.PROCESSOR[lev].pass[ipass];
             ipass++;
         }
         else {
