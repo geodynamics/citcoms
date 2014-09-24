@@ -810,7 +810,7 @@ struct All_variables {
     struct EK *elt_k[MAX_LEVELS];
     struct CC *cc;
     struct CCX *ccx;
-    struct CC *CC[MAX_LEVELS][NCS];
+    struct CC *CC[MAX_LEVELS];
     struct CCX *CCX[MAX_LEVELS][NCS];
 
     struct CC element_Cc;

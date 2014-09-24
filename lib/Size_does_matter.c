@@ -864,7 +864,7 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][CPPR][es].vpt[BVINDEX(i,j,a,k)] =
+              E->CC[lev][es].vpt[BVINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               E->CCX[lev][CPPR][es].vpt[BVXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];
@@ -923,7 +923,7 @@ void construct_c3x3matrix(E)
 
           for (i=1;i<=dims;i++)
             for (j=1;j<=dims;j++)   {
-              E->CC[lev][CPPR][es].ppt[BPINDEX(i,j,a,k)] =
+              E->CC[lev][es].ppt[BPINDEX(i,j,a,k)] =
                     ua[j][1]*u[i][1]+ua[j][2]*u[i][2]+ua[j][3]*u[i][3];
               E->CCX[lev][CPPR][es].ppt[BPXINDEX(i,j,1,a,k)] =
                     ua[j][1]*ux[1][i][1]+ua[j][2]*ux[1][i][2]+ua[j][3]*ux[1][i][3];

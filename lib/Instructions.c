@@ -1062,7 +1062,7 @@ void allocate_common_vars(E)
     ely = E->lmesh.ELY[i];
 
     nxyz = elx*ely;
-    E->CC[i][CPPR] =(struct CC *)  malloc((1)*sizeof(struct CC));
+    E->CC[i] =(struct CC *)  malloc((1)*sizeof(struct CC));
     E->CCX[i][CPPR]=(struct CCX *)  malloc((1)*sizeof(struct CCX));
 
     E->elt_del[i] = (struct EG *) malloc((nel+1)*sizeof(struct EG));
@@ -1357,7 +1357,7 @@ void set_up_nonmg_aliases(struct All_variables *E)
   E->Vi = E->VI[E->mesh.levmax];
   E->EVi = E->EVI[E->mesh.levmax];
   E->node = E->NODE[E->mesh.levmax];
-  E->cc = E->CC[E->mesh.levmax][CPPR];
+  E->cc = E->CC[E->mesh.levmax];
   E->ccx = E->CCX[E->mesh.levmax][CPPR];
   E->Mass = E->MASS[E->mesh.levmax];
   E->gDA = E->GDA[E->mesh.levmax];
