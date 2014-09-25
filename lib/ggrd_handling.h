@@ -44,7 +44,7 @@ void ggrd_read_age_from_file(struct All_variables *, int );
 void xyz2rtp(float ,float ,float ,float *);
 void xyz2rtpd(float ,float ,float ,double *);
 float find_age_in_MY();
-void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
+void ggrd_adjust_tbl_rayleigh(struct All_variables *,double *);
 void ggrd_read_anivisc_from_file(struct All_variables *, int );
 void ggrd_solve_eigen3x3(double [3][3],double [3],
 			 double [3][3],struct All_variables *);

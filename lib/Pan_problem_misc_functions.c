@@ -68,7 +68,7 @@ void calc_cbase_at_node(int , float *,struct All_variables *);
 double theta_g(double , struct All_variables *);
 #endif
 #ifdef USE_GGRD
-void ggrd_adjust_tbl_rayleigh(struct All_variables *,double **);
+void ggrd_adjust_tbl_rayleigh(struct All_variables *,double *);
 #endif
 
 int get_process_identifier()

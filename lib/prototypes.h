@@ -93,8 +93,8 @@ void convection_boundary_conditions(struct All_variables *);
 double determine_model_net_rotation(struct All_variables *, double *);
 double determine_netr_tp(float, float, float, float, float, int, double *, double *);
 void sub_netr(float, float, float, float *, float *, double *);
-void hc_ludcmp_3x3(double [3][3], int, int *);
-void hc_lubksb_3x3(double [3][3], int, int *, double *);
+void hc_ludcmp_3x3(HC_PREC [3][3], int, int *);
+void hc_lubksb_3x3(HC_PREC [3][3], int, int *, HC_PREC *);
 /* Drive_solvers.c */
 void general_stokes_solver_setup(struct All_variables *);
 #ifdef USE_PETSC
