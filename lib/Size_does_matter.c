@@ -345,7 +345,7 @@ void construct_bdry_det(struct All_variables *E)
 
     for (side=SIDE_BEGIN; side<=SIDE_END; side++)
       for(d=1; d<=oned; d++)
-	E->boundary.det[CPPR][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
+	E->boundary.det[side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
 
     for (es=1;es<=E->boundary.nel;es++) {
       el = E->boundary.element[es];
@@ -365,7 +365,7 @@ void construct_bdry_det(struct All_variables *E)
 		dxda[d][e] += xx[sidedim[side][e]][i]*E->Mx.vpt[GMVXINDEX(d-1,i,k)];
 
 	  jacobian = determinant(dxda,E->mesh.nsd-1);
-	  E->boundary.det[CPPR][side][k][es] = jacobian;
+	  E->boundary.det[side][k][es] = jacobian;
 	}
 
       }

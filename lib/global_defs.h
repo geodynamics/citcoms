@@ -128,7 +128,7 @@ struct Bdry {
   int nel;
   int *element;
   int *normal[4];
-  double *det[NCS][7][5];
+  double *det[7][5];
 };
 
 

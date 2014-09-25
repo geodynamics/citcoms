@@ -1116,7 +1116,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
 				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-					* E->boundary.det[CPPR][side][k][bel] * g_1d[k].weight[dims-1];
+					* E->boundary.det[side][k][bel] * g_1d[k].weight[dims-1];
 
 			}
 		}
@@ -1218,7 +1218,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 					tmp += traction_at_gs[b][k] * Cc.vpt[BVINDEX(b,d,a,k)];
 
 				elt_tr[p] += tmp * E->M.vpt[GMVINDEX(j,k)]
-					* E->boundary.det[CPPR][side][k][bel] * g_1d[k].weight[dims-1];
+					* E->boundary.det[side][k][bel] * g_1d[k].weight[dims-1];
 
 			}
 		}
