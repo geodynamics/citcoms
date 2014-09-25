@@ -126,7 +126,7 @@ extern const int CPPR;
 
 struct Bdry {
   int nel;
-  int *element[NCS];
+  int *element;
   int *normal[NCS][4];
   double *det[NCS][7][5];
 };

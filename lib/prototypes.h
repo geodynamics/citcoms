@@ -213,7 +213,7 @@ float global_fmin(struct All_variables *, double);
 double global_dmax(struct All_variables *, double);
 float global_fmax(struct All_variables *, double);
 double Tmaxd(struct All_variables *, double *);
-float Tmax(struct All_variables *, float **);
+float Tmax(struct All_variables *, float *);
 double vnorm_nonnewt(struct All_variables *, double *, double *, int);
 void sum_across_depth_sph1(struct All_variables *, float *, float *);
 void broadcast_vertical(struct All_variables *, float *, float *, int);

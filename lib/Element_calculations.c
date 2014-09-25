@@ -104,7 +104,7 @@ void assemble_forces(E,penalty)
 
     /* for traction bc */
     for(i=1; i<=E->boundary.nel; i++) {
-      e = E->boundary.element[CPPR][i];
+      e = E->boundary.element[i];
 
       for(a=0;a<24;a++) elt_f[a] = 0.0;
       for(a=SIDE_BEGIN; a<=SIDE_END; a++) {
@@ -1055,7 +1055,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 
 	double traction[4][5],traction_at_gs[4][5], value, tmp;
 	int j, b, p, k, a, nodea, d;
-	int el = E->boundary.element[CPPR][bel];
+	int el = E->boundary.element[bel];
 	int flagged;
 	int found = 0;
 
@@ -1137,7 +1137,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 
 	double traction[4][5],traction_at_gs[4][5], value, tmp;
 	int j, b, p, k, a, nodea, d;
-	int el = E->boundary.element[CPPR][bel];
+	int el = E->boundary.element[bel];
 	int flagged;
 	int found = 0;
 

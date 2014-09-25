@@ -724,14 +724,14 @@ double Tmaxd(E,T)
 
 float Tmax(E,T)
   struct All_variables *E;
-  float **T;
+  float *T;
 {
   float global_fmax(),temp,temp1;
   int i,m;
 
   temp = -10.0;
   for(i=1;i<=E->lmesh.nno;i++)
-    temp = max(T[CPPR][i],temp);
+    temp = max(T[i],temp);
 
   temp1 = global_fmax(E,temp);
   return (temp1);

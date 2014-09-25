@@ -348,7 +348,7 @@ void construct_bdry_det(struct All_variables *E)
 	E->boundary.det[CPPR][side][d] = (double *)malloc((1+E->boundary.nel)*sizeof(double));
 
     for (es=1;es<=E->boundary.nel;es++) {
-      el = E->boundary.element[CPPR][es];
+      el = E->boundary.element[es];
 
       for (side=SIDE_BEGIN; side<=SIDE_END; side++) {
 	get_side_x_cart(E, xx, el, side);
