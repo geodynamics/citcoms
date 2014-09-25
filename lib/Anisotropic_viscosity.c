@@ -21,17 +21,11 @@ EDIT THE FILES in hc, not the citcom subdirectories
 #include "element_definitions.h"
 #include "global_defs.h"
 
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-
 #include "material_properties.h"
 #ifdef USE_GGRD
 #include "ggrd_handling.h"
 #endif
 
-
-#else  /* CU */
-   void ggrd_read_anivisc_from_file(struct All_variables *);
-#endif
 
 #include "anisotropic_viscosity.h"
 void calc_cbase_at_tp(float , float , float *);
@@ -295,8 +289,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
     case 3:			/* first init for vel */
     case 4:			/* ISA */
     case 5:			/* same for mixed alignment */
-      if(E->parallel.me == 0)
-         fprintf(stderr,"set_anisotropic_viscosity_at_element_level: initializing isotropic viscosity\n");
+      if(E->parallel.me == 0)fprintf(stderr,"set_anisotropic_viscosity_at_element_level: initializing isotropic viscosity\n");
       for(i=mgmin;i <= mgmax;i++){
 	nel  = E->lmesh.NEL[i];
 	  for(k=1;k <= nel;k++){
@@ -333,14 +326,10 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	    n[2] = 2.0*s -1 ;		/* z */
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
-	      E->EVI2[i][CPPR][off] = vis2;
-         E->EVIn1[i][CPPR][off] = n[0]; 
-         E->EVIn2[i][CPPR][off] = n[1];
-         E->EVIn3[i][CPPR][off] = n[2];
+	      E->EVI2[i][CPPR][off] = vis2;E->EVIn1[i][CPPR][off] = n[0]; E->EVIn2[i][CPPR][off] = n[1];E->EVIn3[i][CPPR][off] = n[2];
 	      E->avmode[i][CPPR][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
-	}
       }	/* mg loop */
       /* end random init */
       break;
@@ -399,7 +388,6 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
       else
 	z_top = E->sphere.ro - E->viscosity.zbase_layer[ani_layer-2];
       for(i=mgmin;i <= mgmax;i++){
-
 	  elx = E->lmesh.ELX[i];elz = E->lmesh.ELZ[i];ely = E->lmesh.ELY[i];
 	  elxlz = elx * elz;
 	  for (j=1;j <= elz;j++){
@@ -542,7 +530,7 @@ c and p cannot be the same matrix
 
 */
 
-void conv_cart4x4_to_spherical(double c[3][3][3][3], double theta, double phi, double p[3][3][3][3])
+  void conv_cart4x4_to_spherical(double c[3][3][3][3], double theta, double phi, double p[3][3][3][3])
 {
   double rot[3][3];
   get_citcom_spherical_rot(theta,phi,rot);
@@ -601,8 +589,7 @@ void rotate_ti6x6_to_director(double D[6][6],double n[3])
     
 }
 
-void get_citcom_spherical_rot(double theta, double phi, double rot[3][3])
-{
+void get_citcom_spherical_rot(double theta, double phi, double rot[3][3]){
   float base[9];
   calc_cbase_at_tp((float)theta,(float)phi, base); /* compute cartesian basis at
 						      theta, phi location */
