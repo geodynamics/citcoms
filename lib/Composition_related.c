@@ -538,14 +538,14 @@ static void init_bulk_composition(struct All_variables *E)
 
     double return_bulk_value_d();
     double volume;
-    double *tmp[NCS];
+    double *tmp;
     int i, m;
     const int ival=0;
 
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        tmp[CPPR] = E->composition.comp_node[i];
+        tmp = E->composition.comp_node[i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);
@@ -561,13 +561,13 @@ void get_bulk_composition(struct All_variables *E)
 
     double return_bulk_value_d();
     double volume;
-    double *tmp[NCS];
+    double *tmp;
     int i, m;
     const int ival = 0;
 
     for (i=0; i<E->composition.ncomp; i++) {
 
-        tmp[CPPR] = E->composition.comp_node[i];
+        tmp = E->composition.comp_node[i];
 
         /* ival=0 returns integral not average */
         volume = return_bulk_value_d(E,tmp,ival);

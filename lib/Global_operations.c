@@ -301,7 +301,7 @@ void return_elementwise_horiz_ave(E,X,H)
 
 float return_bulk_value(E,Z,average)
      struct All_variables *E;
-     float **Z;
+     float *Z;
      int average;
 
 {
@@ -320,7 +320,7 @@ float return_bulk_value(E,Z,average)
 	    for(i=1;i<=ends;i++) {
 		n = E->ien[el].node[i];
 		volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
-		integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+		integral1 += Z[n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
                 }
 
           }
@@ -344,7 +344,7 @@ float return_bulk_value(E,Z,average)
 
 double return_bulk_value_d(E,Z,average)
      struct All_variables *E;
-     double **Z;
+     double *Z;
      int average;
 
 {
@@ -363,7 +363,7 @@ double return_bulk_value_d(E,Z,average)
             for(i=1;i<=ends;i++) {
                 n = E->ien[el].node[i];
                 volume1 += E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
-                integral1 += Z[CPPR][n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
+                integral1 += Z[n] * E->N.vpt[GNVINDEX(i,j)] * E->gDA[el].vpt[j];
             }
 
        }
