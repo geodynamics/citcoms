@@ -134,8 +134,8 @@ struct Bdry {
 
 struct SBC {
   /* stress (traction) boundary conditions */
-  int *node[NCS];
-  double *SB[NCS][7][4];
+  int *node;
+  double *SB[7][4];
 };
 
 

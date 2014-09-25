@@ -350,7 +350,7 @@ void get_system_viscosity(E,propogate,evisc,visc)
 
     if (E->control.verbose)  {
       fprintf(E->fp_out,"output_evisc \n");
-        fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[CPPR]);
+        fprintf(E->fp_out,"output_evisc for cap %d\n",E->sphere.capid[1]);
       for(i=1;i<=E->lmesh.nel;i++)
           fprintf(E->fp_out,"%d %d %f %f\n",i,E->mat[i],evisc[(i-1)*vpts+1],evisc[(i-1)*vpts+7]);
       fflush(E->fp_out);
@@ -1299,7 +1299,7 @@ static void apply_low_visc_wedge_channel(struct All_variables *E, float *evisc)
 static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 {
     int i, ii, k, m, e, ee;
-    int nz_min[NCS], nz_max[NCS];
+    int nz_min, nz_max;
     const int flavor = 0;
     double rad_mean, rr;
 
@@ -1309,7 +1309,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                               E->sx[3][E->ien[e].node[8]]);
             if(rad_mean >= E->viscosity.lv_min_radius) break;
         }
-        nz_min[CPPR] = e;
+        nz_min = e;
 
         /* find index of radius corresponding to lv_max_radius */
         for(e=E->lmesh.elz; e>=1; e--) {
@@ -1317,19 +1317,19 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
                               E->sx[3][E->ien[e].node[8]]);
             if(rad_mean <= E->viscosity.lv_max_radius) break;
         }
-        nz_max[CPPR] = e;
+        nz_max = e;
 
 
 
         for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
-            for(i=nz_min[CPPR]; i<=nz_max[CPPR]; i++) {
+            for(i=nz_min; i<=nz_max; i++) {
                 e = (k-1)*E->lmesh.elz + i;
 
                 rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
                                   E->sx[3][E->ien[e].node[8]]);
 
                 /* loop over elements below e */
-                for(ii=i; ii>=nz_min[CPPR]; ii--) {
+                for(ii=i; ii>=nz_min; ii--) {
                     ee = (k-1)*E->lmesh.elz + ii;
 
                     rr = 0.5 * (E->sx[3][E->ien[ee].node[1]] +
@@ -1350,7 +1350,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
 static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
 {
     int i, ii, k, m, e, ee;
-    int nz_min[NCS], nz_max[NCS];
+    int nz_min, nz_max;
     const int flavor = 0;
     double rad_mean, rr;
 
@@ -1360,7 +1360,7 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                               E->sx[3][E->ien[e].node[8]]);
             if(rad_mean >= E->viscosity.lv_min_radius) break;
         }
-        nz_min[CPPR] = e;
+        nz_min = e;
 
         /* find index of radius corresponding to lv_max_radius */
         for(e=E->lmesh.elz; e>=1; e--) {
@@ -1368,19 +1368,19 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
                               E->sx[3][E->ien[e].node[8]]);
             if(rad_mean <= E->viscosity.lv_max_radius) break;
         }
-        nz_max[CPPR] = e;
+        nz_max = e;
 
 
 
         for(k=1; k<=E->lmesh.elx*E->lmesh.ely; k++) {
-            for(i=nz_min[CPPR]; i<=nz_max[CPPR]; i++) {
+            for(i=nz_min; i<=nz_max; i++) {
                 e = (k-1)*E->lmesh.elz + i;
 
                 rad_mean = 0.5 * (E->sx[3][E->ien[e].node[1]] +
                                   E->sx[3][E->ien[e].node[8]]);
 
                 /* loop over elements below e */
-                for(ii=i; ii>=nz_min[CPPR]; ii--) {
+                for(ii=i; ii>=nz_min; ii--) {
                     ee = (k-1)*E->lmesh.elz + ii;
 
                     /* if ee has tracers in it */

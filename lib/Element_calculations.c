@@ -1071,7 +1071,7 @@ static void get_elt_tr(struct All_variables *E, int bel, int side, double elt_tr
 		for(a=1;a<=ends1;a++)  {
 			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
-				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
+				value = E->sbc.SB[side][d][ E->sbc.node[nodea] ];
 				flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );
@@ -1153,7 +1153,7 @@ static void get_elt_tr_pseudo_surf(struct All_variables *E, int bel, int side, d
 		for(a=1;a<=ends1;a++)  {
 			nodea = E->ien[el].node[ sidenodes[side][a] ];
 			for(d=1;d<=dims;d++) {
-				value = E->sbc.SB[CPPR][side][d][ E->sbc.node[CPPR][nodea] ];
+				value = E->sbc.SB[side][d][ E->sbc.node[nodea] ];
 				flagged = (E->node[nodea] & sbc_flag[d]) && (value);
 				found |= flagged;
 				traction[d][a] = ( flagged ? value : 0.0 );

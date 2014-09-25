@@ -462,17 +462,17 @@ void stress_conform_bcs(struct All_variables *E)
 
               if(E->node[n] & sbc_flag[d]) {
                 if(i==1)
-                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_WEST][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[SIDE_WEST][d][ E->sbc.node[n] ];
                 if(i==E->lmesh.noy)
-                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[CPPR][SIDE_EAST][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][2]] = E->sbc.SB[SIDE_EAST][d][ E->sbc.node[n] ];
                 if(j==1)
-                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_NORTH][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[SIDE_NORTH][d][ E->sbc.node[n] ];
                 if(j==E->lmesh.nox)
-                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[CPPR][SIDE_SOUTH][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][1]] = E->sbc.SB[SIDE_SOUTH][d][ E->sbc.node[n] ];
                 if(k==1)
-                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_BOTTOM][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[SIDE_BOTTOM][d][ E->sbc.node[n] ];
                 if(k==E->lmesh.noz)
-                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[CPPR][SIDE_TOP][d][ E->sbc.node[CPPR][n] ];
+                  E->gstress[(n-1)*6+stress_index[d][3]] = E->sbc.SB[SIDE_TOP][d][ E->sbc.node[n] ];
               }
           }
 

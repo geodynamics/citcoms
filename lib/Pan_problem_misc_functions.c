@@ -115,33 +115,33 @@ void apply_side_sbc(struct All_variables *E)
     parallel_process_termination();
   }
 
-    E->sbc.node[CPPR] = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
+    E->sbc.node = (int* ) malloc((E->lmesh.nno+1)*sizeof(int));
 
     n = 1;
     for(i=1; i<=E->lmesh.nno; i++) {
       if(E->node[i] & sbc_flags) {
-	E->sbc.node[CPPR][i] = n;
+	E->sbc.node[i] = n;
 	n++;
       }
       else
-	E->sbc.node[CPPR][i] = 0;
+	E->sbc.node[i] = 0;
 
     }
 
     for(side=SIDE_BEGIN; side<=SIDE_END; side++)
       for(d=1; d<=E->mesh.nsd; d++) {
-	E->sbc.SB[CPPR][side][d] = (double *) malloc(n*sizeof(double));
+	E->sbc.SB[side][d] = (double *) malloc(n*sizeof(double));
 
 	for(i=0; i<n; i++)
-	  E->sbc.SB[CPPR][side][d][i] = 0;
+	  E->sbc.SB[side][d][i] = 0;
       }
 
     for(d=1; d<=E->mesh.nsd; d++)
       for(i=1; i<=E->lmesh.nno; i++)
 	if(E->node[i] & sbc_flag[d] && E->sphere.cap[1].VB[d][i] != 0) {
-	  j = E->sbc.node[CPPR][i];
+	  j = E->sbc.node[i];
 	  for(side=SIDE_BOTTOM; side<=SIDE_TOP; side++)
-	    E->sbc.SB[CPPR][side][d][j] = E->sphere.cap[1].VB[d][i];
+	    E->sbc.SB[side][d][j] = E->sphere.cap[1].VB[d][i];
 	}
 }
 
