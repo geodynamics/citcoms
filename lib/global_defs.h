@@ -61,9 +61,6 @@ extern "C" {
 
 #else
 
-extern const int CPPR;
-
-
 /* Macros */
 #define max(A,B) (((A) > (B)) ? (A) : (B))
 #define min(A,B) (((A) < (B)) ? (A) : (B))

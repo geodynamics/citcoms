@@ -243,7 +243,7 @@ static void debug_tic(struct All_variables *E)
   int m, j;
 
   fprintf(E->fp_out,"output_temperature\n");
-    fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
+    fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[1]);
     for (j=1;j<=E->lmesh.nno;j++)
       fprintf(E->fp_out,"X = %.6e Z = %.6e Y = %.6e T[%06d] = %.6e \n",E->sx[1][j],E->sx[2][j],E->sx[3][j],j,E->T[j]);
   fflush(E->fp_out);

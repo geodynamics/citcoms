@@ -191,7 +191,7 @@ static void debug_phase_change(struct All_variables *E, float *B)
   int m, j;
 
   fprintf(E->fp_out,"output_phase_change_buoyancy\n");
-    fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[CPPR]);
+    fprintf(E->fp_out,"for cap %d\n",E->sphere.capid[1]);
     for (j=1;j<=E->lmesh.nno;j++)
       fprintf(E->fp_out,"Z = %.6e T = %.6e B[%06d] = %.6e \n",E->sx[3][j],E->T[j],j,B[j]);
   fflush(E->fp_out);

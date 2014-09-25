@@ -140,7 +140,7 @@ void regional_velocity_boundary_conditions(E)
 
       if(E->control.verbose) {
 	  for (node=1;node<=E->lmesh.nno;node++)
-	    fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",CPPR,node,E->sphere.cap[1].VB[1][node],E->sphere.cap[1].VB[2][node],E->sphere.cap[1].VB[3][node],E->node[node]&VBX,E->node[node]&VBY,E->node[node]&VBZ);
+	    fprintf(E->fp_out,"VB== %d %g %g %g flag %u %u %u\n",node,E->sphere.cap[1].VB[1][node],E->sphere.cap[1].VB[2][node],E->sphere.cap[1].VB[3][node],E->node[node]&VBX,E->node[node]&VBY,E->node[node]&VBZ);
 	fflush(E->fp_out);
       }
       /* If any imposed internal velocity structure it goes here */

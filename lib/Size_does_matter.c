@@ -1101,14 +1101,14 @@ void mass_matrix(struct All_variables *E)
 
         for(lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++)  {
             fprintf(E->fp_out,"output_mass lev=%d\n",lev);
-                fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
+                fprintf(E->fp_out,"%d\n",E->sphere.capid[1]);
                 for(e=1;e<=E->lmesh.NEL[lev];e++)
                     fprintf(E->fp_out,"%d %g \n",e,E->ECO[lev][e].area);
                 for (node=1;node<=E->lmesh.NNO[lev];node++)
                     fprintf(E->fp_out,"Mass[%d]= %g \n",node,E->MASS[lev][node]);
         }
 
-            fprintf(E->fp_out,"m=%d %d \n",E->sphere.capid[CPPR],m);
+            fprintf(E->fp_out,"%d\n",E->sphere.capid[1]);
             for (node=1;node<=E->lmesh.nno;node++)
                 fprintf(E->fp_out,"TMass[%d]= %g \n",node,E->TMass[node]);
         fflush(E->fp_out);

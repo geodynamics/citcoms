@@ -527,7 +527,7 @@ void regional_keep_within_bounds(struct All_variables *E,
 void regional_lost_souls(struct All_variables *E)
 {
     /* This part only works if E->sphere.caps_per_proc==1 */
-    const int j = CPPR;
+    const int j = 1;
     int lev = E->mesh.levmax;
 
     int i, d, kk;

@@ -194,7 +194,7 @@ void output_coord(struct All_variables *E)
   sprintf(output_file,"%s.coord.%d",E->control.data_file,E->parallel.me);
   fp1 = output_open(output_file, "w");
 
-  fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+  fprintf(fp1,"%7d\n",E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++)
     fprintf(fp1,"%.6e %.6e %.6e\n",E->sx[1][i],E->sx[2][i],E->sx[3][i]);
   fclose(fp1);
@@ -209,7 +209,7 @@ void output_domain(struct All_variables *E)
 
     /* Note: rank-0 writes the domain bounds of all processors */
 
-    const int j = CPPR;
+    const int j = 1;
     const int tag = 0;
     const int receiver = 0;
     const int nox = E->lmesh.nox;
@@ -310,7 +310,7 @@ void output_visc(struct All_variables *E, int cycles)
   fp1 = output_open(output_file, "w");
 
 
-  fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+  fprintf(fp1,"%7d\n",E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++)
     fprintf(fp1,"%.4e\n",E->VI[lev][i]);
   fclose(fp1);
@@ -327,7 +327,7 @@ void output_avisc(struct All_variables *E, int cycles)
     sprintf(output_file,"%s.avisc.%d.%d", E->control.data_file,
 	    E->parallel.me, cycles);
     fp1 = output_open(output_file, "w");
-    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+    fprintf(fp1,"%7d\n",E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.4e %.4e %.4e %.4e\n",
           E->VI2[lev][i],E->VIn1[lev][i],E->VIn2[lev][i],E->VIn3[lev][i]);
@@ -349,7 +349,7 @@ void output_velo(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
-  fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+  fprintf(fp1,"%7d\n",E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++) {
       fprintf(fp1,"%.6e %.6e %.6e %.6e\n",E->sphere.cap[1].V[1][i],E->sphere.cap[1].V[2][i],E->sphere.cap[1].V[3][i],E->T[i]);
   }
@@ -388,7 +388,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
         else
             topo = E->slice.tpg;
 
-        fprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
+        fprintf(fp2,"%7d\n",E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
@@ -403,7 +403,7 @@ void output_surf_botm(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp2 = output_open(output_file, "w");
 
-      fprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
+      fprintf(fp2,"%7d\n",E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         fprintf(fp2,"%.4e %.4e %.4e %.4e\n",
@@ -477,7 +477,7 @@ void output_stress(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
-    fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+    fprintf(fp1,"%7d\n",E->lmesh.nno);
     /* those are sorted like stt spp srr stp str srp  */
     for (node=1;node<=E->lmesh.nno;node++)
       fprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
@@ -614,7 +614,7 @@ void output_pressure(struct All_variables *E, int cycles)
 
   fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
-  fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+  fprintf(fp1,"%7d\n",E->lmesh.nno);
   for(i=1;i<=E->lmesh.nno;i++)
     fprintf(fp1,"%.6e\n",E->NP[i]);
 
@@ -666,8 +666,8 @@ void output_comp_nd(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file, "w");
 
-        fprintf(fp1,"%3d %7d %.5e %d\n",
-                CPPR, E->lmesh.nel,
+        fprintf(fp1,"%7d %.5e %d\n",
+                E->lmesh.nel,
                 E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
             fprintf(fp1,"%.5e %.5e ",
@@ -698,8 +698,8 @@ void output_comp_el(struct All_variables *E, int cycles)
             E->parallel.me, cycles);
     fp1 = output_open(output_file, "w");
 
-        fprintf(fp1,"%3d %7d %.5e %d\n",
-                CPPR, E->lmesh.nel,
+        fprintf(fp1,"%7d %.5e %d\n",
+                E->lmesh.nel,
                 E->monitor.elapsed_time, E->composition.ncomp);
         for(i=0;i<E->composition.ncomp;i++) {
             fprintf(fp1,"%.5e %.5e ",
@@ -732,7 +732,7 @@ void output_heating(struct All_variables *E, int cycles)
 
     fprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
-    fprintf(fp1,"%3d %7d\n", CPPR, E->lmesh.nel);
+    fprintf(fp1,"%7d\n", E->lmesh.nel);
     for(e=1; e<=E->lmesh.nel; e++)
         fprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[e],
                 E->heating_visc[e], E->heating_latent[e]);

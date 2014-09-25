@@ -148,10 +148,10 @@ void regional_node_locations(E)
   if (E->control.verbose) {
   for (lev=E->mesh.levmin;lev<=E->mesh.levmax;lev++) {
     fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
-    fprintf(E->fp_out,"output_coordinates for cap %d %d\n",CPPR,E->lmesh.NNO[lev]);
+    fprintf(E->fp_out,"output_coordinates for cap %d\n",E->lmesh.NNO[lev]);
     for (i=1;i<=E->lmesh.NNO[lev];i++)
       if(i%E->lmesh.NOZ[lev]==1)
-        fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
+        fprintf(E->fp_out,"%d %g %g %g\n",i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
     }
     fflush(E->fp_out);
   }
@@ -174,7 +174,7 @@ void regional_node_locations(E)
     fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
       for (i=1;i<=E->lmesh.NNO[lev];i++)
         if(i%E->lmesh.NOZ[lev]==1)
-             fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
+             fprintf(E->fp_out,"%d %g %g %g\n",i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
     fflush(E->fp_out);
   }

@@ -380,7 +380,7 @@ void gzdir_output_coord(struct All_variables *E)
     gz1 = gzdir_output_open(output_file,"w");
 
     /* nodal coordinates */
-      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
+      gzprintf(gz1,"%7d\n",E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
 	gzprintf(gz1,"%.6e %.6e %.6e\n",
 		 E->sx[1][i],E->sx[2][i],E->sx[3][i]);
@@ -612,7 +612,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     gzout = gzdir_output_open(output_file,"w");
     gzprintf(gzout,"%d %d %.5e\n",
 	     cycles,E->lmesh.nno,E->monitor.elapsed_time);
-      gzprintf(gzout,"%3d %7d\n",CPPR,E->lmesh.nno);
+      gzprintf(gzout,"%7d\n",E->lmesh.nno);
       if(E->output.gzdir.vtk_io){
 	/* VTK */
 	for(i=1;i<=E->lmesh.nno;i++)
@@ -702,7 +702,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 	     "%s/%d/visc.%d.%d.gz", E->control.data_dir,
 	     cycles,E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
-      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
+      gzprintf(gz1,"%7d\n",E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
 	gzprintf(gz1,"%.4e\n",E->VI[lev][i]);
 
@@ -759,7 +759,7 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 	       "%s/%d/avisc.%d.%d.gz", E->control.data_dir,
 	       cycles,E->parallel.me, cycles);
       gz1 = gzdir_output_open(output_file,"w");
-	gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
+	gzprintf(gz1,"%7d\n",E->lmesh.nno);
 	for(i=1;i<=E->lmesh.nno;i++)
 	  gzprintf(gz1,"%.4e %.4e %.4e %.4e\n",E->VI2[lev][i],E->VIn1[lev][i],E->VIn2[lev][i],E->VIn3[lev][i]);
       
@@ -825,7 +825,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
         else
             topo = E->slice.tpg;
 
-        gzprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
+        gzprintf(fp2,"%7d\n",E->lmesh.nsf);
         for(i=1;i<=E->lmesh.nsf;i++)   {
             s = i*E->lmesh.noz;
             gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
@@ -840,7 +840,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp2 = gzdir_output_open(output_file,"w");
 
-      gzprintf(fp2,"%3d %7d\n",CPPR,E->lmesh.nsf);
+      gzprintf(fp2,"%7d\n",E->lmesh.nsf);
       for(i=1;i<=E->lmesh.nsf;i++)  {
         s = (i-1)*E->lmesh.noz + 1;
         gzprintf(fp2,"%.4e %.4e %.4e %.4e\n",
@@ -916,7 +916,7 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 
   gzprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
 
-    gzprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
+    gzprintf(fp1,"%7d\n",E->lmesh.nno);
     for (node=1;node<=E->lmesh.nno;node++)
       gzprintf(fp1, "%.4e %.4e %.4e %.4e %.4e %.4e\n",
               E->gstress[(node-1)*6+1], /*  stt */
@@ -999,7 +999,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
 	     E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
     gzprintf(gz1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
-      gzprintf(gz1,"%3d %7d\n",CPPR,E->lmesh.nno);
+      gzprintf(gz1,"%7d\n",E->lmesh.nno);
       for(i=1;i<=E->lmesh.nno;i++)
 	gzprintf(gz1,"%.6e\n",E->NP[i]);
     gzclose(gz1);
@@ -1079,8 +1079,8 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 	     E->control.data_dir,cycles,
 	     E->parallel.me, cycles);
     gz1 = gzdir_output_open(output_file,"w");
-      gzprintf(gz1,"%3d %7d %.5e %.5e %.5e\n",
-	       CPPR, E->lmesh.nel,
+      gzprintf(gz1,"%7d %.5e %.5e %.5e\n",
+	       E->lmesh.nel,
 	       E->monitor.elapsed_time,
 	       E->composition.initial_bulk_composition,
 	       E->composition.bulk_composition);
@@ -1130,8 +1130,8 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 	    cycles,E->parallel.me, cycles);
     fp1 = gzdir_output_open(output_file,"w");
 
-        gzprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
-                CPPR, E->lmesh.nel,
+        gzprintf(fp1,"%7d %.5e %.5e %.5e\n",
+                E->lmesh.nel,
                 E->monitor.elapsed_time,
                 E->composition.initial_bulk_composition,
                 E->composition.bulk_composition);
@@ -1158,7 +1158,7 @@ void gzdir_output_heating(struct All_variables *E, int cycles)
 
     gzprintf(fp1,"%.5e\n",E->monitor.elapsed_time);
 
-    gzprintf(fp1,"%3d %7d\n", CPPR, E->lmesh.nel);
+    gzprintf(fp1,"%7d\n", E->lmesh.nel);
     for(e=1; e<=E->lmesh.nel; e++)
         gzprintf(fp1, "%.4e %.4e %.4e\n", E->heating_adi[e],
                   E->heating_visc[e], E->heating_latent[e]);
