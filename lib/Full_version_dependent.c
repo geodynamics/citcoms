@@ -240,7 +240,7 @@ void full_construct_boundary( struct All_variables *E)
     E->boundary.element = (int *)malloc(max_size*sizeof(int));
 
     for(d=1; d<=dims; d++)
-      E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
+      E->boundary.normal[d] = (int *)malloc(max_size*sizeof(int));
 
     count = 1;
     for(k=1; k<=E->lmesh.ely; k++)
@@ -249,9 +249,9 @@ void full_construct_boundary( struct All_variables *E)
 	  i = 1;
 	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
 	  E->boundary.element[count] = el;
-	  E->boundary.normal[CPPR][dims][count] = -1;
+	  E->boundary.normal[dims][count] = -1;
 	  for(d=1; d<dims; d++)
-	      E->boundary.normal[CPPR][d][count] = 0;
+	      E->boundary.normal[d][count] = 0;
 	  ++count;
 	}
 
@@ -259,9 +259,9 @@ void full_construct_boundary( struct All_variables *E)
 	  i = E->lmesh.elz;
 	  el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
 	  E->boundary.element[count] = el;
-	  E->boundary.normal[CPPR][dims][count] = 1;
+	  E->boundary.normal[dims][count] = 1;
 	  for(d=1; d<dims; d++)
-	    E->boundary.normal[CPPR][d][count] = 0;
+	    E->boundary.normal[d][count] = 0;
 	  ++count;
 	}
 

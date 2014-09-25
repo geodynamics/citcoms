@@ -203,7 +203,7 @@ void regional_construct_boundary( struct All_variables *E)
   E->boundary.element = (int *)malloc(max_size*sizeof(int));
 
   for(d=1; d<=dims; d++)
-    E->boundary.normal[CPPR][d] = (int *)malloc(max_size*sizeof(int));
+    E->boundary.normal[d] = (int *)malloc(max_size*sizeof(int));
 
 
     count = 1;
@@ -252,7 +252,7 @@ void regional_construct_boundary( struct All_variables *E)
 	    el = i + (j-1)*E->lmesh.elz + (k-1)*E->lmesh.elz*E->lmesh.elx;
 	    E->boundary.element[count] = el;
 	    for(d=1; d<=dims; d++)
-	      E->boundary.normal[CPPR][d][count] = normalFlag[d];
+	      E->boundary.normal[d][count] = normalFlag[d];
 
 	    ++count;
 	  }
