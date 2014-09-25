@@ -296,7 +296,7 @@ void construct_node_maps(E)
        E->mesh.matrix_size[lev] = matrix;
 
        if(E->control.verbose) {
-           fprintf(E->fp_out, "output Node_map lev=%d m=%d\n", lev, CPPR);
+           fprintf(E->fp_out, "output Node_map lev=%d\n", lev);
            fprintf(E->fp_out, "neq=%d nno=%d max_eqn=%d matrix=%d\n", neq, nno, max_eqn, matrix);
            for(i=0;i<matrix;i++)
                fprintf(E->fp_out, "%d %d\n", i, E->Node_map[lev][i]);

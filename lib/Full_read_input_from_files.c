@@ -90,7 +90,7 @@ void full_read_input_files_for_timesteps(E,action,output)
       pos_age = 1;
     }
 
-      cap = E->sphere.capid[CPPR] - 1;  /* capid: 1-12 */
+      cap = E->sphere.capid[1] - 1;  /* capid: 0-11 */
 
       switch (action) { /* set up files to open */
 

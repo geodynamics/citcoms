@@ -160,7 +160,7 @@ void full_node_locations(E)
   free ((void *) rr);
   free ((void *) RR);
 
-   ii = E->sphere.capid[CPPR];
+   ii = E->sphere.capid[1];
    full_coord_of_cap(E,ii);
 
   if (E->control.verbose) {
@@ -168,7 +168,7 @@ void full_node_locations(E)
           fprintf(E->fp_out,"output_coordinates before rotation %d \n",lev);
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
+                      fprintf(E->fp_out,"%d %g %g %g\n",i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
       fflush(E->fp_out);
   }
@@ -188,7 +188,7 @@ void full_node_locations(E)
   dircos[3][2] = sin(ro)*sin(fo);
   dircos[3][3] = cos(ro);
 
-     ii = E->sphere.capid[CPPR];
+     ii = E->sphere.capid[1];
      full_rotate_mesh(E,dircos,ii);
 
   if (E->control.verbose) {
@@ -196,7 +196,7 @@ void full_node_locations(E)
           fprintf(E->fp_out,"output_coordinates after rotation %d \n",lev);
               for (i=1;i<=E->lmesh.NNO[lev];i++)
                   if(i%E->lmesh.NOZ[lev]==1)
-                      fprintf(E->fp_out,"%d %d %g %g %g\n",CPPR,i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
+                      fprintf(E->fp_out,"%d %g %g %g\n",i,E->SX[lev][1][i],E->SX[lev][2][i],E->SX[lev][3][i]);
       }
       fflush(E->fp_out);
   }

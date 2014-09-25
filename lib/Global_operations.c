@@ -244,7 +244,7 @@ void return_horiz_ave_f(E,X,H)
 
 void return_elementwise_horiz_ave(E,X,H)
      struct All_variables *E;
-     double **X, *H;
+     double *X, *H;
 {
 
   int m,i,j,k,d,noz,noy,el,elz,elx,ely,nproc;
@@ -276,7 +276,7 @@ void return_elementwise_horiz_ave(E,X,H)
       for (j=1;j<=elx;j++)
       {
         el = i + (j-1)*elz + (k-1)*elx*elz;
-        temp[i] += X[CPPR][el]*E->ECO[E->mesh.levmax][el].area;
+        temp[i] += X[el]*E->ECO[E->mesh.levmax][el].area;
         temp[i+elz] += E->ECO[E->mesh.levmax][el].area;
       }
     }
@@ -634,7 +634,7 @@ double global_div_norm2(struct All_variables *E,  double *A)
 
 double global_tdot_d(E,A,B,lev)
    struct All_variables *E;
-   double **A,**B;
+   double *A,*B;
    int lev;
 
 {
@@ -648,7 +648,7 @@ double global_tdot_d(E,A,B,lev)
   nno=E->lmesh.NNO[lev];
   for (i=1;i<=nno;i++)
     if (!(E->NODE[lev][i] & SKIP))
-      temp += A[CPPR][i];
+      temp += A[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_DOUBLE,MPI_SUM,E->parallel.world);
 
@@ -657,7 +657,7 @@ double global_tdot_d(E,A,B,lev)
 
 float global_tdot(E,A,B,lev)
    struct All_variables *E;
-   float **A,**B;
+   float *A,*B;
    int lev;
 
 {
@@ -670,7 +670,7 @@ float global_tdot(E,A,B,lev)
   nno=E->lmesh.NNO[lev];
   for (i=1;i<=nno;i++)
     if (!(E->NODE[lev][i] & SKIP))
-      temp += A[CPPR][i]*B[CPPR][i];
+      temp += A[i]*B[i];
 
   MPI_Allreduce(&temp, &prod,1,MPI_FLOAT,MPI_SUM,E->parallel.world);
 

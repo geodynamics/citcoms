@@ -101,7 +101,7 @@ void full_velocity_boundary_conditions(E)
 				     be easiest to call only once and
 				     have routines deal with multigrid
 				  */
-	  if((lv == E->mesh.gridmin) && (CPPR == E->sphere.caps_per_proc))
+	  if(lv == E->mesh.gridmin)
 	     read_velocity_boundary_from_file(E);
 	}
       }

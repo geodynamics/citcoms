@@ -72,7 +72,7 @@ void full_parallel_processor_setup(struct All_variables *E)
     parallel_process_termination();
     }
 
-  E->sphere.caps_per_proc = CPPR;//max(1,E->sphere.caps*E->parallel.nprocz/E->parallel.nproc);
+  E->sphere.caps_per_proc = 1;
 
   if (E->sphere.caps_per_proc > 1) {
     if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not supported.\n \n");
@@ -109,8 +109,8 @@ oordinate and F-B
   pid_surf = me/proc_per_cap; /* cap number (0~11) */
   i = cases[E->sphere.caps_per_proc]; /* 1 for more than 12 processors */
 
-    temp = pid_surf*E->sphere.caps_per_proc + CPPR-1; /* cap number (out of 12) */
-    E->sphere.capid[CPPR] = incases1[i].links[temp]; /* id (1~12) of the current cap */
+    temp = pid_surf*E->sphere.caps_per_proc; /* cap number (out of 12) */
+    E->sphere.capid[1] = incases1[i].links[temp]; /* id (1~12) of the current cap */
 
   /* determine which caps are linked with each of 12 caps  */
   /* if the 12 caps are broken, set these up instead */
@@ -145,7 +145,7 @@ oordinate and F-B
 
   if (E->control.verbose) {
     fprintf(E->fp_out,"me=%d loc1=%d loc2=%d loc3=%d\n",me,E->parallel.me_loc[1],E->parallel.me_loc[2],E->parallel.me_loc[3]);
-      fprintf(E->fp_out,"capid[%d]=%d \n",CPPR,E->sphere.capid[CPPR]);
+      fprintf(E->fp_out,"capid[1]=%d \n",E->sphere.capid[1]);
     for (m=0;m<E->sphere.caps;m++)
       for (j=0;j<E->parallel.nprocy;j++)
 	for (i=0;i<E->parallel.nprocx;i++)
@@ -434,7 +434,7 @@ void full_parallel_domain_boundary_nodes(E)
          add them back here */
 
       /* north pole is at the front left proc. of 1st cap */
-      if (E->sphere.capid[CPPR] == 1 &&
+      if (E->sphere.capid[1] == 1 &&
           E->parallel.me_loc[1] == 0 &&
           E->parallel.me_loc[2] == 0)
           for(j=1;j<=noz;j++) {
@@ -443,7 +443,7 @@ void full_parallel_domain_boundary_nodes(E)
           }
 
       /* south pole is at the back right proc. of final cap */
-      if (E->sphere.capid[CPPR] == E->sphere.caps &&
+      if (E->sphere.capid[1] == E->sphere.caps &&
           E->parallel.me_loc[1] == E->parallel.nprocx-1 &&
           E->parallel.me_loc[2] == E->parallel.nprocy-1)
           for(j=1;j<=noz;j++) {
@@ -465,7 +465,7 @@ void full_parallel_domain_boundary_nodes(E)
 if (E->control.verbose) {
  fprintf(E->fp_out,"output_shared_nodes %d \n",E->parallel.me);
  for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--)
-    fprintf(E->fp_out,"lev=%d  me=%d capid=%d m=%d \n",lev,E->parallel.me,E->sphere.capid[CPPR],CPPR);
+    fprintf(E->fp_out,"lev=%d  me=%d capid=%d\n",lev,E->parallel.me,E->sphere.capid[1]);
     for (ii=1;ii<=6;ii++)
       for (i=1;i<=E->parallel.NUM_NNO[lev].bound[ii];i++)
         fprintf(E->fp_out,"ii=%d   %d %d \n",ii,i,E->parallel.NODE[lev][i].bound[ii]);
@@ -517,7 +517,7 @@ void full_parallel_communication_routs_v(E)
     noz = E->lmesh.NOZ[lev];
     noy = E->lmesh.NOY[lev];
 
-      cap = E->sphere.capid[CPPR] - 1;  /* which cap I am in (0~11) */
+      cap = E->sphere.capid[1] - 1;  /* which cap I am in (0~11) */
 
       /* -X face */
       npass = ii = 1;
@@ -675,7 +675,7 @@ void full_parallel_communication_routs_v(E)
 	E->parallel.NUM_NODEz[lev].pass[kkk] = 0;
 	E->parallel.NUM_NEQz[lev].pass[kkk] = 0;
 
-	  cap = E->sphere.capid[CPPR] - 1;  /* which cap I am in (0~11) */
+	  cap = E->sphere.capid[1] - 1;  /* which cap I am in (0~11) */
 	  E->parallel.PROCESSORz[lev].pass[kkk] =
 	    E->parallel.loc2proc_map[cap][lx][ly][lz+((ii==5)?-1:1)];
 
@@ -703,7 +703,7 @@ void full_parallel_communication_routs_v(E)
   if(E->control.verbose) {
     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
       fprintf(E->fp_out,"output_communication route surface for lev=%d \n",lev);
-	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[CPPR],E->parallel.TNUM_PASS[lev]);
+	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[1],E->parallel.TNUM_PASS[lev]);
 	for (k=1;k<=E->parallel.TNUM_PASS[lev];k++)   {
 	  fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d eqn and %d node\n",E->parallel.me,k,E->parallel.PROCESSOR[lev].pass[k],E->parallel.NUM_NEQ[lev].pass[k],E->parallel.NUM_NODE[lev].pass[k]);
 	  fprintf(E->fp_out,"Eqn:\n");  
@@ -719,7 +719,7 @@ void full_parallel_communication_routs_v(E)
       for (k=1;k<=E->parallel.TNUM_PASSz[lev];k++)   {
 	kkkp = k + E->sphere.max_connections;
 	fprintf(E->fp_out,"proc %d and pass  %d to proc %d\n",E->parallel.me,k,E->parallel.PROCESSORz[lev].pass[k]);
-	  fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n",E->sphere.capid[CPPR],E->parallel.NUM_NEQ[lev].pass[kkkp],E->parallel.NUM_NODE[lev].pass[kkkp]);
+	  fprintf(E->fp_out,"cap=%d eqn=%d node=%d\n",E->sphere.capid[1],E->parallel.NUM_NEQ[lev].pass[kkkp],E->parallel.NUM_NODE[lev].pass[kkkp]);
 	  for (ii=1;ii<=E->parallel.NUM_NEQ[lev].pass[kkkp];ii++) 
 	    fprintf(E->fp_out,"%d %d\n",ii,E->parallel.EXCHANGE_ID[lev][ii].pass[kkkp]); 
 	  for (ii=1;ii<=E->parallel.NUM_NODE[lev].pass[kkkp];ii++) 
@@ -757,7 +757,7 @@ void full_parallel_communication_routs_s(E)
     noz = E->lmesh.NOZ[lev];
     noy = E->lmesh.NOY[lev];
 
-      j = E->sphere.capid[CPPR];
+      j = E->sphere.capid[1];
 
       for (kkk=1;kkk<=E->parallel.TNUM_PASS[lev];kkk++) {
         if (kkk<=4) {  /* first 4 communications are for XZ and YZ planes */
@@ -788,7 +788,7 @@ void full_parallel_communication_routs_s(E)
   if(E->control.verbose) {
     for(lev=E->mesh.gridmax;lev>=E->mesh.gridmin;lev--) {
       fprintf(E->fp_out,"output_communication route surface for lev=%d \n",lev);
-	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[CPPR],E->parallel.TNUM_PASS[lev]);
+	fprintf(E->fp_out,"  me= %d cap=%d pass  %d \n",E->parallel.me,E->sphere.capid[1],E->parallel.TNUM_PASS[lev]);
 	for (k=1;k<=E->parallel.TNUM_PASS[lev];k++) {
 	  fprintf(E->fp_out,"proc %d and pass  %d to proc %d with %d node\n",E->parallel.me,k,E->parallel.PROCESSOR[lev].pass[k],E->parallel.NUM_sNODE[lev].pass[k]);
 	  fprintf(E->fp_out,"Node:\n");
