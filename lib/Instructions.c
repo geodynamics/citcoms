@@ -1102,19 +1102,19 @@ void allocate_common_vars(E)
    for(i=E->mesh.gridmin;i<=E->mesh.gridmax;i++) {
        nel  = E->lmesh.NEL[i];
        nno  = E->lmesh.NNO[i];
-       E->EVI2[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->avmode[i][CPPR] = (unsigned char *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(unsigned char));
-       E->EVIn1[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->EVIn2[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
-       E->EVIn3[i][CPPR] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVI2[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->avmode[i] = (unsigned char *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(unsigned char));
+       E->EVIn1[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn2[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
+       E->EVIn3[i] = (float *) malloc((nel+1)*vpoints[E->mesh.nsd]*sizeof(float));
        
-       E->VI2[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn1[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn2[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
-       E->VIn3[i][CPPR]  = (float *)        malloc((nno+1)*sizeof(float));
-       if((!(E->EVI2[i][CPPR]))||(!(E->VI2[i][CPPR]))||
-	  (!(E->EVIn1[i][CPPR]))||(!(E->EVIn2[i][CPPR]))||(!(E->EVIn3[i][CPPR]))||
-	  (!(E->VIn1[i][CPPR]))||(!(E->VIn2[i][CPPR]))||(!(E->VIn3[i][CPPR]))){
+       E->VI2[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn1[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn2[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       E->VIn3[i]  = (float *)        malloc((nno+1)*sizeof(float));
+       if((!(E->EVI2[i]))||(!(E->VI2[i]))||
+	  (!(E->EVIn1[i]))||(!(E->EVIn2[i]))||(!(E->EVIn3[i]))||
+	  (!(E->VIn1[i]))||(!(E->VIn2[i]))||(!(E->VIn3[i]))){
 	 fprintf(stderr, "Error: Cannot allocate anisotropic visc memory, rank=%i\n",
 		 E->parallel.me);
 	 parallel_process_termination();

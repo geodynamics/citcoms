@@ -1554,9 +1554,9 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
       for(k=1;k <= nel;k++){
 	for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	  ind = (k-1)*vpts + l;
-	  E->EVI2[i][CPPR][ind] = 0.0;
-	  E->EVIn1[i][CPPR][ind] = 1.0; E->EVIn2[i][CPPR][ind] = E->EVIn3[i][CPPR][ind] = 0.0;
-	  E->avmode[i][CPPR][ind] = (unsigned char)
+	  E->EVI2[i][ind] = 0.0;
+	  E->EVIn1[i][ind] = 1.0; E->EVIn2[i][ind] = E->EVIn3[i][ind] = 0.0;
+	  E->avmode[i][ind] = (unsigned char)
 	    E->viscosity.allow_anisotropic_viscosity;
 	}
       }
@@ -1698,10 +1698,10 @@ void ggrd_read_anivisc_from_file(struct All_variables *E, int is_geographic)
 	    vis2 = 1.0 - pow(10.0,log_vis);
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      ind = (el-1)*vpts + l;
-	      E->EVI2[E->mesh.gridmax][CPPR][ind]  =   vis2;
-	      E->EVIn1[E->mesh.gridmax][CPPR][ind]  = cvec[0];
-	      E->EVIn2[E->mesh.gridmax][CPPR][ind]  = cvec[1];
-	      E->EVIn3[E->mesh.gridmax][CPPR][ind]  = cvec[2];
+	      E->EVI2[E->mesh.gridmax][ind]  =   vis2;
+	      E->EVIn1[E->mesh.gridmax][ind]  = cvec[0];
+	      E->EVIn2[E->mesh.gridmax][ind]  = cvec[1];
+	      E->EVIn3[E->mesh.gridmax][ind]  = cvec[2];
 	    }
 	  }
 	}

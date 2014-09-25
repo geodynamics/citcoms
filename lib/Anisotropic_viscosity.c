@@ -295,9 +295,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	  for(k=1;k <= nel;k++){
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
-	      E->EVI2[i][CPPR][off] = 0.0;
-	      E->EVIn1[i][CPPR][off] = 1.0; E->EVIn2[i][CPPR][off] = E->EVIn3[i][CPPR][off] = 0.0;
-	      E->avmode[i][CPPR][off] = (unsigned char)
+	      E->EVI2[i][off] = 0.0;
+	      E->EVIn1[i][off] = 1.0; E->EVIn2[i][off] = E->EVIn3[i][off] = 0.0;
+	      E->avmode[i][off] = (unsigned char)
 		E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
@@ -326,8 +326,8 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 	    n[2] = 2.0*s -1 ;		/* z */
 	    for(l=1;l <= vpts;l++){ /* assign to all integration points */
 	      off = (k-1)*vpts + l;
-	      E->EVI2[i][CPPR][off] = vis2;E->EVIn1[i][CPPR][off] = n[0]; E->EVIn2[i][CPPR][off] = n[1];E->EVIn3[i][CPPR][off] = n[2];
-	      E->avmode[i][CPPR][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
+	      E->EVI2[i][off] = vis2;E->EVIn1[i][off] = n[0]; E->EVIn2[i][off] = n[1];E->EVIn3[i][off] = n[2];
+	      E->avmode[i][off] = (unsigned char)E->viscosity.allow_anisotropic_viscosity;
 	    }
 	  }
       }	/* mg loop */
@@ -441,9 +441,9 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  n[0]=rout[0];n[1]=rout[1];n[2]=rout[2];
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
-		    E->EVI2[i][CPPR][off] = vis2;
-		    E->EVIn1[i][CPPR][off] = n[0]; E->EVIn2[i][CPPR][off] = n[1];E->EVIn3[i][CPPR][off] = n[2];
-		    E->avmode[i][CPPR][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][off] = vis2;
+		    E->EVIn1[i][off] = n[0]; E->EVIn2[i][off] = n[1];E->EVIn3[i][off] = n[2];
+		    E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 		  }
 		}
 	      }
@@ -453,7 +453,7 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
 		  el = j + (l-1) * elz + (k-1)*elxlz;
 		  for(p=1;p <= vpts;p++){ /* assign to all integration points */
 		    off = (el-1)*vpts + p;
-		    E->EVI2[i][CPPR][off] = 0;E->EVIn1[i][CPPR][off] = 1; E->EVIn2[i][CPPR][off] = 0;E->EVIn3[i][CPPR][off] = 0;E->avmode[i][CPPR][off] = CITCOM_ANIVISC_ORTHO_MODE;
+		    E->EVI2[i][off] = 0;E->EVIn1[i][off] = 1; E->EVIn2[i][off] = 0;E->EVIn3[i][off] = 0;E->avmode[i][off] = CITCOM_ANIVISC_ORTHO_MODE;
 		  }
 		}
 	      }
@@ -703,11 +703,11 @@ void align_director_with_ISA_for_element(struct All_variables *E,
 	/* assign to director for all vpoints */
 	for(i=1;i <= vpts;i++){
 	  off = (e-1)*vpts + i;
-	  E->avmode[lev][CPPR][off] = avmode;
-	  E->EVI2[lev][CPPR][off] = vis2;
-	  E->EVIn1[lev][CPPR][off] = n[0]; 
-	  E->EVIn2[lev][CPPR][off] = n[1];
-	  E->EVIn3[lev][CPPR][off] = n[2];
+	  E->avmode[lev][off] = avmode;
+	  E->EVI2[lev][off] = vis2;
+	  E->EVIn1[lev][off] = n[0]; 
+	  E->EVIn2[lev][off] = n[1];
+	  E->EVIn3[lev][off] = n[2];
 	}
       }	/* in layer */
   }

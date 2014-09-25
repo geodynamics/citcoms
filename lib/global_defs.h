@@ -850,11 +850,11 @@ struct All_variables {
     float *VI[MAX_LEVELS],*EVI[MAX_LEVELS];
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
-    float *VI2[MAX_LEVELS][NCS],*EVI2[MAX_LEVELS][NCS];
-    float *VIn1[MAX_LEVELS][NCS],*EVIn1[MAX_LEVELS][NCS];
-    float *VIn2[MAX_LEVELS][NCS],*EVIn2[MAX_LEVELS][NCS];
-    float *VIn3[MAX_LEVELS][NCS],*EVIn3[MAX_LEVELS][NCS];
-    unsigned char *avmode[MAX_LEVELS][NCS];
+    float *VI2[MAX_LEVELS],*EVI2[MAX_LEVELS];
+    float *VIn1[MAX_LEVELS],*EVIn1[MAX_LEVELS];
+    float *VIn2[MAX_LEVELS],*EVIn2[MAX_LEVELS];
+    float *VIn3[MAX_LEVELS],*EVIn3[MAX_LEVELS];
+    unsigned char *avmode[MAX_LEVELS];
 #endif
 
 

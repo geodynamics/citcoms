@@ -316,11 +316,11 @@ void compute_nodal_stress(struct All_variables *E,
 
 	*/
 	get_constitutive(D,rtf[1][i],rtf[2][i],TRUE,
-			 E->EVIn1[E->mesh.levmax][CPPR][l1], 
-			 E->EVIn2[E->mesh.levmax][CPPR][l1], 
-			 E->EVIn3[E->mesh.levmax][CPPR][l1],
-			 E->EVI2[E->mesh.levmax][CPPR][l1],
-			 E->avmode[E->mesh.levmax][CPPR][l1],
+			 E->EVIn1[E->mesh.levmax][l1], 
+			 E->EVIn2[E->mesh.levmax][l1], 
+			 E->EVIn3[E->mesh.levmax][l1],
+			 E->EVI2[E->mesh.levmax][l1],
+			 E->avmode[E->mesh.levmax][l1],
 			 E);
 	
 	/* deviatoric stress, pressure will be added later */

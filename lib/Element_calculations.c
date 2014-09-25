@@ -312,9 +312,9 @@ void get_elt_k(E,el,elt_k,lev,iconv)
       if(E->viscosity.allow_anisotropic_viscosity){
 	/* allow for a possibly anisotropic viscosity */
 	get_constitutive(D[k],rtf[1][k],rtf[2][k],TRUE,
-			 E->EVIn1[lev][CPPR][off], E->EVIn2[lev][CPPR][off], 
-			 E->EVIn3[lev][CPPR][off],
-			 E->EVI2[lev][CPPR][off],E->avmode[lev][CPPR][off],
+			 E->EVIn1[lev][off], E->EVIn2[lev][off], 
+			 E->EVIn3[lev][off],
+			 E->EVI2[lev][off],E->avmode[lev][off],
 			 E);
       }
 #endif
@@ -907,8 +907,8 @@ void get_elt_g(E,el,elt_del,lev)
      for(i=1;i <= vpts;i++){	/* get vag const matrix */
        off = (el-1)*vpts+i;
        get_constitutive(Dtmp,rtf2[1][i],rtf2[2][i],TRUE,
-			E->EVIn1[lev][CPPR][off], E->EVIn2[lev][CPPR][off], E->EVIn3[lev][CPPR][off],
-			E->EVI2[lev][CPPR][off],E->avmode[lev][CPPR][off],
+			E->EVIn1[lev][off], E->EVIn2[lev][off], E->EVIn3[lev][off],
+			E->EVI2[lev][off],E->avmode[lev][off],
 			E);
        for(j=0;j<6;j++)
 	 for(k=0;k<6;k++)

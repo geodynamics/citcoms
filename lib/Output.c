@@ -330,7 +330,7 @@ void output_avisc(struct All_variables *E, int cycles)
     fprintf(fp1,"%3d %7d\n",CPPR,E->lmesh.nno);
     for(i=1;i<=E->lmesh.nno;i++)
       fprintf(fp1,"%.4e %.4e %.4e %.4e\n",
-          E->VI2[lev][CPPR][i],E->VIn1[lev][CPPR][i],E->VIn2[lev][CPPR][i],E->VIn3[lev][CPPR][i]);
+          E->VI2[lev][i],E->VIn1[lev][i],E->VIn2[lev][i],E->VIn3[lev][i]);
     fclose(fp1);
   }
 }
