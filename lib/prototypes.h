@@ -18,8 +18,8 @@ void get_constitutive_ti_viscosity(double [6][6], double, double, double [3], in
 void get_constitutive_orthotropic_viscosity(double [6][6], double, double [3], int, double, double);
 void get_constitutive_isotropic(double [6][6]);
 void set_anisotropic_viscosity_at_element_level(struct All_variables *, int);
-void normalize_director_at_nodes(struct All_variables *, float **, float **, float **, int);
-void normalize_director_at_gint(struct All_variables *, float **, float **, float **, int);
+void normalize_director_at_nodes(struct All_variables *, float *, float *, float *, int);
+void normalize_director_at_gint(struct All_variables *, float *, float *, float *, int);
 void conv_cart4x4_to_spherical(double [3][3][3][3], double, double, double [3][3][3][3]);
 void conv_cart6x6_to_spherical(double [6][6], double, double, double [6][6]);
 void rotate_ti6x6_to_director(double [6][6], double [3]);

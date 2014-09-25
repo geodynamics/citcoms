@@ -499,14 +499,14 @@ void set_anisotropic_viscosity_at_element_level(struct All_variables *E,
   }
 }
 
-void normalize_director_at_nodes(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
+void normalize_director_at_nodes(struct All_variables *E,float *n1,float *n2, float *n3, int lev)
 {
   int n,m;
     for(n=1;n<=E->lmesh.NNO[lev];n++){
-      normalize_vec3(&(n1[CPPR][n]),&(n2[CPPR][n]),&(n3[CPPR][n]));
+      normalize_vec3(&(n1[n]),&(n2[n]),&(n3[n]));
     }
 }
-void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, float **n3, int lev)
+void normalize_director_at_gint(struct All_variables *E,float *n1,float *n2, float *n3, int lev)
 {
   int m,e,i,enode;
   const int nsd=E->mesh.nsd;
@@ -514,7 +514,7 @@ void normalize_director_at_gint(struct All_variables *E,float **n1,float **n2, f
     for(e=1;e<=E->lmesh.NEL[lev];e++)
       for(i=1;i<=vpts;i++)      {
 	enode = (e-1)*vpts+i;
-	normalize_vec3(&(n1[CPPR][enode]),&(n2[CPPR][enode]),&( n3[CPPR][enode]));
+	normalize_vec3(&(n1[enode]),&(n2[enode]),&( n3[enode]));
       }
 }
 /* 

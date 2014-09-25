@@ -62,14 +62,8 @@ void get_vgm_p(double [4][9],struct Shape_function *,
 	       int ,int , int , int ,
 	       double [3][3], double [3]);
 
-#ifdef CitcomS_global_defs_h	/* CitcomS */
-void normalize_director_at_nodes(struct All_variables *, float **, float **, float **, int);
-void normalize_director_at_gint(struct All_variables *, float **, float **, float **, int);
-#else
 void normalize_director_at_nodes(struct All_variables *, float *, float *, float *, int);
 void normalize_director_at_gint(struct All_variables *, float *, float *, float *, int);
-
-#endif
 
 #define __CITCOM_READ_ANIVISC_HEADER__
 #endif
