@@ -76,11 +76,9 @@ void regional_parallel_processor_setup(struct All_variables *E)
   i = ((me - j)/E->parallel.nprocz - k)/E->parallel.nprocx % E->parallel.nprocy;
   E->parallel.me_loc[2] = i;
 
-  E->sphere.caps_per_proc = 1;
-
   /* determine cap id for each cap in a given processor  */
   pid_surf = me/E->parallel.nprocz;
-  i = cases[E->sphere.caps_per_proc];
+  i = cases[1];
 
   E->sphere.capid[1] = 1;
 

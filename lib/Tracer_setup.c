@@ -1312,8 +1312,7 @@ void get_neighboring_caps(struct All_variables *E)
 
         /* Storing the received cap information
          * XXX: this part assumes:
-         *      1) E->sphere.caps_per_proc==1
-         *      2) E->mesh.nsd==3
+         *      1) E->mesh.nsd==3
          */
         for (kk=0; kk<=num_ngb; kk++) {
             n = 0;

@@ -119,24 +119,8 @@ void full_velocity_boundary_conditions(E)
       if(E->control.side_sbcs)
 	apply_side_sbc(E);
 
-/* if(E->control.verbose) { */
-/*  for (j=1;j<=E->sphere.caps_per_proc;j++) */
-/*    for (node=1;node<=E->lmesh.nno;node++) */
-/*       fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ); */
-/*  fflush(E->fp_out); */
-/* } */
-
-  /* If any imposed internal velocity structure it goes here */
-
-      
-      /*
-	apply stress or velocity boundary conditions, read from file
-	settings are to be implemented in those routines (will only do
-	anything at present, if E->mesh.toplayerbc != 0
-      */
       assign_internal_bc(E);
-
-   return; }
+}
 
 /* ========================================== */
 

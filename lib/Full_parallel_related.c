@@ -72,13 +72,6 @@ void full_parallel_processor_setup(struct All_variables *E)
     parallel_process_termination();
     }
 
-  E->sphere.caps_per_proc = 1;
-
-  if (E->sphere.caps_per_proc > 1) {
-    if (E->parallel.me==0) fprintf(stderr,"!!!! # caps per proc > 1 is not supported.\n \n");
-    parallel_process_termination();
-  }
-
   /* determine the location of processors in each cap */
   cap_id_surf = me / proc_per_cap;
 
@@ -107,9 +100,9 @@ oordinate and F-B
 
   /* determine cap id for each cap in a given processor  */
   pid_surf = me/proc_per_cap; /* cap number (0~11) */
-  i = cases[E->sphere.caps_per_proc]; /* 1 for more than 12 processors */
+  i = cases[1]; /* 1 for more than 12 processors */
 
-    temp = pid_surf*E->sphere.caps_per_proc; /* cap number (out of 12) */
+    temp = pid_surf; /* cap number (out of 12) */
     E->sphere.capid[1] = incases1[i].links[temp]; /* id (1~12) of the current cap */
 
   /* determine which caps are linked with each of 12 caps  */
@@ -133,11 +126,6 @@ oordinate and F-B
     for (i=0;i<E->parallel.nprocx;i++)
       for (j=0;j<E->parallel.nprocy;j++)
 	for (k=0;k<E->parallel.nprocz;k++) {
-	  if (E->sphere.caps_per_proc>1) {
-	    temp = cases[E->sphere.caps_per_proc];
-	    E->parallel.loc2proc_map[m][i][j][k] = incases2[temp].links[m-1];
-	  }
-	  else
 	    E->parallel.loc2proc_map[m][i][j][k] = m*proc_per_cap
 	      + j*E->parallel.nprocx*E->parallel.nprocz
 	      + i*E->parallel.nprocz + k;

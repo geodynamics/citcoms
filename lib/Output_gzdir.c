@@ -269,11 +269,10 @@ void gzdir_output_coord(struct All_variables *E)
       myfprintf(fp1,"DATASET UNSTRUCTURED_GRID\n");
       if(E->output.gzdir.vtk_io == 2) /* serial */
 	sprintf(message,"POINTS %i float\n", /* total number of nodes */
-		E->lmesh.nno * E->parallel.nproc *
-		E->sphere.caps_per_proc);
+		E->lmesh.nno * E->parallel.nproc);
       else			/* parallel */
 	sprintf(message,"POINTS %i float\n",
-		E->lmesh.nno * E->sphere.caps_per_proc);
+		E->lmesh.nno);
       myfprintf(fp1,message);
     }else{			/* serial output */
       /* if not first CPU, wait for previous before appending */
@@ -304,10 +303,9 @@ void gzdir_output_coord(struct All_variables *E)
     if((E->output.gzdir.vtk_io == 3) || (E->parallel.me == 0)){ /* in first CPU, or parallel output */
       if(E->output.gzdir.vtk_io == 2){ /* need to reopen, serial */
 	fp1 = output_open(output_file,"a");
-	j = E->parallel.nproc * E->lmesh.nel *
-	  E->sphere.caps_per_proc; /* total number of elements */
+	j = E->parallel.nproc * E->lmesh.nel; /* total number of elements */
       }else{			/* parallel */
-	j = E->lmesh.nel * E->sphere.caps_per_proc;
+	j = E->lmesh.nel;
       }
       sprintf(message,"CELLS %i %i\n", /* number of elements
 				      total number of int entries
@@ -352,9 +350,9 @@ void gzdir_output_coord(struct All_variables *E)
     if((E->output.gzdir.vtk_io==3) || (E->parallel.me == 0) ){
       if(E->output.gzdir.vtk_io == 2){ /* serial */
 	fp1 = output_open(output_file,"a");
-	j=E->parallel.nproc*E->lmesh.nel*E->sphere.caps_per_proc;
+	j=E->parallel.nproc*E->lmesh.nel;
       }else{			/* parallel */
-	j = E->lmesh.nel*E->sphere.caps_per_proc;
+	j = E->lmesh.nel;
       }
       sprintf(message,"CELL_TYPES %i\n",j); /* number of elements*/
       myfprintf(fp1,message);
@@ -460,7 +458,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
     if((!E->output.gzdir.vtk_base_init) ||(!E->output.gzdir.vtk_base_save)){
       /* either not computed, or need to compute anew */
       if(!E->output.gzdir.vtk_base_init) /* init space */
-	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os*E->sphere.caps_per_proc);
+	E->output.gzdir.vtk_base = (float *)safe_malloc(sizeof(float)*os);
       /* compute */
 	for(i=1,k=0;i <= E->lmesh.nno;i++,k += 9){
 	  /* cartesian basis vectors at theta, phi */
@@ -508,9 +506,9 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
       }
       fp1 = output_open(output_file,"a");
       if(E->output.gzdir.vtk_io == 2) /* serial */
-	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->parallel.nproc*E->sphere.caps_per_proc);
+	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->parallel.nproc);
       else			/* parallel */
-	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno*E->sphere.caps_per_proc);
+	sprintf(message,"POINT_DATA %i\n",E->lmesh.nno);
       myfprintf(fp1,message);
       myfprintf(fp1,"SCALARS temperature float 1\n");
       myfprintf(fp1,"LOOKUP_TABLE default\n");

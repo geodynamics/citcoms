@@ -77,19 +77,6 @@ void construct_ien(E)
 	     }
 
     }     /* end loop for lev */
-
-
-/* if(E->control.verbose)  { */
-/*   for (lev=E->mesh.levmax;lev>=E->mesh.levmin;lev--)  { */
-/*     fprintf(E->fp_out,"output_IEN_arrays me=%d lev=%d \n",E->parallel.me,lev); */
-/*   for (j=1;j<=E->sphere.caps_per_proc;j++) { */
-/*     fprintf(E->fp_out,"output_IEN_arrays me=%d %d %d\n",E->parallel.me,j,E->sphere.capid[j]); */
-/*     for (i=1;i<=E->lmesh.NEL[lev];i++) */
-/*        fprintf(E->fp_out,"%d %d %d %d %d %d %d %d %d\n",i,E->IEN[lev][j][i].node[1],E->IEN[lev][j][i].node[2],E->IEN[lev][j][i].node[3],E->IEN[lev][j][i].node[4],E->IEN[lev][j][i].node[5],E->IEN[lev][j][i].node[6],E->IEN[lev][j][i].node[7],E->IEN[lev][j][i].node[8]); */
-/*     } */
-/*     } */
-/*   fflush (E->fp_out); */
-/*   } */
 }
 
 
@@ -174,14 +161,6 @@ void construct_id(E)
 
     E->lmesh.neq = E->lmesh.NEQ[E->mesh.levmax];
     E->mesh.neq = E->mesh.NEQ[E->mesh.levmax];
-
-/*     if (E->control.verbose) { */
-/*       fprintf(E->fp_out,"output_ID_arrays \n"); */
-/*       for(j=1;j<=E->sphere.caps_per_proc;j++)    */
-/*         for (i=1;i<=E->lmesh.nno;i++) */
-/*           fprintf(E->fp_out,"%d %d %d %d %d\n",eqn_count,i,E->ID[lev][j][i].doff[1],E->ID[lev][j][i].doff[2],E->ID[lev][j][i].doff[3]); */
-/*       fflush(E->fp_out); */
-/*       } */
 }
 
 

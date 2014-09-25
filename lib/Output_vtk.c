@@ -106,7 +106,7 @@ static void vtk_cell_data_trailer(struct All_variables *E, FILE *fp)
 static void vtk_output_temp(struct All_variables *E, FILE *fp)
 {
     int i;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floattemp = malloc(nodes*sizeof(float));
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"temperature\" format=\"%s\">\n", E->output.vtk_format);
@@ -127,7 +127,7 @@ static void vtk_output_temp(struct All_variables *E, FILE *fp)
 static void vtk_output_velo(struct All_variables *E, FILE *fp)
 {
     int i, j;
-    int nodes=E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes=E->lmesh.nno;
     double sint, sinf, cost, cosf;
     float *V[4];
     const int lev = E->mesh.levmax;
@@ -162,7 +162,7 @@ static void vtk_output_velo(struct All_variables *E, FILE *fp)
 
 static void vtk_output_visc(struct All_variables *E, FILE *fp)
 {
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     int lev = E->mesh.levmax;
 
     fprintf(fp, "        <DataArray type=\"Float32\" Name=\"viscosity\" format=\"%s\">\n", E->output.vtk_format);
@@ -181,7 +181,7 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
     /* Output Cartesian coordinates as most VTK visualization softwares
        assume it. */
     int i, j;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floatpos = malloc(nodes*3*sizeof(float));
 
     fputs("      <Points>\n", fp);
@@ -204,7 +204,7 @@ static void vtk_output_coord(struct All_variables *E, FILE *fp)
 
 static void vtk_output_stress(struct All_variables *E, FILE *fp)
 {
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
    /* for stress computation */
     void allocate_STD_mem();
     void compute_nodal_stress();
@@ -232,7 +232,7 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
 {
     int i, j, k;
     char name[255];
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     float* floatcompo = malloc (nodes*sizeof(float));
 
     for(k=0;k<E->composition.ncomp;k++) {
@@ -255,7 +255,7 @@ static void vtk_output_comp_nd(struct All_variables *E, FILE *fp)
 static void vtk_output_surf(struct All_variables *E,  FILE *fp, int cycles)
 {
     int i, j, k;
-    int nodes = E->sphere.caps_per_proc*E->lmesh.nno;
+    int nodes = E->lmesh.nno;
     char output_file[255];
     float* floattopo = malloc (nodes*sizeof(float));
 

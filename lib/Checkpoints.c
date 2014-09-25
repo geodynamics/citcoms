@@ -195,15 +195,12 @@ static void general_checkpoint(struct All_variables *E, FILE *fp)
     fwrite(&(E->parallel.nprocx), sizeof(int), 1, fp);
     fwrite(&(E->parallel.nprocy), sizeof(int), 1, fp);
     fwrite(&(E->parallel.nprocz), sizeof(int), 1, fp);
-    fwrite(&(E->sphere.caps_per_proc), sizeof(int), 1, fp);
 
     /* write timing information */
     fwrite(&(E->monitor.solution_cycles), sizeof(int), 1, fp);
     fwrite(&(E->monitor.elapsed_time), sizeof(float), 1, fp);
     fwrite(&(E->advection.timestep), sizeof(float), 1, fp);
     fwrite(&(E->control.start_age), sizeof(float), 1, fp);
-
-    return;
 }
 
 
@@ -220,14 +217,12 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
        (tmp[2] != E->lmesh.noz) ||
        (tmp[3] != E->parallel.nprocx) ||
        (tmp[4] != E->parallel.nprocy) ||
-       (tmp[5] != E->parallel.nprocz) ||
-       (tmp[6] != E->sphere.caps_per_proc)) {
+       (tmp[5] != E->parallel.nprocz)) {
 
         fprintf(stderr, "Error in reading checkpoint file: mesh parameters mismatch, me=%d\n",
                 E->parallel.me);
-        fprintf(stderr, "%d %d %d %d %d %d %d\n",
-                tmp[0], tmp[1], tmp[2], tmp[3],
-                tmp[4], tmp[5], tmp[6]);
+        fprintf(stderr, "%d %d %d %d %d %d\n",
+                tmp[0], tmp[1], tmp[2], tmp[3], tmp[4], tmp[5]);
         exit(-1);
     }
 
@@ -240,8 +235,6 @@ static void read_general_checkpoint(struct All_variables *E, FILE *fp)
       myerror(E,"read_general_checkpoint: header error");
 
     E->advection.timesteps = E->monitor.solution_cycles;
-
-    return;
 }
 
 
