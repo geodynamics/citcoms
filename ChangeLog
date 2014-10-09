@@ -1,3 +1,13 @@
+2014-09-05 11:05  Rajesh Kommu
+
+	* multiple files changed
+
+	Removed Python sections of CitcomS
+	Wrote Python to standard parameter file conversion tool (Py2C)
+	Converted Python cookbooks parameter files to original style parameter files
+	Added output of parameters to a pidXXXXXX style file
+	Updated the manual to correspond to the new changes
+
 2012-01-24 21:54  becker
 
 	* lib/Ggrd_handling.c, lib/Instructions.c, lib/global_defs.h: Fixed
