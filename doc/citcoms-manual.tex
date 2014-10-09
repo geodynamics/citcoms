@@ -85,7 +85,7 @@ COMPUTATIONAL INFRASTRUCTURE FOR GEODYNAMICS (CIG)
 
 \color{dark_grey}
 \hfill{\Huge \fontfamily{\sfdefault}\selectfont User Manual \\
-\raggedleft \huge \fontfamily{\sfdefault}\selectfont Version {3.?.?}\\}
+\raggedleft \huge \fontfamily{\sfdefault}\selectfont Version {3.3.0}\\}
 
 \null
 \vfill
@@ -106,6 +106,17 @@ Eh Tan\\Michael Gurnis\\Luis Armendariz\\Leif Strand\\Susan Kientz\\
 
 \pagebreak
 \pagenumbering{arabic}
+
+%\noindent \begin{center}
+%\begin{figure}[H]
+%\noindent \centering{}\includegraphics[width=0.75\paperwidth]{graphics/citcoms_cover.pdf}
+%\end{figure}
+%\par\end{center}
+%\noindent \begin{center}
+%\thispagestyle{empty}
+%\par\end{center}
+%\title{CitcomS User Manual}
+%\author{© California Institute of Technology\\Version 3.2.0}
 
 \title{CitcomS User Manual}
 \date{\noindent \today}
@@ -193,8 +204,13 @@ the authors of the code, and CIG \url{geodynamics.org}.
 
 
 \section*{Support}
-Support of CitcomS is based upon work supported by the National Science Foundation 
-under Grant No. EAR-0406751. Any opinions, findings, and conclusions or
+
+Pyre development was funded by the U.S. Dept. of Energy's Advanced
+Simulation and Computing program \url{www.sandia.gov/NNSA/ASC} and
+the National Science Foundation's \url{www.nsf.gov} Information Technology
+Research (ITR) program (grant \#0205653). Continued support of CitcomS
+is based upon work supported by the National Science Foundation under
+Grant No. EAR-0406751. Any opinions, findings, and conclusions or
 recommendations expressed in this material are those of the authors
 and do not necessarily reflect the views of the National Science Foundation.
 
@@ -384,7 +400,7 @@ and is now $10^{-4}$.
 \item The input parameter ``mantle\_temp'' is moved from the {[}CitcomS.solver.param{]}
 to the {[}CitcomS.solver.ic{]} section.
 \end{enumerate}
-This release of CitcomS 3.2 adds numerous changes since 3.1.1 which
+The release of CitcomS 3.2 added numerous changes since 3.1.1 which
 was released in 2009. These include improved implementations of internal
 stress, radial layer dependent viscosity, and velocity boundary conditions.
 Improvements have also been made in solver convergence controls, VTK
@@ -408,6 +424,22 @@ PDEPV psrw=on parameter.
 \item Replaced fixed accuracy setting. Bug reported by Rob Moucha.
 \item Fixed temperature perturbation bug for multiple processors. 
 \end{itemize}
+\end{itemize}
+
+This release (3.3) removes the Python dependencies from CitcomS and provides
+a tool to convert Python style parameter files to the original CitcomS
+parameter files.  Python support was proving problematic because of
+incompatibility with versions of Python newer than 2.6 (final release 2008)
+and other internal issues.  The removal of Python should
+simplify much of the code while retaining almost all functionality.
+A full list of the changes includes:
+
+\begin{itemize}
+\item Removed Python sections of CitcomS
+\item Wrote Python to standard parameter file conversion tool (Py2C)
+\item Converted Python cookbooks parameter files to original style parameter files
+\item Added output of parameters to a pidXXXXXX style file
+\item Updated the manual to correspond to the new changes
 \end{itemize}
 
 \section{Governing Equations\label{sec:Governing-Equations}}
@@ -936,15 +968,15 @@ mpicc~hcc~mpcc~mpcc\_r~mpxlc~cmpicc
 \section{Downloading and Unpacking Source}
 
 To obtain CitcomS, go to the Geodynamics Software Packages web page
-\url{geodynamics.org/cig/software/packages/mc/citcoms}, download
+\url{geodynamics.org/cig/software/citcoms}, download
 the source archive and unpack it using the \texttt{tar} command: 
 \begin{lyxcode}
-\$~tar~xzf~CitcomS-3.2.0.tar.gz
+\$~tar~xzf~CitcomS-3.3.0.tar.gz
 \end{lyxcode}
 
 If you don't have GNU Tar, try the following command instead: 
 \begin{lyxcode}
-\$~gunzip~-c~CitcomS-3.2.0.tar.gz~|~tar~xf~-
+\$~gunzip~-c~CitcomS-3.3.0.tar.gz~|~tar~xf~-
 \end{lyxcode}
 
 \section{Installation Procedure}
@@ -955,7 +987,7 @@ CitcomS:
 \item Navigate (i.e., \texttt{cd}) to the directory containing the CitcomS
 source\texttt{.}~\\
 \texttt{}~\\
-\texttt{\$ cd CitcomS-3.2.0}
+\texttt{\$ cd CitcomS-3.3.0}
 \item Type .\texttt{/configure} to configure the package for your system\texttt{.}~\\
 \texttt{}~\\
 \texttt{\$ ./configure}
@@ -1235,7 +1267,7 @@ variables if these packages is not installed in the system directory.
 
 \section{\label{sec:Software-Repository}Installing from the Software Repository}
 
-The CitcomS source code is available via a Subversion server at the
+The CitcomS source code is available via Git at the
 Geodynamics website \url{geodynamics.org}. This allows users to view
 the revision history of the code and check out the most recent development
 version of the software.
@@ -1250,14 +1282,22 @@ In addition to the usual system requirements, you will need a handful
 of additional development tools installed in order to work with the
 source from the CIG software repository.
 
-First, you must have a Subversion client installed. To check, type
-\texttt{svn}; it should return a usage message.
+First, you must have a Git client installed. To check, type
+\texttt{git}; it should return a usage message.
 \begin{lyxcode}
-\$~svn
+\$~git
 
-Type~'svn~help'~for~usage.
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
 \end{lyxcode}
-For more information on Subversion, visit the Subversion website \url{subversion.tigris.org}.
+For more information on Git, we recommend one of the following websites:
+
+http://github.com/
+http://git-scm.com/
+https://www.atlassian.com/git/
 
 Second, you must have the GNU tools Autoconf, Automake, and Libtool
 installed. To check, enter the following commands:
@@ -1269,28 +1309,28 @@ installed. To check, enter the following commands:
 \$~libtoolize~-{}-version
 \end{lyxcode}
 For more information about these GNU tools, see the GNU website \url{www.gnu.org/software}.
-The CitcomS v3.2.0 source package was created with Autoconf 2.68,
+The CitcomS v3.3.0 source package was created with Autoconf 2.68,
 Automake 1.11.2, and Libtool 2.4.2.
 
 
 \subsection{Download Source from Subversion}
 
-To check out the latest version of the software, use the \texttt{svn
-checkout} command:
+To check out the latest version of the software, use the \texttt{git 
+clone} command:
 \begin{lyxcode}
-\$~svn~checkout~http://geodynamics.org/svn/cig/mc/3D/CitcomS/trunk~CitcomS
+\$~git~clone~https://github.com/geodynamics/citcoms
 \end{lyxcode}
-This will create the local directory \texttt{CitcomS} (if it doesn't
+This will create the local directory \texttt{citcoms} (if it doesn't
 already exist) and fill it with the latest CitcomS source from the
 CIG software repository.
 
 The \texttt{CitcomS} directory thus created is called a \emph{working
 copy}. To merge the latest changes into an existing working copy,
-use the \texttt{svn update} command:
+use the \texttt{git pull update} command:
 \begin{lyxcode}
-\$~cd~CitcomS
+\$~cd~citcoms
 
-\$~svn~update
+\$~git~pull
 \end{lyxcode}
 This will preserve any local changes you have made to your working
 copy.
@@ -1520,6 +1560,7 @@ nprocy=2
 \begin{centering}
 \includegraphics[width=0.5\paperwidth]{graphics/cookbook2.pdf}
 \par\end{centering}
+
 \caption{Computational Domain. Map view on the configuration of the top layer
 of the computational nodes and the processors.}
 \end{figure}
@@ -2587,6 +2628,7 @@ rayleigh=1e6
 \end{lyxcode}
 The parameters specify whether the viscosity should be updated at every time
 step (\texttt{on}), the number of viscous layers (4), the viscosity of
+>>>>>>> python-removal
 each layer (1,1,1,1), whether the viscosity is temperature dependent
 (\texttt{on}), the type of viscosity law to use (4), the activation
 energy of each layer (0.2,0.2,0.2,0.2), the temperature offset of
@@ -2595,6 +2637,19 @@ whether to apply the minimum cutoff (\texttt{on}), the value of the
 minimum cutoff (1.0), whether to apply the maximum cutoff (\texttt{on}),
 and the value of the maximum cutoff (100.0). 
 \begin{lyxcode}
+VISC\_UPDATE~=~on~\\
+num\_mat~=~4~\\
+visc0~=~1,1,1,1~\\
+TDEPV~=~on~\\
+rheol~=~4~\\
+viscE~=~0.2,0.2,0.2,0.2~\\
+viscT~=~0,0,0,0~\\
+viscZ~=~0,0,0,0~\\
+VMIN~=~on~\\
+visc\_min~=~1.0~\\
+VMAX~=~on~\\
+visc\_max~=~100.0
+=======
 VISC\_UPDATE=on\\
 num\_mat=4\\
 visc0=1,1,1,1\\
@@ -2607,6 +2662,7 @@ VMIN=on\\
 visc\_min=1.0\\
 VMAX=on\\
 visc\_max=100.0
+>>>>>>> python-removal
 \end{lyxcode}
 The range of the layers are determined by the following parameters:
 layer 1 extends from the top surface to a depth of \texttt{solver.const.z\_lith}
