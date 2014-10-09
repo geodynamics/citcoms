@@ -51,3 +51,7 @@ visual/OpenDXMacro/Makefile.in
 visual/OpenDXMacro/Makefile
 
 config.h.in~
+
+visual/OpenDXMacro/Makefile
+
+visual/OpenDXMacro/Makefile.in
