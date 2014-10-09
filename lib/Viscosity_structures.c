@@ -1412,7 +1412,7 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(e=1; e<=E->lmesh.nel; e++)
             fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
-    /**/
+    */
 
     return;
 }
@@ -1472,7 +1472,7 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(e=1; e<=E->lmesh.nel; e++)
             fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
-    /**/
+    */
 
     return;
 }

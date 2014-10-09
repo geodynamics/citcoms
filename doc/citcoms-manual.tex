@@ -85,7 +85,7 @@ COMPUTATIONAL INFRASTRUCTURE FOR GEODYNAMICS (CIG)
 
 \color{dark_grey}
 \hfill{\Huge \fontfamily{\sfdefault}\selectfont User Manual \\
-\raggedleft \huge \fontfamily{\sfdefault}\selectfont Version {3.2.0}\\}
+\raggedleft \huge \fontfamily{\sfdefault}\selectfont Version {3.3.0}\\}
 
 \null
 \vfill
@@ -137,11 +137,9 @@ Eh Tan\\Michael Gurnis\\Luis Armendariz\\Leif Strand\\Susan Kientz\\
 \section*{About This Document}
 
 This document is organized into three parts. Part I consists of traditional
-book front matter, including this preface. Part II begins with an
-introduction to Pyre and the Pyre-compatible version of CitcomS and
-their capabilities and proceeds to the details of implementation,
-including several ``cookbooks'' of short tutorials. Part III provides
-appendices and references.
+book front matter, including this preface. Part II describes the capabilities of 
+CitcomS and the details of implementation, including several ``cookbooks'' of short 
+tutorials. Part III provides appendices and references.
 
 The style of this publication is based on the Apple Publications Style
 Guide \url{developer.apple.com/documentation/UserExperience/Conceptual/APStyleGuide/AppleStyleGuide2003.pdf},
@@ -207,7 +205,7 @@ the authors of the code, and CIG \url{geodynamics.org}.
 
 \section*{Support}
 
-Pyre development is funded by the U.S. Dept. of Energy's Advanced
+Pyre development was funded by the U.S. Dept. of Energy's Advanced
 Simulation and Computing program \url{www.sandia.gov/NNSA/ASC} and
 the National Science Foundation's \url{www.nsf.gov} Information Technology
 Research (ITR) program (grant \#0205653). Continued support of CitcomS
@@ -233,17 +231,10 @@ CitcomS is a finite element code designed to solve thermal convection
 problems relevant to earth's mantle released under the GNU General
 Public License (see Appendix \vref{cha:License}). Written in C, the
 code runs on a variety of parallel processing computers, including
-shared and distributed memory platforms. In an effort to increase
-the functionality of CitcomS to include greater control during simulations
-on large parallel systems, the software has been reengineered from
-previous versions of CitcomS to work with a Python-based modeling
-framework called Pyre. With Pyre, CitcomS can be dynamically coupled
-with other CitcomS simulations or with other codes such as SNAC, which
-solves crustal and lithospheric problems. 
+shared and distributed memory platforms. 
 
 
 \section{About CitcomS}
-
 CitcomS is a finite element code written in C that solves for thermo-chemical
 convection within a spherical shell. It can solve for problems within
 either a full or a restricted spherical domain. Although the code
@@ -409,15 +400,12 @@ and is now $10^{-4}$.
 \item The input parameter ``mantle\_temp'' is moved from the {[}CitcomS.solver.param{]}
 to the {[}CitcomS.solver.ic{]} section.
 \end{enumerate}
-This release of CitcomS 3.2 adds numerous changes since 3.1.1 which
+The release of CitcomS 3.2 added numerous changes since 3.1.1 which
 was released in 2009. These include improved implementations of internal
 stress, radial layer dependent viscosity, and velocity boundary conditions.
 Improvements have also been made in solver convergence controls, VTK
-output and several bug fixes. Finally, the Pyre configuration option
-has been turned off by default, though it can be enabled during configuration.
-Other enhancements include:
+output and several bug fixes. Other enhancements include:
 \begin{itemize}
-\item If Python 2.7 is detected, Pyre is disabled due to conflicts.
 \item Trial implementation of anisotropic viscosity.
 \item Added support of multigrid solver in Exchanger.
 \item Improved handling of grd-read velocity and traction boundary conditions.
@@ -433,50 +421,28 @@ PDEPV psrw=on parameter.
 \begin{itemize}
 \item Fixed a bug in pseudo free surface, reported by Robert Moucha.
 \item Correctly handle orphan tracers.
-\item Added Pyre binding for write\_q\_files, z\_layer, r\_grid\_layers,
-rr, nr, others.
 \item Replaced fixed accuracy setting. Bug reported by Rob Moucha.
 \item Fixed temperature perturbation bug for multiple processors. 
 \end{itemize}
 \end{itemize}
 
-\section{About Pyre}
+This release (3.3) removes the Python dependencies from CitcomS and provides
+a tool to convert Python style parameter files to the original CitcomS
+parameter files.  Python support was proving problematic because of
+incompatibility with versions of Python newer than 2.6 (final release 2008)
+and other internal issues.  The removal of Python should
+simplify much of the code while retaining almost all functionality.
+A full list of the changes includes:
 
-Pyre is an object-oriented environment capable of specifying and launching
-numerical simulations on multiple platforms, including Beowulf class
-parallel computers and grid computing systems. Pyre allows the binding
-of multiple components such as solid and fluid models used in Earth
-science simulations, and different meshers. The Pyre framework enables
-the elegant setup, modification and launching of massively parallel
-three-dimensional solver applications. 
-
-The Pyre framework incorporates features aimed at enabling the scientific
-non-expert to perform tasks easily without hindering the expert. Target
-features for end users allow complete and intuitive simulation specification,
-reasonable defaults, consistency checks of input, good diagnostics,
-easy access to remote facilities, and status monitoring. Target features
-for developers include easy access to user input, a shorter development
-cycle, and good debugging support. 
-
-
-\section{Pyre and CitcomS}
-
-Pyre provides a simulation framework that includes solver integration
-and coupling, uniform access to facilities, and integrated visualization.
-The framework offers a way to add new solvers to CitcomS and to fine-tune
-CitcomS simulations. 
-
-Developers have created Pyre classes for CitcomS to facilitate simulation
-setup. However, they are not independent classes in a strict sense.
-They still share the same underlying data structure and their functionality
-is not divided clearly. CitcomS was not designed to be object-oriented
-and to make it so would require significant investment of effort with
-little return. However, the lack of object-oriented features does
-not hinder the coupling of CitcomS with other solvers. 
-
+\begin{itemize}
+\item Removed Python sections of CitcomS
+\item Wrote Python to standard parameter file conversion tool (Py2C)
+\item Converted Python cookbooks parameter files to original style parameter files
+\item Added output of parameters to a pidXXXXXX style file
+\item Updated the manual to correspond to the new changes
+\end{itemize}
 
 \section{Governing Equations\label{sec:Governing-Equations}}
-
 With CitcomS, the mantle is treated as an anelastic, compressible,
 viscous spherical shell under Truncated Anelastic Liquid Approximation.
 With these assumptions, thermal convection is governed by the equations
@@ -918,8 +884,6 @@ Installation of CitcomS requires the following:
 \begin{itemize}
 \item A C compiler
 \item An MPI library
-\item If using Pyre: between Python 2.4 to 2.6, including header files (Python.h),
-and the pythia package (see below).
 \end{itemize}
 You can install all the dependencies in one command on most Linux
 machines. On Debian, Ubuntu or similar distributions, use this command
@@ -941,20 +905,6 @@ MPI installations are typically configured for a particular compiler,
 and provide a special wrapper command to invoke the right compiler.
 Therefore, the choice of MPI implementation often determines which
 C compiler to use.
-\begin{quote}
-\textbf{Note:} Users familiar with older versions of CitcomS may prefer
-to install only the legacy CitcomS tools, \texttt{CitcomSFull} and
-\texttt{CitcomSRegional}, and forgo use of Python and the Pyre framework.
-By default in CitcomS 3.2.0 this is how CitcomS is configured. This
-process requires only a C compiler and an MPI library. For more information,
-see Section \ref{sec:Installing-without-Pyre} later in this chapter.
-\end{quote}
-If you are going to use solver coupling, you will also need a decent
-C++ compiler (e.g., g++ 3.2 or newer) and the Exchanger package; see
-Section \ref{sec:Exchanger-Configuration-(Optional)}. Optionally,
-CitcomS can be configured to use a parallel HDF5 library; see Section
-\vref{sec:HDF5-Configuration}.
-
 
 \subsection{C Compiler}
 
@@ -1015,93 +965,18 @@ searches for the following MPI C command names:
 mpicc~hcc~mpcc~mpcc\_r~mpxlc~cmpicc
 \end{lyxcode}
 
-\subsection{Python (Optional)}
-
-Your system may already have a suitable Python interpreter installed.
-To check, type the \texttt{python} command:
-\begin{lyxcode}
-\$~python~-V
-
-Python~2.5.2
-\end{lyxcode}
-Mac OS X 10.3 and later ships with a suitable version of Python preinstalled.
-If you're using an older version of Mac OS X, or for more information
-in general, see Python on the Mac \url{www.python.org/download/mac}
-at the Python web site.
-
-On Linux, simply install the binary system package available for your
-distribution. Be sure to select the Python development package (typically
-called \texttt{python-dev}) in addition to the core Python package
--- even if you don't plan on doing any Python software development.
-The development package contains the Python header files (Python.h),
-which are necessary for building CitcomS.
-
-If you are working on a cluster and \texttt{python} is too old, try
-poking around a little. Sometimes multiple versions of Python are
-installed on the same system:
-\begin{lyxcode}
-\$~python~-V
-
-Python~2.2.3
-
-\$~which~python
-
-/usr/bin/python
-
-\$~ls~/usr/bin/python{*}
-
-/usr/bin/python~/usr/bin/python2~/usr/bin/python2.2
-
-/usr/bin/python24~/usr/bin/python2.4
-
-\$
-\end{lyxcode}
-In the above scenario, it is useful to create an alias to the newer
-Python:
-\begin{lyxcode}
-\$~cd~\textasciitilde{}/bin
-
-\$~ln~-s~/usr/bin/python2.4~python
-
-\$~export~PATH=\$HOME/bin:\$PATH
-
-\$~cd
-
-\$~hash~-r
-
-\$~which~python
-
-\textasciitilde{}/bin/python
-
-\$~python~-V
-
-Python~2.4.1
-
-\$
-\end{lyxcode}
-If absolutely necessary, one can easily build Python from source using
-a C compiler. You can download Python from the Python website \url{www.python.org}.
-Please note that Pyre in CitcomS does not work with Python 2.7 or
-higher.
-
-
-\subsection{Pythia (Optional)}
-
-The current version of pythia package can be downloaded from the \href{http://www.geodynamics.org/cig/software/pythia}{CIG Pythia page}.
-
-
 \section{Downloading and Unpacking Source}
 
 To obtain CitcomS, go to the Geodynamics Software Packages web page
-\url{geodynamics.org/cig/software/packages/mc/citcoms}, download
+\url{geodynamics.org/cig/software/citcoms}, download
 the source archive and unpack it using the \texttt{tar} command: 
 \begin{lyxcode}
-\$~tar~xzf~CitcomS-3.2.0.tar.gz
+\$~tar~xzf~CitcomS-3.3.0.tar.gz
 \end{lyxcode}
 
 If you don't have GNU Tar, try the following command instead: 
 \begin{lyxcode}
-\$~gunzip~-c~CitcomS-3.2.0.tar.gz~|~tar~xf~-
+\$~gunzip~-c~CitcomS-3.3.0.tar.gz~|~tar~xf~-
 \end{lyxcode}
 
 \section{Installation Procedure}
@@ -1112,7 +987,7 @@ CitcomS:
 \item Navigate (i.e., \texttt{cd}) to the directory containing the CitcomS
 source\texttt{.}~\\
 \texttt{}~\\
-\texttt{\$ cd CitcomS-3.2.0}
+\texttt{\$ cd CitcomS-3.3.0}
 \item Type .\texttt{/configure} to configure the package for your system\texttt{.}~\\
 \texttt{}~\\
 \texttt{\$ ./configure}
@@ -1179,14 +1054,6 @@ please send \texttt{config.log} as an attachment.
 Upon successful completion, \texttt{configure} will print a brief
 configuration summary.
 
-If Pyre is enabled, the \texttt{configure} script will automatically
-check for needed Python dependencies, including the Pythia package
-(which includes the Pyre framework). If necessary, \texttt{configure}
-will download missing Python packages from the Internet and store
-them under \texttt{\textit{\emph{deps/}}}. These are Python packages
-which are required (either directly or indirectly) by CitcomS.
-
-
 \subsection{Configure Usage}
 
 For a detailed list of \texttt{configure} variables and options, give
@@ -1212,16 +1079,6 @@ e.g.,
 \hline 
 \textbf{Variable} & \textbf{Description}\tabularnewline
 \hline 
-\hline 
-PYTHON & Python interpreter. This is useful if you have Python installed in
-a non-standard location, e.g.,
-
-\texttt{~~./configure \textbackslash{}}
-
-\texttt{~~~~~~PYTHON=/opt/python2.5/bin/python} 
-
-By default, \texttt{configure} will search for a suitable Python interpreter
-using your \texttt{PATH} environment variable.\tabularnewline
 \hline 
 CC & C compiler command. This is usually set to the name of an MPI wrapper
 command, e.g.,
@@ -1296,38 +1153,6 @@ itself in \texttt{LDFLAGS} using the \texttt{-l} compiler option.
 If a library name is not given -- or if the given option doesn't work
 -- \texttt{configure} will automatically try linking using \texttt{-lmpi}
 and, if that fails, \texttt{-lmpich}.
-
-
-\section{\label{sec:Exchanger-Configuration-(Optional)}Exchanger Configuration
-(Optional)}
-
-This version of CitcomS is capable of solver coupling. Two or more
-instances of CitcomS solvers can be coupled together to solve a problem
-with different length and time scales \cite{Tan et al GeoFramework Part I}.
-An external Exchanger package is needed for solver coupling. You can
-download Exchanger at CIG's Exchanger web page \url{geodynamics.org/cig/software/packages/cs/exchanger}.
-After you download and untar the package, you can configure and install
-Exchanger using these commands:
-\begin{lyxcode}
-\$~cd~Exchanger-1.0.1/
-
-\$~./configure~-{}-prefix=\$HOME/cig
-
-\$~make
-
-\$~make~install
-\end{lyxcode}
-By default, CitcomS will attempt to auto-detect your Exchanger installation
-and will disable Exchanger support if it is not found. You may specify
-the location of your Exchanger installation by setting the PYTHONPATH
-environment variable to the appropriate installation prefix.
-\begin{lyxcode}
-\$~cd~CitcomS-3.2.0/
-
-\$~export~PYTHONPATH=\$HOME/cig/lib/python2.5/site-packages:\$PYTHONPATH
-
-\$~./configure~-{}-with-exchanger
-\end{lyxcode}
 
 \section{\label{sec:HDF5-Configuration}HDF5 Configuration (Optional)}
 
@@ -1440,55 +1265,9 @@ commands:
 You may need to set \texttt{GMTHOME} and \texttt{NETCDFHOME} environment
 variables if these packages is not installed in the system directory.
 
-
-\section{\label{sec:Batch-System-Configuration}Batch System Configuration}
-
-If you are installing CitcomS on a cluster with a batch system, you
-can configure Pyre such that the \texttt{citcoms} command automatically
-submits jobs to the batch queue. Pyre contains support for the LSF,
-PBS, and Globus batch systems.
-
-The command to submit a batch job depends upon the particular batch
-system used. Further, the command used in a batch script to launch
-an MPI program varies from one cluster to the next. This command can
-vary between two clusters, even if the clusters use the same batch
-system! On some systems, \texttt{mpirun} is invoked directly from
-the batch script. On others, a special wrapper is used instead. If
-you need help to configure Pyre for your cluster, you can contact
-CIG Mantle Convection Mailing List \url{cig-mc@geodynamics.org} for
-assistance.
-
-Properly configured, Pyre can handle job submissions automatically,
-insulating users from the details of the batch system and the site
-configuration. This feature has the most value when the system administrator
-installs a global Pyre configuration file on the cluster (under \texttt{/etc/pythia-0.8}),
-for the benefit of all users and all Pyre-based applications.
-
-For more information on configuring Pyre for your batch system, see
-CIG's Pythia page \url{geodynamics.org/cig/software/packages/cs/pythia/docs/batch}.
-For more information on batch system configuration as it pertains
-to running CitcomS, see Section \vref{sub:Launchers-and-Schedulers}.
-
-
-\section{\label{sec:Installing-without-Pyre}Installing with Pyre}
-
-By default, CitcomS 3.2.0 does not install using Pyre. To build CitcomS
-binaries with the Pyre wrappers (necessary for the example Cookbooks),
-call \texttt{configure} using the \texttt{-{}-with-pyre} option:
-\begin{lyxcode}
-\$~./configure~-{}-with-pyre=yes
-\end{lyxcode}
-The only system requirements for this configuration are an MPI library
-and a C compiler. With Pyre the make command will build \texttt{pycitcoms}
-and \texttt{mpipycitcoms} as well as the script \texttt{citcoms} used
-for running CitcomS. Without Pyre the \texttt{make} command will build
-two command-line tools, \texttt{CitcomSFull} and \texttt{CitcomSRegional},
-for running the full solver and the regional solver, respectively.
-
-
 \section{\label{sec:Software-Repository}Installing from the Software Repository}
 
-The CitcomS source code is available via a Subversion server at the
+The CitcomS source code is available via Git at the
 Geodynamics website \url{geodynamics.org}. This allows users to view
 the revision history of the code and check out the most recent development
 version of the software.
@@ -1503,14 +1282,22 @@ In addition to the usual system requirements, you will need a handful
 of additional development tools installed in order to work with the
 source from the CIG software repository.
 
-First, you must have a Subversion client installed. To check, type
-\texttt{svn}; it should return a usage message.
+First, you must have a Git client installed. To check, type
+\texttt{git}; it should return a usage message.
 \begin{lyxcode}
-\$~svn
+\$~git
 
-Type~'svn~help'~for~usage.
+usage: git [--version] [--help] [-C <path>] [-c name=value]
+           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
+           [-p|--paginate|--no-pager] [--no-replace-objects] [--bare]
+           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+           <command> [<args>]
 \end{lyxcode}
-For more information on Subversion, visit the Subversion website \url{subversion.tigris.org}.
+For more information on Git, we recommend one of the following websites:
+
+http://github.com/
+http://git-scm.com/
+https://www.atlassian.com/git/
 
 Second, you must have the GNU tools Autoconf, Automake, and Libtool
 installed. To check, enter the following commands:
@@ -1522,28 +1309,28 @@ installed. To check, enter the following commands:
 \$~libtoolize~-{}-version
 \end{lyxcode}
 For more information about these GNU tools, see the GNU website \url{www.gnu.org/software}.
-The CitcomS v3.2.0 source package was created with Autoconf 2.68,
+The CitcomS v3.3.0 source package was created with Autoconf 2.68,
 Automake 1.11.2, and Libtool 2.4.2.
 
 
 \subsection{Download Source from Subversion}
 
-To check out the latest version of the software, use the \texttt{svn
-checkout} command:
+To check out the latest version of the software, use the \texttt{git 
+clone} command:
 \begin{lyxcode}
-\$~svn~checkout~http://geodynamics.org/svn/cig/mc/3D/CitcomS/trunk~CitcomS
+\$~git~clone~https://github.com/geodynamics/citcoms
 \end{lyxcode}
-This will create the local directory \texttt{CitcomS} (if it doesn't
+This will create the local directory \texttt{citcoms} (if it doesn't
 already exist) and fill it with the latest CitcomS source from the
 CIG software repository.
 
 The \texttt{CitcomS} directory thus created is called a \emph{working
 copy}. To merge the latest changes into an existing working copy,
-use the \texttt{svn update} command:
+use the \texttt{git pull update} command:
 \begin{lyxcode}
-\$~cd~CitcomS
+\$~cd~citcoms
 
-\$~svn~update
+\$~git~pull
 \end{lyxcode}
 This will preserve any local changes you have made to your working
 copy.
@@ -1597,10 +1384,9 @@ to run \texttt{make} again until you re-run \texttt{configure}.
 
 \chapter{Running CitcomS}
 
+\section{Using CitcomS}
 
-\section{Using CitcomS without Pyre}
-
-Regardless of whether you build CitcomS with or without Pyre, two
+Upon the completion of a successful build, two
 binary executables, \texttt{CitcomSRegional} and \texttt{CitcomSFull},
 are always placed under the \texttt{bin} directory. These programs
 are compiled from pure C code and do not use Python or the Pyre framework.
@@ -1614,216 +1400,146 @@ for a full spherical model, are provided in the \texttt{examples/Regional}
 and \texttt{examples/Full} directories, respectively. The meaning
 of the input parameters is described in Appendix \vref{cha:Appendix-A:-Input}.
 
-The pure C version, compared to the Pyre version, shares the same
-input parameters and functionality, but is less flexible in changing
-parameters and in launching parallel jobs. Users are encouraged to
-use the Pyre version if possible. In the following sections and Chapter
-\ref{cha:Cookbooks}, we will concentrate on the Pyre version only.
-
-
-\section{Using CitcomS with Pyre}
-
-If you build CitcomS with the Pyre framework, an additional executable,
-\texttt{citcoms}, is placed under the \texttt{bin} directory. The
-\texttt{citcoms} executable is a Python script used for running both
-the regional and full spherical models using Pyre. Executed without
-any command line options, \texttt{citcoms} will run a regional model
-with default parameters. It can also run a full spherical model if
-the correct parameters are set (see Section \vref{sec:Cookbook-1:-Global}
-for an example).
-
-On input, CitcomS needs numerous parameters to be specified (see Appendix
-\ref{cha:Appendix-A:-Input} for a full list). All parameters have
-sensible default values. Since you will likely want to specify the
-parameters of your CitcomS runs, you will need to alter both computational
-details (such as the number of time steps) and controlling parameters
-specific to your problem (such as the Rayleigh number). These input
-parameters, or properties in the Pyre terminology, are grouped under
-several Pyre components.
-
-Most of the properties you will set using CitcomS have names which
-are identical to the parameters for CitcomS in pure C version, which
-are described in Appendix \ref{cha:Appendix-A:-Input}.
-
-
 \section{Changing Parameters }
 
-There are several methods to set the input parameters for CitcomS:
-via the command line, or by using a configuration file in \texttt{.cfg}
-format.
+A configuration file should be used to set the input parameters for CitcomS.
+A configuration file is a plain text file whose format is based on the
+Windows INI file. The format of a configuration file is as follows:
 
-
-\subsection{Using the Command Line}
-
-Pyre uses the following syntax to change properties from the command
-line. To change the value of a property of a component, use:
 \begin{lyxcode}
--{}-{[}component{]}.{[}property{]}={[}value{]}
-\end{lyxcode}
-Each component is attached to a facility, so the option above can
-also be written as: 
-\begin{lyxcode}
--{}-{[}facility{]}.{[}property{]}={[}value{]}
-\end{lyxcode}
-Each facility has a default component attached to it. A different
-component can be attached to a facility by:
-\begin{lyxcode}
--{}-{[}facility{]}={[}new\_component{]}~
+\#CitcomS.component1.component2\\
+\#~this~is~a~comment\\
+property1=value1\\
+property2=value2~~;~this~is~another~comment
+property3=val1,val2,val3~~;~this~property~is~specified~by~a~list~of~values
 \end{lyxcode}
 
-\subsection{Using a \texttt{.cfg} File}
-
-Entering all those parameters via the command line involves the risk
-of typographical errors, which can lead to undesired results. You
-may find it easier to write a brief \texttt{.cfg} input file that
-contains the parameters. This file has a format similar to a Windows
-INI file. The file is composed of one or more sections which are formatted
-as follows:
-\begin{lyxcode}
-{[}CitcomS.component1.component2{]}~\\
-\#~this~is~a~comment~\\
-property1~=~value1~\\
-property2~=~value2~~;~this~is~another~comment
-\end{lyxcode}
-We strongly recommend that you use \texttt{.cfg} files for your work.
-The files are syntax-colored by the \texttt{vim} editor. (Upon termination
-of each run, all of the parameters are logged in a \texttt{.cfg} file.)
-
-
-\subsection{Using a \texttt{.pml} File}
-
-A \texttt{.pml} file is an XML file that specifies parameter values
-in a highly structured format. XML files are intended to be read and
-written by machines, not edited manually by humans. The \texttt{.pml}
-file format is intended for applications in which CitcomS input files
-are generated by another program, e.g., a GUI, web application, or
-a high-level structured editor. This file fomat will not be discussed
-or used further in the manual. It is composed of nested sections which
-are formatted as follows:
-\begin{lyxcode}
-<component~name='component1'>~\\
-~~~~<component~name='component2'>~\\
-~~~~~~~~<property~name='property1'>value1</property>~\\
-~~~~~~~~<property~name='property2'>value2</property>~\\
-~~~~</component>~\\
-</component>
-\end{lyxcode}
-
-\subsection{Specification and Placement of Configuration Files}
-
-One or more configuration files and command line options may be specified
-on the command line:
-\begin{lyxcode}
-\$~citcoms~a.cfg~b.cfg~-{}-foo.bar=baz
-\end{lyxcode}
-In addition, the Pyre framework searches for configuration files named
-\texttt{CitcomS.cfg} in several predefined locations. You may put
-settings in any or all of these locations, depending on the scope
-you want the settings to have:
-\begin{enumerate}
-\item \texttt{PREFIX/etc/CitcomS.cfg}, for system-wide settings;
-\item \texttt{\$HOME/.pyre/CitcomS/CitcomS.cfg}, for user settings and preferences;
-\item the current directory (\texttt{./CitcomS.cfg}), for local overrides. 
-\end{enumerate}
-Parameters given directly on the command line will override any input
-contained in a configuration file. If more than one configuration
-files are given on the command line, the later one overrides the former
-ones. Configuration files given on the command line override all other
-\texttt{CitcomS.cfg} files. The \texttt{CitcomS.cfg} files placed
-in (3) will override those in (2), (2) overrides (1), and (1) overrides
-only the built-in defaults.
-
+Upon termination of each run, all of the parameters are logged in a 
+\texttt{pidXXXXXX} file, where \texttt{XXXXXX} is the process id of the
+CitcomS application. Section names such as 
+\texttt{\#CitcomS.component1.component2} are optional, but are recommended for 
+the purpose of organizing the contents of the configuration file
 
 \section{Uniprocessor Example}
 
 CitcomS runs similarly in full spherical or regional modes. For the
 purpose of this example, you will perform a test run of the regional
-version on a workstation. Execute the following on the command line:
+version on a workstation. The CitcomS source package contains an 
+\texttt{examples} directory (the \texttt{make install} command installs the 
+examples under \texttt{PREFIX/share/CitcomS/examples}, where \texttt{PREFIX} 
+is the \texttt{CitcomS} installation directory). In this directory, you will 
+find the \texttt{example0} configuration file. Switch to the \texttt{examples}
+directory and execute the following on the command line:
 \begin{lyxcode}
-\$~citcoms~-{}-steps=10~-{}-controller.monitoringFrequency=5~\textbackslash{}~\\
--{}-solver.datafile=example0~-{}-solver.mesher.nodex=17~-{}-solver.mesher.nodey=17
+\$~CitcomSRegional example0
 \end{lyxcode}
-This runs a default convection problem in a regional domain for 10
-time steps and with a mesh of 17 $\times$ 17 $\times$ 9 nodal points.
-Since we did not provide the parameter \texttt{solver.mesher.nodez},
-the default value 9 is used. The model results are written to files
-\texttt{example0.{*}} with an interval of 5 time steps. 
-
-Instead of writing the input parameters on the command line, you can
-put them in a \texttt{.cfg} file. The CitcomS source package contains
-an \texttt{examples} directory (the \texttt{make install} command
-installs the examples under \texttt{PREFIX/share/CitcomS/examples},
-where \texttt{PREFIX} is the \texttt{CitcomS} installation directory).
-In this directory, you will find a configuration file equivalent to
-the previous example: \texttt{example0.cfg}. You can run the model
-using:
+or, equivalently,
 \begin{lyxcode}
-\$~citcoms~example0.cfg
+\$~mpirun~-np~1~CitcomSRegional example0
 \end{lyxcode}
 
-\subsubsection{Example: Uniprocessor, \texttt{example0.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~5~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~1~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~example0~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-nodex~=~~17~\\
-nodey~=~~17
-\end{lyxcode}
+\subsubsection{Example: Uniprocessor, \texttt{example0}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=5
+
+# CitcomS.controller
+storage_spacing=1
+
+# CitcomS.solver
+datafile=example0
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=17
+nodey=17
+nodez=9
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
 
 \section{\label{sec:Multiprocessor-Example}Multiprocessor Example}
 
-In order to run this example, you should be on a Beowulf cluster with
-four or more processors, or on a supercomputer; and you should be
-in the directory in which the input file is located, in this case,
-the \texttt{examples} directory. CitcomS has been extensively used
-on both environments, using up to several hundred processors. How
-to run a multiprocessor CitcomS model depends on your hardware and
-software settings, e.g., whether a batch system is used, what the
-names of the computers in a cluster are, and how the file system is
-organized. This section will lead you through the different settings
-of a parallel environment. 
-
-
-\subsubsection{Example: Multiprocessor, \texttt{example1.cfg }}
+In the \texttt{examples} directory, type the following at the command line:
 \begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~70~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~10~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~example1~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+\$~mpirun~-np~4~CitcomSRegional example1
 \end{lyxcode}
-This example uses 2 processors in colatitude ($x$-coordinate), 2
-in longitude ($y$-direction), and 1 in the radial ($z$-direction),
-i.e., it uses 4 processors in total. In addition, there will be 17
-nodes in $x$ (theta), 17 nodes in $y$ (fi), and 9 nodes in $z$
-(radius\_inner). The model will run for 70 time steps and the code
-will output the results every 10 time steps.
+
+\subsubsection{Example: Multiprocessor, \texttt{example1}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=70
+
+# CitcomS.controller
+storage_spacing=10
+
+# CitcomS.solver
+datafile=example1
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
+
+This example has:
+\begin{itemize}
+  \item 2 processors in colatitude ($x$-coordinate), specified by 
+    the \texttt{nprocx=2} line in the configuration file
+  \item 2 processors in longitude ($y$-direction), specified by 
+    the \texttt{nprocy=2} line
+  \item 1 processor in the radial ($z$-direction). The default value for
+    the \texttt{nprocx,nprocy,nprocz} parameters is 1. Hence the 
+    \texttt{nprocz=1} line is omitted from the configuration file.
+  \item The total number of processors used is given by
+  $\mathtt{nprocx}\times\mathtt{nprocy}\times\mathtt{nprocz}$. Hence this
+    model uses 4 processors in total.
+  \item There are 17 nodes in $x$ (theta) direction.
+  \item There are 17 nodes in $y$ (fi) direction.
+  \item There are 9 nodes in $z$ (radius\_inner) direction.
+\end{itemize}
+The model will run for 70 time steps and the code will output the results every
+10 time steps.
 
 It is important to realize that within the example script (and in
 finite element method, FEM) the term ``node'' refers to the mesh points
-defining the corners of the elements. In \texttt{example1.cfg}, this
+defining the corners of the elements. In \texttt{example1}, this
 is indicated with:
 \begin{lyxcode}
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~
+nodex=17\\
+nodey=17\\
+nodez=9
 \end{lyxcode}
 These quantities refer to the total number of FEM nodes in a given
 direction for the complete problem, and for the example it works out
@@ -1831,12 +1547,14 @@ that within a given processor there will be 9 $\times$ 9 $\times$
 9 nodes. Note that in the $x$-direction (or $y$) that for the entire
 problem there are 17 nodes and there is one node shared between two
 processors. This shared node is duplicated in two adjacent processors.
+
 Unfortunately, ``nodes'' sometimes also refer to the individual computers
-which make up a Beowulf cluster or supercomputer. In the example scripts,
-this is indicated with:
+which make up a cluster or supercomputer or the number of CPUs in a given 
+computer. We run one ``process'' on each node. In the example script this is 
+indicated with:
 \begin{lyxcode}
-nprocx~=~~2~\\
-nprocy~=~~2
+nprocx=2\\
+nprocy=2
 \end{lyxcode}
 \begin{figure}[H]
 \begin{centering}
@@ -1849,283 +1567,33 @@ of the computational nodes and the processors.}
 
 
 
-\subsection{Output Directories and Output Formats}
-
-CitcomS potentially generates a large number of ASCII files. This
-means that you will have to organize your directories carefully when
-running CitcomS so that you can manage these files as well as use
-a post-processing program contained in this distribution. 
-
-How to best manage this large output depends on whether you will use
-a local file system or a parallel file system. For example, if you
-have a local hard disk on every machine (node) on a Beowulf cluster,
-with each hard disk mounted locally to the machine, this scenario
-is referred to as a local file system in this section. Or you might
-use some kind of parallel file system on your computer (e.g., NFS,
-GPFS, PVFS, to name a few), which is mounted on all of the nodes.
-Usually your home directory is mounted on the parallel file system.
-The local file system is usually more cost- and time-efficient than
-the parallel file system. 
-
-If you want CitcomS to write its output to the local hard disks, you
-need to have a common directory structure on all of the local hard
-disks. For example, if the directory \texttt{/scratch} exists on all
-local hard disks, you can run the example script with:
+\subsection{Output Formats}
+The possible output formats in CitcomS are \texttt{ascii,ascii-gz,hdf5,vtk} with
+\texttt{ascii} being the default. The output format is specified by the
+\texttt{output\_format} configuration parameter. The ASCII output can 
+potentially take a lot of disk space. CitcomS can write \texttt{gzip} 
+compressed output directly. You can run the example script with:
 \begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/scratch
-\end{lyxcode}
-The additional command line option will override the \texttt{datadir}
-property, which specifies the output directory. The output files are
-then placed in \texttt{/scratch} on each individual machine with a
-filename prefix \texttt{example1.}
-
-However, if the output directory name on each local hard disk depends
-on the machine hostname, you can run the example script with:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/scratch\_\%HOSTNAME
-\end{lyxcode}
-The special string \texttt{\%HOSTNAME} will be substituted by the
-hostname of each machine. 
-
-As the final example for a local file system, you can specify an arbitrary
-output directory for each machine. To do so, you must write a program
-to be executed on each machine which will print the output directory.
-The program must be named \texttt{citcoms\_datadir} and must reside
-on your path. An example of \texttt{citcoms\_datadir} can be found
-in the \texttt{visual/} directory. Then you can run the example script
-with:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=\%DATADIR
-\end{lyxcode}
-The special string \texttt{\%DATADIR} will be substituted by the output
-of \texttt{citcoms\_datadir} for each machine.
-
-If you want CitcomS to write its output to a parallel file system,
-you have several choices. You can run the example script as follows
-(substitute \texttt{\emph{username}} with your own username):
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/home/\emph{username}
-\end{lyxcode}
-The output files are then placed in your home directory with a filename
-prefix \texttt{example1}. A potential problem with this approach is
-that the directory \texttt{/home/}\texttt{\emph{username}} will be
-flooded with hundreds of files, perhaps even tens of thousands of
-files if you are running a model using several tens of processors
-for thousands of time steps. Alternatively you can have each machine
-write its output to its own directory, according to its MPI rank.
-You can run the example script with:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/home/\emph{username}/\%RANK
-\end{lyxcode}
-The special string \texttt{\%RANK} will be substituted by the MPI
-rank of each processor. You will see four new directories \texttt{/home/}\texttt{\emph{username}}\texttt{/0},
-\texttt{/home/}\texttt{\emph{username}}\texttt{/1}, \texttt{/home/}\texttt{\emph{username}}\texttt{/2},
-and \texttt{/home/}\texttt{\emph{username}}\texttt{/3}. The processor
-of MPI rank 0 will write its output in \texttt{/home/}\texttt{\emph{username}}\texttt{/0}
-with a filename prefix \texttt{example1} (defined by the property
-\texttt{datafile} inside \texttt{example1.cfg}) and so on. 
-
-The ASCII output can potentially take a lot of disk space. CitcomS
-can write \texttt{gzip} compressed output directly. You can run the
-example script with:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/home/\emph{username}~\textbackslash{}~\\
--{}-solver.output.output\_format=ascii-gz
+  output\_format=ascii-gz
 \end{lyxcode}
 Be warned that the post-process scripts do not understand this output
 format yet.
 
-The last choice is the most powerful one. Instead of writing many
-ASCII files, CitcomS can write its results into a single HDF5 (Hierarchical
-Data Format) file per time step. These HDF5 files take less disk space
-than all the ASCII files combined and don't require additional post-processing
-to be visualized in OpenDX. In order to use this feature, you must
-compile CitcomS with the parallel HDF5 library if you haven't done
-so already (see Section \vref{sec:HDF5-Configuration}). You can run
-the example script with:
+Instead of writing many ASCII files, CitcomS can write its results into a 
+single HDF5 (Hierarchical Data Format) file per time step. These HDF5 files 
+take less disk space than all the ASCII files combined and don't require 
+additional post-processing to be visualized in OpenDX. In order to use this 
+feature, you must compile CitcomS with the parallel HDF5 library if you 
+haven't done so already (see Section \vref{sec:HDF5-Configuration}). You can 
+run the example script with:
 \begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-solver.datadir=/home/\emph{username}~\textbackslash{}~\\
--{}-solver.output.output\_format=hdf5
+  output\_format=hdf5
 \end{lyxcode}
-The output files will be stored in \texttt{/home/}\texttt{\emph{username}}\texttt{/}
+The output files will be stored in 
+\texttt{./}
 with a filename prefix \texttt{example1} and a filename suffix \texttt{h5}.
 See Chapter \vref{cha:Working-with-HDF5} for more information on
 how to work with the HDF5 output.
-
-
-\subsection{\label{sub:Launchers-and-Schedulers}Launchers and Schedulers}
-
-If you have used MPI before, you know that \texttt{mpirun} requires
-several command-line options to launch a parallel job. Or if you have
-used one of the batch systems, you will know that the batch system
-requires you to write a script to launch a job. Fortunately, launching
-a parallel CitcomS job is simplified by Pyre's \texttt{launcher} and
-\texttt{scheduler} facilities. Many properties associated with \texttt{launcher}
-and \texttt{scheduler} are pertinent to the cluster you are on, and
-are best customized in a configuration file. Your personal CitcomS
-configuration file (\texttt{\textasciitilde{}/.pyre/CitcomS/CitcomS.cfg})
-is suitable for this purpose. On a cluster, the ideal setup is to
-install a system-wide configuration file under \texttt{/etc/pythia-0.8},
-for the benefit of all users.
-
-Pyre's \texttt{scheduler} facility is used to specify the type of
-batch system you are using (if any):
-\begin{lyxcode}
-{[}CitcomS{]}
-
-scheduler~=~lsf
-\end{lyxcode}
-The valid values for \texttt{scheduler} are \texttt{lsf}, \texttt{pbs},
-\texttt{globus}, and \texttt{none}.
-
-Pyre's \texttt{launcher} facility is used to specify which MPI implementation
-you are using:
-\begin{lyxcode}
-{[}CitcomS{]}
-
-launcher~=~mpich
-\end{lyxcode}
-The valid values for \texttt{launcher} include \texttt{mpich} and
-\texttt{lam-mpi}.
-
-You may find the \texttt{dry} option useful while debugging the \texttt{launcher}
-and \texttt{scheduler} configuration. To debug the scheduler configuration,
-use the \texttt{-{}-scheduler.dry} option:
-\begin{lyxcode}
-citcoms~-{}-scheduler.dry
-\end{lyxcode}
-This option will cause CitcomS to perform a ``dry run,'' dumping the
-batch script to the console, instead of actually submitting it for
-execution (the output is only meaningful if you're using a batch system).
-Likewise, to debug the launcher configuration, use the \texttt{-{}-launcher.dry}
-option:
-\begin{lyxcode}
-citcoms~-{}-launcher.dry
-\end{lyxcode}
-This option will cause CitcomS to print the \texttt{mpirun} command,
-instead of actually executing it. (If you're using a batch system,
-a job will be submitted for execution; when it runs, CitcomS will
-simply print the \texttt{mpirun} command, and the job will immediately
-terminate.)
-
-
-\subsubsection{Running without a Batch System}
-
-On a cluster without a batch system, you need to specify on which
-machines the job will run. Supposing the machines on your cluster
-are named n001, n002, \ldots{}, etc., but you want to run the job
-on machines n001, n003, n004, and n005 (maybe n002 is down for the
-moment). To run the example, create a file named \texttt{mymachines.cfg}
-which specifies the machines to use:
-\begin{lyxcode}
-{[}CitcomS.launcher{]}
-
-nodegen~=~n\%03d
-
-nodelist~=~{[}1,3-5{]}
-\end{lyxcode}
-The \texttt{nodegen} property is a printf-style format string, used
-in conjunction with \texttt{nodelist} to generate the list of machine
-names. The \texttt{nodelist} property is a comma-separated list of
-machine names in square brackets.
-
-Now, invoke the following:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~mymachines.cfg
-\end{lyxcode}
-This strategy gives you the flexibility to create an assortment of
-\texttt{.cfg} files (with one \texttt{.cfg} file for each machine
-list) which can be easily paired with different parameter files.
-
-If your machine list does not change often, you may find it more convenient
-to specify default values for \texttt{nodegen} and \texttt{nodelist}
-in \texttt{\textasciitilde{}/.pyre/CitcomS/CitcomS.cfg} (which is
-read automatically). Then, you can run any simulation with no additional
-arguments:
-\begin{lyxcode}
-\$~citcoms~example1.cfg\end{lyxcode}
-\begin{quote}
-\textcolor{red}{Warning:} This assumes your machine list has enough
-nodes for the simulation in question.
-\end{quote}
-You will notice that a machine file \texttt{mpirun.nodes} is generated.
-It will contain a list of the nodes where CitcomS has run. Save the
-machine file as it will be useful in the postprocessing step.
-
-
-\subsubsection{Using a Batch System}
-
-The settings which are important when using a batch system are summarized
-in the sample configuration file which follows.
-\begin{lyxcode}
-{[}CitcomS{]}
-
-scheduler~=~lsf~~~~;~the~type~of~the~installed~batch~system~\\
-~\\
-{[}CitcomS.lsf{]}
-
-bsub-options~=~{[}-a~mpich\_gm{]}~~~~;~special~options~for~'bsub'~\\
-~\\
-{[}CitcomS.launcher{]}
-
-command~=~mpirun.lsf~~~~;~'mpirun'~command~to~use~on~our~cluster~\\
-~\\
-{[}CitcomS.job{]}
-
-queue~=~normal~~~~~~~~~~;~default~queue~for~jobs~\\
-walltime~=~5{*}minute~~~~~;~run~time~limit~of~the~job
-\end{lyxcode}
-These settings are usually placed in \texttt{\textasciitilde{}/.pyre/CitcomS/CitcomS.cfg}
-or in a system-wide configuration file. They can be overridden on
-the command line, where one typically specifies the job name and the
-allotted time for the job:
-\begin{lyxcode}
-\$~citcoms~example1.cfg~-{}-job.queue=debug~\textbackslash{}
-
-~~~~-{}-job.name=example1~-{}-job.walltime=5{*}minute
-\end{lyxcode}
-The number of nodes to allocate for the job is determined automatically,
-based upon the simulation parameters.
-
-
-\subsection{Monitoring Your Jobs}
-
-Once launched, CitcomS will print the progress of the model to the
-standard error stream (stderr). Usually, the stderr is directed to
-your terminal so that you can monitor the progress. On some system,
-the stderr is redirected to a file. In any case, the progress is always
-saved in a log file (e.g., \texttt{example1.log}). The log file contains
-the convergence progress of the computation and, if an error occurs,
-debugging output. The time file (e.g., \texttt{example1.time}) contains
-the elapsed model time (in non-dimensional units) and CPU time (in
-seconds) of every time step. The format of the time file can be found
-in Appendix \vref{cha:Appendix-C:-CitComS,}. The log and time files
-are output by the rank-0 processor only. 
-
-Following your successful run, you will want to retrieve the output
-files from all the nodes and process them so they can be visualized
-with the visualization program OpenDX (see Chapter\vref{cha:Postprocessing-and-Graphics}).
-
-
-\section{Using CitcomS on the TeraGrid}
-
-The TeraGrid is a set of parallel supercomputer facilities at eight
-partner sites in the U.S. which creates an integrated, persistent
-computational resource. Since TeraGrid software is based on commodity
-clusters, Linux/Unix, and Globus, it should be easier to scale from
-a laboratory development environment to a high-end environment in
-a straightforward manner which promotes application performance. Although
-the TeraGrid is a high-end resource, it was developed to be accessible
-to the general community of scientists and engineers as a production
-facility. TeraGrid accounts for small allocations are available directly
-from CIG for investigators in the U.S. 
-
-CitcomS has already been installed and tested on several NSF TeraGrid
-platforms, including NCSA, SDSC, and TACC. To use CitcomS on these
-machines, please log in to your TeraGrid account and read the instructions
-at \texttt{\$TG\_COMMUNITY/CIG/CitcomS/TG\_README}. See CIG Community
-Area Software on the TeraGrid \url{geodynamics.org/cig/software/csa/}
-for additional information on access and to apply for allocation time.
 
 
 \chapter{\label{cha:Working-with-HDF5}Working with CitcomS HDF5 Files}
@@ -2865,8 +2333,7 @@ Users familiar with GMT are welcome to contribute a fix to the script.}
 \section{Introduction}
 
 These cookbook examples are meant to serve as a guide to some of the
-types of problems CitcomS can solve. Each of these cookbook problems
-will only run with CitcomS if Pyre is enabled. Cookbook examples range
+types of problems CitcomS can solve. Cookbook examples range
 from regional to full spherical shell problems that address traditional
 mantle convection problems. These cookbook examples are distributed
 with the package under the \texttt{examples} directory. However, you
@@ -2882,11 +2349,7 @@ formulation for studying short wavelength dynamics topography. Cookbook
 7 introduces thermo-chemical convection problem and tuning of the
 Conjugate Gradient velocity solver. Cookbook 8 introduces compressible
 convection problem, checkpointing/restarting, geoid and tuning of
-the Multigrid and Uzawa velocity solver. Cookbook 9 introduces embedding
-one CitcomS domain within another CitcomS domain, and further tuning
-of the advection solver. Cookbook 10 introduces how to convert the
-convection field to seismic velocities and how to generate synthetic
-seismograms using SPECFEM3D\_GLOBE at the CIG Seismology Web Portal.\newpage{}
+the Multigrid and Uzawa velocity solver.
 
 
 \section{\label{sec:Cookbook-1:-Global}Cookbook 1: Global Model}
@@ -2917,22 +2380,22 @@ Right (B): The temperature field at 1081 km depth from a Cookbook
 
 \subsection{Solution}
 
-You will use \texttt{cookbook1.cfg}. The first set of parameters specifies
+You will use \texttt{cookbook1}. The first set of parameters specifies
 that you are going to use the full spherical version of the solver.
 The default is to use the regional spherical version, so this must
 be set.
 \begin{lyxcode}
-solver~=~full
+solver=full
 \end{lyxcode}
 The second set of parameters specifies the number of time steps (100),
 how often full outputs of the computation are created (25), and the
 prefix of output filenames (cookbook1).
 \begin{lyxcode}
-steps~=~100~\\
-monitoringFrequency~=~25~\\
-datafile~=~cookbook1
+steps=100~\\
+storage\_spacing=25\\
+datafile=cookbook1
 \end{lyxcode}
-The \texttt{solver.ic} facility controls the temperature field for
+The following parameters control the temperature field for
 the initial conditions. The last set of parameters includes the number
 of perturbations to the initial temperature (1), the number of nodal
 lines of the perturbation in the longitudinal direction, e.g., the
@@ -2942,36 +2405,51 @@ perturbation is on (5), and the amplitude of the perturbation (0.05).
 Note that although the number of perturbations is assigned here as
 \texttt{num\_perturbations=1}, that is actually the default value.
 \begin{lyxcode}
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05
+num\_perturbations=1\\
+perturbl=3\\
+perturbm=2\\
+perturblayer=5\\
+perturbmag=0.05
 \end{lyxcode}
 This example is executed by typing 
 \begin{lyxcode}
-\$~citcoms~cookbook1.cfg
+\$mpirun -np 12 CitcomSFull cookbook1
 \end{lyxcode}
 
-\subsubsection{Example: Global Model, \texttt{cookbook1.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~100~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~25~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook1~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05~
-\end{lyxcode}
+\subsubsection{Example: Global Model, \texttt{cookbook1}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=100
+solver=full
+
+# CitcomS.controller
+storage_spacing=25
+
+# CitcomS.solver
+datafile=cookbook1
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=9
+nodey=9
+nodez=9
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=5
+perturbm=2
+perturbmag=0.05
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
 Once you have run the model, you can visualize the results using OpenDX,
 described in the previous chapter. When you invoke ``Edit Visual Program,''
 select \texttt{visFull.net}. 
@@ -2986,8 +2464,6 @@ slice through a spherical model of convection, with warmer colors
 indicating upwelling and the cooler colors showing downwelling.}
 \end{figure}
 
-
-
 \subsection{Discussion}
 
 You have generated a simple example of the full CitcomS model, with
@@ -2996,23 +2472,9 @@ and perturbation on the initial temperature field which has a degree-3
 and an order-2 pattern, after 100 time steps, the convection pattern
 remains relatively steady.
 
-As a side note, it is not required that 12 processors, with one spherical
-cap per processor, be used. As an end-member possibility, for example,
-12 different jobs could be run on a single computer (\texttt{n001}
-in this example) by invoking:
-\begin{lyxcode}
-\$~citcoms~cookbook1.cfg~-{}-launcher.nodegen=\textquotedbl{}n\%03d\textquotedbl{}~\textbackslash{}~\\
--{}-launcher.nodelist={[}1,1,1,1,1,1,1,1,1,1,1,1{]}
-\end{lyxcode}
-This is not particularly efficient, but it does illustrate the flexibility
-of both MPI and Pyre.
-
 \newpage{}
 
-
 \section{Cookbook 2: Domain Size and Velocity Boundary Conditions}
-
-
 \subsection{Problem}
 
 This example solves for thermal convection with velocity boundary
@@ -3022,13 +2484,13 @@ This requires using the regional version of CitcomS.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook2.cfg}. The parameters specify the number
+You will use \texttt{cookbook2}. The parameters specify the number
 of time steps (60), the prefix of the output filenames (\texttt{cookbook2}),
 and how often outputs will be created (30).
 \begin{lyxcode}
-steps~=~60~\\
-monitoringFrequency~=~30~\\
-datafile~=~cookbook2
+steps=60\\
+storage\_spacing=30\\
+datafile=cookbook2
 \end{lyxcode}
 The \texttt{solver.mesher} facility has several properties involved
 in the generation of the computational mesh. Continue to use the default
@@ -3041,73 +2503,81 @@ and the minimum/maximum extents in the colatitudal, longitudal, and
 radial (\texttt{theta}, \texttt{fi}, \texttt{radius}) directions.
 The unit for \texttt{theta} and \texttt{fi} is radian.
 \begin{lyxcode}
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
+nprocx=2\\
+nprocy=2\\
+nodex=17\\
+nodey=17\\
+nodez=9\\
 ~\\
-theta\_min~=~0.7854~\\
-theta\_max~=~1.5708~\\
-fi\_min~=~0.0~\\
-fi\_max~=~0.7854~\\
-radius\_inner~=~0.55~\\
-radius\_outer~=~1.0
+theta\_min=0.7854\\
+theta\_max=1.5708\\
+fi\_min=0.0\\
+fi\_max=0.7854\\
+radius\_inner=0.55\\
+radius\_outer=1.0
 \end{lyxcode}
-The \texttt{solver.bc} facility allows you to impose a uniform velocity
+The following parameters allow you to impose a uniform velocity
 across the top surface. You have a velocity which is purely in the
 colatitude direction with a non-dimensional velocity of 100 (see Equation
 \vref{eq:u dim} for how to dimensionalize it).
 \begin{lyxcode}
-topvbc~~~~=~~~1~\\
-topvbxval~=~100~\\
-topvbyval~=~~~0
+topvbc=1\\
+topvbxval=100\\
+topvbyval=0
 \end{lyxcode}
 In addition, the initial temperature field has a linear conductive
 profile. The amplitude of initial temperature perturbation is set
-to zero using the \texttt{solver.ic} facility. 
+to zero using the following parameters. 
 \begin{lyxcode}
-num\_perturbations~=~1~\\
-perturbmag~~~~~~~~=~0.0~
+num\_perturbations=1\\
+perturbmag=0.0
 \end{lyxcode}
 
-\subsubsection{Example: Velocity Boundary Conditions, \texttt{cookbook2.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~60~~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~30~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook2~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-\#~Modify~the~layout~of~the~mesh.~\\
-{[}CitcomS.solver.mesher{]}~\\
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
-~\\
-theta\_min~=~0.7854~\\
-theta\_max~=~1.5708~\\
-fi\_min~=~0.0~\\
-fi\_max~=~0.7854~\\
-radius\_inner~=~0.55~\\
-radius\_outer~=~1.0~\\
-~\\
-\#~Impose~a~uniform~velocity~across~the~top~surface.~\\
-{[}CitcomS.solver.bc{]}~\\
-topvbc~~~~=~~~1~\\
-topvbxval~=~100~\\
-topvbyval~=~~~0~\\
-~\\
-\#~In~addition,~set~the~initial~temperature~perturbation~to~zero.~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbmag~~~~~~~~=~0.0~
-\end{lyxcode}
+\subsubsection{Example: Velocity Boundary Conditions, \texttt{cookbook2}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=60
+
+# CitcomS.controller
+storage_spacing=30      ; how often outputs are created
+
+# CitcomS.solver
+datafile=cookbook2      ; prefix of output filenames
+rayleigh=100000
+
+# Modify the layout of the mesh
+# CitcomS.solver.mesher
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+
+theta_max=1.5708
+theta_min=0.7854
+fi_max=0.7854
+fi_min=0.0
+radius_inner=0.55
+radius_outer=1.0
+
+# Import a uniform velocity across the top surface.
+# CitcomS.solver.bc
+topvbc=1
+topvbxval=100
+topvbyval=0
+
+# In addition, set the initial temperature perturbation to zero.
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.0
+
+# CitcomS.solver.visc
+num_mat=4
+\end{verbatim}
 
 \subsection{Discussion}
 
@@ -3146,19 +2616,19 @@ or stress-dependent viscosity.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook3.cfg}. The parameters specify the number
+You will use \texttt{cookbook3}. The parameters specify the number
 of time steps (200), how often outputs will be created (25), the prefix
 of the output filenames (\texttt{cookbook3}), and the Rayleigh number
 ($10^{6}$).
 \begin{lyxcode}
-steps~=~200~\\
-monitoringFrequency~=~25~\\
-datafile~=~cookbook3~\\
-rayleigh~=~1e6
+steps=200\\
+monitoringFrequency=25\\
+datafile=cookbook3\\
+rayleigh=1e6
 \end{lyxcode}
-The \texttt{solver.visc} facility assigns the viscosities. The parameters
-specify whether the viscosity should be updated at every time step
-(\texttt{on}), the number of viscous layers (4), the viscosity of
+The parameters specify whether the viscosity should be updated at every time
+step (\texttt{on}), the number of viscous layers (4), the viscosity of
+>>>>>>> python-removal
 each layer (1,1,1,1), whether the viscosity is temperature dependent
 (\texttt{on}), the type of viscosity law to use (4), the activation
 energy of each layer (0.2,0.2,0.2,0.2), the temperature offset of
@@ -3179,6 +2649,20 @@ VMIN~=~on~\\
 visc\_min~=~1.0~\\
 VMAX~=~on~\\
 visc\_max~=~100.0
+=======
+VISC\_UPDATE=on\\
+num\_mat=4\\
+visc0=1,1,1,1\\
+TDEPV=on\\
+rheol=4\\
+viscE=0.2,0.2,0.2,0.2\\
+viscT=0,0,0,0\\
+viscZ=0,0,0,0\\
+VMIN=on\\
+visc\_min=1.0\\
+VMAX=on\\
+visc\_max=100.0
+>>>>>>> python-removal
 \end{lyxcode}
 The range of the layers are determined by the following parameters:
 layer 1 extends from the top surface to a depth of \texttt{solver.const.z\_lith}
@@ -3222,43 +2706,51 @@ viscZ=\frac{\rho gV_{a}}{R\Delta T}\label{eq:viscZ}
 viscT=T_{0}\label{eq:viscT}
 \end{equation}
 
+\subsubsection{Example: Temperature-Dependent Viscosity, \texttt{cookbook3}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=200
 
+# CitcomS.controller
+storage_spacing=25
 
-\subsubsection{Example: Temperature-Dependent Viscosity, \texttt{cookbook3.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~200~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~25~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook3~~~~~~~~;~prefix~of~output~filenames~\\
-rayleigh~=~1e6~~~~~~~~~~~~~~;~Rayleigh~number~\\
-~\\
-\#~Modify~the~layout~of~the~mesh.~\\
-{[}CitcomS.solver.mesher{]}~\\
-nprocx~=~~2~\\
-nprocy~=~~2~\\
-nodex~~=~17~\\
-nodey~~=~17~\\
-nodez~~=~~9~\\
-~\\
-\#~Assign~the~viscosities.~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+# CitcomS.solver
+datafile=cookbook3
+rayleigh=1e6
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook3.pdf}
@@ -3289,67 +2781,67 @@ while a lower resolution is sufficient for the wider cold downwelling.
 \subsection{Solution}
 
 The parameter that controls whether a mesh is to be uniform or refined
-is \texttt{solver.mesher.coor}. Set it to \texttt{1} \texttt{(solver.mesher.coor=1)}
+is \texttt{coor}. Set it to \texttt{1} \texttt{(coor=1)}
 in order to read the uneven mesh point coordinates from an input file
 (specified by \texttt{coor\_file}). The format of the coordinate input
 file is described in Appendix \vref{sec:Coordinate-files}.
 \begin{lyxcode}
-coor~=~1~\\
-coor\_file~=~coor.dat
+coor=1\\
+coor\_file=coor.dat
 \end{lyxcode}
 The computational domain is bounded in colatitude between radian 1
 and 2, in latitude between radian 0 and 1, and in radius between 0.55
 and 1, as determined by the content of \texttt{coor\_file}.
 
 
-\subsubsection{Example: Regionally Refined Meshes, \texttt{cookbook4.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~250~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~10~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-rayleigh~=~1e6~~~~~~~~~~~~~~;~Rayleigh~number~\\
-datafile~=~cookbook4~~~~~~~~;~prefix~of~output~filenames~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbmag~=~0.05~\\
-perturblayer~=~10~\\
-~\\
-\#~Perturb~the~initial~temperature~gradient~in~the~longitudinal~\\
-\#~direction.~\\
-perturbl~=~1~\\
-perturbm~=~0~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-\#~Read~uneven~mesh~point~coordinates~from~'coor.dat'.~\\
-coor~=~1~\\
-coor\_file~=~coor.dat~\\
-~\\
-nprocx~=~2~\\
-nprocy~=~1~\\
-nprocz~=~1~\\
-nodex~=~33~\\
-nodey~=~17~\\
-nodez~=~17~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+\subsubsection{Example: Regionally Refined Meshes, \texttt{cookbook4}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=250
+
+# CitcomS.controller
+storage_spacing=50
+
+# CitcomS.solver
+datafile=cookbook4
+rayleigh=1e6
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=coor.dat
+fi_max=1
+fi_min=0
+nodex=33
+nodey=17
+nodez=17
+nprocx=1
+nprocy=1
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=10
+perturbm=0
+perturbmag=0.05
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook4.pdf}
@@ -3403,17 +2895,17 @@ jump occurred for the right slab only, so the Euler pole moved closer.
 Since we impose a top velocity boundary in our model, the following
 parameters should be turned on: 
 \begin{lyxcode}
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~1~\\
+\# CitcomS.solver.bc\\
+topvbc=1\\
 ~\\
-{[}CitcomS.solver.param{]}~\\
-file\_vbcs~=~on
+\# CitcomS.solver.param\\
+file\_vbcs=on
 \end{lyxcode}
 The following two lines specify the location of the velocity files
 and the starting age for the model: 
 \begin{lyxcode}
-start\_age~=~55~\\
-vel\_bound\_file~=~./velocity/bvel.dat~
+start\_age=55\\
+vel\_bound\_file=./velocity/bvel.dat~
 \end{lyxcode}
 Since the starting age is set to 55 Ma, there will be 57 velocity
 files, one for each Ma (\texttt{vel.dat0, vel.dat1,} \texttt{...vel.dat55,
@@ -3429,13 +2921,13 @@ and \texttt{datafile\_old}, and the time step of the velo file in
 \texttt{solition\_cycles\_init}. In this example, a processor of MPI
 rank \texttt{n} will read file \texttt{./ic/cookbook5.velo.n.0}
 \begin{lyxcode}
-{[}CitcomS.solver{]}~\\
-datadir\_old~=~./ic~\\
-datafile\_old~=~cookbook5~\\
+\# CitcomS.solver\\
+datadir\_old=./ic\\
+datafile\_old=cookbook5\\
 ~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~-1~~\\
-solution\_cycles\_init~=~0
+\# CitcomS.solver.ic\\
+tic\_method=-1\\
+solution\_cycles\_init=0
 \end{lyxcode}
 The descending slab will cause some numerical instability in the temperature
 solver. To reduce the numerical instability, you will use a smaller
@@ -3444,9 +2936,9 @@ The change in maximum temperature will also be monitored. If the maximum
 temperature increases too much (> 5\%) between time steps, the temperature
 solver will rerun with half time-step size.
 \begin{lyxcode}
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-monitor\_max\_T~=~on
+\# CitcomS.solver.tsolver\\
+finetunedt=0.75\\
+monitor\_max\_T=on
 \end{lyxcode}
 \begin{figure}[H]
 \begin{centering}
@@ -3463,60 +2955,67 @@ so the Euler pole moved closer.}
 
 
 
-\subsubsection{Example: Subduction Models with Trench Rollback, \texttt{cookbook5.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~1100~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~100~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datafile~=~cookbook5~\\
-datadir\_old~=~./ic~\\
-datafile\_old~=~cookbook5~\\
-rayleigh~=~4.07e+08~\\
-~\\
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~1~\\
-~\\
-{[}CitcomS.solver.param{]}~\\
-file\_vbcs~=~on~\\
-start\_age~=~55~\\
-~\\
-\#~Since~the~starting~age~is~set~to~55~Ma,~there~will~be~57~velocity~\\
-\#~files,~one~for~each~Ma~(bvel.dat0,~bvel.dat1,~...~bvel.dat56).~\\
-vel\_bound\_file~=~./velocity/bvel.dat~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~-1~\\
-solution\_cycles\_init~=~0~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-coor~=~1~\\
-coor\_file~=~./coor.dat~\\
-nprocx~=~1~\\
-nprocy~=~2~\\
-nprocz~=~1~\\
-nodex~=~17~\\
-nodey~=~65~\\
-nodez~=~33~\\
-~\\
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-monitor\_max\_T~=~on~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-num\_mat~=~4~\\
-visc0~=~100,0.003,1,2~\\
-TDEPV~=~on~\\
-viscE~=~24,24,24,24~\\
-viscT~=~0.182,0.182,0.182,0.182~\\
-VMIN~=~on~\\
-visc\_min~=~0.01~\\
-VMAX~=~on~\\
-visc\_max~=~100.0~
-\end{lyxcode}
+\subsubsection{Example: Subduction Models with Trench Rollback, \texttt{cookbook5}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=1100
+
+# CitcomS.controller
+storage_spacing=100
+
+# CitcomS.solver
+datadir_old=./ic
+datafile=cookbook5
+datafile_old=cookbook5
+rayleigh=4.07e+08
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=./coor.dat
+fi_max=1
+fi_min=0
+nodex=17
+nodey=65
+nodez=33
+nprocx=1
+nprocy=2
+nprocz=1
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+finetunedt=0.75
+monitor_max_T=on
+
+# CitcomS.solver.bc
+topvbc=1
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+solution_cycles_init=0
+tic_method=-1
+
+# CitcomS.solver.param
+file_vbcs=on
+start_age=55
+vel_bound_file=./velocity/bvel.dat
+
+# CitcomS.solver.visc
+TDEPV=on
+VMAX=on
+VMIN=on
+num_mat=4
+visc0=100,0.003,1,2
+viscE=24,24,24,24
+viscT=0.182,0.182,0.182,0.182
+visc_max=100.0
+visc_min=0.01
+\end{verbatim}
 \begin{figure}[H]
 \begin{centering}
 \includegraphics{graphics/cookbook5dot2.pdf}
@@ -3554,8 +3053,7 @@ compensated by the deformed surface. This type of boundary condition
 works well for long-wavelength topography, but a free-surface formulation
 becomes necessary in cases where intermediate to short wavelength
 topography is of interest or the lithosphere has a very high effective
-viscosity. Another situation where free-surface formulation is desired
-is when two Pyre solvers, Snac and Citcom, are coupled.
+viscosity.
 
 The basic algorithm \cite{Zhong et al Free-surface formulation,Zhong et al Three-dimensional}
 consists of four steps. 
@@ -3586,15 +3084,15 @@ of the radial dimension placed at the center of the domain
 \end{itemize}
 The pseudo-free-surface boundary condition is enabled by:
 \begin{lyxcode}
-{[}CitcomS.solver.bc{]}~\\
-topvbc~=~2~\\
-pseudo\_free\_surf~=~on
+\# CitcomS.solver.bc\\
+topvbc=2\\
+pseudo\_free\_surf=on
 \end{lyxcode}
 The time step size is fixed to $7.77\times10^{-10}$ (about 1000 yrs),
 instead of determined dynamically by the velocity solution.
 \begin{lyxcode}
-{[}CitcomS.solver.tsolver{]}~\\
-fixed\_timestep~=~7.77e-10
+\# CitcomS.solver.tsolver\\
+fixed\_timestep=7.77e-10
 \end{lyxcode}
 
 \subsection{Discussion}
@@ -3631,7 +3129,7 @@ as due to the thermal heterogeneity, drive the convection flow.
 
 \subsection{Solution}
 
-You will use \texttt{cookbook7.cfg}. Most of the parameters you have
+You will use \texttt{cookbook7}. Most of the parameters you have
 encountered in previous cookbooks. The initial condition is the same
 as in Cookbook 1, and the viscosity law is the same as in Cookbook
 3. 
@@ -3640,17 +3138,17 @@ A large number of ASCII files will be output. In order to keep the
 current directory tidy, the output files can be put in a subdirectory
 \texttt{output/} by specifying
 \begin{lyxcode}
-datadir~=~output
+datadir=output
 \end{lyxcode}
 Since you are interested in the composition field, the compostion
 output should be enabled and some output files disabled:
 \begin{lyxcode}
-output\_optional~=~tracer,comp\_nd
+output\_optional=tracer,comp\_nd
 \end{lyxcode}
 The most important parameters are in the \texttt{CitcomS.solver.tracer}
 section. Turn on the tracer module:
 \begin{lyxcode}
-tracer~=~1
+tracer=1
 \end{lyxcode}
 The number of tracers and their initial location must be set. Here,
 you specify \texttt{tracer\_ic\_method=0}. The tracers will be generated
@@ -3666,9 +3164,9 @@ of the tracers from the file specified by \texttt{datafile\_old} (in
 the \texttt{CitcomS.solver} section) and \texttt{solution\_cycles\_init}
 (in the \texttt{CitcomS.solver.ic} section). 
 \begin{lyxcode}
-tracer\_ic\_method~=~0~\\
-tracers\_per\_element~=~20~\\
-tracer\_file~=~tracer.dat
+tracer\_ic\_method=0\\
+tracers\_per\_element=20\\
+tracer\_file=tracer.dat
 \end{lyxcode}
 Each tracer can have a ``flavor'' attached to it. The meaning of the
 flavor depends on the application. Here, the flavor indicates the
@@ -3680,21 +3178,21 @@ how to assign the flavor to each tracer. If \texttt{ic\_method\_for\_flavors=0},
 tracers above \texttt{z\_interface} are assigned to flavor 0, and
 tracers below \texttt{z\_interface} to flavor 1.
 \begin{lyxcode}
-tracer\_flavors~=~2~\\
-ic\_method\_for\_flavors~=~0~\\
-z\_interface~=~0.7
+tracer\_flavors=2\\
+ic\_method\_for\_flavors=0\\
+z\_interface=0.7
 \end{lyxcode}
 The thermo-chemical convection module is turned on by
 \begin{lyxcode}
-chemical\_buoyancy~=~1
+chemical\_buoyancy=1
 \end{lyxcode}
 The composition field is determined by the ratio method (\texttt{buoy\_type=1})
 \cite{Tackely King tracer ratio method}. The density anomaly of the
 anomalous chemical composition is defined by $B=\Delta\rho_{ch}/\left(\rho_{0}\alpha_{0}\Delta T\right)$,
 the buoyancy ratio. 
 \begin{lyxcode}
-buoy\_type~=~1~\\
-buoyancy\_ratio~=~0.5
+buoy\_type=1\\
+buoyancy\_ratio=0.5
 \end{lyxcode}
 The code keeps track of the sum of the bulk composition. In a perfect
 world, the sum of the bulk composition would not change with time.
@@ -3710,8 +3208,8 @@ rule of thumb is that the grid spacing of the regular grid should
 be less than $18/(nodex\times nprocx)$. These parameters are used
 only in the full spherical version.
 \begin{lyxcode}
-regular\_grid\_deltheta~=~1.0~\\
-regular\_grid\_delphi~=~1.0
+regular\_grid\_deltheta=1.0\\
+regular\_grid\_delphi=1.0
 \end{lyxcode}
 If you encounter any error, look at the end of the tracer log files
 (\texttt{cookbook7.tracer\_log.{*}}) for error messages.
@@ -3726,74 +3224,69 @@ are set by \texttt{piterations}. \texttt{Both vlowstep }and \texttt{piterations}
 should be large integers, but you can experiment with a larger value
 for \texttt{accuracy} to speed up the computation. 
 \begin{lyxcode}
-Solver~=~cgrad~\\
-accuracy~=~1e-03~\\
-vlowstep~=~1000~\\
-piterations~=~1000
+Solver=cgrad\\
+accuracy=1e-03\\
+vlowstep=1000\\
+piterations=1000
 \end{lyxcode}
 
-\subsubsection{Example: Thermo-Chemical Convection, \texttt{cookbook7.cfg}}
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~15~~~~~~~~~~~~~~~~~;~number~of~time~steps~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~5~~~~;~how~often~outputs~are~created~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datadir~=~output~~~~~~~~~~~;~path~to~output~directory~\\
-datafile~=~cookbook7~~~~~~~;~prefix~of~output~filenames~\\
-rayleigh~=~1e7~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~5~\\
-perturbmag~=~0.05~\\
-~\\
-{[}CitcomS.solver.output{]}~\\
-output\_optional~=~tracer,comp\_nd~\\
-~\\
-{[}CitcomS.solver.tracer{]}~\\
-tracer~=~on~\\
-tracer\_ic\_method~=~0~\\
-tracers\_per\_element~=~20~\\
-tracer\_file~=~tracer.dat~\\
-~\\
-tracer\_flavors~=~2~\\
-ic\_method\_for\_flavors~=~0~\\
-z\_interface~=~0.7~\\
-~\\
-chemical\_buoyancy~=~1~\\
-buoy\_type~=~1~\\
-buoyancy\_ratio~=~0.5~\\
-~\\
-regular\_grid\_deltheta~=~1.0~\\
-regular\_grid\_delphi~=~1.0~\\
-~\\
-{[}CitcomS.solver.vsolver{]}~\\
-Solver~=~cgrad~\\
-accuracy~=~1e-04~\\
-vlowstep~=~1000~\\
-piterations~=~1000~\\
-~\\
-\#~Assign~the~viscosities.~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-rheol~=~4~\\
-viscE~=~0.2,0.2,0.2,0.2~\\
-viscT~=~0,0,0,0~\\
-viscZ~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0
-\end{lyxcode}
+\subsubsection{Example: Thermo-Chemical Convection, \texttt{cookbook7}}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=15
+solver=full
+
+# CitcomS.controller
+storage_spacing=5
+
+# CitcomS.solver
+datadir=output
+datafile=cookbook7
+rayleigh=1e7
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=9
+nodey=9
+nodez=9
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.vsolver
+Solver=cgrad
+accuracy=1e-04
+piterations=1000
+vlowstep=1000
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=5
+perturbm=2
+perturbmag=0.05
+
+# CitcomS.solver.output
+output_optional=tracer,comp_nd
+
+# CitcomS.solver.tracer
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=4
+visc0=1,1,1,1
+viscE=0.2,0.2,0.2,0.2
+viscT=0,0,0,0
+viscZ=0,0,0,0
+visc_max=100.0
+visc_min=1.0
+\end{verbatim}
 \noindent \begin{center}
 \begin{figure}[H]
 \noindent \begin{centering}
@@ -3905,20 +3398,16 @@ state. It will use 12 processors and take 1 to 2 days to finish on
 a modern computer. At every 1,000th time-step interval, a checkpoint
 for the internal state of the solver is saved.
 \begin{lyxcode}
-checkpointFrequency~=~1000
+checkpointFrequency=1000
 \end{lyxcode}
 If the solver is interrupted before finishing the computation, one
 can resume the computation from the checkpointed state. To shorten
-the computation time, a checkpoint at the 9,000th time step (\texttt{CitcomS-cookbook8-
-restart.tar.gz}) is provided at CIG's CitcomS web page \url{geodynamics.org/cig/software/packages/mc/citcoms}.
-(Note that the checkpoint files are produced by an x86 machine and
-may not be usable by other types of machines, e.g., PowerPC.) To resume
-the computation from the 9,000th time-step checkpoint, untar the package
-in the \texttt{examples/Cookbook8/} directory and set these parameters:
+the computation time, a checkpoint at the 9,000th time step 
+is provided in the \texttt{examples/Cookbook8/} directory. To restart the
+computation from this checkpoint, set these parameters:
 \begin{lyxcode}
-{[}CitcomS.solver.ic{]}~\\
-restart~=~on~\\
-solution\_cycles\_init~=~9000
+restart=on\\
+solution\_cycles\_init=9000
 \end{lyxcode}
 If you restart from the checkpoint, the computation will resume from
 the 9,000th time-step. Note that the \texttt{coord} files are only
@@ -3936,26 +3425,26 @@ the effective dissipation number is 0.275 ($=0.5\times(r_{outer}-r_{inner})$).
 Under these non-dimensional numbers, the convection is of low vigor
 and low compressibility.
 \begin{lyxcode}
-rayleigh~=~7.68175583e4~\\
-dissipation\_number~=~0.5~\\
-gruneisen~=~1.25~\\
-surfaceT~=~0.1
+rayleigh=7.68175583e4\\
+dissipation\_number=0.5\\
+gruneisen=1.25\\
+surfaceT=0.1
 \end{lyxcode}
 Since we are going to use the multigrid solver, the grid size is specified
 by:
 \begin{lyxcode}
-nodex~=~33~\\
-nodey~=~33~\\
-nodez~=~33~\\
-levels~=~5
+nodex=33\\
+nodey=33\\
+nodez=33\\
+levels=5
 \end{lyxcode}
 The additional parameter \texttt{levels} specifies the nested levels
 of multigrid units and is subjected to the following constraint: 
 \begin{equation}
 \mathrm{nodex}=1+\mathrm{nprocx}\times\mathrm{mgunitx}\times2^{levels-1}\label{eq:mgunit}
 \end{equation}
-where \texttt{mgunitx} must be an integer. In the pure C version,
-\texttt{mgunitx} is an input parameter.
+where \texttt{mgunitx}, which \textbf{must be an integer}, is an input 
+parameter.
 
 If \texttt{reference\_state=}1, then constant gravity, heat capacity,
 thermal expansivity, and $\rho_{r}=exp\left(\frac{D_{i}}{\gamma}(1-r)\right)$
@@ -3963,16 +3452,16 @@ are used as the reference state. If \texttt{reference\_state=}0, the
 reference state is read from a file \texttt{refstate\_file}. See Appendix
 \ref{cha:Appendix-A:-Input} for the file format.
 \begin{lyxcode}
-reference\_state~=~1~\\
-refstate\_file~=~ref.dat
+reference\_state=1\\
+refstate\_file=ref.dat
 \end{lyxcode}
 We are interested in the geoid, dynamic topography, and heat flux.
 The dynamic topography and heat flux are computed on the surface grids.
 The geoid is computed in the spherical harmonics, with a maximal degree
 of \texttt{20}. 
 \begin{lyxcode}
-output\_optional~=~geoid,surf,botm~\\
-output\_ll\_max~=~20
+output\_optional=geoid,surf,botm\\
+output\_ll\_max=20
 \end{lyxcode}
 The initial temperature is a conductive profile with a single spherical
 harmonic perturbation. The perturbation is located at mid-depth and
@@ -3982,29 +3471,29 @@ mag\times\sin\left(\frac{(r-r_{in})\pi}{r_{out}-r_{in}}\right)\left(\sin(m\phi)+
 \]
 
 \begin{lyxcode}
-tic\_method~=~3~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~17~\\
-perturbmag~=~0.01
+tic\_method=3\\
+num\_perturbations=1\\
+perturbl=3\\
+perturbm=2\\
+perturblayer=17\\
+perturbmag=0.01
 \end{lyxcode}
 You will need the output of dynamic topography and the geoid. The
 dynamics topography will be computed by the Consistent Boundary Flux
 (CBF) method, and the effect of self-gravitation is included in the
 geoid. The maximum spherical harmonics degree for the geoid is 20.
 \begin{lyxcode}
-output\_optional~=~geoid,surf,botm~\\
-use\_cbf\_topo~=~on~\\
-self\_gravitation~=~on~\\
-output\_ll\_max~=~20
+output\_optional=geoid,surf,botm\\
+use\_cbf\_topo=on\\
+self\_gravitation=on\\
+output\_ll\_max=20
 \end{lyxcode}
 Various parameters tune the performance of the solver. The maximum
 size of each time step is determined dynamically by the Courant criterion.
 To enhance the stability of the energy equation solver, you will only
 use three quarters of the maximum Courant time-step size.
 \begin{lyxcode}
-finetunedt~=~0.75
+finetunedt=0.75
 \end{lyxcode}
 You will use the multigrid solver to solve the matrix equation $\mathbf{A}x=b$
 for $x$. The multigrid solver is more efficient than the conjugate
@@ -4018,26 +3507,26 @@ of smoothing passes at lowest/highest levels; and \texttt{max\_mg\_cycles}
 is the maximum number of multigrid cycles per solve. All these parameters
 should be small integers.
 \begin{lyxcode}
-Solver~=~multigrid~\\
-mg\_cycle~=~1~\\
-down\_heavy~=~2~\\
-up\_heavy~=~2~\\
-vlowstep~=~20~\\
-vhighstep~=~2~\\
-max\_mg\_cycles~=~50
+Solver=multigrid\\
+mg\_cycle=1\\
+down\_heavy=2\\
+up\_heavy=2\\
+vlowstep=20\\
+vhighstep=2\\
+max\_mg\_cycles=50
 \end{lyxcode}
 The following parameter turn on the pre-conditioner for the matrix
 equation solver (either multigrid or conjugate gradient).
 \begin{lyxcode}
-precond~=~on
+precond=on
 \end{lyxcode}
 The stiffness matrix uses augmented Lagrangian formulation to improve
 the convergence for large viscosity variations \cite{Moresi/Zhong/Gurnis The accuracy}.
 These parameters specify whether to enable the formulation and how
 much weight to use for the formulation.
 \begin{lyxcode}
-aug\_lagr~=~on~\\
-aug\_number~=~2.0e3
+aug\_lagr=on\\
+aug\_number=2.0e3
 \end{lyxcode}
 The discrete Stokes equations \ref{eq:discrete continuite eqn} and
 \ref{eq:discrete momentum eqn} are solved using the Uzawa algorithm,
@@ -4050,15 +3539,15 @@ level for the continuity equation \ref{eq:discrete continuite eqn}.
 Sometimes, larger value of \texttt{piterations} is required for convergence
 if complicated velocity boundary conditions are used.
 \begin{lyxcode}
-piterations~=~375
+piterations=375
 \end{lyxcode}
 For the compressible case, two choices of the Uzawa algorithm are
 available. If \texttt{uzawa=cg}, the algorithm described in Equation
 \ref{eq:iter-cg} is used. In this case, an additional parameter controls
 the maximum number of outer iterations. 
 \begin{lyxcode}
-uzawa~=~cg~\\
-compress\_iter\_maxstep~=~100
+uzawa=cg\\
+compress\_iter\_maxstep=100
 \end{lyxcode}
 If \texttt{uzawa=bicg}, the algorithm described in Equation \ref{eq:bicg}
 is used, and no additional parameter is needed.
@@ -4069,7 +3558,7 @@ and \ref{eq:discrete momentum eqn} both are smaller than \texttt{accuracy},
 or if the changes in the velocity and pressure both are smaller than
 \texttt{accuracy} for the last two iterations.
 \begin{lyxcode}
-accuracy~=~0.001
+accuracy=0.001
 \end{lyxcode}
 Finally, the net angular momentum of the velocity solution is removed.
 The net angular momentum and rigid body rotation are unconstrained
@@ -4082,106 +3571,105 @@ boundary conditions, the angular momentum must be constant in time.
 Enforcing the angular momentum to be zero by removing it from the
 velocity solution is often desirable. 
 \begin{lyxcode}
-remove\_rigid\_rotation~=~off~\\
-remove\_angular\_momentum~=~on
+remove\_rigid\_rotation=off\\
+remove\_angular\_momentum=on
 \end{lyxcode}
 However, for models with imposed plate velocity, it is advisable to
 turn off both \texttt{remove\_rigid\_rotation} and \texttt{remove\_angular\_momentum}.
 
 
-\subsubsection{Example: Compressible Steady-State Convection, cookbook8.cfg}
-\begin{lyxcode}
-\#~Cookbook~8:~Compressible~Model~and~Checkpointing~\\
-~\\
-{[}CitcomS{]}~\\
-solver~=~full~\\
-steps~=~10000~\\
-~\\
-{[}CitcomS.controller{]}~\\
-monitoringFrequency~=~1000~\\
-checkpointFrequency~=~1000~\\
-~\\
-{[}CitcomS.solver{]}~\\
-datadir~=~output~\\
-datafile~=~cookbook8~\\
-datadir\_old~=~restart~\\
-datafile\_old~=~cookbook8~\\
-~\\
-rayleigh~=~7.68175583e4~\\
-dissipation\_number~=~0.5~\\
-gruneisen~=~1.25~\\
-surfaceT~=~0.1~\\
-~\\
-{[}CitcomS.solver.mesher{]}~\\
-nodex~=~33~\\
-nodey~=~33~\\
-nodez~=~33~\\
-levels~=~5~\\
-~\\
-coor~=~1~\\
-coor\_file~=~coord.dat~\\
-~\\
-{[}CitcomS.solver.param{]}~\\
-reference\_state~=~1~\\
-refstate\_file~=~ref.dat~\\
-~\\
-{[}CitcomS.solver.output{]}~\\
-output\_optional~=~geoid,surf,botm~\\
-use\_cbf\_topo~=~on~\\
-self\_gravitation~=~on~\\
-output\_ll\_max~=~20~\\
-~\\
-{[}CitcomS.solver.ic{]}~\\
-tic\_method~=~3~\\
-num\_perturbations~=~1~\\
-perturbl~=~3~\\
-perturbm~=~2~\\
-perturblayer~=~17~\\
-perturbmag~=~0.01~\\
-~\\
-restart~=~off~\\
-solution\_cycles\_init~=~9000~\\
-~\\
-{[}CitcomS.solver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-visc\_smooth\_method~=~1~\\
-~\\
-TDEPV~=~on~\\
-rheol~=~1~\\
-num\_mat~=~4~\\
-viscE~=~2.99573,2.99573,2.99573,2.99573~\\
-viscT~=~0.5,0.5,0.5,0.5~\\
-visc0~=~1,1,1,1~\\
-~\\
-VMIN~=~on~\\
-visc\_min~=~0.001~\\
-VMAX~=~on~\\
-visc\_max~=~1e+06~\\
-~\\
-{[}CitcomS.solver.tsolver{]}~\\
-finetunedt~=~0.75~\\
-~\\
-{[}CitcomS.solver.vsolver{]}~\\
-uzawa~=~cg~\\
-Solver~=~multigrid~\\
-mg\_cycle~=~1~\\
-down\_heavy~=~2~\\
-up\_heavy~=~2~\\
-vlowstep~=~20~\\
-vhighstep~=~2~\\
-max\_mg\_cycles~=~50~\\
-~\\
-aug\_lagr~=~on~\\
-aug\_number~=~2.0e3~\\
-precond~=~on~\\
-~\\
-piterations~=~375~\\
-accuracy~=~0.001~\\
-compress\_iter\_maxstep~=~100~\\
-~\\
-remove\_rigid\_rotation~=~off~\\
-remove\_angular\_momentum~=~on
-\end{lyxcode}
+\subsubsection{Example: Compressible Steady-State Convection, cookbook8}
+\begin{verbatim}
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=10000
+solver=full
+
+# CitcomS.controller
+checkpointFrequency=1000
+storage_spacing=1000
+
+# CitcomS.solver
+datadir=output
+datadir_old=restart
+datafile=cookbook8
+datafile_old=cookbook8
+dissipation_number=0.5
+gruneisen=1.25
+rayleigh=7.68175583e4
+surfaceT=0.1
+
+# CitcomS.solver.mesher
+coor=1
+coor_file=coord.dat
+fi_max=1
+fi_min=0
+levels=5
+mgunitx=2
+mgunity=2
+mgunitz=2
+nodex=33
+nodey=33
+nodez=33
+nproc_surf=12
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.tsolver
+finetunedt=0.75
+
+# CitcomS.solver.vsolver
+Solver=multigrid
+accuracy=0.001
+aug_lagr=on
+aug_number=2.0e3
+compress_iter_maxstep=100
+down_heavy=2
+max_mg_cycles=50
+mg_cycle=1
+piterations=375
+precond=on
+remove_angular_momentum=on
+remove_rigid_rotation=off
+up_heavy=2
+uzawa=cg
+vhighstep=2
+vlowstep=20
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=3
+perturblayer=17
+perturbm=2
+perturbmag=0.01
+restart=off
+solution_cycles_init=9000
+tic_method=3
+
+# CitcomS.solver.output
+output_ll_max=20
+output_optional=geoid,surf,botm
+self_gravitation=on
+use_cbf_topo=on
+
+# CitcomS.solver.param
+reference_state=1
+refstate_file=ref.dat
+
+# CitcomS.solver.visc
+TDEPV=on
+VISC_UPDATE=on
+VMAX=on
+VMIN=on
+num_mat=4
+rheol=1
+visc0=1,1,1,1
+viscE=2.99573,2.99573,2.99573,2.99573
+viscT=0.5,0.5,0.5,0.5
+visc_max=1e+06
+visc_min=0.001
+visc_smooth_method=1
+\end{verbatim}
 
 \subsection{Discussion}
 
@@ -4209,16 +3697,15 @@ SI units) for the Earth. Note that the temperature drop from the core-mantle
 boundary to the surface ($\Delta T$ in Equation \ref{eq:T dim})
 is derived from these constants and the Rayleigh number.
 \begin{lyxcode}
-{[}CitcomS.solver.const{]}~\\
-radius=6.371e+06~\\
-density=3340~\\
-thermdiff=1e-06~\\
-gravacc=9.81~\\
-thermexp=3e-05~\\
-refvisc=1e+21~\\
-cp=1200~\\
-density\_above=1030~\\
-density\_below=6600~
+radius=6.371e+06\\
+density=3340\\
+thermdiff=1e-06\\
+gravacc=9.81\\
+thermexp=3e-05\\
+refvisc=1e+21\\
+cp=1200\\
+density\_above=1030\\
+density\_below=6600
 \end{lyxcode}
 \begin{figure}[H]
 \begin{centering}
@@ -4229,795 +3716,6 @@ density\_below=6600~
 at the 10,000th time step. A tetrahedral symmetric convection pattern
 is developed. Two temperature isosurfaces of 0.4 and 0.8 are shown. }
 \end{figure}
-
-
-\newpage{}
-
-
-\section{Cookbook 9: Nested Solver Coupling for Ridge-Plume Interaction}
-
-To run this cookbook, you need to install the Exchanger package. See
-Section \vref{sec:Exchanger-Configuration-(Optional)} for installation
-instructions.
-
-
-\subsection{Problem}
-
-In order to model the interaction between a segment of a mid-ocean
-ridge and a plume, a small grid spacing is required to resolve the
-thin plume conduit and the flow near the ridge. In addition, the plume
-must be placed sufficiently away from the sidewalls to avoid possible
-boundary effects. Satisfying both of these requirements in a model
-entails a long computation time. Using solver coupling, a high-resolution
-model with a smaller domain can be nested within a low-resolution
-model, and the computation time significantly reduced. 
-
-
-\subsection{Solution}
-
-You will use two solvers in the model. A special command-line option
-is required for a coupled model. Type the following command to run
-this cookbook example:
-\begin{lyxcode}
-\$~citcoms~-{}-coupled~cookbook9.cfg
-\end{lyxcode}
-The embedded solver (esolver) is nested within the domain of the containing
-solver (csolver). The velocity boundary conditions of the esolver
-are fixed normal velocity and shear stress, whose values are received
-from the esolver. The containing solver can be either a full CitcomS
-solver or a regional one. The embedded solver can only be a regional
-one. Both solvers are instances of a regional CitcomS solver in the
-cookbook example. 
-\begin{lyxcode}
-csolver~=~regional~~~~~~;~containing~solver~\\
-esolver~=~regional~~~~~~;~embedded~solver
-\end{lyxcode}
-You will use four processors for this model. Each solver will use
-two processors. The rank-0 and rank-1 processors will be assigned
-to the csolver, and the rank-2 and rank-3 processors will be assigned
-to the esolver.
-\begin{lyxcode}
-{[}CitcomS.layout{]}~\\
-containing\_group~=~{[}0-1{]}~\\
-embedded\_group~=~{[}2-3{]}
-\end{lyxcode}
-The procedure for the nested solver coupling is described elsewhere
-\cite{Tan et al GeoFramework Part I} and only briefly described below:
-\begin{enumerate}
-\item The containing solver solves the velocity and computes its time-step
-size $dt_{c}$.
-\item The containing solver interpolates the velocity, stress and temperature
-onto the boundary of the embedded model.
-\item The embedded model solves the velocity and temperature, using the
-boundary conditions from step 2, with a time-step size $dt_{e}$;
-$dt_{e}$ is always smaller than $dt_{c}$.
-\item Step 3 is repeated until the sum of $dt_{e}$ is equal to $dt_{c}$.
-\item Optionally (if \texttt{two\_way\_communication} is \texttt{on}), the
-containing solver updates its temperature according to the embedded
-solver's temperature.
-\item The containing solver solves the temperature with a time-step size
-$dt_{c}$.
-\item The entire process repeats beginning at step 1.
-\end{enumerate}
-The two solver processes are separated and only communicate through
-the couplers, which in turn use the exchanger package to pass messages.
-The containing coupler and controller (ccoupler and ccontroller) are
-associated with the csolver, and the embedded coupler and controller
-(ecoupler and econtroller) with the esolver. Each solver will track
-its own number of time steps. The esolver has a smaller time-step
-size and, hence, a larger number of time steps. The model will finish
-when either of the solvers reaches the 200th time step. The csolver
-will output for every 2 steps and the esolver for every 10 steps.
-Additional output will occur when the embedded solver is at procedure
-4 above.
-\begin{lyxcode}
-{[}CitcomS{]}~\\
-steps~=~200~\\
-~\\
-{[}CitcomS.ccontroller{]}~\\
-monitoringFrequency~=~2~\\
-~\\
-{[}CitcomS.econtroller{]}~\\
-monitoringFrequency~=~10
-\end{lyxcode}
-A few parameters must be identical for the ccoupler and ecoupler.
-You will use two-way communication, which enables the ecoupler to
-send temperature information to the ccoupler. Otherwise the communication
-is one way, ccoupler to ecoupler only, and the csolver is not affected
-by the esolver.
-\begin{lyxcode}
-two\_way\_communication~=~on
-\end{lyxcode}
-There is an option to exchange initial temperature, which could ensure
-that the initial temperature field of both solvers is consistent.
-The initial temperature field is read from velo files, which already
-contain consistent temperature fields and don't need to exchange that
-information again. 
-\begin{lyxcode}
-exchange\_initial\_temperature~=~off
-\end{lyxcode}
-A good initial guess of pressure field can speed up the convergence
-of the iterative Stokes solver. We will use the pressure solution
-of the containing solver as the initial guess of pressure of the embedded
-solver.
-\begin{lyxcode}
-exchange\_pressure~=~on
-\end{lyxcode}
-Three additional parameters are for the ecoupler only. The following
-two parameters specify whether the top and bottom boundary of the
-esolver will be imposed with the velocity and temperature from the
-csolver. For models with prescribed top or bottom boundary conditions,
-you can turn on these two parameters:
-\begin{lyxcode}
-exclude\_top~=~off~\\
-exclude\_bottom~=~off
-\end{lyxcode}
-The next parameter deserves a little more explanation. The continuity
-equation \ref{eq:conservation of mass} can be rearranged according
-to Gauss's divergence theorem to become:
-\begin{eqnarray}
-\ointop_{surface\ area}\rho_{0}\overrightarrow{u}\cdot\overrightarrow{n}dA & = & 0\label{eq:gauss div}
-\end{eqnarray}
-This equation requires that the normal velocity $\overrightarrow{u}$
-imposed on the embedded solver must have zero outflow. Due to finite
-accuracy of the containing solver and the interpolation process, the
-normal velocity received by the embedded solver might not have zero
-outflow, which could cause a convergence problem in the embedded solver.
-One can amend the received normal velocity slightly to satisfy Equation
-\ref{eq:gauss div} by setting:
-\begin{lyxcode}
-amending\_outflow~=~on
-\end{lyxcode}
-Without turning on \texttt{side\_sbcs}, the model will fail to run.
-\begin{lyxcode}
-{[}CitcomS.esolver.bc{]}~\\
-side\_sbcs~=~on
-\end{lyxcode}
-Plate motion is imposed on top of the esolver, which has a mid-ocean
-ridge with a 5 cm/yr half-spreading rate. A transform fault cuts through
-the ridge. Setting \texttt{start\_age} to 0, the plate motion is read
-from the file \texttt{velocity/bvel.dat0} and will be constant in
-time.
-\begin{lyxcode}
-{[}CitcomS.csolver.bc{]}~\\
-topvbc~=~1~\\
-~\\
-{[}CitcomS.csolver.param{]}~\\
-file\_vbcs~=~on~\\
-vel\_bound\_file~=~velocity/bvel.dat~\\
-start\_age~=~0
-\end{lyxcode}
-The domain of the csolver is bigger than that of the esolver. The
-radial dimension of the esolver will shrink slightly with respect
-to the csolver so that the domain of the esolver is completely inside
-the domain of the csolver. The radial coordinates of the csolver is
-refined near the top and bottom boundaries (\texttt{coor=2}), with
-the lower 10\% of the mesh divided by 15\% of the nodes, the upper
-10\% of the mesh divided by 20\% of the nodes, and the remaining 80\%
-of the mesh divided by 75\% of the nodes. 
-
-Therefore, when setting the values of \texttt{coor\_refine} (see below),
-be careful not to set the first or third value (in example below,
-\texttt{0.1}) too low, or the second or fourth value (in example below,
-\texttt{0.15} and \texttt{0.2}) too high. This can cause the mesh
-size to change too rapidly across an element, which will generate
-pronounced numerical artifacts in the temperature solver.
-\begin{lyxcode}
-{[}CitcomS.csolver.mesher{]}~\\
-nprocz~=~2~\\
-nodex~=~17~\\
-nodey~=~17~\\
-nodez~=~25~\\
-radius\_outer~=~1.0~\\
-radius\_inner~=~0.55~\\
-theta\_min~=~1.171~\\
-theta\_max~=~1.971~\\
-fi\_min~=~0~\\
-fi\_max~=~0.8~\\
-coor~=~2~\\
-coor\_refine~=~0.1,0.15,0.1,0.2~\\
-~\\
-{[}CitcomS.esolver.mesher{]}~\\
-nprocz~=~2~\\
-nodex~=~21~\\
-nodey~=~21~\\
-nodez~=~49~\\
-radius\_outer~=~0.999~\\
-radius\_inner~=~0.551~\\
-theta\_min~=~1.421~\\
-theta\_max~=~1.721~\\
-fi\_min~=~0.25~\\
-fi\_max~=~0.55
-\end{lyxcode}
-The temperature solver has several parameters to tune its behavior.
-The temperature solver is turned on (\texttt{ADV}). A Lenardic-type
-filter, which removes numerical artifacts while keeping total energy
-conserved, is disabled (\texttt{filter\_temp}). The maximum temperature
-can be monitored between time steps (\texttt{monitor\_max\_T}). If
-the maximum temperature increases too much (> 5\%) between time steps,
-the temperature solver will rerun with half time-step size. The time-step
-size is usually determined dynamically according to Courant criterion
-and is reduced by a fraction (\texttt{finetunedt}) to improve accuracy.
-The time-step size can also be specified statically in \texttt{fixed\_timestep},
-if \texttt{fixed\_timestep} is non-zero. The temperature solver uses
-an explicit predictor-corrector algorithm. Using 0.5 for the predictor
-(\texttt{adv\_gamma}) and 2 iterations for the corrector (\texttt{adv\_sub\_iterations}),
-this algorithm is second-order accurate.
-\begin{lyxcode}
-ADV~=~on~\\
-filter\_temp~=~off~\\
-monitor\_max\_T~=~off~\\
-finetunedt~=~0.9~\\
-fixed\_timestep~=~0~\\
-adv\_gamma~=~0.5~\\
-adv\_sub\_iterations~=~2
-\end{lyxcode}
-The purpose of the csolver is to provide the proper boundary condition
-for the esolver, and we don't need high accuracy for that. So we will
-use low accuracy for the csolver and moderate accuracy for the esolver.
-\begin{lyxcode}
-{[}CitcomS.csolver.vsolver{]}~\\
-accuracy~=~2e-2~\\
-~\\
-{[}CitcomS.esolver.vsolver{]}~\\
-accuracy~=~1e-3~\\
-
-\end{lyxcode}
-
-\subsubsection{Example: Nested Solver Coupling for Ridge-Plume Interaction, cookbook9.cfg}
-\begin{lyxcode}
-\#~Cookbook~9:~Nested~Solver~Coupling~for~Ridge-Plume~Interaction~\\
-~\\
-{[}CitcomS{]}~\\
-steps~=~200~\\
-csolver~=~regional~~~~~~;~containing~solver~\\
-esolver~=~regional~~~~~~;~embedded~solver~\\
-~\\
-{[}CitcomS.ccoupler{]}~\\
-two\_way\_communication~=~on~\\
-exchange\_initial\_temperature~=~off~\\
-exchange\_pressure~=~on~\\
-~\\
-{[}CitcomS.ecoupler{]}~\\
-two\_way\_communication~=~on~\\
-exchange\_initial\_temperature~=~off~\\
-exchange\_pressure~=~on~\\
-amending\_outflow~=~on~\\
-exclude\_top~=~off~\\
-exclude\_bottom~=~off~\\
-~\\
-\#~assigning~processors~to~csolver~and~esolver~\\
-{[}CitcomS.layout{]}~\\
-containing\_group~=~{[}0-1{]}~\\
-embedded\_group~=~{[}2-3{]}~\\
-~\\
-{[}CitcomS.ccontroller{]}~\\
-monitoringFrequency~=~2~\\
-~\\
-{[}CitcomS.econtroller{]}~\\
-monitoringFrequency~=~10~\\
-~\\
-{[}CitcomS.csolver{]}~\\
-datadir\_old~=~ic~\\
-datafile\_old~=~cntn~\\
-datadir~=~output~\\
-datafile~=~cntn~\\
-rayleigh~=~1e8~\\
-~\\
-{[}CitcomS.csolver.mesher{]}~\\
-nprocz~=~2~\\
-nodex~=~17~\\
-nodey~=~17~\\
-nodez~=~25~\\
-radius\_outer~=~1.0~\\
-radius\_inner~=~0.55~\\
-theta\_min~=~1.171~\\
-theta\_max~=~1.971~\\
-fi\_min~=~0~\\
-fi\_max~=~0.8~\\
-coor~=~2~\\
-coor\_refine~=~0.1,0.15,0.1,0.2~\\
-~\\
-{[}CitcomS.csolver.bc{]}~\\
-topvbc~=~1~\\
-~\\
-{[}CitcomS.csolver.param{]}~\\
-file\_vbcs~=~on~\\
-vel\_bound\_file~=~velocity/bvel.dat~\\
-start\_age~=~0~\\
-~\\
-{[}CitcomS.csolver.ic{]}~\\
-tic\_method~=~-1~\\
-solution\_cycles\_init~=~0~\\
-~\\
-{[}CitcomS.csolver.tsolver{]}~\\
-ADV~=~on~\\
-filter\_temp~=~off~\\
-monitor\_max\_T~=~off~\\
-finetunedt~=~0.9~\\
-fixed\_timestep~=~0~\\
-adv\_gamma~=~0.5~\\
-adv\_sub\_iterations~=~2~\\
-~\\
-{[}CitcomS.csolver.vsolver{]}~\\
-accuracy~=~2e-2~\\
-~\\
-{[}CitcomS.csolver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-viscE~=~1.6,1.6,1.6,1.6~\\
-viscT~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0~\\
-~\\
-\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#~\\
-~\\
-{[}CitcomS.esolver{]}~\\
-datadir\_old~=~ic~\\
-datafile\_old~=~embd~\\
-datadir~=~output~\\
-datafile~=~embd~\\
-rayleigh~=~1e8~\\
-~\\
-{[}CitcomS.esolver.mesher{]}~\\
-nprocz~=~2~\\
-nodex~=~21~\\
-nodey~=~21~\\
-nodez~=~49~\\
-radius\_outer~=~0.999~\\
-radius\_inner~=~0.551~\\
-theta\_min~=~1.421~\\
-theta\_max~=~1.721~\\
-fi\_min~=~0.25~\\
-fi\_max~=~0.55~\\
-~\\
-{[}CitcomS.esolver.ic{]}~\\
-tic\_method~=~-1~\\
-solution\_cycles\_init~=~0~\\
-~\\
-{[}CitcomS.esolver.vsolver{]}~\\
-accuracy~=~1e-3~\\
-~\\
-{[}CitcomS.esolver.tsolver{]}~\\
-ADV~=~on~\\
-filter\_temp~=~off~\\
-monitor\_max\_T~=~off~\\
-finetunedt~=~0.9~\\
-fixed\_timestep~=~0~\\
-adv\_gamma~=~0.5~\\
-adv\_sub\_iterations~=~2~\\
-~\\
-{[}CitcomS.esolver.visc{]}~\\
-VISC\_UPDATE~=~on~\\
-num\_mat~=~4~\\
-visc0~=~1,1,1,1~\\
-TDEPV~=~on~\\
-viscE~=~1.6,1.6,1.6,1.6~\\
-viscT~=~0,0,0,0~\\
-VMIN~=~on~\\
-visc\_min~=~1.0~\\
-VMAX~=~on~\\
-visc\_max~=~100.0~\\
-~\\
-{[}CitcomS.esolver.bc{]}~\\
-side\_sbcs~=~on
-\end{lyxcode}
-
-\subsection{Discussion}
-
-The solution of this problem is presented in Figure \ref{fig:Cookbook-9}.
-The plume head spreads below the lithosphere, and the plume conduit
-is elongated in the ridge-parallel direction. The lithosphere subducts
-at the left and right edges of the csolver. If the domain of the csolver
-were bigger, the plume would be further away from the subducted slabs. 
-
-\begin{figure}[H]
-\begin{centering}
-\includegraphics[width=0.6\paperwidth]{graphics/cookbook9.png}
-\par\end{centering}
-
-\caption{\label{fig:Cookbook-9}Cookbook 9: The plume head spreads below the
-lithosphere, and the plume conduit is elongated in the ridge-parallel
-direction. The temperature isosurface is at 0.8. The grid spacings
-of both meshes are reduced approximately threefold for better visualization.}
-\end{figure}
-
-
-\newpage{}
-
-
-\section{Cookbook 10: Synthetic Seismograms from Mantle Convection Models}
-
-
-\subsection{Problem}
-
-This example is a step-up of Cookbook \ref{fig:Cookbook-7:-The},
-thermo-chemical convection within a full spherical shell domain. Composition
-heterogeneity exists in the Earth mantle. The density anomalies due
-to the composition heterogeneity, as well as due to the thermal heterogeneity,
-drive the convection flow. The same composition heterogeneity causes
-seismic velocity anomalies. The goal is to convert the mantle convection
-models, with the aid of a mineral physics model, to seismic anomalies,
-and then generate synthetic seismograms using SPECFEM3D\_GLOBE.
-
-
-\subsection{Solution}
-
-This cookbook uses CitcomS and SPECFEM3D\_GLOBE. SPECFEM3D\_GLOBE
-is a spectral element code to simulate seismic wave propogation in
-the global scale. To use SPECFEM3D\_GLOBE, you can either download
-the code from this link \url{geodynamics.org/cig/software/packages/seismo/specfem3d-globe/}
-and install it on your machine, which requires a Fortran 90 compiler
-and a cluster, or you can go to CIG Seismology Web Portal \url{https://crust.geodynamics.org/portals/seismo/}
-to launch a job, which only requires a browser. We will use the later
-approach in the cookbook.
-
-
-\subsubsection{Running CitcomS}
-
-Most of the parameters are copied from Cookbook \ref{fig:Cookbook-7:-The}.
-We will highlight a few differences. We use a higher Rayleigh number.
-\begin{lyxcode}
-rayleigh~=~1e9
-\end{lyxcode}
-The radius of the bottom surface is set to 0.546 in the cookbook,
-which must be smaller than the CMB radius in SPECFEM3D\_GLOBE. (If
-PREM is used as the 1D reference model in SPECFEM3D\_GLOBE, the CMB
-radius is 0.5462.)
-\begin{lyxcode}
-radius\_inner~=~0.546~
-\end{lyxcode}
-We convert the temperature and composition fields to seismic velocities
-using a mineral phyiscs model. Currently, there is only one model
-implemented, based on the model of \textit{Trampert, Vacher, and Vlaar}\cite{Trampert mineral physics model 2001}.
-In their paper, the (depth dependent) temperature and composition
-derivatives of seismic velocities are given as polynomial coefficients.
-Note that the paper has its own reference profile, and is only valid
-between 1000 km < depth < 2600 km. We will extend the model to whole
-mantle and use PREM as the reference profile. This clearly is over-stretching
-the model, but we are using it for demonstration purposes.
-\begin{lyxcode}
-mineral\_physics\_model~=~3
-\end{lyxcode}
-We will output the converted density and seismic velocities for SPECFEM3D\_GLOBE
-consumption. This option enables the binary seismic output (\texttt{{*}.seismic.{*}}
-files), as well as other binary output (\texttt{{*}.domain} and \texttt{{*}.coord\_bin.{*}}
-files) that SPECFEM3D\_GLOBE will read. The formats of these binary
-files are provided in Appendix \ref{sec:Misc.-Binary-Output}.
-\begin{lyxcode}
-output\_optional~=~tracer,~comp\_nd,~seismic
-\end{lyxcode}
-
-\subsubsection{Example: Synthetic Seismograms from Mantle Convection Model, cookbook10.cfg}
-\begin{lyxcode}
-\#~Cookbook~10:~Synthetic~Seismograms~from~Mantle~Convection~Models
-
-{[}CitcomS{]}
-
-solver~=~full
-
-steps~=~15~\\
-~\\
-{[}CitcomS.controller{]}
-
-monitoringFrequency~=~5~\\
-~\\
-{[}CitcomS.solver{]}
-
-datadir~=~output
-
-datafile~=~cookbook10
-
-rayleigh~=~1e9~\\
-~\\
-{[}CitcomS.solver.mesher{]}
-
-radius\_inner~=~0.546~\\
-~\\
-{[}CitcomS.solver.ic{]}
-
-num\_perturbations~=~1
-
-perturbl~=~3
-
-perturbm~=~2
-
-perturblayer~=~5
-
-perturbmag~=~0.05~\\
-~\\
-{[}CitcomS.solver.output{]}
-
-output\_optional~=~tracer,comp\_nd,seismic~\\
-~\\
-{[}CitcomS.solver.param{]}
-
-mineral\_physics\_model~=~3~\\
-~\\
-{[}CitcomS.solver.tracer{]}
-
-tracer~=~on
-
-tracer\_ic\_method~=~0
-
-tracers\_per\_element~=~20
-
-tracer\_file~=~tracer.dat~\\
-~\\
-tracer\_flavors~=~2
-
-ic\_method\_for\_flavors~=~0
-
-z\_interface~=~0.7~\\
-~\\
-chemical\_buoyancy~=~1
-
-buoy\_type~=~1
-
-buoyancy\_ratio~=~0.5~\\
-~\\
-regular\_grid\_deltheta~=~1.0
-
-regular\_grid\_delphi~=~1.0~\\
-~\\
-{[}CitcomS.solver.vsolver{]}
-
-Solver~=~cgrad
-
-accuracy~=~1e-04
-
-vlowstep~=~1000
-
-piterations~=~1000~\\
-~\\
-\#~Assign~the~viscosities.
-
-{[}CitcomS.solver.visc{]}
-
-VISC\_UPDATE~=~on
-
-num\_mat~=~4
-
-visc0~=~1,1,1,1
-
-TDEPV~=~on
-
-rheol~=~4
-
-viscE~=~0.2,0.2,0.2,0.2
-
-viscT~=~0,0,0,0
-
-viscZ~=~0,0,0,0
-
-VMIN~=~on
-
-visc\_min~=~1.0
-
-VMAX~=~on
-
-visc\_max~=~100.0
-\end{lyxcode}
-
-\subsubsection{Running SPECFEM3D\_GLOBE from CIG Seismology Web Portal}
-
-Using your favorite browser, go to the CIG Seismology Web Portal \url{https://crust.geodynamics.org/portals/seismo/}.
-Free registration is required to use the portal. Your initial account
-has 10,000 SUs (CPU-hours) allocated. A short (20 minutes of seismograms),
-low-resolution SPECFEM3D\_GLOBE run consumes about 450 SUs. A short,
-high-resolution SPECFEM3D\_GLOBE run consumes about 1,000 SUs. Further
-SUs can be allocated upon request.
-
-After you login to the portal, take a few minutes to read the instructions
-and familiarize yourself with the interface. You will see a toolbar
-with big icons on the top and several grayed-out tabs below the toolbar.
-The toolbar allows you to specify the earthquake source (\texttt{Events}),
-the receivers (\texttt{Stations}), and simulation parameters (\texttt{3D
-Parameters}), including the resolution (\texttt{Mesh}) and the seismic
-velocity model for the crust and mantle (\texttt{3D Models}). In the
-cookbook, we will upload the result of CitcomS as a 3D Model and upload
-our own fictitious stations and event.
-
-\begin{center}
-\includegraphics[scale=0.6]{graphics/portal-upload-a.png}
-\par\end{center}
-
-Click on the \texttt{3D Models} icon (1), and the \texttt{Upload}
-tab (2), then click on the link \texttt{citcoms\_isotropic\_no\_crust.tgz}
-(3) to download the tar file to your machine. The tar file you just
-downloaded contains the code that reads CitcomS output and feeds the
-seismic velocities to SPECFEM3D\_GLOBE. However, the tarball does
-not contains the actual CitcomS output, which will be provided by
-you later. As you might have guessed from the filename, the code will
-generate an isotropic mantle without an overlay of a 3D crust, such
-as the CRUST2.0 model. The 3D crust model obeys the continent-ocean
-distribution of current Earth. Since our CitcomS model has no notation
-on where is the Pacific and where is Asia, we do not want to impose
-a 3D crust model. You can untar the file by running:
-\begin{lyxcode}
-\$~gunzip~-c~citcoms\_isotropic\_no\_crust.tgz~|~tar~xf~-
-\end{lyxcode}
-You will supply the CitcomS output to the code. Copy these CitcomS
-output files \texttt{cookbook.domain}, \texttt{cookbook.coord\_bin.{*}},
-and \texttt{cookbook.seismic.{*}.15} to the directory \texttt{citcoms\_isotropic\_no\_crust/shared/},
-so that the content of the directory looks like:
-\begin{lyxcode}
-\$~ls~citcoms\_isotropic\_no\_crust/shared/
-
-cookbook10.coord\_bin.0~~~cookbook10.seismic.0.15~
-
-cookbook10.coord\_bin.1~~~cookbook10.seismic.10.15~
-
-cookbook10.coord\_bin.10~~cookbook10.seismic.11.15~
-
-cookbook10.coord\_bin.11~~cookbook10.seismic.1.15~
-
-cookbook10.coord\_bin.2~~~cookbook10.seismic.2.15~
-
-cookbook10.coord\_bin.3~~~cookbook10.seismic.3.15~
-
-cookbook10.coord\_bin.4~~~cookbook10.seismic.4.15~
-
-cookbook10.coord\_bin.5~~~cookbook10.seismic.5.15~
-
-cookbook10.coord\_bin.6~~~cookbook10.seismic.6.15~
-
-cookbook10.coord\_bin.7~~~cookbook10.seismic.7.15~
-
-cookbook10.coord\_bin.8~~~cookbook10.seismic.8.15~
-
-cookbook10.coord\_bin.9~~~cookbook10.seismic.9.15~
-
-cookbook10.domain
-\end{lyxcode}
-These files contain the coordinate, density, and seismic velocities
-data. We will need to tell SPECFEM3D\_GLOBE where to find the CitcomS
-output. Edit the header file \texttt{citcoms\_isotropic\_no\_crust/citcoms\_parm.h}
-to become:
-\begin{lyxcode}
-/{*}~filename~prefix~of~citcoms~output~{*}/
-
-const~char~citcoms\_model\_filename\_base{[}{]}~=~\textquotedbl{}@THIS\_DIR@/shared/cookbook10\textquotedbl{};
-
-
-
-/{*}~time~step~of~citcoms~output~{*}/
-
-const~int~citcoms\_step~=~15;
-\end{lyxcode}
-The portal has a few conventions on where to put the data. First,
-the magic string \texttt{@THIS\_DIR@} will be replaced by the absolute
-path when the tar file is expanded by the portal. Second, the tar
-file will be distributed to all computer nodes when portal launches
-the job. Third, the subdirectory \texttt{shared/} is special such
-that files in this directory will not be distributed to all computer
-nodes. Data files of huge size should be put in this directory. You
-might want to edit \texttt{citcoms\_isotropic\_no\_crust/description.txt}
-to provide a description of your model. The text in this file will
-be displayed on the portal. The final step before uploading is to
-create a new tar file containing the code and data.
-\begin{lyxcode}
-\$~tar~cf~cookbook10.tar~citcoms\_isotropic\_no\_crust/
-
-\$~gzip~cookbook10.tar
-\end{lyxcode}
-Now, you can upload the data by clicking on the \texttt{Browse} button
-(4), choosing \texttt{cookbook10.tar.gz} from the resulting dialog
-box, then clicking on the \texttt{Upload} button. After the portal
-confirms that the upload is successful, click on the \texttt{3D Models}
-icon again; you will see \texttt{cookbook10} is among the available
-3D models.
-
-\begin{center}
-\includegraphics[scale=0.6]{graphics/portal-param-a.png}
-\par\end{center}
-
-You have to select a few parameters for a SPECFEM3D\_GLOBE run. Click
-on the \texttt{3D Parameters} icon (5), the \texttt{New} tab (6),
-select the parameters as shown in the figure above, and save the parameters
-for later use. We will use a global mesh that is capable of resolving
-seismic waves of 27 second period. Since CitcomS mesh is a perfect
-sphere, you need to disable \texttt{topography} and \texttt{ellipticity}
-to have a matching mesh in SPECFEM3D\_GLOBE. The \texttt{oceans} is
-disabled because we don't have a 3D crust.
-
-We will provide our own fictitious earthquake source and seismic stations.
-The earthquake source is defined in \texttt{cmt-solution.cookbook10}
-in the cookbook directory. The source is located at 15 km depth of
-$0^{\circ}$N, $0^{\circ}$E. The half duration of the source is 0
-second, which means a step function is used. Click on the \texttt{Events}
-icon and the \texttt{upload} tab to upload the file \texttt{cmt-solution.cookbook10}.
-The stations are defined in \texttt{stations.cookbook10} in the cookbook
-directory. The stations are on the Equator and are 70 to 100 degrees
-away from the source. Click on the \texttt{Stations} icon and the
-\texttt{upload} tab to upload the file \texttt{stations.cookbook10}.
-
-\begin{center}
-\includegraphics[scale=0.75]{graphics/portal-run-a.png}
-\par\end{center}
-
-Finally, we are ready to launch a SPECFEM3D\_GLOBE simulation. Click
-on the \texttt{Runs} icon (7), then the \texttt{New} tab (8), and
-select our recently uploaded event, stations and parameters. Set the
-record length to 30 minutes, which will give us synthetic seismograms
-of 30 minutes. Click the \texttt{Save} button to save the settings. 
-
-\begin{center}
-\includegraphics[scale=0.6]{graphics/portal-submit2-a.png}
-\par\end{center}
-
-You will be presented with a summary of the simulation settings, including
-a map showing the location of the events and stations. After you have
-reviewed all settings, scroll to the bottom of the page. Click on
-the \texttt{Start} button. The request for the simulation is sent
-to the TeraGrid supercomputing center. Your simulation will be waiting
-in the queue and will be launched within several hours. You can log
-off the portal for now.
-
-\begin{center}
-\includegraphics[scale=0.6]{graphics/portal-result.png}
-\par\end{center}
-
-When your simulation is finished, the portal will send you an e-mail
-notification. Log in to the portal, click on the \texttt{Runs} icon,
-where there is a list of finished and unfinished runs. Click on the
-finished run, and you will see a list of output. Click on the \texttt{specfem3dglobe.tar.gz}
-link to download the tar file. Expand the file:
-\begin{lyxcode}
-\$~gunzip~-c~specfem3dglobe.tar.gz~|~tar~xf~-
-\end{lyxcode}
-You will find the synthetic seismograms \texttt{{*}.sem.sac} in the
-directory \texttt{OUTPUT\_FILES/}.
-
-
-\subsection{Discussion}
-
-The dimensional value of total temperature contrast across the mantle
-is derived from the Rayleigh number in Equation \ref{eq:Ra, Rayleigh number}
-and the dimensional parameters in the \texttt{{[}CitcomS.solver.const{]}}
-section. In the very beginning of the simulation, the total temperature
-contrast across the mantle is displayed on the screen. This value
-will be used to scale the non-dimensional temperature when converting
-the temperature anomaly to seismic velocities.
-\begin{lyxcode}
-Total~temperature~contrast~=~3934.055176~K
-\end{lyxcode}
-The event and stations are all on the equatorial plane. Figure \ref{fig:cookbook10}
-shows the temperature field of the equatorial slice. A large warm
-upwelling is beneath $60^{\circ}$E. We should be able to observe
-its effect on delaying teleseismic waves in the $70^{\circ}$ to $90^{\circ}$
-range.
-
-\noindent \begin{center}
-\begin{figure}[H]
-\begin{centering}
-\includegraphics[scale=0.6]{graphics/cookbook10.png}
-\par\end{centering}
-
-\caption{\label{fig:cookbook10}The equatorial slice of temperature from the
-CitcomS result. Three S wave paths probing the mantle are shown. }
-\end{figure}
-
-\par\end{center}
-
-The synthetic seismograms need to be post-processed. The post-processing
-programs we will use can be downloaded from the portal. Follow the
-instructions on the portal to build the programs. We will band-pass
-filter within the period of 30 and 500 seconds, and convolve the synthetics
-with a gaussian source time function of 50 seconds half duration,
-and append \texttt{conv} to the output filenames.
-\begin{lyxcode}
-\$~process\_syn.pl~-S~-t~30/500~-h~50~-x~conv~{*}.sac
-\end{lyxcode}
-Optionally, you can rotate the synthetics from East-North components
-to Transversal-Radial components.
-\begin{lyxcode}
-\$~rotate.pl~{*}LHE{*}.conv
-\end{lyxcode}
 
 \part{Appendices}
 
@@ -5751,701 +4449,6 @@ r\texttt{\small{adius=6371e3}}~\\
 indicated.\tabularnewline
 \hline 
 \end{tabular}
-
-
-\section{CitcomS Facilities and Properties}
-
-This section lists the facilities and properties in the Pyre version
-of CitcomS. Most of the properties have names which are identical
-to the parameters used in the non-Pyre version of CitcomS and are
-explained in the section above. This section highlights those which
-have changed and those which are entirely new. Parameters are given
-with their default values. 
-
-
-\subsection{Top-Level Facilities and Properties}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{steps=1}} & How many time steps to run.\tabularnewline
-\hline 
-\texttt{\small{launcher=mpich}} & A facility specifying which launcher to use. Choices include \texttt{\small{mpich}}
-and \texttt{\small{lam-mpi}}.\tabularnewline
-\hline 
-\texttt{\small{scheduler=none}} & A facility specifying which scheduler to use. Choices are \texttt{\small{lsf}},
-\texttt{\small{pbs}}, and \texttt{\small{globus}}.\tabularnewline
-\hline 
-\texttt{\small{controller}} & A facility. User cannot change it.\tabularnewline
-\hline 
-\texttt{\small{solver=regional}} & A facility specifying which solver to use. Must be either \texttt{\small{regional}}
-or \texttt{\small{full}}.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{launcher}}}
-
-The launcher facility controls how CitcomS, an MPI application, is
-executed on multiple processors. It is the equivalent to \texttt{mpirun}
-in MPI. 
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{dry=off}} & If on, prints the \texttt{mpirun} command line and exits without launching
-the job.\tabularnewline
-\hline 
-\texttt{\small{nodegen}} & A printf-styled format string, used in conjunction with \texttt{nodelist}
-to generate a list of machine names. Example: \texttt{\small{n\%03d}}\tabularnewline
-\hline 
-\texttt{\small{nodelist}} & A comma-separated list of machine names in square brackets. Example:
-\texttt{ {[}101-103,105,107{]} }\tabularnewline
-\hline 
-\texttt{\small{command}} & \texttt{The command used to launch the job. The default value should
-be customized if using any job scheduler, otherwise the default value
-should work well.}\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{scheduler}}}
-
-The scheduler facility controls how CitcomS submits jobs to a batch
-scheduler. Available schedulers include: \texttt{none} (default, not
-using a batch scheduler), \texttt{lsf} (for Load Sharing Facility
-batch scheduler), \texttt{pbs} (for Portable Batch System batch scheduler),
-\texttt{sge} (for Sun Grid Engine batch scheduler), and tacc-ranger
-(a variant of PBS, customized for the Ranger cluster at Texas Advanced
-Computing Center). Only the command options for these schedulers are
-listed below. For more information on configuring Pyre for your batch
-system, see CIG's Pythia page \url{geodynamics.org/cig/software/packages/cs/pythia/docs/batch}.
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{dry=off}} & If \texttt{\small{on}}, prints the batch script and exits without
-scheduling the job.\tabularnewline
-\hline 
-\texttt{\small{wait=off}} & If \texttt{\small{on}}, waits for batch jobs to finish before exiting.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{job}}}
-
-The \texttt{\small{job}} facility controls options for individual
-batch jobs.
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{name}} & The name of the job.\tabularnewline
-\hline 
-\texttt{\small{queue}} & The name of the queue to which the job is scheduled.\tabularnewline
-\hline 
-\texttt{\small{walltime}} & Time limit for the job, specified using units, e.g.,  \texttt{5{*}minute},
-\texttt{2{*}hour}.\tabularnewline
-\hline 
-\texttt{\small{stdin=/dev/null}} & File to read as the input stream.\tabularnewline
-\hline 
-\texttt{\small{stdout=stdout.txt}} & File to write for the output stream.\tabularnewline
-\hline 
-\texttt{\small{stderr=stderr.txt}} & File to write for the error stream.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{controller}}}
-
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{monitoringFrequency=100}} & The time-step interval between disk output. It replaces the \texttt{storage\_spacing}
-parameter in the (old) CitcomS input file.\tabularnewline
-\hline 
-\texttt{\small{checkpointFrequency=100}} & The time-step interval between checkpoint output, which can be used
-later to resume the computation.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver }}}
-
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{mesher }} & A facility. Must be either \texttt{\small{full-sphere}} or \texttt{\small{regional-sphere}}.
-User does not need to specify it. It is set by the \texttt{solver}
-facility automatically. \tabularnewline
-\hline 
-\texttt{\small{tsolver }} & A facility for the temperature solver using Petrov-Galerkin time integration. \tabularnewline
-\hline 
-\texttt{\small{vsolver }} & A facility for the velocity solver using Boussinesq approximation
-and the Uzawa algorithm. \tabularnewline
-\hline 
-\texttt{\small{bc }} & A facility of boundary conditions.\tabularnewline
-\hline 
-\texttt{\small{const}} & A facility for dimensional constants.\tabularnewline
-\hline 
-\texttt{\small{ic}} & A facility for initial conditions.\tabularnewline
-\hline 
-\texttt{\small{output}} & A facility for output options.\tabularnewline
-\hline 
-\texttt{\small{param}} & A facility for some additional input parameter files.\tabularnewline
-\hline 
-\texttt{\small{phase }} & A facility for phase change parameters.\tabularnewline
-\hline 
-\texttt{\small{tracer }} & A facility for tracer parameters.\tabularnewline
-\hline 
-\texttt{\small{visc}} & A facility for viscosity parameters.\tabularnewline
-\hline 
-\texttt{\small{datadir=\textquotedbl{}.\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{datafile=\textquotedbl{}regtest\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{datadir\_old=\textquotedbl{}.\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{datafile\_old=\textquotedbl{}regtest\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{rayleigh=100000}} & \tabularnewline
-\hline 
-\texttt{\small{dissipation\_number=0.0}} & \tabularnewline
-\hline 
-\texttt{\small{gruneisen=0.0}} & \tabularnewline
-\hline 
-\texttt{\small{surfaceT=0.1}} & \tabularnewline
-\hline 
-\texttt{\small{Q0=0}} & \tabularnewline
-\hline 
-\texttt{\small{stokes\_flow\_only=off}} & \tabularnewline
-\hline 
-\texttt{\small{verbose=off}} & \tabularnewline
-\hline 
-\texttt{\small{see\_convergence=on}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.mesher}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{nprocx=1}} & \tabularnewline
-\hline 
-\texttt{\small{nprocy=1}} & \tabularnewline
-\hline 
-\texttt{\small{nprocz=1 }} & \tabularnewline
-\hline 
-\texttt{\small{coor=0}} & \tabularnewline
-\hline 
-\texttt{\small{coor\_file=\textquotedbl{}coor.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{coor\_refine=0.1,0.15,0.1,0.2}} & \tabularnewline
-\hline 
-\texttt{\small{nodex=9}} & \tabularnewline
-\hline 
-\texttt{\small{nodey=9}} & \tabularnewline
-\hline 
-\texttt{\small{nodez=9}} & \tabularnewline
-\hline 
-\texttt{\small{levels=1 }} & \tabularnewline
-\hline 
-\texttt{\small{radius\_outer=1}} & \tabularnewline
-\hline 
-\texttt{\small{radius\_inner=0.55}} & \tabularnewline
-\hline 
-\texttt{\small{theta\_min=1.0708}} & \tabularnewline
-\hline 
-\texttt{\small{theta\_max=2.0708}} & \tabularnewline
-\hline 
-\texttt{\small{fi\_min=0 }} & \tabularnewline
-\hline 
-\texttt{\small{fi\_max=1}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.tsolver}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{ADV=on}} & \tabularnewline
-\hline 
-\texttt{\small{filter\_temp=off}} & \tabularnewline
-\hline 
-\texttt{\small{monitor\_max\_T=on}} & \tabularnewline
-\hline 
-\texttt{\small{finetunedt=0.9}} & \tabularnewline
-\hline 
-\texttt{\small{fixed\_timestep=0.0}} & \tabularnewline
-\hline 
-\texttt{\small{inputdiffusivity=1}} & \tabularnewline
-\hline 
-\texttt{\small{adv\_gamma=0.5}} & \tabularnewline
-\hline 
-\texttt{\small{adv\_sub\_iterations=2}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.vsolver}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{Solver=cgrad}} & \tabularnewline
-\hline 
-\texttt{\small{node\_assemble=on}} & \tabularnewline
-\hline 
-\texttt{\small{precond=on}} & \tabularnewline
-\hline 
-\texttt{\small{accuracy=1.0e-4}} & \tabularnewline
-\hline 
-\texttt{\small{uzawa=cg}} & \tabularnewline
-\hline 
-\texttt{\small{compress\_iter\_maxstep=100}} & \tabularnewline
-\hline 
-\texttt{\small{mg\_cycle=1 }} & \tabularnewline
-\hline 
-\texttt{\small{down\_heavy=3}} & \tabularnewline
-\hline 
-\texttt{\small{up\_heavy=3}} & \tabularnewline
-\hline 
-\texttt{\small{vlowstep=1000}} & \tabularnewline
-\hline 
-\texttt{\small{vhighstep=3}} & \tabularnewline
-\hline 
-\texttt{\small{max\_mg\_cycles=50}} & \tabularnewline
-\hline 
-\texttt{\small{piterations=1000}} & \tabularnewline
-\hline 
-\texttt{\small{aug\_lagr=on}} & \tabularnewline
-\hline 
-\texttt{\small{aug\_number=2000}} & \tabularnewline
-\hline 
-\texttt{\small{remove\_rigid\_rotation=on}} & \tabularnewline
-\hline 
-\texttt{\small{remove\_angular\_momentum=on}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.bc }}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{side\_sbcs=off}} & \tabularnewline
-\hline 
-\texttt{\small{pseudo\_free\_surf=off}} & \tabularnewline
-\hline 
-\texttt{\small{topvbc=0}} & \tabularnewline
-\hline 
-\texttt{\small{topvbxval=0}} & \tabularnewline
-\hline 
-\texttt{\small{topvbyval=0}} & \tabularnewline
-\hline 
-\texttt{\small{botvbc=0}} & \tabularnewline
-\hline 
-\texttt{\small{botvbxval=0}} & \tabularnewline
-\hline 
-\texttt{\small{botvbyval=0}} & \tabularnewline
-\hline 
-\texttt{\small{toptbc=1}} & \tabularnewline
-\hline 
-\texttt{\small{toptbcval=0}} & \tabularnewline
-\hline 
-\texttt{\small{bottbc=1}} & \tabularnewline
-\hline 
-\texttt{\small{bottbcval=1}} & \tabularnewline
-\hline 
-\texttt{\small{temperature\_bound\_adj=off}} & \tabularnewline
-\hline 
-\texttt{\small{depth\_bound\_adj=0.157}} & \tabularnewline
-\hline 
-\texttt{\small{width\_bound\_adj=0.08727}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.const }}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{radius=6.371e+06}} & \tabularnewline
-\hline 
-\texttt{\small{density=3340.0}} & \tabularnewline
-\hline 
-\texttt{\small{thermdiff=1e-06}} & \tabularnewline
-\hline 
-\texttt{\small{gravacc=9.81}} & \tabularnewline
-\hline 
-\texttt{\small{thermexp=3e-05}} & \tabularnewline
-\hline 
-\texttt{\small{refvisc=1e+21}} & \tabularnewline
-\hline 
-\texttt{\small{cp=1200}} & \tabularnewline
-\hline 
-\texttt{\small{density\_above=1030.0}} & \tabularnewline
-\hline 
-\texttt{\small{density\_below=6600.0}} & \tabularnewline
-\hline 
-\texttt{\small{z\_lith=0.014}} & \tabularnewline
-\hline 
-\texttt{\small{z\_410=0.06435}} & \tabularnewline
-\hline 
-\texttt{\small{z\_lmantle=0.105}} & \tabularnewline
-\hline 
-\texttt{\small{z\_cmb=0.439}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.ic }}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{restart=off}} & \tabularnewline
-\hline 
-\texttt{\small{post\_p=off}} & \tabularnewline
-\hline 
-\texttt{\small{solution\_cycles\_init=0}} & \tabularnewline
-\hline 
-\texttt{\small{zero\_elapsed\_time=on}} & \tabularnewline
-\hline 
-\texttt{\small{tic\_method=0}} & \tabularnewline
-\hline 
-\texttt{\small{num\_perturbations=1}} & \tabularnewline
-\hline 
-\texttt{\small{perturbl=1}} & \tabularnewline
-\hline 
-\texttt{\small{perturbm=1}} & \tabularnewline
-\hline 
-\texttt{\small{perturblayer=5}} & \tabularnewline
-\hline 
-\texttt{\small{perturbmag=0.05}} & \tabularnewline
-\hline 
-\texttt{\small{half\_space\_age=40}} & \tabularnewline
-\hline 
-\texttt{\small{mantle\_temp=1.0}} & \tabularnewline
-\hline 
-\texttt{\small{blob\_center={[}-999,-999,-999{]} }} & \tabularnewline
-\hline 
-\texttt{\small{blob\_radius=0.063 }} & \tabularnewline
-\hline 
-\texttt{\small{blob\_dT=0.18}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.output}}}
-
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{output\_format=\textquotedbl{}ascii\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{output\_optional=\textquotedbl{}surf,botm,}}~\\
-\texttt{\small{tracer\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{output\_ll\_max=20}} & \tabularnewline
-\hline 
-\texttt{self\_gravitation=off} & \tabularnewline
-\hline 
-\texttt{use\_cbf\_topo=off} & \tabularnewline
-\hline 
-\texttt{\small{cb\_block\_size=1048576}} & \tabularnewline
-\hline 
-\texttt{\small{cb\_buffer\_size=4194304}} & \tabularnewline
-\hline 
-\texttt{\small{sieve\_buf\_size=1048576}} & \tabularnewline
-\hline 
-\texttt{\small{output\_alignment=262144}} & \tabularnewline
-\hline 
-\texttt{\small{output\_alignment\_threshold=}}~\\
-\texttt{\small{~~~~524288}} & \tabularnewline
-\hline 
-\texttt{\small{cache\_mdc\_nelmts=10330}} & \tabularnewline
-\hline 
-\texttt{\small{cache\_rdcc\_nelmts=521}} & \tabularnewline
-\hline 
-\texttt{\small{cache\_rdcc\_nbytes=1048576}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.param}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{reference\_state=1}} & \tabularnewline
-\hline 
-\texttt{\small{refstate\_file=\textquotedbl{}refstate.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{mineral\_physics\_model=3}} & \tabularnewline
-\hline 
-\texttt{\small{file\_vbcs=off}} & \tabularnewline
-\hline 
-\texttt{\small{vel\_bound\_file=\textquotedbl{}bvel.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{mat\_control=off}} & \tabularnewline
-\hline 
-\texttt{\small{mat\_file=\textquotedbl{}mat.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{lith\_age=off}} & \tabularnewline
-\hline 
-\texttt{\small{lith\_age\_file=\textquotedbl{}age.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{lith\_age\_time=off}} & \tabularnewline
-\hline 
-\texttt{\small{lith\_age\_depth=0.0314}} & \tabularnewline
-\hline 
-\texttt{\small{start\_age=40 }} & \tabularnewline
-\hline 
-\texttt{\small{reset\_startage=off}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.phase}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{Ra\_410=0 }} & \tabularnewline
-\hline 
-\texttt{\small{clapeyron410=0.0235}} & \tabularnewline
-\hline 
-\texttt{\small{transT410=0.78 }} & \tabularnewline
-\hline 
-\texttt{\small{width410=0.0058}} & \tabularnewline
-\hline 
-\texttt{\small{Ra\_670=0}} & \tabularnewline
-\hline 
-\texttt{\small{clapeyron670=-0.0235}} & \tabularnewline
-\hline 
-\texttt{\small{transT670=0.78}} & \tabularnewline
-\hline 
-\texttt{\small{width670=0.0058}} & \tabularnewline
-\hline 
-\texttt{\small{Ra\_cmb=0}} & \tabularnewline
-\hline 
-\texttt{\small{clapeyroncmb=-0.0235}} & \tabularnewline
-\hline 
-\texttt{\small{transTcmb=0.875}} & \tabularnewline
-\hline 
-\texttt{\small{widthcmb=0.0058}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.tracer}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{tracer=off}} & \tabularnewline
-\hline 
-\texttt{\small{tracer\_ic\_method=0}} & \tabularnewline
-\hline 
-\texttt{\small{tracers\_per\_element=10}} & \tabularnewline
-\hline 
-\texttt{\small{tracer\_file=\textquotedbl{}tracer.dat\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{tracer\_flavors=0}} & \tabularnewline
-\hline 
-\texttt{\small{ic\_method\_for\_flavors=0}} & \tabularnewline
-\hline 
-\texttt{\small{z\_interface=0.7}} & \tabularnewline
-\hline 
-\texttt{\small{itracer\_warnings=on}} & \tabularnewline
-\hline 
-\texttt{\small{regular\_grid\_deltheta=1.0}} & \tabularnewline
-\hline 
-\texttt{\small{regular\_grid\_delphi=1.0}} & \tabularnewline
-\hline 
-\texttt{\small{chemical\_buoyancy=on}} & \tabularnewline
-\hline 
-\texttt{\small{buoy\_type=1}} & \tabularnewline
-\hline 
-\texttt{\small{buoyancy\_ratio=1.0}} & \tabularnewline
-\hline 
-\texttt{\small{tracer\_enriched=off}} & \tabularnewline
-\hline 
-\texttt{\small{Q0\_enriched=0.0}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\texttt{\normalsize{solver.visc}}}
-
-\noindent %
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{Viscosity=\textquotedbl{}system\textquotedbl{}}} & \tabularnewline
-\hline 
-\texttt{\small{visc\_smooth\_method=3}} & \tabularnewline
-\hline 
-\texttt{\small{VISC\_UPDATE=on}} & \tabularnewline
-\hline 
-\texttt{\small{num\_mat=4}} & \tabularnewline
-\hline 
-\texttt{\small{visc0=1,1,1,1,}} & \tabularnewline
-\hline 
-\texttt{\small{TDEPV=off}} & \tabularnewline
-\hline 
-\texttt{\small{rheol=3}} & \tabularnewline
-\hline 
-\texttt{\small{viscE=1,1,1,1,}} & \tabularnewline
-\hline 
-\texttt{\small{viscT=1,1,1,1,}} & \tabularnewline
-\hline 
-\texttt{\small{viscZ=1,1,1,1,}} & \tabularnewline
-\hline 
-\texttt{\small{SDEPV=off}} & \tabularnewline
-\hline 
-\texttt{\small{sdepv\_misfit=0.001}} & \tabularnewline
-\hline 
-\texttt{\small{sdepv\_expt=1,1,1,1,}} & \tabularnewline
-\hline 
-\texttt{\small{PDEPV=off}} & \tabularnewline
-\hline 
-\texttt{\small{pdepv\_a=1e20,1e20,1e20,1e20}} & \tabularnewline
-\hline 
-\texttt{\small{pdepv\_b=0,0,0,0}} & \tabularnewline
-\hline 
-\texttt{\small{pdepv\_y=1e20,1e20,1e20,1e20}} & \tabularnewline
-\hline 
-\texttt{\small{pdepv\_eff=on}} & \tabularnewline
-\hline 
-\texttt{\small{pdepv\_offset=0}} & \tabularnewline
-\hline 
-\texttt{\small{CDEPV=off}} & \tabularnewline
-\hline 
-\texttt{\small{cdepv\_ff=1,1}} & \tabularnewline
-\hline 
-\texttt{\small{low\_visc\_channel=0}} & \tabularnewline
-\hline 
-\texttt{\small{low\_visc\_wedge=0}} & \tabularnewline
-\hline 
-\texttt{\small{lv\_min\_radius=0.9764}} & \tabularnewline
-\hline 
-\texttt{\small{lv\_max\_radius=0.9921}} & \tabularnewline
-\hline 
-\texttt{\small{lv\_channel\_thickness=0.0047}} & \tabularnewline
-\hline 
-\texttt{\small{lv\_reduction=0.5}} & \tabularnewline
-\hline 
-\texttt{\small{VMIN=off}} & \tabularnewline
-\hline 
-\texttt{\small{visc\_min=0.001}} & \tabularnewline
-\hline 
-\texttt{\small{VMAX=off}} & \tabularnewline
-\hline 
-\texttt{\small{visc\_max=1000}} & \tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\noindent \texttt{\normalsize{layout}}}
-
-The following facilities are only used in the coupled CitcomS solver.
-\\
-\\
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{containing\_group={[}0-11{]}}} & The processors to be assigned to the csolver.\tabularnewline
-\hline 
-\texttt{\small{embedded\_group={[}12{]}}} & The processors to be assigned to the esolver.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\noindent \texttt{\normalsize{ccoupler}}}
-
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{si\_unit=off}} & Whether to exchange information in SI units.\tabularnewline
-\hline 
-\texttt{\small{cartesian=off}} & Whether to exchange information in Cartesian coordinate.\tabularnewline
-\hline 
-\texttt{\small{two\_way\_communication=on}} & Whether to transfer information from esolver to csolver.\tabularnewline
-\hline 
-\texttt{\small{exchange\_initial\_temperature}}~\\
-\texttt{\small{=on}} & Whether to ensure consistent initial temperature between csolver or
-esolver.\tabularnewline
-\hline 
-\texttt{\small{exchange\_pressure=on}} & Whether to send the pressure solution to esolver.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\noindent \texttt{\normalsize{ecoupler}}}
-
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{si\_unit=off}} & Whether to exchange information in SI units.\tabularnewline
-\hline 
-\texttt{\small{cartesian=off}} & Whether to exchange information in Cartesian coordinate.\tabularnewline
-\hline 
-\texttt{\small{two\_way\_communication=on}} & Whether to transfer information from esolver to csolver.\tabularnewline
-\hline 
-\texttt{\small{exchange\_initial\_temperature=on}} & Whether to ensure consistent initial temperature between csolver or
-esolver.\tabularnewline
-\hline 
-\texttt{\small{exchange\_pressure=on}} & Whether to receive the initial guess of pressure from csolver.\tabularnewline
-\hline 
-\texttt{\small{exclude\_top=off}} & Whether to exclude the top boundary when receiving boundary conditions
-from the csolver. If the esolver has imposed plate velocity and constant
-temperature at the surface, set this to on.\tabularnewline
-\hline 
-\texttt{\small{exclude\_bottom=off}} & Whether to exclude the bottom boundary when receiving boundary conditions
-from the csolver.\tabularnewline
-\hline 
-\texttt{\small{amending\_outflow=off}} & Whether to amend the velocity boundary conditions to satisfy the continuity
-equation.\tabularnewline
-\hline 
-\end{tabular}
-
-
-\subsection{\noindent \texttt{\normalsize{journal}}}
-
-The Pyre facility \texttt{journal} provides five types of debugging
-output for conceptually different types of information. The journal
-output stream can be instantiated as separated channels multiple times,
-and each channel can be individually activated or deactivated, and
-sent to different locations (the terminal, sockets, files, devices,
-etc.). The streams and their default states of the journal streams
-are:\\
-\\
-\begin{tabular}{|>{\raggedright}p{1.85in}|>{\raggedright}p{4.25in}|}
-\hline 
-\texttt{\small{debug}} & Debugging information. Default off.\tabularnewline
-\hline 
-\texttt{\small{error}} & Unrecoverable runtime error. Default on. \tabularnewline
-\hline 
-\texttt{\small{firewall}} & Fatal programming error. Default on. \tabularnewline
-\hline 
-\texttt{\small{info}} & Descriptive information. Default off.\tabularnewline
-\hline 
-\texttt{\small{warning}} & Recoverable runtime error. Default off.\tabularnewline
-\hline 
-\end{tabular}\\
-\\
-For coupled solvers, there is a large amount of debugging information
-that outputs through the journal facility. That output can be turned
-on/off with command line options. The most important ones are \texttt{journal.debug.Exchanger}
-and \texttt{journal.debug.CitcomS-Exchanger}. Other less important
-options can be found in \texttt{tests/coupled.cfg}. To enable the
-journal output, try running the scripts with the following options:
-\begin{lyxcode}
-{[}CitcomS.journal.debug{]}~\\
-Exchanger~=~on~\\
-CitcomS-Exchanger~=~on
-\end{lyxcode}
 
 \chapter{CitcomS Input File Format}
 

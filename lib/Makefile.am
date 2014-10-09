@@ -27,20 +27,8 @@
 noinst_LIBRARIES =
 lib_LTLIBRARIES =
 
-if COND_PYRE
-
-if COND_EMBEDDING
-    # static library
-    noinst_LIBRARIES += libCitcomS.a
-else
-    # shared library (libtool)
-    lib_LTLIBRARIES += libCitcomS.la
-endif
-
-else
-    # static library
-    noinst_LIBRARIES += libCitcomS.a
-endif
+# static library
+noinst_LIBRARIES += libCitcomS.a
 
 AM_CPPFLAGS =
 if COND_HDF5
@@ -63,8 +51,8 @@ libCitcomS_a_CFLAGS = $(AM_CFLAGS) # hack for automake
 libCitcomS_a_SOURCES = $(sources)
 
 # shared library (libtool)
-libCitcomS_la_LDFLAGS = -release $(VERSION)
-libCitcomS_la_SOURCES = $(sources)
+#libCitcomS_la_LDFLAGS = -release $(VERSION)
+#libCitcomS_la_SOURCES = $(sources)
 
 sources = \
 	Advection_diffusion.c \

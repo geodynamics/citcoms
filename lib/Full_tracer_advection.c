@@ -321,7 +321,7 @@ void full_lost_souls(struct All_variables *E)
                 E->trace.rlater[j][2][kk]);
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
 
@@ -353,7 +353,7 @@ void full_lost_souls(struct All_variables *E)
 
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
     /* Pre communication */
@@ -402,7 +402,7 @@ void full_lost_souls(struct All_variables *E)
 	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
 		E->parallel.me,ireceive[j][kk],isource_proc);
     }
-    /**/
+    */
 
     /* Allocate memory in receive arrays */
 
@@ -619,7 +619,7 @@ void full_lost_souls(struct All_variables *E)
                     isend_z[j][kk],ireceive_z[j][kk]);
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
 
         /* Allocate memory to receive_z arrays */
@@ -983,7 +983,7 @@ void full_get_shape_functions(struct All_variables *E,
     /** debug **
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
             shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
-    /**/
+    */
 
     return;
 }
@@ -1150,7 +1150,7 @@ static void get_2dshape(struct All_variables *E,
     /** debug **
     fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
             nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
-    /**/
+    */
 
     return;
 }
@@ -1252,7 +1252,7 @@ static void spherical_to_uv(struct All_variables *E, int j,
     /** debug **
     fprintf(E->trace.fpt, "(%e %e) -> (%e %e)\n",
             theta, phi, *u, *v);
-    /**/
+    */
 
     return;
 }
@@ -2892,7 +2892,7 @@ static void define_uv_space(struct All_variables *E)
     }
     fprintf(E->trace.fpt, "%d %d %d ref=(%e %e)\n",
             E->lmesh.noz, E->lmesh.nsf, refnode, theta_f, phi_f);
-    /**/
+    */
 
     /* store cos(theta_f) and sin(theta_f) */
     E->gnomonic[0].u = cost[refnode];
@@ -2915,7 +2915,7 @@ static void define_uv_space(struct All_variables *E)
         /** debug **
         fprintf(E->trace.fpt, "n=%d ns=%d cosc=%e (%e %e) -> (%e %e)\n",
                 n, i, cosc, E->sx[j][1][n], E->sx[j][2][n], u, v);
-        /**/
+        */
     }
 
     return;
@@ -3035,7 +3035,7 @@ static void determine_shape_coefficients(struct All_variables *E)
                     E->trace.shape_coefs[j][iwedge][7][i],
                     E->trace.shape_coefs[j][iwedge][8][i],
                     E->trace.shape_coefs[j][iwedge][9][i]);
-            /**/
+            */
 
         } /* end wedge */
     } /* end elem */
