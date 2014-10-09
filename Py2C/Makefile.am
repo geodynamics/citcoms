@@ -31,6 +31,6 @@ bin_PROGRAMS = Py2C
 bin_SCRIPTS =
 
 ######## C drivers ########
-Py2C_SOURCES = Py2CMain.cpp Py2C.cpp
+Py2C_SOURCES = Py2CMain.cpp Py2C.cpp Py2C.hpp
 
 ## end of Makefile.am

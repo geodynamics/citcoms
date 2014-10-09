@@ -26,6 +26,6 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = lib bin Py2C
+SUBDIRS = Py2C etc examples tests visual lib bin
 
 ## end of Makefile.am
