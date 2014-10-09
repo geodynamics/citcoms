@@ -45,3 +45,9 @@ Py2C/Py2C
 *.out
 *.toc
 doc/citcoms-manual.synctex.gz
+
+visual/OpenDXMacro/Makefile.in
+
+visual/OpenDXMacro/Makefile
+
+config.h.in~
