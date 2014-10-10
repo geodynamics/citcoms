@@ -126,6 +126,9 @@ int main(argc,argv)
     fflush(E->fp);
   }
 
+  /* write all config parameters to a file named pidXXXXXXXXX */
+  print_all_config_parameters(E);
+
 
 
   /* this section sets the initial condition;

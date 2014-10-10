@@ -26,12 +26,12 @@
 examplesdir = $(pkgdatadir)/examples
 
 nobase_dist_examples_DATA = \
-	Cookbook1/cookbook1.cfg \
-	Cookbook2/cookbook2.cfg \
-	Cookbook3/cookbook3.cfg \
-	Cookbook4/cookbook4.cfg \
+	Cookbook1/cookbook1 \
+	Cookbook2/cookbook2 \
+	Cookbook3/cookbook3 \
+	Cookbook4/cookbook4 \
 	Cookbook4/coor.dat \
-	Cookbook5/cookbook5.cfg \
+	Cookbook5/cookbook5 \
 	Cookbook5/coor.dat \
 	Cookbook5/ic/cookbook5.velo.0.0 \
 	Cookbook5/ic/cookbook5.velo.1.0 \
@@ -92,21 +92,14 @@ nobase_dist_examples_DATA = \
 	Cookbook5/velocity/bvel.dat7 \
 	Cookbook5/velocity/bvel.dat8 \
 	Cookbook5/velocity/bvel.dat9 \
-	Cookbook6/cookbook6.cfg \
+	Cookbook6/cookbook6 \
 	Cookbook6/coord.dat \
 	Cookbook6/README \
-	Cookbook7/cookbook7.cfg \
-	Cookbook8/cookbook8.cfg \
+	Cookbook7/cookbook7 \
+	Cookbook8/cookbook8 \
 	Cookbook8/coord.dat \
-	Cookbook9/cookbook9.cfg \
-	Cookbook9/ic/cntn.velo.0.0 \
-	Cookbook9/ic/cntn.velo.1.0 \
-	Cookbook9/ic/embd.velo.0.0 \
-	Cookbook9/ic/embd.velo.1.0 \
-	Cookbook9/velocity/bvel.dat0 \
-	Cookbook9/velocity/bvel.dat1 \
-	example0.cfg \
-	example1.cfg \
+	example0 \
+	example1 \
 	Full/input.sample \
 	Full/machine.sample \
 	Full/velbc/README \

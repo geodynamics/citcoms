@@ -36,6 +36,7 @@ bin/citcoms
 bin/mpipycitcoms
 bin/pycitcoms
 visual/project_geoid
+Py2C/Py2C
 
 # ignore LaTex aux files, log files, etc
 *.aux
@@ -44,3 +45,13 @@ visual/project_geoid
 *.out
 *.toc
 doc/citcoms-manual.synctex.gz
+
+visual/OpenDXMacro/Makefile.in
+
+visual/OpenDXMacro/Makefile
+
+config.h.in~
+
+visual/OpenDXMacro/Makefile
+
+visual/OpenDXMacro/Makefile.in

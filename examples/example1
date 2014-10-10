@@ -1,0 +1,32 @@
+# CitcomS
+cpu_limits_in_seconds=360000000
+minstep=70
+
+# CitcomS.controller
+storage_spacing=10
+
+# CitcomS.solver
+datafile=example1
+rayleigh=100000
+
+# CitcomS.solver.mesher
+fi_max=1
+fi_min=0
+nodex=17
+nodey=17
+nodez=9
+nprocx=2
+nprocy=2
+theta_max=2.0708
+theta_min=1.0708
+
+# CitcomS.solver.ic
+num_perturbations=1
+perturbl=1
+perturblayer=5
+perturbm=1
+perturbmag=0.05
+
+# CitcomS.solver.visc
+num_mat=4
+
