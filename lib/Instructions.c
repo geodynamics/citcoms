@@ -2140,8 +2140,8 @@ void print_all_config_parameters(struct All_variables *E)
       fprintf(fp, "\n");
     }
     fprintf(fp, "itracer_warnings=%d\n", E->trace.itracer_warnings);
-    fprintf(fp, "regular_grid_deltheta=%g\n", E->trace.deltheta[0]);
-    fprintf(fp, "regular_grid_delphi=%g\n", E->trace.delphi[0]);
+    fprintf(fp, "regular_grid_deltheta=%g\n", E->trace.deltheta);
+    fprintf(fp, "regular_grid_delphi=%g\n", E->trace.delphi);
     fprintf(fp, "chemical_buoyancy=%d\n", E->composition.ichemical_buoyancy);
     fprintf(fp, "buoy_type=%d\n", E->composition.ibuoy_type);
     fprintf(fp, "buoyancy_ratio=");
