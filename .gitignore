@@ -55,3 +55,22 @@ config.h.in~
 visual/OpenDXMacro/Makefile
 
 visual/OpenDXMacro/Makefile.in
+
+examples/Cookbook1/*botm*
+
+examples/Cookbook1/*chkpt*
+
+examples/Cookbook1/*coord*
+
+examples/Cookbook1/*domain*
+
+examples/Cookbook1/*surf*
+
+examples/Cookbook1/*time*
+
+examples/Cookbook1/*velo*
+
+examples/Cookbook1/*visc*
+
+examples/Cookbook1/pid*
+
