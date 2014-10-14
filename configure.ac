@@ -33,6 +33,13 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 
 # 'configure' options
+AC_ARG_WITH([petsc],
+     [AC_HELP_STRING([--with-petsc],
+         [use PETSc library @<:@default=no@:>@])],
+     [want_petsc="$withval"],
+     [want_petsc=no])
+AM_CONDITIONAL([COND_PETSC], [test "$want_petsc" = yes])
+
 CIT_ARG_HDF5([auto])
 AC_ARG_VAR(HC_HOME, [home path to HC program, used by --with-ggrd])
 AC_ARG_WITH([ggrd],
@@ -54,6 +61,12 @@ AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC 
 
 # Checking a system header here so that CPP is always defined
 AC_CHECK_HEADERS([malloc.h])
+
+if test "$want_petsc" = yes; then
+  CIT_PATH_PETSC(3.5.2,[CPPFLAGS="-DUSE_PETSC $CPPFLAGS"],[AC_MSG_ERROR([PETSc 3.5.1 library not found])])
+  CIT_HEADER_PETSC
+  CIT_CHECK_LIB_PETSC
+fi
 
 # We don't need Fortran.
 AC_PROVIDE([AC_PROG_F77])
@@ -155,6 +168,7 @@ echo -e "\t LDFLAGS: " $LDFLAGS
 echo -e "\t LIBS: " $LIBS
 echo -e "\t with-hdf5: " $want_hdf5
 echo -e "\t with-ggrd: " $want_ggrd
+echo -e "\t with-petsc: " $want_petsc
 echo
 
 dnl end of configure.ac
