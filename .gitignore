@@ -74,3 +74,7 @@ examples/Cookbook1/*visc*
 
 examples/Cookbook1/pid*
 
+
+*.bbl
+
+*.blg
