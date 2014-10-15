@@ -143,9 +143,4 @@ sources = \
 	Regional_version_dependent.c \
 	$(CUDA_SOURCES)
 
-EXTRA_DIST = \
-	Obsolete.c \
-	Full_obsolete.c \
-	Regional_obsolete.c
-
 ## end of Makefile.am
