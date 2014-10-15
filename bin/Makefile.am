@@ -37,9 +37,9 @@ bin_SCRIPTS =
 
 ######## C drivers ########
 CitcomSFull_SOURCES = Citcom.c CitcomSFull.c
-CitcomSFull_LDADD = $(libCitcomS)
+CitcomSFull_LDADD = $(libCitcomS) $(PETSC_LIB)
 CitcomSRegional_SOURCES = Citcom.c CitcomSRegional.c
-CitcomSRegional_LDADD = $(libCitcomS)
+CitcomSRegional_LDADD = $(libCitcomS) $(PETSC_LIB)
 
 libCitcomS = $(top_builddir)/lib/libCitcomS.a
 

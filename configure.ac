@@ -63,7 +63,7 @@ AC_PROG_CXX([mpicxx mpic++ mpiCC hcp mpCC mpxlC mpxlC_r cmpic++ g++ c++ gpp aCC 
 AC_CHECK_HEADERS([malloc.h])
 
 if test "$want_petsc" = yes; then
-  CIT_PATH_PETSC(3.5.2,[CPPFLAGS="-DUSE_PETSC $CPPFLAGS"],[AC_MSG_ERROR([PETSc 3.5.1 library not found])])
+  CIT_PATH_PETSC(3.5.2,[CPPFLAGS="-DUSE_PETSC $PETSC_CC_INCLUDES $CPPFLAGS"],[AC_MSG_ERROR([PETSc 3.5.2 library not found])])
   CIT_HEADER_PETSC
   CIT_CHECK_LIB_PETSC
 fi
