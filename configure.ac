@@ -25,7 +25,7 @@ dnl</LicenseText>
 # $Id$
 
 AC_PREREQ(2.59)
-AC_INIT([CitcomS], [3.3.0], [cig-mc@geodynamics.org], [CitcomS])
+AC_INIT([CitcomS], [3.3.1], [cig-mc@geodynamics.org], [CitcomS])
 AC_CONFIG_AUX_DIR([./aux-config])
 AC_CONFIG_SRCDIR([bin/Citcom.c])
 AC_CONFIG_HEADER([config.h])

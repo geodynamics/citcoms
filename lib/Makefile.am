@@ -78,6 +78,7 @@ sources = \
 	General_matrix_functions.c \
 	global_defs.h \
 	Ggrd_handling.c \
+	ggrd_handling.h \
 	Global_operations.c \
 	hdf5_related.h \
 	Initial_temperature.c \
