@@ -461,7 +461,7 @@ void h5output_coord(struct All_variables *E)
     h5create_field(E->hdf5.file_id, field, "coord", "coordinates of nodes");
 
     /* write to dataset */
-    dataset = H5Dopen(E->hdf5.file_id, "/coord");
+    dataset = H5Dopen(E->hdf5.file_id, "/coord", H5P_DEFAULT);
     status  = h5write_field(dataset, field, 1, 1);
 
     /* release resources */

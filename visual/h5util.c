@@ -51,7 +51,7 @@ field_t *open_field(hid_t group, const char *name)
     field->maxdims = NULL;
     field->n = 0;
 
-    dataset = H5Dopen(group, name);
+    dataset = H5Dopen(group, name, H5P_DEFAULT);
     if(dataset < 0)
     {
         free(field);
@@ -122,7 +122,7 @@ herr_t read_field(hid_t group, field_t *field, int cap)
     if (group < 0 || field == NULL)
         return -1;
 
-    dataset = H5Dopen(group, field->name);
+    dataset = H5Dopen(group, field->name, H5P_DEFAULT);
 
     if (dataset < 0)
         return -1;
