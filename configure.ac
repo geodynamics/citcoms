@@ -33,7 +33,6 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 
 # 'configure' options
-CIT_ARG_HDF5([auto])
 AC_ARG_VAR(HC_HOME, [home path to HC program, used by --with-ggrd])
 AC_ARG_WITH([ggrd],
     [AC_HELP_STRING([--with-ggrd],
@@ -63,21 +62,16 @@ AC_PROG_LIBTOOL
 AC_SEARCH_LIBS([MPI_Init], [mpi mpich], [], [AC_MSG_ERROR([MPI library not found])])
 
 
-CIT_CHECK_LIB_HDF5
-CIT_CHECK_LIB_HDF5_PARALLEL
-
 # Checks for header files.
 AC_CHECK_HEADER([mpi.h], [], [AC_MSG_ERROR([header 'mpi.h' not found])])
-CIT_CHECK_HEADER_HDF5
 
 # Checks for typedefs, structures, and compiler characteristics.
 
 # Checks for library functions.
 
-if test "$want_hdf5" != no; then
-    want_hdf5=yes
-fi
-AM_CONDITIONAL([COND_HDF5], [test "$want_hdf5" = yes])
+AX_LIB_HDF5([parallel])
+AM_CONDITIONAL([COND_HDF5], [test "$with_hdf5" = yes])
+
 AC_SEARCH_LIBS([gzopen], [z], [
 		CPPFLAGS="-DUSE_GZDIR $CPPFLAGS"
 		], [
@@ -153,7 +147,7 @@ echo -e "\t CFLAGS: " $CFLAGS
 echo -e "\t CPPFLAGS: " $CPPFLAGS
 echo -e "\t LDFLAGS: " $LDFLAGS
 echo -e "\t LIBS: " $LIBS
-echo -e "\t with-hdf5: " $want_hdf5
+echo -e "\t with-hdf5: " $with_hdf5
 echo -e "\t with-ggrd: " $want_ggrd
 echo
 

@@ -25,9 +25,6 @@
 
 
 AM_CPPFLAGS = -I$(top_srcdir)/lib
-if COND_HDF5
-    AM_CPPFLAGS += -DUSE_HDF5
-endif
 
 bin_PROGRAMS = CitcomSFull CitcomSRegional
 

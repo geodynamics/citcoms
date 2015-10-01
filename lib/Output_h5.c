@@ -30,7 +30,7 @@
 #include "output_h5.h"
 
 
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
 
 /****************************************************************************
  * Structs for HDF5 output                                                  *
@@ -146,7 +146,7 @@ extern void compute_geoid(struct All_variables *);
 
 void h5output_allocate_memory(struct All_variables *E)
 {
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
     /*
      * Field variables
      */
@@ -220,7 +220,7 @@ void h5output_allocate_memory(struct All_variables *E)
 
 void h5output(struct All_variables *E, int cycles)
 {
-#ifndef USE_HDF5
+#ifndef HAVE_HDF5
     if(E->parallel.me == 0)
         fprintf(stderr, "h5output(): CitcomS was compiled without HDF5!\n");
     MPI_Finalize();
@@ -244,7 +244,7 @@ void h5output(struct All_variables *E, int cycles)
 
 void h5input_params(struct All_variables *E)
 {
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
 
     int m = E->parallel.me;
 
@@ -266,7 +266,7 @@ void h5input_params(struct All_variables *E)
 }
 
 
-#ifdef USE_HDF5
+#ifdef HAVE_HDF5
 
 static void h5output_const(struct All_variables *E)
 {
@@ -2416,4 +2416,4 @@ herr_t set_attribute_double_vector(hid_t obj_id,
     return set_attribute_array(obj_id, attr_name, 1, &dim, H5T_NATIVE_DOUBLE, data);
 }
 
-#endif  /* #ifdef USE_HDF5 */
+#endif  /* #ifdef HAVE_HDF5 */
