@@ -40,7 +40,6 @@
 */
 
 #include <math.h>
-#include <string.h>
 #include "global_defs.h"
 #include "parsing.h"
 #include "parallel_related.h"
@@ -602,7 +601,7 @@ static void find_tracers(struct All_variables *E)
             /* debug *
             fprintf(E->trace.fpt,"BB. kk %d %d %d %d %f %f %f %f %f %f\n",kk,j,iprevious_element,iel,x,y,z,theta,phi,rad);
             fflush(E->trace.fpt);
-            */
+            /**/
 
             E->trace.ielement[j][it]=iel;
 
@@ -702,7 +701,7 @@ void count_tracers_of_flavors(struct All_variables *E)
         }
     }
     fflush(E->trace.fpt);
-    */
+    /**/
 
     return;
 }
@@ -1016,7 +1015,7 @@ static void read_tracer_file(struct All_variables *E)
             fprintf(E->trace.fpt, "\n");
         }
         fflush(E->trace.fpt);
-        */
+        /**/
 
     } /* end j */
 
@@ -1160,7 +1159,7 @@ static void read_old_tracer_file(struct All_variables *E)
             fprintf(E->trace.fpt, "\n");
         }
         fflush(E->trace.fpt);
-        */
+        /**/
 
         fprintf(E->trace.fpt,"Read %d tracers from file %s\n",numtracers,output_file);
         fflush(E->trace.fpt);
@@ -1438,7 +1437,7 @@ void get_neighboring_caps(struct All_variables *E)
             }
         }
         fflush(E->trace.fpt);
-        */
+        /**/
     }
 
     return;

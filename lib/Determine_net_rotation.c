@@ -46,10 +46,10 @@ These have been superceded by the routines in Global_opertations and can probabl
 #include "parsing.h"
 #include "output.h"
 
-#ifdef USE_GGRD
-void hc_ludcmp_3x3(HC_PREC [3][3],int,int *);
-void hc_lubksb_3x3(HC_PREC [3][3],int,int *,HC_PREC *);
-#endif
+
+void ludcmp_3x3(double [3][3],int,int *);
+void lubksb_3x3(double [3][3],int,int *,double *);
+
 
 double determine_netr_tp(float, float, float, float, float, int, double *, double *);
 void sub_netr(float, float, float, float *, float *, double *);
@@ -281,10 +281,9 @@ double determine_netr_tp(float r,float theta,float phi,
     omega[2] = c9[8];
 
     /* solve */
-#ifdef USE_GGRD
-    hc_ludcmp_3x3(coef,n3,ind);
-    hc_lubksb_3x3(coef,n3,ind,omega);
-#endif
+    ludcmp_3x3(coef,n3,ind);
+    lubksb_3x3(coef,n3,ind,omega);
+
     amp = sqrt(omega[0]*omega[0] + omega[1]*omega[1] + omega[2]*omega[2]);
     break;
   default:
@@ -375,27 +374,26 @@ void sub_netr(float r,float theta,float phi,float *velt,float *velp, double *ome
 //      AND MAILING.
 //
 
-#ifdef USE_GGRD
-#define NR_TINY 1.0e-20;
+#define CITCOM_NR_TINY 1.0e-20;
 /* 
 
    matrix is always 3 x 3 , solution is for full system for n == 3,
    for upper 2 x 2 only for n = 2
 
  */
-void hc_ludcmp_3x3(HC_PREC a[3][3],int n,int *indx)
+void ludcmp_3x3(double a[3][3],int n,int *indx)
 {
   int i,imax=0,j,k;
-  HC_PREC big,dum,sum,temp;
-  HC_PREC vv[3];
+  double big,dum,sum,temp;
+  double vv[3];
   
   for (i=0;i < n;i++) {
     big=0.0;
     for (j=0;j < n;j++)
       if ((temp = fabs(a[i][j])) > big) 
 	big=temp;
-    if (fabs(big) < HC_EPS_PREC) {
-      fprintf(stderr,"hc_ludcmp_3x3: singular matrix in routine, big: %g\n",
+    if (fabs(big) < 5e-15) {
+      fprintf(stderr,"ludcmp_3x3: singular matrix in routine, big: %g\n",
 	      big);
       for(j=0;j <n;j++){
 	for(k=0;k<n;k++)
@@ -433,8 +431,8 @@ void hc_ludcmp_3x3(HC_PREC a[3][3],int n,int *indx)
       vv[imax]=vv[j];
     }
     indx[j]=imax;
-    if (fabs(a[j][j]) < HC_EPS_PREC) 
-      a[j][j] = NR_TINY;
+    if (fabs(a[j][j]) < 5e-15) 
+      a[j][j] = CITCOM_NR_TINY;
     if (j != 2) {
       dum=1.0/(a[j][j]);
       for (i=j+1;i < n;i++) 
@@ -443,11 +441,12 @@ void hc_ludcmp_3x3(HC_PREC a[3][3],int n,int *indx)
   }
 }
 
-#undef NR_TINY
-void hc_lubksb_3x3(HC_PREC a[3][3], int n,int *indx, HC_PREC *b)
+#undef CITCOM_NR_TINY
+
+void lubksb_3x3(double a[3][3], int n,int *indx, double *b)
 {
   int i,ii=0,ip,j;
-  HC_PREC sum;
+  double sum;
   int nm1;
   nm1 = n - 1;
   for (i=0;i < n;i++) {
@@ -457,7 +456,7 @@ void hc_lubksb_3x3(HC_PREC a[3][3], int n,int *indx, HC_PREC *b)
     if (ii)
       for (j=ii-1;j <= i-1;j++) 
 	sum -= a[i][j]*b[j];
-    else if (fabs(sum)>HC_EPS_PREC) 
+    else if (fabs(sum)> 5e-15) 
       ii = i+1;
     b[i]=sum;
   }
@@ -469,5 +468,4 @@ void hc_lubksb_3x3(HC_PREC a[3][3], int n,int *indx, HC_PREC *b)
   }
 }
 
-#endif
 

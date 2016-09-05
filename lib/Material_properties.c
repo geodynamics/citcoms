@@ -153,7 +153,7 @@ static void read_refstate(struct All_variables *E)
                 E->refstate.gravity[i],
                 E->refstate.thermal_expansivity[i],
                 E->refstate.heat_capacity[i]);
-        end of debug */
+        /* end of debug */
     }
 
     fclose(fp);

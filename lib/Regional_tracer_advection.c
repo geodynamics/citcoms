@@ -269,6 +269,7 @@ static void make_mesh_ijk(struct All_variables *E)
     for(k=0;k<noz;k++)
 	fprintf(E->trace.fpt, "k=%d z=%e\n", k, E->trace.z_space[k]);
 
+    /**
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 0));
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 1));
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 2));
@@ -294,7 +295,7 @@ static void make_mesh_ijk(struct All_variables *E)
     fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.775));
     fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
     parallel_process_termination();
-    */
+    /**/
 
     return;
 }
@@ -499,7 +500,7 @@ void regional_get_shape_functions(struct All_variables *E,
     fprintf(E->trace.fpt, "sum(shp): %e\n",
             shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]+ shp[8]);
     fflush(E->trace.fpt);
-    */
+    /**/
     return;
 }
 
@@ -567,7 +568,7 @@ void regional_get_velocity(struct All_variables *E,
     fprintf(E->trace.fpt, "THETA: %e -> %e\n", theta, tmp);
 
     fflush(E->trace.fpt);
-    */
+    /**/
 
     return;
 }
@@ -684,7 +685,7 @@ void regional_lost_souls(struct All_variables *E)
     }
     fflush(E->trace.fpt);
     parallel_process_sync(E);
-    */
+    /**/
 
 
     /* Allocate Maximum Memory to Send Arrays */
@@ -781,7 +782,7 @@ void regional_lost_souls(struct All_variables *E)
             }
         }
         fflush(E->trace.fpt);
-        */
+        /**/
 
 
         /* Send info to other processors regarding number of send tracers */
@@ -822,7 +823,7 @@ void regional_lost_souls(struct All_variables *E)
             }
         }
         parallel_process_sync(E);
-        */
+        /**/
 
         /* Allocate memory in receive arrays */
         for (i=0; i<2; i++) {
@@ -873,7 +874,7 @@ void regional_lost_souls(struct All_variables *E)
         }
         fflush(E->trace.fpt);
         parallel_process_sync(E);
-        */
+        /**/
 
         /* put the received tracers */
         for (i=0; i<2; i++) {
@@ -973,7 +974,7 @@ static void put_found_tracers(struct All_variables *E,
                 kk, inside, theta, phi, rad);
         fprintf(E->trace.fpt, "before: %d %d\n",
                 E->trace.ilater[j], E->trace.ntracers[j]);
-        */
+        /**/
 
         if (inside) {
 
@@ -1034,7 +1035,7 @@ static void put_found_tracers(struct All_variables *E,
         fprintf(E->trace.fpt, "after: %d %d\n",
                 E->trace.ilater[j], E->trace.ntracers[j]);
         fflush(E->trace.fpt);
-        */
+        /**/
 
     } /* end of for kk */
 

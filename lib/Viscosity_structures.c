@@ -173,7 +173,7 @@ void viscosity_system_input(struct All_variables *E)
 									*/
 
     // moved to Composition related, for init purposes
-    //input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
+    input_boolean("CDEPV",&(E->viscosity.CDEPV),"off",m);
     for(i=0;i<10;i++)
       E->viscosity.cdepv_ff[i] = 1.0; /* flavor factors for CDEPV */
     if(E->viscosity.CDEPV){
@@ -1408,12 +1408,6 @@ static void low_viscosity_channel_factor(struct All_variables *E, float *F)
     }
 
 
-    /** debug **
-    for(m=1; m<=E->sphere.caps_per_proc; m++)
-        for(e=1; e<=E->lmesh.nel; e++)
-            fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);
-    */
-
     return;
 }
 
@@ -1468,7 +1462,8 @@ static void low_viscosity_wedge_factor(struct All_variables *E, float *F)
     }
 
 
-    /** debug **
+    /* * debug **
+
     for(m=1; m<=E->sphere.caps_per_proc; m++)
         for(e=1; e<=E->lmesh.nel; e++)
             fprintf(stderr, "lv_reduction: %d %e\n", e, F[e]);

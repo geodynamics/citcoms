@@ -93,8 +93,8 @@ void convection_boundary_conditions(struct All_variables *);
 double determine_model_net_rotation(struct All_variables *, double *);
 double determine_netr_tp(float, float, float, float, float, int, double *, double *);
 void sub_netr(float, float, float, float *, float *, double *);
-void hc_ludcmp_3x3(double [3][3], int, int *);
-void hc_lubksb_3x3(double [3][3], int, int *, double *);
+void ludcmp_3x3(double [3][3], int, int *);
+void lubksb_3x3(double [3][3], int, int *, double *);
 /* Drive_solvers.c */
 void general_stokes_solver_setup(struct All_variables *);
 void general_stokes_solver(struct All_variables *);
@@ -221,10 +221,8 @@ void remove_rigid_rot(struct All_variables *);
 void tic_input(struct All_variables *);
 void convection_initial_temperature(struct All_variables *);
 /* Instructions.c */
-void print_all_config_params(struct All_variables *);
 void initial_mesh_solver_setup(struct All_variables *);
 void read_instructions(struct All_variables *, char *);
-void print_all_config_parameters(struct All_variables *E);
 void initial_setup(struct All_variables *);
 void initialize_material(struct All_variables *);
 void initial_conditions(struct All_variables *);
