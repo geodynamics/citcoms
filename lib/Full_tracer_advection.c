@@ -313,7 +313,7 @@ void full_lost_souls(struct All_variables *E)
 
 
     E->trace.istat_isend=E->trace.ilater[j];
-    /** debug **
+    /* * debug **
     for (kk=1; kk<=E->trace.istat_isend; kk++) {
         fprintf(E->trace.fpt, "tracer#=%d xx=(%g,%g,%g)\n", kk,
                 E->trace.rlater[j][0][kk],
@@ -321,7 +321,7 @@ void full_lost_souls(struct All_variables *E)
                 E->trace.rlater[j][2][kk]);
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
 
@@ -344,7 +344,7 @@ void full_lost_souls(struct All_variables *E)
     }
 
 
-    /** debug **
+    /* * debug **
     ithiscap=E->sphere.capid[j];
     for (kk=1;kk<=num_ngb;kk++) {
         ithatcap=E->parallel.PROCESSOR[lev][j].pass[kk];
@@ -353,7 +353,7 @@ void full_lost_souls(struct All_variables *E)
 
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
 
     /* Pre communication */
@@ -390,7 +390,7 @@ void full_lost_souls(struct All_variables *E)
     MPI_Waitall(idb,request,status);
 
 
-    /** debug **
+    /* * debug **
     for (kk=0;kk<=num_ngb;kk++) {
         if(kk==0)
 	  isource_proc=E->parallel.me;
@@ -402,7 +402,7 @@ void full_lost_souls(struct All_variables *E)
 	fprintf(E->trace.fpt,"%d recv %d from proc %d\n",
 		E->parallel.me,ireceive[j][kk],isource_proc);
     }
-    /**/
+    */
 
     /* Allocate memory in receive arrays */
 
@@ -611,7 +611,7 @@ void full_lost_souls(struct All_variables *E)
         MPI_Waitall(idb,request,status);
 
 
-        /** debug **
+        /* * debug **
         for (kk=1;kk<=E->parallel.TNUM_PASSz[lev];kk++) {
             fprintf(E->trace.fpt, "PROC: %d IVN: %d (P: %d) "
                     "SEND: %d REC: %d\n",
@@ -619,7 +619,7 @@ void full_lost_souls(struct All_variables *E)
                     isend_z[j][kk],ireceive_z[j][kk]);
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
 
         /* Allocate memory to receive_z arrays */
@@ -980,10 +980,10 @@ void full_get_shape_functions(struct All_variables *E,
     shp[5]=shaperad[2]*shape2d[2];
     shp[6]=shaperad[2]*shape2d[3];
 
-    /** debug **
+    /* * debug **
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e\n",
             shp[1], shp[2], shp[3], shp[4], shp[5], shp[6]);
-    /**/
+    */
 
     return;
 }
@@ -1147,10 +1147,10 @@ static void get_2dshape(struct All_variables *E,
 
     shape2d[3]=a0+a1*u+a2*v;
 
-    /** debug **
+    /* * debug **
     fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e)\n",
             nelem, n, iwedge, shape2d[1], shape2d[2], shape2d[3]);
-    /**/
+    */
 
     return;
 }
@@ -1249,10 +1249,10 @@ static void spherical_to_uv(struct All_variables *E, int j,
     *u=sint*sinp2*cosc;
     *v=(sin_theta_f*cost-cos_theta_f*sint*cosp2)*cosc;
 
-    /** debug **
+    /* * debug **
     fprintf(E->trace.fpt, "(%e %e) -> (%e %e)\n",
             theta, phi, *u, *v);
-    /**/
+    */
 
     return;
 }
@@ -2884,7 +2884,7 @@ static void define_uv_space(struct All_variables *E)
                                   + E->lmesh.nox / 2);
     phi_f = E->gnomonic_reference_phi = E->sx[j][2][refnode];
 
-    /** debug **
+    /* * debug **
     theta_f = E->sx[j][1][refnode];
     for (i=1; i<=E->lmesh.nsf; i++) {
         fprintf(E->trace.fpt, "i=%d (%e %e %e %e)\n",
@@ -2892,7 +2892,7 @@ static void define_uv_space(struct All_variables *E)
     }
     fprintf(E->trace.fpt, "%d %d %d ref=(%e %e)\n",
             E->lmesh.noz, E->lmesh.nsf, refnode, theta_f, phi_f);
-    /**/
+    */
 
     /* store cos(theta_f) and sin(theta_f) */
     E->gnomonic[0].u = cost[refnode];
@@ -2912,10 +2912,10 @@ static void define_uv_space(struct All_variables *E)
         E->gnomonic[i].u = u;
         E->gnomonic[i].v = v;
 
-        /** debug **
+        /* * debug **
         fprintf(E->trace.fpt, "n=%d ns=%d cosc=%e (%e %e) -> (%e %e)\n",
                 n, i, cosc, E->sx[j][1][n], E->sx[j][2][n], u, v);
-        /**/
+        */
     }
 
     return;
@@ -3023,7 +3023,7 @@ static void determine_shape_coefficients(struct All_variables *E)
             E->trace.shape_coefs[j][iwedge][8][i] = a1;
             E->trace.shape_coefs[j][iwedge][9][i] = a2;
 
-            /** debug **
+            /* * debug **
             fprintf(E->trace.fpt, "el=%d els=%d iwedge=%d shape=(%e %e %e, %e %e %e, %e %e %e)\n",
                     nelem, i, iwedge,
                     E->trace.shape_coefs[j][iwedge][1][i],
@@ -3035,7 +3035,7 @@ static void determine_shape_coefficients(struct All_variables *E)
                     E->trace.shape_coefs[j][iwedge][7][i],
                     E->trace.shape_coefs[j][iwedge][8][i],
                     E->trace.shape_coefs[j][iwedge][9][i]);
-            /**/
+            */
 
         } /* end wedge */
     } /* end elem */

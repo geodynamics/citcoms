@@ -297,7 +297,7 @@ void output_time(struct All_variables *, int);
 #ifdef USE_GZDIR
 /* Output_gzdir.c */
 void gzdir_output(struct All_variables *, int);
-gzFile *gzdir_output_open(char *, char *);
+gzFile gzdir_output_open(char *, char *);
 void gzdir_output_coord(struct All_variables *);
 void gzdir_output_velo_temp(struct All_variables *, int);
 void gzdir_output_visc(struct All_variables *, int);

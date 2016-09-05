@@ -601,7 +601,7 @@ static void find_tracers(struct All_variables *E)
             /* debug *
             fprintf(E->trace.fpt,"BB. kk %d %d %d %d %f %f %f %f %f %f\n",kk,j,iprevious_element,iel,x,y,z,theta,phi,rad);
             fflush(E->trace.fpt);
-            /**/
+            */
 
             E->trace.ielement[j][it]=iel;
 
@@ -689,7 +689,7 @@ void count_tracers_of_flavors(struct All_variables *E)
     }
 
     /* debug */
-    /**
+    /*
     for (j=1; j<=E->sphere.caps_per_proc; j++) {
         for (e=1; e<=E->lmesh.nel; e++) {
             fprintf(E->trace.fpt, "element=%d ntracer_flaver =", e);
@@ -701,7 +701,7 @@ void count_tracers_of_flavors(struct All_variables *E)
         }
     }
     fflush(E->trace.fpt);
-    /**/
+    */
 
     return;
 }
@@ -1003,7 +1003,7 @@ static void read_tracer_file(struct All_variables *E)
         fprintf(E->trace.fpt,"Number of tracers in this cap is: %d\n",
                 E->trace.ntracers[j]);
 
-        /** debug **
+        /* * debug **
         for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
             fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
                     E->trace.basicq[j][0][kk],
@@ -1015,7 +1015,7 @@ static void read_tracer_file(struct All_variables *E)
             fprintf(E->trace.fpt, "\n");
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
     } /* end j */
 
@@ -1147,7 +1147,7 @@ static void read_old_tracer_file(struct All_variables *E)
 
         }
 
-        /** debug **
+        /* debug **
         for (kk=1; kk<=E->trace.ntracers[j]; kk++) {
             fprintf(E->trace.fpt, "tracer#=%d sph_coord=(%g,%g,%g)", kk,
                     E->trace.basicq[j][0][kk],
@@ -1159,7 +1159,7 @@ static void read_old_tracer_file(struct All_variables *E)
             fprintf(E->trace.fpt, "\n");
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
         fprintf(E->trace.fpt,"Read %d tracers from file %s\n",numtracers,output_file);
         fflush(E->trace.fpt);
@@ -1420,7 +1420,7 @@ void get_neighboring_caps(struct All_variables *E)
             }
         } /* end kk, number of neighbors */
 
-        /* debugging output *
+        /* debugging output 
         for (kk=0; kk<=num_ngb; kk++) {
             if (kk==0)
                 neighbor_proc = E->parallel.me;
@@ -1437,7 +1437,7 @@ void get_neighboring_caps(struct All_variables *E)
             }
         }
         fflush(E->trace.fpt);
-        /**/
+        */
     }
 
     return;

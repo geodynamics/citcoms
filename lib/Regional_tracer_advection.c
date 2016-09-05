@@ -269,7 +269,7 @@ static void make_mesh_ijk(struct All_variables *E)
     for(k=0;k<noz;k++)
 	fprintf(E->trace.fpt, "k=%d z=%e\n", k, E->trace.z_space[k]);
 
-    /**
+    
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 0));
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 1));
     fprintf(stderr, "%d\n", isearch_neighbors(E->trace.z_space, noz, 0.7, 2));
@@ -295,7 +295,7 @@ static void make_mesh_ijk(struct All_variables *E)
     fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.775));
     fprintf(stderr, "%d\n", isearch_all(E->trace.z_space, noz, 0.7750001));
     parallel_process_termination();
-    /**/
+    */
 
     return;
 }
@@ -391,7 +391,7 @@ int isearch_neighbors(double *array, int nsize,
     neighbors[4] = hint+2;
 
 
-    /**/
+
     for (n=0; n<number_of_neighbors; n++) {
         i = neighbors[n];
         if ((i >= 0) && (i < nsize-1) &&
@@ -492,7 +492,7 @@ void regional_get_shape_functions(struct All_variables *E,
     shp[7] = tr_dx      * tr_dy      * tr_dz      / volume;
     shp[8] = (dx-tr_dx) * tr_dy      * tr_dz      / volume;
 
-    /** debug **
+    /* * debug **
     fprintf(E->trace.fpt, "dr=(%e,%e,%e)  tr_dr=(%e,%e,%e)\n",
             dx, dy, dz, tr_dx, tr_dy, tr_dz);
     fprintf(E->trace.fpt, "shp: %e %e %e %e %e %e %e %e\n",
@@ -500,7 +500,7 @@ void regional_get_shape_functions(struct All_variables *E,
     fprintf(E->trace.fpt, "sum(shp): %e\n",
             shp[1]+ shp[2]+ shp[3]+ shp[4]+ shp[5]+ shp[6]+ shp[7]+ shp[8]);
     fflush(E->trace.fpt);
-    /**/
+    */
     return;
 }
 
@@ -553,7 +553,7 @@ void regional_get_velocity(struct All_variables *E,
     }
 
 
-    /** debug **
+    /* * debug **
     for(d=1; d<=3; d++) {
         fprintf(E->trace.fpt, "VV: %e %e %e %e %e %e %e %e: %e\n",
                 VV[d][1], VV[d][2], VV[d][3], VV[d][4],
@@ -568,7 +568,7 @@ void regional_get_velocity(struct All_variables *E,
     fprintf(E->trace.fpt, "THETA: %e -> %e\n", theta, tmp);
 
     fflush(E->trace.fpt);
-    /**/
+    */
 
     return;
 }
@@ -685,7 +685,7 @@ void regional_lost_souls(struct All_variables *E)
     }
     fflush(E->trace.fpt);
     parallel_process_sync(E);
-    /**/
+    */
 
 
     /* Allocate Maximum Memory to Send Arrays */
@@ -773,7 +773,7 @@ void regional_lost_souls(struct All_variables *E)
         }
 
 
-        /** debug **
+        /* * debug **
         for (i=0; i<2; i++) {
             for (kk=0; kk<isend[i]; kk++) {
                 fprintf(E->trace.fpt, "dim:%d side:%d kk=%d coord[kk]=%e\n",
@@ -782,7 +782,7 @@ void regional_lost_souls(struct All_variables *E)
             }
         }
         fflush(E->trace.fpt);
-        /**/
+        */
 
 
         /* Send info to other processors regarding number of send tracers */
@@ -810,7 +810,7 @@ void regional_lost_souls(struct All_variables *E)
         MPI_Waitall(idb, request, status);
 
 
-        /** debug **
+        /* * debug **
         for (i=0; i<2; i++) {
             int target_rank;
             kk = d*2 + i + 1;
@@ -823,7 +823,7 @@ void regional_lost_souls(struct All_variables *E)
             }
         }
         parallel_process_sync(E);
-        /**/
+        */
 
         /* Allocate memory in receive arrays */
         for (i=0; i<2; i++) {
@@ -862,7 +862,7 @@ void regional_lost_souls(struct All_variables *E)
         MPI_Waitall(idb, request, status);
 
 
-        /** debug **
+        /* * debug **
         for (i=0; i<2; i++) {
             for (kk=1; kk<=irecv[i]; kk++) {
                 fprintf(E->trace.fpt, "recv: %d %e %e %e\n",
@@ -874,7 +874,7 @@ void regional_lost_souls(struct All_variables *E)
         }
         fflush(E->trace.fpt);
         parallel_process_sync(E);
-        /**/
+        */
 
         /* put the received tracers */
         for (i=0; i<2; i++) {
@@ -969,12 +969,12 @@ static void put_found_tracers(struct All_variables *E,
         else
             inside = 0;
 
-        /** debug **
+        /* * debug **
         fprintf(E->trace.fpt, "kk=%d, inside=%d, xx=(%e, %e, %e)\n",
                 kk, inside, theta, phi, rad);
         fprintf(E->trace.fpt, "before: %d %d\n",
                 E->trace.ilater[j], E->trace.ntracers[j]);
-        /**/
+        */
 
         if (inside) {
 
@@ -1031,11 +1031,11 @@ static void put_found_tracers(struct All_variables *E,
                 E->trace.rlater[j][pp][ilast] = recv[ipos+pp];
         } /* end of if-else */
 
-        /** debug **
+        /* * debug **
         fprintf(E->trace.fpt, "after: %d %d\n",
                 E->trace.ilater[j], E->trace.ntracers[j]);
         fflush(E->trace.fpt);
-        /**/
+        */
 
     } /* end of for kk */
 

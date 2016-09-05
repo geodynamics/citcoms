@@ -85,7 +85,8 @@ void calc_cbase_at_node(int , int , float *,struct All_variables *);
 /*  */
 void get_vtk_filename(char *,int,struct All_variables *,int);
 
-gzFile *gzdir_output_open(char *,char *);
+gzFile gzdir_output_open(char *,char *);
+
 void gzdir_output(struct All_variables *, int );
 void gzdir_output_comp_nd(struct All_variables *, int);
 void gzdir_output_comp_el(struct All_variables *, int);
@@ -206,12 +207,12 @@ void gzdir_output(struct All_variables *E, int out_cycles)
 }
 
 
-gzFile *gzdir_output_open(char *filename,char *mode)
+gzFile gzdir_output_open(char *filename,char *mode)
 {
-  gzFile *fp1;
+  gzFile fp1;
 
   if (*filename) {
-    fp1 = (gzFile *)gzopen(filename,mode);
+    fp1 = (gzFile )gzopen(filename,mode);
     if (!fp1) {
       fprintf(stderr,"gzdir: cannot open file '%s'\n",filename);
       parallel_process_termination();
@@ -234,7 +235,7 @@ void gzdir_output_coord(struct All_variables *E)
   int i, j, offset,ix[9],out;
   char output_file[255],ostring[255],message[255];
   float x[3];
-  gzFile *gz1;
+  gzFile gz1;
   FILE *fp1;
   MPI_Status mpi_stat;
   int mpi_rc, mpi_inmsg, mpi_success_message = 1;
@@ -424,7 +425,7 @@ void gzdir_output_coord(struct All_variables *E)
 	for(i=1;i <= E->lmesh.nel;i++) {
 	  gzprintf(gz1,"%2i\t",enodes[E->mesh.nsd]);
 	  if(enodes[E->mesh.nsd] != 8){
-	    gzprintf(stderr,"gzdir: Output: error, only eight node hexes supported");
+	    fprintf(stderr,"gzdir: Output: error, only eight node hexes supported");
 	    parallel_process_termination();
 	  }
 	  /*
@@ -459,7 +460,7 @@ void gzdir_output_velo_temp(struct All_variables *E, int cycles)
   char output_file[255],output_file2[255],message[255],geo_file[255];
   float cvec[3],vcorr[3];
   double omega[3],oamp;
-  gzFile *gzout;
+  gzFile gzout;
   FILE *fp1;
   /* for dealing with several processors */
   MPI_Status mpi_stat;
@@ -709,7 +710,7 @@ void gzdir_output_visc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
-  gzFile *gz1;
+  gzFile gz1;
   FILE *fp1;
   int lev = E->mesh.levmax;
   float ftmp;
@@ -770,7 +771,7 @@ void gzdir_output_avisc(struct All_variables *E, int cycles)
 {
   int i, j;
   char output_file[255];
-  gzFile *gz1;
+  gzFile gz1;
   FILE *fp1;
   int lev = E->mesh.levmax;
   float ftmp;
@@ -829,7 +830,7 @@ void gzdir_output_surf_botm(struct All_variables *E, int cycles)
 {
   int i, j, s;
   char output_file[255];
-  gzFile *fp2;
+  gzFile fp2;
   float *topo;
 
   if((E->output.write_q_files == 0) || (cycles == 0) ||
@@ -892,7 +893,7 @@ void gzdir_output_geoid(struct All_variables *E, int cycles)
     void compute_geoid();
     int ll, mm, p;
     char output_file[255];
-    gzFile *fp1;
+    gzFile fp1;
 
     compute_geoid(E);
 
@@ -931,7 +932,7 @@ void gzdir_output_stress(struct All_variables *E, int cycles)
 {
   int m, node;
   char output_file[255];
-  gzFile *fp1;
+  gzFile fp1;
   /* for stress computation */
   void allocate_STD_mem();
   void compute_nodal_stress();
@@ -973,7 +974,7 @@ void gzdir_output_horiz_avg(struct All_variables *E, int cycles)
 
   int j;
   char output_file[255];
-  gzFile *fp1;
+  gzFile fp1;
 
   /* compute horizontal average here.... */
   compute_horiz_avg(E);
@@ -1006,7 +1007,7 @@ void gzdir_output_mat(struct All_variables *E)
 {
   int m, el;
   char output_file[255];
-  gzFile* fp;
+  gzFile fp;
 
   snprintf(output_file,255,"%s/mat.%d.gz", E->control.data_dir,E->parallel.me);
   fp = gzdir_output_open(output_file,"w");
@@ -1027,7 +1028,7 @@ void gzdir_output_pressure(struct All_variables *E, int cycles)
   int i, j;
   float ftmp;
   char output_file[255];
-  gzFile *gz1;
+  gzFile gz1;
   FILE *fp1;
   /* for dealing with several processors */
   MPI_Status mpi_stat;
@@ -1077,7 +1078,7 @@ void gzdir_output_tracer(struct All_variables *E, int cycles)
 {
   int i, j, n, ncolumns;
   char output_file[255];
-  gzFile *fp1;
+  gzFile fp1;
 
   snprintf(output_file,255,"%s/%d/tracer.%d.%d.gz",
 	   E->control.data_dir,cycles,
@@ -1115,7 +1116,7 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
 {
   int i, j, k;
   char output_file[255],message[255];
-  gzFile *gz1;
+  gzFile gz1;
   FILE *fp1;
   float ftmp;
   /* for dealing with several processors */
@@ -1132,8 +1133,8 @@ void gzdir_output_comp_nd(struct All_variables *E, int cycles)
       gzprintf(gz1,"%3d %7d %.5e %.5e %.5e\n",
 	       j, E->lmesh.nel,
 	       E->monitor.elapsed_time,
-	       E->composition.initial_bulk_composition,
-	       E->composition.bulk_composition);
+	       E->composition.initial_bulk_composition[0],
+	       E->composition.bulk_composition[0]);
       for(i=1;i<=E->lmesh.nno;i++) {
 	for(k=0;k < E->composition.ncomp;k++)
 	  gzprintf(gz1,"%.6e ",E->composition.comp_node[j][k][i]);
@@ -1177,7 +1178,7 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
 {
     int i, j, k;
     char output_file[255];
-    gzFile *fp1;
+    gzFile fp1;
 
     snprintf(output_file,255,"%s/%d/comp_el.%d.%d.gz", E->control.data_dir,
 	    cycles,E->parallel.me, cycles);
@@ -1187,8 +1188,8 @@ void gzdir_output_comp_el(struct All_variables *E, int cycles)
         gzprintf(fp1,"%3d %7d %.5e %.5e %.5e\n",
                 j, E->lmesh.nel,
                 E->monitor.elapsed_time,
-                E->composition.initial_bulk_composition,
-                E->composition.bulk_composition);
+                E->composition.initial_bulk_composition[0],
+                E->composition.bulk_composition[0]);
 
         for(i=1;i<=E->lmesh.nel;i++) {
 	  for(k=0;k<E->composition.ncomp;k++)
@@ -1206,7 +1207,7 @@ void gzdir_output_heating(struct All_variables *E, int cycles)
 {
     int j, e;
     char output_file[255];
-    gzFile *fp1;
+    gzFile fp1;
 
     snprintf(output_file,255,"%s/%d/heating.%d.%d.gz", E->control.data_dir,
 	    cycles,E->parallel.me, cycles);

@@ -142,9 +142,9 @@ void get_prem(double r, double *vp, double *vs, double *rho)
         + prem_rho[j][2] * r2
         + prem_rho[j][3] * r3;
 
-    /** debug **
+    /* * debug **
     fprintf(stderr, "%e %d %f %f %f\n", r, j, *rho, *vp, *vs);
-    /**/
+    */
 
 #undef NUM_PREM_LAYERS
 #undef SUPPRESS_CRUSTAL_MESH
@@ -215,10 +215,10 @@ static void modified_Trampert_Vacher_Vlaar_PEPI2001(struct All_variables *E,
         vp[i] = vpr[nz] * (1 + dvp);
         vs[i] = vsr[nz] * (1 + dvs);
 
-        /** debug **
+        /* * debug **
         fprintf(stderr, "node=%d dT=%f K, dC=%f, %e %e %e\n",
                 i, dT, dC, drho, dvp, dvs);
-        /**/
+        */
     }
 
 
