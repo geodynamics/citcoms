@@ -113,7 +113,7 @@ int main(argc,argv)
   }
 
   /* write all config parameters to a file named pidXXXXXXXXX */
-  print_all_config_parameters(E);
+  //print_all_config_parameters(E);
 
 
 
@@ -192,6 +192,8 @@ int main(argc,argv)
    * replaced by CitcomS.Controller.march() in Pyre. */
   while ( E->control.keep_going   &&  (Emergency_stop == 0) ) {
 
+
+    
     /* The next few lines of code were replaced by
      * pyCitcom_PG_timestep_solve() in Pyre version.
      * If you modify here, make sure its Pyre counterpart
@@ -255,6 +257,9 @@ int main(argc,argv)
     /* no counterpart in pyre */
     if(E->control.ggrd.ray_control)
       read_rayleigh_from_file(E);
+    if(E->control.ggrd.vtop_control)
+      ggrd_read_vtop_from_file(E, TRUE);
+
 #endif
 
     /* updating plate velocity boundary condition */

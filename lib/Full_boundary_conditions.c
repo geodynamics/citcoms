@@ -175,7 +175,13 @@ void full_temperature_boundary_conditions(E)
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
     }
+<<<<<<< HEAD
     if(E->control.lith_age_time==1)  {
+=======
+    
+    if(E->control.lith_age_time==1)  {
+
+>>>>>>> 9305ed36341f9ecf1f0646e70829b00d421f9da8
       /* set the regions in which to use lithosphere files to determine temperature
 	 note that this is called if the lithosphere age in inputted every time step
 	 OR it is only maintained in the boundary regions */
@@ -239,6 +245,7 @@ void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float va
 /* 
 
    for latitude dependent surface temperature 
+<<<<<<< HEAD
 
  */
 
@@ -268,6 +275,37 @@ void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
     	  }        /* end for loop i & j */
       }
 
+=======
+
+ */
+
+void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
+			   unsigned int mask,char onoff,int level,int m)
+{
+  int i,j,node,rowl;
+
+  /* safety feature */
+  if(dirn > E->mesh.nsd)
+     return;
+
+  if (ROW==1)
+      rowl = 1;
+  else
+      rowl = E->lmesh.NOZ[level];
+
+  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
+       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+
+    /* turn bc marker to zero */
+    if (onoff == 0)          {
+      for(j=1;j<=E->lmesh.NOY[level];j++)
+    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
+    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  }        /* end for loop i & j */
+      }
+
+>>>>>>> 9305ed36341f9ecf1f0646e70829b00d421f9da8
     /* turn bc marker to one */
     else        {
       for(j=1;j<=E->lmesh.NOY[level];j++)

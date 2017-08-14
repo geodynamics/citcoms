@@ -653,9 +653,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("ggrd_comp_smooth",&(E->control.ggrd_comp_smooth),"off",m);
 
 #endif
-  if(E->control.lith_age_time && (!E->control.lith_age))
-    myerror(E,"cannot have lith_age_time but not lith_age control");
-  
+
   input_boolean("aug_lagr",&(E->control.augmented_Lagr),"off",m);
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
