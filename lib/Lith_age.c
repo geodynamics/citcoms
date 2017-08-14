@@ -35,6 +35,11 @@
 #include "parsing.h"
 #include "lith_age.h"
 
+#ifdef USE_GGRD
+#include "hc.h"			/* ggrd and hc packages */
+#include "ggrd_handling.h"
+#endif 
+
 float find_age_in_MY();
 void lith_age_update_tbc(struct All_variables *E);
 
@@ -70,10 +75,16 @@ void lith_age_init(struct All_variables *E)
   int node, i, j, output;
 
   int gnox, gnoy;
+#ifdef USE_GGRD
+  if(E->control.ggrd.age_control)
+    myerror(E,"for ggrd control, don't call lith_age_init");
+#endif
+
   gnox=E->mesh.nox;
   gnoy=E->mesh.noy;
 
   if (E->parallel.me == 0 ) fprintf(stderr,"INSIDE lith_age_init\n");
+  /* for ggrd, this is only defined for top processor */
   E->age_t=(float*) malloc((gnox*gnoy+1)*sizeof(float));
 
   if(E->control.lith_age_time==1)   {
@@ -109,65 +120,97 @@ void lith_age_init(struct All_variables *E)
 
    this doesn't get called if tic == 4 
 
+
 */
 void lith_age_construct_tic(struct All_variables *E)
 {
   int i, j, k, m, node, nodeg;
-  int nox, noy, noz, gnox, gnoy, gnoz;
-  float r1, temp;
+  int nox, noy, noz;
+  float r1, temp,age;
   float depth_used;
 
-
+#ifdef USE_GGRD
+  if(E->control.ggrd.age_control)
+    if(E->parallel.me  != E->parallel.nprocz-1)
+      return ;			/* bail */
+#endif
+  
+  fprintf(stderr," lith_age_construct_tic\n");
+  
   noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
-  gnox=E->mesh.nox;gnoy=E->mesh.noy;gnoz=E->mesh.noz;
 
   for(m=1;m<=E->sphere.caps_per_proc;m++)
     for(i=1;i<=noy;i++)
-      for(j=1;j<=nox;j++)
+      for(j=1;j<=nox;j++){
+	nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
+	age = E->age_t[nodeg];
 	for(k=1;k<=noz;k++)  {
-	  nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
+	  
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  E->T[m][node] = E->control.mantle_temp;
-
 	  r1=E->sx[m][3][node];
-	  if(in_lith_age_depth(r1,E->age_t[nodeg],&depth_used,E)){ /* if closer than (lith_age_depth) from top */
-	    E->T[m][node] = erft_age(r1, E->age_t[nodeg],E);
+	  if(in_lith_age_depth(r1,age,&depth_used,E)){ /* if closer than (lith_age_depth) from top */
+	    E->T[m][node] = erft_age(r1, age,E);
 	  }
 	}
-  
+      }
   /* modify temperature BC to be concorded with read in T */
   lith_age_update_tbc(E);
-
+  
   temperatures_conform_bcs(E);
-
+  
   return;
 }
 /* 
-   assign T and TBC for nodes in the boundary layer
 
- */
-void set_lith_age_for_t_and_tbc(struct All_variables *E)
+   assign T and TBC for nodes in the boundary layer
+   this gets called for tic == 4
+   
+   does a merger with existing temperatures if merge is set 
+
+   for GGRD, age_t is only defined for the top processor, so...
+
+   
+*/
+void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
 {
   int i, j, k, m, node, nodeg;
-  int nox, noy, noz, gnox, gnoy, gnoz,noxnoz;
-  float r1, temp,depth_used;
-
-  if(E->parallel.me == 0)
-    fprintf(stderr,"setting T and TBC within lithosphere to age dependent T\n");
+  int nox, noy, noz, noxnoz;
+  float radius, temp,depth_used,daf,age;
+#ifdef USE_GGRD
+  if(E->control.ggrd.age_control){
+    if(E->parallel.me  != E->parallel.nprocz-1)
+      return;			/* bail */
+    if(!E->control.ggrd.vtop_control_init)
+      myerror(E,"set_lith_age_for_t_and_tbc: error, ggrd age control was not initialized");
+  }
+#endif  
+  noy=E->lmesh.noy;
+  nox=E->lmesh.nox;
+  noz=E->lmesh.noz;
+  noxnoz = nox * noz;
   
-  noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
-  gnox=E->mesh.nox;gnoy=E->mesh.noy;gnoz=E->mesh.noz;
-  noxnoz = nox*noz;
-
+  if(E->parallel.me == 0)
+    fprintf(stderr,"setting T and TBC within lithosphere to age dependent T, merge: %i\n",merge);
+  
   for(m=1;m <= E->sphere.caps_per_proc;m++)
-    for(i=1;i<=noy;i++)
-      for(j=1;j<=nox;j++){
-	nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-	for(k=1;k<=noz;k++)  {
+    for(i=1;i <= noy;i++)
+      for(j=1;j <= nox;j++){
+	
+	nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2) * E->mesh.nox;
+	age = E->age_t[nodeg];
+	
+	for(k=1;k <= noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*noxnoz;
-	  r1=E->sx[m][3][node];
-	  if(in_lith_age_depth(r1,E->age_t[nodeg],&depth_used,E)){ /* if closer than (lith_age_depth) from top */
-	    temp = erft_age(r1, E->age_t[nodeg],E);
+	  
+	  radius = E->sx[m][3][node];
+	  if(in_lith_age_depth(radius,age,&depth_used,E)){ /* if closer than (lith_age_depth) from top */
+	    temp = erft_age(radius,age,E);
+	    if(merge){
+	      daf = (E->sphere.ro - radius)/depth_used;
+	      temp = daf * E->T[m][node] + (1.0-daf)*temp;
+	    }
+	    
 	    E->T[m][node] = temp;
 	    E->sphere.cap[m].TB[1][node]=temp;
 	    E->sphere.cap[m].TB[2][node]=temp;
@@ -177,37 +220,48 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E)
       }
 }
 /* 
-
    determine if we are in the lithosphere for TBC assignment purposes
    normally, this will just mean checking the depth
    
    will also return the depth use
 */
-int in_lith_age_depth(float r1,float age, float *depth_used, struct All_variables *E)
+
+int in_lith_age_depth(float nd_radius,float age, float *lith_thick,
+		      struct All_variables *E)
 {
   static int in_lith_age_init = FALSE;
   static int mode;
-  static float r1diff;
+  static float r_base;
   if(!in_lith_age_init){
     /* initialization branch */
     if(E->control.lith_age_depth > 0){ /* default */
-      r1diff =  E->sphere.ro - E->control.lith_age_depth;
+      r_base =  E->sphere.ro - E->control.lith_age_depth;
       mode = 1;
     }else{
-      /* determine depth from actual age */
+      /* determine depth from actual age, by truncating the erf() */
       mode = 2;
     }
     in_lith_age_init = TRUE;
+    /* init done */
   }
   if(mode == 1){
-    *depth_used = E->control.lith_age_depth;
-    if(r1 >= r1diff)
+    *lith_thick = E->control.lith_age_depth;
+    if(nd_radius >= r_base)
       return 1;
     else
       return 0;
   }else{
-    //fprintf(stderr,"%i %i %g \n",in_lith_age_init,mode,E->control.lith_age_depth);
-    myerror(E,"mode 2 not implemented yet for in_lith_age_depth");
+    /* 
+       cutoff depth at 0.9 T_m , age dependent with max cut off
+    */
+    *lith_thick = 2.32 * sqrt(age);
+    if(*lith_thick > -E->control.lith_age_depth) /* limit */
+      *lith_thick = -E->control.lith_age_depth;
+    //fprintf(stderr,"age: %5.1f zlith: %6.1f\n",age*E->data.scalet,*lith_thick*6371);
+    if(nd_radius >= (E->sphere.ro - (*lith_thick)))
+      return 1;
+    else
+      return 0;
   }
   return 0;
 }
@@ -233,7 +287,7 @@ void lith_age_update_tbc(struct All_variables *E)
 	for(k=1;k<=noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
-
+	  
 	  if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
 	    E->sphere.cap[m].TB[1][node]=E->T[m][node];
 	    E->sphere.cap[m].TB[2][node]=E->T[m][node];
@@ -251,15 +305,25 @@ void lith_age_update_tbc(struct All_variables *E)
 */
 void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 {
-  int j,node,nno,i,k,m,nodeg;
-  float ttt2,ttt3,fff2,fff3,depth_used;
+  int j,node,i,k,m,nodeg;
+  float ttt2,ttt3,fff2,fff3,depth_used,age;
   int nox,noy,noz,noxnoz;
-
+#ifdef USE_GGRD
+  if(E->control.ggrd.age_control){
+    if(!E->control.ggrd.vtop_control_init)
+      myerror(E,"lith_age_temperature_bound_adj: error, ggrd age control was not initialized");
+    
+    if(E->parallel.me  != E->parallel.nprocz-1)
+      return;			/* bail */
+  }
+#endif
   noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
   noxnoz = nox*noz;
 
-  nno=E->lmesh.nno;
-
+  if(E->parallel.me == 0)
+    fprintf(stderr,"lith_age_temperature_bound_adj \n");
+ 
+  
   /* NOTE: To start, the relevent bits of "node" are zero. Thus, they only
      get set to TBX/TBY/TBZ if the node is in one of the bounding regions.
      Also note that right now, no matter which bounding region you are in,
@@ -277,7 +341,8 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
     if(lv==E->mesh.gridmax)
       for(j=1;j<=E->sphere.caps_per_proc;j++)
 	for(node=1;node<=E->lmesh.nno;node++)  {
-	  if( ((E->sx[j][1][node]<=ttt2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) || ((E->sx[j][1][node]>=ttt3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
+	  if( ((E->sx[j][1][node]<=ttt2) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) 
+	      || ((E->sx[j][1][node]>=ttt3) && (E->sx[j][3][node]>=E->sphere.ro-E->control.depth_bound_adj)) )
 	    /* if < (width) from x bounds AND (depth) from top */
 	    {
 	      E->node[j][node]=E->node[j][node] | TBX;
@@ -315,16 +380,20 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 
   if (E->control.lith_age_time) {
     if(lv==E->mesh.gridmax)
-      for(m=1;m<=E->sphere.caps_per_proc;m++)
 
-	for(i=1;i<=noy;i++)
-	  for(j=1;j<=nox;j++){
+      for(m=1;m <= E->sphere.caps_per_proc;m++){
+
+	for(i=1;i <= noy;i++)
+	  for(j=1;j <= nox;j++){
 	    nodeg = E->lmesh.nxs - 1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
-	    for(k=1;k<=noz;k++){
+	    age = E->age_t[nodeg];
+	    for(k=1;k <= noz;k++){
+
 	      /* split this up into x-y-z- loop detailes to be able to
 		 access age_t */
 	      node=k+(j-1)*noz+(i-1)*noxnoz;	      
-	      if(in_lith_age_depth(E->sx[m][3][node],E->age_t[nodeg],&depth_used,E)){ /* if closer than (lith_age_depth) from top */
+	      if(in_lith_age_depth(E->sx[m][3][node],
+				   age,&depth_used,E)){ /* if closer than (lith_age_depth) from top */
 		E->node[m][node]=E->node[m][node] | TBX;
 		E->node[m][node]=E->node[m][node] & (~FBX);
 		E->node[m][node]=E->node[m][node] | TBY;
@@ -334,17 +403,18 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
 	      }
 	    }
 	  }
+      }
   } /* end E->control.lith_age_time */
-  
+
   return;
 }
 
 
 void lith_age_conform_tbc(struct All_variables *E)
 {
-  int m,j,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,i,k;
+  int m,j,node,nox,noz,noy,nodeg,i,k,noxnoz;
   float ttt2,ttt3,fff2,fff3;
-  float r1,t1,f1,t0,temp,depth_used;
+  float r1,t1,f1,t0,temp,depth_used,age;
   float e_4;
   FILE *fp1;
   char output_file[255];
@@ -354,15 +424,22 @@ void lith_age_conform_tbc(struct All_variables *E)
   e_4=1.e-4;
   output = 0;
 
-  gnox=E->mesh.nox;gnoy=E->mesh.noy;gnoz=E->mesh.noz;
+
 
   nox=E->lmesh.nox;noy=E->lmesh.noy;noz=E->lmesh.noz;
+  noxnoz = nox * noz;
 
 #ifdef USE_GGRD
-  if((!E->control.ggrd.age_control)&&(E->control.lith_age_time==1)) { 
+  if(E->control.ggrd.age_control){
+    myerror(E,"for now, we don't like lith_age_conform_tbc with ggrd ages");
+    if(E->parallel.me  != E->parallel.nprocz-1)
+      return ;			/* bail */
+    if(!E->control.ggrd.vtop_control_init)
+      myerror(E,"set_lith_age_for_t_and_tbc: error, ggrd age control was not initialized");
+  }
 #else
   if(E->control.lith_age_time==1)   {
-#endif
+
     /* to open files every timestep */
     if (E->control.lith_age_old_cycles != E->monitor.solution_cycles) {
       /*update so that output only happens once*/
@@ -372,9 +449,13 @@ void lith_age_conform_tbc(struct All_variables *E)
     if (E->parallel.me == 0) fprintf(stderr,"INSIDE lith_age_conform_tbc\n");
     (E->solver.lith_age_read_files)(E,output);
   }
-
+#endif
+  
   /* NOW SET THE TEMPERATURES IN THE BOUNDARY REGIONS */
   if(E->monitor.solution_cycles>1 && E->control.temperature_bound_adj) {
+    if(E->sphere.caps == 12)
+      myerror(E,"temperature_bound_adj and global model does not make sense?");
+
     ttt2=E->control.theta_min + E->control.width_bound_adj;
     ttt3=E->control.theta_max - E->control.width_bound_adj;
     fff2=E->control.fi_min + E->control.width_bound_adj;
@@ -384,8 +465,8 @@ void lith_age_conform_tbc(struct All_variables *E)
       for(i=1;i<=noy;i++)
 	for(j=1;j<=nox;j++)
 	  for(k=1;k<=noz;k++)  {
-	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-	    node=k+(j-1)*noz+(i-1)*nox*noz;
+	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*  E->mesh.nox;
+	    node=k+(j-1)*noz+(i-1)*noxnoz;
 	    t1=E->sx[m][1][node];
 	    f1=E->sx[m][2][node];
 	    r1=E->sx[m][3][node];
@@ -421,31 +502,36 @@ void lith_age_conform_tbc(struct All_variables *E)
   }   /*  end of solution cycles  && temperature_bound_adj */
   
   /* NOW SET THE TEMPERATURES IN THE LITHOSPHERE IF CHANGING EVERY TIME STEP */
-  if((E->convection.tic_method == 4) || ((E->monitor.solution_cycles>0) && E->control.lith_age_time))   {
+
+  if((E->convection.tic_method == 4) || 
+     ((E->monitor.solution_cycles>0) && E->control.lith_age_time)) {
     for(m=1;m<=E->sphere.caps_per_proc;m++)
       for(i=1;i<=noy;i++)
-	for(j=1;j<=nox;j++)
+	for(j=1;j<=nox;j++){
+	  nodeg = E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
+	  age = E->age_t[nodeg];
 	  for(k=1;k<=noz;k++)  {
-	    nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-	    node=k+(j-1)*noz+(i-1)*nox*noz;
+
+	    node=k+(j-1)*noz+(i-1)*noxnoz;
 
 	    r1=E->sx[m][3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
-	      if(in_lith_age_depth(r1,E->age_t[nodeg],&depth_used,E)) {
+	      if(in_lith_age_depth(r1,age,&depth_used,E)) {
 		/* if closer than (lith_age_depth) from top */
 
 		/* set a new age from the file */
 
-		t0 = erft_age(r1, E->age_t[nodeg],E);
+		t0 = erft_age(r1,age,E);
 		E->sphere.cap[m].TB[1][node]=t0;
 		E->sphere.cap[m].TB[2][node]=t0;
 		E->sphere.cap[m].TB[3][node]=t0;
 	      }
 	    }
 	  }     /* end k   */
+	}	/* end j */
   }   /*  end of solution cycles  && lith_age_time */
-  
+
   return;
 }
   
@@ -460,27 +546,30 @@ float erft_age(float nd_radius, float nd_age, struct All_variables *E)
 
 void assimilate_lith_conform_bcs(struct All_variables *E)
 {
-  float lith_age_depth,daf, assimilate_new_temp;
-  int m,j,node,nox,noz,noy,gnox,gnoy,gnoz,nodeg,i,k,noxnoz;
+  float lith_age_depth,daf, assimilate_new_temp,r1;
+  int m,j,node,nox,noz,noy,nodeg,i,k,noxnoz;
   unsigned int type;
 
-
-  gnox=E->mesh.nox;gnoy=E->mesh.noy;gnoz=E->mesh.noz;
-
+#ifdef USE_GGRD
+  myerror(E,"for now, we don't like assimiliate_lith_conform_bcs with ggrd age");
+  if(E->control.ggrd.age_control)
+    if(E->parallel.me  != E->parallel.nprocz-1)
+      return ;			/* bail */
+#endif
+  
   nox=E->lmesh.nox;noy=E->lmesh.noy;noz=E->lmesh.noz;
   noxnoz = nox*noz;
 
-  for(m=1;m<=E->sphere.caps_per_proc;m++)
+  for(m=1;m<=E->sphere.caps_per_proc;m++){
 
     for(i=1;i<=noy;i++)
       for(j=1;j<=nox;j++){
-	nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*gnox;
-	
+	nodeg = E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*E->mesh.noz;
 	for(k=1;k<=noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*noxnoz;
 	  
-	  type = (E->node[j][node] & (TBX | TBZ | TBY));
-	  
+	  type = (E->node[m][node] & (TBX | TBZ | TBY));
+
 	  switch (type) {
 	  case 0:  /* no match, next node */
             break;
@@ -508,22 +597,23 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
             break;
 	  } /* end switch */
 	  
-	  
-
 	  switch (type) {
 	  case 0:  /* no match, next node */
             break;
 	  default:
-	    if(in_lith_age_depth(E->sx[m][3][node],E->age_t[nodeg],&lith_age_depth,E)) {
+
+	    r1 = E->sx[m][3][node];
+	    if(in_lith_age_depth(r1,E->age_t[nodeg],&lith_age_depth,E)) {
 	      /* daf == depth_assimilation_factor */
-	      daf = 0.5*(E->sphere.ro - E->sx[m][3][node])/lith_age_depth;
+	      daf = 0.5*(E->sphere.ro - r1)/lith_age_depth;
 	      E->T[m][node] = daf*E->T[m][node] + (1.0-daf)*assimilate_new_temp;
-	    }
-	    else
+	    }else{
 	      E->T[m][node] = assimilate_new_temp;
+	    }
 	  } /* end switch */
 	  
-	} /* next node */
-      }
+	} /* k */
+      }	  /* j */
+  }	  /* cap */
   return;
 }

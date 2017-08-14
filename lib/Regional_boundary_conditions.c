@@ -195,13 +195,13 @@ void regional_temperature_boundary_conditions(E)
       }
 
     if((E->control.temperature_bound_adj==1) || (E->control.lith_age_time==1))  {
-/* set the regions in which to use lithosphere files to determine temperature
-   note that this is called if the lithosphere age in inputted every time step
-   OR it is only maintained in the boundary regions */
+      /* set the regions in which to use lithosphere files to determine temperature
+	 note that this is called if the lithosphere age in inputted every time step
+	 OR it is only maintained in the boundary regions */
       lith_age_temperature_bound_adj(E,lev);
     }
 
-    }     /* end for j */
+  }     /* end for j */
 
    temperatures_conform_bcs(E);
    E->temperatures_conform_bcs = temperatures_conform_bcs;

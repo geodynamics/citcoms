@@ -89,7 +89,7 @@ void full_velocity_boundary_conditions(E)
         horizontal_bc(E,E->sphere.cap[j].VB,noz,2,0.0,SBY,0,lv,j);
 
 #ifdef USE_GGRD
-	/* Ggrd velocity control */
+	/* Ggrd velocity (and age) control (only for the top processors */
 	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
 	  ggrd_read_vtop_from_file(E,TRUE);
 #endif
@@ -119,15 +119,15 @@ void full_velocity_boundary_conditions(E)
       if(E->control.side_sbcs)
 	apply_side_sbc(E);
 
-/* if(E->control.verbose) { */
-/*  for (j=1;j<=E->sphere.caps_per_proc;j++) */
-/*    for (node=1;node<=E->lmesh.nno;node++) */
-/*       fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ); */
-/*  fflush(E->fp_out); */
-/* } */
+      /* if(E->control.verbose) { */
+      /*  for (j=1;j<=E->sphere.caps_per_proc;j++) */
+      /*    for (node=1;node<=E->lmesh.nno;node++) */
+      /*       fprintf(E->fp_out,"m=%d VB== %d %g %g %g flag %u %u %u\n",j,node,E->sphere.cap[j].VB[1][node],E->sphere.cap[j].VB[2][node],E->sphere.cap[j].VB[3][node],E->node[j][node]&VBX,E->node[j][node]&VBY,E->node[j][node]&VBZ); */
+      /*  fflush(E->fp_out); */
+      /* } */
 
-  /* If any imposed internal velocity structure it goes here */
-
+      /* If any imposed internal velocity structure it goes here */
+      
       
       /*
 	apply stress or velocity boundary conditions, read from file
@@ -135,8 +135,9 @@ void full_velocity_boundary_conditions(E)
 	anything at present, if E->mesh.toplayerbc != 0
       */
       assign_internal_bc(E);
-
-   return; }
+      
+      return;
+}
 
 /* ========================================== */
 
@@ -175,24 +176,19 @@ void full_temperature_boundary_conditions(E)
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
     }
-    
     if(E->control.lith_age_time==1)  {
-
       /* set the regions in which to use lithosphere files to determine temperature
 	 note that this is called if the lithosphere age in inputted every time step
 	 OR it is only maintained in the boundary regions */
       lith_age_temperature_bound_adj(E,lev);
     }
-
-
   }     /* end for j */
 
   temperatures_conform_bcs(E);
   E->temperatures_conform_bcs = temperatures_conform_bcs;
 
-   return; }
-
-
+  return; 
+}
 /*  =========================================================  */
 
 void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float value,
@@ -237,11 +233,7 @@ void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float va
   return;
 }
 
-/* 
-
-   for latitude dependent surface temperature 
-
- */
+/* latitudinally dependent horizontal BC */
 
 void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
 			   unsigned int mask,char onoff,int level,int m)
@@ -284,6 +276,7 @@ void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
 
   return;
 }
+
 /* temp as f(latitude) */
 float lat_dep_temp(struct All_variables *E, int node)
 {
@@ -307,7 +300,7 @@ void temperature_apply_periodic_bcs(E)
  fprintf(E->fp,"Periodic temperature boundary conditions\n");
 
   return;
-  }
+}
 
 
 

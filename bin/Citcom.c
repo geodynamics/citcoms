@@ -272,7 +272,9 @@ int main(argc,argv)
 
 
     if (E->parallel.me == 0)  {
-      fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
+      fprintf(E->fp,"CPU total = %g & CPU = %g for step %d time = %.4e dt = %.4e  maxT = %.4e sub_iteration%d\n",
+	      CPU_time0()-start_time,CPU_time0()-time,E->monitor.solution_cycles,E->monitor.elapsed_time,
+	      E->advection.timestep,E->monitor.T_interior,E->advection.last_sub_iterations);
 
       time = CPU_time0();
     }
