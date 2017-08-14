@@ -282,11 +282,6 @@ void regional_read_input_files_for_timesteps(E,action,output)
       break;
 
       case 2:  /* ages for lithosphere temperature assimilation */
-#ifdef USE_GGRD
-	if(E->control.ggrd.age_control){
-	  ggrd_read_age_from_file(E, 1);
-	}else{
-#endif
         for(i=1;i<=noy;i++)
           for(j=1;j<=nox;j++) {
             node=j+(i-1)*nox;
@@ -307,9 +302,6 @@ void regional_read_input_files_for_timesteps(E,action,output)
           }
         fclose(fp1);
         if (pos_age) fclose(fp2);
-#ifdef USE_GGRD
-	} /* end of branch if allowing for ggrd handling */
-#endif
         break;
 
       case 3:  /* read element materials */

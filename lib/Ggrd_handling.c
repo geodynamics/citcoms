@@ -43,6 +43,7 @@ gzFile gzdir_output_open(char *,char *);
 #include "parallel_related.h"
 #include "composition_related.h"
 #include "element_definitions.h"
+#include "lith_age.h"
 
 #ifdef CITCOM_ALLOW_ANISOTROPIC_VISC
 #include "anisotropic_viscosity.h"
@@ -364,10 +365,22 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
      change internally
   */
   ggrd_grdtrack_free_gstruc(E->control.ggrd.temp.d);
+
+  if(E->control.ggrd.age_control){
+    /* age TBC control overrides this */
+    
+    /* set the TBC boundary condition and set T as well within TBC*/
+    set_lith_age_for_t_and_tbc(E);
+    /* set the boundary flags */
+    lith_age_temperature_bound_adj(E,E->mesh.gridmax);
+  }
+
   /*
      end temperature/density from GMT grd init
   */
-  temperatures_conform_bcs(E);
+  temperatures_conform_bcs2(E);	/* this enforces it, the
+				   temperatures_conform_bcs doesn't
+				   call for lith_age */
 }
 
 /*
@@ -498,8 +511,9 @@ void ggrd_read_mat_from_file(struct All_variables *E, int is_geographic)
     if(E->parallel.me == 0)
       fprintf(stderr,"ggrd_read_mat_from_file: assigning at age %g\n",age);
     if(timedep){
-      ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
-			 E->control.ggrd.time_hist.vstage_transition);
+      if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+			     E->control.ggrd.time_hist.vstage_transition))
+	myerror(E,"interpolation error");
       interpolate = 1;
     }else{
       interpolate = 0;
@@ -731,8 +745,9 @@ void ggrd_read_ray_from_file(struct All_variables *E, int is_geographic)
   if(timedep || (!E->control.ggrd.ray_control_init)){
     if(timedep){
       age = find_age_in_MY(E);
-      ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
-			 E->control.ggrd.time_hist.vstage_transition);
+      if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+			     E->control.ggrd.time_hist.vstage_transition))
+	myerror(E,"interpolation error");
       interpolate = 1;
     }else{
       interpolate = 0;i1 = 0;
@@ -791,6 +806,9 @@ and free mechanical BCs
 if ggrd_vtop_euler is true, will look for plate codes and rotation
 vector file and prescribe Euler vectors instead
 
+if ggrd_read_age is on, will also expect ages
+
+
 */
 
 void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
@@ -804,13 +822,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   char gmt_string[10],char_dummy;
   static int lc =0;			/* only for debugging */
   double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
-    cos_theta,sin_phi,cos_phi,theta_max,theta_min;
-  char tfilename1[1000],tfilename2[1000];
+    cos_theta,sin_phi,cos_phi,theta_max,theta_min,agein1,agein2,scaled_age;
+  char tfilename1[1000],tfilename2[1000],tfilename3[1000];;
   static int pole_warned = FALSE, mode_warned = FALSE;
   static ggrd_boolean shift_to_pos_lon = FALSE;
   ggrd_boolean use_nearneighbor;
   const int dims=E->mesh.nsd;
-  int top_proc,nfree,nfixed,use_vel,allow_internal;
+  int top_proc,nfree,nfixed,use_vel,allow_internal,hnodeg;
   struct elvc{
     float w[3];
   } **euler;
@@ -821,12 +839,15 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
 #endif
 
+
+
   /* number of nodes for this processor at highest MG level */
   nox = E->lmesh.nox;
   noz = E->lmesh.noz;
   noy = E->lmesh.noy;
   noxnoz = nox*noz;
 
+    
 #ifdef GGRD_NN_BACKWARD_COMPATIBLE 
   use_nearneighbor = FALSE;
 #else
@@ -872,10 +893,20 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   if(E->control.ggrd_vtop_euler && (!use_vel)){
     myerror(E,"ggrd_read_vtop_from_file: looking for Euler codes but in traction mode, likely no good");
   }
+  if(!E->control.ggrd.vtop_control_init ){
+    if(verbose)
+      fprintf(stderr,"ggrd_read_vtop_from_file: init stage, assigning %s, mixed mode: %i\n",
+	      ((E->mesh.topvbc)?("velocities"):("tractions")),E->control.ggrd_allow_mixed_vbcs);
+    if(E->control.vbcs_file)
+      myerror(E,"should not have both read_vbcs_file and ggrd_vtop control switched on");
 
-  if(verbose)
-    fprintf(stderr,"ggrd_read_vtop_from_file: init stage, assigning %s, mixed mode: %i\n",
-	    ((E->mesh.topvbc)?("velocities"):("tractions")),E->control.ggrd_allow_mixed_vbcs);
+    if(E->control.ggrd.age_control){
+      if(verbose)
+	fprintf(stderr,"ggrd_read_vtop_from_file: also expecting ages\n");
+      if(E->control.ggrd_vtop_euler)
+	myerror(E,"reading ages in ggrd is incompatible with Euler input");
+    }
+  }
 	    
 
   if(use_vel){
@@ -885,13 +916,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
     vscale = E->data.scalev * E->data.timedir;
     if(E->control.ggrd_vtop_euler)
       vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
-    if(E->parallel.me == 0)
+    if(E->parallel.me == 0 && !E->control.ggrd.vtop_control_init )
       fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr, scaling factor: %g\n",vscale);
   }else{
     /* 
        stress scale, assuming input is in MPa
     */
-    vscale =  1e6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6));
+    vscale =  1e6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6)) * E->data.timedir;
     if((!mode_warned) && (verbose)){
       fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: make sure traction control is what you want, not free slip\n");
       fprintf(stderr,"ggrd_read_vtop_from_file: expecting traction grids in MPa, scaling factor: %g\n",vscale);
@@ -913,10 +944,22 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
     if(!E->control.ggrd.time_hist.init){/* init times, if available*/
       ggrd_init_thist_from_file(&E->control.ggrd.time_hist,E->control.ggrd.time_hist.file,
 				TRUE,(E->parallel.me == 0));
+      if(E->control.ggrd_smooth_stages){
+	/* smooth transition between stages, else this is 0.1 by default */
+	E->control.ggrd.time_hist.vstage_transition = 0;
+	for(i=1;i<E->control.ggrd.time_hist.nvtimes;i++)
+	  E->control.ggrd.time_hist.vstage_transition += 
+	    (E->control.ggrd.time_hist.vtimes[i*3+1]-E->control.ggrd.time_hist.vtimes[(i-1)*3+1]);
+	E->control.ggrd.time_hist.vstage_transition /= (float)(E->control.ggrd.time_hist.nvtimes-1);
+      }
       E->control.ggrd.time_hist.init = 1;
     }
     timedep = (E->control.ggrd.time_hist.nvtimes > 1)?(1):(0);
-    
+    if(verbose && !E->control.ggrd.vtop_control_init ){
+      fprintf(stderr,"ggrd_read_vtop_from_file: time dependence: %i, nsteps: %i stage_tran: %g\n",
+	      timedep,E->control.ggrd.time_hist.nvtimes,E->control.ggrd.time_hist.vstage_transition);
+     
+    }
     if(!E->control.ggrd.vtop_control_init){
       /* 
 	 read in grd files (only needed for top processors, really, but
@@ -941,6 +984,19 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
       */
       E->control.ggrd.svt = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
       E->control.ggrd.svp = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+      if(!E->control.ggrd.svt)
+	myerror(E,"mem error vtheta grid");
+      if(!E->control.ggrd.svp)
+	myerror(E,"mem error vphi grid");
+      if(E->control.ggrd.age_control){
+	E->control.ggrd.ages = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+	if(!E->control.ggrd.ages)
+	  myerror(E,"mem error ages grid");
+	E->age_t=(float*) malloc((E->mesh.nox*E->mesh.noy+1)*sizeof(float));
+	if(!E->age_t)
+	  myerror(E,"age_t in ggrd");
+      }
+      
       if(E->control.ggrd_vtop_euler){
 	/* make room for euler vectors */
 	euler = (struct elvc **)malloc(E->control.ggrd.time_hist.nvtimes * sizeof(struct elvc *));
@@ -963,6 +1019,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	  }else{
 	    sprintf(tfilename1,"%s/vt.grd",E->control.ggrd.vtop_dir);
 	    sprintf(tfilename2,"%s/vp.grd",E->control.ggrd.vtop_dir);
+	    sprintf(tfilename3,"%s/age.grd",E->control.ggrd.age_dir);
 	  }
 	} else {			/* f(t), different stages */
 	  if(E->control.ggrd_vtop_euler){
@@ -971,6 +1028,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	  }else{
 	    sprintf(tfilename1,"%s/%i/vt.grd",E->control.ggrd.vtop_dir,i+1);
 	    sprintf(tfilename2,"%s/%i/vp.grd",E->control.ggrd.vtop_dir,i+1);
+	    sprintf(tfilename3,"%s/%i/age.grd",E->control.ggrd.age_dir,i+1);
 	  }
 	}
 	if(E->control.ggrd_vtop_euler){
@@ -1017,6 +1075,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 					gmt_string,(E->control.ggrd.svp+i),verbose,FALSE,
 					use_nearneighbor))
 	    myerror(E,"ggrd init error vp"); 
+	  if(E->control.ggrd.age_control){
+	    if(ggrd_grdtrack_init_general(FALSE,tfilename3,&char_dummy, /* age */
+					gmt_string,(E->control.ggrd.ages+i),verbose,FALSE,
+					TRUE))
+	    myerror(E,"ggrd init error age"); 
+	    E->control.lith_age_time =1;
+	  }
 	  we_have_velocity_grids = 1;
 	}
 	/* end timestep loop */
@@ -1031,8 +1096,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	}
       }
       if(verbose){
-	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
-		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svt->fmaxlim[0]);
+	fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g ages: %i\n",
+		E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svt->fmaxlim[0],
+		E->control.ggrd.age_control);
       }
       /* end init part, only executed once */
     } 
@@ -1042,7 +1108,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
     */
     theta_max = (90.-E->control.ggrd.svt[0].south)*M_PI/180-1e-5;
     theta_min = (90.-E->control.ggrd.svt[0].north)*M_PI/180+1e-5;
-    if(verbose)
+    if(verbose && !E->control.ggrd.vtop_control_init )
       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
 	      E->control.ggrd.svt[0].south,E->control.ggrd.svt[0].north);
 
@@ -1057,19 +1123,22 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	/* 
 	   interpolate by time 
 	*/
-	if(age < 0){		/* Opposite of other method */
+
+	if(age < 0){		/* forward in time */
 	  interpolate = 0;
-	  /* present day should be last file*/
-	  i1 = E->control.ggrd.time_hist.nvtimes - 1;
+	  /* present day should first  file*/
+	  i1 = 0;f1=1;i2=0;f2=0;
 	  if(verbose)
 	    fprintf(stderr,"ggrd_read_vtop_from_file: using present day vtop for age = %g\n",age);
 	}else{
 	  /*  */
-	  ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
-			     E->control.ggrd.time_hist.vstage_transition);
+	  if(!ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+				 E->control.ggrd.time_hist.vstage_transition))
+	    myerror(E,"interpolation error");
 	  interpolate = 1;
 	  if(verbose)
-	    fprintf(stderr,"ggrd_read_vtop_from_file: interpolating vtop for age = %g\n",age);
+	    fprintf(stderr,"ggrd_read_vtop_from_file: interpolating for age  %g (%.3f of %g Ma, %.3f of %g Ma)\n",
+		    age,f1,E->control.ggrd.time_hist.vtimes[i1*3+1],f2,E->control.ggrd.time_hist.vtimes[i2*3+1]);
 	}
 	
       }else{
@@ -1080,8 +1149,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
       }
       
       if(verbose)
-	fprintf(stderr,"ggrd_read_vtop_from_file: assigning %s BC, timedep: %i time: %g\n",
-		(use_vel)?("velocities"):("tractions"),	timedep,age);
+	fprintf(stderr,"ggrd_read_vtop_from_file: assigning %s BC, timedep: %i time: %g Ma ndtime: %g\n",
+		(use_vel)?("velocities"):("tractions"),	timedep,age,E->monitor.elapsed_time);
       
       /* if mixed BCs are allowed, need to reassign the boundary
 	 condition */
@@ -1110,7 +1179,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	    /* 
 	       determine vertical nodes and set the assign flag, if needed
 	    */
-	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,m,verbose,
+	    ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,nozl,level,m,
+						      verbose&&!E->control.ggrd.vtop_control_init,
 						      &assign,&botnode,&topnode);
 	    /* 
 	       loop through all horizontal nodes and assign boundary
@@ -1144,7 +1214,9 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		    }
 		    rout[1] = theta_min;
 		  }
-		  /* find vp */
+		  /* 
+		     find vp 
+		  */
 		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
 						   vin1,FALSE,shift_to_pos_lon)){
 		    fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
@@ -1218,19 +1290,25 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
       */
       /* scaled cutoff velocity */
       if(!E->control.ggrd_vtop_euler)		/* else, is not defined */
-	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+	//cutoff = E->control.ggrd.svp->fmaxlim[0] * fabs(vscale) + 1e-5;
+	cutoff = 1e10;
       else{
 	cutoff = 1e30;
       }
 
       for (m=1;m <= E->sphere.caps_per_proc;m++) {
 	/* top level only */
-	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,m,verbose,
+	ggrd_vtop_helper_decide_on_internal_nodes(E,allow_internal,E->lmesh.NOZ[E->mesh.gridmax],E->mesh.gridmax,m,
+						  verbose&&!E->control.ggrd.vtop_control_init,
 						  &assign,&botnode,&topnode);
 	if(assign){	
 	  for(i=1;i <= noy;i++)	{/* loop through surface nodes */
 	    for(j=1;j <= nox;j++)    {
 	      nodel =  noz + (j-1) * noz + (i-1)*noxnoz; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
+
+	      /* globale node system horizontal */
+	      hnodeg =E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
+
 	      /*  */
 	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
 	      rout[2] = E->sx[m][2][nodel];
@@ -1260,7 +1338,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 	      /* theta or codes */
 	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
 					       vin1,FALSE,shift_to_pos_lon)){
-		fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
+		fprintf(stderr,"ggrd_read_vtop_from_file: vtheta/code interpolation error at %g, %g\n",
 			rout[1],rout[2]);
 		parallel_process_termination();
 	      }
@@ -1268,16 +1346,25 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		/* phi */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
 						 (vin1+1),FALSE,shift_to_pos_lon)){
-		  fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
+		  fprintf(stderr,"ggrd_read_vtop_from_file: vphi interpolation error at %g, %g\n",
 			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
-	      }
+		if(E->control.ggrd.age_control){
+		  /* age */
+		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ages+i1),
+						   &agein1,FALSE,shift_to_pos_lon)){
+		    fprintf(stderr,"ggrd_read_vtop_from_file: age interpolation error at %g, %g\n",
+			    rout[1],rout[2]);
+		    parallel_process_termination();
+		  }
+		}
+	      }		       /* end non Euler */
 	      if(interpolate){	/* second time */
 		/* theta or code */
 		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,
 						 FALSE,shift_to_pos_lon)){
-		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
+		  fprintf(stderr,"ggrd_read_mat_from_file: theta/euelr 2 interpolation error at %g, %g\n",
 			  rout[1],rout[2]);
 		  parallel_process_termination();
 		}
@@ -1285,13 +1372,31 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		  /* phi */
 		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),
 						   FALSE,shift_to_pos_lon)){
-		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
+		    fprintf(stderr,"ggrd_read_mat_from_file: vphi 2 interpolation error at %g, %g\n",
 			    rout[1],rout[2]);
 		    parallel_process_termination();
 		  }
 		  v[1] = (f1*vin1[0] + f2*vin2[0])*vscale; /* theta */
 		  v[2] = (f1*vin1[1] + f2*vin2[1])*vscale; /* phi */
+		  if(E->control.ggrd.age_control){
+		    /*  */
+		    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ages+i2),
+						     &agein2,FALSE,shift_to_pos_lon)){
+		      fprintf(stderr,"ggrd_read_vtop_from_file: age 2 interpolation error at %g, %g\n",
+			      rout[1],rout[2]);
+		      parallel_process_termination();
+		    }
+		    if(finite(agein1) && finite(agein2))
+		      scaled_age  = (f1*agein1 + f2*agein2)/E->data.scalet;
+		    else if(finite(agein1))
+		      scaled_age = agein1/E->data.scalet;
+		    else if(finite(agein2))
+		      scaled_age = agein2/E->data.scalet;
+		    else 
+		      scaled_age = CITCOM_NAN_AGE/E->data.scalet;
+		  }
 		}else{
+		  /* Euler */
 		  /* for code, take closest stage */
 		  if(f1 > f2){
 		    v[1] = vin1[0];
@@ -1302,10 +1407,13 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		  }
 		}
 	      }else{
+		/* not interpolating  */
 		/* single timestep */
 		if(!E->control.ggrd_vtop_euler){
 		  v[1] = vin1[0]*vscale; /* theta */
 		  v[2] = vin1[1]*vscale; /* phi */
+		  if(E->control.ggrd.age_control)
+		    scaled_age = agein1/E->data.scalet;
 		}else{
 		  v[1] = vin1[0];	/* theta */
 		  euler_i = i1;
@@ -1364,6 +1472,10 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
 		  E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
 		  E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
 		}
+		if(E->control.ggrd.age_control){
+		  //fprintf(stderr,"%g %g\n",scaled_age,agein1);
+		  E->age_t[hnodeg] = scaled_age;
+		}
 		if(use_vel && ontop)
 		  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
 	      }	/* end z */
@@ -1375,6 +1487,8 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
       if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svt);
 	ggrd_grdtrack_free_gstruc(E->control.ggrd.svp);
+	if(E->control.ggrd.age_control)
+	  ggrd_grdtrack_free_gstruc(E->control.ggrd.ages);
       }
 
     } /* end assignment branch */
@@ -1393,6 +1507,7 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   } /* end top processor or allow internal branch branch */
 
   E->control.ggrd.vtop_control_init = TRUE;
+
 }
 
 
@@ -1441,10 +1556,7 @@ void ggrd_vtop_helper_decide_on_internal_nodes(struct All_variables *E,	/* input
   
 }
 
-void ggrd_read_age_from_file(struct All_variables *E, int is_geographic)
-{
-  myerror(E,"not implemented yet");
-} /* end age control */
+
 
 /* adjust Ra in top boundary layer  */
 void ggrd_adjust_tbl_rayleigh(struct All_variables *E,

@@ -162,6 +162,10 @@ void regional_temperature_boundary_conditions(E)
   void temperatures_conform_bcs();
   int j,lev,noz;
 
+
+  if(E->mesh.toptbc_pole)
+    myerror(E,"top pole boundary condition not implemented for regional CitcomS");
+  
   lev = E->mesh.levmax;
 
 

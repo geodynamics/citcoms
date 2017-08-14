@@ -121,6 +121,8 @@ void get_elt_g(struct All_variables *, int, higher_precision [24][1], int, int);
 void get_elt_f(struct All_variables *, int, double [24], int, int);
 void get_aug_k(struct All_variables *, int, double [24*24], int, int);
 /* Full_boundary_conditions.c */
+float lat_dep_temp(struct All_variables *, int );
+void horizontal_bc_lat_dep(struct All_variables *,float *[],int ,int ,unsigned int ,char ,int ,int );
 void full_velocity_boundary_conditions(struct All_variables *);
 void full_temperature_boundary_conditions(struct All_variables *);
 /* Full_geometry_cartesian.c */

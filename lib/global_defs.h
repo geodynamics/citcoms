@@ -344,7 +344,10 @@ struct MESH_DATA {/* general information concerning the fe mesh */
     int NZS[MAX_LEVELS];
     int nsf; /* nodes for surface observables */
     int toptbc;
+    int toptbc_pole;
+
     int bottbc;
+
     int topvbc;
     int botvbc;
     int sidevbc;
@@ -504,6 +507,8 @@ struct CONTROL {
     float TBCtopval;
     float TBCbotval;
 
+  float TBCtop_pole;		/*  */
+
     float Q0;
     float Q0ER;
 
@@ -531,7 +536,7 @@ struct CONTROL {
   struct ggrd_master ggrd;
   float *surface_rayleigh;
   int ggrd_allow_mixed_vbcs,ggrd_comp_smooth,ggrd_tinit_nl_scale;
-  int ggrd_vtop_euler;
+  int ggrd_vtop_euler,ggrd_smooth_stages;
   char ggrd_mat_depth_file[1000];
   ggrd_boolean ggrd_mat_is_3d;
   int ggrd_mat_limit_prefactor,ggrd_mat_is_code;
