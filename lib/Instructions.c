@@ -136,9 +136,16 @@ void initial_mesh_solver_setup(struct All_variables *E)
 
 
 
-    if(E->control.lith_age)
+    if(E->control.lith_age){
+#ifdef USE_GGRD
+      /* if using ggrd, do not call lith_age_init, it should have
+	 already been initialized in GGrd_handling  */
+      if(!E->control.ggrd.age_control)
         lith_age_init(E);
-
+#else      
+        lith_age_init(E);
+#endif
+    }
     (E->problem_boundary_conds)(E);
 
     check_bc_consistency(E);
@@ -471,8 +478,13 @@ void read_initial_settings(struct All_variables *E)
   input_int("pseudo_free_surf",&(E->control.pseudo_free_surf),"0",m);
 
   input_int("toptbc",&(E->mesh.toptbc),"1",m);
+  input_boolean("toptbc_pole",&(E->mesh.toptbc_pole),"off",m); /* variable surface temp BC */
+  
+
   input_int("bottbc",&(E->mesh.bottbc),"1",m);
   input_float("toptbcval",&(E->control.TBCtopval),"0.0",m);
+  input_float("toptbcval_pole",&(E->control.TBCtop_pole),"0.0",m); /*  */
+
   input_float("bottbcval",&(E->control.TBCbotval),"1.0",m);
 
   input_boolean("side_sbcs",&(E->control.side_sbcs),"off",m);
@@ -495,6 +507,10 @@ void read_initial_settings(struct All_variables *E)
 
 
   input_boolean("precise_strain_rate",&(E->control.precise_strain_rate),"off",m);
+
+  /* moved this up here to be initialized before the ggrd stuff, which
+     might use age input  */
+  lith_age_input(E);
 
 #ifdef USE_GGRD
 
@@ -593,6 +609,11 @@ void read_initial_settings(struct All_variables *E)
   input_int("ggrd_vtop_control",&(E->control.ggrd.vtop_control),"0",m); 
   input_string("ggrd_vtop_dir",E->control.ggrd.vtop_dir,"",m); /* file to read prefactors from */
 
+  input_boolean("ggrd_age_control",&(E->control.ggrd.age_control),"off",m); 
+  if(E->control.ggrd.age_control){
+    E->control.lith_age = 1;	/* age control */
+    input_string("ggrd_age_dir",E->control.ggrd.age_dir,"",m);
+  }
   /* 
      
   if ggrd_vtop_euler is set, will read 
@@ -612,8 +633,13 @@ void read_initial_settings(struct All_variables *E)
   if(E->control.ggrd_vtop_euler)
     E->control.ggrd.vtop_control = 1;
 
-  if(E->control.ggrd.vtop_control) /* this will override mat_control setting */
-    E->control.vbcs_file = 1;
+  /* smooth between plate tectoonic stage? */
+  input_boolean("ggrd_smooth_stages",&(E->control.ggrd_smooth_stages),"off",m);
+  /* linear interpolation between stage files (those two are mutually
+     exclusive */
+  input_boolean("ggrd_interpol_time_lin",&tmp_int_in,"off",m);
+  E->control.ggrd.time_hist.interpol_time_lin = (ggrd_boolean)tmp_int_in;
+
 
   /* if set, will check the theta velocities from grid input for
      scaled (internal non dim) values of > 1e9. if found, those nodes will
@@ -626,9 +652,10 @@ void read_initial_settings(struct All_variables *E)
   */
   input_boolean("ggrd_comp_smooth",&(E->control.ggrd_comp_smooth),"off",m);
 
-
 #endif
-
+  if(E->control.lith_age_time && (!E->control.lith_age))
+    myerror(E,"cannot have lith_age_time but not lith_age control");
+  
   input_boolean("aug_lagr",&(E->control.augmented_Lagr),"off",m);
   input_double("aug_number",&(E->control.augmented),"0.0",m);
 
@@ -777,7 +804,7 @@ void read_initial_settings(struct All_variables *E)
   output_common_input(E);
   h5input_params(E);
   phase_change_input(E);
-  lith_age_input(E);
+
 
   tic_input(E);
   tracer_input(E);

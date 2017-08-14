@@ -225,10 +225,16 @@ void convection_initial_temperature(struct All_variables *E)
 #endif
           read_tic_from_file(E);
   }
-  else if (E->control.lith_age)
-      lith_age_construct_tic(E);
-  else
-      construct_tic_from_input(E);
+  else if ((E->control.lith_age) && (E->convection.tic_method != 4)){
+    /* this will assign a lithosphere, but set the rest to background
+       mantle temperature I don't want the ggrd temperature init to be
+       overwritten
+     */
+    lith_age_construct_tic(E);
+  }else{
+    /* bunch of other modes, including ggrd if compiled such  */
+    construct_tic_from_input(E);
+  }
 
   /* Note: it is the callee's responsibility to conform tbc. */
   /* like a call to temperatures_conform_bcs(E); */
@@ -652,8 +658,7 @@ static void construct_tic_from_input(struct All_variables *E)
 #ifdef USE_GGRD
         ggrd_temp_init_general(E,1);
 #else
-        fprintf(stderr,"tic_method 4 only works for USE_GGRD compiled code\n");
-        parallel_process_termination();
+        myerror(E,"tic_method 4 only works for USE_GGRD compiled code\n");
 #endif
         break;
     

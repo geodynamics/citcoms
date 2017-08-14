@@ -25,8 +25,13 @@
  *
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
-void lith_age_input(struct All_variables *E);
-void lith_age_init(struct All_variables *E);
-void lith_age_construct_tic(struct All_variables *E) ;
-void lith_age_temperature_bound_adj(struct All_variables *E, int lv);
-void lith_age_conform_tbc(struct All_variables *E);
+void lith_age_input(struct All_variables *);
+void lith_age_init(struct All_variables *);
+void lith_age_construct_tic(struct All_variables *) ;
+void lith_age_temperature_bound_adj(struct All_variables *, int);
+void lith_age_conform_tbc(struct All_variables *);
+float erft_age(float , float, struct All_variables *);
+void set_lith_age_for_t_and_tbc(struct All_variables *,int);
+int in_lith_age_depth(float ,float, float *,struct All_variables *);
+
+#define CITCOM_NAN_AGE 300 	/* default age, e.g. for continents */

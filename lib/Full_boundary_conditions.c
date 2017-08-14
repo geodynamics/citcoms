@@ -35,10 +35,10 @@
 #endif
 /* ========================================== */
 
-static void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
 void assign_internal_bc(struct All_variables * );
-static void velocity_apply_periodic_bcs();
-static void temperature_apply_periodic_bcs();
+void velocity_apply_periodic_bcs();
+void temperature_apply_periodic_bcs();
 void read_temperature_boundary_from_file(struct All_variables *);
 void read_velocity_boundary_from_file(struct All_variables *);
 
@@ -94,7 +94,6 @@ void full_velocity_boundary_conditions(E)
 	  ggrd_read_vtop_from_file(E,TRUE);
 #endif
 
-
         if(E->control.vbcs_file){ /* this should either only be called
 				     once, or the input routines need
 				     to be told what to do for each
@@ -147,21 +146,27 @@ void full_temperature_boundary_conditions(E)
   void temperatures_conform_bcs();
   void temperature_imposed_vert_bcs();
   int j,lev,noz;
-
+  if(E->mesh.toptbc_pole)
+    if(!E->mesh.toptbc)
+      myerror(E,"top pole temperature BC requires regular temperature BC");
+  
   lev = E->mesh.levmax;
   for (j=1;j<=E->sphere.caps_per_proc;j++)    {
     noz = E->mesh.noz;
-    if(E->mesh.toptbc == 1)    {
-      horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
+    if(E->mesh.toptbc == 1){
+      if(E->mesh.toptbc_pole)	/* latitude dependency */
+	horizontal_bc_lat_dep(E,E->sphere.cap[j].TB,noz,3,TBZ,1,lev,j);
+      else
+	horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,j);
       if(E->control.tbcs_file)
-          read_temperature_boundary_from_file(E);
-      }
+	read_temperature_boundary_from_file(E);
+    }
     else   {
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,0,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,1,lev,j);
-      }
-
+    }
+    
     if(E->mesh.bottbc == 1)    {
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,1,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,0,lev,j);
@@ -169,29 +174,28 @@ void full_temperature_boundary_conditions(E)
     else        {
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,TBZ,0,lev,j);
       horizontal_bc(E,E->sphere.cap[j].TB,1,3,E->control.TBCbotval,FBZ,1,lev,j);
-      }
-
+    }
     if(E->control.lith_age_time==1)  {
-
-   /* set the regions in which to use lithosphere files to determine temperature
-   note that this is called if the lithosphere age in inputted every time step
-   OR it is only maintained in the boundary regions */
+      /* set the regions in which to use lithosphere files to determine temperature
+	 note that this is called if the lithosphere age in inputted every time step
+	 OR it is only maintained in the boundary regions */
       lith_age_temperature_bound_adj(E,lev);
     }
 
 
-    }     /* end for j */
+  }     /* end for j */
 
   temperatures_conform_bcs(E);
   E->temperatures_conform_bcs = temperatures_conform_bcs;
 
-   return; }
+  return; 
+}
 
 
 /*  =========================================================  */
 
-static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float value,
-			  unsigned int mask,char onoff,int level,int m)
+void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,float value,
+		   unsigned int mask,char onoff,int level,int m)
 {
   int i,j,node,rowl;
 
@@ -232,17 +236,72 @@ static void horizontal_bc(struct All_variables *E,float *BC[],int ROW,int dirn,f
   return;
 }
 
+/* 
 
-static void velocity_apply_periodic_bcs(E)
-    struct All_variables *E;
+   for latitude dependent surface temperature 
+
+ */
+
+void horizontal_bc_lat_dep(struct All_variables *E,float *BC[],int ROW,int dirn,
+			   unsigned int mask,char onoff,int level,int m)
+{
+  int i,j,node,rowl;
+
+  /* safety feature */
+  if(dirn > E->mesh.nsd)
+     return;
+
+  if (ROW==1)
+      rowl = 1;
+  else
+      rowl = E->lmesh.NOZ[level];
+
+  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
+       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+
+    /* turn bc marker to zero */
+    if (onoff == 0)          {
+      for(j=1;j<=E->lmesh.NOY[level];j++)
+    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
+    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+    	  }        /* end for loop i & j */
+      }
+
+    /* turn bc marker to one */
+    else        {
+      for(j=1;j<=E->lmesh.NOY[level];j++)
+        for(i=1;i<=E->lmesh.NOX[level];i++)       {
+    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+    	  if(level==E->mesh.levmax)   /* NB */
+    	    BC[dirn][node] = lat_dep_temp(E,node);
+	}     /* end for loop i & j */
+    }
+
+  }             /* end for if ROW */
+
+  return;
+}
+/* temp as f(latitude) */
+float lat_dep_temp(struct All_variables *E, int node)
+{
+  float xp[3],fac;
+  xyz2rtp(E->x[1][1][node],E->x[1][2][node],E->x[1][3][node],xp);
+  fac = sin(xp[1]);		/* sin(theta), 0 at pole, 1  equator */
+  return E->control.TBCtop_pole + fac* (E->control.TBCtopval - E->control.TBCtop_pole);
+}
+
+void velocity_apply_periodic_bcs(E)
+     struct All_variables *E;
 {
   fprintf(E->fp,"Periodic boundary conditions\n");
 
   return;
-  }
+}
 
-static void temperature_apply_periodic_bcs(E)
-    struct All_variables *E;
+void temperature_apply_periodic_bcs(E)
+     struct All_variables *E;
 {
  fprintf(E->fp,"Periodic temperature boundary conditions\n");
 

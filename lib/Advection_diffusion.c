@@ -302,13 +302,18 @@ void PG_timestep_solve(struct All_variables *E)
       }
   }
 
+
+#ifdef USE_GGRD
+  if((E->control.lith_age) && (!E->control.ggrd.age_control)){
+#else
   if(E->control.lith_age) {
-      if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
-      lith_age_conform_tbc(E);
-      assimilate_lith_conform_bcs(E);
+#endif
+    /* this is the old mode, it didn't quite work for me, so I'll not
+       use it with ggrd */
+    if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve - lith_age adjust\n");
+    lith_age_conform_tbc(E);
+    assimilate_lith_conform_bcs(E);
   }
-
-
   return;
 }
 

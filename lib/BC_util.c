@@ -105,18 +105,26 @@ void strip_bcs_from_residual(E,Res,level)
 void temperatures_conform_bcs(E)
      struct All_variables *E;
 {
-  void temperatures_conform_bcs2(struct All_variables *);
-  void assimilate_lith_conform_bcs2(struct All_variables *);
-
   if(E->control.lith_age) {
+#ifdef USE_GGRD
+    if(E->control.ggrd.age_control){ 
+      if(!E->control.ggrd.vtop_control_init) 
+	myerror(E,"temperature_conform_bcs: error, ggrd age control was not initialized");
+      set_lith_age_for_t_and_tbc(E,TRUE); /* reassign for T and TBC */
+      temperatures_conform_bcs2(E);	  
+    }
+#endif    
     /*
     This sequence now moved to end of PG_time_step_solve
     lith_age_conform_tbc(E);
     assimilate_lith_conform_bcs(E);
+
+    this didn't work for me
+
     */
-    }
-  else
+  }else{
     temperatures_conform_bcs2(E);
+  }
   return;
 }
 
