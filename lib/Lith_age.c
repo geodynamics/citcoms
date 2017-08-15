@@ -178,7 +178,8 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
   int nox, noy, noz, noxnoz;
   float radius, temp,depth_used,daf,age;
 #ifdef USE_GGRD
-  if(E->control.ggrd.age_control){
+  if(E->control.ggrd.age_control){ /* only top processors have grids
+				      defined */
     if(E->parallel.me  != E->parallel.nprocz-1)
       return;			/* bail */
     if(!E->control.ggrd.vtop_control_init)
@@ -202,7 +203,7 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
 	
 	for(k=1;k <= noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*noxnoz;
-	  
+
 	  radius = E->sx[m][3][node];
 	  if(in_lith_age_depth(radius,age,&depth_used,E)){ /* if closer than (lith_age_depth) from top */
 	    temp = erft_age(radius,age,E);
@@ -210,7 +211,6 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
 	      daf = (E->sphere.ro - radius)/depth_used;
 	      temp = daf * E->T[m][node] + (1.0-daf)*temp;
 	    }
-	    
 	    E->T[m][node] = temp;
 	    E->sphere.cap[m].TB[1][node]=temp;
 	    E->sphere.cap[m].TB[2][node]=temp;
@@ -287,7 +287,7 @@ void lith_age_update_tbc(struct All_variables *E)
 	for(k=1;k<=noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*nox*noz;
 	  r1=E->sx[m][3][node];
-	  
+	  /* only in interior */
 	  if(fabs(r1-rout)>=e_4 && fabs(r1-rin)>=e_4)  {
 	    E->sphere.cap[m].TB[1][node]=E->T[m][node];
 	    E->sphere.cap[m].TB[2][node]=E->T[m][node];
@@ -510,10 +510,10 @@ void lith_age_conform_tbc(struct All_variables *E)
 	for(j=1;j<=nox;j++){
 	  nodeg = E->lmesh.nxs-1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
 	  age = E->age_t[nodeg];
+
 	  for(k=1;k<=noz;k++)  {
 
 	    node=k+(j-1)*noz+(i-1)*noxnoz;
-
 	    r1=E->sx[m][3][node];
 
 	    if(fabs(r1-E->sphere.ro)>=e_4 && fabs(r1-E->sphere.ri)>=e_4)  { /* if NOT right on the boundary */
