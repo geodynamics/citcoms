@@ -612,6 +612,7 @@ void read_initial_settings(struct All_variables *E)
   input_boolean("ggrd_age_control",&(E->control.ggrd.age_control),"off",m); 
   if(E->control.ggrd.age_control){
     E->control.lith_age = 1;	/* age control */
+    E->control.lith_age_time = 1; /* over time */
     input_string("ggrd_age_dir",E->control.ggrd.age_dir,"",m);
   }
   /* 

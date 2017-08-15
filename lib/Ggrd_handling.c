@@ -204,15 +204,14 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
   char gmt_string[10];
   int i,j,k,m,node,noxnoz,nox,noy,noz;
   static ggrd_boolean shift_to_pos_lon = FALSE;
-  
+  const int block = FALSE;
+
   if(is_geographic)		/* decide on GMT flag */
     sprintf(gmt_string,GGRD_GMT_GEOGRAPHIC_STRING); /* geographic grid */
   else
     sprintf(gmt_string,"");
 
-  noy=E->lmesh.noy;
-  nox=E->lmesh.nox;
-  noz=E->lmesh.noz;
+  noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
   noxnoz = nox * noz;
 
   if(E->parallel.me == 0)
@@ -225,17 +224,19 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 
 
   */
-  /*
-
-  begin MPI synchronization part
-
-  */
-  if(E->parallel.me > 0){
+  if(block){
     /*
-       wait for the previous processor
+      
+      begin MPI synchronization part
+      
     */
-    mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
-		      0, E->parallel.world, &mpi_stat);
+    if(E->parallel.me > 0){
+      /*
+	wait for the previous processor
+      */
+      mpi_rc = MPI_Recv(&mpi_inmsg, 1, MPI_INT, (E->parallel.me-1),
+			0, E->parallel.world, &mpi_stat);
+    }
   }
 
   if(E->control.ggrd.temp.scale_with_prem){/* initialize PREM */
@@ -252,14 +253,17 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 				E->control.ggrd.temp.d,(E->parallel.me == 0),
 				FALSE,FALSE))
     myerror(E,"grd init error");
-  /*  */
-  if(E->parallel.me <  E->parallel.nproc-1){
-    /* tell the next processor to go ahead with the init step	*/
-    mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
-  }else{
-    fprintf(stderr,"ggrd_temp_init_general: last processor (%i) done with grd init\n",
-	    E->parallel.me);
+  if(block){
+    /*  */
+    if(E->parallel.me <  E->parallel.nproc-1){
+      /* tell the next processor to go ahead with the init step	*/
+      mpi_rc = MPI_Send(&mpi_success_message, 1, MPI_INT, (E->parallel.me+1), 0, E->parallel.world);
+    }else{
+      fprintf(stderr,"ggrd_temp_init_general: last processor (%i) done with grd init\n",
+	      E->parallel.me);
+    }
   }
+  
   /*
 
   interpolate densities to temperature given PREM variations
@@ -358,8 +362,9 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
 	  }
 
 
-
+	  /* end x,y,z loops */
 	}
+
   /*
      free the structure, not needed anymore since T should now
      change internally
@@ -370,11 +375,13 @@ void ggrd_temp_init_general(struct All_variables *E,int is_geographic)
     /* set boundary flags for the nodels within the age defined
        thermal boundary layer */
     lith_age_temperature_bound_adj(E,E->mesh.gridmax);
+    /* assign the temperatures based on a mix of T and TBC */
+    set_lith_age_for_t_and_tbc(E,TRUE); 
   }
   /*
      end temperature/density from GMT grd init
   */
-  temperatures_conform_bcs2(E);	/* this enforces it, the
+  temperatures_conform_bcs(E);	/* this enforces it, the
 				   temperatures_conform_bcs doesn't
 				   call for lith_age */
 }
@@ -1514,9 +1521,14 @@ void ggrd_read_vtop_from_file(struct All_variables *E, int is_geographic)
   } /* end top processor or allow internal branch branch */
   if(! E->control.ggrd.vtop_control_init && verbose)
     fprintf(stderr,"vtop_init from ggrd done\n");
-  parallel_process_sync(E);
-  if(E->control.ggrd.age_control)
+
+  if(E->control.ggrd.age_control){
     E->control.ggrd.age_control_init = TRUE;
+    if(E->monitor.solution_cycles > 1){
+      
+      set_lith_age_for_t_and_tbc(E,TRUE); /* reassign for T and TBC */
+    }
+  }
   E->control.ggrd.vtop_control_init = TRUE;
 
 }

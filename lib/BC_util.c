@@ -111,7 +111,7 @@ void temperatures_conform_bcs(E)
     if(E->control.ggrd.age_control){ 
       if(!E->control.ggrd.vtop_control_init) 
 	myerror(E,"temperature_conform_bcs: error, ggrd age control was not initialized");
-      set_lith_age_for_t_and_tbc(E,TRUE); /* reassign for T and TBC */
+
       temperatures_conform_bcs2(E);	  
     }
 #endif    
@@ -119,8 +119,6 @@ void temperatures_conform_bcs(E)
     This sequence now moved to end of PG_time_step_solve
     lith_age_conform_tbc(E);
     assimilate_lith_conform_bcs(E);
-
-    this didn't work for me
 
     */
   }else{

@@ -131,7 +131,7 @@ void lith_age_construct_tic(struct All_variables *E)
 
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control)
-    if(E->parallel.me  != E->parallel.nprocz-1)
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1) /* if not on top, bail */
       return ;			/* bail */
 #endif
   
@@ -177,10 +177,13 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
   int i, j, k, m, node, nodeg;
   int nox, noy, noz, noxnoz;
   float radius, temp,depth_used,daf,age;
+  if(E->parallel.me==0)
+    fprintf(stderr,"set T/TBC dependent T, merge: %i\n",merge);
+  
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control){ /* only top processors have grids
 				      defined */
-    if(E->parallel.me  != E->parallel.nprocz-1)
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1) /* not on top? */
       return;			/* bail */
     if(!E->control.ggrd.vtop_control_init)
       myerror(E,"set_lith_age_for_t_and_tbc: error, ggrd age control was not initialized");
@@ -191,16 +194,12 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
   noz=E->lmesh.noz;
   noxnoz = nox * noz;
   
-  if(E->parallel.me == 0)
-    fprintf(stderr,"setting T and TBC within lithosphere to age dependent T, merge: %i\n",merge);
-  
   for(m=1;m <= E->sphere.caps_per_proc;m++)
     for(i=1;i <= noy;i++)
       for(j=1;j <= nox;j++){
 	
 	nodeg=E->lmesh.nxs-1+j+(E->lmesh.nys+i-2) * E->mesh.nox;
 	age = E->age_t[nodeg];
-	
 	for(k=1;k <= noz;k++)  {
 	  node=k+(j-1)*noz+(i-1)*noxnoz;
 
@@ -218,7 +217,11 @@ void set_lith_age_for_t_and_tbc(struct All_variables *E, int merge)
 	  }
 	}
       }
-}
+  
+  /*   fprintf(stderr,"CPU %i %i nodex %i nodey %i: set T/TBC dependent T, merge: %i\n", */
+  /* 	  E->parallel.me,(E->parallel.nprocx * E->parallel.nprocy * E->parallel.nprocz), */
+  /* 	  E->parallel.me_loc[1],E->parallel.me_loc[2],merge); */
+} 
 /* 
    determine if we are in the lithosphere for TBC assignment purposes
    normally, this will just mean checking the depth
@@ -308,23 +311,21 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
   int j,node,i,k,m,nodeg;
   float ttt2,ttt3,fff2,fff3,depth_used,age;
   int nox,noy,noz,noxnoz;
+  if(E->parallel.me == 0)
+    fprintf(stderr,"lith_age_temperature_bound_adj, lat: %i, lev %i/%i\n",E->control.lith_age_time,lv,E->mesh.gridmax);
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control){
     if(!E->control.ggrd.vtop_control_init)
       myerror(E,"lith_age_temperature_bound_adj: error, ggrd age control was not initialized");
     
-    if(E->parallel.me  != E->parallel.nprocz-1)
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1)
       return;			/* bail */
   }
 #endif
   noy=E->lmesh.noy;nox=E->lmesh.nox;noz=E->lmesh.noz;
   noxnoz = nox*noz;
 
-  if(E->parallel.me == 0)
-    fprintf(stderr,"lith_age_temperature_bound_adj \n");
- 
-  
-  /* NOTE: To start, the relevent bits of "node" are zero. Thus, they only
+   /* NOTE: To start, the relevent bits of "node" are zero. Thus, they only
      get set to TBX/TBY/TBZ if the node is in one of the bounding regions.
      Also note that right now, no matter which bounding region you are in,
      all three get set to true. CPC 6/20/00 */
@@ -379,14 +380,16 @@ void lith_age_temperature_bound_adj(struct All_variables *E, int lv)
   } /* end E->control.temperature_bound_adj */
 
   if (E->control.lith_age_time) {
+    /* general init */
     if(lv==E->mesh.gridmax)
 
       for(m=1;m <= E->sphere.caps_per_proc;m++){
-
 	for(i=1;i <= noy;i++)
 	  for(j=1;j <= nox;j++){
+
 	    nodeg = E->lmesh.nxs - 1+j+(E->lmesh.nys+i-2)*E->mesh.nox;
 	    age = E->age_t[nodeg];
+
 	    for(k=1;k <= noz;k++){
 
 	      /* split this up into x-y-z- loop detailes to be able to
@@ -432,10 +435,10 @@ void lith_age_conform_tbc(struct All_variables *E)
 #ifdef USE_GGRD
   if(E->control.ggrd.age_control){
     myerror(E,"for now, we don't like lith_age_conform_tbc with ggrd ages");
-    if(E->parallel.me  != E->parallel.nprocz-1)
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1) /* not on top? */
       return ;			/* bail */
     if(!E->control.ggrd.vtop_control_init)
-      myerror(E,"set_lith_age_for_t_and_tbc: error, ggrd age control was not initialized");
+      myerror(E,"lith_age_conform: error, ggrd age control was not initialized");
   }
 #else
   if(E->control.lith_age_time==1)   {
@@ -553,7 +556,7 @@ void assimilate_lith_conform_bcs(struct All_variables *E)
 #ifdef USE_GGRD
   myerror(E,"for now, we don't like assimiliate_lith_conform_bcs with ggrd age");
   if(E->control.ggrd.age_control)
-    if(E->parallel.me  != E->parallel.nprocz-1)
+    if(E->parallel.me_loc[3] != E->parallel.nprocz-1)
       return ;			/* bail */
 #endif
   
