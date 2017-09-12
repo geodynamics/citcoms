@@ -1,0 +1,11 @@
+file = fulltest.cap07.100
+grid = 9 x 9 x 9
+format = ascii
+interleaving = field
+majority = row
+header = lines 1
+field = locations, velocity, temperature, viscosity
+structure = 3-vector, 3-vector, scalar, scalar
+type = float, float, float, float
+
+end
