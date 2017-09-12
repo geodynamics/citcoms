@@ -80,6 +80,19 @@ void read_temperature_boundary_from_file(E)
     return;
 }
 
+/*=======================================================================
+  read temperature and stencils for slab assimilation from files
+=========================================================================*/
+/* DJB SLAB */
+void read_slab_temperature_from_file(E)
+     struct All_variables *E;
+{
+      if( E->parallel.me == 0)
+               fprintf(stderr, "\nINSIDE read_slab_temperature_from_file just before call with 6,1 \n");
+
+    (E->solver.read_input_files_for_timesteps)(E,6,1); /* read temperature and stencil (6) and output(1) */
+    return;
+}
 
 /*=======================================================================
   Open restart file to get initial elapsed time, or calculate the right value

@@ -202,6 +202,7 @@ void PG_timestep_solve(struct All_variables *E)
   void temperatures_conform_bcs();
   void lith_age_conform_tbc();
   void assimilate_lith_conform_bcs();
+  void assimilate_slab_conform_bcs(); // DJB SLAB
   int i,m,psc_pass,iredo;
   double time0,time1,T_interior1;
   double *DTdot[NCS], *T1[NCS], *Tdot1[NCS];
@@ -248,6 +249,7 @@ void PG_timestep_solve(struct All_variables *E)
         /* XXX: replace inputdiff with refstate.thermal_conductivity */
 	pg_solver(E,E->T,E->Tdot,DTdot,&(E->convection.heat_sources),E->control.inputdiff,1,E->node);
 	corrector(E,E->T,E->Tdot,DTdot);
+        /* DJB SLAB - this next line does nothing if lith_age is set */
 	temperatures_conform_bcs(E);
       }
 
@@ -306,6 +308,13 @@ void PG_timestep_solve(struct All_variables *E)
       if(E->parallel.me==0) fprintf(stderr,"PG_timestep_solve\n");
       lith_age_conform_tbc(E);
       assimilate_lith_conform_bcs(E);
+  }
+
+  /* DJB SLAB */
+  if(E->control.slab_assim) {
+      if(E->parallel.me==0) fprintf(stderr,"Call assimilate_slab_conform_bcs\n");
+      assimilate_slab_conform_bcs(E);
+      if(E->parallel.me==0) fprintf(stderr,"Returned from assimilate_slab_conform_bcs\n");
   }
 
 

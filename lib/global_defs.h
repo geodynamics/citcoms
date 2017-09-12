@@ -258,6 +258,8 @@ struct CAP    {
     double fi   [5];
     float *TB[4];
     float *VB[4];
+    double *slab_temp; // DJB SLAB
+    double *slab_sten; // DJB SLAB
     float *V[4];
     float *Vprev[4];
     };
@@ -493,7 +495,14 @@ struct CONTROL {
     int lith_age;
     int lith_age_time;
     int lith_age_old_cycles;
+    int lith_age_depth_function; // DJB SLAB
     float lith_age_depth;
+    float lith_age_exponent; // DJB SLAB
+    float lith_age_stencil_value; // DJB SLAB
+    float lith_age_stencil_value_nondim; // DJB SLAB
+    float lith_age_min; // DJB SLAB
+
+    int slab_assim; // DJB SLAB
 
   int precise_strain_rate; /* use proper computation for strain-rates in whole domain, not just poles */
 
@@ -546,6 +555,7 @@ struct CONTROL {
     char temperature_boundary_file[1000];
     char mat_file[1000];
     char lith_age_file[1000];
+    char slab_assim_file[1000]; // DJB SLAB
 
     int total_iteration_cycles;
     int total_v_solver_calls;
@@ -810,6 +820,7 @@ struct All_variables {
     unsigned int *node[NCS];
 
     float *age_t;
+    float *lith_age_depth_t; // DJB
 
     struct Shape_function_dx *GNX[MAX_LEVELS][NCS];
     struct Shape_function_dA *GDA[MAX_LEVELS][NCS];

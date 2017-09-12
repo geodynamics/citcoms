@@ -966,6 +966,10 @@ void allocate_common_vars(E)
   for(i=1;i<=E->mesh.nsd;i++)
       E->sphere.cap[j].TB[i] = (float *)  malloc((nno+1)*sizeof(float));
 
+  /* DJB SLAB */
+  E->sphere.cap[j].slab_temp = (double *) malloc((nno+1)*sizeof(double));
+  E->sphere.cap[j].slab_sten = (double *) malloc((nno+1)*sizeof(double));
+
   E->slice.tpg[j]      = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.tpgb[j]     = (float *)malloc((nsf+2)*sizeof(float));
   E->slice.divg[j]     = (float *)malloc((nsf+2)*sizeof(float));
@@ -2125,6 +2129,14 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "lith_age_file=%s\n", E->control.lith_age_file);
     fprintf(fp, "lith_age_time=%d\n", E->control.lith_age_time);
     fprintf(fp, "lith_age_depth=%g\n", E->control.lith_age_depth);
+    /* DJB SLAB */
+    fprintf(fp, "lith_age_depth_function=%d\n", E->control.lith_age_depth_function);
+    fprintf(fp, "lith_age_exponent=%g\n", E->control.lith_age_exponent);
+    fprintf(fp, "lith_age_min=%g\n", E->control.lith_age_min);
+    fprintf(fp, "lith_age_stencil_value=%g\n", E->control.lith_age_stencil_value);
+    fprintf(fp, "slab_assim=%d\n", E->control.slab_assim);
+    fprintf(fp, "slab_assim_file=%s\n", E->control.slab_assim_file);
+    /* end of DJB SLAB */
     fprintf(fp, "start_age=%g\n", E->control.start_age);
     fprintf(fp, "reset_startage=%d\n", E->control.reset_startage);
     fprintf(fp, "file_tbcs=%d\n", E->control.tbcs_file);

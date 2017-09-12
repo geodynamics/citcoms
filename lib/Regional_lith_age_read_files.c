@@ -37,5 +37,12 @@ void regional_lith_age_read_files(struct All_variables *E, int output)
     return;
 }
 
+/* DJB SLAB */
+void regional_slab_temperature_read_files(struct All_variables *E, int output)
+{
+    void regional_read_input_files_for_timesteps();
+    regional_read_input_files_for_timesteps(E,6,output); /*2 (=action) is for lith_age*/
+    return;
+}
 
 /* End of file */

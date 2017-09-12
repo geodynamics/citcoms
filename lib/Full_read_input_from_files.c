@@ -59,6 +59,7 @@ void full_read_input_files_for_timesteps(E,action,output)
     int elx,ely,elz,elg,emax;
     float *VIP1,*VIP2;
     int *LL1, *LL2;
+    float *ST1,*ST2, *SS1, *SS2; // DJB SLAB
 
     int llayer;
     int layers();
@@ -214,9 +215,38 @@ void full_read_input_files_for_timesteps(E,action,output)
 	}
 	break;
 	
+      case 6:  /* read temperature and stencil for slab assimilation */
+        /* DJB SLAB */
+        if( E->parallel.me == 0)
+               fprintf(stderr, "\nTemperature and Slab assimilation action=%d output=%d\n",action,output);
+
+        sprintf(output_file1,"%s%0.0f.%d",E->control.slab_assim_file,newage1,cap);
+        sprintf(output_file2,"%s%0.0f.%d",E->control.slab_assim_file,newage2,cap);
+        fprintf(stderr, "\nSlab assimilation %s\n",output_file1);
+        fp1=fopen(output_file1,"r");
+        if (fp1 == NULL) {
+            fprintf(E->fp,"(Problem_related #12) Cannot open %s\n",output_file1);
+            exit(8);
+        }
+        if (pos_age) {
+           fp2=fopen(output_file2,"r");
+           if (fp2 == NULL) {
+               fprintf(E->fp,"(Problem_related #13) Cannot open %s\n",output_file2);
+            exit(8);
+           }
+        }
+        if((E->parallel.me==0) && (output==1))   {
+           fprintf(E->fp,"Slab Assimilation: Starting Age = %g, Elapsed time = %g, Current Age = %g\n",E->control.start_age,E->monitor.elapsed_time,age);
+           fprintf(E->fp,"Slab Assimilation: File1 = %s\n",output_file1);
+          if (pos_age)
+             fprintf(E->fp,"Slab Assimilation: File2 = %s\n",output_file2);
+          else
+             fprintf(E->fp,"Slab Assimilation: File2 = No file inputted (negative age)\n");
+        }
+
+        break;
+
       } /* end switch */
-
-
 
       switch (action) { /* Read the contents of files and average */
 
@@ -294,6 +324,13 @@ void full_read_input_files_for_timesteps(E,action,output)
                 fprintf(stderr,"Error while reading file '%s'\n",output_file2);
                 exit(8);
               }
+
+              /* DJB SLAB */
+              if(inputage1 <= E->control.lith_age_stencil_value || inputage2 <= E->control.lith_age_stencil_value) {
+                  inputage1=min(inputage1,inputage2);
+                  inputage2=min(inputage1,inputage2);
+              }
+
               E->age_t[node] = (inputage1 + (inputage2-inputage1)/(newage2-newage1)*(age-newage1))/E->data.scalet;
 	    }
 	    else { /* negative ages - don't do the interpolation */
@@ -416,6 +453,57 @@ void full_read_input_files_for_timesteps(E,action,output)
         free ((void *) TB1);
         free ((void *) TB2);
 	break;
+
+      case 6:  /* read temperature and stencil for slab assimilation */
+          /* XXX DJB */
+          if( E->parallel.me == 0)
+               fprintf(stderr, "\nTemperature and Slab assimilation action=%d\n",action);
+          nnn=nox*noy*noz;
+          ST1=(float*) malloc ((nnn+1)*sizeof(float));
+          ST2=(float*) malloc ((nnn+1)*sizeof(float));
+          SS1=(float*) malloc ((nnn+1)*sizeof(float));
+          SS2=(float*) malloc ((nnn+1)*sizeof(float));
+
+          for(i=1;i<=nnn;i++)  {
+              if(fscanf(fp1,"%g %g",&(ST1[i]),&(SS1[i])) != 2) {
+                  fprintf(stderr,"Error while reading file '%s'\n", output_file1);
+                  exit(8);
+              }
+              if (pos_age) {
+                  if(fscanf(fp2,"%g %g",&(ST2[i]),&(SS2[i])) != 2) {
+                      fprintf(stderr,"Error while reading file '%s'\n", output_file2);
+                      exit(8);
+                  }
+              }
+          }
+
+          fclose(fp1);
+          if (pos_age) fclose(fp2);
+
+          for(j=1;j<=noy1;j++)
+            for(i=1;i<=nox1;i++)
+              for(k=1;k<=noz1;k++)    {
+                nodel = k + (i-1)*noz1 + (j-1)*nox1*noz1;
+                nodeg = (E->lmesh.nzs+k-1) + (E->lmesh.nxs+i-2)*noz + (E->lmesh.nys+j-2)*noz*nox;
+
+                if (pos_age) { /* positive ages - we must interpolate */
+                    E->sphere.cap[m].slab_temp[nodel] = (ST1[nodeg] + (ST2[nodeg]-ST1[nodeg])/(newage2-newage1)*(age-newage1));
+                    E->sphere.cap[m].slab_sten[nodel] = (SS1[nodeg] + (SS2[nodeg]-SS1[nodeg])/(newage2-newage1)*(age-newage1));
+                }
+                else { /* negative ages - don't do the interpolation */
+                    E->sphere.cap[m].slab_temp[nodel] = ST1[nodeg];
+                    E->sphere.cap[m].slab_sten[nodel] = SS1[nodeg];
+                }
+
+          } /* next node */
+
+
+          free ((void *) ST1);
+          free ((void *) ST2);
+          free ((void *) SS1);
+          free ((void *) SS2);
+
+        break;
 
       } /* end switch */
     } /* end for m */

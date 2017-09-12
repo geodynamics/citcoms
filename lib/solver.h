@@ -46,6 +46,7 @@ struct Solver {
 
     /* Lith_age.c */
     void (*lith_age_read_files)(struct All_variables *, int);
+    void (*slab_temperature_read_files)(struct All_variables *, int); // DJB SLAB
 
     /* Parallel_related.c */
     void (*parallel_processor_setup)(struct All_variables *);

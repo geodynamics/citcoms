@@ -42,6 +42,7 @@ void regional_set_3dsphere_defaults(struct All_variables *);
 
 /* Lith_age.c */
 void regional_lith_age_read_files(struct All_variables *, int);
+void regional_slab_temperature_read_files(struct All_variables *, int); // DJB SLAB
 
 /* Parallel_related.c */
 void regional_parallel_processor_setup(struct All_variables *);
@@ -73,6 +74,7 @@ void regional_solver_init(struct All_variables *E)
 
     /* Lith_age.c */
     E->solver.lith_age_read_files = regional_lith_age_read_files;
+    E->solver.slab_temperature_read_files = regional_slab_temperature_read_files; // DJB SLAB
 
     /* Parallel_related.c */
     E->solver.parallel_processor_setup = regional_parallel_processor_setup;

@@ -42,6 +42,7 @@ void full_set_3dsphere_defaults(struct All_variables *);
 
 /* Lith_age.c */
 void full_lith_age_read_files(struct All_variables *, int);
+void full_slab_temperature_read_files(struct All_variables *, int); // DJB SLAB
 
 /* Parallel_related.c */
 void full_parallel_processor_setup(struct All_variables *);
@@ -73,6 +74,7 @@ void full_solver_init(struct All_variables *E)
 
     /* Lith_age.c */
     E->solver.lith_age_read_files = full_lith_age_read_files;
+    E->solver.slab_temperature_read_files = full_slab_temperature_read_files; // DJB
 
     /* Parallel_related.c */
     E->solver.parallel_processor_setup = full_parallel_processor_setup;
