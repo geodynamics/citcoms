@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+
+def weaver():
+    from pyre.weaver.mills.CMill import CMill
+    return CMill()
+
+
+# version
+__id__ = "$Id: c.odb,v 1.1.1.1 2005/03/08 16:13:39 aivazis Exp $"
+
+# End of file 

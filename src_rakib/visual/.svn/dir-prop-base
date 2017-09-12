@@ -1,0 +1,14 @@
+K 10
+svn:ignore
+V 100
+Makefile.in
+Makefile
+.libs
+.deps
+visFull.net
+visRegionalSurface.net
+visRegional.net
+h5tocap
+h5steps
+
+END

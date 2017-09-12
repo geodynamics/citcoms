@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/cig/!svn/ver/15386/mc/3D/CitcomS/trunk/examples
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/cig/!svn/ver/14617/mc/3D/CitcomS/trunk/examples/Makefile.am
+END
+example0.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/cig/!svn/ver/14588/mc/3D/CitcomS/trunk/examples/example0.cfg
+END
+example1.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/cig/!svn/ver/8071/mc/3D/CitcomS/trunk/examples/example1.cfg
+END

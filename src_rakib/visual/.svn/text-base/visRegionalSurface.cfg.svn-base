@@ -1,0 +1,175 @@
+//
+// time: Fri Jun 17 11:18:06 2005
+//
+// version: 3.2.0 (format), 4.3.2 (DX)
+//
+//
+// panel[0]: position = (0.0000,0.0000), size = 0.2930x0.4395, startup = 1, devstyle = 1
+// title: value = Control Panel
+//
+// workspace: width = 500, height = 500
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+// interactor FileSelector[1]: num_components = 1, value = "path to your data"
+// instance: panel = 0, x = 5, y = 5, style = FileSelector, vertical = 1, size = 228x55
+//
+// interactor Integer[8]: num_components = 1, value = 1 
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 0, global continuous = 0
+//
+// node Colormap[5]:
+// input[1]: defaulting = 0, value = { [0.0 0.65263158] [1.0 0.0] }
+// input[2]: defaulting = 0, value = { [0.0 1.0] [1.0 1.0] }
+// input[3]: defaulting = 0, value = { [0.0 1.0] [1.0 1.0] }
+// input[4]: defaulting = 0, value = { [0.0 0.8988764] [1.0 0.8988764] }
+// input[5]: defaulting = 0, value = "Colormap_5"
+// input[7]: defaulting = 1, value = -0.13482128
+// input[8]: defaulting = 1, value = 2.1637275
+// input[9]: defaulting = 1, value = 20
+// input[12]: defaulting = 0, value = { -0.13482128 2.1637275 }
+// input[17]: defaulting = 0, value = -0.13482128
+// input[18]: defaulting = 0, value = 2.1637275
+// window: position = (0.0000,0.0000), size = 0.5078x0.4395
+//
+// interactor Scalar[5]: num_components = 1, value = 0.55 
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 5, global continuous = 0
+//
+// interactor StringList[1]: num_components = 1, value = { "topography (km)", "heatflux" }
+//
+// interactor Selector[1]: num_components = 1, value = 0 
+// selections: maximum = 2, current = 0 
+// option[0]: name = "topography (km)", value = 0
+// option[1]: name = "heatflux", value = 1
+//
+// node Colormap[7]:
+// input[1]: defaulting = 0, value = { [0.0 0.65263158] [1.0 0.0] }
+// input[2]: defaulting = 0, value = { [0.0 1.0] [1.0 1.0] }
+// input[3]: defaulting = 0, value = { [0.0 1.0] [1.0 1.0] }
+// input[4]: defaulting = 0, value = { [0.0 0.86516854] [1.0 0.86516854] }
+// input[5]: defaulting = 0, value = "Colormap_7"
+// input[7]: defaulting = 1, value = -0.018265756
+// input[8]: defaulting = 1, value = 0.24825189
+// input[9]: defaulting = 1, value = 20
+// input[12]: defaulting = 0, value = { -0.018265756 0.24825189 }
+// input[17]: defaulting = 0, value = -0.018265756
+// input[18]: defaulting = 0, value = 0.24825189
+// window: position = (0.0000,0.0000), size = 0.5078x0.4395
+//
+// interactor Scalar[6]: num_components = 1, value = 0.1 
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 5, global continuous = 0
+//
+// interactor Integer[12]: num_components = 1, value = 100 
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 0, global continuous = 0
+//
+// interactor StringList[3]: num_components = 1, value = { "colatitude", "longitude" }
+//
+// interactor Selector[3]: num_components = 1, value = 0 
+// selections: maximum = 2, current = 0 
+// option[0]: name = "colatitude", value = 0
+// option[1]: name = "longitude", value = 1
+//
+// interactor Integer[16]: num_components = 1, value = 70 
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 0, global continuous = 0
+//
+// node Sequencer[1]:
+// vcr[1]: min = 0, max = 100, beg = 0, end = 100, cur = 50, inc = 10, loop = off, step = off, pal = off
+// window: position = (0.0000,0.0000), size = 0.2188x0.0781
+// startup = 0
+//
+// node Image[3]:
+// title: value = Gridded_3D_2ormorevar_notseries
+// depth: value = 24
+// window: position = (0.0477,0.1719), size = 0.7492x0.7568
+// input[1]: defaulting = 0, value = "Image_3"
+// input[4]: defaulting = 0, value = 1
+// input[5]: defaulting = 0, value = [0.0161198 0.954873 -0.00962252]
+// input[6]: defaulting = 0, value = [-0.0928512 6.28227 0.30695]
+// input[7]: defaulting = 0, value = 1.41346
+// input[8]: defaulting = 0, value = 945
+// input[9]: defaulting = 0, value = 0.77619
+// input[10]: defaulting = 0, value = [0.0676713 0.0605621 -0.995868]
+// input[11]: defaulting = 1, value = 15.084
+// input[12]: defaulting = 0, value = 0
+// input[14]: defaulting = 0, value = 1
+// input[15]: defaulting = 0, value = "none"
+// input[16]: defaulting = 0, value = "none"
+// input[17]: defaulting = 0, value = 1
+// input[18]: defaulting = 0, value = 1
+// input[19]: defaulting = 0, value = 1
+// input[22]: defaulting = 0, value = "white"
+// input[25]: defaulting = 0, value = ""
+// input[26]: defaulting = 0, value = "eps color gamma=1 dpi=72 orient=landscape"
+// input[27]: defaulting = 1, value = NULL
+// input[29]: defaulting = 0, value = 1
+// input[30]: defaulting = 0, value = {"x", "y", "z"}
+// input[37]: defaulting = 0, value = {"clear", "black", "black", "black"}
+// input[38]: defaulting = 0, value = {"background", "grid", "ticks", "labels"}
+// input[41]: defaulting = 0, value = "none"
+// input[42]: defaulting = 0, value = "Gridded_3D_2ormorevar_notseries"
+// internal caching: 1
+//
+// node Image[4]:
+// title: value = Gridded_3D_2ormorevar_notseries
+// depth: value = 24
+// window: position = (0.4555,0.4648), size = 0.5375x0.4863
+// input[1]: defaulting = 0, value = "Image_4"
+// input[4]: defaulting = 0, value = 1
+// input[5]: defaulting = 0, value = [-3.38256e-06 -3.38256e-06 0.101445]
+// input[6]: defaulting = 0, value = [0.109576 -3.0761 0.18125]
+// input[7]: defaulting = 0, value = 1.65008
+// input[8]: defaulting = 0, value = 674
+// input[9]: defaulting = 0, value = 0.6773
+// input[10]: defaulting = 0, value = [-0.111015 0.0218223 0.993579]
+// input[11]: defaulting = 1, value = 30.0001
+// input[12]: defaulting = 0, value = 0
+// input[14]: defaulting = 0, value = 1
+// input[15]: defaulting = 0, value = "none"
+// input[16]: defaulting = 0, value = "none"
+// input[17]: defaulting = 0, value = 1
+// input[18]: defaulting = 0, value = 1
+// input[19]: defaulting = 0, value = 1
+// input[22]: defaulting = 0, value = "white"
+// input[25]: defaulting = 0, value = ""
+// input[26]: defaulting = 0, value = "eps color gamma=1 dpi=72 orient=landscape"
+// input[27]: defaulting = 1, value = NULL
+// input[29]: defaulting = 0, value = 1
+// input[30]: defaulting = 0, value = {"x", "y", "z"}
+// input[37]: defaulting = 0, value = {"clear", "black", "black", "black"}
+// input[38]: defaulting = 0, value = {"background", "grid", "ticks", "labels"}
+// input[41]: defaulting = 0, value = "rotate"
+// input[42]: defaulting = 0, value = "Gridded_3D_2ormorevar_notseries"
+// internal caching: 1
+//
+// node Image[7]:
+// title: value = Gridded_3D_2ormorevar_notseries
+// depth: value = 24
+// window: position = (0.4625,0.0000), size = 0.5375x0.4863
+// input[1]: defaulting = 0, value = "Image_7"
+// input[4]: defaulting = 0, value = 1
+// input[5]: defaulting = 0, value = [-0.0633798 0.0386962 0]
+// input[6]: defaulting = 0, value = [-0.0633798 0.0386962 2.70189]
+// input[7]: defaulting = 0, value = 1.44794
+// input[8]: defaulting = 0, value = 674
+// input[9]: defaulting = 0, value = 0.6773
+// input[10]: defaulting = 0, value = [0 1 0]
+// input[11]: defaulting = 1, value = 30.0
+// input[12]: defaulting = 0, value = 0
+// input[14]: defaulting = 0, value = 1
+// input[15]: defaulting = 0, value = "none"
+// input[16]: defaulting = 0, value = "none"
+// input[17]: defaulting = 1, value = 1
+// input[18]: defaulting = 1, value = 1
+// input[19]: defaulting = 0, value = 0
+// input[22]: defaulting = 1, value = "white"
+// input[25]: defaulting = 0, value = NULL
+// input[26]: defaulting = 0, value = "eps color gamma=1 dpi=68 orient=landscape"
+// input[27]: defaulting = 1, value = NULL
+// input[29]: defaulting = 0, value = 1
+// input[30]: defaulting = 0, value = {"x", "y", "z"}
+// input[37]: defaulting = 0, value = {"clear", "black", "black", "black"}
+// input[38]: defaulting = 0, value = {"background", "grid", "ticks", "labels"}
+// input[41]: defaulting = 0, value = "none"
+// input[42]: defaulting = 0, value = "Gridded_3D_2ormorevar_notseries"
+// internal caching: 1
+//
+// interactor ScalarList[1]: num_components = 1, value = { 0.75 }
+// component[0]: minimum = -1e+06, maximum = 1e+06, global increment = 1, decimal = 5, global continuous = 0

@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+#                             Michael A.G. Aivazis
+#                      California Institute of Technology
+#                      (C) 1998-2005  All Rights Reserved
+#
+# <LicenseText>
+#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#
+
+import os
+
+_SYSTEM_ROOT = '@pkgsysconfdir@'
+_USER_ROOT = os.path.join(os.path.expanduser('~'), '.pyre')
+_LOCAL_ROOT = [ '.' ]
+
+
+# version
+__id__ = "$Id: prefix.py.in,v 1.1 2005/09/09 16:12:07 leif Exp $"
+
+# End of file 

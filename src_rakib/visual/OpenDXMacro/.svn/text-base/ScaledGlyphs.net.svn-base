@@ -1,0 +1,161 @@
+//
+// time: Sun May 16 18:26:16 2004
+//
+// version: 3.2.0 (format), 4.3.0 (DX)
+//
+//
+// Begin MDF
+// MODULE ScaledGlyphs
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT data_1; data field; (none);  
+// INPUT data_2; data field; (none);  
+// INPUT shape; scalar; 1.0; factor to describe shape of glyph (must be greater than 0)
+// OPTIONS .1 ; .2 ; .25 ; .50 ; .75 ; 1.0 ; 1.5 ; 2.0 ; 2.5 ; 5.0
+// INPUT scale; scalar; 1.0; scale factor for size of glyphs (must be greater than 0)
+// OPTIONS .1 ; .2 ; .25 ; .50 ; .75 ; 1.0 ; 1.5 ; 2.0      
+// OUTPUT glyph_1; color field;  
+// OUTPUT glyph_2; color field;  
+// OUTPUT ratio; value or value list or field; ratio between glyphs sizes
+// End MDF
+// workspace: width = 521, height = 557
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro ScaledGlyphs(
+ data_1
+,data_2
+,shape = 1.0
+,scale = 1.0
+) -> (
+ glyph_1
+,glyph_2
+,ratio
+) {
+    // 
+    // node Input[1]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'data_1', value = '(none)', descriptive = 1, description = ' ', required = 1, visible = 1
+    //
+ScaledGlyphs_Input_1_out_1 = data_1;
+    // 
+    // node Input[3]: x = 479, y = 14, inputs = 0, label = Input
+    // parameter: position = 4, name = 'scale', value = '1.0', descriptive = 0, description = 'scale factor for size of glyphs (must be greater than 0)', required = 0, visible = 1
+    //
+ScaledGlyphs_Input_3_out_1 = scale;
+    // 
+    // node AutoGlyph[3]: x = 9, y = 417, inputs = 7, label = AutoGlyph
+    //
+ScaledGlyphs_AutoGlyph_3_out_1 = 
+    AutoGlyph(
+    ScaledGlyphs_Input_1_out_1,
+    NULL,
+    NULL,
+    ScaledGlyphs_Input_3_out_1,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node Input[2]: x = 169, y = 3, inputs = 0, label = Input
+    // parameter: position = 2, name = 'data_2', value = '(none)', descriptive = 1, description = ' ', required = 1, visible = 1
+    //
+ScaledGlyphs_Input_2_out_1 = data_2;
+    // 
+    // node Input[4]: x = 366, y = 11, inputs = 0, label = Input
+    // parameter: position = 3, name = 'shape', value = '1.0', descriptive = 0, description = 'factor to describe shape of glyph (must be greater than 0)', required = 0, visible = 1
+    //
+ScaledGlyphs_Input_4_out_1 = shape;
+    // 
+    // node Statistics[1]: x = 44, y = 87, inputs = 1, label = Statistics
+    //
+ScaledGlyphs_Statistics_1_out_1,
+ScaledGlyphs_Statistics_1_out_2,
+ScaledGlyphs_Statistics_1_out_3,
+ScaledGlyphs_Statistics_1_out_4,
+ScaledGlyphs_Statistics_1_out_5 = 
+    Statistics(
+    ScaledGlyphs_Input_1_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Statistics[2]: x = 216, y = 90, inputs = 1, label = Statistics
+    //
+ScaledGlyphs_Statistics_2_out_1,
+ScaledGlyphs_Statistics_2_out_2,
+ScaledGlyphs_Statistics_2_out_3,
+ScaledGlyphs_Statistics_2_out_4,
+ScaledGlyphs_Statistics_2_out_5 = 
+    Statistics(
+    ScaledGlyphs_Input_2_out_1
+    ) [instance: 2, cache: 1];
+    // 
+    // node Compute[3]: x = 204, y = 200, inputs = 3, label = Compute
+    // input[1]: defaulting = 0, visible = 0, type = 32, value = "$0/$1"
+    // expression: value = a/b
+    // name[2]: value = a
+    // name[3]: value = b
+    //
+ScaledGlyphs_Compute_3_out_1 = 
+    Compute(
+    "$0/$1",
+    ScaledGlyphs_Statistics_1_out_5,
+    ScaledGlyphs_Statistics_2_out_5
+    ) [instance: 3, cache: 1];
+    // 
+    // node Compute[2]: x = 221, y = 295, inputs = 3, label = Compute
+    // input[1]: defaulting = 0, visible = 0, type = 32, value = "$1/$0"
+    // expression: value = scale/a
+    // name[2]: value = a
+    // name[3]: value = scale
+    //
+ScaledGlyphs_Compute_2_out_1 = 
+    Compute(
+    "$1/$0",
+    ScaledGlyphs_Compute_3_out_1,
+    ScaledGlyphs_Input_3_out_1
+    ) [instance: 2, cache: 1];
+    // 
+    // node AutoGlyph[4]: x = 178, y = 412, inputs = 7, label = AutoGlyph
+    //
+ScaledGlyphs_AutoGlyph_4_out_1 = 
+    AutoGlyph(
+    ScaledGlyphs_Input_2_out_1,
+    NULL,
+    ScaledGlyphs_Input_4_out_1,
+    ScaledGlyphs_Compute_2_out_1,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 4, cache: 1];
+    // 
+    // node Echo[1]: x = 358, y = 455, inputs = 2, label = Echo
+    //
+    Echo(
+    NULL,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Output[1]: x = 42, y = 491, inputs = 1, label = Output
+    // parameter: position = 1, name = 'glyph_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+glyph_1 = ScaledGlyphs_AutoGlyph_3_out_1;
+    // 
+    // node Output[2]: x = 211, y = 495, inputs = 1, label = Output
+    // parameter: position = 2, name = 'glyph_2', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+glyph_2 = ScaledGlyphs_AutoGlyph_4_out_1;
+    // 
+    // node Output[3]: x = 449, y = 491, inputs = 1, label = Output
+    // parameter: position = 3, name = 'ratio', value = ' ', descriptive = 0, description = 'ratio between glyphs sizes', required = 0, visible = 1
+    //
+ratio = ScaledGlyphs_Compute_3_out_1;
+// network: end of macro body
+}
+ScaledGlyphs_Input_1_out_1 = NULL;
+ScaledGlyphs_Input_3_out_1 = NULL;
+ScaledGlyphs_AutoGlyph_3_out_1 = NULL;
+ScaledGlyphs_Input_2_out_1 = NULL;
+ScaledGlyphs_Input_4_out_1 = NULL;
+ScaledGlyphs_Statistics_1_out_5 = NULL;
+ScaledGlyphs_Statistics_2_out_5 = NULL;
+ScaledGlyphs_Compute_3_out_1 = NULL;
+ScaledGlyphs_Compute_2_out_1 = NULL;
+ScaledGlyphs_AutoGlyph_4_out_1 = NULL;

@@ -1,0 +1,119 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/cig/!svn/ver/22506/cs/autoconf/trunk
+END
+cit_hdf.m4
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/cig/!svn/ver/18556/cs/autoconf/trunk/cit_hdf.m4
+END
+cit_netcdf.m4
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/18064/cs/autoconf/trunk/cit_netcdf.m4
+END
+cit_numpy.m4
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/cig/!svn/ver/14594/cs/autoconf/trunk/cit_numpy.m4
+END
+cit_fortran.m4
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/22492/cs/autoconf/trunk/cit_fortran.m4
+END
+cit_cuda.m4
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/cig/!svn/ver/18420/cs/autoconf/trunk/cit_cuda.m4
+END
+cit_mxml.m4
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/cig/!svn/ver/22506/cs/autoconf/trunk/cit_mxml.m4
+END
+ac_pkg_swig.m4
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/17455/cs/autoconf/trunk/ac_pkg_swig.m4
+END
+cit_petsc.m4
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/cig/!svn/ver/18126/cs/autoconf/trunk/cit_petsc.m4
+END
+cit_python.m4
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/20992/cs/autoconf/trunk/cit_python.m4
+END
+cit_cppunit.m4
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/18064/cs/autoconf/trunk/cit_cppunit.m4
+END
+cit_funcstring.m4
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/14405/cs/autoconf/trunk/cit_funcstring.m4
+END
+acx_pthread.m4
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/18145/cs/autoconf/trunk/acx_pthread.m4
+END
+cit_mpi.m4
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/cig/!svn/ver/7980/cs/autoconf/trunk/cit_mpi.m4
+END
+cit_hdf5.m4
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/cig/!svn/ver/18556/cs/autoconf/trunk/cit_hdf5.m4
+END
+cit_spatialdata.m4
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/18072/cs/autoconf/trunk/cit_spatialdata.m4
+END
+cit_backports.m4
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/18277/cs/autoconf/trunk/cit_backports.m4
+END
+cit_openmp.m4
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/20513/cs/autoconf/trunk/cit_openmp.m4
+END
+cit_proj4.m4
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/cig/!svn/ver/18064/cs/autoconf/trunk/cit_proj4.m4
+END
+cit_adios.m4
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/cig/!svn/ver/22491/cs/autoconf/trunk/cit_adios.m4
+END

@@ -1,0 +1,54 @@
+# Cookbook 5: Subduction Models with Trench Rollback
+
+[CitcomS]
+steps = 1100                ; number of time steps
+
+[CitcomS.controller]
+monitoringFrequency = 100   ; how often outputs are created
+
+[CitcomS.solver]
+datafile = cookbook5
+datadir_old = ./ic
+datafile_old = cookbook5
+rayleigh = 4.07e+08
+
+[CitcomS.solver.bc]
+topvbc = 1
+
+[CitcomS.solver.param]
+file_vbcs = on
+start_age = 55
+
+# Since the starting age is set to 55 Ma, there will be 57 velocity
+# files, one for each Ma (bvel.dat0, bvel.dat1, ... bvel.dat56).
+vel_bound_file = ./velocity/bvel.dat
+
+[CitcomS.solver.ic]
+tic_method = -1
+solution_cycles_init = 0
+
+[CitcomS.solver.mesher]
+coor = 1
+coor_file = ./coor.dat
+nprocx = 1
+nprocy = 2
+nprocz = 1
+nodex = 17
+nodey = 65
+nodez = 33
+
+[CitcomS.solver.tsolver]
+finetunedt = 0.75
+monitor_max_T = on
+
+[CitcomS.solver.visc]
+num_mat = 4
+visc0 = 100,0.003,1,2
+TDEPV = on
+viscE = 24,24,24,24
+viscT = 0.182,0.182,0.182,0.182
+VMIN = on
+visc_min = 0.01
+VMAX = on
+visc_max = 100.0
+

@@ -1,0 +1,46 @@
+# -*- Python -*-
+
+def template():
+    from pyre.schedulers import BatchScriptTemplate
+
+    class LSFBatchScriptTemplate(BatchScriptTemplate):
+
+        def __init__(self):
+            BatchScriptTemplate.__init__(self, "lsf")
+        
+        def render(self):
+            from StringIO import StringIO
+
+            out = StringIO()
+            scheduler = self.scheduler
+            job = self.job
+            
+            print >>out, "#!%s" % scheduler.shell
+            print >>out, "#BSUB -J", job.task
+            if job.queue:
+                print >>out, "#BSUB -q", job.queue
+            if max(job.walltime):
+                print >>out, "#BSUB -W", "%d:%02d" % job.walltime[0:2]
+            print >>out, "#BSUB -n", job.nodes
+            if job.stdin:
+                print >>out, "#BSUB -i", job.stdin
+            if job.stdout:
+                print >>out, "#BSUB -o", job.stdout
+            if job.stderr:
+                print >>out, "#BSUB -e", job.stderr
+            for option in scheduler.bsubOptions:
+                print >>out, "#BSUB", option
+            print >>out
+            print >>out, job.executable, ' '.join(job.arguments)
+            print >>out
+            if job.comments:
+                print >>out, "# ~~~~ comments ~~~~"
+                for line in job.comments:
+                    print >>out, "#", line
+            print >>out
+            print >>out, "# ~~~~ submit command ~~~~"
+            print >>out, "# %s < [script]" % scheduler.command
+            
+            return out.getvalue()
+    
+    return LSFBatchScriptTemplate()

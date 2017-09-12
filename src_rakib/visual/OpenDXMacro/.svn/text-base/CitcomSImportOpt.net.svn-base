@@ -1,0 +1,166 @@
+//
+// time: Sat Nov 17 17:06:53 2007
+//
+// version: 3.2.0 (format), 4.3.2 (DX)
+//
+//
+// Begin MDF
+// MODULE CitcomSImportOpt
+// CATEGORY Macros
+// DESCRIPTION Import CitcomS opt file
+// INPUT format_string; string; (none);  
+// INPUT field; group or field or series or value list or string list; (none); CitcomS temperature field
+// INPUT cap_start; integer; (0);  
+// OPTIONS 0 ; 1   
+// INPUT cap_end; integer; (11);  
+// OUTPUT opt; group;  
+// End MDF
+// workspace: width = 311, height = 607
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSImportOpt(
+ format_string
+,field
+,cap_start
+,cap_end
+) -> (
+ opt
+) {
+    // 
+    // node CollectMultiGrid[3]: x = 191, y = 283, inputs = 4, label = temperature
+    // input[2]: defaulting = 1, visible = 1, type = 32, value = "cap0"
+    // input[4]: defaulting = 1, visible = 1, type = 32, value = "cap1"
+    //
+CitcomSImportOpt_CollectMultiGrid_3_out_1 = 
+    CollectMultiGrid(
+    NULL,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node GetLocal[3]: x = 235, y = 361, inputs = 3, label = GetLocal
+    // input[1]: defaulting = 1, visible = 1, type = 67108863, value = NULL
+    //
+CitcomSImportOpt_GetLocal_3_out_1,
+CitcomSImportOpt_GetLocal_3_out_2 = 
+    GetLocal(
+    CitcomSImportOpt_CollectMultiGrid_3_out_1,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node Input[20]: x = 136, y = 7, inputs = 0, label = Input
+    // parameter: position = 2, name = 'field', value = '(none)', descriptive = 1, description = 'CitcomS field', required = 1, visible = 1
+    //
+CitcomSImportOpt_Input_20_out_1 = field;
+    // 
+    // node Input[18]: x = 200, y = 6, inputs = 0, label = Input
+    // parameter: position = 3, name = 'cap_start', value = '(0)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSImportOpt_Input_18_out_1 = cap_start;
+    // 
+    // node Input[19]: x = 268, y = 5, inputs = 0, label = Input
+    // parameter: position = 4, name = 'cap_end', value = '(11)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSImportOpt_Input_19_out_1 = cap_end;
+    // 
+    // node ForEachN[1]: x = 203, y = 91, inputs = 3, label = ForEachN
+    // input[1]: defaulting = 1, visible = 1, type = 1, value = 0
+    // input[2]: defaulting = 1, visible = 1, type = 1, value = 11
+    // input[3]: visible = 0
+    //
+CitcomSImportOpt_ForEachN_1_out_1,
+CitcomSImportOpt_ForEachN_1_out_2 = 
+    ForEachN(
+    CitcomSImportOpt_Input_18_out_1,
+    CitcomSImportOpt_Input_19_out_1,
+    NULL
+    ) [instance: 1, cache: 1];
+    // 
+    // node Select[11]: x = 11, y = 256, inputs = 3, label = Select
+    //
+CitcomSImportOpt_Select_11_out_1 = 
+    Select(
+    CitcomSImportOpt_Input_20_out_1,
+    CitcomSImportOpt_ForEachN_1_out_1,
+    NULL
+    ) [instance: 11, cache: 1];
+    // 
+    // node Input[21]: x = 62, y = 7, inputs = 0, label = Input
+    // parameter: position = 1, name = 'format_string', value = '(none)', descriptive = 1, description = ' ', required = 1, visible = 1
+    //
+CitcomSImportOpt_Input_21_out_1 = format_string;
+    // 
+    // node Format[1]: x = 70, y = 160, inputs = 2, label = Format
+    // input[1]: defaulting = 1, visible = 1, type = 32, value = "/home/tan2/tmp/benchmarkfull.cap%d.0.general"
+    //
+CitcomSImportOpt_Format_1_out_1 = 
+    Format(
+    CitcomSImportOpt_Input_21_out_1,
+    CitcomSImportOpt_ForEachN_1_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Import[2]: x = 85, y = 256, inputs = 6, label = Import
+    // input[3]: defaulting = 0, visible = 1, type = 32, value = "general"
+    //
+CitcomSImportOpt_Import_2_out_1 = 
+    Import(
+    CitcomSImportOpt_Format_1_out_1,
+    NULL,
+    "general",
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 2, cache: 1];
+    // 
+    // node Replace[2]: x = 50, y = 356, inputs = 4, label = Replace
+    // input[3]: defaulting = 0, visible = 1, type = 32, value = "positions"
+    // input[4]: defaulting = 0, visible = 1, type = 32, value = "positions"
+    //
+CitcomSImportOpt_Replace_2_out_1 = 
+    Replace(
+    CitcomSImportOpt_Select_11_out_1,
+    CitcomSImportOpt_Import_2_out_1,
+    "positions",
+    "positions"
+    ) [instance: 2, cache: 1];
+    // 
+    // node Append[4]: x = 120, y = 438, inputs = 5, label = Append
+    //
+CitcomSImportOpt_Append_4_out_1 = 
+    Append(
+    CitcomSImportOpt_GetLocal_3_out_1,
+    CitcomSImportOpt_Replace_2_out_1,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 4, cache: 1];
+    // 
+    // node Output[13]: x = 112, y = 545, inputs = 1, label = Output
+    // parameter: position = 1, name = 'opt', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+opt = CitcomSImportOpt_Append_4_out_1;
+    // 
+    // node SetLocal[3]: x = 236, y = 512, inputs = 3, label = SetLocal
+    //
+    SetLocal(
+    CitcomSImportOpt_Append_4_out_1,
+    CitcomSImportOpt_GetLocal_3_out_2,
+    NULL
+    ) [instance: 3, cache: 1];
+// network: end of macro body
+}
+CitcomSImportOpt_CollectMultiGrid_3_out_1 = NULL;
+CitcomSImportOpt_GetLocal_3_out_1 = NULL;
+CitcomSImportOpt_GetLocal_3_out_2 = NULL;
+CitcomSImportOpt_Input_20_out_1 = NULL;
+CitcomSImportOpt_Input_18_out_1 = NULL;
+CitcomSImportOpt_Input_19_out_1 = NULL;
+CitcomSImportOpt_ForEachN_1_out_1 = NULL;
+CitcomSImportOpt_Select_11_out_1 = NULL;
+CitcomSImportOpt_Input_21_out_1 = NULL;
+CitcomSImportOpt_Format_1_out_1 = NULL;
+CitcomSImportOpt_Import_2_out_1 = NULL;
+CitcomSImportOpt_Replace_2_out_1 = NULL;
+CitcomSImportOpt_Append_4_out_1 = NULL;

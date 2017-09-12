@@ -1,0 +1,17 @@
+
+[CitcomS]
+steps = 70
+
+[CitcomS.controller]
+monitoringFrequency = 10
+
+[CitcomS.solver]
+datafile = example1
+
+[CitcomS.solver.mesher]
+nprocx =  2
+nprocy =  2
+nodex  = 17
+nodey  = 17
+nodez  =  9
+

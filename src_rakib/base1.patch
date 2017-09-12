@@ -1,0 +1,1436 @@
+Index: lib/Regional_read_input_from_files.c
+===================================================================
+--- lib/Regional_read_input_from_files.c	(revision 16400)
++++ lib/Regional_read_input_from_files.c	(working copy)
+@@ -227,7 +227,9 @@
+ 
+     case 1:  /* velocity boundary conditions */
+ #ifdef USE_GGRD
+-      if(!E->control.ggrd.vtop_control){ /* grd control is called from boundary condition file */
++      if(E->control.ggrd.vtop_control){
++	ggrd_read_vtop_from_file(E, 0);
++      }else{
+ #endif
+       nnn=nox*noy;
+       for(i=1;i<=dims;i++)  {
+Index: lib/Ggrd_handling.c
+===================================================================
+--- lib/Ggrd_handling.c	(revision 16400)
++++ lib/Ggrd_handling.c	(working copy)
+@@ -349,7 +349,6 @@
+   static ggrd_boolean shift_to_pos_lon = FALSE;
+   const int dims=E->mesh.nsd;
+   const int ends = enodes[dims];
+-  FILE *in;
+ 
+   nox=E->mesh.nox;noy=E->mesh.noy;noz=E->mesh.noz;
+   nox1=E->lmesh.nox;noz1=E->lmesh.noz;noy1=E->lmesh.noy;
+@@ -373,7 +372,16 @@
+   if(!E->control.ggrd.mat_control_init){
+     /* assign the general depth dependent material group */
+     construct_mat_group(E);
+- 	
++    if(E->parallel.me==0)
++      
++      if(E->control.ggrd.mat_control > 0)
++	fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to all above %g km\n",
++		E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1]);
++      else
++	fprintf(stderr,"ggrd_read_mat_from_file: initializing ggrd materials, assigning to single layer at %g km\n",
++		E->data.radius_km*E->viscosity.zbase_layer[-E->control.ggrd.mat_control-1]);
++
++	
+     if(is_global)		/* decide on GMT flag */
+       sprintf(gmt_string,GGRD_GMT_GLOBAL_STRING); /* global */
+     else
+@@ -390,34 +398,13 @@
+        read in the material file(s)
+     */
+     E->control.ggrd.mat = (struct  ggrd_gt *)calloc(E->control.ggrd.time_hist.nvtimes,sizeof(struct ggrd_gt));
+-    /* 
+-       is this 3D?
+-    */
+-    if((in = fopen(E->control.ggrd_mat_depth_file,"r"))!=NULL) /* expect 3D setup */
+-      E->control.ggrd_mat_is_3d = TRUE;
+-    else
+-      E->control.ggrd_mat_is_3d = FALSE;
+-
+-    if(E->parallel.me==0)
+-      if(E->control.ggrd.mat_control > 0)
+-	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to all above %g km, input is %s, %s\n",
+-		E->data.radius_km*E->viscosity.zbase_layer[E->control.ggrd.mat_control-1],
+-		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
+-      else
+-	fprintf(stderr,"ggrd_read_mat_from_file: initializing, assigning to single layer at %g km, input is %s, %s\n",
+-		E->data.radius_km*E->viscosity.zbase_layer[-E->control.ggrd.mat_control-1],
+-		(is_global)?("global"):("regional"),(E->control.ggrd_mat_is_3d)?("3D"):("single layer"));
+-
+     for(i=0;i < E->control.ggrd.time_hist.nvtimes;i++){
+       if(!timedep)		/* constant */
+ 	sprintf(tfilename,"%s",E->control.ggrd.mat_file);
+-      else{
+-	if(E->control.ggrd_mat_is_3d)
+-	  sprintf(tfilename,"%s/%i/weak",E->control.ggrd.mat_file,i+1);
+-	else
+-	  sprintf(tfilename,"%s/%i/weak.grd",E->control.ggrd.mat_file,i+1);
+-      }
+-      if(ggrd_grdtrack_init_general(E->control.ggrd_mat_is_3d,tfilename,E->control.ggrd_mat_depth_file,
++      else
++	sprintf(tfilename,"%s/%i/weak.grd",E->control.ggrd.mat_file,i+1);
++      /* 2D file init */
++      if(ggrd_grdtrack_init_general(FALSE,tfilename,&char_dummy,
+ 				    gmt_string,(E->control.ggrd.mat+i),(E->parallel.me == 0),FALSE))
+ 	myerror(E,"ggrd init error");
+     }
+@@ -434,7 +421,7 @@
+   if(timedep || (!E->control.ggrd.mat_control_init)){
+     age = find_age_in_MY(E);
+     if(E->parallel.me == 0)
+-      fprintf(stderr,"ggrd_read_mat_from_file: assigning at age %g\n",age);
++      fprintf(stderr,"ggrd_read_mat_from_ggrd_file: assigning at age %g\n",age);
+     if(timedep){
+       ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+ 			 E->control.ggrd.time_hist.vstage_transition);
+@@ -470,44 +457,21 @@
+ 	      }
+ 	      xloc[1]/=4.;xloc[2]/=4.;xloc[3]/=4.;
+ 	      xyz2rtpd(xloc[1],xloc[2],xloc[3],rout);
+-	      /* 
+-		 material 
+-	      */
+-	      if(E->control.ggrd_mat_is_3d){
+-		if(!ggrd_grdtrack_interpolate_rtp((double)rout[0],(double)rout[1],(double)rout[2],(E->control.ggrd.mat+i1),&indbl,
+-						 FALSE,shift_to_pos_lon)){
+-		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g depth: %g\n",
+-			  rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0);
++	      /* material */
++	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.mat+i1),&indbl,
++					       FALSE,shift_to_pos_lon)){
++		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at lon: %g lat: %g\n",
++			  rout[2]*180/M_PI,90-rout[1]*180/M_PI);
+ 		  parallel_process_termination();
+-		}
+-
+-	      }else{
+-		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],(E->control.ggrd.mat+i1),&indbl,
++	      }
++	      if(interpolate){
++		if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],
++						 (E->control.ggrd.mat+i2),&indbl2,
+ 						 FALSE,shift_to_pos_lon)){
+-		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g\n",
++		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at lon: %g lat: %g\n",
+ 			  rout[2]*180/M_PI,90-rout[1]*180/M_PI);
+ 		  parallel_process_termination();
+ 		}
+-	      }
+-
+-	      if(interpolate){
+-		if(E->control.ggrd_mat_is_3d){
+-		  if(!ggrd_grdtrack_interpolate_rtp((double)rout[0],(double)rout[1],(double)rout[2],
+-						   (E->control.ggrd.mat+i2),&indbl2,
+-						   FALSE,shift_to_pos_lon)){
+-		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g depth: %g\n",
+-			    rout[2]*180/M_PI,90-rout[1]*180/M_PI,(1.0-rout[0]) * 6371.0);
+-		    parallel_process_termination();
+-		  }
+-		}else{
+-		  if(!ggrd_grdtrack_interpolate_tp((double)rout[1],(double)rout[2],
+-						   (E->control.ggrd.mat+i2),&indbl2,
+-						   FALSE,shift_to_pos_lon)){
+-		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at lon: %g lat: %g\n",
+-			    rout[2]*180/M_PI,90-rout[1]*180/M_PI);
+-		    parallel_process_termination();
+-		  }
+-		}
+ 		/* average smoothly between the two tectonic stages */
+ 		vip = exp((f1*log(indbl)+f2*log(indbl2)));
+ 	      }else{
+@@ -629,7 +593,7 @@
+       interpolate = 0;i1 = 0;
+     }
+     if(E->parallel.me == 0)
+-      fprintf(stderr,"ggrd_read_ray_from_file: assigning at time %g\n",age);
++      fprintf(stderr,"ggrd_read_ray_from_ggrd_file: assigning at time %g\n",age);
+     for (m=1;m <= E->sphere.caps_per_proc;m++) {
+       /* loop through all surface nodes */
+       for (j=1;j <= E->lmesh.nsf;j++)  {
+@@ -638,7 +602,7 @@
+ 	rout[2] = (double)E->sx[m][2][node];
+ 	if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.ray+i1),&indbl,
+ 					 FALSE,shift_to_pos_lon)){
+-	  fprintf(stderr,"ggrd_read_ray_from_file: interpolation error at %g, %g\n",
++	  fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
+ 		  rout[1],rout[2]);
+ 	  parallel_process_termination();
+ 	}
+@@ -647,7 +611,7 @@
+ 	  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],
+ 					   (E->control.ggrd.ray+i2),&indbl2,
+ 					   FALSE,shift_to_pos_lon)){
+-	    fprintf(stderr,"ggrd_read_ray_from_file: interpolation error at %g, %g\n",
++	    fprintf(stderr,"ggrd_read_ray_from_ggrd_file: interpolation error at %g, %g\n",
+ 		    rout[1],rout[2]);
+ 	    parallel_process_termination();
+ 	  }
+@@ -679,10 +643,10 @@
+ void ggrd_read_vtop_from_file(struct All_variables *E, int is_global)
+ {
+   MPI_Status mpi_stat;
+-  int mpi_rc,interpolate,timedep,use_codes,code,assign,ontop;
++  int mpi_rc,interpolate,timedep,use_codes,code;
+   int mpi_inmsg, mpi_success_message = 1;
+-  int m,el,i,k,i1,i2,ind,nodel,j,level, verbose;
+-  int nox,noz,noy,noxl,noyl,nozl,lselect,idim,noxnoz,noxlnozl,save_codes,topnode,botnode;
++  int m,el,i,k,i1,i2,ind,nodel,j,level;
++  int noxg,nozg,noyg,noxl,noyl,nozl,lselect,idim,noxgnozg,noxlnozl,save_codes;
+   char gmt_string[10],char_dummy;
+   static int lc =0;			/* only for debugging */
+   double vin1[2],vin2[2],age,f1,f2,vscale,rout[3],cutoff,v[3],sin_theta,vx[4],
+@@ -691,31 +655,15 @@
+   static pole_warned = FALSE, mode_warned = FALSE;
+   static ggrd_boolean shift_to_pos_lon = FALSE;
+   const int dims=E->mesh.nsd;
+-  int top_proc,nfree,nfixed,use_vel,allow_internal;
++  int top_echo,nfree,nfixed,use_vel;
+ #ifdef USE_GZDIR
+   gzFile *fp1;
+ #else
+   myerror(E,"ggrd_read_vtop_from_file needs to use GZDIR (set USE_GZDIR flag) because of code output");
+ #endif
+-
+-  /* number of nodes for this processor at highest MG level */
+-  nox = E->lmesh.nox;
+-  noz = E->lmesh.noz;
+-  noy = E->lmesh.noy;
+-  noxnoz = nox*noz;
+-  
+-  if(E->mesh.toplayerbc > 0)
+-    allow_internal = TRUE;
+-  else
+-    allow_internal = FALSE;
+-
+   /* top processor check */
+-  top_proc = E->parallel.nprocz-1;
+-  /* output of warning messages */
+-  if((allow_internal && (E->parallel.me == 0))||(E->parallel.me == top_proc))
+-    verbose = TRUE;
+-  else
+-    verbose = FALSE;
++  top_echo = E->parallel.nprocz-1;
++
+   /* velocities or tractions? */
+   switch(E->mesh.topvbc){
+   case 0:
+@@ -729,12 +677,7 @@
+     break;
+   }
+ 
+-  /* 
+-     
+-     read in plate code files?  this will assign Euler vector
+-     respective velocities
+-
+-  */
++  /* read in plate code files?  */
+   use_codes = (E->control.ggrd_vtop_omega[0] > 1e-7)?(1):(0);
+   save_codes = 0;
+   if(use_codes && (!use_vel)){
+@@ -742,11 +685,14 @@
+   }
+ 
+ 
+-  if(verbose)
++  if(E->parallel.me == 0)
+     fprintf(stderr,"ggrd_read_vtop_from_file: init stage, assigning %s, mixed mode: %i\n",
+ 	    ((E->mesh.topvbc)?("velocities"):("tractions")),E->control.ggrd_allow_mixed_vbcs);
+ 	    
+-
++  /* global, top level number of nodes */
++  noxg = E->lmesh.nox;nozg=E->lmesh.noz;noyg=E->lmesh.noy;
++  noxgnozg = noxg*nozg;
++  
+   if(use_vel){
+     /* 
+        velocity scaling, assuming input is cm/yr  
+@@ -755,20 +701,20 @@
+     if(use_codes)
+       vscale *=  E->data.radius_km*1e3/1e6*1e2*M_PI/180.;		/* for deg/Myr -> cm/yr conversion */
+     if(E->parallel.me == 0)
+-      fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr, scaling factor: %g\n",vscale);
++      fprintf(stderr,"ggrd_read_vtop_from_file: expecting velocity grids in cm/yr\n, scaling factor: %g",vscale);
+   }else{
+     /* stress scale, from MPa */
+     vscale =  1e6/(E->data.ref_viscosity*E->data.therm_diff/(E->data.radius_km*E->data.radius_km*1e6));
+-    if((!mode_warned) && (verbose)){
++    if((!mode_warned) && (E->parallel.me == 0)){
+       fprintf(stderr,"ggrd_read_vtop_from_file: WARNING: make sure traction control is what you want, not free slip\n");
+       fprintf(stderr,"ggrd_read_vtop_from_file: expecting traction grids in MPa, scaling factor: %g\n",vscale);
+       mode_warned = TRUE;
+     }
+   }
+-  if (allow_internal || (E->parallel.me_loc[3] == top_proc)) { 
++  if (E->parallel.me_loc[3] == top_echo) { 
+     
+     /* 
+-       top processors for regular operations, all for internal
++       TOP PROCESSORs ONLY 
+ 
+     */
+     
+@@ -788,7 +734,7 @@
+ 	 read in grd files (only needed for top processors, really, but
+ 	 leave as is for now
+       */
+-      if(verbose)
++      if(E->parallel.me == top_echo)
+ 	fprintf(stderr,"ggrd_read_vtop_from_file: initializing ggrd velocities/tractions for %s setup\n",
+ 		is_global?("global"):("regional"));
+       if(is_global){		/* decide on GMT flag */
+@@ -850,7 +796,7 @@
+ 	snprintf(tfilename1,1000,"%s/codes.%d.gz", E->control.data_dir,E->parallel.me);
+ 	fp1 = gzdir_output_open(tfilename1,"w");
+       }
+-      if(verbose)
++      if(E->parallel.me == top_echo)
+ 	if(use_codes)
+ 	  fprintf(stderr,"ggrd_read_vtop_from_file: assigning Euler vector %g, %g, %g to plates with code %i\n",
+ 		  E->control.ggrd_vtop_omega[1],
+@@ -860,14 +806,14 @@
+ 	else
+ 	  fprintf(stderr,"ggrd_read_vtop_from_file: done with ggrd vtop BC init, %i timesteps, vp band lim max: %g\n",
+ 		  E->control.ggrd.time_hist.nvtimes,E->control.ggrd.svp->fmaxlim[0]);
+-    } /* end init part */
++    } /* end init */
+     
+     /* 
+        geographic bounds 
+     */
+     theta_max = (90-E->control.ggrd.svp[0].south)*M_PI/180-1e-5;
+     theta_min = (90-E->control.ggrd.svp[0].north)*M_PI/180+1e-5;
+-    if(verbose && is_global){
++    if((E->parallel.me == top_echo) && (is_global)){
+       fprintf(stderr,"ggrd_read_vtop_from_file: determined South/North range: %g/%g\n",
+ 	      E->control.ggrd.svp[0].south,E->control.ggrd.svp[0].north);
+     }
+@@ -885,28 +831,29 @@
+ 	  interpolate = 0;
+ 	  /* present day should be last file*/
+ 	  i1 = E->control.ggrd.time_hist.nvtimes - 1;
+-	  if(verbose)
++	  if(E->parallel.me == top_echo)
+ 	    fprintf(stderr,"ggrd_read_vtop_from_file: using present day vtop for age = %g\n",age);
+ 	}else{
+ 	  /*  */
+ 	  ggrd_interpol_time(age,&E->control.ggrd.time_hist,&i1,&i2,&f1,&f2,
+ 			     E->control.ggrd.time_hist.vstage_transition);
+ 	  interpolate = 1;
+-	  if(verbose)
++	  if(E->parallel.me == top_echo)
+ 	    fprintf(stderr,"ggrd_read_vtop_from_file: interpolating vtop for age = %g\n",age);
+ 	}
+ 	
+       }else{
+ 	interpolate = 0;		/* single timestep, use single file */
+ 	i1 = 0;
+-	if(verbose)
++	if(E->parallel.me == top_echo)
+ 	  fprintf(stderr,"ggrd_read_vtop_from_file: temporally constant velocity BC \n");
+       }
+       
+-      if(verbose)
+-	fprintf(stderr,"ggrd_read_vtop_from_file: assigning %s BC, timedep: %i time: %g\n",
+-		(use_vel)?("velocities"):("tractions"),	timedep,age);
+-      
++      if(E->parallel.me == top_echo){
++	fprintf(stderr,"ggrd_read_vtop_from_file: assigning velocities BC, timedep: %i time: %g\n",
++		timedep,age);
++
++      }
+       /* if mixed BCs are allowed, need to reassign the boundary
+ 	 condition */
+       if(E->control.ggrd_allow_mixed_vbcs){
+@@ -918,126 +865,94 @@
+ 	*/
+ 	if(use_codes)
+ 	  myerror(E,"cannot mix Euler velocities for plate codes and mixed vbcs");
+-	if(verbose)
++	if(E->parallel.me == top_echo)
+ 	  fprintf(stderr,"WARNING: allowing mixed velocity BCs\n");
++	
++	
+ 	/* velocities larger than the cutoff will be assigned as free
+ 	   slip */
+ 	cutoff = E->control.ggrd.svp->fmaxlim[0] + 1e-5;	  
+-	for(level=E->mesh.gridmax;level >= E->mesh.gridmin;level--){/* multigrid levels */
+-	  /* assign BCs to all levels */
++	for(level=E->mesh.gridmax;level>=E->mesh.gridmin;level--){/* multigrid levels */
+ 	  noxl = E->lmesh.NOX[level];
+ 	  noyl = E->lmesh.NOY[level];
+ 	  nozl = E->lmesh.NOZ[level];
+ 	  noxlnozl = noxl*nozl;
+-
+ 	  for (m=1;m <= E->sphere.caps_per_proc;m++) {
+-	    /* determine vertical nodes */
+-	    if(allow_internal){
+-	      /* internal */
+-	      /* check for internal nodes in layers */
+-	      for(k=nozl;k >= 1;k--){
+-		if(layers(E,m,k) > E->mesh.toplayerbc) /* assume regular mesh structure */
+-		  break;
+-	      }
+-	      if(k == nozl){	/*  */
+-		assign = FALSE;
+-	      }else{
+-		assign = TRUE;topnode = nozl;botnode = k+1;
+-	      }
+-	    }else{		/* just top node */
+-	      assign = TRUE;
+-	      topnode = botnode = nozl;
+-	    }
+-	    if(verbose)
+-	      fprintf(stderr,"ggrd_read_vtop_from_file: mixed: internal: %i assign: %i k: %i to %i (%i)\n",
+-		      allow_internal,assign,botnode,topnode,nozl);
+ 	    /* 
+-	       loop through all horizontal nodes and assign boundary
+-	       conditions for all required levels
++	       loop through all horizontal nodes 
+ 	    */
+-	    if(assign){
+-	      for(i=1;i <= noyl;i++){
+-		for(j=1;j <= noxl;j++) {
+-		  nodel =  nozl + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
+-		  /* node location */
+-		  rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
+-		  rout[2] = E->SX[level][m][2][nodel];
+-		  /* 
+-		     
+-		  for global grid, shift theta if too close to poles
+-		  
+-		  */
+-		  if((is_global)&&(rout[1] > theta_max)){
+-		    if(!pole_warned){
+-		      fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
+-			      rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+-		      pole_warned = TRUE;
+-		    }
+-		    rout[1] = theta_max;
++	    for(i=1;i<=noyl;i++){
++	      for(j=1;j<=noxl;j++) {
++		nodel =  j * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
++		/* node location */
++		rout[1] = E->SX[level][m][1][nodel]; /* theta,phi */
++		/* 
++
++		for global grid, shift theta if too close to poles
++		
++		*/
++		if((is_global)&&(rout[1] > theta_max)){
++		  if(!pole_warned){
++		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
++			    rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
++		    pole_warned = TRUE;
+ 		  }
+-		  if((is_global)&&(rout[1] < theta_min)){
+-		    if(!pole_warned){
+-		      fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
+-			      rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
+-		      pole_warned = TRUE;
+-		    }
+-		    rout[1] = theta_min;
++		  rout[1] = theta_max;
++		}
++		if((is_global)&&(rout[1] < theta_min)){
++		  if(!pole_warned){
++		    fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
++			    rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
++		    pole_warned = TRUE;
+ 		  }
+-		  /* find vp */
+-		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
+-						   vin1,FALSE,shift_to_pos_lon)){
+-		    fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
+-			    rout[1],rout[2]);parallel_process_termination();
++		  rout[1] = theta_min;
++		}
++		/*  */
++		rout[2] = E->SX[level][m][2][nodel];
++		/* find vp */
++		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
++						 vin1,FALSE,shift_to_pos_lon)){
++		  fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
++			  rout[1],rout[2]);
++		  parallel_process_termination();
++		}
++		if(interpolate){	/* second time */
++		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),vin2,
++						   FALSE,shift_to_pos_lon)){
++		    fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
++			    rout[1],rout[2]);
++		    parallel_process_termination();
+ 		  }
+-		  if(interpolate){	/* second time */
+-		    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),vin2,
+-						     FALSE,shift_to_pos_lon)){
+-		      fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
+-			      rout[1],rout[2]);parallel_process_termination();
+-		    }
+-		    v[2] = (f1*vin1[0] + f2*vin2[0]); /* vphi unscaled! */
++		  v[2] = (f1*vin1[0] + f2*vin2[0]); /* vphi unscaled! */
++		}else{
++		  v[2] = vin1[0]; /* vphi */
++		}
++		if(fabs(v[2]) > cutoff){
++		  /* free slip */
++		  nfree++;
++		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
++		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
++		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
++		  E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
++		}else{
++		  nfixed++;
++		  if(use_vel){
++		    /* no slip */
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBX;
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBY;
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
+ 		  }else{
+-		    v[2] = vin1[0]; /* vphi */
++		    /* prescribed tractions */
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
++		    E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
+ 		  }
+-		  /* 
+-
+-		  depth dependent factor goes here 
+-
+-		  XXX
+-		  
+-		  */
+-		  
+-		  for(k = botnode;k <= topnode;k++){
+-		    ontop = ((k==nozl) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
+-		    /* depth loop */
+-		    nodel =  k + (j-1) * nozl + (i-1)*noxlnozl; /* top node =  nozl + (j-1) * nozl + (i-1)*noxlnozl; */
+-		    if(fabs(v[2]) > cutoff){
+-		      /* free slip */
+-		      nfree++;
+-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
+-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
+-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
+-		      E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
+-		    }else{
+-		      nfixed++;
+-		      if(use_vel){
+-			/* no slip */
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBX;
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBX);
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | VBY;
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~SBY);
+-		      }else{
+-			/* prescribed tractions */
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBX);
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBX;
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] & (~VBY);
+-			E->NODE[level][m][nodel] = E->NODE[level][m][nodel] | SBY;
+-		      }
+-		    }
+-		  } /* depth loop */
+-		}	/* end x loop */
+-	      } /* end y loop */
+-	    } /* actually assign */
++		}
++	      }	/* end x loop */
++	    } /* end y loop */
++	    /* sum up all assignments */
+ 	  } /* cap */
+ 	} /* level */
+ 	fprintf(stderr,"mixed_bc: %i free %i fixed for CPU %i\n",nfree,nfixed,E->parallel.me);
+@@ -1045,156 +960,126 @@
+ 
+       /* 
+ 	 
+-      now loop through all nodes and assign velocity boundary
+-      condition values
++      now loop through all nodes and assign velocity boundary condition
++      values
+       
+       */
+-      /* scaled cutoff velocity */
+-      if(!use_codes)		/* else, is not defined */
+-	cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
+-      else{
+-	cutoff = 1e30;
+-	if(save_codes)	/* those will be surface nodes only */
+-	  gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
+-      }
+-      
+       for (m=1;m <= E->sphere.caps_per_proc;m++) {
+-	if(allow_internal){
+-	  /* check for internal nodes in layers */
+-	  for(k=noz;k >= 1;k--){
+-	    if(layers(E,m,k) > E->mesh.toplayerbc) /* assumes regular mesh structure ! */
+-	      break;
+-	  }
+-	  if(k == noz){
+-	    assign = FALSE;
+-	  }else{
+-	    assign = TRUE;topnode = noz;botnode = k+1;
+-	  }
+-	}else{		/* just top node */
+-	  assign = TRUE;
+-	  topnode = botnode = noz;
++	/* scaled cutoff velocity */
++	if(!use_codes)		/* else, is not defined */
++	  cutoff = E->control.ggrd.svp->fmaxlim[0] * vscale + 1e-5;
++	else{
++	  cutoff = 1e30;
++	  if(save_codes)	/* those will be surface nodes only */
++	    gzprintf(fp1,"%3d %7d\n",m,E->lmesh.nsf);
+ 	}
+-	if(verbose)
+-	  fprintf(stderr,"ggrd_read_vtop_from_file: internal: %i assign: %i k: %i to %i (%i)\n",
+-		  allow_internal,assign,botnode,topnode,noz);
+-	if(assign){	
+-	  for(i=1;i <= noy;i++)	{/* loop through surface nodes */
+-	    for(j=1;j <= nox;j++)    {
+-	      nodel =  noz + (j-1) * noz + (i-1)*noxnoz; /* top node =  nozg + (j-1) * nozg + (i-1)*noxgnozg; */	
+-	      /*  */
+-	      rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
+-	      rout[2] = E->sx[m][2][nodel];
+-	      /* 
+-		 
+-	      for global grid, shift theta if too close to poles
+-	      
+-	      */
+-	      if((is_global)&&(rout[1] > theta_max)){
+-		if(!pole_warned){
+-		  fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
+-			  rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
+-		  pole_warned = TRUE;
+-		}
+-		rout[1] = theta_max;
++	for(k=1;k <= noyg;k++)	{/* loop through surface nodes */
++	  for(i=1;i <= noxg;i++)    {
++	    nodel = (k-1)*noxgnozg + i * nozg;	/* top node =  nozg + (i-1) * nozg + (k-1)*noxgnozg */
++	    /*  */
++	    rout[1] = E->sx[m][1][nodel]; /* theta,phi coordinates */
++
++	    /* 
++
++	    for global grid, shift theta if too close to poles
++	    
++	    */
++	    if((is_global)&&(rout[1] > theta_max)){
++	      if(!pole_warned){
++		fprintf(stderr,"WARNING: shifting theta from %g (%g) to max theta %g (%g)\n",
++			rout[1],90-180/M_PI*rout[1],theta_max,90-180/M_PI*theta_max);
++		pole_warned = TRUE;
+ 	      }
+-	      if((is_global)&&(rout[1] < theta_min)){
+-		if(!pole_warned){
+-		  fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
+-			  rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
+-		  pole_warned = TRUE;
+-		}
+-		rout[1] = theta_min;
++	      rout[1] = theta_max;
++	    }
++	    if((is_global)&&(rout[1] < theta_min)){
++	      if(!pole_warned){
++		fprintf(stderr,"WARNING: shifting theta from %g (%g) to min theta %g (%g)\n",
++			rout[1],90-180/M_PI*rout[1],theta_min,90-180/M_PI*theta_min);
++		pole_warned = TRUE;
+ 	      }
+-	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
+-					       vin1,FALSE,shift_to_pos_lon)){
+-		fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
++	      rout[1] = theta_min;
++	    }
++	    
++
++	    rout[2] = E->sx[m][2][nodel];
++	    if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i1),
++					     vin1,FALSE,shift_to_pos_lon)){
++	      fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
++		      rout[1],rout[2]);
++	      parallel_process_termination();
++	    }
++	    if(!use_codes)
++	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
++					       (vin1+1),FALSE,shift_to_pos_lon)){
++		fprintf(stderr,"ggrd_read_vtop_from_ggrd_file: interpolation error at %g, %g\n",
+ 			rout[1],rout[2]);
+ 		parallel_process_termination();
+ 	      }
+-	      if(!use_codes)
+-		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i1),
+-						 (vin1+1),FALSE,shift_to_pos_lon)){
+-		  fprintf(stderr,"ggrd_read_vtop_from_file: interpolation error at %g, %g\n",
+-			  rout[1],rout[2]);
+-		  parallel_process_termination();
+-		}
+-	      if(interpolate){	/* second time */
+-		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,
++	    if(interpolate){	/* second time */
++	      if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svt+i2),vin2,
++					       FALSE,shift_to_pos_lon)){
++		fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
++			rout[1],rout[2]);
++		parallel_process_termination();
++	      }
++	      if(!use_codes){
++		if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),
+ 						 FALSE,shift_to_pos_lon)){
+-		  fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
++		  fprintf(stderr,"ggrd_read_mat_from_ggrd_file: interpolation error at %g, %g\n",
+ 			  rout[1],rout[2]);
+ 		  parallel_process_termination();
+ 		}
+-		if(!use_codes){
+-		  if(!ggrd_grdtrack_interpolate_tp(rout[1],rout[2],(E->control.ggrd.svp+i2),(vin2+1),
+-						   FALSE,shift_to_pos_lon)){
+-		    fprintf(stderr,"ggrd_read_mat_from_file: interpolation error at %g, %g\n",
+-			    rout[1],rout[2]);
+-		    parallel_process_termination();
+-		  }
+-		  v[1] = (f1*vin1[0] + f2*vin2[0])*vscale; /* theta */
+-		  v[2] = (f1*vin1[1] + f2*vin2[1])*vscale; /* phi */
+-		}else{
+-		  v[1] = (f1*vin1[0] + f2*vin2[0]); /* theta */
+-		}
++		v[1] = (f1*vin1[0] + f2*vin2[0])*vscale; /* theta */
++		v[2] = (f1*vin1[1] + f2*vin2[1])*vscale; /* phi */
+ 	      }else{
+-		if(!use_codes){
+-		  v[1] = vin1[0]*vscale; /* theta */
+-		  v[2] = vin1[1]*vscale; /* phi */
+-		}else{
+-		  v[1] = vin1[0];	/* theta */
+-		}
++		v[1] = (f1*vin1[0] + f2*vin2[0]); /* theta */
+ 	      }
+-	      
+-	      /* 
+-		 
+-	      depth dependent factor goes here 
+-	      
+-	      XXX
+-	      
+-	      */
+-	      for(k = botnode;k <= topnode;k++){
+-		ontop = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(TRUE):(FALSE);
+-		nodel = k + (j-1) * noz + (i-1)*noxnoz ; /*  node =  k + (j-1) * nozg + (i-1)*noxgnozg; */	
+-		if(use_codes){
+-		  /* find code from v[1], theta */
+-		  code = (int)(v[1] + 0.5);
+-		  if(save_codes)	/* lon lat code */
+-		    gzprintf(fp1, "%9.4f %9.4f %i\n",rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
+-		  if((int)E->control.ggrd_vtop_omega[0] == code){
+-		    /* within plate */
+-		    sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
+-		    sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
+-		    /* compute spherical velocities in cm/yr at this
+-		       location, assuming rotation pole is in deg/Myr */
+-		    vx[1]=E->control.ggrd_vtop_omega[2]*E->x[m][3][nodel] - E->control.ggrd_vtop_omega[3]*E->x[m][2][nodel]; 
+-		    vx[2]=E->control.ggrd_vtop_omega[3]*E->x[m][1][nodel] - E->control.ggrd_vtop_omega[1]*E->x[m][3][nodel]; 
+-		    vx[3]=E->control.ggrd_vtop_omega[1]*E->x[m][2][nodel] - E->control.ggrd_vtop_omega[2]*E->x[m][1][nodel]; 
+-		    /*  */
+-		    v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
+-		    v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phie */
+-		    /* scale */
+-		    v[1] *= vscale;v[2] *= vscale;
+-		  }else{
+-		    v[1] = v[2] = 0.0;
+-		  }
+-		}
+-		/* assign velociites */
+-		if(fabs(v[2]) > cutoff){
+-		  /* huge velocitie - free slip */
+-		  E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
+-		  E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
+-		}else{
+-		  /* regular no slip , assign velocities/tractuibs as BCs */
+-		  E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
+-		  E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
+-		}
+-		if(use_vel && ontop)
+-		  E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
+-	      }	/* end z */
+-	    } /* end x */
+-	  } /* end y */
+-	} /* end assign */
++	    }else{
++	      if(!use_codes){
++		v[1] = vin1[0]*vscale; /* theta */
++		v[2] = vin1[1]*vscale; /* phi */
++	      }else{
++		v[1] = vin1[0];	/* theta */
++	      }
++	    }
++	    if(use_codes){
++	      /* find code from v[1], theta */
++	      code = (int)(v[1] + 0.5);
++	      if(save_codes)	/* lon lat code */
++		gzprintf(fp1, "%9.4f %9.4f %i\n",
++			 rout[2]/M_PI*180,90-rout[1]*180/M_PI,code);
++	      if((int)E->control.ggrd_vtop_omega[0] == code){
++		/* within plate */
++		sin_theta=sin(rout[1]);cos_theta=cos(rout[1]);
++		sin_phi  =sin(rout[2]);cos_phi=  cos(rout[2]);
++  		/* compute spherical velocities in cm/yr at this
++		   location, assuming rotation pole is in deg/Myr */
++		vx[1]=E->control.ggrd_vtop_omega[2]*E->x[m][3][nodel] - E->control.ggrd_vtop_omega[3]*E->x[m][2][nodel]; 
++		vx[2]=E->control.ggrd_vtop_omega[3]*E->x[m][1][nodel] - E->control.ggrd_vtop_omega[1]*E->x[m][3][nodel]; 
++		vx[3]=E->control.ggrd_vtop_omega[1]*E->x[m][2][nodel] - E->control.ggrd_vtop_omega[2]*E->x[m][1][nodel]; 
++		/*  */
++		v[1]= cos_theta*cos_phi*vx[1] + cos_theta*sin_phi*vx[2] - sin_theta*vx[3]; /* theta */
++		v[2]=-          sin_phi*vx[1] +           cos_phi*vx[2]; /* phie */
++		/* scale */
++		v[1] *= vscale;v[2] *= vscale;
++	      }else{
++		v[1] = v[2] = 0.0;
++	      }
++	    }
++	    /* assign velociites */
++	    if(fabs(v[2]) > cutoff){
++	      /* huge velocitie - free slip */
++	      E->sphere.cap[m].VB[1][nodel] = 0;	/* theta */
++	      E->sphere.cap[m].VB[2][nodel] = 0;	/* phi */
++	    }else{
++	      /* regular no slip , assign velocities/tractuibs as BCs */
++	      E->sphere.cap[m].VB[1][nodel] = v[1];	/* theta */
++	      E->sphere.cap[m].VB[2][nodel] = v[2];	/* phi */
++	    }
++	    E->sphere.cap[m].VB[3][nodel] = 0.0; /* r */
++	  }
++	}	/* end surface node loop */
+       } /* end cap loop */
+       
+       if((!timedep)&&(!E->control.ggrd.vtop_control_init)){			/* forget the grids */
+@@ -1207,9 +1092,7 @@
+       gzclose(fp1);
+     }
+   } /* end top proc branch */
+-
+-  /*  */
+-  E->control.ggrd.vtop_control_init = TRUE;
++  E->control.ggrd.vtop_control_init = 1;
+   //if(E->parallel.me == 0)
+   //fprintf(stderr,"vtop from grd done: %i\n",lc++);
+ }
+Index: lib/Full_boundary_conditions.c
+===================================================================
+--- lib/Full_boundary_conditions.c	(revision 16400)
++++ lib/Full_boundary_conditions.c	(working copy)
+@@ -30,13 +30,10 @@
+ #include <math.h>
+ 
+ #include "lith_age.h"
+-#ifdef USE_GGRD
+-#include "ggrd_handling.h"
+-#endif
++
+ /* ========================================== */
+ 
+-void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+-void assign_internal_bc(struct All_variables *,int );
++static void horizontal_bc();
+ static void velocity_apply_periodic_bcs();
+ static void temperature_apply_periodic_bcs();
+ void read_temperature_boundary_from_file(struct All_variables *);
+@@ -52,11 +49,11 @@
+ 
+   void apply_side_sbc();
+ 
+-  int j,noz,lv,k,node;
++  int j,noz,lv;
+ 
+   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
+     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+-      noz = E->lmesh.NOZ[lv];
++      noz = E->mesh.NOZ[lv];
+       if(E->mesh.topvbc != 1) {	/* free slip top */
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,0.0,VBX,0,lv,j);
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,VBZ,1,lv,j);
+@@ -64,6 +61,11 @@
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
++#ifdef USE_GGRD
++	/* Ggrd traction control */
++	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
++	  ggrd_read_vtop_from_file(E, 1);
++#endif
+       }
+       if(E->mesh.botvbc != 1) {	/* free slip bottom */
+         horizontal_bc(E,E->sphere.cap[j].VB,1,1,0.0,VBX,0,lv,j);
+@@ -116,17 +118,7 @@
+ 
+   /* If any imposed internal velocity structure it goes here */
+ 
+-      
+-      /*
+-	apply stress or velocity boundary conditions, read from file
+-	settings are to be implemented in those routines (will only do
+-	anything at present, if E->mesh.toplayerbc > 0
+-      */
+-      assign_internal_bc(E,1);
+-#ifdef USE_GGRD	
+-      if(E->control.ggrd.vtop_control) /* assign stress or velocity BCs */
+-	ggrd_read_vtop_from_file(E,1);
+-#endif
++
+    return; }
+ 
+ /* ========================================== */
+@@ -140,7 +132,7 @@
+ 
+   lev = E->mesh.levmax;
+   for (j=1;j<=E->sphere.caps_per_proc;j++)    {
+-    noz = E->lmesh.noz;
++    noz = E->mesh.noz;
+     if(E->mesh.toptbc == 1)    {
+       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,TBZ,1,lev,j);
+       horizontal_bc(E,E->sphere.cap[j].TB,noz,3,E->control.TBCtopval,FBZ,0,lev,j);
+@@ -181,6 +173,57 @@
+ /*  =========================================================  */
+ 
+ 
++static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
++     struct All_variables *E;
++     float *BC[];
++     int ROW;
++     int dirn;
++     float value;
++     unsigned int mask;
++     char onoff;
++     int level,m;
++
++{
++  int i,j,node,rowl;
++
++    /* safety feature */
++  if(dirn > E->mesh.nsd)
++     return;
++
++  if (ROW==1)
++      rowl = 1;
++  else
++      rowl = E->lmesh.NOZ[level];
++
++  if ( ( (ROW==1) && (E->parallel.me_loc[3]==0) ) ||
++       ( (ROW==E->mesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
++
++    /* turn bc marker to zero */
++    if (onoff == 0)          {
++      for(j=1;j<=E->lmesh.NOY[level];j++)
++    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
++    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
++    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
++    	  }        /* end for loop i & j */
++      }
++
++    /* turn bc marker to one */
++    else        {
++      for(j=1;j<=E->lmesh.NOY[level];j++)
++        for(i=1;i<=E->lmesh.NOX[level];i++)       {
++    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
++    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
++    	  if(level==E->mesh.levmax)   /* NB */
++    	    BC[dirn][node] = value;
++    	  }     /* end for loop i & j */
++      }
++
++    }             /* end for if ROW */
++
++  return;
++}
++
++
+ static void velocity_apply_periodic_bcs(E)
+     struct All_variables *E;
+ {
+@@ -199,8 +242,6 @@
+ 
+ 
+ 
+-
+-
+ /* version */
+ /* $Id$ */
+ 
+Index: lib/ggrd_handling.h
+===================================================================
+--- lib/ggrd_handling.h	(revision 16400)
++++ lib/ggrd_handling.h	(working copy)
+@@ -39,7 +39,7 @@
+ void ggrd_temp_init_general(struct All_variables *,int);
+ void ggrd_read_mat_from_file(struct All_variables *, int );
+ void ggrd_read_ray_from_file(struct All_variables *, int );
+-void ggrd_read_vtop_from_file(struct All_variables *, int);
++void ggrd_read_vtop_from_file(struct All_variables *, int );
+ void ggrd_read_age_from_file(struct All_variables *, int );
+ void xyz2rtp(float ,float ,float ,float *);
+ void xyz2rtpd(float ,float ,float ,double *);
+Index: lib/Full_read_input_from_files.c
+===================================================================
+--- lib/Full_read_input_from_files.c	(revision 16400)
++++ lib/Full_read_input_from_files.c	(working copy)
+@@ -222,7 +222,9 @@
+ 
+       case 1:  /* velocity boundary conditions */
+ #ifdef USE_GGRD
+-	if(!E->control.ggrd.vtop_control){ /* grd control is called from boundary conditions subroutine */
++	if(E->control.ggrd.vtop_control){
++	  ggrd_read_vtop_from_file(E, 1);
++	}else{
+ #endif
+ 	nnn=nox*noy;
+ 	for(i=1;i<=dims;i++)  {
+Index: lib/BC_util.c
+===================================================================
+--- lib/BC_util.c	(revision 16400)
++++ lib/BC_util.c	(working copy)
+@@ -27,120 +27,8 @@
+  */
+ 
+ #include "global_defs.h"
+-void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+-void internal_horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+-void myerror(struct All_variables *,char *);
+-int layers(struct All_variables *,int,int);
+ 
+-/* 
+ 
+-assign boundary conditions to a horizontal layer of nodes on top and
+-bottom, only applying to those processors
+-
+-*/
+-void horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
+-     struct All_variables *E;
+-     float *BC[];
+-     int row;
+-     int dirn;
+-     float value;
+-     unsigned int mask;
+-     char onoff;
+-     int level,m;
+-
+-{
+-  int i,j,node,noxnoz;
+-    /* safety feature */
+-  if(dirn > E->mesh.nsd)
+-     return;
+-  
+-  noxnoz = E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+- 
+-  /* regular operation, assign only if in top
+-     (row==E->lmesh.NOZ[level]) or bottom (row==1) processor  */
+-  
+-  if ( ( (row==1) && (E->parallel.me_loc[3]==0) ) || /* bottom or top */
+-       ( (row==E->lmesh.NOZ[level]) && (E->parallel.me_loc[3]==E->parallel.nprocz-1) ) ) {
+-    
+-    /* turn bc marker to zero */
+-    if (onoff == 0)          {
+-      for(j=1;j<=E->lmesh.NOY[level];j++)
+-	for(i=1;i<=E->lmesh.NOX[level];i++)     {
+-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+-	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+-	}        /* end for loop i & j */
+-    }
+-    
+-    /* turn bc marker to one */
+-    else        {
+-      for(j=1;j<=E->lmesh.NOY[level];j++)
+-	for(i=1;i<=E->lmesh.NOX[level];i++)       {
+-	  node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+-	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+-	  if(level==E->mesh.levmax)   /* NB */
+-	    BC[dirn][node] = value;
+-	}     /* end for loop i & j */
+-    }
+-    
+-  }             /* end for if row */
+-  return;}
+-
+-
+-
+-/* 
+-
+-assign boundary conditions to a horizontal layer of nodes within mesh,
+-without consideration of being in top or bottom processor
+-
+-*/
+-void internal_horizontal_bc(E,BC,row,dirn,value,mask,onoff,level,m)
+-     struct All_variables *E;
+-     float *BC[];
+-     int row;
+-     int dirn;
+-     float value;
+-     unsigned int mask;
+-     char onoff;
+-     int level,m;
+-
+-{
+-  int i,j,node,noxnoz;
+-  /* safety feature */
+-  if(dirn > E->mesh.nsd)
+-     return;
+-  
+-  noxnoz = E->lmesh.NOX[level]*E->lmesh.NOZ[level];
+- 
+-  /* 
+-     assignment to any row, any processor
+-  */
+- 
+-  if((row >  E->lmesh.NOZ[level])||(row < 1))
+-    myerror(E,"internal_horizontal_bc: error, row out of bounds");
+-  
+-  /* turn bc marker to zero */
+-  if (onoff == 0)          {
+-    for(j=1;j<=E->lmesh.NOY[level];j++)
+-      for(i=1;i<=E->lmesh.NOX[level];i++)     {
+-	node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+-	E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
+-      }        /* end for loop i & j */
+-  }else        {
+-    /* turn bc marker to one */
+-    for(j=1;j<=E->lmesh.NOY[level];j++)
+-      for(i=1;i<=E->lmesh.NOX[level];i++)       {
+-	node = row+(i-1)*E->lmesh.NOZ[level]+(j-1)*noxnoz;
+-	E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
+-	if(level == E->mesh.levmax)   /* NB */
+-	  BC[dirn][node] = value;
+-      }     /* end for loop i & j */
+-  }
+-
+-
+-  return;
+-}
+-
+-
+ void strip_bcs_from_residual(E,Res,level)
+     struct All_variables *E;
+     double **Res;
+@@ -248,75 +136,6 @@
+     return;
+ }
+ 
+-/* 
+ 
+-facility to apply internal velocity or stress conditions after
+-top/bottom
+-
+-options:
+-
+-toplayerbc  > 0: assign surface BC down to toplayerbc nd
+-toplayerbc == 0: no action
+-
+- */
+-void assign_internal_bc(struct All_variables *E,int is_global)
+-{
+-  
+-  int lv, j, noz, k,lay,ncount,ontop,onbottom;
+-  /* stress or vel BC within a layer */
+-  ncount = 0;
+-
+-  if(E->mesh.toplayerbc > 0){
+-    for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
+-      for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+-	noz = E->lmesh.NOZ[lv];
+-	/* we're looping through all nodes for the possibility that
+-	   there are several internal processors which need BCs */
+-	for(k=noz;k >= 1;k--){ /* assumes regular grid */
+-	  ontop    = ((k==noz) && (E->parallel.me_loc[3]==E->parallel.nprocz-1))?(1):(0);
+-	  onbottom = ((k==1) && (E->parallel.me_loc[3]==0))?(1):(0);
+-	  /* node number is k, assuming no dependence on x and y  */
+-	  if((lay = layers(E,j,k)) <= E->mesh.toplayerbc){
+-	    
+-	    if((!ontop)&&(!onbottom))
+-	      ncount++;		/* not in top or bottom */
+-	    if(E->mesh.topvbc != 1) {	/* free slip */
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,VBX,0,lv,j);
+-	      if(ontop || onbottom)
+-		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,VBY,0,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,SBX,1,lv,j);
+-	      if(ontop || onbottom)
+-		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,SBY,1,lv,j);
+-	    }else{		/* no slip */
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,E->control.VBXtopval,VBX,1,lv,j);
+-	      if(ontop || onbottom)
+-		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,VBZ,1,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,E->control.VBYtopval,VBY,1,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,1,0.0,                 SBX,0,lv,j);
+-	      if(ontop || onbottom)
+-		internal_horizontal_bc(E,E->sphere.cap[j].VB,k,3,0.0,SBZ,0,lv,j);
+-	      internal_horizontal_bc(E,E->sphere.cap[j].VB,k,2,0.0,                 SBY,0,lv,j);
+-	    }
+-	  }
+-	}
+-      }
+-    /* read in velocities/stresses from grd file? */
+-#ifdef USE_GGRD
+-    if(E->control.ggrd.vtop_control)
+-      ggrd_read_vtop_from_file(E, is_global, 1);
+-#endif
+-  } /* end toplayerbc > 0 branch */
+-  
+-  if(ncount)
+-    fprintf(stderr,"assign_internal_bc: CPU %4i (%s): WARNING: assigned internal %s BCs to %6i nodes\n",
+-	    E->parallel.me,((E->parallel.me_loc[3]==0)&&(E->parallel.nprocz!=1))?("bottom"):
+-	    ((E->parallel.me_loc[3]==E->parallel.nprocz-1)?("top"):("interior")),
+-	    (E->mesh.topvbc!=1)?("stress"):("velocity"),ncount);
+-}
+-
+-
+-
+ /* End of file  */
+ 
+Index: lib/Regional_boundary_conditions.c
+===================================================================
+--- lib/Regional_boundary_conditions.c	(revision 16400)
++++ lib/Regional_boundary_conditions.c	(working copy)
+@@ -30,13 +30,10 @@
+ #include <math.h>
+ 
+ #include "lith_age.h"
+-#ifdef USE_GGRD
+-#include "ggrd_handling.h"
+-#endif
+ 
+ /* ========================================== */
+-void horizontal_bc(struct All_variables *,float *[],int,int,float,unsigned int,char,int,int);
+-void assign_internal_bc(struct All_variables * ,int);
++
++static void horizontal_bc();
+ static void velocity_apply_periodic_bcs();
+ static void temperature_apply_periodic_bcs();
+ static void velocity_refl_vert_bc();
+@@ -53,7 +50,7 @@
+   void renew_top_velocity_boundary();
+   void apply_side_sbc();
+ 
+-  int node,d,j,noz,lv,k;
++  int node,d,j,noz,lv;
+ 
+   for(lv=E->mesh.gridmax;lv>=E->mesh.gridmin;lv--)
+     for (j=1;j<=E->sphere.caps_per_proc;j++)     {
+@@ -66,6 +63,11 @@
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,SBX,1,lv,j);
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,3,0.0,SBZ,0,lv,j);
+ 	horizontal_bc(E,E->sphere.cap[j].VB,noz,2,E->control.VBYtopval,SBY,1,lv,j);
++#ifdef USE_GGRD
++	/* Ggrd traction control */
++	if((lv==E->mesh.gridmax) && E->control.ggrd.vtop_control)
++	  ggrd_read_vtop_from_file(E, 0);
++#endif
+       }
+       else if(E->mesh.topvbc == 1) {
+         horizontal_bc(E,E->sphere.cap[j].VB,noz,1,E->control.VBXtopval,VBX,1,lv,j);
+@@ -114,21 +116,7 @@
+ 
+       if(E->control.side_sbcs)
+ 	apply_side_sbc(E);
+-      /*  */
+-      /* 
+-	 
+-      apply stress or velocity boundary conditions, read from file
+-      settings are to be implemented in those routines (will only do
+-      anything at present, if E->mesh.toplayerbc > 0
+ 
+-      */
+-      assign_internal_bc(E,0);
+-#ifdef USE_GGRD	
+-      if(E->control.ggrd.vtop_control)
+-	ggrd_read_vtop_from_file(E,0);
+-#endif
+-
+-
+       if(E->control.verbose) {
+ 	for (j=1;j<=E->sphere.caps_per_proc;j++)
+ 	  for (node=1;node<=E->lmesh.nno;node++)
+@@ -390,6 +378,61 @@
+ }
+ 
+ 
++/*  =========================================================  */
++
++
++static void horizontal_bc(E,BC,ROW,dirn,value,mask,onoff,level,m)
++     struct All_variables *E;
++     float *BC[];
++     int ROW;
++     int dirn;
++     float value;
++     unsigned int mask;
++     char onoff;
++     int level,m;
++
++{
++  int i,j,node,rowl;
++
++    /* safety feature */
++  if(dirn > E->mesh.nsd)
++     return;
++
++  if (ROW==1)
++      rowl = 1;
++  else
++      rowl = E->lmesh.NOZ[level];
++
++  if ( (ROW==1 && E->parallel.me_loc[3]==0) ||
++       (ROW==E->lmesh.NOZ[level] && E->parallel.me_loc[3]==E->parallel.nprocz-1) ) {
++
++    /* turn bc marker to zero */
++    if (onoff == 0)          {
++      for(j=1;j<=E->lmesh.NOY[level];j++)
++    	for(i=1;i<=E->lmesh.NOX[level];i++)     {
++    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
++    	  E->NODE[level][m][node] = E->NODE[level][m][node] & (~ mask);
++    	  }        /* end for loop i & j */
++      }
++
++    /* turn bc marker to one */
++    else        {
++      for(j=1;j<=E->lmesh.NOY[level];j++)
++        for(i=1;i<=E->lmesh.NOX[level];i++)       {
++    	  node = rowl+(i-1)*E->lmesh.NOZ[level]+(j-1)*E->lmesh.NOX[level]*E->lmesh.NOZ[level];
++    	  E->NODE[level][m][node] = E->NODE[level][m][node] | (mask);
++
++    	  if(level==E->mesh.levmax)   /* NB */
++    	    BC[dirn][node] = value;
++    	  }     /* end for loop i & j */
++      }
++
++    }             /* end for if ROW */
++
++  return;
++}
++
++
+ static void velocity_apply_periodic_bcs(E)
+     struct All_variables *E;
+ {
+@@ -414,7 +457,6 @@
+ 
+ 
+ 
+-
+ /* version */
+ /* $Id$ */
+ 
+Index: lib/Topo_gravity.c
+===================================================================
+--- lib/Topo_gravity.c	(revision 16400)
++++ lib/Topo_gravity.c	(working copy)
+@@ -450,27 +450,19 @@
+ {
+   int m, i, j, k, n, d;
+   const unsigned sbc_flag[4] = {0, SBX, SBY, SBZ};
+-  /* 
+-     stress tensor is sorted like so: 1: xx 2: yy 3: zz 4: xy 5: xz 6: yz 
+-                                         tt    pp    rr    tp    tr    pr 
+-  */
+-  const int stress_index[4][4] = { {0, 0, 0, 0}, /* traction to stress tensor conversion */
+-                                   {0, 1, 4, 5}, /* N-S sides,  xx xy xz */
+-                                   {0, 4, 2, 6}, /* E-W sides   yx yy yz */
+-                                   {0, 5, 6, 3} }; /* U-D sides zx zy zz */
++  const int stress_index[4][4] = { {0, 0, 0, 0},
++                                   {0, 1, 4, 5}, /* N-S sides */
++                                   {0, 4, 2, 6}, /* E-W sides */
++                                   {0, 5, 6, 3} }; /* U-D sides */
+ 
+-  int noxnoz;
++  if(E->control.side_sbcs) {
+ 
+-  noxnoz = E->lmesh.nox*E->lmesh.noz;
+-
+-  if(E->control.side_sbcs) {	/* side boundary conditions */
+-
+     for(m=1; m<=E->sphere.caps_per_proc; m++)
+       for(i=1; i<=E->lmesh.noy; i++)
+         for(j=1; j<=E->lmesh.nox; j++)
+           for(k=1; k<=E->lmesh.noz; k++) {
+ 
+-            n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
++            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
+ 
+             for(d=1; d<=E->mesh.nsd; d++)
+ 
+@@ -491,43 +483,22 @@
+           }
+ 
+   } else {
+-    /* 
+-       regular case 
+ 
+-    */
+-    if(E->mesh.toplayerbc > 0){
+-      /* internal BCs */
+-      for(m=1; m<=E->sphere.caps_per_proc; m++)
+-	for(i=1; i<=E->lmesh.noy; i++)
+-	  for(j=1; j<=E->lmesh.nox; j++)
+-	    for(k=1; k<=E->lmesh.noz; k++) {
+-	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
+-	      for(d=1; d<=E->mesh.nsd; d++)
+-		if(E->node[m][n] & sbc_flag[d]) {
+-		  /* apply internal traction vector on horizontal surface */
+-		  if(layers(E,m,n) <= E->mesh.toplayerbc)
+-		    E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+-		}
+-	    }
+-
+-    }else{
+-      /* default */
+-      for(m=1; m<=E->sphere.caps_per_proc; m++)
+-	for(i=1; i<=E->lmesh.noy; i++)
+-	  for(j=1; j<=E->lmesh.nox; j++)
+-	    for(k=1; k<=E->lmesh.noz; k++) {
+-	      n = k+(j-1)*E->lmesh.noz+(i-1)*noxnoz;
+-	      for(d=1; d<=E->mesh.nsd; d++)
+-		if(E->node[m][n] & sbc_flag[d]) {
+-		  if(i==1 || i==E->lmesh.noy)
+-		    E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
+-		  if(j==1 || j==E->lmesh.nox)
+-		    E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
+-		  if(k==1 || k==E->lmesh.noz)
+-		    E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
+-		}
+-	    }
+-    }
++    for(m=1; m<=E->sphere.caps_per_proc; m++)
++      for(i=1; i<=E->lmesh.noy; i++)
++        for(j=1; j<=E->lmesh.nox; j++)
++          for(k=1; k<=E->lmesh.noz; k++) {
++            n = k+(j-1)*E->lmesh.noz+(i-1)*E->lmesh.nox*E->lmesh.noz;
++            for(d=1; d<=E->mesh.nsd; d++)
++              if(E->node[m][n] & sbc_flag[d]) {
++                if(i==1 || i==E->lmesh.noy)
++                  E->gstress[m][(n-1)*6+stress_index[d][2]] = E->sphere.cap[m].VB[d][n];
++                if(j==1 || j==E->lmesh.nox)
++                  E->gstress[m][(n-1)*6+stress_index[d][1]] = E->sphere.cap[m].VB[d][n];
++                if(k==1 || k==E->lmesh.noz)
++                  E->gstress[m][(n-1)*6+stress_index[d][3]] = E->sphere.cap[m].VB[d][n];
++              }
++          }
+   }
+ }
+ 
+@@ -566,9 +537,9 @@
+     for(m=1;m<=E->sphere.caps_per_proc;m++)
+         TT[m] = (float *) malloc ((E->lmesh.nsf+1)*sizeof(float));
+ 
+-    /* cos coeff */
+-    geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
+     /* sin coeff */
++    geoid[0] = (float*)malloc(E->sphere.hindice*sizeof(float));
++    /* cos coeff */
+     geoid[1] = (float*)malloc(E->sphere.hindice*sizeof(float));
+ 
+     /* reset arrays */

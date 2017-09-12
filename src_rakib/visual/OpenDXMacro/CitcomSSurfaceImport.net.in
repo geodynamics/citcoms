@@ -1,0 +1,116 @@
+//
+// time: Wed Sep 22 09:57:49 2004
+//
+// version: 3.2.0 (format), 4.3.2 (DX)
+//
+//
+//
+// macro reference (indirect): RTFtoXYZ2D @dxmacrodir@/RTFtoXYZ2D.net
+//
+// macro reference (direct): CitcomSSurfaceHeatflux @dxmacrodir@/CitcomSSurfaceHeatflux.net
+include "CitcomSSurfaceHeatflux.net"
+//
+// macro reference (direct): CitcomSSurfaceTopo @dxmacrodir@/CitcomSSurfaceTopo.net
+include "CitcomSSurfaceTopo.net"
+//
+// macro reference (indirect): VelocityRTFtoXYZ2D @dxmacrodir@/VelocityRTFtoXYZ2D.net
+//
+// macro reference (direct): CitcomSSurfaceVelocity @dxmacrodir@/CitcomSSurfaceVelocity.net
+include "CitcomSSurfaceVelocity.net"
+//
+// Begin MDF
+// MODULE CitcomSSurfaceImport
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT input_1; string; (no default);  
+// INPUT input_2; scalar list or vector list; (no default);  
+// OUTPUT output_1; field;  
+// OUTPUT output_2; field;  
+// OUTPUT output_3; field;  
+// End MDF
+// workspace: width = 500, height = 400
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSSurfaceImport(
+ input_1
+,input_2
+) -> (
+ output_1
+,output_2
+,output_3
+) {
+    // 
+    // node Input[27]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'input_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+CitcomSSurfaceImport_Input_27_out_1 = input_1;
+    // 
+    // node Import[3]: x = 244, y = 80, inputs = 6, label = Import
+    //
+CitcomSSurfaceImport_Import_3_out_1 = 
+    Import(
+    CitcomSSurfaceImport_Input_27_out_1,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+    ) [instance: 3, cache: 1];
+    // 
+    // node Input[28]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 2, name = 'input_2', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+CitcomSSurfaceImport_Input_28_out_1 = input_2;
+    // 
+    // node Reduce[5]: x = 349, y = 87, inputs = 2, label = Reduce
+    //
+CitcomSSurfaceImport_Reduce_5_out_1 = 
+    Reduce(
+    CitcomSSurfaceImport_Import_3_out_1,
+    CitcomSSurfaceImport_Input_28_out_1
+    ) [instance: 5, cache: 1];
+    // 
+    // node CitcomSSurfaceHeatflux[1]: x = 159, y = 215, inputs = 1, label = CitcomSSurfaceHeatflux
+    //
+CitcomSSurfaceImport_CitcomSSurfaceHeatflux_1_out_1 = 
+    CitcomSSurfaceHeatflux(
+    CitcomSSurfaceImport_Reduce_5_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node CitcomSSurfaceTopo[1]: x = 0, y = 218, inputs = 1, label = CitcomSSurfaceTopo
+    //
+CitcomSSurfaceImport_CitcomSSurfaceTopo_1_out_1 = 
+    CitcomSSurfaceTopo(
+    CitcomSSurfaceImport_Reduce_5_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node CitcomSSurfaceVelocity[1]: x = 346, y = 217, inputs = 1, label = CitcomSSurfaceVelocity
+    //
+CitcomSSurfaceImport_CitcomSSurfaceVelocity_1_out_1 = 
+    CitcomSSurfaceVelocity(
+    CitcomSSurfaceImport_Reduce_5_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node Output[22]: x = 0, y = 298, inputs = 1, label = Output
+    // parameter: position = 1, name = 'output_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_1 = CitcomSSurfaceImport_CitcomSSurfaceTopo_1_out_1;
+    // 
+    // node Output[23]: x = 0, y = 298, inputs = 1, label = Output
+    // parameter: position = 2, name = 'output_2', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_2 = CitcomSSurfaceImport_CitcomSSurfaceHeatflux_1_out_1;
+    // 
+    // node Output[24]: x = 0, y = 298, inputs = 1, label = Output
+    // parameter: position = 3, name = 'output_3', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_3 = CitcomSSurfaceImport_CitcomSSurfaceVelocity_1_out_1;
+// network: end of macro body
+}
+CitcomSSurfaceImport_Input_27_out_1 = NULL;
+CitcomSSurfaceImport_Import_3_out_1 = NULL;
+CitcomSSurfaceImport_Input_28_out_1 = NULL;
+CitcomSSurfaceImport_Reduce_5_out_1 = NULL;
+CitcomSSurfaceImport_CitcomSSurfaceHeatflux_1_out_1 = NULL;
+CitcomSSurfaceImport_CitcomSSurfaceTopo_1_out_1 = NULL;
+CitcomSSurfaceImport_CitcomSSurfaceVelocity_1_out_1 = NULL;
