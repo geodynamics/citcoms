@@ -2,12 +2,68 @@
 INSTALL
 -------
 
-To install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake,py
+To install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake.py
+
+Example inputs and output are provided in inputeg/
+
+This example is a good one to try and run first: src/examples/Full
+
+You will need to setup your job submission script.  See a slurm example in jobsubmit/
 
 
 ---------------------------------
 Dan's work in progress below here
 ---------------------------------
+
+Rakib's code - sent to me by Sabin (12/09/17) CitcomSModDtopoRelease_Rakib.zip
+
+Differences with Rakib
+----------------------
+Advection_diffusion.c
+  -- scaled visc and adiabatic heating by Di
+     I gave him this code originally, so can include it
+convection_variables.h
+  -- blob_profile, silo parameters, mantle_temp_adiabatic_increase
+global_defs.h
+  -- Shell-output facility
+Initial_temperature.c
+  -- bunch of silo / blob related functions
+     evidentally seeding plumes for the IC
+Material_properties.c
+  -- refstate updates.  I gave him this code so have it (notably Di depth dependent)
+Output.c
+  -- outputs of shells (theta, phi, r, temperature, vr)
+Output_vtk.c
+  -- perhaps not related to Rakib's work
+Viscosity_structures.c
+  -- some new viscosity structures
+ 
+
+
+New code features so far
+------------------------
+
+Implemented:
+  -- slab and lithosphere assimilation (grep for 'DJB SLAB')
+        lith_age_depth_function
+        lith_age_exponent
+        lith_age_min
+        lith_age_stencil_value
+        slab_assim
+        slab_assim_file
+        sten_temp output
+  -- composition (grep for 'DJB COMP')
+        hybrid_method
+        increased memory for tracer arrays
+
+Not implemented (yet):
+  -- internal velocity bcs (I don't think these are used by anyone anyway)
+  -- outputs of heating terms, divv
+  -- tracer density for elements and nodes output
+  -- buoyancy restart for dynamic topography
+  -- time exit routine (possibly originally added by Nico?)
+  -- viscosity structures
+  -- composition and temperature spherical harmonics
 
 Legacy code
 -----------
@@ -30,7 +86,7 @@ Pan_problem.c -> dyn topo
 Problem_related.c -> ivels
 Regional_bcs.c -> ivels
 Regional_lith_age_read_files -> done
-Regoomnal_read_input_files -> ivels
+Regional_read_input_files -> ivels
 Regional_solver -> done
 solver.h -> done
 Stokes_flow_incom -> divv calculation for output

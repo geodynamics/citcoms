@@ -14,13 +14,16 @@
 
 ## ntasks is the number of MPI tasks
 
-#SBATCH --nodes=4
+## I prefer to set nodes and then tasks per node to have greater control
+## over how the job is distributed.  In this case, I can run a global model
+## on one physical node using 12 cores
+
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=12
 ##SBATCH --ntasks=12
 
 #### Your shell commands below this line ####
 module load openmpi/1.10.2-intel
-srun --mpi=pmi2 /home/ubelix/csh/bower/mc/CitcomS/CitcomS-3.3.1-assim/bin/CitcomSFull ./input.sample
-## --solver.datadir=/home/ubelix/csh/bower/mc/CitcomS/examples/Cookbook1/data/%RANK
+srun --mpi=pmi2 /home/ubelix/csh/bower/mc/CitcomS/citcoms_assim/src/bin/CitcomSFull ./input.sample
 
 #srun echo Hello World
