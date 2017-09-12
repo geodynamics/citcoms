@@ -1,0 +1,38 @@
+-------
+INSTALL
+-------
+
+To install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake,py
+
+
+---------------------------------
+Dan's work in progress below here
+---------------------------------
+
+Legacy code
+-----------
+
+Adv_diff -> done
+BC_util -> ivels
+Composition_related.c -> tracer density
+composition_related.h -> tracer density
+Convection.c -> done
+Element_calculations -> buoy restart for dyn topo
+Full_boundary_conditions -> ivels
+Full_lith_age_read_files -> done
+Full_read_input_from_file -> ivels
+Full_solver.c -> done
+global_defs.h -> dyn topo restarts, ivels
+Instructions.c -> outputs, heating terms, divv
+Lith_age.c -> done
+output.c -> various outputs, and time exit routine (check with Nico)
+Pan_problem.c -> dyn topo
+Problem_related.c -> ivels
+Regional_bcs.c -> ivels
+Regional_lith_age_read_files -> done
+Regoomnal_read_input_files -> ivels
+Regional_solver -> done
+solver.h -> done
+Stokes_flow_incom -> divv calculation for output
+tracer_defs.h -> output tracer density
+Viscosity_structure.c -> Zhang et al viscosity, probably more
