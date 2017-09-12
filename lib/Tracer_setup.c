@@ -935,13 +935,19 @@ static void read_tracer_file(struct All_variables *E)
 
 
     /* initially size tracer arrays to number of tracers divided by processors */
-
-    icushion=100;
+    /* DJB COMP
+       increase from 100 to 100000
+       originally to avoid a crash on the Caltech cluster */
+    icushion=100000;
 
     /* for absolute tracer method */
     E->trace.number_of_tracers = number_of_tracers;
 
-    iestimate=number_of_tracers/E->parallel.nproc + icushion;
+    /* DJB COMP
+    increase estimate by 25%
+    originally to avoid a crash on the Caltech cluster */
+    iestimate=number_of_tracers/E->parallel.nproc+number_of_tracers/(E->parallel.nproc*5) + icushion;
+    //iestimate=number_of_tracers/E->parallel.nproc + icushion;
 
     for (j=1;j<=E->sphere.caps_per_proc;j++) {
 

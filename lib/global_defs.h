@@ -667,6 +667,9 @@ struct Output {
     int tracer;       /* whether to output tracer coordinate */
     int comp_el;      /* whether to output composition at elements */
     int comp_nd;      /* whether to output composition at nodes */
+    /* DJB SLAB */
+    int sten_temp;    /* whether to output slab temp stencil */
+    
     int heating;      /* whether to output heating terms at elements */
 
 
@@ -688,6 +691,7 @@ struct COMPOSITION {
     int on;
 
     int ibuoy_type;
+    int hybrid_method; // DJB COMP
     int ncomp;
     double *buoyancy_ratio;
 

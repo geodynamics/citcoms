@@ -1602,6 +1602,7 @@ static void output_parse_optional(struct  All_variables *E)
     E->output.comp_el = 0;
     E->output.comp_nd = 0;
     E->output.heating = 0;
+    E->output.sten_temp = 0; // DJB SLAB
 
     while(1) {
         /* get next field */
@@ -1657,6 +1658,9 @@ static void output_parse_optional(struct  All_variables *E)
             E->output.comp_el = 1;
         else if(strcmp(prev, "comp_nd")==0)
             E->output.comp_nd = 1;
+        /* DJB SLAB */
+        else if(strcmp(prev, "sten_temp")==0)
+            E->output.sten_temp = 1;
         else if(strcmp(prev, "heating")==0)
             E->output.heating = 1;
         else
@@ -2190,6 +2194,7 @@ void print_all_config_parameters(struct All_variables *E)
     fprintf(fp, "regular_grid_delphi=%g\n", E->trace.delphi[0]);
     fprintf(fp, "chemical_buoyancy=%d\n", E->composition.ichemical_buoyancy);
     fprintf(fp, "buoy_type=%d\n", E->composition.ibuoy_type);
+    fprintf(fp, "hybrid_method=%d\n", E->composition.hybrid_method); // DJB COMP
     fprintf(fp, "buoyancy_ratio=");
     if(E->composition.ncomp > 0)
     {

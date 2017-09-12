@@ -49,6 +49,7 @@ void output_surf_botm(struct All_variables *, int);
 void output_geoid(struct All_variables *, int);
 void output_stress(struct All_variables *, int);
 void output_horiz_avg(struct All_variables *, int);
+void output_sten_temp(struct All_variables *, int); // DJB SLAB
 void output_tracer(struct All_variables *, int);
 void output_pressure(struct All_variables *, int);
 void output_heating(struct All_variables *, int);
@@ -161,6 +162,10 @@ void output(struct All_variables *E, int cycles)
 
   if(E->output.heating && E->control.disptn_number != 0)
       output_heating(E, cycles);
+
+  /* DJB SLAB */
+  if (E->output.sten_temp)
+      output_sten_temp(E, cycles);
 
   return;
 }
@@ -356,6 +361,30 @@ void output_avisc(struct All_variables *E, int cycles)
 }
 #endif
 
+/* DJB SLAB */
+void output_sten_temp(struct All_variables *E, int cycles)
+{
+  int i, j;
+  char output_file[255];
+  FILE *fp1;
+
+  sprintf(output_file,"%s.sten_temp.%d.%d", E->control.data_file,
+          E->parallel.me, cycles);
+  fp1 = output_open(output_file, "w");
+
+  fprintf(fp1,"%d %d %.5e\n",cycles,E->lmesh.nno,E->monitor.elapsed_time);
+
+  for(j=1;j<=E->sphere.caps_per_proc;j++) {
+    fprintf(fp1,"%3d %7d\n",j,E->lmesh.nno);
+    for(i=1;i<=E->lmesh.nno;i++) {
+        fprintf(fp1,"%.6e\n",E->sphere.cap[j].slab_sten[i]);
+    }
+  }
+
+  fclose(fp1);
+
+  return;
+}
 
 void output_velo(struct All_variables *E, int cycles)
 {

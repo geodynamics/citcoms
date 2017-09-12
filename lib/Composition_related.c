@@ -66,6 +66,9 @@ void composition_input(struct All_variables *E)
             parallel_process_termination();
         } */
 
+        /* DJB COMP */
+        input_int("hybrid_method",&(E->composition.hybrid_method),"0",m);
+
         if (E->composition.ibuoy_type==0)
             E->composition.ncomp = E->trace.nflavors;
         else if (E->composition.ibuoy_type==1)
@@ -145,6 +148,9 @@ void write_composition_instructions(struct All_variables *E)
 	  fprintf(E->trace.fpt,"Ratio Method\n");
         if (E->composition.ibuoy_type==0)
 	  fprintf(E->trace.fpt,"Absolute Method\n");
+        /* DJB COMP */
+        if (E->composition.hybrid_method)
+          fprintf(E->trace.fpt,"Hybrid Method patch activated\n");
 
         for(k=0; k<E->composition.ncomp; k++) {
             fprintf(E->trace.fpt,"Buoyancy Ratio: %f\n", E->composition.buoyancy_ratio[k]);
@@ -269,7 +275,10 @@ void init_composition(struct All_variables *E)
     } */
 
     /* for empty elements */
-    check_initial_composition(E);
+    /* DJB COMP */
+    if (!E->composition.hybrid_method) {
+        check_initial_composition(E);
+    }
 
     /* Map elemental composition to nodal points */
     map_composition_to_nodes(E);
@@ -321,6 +330,13 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
             if (numtracers == 0) {
                 iempty++;
                 /* fprintf(E->trace.fpt, "No tracer in element %d!\n", e); */
+                /* DJB COMP */
+                if (E->composition.hybrid_method) {
+                    for(i=0;i<E->composition.ncomp;i++) {
+                        E->composition.comp_el[j][i][e] = 0.0;
+                    }
+                }
+
                 continue;
             }
 
@@ -332,7 +348,8 @@ static void compute_elemental_composition_ratio_method(struct All_variables *E)
         }
 
 
-        if (iempty) {
+        /* DJB COMP */
+        if ((iempty) && (!E->composition.hybrid_method)) {
 
             if ((1.0*iempty/E->lmesh.nel)>0.80) {
                 fprintf(E->trace.fpt,"WARNING(compute_elemental...)-number of tracers is REALLY LOW\n");
