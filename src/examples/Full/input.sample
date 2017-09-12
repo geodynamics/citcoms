@@ -1,5 +1,5 @@
 # specify output files
-datadir="/scratch"
+datadir="data/%RANK"
 datafile="fulltest"
 
 output_format=ascii
