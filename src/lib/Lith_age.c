@@ -131,6 +131,11 @@ void lith_age_init(struct All_variables *E)
         }
         /* TODO: DJB SLAB should this be divide by scalet?  In original code
            it is, but it looks like I corrected it during slab assimilation */
+        /* UPDATE: in the original svn code, I write:
+           bug fix.  For time-independent age (lithosphere assimilation) the age was being
+           non-dimensionalised incorrectly (*scalet rather than /scalet).  This has likely
+           never caused a problem because we all use time-dependent lithosphere assimilation.
+           But I've corrected it nonetheless. */
 	E->age_t[node]=E->age_t[node]/E->data.scalet;
       }
     fclose(fp1);
