@@ -30,6 +30,7 @@ This example is a good one to try and run first: src/examples/Full
 You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your
 own submission scripts to the same directory so we have more examples
 
+For currently implemented features, scroll down below.
 
 ---------------------------------
 Dan's work in progress below here
