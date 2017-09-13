@@ -89,11 +89,12 @@ Implemented:
 Not implemented (yet):
   -- internal velocity bcs (I don't think these are used by anyone anyway)
   -- outputs of heating terms, divv
-  -- tracer density for elements and nodes output
-  -- buoyancy restart for dynamic topography
-  -- time exit routine (possibly originally added by Ting?)
+  -- tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
+  -- buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
+  -- time exit routine (added by Ting, see svn r57)
   -- composition and temperature spherical harmonics
   -- anything from Rakib
+  -- reverse gravity acceleraton (added by Ting, see svn r76) for SBI
 
 Legacy code
 -----------
