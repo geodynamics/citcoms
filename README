@@ -2,13 +2,27 @@
 INSTALL
 -------
 
-To install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake.py
+This new version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most
+clusters can load an MPI distribute using 'modules'
 
-Example inputs and output are provided in inputeg/
+e.g., in Bern I use:
+
+module load openmpi/1.10.2-intel
+
+For reasons relating to compilers, the cluster and node setup, some mpi versions may be
+preferred for your particular cluster.  I was recommended by the Bern sys admin to use the
+intel compiler with openmpi.  You might also want to find out which openmpi is preferred
+on your cluster (and perhaps add this above, so we have complete documentation of what works
+and what doesn't).
+
+Then, to install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake.py
+
+Example input and output configuration files are provided in inputeg/
 
 This example is a good one to try and run first: src/examples/Full
 
-You will need to setup your job submission script.  See a slurm example in jobsubmit/
+You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your
+own submission scripts to the same directory so we have more examples
 
 
 ---------------------------------
