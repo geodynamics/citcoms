@@ -15,7 +15,13 @@ intel compiler with openmpi.  You might also want to find out which openmpi is p
 on your cluster (and perhaps add this above, so we have complete documentation of what works
 and what doesn't).
 
-Then, to install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute mymake.py
+Then, to install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute
+
+./mymake.py
+
+[Yes OK, for the step above you do need a python distribution, but this is only to
+ run the commands that configure and make Citcoms.  Python is not actually used for
+ running the code]
 
 Example input and output configuration files are provided in inputeg/
 
