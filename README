@@ -32,7 +32,9 @@ Dan's work in progress below here
 Rakib's code - sent to me by Sabin (12/09/17) CitcomSModDtopoRelease_Rakib.zip
 
 Differences with Rakib
+None of these changes have been implemented in the new code yet
 ----------------------
+
 Advection_diffusion.c
   -- scaled visc and adiabatic heating by Di
      I gave him this code originally, so can include it
@@ -50,8 +52,8 @@ Output.c
 Output_vtk.c
   -- perhaps not related to Rakib's work
 Viscosity_structures.c
-  -- some new viscosity structures
- 
+  -- some new viscosity structures (case 112, 113, 117, 118)
+     these should be straightforward to merge in
 
 
 New code features so far
@@ -69,15 +71,23 @@ Implemented:
   -- composition (grep for 'DJB COMP')
         hybrid_method
         increased memory for tracer arrays
+  -- viscosity formulations (grep for 'DJB VISC')
+        many of these relate to viscosity structures for data assimilation work
+        see Viscosity_structures.c
+            (1) case 20, used in Flament et al. (2013, 2014)
+            (2) case 21, used in Flament et al. (2014), model TC8
+            (3) case 22, used in Flament et al. (2014), model TC7
+            (4) case 23, used in Flament et al. (2014), model TC9
+            (5) case 24, used in Zhang et al. (2010) and Bower et al. (2013)
 
 Not implemented (yet):
   -- internal velocity bcs (I don't think these are used by anyone anyway)
   -- outputs of heating terms, divv
   -- tracer density for elements and nodes output
   -- buoyancy restart for dynamic topography
-  -- time exit routine (possibly originally added by Nico?)
-  -- viscosity structures
+  -- time exit routine (possibly originally added by Ting?)
   -- composition and temperature spherical harmonics
+  -- anything from Rakib
 
 Legacy code
 -----------
@@ -105,4 +115,4 @@ Regional_solver -> done
 solver.h -> done
 Stokes_flow_incom -> divv calculation for output
 tracer_defs.h -> output tracer density
-Viscosity_structure.c -> Zhang et al viscosity, probably more
+Viscosity_structure.c -> done
