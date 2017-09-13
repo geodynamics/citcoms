@@ -880,7 +880,210 @@ void visc_from_T(E,EEta,propogate)
                 }
             }
         break;
-	
+
+    /* DJB VISC */
+    /* Cases in the 20s are modified for data assimilation work */
+    case 20:
+        /* eta = N_0 exp(E/(T+T_0) - E/(0.5+T_0)) 
+           where T is normalized to be within 0...1
+           Rheology used in Flament et al. (2013, 2014).
+           This is a modification of case 3 for a background temperature of 0.5. */
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    for(kk=1;kk<=ends;kk++)   { /* took out
+                                                   computation of
+                                                   depth, not needed
+                                                   TWB */
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+                }
+            }
+        break;
+
+    /* DJB VISC */
+    case 21:
+        /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+           where T is normalized to be within 0...1
+           N_0(r) increases linearly from 10 to 50 in the lower mantle
+           (note that this is hard-coded)
+           Rheology used in Flament et al. (2014), case TC8 */
+ 
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    if(l==3) {
+                         tempa = 10.0+112.72814*(zzz-0.105164024);
+                     }
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+                }
+            }
+        break;
+
+    /* DJB VISC */
+    case 22:
+        /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+           where T is normalized to be within 0...1
+           N_0(r) increases linearly from 10 to 100 in the lower mantle
+           as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+           (note that this is hard-coded)
+           Rheology used in Flament et al. (2014), case TC7 */
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    if(l==3) {
+                         tempa = 10.0+253.638315*(zzz-0.105164024);
+                     }
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+                }
+            }
+        break;
+
+    /* DJB VISC */
+    case 23:
+        /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+           where T is normalized to be within 0...1
+           N_0(r) increases linearly from 10 to 30 in the lower mantle
+           (note that this is hard-coded)
+           Rheology used in Flament et al. (2014), case TC9 */
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control) /* switch moved up here TWB */
+                  tempa = E->viscosity.N0[l] * E->VIP[m][i];
+                else
+                  tempa = E->viscosity.N0[l];
+
+                for(kk=1;kk<=ends;kk++) {
+                  TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                  zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                      TT[kk]=max(TT[kk],zero);
+                      temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+                      zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                    }
+
+                    if(l==3) {
+                         tempa = 10.0+56.36407*(zzz-0.105164024);
+                     }
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa*
+                      exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+                           - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+                }
+            }
+        break;
+
+    /* DJB VISC */
+    case 24:
+        /* Rheology used by Zhang et al. (2010)
+           also explored in Bower et al. (2013)
+           eta = N_0(r) exp( E * (T_0 - T)) 
+           pressure-dependence contribution at the top of the lower
+           mantle is 2 (hard-coded) */
+
+        for(m=1;m<=E->sphere.caps_per_proc;m++)
+            for(i=1;i<=nel;i++)   {
+                l = E->mat[m][i] - 1;
+
+                if(E->control.mat_control==0)
+                    tempa = E->viscosity.N0[l];
+                else if(E->control.mat_control==1)
+                    tempa = E->viscosity.N0[l]*E->VIP[m][i];
+
+                for(kk=1;kk<=ends;kk++) {
+                    TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+                    zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+                }
+
+                for(jj=1;jj<=vpts;jj++) {
+                    temp=0.0;
+                    zzz=0.0;
+                    for(kk=1;kk<=ends;kk++)   {
+                        temp += TT[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                        zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+                     }
+
+                    if(l==3) {
+                        tempa = 2.0+13.91966133*(zzz-0.105164024);
+                    }
+
+                    EEta[m][ (i-1)*vpts + jj ] = tempa *
+                        exp( E->viscosity.E[l] * (E->viscosity.T[l] - temp));
+
+                }
+            }
+        break;
 
     case 100:
         /* user-defined viscosity law goes here */
