@@ -38,7 +38,7 @@ Dan's work in progress below here
 
 Rakib's code - sent to me by Sabin (12/09/17) CitcomSModDtopoRelease_Rakib.zip
 
-Differences with Rakib
+Differences with Rakib: UPDATE: see diff/ directory for complete record
 None of these changes have been implemented in the new code yet
 ----------------------
 
@@ -96,6 +96,7 @@ Not implemented (yet):
   -- composition and temperature spherical harmonics
   -- anything from Rakib
   -- reverse gravity acceleraton (added by Ting, see svn r76) for SBI
+  -- turn off itracer_warnings
 
 Legacy code
 -----------
