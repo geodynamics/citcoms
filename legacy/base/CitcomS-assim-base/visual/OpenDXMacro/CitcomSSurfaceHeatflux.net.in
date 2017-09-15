@@ -1,0 +1,57 @@
+//
+// time: Wed Sep 22 09:56:56 2004
+//
+// version: 3.2.0 (format), 4.3.2 (DX)
+//
+//
+//
+// macro reference (direct): RTFtoXYZ2D @dxmacrodir@/RTFtoXYZ2D.net
+include "RTFtoXYZ2D.net"
+//
+// Begin MDF
+// MODULE CitcomSSurfaceHeatflux
+// CATEGORY Macros
+// DESCRIPTION new macro
+// INPUT input_1; group or series or value list or string list; (no default);  
+// OUTPUT output_1; field;  
+// End MDF
+// workspace: width = 500, height = 400
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSSurfaceHeatflux(
+ input_1
+) -> (
+ output_1
+) {
+    // 
+    // node Input[25]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'input_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+CitcomSSurfaceHeatflux_Input_25_out_1 = input_1;
+    // 
+    // node Select[14]: x = 32, y = 80, inputs = 3, label = Select
+    // input[2]: defaulting = 0, visible = 1, type = 32, value = "heatflux"
+    //
+CitcomSSurfaceHeatflux_Select_14_out_1 = 
+    Select(
+    CitcomSSurfaceHeatflux_Input_25_out_1,
+    "heatflux",
+    NULL
+    ) [instance: 14, cache: 1];
+    // 
+    // node RTFtoXYZ2D[5]: x = 0, y = 203, inputs = 1, label = RTFtoXYZ2D
+    //
+CitcomSSurfaceHeatflux_RTFtoXYZ2D_5_out_1 = 
+    RTFtoXYZ2D(
+    CitcomSSurfaceHeatflux_Select_14_out_1
+    ) [instance: 5, cache: 1];
+    // 
+    // node Output[20]: x = 0, y = 283, inputs = 1, label = Output
+    // parameter: position = 1, name = 'output_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_1 = CitcomSSurfaceHeatflux_RTFtoXYZ2D_5_out_1;
+// network: end of macro body
+}
+CitcomSSurfaceHeatflux_Input_25_out_1 = NULL;
+CitcomSSurfaceHeatflux_Select_14_out_1 = NULL;
+CitcomSSurfaceHeatflux_RTFtoXYZ2D_5_out_1 = NULL;

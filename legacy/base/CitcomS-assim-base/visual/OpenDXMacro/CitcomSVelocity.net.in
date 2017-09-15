@@ -1,0 +1,86 @@
+//
+// time: Tue May 11 11:04:24 2004
+//
+// version: 3.2.0 (format), 4.3.0 (DX)
+//
+//
+//
+// macro reference (direct): VelocityRTFtoXYZ @dxmacrodir@/VelocityRTFtoXYZ.net
+include "VelocityRTFtoXYZ.net"
+//
+// macro reference (direct): RTFtoXYZ @dxmacrodir@/RTFtoXYZ.net
+include "RTFtoXYZ.net"
+//
+// Begin MDF
+// MODULE CitcomSVelocity
+// CATEGORY Macros
+// DESCRIPTION transform velocity field
+// INPUT input_1; group or field or series or value list or string list; (no default);  
+// INPUT input_2; scalar list or vector list; (no default);  
+// OUTPUT output_1; field;  
+// End MDF
+// workspace: width = 500, height = 400
+// layout: snap = 0, width = 50, height = 50, align = NN
+//
+macro CitcomSVelocity(
+ input_1
+,input_2
+) -> (
+ output_1
+) {
+    // 
+    // node Input[6]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 1, name = 'input_1', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSVelocity_Input_6_out_1 = input_1;
+    // 
+    // node Input[7]: x = 0, y = 0, inputs = 0, label = Input
+    // parameter: position = 2, name = 'input_2', value = '(no default)', descriptive = 1, description = ' ', required = 0, visible = 1
+    //
+CitcomSVelocity_Input_7_out_1 = input_2;
+    // 
+    // node Select[9]: x = 46, y = 80, inputs = 3, label = Select
+    // input[2]: defaulting = 0, visible = 1, type = 32, value = "velocity"
+    //
+CitcomSVelocity_Select_9_out_1 = 
+    Select(
+    CitcomSVelocity_Input_6_out_1,
+    "velocity",
+    NULL
+    ) [instance: 9, cache: 1];
+    // 
+    // node Reduce[1]: x = 51, y = 157, inputs = 2, label = Reduce
+    // input[2]: defaulting = 1, visible = 1, type = 16777221, value = { 4.0 }
+    //
+CitcomSVelocity_Reduce_1_out_1 = 
+    Reduce(
+    CitcomSVelocity_Select_9_out_1,
+    CitcomSVelocity_Input_7_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node VelocityRTFtoXYZ[1]: x = 0, y = 239, inputs = 1, label = VelocityRTFtoXYZ
+    //
+CitcomSVelocity_VelocityRTFtoXYZ_1_out_1 = 
+    VelocityRTFtoXYZ(
+    CitcomSVelocity_Reduce_1_out_1
+    ) [instance: 1, cache: 1];
+    // 
+    // node RTFtoXYZ[2]: x = 28, y = 329, inputs = 1, label = RTFtoXYZ
+    //
+CitcomSVelocity_RTFtoXYZ_2_out_1 = 
+    RTFtoXYZ(
+    CitcomSVelocity_VelocityRTFtoXYZ_1_out_1
+    ) [instance: 2, cache: 1];
+    // 
+    // node Output[4]: x = 0, y = 409, inputs = 1, label = Output
+    // parameter: position = 1, name = 'output_1', value = ' ', descriptive = 0, description = ' ', required = 0, visible = 1
+    //
+output_1 = CitcomSVelocity_RTFtoXYZ_2_out_1;
+// network: end of macro body
+}
+CitcomSVelocity_Input_6_out_1 = NULL;
+CitcomSVelocity_Input_7_out_1 = NULL;
+CitcomSVelocity_Select_9_out_1 = NULL;
+CitcomSVelocity_Reduce_1_out_1 = NULL;
+CitcomSVelocity_VelocityRTFtoXYZ_1_out_1 = NULL;
+CitcomSVelocity_RTFtoXYZ_2_out_1 = NULL;
