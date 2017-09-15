@@ -1,0 +1,27 @@
+Installation Instructions
+*************************
+
+Installation of CitcomS requires the following:
+
+  * A C compiler
+
+  * An MPI library
+
+  * If using Pyre, Python 2.3 or greater (Python 2.4 or greater is required 
+    on 64-bit machines), including header files (Python.h).
+
+
+The simplest way to compile this package is:
+
+  1. `cd' to the directory containing the package's source code and type
+     `./configure' to configure the package for your system. 
+
+     Several optional features are disabled by default. Type
+     `./configure --help' to list all available options.
+
+     Running `configure' takes awhile.  While running, it prints some
+     messages telling which features it is checking for.
+
+  2. Type `make' to compile the package.
+
+More installation instruction can be found in the manual.
