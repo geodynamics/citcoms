@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/cig/!svn/ver/7290/mc/3D/CitcomS/trunk/etc
+END
+incomp-non-newtonian.odb
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/incomp-non-newtonian.odb
+END
+regional.odb
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/7290/mc/3D/CitcomS/trunk/etc/regional.odb
+END
+full.odb
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/7290/mc/3D/CitcomS/trunk/etc/full.odb
+END
+regional-sphere.odb
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/regional-sphere.odb
+END
+incomp-newtonian.odb
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/incomp-newtonian.odb
+END
+temp.odb
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/temp.odb
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/5187/mc/3D/CitcomS/trunk/etc/Makefile.am
+END
+full-sphere.odb
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/full-sphere.odb
+END
+__vault__.odb
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/etc/__vault__.odb
+END

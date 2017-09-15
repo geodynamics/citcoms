@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/cig/!svn/ver/15110/mc/3D/CitcomS/trunk/tests
+END
+multicoupled.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/cig/!svn/ver/13196/mc/3D/CitcomS/trunk/tests/multicoupled.cfg
+END
+signon.py
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/2397/mc/3D/CitcomS/trunk/tests/signon.py
+END
+array2d.cc
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/7403/mc/3D/CitcomS/trunk/tests/array2d.cc
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/6545/mc/3D/CitcomS/trunk/tests/Makefile.am
+END
+coupled.cfg
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/15110/mc/3D/CitcomS/trunk/tests/coupled.cfg
+END
+exchange.py
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/cig/!svn/ver/15110/mc/3D/CitcomS/trunk/tests/exchange.py
+END
+test1.sh
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/cig/!svn/ver/7361/mc/3D/CitcomS/trunk/tests/test1.sh
+END
+gnomonic.c
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/cig/!svn/ver/8963/mc/3D/CitcomS/trunk/tests/gnomonic.c
+END
+test2.sh
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/13196/mc/3D/CitcomS/trunk/tests/test2.sh
+END
+test5.sh
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/13196/mc/3D/CitcomS/trunk/tests/test5.sh
+END

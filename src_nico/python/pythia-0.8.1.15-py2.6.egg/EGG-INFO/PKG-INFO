@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pythia
+Version: 0.8.1.15
+Summary: An extensible, object-oriented framework for specifying and staging complex, multi-physics simulations.
+Home-page: http://www.geodynamics.org/cig/software/packages/cs/pythia/
+Author: Michael A.G. Aivazis
+Author-email: aivazis@caltech.edu
+License: BSD
+Description: UNKNOWN
+Platform: UNKNOWN

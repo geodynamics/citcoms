@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/cig/!svn/ver/14647/mc/3D/CitcomS/trunk/bin
+END
+Citcom.c
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/cig/!svn/ver/14647/mc/3D/CitcomS/trunk/bin/Citcom.c
+END
+dummy.cc
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/cig/!svn/ver/7261/mc/3D/CitcomS/trunk/bin/dummy.cc
+END
+CitcomSRegional.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/cig/!svn/ver/5302/mc/3D/CitcomS/trunk/bin/CitcomSRegional.c
+END
+CitcomSFull.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/cig/!svn/ver/5302/mc/3D/CitcomS/trunk/bin/CitcomSFull.c
+END
+citcoms.in
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/cig/!svn/ver/7700/mc/3D/CitcomS/trunk/bin/citcoms.in
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/7700/mc/3D/CitcomS/trunk/bin/Makefile.am
+END
+pycitcoms.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/cig/!svn/ver/6851/mc/3D/CitcomS/trunk/bin/pycitcoms.c
+END
