@@ -1,0 +1,229 @@
+diff -r src_nico/CitcomS/Controller.py legacy/release/CitcomS-assim-r88-source/CitcomS/Controller.py
+155c155
+<         self.solver.save(self.inventory.monitoringFrequencyMyr)
+---
+>         self.solver.save(self.inventory.monitoringFrequency)
+160c160
+<         self.solver.checkpoint(self.inventory.checkpointFrequencyMyr)
+---
+>         self.solver.checkpoint(self.inventory.checkpointFrequency)
+170d169
+<         monitoringFrequencyMyr = pyre.inventory.int("monitoringFrequencyMyr", default=5)
+172d170
+<         checkpointFrequencyMyr = pyre.inventory.int("checkpointFrequencyMyr", default=5)
+diff -r src_nico/CitcomS/Solver/Solver.py legacy/release/CitcomS-assim-r88-source/CitcomS/Solver/Solver.py
+43,46d42
+<         
+<         self.last_output_time = 0.
+<         self.last_checkpoint_time = 0.
+<         
+122,125c118,121
+<             print >> stream, ("monitoringFrequencyMyr=%d" %
+<                 application.controller.inventory.monitoringFrequencyMyr)
+<             print >> stream, ("checkpointFrequencyMyr=%d" %
+<                 application.controller.inventory.checkpointFrequencyMyr)
+---
+>             print >> stream, ("monitoringFrequency=%d" %
+>                 application.controller.inventory.monitoringFrequency)
+>             print >> stream, ("checkpointFrequency=%d" %
+>                 application.controller.inventory.checkpointFrequency)
+150,151d145
+<             self.last_output_time = self.t
+<             self.last_checkpoint_time = self.t
+154,155d147
+<             self.last_output_time = 0.
+<             self.last_checkpoint_time = 0.
+224a217
+>         # XXX DJB
+225a219
+>         self.inventory.bc.updateInternalVelocity()
+249c243
+<     def save(self, monitoringFrequencyMyr):
+---
+>     def save(self, monitoringFrequency):
+258,267c252
+<         #if not (step % monitoringFrequency):
+<         #    output(self.all_variables, step)
+< 
+<         # output IC
+<         if (step==0):
+<             output(self.all_variables, step)
+<             self.last_output_time = self.t
+<             
+<         tdiff = (self.t - self.last_output_time)*self.inventory.const.inventory.radius**2/self.inventory.const.inventory.thermdiff / (3.15576e7*1e6)
+<         if (tdiff >= monitoringFrequencyMyr):
+---
+>         if not (step % monitoringFrequency):
+269d253
+<             self.last_output_time = self.t
+275c259
+<     def checkpoint(self, checkpointFrequencyMyr):
+---
+>     def checkpoint(self, checkpointFrequency):
+278,281c262
+<         #if not (step % checkpointFrequency):
+<         #    output_checkpoint(self.all_variables)
+<         tdiff = (self.t - self.last_checkpoint_time)*self.inventory.const.inventory.radius**2/self.inventory.const.inventory.thermdiff / (3.15576e7*1e6)
+<         if (tdiff >= checkpointFrequencyMyr):
+---
+>         if not (step % checkpointFrequency):
+283,284d263
+<             self.last_checkpoint_time = self.t
+<         
+diff -r src_nico/lib/Full_read_input_from_files.c legacy/release/CitcomS-assim-r88-source/lib/Full_read_input_from_files.c
+243c243
+<           else {
+---
+>           else
+245,246d244
+<              exit(8);
+<           }
+diff -r src_nico/lib/Pan_problem_misc_functions.c legacy/release/CitcomS-assim-r88-source/lib/Pan_problem_misc_functions.c
+278c278
+<               for(i=1;i<=E->lmesh.nno;i++)
+---
+>               for(i=1;i<=E->lmesh.nno;i++){
+281c281
+<                 if(gz <= E->control.exclude_buoy_znode){
+---
+>                 if(gz <= E->control.exclude_buoy_znode)
+diff -r src_nico/lib/Stokes_flow_Incomp.c legacy/release/CitcomS-assim-r88-source/lib/Stokes_flow_Incomp.c
+142,145c142,145
+<     // fprintf(stderr, "(%03d) %5.1f s v=%e p=%e "
+<     //         "div/v=%.2e dv/v=%.2e dp/p=%.2e step %d\n",
+<     //         count, t, v_norm, p_norm, div, dv, dp,
+<     //         E->monitor.solution_cycles);
+---
+>     fprintf(stderr, "(%03d) %5.1f s v=%e p=%e "
+>             "div/v=%.2e dv/v=%.2e dp/p=%.2e step %d\n",
+>             count, t, v_norm, p_norm, div, dv, dp,
+>             E->monitor.solution_cycles);
+diff -r src_nico/lib/Tracer_setup.c legacy/release/CitcomS-assim-r88-source/lib/Tracer_setup.c
+938,939c938,939
+< 
+<     icushion=100;
+---
+>     /* XXX DJB.  was originally 100, but number too low for Caltech cluster */
+>     icushion=100000;
+diff -r src_nico/lib/Viscosity_structures.c legacy/release/CitcomS-assim-r88-source/lib/Viscosity_structures.c
+1002,1121d1001
+<     case 25:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<         where T is normalized to be within 0...1
+<         N_0(r) increases linearly from 5 to 100 in the lower mantle
+<         (note that this is hard-coded) */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1;
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 5.0+275.493297*(zzz-0.105164024);
+<                      }    
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+<                 }    
+<             }    
+<         break;
+< 
+<         case 26:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<  *         where T is normalized to be within 0...1
+<  *                 N_0(r) increases linearly from 5 to 80 in the lower mantle
+<  *                         (note that this is hard-coded) */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1; 
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else 
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }    
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }    
+< 
+<                     if(l==3) {
+<                          tempa = 5.0+217.494708*(zzz-0.105164024);
+<                      }    
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 + E->viscosity.T[l]) );
+<                 }    
+<             }    
+<         break;
+< 
+<         case 27:
+<         /* eta = N_0(r) exp(E/(T+T_0) - E/(0.5+T_0)) 
+<  *            where T is normalized to be within 0...1
+<  *                             N_0(r) increases linearly from 10 to 100 between 1000 and 2867 km depth (Rudolph)
+<  *                                              as suggested by Steinberger & Calderwood (2006), Zhang et al. (2010), etc...
+<  *                                                               (note that this is hard-coded)
+<  *                                                                          Rheology used in Flament et al. (2014), case TC7
+<  *                                                                                   */
+<         for(m=1;m<=E->sphere.caps_per_proc;m++)
+<             for(i=1;i<=nel;i++)   {
+<                 l = E->mat[m][i] - 1; 
+< 
+<                 if(E->control.mat_control) /* switch moved up here TWB */
+<                   tempa = E->viscosity.N0[l] * E->VIP[m][i];
+<                 else 
+<                   tempa = E->viscosity.N0[l];
+< 
+<                 for(kk=1;kk<=ends;kk++) {
+<                   TT[kk] = E->T[m][E->ien[m][i].node[kk]];
+<                   zz[kk] = (1.-E->sx[m][3][E->ien[m][i].node[kk]]);
+<                 }    
+< 
+<                 for(jj=1;jj<=vpts;jj++) {
+<                     temp=0.0;
+<                     zzz=0.0;
+<                     for(kk=1;kk<=ends;kk++)   {
+<                       TT[kk]=max(TT[kk],zero);
+<                       temp += min(TT[kk],one) * E->N.vpt[GNVINDEX(kk,jj)];
+<                       zzz += zz[kk] * E->N.vpt[GNVINDEX(kk,jj)];
+<                     }
+< 
+<                     if(l==3) {
+<                          tempa = 10.0+307.125307*(zzz-0.15696);
+<                      }
+< 
+<                     EEta[m][ (i-1)*vpts + jj ] = tempa*
+<                       exp( E->viscosity.E[l]/(temp+E->viscosity.T[l])
+<                            - E->viscosity.E[l]/(0.5 +E->viscosity.T[l]) );
+<                 }
+<             }
+<         break;
+< 
