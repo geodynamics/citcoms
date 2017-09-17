@@ -86,6 +86,8 @@ Implemented:
             (3) case 22, used in Flament et al. (2014), model TC7
             (4) case 23, used in Flament et al. (2014), model TC9
             (5) case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+  -- output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
+        (grep for 'DJB TIME')
 
 Not implemented (yet):
   -- internal velocity bcs (I don't think these are used by anyone anyway)

@@ -228,6 +228,10 @@ int main(argc,argv)
     if(E->output.write_q_files)
       if ((E->monitor.solution_cycles % E->output.write_q_files)==0)
 	heat_flux(E);
+    /* DJB TIME */
+    /* to add a flag here to switch between non-dimensional and
+       dimensional output.  Use Rakib's modification to pyre for 
+       guidance */
     if ((E->monitor.solution_cycles % E->control.record_every)==0) {
 	(E->problem_output)(E, E->monitor.solution_cycles);
     }
