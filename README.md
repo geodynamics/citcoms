@@ -2,92 +2,83 @@
 
 ## Installation
 
-This new version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most
-clusters can load an MPI distribute using 'modules'
+This version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most clusters can load an MPI distribute using modules
 
 e.g., in Bern I use:
 
-module load openmpi/1.10.2-intel
+```module load openmpi/1.10.2-intel```
 
-For reasons relating to compilers, the cluster and node setup, some mpi versions may be
-preferred for your particular cluster.  I was recommended by the Bern sys admin to use the
-intel compiler with openmpi.  You might also want to find out which openmpi is preferred
-on your cluster (and perhaps add this above, so we have complete documentation of what works
-and what doesn't).
+For reasons relating to compilers, the cluster and node setup, some mpi versions may be preferred for your particular cluster.  I was recommended by the Bern sys admin to use the intel compiler with openmpi.  You might also want to find out which openmpi is preferred on your cluster (and perhaps add this above, so we have complete documentation of what works and what doesn't).
 
 Then, to install CitcomS v3.1.1 with data assimilation go into the src/ directory and execute
 
-./mymake.py
+```./mymake.py```
 
-[Yes OK, for the step above you do need a python distribution, but this is only to
- run the commands that configure and make Citcoms.  Python is not actually used for
- running the code]
+[Yes OK, for the step above you do need a python distribution, but this is only to run the commands that configure and make Citcoms.  Python is not actually used for running the code]
 
 Example input and output configuration files are provided in inputeg/
 
 This example is a good one to try and run first: src/examples/Full
 
-You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your
-own submission scripts to the same directory so we have more examples
+You will need to setup your job submission script.  See a slurm example in jobsubmit/  Please add your own submission scripts to the same directory so we have more examples
 
 For currently implemented features, scroll down below.
 
----------------------------------
-Dan's work in progress below here
----------------------------------
+## Dan's work area follows
 
-Rakib's code - sent to me by Sabin (12/09/17) CitcomSModDtopoRelease_Rakib.zip
+### Rakib's code
 
-Differences with Rakib: UPDATE: see diff/ directory for complete record
+Sent to me by Sabin (12/09/17) CitcomSModDtopoRelease\_Rakib.zip
+See diff/ directory for complete record
 None of these changes have been implemented in the new code yet
-----------------------
 
-Advection_diffusion.c
+Advection\_diffusion.c
   -- scaled visc and adiabatic heating by Di
      I gave him this code originally, so can include it
-convection_variables.h
+convection\_variables.h
   -- blob_profile, silo parameters, mantle_temp_adiabatic_increase
-global_defs.h
+global\_defs.h
   -- Shell-output facility
-Initial_temperature.c
+Initial\_temperature.c
   -- bunch of silo / blob related functions
      evidentally seeding plumes for the IC
-Material_properties.c
+Material\_properties.c
   -- refstate updates.  I gave him this code so have it (notably Di depth dependent)
 Output.c
   -- outputs of shells (theta, phi, r, temperature, vr)
-Output_vtk.c
+Output\_vtk.c
   -- perhaps not related to Rakib's work
-Viscosity_structures.c
+Viscosity\_structures.c
   -- some new viscosity structures (case 112, 113, 117, 118)
      these should be straightforward to merge in
 
 
-New code features so far
-------------------------
+### Code features implemented
 
-Implemented:
-  -- slab and lithosphere assimilation (grep for 'DJB SLAB')
-        lith_age_depth_function
-        lith_age_exponent
-        lith_age_min
-        lith_age_stencil_value
-        slab_assim
-        slab_assim_file
-        sten_temp output
-  -- composition (grep for 'DJB COMP')
-        hybrid_method
-        increased memory for tracer arrays
-  -- viscosity formulations (grep for 'DJB VISC')
-        many of these relate to viscosity structures for data assimilation work
-        see Viscosity_structures.c
-            (1) case 20, used in Flament et al. (2013, 2014)
-            (2) case 21, used in Flament et al. (2014), model TC8
-            (3) case 22, used in Flament et al. (2014), model TC7
-            (4) case 23, used in Flament et al. (2014), model TC9
-            (5) case 24, used in Zhang et al. (2010) and Bower et al. (2013)
-  -- output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
-        (grep for 'DJB TIME')
+#### Slab and lithosphere assimilation (grep for 'DJB SLAB')
+    lith_age_depth_function
+    lith_age_exponent
+    lith_age_min
+    lith_age_stencil_value
+    slab_assim
+    slab_assim_file
+    sten_temp output
+    
+#### Composition (grep for 'DJB COMP')
+    hybrid_method
+    increased memory for tracer arrays
+
+#### Viscosity structures (grep for 'DJB VISC')
+    case 20, used in Flament et al. (2013, 2014)
+    case 21, used in Flament et al. (2014), model TC8
+    case 22, used in Flament et al. (2014), model TC7
+    case 23, used in Flament et al. (2014), model TC9
+    case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+
+#### Output time (grep for 'DJB TIME')
+    output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
+
+### Code features NOT implemented
 
 Not implemented (yet):
   -- internal velocity bcs (I don't think these are used by anyone anyway)
