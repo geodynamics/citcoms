@@ -33,8 +33,7 @@ See diff/ directory for complete record
 None of these changes have been implemented in the new code yet
 
 1. Advection\_diffusion.c
-  * Scaled visc and adiabatic heating by Di
-  * I gave him this code originally, so can include it
+   - Scaled visc and adiabatic heating by Di
 1. convection\_variables.h
    * blob\_profile
    * silo parameters
