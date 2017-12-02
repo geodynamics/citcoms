@@ -32,69 +32,64 @@ Sent to me by Sabin (12/09/17) CitcomSModDtopoRelease\_Rakib.zip
 See diff/ directory for complete record
 None of these changes have been implemented in the new code yet
 
-Advection\_diffusion.c
-  -- scaled visc and adiabatic heating by Di
-     I gave him this code originally, so can include it
-convection\_variables.h
-  -- blob_profile, silo parameters, mantle_temp_adiabatic_increase
-global\_defs.h
-  -- Shell-output facility
-Initial\_temperature.c
-  -- bunch of silo / blob related functions
-     evidentally seeding plumes for the IC
-Material\_properties.c
-  -- refstate updates.  I gave him this code so have it (notably Di depth dependent)
-Output.c
-  -- outputs of shells (theta, phi, r, temperature, vr)
-Output\_vtk.c
-  -- perhaps not related to Rakib's work
-Viscosity\_structures.c
-  -- some new viscosity structures (case 112, 113, 117, 118)
-     these should be straightforward to merge in
-
+1. Advection\_diffusion.c
+   scaled visc and adiabatic heating by Di.  I gave him this code originally, so can include it
+2. convection\_variables.h
+   blob_profile, silo parameters, mantle_temp_adiabatic_increase
+3. global\_defs.h
+   Shell-output facility
+4. Initial\_temperature.c
+   bunch of silo / blob related functions  
+   evidentally seeding plumes for the IC
+5. Material\_properties.c
+   refstate updates.  I gave him this code so have it (notably Di depth dependent)
+6. Output.c
+   outputs of shells (theta, phi, r, temperature, vr)
+7. Output\_vtk.c
+   perhaps not related to Rakib's work
+8. Viscosity\_structures.c
+   some new viscosity structures (case 112, 113, 117, 118)  
+   these should be straightforward to merge in
 
 ### Code features implemented
 
 #### Slab and lithosphere assimilation (grep for 'DJB SLAB')
-    lith_age_depth_function
-    lith_age_exponent
-    lith_age_min
-    lith_age_stencil_value
-    slab_assim
-    slab_assim_file
-    sten_temp output
+1. lith\_age\_depth\_function
+2. lith\_age\_exponent
+3. lith\_age\_min
+4. lith\_age\_stencil\_value
+5. slab\_assim
+6. slab\_assim\_file
+7. sten\_temp output
     
 #### Composition (grep for 'DJB COMP')
-    hybrid_method
-    increased memory for tracer arrays
+1. hybrid_method
+2. increased memory for tracer arrays
 
 #### Viscosity structures (grep for 'DJB VISC')
-    case 20, used in Flament et al. (2013, 2014)
-    case 21, used in Flament et al. (2014), model TC8
-    case 22, used in Flament et al. (2014), model TC7
-    case 23, used in Flament et al. (2014), model TC9
-    case 24, used in Zhang et al. (2010) and Bower et al. (2013)
+1. case 20, used in Flament et al. (2013, 2014)
+2. case 21, used in Flament et al. (2014), model TC8
+3. case 22, used in Flament et al. (2014), model TC7
+4. case 23, used in Flament et al. (2014), model TC9
+5. case 24, used in Zhang et al. (2010) and Bower et al. (2013)
 
 #### Output time (grep for 'DJB TIME')
-    output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
+1. output time modification [NOT IMPLEMENTED, ONLY PLACEHOLDERS]
 
 ### Code features NOT implemented
 
-Not implemented (yet):
-  -- internal velocity bcs (I don't think these are used by anyone anyway)
-  -- outputs of heating terms, divv
-  -- tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
-  -- buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
-  -- time exit routine (added by Ting, see svn r57)
-  -- composition and temperature spherical harmonics
-  -- anything from Rakib
-  -- reverse gravity acceleraton (added by Ting, see svn r76) for SBI
-  -- turn off itracer_warnings
+1. internal velocity bcs (I don't think these are used by anyone anyway)
+2. outputs of heating terms, divv
+3. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
+4. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
+5. time exit routine (added by Ting, see svn r57)
+6. composition and temperature spherical harmonics
+7. anything from Rakib (see Rakib's code in above section)
+8. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
+9. turn off itracer_warnings
 
-Legacy code
------------
-
-Adv_diff -> done
+### Log of features implemented from legacy code
+1. Adv\_diff -> done
 BC_util -> ivels
 Composition_related.c -> tracer density
 composition_related.h -> tracer density
