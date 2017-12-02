@@ -34,33 +34,26 @@ None of these changes have been implemented in the new code yet
 
 1. Advection\_diffusion.c
 
-   scaled visc and adiabatic heating by Di.  I gave him this code originally, so can include it
-   
+   scaled visc and adiabatic heating by Di.  I gave him this code originally, so can include it   
 2. convection\_variables.h
 
    blob_profile, silo parameters, mantle_temp_adiabatic_increase
-   
 3. global\_defs.h
 
    Shell-output facility
-   
 4. Initial\_temperature.c
 
    bunch of silo / blob related functions  
    evidentally seeding plumes for the IC
-   
 5. Material\_properties.c
 
    refstate updates.  I gave him this code so have it (notably Di depth dependent)
-   
 6. Output.c
 
    outputs of shells (theta, phi, r, temperature, vr)
-   
 7. Output\_vtk.c
 
    perhaps not related to Rakib's work
-   
 8. Viscosity\_structures.c
 
    some new viscosity structures (case 112, 113, 117, 118)  
