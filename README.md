@@ -1,6 +1,6 @@
--------
-INSTALL
--------
+# CitcomS with Data Assimilation
+
+## Installation
 
 This new version of CitcomS only requires a valid MPI distribution (no more python / pyre).  Most
 clusters can load an MPI distribute using 'modules'
