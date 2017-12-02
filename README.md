@@ -33,14 +33,14 @@ See diff/ directory for complete record
 None of these changes have been implemented in the new code yet
 
 1. Advection\_diffusion.c
-
-   scaled visc and adiabatic heating by Di.  I gave him this code originally, so can include it   
+  * scaled visc and adiabatic heating by Di.
+  * I gave him this code originally, so can include it.
 2. convection\_variables.h
-
-   blob_profile, silo parameters, mantle_temp_adiabatic_increase
+  * blob\_profile
+  * silo parameters
+  * mantle\_temp\_adiabatic\_increase
 3. global\_defs.h
-
-   Shell-output facility
+  * Shell-output facility
 4. Initial\_temperature.c
 
    bunch of silo / blob related functions  
