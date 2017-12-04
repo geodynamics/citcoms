@@ -126,7 +126,7 @@ None of these changes have been implemented in the new code yet
 1. global\_defs.h -> dyn topo restarts, ivels (TODO)
 1. Instructions.c -> outputs, heating terms, divv (TODO)
 1. Lith\_age.c -> COMPLETE
-1. output.c -> various outputs, and time exit routine (check with Nico) (TODO)
+1. output.c -> various outputs (TODO)
 1. Pan\_problem.c -> dyn topo (TODO)
 1. Problem\_related.c -> ivels (TODO)
 1. Regional\_bcs.c -> ivels (TODO)
