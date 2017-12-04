@@ -34,10 +34,9 @@ For currently implemented features, scroll down below.
 
 Sent to me by Sabin (12/09/17) CitcomSModDtopoRelease\_Rakib.zip
 See diff/ directory for complete record
-None of these changes have been implemented in the new code yet
 
 1. Advection\_diffusion
-    - Scaled visc and adiabatic heating by Di
+    - Scaled visc and adiabatic heating by Di (COMPLETE)
 1. convection\_variables.h
     - blob\_profile
     - silo parameters
@@ -48,15 +47,13 @@ None of these changes have been implemented in the new code yet
     - bunch of silo / blob related functions  
     - evidentally seeding plumes for the IC
 1. Material\_properties.c
-    - refstate updates.
-    - I gave him this code so have it (notably Di depth dependent)
+    - refstate updates (COMPLETE)
 1. Output.c
     - outputs of shells (theta, phi, r, temperature, vr)
 1. Output\_vtk.c
     - perhaps not related to Rakib's work
 1. Viscosity\_structures.c
-    - some new viscosity structures (case 112, 113, 117, 118)  
-    - these should be straightforward to merge in
+    - some new viscosity structures (case 112, 113, 117, 118) (COMPLETE)
 
 ### Code features implemented
 
@@ -101,6 +98,12 @@ None of these changes have been implemented in the new code yet
     - ```exit_at_present``` (bool)
     - modifications made in main time loop in bin/Citcom.c
     - needs testing
+    
+#### Extended-Boussinesq modifications (grep for 'DJB EBA')
+1. depth-dependent scaling for the dissipation number
+   this effectively scales the adiabatic, viscous, and latent heating
+   and can be useful to avoid large heating in certain radial parts
+   of the domain, notably the surface when velocity bcs are imposed
 
 ### Code features NOT implemented
 
