@@ -103,7 +103,12 @@ See diff/ directory for complete record
 1. depth-dependent scaling for the dissipation number
    this effectively scales the adiabatic, viscous, and latent heating
    and can be useful to avoid large heating in certain radial parts
-   of the domain, notably the surface when velocity bcs are imposed
+   of the domain, notably the surface when velocity bcs are imposed.
+
+#### Output (grep for 'DJB OUT')
+1. Composition and temperature spherical harmonics as an output option (char).  See issue, since output for comp only occurs for the last comp field.
+    - ```comp_sph```
+    - ```temp_sph```
 
 ### Code features NOT implemented
 
