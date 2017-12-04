@@ -116,7 +116,6 @@ See diff/ directory for complete record
 1. outputs of heating terms, divv
 1. tracer density for elements and nodes output (added by Ting, see svn r52 through r55)
 1. buoyancy restart for dynamic topography (exclude buoyancy) (see svn r85)
-1. composition and temperature spherical harmonics
 1. reverse gravity acceleraton (added by Ting, see svn r76) for SBI
    note that this appears to have been subsequently removed in r88?
 
